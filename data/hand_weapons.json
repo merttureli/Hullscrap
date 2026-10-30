@@ -1,0 +1,17 @@
+{
+	"_doc": "Hand weapons the crew carry (docs/CONTENT.md section 9); every entry has art in art/items/<art>.png. culture: concord, clans (the Scrapper clans; the art files call them 'scrap'), lumen, basalt, emberkin or fenn. class: pistol, rifle, heavy, melee or tool, which sets the arm pose. damage per hit, rate in uses per second, range in pixels. The class figures are pistol 10 / 1.5 / 300, rifle 14 / 2 / 500, heavy 30 / 0.6 / 350, melee 25 / 1.2 / 40 and tool 6 / 1 / 60; a culture may shift each by up to 20%, and `notes` says what changed and why. Crew carry their species' sidearm (data/species.json) drawn when idle in a fight, holstered at work; the numbers are for on-foot fights later.",
+	"weapons": [
+		{"id": "service_pistol", "name": "Service Pistol", "culture": "concord", "class": "pistol", "damage": 10, "rate": 1.5, "range": 300, "art": "service_pistol", "notes": "class figures"},
+		{"id": "carbine", "name": "Carbine", "culture": "concord", "class": "rifle", "damage": 14, "rate": 2.0, "range": 500, "art": "carbine", "notes": "class figures; the 3-round burst is already in the rate"},
+		{"id": "flare_gun", "name": "Flare Gun", "culture": "clans", "class": "pistol", "damage": 8, "rate": 1.5, "range": 300, "art": "flare_gun", "notes": "damage -20%: it sets fires instead"},
+		{"id": "doorbuster", "name": "Doorbuster", "culture": "clans", "class": "rifle", "damage": 16.8, "rate": 2.0, "range": 400, "art": "doorbuster", "notes": "breaching shotgun: damage +20%, range -20%"},
+		{"id": "rivet_gun", "name": "Rivet Gun", "culture": "clans", "class": "tool", "damage": 6, "rate": 1.0, "range": 60, "art": "rivet_gun", "notes": "class figures; repairs walls at half speed (later)"},
+		{"id": "gatekeepers_lance", "name": "Gatekeeper's Lance", "culture": "lumen", "class": "heavy", "damage": 36, "rate": 0.6, "range": 420, "art": "gatekeepers_lance", "notes": "unique beam rifle: damage +20%, range +20%; its shots bounce (later)"},
+		{"id": "slugthrower", "name": "Slugthrower", "culture": "basalt", "class": "heavy", "damage": 30, "rate": 0.6, "range": 350, "art": "slugthrower", "notes": "class figures; pierces (later)"},
+		{"id": "quarry_hammer", "name": "Quarry Hammer", "culture": "basalt", "class": "melee", "damage": 30, "rate": 0.96, "range": 40, "art": "quarry_hammer", "notes": "damage +20%, rate -20%: a block of stone on a stick; breaches walls (later)"},
+		{"id": "torchgun", "name": "Torchgun", "culture": "emberkin", "class": "heavy", "damage": 24, "rate": 0.6, "range": 280, "art": "torchgun", "notes": "damage -20%, range -20%: a flame, not a slug; sets fires"},
+		{"id": "ember_knife", "name": "Ember Knife", "culture": "emberkin", "class": "melee", "damage": 20, "rate": 1.2, "range": 40, "art": "ember_knife", "notes": "damage -20%: it ignites on hit instead"},
+		{"id": "spark_pistol", "name": "Spark Pistol", "culture": "fenn", "class": "pistol", "damage": 8, "rate": 1.5, "range": 300, "art": "spark_pistol", "notes": "damage -20%: it stuns (ion) instead"},
+		{"id": "multi_tool", "name": "Multi-tool", "culture": "fenn", "class": "tool", "damage": 6, "rate": 1.0, "range": 60, "art": "multi_tool", "notes": "class figures; repairs at 2x speed (later)"}
+	]
+}

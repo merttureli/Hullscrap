@@ -36,6 +36,7 @@ func _init() -> void:
 func _rustbucket() -> Dictionary:
 	return {
 		"file": "starter_rustbucket", "name": "Rustbucket", "size": Vector2i(30, 24),
+		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Rook", "species": "basalt"}, {"name": "Juno", "species": "fenn"}],
 		"blurb": "Welded together from scrap: cheap, thick-skinned, a hold full of junk. Parts rattle and quit, but it hits back.",
 		"rooms": [
 			[1, 1, 7, 6], [7, 1, 22, 6], [22, 1, 28, 6],  # workshop, weapons deck, bridge
@@ -63,6 +64,7 @@ func _rustbucket() -> Dictionary:
 func _courier() -> Dictionary:
 	return {
 		"file": "starter_courier", "name": "Courier", "size": Vector2i(24, 19),
+		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Bram", "species": "basalt"}],
 		"blurb": "Small, quick and reliable: standard parts, a titanium nose and a light shield. Stays out of trouble or shoots its way out.",
 		"rooms": [
 			[0, 1, 23, 6],  # weapons bay
@@ -89,6 +91,7 @@ func _courier() -> Dictionary:
 func _prism() -> Dictionary:
 	return {
 		"file": "starter_prism", "name": "Prism", "size": Vector2i(22, 18),
+		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Tess", "species": "emberkin"}, {"name": "Quill", "species": "fenn"}, {"name": "Wren", "species": "basalt"}],
 		"blurb": "A neon glass cannon: huge power, a snappy four-sector shield, thin skin, and everything runs hot.",
 		"rooms": [
 			[5, 1, 16, 6],  # weapons nose
@@ -192,6 +195,7 @@ func _make(spec: Dictionary) -> void:
 
 	var saved := ship.to_dict()
 	saved["blurb"] = spec["blurb"]
+	saved["crew"] = spec["crew"]  # who starts aboard and their species (Jobs.spawn_crew)
 	var path: String = OUT_DIR + spec["file"] + ".json"
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(_format(saved))

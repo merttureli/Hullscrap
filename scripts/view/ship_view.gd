@@ -9,6 +9,7 @@ const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
+const Art = preload("res://scripts/view/art.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 
 const CELL := 32.0
@@ -24,7 +25,6 @@ const LOOKS := {
 }
 const OTHER_LOOK := {"suit": "#b8382c", "hair": "#1b1b1b", "tool": "#d7dce4"}
 const BUBBLE_STEPS := 48  ## points round a whole bubble
-const SPECIES := "human"  ## whose art the crew wear (art/crew/<species>/)
 
 var arena  ## arena.gd, or null
 var index := 0  ## the ship's index in the arena
@@ -117,8 +117,8 @@ func _draw() -> void:
 	for m in ship.crew:
 		var a: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
 		var look: Dictionary = m.look if not m.look.is_empty() else LOOKS.get(m.name, OTHER_LOOK)
-		var pose := {"species": SPECIES, "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-			"item": PersonDrawer.item_for(m, ship.clock), "down": m.is_down(), "work": PersonDrawer.is_working(m, ship.clock), "t": _clock}
+		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
+			"item": PersonDrawer.item_for(m, ship.clock, arena != null), "down": m.is_down(), "work": PersonDrawer.is_working(m, ship.clock), "t": _clock}
 		PersonDrawer.draw(self, px(m.pos), pose, look, CELL)
 		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL)
 	if _glow != null:
