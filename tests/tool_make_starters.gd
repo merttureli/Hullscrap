@@ -45,8 +45,11 @@ func _init() -> void:
 
 # --- the designs ---------------------------------------------------------------------------------------
 # outline: see hull_outline.gd. plate: the tile of the plated skin cells, plated: which skin cells (local
-# cell -> bool) are plated; the others are steel. walls: bulkheads [x0, y0, x1, y1] (inclusive cells of
-# floor turned into wall); doors [x, y, "h" | "v"]; parts [id, x, y, rot] (mounts: the outside half).
+# cell -> bool) are plated, the others are steel; thick (optional): which cells behind a plated one are
+# plated too (else steel). walls: bulkheads [x0, y0, x1, y1] (inclusive cells of floor turned into wall,
+# also used to square off a corner no crew body would fit in); doors [x, y, "h" | "v"]; parts [id, x, y,
+# rot] (mounts: the outside half). Each ship keeps the parts, crew and cargo of the rectangle it replaced,
+# and its mass and hull integrity stay within 15% of it (tests/test_ship_silhouettes.gd).
 
 ## Scrap line: a lumpy freighter, a hold full of junk, unreliable parts. Three reactors, because scrap
 ## parts draw 20% more and make 10% less.
@@ -77,8 +80,8 @@ func _rustbucket() -> Dictionary:
 
 ## Standard line: small and quick. Two Mk2 reactors because one cannot feed the guns, the shield, both rear
 ## engines and the strafe pair on the side walls.
-## A sleek arrowhead: a long slope2 taper to a pointed bow with the pulse gun on its tip, a narrow neck, a
-## laser on each shoulder step, and swept-back wings (45 degree leading edges) whose tips carry the strafe
+## A sleek arrowhead: a long slope2 taper to a flat tip that carries the pulse gun, a narrow neck, a laser
+## on each shoulder step, and swept-back wings (45 degree leading edges) whose tips carry the strafe
 ## engines, with a notch between the rear engines. Symmetric about x = 12.
 func _courier() -> Dictionary:
 	return {
@@ -105,8 +108,8 @@ func _courier() -> Dictionary:
 
 
 ## Neon line: a glass cannon with a lot of power. A third radiator keeps the Heat Lance from cooking.
-## A faceted crystal: only 45 degree facets, symmetric about x = 11, a spire of reflective coating on the
-## bow between the twin barrels, a pointed stern and a spine corridor down the middle.
+## A faceted crystal: only 45 degree facets, symmetric about x = 11, a coated spire on the bow with a gun on
+## each step beside it, a pointed stern and a spine down the middle (shield, reactor, radiators, engine).
 func _prism() -> Dictionary:
 	return {
 		"file": "starter_prism", "name": "Prism",
@@ -131,8 +134,8 @@ func _prism() -> Dictionary:
 ## The test pirate (combat_session.gd PIRATE_PATH): a small scrap-plated raider with one fixed laser and
 ## one Rattle Burst turret on the nose, two rear engines, a shield and the aim of a pilot of skill 0.5.
 ## A scrap reactor joins the Mk2 because the turret's scrap line draws 20% more than the laser it replaced.
-## A jagged wedge: a notched prow of two prongs, flanks raked and cut into saw teeth (different on each side),
-## a big gun sponson on the port side set well back and a smaller one on the starboard side up by the prow.
+## A jagged wedge: a notched prow of two horns with the laser in the notch, the starboard flank raked and cut
+## into saw teeth, a big sponson on the port side set well back with the turret on it. Two rooms and one door.
 func _pirate() -> Dictionary:
 	return {
 		"file": "pirate_raider", "name": "Pirate Raider",

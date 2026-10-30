@@ -13,7 +13,7 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 
-const MAX_FILL := 0.85  ## the solid area of a ship over the area of its bounding box
+const MAX_FILL := 0.85  ## the area of a ship's built cells (a slope or a curve counts its solid part) over the area of their bounding box
 const MIN_SHAPED := 4  ## cells that are slopes or curves
 const TOLERANCE := 0.15  ## how far mass and hull integrity may drift from the rectangular ships
 
