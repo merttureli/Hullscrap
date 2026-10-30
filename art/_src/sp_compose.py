@@ -45,7 +45,7 @@ def _glow_on_group(g, ox, oy):
 def compose(kit, leg_frame, leg_deg, aim_deg, pose='unarmed', item=None, head=None, gear=None, glow_out=None):
     """returns an interior+outline Spr on the 97x97 group canvas; if glow_out is an Rgba, the rotated glow layers are added to it."""
     sp = kit.sp
-    out = Spr(G, G); o = GC - C
+    out = Spr(G, G); o = GC - sp.C; sh = sp.C - C         # sh: a bigger frame's pivot offset; item mounts are pivot-relative
     glows = []
     def put(layer, deg, gl=None, outer=False, gl_off=(0, 0)):
         r = rotate(layer, deg, GC, GC)
@@ -67,7 +67,7 @@ def compose(kit, leg_frame, leg_deg, aim_deg, pose='unarmed', item=None, head=No
     put(_on_group(arm_layer, o, o), aim_deg, kit.arms_glow.get(pose)[0] if kit.arms_glow.get(pose) else None)
     if item:
         it = kit.items[item]
-        mx, my = MOUNT[pose]
+        mx, my = MOUNT[pose][0] + sh, MOUNT[pose][1] + sh
         gx, gy = it['grip']
         gl = it.get('glow')
         put(_on_group(it['spr'], o + mx - gx, o + my - gy), aim_deg, gl, gl_off=(mx - gx - ITEM_GLOW_PAD, my - gy - ITEM_GLOW_PAD))

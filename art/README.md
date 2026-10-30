@@ -46,6 +46,10 @@ Top-down and layered; every layer faces UP at rotation 0 and shares one frame (`
 - `legs` (rotated to the **movement** direction; `walk` frames advance with the distance walked, `stand` when idle); `torso`, `arms`, the held `item` and `head` (rotated to the **aim**: the mouse for the player, the job's target or the way they walk for the others).
 - `arms` has a pose per item class (`frames`: `unarmed`, `pistol`, `rifle`, `tool`) and a `mount` anchor per pose; an item's top-left goes at `mount - item.grip`. `head` has `hair` and `helmet` frames.
 - Colour masks tint the outfit with the crew member's `suit` colour (cached per colour). A 1 px shadow is drawn in code.
+- Species rigs: `human`, `basalt`, `emberkin`, `fenn`, and race wave 1 `kett`, `mire`, `sporeling`, `gauntling`, `prismatic`, `grundl` (`python3 art/_src/build_all.py` rebuilds them; `python3 art/_src/build.py` checks palette, sizes and that every mount sits where the human's does, relative to the pivot).
+  - **Large rig (`grundl`)**: its `frame` is 49x49 with `pivot` (24,24), so read both from `crew.json` and never assume 33/16. The art overhangs the 2x2 body (32 px); the shadow and pathing stay at the pivot. Every `mount` and `hand` anchor is the shared one moved by (+8,+8): identical relative to the pivot, so the same item formula (`mount - item.grip`, then rotate about the pivot) puts every item in the right place.
+  - `kett` has four arms: the lower pair is small, tucked, and drawn into every arms pose. The glow layers of `sporeling` (spore puffs, 2 drifting frames), `gauntling` (lamp eye, lit LEDs) and `prismatic` (core and lit edges, 2 pulse frames) are multi-frame strips: `torso_glow` carries `anims.on`, `head_glow` lists one frame per head variant per step (see its notes for the fps).
+  - Preview sheet: `python3 art/_src/sheet_races1.py out.png`.
 - Held item: a wrench while repairing, an extinguisher while extinguishing (the wrench if there is no extinguisher art), a pistol for the player with nothing to do, nothing otherwise.
 
 ## Tiles, effects, projectiles
