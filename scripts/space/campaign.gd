@@ -222,6 +222,12 @@ func hull_left(ship) -> int:
 	return maxi(hull_max(ship) - hull_loss, 1)
 
 
+## The hull a fight starts with: the arena's maximum less what the campaign has lost (never below 1), so the
+## damage of one fight, of an event or of a drift jump is still there in the next fight until it is repaired.
+func fight_hull(arena_hull_max: float) -> float:
+	return maxf(1.0, arena_hull_max - float(hull_loss))
+
+
 ## Change the hull integrity by `n` (negative = damage). It never drops below 1 or rises above the
 ## maximum. Returns the change really made.
 func change_hull(ship, n: int) -> int:

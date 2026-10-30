@@ -12,6 +12,9 @@ const Events = preload("res://scripts/space/events.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const BuildMode = preload("res://scripts/build/build_mode.gd")
+const CombatView = preload("res://scripts/combat/combat_view.gd")
+const MapView = preload("res://scripts/ui/map_view.gd")
 
 const STARTERS: Array[String] = ["res://data/ships/starter_rustbucket.json", "res://data/ships/starter_courier.json", "res://data/ships/starter_prism.json"]
 const SEEDS: Array[int] = [11, 22, 33]
@@ -275,7 +278,7 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 	var s := Session.new()
 	s.start(player, enemy, enemy.rng_seed)
 	var mine = s.arena.ships[Session.PLAYER]
-	mine.hull = maxf(1.0, mine.hull_max - float(c.hull_loss))  # what the campaign says is left of the hull
+	mine.hull = c.fight_hull(mine.hull_max)  # what the campaign says is left of the hull
 	var pilot := PilotAI.new(s.arena, Session.PLAYER, Session.ENEMY, {})
 	var ticks := int(_cap_s * 60.0)
 	var n := 0
@@ -359,3 +362,41 @@ func test_regression_hull_left_is_never_below_one() -> void:
 	eq(c.hull_left(ship), 1, "a loss bigger than the maximum leaves 1")
 	c.hull_loss = 0
 	eq(c.hull_left(ship), c.hull_max(ship), "no loss leaves the maximum")
+
+
+## The hull lost in a fight (or an event, or a drift jump) was forgotten at the next fight, which began at
+## full hull and then overwrote the loss: repairing at a station did nothing. A fight now begins with the
+## integrity the campaign says is left.
+func test_regression_a_fight_starts_with_the_hull_the_campaign_has_left() -> void:
+	var sim := ShipSim.new()
+	sim.choose_ship(STARTERS[1])
+	var build := BuildMode.new()
+	build.sim = sim
+	build.build_on = false
+	var view := CombatView.new()
+	view.sim = sim
+	view.build = build
+	var map := MapView.new()
+	map.sim = sim
+	map.combat = view
+	map.size = Vector2(1600.0, 900.0)
+	map.new_game(7)
+	map._start_fight("pirate_raider", {})
+	check(view.active, "the fight starts")
+	var mine = view.session.arena.ships[Session.PLAYER]
+	eq(mine.hull, mine.hull_max, "a fresh campaign begins the fight at full hull")
+	view.leave()
+	map.campaign.hull_loss = 40
+	map._start_fight("pirate_raider", {})
+	check(view.active, "a second fight starts")
+	mine = view.session.arena.ships[Session.PLAYER]
+	eq(mine.hull, mine.hull_max - 40.0, "40 points lost, 40 points fewer")
+	view.leave()
+	map.campaign.hull_loss = 100000
+	map._start_fight("pirate_raider", {})
+	eq(view.session.arena.ships[Session.PLAYER].hull, 1.0, "never below 1")
+	view.leave()
+	map.free()
+	view.free()
+	build.free()
+	sim.free()

@@ -209,6 +209,10 @@ func _start_fight(value: String, after_win: Dictionary) -> void:
 	if why != "":
 		_say("Cannot fight: " + why, true)
 		return
+	var session = combat.get("session") if combat != null else null
+	if session != null:  # the fight starts with the integrity the campaign says is left
+		var mine = session.arena.ships[0]
+		mine.hull = campaign.fight_hull(mine.hull_max)
 	_fighting = true
 	_after_win = after_win
 	_fight_node = str(campaign.node(campaign.current)["type"])
