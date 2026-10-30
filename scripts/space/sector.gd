@@ -1,0 +1,505 @@
+extends RefCounted
+## A sector: the open, real-time region of space a Drift node turns into (docs/CONTENT.md section 11, tuning in
+## data/sectors.json). Pure logic, no nodes. It holds the generated layout (the current, the debris density, 2 to 6
+## points of interest), the ship's place in it and the rules that tie them: triggers, the point-mass flight, the
+## ambient encounters and the save format. Radar visibility is radar.gd; the jump spool is campaign.gd.
+## - Generated from the campaign seed and the node alone (generate()), never from the campaign's rng or the jump
+##   counter: the same seed and node make the same sector, and a sector made late equals one made at the start.
+## - Positions are px in the sector, x right and y down, (0, 0) the top-left corner of the 24,000 px square.
+## - A POI is {id, type, name, pos, visibility (beacon, signal, hidden), event_type, state (new, done), enemy ("" or a
+##   ship design id), main (the node's own arrival event happens here)}; an ambient contact is a POI with `ambient`
+##   true, a `vel` and a `ttl`. Both are in all_pois().
+## - Only the POI states, the ship's place and the ambient clock are saved (to_save): the layout is regenerated.
+## - Ambient rolls and fight spawn points use the sector's own rng (saved), so real-time play never moves the
+##   campaign's rng, which events and loot use.
+
+const Content = preload("res://scripts/data/content.gd")
+const Radar = preload("res://scripts/space/radar.gd")
+const Flight = preload("res://scripts/sim/flight.gd")
+const Stats = preload("res://scripts/sim/stats.gd")
+const Abilities = preload("res://scripts/sim/abilities.gd")
+
+const PATH := "res://data/sectors.json"
+const NEW := "new"
+const DONE := "done"
+const VISIBILITIES: Array[String] = ["beacon", "signal", "hidden"]
+
+static var _cfg := {}
+
+var cfg: Dictionary
+var seed_value := 0  ## this sector's own seed (seed_for)
+var node_id := ""
+var node_type := ""  ## the Drift node's type: the sector's theme
+var region := ""  ## clans, concord, lumen or boneyard
+var size := 24000.0  ## px, the sector is a square
+var arrival := Vector2.ZERO  ## where the ship arrives, near one edge
+var current_angle := 0.0  ## the debris current's direction in degrees (0 east, 90 south on the screen, as in data/debris.json)
+var current_speed := 40.0  ## px/s
+var density := 1.0  ## the debris density: x the base spawn rate and cap of data/debris.json
+var debris_mult := {}  ## debris type id -> weight multiplier: the theme of the node type
+var pois: Array = []  ## the generated POIs, main first
+var ambient: Array = []  ## the passing ships now about (transient; not generated)
+var hostiles: Array = []  ## positions (Vector2, px) of the hostile ships about; the fight in place keeps this list for the jump block
+var ship_pos := Vector2.ZERO
+var ship_vel := Vector2.ZERO
+var accel := 0.0  ## px/s^2 at full thrust: set_flight() reads it from the ship, 0 = the ship cannot fly
+var max_speed := 600.0
+var damping := 0.25  ## per second
+var clock := 0.0  ## seconds spent in the sector (tick)
+var rng := RandomNumberGenerator.new()  ## ambient rolls and spawn points
+var _amb_t := 0.0  # seconds since the last ambient roll
+var _next_amb := 1
+var _engaged := {}  # POI id -> true while its event is open (or, for a station, until the ship has left); not saved
+var _greeted := {}  # station and store POI ids that have greeted this visit; not saved
+
+
+## data/sectors.json, read once.
+static func config() -> Dictionary:
+	if _cfg.is_empty():
+		var data = Content.read(PATH)
+		assert(data is Dictionary and data.get("nodes") is Dictionary, "bad sector data: " + PATH)
+		_cfg = data
+	return _cfg
+
+
+## The seed of node `node_id`'s sector in a campaign of seed `campaign_seed` (FNV-1a of the id, mixed with the seed).
+static func seed_for(campaign_seed: int, id: String) -> int:
+	var h := 2166136261
+	for b in id.to_utf8_buffer():
+		h = ((h ^ int(b)) * 16777619) & 0xFFFFFFFF
+	return (campaign_seed * 1000003) ^ h
+
+
+## A new sector for `node` (a Drift node dictionary) in region `region_id`. `p_cfg` is data/sectors.json by default.
+## The ship starts at the arrival point.
+static func generate(campaign_seed: int, node: Dictionary, region_id: String, p_cfg: Dictionary = {}):
+	var s = new()
+	s.cfg = p_cfg if not p_cfg.is_empty() else config()
+	s.node_id = str(node["id"])
+	s.node_type = str(node["type"])
+	s.region = region_id
+	s.seed_value = seed_for(campaign_seed, s.node_id)
+	var r := RandomNumberGenerator.new()
+	r.seed = s.seed_value
+	s._build(r, node)
+	s.rng.seed = s.seed_value + 7919
+	s.enter()
+	return s
+
+
+# --- generation ------------------------------------------------------------------------------------------
+
+func _build(r: RandomNumberGenerator, node: Dictionary) -> void:
+	size = float(cfg["size"])
+	var a: Dictionary = cfg["arrival"]
+	var along := size * (0.5 + r.randf_range(-1.0, 1.0) * float(a["spread"]))
+	var inset := float(a["inset"])
+	match r.randi() % 4:
+		0:
+			arrival = Vector2(along, inset)
+		1:
+			arrival = Vector2(size - inset, along)
+		2:
+			arrival = Vector2(along, size - inset)
+		_:
+			arrival = Vector2(inset, along)
+	var c: Dictionary = cfg["current"]
+	current_angle = r.randf() * 360.0
+	current_speed = r.randf_range(float(c["speed"][0]), float(c["speed"][1]))
+	var nodes: Dictionary = cfg["nodes"]
+	var n: Dictionary = nodes[node_type] if nodes.has(node_type) else nodes["empty"]
+	density = float(n["density"]) * r.randf_range(0.85, 1.15)
+	debris_mult = n.get("debris", {}).duplicate()
+	var types := _mix(r, n)
+	var pc: Dictionary = cfg["poi"]
+	var types_cfg: Dictionary = cfg["poi_types"]
+	for i in types.size():
+		var type: String = types[i]
+		var t: Dictionary = types_cfg[type]
+		var pos := _place(r, pc)
+		var vis := _roll(r, t["visibility"])
+		var ev := node_type if i == 0 else _roll(r, t["event"])
+		if i == 0 and node_type == "station":
+			vis = "beacon"  # a station always broadcasts
+		var label := str(t["label"])
+		pois.append({"id": "p%d" % i, "type": type, "name": str(node.get("name", "")) if i == 0 and str(node.get("name", "")) != "" else label,
+			"pos": pos, "visibility": vis, "event_type": ev, "state": NEW, "enemy": str(t.get("enemy", "")), "main": i == 0})
+
+
+## The POI types of the sector in order: the node's main one, the ones it always has (`also`), then others rolled by the
+## node's weights, within each type's `max`, until the count (rolled in the node's range, kept within the sector's)
+## is reached.
+func _mix(r: RandomNumberGenerator, n: Dictionary) -> Array:
+	var pc: Dictionary = cfg["poi"]
+	var count := clampi(r.randi_range(int(n["count"][0]), int(n["count"][1])), int(pc["count"][0]), int(pc["count"][1]))
+	var types: Array = [str(n["main"])]
+	var made := {types[0]: 1}
+	for t in n.get("also", []):
+		types.append(str(t))
+		made[str(t)] = int(made.get(str(t), 0)) + 1
+	count = maxi(count, types.size())
+	var weights: Dictionary = n.get("weights", {})
+	while types.size() < count:
+		var open := {}
+		for t in weights:
+			if float(weights[t]) > 0.0 and int(made.get(t, 0)) < int(cfg["poi_types"][t].get("max", 3)):
+				open[t] = float(weights[t])
+		if open.is_empty():
+			break
+		var pick := _pick(r, open)
+		types.append(pick)
+		made[pick] = int(made.get(pick, 0)) + 1
+	return types
+
+
+## A spot 3,000 to 12,000 px from the arrival point, inside the margin, at least `gap` from the others (the gap
+## shrinks when a sector is crowded).
+func _place(r: RandomNumberGenerator, pc: Dictionary) -> Vector2:
+	var gap := float(pc["gap"])
+	var margin := float(pc["margin"])
+	var lo := float(pc["dist"][0])
+	var hi := float(pc["dist"][1])
+	for attempt in 400:
+		if attempt > 0 and attempt % 100 == 0:
+			gap *= 0.7
+		var p := arrival + Vector2.from_angle(r.randf() * TAU) * r.randf_range(lo, hi)
+		if p.x < margin or p.y < margin or p.x > size - margin or p.y > size - margin:
+			continue
+		if pois.all(func(q): return q["pos"].distance_to(p) >= gap):
+			return p
+	return arrival + (Vector2(size, size) / 2.0 - arrival).normalized() * (lo + hi) / 2.0
+
+
+## `v` itself when it is a string, else one key of the weighted object `v`.
+static func _roll(r: RandomNumberGenerator, v) -> String:
+	return v if v is String else _pick(r, v)
+
+
+static func _pick(r: RandomNumberGenerator, weights: Dictionary) -> String:
+	var keys: Array = weights.keys()
+	keys.sort()
+	var total := 0.0
+	for k in keys:
+		total += float(weights[k])
+	var x := r.randf() * total
+	for k in keys:
+		x -= float(weights[k])
+		if x < 0.0:
+			return str(k)
+	return str(keys[-1])
+
+
+# --- the POIs --------------------------------------------------------------------------------------------
+
+## Every POI the sector has now: the generated ones, then the passing ships.
+func all_pois() -> Array:
+	return pois + ambient
+
+
+## The POI with id `id`, {} when there is none.
+func find(id: String) -> Dictionary:
+	for p in pois:
+		if p["id"] == id:
+			return p
+	for p in ambient:
+		if p["id"] == id:
+			return p
+	return {}
+
+
+## The POI of the node's own arrival event.
+func main_poi() -> Dictionary:
+	return pois[0] if not pois.is_empty() else {}
+
+
+## The ship arrives (a jump, a tow): at the arrival point, at rest, with no passing ship, hostile or greeting left over.
+## The POIs keep what is done.
+func enter() -> void:
+	ship_pos = arrival
+	ship_vel = Vector2.ZERO
+	ambient.clear()
+	hostiles.clear()
+	_engaged.clear()
+	_greeted.clear()
+	_amb_t = 0.0
+
+
+## Is point `p` inside the sector (grown by `slack` px)?
+func contains(p: Vector2, slack := 0.0) -> bool:
+	return p.x >= -slack and p.y >= -slack and p.x <= size + slack and p.y <= size + slack
+
+
+# --- triggers --------------------------------------------------------------------------------------------
+
+## The nearest `new` POI within the trigger distance (800 px) runs its event, once. Returns {} when there is none, else
+## {poi, node, refused, event, dock}: what Campaign.arrive() returns for the node's old arrival event (the main POI
+## runs exactly that: a dock master's refusal, a debt call, the greeting or the node's event), `event` for any other
+## POI one picked from its event type by events.gd ({} when nothing fits), and `dock`: the station menu opens
+## (a station or store with a menu, and no refusal). A POI stays engaged until resolve(): it does not fire again. A
+## station or store never becomes done: it greets once per visit, later only docks, and docks again after the ship has
+## left (1.5 x the trigger distance) and come back.
+func trigger(c, ship) -> Dictionary:
+	var pc: Dictionary = cfg["poi"]
+	var near := float(pc["trigger"])
+	var away := near * float(pc["rearm"])
+	var best := {}
+	var best_d := INF
+	for poi in all_pois():
+		if poi["state"] != NEW:
+			continue
+		var d := ship_pos.distance_to(poi["pos"])
+		if _engaged.has(poi["id"]):
+			if d > away:
+				_engaged.erase(poi["id"])
+			continue
+		if d <= near and d < best_d:
+			best = poi
+			best_d = d
+	if best.is_empty():
+		return {}
+	_engaged[best["id"]] = true
+	var t: Dictionary = cfg["poi_types"].get(best["type"], {})
+	var res: Dictionary
+	if bool(t.get("repeat", false)) and _greeted.has(best["id"]):
+		res = {"node": c.node(node_id), "refused": "", "event": {}}
+	else:
+		res = _event_for(c, ship, best)
+	_greeted[best["id"]] = true
+	res["poi"] = best
+	res["dock"] = bool(t.get("dock", false)) and res["refused"] == "" and c.dock_block(node_id) == ""
+	if bool(t.get("repeat", false)) and res["event"].is_empty() and not res["dock"] and res["refused"] == "":
+		return {}
+	return res
+
+
+func _event_for(c, ship, poi: Dictionary) -> Dictionary:
+	if poi["main"] and c.current == node_id:
+		return c.arrive(ship)
+	var ev: Dictionary = c.HOSTILE_PATROL if poi["event_type"] == "patrol" and c.refuses("concord") else c.events.pick(c, {"id": node_id, "type": poi["event_type"], "place": ""}, ship)
+	c.events_seen += int(not ev.is_empty())
+	return {"node": c.node(node_id), "refused": "", "event": ev}
+
+
+## The event of POI `id` is over: it is done (a station or store stays new, see trigger()). Call it when the event
+## panel has no more pages, whatever was chosen. An ambient contact is gone.
+func resolve(id: String) -> void:
+	var poi := find(id)
+	if poi.is_empty():
+		return
+	if bool(cfg["poi_types"].get(poi["type"], {}).get("repeat", false)):
+		return
+	poi["state"] = DONE
+	_engaged.erase(id)
+	if poi.get("ambient", false):
+		ambient.erase(poi)
+
+
+## Are all the generated POIs done (a station or store counts as done)?
+func cleared() -> bool:
+	return pois.all(func(p): return p["state"] == DONE or bool(cfg["poi_types"].get(p["type"], {}).get("repeat", false)))
+
+
+## A `fight` effect at POI `id` (`value`: "tier" or a design id, as in events.gd): {design (a res:// path), pos (where
+## the enemy appears, 250 to 600 px from the POI), poi (its id)}. The design is the POI's own `enemy` when it has one
+## and the effect says "tier", else Campaign.fight_path()'s (the tier tables; a rammer for a pirate after two missed
+## payments). {} for an unknown POI. Combat stays the arena for now.
+func fight_spawn(c, id: String, value := "tier") -> Dictionary:
+	var poi := find(id)
+	if poi.is_empty():
+		return {}
+	var design: String = c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" else c.fight_path(value, str(poi["event_type"]))
+	var s: Array = cfg["poi"]["spawn"]
+	var pos: Vector2 = poi["pos"] + Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(float(s[0]), float(s[1]))
+	return {"design": design, "pos": pos.clamp(Vector2.ZERO, Vector2(size, size)), "poi": id}
+
+
+## Is a hostile ship within `radius` px of the ship (the jump drive does not spool then)?
+func hostile_near(radius: float) -> bool:
+	return hostiles.any(func(p): return ship_pos.distance_to(p) <= radius)
+
+
+# --- flying ----------------------------------------------------------------------------------------------
+
+## The flight numbers of `ship` for fly(): {accel (px/s^2 at full thrust: the powered engines' forward thrust x
+## thrust_to_accel / mass, 0 when the ship cannot fly), max_speed, damping}, from flight.gd and data/flight.json.
+static func flight_numbers(ship) -> Dictionary:
+	ship.refresh()
+	var f := Flight.new()
+	var powered: Dictionary = ship.power_state.get("powered", {})
+	var mass := f.mass_of(ship.grid, ship.components, ship.cables, Stats.mass_mults(ship.components, ship.lines))
+	var thrust := 0.0
+	if f.can_fly(ship.components, powered) == "":
+		thrust = float(f.thrusts_of(Stats.view(ship.components, ship.lines), powered, Abilities.thrust_boost(ship))["fwd"])
+	return {"accel": thrust * f.thrust_to_accel / mass, "max_speed": f.max_speed, "damping": f.linear_damping}
+
+
+## Take the flight numbers from `ship`. Call it on arrival and whenever its engines, mass or power change.
+func set_flight(ship) -> void:
+	var n := flight_numbers(ship)
+	accel = float(n["accel"])
+	max_speed = float(n["max_speed"])
+	damping = float(n["damping"])
+
+
+## Fly `dt` seconds as a point mass: `thrust` is the wanted thrust as a vector in sector directions (length 0 to 1, the
+## fraction of full acceleration; longer is cut to 1), the speed fades with `damping` and is capped at `max_speed`,
+## and the sector's walls stop the ship. The current does not push the ship (it moves the debris); an autopilot or a
+## drifting helm adds what it wants to `thrust`.
+func fly(dt: float, thrust := Vector2.ZERO) -> void:
+	if dt <= 0.0:
+		return
+	ship_vel += thrust.limit_length(1.0) * accel * dt
+	ship_vel = (ship_vel * exp(-damping * dt)).limit_length(max_speed)
+	ship_pos += ship_vel * dt
+	if ship_pos.x < 0.0 or ship_pos.x > size:
+		ship_pos.x = clampf(ship_pos.x, 0.0, size)
+		ship_vel.x = 0.0
+	if ship_pos.y < 0.0 or ship_pos.y > size:
+		ship_pos.y = clampf(ship_pos.y, 0.0, size)
+		ship_vel.y = 0.0
+
+
+# --- the current and the debris --------------------------------------------------------------------------
+
+func current_dir() -> Vector2:
+	return Vector2.from_angle(deg_to_rad(current_angle))
+
+
+func current_vel() -> Vector2:
+	return current_dir() * current_speed
+
+
+## `base` (data/debris.json) with this sector's current, density and theme: the current's direction and speed, the
+## spawn rate, cap and starting pieces times the density, the type weights times the node type's multipliers.
+## drift_debris.gd builds its spawner from it (DriftDebris.for_sector).
+func debris_cfg(base: Dictionary) -> Dictionary:
+	var out := base.duplicate(true)
+	out["current"]["angle"] = current_angle
+	out["current"]["speed"] = current_speed
+	var s: Dictionary = out["spawn"]
+	s["every"] = float(s["every"]) / density
+	s["max_alive"] = maxi(8, roundi(float(s["max_alive"]) * density))
+	s["start_alive"] = roundi(float(s["start_alive"]) * density)
+	for t in out["types"]:
+		t["weight"] = float(t["weight"]) * float(debris_mult.get(t["id"], 1.0))
+	return out
+
+
+# --- ambient encounters ----------------------------------------------------------------------------------
+
+## `dt` seconds pass in the sector: the passing ships move and leave when their time is up or they are far outside,
+## and every `ambient.every` seconds (90) the sector rolls for a new one. `ship` gives the radar's reach (it may be
+## null: the visual range then). Returns the contacts made now.
+func tick(dt: float, ship) -> Array:
+	if dt <= 0.0:
+		return []
+	clock += dt
+	var margin := float(cfg["poi"]["margin"])
+	var i := 0
+	while i < ambient.size():
+		var a: Dictionary = ambient[i]
+		a["pos"] += a["vel"] * dt
+		a["ttl"] -= dt
+		if a["ttl"] <= 0.0 or not contains(a["pos"], margin):
+			_engaged.erase(a["id"])
+			ambient.remove_at(i)
+		else:
+			i += 1
+	var amb: Dictionary = cfg["ambient"]
+	var made := []
+	_amb_t += dt
+	while _amb_t >= float(amb["every"]):
+		_amb_t -= float(amb["every"])
+		var c := _roll_ambient(ship)
+		if not c.is_empty():
+			made.append(c)
+	return made
+
+
+## One ambient roll: with chance `ambient.chance` (and fewer than `max` about) an `unknown` contact appears at
+## `edge` x the radar's reach from the ship, in a random direction that stays inside the sector. Its kind (trader,
+## patrol or pirate: the event type it will run) is picked by the region's weights.
+func _roll_ambient(ship) -> Dictionary:
+	var amb: Dictionary = cfg["ambient"]
+	var lucky := rng.randf() < float(amb["chance"])
+	if not lucky or ambient.size() >= int(amb["max"]):
+		return {}
+	var regions: Dictionary = cfg["regions"]
+	var kind := _pick(rng, regions[region]["ambient"] if regions.has(region) else regions["boneyard"]["ambient"])
+	var dist := Radar.reach(ship) * float(amb["edge"])
+	var at := ship_pos
+	var found := false
+	for k in 8:
+		at = ship_pos + Vector2.from_angle(rng.randf() * TAU) * dist
+		if contains(at, -float(cfg["poi"]["margin"]) / 5.0):
+			found = true
+			break
+	if not found:
+		at = ship_pos + (Vector2(size, size) / 2.0 - ship_pos).normalized() * dist
+	var speed := rng.randf_range(float(amb["speed"][0]), float(amb["speed"][1]))
+	var to := ship_pos
+	if rng.randf() >= float(amb["approach"]):  # it passes by, to one side of the ship
+		var side := (ship_pos - at).normalized().orthogonal() * (1.0 if rng.randf() < 0.5 else -1.0)
+		to = ship_pos + side * rng.randf_range(1500.0, 3000.0)
+	var contact := {"id": "a%d" % _next_amb, "type": "unknown", "name": str(cfg["poi_types"]["unknown"]["label"]), "pos": at, "visibility": "signal",
+		"event_type": kind, "state": NEW, "enemy": "", "main": false, "ambient": true, "vel": (to - at).normalized() * speed, "ttl": float(amb["ttl"])}
+	_next_amb += 1
+	ambient.append(contact)
+	return contact
+
+
+# --- save format -----------------------------------------------------------------------------------------
+
+## What is saved of the sector: the POI states, the ship's place and speed, the ambient clock and the ships about.
+## The layout itself comes from the seed.
+func to_save() -> Dictionary:
+	var states := {}
+	for p in pois:
+		states[p["id"]] = p["state"]
+	var list := []
+	for a in ambient:
+		list.append({"id": a["id"], "kind": a["event_type"], "pos": [a["pos"].x, a["pos"].y], "vel": [a["vel"].x, a["vel"].y], "ttl": a["ttl"], "state": a["state"]})
+	return {"pois": states, "ship": [ship_pos.x, ship_pos.y], "vel": [ship_vel.x, ship_vel.y], "ambient": list, "amb_t": _amb_t,
+		"next_amb": _next_amb, "clock": clock, "rng": str(rng.state)}
+
+
+## Replace the POI states, the ship's place and the ambient state with a saved one. Returns "" or why not (and nothing
+## changes). A saved POI this layout does not have is ignored.
+func load_save(d: Dictionary) -> String:
+	if not (d.get("pois") is Dictionary and d.get("ambient") is Array and _vec(d.get("ship")) != null and _vec(d.get("vel")) != null):
+		return "bad sector data"
+	for id in d["pois"]:
+		if not (d["pois"][id] is String and [NEW, DONE].has(d["pois"][id])):
+			return "bad sector data"
+	var contacts := []
+	for e in d["ambient"]:
+		if not (e is Dictionary and e.get("id") is String and e.get("kind") is String and _vec(e.get("pos")) != null and _vec(e.get("vel")) != null and _is_num(e.get("ttl"))):
+			return "bad sector data"
+		var state := str(e.get("state", NEW))
+		contacts.append({"id": e["id"], "type": "unknown", "name": str(cfg["poi_types"]["unknown"]["label"]), "pos": _vec(e["pos"]), "visibility": "signal",
+			"event_type": e["kind"], "state": state if [NEW, DONE].has(state) else NEW, "enemy": "", "main": false, "ambient": true, "vel": _vec(e["vel"]), "ttl": float(e["ttl"])})
+	for p in pois:
+		if d["pois"].has(p["id"]):
+			p["state"] = d["pois"][p["id"]]
+	ship_pos = _vec(d["ship"]).clamp(Vector2.ZERO, Vector2(size, size))
+	ship_vel = _vec(d["vel"])
+	ambient = contacts
+	_amb_t = float(d.get("amb_t", 0.0)) if _is_num(d.get("amb_t")) else 0.0
+	_next_amb = int(d.get("next_amb", 1)) if _is_num(d.get("next_amb")) else 1
+	clock = float(d.get("clock", 0.0)) if _is_num(d.get("clock")) else 0.0
+	if d.get("rng") is String and str(d["rng"]).is_valid_int():
+		rng.state = int(str(d["rng"]))
+	_engaged.clear()
+	_greeted.clear()
+	return ""
+
+
+static func _is_num(v) -> bool:
+	return v is float or v is int
+
+
+## A saved [x, y] as a Vector2, null when it is not one.
+static func _vec(v):
+	if v is Array and v.size() == 2 and _is_num(v[0]) and _is_num(v[1]):
+		return Vector2(float(v[0]), float(v[1]))
+	return null
