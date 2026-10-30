@@ -13,7 +13,7 @@ Placement uses square hitboxes on the grid, but placed objects should look natur
 ## Pillars (what makes it ours)
 1. **Compartments matter.** Each room has its own oxygen and pressure. Hull breaches vent a room, and closed doors seal it. Fires spread room to room. This is why you build walls.
 2. **Power is a real network.** Cables connect reactors to systems. A cut cable powers down everything beyond it, so routing is part of the design.
-3. **Disable, don't destroy.** Damaged components go offline and crew repair them. Only the hull can truly be lost.
+3. **Disable first, destroy when exposed.** Damaged components go offline and crew repair them. A disabled component that takes another direct hit through a breach is **wrecked**, gone for good apart from salvage. Outside mount halves are armoured: only ever disabled. So walls and repair speed matter.
 4. **Crew are people.**
    - You recruit them at stations and pay wages.
    - They have skills that improve with use.
@@ -73,7 +73,7 @@ Every system should be **unique, FTL Multiverse style**: not just "+10% thrust",
     - So you put it in its own sealed room and crew it with someone in a **suit**, or with a **species that doesn't breathe**.
 - **Heat**: components and rooms have heat.
   - Heat rises from abilities and heavy load and falls through `cooling` (radiators, coolant pumps, vacuum around the room).
-  - Past the component's limit it **overheats**: disabled until cooled, with a fire risk. This follows our "disable, don't destroy" rule.
+  - Past the component's limit it **overheats**: disabled until cooled, with a fire risk. Heat only ever disables.
 - **Manning requirements**: an ability can require the operator to have a trait: `no_breath`, `heat_resistant`, `suit`, `engineer_skill>=3`, ...
   - This is how crew choice matters.
 

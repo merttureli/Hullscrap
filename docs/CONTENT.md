@@ -6,7 +6,7 @@ This is how systems, weapons and real-time combat work, plus the first content s
 Each entry has:
 - `id`, `name`, `family`, `line` (`scrap` / `standard` / `neon`), `tier` (1-3), `size`, `color`;
 - `power` (+ produces, − consumes), `priority`, `manned`;
-- `hp` (system health: at 0 it's **disabled**, not destroyed; crew repair it);
+- `hp` (system health: at 0 it's **disabled** and crew repair it. A direct hit on an already-disabled interior component **wrecks** it, see 4f);
 - `heat_limit` and `heat_per_s` (heat gained while running at full load), `cooling` (heat lost per second);
 - `stats` (family-specific, see below);
 - `abilities` (optional, see 5), `unique` (bool; unique items are found or traded only and have no recipe), `blurb` (one line of flavour).
@@ -56,7 +56,7 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
   - Every solid cell has **hp**: wall 4, door 3, component = its `hp`. Floor cells are open interior: shots pass over them but can hit crew standing there.
   - A projectile deals `damage` to the first solid cell it meets.
     - A wall at 0 becomes a **breach**: a hole, so the room vents.
-    - A component at 0 is **disabled**, not destroyed, until crew repair it.
+    - A component at 0 is **disabled** until crew repair it. A direct hit on one that's already disabled **wrecks** it (4f). Outside mount halves are only ever disabled.
     - If the weapon has `pierce`, leftover damage carries on into the next cells.
   - **Thick outer walls are armour.** A reactor in the middle is protected, and an exposed one is a target. Players will aim for engines and weapons, and flank to reach the soft side.
   - Every hull hit also lowers the ship's **hull integrity** pool: hull_hp = 20 + armour plates. At 0 the ship is **wrecked** and becomes a salvageable derelict.
@@ -170,35 +170,67 @@ Ships are physical bodies made of their cells. **They collide, and both take dam
 - **Wrecks and debris**: wrecked ships stay physical. You can ram them, push them, and later tow them.
 - **Tuning** (`data/collision.json`): `restitution`, `min_speed`, `damage_k`, `crew_knock`, `separation_slop`.
 
-## 4f. Hull mounts: half outside, half inside (owner, 2026-10-30)
-Weapons and engines **straddle the hull wall**, not FTL's all-outside nor a box in a room:
-- the **outside part** (barrel and turret, nozzles) sits in space and **takes the hits you can see**;
-- the **inside part** (breech, capacitor, ammo feed, engine core) sits on the floor, where crew **repair it, wire power to it and feed it ammo**.
+## 4f. Hull mounts: two linked halves through a hull of any thickness (owner, 2026-10-30)
+Weapons and engines are **two linked halves**, not FTL's all-outside nor a box in a room:
+- the **outside half** (turret and barrel, nozzles) sits in space against the hull's outer face, and **takes the hits you can see**;
+- the **inside half** (breech, capacitor, ammo feed, engine core) sits on the floor against the hull's inner face. Crew **repair, wire, feed and man it** there.
+- **Between them is your wall, as thick as you like**: 1 cell of steel, or 5 layers of composite and ablative plating. The halves are linked straight through it.
 
-- **Mount layout**: at rotation 0, **outward is UP**. The footprint is split into bands from top to bottom:
-  - `outside` rows (in space);
-  - **1 `wall` row** (a hull collar that replaces and seals the wall where it passes through);
-  - `inside` rows (on floor).
-  - Data: `"mount": {"outside": 2, "wall": 1, "inside": 2}`, and the size includes all bands (standard guns and engines are **4 wide × 5 tall**; heavy ones 4×6).
-  - **Rotate to put a mount on any wall**: guns face out from their wall, and rear engines use rotation 2.
-- **Placement rules**:
-  - `outside` cells must be **exterior**: hull-frame cells with no tile, connected to open space (not inside a room);
-  - `wall` cells must currently be solid wall (the collar sits on the wall, and the room stays sealed);
-  - `inside` cells must be floor.
-  - Reasons: "the barrel must stick out into space", "needs a wall to mount through", "the breech needs floor inside".
-- **Combat**:
-  - Outside cells are fully exposed. The collar row uses the wall's hp. Inside cells are behind the hull like everything else.
-  - Hits on the outside part damage the component (disabled at 0, "disable, don't destroy").
-  - The room **doesn't breach** unless the collar's wall cell itself is destroyed.
-- **Weapon aim**: the outside turret **rotates to follow the aim** within the weapon's arc. **The arc is centred on the mount's outward direction**, replacing "centre to weapon". Turrets with arc 360 can sweep fully. The shot leaves from the barrel's muzzle.
-- **Repair and power**: crew repair from the inside part (they stand next to inside cells), and cables connect only to inside cells.
-- **Engines**: thrust acts along the **opposite of the nozzle direction**. Forward thrust for W/S is the sum of each engine's thrust × cos(angle between its push and the ship's forward). Rear engines give full thrust, side engines none (lateral thrust and strafing come later). Turning still comes from total thrust, as now.
+- **Data**: `size` is the inside half. `"mount": {"outside": [4, 2], "outside_hp": 30}` adds the outside half.
+  - Standard guns and engines are 4×2 + 4×2. Heavy ones have a 4×3 outside half.
+  - At rotation 0, **outward is UP**: the outside half sits above the inside half, with the wall in between. Rotate to mount on any wall (rear engines use rotation 2).
+- **Placement** (one item, one placement, with a ghost of both halves):
+  - The player places the **outside half** against the outer face of the hull.
+  - The game walks inward through the wall along the mount axis, and puts the **inside half on the first floor rows behind it**.
+  - **The link** is the straight run of cells between the two halves, across the mount's full width. It must be **at least 1 cell deep**, and every cell must be a full wall cell (any material; no doors, floor or shaped pieces).
+  - The outside cells must be exterior (no tile, open to space), and the inside cells free floor.
+  - Refusal reasons: "the barrel must stick out into space", "needs a flat wall to mount through", "the breech needs 4×2 free floor behind the wall".
+  - Thicker walls protect the inside half better and weigh more. That's the trade-off; there's no depth limit.
+  - **Saves** store one record per mount: `pos` (inside half), `rot` and `out` (the outside half's top-left). Bump the save version.
+- **Damage: outside is built to take it, inside is not**:
+  - **Outside half**: its own hp (`outside_hp`). At 0 it's **disabled, never destroyed**: the gun stops firing, or the engine stops pushing.
+    - Shots that hit a disabled outside half pass through to the wall behind it.
+    - Crew repair it **from the inside half**, while the link is intact.
+  - **Inside half**: like every interior component, it's only reachable by a direct hit once the wall in front is breached.
+    - At 0 hp it's disabled and repairable, as now.
+    - **A direct physical hit (projectile, splash or ram) on an interior component that is already disabled wrecks it** (see below).
+    - Wrecking the inside half wrecks the whole mount; the outside half breaks off.
+  - **The link cut**: if any link cell breaches, the mount goes offline (no feed, power or control) until crew patch that breach. The room vents as usual.
+  - The outside half is part of the hitbox. Turrets stick out, so **rams hit guns first**.
+- **Wrecked components (owner, 2026-10-30)**: "disable first, destroy when exposed". This applies to every interior component, not just mounts.
+  - A wrecked component is **gone**: removed from the ship, with a wreck decal on its cells.
+  - A crew job **`clear_wreck`** (priority 30, 4 s) clears the cells and recovers **half its recipe materials** (rounded down) into cargo. A unique (found) component has no recipe, so wrecking it loses it for good.
+  - Fire, heat, ion and malfunctions only ever **disable**. They never wreck.
+  - So protect your systems with walls, and repair disabled ones before the next volley lands.
+- **Weapon aim**: the outside turret **rotates to follow the aim** within the weapon's arc.
+  - **The arc is centred on the mount's outward direction**, replacing "centre to weapon". Turrets with arc 360 can sweep fully.
+  - The shot leaves from the barrel's muzzle.
+- **Power and crew**: cables connect only to the inside half, and the station is manned there.
+- **Engines**: thrust acts along the **opposite of the nozzle direction**. Forward thrust for W/S is the sum of each engine's thrust × cos(angle between its push and the ship's forward).
+  - Rear engines give full thrust, side engines none (lateral thrust and strafing come later).
+  - Turning still comes from total thrust, as now.
 - **Ammo racks** (logistics, Cosmoteer-style):
-  - `ammo_rack`: an inside component, 2×2, holds up to 20 units of one ammo item (missiles, scrap for the Bolt Thrower, ...). It shows its fill level.
-  - A weapon with `ammo` draws only from racks **in the same room as its inside part**. "No ammo rack in the room" and "rack empty" are its refusal reasons.
+  - `ammo_rack` is an inside component, 2×2, holding up to 20 units of one ammo item (missiles, scrap for the Bolt Thrower, ...). It shows its fill level.
+  - A weapon with `ammo` draws from racks **in the same room as its inside half**, or from any rack on its **conveyor network** (below). "No ammo rack in reach" and "rack empty" are its refusal reasons.
   - **A crew job `restock`** (priority 40) carries ammo from ship cargo to any rack below 50%: 1 s per 5 units, walking to it.
-  - So build your gun rooms with racks, and if the rack room burns, the guns run dry.
-- **Ships to redesign**: the starters, the pirate raider and the rammer get their guns and engines re-mounted through their walls (the generator tool rebuilds them).
+  - **A wrecked rack holding explosive ammo (missiles) explodes**: 2 damage per unit, as splash in its room. A big central magazine is efficient, and a liability.
+- **Conveyor belts (owner, 2026-10-30)**: found upgrades that let racks sit anywhere and feed the guns automatically, so crew restock one magazine instead of running between guns.
+  - **The upgrade is a belt drive**, a found or traded component (not a starting blueprint), 2×2, power −1. Line variants:
+
+    | Drive | Line | Speed | Feed | Quirk |
+    |---|---|---|---|---|
+    | Clan Chain Drive | Scrap | 3 cells/s | 1 unit / 0.8 s | jams on malfunction (line reliability) until a crew member kicks it |
+    | Concord Autoloader | Standard | 5 cells/s | 1 unit / 0.5 s | — |
+    | Lumen Mag-Rail | Neon | 8 cells/s | 1 unit / 0.3 s | ion stops it for the ion duration |
+  - **Belts** are a floor overlay laid cell by cell in build mode (an autotile, like cables), costing 1 scrap per cell. Crew walk over them.
+    - Belts run on floor and door cells, never through walls (to feed a gun, lay the belt to its inside half).
+    - Building belts needs at least one belt blueprint, which comes with your first drive.
+  - **Networks**: orthogonally connected belt cells form a network. A rack, weapon or drive **is on a network if a belt cell touches its edge**.
+    - A network moves only with a powered, working drive on it. Several drives add feed rate, and the speed is the best drive's.
+    - A weapon pulls its ammo from the nearest rack on its network (shortest belt path). Each unit **rides the belt visibly** and arrives after path length ÷ speed. Reloads wait for it.
+  - **Damage**: a belt cell under fire or on a breached cell is cut, splitting the network, until crew repair it (the same job as cables).
+  - Later, belts can carry other items: salvage from the airlock to cargo, or scrap to the fabricator.
+- **Ships to redesign**: the starters, the pirate raider and the rammer get their guns and engines re-mounted through their walls (the generator tool rebuilds them). Courier gets a thicker bow.
 
 ## 5. Abilities and quirks (`scripts/sim/abilities.gd`)
 - An ability is `{id, name, type: active|passive, duration, cooldown, effects, side_effects, operator_needs}`.
