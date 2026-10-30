@@ -8,7 +8,7 @@ const PATH := "user://profile.json"
 const VERSION := 1
 const MAX_RUNS := 20  ## records kept
 const SHOWN_RUNS := 5  ## records the main menu lists
-const HINTS: Array[String] = ["picked", "map", "fight"]  ## the first-run hints, in the order they come
+const HINTS: Array[String] = ["picked", "map", "fight", "net"]  ## the first-run hints, in the order they come
 const BETA := "Beta 1"
 const VERSION_PATH := "res://version.txt"  ## the short git hash, written when the game is exported
 

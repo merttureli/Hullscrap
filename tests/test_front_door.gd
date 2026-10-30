@@ -201,7 +201,7 @@ func test_first_run_hints_are_shown_once_and_only_in_the_first_run() -> void:
 	eq(FrontDoor.HINT_TEXT.keys(), Profile.HINTS, "every hint has its text, in order")
 	eq(FrontDoor.HINT_TEXT["picked"], "B: play mode, M: map", "the first hint")
 	eq(FrontDoor.HINT_TEXT["map"], "Click a lit neighbour to jump", "the second hint")
-	eq(FrontDoor.HINT_TEXT["fight"], "Mouse steers, LMB fires, Esc to leave when clear", "the third hint")
+	eq(FrontDoor.HINT_TEXT["fight"], "Mouse steers, LMB fires, J spools the jump drive to escape", "the third hint")
 	_clean()
 
 

@@ -20,7 +20,8 @@ const Starfield = preload("res://scripts/space/starfield.gd")
 const HINT_TEXT := {
 	"picked": "B: play mode, M: map",
 	"map": "Click a lit neighbour to jump",
-	"fight": "Mouse steers, LMB fires, Esc to leave when clear",
+	"fight": "Mouse steers, LMB fires, J spools the jump drive to escape",
+	"net": "Ma's Net Mouth is in your cargo: B, Tab to Systems, put it on an outer wall to catch drifting scrap",
 }
 
 var sim: Node
@@ -86,6 +87,9 @@ func _process(_dt: float) -> void:
 		if open and not _map_seen:
 			_hint("map")
 		_map_seen = open
+		if not map.visible and sim != null and sim.has_method("player_ship") and sim.player_ship() != null \
+				and sim.player_ship().inventory.count("net_mouth_scrap") > 0:
+			_hint("net")  # Ma's gift is in the hold: show where it goes
 	if combat != null:
 		var fighting: bool = combat.active
 		toast.top = 62.0 if fighting else 6.0
