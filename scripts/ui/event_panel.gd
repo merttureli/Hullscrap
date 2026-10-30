@@ -132,7 +132,7 @@ func proceed() -> void:
 		close()
 		fight_requested.emit(str(r["fight"]), r.get("after_win", {}))
 	elif str(r.get("goto", "")) != "" and c.events.has(str(r["goto"])):
-		open_event(c.events.enter(c.events.get_event(str(r["goto"])), c))
+		open_event(c.events.get_event(str(r["goto"])))
 	else:
 		close()
 		finished.emit()
@@ -301,7 +301,7 @@ func _draw_result(lay: Dictionary) -> void:
 static func tone_of(line: String) -> int:
 	if line.contains("is lost"):
 		return -1
-	if line.contains("joins") or line.contains("learned") or line.begins_with("Log found") or line.begins_with("On the map"):
+	if line.contains("joins") or line.contains("learned") or line.begins_with("Log ") or line.begins_with("On the map"):
 		return 1
 	var re := RegEx.new()
 	re.compile("[+-][0-9]+")

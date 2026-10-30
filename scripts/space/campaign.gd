@@ -179,12 +179,28 @@ func label(id: String) -> String:
 	return str(n["name"]) if str(n["name"]) != "" else str(type_info(str(n["type"]))["label"])
 
 
-## Mark `id` (a node or place id) as shown on the map. Returns its label, "" for an unknown id.
+## Show a node on the map: `id` is a node or place id, or a node type (the nearest node of that type that
+## is not on the map yet). Returns its label, "" when there is none.
 func reveal(id: String) -> String:
-	if not drift.has(id):
+	if drift.has(id):
+		revealed[id] = true
+		return label(id)
+	if not config()["types"].has(id):
 		return ""
-	revealed[id] = true
-	return label(id)
+	var here: Vector2 = drift.node(current)["pos"]
+	var best := ""
+	var best_d := INF
+	for n in drift.nodes:
+		if n["type"] != id or is_hidden(n["id"]) or is_known(n["id"]):
+			continue
+		var d: float = here.distance_to(n["pos"])
+		if d < best_d or (d == best_d and n["id"] < best):
+			best = n["id"]
+			best_d = d
+	if best == "":
+		return ""
+	revealed[best] = true
+	return label(best)
 
 
 # --- hull integrity ---------------------------------------------------------------------------------------
@@ -244,6 +260,7 @@ func jump(to: String, ship, drift_jump := false) -> Dictionary:
 		notes.append("The drift jump tears at the hull (-%d integrity)." % cost)
 	else:
 		ship.inventory.add("fuel", -1)
+	flags.erase("at_" + str(drift.node(current).get("place", "")))  # undocked
 	current = to
 	visited[to] = true
 	notes.append_array(_advance(1))
@@ -276,8 +293,9 @@ func wait(ship) -> Dictionary:
 
 ## What happens on reaching the current node. Returns {node, refused, event}: `refused` is the text of a
 ## dock master who turns you away (a faction below the refusal line), `event` the event to show ({} if
-## none). A debt event (Ma's call, a reminder, the collectors' talk) interrupts the node's own event; a
-## station you may dock at rolls its recruits.
+## none). A debt event (Ma's call, a reminder, the collectors' talk) interrupts the node's own event. At a
+## station you may dock at the flag at_<place> is set (until you jump away), its recruits are rolled, and
+## the event is one of its greetings.
 func arrive(ship) -> Dictionary:
 	var n := drift.node(current)
 	var out := {"node": n, "refused": "", "event": {}}
@@ -286,6 +304,8 @@ func arrive(ship) -> Dictionary:
 		if refuses(str(st.get("faction", ""))):
 			out["refused"] = REFUSED_TEXT
 			return out
+		if str(n["place"]) != "":
+			flags["at_" + str(n["place"])] = true  # docked: the station greetings ask for it
 		if st["services"].has("recruit"):
 			roll_offers(current, ship)
 	if n["type"] != "gate":

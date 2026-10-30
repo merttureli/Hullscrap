@@ -10,6 +10,10 @@ extends RefCounted
 ## - An event's `type` is the node type it can happen at. A follow-up page (type `page`, weight 0, or any
 ##   event named by a `goto`) is never rolled at a node. `requires.node` matches a node type or a place id.
 ##   Type `debt` is no node: the debt clock (campaign.gd) picks those, by what their `requires` say.
+##   Type `station` events are the greetings on docking: they ask for the flag at_<place> (set while docked
+##   there) or for `node` a place id.
+## - A `once` event is spent only when the outcome of the choice taken has non-empty effects, so a
+##   "Leave" choice (no effects) does not burn a quest step.
 ## - A choice is hidden when its requirements are not met, greyed (with what it needs) when it only
 ##   lacks items or credits, and blue when it asks for a species, a trait or an installed component.
 ## - `items` and `credits` in a choice's requires must be held; they are paid only when `pay` is true
@@ -155,8 +159,7 @@ func is_page(id: String) -> bool:
 
 ## The event that happens at `node` ({id, type, place}): a weighted roll with the campaign's rng among
 ## the events of the node's type whose requirements hold and that have not been used up (`once`).
-## `filter` (optional Callable(ev) -> bool) can narrow the pool further. {} when there is none. A `once`
-## event is marked used by being picked.
+## `filter` (optional Callable(ev) -> bool) can narrow the pool further. {} when there is none.
 func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 	var pool: Array = []
 	var total := 0.0
@@ -178,7 +181,6 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 		if r < 0.0:
 			chosen = p[0]
 			break
-	enter(chosen, c)
 	return chosen
 
 
@@ -196,13 +198,6 @@ static func debt_kind(ev: Dictionary) -> String:
 	if _list(req.get("flag")).has("debt_missed"):
 		return "miss"
 	return "first" if _list(req.get("not_flag")).has("met_ma") else "reminder"
-
-
-## Mark `ev` as seen (a `once` event never comes back). Returns it.
-func enter(ev: Dictionary, c) -> Dictionary:
-	if bool(ev.get("once", false)):
-		c.used[str(ev["id"])] = true
-	return ev
 
 
 static func _weight(v) -> float:
@@ -359,6 +354,8 @@ func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dicti
 		for id in ids:
 			lines.append("-%d %s" % [cost[id], _name(ship, id)])
 	var outcome := roll(ch.get("outcomes", []), c.rng)
+	if bool(ev.get("once", false)) and not _dict(outcome.get("effects")).is_empty():
+		c.used[str(ev["id"])] = true  # spent: an outcome that does something
 	var res := apply(_dict(outcome.get("effects")), c, ship, node)
 	lines.append_array(res["lines"])
 	var after: Dictionary = _dict(outcome.get("after_win")) if outcome.has("after_win") else _dict(ev.get("after_win"))
@@ -447,9 +444,10 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 				lines.append("%s is lost" % gone)
 	for id in _list(effects.get("log")):
 		if logs.has(str(id)):
+			var again: bool = c.logs_found.has(str(id))  # shown again, but kept once
 			c.logs_found[str(id)] = true
 			found.append(logs[str(id)])
-			lines.append("Log found: " + str(logs[str(id)].get("title", id)))
+			lines.append(("Log read again: " if again else "Log found: ") + str(logs[str(id)].get("title", id)))
 	return {"lines": lines, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "logs": found}
 
 
@@ -673,8 +671,8 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 		if not logs.has(l):
 			bad.call("%s: unknown log id '%s' (not in data/logs/*.json)" % [where, l])
 	for r in _list(eff.get("reveal")):
-		if not (r is String and (known["places"].has(r) or _is_node_id(r))):
-			bad.call("%s: reveal '%s' is not a place id (or a node id like n07)" % [where, r])
+		if not (r is String and (known["places"].has(r) or _is_node_id(r) or NODE_TYPES.has(r))):
+			bad.call("%s: reveal '%s' is not a place id, a node type or a node id like n07" % [where, r])
 
 
 static func _is_num(v) -> bool:

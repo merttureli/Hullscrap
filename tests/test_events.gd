@@ -61,8 +61,28 @@ func test_the_loader_reads_every_json_file_in_the_folder() -> void:
 	for id in e.files:
 		from[e.files[id]] = true
 	check(from.has("res://data/events/core.json"), "core.json is read")
-	check(from.has("res://data/events/drift_pack1.json"), "the first pack is read")
+	check(from.has("res://data/events/drift_pack1.json") and from.has("res://data/events/drift_pack2.json") and from.has("res://data/events/stations.json"), "both packs and the station greetings are read")
 	check(e.has("station_debt_intro") and e.has("distress_hauler_fire") and e.has("asteroid_tumbling_rock"), "events of both files are there")
+
+
+func test_every_outcome_of_every_event_applies_and_every_choice_can_be_taken() -> void:
+	var ship := _ship()
+	ship.inventory.add("credits", 100000)
+	ship.inventory.add("scrap", 1000)
+	var events := Events.new()
+	var outcomes := 0
+	for id in events.order:
+		var c := Campaign.new(3)
+		var ev: Dictionary = events.events[id]
+		for ch in ev.get("choices", []):
+			for o in ch["outcomes"]:
+				var r := c.events.apply(o.get("effects", {}), c, ship, _node(str(ev["type"])))
+				check(r["lines"] is Array and r["logs"] is Array, "%s: the effects of an outcome apply" % id)
+				outcomes += 1
+		var view := c.events.choice_view(ev, c, ship, _node(str(ev["type"])))
+		for v in view:
+			check(v["text"] != "", "%s: choice %d has text" % [id, v["index"]])
+	check(outcomes > 400, "every outcome of the packs was run (%d)" % outcomes)
 
 
 func test_validator_names_the_file_and_the_event() -> void:
@@ -187,12 +207,27 @@ func test_event_requires_jumps_flags_reputation_and_node() -> void:
 	check(not ev.pick(c, _node("empty"), ship).is_empty(), "node matches a node type")
 
 
-func test_once_events_never_repeat() -> void:
-	var c := _camp([_ev("single", "pirate", {}, {}, {"once": true})])
+func test_a_once_event_is_spent_only_by_an_outcome_that_does_something() -> void:
+	var leave := {"text": "Leave", "outcomes": [{"weight": 1, "text": "You go.", "effects": {}}]}
+	var act := {"text": "Act", "outcomes": [{"weight": 1, "text": "Done.", "effects": {"items": {"scrap": 1}}}]}
+	var c := _camp([_ev("quest", "pirate", {}, {}, {"once": true, "choices": [leave, act]})])
 	var ship := _ship()
-	eq(c.events.pick(c, _node("pirate"), ship).get("id", ""), "single", "the first time")
-	check(c.events.pick(c, _node("pirate"), ship).is_empty(), "never again")
-	check(c.used.has("single"), "it is recorded as used")
+	var ev := c.events.pick(c, _node("pirate"), ship)
+	eq(ev.get("id", ""), "quest", "the first time")
+	check(not c.used.has("quest"), "being picked spends nothing")
+	check(c.events.choose(ev, 0, c, ship)["ok"], "a Leave choice (empty effects)")
+	check(not c.used.has("quest"), "does not burn the quest step")
+	eq(c.events.pick(c, _node("pirate"), ship).get("id", ""), "quest", "so it comes again")
+	check(c.events.choose(ev, 1, c, ship)["ok"], "a choice that does something")
+	check(c.used.has("quest"), "spends it")
+	check(c.events.pick(c, _node("pirate"), ship).is_empty(), "and it never comes back")
+
+
+func test_a_once_event_that_only_has_a_goto_effect_is_spent() -> void:
+	var c := _camp([_ev("start", "pirate", {}, {"goto": "next"}, {"once": true}), _ev("next", "pirate", {}, {}, {"weight": 0})])
+	var ship := _ship()
+	c.events.choose(c.events.pick(c, _node("pirate"), ship), 0, c, ship)
+	check(c.used.has("start"), "a goto is an effect")
 
 
 func test_pages_and_weight_zero_events_are_never_picked() -> void:
@@ -514,7 +549,7 @@ func test_goto_chains_pages() -> void:
 	var ev := c.events.pick(c, _node("pirate"), ship)
 	var r := c.events.choose(ev, 0, c, ship)
 	eq(r["goto"], "two", "page one leads to two")
-	r = c.events.choose(c.events.enter(c.events.get_event(r["goto"]), c), 0, c, ship)
+	r = c.events.choose(c.events.get_event(r["goto"]), 0, c, ship)
 	eq(r["goto"], "three", "two leads to three")
 	r = c.events.choose(c.events.get_event(r["goto"]), 0, c, ship)
 	eq(r["goto"], "", "three ends the chain")
@@ -649,7 +684,91 @@ func test_station_events_greet_each_station_and_the_debt_intro_opens_the_run() -
 	eq(a["event"].get("id", ""), "station_debt_intro", "a new run opens with Ma Gantry at Rusthold")
 	var r := c.events.choose(a["event"], 0, c, ship, a["node"])
 	check(r["ok"] and c.flags.has("met_ma"), "signing sets met_ma")
-	eq(c.arrive(ship)["event"].get("id", ""), "station_rusthold_greeting", "afterwards Rusthold greets you")
+	var greeting: Dictionary = c.arrive(ship)["event"]
+	eq(greeting.get("type", ""), "station", "afterwards Rusthold greets you with a station event")
+	check(greeting.get("id", "") == "station_rusthold_greeting" or greeting["requires"].get("flag", "") == "at_rusthold", "one of Rusthold's: " + str(greeting.get("id", "")))
+	c.flags.erase("at_rusthold")  # (picking at other stations without travelling there)
 	for place in ["meridian", "prism"]:
 		var ev := c.events.pick(c, {"id": place, "type": "station", "place": place}, ship)
 		eq(ev.get("id", ""), "station_%s_greeting" % place, place + " has its greeting")
+
+
+func test_the_station_flag_is_set_while_docked_and_cleared_on_leaving() -> void:
+	var c := _camp([_ev("hello", "station", {"flag": "at_rusthold"}, {}), _ev("elsewhere", "station", {"flag": "at_meridian"}, {})], 2)
+	var ship := _ship()
+	check(not c.flags.has("at_rusthold"), "not docked before arriving")
+	eq(c.arrive(ship)["event"].get("id", ""), "hello", "docking at Rusthold runs a greeting that asks for at_rusthold")
+	check(c.flags.has("at_rusthold") and not c.flags.has("at_meridian"), "the flag is set for that station only")
+	c.rep["clans"] = -8
+	c.flags.erase("at_rusthold")
+	check(c.arrive(ship)["refused"] != "" and not c.flags.has("at_rusthold"), "a station that turns you away does not dock you")
+	c.rep["clans"] = 0
+	c.arrive(ship)
+	check(c.flags.has("at_rusthold"), "docked again")
+	check(c.jump(_neighbour(c), ship)["ok"], "jumped away")
+	check(not c.flags.has("at_rusthold"), "undocked: the flag is cleared")
+	var back := Campaign.new(2)
+	back.arrive(ship)
+	eq(back.load_dict(c.to_dict()), "", "(a save keeps the flags)")
+
+
+func test_a_station_event_is_picked_by_weight_among_the_greetings() -> void:
+	var list := [_ev("heavy", "station", {"flag": "at_rusthold"}, {}, {"weight": 90}), _ev("light", "station", {"flag": "at_rusthold"}, {}, {"weight": 10})]
+	var ship := _ship()
+	var counts := {"heavy": 0, "light": 0}
+	for seed_value in 50:
+		var c := _camp(list, seed_value)
+		counts[c.arrive(ship)["event"]["id"]] += 1
+	check(counts["heavy"] > 35 and counts["light"] > 0, "one greeting per docking, weighted: " + str(counts))
+
+
+func _neighbour(c: Campaign) -> String:
+	for o in c.neighbours(c.current):
+		if c.node(o)["type"] != "gate":
+			return o
+	return ""
+
+
+func test_reveal_with_a_node_type_shows_the_nearest_unrevealed_node_of_that_type() -> void:
+	var c := _camp()
+	var ship := _ship()
+	var here: Vector2 = c.node(c.current)["pos"]
+	var want := ""
+	var want_d := INF
+	for n in c.drift.nodes:
+		if n["type"] == "pirate" and not c.is_known(n["id"]):
+			var d: float = here.distance_to(n["pos"])
+			if d < want_d:
+				want = n["id"]
+				want_d = d
+	check(want != "", "there is a pirate node out of sight")
+	var r := _fx({"reveal": "pirate"}, c, ship)
+	check(c.is_known(want) and c.revealed.has(want), "the nearest unknown pirate node is shown: " + want)
+	check(r["lines"].size() == 1 and r["lines"][0].begins_with("On the map:"), "said: " + str(r["lines"]))
+	var second := ""
+	for id in c.revealed:
+		if id != want:
+			second = id
+	eq(second, "", "only one")
+	_fx({"reveal": "pirate"}, c, ship)
+	eq(c.revealed.size(), 2, "the next call shows the next one")
+	for i in 40:
+		_fx({"reveal": "pirate"}, c, ship)
+	var left := 0
+	for n in c.drift.nodes:
+		if n["type"] == "pirate" and not c.is_known(n["id"]):
+			left += 1
+	eq(left, 0, "until none is left")
+	eq(_fx({"reveal": "pirate"}, c, ship)["lines"].size(), 0, "then it does nothing")
+	check(not _events([_ev("r", "empty", {}, {"reveal": "wreck_field"})]).validate().size() > 0, "a node type is a valid reveal for the validator")
+
+
+func test_a_log_found_again_is_shown_again_but_kept_once() -> void:
+	var c := _camp()
+	var ship := _ship()
+	var id: String = c.events.logs.keys()[0]
+	var first := _fx({"log": id}, c, ship)
+	var again := _fx({"log": id}, c, ship)
+	eq(again["logs"].size(), 1, "the log is shown again")
+	check(first["lines"][0].begins_with("Log found: ") and again["lines"][0].begins_with("Log read again: "), "and the line says so")
+	eq(c.logs_found.keys(), [id], "but it is in the campaign's list once")
