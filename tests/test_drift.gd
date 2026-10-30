@@ -1000,3 +1000,19 @@ func test_a_derelict_log_is_shown_in_the_result_page() -> void:
 	check(lay["panel"].encloses(lay["log"]) and lay["panel"].encloses(lay["button"]), "inside the panel")
 	check(EventPanel.tone_of("Log found: x") == 1 and EventPanel.tone_of("-20 credits") == -1 and EventPanel.tone_of("Debt -100 (900 left)") == 1 and EventPanel.tone_of("Debt +50") == -1 and EventPanel.tone_of("Hull integrity -10") == -1, "change lines are coloured by whether they help")
 	_free_screen(d)
+
+
+func test_a_ship_with_no_fuel_can_always_be_towed_home() -> void:
+	var c := Campaign.new(7)
+	var ship := _ship()
+	ship.inventory.add("fuel", -ship.inventory.count("fuel"))
+	var home := c.current
+	var away: String = c.neighbours(home)[0]
+	c.current = away
+	var debt := c.debt
+	var r := c.tow(ship)
+	check(r["ok"], "towed")
+	eq(c.current, home, "back at Gantry Rusthold")
+	eq(c.debt, debt + Campaign.TOW_DEBT, "the tow goes on the debt")
+	eq(ship.inventory.count("fuel"), Campaign.TOW_FUEL, "and Ma throws in some fuel")
+	check(not c.tow(ship)["ok"], "no tow while you have fuel")

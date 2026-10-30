@@ -29,6 +29,8 @@ const SAVE_PATH := "user://campaign.json"
 const REFUSED_TEXT := "The dock master turns you away."
 const DARK_TEXT := "The gate is dark."
 const NO_FUEL := "no fuel"
+const TOW_DEBT := 150  ## what Ma adds to the debt for a tow home (tow)
+const TOW_FUEL := 2
 const HOSTILE_PATROL := {"id": "patrol_hostile", "type": "patrol", "once": false,
 	"text": "The Concord cutter does not hail you. It has your registry on a list, and the list has changed. Every gun on her flank swings round at once.",
 	"choices": [{"text": "Raise shields.", "outcomes": [{"weight": 100, "text": "", "effects": {"fight": "tier"}}]}]}
@@ -346,6 +348,20 @@ func wait(ship) -> Dictionary:
 	var ev := events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)
 	events_seen += int(not ev.is_empty())
 	return {"ok": true, "why": "", "notes": notes, "event": ev}
+
+
+## Stranded with no fuel: call Ma Gantry for a tow back to Gantry Rusthold. It costs TOW_DEBT on the debt and a
+## jump's time, and she throws in TOW_FUEL fuel. Always possible with no fuel, so a run can't soft-lock.
+func tow(ship) -> Dictionary:
+	if ship.inventory.count("fuel") > 0:
+		return {"ok": false, "why": "you still have fuel", "notes": []}
+	var notes := _advance(1)
+	current = drift.start_id()
+	visited[current] = true
+	notes.append_array(add_debt(ship, TOW_DEBT))
+	ship.inventory.add("fuel", TOW_FUEL)
+	notes.append("Ma's tug drags you home: debt +%d, fuel +%d" % [TOW_DEBT, TOW_FUEL])
+	return {"ok": true, "why": "", "notes": notes}
 
 
 ## What happens on reaching the current node. Returns {node, refused, event}: `refused` is the text of a
