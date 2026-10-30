@@ -1,0 +1,24 @@
+{
+ "frame": [
+  11,
+  30
+ ],
+ "anchors": {
+  "grip": [
+   5,
+   21
+  ],
+  "muzzle": [
+   5,
+   0
+  ],
+  "foregrip": [
+   5,
+   12
+  ]
+ },
+ "class": "rifle",
+ "pose": "rifle",
+ "culture": "scrap",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, flame, sparks or the blade tip are. Scrap-built breaching shotgun: twin barrels, a toothed crown, hazard tape, rope-wrapped stock."
+}

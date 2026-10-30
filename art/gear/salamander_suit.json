@@ -1,0 +1,45 @@
+{
+ "id": "salamander_suit",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "fits": "human rig (same anchors as art/crew/human)",
+ "layers": {
+  "body": {
+   "image": "salamander_suit.png",
+   "frame": 0,
+   "color_mask": "salamander_suit_color.png",
+   "draw_after": "torso",
+   "glow": {
+    "image": "salamander_suit_glow.png",
+    "frame": 0,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  },
+  "head": {
+   "image": "salamander_suit.png",
+   "frame": 1,
+   "color_mask": "salamander_suit_color.png",
+   "draw_after": "head",
+   "glow": {
+    "image": "salamander_suit_glow.png",
+    "frame": 1,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  }
+ },
+ "notes": "Salamander suit: a heat-reflective foil mantle with gold trim and a hood with an ember visor slit. Fits the human rig. Layers share the crew frame and rotate about the pivot with the aim (legs with the move direction). \"draw_after\": body goes after the torso (before the arms); head goes after the head layer. Outfit pixels: neutral grey in the PNG, white in the _color mask."
+}

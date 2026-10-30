@@ -1,0 +1,32 @@
+{
+ "frame": [
+  9,
+  23
+ ],
+ "anchors": {
+  "grip": [
+   4,
+   15
+  ],
+  "muzzle": [
+   4,
+   0
+  ]
+ },
+ "class": "melee",
+ "pose": "melee",
+ "culture": "emberkin",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, flame, sparks or the blade tip are. Emberkin ember knife: a dark blade with a glowing edge, a brass guard and wrapped grip. Ignites on hit.",
+ "glow": {
+  "image": "ember_knife_glow.png",
+  "frame": [
+   17,
+   31
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

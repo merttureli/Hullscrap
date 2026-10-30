@@ -1,0 +1,75 @@
+{
+ "id": "exosuit",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "fits": "human rig (same anchors as art/crew/human)",
+ "layers": {
+  "body": {
+   "image": "exosuit.png",
+   "frame": 0,
+   "color_mask": "exosuit_color.png",
+   "draw_after": "torso",
+   "glow": {
+    "image": "exosuit_glow.png",
+    "frame": 0,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  },
+  "head": {
+   "image": "exosuit.png",
+   "frame": 1,
+   "color_mask": "exosuit_color.png",
+   "draw_after": "head",
+   "glow": {
+    "image": "exosuit_glow.png",
+    "frame": 1,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  },
+  "legs": {
+   "image": "exosuit_legs.png",
+   "color_mask": "exosuit_legs_color.png",
+   "replaces": "legs",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     6
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   }
+  },
+  "arms": {
+   "image": "exosuit_arms.png",
+   "color_mask": "exosuit_arms_color.png",
+   "replaces": "arms",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   }
+  }
+ },
+ "notes": "Exosuit: bulky armour shell (tinted plates), a back power unit with a glowing core, a closed helm with a cyan visor. It replaces the legs and the arms too. Fits the human rig. Layers share the crew frame and rotate about the pivot with the aim (legs with the move direction). \"draw_after\": body goes after the torso (before the arms); head goes after the head layer. Outfit pixels: neutral grey in the PNG, white in the _color mask."
+}

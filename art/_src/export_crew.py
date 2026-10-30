@@ -33,7 +33,7 @@ def export():
       'arms':  {'image': 'arms.png', 'color_mask': 'arms_color.png', 'frames': {p: i for i, p in enumerate(cv2.POSES)},
                 'anchors': {p: {k: (list(v) if v else None) for k, v in cv2.ARM[p].items()} for p in cv2.POSES},
                 'notes': 'item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. '
-                         'Use pose "pistol" for pistols, "rifle" for rifles, "tool" for the wrench and extinguisher.'},
+                         'Use pose "pistol" for pistols, "rifle" for rifles, "tool" for the wrench and extinguisher, "heavy" for heavy guns, "melee" for blades and hammers (an item JSON\'s "class" names its pose).'},
       'head':  {'image': 'head.png', 'color_mask': 'head_color.png', 'frames': {h: i for i, h in enumerate(cv2.HEADS)},
                 'notes': 'hair is not tinted; the helmet shell takes the outfit colour, its visor and glint stay as drawn'},
      },
@@ -44,7 +44,7 @@ def export():
     for n in cv2.ITEM_ART:
         sp = cv2.item(n)
         save(sp, '%s/%s.png' % (di, n))
-        jdump({'frame': [sp.w, sp.h], 'anchors': cv2.item_anchors(n), 'pose': pose[n],
+        jdump({'frame': [sp.w, sp.h], 'anchors': cv2.item_anchors(n), 'class': pose[n], 'pose': pose[n],
                'notes': 'faces UP. grip = where the hand closes (goes on the arms pose mount); muzzle = where shots, spray or the tool tip come out.'},
               '%s/%s.json' % (di, n))
 

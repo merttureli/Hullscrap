@@ -1,0 +1,20 @@
+{
+ "frame": [
+  7,
+  15
+ ],
+ "anchors": {
+  "grip": [
+   3,
+   12
+  ],
+  "muzzle": [
+   3,
+   0
+  ]
+ },
+ "class": "pistol",
+ "pose": "pistol",
+ "culture": "concord",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, flame, sparks or the blade tip are. Concord service pistol: clean steel, white registry stencil, one orange ready light."
+}

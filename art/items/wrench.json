@@ -13,6 +13,7 @@
    0
   ]
  },
+ "class": "tool",
  "pose": "tool",
  "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount); muzzle = where shots, spray or the tool tip come out."
 }

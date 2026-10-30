@@ -149,13 +149,16 @@ def brush(s, x0, y0, x1, y1, w=3, c='B'):
             for k in range(w): s.put(x - w // 2 + k, y - w // 2 + j, c)
 def hand(s, x, y):
     s.rect(x - 1, y - 1, 3, 3, 's'); s.put(x + 1, y + 1, 'v')
-POSES = ['unarmed', 'pistol', 'rifle', 'tool']
+POSES = ['unarmed', 'pistol', 'rifle', 'tool', 'heavy', 'melee']
 # anchors relative to the frame's top-left (centre pixel = (16,16)). mount = where the item's grip goes.
 ARM = {
  'unarmed': dict(hand_l=(5, 19), hand_r=(27, 19), mount=None),
  'pistol':  dict(hand_l=(14, 5), hand_r=(18, 5), mount=(16, 5)),
  'rifle':   dict(hand_l=(17, 1), hand_r=(21, 9), mount=(20, 8)),
  'tool':    dict(hand_l=(13, 9), hand_r=(21, 4), mount=(21, 4)),
+ # new classes (art-species): shared by every species so any item fits any body
+ 'heavy':   dict(hand_l=(14, 3), hand_r=(21, 12), mount=(19, 11)),     # big gun braced at the hip, left hand forward on the barrel
+ 'melee':   dict(hand_l=(12, 7), hand_r=(23, 8), mount=(23, 8)),       # weapon held out front-right, left fist up as a guard
 }
 def arms(pose):
     s = Spr(N, N)
@@ -169,6 +172,10 @@ def arms(pose):
         brush(s, 25, 12, 22, 10); brush(s, 7, 12, 16, 3)
     elif pose == 'tool':                                 # tool hand forward, other arm bent across
         brush(s, 25, 12, 22, 6); brush(s, 7, 12, 12, 10)
+    elif pose == 'heavy':                                # right hand low on the grip at the hip, left arm reaches along the barrel
+        brush(s, 25, 13, 22, 12); brush(s, 7, 13, 14, 4)
+    elif pose == 'melee':                                # weapon arm out front-right, left fist raised as a guard
+        brush(s, 25, 12, 23, 9); brush(s, 7, 12, 12, 8)
     s = shade_edges(s)
     for k in ('hand_l', 'hand_r'): hand(s, *a[k])
     return outlined(s)

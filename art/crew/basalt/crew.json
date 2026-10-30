@@ -1,0 +1,197 @@
+{
+ "species": "basalt",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "notes": "Basalt: wide blocky stone-plated shoulders (29 px), a small head sunk between them, thick short-stride legs, no helmet variant (they do not breathe): two rock-pattern heads instead. Crystal veins (c/b/H) carry the optional glow layer. Outfit mask = harness straps, knee and wrist wraps. Same rig as human: every layer faces UP at rotation 0 on one 33x33 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     6
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     16,
+     13
+    ],
+    "back": [
+     16,
+     23
+    ],
+    "shoulder_l": [
+     7,
+     13
+    ],
+    "shoulder_r": [
+     25,
+     13
+    ]
+   },
+   "glow": {
+    "image": "torso_glow.png",
+    "frame": [
+     33,
+     33
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 1,
+    "blend": "add (preferred) or alpha-over"
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      3,
+      22
+     ],
+     "hand_r": [
+      29,
+      22
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      14,
+      5
+     ],
+     "hand_r": [
+      18,
+      5
+     ],
+     "mount": [
+      16,
+      5
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      17,
+      1
+     ],
+     "hand_r": [
+      21,
+      9
+     ],
+     "mount": [
+      20,
+      8
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      13,
+      9
+     ],
+     "hand_r": [
+      21,
+      4
+     ],
+     "mount": [
+      21,
+      4
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      14,
+      3
+     ],
+     "hand_r": [
+      21,
+      12
+     ],
+     "mount": [
+      19,
+      11
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      12,
+      7
+     ],
+     "hand_r": [
+      23,
+      8
+     ],
+     "mount": [
+      23,
+      8
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "rock_a": 0,
+    "rock_b": 1
+   },
+   "glow": {
+    "image": "head_glow.png",
+    "frame": [
+     33,
+     33
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 2,
+    "blend": "add (preferred) or alpha-over"
+   }
+  }
+ }
+}

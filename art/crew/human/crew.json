@@ -69,7 +69,9 @@
     "unarmed": 0,
     "pistol": 1,
     "rifle": 2,
-    "tool": 3
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
    },
    "anchors": {
     "unarmed": {
@@ -124,9 +126,37 @@
       21,
       4
      ]
+    },
+    "heavy": {
+     "hand_l": [
+      14,
+      3
+     ],
+     "hand_r": [
+      21,
+      12
+     ],
+     "mount": [
+      19,
+      11
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      12,
+      7
+     ],
+     "hand_r": [
+      23,
+      8
+     ],
+     "mount": [
+      23,
+      8
+     ]
     }
    },
-   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Use pose \"pistol\" for pistols, \"rifle\" for rifles, \"tool\" for the wrench and extinguisher."
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Use pose \"pistol\" for pistols, \"rifle\" for rifles, \"tool\" for the wrench and extinguisher, \"heavy\" for heavy guns, \"melee\" for blades and hammers (an item JSON's \"class\" names its pose)."
   },
   "head": {
    "image": "head.png",

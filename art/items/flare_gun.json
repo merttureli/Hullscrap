@@ -1,0 +1,32 @@
+{
+ "frame": [
+  9,
+  15
+ ],
+ "anchors": {
+  "grip": [
+   4,
+   10
+  ],
+  "muzzle": [
+   4,
+   0
+  ]
+ },
+ "class": "pistol",
+ "pose": "pistol",
+ "culture": "scrap",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, flame, sparks or the blade tip are. Scrap flare gun: fat signal tube, a red flare shell lit in the muzzle, wire-wrapped grip. Sets fires.",
+ "glow": {
+  "image": "flare_gun_glow.png",
+  "frame": [
+   17,
+   23
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

@@ -1,0 +1,24 @@
+{
+ "frame": [
+  9,
+  29
+ ],
+ "anchors": {
+  "grip": [
+   4,
+   23
+  ],
+  "muzzle": [
+   4,
+   0
+  ],
+  "foregrip": [
+   4,
+   10
+  ]
+ },
+ "class": "rifle",
+ "pose": "rifle",
+ "culture": "concord",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, flame, sparks or the blade tip are. Concord carbine: optic on the rail, three orange lights for the 3-round burst."
+}

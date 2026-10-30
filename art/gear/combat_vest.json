@@ -1,0 +1,30 @@
+{
+ "id": "combat_vest",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "fits": "human rig (same anchors as art/crew/human)",
+ "layers": {
+  "body": {
+   "image": "combat_vest.png",
+   "frame": 0,
+   "color_mask": "combat_vest_color.png",
+   "draw_after": "torso",
+   "glow": {
+    "image": "combat_vest_glow.png",
+    "frame": 0,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  }
+ },
+ "notes": "Combat vest: steel shoulder plates, a back plate, a pouch belt with orange tags. Fits the human rig. Layers share the crew frame and rotate about the pivot with the aim (legs with the move direction). \"draw_after\": body goes after the torso (before the arms); head goes after the head layer. Outfit pixels: neutral grey in the PNG, white in the _color mask."
+}

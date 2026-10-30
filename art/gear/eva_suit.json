@@ -1,0 +1,46 @@
+{
+ "id": "eva_suit",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "fits": "human rig (same anchors as art/crew/human)",
+ "layers": {
+  "body": {
+   "image": "eva_suit.png",
+   "frame": 0,
+   "color_mask": "eva_suit_color.png",
+   "draw_after": "torso",
+   "glow": {
+    "image": "eva_suit_glow.png",
+    "frame": 0,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  },
+  "head": {
+   "image": "eva_suit.png",
+   "frame": 1,
+   "color_mask": "eva_suit_color.png",
+   "draw_after": "head",
+   "notes": "see-through bubble: only its outside is outlined, the inside is clear so the head shows",
+   "glow": {
+    "image": "eva_suit_glow.png",
+    "frame": 1,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  }
+ },
+ "notes": "EVA suit: puffy shoulder rings (tinted), twin air tanks with a green gauge on the back, a see-through bubble helmet. Fits the human rig. Layers share the crew frame and rotate about the pivot with the aim (legs with the move direction). \"draw_after\": body goes after the torso (before the arms); head goes after the head layer. Outfit pixels: neutral grey in the PNG, white in the _color mask."
+}
