@@ -475,14 +475,14 @@ func _draw_tip(id: String) -> void:
 
 
 func _draw_foot(p: Rect2) -> void:
-	var y := p.end.y - FOOT_H + 34.0
+	var y := p.end.y - FOOT_H + 28.0  # the message, then the fuel warning, then the hint line, each on its own row
 	if message != "":
 		_text(message, Vector2(p.position.x + PAD, y), 16, BAD if message_bad else GOOD)
 	_text("Click a lane-linked node to jump (%s)    Enter: dock    T: wait for a trader (no fuel)    Shift+click: drift jump (no fuel, hull -%d)    M / Esc: close" % [jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
 		Vector2(p.position.x + PAD, p.end.y - 22.0), 13, DIM_TEXT)
 	var s = ship()
 	if s != null and campaign.fuel_short(s):
-		_text("Out of fuel!", Vector2(p.position.x + PAD, y + 28.0), 16, BAD)
+		_text("Out of fuel!", Vector2(p.position.x + PAD, y + 20.0), 16, BAD)
 
 
 ## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
