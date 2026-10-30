@@ -93,7 +93,7 @@ func test_without_art_the_placeholder_is_drawn() -> void:
 	var canvas := _draw(_def("engine_mk1"))
 	eq(canvas.count("texture"), 0, "no texture")
 	check(canvas.count("rect") >= 2, "a filled body and an outline")
-	check("E1" in canvas.texts(), "labelled E1: %s" % [canvas.texts()])
+	check("C1" in canvas.texts(), "labelled C1 (Concord Thruster Mk1): %s" % [canvas.texts()])
 	var first: Dictionary = canvas.calls[0]
 	eq(first["rect"], Rect2(102, 102, 124, 60), "the body is the footprint less 2 px")
 	eq(first["color"], Color(_def("engine_mk1")["color"]), "in the part's colour")

@@ -1,10 +1,11 @@
 extends Control
 ## The map of the Drift (M in play mode): the screen of the campaign. Click a node joined to yours by a
-## lane to jump there (1 fuel; Shift+click with an empty tank is a drift jump that costs 15 hull
-## integrity; T waits for a passing trader). The event of the node opens in the event panel, a station
-## opens its menu in the station panel (Enter or a click on your own node docks again). Esc or M closes
-## the map. It owns the Campaign (campaign.gd, saved in user://campaign.json with the ship) and the two
-## panels, and it carries the flow: jump, arrive, event, fight, loot, salvage, station.
+## lane to jump there (1 fuel, less with efficient engines: Campaign.jump_cost; Shift+click with an empty
+## tank is a drift jump that costs 15 hull integrity; T waits for a passing trader). The event of the node
+## opens in the event panel, a station opens its menu in the station panel (Enter or a click on your own
+## node docks again). Esc or M closes the map. It owns the Campaign (campaign.gd, saved in
+## user://campaign.json with the ship) and the two panels, and it carries the flow: jump, arrive, event,
+## fight, loot, salvage, station.
 ## While open it takes every key and click; it stays shut during a fight and under the ship picker.
 ## All rules live in campaign.gd, events.gd and drift.gd; this node reads input and draws, in the UI
 ## colours of docs/ART_STYLE.md.
@@ -154,6 +155,12 @@ func click_node(id: String, drift_jump := false) -> String:
 	refresh()
 	_arrive()
 	return ""
+
+
+## What the next jump costs the ship as it is now: "1 fuel", "0.5 fuel" (Campaign.jump_cost).
+func jump_cost_text() -> String:
+	var s = ship()
+	return Campaign.fuel_text(campaign.jump_cost(s) if s != null else Campaign.FUEL_PARTS)
 
 
 ## Dock at the station of the current node. Returns "" or why not.
@@ -455,7 +462,7 @@ func _draw_tip(id: String) -> void:
 		if n["type"] == "gate":
 			lines.append(Campaign.DARK_TEXT)
 		elif campaign.drift.linked(campaign.current, id):
-			lines.append("1 fuel")
+			lines.append(jump_cost_text())
 	var w := 0.0
 	for l in lines:
 		w = maxf(w, ThemeDB.fallback_font.get_string_size(l, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x)
@@ -471,10 +478,10 @@ func _draw_foot(p: Rect2) -> void:
 	var y := p.end.y - FOOT_H + 34.0
 	if message != "":
 		_text(message, Vector2(p.position.x + PAD, y), 16, BAD if message_bad else GOOD)
-	_text("Click a lane-linked node to jump (1 fuel)    Enter: dock    T: wait for a trader (no fuel)    Shift+click: drift jump (no fuel, hull -%d)    M / Esc: close" % int(campaign.cfg["fuel"]["drift_hull"]),
+	_text("Click a lane-linked node to jump (%s)    Enter: dock    T: wait for a trader (no fuel)    Shift+click: drift jump (no fuel, hull -%d)    M / Esc: close" % [jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
 		Vector2(p.position.x + PAD, p.end.y - 22.0), 13, DIM_TEXT)
 	var s = ship()
-	if s != null and s.inventory.count("fuel") == 0:
+	if s != null and campaign.fuel_short(s):
 		_text("Out of fuel!", Vector2(p.position.x + PAD, y + 28.0), 16, BAD)
 
 

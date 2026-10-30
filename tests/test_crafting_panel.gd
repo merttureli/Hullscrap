@@ -131,7 +131,7 @@ func test_a_job_too_big_for_the_fabricator_says_so() -> void:
 	ship.crafting.enqueue("engine_mk2", ship.inventory, {"level": 2, "tools": []})  # queued while an arm was there
 	_run(sim, 1.0)
 	check(ship.crafting.paused, "level 1 cannot run it")
-	check(_texts(ship).has("Fabricator too weak for Engine Mk2: crafting paused"), "named in the chronicle: %s" % [_texts(ship)])
+	check(_texts(ship).has("Fabricator too weak for Concord Thruster Mk2: crafting paused"), "named in the chronicle: %s" % [_texts(ship)])
 	sim.free()
 
 

@@ -1,0 +1,7 @@
+{
+  "id": "engines_1",
+  "name": "Engine wave 1",
+  "version": "1.0",
+  "requires": [],
+  "notes": "15 new engines (docs/waves/engines_1.md): Concord Thruster Mk3-5, Kickjet Deluxe, Double Kick and Thunderknuckle, Ion Drive Halo, Corona and Zenith, Strafe Jets Mk1-3 and Long-Burn Drive Mk1-3, their recipes and the three key materials they need. The four older engines are re-tuned in the core files."
+}

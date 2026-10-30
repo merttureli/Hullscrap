@@ -1,0 +1,259 @@
+{
+  "recipes": [
+    {
+      "id": "engine_mk3",
+      "output": {
+        "item": "engine_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "copper": 24,
+        "titanium": 12,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system"
+    },
+    {
+      "id": "engine_mk4",
+      "output": {
+        "item": "engine_mk4",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 55,
+        "copper": 32,
+        "titanium": 20,
+        "silicon": 8,
+        "military_circuit": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 55,
+      "category": "system"
+    },
+    {
+      "id": "engine_mk5",
+      "output": {
+        "item": "engine_mk5",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 75,
+        "copper": 40,
+        "titanium": 30,
+        "silicon": 12,
+        "crystal": 2,
+        "military_circuit": 2,
+        "gate_alloy": 1
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 75,
+      "category": "system"
+    },
+    {
+      "id": "engine_scrap_mk2",
+      "output": {
+        "item": "engine_scrap_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 26,
+        "copper": 6
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 25,
+      "category": "system"
+    },
+    {
+      "id": "engine_scrap_mk3",
+      "output": {
+        "item": "engine_scrap_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 36,
+        "copper": 12,
+        "titanium": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 35,
+      "category": "system"
+    },
+    {
+      "id": "engine_scrap_mk4",
+      "output": {
+        "item": "engine_scrap_mk4",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 50,
+        "copper": 18,
+        "titanium": 10,
+        "military_circuit": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 50,
+      "category": "system"
+    },
+    {
+      "id": "engine_neon_mk2",
+      "output": {
+        "item": "engine_neon_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 16,
+        "titanium": 6,
+        "crystal": 4,
+        "silicon": 8
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 45,
+      "category": "system"
+    },
+    {
+      "id": "engine_neon_mk3",
+      "output": {
+        "item": "engine_neon_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "copper": 24,
+        "titanium": 12,
+        "silicon": 16,
+        "crystal": 6
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 60,
+      "category": "system"
+    },
+    {
+      "id": "engine_neon_mk4",
+      "output": {
+        "item": "engine_neon_mk4",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 55,
+        "copper": 32,
+        "titanium": 20,
+        "silicon": 24,
+        "military_circuit": 1,
+        "crystal": 8,
+        "void_crystal": 1
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 85,
+      "category": "system"
+    },
+    {
+      "id": "strafe_jets_mk1",
+      "output": {
+        "item": "strafe_jets_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 10,
+        "copper": 5
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 8,
+      "category": "system"
+    },
+    {
+      "id": "strafe_jets_mk2",
+      "output": {
+        "item": "strafe_jets_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 15,
+        "copper": 8,
+        "titanium": 3
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "strafe_jets_mk3",
+      "output": {
+        "item": "strafe_jets_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 12,
+        "titanium": 6,
+        "silicon": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 20,
+      "category": "system"
+    },
+    {
+      "id": "longburn_mk1",
+      "output": {
+        "item": "longburn_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 15
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "longburn_mk2",
+      "output": {
+        "item": "longburn_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 24,
+        "titanium": 6
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "longburn_mk3",
+      "output": {
+        "item": "longburn_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "copper": 36,
+        "titanium": 12,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system"
+    }
+  ]
+}
