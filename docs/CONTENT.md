@@ -382,3 +382,50 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - Prism: the Soldier, **Tess (emberkin)**, Quill (fenn), and **Wren (basalt, the afterburner operator)**.
   - Every ship carrying an Afterburner has a `no_breath` or suited operator.
   - The pirate raider's crew: 2 humans and 1 basalt.
+
+## 10. Mining and cutting: a reliable way to earn materials (owner, 2026-10-30)
+Fights, raids and quests pay well but unreliably. **Mining is the steady job**: if you badly need 10 more scrap, you take a mining run. It's dangerous but straightforward, and **the right equipment and tactics decide the yield**.
+
+- **It's a mini-game in the combat arena.** No new physics: an asteroid is a "ship" made of rock cells, so cutting, hp, debris and collisions reuse the combat and ramming code (4, 4b, 4e).
+  - **Rock cells** (`data/tiles.json`, `rock_*`): `rock` (hp 6, nothing inside), and ore veins:
+    - `ore_iron` → scrap ×3;
+    - `ore_copper` → copper ×2;
+    - `ore_titanium` → titanium ×2;
+    - `ore_silicate` → silicon ×2;
+    - `ore_crystal` (rare, mostly near Dead Gates) → crystal ×1;
+    - `ice` → restores O2 (refills every room 10% when collected).
+  - **`gas_pocket`**: **explodes when cut** (splash 4, sets fires if the explosion reaches you). This is the main hazard to read and avoid.
+  - Asteroids are generated from a seed: a blob of 60–400 cells, with veins as clusters and gas pockets. Bigger rocks spin slowly.
+- **Cutting**: a destroyed ore cell drops a **chunk** (a small physical body carrying its yield). Destroyed plain rock drops nothing.
+  - When a cut leaves a part of the asteroid disconnected, it **breaks off as its own rock** and drifts away (flood fill over the rock cells).
+  - Breaking big rocks apart is how you reach the inner veins. The pieces keep their momentum, so **they can hit you** (ramming damage applies).
+- **Collecting**: fly into chunks with a **scoop**, or pull them in with a **tractor beam**. Chunks go into the **ore hold**.
+  - The hold's base capacity is 20 units; each `ore_hold` part adds 30. When it's full, extra chunks bounce off.
+  - Raw ore isn't a material yet. **Refining** turns it into materials:
+    - aboard, with a **refinery** (1 unit per 4 s while powered, then into cargo);
+    - or at a station, for a fee (5 credits per unit, the station keeps 20%).
+- **Dangers** (straightforward but real):
+  - drifting and spinning rocks (collision damage, worst for fast or unarmoured ships);
+  - gas pockets;
+  - the heat from long cuts (mining lasers run hot);
+  - **instability**: every field has a stability timer (3–6 min). After it runs out, rocks start breaking up and accelerating ("the field is shifting"), so leave or risk it;
+  - **claim jumpers**: a chance (rising with time spent) that a pirate arrives mid-run.
+  - You can leave at any time unless an enemy is near: Esc, the same rule as combat.
+- **Equipment** (each line has its own take; normal parts with recipes, using the hull-mount format):
+
+  | part | line | what it does |
+  |---|---|---|
+  | Mining Laser Mk1–Mk3 | standard | fixed, hitscan, ×4 damage to rock, ×0.25 to ship armour; heat 2× a laser's |
+  | Bore Drill | scrap | a bow mount: **ram to mine**, ×5 rock damage on ram contact, no power; a ram build's mining tool |
+  | Lumen Cutter | neon | a beam, ×6 to `ore_crystal`, cuts gas pockets without igniting them (×0.5 chance) |
+  | Ore Scoop | scrap | a bow outside half: collects chunks you touch; no power |
+  | Tractor Beam Mk1–Mk2 | standard | a turret mount: holding Q pulls chunks within 300/450 px to the ship |
+  | Ore Hold | any | inside 2×2: +30 ore capacity |
+  | Refinery Mk1–Mk2 | standard | inside 4×4, power −2: refines 1 unit per 4 s (Mk2 per 2 s); a workshop module raises it a level |
+  | Survey Scanner | standard | utility: shows veins and gas pockets inside rocks (otherwise only exposed cells show) |
+  - Ordinary weapons mine too, badly (×1 to rock), so any ship can scrape by. Proper gear makes it fast and safe.
+- **The Drift**:
+  - **`asteroid_field` nodes** (weight 14) and **mining contracts** at stations ("the Clan needs 40 copper ore by jump 20").
+  - Fields roll a richness (poor, rich, motherlode) and a danger tier. Crystal fields sit near Dead Gates and are Warden-guarded.
+  - Before the mini-game exists, `asteroid_field` events offer a text version: surface mining (safe, small yield) or deep cracking (risky, bigger yield, hull damage chance).
+- **The same mini-game later salvages wrecks** (the "hullscrapper" fantasy): cut a dead ship apart and its components drop as chunks to scoop (`wreck` cells instead of ore). One mechanic, two content streams.
