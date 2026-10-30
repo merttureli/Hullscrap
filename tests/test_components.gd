@@ -4,6 +4,30 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const Cables = preload("res://scripts/ship/cables.gd")
+const Weapons = preload("res://scripts/combat/weapons.gd")
+const Stats = preload("res://scripts/sim/stats.gd")
+
+const COMPONENTS := "res://data/components.json"
+const MATERIALS := "res://data/materials.json"
+const ITEMS := "res://data/items.json"
+const WEAPON_KINDS: Array[String] = ["laser", "bolt", "flak", "missile", "beam"]
+const DAMAGE_TYPES: Array[String] = ["kinetic", "energy", "explosive", "ion"]
+const REQUIRED_FIELDS: Array[String] = ["id", "name", "family", "line", "tier", "size", "color", "power", "priority", "manned", "hp", "heat_limit", "heat_per_s", "cooling", "stats"]
+## The weapon parts of the first content pack (docs/CONTENT.md section 6): id -> [line, tier, size, kind, damage_type].
+const WEAPON_PACK := {
+	"pulse_mk1": ["standard", 1, [4, 2], "bolt", "energy"],
+	"pulse_mk2": ["standard", 2, [4, 2], "bolt", "energy"],
+	"rattle_burst_scrap": ["scrap", 1, [4, 2], "bolt", "kinetic"],
+	"shrapnel_cannon_scrap": ["scrap", 1, [4, 4], "flak", "kinetic"],
+	"bolt_thrower_scrap": ["scrap", 1, [4, 2], "missile", "explosive"],
+	"artemis_mk1": ["standard", 1, [4, 2], "missile", "explosive"],
+	"ion_blast_mk1": ["standard", 1, [4, 2], "laser", "ion"],
+	"siren_ion_neon": ["neon", 1, [4, 2], "laser", "ion"],
+	"heat_lance_neon": ["neon", 1, [4, 2], "beam", "energy"],
+	"leech_laser": ["standard", 2, [4, 2], "laser", "energy"],
+	"breach_harpoon": ["standard", 2, [4, 2], "bolt", "kinetic"],
+}
+const UNIQUES: Array[String] = ["leech_laser", "breach_harpoon", "mirror_veil"]
 
 
 ## A 21x21 circular hull (radius 10) with floor on every hull cell.
@@ -42,6 +66,10 @@ func test_data_is_complete() -> void:
 		"robot_arm": [-1, 6, 1], "laser_cutter": [-2, 6, 1], "assembly_rig": [-2, 6, 1], "nanoforge": [-4, 6, 1],
 		"reactor_scrap_mk1": [6, 0, 1], "engine_scrap_mk1": [-2, 4, 1], "oxygen_scrap_mk1": [-2, 1, 1],
 		"reactor_neon_mk1": [16, 0, 1], "engine_neon_mk1": [-3, 4, 1], "radiator": [-1, 2, 1],
+		"pulse_mk1": [-2, 5, 1], "pulse_mk2": [-3, 5, 2], "rattle_burst_scrap": [-2, 5, 1], "shrapnel_cannon_scrap": [-2, 5, 1],
+		"bolt_thrower_scrap": [-1, 5, 1], "artemis_mk1": [-2, 5, 1], "ion_blast_mk1": [-3, 5, 1], "siren_ion_neon": [-3, 5, 1],
+		"heat_lance_neon": [-4, 5, 1], "leech_laser": [-3, 5, 2], "breach_harpoon": [-2, 5, 2],
+		"shield_scrap_mk1": [-3, 3, 1], "shield_mk2": [-4, 3, 2], "shield_neon_mk1": [-4, 3, 1], "mirror_veil": [-3, 3, 2],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:
@@ -197,3 +225,143 @@ func test_cables_place_remove_and_round_trip() -> void:
 	check(back.remove(Vector2i(10, 10)), "removed")
 	check(not back.remove(Vector2i(10, 10)), "nothing left to remove")
 	eq(back.cells.size(), 2, "two cables left")
+
+
+# --- weapons and shields content (docs/CONTENT.md section 6) -----------------------------------
+
+func _raw_components() -> Array:
+	return JSON.parse_string(FileAccess.get_file_as_string(COMPONENTS))["components"]
+
+
+## Every id a weapon may name as ammo: the materials and the items.
+func _cargo_ids() -> Dictionary:
+	var out := {}
+	for m in JSON.parse_string(FileAccess.get_file_as_string(MATERIALS))["materials"]:
+		out[m["id"]] = true
+	for i in JSON.parse_string(FileAccess.get_file_as_string(ITEMS))["items"]:
+		out[i["id"]] = true
+	return out
+
+
+func test_every_component_has_the_runtime_fields_in_the_data() -> void:
+	var lines := Stats.load_lines()
+	var seen := {}
+	for d in _raw_components():
+		var id: String = d.get("id", "?")
+		check(not seen.has(id), id + " is listed once")
+		seen[id] = true
+		for k in REQUIRED_FIELDS:
+			check(d.has(k), "%s has %s" % [id, k])
+		check(lines.has(d.get("line", "")), id + " has a known line")
+		check(d.get("tier", 0) >= 1 and d.get("tier", 0) <= 3, id + " tier is 1 to 3")
+		check(d.get("hp", 0) > 0, id + " has hp")
+		check(d.get("heat_limit", 0) > 0 and d.get("cooling", 0) > 0, id + " has a heat limit and cooling")
+		check(d.get("heat_per_s", -1) >= 0, id + " has heat_per_s")
+		check(typeof(d.get("unique", false)) == TYPE_BOOL, id + " unique is a bool")
+
+
+func test_weapon_parts_and_weapon_stats_match() -> void:
+	var c := _comps()
+	var w := Weapons.new()
+	for id in c.ids():
+		if c.def(id)["family"] == "weapon":
+			check(w.has(id), "weapon part %s has an entry in weapons.json" % id)
+	for id in w.defs:
+		if id.begins_with("test_"):
+			continue
+		check(c.has(id), "weapons.json entry %s is a component" % id)
+		if c.has(id):
+			eq(c.def(id)["family"], "weapon", id + " is in the weapon family")
+
+
+func test_weapon_stats_use_known_kinds_and_damage_types() -> void:
+	var w := Weapons.new()
+	for id in w.defs:
+		var e: Dictionary = w.defs[id]
+		check(e.get("kind", "") in WEAPON_KINDS, "%s kind %s is known" % [id, e.get("kind", "")])
+		check(e.get("damage_type", "") in DAMAGE_TYPES, "%s damage_type %s is known" % [id, e.get("damage_type", "")])
+		var d := w.def(id)
+		check(float(d["damage"]) > 0.0 and float(d["cooldown"]) > 0.0 and float(d["range"]) > 0.0, id + " damage, cooldown and range are positive")
+		check(int(d["shots"]) >= 1 and float(d["arc"]) > 0.0, id + " has shots and an arc")
+		for k in ["fire_chance", "jam_chance", "breach_chance"]:
+			check(float(d.get(k, 0.0)) >= 0.0 and float(d.get(k, 0.0)) <= 1.0, "%s %s is a chance" % [id, k])
+		check(float(d.get("heat_per_shot", 0.0)) >= 0.0, id + " heat_per_shot is not negative")
+		if e.get("kind", "") == "beam":
+			check(float(d["duration"]) > 0.0, id + " beam has a duration")
+		if e.has("effects"):
+			check(e["effects"] is Array and not e["effects"].is_empty(), id + " effects is a list")
+			for tag in e["effects"]:
+				check(tag is String and tag != "", id + " effect tags are names")
+
+
+func test_every_ammo_id_is_cargo() -> void:
+	var cargo := _cargo_ids()
+	var w := Weapons.new()
+	var n := 0
+	for id in w.defs:
+		if w.defs[id].has("ammo"):
+			n += 1
+			check(cargo.has(w.defs[id]["ammo"]), "%s ammo %s is a material or an item" % [id, w.defs[id]["ammo"]])
+	check(n >= 2, "some weapons use ammo")
+	eq(w.defs["bolt_thrower_scrap"]["ammo"], "scrap", "the Bolt Thrower fires scrap")
+	eq(w.defs["artemis_mk1"]["ammo"], "missile", "the Artemis fires missiles")
+
+
+func test_the_weapon_pack() -> void:
+	var c := _comps()
+	var w := Weapons.new()
+	for id in WEAPON_PACK:
+		var want: Array = WEAPON_PACK[id]
+		check(c.has(id), id + " exists")
+		if not c.has(id):
+			continue
+		var d := c.def(id)
+		eq([d["line"], d["tier"], d["size"]], [want[0], want[1], want[2]], id + " line, tier, size")
+		eq([d["family"], d["priority"], d["power"] < 0, d["manned"]], ["weapon", 5, true, false], id + " is an unmanned weapon at priority 5")
+		check(str(d.get("blurb", "")) != "", id + " has a blurb")
+		eq([w.defs[id]["kind"], w.defs[id]["damage_type"]], [want[3], want[4]], id + " kind and damage type")
+	eq(c.def("rattle_burst_scrap")["name"], "Rattle Burst", "name")
+	eq(w.def("rattle_burst_scrap")["shots"], 3, "Rattle Burst fires three shots")
+	check(float(w.def("rattle_burst_scrap")["jam_chance"]) > 0.0, "Rattle Burst jams")
+	eq(w.def("shrapnel_cannon_scrap")["shots"], 5, "Shrapnel Cannon fires five projectiles")
+	eq(w.def("shrapnel_cannon_scrap")["damage"], 1, "of 1 damage each")
+	eq(w.def("pulse_mk1")["speed"], 700, "pulses are projectiles with a speed")
+	check(w.def("pulse_mk2")["damage"] > w.def("pulse_mk1")["damage"] and w.def("pulse_mk2")["cooldown"] < w.def("pulse_mk1")["cooldown"], "Pulse Mk2 hits harder and faster")
+	check(w.def("artemis_mk1")["pass_shields"] and w.def("artemis_mk1")["splash"] > 0, "the Artemis passes shields and splashes")
+	eq(w.defs["siren_ion_neon"]["effects"], ["lock_doors"], "Siren Ion locks doors")
+	check(not w.defs["ion_blast_mk1"].has("effects"), "plain Ion Blast has no door lock")
+	eq(w.def("siren_ion_neon")["damage"], w.def("ion_blast_mk1")["damage"], "Siren Ion is an Ion Blast in the damage it deals")
+	eq([w.def("heat_lance_neon")["fire_chance"], w.def("heat_lance_neon")["heat_per_shot"], w.def("heat_lance_neon")["duration"]], [0.3, 25.0, 1.5], "Heat Lance fires, heats and sweeps")
+	eq(w.defs["leech_laser"]["effects"], ["drain_power"], "Leech Laser drains power")
+	eq([w.def("breach_harpoon")["breach_chance"], w.defs["breach_harpoon"]["effects"]], [1.0, ["tether"]], "Breach Harpoon breaches and tethers")
+
+
+func test_shields_have_layers_and_recharge() -> void:
+	var c := _comps()
+	var n := 0
+	for id in c.ids():
+		var d := c.def(id)
+		if d["family"] != "shield":
+			continue
+		n += 1
+		check(int(d["stats"].get("layers", 0)) >= 1, id + " has at least one layer")
+		check(float(d["stats"].get("recharge", 2.0)) > 0.0, id + " recharge is positive")
+	check(n >= 5, "at least five shields")
+	eq([c.def("shield_scrap_mk1")["name"], c.def("shield_scrap_mk1")["line"], int(c.def("shield_scrap_mk1")["stats"]["layers"])], ["Bubble Rig", "scrap", 1], "Bubble Rig")
+	eq([c.def("shield_mk2")["line"], c.def("shield_mk2")["tier"], int(c.def("shield_mk2")["stats"]["layers"])], ["standard", 2, 2], "Shield Mk2")
+	var neon := c.def("shield_neon_mk1")
+	eq([neon["name"], neon["line"], int(neon["stats"]["layers"]), neon["stats"]["recharge"]], ["Neon Lattice Shield", "neon", 2, 1.4], "Neon Lattice Shield")
+	check(neon["stats"]["recharge"] < 2.0, "the neon shield recharges faster than the default")
+	check(Stats.load_lines()["neon"]["ion_vulnerability"] > 1.0, "and is ion-weak through its line")
+	var veil := c.def("mirror_veil")
+	eq([int(veil["stats"]["layers"]), veil["effects"]], [1, ["reflect_bolts_15"]], "Mirror Veil")
+
+
+func test_uniques_are_marked() -> void:
+	var c := _comps()
+	for id in UNIQUES:
+		check(c.has(id) and c.def(id).get("unique", false) == true, id + " is unique")
+		check(str(c.def(id).get("blurb", "")) != "", id + " has a blurb")
+	for id in WEAPON_PACK:
+		if not id in UNIQUES:
+			check(not c.def(id).get("unique", false), id + " is not unique")

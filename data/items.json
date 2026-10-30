@@ -1,0 +1,14 @@
+{
+  "_doc": "Items that are neither ship components (components.json) nor raw materials (materials.json): ammo, crew gear and special finds. Content is data: add an entry here and recipes and cargo can name it. kind: ammo (spent by weapons that name it in their `ammo` field), gear (crew equipment, craftable) or special (found, bought or earned only: it never has a recipe).",
+  "items": [
+    {"id": "missile", "name": "Missile", "kind": "ammo", "blurb": "Slow, guided and loud about it. Artemis launchers eat these."},
+    {"id": "pistol", "name": "Pistol", "kind": "gear", "blurb": "Loud enough, reliable enough. The crew's first argument-settler."},
+    {"id": "rifle", "name": "Rifle", "kind": "gear", "blurb": "Longer reach, steadier hands. Boarding parties love it."},
+    {"id": "basic_armor", "name": "Basic Armour", "kind": "gear", "blurb": "Polymer plates stitched over a flight suit. Stops a bruise, not a bullet."},
+    {"id": "eva_suit", "name": "EVA Suit", "kind": "gear", "blurb": "Thin, pressurised and unfashionable. Lets a crew member breathe in a vented room."},
+    {"id": "exosuit", "name": "Exosuit", "kind": "special", "blurb": "A powered frame with servos and attitude. Found, never built."},
+    {"id": "salamander_suit", "name": "Salamander Suit", "kind": "special", "blurb": "Immune to fire, but slow. Strolls through the flames, unhurried."},
+    {"id": "heat_suit", "name": "Heat Suit", "kind": "special", "blurb": "Insulated for hot rooms: work beside a Prism Core without cooking."},
+    {"id": "plasma_rifle", "name": "Plasma Rifle", "kind": "special", "blurb": "A hand-held star. Turns up in locked crates and is never sold twice."}
+  ]
+}

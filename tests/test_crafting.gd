@@ -6,6 +6,11 @@ const Inventory = preload("res://scripts/ship/inventory.gd")
 
 const RECIPES := "res://data/recipes.json"
 const MATERIALS := "res://data/materials.json"
+const ITEMS := "res://data/items.json"
+const ITEM_KINDS := ["ammo", "gear", "special"]
+## Mk1 parts of the standard line that are blueprints to find, not known at the start (every other
+## Mk1 Scrap or Standard system is known; Neon is always unlocked).
+const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1"]
 const RARITIES := ["common", "uncommon", "rare", "very_rare"]
 const CATEGORIES := ["system", "gear", "material", "module"]
 const WORKSHOP_TOOLS := ["laser_cutter", "nanoforge"]  # what workshop.gd can provide
@@ -24,6 +29,14 @@ func _comps() -> Components:
 	var c := Components.new()
 	c.load_defs("res://data/components.json")
 	return c
+
+
+## data/items.json: item id -> {id, name, kind, blurb}.
+func _items() -> Dictionary:
+	var out := {}
+	for i in JSON.parse_string(FileAccess.get_file_as_string(ITEMS))["items"]:
+		out[i["id"]] = i
+	return out
 
 
 func _inv(cargo: Dictionary) -> Inventory:
@@ -55,6 +68,9 @@ func test_every_component_has_a_recipe() -> void:
 	for id in comps.ids():
 		if id in NO_RECIPE_YET:
 			continue
+		if comps.def(id).get("unique", false):
+			check(not c.has(id), "unique %s has no recipe" % id)
+			continue
 		check(c.has(id), "component %s has a recipe" % id)
 		if c.has(id):
 			var r := c.def(id)
@@ -66,6 +82,7 @@ func test_every_component_has_a_recipe() -> void:
 func test_recipe_data_is_valid() -> void:
 	var c := _crafting()
 	var comps := _comps()
+	var items := _items()
 	var mats: Array = JSON.parse_string(FileAccess.get_file_as_string(MATERIALS))["materials"]
 	eq(c.materials.size(), mats.size(), "material ids are unique")
 	for m in mats:
@@ -89,6 +106,7 @@ func test_recipe_data_is_valid() -> void:
 				check(c.materials.has(item), "%s output %s is a material" % [id, item])
 			"gear":
 				check(not comps.has(item) and not c.materials.has(item), "%s gear id %s is neither part nor material" % [id, item])
+				check(items.has(item) and items[item]["kind"] in ["gear", "ammo"], "%s output %s is a gear or ammo item" % [id, item])
 		check(not r["materials"].is_empty(), id + " costs something")
 		for m in r["materials"]:
 			check(c.materials.has(m), "%s material %s exists" % [id, m])
@@ -135,12 +153,14 @@ func test_start_blueprints() -> void:
 	# rule: every Mk1 Scrap or Standard system is known from the start; Neon must be unlocked (PLAN: equipment lines)
 	for id in comps.ids():
 		var d: Dictionary = comps.def(id)
-		if d["family"] != "workshop" and d["tier"] == 1 and not id in NO_RECIPE_YET:
-			if d.get("line", "standard") == "neon":
+		if d.get("unique", false):
+			check(not c.is_known(id), "unique %s has no blueprint" % id)
+		elif d["family"] != "workshop" and d["tier"] == 1 and not id in NO_RECIPE_YET:
+			if d.get("line", "standard") == "neon" or id in MK1_TO_UNLOCK:
 				check(not c.is_known(id), "Neon system %s must be unlocked" % id)
 			else:
 				check(c.is_known(id), "Mk1 system %s is known" % id)
-	for id in ["engine_mk2", "laser_mk2", "reactor_mk2", "laser_cutter", "assembly_rig", "nanoforge", "rifle", "eva_suit", "titanium"]:
+	for id in ["engine_mk2", "laser_mk2", "reactor_mk2", "laser_cutter", "assembly_rig", "nanoforge", "rifle", "eva_suit", "titanium", "pulse_mk2", "shield_mk2", "missile"]:
 		check(not c.is_known(id), id + " must be unlocked")
 	check(c.queue.is_empty(), "nothing queued")
 	for id in c.ids():
@@ -156,6 +176,96 @@ func test_unlock() -> void:
 	check(not c.unlock("helm"), "a start blueprint is already known")
 	check(not c.unlock("warp_core"), "an unknown recipe is refused")
 	check(not c.known.has("warp_core"), "and not added")
+
+
+# --- items and the weapons content pack -------------------------------------------------------
+
+func test_items_data() -> void:
+	var c := _crafting()
+	var comps := _comps()
+	var raw: Array = JSON.parse_string(FileAccess.get_file_as_string(ITEMS))["items"]
+	var items := _items()
+	eq(items.size(), raw.size(), "item ids are unique")
+	for id in items:
+		var i: Dictionary = items[id]
+		for k in ["id", "name", "kind", "blurb"]:
+			check(i.has(k) and str(i[k]) != "", "item %s has %s" % [id, k])
+		check(i.get("kind", "") in ITEM_KINDS, "item %s kind %s is known" % [id, i.get("kind", "")])
+		check(not comps.has(id) and not c.materials.has(id), "item %s is not also a part or a material" % id)
+	for id in ["missile"]:
+		eq(items[id]["kind"], "ammo", id + " is ammo")
+	for id in ["pistol", "rifle", "basic_armor", "eva_suit"]:
+		eq(items[id]["kind"], "gear", id + " is gear")
+	for id in ["exosuit", "salamander_suit", "heat_suit", "plasma_rifle"]:
+		eq(items[id]["kind"], "special", id + " is special")
+
+
+func test_every_recipe_output_exists() -> void:
+	var c := _crafting()
+	var comps := _comps()
+	var items := _items()
+	for id in c.ids():
+		var item: String = c.def(id)["output"]["item"]
+		check(comps.has(item) or c.materials.has(item) or items.has(item), "%s output %s is a part, a material or an item" % [id, item])
+
+
+func test_special_items_and_uniques_have_no_recipe() -> void:
+	var c := _crafting()
+	var comps := _comps()
+	for id in _items():
+		if _items()[id]["kind"] == "special":
+			check(not c.has(id), "special item %s has no recipe" % id)
+			check(not c.known.has(id), "special item %s is not a start blueprint" % id)
+	for id in c.ids():
+		check(not _items().has(c.def(id)["output"]["item"]) or _items()[c.def(id)["output"]["item"]]["kind"] != "special", "%s does not make a special item" % id)
+	for id in comps.ids():
+		if comps.def(id).get("unique", false):
+			check(not c.has(id), "unique %s has no recipe" % id)
+	for id in ["leech_laser", "breach_harpoon", "mirror_veil"]:
+		check(not c.has(id), id + " is found, not built")
+
+
+func test_missile_recipe() -> void:
+	var c := _crafting()
+	var r := c.def("missile")
+	eq(r["output"], {"item": "missile", "count": 2}, "two missiles per job")
+	eq(r["materials"], {"scrap": 4, "copper": 2, "polymer": 1}, "missile cost")
+	eq([r["fab_level"], r["tools"], r["category"]], [2, [], "gear"], "missile: level 2, no tool, an item")
+
+
+func test_weapon_and_shield_recipes_follow_the_lines() -> void:
+	var c := _crafting()
+	var comps := _comps()
+	var n := 0
+	for id in comps.ids():
+		var d: Dictionary = comps.def(id)
+		if d["family"] != "weapon" and d["family"] != "shield":
+			continue
+		if d.get("unique", false) or id in ["laser_mk1", "laser_mk2", "shield_mk1"]:
+			continue
+		n += 1
+		var r := c.def(id)
+		check(not r.is_empty(), id + " has a recipe")
+		if r.is_empty():
+			continue
+		var total := 0
+		for m in r["materials"]:
+			total += int(r["materials"][m])
+		match d["line"]:
+			"scrap":
+				eq(r["fab_level"], 1, id + ": scrap is level 1")
+				check(int(r["materials"].get("scrap", 0)) * 2 > total, id + ": scrap is mostly scrap")
+				check(d["tier"] != 1 or c.is_known(id), id + ": a scrap Mk1 is known at the start")
+			"standard":
+				check(r["fab_level"] in [1, 2], id + ": standard is level 1 or 2")
+			"neon":
+				eq(r["fab_level"], 3, id + ": neon is level 3")
+				check("laser_cutter" in r["tools"], id + ": neon needs the laser cutter")
+				check(r["materials"].has("silicon") or r["materials"].has("crystal"), id + ": neon needs silicon or crystal")
+				check(not c.is_known(id), id + ": neon must be unlocked")
+		eq(r["output"]["count"], 1, id + " makes one")
+		eq(r["category"], "system", id + " is a system")
+	check(n >= 12, "the pack's twelve craftable parts are all covered")
 
 
 # --- can_craft --------------------------------------------------------------------------------

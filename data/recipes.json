@@ -1,5 +1,5 @@
 {
-  "_doc": "Fabricator recipes. Content is data: add an entry here and it can be crafted. id: the recipe id, same as its output item. output: item id (a component, a material or a gear item) and count. materials: id -> count, paid from cargo when the job is queued. fab_level: 1 to 4, the fabricator level needed (see workshop modules). tools: tools the fabricator's room must provide, e.g. laser_cutter. time: seconds of crafting. category: system, module, gear or material. start_known: recipes known at the start; every other recipe is a blueprint to unlock by scanning and salvage. Special gear (exosuits, unique guns) has no recipe on purpose: it is only found, bought or earned.",
+  "_doc": "Fabricator recipes. Content is data: add an entry here and it can be crafted. id: the recipe id, same as its output item. output: item id (a component, a material or an item from data/items.json) and count. materials: id -> count, paid from cargo when the job is queued. fab_level: 1 to 4, the fabricator level needed (see workshop modules). tools: tools the fabricator's room must provide, e.g. laser_cutter. time: seconds of crafting. category: system, module, gear (items.json gear and ammo) or material. start_known: recipes known at the start; every other recipe is a blueprint to unlock by scanning and salvage. Special gear (exosuits, unique guns) has no recipe on purpose: it is only found, bought or earned.",
   "start_known": [
     "reactor_mk1",
     "engine_mk1",
@@ -17,7 +17,11 @@
     "reactor_scrap_mk1",
     "engine_scrap_mk1",
     "oxygen_scrap_mk1",
-    "radiator"
+    "radiator",
+    "rattle_burst_scrap",
+    "shrapnel_cannon_scrap",
+    "bolt_thrower_scrap",
+    "shield_scrap_mk1"
   ],
   "recipes": [
     {
@@ -458,6 +462,219 @@
       "tools": [],
       "time": 15,
       "category": "system"
+    },
+    {
+      "id": "pulse_mk1",
+      "output": {
+        "item": "pulse_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 16,
+        "copper": 10,
+        "polymer": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "pulse_mk2",
+      "output": {
+        "item": "pulse_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "titanium": 6,
+        "silicon": 3
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "rattle_burst_scrap",
+      "output": {
+        "item": "rattle_burst_scrap",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 14,
+        "copper": 1
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "shrapnel_cannon_scrap",
+      "output": {
+        "item": "shrapnel_cannon_scrap",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 20,
+      "category": "system"
+    },
+    {
+      "id": "bolt_thrower_scrap",
+      "output": {
+        "item": "bolt_thrower_scrap",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 16,
+        "copper": 1
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "artemis_mk1",
+      "output": {
+        "item": "artemis_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 12,
+        "titanium": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 25,
+      "category": "system"
+    },
+    {
+      "id": "ion_blast_mk1",
+      "output": {
+        "item": "ion_blast_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 16,
+        "copper": 10,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 25,
+      "category": "system"
+    },
+    {
+      "id": "siren_ion_neon",
+      "output": {
+        "item": "siren_ion_neon",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 12,
+        "silicon": 8,
+        "crystal": 2
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 50,
+      "category": "system"
+    },
+    {
+      "id": "heat_lance_neon",
+      "output": {
+        "item": "heat_lance_neon",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 14,
+        "silicon": 6,
+        "crystal": 3,
+        "plasma_cell": 1
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 55,
+      "category": "system"
+    },
+    {
+      "id": "shield_scrap_mk1",
+      "output": {
+        "item": "shield_scrap_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 20,
+      "category": "system"
+    },
+    {
+      "id": "shield_mk2",
+      "output": {
+        "item": "shield_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 25,
+        "copper": 12,
+        "titanium": 8,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 35,
+      "category": "system"
+    },
+    {
+      "id": "shield_neon_mk1",
+      "output": {
+        "item": "shield_neon_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 12,
+        "silicon": 8,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 50,
+      "category": "system"
+    },
+    {
+      "id": "missile",
+      "output": {
+        "item": "missile",
+        "count": 2
+      },
+      "materials": {
+        "scrap": 4,
+        "copper": 2,
+        "polymer": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 6,
+      "category": "gear"
     }
   ]
 }
