@@ -3,6 +3,7 @@ extends Node2D
 ## both ships, which are drawn at their arena transforms (ship_view.gd); the interior build mode
 ## and the walking crew are put away. W/S throttle, A/D turn, the mouse aims, LMB fires group 1 (lasers,
 ## bolts, beams), RMB group 2 (missiles, flak), 1-9 a single weapon, Shift, Space and Q use the engine, shield and utility abilities,
+## the arrow keys shift the shield balance one step toward the bow, stern, port or starboard and End makes it even,
 ## Esc leaves once the enemy is wrecked or 4000 px away, R restarts when you are wrecked.
 ## The rules live in combat_session.gd; this node reads input, runs the session, and draws the aim
 ## wedges, shots, impacts and the HUD (schematics, weapon bar). Shots, beams and effects are drawn from
@@ -30,6 +31,8 @@ const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
 const HINT := "mouse steers   W/S throttle   A/D strafe   T turrets auto   LMB group 1   RMB group 2   1-9 single weapon   Shift engine   Space shield   Q utility   Esc leave"
+
+const SHIELD_HINT := "   arrows shift the shield balance   End even"
 
 ## Emitted when the fight is left: {state ("won", "lost" or "fled"), enemy (its Ship), hull, hull_max (the player's)}.
 signal finished(result: Dictionary)
@@ -268,6 +271,12 @@ func _unhandled_input(e: InputEvent) -> void:
 					_say("Cannot disengage: wreck the enemy or get %d px away" % Session.LEAVE_DISTANCE)
 			KEY_R:
 				restart()
+			KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT:
+				var why: String = session.shift_shield({KEY_UP: "up", KEY_DOWN: "down", KEY_LEFT: "left", KEY_RIGHT: "right"}[e.keycode])
+				if why != "":
+					_say("Shield balance: " + why)
+			KEY_END:
+				session.reset_shield()
 			KEY_T:
 				_say("Turrets: autofire %s" % ("on" if session.toggle_autofire() else "off"))
 			KEY_SPACE:
@@ -372,7 +381,7 @@ func _update_hud() -> void:
 	_banner.text = text
 	_banner.visible = text != ""
 	var co = session.arena.ships[Session.PLAYER]
-	_hint.text = "%s\nenemy %d px   speed %d px/s" % [HINT, session.distance(), co.flight.vel.length()]
+	_hint.text = "%s\nenemy %d px   speed %d px/s%s" % [HINT, session.distance(), co.flight.vel.length(), SHIELD_HINT if co.sectors > 1 and co.layers_cap > 0 else ""]
 
 
 ## Under each turret's slot of the weapon bar: its hit chance against the enemy now (accuracy less the enemy's

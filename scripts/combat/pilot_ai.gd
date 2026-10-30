@@ -15,6 +15,8 @@ extends RefCounted
 ##   as it is).
 ## - With a sectored shield it holds back weapons whose shot would open the sector the player's loaded
 ##   guns are pointing at, for at most HOLD_MAX seconds.
+## - With 2+ shield sectors it shifts the balance toward the side that faces its foe, one step every
+##   SHIFT_BASE_S - aim_skill seconds (the design's `ai.aim_skill`, default 0.6).
 ## - It overcharges its shield when the layers are gone, and does nothing once wrecked.
 ## - Style "rammer" (a ship design's `"ai": {"style": "rammer"}`) does not keep a range: it finds its
 ##   bow (the side with the most ram plating, else forward), points it at where the foe will be and
@@ -35,6 +37,7 @@ const CLOSE_MAX := 260.0  ## px/s it closes at, at most
 const BACK_MAX := 120.0  ## px/s it backs off at, at most
 const HOLD_THROTTLE := 0.5  ## at the preferred range it still pushes this hard
 const HOLD_MAX := 1.5  ## seconds a weapon waits for a safer sector
+const SHIFT_BASE_S := 1.5  ## a shield balance step comes every this many seconds less the aim skill
 const RETARGET_S := 0.5
 const RAM_BACKOFF_S := 2.0  ## seconds a rammer reverses after a collision
 const RAM_ABILITY_RANGE := 600.0  ## px from the foe's hull (its centre less its bounding radius): a rammer presses its engine ability inside this
@@ -48,7 +51,7 @@ var arena
 var me: int
 var foe: int
 var rng := RandomNumberGenerator.new()
-var aim_skill := DEFAULT_AIM_SKILL  ## 0..1: how true the pilot's aim is (the design's ai.aim_skill)
+var aim_skill := DEFAULT_AIM_SKILL  ## 0..1: how true the pilot's aim is and how quickly it shifts its shield balance (the design's ai.aim_skill)
 var side := 1.0  ## +1 or -1: which way it strafes (when it has side engines)
 var bias := 0.0  ## radians: its aim error now, re-rolled with each retarget
 var target_uid := -1  ## the part of the foe it aims at (-1: the ship's centre)
@@ -57,6 +60,7 @@ var _flip := 0.0
 var _retarget := 0.0
 var _hold := {}  # weapon uid -> seconds held back
 var _bow := Vector2.UP  # ship-local direction of a rammer's bow
+var _shift_in := 0.0  # seconds until the next shield balance step
 var _backoff := 0.0  # seconds a rammer still reverses
 var _contact_seen := -1  # the last arena.contact_tick this pilot has reacted to
 
@@ -68,6 +72,7 @@ func _init(p_arena, p_me: int, p_foe: int, p_ai := {}) -> void:
 	foe = p_foe
 	style = str(p_ai.get("style", ""))
 	aim_skill = clampf(float(p_ai.get("aim_skill", DEFAULT_AIM_SKILL)), 0.0, 1.0)
+	_shift_in = shift_interval()
 	_bow = bow_of(arena.ships[me])
 	rng.seed = int(arena.rng.seed) * 7919 + me * 104729 + 17
 	side = 1.0 if rng.randf() < 0.5 else -1.0
@@ -92,6 +97,7 @@ func think(dt: float) -> void:
 		_ram(dt)
 	else:
 		_fly(dt)
+	_balance(dt)
 	_shoot(dt)
 
 
@@ -225,6 +231,23 @@ func _ram(dt: float) -> void:
 	arena.set_input(me, 1.0 if heading.dot(steer) > cos(RAM_ALIGNED) else 0.0, turn)
 	if dist - float(Collisions.hit_cells(arena, foe)["radius"]) < RAM_ABILITY_RANGE:
 		arena.use_key(me, "engine")
+
+
+## Seconds between two steps of shield balance.
+func shift_interval() -> float:
+	return SHIFT_BASE_S - aim_skill
+
+
+## With a sectored shield: a step of weight toward the sector that faces the foe every shift_interval().
+func _balance(dt: float) -> void:
+	var co = arena.ships[me]
+	if co.sectors < 2 or co.layers_cap <= 0:
+		return
+	_shift_in -= dt
+	if _shift_in > 0.0:
+		return
+	_shift_in = shift_interval()
+	Shields.shift_sector(co, Shields.sector_of_world_dir(co, arena.ships[foe].flight.pos - co.flight.pos))
 
 
 # --- shooting ------------------------------------------------------------------------------------
