@@ -422,7 +422,7 @@ func test_save_load_round_trip_with_doors_and_cargo() -> void:
 	s.apply(_put("floor", [Vector2i(5, 6)]))
 	s.grid.set_door_open(MID, true)
 	var d: Dictionary = JSON.parse_string(JSON.stringify(s.to_dict()))
-	eq(d["version"], 3, "saved as version 3")
+	eq(d["version"], 4, "saved as version 4")
 	var t := _session(1, 1)
 	t.apply(_put("floor", [MID]))
 	eq(t.load_dict(d), "", "loads")

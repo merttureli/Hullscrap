@@ -26,7 +26,7 @@ const LOOKS := {
 	"Ada": {"suit": "#e8913a", "hair": "#c2331f", "tool": "#f1d36b"},
 }
 const OTHER_LOOK := {"suit": "#b8382c", "hair": "#1b1b1b", "tool": "#d7dce4"}
-const BUBBLE_STEPS := 48  ## points round a whole bubble
+const HIT_FLASH_S := 0.45  ## seconds a sector flashes after a shot hits it
 
 var arena  ## arena.gd, or null
 var index := 0  ## the ship's index in the arena
@@ -285,51 +285,95 @@ static func draw_health(canvas: CanvasItem, centre: Vector2, frac: float, down: 
 
 # --- shield bubble ----------------------------------------------------------------------------
 
-## The point of the bubble ellipse (semi-axes `ax` px) in direction `phi`, clockwise from the bow.
-static func bubble_point(ax: Vector2, phi: float) -> Vector2:
-	var d := Vector2(sin(phi), -cos(phi))
-	return d / sqrt(pow(d.x / ax.x, 2.0) + pow(d.y / ax.y, 2.0))
+## The part of the polyline `pts` between the fractions `t0` and `t1` of its length (0..1).
+static func sub_line(pts: PackedVector2Array, t0: float, t1: float) -> PackedVector2Array:
+	var total := 0.0
+	for i in pts.size() - 1:
+		total += pts[i].distance_to(pts[i + 1])
+	var out := PackedVector2Array()
+	var done := 0.0
+	for i in pts.size() - 1:
+		var seg := pts[i].distance_to(pts[i + 1])
+		var a := maxf(t0 * total - done, 0.0)
+		var b := minf(t1 * total - done, seg)
+		if b > a and seg > 0.0:
+			if out.is_empty():
+				out.append(pts[i].lerp(pts[i + 1], a / seg))
+			out.append(pts[i].lerp(pts[i + 1], b / seg))
+		done += seg
+	return out
 
 
-## The bubble: a faint ellipse, brighter for every layer up, split into sectors when there are several.
-## An open sector (it just fired) is dim and broken; an ion-locked bubble flickers violet.
+## Dashes of `dash` px with `gap` px between along the polyline `pts`, starting `phase` px in.
+func _dashed(pts: PackedVector2Array, col: Color, width: float, dash := 12.0, gap := 9.0, phase := 0.0) -> void:
+	var pos := -phase
+	for i in pts.size() - 1:
+		var a := pts[i]
+		var seg := pts[i].distance_to(pts[i + 1])
+		var dir := (pts[i + 1] - a) / maxf(seg, 1e-6)
+		var at := 0.0
+		while at < seg:
+			var cycle := fposmod(pos + at, dash + gap)
+			if cycle < dash:
+				var run := minf(dash - cycle, seg - at)
+				draw_line(a + dir * at, a + dir * (at + run), col, width)
+				at += maxf(run, 0.01)
+			else:
+				at += maxf(dash + gap - cycle, 0.01)
+		pos += seg
+
+
+## The bubble: the hull-hugging outline (Shields.shape_of) cut into the ship's sectors. Each sector's line is
+## brighter and thicker for every layer it holds, a faint dashed line at 0, shimmers while its layers fill
+## and flashes when a shot hits it. An open sector (it just fired) is dim and broken; an ion-locked bubble
+## flickers violet; an overcharged one has a gold second skin.
 func _draw_bubble(co) -> void:
 	if co.wrecked or co.layers_cap <= 0:
 		return
-	var ax := Shields.axes(co) * CELL
+	var shape = Shields.shape_of(co)
 	var n: int = co.sectors
-	var open := Shields.open_sectors(co, arena.tick)
+	var lines: Array = shape.sector_lines(n)
 	var ion: bool = co.ion_lock > 0.0
 	var tint := ION if ion else (OVERCHARGE if co.overcharge_left > 0.0 else BUBBLE)
-	var up: float = 0.0 if ion else float(co.layers)
-	var fill := 0.025 + 0.035 * up
-	var line := 0.10 + 0.17 * up if up > 0.0 else 0.07
-	if ion:
-		line = 0.2 + 0.3 * absf(sin(_clock * 25.0))
-	var steps := maxi(6, BUBBLE_STEPS / n)
+	var flick := 0.35 + 0.25 * sin(_clock * 38.0)
 	for k in n:
-		var a0 := (float(k) - 0.5) * TAU / n if n > 1 else -PI
-		var a1 := (float(k) + 0.5) * TAU / n if n > 1 else PI
+		var st: Dictionary = Shields.sector_state(co, k, arena.tick)
 		var pts := PackedVector2Array()
-		for i in steps + 1:
-			pts.append(bubble_point(ax, lerpf(a0, a1, float(i) / steps)))
-		var flick := 0.0
-		if open[k]:
-			flick = 0.35 + 0.25 * sin(_clock * 38.0 + k)
-		draw_colored_polygon(PackedVector2Array([Vector2.ZERO]) + pts if n > 1 else pts, Color(tint, fill * (flick if open[k] else 1.0)))
-		if not open[k]:
-			draw_polyline(pts, Color(tint, minf(line, 0.9)), 2.0, true)
-		else:  # broken: some of the arc is missing, and what is left flickers
+		for p in lines[k]:
+			pts.append(px(p))
+		var up: float = 0.0 if ion else minf(float(st["layers"]), 4.0)
+		var hit := clampf(1.0 - float(arena.tick - int(co.sector_hit[k])) / 60.0 / HIT_FLASH_S, 0.0, 1.0)
+		var fill := 0.02 + 0.03 * up + 0.14 * hit
+		var alpha := minf(0.10 + 0.17 * up, 0.9)
+		var width := 1.5 + 0.9 * up
+		var wedge := PackedVector2Array([Vector2.ZERO]) + pts if n > 1 else pts
+		if st["open"]:  # it just fired through here: dim and broken
+			draw_colored_polygon(wedge, Color(tint, fill * flick))
 			var shift := int(_clock * 24.0)
-			for i in steps:
+			for i in pts.size() - 1:
 				if (i + shift) % 3 != 0:
 					draw_line(pts[i], pts[i + 1], Color(tint, 0.35 * flick), 1.5)
+			continue
+		draw_colored_polygon(wedge, Color(tint, fill))
+		if ion:
+			draw_polyline(pts, Color(tint, 0.2 + 0.3 * absf(sin(_clock * 25.0))), 2.0, true)
+		elif up < 1.0:  # no whole layer: a faint dashed line
+			_dashed(pts, Color(tint, 0.22), 1.5, 12.0, 9.0, _clock * 6.0 if st["filling"] else 0.0)
+		else:
+			draw_polyline(pts, Color(tint, alpha), width, true)
+		if hit > 0.0:
+			draw_polyline(pts, Color(1, 1, 1, 0.8 * hit), width + 3.0 * hit, true)
+		if st["filling"] and not ion:  # layers on their way back: a bright run travels along the line
+			var at := fposmod(_clock * 0.45 + 0.17 * k, 1.0)
+			var run := sub_line(pts, at, minf(at + 0.12, 1.0))
+			if run.size() > 1:
+				draw_polyline(run, Color(tint.lightened(0.5), 0.75), width + 1.5, true)
 	if n > 1:
 		for k in n:
-			var edge := bubble_point(ax, (float(k) - 0.5) * TAU / n)
-			draw_line(Vector2.ZERO, edge, Color(tint, 0.10), 1.0)
+			draw_line(Vector2.ZERO, px(shape.boundary_toward(Vector2.from_angle((float(k) - 0.5) * TAU / n - PI / 2.0))), Color(tint, 0.10), 1.0)
 	if co.overcharge_left > 0.0:
 		var outer := PackedVector2Array()
-		for i in BUBBLE_STEPS + 1:
-			outer.append(bubble_point(ax + Vector2(10.0, 10.0), TAU * i / BUBBLE_STEPS))
+		for p in shape.grown(0.35).outline():
+			outer.append(px(p))
+		outer.append(outer[0])
 		draw_polyline(outer, Color(OVERCHARGE, 0.35 + 0.2 * sin(_clock * 6.0)), 2.0, true)

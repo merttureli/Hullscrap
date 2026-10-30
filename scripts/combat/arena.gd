@@ -39,12 +39,19 @@ class Combatant extends RefCounted:
 	var inertia := 1.0  ## moment of inertia about it (mass x px^2), for collisions
 	var hit_cache := {}  ## collisions.gd's outer cells of this ship; {} = rebuild
 	var thrust := 0.0
-	var layers := 0  ## shield layers up now
-	var layers_cap := 0
-	var shield_timers: Array[float] = []  ## seconds until each used layer is back
+	var layers: int:  ## whole shield layers up now, over all the sectors
+		get:
+			return Shields.layers_up(self)
+	var layers_cap := 0  ## layers a sector of weight 1 holds: the powered generators' and the running overcharge's; a sector holds this x its weight
+	var sectors := 1  ## the bubble's sectors (the best powered generator's stats.sectors: 1, 2, 4 or 8)
+	var weights: Array = [1.0]  ## the balance: one weight per sector, 0..2 in steps of 0.5, adding up to `sectors` (shield_balance.gd)
+	var sector_layers: Array = [0.0]  ## layers up in each sector now
+	var sector_timers: Array = [[]]  ## per sector: Vector2(seconds left, layers) for each used or newly gained layer on its way back
+	var sector_hit: Array = [-1000000]  ## per sector: the tick a shot last hit it (the view flashes it)
 	var ion_lock := 0.0  ## seconds the shields stay offline
-	var sectors := 1  ## the bubble's sectors (the best powered generator's stats.sectors); layers are one pool
 	var sector_open := {}  ## sector -> Vector2i(first tick, last tick) it is open: shots pass, no layer used (after this ship fired through it)
+	var shape: RefCounted = null  ## shield_shape.gd outline of the bubble, kept by Shields.shape_of
+	var shape_sig: Array = []
 	var ability_rev := -1  ## the ship's Abilities.rev this combatant last computed its thrust and layers for
 	var overcharge_left: float:  ## seconds the running shield ability (Overcharge) has left
 		get:
@@ -107,7 +114,7 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 	co.mounts = weapons.mounts_of(ship)
 	ships.append(co)
 	_recompute(co)
-	co.layers = co.layers_cap  # shields start full
+	Shields.start(co)  # shields start full, with the ship's saved balance
 	return ships.size() - 1
 
 
@@ -192,6 +199,8 @@ func _recompute(co) -> void:
 	co.com = props["com"]
 	co.inertia = props["inertia"]
 	co.hit_cache = {}
+	if co.dirty:
+		co.shape = null  # the cells may have changed: the bubble's outline is rebuilt on its next use
 	co.thrust = co.flight.thrust_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	Shields.resync(co)
 	co.ability_rev = Abilities.rev(co.ship)
@@ -294,6 +303,6 @@ func snapshot() -> Dictionary:
 			var inst: Dictionary = co.ship.components.instances[uid]
 			parts[str(uid)] = [inst.get("hp", -1), inst.get("status", "")]
 		list.append({"pos": [co.flight.pos.x, co.flight.pos.y], "vel": [co.flight.vel.x, co.flight.vel.y], "angle": co.flight.angle, "ang_vel": co.flight.ang_vel,
-			"hull": co.hull, "wrecked": co.wrecked, "layers": co.layers, "ion_lock": co.ion_lock,
+			"hull": co.hull, "wrecked": co.wrecked, "layers": co.layers, "weights": co.weights.duplicate(), "sector_layers": co.sector_layers.duplicate(), "ion_lock": co.ion_lock,
 			"grid": co.ship.grid.to_dict(), "parts": parts})
 	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "tethers": tethers.size(), "events": events.size(), "power_bonus": power_bonus.duplicate()}

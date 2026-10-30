@@ -113,7 +113,7 @@ func test_round_trip_covers_everything() -> void:
 	a.refresh()
 	a.atmosphere.pressure[0] = 0.5
 	var d: Dictionary = JSON.parse_string(JSON.stringify(a.to_dict()))
-	eq(d["version"], 3, "version 3")
+	eq(d["version"], 4, "version 4")
 	var b := Ship.new_starter()
 	eq(b.load_dict(d), "", "loads")
 	eq(b.grid.size, a.grid.size, "size")
@@ -140,7 +140,7 @@ func test_version_2_save_loads_without_parts_or_cables() -> void:
 	eq(a.inventory.to_dict(), {"scrap": 7, "copper": 3}, "cargo from the save")
 	check(a.grid.get_tile(Vector2i(8, 8)) == "wall", "tiles from the save")
 	check(a.power_state["powered"].is_empty(), "nothing to power")
-	eq(a.load_dict({"version": 4}), "unsupported ship version", "a newer version is refused")
+	eq(a.load_dict({"version": 5}), "unsupported ship version", "a newer version is refused")
 
 
 func test_bad_saves_change_nothing() -> void:

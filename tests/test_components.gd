@@ -27,7 +27,7 @@ const WEAPON_PACK := {
 	"leech_laser": ["standard", 2, [4, 2], "laser", "energy"],
 	"breach_harpoon": ["standard", 2, [4, 2], "bolt", "kinetic"],
 }
-const SHIELD_SECTORS: Array[int] = [1, 4, 8]
+const SHIELD_SECTORS: Array[int] = [1, 2, 4, 8]
 const UNIQUES: Array[String] = ["leech_laser", "breach_harpoon", "mirror_veil", "afterburner"]
 
 
@@ -349,9 +349,9 @@ func test_shields_have_layers_and_recharge() -> void:
 		check(int(d["stats"].get("layers", 0)) >= 1, id + " has at least one layer")
 		check(float(d["stats"].get("recharge", 2.0)) > 0.0, id + " recharge is positive")
 		var sectors = d["stats"].get("sectors")
-		check(sectors != null and sectors == int(sectors) and int(sectors) in SHIELD_SECTORS, "%s sectors %s is an integer in 1, 4 or 8" % [id, str(sectors)])
+		check(sectors != null and sectors == int(sectors) and int(sectors) in SHIELD_SECTORS, "%s sectors %s is an integer in 1, 2, 4 or 8" % [id, str(sectors)])
 	check(n >= 5, "at least five shields")
-	eq([int(c.def("shield_mk1")["stats"]["sectors"]), int(c.def("shield_scrap_mk1")["stats"]["sectors"]), int(c.def("shield_mk2")["stats"]["sectors"]), int(c.def("mirror_veil")["stats"]["sectors"])], [1, 1, 1, 1], "standard, scrap and unique shields have one sector")
+	eq([int(c.def("shield_mk1")["stats"]["sectors"]), int(c.def("shield_scrap_mk1")["stats"]["sectors"]), int(c.def("shield_mk2")["stats"]["sectors"]), int(c.def("mirror_veil")["stats"]["sectors"])], [1, 1, 2, 1], "Mk1, scrap and unique shields are one piece, the Mk2 has two sectors")
 	eq(int(c.def("shield_neon_mk1")["stats"]["sectors"]), 4, "the neon shield has four sectors")
 	eq([c.def("shield_scrap_mk1")["name"], c.def("shield_scrap_mk1")["line"], int(c.def("shield_scrap_mk1")["stats"]["layers"])], ["Bubble Rig", "scrap", 1], "Bubble Rig")
 	eq([c.def("shield_mk2")["line"], c.def("shield_mk2")["tier"], int(c.def("shield_mk2")["stats"]["layers"])], ["standard", 2, 2], "Shield Mk2")

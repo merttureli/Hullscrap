@@ -174,13 +174,36 @@ func ability_state(s: Dictionary) -> Dictionary:
 		"cooldown": float(s["ability"].get("cooldown", 0.0)), "reason": "" if state in ["active", "ready"] else why}
 
 
+## The player presses an arrow key: one step of shield balance toward "up" (bow), "down" (stern), "left"
+## (port) or "right" (starboard). "" when it moved, else why not.
+func shift_shield(dir: String) -> String:
+	return Shields.shift(arena.ships[PLAYER], dir)
+
+
+## The player presses End: every sector back to weight 1. The losers drop at once, the gainers recharge.
+func reset_shield() -> void:
+	Shields.reset_even(arena.ships[PLAYER])
+
+
+## What the shield diagram shows: one entry per sector of the player's bubble, bow first, clockwise:
+## {layers, cap, weight, open, filling}. Empty with no shield generator.
+func shield_sectors() -> Array:
+	var co = arena.ships[PLAYER]
+	var out := []
+	if co.layers_cap <= 0:
+		return out
+	for s in co.sectors:
+		out.append(Shields.sector_state(co, s, arena.tick))
+	return out
+
+
 ## Where the camera should be and how far to zoom so both ships fit a viewport of `view` px:
 ## {center, zoom}. `margin`: the fraction of the screen kept free.
 func framing(view: Vector2, margin := 0.2) -> Dictionary:
 	var a = arena.ships[PLAYER]
 	var b = arena.ships[ENEMY]
-	var reach_a: float = (Shields.axes(a).length() + 1.0) * arena.CELL
-	var reach_b: float = (Shields.axes(b).length() + 1.0) * arena.CELL
+	var reach_a: float = (Shields.reach(a) + 1.0) * arena.CELL
+	var reach_b: float = (Shields.reach(b) + 1.0) * arena.CELL
 	var centre: Vector2 = (a.flight.pos + b.flight.pos) / 2.0
 	var half: Vector2 = (a.flight.pos - b.flight.pos).abs() / 2.0 + Vector2.ONE * maxf(reach_a, reach_b)
 	var zoom := minf(view.x / (2.0 * half.x), view.y / (2.0 * half.y)) * (1.0 - margin)
