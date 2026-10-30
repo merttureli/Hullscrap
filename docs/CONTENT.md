@@ -67,6 +67,10 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
   - When you fire anything shields can stop (laser, bolt, flak, beam, ion), **your whole bubble is open** for `drops_shield_s`: laser 0.3 s, bolt 0.4 s, flak 0.6 s, ion 0.3 s, and a beam for its whole duration.
   - Layers aren't spent while it's open, and **missiles never open it**.
   - So you time your volleys, shield-heavy ships favour missiles, and an enemy who just fired is briefly exposed.
+- **Sectored shields (owner, 2026-10-30)**:
+  - The bubble is split into **sectors** around the ship. Their count comes from the best powered generator: level 1–2 has 1 sector (the whole bubble), **level 3 has 4**, **level 6 has 8**. Neon generators get 4 early.
+  - Firing opens **only the sector the shot leaves through**, and incoming hits check the sector at their impact angle. Layers stay one shared pool.
+  - Better shield tech means smaller openings when you fire. Levels 4–6 are future content.
 - **Shield-heavy builds**: layers are the sum of your powered generators, each a big power draw, so lots of energy plus generators is a real alternative to armour.
   - **Space = Shield Overcharge**: +1 temporary layer for 6 s, at +4 power draw while active, with a 20 s cooldown.
 - **Fires and breaches** come from hits (`fire_chance`, and walls reaching 0) and use the existing oxygen and fire rules.
