@@ -1,27 +1,37 @@
 extends Node2D
 ## Crew on the ship: the player's soldier (WASD) and one NPC, Ada (middle-click a cell to send her).
-## Rules live in scripts/crew/*; this node reads input and draws. Grid, cell size and cell
-## positions come from the sibling BuildMode node, read every frame (a loaded ship may swap the grid).
+## Rules live in scripts/crew/*; this node reads input and draws. The ship comes from the sibling
+## ShipSim (player_ship(), read every frame); cell size and cell positions from the sibling BuildMode.
+## Crew are kept in ship.crew, which the simulation reads (doors, breathing).
 
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 
-## Callable(cell) -> bool for doors; whoever owns door state sets it. Invalid = every door open.
-var door_passable: Callable = Callable()
+## Callable(cell) -> bool for doors. Auto doors: crew walk through every door and it closes behind
+## them (the simulation counts a door as open while someone stands on it), so there are no locks yet.
+var door_passable: Callable = func(_cell: Vector2i) -> bool: return true
 var player: CrewMember
 var ada: CrewMember
 var build: Node
+var sim: Node
 
 
 func _ready() -> void:
 	build = get_node_or_null("../BuildMode")
+	sim = get_node_or_null("../ShipSim")
+
+
+## The ship the player is on (null until the scene is wired).
+func _ship():
+	return sim.player_ship() if sim != null and build != null else null
 
 
 func _process(dt: float) -> void:
-	if build == null or build.grid == null:
+	var ship = _ship()
+	if ship == null:
 		return
-	var grid = build.grid
-	_spawn(grid)
+	var grid = ship.grid
+	_spawn(ship)
 	for m: CrewMember in _crew():
 		m.resolve(grid, door_passable)
 	if player != null:
@@ -32,11 +42,11 @@ func _process(dt: float) -> void:
 
 
 func _unhandled_input(e: InputEvent) -> void:
-	if ada == null or build == null or build.grid == null:
+	if ada == null or _ship() == null:
 		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_MIDDLE:
 		var p: Vector2 = (make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL
-		ada.go_to(build.grid, Vector2i(floori(p.x), floori(p.y)), door_passable)
+		ada.go_to(_ship().grid, Vector2i(floori(p.x), floori(p.y)), door_passable)
 
 
 func _crew() -> Array[CrewMember]:
@@ -57,16 +67,19 @@ func _wasd() -> Vector2:
 
 
 ## Put the soldier, then Ada, on the walkable cells nearest the grid centre once they exist.
-func _spawn(grid) -> void:
+func _spawn(ship) -> void:
+	var grid = ship.grid
 	var mid := Vector2(grid.size) / 2.0
 	if player == null:
 		var c := Pathfinder.nearest_walkable(grid, mid, door_passable)
 		if c != Pathfinder.NO_CELL:
 			player = CrewMember.new("Soldier", Vector2(c) + Vector2(0.5, 0.5))
+			ship.crew.append(player)
 	if player != null and ada == null:
 		var c := Pathfinder.nearest_walkable(grid, mid, door_passable, player.cell())
 		if c != Pathfinder.NO_CELL:
 			ada = CrewMember.new("Ada", Vector2(c) + Vector2(0.5, 0.5))
+			ship.crew.append(ada)
 
 
 ## Screen position of a point given in cell units.
@@ -75,7 +88,7 @@ func _world(p: Vector2) -> Vector2:
 
 
 func _draw() -> void:
-	if build == null or build.grid == null:
+	if _ship() == null:
 		return
 	if ada != null:
 		for c in ada.path:
