@@ -29,7 +29,7 @@ const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
-const HINT := "mouse steers the ship (fixed guns point where its nose does)   W/S throttle   A/D strafe   T turret autofire   LMB group 1   RMB group 2   1-9 single weapon   Shift engine ability   Space shield ability   Q utility   Esc leave"
+const HINT := "mouse steers   W/S throttle   A/D strafe   T turrets auto   LMB group 1   RMB group 2   1-9 single weapon   Shift engine   Space shield   Q utility   Esc leave"
 
 var sim: Node  ## ShipSim
 var build: Node  ## BuildMode (put away during the fight)
@@ -368,7 +368,7 @@ func _update_hud() -> void:
 	_hint.text = "%s\nenemy %d px   speed %d px/s" % [HINT, session.distance(), co.flight.vel.length()]
 
 
-## Over each turret's slot of the weapon bar: its hit chance against the enemy now (accuracy less the enemy's
+## Under each turret's slot of the weapon bar: its hit chance against the enemy now (accuracy less the enemy's
 ## evasion) and whether the turrets fire by themselves (T).
 func _draw_bar_extras() -> void:
 	if session == null or _bar == null or not _bar.visible:
@@ -381,10 +381,9 @@ func _draw_bar_extras() -> void:
 		if not list[i]["turret"]:
 			continue
 		var st: Dictionary = session.slot_state(list[i]["uid"], _aim())
-		var at := Vector2(x0 + i * (WeaponBar.SLOT.x + WeaponBar.GAP), row_y)
-		var font := ThemeDB.fallback_font
-		_bar_extras.draw_string(font, at + Vector2(WeaponBar.SLOT.x - 66.0, 28.0), "HIT %d%%" % roundi(float(st["hit"]) * 100.0), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#cfe6ff"))
-		_bar_extras.draw_string(font, at + Vector2(WeaponBar.SLOT.x - 66.0, 40.0), "TURRET AUTO" if auto else "TURRET HOLD", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, WeaponBar.READY if auto else WeaponBar.COOLING)
+		var at := Vector2(x0 + i * (WeaponBar.SLOT.x + WeaponBar.GAP), row_y + WeaponBar.SLOT.y + 10.0)  # under its slot
+		var text := "TURRET  HIT %d%%  %s" % [roundi(float(st["hit"]) * 100.0), "AUTO" if auto else "HOLD"]
+		_bar_extras.draw_string(ThemeDB.fallback_font, at + Vector2(6.0, 0.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, WeaponBar.READY if auto else WeaponBar.COOLING)
 
 
 # --- effects ----------------------------------------------------------------------------------------
