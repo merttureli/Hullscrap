@@ -68,6 +68,37 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Enemy pilot AI** keeps its preferred range, strafes, **leads its shots at your components** (weapons, then engines, then reactor) and uses its abilities on cooldown. It's deterministic from the battle seed.
 - **Determinism**: physics and all rolls step at a fixed rate with the battle's seeded RNG, so a battle with the same inputs replays exactly.
 
+## 4b. Armour materials, layering and damage types (From the Depths, in 2D)
+- **Damage types**:
+  - `kinetic` (bolts, flak, scrap missiles);
+  - `energy` (lasers, beams, pulse);
+  - `explosive` (missiles and their splash);
+  - `ion` (no structural damage: strips shield layers and ion-locks systems).
+  - Every weapon has a `damage_type`.
+- **Walls are armour, and layers are cells.** A hull 3 cells thick is 3 layers. Each wall **material** is its own tile in `data/tiles.json`, with:
+  - `hp`, `mass` (feeds `flight.gd`, so more and heavier layers make a slower, sluggish ship), `cost`, `line`;
+  - `resist` (damage multiplier per type, e.g. `{"energy": 0.5}`);
+  - `deflect` (chance per type to bounce a shot away entirely, e.g. `{"energy": 0.4}`);
+  - optional quirks.
+- **Ricochet**: kinetic shots hitting a wall at a shallow angle (more than 60° from the surface normal) have a 50% chance to glance off. Angled hull shapes matter.
+- **Spacing**: an `explosive` hit detonates on the first layer. A **spaced** layer (an empty or floor cell between two wall layers) cuts the splash reaching the next layer to 30%.
+- **Materials v1** (tune later):
+
+| Material | Line | hp | mass | Strong against | Weak against | Notes |
+|---|---|---|---|---|---|---|
+| Scrap Plate | scrap | 3 | 2.0 | n/a | explosive ×1.5 | dirt cheap, easy to patch |
+| Steel Wall | standard | 4 | 2.0 | n/a | n/a | the baseline (today's `wall`) |
+| Titanium Alloy | standard | 6 | 1.5 | kinetic ×0.8 | n/a | light and strong, costs titanium |
+| Heavy Armour | standard | 10 | 5.0 | kinetic ×0.6, explosive ×0.7 | n/a | very heavy, a slow brick |
+| Reflective Coating | neon | 2 | 0.5 | **deflects 40% of energy** | kinetic ×1.5 | the outer skin against lasers |
+| Ablative Plating | standard | 5 | 2.5 | energy ×0.5 | n/a | loses 1 max hp per energy hit (burns away) |
+| Whipple Spacer | standard | 2 | 0.8 | explosive (spacing rule) | n/a | thin sacrificial outer layer against missiles |
+| Neon Lattice | neon | 3 | 1.0 | energy ×0.7 | ion ×2 | **quirk**: 20% of the energy damage it absorbs becomes ship power for 5 s |
+
+- **The design question this creates**: reflective outside against lasers, alloy in the middle, a Whipple spacer against missiles, heavy armour only around the reactor. Every layer costs speed and turning. Enemies counter with their weapon mix.
+- **Build mode**: every wall material is in the Tiles palette. **Ctrl-drag a room** uses the selected wall material. A new **"Plating" tool** adds one layer around the whole outer hull (it expands outward if there's hull room).
+- Breached layers (hp 0) leave a hole. Repairing restores the original material.
+
 ## 5. Abilities and quirks (`scripts/sim/abilities.gd`)
 - An ability is `{id, name, type: active|passive, duration, cooldown, effects, side_effects, operator_needs}`.
   - Active abilities are triggered by the player (or by an AI captain) when the component is powered and, if `operator_needs` is set, manned by a qualifying crew member.
@@ -119,7 +150,9 @@ Tiers and lines follow the tables. Unique items (★) have no recipe.
 2. **Combat physics, headless**:
    - an arena with 2 ships (flight bodies, rotated grids);
    - projectiles and hitscan lasers, weapon arcs and cooldowns;
-   - cell collision with hp and pierce, shields, breaches, disables and hull integrity;
+   - cell collision with hp and pierce;
+   - **damage types, wall materials (resist, deflect, ricochet, spacing)**;
+   - shields, breaches, disables and hull integrity;
    - deterministic tests.
 3. **Combat in the game**: the zoomed-out arena, flight controls, mouse aiming, the weapon bar, both schematics at the top, and a pirate ship with pilot AI.
 4. Abilities, with the Afterburner end to end.
