@@ -1,0 +1,144 @@
+{
+  "logs": [
+    {
+      "id": "log_clans_soup_rules",
+      "title": "House Rules",
+      "ship": "Tin Mother",
+      "faction": "clans",
+      "text": "House rules, galley of the Tin Mother.\nRule 1: the soup is whatever is in the pot.\nRule 2: do not ask about Rule 1.\nRule 3: seconds are free, if you did not ask about Rule 1.\nNever had a complaint. Mostly because of Rule 2."
+    },
+    {
+      "id": "log_clans_basalt_hands",
+      "title": "Slate's shift",
+      "ship": "Hot Take",
+      "faction": "clans",
+      "text": "Slate fixed the reactor again today by sitting next to it.\nI asked how. He said, 'I asked it.'\nI asked what it said. He said, 'It was tired.'\nBest engineer I ever had, and I don't understand a thing he does. Neither does the reactor. It runs better, though."
+    },
+    {
+      "id": "log_clans_claim_note",
+      "title": "Back in 5",
+      "ship": "Unpaid Leave",
+      "faction": "clans",
+      "text": "Gone to look at the next rock. Back in 5 minutes.\nLeft the lamp on. Left the sacks. Left a note on the airlock in case.\nIf you're reading this and I'm not back, I found a good vein. Take it.\nDon't take the sacks. The sacks are mine."
+    },
+    {
+      "id": "log_clans_ma_birthday",
+      "title": "Collection",
+      "ship": "Gravy Train",
+      "faction": "clans",
+      "text": "We took up a collection for Ma Gantry's birthday. 4,100 credits, in small coins, for the good cake.\nMa counted it twice and said, 'That's exactly what you owe me. Thank you.'\nThen she ate the cake.\nIt was a good cake. We didn't get any."
+    },
+    {
+      "id": "log_clans_fight_rota",
+      "title": "Bay 4 rota",
+      "ship": "Mind The Gap",
+      "faction": "clans",
+      "text": "Cargo bay fights are now scheduled. Tuesdays: cousins. Thursdays: in-laws. Saturdays: anyone.\nBring your own chair. We have run out of chairs.\nThe winner gets the good wrench for a week.\nThe wrench is, in fact, not that good."
+    },
+    {
+      "id": "log_concord_pencil",
+      "title": "Requisition 1,400",
+      "ship": "CS-077 Punctuality",
+      "faction": "concord",
+      "text": "Requisition for pencils: 1,400. Reason: none left.\nResponse: DENIED. Reason: pencil shortage.\nI have filed an appeal against the denial, in pencil.\nIt is the last pencil. I shall return it after the appeal."
+    },
+    {
+      "id": "log_concord_hallett_mug",
+      "title": "Patrol log, personal",
+      "ship": "CS-114 Diligence",
+      "faction": "concord",
+      "text": "I joined to inspect the Lattice. I inspect cargo.\nThe cargo is mostly honest. The captains are mostly not. The ratio is better than I expected.\nToday a Scrapper gave me tea in a mug that said WORLD'S OKAYEST OFFICER.\nI kept the mug. It is the only award I have ever had."
+    },
+    {
+      "id": "log_concord_salvage_annex",
+      "title": "Annex 9: Salvage Rights",
+      "ship": "CS-242 Thrift",
+      "faction": "concord",
+      "text": "Clans' position: finders keepers.\nConcord's position: ownership persists.\nCompromise reached after eleven hours: the wreck shall be called 'the wreck'.\nBoth sides left satisfied. Neither will say with what."
+    },
+    {
+      "id": "log_concord_floor_note",
+      "title": "Maintenance, deck 4",
+      "ship": "CS-333 Civility",
+      "faction": "concord",
+      "text": "Floors polished: 4 decks, daily.\nNo one has asked us to stop. We have decided that is permission.\nThe alternative is to think about what the floors are being kept clean for.\nThe floors are very clean."
+    },
+    {
+      "id": "log_lumen_first_note",
+      "title": "The first note",
+      "ship": "Phosphene",
+      "faction": "lumen",
+      "text": "The buoy sings because someone must.\nThe first note is a question. The second is also a question.\nThe third is an answer, and the answer is whoever is listening.\nWe will not say more. It would spoil the arrival."
+    },
+    {
+      "id": "log_lumen_greenhouse",
+      "title": "Garden, unattended",
+      "ship": "Gegenschein",
+      "faction": "lumen",
+      "text": "The plants lean toward a light no instrument sees.\nWe stopped weeding. It seemed rude.\nThe drone waters them on schedule. We have not told it the schedule has ended.\nIt has not told us either."
+    },
+    {
+      "id": "log_lumen_apprentice_rule",
+      "title": "For the apprentice",
+      "ship": "Alpenglow",
+      "faction": "lumen",
+      "text": "Do not ask what the crystal is for.\nAsk what it is afraid of.\nThen put it down, gently, and let it finish.\nThe ones who learn this become engineers. The rest become very good gardeners."
+    },
+    {
+      "id": "log_lumen_emberkin_rota",
+      "title": "Complaint, engine room",
+      "ship": "Cerenkov",
+      "faction": "lumen",
+      "text": "To the Prism, from the Emberkin staff: the engine room is cold.\nThe thermostat says 40 degrees. We say cold. Please send a little war.\nThe human crew say it is too hot. We have noted it.\nWe have noted also that humans are always cold, and then complain."
+    },
+    {
+      "id": "log_lumen_ion_complaint",
+      "title": "A word on ion",
+      "ship": "Moonbow",
+      "faction": "lumen",
+      "text": "The neon does not like the ion.\nWe are told it is the same physics that broke the gate, and the neon remembers.\nDo not say this in front of the engines.\nThey have heard, and they have been very quiet since."
+    },
+    {
+      "id": "log_clans_eleven_chairs",
+      "title": "Matched speed",
+      "ship": "Mostly Legal",
+      "faction": "clans",
+      "text": "Matched speed with the green-lit one. Looked in the galley window.\nTable laid for eleven. Eleven chairs pushed back, like they'd all stood up at once.\nEleven bowls. Steam still coming off every one.\nNobody on the bridge. Nobody on the stairs. We didn't dock, we didn't wave, and we didn't have the decency to be scared until we were home."
+    },
+    {
+      "id": "log_concord_roll_call",
+      "title": "Roll call, satisfactory",
+      "ship": "CS-166 Fortitude",
+      "faction": "concord",
+      "text": "Boarded the contact at 14:06. Air good. Lights on. Galley warm.\nManifest recovered from the console: eleven names.\nRoll call held in the corridor, as procedure requires.\nResponse: eleven present. Observed: none.\nFiled under 'Roll Call, Satisfactory'. I have no other form that fits."
+    },
+    {
+      "id": "log_clans_tidy_engines",
+      "title": "Tuff",
+      "ship": "Duct Tape Dream",
+      "faction": "clans",
+      "text": "Tuff went aboard the green-lit one for ten minutes.\nCame back and sat in the airlock with his back to the wall. Wouldn't say why.\nHe says the engine room was the cleanest thing he has ever seen.\nHe says he has never been so scared. He's been fixing ours all week, as if to apologise to them."
+    },
+    {
+      "id": "log_lumen_fourth_note",
+      "title": "The unfinished",
+      "ship": "Fogbow",
+      "faction": "lumen",
+      "text": "It hums the fourth note.\nWe have only taught the Prism three.\nWhoever finished the song has no mouth that we can find.\nWe have begun to hum back. The Warden asks that we stop. We have asked the Warden what it hears."
+    },
+    {
+      "id": "log_concord_daily_entry",
+      "title": "Recorder, verbatim",
+      "ship": "CS-428 Accord",
+      "faction": "concord",
+      "text": "Transcribed from the contact's flight recorder, verbatim.\n06:00. All well. Crew: all present.\n06:00, next day. All well. Crew: all present.\n14,609 entries, no variation. The 14,610th, dated today:\nAll well. Crew: all present. Visitors: noted. Welcome aboard."
+    },
+    {
+      "id": "log_lumen_same_eleven",
+      "title": "Count",
+      "ship": "Glory",
+      "faction": "lumen",
+      "text": "The door stood open eleven seconds.\nThe table was laid for eleven.\nWe do not say these are the same eleven. We say we have counted.\nWe say also that we have stopped counting, and begun to listen."
+    }
+  ]
+}
