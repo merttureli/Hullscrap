@@ -198,6 +198,7 @@ func _muzzle_for(d: Vector2, cell: Vector2i) -> Vector2:
 
 
 ## 300 tiny kinetic bolts at one wall cell, coming at `deg` degrees off the wall's face normal.
+## Returns [ricochets, hits on the target]; a ricochet is reflected and flies on into space.
 func _ricochets(deg: float) -> Array:
 	_duel(3)
 	for y in range(5, 26):
@@ -209,19 +210,27 @@ func _ricochets(deg: float) -> Array:
 	for i in 300:
 		_shoot(tiny, muzzle + d * 100.0)
 	arena.step(1.5)
-	return [_count("ricochet"), _count("hit")]
+	var hits := 0
+	for e in arena.events:
+		hits += int(e["type"] == "hit" and e["ship"] == 1)
+	return [_count("ricochet"), hits]
 
 
-func test_kinetic_shots_ricochet_at_shallow_angles_only() -> void:
+func test_kinetic_shots_ricochet_on_a_curve_of_the_angle() -> void:
+	# 0 below 40 degrees off the normal, rising linearly to 0.8 at 75 degrees and beyond.
 	var shallow := _ricochets(75.0)
-	check(shallow[0] >= 110 and shallow[0] <= 190, "about half of 300 shallow shots glance off, got %d" % shallow[0])
+	check(shallow[0] >= 215 and shallow[0] <= 265, "80%% of 300 shots at 75 degrees glance off, got %d" % shallow[0])
 	eq(shallow[0] + shallow[1], 300, "every shot glanced off or hit")
 	var steep := _ricochets(40.0)
 	eq(steep[0], 0, "40 degrees off the normal is steep enough")
 	var straight := _ricochets(0.0)
 	eq(straight, [0, 300], "head-on shots never ricochet")
 	var edge := _ricochets(58.0)
-	eq(edge[0], 0, "under 60 degrees none glance off")
+	check(edge[0] >= 95 and edge[0] <= 150, "41%% at 58 degrees (about 123 of 300), got %d" % edge[0])
+	var mid := _ricochets(50.0)
+	check(mid[0] >= 45 and mid[0] <= 95, "23%% at 50 degrees (about 69 of 300), got %d" % mid[0])
+	var grazing := _ricochets(85.0)
+	check(grazing[0] >= 215 and grazing[0] <= 265, "past 75 degrees it stays at 80%%, got %d" % grazing[0])
 
 
 func test_energy_does_not_ricochet() -> void:
