@@ -588,7 +588,7 @@ func _cargo_text() -> String:
 
 func _controls_text() -> String:
 	if not build_on:
-		return "WASD walk   middle-click send Ada   E door   O oxygen   P power   K fight   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom"
+		return "WASD walk   middle-click send Ada   E door   O oxygen   P power   K fight (Shift+K rammer)   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom"
 	var how := "LMB paint   Shift+LMB line   Ctrl+LMB rectangle   RMB remove"
 	if group == Group.TILES:
 		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove" + ("   T shape" if grid.tile_flag(selected, "solid") else "")

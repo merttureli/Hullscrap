@@ -372,6 +372,14 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), pay the debt, repair hull integrity (2 credits per point), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).
   - Gantry Rusthold sells Scrap-line parts, Meridian Standard-line parts, and the Prism Neon-line parts.
 - **After a won fight**: loot is credits 20–60 × tier, scrap 30–80 × tier, and a 25% chance of one of the enemy's components. Then a `wreck_field`-style salvage event runs (boarding the wreck on foot comes later).
+- **Conventions the content uses** (as built):
+  - **Event types** are the node types plus `debt` (picked by the debt clock from `requires`: the first call after jump 2, reminders when a payment is due within 2 jumps, repo talk after a miss) and `station` (one weighted greeting per docking, gated by the `at_rusthold` / `at_meridian` / `at_prism` flags that are set while docked).
+  - **Follow-up pages** have `weight: 0` and are reached only by `goto`. `after_win` is an event-level `{text, effects}`.
+  - **`once` events** are spent only when the chosen outcome has non-empty effects, so walking away doesn't burn a quest step.
+  - **Effects**: `log` (hands over a derelict log; kept once in `logs_found`), and `reveal` with a node type (reveals the nearest unrevealed node of that type). `lose_crew` is an int.
+  - **Requires**: `fuel_max` (true when fuel ≤ N). `pay` on a choice charges what its `requires` named.
+  - **Hull integrity** is a campaign number, repaired at stations. Events and drift jumps never take the last point.
+  - **Losing a fight ends the run** (a new campaign starts).
 - **Controls**: **M** opens the map from play mode. Click a linked node to jump; the event panel opens on arrival. Esc closes the map.
 - **Saves**: the campaign (seed, node positions, lanes and types, the current node, visited nodes, flags, reputation, debt, jump counter, and `once` events used) is saved with the ship. Bump the save version.
 

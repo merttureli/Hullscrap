@@ -249,7 +249,7 @@ func _unhandled_input(e: InputEvent) -> void:
 				if build.build_on:
 					build.message = "K: switch to play mode (B) to fight"
 				else:
-					var why := enter()
+					var why := enter(Session.RAMMER_PATH if e.shift_pressed else Session.PIRATE_PATH)  # Shift+K: the Rustfang rammer
 					if why != "":
 						build.message = why
 				_handled()
