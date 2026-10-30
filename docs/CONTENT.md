@@ -1,6 +1,6 @@
 # Hullscrap: content and core rules (lead design, v1)
 
-This is how systems, weapons and combat work, plus the first content set. Everything here is **data** (`data/*.json`), read by generic code. Numbers are starting points for tuning. Visuals are swappable: every item draws through `scripts/view/visuals.gd` by id, as a placeholder now and real art later.
+This is how systems, weapons and real-time combat work, plus the first content set. Everything here is **data** (`data/*.json`), read by generic code. Numbers are starting points for tuning. Visuals are swappable: every item draws through `scripts/view/visuals.gd` by id, as a placeholder now and real art later.
 
 ## 1. Component schema (`data/components.json`)
 Each entry has:
@@ -31,30 +31,42 @@ Each entry has:
 - At `heat_limit` it **overheats**: disabled until heat drops below 50%, with a 20% chance to start a fire in the room when it trips.
 - Room temperature is cosmetic for now. Species traits use it later (heat-loving species work better in hot rooms).
 
-## 4. Combat core (`scripts/sim/combat.gd`): FTL-like, room-targeted
-- **Hull**: each ship has `hull_hp` = 20 + armour (from `armor_plate` components). At 0 the ship is wrecked: it becomes a derelict you can salvage. Ships are never deleted.
-- **Weapons** are charged by power over `charge_time`. When charged and aimed at a **target room** on an enemy ship, they fire. Weapon stats:
-  - `shots`, `damage` (to hull), `sys_damage` (to components in the hit room);
-  - `ion` (shield layers removed and system ion-lock seconds), `fire_chance`, `breach_chance`;
-  - `pierce` (shield layers ignored), `kind` (`bolt`, `missile`, `beam`, `flak`, `ion`, `drone`), `ammo` (an item consumed per volley, or none);
-  - `accuracy_bonus`.
-- **Shields**: `layers` from powered shield components. Each projectile (except missiles and pierce) hits a layer instead, and a layer recharges after `recharge` seconds. Beams lose damage per layer.
-- **Hit and miss**:
-  - **Evasion** = the target's (powered engine thrust / mass) × k, plus a bonus for a manned helm, capped at 60%.
-  - The shot hits if roll ≥ evasion − accuracy_bonus.
-- **On a hit**:
-  - hull −= damage;
-  - each component in the room takes `sys_damage`;
-  - crew in the room take damage;
-  - roll `fire_chance` (start a fire on a random floor cell of the room);
-  - roll `breach_chance` (a random wall cell of the room becomes **breached**: the room vents until repaired).
-- **Fires** (`scripts/sim/fire.gd`):
-  - burn on cells, spread to neighbouring floor cells (10%/s);
-  - consume room O2, damage components (0.5/s) and crew;
-  - die out below 20% O2.
-  - Crew put them out.
-- **Repairs**: crew with a job fix disabled components (hp back up), breaches and fires. Speed comes from skill and the line's repair multiplier.
-- **Determinism**: all combat rolls use the battle's seeded RNG.
+## 4. Combat: real-time 1v1, you fly and aim (owner, 2026-10-30)
+Combat is **action, not menus**. When an enemy engages, the camera **zooms out to a 1v1 arena**. You fly your ship and physically aim at the enemy's parts. **How you built your ship decides how it fights.**
+
+- **Flying** (the player is at the helm):
+  - **W/S** thrust and reverse, **A/D** turn.
+  - Speed, acceleration and turn rate come from `flight.gd`: powered engines' thrust against the mass of everything you built.
+  - The crew stay aboard and repair, fight fires and man stations on their own.
+- **Aiming**:
+  - **Mouse aims.**
+  - **LMB** fires weapon group 1, **RMB** fires group 2. Lasers default to group 1 and missiles to group 2.
+  - **1–4** fire a single weapon, **Shift** triggers the engine ability (e.g. Afterburner), **Space** the shield ability, **Q** and **E** utility abilities.
+  - Weapons have **cooldowns** (charge times) shown on the weapon bar.
+- **Weapon arcs**: a weapon fires from **its own position on your ship**.
+  - It aims within a **120° arc** pointing outward, from the ship's centre through the weapon. Some weapons have their own `arc`; turrets get 360°.
+  - So guns belong on the hull edge, facing out. Flanking the enemy matters.
+- **Shot types**:
+  - **Lasers** are hitscan, an instant beam to the first thing they meet, so you have to track the target.
+  - **Pulse, bolt and flak** are projectiles with a travel speed. You have to **lead moving targets**; there's no auto-aim.
+  - **Missiles** are slow and lightly homing, pass through shields, and explode with splash damage.
+  - **Beams** sweep a line while held.
+- **Physical hits on the ship's real grid**:
+  - Shots travel in the plane and **collide with the enemy's actual cells**, in ship-local coordinates with its rotation.
+  - Every solid cell has **hp**: wall 4, door 3, component = its `hp`. Floor cells are open interior: shots pass over them but can hit crew standing there.
+  - A projectile deals `damage` to the first solid cell it meets.
+    - A wall at 0 becomes a **breach**: a hole, so the room vents.
+    - A component at 0 is **disabled**, not destroyed, until crew repair it.
+    - If the weapon has `pierce`, leftover damage carries on into the next cells.
+  - **Thick outer walls are armour.** A reactor in the middle is protected, and an exposed one is a target. Players will aim for engines and weapons, and flank to reach the soft side.
+  - Every hull hit also lowers the ship's **hull integrity** pool: hull_hp = 20 + armour plates. At 0 the ship is **wrecked** and becomes a salvageable derelict.
+- **Shields** are a bubble (an ellipse around the hull) with **layers** from powered shield components.
+  - A projectile or laser hitting the bubble uses up a layer, and layers recharge over time.
+  - Missiles pass through. Ion removes layers and ion-locks systems.
+- **Fires and breaches** come from hits (`fire_chance`, and walls reaching 0) and use the existing oxygen and fire rules.
+- **Two schematics at the top of the screen**: faint close-up maps of **your ship and the enemy's**, FTL-style. They show rooms, systems with hp, disabled, fire and breach states, hull integrity and shield layers. You read the damage there while fighting in the arena.
+- **Enemy pilot AI** keeps its preferred range, strafes, **leads its shots at your components** (weapons, then engines, then reactor) and uses its abilities on cooldown. It's deterministic from the battle seed.
+- **Determinism**: physics and all rolls step at a fixed rate with the battle's seeded RNG, so a battle with the same inputs replays exactly.
 
 ## 5. Abilities and quirks (`scripts/sim/abilities.gd`)
 - An ability is `{id, name, type: active|passive, duration, cooldown, effects, side_effects, operator_needs}`.
@@ -104,7 +116,11 @@ Tiers and lines follow the tables. Unique items (★) have no recipe.
 
 ## 7. Order of implementation (each step is a Sonnet brief with tests)
 1. `lines.json`, the `line`/`hp`/`heat` fields, the stats resolver (base × line × tier → effective), reliability rolls, heat and overheating, and the visual registry.
-2. Abilities, with the Afterburner end to end (an HUD button and its side effects).
-3. Combat logic: weapons charge and fire at rooms, shields, evasion, damage, fires and breaches, all headless and tested ship against ship.
-4. Combat in the game: a target ship spawns (a simple pirate), the tactical view, the weapon bar, target selection.
+2. **Combat physics, headless**:
+   - an arena with 2 ships (flight bodies, rotated grids);
+   - projectiles and hitscan lasers, weapon arcs and cooldowns;
+   - cell collision with hp and pierce, shields, breaches, disables and hull integrity;
+   - deterministic tests.
+3. **Combat in the game**: the zoomed-out arena, flight controls, mouse aiming, the weapon bar, both schematics at the top, and a pirate ship with pilot AI.
+4. Abilities, with the Afterburner end to end.
 5. Crew jobs: repair, firefighting, manning stations (manned bonuses).
