@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "pulse_mk1_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Pulse Mk1: the revolving six-chamber drum IS the charge indicator: charge frame i loads (0,2,3,4,5,6) chambers and indexes the drum half a step on odd frames; frame 5 = ready (all lit, centre pixel white). Plus power coupling, repair hatch and an amber strip. fire: the drum is spent (empty chambers). damaged: drum rim cracked, a bent casing jams a chamber; disabled: drum split, casings spilled. Barrel layer pulse_mk1_barrel: stubby plasma barrel.",
+ "offset": [
+  0,
+  -4
+ ]
+}

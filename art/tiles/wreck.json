@@ -1,0 +1,18 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "variants": [
+   0,
+   4,
+   0
+  ]
+ },
+ "notes": "Debris decal drawn over the floor in each cell of a wrecked component. 4 variants (frame index): 0 scorched floor, 1 twisted plate, 2 loose cables, 3 burnt scrap. Generic, no family colour: pick a variant per cell by hash."
+}

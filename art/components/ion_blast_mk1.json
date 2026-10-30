@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "ion_blast_mk1_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Ion Blast: three teal coil capacitors that light one after another as it charges (frame 5 = all three bright, strip cyan), power coupling, hatch. fire: coils and strip discharge in a white flash. damaged: one coil unwinding, a lamp dead, sparks; disabled: coils scorched dark, a casing split. Barrel layer ion_blast_mk1_barrel: a slim core tube wrapped in three teal coils with a cyan emitter tip.",
+ "offset": [
+  0,
+  -4
+ ]
+}

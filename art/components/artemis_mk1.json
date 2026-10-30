@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "artemis_mk1_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Artemis Mk1: the missile cradle with a feed chute on the right (the ammo rack sits beside it), power coupling, repair hatch and a lamp strip. charge: a missile slides in from the chute into the cradle (frame 5 = seated and ready, strip green); fire: the cradle is empty and the strip discharges. damaged: chute cracked, lamps dead, sparks; disabled: the missile is jammed half way in the chute. Barrel layer artemis_mk1_barrel: the twin-rail launcher head with one missile on the upper rail; fire: the missile leaves under power, then smoke.",
+ "offset": [
+  0,
+  -4
+ ]
+}

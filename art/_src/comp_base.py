@@ -117,6 +117,7 @@ def export(c, outdir=None):
         J['glow'] = {'image': c.id + '_glow.png', 'frame': [gw, gh], 'offset': [-l, -t], 'anims': ganims}
     if c.anchors: J['anchors'] = {k: list(v) for k, v in c.anchors.items()}
     J['notes'] = c.notes
+    if hasattr(c, 'finish_json'): c.finish_json(J, outdir)     # two-layer weapons add their barrel
     with open('%s/%s.json' % (outdir, c.id), 'w') as f: json.dump(J, f, indent=1); f.write('\n')
     return frames, gframes, J
 

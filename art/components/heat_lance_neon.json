@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "heat_lance_neon_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Heat Lance (neon): twelve heat fins in two banks that glow orange fin by fin as it charges (frame 5 = all twelve white-hot at the tips, strip yellow), a heat-core window, power coupling, hatch. fire: every fin flashes white. damaged: fins bent and dead, sparks; disabled: fins dark, a bank split. Barrel layer heat_lance_neon_barrel: the long beam-focus lens head with heat fins; fire: the lens flares white-orange and a beam starts.",
+ "offset": [
+  0,
+  -4
+ ]
+}
