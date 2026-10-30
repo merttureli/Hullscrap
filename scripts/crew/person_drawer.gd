@@ -92,9 +92,9 @@ static func is_working(m, clock: float) -> bool:
 
 ## Draw a person centred on `centre_px`. `pose`: {species ("human"), move (angle they walk, radians,
 ## 0 = right), aim (angle the torso points), phase (walk phase, radians), moving, item (id or ""),
-## down, work (the tool jabs), t (seconds)}. `palette`: "suit" colour tints the outfit.
-static func draw(canvas: CanvasItem, centre_px: Vector2, pose: Dictionary, palette: Dictionary, cell_px: float) -> void:
-	var sheet = Art.crew(str(pose.get("species", "human")))
+## down, work (the tool jabs), helmet, t (seconds)}. `palette`: "suit" colour tints the outfit.
+static func draw(canvas, centre_px: Vector2, pose: Dictionary, palette: Dictionary, cell_px: float) -> void:
+	var sheet = art_of(pose)
 	if sheet == null:
 		var facing := float(pose.get("aim", pose.get("move", 0.0)))
 		draw_person(canvas, centre_px, facing, float(pose.get("phase", 0.0)), bool(pose.get("moving", false)), palette, cell_px)
@@ -109,9 +109,16 @@ static func draw(canvas: CanvasItem, centre_px: Vector2, pose: Dictionary, palet
 		_blit(canvas, l, l["sheet"].tinted(suit) if l["tint"] else l["sheet"].texture, centre_px, k, base)
 
 
-## The layers to draw, back to front: [{layer, sheet, frame, angle (radians, to rotate by), off
-## (source px from the body centre), tint (colour mask applies)}]. Legs turn to `move`, everything
-## else to `aim`; the walk frame follows `phase` (the stand frame when not moving or down).
+## The crew art the pose asks for (art/crew/<species>/), or null: then the placeholder is drawn.
+static func art_of(pose: Dictionary) -> RefCounted:
+	return Art.crew(str(pose.get("species", "human")))
+
+
+## The layers to draw, back to front: [{layer, sheet, frame, angle (radians, to rotate by), pos
+## (where the frame's top-left goes, in source px from the pivot's middle), tint (colour mask applies)}].
+## Legs turn to `move`, everything else to `aim`; the walk frame follows `phase` (the stand frame
+## when not moving or down). The item sits with its grip on the arm pose's mount; the head is a
+## hair frame, or the helmet when the pose says "helmet".
 static func plan(sheet, pose: Dictionary) -> Array:
 	var down: bool = pose.get("down", false)
 	var move := float(pose.get("move", pose.get("aim", 0.0)))
@@ -122,22 +129,26 @@ static func plan(sheet, pose: Dictionary) -> Array:
 	if pose.get("moving", false) and not down and legs.has_anim("walk"):
 		var n: int = legs.anims["walk"]["count"]
 		frame = legs.start_of("walk") + int(fposmod(float(pose.get("phase", 0.0)), TAU) / TAU * n) % n
-	out.append({"layer": "legs", "sheet": legs, "frame": frame, "angle": move + PI / 2.0, "off": Vector2.ZERO, "tint": true})
-	out.append({"layer": "torso", "sheet": sheet, "frame": 0, "angle": aim + PI / 2.0, "off": Vector2.ZERO, "tint": true})
+	out.append({"layer": "legs", "sheet": legs, "frame": frame, "angle": move + PI / 2.0, "pos": legs.origin_of_frame(), "tint": true})
+	out.append({"layer": "torso", "sheet": sheet, "frame": 0, "angle": aim + PI / 2.0, "pos": sheet.origin_of_frame(), "tint": true})
 	var arms = sheet.layers.get("arms")
-	if arms == null:
-		return out
-	var held := held_item(pose)
-	var cls: String = held["sheet"].pose if not held.is_empty() and held["sheet"].pose != "" else "tool"
-	if held.is_empty() or not sheet.poses.has(cls) or sheet.poses[cls]["mount"] == null:
-		cls = "unarmed"
-		held = {}
-	var jab := Vector2(0.0, -absf(sin(float(pose.get("t", 0.0)) * 9.0)) * JAB) if pose.get("work", false) and not down else Vector2.ZERO
-	out.append({"layer": "arms", "sheet": arms, "frame": sheet.poses[cls]["frame"], "angle": aim + PI / 2.0, "off": jab, "tint": true})
-	if not held.is_empty():
-		var it = held["sheet"]
-		out.append({"layer": "item", "sheet": it, "frame": 0, "angle": aim + PI / 2.0,
-			"off": sheet.poses[cls]["mount"] - it.anchor_c("grip") + jab, "tint": false, "id": held["id"]})
+	if arms != null:
+		var held := held_item(pose)
+		var cls: String = held["sheet"].pose if not held.is_empty() and held["sheet"].pose != "" else "tool"
+		if held.is_empty() or not sheet.poses.has(cls) or sheet.poses[cls]["mount"] == null:
+			cls = "unarmed"
+			held = {}
+		var jab := Vector2(0.0, -absf(sin(float(pose.get("t", 0.0)) * 9.0)) * JAB) if pose.get("work", false) and not down else Vector2.ZERO
+		var pose_frame: int = sheet.poses[cls]["frame"] if sheet.poses.has(cls) else 0
+		out.append({"layer": "arms", "sheet": arms, "frame": pose_frame, "angle": aim + PI / 2.0, "pos": arms.origin_of_frame() + jab, "tint": true})
+		if not held.is_empty():
+			var it = held["sheet"]
+			out.append({"layer": "item", "sheet": it, "frame": 0, "angle": aim + PI / 2.0, "tint": false, "id": held["id"],
+				"pos": sheet.poses[cls]["mount"] - it.anchors.get("grip", Vector2.ZERO) + arms.origin_of_frame() + jab})
+	var head = sheet.layers.get("head")
+	if head != null:
+		var hf: int = head.named_frames.get("helmet" if pose.get("helmet", false) else "hair", 0)
+		out.append({"layer": "head", "sheet": head, "frame": hf, "angle": aim + PI / 2.0, "pos": head.origin_of_frame(), "tint": true})
 	return out
 
 
@@ -154,16 +165,13 @@ static func held_item(pose: Dictionary) -> Dictionary:
 	return {} if it == null else {"id": id, "sheet": it}
 
 
-## One layer: frame `l["frame"]` of `tex` (laid out like l["sheet"]), turned by l["angle"] about the
-## body centre `at` and offset by l["off"], at `k` px per source px.
-static func _blit(canvas: CanvasItem, l: Dictionary, tex: Texture2D, at: Vector2, k: float, mod: Color) -> void:
+## One layer: frame l["frame"] of `tex` (laid out like l["sheet"]), turned by l["angle"] about the
+## body centre `at` and placed at l["pos"], `k` px per source px.
+static func _blit(canvas, l: Dictionary, tex: Texture2D, at: Vector2, k: float, mod: Color) -> void:
 	var sh = l["sheet"]
 	canvas.draw_set_transform(at, l["angle"], Vector2(k, k))
-	var top_left: Vector2 = l["off"] - sh.centre() - Vector2(0.5, 0.5)
-	canvas.draw_texture_rect_region(tex, Rect2(top_left, Vector2(sh.frame)), sh.region(l["frame"]), mod)
+	canvas.draw_texture_rect_region(tex, Rect2(l["pos"], Vector2(sh.frame)), sh.region(l["frame"]), mod)
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-
 
 
 ## Draw a person centred on `centre_px` (pixels, in the canvas' own coordinates).

@@ -1,0 +1,17 @@
+{
+ "frame": [
+  2,
+  4
+ ],
+ "pose": "pistol",
+ "anchors": {
+  "grip": [
+   1,
+   3
+  ],
+  "muzzle": [
+   0,
+   0
+  ]
+ }
+}

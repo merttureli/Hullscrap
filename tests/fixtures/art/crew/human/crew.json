@@ -1,0 +1,79 @@
+{
+ "frame": [
+  5,
+  5
+ ],
+ "pivot": [
+  2,
+  2
+ ],
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     8
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   }
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     2,
+     2
+    ]
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3
+   },
+   "anchors": {
+    "unarmed": {
+     "mount": null
+    },
+    "pistol": {
+     "mount": [
+      2,
+      0
+     ]
+    },
+    "rifle": {
+     "mount": [
+      3,
+      0
+     ]
+    },
+    "tool": {
+     "mount": [
+      4,
+      1
+     ]
+    }
+   }
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "hair": 0,
+    "helmet": 1
+   }
+  }
+ }
+}

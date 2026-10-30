@@ -14,6 +14,8 @@ var frame := Vector2i.ONE  ## source px of one frame
 var columns := 1
 var count := 1  ## number of frames
 var cells := Vector2i.ZERO  ## the footprint in cells at rotation 0; ZERO for a plain PNG with no JSON
+var pivot := Vector2.ZERO  ## the pixel crew and items turn about (the JSON's "pivot"; the frame's middle pixel by default)
+var named_frames := {}  ## "frames": {name: frame index}, e.g. a head's "hair" and "helmet"
 var offset := Vector2.ZERO  ## where the frame's top-left sits against the footprint's top-left (source px; overhang is negative)
 var orientation_rot := 0  ## quarter turns added to the placed rotation, so the art's facing matches the game's
 var autotile := ""  ## "mask4": frame = N*1 + E*2 + S*4 + W*8 over neighbours
@@ -21,16 +23,15 @@ var anims := {}  ## name -> {"start", "count", "fps"}
 var glow = null  ## another SpriteSheet (its `offset` is against this sheet's frame top-left), or null
 var anchors := {}  ## name -> Vector2, source px from the frame's top-left pixel
 var layers := {}  ## crew: "legs" / "arms" sheets next to this torso sheet
-var poses := {}  ## crew: arm pose name -> {"frame": int, "mount": Vector2 or null}, centre-relative
+var poses := {}  ## crew arms: pose name -> {"frame": int, "mount": Vector2 or null (source px from the frame's top-left)}
 var pose := ""  ## an item: the arm pose class it is held in ("pistol", "rifle", "tool")
 var notes := ""
 var _tinted := {}  # "#rrggbb" -> ImageTexture
 
 
 ## A sheet from the JSON dictionary `d` (any key may be missing) and its images. `mask_img` may be
-## null. `centre_anchors`: anchors in `d` count from the frame's centre pixel, not its top-left
-## (crew and items); "anchors_origin" in `d` overrides.
-static func from_dict(d: Dictionary, img: Image, mask_img: Image = null, centre_anchors := false) -> RefCounted:
+## null. Anchors count from the frame's top-left pixel unless `d` says "anchors_origin": "centre".
+static func from_dict(d: Dictionary, img: Image, mask_img: Image = null) -> RefCounted:
 	var s = new()
 	s.image = img
 	s.mask = mask_img if mask_img != null and mask_img.get_size() == img.get_size() else null
@@ -39,6 +40,12 @@ static func from_dict(d: Dictionary, img: Image, mask_img: Image = null, centre_
 	s.frame = Vector2i(maxi(1, int(fr[0])), maxi(1, int(fr[1]))) if fr is Array and fr.size() == 2 else img.get_size()
 	s.columns = maxi(1, img.get_width() / s.frame.x)
 	s.count = s.columns * maxi(1, img.get_height() / s.frame.y)
+	var pv = d.get("pivot")
+	s.pivot = _vec(pv) if pv is Array and pv.size() == 2 else Vector2(s.frame.x / 2, s.frame.y / 2)
+	var nf = d.get("frames")
+	if nf is Dictionary:
+		for name in nf:
+			s.named_frames[str(name)] = int(nf[name])
 	var ce = d.get("cells")
 	if ce is Array and ce.size() == 2:
 		s.cells = Vector2i(int(ce[0]), int(ce[1]))
@@ -53,12 +60,13 @@ static func from_dict(d: Dictionary, img: Image, mask_img: Image = null, centre_
 			var v = a[name]
 			if v is Array and v.size() >= 2:
 				s.anims[str(name)] = {"start": int(v[0]), "count": maxi(1, int(v[1])), "fps": float(v[2]) if v.size() > 2 else 0.0}
-	var origin := str(d.get("anchors_origin", "centre" if centre_anchors else "topleft"))
+	var origin := str(d.get("anchors_origin", "topleft"))
 	var at = d.get("anchors")
 	if at is Dictionary:
 		for name in at:
-			var p := _vec(at[name])
-			s.anchors[str(name)] = p + s.centre() if origin in ["centre", "center"] else p
+			if at[name] is Array:  # a nested table (the arm poses' hands) is read by art.gd
+				var p := _vec(at[name])
+				s.anchors[str(name)] = p + Vector2(s.frame.x / 2, s.frame.y / 2) if origin in ["centre", "center"] else p
 	return s
 
 
@@ -66,14 +74,10 @@ static func _vec(v) -> Vector2:
 	return Vector2(float(v[0]), float(v[1])) if v is Array and v.size() == 2 else Vector2.ZERO
 
 
-## The centre pixel of a frame (what crew and items rotate about): (w / 2, h / 2) by integer division.
-func centre() -> Vector2:
-	return Vector2(frame.x / 2, frame.y / 2)
-
-
-## Anchor `name` from the centre pixel (x right, y down), or `fallback` when the sheet has none.
-func anchor_c(name: String, fallback := Vector2.ZERO) -> Vector2:
-	return anchors[name] - centre() if anchors.has(name) else fallback
+## Where the top-left of frame pixels sits when the pivot pixel's middle is the origin (what the
+## crew drawer turns about): minus the pivot, minus half a pixel.
+func origin_of_frame() -> Vector2:
+	return -(pivot + Vector2(0.5, 0.5))
 
 
 func has_anim(name: String) -> bool:

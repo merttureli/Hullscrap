@@ -145,10 +145,10 @@ static func _draw_sheet(canvas, sheet, rect: Rect2, def: Dictionary, inst: Dicti
 	var alpha := float(opts.get("alpha", 1.0))
 	var t := float(opts.get("time", 0.0))
 	var foot := Vector2(float(def["size"][0]), float(def["size"][1])) * cell_px
-	var k := Vector2.ONE * cell_px / SpriteSheet.SRC_CELL if sheet.cells != Vector2i.ZERO else foot / Vector2(sheet.frame)
+	var k: Vector2 = Vector2.ONE * cell_px / SpriteSheet.SRC_CELL if sheet.cells != Vector2i.ZERO else foot / Vector2(sheet.frame)
 	var tint := Color(DIM, alpha) if st["dim"] else Color(1, 1, 1, alpha)
 	var xf := Transform2D(sheet.rot_total(int(inst.get("rot", 0))) * PI / 2.0, rect.get_center())
-	var at := -foot / 2.0 + sheet.offset * k  # the frame's top-left, in the turned frame
+	var at: Vector2 = -foot / 2.0 + sheet.offset * k  # the frame's top-left, in the turned frame
 	var dest := Rect2(at, Vector2(sheet.frame) * k)
 	var src: Rect2 = sheet.region(st["frame"])
 	canvas.draw_set_transform_matrix(xf)

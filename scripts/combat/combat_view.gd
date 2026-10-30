@@ -11,6 +11,7 @@ const Session = preload("res://scripts/combat/combat_session.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
+const Art = preload("res://scripts/view/art.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
 
@@ -22,6 +23,8 @@ const BEAM_LIFE := 0.15
 const MAX_FX := 500
 const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const STAR_COUNT := 220
+const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
+const ART_FPS := 16.0  ## frames per second of art that names no animation
 const HINT := "W/S throttle   A/D turn   mouse aims   LMB group 1   RMB group 2   1-9 single weapon   Space overcharge shield   Esc leave"
 
 var sim: Node  ## ShipSim
@@ -387,19 +390,29 @@ func _on_event(e: Dictionary) -> void:
 	var dir: Vector2 = e.get("dir", Vector2.ZERO)
 	match e["type"]:
 		"shot":
-			_add_fx({"k": "flash", "pos": e["origin"], "life": 0.09, "r": 10.0, "color": _shot_color(idx, "energy" if e["kind"] in ["laser", "beam"] else "kinetic")})
+			if Art.fx("muzzle") != null:
+				_add_fx({"k": "art", "name": "muzzle", "pos": e["origin"], "angle": dir.angle() + PI / 2.0, "life": 0.14})
+			else:
+				_add_fx({"k": "flash", "pos": e["origin"], "life": 0.09, "r": 10.0, "color": _shot_color(idx, "energy" if e["kind"] in ["laser", "beam"] else "kinetic")})
 		"beam":
-			_add_fx({"k": "beam", "a": e["from"], "b": e["to"], "life": BEAM_LIFE, "color": _shot_color(idx, e["dtype"])})
+			_add_fx({"k": "beam", "a": e["from"], "b": e["to"], "life": BEAM_LIFE, "color": _shot_color(idx, e["dtype"]),
+				"kind": str(arena.weapons.def(str(e.get("weapon", "")))["kind"])})
 		"hit":
 			var big: bool = e["kind"] == "component"
 			var col := Color("#ffb347") if big else Color("#ffe9a8")
 			if e["dtype"] == "ion":
 				col = Color("#b99bff")
-			_on_ship(idx, pos, {"k": "flash", "life": 0.22, "r": 18.0 if big else 11.0, "color": col})
+			if big and Art.fx("explosion") != null:
+				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.5, "scale": 0.7})
+			else:
+				_on_ship(idx, pos, {"k": "flash", "life": 0.22, "r": 18.0 if big else 11.0, "color": col})
 			_sparks(pos, n, 7 if big else 4, col)
 		"shield":
 			var shot_dir := dir
-			_on_ship(idx, pos, {"k": "ring", "life": 0.55, "r": 70.0, "color": Color("#7fe4ff") if e.get("dtype", "") != "ion" else Color("#b99bff")})
+			if Art.fx("shield_ripple") != null:
+				_on_ship(idx, pos, {"k": "art", "name": "shield_ripple", "life": 0.45, "scale": 1.5, "angle": shot_dir.angle() + PI / 2.0})
+			else:
+				_on_ship(idx, pos, {"k": "ring", "life": 0.55, "r": 70.0, "color": Color("#7fe4ff") if e.get("dtype", "") != "ion" else Color("#b99bff")})
 			_on_ship(idx, pos, {"k": "flash", "life": 0.15, "r": 16.0, "color": Color("#bff2ff")})
 			_sparks(pos, -shot_dir, 3, Color("#9fe8ff"))
 		"deflect", "ricochet":
@@ -408,7 +421,10 @@ func _on_event(e: Dictionary) -> void:
 			_add_fx({"k": "streak", "pos": pos, "dir": out, "len": 90.0, "life": 0.28, "color": col})
 			_on_ship(idx, pos, {"k": "flash", "life": 0.12, "r": 9.0, "color": col})
 		"breach":
-			_on_ship(idx, pos, {"k": "flash", "life": 0.3, "r": 22.0, "color": Color("#ff5a3a")})
+			if Art.fx("explosion") != null:
+				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.6, "scale": 1.0})
+			else:
+				_on_ship(idx, pos, {"k": "flash", "life": 0.3, "r": 22.0, "color": Color("#ff5a3a")})
 			for i in 6:
 				var d := (n if n != Vector2.ZERO else Vector2.from_angle(_rng.randf() * TAU)).rotated(_rng.randf_range(-0.9, 0.9))
 				_add_fx({"k": "puff", "pos": pos, "vel": d * _rng.randf_range(40.0, 110.0), "life": _rng.randf_range(0.6, 1.0), "r": 8.0, "grow": 26.0, "color": Color("#b9bfc9", 0.6)})
@@ -422,7 +438,10 @@ func _on_event(e: Dictionary) -> void:
 			_on_ship(idx, pos, {"k": "ring", "life": 0.8, "r": 260.0, "color": Color("#ffd24a")})
 		"wreck":
 			_on_ship(idx, pos, {"k": "ring", "life": 1.1, "r": 420.0, "color": Color("#ffb347")})
-			_on_ship(idx, pos, {"k": "flash", "life": 0.6, "r": 90.0, "color": Color("#ffd9a0")})
+			if Art.fx("explosion") != null:
+				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 1.2, "scale": 4.0})
+			else:
+				_on_ship(idx, pos, {"k": "flash", "life": 0.6, "r": 90.0, "color": Color("#ffd9a0")})
 			_sparks(pos, Vector2.ZERO, 36, Color("#ffcf7a"))
 			for i in 10:
 				_add_fx({"k": "puff", "pos": pos + Vector2.from_angle(_rng.randf() * TAU) * _rng.randf_range(0.0, 120.0), "vel": Vector2.from_angle(_rng.randf() * TAU) * 40.0, "life": 1.4, "r": 24.0, "grow": 50.0, "color": Color("#8a8f99", 0.5)})
@@ -486,7 +505,11 @@ func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 	var col: Color = f["color"]
 	var fade := 1.0 - age
 	match f["k"]:
+		"art":
+			_draw_art_fx(c, f, age, px)
 		"beam":
+			if _draw_art_beam(c, f, fade, px):
+				return
 			c.draw_line(f["a"], f["b"], Color(col, 0.25 * fade), 9.0 * px)
 			c.draw_line(f["a"], f["b"], Color(col, 0.9 * fade), 3.0 * px)
 			c.draw_line(f["a"], f["b"], Color(1, 1, 1, fade), 1.2 * px)
@@ -504,6 +527,12 @@ func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 			c.draw_line(p, p - v.normalized() * (10.0 + 14.0 * fade) * px, Color(col, fade), 2.0 * px)
 		"puff":
 			var p := _fx_pos(f)
+			var smoke = Art.fx("smoke")
+			if smoke != null:
+				var k := maxf(ART_SCALE, ART_SCALE * px) * (0.5 + float(f["r"]) / 24.0 + age * 0.5)
+				var size := Vector2(smoke.frame) * k
+				c.draw_texture_rect_region(smoke.texture, Rect2(p - size / 2.0, size), smoke.region(smoke.frame_life("on", age)), Color(1, 1, 1, fade))
+				return
 			c.draw_circle(p, (f["r"] + f["grow"] * age) * px * 0.5 if f["r"] < 4.0 else f["r"] + f["grow"] * age, Color(col, col.a * fade))
 		"streak":
 			var from: Vector2 = f["pos"] + f["dir"] * 18.0 * age
@@ -516,6 +545,10 @@ func _draw_shot(c: Node2D, p: Dictionary, px: float) -> void:
 	var at: Vector2 = p["pos"]
 	var v: Vector2 = p["vel"]
 	var d := v.normalized()
+	var art = Art.projectile(str(w["kind"]))
+	if art != null:
+		_draw_art_shot(c, art, at, d, px)
+		return
 	match w["kind"]:
 		"missile":
 			var side := d.rotated(PI / 2.0)
@@ -530,6 +563,49 @@ func _draw_shot(c: Node2D, p: Dictionary, px: float) -> void:
 			c.draw_circle(at, 9.0 * px, Color(col, 0.22))
 			c.draw_circle(at, 4.4 * px, col)
 			c.draw_circle(at, 2.0 * px, Color.WHITE)
+
+
+## One frame of `art` (a projectile or effect sheet) looping at its first animation's fps, else ART_FPS.
+func _loop_frame(art) -> int:
+	for name in ["fly", "on"]:
+		if art.has_anim(name):
+			return art.frame_at(name, _clock)
+	return int(_clock * ART_FPS) % art.count
+
+
+## A projectile sprite at `at` flying along `d`: the sheet faces up (plus its orientation_rot quarter
+## turns), pinned at its "head" anchor (the sprite's middle without one), drawn at least ART_SCALE screen px per source px.
+func _draw_art_shot(c: Node2D, art, at: Vector2, d: Vector2, px: float) -> void:
+	var k := maxf(ART_SCALE, ART_SCALE * px)
+	var head: Vector2 = art.anchors.get("head", Vector2(art.frame) / 2.0 - Vector2(0.5, 0.5)) + Vector2(0.5, 0.5)
+	c.draw_set_transform(at, d.angle() + PI / 2.0 + art.orientation_rot * PI / 2.0, Vector2(k, k))
+	c.draw_texture_rect_region(art.texture, Rect2(-head, Vector2(art.frame)), art.region(_loop_frame(art)), Color.WHITE)
+	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## An effect frame (art/fx/<name>) at the fx's place, played once over its life, turned by f["angle"].
+func _draw_art_fx(c: Node2D, f: Dictionary, age: float, px: float) -> void:
+	var art = Art.fx(str(f["name"]))
+	if art == null:
+		return
+	var k := maxf(ART_SCALE, ART_SCALE * px) * float(f.get("scale", 1.0))
+	c.draw_set_transform(_fx_pos(f), float(f.get("angle", 0.0)), Vector2(k, k))
+	c.draw_texture_rect_region(art.texture, Rect2(-Vector2(art.frame) / 2.0, Vector2(art.frame)), art.region(art.frame_life("on", age)), Color.WHITE)
+	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## A hitscan beam drawn with art/projectiles/<kind> (facing up), stretched from `a` to `b`. False when there is no such art.
+func _draw_art_beam(c: Node2D, f: Dictionary, fade: float, px: float) -> bool:
+	var art = Art.projectile(str(f.get("kind", "")))
+	if art == null:
+		return false
+	var a: Vector2 = f["a"]
+	var len := a.distance_to(f["b"])
+	var width := float(art.frame.x) * maxf(ART_SCALE, ART_SCALE * px)
+	c.draw_set_transform(a, (f["b"] - a).angle() + PI / 2.0, Vector2.ONE)
+	c.draw_texture_rect_region(art.texture, Rect2(Vector2(-width / 2.0, -len), Vector2(width, len)), art.region(_loop_frame(art)), Color(1, 1, 1, fade))
+	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	return true
 
 
 ## The player's weapons: a faint wedge for the arc, a line to the aim point from each that can fire

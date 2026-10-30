@@ -20,6 +20,8 @@ const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
+const TileArt = preload("res://scripts/view/tile_art.gd")
+const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const CELL := 32
 const SAVE_PATH := "user://ship.json"
 const OK_TINT := Color(0.35, 1, 0.45)
@@ -59,6 +61,8 @@ var ghost: Array = []  # session.preview() of the pending edit: the changes, eac
 var materials: Array[String] = []  # cargo ids shown first in the HUD, in tile-cost order
 var _session: BuildSession
 var _pal: Array[String] = []  # the numbered systems, see _palette()
+var _clock := 0.0  # seconds, for the loops of the art
+var _glow: Node2D  # additive layer for the glow art of the systems
 
 var ship: Ship:
 	get:
@@ -77,6 +81,8 @@ var session: BuildSession:
 
 
 func _ready() -> void:
+	_glow = GlowLayer.new()
+	add_child(_glow)
 	sim = get_node_or_null("../ShipSim")
 	crew = get_node_or_null("../Crew")
 	picker = get_node_or_null("../PickerLayer/ShipPicker")
@@ -89,7 +95,8 @@ func _ready() -> void:
 	_update_hud()
 
 
-func _process(_dt: float) -> void:
+func _process(dt: float) -> void:
+	_clock += dt
 	if combat:
 		return
 	queue_redraw()
@@ -559,9 +566,10 @@ func _draw_tile(c: Vector2i, id: String, open_doors: Dictionary) -> void:
 		if piece[0] == c:  # the piece is drawn once, from its first cell
 			_draw_door(piece, col, open_doors.has(c))
 	elif def.get("solid", false):
-		draw_rect(r, col)
-		draw_rect(r.grow(-3), col.lightened(0.12))
-	else:
+		if not TileArt.wall_tile(self, r, grid, c, id, col):
+			draw_rect(r, col)
+			draw_rect(r.grow(-3), col.lightened(0.12))
+	elif not TileArt.floor_tile(self, r, c):
 		draw_rect(r, col)
 		draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
 
@@ -570,10 +578,15 @@ func _draw_tile(c: Vector2i, id: String, open_doors: Dictionary) -> void:
 ## into the walls at both ends when open. The leaves run along the piece (the wall's direction).
 func _draw_door(piece: Array[Vector2i], col: Color, open: bool) -> void:
 	var floor_col: Color = grid.defs.color("floor") if grid.defs.has("floor") else col.darkened(0.5)
+	var rects := []
 	for p in piece:
-		draw_rect(cell_rect(p), floor_col)
+		rects.append(cell_rect(p))
+		if not TileArt.floor_tile(self, rects[-1], p):
+			draw_rect(rects[-1], floor_col)
 	var horizontal: bool = piece[1].x != piece[0].x if piece.size() > 1 \
 		else grid._is_solid(piece[0] + Vector2i.LEFT) and grid._is_solid(piece[0] + Vector2i.RIGHT)  # a lone old-save door
+	if TileArt.door_piece(self, rects, horizontal, open, _clock):
+		return
 	var along := Vector2.RIGHT if horizontal else Vector2.DOWN
 	var across := Vector2(along.y, along.x)
 	var base := cell_rect(piece[0]).position
@@ -588,6 +601,8 @@ func _draw_door(piece: Array[Vector2i], col: Color, open: bool) -> void:
 ## Thin lines between neighbouring cable cells, a dot on every cell. `tint`: cell -> colour (power overlay).
 func _draw_cables(tint: Dictionary) -> void:
 	for c in ship.cables.cells:
+		if TileArt.cable(self, cell_rect(c), ship.cables.has, c, tint.get(c, Color.WHITE)):
+			continue
 		var col: Color = tint.get(c, CABLE_COLOR)
 		var mid := cell_rect(c).get_center()
 		draw_circle(mid, 3.0, col)
@@ -600,9 +615,13 @@ func _draw_components() -> void:
 	var powered: Dictionary = ship.power_state.get("powered", {})
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
+	var glow_quads := []
 	for uid in uids:
 		var inst: Dictionary = ship.components.instances[uid]
-		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, {"powered": powered.get(uid, false)})
+		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL,
+			{"powered": powered.get(uid, false), "time": _clock, "glow_out": glow_quads})
+	if _glow != null:
+		_glow.show_quads(glow_quads)
 
 
 ## Each room cell from red (empty) to blue (full); breached rooms get an outline.
