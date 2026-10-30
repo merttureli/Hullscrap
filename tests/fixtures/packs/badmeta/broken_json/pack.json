@@ -1,0 +1,7 @@
+{
+  "id": "broken_json",
+  "name": "broken_json",
+  "version": "1.0",
+  "requires": [],
+  "notes": "Test fixture: see tests/test_content.gd."
+}

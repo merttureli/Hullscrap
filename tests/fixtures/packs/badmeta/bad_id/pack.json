@@ -1,0 +1,7 @@
+{
+  "id": "other_name",
+  "name": "other_name",
+  "version": "1.0",
+  "requires": [],
+  "notes": "Test fixture: see tests/test_content.gd."
+}

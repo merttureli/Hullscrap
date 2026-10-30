@@ -1,0 +1,18 @@
+{
+  "recipes": [
+    {
+      "id": "fx_thruster",
+      "output": {
+        "item": "fx_thruster",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 10
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 5,
+      "category": "system"
+    }
+  ]
+}

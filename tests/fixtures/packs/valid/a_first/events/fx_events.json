@@ -1,0 +1,10 @@
+{
+  "events": [
+    {
+      "id": "fx_event",
+      "type": "empty",
+      "weight": 1,
+      "text": "Nothing happens, in a fixture."
+    }
+  ]
+}

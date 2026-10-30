@@ -1,0 +1,9 @@
+{
+  "id": "b_second",
+  "name": "Fixture B",
+  "version": "1.0",
+  "requires": [
+    "a_first"
+  ],
+  "notes": "Test fixture: see tests/test_content.gd."
+}

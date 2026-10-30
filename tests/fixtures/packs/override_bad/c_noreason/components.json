@@ -1,0 +1,27 @@
+{
+  "components": [
+    {
+      "id": "fx_y",
+      "name": "No Reason Y",
+      "family": "engine",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#5aa9e6",
+      "power": -2,
+      "priority": 4,
+      "manned": false,
+      "hp": 9,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 10
+      },
+      "override": true
+    }
+  ]
+}
