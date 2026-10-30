@@ -1,0 +1,42 @@
+{
+ "frame": [6, 16],
+ "length": 16,
+ "width": 6,
+ "orientation": "up",
+ "tile": "y",
+ "anims": {
+  "flicker": [0, 3, 12]
+ },
+ "anchors": {
+  "head": [3, 0],
+  "tail": [3, 15]
+ },
+ "glow": {
+  "image": "beam_glow.png",
+  "frame": [16, 16],
+  "offset": [-5, 0],
+  "anims": {
+   "flicker": [0, 3, 12]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "tile": "y"
+ },
+ "impact": {
+  "image": "beam_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 3, 14]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "beam_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 3, 14]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "Cyan beam with a white core, tileable along y, 3 flicker frames (step one per tick; use the same frame on every repeat or offset them for a crawling look)."
+}

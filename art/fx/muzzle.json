@@ -1,0 +1,21 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "mode": "once",
+ "anims": {
+  "play": [0, 3, 24]
+ },
+ "anchors": {
+  "muzzle": [8, 15]
+ },
+ "glow": {
+  "image": "muzzle_glow.png",
+  "frame": [26, 26],
+  "offset": [-5, -5],
+  "anims": {
+   "play": [0, 3, 24]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Muzzle flash, faces UP (rotation 0): place the muzzle anchor on the weapon muzzle and rotate with the weapon."
+}

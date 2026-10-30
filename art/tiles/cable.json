@@ -1,0 +1,24 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "autotile": "mask4",
+ "mask": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "frames": 16,
+ "powered": "cable_on.png",
+ "glow": {
+  "image": "cable_glow.png",
+  "frame": [16, 16],
+  "offset": [0, 0],
+  "anims": {
+   "on": [0, 16, 0]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "autotile": "mask4"
+ },
+ "notes": "Unpowered (dull) cable. cable_on.png is the powered version (green light strip), same 16-frame mask layout; draw cable_glow.png over it for the soft green glow. Ends and tees get a small junction plate."
+}

@@ -1,0 +1,23 @@
+{
+ "frame": [6, 20],
+ "orientation": "up",
+ "body": [6, 12],
+ "anims": {
+  "fly": [0, 3, 14]
+ },
+ "anchors": {
+  "nose": [3, 0],
+  "center": [3, 6],
+  "tail": [3, 12]
+ },
+ "glow": {
+  "image": "missile_glow.png",
+  "frame": [18, 32],
+  "offset": [-6, -6],
+  "anims": {
+   "fly": [0, 3, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Missile body 12 long x 6 wide, with a 3-frame exhaust drawn below it inside the frame. Tail anchor is where the exhaust starts."
+}

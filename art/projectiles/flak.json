@@ -1,0 +1,21 @@
+{
+ "frame": [6, 8],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 2, 12]
+ },
+ "anchors": {
+  "head": [3, 2],
+  "tail": [3, 7]
+ },
+ "glow": {
+  "image": "flak_glow.png",
+  "frame": [14, 16],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 2, 12]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Dark steel flak shell with a hot spark behind it (2 frames)."
+}

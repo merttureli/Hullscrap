@@ -1,0 +1,11 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "variants": 3,
+ "anims": {
+  "a": [0, 1, 0],
+  "b": [1, 1, 0],
+  "c": [2, 1, 0]
+ },
+ "notes": "Hull hole: jagged near-black hole, torn rim, bent flaps, soot and debris specks. Drawn over a wall or floor cell; pick a variant per cell by a position hash."
+}

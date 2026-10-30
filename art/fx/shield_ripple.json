@@ -1,0 +1,22 @@
+{
+ "frame": [32, 32],
+ "cells": [2, 2],
+ "mode": "once",
+ "anims": {
+  "play": [0, 4, 12]
+ },
+ "anchors": {
+  "impact": [16, 6]
+ },
+ "glow": {
+  "image": "shield_ripple_glow.png",
+  "frame": [32, 32],
+  "offset": [0, 0],
+  "anims": {
+   "play": [0, 4, 12]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "note": "soft blue fill of the shield skin behind the ripple"
+ },
+ "notes": "Arc of the shield skin rippling outward from the hit, 4 frames. Faces UP: the impact anchor is the apex of the arc; rotate so the apex points at the hit, with the arc bulging away from the ship."
+}

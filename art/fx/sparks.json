@@ -1,0 +1,12 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "mode": "once",
+ "anims": {
+  "play": [0, 3, 12]
+ },
+ "anchors": {
+  "center": [8, 8]
+ },
+ "notes": "Electrical sparks bursting from the centre (white-yellow rays, then orange specks)."
+}
