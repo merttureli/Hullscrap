@@ -1,0 +1,28 @@
+{
+  "materials": [
+    {
+      "id": "military_circuit",
+      "name": "Military Circuit",
+      "color": "#6fae5a",
+      "rarity": "very_rare",
+      "kind": "material",
+      "blurb": "A fleet-grade control board, serial numbers filed off by someone in a hurry."
+    },
+    {
+      "id": "gate_alloy",
+      "name": "Gate Alloy",
+      "color": "#d6bf7e",
+      "rarity": "very_rare",
+      "kind": "material",
+      "blurb": "Metal that remembers being part of a gate. Warm to the touch, and it does not say why."
+    },
+    {
+      "id": "void_crystal",
+      "name": "Void Crystal",
+      "color": "#9a5be0",
+      "rarity": "very_rare",
+      "kind": "material",
+      "blurb": "Grown in the dark inside a motherlode. Looking in is like reading an answer to a question nobody asked."
+    }
+  ]
+}

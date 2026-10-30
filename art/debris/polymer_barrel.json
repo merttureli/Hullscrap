@@ -1,0 +1,28 @@
+{
+ "frame": [
+  16,
+  24
+ ],
+ "anims": {
+  "tumble": [
+   0,
+   4,
+   3
+  ]
+ },
+ "anchors": {
+  "center": [
+   8,
+   12
+  ]
+ },
+ "tumble_deg": [
+  -12,
+  -4,
+  4,
+  12
+ ],
+ "loop": "pingpong",
+ "material": "polymer",
+ "notes": "Polymer barrel: a pale blue-white drum with two steel hoops, a bung and an amber hazard label. Drops polymer 2. Frames are the piece turned [-12, -4, 4, 12] degrees, lit from the top-left each time; loop them pingpong (`wrap` = 1,2,3,4,1... ; `pingpong` = 1,2,3,4,3,2,...), the game may also rotate the node. "
+}

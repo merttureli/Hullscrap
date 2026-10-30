@@ -1,0 +1,72 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "pulling": [
+   2,
+   6,
+   10
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "lumen_siphon_neon_out_glow.png",
+  "frame": [
+   80,
+   94
+  ],
+  "offset": [
+   -8,
+   -48
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "pulling": [
+    2,
+    6,
+    10
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   16
+  ]
+ },
+ "notes": "OUTSIDE half of the Lumen Siphon (neon, 4x2): a funnel of navy panels crowned with crystal spikes, a cyan vortex of dashed rings spiralling into a faceted crystal core at the throat. Pull radius 6 cells, small debris only. pulling: the vortex turns and the core flares, with a wide cyan glow and shimmer arcs (glow layer). damaged: a spike snapped and hanging, the collar cracked, the vortex stuttering; disabled: scorched, dull, dented, sparking."
+}

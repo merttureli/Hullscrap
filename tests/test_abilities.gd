@@ -221,9 +221,9 @@ func test_sputter_boost_is_x1_25_of_a_kickjet() -> void:
 	var d := _rig("engine_scrap_mk1")
 	var a := Arena.new(1)
 	a.add_ship(d["ship"])
-	near(a.ships[0].thrust, 8.1, "scrap thrust 9 x 0.9")
+	near(a.ships[0].thrust, 9.0, "scrap thrust 10 x 0.9")
 	a.use_ability(0, d["part"])
-	near(a.ships[0].thrust, 8.1 * 1.25, "x1.25")
+	near(a.ships[0].thrust, 9.0 * 1.25, "x1.25")
 
 
 # --- side effects --------------------------------------------------------------------------------------

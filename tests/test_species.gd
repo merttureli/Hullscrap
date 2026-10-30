@@ -305,7 +305,9 @@ func test_a_crew_list_is_read_loosely() -> void:
 func test_every_species_has_its_rig_and_sidearm_art() -> void:
 	_default_art()
 	var table: Dictionary = CrewMember.species_table()["species"]
-	eq(table.keys().size(), TABLE.size(), "the four species of the notes")
+	for id in TABLE:
+		check(table.has(id), id + ": one of the four species of the notes")
+	check(table.size() >= TABLE.size(), "and the species of the packs come on top")
 	var ids: Array = _weapons().map(func(w): return w["id"])
 	for id in table:
 		var def: Dictionary = table[id]

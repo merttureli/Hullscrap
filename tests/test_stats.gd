@@ -51,7 +51,7 @@ func test_every_component_has_runtime_fields_and_a_known_line() -> void:
 		check(c.def(id).get("blurb", "") != "", id + " has a blurb")
 		eq(c.def(id)["size"], c.def({"reactor_scrap_mk1": "reactor_mk1", "engine_scrap_mk1": "engine_mk1", "oxygen_scrap_mk1": "oxygen_gen", "reactor_neon_mk1": "reactor_mk1", "engine_neon_mk1": "engine_mk1", "radiator": "radiator"}[id])["size"], id + " size")
 	eq([c.def("reactor_scrap_mk1")["name"], c.def("engine_scrap_mk1")["name"], c.def("oxygen_scrap_mk1")["name"], c.def("reactor_neon_mk1")["name"], c.def("engine_neon_mk1")["name"]],
-		["Rustbucket Reactor", "Kickjet", "Wheezer O2", "Prism Core", "Ion Drive"], "names")
+		["Rustbucket Reactor", "Kickjet", "Wheezer O2", "Prism Core", "Ion Drive: Glimmer"], "names")
 
 
 func test_scrap_and_neon_multiply_the_output() -> void:
@@ -60,8 +60,8 @@ func test_scrap_and_neon_multiply_the_output() -> void:
 	var scrap := Stats.effective(c.def("reactor_scrap_mk1"), lines)
 	_near(scrap["power"], 6 * 0.9, "scrap reactor gives 6 x 0.9")
 	_near(Stats.effective(c.def("reactor_neon_mk1"), lines)["power"], 16 * 1.3, "neon reactor 16 x 1.3")
-	_near(Stats.effective(c.def("engine_neon_mk1"), lines)["stats"]["thrust"], 16 * 1.3, "neon engine thrust x 1.3")
-	_near(Stats.effective(c.def("engine_scrap_mk1"), lines)["stats"]["thrust"], 9 * 0.9, "scrap engine thrust x 0.9")
+	_near(Stats.effective(c.def("engine_neon_mk1"), lines)["stats"]["thrust"], 10 * 1.3, "neon engine thrust x 1.3")
+	_near(Stats.effective(c.def("engine_scrap_mk1"), lines)["stats"]["thrust"], 10 * 0.9, "scrap engine thrust x 0.9")
 	_near(Stats.effective(c.def("oxygen_scrap_mk1"), lines)["stats"]["o2_rate"], 0.6 * 0.9, "scrap O2 rate x 0.9")
 	var std := Stats.effective(c.def("engine_mk1"), lines)
 	eq(std["stats"]["thrust"], 10.0, "a standard engine is unchanged")
@@ -72,7 +72,7 @@ func test_power_draw_heat_mass_and_reliability_follow_the_line() -> void:
 	var c := _comps()
 	var lines := Stats.load_lines()
 	_near(Stats.effective(c.def("engine_scrap_mk1"), lines)["power"], -2 * 1.2, "scrap draws x 1.2")
-	_near(Stats.effective(c.def("engine_neon_mk1"), lines)["power"], -3 * 0.9, "neon draws x 0.9")
+	_near(Stats.effective(c.def("engine_neon_mk1"), lines)["power"], -2 * 0.9, "neon draws x 0.9")
 	var n := Stats.effective(c.def("reactor_neon_mk1"), lines)
 	_near(n["heat_per_s"], 10 * 1.5, "neon heat x 1.5")
 	_near(n["mass_mult"], 0.7, "neon mass")
@@ -94,7 +94,7 @@ func test_effective_stats_are_a_copy_and_unknown_lines_are_standard() -> void:
 	var lines := Stats.load_lines()
 	var e := Stats.effective(c.def("engine_neon_mk1"), lines)
 	e["stats"]["thrust"] = 1.0
-	eq(c.def("engine_neon_mk1")["stats"]["thrust"], 16, "the def is untouched")
+	eq(c.def("engine_neon_mk1")["stats"]["thrust"], 10, "the def is untouched")
 	var odd := c.def("engine_mk1").duplicate(true)
 	odd["line"] = "mystery"
 	eq(Stats.effective(odd, lines)["stats"]["thrust"], 10.0, "unknown line: no change")
@@ -133,8 +133,8 @@ func test_flight_uses_the_line_numbers() -> void:
 	var f := Flight.new("")
 	var view := Stats.view(ship.components, ship.lines)
 	var powered := {a: true, b: true}
-	_near(f.thrust_of(view, powered), 16 * 1.3 + 9 * 0.9, "thrust through the view")
-	_near(f.thrust_of(ship.components, powered), 16.0 + 9.0, "the raw components keep the base numbers")
+	_near(f.thrust_of(view, powered), 10 * 1.3 + 10 * 0.9, "thrust through the view")
+	_near(f.thrust_of(ship.components, powered), 10.0 + 10.0, "the raw components keep the base numbers")
 	var plain := f.mass_of(ship.grid, ship.components, ship.cables)
 	var adjusted := f.mass_of(ship.grid, ship.components, ship.cables, Stats.mass_mults(ship.components, ship.lines))
 	# two 8-cell engines at 3 per cell: neon x 0.7 and scrap x 1.2

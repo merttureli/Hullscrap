@@ -2,7 +2,14 @@
 
 A top-down 2D spaceship game. Start with a ready-made ship (or an empty hull), build walls, rooms and systems on a grid, run power to them, crew the ship, fly it, dock and fight. The plan is in [`docs/PLAN.md`](docs/PLAN.md).
 
-## Play the current build
+## Play the beta (no install)
+Every push to `main` builds the game for **Windows, Linux and macOS** on GitHub Actions (the **beta builds** workflow).
+1. On GitHub, open **Actions → beta builds**, then the latest green run.
+2. Under **Artifacts**, download **Hullscrap-Windows** (or Linux / macOS) and unzip it.
+3. Run **Hullscrap.exe** (Linux: `Hullscrap.x86_64`; macOS: unzip the app, then right-click → Open the first time, because it isn't signed).
+Saves go to Godot's user folder (on Windows: `%APPDATA%\Godot\app_userdata\Hullscrap`).
+
+## Play from the source (with the Godot editor)
 1. Install **Godot 4.6.3** (standard build, not .NET) from https://godotengine.org/download/archive/4.6.3-stable/.
 2. Open Godot, choose **Import**, and pick this folder's `project.godot`.
 3. Press **F5** to play. The game opens on **Choose your ship** (see [Starter ships](#starter-ships)): press **1**, **2** or **3**, then **B** for play mode and **K** to fight the test pirate (**Shift+K**: the Rustfang rammer). **M** opens the map of the Drift (the campaign).
@@ -15,6 +22,7 @@ A top-down 2D spaceship game. Start with a ready-made ship (or an empty hull), b
 | B | Build mode / play mode (the HUD shows which) |
 | N (play mode) | Pick another starter ship: asks "Discard current ship?" (Y / N), then shows the picker |
 | K (play mode) | Fight the test pirate (see Combat) |
+| H | The **Shields tab** (both modes, not in a fight): your ship's silhouette with its real shield bubble and sectors. Click a sector's **+** or **-**, or pick a preset (Even, Bow, Stern, Port, Starboard) or one of 2 custom slots (Save / Load). H or Esc closes it. See Combat |
 | W A S D | Walk (your soldier). The legs turn to the way you walk |
 | Mouse (play mode) | Your soldier aims at the cursor: the torso and what they hold (a pistol; a wrench or an extinguisher while working) turn to it |
 | E (hold) | Work with your own hands: stand next to a fire, a breach, a broken system or a downed crewmate and hold E. It goes at the speed of a crew member's work (see Crew, fire and repairs) |
@@ -97,8 +105,13 @@ In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_rai
 | Shift | Engine ability (a Kickjet's Sputter Boost...) |
 | Space | Shield ability: Overcharge gives one extra layer for 6 s, then 15 s of rest |
 | Q | Utility ability (the Prism Core's Overdrive...) |
+| Arrow keys | Shield balance, one step (half a weight) toward a side: **Up** the bow, **Down** the stern, **Left** port, **Right** starboard (port and starboard need 4+ sectors; the step is taken from the opposite sector first, then evenly from the others; no step past 0 or 2) |
+| End | Shield balance back to even |
 | Esc | Leave, once the pirate is wrecked or more than 4000 px away |
+| J | Spool the jump drive: after 10 s you escape the fight from any range (a fled fight gives no loot) |
 | R | After your ship is wrecked: back to build mode with the empty starter hull reloaded (B, then N, picks a ship again) |
+
+**The shield bubble** (`scripts/combat/shield_shape.gd`, `shields.gd`, `shield_balance.gd`; design in `docs/CONTENT.md` 4). It is the convex hull of the ship's solid cells (walls, doors, parts and the outside halves of mounts), inflated 1.5 cells with rounded corners, so it hugs a long, wedge-shaped or lumpy ship and never cuts into the hull; it is rebuilt when the hull changes and shots test against that outline. The best powered generator sets the **sector count** (`stats.sectors`: 1 for the Mk1 and scrap, 2 for the Mk2, 4 for the Neon Lattice, 8 later), bow first and clockwise. Each sector has a **weight** (steps of 0.5, 0 to 2, adding up to the sector count) and holds `layers x weight` layers: with 2 layers on bow and stern, even is 2 and 2, the **Bow** preset 4 and 0. A hit uses a layer of the sector it enters and each sector recharges its own (2 s a layer). **Shifting takes time**: the sector that loses weight drops to its new capacity at once, the one that gains it fills at the recharge rate. Firing opens only the sector the shot leaves through. A changed sector count (a generator lost or repaired) starts from even weights again; Overcharge adds a layer to every sector in proportion to its weight. The bubble is drawn along its outline, each sector as bright and thick as its layers, dashed at 0, shimmering while it fills and flashing when hit; the small diagram left of the weapon bar shows each sector's layers (dark while open). The pilot AI with 2+ sectors shifts toward the side facing you, one step every `1.5 - ai.aim_skill` seconds (default skill 0.6). The balance you set in the Shields tab is kept in the ship's save (`shield_balance`, ship save version 4; older saves fight even) and is how every fight starts.
 
 The panels at the top are the schematics (yours left, the enemy's right): rooms, walls, breaches in red, systems coloured by state (green ok, yellow damaged, red disabled, orange overheated, purple jammed, grey unpowered), a hull bar and the shield pips. **Firing opens your own shield**: the sector of the bubble the shot leaves through drops for 0.3 s (laser), 0.4 s (bolt), 0.6 s (flak) or the whole beam, while shots pass it and use no layer; the schematic shows "OPEN" and the sector ring goes dark. Missiles never drop it. Open doors let shots through; closed doors block them. The weapon bar shows each weapon's key, group, cooldown ring and state (ready, cooling, no power, jammed, no ammo, disabled, offline, out of arc for a turret), and under each turret its hit chance against the enemy.
 
@@ -107,6 +120,9 @@ The panels at the top are the schematics (yours left, the enemy's right): rooms,
 **Ramming and ricochets** (`scripts/combat/impact_fx.gd`). When two ships collide hard enough to hurt, sparks and debris fly from the contact points (`fx/sparks`, `fx/explosion`), the screen shakes by the impact energy, a banner and the chronicle say "Rammed the pirate: 14 hull damage (took 6)", and the walls take their damage as usual. A shot that glances off a hull shows a small spark at the bounce point.
 
 Characters are big: a crew body is 2x2 cells (drawn about 3x3), so doors are a piece of exactly 2 cells in a row with a wall cell at each end (wall, door, door, wall), and a corridor needs 2 cells. Walls stay 1 cell thick. A door costs per cell; removing or replacing either cell takes the whole piece, and a wall holding a door can't be removed. Systems are items from the cargo: placing one uses an item up, removing it gives the item back. A system needs floor under every cell, and that floor can't be removed or built over while it stands there. Cables cost copper per cell (`data/build.json`) and may run under anything. A system only works when a cable connects it to a reactor; an unpowered one is drawn dimmed with a red mark.
+
+## Front door
+The game opens on the **main menu** (`scripts/ui/main_menu.gd`, `scripts/ui/front_door.gd`): **Continue** (only when a run is saved with Ctrl+S or "Save and quit to menu": it loads the ship and the campaign), **New run** (the ship picker; Esc there goes back to the menu), **How to play**, **Quit**. The corner shows `Beta 1 (<git hash>)` from `version.txt` (written at export, `dev` without it) and the last five runs from `user://profile.json`. **Esc** in the game opens the pause menu (Resume, How to play, Save and quit to menu, Quit; the game is paused). **F1** opens **How to play** anywhere (`scripts/ui/help_panel.gd`): one screen of keys in columns, with a First run box. In the first run only, three hint toasts appear (after the ship is picked, on the first map, on the first fight). When a campaign fight is lost, **YOUR SHIP IS SCRAP** shows the ship, jumps, credits, debt, crew alive, events seen and fights won (`scripts/ui/game_over.gd`), the run goes into `user://profile.json` and the saves are deleted: death is final. `tests/test_front_door.gd` checks the menu, the help text against the keys of the input handlers, the profile and the end screen's numbers; when you add or change a key, change `HelpPanel.COLUMNS` and the list in that test.
 
 ## Art
 The game draws pixel art from `art/` and falls back to flat code-drawn placeholders for anything missing (`scripts/view/art.gd` loads and caches it; no editor import is needed). What is live:

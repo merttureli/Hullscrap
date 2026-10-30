@@ -1,0 +1,96 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   15
+  ]
+ },
+ "notes": "OUTSIDE half of the Lumen Eye (neon, 2x2): a navy pedestal with a cyan slip ring and a crystal gem; the eye (lumen_eye_neon_barrel) turns on it.",
+ "barrel": {
+  "image": "lumen_eye_neon_barrel.png",
+  "frame": [
+   31,
+   28
+  ],
+  "pivot_on_base": [
+   16,
+   15
+  ],
+  "pivot_on_barrel": [
+   15,
+   20
+  ],
+  "anims": {
+   "idle": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ],
+   "disabled": [
+    4,
+    1,
+    0
+   ]
+  },
+  "aim": "spin",
+  "spin": true,
+  "glow": {
+   "image": "lumen_eye_neon_barrel_glow.png",
+   "frame": [
+    47,
+    44
+   ],
+   "offset": [
+    -8,
+    -8
+   ],
+   "anims": {
+    "idle": [
+     0,
+     2,
+     3
+    ],
+    "damaged": [
+     2,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}

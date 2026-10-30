@@ -34,7 +34,7 @@ So the rule from now on is: **mechanics are a fixed vocabulary, and content is d
   - `jump_range` (nodes per jump);
   - `fuel_mult`;
   - `reveal_enemy` (show enemy interior and crew on the schematic).
-- **Crew traits**: a **trait library in `data/traits.json`**. Every trait is a bag of generic keys:
+- **Crew traits**: a **trait library in `data/traits.json`**, resolved in one place (`scripts/crew/traits.gd`, `TraitSet.of(member)`; its `_doc` and the `##` lines say what each key does). Built: `hp_mult`, `speed_mult`, `o2_use`, `suffocate_mult`, `damage_taken`, `work_mult` (as speed factors), `heal_mult`, `mechanical`, `aura` {o2_per_s, heal_per_s, work_mult}, `station` {power_bonus, manned_mult}, `melee_mult` and `ranged_mult` (kept for on-foot fights), `swarm`, `dries_out`, `ion_stun`. Still to come: `body`, `line_affinity`, the other `aura` and `station` keys, `counter_melee` and the Special list. Every trait is a bag of generic keys:
   - **Body**: `hp_mult`, `speed_mult`, `body` (2 = the normal 2×2; 1 = a small body that fits 1-cell crawlspaces).
   - **Air**: `o2_use` (0 = doesn't breathe), `suffocate_mult`.
   - **Damage taken**: `damage_taken` {fire, no_air, melee, ranged, ion}, plus `ion_stun` (seconds stunned by ion).

@@ -14,12 +14,16 @@ const Arena = preload("res://scripts/combat/arena.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
-const VERSION := 1
+## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
+const VERSION := 2
+const MIN_VERSION := 1
+## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
+const FUEL_PARTS := 100
 const CONFIG_PATH := "res://data/drift.json"
 const FACTIONS_PATH := "res://data/factions.json"
-const NAMES_PATH := "res://data/names.json"
 const ITEMS_PATH := "res://data/items.json"
 const SAVE_PATH := "user://campaign.json"
 const REFUSED_TEXT := "The dock master turns you away."
@@ -50,6 +54,9 @@ var revealed := {}  ## node ids shown on the map although far from any visited n
 var logs_found := {}  ## derelict log ids found: id -> true
 var reminded := -1  ## the payment cycle (jumps / every) Ma's reminder was shown in
 var hull_loss := 0  ## hull integrity points lost; repaired at stations
+var fuel_part := 0  ## parts (hundredths) of a fuel the jumps have used up and not yet paid; 0..FUEL_PARTS-1, spent as whole fuel when they reach FUEL_PARTS
+var events_seen := 0  ## events met at nodes, waits and wrecks (the game over screen counts them)
+var fights_won := 0  ## fights of the run that were won
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
 var _hull_key := -1
 var _hull_max := 0
@@ -216,9 +223,16 @@ func hull_max(ship) -> int:
 	return _hull_max
 
 
-## The integrity `ship` has left.
+## The integrity `ship` has left (at least 1: a damaged hull has a lower maximum than the one the loss was
+## counted against, and the number must never show as zero or less).
 func hull_left(ship) -> int:
-	return hull_max(ship) - hull_loss
+	return maxi(hull_max(ship) - hull_loss, 1)
+
+
+## The hull a fight starts with: the arena's maximum less what the campaign has lost (never below 1), so the
+## damage of one fight, of an event or of a drift jump is still there in the next fight until it is repaired.
+func fight_hull(arena_hull_max: float) -> float:
+	return maxf(1.0, arena_hull_max - float(hull_loss))
 
 
 ## Change the hull integrity by `n` (negative = damage). It never drops below 1 or rises above the
@@ -239,16 +253,16 @@ func jump_block(to: String, ship, drift_jump := false) -> String:
 	if drift.node(to)["type"] == "gate":
 		return DARK_TEXT
 	if drift_jump:
-		if ship.inventory.count("fuel") > 0:
+		if not fuel_short(ship):
 			return "you still have fuel"
 		if hull_left(ship) <= int(cfg["fuel"]["drift_hull"]):
 			return "the hull would not survive a drift jump"
 		return ""
-	return NO_FUEL if ship.inventory.count("fuel") < 1 else ""
+	return NO_FUEL if fuel_short(ship) else ""
 
 
-## Jump along a lane to `to`: 1 fuel (or 15 integrity for a drift jump), +1 on the jump counter, which
-## may bring a payment due. Returns {ok, why, node, drift, notes}; `notes` are lines to tell the player.
+## Jump along a lane to `to`: the fuel of jump_cost() (or 15 integrity for a drift jump), +1 on the jump
+## counter, which may bring a payment due. Returns {ok, why, node, drift, notes}; `notes` are lines to tell the player.
 func jump(to: String, ship, drift_jump := false) -> Dictionary:
 	var why := jump_block(to, ship, drift_jump)
 	if why != "":
@@ -259,12 +273,53 @@ func jump(to: String, ship, drift_jump := false) -> Dictionary:
 		change_hull(ship, -cost)
 		notes.append("The drift jump tears at the hull (-%d integrity)." % cost)
 	else:
-		ship.inventory.add("fuel", -1)
+		var parts := fuel_part + jump_cost(ship)
+		ship.inventory.add("fuel", -(parts / FUEL_PARTS))
+		fuel_part = parts % FUEL_PARTS
 	flags.erase("at_" + str(drift.node(current).get("place", "")))  # undocked
 	current = to
 	visited[to] = true
 	notes.append_array(_advance(1))
 	return {"ok": true, "why": "", "node": to, "drift": drift_jump, "notes": notes}
+
+
+## What the next jump costs, in parts (hundredths) of a fuel: the thrust-weighted mean `fuel_mult` of the powered
+## engines (an offline mount, with its outside half disabled or its link cut, is not powered and does not count; an
+## engine without a `fuel_mult` counts as 1.0), rounded to a part. A ship with no powered engine pays a whole fuel.
+func jump_cost(ship) -> int:
+	ship.refresh()
+	var powered: Dictionary = ship.power_state.get("powered", {})
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	var weighted := 0.0
+	var thrust := 0.0
+	for uid in uids:
+		var id := str(ship.components.instances[uid]["id"])
+		if not powered.get(uid, false) or str(ship.components.def(id).get("family", "")) != "engine":
+			continue
+		var t := float(ship.effective(id)["stats"].get("thrust", 0.0))
+		weighted += t * float(ship.components.def(id).get("stats", {}).get("fuel_mult", 1.0))
+		thrust += t
+	if thrust <= 0.0:
+		return FUEL_PARTS
+	return maxi(1, roundi(weighted / thrust * FUEL_PARTS))
+
+
+## The whole fuel the next jump takes from the cargo: the remainder plus its cost, in whole fuels.
+func jump_fuel(ship) -> int:
+	return (fuel_part + jump_cost(ship)) / FUEL_PARTS
+
+
+## Is the cargo short of the fuel the next jump takes?
+func fuel_short(ship) -> bool:
+	return ship.inventory.count("fuel") < jump_fuel(ship)
+
+
+## A cost in parts as text: "1 fuel", "0.5 fuel", "1.25 fuel".
+static func fuel_text(parts: int) -> String:
+	if parts % FUEL_PARTS == 0:
+		return "%d fuel" % (parts / FUEL_PARTS)
+	return ("%d.%02d" % [parts / FUEL_PARTS, parts % FUEL_PARTS]).rstrip("0") + " fuel"
 
 
 ## Time passes by `n` jumps: the counter goes up and each payment date crossed is checked.
@@ -288,7 +343,9 @@ func wait(ship) -> Dictionary:
 	if ship.inventory.count("fuel") > 0:
 		return {"ok": false, "why": "you still have fuel", "notes": [], "event": {}}
 	var notes := _advance(1)
-	return {"ok": true, "why": "", "notes": notes, "event": events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)}
+	var ev := events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)
+	events_seen += int(not ev.is_empty())
+	return {"ok": true, "why": "", "notes": notes, "event": ev}
 
 
 ## What happens on reaching the current node. Returns {node, refused, event}: `refused` is the text of a
@@ -312,11 +369,14 @@ func arrive(ship) -> Dictionary:
 		var due := _debt_event(ship)
 		if not due.is_empty():
 			out["event"] = due
+			events_seen += 1
 			return out
 	if n["type"] == "patrol" and refuses("concord"):
 		out["event"] = HOSTILE_PATROL
+		events_seen += 1
 		return out
 	out["event"] = events.pick(self, n, ship)
+	events_seen += int(not out["event"].is_empty())
 	return out
 
 
@@ -436,6 +496,7 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 	if state != "won":
 		out["text"] = "You break away. The fight is not finished, but you are."
 		return out
+	fights_won += 1
 	out["text"] = "The wreck tumbles away, still venting."
 	out["lines"] = loot(res.get("enemy"), ship)
 	if not after_win.is_empty():
@@ -471,19 +532,20 @@ func loot(enemy, ship) -> Array:
 
 ## The salvage event that follows a won fight (a wreck_field one), or {}.
 func salvage_event(ship) -> Dictionary:
-	return events.pick(self, {"id": current, "type": "wreck_field", "place": ""}, ship)
+	var ev := events.pick(self, {"id": current, "type": "wreck_field", "place": ""}, ship)
+	events_seen += int(not ev.is_empty())
+	return ev
 
 
 # --- crew --------------------------------------------------------------------------------------------------------
 
-## A name for a new `species` crew member nobody aboard has: from data/names.json when it exists
-## (crew -> species -> names), else the names of data/crew.json.
+## A name for a new `species` crew member nobody aboard has: from the name pools (crew -> species ->
+## names, data/names.json and the packs' names.json through the content loader), else the names of data/crew.json.
 func crew_name(species: String, ship) -> String:
 	var pool: Array = []
-	if FileAccess.file_exists(NAMES_PATH):
-		var data = JSON.parse_string(FileAccess.get_file_as_string(NAMES_PATH))
-		if data is Dictionary and data.get("crew") is Dictionary and data["crew"].get(species) is Array:
-			pool = data["crew"][species]
+	var crew_pools = Content.names().get("crew")
+	if crew_pools is Dictionary and crew_pools.get(species) is Array:
+		pool = crew_pools[species]
 	if pool.is_empty():
 		pool = CrewMember.config().get("names", [])
 	var free: Array = pool.filter(func(n): return not ship.crew.any(func(m): return m.name == n))
@@ -683,12 +745,12 @@ func to_dict() -> Dictionary:
 	return {"version": VERSION, "seed": seed_value, "rng_state": str(rng.state), "map": drift.to_dict(), "current": current,
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
 		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
-		"offers": offers.duplicate(true)}
+		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won}
 
 
 ## Replace the state with a saved one. Returns "" on success, else why not (and nothing changes).
 func load_dict(d: Dictionary) -> String:
-	if int(d.get("version", 0)) != VERSION:
+	if int(d.get("version", 0)) < MIN_VERSION or int(d.get("version", 0)) > VERSION:
 		return "unsupported campaign version"
 	var map = Drift.from_dict(d["map"]) if d.get("map") is Dictionary else null
 	if map == null:
@@ -718,6 +780,9 @@ func load_dict(d: Dictionary) -> String:
 	paid = int(d["paid"])
 	jumps = int(d["jumps"])
 	hull_loss = int(d["hull_loss"])
+	fuel_part = clampi(int(d.get("fuel_part", 0)), 0, FUEL_PARTS - 1)  # a version 1 save has none
+	events_seen = int(d.get("events_seen", 0))  # saves from before the game over screen have none
+	fights_won = int(d.get("fights_won", 0))
 	offers = d["offers"].duplicate(true)
 	_hull_key = -1
 	return ""

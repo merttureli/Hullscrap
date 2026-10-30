@@ -1,0 +1,46 @@
+{
+ "frame": [
+  16,
+  24
+ ],
+ "anims": {
+  "tumble": [
+   0,
+   4,
+   3
+  ]
+ },
+ "glow": {
+  "image": "fuel_canister_glow.png",
+  "frame": [
+   32,
+   40
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "tumble": [
+    0,
+    4,
+    3
+   ]
+  }
+ },
+ "anchors": {
+  "center": [
+   8,
+   12
+  ]
+ },
+ "tumble_deg": [
+  -12,
+  -4,
+  4,
+  12
+ ],
+ "loop": "pingpong",
+ "material": "fuel",
+ "notes": "Fuel canister: an amber jerrycan with a steel handle, a red cap, an embossed cross and a glowing gauge; rare. Drops fuel 1. Frames are the piece turned [-12, -4, 4, 12] degrees, lit from the top-left each time; loop them pingpong (`wrap` = 1,2,3,4,1... ; `pingpong` = 1,2,3,4,3,2,...), the game may also rotate the node. Glow layer: additive, pulsing a little per frame."
+}

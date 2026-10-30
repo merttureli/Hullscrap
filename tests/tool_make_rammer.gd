@@ -41,7 +41,7 @@ func _init() -> void:
 	var ras := HullOutline.rasterize(OUTLINE)
 	for e in ras["errors"]:
 		_fail("Rustfang: " + e)
-	var skin := HullOutline.layers(ras["cells"], func(c): return "ram_plating" if c.y < BOW_ROWS else "scrap_plate", func(c): return "ram_plating" if c.y < 2 else ("scrap_plate" if c.y < 16 else ""))
+	var skin := HullOutline.layers(ras["cells"], func(c): return "ram_plating" if c.y < BOW_ROWS else "scrap_plate", func(c): return "ram_plating" if c.y < BOW_ROWS else ("scrap_plate" if c.y < 16 else ""))
 	var lo := Vector2i(1 << 20, 1 << 20)
 	var hi := Vector2i(-(1 << 20), -(1 << 20))
 	for c in skin:

@@ -4,7 +4,8 @@ extends Control
 ## arena) and the key numbers: power, mass, hull, shield layers and weapon names. 1 / 2 / 3 or a click
 ## loads the design into the player's ship (ShipSim.choose_ship); the build mode works as usual after.
 ## It opens when the game starts; N in play mode (build_mode.gd) asks "Discard current ship? Y/N" first.
-## Esc closes it and keeps the current ship. While it is open it swallows every key and click.
+## Esc closes it and keeps the current ship (or calls `on_escape`, which the main menu sets for a new run).
+## While it is open it swallows every key and click.
 ## Rules are in ShipSim and Ship.from_design; this node only draws and reads input.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -35,6 +36,9 @@ const BAD := Color("#e0453a")
 
 enum Mode { CHOOSE, CONFIRM }
 
+## Emitted after a ship was chosen and the picker closed.
+signal chosen
+
 var sim: Node  ## the ShipSim whose player ship is replaced
 var build: Node  ## the BuildMode (told about the new ship)
 var crew: Node  ## the crew view (its people respawn on the new ship)
@@ -42,6 +46,7 @@ var cam: Camera2D  ## fitted to the new ship
 var mode: int = Mode.CHOOSE
 var hover := -1  ## the card under the mouse
 var cards: Array = []  ## {path, name, blurb, stats, schematic}
+var on_escape := Callable()  ## called instead of just closing when Esc is pressed (once)
 
 
 func _ready() -> void:
@@ -52,7 +57,10 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	load_cards()
-	open()
+	if get_node_or_null("../../FrontDoor") != null:
+		close()  # the front door opens it from New run
+	else:
+		open()
 
 
 ## Load every design of DESIGNS that can be read into a card; one that cannot is left out.
@@ -157,6 +165,8 @@ func choose(i: int) -> String:
 	if build != null:
 		build.ship_replaced("%s: B for play mode, then K to fight. Everything can be rebuilt" % ship.name)
 	close()
+	on_escape = Callable()
+	chosen.emit()
 	return ""
 
 
@@ -179,7 +189,11 @@ func _input(e: InputEvent) -> void:
 		KEY_1, KEY_2, KEY_3:
 			choose(e.keycode - KEY_1)
 		KEY_ESCAPE:
+			var back := on_escape
+			on_escape = Callable()
 			close()
+			if back.is_valid():
+				back.call()
 
 
 func _gui_input(e: InputEvent) -> void:

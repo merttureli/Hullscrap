@@ -1,0 +1,502 @@
+{
+  "components": [
+    {
+      "id": "engine_mk3",
+      "name": "Concord Thruster Mk3",
+      "blurb": "Third revision, rated at 110% of the fuel allowance. Auditors are asked not to enquire where the extra ten percent goes.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 3,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 2],
+        "outside_hp": 8
+      },
+      "color": "#2f5bc4",
+      "power": -4,
+      "priority": 4,
+      "manned": false,
+      "hp": 10,
+      "heat_limit": 100,
+      "heat_per_s": 5,
+      "cooling": 5,
+      "stats": {
+        "thrust": 26,
+        "fuel_mult": 1.1
+      }
+    },
+    {
+      "id": "engine_mk4",
+      "name": "Concord Thruster Mk4",
+      "blurb": "Fleet-grade thrust on a military circuit, in a housing built to be hit. Burns fuel like a procurement budget.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 4,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 3],
+        "outside_hp": 9
+      },
+      "color": "#25489f",
+      "power": -5,
+      "priority": 4,
+      "manned": false,
+      "hp": 12,
+      "heat_limit": 100,
+      "heat_per_s": 6,
+      "cooling": 6,
+      "stats": {
+        "thrust": 36,
+        "fuel_mult": 1.2
+      }
+    },
+    {
+      "id": "engine_mk5",
+      "name": "Concord Thruster Mk5",
+      "blurb": "Gate-alloy bell, gold registry band. Issued to flagships; there are no flagships now, and the forms still arrive.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 5,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 3],
+        "outside_hp": 11
+      },
+      "color": "#1f3a7d",
+      "power": -6,
+      "priority": 4,
+      "manned": false,
+      "hp": 14,
+      "heat_limit": 100,
+      "heat_per_s": 7,
+      "cooling": 7,
+      "stats": {
+        "thrust": 48,
+        "fuel_mult": 1.3
+      }
+    },
+    {
+      "id": "engine_scrap_mk2",
+      "name": "Kickjet Deluxe",
+      "blurb": "Deluxe means someone found a second nozzle. It does not mean anyone checked that it fits.",
+      "family": "engine",
+      "line": "scrap",
+      "tier": 2,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 2],
+        "outside_hp": 6
+      },
+      "color": "#9a8f7a",
+      "power": -3,
+      "priority": 4,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 4,
+      "stats": {
+        "thrust": 18,
+        "fuel_mult": 1.0
+      },
+      "abilities": [
+        {
+          "id": "sputter_boost",
+          "name": "Sputter Boost",
+          "type": "active",
+          "key": "engine",
+          "duration": 4,
+          "cooldown": 15,
+          "effects": {
+            "stat_mult": {
+              "thrust": 1.3
+            }
+          },
+          "side_effects": [
+            {
+              "type": "self_damage",
+              "rate": 0.3
+            },
+            {
+              "type": "fire_risk",
+              "rate": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "engine_scrap_mk3",
+      "name": "Double Kick",
+      "blurb": "Two Kickjets and a great deal of tape. Kicks twice, occasionally in different directions.",
+      "family": "engine",
+      "line": "scrap",
+      "tier": 3,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 2],
+        "outside_hp": 8
+      },
+      "color": "#a58a60",
+      "power": -4,
+      "priority": 4,
+      "manned": false,
+      "hp": 10,
+      "heat_limit": 100,
+      "heat_per_s": 5,
+      "cooling": 5,
+      "stats": {
+        "thrust": 26,
+        "fuel_mult": 1.1
+      },
+      "abilities": [
+        {
+          "id": "sputter_boost",
+          "name": "Sputter Boost",
+          "type": "active",
+          "key": "engine",
+          "duration": 4,
+          "cooldown": 15,
+          "effects": {
+            "stat_mult": {
+              "thrust": 1.35
+            }
+          },
+          "side_effects": [
+            {
+              "type": "self_damage",
+              "rate": 0.3
+            },
+            {
+              "type": "fire_risk",
+              "rate": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "engine_scrap_mk4",
+      "name": "Thunderknuckle",
+      "blurb": "Four nozzles that have never met, welded into one fist. Stand clear of the exhaust, and of the welds.",
+      "family": "engine",
+      "line": "scrap",
+      "tier": 4,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 3],
+        "outside_hp": 9
+      },
+      "color": "#b07a42",
+      "power": -5,
+      "priority": 4,
+      "manned": false,
+      "hp": 12,
+      "heat_limit": 100,
+      "heat_per_s": 6,
+      "cooling": 6,
+      "stats": {
+        "thrust": 36,
+        "fuel_mult": 1.2
+      },
+      "abilities": [
+        {
+          "id": "sputter_boost",
+          "name": "Sputter Boost",
+          "type": "active",
+          "key": "engine",
+          "duration": 4,
+          "cooldown": 15,
+          "effects": {
+            "stat_mult": {
+              "thrust": 1.4
+            }
+          },
+          "side_effects": [
+            {
+              "type": "self_damage",
+              "rate": 0.3
+            },
+            {
+              "type": "fire_risk",
+              "rate": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "engine_neon_mk2",
+      "name": "Ion Drive: Halo",
+      "blurb": "The ring is not for show. It is where the light decides to leave.",
+      "family": "engine",
+      "line": "neon",
+      "tier": 2,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 2],
+        "outside_hp": 6
+      },
+      "color": "#5ae8ff",
+      "power": -3,
+      "priority": 4,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 4,
+      "stats": {
+        "thrust": 18,
+        "fuel_mult": 1.0
+      }
+    },
+    {
+      "id": "engine_neon_mk3",
+      "name": "Ion Drive: Corona",
+      "blurb": "Crystal fins drink the heat and hum it back. Ask for more, and it remembers you asked.",
+      "family": "engine",
+      "line": "neon",
+      "tier": 3,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 2],
+        "outside_hp": 8
+      },
+      "color": "#7ff0ff",
+      "power": -4,
+      "priority": 4,
+      "manned": false,
+      "hp": 10,
+      "heat_limit": 100,
+      "heat_per_s": 5,
+      "cooling": 5,
+      "stats": {
+        "thrust": 26,
+        "fuel_mult": 1.1
+      },
+      "abilities": [
+        {
+          "id": "ion_surge",
+          "name": "Ion Surge",
+          "type": "active",
+          "key": "engine",
+          "duration": 5,
+          "cooldown": 20,
+          "effects": {
+            "stat_mult": {
+              "thrust": 1.3
+            }
+          },
+          "side_effects": [
+            {
+              "type": "heat",
+              "rate": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "engine_neon_mk4",
+      "name": "Ion Drive: Zenith",
+      "blurb": "A crown of crystal no hand fastened. It was waiting for the push before there was a ship.",
+      "family": "engine",
+      "line": "neon",
+      "tier": 4,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 3],
+        "outside_hp": 9
+      },
+      "color": "#a8f4ff",
+      "power": -5,
+      "priority": 4,
+      "manned": false,
+      "hp": 12,
+      "heat_limit": 100,
+      "heat_per_s": 6,
+      "cooling": 6,
+      "stats": {
+        "thrust": 36,
+        "fuel_mult": 1.2
+      },
+      "abilities": [
+        {
+          "id": "ion_surge",
+          "name": "Ion Surge",
+          "type": "active",
+          "key": "engine",
+          "duration": 5,
+          "cooldown": 20,
+          "effects": {
+            "stat_mult": {
+              "thrust": 1.35
+            }
+          },
+          "side_effects": [
+            {
+              "type": "heat",
+              "rate": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "strafe_jets_mk1",
+      "name": "Strafe Jets Mk1",
+      "blurb": "Small jets for sliding sideways. Mount them on the side walls and let the docking look easy.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 1,
+      "size": [2, 2],
+      "mount": {
+        "outside": [2, 2],
+        "outside_hp": 3
+      },
+      "color": "#7fc1ee",
+      "power": -1,
+      "priority": 4,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "thrust": 6,
+        "fuel_mult": 1.0
+      },
+      "quirk": "small side jets, mount on side walls for A/D strafe"
+    },
+    {
+      "id": "strafe_jets_mk2",
+      "name": "Strafe Jets Mk2",
+      "blurb": "Slightly larger jets for sliding sideways harder. The form for 'sideways' has been revised twice.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 2,
+      "size": [2, 2],
+      "mount": {
+        "outside": [2, 2],
+        "outside_hp": 4
+      },
+      "color": "#62a8e0",
+      "power": -2,
+      "priority": 4,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "thrust": 10,
+        "fuel_mult": 1.0
+      },
+      "quirk": "small side jets, mount on side walls for A/D strafe"
+    },
+    {
+      "id": "strafe_jets_mk3",
+      "name": "Strafe Jets Mk3",
+      "blurb": "Gyro-stabilised side jets, rated for dock approaches and mild panic. The gyro is the quiet one.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 3,
+      "size": [2, 2],
+      "mount": {
+        "outside": [2, 2],
+        "outside_hp": 5
+      },
+      "color": "#4c8fd0",
+      "power": -2,
+      "priority": 4,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 14,
+        "fuel_mult": 1.0
+      },
+      "quirk": "small side jets, mount on side walls for A/D strafe"
+    },
+    {
+      "id": "longburn_mk1",
+      "name": "Long-Burn Drive Mk1",
+      "blurb": "An explorer's engine: half the fuel, sixty percent of the thrust. The survey office suggests patience for the rest.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 1,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 2],
+        "outside_hp": 5
+      },
+      "color": "#9fd4f2",
+      "power": -2,
+      "priority": 4,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "thrust": 6,
+        "fuel_mult": 0.5
+      },
+      "quirk": "an explorer's engine: half the fuel, 60% thrust"
+    },
+    {
+      "id": "longburn_mk2",
+      "name": "Long-Burn Drive Mk2",
+      "blurb": "A longer bell and the same stubbornness. Survey crews call it the slow road, and arrive anyway.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 2,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 2],
+        "outside_hp": 6
+      },
+      "color": "#86c4ee",
+      "power": -3,
+      "priority": 4,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 11,
+        "fuel_mult": 0.5
+      },
+      "quirk": "an explorer's engine: half the fuel, 60% thrust"
+    },
+    {
+      "id": "longburn_mk3",
+      "name": "Long-Burn Drive Mk3",
+      "blurb": "Fuel allowance cut again. The survey office is very proud of the new number, and has never been aboard.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 3,
+      "size": [4, 2],
+      "mount": {
+        "outside": [4, 2],
+        "outside_hp": 8
+      },
+      "color": "#6fb4e8",
+      "power": -4,
+      "priority": 4,
+      "manned": false,
+      "hp": 10,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 4,
+      "stats": {
+        "thrust": 16,
+        "fuel_mult": 0.45
+      },
+      "quirk": "an explorer's engine: half the fuel, 60% thrust"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+ "frame": [
+  24,
+  16
+ ],
+ "anims": {
+  "tumble": [
+   0,
+   4,
+   3
+  ]
+ },
+ "anchors": {
+  "center": [
+   12,
+   8
+  ]
+ },
+ "tumble_deg": [
+  -9,
+  -3,
+  3,
+  9
+ ],
+ "loop": "pingpong",
+ "material": "titanium",
+ "notes": "Titanium plate: a clean, bevelled cool-grey armour plate with a diagonal sheen. Drops titanium 1-2. Frames are the piece turned [-9, -3, 3, 9] degrees, lit from the top-left each time; loop them pingpong (`wrap` = 1,2,3,4,1... ; `pingpong` = 1,2,3,4,3,2,...), the game may also rotate the node. "
+}

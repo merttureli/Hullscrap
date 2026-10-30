@@ -1,0 +1,13 @@
+{
+ "frame": [
+  512,
+  512
+ ],
+ "alpha": true,
+ "tint": "multiply",
+ "suggested_tints": {
+  "region": "#b5683a"
+ },
+ "parallax": 0.06,
+ "notes": "Nebula overlay, Clan space: rust-red dust, ragged horizontal lanes. Soft alpha (at most 100/255) in palette greys, fading to nothing at the edge so it can be placed anywhere with no border. Multiply the suggested tint over it and draw it big, behind everything, over the star layers; it must stay faint, the ship stands out."
+}

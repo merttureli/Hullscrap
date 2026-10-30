@@ -1,0 +1,43 @@
+{
+ "frame": [
+  48,
+  48
+ ],
+ "anims": {
+  "tumble": [
+   0,
+   4,
+   3
+  ],
+  "cracked_1": [
+   4,
+   1,
+   0
+  ],
+  "cracked_2": [
+   5,
+   1,
+   0
+  ],
+  "cracked": [
+   4,
+   2,
+   0
+  ]
+ },
+ "anchors": {
+  "center": [
+   24,
+   24
+  ]
+ },
+ "tumble_deg": [
+  0,
+  90,
+  180,
+  270
+ ],
+ "loop": "wrap",
+ "material": "ore",
+ "notes": "Ore rock L: a big asteroid chunk with craters and visible ore veins (copper orange, iron rust, titanium pale, a little crystal cyan). cracked_1 / cracked_2 are the damage stages (turn 0): fissures, then the rock split apart. Break it into chunks with any weapon. Frames are the piece turned [0, 90, 180, 270] degrees, lit from the top-left each time; loop them wrap (`wrap` = 1,2,3,4,1... ; `pingpong` = 1,2,3,4,3,2,...), the game may also rotate the node. `cracked_1` / `cracked_2` = damage stages, `broken` = the burst crate left behind. "
+}

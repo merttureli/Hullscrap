@@ -1,0 +1,33 @@
+{
+ "frame": [
+  24,
+  24
+ ],
+ "anims": {
+  "tumble": [
+   0,
+   4,
+   3
+  ],
+  "broken": [
+   4,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "center": [
+   12,
+   12
+  ]
+ },
+ "tumble_deg": [
+  0,
+  90,
+  180,
+  270
+ ],
+ "loop": "wrap",
+ "material": "crate",
+ "notes": "Sealed crate: a brown cargo crate with steel corner brackets, an amber seal band and a latch. Shoot it open: 1-2 random items or materials. `broken` is the burst crate left behind. Frames are the piece turned [0, 90, 180, 270] degrees, lit from the top-left each time; loop them wrap (`wrap` = 1,2,3,4,1... ; `pingpong` = 1,2,3,4,3,2,...), the game may also rotate the node. "
+}

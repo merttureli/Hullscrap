@@ -1,0 +1,70 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   6,
+   4
+  ],
+  "pulling": [
+   6,
+   6,
+   10
+  ],
+  "off": [
+   12,
+   1,
+   0
+  ],
+  "damaged": [
+   13,
+   2,
+   4
+  ],
+  "disabled": [
+   15,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "lumen_siphon_neon_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    6,
+    4
+   ],
+   "pulling": [
+    6,
+    6,
+    10
+   ],
+   "damaged": [
+    12,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Lumen Siphon (neon, 4x2): a crystal chamber, a cyan-lit glass column with motes orbiting inside it (6 frames), side lamps and a flow bar. pulling: more motes, magenta flickers. damaged: the column cracked, motes jittering; disabled: dark column, a crystal chunk jammed.",
+ "offset": [
+  0,
+  -4
+ ]
+}

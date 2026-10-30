@@ -96,8 +96,9 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 		if d["family"] in ["weapon", "engine"]:
 			n += 1
 			check(Mounts.is_mount(d), id + " is a hull mount")
-			eq(d["size"], [4, 2], id + ": the inside half is 4x2")
-			eq(d["mount"]["outside"][0], 4, id + ": and the outside half is as wide")
+			var narrow: bool = d["size"][0] == 2  # Strafe Jets: 2x2 and 2x2 (docs/waves/engines_1.md)
+			eq(d["size"], [2, 2] if narrow else [4, 2], id + ": the inside half is 4x2 (a Strafe Jets one 2x2)")
+			eq(d["mount"]["outside"][0], d["size"][0], id + ": and the outside half is as wide")
 			eq(d["mount"]["outside_hp"], int(floor(d["hp"] * 0.75 + 0.5)), id + ": outside_hp is 75 percent of hp, rounded")
 		else:
 			check(not Mounts.is_mount(d), id + " is a plain part")

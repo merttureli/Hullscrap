@@ -18,14 +18,16 @@ const PLAYER := 0
 const ENEMY := 1
 const SPAWN_DISTANCE := 1200.0  ## px the enemy starts ahead of the player
 const LEAVE_DISTANCE := 4000.0  ## px apart at which Esc lets the player disengage
+const JUMP_SPOOL := 10.0  ## seconds the jump drive spools (J) before the player can leave a fight anywhere
 const STEP := 1.0 / 60.0
 const MAX_TICKS := 8  ## substeps one frame may run, so a stall does not snowball
 const STEER_MIN_DISTANCE := 48.0  ## px: a cursor closer to the ship than this does not turn it
-const WON_TEXT := "Pirate wrecked. Salvage comes later. Esc to return"
+const WON_TEXT := "Pirate wrecked. Esc to return"
 const LOST_TEXT := "Your ship is wrecked. R to restart"
 
 var arena: Arena
 var ai: PilotAI
+var jump_charge := -1.0  ## seconds the jump drive has spooled (J); -1 while it is not spooling
 var input := {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}  ## the player's keys, set by the view: W/S throttle, A/D "turn" (keys steering) or "strafe" (mouse steering)
 var cursor: Variant = null  ## the world point the mouse is on, set by the view each frame; the ship turns toward it (mouse steering) and the fixed guns' barrels follow it. null: keys steering, barrels at rest
 var enemy_label := "Pirate"
@@ -69,6 +71,21 @@ func start(player: Ship, enemy: Ship, seed_value := 1) -> void:
 
 
 ## Run `dt` seconds in fixed substeps: the player's helm, the pilot, then the arena.
+## J in a fight: start spooling the jump drive. "" when it starts, else why not.
+func start_jump() -> String:
+	if jump_charge >= 0.0:
+		return "The jump drive is already spooling"
+	if state() != "fighting":
+		return "No need to jump now"
+	jump_charge = 0.0
+	return ""
+
+
+## True once the jump drive has spooled: the player can leave at any range.
+func jump_ready() -> bool:
+	return jump_charge >= JUMP_SPOOL
+
+
 func tick(dt: float) -> void:
 	_acc = minf(_acc + dt, MAX_TICKS * STEP)
 	while _acc >= STEP - 1e-9:
@@ -79,6 +96,8 @@ func tick(dt: float) -> void:
 			arena.aim_points[PLAYER] = cursor
 		ai.think(STEP)
 		arena.step(STEP)
+		if jump_charge >= 0.0 and state() == "fighting":
+			jump_charge += STEP
 
 
 ## The helm the player's ship gets this substep. Mouse steering (data/flight.json controls.steer, with
@@ -125,7 +144,7 @@ func distance() -> float:
 
 ## May the player leave (Esc)? Once the enemy is wrecked, or when the two are far apart.
 func can_leave() -> bool:
-	return arena.ships[ENEMY].wrecked or distance() > LEAVE_DISTANCE
+	return arena.ships[ENEMY].wrecked or distance() > LEAVE_DISTANCE or jump_ready()
 
 
 ## The player's weapons in slot order: [{uid, id, name, group, turret}]: placed ones by uid, then virtual mounts as added.
@@ -203,13 +222,36 @@ func ability_state(s: Dictionary) -> Dictionary:
 		"cooldown": float(s["ability"].get("cooldown", 0.0)), "reason": "" if state in ["active", "ready"] else why}
 
 
+## The player presses an arrow key: one step of shield balance toward "up" (bow), "down" (stern), "left"
+## (port) or "right" (starboard). "" when it moved, else why not.
+func shift_shield(dir: String) -> String:
+	return Shields.shift(arena.ships[PLAYER], dir)
+
+
+## The player presses End: every sector back to weight 1. The losers drop at once, the gainers recharge.
+func reset_shield() -> void:
+	Shields.reset_even(arena.ships[PLAYER])
+
+
+## What the shield diagram shows: one entry per sector of the player's bubble, bow first, clockwise:
+## {layers, cap, weight, open, filling}. Empty with no shield generator.
+func shield_sectors() -> Array:
+	var co = arena.ships[PLAYER]
+	var out := []
+	if co.layers_cap <= 0:
+		return out
+	for s in co.sectors:
+		out.append(Shields.sector_state(co, s, arena.tick))
+	return out
+
+
 ## Where the camera should be and how far to zoom so both ships fit a viewport of `view` px:
 ## {center, zoom}. `margin`: the fraction of the screen kept free.
 func framing(view: Vector2, margin := 0.2) -> Dictionary:
 	var a = arena.ships[PLAYER]
 	var b = arena.ships[ENEMY]
-	var reach_a: float = (Shields.axes(a).length() + 1.0) * arena.CELL
-	var reach_b: float = (Shields.axes(b).length() + 1.0) * arena.CELL
+	var reach_a: float = (Shields.reach(a) + 1.0) * arena.CELL
+	var reach_b: float = (Shields.reach(b) + 1.0) * arena.CELL
 	var centre: Vector2 = (a.flight.pos + b.flight.pos) / 2.0
 	var half: Vector2 = (a.flight.pos - b.flight.pos).abs() / 2.0 + Vector2.ONE * maxf(reach_a, reach_b)
 	var zoom := minf(view.x / (2.0 * half.x), view.y / (2.0 * half.y)) * (1.0 - margin)
