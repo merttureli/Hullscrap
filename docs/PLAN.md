@@ -19,7 +19,7 @@ Placement uses square hitboxes on the grid, but placed objects should look natur
    - They have skills that improve with use.
    - They man systems, which run better when manned (FTL), and fight fires, repair and heal on their own.
    - You set priorities, not every step.
-5. **Two views.** An interior view with the ship centred and space scrolling past, and a tactical view with a free camera for ship-to-ship fights.
+5. **Raft in space (owner, 2026-10-30).** Each place in the Drift is an open sector you fly through with the ship centred. Debris drifts past on the current, and your **salvage intakes** collect it for a steady income. A **radar** finds points of interest (stores, wrecks, distress beacons, unknown ships, mining fields, quests); you set a course, the helm flies there while you walk around inside, and when you're done you **light-speed** to the next place. Zoom out for fights, which happen in the same space. See CONTENT section 11.
 6. **Docking is physical.** Airlocks connect, and you walk aboard another ship to trade or board it.
 7. **On foot: walk aboard other ships and stations.** This is what sets us apart from FTL, and it gets its own section below.
 8. **Salvage and craft (Subnautica-style).**

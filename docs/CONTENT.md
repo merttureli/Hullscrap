@@ -468,3 +468,97 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - Fields roll a richness (poor, rich, motherlode) and a danger tier. Crystal fields sit near Dead Gates and are Warden-guarded.
   - Before the mini-game exists, `asteroid_field` events offer a text version: surface mining (safe, small yield) or deep cracking (risky, bigger yield, hull damage chance).
 - **The same mini-game later salvages wrecks** (the "hullscrapper" fantasy): cut a dead ship apart and its components drop as chunks to scoop (`wreck` cells instead of ore). One mechanic, two content streams.
+
+## 11. Sector space: Raft in space (owner, 2026-10-30; this is the core loop)
+> "More Raft-like: shoot resources that float around space, build collection chambers to get a steady gain of resources. A radar or beacon shows where the big events are, and you set your course there. When you're done with a place, you light-speed to another. Every place has a few notable areas: mining, quests, unknown ships, a store, an abandoned station, a distress beacon."
+
+**Two scales**:
+- **The Drift map** (section 8) is the **macro** layer: places linked by lanes. Moving between them is a **light-speed jump** (fuel, a spool-up).
+- Each place is a **sector**: an open, real-time region of space you **fly through**. The ship is centred, space and debris drift past (like Raft), and the crew live and work inside while you travel.
+- **Combat, mining, salvage and events all happen in the sector.** The combat arena becomes sector space, with no separate screen.
+
+### The sector
+- **Generated from the node's seed and type**: a region about 24,000 × 24,000 px.
+  - A **current**: a direction and speed (20–60 px/s) that debris drifts along. The Drift literally drifts.
+  - A **debris density**, with the theme set by the node type: wreck fields are dense with salvage, asteroid fields with rock, empty sectors sparse.
+  - **2–6 points of interest (POIs)**, placed 3,000–12,000 px from where you arrive.
+- **POI types**:
+  - station or store, trader, distress beacon, wreck, abandoned station, mining field;
+  - unknown ship (could be a trader, a pirate, refugees or a derelict);
+  - pirate nest, Concord checkpoint, anomaly, quest site.
+  - The node type sets the mix: a `pirate` node has a nest plus a wreck or two; a `trader` node has a store plus a mining field; and so on (`data/sectors.json`).
+- **Approaching a POI** (within 800 px) runs **its event** (section 8's event system, unchanged). A `fight` effect spawns the enemy ship physically in the sector, near the POI. A store opens the station menu.
+  - POIs remember what's done. **The sector panel lists them, and when you've done what you want, you jump.**
+- **Ambient encounters**: while you're in a sector, a roll every ~90 s can spawn a passing ship (trader, patrol, pirate) at the radar's edge, which comes to you or passes by.
+
+### Drifting resources, the Raft loop
+- **Debris spawns continuously upstream of the ship**, in a ring 1,500–3,000 px out, drifts along the current, and despawns when far behind.
+- **Types** (`data/debris.json`, content):
+  - scrap chunk (scrap 2–5), copper coil (copper 1–3), polymer barrel (polymer 2), ice chunk (refills O2 10%);
+  - sealed crate (shoot it open: 1–2 random items or materials);
+  - an ore rock (shoot it to break it into chunks, the mining rules in section 10);
+  - a dead drone (salvage: a chance of a component);
+  - a fuel canister (fuel 1, rare).
+- **Collecting**: **Salvage Intakes**, the "collection chambers".
+  - An intake is a **hull mount** (section 4f) whose outside half is an open mouth with a magnetic net, and whose inside half is a sorting hopper that feeds cargo.
+  - Debris that **touches the mouth**, or comes within its **pull radius**, is drawn in and lands in cargo, up to the ore and hold capacity of section 10.
+  - Debris that hits plain hull just bounces (a scratch, if fast).
+  - So **where you put intakes, and how you fly into the current, decides your income.** Bow intakes catch what you fly into; side intakes catch the current as you drift.
+
+  | part | line | mouth | pull radius | notes |
+  |---|---|---|---|---|
+  | Net Mouth | scrap | 2×2 out / 2×2 in | 1 cell | no power; jams sometimes (reliability) |
+  | Salvage Intake Mk1–Mk3 | standard | 4×2 out / 4×2 in | 2 / 3 / 4 cells | power −1 / −1 / −2 |
+  | Lumen Siphon | neon | 4×2 out / 4×2 in | 6 cells | power −3; pulls only small debris |
+  | Tractor Beam Mk1–Mk2 | standard | turret | 300 / 450 px | **Q** held: pulls debris toward the nearest intake (section 10) |
+- **Shooting debris**: any weapon breaks a crate or rock into chunks. Mining lasers do it well (section 10).
+- **The target income**: idle drifting with one Mk1 intake brings ~15–25 scrap a minute plus a bit of copper and polymer. Actively chasing debris and breaking crates doubles that. Big hauls come from POIs (wrecks, mining fields, quests).
+  - This is the steady, reliable income the owner asked for. Fights and quests are the jackpots.
+
+### Radar and beacons
+- **What you can see**:
+  - `beacon` POIs (stations, stores, traders, distress beacons, quest markers) **broadcast**: you always know their bearing, from anywhere in the sector.
+  - `signal` POIs (wrecks, abandoned stations, mining fields, unknown ships) need a **radar** within its range.
+  - `hidden` ones (ambushes, a ship running dark) show only within visual range (1,500 px) or to a Mk3 radar.
+- **Radar** (a hull mount: an inside console plus an outside dish that turns):
+  - Mk1: range 6,000 px, shows "contact" and the bearing.
+  - Mk2: 10,000 px, and **identifies the type**.
+  - Mk3: 16,000 px, sees hidden contacts.
+  - Scrap "Listening Horn": 5,000 px, cheap, no power. Neon "Lumen Eye": 14,000 px; identifies; ion-weak.
+  - Without a radar you see only beacons and what's in visual range.
+- **HUD**:
+  - A **compass ring** around the ship and **edge markers** for known contacts: an icon, the distance, and the type once identified.
+  - Debris shows on the ring as faint dots within 2,000 px.
+  - **Click a marker to set a course.**
+
+### Flying and the helm
+- **The ship moves when the helm is manned.** With a course set, a crew member at the helm **steers there on autopilot**: it rotates toward the course, thrusts, slows on arrival, and avoids rocks.
+- **The player can take the helm** (E at the helm) and fly by hand with the flight controls of section 4. **E again** hands the helm back to the autopilot.
+- With nobody at the helm, the ship drifts with the current (and still collects debris).
+- So you can walk around inside, fight fires, man a gun or build while the ship travels, which is Raft's core feeling.
+- **Combat while walking**: fixed guns fire only when someone aims them. The pilot at the helm aims the bow guns; a crew member at a weapon station fires at the nearest hostile within the gun's arc (with the AI's aim skill). Turrets fire on their own.
+
+### Light speed (leaving)
+- **M** opens the Drift map. Pick a linked place and the jump drive spools for **8 s**: a visible charge, and you can keep flying.
+- **It's blocked while a hostile ship is within 2,000 px** ("hostiles too close to jump"). Fuel is spent when it fires, as section 8 says (including `fuel_mult`).
+- Arriving puts you at the sector's arrival point. Sectors you've visited remember their POIs.
+
+### What changes in sections 8 and 10
+- A Drift **node's type is now its sector's theme**: it sets the POI mix and the debris density. Its events run at the matching POIs, not on arrival.
+- The debt clock, reputation, stations, loot and saves stay the same.
+- **Mining** happens at mining-field POIs and on the ore rocks drifting by, with the same cutting rules, in the same space.
+
+### Order (each step is a brief)
+1. **Sector core** (logic, headless tests):
+   - sector generation from a node;
+   - the debris spawner and bodies, intakes and collecting, breaking debris;
+   - radar visibility rules;
+   - the autopilot to a course;
+   - the jump spool;
+   - POI triggering into events;
+   - fights spawned in place.
+
+   It builds on the arena after the mounts and shields v2 merges.
+2. **Sector view**: the ship-centred interior while flying, parallax space, debris sprites, the compass ring and edge markers, click to set a course, zooming from interior to flight view, and combat inside the sector.
+3. **Content**: intakes, radars and debris data with art (drift pieces, intake mouths, radar dishes), POI types in `data/sectors.json`, and writer passes for POI events.
+4. **On foot** at POIs (docking, abandoned stations, boarding), later, as PLAN says.
