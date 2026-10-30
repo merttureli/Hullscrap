@@ -6,16 +6,22 @@ extends RefCounted
 ##             A door is a piece of two cells: "to" a door tile builds one starting at "cell", going
 ##             along "axis" (Vector2i.RIGHT or DOWN; left out = the grid's automatic choice). Removing
 ##             or replacing either cell of a door piece takes the whole piece (it is one step).
+##             A solid tile may carry "shape" (a cell shape of shapes.gd), "rot" and "mirror": the cell
+##             takes that shape (left out = a full square). Its cost, hp and mass scale with the area.
+##   piece     {"layer": "piece", "piece": id of shapes.gd, "tile": solid tile id, "anchor", "rot", "mirror"}
+##             builds all the cells of a shaped piece (slope45, slope2, round2...) or none of them.
 ##   component {"layer": "component", "id", "anchor", "rot"} places; {"layer": "component", "cell"} removes
 ##   cable     {"layer": "cable", "cell"} places; add "remove": true to remove
 ## Placing a component takes one item with its id from the cargo; removing it gives the item back.
 ## A cable costs build.json's cable_cost per cell, refunded in full. A tile costs per cell, so a door
 ## piece costs twice. A step is the list of what was really done: tiles {layer, cell, from, to}
-## (+ "from_open" for a removed open door; a door piece is two entries),
+## (+ "from_open" for a removed open door, "from_shape" / "to_shape" for a shaped cell; a door piece
+## and a shaped piece are one entry per cell),
 ## components {layer, uid, id, anchor, rot, added}, cables {layer, cell, added}.
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
+const Shapes = preload("res://scripts/ship/shapes.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
 const MAX_HISTORY := 200
 const BUILD_PATH := "res://data/build.json"
@@ -144,6 +150,19 @@ func plan_cables(mode: int, remove: bool, a: Vector2i, b: Vector2i, path: Array 
 	return _clip(changes)
 
 
+## Build piece `piece` (shapes.gd: slope45, slope2, round2...) of the solid tile `tile` with its
+## top-left cell on `anchor`, turned `rot` quarter turns and optionally mirrored: one change, one undo step.
+func plan_piece(piece: String, tile: String, anchor: Vector2i, rot := 0, mirror := false) -> Dictionary:
+	if not Shapes.has_piece(piece):
+		return {"changes": [], "error": "unknown piece"}
+	if not grid.tile_flag(tile, "solid"):
+		return {"changes": [], "error": "only walls take a shape"}
+	for pc in Shapes.piece_cells(piece, anchor, rot, mirror):
+		if not grid.in_bounds(pc["cell"]):
+			return {"changes": [], "error": "outside the hull"}
+	return {"changes": [{"layer": "piece", "piece": piece, "tile": tile, "anchor": anchor, "rot": posmod(rot, 4), "mirror": mirror}], "error": ""}
+
+
 ## Place component `id` with its top-left cell on `anchor`, turned `rot` quarter turns.
 func plan_component(id: String, anchor: Vector2i, rot: int) -> Dictionary:
 	if not grid.in_bounds(anchor):
@@ -258,7 +277,9 @@ func _run(changes: Array) -> Dictionary:
 	for ch in changes:
 		match ch.get("layer", "tile"):
 			"tile":
-				reasons.append(_try_tile(ch["cell"], ch["to"], step, ch.get("axis", Vector2i.ZERO)))
+				reasons.append(_try_tile(ch["cell"], ch["to"], step, ch.get("axis", Vector2i.ZERO), Shapes.norm({"shape": ch.get("shape", Shapes.FULL), "rot": ch.get("rot", 0), "mirror": ch.get("mirror", false)})))
+			"piece":
+				reasons.append(_try_piece(ch, step))
 			"component":
 				reasons.append(_try_component(ch, step))
 			"cable":
@@ -268,17 +289,35 @@ func _run(changes: Array) -> Dictionary:
 	return {"step": step, "reasons": reasons}
 
 
+## Build all the cells of a piece, or none: a cell that cannot be built undoes the cells before it.
+func _try_piece(ch: Dictionary, step: Array) -> String:
+	if not Shapes.has_piece(str(ch.get("piece", ""))):
+		return "unknown piece"
+	var tile := str(ch.get("tile", ""))
+	if not grid.tile_flag(tile, "solid"):
+		return "only walls take a shape"
+	var done := []
+	for pc in Shapes.piece_cells(ch["piece"], ch["anchor"], int(ch.get("rot", 0)), bool(ch.get("mirror", false))):
+		var why := _try_tile(pc["cell"], tile, done, Vector2i.ZERO, Shapes.norm(pc))
+		if why != "":
+			_revert(done)
+			return why
+	step.append_array(done)
+	return ""
+
+
 ## Build `to` on `c` ("" removes). A door is a piece of two cells and so is any change to a door cell.
-func _try_tile(c: Vector2i, to: String, step: Array, axis := Vector2i.ZERO) -> String:
+## `shape` ({shape, rot, mirror} or {} for a full square) is the shape the new cell takes.
+func _try_tile(c: Vector2i, to: String, step: Array, axis := Vector2i.ZERO, shape := {}) -> String:
 	var placing_door := to != "" and grid.tile_flag(to, "door")
 	var axis_used := (axis if axis != Vector2i.ZERO else grid.door_axis_at(c)) if placing_door else Vector2i.ZERO
 	var why: String
 	var cells: Array[Vector2i] = [c]
 	if placing_door:
-		why = grid.can_place_door(to, c, axis_used)
+		why = grid.can_place_door(to, c, axis_used) if shape.is_empty() else "only walls take a shape"
 		cells.append(c + axis_used)
 	else:
-		why = grid.can_remove(c) if to == "" else grid.can_place(to, c)
+		why = grid.can_remove(c) if to == "" else grid.can_place(to, c, shape)
 		if grid.tile_flag(grid.get_tile(c), "door"):
 			cells = grid.door_piece(c)
 	if why == "":
@@ -295,12 +334,16 @@ func _try_tile(c: Vector2i, to: String, step: Array, axis := Vector2i.ZERO) -> S
 		var e := {"layer": "tile", "cell": p, "from": from, "to": to}
 		if grid.is_door_open(p):
 			e["from_open"] = true
+		if not grid.shape_of(p).is_empty():
+			e["from_shape"] = grid.shape_of(p).duplicate()
+		if not shape.is_empty() and to != "":
+			e["to_shape"] = shape
 		edits.append(e)
-		_add_cost(old_cost, grid.cost_of(from))
+		_add_cost(old_cost, grid.cost_of(from, grid.area_at(p)))
 	var new_cost := {}
 	if to != "":
 		for p in cells:
-			_add_cost(new_cost, grid.cost_of(to))
+			_add_cost(new_cost, grid.cost_of(to, Shapes.area_of(shape)))
 	inventory.refund(old_cost)
 	var short: Dictionary = inventory.missing(new_cost)
 	if not short.is_empty():
@@ -312,7 +355,7 @@ func _try_tile(c: Vector2i, to: String, step: Array, axis := Vector2i.ZERO) -> S
 	elif to == "":
 		grid.remove(c)
 	else:
-		grid.place(to, c)
+		grid.place(to, c, shape)
 	step.append_array(edits)
 	return ""
 
@@ -390,9 +433,11 @@ func _replay(e: Dictionary, forward: bool) -> void:
 		_:
 			var from: String = e["from"] if forward else e["to"]
 			var to: String = e["to"] if forward else e["from"]
-			_shift(grid.cost_of(from), 1)
-			_shift(grid.cost_of(to), -1)
-			grid.force_tile(e["cell"], to)
+			var from_shape: Dictionary = e.get("from_shape", {}) if forward else e.get("to_shape", {})
+			var to_shape: Dictionary = e.get("to_shape", {}) if forward else e.get("from_shape", {})
+			_shift(grid.cost_of(from, Shapes.area_of(from_shape)), 1)
+			_shift(grid.cost_of(to, Shapes.area_of(to_shape)), -1)
+			grid.force_tile(e["cell"], to, to_shape)
 			if not forward and e.get("from_open", false):
 				grid.set_door_open(e["cell"], true)
 

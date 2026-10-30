@@ -6,6 +6,8 @@ extends RefCounted
 
 const VERSION := 2  # 2 adds door states; version 1 saves still load (all doors closed)
 # Combat damage (hp, hp_max, breached) is saved as optional keys, written only when there is damage.
+# Cell shapes (shapes, breached_shapes) are optional keys too, written only for cells that are not a full square.
+const Shapes = preload("res://scripts/ship/shapes.gd")
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 
 var size: Vector2i
@@ -16,6 +18,8 @@ var door_open := {}  # Vector2i -> true for doors that are open; closed doors ar
 var hp := {}  # Vector2i -> float: current hp of damaged cells (a cell not listed has full hp)
 var hp_max := {}  # Vector2i -> float: max hp of cells burnt below their tile's hp (ablative); others are absent
 var breached := {}  # Vector2i -> tile id: cells shot open (now empty), with the tile to restore on repair
+var shapes := {}  # Vector2i -> {shape, rot, mirror}: solid cells that are not a full square (see shapes.gd); a cell not listed is full
+var breached_shapes := {}  # Vector2i -> {shape, rot, mirror}: the shape of a breached cell, restored on repair
 
 
 func _init(p_size := Vector2i(63, 63), p_defs = null) -> void:
@@ -45,14 +49,18 @@ func get_tile(c: Vector2i) -> String:
 	return tiles.get(c, "")
 
 
-## Why `id` cannot go on `c`, or "" when it can. Placing over a different tile replaces it.
-func can_place(id: String, c: Vector2i) -> String:
+## Why `id` cannot go on `c`, or "" when it can. Placing over a different tile replaces it. `shape`
+## ({shape, rot, mirror}, default a full square) is the shape the cell takes; only solid tiles take one.
+func can_place(id: String, c: Vector2i, shape := {}) -> String:
 	if not in_hull(c):
 		return "outside the hull"
 	if defs != null and not defs.has(id):
 		return "unknown tile"
+	var sh := Shapes.norm(shape)
+	if not sh.is_empty() and not _flag(id, "solid"):
+		return "only walls take a shape"
 	var cur := get_tile(c)
-	if cur == id:
+	if cur == id and shape_of(c) == sh:
 		return "already there"
 	if cur != "" and not _flag(id, "solid") and _supports_door(c):
 		return "a door needs this wall"
@@ -63,13 +71,13 @@ func can_place(id: String, c: Vector2i) -> String:
 
 ## Place tile `id` on `c`. A door goes in as a piece of two cells starting at `c` (door_axis_at
 ## picks the direction; place_door() chooses it). Replacing a door cell replaces its whole piece.
-func place(id: String, c: Vector2i) -> bool:
-	if can_place(id, c) != "":
+func place(id: String, c: Vector2i, shape := {}) -> bool:
+	if can_place(id, c, shape) != "":
 		return false
 	if _flag(id, "door"):
 		return place_door(id, c, door_axis_at(c))
 	for p in door_piece(c) if _flag(get_tile(c), "door") else [c]:
-		force_tile(p, id)
+		force_tile(p, id, shape)
 	return true
 
 
@@ -130,8 +138,9 @@ func door_piece(c: Vector2i) -> Array[Vector2i]:
 
 
 ## Set the tile on `c` ("" clears it) without checking any rule, close any door there and forget
-## any damage on the cell. Only for replaying recorded edits; use place() and remove() for user actions.
-func force_tile(c: Vector2i, id: String) -> void:
+## any damage on the cell. `shape` ({shape, rot, mirror}) is the cell's new shape, a full square when
+## left out. Only for replaying recorded edits; use place() and remove() for user actions.
+func force_tile(c: Vector2i, id: String, shape := {}) -> void:
 	if id == "":
 		tiles.erase(c)
 	else:
@@ -140,17 +149,49 @@ func force_tile(c: Vector2i, id: String) -> void:
 	hp.erase(c)
 	hp_max.erase(c)
 	breached.erase(c)
+	breached_shapes.erase(c)
+	var sh := Shapes.norm(shape) if id != "" else {}
+	if sh.is_empty():
+		shapes.erase(c)
+	else:
+		shapes[c] = sh
+
+
+## Give the tile on `c` a shape (a full square erases it). Rotation is in quarter turns clockwise.
+func set_shape(c: Vector2i, shape: String, rot := 0, mirror := false) -> void:
+	var sh := Shapes.norm({"shape": shape, "rot": rot, "mirror": mirror})
+	if sh.is_empty():
+		shapes.erase(c)
+	else:
+		shapes[c] = sh
+
+
+## The stored shape of the cell on `c`: {shape, rot, mirror}, or {} for a full square.
+func shape_of(c: Vector2i) -> Dictionary:
+	return shapes.get(c, {})
+
+
+## Solid area of the cell on `c` in cells: 1 for a full square, less for a slope or a curve.
+func area_at(c: Vector2i) -> float:
+	return Shapes.area_of(shapes[c]) if shapes.has(c) else 1.0
+
+
+## The solid polygon of the cell on `c` in cell-local coordinates (the unit square when it is full).
+func polygon_at(c: Vector2i) -> PackedVector2Array:
+	var sh := shape_of(c)
+	return Shapes.cell_polygon(str(sh["shape"]), int(sh["rot"]), bool(sh["mirror"])) if not sh.is_empty() else Shapes.cell_polygon(Shapes.FULL)
 
 
 ## Max hp of the tile on `c`: what ablative burn left of it, else its tile's `hp` (1 when the tile
-## has none, or the grid has no rules); 0 where there is no tile.
+## has none, or the grid has no rules) times the cell's solid area, at least 1; 0 where there is no tile.
 func max_hp_of(c: Vector2i) -> float:
 	var id := get_tile(c)
 	if id == "":
 		return 0.0
 	if hp_max.has(c):
 		return hp_max[c]
-	return float(defs.get_def(id).get("hp", 1.0)) if defs != null else 1.0
+	var base := float(defs.get_def(id).get("hp", 1.0)) if defs != null else 1.0
+	return maxf(base * area_at(c), 1.0) if shapes.has(c) else base
 
 
 ## Current hp of the tile on `c`; 0 where there is no tile.
@@ -164,8 +205,11 @@ func breach(c: Vector2i) -> String:
 	var id := get_tile(c)
 	if id == "":
 		return ""
+	var sh := shape_of(c)
 	force_tile(c, "")
 	breached[c] = id
+	if not sh.is_empty():
+		breached_shapes[c] = sh
 	return id
 
 
@@ -173,7 +217,7 @@ func breach(c: Vector2i) -> String:
 func repair(c: Vector2i) -> bool:
 	if not breached.has(c):
 		return false
-	force_tile(c, breached[c])
+	force_tile(c, breached[c], breached_shapes.get(c, {}))
 	return true
 
 
@@ -194,15 +238,16 @@ func remove(c: Vector2i) -> bool:
 	return true
 
 
-## Materials needed to build tile `id` (material id -> count); {} when it is free or unknown.
-func cost_of(id: String) -> Dictionary:
+## Materials needed to build tile `id` (material id -> count); {} when it is free or unknown. A
+## cell that is only part of a square (`area` < 1) costs that part of each count, rounded up.
+func cost_of(id: String, area := 1.0) -> Dictionary:
 	if defs == null:
 		return {}
 	var raw = defs.get_def(id).get("cost", {})
 	var cost := {}
 	if raw is Dictionary:
 		for m in raw:  # JSON numbers are floats
-			cost[str(m)] = int(raw[m])
+			cost[str(m)] = int(raw[m]) if area >= 1.0 else ceili(float(raw[m]) * area - 1e-9)
 	return cost
 
 
@@ -210,7 +255,7 @@ func cost_of(id: String) -> Dictionary:
 func total_cost() -> Dictionary:
 	var sum := {}
 	for c in tiles:
-		var cost := cost_of(tiles[c])
+		var cost := cost_of(tiles[c], area_at(c))
 		for m in cost:
 			sum[m] = int(sum.get(m, 0)) + int(cost[m])
 	return sum
@@ -254,6 +299,12 @@ func to_dict() -> Dictionary:
 			for c in _sorted(pair[1].keys()):
 				list.append([c.x, c.y, pair[1][c]])
 			d[pair[0]] = list
+	for pair in [["shapes", shapes], ["breached_shapes", breached_shapes]]:
+		if not pair[1].is_empty():
+			var list := []
+			for c in _sorted(pair[1].keys()):
+				list.append([c.x, c.y, pair[1][c]["shape"], pair[1][c]["rot"], pair[1][c]["mirror"]])
+			d[pair[0]] = list
 	return d
 
 
@@ -281,7 +332,9 @@ func load_dict(d: Dictionary) -> String:
 	var new_hp = _cell_values(d, "hp", false)
 	var new_hp_max = _cell_values(d, "hp_max", false)
 	var new_breached = _cell_values(d, "breached", true)
-	if new_hp == null or new_hp_max == null or new_breached == null:
+	var new_shapes = _shape_values(d, "shapes")
+	var new_breached_shapes = _shape_values(d, "breached_shapes")
+	if new_hp == null or new_hp_max == null or new_breached == null or new_shapes == null or new_breached_shapes == null:
 		return "bad ship data"
 	for c in new_breached:
 		if defs != null and not defs.has(new_breached[c]):
@@ -292,6 +345,8 @@ func load_dict(d: Dictionary) -> String:
 	hp = new_hp
 	hp_max = new_hp_max
 	breached = new_breached
+	shapes = new_shapes
+	breached_shapes = new_breached_shapes
 	door_open.clear()
 	for p in d.get("doors_open", []):
 		if p is Array and p.size() == 2 and _flag(get_tile(Vector2i(int(p[0]), int(p[1]))), "door"):
@@ -310,6 +365,22 @@ static func _cell_values(d: Dictionary, key: String, text: bool):
 		if not (p is Array and p.size() == 3 and (p[2] is String if text else (p[2] is float or p[2] is int))):
 			return null
 		out[Vector2i(int(p[0]), int(p[1]))] = p[2] if text else float(p[2])
+	return out
+
+
+## The optional save list `key` ([[x, y, shape, rot, mirror], ...]) as cell -> {shape, rot, mirror}; {}
+## when absent, null when malformed or naming an unknown shape. Full squares are dropped.
+static func _shape_values(d: Dictionary, key: String):
+	var list = d.get(key, [])
+	if not list is Array:
+		return null
+	var out := {}
+	for p in list:
+		if not (p is Array and p.size() == 5 and p[2] is String and Shapes.has_shape(p[2]) and (p[3] is float or p[3] is int) and p[4] is bool):
+			return null
+		var sh := Shapes.norm({"shape": p[2], "rot": int(p[3]), "mirror": p[4]})
+		if not sh.is_empty():
+			out[Vector2i(int(p[0]), int(p[1]))] = sh
 	return out
 
 

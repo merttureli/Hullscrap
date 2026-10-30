@@ -675,6 +675,22 @@
       "tools": [],
       "time": 6,
       "category": "gear"
+    },
+    {
+      "id": "inertial_dampener",
+      "output": {
+        "item": "inertial_dampener",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 8,
+        "titanium": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 25,
+      "category": "system"
     }
   ]
 }
