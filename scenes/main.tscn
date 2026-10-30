@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/build/build_mode.gd" id="1_build"]
 [ext_resource type="Script" path="res://scripts/space/starfield.gd" id="2_stars"]
 [ext_resource type="Script" path="res://scripts/crew/crew_view.gd" id="3_crew"]
 [ext_resource type="Script" path="res://scripts/sim/ship_sim.gd" id="4_sim"]
 [ext_resource type="Script" path="res://scripts/combat/combat_view.gd" id="5_combat"]
+[ext_resource type="Script" path="res://scripts/ui/ship_picker.gd" id="6_picker"]
 
 [node name="Main" type="Node2D"]
 
@@ -37,3 +38,15 @@ offset_top = 10.0
 offset_right = 900.0
 offset_bottom = 120.0
 theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+
+[node name="PickerLayer" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="ShipPicker" type="Control" parent="PickerLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6_picker")

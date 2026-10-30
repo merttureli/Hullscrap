@@ -16,6 +16,7 @@ const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
 const MAX_FRAME := 0.25  ## longest time step a slow frame may take, seconds
 
 var ships: Array = []
+var design_path := ""  ## the design file the player's ship was last loaded from; "" for the empty starter hull
 var _rngs := {}  # ship -> its RandomNumberGenerator
 
 
@@ -26,6 +27,21 @@ func _init() -> void:
 ## The ship the player controls and builds on.
 func player_ship() -> Ship:
 	return ships[0] if not ships.is_empty() else null
+
+
+## Replace the player's ship with the design in `path` (Ship.from_design): its crew, chronicle and
+## random rolls start afresh. "" when it worked, else why not (nothing changes then).
+func choose_ship(path: String) -> String:
+	var ship: Ship = Ship.from_design(path)
+	if ship == null:
+		return "cannot load " + path
+	if ships.is_empty():
+		ships.append(ship)
+	else:
+		_rngs.erase(ships[0])
+		ships[0] = ship
+	design_path = path
+	return ""
 
 
 func _process(dt: float) -> void:
