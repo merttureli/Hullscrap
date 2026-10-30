@@ -1,4 +1,15 @@
 {
   "_doc": "What the ship carries at the start of a new game: item or material id -> count. Item ids are system ids from components.json (crafted items you place from cargo).",
-  "cargo": {"scrap": 400, "copper": 30, "reactor_mk1": 1, "engine_mk1": 2, "oxygen_gen": 1, "helm": 1, "bed": 2, "fabricator": 1, "shield_mk1": 1, "laser_mk1": 1}
+  "cargo": {
+    "scrap": 1200,
+    "copper": 120,
+    "reactor_mk1": 1,
+    "engine_mk1": 2,
+    "oxygen_gen": 1,
+    "helm": 1,
+    "bed": 2,
+    "fabricator": 1,
+    "shield_mk1": 1,
+    "laser_mk1": 1
+  }
 }
