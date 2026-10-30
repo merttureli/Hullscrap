@@ -2,13 +2,14 @@ extends RefCounted
 ## The ship's build grid: which cells are inside the hull and what is built on each cell.
 ## Pure data (no nodes, no drawing) so every rule can be tested headless.
 
-const VERSION := 1
+const VERSION := 2  # 2 adds door states; version 1 saves still load (all doors closed)
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 
 var size: Vector2i
 var defs  # tile_defs.gd instance, or null for a rule-less grid
 var hull := {}   # Vector2i -> true: cells where building is allowed
 var tiles := {}  # Vector2i -> tile id
+var door_open := {}  # Vector2i -> true for doors that are open; closed doors are absent
 
 
 func _init(p_size := Vector2i(31, 31), p_defs = null) -> void:
@@ -57,8 +58,18 @@ func can_place(id: String, c: Vector2i) -> String:
 func place(id: String, c: Vector2i) -> bool:
 	if can_place(id, c) != "":
 		return false
-	tiles[c] = id
+	force_tile(c, id)
 	return true
+
+
+## Set the tile on `c` ("" clears it) without checking any rule, and close any door there.
+## Only for replaying recorded edits; use place() and remove() for user actions.
+func force_tile(c: Vector2i, id: String) -> void:
+	if id == "":
+		tiles.erase(c)
+	else:
+		tiles[c] = id
+	door_open.erase(c)
 
 
 func can_remove(c: Vector2i) -> String:
@@ -72,15 +83,50 @@ func can_remove(c: Vector2i) -> String:
 func remove(c: Vector2i) -> bool:
 	if can_remove(c) != "":
 		return false
-	tiles.erase(c)
+	force_tile(c, "")
 	return true
 
 
-func total_cost() -> int:
-	var sum := 0
+## Materials needed to build tile `id` (material id -> count); {} when it is free or unknown.
+func cost_of(id: String) -> Dictionary:
+	if defs == null:
+		return {}
+	var raw = defs.get_def(id).get("cost", {})
+	var cost := {}
+	if raw is Dictionary:
+		for m in raw:  # JSON numbers are floats
+			cost[str(m)] = int(raw[m])
+	return cost
+
+
+## Everything built so far, summed per material.
+func total_cost() -> Dictionary:
+	var sum := {}
 	for c in tiles:
-		sum += defs.cost(tiles[c]) if defs != null else 0
+		var cost := cost_of(tiles[c])
+		for m in cost:
+			sum[m] = int(sum.get(m, 0)) + int(cost[m])
 	return sum
+
+
+## True when tile `id` has the data flag `key` ("solid", "door").
+func tile_flag(id: String, key: String) -> bool:
+	return _flag(id, key)
+
+
+## Open or close the door on `c`. Returns false when there is no door there.
+func set_door_open(c: Vector2i, open: bool) -> bool:
+	if not _flag(get_tile(c), "door"):
+		return false
+	if open:
+		door_open[c] = true
+	else:
+		door_open.erase(c)
+	return true
+
+
+func is_door_open(c: Vector2i) -> bool:
+	return door_open.has(c)
 
 
 func to_dict() -> Dictionary:
@@ -90,20 +136,40 @@ func to_dict() -> Dictionary:
 	var t := []
 	for c in _sorted(tiles.keys()):
 		t.append([c.x, c.y, tiles[c]])
-	return {"version": VERSION, "size": [size.x, size.y], "hull": h, "tiles": t}
+	var o := []
+	for c in _sorted(door_open.keys()):
+		o.append([c.x, c.y])
+	return {"version": VERSION, "size": [size.x, size.y], "hull": h, "tiles": t, "doors_open": o}
 
 
-## Replace this grid with a saved one. Returns "" on success, else the reason.
+## Replace this grid with a saved one (version 1 or 2). Returns "" on success, else the reason;
+## nothing changes when it fails.
 func load_dict(d: Dictionary) -> String:
-	if int(d.get("version", 0)) != VERSION:
+	var version := int(d.get("version", 0))
+	if version < 1 or version > VERSION:
 		return "unsupported ship version"
-	size = Vector2i(int(d["size"][0]), int(d["size"][1]))
-	hull.clear()
-	tiles.clear()
+	if not (d.get("size") is Array and d["size"].size() == 2 and d.get("hull") is Array and d.get("tiles") is Array):
+		return "bad ship data"
+	var new_size := Vector2i(int(d["size"][0]), int(d["size"][1]))
+	var new_hull := {}
 	for p in d["hull"]:
-		hull[Vector2i(int(p[0]), int(p[1]))] = true
+		if not (p is Array and p.size() == 2):
+			return "bad ship data"
+		new_hull[Vector2i(int(p[0]), int(p[1]))] = true
+	var new_tiles := {}
 	for p in d["tiles"]:
-		tiles[Vector2i(int(p[0]), int(p[1]))] = str(p[2])
+		if not (p is Array and p.size() == 3):
+			return "bad ship data"
+		if defs != null and not defs.has(str(p[2])):
+			return "unknown tile " + str(p[2])
+		new_tiles[Vector2i(int(p[0]), int(p[1]))] = str(p[2])
+	size = new_size
+	hull = new_hull
+	tiles = new_tiles
+	door_open.clear()
+	for p in d.get("doors_open", []):
+		if p is Array and p.size() == 2 and _flag(get_tile(Vector2i(int(p[0]), int(p[1]))), "door"):
+			door_open[Vector2i(int(p[0]), int(p[1]))] = true
 	return ""
 
 

@@ -11,10 +11,15 @@ A top-down 2D spaceship game. Start with an empty hull, build walls, rooms and s
 | Input | Action |
 |---|---|
 | 1 / 2 / 3 | Floor / Wall / Door |
-| Left mouse (hold to paint) | Place: green ghost = allowed, red = not, with the reason at the top |
-| Right mouse (hold to erase) | Remove |
+| Left mouse (drag to paint) | Place; the whole stroke is one undo step. Green ghost = it will apply, red = not (reason at the top) |
+| Shift + left mouse drag | Straight line, locked to the horizontal or vertical axis |
+| Ctrl + left mouse drag | Rectangle. Floor fills it, wall makes a room (walls round the edge, floor inside); doors one at a time |
+| Right mouse (+ Shift / Ctrl) | The same three modes, but removing (100% refund) |
+| E over a door | Open / close it (free, not an undo step) |
+| Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z) | Undo / redo (tiles and cargo) |
 | Mouse wheel | Zoom |
-| Ctrl+S / Ctrl+L | Save / load the ship (`user://ship.json`) |
+| Ctrl+S / Ctrl+L | Save / load the whole ship: tiles, cargo, door states (`user://ship.json`) |
+| Esc | Cancel a drag |
 
 A door needs walls on two opposite sides, and a wall holding a door can't be removed.
 

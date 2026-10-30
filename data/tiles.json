@@ -1,8 +1,8 @@
 {
-  "_doc": "Buildable tiles. Content is data: add a tile here and it appears in build mode. Flags: solid (blocks movement, holds doors), door (needs solid tiles on two opposite sides).",
+  "_doc": "Buildable tiles. Content is data: add a tile here and it appears in build mode. Flags: solid (blocks movement, holds doors), door (needs solid tiles on two opposite sides). cost is a dict of material id -> count, paid from the ship's cargo.",
   "tiles": [
-    {"id": "floor", "name": "Floor", "color": "#3b4352", "cost": 1},
-    {"id": "wall", "name": "Wall", "color": "#9aa3b5", "cost": 2, "solid": true},
-    {"id": "door", "name": "Door", "color": "#e0a83a", "cost": 5, "door": true}
+    {"id": "floor", "name": "Floor", "color": "#3b4352", "cost": {"scrap": 1}},
+    {"id": "wall", "name": "Wall", "color": "#9aa3b5", "cost": {"scrap": 2}, "solid": true},
+    {"id": "door", "name": "Door", "color": "#e0a83a", "cost": {"scrap": 3, "copper": 1}, "door": true}
   ]
 }

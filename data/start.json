@@ -1,0 +1,4 @@
+{
+  "_doc": "What the ship carries at the start of a new game: item or material id -> count.",
+  "cargo": {"scrap": 400, "copper": 30}
+}
