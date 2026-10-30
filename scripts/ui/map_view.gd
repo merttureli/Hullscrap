@@ -41,6 +41,7 @@ var hover := ""  ## the node id under the mouse
 var message := ""
 var message_bad := false
 var new_seed := 0  ## the seed of the next new campaign; 0 picks one
+var save_path := Campaign.SAVE_PATH  ## where the campaign is saved with the ship (tests point it elsewhere)
 var hull := Vector2i.ZERO  ## (left, max) hull integrity, refreshed after every action
 var _arrived := false  # the arrival at the start of this campaign has been played
 var _fighting := false  # a fight of ours is on
@@ -244,7 +245,7 @@ func _on_fight_finished(result: Dictionary) -> void:
 
 ## Write the campaign next to the ship save. Returns "" or why not.
 func save_campaign() -> String:
-	return campaign.save() if campaign != null else ""
+	return campaign.save(save_path) if campaign != null else ""
 
 
 ## Load the campaign saved with the ship. An old ship save without one starts a new campaign.
@@ -252,7 +253,7 @@ func save_campaign() -> String:
 func load_campaign() -> String:
 	_ensure_panels()
 	var fresh := Campaign.new(new_seed if new_seed != 0 else randi())
-	var why := fresh.load_file()
+	var why := fresh.load_file(save_path)
 	if why == "":
 		campaign = fresh
 		_arrived = true
@@ -443,9 +444,10 @@ func _draw_tip(id: String) -> void:
 		lines.append("Unknown")
 		lines.append("Jump to find out" if campaign.drift.linked(campaign.current, id) else "Out of reach")
 	else:
-		lines.append(campaign.label(id))
-		if n["place"] == "":
-			lines.append(str(Campaign.type_info(str(n["type"]))["label"]) + (", Scrapper trader" if n.get("clan", false) else ""))
+		var type_label := str(Campaign.type_info(str(n["type"]))["label"])
+		lines.append(campaign.label(id) + (" (Scrapper trader)" if n.get("clan", false) else ""))
+		if n["place"] != "" or n.get("clan", false):
+			lines.append(type_label)
 		if n["type"] == "gate":
 			lines.append(Campaign.DARK_TEXT)
 		elif campaign.drift.linked(campaign.current, id):

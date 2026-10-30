@@ -344,18 +344,17 @@ func test_below_minus_five_a_station_refuses_docking() -> void:
 func test_hostile_concord_patrols_attack() -> void:
 	var c := _camp()
 	var ship := _ship()
-	var patrol := ""
-	for n in c.drift.nodes:
-		if n["type"] == "patrol":
-			patrol = n["id"]
-	if patrol == "":
-		return  # no patrol on this seed's map
+	var patrol: String = c.drift.ids()[10]  # any random node, made a patrol
+	c.drift.node(patrol)["type"] = "patrol"
 	c.current = patrol
+	var calm: Dictionary = c.arrive(ship)["event"]
+	check(calm.get("id", "") != "patrol_hostile", "at peace the patrol only inspects")
 	c.rep["concord"] = -6
 	var ev: Dictionary = c.arrive(ship)["event"]
-	eq(ev.get("id", ""), "patrol_hostile", "the patrol opens fire")
+	eq(ev.get("id", ""), "patrol_hostile", "below -5 the patrol opens fire")
 	var r := c.events.choose(ev, 0, c, ship, c.node(patrol))
 	eq(r["fight"], "tier", "and the fight starts")
+	eq(c.fight_path("tier", "patrol"), "res://data/ships/pirate_raider.json", "from the patrol table")
 
 
 func test_at_plus_five_prices_are_twenty_percent_off() -> void:
@@ -966,6 +965,7 @@ func test_the_campaign_is_saved_and_loaded_with_the_ship() -> void:
 	var d := _screen()
 	var map: MapView = d["map"]
 	map.event_panel.close()
+	map.save_path = "user://test_campaign_map.json"
 	map.campaign.flags["met_ma"] = true
 	map.campaign.jumps = 3
 	eq(map.save_campaign(), "", "saved")
@@ -974,7 +974,28 @@ func test_the_campaign_is_saved_and_loaded_with_the_ship() -> void:
 	eq(map.load_campaign(), "", "loaded")
 	check(map.campaign.flags.has("met_ma") and map.campaign.jumps == 3 and map.campaign.seed_value == 5, "the saved one is back")
 	check(not map.event_panel.visible, "without replaying the arrival")
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(Campaign.SAVE_PATH))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(map.save_path))
 	check(map.load_campaign() != "", "an old save with no campaign file says so")
 	eq(map.campaign.jumps, 0, "and a new campaign begins")
+	_free_screen(d)
+
+
+func test_a_derelict_log_is_shown_in_the_result_page() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var panel: EventPanel = map.event_panel
+	panel.close()
+	var id: String = map.campaign.events.logs.keys()[0]
+	var custom := Events.new("res://tests")
+	custom.add({"id": "log_event", "type": "wreck_field", "weight": 10, "once": false, "requires": {}, "text": "A pad glints in the wreck.",
+		"choices": [{"text": "Read it.", "outcomes": [{"weight": 1, "text": "You read.", "effects": {"log": id}}]}]}, "test.json")
+	map.campaign.events = custom
+	panel.open_event(custom.get_event("log_event"))
+	panel.choose(0)
+	eq(panel.result["logs"].size(), 1, "the log is in the result")
+	check(map.campaign.logs_found.has(id), "and remembered")
+	var lay := panel.layout()
+	check(lay["log"].size.y > 40.0 and lay["button"].position.y > lay["log"].end.y, "its box is laid out above the Continue button")
+	check(lay["panel"].encloses(lay["log"]) and lay["panel"].encloses(lay["button"]), "inside the panel")
+	check(EventPanel.tone_of("Log found: x") == 1 and EventPanel.tone_of("-20 credits") == -1 and EventPanel.tone_of("Debt -100 (900 left)") == 1 and EventPanel.tone_of("Debt +50") == -1 and EventPanel.tone_of("Hull integrity -10") == -1, "change lines are coloured by whether they help")
 	_free_screen(d)

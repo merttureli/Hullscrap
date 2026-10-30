@@ -108,13 +108,19 @@ func rows(col: int) -> Array:
 		if "debt" in cfg["services"]:
 			var pay := mini(int(c.cfg["debt"]["payment"]), c.debt)
 			out.append({"kind": "header", "label": "MA GANTRY'S DEBT: %d" % c.debt, "right": "behind %d" % c.behind() if c.behind() > 0 else ""})
-			out.append({"kind": "pay", "id": "pay", "label": "Pay %d" % pay, "right": "%d cr" % pay, "cost": pay})
-			out.append({"kind": "pay_all", "id": "pay_all", "label": "Pay it all", "right": "%d cr" % c.debt, "cost": c.debt})
+			if c.debt > 0:
+				out.append({"kind": "pay", "id": "pay", "label": "Pay %d" % pay, "right": "%d cr" % pay, "cost": pay})
+				out.append({"kind": "pay_all", "id": "pay_all", "label": "Pay it all", "right": "%d cr" % c.debt, "cost": c.debt})
+			else:
+				out.append({"kind": "note", "label": "Paid off. Ma has nothing more to say to you."})
 		if "repair" in cfg["services"]:
 			var each: int = c.price(int(c.cfg["prices"]["repair"]), _faction())
 			out.append({"kind": "header", "label": "HULL INTEGRITY: %d/%d" % [c.hull_left(s), c.hull_max(s)], "right": "%d cr a point" % each})
-			out.append({"kind": "repair", "id": "repair", "label": "Repair 10 points", "right": "%d cr" % (mini(10, c.hull_loss) * each), "cost": mini(10, c.hull_loss) * each})
-			out.append({"kind": "repair_all", "id": "repair_all", "label": "Repair all (%d points)" % c.hull_loss, "right": "%d cr" % (c.hull_loss * each), "cost": c.hull_loss * each})
+			if c.hull_loss > 0:
+				out.append({"kind": "repair", "id": "repair", "label": "Repair 10 points", "right": "%d cr" % (mini(10, c.hull_loss) * each), "cost": mini(10, c.hull_loss) * each})
+				out.append({"kind": "repair_all", "id": "repair_all", "label": "Repair all (%d points)" % c.hull_loss, "right": "%d cr" % (c.hull_loss * each), "cost": c.hull_loss * each})
+			else:
+				out.append({"kind": "note", "label": "The hull is sound."})
 		if "recruit" in cfg["services"]:
 			var price: int = c.price(int(c.cfg["prices"]["recruit"]), _faction())
 			out.append({"kind": "header", "label": "RECRUITS", "right": "%d cr each" % price})
