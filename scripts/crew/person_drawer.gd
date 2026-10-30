@@ -1,11 +1,169 @@
 extends RefCounted
-## Draws one crew member as a top-down person, about 3 cells across, in code (placeholder until real
-## art lands). Static: `draw_person(canvas, ...)` draws onto any CanvasItem inside its _draw().
-## Local frame while drawing: +x is where the person faces, +y their right-hand side, in cells;
+## Draws one crew member as a top-down person. draw() uses the layered pixel sprite of
+## art/crew/<species>/ (legs turned to the way they walk; torso, arms and the held item turned to
+## where they aim; the outfit tinted by their palette's "suit" colour through the colour masks; a
+## 1 px shadow) and falls back to the placeholder, drawn in code about 3 cells across, when that art
+## is missing. Static: draw(canvas, ...) draws onto any CanvasItem inside its _draw().
+## Placeholder local frame: +x is where the person faces, +y their right-hand side, in cells;
 ## everything is turned by `facing` and scaled by `cell_px`.
 
+const Art = preload("res://scripts/view/art.gd")
+const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
 const SEGMENTS := 20  ## points on a drawn ellipse
 const SCALE := 1.15  ## the figure below is drawn in units of this many cells: arms and legs reach about 3 cells across
+const STRIDE := PI  ## walk phase (radians) per cell walked: one full leg cycle every 2 cells
+const IDLE_SPEED := 2.2  ## radians per second of the breathing bob
+const TURN_RATE := 14.0  ## how fast the drawn legs follow the direction of movement
+const AIM_RATE := 18.0  ## how fast the drawn torso follows the aim
+const SHADOW := Color(0, 0, 0, 0.32)
+const DOWN_TINT := Color(0.5, 0.5, 0.55)
+const HAND_FRESH := 0.4  ## seconds a hand job (the player holding E) counts as going on after its last tick
+const JAB := 1.5  ## source px a tool jabs forward while working
+## The held item by the job; anything else with a job holds nothing, no job holds a pistol for the player.
+const JOB_ITEMS := {"extinguish": "extinguisher", "repair_breach": "wrench", "repair_component": "wrench"}
+
+
+## Update the drawing state `a` of crew member `m` by `dt` seconds. `a`: {last, phase, angle (the
+## way they move), aim (the way the torso points), moving}. `aim`: the wanted aim angle (radians).
+## The walk phase grows with the distance walked (with time when standing, for the breathing bob).
+static func animate(a: Dictionary, m, dt: float, aim: float) -> void:
+	var moved: float = (m.pos - a["last"]).length()
+	a["moving"] = moved > 0.0005
+	a["phase"] += (moved * STRIDE) if a["moving"] else (dt * IDLE_SPEED)
+	a["angle"] = lerp_angle(a["angle"], m.facing.angle(), 1.0 - exp(-TURN_RATE * dt))
+	a["aim"] = lerp_angle(a["aim"], aim, 1.0 - exp(-AIM_RATE * dt))
+	a["last"] = m.pos
+
+
+## A fresh drawing state for `m`.
+static func new_state(m) -> Dictionary:
+	return {"last": m.pos, "phase": 0.0, "angle": m.facing.angle(), "aim": m.facing.angle(), "moving": false}
+
+
+## The point in cell units that the job of `m` is about (the fire or breach cell, the middle of a
+## part or station), or null when they have no such job.
+static func job_target(m) -> Variant:
+	var job: Dictionary = m.job
+	if job.is_empty() or job.get("type", "") == "rest":
+		return null
+	if job.get("cells") is Array and not job["cells"].is_empty():
+		var sum := Vector2.ZERO
+		for c in job["cells"]:
+			sum += Vector2(c) + Vector2(0.5, 0.5)
+		return sum / job["cells"].size()
+	if job.get("cell") is Vector2i:
+		return Vector2(job["cell"]) + Vector2(0.5, 0.5)
+	return null
+
+
+## The angle (radians, 0 = right) a crew member who is not steered by a mouse aims at: what their job
+## is about once they have arrived, else the way they walk.
+static func job_aim(m) -> float:
+	var target: Variant = job_target(m)
+	if target != null and m.path.is_empty():
+		var d: Vector2 = target - m.pos
+		if d.length() > 0.05:
+			return d.angle()
+	return m.facing.angle()
+
+
+## The id of the item `m` holds: by the job (see JOB_ITEMS), a pistol for the player with no job, else "".
+## `clock`: the ship's clock, to tell a hand job still going on from a stale one.
+static func item_for(m, clock: float) -> String:
+	if m.is_down():
+		return ""
+	var job: Dictionary = m.job
+	var type := str(job.get("type", ""))
+	if job.get("hand", false) and clock - float(job.get("t", -1.0e9)) > HAND_FRESH:
+		type = ""  # E let go: the job record is stale
+	if type != "":
+		return str(JOB_ITEMS.get(type, ""))
+	return "pistol" if m.is_player else ""
+
+
+## True while `m` is at a job that uses a tool (arms jab): they have arrived, or the player is holding E.
+static func is_working(m, clock: float) -> bool:
+	if m.is_down() or not JOB_ITEMS.has(str(m.job.get("type", ""))):
+		return false
+	if m.job.get("hand", false):
+		return clock - float(m.job.get("t", -1.0e9)) <= HAND_FRESH
+	return m.path.is_empty()
+
+
+## Draw a person centred on `centre_px`. `pose`: {species ("human"), move (angle they walk, radians,
+## 0 = right), aim (angle the torso points), phase (walk phase, radians), moving, item (id or ""),
+## down, work (the tool jabs), t (seconds)}. `palette`: "suit" colour tints the outfit.
+static func draw(canvas: CanvasItem, centre_px: Vector2, pose: Dictionary, palette: Dictionary, cell_px: float) -> void:
+	var sheet = Art.crew(str(pose.get("species", "human")))
+	if sheet == null:
+		var facing := float(pose.get("aim", pose.get("move", 0.0)))
+		draw_person(canvas, centre_px, facing, float(pose.get("phase", 0.0)), bool(pose.get("moving", false)), palette, cell_px)
+		return
+	var k := cell_px / SpriteSheet.SRC_CELL
+	var layers := plan(sheet, pose)
+	var base := Color(DOWN_TINT if pose.get("down", false) else Color.WHITE)
+	for l in layers:  # the shadow first: the same silhouettes, one source px down and right
+		_blit(canvas, l, l["sheet"].texture, centre_px + Vector2(k, k), k, SHADOW)
+	var suit := Color(palette.get("suit", "#33c6d6"))
+	for l in layers:
+		_blit(canvas, l, l["sheet"].tinted(suit) if l["tint"] else l["sheet"].texture, centre_px, k, base)
+
+
+## The layers to draw, back to front: [{layer, sheet, frame, angle (radians, to rotate by), off
+## (source px from the body centre), tint (colour mask applies)}]. Legs turn to `move`, everything
+## else to `aim`; the walk frame follows `phase` (the stand frame when not moving or down).
+static func plan(sheet, pose: Dictionary) -> Array:
+	var down: bool = pose.get("down", false)
+	var move := float(pose.get("move", pose.get("aim", 0.0)))
+	var aim := float(pose.get("aim", move))
+	var out := []
+	var legs = sheet.layers["legs"]
+	var frame: int = legs.start_of("stand")
+	if pose.get("moving", false) and not down and legs.has_anim("walk"):
+		var n: int = legs.anims["walk"]["count"]
+		frame = legs.start_of("walk") + int(fposmod(float(pose.get("phase", 0.0)), TAU) / TAU * n) % n
+	out.append({"layer": "legs", "sheet": legs, "frame": frame, "angle": move + PI / 2.0, "off": Vector2.ZERO, "tint": true})
+	out.append({"layer": "torso", "sheet": sheet, "frame": 0, "angle": aim + PI / 2.0, "off": Vector2.ZERO, "tint": true})
+	var arms = sheet.layers.get("arms")
+	if arms == null:
+		return out
+	var held := held_item(pose)
+	var cls: String = held["sheet"].pose if not held.is_empty() and held["sheet"].pose != "" else "tool"
+	if held.is_empty() or not sheet.poses.has(cls) or sheet.poses[cls]["mount"] == null:
+		cls = "unarmed"
+		held = {}
+	var jab := Vector2(0.0, -absf(sin(float(pose.get("t", 0.0)) * 9.0)) * JAB) if pose.get("work", false) and not down else Vector2.ZERO
+	out.append({"layer": "arms", "sheet": arms, "frame": sheet.poses[cls]["frame"], "angle": aim + PI / 2.0, "off": jab, "tint": true})
+	if not held.is_empty():
+		var it = held["sheet"]
+		out.append({"layer": "item", "sheet": it, "frame": 0, "angle": aim + PI / 2.0,
+			"off": sheet.poses[cls]["mount"] - it.anchor_c("grip") + jab, "tint": false, "id": held["id"]})
+	return out
+
+
+## {id, sheet} of the item the pose asks for; the wrench stands in for an extinguisher with no art;
+## empty when there is none (no item, a missing sheet, or a person who is down).
+static func held_item(pose: Dictionary) -> Dictionary:
+	var id := str(pose.get("item", ""))
+	if id == "" or pose.get("down", false):
+		return {}
+	var it = Art.item(id)
+	if it == null and id == "extinguisher":
+		id = "wrench"
+		it = Art.item(id)
+	return {} if it == null else {"id": id, "sheet": it}
+
+
+## One layer: frame `l["frame"]` of `tex` (laid out like l["sheet"]), turned by l["angle"] about the
+## body centre `at` and offset by l["off"], at `k` px per source px.
+static func _blit(canvas: CanvasItem, l: Dictionary, tex: Texture2D, at: Vector2, k: float, mod: Color) -> void:
+	var sh = l["sheet"]
+	canvas.draw_set_transform(at, l["angle"], Vector2(k, k))
+	var top_left: Vector2 = l["off"] - sh.centre() - Vector2(0.5, 0.5)
+	canvas.draw_texture_rect_region(tex, Rect2(top_left, Vector2(sh.frame)), sh.region(l["frame"]), mod)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
 
 
 ## Draw a person centred on `centre_px` (pixels, in the canvas' own coordinates).
