@@ -149,7 +149,8 @@ func _step_ship(ship: Ship, dt: float) -> void:
 		if not ship.crew.is_empty() or not Jobs.spawn_enemy_crew(ship).is_empty():
 			_crewed[ship] = true
 	for m in ship.crew:
-		ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * dt)
+		if not m.traits().has("no_breath"):  # Basalt don't use the air
+			ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * dt)
 	Fire.tick(ship, dt, rng)
 	jobs_of(ship).tick(ship, dt, ships.size() > 1)  # more than one ship aboard the sim: a fight
 	ship.atmosphere.tick(dt, open_door_cells(ship))

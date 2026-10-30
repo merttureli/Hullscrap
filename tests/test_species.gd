@@ -11,6 +11,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 
 const STARTERS := ["res://data/ships/starter_rustbucket.json", "res://data/ships/starter_courier.json", "res://data/ships/starter_prism.json"]
 const PIRATE := "res://data/ships/pirate_raider.json"
@@ -145,6 +146,22 @@ func test_no_breath_takes_no_damage_without_air_and_a_human_does() -> void:
 	near(basalt.hp, 140.0, "the Basalt takes nothing")
 	near(human.hp, 95.0, "the human takes 5 a second")
 	near(fenn.hp, 70.0, "so does the Fenn")
+
+
+func test_no_breath_crew_use_no_air() -> void:
+	var used := {}
+	for species in ["basalt", "human"]:
+		var ship := Fixture.room_ship()
+		var m := _person("Wren", species, 12, 11, true)
+		ship.crew.append(m)
+		var room := ship.atmosphere.room_at(m.cell())
+		var before: float = ship.atmosphere.oxygen_of(room)
+		var sim := ShipSim.new()
+		sim.ships = [ship]
+		sim._step_ship(ship, 1.0)
+		used[species] = before - ship.atmosphere.oxygen_of(room)
+	near(used["basalt"], 0.0, "a Basalt breathes nothing")
+	check(used["human"] > 0.0, "a human uses the room's air")
 
 
 func test_heat_resistant_takes_a_quarter_of_the_fire_damage() -> void:
