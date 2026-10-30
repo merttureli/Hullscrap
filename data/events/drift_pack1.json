@@ -441,7 +441,7 @@
       ]
     },
     {
-      "id": "anomaly_singing_buoy", "type": "anomaly", "weight": 12, "once": false, "requires": {"not_flag": "prism_revealed"},
+      "id": "anomaly_singing_buoy", "type": "anomaly", "weight": 4, "once": false, "requires": {"not_flag": "prism_revealed"},
       "text": "A buoy of fused glass turns slowly in the dark, singing three notes. The third note is yours. It wasn't, a moment ago. Your instruments find no power source, and your crew find a mild, polite homesickness.",
       "choices": [
         {"text": "Listen to the third note.", "outcomes": [
