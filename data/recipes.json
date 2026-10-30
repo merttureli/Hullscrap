@@ -195,6 +195,21 @@
       "category": "system"
     },
     {
+      "id": "laser_turret_mk1",
+      "output": {
+        "item": "laser_turret_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 27,
+        "copper": 18
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
       "id": "reactor_mk2",
       "output": {
         "item": "reactor_mk2",

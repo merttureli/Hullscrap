@@ -48,7 +48,7 @@ func _duel(tiles := {}, seed_value := 1) -> void:
 
 
 func _w(type: String, dmg := 1.0, kind := "bolt") -> Dictionary:
-	return {"kind": kind, "damage_type": type, "damage": dmg, "pierce": 0, "speed": 700.0, "range": 4000.0, "arc": 360, "cooldown": 0.0}
+	return {"kind": kind, "damage_type": type, "damage": dmg, "pierce": 0, "speed": 700.0, "range": 4000.0, "gimbal": 180, "cooldown": 0.0}
 
 
 ## Trace weapon `w` between two points of the target's grid (cell coordinates). Returns the out dict.

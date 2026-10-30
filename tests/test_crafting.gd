@@ -10,7 +10,7 @@ const ITEMS := "res://data/items.json"
 const ITEM_KINDS := ["ammo", "gear", "special"]
 ## Mk1 parts of the standard line that are blueprints to find, not known at the start (every other
 ## Mk1 Scrap or Standard system is known; Neon is always unlocked).
-const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1"]
+const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1", "laser_turret_mk1"]
 const RARITIES := ["common", "uncommon", "rare", "very_rare"]
 const CATEGORIES := ["system", "gear", "material", "module"]
 const WORKSHOP_TOOLS := ["laser_cutter", "nanoforge"]  # what workshop.gd can provide
