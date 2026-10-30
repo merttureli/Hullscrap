@@ -1,0 +1,42 @@
+{
+ "frame": [
+  2,
+  2
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "mode": "loop",
+ "anims": {
+  "loop": [
+   0,
+   3,
+   8
+  ]
+ },
+ "anchors": {
+  "base": [
+   1,
+   1
+  ]
+ },
+ "glow": {
+  "image": "fire_glow.png",
+  "frame": [
+   4,
+   4
+  ],
+  "offset": [
+   -1,
+   -1
+  ],
+  "anims": {
+   "loop": [
+    0,
+    3,
+    8
+   ]
+  }
+ }
+}

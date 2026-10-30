@@ -1,0 +1,11 @@
+{
+ "frame": [16, 16],
+ "anims": {
+  "play": [0, 3, 14]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [8, 8]
+ },
+ "notes": "End flare for the beam; see beam.json."
+}

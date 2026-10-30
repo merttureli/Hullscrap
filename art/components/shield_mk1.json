@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   4,
+   6
+  ],
+  "disabled": [
+   9,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "shield_mk1_glow.png",
+  "frame": [
+   88,
+   88
+  ],
+  "offset": [
+   -12,
+   -12
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    4,
+    6
+   ]
+  }
+ },
+ "notes": "Emitter pulse loop (4 frames): a ring rises out of the dome while the pylon crystals take turns."
+}

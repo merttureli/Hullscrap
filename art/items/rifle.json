@@ -1,0 +1,22 @@
+{
+ "frame": [
+  9,
+  33
+ ],
+ "anchors": {
+  "grip": [
+   4,
+   26
+  ],
+  "muzzle": [
+   4,
+   0
+  ],
+  "foregrip": [
+   4,
+   13
+  ]
+ },
+ "pose": "rifle",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount); muzzle = where shots, spray or the tool tip come out."
+}

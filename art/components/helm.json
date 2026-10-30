@@ -1,0 +1,62 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   4
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   6
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "helm_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    4
+   ],
+   "damaged": [
+    2,
+    2,
+    6
+   ]
+  }
+ },
+ "anchors": {
+  "seat": [
+   15,
+   22
+  ]
+ },
+ "notes": "Console at the top, pilot seat below it: a crew member manning it stands on \"seat\" facing up. Screen flicker loop (2 frames)."
+}

@@ -1,0 +1,22 @@
+{
+ "frame": [32, 32],
+ "cells": [2, 2],
+ "mode": "once",
+ "anims": {
+  "play": [0, 10, 14]
+ },
+ "anchors": {
+  "center": [16, 16]
+ },
+ "glow": {
+  "image": "explosion_glow.png",
+  "frame": [48, 48],
+  "offset": [-8, -8],
+  "anims": {
+   "play": [0, 10, 14]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "note": "the last four glow frames are empty"
+ },
+ "notes": "Flat white core -> yellow -> orange -> lobes that open -> shards flying out -> embers. Scale up for bigger blasts; fragments are transparent-backed."
+}

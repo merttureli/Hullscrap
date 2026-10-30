@@ -1,0 +1,27 @@
+{
+ "frame": [32, 16],
+ "cells": [2, 1],
+ "orientation": "horizontal: the long axis runs along the wall; the game rotates the piece for a vertical wall",
+ "anims": {
+  "open": [0, 5, 10],
+  "closed": [0, 1, 0],
+  "opened": [4, 1, 0],
+  "locked": [5, 1, 0],
+  "broken": [6, 1, 0]
+ },
+ "glow": {
+  "image": "door_glow.png",
+  "frame": [36, 20],
+  "offset": [-2, -2],
+  "anims": {
+   "on": [0, 7, 0]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "note": "frame i of the glow goes with frame i of the door; amber leaf lights, red lamp when locked"
+ },
+ "anchors": {
+  "opening_left": [5, 0],
+  "opening_right": [27, 0]
+ },
+ "notes": "Frames 0-4 play closed -> open (play backwards to close). 5 = locked (red lamp), 6 = broken (bent leaf, jammed half open). Open frames leave the passage transparent so the floor shows. Same band profile as the wall tiles (row 0 near-black, row 1 lit lip, rows 14-15 shadow)."
+}

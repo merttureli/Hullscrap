@@ -15,7 +15,8 @@ A top-down 2D spaceship game. Start with a ready-made ship (or an empty hull), b
 | B | Build mode / play mode (the HUD shows which) |
 | N (play mode) | Pick another starter ship: asks "Discard current ship?" (Y / N), then shows the picker |
 | K (play mode) | Fight the test pirate (see Combat) |
-| W A S D | Walk (your soldier) |
+| W A S D | Walk (your soldier). The legs turn to the way you walk |
+| Mouse (play mode) | Your soldier aims at the cursor: the torso and what they hold (a pistol; a wrench or an extinguisher while working) turn to it |
 | E (hold) | Work with your own hands: stand next to a fire, a breach, a broken system or a downed crewmate and hold E. It goes at the speed of a crew member's work (see Crew, fire and repairs) |
 | Middle mouse | Send Ada there (bodies are 2x2 cells, so she stands where one fits). She leaves the job board alone for 8 s |
 | E over a door | Open / close the whole door piece (both cells; free, not an undo step; both modes). Crew also walk through closed doors, which open while any body overlaps them |
@@ -59,7 +60,7 @@ Every starter comes with four people: your soldier, Ada, and two more NPCs (Rook
 **Fire** (`scripts/sim/fire.gd`, `ship.fires`: cell -> intensity 0 to 1, saved with the ship). A fire burns on a floor cell (a cell under a system too; doors and walls are not floor, so a fire stays in its room).
 - Each second: while the room's air is above 20% the intensity grows by 0.15, below it the fire decays by 0.3 and goes out at 0; each burning cell has a 10% chance to light a random neighbouring floor cell and uses 0.05 of the room's oxygen; a system on a burning cell loses 0.5 hp (at 0 it is disabled, not destroyed).
 - Fires start when a system overheats (20%) or malfunctions (30%), on the system's first cell, and when a hit in a fight ignites (`fire_chance`), on the cell that was hit.
-- Drawn as flickering orange and red blobs, in the interior and on the ships in a fight (placeholder art: `ShipView.draw_fire()`).
+- Drawn from `art/fx/fire` (a flame per burning cell, with its glow), or as flickering orange and red blobs when that art is missing (`ShipView.draw_fire()`), in the interior and on the ships in a fight.
 
 **Health.** Standing in a burning cell costs 10 hp a second, a room below 15% air 5. At 0 hp a crew member is **down**: they don't move, and a crewmate revives them (3 s of work, back with 20 hp) or a powered medbay does (15 hp a second, times the medbay's `stats.heal`). A bed heals 5 hp a second. A small health bar hangs over anyone hurt.
 
@@ -96,6 +97,14 @@ In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_rai
 The panels at the top are the schematics (yours left, the enemy's right): rooms, walls, breaches in red, systems coloured by state (green ok, yellow damaged, red disabled, orange overheated, purple jammed, grey unpowered), a hull bar and the shield pips. **Firing opens your own shield**: the sector of the bubble the shot leaves through drops for 0.3 s (laser), 0.4 s (bolt), 0.6 s (flak) or the whole beam, while shots pass it and use no layer; the schematic shows "OPEN" and the sector ring goes dark. Missiles never drop it. Open doors let shots through; closed doors block them. The weapon bar shows each weapon's key, group, cooldown ring and state (ready, cooling, no power, jammed, no ammo, out of arc).
 
 Characters are big: a crew body is 2x2 cells (drawn about 3x3), so doors are a piece of exactly 2 cells in a row with a wall cell at each end (wall, door, door, wall), and a corridor needs 2 cells. Walls stay 1 cell thick. A door costs per cell; removing or replacing either cell takes the whole piece, and a wall holding a door can't be removed. Systems are items from the cargo: placing one uses an item up, removing it gives the item back. A system needs floor under every cell, and that floor can't be removed or built over while it stands there. Cables cost copper per cell (`data/build.json`) and may run under anything. A system only works when a cable connects it to a reactor; an unpowered one is drawn dimmed with a red mark.
+
+## Art
+The game draws pixel art from `art/` and falls back to flat code-drawn placeholders for anything missing (`scripts/view/art.gd` loads and caches it; no editor import is needed). What is live:
+- **Systems** (`art/components`): the sprite at the part's footprint, turned with it, animated by state (on, off, weapon charge and fire, damaged, disabled, malfunction flicker, overheated pulse) with a glow layer; the heat bar, hp pips and marks stay on top. A part with no art borrows the next lower tier's (Engine Mk2 shows the Mk1 sprite until it has its own).
+- **Crew** (`art/crew`): layered top-down sprites, legs to the way they walk, torso, arms, item and head to the aim, the outfit tinted with each crew member's suit colour, a 1 px shadow.
+- **Structure and effects** (`art/tiles`, `art/fx`, `art/projectiles`): autotiled walls, floors, doors that open, breaches, powered cables, fire, smoke, sparks, explosions, muzzle flashes, shield ripples, shots and beams.
+
+The format and how to add art are in [`art/README.md`](art/README.md); every file's source is in [`ASSETS.md`](ASSETS.md). The default texture filter is nearest.
 
 ## Tests
 ```

@@ -1,0 +1,141 @@
+{
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "notes": "Top-down layered human. Every layer faces UP at rotation 0 and shares one 33x33 frame; rotate about pivot. Anchors are source px from the frame top-left. Outfit pixels are neutral grey in the base PNG and white in *_color.png: multiply by the outfit colour there. No baked shadow: draw a 1px down-right shadow from the final silhouette. Rotation: quarter turns are lossless; for other angles nearest works, or pre-render 32 rotations (reference: art/_src/compose.py).",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     8
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lighter"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     16,
+     14
+    ],
+    "back": [
+     16,
+     24
+    ],
+    "shoulder_l": [
+     8,
+     14
+    ],
+    "shoulder_r": [
+     24,
+     14
+    ]
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      5,
+      19
+     ],
+     "hand_r": [
+      27,
+      19
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      14,
+      5
+     ],
+     "hand_r": [
+      18,
+      5
+     ],
+     "mount": [
+      16,
+      5
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      17,
+      1
+     ],
+     "hand_r": [
+      21,
+      9
+     ],
+     "mount": [
+      20,
+      8
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      13,
+      9
+     ],
+     "hand_r": [
+      21,
+      4
+     ],
+     "mount": [
+      21,
+      4
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Use pose \"pistol\" for pistols, \"rifle\" for rifles, \"tool\" for the wrench and extinguisher."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "hair": 0,
+    "helmet": 1
+   },
+   "notes": "hair is not tinted; the helmet shell takes the outfit colour, its visor and glint stay as drawn"
+  }
+ }
+}

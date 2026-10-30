@@ -13,9 +13,8 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
-const STRIDE := PI  ## walk phase (radians) per cell walked: one full leg cycle every 2 cells
-const IDLE_SPEED := 2.2  ## radians per second of the breathing bob
-const TURN_RATE := 14.0  ## how fast the drawn body follows the direction of movement
+const SPECIES := "human"  ## whose art the crew wear (art/crew/<species>/)
+const AIM_DEAD_ZONE := 0.3  ## cells: with the mouse this close to the player, the aim stays where it was
 
 ## Callable(cell) -> bool for doors. Auto doors: crew walk through every door and it closes behind
 ## them (the simulation counts a door piece as open while a body overlaps it), so there are no locks yet.
@@ -24,7 +23,9 @@ var player: CrewMember
 var ada: CrewMember
 var build: Node
 var sim: Node
-var _anim := {}  # CrewMember -> {last: Vector2, phase: float, angle: float, moving: bool}, for drawing only
+## Scripts and tests aim the player here (a world point) instead of with the mouse.
+var aim_override: Variant = null
+var _anim := {}  # CrewMember -> PersonDrawer.new_state(): {last, phase, angle, aim, moving}, for drawing only
 var _clock := 0.0  # for the flicker of the fires
 var _layer: CanvasLayer  # the HUD crew line
 var _line: Label
@@ -84,9 +85,13 @@ func _unhandled_input(e: InputEvent) -> void:
 			Jobs.order_move(_ship(), ada, a, door_passable)  # she leaves the job board alone for a while
 
 
-## WASD by keycode (any layout). Ctrl/Cmd held means a shortcut like Ctrl+S, not walking.
+## WASD by keycode (any layout). Ctrl/Cmd held means a shortcut like Ctrl+S, not walking, and so
+## does the crafting panel (C) being open, whose keys must not walk the soldier about.
 func _wasd() -> Vector2:
 	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_META):
+		return Vector2.ZERO
+	var craft := get_node_or_null("../CraftLayer/CraftingPanel")
+	if craft != null and craft.visible:
 		return Vector2.ZERO
 	return Vector2(
 		float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A)),
@@ -115,15 +120,27 @@ func _world(p: Vector2) -> Vector2:
 
 
 ## Drawing state of one person: the walk phase grows with the distance walked (the breathing
-## phase with time when standing), and the drawn direction turns smoothly toward the way they face.
+## phase with time when standing), the legs turn smoothly toward the way they move and the torso
+## toward the aim (PersonDrawer.animate).
 func _animate(m: CrewMember, dt: float) -> void:
-	var a: Dictionary = _anim.get(m, {"last": m.pos, "phase": 0.0, "angle": m.facing.angle(), "moving": false})
-	var moved: float = (m.pos - a["last"]).length()
-	a["moving"] = moved > 0.0005
-	a["phase"] += (moved * STRIDE) if a["moving"] else (dt * IDLE_SPEED)
-	a["angle"] = lerp_angle(a["angle"], m.facing.angle(), 1.0 - exp(-TURN_RATE * dt))
-	a["last"] = m.pos
+	var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
+	PersonDrawer.animate(a, m, dt, _aim_of(m, a))
 	_anim[m] = a
+
+
+## The angle (radians, 0 = right) `m` aims at. The player aims at the mouse; the others at what
+## their job is about once they stand at it, else the way they walk.
+func _aim_of(m: CrewMember, a: Dictionary) -> float:
+	if m.is_player:
+		var at: Variant = aim_override
+		if at == null and is_inside_tree():
+			at = get_global_mouse_position()
+		if at != null:
+			var d: Vector2 = at - _world(m.pos)
+			if d.length() > AIM_DEAD_ZONE * build.CELL:
+				return d.angle()
+		return a["aim"]
+	return PersonDrawer.job_aim(m)
 
 
 func _draw() -> void:
@@ -152,6 +169,9 @@ func look_of(m: CrewMember) -> Dictionary:
 
 
 func _draw_person(m: CrewMember) -> void:
-	var a: Dictionary = _anim.get(m, {"phase": 0.0, "angle": m.facing.angle(), "moving": false})
-	PersonDrawer.draw_person(self, _world(m.pos), a["angle"], a["phase"], a["moving"], look_of(m), build.CELL)
+	var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
+	var clock: float = _ship().clock
+	var pose := {"species": SPECIES, "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
+		"item": PersonDrawer.item_for(m, clock), "down": m.is_down(), "work": PersonDrawer.is_working(m, clock), "t": _clock}
+	PersonDrawer.draw(self, _world(m.pos), pose, look_of(m), build.CELL)
 	ShipView.draw_health(self, _world(m.pos), m.hp / m.max_hp, m.is_down(), build.CELL)

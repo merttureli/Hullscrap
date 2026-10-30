@@ -1,0 +1,66 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   3,
+   8
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_mk1_glow.png",
+  "frame": [
+   88,
+   48
+  ],
+  "offset": [
+   -16,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    3,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust_upper": [
+   1,
+   7
+  ],
+  "exhaust_lower": [
+   1,
+   22
+  ]
+ },
+ "notes": "Nozzles face west (left) at rot 0. Glow loop: hot nozzle bloom, hatch and lamps."
+}

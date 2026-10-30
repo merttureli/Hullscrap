@@ -1,0 +1,88 @@
+{
+ "frame": [
+  2,
+  2
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   4
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   3,
+   0
+  ],
+  "fire": [
+   6,
+   1,
+   0
+  ],
+  "damaged": [
+   7,
+   2,
+   4
+  ],
+  "disabled": [
+   9,
+   1,
+   0
+  ],
+  "malfunction": [
+   10,
+   1,
+   0
+  ],
+  "overheated": [
+   11,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "probe_glow.png",
+  "frame": [
+   3,
+   3
+  ],
+  "offset": [
+   -1,
+   -1
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    4
+   ],
+   "charge": [
+    2,
+    3,
+    0
+   ],
+   "fire": [
+    5,
+    1,
+    0
+   ]
+  }
+ },
+ "anchors": {
+  "muzzle": [
+   2,
+   1
+  ]
+ },
+ "orientation_rot": 3,
+ "notes": "test fixture: every state"
+}

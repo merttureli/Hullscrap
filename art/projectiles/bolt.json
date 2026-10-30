@@ -1,0 +1,21 @@
+{
+ "frame": [6, 12],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 4, 16]
+ },
+ "anchors": {
+  "head": [3, 2],
+  "tail": [3, 11]
+ },
+ "glow": {
+  "image": "bolt_glow.png",
+  "frame": [14, 20],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 4, 16]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Glowing 6px pellet with a flickering tail (4 frames). Head anchor is the pellet centre."
+}
