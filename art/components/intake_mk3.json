@@ -1,0 +1,70 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   6,
+   4
+  ],
+  "pulling": [
+   6,
+   6,
+   10
+  ],
+  "off": [
+   12,
+   1,
+   0
+  ],
+  "damaged": [
+   13,
+   2,
+   4
+  ],
+  "disabled": [
+   15,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "intake_mk3_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    6,
+    4
+   ],
+   "pulling": [
+    6,
+    6,
+    10
+   ],
+   "damaged": [
+    12,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Salvage Intake Mk3 (standard, 4x2): the Mk2 hopper plus a field stabiliser coil with a mint core. States as Mk1.",
+ "offset": [
+  0,
+  -4
+ ]
+}

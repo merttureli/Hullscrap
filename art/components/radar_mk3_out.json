@@ -1,0 +1,96 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   15
+  ]
+ },
+ "notes": "OUTSIDE half of the Radar Mk3 (standard, 2x2 turntable): an armoured base with two lamps; the phased-array face on a boom (radar_mk3_barrel) turns on it.",
+ "barrel": {
+  "image": "radar_mk3_barrel.png",
+  "frame": [
+   35,
+   28
+  ],
+  "pivot_on_base": [
+   16,
+   15
+  ],
+  "pivot_on_barrel": [
+   17,
+   20
+  ],
+  "anims": {
+   "idle": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ],
+   "disabled": [
+    4,
+    1,
+    0
+   ]
+  },
+  "aim": "spin",
+  "spin": true,
+  "glow": {
+   "image": "radar_mk3_barrel_glow.png",
+   "frame": [
+    51,
+    44
+   ],
+   "offset": [
+    -8,
+    -8
+   ],
+   "anims": {
+    "idle": [
+     0,
+     2,
+     3
+    ],
+    "damaged": [
+     2,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}

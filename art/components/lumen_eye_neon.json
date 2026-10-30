@@ -1,0 +1,60 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "lumen_eye_neon_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Lumen Eye (neon, 4x2): a navy console with a cyan scope, a magenta iris readout and crystal lamps. on: the cyan sweep turns round (8 frames); damaged: glitch band, the iris flickering; disabled: a dead column. Range 14,000 px, identifies the type; ion-weak.",
+ "offset": [
+  0,
+  -4
+ ]
+}

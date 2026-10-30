@@ -1,0 +1,173 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "station": [
+   0,
+   1,
+   0
+  ],
+  "store": [
+   1,
+   1,
+   0
+  ],
+  "trader": [
+   2,
+   1,
+   0
+  ],
+  "distress": [
+   3,
+   1,
+   0
+  ],
+  "wreck": [
+   4,
+   1,
+   0
+  ],
+  "abandoned_station": [
+   5,
+   1,
+   0
+  ],
+  "mining_field": [
+   6,
+   1,
+   0
+  ],
+  "unknown": [
+   7,
+   1,
+   0
+  ],
+  "pirate_nest": [
+   8,
+   1,
+   0
+  ],
+  "concord_checkpoint": [
+   9,
+   1,
+   0
+  ],
+  "anomaly": [
+   10,
+   1,
+   0
+  ],
+  "quest": [
+   11,
+   1,
+   0
+  ],
+  "contact": [
+   12,
+   1,
+   0
+  ],
+  "course": [
+   13,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "glow": {
+  "image": "poi_icons_glow.png",
+  "frame": [
+   24,
+   24
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "station": [
+    0,
+    1,
+    0
+   ],
+   "store": [
+    1,
+    1,
+    0
+   ],
+   "trader": [
+    2,
+    1,
+    0
+   ],
+   "distress": [
+    3,
+    1,
+    0
+   ],
+   "wreck": [
+    4,
+    1,
+    0
+   ],
+   "abandoned_station": [
+    5,
+    1,
+    0
+   ],
+   "mining_field": [
+    6,
+    1,
+    0
+   ],
+   "unknown": [
+    7,
+    1,
+    0
+   ],
+   "pirate_nest": [
+    8,
+    1,
+    0
+   ],
+   "concord_checkpoint": [
+    9,
+    1,
+    0
+   ],
+   "anomaly": [
+    10,
+    1,
+    0
+   ],
+   "quest": [
+    11,
+    1,
+    0
+   ],
+   "contact": [
+    12,
+    1,
+    0
+   ],
+   "course": [
+    13,
+    1,
+    0
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "HUD icons for sector points of interest, one 16x16 frame per type (anim name = POI type): station, store, trader, distress, wreck, abandoned_station, mining_field, unknown, pirate_nest, concord_checkpoint, anomaly, quest, plus `contact` (an unidentified radar contact) and `course` (the set-course marker). Family colours: distress red + amber, quest gold, Lumen cyan (anomaly, course), Concord blue, pirate red. Draw them at 2x or more on the compass ring and edge markers; the glow layer is additive and may be pulsed (distress, quest, course) or left out."
+}

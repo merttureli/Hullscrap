@@ -1,0 +1,44 @@
+{
+ "frame": [
+  96,
+  96
+ ],
+ "cells": [
+  6,
+  6
+ ],
+ "mode": "once",
+ "anims": {
+  "flash": [
+   0,
+   6,
+   14
+  ]
+ },
+ "anchors": {
+  "center": [
+   48,
+   48
+  ]
+ },
+ "glow": {
+  "image": "jump_flash_glow.png",
+  "frame": [
+   112,
+   112
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "flash": [
+    0,
+    6,
+    14
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Jump flash, 6 frames at 14 fps: a spark, a white-out disc with a vertical streak (light speed runs along the ship's forward = up), a shock ring that expands and thins, then a few sparkles. Play it on the ship the moment the jump fires, then remove the ship; the streak is drawn vertical, turn it with the ship."
+}

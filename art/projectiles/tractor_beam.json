@@ -1,0 +1,48 @@
+{
+ "frame": [
+  12,
+  16
+ ],
+ "length": 16,
+ "width": 12,
+ "orientation": "up: the head (away from the turret) is at the top; the chevrons point DOWN, at the turret",
+ "tile": "y",
+ "anims": {
+  "pull": [
+   0,
+   4,
+   12
+  ]
+ },
+ "anchors": {
+  "head": [
+   6,
+   0
+  ],
+  "tail": [
+   6,
+   15
+  ]
+ },
+ "glow": {
+  "image": "tractor_beam_glow.png",
+  "frame": [
+   20,
+   16
+  ],
+  "offset": [
+   -4,
+   0
+  ],
+  "anims": {
+   "pull": [
+    0,
+    4,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "tile": "y"
+ },
+ "notes": "Tractor beam: a pale green-cyan pulling wave. V-shaped wavefronts crawl DOWN the strip, toward the turret (4 frames, 2 px a frame; they loop seamlessly), round a pale core thread. Repeat the frame along y from the turret (tail) to the debris (head); use the same frame on every repeat for a clean wave or offset them for a ripple. No impact flare: the pulled chunk is the target."
+}

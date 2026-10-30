@@ -1,0 +1,72 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "pulling": [
+   2,
+   6,
+   10
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "intake_mk3_out_glow.png",
+  "frame": [
+   80,
+   92
+  ],
+  "offset": [
+   -8,
+   -48
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "pulling": [
+    2,
+    6,
+    10
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   16
+  ]
+ },
+ "notes": "OUTSIDE half of the Salvage Intake Mk3 (standard, 4x2): the widest mouth, heavy rims with armour chevrons, three fat coils on each cheek and an overhead emitter bar with three mint nodes. Pull radius 4 cells. States as Mk1."
+}

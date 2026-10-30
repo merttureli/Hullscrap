@@ -1,0 +1,132 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "tractor_mk1_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   15
+  ]
+ },
+ "notes": "OUTSIDE half of the Tractor Beam Mk1 (a TURRET): turret-ring base, a copper coil canister and a mint sensor. damaged: ring and wing cracked, cover flapping; disabled: scorched, dented, sparking.",
+ "barrel": {
+  "image": "tractor_mk1_barrel.png",
+  "frame": [
+   23,
+   36
+  ],
+  "pivot_on_base": [
+   32,
+   15
+  ],
+  "pivot_on_barrel": [
+   11,
+   26
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    10
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "turret",
+  "muzzle": [
+   11,
+   2
+  ],
+  "glow": {
+   "image": "tractor_mk1_barrel_glow.png",
+   "frame": [
+    43,
+    56
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     10
+    ],
+    "damaged": [
+     4,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}

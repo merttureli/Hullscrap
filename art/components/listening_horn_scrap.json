@@ -1,0 +1,60 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "listening_horn_scrap_glow.png",
+  "frame": [
+   48,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Listening Horn (scrap, 2x2): a crude amber scope in a rusty frame with a speaker grille and a patch plate. on: the sweep line crawls round (8 frames); damaged: glitch band, a lamp dead, a loose wire; disabled: a dead, cracked screen. Range 5,000 px, no power.",
+ "offset": [
+  0,
+  -4
+ ]
+}

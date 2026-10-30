@@ -1,0 +1,44 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "mode": "once",
+ "anims": {
+  "spool": [
+   0,
+   8,
+   1
+  ]
+ },
+ "anchors": {
+  "center": [
+   32,
+   32
+  ]
+ },
+ "glow": {
+  "image": "jump_spool_glow.png",
+  "frame": [
+   80,
+   80
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "spool": [
+    0,
+    8,
+    1
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Jump spool: a ring of light tightening round the ship over 8 frames (blue, then cyan, then white; the dashes close up and streaks fall inward, the core charges at the end). The drive spools for 8 s, so play it at 1 fps (frame = floor(elapsed)) or stretch it with the spool timer; scale it up to the ship (it is drawn for a 4x4-cell ship) and hold the last frame until the flash."
+}
