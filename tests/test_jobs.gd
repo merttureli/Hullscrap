@@ -638,17 +638,20 @@ func test_a_manned_weapon_fires_again_sooner() -> void:
 
 # --- crews ---------------------------------------------------------------------------------------
 
-func test_the_starters_come_with_four_crew() -> void:
+func test_the_starters_come_with_their_crews() -> void:
 	for path in STARTERS:
 		var ship := Ship.from_design(path)
+		var want: Array = ship.crew_plan.map(func(e): return e["name"])
 		var made := Jobs.spawn_crew(ship)
-		eq(made.size(), 4, path + ": four people")
-		eq(ship.crew.size(), 4, path + ": all aboard")
+		check(want.size() >= 3, path + ": the design lists a crew")
+		eq(made.size(), want.size(), path + ": the whole crew list")
+		eq(ship.crew.size(), want.size(), path + ": all aboard")
 		eq(ship.crew.filter(func(m): return m.is_player).size(), 1, path + ": one of them is the player")
 		var names: Array = ship.crew.map(func(m): return m.name)
-		check(names.has("Soldier") and names.has("Ada"), path + ": the soldier and Ada")
-		eq(_distinct(names), 4, path + ": names are all different")
-		eq(_distinct(ship.crew.map(func(m): return m.look["suit"])), 4, path + ": four different suits")
+		eq(names, want, path + ": the names of the list, in order")
+		check(names.has("Soldier"), path + ": the soldier")
+		eq(_distinct(names), want.size(), path + ": names are all different")
+		eq(_distinct(ship.crew.map(func(m): return m.look["suit"])), want.size(), path + ": different suits")
 		for m in ship.crew:
 			check(Pathfinder.body_ok(ship.grid, m.anchor()), "%s: %s stands where a body fits" % [path, m.name])
 		for i in ship.crew.size():
@@ -663,7 +666,15 @@ func test_the_starters_come_with_four_crew() -> void:
 		for m in ship.crew.filter(func(m): return not m.is_player and m.name != "Ada"):
 			check(beds.any(func(cells): return cells.has(m.cell())), "%s: %s starts on a bed" % [path, m.name])
 		eq(Jobs.spawn_crew(ship).size(), 0, path + ": asking again adds nobody")
-		eq(ship.crew.size(), 4, path + ": still four")
+		eq(ship.crew.size(), want.size(), path + ": still the same crew")
+
+
+func test_a_design_with_no_crew_list_gets_the_default_crew() -> void:
+	var ship := Ship.from_design(STARTERS[0])
+	ship.crew_plan = []
+	var made := Jobs.spawn_crew(ship)
+	eq(made.map(func(m): return m.name), ["Soldier", "Ada", "Rook", "Juno"], "the soldier, Ada and the first two names")
+	check(made.all(func(m): return m.species == "human"), "all human, as before")
 
 
 func test_no_floor_no_crew_yet() -> void:
@@ -750,7 +761,7 @@ func test_holding_e_next_to_a_fire_puts_it_out() -> void:
 
 func test_the_crew_view_spawns_the_crew_and_finds_the_player_and_ada() -> void:
 	var view := CrewView.new()
-	var ship := Ship.from_design(STARTERS[2])
+	var ship := Ship.from_design(STARTERS[0])
 	view._spawn(ship)
 	eq(ship.crew.size(), 4, "four aboard")
 	check(view.player != null and view.player.is_player, "the player's soldier")
@@ -760,8 +771,14 @@ func test_the_crew_view_spawns_the_crew_and_finds_the_player_and_ada() -> void:
 	eq(ship.crew.size(), count, "nothing is added twice")
 	var other := Ship.from_design(STARTERS[1])
 	view._spawn(other)
-	eq(other.crew.size(), 4, "a new ship gets its own crew")
+	eq(other.crew.size(), 3, "a new ship gets its own crew")
 	check(view.player in other.crew and not view.player in ship.crew, "the view follows the new ship's soldier")
+	var prism := Ship.from_design(STARTERS[2])  # no Ada on the Prism
+	view._spawn(prism)
+	eq(prism.crew.size(), 4, "the Prism's four")
+	check(view.player in prism.crew and view.ada == null, "a soldier and no Ada")
+	view._spawn(prism)
+	eq(prism.crew.size(), 4, "and nothing is added twice without her either")
 	view.free()
 
 

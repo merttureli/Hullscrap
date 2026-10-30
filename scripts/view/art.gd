@@ -97,6 +97,11 @@ static func crew(species: String) -> RefCounted:
 	return out
 
 
+## The art folder to draw a crew member with: `rig` (art/crew/<rig>/) when its art is there, else "human".
+static func crew_rig(rig: String) -> String:
+	return rig if crew(rig) != null else "human"
+
+
 ## The arm poses from the arms layer table `ld`: {name: {"frame": int, "mount": Vector2 or null}}, the
 ## mount in source px from the frame's top-left. Either "frames" {pose: index} with "anchors"
 ## {pose: {"mount": [x, y]}}, or "poses" {pose: {"frame", "mount"}}. "unarmed" always exists.

@@ -44,6 +44,7 @@ var events: Array = []  ## the chronicle, newest last: {t, text}; at most MAX_EV
 var clock := 0.0  ## seconds this ship has been simulated; the `t` of new events
 var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; not saved yet
+var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
 var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
 var ability_state := Abilities.fresh_state()  ## abilities running or resting (abilities.gd); not saved
@@ -79,6 +80,7 @@ static func new_starter(tiles_path := TILES_PATH, components_path := COMPONENTS_
 
 ## A ship from a design file (data/ships/*.json, the Ship.to_dict format), or null when it cannot be loaded.
 ## The grid takes the file's size and hull; the starter designs sit in the middle of a 63x63 grid.
+## An optional "crew" list ([{name, species}]) becomes `crew_plan`.
 static func from_design(path: String) -> RefCounted:
 	if not FileAccess.file_exists(path):
 		return null
@@ -88,7 +90,14 @@ static func from_design(path: String) -> RefCounted:
 	var defs := TileDefs.new()
 	defs.load_file(TILES_PATH)
 	var s := new("Ship", ShipGrid.new(Vector2i(int(d["size"][0]), int(d["size"][1])), defs))
-	return s if s.load_dict(d) == "" else null
+	if s.load_dict(d) != "":
+		return null
+	var list = d.get("crew")
+	if list is Array:
+		for e in list:
+			if e is Dictionary and str(e.get("name", "")) != "":
+				s.crew_plan.append({"name": str(e["name"]), "species": str(e.get("species", "human"))})
+	return s
 
 
 ## The cargo a new ship starts with (data/start.json).
