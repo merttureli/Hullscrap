@@ -120,6 +120,7 @@ def export(c, outdir=None):
     if getattr(c, 'offset', None): J['offset'] = list(c.offset)
     if getattr(c, 'extra', None): J.update(c.extra)
     J['notes'] = c.notes
+    if hasattr(c, 'finish_json'): c.finish_json(J, outdir)     # two-layer weapons add their barrel
     with open('%s/%s.json' % (outdir, c.id), 'w') as f: json.dump(J, f, indent=1); f.write('\n')
     return frames, gframes, J
 

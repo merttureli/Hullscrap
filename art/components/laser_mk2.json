@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "laser_mk2_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Laser Mk2: three steel capacitors, repair hatch, power coupling, 5-cell strip plus a second row of magenta pips (the Mk2 accent). charge: frame round(fraction*5), 5 = ready; fire: strip discharge. Barrel layer laser_mk2_barrel: twin emitter rails with a fork gap, magenta trim; damaged: rail cracked, lower emitter cap hangs by a wire; disabled: the top rail snaps and droops into the fork.",
+ "offset": [
+  0,
+  -4
+ ]
+}

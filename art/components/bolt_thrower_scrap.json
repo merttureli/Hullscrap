@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "bolt_thrower_scrap_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Bolt Thrower (scrap): the FEED CHUTE to the right edge, where an ammo rack (scrap) sits beside it; charge: a scrap chunk rides the chute into the breech, lamps fill; fire: lamps stutter. damaged: chute dented, lamps dead; disabled: a chunk jammed in the chute. Barrel layer bolt_thrower_scrap_barrel: a crude launcher tube with a piece of scrap seated in its mouth; fire: the scrap flies out in a puff of smoke.",
+ "offset": [
+  0,
+  -4
+ ]
+}

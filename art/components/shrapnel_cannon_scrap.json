@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "shrapnel_cannon_scrap_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Shrapnel Cannon (scrap): the funnel spout that feeds the breech with scrap, mismatched cans, repair hatch, amber lamp strip. charge: lamps fill; fire: the strip stutters. damaged: spout dented, lamps dead; disabled: dark, cracked. Barrel layer shrapnel_cannon_scrap_barrel: a fat flak mortar tube with a flared mouth, rust bands, hazard tape; fire: a big flash with scrap flying.",
+ "offset": [
+  0,
+  -4
+ ]
+}

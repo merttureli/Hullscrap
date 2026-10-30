@@ -1,0 +1,191 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   1,
+   0
+  ],
+  "fill_0": [
+   1,
+   1,
+   0
+  ],
+  "fill_1": [
+   2,
+   1,
+   0
+  ],
+  "fill_2": [
+   3,
+   1,
+   0
+  ],
+  "fill_3": [
+   4,
+   1,
+   0
+  ],
+  "fill_4": [
+   5,
+   1,
+   0
+  ],
+  "scrap_0": [
+   6,
+   1,
+   0
+  ],
+  "scrap_1": [
+   7,
+   1,
+   0
+  ],
+  "scrap_2": [
+   8,
+   1,
+   0
+  ],
+  "scrap_3": [
+   9,
+   1,
+   0
+  ],
+  "scrap_4": [
+   10,
+   1,
+   0
+  ],
+  "slug_0": [
+   11,
+   1,
+   0
+  ],
+  "slug_1": [
+   12,
+   1,
+   0
+  ],
+  "slug_2": [
+   13,
+   1,
+   0
+  ],
+  "slug_3": [
+   14,
+   1,
+   0
+  ],
+  "slug_4": [
+   15,
+   1,
+   0
+  ],
+  "damaged": [
+   16,
+   2,
+   4
+  ],
+  "disabled": [
+   18,
+   1,
+   0
+  ],
+  "wrecked": [
+   19,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "ammo_rack_glow.png",
+  "frame": [
+   40,
+   40
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "on": [
+    0,
+    1,
+    0
+   ],
+   "fill_1": [
+    1,
+    1,
+    0
+   ],
+   "fill_2": [
+    2,
+    1,
+    0
+   ],
+   "fill_3": [
+    3,
+    1,
+    0
+   ],
+   "fill_4": [
+    4,
+    1,
+    0
+   ],
+   "scrap_1": [
+    5,
+    1,
+    0
+   ],
+   "scrap_2": [
+    6,
+    1,
+    0
+   ],
+   "scrap_3": [
+    7,
+    1,
+    0
+   ],
+   "scrap_4": [
+    8,
+    1,
+    0
+   ],
+   "slug_1": [
+    9,
+    1,
+    0
+   ],
+   "slug_2": [
+    10,
+    1,
+    0
+   ],
+   "slug_3": [
+    11,
+    1,
+    0
+   ],
+   "slug_4": [
+    12,
+    1,
+    0
+   ],
+   "damaged": [
+    13,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE component, 2x2. Four bays fill one by one: fill_0 (empty) .. fill_4 (full) hold MISSILES (red-nosed rounds), scrap_0..scrap_4 hold SCRAP CHUNKS, slug_0..slug_4 hold brass SLUGS. The four lamps along the bottom light as the bays fill. on = full missile rack. damaged (2 frames): dented frame, a bay cracked, a sparking wire; disabled: dark, a bay burst open with its contents spilled; wrecked: a collapsed heap of twisted frame and burnt contents (shown briefly before the part is cleared)."
+}
