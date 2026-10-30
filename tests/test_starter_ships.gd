@@ -21,6 +21,7 @@ const PATHS := {
 }
 const PIRATE := "res://data/ships/pirate_raider.json"
 const MAX_COVER := 3  ## tiles between a gun and open space: a wall, a plate, one more at most
+const BOW_ROWS := 6  ## the Courier is an arrowhead: its titanium skin covers the nose, shoulders included (docs/CONTENT.md 4c)
 
 
 func _ship(key: String) -> Ship:
@@ -235,11 +236,10 @@ func test_courier_is_the_standard_ship() -> void:
 	check(b[1].x - b[0].x + 1 == 24 and b[1].y - b[0].y + 1 <= 19, "about 24x18 cells in use")
 	eq([_count(ship, "engine_mk2"), _count(ship, "shield_mk1"), _count(ship, "laser_mk1"), _count(ship, "pulse_mk1")], [2, 1, 2, 1], "2 Engine Mk2 (the fast ship), Shield Mk1, 2 Laser Mk1, Pulse Mk1")
 	check(_count(ship, "reactor_mk2") == 2 and _count(ship, "radiator") >= 1, "two Reactor Mk2 (the strafe pair needs the power) and a radiator")
-	check(_tiles(ship, "titanium_alloy") >= 20, "a titanium front layer")
+	check(_tiles(ship, "titanium_alloy") >= 20, "a titanium nose")
 	for c in ship.grid.tiles:
 		if ship.grid.tiles[c] == "titanium_alloy":
-			eq(c.y, b[0].y, "titanium only on the front row")
-			break
+			check(c.y <= b[0].y + BOW_ROWS, "titanium only on the bow (the arrowhead's first %d rows): %s" % [BOW_ROWS + 1, str(c)])
 	eq(ship.inventory.count("credits"), 500, "500 credits")
 
 
@@ -256,8 +256,8 @@ func test_courier_has_a_strafe_pair_on_its_side_walls() -> void:
 	eq(side, 2, "two engines on the side walls")
 	var bow := 0
 	for c in ship.grid.tiles:
-		bow += int(ship.grid.tiles[c] == "titanium_alloy" and c.y == _bounds(ship)[0].y)
-	check(bow >= 20, "and the bow is a titanium layer over the wall, two cells thick")
+		bow += int(ship.grid.tiles[c] == "titanium_alloy" and c.y <= _bounds(ship)[0].y + BOW_ROWS)
+	check(bow >= 20, "and the pointed bow is a titanium skin over the wall, two cells thick")
 	for uid in _family(ship, "weapon"):
 		var inst: Dictionary = ship.components.instances[uid]
 		eq(Mounts.depth_of(ship.components.def(inst["id"]), inst["anchor"], inst["rot"], inst["out_anchor"]), 2, "%s: its link is the whole 2-cell bow" % inst["id"])
