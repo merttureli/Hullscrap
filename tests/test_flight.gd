@@ -46,7 +46,8 @@ func test_config_matches_the_data_file() -> void:
 	eq(f.component_mass, {"reactor_mk1": 14.0, "reactor_mk2": 16.0}, "component masses")
 	eq([f.component_mass_per_cell, f.cable_mass_per_cell], [3.0, 0.1], "per-cell masses")
 	eq([f.linear_damping, f.angular_damping], [0.25, 1.5], "damping")
-	eq([f.thrust_to_accel, f.turn_factor, f.max_speed], [40.0, 0.6, 600.0], "thrust_to_accel, turn_factor, max_speed")
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/flight.json"))
+	eq([f.thrust_to_accel, f.turn_factor, f.max_speed], [float(data["thrust_to_accel"]), float(data["turn_factor"]), float(data["max_speed"])], "tuning comes from the data file")
 	var d := Flight.new("")
 	eq(d.max_speed, 600.0, "no file keeps the defaults")
 	check(not d.load_config("res://data/nope.json"), "a missing file is refused")
@@ -135,7 +136,7 @@ func test_boost_multiplies_thrust() -> void:
 
 
 func test_throttle_accelerates_up() -> void:
-	var f := Flight.new()
+	var f := Flight.new("")  # code defaults, so tuning the data file never breaks the physics checks
 	f.step(0.1, {"throttle": 1.0}, 100.0, 20.0)  # accel = 20 * 40 / 100 = 8 px/s^2
 	near(f.vel.y, -0.8 * exp(-f.linear_damping * 0.1), "velocity points up", 1e-5)
 	near(f.vel.x, 0.0, "and not sideways")
@@ -230,7 +231,7 @@ func test_no_thrust_means_no_push() -> void:
 
 
 func test_turning_changes_the_angle_and_damping_stops_the_spin() -> void:
-	var f := Flight.new()
+	var f := Flight.new("")
 	for i in 10:
 		f.step(0.1, {"turn": 1.0}, 50.0, 20.0)  # 0.6 * 20 / 50 = 0.24 rad/s^2
 	check(f.angle > 0.0, "positive turn is clockwise")

@@ -1,12 +1,19 @@
 {
   "_doc": "Flight model constants, read by scripts/sim/flight.gd. Units: mass in mass units, thrust in the thrust units of components.json (stats.thrust), positions in pixels, speed in px/s, angles in radians. tile_mass: mass of one tile of each id (unknown ids weigh 1.0). component_mass: whole-component mass by id; any component not listed weighs component_mass_per_cell times its footprint cells. cable_mass_per_cell: mass of one cable cell. linear_damping and angular_damping: exponential decay rates per second for velocity and spin. thrust_to_accel: acceleration (px/s^2) = throttle x thrust x thrust_to_accel / mass. turn_factor: angular acceleration (rad/s^2) = turn x thrust x turn_factor / mass. max_speed: speed cap in px/s.",
-  "tile_mass": {"floor": 1.0, "wall": 2.0, "door": 2.0},
+  "tile_mass": {
+    "floor": 1.0,
+    "wall": 2.0,
+    "door": 2.0
+  },
   "component_mass_per_cell": 3.0,
-  "component_mass": {"reactor_mk1": 14, "reactor_mk2": 16},
+  "component_mass": {
+    "reactor_mk1": 14,
+    "reactor_mk2": 16
+  },
   "cable_mass_per_cell": 0.1,
   "linear_damping": 0.25,
   "angular_damping": 1.5,
-  "thrust_to_accel": 40.0,
-  "turn_factor": 0.6,
+  "thrust_to_accel": 500.0,
+  "turn_factor": 12.0,
   "max_speed": 600.0
 }
