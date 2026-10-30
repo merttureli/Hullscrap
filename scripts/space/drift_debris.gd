@@ -194,6 +194,8 @@ func _spawn(ship, along := NAN) -> Dictionary:
 	var perp := Vector2(-dir.y, dir.x)
 	var t := _pick()
 	var half := minf(_cross_half(lane, perp) + float(s["lane_margin"]), float(s["lane_max"]))
+	if rng.randf() < float(s["scatter"]):  # a share of the debris is spread over the whole view, so it is not one stream
+		half = maxf(half, _cross_reach(lane) - 2.0 * float(s["margin"]))
 	var lat := perp.dot(lane["centre"] - view_centre) + rng.randf_range(-1.0, 1.0) * half
 	var a := -_reach(lane) if is_nan(along) else along
 	var p := {"uid": _next_uid, "type": str(t["id"]), "pos": view_centre + dir * a + perp * lat,
