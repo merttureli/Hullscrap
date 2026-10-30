@@ -95,7 +95,7 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 				_since = 1.0e9
 		"man_station":
 			ship.manned[job["uid"]] = m.name
-		"repair_breach", "repair_component", "revive":
+		"repair_breach", "repair_component", "revive", "clear_wreck":
 			var key: String = job["key"]
 			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(m, job["type"])
 			if progress[key] >= float(job["work"]) - 1e-6:

@@ -93,7 +93,7 @@ func mass_of(grid, components, cables, mass_mult := {}) -> float:
 		var i: Dictionary = components.instances[uid]
 		var e: Array = comps.get(i["id"], [0, 0])
 		e[0] += 1
-		e[1] += i["cells"].size()
+		e[1] += i["cells"].size() + i["out_cells"].size()  # both halves of a mount weigh
 		comps[i["id"]] = e
 	for id in _sorted(comps.keys()):
 		var m := float(mass_mult.get(id, 1.0))
