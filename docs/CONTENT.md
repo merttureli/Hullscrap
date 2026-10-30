@@ -515,6 +515,32 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 - **The target income**: idle drifting with one Mk1 intake brings ~15–25 scrap a minute plus a bit of copper and polymer. Actively chasing debris and breaking crates doubles that. Big hauls come from POIs (wrecks, mining fields, quests).
   - This is the steady, reliable income the owner asked for. Fights and quests are the jackpots.
 
+### Materials by rarity and region (owner, 2026-10-30)
+> "Basic materials can float around, but key upgrade materials or rare ones are only found through fighting, special mining or questing. Different regions have different core materials floating around, and quest items are found too."
+
+- **Common** (they float everywhere; the Raft loop): scrap, copper, polymer, ice.
+- **Regional** (they float only in their region's sectors, and are bought dearly elsewhere):
+  - **titanium**: Concord space around Meridian, and wreck fields;
+  - **silicon**: asteroid regions;
+  - **crystal shards**: Lumen space around the Prism, and the Dead Gate approaches (small amounts);
+  - **plasma cells**: rare canisters near anomalies.
+- **Key materials** (**never float**; Mk4/Mk5 parts and uniques need them):
+  - `military_circuit`: from wrecked Concord patrols, Enforcers and pirate captains (fight loot);
+  - `gate_alloy`: from Dead Gate POIs and Warden drones;
+  - `void_crystal`: only from **motherlode** mining fields (special mining POIs, guarded or unstable);
+  - `nanite_paste` (exists): from wreck medbays, abandoned stations and quests.
+- **Quest items** (`kind: "quest"` in `items.json`): story objects found at POIs and given by events, such as Ma's ledger, the buoy's recording or Skarn's hat.
+  - Events `require` and consume them; they can't be sold, and they show in their own cargo section.
+- **Regions of the Drift**: every map node belongs to a region by its nearest landmark:
+  - **Clan space** (Rusthold): scrap-rich, Rustfangs;
+  - **Concord space** (Meridian): titanium, patrols;
+  - **Lumen space** (the Prism): crystal, Wardens;
+  - **the Boneyard**: dense wrecks, salvage, scavengers;
+  - **Gate approaches** (the Dead Gates): crystal, gate alloy, the Hollow.
+
+  The region sets each sector's debris table (`data/debris.json` per region), the enemy mix and its stores' stock. The map tints regions faintly.
+- **Recipes gate tiers this way**: Mk1–Mk3 need common and regional materials; **Mk4 needs a key material, and Mk5 needs two**. So the best parts come from fighting, special mining and questing, never from drifting alone.
+
 ### Radar and beacons
 - **What you can see**:
   - `beacon` POIs (stations, stores, traders, distress beacons, quest markers) **broadcast**: you always know their bearing, from anywhere in the sector.

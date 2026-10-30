@@ -37,10 +37,11 @@ Base stats are **Standard-band values** (`data/balance.json`). The line multipli
   - Mk1: scrap 20, copper 10 (as now);
   - Mk2: scrap 30, copper 16, titanium 6;
   - Mk3: scrap 40, copper 24, titanium 12, silicon 4;
-  - Mk4: scrap 55, copper 32, titanium 20, silicon 8;
-  - Mk5: scrap 75, copper 40, titanium 30, silicon 12, crystal 2.
-- **Scrap** (cheap): Mk1 scrap 16 (as now); Mk2 scrap 26, copper 6; Mk3 scrap 36, copper 12, titanium 4; Mk4 scrap 50, copper 18, titanium 10.
-- **Neon** (dear): the Standard recipe of the same tier, plus crystal 2 × tier and silicon 4 × tier.
+  - Mk4: scrap 55, copper 32, titanium 20, silicon 8, **military_circuit 1** (a key material, CONTENT section 11);
+  - Mk5: scrap 75, copper 40, titanium 30, silicon 12, crystal 2, **military_circuit 2, gate_alloy 1**.
+- **Scrap** (cheap): Mk1 scrap 16 (as now); Mk2 scrap 26, copper 6; Mk3 scrap 36, copper 12, titanium 4; Mk4 scrap 50, copper 18, titanium 10, military_circuit 1.
+- **Neon** (dear): the Standard recipe of the same tier, plus crystal 2 × tier and silicon 4 × tier. Mk4 adds void_crystal 1.
+- The key materials (`military_circuit`, `gate_alloy`, `void_crystal`) are added to `data/materials.json` by this wave if they're missing (kind material, with a one-line blurb).
 - **Strafe Jets**: half the Standard recipe of the same tier, rounded up. **Long-Burn**: the Standard recipe +50% copper.
 - Known at the start: no change. The new ones are blueprints found or bought: Meridian stocks the Concord and Strafe parts, Gantry Rusthold the Kickjets, the Prism the Ion Drives, and the Long-Burn is sold at both Meridian and the Prism.
 
