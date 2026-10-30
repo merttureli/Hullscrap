@@ -42,7 +42,11 @@ func near(got: float, want: float, msg: String, eps := 1e-6) -> void:
 
 func test_config_matches_the_data_file() -> void:
 	var f := Flight.new()
-	eq(f.tile_mass, {"floor": 1.0, "wall": 2.0, "door": 2.0}, "tile masses")
+	var tiles: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/tiles.json"))
+	for t in tiles["tiles"]:
+		eq(f.tile_mass.get(t["id"]), float(t["mass"]), "mass of tile " + t["id"] + " comes from tiles.json")
+	eq(f.tile_mass.size(), tiles["tiles"].size(), "and no tile is missing a mass")
+	check(not (JSON.parse_string(FileAccess.get_file_as_string("res://data/flight.json")) as Dictionary).has("tile_mass"), "flight.json has no second copy")
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/flight.json"))
 	for id in cfg["component_mass"]:
 		eq(f.component_mass.get(id), float(cfg["component_mass"][id]), "component mass of " + id + " comes from the data file")

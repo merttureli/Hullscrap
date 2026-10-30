@@ -8,10 +8,10 @@ extends RefCounted
 ## on screen, as in flight.gd). A cell is 32 px.
 
 const Flight = preload("res://scripts/sim/flight.gd")
-const Power = preload("res://scripts/sim/power.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
+const Stats = preload("res://scripts/sim/stats.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
@@ -36,6 +36,10 @@ class Combatant extends RefCounted:
 	var layers_cap := 0
 	var shield_timers: Array[float] = []  ## seconds until each used layer is back
 	var ion_lock := 0.0  ## seconds the shields stay offline
+	var sectors := 1  ## the bubble's sectors (the best powered generator's stats.sectors); layers are one pool
+	var sector_open := {}  ## sector -> Vector2i(first tick, last tick) it is open: shots pass, no layer used (after this ship fired through it)
+	var overcharge_left := 0.0  ## seconds the overcharge layer lasts
+	var overcharge_cd := 0.0  ## seconds until the shield may be overcharged again
 	var input := {"throttle": 0.0, "turn": 0.0}
 	var dirty := true  ## parts or tiles changed: power, mass and shield cap need recomputing
 	var next_virtual := -1
@@ -45,7 +49,7 @@ var rng := RandomNumberGenerator.new()
 var weapons := Weapons.new()
 var projectiles: Array = []
 var beams: Array = []
-var events: Array = []  ## {tick, type, ship, cell, ...}: shot, shield, ion_lock, hit, deflect, ricochet, breach, disable, ignite (a hit started a fire), wreck
+var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line), jam, shield, ion_lock, hit, deflect, ricochet (those with dir and n: the shot's direction and the face normal, world), breach, disable, ignite (a hit started a fire), wreck
 var power_bonus := {}  ## ship index -> power the neon lattice has made of absorbed energy (counted, not used yet)
 var tick := 0  ## substeps run so far
 var _acc := 0.0
@@ -69,10 +73,6 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 	co.flight.pos = pos
 	co.flight.angle = angle
 	var grid = ship.grid
-	if grid.defs != null:  # the tile masses of data/tiles.json (flight.json knows only the old three)
-		for id in grid.defs.ids():
-			if grid.defs.get_def(id).has("mass"):
-				co.flight.tile_mass[id] = float(grid.defs.get_def(id)["mass"])
 	var lo := Vector2(INF, INF)
 	var hi := Vector2(-INF, -INF)
 	for c in grid.hull:
@@ -143,20 +143,25 @@ func _substep() -> void:
 	Projectiles.step(self, SUBSTEP)
 
 
-## Recompute power, mass, thrust and the shield cap of ship `idx` if a part or tile changed.
+## Recompute power, mass, thrust and the shield cap of ship `idx` if a part or tile changed here, or
+## the ship itself found a change (its own power solve: ShipSim's heat, malfunctions and repairs).
 func sync(idx: int) -> void:
-	if ships[idx].dirty:
-		_recompute(ships[idx])
+	var co = ships[idx]
+	if co.dirty:
+		co.ship.mark_dirty()
+	co.ship.refresh()
+	if co.dirty or not is_same(co.powered, co.ship.power_state.get("powered")):  # a new solve, here or in ShipSim
+		_recompute(co)
 
 
+## The ship's own power solve is the one truth (parts that are not ok are off), so the HUD and the
+## arena agree; thrust and mass use the line-adjusted numbers.
 func _recompute(co) -> void:
-	var off := {}
-	for uid in co.ship.components.instances:
-		if co.ship.components.instances[uid].get("status", "") == "disabled":
-			off[uid] = true
-	co.powered = Power.solve(co.ship.components, co.ship.cables, off)["powered"]
-	co.mass = co.flight.mass_of(co.ship.grid, co.ship.components, co.ship.cables)
-	co.thrust = co.flight.thrust_of(co.ship.components, co.powered)
+	co.ship.refresh()
+	co.powered = co.ship.power_state.get("powered", {})
+	var view = Stats.view(co.ship.components, co.ship.lines)
+	co.mass = co.flight.mass_of(co.ship.grid, co.ship.components, co.ship.cables, Stats.mass_mults(co.ship.components, co.ship.lines))
+	co.thrust = co.flight.thrust_of(view, co.powered)
 	Shields.resync(co)
 	co.dirty = false
 
@@ -171,10 +176,18 @@ func wreck(idx: int) -> void:
 	log_event("wreck", idx)
 
 
+## Append an event. `pos` is the world point of `cell` (the ship's centre for no cell) unless `extra` gives one.
 func log_event(type: String, ship: int, cell := Vector2i(-1, -1), extra := {}) -> void:
-	var e := {"tick": tick, "type": type, "ship": ship, "cell": cell}
-	e.merge(extra)
+	var e := {"tick": tick, "type": type, "ship": ship, "cell": cell,
+		"pos": cell_to_world(ship, cell) if cell.x >= 0 else ships[ship].flight.pos}
+	e.merge(extra, true)
 	events.append(e)
+
+
+## Overcharge the shield of ship `idx`: one extra layer for Shields.OVERCHARGE_S seconds, then a
+## cooldown. "" when it worked, else why not.
+func overcharge(idx: int) -> String:
+	return Shields.overcharge(self, idx)
 
 
 ## A world point in ship `idx`'s grid, in (fractional) cell coordinates.
