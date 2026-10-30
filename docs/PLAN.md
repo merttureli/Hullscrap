@@ -21,6 +21,11 @@ Placement uses square hitboxes on the grid, but placed objects should look natur
    - You set priorities, not every step.
 5. **Two views.** An interior view with the ship centred and space scrolling past, and a tactical view with a free camera for ship-to-ship fights.
 6. **Docking is physical.** Airlocks connect, and you walk aboard another ship to trade or board it.
+7. **Salvage and craft (Subnautica-style).**
+   - Structure (floors, walls, doors, cables) costs raw materials directly.
+   - Systems (engines, reactors, weapons, shields...) are items crafted at a Fabricator from blueprints and materials, then placed from cargo. Removing a system returns the item.
+   - Systems come in tiers (Mk1, Mk2, Mk3) with better stats.
+   - Blueprints unlock by salvaging and scanning wrecks; materials come from salvage, mining and trade.
 
 Reference games for ideas, not code: Space Haven (closest), FTL, Cosmoteer, Barotrauma, Raft, Among Us.
 
@@ -41,6 +46,11 @@ Reference games for ideas, not code: Space Haven (closest), FTL, Cosmoteer, Baro
    - Rooms detected by flood fill, with oxygen per room.
    - Cables solve power: which components are powered, and shortfalls.
    - An overlay view for rooms, power and oxygen.
+3b. **Crafting.**
+   - Materials and cargo; recipes and blueprints from data.
+   - A Fabricator component with a crafting queue.
+   - Crafted system items are placed from cargo.
+   - Structure costs materials.
 4. **Crew.**
    - Your soldier moves with WASD.
    - NPC crew pathfind on the grid through doors and pick jobs by priority: man a station, repair, fight fire, heal, rest.
@@ -58,7 +68,6 @@ Milestones 2 to 4 together make the first "show your friend" demo: build a ship,
 
 ## Ideas backlog (not scheduled)
 - Crew traits and morale.
-- Salvaging wrecks for parts (the "scrap" in Hullscrap).
 - Ship blueprints you can share.
 - Random sector events.
 - A choice between pirate, trader and mercenary careers.
