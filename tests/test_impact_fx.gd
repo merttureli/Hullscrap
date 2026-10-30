@@ -59,9 +59,9 @@ func test_a_ram_gives_sparks_debris_a_blast_and_a_line() -> void:
 		check(f["life"] > 0.0 and f.has("pos"), "every entry has a place and a life")
 	check(r["shake"] >= ImpactFx.SHAKE_MIN and r["shake"] <= ImpactFx.SHAKE_MAX, "a shake in range: %s" % r["shake"])
 	var line: String = r["line"]
-	check(line.begins_with("Rammed the pirate: "), "the chronicle line (%s)" % line)
+	check(line.begins_with("Collision with the pirate: it took "), "the chronicle line (%s)" % line)
 	check(line.contains(" hull damage") or line.contains("no hull damage"), "says the damage (%s)" % line)
-	check(line.contains("(took "), "and what the ram cost us (%s)" % line)
+	check(line.contains(", we took "), "and what the ram cost us (%s)" % line)
 	var chronicle: Array = s.arena.ships[Session.PLAYER].ship.events
 	eq(chronicle.back()["text"], line, "the line is in the player's chronicle")
 	var d: Dictionary = r["damage"]
@@ -145,7 +145,7 @@ func test_the_view_turns_a_ram_into_effects_a_shake_and_a_note() -> void:
 	view._on_event(s.arena.events[i])
 	check(view._fx.size() > 5, "effects were added: %d" % view._fx.size())
 	check(view._shake >= ImpactFx.SHAKE_MIN, "the camera shakes: %s" % view._shake)
-	check(view._note.begins_with("Rammed the pirate"), "a note says so (%s)" % view._note)
+	check(view._note.begins_with("Collision with the pirate"), "a note says so (%s)" % view._note)
 	var kinds := {}
 	for f in view._fx:
 		kinds[f["k"]] = true

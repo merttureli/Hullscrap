@@ -167,11 +167,22 @@ func _draw_tile(grid, c: Vector2i, id: String) -> void:
 
 ## The exterior skin over the walls that face space. The plan is remade when walls come or go (a breach, a repair).
 func _draw_skin(grid) -> void:
-	var sig := [grid.tiles.size(), grid.shapes.size(), grid.breached.size()]
+	var sig := [grid.tiles.size(), grid.shapes.size(), grid.breached.size(), ship.components.instances.size()]
 	if sig != _skin_sig:
-		_skin = TileArt.skin_plan(grid)
+		_skin = TileArt.skin_plan(grid, _part_lines())
 		_skin_sig = sig
 	TileArt.draw_skin(self, _skin, px(Vector2.ZERO), CELL, _clock, _glow_quads)
+
+
+## Line -> cells of the ship's parts, so a ship full of neon parts wears the neon skin even on standard plates.
+func _part_lines() -> Dictionary:
+	var out := {}
+	for uid in ship.components.instances:
+		var inst: Dictionary = ship.components.instances[uid]
+		var line := str(ship.components.def(inst["id"]).get("line", ""))
+		if line != "":
+			out[line] = int(out.get(line, 0)) + inst["cells"].size()
+	return out
 
 
 ## A door piece: floor under it, two leaves that meet in the middle when closed and slide back into

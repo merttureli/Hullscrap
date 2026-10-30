@@ -269,6 +269,7 @@ func test_the_skin_tint_follows_the_dominant_line() -> void:
 	var g := _grid()
 	_ring(g, 10, 8, "scrap_plate")
 	eq(TileArt.skin_plan(g)["line"], "scrap", "scrap plates all round")
+	eq(TileArt.skin_plan(g, {"neon": 10000})["line"], "neon", "a ship full of neon parts wears the neon skin")
 	eq(TileArt.skin_tint(sheet, "scrap"), Color8(255, 184, 133), "scrap rust")
 	eq(TileArt.skin_tint(sheet, "standard"), Color8(237, 250, 255), "standard clean")
 	eq(TileArt.skin_tint(sheet, "neon"), Color8(92, 112, 189), "neon navy")

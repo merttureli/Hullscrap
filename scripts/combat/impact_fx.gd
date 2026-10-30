@@ -42,7 +42,8 @@ static func ram_damage(events: Array, index: int) -> Dictionary:
 
 ## The effects of the ram event `arena.events[index]`: {"fx": entries, "line": the chronicle line, "shake"
 ## (screen px), "damage" (ram_damage)}. Sparks, debris and a small blast at every contact point, a blast
-## and (for a hard one) a ring where the ships met. The line, "Rammed the pirate: 14 hull damage (took 6)",
+## and (for a hard one) a ring where the ships met. The line, "Collision with the pirate: it took 14 hull damage, we took 6 hull damage"
+## (who rammed whom is not decided: both ships take damage),
 ## is also written to ship `player`'s chronicle; it is "" when `player` is in neither ship of the collision.
 static func ram(arena, index: int, player := 0, label := "pirate") -> Dictionary:
 	var e: Dictionary = arena.events[index]
@@ -67,7 +68,7 @@ static func ram(arena, index: int, player := 0, label := "pirate") -> Dictionary
 	var line := ""
 	if player in [e["a"], e["b"]]:
 		var other: int = e["b"] if e["a"] == player else e["a"]
-		line = "Rammed the %s: %s (took %s)" % [label, _hull_text(dmg.get(other, {}).get("hull", 0.0)), _hull_text(dmg.get(player, {}).get("hull", 0.0), true)]
+		line = "Collision with the %s: it took %s, we took %s" % [label, _hull_text(dmg.get(other, {}).get("hull", 0.0)), _hull_text(dmg.get(player, {}).get("hull", 0.0))]
 		arena.ships[player].ship.log_event(line)
 	return {"fx": fx, "line": line, "shake": shake(energy), "damage": dmg}
 

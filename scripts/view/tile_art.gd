@@ -303,8 +303,8 @@ static func skin_mask(grid, c: Vector2i) -> int:
 ## solid cells next to space (ram plating keeps its hazard tape, and a shaped cell that looks into the
 ## ship has no skin): `mask` is skin_mask(), `row` the row of the shaped sheet (-1 for a full cell),
 ## `variant` a panel variant by the cell's position, `decal` a greeble ("" for none). `line` is the line
-## that most of those cells' tiles belong to (a tie goes to standard).
-static func skin_plan(grid) -> Dictionary:
+## that most of those cells' tiles belong to, plus `extra` (line -> cells, e.g. the ship's parts), a tie going to standard.
+static func skin_plan(grid, extra := {}) -> Dictionary:
 	var cells := []
 	var index := {}
 	var lines := {}
@@ -326,6 +326,8 @@ static func skin_plan(grid) -> Dictionary:
 		index[c] = e
 	for e in cells:
 		e["decal"] = decal_for(index, e)
+	for line in extra:
+		lines[line] = int(lines.get(line, 0)) + int(extra[line])
 	return {"cells": cells, "line": dominant_line(lines)}
 
 
