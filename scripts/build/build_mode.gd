@@ -10,8 +10,8 @@ extends Node2D
 ## would apply, red = not (the reason is in the HUD). Edits happen on mouse release.
 ## Play mode has no ghost and LMB/RMB do nothing yet. Both modes: E opens/closes the door piece under the
 ## mouse, O shows oxygen, P shows power, Ctrl+S saves to user://ship.json, Ctrl+L loads it, wheel zooms.
-## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F repairs the system
-## under the mouse (until crew jobs exist). Play mode only: N asks the ship picker (ship_picker.gd) for another ship.
+## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F sends the nearest
+## crew member to repair the system under the mouse. Play mode only: N asks the ship picker (ship_picker.gd) for another ship.
 ## W, A, S, D are reserved for player movement: do not bind them without a modifier.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -322,11 +322,7 @@ func _repair_under_mouse() -> void:
 	if uid < 0:
 		message = "no system under the mouse"
 		return
-	var inst: Dictionary = ship.components.instances[uid]
-	var name: String = ship.components.def(inst["id"]).get("name", inst["id"])
-	var fine: bool = inst["status"] == "ok" and inst["hp"] >= ship.effective(inst["id"])["hp"]
-	ship.repair(uid)
-	message = "%s needs no repair" % name if fine else "repaired " + name
+	message = sim.jobs_of(ship).order_repair(ship, uid)  # the nearest crew member goes and fixes it
 
 
 ## The player's ship was replaced (the picker loaded a design): forget the old ship's edit state.

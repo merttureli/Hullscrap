@@ -13,6 +13,7 @@ const Inventory = preload("res://scripts/ship/inventory.gd")
 const Atmosphere = preload("res://scripts/sim/atmosphere.gd")
 const Power = preload("res://scripts/sim/power.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
+const Fire = preload("res://scripts/sim/fire.gd")
 
 ## Save format. 3 adds name, world transform, components, cables and oxygen on top of the
 ## grid and cargo of 2; versions 1 and 2 still load (no components, no cables).
@@ -36,6 +37,8 @@ var events: Array = []  ## the chronicle, newest last: {t, text}; at most MAX_EV
 var clock := 0.0  ## seconds this ship has been simulated; the `t` of new events
 var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; not saved yet
+var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
+var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
 var world_pos := Vector2.ZERO  ## pixels; for drawing, 0 for now
 var rot_quarters := 0  ## quarter turns; for drawing, 0 for now
 var _structure_dirty := true
@@ -155,6 +158,11 @@ func to_dict() -> Dictionary:
 	d["components"] = components.to_dict()
 	d["cables"] = cables.to_dict()
 	d["oxygen"] = atmosphere.pressure.duplicate()
+	if not fires.is_empty():  # optional, like the grid's damage lists: only written when something burns
+		var list := []
+		for c in Fire.sorted_cells(fires.keys()):
+			list.append([c.x, c.y, fires[c]])
+		d["fires"] = list
 	return d
 
 
@@ -178,6 +186,9 @@ func load_dict(d: Dictionary) -> String:
 		var why := _check_layers(d)
 		if why != "":
 			return why
+	var burning = _read_fires(d)
+	if burning == null:
+		return "bad ship data"
 	var gd := d.duplicate()
 	gd["version"] = mini(version, ShipGrid.VERSION)
 	var err: String = grid.load_dict(gd)
@@ -193,6 +204,8 @@ func load_dict(d: Dictionary) -> String:
 		var p = d.get("world_pos")
 		world_pos = Vector2(float(p[0]), float(p[1])) if p is Array and p.size() == 2 else Vector2.ZERO
 		rot_quarters = posmod(int(d.get("rot", 0)), 4)
+	fires = burning
+	manned = {}
 	atmosphere.rooms = []
 	atmosphere.room_of = {}
 	atmosphere.doors = []
@@ -204,6 +217,20 @@ func load_dict(d: Dictionary) -> String:
 		for i in air.size():
 			atmosphere.pressure[i] = clampf(float(air[i]), 0.0, 1.0)
 	return ""
+
+
+## The optional "fires" list of a save ([[x, y, intensity], ...]) as cell -> intensity; {} when
+## absent, null when malformed.
+func _read_fires(d: Dictionary):
+	var list = d.get("fires", [])
+	if not list is Array:
+		return null
+	var out := {}
+	for p in list:
+		if not (p is Array and p.size() == 3 and (p[2] is float or p[2] is int)):
+			return null
+		out[Vector2i(int(p[0]), int(p[1]))] = clampf(float(p[2]), 0.0, 1.0)
+	return out
 
 
 ## Is the components/cables part of a version 3 save well formed? Checked before anything is

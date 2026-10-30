@@ -12,6 +12,8 @@ const Weapons = preload("res://scripts/combat/weapons.gd")
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
+const Fire = preload("res://scripts/sim/fire.gd")
+const Jobs = preload("res://scripts/crew/jobs.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
@@ -113,8 +115,15 @@ func set_input(idx: int, throttle: float, turn: float) -> void:
 
 
 ## Fire mount `uid` of ship `idx` at the world point `aim`. False when it cannot (see Weapons.can_fire).
+## A weapon with a crew member at its station cools down faster (Jobs.cooldown_mult).
 func fire(idx: int, uid: int, aim: Vector2) -> bool:
-	return weapons.fire(self, idx, uid, aim)
+	if not weapons.fire(self, idx, uid, aim):
+		return false
+	var co = ships[idx]
+	var mult: float = Jobs.cooldown_mult(co.ship, uid)
+	if mult < 1.0:
+		co.cooldowns[uid] = tick + int(ceil(float(int(co.cooldowns[uid]) - tick) * mult - 1e-6))
+	return true
 
 
 ## Seconds until mount `uid` of ship `idx` may fire again (0 when ready).
@@ -182,6 +191,8 @@ func log_event(type: String, ship: int, cell := Vector2i(-1, -1), extra := {}) -
 		"pos": cell_to_world(ship, cell) if cell.x >= 0 else ships[ship].flight.pos}
 	e.merge(extra, true)
 	events.append(e)
+	if type == "ignite":  # a hit started a real fire (scripts/sim/fire.gd)
+		Fire.ignite_near(ships[ship].ship, cell)
 
 
 ## Overcharge the shield of ship `idx`: one extra layer for Shields.OVERCHARGE_S seconds, then a

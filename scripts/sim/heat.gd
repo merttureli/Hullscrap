@@ -2,8 +2,10 @@ extends RefCounted
 ## Heat per component (docs/CONTENT.md section 3). A running part (powered, status ok) gains
 ## heat_per_s x line heat each second; every part loses cooling plus the cooling bonus of the
 ## radiators running in its room. At heat_limit a part overheats: it is out of action (unpowered)
-## until its heat drops below half the limit, and the trip may start a fire. Deterministic: the
-## fire roll comes from the rng the caller passes (ShipSim's).
+## until its heat drops below half the limit, and the trip may start a fire (fire.gd) on the part's
+## first cell. Deterministic: the fire roll comes from the rng the caller passes (ShipSim's).
+
+const Fire = preload("res://scripts/sim/fire.gd")
 
 const FIRE_CHANCE := 0.2  ## on tripping the limit
 const RECOVER_AT := 0.5  ## an overheated part works again below this fraction of its limit
@@ -32,8 +34,9 @@ static func tick(ship, dt: float, rng: RandomNumberGenerator = null) -> void:
 		if inst["status"] == "ok" and heat >= e["heat_limit"]:
 			inst["status"] = "overheated"
 			ship.log_event("%s overheated" % name)
-			if rng != null and rng.randf() < FIRE_CHANCE:  # fires are not implemented yet: only logged
+			if rng != null and rng.randf() < FIRE_CHANCE:
 				ship.log_event("%s started a fire" % name)
+				Fire.ignite_part(ship, uid)
 		elif inst["status"] == "overheated" and heat < e["heat_limit"] * RECOVER_AT:
 			inst["status"] = "ok"
 			ship.log_event("%s cooled down" % name)

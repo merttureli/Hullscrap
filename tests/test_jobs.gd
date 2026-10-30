@@ -1,0 +1,809 @@
+extends "res://tests/base_test.gd"
+## Crew jobs (scripts/crew/jobs.gd): the board, who takes what, fighting fires, repairs, manning,
+## health, the starting crew, and the crew working on during a fight.
+
+const Fixture = preload("res://tests/fixture_ship.gd")
+const Jobs = preload("res://scripts/crew/jobs.gd")
+const Fire = preload("res://scripts/sim/fire.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Arena = preload("res://scripts/combat/arena.gd")
+const Ship = preload("res://scripts/ship/ship.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const CrewView = preload("res://scripts/crew/crew_view.gd")
+const BuildMode = preload("res://scripts/build/build_mode.gd")
+
+const STARTERS := ["res://data/ships/starter_rustbucket.json", "res://data/ships/starter_courier.json", "res://data/ships/starter_prism.json"]
+const PIRATE := "res://data/ships/pirate_raider.json"
+const STEP := 0.1
+
+
+## A person whose 2x2 body has its top-left cell on (x, y).
+func _npc(p_name: String, x: int, y: int) -> CrewMember:
+	return CrewMember.new(p_name, Pathfinder.centre_of(Vector2i(x, y)))
+
+
+func _player(x: int, y: int) -> CrewMember:
+	var m := _npc("Soldier", x, y)
+	m.is_player = true
+	return m
+
+
+## Run the crew of `ship` for `seconds` in steps of 0.1 s (no fire growth: Jobs only).
+func _run(jobs: Jobs, ship: Ship, seconds: float) -> void:
+	for i in roundi(seconds / STEP):
+		jobs.tick(ship, STEP)
+
+
+func _distinct(list: Array) -> int:
+	var seen := {}
+	for x in list:
+		seen[x] = true
+	return seen.size()
+
+
+func _log_index(ship: Ship, text: String) -> int:
+	for i in ship.events.size():
+		if ship.events[i]["text"] == text:
+			return i
+	return -1
+
+
+func near(got: float, want: float, msg: String, eps := 1e-6) -> void:
+	check(absf(got - want) <= eps, "%s: expected %s, got %s" % [msg, want, got])
+
+
+## Seconds (in 0.1 steps) until `done` is true, 0.0 - 60.0; -1 if it never was.
+func _time_until(jobs: Jobs, ship: Ship, done: Callable) -> float:
+	for i in 600:
+		jobs.tick(ship, STEP)
+		if done.call():
+			return (i + 1) * STEP
+	return -1.0
+
+
+# --- the board and its order ---------------------------------------------------------------------
+
+## A room with a helm, an engine that malfunctions, a fire, and a breach. Returns the uids too.
+func _trouble() -> Dictionary:
+	var ship := Fixture.room_ship()
+	var d := {"ship": ship}
+	d["helm"] = Fixture.put(ship, "helm", 19, 10)
+	d["engine"] = Fixture.put(ship, "engine_mk1", 15, 14)
+	ship.components.instances[d["engine"]]["status"] = "malfunction"
+	ship.fires[Vector2i(12, 12)] = 0.3
+	ship.grid.breach(Vector2i(15, 8))
+	ship.mark_dirty()
+	ship.refresh()
+	return d
+
+
+func test_the_board_lists_fire_before_breach_before_part_before_station() -> void:
+	var d := _trouble()
+	var jobs := Jobs.new()
+	jobs.build_board(d["ship"])
+	var keys: Array = Jobs.by_priority(jobs.board.values()).map(func(j): return j["key"])
+	eq(keys, ["fire:12,12", "breach:15,8", "fix:%d" % d["engine"], "post:%d" % d["helm"]], "highest priority first")
+	eq([jobs.board["fire:12,12"]["priority"], jobs.board["breach:15,8"]["priority"], jobs.board["fix:%d" % d["engine"]]["priority"], jobs.board["post:%d" % d["helm"]]["priority"]], [100, 90, 80, 50], "100 / 90 / 80 / 50")
+
+
+func test_weapons_engines_and_shields_come_first_in_a_fight() -> void:
+	var ship := Fixture.room_ship()
+	var laser := Fixture.put(ship, "laser_mk1", 15, 10)
+	var engine := Fixture.put(ship, "engine_mk1", 15, 14)
+	var radiator := Fixture.put(ship, "radiator", 10, 10)
+	for uid in [laser, engine, radiator]:
+		ship.components.instances[uid]["status"] = "malfunction"
+	var jobs := Jobs.new()
+	jobs.build_board(ship)
+	eq([jobs.board["fix:%d" % laser]["priority"], jobs.board["fix:%d" % radiator]["priority"]], [80, 80], "calm: all alike")
+	jobs.combat = true
+	jobs.build_board(ship)
+	eq([jobs.board["fix:%d" % laser]["priority"], jobs.board["fix:%d" % engine]["priority"], jobs.board["fix:%d" % radiator]["priority"]], [90, 90, 80], "in a fight: weapon and engine +10")
+
+
+func test_an_overheated_part_is_not_a_job_but_a_disabled_one_is() -> void:
+	var ship := Fixture.room_ship()
+	var uid := Fixture.put(ship, "engine_mk1", 15, 14)
+	var jobs := Jobs.new()
+	ship.components.instances[uid]["status"] = "overheated"
+	jobs.build_board(ship)
+	check(not jobs.board.has("fix:%d" % uid), "it just needs time")
+	ship.components.instances[uid]["status"] = "disabled"
+	jobs.build_board(ship)
+	check(jobs.board.has("fix:%d" % uid), "disabled: repair")
+
+
+func test_only_the_helm_is_manned_unless_the_data_says_so() -> void:
+	var ship := Fixture.room_ship()
+	var helm := Fixture.put(ship, "helm", 19, 10)
+	var laser := Fixture.put(ship, "laser_mk1", 15, 10)
+	var jobs := Jobs.new()
+	jobs.build_board(ship)
+	eq(jobs.board.keys(), ["post:%d" % helm], "the helm always, the laser not")
+	ship.components.by_id["laser_mk1"]["manned"] = true
+	jobs.build_board(ship)
+	check(jobs.board.has("post:%d" % laser), "a weapon with manned: true gets a post")
+	eq(jobs.board["post:%d" % laser]["priority"], 50, "at 50")
+
+
+# --- who takes what ------------------------------------------------------------------------------
+
+func test_one_crew_member_works_through_fire_breach_part_station_in_that_order() -> void:
+	var d := _trouble()
+	var ship: Ship = d["ship"]
+	var m := _npc("Ada", 13, 14)
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	_run(jobs, ship, 60.0)
+	var fire_out := _log_index(ship, "Fire out")
+	var sealed := _log_index(ship, "Breach sealed")
+	var fixed := _log_index(ship, "Engine Mk1 repaired")
+	check(fire_out >= 0 and sealed >= 0 and fixed >= 0, "all three were done: %s" % str(ship.events.map(func(e): return e["text"])))
+	check(fire_out < sealed and sealed < fixed, "fire, then breach, then part")
+	check(ship.fires.is_empty() and ship.grid.breached.is_empty(), "nothing burns, nothing is open")
+	eq(ship.components.instances[d["engine"]]["status"], "ok", "the engine runs")
+	check(ship.manned.has(d["helm"]), "and then the helm is manned")
+	eq(ship.manned[d["helm"]], "Ada", "by her")
+
+
+func test_a_free_crew_member_picks_the_nearest_of_equal_jobs() -> void:
+	var ship := Fixture.room_ship()
+	ship.fires[Vector2i(10, 15)] = 0.5
+	ship.fires[Vector2i(20, 10)] = 0.5
+	var near_one := _npc("Near", 18, 11)
+	ship.crew.append(near_one)
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	eq(near_one.job["key"], "fire:20,10", "the fire close by, not the one across the room")
+
+
+func test_two_crew_do_not_both_take_a_one_place_job() -> void:
+	var ship := Fixture.room_ship()
+	var uid := Fixture.put(ship, "engine_mk1", 15, 14)
+	ship.components.instances[uid]["status"] = "malfunction"
+	var a := _npc("A", 13, 14)
+	var b := _npc("B", 13, 11)
+	ship.crew.append_array([a, b])
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	var taken := [a, b].filter(func(m): return not m.job.is_empty())
+	eq(taken.size(), 1, "one repair, one repairer")
+	check(a.job.has("key") and b.job.is_empty(), "the other has nothing to do")
+
+
+func test_jobs_nobody_works_on_go_first() -> void:
+	var ship := Fixture.room_ship()
+	ship.fires[Vector2i(12, 12)] = 0.5
+	ship.fires[Vector2i(20, 15)] = 0.5
+	var a := _npc("A", 13, 12)
+	var b := _npc("B", 16, 12)  # nearer to the first fire than to the second
+	ship.crew.append_array([a, b])
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	eq(a.job["key"], "fire:12,12", "the first takes the near fire")
+	eq(b.job["key"], "fire:20,15", "the second takes the one nobody works on, though the first has a free place")
+
+
+func test_a_crew_member_switches_to_a_job_30_points_higher() -> void:
+	var ship := Fixture.room_ship()
+	var helm := Fixture.put(ship, "helm", 19, 10)
+	var engine := Fixture.put(ship, "engine_mk1", 15, 14)
+	var m := _npc("Ada", 17, 10)  # next to the helm
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	_run(jobs, ship, 0.5)
+	eq(m.job["key"], "post:%d" % helm, "at the helm")
+	check(ship.manned.has(helm), "manning it")
+	ship.components.instances[engine]["status"] = "malfunction"  # 80 against 50: exactly 30 more
+	_run(jobs, ship, 1.2)
+	eq(m.job.get("type"), "repair_component", "she goes to fix the engine")
+	check(not ship.manned.has(helm), "and leaves the helm")
+
+
+func test_a_crew_member_keeps_a_job_when_the_new_one_is_less_than_30_higher() -> void:
+	var ship := Fixture.room_ship()
+	var engine := Fixture.put(ship, "engine_mk1", 15, 14)
+	ship.components.instances[engine]["status"] = "malfunction"
+	var m := _npc("Ada", 13, 14)
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	_run(jobs, ship, 1.0)
+	eq(m.job["key"], "fix:%d" % engine, "repairing")
+	ship.grid.breach(Vector2i(15, 8))  # 90: 10 higher
+	ship.mark_dirty()
+	_run(jobs, ship, 1.5)
+	eq(m.job.get("key"), "fix:%d" % engine, "she keeps at the repair")
+	ship.fires[Vector2i(12, 12)] = 0.9  # 100: 20 higher
+	_run(jobs, ship, 1.5)
+	eq(m.job.get("key"), "fix:%d" % engine, "and at the repair")
+	check(float(jobs.progress.get("fix:%d" % engine, 0.0)) > 0.0, "(it is making progress)")
+
+
+func test_a_fire_pulls_a_crew_member_off_a_station() -> void:
+	var ship := Fixture.room_ship()
+	Fixture.put(ship, "helm", 19, 10)
+	var m := _npc("Ada", 17, 10)
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	_run(jobs, ship, 0.5)
+	eq(m.job["type"], "man_station", "at the helm")
+	ship.fires[Vector2i(12, 12)] = 0.9
+	_run(jobs, ship, 1.2)
+	eq(m.job.get("type"), "extinguish", "100 is 50 above 50")
+
+
+func test_the_search_is_limited() -> void:
+	var ship := Fixture.room_ship()
+	for x in range(10, 21, 2):
+		for y in [10, 12, 14]:
+			ship.fires[Vector2i(x, y)] = 0.5
+	var crew := [_npc("A", 9, 9), _npc("B", 20, 15), _npc("C", 14, 12), _npc("D", 9, 15), _npc("E", 20, 9), _npc("F", 12, 12)]
+	ship.crew.append_array(crew)
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	check(jobs.paths_used > 0, "it searched")
+	eq(jobs.paths_used, int(Jobs.jcfg()["search"]["paths"]), "and stopped at the budget of path searches")
+	check(crew.filter(func(m): return not m.job.is_empty()).size() >= 3, "while the first few have work")
+
+
+# --- the work itself -----------------------------------------------------------------------------
+
+func test_a_crew_member_next_to_a_fire_lowers_it_half_a_point_a_second() -> void:
+	var ship := Fixture.room_ship()
+	ship.fires[Vector2i(15, 12)] = 0.9
+	ship.crew.append(_npc("A", 16, 12))
+	var jobs := Jobs.new()
+	_run(jobs, ship, 1.0)
+	near(ship.fires[Vector2i(15, 12)], 0.4, "0.9 - 0.5 after a second", 1e-5)
+
+
+func test_two_crew_put_a_fire_out_twice_as_fast() -> void:
+	var one := Fixture.room_ship()
+	one.fires[Vector2i(15, 12)] = 0.9
+	one.crew.append(_npc("A", 16, 12))
+	var two := Fixture.room_ship()
+	two.fires[Vector2i(15, 12)] = 0.9
+	two.crew.append_array([_npc("A", 16, 12), _npc("B", 13, 12)])
+	var t1 := _time_until(Jobs.new(), one, func(): return one.fires.is_empty())
+	var t2 := _time_until(Jobs.new(), two, func(): return two.fires.is_empty())
+	check(t1 > 0.0 and t2 > 0.0, "both put it out")
+	near(t1, 1.8, "alone: 0.9 / 0.5", 0.15)
+	near(t2, 0.9, "together: 0.9 / 1.0", 0.15)
+	check(t2 < t1 * 0.6, "twice as fast")
+	check(_log_index(two, "Fire out") >= 0, "and the chronicle says so")
+
+
+func test_a_crew_member_does_not_stand_in_the_flames_to_fight_them() -> void:
+	var ship := Fixture.room_ship()
+	for c in [Vector2i(15, 12), Vector2i(16, 12), Vector2i(15, 13), Vector2i(16, 13)]:
+		ship.fires[c] = 0.9
+	var m := _npc("A", 9, 9)
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	check(m.job.has("spot"), "she has a job")
+	for c in Pathfinder.body_cells(m.job["spot"]):
+		check(not ship.fires.has(c), "the spot %s is clear of fire" % str(m.job["spot"]))
+
+
+func test_breach_repair_restores_the_wall_and_reseals_the_room() -> void:
+	var ship := Fixture.room_ship()
+	var room := ship.atmosphere.room_at(Vector2i(15, 9))
+	check(ship.atmosphere.rooms[room]["sealed"], "sealed at first")
+	ship.grid.breach(Vector2i(15, 8))
+	ship.mark_dirty()
+	ship.refresh()
+	check(not ship.atmosphere.rooms[ship.atmosphere.room_at(Vector2i(15, 9))]["sealed"], "the breach opens the room to space")
+	ship.crew.append(_npc("A", 14, 9))
+	var jobs := Jobs.new()
+	_run(jobs, ship, 5.5)
+	check(ship.grid.breached.has(Vector2i(15, 8)), "not done at 5.5 s (6 s of work)")
+	_run(jobs, ship, 1.0)
+	eq(ship.grid.get_tile(Vector2i(15, 8)), "wall", "the wall is back")
+	check(ship.grid.breached.is_empty(), "no breach left")
+	ship.refresh()
+	check(ship.atmosphere.rooms[ship.atmosphere.room_at(Vector2i(15, 9))]["sealed"], "and the room is sealed again")
+	check(_log_index(ship, "Breach sealed") >= 0, "'Breach sealed' in the chronicle")
+	near(ship.grid.hp_of(Vector2i(15, 8)), 4.0, "at full hp")
+
+
+func test_a_breach_in_scrap_plate_is_patched_in_half_the_time() -> void:
+	var ship := Fixture.room_ship()
+	ship.grid.force_tile(Vector2i(15, 8), "scrap_plate")
+	ship.grid.breach(Vector2i(15, 8))
+	ship.mark_dirty()
+	ship.crew.append(_npc("A", 14, 9))
+	var t := _time_until(Jobs.new(), ship, func(): return ship.grid.breached.is_empty())
+	near(t, 3.0, "6 s x the scrap line's 0.5", 0.15)
+	eq(ship.grid.get_tile(Vector2i(15, 8)), "scrap_plate", "the same material comes back")
+
+
+func test_part_repair_respects_the_lines_repair_multiplier() -> void:
+	for pair in [["engine_scrap_mk1", 2.5], ["engine_mk1", 5.0], ["engine_neon_mk1", 7.5]]:
+		var ship := Fixture.room_ship()
+		var uid := Fixture.put(ship, pair[0], 15, 10)
+		var inst: Dictionary = ship.components.instances[uid]
+		inst["status"] = "malfunction"
+		inst["hp"] = 1
+		ship.crew.append(_npc("A", 13, 10))
+		var t := _time_until(Jobs.new(), ship, func(): return inst["status"] == "ok")
+		near(t, pair[1], "%s takes 5 s x the repair multiplier" % pair[0], 0.15)
+		eq(inst["hp"], ship.effective(pair[0])["hp"], "and comes back at full hp")
+	var named := Fixture.room_ship()
+	var kick := Fixture.put(named, "engine_scrap_mk1", 15, 10)
+	named.components.instances[kick]["status"] = "disabled"
+	named.crew.append(_npc("A", 13, 10))
+	_time_until(Jobs.new(), named, func(): return named.components.instances[kick]["status"] == "ok")
+	check(_log_index(named, "Kickjet repaired") >= 0, "'Kickjet repaired' in the chronicle")
+
+
+func test_the_crew_walk_to_the_job() -> void:
+	var ship := Fixture.room_ship()
+	var uid := Fixture.put(ship, "engine_mk1", 15, 14)
+	ship.components.instances[uid]["status"] = "malfunction"
+	var m := _npc("A", 9, 9)
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	_run(jobs, ship, 1.0)
+	check(m.pos.distance_to(Pathfinder.centre_of(Vector2i(9, 9))) > 2.0, "she is on her way")
+	check(jobs.progress.get("fix:%d" % uid, 0.0) == 0.0, "no work done while walking")
+	_run(jobs, ship, 3.0)
+	check(Jobs.new().in_reach(m, jobs.board["fix:%d" % uid]), "she arrived next to the engine")
+
+
+# --- the player ----------------------------------------------------------------------------------
+
+func test_the_player_is_never_given_a_job() -> void:
+	var ship := Fixture.room_ship()
+	var uid := Fixture.put(ship, "engine_mk1", 15, 14)
+	ship.components.instances[uid]["status"] = "malfunction"
+	ship.fires[Vector2i(12, 12)] = 0.5
+	Fixture.put(ship, "helm", 19, 10)
+	var p := _player(13, 12)
+	ship.crew.append(p)
+	var at := p.pos
+	var jobs := Jobs.new()
+	_run(jobs, ship, 10.0)
+	check(p.job.is_empty(), "no job")
+	eq(p.pos, at, "and he has not moved")
+	check(p.path.is_empty(), "no path")
+	check(ship.fires.has(Vector2i(12, 12)), "the fire is still burning")
+	check(ship.manned.is_empty(), "and the helm is empty")
+
+
+func test_the_player_works_a_job_by_hand_at_the_same_speed() -> void:
+	var ship := Fixture.room_ship()
+	var uid := Fixture.put(ship, "engine_mk1", 15, 14)
+	ship.components.instances[uid]["status"] = "malfunction"
+	ship.fires[Vector2i(12, 12)] = 0.9
+	var p := _player(13, 12)  # next to the fire, far from the engine
+	ship.crew.append(p)
+	var jobs := Jobs.new()
+	jobs.build_board(ship)
+	eq(jobs.hand_work(ship, p, 1.0), "fire:12,12", "E held next to the fire")
+	near(ship.fires[Vector2i(12, 12)], 0.4, "0.5 a second, like a crew member")
+	jobs.hand_work(ship, p, 1.0)
+	check(ship.fires.is_empty(), "out")
+	p.pos = Pathfinder.centre_of(Vector2i(13, 14))
+	jobs.build_board(ship)
+	for i in 49:
+		jobs.hand_work(ship, p, STEP)
+	eq(ship.components.instances[uid]["status"], "malfunction", "4.9 s is not enough for a standard engine")
+	for i in 3:
+		jobs.hand_work(ship, p, STEP)
+	eq(ship.components.instances[uid]["status"], "ok", "5 s is")
+	eq(jobs.hand_work(ship, p, 1.0), "", "nothing left in reach")
+
+
+func test_the_player_and_a_crew_member_stack() -> void:
+	var ship := Fixture.room_ship()
+	ship.fires[Vector2i(15, 12)] = 0.9
+	var p := _player(13, 12)  # the other side of the fire from the crew member
+	ship.crew.append_array([p, _npc("A", 16, 12)])
+	var jobs := Jobs.new()
+	for i in 9:
+		jobs.tick(ship, STEP)
+		jobs.hand_work(ship, p, STEP)
+	check(ship.fires.is_empty(), "0.9 gone in 0.9 s: 0.5 + 0.5 a second")
+
+
+# --- health --------------------------------------------------------------------------------------
+
+func test_fire_hurts_crew_standing_in_it() -> void:
+	var ship := Fixture.room_ship()
+	ship.fires[Vector2i(15, 12)] = 0.5
+	var p := _player(14, 11)  # the body covers (14..15, 11..12): the fire is under it
+	var safe := _player(19, 14)
+	ship.crew.append_array([p, safe])
+	var jobs := Jobs.new()
+	jobs.tick(ship, 1.0)
+	near(p.hp, 90.0, "10 a second")
+	near(safe.hp, 100.0, "the one away from it is fine")
+
+
+func test_thin_air_hurts_below_15_percent() -> void:
+	var ship := Fixture.room_ship()
+	var p := _player(14, 11)
+	ship.crew.append(p)
+	var room := ship.atmosphere.room_at(p.cell())
+	var jobs := Jobs.new()
+	ship.atmosphere.pressure[room] = 0.15
+	jobs.tick(ship, 1.0)
+	near(p.hp, 100.0, "15% is fine")
+	ship.atmosphere.pressure[room] = 0.14
+	jobs.tick(ship, 1.0)
+	near(p.hp, 95.0, "below it: 5 a second")
+
+
+func test_at_zero_a_crew_member_is_down_and_stays_where_they_are() -> void:
+	var ship := Fixture.room_ship()
+	ship.fires[Vector2i(15, 12)] = 0.5
+	var p := _player(14, 11)
+	ship.crew.append(p)
+	var jobs := Jobs.new()
+	for i in 12:
+		jobs.tick(ship, 1.0)
+	check(p.is_down(), "down")
+	near(p.hp, 0.0, "hp stops at 0")
+	check(_log_index(ship, "Soldier is down") >= 0, "the chronicle says so")
+	var at := p.pos
+	p.move_input(ship.grid, Vector2.RIGHT, 1.0)
+	eq(p.pos, at, "he does not walk")
+	var n := _npc("A", 10, 10)
+	n.hurt(1000.0)
+	check(n.is_down(), "an NPC too")
+	n.go_to(ship.grid, Vector2i(18, 14))
+	n.step(1.0)
+	eq(n.pos, Pathfinder.centre_of(Vector2i(10, 10)), "does not move")
+
+
+func test_a_crewmate_revives_a_downed_crew_member() -> void:
+	var ship := Fixture.room_ship()
+	var p := _player(18, 14)
+	p.hurt(1000.0)
+	var n := _npc("Ada", 10, 10)
+	ship.crew.append_array([p, n])
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	eq(jobs.board["revive:Soldier"]["priority"], 95, "a downed crewmate is a job")
+	eq(n.job.get("key"), "revive:Soldier", "Ada goes to him")
+	var t := _time_until(jobs, ship, func(): return not p.is_down())
+	check(t > 3.0, "it takes 3 s of work and a walk: %s" % t)
+	near(p.hp, 20.0, "he comes back with 20 hp")
+	check(_log_index(ship, "Soldier is back on their feet") >= 0, "the chronicle says so")
+
+
+func _medbay_ship(power: bool) -> Dictionary:
+	var ship := Fixture.room_ship()
+	var d := {"ship": ship}
+	d["medbay"] = Fixture.put(ship, "medbay", 10, 10)  # x 10..13, y 10..13
+	if power:
+		Fixture.put(ship, "reactor_mk1", 15, 10)
+		Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	ship.refresh()
+	return d
+
+
+func test_a_powered_medbay_heals_15_a_second_and_brings_the_downed_back() -> void:
+	var d := _medbay_ship(true)
+	var ship: Ship = d["ship"]
+	var p := _player(11, 11)  # the body centre is in the medbay
+	p.hurt(1000.0)
+	ship.crew.append(p)
+	var jobs := Jobs.new()
+	jobs.tick(ship, 1.0)
+	near(p.hp, 15.0, "15 a second")
+	check(not p.is_down(), "up again")
+	check(_log_index(ship, "Soldier is back on their feet") >= 0, "the chronicle says so")
+	jobs.tick(ship, 10.0)
+	near(p.hp, 100.0, "healed")
+
+
+func test_an_unpowered_medbay_does_nothing() -> void:
+	var d := _medbay_ship(false)
+	var ship: Ship = d["ship"]
+	var p := _player(11, 11)
+	p.hurt(50.0)
+	ship.crew.append(p)
+	Jobs.new().tick(ship, 1.0)
+	near(p.hp, 50.0, "no power, no healing")
+
+
+func test_a_bed_heals_5_a_second() -> void:
+	var ship := Fixture.room_ship()
+	Fixture.put(ship, "bed", 10, 10)  # x 10..11, y 10..13
+	var p := _player(10, 10)
+	p.hurt(50.0)
+	ship.crew.append(p)
+	Jobs.new().tick(ship, 2.0)
+	near(p.hp, 60.0, "5 a second")
+
+
+func test_a_hurt_crew_member_with_nothing_to_do_goes_to_bed() -> void:
+	var ship := Fixture.room_ship()
+	var bed := Fixture.put(ship, "bed", 10, 10)
+	var m := _npc("Ada", 18, 14)
+	m.hurt(40.0)
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	eq(m.job.get("type"), "rest", "she rests")
+	eq(m.job.get("key"), "rest:%d" % bed, "on the bed")
+	var t := _time_until(jobs, ship, func(): return m.hp >= m.max_hp)
+	check(t > 0.0, "healed to full: %s" % t)
+	_run(jobs, ship, 2.0)
+	check(m.job.is_empty(), "and she gets up")
+
+
+func test_a_powered_medbay_is_preferred_over_a_bed() -> void:
+	var d := _medbay_ship(true)
+	var ship: Ship = d["ship"]
+	Fixture.put(ship, "bed", 19, 10)
+	var m := _npc("Ada", 17, 14)  # nearer to the bed
+	m.hurt(40.0)
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	eq(m.job.get("key"), "rest:%d" % d["medbay"], "the medbay")
+
+
+func test_a_manual_order_keeps_the_job_board_away_for_a_while() -> void:
+	var ship := Fixture.room_ship()
+	ship.fires[Vector2i(12, 12)] = 0.9
+	var m := _npc("Ada", 13, 12)
+	ship.crew.append(m)
+	check(Jobs.order_move(ship, m, Vector2i(18, 14)), "there is a way")
+	var jobs := Jobs.new()
+	_run(jobs, ship, 3.0)
+	near(ship.fires[Vector2i(12, 12)], 0.9, "she walks on, the fire is not touched")
+	eq(m.anchor(), Vector2i(18, 14), "and arrives")
+	_run(jobs, ship, 14.0)
+	check(ship.fires.is_empty(), "then the board has her again")
+
+
+func test_an_order_repairs_a_damaged_part_that_still_works() -> void:
+	var ship := Fixture.room_ship()
+	var uid := Fixture.put(ship, "engine_mk1", 15, 10)
+	var inst: Dictionary = ship.components.instances[uid]
+	inst["hp"] = 2
+	var jobs := Jobs.new()
+	jobs.build_board(ship)
+	check(not jobs.board.has("fix:%d" % uid), "the board leaves it alone")
+	eq(jobs.order_repair(ship, uid), "no crew to send", "nobody to send")
+	ship.crew.append(_npc("Ada", 13, 10))
+	eq(jobs.order_repair(ship, uid), "Ada will repair Engine Mk1", "an order does")
+	_run(jobs, ship, 7.0)
+	eq(inst["hp"], 6, "mended")
+	eq(jobs.order_repair(ship, uid), "Engine Mk1 needs no repair", "nothing more to do")
+	inst["status"] = "overheated"
+	eq(jobs.order_repair(ship, uid), "Engine Mk1 is cooling down", "an overheated part just needs time")
+	eq(jobs.order_repair(ship, 99), "no system under the mouse", "no such part")
+
+
+# --- manned bonuses ------------------------------------------------------------------------------
+
+func test_a_manned_helm_adds_evasion() -> void:
+	var ship := Fixture.room_ship()
+	var helm := Fixture.put(ship, "helm", 19, 10)
+	eq(Jobs.evasion_bonus(ship), 0.0, "nobody at the helm")
+	ship.crew.append(_npc("Ada", 13, 14))
+	var jobs := Jobs.new()
+	_run(jobs, ship, 8.0)
+	check(ship.manned.has(helm), "she went to the helm on her own")
+	near(Jobs.evasion_bonus(ship), 0.1, "+10 percent")
+	ship.components.instances[helm]["status"] = "malfunction"
+	eq(Jobs.evasion_bonus(ship), 0.0, "a broken helm gives nothing")
+
+
+func _gun_ship(manned: bool) -> Dictionary:
+	var ship := Fixture.room_ship()
+	var reactor := Fixture.put(ship, "reactor_mk1", 10, 10)
+	var laser := Fixture.put(ship, "laser_mk1", 15, 10)
+	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	ship.components.by_id["laser_mk1"]["manned"] = true
+	ship.refresh()
+	if manned:
+		ship.crew.append(_npc("Ada", 15, 12))
+		_run(Jobs.new(), ship, 3.0)
+	return {"ship": ship, "laser": laser, "reactor": reactor}
+
+
+func test_a_manned_weapon_cools_down_ten_percent_faster() -> void:
+	var cooldowns := []
+	for manned in [false, true]:
+		var d := _gun_ship(manned)
+		check(d["ship"].manned.has(d["laser"]) == manned, "the laser is manned: %s" % str(manned))
+		var a := Arena.new()
+		var i := a.add_ship(d["ship"])
+		check(a.fire(i, d["laser"], Vector2(0.0, -1000.0)), "it fires")
+		cooldowns.append(a.cooldown_left(i, d["laser"]))
+	near(cooldowns[0], 1.2, "alone: the data's 1.2 s", 0.02)
+	near(cooldowns[1], 1.08, "manned: 10 percent less", 0.03)
+	check(cooldowns[1] < cooldowns[0], "shorter")
+
+
+func test_a_manned_weapon_fires_again_sooner() -> void:
+	var d := _gun_ship(true)
+	var a := Arena.new()
+	var i := a.add_ship(d["ship"])
+	var aim := Vector2(0.0, -1000.0)
+	check(a.fire(i, d["laser"], aim), "first shot")
+	a.step(1.05)
+	check(not a.fire(i, d["laser"], aim), "still cooling at 1.05 s")
+	a.step(0.06)
+	check(a.fire(i, d["laser"], aim), "ready at 1.11 s, before the unmanned 1.2 s")
+
+
+# --- crews ---------------------------------------------------------------------------------------
+
+func test_the_starters_come_with_four_crew() -> void:
+	for path in STARTERS:
+		var ship := Ship.from_design(path)
+		var made := Jobs.spawn_crew(ship)
+		eq(made.size(), 4, path + ": four people")
+		eq(ship.crew.size(), 4, path + ": all aboard")
+		eq(ship.crew.filter(func(m): return m.is_player).size(), 1, path + ": one of them is the player")
+		var names: Array = ship.crew.map(func(m): return m.name)
+		check(names.has("Soldier") and names.has("Ada"), path + ": the soldier and Ada")
+		eq(_distinct(names), 4, path + ": names are all different")
+		eq(_distinct(ship.crew.map(func(m): return m.look["suit"])), 4, path + ": four different suits")
+		for m in ship.crew:
+			check(Pathfinder.body_ok(ship.grid, m.anchor()), "%s: %s stands where a body fits" % [path, m.name])
+		for i in ship.crew.size():
+			for j in range(i + 1, ship.crew.size()):
+				var a: Vector2i = ship.crew[i].anchor()
+				var b: Vector2i = ship.crew[j].anchor()
+				check(absi(a.x - b.x) >= 2 or absi(a.y - b.y) >= 2, "%s: %s and %s do not overlap" % [path, ship.crew[i].name, ship.crew[j].name])
+		var beds: Array = []
+		for uid in ship.components.instances:
+			if ship.components.def(ship.components.instances[uid]["id"])["family"] == "bed":
+				beds.append(ship.components.instances[uid]["cells"])
+		for m in ship.crew.filter(func(m): return not m.is_player and m.name != "Ada"):
+			check(beds.any(func(cells): return cells.has(m.cell())), "%s: %s starts on a bed" % [path, m.name])
+		eq(Jobs.spawn_crew(ship).size(), 0, path + ": asking again adds nobody")
+		eq(ship.crew.size(), 4, path + ": still four")
+
+
+func test_no_floor_no_crew_yet() -> void:
+	var ship := Ship.new_starter()
+	eq(Jobs.spawn_crew(ship).size(), 0, "nowhere to stand on the bare hull")
+	check(ship.crew.is_empty(), "nobody aboard")
+
+
+func test_the_pirate_has_three_enemy_crew() -> void:
+	var ship := Ship.from_design(PIRATE)
+	var made := Jobs.spawn_enemy_crew(ship)
+	eq(made.size(), 3, "three")
+	check(made.all(func(m): return not m.is_player and Pathfinder.body_ok(ship.grid, m.anchor())), "ordinary crew on the floor")
+	check(made.all(func(m): return m.look == made[0].look), "in the enemy colours")
+	eq(_distinct(made.map(func(m): return m.name)), 3, "with three names")
+	var sim := ShipSim.new()
+	var player := Ship.from_design(STARTERS[1])
+	sim.ships = [player, Ship.from_design(PIRATE)]
+	sim.step(0.1)
+	eq(sim.ships[1].crew.size(), 3, "the sim crews the other ship on its first tick")
+	eq(player.crew.size(), 0, "and leaves the player's to the crew view")
+	sim.step(0.1)
+	eq(sim.ships[1].crew.size(), 3, "once")
+	sim.free()
+
+
+func test_the_crew_keep_working_during_a_fight() -> void:
+	var sim := ShipSim.new()
+	var ship := Fixture.room_ship()
+	var uid := Fixture.put(ship, "laser_mk1", 15, 10)
+	ship.components.instances[uid]["status"] = "malfunction"
+	ship.fires[Vector2i(12, 12)] = 0.5
+	ship.crew.append_array([_npc("Ada", 9, 13), _npc("Rook", 18, 14)])
+	var enemy := Ship.from_design(PIRATE)
+	sim.ships = [ship, enemy]  # two ships in the sim: a fight
+	sim.step(0.1)
+	check(sim.jobs_of(ship).combat, "the board knows it is a fight")
+	eq(sim.jobs_of(ship).board["fix:%d" % uid]["priority"], 90, "a weapon is a 90 job in a fight")
+	for i in 400:
+		sim.step(0.1)
+	check(ship.fires.is_empty(), "the fire is out")
+	eq(ship.components.instances[uid]["status"], "ok", "and the laser is mended")
+	check(enemy.crew.size() == 3, "the pirate's crew are at their posts")
+	sim.free()
+
+
+func _key(code: Key, down: bool) -> void:
+	var e := InputEventKey.new()
+	e.keycode = code
+	e.physical_keycode = code
+	e.pressed = down
+	Input.parse_input_event(e)
+	Input.flush_buffered_events()
+
+
+func test_holding_e_next_to_a_fire_puts_it_out() -> void:
+	var sim := ShipSim.new()
+	var ship := Fixture.room_ship()
+	sim.ships = [ship]
+	var view := CrewView.new()
+	view.sim = sim
+	view.build = BuildMode.new()
+	view.build.sim = sim
+	var p := _player(13, 12)
+	ship.crew.append(p)
+	view.player = p
+	view.ada = _npc("Ada", 20, 14)  # (so the view does not spawn a crew of its own)
+	ship.crew.append(view.ada)
+	ship.fires[Vector2i(15, 12)] = 0.9
+	sim.step(0.1)  # the board is built
+	var before: float = ship.fires[Vector2i(15, 12)]
+	view._process(0.5)
+	near(ship.fires[Vector2i(15, 12)], before, "E not held: nothing happens")
+	_key(KEY_E, true)
+	for i in 4:
+		view._process(0.25)
+	_key(KEY_E, false)
+	near(ship.fires[Vector2i(15, 12)], before - 0.5, "E held for a second: 0.5 less", 0.01)
+	check(Jobs.crew_line(ship).contains("You extinguishing"), "the HUD line shows what he is doing: " + Jobs.crew_line(ship))
+	view.build.free()
+	view.free()
+	sim.free()
+
+
+func test_the_crew_view_spawns_the_crew_and_finds_the_player_and_ada() -> void:
+	var view := CrewView.new()
+	var ship := Ship.from_design(STARTERS[2])
+	view._spawn(ship)
+	eq(ship.crew.size(), 4, "four aboard")
+	check(view.player != null and view.player.is_player, "the player's soldier")
+	eq(view.ada.name, "Ada", "and Ada")
+	var count: int = ship.crew.size()
+	view._spawn(ship)
+	eq(ship.crew.size(), count, "nothing is added twice")
+	var other := Ship.from_design(STARTERS[1])
+	view._spawn(other)
+	eq(other.crew.size(), 4, "a new ship gets its own crew")
+	check(view.player in other.crew and not view.player in ship.crew, "the view follows the new ship's soldier")
+	view.free()
+
+
+# --- the story ---------------------------------------------------------------------------------
+
+func _story(path: String, seconds: int) -> Array:
+	var sim := ShipSim.new()
+	sim.choose_ship(path)
+	var ship: Ship = sim.player_ship()
+	Jobs.spawn_crew(ship)
+	for i in seconds * 4:
+		sim.step(0.25)
+	var out: Array = [ship.events.map(func(e): return "%d %s" % [roundi(e["t"]), e["text"]]), ship.fires.duplicate()]
+	for m in ship.crew:
+		out.append([m.name, m.pos, m.hp, m.job.get("key", ""), ship.atmosphere.room_at(m.cell())])
+	for uid in ship.components.instances:
+		var inst: Dictionary = ship.components.instances[uid]
+		out.append([uid, inst["status"], inst["hp"], roundf(inst["heat"] * 1000.0)])
+	sim.free()
+	return out
+
+
+func test_the_same_ship_plays_out_the_same() -> void:
+	var a := _story(STARTERS[0], 320)  # the Rustbucket: its scrap parts break and burn
+	var b := _story(STARTERS[0], 320)
+	eq(a, b, "the same seed, the same story")
+	check(a[0].size() > 3, "and there was one to tell: %s" % str(a[0]))
+
+
+func test_crew_line_reads_like_the_hud_example() -> void:
+	var ship := Fixture.room_ship()
+	var ada := _npc("Ada", 10, 10)
+	ada.job = {"label": Jobs.label_of({"type": "repair_component", "name": "Laser Mk1"})}
+	var rook := _npc("Rook", 12, 10)
+	rook.job = {"label": Jobs.label_of({"type": "extinguish"})}
+	var juno := _npc("Juno", 14, 10)
+	juno.job = {"label": Jobs.label_of({"type": "man_station", "family": "helm", "name": "Helm"})}
+	var pike := _npc("Pike", 16, 10)
+	var me := _player(18, 10)
+	ship.crew.append_array([ada, rook, juno, pike, me])
+	eq(Jobs.crew_line(ship), "Crew: Ada repairing Laser Mk1, Rook extinguishing, Juno at helm, Pike idle", "the player is left out while fine")
+	me.hurt(30.0)
+	eq(Jobs.crew_line(ship), "Crew: Ada repairing Laser Mk1, Rook extinguishing, Juno at helm, Pike idle, You hurt (70 hp)", "and named when hurt")
+	pike.hurt(1000.0)
+	check(Jobs.crew_line(ship).contains("Pike down"), "a downed one says so")
+	eq(Jobs.crew_line(Fixture.room_ship()), "Crew: none", "an empty ship")
