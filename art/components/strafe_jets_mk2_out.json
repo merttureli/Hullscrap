@@ -1,0 +1,71 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "strafe_jets_mk2_out_glow.png",
+  "frame": [
+   48,
+   70
+  ],
+  "offset": [
+   -8,
+   -34
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust_left": [
+   5,
+   3
+  ],
+  "exhaust_right": [
+   26,
+   3
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Concord Strafe Jets Mk2, a small hull mount (outward is up; mount it on a side wall for A/D strafe): Mk1 plus an amber collar ring on each bell, a coolant canister between the jets, and inside an amber ring round the gyro. Damaged: the left bell lip dented and hanging, the right bell cracked and sputtering, the gyro glass cracked and stalling, lamps red, sparks. Disabled: both bells bent over at the neck, the gyro dead and cracked, the hatch popped. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}

@@ -1,0 +1,79 @@
+{
+ "frame": [
+  64,
+  48
+ ],
+ "cells": [
+  4,
+  3
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_scrap_mk4_out_glow.png",
+  "frame": [
+   84,
+   90
+  ],
+  "offset": [
+   -10,
+   -38
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust_1": [
+   8,
+   10
+  ],
+  "exhaust_2": [
+   23,
+   3
+  ],
+  "exhaust_3": [
+   38,
+   6
+  ],
+  "exhaust_4": [
+   53,
+   12
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Scrapper Clans \"Thunderknuckle\", a hull mount (outward is up): the 4x3 housing: four mismatched nozzles welded into a fist (a grey pipe, a rust cone, a steel box, a taped stovepipe at different heights) on a palm of mismatched bolted plates with a weld across the top and a band of hazard tape; inside the Kickjet core with a crude painted fist, two motors, heavy tape and patches. Damaged: the stovepipe is bent and sputters, the box nozzle is cracked, tape is peeling off the palm, a plate lost its bolts, sparks. Disabled: the stovepipe snapped off, the cone bent over, the pipe hanging off its weld, the palm plates split, the core dead. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}

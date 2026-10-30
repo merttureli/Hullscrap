@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_neon_mk2_glow.png",
+  "frame": [
+   84,
+   50
+  ],
+  "offset": [
+   -10,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "power_coupling": [
+   32,
+   30
+  ],
+  "repair_hatch": [
+   12,
+   29
+  ]
+ },
+ "orientation": "inside half: rotation 0, outward is UP: the core sits on the floor with its top 4px overhanging the inner wall face (see offset); cable plugs into the power coupling",
+ "offset": [
+  0,
+  -4
+ ],
+ "mount": {
+  "part": "inside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Lumen \"Ion Drive: Halo\", a hull mount (outward is up): the Glimmer ion rings and spine plus a ring of light round the spine (cyan, magenta nodes, a glint that runs round it) and a soft ring of light in the glow; inside the Glimmer core with a second ring of light round the lens crystal. Damaged: the middle ring has slipped out of line and cracked, the halo ring is broken and arcs jump the gap, the lens crystal is cracked and flickers. Disabled: the top ring snapped half off and hanging, the halo ring broken and dark, the lens shattered, every line dead. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+}
