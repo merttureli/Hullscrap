@@ -1,0 +1,10 @@
+{
+  "items": [
+    {
+      "id": "fx_widget",
+      "name": "Fixture Widget",
+      "kind": "special",
+      "blurb": "Only for tests."
+    }
+  ]
+}

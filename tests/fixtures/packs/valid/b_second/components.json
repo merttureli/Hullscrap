@@ -1,0 +1,26 @@
+{
+  "components": [
+    {
+      "id": "fx_engine_b",
+      "name": "Fixture Engine B",
+      "family": "engine",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#5aa9e6",
+      "power": -3,
+      "priority": 4,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 18
+      }
+    }
+  ]
+}

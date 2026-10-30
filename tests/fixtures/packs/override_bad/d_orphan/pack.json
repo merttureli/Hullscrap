@@ -1,0 +1,7 @@
+{
+  "id": "d_orphan",
+  "name": "d_orphan",
+  "version": "1.0",
+  "requires": [],
+  "notes": "Test fixture: see tests/test_content.gd."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "typo_file",
+  "name": "typo_file",
+  "version": "1.0",
+  "requires": [],
+  "notes": "Test fixture: see tests/test_content.gd."
+}

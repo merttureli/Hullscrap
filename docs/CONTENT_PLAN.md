@@ -168,6 +168,29 @@ New rigs needed: **small** (Vellum, Rattler, Tessellate fragments), **large** (G
 
 The game must stay playable on `main` after every merge. Content only adds; mechanics change rarely and carefully.
 
+### Adding content
+**Make a pack** (one per wave or agent, so nobody edits the same file):
+1. A folder `data/packs/<pack_id>/` (lowercase and underscores, e.g. `engines_wave1`). Packs load in alphabetical order after the core files.
+2. `pack.json` with `id` (the folder name), `name`, `version`, `requires` (a list of pack ids this one needs, `[]` for none) and `notes`. A missing field is an error.
+3. Any of these files, each in the shape of its core file in `data/`: `components.json`, `weapons.json` (an object keyed by component id), `recipes.json`, `items.json`, `materials.json`, `tiles.json`, `species.json`, `traits.json`, `hand_weapons.json`, `factions.json`, `names.json` (name pools are joined), plus `events/*.json` and `ships/<name>.json` (one design per file; its file name is its id). A misspelt file or folder name is an error.
+4. Ids are unique across the whole game (a component, a material and an item cannot share one; art is found by id). To change something that exists, write the whole entry again with `"override": true` and a `"reason"`; the later pack replaces the earlier entry.
+5. Code reads content only through `scripts/data/content.gd` (`Content.list(kind)`, `Content.events()`, `Content.ships()`, `Content.names()`, or `Content.read(path)` for a loader that takes a path).
+
+**What `tests/test_content.gd` checks** (every message names the file and the id): files parse and ids are unique; pack.json is complete and its `requires` exist; recipes name real components, items and materials; every weapon part has a `weapons` entry and the reverse; abilities use only the keys and effect types listed in `scripts/sim/abilities.gd`; ships use real components and tiles; species use defined traits; the Drift's event validator runs when it exists; and **balance bands** (`data/balance.json`): a non-unique part of a family with bands must be within 20% of its band (after its line's multipliers) unless it has a quirk (a non-empty `abilities` or `side_effects`, or `"quirk": "<why>"`). The art check only reports: the ids with no `art/components/<id>.png` are counted in the test output and listed in `CONTENT_INDEX.md`.
+
+**Run it:**
+```
+godot --headless --path . --script res://tests/run_tests.gd                # the validator is part of the suite
+godot --headless --path . --script res://tests/tool_content_index.gd       # rewrites docs/CONTENT_INDEX.md; commit it
+```
+
+**Checklist for a new component:**
+1. **Data**: an entry in the pack's `components.json` with every field of the core ones (`id`, `name`, `family`, `line`, `tier`, `size`, `power`, `priority`, `hp`, heat fields, `stats`), and a `weapons.json` entry if it is a weapon.
+2. **Recipe**: an entry in `recipes.json` (the recipe id is the part's id), unless the part is `unique` (found or earned).
+3. **Art id**: the sheet goes to `art/components/<id>.png` (art bible); until then the part is listed as having no art.
+4. **Blurb**: one line of flavour in `blurb`.
+5. **Band**: take `power`, `hp` and the main stat from the `data/balance.json` row for its family and tier; if the part must be off the table, give it a quirk (a trade-off) and say why.
+
 ## 8. Order from here
 1. Merge the running work: physics, the Drift, species, the writing pack.
 2. **Foundation**: hull mounts (CONTENT 4f, fixed guns and turrets) and **the content pack loader with the validator and balance bands**.

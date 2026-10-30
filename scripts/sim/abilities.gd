@@ -20,6 +20,8 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 const KEYS: Array[String] = ["engine", "shield", "utility"]  ## the combat keys: Shift, Space and Q
+const EFFECTS: Array[String] = ["stat_mult", "shield_layer", "charge_mult", "evasion_add"]  ## the keys of an ability's `effects` that something reads
+const SIDE_EFFECTS: Array[String] = ["drain_o2", "heat", "power_spike", "fire_risk", "self_damage"]  ## the `type`s of its `side_effects`
 const EPS := 1e-9
 
 

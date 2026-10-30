@@ -5,6 +5,7 @@ extends RefCounted
 ## turns clockwise on screen.
 
 const Shapes = preload("res://scripts/ship/shapes.gd")
+const Content = preload("res://scripts/data/content.gd")
 const CONFIG_PATH := "res://data/flight.json"
 const TILES_PATH := "res://data/tiles.json"  ## the one source of tile masses
 const VERSION := 1
@@ -43,7 +44,7 @@ func _init(config_path := CONFIG_PATH, tiles_path := TILES_PATH) -> void:
 func load_tile_masses(path: String) -> bool:
 	if not FileAccess.file_exists(path):
 		return false
-	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var data = Content.read(path)
 	if not (data is Dictionary and data.get("tiles") is Array):
 		return false
 	var masses := {}

@@ -8,6 +8,9 @@ extends Node2D
 ## step; a system is placed on release), Shift+LMB draws a straight line, Ctrl+LMB a rectangle (a
 ## wall makes a room); RMB does the same but removes. The ghost shows the pending edit: green = it
 ## would apply, red = not (the reason is in the HUD). Edits happen on mouse release.
+## A wall can take a shape: T cycles the wall tool full > slope45 > slope2 > round2 (shapes.gd pieces), R turns the
+## piece and Shift+R mirrors it. A piece goes down on release with its top-left cell under the mouse as one undo
+## step, and its ghost is the real outline of each cell (green = it will apply, red = not, the reason in the HUD).
 ## Play mode has no ghost and LMB/RMB do nothing yet. Both modes: E opens/closes the door piece under the
 ## mouse, O shows oxygen, P shows power, Ctrl+S saves to user://ship.json, Ctrl+L loads it, wheel zooms.
 ## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F sends the nearest
@@ -19,6 +22,7 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Rooms = preload("res://scripts/sim/rooms.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
+const Shapes = preload("res://scripts/ship/shapes.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
@@ -51,6 +55,9 @@ var selected := ""  ## tile id
 var sel_component := ""  ## system id
 var rot := 0  ## quarter turns of the system being placed
 var door_flip := false  ## R: put the door piece across the way it would fit by itself
+var wall_piece := Shapes.FULL  ## T: the shape the wall tool builds (a piece id of shapes.gd)
+var shape_rot := 0  ## quarter turns of that piece (R)
+var shape_mirror := false  ## and whether it is mirrored (Shift+R)
 var show_o2 := false
 var show_power := false
 var hover := Vector2i(-1, -1)
@@ -220,26 +227,47 @@ func _on_key(e: InputEventKey) -> void:
 					drift.open()
 			_:
 				if build_on:
-					_build_key(e.keycode)
+					_build_key(e.keycode, e.shift_pressed)
 
 
-## Palette keys: Tab changes group, R rotates, 1-9 pick a tile or a system.
-func _build_key(code: Key) -> void:
+## Palette keys: Tab changes group, T the wall shape, R rotates (Shift+R mirrors a shape), 1-9 pick a tile or a system.
+func _build_key(code: Key, shift := false) -> void:
 	message = ""
 	if code == KEY_TAB:
 		group = (group + 1) % GROUP_NAMES.size()
 		_fix_component()
+	elif code == KEY_T:
+		_cycle_piece()
 	elif code == KEY_R:
-		if group == Group.TILES:
-			door_flip = not door_flip
-		else:
+		if group != Group.TILES:
 			rot = (rot + 1) % 4
+		elif grid.tile_flag(selected, "solid"):
+			if shift:
+				shape_mirror = not shape_mirror
+			else:
+				shape_rot = (shape_rot + 1) % 4
+		else:
+			door_flip = not door_flip
 	else:
 		var i: int = code - KEY_1
 		if group == Group.TILES and i >= 0 and i < grid.defs.ids().size():
 			selected = grid.defs.ids()[i]
 		elif group == Group.SYSTEMS and i >= 0 and i < _palette().size():
 			sel_component = _palette()[i]
+
+
+## T: the next shape for the wall tool (the pieces of data/shapes.json in order, full first).
+func _cycle_piece() -> void:
+	var ids := Shapes.piece_ids()
+	wall_piece = ids[(ids.find(wall_piece) + 1) % ids.size()]
+	message = "wall shape: " + wall_piece
+	if not grid.tile_flag(selected, "solid"):
+		message += " (pick a wall to build it)"
+
+
+## Is the wall tool set to build a shaped piece: a wall tile selected in the Tiles palette and a shape other than full?
+func _shaped_wall() -> bool:
+	return group == Group.TILES and wall_piece != Shapes.FULL and grid.tile_flag(selected, "solid")
 
 
 ## The systems the number keys pick, in a fixed order: those in the cargo when the list was last
@@ -309,6 +337,8 @@ func _plan() -> Dictionary:
 	var path: Array = drag_path if dragging else [hover]
 	if group == Group.TILES and not remove and grid.tile_flag(selected, "door"):
 		return session.plan_door(selected, hover, _door_axis())
+	if not remove and _shaped_wall():
+		return session.plan_piece(wall_piece, selected, hover, shape_rot, shape_mirror)
 	match group:
 		Group.SYSTEMS:
 			if remove:
@@ -335,6 +365,8 @@ func _refresh_ghost() -> void:
 		return
 	var pl := _plan()
 	ghost = session.preview(pl["changes"])
+	if ghost.is_empty() and pl["error"] != "" and _shaped_wall() and not (dragging and drag_button == MOUSE_BUTTON_RIGHT):
+		ghost = [{"layer": "piece", "piece": wall_piece, "tile": selected, "anchor": hover, "rot": shape_rot, "mirror": shape_mirror, "reason": pl["error"]}]  # plan_piece refused: show the piece red
 	if dragging:
 		message = pl["error"]
 
@@ -513,7 +545,21 @@ func _selection_text() -> String:
 			return "selected: Cable (cost %s per cell)   cables %d" % [_cost_text(session.cable_cost), ship.cables.cells.size()]
 	if grid.tile_flag(selected, "door"):
 		return "selected: %s piece, 2 cells (cost %s per cell)   tiles %d" % [grid.defs.get_def(selected).get("name", selected), _cost_text(grid.cost_of(selected)), grid.tiles.size()]
+	if _shaped_wall():
+		var size := Shapes.piece_size(wall_piece, shape_rot)
+		return "selected: %s %s (%dx%d), turned %d deg%s (cost %s)   tiles %d" % [grid.defs.get_def(selected).get("name", selected), wall_piece,
+			size.x, size.y, shape_rot * 90, ", mirrored" if shape_mirror else "", _cost_text(_piece_cost()), grid.tiles.size()]
 	return "selected: %s (cost %s)   tiles %d" % [grid.defs.get_def(selected).get("name", selected), _cost_text(grid.cost_of(selected)), grid.tiles.size()]
+
+
+## What the wall tool's piece costs: each cell by its solid area (rounded up per cell).
+func _piece_cost() -> Dictionary:
+	var sum := {}
+	for pc in Shapes.piece_cells(wall_piece, Vector2i.ZERO, shape_rot, shape_mirror):
+		var cost := grid.cost_of(selected, Shapes.area_of(pc))
+		for m in cost:
+			sum[m] = int(sum.get(m, 0)) + int(cost[m])
+	return sum
 
 
 func _cost_text(cost: Dictionary) -> String:
@@ -545,8 +591,10 @@ func _controls_text() -> String:
 		return "WASD walk   middle-click send Ada   E door   O oxygen   P power   K fight   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom"
 	var how := "LMB paint   Shift+LMB line   Ctrl+LMB rectangle   RMB remove"
 	if group == Group.TILES:
-		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove"
-		if grid.tile_flag(selected, "door"):
+		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove" + ("   T shape" if grid.tile_flag(selected, "solid") else "")
+		if _shaped_wall():
+			how = "LMB place %s (top-left cell on the mouse)   RMB remove   T shape   R rotate   Shift+R mirror" % wall_piece
+		elif grid.tile_flag(selected, "door"):
 			how = "LMB place a 2-cell door in a wall   RMB remove   R flip"
 	elif group == Group.SYSTEMS:
 		how = "LMB place   RMB remove   R rotate   F repair"
@@ -599,9 +647,7 @@ func _draw_tile(c: Vector2i, id: String, open_doors: Dictionary) -> void:
 		if piece[0] == c:  # the piece is drawn once, from its first cell
 			_draw_door(piece, col, open_doors.has(c))
 	elif def.get("solid", false):
-		if not TileArt.wall_tile(self, r, grid, c, id, col):
-			draw_rect(r, col)
-			draw_rect(r.grow(-3), col.lightened(0.12))
+		TileArt.solid_cell(self, r, grid, c, id, col)
 	elif not TileArt.floor_tile(self, r, c):
 		draw_rect(r, col)
 		draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
@@ -719,10 +765,26 @@ func _draw_ghost(g: Dictionary) -> void:
 			_draw_ghost_system(g, tint)
 		"cable":
 			_draw_ghost_cell(g["cell"], Color.TRANSPARENT if g.get("remove", false) else Color(CABLE_COLOR, 0.45), tint)
+		"piece":
+			_draw_ghost_piece(g, tint)
 		_:
 			var fill := Color(grid.defs.color(g["to"]), 0.45) if g["to"] != "" else Color.TRANSPARENT
 			for c in _ghost_cells(g):
 				_draw_ghost_cell(c, fill, tint)
+
+
+## A shaped piece: each cell as the real outline of its polygon, inside a faint square showing the footprint.
+func _draw_ghost_piece(g: Dictionary, tint: Color) -> void:
+	var fill := Color(grid.defs.color(g["tile"]), 0.55)
+	for pc in Shapes.piece_cells(g["piece"], g["anchor"], g["rot"], g["mirror"]):
+		var r := cell_rect(pc["cell"])
+		draw_rect(r.grow(-1), Color(tint, 0.18), false, 1.0)
+		var pts := PackedVector2Array()
+		for p in Shapes.cell_polygon(pc["shape"], pc["rot"], pc["mirror"]):
+			pts.append(r.position + p * CELL)
+		draw_colored_polygon(pts, fill)
+		pts.append(pts[0])
+		draw_polyline(pts, tint, 2.0)
 
 
 ## The cells a tile change touches: a door piece is two cells, so a door placement or the removal

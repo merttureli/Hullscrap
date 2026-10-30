@@ -1,0 +1,26 @@
+{
+  "components": [
+    {
+      "id": "fx_x",
+      "name": "Base X",
+      "family": "engine",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#5aa9e6",
+      "power": -2,
+      "priority": 4,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 10
+      }
+    }
+  ]
+}
