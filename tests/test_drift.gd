@@ -9,6 +9,11 @@ const Events = preload("res://scripts/space/events.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Components = preload("res://scripts/ship/components.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const MapView = preload("res://scripts/ui/map_view.gd")
+const EventPanel = preload("res://scripts/ui/event_panel.gd")
+const StationPanel = preload("res://scripts/ui/station_panel.gd")
+const BuildMode = preload("res://scripts/build/build_mode.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const STARTERS := ["res://data/ships/starter_rustbucket.json", "res://data/ships/starter_courier.json", "res://data/ships/starter_prism.json"]
@@ -609,3 +614,367 @@ func test_factions_file_lists_peoples_and_thresholds() -> void:
 	for x in f["factions"]:
 		for k in ["id", "name", "line", "color", "name_style", "hostile"]:
 			check(x.has(k), "%s has %s" % [x.get("id", "?"), k])
+
+
+# --- the screens: map, event panel, station panel ---------------------------------------------------------------------------
+
+## A stand-in for the combat view: it records the design it was asked to fight and lets a test end the fight.
+class FakeCombat extends Node:
+	signal finished(result: Dictionary)
+	var active := false
+	var entered := ""
+
+	func enter(path := "") -> String:
+		entered = path
+		active = true
+		return ""
+
+
+## A map view on a sim with the Rustbucket, a seeded campaign started (Ma's introduction is up), and a fake combat view.
+func _screen(seed_value := 5) -> Dictionary:
+	var sim := ShipSim.new()
+	sim.ships = [_ship()]
+	var fake := FakeCombat.new()
+	var map := MapView.new()
+	map.sim = sim
+	map.combat = fake
+	fake.finished.connect(map._on_fight_finished)
+	map.size = Vector2(1600.0, 900.0)
+	map.new_seed = seed_value
+	map.open()
+	map.event_panel.size = map.size
+	map.station_panel.size = map.size
+	return {"map": map, "sim": sim, "fake": fake}
+
+
+func _free_screen(d: Dictionary) -> void:
+	d["map"].free()
+	d["sim"].free()
+	d["fake"].free()
+
+
+func _press(node: Node, code: Key) -> void:
+	var e := InputEventKey.new()
+	e.keycode = code
+	e.pressed = true
+	node._input(e)
+
+
+## The index in the panel's view of the choice whose text contains `part`.
+func _find(panel: EventPanel, part: String) -> int:
+	for i in panel.view.size():
+		if panel.view[i]["text"].contains(part):
+			return i
+	return -1
+
+
+func _click(node: Control, at: Vector2) -> void:
+	var e := InputEventMouseButton.new()
+	e.position = at
+	e.pressed = true
+	e.button_index = MOUSE_BUTTON_LEFT
+	node._gui_input(e)
+
+
+func test_a_new_run_opens_with_ma_gantry_then_the_station_menu() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	check(map.visible, "the map is open")
+	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "station_debt_intro", "Ma Gantry's introduction is up")
+	check(not map.station_panel.visible, "the menu waits")
+	eq(map.event_panel.choose(0), "", "'Sign me up'")
+	check(map.event_panel.page == "result" and map.event_panel.result["text"] != "", "the outcome is shown")
+	check(map.campaign.flags.has("met_ma"), "met_ma is set")
+	_press(map.event_panel, KEY_ENTER)
+	check(not map.event_panel.visible, "Enter goes on")
+	check(map.station_panel.visible and map.station_panel.station == "rusthold", "and Rusthold's menu opens")
+	_press(map.station_panel, KEY_ESCAPE)
+	check(not map.station_panel.visible and map.visible, "Esc leaves the menu for the map")
+	_press(map, KEY_M)
+	check(not map.visible, "M closes the map")
+	_free_screen(d)
+
+
+func test_clicking_a_linked_node_jumps_and_a_far_one_does_not() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var c: Campaign = map.campaign
+	map.event_panel.close()
+	var ship: Ship = d["sim"].player_ship()
+	var to := _next(c)
+	_click(map, map.node_pos(to))
+	eq(c.current, to, "the click on a linked node jumped")
+	eq([ship.inventory.count("fuel"), c.jumps], [5, 1], "1 fuel, 1 jump")
+	map.event_panel.close()
+	map.station_panel.close()
+	var far := ""
+	for id in c.drift.ids():
+		if id != c.current and not c.drift.linked(c.current, id) and not c.is_hidden(id):
+			far = id
+	var fuel := ship.inventory.count("fuel")
+	eq(map.click_node(far), "no lane there", "a node with no lane is refused")
+	eq(ship.inventory.count("fuel"), fuel, "for free")
+	check(map.message_bad and map.message != "", "and it says so")
+	ship.inventory.counts.erase("fuel")
+	var back: String = c.drift.neighbours(c.current)[0]
+	check(map.click_node(back).begins_with("no fuel"), "no fuel, no jump")
+	check(map.message.contains("Shift+click"), "the message points at the drift jump")
+	_free_screen(d)
+
+
+func test_node_positions_fit_the_map_area_and_hit_testing_agrees() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var area := map.map_rect()
+	for id in map.campaign.drift.ids():
+		var p := map.node_pos(id)
+		check(area.has_point(p), "%s is inside the map area" % id)
+		if not map.campaign.is_hidden(id):
+			eq(map.node_at(p), id, "%s is found at its own position" % id)
+	eq(map.node_at(Vector2(2.0, 2.0)), "", "empty space finds nothing")
+	check(map.node_at(map.node_pos("prism")) != "prism", "the hidden Prism cannot be clicked")
+	_free_screen(d)
+
+
+func test_an_event_with_a_blue_option_changes_the_cargo() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var ship: Ship = d["sim"].player_ship()
+	map.event_panel.close()
+	var ev: Dictionary = map.campaign.events.get_event("wreck_dead_freighter")
+	map.event_panel.open_event(ev)
+	var blue := _find(map.event_panel, "[Basalt]")
+	check(blue >= 0 and map.event_panel.view[blue]["blue"], "the Basalt option is on offer, and blue")
+	var scrap := ship.inventory.count("scrap")
+	var ti := ship.inventory.count("titanium")
+	eq(map.event_panel.choose(blue), "", "taken")
+	eq([ship.inventory.count("scrap"), ship.inventory.count("titanium")], [scrap + 60, ti + 10], "the cargo changed")
+	check(map.event_panel.result["lines"].has("+60 Scrap"), "and the panel says so")
+	_press(map.event_panel, KEY_SPACE)
+	check(not map.event_panel.visible, "Space goes on, and the chain ends")
+	_free_screen(d)
+
+
+func test_event_panel_keys_clicks_and_greyed_rows() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var ship: Ship = d["sim"].player_ship()
+	var panel: EventPanel = map.event_panel
+	panel.close()
+	ship.inventory.counts.erase("credits")
+	panel.open_event(map.campaign.events.get_event("trader_fuel_peddler"))
+	var buy := _find(panel, "Buy one can")
+	check(buy >= 0 and panel.view[buy]["grey"] and panel.view[buy]["need"] == "24 credits", "with no credits the can is greyed, with the need")
+	check(panel.choose(buy).contains("24 credits"), "and it cannot be taken")
+	check(panel.page == "choices", "the panel stays on its choices")
+	ship.inventory.add("credits", 100)
+	panel.open_event(map.campaign.events.get_event("trader_fuel_peddler"))
+	var fuel := ship.inventory.count("fuel")
+	_click(panel, panel.choice_rect(_find(panel, "Buy one can")).get_center())
+	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [fuel + 1, 76], "a click buys a can for 24")
+	check(panel.page == "result", "the outcome is up")
+	_click(panel, panel.layout()["button"].get_center())
+	check(not panel.visible, "the Continue button ends it")
+	panel.open_event(map.campaign.events.get_event("trader_fuel_peddler"))
+	_press(panel, KEY_2)
+	eq(ship.inventory.count("fuel"), fuel + 4, "key 2 buys three more")
+	_free_screen(d)
+
+
+func test_goto_opens_the_next_page_in_the_panel() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var panel: EventPanel = map.event_panel
+	panel.close()
+	panel.open_event(map.campaign.events.get_event("repo_collectors"))
+	map.campaign.flags["debt_missed"] = true
+	var talk := _find(panel, "Take it up with Ma")
+	check(talk >= 0, "that choice is on offer")
+	panel.choose(talk)
+	check(panel.result["goto"] == "repo_fight", "it leads on")
+	panel.proceed()
+	eq(panel.event.get("id", ""), "repo_fight", "the next page is shown")
+	check(panel.page == "choices", "with its own choices")
+	_free_screen(d)
+
+
+func test_a_fight_from_an_event_starts_combat_and_calls_back_with_the_result() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var ship: Ship = d["sim"].player_ship()
+	var fake: FakeCombat = d["fake"]
+	var panel: EventPanel = map.event_panel
+	panel.close()
+	panel.open_event(map.campaign.events.get_event("repo_fight"))
+	panel.choose(0)
+	panel.proceed()
+	eq(fake.entered, "res://data/ships/pirate_raider.json", "the combat view was asked to fight the raider")
+	check(not map.visible, "the map steps aside")
+	var credits := ship.inventory.count("credits")
+	var foe: Ship = Ship.from_design("res://data/ships/pirate_raider.json")
+	fake.finished.emit({"state": "won", "enemy": foe, "hull": 200.0, "hull_max": 228.0})
+	check(map.visible and panel.visible, "back on the map with a page up")
+	check(panel.result["text"].contains("ledger") and panel.result["lines"].any(func(l): return l.begins_with("+")), "the after_win text and the loot are shown")
+	check(ship.inventory.count("credits") >= credits + 60, "the loot (and the 40 of the ledger) is in the cargo")
+	eq(map.campaign.hull_loss, 28, "the damage of the fight stays")
+	panel.proceed()
+	check(panel.visible and panel.event.get("type", "") == "wreck_field", "then a salvage event")
+	_free_screen(d)
+
+
+func test_losing_a_fight_starts_a_new_run() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var fake: FakeCombat = d["fake"]
+	map.event_panel.close()
+	map.campaign.jumps = 12
+	map.campaign.debt = 400
+	map.event_panel.open_event(map.campaign.events.get_event("repo_fight"))
+	map.event_panel.choose(0)
+	map.event_panel.proceed()
+	fake.finished.emit({"state": "lost"})
+	eq([map.campaign.jumps, map.campaign.debt], [0, 1000], "a fresh campaign")
+	check(not map.event_panel.visible, "with nothing open")
+	_free_screen(d)
+
+
+func test_a_fight_the_map_did_not_start_is_ignored() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var fake: FakeCombat = d["fake"]
+	map.event_panel.close()
+	var jumps: int = map.campaign.jumps
+	fake.finished.emit({"state": "won", "enemy": null, "hull": 1.0, "hull_max": 2.0})
+	eq(map.campaign.hull_loss, 0, "the K-key test pirate gives no loot and changes nothing")
+	eq(map.campaign.jumps, jumps, "(nothing moved)")
+	_free_screen(d)
+
+
+func test_station_menu_trades_pays_repairs_and_recruits() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var ship: Ship = d["sim"].player_ship()
+	var c: Campaign = map.campaign
+	var st: StationPanel = map.station_panel
+	map.event_panel.close()
+	c.hull_loss = 40
+	st.open("rusthold")
+	ship.inventory.add("credits", 2000)
+	var rows0 := st.rows(0)
+	eq(rows0[0]["id"], "fuel", "BUY starts with fuel")
+	check(rows0.size() > 5, "and Rusthold's stock")
+	var credits := ship.inventory.count("credits")
+	st.act(0, 0)
+	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [7, credits - 8], "one can of fuel for 8")
+	st.act(0, 0, MOUSE_BUTTON_RIGHT)
+	eq(ship.inventory.count("fuel"), 12, "right-click buys five")
+	ship.inventory.add("titanium", 10)
+	var sell := -1
+	for i in st.rows(1).size():
+		if st.rows(1)[i]["id"] == "titanium":
+			sell = i
+	credits = ship.inventory.count("credits")
+	st.act(1, sell)
+	eq(ship.inventory.count("credits"), credits + 3, "one titanium sold at half of 6")
+	var buy := -1
+	for i in rows0.size():
+		if rows0[i].get("id", "") == "engine_scrap_mk1":
+			buy = i
+	credits = ship.inventory.count("credits")
+	var engines := ship.inventory.count("engine_scrap_mk1")
+	st.act(0, buy)
+	eq([ship.inventory.count("engine_scrap_mk1"), ship.inventory.count("credits")], [engines + 1, credits - 90], "stock bought")
+	var srv := st.rows(2)
+	var pay := -1
+	var repair := -1
+	var recruit := -1
+	for i in srv.size():
+		match srv[i]["kind"]:
+			"pay":
+				pay = i
+			"repair":
+				repair = i
+			"recruit":
+				recruit = i
+	credits = ship.inventory.count("credits")
+	st.act(2, pay)
+	eq([c.debt, ship.inventory.count("credits")], [900, credits - 100], "100 paid on the debt")
+	st.act(2, repair)
+	eq(c.hull_loss, 30, "10 points of hull repaired")
+	var crew := ship.crew.size()
+	st.act(2, recruit)
+	eq(ship.crew.size(), crew + 1, "a recruit hired")
+	check(not st.message_bad, "no complaint: " + st.message)
+	ship.inventory.counts.erase("credits")
+	st.act(0, 0)
+	check(st.message_bad, "no credits: refused")
+	_click(st, st.row_rect(0, 0).get_center())
+	check(st.message_bad, "a click on a row does the same")
+	_press(st, KEY_ESCAPE)
+	check(not st.visible, "Esc leaves")
+	_free_screen(d)
+
+
+func test_a_refused_dock_shows_the_dock_masters_words() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	map.event_panel.close()
+	map.campaign.rep["clans"] = -8
+	check(map.dock() == "The dock master turns you away.", "dock() is refused")
+	check(not map.station_panel.visible, "no menu")
+	map._arrive()
+	check(map.event_panel.visible and map.event_panel.result["text"] == "The dock master turns you away.", "arriving shows it as a notice")
+	_free_screen(d)
+
+
+func test_the_event_panel_layout_keeps_the_choices_inside_the_panel() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var panel: EventPanel = map.event_panel
+	for id in ["wreck_dead_freighter", "pirate_toll", "asteroid_tumbling_rock"]:
+		panel.open_event(map.campaign.events.get_event(id))
+		var lay := panel.layout()
+		var p: Rect2 = lay["panel"]
+		check(Rect2(Vector2.ZERO, panel.size).encloses(p), id + ": the panel fits the screen")
+		eq(lay["rows"].size(), panel.view.size(), id + ": one row per choice")
+		for r in lay["rows"]:
+			check(p.encloses(r), id + ": a row is inside the panel")
+	_free_screen(d)
+
+
+func test_m_opens_the_map_from_play_mode_only() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	map.event_panel.close()
+	map.visible = false
+	var build := BuildMode.new()
+	build.sim = d["sim"]
+	build.drift = map
+	var key := InputEventKey.new()
+	key.keycode = KEY_M
+	key.pressed = true
+	build._on_key(key)
+	check(not map.visible and build.message.contains("play mode"), "in build mode M only says why not")
+	build.build_on = false
+	build._on_key(key)
+	check(map.visible, "in play mode M opens the map")
+	build.free()
+	_free_screen(d)
+
+
+func test_the_campaign_is_saved_and_loaded_with_the_ship() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	map.event_panel.close()
+	map.campaign.flags["met_ma"] = true
+	map.campaign.jumps = 3
+	eq(map.save_campaign(), "", "saved")
+	map.new_game(99)
+	eq(map.campaign.jumps, 0, "a different campaign now")
+	eq(map.load_campaign(), "", "loaded")
+	check(map.campaign.flags.has("met_ma") and map.campaign.jumps == 3 and map.campaign.seed_value == 5, "the saved one is back")
+	check(not map.event_panel.visible, "without replaying the arrival")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Campaign.SAVE_PATH))
+	check(map.load_campaign() != "", "an old save with no campaign file says so")
+	eq(map.campaign.jumps, 0, "and a new campaign begins")
+	_free_screen(d)
