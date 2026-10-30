@@ -162,6 +162,8 @@ func test_every_shipped_sheet_is_consistent() -> void:
 			if not f.ends_with(".json"):
 				continue
 			var id := f.get_basename()
+			if not FileAccess.file_exists("%s/%s.png" % [dir, id]) and not JSON.parse_string(FileAccess.get_file_as_string("%s/%s" % [dir, f])).has("frame"):
+				continue  # a data file next to the art (tiles/shapes.json holds the shape polygons)
 			var s = Art._sheet(kind, id)
 			check(s != null, "%s/%s has its PNG" % [kind, id])
 			if s == null:
