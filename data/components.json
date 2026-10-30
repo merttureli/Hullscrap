@@ -1,0 +1,17 @@
+{
+  "_doc": "Placeable ship components. Content is data: add an entry here and it can be placed. size is [w, h] in cells at rotation 0. power: positive produces, negative consumes. priority: lower is powered first when power is short (0 for producers and zero-power parts). tier: 1 to 3 (Mk1 to Mk3). family groups related parts. manned: works better with crew. stats: numbers read by the systems that use the part.",
+  "components": [
+    {"id": "reactor_mk1", "name": "Reactor Mk1", "family": "reactor", "tier": 1, "size": [2, 2], "color": "#f2c14e", "power": 8, "priority": 0, "manned": false, "stats": {}},
+    {"id": "reactor_mk2", "name": "Reactor Mk2", "family": "reactor", "tier": 2, "size": [2, 2], "color": "#ff8c3a", "power": 14, "priority": 0, "manned": false, "stats": {}},
+    {"id": "engine_mk1", "name": "Engine Mk1", "family": "engine", "tier": 1, "size": [2, 1], "color": "#5aa9e6", "power": -2, "priority": 4, "manned": false, "stats": {"thrust": 10}},
+    {"id": "engine_mk2", "name": "Engine Mk2", "family": "engine", "tier": 2, "size": [2, 1], "color": "#3a6fd8", "power": -3, "priority": 4, "manned": false, "stats": {"thrust": 18}},
+    {"id": "oxygen_gen", "name": "Oxygen Generator", "family": "oxygen", "tier": 1, "size": [1, 2], "color": "#7bd88f", "power": -2, "priority": 1, "manned": false, "stats": {"o2_rate": 0.6}},
+    {"id": "shield_mk1", "name": "Shield Mk1", "family": "shield", "tier": 1, "size": [2, 2], "color": "#8e7dff", "power": -3, "priority": 3, "manned": false, "stats": {"layers": 1}},
+    {"id": "laser_mk1", "name": "Laser Mk1", "family": "weapon", "tier": 1, "size": [2, 1], "color": "#e8624a", "power": -2, "priority": 5, "manned": false, "stats": {"damage": 2, "cooldown": 6}},
+    {"id": "laser_mk2", "name": "Laser Mk2", "family": "weapon", "tier": 2, "size": [2, 1], "color": "#ff3b8a", "power": -3, "priority": 5, "manned": false, "stats": {"damage": 3, "cooldown": 5}},
+    {"id": "helm", "name": "Helm", "family": "helm", "tier": 1, "size": [1, 1], "color": "#d9dbe8", "power": -1, "priority": 2, "manned": true, "stats": {}},
+    {"id": "medbay", "name": "Medbay", "family": "medbay", "tier": 1, "size": [2, 2], "color": "#4ad1b8", "power": -2, "priority": 3, "manned": false, "stats": {"heal": 1.0}},
+    {"id": "bed", "name": "Bed", "family": "bed", "tier": 1, "size": [1, 2], "color": "#b98a6a", "power": 0, "priority": 0, "manned": false, "stats": {}},
+    {"id": "fabricator", "name": "Fabricator", "family": "fabricator", "tier": 1, "size": [2, 1], "color": "#c78ae0", "power": -2, "priority": 6, "manned": false, "stats": {}}
+  ]
+}
