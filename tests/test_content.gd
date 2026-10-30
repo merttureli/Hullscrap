@@ -410,7 +410,7 @@ func test_a_pack_adds_weapons_items_events_ships_and_names() -> void:
 	check(Content.has("items", "fx_widget") and Content.has("events", "fx_event"), "an item and an event")
 	var ship: Dictionary = Content.entry("ships", "fx_ship")
 	check(ship.get("pack") == "a_first" and ship["design"]["name"] == "Fixture Ship", "a ship design")
-	eq(Content.names()["crew"], ["Fixture Fenn", "Second Fenn"], "name pools join, without repeats")
+	eq(Content.names()["fixture_pool"], ["Fixture Fenn", "Second Fenn"], "name pools join, without repeats")
 	eq(Content.origin("components", "fx_gun"), "a_first", "the origin of a pack's part")
 	eq(Content.file_of("components", "fx_gun"), FIXTURES + "valid/a_first/components.json", "and its file")
 	_done()
