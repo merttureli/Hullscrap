@@ -6,6 +6,7 @@ extends RefCounted
 
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 const PATH := "res://data/weapons.json"
 const BASE := {"damage_type": "energy", "damage": 1.0, "cooldown": 1.0, "range": 900.0, "arc": 120.0,
@@ -30,7 +31,7 @@ func _init(path := PATH) -> void:
 
 
 func load_defs(path: String) -> void:
-	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var data = Content.read(path)
 	assert(data is Dictionary and data.get("weapons") is Dictionary, "bad weapon data: " + path)
 	defs = data["weapons"]
 
