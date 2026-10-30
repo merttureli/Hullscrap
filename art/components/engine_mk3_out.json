@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_mk3_out_glow.png",
+  "frame": [
+   84,
+   68
+  ],
+  "offset": [
+   -10,
+   -32
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust_left": [
+   13,
+   1
+  ],
+  "exhaust_right": [
+   50,
+   1
+  ],
+  "exhaust_mid": [
+   32,
+   9
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Concord Thruster Mk3, a hull mount (outward is up): the Mk2 twin amber-ringed bells plus a third, smaller vernier nozzle between them, a coolant drum with a pipe on each flank, and inside the Mk2 core plus a coolant pump (gauge and drum) in place of the feed pipes and a cable harness across the middle. Damaged: the left bell lip dented and hanging, the right bell cracked and sputtering, the vernier bent over and weeping coolant, a drum cracked; the pump gauge reads red, sparks at the hatch and coupling. Disabled: the left nozzle snapped off at the neck, the right bent over, the vernier broken off, a drum split; the core dead with its repair hatch popped. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}

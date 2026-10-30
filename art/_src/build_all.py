@@ -3,8 +3,8 @@ import os, subprocess, sys
 from px import *
 import export_crew, comp_base, comp_laser, comp_new, sp_export, comp_weapons, tile_wreck
 import pal_races1                 # race wave 1: three Mire skin greens + two private cyan letters (before the palette is written)
-import lines_reactor, lines_engine, lines_o2_shield, lines_shield, lines_shop, lines_belt     # equipment lines + workshop + belts (extra palette letters register on import)
-LINES = lines_reactor.ALL + lines_engine.ALL + lines_o2_shield.ALL + lines_shield.ALL + lines_shop.ALL + lines_belt.ALL
+import lines_reactor, lines_engine, lines_engine1, lines_o2_shield, lines_shield, lines_shop, lines_belt     # equipment lines + workshop + belts (extra palette letters register on import)
+LINES = lines_reactor.ALL + lines_engine.ALL + lines_engine1.ALL + lines_o2_shield.ALL + lines_shield.ALL + lines_shop.ALL + lines_belt.ALL
 REPLACED = {'engine_mk1', 'shield_mk1'}            # redrawn by the lines modules (engine split into core + _out, shield with the new animation); comp_engine.py is the old west-facing engine, superseded
 COMPS = [C for C in [comp_laser.Laser] + comp_new.ALL if C.id not in REPLACED] + LINES + comp_weapons.ALL
 if __name__ == '__main__':

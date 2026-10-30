@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  48
+ ],
+ "cells": [
+  4,
+  3
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_mk4_out_glow.png",
+  "frame": [
+   84,
+   90
+  ],
+  "offset": [
+   -10,
+   -38
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust_left": [
+   12,
+   1
+  ],
+  "exhaust_right": [
+   52,
+   1
+  ],
+  "exhaust_mid": [
+   32,
+   10
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Concord Thruster Mk4, a hull mount (outward is up): the 4x3 nozzle housing: two heavy bells with heat-sink fins on a reinforced collar plate with an amber stripe, a taller middle nozzle between them; inside the Mk3 core with an amber-framed hatch, armour corner plates and a finned heat sink in place of the vent grille. Damaged: the left bell lip dented and hanging, the right bell cracked and sputtering, a fin torn off, the middle nozzle cracked, sparks. Disabled: both bells bent over at the neck, the middle nozzle snapped, the fins gone, the collar cracked. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}
