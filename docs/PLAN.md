@@ -108,6 +108,11 @@ Reference games for ideas, not code: Space Haven (closest), FTL, Cosmoteer, Baro
 ## Decisions so far
 - **Engine**: Godot 4.6.3, GDScript, desktop builds (Windows and Mac), not browser.
 - **Walls are whole cells** (as in RimWorld and Space Haven). Edge walls can be revisited later if needed.
+- **Scale (owner, 2026-10-30)**: characters are big and detailed. A crew body takes **2×2 cells** (collision and pathfinding by clearance) and is **drawn about 3×3 cells**.
+  - Walls stay 1 cell thick, so they look slim next to people.
+  - **Doors are 2 cells wide**, and corridors need at least 2 cells.
+  - System footprints are doubled (reactor 4×4, engine 4×2, ...), and the hull is bigger to match.
+  - Characters are drawn in code with detail (head and helmet, shoulders, arms, walking legs, held item, suit colours) until real art arrives.
 - **Multi-cell components** (a 2×2 reactor) arrive in milestone 3 with footprints and rotation.
 - **Content is JSON data** (`data/`). **Logic is headless-testable** (`scripts/ship` and similar).
 
