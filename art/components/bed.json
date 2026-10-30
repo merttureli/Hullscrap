@@ -1,0 +1,39 @@
+{
+ "frame": [
+  32,
+  64
+ ],
+ "cells": [
+  2,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   1,
+   0
+  ],
+  "off": [
+   1,
+   1,
+   0
+  ],
+  "damaged": [
+   2,
+   1,
+   0
+  ],
+  "disabled": [
+   3,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pillow": [
+   15,
+   9
+  ]
+ },
+ "notes": "Head end at the top. Needs no power, so on and off are the same frame."
+}

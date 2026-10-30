@@ -1,0 +1,82 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   1,
+   0
+  ],
+  "off": [
+   1,
+   1,
+   0
+  ],
+  "charge": [
+   2,
+   6,
+   0
+  ],
+  "fire": [
+   8,
+   2,
+   12
+  ],
+  "damaged": [
+   10,
+   2,
+   4
+  ],
+  "disabled": [
+   12,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "laser_mk1_glow.png",
+  "frame": [
+   96,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    1,
+    0
+   ],
+   "charge": [
+    1,
+    6,
+    0
+   ],
+   "fire": [
+    7,
+    2,
+    12
+   ],
+   "damaged": [
+    9,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "muzzle": [
+   63,
+   15
+  ]
+ },
+ "notes": "Barrel points east (right) at rot 0. charge: pick frame round(fraction*5); frame 5 = ready (all cells green, lens lit). fire plays once (flash + afterglow). on = the ready frame."
+}

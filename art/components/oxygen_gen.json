@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  64
+ ],
+ "cells": [
+  2,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   12
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   4,
+   6
+  ],
+  "disabled": [
+   9,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "oxygen_gen_glow.png",
+  "frame": [
+   48,
+   80
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    12
+   ],
+   "damaged": [
+    4,
+    4,
+    6
+   ]
+  }
+ },
+ "notes": "Fan spin loop (4 frames = a quarter turn of a 4-blade fan). Lamps on the glow layer."
+}
