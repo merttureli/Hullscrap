@@ -11,7 +11,7 @@ extends Node2D
 ## Play mode has no ghost and LMB/RMB do nothing yet. Both modes: E opens/closes the door piece under the
 ## mouse, O shows oxygen, P shows power, Ctrl+S saves to user://ship.json, Ctrl+L loads it, wheel zooms.
 ## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F repairs the system
-## under the mouse (until crew jobs exist).
+## under the mouse (until crew jobs exist). Play mode only: N asks the ship picker (ship_picker.gd) for another ship.
 ## W, A, S, D are reserved for player movement: do not bind them without a modifier.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -38,6 +38,7 @@ const GROUP_NAMES: Array[String] = ["Tiles", "Systems", "Cables"]
 
 var sim: Node  ## the ShipSim that owns the ships
 var crew: Node  ## the crew view, for the player's position
+var picker: Node  ## the ship picker (ship_picker.gd): while it is open this node ignores input
 var build_on := true  ## false = play mode
 var combat := false  ## a fight is on (combat_view.gd): this node ignores input and does not draw
 var group: int = Group.TILES
@@ -78,6 +79,7 @@ var session: BuildSession:
 func _ready() -> void:
 	sim = get_node_or_null("../ShipSim")
 	crew = get_node_or_null("../Crew")
+	picker = get_node_or_null("../PickerLayer/ShipPicker")
 	selected = grid.defs.ids()[0]
 	for id in grid.defs.ids():
 		_add_material(grid.cost_of(id))
@@ -118,7 +120,7 @@ func _add_material(cost: Dictionary) -> void:
 
 
 func _unhandled_input(e: InputEvent) -> void:
-	if ship == null or combat:
+	if ship == null or combat or (picker != null and picker.visible):
 		return
 	if e is InputEventMouseMotion:
 		hover = _cell_of(e)
@@ -182,6 +184,9 @@ func _on_key(e: InputEventKey) -> void:
 				show_o2 = not show_o2
 			KEY_P:
 				show_power = not show_power
+			KEY_N:
+				if not build_on and picker != null:
+					picker.ask()
 			_:
 				if build_on:
 					_build_key(e.keycode)
@@ -324,6 +329,15 @@ func _repair_under_mouse() -> void:
 	message = "%s needs no repair" % name if fine else "repaired " + name
 
 
+## The player's ship was replaced (the picker loaded a design): forget the old ship's edit state.
+func ship_replaced(text: String) -> void:
+	dragging = false
+	drag_path = []
+	_fix_component()
+	_refresh_ghost()
+	message = text
+
+
 func _undo() -> void:
 	message = "undone" if session.undo() else "nothing to undo"
 
@@ -362,6 +376,7 @@ func _load() -> void:
 func _update_hud() -> void:
 	if hud != null:
 		hud.text = hud_text()
+		hud.visible = picker == null or not picker.visible  # the picker has the screen
 
 
 ## The whole HUD: mode, palette, selection and cost, cargo, power, the oxygen where the player
@@ -494,7 +509,7 @@ func _cargo_text() -> String:
 
 func _controls_text() -> String:
 	if not build_on:
-		return "WASD walk   middle-click send Ada   E door   O oxygen   P power   B build   Ctrl+S/L save/load   wheel zoom"
+		return "WASD walk   middle-click send Ada   E door   O oxygen   P power   K fight   N new ship   B build   Ctrl+S/L save/load   wheel zoom"
 	var how := "LMB paint   Shift+LMB line   Ctrl+LMB rectangle   RMB remove"
 	if group == Group.TILES:
 		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove"
