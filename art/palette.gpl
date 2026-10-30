@@ -1,0 +1,29 @@
+GIMP Palette
+Name: Hullscrap
+Columns: 5
+#
+ 19  22  27	#13161b near-black outline
+ 42  47  55	#2a2f37 dark slate
+ 61  68  78	#3d444e steel dark
+ 86  94 106	#565e6a steel mid-dark / floor shadow
+122 132 145	#7a8491 steel mid
+163 172 184	#a3acb8 steel light
+210 216 224	#d2d8e0 steel highlight
+244 246 248	#f4f6f8 white (icons, hot cores)
+110 118 131	#6e7683 floor
+100 108 120	#646c78 floor grid
+ 58  46  40	#3a2e28 brown dark
+109  86  70	#6d5646 brown mid
+147 119  95	#93775f brown light
+156  90  51	#9c5a33 scrap rust
+107 211  74	#6bd34a power green
+ 79 163 255	#4fa3ff shield blue
+232 138 160	#e88aa0 low-o2 pink
+255 138  30	#ff8a1e fire orange
+255 210  58	#ffd23a fire yellow
+224  65  59	#e0413b damage red
+225 161  54	#e1a136 hull / door amber
+ 60 242 255	#3cf2ff neon cyan
+255  79 216	#ff4fd8 neon magenta
+227 173 130	#e3ad82 skin
+184 122  84	#b87a54 skin shade
