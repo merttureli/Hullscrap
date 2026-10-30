@@ -14,12 +14,12 @@ A top-down 2D spaceship game. Start with an empty hull, build walls, rooms and s
 |---|---|
 | B | Build mode / play mode (the HUD shows which) |
 | W A S D | Walk (your soldier) |
-| Middle mouse | Send Ada to that cell |
-| E over a door | Open / close it (free, not an undo step; both modes). Crew also walk through closed doors, which open while they stand in them |
+| Middle mouse | Send Ada there (bodies are 2x2 cells, so she stands where one fits) |
+| E over a door | Open / close the whole door piece (both cells; free, not an undo step; both modes). Crew also walk through closed doors, which open while any body overlaps them |
 | O | Oxygen overlay: each room cell from red (empty) to blue (full), breached rooms outlined |
 | P | Power overlay: cables shown, each network tinted, with its supply / demand over its first cable |
-| Mouse wheel | Zoom |
-| Ctrl+S / Ctrl+L | Save / load the whole ship: tiles, doors, systems, cables, cargo, oxygen (`user://ship.json`; older saves still load) |
+| Mouse wheel | Zoom (0.2 to 3; the game starts at 0.5) |
+| Ctrl+S / Ctrl+L | Save / load the whole ship: tiles, doors, systems, cables, cargo, oxygen (`user://ship.json`; older saves still load, but one from before the 2x scale keeps its small layout and 1-cell doors, and its systems now take their doubled size, so rebuild it) |
 
 Build mode only:
 
@@ -28,15 +28,15 @@ Build mode only:
 | Tab | Next palette: Tiles, Systems, Cables |
 | 1 / 2 / 3 | Tiles: Floor / Wall / Door |
 | 1 - 9 | Systems: pick a system you hold in cargo (the list shows how many) |
-| R | Systems: rotate the system by a quarter turn |
-| Left mouse (drag to paint) | Place; the whole stroke is one undo step. Green ghost = it will apply, red = not (reason in the HUD). A system is placed with its top-left cell on the mouse, on release |
+| R | Systems: rotate the system by a quarter turn. Door: flip the piece across the way it fits |
+| Left mouse (drag to paint) | Place; the whole stroke is one undo step. Green ghost = it will apply, red = not (reason in the HUD). A system is placed with its top-left cell on the mouse, on release; a door piece likewise (2x1 or 1x2, turned along the wall by itself), as one undo step |
 | Shift + left mouse drag | Straight line, locked to the horizontal or vertical axis |
 | Ctrl + left mouse drag | Rectangle. Floor and cables fill it, a wall makes a room (walls round the edge, floor inside); doors and systems one at a time |
 | Right mouse (+ Shift / Ctrl) | Tiles and cables: the same three modes, but removing (100% refund). Systems: removes the one under the mouse and returns it to the cargo |
 | Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z) | Undo / redo (tiles, systems, cables and cargo) |
 | Esc | Cancel a drag |
 
-A door needs walls on two opposite sides, and a wall holding a door can't be removed. Systems are items from the cargo: placing one uses an item up, removing it gives the item back. A system needs floor under every cell, and that floor can't be removed or built over while it stands there. Cables cost copper per cell (`data/build.json`) and may run under anything. A system only works when a cable connects it to a reactor; an unpowered one is drawn dimmed with a red mark.
+Characters are big: a crew body is 2x2 cells (drawn about 3x3), so doors are a piece of exactly 2 cells in a row with a wall cell at each end (wall, door, door, wall), and a corridor needs 2 cells. Walls stay 1 cell thick. A door costs per cell; removing or replacing either cell takes the whole piece, and a wall holding a door can't be removed. Systems are items from the cargo: placing one uses an item up, removing it gives the item back. A system needs floor under every cell, and that floor can't be removed or built over while it stands there. Cables cost copper per cell (`data/build.json`) and may run under anything. A system only works when a cable connects it to a reactor; an unpowered one is drawn dimmed with a red mark.
 
 ## Tests
 ```

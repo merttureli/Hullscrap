@@ -2,11 +2,13 @@ extends Node2D
 ## Build mode and play mode on the player's ship (from ShipSim.player_ship()). B switches.
 ## Build mode edits three layers through BuildSession, which pays, refunds and keeps the undo history.
 ## Tab cycles the palette (Tiles, Systems, Cables). Tiles: 1-3 pick one. Systems: 1-9 pick a system
-## from the cargo, R rotates it. Cables: nothing to pick. LMB paints (a whole stroke is one undo
+## from the cargo, R rotates it. Cables: nothing to pick. A door is a piece of two cells (a crew body
+## is 2x2): with Door selected the ghost is that piece, turned to fit the wall (R flips it), LMB
+## places it as one step and RMB on either cell removes it all. LMB paints (a whole stroke is one undo
 ## step; a system is placed on release), Shift+LMB draws a straight line, Ctrl+LMB a rectangle (a
 ## wall makes a room); RMB does the same but removes. The ghost shows the pending edit: green = it
 ## would apply, red = not (the reason is in the HUD). Edits happen on mouse release.
-## Play mode has no ghost and LMB/RMB do nothing yet. Both modes: E opens/closes the door under the
+## Play mode has no ghost and LMB/RMB do nothing yet. Both modes: E opens/closes the door piece under the
 ## mouse, O shows oxygen, P shows power, Ctrl+S saves to user://ship.json, Ctrl+L loads it, wheel zooms.
 ## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag.
 ## W, A, S, D are reserved for player movement: do not bind them without a modifier.
@@ -15,6 +17,7 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Rooms = preload("res://scripts/sim/rooms.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const CELL := 32
 const SAVE_PATH := "user://ship.json"
 const OK_TINT := Color(0.35, 1, 0.45)
@@ -37,6 +40,7 @@ var group: int = Group.TILES
 var selected := ""  ## tile id
 var sel_component := ""  ## system id
 var rot := 0  ## quarter turns of the system being placed
+var door_flip := false  ## R: put the door piece across the way it would fit by itself
 var show_o2 := false
 var show_power := false
 var hover := Vector2i(-1, -1)
@@ -181,7 +185,10 @@ func _build_key(code: Key) -> void:
 		group = (group + 1) % GROUP_NAMES.size()
 		_fix_component()
 	elif code == KEY_R:
-		rot = (rot + 1) % 4
+		if group == Group.TILES:
+			door_flip = not door_flip
+		else:
+			rot = (rot + 1) % 4
 	else:
 		var i: int = code - KEY_1
 		if group == Group.TILES and i >= 0 and i < grid.defs.ids().size():
@@ -255,6 +262,8 @@ func _plan() -> Dictionary:
 	var mode: int = drag_mode if dragging else BuildSession.Mode.PAINT
 	var start := drag_start if dragging else hover
 	var path: Array = drag_path if dragging else [hover]
+	if group == Group.TILES and not remove and grid.tile_flag(selected, "door"):
+		return session.plan_door(selected, hover, _door_axis())
 	match group:
 		Group.SYSTEMS:
 			if remove:
@@ -265,6 +274,14 @@ func _plan() -> Dictionary:
 		Group.CABLES:
 			return session.plan_cables(mode, remove, start, hover, path)
 	return session.plan(mode, selected, remove, start, hover, path)
+
+
+## The direction of the door piece under the mouse: the way the walls round it allow, or across that when flipped.
+func _door_axis() -> Vector2i:
+	var axis := grid.door_axis_at(hover)
+	if door_flip:
+		return Vector2i.DOWN if axis == Vector2i.RIGHT else Vector2i.RIGHT
+	return axis
 
 
 func _refresh_ghost() -> void:
@@ -296,7 +313,7 @@ func _redo() -> void:
 
 func _zoom(f: float) -> void:
 	if cam:
-		cam.zoom = (cam.zoom * f).clamp(Vector2(0.3, 0.3), Vector2(3, 3))
+		cam.zoom = (cam.zoom * f).clamp(Vector2(0.2, 0.2), Vector2(3, 3))
 
 
 func _save() -> void:
@@ -418,6 +435,8 @@ func _selection_text() -> String:
 				last.x + 1, last.y + 1, rot * 90]
 		Group.CABLES:
 			return "selected: Cable (cost %s per cell)   cables %d" % [_cost_text(session.cable_cost), ship.cables.cells.size()]
+	if grid.tile_flag(selected, "door"):
+		return "selected: %s piece, 2 cells (cost %s per cell)   tiles %d" % [grid.defs.get_def(selected).get("name", selected), _cost_text(grid.cost_of(selected)), grid.tiles.size()]
 	return "selected: %s (cost %s)   tiles %d" % [grid.defs.get_def(selected).get("name", selected), _cost_text(grid.cost_of(selected)), grid.tiles.size()]
 
 
@@ -451,6 +470,8 @@ func _controls_text() -> String:
 	var how := "LMB paint   Shift+LMB line   Ctrl+LMB rectangle   RMB remove"
 	if group == Group.TILES:
 		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove"
+		if grid.tile_flag(selected, "door"):
+			how = "LMB place a 2-cell door in a wall   RMB remove   R flip"
 	elif group == Group.SYSTEMS:
 		how = "LMB place   RMB remove   R rotate"
 	return "%s   E door   O oxygen   P power\nCtrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   wheel zoom" % how
@@ -475,8 +496,9 @@ func _draw() -> void:
 	for c in grid.hull:
 		draw_rect(cell_rect(c), Color("#141922"))
 		draw_rect(cell_rect(c), Color(1, 1, 1, 0.05), false, 1.0)
+	var open_doors := ShipSim.open_door_cells(ship)  # doors someone opened, and doors a body is in
 	for c in grid.tiles:
-		_draw_tile(c, grid.tiles[c])
+		_draw_tile(c, grid.tiles[c], open_doors)
 	if build_on or show_power:
 		_draw_cables(_network_tints() if show_power else {})
 	_draw_components()
@@ -489,32 +511,39 @@ func _draw() -> void:
 
 
 ## Placeholder look: flat shapes until real art lands (see docs/PLAN.md, milestone 8).
-func _draw_tile(c: Vector2i, id: String) -> void:
+func _draw_tile(c: Vector2i, id: String, open_doors: Dictionary) -> void:
 	var r := cell_rect(c)
 	var col: Color = grid.defs.color(id)
 	var def: Dictionary = grid.defs.get_def(id)
 	if def.get("door", false):
-		draw_rect(r, grid.defs.color("floor") if grid.defs.has("floor") else col.darkened(0.5))
-		var across_x := grid._is_solid(c + Vector2i.LEFT) and grid._is_solid(c + Vector2i.RIGHT)
-		var bar := Rect2(r.position + Vector2(0, CELL * 0.4), Vector2(CELL, CELL * 0.2)) if across_x \
-			else Rect2(r.position + Vector2(CELL * 0.4, 0), Vector2(CELL * 0.2, CELL))
-		var bars := [bar]
-		if grid.is_door_open(c):  # open: the bar splits to both sides of the cell
-			var q := CELL * 0.25
-			if across_x:
-				bars = [Rect2(bar.position, Vector2(q, bar.size.y)),
-					Rect2(bar.position + Vector2(CELL - q, 0), Vector2(q, bar.size.y))]
-			else:
-				bars = [Rect2(bar.position, Vector2(bar.size.x, q)),
-					Rect2(bar.position + Vector2(0, CELL - q), Vector2(bar.size.x, q))]
-		for b in bars:
-			draw_rect(b, col)
+		var piece := grid.door_piece(c)
+		if piece[0] == c:  # the piece is drawn once, from its first cell
+			_draw_door(piece, col, open_doors.has(c))
 	elif def.get("solid", false):
 		draw_rect(r, col)
 		draw_rect(r.grow(-3), col.lightened(0.12))
 	else:
 		draw_rect(r, col)
 		draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
+
+
+## A door piece: floor under it, then two leaves that meet in the middle when closed and slide back
+## into the walls at both ends when open. The leaves run along the piece (the wall's direction).
+func _draw_door(piece: Array[Vector2i], col: Color, open: bool) -> void:
+	var floor_col: Color = grid.defs.color("floor") if grid.defs.has("floor") else col.darkened(0.5)
+	for p in piece:
+		draw_rect(cell_rect(p), floor_col)
+	var horizontal: bool = piece[1].x != piece[0].x if piece.size() > 1 \
+		else grid._is_solid(piece[0] + Vector2i.LEFT) and grid._is_solid(piece[0] + Vector2i.RIGHT)  # a lone old-save door
+	var along := Vector2.RIGHT if horizontal else Vector2.DOWN
+	var across := Vector2(along.y, along.x)
+	var base := cell_rect(piece[0]).position
+	var n := float(piece.size())
+	var leaves := [[0.0, n * 0.25], [n * 0.75, n]] if open else [[0.0, n * 0.5], [n * 0.5, n]]
+	for l in leaves:
+		draw_rect(Rect2(base + along * (l[0] * CELL) + across * (CELL * 0.4), along * ((l[1] - l[0]) * CELL) + across * (CELL * 0.2)), col)
+	if not open:  # the seam where the leaves meet
+		draw_rect(Rect2(base + along * (n * 0.5 * CELL - 1.0) + across * (CELL * 0.4), along * 2.0 + across * (CELL * 0.2)), col.darkened(0.55))
 
 
 ## Thin lines between neighbouring cable cells, a dot on every cell. `tint`: cell -> colour (power overlay).
@@ -632,7 +661,21 @@ func _draw_ghost(g: Dictionary) -> void:
 		"cable":
 			_draw_ghost_cell(g["cell"], Color.TRANSPARENT if g.get("remove", false) else Color(CABLE_COLOR, 0.45), tint)
 		_:
-			_draw_ghost_cell(g["cell"], Color(grid.defs.color(g["to"]), 0.45) if g["to"] != "" else Color.TRANSPARENT, tint)
+			var fill := Color(grid.defs.color(g["to"]), 0.45) if g["to"] != "" else Color.TRANSPARENT
+			for c in _ghost_cells(g):
+				_draw_ghost_cell(c, fill, tint)
+
+
+## The cells a tile change touches: a door piece is two cells, so a door placement or the removal
+## or replacement of a door cell shows both.
+func _ghost_cells(g: Dictionary) -> Array[Vector2i]:
+	var c: Vector2i = g["cell"]
+	if g["to"] != "" and grid.tile_flag(g["to"], "door"):
+		var axis: Vector2i = g.get("axis", grid.door_axis_at(c))
+		return [c, c + axis]
+	if grid.tile_flag(grid.get_tile(c), "door"):
+		return grid.door_piece(c)
+	return [c]
 
 
 ## One cell: `fill` for a placement, a cross when `fill` is transparent (a removal).

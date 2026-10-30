@@ -27,7 +27,7 @@ func _box(g: ShipGrid, r: Rect2i) -> void:
 			g.place("wall" if edge else "floor", Vector2i(x, y))
 
 
-## A wall across column `x` of a box whose interior rows are 2..4, with a door at (x, 3).
+## A wall across column `x` of a box whose interior rows are 2..4, with a 2-cell door piece at (x, 3) and (x, 4).
 func _divide(g: ShipGrid, x: int) -> void:
 	for y in range(2, 5):
 		g.place("wall", Vector2i(x, y))
@@ -139,6 +139,21 @@ func test_open_door_equalises_and_conserves_oxygen() -> void:
 	var want := total / 15.0  # size-weighted average
 	_near(a.pressure_of(0), want, 1e-3, "left room settles at the average")
 	_near(a.pressure_of(1), want, 1e-3, "right room settles at the average")
+
+
+func test_a_two_cell_door_passes_gas_through_both_cells() -> void:
+	var one := _atm()
+	one.rebuild(_pair())
+	one.consume(1, 100.0)
+	var two := _atm()
+	two.rebuild(_pair())
+	two.consume(1, 100.0)
+	one.tick(0.01, {DOOR: true})
+	two.tick(0.01, {DOOR: true, DOOR + Vector2i.DOWN: true})
+	var moved_one := 1.0 - one.pressure_of(0)
+	var moved_two := 1.0 - two.pressure_of(0)
+	check(moved_one > 0.0, "gas moves through one open cell")
+	check(moved_two > 1.9 * moved_one and moved_two <= 2.0 * moved_one, "an open 2-wide door passes about twice as much, got %f vs %f" % [moved_two, moved_one])
 
 
 func test_gas_flows_from_high_to_low_only() -> void:

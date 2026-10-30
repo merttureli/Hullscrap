@@ -66,38 +66,57 @@ func test_door_splits_two_rooms_and_links_them() -> void:
 	_box(g, Rect2i(1, 1, 7, 5))
 	for y in range(2, 5):
 		check(g.place("wall", Vector2i(4, y)), "divider wall")
-	check(g.place("door", Vector2i(4, 3)), "door in the divider")
+	check(g.place("door", Vector2i(4, 3)), "a 2-cell door in the divider")
 	var res := Rooms.compute(g)
 	eq(res["rooms"].size(), 2, "two rooms")
 	eq(res["rooms"][0]["size"], 6, "left room")
 	eq(res["rooms"][1]["size"], 6, "right room")
 	check(res["rooms"][0]["sealed"] and res["rooms"][1]["sealed"], "both sealed")
-	eq(res["doors"].size(), 1, "one door")
-	eq(res["doors"][0]["cell"], Vector2i(4, 3), "door cell")
-	eq(res["doors"][0]["a"], 0, "left end is room 0")
-	eq(res["doors"][0]["b"], 1, "right end is room 1")
-	check(not res["room_of"].has(Vector2i(4, 3)), "the door itself is no room cell")
+	eq(res["doors"].size(), 2, "a door piece is two door cells")
+	for i in 2:
+		eq(res["doors"][i]["cell"], Vector2i(4, 3 + i), "door cell %d" % i)
+		eq(res["doors"][i]["a"], 0, "left end is room 0 (cell %d)" % i)
+		eq(res["doors"][i]["b"], 1, "right end is room 1 (cell %d)" % i)
+	check(not res["room_of"].has(Vector2i(4, 3)) and not res["room_of"].has(Vector2i(4, 4)), "the door is no room cell")
 	# without the door the rooms are still split by the wall
 	g.place("wall", Vector2i(4, 3))
 	eq(Rooms.compute(g)["rooms"].size(), 2, "a wall splits them too")
 	eq(Rooms.compute(g)["doors"].size(), 0, "and there is no door")
 
 
+func test_a_horizontal_door_piece_links_the_rooms_above_and_below() -> void:
+	var g := _grid()
+	_box(g, Rect2i(1, 1, 7, 7))
+	for x in range(2, 7):
+		g.place("wall", Vector2i(x, 4))
+	check(g.place("door", Vector2i(3, 4)), "a 2x1 door in the horizontal divider")
+	var res := Rooms.compute(g)
+	eq(res["rooms"].size(), 2, "two rooms")
+	eq(res["doors"].size(), 2, "two door cells")
+	for i in 2:
+		eq(res["doors"][i]["cell"], Vector2i(3 + i, 4), "door cell %d" % i)
+		eq(res["doors"][i]["a"], 0, "room above (cell %d)" % i)
+		eq(res["doors"][i]["b"], 1, "room below (cell %d)" % i)
+
+
 func test_door_in_outer_wall_links_to_space() -> void:
 	var g := _grid()
 	_box(g, Rect2i(1, 1, 5, 5))
-	check(g.place("door", Vector2i(3, 1)), "door in the top wall")
-	check(g.place("door", Vector2i(1, 3)), "door in the left wall")
+	check(g.place("door", Vector2i(2, 1)), "door in the top wall (cells 2 and 3)")
+	check(g.place("door", Vector2i(1, 3)), "door in the left wall (cells 3 and 4)")
 	var res := Rooms.compute(g)
 	eq(res["rooms"].size(), 1, "one room")
 	check(res["rooms"][0]["sealed"], "doors seal")
-	eq(res["doors"].size(), 2, "two doors")
-	eq(res["doors"][0]["cell"], Vector2i(3, 1), "sorted by y then x")
-	eq(res["doors"][0]["a"], Rooms.SPACE, "top door: space above")
-	eq(res["doors"][0]["b"], 0, "top door: room below")
-	eq(res["doors"][1]["cell"], Vector2i(1, 3), "left door")
-	eq(res["doors"][1]["a"], Rooms.SPACE, "left door: space to the left")
-	eq(res["doors"][1]["b"], 0, "left door: room to the right")
+	eq(res["doors"].size(), 4, "two pieces of two")
+	var cells := []
+	for d in res["doors"]:
+		cells.append(d["cell"])
+	eq(cells, [Vector2i(2, 1), Vector2i(3, 1), Vector2i(1, 3), Vector2i(1, 4)], "sorted by y then x")
+	for i in 2:
+		eq(res["doors"][i]["a"], Rooms.SPACE, "top door: space above")
+		eq(res["doors"][i]["b"], 0, "top door: room below")
+		eq(res["doors"][2 + i]["a"], Rooms.SPACE, "left door: space to the left")
+		eq(res["doors"][2 + i]["b"], 0, "left door: room to the right")
 	eq(Rooms.SPACE, -1, "space is -1")
 
 

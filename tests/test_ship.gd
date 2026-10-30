@@ -8,19 +8,20 @@ const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const CrewView = preload("res://scripts/crew/crew_view.gd")
 const GridTests = preload("res://tests/test_pathfinder.gd")
-const REACTOR := Vector2i(4, 4)  # 2x2: (4,4) (5,4) (4,5) (5,5)
-const GEN := Vector2i(7, 5)  # 1x2: (7,5) (7,6)
+const REACTOR := Vector2i(10, 10)  # 4x4: x 10..13, y 10..13
+const GEN := Vector2i(15, 10)  # 2x4: x 15..16, y 10..13
+const ROOM_CELLS := 104.0  # the room below: floor x 9..21, y 9..16
 
 
-## A 15x15 ship with a sealed room (walls round (3,3)-(9,8), floor inside: 20 cells) and a few parts in the cargo.
+## A 31x31 ship with a sealed room (walls round (8,8)-(22,17), floor inside: 13x8 = 104 cells) and a few parts in the cargo.
 func _room_ship() -> Ship:
 	var defs := TileDefs.new()
 	defs.load_file("res://data/tiles.json")
-	var g := ShipGrid.new(Vector2i(15, 15), defs)
-	g.fill_circle_hull(7.0)
+	var g := ShipGrid.new(Vector2i(31, 31), defs)
+	g.fill_circle_hull(15.0)
 	var ship := Ship.new("Test", g)
-	ship.inventory.load_dict({"scrap": 200, "copper": 20, "reactor_mk1": 1, "oxygen_gen": 1, "helm": 1})
-	BuildSession.new(ship).apply(BuildSession.room_changes(Vector2i(3, 3), Vector2i(9, 8), "wall", "floor"))
+	ship.inventory.load_dict({"scrap": 400, "copper": 40, "reactor_mk1": 1, "oxygen_gen": 1, "helm": 1})
+	BuildSession.new(ship).apply(BuildSession.room_changes(Vector2i(8, 8), Vector2i(22, 17), "wall", "floor"))
 	ship.refresh()
 	return ship
 
@@ -41,7 +42,7 @@ func _powered_room() -> Ship:
 	var ship := _room_ship()
 	var s := BuildSession.new(ship)
 	s.apply([_place("reactor_mk1", REACTOR), _place("oxygen_gen", GEN)])
-	s.apply(_cables([Vector2i(5, 5), Vector2i(6, 5), Vector2i(7, 5)]))
+	s.apply(_cables([Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)]))
 	ship.refresh()
 	return ship
 
@@ -58,14 +59,16 @@ func _run(sim: ShipSim, seconds: float) -> void:
 
 
 func _room_pressure(ship: Ship) -> float:
-	return ship.atmosphere.pressure_at(Vector2i(5, 6))
+	return ship.atmosphere.pressure_at(Vector2i(12, 15))
 
 
 # --- The ship ---
 
 func test_starter_ship_has_hull_and_cargo() -> void:
 	var s := Ship.new_starter()
-	check(s.grid.hull.size() > 300, "a circular hull")
+	eq(s.grid.size, Vector2i(63, 63), "a 63x63 grid for the 2x2 crew")
+	check(s.grid.in_hull(Vector2i(31, 31)) and s.grid.in_hull(Vector2i(31, 4)) and not s.grid.in_hull(Vector2i(31, 2)), "a circular hull of radius 28")
+	check(s.grid.hull.size() > 2400, "a circular hull")
 	eq(s.grid.tiles.size(), 0, "nothing built yet")
 	check(s.inventory.count("scrap") > 0 and s.inventory.count("copper") > 0, "starts with materials")
 	for id in ["reactor_mk1", "oxygen_gen", "helm", "fabricator"]:
@@ -85,7 +88,7 @@ func test_refresh_follows_structure_and_parts() -> void:
 	check(not s.refresh(), "once")
 	var uid := s.components.place(s.grid, "reactor_mk1", REACTOR, 0)
 	check(s.refresh(), "a part added behind our back is noticed")
-	s.cables.place(s.grid, Vector2i(5, 5))
+	s.cables.place(s.grid, Vector2i(11, 11))
 	check(s.refresh(), "so is a cable")
 	check(s.power_state["powered"][uid], "the reactor is in the power result")
 	s.components.remove_at(REACTOR)
@@ -99,8 +102,8 @@ func test_round_trip_covers_everything() -> void:
 	a.world_pos = Vector2(120.5, -40)
 	a.rot_quarters = 3
 	var s := BuildSession.new(a)
-	s.apply([{"layer": "tile", "cell": Vector2i(6, 8), "to": "door"}])
-	a.grid.set_door_open(Vector2i(6, 8), true)
+	s.apply([{"layer": "tile", "cell": Vector2i(12, 17), "to": "door"}])  # a 2-cell door in the bottom wall
+	a.grid.set_door_open(Vector2i(12, 17), true)
 	a.refresh()
 	a.atmosphere.pressure[0] = 0.5
 	var d: Dictionary = JSON.parse_string(JSON.stringify(a.to_dict()))
@@ -110,7 +113,7 @@ func test_round_trip_covers_everything() -> void:
 	eq(b.grid.size, a.grid.size, "size")
 	eq(b.grid.hull, a.grid.hull, "hull")
 	eq(b.grid.tiles, a.grid.tiles, "tiles")
-	check(b.grid.is_door_open(Vector2i(6, 8)), "the open door")
+	check(b.grid.is_door_open(Vector2i(12, 17)) and b.grid.is_door_open(Vector2i(13, 17)), "the open door, both cells")
 	eq(b.components.to_dict(), a.components.to_dict(), "components, uids included")
 	eq(b.cables.cells, a.cables.cells, "cables")
 	eq(b.inventory.to_dict(), a.inventory.to_dict(), "cargo")
@@ -129,7 +132,7 @@ func test_version_2_save_loads_without_parts_or_cables() -> void:
 	eq(a.components.instances.size(), 0, "no components")
 	eq(a.cables.cells.size(), 0, "no cables")
 	eq(a.inventory.to_dict(), {"scrap": 7, "copper": 3}, "cargo from the save")
-	check(a.grid.get_tile(Vector2i(3, 3)) == "wall", "tiles from the save")
+	check(a.grid.get_tile(Vector2i(8, 8)) == "wall", "tiles from the save")
 	check(a.power_state["powered"].is_empty(), "nothing to power")
 	eq(a.load_dict({"version": 4}), "unsupported ship version", "a newer version is refused")
 
@@ -167,7 +170,7 @@ func test_a_powered_generator_raises_the_pressure() -> void:
 	var sim := _sim_of([ship])
 	_run(sim, 2.0)
 	var rate: float = ship.components.def("oxygen_gen")["stats"]["o2_rate"]
-	check(is_equal_approx(_room_pressure(ship), 0.5 + rate * 2.0 / 20.0), "0.6 cell units a second into 20 cells, got %f" % _room_pressure(ship))
+	check(is_equal_approx(_room_pressure(ship), 0.5 + rate * 2.0 / ROOM_CELLS), "0.6 cell units a second into 104 cells, got %f" % _room_pressure(ship))
 	sim.free()
 
 
@@ -196,16 +199,21 @@ func test_power_follows_a_part_removed_behind_the_sims_back() -> void:
 
 func test_crew_breathe() -> void:
 	var ship := _room_ship()
-	ship.crew.append(CrewMember.new("A", Vector2(5.5, 5.5)))
-	ship.crew.append(CrewMember.new("B", Vector2(6.5, 5.5)))
+	ship.crew.append(CrewMember.new("A", Vector2(12.0, 14.0)))
+	ship.crew.append(CrewMember.new("B", Vector2(16.0, 14.0)))
 	var sim := _sim_of([ship])
 	_run(sim, 10.0)
-	check(is_equal_approx(_room_pressure(ship), 1.0 - 2.0 * 0.02 * 10.0 / 20.0), "two people use 0.4 cell units in 10 s, got %f" % _room_pressure(ship))
+	check(is_equal_approx(_room_pressure(ship), 1.0 - 2.0 * 0.02 * 10.0 / ROOM_CELLS), "two people use 0.4 cell units in 10 s, got %f" % _room_pressure(ship))
 	sim.free()
 
 
 func test_a_door_is_open_while_someone_stands_in_it() -> void:
-	var g := GridTests.grid_from(["#######", "#..D..#", "#######"])
+	var g := GridTests.grid_from([
+		"##########",
+		"#...D....#",
+		"#...D....#",
+		"##########",
+	])
 	var ship := Ship.new("Doors", g)
 	ship.refresh()
 	var left := ship.atmosphere.room_at(Vector2i(1, 1))
@@ -216,16 +224,65 @@ func test_a_door_is_open_while_someone_stands_in_it() -> void:
 	var sim := _sim_of([ship])
 	_run(sim, 1.0)
 	eq(ship.atmosphere.pressure[right], 0.0, "a shut door holds the air")
-	ship.crew.append(CrewMember.new("Walker", Vector2(3.5, 1.5)))
+	ship.crew.append(CrewMember.new("Walker", Vector2(4.0, 2.0)))  # the body covers the door
 	_run(sim, 1.0)
 	check(ship.atmosphere.pressure[right] > 0.1, "air flows through the door while someone is in it")
 	var total: float = ship.atmosphere.total_oxygen()
-	ship.crew[0].pos = Vector2(1.5, 1.5)
+	ship.crew[0].pos = Vector2(2.0, 2.0)
 	var after := ship.atmosphere.pressure[right]
 	_run(sim, 1.0)
 	eq(ship.atmosphere.pressure[right], after, "and stops when they step out")
 	check(ship.atmosphere.total_oxygen() <= total, "nothing was made out of nothing")
 	sim.free()
+
+
+func test_a_body_over_one_cell_opens_the_whole_door_piece() -> void:
+	var g := GridTests.grid_from([
+		"#######",
+		"#.....#",
+		"#.....#",
+		"##DD###",
+		"#.....#",
+		"#.....#",
+		"#######",
+	])
+	var ship := Ship.new("Doors", g)
+	ship.refresh()
+	var above := ship.atmosphere.room_at(Vector2i(1, 1))
+	var below := ship.atmosphere.room_at(Vector2i(1, 4))
+	ship.atmosphere.pressure[above] = 1.0
+	ship.atmosphere.pressure[below] = 0.0
+	var sim := _sim_of([ship])
+	var walker := CrewMember.new("Walker", Vector2(4.0, 2.6))  # body on x 3..4, y 2..3: only door cell (3,3) is under it
+	eq(walker.body_cells(), [Vector2i(3, 2), Vector2i(4, 2), Vector2i(3, 3), Vector2i(4, 3)] as Array[Vector2i], "the body covers one door cell")
+	ship.crew.append(walker)
+	sim.step(0.01)
+	# Both door cells pass gas: 2 cells x 1.0 diff x door_rate 2.0 x 0.01 s into a room of 10 cells.
+	check(absf(ship.atmosphere.pressure[below] - 2.0 * 2.0 * 0.01 / 10.0) < 0.0001, "the other cell of the piece opened too, got %f" % ship.atmosphere.pressure[below])
+	walker.pos = Vector2(3.0, 1.0)
+	sim.step(0.01)
+	var held: float = ship.atmosphere.pressure[below]
+	sim.step(0.01)
+	eq(ship.atmosphere.pressure[below], held, "shut again once the body is clear")
+	sim.free()
+
+
+func test_open_door_cells_are_the_opened_doors_and_the_pieces_with_a_body_in_them() -> void:
+	var g := GridTests.grid_from([
+		"#########",
+		"#...D...#",
+		"#...D...#",
+		"#########",
+	])
+	var ship := Ship.new("Doors", g)
+	eq(ShipSim.open_door_cells(ship), {}, "all shut, nobody about")
+	ship.crew.append(CrewMember.new("A", Vector2(2.0, 2.0)))
+	eq(ShipSim.open_door_cells(ship), {}, "a body next to the door does not open it")
+	ship.crew[0].pos = Vector2(3.6, 2.0)  # covers x 3..4: overlaps both door cells
+	eq(ShipSim.open_door_cells(ship), {Vector2i(4, 1): true, Vector2i(4, 2): true}, "both cells of the piece")
+	ship.crew.clear()
+	g.set_door_open(Vector2i(4, 2), true)
+	eq(ShipSim.open_door_cells(ship), {Vector2i(4, 1): true, Vector2i(4, 2): true}, "an opened door counts, both cells")
 
 
 func test_the_sim_runs_every_ship() -> void:

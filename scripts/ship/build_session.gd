@@ -3,11 +3,15 @@ extends RefCounted
 ## recorded as one undo step, across all three layers. No nodes, so it is testable headless.
 ## A change says which layer it edits (a change without "layer" is a tile change):
 ##   tile      {"layer": "tile", "cell", "to": tile id, "" = remove}
+##             A door is a piece of two cells: "to" a door tile builds one starting at "cell", going
+##             along "axis" (Vector2i.RIGHT or DOWN; left out = the grid's automatic choice). Removing
+##             or replacing either cell of a door piece takes the whole piece (it is one step).
 ##   component {"layer": "component", "id", "anchor", "rot"} places; {"layer": "component", "cell"} removes
 ##   cable     {"layer": "cable", "cell"} places; add "remove": true to remove
 ## Placing a component takes one item with its id from the cargo; removing it gives the item back.
-## A cable costs build.json's cable_cost per cell, refunded in full. A step is the list of what was
-## really done: tiles {layer, cell, from, to} (+ "from_open" for a removed open door),
+## A cable costs build.json's cable_cost per cell, refunded in full. A tile costs per cell, so a door
+## piece costs twice. A step is the list of what was really done: tiles {layer, cell, from, to}
+## (+ "from_open" for a removed open door; a door piece is two entries),
 ## components {layer, uid, id, anchor, rot, added}, cables {layer, cell, added}.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -46,7 +50,8 @@ static func start_cargo(path := Ship.START_PATH) -> Dictionary:
 
 ## One user action: `changes` (see the top) applied in order. A change that breaks a rule or
 ## can't be paid for is skipped. Returns {"applied": n, "skipped": n, "reason": the first skip
-## reason or ""}.
+## reason or ""}: `applied` counts what was really done (a door piece is two cells), `skipped`
+## the changes refused.
 func apply(changes: Array) -> Dictionary:
 	var run := _run(changes)
 	var step: Array = run["step"]
@@ -119,6 +124,15 @@ func plan(mode: int, tile: String, remove: bool, a: Vector2i, b: Vector2i, path:
 			changes.append({"layer": "tile", "cell": c, "to": to})
 	var pl := _clip(changes)
 	pl["changes"] = _doors_first(pl["changes"])
+	return pl
+
+
+## One door piece of tile `id` starting at `c`, going along `axis` (Vector2i.RIGHT or DOWN; the
+## default Vector2i.ZERO lets the grid choose by the walls round it).
+func plan_door(id: String, c: Vector2i, axis := Vector2i.ZERO) -> Dictionary:
+	var pl := _clip([{"layer": "tile", "cell": c, "to": id}])
+	if axis != Vector2i.ZERO and not pl["changes"].is_empty():
+		pl["changes"][0]["axis"] = axis
 	return pl
 
 
@@ -244,7 +258,7 @@ func _run(changes: Array) -> Dictionary:
 	for ch in changes:
 		match ch.get("layer", "tile"):
 			"tile":
-				reasons.append(_try_tile(ch["cell"], ch["to"], step))
+				reasons.append(_try_tile(ch["cell"], ch["to"], step, ch.get("axis", Vector2i.ZERO)))
 			"component":
 				reasons.append(_try_component(ch, step))
 			"cable":
@@ -254,30 +268,58 @@ func _run(changes: Array) -> Dictionary:
 	return {"step": step, "reasons": reasons}
 
 
-func _try_tile(c: Vector2i, to: String, step: Array) -> String:
-	var from: String = grid.get_tile(c)
-	var was_open: bool = grid.is_door_open(c)
-	var old_cost: Dictionary = grid.cost_of(from)
-	var why: String = grid.can_remove(c) if to == "" else grid.can_place(to, c)
+## Build `to` on `c` ("" removes). A door is a piece of two cells and so is any change to a door cell.
+func _try_tile(c: Vector2i, to: String, step: Array, axis := Vector2i.ZERO) -> String:
+	var placing_door := to != "" and grid.tile_flag(to, "door")
+	var axis_used := (axis if axis != Vector2i.ZERO else grid.door_axis_at(c)) if placing_door else Vector2i.ZERO
+	var why: String
+	var cells: Array[Vector2i] = [c]
+	if placing_door:
+		why = grid.can_place_door(to, c, axis_used)
+		cells.append(c + axis_used)
+	else:
+		why = grid.can_remove(c) if to == "" else grid.can_place(to, c)
+		if grid.tile_flag(grid.get_tile(c), "door"):
+			cells = grid.door_piece(c)
 	if why == "":
-		why = _stands_on(c, to)
+		for p in cells:
+			why = _stands_on(p, to)
+			if why != "":
+				break
 	if why != "":
 		return why
+	var edits := []
+	var old_cost := {}
+	for p in cells:
+		var from: String = grid.get_tile(p)
+		var e := {"layer": "tile", "cell": p, "from": from, "to": to}
+		if grid.is_door_open(p):
+			e["from_open"] = true
+		edits.append(e)
+		_add_cost(old_cost, grid.cost_of(from))
+	var new_cost := {}
+	if to != "":
+		for p in cells:
+			_add_cost(new_cost, grid.cost_of(to))
 	inventory.refund(old_cost)
-	if to == "":
+	var short: Dictionary = inventory.missing(new_cost)
+	if not short.is_empty():
+		inventory.spend(old_cost)
+		return "not enough " + str(short.keys()[0])
+	inventory.spend(new_cost)
+	if placing_door:
+		grid.place_door(to, c, axis_used)
+	elif to == "":
 		grid.remove(c)
 	else:
-		var short: Dictionary = inventory.missing(grid.cost_of(to))
-		if not short.is_empty():
-			inventory.spend(old_cost)
-			return "not enough " + str(short.keys()[0])
-		inventory.spend(grid.cost_of(to))
 		grid.place(to, c)
-	var e := {"layer": "tile", "cell": c, "from": from, "to": to}
-	if was_open:
-		e["from_open"] = true
-	step.append(e)
+	step.append_array(edits)
 	return ""
+
+
+func _add_cost(sum: Dictionary, cost: Dictionary) -> void:
+	for m in cost:
+		sum[m] = int(sum.get(m, 0)) + int(cost[m])
 
 
 ## A system can't be left without floor: a reason when `c` holds one and `to` is not a floor tile.
