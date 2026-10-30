@@ -1,0 +1,19 @@
+{
+  "_doc": "Cell shapes and the multi-cell pieces built from them (docs/CONTENT.md 4d). shapes: id -> the solid polygon in cell-local coordinates (0..1, x right, y down), convex, clockwise on screen. A cell's rotation (quarter turns clockwise, about the cell centre) and mirror (x flipped before turning) are stored next to its shape on the grid; scripts/ship/shapes.gd does the maths. tri at rotation 0 is the bottom-left half (the diagonal runs from the top-left corner to the bottom-right). round2: the quarter disk centred at the piece's bottom-right corner (2,2), radius 2, as an 8-segment polygon, clipped to each of its 4 cells. pieces: id -> cells as {off: [x, y] in the piece, shape}. At rotation 0 a piece is as listed: slope2 is 2x1 and rises from (0,1) to (2,0) across its two cells, solid below the line; round2 is 2x2. Pieces turn in quarter turns and can be mirrored; the anchor is the top-left cell of the turned footprint, like components.",
+  "shapes": {
+    "full": [[0, 0], [1, 0], [1, 1], [0, 1]],
+    "tri": [[0, 0], [1, 1], [0, 1]],
+    "tri2_low": [[0, 1], [1, 0.5], [1, 1]],
+    "tri2_high": [[0, 0.5], [1, 0], [1, 1], [0, 1]],
+    "round2_tl": [[0.277655, 1], [0.337061, 0.88886], [0.585786, 0.585786], [0.88886, 0.337061], [1, 0.277655], [1, 1]],
+    "round2_tr": [[0, 0.277655], [0.234633, 0.152241], [0.609819, 0.038429], [1, 0], [1, 1], [0, 1]],
+    "round2_bl": [[0, 1], [0.038429, 0.609819], [0.152241, 0.234633], [0.277655, 0], [1, 0], [1, 1]],
+    "round2_br": [[0, 0], [1, 0], [1, 1], [0, 1]]
+  },
+  "pieces": {
+    "full": [{"off": [0, 0], "shape": "full"}],
+    "slope45": [{"off": [0, 0], "shape": "tri"}],
+    "slope2": [{"off": [0, 0], "shape": "tri2_low"}, {"off": [1, 0], "shape": "tri2_high"}],
+    "round2": [{"off": [0, 0], "shape": "round2_tl"}, {"off": [1, 0], "shape": "round2_tr"}, {"off": [0, 1], "shape": "round2_bl"}, {"off": [1, 1], "shape": "round2_br"}]
+  }
+}

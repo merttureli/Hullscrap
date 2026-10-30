@@ -13,6 +13,7 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 
 const PIRATE_PATH := "res://data/ships/pirate_raider.json"
+const RAMMER_PATH := "res://data/ships/rustfang_rammer.json"  ## the test rammer (Shift+K in the combat view)
 const PLAYER := 0
 const ENEMY := 1
 const SPAWN_DISTANCE := 1200.0  ## px the enemy starts ahead of the player
@@ -29,7 +30,8 @@ var enemy_label := "Pirate"
 var _acc := 0.0
 
 
-## A ship from a saved-ship JSON file (Ship.to_dict format), or null when it cannot be loaded.
+## A ship from a saved-ship JSON file (Ship.to_dict format), or null when it cannot be loaded. A
+## design's `ai` entry ({"style": "rammer"}) is kept on the ship as the meta value "ai" and read by start().
 static func load_ship(path: String) -> Ship:
 	if not FileAccess.file_exists(path):
 		return null
@@ -39,7 +41,17 @@ static func load_ship(path: String) -> Ship:
 	var defs := TileDefs.new()
 	defs.load_file(Ship.TILES_PATH)
 	var ship := Ship.new("Ship", ShipGrid.new(Vector2i(int(d["size"][0]), int(d["size"][1])), defs))
-	return ship if ship.load_dict(d) == "" else null
+	if ship.load_dict(d) != "":
+		return null
+	if d.get("ai") is Dictionary:
+		ship.set_meta("ai", d["ai"])
+	return ship
+
+
+## The test rammer enemy (data/ships/rustfang_rammer.json), or null when it cannot be loaded. The
+## combat view starts the fight with `enter(Session.RAMMER_PATH)`.
+static func spawn_rammer() -> Ship:
+	return load_ship(RAMMER_PATH)
 
 
 ## Put `player` at the origin and `enemy` SPAWN_DISTANCE ahead of it (up), facing it. `seed_value`
@@ -48,7 +60,7 @@ func start(player: Ship, enemy: Ship, seed_value := 1) -> void:
 	arena = Arena.new(seed_value)
 	arena.add_ship(player, Vector2.ZERO, 0.0)
 	arena.add_ship(enemy, Vector2(0.0, -SPAWN_DISTANCE), PI)
-	ai = PilotAI.new(arena, ENEMY, PLAYER)
+	ai = PilotAI.new(arena, ENEMY, PLAYER, enemy.get_meta("ai", {}))
 	input = {"throttle": 0.0, "turn": 0.0}
 	_acc = 0.0
 

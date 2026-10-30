@@ -188,11 +188,11 @@ func _spend(arena, idx: int, uid: int, m: Dictionary, w: Dictionary) -> void:
 		arena.log_event("jam", idx, Vector2i(-1, -1), {"uid": uid, "weapon": m["id"]})
 
 
-## A hitscan line of weapon `w` from `from` to `to` (world); the "beam" event says where it ended.
+## A hitscan line of weapon `w` from `from` to `to` (world); a "beam" event says where each part of it
+## ended: one, or two when a cell glanced it off and it bounced once (the second has bounce true).
 func _line(arena, idx: int, w: Dictionary, id: String, from: Vector2, to: Vector2) -> void:
-	var out := {}
-	Projectiles.trace(arena, idx, w, from, to, out)
-	arena.log_event("beam", idx, Vector2i(-1, -1), {"weapon": id, "from": from, "to": out["end"], "dtype": w["damage_type"], "shield": out["shield"]})
+	for seg in Projectiles.hitscan(arena, idx, w, from, to):
+		arena.log_event("beam", idx, Vector2i(-1, -1), {"weapon": id, "from": seg["from"], "to": seg["to"], "dtype": w["damage_type"], "shield": seg["shield"], "bounce": seg["bounce"]})
 
 
 ## Burn the active beams for one substep: each ends after its duration, with its ship wrecked or

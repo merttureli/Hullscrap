@@ -11,6 +11,7 @@ const Flight = preload("res://scripts/sim/flight.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
+const Collisions = preload("res://scripts/combat/collisions.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
@@ -34,6 +35,9 @@ class Combatant extends RefCounted:
 	var cooldowns := {}  ## uid -> arena tick when the mount may fire again
 	var powered := {}  ## uid -> bool, the power solve with disabled parts left out
 	var mass := 1.0
+	var com := Vector2.ZERO  ## centre of mass, in grid cell coordinates
+	var inertia := 1.0  ## moment of inertia about it (mass x px^2), for collisions
+	var hit_cache := {}  ## collisions.gd's outer cells of this ship; {} = rebuild
 	var thrust := 0.0
 	var layers := 0  ## shield layers up now
 	var layers_cap := 0
@@ -57,8 +61,11 @@ var rng := RandomNumberGenerator.new()
 var weapons := Weapons.new()
 var projectiles: Array = []
 var beams: Array = []
-var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line), jam, shield, ion_lock, hit, deflect, ricochet (those with dir and n: the shot's direction and the face normal, world), breach, disable, ignite (a hit started a fire), wreck
+var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed), breach, disable, ignite (a hit started a fire), wreck
 var power_bonus := {}  ## ship index -> power the neon lattice has made of absorbed energy (counted, not used yet)
+var collision := Collisions.load_config()  ## data/collision.json: restitution, min_speed, damage_k, crew_knock, separation_slop...
+var contact_tick := {}  ## ship index -> the last tick it touched another ship
+var tethers: Array = []  ## bow latches: {a, b (ships), la, lb (anchors in each ship's cell coordinates), left (seconds)}
 var tick := 0  ## substeps run so far
 var _acc := 0.0
 
@@ -157,6 +164,7 @@ func _substep() -> void:
 		var fly: bool = not co.wrecked and co.flight.can_fly(co.ship.components, co.powered) == ""
 		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust)
 		Shields.tick(co, SUBSTEP)
+	Collisions.step(self, SUBSTEP)
 	weapons.tick_beams(self)
 	Projectiles.step(self, SUBSTEP)
 
@@ -178,7 +186,12 @@ func _recompute(co) -> void:
 	co.ship.refresh()
 	co.powered = co.ship.power_state.get("powered", {})
 	var view = Stats.view(co.ship.components, co.ship.lines)
-	co.mass = co.flight.mass_of(co.ship.grid, co.ship.components, co.ship.cables, Stats.mass_mults(co.ship.components, co.ship.lines))
+	var mults := Stats.mass_mults(co.ship.components, co.ship.lines)
+	co.mass = co.flight.mass_of(co.ship.grid, co.ship.components, co.ship.cables, mults)
+	var props: Dictionary = co.flight.mass_props(co.ship.grid, co.ship.components, co.ship.cables, mults)
+	co.com = props["com"]
+	co.inertia = props["inertia"]
+	co.hit_cache = {}
 	co.thrust = co.flight.thrust_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	Shields.resync(co)
 	co.ability_rev = Abilities.rev(co.ship)
@@ -280,7 +293,7 @@ func snapshot() -> Dictionary:
 		for uid in co.ship.components.instances:
 			var inst: Dictionary = co.ship.components.instances[uid]
 			parts[str(uid)] = [inst.get("hp", -1), inst.get("status", "")]
-		list.append({"pos": [co.flight.pos.x, co.flight.pos.y], "vel": [co.flight.vel.x, co.flight.vel.y], "angle": co.flight.angle,
+		list.append({"pos": [co.flight.pos.x, co.flight.pos.y], "vel": [co.flight.vel.x, co.flight.vel.y], "angle": co.flight.angle, "ang_vel": co.flight.ang_vel,
 			"hull": co.hull, "wrecked": co.wrecked, "layers": co.layers, "ion_lock": co.ion_lock,
 			"grid": co.ship.grid.to_dict(), "parts": parts})
-	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "events": events.size(), "power_bonus": power_bonus.duplicate()}
+	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "tethers": tethers.size(), "events": events.size(), "power_bonus": power_bonus.duplicate()}

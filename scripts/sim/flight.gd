@@ -4,12 +4,14 @@ extends RefCounted
 ## data/flight.json. Units: pixels, px/s and radians. Angle 0 faces up (-y); a positive angle
 ## turns clockwise on screen.
 
+const Shapes = preload("res://scripts/ship/shapes.gd")
 const CONFIG_PATH := "res://data/flight.json"
 const TILES_PATH := "res://data/tiles.json"  ## the one source of tile masses
 const VERSION := 1
 const REVERSE := 0.5  ## reverse thrust as a fraction of forward thrust
 const UNKNOWN_TILE_MASS := 1.0
 const MIN_MASS := 1.0
+const CELL_PX := 32.0  ## pixels per grid cell, for the moment of inertia (arena.gd's CELL)
 
 var tile_mass := {"floor": 1.0, "wall": 2.0, "door": 2.0}  ## code defaults; load_tile_masses() replaces them with data/tiles.json
 var component_mass := {"reactor_mk1": 14.0, "reactor_mk2": 16.0}  ## component id -> whole mass
@@ -76,9 +78,9 @@ func load_config(path: String) -> bool:
 ## thrust pass thrust_of / can_fly a Stats.view(components, lines) instead of the components.
 func mass_of(grid, components, cables, mass_mult := {}) -> float:
 	var total := 0.0
-	var tiles := {}  # tile id -> count
+	var tiles := {}  # tile id -> cells (a sloped or curved cell counts as its solid area)
 	for c in grid.tiles:
-		tiles[grid.tiles[c]] = int(tiles.get(grid.tiles[c], 0)) + 1
+		tiles[grid.tiles[c]] = float(tiles.get(grid.tiles[c], 0.0)) + grid.area_at(c)
 	for id in _sorted(tiles.keys()):
 		total += float(tiles[id]) * float(tile_mass.get(id, UNKNOWN_TILE_MASS))
 	var comps := {}  # component id -> [instances, footprint cells]
@@ -96,6 +98,56 @@ func mass_of(grid, components, cables, mass_mult := {}) -> float:
 			total += float(comps[id][1]) * component_mass_per_cell * m
 	total += float(cables.cells.size()) * cable_mass_per_cell
 	return maxf(total, MIN_MASS)
+
+
+## The mass distribution of the ship: {mass (as mass_of), com (centre of mass, grid cell coordinates),
+## inertia (moment of inertia about the centre of mass, mass x px^2)}. Tiles weigh their tile mass x
+## solid area at the centre of that area; a component's mass is spread evenly over its cells; a cable
+## cell weighs cable_mass_per_cell. Each cell also counts as a square plate (m / 6 in cell units).
+func mass_props(grid, components, cables, mass_mult := {}) -> Dictionary:
+	var m := 0.0
+	var sum := Vector2.ZERO  # sum of m * position
+	var sq := 0.0  # sum of m * |position|^2, plus the plates' own inertia
+	var cells := _sorted_cells(grid.tiles.keys())
+	for c in cells:
+		var id: String = grid.tiles[c]
+		var mi: float = float(tile_mass.get(id, UNKNOWN_TILE_MASS)) * grid.area_at(c)
+		var at := Vector2(c) + Vector2(0.5, 0.5)
+		if grid.shapes.has(c):
+			var sh: Dictionary = grid.shapes[c]
+			at = Vector2(c) + Shapes.centroid(str(sh["shape"]), int(sh["rot"]), bool(sh["mirror"]))
+		m += mi
+		sum += mi * at
+		sq += mi * (at.dot(at) + 1.0 / 6.0)
+	var uids := _sorted(components.instances.keys())
+	for uid in uids:
+		var inst: Dictionary = components.instances[uid]
+		var k := float(mass_mult.get(inst["id"], 1.0))
+		var whole: float = float(component_mass[inst["id"]]) if component_mass.has(inst["id"]) else float(inst["cells"].size()) * component_mass_per_cell
+		var mi: float = whole * k / float(maxi(inst["cells"].size(), 1))
+		for c in inst["cells"]:
+			var at := Vector2(c) + Vector2(0.5, 0.5)
+			m += mi
+			sum += mi * at
+			sq += mi * (at.dot(at) + 1.0 / 6.0)
+	for c in _sorted_cells(cables.cells.keys()):
+		var at := Vector2(c) + Vector2(0.5, 0.5)
+		m += cable_mass_per_cell
+		sum += cable_mass_per_cell * at
+		sq += cable_mass_per_cell * (at.dot(at) + 1.0 / 6.0)
+	var com := sum / m if m > 1e-9 else Vector2.ZERO
+	var inertia := maxf(sq - m * com.dot(com), 0.0) * CELL_PX * CELL_PX
+	return {"mass": maxf(m, MIN_MASS), "com": com, "inertia": maxf(inertia, MIN_MASS * CELL_PX * CELL_PX / 6.0)}
+
+
+## Moment of inertia of the ship about its centre of mass (see mass_props), in mass x px^2.
+func moment_of_inertia(grid, components, cables, mass_mult := {}) -> float:
+	return float(mass_props(grid, components, cables, mass_mult)["inertia"])
+
+
+## Centre of mass of the ship in grid cell coordinates (see mass_props).
+func centre_of_mass(grid, components, cables, mass_mult := {}) -> Vector2:
+	return mass_props(grid, components, cables, mass_mult)["com"]
 
 
 ## Total thrust of the powered engines. `boost`: component uid -> thrust multiplier (default 1.0).
@@ -173,4 +225,10 @@ static func _is_num(v) -> bool:
 
 static func _sorted(keys: Array) -> Array:
 	keys.sort()
+	return keys
+
+
+## Cells in (y, x) order, so sums over them are the same every run.
+static func _sorted_cells(keys: Array) -> Array:
+	keys.sort_custom(func(a, b): return a.y < b.y or (a.y == b.y and a.x < b.x))
 	return keys

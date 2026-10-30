@@ -1,5 +1,5 @@
 {
-  "_doc": "Placeable ship components. Content is data: add an entry here and it can be placed. size is [w, h] in cells at rotation 0 (a crew body is 2x2 cells, so a 1-cell corridor is too narrow). power: positive produces, negative consumes. priority: lower is powered first when power is short (0 for producers and zero-power parts). tier: 1 to 3 (Mk1 to Mk3). family groups related parts. manned: works better with crew. stats: numbers read by the systems that use the part. line: scrap, standard or neon (data/lines.json). hp: system health, at 0 it is disabled until repaired. heat_limit: overheats at this heat. heat_per_s: heat gained per second while running. cooling: heat lost per second. stats.cooling_bonus: extra cooling every part in the same room gets (radiator). Shield stats: stats.layers (bubble layers), stats.sectors (1, 4 or 8: how many sectors the bubble is split into) and stats.recharge (seconds until a used layer is back, default 2.0; lower is faster). unique: true marks a found-or-traded item that has no recipe. effects: tags the combat code reads for a unique or special part (for weapons they live in weapons.json). A weapon part needs an entry in weapons.json under the same id. abilities: optional list of {id, name, type (active or passive), key (engine, shield or utility: the combat key that triggers an active one), duration and cooldown in seconds (the cooldown starts when the effect ends), effects, side_effects, operator_needs, event} (see docs/CONTENT.md section 5 and scripts/sim/abilities.gd). effects: stat_mult {thrust or power: factor} on this part, shield_layer (extra layers), charge_mult (weapon cooldown factor), evasion_add. side_effects: a list of {type, rate} applied per second while it runs: drain_o2 (fraction of the room's air lost per second), heat, power_spike (extra draw), fire_risk (chance per second), self_damage (hp per second). operator_needs: traits a crew member manning the part must have; a|b means either. blurb: one line of flavour.",
+  "_doc": "Placeable ship components. Content is data: add an entry here and it can be placed. size is [w, h] in cells at rotation 0 (a crew body is 2x2 cells, so a 1-cell corridor is too narrow). power: positive produces, negative consumes. priority: lower is powered first when power is short (0 for producers and zero-power parts). tier: 1 to 3 (Mk1 to Mk3). family groups related parts. manned: works better with crew. stats: numbers read by the systems that use the part. line: scrap, standard or neon (data/lines.json). hp: system health, at 0 it is disabled until repaired. heat_limit: overheats at this heat. heat_per_s: heat gained per second while running. cooling: heat lost per second. stats.cooling_bonus: extra cooling every part in the same room gets (radiator). Shield stats: stats.layers (bubble layers), stats.sectors (1, 4 or 8: how many sectors the bubble is split into) and stats.recharge (seconds until a used layer is back, default 2.0; lower is faster). unique: true marks a found-or-traded item that has no recipe. effects: tags the combat code reads for a unique or special part (for weapons they live in weapons.json). A weapon part needs an entry in weapons.json under the same id. abilities: optional list of {id, name, type (active or passive), key (engine, shield or utility: the combat key that triggers an active one), duration and cooldown in seconds (the cooldown starts when the effect ends), effects, side_effects, operator_needs, event} (see docs/CONTENT.md section 5 and scripts/sim/abilities.gd). effects: stat_mult {thrust or power: factor} on this part, shield_layer (extra layers), charge_mult (weapon cooldown factor), evasion_add. side_effects: a list of {type, rate} applied per second while it runs: drain_o2 (fraction of the room's air lost per second), heat, power_spike (extra draw), fire_risk (chance per second), self_damage (hp per second). operator_needs: traits a crew member manning the part must have; a|b means either. blurb: one line of flavour. Ram parts (docs/CONTENT.md 4e) read stats.ram_deal (damage dealt to the other ship in a collision, as a multiple), stats.tether_s (seconds it latches on after a hit), stats.ram_take (multiple of ram damage taken by the ship's plain cells while the part is powered) and stats.no_knock (1: crew take no knock from a ram while it is powered).",
   "components": [
     {
       "id": "reactor_mk1",
@@ -978,6 +978,55 @@
       ],
       "unique": true,
       "blurb": "Bounces the odd bolt back at whoever sent it."
+    },
+    {
+      "id": "inertial_dampener",
+      "name": "Inertial Dampener",
+      "family": "utility",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#7f9ccf",
+      "power": -2,
+      "priority": 3,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "ram_take": 0.5,
+        "no_knock": 1
+      },
+      "blurb": "Soaks up the shock of a ram. Half damage to your plain cells and the crew keep their feet. Needs power."
+    },
+    {
+      "id": "battering_bow",
+      "name": "Battering Bow",
+      "family": "ram",
+      "line": "scrap",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#9c6b3f",
+      "power": 0,
+      "priority": 0,
+      "manned": false,
+      "hp": 14,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {
+        "ram_deal": 3.0,
+        "tether_s": 3.0
+      },
+      "unique": true,
+      "blurb": "A Scrapper wedge of welded girders. Triple ram damage, and it latches on to whatever it hits."
     }
   ]
 }
