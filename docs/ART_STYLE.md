@@ -5,7 +5,7 @@ We re-create the *style* of FTL / FTL: Multiverse. **We never use their files.**
 ## Medium
 - **Pixel art**: hard pixels, nearest-neighbour scaling, no blur or soft gradients, except soft alpha **glow layers** (lights, projectiles, engines). Light shading comes from 2–3 hand-placed tones, and dithering only where it's needed.
 - **Source scale**: 1 grid cell = **16 × 16 source pixels**, displayed at 2× (32 screen px per cell at zoom 1).
-  - So a crew sprite is a **24 × 24** source canvas (about 3×3 cells on screen).
+  - So a crew body is about **28 × 28** source pixels, top-down and layered (see Crew).
   - A 4×4 reactor is 64 × 64 source.
 - Light comes from the top-left. Every object has a **1 px dark outline** (not pure black: a dark shade of its own colour) and a 1 px drop shadow down-right on the floor.
 
@@ -30,17 +30,18 @@ We re-create the *style* of FTL / FTL: Multiverse. **We never use their files.**
   - a damaged system gets a red flashing icon;
   - an unpowered one has its icon greyed.
 
-## Crew
-- **24×24 source**, in FTL's three-quarter top-down view: big readable head, simple body.
-- **Each species has a distinct silhouette** and each outfit a distinct colour.
-- **Animations** (frames per direction; 4 directions, or 2 mirrored):
-  - walk 4 frames;
-  - idle 2 frames (breathing);
-  - work or repair 2–4 frames (tool motion);
-  - extinguish 2 frames;
-  - shoot 2 frames;
-  - down 1 frame.
-- Played at 6–8 fps, never interpolated.
+## Crew: strictly top-down and layered (owner, 2026-10-30)
+FTL's three-quarter view needs a full set of drawings per direction, which we can't afford for a shooter. **Our crew are drawn straight from above and rotate freely**, built from layers so gear never needs a redraw:
+1. **Legs**: a walk cycle of 4–6 frames plus a standing frame. It rotates to the **movement** direction.
+2. **Torso, shoulders and head**: one drawing per species. Outfit colour is on a `_color` mask (tinted per crew member). Helmets, backpacks and exosuits are overlays.
+   - It rotates to the **aim** direction: the cursor for the player, the target for NPCs.
+3. **Arms**: one pose per weapon class: `unarmed`, `pistol` (one or two hands, short), `rifle` (two hands, long), `tool` (wrench or extinguisher). Arms rotate with the torso.
+4. **Weapons and tools**: separate small sprites, each with a **grip** anchor and a **muzzle** anchor. A new gun is one small drawing.
+- **Anchors** are stored in JSON next to each sprite, in source pixels relative to the sprite centre: `hand_r`, `hand_l`, `head`, `back` for the body; `grip`, `muzzle` for weapons.
+- **Size**: the body is about 28×28 source pixels (2×2 cells is the collision; the drawing may overhang a little).
+  - Rotate with nearest-neighbour. If jaggies show, pre-render 32 rotations at load time.
+  - Same law as before: 1 px dark outline, 2–3 tones per material, top-left light (baked; we accept the inconsistency on rotation).
+- **Animations**: legs walk at 8 fps; arm recoil is 2 frames; tool use is 2–3 frames on the arms only; "down" is one frame.
 
 ## Ships in space (combat view)
 - **The hull is a hand-shaped exterior**: panel lines, rivets and greebles, darker outline, engine glows (2-frame pulse), and line accents.
