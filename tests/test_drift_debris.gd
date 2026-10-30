@@ -61,18 +61,21 @@ func _starter_with_a_net() -> Ship:
 	var ship: Ship = Ship.from_design(RUSTBUCKET)
 	ship.refresh()
 	var best := Vector2i(-1, -1)
+	var best_rot := 0
 	var best_score := 1.0e9
-	for y in ship.grid.size.y:
-		for x in ship.grid.size.x:
-			if ship.components.can_place_mount(ship.grid, "net_mouth_scrap", Vector2i(x, y), 0) != "":
-				continue
-			var score := float(y) * 100.0 + absf(float(x) - float(ship.grid.size.x) / 2.0)
-			if score < best_score:
-				best_score = score
-				best = Vector2i(x, y)
-	check(best.x >= 0, "the starter has a spot for a Net Mouth facing up")
+	for rot in [0, 1, 3]:  # facing up (the bow, upstream) is best; a side wall works when the bow is full of guns and slopes
+		for y in ship.grid.size.y:
+			for x in ship.grid.size.x:
+				if ship.components.can_place_mount(ship.grid, "net_mouth_scrap", Vector2i(x, y), rot) != "":
+					continue
+				var score := float(y) * 100.0 + absf(float(x) - float(ship.grid.size.x) / 2.0) + (0.0 if rot == 0 else 2000.0)
+				if score < best_score:
+					best_score = score
+					best = Vector2i(x, y)
+					best_rot = rot
+	check(best.x >= 0, "the starter has a spot for a Net Mouth on an outer wall")
 	if best.x >= 0:
-		check(ship.components.place_mount(ship.grid, "net_mouth_scrap", best, 0) >= 0, "and it goes in")
+		check(ship.components.place_mount(ship.grid, "net_mouth_scrap", best, best_rot) >= 0, "and it goes in")
 	ship.refresh()
 	return ship
 
@@ -353,8 +356,8 @@ func test_the_intakes_the_recipes_and_ma_gantrys_net_are_in_the_data() -> void:
 	var ship := Ship.new_starter()
 	var net: Dictionary = ship.components.def("net_mouth_scrap")
 	var mk1: Dictionary = ship.components.def("intake_mk1")
-	eq([net["family"], net["line"], net["size"], net["mount"]["outside"], net["power"], net["hp"], int(net["stats"]["pull_radius"])], ["intake", "scrap", [2, 2], [2, 2], 0, 4, 1], "Net Mouth")
-	eq([mk1["family"], mk1["line"], mk1["size"], mk1["mount"]["outside"], mk1["power"], mk1["hp"], int(mk1["stats"]["pull_radius"])], ["intake", "standard", [4, 2], [4, 2], -1, 6, 2], "Intake Mk1")
+	eq([net["family"], net["line"], net["size"], net["mount"]["outside"], net["power"], net["hp"], int(net["stats"]["pull_radius"])], ["intake", "scrap", [2, 2], [2, 2], 0, 4, 2], "Net Mouth")
+	eq([mk1["family"], mk1["line"], mk1["size"], mk1["mount"]["outside"], mk1["power"], mk1["hp"], int(mk1["stats"]["pull_radius"])], ["intake", "standard", [4, 2], [4, 2], -1, 6, 3], "Intake Mk1")
 	var recipes := {}
 	for r in Content.list("recipes"):
 		recipes[r["id"]] = r

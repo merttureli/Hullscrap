@@ -517,8 +517,8 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 
   | part | line | mouth | pull radius | notes |
   |---|---|---|---|---|
-  | Net Mouth | scrap | 2×2 out / 2×2 in | 1 cell | no power; jams sometimes (reliability) |
-  | Salvage Intake Mk1–Mk3 | standard | 4×2 out / 4×2 in | 2 / 3 / 4 cells | power −1 / −1 / −2 |
+  | Net Mouth | scrap | 2×2 out / 2×2 in | 2 cells | no power; jams sometimes (reliability) |
+  | Salvage Intake Mk1–Mk3 | standard | 4×2 out / 4×2 in | 3 / 4 / 5 cells | power −1 / −1 / −2 |
   | Lumen Siphon | neon | 4×2 out / 4×2 in | 6 cells | power −3; pulls only small debris |
   | Tractor Beam Mk1–Mk2 | standard | turret | 300 / 450 px | **Q** held: pulls debris toward the nearest intake (section 10) |
 - **Shooting debris**: any weapon breaks a crate or rock into chunks. Mining lasers do it well (section 10).
