@@ -73,8 +73,14 @@ func test_starter_ship_has_hull_and_cargo() -> void:
 	check(s.inventory.count("scrap") > 0 and s.inventory.count("copper") > 0, "starts with materials")
 	for id in ["reactor_mk1", "oxygen_gen", "helm", "fabricator"]:
 		check(s.inventory.count(id) > 0, "starts with a " + id)
+	var mats: Array = []
+	for m in JSON.parse_string(FileAccess.get_file_as_string("res://data/materials.json"))["materials"]:
+		mats.append(m["id"])
+	var items: Array = []
+	for it in JSON.parse_string(FileAccess.get_file_as_string("res://data/items.json"))["items"]:
+		items.append(it["id"])
 	for id in s.inventory.counts:
-		check(id in ["scrap", "copper"] or s.components.has(id), "%s is a material or a known system" % id)
+		check(id in mats or id in items or s.components.has(id), "%s is a material, an item or a known system" % id)
 	eq(s.world_pos, Vector2.ZERO, "world position starts at 0")
 	eq(s.rot_quarters, 0, "and rotation too")
 	check(s.crew.is_empty(), "no crew yet")
