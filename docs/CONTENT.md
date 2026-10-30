@@ -140,6 +140,17 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Size balances itself**: more space means more walls to enclose it, more material cost, more mass (slower, turns worse), more armour, more oxygen to fill and more crew to run it. No artificial size cap beyond the grid limit (128×128).
 - **Credits** are the trading currency (buying frames, gear and crew; selling salvage). Materials stay physical cargo. Each starter ship starts with some credits.
 - The ship grid is a fixed 128×128 workspace. The hull marks which cells you own.
+- **Ship silhouettes (owner, 2026-10-30: "spaceships being rectangles is pretty goofy")**: no premade ship is a rectangle.
+  - Every designed ship (starters, enemies, NPCs, stations) uses **slopes and curves** (4d) for a bow, stern and flanks with character.
+  - It has a **non-rectangular footprint**: sponsons, wings, an engine block, a tapered nose, a raised bridge pod.
+  - **It reads at a glance in combat.** Guns sit on flat hull faces (mounts need a flat wall), and the slopes go everywhere else.
+  - The direction per ship:
+    - *Rustbucket*: a lumpy, asymmetric patched freighter. A blunt sloped bow, one fat cargo sponson on the port side, a rounded stern with the engines in a wide block, and a scrap-plate patch that sticks out.
+    - *Courier*: a sleek arrowhead. A long `slope2` bow taper, swept-back wings carrying the side Strafe Jets, and a narrow waist.
+    - *Prism*: a faceted crystal shape. Only 45° facets (a diamond or hexagon outline), a symmetric neon spine, and a pointed bow and stern.
+    - *Pirate raider*: a jagged wedge with a notched prow and asymmetric gun sponsons.
+    - *Rustfang rammer*: the ram-plated V bow (already shaped), a heavy engine block and short stubby flanks.
+  - The **build mode** helps the player do the same: the shape tool (T/R/Shift+R) is in the hint line, and later a "Round Off" tool.
 
 ## 4d. Angled and curved parts: slopes, curves and real ricochet (owner, 2026-10-30)
 Walls stop being only squares. **Any wall material can take a shape**, for style (ships with real silhouettes, inside and out) and for **physics** (sloped armour deflects).
