@@ -77,6 +77,7 @@ const COLUMNS: Array = [
 			["Shift / Space / Q", "Engine / shield / utility ability"],
 			["Arrows / End", "Shift the shield toward a side / back to even"],
 			["Esc", "Leave, once the enemy is wrecked or far away"],
+			["J", "Spool the jump drive (10 s), then escape the fight"],
 			["R", "After your ship is wrecked"],
 		]],
 	],

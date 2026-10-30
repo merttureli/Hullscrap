@@ -268,7 +268,10 @@ func _unhandled_input(e: InputEvent) -> void:
 				if session.can_leave():
 					leave()
 				else:
-					_say("Cannot disengage: wreck the enemy or get %d px away" % Session.LEAVE_DISTANCE)
+					_say("Cannot disengage: wreck the enemy, get %d px away, or press J to spool the jump drive" % Session.LEAVE_DISTANCE)
+			KEY_J:
+				var why_jump: String = session.start_jump()
+				_say(why_jump if why_jump != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL))
 			KEY_R:
 				restart()
 			KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT:
@@ -341,6 +344,9 @@ func frame(dt: float) -> void:
 			if hold_override.get(g, false) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT if g == 1 else MOUSE_BUTTON_RIGHT):
 				session.fire_group(g, _aim())
 	session.tick(dt)
+	if session.jump_ready():
+		leave()  # the jump drive has spooled: away
+		return
 	_consume_events()
 	_age_fx(dt)
 	var player = session.arena.ships[Session.PLAYER]
