@@ -73,3 +73,16 @@
 - **The lead's cadence**: keep 6–10 builders running, merge continuously, keep `main` green and the beta builds green, and screenshot every big merge to the owner.
   - At about 16:00 UTC, **freeze features**: only fixes and balance from then on.
   - At about 17:00 UTC, **ship Beta 2**: a green build, a release note, and the presentation page.
+
+## THE STOP RULE (owner, 2026-10-30)
+> "Everything ideally ships in the 14-hour window. Once we hit that, any remaining agents finish their work for the next round, then hold and wait for my second playtest. So: 25% usage or the 14-hour window, whichever we hit first."
+
+The loop stops at whichever comes first:
+- **weekly usage reaches 25%** (the newest `rate_limit_event`'s `seven_day` utilization in this session ≥ 0.25; the window reset at 03:00 UTC Oct 31), checked every 2 hours and at every merge;
+- or **the 14-hour window ends** (17:00 UTC Oct 31).
+
+When it hits:
+1. **No new agents** from then on.
+2. Every running agent **finishes its current piece of work**, commits and pushes its branch (it's kept for the next round, even if unmerged). The mechanics director writes up.
+3. The lead merges what's green and **ships Beta 2**: a green build, a release note and the presentation page.
+4. Then **everything holds** until the owner's second playtest and feedback. Nothing more is spent until the owner says go.
