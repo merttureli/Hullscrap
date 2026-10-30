@@ -9,6 +9,8 @@ const Content = preload("res://scripts/data/content.gd")
 const Balance = preload("res://scripts/data/balance.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
 
@@ -174,6 +176,55 @@ func species_problems(species: Array, traits: Dictionary) -> Array[String]:
 	return out
 
 
+## Problems in the trait keys of one entry (a trait, or a species with keys inline): a key that is not in
+## TraitSet.KEYS (only `strict` entries, the traits; a species has fields of its own), a group that is not an
+## object of known sub-keys, a value that is not a number (a flag for `mechanical`).
+func _key_problems(at: String, e: Dictionary, strict: bool) -> Array[String]:
+	var out: Array[String] = []
+	for k in e:
+		if not TraitSet.KEYS.has(k):
+			if strict and not TraitSet.META.has(k):
+				out.append("%s: uses the unknown key '%s' (known: %s)" % [at, k, ", ".join(TraitSet.KEYS.keys())])
+			continue
+		var subs: Array = TraitSet.KEYS[k]
+		var v = e[k]
+		if subs.is_empty():
+			if not (v is bool if k == "mechanical" else (v is float or v is int)):
+				out.append("%s: '%s' must be %s" % [at, k, "true or false" if k == "mechanical" else "a number"])
+		elif not v is Dictionary:
+			out.append("%s: '%s' must be an object of %s" % [at, k, ", ".join(subs)])
+		else:
+			for sub in v:
+				if not subs.has(sub):
+					out.append("%s: '%s' has the unknown key '%s' (known: %s)" % [at, k, sub, ", ".join(subs)])
+				elif not (v[sub] is float or v[sub] is int):
+					out.append("%s: '%s.%s' must be a number" % [at, k, sub])
+	return out
+
+
+## Every trait of the library uses only known keys (TraitSet.KEYS) with numbers in them, and has a name.
+func trait_problems(traits: Array) -> Array[String]:
+	var out: Array[String] = []
+	for t in traits:
+		var at := _at("traits", t)
+		if str(t.get("name", "")) == "":
+			out.append(at + ": has no name")
+		out.append_array(_key_problems(at, t, true))
+	return out
+
+
+## Species with trait keys inline use known ones, and the personal traits of crew.json exist in the library.
+func crew_key_problems(species: Array, personal: Dictionary, traits: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	for s in species:
+		out.append_array(_key_problems(_at("species", s), s, false))
+	for who in personal:
+		for t in personal[who]:
+			if not traits.has(str(t)):
+				out.append("res://data/crew.json: traits of '%s': trait '%s' is not defined" % [who, t])
+	return out
+
+
 ## The shape of the bands table, and every part of a family that has bands against its band.
 func balance_problems(comps: Array, table: Dictionary, lines: Dictionary) -> Array[String]:
 	var out: Array[String] = []
@@ -218,17 +269,9 @@ func missing_art() -> Array[String]:
 	return out
 
 
-## Every trait a species may name: the traits kind, and the library inside species.json when it has one.
+## Every trait a species may name: the library (data/traits.json, the packs, and the old table in species.json).
 func _known_traits() -> Dictionary:
-	var out := {}
-	for id in Content.ids("traits"):
-		out[id] = true
-	if not Content.ids("species").is_empty():
-		var doc = Content.read("res://data/species.json")
-		if doc is Dictionary and doc.get("traits") is Dictionary:
-			for id in doc["traits"]:
-				out[id] = true
-	return out
+	return TraitSet.library()
 
 
 func _tile_ids() -> Dictionary:
@@ -270,6 +313,8 @@ func all_problems() -> Array[String]:
 	out.append_array(ability_problems(Content.list("components")))
 	out.append_array(ship_problems(Content.ships(), _component_ids(), _tile_ids()))
 	out.append_array(species_problems(Content.list("species"), _known_traits()))
+	out.append_array(trait_problems(Content.list("traits")))
+	out.append_array(crew_key_problems(Content.list("species"), CrewMember.config().get("traits", {}), _known_traits()))
 	out.append_array(balance_problems(Content.list("components"), Balance.load_table(), lines))
 	out.append_array(event_problems())
 	return out
@@ -320,6 +365,12 @@ func test_ships_use_real_components_and_tiles() -> void:
 
 func test_species_use_defined_traits() -> void:
 	_none(species_problems(Content.list("species"), _known_traits()))  # nothing to check until species.json is on main
+
+
+func test_traits_use_only_known_keys() -> void:
+	check(Content.list("traits").size() >= 17, "the library has the core traits and the packs'")
+	_none(trait_problems(Content.list("traits")))
+	_none(crew_key_problems(Content.list("species"), CrewMember.config().get("traits", {}), _known_traits()))
 
 
 func test_events_pass_the_drift_validator_when_it_exists() -> void:
@@ -525,6 +576,24 @@ func test_the_species_rule_catches_an_undefined_trait() -> void:
 	var p := species_problems([{"id": "fenn", "traits": ["fast_repair", "telepathy"]}], {"fast_repair": true})
 	eq(p.size(), 1, "one problem")
 	check(_has_line(p, ["fenn", "'telepathy'"]), "it names the species and the trait")
+
+
+func test_the_trait_rule_catches_unknown_keys_and_bad_values() -> void:
+	var good := {"id": "ok", "name": "Fine", "o2_use": 0.5, "mechanical": true, "work_mult": {"repair": 1.2}, "blurb": "words"}
+	eq(trait_problems([good]).size(), 0, "a good bag")
+	var p := trait_problems([
+		{"id": "typo", "name": "Typo", "work_mults": {"repair": 2}},
+		{"id": "sub", "name": "Sub", "work_mult": {"welding": 2}},
+		{"id": "shape", "name": "Shape", "damage_taken": 2, "o2_use": "none", "mechanical": 1},
+		{"id": "nameless", "o2_use": 0},
+	])
+	eq(p.size(), 6, "six problems: " + str(p))
+	check(_has_line(p, ["typo", "unknown key 'work_mults'"]) and _has_line(p, ["sub", "'welding'"]), "a key and a sub-key, named with the trait")
+	check(_has_line(p, ["shape", "'damage_taken' must be an object"]) and _has_line(p, ["shape", "'o2_use' must be a number"]) and _has_line(p, ["shape", "'mechanical' must be true or false"]), "values of the wrong kind")
+	check(_has_line(p, ["nameless", "no name"]), "a name is needed")
+	var q := crew_key_problems([{"id": "odd", "hp": 5, "work_mult": {"repair": "fast"}}], {"Rook": ["suit", "levitation"]}, {"suit": true})
+	eq(q.size(), 2, "a species with a bad inline key, a personal trait that does not exist: " + str(q))
+	check(_has_line(q, ["odd", "work_mult.repair"]) and _has_line(q, ["Rook", "'levitation'"]), "each names where it is")
 
 
 func test_the_balance_rule_checks_a_part_against_its_band() -> void:

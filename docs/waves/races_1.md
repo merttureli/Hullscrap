@@ -27,6 +27,11 @@ Six new races (CONTENT_PLAN section 5, rows 5–9 and 11). Each race is data plu
   - Sporeling and Prismatic at the Prism;
   - Gauntling at Gantry Rusthold and in Scrap `trader` events.
 
+## Data (done: `data/packs/races_1/`)
+- Species hp and speed are the species' own fields (Kett hp 80, Sporeling speed 0.8, Grundl hp 180 and speed 0.7); the rest are traits of the pack's `traits.json`: Kett `swarm`; Mire `firefighter` and `dries_out`; Sporeling `aura_spores` and `flammable`; Gauntling `mechanical`, `half_lungs`, `ion_prone` and `tinkerer`; Prismatic `crystal_conduit` and `crystal_body`; Grundl `hauler` and `clumsy`.
+- "repair ×0.8" (Gauntling) and "repair ×1.3" (Grundl) are repair **time** factors, like Fenn's ×0.6, and they cover breach patching too; as work speeds they are 1.25 and 0.77.
+- Recruiting: Rusthold Kett 2 and Gauntling 1, Meridian Mire 2 and Grundl 1, the Prism Sporeling 2 and Prismatic 1 (`data/drift.json`). Gauntlings in Scrap `trader` events are for the writing pass (`recruit` effects).
+
 ## Art brief (one agent; the species art agent's rig, generator and quality bar)
 - Read `docs/ART_STYLE.md` "The approved look" and look at `docs/art_reference/crew_species.png`, the bar to match.
 - Reuse `art/_src/sp_*.py` (the species generators) and the human rig layout: legs (walk 6 + stand), torso, arms (6 poses: unarmed, pistol, rifle, tool, heavy, melee), head (hair/helmet or species variants), `_color` masks, and `crew.json` anchors **identical to the other species**, so items fit.
