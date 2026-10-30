@@ -15,6 +15,7 @@ const CONFIG_PATH := "res://data/crew.json"
 static var _config := {}  # data/crew.json, read on first use
 
 var name := ""
+var species := "human"  ## species id (human, basalt, emberkin or fenn)
 var pos := Vector2.ZERO
 var speed := 3.0  ## cells per second
 var facing := Vector2.DOWN

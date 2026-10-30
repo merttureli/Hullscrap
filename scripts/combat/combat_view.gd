@@ -29,6 +29,9 @@ const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
 const HINT := "W/S throttle   A/D turn   mouse aims   LMB group 1   RMB group 2   1-9 single weapon   Shift engine ability   Space shield ability   Q utility   Esc leave"
 
+## Emitted when the fight is left: {state ("won", "lost" or "fled"), enemy (its Ship), hull, hull_max (the player's)}.
+signal finished(result: Dictionary)
+
 var sim: Node  ## ShipSim
 var build: Node  ## BuildMode (put away during the fight)
 var crew: Node  ## crew view (put away too)
@@ -168,6 +171,9 @@ func enter(path := Session.PIRATE_PATH) -> String:
 func leave() -> void:
 	if not active:
 		return
+	var foe = session.arena.ships[Session.ENEMY]
+	var mine = session.arena.ships[Session.PLAYER]
+	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max}
 	sim.ships.erase(session.arena.ships[Session.ENEMY].ship)
 	for v in _views:
 		v.queue_free()
@@ -184,6 +190,7 @@ func leave() -> void:
 		cam.zoom = _saved_cam["zoom"]
 	active = false
 	session = null
+	finished.emit(result)
 
 
 ## After being wrecked: back to the interior with the starter ship reloaded.

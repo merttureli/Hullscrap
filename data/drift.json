@@ -1,0 +1,65 @@
+{
+	"_doc": "Tuning for the Drift campaign (scripts/space/drift.gd makes the map, campaign.gd runs it, docs/CONTENT.md section 8). map: nodes = how many in all (fixed places included), size = the region in px, margin = how close to the edge a random node may sit, min_spacing = least distance between two nodes, lane_third and lane_fourth = chance a node asks for a 3rd and a 4th lane (all ask for 2), lane_length = longest lane made for fun (connecting lanes may be longer), clearance = how near a lane may pass another node, clan_trader = chance a trader node is a Scrapper one (Ma's collectors take payments there). node_weights: the type of every non-fixed node is rolled by these. types: label, colour and glyph the map draws. places: the fixed nodes (pos in px; jitter = seeded wobble; faction = who runs it; hidden_until = a flag that must be set before the node shows; start = where the campaign begins). fuel: the item `fuel` costs `price` credits at stations (traders asking `trader_multiplier` times that), a drift jump costs `drift_hull` hull integrity. debt: Ma Gantry's loan (total owed, payment due every `every` jumps; `kettle` is the unique she gives when it is paid off). danger: jumps at which the enemy tier goes up. enemies: ship designs by kind and tier (paths; only the Pirate Raider exists so far, add designs here as they land). loot: after a won fight, credits and scrap ranges (times the tier) and the chance of one of the enemy's components. prices: hull repair per point, the fraction of value paid when selling, the recruit price, how many recruits a station offers. values: what things are worth (sale = half): per material rarity, per component tier, unique parts, and per item kind. stations: the menu of each place (services: fuel, sell, stock, debt, repair, recruit; stock = id -> price; recruit = species -> weight; faction decides refusal and discounts). `clan_trader` is the menu of a Scrapper trader node.",
+	"map": {
+		"nodes": 28, "size": [1600, 1000], "margin": 60, "min_spacing": 110,
+		"lane_min": 2, "lane_max": 4, "lane_third": 0.55, "lane_fourth": 0.15, "lane_length": 380, "clearance": 26,
+		"attempts": 400, "clan_trader": 0.4
+	},
+	"node_weights": {"pirate": 22, "wreck_field": 18, "distress": 16, "trader": 10, "anomaly": 8, "patrol": 8, "asteroid_field": 14, "empty": 4},
+	"types": {
+		"station": {"label": "Station", "color": "#e1a136", "glyph": "S"},
+		"gate": {"label": "Dead Gate", "color": "#59667a", "glyph": "G"},
+		"pirate": {"label": "Pirate activity", "color": "#e0413b", "glyph": "P"},
+		"wreck_field": {"label": "Wreck field", "color": "#9aa0a6", "glyph": "W"},
+		"distress": {"label": "Distress signal", "color": "#f2c744", "glyph": "!"},
+		"trader": {"label": "Trader", "color": "#6bd34a", "glyph": "T"},
+		"anomaly": {"label": "Anomaly", "color": "#c06bff", "glyph": "A"},
+		"patrol": {"label": "Concord patrol", "color": "#4fa3ff", "glyph": "C"},
+		"asteroid_field": {"label": "Asteroid field", "color": "#c2956a", "glyph": "R"},
+		"empty": {"label": "Empty space", "color": "#6b7686", "glyph": "-"}
+	},
+	"places": [
+		{"id": "rusthold", "name": "Gantry Rusthold", "type": "station", "faction": "clans", "pos": [70, 500], "start": true},
+		{"id": "meridian", "name": "Concord Station Meridian", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90},
+		{"id": "prism", "name": "The Prism", "type": "station", "faction": "lumen", "pos": [1180, 240], "jitter": 80, "hidden_until": "prism_revealed"},
+		{"id": "gate_1", "name": "The Concord Gate", "type": "gate", "pos": [790, 45]},
+		{"id": "gate_2", "name": "The Scrapper Gate", "type": "gate", "pos": [790, 955]},
+		{"id": "gate_3", "name": "The Lumen Gate", "type": "gate", "pos": [1555, 520]}
+	],
+	"fuel": {"start": 6, "price": 8, "trader_multiplier": 3, "drift_hull": 15},
+	"debt": {"total": 1000, "payment": 100, "every": 8, "creditor": "Ma Gantry", "kettle": "reactor_scrap_kettle"},
+	"danger": {"tier2_from": 10, "tier3_from": 25},
+	"enemies": {
+		"pirate": {"1": ["res://data/ships/pirate_raider.json"], "2": ["res://data/ships/pirate_raider.json"], "3": ["res://data/ships/pirate_raider.json"]},
+		"patrol": {"1": ["res://data/ships/pirate_raider.json"], "2": ["res://data/ships/pirate_raider.json"], "3": ["res://data/ships/pirate_raider.json"]},
+		"rammer": {"1": ["res://data/ships/pirate_raider.json"], "2": ["res://data/ships/pirate_raider.json"], "3": ["res://data/ships/pirate_raider.json"]}
+	},
+	"loot": {"credits": [20, 60], "scrap": [30, 80], "component_chance": 0.25},
+	"prices": {"repair": 2, "sell_fraction": 0.5, "recruit": 150, "offers": 2},
+	"values": {
+		"rarity": {"common": 2, "uncommon": 6, "rare": 18, "very_rare": 45},
+		"tier": {"1": 40, "2": 90, "3": 160},
+		"unique": 250,
+		"kind": {"ammo": 5, "gear": 30, "special": 150}
+	},
+	"stations": {
+		"rusthold": {
+			"faction": "clans", "services": ["fuel", "sell", "stock", "debt", "repair", "recruit"],
+			"stock": {"engine_scrap_mk1": 90, "reactor_scrap_mk1": 140, "oxygen_scrap_mk1": 80, "shield_scrap_mk1": 110, "rattle_burst_scrap": 130, "bolt_thrower_scrap": 150, "shrapnel_cannon_scrap": 160, "radiator": 40, "bed": 30, "missile": 12},
+			"recruit": {"human": 5, "basalt": 3, "fenn": 1}
+		},
+		"meridian": {
+			"faction": "concord", "services": ["fuel", "sell", "stock", "repair", "recruit"],
+			"stock": {"engine_mk1": 120, "reactor_mk1": 150, "reactor_mk2": 320, "shield_mk1": 160, "shield_mk2": 330, "laser_mk1": 140, "laser_mk2": 280, "pulse_mk1": 130, "oxygen_gen": 90, "medbay": 180, "helm": 70, "artemis_mk1": 220, "missile": 14},
+			"recruit": {"human": 6, "fenn": 2}
+		},
+		"prism": {
+			"faction": "lumen", "services": ["fuel", "sell", "stock", "repair", "recruit"],
+			"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "shield_neon_mk1": 340, "heat_lance_neon": 420, "siren_ion_neon": 400, "radiator": 50},
+			"recruit": {"emberkin": 6, "fenn": 1, "human": 1}
+		},
+		"clan_trader": {
+			"faction": "clans", "services": ["fuel", "sell", "debt"], "stock": {}, "recruit": {}
+		}
+	}
+}

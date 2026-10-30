@@ -1,0 +1,12 @@
+{
+	"_doc": "The peoples of the Drift (docs/LORE.md, docs/CONTENT.md section 8). id, name, short (the label on the reputation bar), line (the equipment line they trade), color, name_style (how their ships are named: boat_insult, registry_virtue, light_phenomenon, or none) and hostile. A hostile faction has no reputation bar. rep: reputation runs from `min` to `max`; below `refuse_below` that faction's stations refuse docking and its patrols attack; from `discount_from` up its stations take `discount` (a fraction) off their prices.",
+	"rep": {"min": -10, "max": 10, "refuse_below": -5, "discount_from": 5, "discount": 0.2},
+	"factions": [
+		{"id": "clans", "name": "Scrapper Clans", "short": "Clans", "line": "scrap", "color": "#e1a136", "name_style": "boat_insult", "hostile": false},
+		{"id": "concord", "name": "The Concord", "short": "Concord", "line": "standard", "color": "#4fa3ff", "name_style": "registry_virtue", "hostile": false},
+		{"id": "lumen", "name": "The Lumen", "short": "Lumen", "line": "neon", "color": "#c06bff", "name_style": "light_phenomenon", "hostile": false},
+		{"id": "rustfangs", "name": "Rustfangs", "short": "Rustfangs", "line": "scrap", "color": "#c0392b", "name_style": "boat_insult", "hostile": true},
+		{"id": "wardens", "name": "Wardens", "short": "Wardens", "line": "neon", "color": "#8be0ff", "name_style": "none", "hostile": true},
+		{"id": "hollow", "name": "The Hollow", "short": "The Hollow", "line": "", "color": "#2b3340", "name_style": "none", "hostile": true}
+	]
+}

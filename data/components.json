@@ -978,6 +978,46 @@
       ],
       "unique": true,
       "blurb": "Bounces the odd bolt back at whoever sent it."
+    },
+    {
+      "id": "reactor_scrap_kettle",
+      "name": "Ma's Kettle",
+      "family": "reactor",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#c9923f",
+      "power": 8,
+      "priority": 0,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "boil_over",
+          "name": "Boils Over",
+          "type": "passive",
+          "effects": {},
+          "side_effects": [
+            {
+              "type": "drain_o2",
+              "rate": 0.01
+            },
+            {
+              "type": "fire_risk",
+              "rate": 0.01
+            }
+          ]
+        }
+      ],
+      "unique": true,
+      "blurb": "Ma Gantry's own reactor, handed over with a straight face. Two more power than it has any right to, and the room smells of tea and smoke."
     }
   ]
 }
