@@ -588,3 +588,57 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 2. **Sector view**: the ship-centred interior while flying, parallax space, debris sprites, the compass ring and edge markers, click to set a course, zooming from interior to flight view, and combat inside the sector.
 3. **Content**: intakes, radars and debris data with art (drift pieces, intake mouths, radar dishes), POI types in `data/sectors.json`, and writer passes for POI events.
 4. **On foot** at POIs (docking, abandoned stations, boarding), later, as PLAN says.
+
+## 12. Processing: smelters and the material ladder (owner, 2026-10-30)
+> "Put smelters in the ship to smelt bad materials into better ones: smelt scrap (an early-game material with no late-game use) into forged steel armour or something."
+
+- **Scrap never becomes useless**: it's the feedstock of **steel**, and steel is what mid and late parts and armour are made of.
+- **Processing parts** (inside components, crew-operated; manned works 30% faster):
+  - **Smelter** (a Scrap "Slag Pot", Standard Mk1–Mk3, a Neon "Plasma Forge"). It runs hot (heat_per_s 8 and up), so Emberkin love working it, and give it a radiator.
+  - **Refinery** (section 10): ore into materials.
+  - Later, a **Fuel Cracker**: ice plus a plasma cell into fuel, slowly. Fuel stays scarce, so it is slow and expensive.
+- **The ladder** (`data/processing.json`, recipe-like: inputs → output, seconds, the minimum processing level):
+
+  | output | inputs | time | level | used for |
+  |---|---|---|---|---|
+  | `steel` | scrap ×4 | 6 s | Smelter Mk1 | Forged Steel Plate (a wall material: hp 8, kinetic resist 0.3); every Mk3+ recipe uses steel where Mk1 and Mk2 used raw scrap |
+  | `alloy` | steel ×2, titanium ×1 | 10 s | Smelter Mk2 | Alloy Armour (hp 10, all-round resist 0.2); Mk4+ hulls and housings |
+  | `conductor` | copper ×3, silicon ×1 | 8 s | Smelter Mk2 | Mk3+ power, shields and weapon capacitors |
+  | `glass_lattice` | silicon ×2, crystal ×1 | 12 s | Plasma Forge | Neon parts Mk2+, reflective coatings |
+  | `fuel` | ice ×10, plasma_cell ×1 | 60 s | Fuel Cracker | emergency fuel |
+- Processing **queues like the fabricator** (`crafting.gd`'s queue model) and pulls from cargo. A conveyor network (4f) can feed it, and a smelter can sit next to an ore hold.
+- **The early-to-late shape**:
+  - early, you drift and collect scrap and build with raw scrap;
+  - mid-game, you smelt steel and build the Mk3 parts and Forged Steel armour;
+  - late, you need alloy and conductor plus the key materials of section 11 (fights, special mining, quests) for Mk4 and Mk5.
+- Engine wave 1's Mk3+ recipes switch their scrap to steel (scrap 40 → steel 10) when processing lands.
+
+## 13. The end: endings, and why to start again (owner, 2026-10-30)
+> "We need an end goal so the game can end and give you a reason to restart with a new build: depending on the lore, finding an established civilisation that survived and is thriving (like I Am Legend), or multiple endings you can run into."
+
+- **A run is 4–8 hours.** It has an ending, a score, and **unlocks** that change how the next run starts. The 200 hours come from replaying with different ships, crews and paths (FTL / Multiverse-style).
+- **Pacing in acts and pressure clocks**:
+  - **Act 1, Clan space**: Ma's debt clock (section 8) is the early pressure.
+  - **Act 2, the Boneyard and Concord space**: the money is good, and the first fragments of **the Haven broadcast** turn up.
+  - **Act 3, the Gate approaches**: **the Hollow tide** is the late pressure. From about jump 30, the Hollow spreads from the Dead Gates one node every few jumps. Hollow nodes have ghost ships, no stores and dead beacons, so you can't stall forever.
+- **The endings** (each is a quest chain of events, flags and special POIs, and you can run into more than one in a run; the first one you **complete** ends the run):
+  1. **The Haven** (the owner's idea, *I Am Legend*): a looping broadcast, "If you can hear this, we're alive. Come to the Lantern Reach", is heard in fragments (logs, radar ghosts, distress beacons).
+     - Triangulate it with the radar across regions. Most fragments are real, and some are **Hollow lures**.
+     - At the end of the trail is **Halcyon**, a generation ship that was mid-jump at the Snap. For forty years it has quietly **thrived** in a hidden pocket of the Drift: gardens, children, working gates of its own design.
+     - You choose:
+       - **settle** (the peace ending);
+       - **lead others there** (bring Ma, the Concord or the Lumen, which needs reputation; the best Haven ending);
+       - or find that they are not what they seem (a dark variant, if you followed a lure).
+  2. **The Way Out**: restart a Dead Gate. That needs `gate_alloy`, a gate core from the Dead Gate dungeon, and a faction's backing. The faction decides the ending's tone:
+     - **Concord** (the Lattice returns, with paperwork);
+     - **Clans** (a free gate: chaos and freedom);
+     - **Lumen** (the gate opens somewhere new).
+  3. **The Hollow**: follow the hidden Hollow thread (the derelict logs) into the Scrapper Gate and learn what came out at the Snap. It is the hardest ending, the true-lore one, and changes the next run's map (Hollow nodes from the start, plus a Hollow-touched starter).
+  4. **Retire** (the short ending): pay off Ma, then buy a berth at Gantry Rusthold (5,000 credits) and hang up your helmet. It has a low score but it counts, and it's good for short sessions.
+- **Score**: endings are worth base points, plus credits, crew alive, POIs done, parts built, and jumps saved.
+- **Unlocks for the next run** (they widen choice, never raw power):
+  - **new starter ships**: the Concord frigate after the Concord Way Out, a Lumen skiff after the Lumen one, the Halcyon tender after the Haven;
+  - **new starting species** (Haven: any species you recruited this run);
+  - **starting blueprints** (one per ending, chosen from what you built this run);
+  - **map variants** (the Hollow ending).
+- **A run log** (a chronicle you can read on the ending screen) and a **hall of ships** (each finished ship's design is saved, and can be exported as a premade).

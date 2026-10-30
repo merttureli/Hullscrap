@@ -44,6 +44,14 @@ You inherited (won at cards, stole, were "loaned") a barely-working hull and the
 - **Politics**: they want to *study* the gates, not restart them. Possibly they're the ones who turned them off. Their quests are strange, and the rewards are blueprints.
 - **They hire you for** scanning anomalies, retrieving crystal from gate debris, testing prototypes (a quest that literally hands you a quirky unique), and escorting researchers.
 
+## The Haven: the signal in the dark (owner's idea, 2026-10-30)
+- **The broadcast**: since a few years after the Snap, a weak looping message has crossed the Drift: *"If you can hear this, we're alive. Come to the Lantern Reach."*
+  - Most people think it's a hoax or a Hollow trick. Scrappers call chasing it "going lantern-blind".
+- **Halcyon** is real. It's a generation ship that was mid-jump when the Lattice died. It came out in a quiet pocket of the Drift and simply... lived. Forty years of gardens, schools, and children who've never seen a wreck.
+  - They built small working gates of their own design and told no one, because everyone they ever answered tried to take them.
+- **The lures**: the Hollow learned the broadcast. Some fragments lead to Halcyon, and some lead to something that sounds exactly like it.
+- **What it means for play**: the Haven is the hopeful ending. Fragments are found in logs, radar ghosts and distress beacons; the trail crosses every region. Reaching it is a choice between keeping it secret, bringing others, or (if you followed the wrong voice) something worse.
+
 ## Species
 All are data; traits appear in `data/crew.json` as they're implemented.
 - **Humans**: most of the Drift. Balanced, need air, complain about everything.
