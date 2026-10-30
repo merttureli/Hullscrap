@@ -14,6 +14,11 @@
     "engine_scrap_mk1": 1,
     "reactor_neon_mk1": 1,
     "radiator": 2,
-    "oxygen_scrap_mk1": 1
+    "oxygen_scrap_mk1": 1,
+    "missile": 6,
+    "artemis_mk1": 1,
+    "rattle_burst_scrap": 1,
+    "bolt_thrower_scrap": 1,
+    "pulse_mk1": 1
   }
 }
