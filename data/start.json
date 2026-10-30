@@ -10,6 +10,10 @@
     "bed": 2,
     "fabricator": 1,
     "shield_mk1": 1,
-    "laser_mk1": 1
+    "laser_mk1": 1,
+    "engine_scrap_mk1": 1,
+    "reactor_neon_mk1": 1,
+    "radiator": 2,
+    "oxygen_scrap_mk1": 1
   }
 }

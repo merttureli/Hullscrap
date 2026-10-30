@@ -43,7 +43,9 @@ func near(got: float, want: float, msg: String, eps := 1e-6) -> void:
 func test_config_matches_the_data_file() -> void:
 	var f := Flight.new()
 	eq(f.tile_mass, {"floor": 1.0, "wall": 2.0, "door": 2.0}, "tile masses")
-	eq(f.component_mass, {"reactor_mk1": 14.0, "reactor_mk2": 16.0}, "component masses")
+	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/flight.json"))
+	for id in cfg["component_mass"]:
+		eq(f.component_mass.get(id), float(cfg["component_mass"][id]), "component mass of " + id + " comes from the data file")
 	eq([f.component_mass_per_cell, f.cable_mass_per_cell], [3.0, 0.1], "per-cell masses")
 	eq([f.linear_damping, f.angular_damping], [0.25, 1.5], "damping")
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/flight.json"))

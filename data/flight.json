@@ -8,7 +8,9 @@
   "component_mass_per_cell": 3.0,
   "component_mass": {
     "reactor_mk1": 14,
-    "reactor_mk2": 16
+    "reactor_mk2": 16,
+    "reactor_scrap_mk1": 18,
+    "reactor_neon_mk1": 10
   },
   "cable_mass_per_cell": 0.1,
   "linear_damping": 0.25,

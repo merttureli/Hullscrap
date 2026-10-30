@@ -1,28 +1,463 @@
 {
   "_doc": "Fabricator recipes. Content is data: add an entry here and it can be crafted. id: the recipe id, same as its output item. output: item id (a component, a material or a gear item) and count. materials: id -> count, paid from cargo when the job is queued. fab_level: 1 to 4, the fabricator level needed (see workshop modules). tools: tools the fabricator's room must provide, e.g. laser_cutter. time: seconds of crafting. category: system, module, gear or material. start_known: recipes known at the start; every other recipe is a blueprint to unlock by scanning and salvage. Special gear (exosuits, unique guns) has no recipe on purpose: it is only found, bought or earned.",
-  "start_known": ["reactor_mk1", "engine_mk1", "oxygen_gen", "shield_mk1", "laser_mk1", "helm", "medbay", "bed", "fabricator", "robot_arm", "pistol", "basic_armor", "polymer"],
+  "start_known": [
+    "reactor_mk1",
+    "engine_mk1",
+    "oxygen_gen",
+    "shield_mk1",
+    "laser_mk1",
+    "helm",
+    "medbay",
+    "bed",
+    "fabricator",
+    "robot_arm",
+    "pistol",
+    "basic_armor",
+    "polymer",
+    "reactor_scrap_mk1",
+    "engine_scrap_mk1",
+    "oxygen_scrap_mk1",
+    "radiator"
+  ],
   "recipes": [
-    {"id": "reactor_mk1", "output": {"item": "reactor_mk1", "count": 1}, "materials": {"scrap": 30, "copper": 15}, "fab_level": 1, "tools": [], "time": 20, "category": "system"},
-    {"id": "engine_mk1", "output": {"item": "engine_mk1", "count": 1}, "materials": {"scrap": 20, "copper": 10}, "fab_level": 1, "tools": [], "time": 15, "category": "system"},
-    {"id": "oxygen_gen", "output": {"item": "oxygen_gen", "count": 1}, "materials": {"scrap": 15, "copper": 8}, "fab_level": 1, "tools": [], "time": 12, "category": "system"},
-    {"id": "shield_mk1", "output": {"item": "shield_mk1", "count": 1}, "materials": {"scrap": 20, "copper": 14}, "fab_level": 1, "tools": [], "time": 18, "category": "system"},
-    {"id": "laser_mk1", "output": {"item": "laser_mk1", "count": 1}, "materials": {"scrap": 18, "copper": 12}, "fab_level": 1, "tools": [], "time": 15, "category": "system"},
-    {"id": "helm", "output": {"item": "helm", "count": 1}, "materials": {"scrap": 10, "copper": 6}, "fab_level": 1, "tools": [], "time": 8, "category": "system"},
-    {"id": "medbay", "output": {"item": "medbay", "count": 1}, "materials": {"scrap": 20, "copper": 10}, "fab_level": 1, "tools": [], "time": 15, "category": "system"},
-    {"id": "bed", "output": {"item": "bed", "count": 1}, "materials": {"scrap": 8, "copper": 2}, "fab_level": 1, "tools": [], "time": 6, "category": "system"},
-    {"id": "fabricator", "output": {"item": "fabricator", "count": 1}, "materials": {"scrap": 25, "copper": 12}, "fab_level": 1, "tools": [], "time": 15, "category": "system"},
-    {"id": "engine_mk2", "output": {"item": "engine_mk2", "count": 1}, "materials": {"scrap": 25, "copper": 10, "titanium": 8}, "fab_level": 2, "tools": [], "time": 30, "category": "system"},
-    {"id": "laser_mk2", "output": {"item": "laser_mk2", "count": 1}, "materials": {"scrap": 20, "copper": 10, "titanium": 6, "silicon": 4}, "fab_level": 2, "tools": ["laser_cutter"], "time": 30, "category": "system"},
-    {"id": "reactor_mk2", "output": {"item": "reactor_mk2", "count": 1}, "materials": {"scrap": 40, "titanium": 12, "silicon": 6, "plasma_cell": 2}, "fab_level": 3, "tools": [], "time": 45, "category": "system"},
-    {"id": "robot_arm", "output": {"item": "robot_arm", "count": 1}, "materials": {"scrap": 15, "copper": 10}, "fab_level": 1, "tools": [], "time": 10, "category": "module"},
-    {"id": "laser_cutter", "output": {"item": "laser_cutter", "count": 1}, "materials": {"scrap": 20, "copper": 12, "silicon": 4}, "fab_level": 2, "tools": [], "time": 20, "category": "module"},
-    {"id": "assembly_rig", "output": {"item": "assembly_rig", "count": 1}, "materials": {"scrap": 30, "copper": 15, "titanium": 6}, "fab_level": 2, "tools": [], "time": 30, "category": "module"},
-    {"id": "nanoforge", "output": {"item": "nanoforge", "count": 1}, "materials": {"scrap": 40, "titanium": 12, "silicon": 8, "crystal": 2, "nanite_paste": 3}, "fab_level": 3, "tools": [], "time": 60, "category": "module"},
-    {"id": "pistol", "output": {"item": "pistol", "count": 1}, "materials": {"scrap": 8, "copper": 4}, "fab_level": 1, "tools": [], "time": 8, "category": "gear"},
-    {"id": "rifle", "output": {"item": "rifle", "count": 1}, "materials": {"scrap": 14, "copper": 6, "titanium": 3}, "fab_level": 2, "tools": [], "time": 16, "category": "gear"},
-    {"id": "basic_armor", "output": {"item": "basic_armor", "count": 1}, "materials": {"scrap": 10, "polymer": 4}, "fab_level": 1, "tools": [], "time": 12, "category": "gear"},
-    {"id": "eva_suit", "output": {"item": "eva_suit", "count": 1}, "materials": {"scrap": 6, "polymer": 8, "silicon": 2}, "fab_level": 2, "tools": [], "time": 25, "category": "gear"},
-    {"id": "titanium", "output": {"item": "titanium", "count": 2}, "materials": {"scrap": 5}, "fab_level": 2, "tools": ["laser_cutter"], "time": 8, "category": "material"},
-    {"id": "polymer", "output": {"item": "polymer", "count": 1}, "materials": {"scrap": 3, "copper": 1}, "fab_level": 1, "tools": [], "time": 5, "category": "material"}
+    {
+      "id": "reactor_mk1",
+      "output": {
+        "item": "reactor_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 15
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 20,
+      "category": "system"
+    },
+    {
+      "id": "engine_mk1",
+      "output": {
+        "item": "engine_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "oxygen_gen",
+      "output": {
+        "item": "oxygen_gen",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 15,
+        "copper": 8
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 12,
+      "category": "system"
+    },
+    {
+      "id": "shield_mk1",
+      "output": {
+        "item": "shield_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 14
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "laser_mk1",
+      "output": {
+        "item": "laser_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 18,
+        "copper": 12
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "helm",
+      "output": {
+        "item": "helm",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 10,
+        "copper": 6
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 8,
+      "category": "system"
+    },
+    {
+      "id": "medbay",
+      "output": {
+        "item": "medbay",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "bed",
+      "output": {
+        "item": "bed",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 8,
+        "copper": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 6,
+      "category": "system"
+    },
+    {
+      "id": "fabricator",
+      "output": {
+        "item": "fabricator",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 25,
+        "copper": 12
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "engine_mk2",
+      "output": {
+        "item": "engine_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 25,
+        "copper": 10,
+        "titanium": 8
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "laser_mk2",
+      "output": {
+        "item": "laser_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "reactor_mk2",
+      "output": {
+        "item": "reactor_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "titanium": 12,
+        "silicon": 6,
+        "plasma_cell": 2
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 45,
+      "category": "system"
+    },
+    {
+      "id": "robot_arm",
+      "output": {
+        "item": "robot_arm",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 15,
+        "copper": 10
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 10,
+      "category": "module"
+    },
+    {
+      "id": "laser_cutter",
+      "output": {
+        "item": "laser_cutter",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 12,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 20,
+      "category": "module"
+    },
+    {
+      "id": "assembly_rig",
+      "output": {
+        "item": "assembly_rig",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 15,
+        "titanium": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "module"
+    },
+    {
+      "id": "nanoforge",
+      "output": {
+        "item": "nanoforge",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "titanium": 12,
+        "silicon": 8,
+        "crystal": 2,
+        "nanite_paste": 3
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 60,
+      "category": "module"
+    },
+    {
+      "id": "pistol",
+      "output": {
+        "item": "pistol",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 8,
+        "copper": 4
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 8,
+      "category": "gear"
+    },
+    {
+      "id": "rifle",
+      "output": {
+        "item": "rifle",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 14,
+        "copper": 6,
+        "titanium": 3
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 16,
+      "category": "gear"
+    },
+    {
+      "id": "basic_armor",
+      "output": {
+        "item": "basic_armor",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 10,
+        "polymer": 4
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 12,
+      "category": "gear"
+    },
+    {
+      "id": "eva_suit",
+      "output": {
+        "item": "eva_suit",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 6,
+        "polymer": 8,
+        "silicon": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 25,
+      "category": "gear"
+    },
+    {
+      "id": "titanium",
+      "output": {
+        "item": "titanium",
+        "count": 2
+      },
+      "materials": {
+        "scrap": 5
+      },
+      "fab_level": 2,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 8,
+      "category": "material"
+    },
+    {
+      "id": "polymer",
+      "output": {
+        "item": "polymer",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 3,
+        "copper": 1
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 5,
+      "category": "material"
+    },
+    {
+      "id": "reactor_scrap_mk1",
+      "output": {
+        "item": "reactor_scrap_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "engine_scrap_mk1",
+      "output": {
+        "item": "engine_scrap_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 16
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 20,
+      "category": "system"
+    },
+    {
+      "id": "oxygen_scrap_mk1",
+      "output": {
+        "item": "oxygen_scrap_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 12,
+        "copper": 1
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    },
+    {
+      "id": "reactor_neon_mk1",
+      "output": {
+        "item": "reactor_neon_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "silicon": 8,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 60,
+      "category": "system"
+    },
+    {
+      "id": "engine_neon_mk1",
+      "output": {
+        "item": "engine_neon_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 12,
+        "silicon": 6,
+        "crystal": 2
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 45,
+      "category": "system"
+    },
+    {
+      "id": "radiator",
+      "output": {
+        "item": "radiator",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 10,
+        "copper": 4
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 15,
+      "category": "system"
+    }
   ]
 }

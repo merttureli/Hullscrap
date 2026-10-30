@@ -11,7 +11,7 @@ const CATEGORIES := ["system", "gear", "material", "module"]
 const WORKSHOP_TOOLS := ["laser_cutter", "nanoforge"]  # what workshop.gd can provide
 ## Scrap and Neon line parts and the radiator, added with the lines (docs/CONTENT.md step 1): they
 ## have no recipe yet. Remove an id from here when its recipe is added.
-const NO_RECIPE_YET: Array[String] = ["reactor_scrap_mk1", "engine_scrap_mk1", "oxygen_scrap_mk1", "reactor_neon_mk1", "engine_neon_mk1", "radiator"]
+const NO_RECIPE_YET: Array[String] = []
 
 
 func _crafting() -> Crafting:
@@ -130,12 +130,16 @@ func test_the_numbers_follow_the_brief() -> void:
 func test_start_blueprints() -> void:
 	var c := _crafting()
 	var comps := _comps()
-	var want := ["reactor_mk1", "engine_mk1", "oxygen_gen", "shield_mk1", "laser_mk1", "helm", "medbay", "bed", "fabricator", "robot_arm", "pistol", "basic_armor", "polymer"]
-	want.sort()
-	eq(_ids(c.known), want, "known at the start")
+	for id in ["reactor_mk1", "engine_mk1", "oxygen_gen", "shield_mk1", "laser_mk1", "helm", "medbay", "bed", "fabricator", "robot_arm", "pistol", "basic_armor", "polymer"]:
+		check(c.is_known(id), id + " is known at the start")
+	# rule: every Mk1 Scrap or Standard system is known from the start; Neon must be unlocked (PLAN: equipment lines)
 	for id in comps.ids():
-		if comps.def(id)["family"] != "workshop" and comps.def(id)["tier"] == 1 and not id in NO_RECIPE_YET:
-			check(c.is_known(id), "Mk1 system %s is known" % id)
+		var d: Dictionary = comps.def(id)
+		if d["family"] != "workshop" and d["tier"] == 1 and not id in NO_RECIPE_YET:
+			if d.get("line", "standard") == "neon":
+				check(not c.is_known(id), "Neon system %s must be unlocked" % id)
+			else:
+				check(c.is_known(id), "Mk1 system %s is known" % id)
 	for id in ["engine_mk2", "laser_mk2", "reactor_mk2", "laser_cutter", "assembly_rig", "nanoforge", "rifle", "eva_suit", "titanium"]:
 		check(not c.is_known(id), id + " must be unlocked")
 	check(c.queue.is_empty(), "nothing queued")
