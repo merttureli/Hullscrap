@@ -1,0 +1,12 @@
+{
+  "weapons": {
+    "fx_gun": {
+      "kind": "laser",
+      "damage_type": "energy",
+      "damage": 2,
+      "cooldown": 1.2,
+      "range": 900,
+      "arc": 120
+    }
+  }
+}
