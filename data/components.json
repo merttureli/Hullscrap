@@ -1,42 +1,810 @@
 {
   "_doc": "Placeable ship components. Content is data: add an entry here and it can be placed. size is [w, h] in cells at rotation 0 (a crew body is 2x2 cells, so a 1-cell corridor is too narrow). power: positive produces, negative consumes. priority: lower is powered first when power is short (0 for producers and zero-power parts). tier: 1 to 3 (Mk1 to Mk3). family groups related parts. manned: works better with crew. stats: numbers read by the systems that use the part. line: scrap, standard or neon (data/lines.json). hp: system health, at 0 it is disabled until repaired. heat_limit: overheats at this heat. heat_per_s: heat gained per second while running. cooling: heat lost per second. stats.cooling_bonus: extra cooling every part in the same room gets (radiator). Shield stats: stats.layers (bubble layers), stats.sectors (1, 4 or 8: how many sectors the bubble is split into) and stats.recharge (seconds until a used layer is back, default 2.0; lower is faster). unique: true marks a found-or-traded item that has no recipe. effects: tags the combat code reads for a unique or special part (for weapons they live in weapons.json). A weapon part needs an entry in weapons.json under the same id. blurb: one line of flavour.",
   "components": [
-    {"id": "reactor_mk1", "name": "Reactor Mk1", "family": "reactor", "line": "standard", "tier": 1, "size": [4, 4], "color": "#f2c14e", "power": 8, "priority": 0, "manned": false, "hp": 8, "heat_limit": 100, "heat_per_s": 4, "cooling": 5, "stats": {}},
-    {"id": "reactor_mk2", "name": "Reactor Mk2", "family": "reactor", "line": "standard", "tier": 2, "size": [4, 4], "color": "#ff8c3a", "power": 14, "priority": 0, "manned": false, "hp": 8, "heat_limit": 100, "heat_per_s": 4, "cooling": 5, "stats": {}},
-    {"id": "engine_mk1", "name": "Engine Mk1", "family": "engine", "line": "standard", "tier": 1, "size": [4, 2], "color": "#5aa9e6", "power": -2, "priority": 4, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 3, "cooling": 3, "stats": {"thrust": 10}},
-    {"id": "engine_mk2", "name": "Engine Mk2", "family": "engine", "line": "standard", "tier": 2, "size": [4, 2], "color": "#3a6fd8", "power": -3, "priority": 4, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 3, "cooling": 3, "stats": {"thrust": 18}},
-    {"id": "oxygen_gen", "name": "Oxygen Generator", "family": "oxygen", "line": "standard", "tier": 1, "size": [2, 4], "color": "#7bd88f", "power": -2, "priority": 1, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {"o2_rate": 0.6}},
-    {"id": "shield_mk1", "name": "Shield Mk1", "family": "shield", "line": "standard", "tier": 1, "size": [4, 4], "color": "#8e7dff", "power": -3, "priority": 3, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {"layers": 1, "sectors": 1}},
-    {"id": "laser_mk1", "name": "Laser Mk1", "family": "weapon", "line": "standard", "tier": 1, "size": [4, 2], "color": "#e8624a", "power": -2, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {"damage": 2, "cooldown": 6}},
-    {"id": "laser_mk2", "name": "Laser Mk2", "family": "weapon", "line": "standard", "tier": 2, "size": [4, 2], "color": "#ff3b8a", "power": -3, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {"damage": 3, "cooldown": 5}},
-    {"id": "helm", "name": "Helm", "family": "helm", "line": "standard", "tier": 1, "size": [2, 2], "color": "#d9dbe8", "power": -1, "priority": 2, "manned": true, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {}},
-    {"id": "medbay", "name": "Medbay", "family": "medbay", "line": "standard", "tier": 1, "size": [4, 4], "color": "#4ad1b8", "power": -2, "priority": 3, "manned": false, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {"heal": 1.0}},
-    {"id": "bed", "name": "Bed", "family": "bed", "line": "standard", "tier": 1, "size": [2, 4], "color": "#b98a6a", "power": 0, "priority": 0, "manned": false, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {}},
-    {"id": "fabricator", "name": "Fabricator", "family": "fabricator", "line": "standard", "tier": 1, "size": [4, 2], "color": "#c78ae0", "power": -2, "priority": 6, "manned": false, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {}},
-    {"id": "robot_arm", "name": "Robot Arm", "family": "workshop", "line": "standard", "tier": 1, "size": [2, 2], "color": "#a7c957", "power": -1, "priority": 6, "manned": false, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {}},
-    {"id": "laser_cutter", "name": "Laser Cutter", "family": "workshop", "line": "standard", "tier": 1, "size": [2, 4], "color": "#f78fb3", "power": -2, "priority": 6, "manned": false, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {}},
-    {"id": "assembly_rig", "name": "Assembly Rig", "family": "workshop", "line": "standard", "tier": 1, "size": [4, 4], "color": "#8d99ae", "power": -2, "priority": 6, "manned": false, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {}},
-    {"id": "nanoforge", "name": "Nanoforge", "family": "workshop", "line": "standard", "tier": 1, "size": [4, 4], "color": "#00e5ff", "power": -4, "priority": 6, "manned": false, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {}},
-    {"id": "reactor_scrap_mk1", "name": "Rustbucket Reactor", "family": "reactor", "line": "scrap", "tier": 1, "size": [4, 4], "color": "#b8863b", "power": 6, "priority": 0, "manned": false, "hp": 8, "heat_limit": 100, "heat_per_s": 4, "cooling": 5, "stats": {}, "blurb": "Cheap salvage core. Loud, thirsty and it hiccups."},
-    {"id": "engine_scrap_mk1", "name": "Kickjet", "family": "engine", "line": "scrap", "tier": 1, "size": [4, 2], "color": "#8a9bb0", "power": -2, "priority": 4, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 3, "cooling": 3, "stats": {"thrust": 9}, "blurb": "Welded together from three other engines. Kicks like a mule."},
-    {"id": "oxygen_scrap_mk1", "name": "Wheezer O2", "family": "oxygen", "line": "scrap", "tier": 1, "size": [2, 4], "color": "#86a87c", "power": -2, "priority": 1, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {"o2_rate": 0.6}, "blurb": "Wheezes, rattles and keeps you breathing. Mostly."},
-    {"id": "reactor_neon_mk1", "name": "Prism Core", "family": "reactor", "line": "neon", "tier": 1, "size": [4, 4], "color": "#ffd84a", "power": 16, "priority": 0, "manned": false, "hp": 8, "heat_limit": 100, "heat_per_s": 10, "cooling": 5, "stats": {}, "blurb": "Crystal lattice reactor. Huge output, runs very hot: bring radiators."},
-    {"id": "engine_neon_mk1", "name": "Ion Drive", "family": "engine", "line": "neon", "tier": 1, "size": [4, 2], "color": "#3ee0ff", "power": -3, "priority": 4, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 3, "cooling": 3, "stats": {"thrust": 16}, "blurb": "Light and fast, glows when it works."},
-    {"id": "radiator", "name": "Radiator", "family": "radiator", "line": "standard", "tier": 1, "size": [2, 2], "color": "#8fb8c9", "power": -1, "priority": 2, "manned": false, "hp": 4, "heat_limit": 100, "heat_per_s": 0, "cooling": 3, "stats": {"cooling_bonus": 6}, "blurb": "Dumps heat to space. Adds cooling to every part in its room."},
-    {"id": "pulse_mk1", "name": "Pulse Mk1", "family": "weapon", "line": "standard", "tier": 1, "size": [4, 2], "color": "#e9c46a", "power": -2, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "blurb": "A steady thump of plasma. Honest work, slightly dull."},
-    {"id": "pulse_mk2", "name": "Pulse Mk2", "family": "weapon", "line": "standard", "tier": 2, "size": [4, 2], "color": "#f4a261", "power": -3, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "blurb": "Same thump, bigger fist. Dents hulls and egos alike."},
-    {"id": "rattle_burst_scrap", "name": "Rattle Burst", "family": "weapon", "line": "scrap", "tier": 1, "size": [4, 2], "color": "#a68a64", "power": -2, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "blurb": "Three shots per volley, if it doesn't seize up first."},
-    {"id": "shrapnel_cannon_scrap", "name": "Shrapnel Cannon", "family": "weapon", "line": "scrap", "tier": 1, "size": [4, 4], "color": "#9c8f6a", "power": -2, "priority": 5, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "blurb": "Spits a fistful of scrap at everything at once. Shields hate it."},
-    {"id": "bolt_thrower_scrap", "name": "Bolt Thrower", "family": "weapon", "line": "scrap", "tier": 1, "size": [4, 2], "color": "#8d6e53", "power": -1, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "blurb": "Eats scrap and throws it back with feeling. Never dry while the hold has junk."},
-    {"id": "artemis_mk1", "name": "Artemis Mk1", "family": "weapon", "line": "standard", "tier": 1, "size": [4, 2], "color": "#e76f51", "power": -2, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "blurb": "Guided and polite about it: sails through shields, then goes off."},
-    {"id": "ion_blast_mk1", "name": "Ion Blast", "family": "weapon", "line": "standard", "tier": 1, "size": [4, 2], "color": "#4cc9f0", "power": -3, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "blurb": "Harmless to the hull, ruinous to the shields. Everything it touches goes quiet."},
-    {"id": "siren_ion_neon", "name": "Siren Ion", "family": "weapon", "line": "neon", "tier": 1, "size": [4, 2], "color": "#5ef2e0", "power": -3, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 1.5, "cooling": 3, "stats": {}, "blurb": "Wails across the target ship, and its doors lock up in sympathy."},
-    {"id": "heat_lance_neon", "name": "Heat Lance", "family": "weapon", "line": "neon", "tier": 1, "size": [4, 2], "color": "#ff6b35", "power": -4, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 1.5, "cooling": 3, "stats": {}, "blurb": "A beam that sets rooms on fire as a hobby. Runs hot enough to cook itself."},
-    {"id": "leech_laser", "name": "Leech Laser", "family": "weapon", "line": "standard", "tier": 2, "size": [4, 2], "color": "#9bf06a", "power": -3, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "unique": true, "blurb": "Every hit sips the enemy reactor and hands you the change."},
-    {"id": "breach_harpoon", "name": "Breach Harpoon", "family": "weapon", "line": "standard", "tier": 2, "size": [4, 2], "color": "#c9ced6", "power": -2, "priority": 5, "manned": false, "hp": 5, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {}, "unique": true, "blurb": "Punches a hole and leaves a rope behind. Reels derelicts in for docking."},
-    {"id": "shield_scrap_mk1", "name": "Bubble Rig", "family": "shield", "line": "scrap", "tier": 1, "size": [4, 4], "color": "#6f7fa0", "power": -3, "priority": 3, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {"layers": 1, "sectors": 1}, "blurb": "A bubble held together with hope and tape. Flickers."},
-    {"id": "shield_mk2", "name": "Shield Mk2", "family": "shield", "line": "standard", "tier": 2, "size": [4, 4], "color": "#6a5cf0", "power": -4, "priority": 3, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {"layers": 2, "sectors": 1}, "blurb": "Two layers of standard-issue peace of mind."},
-    {"id": "shield_neon_mk1", "name": "Neon Lattice Shield", "family": "shield", "line": "neon", "tier": 1, "size": [4, 4], "color": "#6df0d4", "power": -4, "priority": 3, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {"layers": 2, "sectors": 4, "recharge": 1.4}, "blurb": "Two layers that snap back fast. Pray nobody brings an ion gun."},
-    {"id": "mirror_veil", "name": "Mirror Veil", "family": "shield", "line": "standard", "tier": 2, "size": [4, 4], "color": "#e6f2ff", "power": -3, "priority": 3, "manned": false, "hp": 6, "heat_limit": 100, "heat_per_s": 2, "cooling": 3, "stats": {"layers": 1, "sectors": 1}, "effects": ["reflect_bolts_15"], "unique": true, "blurb": "Bounces the odd bolt back at whoever sent it."}
+    {
+      "id": "reactor_mk1",
+      "name": "Reactor Mk1",
+      "family": "reactor",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#f2c14e",
+      "power": 8,
+      "priority": 0,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {}
+    },
+    {
+      "id": "reactor_mk2",
+      "name": "Reactor Mk2",
+      "family": "reactor",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#ff8c3a",
+      "power": 14,
+      "priority": 0,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {}
+    },
+    {
+      "id": "engine_mk1",
+      "name": "Engine Mk1",
+      "family": "engine",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#5aa9e6",
+      "power": -2,
+      "priority": 4,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 10
+      }
+    },
+    {
+      "id": "engine_mk2",
+      "name": "Engine Mk2",
+      "family": "engine",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#3a6fd8",
+      "power": -3,
+      "priority": 4,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 18
+      }
+    },
+    {
+      "id": "oxygen_gen",
+      "name": "Oxygen Generator",
+      "family": "oxygen",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        4
+      ],
+      "color": "#7bd88f",
+      "power": -2,
+      "priority": 1,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {
+        "o2_rate": 0.6
+      }
+    },
+    {
+      "id": "shield_mk1",
+      "name": "Shield Mk1",
+      "family": "shield",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#8e7dff",
+      "power": -3,
+      "priority": 3,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "layers": 1,
+        "sectors": 1
+      }
+    },
+    {
+      "id": "laser_mk1",
+      "name": "Laser Mk1",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#e8624a",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "damage": 2,
+        "cooldown": 6
+      }
+    },
+    {
+      "id": "laser_mk2",
+      "name": "Laser Mk2",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#ff3b8a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "damage": 3,
+        "cooldown": 5
+      }
+    },
+    {
+      "id": "helm",
+      "name": "Helm",
+      "family": "helm",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#d9dbe8",
+      "power": -1,
+      "priority": 2,
+      "manned": true,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "medbay",
+      "name": "Medbay",
+      "family": "medbay",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#4ad1b8",
+      "power": -2,
+      "priority": 3,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {
+        "heal": 1.0
+      }
+    },
+    {
+      "id": "bed",
+      "name": "Bed",
+      "family": "bed",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        4
+      ],
+      "color": "#b98a6a",
+      "power": 0,
+      "priority": 0,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "fabricator",
+      "name": "Fabricator",
+      "family": "fabricator",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#c78ae0",
+      "power": -2,
+      "priority": 6,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "robot_arm",
+      "name": "Robot Arm",
+      "family": "workshop",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#a7c957",
+      "power": -1,
+      "priority": 6,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "laser_cutter",
+      "name": "Laser Cutter",
+      "family": "workshop",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        4
+      ],
+      "color": "#f78fb3",
+      "power": -2,
+      "priority": 6,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "assembly_rig",
+      "name": "Assembly Rig",
+      "family": "workshop",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#8d99ae",
+      "power": -2,
+      "priority": 6,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "nanoforge",
+      "name": "Nanoforge",
+      "family": "workshop",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#00e5ff",
+      "power": -4,
+      "priority": 6,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "reactor_scrap_mk1",
+      "name": "Rustbucket Reactor",
+      "family": "reactor",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#b8863b",
+      "power": 6,
+      "priority": 0,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {},
+      "blurb": "Cheap salvage core. Loud, thirsty and it hiccups."
+    },
+    {
+      "id": "engine_scrap_mk1",
+      "name": "Kickjet",
+      "family": "engine",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#8a9bb0",
+      "power": -2,
+      "priority": 4,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 9
+      },
+      "blurb": "Welded together from three other engines. Kicks like a mule."
+    },
+    {
+      "id": "oxygen_scrap_mk1",
+      "name": "Wheezer O2",
+      "family": "oxygen",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        2,
+        4
+      ],
+      "color": "#86a87c",
+      "power": -2,
+      "priority": 1,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {
+        "o2_rate": 0.6
+      },
+      "blurb": "Wheezes, rattles and keeps you breathing. Mostly."
+    },
+    {
+      "id": "reactor_neon_mk1",
+      "name": "Prism Core",
+      "family": "reactor",
+      "line": "neon",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#ffd84a",
+      "power": 16,
+      "priority": 0,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 10,
+      "cooling": 5,
+      "stats": {},
+      "blurb": "Crystal lattice reactor. Huge output, runs very hot: bring radiators."
+    },
+    {
+      "id": "engine_neon_mk1",
+      "name": "Ion Drive",
+      "family": "engine",
+      "line": "neon",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#3ee0ff",
+      "power": -3,
+      "priority": 4,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "thrust": 16
+      },
+      "blurb": "Light and fast, glows when it works."
+    },
+    {
+      "id": "radiator",
+      "name": "Radiator",
+      "family": "radiator",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#8fb8c9",
+      "power": -1,
+      "priority": 2,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {
+        "cooling_bonus": 6
+      },
+      "blurb": "Dumps heat to space. Adds cooling to every part in its room."
+    },
+    {
+      "id": "pulse_mk1",
+      "name": "Pulse Mk1",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#e9c46a",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "A steady thump of plasma. Honest work, slightly dull."
+    },
+    {
+      "id": "pulse_mk2",
+      "name": "Pulse Mk2",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#f4a261",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "Same thump, bigger fist. Dents hulls and egos alike."
+    },
+    {
+      "id": "rattle_burst_scrap",
+      "name": "Rattle Burst",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#a68a64",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "Three shots per volley, if it doesn't seize up first."
+    },
+    {
+      "id": "shrapnel_cannon_scrap",
+      "name": "Shrapnel Cannon",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#9c8f6a",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "Spits a fistful of scrap at everything at once. Shields hate it."
+    },
+    {
+      "id": "bolt_thrower_scrap",
+      "name": "Bolt Thrower",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#8d6e53",
+      "power": -1,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "Eats scrap and throws it back with feeling. Never dry while the hold has junk."
+    },
+    {
+      "id": "artemis_mk1",
+      "name": "Artemis Mk1",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#e76f51",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "Guided and polite about it: sails through shields, then goes off."
+    },
+    {
+      "id": "ion_blast_mk1",
+      "name": "Ion Blast",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#4cc9f0",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "Harmless to the hull, ruinous to the shields. Everything it touches goes quiet."
+    },
+    {
+      "id": "siren_ion_neon",
+      "name": "Siren Ion",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#5ef2e0",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 1.5,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "Wails across the target ship, and its doors lock up in sympathy."
+    },
+    {
+      "id": "heat_lance_neon",
+      "name": "Heat Lance",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#ff6b35",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 1.5,
+      "cooling": 3,
+      "stats": {},
+      "blurb": "A beam that sets rooms on fire as a hobby. Runs hot enough to cook itself."
+    },
+    {
+      "id": "leech_laser",
+      "name": "Leech Laser",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#9bf06a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "unique": true,
+      "blurb": "Every hit sips the enemy reactor and hands you the change."
+    },
+    {
+      "id": "breach_harpoon",
+      "name": "Breach Harpoon",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "color": "#c9ced6",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {},
+      "unique": true,
+      "blurb": "Punches a hole and leaves a rope behind. Reels derelicts in for docking."
+    },
+    {
+      "id": "shield_scrap_mk1",
+      "name": "Bubble Rig",
+      "family": "shield",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#6f7fa0",
+      "power": -3,
+      "priority": 3,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "layers": 1,
+        "sectors": 1
+      },
+      "blurb": "A bubble held together with hope and tape. Flickers."
+    },
+    {
+      "id": "shield_mk2",
+      "name": "Shield Mk2",
+      "family": "shield",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#6a5cf0",
+      "power": -4,
+      "priority": 3,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "layers": 2,
+        "sectors": 1
+      },
+      "blurb": "Two layers of standard-issue peace of mind."
+    },
+    {
+      "id": "shield_neon_mk1",
+      "name": "Neon Lattice Shield",
+      "family": "shield",
+      "line": "neon",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#6df0d4",
+      "power": -4,
+      "priority": 3,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "layers": 2,
+        "sectors": 4,
+        "recharge": 1.4
+      },
+      "blurb": "Two layers that snap back fast. Pray nobody brings an ion gun."
+    },
+    {
+      "id": "mirror_veil",
+      "name": "Mirror Veil",
+      "family": "shield",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#e6f2ff",
+      "power": -3,
+      "priority": 3,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "layers": 1,
+        "sectors": 1
+      },
+      "effects": [
+        "reflect_bolts_15"
+      ],
+      "unique": true,
+      "blurb": "Bounces the odd bolt back at whoever sent it."
+    }
   ]
 }

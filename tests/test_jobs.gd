@@ -119,9 +119,10 @@ func test_only_the_helm_is_manned_unless_the_data_says_so() -> void:
 	var helm := Fixture.put(ship, "helm", 19, 10)
 	var laser := Fixture.put(ship, "laser_mk1", 15, 10)
 	var jobs := Jobs.new()
+	ship.components.by_id["laser_mk1"]["manned"] = false
 	jobs.build_board(ship)
-	eq(jobs.board.keys(), ["post:%d" % helm], "the helm always, the laser not")
-	ship.components.by_id["laser_mk1"]["manned"] = true
+	eq(jobs.board.keys(), ["post:%d" % helm], "the helm always, an unmanned laser not")
+	ship.components.by_id["laser_mk1"]["manned"] = true  # weapons are manned stations in the data (lead decision)
 	jobs.build_board(ship)
 	check(jobs.board.has("post:%d" % laser), "a weapon with manned: true gets a post")
 	eq(jobs.board["post:%d" % laser]["priority"], 50, "at 50")

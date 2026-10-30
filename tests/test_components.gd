@@ -318,7 +318,7 @@ func test_the_weapon_pack() -> void:
 			continue
 		var d := c.def(id)
 		eq([d["line"], d["tier"], d["size"]], [want[0], want[1], want[2]], id + " line, tier, size")
-		eq([d["family"], d["priority"], d["power"] < 0, d["manned"]], ["weapon", 5, true, false], id + " is an unmanned weapon at priority 5")
+		eq([d["family"], d["priority"], d["power"] < 0, d["manned"]], ["weapon", 5, true, true], id + " is a manned weapon station at priority 5")
 		check(str(d.get("blurb", "")) != "", id + " has a blurb")
 		eq([w.defs[id]["kind"], w.defs[id]["damage_type"]], [want[3], want[4]], id + " kind and damage type")
 	eq(c.def("rattle_burst_scrap")["name"], "Rattle Burst", "name")
