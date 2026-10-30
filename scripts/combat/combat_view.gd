@@ -9,6 +9,7 @@ extends Node2D
 ## art/projectiles and art/fx (scripts/view/art.gd) when that art exists, else as code-drawn placeholders.
 
 const Session = preload("res://scripts/combat/combat_session.gd")
+const ImpactFx = preload("res://scripts/combat/impact_fx.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
@@ -25,6 +26,7 @@ const GREY := Color("#7a8494")
 const BEAM_LIFE := 0.15
 const MAX_FX := 500
 const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
+const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
 const HINT := "W/S throttle   A/D turn   mouse aims   LMB group 1   RMB group 2   1-9 single weapon   Shift engine ability   Space shield ability   Q utility   Esc leave"
@@ -53,6 +55,7 @@ var _clock := 0.0
 var _frame := 0
 var _cam_pos := Vector2.ZERO
 var _zoom := 0.5
+var _shake := 0.0  # screen px of camera shake left (a ram kicks it)
 var _saved_cam := {}
 var _rng := RandomNumberGenerator.new()  # visual only
 var _schem: Array = []
@@ -179,6 +182,9 @@ func leave() -> void:
 	_fx.clear()
 	_show_hud(false)
 	_put_away(false)
+	_shake = 0.0
+	if cam != null:
+		cam.offset = Vector2.ZERO
 	if cam != null and not _saved_cam.is_empty():
 		cam.position = _saved_cam["pos"]
 		cam.zoom = _saved_cam["zoom"]
@@ -331,6 +337,8 @@ func _move_camera(dt: float) -> void:
 	if cam != null:
 		cam.position = _cam_pos
 		cam.zoom = Vector2(_zoom, _zoom)
+		_shake *= exp(-SHAKE_DECAY * dt)
+		cam.offset = Vector2(_rng.randf_range(-1.0, 1.0), _rng.randf_range(-1.0, 1.0)) * _shake / _zoom if _shake > 0.3 else Vector2.ZERO
 
 
 func _update_hud() -> void:
@@ -429,6 +437,15 @@ func _on_event(e: Dictionary) -> void:
 			var col := Color("#d6f3ff") if e["type"] == "deflect" else Color("#ffd27a")
 			_add_fx({"k": "streak", "pos": pos, "dir": out, "len": 90.0, "life": 0.28, "color": col})
 			_on_ship(idx, pos, {"k": "flash", "life": 0.12, "r": 9.0, "color": col})
+			for f in ImpactFx.bounce(e):  # a small spark at the bounce point
+				_add_impact_fx(f)
+		"ram":  # two ships met hard: sparks and debris at the contact points, a shake, a line in the chronicle
+			var r := ImpactFx.ram(arena, _cursor, Session.PLAYER, session.enemy_label.to_lower())
+			for f in r["fx"]:
+				_add_impact_fx(f)
+			_shake = maxf(_shake, r["shake"])
+			if r["line"] != "":
+				_say(r["line"])
 		"breach":
 			if Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.6, "scale": 1.0})
@@ -457,6 +474,14 @@ func _on_event(e: Dictionary) -> void:
 			_sparks(pos, Vector2.ZERO, 36, Color("#ffcf7a"))
 			for i in 10:
 				_add_fx({"k": "puff", "pos": pos + Vector2.from_angle(_rng.randf() * TAU) * _rng.randf_range(0.0, 120.0), "vel": Vector2.from_angle(_rng.randf() * TAU) * 40.0, "life": 1.4, "r": 24.0, "grow": 50.0, "color": Color("#8a8f99", 0.5)})
+
+
+## An effect from ImpactFx: art when there is, else the flash of its fallback size.
+func _add_impact_fx(f: Dictionary) -> void:
+	if f["k"] == "art" and Art.fx(str(f["name"])) == null:
+		_add_fx({"k": "flash", "pos": f["pos"], "life": f["life"], "r": f["r"], "color": f["color"]})
+	else:
+		_add_fx(f)
 
 
 ## `count` sparks flying out from `pos`, mostly along `bias` (any direction when zero).
@@ -547,6 +572,11 @@ func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 				_blit_art(c, smoke, smoke.life_frame(age), p, 0.0, _art_k(px) * (0.5 + float(f["r"]) / 24.0 + age * 0.5), "", Color(1, 1, 1, fade))
 				return
 			c.draw_circle(p, (f["r"] + f["grow"] * age) * px * 0.5 if f["r"] < 4.0 else f["r"] + f["grow"] * age, Color(col, col.a * fade))
+		"debris":  # a chip of hull tumbling away
+			var p := _fx_pos(f)
+			var a: float = f["spin"] * (_clock - f["t0"])
+			var h: float = f["size"] * px
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-h, -h).rotated(a), p + Vector2(h, -h * 0.6).rotated(a), p + Vector2(h * 0.7, h).rotated(a), p + Vector2(-h * 0.8, h * 0.7).rotated(a)]), Color(col, fade))
 		"streak":
 			var from: Vector2 = f["pos"] + f["dir"] * 18.0 * age
 			c.draw_line(from, from + f["dir"] * f["len"] * (0.4 + 0.6 * age), Color(col, 0.9 * fade), 3.0 * px)

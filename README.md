@@ -32,9 +32,11 @@ Build mode only:
 | Tab | Next palette: Tiles, Systems, Cables |
 | 1 / 2 / 3 | Tiles: Floor / Wall / Door |
 | 1 - 9 | Systems: pick a system you hold in cargo (the list shows how many) |
-| R | Systems: rotate the system by a quarter turn. Door: flip the piece across the way it fits |
+| R | Systems: rotate the system by a quarter turn. Door: flip the piece across the way it fits. Wall: turn the shape a quarter turn |
+| T | Wall: cycle the wall tool through the shapes: full, slope45, slope2, round2 (pieces of `data/shapes.json`) |
+| Shift+R | Wall: mirror the shape |
 | F (over a system) | Send the nearest crew member to repair it. Unlike the job board, an order also covers a system that works but is damaged |
-| Left mouse (drag to paint) | Place; the whole stroke is one undo step. Green ghost = it will apply, red = not (reason in the HUD). A system is placed with its top-left cell on the mouse, on release; a door piece likewise (2x1 or 1x2, turned along the wall by itself), as one undo step |
+| Left mouse (drag to paint) | Place; the whole stroke is one undo step. Green ghost = it will apply, red = not (reason in the HUD). A system is placed with its top-left cell on the mouse, on release; a door piece likewise (2x1 or 1x2, turned along the wall by itself), as one undo step. A shaped wall piece (T) is the same: top-left cell on the mouse, on release, one undo step, and its ghost is the real outline of each cell |
 | Shift + left mouse drag | Straight line, locked to the horizontal or vertical axis |
 | Ctrl + left mouse drag | Rectangle. Floor and cables fill it, a wall makes a room (walls round the edge, floor inside); doors and systems one at a time |
 | Right mouse (+ Shift / Ctrl) | Tiles and cables: the same three modes, but removing (100% refund). Systems: removes the one under the mouse and returns it to the cargo |
@@ -90,11 +92,15 @@ In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_rai
 | Left mouse (hold) | Fire group 1: lasers, bolts, beams |
 | Right mouse (hold) | Fire group 2: missiles, flak |
 | 1 - 9 | Fire that weapon (the slot numbers on the weapon bar) |
-| Space | Overcharge the shield: one extra layer for 6 s, then 15 s of rest |
+| Shift | Engine ability (a Kickjet's Sputter Boost...) |
+| Space | Shield ability: Overcharge gives one extra layer for 6 s, then 15 s of rest |
+| Q | Utility ability (the Prism Core's Overdrive...) |
 | Esc | Leave, once the pirate is wrecked or more than 4000 px away |
 | R | After your ship is wrecked: back to build mode with the empty starter hull reloaded (B, then N, picks a ship again) |
 
 The panels at the top are the schematics (yours left, the enemy's right): rooms, walls, breaches in red, systems coloured by state (green ok, yellow damaged, red disabled, orange overheated, purple jammed, grey unpowered), a hull bar and the shield pips. **Firing opens your own shield**: the sector of the bubble the shot leaves through drops for 0.3 s (laser), 0.4 s (bolt), 0.6 s (flak) or the whole beam, while shots pass it and use no layer; the schematic shows "OPEN" and the sector ring goes dark. Missiles never drop it. Open doors let shots through; closed doors block them. The weapon bar shows each weapon's key, group, cooldown ring and state (ready, cooling, no power, jammed, no ammo, out of arc).
+
+**Ramming and ricochets** (`scripts/combat/impact_fx.gd`). When two ships collide hard enough to hurt, sparks and debris fly from the contact points (`fx/sparks`, `fx/explosion`), the screen shakes by the impact energy, a banner and the chronicle say "Rammed the pirate: 14 hull damage (took 6)", and the walls take their damage as usual. A shot that glances off a hull shows a small spark at the bounce point.
 
 Characters are big: a crew body is 2x2 cells (drawn about 3x3), so doors are a piece of exactly 2 cells in a row with a wall cell at each end (wall, door, door, wall), and a corridor needs 2 cells. Walls stay 1 cell thick. A door costs per cell; removing or replacing either cell takes the whole piece, and a wall holding a door can't be removed. Systems are items from the cargo: placing one uses an item up, removing it gives the item back. A system needs floor under every cell, and that floor can't be removed or built over while it stands there. Cables cost copper per cell (`data/build.json`) and may run under anything. A system only works when a cable connects it to a reactor; an unpowered one is drawn dimmed with a red mark.
 
@@ -103,6 +109,7 @@ The game draws pixel art from `art/` and falls back to flat code-drawn placehold
 - **Systems** (`art/components`): the sprite at the part's footprint, turned with it, animated by state (on, off, weapon charge and fire, damaged, disabled, malfunction flicker, overheated pulse) with a glow layer; the heat bar, hp pips and marks stay on top. A part with no art borrows the next lower tier's (Engine Mk2 shows the Mk1 sprite until it has its own).
 - **Crew** (`art/crew`): layered top-down sprites, legs to the way they walk, torso, arms, item and head to the aim, the outfit tinted with each crew member's suit colour, a 1 px shadow.
 - **Structure and effects** (`art/tiles`, `art/fx`, `art/projectiles`): autotiled walls, floors, doors that open, breaches, powered cables, fire, smoke, sparks, explosions, muzzle flashes, shield ripples, shots and beams.
+- **Shaped walls and the hull skin** (`art/tiles/*_shapes`, `hull_skin*`): slopes and curves are drawn from the shaped sheets (a frame per orientation and neighbour mask; a neighbour joins a wall when it covers 60% of the shared edge), ram plating from `walls_ram*` with no tint, and the open part of a shaped wall shows floor when it looks into the ship, space otherwise. A ship in a fight also gets the exterior skin over every wall that faces space (panel variants and a few vents, antennas, hatches and lamps by position, tinted by the line most of those walls belong to; neon adds an edge glow; ram plating keeps its hazard tape). The interior and build views never show it.
 
 The format and how to add art are in [`art/README.md`](art/README.md); every file's source is in [`ASSETS.md`](ASSETS.md). The default texture filter is nearest.
 
