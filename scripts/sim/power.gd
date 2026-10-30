@@ -5,9 +5,10 @@ extends RefCounted
 ## never depends on insertion order.
 
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
+const EPS := 0.0001  ## slack for float power (line multipliers make 5.4 and 2.4)
 
 
-## `components`: a components.gd instance; `cables`: a cables.gd instance; `disabled`: uid -> true
+## `components`: a components.gd instance (or a Stats.View of one, for line-adjusted power); `cables`: a cables.gd instance; `disabled`: uid -> true
 ## for damaged parts that neither make nor use power (they still bridge cables).
 ## Returns {powered: {uid: bool}, networks: [{id, cells, members, supply, demand, used}],
 ## network_of: {uid: network id}}. Network ids follow each network's first cell in reading order.
@@ -62,7 +63,7 @@ static func solve(components, cables, disabled := {}) -> Dictionary:
 			if disabled.get(uid, false):
 				continue
 			var d: Dictionary = components.def(components.instances[uid]["id"])
-			var p := int(d.get("power", 0))
+			var p = d.get("power", 0)  # an int, or a float for line-adjusted parts
 			if p > 0:
 				n["supply"] += p
 				powered[uid] = true
@@ -72,9 +73,9 @@ static func solve(components, cables, disabled := {}) -> Dictionary:
 			else:
 				powered[uid] = true
 		consumers.sort_custom(func(a, b): return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
-		var left: int = n["supply"]
+		var left = n["supply"]
 		for k in consumers:
-			if k[2] <= left:
+			if k[2] <= left + EPS:
 				left -= k[2]
 				n["used"] += k[2]
 				powered[k[1]] = true

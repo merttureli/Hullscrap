@@ -12,6 +12,7 @@ const Cables = preload("res://scripts/ship/cables.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
 const Atmosphere = preload("res://scripts/sim/atmosphere.gd")
 const Power = preload("res://scripts/sim/power.gd")
+const Stats = preload("res://scripts/sim/stats.gd")
 
 ## Save format. 3 adds name, world transform, components, cables and oxygen on top of the
 ## grid and cargo of 2; versions 1 and 2 still load (no components, no cables).
@@ -19,6 +20,7 @@ const VERSION := 3
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
 const START_PATH := "res://data/start.json"
+const MAX_EVENTS := 50
 const START_SIZE := Vector2i(63, 63)
 const START_RADIUS := 28.0
 
@@ -28,7 +30,11 @@ var components: Components
 var cables: Cables
 var atmosphere: Atmosphere
 var inventory: Inventory  ## the cargo: materials and items (crafted systems)
+var lines := {}  ## equipment lines (data/lines.json): line id -> multipliers
 var power_state := {}  ## the last Power.solve result; empty until the first refresh()
+var events: Array = []  ## the chronicle, newest last: {t, text}; at most MAX_EVENTS; not saved
+var clock := 0.0  ## seconds this ship has been simulated; the `t` of new events
+var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; not saved yet
 var world_pos := Vector2.ZERO  ## pixels; for drawing, 0 for now
 var rot_quarters := 0  ## quarter turns; for drawing, 0 for now
@@ -38,6 +44,7 @@ var _signature := 0  ## of the parts and cables the last refresh() saw
 
 func _init(p_name := "Ship", p_grid: ShipGrid = null, components_path := COMPONENTS_PATH) -> void:
 	name = p_name
+	lines = Stats.load_lines()
 	grid = p_grid if p_grid != null else ShipGrid.new()
 	components = Components.new()
 	components.load_defs(components_path)
@@ -64,23 +71,59 @@ static func start_cargo(path := START_PATH) -> Dictionary:
 	return data["cargo"]
 
 
+## The effective stats (Stats.effective) of component id `id` on this ship.
+func effective(id: String) -> Dictionary:
+	return Stats.effective(components.def(id), lines)
+
+
+## Components that are out of action (status is not "ok"): uid -> true. They neither make nor use power.
+func disabled_uids() -> Dictionary:
+	var out := {}
+	var uids := components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		if components.instances[uid]["status"] != "ok":
+			out[uid] = true
+	return out
+
+
+## Add a line to the chronicle (newest last), dropping the oldest beyond MAX_EVENTS.
+func log_event(text: String) -> void:
+	events.append({"t": clock, "text": text})
+	while events.size() > MAX_EVENTS:
+		events.pop_front()
+
+
+## Repair a component: status back to ok and hp to the maximum. Returns false for an unknown uid.
+## Heat is left alone, so a part that is still too hot trips again at once.
+func repair(uid: int) -> bool:
+	if not components.instances.has(uid):
+		return false
+	var inst: Dictionary = components.instances[uid]
+	inst["status"] = "ok"
+	inst["hp"] = Stats.max_hp(components.def(inst["id"]))
+	return true
+
+
 ## The structure changed (tiles, doors): the next refresh() rebuilds the rooms and re-solves power.
 func mark_dirty() -> void:
 	_structure_dirty = true
 
 
 ## Bring the derived state up to date. Rooms are rebuilt after a structure change; power is
-## re-solved then too, and also when a component or cable was added or removed behind our back.
+## re-solved then too, and also when a component or cable was added or removed behind our back or
+## a component went out of action or came back. Power uses the line-adjusted numbers (Stats).
 ## Returns true when something was recomputed. Cheap when nothing changed.
 func refresh() -> bool:
 	var uids := components.instances.keys()
 	uids.sort()
-	var sig := hash([uids, cables.cells.size()])
+	var off := disabled_uids()
+	var sig := hash([uids, cables.cells.size(), off.keys()])
 	if not _structure_dirty and sig == _signature:
 		return false
 	if _structure_dirty:
 		atmosphere.rebuild(grid)
-	power_state = Power.solve(components, cables)
+	power_state = Power.solve(Stats.view(components, lines), cables, off)
 	_structure_dirty = false
 	_signature = sig
 	return true
@@ -156,7 +199,7 @@ func _check_layers(d: Dictionary) -> String:
 	var k = d.get("cables")
 	if not (c is Dictionary and k is Dictionary):
 		return "bad ship data"
-	if int(c.get("version", 0)) != Components.VERSION:
+	if not Components.supports(int(c.get("version", 0))):
 		return "unsupported components version"
 	if int(k.get("version", 0)) != Cables.VERSION:
 		return "unsupported cables version"
