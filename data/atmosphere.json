@@ -1,0 +1,5 @@
+{
+	"_doc": "Atmosphere tuning. vent_rate: fraction of its pressure a breached room loses per second (exponential). door_rate: gas an open door moves between two rooms, in cell units per second per unit of pressure difference.",
+	"vent_rate": 1.5,
+	"door_rate": 2.0
+}
