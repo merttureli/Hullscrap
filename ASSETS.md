@@ -13,6 +13,16 @@ Every file below is original art made for Hullscrap (generated pixel by pixel fr
 | art/tiles/floor.png | original, made for Hullscrap | project-owned |
 | art/tiles/walls.png | original, made for Hullscrap | project-owned |
 | art/tiles/walls_armor.png | original, made for Hullscrap | project-owned |
+| art/tiles/walls_shapes.png | original, made for Hullscrap | project-owned |
+| art/tiles/walls_armor_shapes.png | original, made for Hullscrap | project-owned |
+| art/tiles/walls_ram.png | original, made for Hullscrap | project-owned |
+| art/tiles/walls_ram_shapes.png | original, made for Hullscrap | project-owned |
+| art/tiles/hull_skin.png | original, made for Hullscrap | project-owned |
+| art/tiles/hull_skin_glow.png | original, made for Hullscrap | project-owned |
+| art/tiles/hull_skin_shapes.png | original, made for Hullscrap | project-owned |
+| art/tiles/hull_skin_shapes_glow.png | original, made for Hullscrap | project-owned |
+| art/tiles/hull_skin_decals.png | original, made for Hullscrap | project-owned |
+| art/tiles/hull_skin_decals_glow.png | original, made for Hullscrap | project-owned |
 | art/fx/explosion.png | original, made for Hullscrap | project-owned |
 | art/fx/explosion_glow.png | original, made for Hullscrap | project-owned |
 | art/fx/fire.png | original, made for Hullscrap | project-owned |

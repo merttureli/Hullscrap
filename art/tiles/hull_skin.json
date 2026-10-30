@@ -1,0 +1,46 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "autotile": "mask4",
+ "mask": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "mask_means": "neighbour faces open space",
+ "frames": 16,
+ "variants": 4,
+ "layout": "16 columns (mask) x 4 rows (variant)",
+ "tint": "multiply",
+ "suggested_tints": {
+  "standard": [237, 250, 255],
+  "scrap": [255, 184, 133],
+  "neon": [92, 112, 189],
+  "armor_plate": [148, 168, 230],
+  "edge_glow_neon": [64, 242, 255],
+  "lamp_glow": [255, 217, 140]
+ },
+ "coverage": {
+  "depth_px": 14,
+  "rim": [0, 1, 2],
+  "left_to_wall_px": 2
+ },
+ "glow": {
+  "image": "hull_skin_glow.png",
+  "frame": [22, 22],
+  "offset": [-3, -3],
+  "blend": "add (preferred) or alpha-over",
+  "layout": "16 frames, same mask columns",
+  "note": "neutral edge glow, 3 soft bands outside every space-facing edge: tint it per line (cyan for neon) and draw it only for lines that glow"
+ },
+ "shapes": {
+  "image": "hull_skin_shapes.png",
+  "glow": "hull_skin_shapes_glow.png"
+ },
+ "decals": {
+  "image": "hull_skin_decals.png",
+  "glow": "hull_skin_decals_glow.png"
+ },
+ "notes": "Mask bit set = that side of the cell faces open SPACE (not \"solid neighbour\" as in walls.png): column = N*1 + E*2 + S*4 + W*8. The skin is drawn over a wall cell. It paints a rim (near-black outline, then a lit or shaded edge by facing) on every space-facing side and covers the cell up to 14px in from it, so the last 2px on the far side stay the wall's own interior outline; with no space-facing side (column 0) it is one whole panel. Cells on a thin spar that face space on two sides are covered fully. row = variant: bit0 = no panel joint on the left edge, bit1 = no joint on the top edge (the panel continues from the neighbour). Pick per cell by a position hash so panels read 1-3 cells long. Neutral greys only (K D E W S M L): multiply a tint per culture line (scrap rust, standard clean, neon dark navy)."
+}

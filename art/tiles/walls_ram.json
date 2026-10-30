@@ -1,0 +1,14 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "autotile": "mask4",
+ "mask": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "frames": 16,
+ "tint": "none",
+ "notes": "Ram plating: thick gunmetal plates, big bolt heads, dents, and a 3px amber-and-black hazard tape on every open edge (the leading edge). Fixed colours: do NOT multiply a tint over it. Autotile by 4-neighbour mask in SCREEN space (after rotating / mirroring the cell): column = N*1 + E*2 + S*4 + W*8, bit set when that neighbour is solid (a neighbour counts as solid when it covers the shared edge). Flat edges with a solid neighbour get the joint seam and rivets of walls.png; open flat edges get the near-black outline and lip; the cut edge (diagonal or arc) is always open and gets the same outline. The non-solid part is transparent: the game draws floor or space under it. Bits for sides where the cell has no flat edge are ignored (the frames repeat)."
+}

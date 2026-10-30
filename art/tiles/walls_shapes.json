@@ -1,0 +1,20 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "autotile": "mask4",
+ "mask": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "frames": 16,
+ "rows": {
+  "cells": ["tri", "tri2_low", "tri2_high", "arc_tl", "arc_tr", "arc_bl", "arc_br"],
+  "count": 56,
+  "row": "row = orient * 7 + cell index (orient = mirror*4 + rot, see shapes.json); rows 0-6 are rotation 0, the set asked for in the brief"
+ },
+ "layout": "16 columns (mask) x 56 rows",
+ "shapes": "tiles/shapes.json",
+ "notes": "Autotile by 4-neighbour mask in SCREEN space (after rotating / mirroring the cell): column = N*1 + E*2 + S*4 + W*8, bit set when that neighbour is solid (a neighbour counts as solid when it covers the shared edge). Flat edges with a solid neighbour get the joint seam and rivets of walls.png; open flat edges get the near-black outline and lip; the cut edge (diagonal or arc) is always open and gets the same outline. The non-solid part is transparent: the game draws floor or space under it. Bits for sides where the cell has no flat edge are ignored (the frames repeat). Same language as walls.png."
+}

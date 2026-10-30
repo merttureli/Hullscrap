@@ -1,0 +1,77 @@
+{
+ "version": 1,
+ "units": "cell-local 0..1, x to the right, y DOWN (screen), rotation 0, no mirror. Polygons wind clockwise on screen. A cell may be solid on only part of itself; the rest is open (space or floor).",
+ "orientation": "orient = mirror*4 + rot. Mirror flips x first (x -> 1-x); then the shape turns clockwise by rot quarter turns, (x, y) -> (1-y, x). For a multi-cell piece the same transform is applied about the PIECE (cell (cx,cy) of a w x h piece goes to (w-1-cx, cy) when mirrored, then (h-1-cy, cx) per quarter turn, and w,h swap).",
+ "shapes": {
+  "full": {
+   "poly": [[0, 0], [1, 0], [1, 1], [0, 1]],
+   "area": 1.0,
+   "pixels": 1.0
+  },
+  "tri": {
+   "poly": [[0, 0], [1, 1], [0, 1]],
+   "area": 0.5,
+   "pixels": 0.5312
+  },
+  "tri2_low": {
+   "poly": [[0, 1], [1, 0.5], [1, 1]],
+   "area": 0.25,
+   "pixels": 0.2812
+  },
+  "tri2_high": {
+   "poly": [[0, 0.5], [1, 0], [1, 1], [0, 1]],
+   "area": 0.75,
+   "pixels": 0.7812
+  },
+  "arc_tl": {
+   "poly": [[1, 1], [0.27765, 1], [0.33706, 0.88886], [0.58579, 0.58579], [0.88886, 0.33706], [1, 0.27765]],
+   "area": 0.30884,
+   "pixels": 0.3086
+  },
+  "arc_tr": {
+   "poly": [[0, 1], [0, 0.27765], [0.23463, 0.15224], [0.60982, 0.03843], [1, 0], [1, 1]],
+   "area": 0.9063,
+   "pixels": 0.9062
+  },
+  "arc_bl": {
+   "poly": [[1, 0], [1, 1], [0, 1], [0.03843, 0.60982], [0.15224, 0.23463], [0.27765, 0]],
+   "area": 0.9063,
+   "pixels": 0.9062
+  },
+  "arc_br": {
+   "poly": [[0, 1], [0, 0], [1, 0], [1, 1]],
+   "area": 1.0,
+   "pixels": 1.0
+  }
+ },
+ "pieces": {
+  "full": {
+   "size": [1, 1],
+   "cells": [{"at": [0, 0], "shape": "full"}]
+  },
+  "slope45": {
+   "size": [1, 1],
+   "cells": [{"at": [0, 0], "shape": "tri"}]
+  },
+  "slope2": {
+   "size": [2, 1],
+   "cells": [{"at": [0, 0], "shape": "tri2_low"}, {"at": [1, 0], "shape": "tri2_high"}]
+  },
+  "round2": {
+   "size": [2, 2],
+   "cells": [{"at": [0, 0], "shape": "arc_tl"}, {"at": [1, 0], "shape": "arc_tr"}, {"at": [0, 1], "shape": "arc_bl"}, {"at": [1, 1], "shape": "arc_br"}]
+  }
+ },
+ "round2": {
+  "centre": [2.0, 2.0],
+  "radius": 2.0,
+  "segments": 8,
+  "arc": [[0, 2], [0.03843, 1.60982], [0.15224, 1.23463], [0.33706, 0.88886], [0.58579, 0.58579], [0.88886, 0.33706], [1.23463, 0.15224], [1.60982, 0.03843], [2, 0]],
+  "note": "convex rounded corner, rotation 0: the solid region is the quarter disk centred at the piece bottom-right corner (2,2); solid toward the bottom-right, open at the top-left. The arc runs from (0,2) to (2,0) and is tangent to the left wall below it and to the top wall right of it. Cells: arc_br is full, arc_tr and arc_bl lose a corner, arc_tl keeps only a small triangle-like sliver at its bottom-right. Cell polygons are the 8-gon clipped to each cell."
+ },
+ "art": {
+  "pixels_per_cell": 16,
+  "raster": "tri is y >= x. tri2_low is y >= 15 - x//2, tri2_high is y >= 7 - x//2 (a clean 2:1 staircase, steps aligned to pixel pairs). The arcs rasterise the 8-gon at pixel centres. Art edges follow the polygons to within 1 px.",
+  "light": "from the top-left, computed per orientation on the real edge direction, so every orientation of every cell is lit correctly (sheets hold all 8)."
+ }
+}
