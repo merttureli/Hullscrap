@@ -1,0 +1,21 @@
+{
+	"_doc": "Debris that drifts past the ship in play mode (docs/CONTENT.md section 11, the Raft loop; scripts/space/drift_debris.gd). All numbers are here. current: the way and speed debris drifts in world px/s (angle in degrees, 0 = east and 90 = south on the screen; the ship's bow is up), with a slow wobble (wobble_deg swing of the direction, speed_wobble swing of the speed as a fraction, wobble_period seconds). spawn: a piece appears just outside the view (`margin` px) on the upstream side, one every `every` seconds (+-`jitter` of it), at most `max_alive` at once, across a lane as wide as the ship plus `lane_margin` px each side (at most `lane_max` px each side of the ship's middle, so a big ship does not thin the stream); `start_alive` pieces are already drifting when play begins; a piece despawns past the downstream edge of the view (+`margin`) or after `max_age` seconds. relax: how fast a piece's speed returns to the current's (per second). pull: an intake draws a piece within its pull radius toward the mouth at `speed` px/s (`ease` = how fast the piece turns to it, per second). bounce: a piece that hits hull keeps `restitution` of its speed along the normal and gets a sideways kick of up to `kick` times that speed. cargo_limit: most units the hold takes before an intake refuses a piece (0 = no limit yet; the hold of CONTENT section 10 comes later). types: id, name, weight (how often it spawns), size (px across, also its hitbox), art (art/debris/<art>.png + .json; a drawn placeholder in `color` when there is none), yield (cargo id -> units on collection), effect (o2: the fraction of air every room gets), roll (a crate: weighted outcomes, each with an item and a count range [min, max]).",
+	"current": {"angle": 70, "speed": 40, "wobble_deg": 14, "wobble_period": 45, "speed_wobble": 0.15},
+	"spawn": {"every": 0.6, "jitter": 0.4, "max_alive": 45, "start_alive": 40, "margin": 160, "lane_margin": 96, "lane_max": 320, "max_age": 150},
+	"relax": 0.6,
+	"pull": {"speed": 90, "ease": 5.0},
+	"bounce": {"restitution": 0.5, "kick": 0.8},
+	"cargo_limit": 0,
+	"types": [
+		{"id": "scrap_chunk_s", "name": "Scrap chunk", "weight": 40, "size": 22, "art": "scrap_chunk_s", "color": "#9aa0a6", "yield": {"scrap": 2}},
+		{"id": "scrap_chunk_m", "name": "Big scrap chunk", "weight": 20, "size": 32, "art": "scrap_chunk_m", "color": "#8a9099", "yield": {"scrap": 4}},
+		{"id": "copper_coil", "name": "Copper coil", "weight": 12, "size": 26, "art": "copper_coil", "color": "#d98a4e", "yield": {"copper": 2}},
+		{"id": "polymer_barrel", "name": "Polymer barrel", "weight": 10, "size": 26, "art": "polymer_barrel", "color": "#e8e1c8", "yield": {"polymer": 2}},
+		{"id": "ice_chunk_s", "name": "Ice chunk", "weight": 10, "size": 22, "art": "ice_chunk_s", "color": "#bfefff", "effect": {"o2": 0.05}},
+		{"id": "sealed_crate", "name": "Sealed crate", "weight": 5, "size": 32, "art": "sealed_crate", "color": "#9c6b3f", "roll": [
+			{"weight": 50, "item": "scrap", "count": [6, 12]},
+			{"weight": 35, "item": "copper", "count": [3, 5]},
+			{"weight": 15, "item": "missile", "count": [1, 1]}]},
+		{"id": "fuel_canister", "name": "Fuel canister", "weight": 3, "size": 26, "art": "fuel_canister", "color": "#f2c744", "yield": {"fuel": 1}}
+	]
+}

@@ -182,7 +182,9 @@ static func anim_state(sheet, def: Dictionary, inst: Dictionary, opts := {}) -> 
 		st["frame"] = sheet.frame_at(st["anim"], t)
 		return st
 	var anim := "on"
-	if not powered:
+	if opts.get("pulling", false) and sheet.has_anim("pulling"):  # an intake drawing a piece in (debris_view.gd)
+		anim = "pulling"
+	elif not powered:
 		anim = "off" if sheet.has_anim("off") else "on"
 		st["dim"] = not sheet.has_anim("off")
 	elif status == "malfunction":
