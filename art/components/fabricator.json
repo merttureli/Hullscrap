@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "fabricator_glow.png",
+  "frame": [
+   80,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Workshop, amber: a print bed with a gantry beam; the print head slides along it and the beam walks across as a part builds up under it (hot newest layer). A violet filament spool on the left, amber lamps and a violet lamp on the right. Damaged: the bed is cracked, the beam is bent and the head hangs off at an angle spitting sparks. Disabled: the head has fallen onto the bed, the beam is snapped, the part has collapsed to rubble."
+}

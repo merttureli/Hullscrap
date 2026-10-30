@@ -1,0 +1,63 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   10
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "belt_drive_neon_glow.png",
+  "frame": [
+   44,
+   44
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    10
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "anchors": {
+  "belt_out": [
+   16,
+   0
+  ]
+ },
+ "belt": "rollers come off the top edge; the belt tile continues from there",
+ "notes": "Lumen \"Mag-Rail\": no chain or tread, a magnetic rail: a navy track with cyan edge lines and four coil rings whose pulse climbs the rail (the on loop), a navy housing with a flywheel ring of four cyan segments spinning inside it, magenta pins. Damaged: a coil ring is dark and cracked, the flywheel stutters, arcs spit at the rail. Disabled: the rail split and dull, the flywheel stopped and cracked, every cyan line dead."
+}

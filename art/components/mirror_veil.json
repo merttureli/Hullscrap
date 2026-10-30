@@ -1,0 +1,76 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "hit": [
+   9,
+   3,
+   12
+  ],
+  "recharge": [
+   12,
+   4,
+   10
+  ],
+  "damaged": [
+   16,
+   2,
+   6
+  ],
+  "disabled": [
+   18,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "mirror_veil_glow.png",
+  "frame": [
+   88,
+   88
+  ],
+  "offset": [
+   -12,
+   -12
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "hit": [
+    8,
+    3,
+    12
+   ],
+   "recharge": [
+    11,
+    4,
+    10
+   ],
+   "damaged": [
+    15,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Unique. A polished mirror dish in a standard blue-steel frame with gold trim (edge line, corner brackets, boss). On loop (8): two glints sweep diagonally across the mirror, the gold rim segments turn clockwise while the inner facet ring turns the other way, bright reflection arcs crawl between the four gold mounts, the gold boss breathes. hit (3): a white flare and ripple, the mirror flashing. recharge (4): the gold rim and facet ring spinning up. Damaged: a crack spreads over the glass with a dark chipped wedge, the trim is bent at one corner. Disabled: the mirror shattered to dull shards with a hole, the trim dead and scorched."
+}

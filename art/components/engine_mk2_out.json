@@ -1,0 +1,71 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_mk2_out_glow.png",
+  "frame": [
+   84,
+   68
+  ],
+  "offset": [
+   -10,
+   -32
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust_left": [
+   13,
+   1
+  ],
+  "exhaust_right": [
+   50,
+   1
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Concord Mk2, a hull mount (outward is up): Mk1 plus an amber collar ring on each bell and each wall collar, and a wider hatch with two lit turbines, registry stencil. Damaged: the left bell lip is dented in and hanging, the right bell cracked and sputtering, the second turbine stalled and cracked, sparks at the hatch and coupling, lamps red. Disabled: the left nozzle snapped off at the neck, the right bent over, wall collar cracked, both turbines dead, repair hatch popped. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}

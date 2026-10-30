@@ -1,0 +1,76 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "hit": [
+   9,
+   3,
+   12
+  ],
+  "recharge": [
+   12,
+   4,
+   10
+  ],
+  "damaged": [
+   16,
+   2,
+   6
+  ],
+  "disabled": [
+   18,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "shield_scrap_mk1_glow.png",
+  "frame": [
+   88,
+   88
+  ],
+  "offset": [
+   -12,
+   -12
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "hit": [
+    8,
+    3,
+    12
+   ],
+   "recharge": [
+    11,
+    4,
+    10
+   ],
+   "damaged": [
+    15,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Scrapper Clans \"Bubble Rig\": a salvaged emitter dish (a rim section replaced with rust plate, a dent bitten out of the opposite side) on a bolted girder scaffold with cross-braces and a taped upright. On loop (8): the rim lamps chase round clockwise while the tripod of feed struts turns the other way, arcs sputter between the strut tips (and drop out now and then), the horn bead breathes unevenly. hit (3): flare and ripple. recharge (4): the lamps and struts spinning up. Damaged: the dish has torn loose from the north strut and sags, the patch hangs by a bolt, the horn arcs and flickers. Disabled: the dish is cracked through and slid off its tripod, the horn snapped, a girder bent."
+}

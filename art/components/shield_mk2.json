@@ -1,0 +1,76 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "hit": [
+   9,
+   3,
+   12
+  ],
+  "recharge": [
+   12,
+   4,
+   10
+  ],
+  "damaged": [
+   16,
+   2,
+   6
+  ],
+  "disabled": [
+   18,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "shield_mk2_glow.png",
+  "frame": [
+   88,
+   88
+  ],
+  "offset": [
+   -12,
+   -12
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "hit": [
+    8,
+    3,
+    12
+   ],
+   "recharge": [
+    11,
+    4,
+    10
+   ],
+   "damaged": [
+    15,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Concord Mk2 (two layers): Mk1 plus a second ring counter-rotating inside the first, a thin outer ring round the dome with blue nodes, two layer pips, corner lamps and registry stencil. On loop (8): two emitter rings and the dome petals turning against each other, arcs crawling between the pylons, pylons lighting N, E, S, W, the core breathing. hit (3): flare and ripple. recharge (4): rings spinning up. Damaged: dome cracked with a dark chip, west pylon dead, a casing flap hangs off the lower-right corner, the outer ring has a gap. Disabled: dome shattered, west pylon smashed, casing split corner to corner."
+}

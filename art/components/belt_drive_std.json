@@ -1,0 +1,63 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   10
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "belt_drive_std_glow.png",
+  "frame": [
+   44,
+   44
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    10
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "anchors": {
+  "belt_out": [
+   16,
+   0
+  ]
+ },
+ "belt": "rollers come off the top edge; the belt tile continues from there",
+ "notes": "Concord \"Autoloader\": a clean steel housing with a spoked drive wheel in a window, two roller bars and a belt with scrolling treads coming off the top edge, a registry stencil, a green lamp. On: the wheel turns a quarter-spoke per frame (4 frames loop) while the treads scroll. Damaged: housing cracked, a spoke bent, roller bar skewed, lamp red and a spark. Disabled: the belt torn, the wheel off its axle, the housing split."
+}

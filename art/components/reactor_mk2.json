@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "reactor_mk2_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Concord Mk2: Mk1 plus a second (outer) ring whose 8 amber lamps chase around it, and a bigger, hotter core. Damaged: the upper-right capacitor is split open and sparking, the left pipe has slipped its flange and weeps, the outer ring has a chipped gap, the core stutters. Disabled: dead core, the casing split corner to corner, the capacitor blown out."
+}

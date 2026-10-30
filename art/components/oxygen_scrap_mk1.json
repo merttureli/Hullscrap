@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  64
+ ],
+ "cells": [
+  2,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   10
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "oxygen_scrap_mk1_glow.png",
+  "frame": [
+   48,
+   80
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    10
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Scrapper Clans \"Wheezer\": a wobbling fan (off-centre, one blade bent) behind a bent guard bar, a rust-patched duct with a hazard-taped joint that drips and wheezes a puff on the loop, one grey and one rusty tank with a faded green O2 band, amber lamps. Damaged: a blade has snapped off and the fan staggers, the duct patch has popped a bolt and gushes, lamps flicker red, a spark at the tank valve. Disabled: the fan is stopped with a blade hanging, the duct has pulled apart, the rusty tank has burst a seam, lamps dead."
+}

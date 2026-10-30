@@ -1,0 +1,73 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   10
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ],
+  "jammed": [
+   8,
+   2,
+   6
+  ]
+ },
+ "glow": {
+  "image": "belt_drive_scrap_glow.png",
+  "frame": [
+   44,
+   44
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    10
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ],
+   "jammed": [
+    6,
+    2,
+    6
+   ]
+  }
+ },
+ "anchors": {
+  "belt_out": [
+   16,
+   0
+  ]
+ },
+ "belt": "rollers come off the top edge; the belt tile continues from there",
+ "notes": "Scrapper Clans \"Chain Drive\": a greasy housing of two mismatched plates, hazard tape, a toothed sprocket in a window driving a chain (link dots crawl along it) up to the roller axle, a rough rubber belt with a rusty roller. On: the sprocket turns a quarter-tooth per frame (4 frames), chain links and treads move. JAMMED (2 frames): a bolt is wedged in the sprocket, the chain hangs slack, sparks, the red lamp flashes. Damaged: the chain has jumped a tooth and sags, plate cracked, tape peeling, sparks. Disabled: the chain snapped and lying across the housing, belt torn, sprocket bent."
+}

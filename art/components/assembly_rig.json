@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   5
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "assembly_rig_glow.png",
+  "frame": [
+   80,
+   80
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    5
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "notes": "Workshop: a steel jig frame with T-slot rails and four clamps round a half-built chassis (bolt circle, motor boss). The clamps press in turn (N, E, S, W) with a violet toggle lever flipping, and a weld spark runs round the joint. Damaged: the east clamp arm is bent, the chassis is knocked out of true, a rail is cracked and the weld sparks. Disabled: clamps flung open and dead, the chassis fallen into pieces on the table."
+}

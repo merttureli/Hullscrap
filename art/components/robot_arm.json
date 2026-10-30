@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "robot_arm_glow.png",
+  "frame": [
+   44,
+   44
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "notes": "Workshop: a two-segment articulated arm on a round base with violet joint caps and a band on each segment; the on loop swings the shoulder and elbow through a pick-and-place sweep with a violet part in the claw. Damaged: the forearm droops, the elbow sparks, a segment is cracked. Disabled: the arm lies limp across the pad with the claw detached."
+}
