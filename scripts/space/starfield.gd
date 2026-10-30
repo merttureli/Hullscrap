@@ -7,6 +7,7 @@ extends Node2D
 
 var stars: Array = []  # [unit position, depth 0.2..1, radius]
 var t := 0.0
+var _offset := Vector2.ZERO  # the drift integrated over time, so a drift that changes (debris_view.gd follows the current) never makes the sky jump
 
 
 func _ready() -> void:
@@ -18,6 +19,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	t += delta
+	_offset += drift * delta
 	queue_redraw()
 
 
@@ -26,6 +28,6 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, vp), Color("#05070c"))
 	for s in stars:
 		var depth: float = s[1]
-		var p: Vector2 = s[0] * vp + drift * t * depth
+		var p: Vector2 = s[0] * vp + _offset * depth
 		p = Vector2(fposmod(p.x, vp.x), fposmod(p.y, vp.y))
 		draw_circle(p, s[2] * depth, Color(1, 1, 1, 0.3 + 0.6 * depth))

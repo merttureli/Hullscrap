@@ -159,8 +159,11 @@ func test_the_save_keeps_the_queue_and_the_blueprints() -> void:
 	c.name = "untouched"
 	eq(c.load_dict(bad), "bad job in the queue", "a broken queue is refused")
 	eq([c.name, c.crafting.queue.size(), c.components.instances.size()], ["untouched", 0, 0], "and nothing was replaced")
-	var design := Ship.from_design("res://data/ships/starter_courier.json")
-	eq([design.crafting.queue.size(), design.crafting.known.size()], [0, Ship.new_starter().crafting.known.size()], "a design file without the section starts with the start blueprints")
+	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/ships/starter_courier.json"))
+	raw.erase("crafting")  # the design files carry the blueprints they were made with; this is a design without the section
+	var design := Ship.new_starter()
+	eq(design.load_dict(raw), "", "a design file without the section loads")
+	eq([design.crafting.queue.size(), design.crafting.known.size()], [0, Ship.new_starter().crafting.known.size()], "and starts with the start blueprints")
 	sim.free()
 
 

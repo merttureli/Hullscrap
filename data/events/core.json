@@ -7,12 +7,12 @@
 			"text": "Ma Gantry meets you on the dock herself, which is never good. She is small, loud and holding a clipboard made from what used to be a door. \"That hull is mine,\" she says, \"until you've paid me a thousand credits. A hundred every eight jumps. I'm not a monster. I'm a lender.\"",
 			"choices": [
 				{"text": "\"Sign me up, Ma.\"", "outcomes": [
-					{"weight": 100, "text": "She has you thumbprint the clipboard. Something wet is already on it. \"Meridian's the Concord yard, a few lanes out. Don't tell them I sent you.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "rep": {"clans": 1}}}]},
+					{"weight": 100, "text": "She has you thumbprint the clipboard. Something wet is already on it. \"Meridian's the Concord yard, a few lanes out. Don't tell them I sent you.\" She thumps a hoop of wire and cable onto the clipboard. \"And take this net. Scrap floats by for free out here, and I'm not paying for your laziness. Bolt it to an outer wall.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "rep": {"clans": 1}, "items": {"net_mouth_scrap": 1}}}]},
 				{"text": "\"A thousand? For this?\"", "outcomes": [
-					{"weight": 70, "text": "\"For that,\" Ma agrees, tapping your hull with the clipboard. It rings like a dropped pan. She slides the paper over anyway.", "effects": {"flag": "met_ma", "reveal": "meridian"}},
-					{"weight": 30, "text": "\"Fifty more for the attitude,\" says Ma, and writes it in. The pen is chained to her wrist. You never saw her draw it.", "effects": {"flag": "met_ma", "reveal": "meridian", "debt": 50}}]},
+					{"weight": 70, "text": "\"For that,\" Ma agrees, tapping your hull with the clipboard. It rings like a dropped pan. She slides the paper over anyway, then a hoop of wire and cable. \"Take the net, too. Scrap floats by for free out here, and I'm not paying for your laziness.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "items": {"net_mouth_scrap": 1}}},
+					{"weight": 30, "text": "\"Fifty more for the attitude,\" says Ma, and writes it in. The pen is chained to her wrist. You never saw her draw it. \"And take this net. Scrap floats by for free out here, I'm not paying for your laziness.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "debt": 50, "items": {"net_mouth_scrap": 1}}}]},
 				{"text": "[Fenn] Read the fine print aloud, slowly.", "requires": {"species": "fenn"}, "outcomes": [
-					{"weight": 100, "text": "Your Fenn finds a clause about \"reasonable wear\" and reads it out twice. Ma stares, then laughs like a bolt coming loose. \"Hundred off. Never do that again.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "debt": -100, "rep": {"clans": 1}}}]}
+					{"weight": 100, "text": "Your Fenn finds a clause about \"reasonable wear\" and reads it out twice. Ma stares, then laughs like a bolt coming loose. \"Hundred off. Never do that again. And take this net. Scrap floats by for free out here, I'm not paying for your laziness.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "debt": -100, "rep": {"clans": 1}, "items": {"net_mouth_scrap": 1}}}]}
 			]
 		},
 		{

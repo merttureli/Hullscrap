@@ -21,7 +21,8 @@
     "rattle_burst_scrap",
     "shrapnel_cannon_scrap",
     "bolt_thrower_scrap",
-    "shield_scrap_mk1"
+    "shield_scrap_mk1",
+    "net_mouth_scrap"
   ],
   "recipes": [
     {
@@ -705,6 +706,35 @@
       "fab_level": 2,
       "tools": [],
       "time": 25,
+      "category": "system"
+    },
+    {
+      "id": "net_mouth_scrap",
+      "output": {
+        "item": "net_mouth_scrap",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 12,
+      "category": "system"
+    },
+    {
+      "id": "intake_mk1",
+      "output": {
+        "item": "intake_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 10
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 20,
       "category": "system"
     }
   ]

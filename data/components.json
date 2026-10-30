@@ -1244,6 +1244,66 @@
       ],
       "unique": true,
       "blurb": "Ma Gantry's own reactor, handed over with a straight face. Two more power than it has any right to, and the room smells of tea and smoke."
+    },
+    {
+      "id": "net_mouth_scrap",
+      "name": "Net Mouth",
+      "blurb": "A hoop of cable and fishing wire bolted over a hole. Debris that touches the net is hauled in. No power, no manners.",
+      "family": "intake",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 3
+      },
+      "color": "#8a9bb0",
+      "power": 0,
+      "priority": 0,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {
+        "pull_radius": 1
+      }
+    },
+    {
+      "id": "intake_mk1",
+      "name": "Salvage Intake Mk1",
+      "blurb": "A magnetic mouth and a sorting hopper. Pulls in what drifts within two cells and files it as cargo.",
+      "family": "intake",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#5aa9e6",
+      "power": -1,
+      "priority": 6,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "pull_radius": 2
+      }
     }
   ]
 }
