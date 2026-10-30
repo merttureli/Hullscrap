@@ -3,5 +3,24 @@
   2,
   2
  ],
- "autotile": "mask4"
+ "autotile": "mask4",
+ "powered": "cable_on.png",
+ "glow": {
+  "image": "cable_glow.png",
+  "frame": [
+   2,
+   2
+  ],
+  "offset": [
+   0,
+   0
+  ],
+  "anims": {
+   "on": [
+    0,
+    16,
+    0
+   ]
+  }
+ }
 }

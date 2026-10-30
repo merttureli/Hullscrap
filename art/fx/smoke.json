@@ -1,0 +1,12 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "mode": "once",
+ "anims": {
+  "play": [0, 4, 5]
+ },
+ "anchors": {
+  "base": [8, 15]
+ },
+ "notes": "Grey puff rising and thinning over 4 frames. Hard pixels; fade it with modulate alpha as it rises. Spawn staggered puffs for a smoke column."
+}

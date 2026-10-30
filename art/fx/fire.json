@@ -1,0 +1,21 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "mode": "loop",
+ "anims": {
+  "loop": [0, 4, 8]
+ },
+ "anchors": {
+  "base": [8, 15]
+ },
+ "glow": {
+  "image": "fire_glow.png",
+  "frame": [24, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "loop": [0, 4, 8]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "One burning cell: flat bold flames (yellow core, orange body, red tips), base on the bottom edge. Several fires in a row look right if each starts on a random frame."
+}

@@ -1,0 +1,43 @@
+{
+ "frame": [4, 16],
+ "length": 16,
+ "width": 4,
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "tile": "y",
+ "cells": [1, 1],
+ "anims": {
+  "loop": [0, 1, 0]
+ },
+ "anchors": {
+  "head": [2, 0],
+  "tail": [2, 15]
+ },
+ "glow": {
+  "image": "laser_glow.png",
+  "frame": [12, 16],
+  "offset": [-4, 0],
+  "anims": {
+   "loop": [0, 1, 0]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "tile": "y"
+ },
+ "impact": {
+  "image": "laser_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 3, 18]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "laser_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 3, 18]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "Red beam with a white core, 16 long x 4 wide. Repeat the frame along y to any length (it joins seamlessly, glow too). Draw the impact flare at the hit point."
+}

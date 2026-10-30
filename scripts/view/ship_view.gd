@@ -34,6 +34,8 @@ var _clock := 0.0
 var _glow: Node2D  # additive layer for the glow art of the parts
 var _weapons := {}  # uid -> {left, peak, shot}: a weapon's cooldown as last seen, the longest it has been, when it last fired (_clock)
 var _crew_anim := {}  # CrewMember -> PersonDrawer state, for drawing only
+var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state, for the opening animation
+var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
 
 
 ## Follow ship `idx` of `p_arena`.
@@ -89,6 +91,7 @@ func px(c: Vector2) -> Vector2:
 func _draw() -> void:
 	if ship == null:
 		return
+	_glow_quads = []
 	var grid = ship.grid
 	for c in grid.tiles:
 		_draw_tile(grid, c, grid.tiles[c])
@@ -99,7 +102,6 @@ func _draw() -> void:
 	var powered: Dictionary = ship.power_state.get("powered", {})
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
-	var glow_quads := []
 	for uid in uids:
 		var inst: Dictionary = ship.components.instances[uid]
 		var lo: Vector2i = inst["cells"][0]
@@ -109,11 +111,9 @@ func _draw() -> void:
 			hi = hi.max(c)
 		var r := Rect2(px(Vector2(lo)), Vector2(hi - lo + Vector2i.ONE) * CELL)
 		var opts := _weapon_opts(uid)
-		opts.merge({"powered": powered.get(uid, false), "time": _clock, "glow_out": glow_quads})
+		opts.merge({"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads})
 		Visuals.draw_component(self, r, ship.components.def(inst["id"]), inst, CELL, opts)
-	if _glow != null:
-		_glow.show_quads(glow_quads)
-	draw_fire(self, ship.fires, px(Vector2.ZERO), CELL, _clock)
+	draw_fire(self, ship.fires, px(Vector2.ZERO), CELL, _clock, _glow_quads)
 	for m in ship.crew:
 		var a: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
 		var look: Dictionary = m.look if not m.look.is_empty() else LOOKS.get(m.name, OTHER_LOOK)
@@ -121,6 +121,8 @@ func _draw() -> void:
 			"item": PersonDrawer.item_for(m, ship.clock), "down": m.is_down(), "work": PersonDrawer.is_working(m, ship.clock), "t": _clock}
 		PersonDrawer.draw(self, px(m.pos), pose, look, CELL)
 		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL)
+	if _glow != null:
+		_glow.show_quads(_glow_quads)
 	if arena != null:
 		_draw_bubble(arena.ships[index])
 
@@ -170,7 +172,7 @@ func _draw_door(grid, piece: Array[Vector2i], col: Color, open: bool) -> void:
 		if not TileArt.floor_tile(self, cell_rect, p):
 			draw_rect(cell_rect, floor_col)
 	var horizontal: bool = piece[1].x != piece[0].x if piece.size() > 1 else true
-	if TileArt.door_piece(self, rects, horizontal, open, _clock):
+	if TileArt.door_piece(self, rects, horizontal, TileArt.door_fraction(_doors, piece[0], open, _clock), _glow_quads):
 		return
 	var along := Vector2.RIGHT if horizontal else Vector2.DOWN
 	var across := Vector2(along.y, along.x)
@@ -219,10 +221,10 @@ func _draw_damage(grid, c: Vector2i) -> void:
 ## Fires as flickering blobs: a red base, an orange body and a yellow core per burning cell, bigger
 ## with the intensity. `fires`: cell -> intensity (0..1); `origin`: where cell (0, 0) starts, in the
 ## canvas' pixels; `t`: seconds, for the flicker. Static, so the interior view uses it too.
-static func draw_fire(canvas: CanvasItem, fires: Dictionary, origin: Vector2, cell_px: float, t: float) -> void:
+static func draw_fire(canvas: CanvasItem, fires: Dictionary, origin: Vector2, cell_px: float, t: float, glow_out = null) -> void:
 	for c in fires:
 		var i: float = clampf(fires[c], 0.0, 1.0)
-		if TileArt.fire_cell(canvas, Rect2(origin + Vector2(c) * cell_px, Vector2(cell_px, cell_px)), i, t, c):
+		if TileArt.fire_cell(canvas, Rect2(origin + Vector2(c) * cell_px, Vector2(cell_px, cell_px)), i, t, c, glow_out):
 			continue
 		var h := hash(c)
 		var phase := float(h & 255) / 40.0

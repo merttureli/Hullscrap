@@ -1,0 +1,10 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "mode": "loop",
+ "anims": {
+  "loop": [0, 3, 6]
+ },
+ "alpha": true,
+ "notes": "Optional overlay for overheated parts: translucent dashes of pale heat climbing and wobbling. Alpha layer (palette hues, alpha 40-80). Tile it over the part, one frame step per tick."
+}

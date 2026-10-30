@@ -1,0 +1,11 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "variants": 3,
+ "anims": {
+  "v0": [0, 1, 0],
+  "v1": [1, 1, 0],
+  "v2": [2, 1, 0]
+ },
+ "notes": "Three seamless floor variants. Each has the 1px tile seam on its top and left edge, so any mix tiles cleanly. Pick one per cell by a position hash; v0 is the plain one, so use it most."
+}

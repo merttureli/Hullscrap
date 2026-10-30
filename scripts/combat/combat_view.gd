@@ -12,6 +12,8 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const Art = preload("res://scripts/view/art.gd")
+const TileArt = preload("res://scripts/view/tile_art.gd")
+const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
 
@@ -24,7 +26,6 @@ const MAX_FX := 500
 const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
-const ART_FPS := 16.0  ## frames per second of art that names no animation
 const HINT := "W/S throttle   A/D turn   mouse aims   LMB group 1   RMB group 2   1-9 single weapon   Space overcharge shield   Esc leave"
 
 var sim: Node  ## ShipSim
@@ -40,6 +41,8 @@ var hold_override := {}  ## fire group -> true: held down as if by the mouse
 
 var _views: Array = []
 var _fx_node: Node2D
+var _glow: Node2D  # additive layer inside _fx_node for the glow of projectiles and effects
+var _glow_quads: Array = []
 var _stars_node: Node2D
 var _stars: Array = []  # [unit position, depth, radius]
 var _star_drift := Vector2.ZERO
@@ -150,6 +153,8 @@ func enter(path := Session.PIRATE_PATH) -> String:
 	_fx_node = Node2D.new()
 	_fx_node.draw.connect(_draw_fx)
 	add_child(_fx_node)
+	_glow = GlowLayer.new()
+	_fx_node.add_child(_glow)
 	if not _schem.is_empty():
 		_schem[0].bind(session.arena, Session.PLAYER, player.name if player.name != "Ship" else "Your ship")
 		_schem[1].bind(session.arena, Session.ENEMY, enemy.name)
@@ -169,6 +174,7 @@ func leave() -> void:
 	if _fx_node != null:
 		_fx_node.queue_free()
 		_fx_node = null
+		_glow = null
 	_fx.clear()
 	_show_hud(false)
 	_put_away(false)
@@ -391,7 +397,7 @@ func _on_event(e: Dictionary) -> void:
 	match e["type"]:
 		"shot":
 			if Art.fx("muzzle") != null:
-				_add_fx({"k": "art", "name": "muzzle", "pos": e["origin"], "angle": dir.angle() + PI / 2.0, "life": 0.14})
+				_add_fx({"k": "art", "name": "muzzle", "anchor": "muzzle", "pos": e["origin"], "angle": dir.angle() + PI / 2.0, "life": 0.14})
 			else:
 				_add_fx({"k": "flash", "pos": e["origin"], "life": 0.09, "r": 10.0, "color": _shot_color(idx, "energy" if e["kind"] in ["laser", "beam"] else "kinetic")})
 		"beam":
@@ -404,13 +410,15 @@ func _on_event(e: Dictionary) -> void:
 				col = Color("#b99bff")
 			if big and Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.5, "scale": 0.7})
+			elif Art.fx("sparks") != null:
+				_on_ship(idx, pos, {"k": "art", "name": "sparks", "life": 0.25, "scale": 0.7})
 			else:
 				_on_ship(idx, pos, {"k": "flash", "life": 0.22, "r": 18.0 if big else 11.0, "color": col})
 			_sparks(pos, n, 7 if big else 4, col)
 		"shield":
 			var shot_dir := dir
 			if Art.fx("shield_ripple") != null:
-				_on_ship(idx, pos, {"k": "art", "name": "shield_ripple", "life": 0.45, "scale": 1.5, "angle": shot_dir.angle() + PI / 2.0})
+				_on_ship(idx, pos, {"k": "art", "name": "shield_ripple", "anchor": "impact", "life": 0.45, "scale": 1.5, "angle": (-shot_dir).angle() + PI / 2.0})
 			else:
 				_on_ship(idx, pos, {"k": "ring", "life": 0.55, "r": 70.0, "color": Color("#7fe4ff") if e.get("dtype", "") != "ion" else Color("#b99bff")})
 			_on_ship(idx, pos, {"k": "flash", "life": 0.15, "r": 16.0, "color": Color("#bff2ff")})
@@ -429,7 +437,10 @@ func _on_event(e: Dictionary) -> void:
 				var d := (n if n != Vector2.ZERO else Vector2.from_angle(_rng.randf() * TAU)).rotated(_rng.randf_range(-0.9, 0.9))
 				_add_fx({"k": "puff", "pos": pos, "vel": d * _rng.randf_range(40.0, 110.0), "life": _rng.randf_range(0.6, 1.0), "r": 8.0, "grow": 26.0, "color": Color("#b9bfc9", 0.6)})
 		"disable":
-			_on_ship(idx, pos, {"k": "flash", "life": 0.3, "r": 24.0, "color": Color("#ffe14a")})
+			if Art.fx("sparks") != null:
+				_on_ship(idx, pos, {"k": "art", "name": "sparks", "life": 0.35, "scale": 1.5})
+			else:
+				_on_ship(idx, pos, {"k": "flash", "life": 0.3, "r": 24.0, "color": Color("#ffe14a")})
 			_sparks(pos, Vector2.ZERO, 10, Color("#ffe14a"))
 		"ignite":
 			for i in 3:
@@ -486,12 +497,15 @@ func _draw_fx() -> void:
 	var c := _fx_node
 	var arena = session.arena
 	var px := _px()
+	_glow_quads = []
 	if session.state() != "lost":
 		_draw_aim(c, px)
 	for f in _fx:
 		_draw_one(c, f, px)
 	for p in arena.projectiles:
 		_draw_shot(c, p, px)
+	if _glow != null:
+		_glow.show_quads(_glow_quads)
 
 
 func _fx_pos(f: Dictionary) -> Vector2:
@@ -508,7 +522,7 @@ func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 		"art":
 			_draw_art_fx(c, f, age, px)
 		"beam":
-			if _draw_art_beam(c, f, fade, px):
+			if _draw_art_beam(c, f, age, px):
 				return
 			c.draw_line(f["a"], f["b"], Color(col, 0.25 * fade), 9.0 * px)
 			c.draw_line(f["a"], f["b"], Color(col, 0.9 * fade), 3.0 * px)
@@ -529,9 +543,7 @@ func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 			var p := _fx_pos(f)
 			var smoke = Art.fx("smoke")
 			if smoke != null:
-				var k := maxf(ART_SCALE, ART_SCALE * px) * (0.5 + float(f["r"]) / 24.0 + age * 0.5)
-				var size := Vector2(smoke.frame) * k
-				c.draw_texture_rect_region(smoke.texture, Rect2(p - size / 2.0, size), smoke.region(smoke.frame_life("on", age)), Color(1, 1, 1, fade))
+				_blit_art(c, smoke, smoke.life_frame(age), p, 0.0, _art_k(px) * (0.5 + float(f["r"]) / 24.0 + age * 0.5), "", Color(1, 1, 1, fade))
 				return
 			c.draw_circle(p, (f["r"] + f["grow"] * age) * px * 0.5 if f["r"] < 4.0 else f["r"] + f["grow"] * age, Color(col, col.a * fade))
 		"streak":
@@ -565,46 +577,81 @@ func _draw_shot(c: Node2D, p: Dictionary, px: float) -> void:
 			c.draw_circle(at, 2.0 * px, Color.WHITE)
 
 
-## One frame of `art` (a projectile or effect sheet) looping at its first animation's fps, else ART_FPS.
-func _loop_frame(art) -> int:
-	for name in ["fly", "on"]:
-		if art.has_anim(name):
-			return art.frame_at(name, _clock)
-	return int(_clock * ART_FPS) % art.count
+## One frame `f` of `sheet`, turned by `angle` with its anchor pixel `anchor` (a name from the
+## sheet's anchors; the frame's middle without one) at `at`, `k` world px per source px, and its
+## glow layer (frame `f` of the glow sheet) on the additive layer.
+func _blit_art(c: Node2D, sheet, f: int, at: Vector2, angle: float, k: float, anchor := "", mod := Color.WHITE) -> void:
+	var pin: Vector2 = sheet.anchors[anchor] + Vector2(0.5, 0.5) if sheet.anchors.has(anchor) else Vector2(sheet.frame) / 2.0
+	var xf := Transform2D(angle, at)
+	var dest := Rect2(-pin * k, Vector2(sheet.frame) * k)
+	c.draw_set_transform_matrix(xf)
+	c.draw_texture_rect_region(sheet.texture, dest, sheet.region(f), mod)
+	c.draw_set_transform_matrix(Transform2D.IDENTITY)
+	var g = sheet.glow
+	if g != null:
+		TileArt.emit(c, _glow_quads if _glow != null else null, {"tex": g.texture, "rect": Rect2(dest.position + g.offset * k, Vector2(g.frame) * k),
+			"src": g.region(clampi(f, 0, g.count - 1)), "xf": xf, "mod": mod})
 
 
-## A projectile sprite at `at` flying along `d`: the sheet faces up (plus its orientation_rot quarter
-## turns), pinned at its "head" anchor (the sprite's middle without one), drawn at least ART_SCALE screen px per source px.
+## Screen px per source px of the effect and projectile art, in world px: at least ART_SCALE on screen.
+func _art_k(px: float) -> float:
+	return maxf(ART_SCALE, ART_SCALE * px)
+
+
+## A projectile sprite at `at` flying along `d` (the art faces up, plus its orientation_rot quarter
+## turns), its "head" (else "center") pixel on `at`, looping its own animation.
 func _draw_art_shot(c: Node2D, art, at: Vector2, d: Vector2, px: float) -> void:
-	var k := maxf(ART_SCALE, ART_SCALE * px)
-	var head: Vector2 = art.anchors.get("head", Vector2(art.frame) / 2.0 - Vector2(0.5, 0.5)) + Vector2(0.5, 0.5)
-	c.draw_set_transform(at, d.angle() + PI / 2.0 + art.orientation_rot * PI / 2.0, Vector2(k, k))
-	c.draw_texture_rect_region(art.texture, Rect2(-head, Vector2(art.frame)), art.region(_loop_frame(art)), Color.WHITE)
-	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_blit_art(c, art, art.loop_frame(_clock), at, d.angle() + PI / 2.0 + art.orientation_rot * PI / 2.0, _art_k(px), "head" if art.anchors.has("head") else "center")
 
 
-## An effect frame (art/fx/<name>) at the fx's place, played once over its life, turned by f["angle"].
+## An effect (art/fx/<name>) at the fx's place, played once over its life, turned by f["angle"], its
+## f["anchor"] pixel (else the middle) on the spot.
 func _draw_art_fx(c: Node2D, f: Dictionary, age: float, px: float) -> void:
 	var art = Art.fx(str(f["name"]))
-	if art == null:
-		return
-	var k := maxf(ART_SCALE, ART_SCALE * px) * float(f.get("scale", 1.0))
-	c.draw_set_transform(_fx_pos(f), float(f.get("angle", 0.0)), Vector2(k, k))
-	c.draw_texture_rect_region(art.texture, Rect2(-Vector2(art.frame) / 2.0, Vector2(art.frame)), art.region(art.frame_life("on", age)), Color.WHITE)
-	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if art != null:
+		_blit_art(c, art, art.life_frame(age), _fx_pos(f), float(f.get("angle", 0.0)), _art_k(px) * float(f.get("scale", 1.0)), str(f.get("anchor", "")))
 
 
-## A hitscan beam drawn with art/projectiles/<kind> (facing up), stretched from `a` to `b`. False when there is no such art.
-func _draw_art_beam(c: Node2D, f: Dictionary, fade: float, px: float) -> bool:
+## The pieces a beam `length` px long is tiled from when one tile is `tile` px: [{"from": distance
+## from the start, "len": px}], all full tiles but the last.
+static func beam_pieces(length: float, tile: float) -> Array:
+	var out := []
+	var done := 0.0
+	while done < length - 0.001 and tile > 0.0:
+		var h := minf(tile, length - done)
+		out.append({"from": done, "len": h})
+		done += h
+	return out
+
+
+## A hitscan beam in art/projectiles/<kind> (it faces up, tiles along y), laid from `a` to `b` out of
+## whole tiles and a cut last one (the sprite's head end), with its glow, and the kind's impact flare
+## at `b`. False when there is no such art.
+func _draw_art_beam(c: Node2D, f: Dictionary, age: float, px: float) -> bool:
 	var art = Art.projectile(str(f.get("kind", "")))
 	if art == null:
 		return false
 	var a: Vector2 = f["a"]
-	var len := a.distance_to(f["b"])
-	var width := float(art.frame.x) * maxf(ART_SCALE, ART_SCALE * px)
-	c.draw_set_transform(a, (f["b"] - a).angle() + PI / 2.0, Vector2.ONE)
-	c.draw_texture_rect_region(art.texture, Rect2(Vector2(-width / 2.0, -len), Vector2(width, len)), art.region(_loop_frame(art)), Color(1, 1, 1, fade))
-	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var b: Vector2 = f["b"]
+	var k := _art_k(px)
+	var fade := 1.0 - age
+	var xf := Transform2D((b - a).angle() + PI / 2.0, a)
+	var frame: int = art.loop_frame(_clock)
+	var w := float(art.frame.x) * k
+	var g = art.glow
+	var out = _glow_quads if _glow != null else null
+	c.draw_set_transform_matrix(xf)
+	for p in beam_pieces(a.distance_to(b), float(art.frame.y) * k):
+		var rows: float = p["len"] / k  # source rows of this piece, from the head end of the frame
+		var at := Vector2(-w / 2.0, -(p["from"] + p["len"]))
+		c.draw_texture_rect_region(art.texture, Rect2(at, Vector2(w, p["len"])), Rect2(art.region(frame).position, Vector2(art.frame.x, rows)), Color(1, 1, 1, fade))
+		if g != null:
+			TileArt.emit(c, out, {"tex": g.texture, "rect": Rect2(at + Vector2(g.offset.x * k, 0.0), Vector2(float(g.frame.x) * k, p["len"])),
+				"src": Rect2(g.region(clampi(frame, 0, g.count - 1)).position, Vector2(g.frame.x, rows)), "xf": xf, "mod": Color(1, 1, 1, fade)})
+	c.draw_set_transform_matrix(Transform2D.IDENTITY)
+	var hit = Art.projectile(str(f["kind"]) + "_impact")
+	if hit != null:
+		_blit_art(c, hit, hit.life_frame(age), b, 0.0, k, "center", Color(1, 1, 1, fade))
 	return true
 
 

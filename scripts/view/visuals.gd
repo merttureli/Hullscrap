@@ -165,10 +165,23 @@ static func _draw_sheet(canvas, sheet, rect: Rect2, def: Dictionary, inst: Dicti
 		else:
 			canvas.draw_texture_rect_region(quad["tex"], quad["rect"], quad["src"], quad["mod"])
 	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+	if st["heat"]:
+		draw_shimmer(canvas, rect, t, cell_px, alpha)
 	if st["sparks"]:
 		draw_sparks(canvas, rect, t, int(inst.get("uid", 0)), cell_px, alpha)
 	if st["smoke"]:
 		draw_smoke(canvas, rect, t, int(inst.get("uid", 0)), cell_px, alpha)
+
+
+## Heat shimmer over every cell of `rect` (art/fx/heat_shimmer, an alpha overlay); nothing without that art.
+static func draw_shimmer(canvas, rect: Rect2, t: float, cell_px: float, alpha := 1.0) -> void:
+	var fx = Art.fx("heat_shimmer")
+	if fx == null:
+		return
+	var src: Rect2 = fx.region(fx.loop_frame(t))
+	for y in roundi(rect.size.y / cell_px):
+		for x in roundi(rect.size.x / cell_px):
+			canvas.draw_texture_rect_region(fx.texture, Rect2(rect.position + Vector2(x, y) * cell_px, Vector2(cell_px, cell_px)), src, Color(1, 1, 1, alpha))
 
 
 ## Sparks jumping about `rect`: art/fx/sparks frames when that art exists, else a few 2 px specks.
@@ -179,7 +192,7 @@ static func draw_sparks(canvas, rect: Rect2, t: float, seed_value: int, cell_px:
 		var n := int(t * 12.0) + i * 7919 + seed_value * 104729
 		var p := rect.position + Vector2(_unit(n * 2), _unit(n * 2 + 1)) * rect.size
 		if fx != null:
-			var f: int = fx.frame_at("on", t + i * 0.13)
+			var f: int = fx.loop_frame(t + i * 0.13)
 			canvas.draw_texture_rect_region(fx.texture, Rect2(p - Vector2(fx.frame) * unit / 2.0, Vector2(fx.frame) * unit), fx.region(f), Color(1, 1, 1, alpha))
 		else:
 			canvas.draw_rect(Rect2(p, Vector2(2, 2) * unit), Color(SPARK_COLORS[i % SPARK_COLORS.size()], alpha))
@@ -193,7 +206,7 @@ static func draw_smoke(canvas, rect: Rect2, t: float, seed_value: int, cell_px: 
 		var age := fposmod(t * 0.6 + float(i) / 3.0 + _unit(seed_value + i) * 0.3, 1.0)
 		var p := rect.get_center() + Vector2((_unit(seed_value * 3 + i) - 0.5) * rect.size.x * 0.6, -age * cell_px * 1.6)
 		if fx != null:
-			var f: int = fx.frame_life("on", age)
+			var f: int = fx.life_frame(age)
 			canvas.draw_texture_rect_region(fx.texture, Rect2(p - Vector2(fx.frame) * unit / 2.0, Vector2(fx.frame) * unit), fx.region(f), Color(1, 1, 1, alpha * (1.0 - age)))
 		else:
 			canvas.draw_circle(p, (3.0 + 7.0 * age) * unit, Color(0.45, 0.46, 0.5, 0.55 * (1.0 - age) * alpha))

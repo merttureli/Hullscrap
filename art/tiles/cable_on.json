@@ -1,0 +1,13 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "autotile": "mask4",
+ "mask": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "frames": 16,
+ "notes": "Powered cable, see cable.json."
+}

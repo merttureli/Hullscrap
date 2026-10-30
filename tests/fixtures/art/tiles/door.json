@@ -3,16 +3,43 @@
   4,
   2
  ],
+ "cells": [
+  2,
+  1
+ ],
  "anims": {
+  "open": [
+   0,
+   5,
+   10
+  ],
   "closed": [
    0,
    1,
    0
   ],
-  "open": [
-   1,
+  "locked": [
+   4,
    1,
    0
   ]
+ },
+ "glow": {
+  "image": "door_glow.png",
+  "frame": [
+   6,
+   4
+  ],
+  "offset": [
+   -1,
+   -1
+  ],
+  "anims": {
+   "on": [
+    0,
+    5,
+    0
+   ]
+  }
  }
 }

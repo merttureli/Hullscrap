@@ -1,7 +1,21 @@
 {
- "frame": [32, 12],
- "orientation_rot": 3,
- "anims": {"fly": [0, 4, 16]},
- "anchors": {"head": [27, 6]},
- "notes": "Authored facing EAST (head right); orientation_rot 3 turns it to face UP, the format's rot 0. Soft glow is baked into the frames."
+ "frame": [6, 12],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 4, 16]
+ },
+ "anchors": {
+  "head": [3, 2],
+  "tail": [3, 11]
+ },
+ "glow": {
+  "image": "bolt_glow.png",
+  "frame": [14, 20],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 4, 16]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Glowing 6px pellet with a flickering tail (4 frames). Head anchor is the pellet centre."
 }

@@ -1,0 +1,14 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "autotile": "mask4",
+ "mask": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "frames": 16,
+ "tint": "multiply",
+ "notes": "Autotile by 4-neighbour mask: frame index = N*1 + E*2 + S*4 + W*8, each bit set when that neighbour is also solid. Walls fill their whole cell; open sides get the near-black outline, convex corners are chamfered (transparent corner pixels). Heavier armour plate in neutral greys: multiply the material colour over it."
+}

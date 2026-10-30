@@ -45,3 +45,4 @@ Source and licence of every art and audio file in the repo.
 | `art/items/wrench.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/items/wrench.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/palette.gpl` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `tests/fixtures/art/**` (tiny test images and JSON, every kind) | original, made for Hullscrap (hand-generated, 2-5 px) | project-owned |

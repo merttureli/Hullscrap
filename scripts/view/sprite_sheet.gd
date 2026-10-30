@@ -26,6 +26,7 @@ var layers := {}  ## crew: "legs" / "arms" sheets next to this torso sheet
 var poses := {}  ## crew arms: pose name -> {"frame": int, "mount": Vector2 or null (source px from the frame's top-left)}
 var pose := ""  ## an item: the arm pose class it is held in ("pistol", "rifle", "tool")
 var notes := ""
+var meta := {}  ## the whole JSON, for the keys only one kind of sheet uses (variants, powered, tile, length, impact, mode)
 var _tinted := {}  # "#rrggbb" -> ImageTexture
 
 
@@ -54,6 +55,7 @@ static func from_dict(d: Dictionary, img: Image, mask_img: Image = null) -> RefC
 	s.autotile = str(d.get("autotile", ""))
 	s.pose = str(d.get("pose", ""))
 	s.notes = str(d.get("notes", ""))
+	s.meta = d
 	var a = d.get("anims", d.get("animations", {}))
 	if a is Dictionary:
 		for name in a:
@@ -82,6 +84,21 @@ func origin_of_frame() -> Vector2:
 
 func has_anim(name: String) -> bool:
 	return anims.has(name)
+
+
+## The name of the first animation (an effect sheet has one: "play", "loop", "fly", "flicker"), or "".
+func primary() -> String:
+	return str(anims.keys()[0]) if not anims.is_empty() else ""
+
+
+## The frame of the sheet's own animation looping at `t` seconds (every frame at 8 fps when it names none).
+func loop_frame(t: float) -> int:
+	return frame_at(primary(), t) if not anims.is_empty() else int(maxf(t, 0.0) * 8.0) % count
+
+
+## The frame of the sheet's own animation played once over a life 0..1 (every frame when it names none).
+func life_frame(f: float) -> int:
+	return frame_life(primary(), f)
 
 
 ## First frame of animation `name` (0 when there is none).

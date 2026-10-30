@@ -62,7 +62,9 @@ var materials: Array[String] = []  # cargo ids shown first in the HUD, in tile-c
 var _session: BuildSession
 var _pal: Array[String] = []  # the numbered systems, see _palette()
 var _clock := 0.0  # seconds, for the loops of the art
-var _glow: Node2D  # additive layer for the glow art of the systems
+var _glow: Node2D  # additive layer for the glow art
+var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
+var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state
 
 var ship: Ship:
 	get:
@@ -539,6 +541,7 @@ func _ghost_note() -> String:
 func _draw() -> void:
 	if ship == null:
 		return
+	_glow_quads = []
 	for c in grid.hull:
 		draw_rect(cell_rect(c), Color("#141922"))
 		draw_rect(cell_rect(c), Color(1, 1, 1, 0.05), false, 1.0)
@@ -554,6 +557,8 @@ func _draw() -> void:
 		_draw_power()
 	for g in ghost:
 		_draw_ghost(g)
+	if _glow != null:
+		_glow.show_quads(_glow_quads)
 
 
 ## Placeholder look: flat shapes until real art lands (see docs/PLAN.md, milestone 8).
@@ -585,7 +590,7 @@ func _draw_door(piece: Array[Vector2i], col: Color, open: bool) -> void:
 			draw_rect(rects[-1], floor_col)
 	var horizontal: bool = piece[1].x != piece[0].x if piece.size() > 1 \
 		else grid._is_solid(piece[0] + Vector2i.LEFT) and grid._is_solid(piece[0] + Vector2i.RIGHT)  # a lone old-save door
-	if TileArt.door_piece(self, rects, horizontal, open, _clock):
+	if TileArt.door_piece(self, rects, horizontal, TileArt.door_fraction(_doors, piece[0], open, _clock), _glow_quads):
 		return
 	var along := Vector2.RIGHT if horizontal else Vector2.DOWN
 	var across := Vector2(along.y, along.x)
@@ -600,8 +605,13 @@ func _draw_door(piece: Array[Vector2i], col: Color, open: bool) -> void:
 
 ## Thin lines between neighbouring cable cells, a dot on every cell. `tint`: cell -> colour (power overlay).
 func _draw_cables(tint: Dictionary) -> void:
+	var live := {}  # cable cells whose network has power to give: they get the lit art
+	for n in ship.power_state.get("networks", []):
+		if float(n["supply"]) > 0.0:
+			for c in n["cells"]:
+				live[c] = true
 	for c in ship.cables.cells:
-		if TileArt.cable(self, cell_rect(c), ship.cables.has, c, tint.get(c, Color.WHITE)):
+		if TileArt.cable(self, cell_rect(c), ship.cables.has, c, live.has(c)):  # the glow over the lit cable, not on the additive layer: systems cover cables
 			continue
 		var col: Color = tint.get(c, CABLE_COLOR)
 		var mid := cell_rect(c).get_center()
@@ -615,13 +625,10 @@ func _draw_components() -> void:
 	var powered: Dictionary = ship.power_state.get("powered", {})
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
-	var glow_quads := []
 	for uid in uids:
 		var inst: Dictionary = ship.components.instances[uid]
 		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL,
-			{"powered": powered.get(uid, false), "time": _clock, "glow_out": glow_quads})
-	if _glow != null:
-		_glow.show_quads(glow_quads)
+			{"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads})
 
 
 ## Each room cell from red (empty) to blue (full); breached rooms get an outline.
