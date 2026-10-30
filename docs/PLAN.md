@@ -47,6 +47,19 @@ Every system should be **unique, FTL Multiverse style**: not just "+10% thrust",
   - You recruit them at stations.
 - **Suits** are crafted items. A crew member wearing one works in low oxygen or vacuum for a limited time (an air supply that refills in pressurised rooms). Suits take a slot from a suit locker.
 
+## Personal gear, expeditions and rare finds (Fallout Shelter / FTL style)
+- **Crew gear slots**: weapon, outfit (armour or suit), utility (e.g. a medkit, scanner or jetpack).
+  - **Basic gear can be crafted** at the Fabricator: pistols, rifles, basic armour, a basic EVA suit with a short air supply.
+  - **Special gear can't be crafted**: unique guns, exosuits, fire-resistant outfits, heat suits, cloaks. You only **find it on expeditions, buy it, trade for it or earn it from quests**.
+  - Special gear has named, quirky effects, like our systems (e.g. *Salamander Suit*: immune to fire, but slows the wearer).
+- **Unique characters**: some crew can only be recruited from exploration events (rescued survivors, defectors, strange aliens). They have personal stories and better or odd traits.
+- **Expeditions**: send a team off the ship (derelicts, stations, planets, asteroid bases).
+  - Text and choice events, FTL style. The outcome depends on the team's skills, species, traits and gear.
+  - Rewards: materials, blueprints, gear, new crew.
+  - **Risk is real and permanent**: crew can be injured, captured, killed or **just disappear**, and **any gear they carried is gone with them**. Taking your best exosuit makes success likelier, but you might lose it. That tension is the point.
+  - Expedition results come from seeded randomness, so they can be replayed and tested.
+- Events and expeditions are **data** (`data/events/*.json`): a scene text, choices, requirements (trait, gear, skill), and weighted outcomes.
+
 ## Fabricator levels and workshop modules
 - Every recipe has a `fab_level` (1 to 4) and optional `tools` (e.g. `laser_cutter`, `robot_arm`, `nanoforge`, `plasma_furnace`).
 - The **Fabricator's level** comes from **workshop modules placed in the same room**:
@@ -101,6 +114,7 @@ Reference games for ideas, not code: Space Haven (closest), FTL, Cosmoteer, Baro
 4b. **Species and suits**: species traits from data, suits with an air supply, suit lockers.
 5. **Flight + quirks v1.** Abilities (active and passive), heat and overheating, operator requirements. The first quirky engines and reactors.
 5a. **Flight.** The ship-centred camera, with thrust and turning from the engines placed versus the ship's mass. The starfield drifts with velocity.
+5b. **Expeditions v1**: send a team to a derelict. Event and choice data, outcomes from skills and gear, permanent loss of crew and gear. Personal gear slots, with basic gear craftable and special gear only found.
 6. **Combat v1.**
    - A tactical view against one AI ship.
    - Weapons fire at targeted rooms. Shields absorb.
