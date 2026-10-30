@@ -19,8 +19,8 @@ const VERSION := 3
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
 const START_PATH := "res://data/start.json"
-const START_SIZE := Vector2i(31, 31)
-const START_RADIUS := 14.0
+const START_SIZE := Vector2i(63, 63)
+const START_RADIUS := 28.0
 
 var name := "Ship"
 var grid: ShipGrid

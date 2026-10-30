@@ -12,12 +12,12 @@ var comps: Components
 var cables: Cables
 
 
-## A 15x15 circular hull with no tiles, no components and no cables.
+## A 31x31 circular hull with no tiles, no components and no cables.
 func _setup() -> void:
 	var defs := TileDefs.new()
 	defs.load_file("res://data/tiles.json")
-	grid = ShipGrid.new(Vector2i(15, 15), defs)
-	grid.fill_circle_hull(7.0)
+	grid = ShipGrid.new(Vector2i(31, 31), defs)
+	grid.fill_circle_hull(15.0)
 	comps = Components.new()
 	comps.load_defs("res://data/components.json")
 	cables = Cables.new()
@@ -73,17 +73,17 @@ func test_mass_counts_tiles() -> void:
 func test_mass_counts_components() -> void:
 	_setup()
 	var f := Flight.new()
-	_floor(4, 6, 8, 2)  # 16 floors
-	_put("reactor_mk1", 4, 6)
-	near(f.mass_of(grid, comps, cables), 16.0 + 14.0, "a listed component uses its own mass")
-	_put("reactor_mk2", 6, 6)
-	near(f.mass_of(grid, comps, cables), 16.0 + 14.0 + 16.0, "the second listed component")
-	_put("engine_mk1", 8, 6)  # 2x1 = 2 cells
-	near(f.mass_of(grid, comps, cables), 16.0 + 14.0 + 16.0 + 6.0, "an unlisted 2x1 weighs 3 per cell")
-	_put("helm", 10, 6)
-	near(f.mass_of(grid, comps, cables), 16.0 + 14.0 + 16.0 + 6.0 + 3.0, "an unlisted 1x1")
-	comps.remove_at(Vector2i(4, 6))
-	near(f.mass_of(grid, comps, cables), 16.0 + 16.0 + 6.0 + 3.0, "removing a component lightens the ship")
+	_floor(4, 12, 24, 4)  # 96 floors
+	_put("reactor_mk1", 4, 12)
+	near(f.mass_of(grid, comps, cables), 96.0 + 14.0, "a listed component uses its own mass")
+	_put("reactor_mk2", 8, 12)
+	near(f.mass_of(grid, comps, cables), 96.0 + 14.0 + 16.0, "the second listed component")
+	_put("engine_mk1", 12, 12)  # 4x2 = 8 cells
+	near(f.mass_of(grid, comps, cables), 96.0 + 14.0 + 16.0 + 24.0, "an unlisted 4x2 weighs 3 per cell")
+	_put("helm", 16, 12)  # 2x2 = 4 cells
+	near(f.mass_of(grid, comps, cables), 96.0 + 14.0 + 16.0 + 24.0 + 12.0, "an unlisted 2x2")
+	comps.remove_at(Vector2i(4, 12))
+	near(f.mass_of(grid, comps, cables), 96.0 + 16.0 + 24.0 + 12.0, "removing a component lightens the ship")
 
 
 func test_mass_counts_cables() -> void:
@@ -100,15 +100,15 @@ func test_mass_counts_cables() -> void:
 ## A reactor, a helm and three engines (mk1, mk2, mk1 off the cable); returns the uids by name.
 func _engine_ship() -> Dictionary:
 	_setup()
-	_floor(2, 5, 9, 3)
+	_floor(2, 12, 24, 8)
 	var s := {}
-	s["reactor"] = _put("reactor_mk1", 2, 5)
-	s["helm"] = _put("helm", 4, 5)
-	s["e1"] = _put("engine_mk1", 5, 5)
-	s["e2"] = _put("engine_mk2", 7, 5)
-	s["off"] = _put("engine_mk1", 5, 7)
-	for x in range(3, 9):
-		check(cables.place(grid, Vector2i(x, 5)), "cable at %d" % x)
+	s["reactor"] = _put("reactor_mk1", 2, 12)
+	s["helm"] = _put("helm", 6, 12)
+	s["e1"] = _put("engine_mk1", 8, 12)
+	s["e2"] = _put("engine_mk2", 12, 12)
+	s["off"] = _put("engine_mk1", 8, 16)
+	for x in range(3, 14):
+		check(cables.place(grid, Vector2i(x, 12)), "cable at %d" % x)
 	return s
 
 
