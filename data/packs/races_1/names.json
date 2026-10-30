@@ -1,0 +1,10 @@
+{
+	"crew": {
+		"kett": ["Tsk", "Ktik", "Zzik", "Trrk", "Chik", "Skrit", "Klak", "Vrrk", "Tcha", "Xikk", "Drikt", "Kzzt"],
+		"mire": ["Bloop", "Glub", "Mool", "Wubb", "Oomi", "Plom", "Bogo", "Lulu", "Moll", "Dribb", "Nuub", "Mubu"],
+		"sporeling": ["Mallow", "Morel", "Sorrel", "Hush", "Nettle", "Lull", "Loam", "Spore", "Velvet", "Murmur", "Downy", "Puffball"],
+		"gauntling": ["Rivet", "Patch", "Clank", "Gasket", "Shunt", "Splice", "Lefty", "Old Weld", "Crank", "Spanner", "Hinge", "Half-Pint"],
+		"prismatic": ["Glint", "Facet", "Gleam", "Sheen", "Lustre", "Spectra", "Shimmer", "Gloss", "Beryl", "Opal", "Prisma", "Dazzle"],
+		"grundl": ["Bulk", "Dorn", "Hodd", "Gronn", "Tubb", "Barro", "Mugg", "Brunn", "Thud", "Ballast", "Dunnage", "Hogshead"]
+	}
+}

@@ -14,12 +14,16 @@ const Arena = preload("res://scripts/combat/arena.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
-const VERSION := 1
+## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
+const VERSION := 2
+const MIN_VERSION := 1
+## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
+const FUEL_PARTS := 100
 const CONFIG_PATH := "res://data/drift.json"
 const FACTIONS_PATH := "res://data/factions.json"
-const NAMES_PATH := "res://data/names.json"
 const ITEMS_PATH := "res://data/items.json"
 const SAVE_PATH := "user://campaign.json"
 const REFUSED_TEXT := "The dock master turns you away."
@@ -50,6 +54,7 @@ var revealed := {}  ## node ids shown on the map although far from any visited n
 var logs_found := {}  ## derelict log ids found: id -> true
 var reminded := -1  ## the payment cycle (jumps / every) Ma's reminder was shown in
 var hull_loss := 0  ## hull integrity points lost; repaired at stations
+var fuel_part := 0  ## parts (hundredths) of a fuel the jumps have used up and not yet paid; 0..FUEL_PARTS-1, spent as whole fuel when they reach FUEL_PARTS
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
 var _hull_key := -1
 var _hull_max := 0
@@ -246,16 +251,16 @@ func jump_block(to: String, ship, drift_jump := false) -> String:
 	if drift.node(to)["type"] == "gate":
 		return DARK_TEXT
 	if drift_jump:
-		if ship.inventory.count("fuel") > 0:
+		if not fuel_short(ship):
 			return "you still have fuel"
 		if hull_left(ship) <= int(cfg["fuel"]["drift_hull"]):
 			return "the hull would not survive a drift jump"
 		return ""
-	return NO_FUEL if ship.inventory.count("fuel") < 1 else ""
+	return NO_FUEL if fuel_short(ship) else ""
 
 
-## Jump along a lane to `to`: 1 fuel (or 15 integrity for a drift jump), +1 on the jump counter, which
-## may bring a payment due. Returns {ok, why, node, drift, notes}; `notes` are lines to tell the player.
+## Jump along a lane to `to`: the fuel of jump_cost() (or 15 integrity for a drift jump), +1 on the jump
+## counter, which may bring a payment due. Returns {ok, why, node, drift, notes}; `notes` are lines to tell the player.
 func jump(to: String, ship, drift_jump := false) -> Dictionary:
 	var why := jump_block(to, ship, drift_jump)
 	if why != "":
@@ -266,12 +271,53 @@ func jump(to: String, ship, drift_jump := false) -> Dictionary:
 		change_hull(ship, -cost)
 		notes.append("The drift jump tears at the hull (-%d integrity)." % cost)
 	else:
-		ship.inventory.add("fuel", -1)
+		var parts := fuel_part + jump_cost(ship)
+		ship.inventory.add("fuel", -(parts / FUEL_PARTS))
+		fuel_part = parts % FUEL_PARTS
 	flags.erase("at_" + str(drift.node(current).get("place", "")))  # undocked
 	current = to
 	visited[to] = true
 	notes.append_array(_advance(1))
 	return {"ok": true, "why": "", "node": to, "drift": drift_jump, "notes": notes}
+
+
+## What the next jump costs, in parts (hundredths) of a fuel: the thrust-weighted mean `fuel_mult` of the powered
+## engines (an offline mount, with its outside half disabled or its link cut, is not powered and does not count; an
+## engine without a `fuel_mult` counts as 1.0), rounded to a part. A ship with no powered engine pays a whole fuel.
+func jump_cost(ship) -> int:
+	ship.refresh()
+	var powered: Dictionary = ship.power_state.get("powered", {})
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	var weighted := 0.0
+	var thrust := 0.0
+	for uid in uids:
+		var id := str(ship.components.instances[uid]["id"])
+		if not powered.get(uid, false) or str(ship.components.def(id).get("family", "")) != "engine":
+			continue
+		var t := float(ship.effective(id)["stats"].get("thrust", 0.0))
+		weighted += t * float(ship.components.def(id).get("stats", {}).get("fuel_mult", 1.0))
+		thrust += t
+	if thrust <= 0.0:
+		return FUEL_PARTS
+	return maxi(1, roundi(weighted / thrust * FUEL_PARTS))
+
+
+## The whole fuel the next jump takes from the cargo: the remainder plus its cost, in whole fuels.
+func jump_fuel(ship) -> int:
+	return (fuel_part + jump_cost(ship)) / FUEL_PARTS
+
+
+## Is the cargo short of the fuel the next jump takes?
+func fuel_short(ship) -> bool:
+	return ship.inventory.count("fuel") < jump_fuel(ship)
+
+
+## A cost in parts as text: "1 fuel", "0.5 fuel", "1.25 fuel".
+static func fuel_text(parts: int) -> String:
+	if parts % FUEL_PARTS == 0:
+		return "%d fuel" % (parts / FUEL_PARTS)
+	return ("%d.%02d" % [parts / FUEL_PARTS, parts % FUEL_PARTS]).rstrip("0") + " fuel"
 
 
 ## Time passes by `n` jumps: the counter goes up and each payment date crossed is checked.
@@ -483,14 +529,13 @@ func salvage_event(ship) -> Dictionary:
 
 # --- crew --------------------------------------------------------------------------------------------------------
 
-## A name for a new `species` crew member nobody aboard has: from data/names.json when it exists
-## (crew -> species -> names), else the names of data/crew.json.
+## A name for a new `species` crew member nobody aboard has: from the name pools (crew -> species ->
+## names, data/names.json and the packs' names.json through the content loader), else the names of data/crew.json.
 func crew_name(species: String, ship) -> String:
 	var pool: Array = []
-	if FileAccess.file_exists(NAMES_PATH):
-		var data = JSON.parse_string(FileAccess.get_file_as_string(NAMES_PATH))
-		if data is Dictionary and data.get("crew") is Dictionary and data["crew"].get(species) is Array:
-			pool = data["crew"][species]
+	var crew_pools = Content.names().get("crew")
+	if crew_pools is Dictionary and crew_pools.get(species) is Array:
+		pool = crew_pools[species]
 	if pool.is_empty():
 		pool = CrewMember.config().get("names", [])
 	var free: Array = pool.filter(func(n): return not ship.crew.any(func(m): return m.name == n))
@@ -690,12 +735,12 @@ func to_dict() -> Dictionary:
 	return {"version": VERSION, "seed": seed_value, "rng_state": str(rng.state), "map": drift.to_dict(), "current": current,
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
 		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
-		"offers": offers.duplicate(true)}
+		"fuel_part": fuel_part, "offers": offers.duplicate(true)}
 
 
 ## Replace the state with a saved one. Returns "" on success, else why not (and nothing changes).
 func load_dict(d: Dictionary) -> String:
-	if int(d.get("version", 0)) != VERSION:
+	if int(d.get("version", 0)) < MIN_VERSION or int(d.get("version", 0)) > VERSION:
 		return "unsupported campaign version"
 	var map = Drift.from_dict(d["map"]) if d.get("map") is Dictionary else null
 	if map == null:
@@ -725,6 +770,7 @@ func load_dict(d: Dictionary) -> String:
 	paid = int(d["paid"])
 	jumps = int(d["jumps"])
 	hull_loss = int(d["hull_loss"])
+	fuel_part = clampi(int(d.get("fuel_part", 0)), 0, FUEL_PARTS - 1)  # a version 1 save has none
 	offers = d["offers"].duplicate(true)
 	_hull_key = -1
 	return ""

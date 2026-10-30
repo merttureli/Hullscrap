@@ -1,0 +1,10 @@
+{
+	"species": {
+		"kett": {"name": "Kett", "hp": 80, "speed": 1.0, "traits": ["swarm"], "rig": "kett", "sidearm": "rivet_gun", "notes": "insectoid hive-workers; hp x0.8; they get sad alone"},
+		"mire": {"name": "Mire", "hp": 100, "speed": 1.0, "traits": ["firefighter", "dries_out"], "rig": "mire", "sidearm": "service_pistol", "notes": "amphibian firefighters: extinguish x2, fire damage x0.5, dry out in hot rooms"},
+		"sporeling": {"name": "Sporeling", "hp": 100, "speed": 0.8, "traits": ["aura_spores", "flammable"], "rig": "sporeling", "sidearm": "flare_gun", "notes": "walking fungus colonies: speed x0.8, fire damage x1.5"},
+		"gauntling": {"name": "Gauntling", "hp": 100, "speed": 1.0, "traits": ["mechanical", "half_lungs", "ion_prone", "tinkerer"], "rig": "gauntling", "sidearm": "multi_tool", "notes": "salvage cyborgs: repair time x0.8, o2_use 0.5, ion stun 3 s"},
+		"prismatic": {"name": "Prismatic", "hp": 100, "speed": 1.0, "traits": ["crystal_conduit", "crystal_body"], "rig": "prismatic", "sidearm": "gatekeepers_lance", "notes": "Lumen crystal-born: +1 power to the system they man, ion damage x2, melee x0.5"},
+		"grundl": {"name": "Grundl", "hp": 180, "speed": 0.7, "traits": ["hauler", "clumsy"], "rig": "grundl", "sidearm": "quarry_hammer", "notes": "huge haulers, drawn on the large rig over the normal 2x2 body: hp x1.8, speed x0.7, restock x2, melee x2, repair time x1.3"}
+	}
+}

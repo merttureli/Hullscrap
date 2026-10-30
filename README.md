@@ -2,7 +2,14 @@
 
 A top-down 2D spaceship game. Start with a ready-made ship (or an empty hull), build walls, rooms and systems on a grid, run power to them, crew the ship, fly it, dock and fight. The plan is in [`docs/PLAN.md`](docs/PLAN.md).
 
-## Play the current build
+## Play the beta (no install)
+Every push to `main` builds the game for **Windows, Linux and macOS** on GitHub Actions (the **beta builds** workflow).
+1. On GitHub, open **Actions → beta builds**, then the latest green run.
+2. Under **Artifacts**, download **Hullscrap-Windows** (or Linux / macOS) and unzip it.
+3. Run **Hullscrap.exe** (Linux: `Hullscrap.x86_64`; macOS: unzip the app, then right-click → Open the first time, because it isn't signed).
+Saves go to Godot's user folder (on Windows: `%APPDATA%\Godot\app_userdata\Hullscrap`).
+
+## Play from the source (with the Godot editor)
 1. Install **Godot 4.6.3** (standard build, not .NET) from https://godotengine.org/download/archive/4.6.3-stable/.
 2. Open Godot, choose **Import**, and pick this folder's `project.godot`.
 3. Press **F5** to play. The game opens on **Choose your ship** (see [Starter ships](#starter-ships)): press **1**, **2** or **3**, then **B** for play mode and **K** to fight the test pirate (**Shift+K**: the Rustfang rammer). **M** opens the map of the Drift (the campaign).

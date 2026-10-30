@@ -22,6 +22,7 @@ extends RefCounted
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
 
 const Content = preload("res://scripts/data/content.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
@@ -35,8 +36,6 @@ const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
 const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log"]
 const RECRUIT_KEYS: Array = ["name", "species"]
-const SPECIES: Array = ["human", "basalt", "emberkin", "fenn"]
-const TRAITS: Array = ["no_breath", "heat_resistant", "fast_repair", "suit"]
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
 const SHIPS_DIR := "res://data/ships/"
 const DEFAULT_WEIGHT := 10.0
@@ -321,7 +320,7 @@ func _reason(req: Dictionary, ship) -> String:
 	if req.has("species"):
 		return " / ".join(_list(req["species"]).map(func(s): return str(s).capitalize()))
 	if req.has("trait"):
-		return " / ".join(_list(req["trait"]).map(func(t): return TRAIT_LABELS.get(t, str(t).capitalize())))
+		return " / ".join(_list(req["trait"]).map(func(t): return TRAIT_LABELS.get(t, TraitSet.library().get(str(t), {}).get("name", str(t).capitalize()))))
 	return " / ".join(_list(req.get("component")).map(func(id): return ship.components.def(str(id)).get("name", str(id)) if ship.components.has(str(id)) else str(id)))
 
 
@@ -492,8 +491,14 @@ static func _known() -> Dictionary:
 		for f in fac.get("factions", []):
 			if not bool(f.get("hostile", false)):
 				factions[str(f["id"])] = true
+	var species := {}  # every species of data/species.json and the packs, and every trait of the library
+	for id in Content.ids("species"):
+		species[id] = true
+	var traits := {}
+	for id in TraitSet.library():
+		traits[id] = true
 	return {"items": items, "components": _ids_of("res://data/components.json", "components"), "recipes": _ids_of("res://data/recipes.json", "recipes"),
-		"places": places, "factions": factions}
+		"places": places, "factions": factions, "species": species, "traits": traits}
 
 
 func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[String]) -> void:
@@ -590,11 +595,11 @@ func _check_req(req, allowed: Array, where: String, known: Dictionary, bad: Call
 	if req.has("node") and not (NODE_TYPES.has(req["node"]) or known["places"].has(req["node"])):
 		bad.call("%s: node '%s' is neither a node type nor a place id" % [where, req["node"]])
 	for s in _list(req.get("species")):
-		if not SPECIES.has(s):
-			bad.call("%s: unknown species '%s' (known: %s)" % [where, s, ", ".join(SPECIES)])
+		if not known["species"].has(s):
+			bad.call("%s: unknown species '%s' (known: %s)" % [where, s, ", ".join(known["species"].keys())])
 	for t in _list(req.get("trait")):
-		if not TRAITS.has(t):
-			bad.call("%s: unknown trait '%s' (known: %s)" % [where, t, ", ".join(TRAITS)])
+		if not known["traits"].has(t):
+			bad.call("%s: unknown trait '%s' (known: %s)" % [where, t, ", ".join(known["traits"].keys())])
 	for id in _list(req.get("component")):
 		if not known["components"].has(id):
 			bad.call("%s: unknown component '%s'" % [where, id])
@@ -654,8 +659,8 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 			bad.call(where + ": recruit must be {name?, species}")
 			continue
 		_check_keys(r, RECRUIT_KEYS, where + " recruit: ", bad)
-		if not SPECIES.has(r.get("species")):
-			bad.call("%s: recruit has unknown species '%s' (known: %s)" % [where, r.get("species"), ", ".join(SPECIES)])
+		if not known["species"].has(r.get("species")):
+			bad.call("%s: recruit has unknown species '%s' (known: %s)" % [where, r.get("species"), ", ".join(known["species"].keys())])
 	if eff.has("lose_crew") and not (eff["lose_crew"] is bool or _is_int(eff["lose_crew"])):
 		bad.call(where + ": lose_crew must be true or a count")
 	for b in _list(eff.get("blueprint")):

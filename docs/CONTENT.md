@@ -412,6 +412,16 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
 | basalt | 140 | 0.75 | `no_breath` (no damage from no air) | heals others at ×0.5 (bad medics); rig `basalt`, no helmet |
 | emberkin | 90 | 1.0 | `heat_resistant` (fire damage ×0.25, can stand in overheated rooms) | — |
 | fenn | 75 | 1.15 | `fast_repair` (repair and breach-patch time ×0.6) | — |
+| kett | 80 | 1.0 | `swarm` (work +25% per other Kett in the room, at most +50%) | pack `races_1`; rivet gun |
+| mire | 100 | 1.0 | `firefighter` (extinguish ×2, fire damage ×0.5), `dries_out` (−2 hp/s in a room whose hottest part is above 60) | pack `races_1`; service pistol |
+| sporeling | 100 | 0.8 | `aura_spores` (their room gains 0.01 air/s and heals everyone 1 hp/s), `flammable` (fire damage ×1.5) | pack `races_1`; flare gun |
+| gauntling | 100 | 1.0 | `mechanical` (beds do not heal; a crewmate's `repair_crew` job does), `half_lungs` (air ×0.5), `ion_prone` (stunned 3 s by ion), `tinkerer` (repair time ×0.8) | pack `races_1`; multi-tool |
+| prismatic | 100 | 1.0 | `crystal_conduit` (+1 power to the system they man), `crystal_body` (ion damage ×2, melee ×0.5) | pack `races_1`; Gatekeeper's lance |
+| grundl | 180 | 0.7 | `hauler` (restock ×2, melee ×2), `clumsy` (repair time ×1.3) | pack `races_1`; quarry hammer; the large rig over the normal 2×2 body |
+- **Traits are a library** (`data/traits.json`, plus the `traits.json` of every pack): each is a bag of generic keys that `scripts/crew/traits.gd` (`TraitSet.of(member)`) merges into numbers, and every rule a key changes reads them there, so a new race is data only. The keys and what they do are in `data/traits.json` `_doc`; a species entry may also carry keys inline (Basalt's `work_mult.heal_others`).
+  - Work speeds are factors on speed (2 = twice as fast); a race spec's repair "×0.8" is a time factor (as Fenn's ×0.6), so its work speed is 1 / 0.8.
+  - Room heat is the heat of the hottest part in the room (`Heat.room_heat`).
+  - An ion hit costs each crew member in the room it lands in `ion_hp` (`data/crew.json`) per point of damage, times their `damage_taken.ion`, and stuns them for `ion_stun` seconds.
 - Traits from species merge with personal traits (`crew.json` `traits`) and with gear (`suit` from an EVA suit). The existing `abilities.meets()` sees all of them.
 - **Hand weapons** live in `data/hand_weapons.json`: id, name, culture (concord, clans, lumen, basalt, emberkin, fenn), class (pistol, rifle, heavy, melee, tool), damage, rate, range, and the art id.
   - They're used for on-foot fights later. For now crew carry their culture's sidearm: drawn when idle in combat, holstered at work.

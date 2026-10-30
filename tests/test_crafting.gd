@@ -3,6 +3,7 @@ extends "res://tests/base_test.gd"
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 const RECIPES := "res://data/recipes.json"
 const MATERIALS := "res://data/materials.json"
@@ -10,7 +11,7 @@ const ITEMS := "res://data/items.json"
 const ITEM_KINDS := ["ammo", "gear", "special"]
 ## Mk1 parts of the standard line that are blueprints to find, not known at the start (every other
 ## Mk1 Scrap or Standard system is known; Neon is always unlocked).
-const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1", "laser_turret_mk1"]
+const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1", "laser_turret_mk1", "strafe_jets_mk1", "longburn_mk1"]
 const RARITIES := ["common", "uncommon", "rare", "very_rare"]
 const CATEGORIES := ["system", "gear", "material", "module"]
 const WORKSHOP_TOOLS := ["laser_cutter", "nanoforge"]  # what workshop.gd can provide
@@ -83,13 +84,13 @@ func test_recipe_data_is_valid() -> void:
 	var c := _crafting()
 	var comps := _comps()
 	var items := _items()
-	var mats: Array = JSON.parse_string(FileAccess.get_file_as_string(MATERIALS))["materials"]
+	var mats: Array = Content.read(MATERIALS)["materials"]  # the core file and the packs
 	eq(c.materials.size(), mats.size(), "material ids are unique")
 	for m in mats:
 		for k in ["id", "name", "color", "rarity"]:
 			check(m.has(k), "material %s has %s" % [m.get("id", "?"), k])
 		check(RARITIES.has(m["rarity"]), "%s rarity %s is known" % [m["id"], m["rarity"]])
-	for id in ["scrap", "copper", "titanium", "silicon", "polymer", "crystal", "plasma_cell", "nanite_paste"]:
+	for id in ["scrap", "copper", "titanium", "silicon", "polymer", "crystal", "plasma_cell", "nanite_paste", "military_circuit", "gate_alloy", "void_crystal"]:
 		check(c.materials.has(id), "material " + id)
 	check(c.ids().size() > 0, "there are recipes")
 	for id in c.ids():

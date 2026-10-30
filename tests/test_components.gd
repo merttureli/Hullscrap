@@ -66,12 +66,17 @@ func test_data_is_complete() -> void:
 		"helm": [-1, 2, 1], "medbay": [-2, 3, 1], "bed": [0, 0, 1], "fabricator": [-2, 6, 1],
 		"robot_arm": [-1, 6, 1], "laser_cutter": [-2, 6, 1], "assembly_rig": [-2, 6, 1], "nanoforge": [-4, 6, 1],
 		"reactor_scrap_mk1": [6, 0, 1], "engine_scrap_mk1": [-2, 4, 1], "oxygen_scrap_mk1": [-2, 1, 1],
-		"reactor_neon_mk1": [16, 0, 1], "engine_neon_mk1": [-3, 4, 1], "radiator": [-1, 2, 1],
+		"reactor_neon_mk1": [16, 0, 1], "engine_neon_mk1": [-2, 4, 1], "radiator": [-1, 2, 1],
 		"pulse_mk1": [-2, 5, 1], "pulse_mk2": [-3, 5, 2], "rattle_burst_scrap": [-2, 5, 1], "shrapnel_cannon_scrap": [-2, 5, 1],
 		"bolt_thrower_scrap": [-1, 5, 1], "artemis_mk1": [-2, 5, 1], "ion_blast_mk1": [-3, 5, 1], "siren_ion_neon": [-3, 5, 1],
 		"heat_lance_neon": [-4, 5, 1], "leech_laser": [-3, 5, 2], "breach_harpoon": [-2, 5, 2],
 		"shield_scrap_mk1": [-3, 3, 1], "shield_mk2": [-4, 3, 2], "shield_neon_mk1": [-4, 3, 1], "mirror_veil": [-3, 3, 2],
 		"afterburner": [-3, 4, 2], "inertial_dampener": [-2, 3, 2], "battering_bow": [0, 0, 2], "reactor_scrap_kettle": [8, 0, 1],
+		# engine wave 1 (data/packs/engines_1)
+		"engine_mk3": [-4, 4, 3], "engine_mk4": [-5, 4, 4], "engine_mk5": [-6, 4, 5], "engine_scrap_mk2": [-3, 4, 2], "engine_scrap_mk3": [-4, 4, 3],
+		"engine_scrap_mk4": [-5, 4, 4], "engine_neon_mk2": [-3, 4, 2], "engine_neon_mk3": [-4, 4, 3], "engine_neon_mk4": [-5, 4, 4],
+		"strafe_jets_mk1": [-1, 4, 1], "strafe_jets_mk2": [-2, 4, 2], "strafe_jets_mk3": [-2, 4, 3],
+		"longburn_mk1": [-2, 4, 1], "longburn_mk2": [-3, 4, 2], "longburn_mk3": [-4, 4, 3],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:
