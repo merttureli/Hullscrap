@@ -132,7 +132,8 @@ Walls stop being only squares. **Any wall material can take a shape**, for style
     - `full` (today's wall);
     - `slope45` (1 cell, half triangle);
     - `slope2` (2×1 cells, a shallow ~27° ramp: a small triangle plus a trapezoid);
-    - `round2` (2×2 cells, a quarter-circle corner approximated by a polygon).
+    - `round2` (2×2 cells): a convex rounded corner. At rotation 0 the solid region is the **quarter disk centred at the piece's bottom-right corner (2,2) with radius 2**: solid toward the bottom-right, empty (space or floor) at the top-left. The arc is an 8-segment polygon.
+    - `tri` at rotation 0 is the **bottom-left half** (the diagonal runs from the top-left corner to the bottom-right). `slope2` at rotation 0 rises from (0,1) to (2,0) across its two cells, solid below the line.
   - A shaped cell stores `shape`, `rot` and `mirror` next to its material tile.
 - **Area scaling**: hp, mass and cost scale with the shape's solid area (triangle = 0.5, minimum 1 hp, cost rounded up). Sloped hulls are lighter per cell but take more cells to wrap a room.
 - **Rooms and walking**: in v1 a shaped cell is fully **solid** for sealing rooms and for pathfinding. Its open part is drawn as floor (inside) or space (outside) based on its neighbours.
@@ -145,6 +146,29 @@ Walls stop being only squares. **Any wall material can take a shape**, for style
 - **Building**: in the Tiles palette, **T** cycles the shape (full → slope45 → slope2 → round2), **R** rotates, **Shift+R** mirrors.
   - A **Round Off** tool (later) converts the hull's convex outer corners into slopes automatically.
 - **Exterior hull skin**: outer solid cells (next to space) get a hull-skin layer drawn outside (panel lines, rivets, material tint, edges that follow the slopes and curves). In combat at a distance the skin is what you see, as in FTL.
+
+## 4e. Hitboxes and ramming: ships collide physically (owner, 2026-10-30)
+Ships are physical bodies made of their cells. **They collide, and both take damage**, so **ram builds** are a real strategy.
+- **Hitboxes**:
+  - Every solid cell (walls, doors, component cells, and **shaped cells with their real polygons**) is part of the ship's hitbox, in ship-local space, rotated with the ship.
+  - Broad phase: bounding circles. Narrow phase: only **outer cells** (solid cells next to non-solid), tested against the other ship's cells. Contacts are pairs of overlapping cells, each with a point, normal and penetration.
+- **Response** (fixed 1/60 s substeps, deterministic):
+  - Ships are pushed apart along the contact normal, weighted by inverse mass.
+  - Impulse `j = (1 + e) · v_rel·n / (1/mA + 1/mB + angular terms)` with restitution `e = 0.2`, applied to both velocities **and spins**. The moment of inertia comes from the ship's cells, so off-centre hits spin you.
+  - Mass is the flight mass (heavy armour makes a battering ram, and a slow one).
+- **Damage**:
+  - Impact energy `E = ½ · μ · (v_rel·n)²` with reduced mass `μ = mA·mB/(mA+mB)`.
+  - Below a safe speed (`ram.min_speed`, about 40 px/s relative) there's no damage: a gentle bump, which docking needs.
+  - Above it, each ship takes `E × ram.damage_k`, spread over the cells in contact (more to the cells hit hardest), as **kinetic** damage. Material resistance and slope angle apply (a glancing slope contact does less, per the sloped-armour rule).
+  - Walls at 0 hp breach, components at 0 are disabled, and the lost hp lowers hull integrity.
+  - Crew in rooms touching the impact take a knock (5 hp per 100 px/s of impact).
+- **Ram content**:
+  - **Ram Plating** (wall material, standard line, C): hp 12, mass 4, kinetic resist 0.4. Quirk `ram`: it **deals 2× ram damage and takes 0.5×**. A bow of it, plus slopes to glance off return fire, is the classic ram build.
+  - **Inertial Dampener** (utility component, 2×2, C, power −2): halves ram damage taken by your **non-ram** cells and stops crew knocks. The counter.
+  - **Scrapper "Battering Bow"** (★ found): a 4×2 bow component. Ram damage ×3, and it **latches on** (a tether) for 3 s after a hit, a natural boarding opener.
+- **Pilot AI**: ship designs may set `"ai": {"style": "rammer"}`. A rammer closes at full thrust with its bow (the side with the most ram plating) aimed at you, uses its engine ability on approach, and backs off after impact to come around again.
+- **Wrecks and debris**: wrecked ships stay physical. You can ram them, push them, and later tow them.
+- **Tuning** (`data/collision.json`): `restitution`, `min_speed`, `damage_k`, `crew_knock`, `separation_slop`.
 
 ## 5. Abilities and quirks (`scripts/sim/abilities.gd`)
 - An ability is `{id, name, type: active|passive, duration, cooldown, effects, side_effects, operator_needs}`.
