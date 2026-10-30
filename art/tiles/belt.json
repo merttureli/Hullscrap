@@ -1,0 +1,29 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "autotile": "mask4",
+ "mask": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "frames": 16,
+ "layout": "column = mask (N*1 + E*2 + S*4 + W*8), row = scroll frame",
+ "scroll_frames": 4,
+ "scroll_fps": 8,
+ "anims": {
+  "scroll": [
+   0,
+   4,
+   8
+  ]
+ },
+ "notes": "Conveyor-belt floor overlay, flat and low contrast so crew read on top. Treads scroll north on vertical arms and east on horizontal arms (4 frames loop); the game mirrors or rotates the draw to the belt heading. Frame for mask m, scroll step f is the 16x16 cell at x = m*16, y = f*16."
+}

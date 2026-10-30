@@ -1,33 +1,104 @@
 # Assets
 
-Source and licence of every art and audio file in the repo. All art so far is original, made for Hullscrap, and project-owned: generated pixel by pixel from the scripts in `art/_src/` (`px.py` helpers for the systems and crew, `px_structure.py` for the tiles, effects and projectiles; run `art/_src/build_all.py` and `art/_src/build.py`). Each PNG has a `.json` beside it, except the `_glow` layers and `_color` masks, which are described by the JSON of the sprite they belong to.
+Source and licence of every art and audio file in the repo.
 
 | File | Source | Licence |
 |---|---|---|
-| `art/_src/*.py` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/assembly_rig.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/assembly_rig.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/assembly_rig_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/bed.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/bed.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_neon.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_neon.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_neon_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_scrap.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_scrap.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_scrap_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_std.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_std.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/belt_drive_std_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/engine_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/engine_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/engine_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk1_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk1_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk1_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk2_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk2_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_mk2_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_neon_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_neon_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_neon_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_neon_mk1_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_neon_mk1_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_neon_mk1_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_scrap_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_scrap_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_scrap_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_scrap_mk1_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_scrap_mk1_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/engine_scrap_mk1_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/fabricator.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/fabricator.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/fabricator_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/helm.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/helm.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/helm_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/laser_cutter.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/laser_cutter.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/laser_cutter_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/laser_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/laser_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/laser_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/medbay.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/medbay.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/medbay_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/mirror_veil.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/mirror_veil.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/mirror_veil_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/nanoforge.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/nanoforge.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/nanoforge_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/oxygen_gen.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/oxygen_gen.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/oxygen_gen_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/oxygen_scrap_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/oxygen_scrap_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/oxygen_scrap_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/radiator.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/radiator.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/radiator_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/reactor_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/reactor_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/reactor_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_neon_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_neon_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_neon_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_scrap_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_scrap_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_scrap_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/robot_arm.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/robot_arm.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/robot_arm_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/shield_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/shield_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/shield_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_neon_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_neon_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_neon_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_scrap_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_scrap_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/shield_scrap_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/basalt/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/basalt/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/basalt/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -69,16 +140,23 @@ Source and licence of every art and audio file in the repo. All art so far is or
 | `art/crew/human/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/human/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/human/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/fx/explosion.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/explosion.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/explosion_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/fx/fire.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/fire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/fire_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/fx/heat_shimmer.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/heat_shimmer.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/fx/muzzle.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/muzzle.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/muzzle_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/fx/shield_ripple.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/shield_ripple.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/shield_ripple_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/fx/smoke.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/smoke.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/fx/sparks.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/sparks.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/combat_vest.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/combat_vest.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -155,72 +233,63 @@ Source and licence of every art and audio file in the repo. All art so far is or
 | `art/items/wrench.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/items/wrench.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/palette.gpl` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/projectiles/beam.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/beam.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/beam_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/projectiles/beam_impact.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/beam_impact.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/beam_impact_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/projectiles/bolt.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/bolt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/bolt_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/projectiles/flak.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/flak.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/flak_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/projectiles/laser.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/laser.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/laser_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/projectiles/laser_impact.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/laser_impact.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/laser_impact_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/projectiles/missile.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/missile.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/projectiles/missile_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/belt.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/belt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/belt_cut.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/belt_cut.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/breach.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/breach.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/cable.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/cable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/cable_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/cable_on.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/cable_on.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/door.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/door.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/door_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/floor.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/floor.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin_decals.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin_decals.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin_decals_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin_shapes.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin_shapes.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/hull_skin_shapes_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/shapes.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/walls.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_armor.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/tiles/walls_armor.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_armor_shapes.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_armor_shapes.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_ram.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_ram.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_ram_shapes.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_ram_shapes.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_shapes.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/tiles/walls_shapes.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `tests/fixtures/art/**` (tiny test images and JSON, every kind) | original, made for Hullscrap (hand-generated, 2-5 px) | project-owned |
-| art/tiles/breach.png | original, made for Hullscrap | project-owned |
-| art/tiles/cable.png | original, made for Hullscrap | project-owned |
-| art/tiles/cable_glow.png | original, made for Hullscrap | project-owned |
-| art/tiles/cable_on.png | original, made for Hullscrap | project-owned |
-| art/tiles/door.png | original, made for Hullscrap | project-owned |
-| art/tiles/door_glow.png | original, made for Hullscrap | project-owned |
-| art/tiles/floor.png | original, made for Hullscrap | project-owned |
-| art/tiles/walls.png | original, made for Hullscrap | project-owned |
-| art/tiles/walls_armor.png | original, made for Hullscrap | project-owned |
-| art/tiles/walls_shapes.png | original, made for Hullscrap | project-owned |
-| art/tiles/walls_armor_shapes.png | original, made for Hullscrap | project-owned |
-| art/tiles/walls_ram.png | original, made for Hullscrap | project-owned |
-| art/tiles/walls_ram_shapes.png | original, made for Hullscrap | project-owned |
-| art/tiles/hull_skin.png | original, made for Hullscrap | project-owned |
-| art/tiles/hull_skin_glow.png | original, made for Hullscrap | project-owned |
-| art/tiles/hull_skin_shapes.png | original, made for Hullscrap | project-owned |
-| art/tiles/hull_skin_shapes_glow.png | original, made for Hullscrap | project-owned |
-| art/tiles/hull_skin_decals.png | original, made for Hullscrap | project-owned |
-| art/tiles/hull_skin_decals_glow.png | original, made for Hullscrap | project-owned |
-| art/fx/explosion.png | original, made for Hullscrap | project-owned |
-| art/fx/explosion_glow.png | original, made for Hullscrap | project-owned |
-| art/fx/fire.png | original, made for Hullscrap | project-owned |
-| art/fx/fire_glow.png | original, made for Hullscrap | project-owned |
-| art/fx/heat_shimmer.png | original, made for Hullscrap | project-owned |
-| art/fx/muzzle.png | original, made for Hullscrap | project-owned |
-| art/fx/muzzle_glow.png | original, made for Hullscrap | project-owned |
-| art/fx/shield_ripple.png | original, made for Hullscrap | project-owned |
-| art/fx/shield_ripple_glow.png | original, made for Hullscrap | project-owned |
-| art/fx/smoke.png | original, made for Hullscrap | project-owned |
-| art/fx/sparks.png | original, made for Hullscrap | project-owned |
-| art/projectiles/beam.png | original, made for Hullscrap | project-owned |
-| art/projectiles/beam_glow.png | original, made for Hullscrap | project-owned |
-| art/projectiles/beam_impact.png | original, made for Hullscrap | project-owned |
-| art/projectiles/beam_impact_glow.png | original, made for Hullscrap | project-owned |
-| art/projectiles/bolt.png | original, made for Hullscrap | project-owned |
-| art/projectiles/bolt_glow.png | original, made for Hullscrap | project-owned |
-| art/projectiles/flak.png | original, made for Hullscrap | project-owned |
-| art/projectiles/flak_glow.png | original, made for Hullscrap | project-owned |
-| art/projectiles/laser.png | original, made for Hullscrap | project-owned |
-| art/projectiles/laser_glow.png | original, made for Hullscrap | project-owned |
-| art/projectiles/laser_impact.png | original, made for Hullscrap | project-owned |
-| art/projectiles/laser_impact_glow.png | original, made for Hullscrap | project-owned |
-| art/projectiles/missile.png | original, made for Hullscrap | project-owned |
-| art/projectiles/missile_glow.png | original, made for Hullscrap | project-owned |
-| art/_src/*.py | original, made for Hullscrap (generator source) | project-owned |

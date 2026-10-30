@@ -10,21 +10,31 @@
  "anims": {
   "on": [
    0,
-   4,
-   6
+   8,
+   8
   ],
   "off": [
-   4,
+   8,
    1,
    0
   ],
-  "damaged": [
-   5,
+  "hit": [
+   9,
+   3,
+   12
+  ],
+  "recharge": [
+   12,
    4,
+   10
+  ],
+  "damaged": [
+   16,
+   2,
    6
   ],
   "disabled": [
-   9,
+   18,
    1,
    0
   ]
@@ -42,15 +52,25 @@
   "anims": {
    "on": [
     0,
+    8,
+    8
+   ],
+   "hit": [
+    8,
+    3,
+    12
+   ],
+   "recharge": [
+    11,
     4,
-    6
+    10
    ],
    "damaged": [
-    4,
-    4,
+    15,
+    2,
     6
    ]
   }
  },
- "notes": "Emitter pulse loop (4 frames): a ring rises out of the dome while the pylon crystals take turns."
+ "notes": "Concord Mk1. On loop (8 frames): an emitter ring turning clockwise round the dome while the dome petals turn the other way, energy arcs crawling between the four pylons, the pylon crystals lighting in turn N, E, S, W, the core breathing. hit (3): a white flare from the core and a ripple running out. recharge (4): the rings spinning up, core dim and growing. Damaged: the dome is cracked with a dark chip, the west pylon crystal is dead, a casing flap hangs off the lower-right corner. Disabled: dome shattered, west pylon smashed, casing split."
 }

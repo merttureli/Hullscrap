@@ -1,0 +1,76 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "hit": [
+   9,
+   3,
+   12
+  ],
+  "recharge": [
+   12,
+   4,
+   10
+  ],
+  "damaged": [
+   16,
+   2,
+   6
+  ],
+  "disabled": [
+   18,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "shield_neon_mk1_glow.png",
+  "frame": [
+   88,
+   88
+  ],
+  "offset": [
+   -12,
+   -12
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "hit": [
+    8,
+    3,
+    12
+   ],
+   "recharge": [
+    11,
+    4,
+    10
+   ],
+   "damaged": [
+    15,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Lumen \"Neon Lattice\": four crystal pylons (N, E, S, W) round a core, joined by a 1px cyan lattice that splits the field into four sectors. On loop (8): the pylons light in sequence N, E, S, W (two frames each) with an arc crawling along the lattice edge to the next pylon and that sector's magenta lamp lit; the core facets turn clockwise while a 4-segment ring counter-rotates; the core breathes. hit (3): flare and ripple. recharge (4): ring and facets spinning up. Damaged: the west pylon is dark and cracked, a lattice edge flickers out, the core is chipped. Disabled: pylons dull, the north pylon snapped off, core shattered, every lattice line dead."
+}

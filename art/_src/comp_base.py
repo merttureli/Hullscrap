@@ -116,6 +116,9 @@ def export(c, outdir=None):
         strip.save('%s/%s_glow.png' % (outdir, c.id))
         J['glow'] = {'image': c.id + '_glow.png', 'frame': [gw, gh], 'offset': [-l, -t], 'anims': ganims}
     if c.anchors: J['anchors'] = {k: list(v) for k, v in c.anchors.items()}
+    if getattr(c, 'orientation', None): J['orientation'] = c.orientation
+    if getattr(c, 'offset', None): J['offset'] = list(c.offset)
+    if getattr(c, 'extra', None): J.update(c.extra)
     J['notes'] = c.notes
     with open('%s/%s.json' % (outdir, c.id), 'w') as f: json.dump(J, f, indent=1); f.write('\n')
     return frames, gframes, J

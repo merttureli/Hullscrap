@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "nanoforge_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Workshop, neon-ish: a round vat of nanite paste in a navy-violet cradle with a cyan glass rim. The paste carries a four-arm swirl of bright nanites that turns a quarter-arm per... (4 frames = a quarter turn of a four-fold swirl, so it loops cleanly); four feed pipes with violet lamps. Damaged: the glass is cracked and paste weeps out onto the cradle, the swirl stutters. Disabled: the vat is dry and dull, the glass shattered, paste dried round the crack."
+}

@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "reactor_scrap_mk1_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "notes": "Scrapper Clans: a patched pressure vessel, mismatched plates, hazard tape, a leaking pipe (steam puffs and a falling drip on the loop), a flickering amber core in a window with a rust patch over one corner. Damaged: the vessel patch has popped its bolts and hangs, the core hiccups, wire ends spit sparks, the drip becomes a stream. Disabled: dead core, the vessel split open along the weld with the patch plate fallen off, a dark leak pool."
+}

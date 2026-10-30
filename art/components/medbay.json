@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   4
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "medbay_glow.png",
+  "frame": [
+   80,
+   80
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    4
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "notes": "Workshop/medical: two beds side by side and a scanner arch on rails that sweeps down the beds with a green scan line, a pulse monitor between them, violet trim on the equipment rail. The arch runs up and back down over the 4 frames. Damaged: the arch is jammed skewed on its rails, the scan line flickers and one monitor is dead, a bed is torn. Disabled: the arch has dropped across one bed, scanner dead, monitors dark."
+}

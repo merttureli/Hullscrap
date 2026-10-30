@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_neon_mk1_glow.png",
+  "frame": [
+   84,
+   50
+  ],
+  "offset": [
+   -10,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "power_coupling": [
+   32,
+   30
+  ],
+  "repair_hatch": [
+   12,
+   29
+  ]
+ },
+ "orientation": "inside half: rotation 0, outward is UP: the core sits on the floor with its top 4px overhanging the inner wall face (see offset); cable plugs into the power coupling",
+ "offset": [
+  0,
+  -4
+ ],
+ "mount": {
+  "part": "inside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Lumen \"Ion Drive\", a hull mount (outward is up): a stack of three ion rings outside, widest at the nozzle on top, the light running up them (cyan lit core, magenta pins) and a cyan glow with a magenta halo streaming out above; a navy collar with cyan edge lines; inside a slim navy core with a lens crystal accumulator, a display, a repair hatch and a cyan-ringed power coupling. Damaged: the middle ring has slipped out of line and cracked, arcs jump the gap, the lens crystal is cracked and flickers. Disabled: the top ring snapped half off and hanging, the collar cracked, the lens shattered, every line dead. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+}

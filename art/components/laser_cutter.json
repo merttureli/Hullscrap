@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  64
+ ],
+ "cells": [
+  2,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   8
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "laser_cutter_glow.png",
+  "frame": [
+   44,
+   76
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    8
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Workshop: a gantry bridge on two rails over a metal sheet; the carriage carries a red cutting point (white core, sparks) and the bridge creeps down the sheet leaving a dark kerf behind. Violet rail caps and lamps. Damaged: the bridge is skewed on its rails, the lens is cracked and the beam stutters, the sheet is scorched. Disabled: the bridge has dropped off one rail, the lens is gone, the kerf is an open burn."
+}

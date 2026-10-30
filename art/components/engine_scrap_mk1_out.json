@@ -1,0 +1,67 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   6
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_scrap_mk1_out_glow.png",
+  "frame": [
+   84,
+   70
+  ],
+  "offset": [
+   -10,
+   -34
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    6
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust": [
+   27,
+   1
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Scrapper Clans \"Kickjet\", a hull mount (outward is up): ONE oversized dented bell outside with a rust patch, a rusty fuel tank strapped on beside it, a patched mismatched wall collar with hazard tape, and inside a squat motor block with a taped control box, warm lamps, a patched repair hatch and a taped power coupling. The jet flickers unevenly. Damaged: the lower strap snapped and the tank sags and weeps fuel, the bell patch lost a bolt and the dent is on fire, the core sparks. Disabled: the bell broken off its neck and lying beside it, the tank slid off and split, the collar cracked, the core dead. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}
