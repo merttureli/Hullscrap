@@ -1,0 +1,32 @@
+{
+ "frame": [
+  9,
+  16
+ ],
+ "anchors": {
+  "grip": [
+   4,
+   12
+  ],
+  "muzzle": [
+   4,
+   0
+  ]
+ },
+ "class": "pistol",
+ "pose": "pistol",
+ "culture": "fenn",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, flame, sparks or the blade tip are. Fenn spark pistol: forked electrode with a spark gap, brass coil winding, a tiny charge dial. Stuns (ion).",
+ "glow": {
+  "image": "spark_pistol_glow.png",
+  "frame": [
+   17,
+   24
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

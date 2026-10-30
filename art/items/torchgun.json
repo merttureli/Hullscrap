@@ -1,0 +1,36 @@
+{
+ "frame": [
+  13,
+  33
+ ],
+ "anchors": {
+  "grip": [
+   6,
+   27
+  ],
+  "muzzle": [
+   6,
+   0
+  ],
+  "foregrip": [
+   6,
+   12
+  ]
+ },
+ "class": "heavy",
+ "pose": "heavy",
+ "culture": "emberkin",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, flame, sparks or the blade tip are. Emberkin torchgun: brass nozzle with a pilot flame, riveted fuel tank, pressure gauge, wood grip. Sets fires; Emberkin do not burn.",
+ "glow": {
+  "image": "torchgun_glow.png",
+  "frame": [
+   21,
+   41
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

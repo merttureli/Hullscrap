@@ -1,0 +1,43 @@
+{
+ "frame": [
+  11,
+  13
+ ],
+ "mode": "once",
+ "anims": {
+  "play": [
+   0,
+   3,
+   24
+  ]
+ },
+ "anchors": {
+  "muzzle": [
+   5,
+   12
+  ]
+ },
+ "for_class": [
+  "pistol"
+ ],
+ "glow": {
+  "image": "muzzle_pistol_glow.png",
+  "frame": [
+   21,
+   23
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    24
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Hand-weapon muzzle flash, faces UP (rotation 0): put the muzzle anchor on the weapon's muzzle point and rotate with the weapon. Plays once per shot."
+}

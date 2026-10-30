@@ -1,0 +1,20 @@
+{
+ "frame": [
+  11,
+  20
+ ],
+ "anchors": {
+  "grip": [
+   5,
+   13
+  ],
+  "muzzle": [
+   5,
+   0
+  ]
+ },
+ "class": "tool",
+ "pose": "tool",
+ "culture": "scrap",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, flame, sparks or the blade tip are. Scrap rivet gun: a nozzle, a strip of rivets on the side, an air hose looping off the back. Repairs walls at half speed."
+}

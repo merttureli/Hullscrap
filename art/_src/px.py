@@ -37,6 +37,9 @@ PAL = {
  # skin
  's': ('e3ad82', 'skin'),
  'v': ('b87a54', 'skin shade'),
+ # species (art-species): emberkin skin mid, fenn cream fur
+ 'e': ('8a3426', 'ember skin'),
+ 'f': ('e2d0ac', 'fenn fur cream'),
 }
 RGB = {c: tuple(int(h[i:i+2], 16) for i in (0, 2, 4)) for c, (h, _) in PAL.items()}
 
