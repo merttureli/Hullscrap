@@ -76,17 +76,37 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
     - If the weapon has `pierce`, leftover damage carries on into the next cells.
   - **Thick outer walls are armour.** A reactor in the middle is protected, and an exposed one is a target. Players will aim for engines and weapons, and flank to reach the soft side.
   - Every hull hit also lowers the ship's **hull integrity** pool: hull_hp = 20 + armour plates. At 0 the ship is **wrecked** and becomes a salvageable derelict.
-- **Shields** are a bubble (an ellipse around the hull) with **layers** from powered shield components.
+- **Shields** are a bubble around the hull (its shape is below) with **layers** from powered shield components.
   - A projectile or laser hitting the bubble uses up a layer, and layers recharge over time.
   - Missiles pass through. Ion removes layers and ion-locks systems.
 - **Firing opens your own shield (owner, 2026-10-30)**:
   - When you fire anything shields can stop (laser, bolt, flak, beam, ion), **your whole bubble is open** for `drops_shield_s`: laser 0.3 s, bolt 0.4 s, flak 0.6 s, ion 0.3 s, and a beam for its whole duration.
   - Layers aren't spent while it's open, and **missiles never open it**.
   - So you time your volleys, shield-heavy ships favour missiles, and an enemy who just fired is briefly exposed.
-- **Sectored shields (owner, 2026-10-30)**:
-  - The bubble is split into **sectors** around the ship. Their count comes from the best powered generator: level 1–2 has 1 sector (the whole bubble), **level 3 has 4**, **level 6 has 8**. Neon generators get 4 early.
-  - Firing opens **only the sector the shot leaves through**, and incoming hits check the sector at their impact angle. Layers stay one shared pool.
-  - Better shield tech means smaller openings when you fire. Levels 4–6 are future content.
+- **Shield shape (owner, 2026-10-30: "surround the whole ship, never clip the inside")**:
+  - The bubble is the **convex hull of the ship's solid cells** (outside mount halves included), **inflated by 1.5 cells with rounded corners**, rather than an ellipse.
+  - So it hugs any silhouette (long, wedge-shaped, lumpy) and never cuts through the hull. Hits test against that shape.
+  - It is rebuilt when the hull changes (building, a part lost); breaches don't change it.
+- **Sectors and balance, Star Wars: Squadrons-style (owner, 2026-10-30)**:
+  - The bubble's **sector count** comes from the best powered generator. Sectors are angle ranges from the ship's centre, starting at the bow.
+    - **1 sector** (Mk1, scrap): one piece, nothing to configure.
+    - **2 sectors** (Mk2): **bow and stern**.
+    - **4 sectors** (Mk3, and Neon from Mk1): bow, starboard, stern, port.
+    - **8 sectors** (Mk5, and late uniques): the 4 above plus the diagonals.
+  - **Balance**: each sector has a weight `w` in steps of 0.5, from 0 to 2, and the weights always sum to the sector count (even = every w is 1).
+    - A sector holds **`total layers × w`** layers.
+    - So with 2 layers on bow and stern: even is 2/2, "double the bow" is 4 bow and 0 stern, and 3/1 is in between.
+    - Protection is moved, never created.
+  - **Layers are per sector**: a hit spends a layer of the sector it hits, and each sector recharges its own.
+  - **Shifting takes time**: the losing sector drops at once, and the gaining sector fills at the recharge rate, so you can't swap for free as a volley lands.
+  - Firing opens **only the sector the shot leaves through**, for `drops_shield_s`.
+  - **In combat**: the arrow keys shift balance one step: ↑ bow, ↓ stern, ← port, → starboard (port and starboard need 4+ sectors). The step is taken from the opposite sector first, then evenly from the others. **End** returns to even.
+    - A small shield diagram by the weapon bar shows each sector's layers.
+  - **The Shields tab** (**H** in play or build mode): your ship's silhouette with its real bubble and sectors.
+    - Click a sector's + and − (the weights stay summed), or pick a preset: Even, Bow, Stern, Port, Starboard, plus 2 custom slots.
+    - The chosen balance is saved with the ship and is how every fight starts.
+  - The bubble is drawn along its shape: brightness and thickness by each sector's layers, a faint dashed line for a sector at 0, and a shimmer where layers are filling.
+  - **Pilot AI** with 2+ sectors shifts toward the side facing its enemy, at a speed set by `ai.aim_skill`.
 - **Shield-heavy builds**: layers are the sum of your powered generators, each a big power draw, so lots of energy plus generators is a real alternative to armour.
   - **Space = Shield Overcharge**: +1 temporary layer for 6 s, at +4 power draw while active, with a 20 s cooldown.
 - **Fires and breaches** come from hits (`fire_chance`, and walls reaching 0) and use the existing oxygen and fire rules.
