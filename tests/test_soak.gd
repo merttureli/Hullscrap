@@ -400,3 +400,26 @@ func test_regression_a_fight_starts_with_the_hull_the_campaign_has_left() -> voi
 	view.free()
 	build.free()
 	sim.free()
+
+
+## An event whose every shown choice is greyed (it asks for credits or items you lack) used to leave the
+## event panel with nothing to press: no key or click went on. The panel now adds Leave.
+func test_regression_an_event_of_only_greyed_choices_still_has_a_way_out() -> void:
+	var sim := ShipSim.new()
+	sim.choose_ship(STARTERS[1])
+	var map := MapView.new()
+	map.sim = sim
+	map.size = Vector2(1600.0, 900.0)
+	map.new_game(7)
+	var ev := {"id": "poor_test", "type": "empty", "text": "A toll.", "choices": [
+		{"text": "Pay the toll.", "requires": {"credits": 99999}, "outcomes": [{"weight": 100, "text": "", "effects": {}}]}]}
+	var finished := [0]
+	map.event_panel.finished.connect(func(): finished[0] += 1)
+	map.event_panel.open_event(ev)
+	eq(map.event_panel.view.size(), 2, "the greyed choice and Leave")
+	check(map.event_panel.view[0]["grey"] and not map.event_panel.view[1]["grey"], "the first is greyed, the second is not")
+	eq(map.event_panel.choose(1), "", "Leave works")
+	check(not map.event_panel.visible, "the panel closes")
+	eq(finished[0], 1, "and tells the map it is done")
+	map.free()
+	sim.free()
