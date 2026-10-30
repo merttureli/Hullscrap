@@ -4,22 +4,58 @@ extends RefCounted
 ## sits on the four cells round `pos`, and collides as a circle of RADIUS (a little under a cell,
 ## so a 2-wide opening lets it through). NPCs follow a `path` of body anchors (go_to + step), whose
 ## body centre is the anchor plus (1, 1); the player's soldier moves directly (move_input).
+## Health and the current job live here too (rules in jobs.gd); the defaults are in data/crew.json.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide)
 const MAX_SUBSTEP := 0.2  ## longest single move in cells, so a long frame cannot skip over a wall
+const CONFIG_PATH := "res://data/crew.json"
+
+static var _config := {}  # data/crew.json, read on first use
 
 var name := ""
 var pos := Vector2.ZERO
 var speed := 3.0  ## cells per second
 var facing := Vector2.DOWN
 var path: Array[Vector2i] = []
+var hp := 100.0
+var max_hp := 100.0
+var is_player := false  ## the player's soldier: moved by hand, never given a job
+var look := {}  ## PersonDrawer palette ("suit", "hair", "tool"); empty = the viewer picks one by name
+var job := {}  ## what they are doing now (a Jobs board entry plus its "spot"); empty = idle
+var hold := 0.0  ## seconds left of a manual order, during which the job board leaves them alone
 
 
 func _init(p_name := "", p_pos := Vector2.ZERO) -> void:
 	name = p_name
 	pos = p_pos
+	max_hp = float(config().get("hp", 100))
+	hp = max_hp
+
+
+## data/crew.json as a Dictionary (read once; empty when the file is missing or unusable).
+static func config() -> Dictionary:
+	if _config.is_empty() and FileAccess.file_exists(CONFIG_PATH):
+		var data = JSON.parse_string(FileAccess.get_file_as_string(CONFIG_PATH))
+		if data is Dictionary:
+			_config = data
+	return _config
+
+
+## At 0 hp a crew member is down: they don't move and no job is given, until a medbay or a crewmate revives them.
+func is_down() -> bool:
+	return hp <= 0.0
+
+
+## Lose `amount` hp (not below 0).
+func hurt(amount: float) -> void:
+	hp = maxf(hp - amount, 0.0)
+
+
+## Gain `amount` hp (not above the maximum).
+func heal(amount: float) -> void:
+	hp = minf(hp + amount, max_hp)
 
 
 ## The cell under the centre of the body (the room whose air this person breathes).
@@ -50,6 +86,9 @@ func go_to(grid: ShipGrid, target: Vector2i, door_passable: Callable = Callable(
 
 ## Advance along the path, centre to centre. Ends exactly on the last anchor's body centre.
 func step(dt: float) -> void:
+	if is_down():
+		path.clear()
+		return
 	var left := speed * dt
 	while left > 0.0 and not path.is_empty():
 		var to := Pathfinder.centre_of(path[0])
@@ -71,7 +110,7 @@ func step(dt: float) -> void:
 ## Doorway assist: walking straight at an opening a little off line, the body drifts sideways onto
 ## the line that lets it through (a 2-wide door leaves only 0.2 cells to spare).
 func move_input(grid: ShipGrid, dir: Vector2, dt: float, door_passable: Callable = Callable()) -> void:
-	if dir.length_squared() < 0.0001 or dt <= 0.0:
+	if is_down() or dir.length_squared() < 0.0001 or dt <= 0.0:
 		return
 	facing = dir.normalized()
 	var dist := speed * dt

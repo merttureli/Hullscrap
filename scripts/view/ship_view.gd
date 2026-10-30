@@ -92,9 +92,11 @@ func _draw() -> void:
 			hi = hi.max(c)
 		var r := Rect2(px(Vector2(lo)), Vector2(hi - lo + Vector2i.ONE) * CELL)
 		Visuals.draw_component(self, r, ship.components.def(inst["id"]), inst, CELL, {"powered": powered.get(uid, false)})
+	draw_fire(self, ship.fires, px(Vector2.ZERO), CELL, _clock)
 	for m in ship.crew:
-		var look: Dictionary = LOOKS.get(m.name, OTHER_LOOK)
+		var look: Dictionary = m.look if not m.look.is_empty() else LOOKS.get(m.name, OTHER_LOOK)
 		PersonDrawer.draw_person(self, px(m.pos), m.facing.angle(), _clock * 2.2, false, look, CELL)
+		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL)
 	if arena != null:
 		_draw_bubble(arena.ships[index])
 
@@ -160,6 +162,40 @@ func _draw_damage(grid, c: Vector2i) -> void:
 	draw_line(o + Vector2(4, 6), o + Vector2(CELL * 0.55, CELL * 0.5), Color(0, 0, 0, 0.8), 1.5)
 	if lost > 0.4:
 		draw_line(o + Vector2(CELL * 0.55, CELL * 0.5), o + Vector2(CELL - 5, CELL - 8), Color(0, 0, 0, 0.8), 1.5)
+
+
+# --- fire and health (placeholder art: swap these two helpers for real art) -----------------------
+
+## Fires as flickering blobs: a red base, an orange body and a yellow core per burning cell, bigger
+## with the intensity. `fires`: cell -> intensity (0..1); `origin`: where cell (0, 0) starts, in the
+## canvas' pixels; `t`: seconds, for the flicker. Static, so the interior view uses it too.
+static func draw_fire(canvas: CanvasItem, fires: Dictionary, origin: Vector2, cell_px: float, t: float) -> void:
+	for c in fires:
+		var i: float = clampf(fires[c], 0.0, 1.0)
+		var h := hash(c)
+		var phase := float(h & 255) / 40.0
+		var flick := 0.88 + 0.12 * sin(t * 11.0 + phase) + 0.05 * sin(t * 23.0 + phase * 2.0)
+		var mid := origin + (Vector2(c) + Vector2(0.5, 0.5)) * cell_px
+		var r := cell_px * (0.35 + 0.5 * i) * flick
+		canvas.draw_circle(mid, r * 1.5, Color(1.0, 0.25, 0.05, 0.14 + 0.1 * i))
+		canvas.draw_circle(mid + Vector2(sin(t * 7.0 + phase), 0.0) * cell_px * 0.06, r, Color(0.95, 0.2, 0.06, 0.55 + 0.3 * i))
+		canvas.draw_circle(mid + Vector2(0.0, -0.08) * cell_px, r * 0.68, Color(1.0, 0.55, 0.1, 0.75))
+		canvas.draw_circle(mid + Vector2(0.0, -0.14) * cell_px, r * 0.36 * flick, Color(1.0, 0.9, 0.4, 0.9))
+
+
+## A small health bar over the head of a person at `centre` (pixels), only when hurt or down.
+static func draw_health(canvas: CanvasItem, centre: Vector2, frac: float, down: bool, cell_px: float) -> void:
+	if frac >= 1.0 and not down:
+		return
+	var w := cell_px * 1.8
+	var r := Rect2(centre + Vector2(-w / 2.0, -cell_px * 1.9), Vector2(w, cell_px * 0.22))
+	canvas.draw_rect(r.grow(1.5), Color(0, 0, 0, 0.7))
+	canvas.draw_rect(r, Color("#5a1d1d"))
+	canvas.draw_rect(Rect2(r.position, Vector2(r.size.x * clampf(frac, 0.0, 1.0), r.size.y)), Color("#7bd88f") if frac > 0.4 else Color("#ff5a4a"))
+	if down:  # a red cross over them
+		var k := cell_px * 0.7
+		canvas.draw_line(centre + Vector2(-k, -k), centre + Vector2(k, k), Color(1, 0.2, 0.2, 0.8), 3.0)
+		canvas.draw_line(centre + Vector2(-k, k), centre + Vector2(k, -k), Color(1, 0.2, 0.2, 0.8), 3.0)
 
 
 # --- shield bubble ----------------------------------------------------------------------------

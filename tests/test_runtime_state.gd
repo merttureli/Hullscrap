@@ -1,11 +1,12 @@
 extends "res://tests/base_test.gd"
-## The runtime state of placed components (hp, heat, status): saving, power, the chronicle, the F key and the HUD.
+## The runtime state of placed components (hp, heat, status): saving, power, the chronicle, the F key (an order to the crew) and the HUD.
 
 const Fixture = preload("res://tests/fixture_ship.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 
 ## Reactor (x 10..13), engine (x 15..18) and oxygen generator (x 15..16, y 12..15) on one cable.
@@ -117,7 +118,7 @@ func _done(b: BuildMode) -> void:
 	b.free()
 
 
-func test_f_repairs_the_part_under_the_mouse() -> void:
+func test_f_sends_the_nearest_crew_member_to_repair_the_part_under_the_mouse() -> void:
 	var d := _ship()
 	var ship: Ship = d["ship"]
 	var inst: Dictionary = ship.components.instances[d["engine"]]
@@ -129,8 +130,17 @@ func test_f_repairs_the_part_under_the_mouse() -> void:
 	e.keycode = KEY_F
 	e.pressed = true
 	b._on_key(e)
+	eq(b.message, "no crew to send", "nobody aboard to go")
+	var near := CrewMember.new("Near", Vector2(16.0, 13.0))
+	var far := CrewMember.new("Far", Vector2(20.0, 15.0))
+	ship.crew.append_array([far, near])
+	b._on_key(e)
+	eq(b.message, "Near will repair Kickjet", "the nearest one goes")
+	eq(near.job.get("type"), "repair_component", "and has the job")
+	check(far.job.is_empty(), "the other stays")
+	for i in 100:  # a Kickjet is scrap: 2.5 s of work after the walk
+		b.sim.step(0.1)
 	eq([inst["status"], inst["hp"]], ["ok", 6], "repaired")
-	eq(b.message, "repaired Kickjet", "the message")
 	b._on_key(e)
 	eq(b.message, "Kickjet needs no repair", "nothing to do the second time")
 	b.hover = Vector2i(20, 14)
@@ -140,6 +150,7 @@ func test_f_repairs_the_part_under_the_mouse() -> void:
 	inst["status"] = "malfunction"
 	b.hover = Vector2i(16, 10)
 	b._on_key(e)
+	eq(b.message, "no system under the mouse", "F only works in build mode: the message is left alone")
 	eq(inst["status"], "malfunction", "F only works in build mode")
 	_done(b)
 

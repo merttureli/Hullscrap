@@ -1,0 +1,48 @@
+{
+	"_doc": "Crew defaults and job numbers (read by scripts/crew/crew_member.gd config(), jobs.gd, and fire.gd for room names). hp: a crew member's health. damage_per_s: fire (standing in a burning cell) and no_air (room pressure below no_air_below, a fraction). heal_per_s: lying on a bed or in a powered medbay (the medbay's stats.heal multiplies it). revive_hp: health a downed crew member comes back with. player and ada: the two people every ship starts with (name and PersonDrawer palette). extra_crew: more NPCs spawned at beds, named from names in order and coloured from looks in order. enemy: the crew of a ship that is not the player's (count, names, one palette). jobs: period is how often the job board is rebuilt and handed out (seconds); switch_margin is how much higher a new job's priority must be to pull a crew member off the one they are doing; search limits the work of picking (jobs: how many of the nearest jobs get a path, spots: how many standing spots per job, paths: path searches per hand-out); order_hold is how long a crew member ignores the board after a manual order (middle click). Per job: priority, seconds (work time, times the line's repair multiplier), rate (extinguish: intensity removed per crew member per second), slots (crew that may work it at once). repair_component adds combat_bonus to the priority of parts of combat_families while a fight is on. man_station applies to helm and to the families listed when the part has manned: true. manned: helm_evasion is the evasion a manned helm adds in combat (the arena may read ship.manned later); weapon_cooldown is the fraction a manned weapon's cooldown is shortened by. room_names: the first family found in a room names it in the chronicle. labels: the words of the HUD crew line ({name} is the part, {who} the crew member).",
+	"hp": 100,
+	"damage_per_s": {"fire": 10, "no_air": 5},
+	"no_air_below": 0.15,
+	"heal_per_s": {"bed": 5, "medbay": 15},
+	"revive_hp": 20,
+	"player": {"name": "Soldier", "look": {"suit": "#33c6d6", "hair": "#2b2320", "tool": "#d7dce4"}},
+	"ada": {"name": "Ada", "look": {"suit": "#e8913a", "hair": "#c2331f", "tool": "#f1d36b"}},
+	"extra_crew": 2,
+	"names": ["Rook", "Juno", "Pike", "Marlo", "Tess", "Quill", "Bram", "Wren"],
+	"looks": [
+		{"suit": "#4fae6b", "hair": "#3a2a1c", "tool": "#e6e2c8"},
+		{"suit": "#a56be0", "hair": "#e9d9a3", "tool": "#d7dce4"},
+		{"suit": "#e0d24a", "hair": "#1e1e26", "tool": "#d7dce4"},
+		{"suit": "#e0689a", "hair": "#4a2a2a", "tool": "#f1d36b"}
+	],
+	"enemy": {"count": 3, "names": ["Grub", "Skab", "Vex", "Dredge"], "look": {"suit": "#b8382c", "hair": "#1b1b1b", "tool": "#d7dce4"}},
+	"jobs": {
+		"period": 1.0,
+		"switch_margin": 30,
+		"search": {"jobs": 4, "spots": 2, "paths": 24},
+		"order_hold": 8.0,
+		"extinguish": {"priority": 100, "rate": 0.5, "slots": 2},
+		"revive": {"priority": 95, "seconds": 3.0, "slots": 1},
+		"repair_breach": {"priority": 90, "seconds": 6.0, "slots": 1},
+		"repair_component": {"priority": 80, "seconds": 5.0, "slots": 1, "combat_bonus": 10, "combat_families": ["weapon", "engine", "shield"]},
+		"man_station": {"priority": 50, "slots": 1, "families": ["weapon", "shield", "engine"]},
+		"rest": {"priority": 10}
+	},
+	"manned": {"helm_evasion": 0.1, "weapon_cooldown": 0.1},
+	"room_names": [
+		["reactor", "reactor room"], ["engine", "engine room"], ["helm", "bridge"], ["weapon", "weapons bay"],
+		["shield", "shield room"], ["oxygen", "life support"], ["medbay", "medbay"], ["fabricator", "workshop"], ["bed", "crew quarters"]
+	],
+	"room_default": "corridor",
+	"labels": {
+		"idle": "idle",
+		"down": "down",
+		"extinguish": "extinguishing",
+		"repair_breach": "sealing a breach",
+		"repair_component": "repairing {name}",
+		"man_station": "manning {name}",
+		"station_helm": "at helm",
+		"revive": "reviving {who}",
+		"rest": "resting"
+	}
+}

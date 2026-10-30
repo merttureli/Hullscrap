@@ -16,12 +16,13 @@ A top-down 2D spaceship game. Start with a ready-made ship (or an empty hull), b
 | N (play mode) | Pick another starter ship: asks "Discard current ship?" (Y / N), then shows the picker |
 | K (play mode) | Fight the test pirate (see Combat) |
 | W A S D | Walk (your soldier) |
-| Middle mouse | Send Ada there (bodies are 2x2 cells, so she stands where one fits) |
+| E (hold) | Work with your own hands: stand next to a fire, a breach, a broken system or a downed crewmate and hold E. It goes at the speed of a crew member's work (see Crew, fire and repairs) |
+| Middle mouse | Send Ada there (bodies are 2x2 cells, so she stands where one fits). She leaves the job board alone for 8 s |
 | E over a door | Open / close the whole door piece (both cells; free, not an undo step; both modes). Crew also walk through closed doors, which open while any body overlaps them |
 | O | Oxygen overlay: each room cell from red (empty) to blue (full), breached rooms outlined |
 | P | Power overlay: cables shown, each network tinted, with its supply / demand over its first cable |
 | Mouse wheel | Zoom (0.2 to 3; the game starts at 0.5) |
-| Ctrl+S / Ctrl+L | Save / load the whole ship: tiles, doors, systems, cables, cargo, oxygen (`user://ship.json`; older saves still load, but one from before the 2x scale keeps its small layout and 1-cell doors, and its systems now take their doubled size, so rebuild it) |
+| Ctrl+S / Ctrl+L | Save / load the whole ship: tiles, doors, systems, cables, cargo, oxygen, fires (`user://ship.json`; older saves still load, but one from before the 2x scale keeps its small layout and 1-cell doors, and its systems now take their doubled size, so rebuild it) |
 
 Build mode only:
 
@@ -31,6 +32,7 @@ Build mode only:
 | 1 / 2 / 3 | Tiles: Floor / Wall / Door |
 | 1 - 9 | Systems: pick a system you hold in cargo (the list shows how many) |
 | R | Systems: rotate the system by a quarter turn. Door: flip the piece across the way it fits |
+| F (over a system) | Send the nearest crew member to repair it. Unlike the job board, an order also covers a system that works but is damaged |
 | Left mouse (drag to paint) | Place; the whole stroke is one undo step. Green ghost = it will apply, red = not (reason in the HUD). A system is placed with its top-left cell on the mouse, on release; a door piece likewise (2x1 or 1x2, turned along the wall by itself), as one undo step |
 | Shift + left mouse drag | Straight line, locked to the horizontal or vertical axis |
 | Ctrl + left mouse drag | Rectangle. Floor and cables fill it, a wall makes a room (walls round the edge, floor inside); doors and systems one at a time |
@@ -51,8 +53,33 @@ Every starter is a working ship: closed rooms joined by 2-wide doors, every part
 
 The designs are `data/ships/starter_*.json`: the saved-ship format (Ctrl+S) plus a `blurb` line the picker shows. `Ship.from_design(path)` loads one and `ShipSim.choose_ship(path)` puts it in the player's slot. `tests/tool_make_starters.gd` builds them from room rectangles, doors, parts and plating through `BuildSession`, wires them and exports them (`godot --headless --path . --script res://tests/tool_make_starters.gd`, it prints a map and the stats of each); `tests/test_starter_ships.gd` checks them.
 
+## Crew, fire and repairs
+Every starter comes with four people: your soldier, Ada, and two more NPCs (Rook and Juno; names and suit colours come from `data/crew.json`) who start on the beds. The pirate has three enemy crew. Everyone has 100 hp.
+
+**Fire** (`scripts/sim/fire.gd`, `ship.fires`: cell -> intensity 0 to 1, saved with the ship). A fire burns on a floor cell (a cell under a system too; doors and walls are not floor, so a fire stays in its room).
+- Each second: while the room's air is above 20% the intensity grows by 0.15, below it the fire decays by 0.3 and goes out at 0; each burning cell has a 10% chance to light a random neighbouring floor cell and uses 0.05 of the room's oxygen; a system on a burning cell loses 0.5 hp (at 0 it is disabled, not destroyed).
+- Fires start when a system overheats (20%) or malfunctions (30%), on the system's first cell, and when a hit in a fight ignites (`fire_chance`), on the cell that was hit.
+- Drawn as flickering orange and red blobs, in the interior and on the ships in a fight (placeholder art: `ShipView.draw_fire()`).
+
+**Health.** Standing in a burning cell costs 10 hp a second, a room below 15% air 5. At 0 hp a crew member is **down**: they don't move, and a crewmate revives them (3 s of work, back with 20 hp) or a powered medbay does (15 hp a second, times the medbay's `stats.heal`). A bed heals 5 hp a second. A small health bar hangs over anyone hurt.
+
+**Jobs** (`scripts/crew/jobs.gd`, numbers in `data/crew.json`). Every second the ship's job board is rebuilt from its state and idle NPCs take the highest-priority job nobody is on (two may fight the same fire), the nearest first by walking distance (only the few nearest get a path search). They keep a job until it is done or one at least 30 points higher shows up. Your soldier is never given a job.
+
+| Priority | Job | Work |
+|---|---|---|
+| 100 | Extinguish a burning cell | 0.5 intensity per second per crew member; two stack |
+| 95 | Revive a downed crew member | 3 s |
+| 90 | Repair a breach | 6 s x the repair multiplier of the wall's line; the wall comes back and the room seals |
+| 80 (90 for a weapon, engine or shield in a fight) | Repair a malfunctioning or disabled system | 5 s x the repair multiplier of the system's line (scrap 0.5, standard 1, neon 1.5). An overheated system just needs time |
+| 50 | Man a station: the helm, and weapons, shields or engines whose data says `manned: true` | stands next to it |
+| 10 | Rest, when hurt: a powered medbay, else a bed | heals |
+
+A manned helm adds 10% evasion in a fight (`Jobs.evasion_bonus(ship)`; the arena does not read it yet) and a manned weapon cools down 10% faster (wired into `Arena.fire`). `ship.manned` maps each manned system's uid to the crew member at it.
+
+The HUD (bottom left) has one line, "Crew: Ada repairing Laser Mk1, Rook extinguishing, Juno at helm, ...", and the chronicle logs "Fire in engine room", "Fire out", "Breach sealed", "Kickjet repaired", "Rook is down", "Rook is back on their feet".
+
 ## Combat
-In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_raider.json`, 1200 px ahead). The camera zooms out to frame both ships, the interior is put away and the walking crew stop. Power, heat, oxygen and malfunctions keep running on both ships.
+In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_raider.json`, 1200 px ahead). The camera zooms out to frame both ships, the interior is put away and the crew are drawn on the hulls: they keep working (fires, breaches, repairs, stations) on both ships. Power, heat, oxygen, fires and malfunctions keep running on both ships.
 
 | Input | Action |
 |---|---|

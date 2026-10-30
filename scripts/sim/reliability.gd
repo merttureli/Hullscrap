@@ -2,8 +2,10 @@ extends RefCounted
 ## Malfunctions (docs/CONTENT.md section 2). Each running component (powered, status ok) rolls
 ## malfunction_per_min / 60 x dt per tick, from the line. A malfunction puts it out of action until
 ## it is repaired (Ship.repair). A quarter of malfunctions also cost 1 hp, and at 0 hp the status is
-## "disabled"; 30% start a fire in the room (fires are not implemented yet: the chronicle says so).
+## "disabled"; 30% start a fire (fire.gd) on the part's first cell.
 ## Deterministic: all rolls come from the rng the caller passes, in uid order.
+
+const Fire = preload("res://scripts/sim/fire.gd")
 
 const DAMAGE_CHANCE := 0.25  ## a malfunction also deals 1 damage
 const FIRE_CHANCE := 0.3
@@ -33,5 +35,6 @@ static func tick(ship, dt: float, rng: RandomNumberGenerator) -> void:
 			if inst["hp"] <= 0:
 				inst["status"] = "disabled"
 				ship.log_event("%s is disabled" % name)
-		if rng.randf() < FIRE_CHANCE:  # only logged for now
+		if rng.randf() < FIRE_CHANCE:
 			ship.log_event("%s started a fire" % name)
+			Fire.ignite_part(ship, uid)
