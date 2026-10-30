@@ -43,7 +43,7 @@ func _tile(x: int, y: int, id: String) -> void:
 
 
 func _def(id: String, d: Dictionary) -> int:
-	var full := {"kind": "laser", "damage_type": "energy", "damage": 1, "arc": 360, "cooldown": 0.0, "range": 2000}
+	var full := {"kind": "laser", "damage_type": "energy", "damage": 1, "gimbal": 180, "cooldown": 0.0, "range": 2000}
 	full.merge(d, true)
 	arena.weapons.defs[id] = full
 	return arena.add_mount(0, id, Vector2(20.5, 15.5))

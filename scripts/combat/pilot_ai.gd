@@ -2,9 +2,9 @@ extends RefCounted
 ## The enemy pilot: flies one ship of the arena against another and shoots. Deterministic: its few
 ## random choices (aim jitter, which way it strafes) come from its own generator, seeded from the
 ## arena's seed, and it only reads the arena. Call think(dt) once per arena substep, before stepping.
-## - Range: the gap between the two hulls is RANGE_FRACTION of its shortest weapon range, so it holds
-##   that much plus both hulls' radii between the ships' centres (it used to hold 630 px between
-##   centres and clip the player's hull).
+## - Range: it keeps RANGE_FRACTION of its shortest weapon range between the ships' centres, and at
+##   least both hulls' radii plus HULL_MARGIN (it used to hold 630 px between centres and clip the
+##   player's hull with its own).
 ## - Pointing: it turns its nose so the fixed guns (their mean outward direction) lead the target, off by
 ##   an aim error that shrinks with `aim_skill` (the design's `ai.aim_skill`, 0..1, default 0.6): up to
 ##   (1 - aim_skill) x AIM_ERROR_DEG degrees either way, re-rolled every RETARGET_S. It fires a fixed gun
@@ -25,6 +25,7 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
 
 const RANGE_FRACTION := 0.7
+const HULL_MARGIN := 40.0  ## px kept between the two hulls' bounding circles, at least
 const DEFAULT_RANGE := 600.0
 const PRIORITY: Array[String] = ["weapon", "engine", "reactor"]  ## families it shoots at first
 const DEFAULT_AIM_SKILL := 0.6
@@ -117,16 +118,20 @@ func _fly(dt: float) -> void:
 	var axis := Vector2.ZERO
 	var reach := INF
 	var lead_mount := {}
+	var pivots := Vector2.ZERO  # where the fixed guns turn, summed
+	var fixed := 0
 	for uid in armed:
 		var m: Dictionary = armed[uid]
 		var w: Dictionary = arena.weapons.def(m["id"])
 		reach = minf(reach, float(w["range"]))
 		if not w["turret"]:
 			axis += Vector2(m["dir"])
+			pivots += Vector2(m["pos"])
+			fixed += 1
 			if lead_mount.is_empty():
 				lead_mount = m
 	axis = axis.normalized() if axis.length_squared() > 1e-6 else Vector2.UP
-	var preferred := RANGE_FRACTION * (reach if reach < INF else DEFAULT_RANGE) + _radius(me) + _radius(foe)
+	var preferred := maxf(RANGE_FRACTION * (reach if reach < INF else DEFAULT_RANGE), _radius(me) + _radius(foe) + HULL_MARGIN)
 	var to_foe: Vector2 = tgt.flight.pos - co.flight.pos
 	var dist := to_foe.length()
 	var u := to_foe / maxf(dist, 1.0)
@@ -141,6 +146,10 @@ func _fly(dt: float) -> void:
 	# Turn so the fixed guns' axis leads the target (a guess off by its aim error).
 	var aim: Vector2 = aim_for(lead_mount) if not lead_mount.is_empty() else tgt.flight.pos
 	var want: float = (aim - co.flight.pos).angle() - axis.angle()
+	if fixed > 0:  # the guns sit off the middle: aim so that they, not the centre, point at it
+		for k in 3:
+			var at: Vector2 = co.flight.pos + ((pivots / fixed - co.pivot) * arena.CELL).rotated(want)
+			want = (aim - at).angle() - axis.angle()
 	var turn: float = co.flight.steer_toward(want, co.mass, co.thrust)
 	# Close or open the range with the thrust (it pushes along the heading, near the target's direction).
 	var closing: float = co.flight.vel.dot(u)

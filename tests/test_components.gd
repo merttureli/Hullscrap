@@ -18,7 +18,7 @@ const WEAPON_PACK := {
 	"pulse_mk1": ["standard", 1, [4, 2], "bolt", "energy"],
 	"pulse_mk2": ["standard", 2, [4, 2], "bolt", "energy"],
 	"rattle_burst_scrap": ["scrap", 1, [4, 2], "bolt", "kinetic"],
-	"shrapnel_cannon_scrap": ["scrap", 1, [4, 4], "flak", "kinetic"],
+	"shrapnel_cannon_scrap": ["scrap", 1, [4, 2], "flak", "kinetic"],  # the inside half; its outside half is 4x3
 	"bolt_thrower_scrap": ["scrap", 1, [4, 2], "missile", "explosive"],
 	"artemis_mk1": ["standard", 1, [4, 2], "missile", "explosive"],
 	"ion_blast_mk1": ["standard", 1, [4, 2], "laser", "ion"],
@@ -62,7 +62,7 @@ func test_data_is_complete() -> void:
 	var c := _comps()
 	var want := {
 		"reactor_mk1": [8, 0, 1], "reactor_mk2": [14, 0, 2], "engine_mk1": [-2, 4, 1], "engine_mk2": [-3, 4, 2],
-		"oxygen_gen": [-2, 1, 1], "shield_mk1": [-3, 3, 1], "laser_mk1": [-2, 5, 1], "laser_mk2": [-3, 5, 2],
+		"oxygen_gen": [-2, 1, 1], "shield_mk1": [-3, 3, 1], "laser_mk1": [-2, 5, 1], "laser_mk2": [-3, 5, 2], "laser_turret_mk1": [-3, 5, 1],
 		"helm": [-1, 2, 1], "medbay": [-2, 3, 1], "bed": [0, 0, 1], "fabricator": [-2, 6, 1],
 		"robot_arm": [-1, 6, 1], "laser_cutter": [-2, 6, 1], "assembly_rig": [-2, 6, 1], "nanoforge": [-4, 6, 1],
 		"reactor_scrap_mk1": [6, 0, 1], "engine_scrap_mk1": [-2, 4, 1], "oxygen_scrap_mk1": [-2, 1, 1],
@@ -332,7 +332,8 @@ func test_the_weapon_pack() -> void:
 	check(w.def("artemis_mk1")["pass_shields"] and w.def("artemis_mk1")["splash"] > 0, "the Artemis passes shields and splashes")
 	eq(w.defs["siren_ion_neon"]["effects"], ["lock_doors"], "Siren Ion locks doors")
 	check(not w.defs["ion_blast_mk1"].has("effects"), "plain Ion Blast has no door lock")
-	eq(w.def("siren_ion_neon")["damage"], w.def("ion_blast_mk1")["damage"], "Siren Ion is an Ion Blast in the damage it deals")
+	eq(w.defs["siren_ion_neon"]["damage"], w.defs["ion_blast_mk1"]["damage"], "Siren Ion is an Ion Blast in the damage it deals")
+	check(absf(w.def("siren_ion_neon")["damage"] - 0.6 * w.def("ion_blast_mk1")["damage"]) < 1e-9, "less a turret's 40 percent")
 	eq([w.def("heat_lance_neon")["fire_chance"], w.def("heat_lance_neon")["heat_per_shot"], w.def("heat_lance_neon")["duration"]], [0.3, 25.0, 1.5], "Heat Lance fires, heats and sweeps")
 	eq(w.defs["leech_laser"]["effects"], ["drain_power"], "Leech Laser drains power")
 	eq([w.def("breach_harpoon")["breach_chance"], w.defs["breach_harpoon"]["effects"]], [1.0, ["tether"]], "Breach Harpoon breaches and tethers")

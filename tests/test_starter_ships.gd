@@ -1,7 +1,8 @@
 extends "res://tests/base_test.gd"
 ## The three starter ships (data/ships/starter_*.json): each loads, sits in the middle of the 63x63
-## grid with a hull of its bounding box plus 2 cells, is wired, sealed, connected, can fly, has guns on
-## the outer edge, a shield and the rest of a working ship, and runs for minutes without overheating.
+## grid with a hull of its bounding box plus 2 cells, is wired, sealed, connected, can fly, has guns and
+## engines mounted through its walls, a shield and the rest of a working ship, and runs for minutes
+## without overheating.
 ## tests/tool_make_starters.gd rebuilds the files.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -11,6 +12,7 @@ const Rooms = preload("res://scripts/sim/rooms.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
+const Mounts = preload("res://scripts/ship/mounts.gd")
 
 const PATHS := {
 	"Rustbucket": "res://data/ships/starter_rustbucket.json",
@@ -51,11 +53,14 @@ func _tiles(ship: Ship, id: String) -> int:
 	return n
 
 
-## The bounding box (lo, hi) of everything built: tiles, parts and cables.
-func _bounds(ship: Ship) -> Array:
+## The bounding box (lo, hi) of everything built: tiles, parts and cables, and with `mounts` the outside
+## halves of the hull mounts too (they stick out of the hull into space).
+func _bounds(ship: Ship, mounts := false) -> Array:
 	var cells: Array = ship.grid.tiles.keys() + ship.cables.cells.keys()
 	for uid in ship.components.instances:
 		cells.append_array(ship.components.instances[uid]["cells"])
+		if mounts:
+			cells.append_array(ship.components.instances[uid]["out_cells"])
 	var lo: Vector2i = cells[0]
 	var hi: Vector2i = cells[0]
 	for c in cells:
@@ -79,10 +84,10 @@ func test_each_starter_loads() -> void:
 	check(Ship.new_starter().grid.tiles.is_empty(), "the empty starter hull is unchanged")
 
 
-func test_the_hull_is_the_bounding_box_plus_two_cells_in_the_middle() -> void:
+func test_the_hull_is_the_bounding_box_plus_two_cells_in_the_middle() -> void:  # the box of the hull, parts, cables and the outside halves of the mounts
 	for key in PATHS:
 		var ship := _ship(key)
-		var b := _bounds(ship)
+		var b := _bounds(ship, true)
 		var lo: Vector2i = b[0] - Vector2i(2, 2)
 		var hi: Vector2i = b[1] + Vector2i(2, 2)
 		var want := {}
@@ -91,7 +96,7 @@ func test_the_hull_is_the_bounding_box_plus_two_cells_in_the_middle() -> void:
 				want[Vector2i(x, y)] = true
 		check(ship.grid.hull == want, key + ": the hull is the bounding box grown by 2")
 		var centre := Vector2(lo + hi + Vector2i.ONE) / 2.0
-		check((centre - Vector2(31.5, 31.5)).length() <= 1.0, "%s: centred in the grid (%s)" % [key, str(centre)])
+		check((centre - Vector2(31.5, 31.5)).length() <= 1.5, "%s: centred in the grid, give or take the barrels on one side (%s)" % [key, str(centre)])
 
 
 func test_every_component_is_powered_and_supply_covers_demand() -> void:
@@ -181,32 +186,35 @@ func test_each_has_guns_a_shield_and_the_rest_of_a_ship() -> void:
 		eq(mates, 0, key + ": the workshop holds the fabricator alone")
 
 
-func test_guns_sit_on_the_outer_edge_facing_out() -> void:
+func test_every_gun_and_engine_is_mounted_through_the_wall() -> void:
 	for key in PATHS:
 		var ship := _ship(key)
-		var b := _bounds(ship)
-		var pivot := Vector2(b[0] + b[1] + Vector2i.ONE) / 2.0
-		for uid in _family(ship, "weapon"):
-			var cells: Array = ship.components.instances[uid]["cells"]
-			var sum := Vector2.ZERO
-			for c in cells:
-				sum += Vector2(c) + Vector2(0.5, 0.5)
-			var off: Vector2 = sum / cells.size() - pivot  # the way the gun points
-			var dir := Vector2i(signi(roundi(off.x)), 0) if absf(off.x) > absf(off.y) else Vector2i(0, signi(roundi(off.y)))
-			var worst := 0
-			for c in cells:
-				if cells.has(c + dir):
-					continue  # not on the outer face of the gun
-				var n: Vector2i = c + dir
-				var cover := 0
-				while ship.grid.tiles.has(n) or ship.components.at(n) >= 0:
-					check(ship.components.at(n) < 0, "%s: another part is in front of the gun at %s" % [key, str(c)])
-					cover += 1
-					n += dir
-					if cover > 8:
-						break
-				worst = maxi(worst, cover)
-			check(worst >= 1 and worst <= MAX_COVER, "%s: the gun at %s has %d tiles in front of it" % [key, str(cells[0]), worst])
+		for fam in ["weapon", "engine"]:
+			for uid in _family(ship, fam):
+				var inst: Dictionary = ship.components.instances[uid]
+				var name := "%s: %s at %s" % [key, inst["id"], str(inst["anchor"])]
+				check(ship.components.has_outside(uid), name + " has an outside half")
+				check(ship.components.link_intact(ship.grid, uid), name + ": its wall is whole")
+				for c in inst["out_cells"]:
+					check(ship.grid.get_tile(c) == "" and ship.components.at(c) < 0, "%s: the barrel at %s is in space" % [name, str(c)])
+				for c in inst["link"]:
+					check(ship.grid.tile_flag(ship.grid.get_tile(c), "solid"), "%s: %s is a wall" % [name, str(c)])
+				for c in inst["cells"]:
+					check(ship.grid.get_tile(c) == "floor", "%s: the breech at %s is on the floor" % [name, str(c)])
+				var layers := Mounts.depth_of(ship.components.def(inst["id"]), inst["anchor"], inst["rot"], inst["out_anchor"])
+				check(layers >= 1 and layers <= MAX_COVER, "%s: %d layers of wall between the halves" % [name, layers])
+				check(inst["out_hp"] == ship.components.outside_hp_max(inst["id"]), name + ": the outside half is whole")
+
+
+func test_nose_guns_point_forward_and_rear_engines_push_forward() -> void:
+	for key in PATHS:
+		var ship := _ship(key)
+		var arena := Arena.new(1)
+		arena.add_ship(ship)
+		var co = arena.ships[0]
+		check(co.thrusts["fwd"] > 0.0, "%s: the engines push forward (%s)" % [key, str(co.thrusts)])
+		for uid in co.mounts:
+			eq(co.mounts[uid]["dir"], Vector2.UP, "%s: %s is on the bow" % [key, co.mounts[uid]["id"]])
 
 
 func test_rustbucket_is_the_scrap_ship() -> void:
@@ -226,13 +234,30 @@ func test_courier_is_the_standard_ship() -> void:
 	var b := _bounds(ship)
 	check(b[1].x - b[0].x + 1 == 24 and b[1].y - b[0].y + 1 <= 19, "about 24x18 cells in use")
 	eq([_count(ship, "engine_mk2"), _count(ship, "shield_mk1"), _count(ship, "laser_mk1"), _count(ship, "pulse_mk1")], [2, 1, 2, 1], "2 Engine Mk2 (the fast ship), Shield Mk1, 2 Laser Mk1, Pulse Mk1")
-	check(_count(ship, "reactor_mk1") >= 1 and _count(ship, "radiator") >= 1, "Reactor Mk1 and a radiator")
+	check(_count(ship, "reactor_mk2") == 2 and _count(ship, "radiator") >= 1, "two Reactor Mk2 (the strafe pair needs the power) and a radiator")
 	check(_tiles(ship, "titanium_alloy") >= 20, "a titanium front layer")
 	for c in ship.grid.tiles:
 		if ship.grid.tiles[c] == "titanium_alloy":
 			eq(c.y, b[0].y, "titanium only on the front row")
 			break
 	eq(ship.inventory.count("credits"), 500, "500 credits")
+
+
+func test_courier_has_a_strafe_pair_on_its_side_walls() -> void:
+	var ship := _ship("Courier")
+	var arena := Arena.new(1)
+	arena.add_ship(ship)
+	var t: Dictionary = arena.ships[0].thrusts
+	check(t["left"] > 0.0 and absf(t["left"] - t["right"]) < 1e-6, "equal thrust to the left and to the right: %s" % str(t))
+	var side := 0
+	for uid in _family(ship, "engine"):
+		var o := Mounts.outward(ship.components.instances[uid]["rot"])
+		side += int(o == Vector2i.LEFT or o == Vector2i.RIGHT)
+	eq(side, 2, "two engines on the side walls")
+	var bow := 0
+	for c in ship.grid.tiles:
+		bow += int(ship.grid.tiles[c] == "titanium_alloy" and c.y == _bounds(ship)[0].y)
+	check(bow >= 20, "and the bow is a titanium layer over the wall, two cells thick")
 
 
 func test_prism_is_the_neon_ship() -> void:

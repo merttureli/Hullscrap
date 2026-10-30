@@ -592,7 +592,7 @@ func test_a_manned_helm_adds_evasion() -> void:
 	var jobs := Jobs.new()
 	_run(jobs, ship, 8.0)
 	check(ship.manned.has(helm), "she went to the helm on her own")
-	near(Jobs.evasion_bonus(ship), 0.1, "+10 percent")
+	near(Jobs.evasion_bonus(ship), 0.05, "+5 percent")
 	ship.components.instances[helm]["status"] = "malfunction"
 	eq(Jobs.evasion_bonus(ship), 0.0, "a broken helm gives nothing")
 

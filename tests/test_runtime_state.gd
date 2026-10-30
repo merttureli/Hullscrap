@@ -9,12 +9,12 @@ const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 
-## Reactor (x 10..13), engine (x 15..18) and oxygen generator (x 15..16, y 12..15) on one cable.
+## Reactor (x 10..13), consumer (x 15..18; a fabricator: a hull mount would need a wall to come back from a save) and oxygen generator (x 15..16, y 12..15) on one cable.
 func _ship() -> Dictionary:
 	var ship := Fixture.room_ship()
 	var d := {"ship": ship}
 	d["reactor"] = Fixture.put(ship, "reactor_mk1", 10, 10)
-	d["engine"] = Fixture.put(ship, "engine_scrap_mk1", 15, 10)
+	d["part"] = Fixture.put(ship, "fabricator", 15, 10)
 	d["gen"] = Fixture.put(ship, "oxygen_gen", 15, 12)
 	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(15, 12)])
 	ship.refresh()
@@ -25,32 +25,32 @@ func test_new_instances_start_healthy() -> void:
 	var d := _ship()
 	var inst: Dictionary = d["ship"].components.instances[d["reactor"]]
 	eq([inst["hp"], inst["heat"], inst["status"]], [8, 0.0, "ok"], "reactor hp, heat, status")
-	eq(d["ship"].components.instances[d["engine"]]["hp"], 6, "engine hp")
+	eq(d["ship"].components.instances[d["part"]]["hp"], 4, "part hp")
 
 
 func test_parts_that_are_not_ok_are_not_powered() -> void:
 	var d := _ship()
 	var ship: Ship = d["ship"]
-	check(ship.power_state["powered"][d["engine"]] and ship.power_state["powered"][d["gen"]], "all powered at first")
+	check(ship.power_state["powered"][d["part"]] and ship.power_state["powered"][d["gen"]], "all powered at first")
 	for status in ["overheated", "malfunction", "disabled"]:
-		ship.components.instances[d["engine"]]["status"] = status
+		ship.components.instances[d["part"]]["status"] = status
 		ship.refresh()
-		check(not ship.power_state["powered"][d["engine"]], status + " engine is not powered")
+		check(not ship.power_state["powered"][d["part"]], status + " part is not powered")
 		check(ship.power_state["powered"][d["gen"]], "the rest still runs")
-		ship.components.instances[d["engine"]]["status"] = "ok"
+		ship.components.instances[d["part"]]["status"] = "ok"
 		ship.refresh()
-		check(ship.power_state["powered"][d["engine"]], "ok again: powered")
+		check(ship.power_state["powered"][d["part"]], "ok again: powered")
 	ship.components.instances[d["reactor"]]["status"] = "malfunction"
 	ship.refresh()
 	check(not ship.power_state["powered"][d["reactor"]], "a malfunctioning reactor makes no power")
-	check(not ship.power_state["powered"][d["gen"]] and not ship.power_state["powered"][d["engine"]], "and so nothing else runs")
+	check(not ship.power_state["powered"][d["gen"]] and not ship.power_state["powered"][d["part"]], "and so nothing else runs")
 	eq(ship.power_state["networks"][0]["supply"], 0, "no supply")
 
 
 func test_state_round_trips_through_save_and_load() -> void:
 	var d := _ship()
 	var a: Ship = d["ship"]
-	var inst: Dictionary = a.components.instances[d["engine"]]
+	var inst: Dictionary = a.components.instances[d["part"]]
 	inst["hp"] = 2
 	inst["heat"] = 37.5
 	inst["status"] = "malfunction"
@@ -59,11 +59,11 @@ func test_state_round_trips_through_save_and_load() -> void:
 	var saved: Dictionary = JSON.parse_string(JSON.stringify(a.to_dict()))
 	var b := Ship.new_starter()
 	eq(b.load_dict(saved), "", "loads")
-	var got: Dictionary = b.components.instances[d["engine"]]
-	eq([got["hp"], got["heat"], got["status"]], [2, 37.5, "malfunction"], "engine state")
+	var got: Dictionary = b.components.instances[d["part"]]
+	eq([got["hp"], got["heat"], got["status"]], [2, 37.5, "malfunction"], "part state")
 	eq([b.components.instances[d["reactor"]]["status"], b.components.instances[d["reactor"]]["heat"]], ["overheated", 100.0], "reactor state")
 	eq(b.components.instances[d["gen"]]["status"], "ok", "a healthy part stays healthy")
-	check(not b.power_state["powered"][d["engine"]] and not b.power_state["powered"][d["reactor"]], "power is solved with the loaded statuses")
+	check(not b.power_state["powered"][d["part"]] and not b.power_state["powered"][d["reactor"]], "power is solved with the loaded statuses")
 	eq(JSON.stringify(b.to_dict()), JSON.stringify(a.to_dict()), "and it saves back the same")
 
 
@@ -74,8 +74,8 @@ func test_version_1_parts_load_as_new() -> void:
 	eq(c.load_dict(old), "", "a version 1 save loads")
 	var inst: Dictionary = c.instances[2]
 	eq([inst["hp"], inst["heat"], inst["status"]], [8, 0.0, "ok"], "full hp, cold, ok")
-	eq(c.to_dict()["version"], 2, "and saves as version 2")
-	eq(c.load_dict({"version": 3, "next_uid": 1, "instances": []}), "unsupported components version", "newer is refused")
+	eq(c.to_dict()["version"], 3, "and saves as version 3")
+	eq(c.load_dict({"version": 4, "next_uid": 1, "instances": []}), "unsupported components version", "newer is refused")
 	var odd := {"version": 2, "next_uid": 3, "instances": [{"uid": 2, "id": "engine_mk1", "anchor": [4, 4], "rot": 0, "hp": 99, "heat": -5, "status": "exploded"}]}
 	eq(c.load_dict(odd), "", "odd state loads")
 	inst = c.instances[2]
@@ -92,7 +92,7 @@ func test_a_ship_save_with_version_1_parts_still_loads() -> void:
 		i.erase("status")
 	var b := Ship.new_starter()
 	eq(b.load_dict(saved), "", "loads")
-	eq(b.components.instances[d["engine"]]["status"], "ok", "as new")
+	eq(b.components.instances[d["part"]]["status"], "ok", "as new")
 
 
 func test_the_chronicle_keeps_the_last_50() -> void:
@@ -121,7 +121,7 @@ func _done(b: BuildMode) -> void:
 func test_f_sends_the_nearest_crew_member_to_repair_the_part_under_the_mouse() -> void:
 	var d := _ship()
 	var ship: Ship = d["ship"]
-	var inst: Dictionary = ship.components.instances[d["engine"]]
+	var inst: Dictionary = ship.components.instances[d["part"]]
 	inst["status"] = "malfunction"
 	inst["hp"] = 3
 	var b := _mode(ship)
@@ -135,14 +135,14 @@ func test_f_sends_the_nearest_crew_member_to_repair_the_part_under_the_mouse() -
 	var far := CrewMember.new("Far", Vector2(20.0, 15.0))
 	ship.crew.append_array([far, near])
 	b._on_key(e)
-	eq(b.message, "Near will repair Kickjet", "the nearest one goes")
+	eq(b.message, "Near will repair Fabricator", "the nearest one goes")
 	eq(near.job.get("type"), "repair_component", "and has the job")
 	check(far.job.is_empty(), "the other stays")
-	for i in 100:  # a Kickjet is scrap: 2.5 s of work after the walk
+	for i in 100:  # 5 s of work after the walk
 		b.sim.step(0.1)
-	eq([inst["status"], inst["hp"]], ["ok", 6], "repaired")
+	eq([inst["status"], inst["hp"]], ["ok", 4], "repaired")
 	b._on_key(e)
-	eq(b.message, "Kickjet needs no repair", "nothing to do the second time")
+	eq(b.message, "Fabricator needs no repair", "nothing to do the second time")
 	b.hover = Vector2i(20, 14)
 	b._on_key(e)
 	eq(b.message, "no system under the mouse", "empty floor")
@@ -176,5 +176,5 @@ func test_the_hud_shows_fractional_power() -> void:
 	Fixture.put(d["ship"], "reactor_scrap_mk1", 10, 10)
 	d["ship"].refresh()
 	var b := _mode(d["ship"])
-	check(b.hud_text().contains("power 5.4 supply / 4.4 demand"), "5.4 supply: " + b.hud_text().split("\n")[0])
+	check(b.hud_text().contains("power 5.4 supply / 4 demand"), "5.4 supply: " + b.hud_text().split("\n")[0])
 	_done(b)
