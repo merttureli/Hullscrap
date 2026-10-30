@@ -166,13 +166,14 @@ func test_history_is_capped() -> void:
 
 func test_undo_bypasses_placement_rules() -> void:
 	var s := _session()
-	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(6, 5)]))
+	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(7, 5)]))
 	s.apply(_put("door", [MID]))
 	s.apply([{"cell": MID, "to": ""}])
 	s.apply([{"cell": Vector2i(4, 5), "to": ""}])
 	check(s.undo(), "undo wall removal")
 	check(s.undo(), "undo door removal")
 	eq(s.grid.get_tile(MID), "door", "door restored")
+	eq(s.grid.get_tile(MID + Vector2i.RIGHT), "door", "both cells of it")
 	check(s.undo(), "undo door placement")
 	check(s.undo(), "undo walls")
 	eq(s.grid.tiles.size(), 0, "empty again")
@@ -181,27 +182,27 @@ func test_undo_bypasses_placement_rules() -> void:
 
 func test_undo_brings_back_an_open_door_open() -> void:
 	var s := _session()
-	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(6, 5)]))
+	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(7, 5)]))
 	s.apply(_put("door", [MID]))
 	s.grid.set_door_open(MID, true)
 	s.apply([{"cell": MID, "to": ""}])
 	check(not s.grid.is_door_open(MID), "removed door has no state")
 	s.undo()
-	check(s.grid.is_door_open(MID), "undo restores it open")
+	check(s.grid.is_door_open(MID) and s.grid.is_door_open(MID + Vector2i.RIGHT), "undo restores it open, both cells")
 	s.redo()
 	s.undo()
 	s.undo()
 	s.redo()
-	check(not s.grid.is_door_open(MID), "a door placed again starts closed")
+	check(not s.grid.is_door_open(MID) and not s.grid.is_door_open(MID + Vector2i.RIGHT), "a door placed again starts closed")
 
 
 func test_removing_refunds_everything() -> void:
 	var s := _session()
-	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(6, 5)]))
+	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(7, 5)]))
 	s.apply(_put("door", [MID]))
-	eq(s.inventory.to_dict(), {"scrap": 100 - 4 - 3, "copper": 9}, "paid in materials")
+	eq(s.inventory.to_dict(), {"scrap": 100 - 4 - 2 * 3, "copper": 8}, "paid in materials, a door costs per cell")
 	var r := s.apply([{"cell": MID, "to": ""}])
-	eq(r["applied"], 1, "door removed")
+	eq(r["applied"], 2, "door removed: both cells")
 	eq(s.inventory.to_dict(), {"scrap": 100 - 4, "copper": 10}, "door refunded 100%")
 	r = s.apply([{"cell": MID, "to": ""}])
 	eq(r, {"applied": 0, "skipped": 1, "reason": "nothing to remove"}, "empty cell")
@@ -219,7 +220,7 @@ func test_unaffordable_placement_is_skipped() -> void:
 
 func test_door_needs_copper_too() -> void:
 	var s := _session(50, 0)
-	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(6, 5)]))
+	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(7, 5)]))
 	var r := s.apply(_put("door", [MID]))
 	eq(r["reason"], "not enough copper", "copper is the missing material")
 	eq(s.inventory.count("scrap"), 46, "nothing was charged")
@@ -249,10 +250,94 @@ func test_replacing_refunds_the_old_tile() -> void:
 func test_replace_that_cannot_be_paid_changes_nothing() -> void:
 	var s := _session(0, 0)
 	s.grid.force_tile(MID, "floor")
+	s.grid.force_tile(Vector2i(4, 5), "wall")
+	s.grid.force_tile(Vector2i(7, 5), "wall")
 	var r := s.apply(_put("door", [MID]))
 	check(r["applied"] == 0, "door refused")
 	eq(s.grid.get_tile(MID), "floor", "floor still there")
 	eq(s.inventory.to_dict(), {}, "cargo untouched")
+
+
+# --- Door pieces ---
+
+## A wall along row 5 (x 3..8) in a session with plenty of scrap and copper.
+func _wall_session() -> BuildSession:
+	var s := _session(200, 20)
+	s.apply(_put("wall", _row(3, 8, 5)))
+	return s
+
+
+func test_a_door_piece_is_one_change_and_one_undo_step() -> void:
+	var s := _wall_session()
+	var cargo := s.inventory.to_dict()
+	var pl := s.plan_door("door", MID)
+	eq(pl["changes"].size(), 1, "one change for the piece")
+	var r := s.apply(pl["changes"])
+	eq(r, {"applied": 2, "skipped": 0, "reason": ""}, "both cells built")
+	eq(s.grid.door_piece(MID), [MID, MID + Vector2i.RIGHT] as Array[Vector2i], "a 2x1 piece in the horizontal wall")
+	eq(s.undo_stack.size(), 2, "the wall stroke and one step for the door")
+	eq(s.inventory.count("scrap"), cargo["scrap"] + 4 - 6, "two walls refunded, two door cells paid")
+	eq(s.inventory.count("copper"), cargo["copper"] - 2, "a copper a cell")
+	check(s.undo(), "one undo")
+	eq([s.grid.get_tile(MID), s.grid.get_tile(MID + Vector2i.RIGHT)], ["wall", "wall"], "both cells are walls again")
+	eq(s.inventory.to_dict(), cargo, "and the cargo is back")
+	check(s.redo(), "one redo")
+	eq(s.grid.door_piece(MID).size(), 2, "the piece is back")
+	eq(s.inventory.count("copper"), cargo["copper"] - 2, "and paid again")
+
+
+func test_a_door_piece_needs_walls_at_both_ends_and_goes_the_way_the_walls_run() -> void:
+	var s := _wall_session()
+	var r := s.apply(s.plan_door("door", Vector2i(3, 5))["changes"])  # (2,5) is empty: no wall at that end
+	eq(r["reason"], "doors need walls at both ends", "refused")
+	eq(r["applied"], 0, "nothing built")
+	eq(s.grid.get_tile(Vector2i(3, 5)), "wall", "the wall is untouched")
+	eq(s.apply(s.plan_door("door", MID, Vector2i.DOWN)["changes"])["reason"], "doors need walls at both ends", "a piece across the wall does not fit")
+	var v := _session(200, 20)
+	v.apply(_put("wall", [Vector2i(5, 3), Vector2i(5, 4), Vector2i(5, 5), Vector2i(5, 6), Vector2i(5, 7)]))
+	var pl := v.plan_door("door", Vector2i(5, 4))
+	check(not pl["changes"][0].has("axis"), "no axis: the grid chooses")
+	eq(v.preview(pl["changes"])[0]["reason"], "", "a vertical piece fits the vertical wall")
+	eq(v.apply(pl["changes"])["applied"], 2, "built")
+	eq(v.grid.door_piece(Vector2i(5, 5)), [Vector2i(5, 4), Vector2i(5, 5)] as Array[Vector2i], "1x2, seen from either cell")
+	eq(v.plan_door("door", Vector2i(-4, 5))["error"], "outside the hull", "off the grid")
+
+
+func test_removing_either_door_cell_takes_the_whole_piece_in_one_step() -> void:
+	var s := _wall_session()
+	s.apply(s.plan_door("door", MID)["changes"])
+	var steps := s.undo_stack.size()
+	var cargo := s.inventory.to_dict()
+	var r := s.apply([{"cell": MID + Vector2i.RIGHT, "to": ""}])  # the second cell
+	eq(r, {"applied": 2, "skipped": 0, "reason": ""}, "both cells removed")
+	eq([s.grid.get_tile(MID), s.grid.get_tile(MID + Vector2i.RIGHT)], ["", ""], "gone")
+	eq(s.undo_stack.size(), steps + 1, "one step")
+	eq(s.inventory.count("copper"), cargo["copper"] + 2, "both cells refunded")
+	check(s.undo(), "undo")
+	eq(s.grid.door_piece(MID), [MID, MID + Vector2i.RIGHT] as Array[Vector2i], "the whole piece is back")
+	eq(s.inventory.to_dict(), cargo, "cargo as before")
+
+
+func test_replacing_one_door_cell_replaces_the_piece() -> void:
+	var s := _wall_session()
+	s.apply(s.plan_door("door", MID)["changes"])
+	var r := s.apply(_put("floor", [MID]))
+	eq(r["applied"], 2, "both cells become floor")
+	eq([s.grid.get_tile(MID), s.grid.get_tile(MID + Vector2i.RIGHT)], ["floor", "floor"], "a floor in the doorway")
+	s.undo()
+	eq(s.grid.door_piece(MID + Vector2i.RIGHT).size(), 2, "undo brings the piece back")
+	var walled := s.apply(_put("wall", [MID + Vector2i.RIGHT]))
+	eq(walled["applied"], 2, "a wall over one cell walls up both")
+
+
+func test_a_door_piece_cannot_go_over_a_system() -> void:
+	var s := _parts_session()
+	s.inventory.add("helm", 1)
+	s.apply(_put("wall", [Vector2i(3, 5), Vector2i(6, 5)]))
+	check(s.apply([{"layer": "component", "id": "helm", "anchor": Vector2i(4, 4), "rot": 0}])["applied"] == 1, "a helm on x 4..5, y 4..5")
+	var r := s.apply(s.plan_door("door", Vector2i(4, 5))["changes"])  # walls at both ends, but the helm stands on its cells
+	eq(r, {"applied": 0, "skipped": 1, "reason": "a %s stands here" % s.ship.components.def("helm")["name"]}, "refused, with the reason")
+	eq(s.grid.get_tile(Vector2i(4, 5)), "floor", "the floor is still there")
 
 
 # --- Planning a drag ---
@@ -307,11 +392,11 @@ func test_paint_plan_drops_repeats_and_outside_cells() -> void:
 
 func test_removing_a_rectangle_takes_doors_before_their_walls() -> void:
 	var s := _session()
-	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(6, 5)]))
+	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(7, 5)]))
 	s.apply(_put("door", [MID]))
-	var pl := s.plan(BuildSession.Mode.RECT, "", true, Vector2i(3, 4), Vector2i(7, 6))
+	var pl := s.plan(BuildSession.Mode.RECT, "", true, Vector2i(3, 4), Vector2i(8, 6))
 	var r := s.apply(pl["changes"])
-	eq(r, {"applied": 3, "skipped": 12, "reason": "nothing to remove"}, "wall, door, wall all go")
+	eq(r, {"applied": 4, "skipped": 15, "reason": "nothing to remove"}, "wall, both door cells, wall all go")
 	eq(s.grid.tiles.size(), 0, "empty")
 
 
@@ -332,7 +417,7 @@ func test_preview_changes_nothing() -> void:
 
 func test_save_load_round_trip_with_doors_and_cargo() -> void:
 	var s := _session()
-	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(6, 5)]))
+	s.apply(_put("wall", [Vector2i(4, 5), Vector2i(7, 5)]))
 	s.apply(_put("door", [MID]))
 	s.apply(_put("floor", [Vector2i(5, 6)]))
 	s.grid.set_door_open(MID, true)
@@ -342,7 +427,7 @@ func test_save_load_round_trip_with_doors_and_cargo() -> void:
 	t.apply(_put("floor", [MID]))
 	eq(t.load_dict(d), "", "loads")
 	eq(t.grid.tiles, s.grid.tiles, "same tiles")
-	check(t.grid.is_door_open(MID), "door is still open")
+	check(t.grid.is_door_open(MID) and t.grid.is_door_open(MID + Vector2i.RIGHT), "door is still open, both cells")
 	eq(t.inventory.to_dict(), s.inventory.to_dict(), "same cargo")
 	eq(t.undo_stack.size(), 0, "history cleared")
 	check(not t.undo(), "nothing to undo after a load")
@@ -390,12 +475,12 @@ func _cable(c: Vector2i, remove := false) -> Dictionary:
 	return {"layer": "cable", "cell": c, "remove": remove}
 
 
-## A session with floor on (3,3)-(9,9), a reactor and two engines in the cargo, and a clean history.
+## A session with floor on (3,3)-(11,11), a reactor and two engines in the cargo, and a clean history.
 func _parts_session(copper := 20) -> BuildSession:
 	var s := _session(200, copper)
 	s.inventory.add("reactor_mk1", 1)
 	s.inventory.add("engine_mk1", 2)
-	s.apply(_put("floor", BuildSession.rect_cells(Vector2i(3, 3), Vector2i(9, 9))))
+	s.apply(_put("floor", BuildSession.rect_cells(Vector2i(3, 3), Vector2i(11, 11))))
 	s.undo_stack.clear()
 	return s
 
@@ -415,7 +500,8 @@ func test_placing_a_system_takes_an_item_and_undo_returns_it() -> void:
 	eq(r, {"applied": 1, "skipped": 0, "reason": ""}, "placed")
 	eq(s.inventory.count("reactor_mk1"), 0, "the item is used up")
 	var uid := s.ship.components.at(Vector2i(5, 5))
-	check(uid >= 0, "it covers its whole 2x2 footprint")
+	check(uid >= 0, "it covers its whole 4x4 footprint")
+	eq(s.ship.components.at(Vector2i(7, 7)), uid, "down to the far corner")
 	eq(s.ship.components.at(Vector2i(4, 4)), uid, "same part on the anchor cell")
 	check(s.undo(), "undo")
 	eq(s.inventory.count("reactor_mk1"), 1, "the item is back in the cargo")
@@ -429,7 +515,7 @@ func test_a_rotated_system_covers_its_rotated_footprint() -> void:
 	var s := _parts_session()
 	var r := s.apply([{"layer": "component", "id": "engine_mk1", "anchor": Vector2i(4, 4), "rot": 1}])
 	eq(r["applied"], 1, "engine placed on its side")
-	check(s.ship.components.at(Vector2i(4, 5)) >= 0 and s.ship.components.at(Vector2i(5, 4)) < 0, "2x1 turned into 1x2")
+	check(s.ship.components.at(Vector2i(4, 7)) >= 0 and s.ship.components.at(Vector2i(6, 4)) < 0, "4x2 turned into 2x4")
 
 
 func test_without_an_item_a_system_is_skipped_with_its_name() -> void:
@@ -513,10 +599,10 @@ func test_a_floor_under_a_system_cannot_go() -> void:
 	var why := "a %s stands here" % name
 	eq(s.apply([{"layer": "tile", "cell": Vector2i(4, 4), "to": ""}])["reason"], why, "removing the floor")
 	eq(s.apply(_put("wall", [Vector2i(5, 5)]))["reason"], why, "walling it over")
-	eq(s.apply(_put("door", [Vector2i(5, 4)]))["reason"] in [why, "doors need walls on two opposite sides"], true, "a door can't go there either")
+	eq(s.apply(_put("door", [Vector2i(5, 4)]))["reason"] in [why, "doors need walls at both ends"], true, "a door can't go there either")
 	eq(s.grid.get_tile(Vector2i(4, 4)), "floor", "the floor is still there")
 	eq(s.undo_stack.size(), 1, "and nothing was recorded")
-	var r := s.apply([{"layer": "tile", "cell": Vector2i(6, 4), "to": ""}])
+	var r := s.apply([{"layer": "tile", "cell": Vector2i(8, 4), "to": ""}])
 	eq(r["applied"], 1, "the floor beside it can go")
 	s.apply([{"layer": "component", "cell": Vector2i(4, 4)}])
 	eq(s.apply([{"layer": "tile", "cell": Vector2i(4, 4), "to": ""}])["applied"], 1, "once the system is removed")
@@ -528,7 +614,7 @@ func test_redo_works_across_layers() -> void:
 	s.apply(_put("wall", [Vector2i(9, 9)]))
 	s.apply([_reactor()])
 	s.apply([_cable(Vector2i(4, 4)), _cable(Vector2i(5, 4))])
-	s.apply([_cable(Vector2i(5, 4), true), {"layer": "tile", "cell": Vector2i(8, 8), "to": "wall"}, {"layer": "component", "id": "engine_mk1", "anchor": Vector2i(6, 6), "rot": 0}])
+	s.apply([_cable(Vector2i(5, 4), true), {"layer": "tile", "cell": Vector2i(8, 8), "to": "wall"}, {"layer": "component", "id": "engine_mk1", "anchor": Vector2i(4, 8), "rot": 0}])
 	var done := _snapshot(s, false)
 	eq(s.undo_stack.size(), 4, "four steps over three layers")
 	while s.undo():
@@ -548,13 +634,13 @@ func test_redo_works_across_layers() -> void:
 
 func test_preview_of_a_system_changes_nothing() -> void:
 	var s := _parts_session()
-	s.apply([_reactor(6, 6)])
+	s.apply([_reactor(8, 8)])
 	var before := _snapshot(s)
 	var out := s.preview([_reactor(3, 3)])
 	eq(out[0]["reason"], "no Reactor Mk1 in cargo", "no second reactor")
 	s.inventory.add("reactor_mk1", 1)
 	before = _snapshot(s)
-	out = s.preview([_reactor(3, 3), _cable(Vector2i(3, 3)), {"layer": "component", "cell": Vector2i(6, 6)}])
+	out = s.preview([_reactor(3, 3), _cable(Vector2i(3, 3)), {"layer": "component", "cell": Vector2i(8, 8)}])
 	eq([out[0]["reason"], out[1]["reason"], out[2]["reason"]], ["", "", ""], "all three would apply")
 	eq(out[0]["id"], "reactor_mk1", "the preview carries the change")
 	eq(_snapshot(s), before, "nothing changed, not even the next uid")
@@ -585,4 +671,4 @@ func test_save_load_round_trip_with_systems_and_cables() -> void:
 	eq(_snapshot(t), saved, "everything came back")
 	eq(t.undo_stack.size(), 0, "history cleared")
 	check(t.ship.components.at(Vector2i(5, 5)) >= 0 and t.ship.cables.has(Vector2i(5, 4)), "the system and the cable")
-	eq(t.apply([_reactor(6, 6)])["reason"], "no Reactor Mk1 in cargo", "the reactor in the save was the only one")
+	eq(t.apply([_reactor(8, 8)])["reason"], "no Reactor Mk1 in cargo", "the reactor in the save was the only one")
