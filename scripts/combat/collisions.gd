@@ -19,6 +19,7 @@ extends RefCounted
 ## Tuning is data/collision.json (loaded into `arena.collision`).
 
 const Damage = preload("res://scripts/combat/damage.gd")
+const Mounts = preload("res://scripts/ship/mounts.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 
 const PATH := "res://data/collision.json"
@@ -361,6 +362,9 @@ static func _hurt(arena, i: int, j: int, contacts: Array, n: Vector2, p: Vector2
 		for cell in cells:
 			var rec: Dictionary = share[cell]
 			var obj: Dictionary = Damage.solid_at(co, cell)
+			if obj.is_empty():  # a disabled outside half is there to touch but takes nothing more: the blow goes on into the wall behind it
+				cell = _behind_disabled(co, cell)
+				obj = Damage.solid_at(co, cell)
 			if obj.is_empty():
 				continue
 			var amount: float = budget * rec["deal"] / total  # its depth share of the budget x the other side's multiplier
@@ -384,6 +388,20 @@ static func _contact_points(contacts: Array) -> Array:
 	for k in range(0, contacts.size(), step):
 		out.append(contacts[k]["p"])
 	return out
+
+
+## The cell behind `cell` when that is part of a disabled outside half (a hull mount's barrel): the first
+## cell inward of the barrel, the wall it is mounted through. `cell` itself when it is not.
+static func _behind_disabled(co, cell: Vector2i) -> Vector2i:
+	var parts = co.ship.components
+	var uid: int = parts.at_out(cell)
+	if uid < 0 or parts.outside_alive(uid):
+		return cell
+	var step := -Mounts.outward(int(parts.instances[uid]["rot"]))
+	var c := cell
+	while parts.at_out(c) == uid:
+		c += step
+	return c
 
 
 ## What the other ship's cell `cell` multiplies the damage it does in a collision by: its ram quirk

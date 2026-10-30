@@ -421,6 +421,20 @@ func test_the_outside_half_is_part_of_the_hitbox_and_the_mass() -> void:
 	near(m_with - f.mass_of(bare.grid, bare.components, bare.cables), 8.0 * f.component_mass_per_cell, "the outside half weighs 8 cells more", 1e-6)
 
 
+func test_a_ram_on_a_disabled_barrel_goes_on_into_the_wall_behind_it() -> void:
+	for rot in 4:
+		var d := _rig(2, rot)
+		var a := _arena(d)
+		var inst: Dictionary = d["ship"].components.instances[d["uid"]]
+		var barrel: Vector2i = Wall.at(rot, -1, -1)  # the cell of the barrel against the wall
+		eq(Collisions._behind_disabled(a.ships[0], barrel), barrel, "rot %d: a working barrel takes the blow itself" % rot)
+		inst["out_hp"] = 0
+		var first: Vector2i = Wall.at(rot, -1, 0)
+		eq(Collisions._behind_disabled(a.ships[0], barrel), first, "rot %d: a disabled one passes it to the wall cell behind it" % rot)
+		eq(Collisions._behind_disabled(a.ships[0], Wall.at(rot, -1, -2)), first, "rot %d: from the outer row of the barrel too" % rot)
+		eq(Collisions._behind_disabled(a.ships[0], first), first, "rot %d: a wall cell is just itself" % rot)
+
+
 # --- wrecked parts ------------------------------------------------------------------------------------
 
 func test_a_disabled_part_hit_again_is_wrecked_and_leaves_debris() -> void:
