@@ -1,0 +1,21 @@
+name: tests
+on:
+  push:
+  pull_request:
+jobs:
+  godot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Godot 4.6.3 (headless)
+        run: |
+          curl -sSL -o godot.zip https://github.com/godotengine/godot/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip
+          unzip -q godot.zip && mv Godot_v4.6.3-stable_linux.x86_64 godot && rm godot.zip
+      - name: Import project
+        run: ./godot --headless --path . --import
+      - name: Tests
+        run: ./godot --headless --path . --script res://tests/run_tests.gd
+      - name: Main scene runs without script errors
+        run: |
+          ./godot --headless --path . --quit-after 120 2>&1 | tee run.log
+          if grep -E "SCRIPT ERROR|Parse Error" run.log; then exit 1; fi
