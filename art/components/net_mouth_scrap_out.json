@@ -1,0 +1,62 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "pulling": [
+   2,
+   6,
+   10
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "net_mouth_scrap_out_glow.png",
+  "frame": [
+   48,
+   64
+  ],
+  "offset": [
+   -8,
+   -20
+  ],
+  "anims": {
+   "pulling": [
+    0,
+    6,
+    10
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   16
+  ]
+ },
+ "notes": "OUTSIDE half of the Net Mouth (scrap, 2x2): a welded cargo net stretched on a rusty frame, hazard tape on the posts, a horseshoe magnet wired to the top brace, junk caught in the mesh. pulling: the net billows, caught bits slide to the throat, the magnet throws mint shimmer arcs (glow layer). damaged: net torn open, a post bent, tape peeling; disabled: scorched, dented, net burnt to strands, sparking."
+}

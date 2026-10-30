@@ -11,8 +11,11 @@ The game draws pixel art from this folder and falls back to flat code-drawn plac
 - `crew/<species>/`: `legs.png`, `torso.png`, `arms.png`, `head.png`, each with a `_color.png` mask, plus `crew.json`.
 - `items/<id>.png` (+ `.json`): hand-held items (`pistol`, `rifle`, `wrench`, `extinguisher`).
 - `tiles/`: `floor`, `walls`, `walls_armor`, `door`, `breach`, `cable` (+ `cable_on`).
-- `fx/`: `fire`, `smoke`, `sparks`, `explosion`, `muzzle`, `shield_ripple`, `heat_shimmer`.
-- `projectiles/<kind>`: `laser`, `beam` (hitscan, tiled along y, with `laser_impact` / `beam_impact` flares), `bolt`, `flak`, `missile`.
+- `fx/`: `fire`, `smoke`, `sparks`, `explosion`, `muzzle`, `shield_ripple`, `heat_shimmer`, `jump_spool`, `jump_flash`.
+- `projectiles/<kind>`: `laser`, `beam` (hitscan, tiled along y, with `laser_impact` / `beam_impact` flares), `bolt`, `flak`, `missile`, `tractor_beam` (tiled along y).
+- `debris/<id>.png` (+ `.json`, `_glow`): drifting sector debris (see "Sector space art" below).
+- `ui/`: `poi_icons` (HUD icons for sector points of interest).
+- `space/`: `stars_far`, `stars_mid`, `stars_near` (tiling parallax layers) and `nebula_<region>` (faint soft overlays).
 - `palette.gpl`: the shared palette. Hard-pixel layers use only its colours; glow layers are soft alpha.
 
 ## Sprite JSON (one per PNG; every field optional)
@@ -76,3 +79,37 @@ A weapon straddles the hull wall, so it is drawn as two halves plus a rotating b
 - Fixed: laser_mk1, laser_mk2, pulse_mk1, pulse_mk2, artemis_mk1, ion_blast_mk1, shrapnel_cannon_scrap, bolt_thrower_scrap, heat_lance_neon, breach_harpoon. Turrets: laser_turret_mk1 (the Concord Point Turret), rattle_burst_scrap, siren_ion_neon, leech_laser.
 - `ammo_rack.png` (2x2, 32x32): anims `fill_0..4` (missiles, also `on` = full), `scrap_0..4`, `slug_0..4`, `damaged` (2), `disabled`, `wrecked`.
 - `tiles/wreck.png`: a 16x16 debris decal, 4 variants (scorched floor, twisted plate, loose cables, burnt scrap).
+
+## Sector space art ("Raft in space", `docs/CONTENT.md` section 11)
+Generator: `art/_src/sector_all.py` (`debris.py`, `comp_salvage.py`, `comp_radar.py`, `comp_tractor.py`, `sector_fx.py`, `poi_icons.py`, `space_bg.py`); `build_all.py` rebuilds it all, `python3 art/_src/sector_all.py` just this set, and `python3 art/_src/sheet_sector.py out.png` draws the 3x preview sheet. Palette: 8 colours were added at the end of `palette.gpl` (45 in all): copper `T` `Y`, ice `i` `z`, polymer `k`, titanium `x` `t`, tractor mint `h`.
+
+**Drifting debris** (`debris/<id>.png`, 1 px near-black outline, lit from the top-left in every frame, no baked shadow: it floats in space). Anim `tumble` = 4 frames (the piece turned by the degrees in `tumble_deg`; `loop` is `wrap` (1,2,3,4,1...) for the near-round pieces, `pingpong` for the long ones: barrel, canisters, plate); the game may also turn the node. Anchor `center`. `glow` (additive, 16 px bigger all round, offset -8,-8) on `crystal_shard`, `plasma_canister` and `fuel_canister`.
+| id | frame | material cue | extras |
+|---|---|---|---|
+| `scrap_chunk_s` / `_m` | 16x16 / 24x24 | grey steel, rust patches, hazard tape | |
+| `copper_coil` | 16x16 | copper orange windings, a steel clip | |
+| `polymer_barrel` | 16x24 | white-blue drum, steel hoops, amber label | |
+| `ice_chunk_s` / `_m` | 16x16 / 24x24 | pale cyan facets, frost glints | |
+| `titanium_plate` | 24x16 | cool grey with a diagonal sheen | |
+| `silicon_rock` | 24x24 | dark rock with glassy faces | |
+| `crystal_shard` | 16x16 | saturated cyan prisms | glow |
+| `plasma_canister` | 16x24 | steel bottle, magenta plasma window | glow |
+| `sealed_crate` | 24x24 | brown crate, steel corners, amber seal | `broken` (frame 5) |
+| `ore_rock_s` / `ore_rock_l` | 24x24 / 48x48 | brown rock, craters, vein specks (copper, iron, titanium, crystal) | `cracked_1`, `cracked_2` (`cracked` = both) on `ore_rock_l` |
+| `dead_drone` | 24x24 | grey quad-rotor, one arm snapped, amber plate | |
+| `fuel_canister` | 16x24 | amber jerrycan, red cap, glowing gauge | glow |
+| `fragment` | 8x8 | neutral greys: multiply a material tint | 4 variants, anims `v0`..`v3` |
+
+**Salvage intakes** (hull mounts, the weapon two-halves format, NO barrel): `net_mouth_scrap` (2x2 + 2x2, frames 32x36), `intake_mk1`, `_mk2`, `_mk3`, `lumen_siphon_neon` (4x2 + 4x2, frames 64x36). Outward is UP, offsets and flanges as for weapons.
+- `<id>_out` (the mouth): anims `on` (2), `pulling` (6, 10 fps), `off`, `damaged` (2), `disabled` (2). `pulling` lights the coils and slides bits down the ribs; the magnetic shimmer (mint wavefronts closing on the mouth, cyan for the Lumen Siphon) is in `<id>_out_glow.png`, whose frame is TALLER than the sprite (its JSON `offset` is [-8, -N] with N = 20..48: the pull radius made visible). Use the glow's `pulling` anim (the game falls back to its `on` otherwise).
+- `<id>` (the hopper): anims `on` (6, bits drift to the belt), `pulling` (6, busy), `off`, `damaged` (2), `disabled`. Outside mouths are only ever scorched and dented.
+
+**Radars** (hull mounts, weapon format, rotating dish as the `_barrel`): `radar_mk1` (inside 2x2), `radar_mk2`, `radar_mk3`, `lumen_eye_neon` (inside 4x2), `listening_horn_scrap` (inside 2x2); every outside base is 2x2 (frame 32x36, `cells` [2,2] in `<id>_out.json`). The inside console `on` is an 8-frame SWEEP on its screen (a line turning one step per frame, blips lighting as it passes; `damaged` glitches, `disabled` is dead). `<id>_barrel.png` is the dish drawn pointing UP; JSON `aim` is `"spin"` (turns continuously, the game sets the speed), `anchors.pivot` goes on `pivot_on_base` of the `_out` half. Barrel anims: `idle` (2, a blinking lamp), `damaged` (2), `disabled`.
+
+**Tractor Beam turrets** (`tractor_mk1`, `tractor_mk2`, turret format as `laser_turret_mk1`, 4x2 + 4x2): anims as a turret; `fire` = the beam is ON (the strip pulses; the head `fire` = 3 frames, the coil rings light mint one by one and wavefronts leave the lens, no recoil). The beam is `projectiles/tractor_beam.png`: 12x16, 4 frames (`pull`, 12 fps), tiled along y from the turret (tail) to the debris (head), shallow V-shaped waves crawling toward the turret; glow `tractor_beam_glow.png` tiles too. No impact flare.
+
+**HUD icons** `ui/poi_icons.png` (+ `_glow`, 24x24 frames at -4,-4): 16x16 per type, anim name = POI type: `station`, `store`, `trader`, `distress`, `wreck`, `abandoned_station`, `mining_field`, `unknown`, `pirate_nest`, `concord_checkpoint`, `anomaly`, `quest`, `contact` (an unidentified radar contact), `course` (the set-course marker). Family colours: distress red + amber, quest gold, Lumen cyan, Concord blue, pirate red.
+
+**Space backdrop** (`space/`, transparent, soft alpha: the one place soft gradients are allowed): `stars_far`, `stars_mid`, `stars_near` are 256x256 and TILE on both axes (draw repeated, offset by camera x `parallax` 0.04 / 0.12 / 0.35); `nebula_clan`, `_concord`, `_lumen`, `_boneyard`, `_gate` are 512x512 faint overlays in palette greys (at most 52..76 of 255 alpha, edges fade to nothing): multiply the `suggested_tints` of their JSON over them (clan rust, Concord blue-grey, Lumen cyan-violet, Boneyard murky olive, gate pale) and draw them big, behind the ship.
+
+**Jump drive** `fx/jump_spool.png` (64x64, 8 frames: a ring of light tightening, 1 fps over the 8 s spool, or stretch it to the timer) and `fx/jump_flash.png` (96x96, 6 frames at 14 fps: spark, white-out with a vertical streak, expanding shock ring, sparkles), each with a `_glow`.

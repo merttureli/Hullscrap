@@ -1,0 +1,72 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "pulling": [
+   2,
+   6,
+   10
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "intake_mk2_out_glow.png",
+  "frame": [
+   80,
+   84
+  ],
+  "offset": [
+   -8,
+   -40
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "pulling": [
+    2,
+    6,
+    10
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   16
+  ]
+ },
+ "notes": "OUTSIDE half of the Salvage Intake Mk2 (standard, 4x2): a wider mouth with thicker, double-lit rims, two copper coils on each cheek and seven guide ribs. Pull radius 3 cells. States as Mk1."
+}

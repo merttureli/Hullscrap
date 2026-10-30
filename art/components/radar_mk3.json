@@ -1,0 +1,60 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "radar_mk3_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Radar Mk3 (standard, 4x2): the Mk2 console plus a spectrum strip and a red \"hidden contact\" lamp that blinks when the array sees something running dark. on: 8-frame sweep; damaged / disabled as Mk1. Range 16,000 px, sees hidden contacts.",
+ "offset": [
+  0,
+  -4
+ ]
+}

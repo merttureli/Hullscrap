@@ -1,0 +1,70 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   6,
+   4
+  ],
+  "pulling": [
+   6,
+   6,
+   10
+  ],
+  "off": [
+   12,
+   1,
+   0
+  ],
+  "damaged": [
+   13,
+   2,
+   4
+  ],
+  "disabled": [
+   15,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "intake_mk1_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    6,
+    4
+   ],
+   "pulling": [
+    6,
+    6,
+    10
+   ],
+   "damaged": [
+    12,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Salvage Intake Mk1 (standard, 4x2): a glass-fronted sorting hopper with a belt, a sorter panel with three chutes (amber, cyan, green lamps) and a flow bar. on: bits drift to the belt (6 frames); pulling: busy, five bits, the flow bar chases. damaged: glass cracked, chute lamps dead, bar half dead; disabled: cargo jammed in the outlet.",
+ "offset": [
+  0,
+  -4
+ ]
+}

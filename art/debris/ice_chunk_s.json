@@ -1,0 +1,28 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "anims": {
+  "tumble": [
+   0,
+   4,
+   3
+  ]
+ },
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "tumble_deg": [
+  0,
+  90,
+  180,
+  270
+ ],
+ "loop": "wrap",
+ "material": "ice",
+ "notes": "Ice chunk S: a faceted lump of pale cyan ice with frost glints. Refills O2 a little when collected. Frames are the piece turned [0, 90, 180, 270] degrees, lit from the top-left each time; loop them wrap (`wrap` = 1,2,3,4,1... ; `pingpong` = 1,2,3,4,3,2,...), the game may also rotate the node. "
+}

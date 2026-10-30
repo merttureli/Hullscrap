@@ -1,7 +1,8 @@
 """Regenerates every art file this generator owns: palette, crew, items, components, tiles, ASSETS.md rows."""
-import subprocess, sys
+import subprocess, sys, os
 from px import *
 import export_crew, comp_base, comp_laser, comp_new, sp_export, comp_weapons, tile_wreck
+import sector_all                                                                  # sector space: debris, intakes, radars, tractor, HUD icons, backdrop, jump fx
 import lines_reactor, lines_engine, lines_o2_shield, lines_shield, lines_shop, lines_belt     # equipment lines + workshop + belts (extra palette letters register on import)
 LINES = lines_reactor.ALL + lines_engine.ALL + lines_o2_shield.ALL + lines_shield.ALL + lines_shop.ALL + lines_belt.ALL
 REPLACED = {'engine_mk1', 'shield_mk1'}            # redrawn by the lines modules (engine split into core + _out, shield with the new animation); comp_engine.py is the old west-facing engine, superseded
@@ -16,4 +17,5 @@ if __name__ == '__main__':
         print(c.id, J['frame'], list(J['anims']))
     lines_belt.export_tiles(ART + '/tiles')
     tile_wreck.export()
-    subprocess.run([sys.executable, 'assets_md.py'], check=True)
+    sector_all.export_all()
+    subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets_md.py')], check=True)

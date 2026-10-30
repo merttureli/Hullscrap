@@ -1,0 +1,10 @@
+{
+ "frame": [
+  256,
+  256
+ ],
+ "tile": "xy",
+ "alpha": true,
+ "parallax": 0.12,
+ "notes": "Parallax star layer, mid stars: fewer and brighter, some 2x2 stars and a few sparkles. Transparent, tiles seamlessly on both axes (every star wraps round the edge): draw it repeated, offset by the camera times `parallax` (far 0.04, mid 0.12, near 0.35), over the space colour the game draws behind. Soft alpha on palette letters (the one place alpha stars are allowed)."
+}

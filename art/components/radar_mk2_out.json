@@ -1,0 +1,96 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   15
+  ]
+ },
+ "notes": "OUTSIDE half of the Radar Mk2 (standard, 2x2 turntable): heavier base with a blue-lit slip ring; the big ribbed dish with a forked feed (radar_mk2_barrel) turns on it.",
+ "barrel": {
+  "image": "radar_mk2_barrel.png",
+  "frame": [
+   31,
+   30
+  ],
+  "pivot_on_base": [
+   16,
+   15
+  ],
+  "pivot_on_barrel": [
+   15,
+   22
+  ],
+  "anims": {
+   "idle": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ],
+   "disabled": [
+    4,
+    1,
+    0
+   ]
+  },
+  "aim": "spin",
+  "spin": true,
+  "glow": {
+   "image": "radar_mk2_barrel_glow.png",
+   "frame": [
+    47,
+    46
+   ],
+   "offset": [
+    -8,
+    -8
+   ],
+   "anims": {
+    "idle": [
+     0,
+     2,
+     3
+    ],
+    "damaged": [
+     2,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}

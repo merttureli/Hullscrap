@@ -195,27 +195,46 @@ def read_png(path):
 
 def validate():
     import json
+    import pal_sector                                    # registers the full palette (palette.gpl is the law, not only the pilot colours)
+    import px
+    ok_rgb = PALETTE_RGB | set(px.RGB.values())
     bad = 0
-    for sub in ('tiles', 'fx', 'projectiles'):
+    for sub in ('tiles', 'fx', 'projectiles', 'debris', 'ui', 'space'):
+        if not os.path.isdir(os.path.join(ART, sub)): continue
         for fn in sorted(os.listdir(os.path.join(ART, sub))):
             if not fn.endswith('.png'): continue
             rel = sub + '/' + fn
             w, h, rows = read_png(os.path.join(ART, rel))
             js = os.path.join(ART, rel[:-4] + '.json')
-            is_glow = rel in ALPHA_OK
+            is_glow = rel in ALPHA_OK or fn.endswith('_glow.png') or sub == 'space'          # glow layers and the space layers carry soft alpha
             if not is_glow and not os.path.exists(js):
                 print('MISSING JSON', rel); bad += 1
             for y, row in enumerate(rows):
                 for x in range(w):
                     r, g, b, a = row[x * 4:x * 4 + 4]
                     if a == 0: continue
-                    if (r, g, b) not in PALETTE_RGB:
+                    if (r, g, b) not in ok_rgb:
                         print('OFF-PALETTE', rel, x, y, (r, g, b)); bad += 1
                     if a != 255 and not is_glow:
                         print('PARTIAL ALPHA in hard-pixel file', rel, x, y, a); bad += 1
             if os.path.exists(js):
-                fw, fh = json.load(open(js))['frame']
+                J = json.load(open(js))
+                fw, fh = J['frame']
                 if w % fw or h % fh: print('FRAME MISMATCH', rel, (w, h), (fw, fh)); bad += 1
+                n = (w // fw) * (h // fh)
+                for name, (st, cnt, _fps) in J.get('anims', {}).items():
+                    if st < 0 or cnt < 1 or st + cnt > n: print('ANIM OUT OF RANGE', rel, name, (st, cnt), 'frames', n); bad += 1
+                g = J.get('glow')
+                if g and sub in ('debris', 'ui', 'fx', 'projectiles'):
+                    gp = os.path.join(ART, sub, g['image'])
+                    if not os.path.exists(gp): print('MISSING GLOW', rel, g['image']); bad += 1
+                    else:
+                        gw, gh, _ = read_png(gp); gfw, gfh = g['frame']
+                        if gw % gfw or gh % gfh: print('GLOW FRAME MISMATCH', rel, (gw, gh), (gfw, gfh)); bad += 1
+                        else:
+                            gn = (gw // gfw) * (gh // gfh)
+                            for name, (st, cnt, _fps) in g.get('anims', {}).items():
+                                if st + cnt > gn: print('GLOW ANIM OUT OF RANGE', rel, name, (st, cnt), 'frames', gn); bad += 1
     print('validate:', 'OK' if not bad else '%d problems' % bad)
     return bad
 
@@ -243,4 +262,5 @@ def check_masks():
 
 if __name__ == '__main__':
     build()
-    sys.exit(1 if (validate() or check_masks() or SH.check_shapes()) else 0)
+    import sector_all
+    sys.exit(1 if (validate() or check_masks() or SH.check_shapes() or sector_all.validate()) else 0)

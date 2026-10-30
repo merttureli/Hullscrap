@@ -1,0 +1,60 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "radar_mk1_glow.png",
+  "frame": [
+   48,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Radar Mk1 (standard, 2x2): a small console with a round scope. on: the sweep line turns one step per frame (8 frames) with a fading trail and blips that light as it passes; damaged: glitch band and dead pixels, the sweep stutters; disabled: a dead, dark screen. Range 6,000 px: shows \"contact\" and the bearing.",
+ "offset": [
+  0,
+  -4
+ ]
+}

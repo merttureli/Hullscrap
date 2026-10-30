@@ -1,0 +1,13 @@
+{
+ "frame": [
+  512,
+  512
+ ],
+ "alpha": true,
+ "tint": "multiply",
+ "suggested_tints": {
+  "region": "#8f9cff"
+ },
+ "parallax": 0.06,
+ "notes": "Nebula overlay, Lumen space: glowing cyan-violet filaments with bright cores. Soft alpha (at most 58/255) in palette greys, fading to nothing at the edge so it can be placed anywhere with no border. Multiply the suggested tint over it and draw it big, behind everything, over the star layers; it must stay faint, the ship stands out."
+}

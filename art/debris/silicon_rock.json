@@ -1,0 +1,28 @@
+{
+ "frame": [
+  24,
+  24
+ ],
+ "anims": {
+  "tumble": [
+   0,
+   4,
+   3
+  ]
+ },
+ "anchors": {
+  "center": [
+   12,
+   12
+  ]
+ },
+ "tumble_deg": [
+  0,
+  90,
+  180,
+  270
+ ],
+ "loop": "wrap",
+ "material": "silicon",
+ "notes": "Silicon rock: dark grey-blue rock with cleaved, glassy faces that catch the light. Drops silicon 1-2. Frames are the piece turned [0, 90, 180, 270] degrees, lit from the top-left each time; loop them wrap (`wrap` = 1,2,3,4,1... ; `pingpong` = 1,2,3,4,3,2,...), the game may also rotate the node. "
+}

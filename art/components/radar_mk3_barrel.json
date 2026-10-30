@@ -1,0 +1,59 @@
+{
+ "frame": [
+  35,
+  28
+ ],
+ "pivot_on_base": [
+  16,
+  15
+ ],
+ "aim": "spin",
+ "anims": {
+  "idle": [
+   0,
+   2,
+   3
+  ],
+  "damaged": [
+   2,
+   2,
+   4
+  ],
+  "disabled": [
+   4,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   17,
+   20
+  ]
+ },
+ "notes": "Rotating dish, drawn pointing UP; turn it about anchors.pivot placed on pivot_on_base of <id>_out. It spins continuously (`aim: spin`; sweep speed is the game's). idle: 2 frames (a blinking lamp); damaged: bent and cracked, sparking; disabled: broken and dark (it stops turning).",
+ "spin": true,
+ "glow": {
+  "image": "radar_mk3_barrel_glow.png",
+  "frame": [
+   51,
+   44
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "idle": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ }
+}

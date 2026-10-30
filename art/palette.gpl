@@ -39,3 +39,11 @@ Columns: 5
 138  95 208	#8a5fd0 workshop violet
 196 160 240	#c4a0f0 workshop violet light
  78  53 144	#4e3590 workshop violet dark
+212 121  58	#d4793a copper light (debris: copper orange)
+242 171 106	#f2ab6a copper highlight
+143 220 236	#8fdcec ice mid (debris: pale cyan)
+223 249 255	#dff9ff ice pale / frost highlight
+142 168 232	#8ea8e8 polymer pale blue (debris: white-blue)
+111 139 163	#6f8ba3 titanium cool mid (debris: cool grey)
+180 208 226	#b4d0e2 titanium cool light / sheen
+140 240 196	#8cf0c4 tractor mint (pale green-cyan: tractor beam, magnet pull)

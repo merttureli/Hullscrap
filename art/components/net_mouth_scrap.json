@@ -1,0 +1,70 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   6,
+   4
+  ],
+  "pulling": [
+   6,
+   6,
+   10
+  ],
+  "off": [
+   12,
+   1,
+   0
+  ],
+  "damaged": [
+   13,
+   2,
+   4
+  ],
+  "disabled": [
+   15,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "net_mouth_scrap_glow.png",
+  "frame": [
+   48,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    6,
+    4
+   ],
+   "pulling": [
+    6,
+    6,
+    10
+   ],
+   "damaged": [
+    12,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Net Mouth (scrap, 2x2): a riveted junk hopper with a patched chute and a dial gauge. on: scrap bits slowly tumble down the hopper (6 frames); pulling: the same, faster, with the gauge swinging and the lamp blinking. damaged: chute dented, a bit jammed, lamp dead; disabled: a chunk jammed in the chute.",
+ "offset": [
+  0,
+  -4
+ ]
+}
