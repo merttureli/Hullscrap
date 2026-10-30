@@ -88,6 +88,7 @@ func _process(_dt: float) -> void:
 		_map_seen = open
 	if combat != null:
 		var fighting: bool = combat.active
+		toast.top = 62.0 if fighting else 6.0
 		if fighting and not _fight_seen:
 			_hint("fight")
 		_fight_seen = fighting

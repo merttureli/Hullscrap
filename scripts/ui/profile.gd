@@ -104,9 +104,12 @@ static func clear_saves(paths: Array) -> void:
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
 
 
-## "Beta 1 (a1b2c3d)" with the short git hash from version.txt, else "Beta 1 (dev)".
+## "Beta 1 (a1b2c3d)" with the short git hash from version.txt (the export writes "Beta 1 <hash>"; a bare
+## hash works too), else "Beta 1 (dev)".
 static func version_label(file := VERSION_PATH) -> String:
-	var hash := ""
+	var short := "dev"
 	if FileAccess.file_exists(file):
-		hash = FileAccess.get_file_as_string(file).strip_edges().get_slice("\n", 0).strip_edges().left(7)
-	return "%s (%s)" % [BETA, hash if hash != "" else "dev"]
+		var words := FileAccess.get_file_as_string(file).strip_edges().get_slice("\n", 0).split(" ", false)
+		if not words.is_empty() and words[-1].length() >= 4 and words[-1].is_valid_hex_number():
+			short = words[-1].left(7)
+	return "%s (%s)" % [BETA, short]

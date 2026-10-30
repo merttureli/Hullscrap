@@ -12,6 +12,7 @@ const AMBER := Color("#e1a136")
 var queue: Array[String] = []  ## the toasts waiting
 var current := ""  ## the one on show
 var left := 0.0  ## seconds it has left
+var top := 6.0  ## y of the panel: lower in a fight, under the key line of the combat screen
 
 
 func _ready() -> void:
@@ -55,7 +56,7 @@ func _draw() -> void:
 	var a := alpha()
 	var font := ThemeDB.fallback_font
 	var w := font.get_string_size(current, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
-	var r := Rect2(Vector2((size.x - w) / 2.0 - 24.0, 6.0), Vector2(w + 48.0, 40.0))
+	var r := Rect2(Vector2((size.x - w) / 2.0 - 24.0, top), Vector2(w + 48.0, 40.0))
 	draw_rect(r, Color(PANEL_BG, 0.95 * a))
 	draw_rect(r, Color(AMBER, a), false, 2.0)
 	draw_string(font, r.position + Vector2(24.0, 28.0), current, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(TEXT, a))

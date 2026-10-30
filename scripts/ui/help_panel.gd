@@ -33,7 +33,7 @@ const COLUMNS: Array = [
 			["Click", "Buy or sell one"],
 			["Right click", "Five fuel, or all of an item"],
 			["Wheel", "Scroll a column"],
-			["Esc / Enter", "Leave"],
+			["Esc / Enter / M", "Leave"],
 		]],
 	],
 	[
@@ -58,7 +58,7 @@ const COLUMNS: Array = [
 	[
 		["THE MAP AND EVENTS (M in play mode)", [
 			["M", "Open / close the map"],
-			["Click a lit neighbour", "Jump there for 1 fuel; an event or a station follows"],
+			["Click a lit neighbour", "Jump there for fuel (the tooltip says how much); an event or a station follows"],
 			["Shift+click", "Drift jump with no fuel (costs hull)"],
 			["T", "Wait for a passing trader (no fuel)"],
 			["Enter", "Dock at the station you are at"],
@@ -66,7 +66,8 @@ const COLUMNS: Array = [
 			["1 - 9 or click", "Pick a choice in an event"],
 			["Enter / Space", "Continue"],
 		]],
-		["COMBAT (K in play mode: the test pirate)", [
+		["COMBAT (a fight, or K in play mode)", [
+			["K", "Play mode: meet the test pirate (Shift+K: the Rustfang rammer)"],
 			["Mouse", "Steer; fixed guns aim where the ship points"],
 			["W / S", "Throttle forward / back"],
 			["A / D", "Strafe"],
@@ -100,7 +101,7 @@ const COL_GAP := 20.0
 const PAD := 18.0
 const MARGIN := 24.0
 const TITLE_H := 56.0
-const FONT := 15
+const FONT := 14
 const ROW_GAP := 5.0
 const DIM := Color(0.0, 0.0, 0.0, 0.8)
 const PANEL_BG := Color("#1f2630")

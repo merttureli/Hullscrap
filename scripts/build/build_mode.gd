@@ -19,7 +19,8 @@ extends Node2D
 ## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F sends the nearest
 ## crew member to repair the system under the mouse. Play mode only: N asks the ship picker (ship_picker.gd) for another ship,
 ## M opens the map of the Drift (map_view.gd; the campaign is saved and loaded with the ship). H (both modes) opens the Shields tab
-## (shield_panel.gd), where the shield balance of the ship is set.
+## (shield_panel.gd), where the shield balance of the ship is set. Esc (when it has nothing to cancel) asks the front door
+## (front_door.gd) for the pause menu; F1 (How to play) is the help panel's own.
 ## W, A, S, D are reserved for player movement: do not bind them without a modifier.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
