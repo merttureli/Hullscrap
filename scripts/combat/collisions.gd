@@ -27,6 +27,7 @@ const DEFAULTS := {"restitution": 0.2, "min_speed": 40.0, "damage_k": 6e-7, "cre
 const NEAR := 1.4143 * CELL  ## cells whose centres are further apart than this cannot overlap
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const EDGE_EPS := 1e-6
+const EVENT_POINTS := 6  ## contact points a "ram" event carries, for the effects
 
 
 ## The tuning of data/collision.json over the built-in defaults (all numbers).
@@ -332,7 +333,7 @@ static func _hurt(arena, i: int, j: int, contacts: Array, n: Vector2, p: Vector2
 	var b = arena.ships[j]
 	var mu: float = a.mass * b.mass / (a.mass + b.mass)
 	var energy := 0.5 * mu * closing * closing
-	arena.log_event("ram", i, Vector2i(-1, -1), {"pos": p, "energy": energy, "a": i, "b": j, "speed": closing, "n": n})
+	arena.log_event("ram", i, Vector2i(-1, -1), {"pos": p, "energy": energy, "a": i, "b": j, "speed": closing, "n": n, "points": _contact_points(contacts)})
 	var tether := 0.0
 	for side in 2:
 		var idx := i if side == 0 else j
@@ -373,6 +374,15 @@ static func _hurt(arena, i: int, j: int, contacts: Array, n: Vector2, p: Vector2
 			_knock(arena, idx, cells, closing)
 	if tether > 0.0:
 		_latch(arena, i, j, p, tether)
+
+
+## Up to EVENT_POINTS of the world points where the ships touch, evenly picked from `contacts`.
+static func _contact_points(contacts: Array) -> Array:
+	var step := maxi(1, ceili(float(contacts.size()) / EVENT_POINTS))
+	var out := []
+	for k in range(0, contacts.size(), step):
+		out.append(contacts[k]["p"])
+	return out
 
 
 ## What the other ship's cell `cell` multiplies the damage it does in a collision by: its ram quirk
