@@ -305,3 +305,80 @@ Tiers and lines follow the tables. Unique items (★) have no recipe.
 4. Abilities, with the Afterburner end to end.
 5. Crew jobs: repair, firefighting, manning stations (manned bonuses).
 6. Premade ships: the design file format, 3 starters plus 2 pirates, a start screen to choose one, Hull Frame items and the expansion tool, credits.
+7. Physics: shaped cells, ricochet, ship collisions and ramming (4d, 4e).
+8. Hull mounts (two halves), fixed guns and turrets, mouse steering, wrecked components, ammo racks and the restock job, conveyor belts (4, 4f).
+9. The Drift: map, jumps, events, reputation, the debt and stations (8), with the first event pack.
+10. Species in play (9): species data, rigs in the game, starting crews, hand weapons data.
+
+## 8. The Drift: the map, jumps, events and the debt (lead, 2026-10-30)
+This is the campaign loop that gives fights, salvage and trade a reason, FTL-style but with a home.
+- **The map** (`scripts/space/drift.gd`, logic; `data/drift.json`, tuning):
+  - It is generated from the campaign seed: **28 nodes** scattered in a 1600×1000 region with a minimum spacing. Lanes join each node to its 2–4 nearest neighbours, and the graph is always connected.
+  - **Fixed places**:
+    - **Gantry Rusthold** is the start, at the left edge.
+    - **Meridian** is mid-map.
+    - **The Prism** exists from the start but stays hidden until the flag `prism_revealed` is set.
+    - **Three Dead Gates** sit on the far edges (`gate` nodes, not enterable yet: "the gate is dark").
+  - Every other node rolls a type by weight: `pirate` 22, `wreck_field` 18, `distress` 16, `trader` 10, `anomaly` 8 (Lumen), `patrol` 8 (Concord), `empty` 18.
+  - **Fog**: you see the types of nodes next to ones you've visited. Others show "?". Stations are always visible once you've heard of them (a flag).
+- **Jumping**:
+  - Click a node linked to yours. A jump costs **1 `fuel`**, a new item (start with 6, buy at stations for 8 credits).
+  - With no fuel, you can only wait for a passing trader (an event that sells fuel at triple price) or drift: a jump that costs 15 hull integrity.
+  - Each jump advances the **jump counter**, which drives the debt clock and the danger.
+  - **Danger**: pirate and patrol fights scale with the jump counter. Enemy designs pick from tables by tier (tier 1 at jumps 0–9, tier 2 from 10, tier 3 from 25).
+- **Arriving**: the node's type runs an **event** picked by weight from `data/events/*.json` (a seeded roll). A pirate node may skip the talk and start a fight.
+- **Events (FTL-style text with choices)**, one JSON object per event:
+  ```json
+  {"id": "distress_hauler_fire", "type": "distress", "weight": 10, "once": false,
+   "requires": {"jumps_min": 0, "flag": "", "not_flag": "", "rep_min": {"clans": -10}},
+   "text": "A Scrapper hauler is spinning, a fire glowing through its cargo windows...",
+   "choices": [
+     {"text": "Dock and help fight the fire.", "outcomes": [
+        {"weight": 70, "text": "...", "effects": {"items": {"scrap": 40, "credits": 30}, "rep": {"clans": 1}}},
+        {"weight": 30, "text": "...", "effects": {"crew_hp": -20, "items": {"scrap": 15}}}]},
+     {"text": "[Basalt] Send Rook out on the hull, no suit needed.", "requires": {"species": "basalt"},
+      "outcomes": [{"weight": 100, "text": "...", "effects": {"items": {"scrap": 60}, "rep": {"clans": 2}}}]},
+     {"text": "Leave them to it.", "outcomes": [{"weight": 100, "text": "...", "effects": {}}]}]}
+  ```
+  - `requires` on an event: `jumps_min`, `jumps_max`, `flag`, `not_flag`, `rep_min`/`rep_max` per faction, `node` (a node type).
+  - `requires` on a choice: any of those, plus `species`, `trait`, `items` (you must hold them; they're paid only if `pay` is set), `component` (installed), and `credits`.
+    - A choice whose `requires` names a species, trait or component is a **blue option**: shown in cyan, with its reason in brackets.
+    - A choice whose requirements aren't met is hidden. One that only lacks items or credits shows greyed out, with what it needs.
+  - **Effects**:
+    - `items` (+/−, including `credits`, `fuel`, materials and components), `rep` {clans, concord, lumen}, `crew_hp` (everyone, +/−), `hull` (integrity +/−), `flag` / `clear_flag`;
+    - `recruit` {name?, species}, `lose_crew` (a random non-player), `blueprint` (an id);
+    - `fight` (a ship design id, or `"tier"` to roll from the node's table), `goto` (another event id: a follow-up page), `reveal` (a node or station id), `debt` (+/−).
+  - Outcomes are rolled with the campaign RNG. A `fight` effect starts combat, and after a win the event's `after_win` text and effects (optional) run.
+- **Reputation**: three numbers, `clans`, `concord`, `lumen`, from −10 to +10, starting at 0.
+  - Below −5, that faction's stations refuse you and its patrols attack.
+  - At +5 and above, prices are 20% off and its event options open up.
+  - `data/factions.json` holds id, name, line, colours, the ship name style and these thresholds. Rustfangs, Wardens and the Hollow are listed as hostile, with no reputation bar.
+- **The debt (the pressure clock)**: you owe **Ma Gantry** of the Gantry Clan for your hull.
+  - **1000 credits**, with a payment of **100 due every 8 jumps**, paid at any Scrapper station (Gantry Rusthold, or a `trader` node flagged clan).
+  - Miss a payment and a "repo crew" event chain starts: Rustfang collectors (a pirate fight that also demands credits). Two misses in a row and the next pirate fight is a rammer that wants your ship back.
+  - Pay it all off and Ma gives you a unique ("Ma's Kettle", a Scrap reactor with a quirk) and the flag `debt_free`. The debt is a cargo-independent number on the campaign.
+- **Stations** (for now a menu; walkable stations come with on-foot play):
+  - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), pay the debt, repair hull integrity (2 credits per point), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).
+  - Gantry Rusthold sells Scrap-line parts, Meridian Standard-line parts, and the Prism Neon-line parts.
+- **After a won fight**: loot is credits 20–60 × tier, scrap 30–80 × tier, and a 25% chance of one of the enemy's components. Then a `wreck_field`-style salvage event runs (boarding the wreck on foot comes later).
+- **Controls**: **M** opens the map from play mode. Click a linked node to jump; the event panel opens on arrival. Esc closes the map.
+- **Saves**: the campaign (seed, node positions, lanes and types, the current node, visited nodes, flags, reputation, debt, jump counter, and `once` events used) is saved with the ship. Bump the save version.
+
+## 9. Species in play (lead, 2026-10-30)
+`data/species.json`. A crew member's `species` sets their body, their traits and their art rig (`art/crew/<species>/`).
+
+| species | hp | speed | traits | other |
+|---|---|---|---|---|
+| human | 100 | 1.0 | — | — |
+| basalt | 140 | 0.75 | `no_breath` (no damage from no air) | heals others at ×0.5 (bad medics); rig `basalt`, no helmet |
+| emberkin | 90 | 1.0 | `heat_resistant` (fire damage ×0.25, can stand in overheated rooms) | — |
+| fenn | 75 | 1.15 | `fast_repair` (repair and breach-patch time ×0.6) | — |
+- Traits from species merge with personal traits (`crew.json` `traits`) and with gear (`suit` from an EVA suit). The existing `abilities.meets()` sees all of them.
+- **Hand weapons** live in `data/hand_weapons.json`: id, name, culture (concord, clans, lumen, basalt, emberkin, fenn), class (pistol, rifle, heavy, melee, tool), damage, rate, range, and the art id.
+  - They're used for on-foot fights later. For now crew carry their culture's sidearm: drawn when idle in combat, holstered at work.
+- **Starting crews** (in each starter design's `crew` list):
+  - Rustbucket: the Soldier, Ada (human), **Rook (basalt, the afterburner operator)**, and Juno (fenn).
+  - Courier: the Soldier, Ada, and **Bram (basalt, the afterburner operator)**.
+  - Prism: the Soldier, **Tess (emberkin)**, Quill (fenn), and **Wren (basalt, the afterburner operator)**.
+  - Every ship carrying an Afterburner has a `no_breath` or suited operator.
+  - The pirate raider's crew: 2 humans and 1 basalt.
