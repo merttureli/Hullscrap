@@ -63,6 +63,12 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Shields** are a bubble (an ellipse around the hull) with **layers** from powered shield components.
   - A projectile or laser hitting the bubble uses up a layer, and layers recharge over time.
   - Missiles pass through. Ion removes layers and ion-locks systems.
+- **Firing opens your own shield (owner, 2026-10-30)**:
+  - When you fire anything shields can stop (laser, bolt, flak, beam, ion), **your whole bubble is open** for `drops_shield_s`: laser 0.3 s, bolt 0.4 s, flak 0.6 s, ion 0.3 s, and a beam for its whole duration.
+  - Layers aren't spent while it's open, and **missiles never open it**.
+  - So you time your volleys, shield-heavy ships favour missiles, and an enemy who just fired is briefly exposed.
+- **Shield-heavy builds**: layers are the sum of your powered generators, each a big power draw, so lots of energy plus generators is a real alternative to armour.
+  - **Space = Shield Overcharge**: +1 temporary layer for 6 s, at +4 power draw while active, with a 20 s cooldown.
 - **Fires and breaches** come from hits (`fire_chance`, and walls reaching 0) and use the existing oxygen and fire rules.
 - **Two schematics at the top of the screen**: faint close-up maps of **your ship and the enemy's**, FTL-style. They show rooms, systems with hp, disabled, fire and breach states, hull integrity and shield layers. You read the damage there while fighting in the arena.
 - **Enemy pilot AI** keeps its preferred range, strafes, **leads its shots at your components** (weapons, then engines, then reactor) and uses its abilities on cooldown. It's deterministic from the battle seed.
