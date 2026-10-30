@@ -3,7 +3,7 @@
 We re-create the *style* of FTL / FTL: Multiverse. **We never use their files.** All art is original, made to these rules, or human-made packs under CC0 or CC-BY (logged in `ASSETS.md`).
 
 ## Medium
-- **Pixel art**: hard pixels, nearest-neighbour scaling, no blur or soft gradients. Light shading comes from 2–3 hand-placed tones, and dithering only where it's needed.
+- **Pixel art**: hard pixels, nearest-neighbour scaling, no blur or soft gradients, except soft alpha **glow layers** (lights, projectiles, engines). Light shading comes from 2–3 hand-placed tones, and dithering only where it's needed.
 - **Source scale**: 1 grid cell = **16 × 16 source pixels**, displayed at 2× (32 screen px per cell at zoom 1).
   - So a crew sprite is a **24 × 24** source canvas (about 3×3 cells on screen).
   - A 4×4 reactor is 64 × 64 source.
@@ -56,6 +56,22 @@ We re-create the *style* of FTL / FTL: Multiverse. **We never use their files.**
 - Chunky panels: dark slate fill `#1f2630`, 2 px light border `#cfd6df`, a 1 px inner highlight.
 - A **pixel font**, white, 8 px source.
 - Power bars are stacked green segments. Hull is a green-to-red bar, shield layers are blue pips, and weapon cooldowns are segmented bars.
+
+## Lessons from studying real FTL: Multiverse sprites (lead, 2026-10-30)
+These come from a human-made Multiverse add-on on GitHub (TCC). They're **for reference only, never copied or traced.**
+- **Crew** are tiny, crisp silhouettes:
+  - sheets of **35×35 frames, 8 columns**, with the figure only ~15–18 px tall inside each frame;
+  - a **1 px near-black outline** around everything, the body in **2–3 tones of one hue**, limbs 1–2 px wide, the head 4–6 px;
+  - rows: **walk 4 frames × down/up/left/right** (not mirrored), then action rows (repair, melee swings with a weapon line, shooting);
+  - outfit colour sits on a **separate `_color` mask layer** that the game tints. We do the same: one base sheet, plus a colour mask for outfits and factions.
+- **Hulls are the star**. Painterly pixel art with big planar panels, each in **3–4 tones**, dark panel-seam lines, chamfered silhouettes, decals and insignia.
+  - Light strips (orange or teal) and engine glow live on a **separate `_glow` layer**; faction colour on a `_color` layer.
+- **Floors** are one flat **cool grey silhouette** of the whole interior, with a **2 px near-black outline and chamfered corners**. The game draws rooms, walls and doors on top.
+- **Room props**: small machine sprites (35×35 or 35×70) standing against walls. Muted greys and browns with a few lit indicator pixels; glow on its own layer.
+- **Weapons** sit on the **hull edge** as small sprites with an **animated charge strip** (indicator lights fill up frame by frame as it charges), then fire frames.
+- **Projectiles** are 4-frame strips: a bright 1–2 px core with a **soft alpha glow**. Soft glow is the one allowed exception to "hard pixels".
+- **Explosions** are **flat 2–3 colour shapes** (white core, coloured body) that fragment over many frames (about 30). Bold and graphic, not realistic.
+- **What this means for us**: restraint everywhere except hulls, lights and effects. A muted interior, crisp outlined crew, and rich hull exteriors. Every sprite gets optional `_glow` and `_color` layers.
 
 ## Files
 - `art/<area>/<id>.png` (crew in `art/crew/<species>_<outfit>.png` as sprite sheets), plus a JSON next to each sheet with frame size, frames per animation and fps.
