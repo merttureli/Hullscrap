@@ -29,7 +29,7 @@ const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
-const HINT := "W/S throttle   A/D turn   mouse aims   LMB group 1   RMB group 2   1-9 single weapon   Shift engine ability   Space shield ability   Q utility   Esc leave"
+const HINT := "mouse steers the ship (fixed guns point where its nose does)   W/S throttle   A/D strafe   T turret autofire   LMB group 1   RMB group 2   1-9 single weapon   Shift engine ability   Space shield ability   Q utility   Esc leave"
 
 var sim: Node  ## ShipSim
 var build: Node  ## BuildMode (put away during the fight)
@@ -60,6 +60,7 @@ var _saved_cam := {}
 var _rng := RandomNumberGenerator.new()  # visual only
 var _schem: Array = []
 var _bar: Control
+var _bar_extras: Control  # over the weapon bar: each turret's hit chance and whether it autofires
 var _banner: Label
 var _hint: Label
 var _note := ""
@@ -107,6 +108,10 @@ func _make_hud() -> void:
 	_bar = WeaponBar.new()
 	_bar.visible = false
 	layer.add_child(_bar)
+	_bar_extras = Control.new()
+	_bar_extras.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_bar_extras.draw.connect(_draw_bar_extras)
+	_bar.add_child(_bar_extras)
 	_banner = Label.new()
 	_banner.size = Vector2(1100.0, 60.0)
 	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -256,6 +261,8 @@ func _unhandled_input(e: InputEvent) -> void:
 					_say("Cannot disengage: wreck the enemy or get %d px away" % Session.LEAVE_DISTANCE)
 			KEY_R:
 				restart()
+			KEY_T:
+				_say("Turrets: autofire %s" % ("on" if session.toggle_autofire() else "off"))
 			KEY_SPACE:
 				var why := session.arena.overcharge(Session.PLAYER)
 				if why != "":
@@ -295,8 +302,8 @@ func _handled() -> void:
 func _helm() -> Dictionary:
 	if input_override != null:
 		return input_override
-	return {"throttle": float(Input.is_key_pressed(KEY_W)) - float(Input.is_key_pressed(KEY_S)),
-		"turn": float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A))}
+	var side := float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A))  # strafe with the mouse steering, turn with the keys
+	return {"throttle": float(Input.is_key_pressed(KEY_W)) - float(Input.is_key_pressed(KEY_S)), "turn": side, "strafe": side}
 
 
 # --- the frame --------------------------------------------------------------------------------------
@@ -311,7 +318,8 @@ func frame(dt: float) -> void:
 	_clock += dt
 	_frame += 1
 	var st: String = session.state()
-	session.input = _helm() if st != "lost" else {"throttle": 0.0, "turn": 0.0}
+	session.input = _helm() if st != "lost" else {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
+	session.cursor = _aim()
 	if st != "lost":
 		for g in [1, 2]:
 			if hold_override.get(g, false) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT if g == 1 else MOUSE_BUTTON_RIGHT):
@@ -325,6 +333,8 @@ func frame(dt: float) -> void:
 	_update_hud()
 	if _fx_node != null:
 		_fx_node.queue_redraw()
+	if _bar_extras != null:
+		_bar_extras.queue_redraw()
 	if _stars_node != null:
 		_stars_node.queue_redraw()
 
@@ -356,6 +366,25 @@ func _update_hud() -> void:
 	_banner.visible = text != ""
 	var co = session.arena.ships[Session.PLAYER]
 	_hint.text = "%s\nenemy %d px   speed %d px/s" % [HINT, session.distance(), co.flight.vel.length()]
+
+
+## Over each turret's slot of the weapon bar: its hit chance against the enemy now (accuracy less the enemy's
+## evasion) and whether the turrets fire by themselves (T).
+func _draw_bar_extras() -> void:
+	if session == null or _bar == null or not _bar.visible:
+		return
+	var list: Array = session.weapons()
+	var row_y := WeaponBar.ASLOT.y + WeaponBar.GAP if not session.ability_slots().is_empty() else 0.0
+	var x0 := (_bar.size.x - (list.size() * (WeaponBar.SLOT.x + WeaponBar.GAP) - WeaponBar.GAP)) / 2.0
+	var auto: bool = session.arena.autofire.get(Session.PLAYER, true)
+	for i in list.size():
+		if not list[i]["turret"]:
+			continue
+		var st: Dictionary = session.slot_state(list[i]["uid"], _aim())
+		var at := Vector2(x0 + i * (WeaponBar.SLOT.x + WeaponBar.GAP), row_y)
+		var font := ThemeDB.fallback_font
+		_bar_extras.draw_string(font, at + Vector2(WeaponBar.SLOT.x - 66.0, 28.0), "HIT %d%%" % roundi(float(st["hit"]) * 100.0), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#cfe6ff"))
+		_bar_extras.draw_string(font, at + Vector2(WeaponBar.SLOT.x - 66.0, 40.0), "TURRET AUTO" if auto else "TURRET HOLD", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, WeaponBar.READY if auto else WeaponBar.COOLING)
 
 
 # --- effects ----------------------------------------------------------------------------------------
@@ -463,6 +492,14 @@ func _on_event(e: Dictionary) -> void:
 		"ignite":
 			for i in 3:
 				_add_fx({"k": "puff", "pos": pos, "vel": Vector2.from_angle(_rng.randf() * TAU) * 30.0, "life": 0.7, "r": 6.0, "grow": 16.0, "color": Color("#ff7a2a", 0.6)})
+		"wreck_part":
+			if Art.fx("explosion") != null:
+				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.7, "scale": 1.6})
+			else:
+				_on_ship(idx, pos, {"k": "flash", "life": 0.4, "r": 40.0, "color": Color("#ffb347")})
+			_sparks(pos, Vector2.ZERO, 16, Color("#ffcf7a"))
+			for i in 4:
+				_add_fx({"k": "puff", "pos": pos, "vel": Vector2.from_angle(_rng.randf() * TAU) * 30.0, "life": 1.0, "r": 12.0, "grow": 30.0, "color": Color("#8a8f99", 0.5)})
 		"overcharge":
 			_on_ship(idx, pos, {"k": "ring", "life": 0.8, "r": 260.0, "color": Color("#ffd24a")})
 		"wreck":
@@ -686,8 +723,9 @@ func _draw_art_beam(c: Node2D, f: Dictionary, age: float, px: float) -> bool:
 	return true
 
 
-## The player's weapons: a faint wedge for the arc, a line to the aim point from each that can fire
-## (dim while it cools), grey ones whose arc misses the aim point, and the crosshair.
+## The player's weapons. A fixed gun: a faint cone of its gimbal and a boresight line along its barrel (bright
+## when it can fire, dim while it cools, a short grey stub when it cannot). A turret: a faint wedge of its arc,
+## a ring where it turns and a line along its barrel. Then the crosshair.
 func _draw_aim(c: Node2D, px: float) -> void:
 	var arena = session.arena
 	var co = arena.ships[Session.PLAYER]
@@ -695,31 +733,28 @@ func _draw_aim(c: Node2D, px: float) -> void:
 	for w in session.weapons():
 		var m: Dictionary = co.mounts[w["uid"]]
 		var def: Dictionary = arena.weapons.def(m["id"])
-		var origin: Vector2 = arena.local_to_world(Session.PLAYER, m["pos"])
+		var pivot: Vector2 = arena.local_to_world(Session.PLAYER, m["pos"])
+		var muzzle: Vector2 = arena.weapons.muzzle_of(arena, Session.PLAYER, m)
 		var st: Dictionary = session.slot_state(w["uid"], aim)
 		var can: bool = st["status"] in ["ready", "cooling down"]
 		var col: Color = GROUP_COLORS.get(w["group"], Color.WHITE) if can else GREY
-		var arc := float(def["arc"])
 		var reach := float(def["range"])
-		if arc < 360.0:
-			var axis: Vector2 = (m["pos"] - co.pivot).rotated(co.flight.angle)
-			if axis.length_squared() < 1e-6:
-				axis = Vector2.UP
-			var a0 := axis.angle() - deg_to_rad(arc * 0.5)
-			var pts := PackedVector2Array([origin])
+		var half := deg_to_rad(float(def["arc"]) * 0.5) if def["turret"] else deg_to_rad(float(def["gimbal"]))
+		if half < PI - 0.01:
+			var a0: float = Vector2(m["dir"]).rotated(co.flight.angle).angle() - half
+			var pts := PackedVector2Array([pivot])
 			for i in 17:
-				pts.append(origin + Vector2.from_angle(a0 + deg_to_rad(arc) * i / 16.0) * reach)
+				pts.append(pivot + Vector2.from_angle(a0 + 2.0 * half * i / 16.0) * reach)
 			c.draw_colored_polygon(pts, Color(col, 0.06 if can else 0.035))
-			c.draw_line(origin, pts[1], Color(col, 0.22), 1.0 * px)
-			c.draw_line(origin, pts[-1], Color(col, 0.22), 1.0 * px)
-		else:
-			c.draw_arc(origin, 40.0 * px, 0.0, TAU, 24, Color(col, 0.18), 1.0 * px)
-		var to := aim - origin
-		var end := origin + to.limit_length(reach)
+			c.draw_line(pivot, pts[1], Color(col, 0.22), 1.0 * px)
+			c.draw_line(pivot, pts[-1], Color(col, 0.22), 1.0 * px)
+		if def["turret"]:
+			c.draw_arc(pivot, 40.0 * px, 0.0, TAU, 24, Color(col, 0.18), 1.0 * px)
+		var barrel: Vector2 = Vector2(m["aim"]).rotated(co.flight.angle)
 		if can:
-			c.draw_line(origin, end, Color(col, 0.7 if st["status"] == "ready" else 0.28), 1.6 * px)
+			c.draw_line(muzzle, muzzle + barrel * reach, Color(col, 0.7 if st["status"] == "ready" else 0.28), 1.6 * px)
 		else:
-			c.draw_line(origin, origin + to.normalized() * 36.0 * px, Color(col, 0.55), 1.4 * px)  # a short grey stub
+			c.draw_line(muzzle, muzzle + barrel * 36.0 * px, Color(col, 0.55), 1.4 * px)  # a short grey stub
 	c.draw_arc(aim, 10.0 * px, 0.0, TAU, 20, Color(1, 1, 1, 0.8), 1.5 * px)
 	c.draw_line(aim - Vector2(16, 0) * px, aim - Vector2(5, 0) * px, Color(1, 1, 1, 0.8), 1.5 * px)
 	c.draw_line(aim + Vector2(16, 0) * px, aim + Vector2(5, 0) * px, Color(1, 1, 1, 0.8), 1.5 * px)

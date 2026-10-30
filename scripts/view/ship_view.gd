@@ -13,6 +13,7 @@ const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Art = preload("res://scripts/view/art.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
+const Mounts = preload("res://scripts/ship/mounts.gd")
 
 const CELL := 32.0
 const HOLE := Color("#06080c")
@@ -105,20 +106,26 @@ func _draw() -> void:
 		_draw_hole(c)
 	for c in grid.hp:
 		_draw_damage(grid, c)
+	Visuals.draw_wrecks(self, ship.components.wrecks, px(Vector2.ZERO), CELL)
 	var powered: Dictionary = ship.power_state.get("powered", {})
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
+	var all_opts := {}
 	for uid in uids:
 		var inst: Dictionary = ship.components.instances[uid]
-		var lo: Vector2i = inst["cells"][0]
-		var hi: Vector2i = lo
-		for c in inst["cells"]:
-			lo = lo.min(c)
-			hi = hi.max(c)
-		var r := Rect2(px(Vector2(lo)), Vector2(hi - lo + Vector2i.ONE) * CELL)
 		var opts := _weapon_opts(uid)
-		opts.merge({"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads})
-		Visuals.draw_component(self, r, ship.components.def(inst["id"]), inst, CELL, opts)
+		opts.merge({"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads, "thrusting": _thrusting(inst)})
+		all_opts[uid] = opts
+		Visuals.draw_component(self, _rect_of(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
+	for uid in uids:  # the outside halves and barrels of the hull mounts, over the wall's edge
+		var inst: Dictionary = ship.components.instances[uid]
+		if inst["out_cells"].is_empty():
+			continue
+		var def: Dictionary = ship.components.def(inst["id"])
+		var aim := Vector2.ZERO
+		if arena != null and arena.ships[index].mounts.has(uid):
+			aim = arena.ships[index].mounts[uid]["aim"]
+		Visuals.draw_mount_out(self, def, inst, _rect_of(inst["out_cells"]), px(Mounts.barrel(def, inst["out_anchor"], inst["rot"])["pivot"]), CELL, aim, all_opts[uid])
 	draw_fire(self, ship.fires, px(Vector2.ZERO), CELL, _clock, _glow_quads)
 	for m in ship.crew:
 		var a: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
@@ -131,6 +138,28 @@ func _draw() -> void:
 		_glow.show_quads(_glow_quads)
 	if arena != null:
 		_draw_bubble(arena.ships[index])
+
+
+## The screen rectangle (in the ship's frame) of a set of grid cells.
+func _rect_of(cells: Array) -> Rect2:
+	var lo: Vector2i = cells[0]
+	var hi: Vector2i = lo
+	for c in cells:
+		lo = lo.min(c)
+		hi = hi.max(c)
+	return Rect2(px(Vector2(lo)), Vector2(hi - lo + Vector2i.ONE) * CELL)
+
+
+## Is the engine `inst` pushing now? When the helm asks for what it gives: forward or reverse for an engine
+## pushing forward, a strafe for one pushing that way. False with no arena, and for a ship that cannot fly.
+func _thrusting(inst: Dictionary) -> bool:
+	if arena == null or ship.components.def(inst["id"]).get("family", "") != "engine":
+		return false
+	var input: Dictionary = arena.ships[index].input
+	var push := -Vector2(Mounts.outward(int(inst["rot"])))
+	var throttle := float(input.get("throttle", 0.0))
+	var strafe := float(input.get("strafe", 0.0))
+	return (throttle != 0.0 and push.y < -0.5) or (strafe > 0.0 and push.x > 0.5) or (strafe < 0.0 and push.x < -0.5)
 
 
 ## What the art of weapon `uid` needs from the arena: {charge (0..1, how far the cooldown has run),

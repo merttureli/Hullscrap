@@ -170,26 +170,35 @@ static func flat_wall(grid, c: Vector2i) -> bool:
 
 ## Where a shot leaves a mount: {pivot: the barrel's turning point (ship-local cell coordinates),
 ## reach: cells from the pivot to the muzzle}, read from the art's anchors (art/components/<id>_out.json
-## has the pivot on the outside half, the barrel's own JSON the pivot and muzzle on the barrel). The
-## art is drawn at rotation 0 (outward up), so the pivot turns about the middle of the outside half
-## with the part. Without that art: the middle of the outside half and DEFAULT_REACH.
+## has the pivot on the outside half and the barrel's pivot and muzzle). The art is drawn at rotation 0
+## (outward up), so the pivot turns about the middle of the outside half with the part. Without that art:
+## the middle of the outside half and DEFAULT_REACH.
 static func barrel(def: Dictionary, out: Vector2i, rot: int) -> Dictionary:
-	var id := str(def.get("id", ""))
+	var key := "%s/%s" % [Art.root, def.get("id", "")]
+	if not _art.has(key):
+		_art[key] = _read_barrel(def)
 	var raw: Array = def["mount"]["outside"]
 	var half := Vector2(float(raw[0]), float(raw[1])) * SRC_CELL / 2.0
-	var pivot_px := half
-	var reach := DEFAULT_REACH
-	var meta := Art.read_json("%s/components/%s_out.json" % [Art.root, id])
-	var b = meta.get("barrel")
+	var osz := turned(raw, rot)
+	var pivot_px: Vector2 = _art[key]["pivot_px"]
+	return {"pivot": Vector2(out) + Vector2(osz) / 2.0 + (pivot_px - half).rotated(posmod(rot, 4) * PI / 2.0) / SRC_CELL, "reach": _art[key]["reach"]}
+
+
+static var _art := {}  # "<art root>/<id>" -> {pivot_px (in the rotation 0 art of the outside half), reach}
+
+
+static func _read_barrel(def: Dictionary) -> Dictionary:
+	var raw: Array = def["mount"]["outside"]
+	var out := {"pivot_px": Vector2(float(raw[0]), float(raw[1])) * SRC_CELL / 2.0, "reach": DEFAULT_REACH}
+	var b = Art.read_json("%s/components/%s_out.json" % [Art.root, def.get("id", "")]).get("barrel")
 	if b is Dictionary:
 		if b.get("pivot_on_base") is Array and b["pivot_on_base"].size() == 2:
-			pivot_px = Vector2(float(b["pivot_on_base"][0]), float(b["pivot_on_base"][1]))
+			out["pivot_px"] = Vector2(float(b["pivot_on_base"][0]), float(b["pivot_on_base"][1]))
 		var on = b.get("pivot_on_barrel")
 		var mz = b.get("muzzle")
 		if on is Array and mz is Array and on.size() == 2 and mz.size() == 2:
-			reach = absf(float(on[1]) - float(mz[1])) / SRC_CELL
-	var osz := turned(raw, rot)
-	return {"pivot": Vector2(out) + Vector2(osz) / 2.0 + (pivot_px - half).rotated(posmod(rot, 4) * PI / 2.0) / SRC_CELL, "reach": reach}
+			out["reach"] = absf(float(on[1]) - float(mz[1])) / SRC_CELL
+	return out
 
 
 ## Stand-in for the placed components while migrating a part: `own` cells count as free floor.
