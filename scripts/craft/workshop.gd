@@ -6,6 +6,7 @@ const ARM := "robot_arm"
 const CUTTER := "laser_cutter"
 const RIG := "assembly_rig"
 const FORGE := "nanoforge"
+const FAB := "fabricator"
 
 
 ## `ship_components`: a components.gd instance; `rooms_result`: Rooms.compute's result;
@@ -46,4 +47,28 @@ static func level_of(ship_components, rooms_result: Dictionary, fab_uid: int, po
 		out["tools"].append(CUTTER)
 	if n[FORGE] >= 1:
 		out["tools"].append(FORGE)
+	return out
+
+
+## The ship's best fabricator: level_of() for each placed one, the highest level wins (then the most
+## tools, then the lowest uid). {"level", "tools", "modules", "uid", "count"}: level 0 and uid -1 when
+## no fabricator is powered, `count` is how many fabricators the ship has. Reads the ship's own rooms
+## and power (refreshing it first).
+static func best(ship) -> Dictionary:
+	ship.refresh()
+	var out := {"level": 0, "tools": [], "modules": [], "uid": -1, "count": 0}
+	var rooms := {"room_of": ship.atmosphere.room_of}
+	var powered: Dictionary = ship.power_state.get("powered", {})
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		if ship.components.instances[uid]["id"] != FAB:
+			continue
+		out["count"] += 1
+		var r := level_of(ship.components, rooms, uid, powered)
+		if r["level"] > out["level"] or (r["level"] == out["level"] and r["level"] > 0 and r["tools"].size() > out["tools"].size()):
+			var count: int = out["count"]
+			out = r
+			out["uid"] = uid
+			out["count"] = count
 	return out

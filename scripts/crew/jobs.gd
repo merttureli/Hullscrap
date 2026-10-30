@@ -21,6 +21,9 @@ extends RefCounted
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
+const Abilities = preload("res://scripts/sim/abilities.gd")
+const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
+const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const FAULTY: Array[String] = ["malfunction", "disabled"]  ## part statuses a crew member can repair
 const NO_FIRE := Vector2i(-1, -1)  ## "no burning cell"
@@ -122,7 +125,7 @@ func build_board(ship) -> void:
 		if inst["status"] in FAULTY:
 			_add(b, _fix_job(ship, uid))
 		if family == "helm" or (bool(def.get("manned", false)) and family in j["man_station"]["families"]):
-			_add(b, _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family}))
+			_add(b, _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)}))
 	for key in orders.keys():
 		var uid := int(orders[key]["uid"])
 		if not ship.components.instances.has(uid) or _fine(ship, uid):
@@ -208,6 +211,26 @@ func assign(ship) -> void:
 			_rest(ship, m)
 
 
+## The traits a station's abilities ask of whoever mans it (every `operator_needs` entry), [] when none.
+static func _needs_of(def: Dictionary) -> Array:
+	var out: Array = []
+	for a in def.get("abilities", []):
+		for n in a.get("operator_needs", []):
+			if not n in out:
+				out.append(n)
+	return out
+
+
+## `job` as `m` sees it: a station that needs traits is worth more to crew who have them, less to the rest.
+static func _for_member(job: Dictionary, m) -> Dictionary:
+	var needs: Array = job.get("needs", [])
+	if job["type"] != "man_station" or needs.is_empty():
+		return job
+	var j := job.duplicate()
+	j["priority"] = int(job["priority"]) + (QUALIFIED_BONUS if Abilities.meets(m, needs) else -UNQUALIFIED_PENALTY)
+	return j
+
+
 ## Is the job of `m` still worth doing? Refreshes their copy from the board.
 func _still_valid(ship, m) -> bool:
 	var job: Dictionary = m.job
@@ -232,7 +255,7 @@ func _pick(ship, m, claims: Dictionary, floor_p: int) -> Dictionary:
 			open.append(job)
 	if open.is_empty():
 		return {}
-	open = by_priority(open)
+	open = by_priority(open.map(func(job): return _for_member(job, m)))
 	var taken := _taken(ship, m)
 	var i := 0
 	while i < open.size():

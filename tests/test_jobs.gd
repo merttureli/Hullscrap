@@ -808,3 +808,17 @@ func test_crew_line_reads_like_the_hud_example() -> void:
 	pike.hurt(1000.0)
 	check(Jobs.crew_line(ship).contains("Pike down"), "a downed one says so")
 	eq(Jobs.crew_line(Fixture.room_ship()), "Crew: none", "an empty ship")
+
+
+func test_crew_with_the_right_traits_take_the_station_that_needs_them() -> void:
+	var ship := Fixture.room_ship()
+	var burner := Fixture.put(ship, "afterburner", 15, 14)
+	var helm := Fixture.put(ship, "helm", 19, 10)
+	var ada := _npc("Ada", 15, 12)  # closer to the afterburner, but no suit
+	var rook := _npc("Rook", 18, 12)  # has the "suit" trait in data/crew.json
+	ship.crew.append(ada)
+	ship.crew.append(rook)
+	var jobs := Jobs.new()
+	_run(jobs, ship, 1.5)
+	eq(rook.job.get("key"), "post:%d" % burner, "the suited crew member mans the afterburner")
+	eq(ada.job.get("key"), "post:%d" % helm, "and the other takes the helm")

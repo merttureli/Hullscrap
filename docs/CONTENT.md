@@ -125,6 +125,27 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Credits** are the trading currency (buying frames, gear and crew; selling salvage). Materials stay physical cargo. Each starter ship starts with some credits.
 - The ship grid is a fixed 128×128 workspace. The hull marks which cells you own.
 
+## 4d. Angled and curved parts: slopes, curves and real ricochet (owner, 2026-10-30)
+Walls stop being only squares. **Any wall material can take a shape**, for style (ships with real silhouettes, inside and out) and for **physics** (sloped armour deflects).
+- **Shapes are data** (`data/shapes.json`): a polygon per cell in cell-local 0..1 coordinates, plus multi-cell **pieces** built from them. Pieces rotate in quarter turns and can be mirrored.
+  - v1 pieces:
+    - `full` (today's wall);
+    - `slope45` (1 cell, half triangle);
+    - `slope2` (2×1 cells, a shallow ~27° ramp: a small triangle plus a trapezoid);
+    - `round2` (2×2 cells, a quarter-circle corner approximated by a polygon).
+  - A shaped cell stores `shape`, `rot` and `mirror` next to its material tile.
+- **Area scaling**: hp, mass and cost scale with the shape's solid area (triangle = 0.5, minimum 1 hp, cost rounded up). Sloped hulls are lighter per cell but take more cells to wrap a room.
+- **Rooms and walking**: in v1 a shaped cell is fully **solid** for sealing rooms and for pathfinding. Its open part is drawn as floor (inside) or space (outside) based on its neighbours.
+- **Combat physics**:
+  - Rays and projectiles test the **real polygon edges**. The hit point and its **surface normal** give the incidence angle θ (0 = straight on).
+  - **Sloped armour**: kinetic and explosive damage × `clamp(cos θ, 0.5, 1)`, because a shot at an angle passes through more plate. Energy is unaffected.
+  - **Ricochet** (replaces the flat 50%-over-60° rule, for every cell including flat walls): kinetic chance is 0 below 40°, rising linearly to 80% at 75°+.
+  - **Reflective coating** deflects energy at its base chance × (1 + 0.5 sin θ).
+  - **Bounces are real**: a ricocheted or deflected shot **reflects** off the surface at 50% damage (lasers bounce once, projectiles up to twice) and can hit anything, **including your own ship** or a third party. Angle your plates so bounces go out into space.
+- **Building**: in the Tiles palette, **T** cycles the shape (full → slope45 → slope2 → round2), **R** rotates, **Shift+R** mirrors.
+  - A **Round Off** tool (later) converts the hull's convex outer corners into slopes automatically.
+- **Exterior hull skin**: outer solid cells (next to space) get a hull-skin layer drawn outside (panel lines, rivets, material tint, edges that follow the slopes and curves). In combat at a distance the skin is what you see, as in FTL.
+
 ## 5. Abilities and quirks (`scripts/sim/abilities.gd`)
 - An ability is `{id, name, type: active|passive, duration, cooldown, effects, side_effects, operator_needs}`.
   - Active abilities are triggered by the player (or by an AI captain) when the component is powered and, if `operator_needs` is set, manned by a qualifying crew member.

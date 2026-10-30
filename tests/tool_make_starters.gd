@@ -81,7 +81,7 @@ func _courier() -> Dictionary:
 			["engine_mk2", 1, 16], ["engine_mk2", 19, 16],
 		],
 		"plates": [["titanium_alloy", func(c): return c.y == 0 and c.x >= 0 and c.x <= 23]],
-		"cargo": {"scrap": 220, "copper": 80, "titanium": 40, "polymer": 10, "engine_mk1": 1, "laser_mk1": 1, "radiator": 1, "credits": 500},
+		"cargo": {"scrap": 220, "copper": 80, "titanium": 40, "polymer": 10, "engine_mk1": 1, "laser_mk1": 1, "afterburner": 1, "radiator": 1, "credits": 500},
 	}
 
 
@@ -105,7 +105,7 @@ func _prism() -> Dictionary:
 			["reactor_neon_mk1", 5, 13], ["radiator", 9, 13], ["radiator", 11, 13], ["engine_neon_mk1", 13, 15],
 		],
 		"plates": [["reflective_coating", func(c): return c.y == 0]],
-		"cargo": {"scrap": 120, "copper": 60, "polymer": 10, "silicon": 40, "crystal": 12, "plasma_cell": 3, "radiator": 1, "bed": 1, "credits": 400},
+		"cargo": {"scrap": 120, "copper": 60, "polymer": 10, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "radiator": 1, "bed": 1, "credits": 400},
 	}
 
 
