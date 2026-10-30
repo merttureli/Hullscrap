@@ -36,6 +36,23 @@ Build mode only:
 | Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z) | Undo / redo (tiles, systems, cables and cargo) |
 | Esc | Cancel a drag |
 
+## Combat
+In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_raider.json`, 1200 px ahead). The camera zooms out to frame both ships, the interior is put away and the walking crew stop. Power, heat, oxygen and malfunctions keep running on both ships.
+
+| Input | Action |
+|---|---|
+| W / S | Throttle forward / reverse |
+| A / D | Turn left / right |
+| Mouse | Aim. A line runs from each weapon that can fire, with its arc as a faint wedge; a weapon whose arc misses the aim point is drawn grey |
+| Left mouse (hold) | Fire group 1: lasers, bolts, beams |
+| Right mouse (hold) | Fire group 2: missiles, flak |
+| 1 - 9 | Fire that weapon (the slot numbers on the weapon bar) |
+| Space | Overcharge the shield: one extra layer for 6 s, then 15 s of rest |
+| Esc | Leave, once the pirate is wrecked or more than 4000 px away |
+| R | After your ship is wrecked: back to build mode with the starter ship reloaded |
+
+The panels at the top are the schematics (yours left, the enemy's right): rooms, walls, breaches in red, systems coloured by state (green ok, yellow damaged, red disabled, orange overheated, purple jammed, grey unpowered), a hull bar and the shield pips. **Firing opens your own shield**: the sector of the bubble the shot leaves through drops for 0.3 s (laser), 0.4 s (bolt), 0.6 s (flak) or the whole beam, while shots pass it and use no layer; the schematic shows "OPEN" and the sector ring goes dark. Missiles never drop it. Open doors let shots through; closed doors block them. The weapon bar shows each weapon's key, group, cooldown ring and state (ready, cooling, no power, jammed, no ammo, out of arc).
+
 Characters are big: a crew body is 2x2 cells (drawn about 3x3), so doors are a piece of exactly 2 cells in a row with a wall cell at each end (wall, door, door, wall), and a corridor needs 2 cells. Walls stay 1 cell thick. A door costs per cell; removing or replacing either cell takes the whole piece, and a wall holding a door can't be removed. Systems are items from the cargo: placing one uses an item up, removing it gives the item back. A system needs floor under every cell, and that floor can't be removed or built over while it stands there. Cables cost copper per cell (`data/build.json`) and may run under anything. A system only works when a cable connects it to a reactor; an unpowered one is drawn dimmed with a red mark.
 
 ## Tests
