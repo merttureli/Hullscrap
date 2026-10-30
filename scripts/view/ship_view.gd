@@ -1,9 +1,11 @@
 extends Node2D
 ## One ship drawn at its place in the arena: the node sits on the ship's flight body (position and
 ## heading), so everything below is drawn in the ship's own frame, in pixels from its pivot. Tiles
-## (materials by colour), breached cells as dark holes, damage, doors, systems through visuals.gd,
-## crew, and the shield bubble. Drawing only; bind() it to an arena ship and it follows it.
-## Reusable: with no arena it draws a plain Ship at the node's own transform (pivot = the hull's centre).
+## (materials by colour, shaped cells as slopes and curves), the exterior hull skin over the cells
+## that face space (a ship in an arena only), breached cells as dark holes, damage, doors, systems
+## through visuals.gd, crew, and the shield bubble. Drawing only; bind() it to an arena ship and it
+## follows it. Reusable: with no arena it draws a plain Ship at the node's own transform (pivot = the
+## hull's centre), with no skin.
 
 const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
@@ -36,6 +38,8 @@ var _weapons := {}  # uid -> {left, peak, shot}: a weapon's cooldown as last see
 var _crew_anim := {}  # CrewMember -> PersonDrawer state, for drawing only
 var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state, for the opening animation
 var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
+var _skin := {}  # TileArt.skin_plan() of the grid, remade when _skin_sig changes
+var _skin_sig := []
 
 
 ## Follow ship `idx` of `p_arena`.
@@ -95,6 +99,8 @@ func _draw() -> void:
 	var grid = ship.grid
 	for c in grid.tiles:
 		_draw_tile(grid, c, grid.tiles[c])
+	if arena != null:
+		_draw_skin(grid)
 	for c in grid.breached:
 		_draw_hole(c)
 	for c in grid.hp:
@@ -153,12 +159,19 @@ func _draw_tile(grid, c: Vector2i, id: String) -> void:
 		if piece[0] == c:
 			_draw_door(grid, piece, col, grid.is_door_open(c))
 	elif def.get("solid", false):
-		if not TileArt.wall_tile(self, r, grid, c, id, col):
-			draw_rect(r, col)
-			draw_rect(r.grow(-3), col.lightened(0.12))
+		TileArt.solid_cell(self, r, grid, c, id, col)
 	elif not TileArt.floor_tile(self, r, c):
 		draw_rect(r, col)
 		draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
+
+
+## The exterior skin over the walls that face space. The plan is remade when walls come or go (a breach, a repair).
+func _draw_skin(grid) -> void:
+	var sig := [grid.tiles.size(), grid.shapes.size(), grid.breached.size()]
+	if sig != _skin_sig:
+		_skin = TileArt.skin_plan(grid)
+		_skin_sig = sig
+	TileArt.draw_skin(self, _skin, px(Vector2.ZERO), CELL, _clock, _glow_quads)
 
 
 ## A door piece: floor under it, two leaves that meet in the middle when closed and slide back into
@@ -210,7 +223,14 @@ func _draw_damage(grid, c: Vector2i) -> void:
 	if lost <= 0.0:
 		return
 	var o := px(Vector2(c))
-	draw_rect(Rect2(o, Vector2(CELL, CELL)), Color(0.05, 0.02, 0.0, 0.55 * lost))
+	var shade := Color(0.05, 0.02, 0.0, 0.55 * lost)
+	if grid.shapes.has(c):  # only the solid part of a slope or a curve darkens
+		var pts := PackedVector2Array()
+		for p in grid.polygon_at(c):
+			pts.append(o + p * CELL)
+		draw_colored_polygon(pts, shade)
+	else:
+		draw_rect(Rect2(o, Vector2(CELL, CELL)), shade)
 	draw_line(o + Vector2(4, 6), o + Vector2(CELL * 0.55, CELL * 0.5), Color(0, 0, 0, 0.8), 1.5)
 	if lost > 0.4:
 		draw_line(o + Vector2(CELL * 0.55, CELL * 0.5), o + Vector2(CELL - 5, CELL - 8), Color(0, 0, 0, 0.8), 1.5)
