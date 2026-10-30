@@ -225,7 +225,7 @@ func test_courier_is_the_standard_ship() -> void:
 	var ship := _ship("Courier")
 	var b := _bounds(ship)
 	check(b[1].x - b[0].x + 1 == 24 and b[1].y - b[0].y + 1 <= 19, "about 24x18 cells in use")
-	eq([_count(ship, "engine_mk1"), _count(ship, "shield_mk1"), _count(ship, "laser_mk1"), _count(ship, "pulse_mk1")], [2, 1, 2, 1], "2 Engine Mk1, Shield Mk1, 2 Laser Mk1, Pulse Mk1")
+	eq([_count(ship, "engine_mk2"), _count(ship, "shield_mk1"), _count(ship, "laser_mk1"), _count(ship, "pulse_mk1")], [2, 1, 2, 1], "2 Engine Mk2 (the fast ship), Shield Mk1, 2 Laser Mk1, Pulse Mk1")
 	check(_count(ship, "reactor_mk1") >= 1 and _count(ship, "radiator") >= 1, "Reactor Mk1 and a radiator")
 	check(_tiles(ship, "titanium_alloy") >= 20, "a titanium front layer")
 	for c in ship.grid.tiles:

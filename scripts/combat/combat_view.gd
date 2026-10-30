@@ -181,6 +181,12 @@ func restart() -> void:
 	if not active or session.state() != "lost":
 		return
 	leave()
+	# reload the ship the player picked (its design file); the empty starter hull only if none was picked
+	if sim != null and sim.design_path != "":
+		var why_d: String = sim.choose_ship(sim.design_path)
+		if build != null:
+			build.message = "ship reloaded" if why_d == "" else why_d
+		return
 	if build != null:
 		var why: String = build.session.load_dict(Ship.new_starter().to_dict())
 		build.build_on = true

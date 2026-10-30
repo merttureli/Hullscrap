@@ -78,7 +78,7 @@ func _courier() -> Dictionary:
 			["bed", 1, 7], ["bed", 3, 7], ["oxygen_gen", 5, 7],
 			["fabricator", 9, 10], ["helm", 16, 8], ["shield_mk1", 19, 7],
 			["reactor_mk2", 6, 14], ["reactor_mk1", 12, 14], ["radiator", 16, 14],
-			["engine_mk1", 1, 16], ["engine_mk1", 19, 16],
+			["engine_mk2", 1, 16], ["engine_mk2", 19, 16],
 		],
 		"plates": [["titanium_alloy", func(c): return c.y == 0 and c.x >= 0 and c.x <= 23]],
 		"cargo": {"scrap": 220, "copper": 80, "titanium": 40, "polymer": 10, "engine_mk1": 1, "laser_mk1": 1, "radiator": 1, "credits": 500},
