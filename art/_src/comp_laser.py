@@ -1,77 +1,37 @@
-"""Laser Mk1, 4x2 cells, barrel pointing EAST at rotation 0."""
-from comp_base import *
+"""Laser Mk1, 4x5 cells, hull mount: outside (turret seat, power cells, sensor), wall collar, inside (cell bank, hatch, charge strip).
+Two layers: this mount and the ribbed-barrel head (`barrel`, drawn pointing up, pivot at the turret ring centre)."""
+from wbase import *
 
-CELL_X = [19, 23, 27, 31, 35]
-FLASH = [art("""
-...o..
-..oyo.
-.oyyyo
-.yHHyo
-yHHHHy
-HHHHHH
-HHHHHH
-yHHHHy
-.yHHyo
-.oyyyo
-..oyo.
-...o..
-"""), art("""
-......
-......
-...o..
-..oyo.
-.oyHyo
-oyHHHy
-oyHHHy
-.oyHyo
-..oyo.
-...o..
-......
-......
-""")]
+FLAP = art("""
+....SSM.
+..SSMMS.
+SSMMSS..
+""")
 
-class Laser(Comp):
-    id = 'laser_mk1'; cells = (4, 2)
-    glow_pad = (8, 8, 24, 8)
-    anims = [('on', 'ready', 1, 0), ('off', 'off', 1, 0), ('charge', 'charge', 6, 0), ('fire', 'fire', 2, 12),
-             ('damaged', 'damaged', 2, 4), ('disabled', 'disabled', 1, 0)]
-    anchors = {'muzzle': (63, 15)}
-    notes = ('Barrel points east (right) at rot 0. charge: pick frame round(fraction*5); frame 5 = ready (all cells green, lens lit). '
-             'fire plays once (flash + afterglow). on = the ready frame.')
-    scorch = [(26, 3, 'S'), (45, 19, 'L')]
-    loose = (16, 15)
-    cracks = [(22, 6, 'A'), (4, 11, 'B'), (47, 11, 'A')]
+class Laser(Weapon):
+    id = 'laser_mk1'
+    blen, bwid = 56, 19
+    pivot = (32, 12)
+    bpivot = (6, 9)
+    bmuzzle = (41, 9)
+    out_notes = ('OUTSIDE half of the Laser Mk1 (a FIXED gun): a forward-heavy housing with the barrel in a sleeve and gimbal collar, copper power cells, sensor dome and antenna; the bottom flange overhangs the outer wall face. '
+                 'damaged: antenna bent, wing and ring cracked, cover flapping; disabled: scorched and dented, ring cracked, sparking (2 frames), never destroyed.')
+    notes = ('INSIDE half of the Laser Mk1 (hull mount, outward = up; the top flange overhangs the inner wall face, see offset): cell bank, repair hatch, power coupling, 5-cell charge strip. '
+             'charge: frame round(fraction*5); frame 5 = ready (all green); fire: the strip discharges (flash, then dark). '
+             'damaged: last cells dead, a cell cracked, sparks; disabled: dark, cracked. The rotating head is laser_mk1_barrel (idle, fire, damaged, disabled).')
 
-    def frame(self, state, i):
-        if state == 'damaged':        # damaged: ready frame with damage, lens flickering
-            self._dmg_i = i
-        return Comp.frame(self, state, i)
-
-    def interior(self, state, i):
-        powered = state != 'off'
-        lit = {'charge': i, 'ready': 5, 'on': 5}.get(state, 0)
-        ready = state in ('ready', 'on') or (state == 'charge' and i == 5)
-        fire = state == 'fire'
-        if state == 'on' and getattr(self, '_dmg_i', 0) == 1: ready = False     # damaged flicker frame
-        s = Spr(64, 32)
-        bev(s, 1, 6, 14, 20, 'M', 'S', 'W')
-        for cx in (4, 7, 10):
-            s.rect(cx, 8, 2, 16, 'q'); s.vline(cx, 8, 16, 'Q'); s.vline(cx + 1, 8, 16, 'n')
-        s.rect(2, 14, 1, 4, 'D'); s.put(2, 15, 'g' if powered else 'E'); s.put(2, 16, 'g' if powered else 'E')
-        bev(s, 14, 4, 27, 24, 'M', 'S', 'W')
-        hollow(s, 16, 6, 23, 20, 'W')
-        for vx in (20, 27, 34): s.rect(vx, 7, 4, 2, 'D')
-        for (x, y) in ((17, 7), (37, 7), (17, 24), (37, 24)): s.put(x, y, 'L')
-        recess(s, 18, 12, 19, 8, 'D', 'K')
-        for k, cx in enumerate(CELL_X):
-            on = k < lit and not fire
-            for r in range(4):
-                if ready and on: c = 'g'
-                elif on: c = 'y' if r < 2 else 'a'
-                else: c = 'E' if r > 0 else 'W'
-                s.hline(cx, 14 + r, 3, c)
-            if on: s.put(cx, 14, 'H')
-        s.stamp(19, 21, art("""
+    # ---------------------------------------------------------------- mount: outside
+    def outside(self, s, st):
+        pw = st.powered
+        gun_housing(s)
+        bev(s, 3, 6, 16, 18, 'M', 'S', 'W')                                   # left wing: power cells
+        for cx in (5, 8, 11):
+            s.rect(cx, 8, 2, 14, 'q'); s.vline(cx, 8, 14, 'Q'); s.vline(cx + 1, 8, 14, 'n')
+        s.rect(3, 12, 1, 4, 'D'); s.put(3, 13, 'g' if pw else 'E'); s.put(3, 14, 'g' if pw else 'E')
+        for cy in (8, 20): s.rect(14, cy, 3, 2, 'q'); s.hline(14, cy, 3, 'Q')
+        bev(s, 45, 6, 16, 18, 'M', 'S', 'W')                                  # right wing: sensor and decals
+        s.rect(52, 2, 4, 4, 'W'); s.put(52, 2, 'M'); s.put(52, 3, 'M'); s.put(53, 1, 'c' if pw else 'E')
+        s.stamp(50, 9, art("""
 .KKKK.
 KDDDDK
 KDcDDK
@@ -79,39 +39,86 @@ KDDDDK
 KDDDDK
 .KKKK.
 """))
-        if powered: s.put(21, 23, 'c'); s.put(22, 22, 'c')
-        else: s.put(21, 23, 'E')
-        for hx in range(27, 38, 4):
-            for k in range(3): s.put(hx + k, 21 + k, 'a'); s.put(hx + k + 1, 21 + k, 'D')
-        s.rect(26, 2, 5, 2, 'W'); s.put(28, 1, 'c' if powered else 'E'); s.put(27, 2, 'M'); s.put(26, 2, 'M')
-        for cy in (8, 23): s.rect(12, cy, 3, 2, 'q'); s.hline(12, cy, 3, 'Q')
-        bev(s, 41, 7, 4, 4, 'W', 'E', 'D', cham=False); bev(s, 41, 21, 4, 4, 'W', 'E', 'D', cham=False)
-        tones = 'LMMSSSSWWE'
-        for r in range(10): s.hline(41, 11 + r, 16, tones[r])
-        for rx in (44, 49, 54):
-            bev(s, rx, 9, 3, 14, 'L', 'M', 'S', cham=False)
-            s.vline(rx + 2, 9, 14, 'W'); s.hline(rx, 22, 3, 'W')
-        bev(s, 56, 9, 5, 14, 'S', 'E', 'D')
-        s.rect(58, 12, 3, 8, 'D')
-        if ready or fire:
-            s.rect(58, 12, 3, 8, 'r'); s.rect(59, 13, 2, 6, 'o'); s.rect(60, 14, 1, 4, 'y'); s.put(60, 15, 'H'); s.put(60, 16, 'H')
-        else:
-            s.rect(58, 13, 3, 6, 'E'); s.put(58, 13, 'W'); s.put(59, 13, 'W')
-        return s
-
-    def after(self, state, i, s):
-        if state == 'fire': s.stamp(58, 10, FLASH[i])
-        return s
+        if pw and (st.state != 'on' or st.i == 0): s.put(52, 12, 'c'); s.put(53, 11, 'c')
+        else: s.put(52, 12, 'E')
+        for hx in range(48, 58, 4):
+            for k in range(3): s.put(hx + k, 18 + k, 'a'); s.put(hx + k + 1, 18 + k, 'D')
+        bolts(s, [(47, 8), (58, 8), (47, 22)])
+    # ---------------------------------------------------------------- mount: inside
+    def inside(self, s, st):
+        y = self.iy
+        housing(s, y)
+        coupling(s, 3, y + 8, st)
+        for cx in (16, 22, 28, 34):                                            # the cell bank
+            cylv(s, cx, y + 6, 5, 15, 'QQqqn')
+        for cy in (y + 9, y + 17): s.hline(15, cy, 24, 'S'); s.hline(15, cy + 1, 24, 'W')
+        bev(s, 42, y + 6, 19, 16, 'M', 'S', 'W')                               # breech block
+        hatch(s, 46, y + 8, st)
+        for vx in (45, 49, 53, 57): s.rect(vx, y + 19, 3, 1, 'D')
+        s.hline(4, y + 25, 2, 'W'); s.hline(7, y + 25, 3, 'W'); s.hline(55, y + 25, 3, 'W'); s.hline(59, y + 25, 2, 'W')    # registry stencil
+        strip(s, st, STRIP_X, y + STRIP_DY)
+    # ---------------------------------------------------------------- mount: damage
+    def hurt_out(self, s, st):
+        s.erase(53, 1); s.put(54, 1, 'S'); s.put(55, 1, 'W'); s.put(56, 2, 'S')           # antenna bent over
+        crack(s, [(54, 6), (53, 9), (55, 11), (52, 14), (53, 17), (51, 20)])               # right wing and dome cracked
+        crack(s, [(24, 9), (26, 12), (25, 16), (28, 19)])                                   # turret ring cracked
+        s.stamp(2, 5, FLAP)                                                                 # the wing cover flaps on one corner
+        wire(s, [(10, 6), (12, 7), (14, 7)])
+        spark(s, 10, 4, False) if st.i == 0 else spark(s, 52, 13, False)
+    def wreck_out(self, s, st):
+        scorched(s, st, crack_pts=[[(24, 8), (26, 11), (25, 15), (28, 18), (27, 22)], [(52, 7), (53, 10), (51, 14), (54, 18)]],
+                 dents=[(6, 16, 5, 6), (49, 17, 6, 4)], soots=[(20, 3, 0), (46, 5, 1), (8, 7, 2)],
+                 wires_=[[(10, 6), (12, 8), (13, 11)]], sparks=[(30, 6), (12, 12)], flap=(2, 5))
+        s.put(52, 3, 'E'); s.erase(53, 1)
+    def hurt_in(self, s, st):
+        y = self.iy
+        dead_cells(s, st, y + STRIP_DY)
+        crack(s, [(23, y + 6), (24, y + 10), (22, y + 14)])                                 # a cell cracked
+        spark(s, 24, y + 9, False) if st.i == 1 else spark(s, 56, y + 14, False)
+    def wreck_in(self, s, st):
+        y = self.iy
+        crack(s, [(23, y + 6), (24, y + 10), (22, y + 14), (25, y + 18)])
+        crack(s, [(48, y + 8), (51, y + 11), (50, y + 14)])
+        wire(s, [(14, y + 19), (16, y + 22), (19, y + 23)])
 
     def glow(self, state, i, g, ox, oy):
-        lit = {'charge': i, 'ready': 5, 'damaged': 5}.get(state, 0)
-        ready = state in ('ready', 'damaged') or (state == 'charge' and i == 5)
-        if state == 'damaged' and i == 1: ready = False
-        for j in range(lit if state != 'fire' else 0):
-            glow(g, ox + CELL_X[j] + 1.5, oy + 15.5, 5.0, (107, 211, 74) if ready else (255, 210, 58), 0.55, 2.0)
-        glow(g, ox + 2.5, oy + 16, 4, (107, 211, 74), 0.5, 2.0)
-        if ready: glow(g, ox + 60, oy + 16, 11, (255, 80, 60), 0.6, 2.0)
+        y = self.iy
+        strip_glow(g, ox, oy, state, i, STRIP_X, y + STRIP_DY)
+        glow(g, ox + 12, oy + y + 14, 3, (107, 211, 74), 0.5, 2.0)
+    def out_glow(self, state, i, g, ox, oy):
+        glow(g, ox + 3.5, oy + 14, 4, (107, 211, 74), 0.5, 2.0)
+        glow(g, ox + 52.5, oy + 11.5, 5, (60, 242, 255), 0.35, 2.0)
+
+    # ---------------------------------------------------------------- barrel (east-pointing scratch canvas)
+    def barrel(self, b, st):
+        o = -st.rc
+        cylh(b, 13 + o, 4, 28, 11)
+        for rx in (18, 23, 28, 33):
+            bev(b, rx + o, 3, 3, 13, 'L', 'M', 'S', cham=False)
+            b.vline(rx + o + 2, 3, 13, 'W'); b.hline(rx + o, 15, 3, 'W')
+        bev(b, 37 + o, 3, 5, 13, 'S', 'E', 'D')
+        lens(b, 39 + o, 6, 3, 7, st.fire)
+        if not st.fire: b.put(41 + o, 9, 'r')
+        breech(b, 9, 15)
+    def bhurt(self, b, st):
+        b.rect(28, 3, 3, 13, '.'); b.rect(28, 3, 3, 1, 'S')                                # one ring torn off ...
+        wire(b, [(29, 4), (29, 5)]); wire(b, [(28, 15), (29, 17), (30, 18)])
+        bev(b, 29, 16, 3, 3, 'L', 'M', 'S', cham=False)                                    # ... and swinging by its wire
+        crack(b, [(37, 4), (39, 7), (38, 10), (40, 14)])
+        b.put(41, 9, 'r' if st.i == 0 else 'E')
+        spark(b, 31, 17, False) if st.i == 0 else spark(b, 39, 8, False)
+    def bbreak(self, b, st):
+        return cleave(b, lambda y: 25, 2, 3)
+    def bwreck(self, b, st):
+        for y in (6, 12): wire(b, [(25, y), (27, y + 1), (29, y + 1)])
+        crack(b, [(38, 7), (40, 10), (39, 13), (42, 15)], 'K', 'S')
+        b.rect(42, 12, 3, 4, 'D'); b.put(43, 13, 'S'); b.put(44, 15, 'S')
+        wire(b, [(27, 18), (27, 20)])
+    def bafter(self, b, st):
+        if st.fire: b.stamp(41 - st.rc, 9 - len(FLASH_E[st.i]) // 2, FLASH_E[st.i])
+    def bglow(self, state, i, g, ox, oy):
         if state == 'fire':
-            r = (22, 14)[i]
-            glow(g, ox + 62, oy + 15.5, r, (255, 130, 50), 0.6 if i == 0 else 0.4, 2.0, sx=1.25)
-            glow(g, ox + 62, oy + 15.5, r / 2, (255, 235, 160), 0.7 if i == 0 else 0.4, 1.6)
+            rc = (2, 1, 0)[i]
+            glow(g, ox + 44 - rc, oy + 9.5, (16, 11, 8)[i], (255, 130, 50), (0.65, 0.5, 0.35)[i], 2.0, sx=1.3)
+            glow(g, ox + 43 - rc, oy + 9.5, (8, 5, 3)[i], (255, 235, 160), (0.75, 0.55, 0.4)[i], 1.6)
+        if state == 'damaged' and i == 0: glow(g, ox + 41, oy + 9.5, 4, (255, 80, 60), 0.4, 2.0)

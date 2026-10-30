@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "breach_harpoon_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Breach Harpoon (unique, gold trim): the cable spool, which winds the rope back on as it charges (rope disc grows frame by frame, frame 5 = full, strip green; the spokes turn half a step on odd frames), power coupling, repair hatch. fire: the spool is empty and the strip discharges. damaged: spool flange cracked, rope fraying, sparks; disabled: spool jammed and dark, rope tangled. Barrel layer breach_harpoon_barrel: the heavy open trough with the harpoon (barbed head) loaded; fire: the harpoon flies, the cable pays out, steam.",
+ "offset": [
+  0,
+  -4
+ ]
+}

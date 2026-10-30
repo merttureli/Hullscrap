@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "leech_laser_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Leech Laser (unique, gold trim): a glass siphon tank whose green fluid rises with the charge (frame 5 = full, strip green), the thick power-tap cable from the coupling, repair hatch. fire: the tank drains in a flash. damaged: tank glass cracked, cable frayed and sparking; disabled: tank dark and split, cable torn out. Barrel layer leech_laser_barrel: a laser barrel with the siphon coil wrapped round it (green and gold) and a power-tap cable looped under it.",
+ "offset": [
+  0,
+  -4
+ ]
+}

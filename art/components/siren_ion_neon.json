@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "siren_ion_neon_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Siren Ion (neon): a big faceted crystal capacitor that brightens as it charges (dull, blue edges, cyan, then white-cyan with a magenta core at ready), power coupling, hatch, cyan/magenta strip. fire: the crystal flashes white. damaged: crystal cracked, lamps dead; disabled: crystal dark and split. Barrel layer siren_ion_neon_barrel: a horn-shaped emitter with crystal fins and a sensor pod; fire: sound-wave arcs in magenta and cyan roll out of the mouth.",
+ "offset": [
+  0,
+  -4
+ ]
+}

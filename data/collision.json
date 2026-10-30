@@ -1,0 +1,10 @@
+{
+  "_doc": "Ship-to-ship collisions (docs/CONTENT.md 4e), read by scripts/combat/collisions.gd. restitution: bounce of the impulse (0 sticks, 1 is elastic). min_speed: closing speed in px/s at the contact below which a bump does no damage and no knock. damage_k: hp of damage each ship takes per unit of impact energy E = 1/2 * reduced mass * closing speed^2, before material resist, slope, ram quirks and the dampener. crew_knock: hp lost by each crew member in a room touching the impact, per 100 px/s of closing speed. separation_slop: px of overlap that is left alone when ships are pushed apart. correction: the share of the rest of the overlap removed each substep. tether_pull: how hard (0..1 of the gap per substep) a latched bow pulls the two ships together.",
+  "restitution": 0.2,
+  "min_speed": 40,
+  "damage_k": 6e-7,
+  "crew_knock": 5,
+  "separation_slop": 0.5,
+  "correction": 0.8,
+  "tether_pull": 0.2
+}

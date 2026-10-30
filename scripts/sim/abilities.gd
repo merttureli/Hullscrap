@@ -9,7 +9,7 @@ extends RefCounted
 ## - side_effects, per second while it runs: drain_o2 (fraction of the part's room air lost), heat,
 ##   power_spike (extra power draw, taken in the power solve), fire_risk (chance), self_damage (hp).
 ## - operator_needs: traits the crew member manning the part (ship.manned) must have; "a|b" means
-##   either. Traits come from data/crew.json.
+##   either. Traits come from the crew member's species, data/crew.json and gear (CrewMember.traits()).
 ## State lives on the ship, in `ship.ability_state` (not saved): `slots` "uid:id" -> {uid, id, active,
 ## cd} (seconds left) and `rev`, which counts starts and ends so the power solve, the arena's thrust
 ## and its shield layers know to refresh. Everything here is static. tick() is driven by ShipSim
@@ -272,9 +272,10 @@ static func operator_of(ship, uid: int):
 	return null
 
 
-## The traits of a crew member (data/crew.json `traits`, by name); [] when they have none.
+## The traits of a crew member: their species', their own (data/crew.json `traits`, by name) and
+## those of worn gear, merged (CrewMember.traits()); [] when they have none.
 static func traits_of(member) -> Array:
-	return CrewMember.config().get("traits", {}).get(member.name, [])
+	return member.traits()
 
 
 ## Does `member` have, for every entry of `needs`, at least one of its traits ("a|b" is either)?

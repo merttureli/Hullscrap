@@ -1,13 +1,22 @@
 extends RefCounted
 ## What a shot does once it meets a ship's cells. Walls, doors and components stop shots; floor and
-## empty cells do not. Order on each solid cell: deflect roll, kinetic ricochet roll, then damage
-## times the material's resist, applied to the cell's hp (a part's hp for a component). A wall or
-## door at 0 hp is breached (the cell becomes empty); a component at 0 hp is disabled. Hull
-## integrity drops by the damage dealt to walls and doors. Works on arena combatants (arena.gd);
-## every roll comes from the arena's seeded rng.
+## empty cells do not; a shaped cell (slope, curve) only where its polygon is. The shot's incidence
+## theta is the angle between its reversed path and the outward normal of the face it enters (0 is
+## straight on). Order on each wall or door: deflect roll, kinetic ricochet roll, then damage times
+## the material's resist (and, for kinetic and explosive, clamp(cos theta, 0.5, 1): sloped armour),
+## applied to the cell's hp (a part's hp for a component). A wall or door at 0 hp is breached (the
+## cell becomes empty); a component at 0 hp is disabled. Hull integrity drops by the damage dealt to
+## walls and doors. A deflect or ricochet reflects the shot about the normal at half damage (see
+## projectiles.gd for the bounces that follow). Works on arena combatants (arena.gd); every roll
+## comes from the arena's seeded rng.
 
-const RICOCHET_COS := 0.5  ## cos 60 degrees: a shot more than 60 degrees off the face normal may glance off
-const RICOCHET_CHANCE := 0.5
+const Shapes = preload("res://scripts/ship/shapes.gd")
+
+const RICOCHET_FROM_DEG := 40.0  ## kinetic shots never glance off a face closer to straight on than this
+const RICOCHET_FULL_DEG := 75.0  ## and from here on glance off with RICOCHET_MAX
+const RICOCHET_MAX := 0.8
+const SLOPE_MIN := 0.5  ## least share of kinetic and explosive damage that a glancing hit does
+const BOUNCE_DAMAGE := 0.5  ## share of its damage a bounced shot keeps
 const SPLASH_FRACTION := 0.5  ## of the shot's damage, to every solid cell within the splash radius
 const SPACED_FRACTION := 0.3  ## of that splash, for a cell behind an empty or floor gap
 const LATTICE_FRACTION := 0.2  ## of the energy damage a neon lattice absorbs, counted as ship power
@@ -31,35 +40,68 @@ static func solid_at(co, cell: Vector2i) -> Dictionary:
 	return {}
 
 
+## Chance that a kinetic shot hitting a face at `theta_deg` off its normal glances off: 0 below 40
+## degrees, rising linearly to 0.8 at 75 degrees and more.
+static func ricochet_chance(theta_deg: float) -> float:
+	return RICOCHET_MAX * clampf((theta_deg - RICOCHET_FROM_DEG) / (RICOCHET_FULL_DEG - RICOCHET_FROM_DEG), 0.0, 1.0)
+
+
+## Share of a hit that damage of `type` does at an incidence whose cosine is `cos_t`: kinetic and
+## explosive lose to a shallow angle (a shot at an angle crosses more plate), down to 0.5; the rest do not.
+static func slope_factor(type: String, cos_t: float) -> float:
+	return clampf(cos_t, SLOPE_MIN, 1.0) if type == "kinetic" or type == "explosive" else 1.0
+
+
+## Where the segment a -> b (ship-local cell coordinates) meets solid `cell` of `co`, which the DDA
+## entered at `entry` ({t, n} of Projectiles.cells_along): {t, n} (n is the outward face normal, zero
+## when the segment starts inside), or {} for a shaped cell whose empty part it only crosses.
+static func cell_hit(co, cell: Vector2i, a: Vector2, b: Vector2, entry: Dictionary) -> Dictionary:
+	var sh: Dictionary = co.ship.grid.shape_of(cell)
+	if sh.is_empty():
+		return {"t": entry["t"], "n": entry["n"]}
+	return Shapes.segment_hit(sh, a - Vector2(cell), b - Vector2(cell))
+
+
 ## A shot of weapon `w` crosses `entries` (cells in order, from Projectiles.cells_along, the first
-## already a solid one) of ship `idx` going along `dir` (ship-local). Resolves it to the end.
-static func march(arena, idx: int, w: Dictionary, entries: Array, dir: Vector2) -> void:
+## already a solid one that `first_hit` ({t, n}, see cell_hit) was found for) of ship `idx` along the
+## segment a -> b (ship-local). Resolves it to the end: {} when it was spent, {"bounce": {pos (world),
+## n (world face normal), dir (new world direction), ship, cell, dmg, pierce}} when a cell glanced it off.
+static func march(arena, idx: int, w: Dictionary, a: Vector2, b: Vector2, entries: Array, first_hit: Dictionary) -> Dictionary:
 	var co = arena.ships[idx]
 	var dmg := float(w["damage"])
 	var pierce := int(w["pierce"])
 	var type: String = w["damage_type"]
 	var seen := {}  # component uids already hit by this shot
+	var dir := (b - a).normalized()
 	var wdir: Vector2 = dir.rotated(co.flight.angle)  # the shot's direction in the world, for the effects
 	var first := true
-	for e in entries:
+	for k in entries.size():
+		var e: Dictionary = entries[k]
 		var cell: Vector2i = e["c"]
 		var obj := solid_at(co, cell)
 		if obj.is_empty():
 			continue
+		var h: Dictionary = first_hit if k == 0 else cell_hit(co, cell, a, b, e)
+		if h.is_empty():
+			continue  # a shaped cell the shot passes the empty half of
+		var n: Vector2 = h["n"]
+		var nw: Vector2 = n.rotated(co.flight.angle)
+		var cos_t := clampf(-dir.dot(n), 0.0, 1.0) if n != Vector2.ZERO else 1.0
+		var factor := 1.0
 		if obj["kind"] == "component":
 			if seen.has(obj["uid"]):
 				continue
 			seen[obj["uid"]] = true
 		else:
-			var chance := float(obj["def"].get("deflect", {}).get(type, 0.0))
+			var chance := float(obj["def"].get("deflect", {}).get(type, 0.0)) * (1.0 + 0.5 * sqrt(1.0 - cos_t * cos_t))
 			if chance > 0.0 and arena.rng.randf() < chance:
-				arena.log_event("deflect", idx, cell, {"dir": wdir, "n": e["n"].rotated(co.flight.angle)})
-				return
-			var n: Vector2 = e["n"]
-			if type == "kinetic" and n != Vector2.ZERO and absf(dir.dot(n)) < RICOCHET_COS and arena.rng.randf() < RICOCHET_CHANCE:
-				arena.log_event("ricochet", idx, cell, {"dir": wdir, "n": n.rotated(co.flight.angle)})
-				return
-		var res := apply(arena, idx, cell, obj, dmg, type, {"dir": wdir, "n": e["n"].rotated(co.flight.angle)})
+				return {"bounce": _bounce(arena, "deflect", idx, cell, a.lerp(b, h["t"]), wdir, nw, dmg, pierce)}
+			if type == "kinetic":
+				var p := ricochet_chance(rad_to_deg(acos(cos_t)))
+				if p > 1e-6 and arena.rng.randf() < p:
+					return {"bounce": _bounce(arena, "ricochet", idx, cell, a.lerp(b, h["t"]), wdir, nw, dmg, pierce)}
+			factor = slope_factor(type, cos_t)
+		var res := apply(arena, idx, cell, obj, dmg * factor, type, {"dir": wdir, "n": nw})
 		if first:
 			first = false
 			var fc := float(w.get("fire_chance", 0.0))
@@ -69,9 +111,21 @@ static func march(arena, idx: int, w: Dictionary, entries: Array, dir: Vector2) 
 			if radius > 0.0:
 				splash(arena, idx, cell, dmg * SPLASH_FRACTION, radius, type, obj.get("uid", -1))
 		if res["left"] <= 0.0 or pierce <= 0:
-			return
+			return {}
 		pierce -= 1
 		dmg = res["left"]
+	return {}
+
+
+## A shot glanced off `cell` of ship `idx` at `local_pt` (ship-local cell coordinates): log the event
+## (`type` ricochet or deflect: pos is the hit point, dir the way the shot flew, n the face normal and
+## new_dir the way it leaves, all in the world) and give the bounce for the caller to carry on with.
+static func _bounce(arena, type: String, idx: int, cell: Vector2i, local_pt: Vector2, wdir: Vector2, nw: Vector2, dmg: float, pierce: int) -> Dictionary:
+	var pt: Vector2 = arena.local_to_world(idx, local_pt)
+	var nn := nw if nw != Vector2.ZERO else -wdir
+	var out := wdir - 2.0 * wdir.dot(nn) * nn
+	arena.log_event(type, idx, cell, {"pos": pt, "dir": wdir, "n": nw, "new_dir": out})
+	return {"pos": pt, "n": nn, "dir": out, "ship": idx, "cell": cell, "dmg": dmg * BOUNCE_DAMAGE, "pierce": pierce}
 
 
 ## Apply `dmg` of `type` to the wall, door or part `obj` on `cell`. `info`: extra keys for the hit

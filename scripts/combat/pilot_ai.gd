@@ -10,8 +10,13 @@ extends RefCounted
 ## - With a sectored shield it holds back weapons whose shot would open the sector the player's loaded
 ##   guns are pointing at, for at most HOLD_MAX seconds.
 ## - It overcharges its shield when the layers are gone, and does nothing once wrecked.
+## - Style "rammer" (a ship design's `"ai": {"style": "rammer"}`) does not keep a range: it finds its
+##   bow (the side with the most ram plating, else forward), points it at where the foe will be and
+##   closes at full throttle, uses its engine ability within RAM_ABILITY_RANGE of the foe's hull, and after a collision
+##   backs off for RAM_BACKOFF_S seconds before coming round again. Its guns still fire when they can.
 
 const Shields = preload("res://scripts/combat/shields.gd")
+const Collisions = preload("res://scripts/combat/collisions.gd")
 
 const RANGE_FRACTION := 0.7
 const DEFAULT_RANGE := 600.0
@@ -25,6 +30,13 @@ const BACK_MAX := 120.0  ## px/s it backs off at, at most
 const HOLD_THROTTLE := 0.5  ## at the preferred range it still pushes this hard
 const HOLD_MAX := 1.5  ## seconds a weapon waits for a safer sector
 const RETARGET_S := 0.5
+const RAM_BACKOFF_S := 2.0  ## seconds a rammer reverses after a collision
+const RAM_ABILITY_RANGE := 600.0  ## px from the foe's hull (its centre less its bounding radius): a rammer presses its engine ability inside this
+const RAM_FINAL := 160.0  ## px: inside this a rammer steers straight at the foe
+const RAM_CLOSE_SPEED := 320.0  ## px/s a rammer steers to close at
+const RAM_MIN_CLOSE := 100.0  ## px/s: the closing speed it assumes when working out the time to contact
+const RAM_MAX_LEAD_S := 4.0
+const RAM_ALIGNED := 0.45  ## rad: full throttle when the heading is this close to the steering direction
 
 var arena
 var me: int
@@ -32,15 +44,22 @@ var foe: int
 var rng := RandomNumberGenerator.new()
 var side := 1.0  ## +1 or -1: which way the guns' axis is turned off the target
 var target_uid := -1  ## the part of the foe it aims at (-1: the ship's centre)
+var style := ""  ## "" (keeps its range and strafes) or "rammer"
 var _flip := 0.0
 var _retarget := 0.0
 var _hold := {}  # weapon uid -> seconds held back
+var _bow := Vector2.UP  # ship-local direction of a rammer's bow
+var _backoff := 0.0  # seconds a rammer still reverses
+var _contact_seen := -1  # the last arena.contact_tick this pilot has reacted to
 
 
-func _init(p_arena, p_me: int, p_foe: int) -> void:
+## `p_ai`: the `ai` entry of the ship's design ({"style": "rammer"}), if it has one.
+func _init(p_arena, p_me: int, p_foe: int, p_ai := {}) -> void:
 	arena = p_arena
 	me = p_me
 	foe = p_foe
+	style = str(p_ai.get("style", ""))
+	_bow = bow_of(arena.ships[me])
 	rng.seed = int(arena.rng.seed) * 7919 + me * 104729 + 17
 	side = 1.0 if rng.randf() < 0.5 else -1.0
 	_flip = rng.randf_range(2.0, 4.0)
@@ -57,7 +76,11 @@ func think(dt: float) -> void:
 	if _retarget <= 0.0 or not _part_ok(target_uid):
 		_retarget = RETARGET_S
 		target_uid = pick_target()
-	_fly(dt)
+		_bow = bow_of(co)
+	if style == "rammer":
+		_ram(dt)
+	else:
+		_fly(dt)
 	_shoot(dt)
 
 
@@ -130,6 +153,67 @@ func _fly(dt: float) -> void:
 		if absf(gap) < preferred * 0.15 and absf(throttle) < HOLD_THROTTLE:
 			throttle = HOLD_THROTTLE * (1.0 if gap >= 0.0 else -1.0)  # keep pushing on the slant: that is the strafe
 	arena.set_input(me, throttle, turn)
+
+
+## The ship's bow, ship-local: the unit vector toward the side (up, down, left, right of its centre)
+## holding the most ram plating (a tile with the `ram` quirk); forward (up) when it has none, and on a tie the first of up, down, left, right.
+static func bow_of(co) -> Vector2:
+	var sides: Array[Vector2] = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+	var count := [0, 0, 0, 0]
+	var grid = co.ship.grid
+	for c in grid.tiles:
+		if str(grid.defs.get_def(grid.tiles[c]).get("quirk", "")) != "ram":
+			continue
+		var v: Vector2 = Vector2(c) + Vector2(0.5, 0.5) - co.pivot
+		if absf(v.x) > absf(v.y):
+			count[3 if v.x > 0.0 else 2] += 1
+		else:
+			count[1 if v.y > 0.0 else 0] += 1
+	var best := 0
+	for k in range(1, 4):
+		if count[k] > count[best]:
+			best = k
+	return sides[best]
+
+
+## Helm turn (-1..1) that brings an angle error `err` (rad, positive is clockwise) to zero, braking in time.
+func _turn_for(err: float) -> float:
+	var co = arena.ships[me]
+	var alpha: float = co.thrust * co.flight.turn_factor / maxf(co.mass, 1.0)  # rad/s^2 at full turn
+	if alpha <= 1e-4:
+		return 0.0
+	var w_cap := alpha / maxf(co.flight.angular_damping, 0.1) * 0.8
+	var w_des := signf(err) * minf(sqrt(2.0 * alpha * 0.5 * absf(err)), w_cap)
+	return clampf((w_des - co.flight.ang_vel) / (alpha * 0.12), -1.0, 1.0)
+
+
+## A rammer's flying: bow at the foe's future position and full throttle, or reversing after a collision.
+func _ram(dt: float) -> void:
+	var co = arena.ships[me]
+	var tgt = arena.ships[foe]
+	var to_foe: Vector2 = tgt.flight.pos - co.flight.pos
+	var dist := to_foe.length()
+	var touched: int = int(arena.contact_tick.get(me, -1))
+	if touched > _contact_seen:
+		_contact_seen = touched
+		if _backoff <= 0.0:
+			_backoff = RAM_BACKOFF_S
+	var u := to_foe / maxf(dist, 1.0)
+	if _backoff > 0.0:  # keep the bow on the foe while backing away, ready to come round
+		_backoff -= dt
+		arena.set_input(me, -1.0, _turn_for(wrapf(u.angle() - _bow.angle() - co.flight.angle, -PI, PI)))
+		return
+	var rel_v: Vector2 = co.flight.vel - tgt.flight.vel
+	var t_hit := clampf(dist / maxf(rel_v.dot(u), RAM_MIN_CLOSE), 0.0, RAM_MAX_LEAD_S)
+	var aim: Vector2 = tgt.flight.pos + tgt.flight.vel * t_hit
+	var steer: Vector2 = (aim - co.flight.pos).normalized()
+	if dist > RAM_FINAL:  # cancel the sideways drift as well as closing in
+		steer = (steer * RAM_CLOSE_SPEED - (rel_v - steer * rel_v.dot(steer))).normalized()
+	var turn := _turn_for(wrapf(steer.angle() - _bow.angle() - co.flight.angle, -PI, PI))
+	var heading := Vector2.UP.rotated(co.flight.angle)
+	arena.set_input(me, 1.0 if heading.dot(steer) > cos(RAM_ALIGNED) else 0.0, turn)
+	if dist - float(Collisions.hit_cells(arena, foe)["radius"]) < RAM_ABILITY_RANGE:
+		arena.use_key(me, "engine")
 
 
 # --- shooting ------------------------------------------------------------------------------------

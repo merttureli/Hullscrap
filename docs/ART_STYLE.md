@@ -74,6 +74,44 @@ These come from a human-made Multiverse add-on on GitHub (TCC). They're **for re
 - **Explosions** are **flat 2–3 colour shapes** (white core, coloured body) that fragment over many frames (about 30). Bold and graphic, not realistic.
 - **What this means for us**: restraint everywhere except hulls, lights and effects. A muted interior, crisp outlined crew, and rich hull exteriors. Every sprite gets optional `_glow` and `_color` layers.
 
+## The approved look: our art bible (owner, 2026-10-30: "exactly what we are looking for", "so so good")
+The reference sheets are in **`docs/art_reference/`**. Every new art agent reads these first and matches them.
+- crew and species: `crew_species.png`;
+- systems: `systems_v2.png` and `lines_reactors_engines.png`;
+- shields: `shields.png`;
+- workshop and belts: `workshop_belts.png`;
+- weapons: `weapons_mounted.png` and `weapon_states_laser_mk1.png`;
+- structure: `structure.png` and `shapes_hull_skin.png`.
+
+**The recipe that works (keep it)**
+1. **Made in code, pixel by pixel.** Each sprite is an ASCII map in a Python generator in `art/_src/`.
+   - Every colour comes from the palette, and the rebuild is byte-identical.
+   - `build.py` checks palette, frame sizes and glow sizes.
+   - No noise, no maths gradients, no AI images.
+2. **The shape of everything**: 16 px per cell, a 1 px near-black outline, light from the top-left, and a 3–4 tone steel ramp. Panel seams, bolts at the corners, and a few lit indicator pixels.
+3. **Family colour** (light pixels and glow) is the same across every line:
+   - reactor amber, engines orange exhaust, O2 green, shields blue;
+   - weapons red/orange/teal by type, workshop violet, fabricator amber, belts neutral.
+4. **Line language**:
+   - **Scrap** has rust patches, hazard tape, bolt heads, weld seams, amber lamps and slight asymmetry.
+   - **Standard** is clean and symmetrical, with a registry stencil; higher tiers add machinery.
+   - **Neon** has navy panels, crisp 1 px cyan/magenta edges and crystal facets, with the glow carrying the light.
+5. **States tell a story** (the v1 lesson: never one generic damage stamp):
+   - `on` loops (2–8 frames; shields 8, with a 3-frame `hit` and a 4-frame `recharge`).
+   - `off` has its lights dead.
+   - `damaged` is specific to the object: this panel cracks, that cable hangs, and sparks come from one spot.
+   - `disabled` is visibly broken: a split casing, a dead core, a snapped barrel.
+   - **Outside mount halves are never shattered, only scorched and dented**, because they can always be repaired.
+6. **Hull mounts** are an inside half and an outside half.
+   - Each half has a 3–4 px flange overhanging its wall face (`offset`), with the wall drawn between them.
+   - The barrel is its own sprite, drawn pointing up. Fixed guns have a long barrel braced in a sleeve; turrets have a ring base, a compact head and a sensor eye.
+7. **Crew** are top-down layered rigs. **Every species uses the same arm mounts**, so any item fits any body. Outfits are tinted through `_color` masks.
+8. **Shaped walls are pre-lit in all 8 orientations.** The game picks a frame and never rotates a lit sprite.
+9. **Tiers grow by adding parts**: Mk2 adds a second accent, Mk3 extra machinery, Mk4 and Mk5 heavier housings, all in the same silhouette family. So a Mk5 reads as a big brother of the Mk1.
+10. **Every art agent ships a labelled 3× preview sheet** with every frame and an assembled in-context view (mounted through a wall, in a room). The lead reviews it, and the owner sees it before merging.
+
+**Palette budget**: 37 colours now. A new colour needs a reason and is registered in `px.py`/`pal_*.py`, never ad hoc. Stay under 48.
+
 ## Files
 - `art/<area>/<id>.png` (crew in `art/crew/<species>_<outfit>.png` as sprite sheets), plus a JSON next to each sheet with frame size, frames per animation and fps.
 - The game picks them up through `scripts/view/visuals.gd` (components), and through the crew and person drawers once they read sheets. Placeholders stay as the fallback.

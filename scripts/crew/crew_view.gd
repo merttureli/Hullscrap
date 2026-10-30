@@ -13,7 +13,7 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
-const SPECIES := "human"  ## whose art the crew wear (art/crew/<species>/)
+const Art = preload("res://scripts/view/art.gd")
 const AIM_DEAD_ZONE := 0.3  ## cells: with the mouse this close to the player, the aim stays where it was
 
 ## Callable(cell) -> bool for doors. Auto doors: crew walk through every door and it closes behind
@@ -98,15 +98,17 @@ func _wasd() -> Vector2:
 		float(Input.is_key_pressed(KEY_S)) - float(Input.is_key_pressed(KEY_W)))
 
 
-## Put the starting crew on the ship once there is floor for it (Jobs.spawn_crew: the soldier and Ada
-## on the body spots nearest the grid centre, two more at the beds), and find the soldier and Ada among them.
+## Put the starting crew on the ship once there is floor for it (Jobs.spawn_crew: the design's crew
+## list, else the soldier and Ada on the body spots nearest the grid centre and two more at the beds),
+## and find the soldier and Ada among them (a design may leave Ada out).
 func _spawn(ship) -> void:
-	if player != null and ada != null and ship.crew.has(player) and ship.crew.has(ada):
+	var ada_name: String = CrewMember.config()["ada"]["name"]
+	var wants_ada: bool = ship.crew_plan.is_empty() or ship.crew_plan.any(func(e): return e["name"] == ada_name)
+	if player != null and ship.crew.has(player) and (not wants_ada or (ada != null and ship.crew.has(ada))):
 		return
 	Jobs.spawn_crew(ship)
 	player = null
 	ada = null
-	var ada_name: String = CrewMember.config()["ada"]["name"]
 	for m in ship.crew:
 		if m.is_player:
 			player = m
@@ -171,7 +173,8 @@ func look_of(m: CrewMember) -> Dictionary:
 func _draw_person(m: CrewMember) -> void:
 	var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
 	var clock: float = _ship().clock
-	var pose := {"species": SPECIES, "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-		"item": PersonDrawer.item_for(m, clock), "down": m.is_down(), "work": PersonDrawer.is_working(m, clock), "t": _clock}
+	var fight: bool = sim != null and sim.has_method("jobs_of") and sim.jobs_of(_ship()).combat
+	var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
+		"item": PersonDrawer.item_for(m, clock, fight), "down": m.is_down(), "work": PersonDrawer.is_working(m, clock), "t": _clock}
 	PersonDrawer.draw(self, _world(m.pos), pose, look_of(m), build.CELL)
 	ShipView.draw_health(self, _world(m.pos), m.hp / m.max_hp, m.is_down(), build.CELL)

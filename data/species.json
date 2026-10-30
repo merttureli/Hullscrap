@@ -1,0 +1,15 @@
+{
+	"_doc": "Species (docs/CONTENT.md section 9), read by scripts/crew/crew_member.gd. A crew member's `species` (set by the ship design's `crew` list) sets their max hp (hp), walk speed (speed, a factor on the 3 cells/s base), traits (merged with personal traits from data/crew.json and gear traits, see CrewMember.traits()), the art folder they are drawn with (rig: art/crew/<rig>/) and the hand weapon they carry (sidearm: an id of data/hand_weapons.json, drawn when idle in a fight). mult: factors on a rule, multiplied together with those of the member's traits (see `traits` below); heal_others scales the speed of reviving a crewmate. traits: what a trait id does. mult stats: no_air_damage (damage taken in a room without air), fire_damage (damage taken standing in a fire), repair_time (the time a repair or breach job takes). A trait with no entry here (suit) is only a label that abilities.gd checks against operator_needs. default: the species of anyone whose design names none.",
+	"default": "human",
+	"traits": {
+		"no_breath": {"name": "Does not breathe", "mult": {"no_air_damage": 0.0}},
+		"heat_resistant": {"name": "Heat resistant", "mult": {"fire_damage": 0.25}},
+		"fast_repair": {"name": "Quick hands", "mult": {"repair_time": 0.6}}
+	},
+	"species": {
+		"human": {"name": "Human", "hp": 100, "speed": 1.0, "traits": [], "mult": {}, "rig": "human", "sidearm": "service_pistol"},
+		"basalt": {"name": "Basalt", "hp": 140, "speed": 0.75, "traits": ["no_breath"], "mult": {"heal_others": 0.5}, "rig": "basalt", "sidearm": "quarry_hammer", "notes": "bad medics: heal_others 0.5; no helmet in the art"},
+		"emberkin": {"name": "Emberkin", "hp": 90, "speed": 1.0, "traits": ["heat_resistant"], "mult": {}, "rig": "emberkin", "sidearm": "ember_knife", "notes": "can stand in overheated rooms: no room heat hurts crew yet, so nothing to exempt"},
+		"fenn": {"name": "Fenn", "hp": 75, "speed": 1.15, "traits": ["fast_repair"], "mult": {}, "rig": "fenn", "sidearm": "spark_pistol"}
+	}
+}

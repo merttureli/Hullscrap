@@ -67,9 +67,10 @@ static func job_aim(m) -> float:
 	return m.facing.angle()
 
 
-## The id of the item `m` holds: by the job (see JOB_ITEMS), a pistol for the player with no job, else "".
+## The id of the item `m` holds: by the job (see JOB_ITEMS), a pistol for the player with no job, the
+## species' sidearm (CrewMember.sidearm) for anyone else idle in a fight (`in_combat`), else "".
 ## `clock`: the ship's clock, to tell a hand job still going on from a stale one.
-static func item_for(m, clock: float) -> String:
+static func item_for(m, clock: float, in_combat := false) -> String:
 	if m.is_down():
 		return ""
 	var job: Dictionary = m.job
@@ -78,7 +79,9 @@ static func item_for(m, clock: float) -> String:
 		type = ""  # E let go: the job record is stale
 	if type != "":
 		return str(JOB_ITEMS.get(type, ""))
-	return "pistol" if m.is_player else ""
+	if m.is_player:
+		return "pistol"
+	return m.sidearm() if in_combat and job.is_empty() else ""
 
 
 ## True while `m` is at a job that uses a tool (arms jab): they have arrived, or the player is holding E.

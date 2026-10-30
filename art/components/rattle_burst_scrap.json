@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "rattle_burst_scrap_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Rattle Burst (scrap): mismatched capacitor cans, a patched repair hatch, a bare cable stub, amber lamp strip (warm lamps, no clean indicators). charge: lamps fill; fire: the strip stutters (three quick flashes). damaged: a can dented and leaking, a lamp dead, sparks; disabled: dark, cracked, cable torn. Barrel layer rattle_burst_scrap_barrel: three welded barrels of different lengths clamped with rust bands and hazard tape. fire: the three barrels flash in turn (a 3-round burst). Disabled = JAMMED: the middle barrel is bent, a case is stuck in its mouth.",
+ "offset": [
+  0,
+  -4
+ ]
+}

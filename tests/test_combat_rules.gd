@@ -90,14 +90,14 @@ func test_helm_input_flies_the_ship() -> void:
 	a.set_input(i, -1.0, 0.0)
 	a.step(0.5)
 	check(a.ships[i].flight.vel.length() < v.length() + 1.0, "reverse slows it")
-	var dead := a.add_ship(_pirate(), Vector2(500.0, 0.0))
+	var dead := a.add_ship(_pirate(), Vector2(1500.0, 0.0))  # clear of the first ship: hulls that touch push each other
 	a.ships[dead].ship.components.instances[a.ships[dead].ship.components.instances.keys()[0]]["status"] = "ok"
 	for uid in a.ships[dead].ship.components.instances:
 		if a.ships[dead].ship.components.def(a.ships[dead].ship.components.instances[uid]["id"])["family"] == "helm":
 			a.ships[dead].ship.components.instances[uid]["status"] = "disabled"
 	a.set_input(dead, 1.0, 0.0)
 	a.step(1.0)
-	eq(a.ships[dead].flight.pos, Vector2(500.0, 0.0), "no powered helm, no flight")
+	eq(a.ships[dead].flight.pos, Vector2(1500.0, 0.0), "no powered helm, no flight")
 
 
 # --- doors -------------------------------------------------------------------------------------------

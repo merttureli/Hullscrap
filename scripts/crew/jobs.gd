@@ -95,9 +95,18 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 			ship.manned[job["uid"]] = m.name
 		"repair_breach", "repair_component", "revive":
 			var key: String = job["key"]
-			progress[key] = float(progress.get(key, 0.0)) + dt
+			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(m, job["type"])
 			if progress[key] >= float(job["work"]) - 1e-6:
 				_finish(ship, job)
+
+
+## How fast `m` does a job of `type`: 1 / the repair_time factor of their traits for a repair or a
+## breach (fast_repair works in 0.6 of the time), the heal_others factor of their species for a
+## revive (a Basalt is a slow medic).
+static func _work_rate(m, type: String) -> float:
+	if type == "revive":
+		return m.mult("heal_others")
+	return 1.0 / maxf(m.mult("repair_time"), 0.01)
 
 
 # --- the board ----------------------------------------------------------------------------------
@@ -417,11 +426,11 @@ func _health(ship, dt: float) -> void:
 		var dmg := 0.0
 		for c in m.body_cells():
 			if ship.fires.has(c):
-				dmg += float(dps["fire"])
+				dmg += float(dps["fire"]) * m.mult("fire_damage")
 				break
 		var room: int = ship.atmosphere.room_at(m.cell())
 		if room >= 0 and ship.atmosphere.pressure_of(room) < float(cfg["no_air_below"]):
-			dmg += float(dps["no_air"])
+			dmg += float(dps["no_air"]) * m.mult("no_air_damage")
 		if dmg > 0.0:
 			m.hurt(dmg * dt)
 		var heal := _heal_rate(ship, m)
@@ -656,10 +665,13 @@ static func _works(ship, uid: int) -> bool:
 
 # --- people -------------------------------------------------------------------------------------
 
-## Make sure `ship` has its starting crew: the player's soldier, Ada, and `extra_crew` more NPCs at
-## the beds (data/crew.json). Only adds what is missing, and stops at the first one that finds no
-## place for a body yet. Returns the new members.
+## Make sure `ship` has its starting crew: the design's crew list when it has one (`ship.crew_plan`,
+## names and species), else the player's soldier, Ada, and `extra_crew` more NPCs at the beds
+## (data/crew.json). Only adds what is missing, and stops at the first one that finds no place for a
+## body yet. Returns the new members.
 static func spawn_crew(ship) -> Array:
+	if not ship.crew_plan.is_empty():
+		return _spawn_planned(ship)
 	var cfg := CrewMember.config()
 	var grid = ship.grid
 	var mid := Vector2(grid.size) / 2.0
@@ -698,8 +710,45 @@ static func spawn_crew(ship) -> Array:
 	return out
 
 
-## The crew of a ship that is not the player's: `enemy.count` people round the helm (data/crew.json).
-## Returns the new members (none when the ship has no floor yet).
+## spawn_crew for a design with a crew list: each entry not aboard yet, in order. The entry named
+## like the player in data/crew.json is the soldier and Ada's gets her look; both stand on the spots
+## nearest the middle. The others take the colours of `looks` in order and stand at the beds, the
+## n-th at bed n (round the beds when there are fewer).
+static func _spawn_planned(ship) -> Array:
+	var cfg := CrewMember.config()
+	var grid = ship.grid
+	var mid := Vector2(grid.size) / 2.0
+	var beds := _beds(ship)
+	var out := []
+	var npc := 0
+	for e in ship.crew_plan:
+		var who: String = e["name"]
+		var is_player: bool = who == cfg["player"]["name"]
+		var is_ada: bool = who == cfg["ada"]["name"]
+		var nth := npc
+		if not is_player and not is_ada:
+			npc += 1
+		if _find(ship, func(m): return m.name == who) != null:
+			continue
+		var near := mid
+		var look: Dictionary = cfg["player"]["look"] if is_player else cfg["ada"]["look"]
+		if not is_player and not is_ada:
+			look = cfg["looks"][nth % cfg["looks"].size()]
+			if not beds.is_empty():
+				near = Pathfinder.centre_of(beds[nth % beds.size()])
+		var spot := _free_spot(grid, near, _anchors(ship))
+		if spot == Pathfinder.NO_CELL:
+			break
+		var m = _person(who, look, Pathfinder.centre_of(spot), str(e["species"]))
+		m.is_player = is_player
+		ship.crew.append(m)
+		out.append(m)
+	return out
+
+
+## The crew of a ship that is not the player's: the design's crew list when it has one, else
+## `enemy.count` people (data/crew.json), round the helm. Returns the new members (none when the
+## ship has no floor yet).
 static func spawn_enemy_crew(ship) -> Array:
 	var cfg: Dictionary = CrewMember.config()["enemy"]
 	var grid = ship.grid
@@ -718,12 +767,14 @@ static func spawn_enemy_crew(ship) -> Array:
 			near = Pathfinder.centre_of(ship.components.instances[uid]["cells"][0])
 			break
 	var out := []
-	for i in int(cfg["count"]):
+	var plan: Array = ship.crew_plan
+	for i in (plan.size() if not plan.is_empty() else int(cfg["count"])):
 		var spot := _free_spot(grid, near, _anchors(ship))
 		if spot == Pathfinder.NO_CELL:
 			break
+		var entry: Dictionary = plan[i] if not plan.is_empty() else {}
 		var names: Array = cfg["names"]
-		var m = _person(_next_name(ship, names), cfg["look"], Pathfinder.centre_of(spot))
+		var m = _person(str(entry.get("name", _next_name(ship, names))), cfg["look"], Pathfinder.centre_of(spot), str(entry.get("species", "human")))
 		ship.crew.append(m)
 		out.append(m)
 	return out
@@ -739,8 +790,8 @@ static func order_move(ship, m, anchor: Vector2i, door_passable: Callable = Call
 	return true
 
 
-static func _person(p_name: String, p_look: Dictionary, p_pos: Vector2):
-	var m = CrewMember.new(p_name, p_pos)
+static func _person(p_name: String, p_look: Dictionary, p_pos: Vector2, p_species := "human"):
+	var m = CrewMember.new(p_name, p_pos, p_species)
 	m.look = p_look.duplicate()
 	return m
 

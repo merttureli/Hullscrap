@@ -11,13 +11,17 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide)
 const MAX_SUBSTEP := 0.2  ## longest single move in cells, so a long frame cannot skip over a wall
 const CONFIG_PATH := "res://data/crew.json"
+const SPECIES_PATH := "res://data/species.json"
+const BASE_SPEED := 3.0  ## cells per second for a species with speed 1.0
 
 static var _config := {}  # data/crew.json, read on first use
+static var _species := {}  # data/species.json, read on first use
 
 var name := ""
-var species := "human"  ## species id (human, basalt, emberkin or fenn)
+var species := "human"  ## the species id (data/species.json): hp, speed, traits, art rig and sidearm
+var gear_traits: Array = []  ## traits worn gear gives (an EVA suit gives "suit"); nothing equips gear yet
 var pos := Vector2.ZERO
-var speed := 3.0  ## cells per second
+var speed := BASE_SPEED  ## cells per second
 var facing := Vector2.DOWN
 var path: Array[Vector2i] = []
 var hp := 100.0
@@ -28,11 +32,10 @@ var job := {}  ## what they are doing now (a Jobs board entry plus its "spot"); 
 var hold := 0.0  ## seconds left of a manual order, during which the job board leaves them alone
 
 
-func _init(p_name := "", p_pos := Vector2.ZERO) -> void:
+func _init(p_name := "", p_pos := Vector2.ZERO, p_species := "human") -> void:
 	name = p_name
 	pos = p_pos
-	max_hp = float(config().get("hp", 100))
-	hp = max_hp
+	set_species(p_species)
 
 
 ## data/crew.json as a Dictionary (read once; empty when the file is missing or unusable).
@@ -42,6 +45,63 @@ static func config() -> Dictionary:
 		if data is Dictionary:
 			_config = data
 	return _config
+
+
+## data/species.json as a Dictionary: {default, traits, species} (read once; empty when the file is missing or unusable).
+static func species_table() -> Dictionary:
+	if _species.is_empty() and FileAccess.file_exists(SPECIES_PATH):
+		var data = JSON.parse_string(FileAccess.get_file_as_string(SPECIES_PATH))
+		if data is Dictionary:
+			_species = data
+	return _species
+
+
+## The entry of species `id` in data/species.json; {} for an id it does not list.
+static func species_def(id: String) -> Dictionary:
+	var d = species_table().get("species", {}).get(id)
+	return d if d is Dictionary else {}
+
+
+## Become species `id`: max hp and walk speed come from its entry (the crew.json hp, and speed 1.0,
+## for an id data/species.json does not list), and hp is full.
+func set_species(id: String) -> void:
+	species = id
+	var def := species_def(id)
+	max_hp = float(def.get("hp", config().get("hp", 100)))
+	hp = max_hp
+	speed = BASE_SPEED * float(def.get("speed", 1.0))
+
+
+## Every trait this person has, without repeats: their species' (data/species.json), their own
+## (data/crew.json `traits`, by name) and the ones worn gear gives (`gear_traits`).
+func traits() -> Array:
+	var out := []
+	for list in [species_def(species).get("traits", []), config().get("traits", {}).get(name, []), gear_traits]:
+		for t in list:
+			if not out.has(t):
+				out.append(t)
+	return out
+
+
+## The factor on rule `stat` for this person: their species' `mult` entry times that of every trait
+## they have (data/species.json). 1.0 when nothing changes it. Stats: no_air_damage, fire_damage,
+## repair_time, heal_others.
+func mult(stat: String) -> float:
+	var m := float(species_def(species).get("mult", {}).get(stat, 1.0))
+	var defs: Dictionary = species_table().get("traits", {})
+	for t in traits():
+		m *= float(defs.get(t, {}).get("mult", {}).get(stat, 1.0))
+	return m
+
+
+## The art folder this person is drawn with (art/crew/<rig>/): their species' `rig`, else the species id.
+func rig() -> String:
+	return str(species_def(species).get("rig", species))
+
+
+## The hand weapon they carry (an id of data/hand_weapons.json), "" when their species has none.
+func sidearm() -> String:
+	return str(species_def(species).get("sidearm", ""))
 
 
 ## At 0 hp a crew member is down: they don't move and no job is given, until a medbay or a crewmate revives them.
