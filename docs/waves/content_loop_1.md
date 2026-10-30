@@ -50,6 +50,20 @@
 
 - **The window** runs from 10 pm Central (03:00 UTC, Oct 31) to about noon Central (17:00 UTC, Oct 31). At the end comes **Beta 2**: a green build, tagged, with a presentation for the owner.
 - **Models**: builders are **Sonnet**. **Opus** is used for the mechanics director and for any brief that needs design judgment or a hard, cross-cutting refactor (the region graph, the sector view integration).
+- **PRIORITY 0: the owner's playtest feedback on Beta 1** (2026-10-30: "combat is amazing"). These come **before everything else**:
+  1. **Ships are a little slow**: raise the flight numbers (thrust, acceleration, top speed) by about 50% in `data/flight.json`, so fights feel fast and nimble. Keep the turn rate in proportion, and re-run the AI fight and soak tests. Cruise ×3 outside combat stays planned for sector space.
+  2. **Build mode pauses the world**: entering build mode stops the simulation (crew, jobs, fires, oxygen, debris, heat, crafting), so you can't kill your crew by rebuilding walls. On leaving build mode, anyone standing inside a new wall or a sealed-off pocket is moved to the nearest reachable floor, and rooms and air are recomputed. The HUD says "PAUSED: build mode".
+  3. **A real UI for building**: replace the text HUD with panels.
+     - A **build palette** with category tabs (Structure, Shapes, Systems, Weapons, Engines, Utility, Cargo) and **icon cards** drawn from the real sprites. Each card shows the name, size, power, cost or "in cargo ×N", and the line colour.
+     - A **hover and selection card**: name, stats, blurb, quirk, recipe and placement rules.
+     - The **ghost** shows exactly what goes where: both mount halves, its footprint, valid in green, invalid in red with the reason.
+     - A top resource bar (scrap, copper, polymer, titanium, silicon, crystal, credits, fuel, power supply and demand, O2).
+     - A bottom mode bar (Build / Play / Map / Shields / Crafting) with keys.
+     - Pixel UI frames in the art style (an art agent draws the panel kit and icons).
+  4. **Start with very little, in bigger ships**: "interiors are very packed, there's very little creative space."
+     - Starters become **bigger hull frames** (about 1.6–2× the buildable area) with **only the essentials** built: a reactor, a helm, 1–2 engines, 1 weapon, O2, 2 beds, and a fabricator.
+     - Much of the frame is **empty space to build in**. The starting cargo carries materials (and a few parts) instead of everything being pre-installed.
+     - This applies to the 3 current starters now, and is a rule for every future starter (CONTENT 19): **essentials only, lots of room**.
 - **What Beta 2 must have** (in priority order):
   1. **The core loop, complete**:
      - regions (an 8-stage run with region choice);

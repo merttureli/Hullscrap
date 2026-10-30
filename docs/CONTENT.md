@@ -160,6 +160,7 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Size balances itself**: more space means more walls to enclose it, more material cost, more mass (slower, turns worse), more armour, more oxygen to fill and more crew to run it. No artificial size cap beyond the grid limit (128×128).
 - **Credits** are the trading currency (buying frames, gear and crew; selling salvage). Materials stay physical cargo. Each starter ship starts with some credits.
 - The ship grid is a fixed 128×128 workspace. The hull marks which cells you own.
+- **Start with very little (owner, 2026-10-30, Beta 1 feedback)**: starters are **big frames with only the essentials built** (reactor, helm, 1–2 engines, 1 weapon, O2, 2 beds, fabricator). Half or more of the frame is empty, to build in. The starting cargo carries materials and a few parts. Creativity is the point: the player builds the ship they want.
 - **Ship silhouettes (owner, 2026-10-30: "spaceships being rectangles is pretty goofy")**: no premade ship is a rectangle.
   - Every designed ship (starters, enemies, NPCs, stations) uses **slopes and curves** (4d) for a bow, stern and flanks with character.
   - It has a **non-rectangular footprint**: sponsons, wings, an engine block, a tapered nose, a raised bridge pod.
