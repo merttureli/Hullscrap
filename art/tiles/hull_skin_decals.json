@@ -1,0 +1,23 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "rects": {
+  "vent": [0, 0, 32, 16],
+  "antenna": [32, 0, 16, 16],
+  "hatch": [48, 0, 16, 16],
+  "light_on": [64, 0, 16, 16],
+  "light_off": [80, 0, 16, 16]
+ },
+ "tint": "multiply",
+ "anims": {
+  "lamp": [4, 2, 1]
+ },
+ "glow": {
+  "image": "hull_skin_decals_glow.png",
+  "frame": [96, 16],
+  "offset": [0, 0],
+  "blend": "add (preferred) or alpha-over",
+  "note": "same atlas size; lit pixels of light_on and the antenna tip glow (neutral white, tint it)"
+ },
+ "notes": "Greeble decals, rects are [x, y, w, h] in this image: vent (32x16, spans two cells), antenna stub, panel hatch, light_on / light_off (blink between them). Draw over a skin cell, centred. All art sits inside x,y = 3..12 of each 16px cell, so it never touches the 3px rim on any side. Sprinkle deterministically (position hash), a few per large run of skin."
+}

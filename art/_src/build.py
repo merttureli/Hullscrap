@@ -3,7 +3,7 @@ Stdlib only. Every hard-pixel PNG uses palette colours only; glow layers (and th
 import os, sys, zlib, struct
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from px_structure import *
-import tiles as T, fx as X, projectiles as P
+import tiles as T, fx as X, projectiles as P, shapes as SH
 
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ALPHA_OK = set()          # files allowed to carry partial alpha (glow layers, overlays)
@@ -78,6 +78,10 @@ def build():
     out_spr('tiles/cable_on', cab_on, {
         'frame': [16, 16], 'cells': [1, 1], 'autotile': 'mask4', 'mask': {'N': 1, 'E': 2, 'S': 4, 'W': 8}, 'frames': 16, 'notes': 'Powered cable, see cable.json.'})
     out_glow('tiles/cable_glow', [halo(f, 16, 16, 0, 0, bands=((1.1, 85), (2.3, 42), (3.6, 18)), src='g') for f in cab_on])
+
+    # ---------------------------------------------------------------- shaped walls, ram plating, exterior hull skin
+    SH.build_shapes(ART, out_spr)
+    ALPHA_OK.update(SH.GLOW_FILES)
 
     # ---------------------------------------------------------------- fx
     fire = X.fire_frames()
@@ -239,4 +243,4 @@ def check_masks():
 
 if __name__ == '__main__':
     build()
-    sys.exit(1 if (validate() or check_masks()) else 0)
+    sys.exit(1 if (validate() or check_masks() or SH.check_shapes()) else 0)

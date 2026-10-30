@@ -1,0 +1,28 @@
+{
+ "frame": [16, 16],
+ "cells": [1, 1],
+ "autotile": "mask4",
+ "mask": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "mask_means": "neighbour faces open space",
+ "frames": 16,
+ "rows": {
+  "cells": ["tri", "tri2_low", "tri2_high", "arc_tl", "arc_tr", "arc_bl", "arc_br"],
+  "count": 56,
+  "row": "row = orient * 7 + cell index (orient = mirror*4 + rot, see shapes.json); rows 0-6 are rotation 0, the set asked for in the brief"
+ },
+ "tint": "multiply",
+ "layout": "16 columns (mask) x 56 rows",
+ "shapes": "tiles/shapes.json",
+ "glow": {
+  "image": "hull_skin_shapes_glow.png",
+  "frame": [22, 22],
+  "offset": [-3, -3],
+  "layout": "same grid as this sheet"
+ },
+ "notes": "Skin for shaped cells (same sheet layout as walls_shapes.png). The cut edge (diagonal or arc) always faces space; mask bits say which FLAT edges also face space. Joint lines run on the top and left edges. Mask bit set = that side of the cell faces open SPACE (not \"solid neighbour\" as in walls.png): column = N*1 + E*2 + S*4 + W*8. The skin is drawn over a wall cell. It paints a rim (near-black outline, then a lit or shaded edge by facing) on every space-facing side and covers the cell up to 14px in from it, so the last 2px on the far side stay the wall's own interior outline; with no space-facing side (column 0) it is one whole panel. Cells on a thin spar that face space on two sides are covered fully."
+}
