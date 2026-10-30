@@ -5,6 +5,7 @@ extends RefCounted
 ## turns clockwise on screen.
 
 const Shapes = preload("res://scripts/ship/shapes.gd")
+const Mounts = preload("res://scripts/ship/mounts.gd")
 const CONFIG_PATH := "res://data/flight.json"
 const TILES_PATH := "res://data/tiles.json"  ## the one source of tile masses
 const VERSION := 1
@@ -22,6 +23,7 @@ var angular_damping := 1.5  ## per second
 var thrust_to_accel := 40.0  ## px/s^2 per thrust unit per mass unit
 var turn_factor := 0.6  ## rad/s^2 per thrust unit per mass unit
 var max_speed := 600.0  ## px/s
+var steer := "mouse"  ## data/flight.json controls.steer: "mouse" (the ship turns toward the cursor, A/D strafe) or "keys" (A/D turn)
 
 var pos := Vector2.ZERO
 var vel := Vector2.ZERO
@@ -67,6 +69,8 @@ func load_config(path: String) -> bool:
 			if _is_num(data["component_mass"][id]):
 				masses[str(id)] = maxf(0.0, float(data["component_mass"][id]))
 		component_mass = masses
+	if data.get("controls") is Dictionary and str(data["controls"].get("steer", "")) in ["mouse", "keys"]:
+		steer = str(data["controls"]["steer"])
 	for k in ["component_mass_per_cell", "cable_mass_per_cell", "linear_damping", "angular_damping", "thrust_to_accel", "turn_factor", "max_speed"]:
 		if _is_num(data.get(k)):
 			set(k, maxf(0.0, float(data[k])))
@@ -123,9 +127,10 @@ func mass_props(grid, components, cables, mass_mult := {}) -> Dictionary:
 	for uid in uids:
 		var inst: Dictionary = components.instances[uid]
 		var k := float(mass_mult.get(inst["id"], 1.0))
-		var whole: float = float(component_mass[inst["id"]]) if component_mass.has(inst["id"]) else float(inst["cells"].size()) * component_mass_per_cell
-		var mi: float = whole * k / float(maxi(inst["cells"].size(), 1))
-		for c in inst["cells"]:
+		var spread: Array = inst["cells"] + inst["out_cells"]  # both halves of a mount weigh
+		var whole: float = float(component_mass[inst["id"]]) if component_mass.has(inst["id"]) else float(spread.size()) * component_mass_per_cell
+		var mi: float = whole * k / float(maxi(spread.size(), 1))
+		for c in spread:
 			var at := Vector2(c) + Vector2(0.5, 0.5)
 			m += mi
 			sum += mi * at
@@ -162,17 +167,59 @@ func thrust_of(components, powered: Dictionary, boost := {}) -> float:
 	return total
 
 
-## Advance `dt` seconds. `input`: {"throttle": -1..1, "turn": -1..1}; negative throttle is reverse
-## at half power, positive turn is clockwise. Both thrust and turning scale with `thrust` / `mass`.
-func step(dt: float, input: Dictionary, mass: float, thrust: float) -> void:
+## The thrust of the powered engines by direction (docs/CONTENT.md 4f): an engine pushes opposite its
+## nozzle (the mount's outward direction), so {fwd: the sum of thrust x cos(angle between its push and
+## the ship's forward) (at least 0), left and right: thrust x the sideways part of its push, summed
+## over the engines that push that way}. Rear engines (rotation 2) give full forward thrust and no
+## sideways, engines on a side wall give none forward and all sideways. `boost` as in thrust_of.
+func thrusts_of(components, powered: Dictionary, boost := {}) -> Dictionary:
+	var fwd := 0.0
+	var left := 0.0
+	var right := 0.0
+	for uid in _sorted(components.instances.keys()):
+		if not powered.get(uid, false):
+			continue
+		var d: Dictionary = components.def(components.instances[uid]["id"])
+		if d.get("family", "") != "engine":
+			continue
+		var t := float(d.get("stats", {}).get("thrust", 0.0)) * maxf(0.0, float(boost.get(uid, 1.0)))
+		var push := -Vector2(Mounts.outward(int(components.instances[uid]["rot"])))
+		fwd += t * push.dot(Vector2.UP)
+		if push.x > 0.0:
+			right += t * push.x
+		elif push.x < 0.0:
+			left -= t * push.x
+	return {"fwd": maxf(fwd, 0.0), "left": left, "right": right}
+
+
+## The helm turn (-1..1) that swings the heading toward `target` (an `angle`, radians) and stops it
+## there: it asks for the fastest turn it can still brake from. Mouse steering and the pilot AI use it.
+func steer_toward(target: float, mass: float, thrust: float) -> float:
+	var err := wrapf(target - angle, -PI, PI)
+	var alpha := thrust * turn_factor / maxf(mass, MIN_MASS)  # rad/s^2 at full turn
+	if alpha <= 1e-4:
+		return 0.0
+	var w_cap := alpha / maxf(angular_damping, 0.1) * 0.8
+	var w_des := signf(err) * minf(sqrt(2.0 * alpha * 0.5 * absf(err)), w_cap)
+	return clampf((w_des - ang_vel) / (alpha * 0.12), -1.0, 1.0)
+
+
+## Advance `dt` seconds. `input`: {"throttle": -1..1, "turn": -1..1, "strafe": -1..1}; negative
+## throttle is reverse at half power, positive turn is clockwise, positive strafe slides to the
+## ship's right. Turning scales with `thrust` / `mass`; thrust forward with `thrusts.fwd` (by default
+## all of `thrust`) and strafing with `thrusts.right` or `.left` (by default none), see thrusts_of.
+func step(dt: float, input: Dictionary, mass: float, thrust: float, thrusts := {}) -> void:
 	if dt <= 0.0:
 		return
 	var throttle := clampf(float(input.get("throttle", 0.0)), -1.0, 1.0)
 	var turn := clampf(float(input.get("turn", 0.0)), -1.0, 1.0)
+	var strafe := clampf(float(input.get("strafe", 0.0)), -1.0, 1.0)
 	if throttle < 0.0:
 		throttle *= REVERSE
 	mass = maxf(mass, MIN_MASS)
-	vel += Vector2.UP.rotated(angle) * (throttle * thrust * thrust_to_accel / mass * dt)
+	vel += Vector2.UP.rotated(angle) * (throttle * float(thrusts.get("fwd", thrust)) * thrust_to_accel / mass * dt)
+	var side := float(thrusts.get("right", 0.0)) if strafe > 0.0 else float(thrusts.get("left", 0.0))
+	vel += Vector2.RIGHT.rotated(angle) * (strafe * side * thrust_to_accel / mass * dt)
 	ang_vel += turn * thrust * turn_factor / mass * dt
 	vel = (vel * exp(-linear_damping * dt)).limit_length(max_speed)
 	ang_vel *= exp(-angular_damping * dt)

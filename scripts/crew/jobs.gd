@@ -5,8 +5,10 @@ extends RefCounted
 ## The job board is rebuilt from the ship's state every `period` seconds (and at once after a job
 ## is finished): `extinguish` a burning cell (100), `revive` a downed crew member (95),
 ## `repair_breach` a shot-open wall (90), `repair_component` a malfunctioning or disabled part (80,
-## +10 for a weapon, engine or shield in a fight), `man_station` (50: the helm, and weapons, shields
-## and engines flagged manned). A job has `slots` places (two crew stack on a fire) and a place to
+## +10 for a weapon, engine or shield in a fight; also a hull mount whose outside half is damaged and
+## whose link is intact, from its inside half), `man_station` (50: the helm, and weapons, shields
+## and engines flagged manned), `clear_wreck` (30: the debris of a part that was shot to pieces, which
+## gives back half its recipe). A job has `slots` places (two crew stack on a fire) and a place to
 ## stand next to it. Numbers are in data/crew.json.
 ## Each hand-out, an idle crew member takes the highest-priority job with a free place, preferring
 ## jobs nobody works on, then the nearest by walking distance (only the nearest few get a path
@@ -131,10 +133,12 @@ func build_board(ship) -> void:
 		var inst: Dictionary = ship.components.instances[uid]
 		var def: Dictionary = ship.components.def(inst["id"])
 		var family := str(def.get("family", ""))
-		if inst["status"] in FAULTY:
+		if inst["status"] in FAULTY or ship.outside_hurt(uid):
 			_add(b, _fix_job(ship, uid))
 		if family == "helm" or (bool(def.get("manned", false)) and family in j["man_station"]["families"]):
 			_add(b, _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)}))
+	for w in ship.components.wrecks:
+		_add(b, _job("clear_wreck", "wreck:%d,%d" % [w["cells"][0].x, w["cells"][0].y], w["cells"], {"id": w["id"], "name": ship.components.def(w["id"]).get("name", w["id"])}))
 	for key in orders.keys():
 		var uid := int(orders[key]["uid"])
 		if not ship.components.instances.has(uid) or _fine(ship, uid):
@@ -394,6 +398,13 @@ func _finish(ship, job: Dictionary) -> void:
 	board.erase(key)
 	_since = 1.0e9
 	match job["type"]:
+		"clear_wreck":
+			var w: Dictionary = ship.components.clear_wreck(ship.components.wreck_at(job["cells"][0]))
+			if not w.is_empty():
+				var refund: Dictionary = ship.wreck_refund(w["id"])
+				for m in refund:
+					ship.inventory.add(m, refund[m])
+				ship.log_event("Cleared the wreck of %s%s" % [job["name"], " (+%s)" % ", ".join(refund.keys().map(func(m): return "%d %s" % [refund[m], m])) if not refund.is_empty() else ""])
 		"repair_breach":
 			if ship.grid.repair(job["cell"]):
 				ship.mark_dirty()
@@ -593,7 +604,7 @@ func _fix_job(ship, uid: int) -> Dictionary:
 ## Works and not damaged: nothing to repair.
 func _fine(ship, uid: int) -> bool:
 	var inst: Dictionary = ship.components.instances[uid]
-	return inst["status"] == "ok" and float(inst["hp"]) >= float(ship.effective(inst["id"])["hp"])
+	return inst["status"] == "ok" and float(inst["hp"]) >= float(ship.effective(inst["id"])["hp"]) and not ship.outside_hurt(uid)
 
 
 static func _add(board_: Dictionary, job: Dictionary) -> void:

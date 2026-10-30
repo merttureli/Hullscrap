@@ -31,14 +31,15 @@ class Combatant extends RefCounted:
 	var hull_max := HULL_BASE
 	var hull := HULL_BASE
 	var wrecked := false  ## hull at 0: no firing, no shields, no thrust; stays in the arena
-	var mounts := {}  ## uid -> {id, pos (cell coordinates), virtual, powered (virtual only)}
+	var mounts := {}  ## uid -> {id, pos (barrel pivot, cell coordinates), dir (outward, ship-local), reach, aim (live barrel direction), virtual, powered (virtual only)}
 	var cooldowns := {}  ## uid -> arena tick when the mount may fire again
 	var powered := {}  ## uid -> bool, the power solve with disabled parts left out
 	var mass := 1.0
 	var com := Vector2.ZERO  ## centre of mass, in grid cell coordinates
 	var inertia := 1.0  ## moment of inertia about it (mass x px^2), for collisions
 	var hit_cache := {}  ## collisions.gd's outer cells of this ship; {} = rebuild
-	var thrust := 0.0
+	var thrust := 0.0  ## total thrust of the powered engines (it turns the ship)
+	var thrusts := {"fwd": 0.0, "left": 0.0, "right": 0.0}  ## thrust along the ship's forward, to its left and to its right (Flight.thrusts_of)
 	var layers := 0  ## shield layers up now
 	var layers_cap := 0
 	var shield_timers: Array[float] = []  ## seconds until each used layer is back
@@ -52,7 +53,7 @@ class Combatant extends RefCounted:
 	var overcharge_cd: float:  ## seconds until a shield ability is ready again (0 when one is ready or running)
 		get:
 			return Abilities.key_cooldown_left(ship, "shield")
-	var input := {"throttle": 0.0, "turn": 0.0}
+	var input := {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
 	var dirty := true  ## parts or tiles changed: power, mass and shield cap need recomputing
 	var next_virtual := -1
 
@@ -61,7 +62,9 @@ var rng := RandomNumberGenerator.new()
 var weapons := Weapons.new()
 var projectiles: Array = []
 var beams: Array = []
-var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed), breach, disable, ignite (a hit started a fire), wreck
+var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed), breach, disable (uid; half "out": the outside half of a mount), wreck_part (uid, id: a disabled part was hit again and is gone, debris on its cells), ignite (a hit started a fire), wreck
+var autofire := {}  ## ship index -> false when its turrets hold fire (the T key); a ship not listed autofires
+var aim_points := {}  ## ship index -> the world point its fixed guns' barrels follow (the player's cursor), set by the caller
 var power_bonus := {}  ## ship index -> power the neon lattice has made of absorbed energy (counted, not used yet)
 var collision := Collisions.load_config()  ## data/collision.json: restitution, min_speed, damage_k, crew_knock, separation_slop...
 var contact_tick := {}  ## ship index -> the last tick it touched another ship
@@ -112,19 +115,22 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 
 
 ## Give ship `idx` a weapon by id without a placed component (the test_* weapons, or any entry of
-## weapons.json). `cell_pos` is where it sits, in grid cell coordinates. Returns its mount uid
-## (negative, so it never clashes with a component uid).
-func add_mount(idx: int, weapon_id: String, cell_pos: Vector2, powered := true) -> int:
+## weapons.json). `cell_pos` is where it sits (and turns), in grid cell coordinates; `dir` the ship-local
+## direction it points (outward): by default from the ship's centre through `cell_pos`. Its muzzle is
+## at `cell_pos`. Returns its mount uid (negative, so it never clashes with a component uid).
+func add_mount(idx: int, weapon_id: String, cell_pos: Vector2, powered := true, dir := Vector2.ZERO) -> int:
 	var co = ships[idx]
 	var uid: int = co.next_virtual
 	co.next_virtual -= 1
-	co.mounts[uid] = {"id": weapon_id, "pos": cell_pos, "virtual": true, "powered": powered}
+	if dir == Vector2.ZERO:
+		dir = (cell_pos - co.pivot).normalized() if cell_pos.distance_squared_to(co.pivot) > 1e-6 else Vector2.UP
+	co.mounts[uid] = {"id": weapon_id, "pos": cell_pos, "dir": dir.normalized(), "reach": 0.0, "aim": dir.normalized(), "virtual": true, "powered": powered}
 	return uid
 
 
-## Set the helm input of ship `idx`: throttle and turn, each -1..1.
-func set_input(idx: int, throttle: float, turn: float) -> void:
-	ships[idx].input = {"throttle": throttle, "turn": turn}
+## Set the helm input of ship `idx`: throttle, turn and strafe (right is positive), each -1..1.
+func set_input(idx: int, throttle: float, turn: float, strafe := 0.0) -> void:
+	ships[idx].input = {"throttle": throttle, "turn": turn, "strafe": strafe}
 
 
 ## Fire mount `uid` of ship `idx` at the world point `aim`. False when it cannot (see Weapons.can_fire).
@@ -162,9 +168,13 @@ func _substep() -> void:
 		sync(i)
 		var co = ships[i]
 		var fly: bool = not co.wrecked and co.flight.can_fly(co.ship.components, co.powered) == ""
-		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust)
+		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust, co.thrusts)
 		Shields.tick(co, SUBSTEP)
+		if aim_points.has(i) and not co.wrecked:  # fixed guns follow the cursor
+			for uid in co.mounts:
+				weapons.point_barrel(self, i, uid, aim_points[i])
 	Collisions.step(self, SUBSTEP)
+	weapons.tick_turrets(self)
 	weapons.tick_beams(self)
 	Projectiles.step(self, SUBSTEP)
 
@@ -193,6 +203,7 @@ func _recompute(co) -> void:
 	co.inertia = props["inertia"]
 	co.hit_cache = {}
 	co.thrust = co.flight.thrust_of(view, co.powered, Abilities.thrust_boost(co.ship))
+	co.thrusts = co.flight.thrusts_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	Shields.resync(co)
 	co.ability_rev = Abilities.rev(co.ship)
 	co.dirty = false
@@ -292,7 +303,7 @@ func snapshot() -> Dictionary:
 		var parts := {}
 		for uid in co.ship.components.instances:
 			var inst: Dictionary = co.ship.components.instances[uid]
-			parts[str(uid)] = [inst.get("hp", -1), inst.get("status", "")]
+			parts[str(uid)] = [inst.get("hp", -1), inst.get("status", ""), inst.get("out_hp", 0)]
 		list.append({"pos": [co.flight.pos.x, co.flight.pos.y], "vel": [co.flight.vel.x, co.flight.vel.y], "angle": co.flight.angle, "ang_vel": co.flight.ang_vel,
 			"hull": co.hull, "wrecked": co.wrecked, "layers": co.layers, "ion_lock": co.ion_lock,
 			"grid": co.ship.grid.to_dict(), "parts": parts})

@@ -5,7 +5,10 @@ extends RefCounted
 ## straight on). Order on each wall or door: deflect roll, kinetic ricochet roll, then damage times
 ## the material's resist (and, for kinetic and explosive, clamp(cos theta, 0.5, 1): sloped armour),
 ## applied to the cell's hp (a part's hp for a component). A wall or door at 0 hp is breached (the
-## cell becomes empty); a component at 0 hp is disabled. Hull integrity drops by the damage dealt to
+## cell becomes empty); a component at 0 hp is disabled, and a direct hit on one that is already at
+## 0 wrecks it: it is gone, with debris on its cells (ion and fire never do; see wreck_part). The
+## outside half of a hull mount (docs/CONTENT.md 4f) has its own hp, is only ever disabled, and a
+## disabled one lets shots through to the cells behind it. Hull integrity drops by the damage dealt to
 ## walls and doors. A deflect or ricochet reflects the shot about the normal at half damage (see
 ## projectiles.gd for the bounces that follow). Works on arena combatants (arena.gd); every roll
 ## comes from the arena's seeded rng.
@@ -24,8 +27,10 @@ const DEFAULT_COMPONENT_HP := 4.0  ## for a part whose instance and definition g
 
 
 ## What stops a shot on `cell` of combatant `co`: {} where it passes (empty, floor, an open door), else
-## {"kind": "wall" | "door" | "component", "def": tile def, "uid": component uid}.
-static func solid_at(co, cell: Vector2i) -> Dictionary:
+## {"kind": "wall" | "door" | "component", "def": tile def, "uid": component uid, "half": "out" for the
+## outside half of a hull mount}. A disabled outside half lets shots through, but `hitbox` (ships
+## touching: the shape of the hull) still counts it.
+static func solid_at(co, cell: Vector2i, hitbox := false) -> Dictionary:
 	var grid = co.ship.grid
 	var id: String = grid.get_tile(cell)
 	if id != "" and grid.defs != null:
@@ -37,7 +42,15 @@ static func solid_at(co, cell: Vector2i) -> Dictionary:
 	var uid: int = co.ship.components.at(cell)
 	if uid >= 0:
 		return {"kind": "component", "uid": uid}
+	uid = co.ship.components.at_out(cell)
+	if uid >= 0 and (hitbox or co.ship.components.outside_alive(uid)):
+		return {"kind": "component", "uid": uid, "half": "out"}
 	return {}
+
+
+## The key of the part `obj` (a solid_at result) hit: its uid, plus "o" for the outside half of a mount.
+static func part_key(obj: Dictionary) -> String:
+	return "%d%s" % [obj["uid"], "o" if obj.get("half", "") == "out" else ""]
 
 
 ## Chance that a kinetic shot hitting a face at `theta_deg` off its normal glances off: 0 below 40
@@ -71,7 +84,7 @@ static func march(arena, idx: int, w: Dictionary, a: Vector2, b: Vector2, entrie
 	var dmg := float(w["damage"])
 	var pierce := int(w["pierce"])
 	var type: String = w["damage_type"]
-	var seen := {}  # component uids already hit by this shot
+	var seen := {}  # parts (part_key) already hit by this shot
 	var dir := (b - a).normalized()
 	var wdir: Vector2 = dir.rotated(co.flight.angle)  # the shot's direction in the world, for the effects
 	var first := true
@@ -89,9 +102,9 @@ static func march(arena, idx: int, w: Dictionary, a: Vector2, b: Vector2, entrie
 		var cos_t := clampf(-dir.dot(n), 0.0, 1.0) if n != Vector2.ZERO else 1.0
 		var factor := 1.0
 		if obj["kind"] == "component":
-			if seen.has(obj["uid"]):
+			if seen.has(part_key(obj)):
 				continue
-			seen[obj["uid"]] = true
+			seen[part_key(obj)] = true
 		else:
 			var chance := float(obj["def"].get("deflect", {}).get(type, 0.0)) * (1.0 + 0.5 * sqrt(1.0 - cos_t * cos_t))
 			if chance > 0.0 and arena.rng.randf() < chance:
@@ -109,7 +122,7 @@ static func march(arena, idx: int, w: Dictionary, a: Vector2, b: Vector2, entrie
 				arena.log_event("ignite", idx, cell)
 			var radius := float(w.get("splash", 0.0))
 			if radius > 0.0:
-				splash(arena, idx, cell, dmg * SPLASH_FRACTION, radius, type, obj.get("uid", -1))
+				splash(arena, idx, cell, dmg * SPLASH_FRACTION, radius, type, part_key(obj) if obj["kind"] == "component" else "")
 		if res["left"] <= 0.0 or pierce <= 0:
 			return {}
 		pierce -= 1
@@ -136,26 +149,42 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 	var comps = co.ship.components
 	var grid = co.ship.grid
 	var is_part: bool = obj["kind"] == "component"
+	if is_part and not comps.instances.has(obj["uid"]):  # wrecked a moment ago by the same blast
+		return {"dealt": 0.0, "left": dmg}
+	var outside: bool = is_part and obj.get("half", "") == "out"
 	var resist := 1.0
 	var cur: float
 	var inst: Dictionary
 	if is_part:
 		inst = comps.instances[obj["uid"]]
-		cur = float(inst.get("hp", comps.def(inst["id"]).get("hp", DEFAULT_COMPONENT_HP)))
+		cur = float(inst["out_hp"]) if outside else float(inst.get("hp", comps.def(inst["id"]).get("hp", DEFAULT_COMPONENT_HP)))
 	else:
 		resist = float(obj["def"].get("resist", {}).get(type, 1.0))
 		cur = grid.hp_of(cell)
 	var eff := 0.0 if type == "ion" else dmg * resist  # ion does no structural damage
 	var dealt := minf(eff, cur)
 	var left := dmg - cur / resist if eff > cur and resist > 0.0 else 0.0
+	var was := cur
 	cur -= dealt
 	var hit := {"dealt": dealt, "kind": obj["kind"], "dtype": type}
 	hit.merge(info)  # dir and n of the shot, for the effects
+	if outside:
+		hit["half"] = "out"
 	arena.log_event("hit", idx, cell, hit)
 	if is_part:
+		if outside:  # built to take it: disabled at 0, never destroyed
+			inst["out_hp"] = cur
+			if cur <= 0.0 and was > 0.0:
+				co.dirty = true
+				arena.log_event("disable", idx, cell, {"uid": obj["uid"], "half": "out"})
+			return {"dealt": dealt, "left": left}
 		inst["hp"] = cur
+		if was <= 0.0 and eff > 0.0 and int(inst.get("zero_tick", -1)) < arena.tick:  # disabled already, and hit again: gone
+			wreck_part(arena, idx, obj["uid"])
+			return {"dealt": dealt, "left": left}
 		if cur <= 0.0 and inst.get("status", "") != "disabled":
 			inst["status"] = "disabled"
+			inst["zero_tick"] = arena.tick  # a hit in this same tick does not wreck it
 			co.dirty = true
 			arena.log_event("disable", idx, cell, {"uid": obj["uid"]})
 		return {"dealt": dealt, "left": left}
@@ -181,28 +210,49 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 	return {"dealt": dealt, "left": left}
 
 
+## Part `uid` of ship `idx` is wrecked (a direct hit on one that was already disabled): it is removed,
+## the outside half of a mount with it, and its inside cells get a wreck decal until a crew member
+## clears them (the `clear_wreck` job gives back half its recipe). Logs a "wreck_part" event.
+static func wreck_part(arena, idx: int, uid: int) -> void:
+	var co = arena.ships[idx]
+	var ship = co.ship
+	var inst: Dictionary = ship.components.instances[uid]
+	var id: String = inst["id"]
+	var at: Vector2i = inst["cells"][0]
+	ship.components.wreck(uid)
+	co.mounts.erase(uid)
+	co.cooldowns.erase(uid)
+	ship.manned.erase(uid)
+	co.dirty = true
+	ship.mark_dirty()
+	ship.log_event("%s wrecked" % ship.components.def(id).get("name", id))
+	arena.log_event("wreck_part", idx, at, {"uid": uid, "id": id})
+
+
 ## An explosion at `impact`: every solid cell within `radius` cells takes `amount` of `type`
 ## (resist applies; deflect and ricochet do not), or SPACED_FRACTION of it when an empty or floor
-## cell lies between it and the impact. A part takes it once. `skip_uid`: the part hit directly.
-static func splash(arena, idx: int, impact: Vector2i, amount: float, radius: float, type: String, skip_uid := -1) -> void:
+## cell lies between it and the impact. A part takes it once (each half of a mount is a part).
+## `skip`: the part_key of the part hit directly.
+static func splash(arena, idx: int, impact: Vector2i, amount: float, radius: float, type: String, skip := "") -> void:
 	var co = arena.ships[idx]
 	var r := ceili(radius)
 	var hits: Array = []  # [cell, obj, amount]
-	var part_hit := {}  # part uid -> index in hits
+	var part_hit := {}  # part_key -> index in hits
 	for dy in range(-r, r + 1):
 		for dx in range(-r, r + 1):
 			if (dx == 0 and dy == 0) or dx * dx + dy * dy > radius * radius + 1e-9:
 				continue
 			var c := impact + Vector2i(dx, dy)
 			var obj := solid_at(co, c)
-			if obj.is_empty() or (obj["kind"] == "component" and obj["uid"] == skip_uid):
+			if obj.is_empty() or (obj["kind"] == "component" and part_key(obj) == skip):
 				continue
 			var a := amount * (SPACED_FRACTION if _spaced(co, impact, c) else 1.0)
 			if obj["kind"] == "component":
-				if part_hit.has(obj["uid"]):
-					hits[part_hit[obj["uid"]]][2] = maxf(hits[part_hit[obj["uid"]]][2], a)
+				var key := part_key(obj)
+				if part_hit.has(key):
+					hits[part_hit[key]][2] = maxf(hits[part_hit[key]][2], a)
 					continue
-				part_hit[obj["uid"]] = hits.size()
+				part_hit[key] = hits.size()
 			hits.append([c, obj, a])
 	for h in hits:
 		apply(arena, idx, h[0], h[1], h[2], type)

@@ -58,15 +58,16 @@ static func step(arena, dt: float) -> void:
 static func hit_cells(arena, idx: int) -> Dictionary:
 	var co = arena.ships[idx]
 	var g = co.ship.grid
-	var sig := [g.tiles.size(), g.shapes.size(), g.door_open.size(), g.breached.size(), co.ship.components.instances.size()]
+	var sig := [g.tiles.size(), g.shapes.size(), g.door_open.size(), g.breached.size(), co.ship.components.instances.size(), co.ship.components.wrecks.size()]
 	if co.hit_cache.get("sig") == sig:
 		return co.hit_cache
 	var solid := {}
 	var all: Array = g.tiles.keys()
 	for uid in co.ship.components.instances:
 		all.append_array(co.ship.components.instances[uid]["cells"])
+		all.append_array(co.ship.components.instances[uid]["out_cells"])  # the outside half of a mount sticks out: rams hit guns first
 	for c in all:
-		if not Damage.solid_at(co, c).is_empty():
+		if not Damage.solid_at(co, c, true).is_empty():  # a disabled outside half is still there
 			solid[c] = true
 	var cells: Array = []
 	for c in solid:
