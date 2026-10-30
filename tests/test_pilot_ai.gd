@@ -108,7 +108,10 @@ func test_the_ai_closes_to_its_preferred_range_and_shoots() -> void:
 	check(_count(a, "shot", 0) >= 8, "it fires: %d shots" % _count(a, "shot", 0))
 	check(_count(a, "hit", 1) + _count(a, "shield", 1) > 0, "and hits")
 	check(a.ships[1].hull < a.ships[1].hull_max, "the foe's hull is hurt")
-	near(a.ships[0].hull, a.ships[0].hull_max, "(the sitting foe did nothing)", 1e-6)
+	eq(_count(a, "shot", 1), 0, "(the sitting foe fired nothing)")
+	for e in a.events:  # the strafing pirate's wide hull may clip the foe's: that is the only way it can be hurt
+		if e["type"] == "hit" and e["ship"] == 0:
+			check(e.get("ram", false), "(and the only damage it took was from a collision)")
 	var arcs := 0
 	for uid in a.ships[0].mounts:
 		arcs += int(a.weapons.in_arc(a, 0, a.ships[0].mounts[uid], a.ships[1].flight.pos))
