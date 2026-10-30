@@ -1,0 +1,37 @@
+{
+ "frame": [
+  8,
+  8
+ ],
+ "anims": {
+  "v0": [
+   0,
+   1,
+   0
+  ],
+  "v1": [
+   1,
+   1,
+   0
+  ],
+  "v2": [
+   2,
+   1,
+   0
+  ],
+  "v3": [
+   3,
+   1,
+   0
+  ]
+ },
+ "variants": 4,
+ "anchors": {
+  "center": [
+   4,
+   4
+  ]
+ },
+ "material": "any",
+ "notes": "Fragments: the small chunk breaking a piece leaves behind, 4 variants in neutral greys (chunk, sliver, wedge, nugget). Multiply a material tint over them (copper, ice, scrap...); pick a variant per chunk, turn freely."
+}

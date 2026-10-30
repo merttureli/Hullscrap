@@ -1,0 +1,28 @@
+{
+ "frame": [
+  24,
+  24
+ ],
+ "anims": {
+  "tumble": [
+   0,
+   4,
+   3
+  ]
+ },
+ "anchors": {
+  "center": [
+   12,
+   12
+  ]
+ },
+ "tumble_deg": [
+  0,
+  90,
+  180,
+  270
+ ],
+ "loop": "wrap",
+ "material": "scrap",
+ "notes": "Scrap chunk M: a plate wrapped round a bent girder, a scrap of hazard tape, rust and bolts. Drops scrap 3-5. Frames are the piece turned [0, 90, 180, 270] degrees, lit from the top-left each time; loop them wrap (`wrap` = 1,2,3,4,1... ; `pingpong` = 1,2,3,4,3,2,...), the game may also rotate the node. "
+}

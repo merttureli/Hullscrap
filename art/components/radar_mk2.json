@@ -1,0 +1,60 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "damaged": [
+   9,
+   2,
+   4
+  ],
+  "disabled": [
+   11,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "radar_mk2_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Radar Mk2 (standard, 4x2): a wide console: a big round scope with range rings, a bar-graph readout and a keypad. on: the sweep line turns one step per frame (8 frames); damaged / disabled as Mk1. Range 10,000 px and it identifies the type.",
+ "offset": [
+  0,
+  -4
+ ]
+}

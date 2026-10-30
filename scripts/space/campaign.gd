@@ -55,6 +55,8 @@ var logs_found := {}  ## derelict log ids found: id -> true
 var reminded := -1  ## the payment cycle (jumps / every) Ma's reminder was shown in
 var hull_loss := 0  ## hull integrity points lost; repaired at stations
 var fuel_part := 0  ## parts (hundredths) of a fuel the jumps have used up and not yet paid; 0..FUEL_PARTS-1, spent as whole fuel when they reach FUEL_PARTS
+var events_seen := 0  ## events met at nodes, waits and wrecks (the game over screen counts them)
+var fights_won := 0  ## fights of the run that were won
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
 var _hull_key := -1
 var _hull_max := 0
@@ -221,9 +223,16 @@ func hull_max(ship) -> int:
 	return _hull_max
 
 
-## The integrity `ship` has left.
+## The integrity `ship` has left (at least 1: a damaged hull has a lower maximum than the one the loss was
+## counted against, and the number must never show as zero or less).
 func hull_left(ship) -> int:
-	return hull_max(ship) - hull_loss
+	return maxi(hull_max(ship) - hull_loss, 1)
+
+
+## The hull a fight starts with: the arena's maximum less what the campaign has lost (never below 1), so the
+## damage of one fight, of an event or of a drift jump is still there in the next fight until it is repaired.
+func fight_hull(arena_hull_max: float) -> float:
+	return maxf(1.0, arena_hull_max - float(hull_loss))
 
 
 ## Change the hull integrity by `n` (negative = damage). It never drops below 1 or rises above the
@@ -334,7 +343,9 @@ func wait(ship) -> Dictionary:
 	if ship.inventory.count("fuel") > 0:
 		return {"ok": false, "why": "you still have fuel", "notes": [], "event": {}}
 	var notes := _advance(1)
-	return {"ok": true, "why": "", "notes": notes, "event": events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)}
+	var ev := events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)
+	events_seen += int(not ev.is_empty())
+	return {"ok": true, "why": "", "notes": notes, "event": ev}
 
 
 ## What happens on reaching the current node. Returns {node, refused, event}: `refused` is the text of a
@@ -358,11 +369,14 @@ func arrive(ship) -> Dictionary:
 		var due := _debt_event(ship)
 		if not due.is_empty():
 			out["event"] = due
+			events_seen += 1
 			return out
 	if n["type"] == "patrol" and refuses("concord"):
 		out["event"] = HOSTILE_PATROL
+		events_seen += 1
 		return out
 	out["event"] = events.pick(self, n, ship)
+	events_seen += int(not out["event"].is_empty())
 	return out
 
 
@@ -482,6 +496,7 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 	if state != "won":
 		out["text"] = "You break away. The fight is not finished, but you are."
 		return out
+	fights_won += 1
 	out["text"] = "The wreck tumbles away, still venting."
 	out["lines"] = loot(res.get("enemy"), ship)
 	if not after_win.is_empty():
@@ -517,7 +532,9 @@ func loot(enemy, ship) -> Array:
 
 ## The salvage event that follows a won fight (a wreck_field one), or {}.
 func salvage_event(ship) -> Dictionary:
-	return events.pick(self, {"id": current, "type": "wreck_field", "place": ""}, ship)
+	var ev := events.pick(self, {"id": current, "type": "wreck_field", "place": ""}, ship)
+	events_seen += int(not ev.is_empty())
+	return ev
 
 
 # --- crew --------------------------------------------------------------------------------------------------------
@@ -728,7 +745,7 @@ func to_dict() -> Dictionary:
 	return {"version": VERSION, "seed": seed_value, "rng_state": str(rng.state), "map": drift.to_dict(), "current": current,
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
 		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
-		"fuel_part": fuel_part, "offers": offers.duplicate(true)}
+		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won}
 
 
 ## Replace the state with a saved one. Returns "" on success, else why not (and nothing changes).
@@ -764,6 +781,8 @@ func load_dict(d: Dictionary) -> String:
 	jumps = int(d["jumps"])
 	hull_loss = int(d["hull_loss"])
 	fuel_part = clampi(int(d.get("fuel_part", 0)), 0, FUEL_PARTS - 1)  # a version 1 save has none
+	events_seen = int(d.get("events_seen", 0))  # saves from before the game over screen have none
+	fights_won = int(d.get("fights_won", 0))
 	offers = d["offers"].duplicate(true)
 	_hull_key = -1
 	return ""

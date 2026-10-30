@@ -1,0 +1,96 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   15
+  ]
+ },
+ "notes": "OUTSIDE half of the Listening Horn (scrap, 2x2): a welded drum stand with hazard tape and guy bolts; the riveted horn (listening_horn_scrap_barrel) turns on top.",
+ "barrel": {
+  "image": "listening_horn_scrap_barrel.png",
+  "frame": [
+   25,
+   26
+  ],
+  "pivot_on_base": [
+   16,
+   15
+  ],
+  "pivot_on_barrel": [
+   12,
+   19
+  ],
+  "anims": {
+   "idle": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ],
+   "disabled": [
+    4,
+    1,
+    0
+   ]
+  },
+  "aim": "spin",
+  "spin": true,
+  "glow": {
+   "image": "listening_horn_scrap_barrel_glow.png",
+   "frame": [
+    41,
+    42
+   ],
+   "offset": [
+    -8,
+    -8
+   ],
+   "anims": {
+    "idle": [
+     0,
+     2,
+     3
+    ],
+    "damaged": [
+     2,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}

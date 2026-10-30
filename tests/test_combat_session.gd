@@ -112,7 +112,7 @@ func test_the_fight_ends_when_a_ship_is_wrecked() -> void:
 	check(not s.can_leave(), "cannot leave at 1200 px")
 	s.arena.wreck(Session.ENEMY)
 	eq(s.state(), "won", "the pirate is wrecked")
-	eq(s.end_text(), "Pirate wrecked. Salvage comes later. Esc to return", "the message")
+	eq(s.end_text(), "Pirate wrecked. Esc to return", "the message")
 	check(s.can_leave(), "Esc works now")
 	var drift: Vector2 = s.arena.ships[Session.ENEMY].flight.vel
 	s.arena.ships[Session.ENEMY].flight.vel = Vector2(50.0, 0.0)
@@ -128,6 +128,20 @@ func test_the_fight_ends_when_a_ship_is_wrecked() -> void:
 	check(far.can_leave(), "more than 4000 px away you may leave")
 	far.arena.ships[Session.ENEMY].flight.pos = Vector2(0.0, -3900.0)
 	check(not far.can_leave(), "3900 is not enough")
+
+
+func test_the_jump_drive_spools_then_lets_the_player_leave() -> void:
+	var s := _session()
+	check(not s.can_leave(), "cannot leave at 1200 px")
+	eq(s.start_jump(), "", "J starts the spool")
+	eq(s.start_jump(), "The jump drive is already spooling", "once")
+	var steps := int(Session.JUMP_SPOOL / Session.STEP)
+	for i in steps / 2:
+		s.tick(Session.STEP)
+	check(not s.jump_ready() and not s.can_leave(), "not ready halfway")
+	for i in steps / 2 + 10:
+		s.tick(Session.STEP)
+	check(s.jump_ready() and s.can_leave(), "ready after the spool: the player can leave at any range")
 
 
 func test_the_camera_frames_both_ships() -> void:

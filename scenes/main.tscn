@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/build/build_mode.gd" id="1_build"]
 [ext_resource type="Script" path="res://scripts/space/starfield.gd" id="2_stars"]
@@ -7,7 +7,8 @@
 [ext_resource type="Script" path="res://scripts/combat/combat_view.gd" id="5_combat"]
 [ext_resource type="Script" path="res://scripts/ui/ship_picker.gd" id="6_picker"]
 [ext_resource type="Script" path="res://scripts/ui/crafting_panel.gd" id="7_craft"]
-[ext_resource type="Script" path="res://scripts/view/debris_view.gd" id="8_debris"]
+[ext_resource type="Script" path="res://scripts/ui/front_door.gd" id="8_front"]
+[ext_resource type="Script" path="res://scripts/view/debris_view.gd" id="9_debris"]
 
 [node name="Main" type="Node2D"]
 
@@ -18,7 +19,7 @@ layer = -1
 script = ExtResource("2_stars")
 
 [node name="Debris" type="Node2D" parent="."]
-script = ExtResource("8_debris")
+script = ExtResource("9_debris")
 
 [node name="BuildMode" type="Node2D" parent="."]
 script = ExtResource("1_build")
@@ -67,3 +68,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("6_picker")
+
+[node name="FrontDoor" type="Node" parent="."]
+script = ExtResource("8_front")

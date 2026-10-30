@@ -32,6 +32,9 @@ const BAD := Color("#e0413b")
 const AMBER := Color("#e1a136")
 const UNKNOWN := Color("#3a4350")
 
+## Emitted when a lost fight ends the run, with the campaign as it stood (front_door.gd shows the game over screen).
+signal run_over(campaign)
+
 var sim: Node  ## the ShipSim whose player ship travels
 var build: Node  ## the BuildMode (told about the new ship)
 var combat: Node  ## the combat view: fights started from events run there
@@ -216,6 +219,10 @@ func _start_fight(value: String, after_win: Dictionary) -> void:
 	if why != "":
 		_say("Cannot fight: " + why, true)
 		return
+	var session = combat.get("session") if combat != null else null
+	if session != null:  # the fight starts with the integrity the campaign says is left
+		var mine = session.arena.ships[0]
+		mine.hull = campaign.fight_hull(mine.hull_max)
 	_fighting = true
 	_after_win = after_win
 	_fight_node = str(campaign.node(campaign.current)["type"])
@@ -230,6 +237,7 @@ func _on_fight_finished(result: Dictionary) -> void:
 	var r := campaign.fight_done(result, ship(), _after_win)
 	_after_win = {}
 	if r["state"] == "lost":
+		run_over.emit(campaign)
 		new_game()
 		_say("Wrecked. A new run begins.", true)
 		return
@@ -471,14 +479,14 @@ func _draw_tip(id: String) -> void:
 
 
 func _draw_foot(p: Rect2) -> void:
-	var y := p.end.y - FOOT_H + 34.0
+	var y := p.end.y - FOOT_H + 28.0  # the message, then the fuel warning, then the hint line, each on its own row
 	if message != "":
 		_text(message, Vector2(p.position.x + PAD, y), 16, BAD if message_bad else GOOD)
 	_text("Click a lane-linked node to jump (%s)    Enter: dock    T: wait for a trader (no fuel)    Shift+click: drift jump (no fuel, hull -%d)    M / Esc: close" % [jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
 		Vector2(p.position.x + PAD, p.end.y - 22.0), 13, DIM_TEXT)
 	var s = ship()
 	if s != null and campaign.fuel_short(s):
-		_text("Out of fuel!", Vector2(p.position.x + PAD, y + 28.0), 16, BAD)
+		_text("Out of fuel!", Vector2(p.position.x + PAD, y + 20.0), 16, BAD)
 
 
 ## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
