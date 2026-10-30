@@ -70,8 +70,11 @@ func open_event(ev: Dictionary) -> void:
 	event = ev
 	title = c.label(c.current)
 	view = c.events.choice_view(ev, c, map.ship(), _node())
+	var leave := {"index": -1, "text": "Leave.", "blue": false, "grey": false, "need": ""}
 	if view.is_empty():
-		view = [{"index": -1, "text": "Leave.", "blue": false, "grey": false, "need": ""}]
+		view = [leave]
+	elif view.all(func(v): return v["grey"]):
+		view.append(leave)  # every choice needs something you lack: never leave the panel without a way out
 	page = "choices"
 	message = ""
 	hover = -1
