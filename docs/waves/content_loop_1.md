@@ -30,9 +30,12 @@
    - **race wave 2**: Vellum, Oorth, Drakkin, Wisp, Hullkin, Lantern, with the small and floating rigs;
    - **engines wave 2**: CONTENT_PLAN 4 B, C and D, including uniques with quests;
    - **processing** (smelters, steel and alloy) from CONTENT 12.
+9. **The race loop to 30** (owner: "loop the races until we reach 30 unique ones"): waves 2, 3 and 4 from `docs/waves/races_2_4.md`.
+   - Each wave is a hooks code agent plus an art agent plus a data and writing agent.
+   - Run them back to back, with the next wave's art starting while the previous wave's data lands, until 30 species are on main.
 8. **Sector space steps 2 and 3**: the view, autopilot, fights in place, then its content (intakes Mk2/Mk3, radars, tractor), when step 1 lands.
 
 ## Order of starting
-- At 10 pm, start tracks 1, 4 (two writers), 5 (writer and code), 6 and 7 (weapons wave 2: art plus data) at once.
+- At 10 pm, start tracks 1, 4 (two writers), 5 (writer and code), 6, 7 (weapons wave 2: art plus data) and **9 (race wave 2: hooks, art and data; wave 3 art too)** at once.
 - Tracks 2 and 3 start when track 1 has a first merge, and track 8 when step 1 of the sector core merges.
 - The lead keeps about 6–8 agents running and merges continuously.

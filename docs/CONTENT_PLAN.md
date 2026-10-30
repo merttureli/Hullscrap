@@ -111,7 +111,7 @@ Bands for weapons, shields, reactors, O2 and the workshop come in the same table
 
 Art: every tier and variant follows the art bible (tiers grow by adding parts). Uniques get a gold-trim accent and a signature silhouette.
 
-## 5. Races: the roster (target 24; the owner: "ideally 15–30")
+## 5. Races: the roster (target **30**; the owner: "loop the races until we reach 30 unique ones")
 Each race is **data plus art**:
 - traits from the library;
 - a body rig (the 4 existing rigs plus new ones);
@@ -146,6 +146,8 @@ Each race is **data plus art**:
 | 22 | Quillback | spined and proud | counter_melee 10, hp ×1.1, no_suit |
 | 23 | Kite | born in zero-g | suffocation ×0.5, speed ×1.5 in vacuum rooms, hp ×0.9 |
 | 24 | Warden-frame | rebuilt Lumen drones (quest only) | mechanical, o2_use 0, ranged ×1.5, ion damage ×3 |
+
+Rows 25–30 (wave 4): Murrow (mole miners), Siltborn (gas-giant floaters), Corvin (crow scavengers), Brine (crab dockworkers), Echo (mimics) and Ferro (living ferrofluid). The full specs for waves 2–4 are in `docs/waves/races_2_4.md`.
 
 New rigs needed: **small** (Vellum, Rattler, Tessellate fragments), **large** (Grundl, Drakkin), **floating** (Wisp, Lantern wings), **mechanical** (Gauntling, Warden-frame). Each rig can be shared by several races through `_color` masks and head and accessory layers.
 
