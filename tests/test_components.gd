@@ -30,6 +30,7 @@ func test_data_is_complete() -> void:
 		"reactor_mk1": [8, 0, 1], "reactor_mk2": [14, 0, 2], "engine_mk1": [-2, 4, 1], "engine_mk2": [-3, 4, 2],
 		"oxygen_gen": [-2, 1, 1], "shield_mk1": [-3, 3, 1], "laser_mk1": [-2, 5, 1], "laser_mk2": [-3, 5, 2],
 		"helm": [-1, 2, 1], "medbay": [-2, 3, 1], "bed": [0, 0, 1], "fabricator": [-2, 6, 1],
+		"robot_arm": [-1, 6, 1], "laser_cutter": [-2, 6, 1], "assembly_rig": [-2, 6, 1], "nanoforge": [-4, 6, 1],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:

@@ -1,0 +1,13 @@
+{
+  "_doc": "Raw materials that cargo, tile costs and recipes use. Content is data: add an entry here and recipes can name it. rarity: common, uncommon, rare or very_rare (how often salvage, mining and trade give it).",
+  "materials": [
+    {"id": "scrap", "name": "Scrap", "color": "#9aa0a6", "rarity": "common"},
+    {"id": "copper", "name": "Copper", "color": "#d98a4e", "rarity": "common"},
+    {"id": "polymer", "name": "Polymer", "color": "#e8e1c8", "rarity": "common"},
+    {"id": "titanium", "name": "Titanium", "color": "#b9c6d6", "rarity": "uncommon"},
+    {"id": "silicon", "name": "Silicon", "color": "#6c7a89", "rarity": "uncommon"},
+    {"id": "crystal", "name": "Crystal", "color": "#7fdbff", "rarity": "rare"},
+    {"id": "plasma_cell", "name": "Plasma Cell", "color": "#ff7ae0", "rarity": "rare"},
+    {"id": "nanite_paste", "name": "Nanite Paste", "color": "#7dff9b", "rarity": "very_rare"}
+  ]
+}
