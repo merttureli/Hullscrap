@@ -17,12 +17,14 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
+const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 
 ## Save format. 3 adds name, world transform, components, cables and oxygen on top of the
 ## grid and cargo of 2; versions 1 and 2 still load (no components, no cables). The optional
 ## "crafting" list (blueprints and queue) was added within 3: a save without it starts with the
-## blueprints known at the start.
-const VERSION := 3
+## blueprints known at the start. 4 adds the optional "shield_balance" (the chosen sector weights and the
+## two custom presets of the Shields tab); older saves load with it fresh (even weights, empty slots).
+const VERSION := 4
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
 const START_PATH := "res://data/start.json"
@@ -46,6 +48,7 @@ var clock := 0.0  ## seconds this ship has been simulated; the `t` of new events
 var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; not saved yet
 var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
+var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
 var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
 var ability_state := Abilities.fresh_state()  ## abilities running or resting (abilities.gd); not saved
@@ -113,13 +116,14 @@ func effective(id: String) -> Dictionary:
 	return Stats.effective(components.def(id), lines)
 
 
-## Components that are out of action (status is not "ok"): uid -> true. They neither make nor use power.
+## Components that are out of action (status is not "ok", or a hull mount whose outside half is
+## disabled or whose link is cut): uid -> true. They neither make nor use power.
 func disabled_uids() -> Dictionary:
 	var out := {}
 	var uids := components.instances.keys()
 	uids.sort()
 	for uid in uids:
-		if components.instances[uid]["status"] != "ok":
+		if components.instances[uid]["status"] != "ok" or components.offline_reason(grid, uid) != "":
 			out[uid] = true
 	return out
 
@@ -132,14 +136,38 @@ func log_event(text: String) -> void:
 
 
 ## Repair a component: status back to ok and hp to the maximum. Returns false for an unknown uid.
-## Heat is left alone, so a part that is still too hot trips again at once.
+## Heat is left alone, so a part that is still too hot trips again at once. A hull mount with a
+## damaged outside half and an intact link heals the outside half first (one repair each).
 func repair(uid: int) -> bool:
 	if not components.instances.has(uid):
 		return false
 	var inst: Dictionary = components.instances[uid]
+	if outside_hurt(uid):
+		inst["out_hp"] = components.outside_hp_max(inst["id"])
+		return true
 	inst["status"] = "ok"
 	inst["hp"] = Stats.max_hp(components.def(inst["id"]))
 	return true
+
+
+## Is mount `uid`'s outside half below its hp, with the link intact so a crew member can reach it?
+func outside_hurt(uid: int) -> bool:
+	var inst: Dictionary = components.instances.get(uid, {})
+	return not inst.is_empty() and components.has_outside(uid) and int(inst["out_hp"]) < components.outside_hp_max(inst["id"]) and components.link_intact(grid, uid)
+
+
+## What clearing the wreck of component `id` gives back: half its recipe materials, rounded down. A
+## unique (found) part has no recipe and gives nothing.
+func wreck_refund(id: String) -> Dictionary:
+	var out := {}
+	if bool(components.def(id).get("unique", false)):
+		return out
+	var mats: Dictionary = crafting.def(id).get("materials", {})
+	for m in mats:
+		var n := floori(float(mats[m]) / 2.0)
+		if n > 0:
+			out[m] = n
+	return out
 
 
 ## The structure changed (tiles, doors): the next refresh() rebuilds the rooms and re-solves power.
@@ -183,6 +211,8 @@ func to_dict() -> Dictionary:
 	d["cables"] = cables.to_dict()
 	d["crafting"] = crafting.to_dict()
 	d["oxygen"] = atmosphere.pressure.duplicate()
+	if not ShieldBalance.is_fresh(shield_balance):  # optional: only written when the player set something
+		d["shield_balance"] = shield_balance.duplicate(true)
 	if not fires.is_empty():  # optional, like the grid's damage lists: only written when something burns
 		var list := []
 		for c in Fire.sorted_cells(fires.keys()):
@@ -228,7 +258,10 @@ func load_dict(d: Dictionary) -> String:
 	inventory.counts = cargo.counts
 	var empty_parts := {"version": Components.VERSION, "next_uid": 1, "instances": []}
 	var empty_cables := {"version": Cables.VERSION, "cells": []}
-	components.load_dict(d["components"] if version >= 3 else empty_parts)
+	components.load_dict(d["components"] if version >= 3 else empty_parts, grid)
+	for r in components.returned:  # old weapons and engines with no wall to mount through
+		inventory.add(r["id"], 1)
+		log_event(r["text"])
 	cables.load_dict(d["cables"] if version >= 3 else empty_cables)
 	if version >= 3:
 		name = str(d.get("name", name))
@@ -236,6 +269,7 @@ func load_dict(d: Dictionary) -> String:
 		world_pos = Vector2(float(p[0]), float(p[1])) if p is Array and p.size() == 2 else Vector2.ZERO
 		rot_quarters = posmod(int(d.get("rot", 0)), 4)
 	fires = burning
+	shield_balance = ShieldBalance.sanitize(d.get("shield_balance"))
 	manned = {}
 	ability_state = Abilities.fresh_state()
 	if d.has("crafting"):

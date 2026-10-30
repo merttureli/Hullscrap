@@ -90,26 +90,57 @@ func test_step_runs_whole_substeps_and_moves_ships() -> void:
 	near(a.ships[i].flight.pos.x, 100.0 * 61.0 / 60.0, "moved by its velocity", 1e-3)
 
 
-func test_arcs_follow_the_mount_and_the_ship_turn() -> void:
+## The direction (world) of the newest "shot" event.
+func _last_shot_dir(a: Arena) -> Vector2:
+	for k in range(a.events.size() - 1, -1, -1):
+		if a.events[k]["type"] == "shot":
+			return a.events[k]["dir"]
+	return Vector2.ZERO
+
+
+func test_a_fixed_gun_fires_along_its_mount_within_its_gimbal() -> void:
 	var a := Arena.new()
 	var i := a.add_ship(_ship())
-	var east := a.add_mount(i, "laser_mk1", Vector2(20.5, 15.5))  # 5 cells right of the centre
+	var east := a.add_mount(i, "laser_mk1", Vector2(20.5, 15.5))  # 5 cells right of the centre: it points east
 	var far := 1000.0
-	check(a.fire(i, east, Vector2(far, 0.0)), "fires straight out")
+	var at := a.local_to_world(i, Vector2(20.5, 15.5))
+	check(a.fire(i, east, at + Vector2(far, 0.0)), "fires straight out")
+	near(_last_shot_dir(a).angle(), 0.0, "along its mount", 1e-6)
 	a.ships[i].cooldowns.clear()
-	check(a.fire(i, east, Vector2(far, far * tan(deg_to_rad(55.0)))), "55 degrees off the axis is inside the 120 degree arc")
+	check(a.fire(i, east, at + Vector2.from_angle(deg_to_rad(3.0)) * far), "3 degrees off")
+	near(rad_to_deg(_last_shot_dir(a).angle()), 3.0, "inside the 5 degree gimbal the barrel follows the aim", 1e-4)
 	a.ships[i].cooldowns.clear()
-	eq(a.weapons.can_fire(a, i, east, Vector2(far, far * tan(deg_to_rad(65.0)))), "out of arc", "65 degrees off is outside")
-	eq(a.weapons.can_fire(a, i, east, Vector2(0.0, -far)), "out of arc", "north is outside")
-	eq(a.weapons.can_fire(a, i, east, Vector2(-far, 0.0)), "out of arc", "behind is outside")
-	check(not a.fire(i, east, Vector2(-far, 0.0)), "refuses to fire behind")
+	check(a.fire(i, east, at + Vector2.from_angle(deg_to_rad(55.0)) * far), "55 degrees off still fires")
+	near(rad_to_deg(_last_shot_dir(a).angle()), 5.0, "but only 5 degrees round: the ship is aimed, not the gun", 1e-4)
+	a.ships[i].cooldowns.clear()
+	check(a.fire(i, east, at + Vector2.from_angle(deg_to_rad(-20.0)) * far), "20 degrees the other way")
+	near(rad_to_deg(_last_shot_dir(a).angle()), -5.0, "clamped on that side too", 1e-4)
+	a.ships[i].cooldowns.clear()
+	check(a.fire(i, east, at + Vector2(-far, 0.0)), "aimed behind it fires too")
+	near(absf(rad_to_deg(_last_shot_dir(a).angle())), 5.0, "along the edge of the cone", 1e-4)
+	check(a.weapons.in_arc(a, i, a.ships[i].mounts[east], at + Vector2.from_angle(deg_to_rad(4.0)) * far), "in_arc: the aim point is inside the cone")
+	check(not a.weapons.in_arc(a, i, a.ships[i].mounts[east], at + Vector2.from_angle(deg_to_rad(6.0)) * far), "and 6 degrees is outside it")
+	a.ships[i].cooldowns.clear()
 	a.ships[i].flight.angle = PI / 2.0  # the east mount now faces south
-	eq(a.weapons.can_fire(a, i, east, Vector2(far, 0.0)), "out of arc", "east is outside after the turn")
-	eq(a.weapons.can_fire(a, i, east, Vector2(0.0, far)), "", "south is inside after the turn")
+	at = a.local_to_world(i, Vector2(20.5, 15.5))
+	a.fire(i, east, at + Vector2(far, 0.0))
+	near(_last_shot_dir(a).angle(), PI / 2.0 - deg_to_rad(5.0), "after the ship turned the gun points south: east is 90 degrees off, so the cone's edge", 1e-4)
+	a.ships[i].cooldowns.clear()
+	a.fire(i, east, at + Vector2(0.0, far))
+	near(_last_shot_dir(a).angle(), PI / 2.0, "and south is straight on", 1e-4)
 	var gun := a.add_mount(i, "test_bolt", Vector2(20.5, 15.5))
-	eq(a.weapons.can_fire(a, i, gun, Vector2(-far, 0.0)), "", "a 360 degree turret fires anywhere")
-	eq(a.weapons.can_fire(a, i, gun, a.local_to_world(i, Vector2(20.5, 15.5))), "out of arc", "no aim direction, no shot")
+	eq(a.weapons.can_fire(a, i, gun, Vector2(-far, 0.0)), "", "a test gun has a 180 degree gimbal: it fires anywhere")
 	eq(a.weapons.can_fire(a, i, 99, Vector2(far, 0.0)), "no such weapon", "unknown mount")
+
+
+func test_a_mount_added_with_a_direction_points_that_way() -> void:
+	var a := Arena.new()
+	var i := a.add_ship(_ship())
+	var up := a.add_mount(i, "laser_mk1", Vector2(15.5, 10.5), true, Vector2.UP)
+	a.fire(i, up, a.local_to_world(i, Vector2(15.5, 10.5)) + Vector2(1000.0, 0.0))
+	near(rad_to_deg(_last_shot_dir(a).angle()), -90.0 + 5.0, "a gun that points up, aimed east, goes 5 degrees clockwise of up", 1e-4)
+	var centre := a.add_mount(i, "laser_mk1", Vector2(15.5, 15.5))
+	eq(a.ships[i].mounts[centre]["dir"], Vector2.UP, "a mount in the middle of the ship points up")
 
 
 func test_cooldown_is_respected() -> void:
@@ -153,8 +184,9 @@ func test_a_placed_laser_needs_power() -> void:
 	s.cables.place(s.grid, Vector2i(20, 15))
 	s.cables.place(s.grid, Vector2i(20, 16))
 	a.ships[i].dirty = true
-	eq(a.weapons.can_fire(a, i, laser, Vector2(1000.0, 0.0)), "", "powered and in arc")
-	eq(a.weapons.can_fire(a, i, laser, Vector2(-1000.0, 0.0)), "out of arc", "pointing outward from the ship's centre")
+	eq(a.weapons.can_fire(a, i, laser, Vector2(1000.0, 0.0)), "", "powered")
+	eq(a.weapons.can_fire(a, i, laser, Vector2(-1000.0, 0.0)), "", "a fixed gun is never out of arc: it fires along its own direction")
+	check(not a.weapons.in_arc(a, i, a.ships[i].mounts[laser], Vector2(-1000.0, 0.0)), "though the aim point is far outside its cone")
 
 
 ## The shot that must be led: the speed of the bolt against a target on the move.
@@ -217,7 +249,7 @@ func test_hull_integrity_counts_armour_and_wrecks_the_ship() -> void:
 	var t := _ship()
 	_block(t, 3, 15, 12, 15, "wall")  # 10 walls of 4 hp
 	var target := b.add_ship(t, Vector2(800.0, 0.0))
-	b.weapons.defs["lance"] = {"kind": "laser", "damage": 100, "pierce": 50, "arc": 360, "range": 2000, "cooldown": 0.1}
+	b.weapons.defs["lance"] = {"kind": "laser", "damage": 100, "pierce": 50, "gimbal": 180, "range": 2000, "cooldown": 0.1}
 	var lance := b.add_mount(shooter, "lance", Vector2(20.5, 15.5))
 	var small := b.add_mount(shooter, "laser_mk1", Vector2(20.5, 15.5))
 	eq(b.ships[target].hull_max, 20.0, "plain steel adds nothing")

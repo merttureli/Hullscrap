@@ -4,7 +4,10 @@ extends Control
 ## out of arc ...). Above it, one slot per active ability of the ship (Abilities.slots): the key that
 ## triggers it (Shift engine, Space shield, Q utility), its name, a ring that shows the time left while
 ## it runs and the cooldown while it rests, and why it cannot start; a press that is refused flashes
-## the reason in the slot. Reads a CombatSession; the only input it takes is the three ability keys.
+## the reason in the slot. To the left of the rows a small diagram shows the shield: a ring of the bubble's
+## sectors, bow up, each as bright and thick as the layers it holds, with the number, dark while open and
+## dashed at 0 (arrow keys shift the balance, End makes it even; combat_view.gd takes those keys).
+## Reads a CombatSession; the only input it takes is the three ability keys.
 
 const SLOT := Vector2(176.0, 58.0)
 const ASLOT := Vector2(196.0, 66.0)  ## an ability slot: taller, for the reason
@@ -19,6 +22,10 @@ const GOLD := Color("#ffd24a")
 const KEY_OF := {KEY_SHIFT: "engine", KEY_SPACE: "shield", KEY_Q: "utility"}  ## keycode -> ability key
 const KEY_LABEL := {"engine": "SHIFT", "shield": "SPACE", "utility": "Q"}
 const FLASH_MS := 2200  ## how long a refusal stays in its slot
+const DIAG := Vector2(132.0, 138.0)  ## the shield diagram's box
+const DIAG_RING := 33.0  ## its ring's radius
+const PIP := Color("#5fd4ff")
+const ION := Color("#a07bff")
 const BLOCKED_TEXT := {"unpowered": "NO POWER", "disabled": "DISABLED", "overheated": "OVERHEATED", "malfunction": "JAMMED", "wrecked": "WRECKED"}
 const GROUP_COLORS := {1: Color("#5fd4ff"), 2: Color("#ff9a3c")}
 const STATUS_TEXT := {
@@ -76,6 +83,10 @@ func press(key: String) -> Dictionary:
 func _draw() -> void:
 	if session == null:
 		return
+	var parts: Array = session.shield_sectors()
+	if not parts.is_empty():
+		var rows_left := (size.x - maxf(_row_width(session.weapons().size(), SLOT.x), _row_width(session.ability_slots().size(), ASLOT.x))) / 2.0
+		_shield_diagram(Vector2(rows_left - DIAG.x - 14.0, size.y - DIAG.y), parts)
 	var slots: Array = session.ability_slots()
 	var row_y := 0.0
 	if not slots.is_empty():
@@ -152,6 +163,50 @@ func _ability_slot(at: Vector2, s: Dictionary) -> void:
 	else:
 		_text(label, at + Vector2(58.0, 39.0), 11, col)
 		_text(str(s["part"]), at + Vector2(58.0, 55.0), 10, GREY)
+
+
+## The shield diagram at `at`: `parts` is session.shield_sectors().
+func _shield_diagram(at: Vector2, parts: Array) -> void:
+	var n := parts.size()
+	var ion: bool = session.arena.ships[session.PLAYER].ion_lock > 0.0
+	draw_rect(Rect2(at, DIAG), BG)
+	draw_rect(Rect2(at, DIAG), Color(PIP, 0.5), false, 2.0)
+	var c := at + Vector2(DIAG.x / 2.0, 70.0)
+	_text("SHIELD", at + Vector2(8.0, 14.0), 11, TEXT)
+	if n > 1:
+		_text("arrows  End", at + Vector2(DIAG.x - 8.0, 14.0), 9, GREY, -1.0)
+	var width := TAU / n
+	var gap := 0.07 if n > 1 else 0.0
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.008)
+	for k in n:
+		var st: Dictionary = parts[k]
+		var mid := -PI / 2.0 + k * width
+		var a0 := mid - width / 2.0 + gap
+		var a1 := mid + width / 2.0 - gap
+		var up: float = 0.0 if ion else minf(float(st["layers"]), 4.0)
+		var frac := clampf(float(st["layers"]) / maxf(float(st["cap"]), 1.0), 0.0, 1.0)
+		if st["open"]:
+			draw_arc(c, DIAG_RING, a0, a1, 12, Color("#243242"), 5.0, true)
+		elif ion:
+			draw_arc(c, DIAG_RING, a0, a1, 12, Color(ION, 0.4 + 0.3 * pulse), 4.0, true)
+		elif up < 1.0:  # no whole layer: dashes
+			var steps := maxi(3, int((a1 - a0) / 0.22))
+			for d in steps:
+				if d % 2 == 0:
+					draw_arc(c, DIAG_RING, lerpf(a0, a1, float(d) / steps), lerpf(a0, a1, float(d + 1) / steps), 4, Color(GREY, 0.7), 2.0, true)
+		else:
+			draw_arc(c, DIAG_RING, a0, a1, 12, Color(PIP, 0.3 + 0.65 * frac), 3.0 + 1.6 * up, true)
+		if st["filling"] and not ion:  # layers on their way back
+			draw_arc(c, DIAG_RING + 8.0, a0, a1, 12, Color(PIP, 0.25 + 0.5 * pulse), 1.5, true)
+		var shown := float(st["layers"])
+		var label := "%d" % floori(shown + 1e-6) if is_equal_approx(shown, roundf(shown)) else "%.1f" % shown
+		var tp := c + Vector2.from_angle(mid) * (DIAG_RING + 15.0) if n > 1 else c + Vector2(0.0, 24.0)
+		_text(label, tp + Vector2(-4.0 * label.length(), 4.0), 12, Color(TEXT, 0.35 if st["open"] else 1.0), -1.0)
+	var bow := PackedVector2Array([c + Vector2(0.0, -11.0), c + Vector2(7.0, 9.0), c + Vector2(0.0, 5.0), c + Vector2(-7.0, 9.0)])
+	draw_colored_polygon(bow, Color(GREY, 0.8))
+	if n <= 4:
+		var weights := PackedStringArray(parts.map(func(st): return "%.1f" % st["weight"]))
+		_text("balance " + (" ".join(weights) if n > 1 else "one piece"), at + Vector2(8.0, DIAG.y - 6.0), 10, GREY)
 
 
 func _text(text: String, at: Vector2, size: int, col: Color, width := -1.0, align := HORIZONTAL_ALIGNMENT_LEFT) -> void:

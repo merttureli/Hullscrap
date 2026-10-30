@@ -303,18 +303,20 @@ func test_man_restock_and_craft_work_mult_and_manned_mult() -> void:
 	var ada := _person("Ada", "human", 12, 13)
 	ship.crew.append(ada)
 	ship.manned[helm] = "Ada"
-	near(Jobs.evasion_bonus(ship), 0.1, "a plain operator: the data's helm evasion")
+	var base: float = CrewMember.config()["manned"]["helm_evasion"]
+	var cool: float = CrewMember.config()["manned"]["weapon_cooldown"]
+	near(Jobs.evasion_bonus(ship), base, "a plain operator: the data's helm evasion")
 	ada.gear_traits = ["t_gunner"]
-	near(Jobs.evasion_bonus(ship), 0.2, "work_mult.man x2 doubles what the post gives")
+	near(Jobs.evasion_bonus(ship), base * 2.0, "work_mult.man x2 doubles what the post gives")
 	ada.gear_traits = ["t_steady"]
-	near(Jobs.evasion_bonus(ship), 0.15, "station.manned_mult x1.5")
+	near(Jobs.evasion_bonus(ship), base * 1.5, "station.manned_mult x1.5")
 	ada.gear_traits = ["t_gunner", "t_steady"]
-	near(Jobs.evasion_bonus(ship), 0.3, "and they multiply")
+	near(Jobs.evasion_bonus(ship), base * 3.0, "and they multiply")
 	var gun := Fixture.put(ship, "laser_mk1", 15, 10)
 	ship.manned[gun] = "Ada"
-	near(Jobs.cooldown_mult(ship, gun), 1.0 - 0.1 * 3.0, "a manned weapon cools down by the factor too (0.7)")
+	near(Jobs.cooldown_mult(ship, gun), 1.0 - cool * 3.0, "a manned weapon cools down by the factor too")
 	ada.gear_traits = []
-	near(Jobs.cooldown_mult(ship, gun), 0.9, "as before without the traits")
+	near(Jobs.cooldown_mult(ship, gun), 1.0 - cool, "as before without the traits")
 	var grundl := _person("Bulk", "grundl", 17, 13)
 	ship.crew.append(grundl)
 	near(TraitSet.work_rate(ship, grundl, "restock"), 2.0, "a Grundl restocks twice as fast (kept: no job restocks yet)")

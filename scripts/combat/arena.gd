@@ -31,20 +31,28 @@ class Combatant extends RefCounted:
 	var hull_max := HULL_BASE
 	var hull := HULL_BASE
 	var wrecked := false  ## hull at 0: no firing, no shields, no thrust; stays in the arena
-	var mounts := {}  ## uid -> {id, pos (cell coordinates), virtual, powered (virtual only)}
+	var mounts := {}  ## uid -> {id, pos (barrel pivot, cell coordinates), dir (outward, ship-local), reach, aim (live barrel direction), virtual, powered (virtual only)}
 	var cooldowns := {}  ## uid -> arena tick when the mount may fire again
 	var powered := {}  ## uid -> bool, the power solve with disabled parts left out
 	var mass := 1.0
 	var com := Vector2.ZERO  ## centre of mass, in grid cell coordinates
 	var inertia := 1.0  ## moment of inertia about it (mass x px^2), for collisions
 	var hit_cache := {}  ## collisions.gd's outer cells of this ship; {} = rebuild
-	var thrust := 0.0
-	var layers := 0  ## shield layers up now
-	var layers_cap := 0
-	var shield_timers: Array[float] = []  ## seconds until each used layer is back
+	var thrust := 0.0  ## total thrust of the powered engines (it turns the ship)
+	var thrusts := {"fwd": 0.0, "left": 0.0, "right": 0.0}  ## thrust along the ship's forward, to its left and to its right (Flight.thrusts_of)
+	var layers: int:  ## whole shield layers up now, over all the sectors
+		get:
+			return Shields.layers_up(self)
+	var layers_cap := 0  ## layers a sector of weight 1 holds: the powered generators' and the running overcharge's; a sector holds this x its weight
+	var sectors := 1  ## the bubble's sectors (the best powered generator's stats.sectors: 1, 2, 4 or 8)
+	var weights: Array = [1.0]  ## the balance: one weight per sector, 0..2 in steps of 0.5, adding up to `sectors` (shield_balance.gd)
+	var sector_layers: Array = [0.0]  ## layers up in each sector now
+	var sector_timers: Array = [[]]  ## per sector: Vector2(seconds left, layers) for each used or newly gained layer on its way back
+	var sector_hit: Array = [-1000000]  ## per sector: the tick a shot last hit it (the view flashes it)
 	var ion_lock := 0.0  ## seconds the shields stay offline
-	var sectors := 1  ## the bubble's sectors (the best powered generator's stats.sectors); layers are one pool
 	var sector_open := {}  ## sector -> Vector2i(first tick, last tick) it is open: shots pass, no layer used (after this ship fired through it)
+	var shape: RefCounted = null  ## shield_shape.gd outline of the bubble, kept by Shields.shape_of
+	var shape_sig: Array = []
 	var ability_rev := -1  ## the ship's Abilities.rev this combatant last computed its thrust and layers for
 	var overcharge_left: float:  ## seconds the running shield ability (Overcharge) has left
 		get:
@@ -52,7 +60,7 @@ class Combatant extends RefCounted:
 	var overcharge_cd: float:  ## seconds until a shield ability is ready again (0 when one is ready or running)
 		get:
 			return Abilities.key_cooldown_left(ship, "shield")
-	var input := {"throttle": 0.0, "turn": 0.0}
+	var input := {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
 	var dirty := true  ## parts or tiles changed: power, mass and shield cap need recomputing
 	var next_virtual := -1
 
@@ -61,7 +69,9 @@ var rng := RandomNumberGenerator.new()
 var weapons := Weapons.new()
 var projectiles: Array = []
 var beams: Array = []
-var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed; n: the contact normal; points: up to 6 contact points, world), breach, disable, ignite (a hit started a fire), wreck
+var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed; n: the contact normal; points: up to 6 contact points, world), breach, disable (uid; half "out": the outside half of a mount), wreck_part (uid, id: a disabled part was hit again and is gone, debris on its cells), ignite (a hit started a fire), wreck
+var autofire := {}  ## ship index -> false when its turrets hold fire (the T key); a ship not listed autofires
+var aim_points := {}  ## ship index -> the world point its fixed guns' barrels follow (the player's cursor), set by the caller
 var power_bonus := {}  ## ship index -> power the neon lattice has made of absorbed energy (counted, not used yet)
 var collision := Collisions.load_config()  ## data/collision.json: restitution, min_speed, damage_k, crew_knock, separation_slop...
 var contact_tick := {}  ## ship index -> the last tick it touched another ship
@@ -107,24 +117,27 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 	co.mounts = weapons.mounts_of(ship)
 	ships.append(co)
 	_recompute(co)
-	co.layers = co.layers_cap  # shields start full
+	Shields.start(co)  # shields start full, with the ship's saved balance
 	return ships.size() - 1
 
 
 ## Give ship `idx` a weapon by id without a placed component (the test_* weapons, or any entry of
-## weapons.json). `cell_pos` is where it sits, in grid cell coordinates. Returns its mount uid
-## (negative, so it never clashes with a component uid).
-func add_mount(idx: int, weapon_id: String, cell_pos: Vector2, powered := true) -> int:
+## weapons.json). `cell_pos` is where it sits (and turns), in grid cell coordinates; `dir` the ship-local
+## direction it points (outward): by default from the ship's centre through `cell_pos`. Its muzzle is
+## at `cell_pos`. Returns its mount uid (negative, so it never clashes with a component uid).
+func add_mount(idx: int, weapon_id: String, cell_pos: Vector2, powered := true, dir := Vector2.ZERO) -> int:
 	var co = ships[idx]
 	var uid: int = co.next_virtual
 	co.next_virtual -= 1
-	co.mounts[uid] = {"id": weapon_id, "pos": cell_pos, "virtual": true, "powered": powered}
+	if dir == Vector2.ZERO:
+		dir = (cell_pos - co.pivot).normalized() if cell_pos.distance_squared_to(co.pivot) > 1e-6 else Vector2.UP
+	co.mounts[uid] = {"id": weapon_id, "pos": cell_pos, "dir": dir.normalized(), "reach": 0.0, "aim": dir.normalized(), "virtual": true, "powered": powered}
 	return uid
 
 
-## Set the helm input of ship `idx`: throttle and turn, each -1..1.
-func set_input(idx: int, throttle: float, turn: float) -> void:
-	ships[idx].input = {"throttle": throttle, "turn": turn}
+## Set the helm input of ship `idx`: throttle, turn and strafe (right is positive), each -1..1.
+func set_input(idx: int, throttle: float, turn: float, strafe := 0.0) -> void:
+	ships[idx].input = {"throttle": throttle, "turn": turn, "strafe": strafe}
 
 
 ## Fire mount `uid` of ship `idx` at the world point `aim`. False when it cannot (see Weapons.can_fire).
@@ -162,9 +175,13 @@ func _substep() -> void:
 		sync(i)
 		var co = ships[i]
 		var fly: bool = not co.wrecked and co.flight.can_fly(co.ship.components, co.powered) == ""
-		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust)
+		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust, co.thrusts)
 		Shields.tick(co, SUBSTEP)
+		if aim_points.has(i) and not co.wrecked:  # fixed guns follow the cursor
+			for uid in co.mounts:
+				weapons.point_barrel(self, i, uid, aim_points[i])
 	Collisions.step(self, SUBSTEP)
+	weapons.tick_turrets(self)
 	weapons.tick_beams(self)
 	Projectiles.step(self, SUBSTEP)
 
@@ -192,7 +209,10 @@ func _recompute(co) -> void:
 	co.com = props["com"]
 	co.inertia = props["inertia"]
 	co.hit_cache = {}
+	if co.dirty:
+		co.shape = null  # the cells may have changed: the bubble's outline is rebuilt on its next use
 	co.thrust = co.flight.thrust_of(view, co.powered, Abilities.thrust_boost(co.ship))
+	co.thrusts = co.flight.thrusts_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	Shields.resync(co)
 	co.ability_rev = Abilities.rev(co.ship)
 	co.dirty = false
@@ -292,8 +312,8 @@ func snapshot() -> Dictionary:
 		var parts := {}
 		for uid in co.ship.components.instances:
 			var inst: Dictionary = co.ship.components.instances[uid]
-			parts[str(uid)] = [inst.get("hp", -1), inst.get("status", "")]
+			parts[str(uid)] = [inst.get("hp", -1), inst.get("status", ""), inst.get("out_hp", 0)]
 		list.append({"pos": [co.flight.pos.x, co.flight.pos.y], "vel": [co.flight.vel.x, co.flight.vel.y], "angle": co.flight.angle, "ang_vel": co.flight.ang_vel,
-			"hull": co.hull, "wrecked": co.wrecked, "layers": co.layers, "ion_lock": co.ion_lock,
+			"hull": co.hull, "wrecked": co.wrecked, "layers": co.layers, "weights": co.weights.duplicate(), "sector_layers": co.sector_layers.duplicate(), "ion_lock": co.ion_lock,
 			"grid": co.ship.grid.to_dict(), "parts": parts})
 	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "tethers": tethers.size(), "events": events.size(), "power_bonus": power_bonus.duplicate()}

@@ -2,13 +2,21 @@ extends RefCounted
 ## The enemy pilot: flies one ship of the arena against another and shoots. Deterministic: its few
 ## random choices (aim jitter, which way it strafes) come from its own generator, seeded from the
 ## arena's seed, and it only reads the arena. Call think(dt) once per arena substep, before stepping.
-## - Range: it keeps RANGE_FRACTION of its shortest weapon range.
-## - Strafing: no side thrust exists, so it turns its guns' axis a few degrees off the target (never
-##   enough to leave an arc) and lets the thrust push it sideways, flipping now and then.
-## - Aim: the player's weapons first, then engines, then the reactor, at the part's centre, led by the
-##   part's own velocity for shots that fly (hitscan lasers and beams go at the part as it is).
+## - Range: it keeps RANGE_FRACTION of its shortest weapon range between the ships' centres, and at
+##   least both hulls' radii plus HULL_MARGIN (it used to hold 630 px between centres and clip the
+##   player's hull with its own).
+## - Pointing: it turns its nose so the fixed guns (their mean outward direction) lead the target, off by
+##   an aim error that shrinks with `aim_skill` (the design's `ai.aim_skill`, 0..1, default 0.6): up to
+##   (1 - aim_skill) x AIM_ERROR_DEG degrees either way, re-rolled every RETARGET_S. It fires a fixed gun
+##   only when the gun can bear (its gimbal reaches the aim point). Turrets track and fire by themselves
+##   in the arena (Weapons.tick_turrets). It strafes with side engines when it has them.
+## - Aim: the player's weapons first, then engines, then the reactor (the outside half of a mount, the part
+##   it can see), led by the part's own velocity for shots that fly (hitscan lasers and beams go at the part
+##   as it is).
 ## - With a sectored shield it holds back weapons whose shot would open the sector the player's loaded
 ##   guns are pointing at, for at most HOLD_MAX seconds.
+## - With 2+ shield sectors it shifts the balance toward the side that faces its foe, one step every
+##   SHIFT_BASE_S - aim_skill seconds (the design's `ai.aim_skill`, default 0.6).
 ## - It overcharges its shield when the layers are gone, and does nothing once wrecked.
 ## - Style "rammer" (a ship design's `"ai": {"style": "rammer"}`) does not keep a range: it finds its
 ##   bow (the side with the most ram plating, else forward), points it at where the foe will be and
@@ -19,16 +27,17 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
 
 const RANGE_FRACTION := 0.7
+const HULL_MARGIN := 40.0  ## px kept between the two hulls' bounding circles, at least
 const DEFAULT_RANGE := 600.0
 const PRIORITY: Array[String] = ["weapon", "engine", "reactor"]  ## families it shoots at first
-const JITTER_DEG := 1.5  ## aim error, either way
-const STRAFE_MAX_DEG := 30.0
-const STRAFE_MIN_DEG := 12.0
+const DEFAULT_AIM_SKILL := 0.6
+const AIM_ERROR_DEG := 12.0  ## aim error either way of a pilot with no skill; a pilot of skill s is off by up to (1 - s) of it
 const LATERAL_MAX := 150.0  ## px/s of sideways drift before it turns the other way
 const CLOSE_MAX := 260.0  ## px/s it closes at, at most
 const BACK_MAX := 120.0  ## px/s it backs off at, at most
 const HOLD_THROTTLE := 0.5  ## at the preferred range it still pushes this hard
 const HOLD_MAX := 1.5  ## seconds a weapon waits for a safer sector
+const SHIFT_BASE_S := 1.5  ## a shield balance step comes every this many seconds less the aim skill
 const RETARGET_S := 0.5
 const RAM_BACKOFF_S := 2.0  ## seconds a rammer reverses after a collision
 const RAM_ABILITY_RANGE := 600.0  ## px from the foe's hull (its centre less its bounding radius): a rammer presses its engine ability inside this
@@ -42,13 +51,16 @@ var arena
 var me: int
 var foe: int
 var rng := RandomNumberGenerator.new()
-var side := 1.0  ## +1 or -1: which way the guns' axis is turned off the target
+var aim_skill := DEFAULT_AIM_SKILL  ## 0..1: how true the pilot's aim is and how quickly it shifts its shield balance (the design's ai.aim_skill)
+var side := 1.0  ## +1 or -1: which way it strafes (when it has side engines)
+var bias := 0.0  ## radians: its aim error now, re-rolled with each retarget
 var target_uid := -1  ## the part of the foe it aims at (-1: the ship's centre)
 var style := ""  ## "" (keeps its range and strafes) or "rammer"
 var _flip := 0.0
 var _retarget := 0.0
 var _hold := {}  # weapon uid -> seconds held back
 var _bow := Vector2.UP  # ship-local direction of a rammer's bow
+var _shift_in := 0.0  # seconds until the next shield balance step
 var _backoff := 0.0  # seconds a rammer still reverses
 var _contact_seen := -1  # the last arena.contact_tick this pilot has reacted to
 
@@ -59,6 +71,8 @@ func _init(p_arena, p_me: int, p_foe: int, p_ai := {}) -> void:
 	me = p_me
 	foe = p_foe
 	style = str(p_ai.get("style", ""))
+	aim_skill = clampf(float(p_ai.get("aim_skill", DEFAULT_AIM_SKILL)), 0.0, 1.0)
+	_shift_in = shift_interval()
 	_bow = bow_of(arena.ships[me])
 	rng.seed = int(arena.rng.seed) * 7919 + me * 104729 + 17
 	side = 1.0 if rng.randf() < 0.5 else -1.0
@@ -77,10 +91,13 @@ func think(dt: float) -> void:
 		_retarget = RETARGET_S
 		target_uid = pick_target()
 		_bow = bow_of(co)
+		var e := deg_to_rad((1.0 - aim_skill) * AIM_ERROR_DEG)
+		bias = rng.randf_range(-e, e)
 	if style == "rammer":
 		_ram(dt)
 	else:
 		_fly(dt)
+	_balance(dt)
 	_shoot(dt)
 
 
@@ -102,25 +119,25 @@ func _fly(dt: float) -> void:
 	var co = arena.ships[me]
 	var tgt = arena.ships[foe]
 	var armed := _armed()
-	# The axis its guns point along (ship-local), its shortest range, and how far it may turn off the target.
+	# The axis its fixed guns point along (ship-local: the mean of their outward directions), the
+	# first of them, and its shortest range.
 	var axis := Vector2.ZERO
 	var reach := INF
+	var lead_mount := {}
+	var pivots := Vector2.ZERO  # where the fixed guns turn, summed
+	var fixed := 0
 	for uid in armed:
 		var m: Dictionary = armed[uid]
 		var w: Dictionary = arena.weapons.def(m["id"])
 		reach = minf(reach, float(w["range"]))
-		if float(w["arc"]) < 360.0:
-			axis += (m["pos"] - co.pivot).normalized()
+		if not w["turret"]:
+			axis += Vector2(m["dir"])
+			pivots += Vector2(m["pos"])
+			fixed += 1
+			if lead_mount.is_empty():
+				lead_mount = m
 	axis = axis.normalized() if axis.length_squared() > 1e-6 else Vector2.UP
-	var margin := STRAFE_MAX_DEG
-	for uid in armed:
-		var m: Dictionary = armed[uid]
-		var arc := float(arena.weapons.def(m["id"])["arc"])
-		if arc < 360.0:
-			var off := rad_to_deg(absf(axis.angle_to((m["pos"] - co.pivot).normalized())))
-			margin = minf(margin, arc * 0.5 - off - 5.0)
-	var offset := deg_to_rad(clampf(margin, STRAFE_MIN_DEG, STRAFE_MAX_DEG))
-	var preferred := RANGE_FRACTION * (reach if reach < INF else DEFAULT_RANGE)
+	var preferred := maxf(RANGE_FRACTION * (reach if reach < INF else DEFAULT_RANGE), _radius(me) + _radius(foe) + HULL_MARGIN)
 	var to_foe: Vector2 = tgt.flight.pos - co.flight.pos
 	var dist := to_foe.length()
 	var u := to_foe / maxf(dist, 1.0)
@@ -132,15 +149,14 @@ func _fly(dt: float) -> void:
 	var lateral: float = co.flight.vel.dot(u.rotated(PI / 2.0))
 	if absf(lateral) > LATERAL_MAX:
 		side = -signf(lateral)
-	# Turn so the guns' axis points at the target, a little to one side.
-	var want: float = u.angle() + side * offset - axis.angle()
-	var err := wrapf(want - co.flight.angle, -PI, PI)
-	var alpha: float = co.thrust * co.flight.turn_factor / maxf(co.mass, 1.0)  # rad/s^2 at full turn
-	var turn := 0.0
-	if alpha > 1e-4:
-		var w_cap := alpha / maxf(co.flight.angular_damping, 0.1) * 0.8
-		var w_des := signf(err) * minf(sqrt(2.0 * alpha * 0.5 * absf(err)), w_cap)
-		turn = clampf((w_des - co.flight.ang_vel) / (alpha * 0.12), -1.0, 1.0)
+	# Turn so the fixed guns' axis leads the target (a guess off by its aim error).
+	var aim: Vector2 = aim_for(lead_mount) if not lead_mount.is_empty() else tgt.flight.pos
+	var want: float = (aim - co.flight.pos).angle() - axis.angle()
+	if fixed > 0:  # the guns sit off the middle: aim so that they, not the centre, point at it
+		for k in 3:
+			var at: Vector2 = co.flight.pos + ((pivots / fixed - co.pivot) * arena.CELL).rotated(want)
+			want = (aim - at).angle() - axis.angle()
+	var turn: float = co.flight.steer_toward(want, co.mass, co.thrust)
 	# Close or open the range with the thrust (it pushes along the heading, near the target's direction).
 	var closing: float = co.flight.vel.dot(u)
 	var brake: float = co.thrust * co.flight.thrust_to_accel / maxf(co.mass, 1.0) * co.flight.REVERSE * 0.6  # px/s^2 it can stop with
@@ -151,8 +167,14 @@ func _fly(dt: float) -> void:
 	if heading.dot(u) > 0.5:
 		throttle = clampf((want_closing - closing) / 90.0, -1.0, 1.0)
 		if absf(gap) < preferred * 0.15 and absf(throttle) < HOLD_THROTTLE:
-			throttle = HOLD_THROTTLE * (1.0 if gap >= 0.0 else -1.0)  # keep pushing on the slant: that is the strafe
-	arena.set_input(me, throttle, turn)
+			throttle = HOLD_THROTTLE * (1.0 if gap >= 0.0 else -1.0)  # keep pushing: the hold is a slow orbit
+	var strafe := side if float(co.thrusts["left"]) + float(co.thrusts["right"]) > 0.0 else 0.0
+	arena.set_input(me, throttle, turn, strafe)
+
+
+## Px from the pivot of ship `idx` to its farthest cell corner: how far its hull reaches.
+func _radius(idx: int) -> float:
+	return float(Collisions.hit_cells(arena, idx)["radius"])
 
 
 ## The ship's bow, ship-local: the unit vector toward the side (up, down, left, right of its centre)
@@ -179,12 +201,7 @@ static func bow_of(co) -> Vector2:
 ## Helm turn (-1..1) that brings an angle error `err` (rad, positive is clockwise) to zero, braking in time.
 func _turn_for(err: float) -> float:
 	var co = arena.ships[me]
-	var alpha: float = co.thrust * co.flight.turn_factor / maxf(co.mass, 1.0)  # rad/s^2 at full turn
-	if alpha <= 1e-4:
-		return 0.0
-	var w_cap := alpha / maxf(co.flight.angular_damping, 0.1) * 0.8
-	var w_des := signf(err) * minf(sqrt(2.0 * alpha * 0.5 * absf(err)), w_cap)
-	return clampf((w_des - co.flight.ang_vel) / (alpha * 0.12), -1.0, 1.0)
+	return co.flight.steer_toward(co.flight.angle + err, co.mass, co.thrust)
 
 
 ## A rammer's flying: bow at the foe's future position and full throttle, or reversing after a collision.
@@ -216,6 +233,23 @@ func _ram(dt: float) -> void:
 		arena.use_key(me, "engine")
 
 
+## Seconds between two steps of shield balance.
+func shift_interval() -> float:
+	return SHIFT_BASE_S - aim_skill
+
+
+## With a sectored shield: a step of weight toward the sector that faces the foe every shift_interval().
+func _balance(dt: float) -> void:
+	var co = arena.ships[me]
+	if co.sectors < 2 or co.layers_cap <= 0:
+		return
+	_shift_in -= dt
+	if _shift_in > 0.0:
+		return
+	_shift_in = shift_interval()
+	Shields.shift_sector(co, Shields.sector_of_world_dir(co, arena.ships[foe].flight.pos - co.flight.pos))
+
+
 # --- shooting ------------------------------------------------------------------------------------
 
 ## The foe's part to aim at: its first alive part of the first family in PRIORITY that has one, else
@@ -242,14 +276,17 @@ func pick_target() -> int:
 
 
 func _part_ok(uid: int) -> bool:
-	var inst = arena.ships[foe].ship.components.instances.get(uid)
-	return inst != null and inst.get("status", "ok") != "disabled" and float(inst.get("hp", 1)) > 0.0
+	var ship = arena.ships[foe].ship
+	var inst = ship.components.instances.get(uid)
+	return inst != null and inst.get("status", "ok") != "disabled" and float(inst.get("hp", 1)) > 0.0 and ship.components.offline_reason(ship.grid, uid) == ""
 
 
-## The centre of part `uid` of ship `idx`, in its grid cell coordinates.
+## The centre of part `uid` of ship `idx`, in its grid cell coordinates: the outside half of a hull
+## mount (what the pilot sees), else the part.
 func part_centre(idx: int, uid: int) -> Vector2:
 	var sum := Vector2.ZERO
-	var cells: Array = arena.ships[idx].ship.components.instances[uid]["cells"]
+	var inst: Dictionary = arena.ships[idx].ship.components.instances[uid]
+	var cells: Array = inst["out_cells"] if not inst["out_cells"].is_empty() else inst["cells"]
 	for c in cells:
 		sum += Vector2(c) + Vector2(0.5, 0.5)
 	return sum / cells.size()
@@ -285,7 +322,8 @@ func point_velocity(idx: int, local: Vector2) -> Vector2:
 	return co.flight.vel + r.rotated(PI / 2.0) * co.flight.ang_vel
 
 
-## The world point to aim mount `m` at: the chosen part (or the centre of the ship), led, with the jitter.
+## The world point to aim mount `m` at: the chosen part (or the centre of the ship), led, and turned off
+## by the pilot's aim error `bias` when `jitter`.
 func aim_for(m: Dictionary, jitter := true) -> Vector2:
 	var local: Vector2 = part_centre(foe, target_uid) if target_uid >= 0 and _part_ok(target_uid) else arena.ships[foe].pivot
 	var origin: Vector2 = arena.local_to_world(me, m["pos"])
@@ -293,7 +331,7 @@ func aim_for(m: Dictionary, jitter := true) -> Vector2:
 	var speed := float(w["speed"]) if w["kind"] in ["bolt", "flak", "missile"] else 0.0
 	var aim := lead_point(origin, arena.local_to_world(foe, local), point_velocity(foe, local), speed)
 	if jitter:
-		aim = origin + (aim - origin).rotated(deg_to_rad(rng.randf_range(-JITTER_DEG, JITTER_DEG)))
+		aim = origin + (aim - origin).rotated(bias)
 	return aim
 
 
@@ -305,13 +343,16 @@ func _shoot(dt: float) -> void:
 	var uids: Array = co.mounts.keys()
 	uids.sort()
 	for uid in uids:
-		if arena.cooldown_left(me, uid) > 0.0:
-			continue
 		var m: Dictionary = co.mounts[uid]
 		var w: Dictionary = arena.weapons.def(m["id"])
+		if w["turret"]:
+			continue  # it tracks and fires by itself (Weapons.tick_turrets)
 		var aim := aim_for(m)
-		var origin: Vector2 = arena.local_to_world(me, m["pos"])
-		if origin.distance_to(aim) > float(w["range"]) or arena.weapons.can_fire(arena, me, uid, aim) != "":
+		arena.weapons.point_barrel(arena, me, uid, aim)
+		if arena.cooldown_left(me, uid) > 0.0:
+			continue
+		var origin: Vector2 = arena.weapons.muzzle_of(arena, me, m)
+		if origin.distance_to(aim) > float(w["range"]) or arena.weapons.can_fire(arena, me, uid, aim) != "" or not arena.weapons.in_arc(arena, me, m, aim):
 			continue
 		if not danger.is_empty() and Shields.drop_seconds(w) > 0.0:
 			var s := Shields.outgoing_sector(co, m["pos"], (aim - origin).rotated(-co.flight.angle))

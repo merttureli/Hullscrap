@@ -2,7 +2,10 @@ extends Node2D
 ## Build mode and play mode on the player's ship (from ShipSim.player_ship()). B switches.
 ## Build mode edits three layers through BuildSession, which pays, refunds and keeps the undo history.
 ## Tab cycles the palette (Tiles, Systems, Cables). Tiles: 1-3 pick one. Systems: 1-9 pick a system
-## from the cargo, R rotates it. Cables: nothing to pick. A door is a piece of two cells (a crew body
+## from the cargo, R rotates it. A weapon or engine is a hull mount (docs/CONTENT.md 4f): point at the cell where
+## its OUTSIDE half goes, in space against the outer wall face (outward is up at 0 degrees, R turns it); the
+## game walks inward through the wall and puts the inside half on the floor behind it, and the ghost shows both
+## halves and the wall between them. Cables: nothing to pick. A door is a piece of two cells (a crew body
 ## is 2x2): with Door selected the ghost is that piece, turned to fit the wall (R flips it), LMB
 ## places it as one step and RMB on either cell removes it all. LMB paints (a whole stroke is one undo
 ## step; a system is placed on release), Shift+LMB draws a straight line, Ctrl+LMB a rectangle (a
@@ -15,7 +18,8 @@ extends Node2D
 ## mouse, O shows oxygen, P shows power, Ctrl+S saves to user://ship.json, Ctrl+L loads it, wheel zooms.
 ## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F sends the nearest
 ## crew member to repair the system under the mouse. Play mode only: N asks the ship picker (ship_picker.gd) for another ship,
-## M opens the map of the Drift (map_view.gd; the campaign is saved and loaded with the ship).
+## M opens the map of the Drift (map_view.gd; the campaign is saved and loaded with the ship). H (both modes) opens the Shields tab
+## (shield_panel.gd), where the shield balance of the ship is set.
 ## W, A, S, D are reserved for player movement: do not bind them without a modifier.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -23,11 +27,13 @@ const Rooms = preload("res://scripts/sim/rooms.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
+const Mounts = preload("res://scripts/ship/mounts.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const MapView = preload("res://scripts/ui/map_view.gd")
+const ShieldPanel = preload("res://scripts/ui/shield_panel.gd")
 const CELL := 32
 const SAVE_PATH := "user://ship.json"
 const OK_TINT := Color(0.35, 1, 0.45)
@@ -48,6 +54,7 @@ var sim: Node  ## the ShipSim that owns the ships
 var crew: Node  ## the crew view, for the player's position
 var picker: Node  ## the ship picker (ship_picker.gd): while it is open this node ignores input
 var drift: Node  ## the map of the Drift (map_view.gd), made in _ready if the scene has none; M opens it
+var shields: Node  ## the Shields tab (shield_panel.gd), made in _ready if the scene has none; H opens it
 var build_on := true  ## false = play mode
 var combat := false  ## a fight is on (combat_view.gd): this node ignores input and does not draw
 var group: int = Group.TILES
@@ -101,6 +108,9 @@ func _ready() -> void:
 	drift = get_node_or_null("../DriftLayer/MapView")
 	if drift == null and get_parent() != null:
 		_make_drift()
+	shields = get_node_or_null("../ShieldLayer/ShieldPanel")
+	if shields == null and get_parent() != null:
+		_make_shields()
 	selected = grid.defs.ids()[0]
 	for id in grid.defs.ids():
 		_add_material(grid.cost_of(id))
@@ -118,6 +128,18 @@ func _make_drift() -> void:
 	drift = MapView.new()
 	drift.name = "MapView"
 	layer.add_child(drift)
+	get_parent().add_child.call_deferred(layer)
+
+
+## The Shields tab, in a canvas layer of its own (above the crafting panel, under the picker).
+func _make_shields() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "ShieldLayer"
+	layer.layer = 4
+	shields = ShieldPanel.new()
+	shields.name = "ShieldPanel"
+	shields.sim = sim
+	layer.add_child(shields)
 	get_parent().add_child.call_deferred(layer)
 
 
@@ -225,6 +247,9 @@ func _on_key(e: InputEventKey) -> void:
 					message = "M: switch to play mode (B) to open the map"
 				elif drift != null:
 					drift.open()
+			KEY_H:
+				if shields != null:
+					shields.open()
 			_:
 				if build_on:
 					_build_key(e.keycode, e.shift_pressed)
@@ -381,7 +406,7 @@ func _toggle_door() -> void:
 
 
 func _repair_under_mouse() -> void:
-	var uid := ship.components.at(hover)
+	var uid := ship.components.any_at(hover)  # either half of a hull mount
 	if uid < 0:
 		message = "no system under the mouse"
 		return
@@ -538,9 +563,13 @@ func _selection_text() -> String:
 			if sel_component == "":
 				return "selected: nothing"
 			var last: Vector2i = ship.components.footprint(sel_component, Vector2i.ZERO, rot).back()
-			return "selected: %s (1 from cargo, %d held)   %dx%d   rotation %d deg" % [
+			var line := "selected: %s (1 from cargo, %d held)   %dx%d   rotation %d deg" % [
 				ship.components.def(sel_component).get("name", sel_component), ship.inventory.count(sel_component),
 				last.x + 1, last.y + 1, rot * 90]
+			if ship.components.is_mount(sel_component):
+				var out := Mounts.turned(ship.components.def(sel_component)["mount"]["outside"], rot)
+				line += "   + outside half %dx%d, pointing %s: put it in space against the wall" % [out.x, out.y, ["up", "right", "down", "left"][rot]]
+			return line
 		Group.CABLES:
 			return "selected: Cable (cost %s per cell)   cables %d" % [_cost_text(session.cable_cost), ship.cables.cells.size()]
 	if grid.tile_flag(selected, "door"):
@@ -597,7 +626,7 @@ func _controls_text() -> String:
 		elif grid.tile_flag(selected, "door"):
 			how = "LMB place a 2-cell door in a wall   RMB remove   R flip"
 	elif group == Group.SYSTEMS:
-		how = "LMB place   RMB remove   R rotate   F repair"
+		how = "LMB place (a weapon or engine: its outside half on the mouse)   RMB remove   R rotate   F repair"
 	return "%s   E door   O oxygen   P power\nCtrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   wheel zoom" % how
 
 
@@ -626,6 +655,7 @@ func _draw() -> void:
 		_draw_tile(c, grid.tiles[c], open_doors)
 	if build_on or show_power:
 		_draw_cables(_network_tints() if show_power else {})
+	Visuals.draw_wrecks(self, ship.components.wrecks, _origin(), CELL)
 	_draw_components()
 	if show_o2:
 		_draw_oxygen()
@@ -703,6 +733,17 @@ func _draw_components() -> void:
 		var inst: Dictionary = ship.components.instances[uid]
 		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL,
 			{"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads})
+	for uid in uids:  # the outside half and barrel of each hull mount, over the edge of the wall
+		var inst: Dictionary = ship.components.instances[uid]
+		if not inst["out_cells"].is_empty():
+			var def: Dictionary = ship.components.def(inst["id"])
+			Visuals.draw_mount_out(self, def, inst, _cells_rect(inst["out_cells"]), _pivot_px(def, inst["out_anchor"], inst["rot"]), CELL, Vector2.ZERO,
+				{"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads})
+
+
+## Where the barrel of mount `def` turns, in the canvas' pixels, for an outside half at `out` turned `rot`.
+func _pivot_px(def: Dictionary, out: Vector2i, rot: int) -> Vector2:
+	return _origin() + Vector2(Mounts.barrel(def, out, rot)["pivot"]) * CELL
 
 
 ## Each room cell from red (empty) to blue (full); breached rooms get an outline.
@@ -819,17 +860,39 @@ func _draw_cross(r: Rect2, tint: Color) -> void:
 func _draw_ghost_system(g: Dictionary, tint: Color) -> void:
 	var id: String = g.get("id", "")
 	var cells: Array = []
-	if id != "":
-		cells = ship.components.footprint(id, g["anchor"], g["rot"])
-	else:
-		var uid: int = ship.components.at(g["cell"])
+	if id == "":  # a removal: both halves of a mount
+		var uid: int = ship.components.any_at(g["cell"])
 		if uid < 0:
 			return
-		id = ship.components.instances[uid]["id"]
-		cells = ship.components.instances[uid]["cells"]
+		var inst: Dictionary = ship.components.instances[uid]
+		for half in [inst["cells"], inst["out_cells"]]:
+			if not half.is_empty():
+				_draw_cross(_cells_rect(half).grow(-1), tint)
+				draw_rect(_cells_rect(half).grow(-1), tint, false, 2.0)
+		return
+	if ship.components.is_mount(id):
+		_draw_ghost_mount(g, tint)
+		return
+	cells = ship.components.footprint(id, g["anchor"], g["rot"])
 	var r := _cells_rect(cells).grow(-1)
-	if g.has("id"):
-		Visuals.draw_component(self, _cells_rect(cells), ship.components.def(id), {"rot": g["rot"]}, CELL, {"alpha": 0.6})
-	else:
-		_draw_cross(r, tint)
+	Visuals.draw_component(self, _cells_rect(cells), ship.components.def(id), {"rot": g["rot"]}, CELL, {"alpha": 0.6})
 	draw_rect(r, tint, false, 2.0)
+
+
+## A hull mount about to be placed with its outside half on g["anchor"]: the outside half and barrel there, and, when the
+## placement rule finds a spot behind the wall, the inside half, with the wall between them lit.
+func _draw_ghost_mount(g: Dictionary, tint: Color) -> void:
+	var id: String = g["id"]
+	var def: Dictionary = ship.components.def(id)
+	var out_cells := Mounts.rect_cells(Rect2i(g["anchor"], Mounts.turned(def["mount"]["outside"], g["rot"])))
+	var out_rect := _cells_rect(out_cells)
+	Visuals.draw_mount_out(self, def, {"rot": g["rot"]}, out_rect, _pivot_px(def, g["anchor"], g["rot"]), CELL, Vector2.ZERO, {"alpha": 0.6})
+	draw_rect(out_rect.grow(-1), tint, false, 2.0)
+	var plan: Dictionary = ship.components.plan_mount(grid, id, g["anchor"], g["rot"])
+	if plan["why"] != "":
+		return
+	for c in plan["link"]:
+		draw_rect(cell_rect(c).grow(-5), Color(tint, 0.35))
+	var in_rect := _cells_rect(plan["cells"])
+	Visuals.draw_component(self, in_rect, def, {"rot": g["rot"]}, CELL, {"alpha": 0.6})
+	draw_rect(in_rect.grow(-1), tint, false, 2.0)

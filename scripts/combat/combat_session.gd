@@ -20,12 +20,14 @@ const SPAWN_DISTANCE := 1200.0  ## px the enemy starts ahead of the player
 const LEAVE_DISTANCE := 4000.0  ## px apart at which Esc lets the player disengage
 const STEP := 1.0 / 60.0
 const MAX_TICKS := 8  ## substeps one frame may run, so a stall does not snowball
+const STEER_MIN_DISTANCE := 48.0  ## px: a cursor closer to the ship than this does not turn it
 const WON_TEXT := "Pirate wrecked. Salvage comes later. Esc to return"
 const LOST_TEXT := "Your ship is wrecked. R to restart"
 
 var arena: Arena
 var ai: PilotAI
-var input := {"throttle": 0.0, "turn": 0.0}  ## the player's helm, set by the view
+var input := {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}  ## the player's keys, set by the view: W/S throttle, A/D "turn" (keys steering) or "strafe" (mouse steering)
+var cursor: Variant = null  ## the world point the mouse is on, set by the view each frame; the ship turns toward it (mouse steering) and the fixed guns' barrels follow it. null: keys steering, barrels at rest
 var enemy_label := "Pirate"
 var _acc := 0.0
 
@@ -61,7 +63,8 @@ func start(player: Ship, enemy: Ship, seed_value := 1) -> void:
 	arena.add_ship(player, Vector2.ZERO, 0.0)
 	arena.add_ship(enemy, Vector2(0.0, -SPAWN_DISTANCE), PI)
 	ai = PilotAI.new(arena, ENEMY, PLAYER, enemy.get_meta("ai", {}))
-	input = {"throttle": 0.0, "turn": 0.0}
+	input = {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
+	cursor = null
 	_acc = 0.0
 
 
@@ -70,9 +73,33 @@ func tick(dt: float) -> void:
 	_acc = minf(_acc + dt, MAX_TICKS * STEP)
 	while _acc >= STEP - 1e-9:
 		_acc -= STEP
-		arena.set_input(PLAYER, input["throttle"], input["turn"])
+		var helm := helm_input()
+		arena.set_input(PLAYER, helm["throttle"], helm["turn"], helm["strafe"])
+		if cursor != null:
+			arena.aim_points[PLAYER] = cursor
 		ai.think(STEP)
 		arena.step(STEP)
+
+
+## The helm the player's ship gets this substep. Mouse steering (data/flight.json controls.steer, with
+## a cursor): the ship turns toward the cursor at its turn rate and A/D strafe. Keys steering (or no
+## cursor yet): A/D turn, no strafe.
+func helm_input() -> Dictionary:
+	var co = arena.ships[PLAYER]
+	var throttle := float(input.get("throttle", 0.0))
+	if cursor != null and co.flight.steer == "mouse":
+		var to: Vector2 = cursor - co.flight.pos
+		var turn := 0.0
+		if to.length() > STEER_MIN_DISTANCE:
+			turn = co.flight.steer_toward(to.angle() + PI / 2.0, co.mass, co.thrust)
+		return {"throttle": throttle, "turn": turn, "strafe": float(input.get("strafe", 0.0))}
+	return {"throttle": throttle, "turn": float(input.get("turn", 0.0)), "strafe": 0.0}
+
+
+## T: the player's turrets fire by themselves, or hold fire. Returns whether they autofire now.
+func toggle_autofire() -> bool:
+	arena.autofire[PLAYER] = not arena.autofire.get(PLAYER, true)
+	return arena.autofire[PLAYER]
 
 
 ## "fighting", "won" (the enemy is wrecked) or "lost" (the player is; this wins when both are).
@@ -101,7 +128,7 @@ func can_leave() -> bool:
 	return arena.ships[ENEMY].wrecked or distance() > LEAVE_DISTANCE
 
 
-## The player's weapons in slot order: [{uid, id, name, group}]: placed ones by uid, then virtual mounts as added.
+## The player's weapons in slot order: [{uid, id, name, group, turret}]: placed ones by uid, then virtual mounts as added.
 func weapons() -> Array:
 	var co = arena.ships[PLAYER]
 	var uids: Array = co.mounts.keys()
@@ -112,7 +139,7 @@ func weapons() -> Array:
 		var name := str(m["id"])
 		if not m["virtual"]:
 			name = str(co.ship.components.def(co.ship.components.instances[uid]["id"]).get("name", name))
-		out.append({"uid": uid, "id": m["id"], "name": name, "group": arena.weapons.group_of(m["id"])})
+		out.append({"uid": uid, "id": m["id"], "name": name, "group": arena.weapons.group_of(m["id"]), "turret": bool(arena.weapons.def(m["id"])["turret"])})
 	return out
 
 
@@ -132,16 +159,18 @@ func fire_slot(slot: int, aim: Vector2) -> bool:
 
 
 ## What the weapon bar shows for the player's weapon `uid` aiming at `aim`: {cooldown_left, cooldown,
-## status ("ready", "cooling down", "out of arc", "unpowered", "no ammo", "malfunction", "overheated",
-## "disabled", "wrecked"), in_arc}.
+## status ("ready", "cooling down", "out of arc" (a turret), "no target", "unpowered", "no ammo", "malfunction",
+## "overheated", "disabled" (an outside half shot out), "offline" (a cut link), "wrecked"), in_arc (the
+## point is inside the gun's gimbal cone, or the turret's arc), turret, hit (a turret's chance to hit the
+## enemy, 0..1; -1 for a fixed gun)}.
 func slot_state(uid: int, aim: Vector2) -> Dictionary:
 	var m: Dictionary = arena.ships[PLAYER].mounts[uid]
 	var why: String = arena.weapons.can_fire(arena, PLAYER, uid, aim)
 	var in_arc: bool = arena.weapons.in_arc(arena, PLAYER, m, aim)
-	if why == "cooling down" and not in_arc:
-		why = "out of arc"
+	var turret: bool = arena.weapons.def(m["id"])["turret"]
 	return {"cooldown_left": arena.cooldown_left(PLAYER, uid), "cooldown": float(arena.weapons.def(m["id"])["cooldown"]),
-		"status": "ready" if why == "" else why, "in_arc": in_arc}
+		"status": "ready" if why == "" else why, "in_arc": in_arc, "turret": turret,
+		"hit": arena.weapons.hit_chance(arena, PLAYER, uid, ENEMY) if turret else -1.0}
 
 
 ## The player's ability slots in key order (Abilities.slots): [{uid, id, slot, key, name, part, ability}].
@@ -174,13 +203,36 @@ func ability_state(s: Dictionary) -> Dictionary:
 		"cooldown": float(s["ability"].get("cooldown", 0.0)), "reason": "" if state in ["active", "ready"] else why}
 
 
+## The player presses an arrow key: one step of shield balance toward "up" (bow), "down" (stern), "left"
+## (port) or "right" (starboard). "" when it moved, else why not.
+func shift_shield(dir: String) -> String:
+	return Shields.shift(arena.ships[PLAYER], dir)
+
+
+## The player presses End: every sector back to weight 1. The losers drop at once, the gainers recharge.
+func reset_shield() -> void:
+	Shields.reset_even(arena.ships[PLAYER])
+
+
+## What the shield diagram shows: one entry per sector of the player's bubble, bow first, clockwise:
+## {layers, cap, weight, open, filling}. Empty with no shield generator.
+func shield_sectors() -> Array:
+	var co = arena.ships[PLAYER]
+	var out := []
+	if co.layers_cap <= 0:
+		return out
+	for s in co.sectors:
+		out.append(Shields.sector_state(co, s, arena.tick))
+	return out
+
+
 ## Where the camera should be and how far to zoom so both ships fit a viewport of `view` px:
 ## {center, zoom}. `margin`: the fraction of the screen kept free.
 func framing(view: Vector2, margin := 0.2) -> Dictionary:
 	var a = arena.ships[PLAYER]
 	var b = arena.ships[ENEMY]
-	var reach_a: float = (Shields.axes(a).length() + 1.0) * arena.CELL
-	var reach_b: float = (Shields.axes(b).length() + 1.0) * arena.CELL
+	var reach_a: float = (Shields.reach(a) + 1.0) * arena.CELL
+	var reach_b: float = (Shields.reach(b) + 1.0) * arena.CELL
 	var centre: Vector2 = (a.flight.pos + b.flight.pos) / 2.0
 	var half: Vector2 = (a.flight.pos - b.flight.pos).abs() / 2.0 + Vector2.ONE * maxf(reach_a, reach_b)
 	var zoom := minf(view.x / (2.0 * half.x), view.y / (2.0 * half.y)) * (1.0 - margin)

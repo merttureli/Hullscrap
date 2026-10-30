@@ -23,7 +23,7 @@ func _rig(part_id: String, reactor_id := "reactor_mk1") -> Dictionary:
 	var ship := Fixture.room_ship()
 	var d := {"ship": ship}
 	d["reactor"] = Fixture.put(ship, reactor_id, 10, 10)
-	d["part"] = Fixture.put(ship, part_id, 15, 10)
+	d["part"] = Fixture.put(ship, part_id, 15, 10, 2)  # turned round: a bare engine pushes opposite its nozzle, and the nozzle of rotation 0 points up
 	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	return d
@@ -346,7 +346,7 @@ func test_a_running_ability_can_change_every_weapon_cooldown() -> void:
 			"effects": {"charge_mult": 0.5}, "side_effects": []}]
 		var a := Arena.new(1)
 		a.add_ship(d["ship"])
-		a.weapons.defs["slow"] = {"kind": "laser", "damage_type": "energy", "damage": 1, "arc": 360, "cooldown": 2.0, "range": 2000}
+		a.weapons.defs["slow"] = {"kind": "laser", "damage_type": "energy", "damage": 1, "gimbal": 180, "cooldown": 2.0, "range": 2000}
 		var gun := a.add_mount(0, "slow", Vector2(15.5, 5.5))
 		if haste:
 			a.use_key(0, "utility")

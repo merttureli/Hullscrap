@@ -61,11 +61,11 @@ func test_fire_groups_follow_the_weapon_kinds() -> void:
 	arena.add_mount(Session.PLAYER, "test_bolt", Vector2(31.0, 28.0))
 	arena.add_mount(Session.PLAYER, "test_missile", Vector2(31.0, 28.0))
 	var list := s.weapons()
-	eq(list.map(func(x): return x["id"]), ["laser_mk1", "laser_mk1", "test_bolt", "test_missile"], "placed weapons first, then the added ones")
+	eq(list.map(func(x): return x["id"]), ["laser_mk1", "rattle_burst_scrap", "test_bolt", "test_missile"], "placed weapons first, then the added ones")
 	var aim: Vector2 = arena.ships[Session.ENEMY].flight.pos
 	eq(s.fire_group(2, aim), 1, "the right button: the one missile")
 	eq(arena.projectiles.size(), 1, "launched")
-	eq(s.fire_group(1, aim), 3, "the left button: both lasers and the bolt, not the missile")
+	eq(s.fire_group(1, aim), 3, "the left button: the laser, the rattle turret and the bolt, not the missile")
 	eq(s.fire_group(1, aim), 0, "all cooling down")
 	arena.ships[Session.PLAYER].cooldowns.clear()
 	check(s.fire_slot(3, aim), "slot 3 is the bolt")
@@ -78,20 +78,30 @@ func test_the_weapon_bar_states() -> void:
 	var arena = s.arena
 	var uid: int = s.weapons()[0]["uid"]
 	var ahead: Vector2 = arena.ships[Session.ENEMY].flight.pos
-	var st := s.slot_state(uid, ahead)
-	eq([st["status"], st["in_arc"], st["cooldown_left"]], ["ready", true, 0.0], "ready, in arc")
-	eq(s.slot_state(uid, Vector2(0.0, 1500.0))["status"], "out of arc", "aimed behind the ship")
+	var st := s.slot_state(uid, Vector2(0.0, -1500.0))
+	eq([st["status"], st["in_arc"], st["cooldown_left"], st["turret"], st["hit"]], ["ready", true, 0.0, false, -1.0], "a fixed gun: ready, and the point is inside its gimbal cone")
+	st = s.slot_state(uid, Vector2(0.0, 1500.0))
+	eq([st["status"], st["in_arc"]], ["ready", false], "aimed behind the ship it is still ready (it fires along its barrel), but the point is out of its cone")
 	s.fire_slot(1, ahead)
 	st = s.slot_state(uid, ahead)
 	eq(st["status"], "cooling down", "just fired")
 	check(st["cooldown_left"] > 1.0 and st["cooldown"] == 1.2, "with the cooldown counting: %s" % str(st))
-	eq(s.slot_state(uid, Vector2(0.0, 1500.0))["status"], "out of arc", "out of arc outranks cooling")
+	eq(s.slot_state(uid, Vector2(0.0, 1500.0))["in_arc"], false, "the cone is still out of reach while it cools")
 	arena.ships[Session.PLAYER].ship.components.instances[uid]["status"] = "malfunction"
 	eq(s.slot_state(uid, ahead)["status"], "malfunction", "a jammed gun")
 	arena.ships[Session.PLAYER].ship.components.instances[uid]["status"] = "ok"
 	arena.ships[Session.PLAYER].ship.components.instances[uid]["hp"] = 0
 	arena.ships[Session.PLAYER].ship.components.instances[uid]["status"] = "disabled"
 	eq(s.slot_state(uid, ahead)["status"], "disabled", "a disabled one")
+	var turret: int = s.weapons()[1]["uid"]
+	st = s.slot_state(turret, ahead)
+	eq([st["status"], st["turret"], st["in_arc"]], ["ready", true, true], "the Rattle Burst turret: ready, the enemy is inside its arc")
+	near(st["hit"], 0.6, "its hit chance against a ship that stands still: its accuracy")
+	arena.ships[Session.ENEMY].flight.vel = Vector2(0.0, -300.0)
+	near(s.slot_state(turret, ahead)["hit"], 0.6 - 0.125, "less the target's evasion at half its top speed")
+	eq(s.slot_state(turret, Vector2(0.0, 1500.0))["status"], "ready", "a turret shoots at the enemy whatever the cursor says")
+	arena.ships[Session.ENEMY].flight.pos = Vector2(0.0, 1200.0)
+	eq(s.slot_state(turret, ahead)["status"], "out of arc", "but not at an enemy behind it, outside its 240 degree arc")
 	eq(Schematic.component_state({"id": "x", "power": -2, "hp": 4}, {"hp": 4, "status": "ok"}, false), "unpowered", "schematic: a consumer without power")
 	eq(Schematic.component_state({"id": "x", "power": -2, "hp": 4}, {"hp": 2, "status": "ok"}, true), "damaged", "schematic: damaged")
 	eq(Schematic.component_state({"id": "x", "power": 4, "hp": 4}, {"hp": 4, "status": "overheated"}, true), "overheated", "schematic: overheated")

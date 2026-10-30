@@ -26,12 +26,20 @@ func _ship() -> Ship:
 	return Ship.new("t", g)
 
 
+## Eight wall cells near the edge of `s`, beside its middle row and column (which the shots travel along):
+## the bubble hugs the solid cells, so this makes it span the whole 31x31 hull.
+func _edged(s: Ship) -> Ship:
+	for c in [Vector2i(1, 14), Vector2i(1, 16), Vector2i(29, 14), Vector2i(29, 16), Vector2i(14, 1), Vector2i(16, 1), Vector2i(14, 29), Vector2i(16, 29)]:
+		s.grid.force_tile(c, "wall")
+	return s
+
+
 ## Ship 0 shoots (laser_mk1 on its east side); ship 1 has a wall at (3, 15), in the line of fire,
 ## a reactor and `shields` Mk1 shield generators wired up (`wired` false leaves out the cable).
 func _duel(shields: int, wired := true, seed_value := 1) -> void:
 	arena = Arena.new(seed_value)
 	arena.add_ship(_ship())
-	target = _ship()
+	target = _edged(_ship())
 	target.grid.force_tile(Vector2i(3, 15), "wall")
 	check(target.components.place(target.grid, "reactor_mk1", Vector2i(9, 19), 0) > 0, "reactor placed")
 	for i in shields:
@@ -44,7 +52,7 @@ func _duel(shields: int, wired := true, seed_value := 1) -> void:
 
 
 func _def(id: String, d: Dictionary) -> int:
-	var full := {"kind": "laser", "damage_type": "energy", "damage": 1, "arc": 360, "cooldown": 0.0, "range": 2000}
+	var full := {"kind": "laser", "damage_type": "energy", "damage": 1, "gimbal": 180, "cooldown": 0.0, "range": 2000}
 	full.merge(d, true)
 	arena.weapons.defs[id] = full
 	return arena.add_mount(0, id, Vector2(20.5, 15.5))
@@ -161,26 +169,6 @@ func test_a_wreck_has_no_shields() -> void:
 	_shoot(gun)
 	eq(_count("shield"), 0, "nothing absorbed")
 	eq(_count("hit"), 1, "the derelict still takes hits")
-
-
-func test_the_bubble_is_an_ellipse_around_the_hull_box_plus_a_margin() -> void:
-	_duel(1)
-	var co = arena.ships[1]
-	eq(Shields.axes(co), Vector2(16.5, 16.5), "31x31 hull box: 15.5 + 1 margin")
-	near(Shields.entry_t(co, Vector2(-5.0, 15.5), Vector2(15.5, 15.5)), 4.0 / 20.5, "enters at x = -1")
-	eq(Shields.entry_t(co, Vector2(15.5, 15.5), Vector2(40.0, 15.5)), -1.0, "a segment that starts inside is already through")
-	eq(Shields.entry_t(co, Vector2(-5.0, 15.5), Vector2(-2.0, 15.5)), -1.0, "stops short")
-	eq(Shields.entry_t(co, Vector2(-5.0, -20.0), Vector2(40.0, -20.0)), -1.0, "passes above")
-	eq(Shields.entry_t(co, Vector2(-5.0, 33.0), Vector2(40.0, 33.0)), -1.0, "passes below")
-	# A wide, short hull: cells 5..24 x 10..14 -> 20 x 5 box -> axes 11 x 3.5.
-	var s := _ship()
-	s.grid.hull.clear()
-	for y in range(10, 15):
-		for x in range(5, 25):
-			s.grid.hull[Vector2i(x, y)] = true
-	var i := arena.add_ship(s)
-	eq(Shields.axes(arena.ships[i]), Vector2(11.0, 3.5), "an ellipse, not a circle")
-	near(Shields.entry_t(arena.ships[i], Vector2(15.0, 0.0), Vector2(15.0, 12.5)), 9.0 / 12.5, "enters at the top of the ellipse, 3.5 above the centre")
 
 
 func test_a_shot_already_inside_the_bubble_is_not_stopped() -> void:

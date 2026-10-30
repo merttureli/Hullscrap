@@ -2,8 +2,10 @@ extends SceneTree
 ## Not a test (the runner only loads test_*.gd). Rebuilds the test rammer enemy, data/ships/rustfang_rammer.json:
 ##   godot --headless --path . --script res://tests/tool_make_rammer.gd
 ## A scrap ship with a ram-plated wedge bow (a two-thick ram plating skin round a floor cavity, its edges
-## built from slope45 pieces), two Kickjets, two Rattle Bursts, two scrap reactors and the rammer pilot
-## style. Local coordinates: the top-left cell of its bounding box is 0,0. Built through BuildSession,
+## built from slope45 pieces, its tip cut flat to carry the bow gun), two Kickjets on the rear wall, a Bolt
+## Thrower through the flat tip of the wedge (a fixed gun: the whole ship is aimed), two scrap reactors and
+## the rammer pilot style. Local coordinates: the top-left cell of its bounding box is 0,0. Built through
+## BuildSession (a mount is [id, x, y, rot] with x, y its OUTSIDE half's top-left, see tool_make_starters.gd),
 ## wired by a breadth-first router, exported with Ship.to_dict() plus its "ai" entry. Prints a map.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -21,9 +23,9 @@ const STOCK := {"scrap": 5000, "copper": 600, "titanium": 400, "polymer": 100}
 const WEDGE := 7  ## rows of the wedge; its widest row spans the whole hull
 const SIDES: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
 const PARTS := [
-	["rattle_burst_scrap", 1, 8], ["rattle_burst_scrap", 9, 8], ["helm", 6, 9],
+	["bolt_thrower_scrap", 5, 0], ["helm", 6, 9],
 	["reactor_scrap_mk1", 1, 13], ["reactor_scrap_mk1", 9, 13],
-	["engine_scrap_mk1", 1, 17], ["engine_scrap_mk1", 9, 17],
+	["engine_scrap_mk1", 1, 20, 2], ["engine_scrap_mk1", 9, 20, 2],
 ]
 
 var _bad := false
@@ -58,17 +60,18 @@ func _init() -> void:
 	_apply(session, changes, "decks")
 
 	# The wedge: row r has its edge slopes at 6 - r and 7 + r, ram plating next to them, floor between.
+	# Its first row (2) is the flat tip, four cells of ram plating, that the bow gun is mounted through.
 	changes = []
-	for r in WEDGE:
+	for r in range(2, WEDGE):
 		for x in range(7 - r, 7 + r):
 			var c := Vector2i(x, r) + off
-			if r >= 1 and (x == 7 - r or x == 6 + r):
+			if r == 2 or x == 7 - r or x == 6 + r:
 				changes.append({"layer": "tile", "cell": c, "to": "ram_plating"})
-			elif r >= 2:
+			else:
 				changes.append({"layer": "tile", "cell": c, "to": "floor"})
 	_apply(session, changes, "wedge body")
 	changes = []
-	for r in WEDGE:
+	for r in range(2, WEDGE):
 		changes.append_array(session.plan_piece("slope45", "ram_plating", Vector2i(6 - r, r) + off, 0, true)["changes"])
 		changes.append_array(session.plan_piece("slope45", "ram_plating", Vector2i(7 + r, r) + off, 0, false)["changes"])
 	_apply(session, changes, "wedge slopes")
@@ -80,7 +83,7 @@ func _init() -> void:
 
 	changes = []
 	for p in PARTS:
-		changes.append({"layer": "component", "id": p[0], "anchor": Vector2i(p[1], p[2]) + off, "rot": 0})
+		changes.append({"layer": "component", "id": p[0], "anchor": Vector2i(p[1], p[2]) + off, "rot": p[3] if p.size() > 3 else 0})
 	_apply(session, changes, "parts")
 	_wire(ship, session)
 
@@ -89,6 +92,10 @@ func _init() -> void:
 	for c in g.tiles:
 		lo = lo.min(c)
 		hi = hi.max(c)
+	for uid in ship.components.instances:
+		for c in ship.components.instances[uid]["out_cells"]:
+			lo = lo.min(c)
+			hi = hi.max(c)
 	lo -= Vector2i(MARGIN, MARGIN)
 	hi += Vector2i(MARGIN, MARGIN)
 	g.hull.clear()
@@ -100,7 +107,7 @@ func _init() -> void:
 
 	var saved := ship.to_dict()
 	saved["blurb"] = "A scrap wedge with ram plating for a nose and two Kickjets for a temper. Flies straight at you, backs off, comes round again."
-	saved["ai"] = {"style": "rammer"}
+	saved["ai"] = {"style": "rammer", "aim_skill": 0.4}
 	var f := FileAccess.open(OUT, FileAccess.WRITE)
 	f.store_string(_format(saved))
 	f.close()
@@ -199,6 +206,8 @@ func _report() -> void:
 	for c in g.tiles:
 		lo = lo.min(c)
 		hi = hi.max(c)
+	lo.y -= 2  # the bow gun's outside half
+	hi.y += 2  # and the engines'
 	var glyph := {"reactor": "R", "engine": "E", "weapon": "W", "helm": "H"}
 	for y in range(lo.y, hi.y + 1):
 		var row := ""
@@ -213,6 +222,8 @@ func _report() -> void:
 			var uid: int = ship.components.at(c)
 			if uid >= 0:
 				ch = glyph.get(ship.components.def(ship.components.instances[uid]["id"])["family"], "?")
+			elif ship.components.at_out(c) >= 0:
+				ch = glyph.get(ship.components.def(ship.components.instances[ship.components.at_out(c)]["id"])["family"], "?").to_lower()
 			row += ch
 		print(row)
 	var unpowered := []

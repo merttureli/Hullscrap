@@ -422,7 +422,7 @@ func test_save_load_round_trip_with_doors_and_cargo() -> void:
 	s.apply(_put("floor", [Vector2i(5, 6)]))
 	s.grid.set_door_open(MID, true)
 	var d: Dictionary = JSON.parse_string(JSON.stringify(s.to_dict()))
-	eq(d["version"], 3, "saved as version 3")
+	eq(d["version"], 4, "saved as version 4")
 	var t := _session(1, 1)
 	t.apply(_put("floor", [MID]))
 	eq(t.load_dict(d), "", "loads")
@@ -475,10 +475,11 @@ func _cable(c: Vector2i, remove := false) -> Dictionary:
 	return {"layer": "cable", "cell": c, "remove": remove}
 
 
-## A session with floor on (3,3)-(11,11), a reactor and two engines in the cargo, and a clean history.
+## A session with floor on (3,3)-(11,11), a reactor, two oxygen generators and two engines (hull mounts) in the cargo, and a clean history.
 func _parts_session(copper := 20) -> BuildSession:
 	var s := _session(200, copper)
 	s.inventory.add("reactor_mk1", 1)
+	s.inventory.add("oxygen_gen", 2)
 	s.inventory.add("engine_mk1", 2)
 	s.apply(_put("floor", BuildSession.rect_cells(Vector2i(3, 3), Vector2i(11, 11))))
 	s.undo_stack.clear()
@@ -513,9 +514,9 @@ func test_placing_a_system_takes_an_item_and_undo_returns_it() -> void:
 
 func test_a_rotated_system_covers_its_rotated_footprint() -> void:
 	var s := _parts_session()
-	var r := s.apply([{"layer": "component", "id": "engine_mk1", "anchor": Vector2i(4, 4), "rot": 1}])
-	eq(r["applied"], 1, "engine placed on its side")
-	check(s.ship.components.at(Vector2i(4, 7)) >= 0 and s.ship.components.at(Vector2i(6, 4)) < 0, "4x2 turned into 2x4")
+	var r := s.apply([{"layer": "component", "id": "oxygen_gen", "anchor": Vector2i(4, 4), "rot": 1}])
+	eq(r["applied"], 1, "generator placed on its side")
+	check(s.ship.components.at(Vector2i(7, 4)) >= 0 and s.ship.components.at(Vector2i(4, 6)) < 0, "2x4 turned into 4x2")
 
 
 func test_without_an_item_a_system_is_skipped_with_its_name() -> void:
@@ -527,8 +528,8 @@ func test_without_an_item_a_system_is_skipped_with_its_name() -> void:
 	eq(s.ship.components.instances.size(), 0, "nothing built")
 	eq(s.undo_stack.size(), 0, "no step")
 	eq(s.preview([_reactor()])[0]["reason"], "no %s in cargo" % name, "the ghost says why")
-	eq(s.apply([{"layer": "component", "id": "engine_mk1", "anchor": Vector2i(0, 0), "rot": 0}])["reason"], "outside the hull", "placement rules come first")
-	eq(s.apply([{"layer": "component", "id": "engine_mk1", "anchor": Vector2i(10, 4), "rot": 0}])["reason"], "needs floor underneath", "needs floor")
+	eq(s.apply([{"layer": "component", "id": "oxygen_gen", "anchor": Vector2i(0, 0), "rot": 0}])["reason"], "outside the hull", "placement rules come first")
+	eq(s.apply([{"layer": "component", "id": "oxygen_gen", "anchor": Vector2i(11, 4), "rot": 0}])["reason"], "needs floor underneath", "needs floor")
 
 
 func test_removing_a_system_returns_the_item() -> void:
@@ -614,7 +615,7 @@ func test_redo_works_across_layers() -> void:
 	s.apply(_put("wall", [Vector2i(9, 9)]))
 	s.apply([_reactor()])
 	s.apply([_cable(Vector2i(4, 4)), _cable(Vector2i(5, 4))])
-	s.apply([_cable(Vector2i(5, 4), true), {"layer": "tile", "cell": Vector2i(8, 8), "to": "wall"}, {"layer": "component", "id": "engine_mk1", "anchor": Vector2i(4, 8), "rot": 0}])
+	s.apply([_cable(Vector2i(5, 4), true), {"layer": "tile", "cell": Vector2i(8, 8), "to": "wall"}, {"layer": "component", "id": "oxygen_gen", "anchor": Vector2i(4, 8), "rot": 0}])
 	var done := _snapshot(s, false)
 	eq(s.undo_stack.size(), 4, "four steps over three layers")
 	while s.undo():
@@ -629,7 +630,7 @@ func test_redo_works_across_layers() -> void:
 	s.redo()
 	s.redo()
 	eq(_snapshot(s, false), done, "and again after a partial undo")
-	eq(s.inventory.count("engine_mk1"), 1, "one engine used")
+	eq(s.inventory.count("oxygen_gen"), 1, "one generator used")
 
 
 func test_preview_of_a_system_changes_nothing() -> void:
