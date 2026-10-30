@@ -35,17 +35,33 @@ Each entry has:
 Combat is **action, not menus**. When an enemy engages, the camera **zooms out to a 1v1 arena**. You fly your ship and physically aim at the enemy's parts. **How you built your ship decides how it fights.**
 
 - **Flying** (the player is at the helm):
-  - **W/S** thrust and reverse, **A/D** turn.
+  - **The ship turns toward the mouse cursor** at its turn rate, so you aim nose guns by flying (owner, 2026-10-30). Heavy ships turn slowly, so they aim slowly.
+  - **W/S** thrust and reverse. **A/D strafe** sideways, using engines mounted on the side walls (thrust × the sideways component of their push). No side engines means no strafe.
+  - A setting `controls.steer` switches to keys (A/D turn as before, with the mouse only aiming gimbals).
   - Speed, acceleration and turn rate come from `flight.gd`: powered engines' thrust against the mass of everything you built.
   - The crew stay aboard and repair, fight fires and man stations on their own.
 - **Aiming**:
-  - **Mouse aims.**
-  - **LMB** fires weapon group 1, **RMB** fires group 2. Lasers default to group 1 and missiles to group 2.
+  - **Fixed guns aim where the ship points** (plus a few degrees of gimbal toward the cursor). Turrets aim themselves (see "Fixed guns and turrets" below).
+  - **LMB** fires weapon group 1, **RMB** fires group 2. Lasers default to group 1 and missiles to group 2. **T** toggles turret autofire.
   - **1–4** fire a single weapon, **Shift** triggers the engine ability (e.g. Afterburner), **Space** the shield ability, **Q** and **E** utility abilities.
   - Weapons have **cooldowns** (charge times) shown on the weapon bar.
-- **Weapon arcs**: a weapon fires from **its own position on your ship**.
-  - It aims within a **120° arc** pointing outward, from the ship's centre through the weapon. Some weapons have their own `arc`; turrets get 360°.
-  - So guns belong on the hull edge, facing out. Flanking the enemy matters.
+- **Fixed guns and turrets (owner, 2026-10-30)**: a weapon fires from **its own hull mount** (4f), outward through its wall.
+  - **Most weapons are fixed.** The barrel points along the mount's outward direction, so **you aim by pointing the ship**.
+    - A small **gimbal** (`gimbal` in degrees; Scrap 3, Standard 5, Neon 8) lets the barrel follow the cursor inside that cone.
+    - Nose guns fire forward, and guns on a side wall fire sideways. **Broadside ships** are a real build.
+    - A faint boresight line shows where each fixed gun points.
+  - **Turrets** (`"turret": true`) rotate within their `arc` (centred on the outward direction) at `track` degrees per second, and **aim themselves** at the enemy with perfect lead, firing when ready.
+    - **Reliable but weak**: about 60% of a fixed gun's damage at the same tier, ×1.5 cost, and 1 more power.
+    - **Hit chance** = `accuracy` (0.6–0.85) − the target's evasion. Evasion = 0.25 × speed ÷ max speed, +0.05 with a manned helm. The weapon bar shows the hit % against the current target.
+    - Each turret shot rolls on the combat RNG. **A hit aims at a random outer cell facing the turret; a miss aims just off the hull.** Then physics takes over: a hard turn can still dodge it, and shields still stop it.
+    - So **turrets can't pick your reactor; a good pilot with fixed guns can.** Turrets suit steady chip damage, ion, and builds that can't turn (rams, freighters).
+  - **Skill beats spending**: a good pilot with cheap fixed guns puts full damage exactly where they want and dodges turret fire. A bad pilot is better off with turrets.
+  - **Targeting Computer** (utility, 2×2, power −1, standard line, C): shows a **lead marker** for fixed guns, and gives turrets +0.1 accuracy.
+    - Variants: Scrap "Spotter's Scope" (cheap, and the marker jitters) and Neon "Oracle Lens" (marker, plus the enemy's weapon charge bars).
+  - **Pilot AI** turns its nose to lead you with fixed guns. `ai.aim_skill` (0–1) adds aim error: Rustfangs 0.5, Concord 0.85.
+  - **Which weapons are turrets**:
+    - Turrets: Rattle Burst (scrap), Siren (neon ion), Leech Laser (★), and a new **Concord Point Turret** `laser_turret_mk1` (standard, damage 1, cooldown 4, accuracy 0.8, arc 270, track 120°/s).
+    - Everything else is fixed: lasers, pulses, Shrapnel Cannon, Bolt Thrower, Artemis, Ion Blast, Heat Lance (sweep the beam by turning) and Breach Harpoon.
 - **Shot types**:
   - **Lasers** are hitscan, an instant beam to the first thing they meet, so you have to track the target.
   - **Pulse, bolt and flak** are projectiles with a travel speed. You have to **lead moving targets**; there's no auto-aim.
@@ -202,9 +218,7 @@ Weapons and engines are **two linked halves**, not FTL's all-outside nor a box i
   - A crew job **`clear_wreck`** (priority 30, 4 s) clears the cells and recovers **half its recipe materials** (rounded down) into cargo. A unique (found) component has no recipe, so wrecking it loses it for good.
   - Fire, heat, ion and malfunctions only ever **disable**. They never wreck.
   - So protect your systems with walls, and repair disabled ones before the next volley lands.
-- **Weapon aim**: the outside turret **rotates to follow the aim** within the weapon's arc.
-  - **The arc is centred on the mount's outward direction**, replacing "centre to weapon". Turrets with arc 360 can sweep fully.
-  - The shot leaves from the barrel's muzzle.
+- **Weapon aim**: fixed guns fire along the mount's outward direction (± `gimbal`). Turrets rotate within their `arc`, centred on the outward direction. See "Fixed guns and turrets" in section 4. The shot leaves from the barrel's muzzle.
 - **Power and crew**: cables connect only to the inside half, and the station is manned there.
 - **Engines**: thrust acts along the **opposite of the nozzle direction**. Forward thrust for W/S is the sum of each engine's thrust × cos(angle between its push and the ship's forward).
   - Rear engines give full thrust, side engines none (lateral thrust and strafing come later).
