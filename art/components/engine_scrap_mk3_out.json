@@ -1,0 +1,71 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_scrap_mk3_out_glow.png",
+  "frame": [
+   84,
+   70
+  ],
+  "offset": [
+   -10,
+   -34
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust_left": [
+   14,
+   1
+  ],
+  "exhaust_right": [
+   41,
+   5
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Scrapper Clans \"Double Kick\", a hull mount (outward is up): two big mismatched bells welded side by side, a dented grey one and a rust one with a grey patch, a welded cross plate with tape, and a small strapped tank; inside the Kickjet core with a second ribbed motor, taped hatches, a rusty feed pipe and wires between the boxes. Damaged: the dent is on fire, the rust bell lost a patch bolt and its flame sputters, the tank strap is snapped and it weeps fuel, sparks in the core. Disabled: both bells bent over at their necks, the weld between them cracked, the tank slid off and split, the core dead. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}

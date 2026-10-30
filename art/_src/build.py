@@ -220,6 +220,60 @@ def validate():
     return bad
 
 
+def read_gpl():
+    out = set()
+    for line in open(os.path.join(ART, 'palette.gpl')).read().splitlines():
+        parts = line.split('\t')
+        if len(parts) == 2 and parts[1].startswith('#'):
+            h = parts[1][1:7]
+            out.add(tuple(int(h[i:i + 2], 16) for i in (0, 2, 4)))
+    return out
+
+
+def validate_crew():
+    """every crew rig in art/crew: the PNG sizes agree with crew.json (frame, frames per layer, glow and mask sizes), hard-pixel layers use only
+    art/palette.gpl colours at alpha 0/255, glow layers only palette hues (alpha may vary), and every pose's mount and hands sit at the same place
+    RELATIVE TO THE PIVOT as the human's (so any item fits any body, also on the large rig)."""
+    import json
+    pal = read_gpl(); bad = 0
+    ref = json.load(open(os.path.join(ART, 'crew/human/crew.json')))
+    def rel(d, pose, key):
+        v = d['layers']['arms']['anchors'][pose][key]
+        return None if v is None else (v[0] - d['pivot'][0], v[1] - d['pivot'][1])
+    for sp in sorted(os.listdir(os.path.join(ART, 'crew'))):
+        base = os.path.join(ART, 'crew', sp)
+        if not os.path.isdir(base): continue
+        d = json.load(open(os.path.join(base, 'crew.json')))
+        fw, fh = d['frame']
+        layers = d['layers']
+        want = {'legs': 7, 'torso': 1, 'arms': 6, 'head': len(layers['head']['frames'])}
+        for name, n in want.items():
+            L = layers[name]
+            for img in (L['image'], L['color_mask']):
+                w, h, rows = read_png(os.path.join(base, img))
+                if (w, h) != (fw * n, fh): print('SIZE', sp, img, (w, h), 'want', (fw * n, fh)); bad += 1
+                for y, row in enumerate(rows):
+                    for x in range(w):
+                        r, g, b, a = row[x * 4:x * 4 + 4]
+                        if a == 0: continue
+                        if a != 255: print('PARTIAL ALPHA', sp, img, x, y); bad += 1
+                        if img == L['image'] and (r, g, b) not in pal: print('OFF-PALETTE', sp, img, x, y, (r, g, b)); bad += 1
+                        if img == L['color_mask'] and (r, g, b) != (244, 246, 248): print('MASK NOT WHITE', sp, img, x, y); bad += 1
+            if 'glow' in L:
+                G = L['glow']; w, h, rows = read_png(os.path.join(base, G['image']))
+                if (h, G['frame']) != (fh, [fw, fh]) or w != fw * G['frames']: print('GLOW SIZE', sp, G['image'], (w, h), G); bad += 1
+                for y, row in enumerate(rows):
+                    for x in range(w):
+                        r, g, b, a = row[x * 4:x * 4 + 4]
+                        if a and (r, g, b) not in pal: print('GLOW OFF-PALETTE', sp, G['image'], x, y, (r, g, b)); bad += 1
+        for pose in layers['arms']['frames']:
+            if pose == 'unarmed': continue
+            for key in ('mount', 'hand_l', 'hand_r'):
+                if rel(d, pose, key) != rel(ref, pose, key): print('MOUNT', sp, pose, key, rel(d, pose, key), 'human', rel(ref, pose, key)); bad += 1
+    print('crew:', 'OK' if not bad else '%d problems' % bad)
+    return bad
+
+
 def check_masks():
     """the autotile index rule N*1 + E*2 + S*4 + W*8 really is what each frame draws."""
     bad = 0
@@ -243,4 +297,4 @@ def check_masks():
 
 if __name__ == '__main__':
     build()
-    sys.exit(1 if (validate() or check_masks() or SH.check_shapes()) else 0)
+    sys.exit(1 if (validate() or validate_crew() or check_masks() or SH.check_shapes()) else 0)

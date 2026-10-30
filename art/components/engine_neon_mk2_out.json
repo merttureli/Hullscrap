@@ -1,0 +1,67 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_neon_mk2_out_glow.png",
+  "frame": [
+   88,
+   72
+  ],
+  "offset": [
+   -12,
+   -36
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust": [
+   32,
+   1
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Lumen \"Ion Drive: Halo\", a hull mount (outward is up): the Glimmer ion rings and spine plus a ring of light round the spine (cyan, magenta nodes, a glint that runs round it) and a soft ring of light in the glow; inside the Glimmer core with a second ring of light round the lens crystal. Damaged: the middle ring has slipped out of line and cracked, the halo ring is broken and arcs jump the gap, the lens crystal is cracked and flickers. Disabled: the top ring snapped half off and hanging, the halo ring broken and dark, the lens shattered, every line dead. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}

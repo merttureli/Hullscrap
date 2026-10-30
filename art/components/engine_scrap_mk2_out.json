@@ -1,0 +1,71 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_scrap_mk2_out_glow.png",
+  "frame": [
+   84,
+   70
+  ],
+  "offset": [
+   -10,
+   -34
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust": [
+   27,
+   1
+  ],
+  "exhaust_small": [
+   6,
+   10
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Scrapper Clans \"Kickjet Deluxe\", a hull mount (outward is up): the Kickjet bell and strapped tank plus a rusty stovepipe nozzle with its own small flame where the bracket was, a racing stripe of hazard tape round the bell and more patches; inside the Kickjet core plus a taped spare plate, a second lamp row and a rusty feed pipe. Damaged: the lower tank strap snapped and the tank sags and weeps fuel, the dent is on fire, the stovepipe is bent over and sputtering, sparks in the core. Disabled: the bell broken off its neck, the stovepipe snapped, the tank slid off and split, the core dead. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}

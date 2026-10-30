@@ -33,11 +33,14 @@ def shade_gen(s, base, hi, lo):
 
 
 
-def pose_anchors(unarmed_l, unarmed_r, hands=None):
+def pose_anchors(unarmed_l, unarmed_r, hands=None, shift=0):
+    """hand and mount targets per pose. `shift` moves the shared targets for a bigger frame whose pivot is at (16+shift, 16+shift):
+    the mounts stay identical RELATIVE TO THE PIVOT, which is what makes every item fit every body."""
     h = dict(HANDS if hands is None else hands)
+    mv = lambda v: (v[0] + shift, v[1] + shift)
     out = {'unarmed': dict(hand_l=unarmed_l, hand_r=unarmed_r, mount=None)}
     for p in POSES[1:]:
-        out[p] = dict(hand_l=h[p]['hand_l'], hand_r=h[p]['hand_r'], mount=MOUNT[p])
+        out[p] = dict(hand_l=mv(h[p]['hand_l']), hand_r=mv(h[p]['hand_r']), mount=mv(MOUNT[p]))
     return out
 
 # ---------------------------------------------------------------- glow layers (soft alpha, one RGBA frame per sprite frame)
@@ -45,18 +48,34 @@ def new_glow(w=N, h=N): return Rgba(w, h)
 def glow_px(layer, pts, rgb, strength=0.9, r=3.0, power=1.6):
     for (x, y) in pts: glow(layer, x + 0.5, y + 0.5, r, rgb, strength, power)
 
+def glow_px_max(layer, pts, rgb, strength=0.9, r=3.0, power=1.6):
+    """like glow_px, but the strongest light wins per pixel instead of blending, so every glow pixel keeps an exact palette hue (alpha varies)."""
+    for (x, y) in pts:
+        cx, cy = x + 0.5, y + 0.5
+        for yy in range(int(cy - r - 1), int(cy + r + 2)):
+            for xx in range(int(cx - r - 1), int(cx + r + 2)):
+                if not (0 <= xx < layer.w and 0 <= yy < layer.h): continue
+                d = ((xx + 0.5 - cx) ** 2 + (yy + 0.5 - cy) ** 2) ** 0.5
+                if d >= r: continue
+                a = int(255 * strength * (1 - d / r) ** power)
+                if a > 5 and a > layer.p[yy][xx][3]: layer.p[yy][xx] = list(rgb) + [a]
+
 def spr_pts(s, chars):
     return [(x, y) for y in range(s.h) for x in range(s.w) if s.g[y][x] in chars]
 
 def glow_strip(frames):
-    out = Rgba(N * len(frames), N)
-    for i, f in enumerate(frames): out.blit_rgba(f, i * N, 0)
+    w = frames[0].w
+    out = Rgba(w * len(frames), frames[0].h)
+    for i, f in enumerate(frames): out.blit_rgba(f, i * w, 0)
     return out
 
 class Species:
     """what export and the compose kit read."""
     id = '?'
+    N = N                  # frame size (square) and pivot pixel; the large rig (Grundl) overrides both
+    C = C
     walk_fps = 8
+    glow_fps = None        # fps of multi-frame torso/head glows that pulse or drift (set by the race-wave-1 species; the older ones stay silent)
     head_names = []
     notes = ''
     def legs(self): raise NotImplementedError

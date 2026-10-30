@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_neon_mk4_glow.png",
+  "frame": [
+   84,
+   50
+  ],
+  "offset": [
+   -10,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "power_coupling": [
+   32,
+   30
+  ],
+  "repair_hatch": [
+   12,
+   29
+  ]
+ },
+ "orientation": "inside half: rotation 0, outward is UP: the core sits on the floor with its top 4px overhanging the inner wall face (see offset); cable plugs into the power coupling",
+ "offset": [
+  0,
+  -4
+ ],
+ "mount": {
+  "part": "inside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Lumen \"Ion Drive: Zenith\", a hull mount (outward is up): the 4x3 housing: four ion rings (widest at the nozzle) under a crystal emitter, tall crystal fins on both flanks, a ring of light round the base of the spine, and a floating ring of crystal glints in the glow above the nozzle; inside the Corona core with a second, dashed ring of light round the lens. Damaged: the second ring has slipped out of line and cracked, the emitter crystal is chipped, a fin is snapped half off, arcs jump the gap, the lens is cracked and flickers. Disabled: the top ring snapped half off and hanging, the emitter broken, both fin clusters dead and broken, the lens shattered. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+}
