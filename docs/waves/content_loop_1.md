@@ -37,6 +37,7 @@
 11. **Unique characters** (CONTENT 16): the crew active-ability code (G, the vocabulary, cooldowns, crew cards), then character packs of about 16 at a time (writer plus art) until 64.
 12. **Racial tech** (CONTENT 17): the new damage effects in combat, then per race 3 ship weapons, 3 components and 2 hand weapons (data plus art plus projectile and impact effects). It folds into the race loop: every race wave ships its arsenal, and waves 0–1 (the existing 10 races) get theirs first.
 13. **Rare factions** (CONTENT 18): one pack per faction (region, enemy table, events and quests, crew, relics), from uncommon to legendary.
+14. **The hangar** (CONTENT 19): the hangar screen and unlock code (with track 5's unlocks). Then 1–3 starter ships per race, shipped with each race wave (existing races first), plus the event starters as their landmarks, endings and rare factions land. The target is about 80.
 8. **Sector space steps 2 and 3**: the view, autopilot, fights in place, then its content (intakes Mk2/Mk3, radars, tractor), when step 1 lands.
 
 ## Order of starting

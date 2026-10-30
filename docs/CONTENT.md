@@ -772,3 +772,31 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - Rare factions use budgets far above the stage (×1.5 to ×3) and tech the player can't match early. **Meeting one unprepared can end your run**; their encounters are telegraphed with a threat of 5 skulls and a choice to flee.
   - Beating them, or finishing their quest chains, gives tech above the bands: legendary uniques that can carry the rest of a run.
 - **Data**: each rare faction is a pack with its region (if any), enemy table, events and quests, crew, and relic components marked `"relic": true`. Relics may ignore the bands, and the validator only requires a `quirk` or a cost.
+
+## 19. The hangar: unlockable starter ships (owner, 2026-10-30)
+> "Every large event and race could give us 1–3 unique starter ships."
+
+- **Every race unlocks 1–3 starter ships**, as the A, B and C layouts of its own ship type (FTL's hangar):
+  - **A** is the race's signature: its racial tech plus a crew of that race.
+  - **B** is a different strategy: missiles, rams, a shield brick, a boarder, or a miner.
+  - **C** is the odd one: a mixed crew, a quirky unique, or a hard mode.
+- **Large events give starters too**: landmarks (13), endings (13), rare factions beaten or befriended (18), and big quest chains. Examples:
+  - the **Halcyon Tender** (the Haven ending);
+  - **CS-001 Patience**'s little sister (a Concord landmark);
+  - a **Baron's Yacht** (the Salvage Barons);
+  - an **Architect Seed** (relic hull; very rare);
+  - **Ma's Kettle-class tug** (Retire ending).
+- **The target is about 80 starters**: 30 races × 2 on average, plus about 20 from events. Each one is real:
+  - a silhouette in its race's or faction's style (4c, never a rectangle);
+  - working power, rooms and crew paths;
+  - a starting cargo and a one-line pitch;
+  - a fair stage-1 strength (the balance harness checks every starter against stage-1 enemies at the 85–95% target).
+- **How they unlock**: each has an `unlock` condition (`data/unlocks.json`):
+  - reach its race's homeland;
+  - recruit 3 of that race in one run;
+  - finish its race's quest;
+  - complete a landmark or ending;
+  - beat a rare faction.
+
+  The run-start screen shows the hangar: ships grouped by race and faction, with the A/B/C tabs, the unlock hint on locked ones, and stats and crew for the selected ship.
+- **Building them**: hand-tuned designs written by generator tools, like `tests/tool_make_starters.gd`. Each race wave ships its starters. The procedural ship generator (track 1) can propose hulls that a designer agent then tunes.
