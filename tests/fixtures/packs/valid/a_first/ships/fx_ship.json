@@ -1,0 +1,23 @@
+{
+  "name": "Fixture Ship",
+  "size": [
+    3,
+    3
+  ],
+  "hull": [
+    [
+      1,
+      1
+    ]
+  ],
+  "tiles": [
+    [
+      1,
+      1,
+      "floor"
+    ]
+  ],
+  "components": {
+    "instances": []
+  }
+}

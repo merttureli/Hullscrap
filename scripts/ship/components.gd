@@ -4,6 +4,7 @@ extends RefCounted
 ## (hp, heat, status). Pure data, no nodes.
 
 const Stats = preload("res://scripts/sim/stats.gd")
+const Content = preload("res://scripts/data/content.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 ## Save format. 2 adds each instance's hp, heat and status; 3 adds the outside half of a hull mount
 ## (`out`, `out_hp`) and the wrecks; versions 1 and 2 still load (full hp, cold, ok; a weapon or engine
@@ -24,7 +25,7 @@ var _next_uid := 1   # only grows, so a uid is never reused
 
 
 func load_defs(path: String) -> void:
-	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var data = Content.read(path)
 	assert(data is Dictionary and data.has("components"), "bad component data: " + path)
 	for d in data["components"]:
 		for k in ["power", "priority", "tier"]:

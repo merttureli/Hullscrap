@@ -4,6 +4,7 @@
     {
       "id": "reactor_mk1",
       "name": "Reactor Mk1",
+      "blurb": "Standard fusion core, certified safe. Certification pending since the Snap.",
       "family": "reactor",
       "line": "standard",
       "tier": 1,
@@ -24,6 +25,7 @@
     {
       "id": "reactor_mk2",
       "name": "Reactor Mk2",
+      "blurb": "More output, same footprint, same warranty. The warranty office is closed.",
       "family": "reactor",
       "line": "standard",
       "tier": 2,
@@ -44,6 +46,7 @@
     {
       "id": "engine_mk1",
       "name": "Engine Mk1",
+      "blurb": "Reliable thrust, uncomplicated. Do not mistake that for exciting.",
       "family": "engine",
       "line": "standard",
       "tier": 1,
@@ -73,6 +76,7 @@
     {
       "id": "engine_mk2",
       "name": "Engine Mk2",
+      "blurb": "Improved thrust, improved paperwork. Mostly the paperwork.",
       "family": "engine",
       "line": "standard",
       "tier": 2,
@@ -161,6 +165,7 @@
     {
       "id": "oxygen_gen",
       "name": "Oxygen Generator",
+      "blurb": "Scrubs, cracks and recirculates. Output meets regulation. The regulation was set low, by tired people.",
       "family": "oxygen",
       "line": "standard",
       "tier": 1,
@@ -183,6 +188,7 @@
     {
       "id": "shield_mk1",
       "name": "Shield Mk1",
+      "blurb": "A single bubble of certified safety. Certification not valid in the Drift.",
       "family": "shield",
       "line": "standard",
       "tier": 1,
@@ -221,6 +227,7 @@
     {
       "id": "laser_mk1",
       "name": "Laser Mk1",
+      "blurb": "Standard-issue beam. Does what it says on the form.",
       "family": "weapon",
       "line": "standard",
       "tier": 1,
@@ -251,6 +258,7 @@
     {
       "id": "laser_mk2",
       "name": "Laser Mk2",
+      "blurb": "Second revision of the standard beam. The revision notes are longer than the beam.",
       "family": "weapon",
       "line": "standard",
       "tier": 2,
@@ -312,6 +320,7 @@
     {
       "id": "helm",
       "name": "Helm",
+      "blurb": "One chair, one wheel, one person to blame.",
       "family": "helm",
       "line": "standard",
       "tier": 1,
@@ -332,6 +341,7 @@
     {
       "id": "medbay",
       "name": "Medbay",
+      "blurb": "Sterile, bright and optimistic. Staff should have soft hands; Basalt staff are reminded they do not.",
       "family": "medbay",
       "line": "standard",
       "tier": 1,
@@ -354,6 +364,7 @@
     {
       "id": "bed",
       "name": "Bed",
+      "blurb": "Bunk, thin mattress, one blanket. 'Crew' are not issued a second blanket.",
       "family": "bed",
       "line": "standard",
       "tier": 1,
@@ -374,6 +385,7 @@
     {
       "id": "fabricator",
       "name": "Fabricator",
+      "blurb": "Turns materials and blueprints into parts, and waiting lists into queues.",
       "family": "fabricator",
       "line": "standard",
       "tier": 1,
@@ -394,6 +406,7 @@
     {
       "id": "robot_arm",
       "name": "Robot Arm",
+      "blurb": "Workshop module. Raises the Fabricator to level 2 and holds things steady while you swear at them.",
       "family": "workshop",
       "line": "standard",
       "tier": 1,
@@ -414,6 +427,7 @@
     {
       "id": "laser_cutter",
       "name": "Laser Cutter",
+      "blurb": "Workshop module. Cuts plate cleanly; the manual notes it will also cut the manual.",
       "family": "workshop",
       "line": "standard",
       "tier": 1,
@@ -434,6 +448,7 @@
     {
       "id": "assembly_rig",
       "name": "Assembly Rig",
+      "blurb": "Workshop module. Three arms, one frame, and a safety guide read in full by nobody.",
       "family": "workshop",
       "line": "standard",
       "tier": 1,
@@ -454,6 +469,7 @@
     {
       "id": "nanoforge",
       "name": "Nanoforge",
+      "blurb": "Workshop module, level 4. Builds from the atom up. Please do not ask what with.",
       "family": "workshop",
       "line": "standard",
       "tier": 1,

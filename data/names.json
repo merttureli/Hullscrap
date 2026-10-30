@@ -1,0 +1,51 @@
+{
+  "_doc": "Name pools for generated ships and crew (docs/LORE.md, 'Names'). clans: Scrapper ships, named like boats and insults. concord: registry number plus a virtue. lumen: light phenomena. rustfang: Scrapper exiles turned pirates, named like grudges and dental work. crew: first names by species. Basalt names are heavy and mineral, Emberkin names short and bright, Fenn names quick, with doubled letters and clicks. No crew name repeats one in crew.json.",
+  "clans": [
+    "Second Mortgage", "Not Again", "Ma's Other Kettle", "Wet Paint", "Dunnock's Folly",
+    "Bad Idea", "Cousin's Reactor", "Rent Due", "Good Enough", "Spare Parts",
+    "Hold My Fuel", "Tin Mother", "Patch Job", "Mind The Gap", "Friendly Fire",
+    "Probably Fine", "Long Weekend", "Gravy Train", "Sorry Boss", "Dented Pride",
+    "Three Wrenches", "Last Resort", "Unpaid Leave", "Old Faithless", "Knucklehead",
+    "Hot Take", "Mostly Legal", "Duct Tape Dream", "Pot Luck", "Slow Learner"
+  ],
+  "concord": [
+    "CS-114 Diligence", "CS-203 Constancy", "CS-221 Sobriety", "CS-309 Mercy", "CS-480 Vigilance",
+    "CS-512 Prudence", "CS-077 Punctuality", "CS-131 Temperance", "CS-166 Fortitude", "CS-189 Probity",
+    "CS-242 Thrift", "CS-257 Patience", "CS-278 Forbearance", "CS-295 Rectitude", "CS-318 Candour",
+    "CS-333 Civility", "CS-346 Modesty", "CS-361 Clemency", "CS-374 Frugality", "CS-402 Duty",
+    "CS-417 Order", "CS-428 Accord", "CS-439 Honesty", "CS-451 Restraint", "CS-467 Charity",
+    "CS-473 Tolerance", "CS-495 Fidelity", "CS-508 Perseverance", "CS-526 Humility", "CS-541 Propriety"
+  ],
+  "lumen": [
+    "Caustic", "Afterimage", "Parhelion", "Gegenschein", "Alpenglow",
+    "Airglow", "Moonbow", "Fogbow", "Fata Morgana", "Green Flash",
+    "Phosphene", "Corona", "Halo", "Glory", "Mirage",
+    "Iridescence", "Diffraction", "Refraction", "Scintilla", "Moire",
+    "Gloaming", "Penumbra", "Zodiacal", "Cerenkov", "Speckle",
+    "Lensing", "Bloom", "Sundog", "Blue Hour", "Redshift"
+  ],
+  "rustfang": [
+    "Dental Plan", "Overbite", "Cheap Shot", "Hard Feelings", "Nothing Personal",
+    "Final Notice", "Bad Debt", "Collections", "Sore Loser", "Back Alley",
+    "Eviction Notice", "Rotten Tooth", "Sharp Words", "Bitter End", "Spare Teeth",
+    "Grudge Match", "Fang Club", "Dog Days", "Loan Shark", "Last Laugh"
+  ],
+  "crew": {
+    "human": [
+      "Pell", "Hob", "Nan", "Dex", "Maud", "Jory", "Sal", "Ines", "Calder", "Odette",
+      "Frey", "Moss", "Teodor", "Lark", "Benno", "Kit", "Rue", "Hollis", "Ozzie", "Greta"
+    ],
+    "basalt": [
+      "Gneiss", "Slate", "Tuff", "Shale", "Flint", "Gabbro",
+      "Cairn", "Scree", "Tor", "Crag", "Mica", "Brack"
+    ],
+    "emberkin": [
+      "Cinder", "Kindle", "Flick", "Ziv", "Ember", "Glim",
+      "Spark", "Tallow", "Wick", "Zest", "Kiln", "Brisk"
+    ],
+    "fenn": [
+      "Tikk", "Pipp", "Quibb", "Zeff", "Kekki", "Nibb",
+      "Brikk", "Yipp", "Skett", "Clikk", "Hepp", "Tuzzle"
+    ]
+  }
+}

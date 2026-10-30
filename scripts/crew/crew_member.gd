@@ -8,6 +8,7 @@ extends RefCounted
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Content = preload("res://scripts/data/content.gd")
 const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide)
 const MAX_SUBSTEP := 0.2  ## longest single move in cells, so a long frame cannot skip over a wall
 const CONFIG_PATH := "res://data/crew.json"
@@ -50,7 +51,7 @@ static func config() -> Dictionary:
 ## data/species.json as a Dictionary: {default, traits, species} (read once; empty when the file is missing or unusable).
 static func species_table() -> Dictionary:
 	if _species.is_empty() and FileAccess.file_exists(SPECIES_PATH):
-		var data = JSON.parse_string(FileAccess.get_file_as_string(SPECIES_PATH))
+		var data = Content.read(SPECIES_PATH)  # core plus any packs' species
 		if data is Dictionary:
 			_species = data
 	return _species

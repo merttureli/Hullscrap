@@ -1,0 +1,144 @@
+{
+  "logs": [
+    {
+      "id": "log_clans_midjump",
+      "title": "Night 1, or Tuesday",
+      "ship": "Hold My Fuel",
+      "faction": "clans",
+      "text": "Night 1 after. Or Tuesday. The clock says Tuesday.\nWe were halfway through the gate when every light on the ship blinked and came back different.\nDunn says the stars are in the wrong places. Dunn is the navigator, so I told him that's his job.\nHe didn't laugh. We have 41 days of food and 90 of coffee. Coffee wins."
+    },
+    {
+      "id": "log_concord_incident_minor",
+      "title": "Incident Report (Minor)",
+      "ship": "CS-203 Constancy",
+      "faction": "concord",
+      "text": "OFFICIAL LOG, CS-203 CONSTANCY. Gate transit interrupted at 02:14 ship time.\nCause: unknown. Cause (provisional): solar event. Cause (privately): the helmsman says 'it let go'.\nCrew of 31. Vessel intact. Position: not on any chart I possess.\nFiling this under 'Incidents, Minor'. I will not be sending a copy. There is nobody to send it to."
+    },
+    {
+      "id": "log_lumen_eleven_seconds",
+      "title": "Eleven seconds",
+      "ship": "Caustic",
+      "faction": "lumen",
+      "text": "The door was open for eleven seconds.\nWe saw through it. Do not ask what. The word we have is 'enough'.\nThen it closed, and we were told that was the Snap.\nWe were not told. We were there."
+    },
+    {
+      "id": "log_clans_out_of_the_gate",
+      "title": "Boneyard run, third gate",
+      "ship": "Friendly Fire",
+      "faction": "clans",
+      "text": "Boneyard run, third gate side. Spotted a ship coming OUT of the gate. Not through. Out.\nGreen running lights, hull like it was poured instead of built. Nothing on any channel.\nHobb says wave. I didn't wave. Nobody on board moved.\nIt drifted past us like a dog that knows the way home, and went nowhere. We left. Fast."
+    },
+    {
+      "id": "log_concord_unregistered_contact",
+      "title": "Contact, unregistered",
+      "ship": "CS-480 Vigilance",
+      "faction": "concord",
+      "text": "Contact 0.4 AU off Gate 2. Hull composition inconsistent with any registry.\nSystems running. No crew detected. Requested orders.\nNo reply. Requested orders again.\nLogged the first silence as 'delay'. Logged the second as 'concern'. Logging the third as 'the usual'."
+    },
+    {
+      "id": "log_lumen_unfinished_sentences",
+      "title": "Not ships",
+      "ship": "Gloaming",
+      "faction": "lumen",
+      "text": "They are not ships. They are sentences the gate has not finished.\nWe have asked to hear the end.\nThe Warden says no. The Warden is shy.\nWe will wait. We are good at it."
+    },
+    {
+      "id": "log_clans_the_bill",
+      "title": "Read the small print",
+      "ship": "Rent Due",
+      "faction": "clans",
+      "text": "Ma Gantry sent a bill along with my hull. The bill is bigger than the hull.\nI looked it up: that's allowed. It's in the small print, which is also the big print.\nI have decided to be a legend instead.\nMa says legends pay the same rates."
+    },
+    {
+      "id": "log_concord_form_9b",
+      "title": "Form 9-B, Requisitions",
+      "ship": "CS-512 Prudence",
+      "faction": "concord",
+      "text": "To whoever reads this: the shipyard at Meridian is still working. We make Mk parts.\nWe have nothing to put them on.\nI have drafted 2,400 requisitions this year and approved every one.\nIf a ship ever comes, we will be ready."
+    },
+    {
+      "id": "log_lumen_test_pulse",
+      "title": "Experiment 4411",
+      "ship": "Refraction",
+      "faction": "lumen",
+      "text": "Experiment 4411. The gate answered the test pulse before we sent it.\nMira says it is a timing fault. Mira has been saying that for nine weeks.\nToday it answered twice.\nWe have not told the Concord. We have not told anyone. We have told the gate, and it did not seem surprised."
+    },
+    {
+      "id": "log_clans_exile",
+      "title": "Dues",
+      "ship": "Collections",
+      "faction": "clans",
+      "text": "They threw me out for creative accounting. The Fang took me in for the same reason.\nWe're all exiles. Ma threw us out, Concord hunts us, and the Lumen won't even talk.\nIt's a good club. The dues are terrible."
+    },
+    {
+      "id": "log_concord_roster",
+      "title": "Gate-yard roster",
+      "ship": "CS-131 Temperance",
+      "faction": "concord",
+      "text": "Gate-yard roster, labour caste, Basalt: 4,100 hands before the Snap.\nCount after the Snap: 4,100. I counted twice.\nThey all remember that night. None of them will say what they remember.\nEvery one of them, when they think I'm not looking, looks at the same patch of sky."
+    },
+    {
+      "id": "log_clans_rusthold_rule",
+      "title": "Rule of the Rusthold",
+      "ship": "Patch Job",
+      "faction": "clans",
+      "text": "Welded three hulls together today, joined by a corridor made from a fourth.\nTomorrow I find out which way is up.\nRule of the Rusthold: if it holds air, it's a room.\nIf it doesn't, it's a balcony."
+    },
+    {
+      "id": "log_lumen_star_count",
+      "title": "The count",
+      "ship": "Gloaming",
+      "faction": "lumen",
+      "text": "We counted the stars on the first night. There were 3,011.\nOn the second night there were 3,012.\nWe do not know which one is the new one.\nWe have decided to be kind to all of them."
+    },
+    {
+      "id": "log_clans_green_hat",
+      "title": "To Dorrie",
+      "ship": "Sorry Boss",
+      "faction": "clans",
+      "text": "To Dorrie, wherever you landed.\nThe jump put me in the Drift and you somewhere else, and I check every wreck for your hat.\nIt's a green hat. If you find this, it's a green hat.\nIf it isn't, ignore me. I'm still looking."
+    },
+    {
+      "id": "log_concord_probably_fine",
+      "title": "Patrol log, no action",
+      "ship": "CS-295 Rectitude",
+      "faction": "concord",
+      "text": "Stopped a Scrapper barge for an unlicensed reactor.\nReactor was fine. Barge was named Probably Fine.\nI wrote 'Probably Fine' in the findings box and let them go.\nPlease do not review this."
+    },
+    {
+      "id": "log_lumen_warden_asks",
+      "title": "Unit 7",
+      "ship": "Scintilla",
+      "faction": "lumen",
+      "text": "Warden unit 7 has begun asking questions.\nThe first was: who is on the other side of the gate?\nIt is an unscheduled behaviour. We are delighted.\nWe are also keeping its door locked from the outside."
+    },
+    {
+      "id": "log_clans_brother_in_law",
+      "title": "To whoever salvages my ship",
+      "ship": "Three Wrenches",
+      "faction": "clans",
+      "text": "WARNING TO WHOEVER SALVAGES MY SHIP: the third cabin is not empty.\nIt has my brother-in-law. Not in the grim way. He just won't leave.\nFeed him. He likes the blue ration.\nHe doesn't like questions."
+    },
+    {
+      "id": "log_concord_meridian_day3",
+      "title": "Meridian, day 3",
+      "ship": "CS-189 Probity",
+      "faction": "concord",
+      "text": "Do Not Panic signs are up on every deck. Panic has not been made available.\nWe are all waiting for instructions from the Lattice Authority.\nThe Lattice Authority was the Lattice."
+    },
+    {
+      "id": "log_lumen_second_note",
+      "title": "Gate three",
+      "ship": "Moire",
+      "faction": "lumen",
+      "text": "The crystals at gate three are not growing. They are being remembered.\nIf you can hear the second note, put the shard back.\nIf you can hear the third, it is already too late to be polite about it."
+    },
+    {
+      "id": "log_clans_kettle",
+      "title": "A kettle",
+      "ship": "Knucklehead",
+      "faction": "clans",
+      "text": "Skipper's log. A Hollow tried to dock with us.\nAirlock cycled itself open. Nobody inside, lights on, kettle still hot.\nWe closed the door. Took the kettle.\nIt's the best kettle we've ever had. It never boils over. Not sure that's good news."
+    }
+  ]
+}

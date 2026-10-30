@@ -1,0 +1,9 @@
+{
+  "id": "orphan",
+  "name": "orphan",
+  "version": "1.0",
+  "requires": [
+    "ghost"
+  ],
+  "notes": "Test fixture: see tests/test_content.gd."
+}

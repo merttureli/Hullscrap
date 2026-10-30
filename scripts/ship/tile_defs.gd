@@ -1,12 +1,14 @@
 extends RefCounted
 ## Tile definitions loaded from data/*.json. Content is data, not code.
 
+const Content = preload("res://scripts/data/content.gd")
+
 var by_id := {}
 var order: Array[String] = []
 
 
 func load_file(path: String) -> void:
-	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var data = Content.read(path)
 	assert(data is Dictionary and data.has("tiles"), "bad tile data: " + path)
 	for t in data["tiles"]:
 		by_id[t["id"]] = t

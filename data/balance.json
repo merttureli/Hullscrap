@@ -1,0 +1,17 @@
+{
+  "_doc": "Balance bands (docs/CONTENT_PLAN.md section 3): the expected stats of a part by family and tier, for the Standard line. bands: family -> tier -> stat -> value. A stat is `power`, `hp` or a key of the part's `stats`. A line multiplies a band the way scripts/sim/stats.gd resolves a part's numbers (a Scrap engine's thrust band is the Standard one times the line's `output`), so a part is compared by its effective numbers. tests/test_content.gd fails a non-unique part of a family listed here when a stat is more than `tolerance` (a fraction) off its band, unless the part has a quirk (a non-empty `abilities` or `side_effects`, or a `quirk` text saying why) or is listed in `waivers`. waivers: part id -> why it is off the bands today; a waiver is removed when the part is fixed (the test fails on a waiver that is no longer needed). Content agents fill these tables from the lead's spec; they do not invent numbers. More families (weapons, shields, reactors, O2, the workshop) are added here when each gets its wave.",
+  "tolerance": 0.2,
+  "bands": {
+    "engine": {
+      "1": {"thrust": 10, "power": -2, "hp": 6},
+      "2": {"thrust": 18, "power": -3, "hp": 8},
+      "3": {"thrust": 26, "power": -4, "hp": 10},
+      "4": {"thrust": 36, "power": -5, "hp": 12},
+      "5": {"thrust": 48, "power": -6, "hp": 14}
+    }
+  },
+  "waivers": {
+    "engine_mk2": "Made before the bands: hp 6 against a band of 8 (25% off). Engine wave 1 sets it.",
+    "engine_neon_mk1": "Made before the bands: thrust 16 and power -3 are Mk2 numbers, 60% and 50% off the Neon Mk1 band (thrust 10 and power -2, times the line). Engine wave 1 re-tunes it."
+  }
+}

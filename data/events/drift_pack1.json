@@ -1,0 +1,678 @@
+{"events": [
+    {
+      "id": "distress_hauler_fire", "type": "distress", "weight": 10, "once": false, "requires": {},
+      "text": "The hauler Not Again is tumbling end over end, fire glowing in every cargo window. Her crew is on every channel at once, including a few retired after the Snap. Nobody who knows her name is surprised.",
+      "choices": [
+        {"text": "Dock and help fight the fire.", "outcomes": [
+          {"weight": 60, "text": "You pass buckets, foam and swearing hand to hand until the hold goes dark. Her skipper kisses your airlock.", "effects": {"rep": {"clans": 1}, "goto": "distress_hauler_thanks"}},
+          {"weight": 25, "text": "The foam runs out before the fire does. You drag the crew clear and give the rest of the hold to the dark.", "effects": {"crew_hp": -15, "items": {"scrap": 20}, "rep": {"clans": 1}}},
+          {"weight": 15, "text": "A cargo pod goes off like a firework as you dock and kicks a dent in your hull. The fire goes out anyway, for want of anything left to burn.", "effects": {"hull": -10, "items": {"scrap": 20}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Emberkin] Send your Emberkin into the hold. It's only warm in there.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 90, "text": "Your Emberkin wades into the hold like it's a bath, hauls out crates and crew, and asks if there's more. The skipper tries to hire them on the spot.", "effects": {"items": {"scrap": 55, "credits": 30}, "rep": {"clans": 2}}},
+          {"weight": 10, "text": "Warm turns out to have a limit. Your Emberkin comes out smoking, pleased with the haul and a little offended.", "effects": {"crew_hp": -10, "items": {"scrap": 55}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Basalt] Send your Basalt out on the hull to cut the burning pod loose.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 85, "text": "Your Basalt walks into vacuum without a suit, which still upsets people who watch, and cuts the pod away in one slow swing. The fire starves. The skipper cries a little.", "effects": {"items": {"scrap": 50, "credits": 20}, "rep": {"clans": 2}}},
+          {"weight": 15, "text": "The pod tumbles into your hull on its way past. Your Basalt apologises to the hull.", "effects": {"hull": -5, "items": {"scrap": 50}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You jump. Their prayers follow you on every channel for a good while, and most of the prayers are rude.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_hauler_thanks", "type": "distress", "weight": 0, "once": false, "requires": {},
+      "text": "Skipper Dunnock Vale is soot to the eyebrows and furious with relief, which on a Scrapper looks like plain fury. He can pay in cash, or in a word to his cousin at the Gantry Clan. He can't do both; he has checked.",
+      "choices": [
+        {"text": "Take the cash.", "outcomes": [
+          {"weight": 100, "text": "He counts it out in small notes and smaller apologies.", "effects": {"items": {"credits": 40}}}
+        ]},
+        {"text": "Take the word to his cousin.", "outcomes": [
+          {"weight": 100, "text": "The cousin owes Dunnock and Dunnock owes you. By the time it reaches Ma Gantry's desk it sounds like a legend, and the number on your hull gets a little lighter.", "effects": {"rep": {"clans": 3}, "debt": -25}}
+        ]},
+        {"text": "[Fast repair] Fix his fire suppressors on the way out and take a bit of both.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Your engineer has the suppressors humming before the coffee cools. Dunnock pays in cash and in word, then looks like he regrets doing the maths.", "effects": {"items": {"credits": 20, "scrap": 25}, "rep": {"clans": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_medical_hulk", "type": "distress", "weight": 8, "once": false, "requires": {},
+      "text": "CS-309 Mercy, hospital ship, class 2. Status: 41 patients, 2 doctors, 0 bandages. The distress call is a requisition form, repeated every ninety seconds, politely.",
+      "choices": [
+        {"text": "Donate 20 polymer for dressings.", "requires": {"items": {"polymer": 20}}, "outcomes": [
+          {"weight": 100, "text": "The doctors cry, then complete the receipt, then cry again. Concord remembers receipts.", "effects": {"items": {"polymer": -20, "credits": 20}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "[Fabricator] Run your fabricator in their hold and make dressings by the metre.", "requires": {"component": "fabricator", "items": {"scrap": 30}}, "outcomes": [
+          {"weight": 80, "text": "The fabricator hums and extrudes bandage in great pale ribbons. The doctors weep at the sight of a roll, then pay.", "effects": {"items": {"scrap": -30, "credits": 35}, "rep": {"concord": 2}}},
+          {"weight": 20, "text": "Half the batch comes out stiff as card. The doctors use it as splints, with great enthusiasm.", "effects": {"items": {"scrap": -30, "credits": 15}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Ferry the worst cases to Meridian (costs 2 fuel).", "requires": {"items": {"fuel": 2}}, "outcomes": [
+          {"weight": 100, "text": "You carry six stretchers and one furious clerk across the lane. Concord pays by the form, and in goodwill.", "effects": {"items": {"fuel": -2, "credits": 80}, "rep": {"concord": 3}}}
+        ]},
+        {"text": "Wish them luck and jump.", "outcomes": [
+          {"weight": 100, "text": "The forms continue, politely, behind you.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_lumen_pod", "type": "distress", "weight": 6, "once": false, "requires": {},
+      "text": "A pod the colour of a held breath drifts across the lane. Inside, a Lumen researcher sits very still, counting something on their fingers. The beacon doesn't ping; it hums.",
+      "choices": [
+        {"text": "Haul the pod aboard.", "outcomes": [
+          {"weight": 45, "text": "They thank you in riddles and leave a handful of crystal on the floor, as if it were nothing. To them it probably is.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}}},
+          {"weight": 25, "text": "The researcher steps out of the pod, looks around your ship, and says 'Yes. This one.' They intend to stay.", "effects": {"recruit": {"species": "emberkin"}, "rep": {"lumen": 1}}},
+          {"weight": 30, "text": "The counting spreads. For an hour your whole crew counts under their breath, and no one will say what. Everyone gets a headache that tastes of copper.", "effects": {"crew_hp": -10, "items": {"crystal": 2}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Prism Core] Let your reactor answer the hum.", "requires": {"component": "reactor_neon_mk1"}, "outcomes": [
+          {"weight": 70, "text": "The Prism Core rings back, and the pod brightens like a face in recognition. A blueprint appears on your console, uninvited and neat.", "effects": {"blueprint": "shield_neon_mk1", "rep": {"lumen": 3}}},
+          {"weight": 30, "text": "The reactor answers a little too loud. The pod flinches, the lights stutter, and a few crystals spill into your hold by way of apology.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "Crack the pod for its crystal and leave the passenger.", "outcomes": [
+          {"weight": 60, "text": "The crystal comes away easily, which bothers you more than it should. The passenger watches with polite interest and says nothing.", "effects": {"items": {"crystal": 5, "plasma_cell": 1}, "rep": {"lumen": -3}}},
+          {"weight": 40, "text": "The pod is warded with something that fights back. It stings, and it remembers.", "effects": {"crew_hp": -15, "items": {"crystal": 3}, "rep": {"lumen": -3}}}
+        ]},
+        {"text": "Leave it. Some things count better alone.", "outcomes": [
+          {"weight": 100, "text": "The pod turns slowly in your wake. The counting goes on.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_tanker_leak", "type": "distress", "weight": 8, "once": false, "requires": {},
+      "text": "A Fenn fuel tanker is sneezing glittering clouds into the dark. Her captain, Sixpence's cousin Fourpence, is shouting rates at you: so much per patch, so much per minute, extra if you ask nicely. The meter is already running.",
+      "choices": [
+        {"text": "Patch the leak at their rates.", "outcomes": [
+          {"weight": 75, "text": "It takes an hour and your crew's whole supply of patience. The captain pays to the credit, the only way a Fenn pays.", "effects": {"items": {"credits": 25}}},
+          {"weight": 25, "text": "The patch holds, but the captain finds extras: sealant, standby fees, a surcharge for your face. You go home with less than you hoped.", "effects": {"items": {"credits": 10}}}
+        ]},
+        {"text": "[Fenn] Your Fenn takes over the pump and the negotiation.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 80, "text": "Two Fenn at a leaking tank is an ancient and terrible thing. By the end the captain is paying you and thanking you, and neither can say how.", "effects": {"items": {"credits": 90}}},
+          {"weight": 20, "text": "Your Fenn guilts the captain into a spare cell on top of the fee, and walks away looking pleased with the arithmetic.", "effects": {"items": {"credits": 40, "fuel": 1}}}
+        ]},
+        {"text": "Siphon the spill into your own tanks.", "outcomes": [
+          {"weight": 70, "text": "You tap the cloud and call it a rescue. The captain notices, but he is too busy plugging holes to argue.", "effects": {"items": {"fuel": 2}}},
+          {"weight": 30, "text": "The tap sprays your hull and the captain notices that too. He has a lot to say about it, all of it priced.", "effects": {"hull": -5, "items": {"fuel": 1}}}
+        ]},
+        {"text": "Wave and keep flying.", "outcomes": [
+          {"weight": 100, "text": "The captain's voice follows you for three jumps' worth of range, quoting rates.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_rustfang_bait", "type": "distress", "weight": 10, "once": false, "requires": {},
+      "text": "MAYDAY, says a hauler, a perfectly ordinary hauler, please come close and don't scan us. The hauler is wearing Rustfang paint under two coats of apology. Its beacon plays a recorded cough on a loop.",
+      "choices": [
+        {"text": "Come alongside anyway.", "outcomes": [
+          {"weight": 40, "text": "They're real, and so is the leak. They give you what they can, and nobody asks why the paint is two colours.", "effects": {"items": {"scrap": 30, "credits": 15}}},
+          {"weight": 60, "text": "Rustfang boarders pour out of the airlock before your clamps have even bitten.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Artemis Mk1] Put a missile across their nose before they close.", "requires": {"component": "artemis_mk1", "items": {"missile": 1}}, "outcomes": [
+          {"weight": 70, "text": "The missile gives them a fright and a reason to leave. They dump their cargo as they run, which is rude of them and good for you.", "effects": {"items": {"missile": -1, "scrap": 55}, "rep": {"concord": 1}}},
+          {"weight": 30, "text": "They return fire instead of running. Rustfangs have never learned when to take a hint.", "effects": {"items": {"missile": -1}, "fight": "pirate_raider"}}
+        ]},
+        {"text": "Hail them and ask politely for papers.", "outcomes": [
+          {"weight": 50, "text": "A long silence. Then the coughing stops, the paint stops apologising, and they leave. A little cash is stuck to your hull, probably by way of thanks.", "effects": {"items": {"credits": 20}}},
+          {"weight": 50, "text": "'Papers,' says a voice. 'Here's my paper,' says another, and then the guns.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Ignore it.", "outcomes": [
+          {"weight": 100, "text": "You jump. The cough follows you for three channels, getting better at it.", "effects": {}}
+        ]}
+      ],
+      "after_win": {"text": "Among the wreckage there's a hand-painted sign reading HONEST HAULER. It has been used a lot.", "effects": {"rep": {"concord": 1}}}
+    },
+    {
+      "id": "distress_stranded_basalt", "type": "distress", "weight": 5, "once": true, "requires": {},
+      "text": "A lone Basalt stands on the hull of a dead freighter, patient as a boulder, no suit and no hurry. The comm crackles with a voice like gravel in a drum: 'Passing ship. If it is not trouble, I would like a lift. I have been here some time.'",
+      "choices": [
+        {"text": "Take them aboard.", "outcomes": [
+          {"weight": 100, "text": "They climb in with one bag and one question, which is whether you have anywhere warm. They'll work for passage. They'll also work for free, which is worse for your conscience.", "effects": {"recruit": {"species": "basalt", "name": "Gneiss"}}}
+        ]},
+        {"text": "[Basalt] Answer on the hull channel, in the slow tongue.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt and the stranger speak for a long time, in a language of long pauses. Then the stranger boards, carrying a rock that hums, and hands it over without explanation.", "effects": {"recruit": {"species": "basalt", "name": "Gneiss"}, "items": {"silicon": 8, "titanium": 5}}}
+        ]},
+        {"text": "Ask them how long 'some time' is.", "outcomes": [
+          {"weight": 100, "text": "The comm is quiet for so long you think the line has dropped. Then it says: 'I will tell you.'", "effects": {"goto": "distress_basalt_answer"}}
+        ]},
+        {"text": "Wave and move on.", "outcomes": [
+          {"weight": 100, "text": "They lift one hand, slowly. They do not look surprised.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_basalt_answer", "type": "distress", "weight": 0, "once": false, "requires": {},
+      "text": "The Basalt is quiet for a long moment. 'Forty years,' they say. 'I was told to wait until the door opened, and it hasn't.' Below their feet, the hull is chalked with forty years of tally marks, and the last row is crossed through.",
+      "choices": [
+        {"text": "Offer them a berth and a wrench.", "outcomes": [
+          {"weight": 100, "text": "'A wrench,' they say, with something close to joy. They take it like a promise.", "effects": {"recruit": {"species": "basalt", "name": "Gneiss"}}}
+        ]},
+        {"text": "Ask what door.", "outcomes": [
+          {"weight": 100, "text": "'The one we built,' they say, and no more, and you understand that is all you will get. They step off the hull and into your airlock as if it were a step.", "effects": {"recruit": {"species": "basalt", "name": "Gneiss"}, "flag": "basalt_waited"}}
+        ]},
+        {"text": "Wish them well and go.", "outcomes": [
+          {"weight": 100, "text": "They nod. You think they were hoping you would.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "pirate_vex_toll", "type": "pirate", "weight": 14, "once": false, "requires": {"jumps_max": 30},
+      "text": "A Rustfang gunboat, the Dental Plan, slides across your nose and opens a channel. 'Toll,' says a cheerful voice. 'Fifty credits. Captain Vex is saving for a bigger gun.'",
+      "choices": [
+        {"text": "Pay the toll (50 credits).", "requires": {"credits": 50}, "outcomes": [
+          {"weight": 85, "text": "'Pleasure doing business,' says Vex, and means it. The Dental Plan peels away, whistling.", "effects": {"items": {"credits": -50}}},
+          {"weight": 15, "text": "Vex takes the money and then remembers he's a pirate. The Dental Plan swings round, guns warm.", "effects": {"items": {"credits": -50}, "fight": "pirate_raider"}}
+        ]},
+        {"text": "Haggle him down.", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 40, "text": "'Thirty,' says Vex, wounded. 'And you buy a raffle ticket.' You buy a raffle ticket.", "effects": {"items": {"credits": -30}}},
+          {"weight": 35, "text": "Vex goes quiet, and you can hear him think. 'Tell you what,' he says.", "effects": {"goto": "pirate_vex_offer"}},
+          {"weight": 25, "text": "'Haggle? HAGGLE?' Vex puts the gunboat's nose in your face and the guns in your hull.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Afterburner] Floor it and leave the toll booth in your exhaust.", "requires": {"component": "afterburner"}, "outcomes": [
+          {"weight": 80, "text": "The Dental Plan shrinks to a dot, the dot to a thought, the thought to a rude word on the comm.", "effects": {}},
+          {"weight": 20, "text": "They clip you on the way past, with feeling.", "effects": {"hull": -10}}
+        ]},
+        {"text": "Refuse and charge the guns.", "outcomes": [
+          {"weight": 100, "text": "'Wrong answer,' says Vex, warmly.", "effects": {"fight": "pirate_raider"}}
+        ]}
+      ],
+      "after_win": {"text": "The Dental Plan comes apart, and Vex's escape pod spits a rude flare as it tumbles away. Concord pays a little for the paperwork.", "effects": {"rep": {"concord": 1}, "items": {"credits": 20}}}
+    },
+    {
+      "id": "pirate_vex_offer", "type": "pirate", "weight": 0, "once": false, "requires": {},
+      "text": "Vex squints at you over the comm. 'Skip the toll. Carry this crate to the next Gantry trader, unopened, for forty.' Behind him, someone says the crate is making a noise.",
+      "choices": [
+        {"text": "Take the crate and the forty.", "outcomes": [
+          {"weight": 60, "text": "The crate rattles politely all the way. Vex pays in advance, because he's an optimist, and you're now a smuggler in your own mind.", "effects": {"items": {"credits": 40}, "rep": {"clans": -1}}},
+          {"weight": 40, "text": "The crate wasn't rattling. It was ticking. Your hull learns what a box of cheap fireworks can do.", "effects": {"items": {"credits": 40}, "hull": -10}}
+        ]},
+        {"text": "Open the crate first.", "outcomes": [
+          {"weight": 50, "text": "Missiles, in boxes labelled NOT MISSILES in Vex's handwriting. You keep three, and a small, bright feeling of superiority.", "effects": {"items": {"missile": 3}}},
+          {"weight": 50, "text": "It's rigged. Vex was not joking about the noise.", "effects": {"crew_hp": -15, "items": {"missile": 1}}}
+        ]},
+        {"text": "Tell him no and wave him off.", "outcomes": [
+          {"weight": 100, "text": "'Pity,' says Vex. 'The offer stood for about four seconds.' He lets you go, which was the whole offer.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "pirate_ransom_hold", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 2},
+      "text": "A Rustfang skiff has a Concord supply clerk in its hold and a hand-lettered sign that says RANSOM. 'Sixty credits,' says the pirate. 'Or your guns, or your face, we're flexible.' In the background, the clerk is correcting their spelling.",
+      "choices": [
+        {"text": "Pay the sixty credits.", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 70, "text": "The clerk steps aboard, straightens their jacket, and files a receipt for their own rescue. Concord will hear of this, with forms.", "effects": {"items": {"credits": -60}, "rep": {"concord": 3}}},
+          {"weight": 30, "text": "The clerk is so grateful they write you a requisition for a rifle blueprint, signed in triplicate and probably legal.", "effects": {"items": {"credits": -60}, "rep": {"concord": 3}, "blueprint": "rifle"}}
+        ]},
+        {"text": "Fight for the clerk.", "outcomes": [
+          {"weight": 100, "text": "'Flexible,' you say, and light the guns.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Leech Laser] Sip their reactor dry and walk in.", "requires": {"component": "leech_laser"}, "outcomes": [
+          {"weight": 75, "text": "A few shots of the Leech and their lights fade to candle strength. The clerk crosses the gap with dignity, as if going to lunch.", "effects": {"items": {"credits": 35}, "rep": {"concord": 3}}},
+          {"weight": 25, "text": "They get one shot off in the dark. The clerk comes through anyway, apologising for the trouble.", "effects": {"hull": -10, "rep": {"concord": 3}}}
+        ]},
+        {"text": "Not your clerk. Not your problem.", "outcomes": [
+          {"weight": 100, "text": "The skiff recedes. Over the comm, faintly, you hear the clerk say 'Excuse me, it's spelled with two Rs.'", "effects": {}}
+        ]}
+      ],
+      "after_win": {"text": "The clerk emerges from the wreck's escape bay with a stamp and a grudge. Concord will hear about this, with enthusiasm.", "effects": {"rep": {"concord": 3}, "items": {"credits": 30}}}
+    },
+    {
+      "id": "pirate_defector", "type": "pirate", "weight": 8, "once": false, "requires": {},
+      "text": "A Rustfang skiff, one man aboard, flies a white flag made from a pair of underpants. 'I'm done,' he says. 'Take me in, I know where the Fang keeps its fuel.' He sounds sincere, as they always do.",
+      "choices": [
+        {"text": "Take him aboard.", "outcomes": [
+          {"weight": 55, "text": "He's real. He sleeps for two days, wakes, and starts fixing things nobody asked him to fix. He kept his word about the fuel, too.", "effects": {"recruit": {"species": "human"}, "items": {"fuel": 2}}},
+          {"weight": 45, "text": "The skiff blows its seals the moment you dock. He wasn't done; he was on the clock.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Basalt] Let your Basalt look at him for a while.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt says nothing for four minutes. By the end the man has confessed to the trap, the plan, and an unrelated incident involving a goat. The fuel is real; he hands it over like a penance.", "effects": {"items": {"fuel": 2, "credits": 25}}}
+        ]},
+        {"text": "Shoot first and collect the Concord bounty.", "outcomes": [
+          {"weight": 70, "text": "A short, unglamorous exchange. The bounty is paid on the spot, via a Concord relay that is sorry for the circumstances.", "effects": {"items": {"credits": 40}, "rep": {"concord": 1, "clans": -1}}},
+          {"weight": 30, "text": "He wasn't alone. The skiff had friends hiding in the debris.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Wave him off. Not your fight.", "outcomes": [
+          {"weight": 100, "text": "He salutes with the underpants and drifts away. You will think about it more than he will.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "pirate_ambush_wreck", "type": "pirate", "weight": 12, "once": false, "requires": {"jumps_min": 3},
+      "text": "Three Rustfang hulls light up behind a dead freighter. They don't hail; they just laugh on an open channel, which is rude and efficient. Your scanners were looking the other way.",
+      "choices": [
+        {"text": "Fight.", "outcomes": [
+          {"weight": 100, "text": "There's a time for talking, and this isn't it.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Shield Mk1] Hide behind the bubble and ram through the gap.", "requires": {"component": "shield_mk1"}, "outcomes": [
+          {"weight": 60, "text": "The shield takes the first volley and you take the gap. Their laughter stops somewhere around the second.", "effects": {"hull": -5}},
+          {"weight": 40, "text": "The gap is smaller than it looked, and you scrape out the far side with the bubble screaming. They come after you, still laughing.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Dump 40 scrap as a decoy and run.", "requires": {"items": {"scrap": 40}}, "outcomes": [
+          {"weight": 70, "text": "Rustfangs can't resist junk. All three break formation to fight over it, and you are out the far side before they've sorted the shares.", "effects": {"items": {"scrap": -40}}},
+          {"weight": 30, "text": "Two of them ignore the junk. You get a hole in your hull and a short, undignified sprint.", "effects": {"items": {"scrap": -40}, "hull": -10}}
+        ]}
+      ],
+      "after_win": {"text": "Their lockers hold a couple of well-oiled sidearms and one very confusing love letter.", "effects": {"items": {"pistol": 1, "rifle": 1}}}
+    },
+    {
+      "id": "wreck_field_snap_splice", "type": "wreck_field", "weight": 10, "once": false, "requires": {},
+      "text": "Out in the Boneyard, the front half of a tug is fused to the back half of a yacht, mid-jump, forever. The Snap decided they'd make good friends. The airlock plate says WELCOME in one language and NO ENTRY in the other.",
+      "choices": [
+        {"text": "Strip both halves by hand.", "outcomes": [
+          {"weight": 62, "text": "The tug half is all bolts and the yacht half is all brass. You come out with an armful of both.", "effects": {"items": {"scrap": 45, "copper": 15}}},
+          {"weight": 30, "text": "Two engineering philosophies have made a door that opens both ways, and you find out about the second way the hard way.", "effects": {"crew_hp": -10, "items": {"scrap": 30}}},
+          {"weight": 8, "text": "Under the yacht's racing livery, a nozzle the size of a barrel and the name AFTERBURNER stencilled on it in cheerful paint.", "effects": {"items": {"afterburner": 1}}}
+        ]},
+        {"text": "[Breach Harpoon] Reel the whole friendship home and strip it at your leisure.", "requires": {"component": "breach_harpoon"}, "outcomes": [
+          {"weight": 100, "text": "The harpoon bites, the rope tightens, and the whole bad idea comes home with you. You spend a week strip-mining it, and the crew sing the entire time.", "effects": {"items": {"scrap": 100, "copper": 20, "titanium": 6}}}
+        ]},
+        {"text": "[Suit] Cut the yacht captain's safe out of the hull, outside.", "requires": {"trait": "suit"}, "outcomes": [
+          {"weight": 60, "text": "The safe is rated for fire, flood and divorce. You cut it free at the weld and carry it in like a baby.", "effects": {"items": {"credits": 90}}},
+          {"weight": 40, "text": "The weld lets go early. You tear a suit seal on the way back in and swear the safe is worth it.", "effects": {"crew_hp": -15, "items": {"credits": 40}}}
+        ]},
+        {"text": "Leave it. Some friendships should be left alone.", "outcomes": [
+          {"weight": 100, "text": "You back away from the hull. The two halves go on being friends.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_dead_cruiser", "type": "wreck_field", "weight": 10, "once": false, "requires": {"jumps_min": 4},
+      "text": "A Concord cruiser, CS-221 Sobriety. Status: cold, lights none, distress call none. On the bridge window, from the inside, there is a handprint, and it still shines like a fresh one.",
+      "choices": [
+        {"text": "Board and salvage it.", "outcomes": [
+          {"weight": 45, "text": "The corridors are cold and the cabinets full. The handprint was a smear of old grease. Mostly.", "effects": {"items": {"scrap": 50, "credits": 25}}},
+          {"weight": 35, "text": "The lights come up the moment your airlock seals, and the guns come up with them. It wasn't dead. It was patient.", "effects": {"fight": "tier"}},
+          {"weight": 10, "text": "You split up to search. One of the party takes a wrong turn and the ship, politely, does not give them back.", "effects": {"lose_crew": 1, "items": {"scrap": 40}}},
+          {"weight": 10, "text": "In the engine bay, wrapped in a tarp and a Concord seal reading NOT FOR ISSUE, a nozzle with a long burn history.", "effects": {"items": {"afterburner": 1}}}
+        ]},
+        {"text": "[Artemis Mk1] Put a missile into the bridge first. Knock before you enter.", "requires": {"component": "artemis_mk1", "items": {"missile": 1}}, "outcomes": [
+          {"weight": 60, "text": "The missile finds the bridge and nothing answers. Whatever was in there is salvage now, and so is the rest.", "effects": {"items": {"missile": -1, "scrap": 60}}},
+          {"weight": 40, "text": "The missile hits something that was very much awake. The cruiser unfolds its guns like a man standing up.", "effects": {"items": {"missile": -1}, "fight": "tier"}}
+        ]},
+        {"text": "Hail it. Politely.", "outcomes": [
+          {"weight": 40, "text": "Nothing answers. You board, and nothing minds. A long quiet afternoon turns a profit.", "effects": {"items": {"scrap": 40, "credits": 20}}},
+          {"weight": 60, "text": "'Vessel,' says a voice that is reading off a card, 'you are in a restricted lane.' The guns say it too.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Back away slowly, with dignity.", "outcomes": [
+          {"weight": 100, "text": "The handprint on the window is gone by the time you look back.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_sealed_hold", "type": "wreck_field", "weight": 8, "once": true, "requires": {},
+      "text": "Concord cargo container, serial unreadable. Stamped FRAGILE, SEALED and DO NOT ROUTE THROUGH THE DRIFT. It has been routed through the Drift for forty years, and the seal is still green.",
+      "choices": [
+        {"text": "Pry it open.", "outcomes": [
+          {"weight": 40, "text": "Inside, neat rows of titanium plate and a manifest reading 'For Meridian'. Meridian can wait another forty years.", "effects": {"items": {"titanium": 8, "silicon": 6}}},
+          {"weight": 25, "text": "The container vents an air sample best described as historic. Your crew cough for an hour.", "effects": {"crew_hp": -10, "items": {"polymer": 20}}},
+          {"weight": 25, "text": "Seventy crates of regulation wiring, each stamped and signed. Concord would pay for these, in better days.", "effects": {"items": {"copper": 25, "scrap": 20}}},
+          {"weight": 10, "text": "Under the paperwork, wrapped in foam: a hook with a bite like a bad temper, and a note saying REQUEST DENIED.", "effects": {"items": {"breach_harpoon": 1}}}
+        ]},
+        {"text": "[Laser Cutter] Cut in from the corner. No alarms that way.", "requires": {"component": "laser_cutter"}, "outcomes": [
+          {"weight": 85, "text": "The cutter makes a lovely clean slice and none of the alarms notice. The titanium inside is grateful.", "effects": {"items": {"titanium": 10, "silicon": 8, "polymer": 15}}},
+          {"weight": 15, "text": "Under a false floor, a locked crate. Inside, still warm, a hand-held star with a Lumen serial and a very smug safety catch.", "effects": {"items": {"plasma_rifle": 1}}}
+        ]},
+        {"text": "Scan the seal and sample the outer packing.", "outcomes": [
+          {"weight": 100, "text": "The seal is real and so is the warning. You take a polymer sample from the outer packing and leave the rest to history.", "effects": {"items": {"polymer": 20}}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_gate_debris", "type": "wreck_field", "weight": 8, "once": false, "requires": {},
+      "text": "Shards of dead-gate casing hang in a slow ring, and each one hums a different note. The Lumen would call it a choir; the Scrappers call it a payday. The shards are very warm.",
+      "choices": [
+        {"text": "Pull shards with the crane, quickly.", "outcomes": [
+          {"weight": 55, "text": "The crane gets four shards before the humming gets loud. You back off before it can start a verse.", "effects": {"items": {"crystal": 3, "plasma_cell": 1}}},
+          {"weight": 30, "text": "A shard rings, and the ring goes through the hull like a bell. Your ears spend the afternoon making one very small, high note.", "effects": {"crew_hp": -10, "items": {"crystal": 2}}},
+          {"weight": 15, "text": "A shard cracks open and coughs a handful of plasma cells across your windscreen in a little burst of light.", "effects": {"hull": -5, "items": {"plasma_cell": 3}}}
+        ]},
+        {"text": "[Emberkin] Send your Emberkin to pick them out by hand. They're only warm.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin returns with arms full of glowing glass and the look of someone who has had a lovely bath.", "effects": {"items": {"crystal": 5, "plasma_cell": 2}}}
+        ]},
+        {"text": "Leave them for the Lumen. Counting shards is their job.", "outcomes": [
+          {"weight": 100, "text": "You leave the choir to its song. Somewhere in the lane, someone you will never meet does the counting.", "effects": {"rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_warden_husk", "type": "wreck_field", "weight": 8, "once": false, "requires": {"jumps_min": 5},
+      "text": "A Lumen Warden drone is perched on a gate-casing shard like a bird on a wire, lights dim, arms folded. The scanner swears it's off. The scanner has been wrong before, in ways that leave scorch marks.",
+      "choices": [
+        {"text": "Salvage the drone.", "outcomes": [
+          {"weight": 50, "text": "It stays off. You take the lens array, the power cells, and the faint feeling of being watched.", "effects": {"items": {"crystal": 4, "plasma_cell": 1}}},
+          {"weight": 50, "text": "The Warden unfolds one arm at a time, as though remembering how, and then remembers.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Ion Blast] Hit it with ion first. Wardens hate ion.", "requires": {"component": "ion_blast_mk1"}, "outcomes": [
+          {"weight": 85, "text": "The Warden sparks, shudders and goes properly dark, the kind of dark that stays. Its core drops into your net.", "effects": {"items": {"crystal": 5, "plasma_cell": 2}}},
+          {"weight": 15, "text": "The Warden's last act is to throw a bolt your way, out of spite.", "effects": {"hull": -10, "items": {"crystal": 4, "plasma_cell": 1}}}
+        ]},
+        {"text": "Leave it. It looked at you first.", "outcomes": [
+          {"weight": 100, "text": "Its lights stay dim as you go. You don't look back, because it might.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_cold_sleep", "type": "wreck_field", "weight": 6, "once": true, "requires": {},
+      "text": "A Scrapper tug, the Bad Idea, still pressurised after forty years. Six cold-sleep pods line the cargo bay, their green lights steady and every name tag out of date. The tug's clock is forty years slow and very sure of itself.",
+      "choices": [
+        {"text": "Wake one.", "outcomes": [
+          {"weight": 100, "text": "The pod hisses, the lid lifts, and a woman sits up blinking at the sound of her own coughing.", "effects": {"goto": "wreck_field_cold_sleep_awake"}}
+        ]},
+        {"text": "[Medbay] Wake them properly: warm, slow, medical.", "requires": {"component": "medbay"}, "outcomes": [
+          {"weight": 100, "text": "Two hours in the medbay and the sleepers wake up complaining about the date. One of them shakes your hand and signs on, and pays you with a pay chit that's still good at the Rusthold.", "effects": {"recruit": {"species": "human"}, "items": {"credits": 30}}}
+        ]},
+        {"text": "Strip the engine room and leave the sleepers be.", "outcomes": [
+          {"weight": 100, "text": "The engine room is a gold mine of mismatched parts. The sleepers don't stir, and the green lights keep their patience.", "effects": {"items": {"scrap": 50, "copper": 15}}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_cold_sleep_awake", "type": "wreck_field", "weight": 0, "once": false, "requires": {},
+      "text": "The woman is called Maud Teller, and her first question is what the date is. Her second is who's running the Lattice now. By the time you've finished not answering, she has asked for a very strong drink and a very large wrench.",
+      "choices": [
+        {"text": "Tell her about the Snap. All of it.", "outcomes": [
+          {"weight": 100, "text": "She listens to the end without interrupting, then says, very quietly, 'So we're not going home.' She signs on anyway, and does not ask to see the other pods again.", "effects": {"recruit": {"species": "human", "name": "Maud"}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Tell her it's only been a few days.", "outcomes": [
+          {"weight": 60, "text": "She nods, believes you, and spends a happy afternoon fixing your coolant lines. The lie sits in the room like a third crew member.", "effects": {"recruit": {"species": "human", "name": "Maud"}}},
+          {"weight": 40, "text": "She checks your clock, your hair and your age, and decides you are lying. She takes the job on principle, and the wrench along with it.", "effects": {"recruit": {"species": "human", "name": "Maud"}, "crew_hp": -10}}
+        ]},
+        {"text": "Ask her what she remembers before the pods.", "outcomes": [
+          {"weight": 100, "text": "Maud frowns. 'Green lights, a hum, then sleep; there were nine of us,' she says, and counts the pods. There are six.", "effects": {"recruit": {"species": "human", "name": "Maud"}, "flag": "maud_nine"}}
+        ]}
+      ]
+    },
+    {
+      "id": "trader_sixpence_fuel", "type": "trader", "weight": 14, "once": false, "requires": {},
+      "text": "A Fenn peddler's barge, Exact Change, swings in beside you with her running lights blinking in a sales pattern. 'Fuel,' says Sixpence over the comm, 'the finest in the Drift, at a price that reflects my feelings about you.' The feelings are mild. The price is triple.",
+      "choices": [
+        {"text": "Buy 1 fuel (24 credits).", "requires": {"credits": 24}, "outcomes": [
+          {"weight": 100, "text": "Sixpence weighs the coins on a scale you can't see and nods. 'Pleasure,' he says. It was not a pleasure.", "effects": {"items": {"credits": -24, "fuel": 1}}}
+        ]},
+        {"text": "Buy 3 fuel (72 credits).", "requires": {"credits": 72}, "outcomes": [
+          {"weight": 100, "text": "'A bulk buyer,' says Sixpence, with real warmth, and charges you accordingly.", "effects": {"items": {"credits": -72, "fuel": 3}}}
+        ]},
+        {"text": "[Fenn] Haggle in his own dialect (3 fuel).", "requires": {"species": "fenn", "credits": 72}, "outcomes": [
+          {"weight": 70, "text": "Your Fenn and Sixpence argue for three minutes in clicks too fast to follow, ending in a handshake and a lot of laughing. Three fuel, forty-five credits.", "effects": {"items": {"credits": -45, "fuel": 3}}},
+          {"weight": 30, "text": "It goes the other way: your Fenn is outhaggled, and the price is the same with a worse attitude.", "effects": {"items": {"credits": -72, "fuel": 3}}}
+        ]},
+        {"text": "Move on without fuel.", "outcomes": [
+          {"weight": 100, "text": "'Your funeral,' says Sixpence. 'Cheap, though.' He is already hailing the next ship.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "trader_pawnbarge", "type": "trader", "weight": 8, "once": false, "requires": {},
+      "text": "A clan pawnbarge hung with parts like a butcher's shop front. Every item is tagged WORKS, in the same handwriting, with the same optimism. The proprietor, Ma Pickle, is asleep in a hammock and wakes only for money.",
+      "choices": [
+        {"text": "Buy a mystery crate (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 40, "text": "Mostly scrap, with a single left shoe. You don't ask.", "effects": {"items": {"credits": -30, "scrap": 50}}},
+          {"weight": 25, "text": "Wiring, mostly. Good wiring.", "effects": {"items": {"credits": -30, "copper": 25, "polymer": 15}}},
+          {"weight": 20, "text": "An engine, in the sense that it has the shape of one.", "effects": {"items": {"credits": -30, "engine_mk1": 1}}},
+          {"weight": 10, "text": "A shield emitter that is still warm.", "effects": {"items": {"credits": -30, "shield_mk2": 1}}},
+          {"weight": 5, "text": "Under the shoes, a laser with a cord and a bad attitude. Ma Pickle opens one eye, sees what you've found, and says nothing, which is the most expensive thing she has ever said.", "effects": {"items": {"credits": -30, "leech_laser": 1}}}
+        ]},
+        {"text": "Sell her your spare Radiator.", "requires": {"items": {"radiator": 1}}, "outcomes": [
+          {"weight": 100, "text": "Ma Pickle bites it, which is how you test radiators, and pays without opening her eyes.", "effects": {"items": {"radiator": -1, "credits": 35}}}
+        ]},
+        {"text": "[Fenn] Let your Fenn pick the crate.", "requires": {"species": "fenn", "credits": 30}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn walks the aisles, taps one crate, and says 'that one'. It's the only crate with a lock. Ma Pickle's eyes open for the first time all day.", "effects": {"items": {"credits": -30, "titanium": 8, "silicon": 6, "plasma_cell": 1}}}
+        ]},
+        {"text": "Touch nothing. Everything works until you do.", "outcomes": [
+          {"weight": 100, "text": "Ma Pickle goes back to sleep. The tags go on lying.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "trader_concord_requisitions", "type": "trader", "weight": 8, "once": false, "requires": {},
+      "text": "CS-512 Prudence, supply barge. Stock: adequate; forms required: 6, forms available: 5. A sixth is being drafted, and the clerk would like you to know they have been drafting it for eleven years.",
+      "choices": [
+        {"text": "File five forms and request missiles (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "Stamp, stamp, stamp. Four missiles slide out of a hatch labelled MISCELLANEOUS and you sign for them in triplicate.", "effects": {"items": {"credits": -40, "missile": 4}}}
+        ]},
+        {"text": "Bribe the clerk for the sixth form (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 70, "text": "The clerk pretends not to see your hand, and the sixth form appears fully stamped. A Shield Mk1 comes out of the hatch, authorised at last, and your record gains a small, tasteful smudge.", "effects": {"items": {"credits": -30, "shield_mk1": 1}, "rep": {"concord": -1}}},
+          {"weight": 30, "text": "The clerk is honest. It is the worst possible luck.", "effects": {"items": {"credits": -30}, "rep": {"concord": -2}}}
+        ]},
+        {"text": "Sell them 30 scrap for the recycling fund.", "requires": {"items": {"scrap": 30}}, "outcomes": [
+          {"weight": 100, "text": "A clerk weighs your scrap with a grave, official look and enters it under 'Donations, Unsolicited'. You are thanked in writing.", "effects": {"items": {"scrap": -30, "credits": 25}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Leave. The sixth form can wait another eleven years.", "outcomes": [
+          {"weight": 100, "text": "The barge's lights wink politely as you go. The form is still being drafted.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_singing_buoy", "type": "anomaly", "weight": 12, "once": false, "requires": {"not_flag": "prism_revealed"},
+      "text": "A buoy of fused glass turns slowly in the dark, singing three notes. The third note is yours. It wasn't, a moment ago. Your instruments find no power source, and your crew find a mild, polite homesickness.",
+      "choices": [
+        {"text": "Listen to the third note.", "outcomes": [
+          {"weight": 100, "text": "You listen. It listens back, which is somehow worse.", "effects": {"goto": "anomaly_buoy_answer"}}
+        ]},
+        {"text": "[Emberkin] Let your Emberkin hum it back.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin hums the third note without being asked, and the buoy brightens like something that has been waiting a long time.", "effects": {"rep": {"lumen": 1}, "goto": "anomaly_buoy_answer"}}
+        ]},
+        {"text": "Fly off. The notes aren't for you.", "outcomes": [
+          {"weight": 100, "text": "The song fades behind you. Your crew keep humming it for the rest of the shift.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_buoy_answer", "type": "anomaly", "weight": 0, "once": false, "requires": {},
+      "text": "The buoy stops, and the dark opens a pinhole of light a long way off, then another. Together they spell a direction: not a station yet, but the shape of one. The notes arrange themselves into something very like an invitation.",
+      "choices": [
+        {"text": "Mark the bearing and follow it.", "outcomes": [
+          {"weight": 100, "text": "The light blooms ahead: a station like a crystal fist, humming softly, with every window turned your way. Someone a long way off has noticed you noticing.", "effects": {"flag": "prism_revealed", "rep": {"lumen": 1}}}
+        ]},
+        {"text": "File the bearing with Concord archives.", "outcomes": [
+          {"weight": 100, "text": "Meridian logs your report under 'Anomalies, Unverified'. The Lumen will hear of it, though not from you. The station shows up on your chart regardless.", "effects": {"flag": "prism_revealed", "rep": {"concord": 1, "lumen": -1}}}
+        ]},
+        {"text": "Keep it to yourself and turn away.", "outcomes": [
+          {"weight": 100, "text": "You file the notes under 'later'. The buoy goes silent, and the silence feels like a held door.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_afterimage", "type": "anomaly", "weight": 8, "once": true, "requires": {"jumps_min": 4},
+      "text": "A ship sits in the lane, outline only, as if drawn on the dark in light. The scanner insists it is four hundred metres away and also inside you. The name glows and fades along its flank: Afterimage.",
+      "choices": [
+        {"text": "Fly through it.", "outcomes": [
+          {"weight": 55, "text": "You pass through a ship made of nothing, and the nothing passes through you. Every crew member sees something different and none will say what.", "effects": {"crew_hp": -10, "items": {"crystal": 3}}},
+          {"weight": 35, "text": "The outline closes round you like a held breath, then lets you go, dimmer, and you a little richer.", "effects": {"items": {"plasma_cell": 2, "crystal": 2}}},
+          {"weight": 10, "text": "Where the bow would be, a veil of glass hangs, folded small. It comes with you like it was always yours.", "effects": {"items": {"mirror_veil": 1}}}
+        ]},
+        {"text": "[Mirror Veil] Hold up your veil and let it see itself.", "requires": {"component": "mirror_veil"}, "outcomes": [
+          {"weight": 85, "text": "The veil catches the outline and throws it back. For a moment there are two Afterimages. Then there is a gift of crystal, and one of them.", "effects": {"items": {"crystal": 6}, "rep": {"lumen": 2}}},
+          {"weight": 15, "text": "The Afterimage folds itself into a sheet of light and leaves a blueprint on your console, as one might leave a card.", "effects": {"items": {"crystal": 3}, "blueprint": "siren_ion_neon", "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Basalt] Ask your Basalt what they see.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt looks at the outline for a long time. 'I have seen this ship,' they say, 'and it has not happened yet.' They say nothing else until the next jump.", "effects": {"flag": "afterimage_seen", "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Go around, at a respectful distance.", "outcomes": [
+          {"weight": 100, "text": "You take the long way. The outline turns to watch you go, politely, like a cat at a window.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_frozen_flare", "type": "anomaly", "weight": 8, "once": false, "requires": {"jumps_min": 3},
+      "text": "Light has stopped here. A solar flare hangs frozen mid-bloom, a wall of white standing perfectly still across the lane. The scanner says it's a door. The scanner says a lot of things.",
+      "choices": [
+        {"text": "Fly through the flare.", "outcomes": [
+          {"weight": 50, "text": "It is like flying through a held note. You come out the far side with plasma dust all over the hull and a happy sort of ringing.", "effects": {"items": {"plasma_cell": 2, "crystal": 2}}},
+          {"weight": 50, "text": "The flare remembers it's a flare. The heat is brief, immense and entirely personal.", "effects": {"hull": -10, "items": {"plasma_cell": 1}}}
+        ]},
+        {"text": "[Shield Mk1] Fly through under shield.", "requires": {"component": "shield_mk1"}, "outcomes": [
+          {"weight": 85, "text": "The bubble takes the heat in one long, sweet hiss. You emerge with plasma dust on the shield and a grin on the bridge.", "effects": {"items": {"plasma_cell": 3, "crystal": 3}}},
+          {"weight": 15, "text": "The shield flares and fails halfway across. You scrape out the far side with new opinions.", "effects": {"hull": -10, "items": {"plasma_cell": 2}}}
+        ]},
+        {"text": "Scan it from a safe distance.", "outcomes": [
+          {"weight": 100, "text": "The scanner draws a perfect picture of a door and no handle. The Lumen would give a great deal for the picture, and you suspect they know already.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "patrol_hallett_inspection", "type": "patrol", "weight": 12, "once": false, "requires": {"rep_min": {"concord": -4}},
+      "text": "CS-114 Diligence, patrol cutter, class: tired. Officer Hallett requests that you hold position for a Routine Cargo Inspection (Form 12-C). His tone is that of a man who has asked this four thousand times and been thanked for none of them.",
+      "choices": [
+        {"text": "Submit to the inspection.", "outcomes": [
+          {"weight": 65, "text": "Hallett checks the manifest, the hold and his watch, and signs. 'Safe travels,' he says, in the voice of a man who would rather you stayed.", "effects": {"rep": {"concord": 1}}},
+          {"weight": 35, "text": "Form 12-C(ii): salvage rights surcharge. He apologises as he reads it, and accepts payment in kind, being a practical man.", "effects": {"items": {"scrap": -30}}}
+        ]},
+        {"text": "[Human] File a complaint, loudly. Humans are good at it.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 80, "text": "Hallett reads your form and looks at you with the quiet respect of one professional for another. 'Go, please,' he says, and stamps you a small rebate.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}}},
+          {"weight": 20, "text": "Hallett counters with a complaint of his own. It is longer, and has footnotes. You lose half a day and a little fuel.", "effects": {"items": {"fuel": -1}}}
+        ]},
+        {"text": "Stall until his sensors give up.", "outcomes": [
+          {"weight": 40, "text": "Hallett's cutter drifts off to inspect something more cooperative. You've saved a form and cost yourself nothing.", "effects": {}},
+          {"weight": 40, "text": "The cutter's scanners are better than your excuses. 'Contraband,' says Hallett, almost kindly.", "effects": {"items": {"scrap": -30}, "rep": {"concord": -2}}},
+          {"weight": 20, "text": "Hallett sighs, calls it in, and two Enforcers arrive faster than the paperwork.", "effects": {"rep": {"concord": -3}, "fight": "tier"}}
+        ]}
+      ]
+    },
+    {
+      "id": "patrol_bounty_posting", "type": "patrol", "weight": 8, "once": false, "requires": {"jumps_min": 2, "rep_min": {"concord": -4}},
+      "text": "Hallett's cutter hails you on the other frequency, the one with the stationery. 'A bounty, if you want it: the Dental Plan, captain one Vex, wanted for toll-taking, noise, and being a person.' He pauses. 'Three separate counts.'",
+      "choices": [
+        {"text": "Accept the bounty.", "outcomes": [
+          {"weight": 100, "text": "Hallett stamps the contract with a stamp that has seen better decades. 'Do try to bring back the paperwork,' he says. Vex, by awful luck, is right behind you.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Decline politely.", "outcomes": [
+          {"weight": 100, "text": "'Understood,' says Hallett. He writes 'declined' on something, and the something sighs.", "effects": {}}
+        ]},
+        {"text": "Sell the bounty details to a Clan broker instead.", "outcomes": [
+          {"weight": 100, "text": "A Scrapper broker pays on the spot in dented coin, with a laugh. Vex will be warned by sunset. Hallett will be told you are a fine upstanding citizen, until he isn't.", "effects": {"items": {"credits": 40}, "rep": {"clans": 2, "concord": -2}}}
+        ]}
+      ],
+      "after_win": {"text": "Hallett's bounty office pays on receipt of one gunboat's worth of paperwork. 'Remarkable,' he writes. He means it as a complaint.", "effects": {"items": {"credits": 100}, "rep": {"concord": 2}}}
+    },
+    {
+      "id": "patrol_enforcer_warrant", "type": "patrol", "weight": 10, "once": false, "requires": {"rep_max": {"concord": -3}},
+      "text": "Two Concord cutters box you in, rank lights on, weapons politely unarmed. 'Vessel,' says a clipped voice, 'you are listed. You are asked to stand down and pay a fine.' The word asked is doing a great deal of work in that sentence.",
+      "choices": [
+        {"text": "Pay the fine (80 credits).", "requires": {"credits": 80}, "outcomes": [
+          {"weight": 100, "text": "The cutters stamp you clean. For about a minute you are a model citizen. 'Do not make this a habit,' says the clipped voice, which is exactly what a habit sounds like.", "effects": {"items": {"credits": -80}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Surrender 60 scrap in lieu.", "requires": {"items": {"scrap": 60}}, "outcomes": [
+          {"weight": 100, "text": "They accept scrap with the weary grace of people who have been paid in worse. 'Receipt,' says the voice. 'Keep it; it is the closest thing to a friend you will find out here.'", "effects": {"items": {"scrap": -60}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Ion Drive] Slip the cordon on a fast burn.", "requires": {"component": "engine_neon_mk1"}, "outcomes": [
+          {"weight": 75, "text": "The Ion Drive lights up like a promise, and you're through the gap before the cutters finish saying 'stand'.", "effects": {"rep": {"concord": -1}}},
+          {"weight": 25, "text": "They get a clean shot at your tail on the way out.", "effects": {"hull": -10, "rep": {"concord": -1}}}
+        ]},
+        {"text": "Refuse and fight.", "outcomes": [
+          {"weight": 100, "text": "The clipped voice sighs. 'Noted,' it says. 'Regrettably.'", "effects": {"fight": "tier"}}
+        ]}
+      ],
+      "after_win": {"text": "Two cutters, two reports, and one very long file with your name on it.", "effects": {"rep": {"concord": -2}}}
+    },
+    {
+      "id": "empty_card_game", "type": "empty", "weight": 10, "once": false, "requires": {},
+      "text": "Nothing out here but you, the stars and eleven hours of quiet. Somebody drags a crate into the mess and deals from a deck that's been missing three cards since the Snap.",
+      "choices": [
+        {"text": "Sit in, for stakes (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 45, "text": "You win, narrowly, on a hand that shouldn't have worked. Someone accuses the dealer of cheating. Someone is right.", "effects": {"items": {"credits": 25}}},
+          {"weight": 55, "text": "You lose, gracefully and with swearing. The whole crew have never been happier.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+        ]},
+        {"text": "[Basalt] Let your Basalt deal. Nobody can read them.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt plays a perfectly even game, with a face like a rock, which it is. The crew lose their stakes into the ship's fund and thank them for it.", "effects": {"items": {"credits": 30}, "crew_hp": 10}}
+        ]},
+        {"text": "Watch from the doorway.", "outcomes": [
+          {"weight": 100, "text": "You watch them play for an hour without saying much. It's one of the better hours of the trip.", "effects": {"crew_hp": 10}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_long_quiet", "type": "empty", "weight": 10, "once": false, "requires": {},
+      "text": "The drive hums its one note, and the ship is quiet in the way that feels like company. Somewhere aft, someone is humming off-key. Nobody has been shot at in hours.",
+      "choices": [
+        {"text": "Let the crew rest.", "outcomes": [
+          {"weight": 100, "text": "Somebody finds a blanket. Somebody else finds a second blanket. By the time you notice, the whole ship is asleep except the autopilot, which never needed to be.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "[Emberkin] Sit on the warm reactor casing with your Emberkin.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "It's warm, and quiet, and your Emberkin tells you about a place with two suns and no winter, and you believe every word. You come away feeling something close to well.", "effects": {"crew_hp": 15}}
+        ]},
+        {"text": "[Basalt] Stand at the window with your Basalt and say nothing.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Neither of you speaks for an hour. Then your Basalt says, 'That is where the gate was.' You look and see only dark, and nod anyway, and they press a small grey stone into your hand, warm from being held.", "effects": {"crew_hp": 10, "items": {"silicon": 5}}}
+        ]},
+        {"text": "Use the quiet to catch up on repairs.", "outcomes": [
+          {"weight": 100, "text": "You spend the hours with a wrench and a cup of something hot. The ship comes out better for it. So, annoyingly, do you.", "effects": {"hull": 10}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_radio_rusthold", "type": "empty", "weight": 10, "once": false, "requires": {},
+      "text": "Radio Rusthold fades in through the static, a pirate station run out of someone's laundry room. The presenter reads requests, dedications and the day's debts, in that order. A song goes out to 'the ship that owes Ma Gantry'. You think it might be you.",
+      "choices": [
+        {"text": "Call in a request.", "outcomes": [
+          {"weight": 70, "text": "You ask for something slow and sad, and the presenter plays something fast and rude. Your crew sing along anyway.", "effects": {"crew_hp": 10, "rep": {"clans": 1}}},
+          {"weight": 30, "text": "The presenter reads your name and balance on air to a round of applause from three hundred strangers. Ma Gantry rings in to say hello, which is worse.", "effects": {"rep": {"clans": 1}, "debt": 20}}
+        ]},
+        {"text": "[Suit] Take a walk on the hull while it plays.", "requires": {"trait": "suit"}, "outcomes": [
+          {"weight": 100, "text": "You stand on the skin of the ship with the stars on one side and a dying radio on the other. It's the closest thing to a holiday you've had. You also find a loose bolt, and keep it.", "effects": {"crew_hp": 10, "items": {"scrap": 20}}}
+        ]},
+        {"text": "Dial around the band.", "outcomes": [
+          {"weight": 50, "text": "A Concord channel reads out a shipping forecast for a Lattice that no longer exists, in a voice suspiciously like Officer Hallett's. 'Fair winds in Sector Nine,' he sighs. There is no Sector Nine.", "effects": {"rep": {"concord": 1}}},
+          {"weight": 50, "text": "A Lumen channel that is only one held note, rising. Your whole bridge goes quiet to hear the end of it.", "effects": {"rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "debt_ma_first_call", "type": "debt", "weight": 40, "once": true, "requires": {"jumps_min": 2, "not_flag": "met_ma"},
+      "text": "The comm lights up with a face like a closed door. 'Ma Gantry,' says the face, in a voice like a kettle coming to the boil. 'Just checking on my hull, the one you're sitting in. Heard the number a thousand?'",
+      "choices": [
+        {"text": "Promise to pay on time.", "outcomes": [
+          {"weight": 100, "text": "'That's what they all say,' says Ma, writing it down. 'A hundred every eight jumps, at a Rusthold or a clan trader. I don't chase, I send people.'", "effects": {"flag": "met_ma", "rep": {"clans": 1}}}
+        ]},
+        {"text": "Pay 100 now, up front.", "requires": {"credits": 100}, "outcomes": [
+          {"weight": 100, "text": "Ma Gantry's eyebrow does something. 'Well, someone raised you,' she says, and takes the hundred, and shaves ten off the number for manners.", "effects": {"items": {"credits": -100}, "debt": -110, "rep": {"clans": 2}, "flag": "met_ma"}}
+        ]},
+        {"text": "Ask for an extension.", "outcomes": [
+          {"weight": 40, "text": "'An extension,' says Ma, as if tasting it. 'Fifty on the number, for the privilege.' She hangs up before you can thank her.", "effects": {"flag": "met_ma", "debt": 50}},
+          {"weight": 60, "text": "'No,' says Ma, but in a warm way. 'But I'll remember you asked.'", "effects": {"flag": "met_ma", "rep": {"clans": 1}}}
+        ]},
+        {"text": "Hang up.", "outcomes": [
+          {"weight": 100, "text": "The line goes dead. Somewhere in the Rusthold, a ledger opens a fresh page.", "effects": {"flag": "met_ma", "rep": {"clans": -2}}}
+        ]}
+      ]
+    },
+    {
+      "id": "debt_ma_reminder", "type": "debt", "weight": 20, "once": false, "requires": {"jumps_min": 6, "flag": "met_ma", "not_flag": "debt_missed"},
+      "text": "A message from the Gantry Rusthold, forwarded by a Fenn clerk who clearly hates being the messenger: 'Ma says the next payment is due soon. She says it with love.' The clerk has added, in smaller print, 'It is worse with love.'",
+      "choices": [
+        {"text": "Pay 100 now, early.", "requires": {"credits": 100}, "outcomes": [
+          {"weight": 100, "text": "The clerk notarises it with a stamp that sounds like a small door closing. 'Ma will be pleased,' they say, and sound afraid of it.", "effects": {"items": {"credits": -100}, "debt": -100, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Fabricator] Offer Ma a part from your own fabricator, in lieu.", "requires": {"component": "fabricator", "items": {"scrap": 40}}, "outcomes": [
+          {"weight": 70, "text": "A hand-built part arrives at the Rusthold wrapped in last week's news. Ma takes it, weighs it, and knocks sixty off the number. 'Make it twice,' she says, and does not say please.", "effects": {"items": {"scrap": -40}, "debt": -60, "rep": {"clans": 1}}},
+          {"weight": 30, "text": "The part comes back with a note: 'Rattles.' Ma knocks thirty off anyway.", "effects": {"items": {"scrap": -40}, "debt": -30}}
+        ]},
+        {"text": "Do Ma a favour: haul her crate to the next trader.", "outcomes": [
+          {"weight": 60, "text": "Easy money, if you ignore what the crate is humming. Ma knocks fifty off the number and never says what was in it.", "effects": {"debt": -50}},
+          {"weight": 40, "text": "Rustfangs love a clan crate. They find you quickly and lovingly.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Ignore it.", "outcomes": [
+          {"weight": 100, "text": "The message sits in your inbox like a held breath. The Fenn clerk sends a second one, just a small sad face.", "effects": {}}
+        ]}
+      ],
+      "after_win": {"text": "The crate survives, dented but humming. Ma will be told, and she will not say thank you.", "effects": {"debt": -50}}
+    },
+    {
+      "id": "debt_repo_crew_talk", "type": "debt", "weight": 30, "once": false, "requires": {"flag": "debt_missed"},
+      "text": "A collection boat hauls alongside, GANTRY CLAN RECOVERY SERVICES hand-painted over its old Rustfang logo. 'Missed payment,' says the collector, in the voice of a man reading from a card. 'Ma sends her love and this charming invoice.'",
+      "choices": [
+        {"text": "Pay the missed 100 credits.", "requires": {"credits": 100}, "outcomes": [
+          {"weight": 100, "text": "The collector counts it twice, then tears the invoice in half with real regret. 'Pleasure,' he says. 'Keep it quick next time.'", "effects": {"items": {"credits": -100}, "debt": -100, "clear_flag": "debt_missed", "rep": {"clans": 1}}}
+        ]},
+        {"text": "Pay half and promise the rest.", "requires": {"credits": 50}, "outcomes": [
+          {"weight": 70, "text": "'Half,' says the collector, thoughtfully. 'Half is a start, half is a talking point.' He writes down 'half' and underlines it twice.", "effects": {"items": {"credits": -50}, "debt": -40, "clear_flag": "debt_missed"}},
+          {"weight": 30, "text": "'Half,' says the collector, 'is an insult, and insults carry a convenience fee.' He types the fee with visible pleasure.", "effects": {"items": {"credits": -50}, "debt": -20}}
+        ]},
+        {"text": "Fight the collection boat.", "outcomes": [
+          {"weight": 100, "text": "You don't recall signing a clause about this. The collector does, and recites it fondly as the guns warm.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Afterburner] Outrun them.", "requires": {"component": "afterburner"}, "outcomes": [
+          {"weight": 70, "text": "The collection boat is built for hailing, not chasing. You leave it behind with a slow, angry clock.", "effects": {"rep": {"clans": -1}}},
+          {"weight": 30, "text": "They shout a few parting shots across the dark. You feel each one.", "effects": {"hull": -10, "rep": {"clans": -1}}}
+        ]}
+      ],
+      "after_win": {"text": "The boat comes apart. Ma will send a bigger one, with a bigger invoice.", "effects": {"rep": {"clans": -2}, "debt": 50}}
+    }
+]}

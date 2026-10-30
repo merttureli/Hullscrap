@@ -18,6 +18,7 @@ const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 const PATH := "res://data/weapons.json"
 const BASE := {"damage_type": "energy", "damage": 1.0, "cooldown": 1.0, "range": 900.0, "arc": 360.0,
@@ -48,7 +49,7 @@ func _init(path := PATH) -> void:
 
 
 func load_defs(path: String) -> void:
-	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var data = Content.read(path)
 	assert(data is Dictionary and data.get("weapons") is Dictionary, "bad weapon data: " + path)
 	defs = data["weapons"]
 	turret_damage = float(data.get("turret_damage", turret_damage))

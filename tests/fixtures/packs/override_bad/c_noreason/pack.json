@@ -1,0 +1,9 @@
+{
+  "id": "c_noreason",
+  "name": "c_noreason",
+  "version": "1.0",
+  "requires": [
+    "a_base"
+  ],
+  "notes": "Test fixture: see tests/test_content.gd."
+}

@@ -2,6 +2,7 @@ extends RefCounted
 ## Recipes (data/recipes.json), the blueprints the player knows and the fabricator's job queue.
 ## Materials are spent when a job is queued and refunded if it is cancelled. Pure data, no nodes.
 
+const Content = preload("res://scripts/data/content.gd")
 const VERSION := 1
 const QUEUE_MAX := 8
 const ITEMS_PATH := "res://data/items.json"  ## names of ammo, gear and special items
@@ -18,9 +19,9 @@ var _item_names := {}  # item id -> name (data/items.json)
 
 ## Load the recipes and materials. Resets the known blueprints to `start_known` and empties the queue.
 func load(recipes_path: String, materials_path: String) -> void:
-	var m = JSON.parse_string(FileAccess.get_file_as_string(materials_path))
+	var m = Content.read(materials_path)
 	assert(m is Dictionary and m.has("materials"), "bad material data: " + materials_path)
-	var r = JSON.parse_string(FileAccess.get_file_as_string(recipes_path))
+	var r = Content.read(recipes_path)
 	assert(r is Dictionary and r.has("recipes"), "bad recipe data: " + recipes_path)
 	materials.clear()
 	recipes.clear()
@@ -31,7 +32,7 @@ func load(recipes_path: String, materials_path: String) -> void:
 	_start_known.clear()
 	_item_names.clear()
 	if FileAccess.file_exists(ITEMS_PATH):
-		var it = JSON.parse_string(FileAccess.get_file_as_string(ITEMS_PATH))
+		var it = Content.read(ITEMS_PATH)
 		if it is Dictionary and it.get("items") is Array:
 			for d in it["items"]:
 				_item_names[str(d["id"])] = str(d.get("name", d["id"]))

@@ -1,0 +1,9 @@
+{
+  "id": "b_over",
+  "name": "b_over",
+  "version": "1.0",
+  "requires": [
+    "a_base"
+  ],
+  "notes": "Test fixture: see tests/test_content.gd."
+}
