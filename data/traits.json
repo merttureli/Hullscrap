@@ -1,0 +1,28 @@
+{
+	"_doc": {
+		"about": "The crew trait library (docs/CONTENT_PLAN.md section 2). A trait is a bag of generic keys; scripts/crew/traits.gd (TraitSet.of) merges the bags of a crew member's species, personal traits (data/crew.json `traits`, by name) and worn gear into numbers, and every rule that a key changes reads them there. Packs add traits in their own traits.json, in this shape. Merging: factors multiply (a trait with no entry for a key leaves it alone), amounts add, `mechanical` is true if any trait says so, ion_stun and the dries_out threshold take the strongest. A species entry (data/species.json) may carry the same keys inline, merged first. A trait with no keys (suit) is only a label that abilities.gd checks against operator_needs. `name` and `blurb` are for the UI. The old place for traits, the `traits` table of species.json with a `mult` object (no_air_damage, fire_damage, repair_time as a time factor, heal_others), is still read for ids this file does not define.",
+		"keys": {
+			"hp_mult": "factor on the species' max hp, applied when the species is set",
+			"speed_mult": "factor on the species' walk speed, applied when the species is set",
+			"o2_use": "factor on the air they breathe (BREATH_RATE per second); 0 = does not breathe, and so cannot suffocate",
+			"suffocate_mult": "factor on the damage they take in a room with no air",
+			"damage_taken": "factors on the damage they take, by source: fire (standing in a burning cell), no_air, ion (an ion hit on their room: crew.json ion_hp per point), melee and ranged (kept for the on-foot fights, nothing reads them yet)",
+			"work_mult": "factors on the SPEED of their work (2 = twice as fast), by job: repair (a part, or a crewmate with `mechanical`), extinguish, breach, man (how well they work a post, times station.manned_mult), heal_others (reviving a crewmate), restock and craft (kept for jobs that do not exist yet)",
+			"heal_mult": "factors on what a bed and a medbay heal them (0 = it does not)",
+			"mechanical": "true: beds do not heal them; a hurt one gets a repair_crew job (priority 75) that any other crew member does",
+			"aura": "what they give to the room they stand in while up: o2_per_s (air added), heal_per_s (hp for everyone in the room), work_mult (factor on the work speed of the OTHERS in the room)",
+			"station": "power_bonus: the part they man gets this much power while they man it (added to its figure, so a consumer draws less); manned_mult: factor on the bonuses a manned helm, weapon or shield gives",
+			"melee_mult": "factor on their melee damage (kept for the on-foot fights)",
+			"ranged_mult": "factor on their ranged damage (kept for the on-foot fights)",
+			"swarm": "work speed +per_other for every OTHER up crew member of the same species in their room, at most +max",
+			"dries_out": "they lose hp_per_s hit points a second in a room whose hottest part is above heat_above",
+			"ion_stun": "seconds they are stunned (no walking, no work) when an ion hit lands on their room"
+		}
+	},
+	"traits": {
+		"suit": {"name": "Suited", "blurb": "Wears an EVA suit: the label abilities ask for."},
+		"no_breath": {"name": "Does not breathe", "o2_use": 0},
+		"heat_resistant": {"name": "Heat resistant", "damage_taken": {"fire": 0.25}},
+		"fast_repair": {"name": "Quick hands", "notes": "repair and breach time x0.6, which is a work speed of 1/0.6", "work_mult": {"repair": 1.6666667, "breach": 1.6666667}}
+	}
+}

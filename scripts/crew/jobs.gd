@@ -5,8 +5,9 @@ extends RefCounted
 ## The job board is rebuilt from the ship's state every `period` seconds (and at once after a job
 ## is finished): `extinguish` a burning cell (100), `revive` a downed crew member (95),
 ## `repair_breach` a shot-open wall (90), `repair_component` a malfunctioning or disabled part (80,
-## +10 for a weapon, engine or shield in a fight), `man_station` (50: the helm, and weapons, shields
-## and engines flagged manned). A job has `slots` places (two crew stack on a fire) and a place to
+## +10 for a weapon, engine or shield in a fight), `repair_crew` a hurt `mechanical` crew member (75,
+## done by any other crew member: beds do not heal them), `man_station` (50: the helm, and weapons,
+## shields and engines flagged manned). A job has `slots` places (two crew stack on a fire) and a place to
 ## stand next to it. Numbers are in data/crew.json.
 ## Each hand-out, an idle crew member takes the highest-priority job with a free place, preferring
 ## jobs nobody works on, then the nearest by walking distance (only the nearest few get a path
@@ -14,6 +15,9 @@ extends RefCounted
 ## least `switch_margin` priority points higher shows up. The player's soldier is never given a
 ## job; the player works a job by standing next to it and holding E (hand_work). Hurt crew with
 ## nothing to do rest on a bed (5 hp/s) or in a powered medbay (15 hp/s).
+## What the crew's traits change (traits.gd, the library in data/traits.json) is asked there: work speed
+## (work_rate: repair, extinguish, breach, revive, swarm and aura bonuses), air and fire damage, room heat
+## (dries_out), healing (heal_mult, auras) and ion hits (ion_hit: damage and stun).
 ## Repairs take `seconds` x the repair multiplier of the part's line (of the wall's line for a
 ## breach). A crew member at a station marks it in `ship.manned` (uid -> name): a manned helm adds
 ## evasion in a fight and a manned weapon cools down faster (see evasion_bonus, cooldown_mult).
@@ -22,12 +26,16 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
+const Heat = preload("res://scripts/sim/heat.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
 const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const FAULTY: Array[String] = ["malfunction", "disabled"]  ## part statuses a crew member can repair
 const NO_FIRE := Vector2i(-1, -1)  ## "no burning cell"
 const HAND_SHOWN := 0.6  ## seconds the HUD still says what the player was doing by hand
+## The TraitSet work_mult a job type is done at.
+const WORK_KIND := {"extinguish": "extinguish", "repair_breach": "breach", "repair_component": "repair", "repair_crew": "repair", "revive": "heal_others"}
 
 var board := {}  ## job key -> job: {key, type, priority, cells, slots, work, label, ...}
 var progress := {}  ## job key -> seconds of work done so far (kept while the job stays on the board)
@@ -51,7 +59,9 @@ func tick(ship, dt: float, in_combat := false) -> void:
 	ship.manned.clear()
 	for m in ship.crew:
 		m.hold = maxf(m.hold - dt, 0.0)
-		if m.is_down() or m.is_player:
+		var stunned: bool = m.is_stunned()
+		m.stun = maxf(m.stun - dt, 0.0)
+		if m.is_down() or m.is_player or stunned:
 			continue
 		m.step(dt)
 		if not m.job.is_empty():
@@ -62,11 +72,11 @@ func tick(ship, dt: float, in_combat := false) -> void:
 ## The player's hand on a job: `m` works the best job they stand next to (not a station) for `dt`
 ## seconds, at the same speed as an NPC. Returns its key, "" when there is nothing in reach.
 func hand_work(ship, m, dt: float) -> String:
-	if m.is_down():
+	if m.is_down() or m.is_stunned():
 		return ""
 	for key in by_priority(board.values()).map(func(j): return j["key"]):
 		var job: Dictionary = board[key]
-		if job["type"] != "man_station" and in_reach(m, job):
+		if job["type"] != "man_station" and in_reach(m, job) and not _is_own(job, m):
 			work(ship, m, job, dt)
 			m.job = {"key": key, "type": job["type"], "label": job["label"], "hand": true, "t": ship.clock}
 			return key
@@ -79,14 +89,15 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 		"extinguish":
 			var c: Vector2i = job["cell"]
 			var foot := _fire_under(ship, m)
+			var rate := float(jcfg()["extinguish"]["rate"]) * _work_rate(ship, m, "extinguish") * dt
 			if ship.fires.has(c) and foot != NO_FIRE:  # the fire has spread under their feet: that one first
-				ship.fires[foot] = float(ship.fires[foot]) - float(jcfg()["extinguish"]["rate"]) * dt
+				ship.fires[foot] = float(ship.fires[foot]) - rate
 				if ship.fires[foot] <= 0.0:
 					Fire.extinguish(ship, foot)
 					board.erase("fire:%d,%d" % [foot.x, foot.y])
 				return
 			if ship.fires.has(c):
-				ship.fires[c] = float(ship.fires[c]) - float(jcfg()["extinguish"]["rate"]) * dt
+				ship.fires[c] = float(ship.fires[c]) - rate
 			if not ship.fires.has(c) or ship.fires[c] <= 0.0:
 				Fire.extinguish(ship, c)
 				board.erase(job["key"])  # done: everyone on it moves on at the next hand-out
@@ -95,18 +106,28 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 			ship.manned[job["uid"]] = m.name
 		"repair_breach", "repair_component", "revive":
 			var key: String = job["key"]
-			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(m, job["type"])
+			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(ship, m, job["type"])
 			if progress[key] >= float(job["work"]) - 1e-6:
 				_finish(ship, job)
+		"repair_crew":  # mends the hurt crewmate (hp a second) until they are whole
+			var who = _find(ship, func(x): return x.name == job["who"])
+			if who != null and not who.is_down() and who.hp < who.max_hp:
+				who.heal(float(jcfg()["repair_crew"]["rate"]) * _work_rate(ship, m, "repair_crew") * dt)
+			if who == null or who.is_down() or who.hp >= who.max_hp:
+				board.erase(job["key"])
+				_since = 1.0e9
 
 
-## How fast `m` does a job of `type`: 1 / the repair_time factor of their traits for a repair or a
-## breach (fast_repair works in 0.6 of the time), the heal_others factor of their species for a
-## revive (a Basalt is a slow medic).
-static func _work_rate(m, type: String) -> float:
-	if type == "revive":
-		return m.mult("heal_others")
-	return 1.0 / maxf(m.mult("repair_time"), 0.01)
+## How fast `m` does a job of `type`, 1.0 being normal: the work_mult of their traits for it (fast_repair
+## works a repair or a breach 1 / 0.6 times as fast, a Basalt revives at half speed), with the swarm and
+## aura bonuses of the crew in their room (TraitSet.work_rate).
+static func _work_rate(ship, m, type: String) -> float:
+	return TraitSet.work_rate(ship, m, WORK_KIND.get(type, "repair"))
+
+
+## Is `job` the mending of `m` themselves? Nobody mends their own body.
+static func _is_own(job: Dictionary, m) -> bool:
+	return job["type"] == "repair_crew" and job["who"] == m.name
 
 
 # --- the board ----------------------------------------------------------------------------------
@@ -121,6 +142,8 @@ func build_board(ship) -> void:
 	for m in ship.crew:
 		if m.is_down():
 			_add(b, _job("revive", "revive:" + m.name, m.body_cells(), {"who": m.name}))
+		elif m.hp < m.max_hp and TraitSet.of(m)["mechanical"]:
+			_add(b, _job("repair_crew", "mend:" + m.name, m.body_cells(), {"who": m.name}))
 	for c in Fire.sorted_cells(grid.breached.keys()):
 		var tile: Dictionary = grid.defs.get_def(grid.breached[c]) if grid.defs != null else {}
 		var mult := float(ship.lines.get(str(tile.get("line", "standard")), {}).get("repair", 1.0))
@@ -258,7 +281,7 @@ func _pick(ship, m, claims: Dictionary, floor_p: int) -> Dictionary:
 	var open: Array = []
 	for key in board:
 		var job: Dictionary = board[key]
-		if job["priority"] < floor_p or (not m.job.is_empty() and m.job["key"] == key):
+		if job["priority"] < floor_p or (not m.job.is_empty() and m.job["key"] == key) or _is_own(job, m):
 			continue
 		if int(claims.get(key, 0)) < int(job["slots"]):
 			open.append(job)
@@ -335,12 +358,15 @@ func _take(ship, m, job: Dictionary, spot: Vector2i, claims: Dictionary) -> void
 		claims[job["key"]] = int(claims.get(job["key"], 0)) + 1
 
 
-## A hurt crew member with nothing to do goes to a powered medbay, else a bed.
+## A hurt crew member with nothing to do goes to a powered medbay, else a bed (not where heal_mult is 0).
 func _rest(ship, m) -> void:
 	var taken := _taken(ship, m)
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
+	var heal: Dictionary = TraitSet.of(m)["heal_mult"]
 	for family in ["medbay", "bed"]:
+		if float(heal[family]) <= 0.0:
+			continue
 		var cands: Array = []
 		for uid in uids:
 			var inst: Dictionary = ship.components.instances[uid]
@@ -417,23 +443,35 @@ func _fire_under(ship, m) -> Vector2i:
 	return best
 
 
-## Hurt and heal every crew member: fire, thin air, beds and medbays (data/crew.json).
+## Hurt and heal every crew member: fire, thin air, hot rooms (dries_out), beds, medbays and auras
+## (data/crew.json, and the traits of each: damage_taken, o2_use, suffocate_mult, heal_mult, aura).
 func _health(ship, dt: float) -> void:
 	var cfg := CrewMember.config()
 	var dps: Dictionary = cfg["damage_per_s"]
+	var auras := TraitSet.room_auras(ship)
+	var heats := {}  # room id -> heat of its hottest part, read once and only if somebody dries out
+	var heats_read := false
 	for m in ship.crew:
+		var t := TraitSet.of(m)
 		var was_down: bool = m.is_down()
 		var dmg := 0.0
 		for c in m.body_cells():
 			if ship.fires.has(c):
-				dmg += float(dps["fire"]) * m.mult("fire_damage")
+				dmg += float(dps["fire"]) * float(t["damage_taken"]["fire"])
 				break
 		var room: int = ship.atmosphere.room_at(m.cell())
-		if room >= 0 and ship.atmosphere.pressure_of(room) < float(cfg["no_air_below"]):
-			dmg += float(dps["no_air"]) * m.mult("no_air_damage")
+		if room >= 0 and ship.atmosphere.pressure_of(room) < float(cfg["no_air_below"]) and float(t["o2_use"]) > 0.0:
+			dmg += float(dps["no_air"]) * float(t["damage_taken"]["no_air"]) * float(t["suffocate_mult"])
+		var dry: Dictionary = t["dries_out"]
+		if room >= 0 and float(dry["hp_per_s"]) > 0.0:
+			if not heats_read:
+				heats = Heat.room_heat(ship)
+				heats_read = true
+			if float(heats.get(room, 0.0)) > float(dry["heat_above"]):
+				dmg += float(dry["hp_per_s"])
 		if dmg > 0.0:
 			m.hurt(dmg * dt)
-		var heal := _heal_rate(ship, m)
+		var heal := _heal_rate(ship, m) + float(auras.get(room, {}).get("heal_per_s", 0.0))
 		if heal > 0.0:
 			m.heal(heal * dt)
 		if m.is_down() and not was_down:
@@ -444,7 +482,8 @@ func _health(ship, dt: float) -> void:
 			ship.log_event("%s is back on their feet" % m.name)
 
 
-## hp per second where `m` lies: a bed, or a medbay that is on (its stats.heal scales the rate).
+## hp per second where `m` lies: a bed, or a medbay that is on (its stats.heal scales the rate), times
+## their heal_mult for it.
 func _heal_rate(ship, m) -> float:
 	var uid: int = ship.components.at(m.cell())
 	if uid < 0:
@@ -452,13 +491,38 @@ func _heal_rate(ship, m) -> float:
 	var inst: Dictionary = ship.components.instances[uid]
 	var def: Dictionary = ship.components.def(inst["id"])
 	var rates: Dictionary = CrewMember.config()["heal_per_s"]
+	var heal: Dictionary = TraitSet.of(m)["heal_mult"]
 	match str(def.get("family", "")):
 		"bed":
-			return float(rates["bed"])
+			return float(rates["bed"]) * float(heal["bed"])
 		"medbay":
 			if _rest_ok(ship, uid):
-				return float(rates["medbay"]) * float(def.get("stats", {}).get("heal", 1.0))
+				return float(rates["medbay"]) * float(def.get("stats", {}).get("heal", 1.0)) * float(heal["medbay"])
 	return 0.0
+
+
+## An ion hit of `amount` damage lands on `cell` (Damage.apply calls this): every crew member in a room
+## that touches it takes crew.json `ion_hp` x amount x their damage_taken.ion hit points and is stunned
+## for their ion_stun seconds.
+static func ion_hit(ship, cell: Vector2i, amount: float) -> void:
+	var rooms := {}
+	for d in [Vector2i.ZERO] + SIDES:
+		var r: int = ship.atmosphere.room_of.get(cell + d, -1)
+		if r >= 0:
+			rooms[r] = true
+	for m in ship.crew:
+		if not rooms.has(ship.atmosphere.room_of.get(m.cell(), -1)):
+			continue
+		var t := TraitSet.of(m)
+		var hp := float(CrewMember.config().get("ion_hp", 0.0)) * amount * float(t["damage_taken"]["ion"])
+		var was_down: bool = m.is_down()
+		if hp > 0.0:
+			m.hurt(hp)
+		m.stun = maxf(m.stun, float(t["ion_stun"]))
+		if m.is_down() and not was_down:
+			m.job = {}
+			m.path.clear()
+			ship.log_event("%s is down" % m.name)
 
 
 # --- places to stand ----------------------------------------------------------------------------
@@ -638,18 +702,18 @@ static func crew_line(ship) -> String:
 	return "Crew: " + (", ".join(parts) if not parts.is_empty() else "none")
 
 
-## The evasion a manned helm adds in a fight (0 when nobody is at it).
+## The evasion a manned helm adds in a fight (0 when nobody is at it), times the operator's manned factor.
 static func evasion_bonus(ship) -> float:
 	for uid in ship.manned:
 		if _family(ship, uid) == "helm" and _works(ship, uid):
-			return float(CrewMember.config()["manned"]["helm_evasion"])
+			return float(CrewMember.config()["manned"]["helm_evasion"]) * TraitSet.manned_factor(ship, uid)
 	return 0.0
 
 
-## Multiplier on the cooldown of weapon `uid`: shorter while somebody mans it.
+## Multiplier on the cooldown of weapon `uid`: shorter while somebody mans it (by the operator's manned factor, at most 90%).
 static func cooldown_mult(ship, uid: int) -> float:
 	if ship.manned.has(uid) and _family(ship, uid) == "weapon" and _works(ship, uid):
-		return 1.0 - float(CrewMember.config()["manned"]["weapon_cooldown"])
+		return 1.0 - minf(float(CrewMember.config()["manned"]["weapon_cooldown"]) * TraitSet.manned_factor(ship, uid), 0.9)
 	return 1.0
 
 

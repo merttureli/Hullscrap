@@ -53,3 +53,15 @@ static func room_bonus(ship) -> Dictionary:
 		if b > 0.0 and room >= 0 and inst["status"] == "ok" and powered.get(uid, false):
 			out[room] = float(out.get(room, 0.0)) + b
 	return out
+
+
+## The heat of each room: room id -> the heat of its hottest part (rooms without a part are left out).
+## Crew with the dries_out trait (traits.gd) lose hp in a room above their threshold.
+static func room_heat(ship) -> Dictionary:
+	var out := {}
+	for uid in ship.components.instances:
+		var inst: Dictionary = ship.components.instances[uid]
+		var room: int = ship.atmosphere.room_at(inst["anchor"])
+		if room >= 0:
+			out[room] = maxf(float(out.get(room, 0.0)), float(inst["heat"]))
+	return out

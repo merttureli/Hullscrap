@@ -11,6 +11,7 @@ extends RefCounted
 ## comes from the arena's seeded rng.
 
 const Shapes = preload("res://scripts/ship/shapes.gd")
+const Jobs = preload("res://scripts/crew/jobs.gd")
 
 const RICOCHET_FROM_DEG := 40.0  ## kinetic shots never glance off a face closer to straight on than this
 const RICOCHET_FULL_DEG := 75.0  ## and from here on glance off with RICOCHET_MAX
@@ -152,6 +153,8 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 	var hit := {"dealt": dealt, "kind": obj["kind"], "dtype": type}
 	hit.merge(info)  # dir and n of the shot, for the effects
 	arena.log_event("hit", idx, cell, hit)
+	if type == "ion":
+		Jobs.ion_hit(co.ship, cell, dmg)  # the crew in that room are jolted and may be stunned
 	if is_part:
 		inst["hp"] = cur
 		if cur <= 0.0 and inst.get("status", "") != "disabled":

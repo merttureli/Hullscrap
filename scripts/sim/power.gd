@@ -11,12 +11,15 @@ const EPS := 0.0001  ## slack for float power (line multipliers make 5.4 and 2.4
 ## `components`: a components.gd instance (or a Stats.View of one, for line-adjusted power); `cables`: a cables.gd instance; `disabled`: uid -> true
 ## for damaged parts that neither make nor use power (they still bridge cables).
 ## `mods`: Abilities.power_mods, the abilities running now: {mult: uid -> factor on the part's power
-## figure, extra: uid -> power_spike draw added to its demand (a producer gives that much less)}.
+## figure, extra: uid -> power_spike draw added to its demand (a producer gives that much less),
+## bonus: uid -> power added to the part's figure, after the factor: the manned-station bonus of an
+## operator's traits, TraitSet.station_bonus}.
 ## Returns {powered: {uid: bool}, networks: [{id, cells, members, supply, demand, used}],
 ## network_of: {uid: network id}}. Network ids follow each network's first cell in reading order.
 static func solve(components, cables, disabled := {}, mods := {}) -> Dictionary:
 	var mults: Dictionary = mods.get("mult", {})
 	var extras: Dictionary = mods.get("extra", {})
+	var bonuses: Dictionary = mods.get("bonus", {})
 	var cells: Array = cables.cells.keys()
 	cells.sort_custom(_before)
 	var label := {}  # cable cell -> cable group
@@ -71,6 +74,8 @@ static func solve(components, cables, disabled := {}, mods := {}) -> Dictionary:
 			var extra := float(extras.get(uid, 0.0))
 			if mults.has(uid):
 				p = p * float(mults[uid])
+			if bonuses.has(uid):
+				p = p + float(bonuses[uid])
 			if p > 0 and extra > 0.0:
 				p = maxf(p - extra, 0.0)
 				extra = 0.0

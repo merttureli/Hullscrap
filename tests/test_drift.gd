@@ -4,6 +4,7 @@ extends "res://tests/base_test.gd"
 ## danger tiers, the station trades, saving and loading, and the data files that feed it.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const Content = preload("res://scripts/data/content.gd")
 const Drift = preload("res://scripts/space/drift.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -454,7 +455,7 @@ func test_recruit_for_150_credits() -> void:
 	c.roll_offers("rusthold", ship)
 	eq(c.offers["rusthold"].size(), 2, "2 recruits on offer")
 	for o in c.offers["rusthold"]:
-		check(o["species"] in ["human", "basalt", "fenn"], "species weighted by the station: " + o["species"])
+		check(o["species"] in ["human", "basalt", "fenn", "kett", "gauntling"], "species weighted by the station: " + o["species"])
 		check(o["name"] != "", "each has a name")
 	var first: Dictionary = c.offers["rusthold"][0]
 	var crew := ship.crew.size()
@@ -580,7 +581,7 @@ func test_drift_data_names_things_that_exist() -> void:
 			check(comps.has(id) or items.has(id), "%s stocks %s, which exists" % [st, id])
 			check(not comps.has(id) or not comps.def(id).get("unique", false), "%s does not stock the unique %s" % [st, id])
 		for sp in s["recruit"]:
-			check(Events.SPECIES.has(sp), "%s recruits a known species: %s" % [st, sp])
+			check(Content.has("species", str(sp)), "%s recruits a known species: %s" % [st, sp])
 		for svc in s["services"]:
 			check(svc in ["fuel", "sell", "stock", "debt", "repair", "recruit"], "%s: known service %s" % [st, svc])
 	for kind in cfg["enemies"]:

@@ -1,0 +1,10 @@
+{
+	"_doc": "A content root with the old home of the trait library: the `traits` table in species.json, with `mult` objects (tests/test_traits.gd).",
+	"default": "human",
+	"traits": {
+		"old_hardy": {"name": "Old hardy", "mult": {"fire_damage": 0.5, "repair_time": 2.0}}
+	},
+	"species": {
+		"oldie": {"name": "Oldie", "hp": 90, "speed": 1.0, "traits": ["old_hardy"], "rig": "human"}
+	}
+}

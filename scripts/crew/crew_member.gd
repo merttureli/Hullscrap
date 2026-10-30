@@ -9,6 +9,7 @@ extends RefCounted
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide)
 const MAX_SUBSTEP := 0.2  ## longest single move in cells, so a long frame cannot skip over a wall
 const CONFIG_PATH := "res://data/crew.json"
@@ -31,6 +32,7 @@ var is_player := false  ## the player's soldier: moved by hand, never given a jo
 var look := {}  ## PersonDrawer palette ("suit", "hair", "tool"); empty = the viewer picks one by name
 var job := {}  ## what they are doing now (a Jobs board entry plus its "spot"); empty = idle
 var hold := 0.0  ## seconds left of a manual order, during which the job board leaves them alone
+var stun := 0.0  ## seconds left stunned (an ion hit on their room, trait ion_stun): no walking, no work
 
 
 func _init(p_name := "", p_pos := Vector2.ZERO, p_species := "human") -> void:
@@ -48,7 +50,7 @@ static func config() -> Dictionary:
 	return _config
 
 
-## data/species.json as a Dictionary: {default, traits, species} (read once; empty when the file is missing or unusable).
+## data/species.json as a Dictionary: {default, species} (read once, with the packs' species; empty when the file is missing or unusable).
 static func species_table() -> Dictionary:
 	if _species.is_empty() and FileAccess.file_exists(SPECIES_PATH):
 		var data = Content.read(SPECIES_PATH)  # core plus any packs' species
@@ -64,13 +66,15 @@ static func species_def(id: String) -> Dictionary:
 
 
 ## Become species `id`: max hp and walk speed come from its entry (the crew.json hp, and speed 1.0,
-## for an id data/species.json does not list), and hp is full.
+## for an id data/species.json does not list) times the hp_mult and speed_mult of their traits (TraitSet,
+## the species' and personal ones; gear worn later does not change the body), and hp is full.
 func set_species(id: String) -> void:
 	species = id
 	var def := species_def(id)
-	max_hp = float(def.get("hp", config().get("hp", 100)))
+	var t := TraitSet.of(self)
+	max_hp = float(def.get("hp", config().get("hp", 100))) * float(t["hp_mult"])
 	hp = max_hp
-	speed = BASE_SPEED * float(def.get("speed", 1.0))
+	speed = BASE_SPEED * float(def.get("speed", 1.0)) * float(t["speed_mult"])
 
 
 ## Every trait this person has, without repeats: their species' (data/species.json), their own
@@ -84,17 +88,6 @@ func traits() -> Array:
 	return out
 
 
-## The factor on rule `stat` for this person: their species' `mult` entry times that of every trait
-## they have (data/species.json). 1.0 when nothing changes it. Stats: no_air_damage, fire_damage,
-## repair_time, heal_others.
-func mult(stat: String) -> float:
-	var m := float(species_def(species).get("mult", {}).get(stat, 1.0))
-	var defs: Dictionary = species_table().get("traits", {})
-	for t in traits():
-		m *= float(defs.get(t, {}).get("mult", {}).get(stat, 1.0))
-	return m
-
-
 ## The art folder this person is drawn with (art/crew/<rig>/): their species' `rig`, else the species id.
 func rig() -> String:
 	return str(species_def(species).get("rig", species))
@@ -103,6 +96,11 @@ func rig() -> String:
 ## The hand weapon they carry (an id of data/hand_weapons.json), "" when their species has none.
 func sidearm() -> String:
 	return str(species_def(species).get("sidearm", ""))
+
+
+## Stunned (ion, see TraitSet): they neither walk nor work until `stun` runs out.
+func is_stunned() -> bool:
+	return stun > 0.0
 
 
 ## At 0 hp a crew member is down: they don't move and no job is given, until a medbay or a crewmate revives them.
@@ -151,6 +149,8 @@ func step(dt: float) -> void:
 	if is_down():
 		path.clear()
 		return
+	if is_stunned():
+		return
 	var left := speed * dt
 	while left > 0.0 and not path.is_empty():
 		var to := Pathfinder.centre_of(path[0])
@@ -172,7 +172,7 @@ func step(dt: float) -> void:
 ## Doorway assist: walking straight at an opening a little off line, the body drifts sideways onto
 ## the line that lets it through (a 2-wide door leaves only 0.2 cells to spare).
 func move_input(grid: ShipGrid, dir: Vector2, dt: float, door_passable: Callable = Callable()) -> void:
-	if is_down() or dir.length_squared() < 0.0001 or dt <= 0.0:
+	if is_down() or is_stunned() or dir.length_squared() < 0.0001 or dt <= 0.0:
 		return
 	facing = dir.normalized()
 	var dist := speed * dt
