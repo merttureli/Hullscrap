@@ -11,6 +11,7 @@ extends Control
 ## docs/ART_STYLE.md like the crafting and station screens. build_mode.gd makes it and opens it on H.
 
 const Schematic = preload("res://scripts/ui/schematic.gd")
+const ShipView = preload("res://scripts/view/ship_view.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Shape = preload("res://scripts/combat/shield_shape.gd")
 const Balance = preload("res://scripts/combat/shield_balance.gd")
@@ -343,9 +344,10 @@ func sector_buttons(k: int) -> Array:
 	var edge := to_screen(shape().boundary_toward(d))
 	var at := edge + d * (BTN.y * 1.1)
 	var across := d.rotated(PI / 2.0)
+	var half := (BTN.x + 4.0) / maxf(absf(across.x), absf(across.y)) / 2.0  # far enough apart that the squares never touch
 	var out := []
 	for sign in [-1, 1]:
-		var c: Vector2 = at + across * (BTN.x * 0.6) * sign
+		var c: Vector2 = at + across * half * sign
 		out.append(Rect2(c - BTN / 2.0, BTN))
 	return out
 
@@ -418,7 +420,7 @@ func _draw_bubble(n: int, total: int) -> void:
 		if cap >= 1.0:
 			draw_polyline(pts, Color(BUBBLE, minf(0.3 + 0.15 * cap, 0.95)), 2.0 + 1.2 * minf(cap, 4.0), true)
 		else:
-			_dashed(pts, Color(BUBBLE, 0.35), 2.0)
+			ShipView.dashed(self, pts, Color(BUBBLE, 0.5), 2.5, 14.0, 10.0)
 		if n > 1:
 			var d := sector_dir(k, n)
 			var sector_name := Balance.name_of(n, k)
@@ -490,14 +492,6 @@ func _button(b: Dictionary) -> void:
 	var col: Color = TEXT if b["enabled"] else Color(DIM_TEXT, 0.5)
 	var wide := ThemeDB.fallback_font.get_string_size(b["label"], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px).x
 	_text(b["label"], r.position + Vector2((r.size.x - wide) / 2.0, r.size.y / 2.0 + size_px * 0.35), size_px, col)
-
-
-func _dashed(pts: PackedVector2Array, col: Color, width: float) -> void:
-	var on := true
-	for i in pts.size() - 1:
-		if on:
-			draw_line(pts[i], pts[i + 1], col, width)
-		on = not on
 
 
 ## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.

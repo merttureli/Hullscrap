@@ -3,6 +3,7 @@ extends "res://tests/base_test.gd"
 ## corners (shield_shape.gd), its point and segment tests and its sectors.
 
 const Shape = preload("res://scripts/combat/shield_shape.gd")
+const Wall = preload("res://tests/fixture_wall.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
@@ -186,3 +187,21 @@ func test_a_wider_copy_of_the_shape_is_cached_and_bigger() -> void:
 	check(g == s.grown(0.5), "cached")
 	near(g.margin(Vector2(5, 3)), s.margin(Vector2(5, 3)) + 0.5, "half a cell more all round")
 	check(g.contains(Vector2(-1.9, 3.0)) and not s.contains(Vector2(-1.9, 3.0)), "it holds a point the plain one does not")
+
+
+func test_the_outside_half_of_a_mount_is_inside_the_bubble() -> void:
+	for rot in 4:
+		var ship := Wall.wall_ship(1, rot)
+		var plain = Shape.from_cells(Shape.cells_of(ship), Shape.centre_of(ship))
+		var uid: int = ship.components.place_mount(ship.grid, "laser_mk1", Wall.out_anchor(rot), rot)
+		check(uid >= 0, "rot %d: a laser through the wall" % rot)
+		var outside: Array = ship.components.instances[uid]["out_cells"]
+		check(not outside.is_empty(), "rot %d: it has an outside half" % rot)
+		var cells := Shape.cells_of(ship)
+		var shape = Shape.from_cells(cells, Shape.centre_of(ship))
+		var short := false
+		for c in outside:
+			check(cells.has(c), "rot %d: the half's cell %s is one of the shape's cells" % [rot, str(c)])
+			check(shape.margin(Vector2(c) + Vector2(0.5, 0.5)) >= Shape.INFLATE - 1e-6, "rot %d: the half, in space, has 1.5 cells to spare" % rot)
+			short = short or plain.margin(Vector2(c) + Vector2(0.5, 0.5)) < Shape.INFLATE
+		check(short, "rot %d: the wall alone would have left part of the half too close to the edge" % rot)

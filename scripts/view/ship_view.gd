@@ -333,8 +333,8 @@ static func sub_line(pts: PackedVector2Array, t0: float, t1: float) -> PackedVec
 	return out
 
 
-## Dashes of `dash` px with `gap` px between along the polyline `pts`, starting `phase` px in.
-func _dashed(pts: PackedVector2Array, col: Color, width: float, dash := 12.0, gap := 9.0, phase := 0.0) -> void:
+## Dashes of `dash` px with `gap` px between along the polyline `pts` on the canvas `cv`, starting `phase` px in.
+static func dashed(cv: CanvasItem, pts: PackedVector2Array, col: Color, width: float, dash := 12.0, gap := 9.0, phase := 0.0) -> void:
 	var pos := -phase
 	for i in pts.size() - 1:
 		var a := pts[i]
@@ -345,7 +345,7 @@ func _dashed(pts: PackedVector2Array, col: Color, width: float, dash := 12.0, ga
 			var cycle := fposmod(pos + at, dash + gap)
 			if cycle < dash:
 				var run := minf(dash - cycle, seg - at)
-				draw_line(a + dir * at, a + dir * (at + run), col, width)
+				cv.draw_line(a + dir * at, a + dir * (at + run), col, width)
 				at += maxf(run, 0.01)
 			else:
 				at += maxf(dash + gap - cycle, 0.01)
@@ -372,9 +372,9 @@ func _draw_bubble(co) -> void:
 			pts.append(px(p))
 		var up: float = 0.0 if ion else minf(float(st["layers"]), 4.0)
 		var hit := clampf(1.0 - float(arena.tick - int(co.sector_hit[k])) / 60.0 / HIT_FLASH_S, 0.0, 1.0)
-		var fill := 0.02 + 0.03 * up + 0.14 * hit
-		var alpha := minf(0.10 + 0.17 * up, 0.9)
-		var width := 1.5 + 0.9 * up
+		var fill := 0.03 + 0.03 * up + 0.14 * hit
+		var alpha := minf(0.22 + 0.17 * up, 0.9)
+		var width := 2.0 + 1.0 * up
 		var wedge := PackedVector2Array([Vector2.ZERO]) + pts if n > 1 else pts
 		if st["open"]:  # it just fired through here: dim and broken
 			draw_colored_polygon(wedge, Color(tint, fill * flick))
@@ -387,7 +387,7 @@ func _draw_bubble(co) -> void:
 		if ion:
 			draw_polyline(pts, Color(tint, 0.2 + 0.3 * absf(sin(_clock * 25.0))), 2.0, true)
 		elif up < 1.0:  # no whole layer: a faint dashed line
-			_dashed(pts, Color(tint, 0.22), 1.5, 12.0, 9.0, _clock * 6.0 if st["filling"] else 0.0)
+			dashed(self, pts, Color(tint, 0.22), 1.5, 12.0, 9.0, _clock * 6.0 if st["filling"] else 0.0)
 		else:
 			draw_polyline(pts, Color(tint, alpha), width, true)
 		if hit > 0.0:

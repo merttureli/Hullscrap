@@ -181,6 +181,8 @@ static func reset_even(co) -> void:
 ## One step of balance toward the side `dir` ("up" bow, "down" stern, "left" port, "right" starboard).
 ## "" when it moved, else why not.
 static func shift(co, dir: String) -> String:
+	if co.wrecked or co.layers_cap <= 0:
+		return "no shield"
 	if co.sectors < 2:
 		return "one piece: no balance to set"
 	var s := Balance.dir_sector(co.sectors, dir)
