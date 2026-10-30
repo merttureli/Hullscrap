@@ -10,8 +10,5 @@
       "5": {"thrust": 48, "power": -6, "hp": 14}
     }
   },
-  "waivers": {
-    "engine_mk2": "Made before the bands: hp 6 against a band of 8 (25% off). Engine wave 1 sets it.",
-    "engine_neon_mk1": "Made before the bands: thrust 16 and power -3 are Mk2 numbers, 60% and 50% off the Neon Mk1 band (thrust 10 and power -2, times the line). Engine wave 1 re-tunes it."
-  }
+  "waivers": {}
 }
