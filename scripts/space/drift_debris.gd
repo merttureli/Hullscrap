@@ -1,11 +1,11 @@
 extends RefCounted
-## Debris that drifts past the ship on a current (docs/CONTENT.md section 11, the Raft loop; first slice:
-## no sector, radar or jumps yet). Pure logic, no nodes: debris_view.gd steps it in play mode and draws it.
+## Debris that drifts past the ship on a current (docs/CONTENT.md section 11, the Raft loop). Pure logic, no nodes: debris_view.gd steps it in play mode and draws it.
 ## All numbers are in data/debris.json. The current has a direction and a speed in world px/s, with a slow
 ## wobble. Pieces appear just outside the view upstream, drift and tumble, and despawn past the downstream edge
 ## of the view. A piece within an intake's pull radius of its outside half (the mouth) is drawn toward it, and
 ## one that touches the mouth lands in ship.inventory (refused when the hold cannot take it: it bounces). A
 ## piece that touches any other solid cell (a tile, an outside half) bounces off and keeps drifting.
+## A sector (sector.gd) can set the current and the density (for_sector); with none, the numbers of debris.json run.
 ## Positions are world px, the same space the build view draws the ship in (ship.world_pos is the grid centre).
 ## Randomness comes from one RandomNumberGenerator seeded by the caller (the ship's rng_seed): same seed, same run.
 
@@ -50,6 +50,12 @@ func _init(seed_value := 1, p_cfg: Dictionary = {}) -> void:
 	for i in 3:
 		_phase[i] = rng.randf() * TAU
 	_spawn_in = float(cfg["spawn"]["every"])
+
+
+## A spawner driven by `sector` (sector.gd): its current's direction and speed, its debris density and the theme of
+## its node type, on top of data/debris.json. The ship in `sector` moves; the pieces still drift with the current.
+static func for_sector(sector, seed_value := 1):
+	return new(seed_value, sector.debris_cfg(Content.read(PATH)))
 
 
 # --- the current ---------------------------------------------------------------------------------------

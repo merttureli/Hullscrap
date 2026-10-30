@@ -1,0 +1,41 @@
+{
+	"_doc": "Sector space (docs/CONTENT.md section 11; scripts/space/sector.gd makes a sector from a Drift node, radar.gd says what the ship sees of it). A sector is generated from the campaign seed and the node (same seed and node, same sector), never from the jump counter. size: the square region in px. arrival: the ship arrives `inset` px in from one edge (a seeded edge), `spread` of the edge's length either side of its middle. current: the debris current's speed range in px/s (its direction is any). poi: `count` the least and most POIs of a sector, `dist` how far from the arrival point a POI sits, `gap` the least distance between two POIs (relaxed when a sector is crowded), `margin` how close to the edge a POI may sit, `trigger` the distance at which a new POI runs its event, `rearm` x trigger is how far a station or store must be left before it greets again, `spawn` how far from a POI a fight's enemy appears (min, max). radar: `visual` the range at which anything (a hidden contact too) is seen with no radar, `helm` the range of the built-in Mk0 radar of a powered helm (no identification); other radar parts add stats.radar_range (px) and stats.identify. ambient: every `every` seconds a roll with `chance` adds a passing ship (an `unknown` contact whose kind is picked by the region's `ambient` weights) at `edge` x the radar's range; it flies at `speed` px/s (min, max), comes to the ship with chance `approach` or passes by, leaves after `ttl` seconds, and at most `max` are about at once. poi_types: label, visibility (beacon: always on the radar; signal: needs a radar in range; hidden: seen only within the visual range; a weighted object is rolled), event (the event type its event is picked from, data/events; a weighted object is rolled; the main POI of a node always uses the node's own type), max (the most of this type in a sector), repeat (a station or store: it never becomes done, it greets once per visit and then only docks), dock (it opens the station menu when the node has one), enemy (a ship design id that the POI's fights use instead of the tier roll; empty = the event decides). nodes: per Drift node type, `main` the POI type that is always there (its event is the node's old arrival event), `also` POI types that are always there too (a pirate nest has a wreck, a store has a mining field), `count` the least and most POIs in all, `weights` POI type -> weight for the other POIs (0 or missing = never), `density` the debris density (x the base spawn rate and cap of data/debris.json) and `debris` debris type id -> weight multiplier (the theme). regions: every node belongs to the region of its nearest landmark (a fixed place of data/drift.json; `landmark` \"\" = the Boneyard, whatever lies between), and the region's `ambient` weights say which passing ships come by.",
+	"size": 24000,
+	"arrival": {"inset": 1200, "spread": 0.3},
+	"current": {"speed": [20, 60]},
+	"poi": {"count": [2, 6], "dist": [3000, 12000], "gap": 2500, "margin": 1000, "trigger": 800, "rearm": 1.5, "spawn": [250, 600]},
+	"radar": {"visual": 1500, "helm": 3000},
+	"ambient": {"every": 90, "chance": 0.5, "edge": 0.9, "speed": [60, 140], "approach": 0.6, "ttl": 300, "max": 3},
+	"poi_types": {
+		"station": {"label": "Station", "visibility": "beacon", "event": "station", "max": 1, "repeat": true, "dock": true},
+		"store": {"label": "Store", "visibility": "beacon", "event": "trader", "max": 1, "repeat": true, "dock": true},
+		"trader": {"label": "Trader", "visibility": "beacon", "event": "trader", "max": 2},
+		"distress": {"label": "Distress beacon", "visibility": "beacon", "event": "distress", "max": 2},
+		"wreck": {"label": "Wreck", "visibility": "signal", "event": "wreck_field", "max": 3},
+		"abandoned_station": {"label": "Abandoned station", "visibility": "signal", "event": {"wreck_field": 3, "anomaly": 1}, "max": 1},
+		"mining_field": {"label": "Mining field", "visibility": "signal", "event": "asteroid_field", "max": 2},
+		"unknown": {"label": "Unknown ship", "visibility": {"signal": 3, "hidden": 1}, "event": {"trader": 3, "pirate": 3, "distress": 2, "wreck_field": 2}, "max": 2},
+		"pirate_nest": {"label": "Pirate nest", "visibility": {"signal": 1, "hidden": 1}, "event": "pirate", "max": 1},
+		"concord_checkpoint": {"label": "Concord checkpoint", "visibility": "signal", "event": "patrol", "max": 1},
+		"anomaly": {"label": "Anomaly", "visibility": "signal", "event": "anomaly", "max": 1},
+		"quest": {"label": "Quest site", "visibility": "beacon", "event": "quest", "max": 1}
+	},
+	"nodes": {
+		"station": {"main": "station", "count": [3, 4], "density": 0.5, "weights": {"wreck": 3, "mining_field": 3, "unknown": 3, "trader": 2, "distress": 1, "abandoned_station": 1}, "debris": {}},
+		"pirate": {"main": "pirate_nest", "also": ["wreck"], "count": [3, 4], "density": 0.8, "weights": {"wreck": 8, "unknown": 3, "distress": 1, "mining_field": 1, "abandoned_station": 1}, "debris": {"scrap_chunk_s": 1.3, "scrap_chunk_m": 1.3}},
+		"wreck_field": {"main": "wreck", "count": [3, 5], "density": 1.8, "weights": {"wreck": 8, "abandoned_station": 2, "unknown": 2, "pirate_nest": 1, "distress": 1, "mining_field": 1}, "debris": {"scrap_chunk_s": 1.6, "scrap_chunk_m": 2.0, "copper_coil": 1.3, "sealed_crate": 3.0}},
+		"distress": {"main": "distress", "count": [2, 4], "density": 0.9, "weights": {"wreck": 4, "unknown": 3, "pirate_nest": 1, "mining_field": 1, "trader": 1}, "debris": {}},
+		"trader": {"main": "store", "also": ["mining_field"], "count": [2, 4], "density": 0.8, "weights": {"mining_field": 6, "wreck": 2, "unknown": 2, "distress": 1, "trader": 1}, "debris": {}},
+		"anomaly": {"main": "anomaly", "count": [2, 4], "density": 0.6, "weights": {"unknown": 3, "wreck": 2, "abandoned_station": 2, "quest": 1, "mining_field": 1}, "debris": {"ice_chunk_s": 1.5}},
+		"patrol": {"main": "concord_checkpoint", "count": [2, 4], "density": 0.6, "weights": {"unknown": 2, "wreck": 2, "trader": 2, "distress": 1, "mining_field": 1}, "debris": {}},
+		"asteroid_field": {"main": "mining_field", "count": [3, 5], "density": 1.7, "weights": {"mining_field": 5, "wreck": 2, "unknown": 2, "pirate_nest": 1, "abandoned_station": 1}, "debris": {"copper_coil": 2.0, "ice_chunk_s": 2.0, "scrap_chunk_s": 0.5, "scrap_chunk_m": 0.5}},
+		"empty": {"main": "unknown", "count": [2, 3], "density": 0.3, "weights": {"wreck": 3, "unknown": 2, "mining_field": 2, "distress": 1}, "debris": {}},
+		"gate": {"main": "unknown", "count": [2, 2], "density": 0.2, "weights": {"wreck": 1}, "debris": {}}
+	},
+	"regions": {
+		"clans": {"label": "Clan space", "landmark": "rusthold", "ambient": {"pirate": 5, "trader": 3, "patrol": 1}},
+		"concord": {"label": "Concord space", "landmark": "meridian", "ambient": {"patrol": 5, "trader": 3, "pirate": 1}},
+		"lumen": {"label": "Lumen space", "landmark": "prism", "ambient": {"trader": 3, "patrol": 2, "pirate": 1}},
+		"boneyard": {"label": "The Boneyard", "landmark": "", "ambient": {"pirate": 4, "trader": 2, "patrol": 1}}
+	}
+}

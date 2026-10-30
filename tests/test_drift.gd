@@ -550,7 +550,7 @@ func test_loading_a_bad_or_old_save_changes_nothing() -> void:
 	check(c.load_dict(bad) != "", "a missing list is refused")
 	eq(JSON.stringify(c.to_dict()), snapshot, "after all that the campaign is as it was")
 	check(c.load_file("user://no_such_campaign.json") != "", "a missing file is an error, not a crash")
-	eq(Campaign.VERSION, 2, "the save format is version 2 (version 1 has no fuel_part and still loads: see test_engines1.gd)")
+	eq(Campaign.VERSION, 3, "the save format is version 3 (version 1 has no fuel_part, versions 1 and 2 have no sectors; they still load: see test_engines1.gd and test_sector.gd)")
 
 
 func test_save_file_round_trip() -> void:

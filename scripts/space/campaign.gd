@@ -3,6 +3,8 @@ extends RefCounted
 ## (drift.gd), the current node, what is visited, flags, reputation, Ma Gantry's debt and its clock, the
 ## jump counter, the `once` events used, the hull integrity lost, the recruits on offer. Jumping, arriving
 ## (which event happens), fights (design choice, loot, the result), the station trades, save and load.
+## Light speed (start_jump, tick_jump: an 8 s spool, no jump with hostiles near) and the sectors the nodes turn into
+## (sector.gd, docs/CONTENT.md section 11) are here too; cfg `instant_jump` keeps the beta's instant jump for now.
 ## No nodes, no drawing: map_view.gd, event_panel.gd and station_panel.gd are thin views over it.
 ## All randomness is the one RandomNumberGenerator `rng`, seeded with the campaign seed and saved with it,
 ## so a run replays exactly. Numbers come from data/drift.json, reputation rules from data/factions.json.
@@ -15,10 +17,13 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
+const Sector = preload("res://scripts/space/sector.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
-const VERSION := 2
+## 3 adds `sectors` (the POI states and the ship's place of each sector visited, sector.gd) and `spool` (the jump
+## drive's charge); older saves load with no sector yet, so the ship arrives at the arrival point of its node's sector.
+const VERSION := 3
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100
@@ -29,6 +34,8 @@ const SAVE_PATH := "user://campaign.json"
 const REFUSED_TEXT := "The dock master turns you away."
 const DARK_TEXT := "The gate is dark."
 const NO_FUEL := "no fuel"
+const HOSTILES_TEXT := "hostiles too close to jump"
+const SPOOL_TEXT := "spool the jump drive first"
 const TOW_DEBT := 150  ## what Ma adds to the debt for a tow home (tow)
 const TOW_FUEL := 2
 const HOSTILE_PATROL := {"id": "patrol_hostile", "type": "patrol", "once": false,
@@ -60,6 +67,9 @@ var fuel_part := 0  ## parts (hundredths) of a fuel the jumps have used up and n
 var events_seen := 0  ## events met at nodes, waits and wrecks (the game over screen counts them)
 var fights_won := 0  ## fights of the run that were won
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
+var sectors := {}  ## node id -> Sector (sector.gd) for every node visited (made on first use from the seed, so only their states are saved)
+var spool := {}  ## the jump drive spooling: {to, t (seconds charged), drift (the no-fuel jump), blocked}; {} when idle
+var last_jump := {}  ## what the last spooled jump did: the jump() result ({ok, why, node, drift, notes})
 var _hull_key := -1
 var _hull_max := 0
 
@@ -263,9 +273,22 @@ func jump_block(to: String, ship, drift_jump := false) -> String:
 	return NO_FUEL if fuel_short(ship) else ""
 
 
-## Jump along a lane to `to`: the fuel of jump_cost() (or 15 integrity for a drift jump), +1 on the jump
-## counter, which may bring a payment due. Returns {ok, why, node, drift, notes}; `notes` are lines to tell the player.
+## Is the old instant jump on (cfg `instant_jump`, true for now)? The map then jumps with jump() at once; with it off
+## a jump is start_jump() and tick_jump(), eight seconds of spool.
+func instant_jump() -> bool:
+	return bool(cfg.get("instant_jump", true))
+
+
+## Jump along a lane to `to` at once (the beta's map): the fuel of jump_cost() (or 15 integrity for a drift jump), +1 on
+## the jump counter, which may bring a payment due. Returns {ok, why, node, drift, notes}; `notes` are lines to tell the
+## player. With `instant_jump` off it refuses: the jump spools (start_jump).
 func jump(to: String, ship, drift_jump := false) -> Dictionary:
+	if not instant_jump():
+		return {"ok": false, "why": SPOOL_TEXT, "notes": []}
+	return _jump_now(to, ship, drift_jump)
+
+
+func _jump_now(to: String, ship, drift_jump: bool) -> Dictionary:
 	var why := jump_block(to, ship, drift_jump)
 	if why != "":
 		return {"ok": false, "why": why, "notes": []}
@@ -281,6 +304,7 @@ func jump(to: String, ship, drift_jump := false) -> Dictionary:
 	flags.erase("at_" + str(drift.node(current).get("place", "")))  # undocked
 	current = to
 	visited[to] = true
+	_enter(to, ship)
 	notes.append_array(_advance(1))
 	return {"ok": true, "why": "", "node": to, "drift": drift_jump, "notes": notes}
 
@@ -358,6 +382,8 @@ func tow(ship) -> Dictionary:
 	var notes := _advance(1)
 	current = drift.start_id()
 	visited[current] = true
+	spool = {}
+	_enter(current, ship)
 	notes.append_array(add_debt(ship, TOW_DEBT))
 	ship.inventory.add("fuel", TOW_FUEL)
 	notes.append("Ma's tug drags you home: debt +%d, fuel +%d" % [TOW_DEBT, TOW_FUEL])
@@ -415,6 +441,123 @@ func _debt_timing(e: Dictionary) -> bool:
 		"reminder":
 			return debt > 0 and next_due_in() <= 2 and reminded != jumps / every
 	return true
+
+
+# --- light speed: the jump drive spools (docs/CONTENT.md section 11) ---------------------------------------
+
+## Seconds the jump drive takes to charge (cfg jump.spool, 8).
+func spool_time() -> float:
+	return float(cfg.get("jump", {}).get("spool", 8.0))
+
+
+## How close a hostile ship may be before the drive will not spool, in px (cfg jump.hostile_range, 2,000).
+func hostile_range() -> float:
+	return float(cfg.get("jump", {}).get("hostile_range", 2000.0))
+
+
+## Begin charging the jump drive for a jump along a lane to `to` (the checks of jump_block; `hostiles_near`: a hostile
+## is within hostile_range(), see Sector.hostile_near). Nothing is spent yet. The ship keeps flying while it spools.
+## Returns {ok, why}. One spool at a time: cancel_jump() first to change the target.
+func start_jump(to: String, ship, hostiles_near := false, drift_jump := false) -> Dictionary:
+	if not spool.is_empty():
+		return {"ok": false, "why": "the jump drive is already spooling"}
+	var why := jump_block(to, ship, drift_jump)
+	if why == "" and hostiles_near:
+		why = HOSTILES_TEXT
+	if why != "":
+		return {"ok": false, "why": why}
+	spool = {"to": to, "t": 0.0, "drift": drift_jump, "blocked": false}
+	return {"ok": true, "why": ""}
+
+
+## Stop charging (the map's cancel, or the ship was towed). Nothing was spent.
+func cancel_jump() -> void:
+	spool = {}
+
+
+## The charge for the HUD: {active, to, t, total, frac (0..1), blocked}.
+func jump_status() -> Dictionary:
+	if spool.is_empty():
+		return {"active": false, "to": "", "t": 0.0, "total": spool_time(), "frac": 0.0, "blocked": false}
+	var total := spool_time()
+	return {"active": true, "to": spool["to"], "t": spool["t"], "total": total, "frac": clampf(float(spool["t"]) / total, 0.0, 1.0), "blocked": bool(spool.get("blocked", false))}
+
+
+## The drive charges for `dt` seconds. While `hostiles_near` (a hostile within hostile_range()) the charge holds where
+## it is and this returns "blocked" (HOSTILES_TEXT is why). When the charge is full the jump fires: the fuel is spent
+## now (jump_block is checked again, the fuel_mult of the engines as they are), the ship arrives in the sector of `to`
+## (its arrival point, its POIs as they were left), and this returns "jumped" with the jump() result in `last_jump`.
+## Also returns "spooling" (charging), "failed" (the jump was refused when it fired, last_jump.why says why; the spool
+## is over) and "" (no spool).
+func tick_jump(dt: float, hostiles_near: bool, ship) -> String:
+	if spool.is_empty():
+		return ""
+	spool["blocked"] = hostiles_near
+	if hostiles_near:
+		return "blocked"
+	spool["t"] = float(spool["t"]) + maxf(dt, 0.0)
+	if float(spool["t"]) < spool_time():
+		return "spooling"
+	var to := str(spool["to"])
+	var drift_jump := bool(spool.get("drift", false))
+	spool = {}
+	last_jump = _jump_now(to, ship, drift_jump)
+	return "jumped" if last_jump["ok"] else "failed"
+
+
+# --- sectors ------------------------------------------------------------------------------------------------
+
+## The region of node `id`: that of its nearest landmark (a fixed place of the map; the landmark of each region is
+## in data/sectors.json): clans (Rusthold), concord (Meridian), lumen (the Prism), else the boneyard. Regions are not on
+## the map yet.
+func region_of(id: String) -> String:
+	return _region_in(drift, id)
+
+
+static func _region_in(map, id: String) -> String:
+	var here: Dictionary = map.node(id)
+	var near := ""
+	var near_d := INF
+	for n in map.nodes:
+		if str(n.get("place", "")) == "" or here.is_empty():
+			continue
+		var d: float = here["pos"].distance_to(n["pos"])
+		if d < near_d or (d == near_d and str(n["id"]) < near):
+			near = str(n["id"])
+			near_d = d
+	var regions: Dictionary = Sector.config()["regions"]
+	var fallback := "boneyard"
+	for r in regions:
+		if str(regions[r]["landmark"]) == "":
+			fallback = str(r)
+		elif near != "" and str(regions[r]["landmark"]) == near:
+			return str(r)
+	return fallback
+
+
+## The sector of node `id`: made from the campaign seed and the node the first time it is asked for, the same every
+## time. null for a node the map does not have.
+func sector_at(id: String):
+	if not sectors.has(id):
+		if not drift.has(id):
+			return null
+		sectors[id] = Sector.generate(seed_value, drift.node(id), region_of(id))
+	return sectors[id]
+
+
+## The sector the ship is in.
+func current_sector():
+	return sector_at(current)
+
+
+## The ship arrives at node `id` (a jump or a tow): in its sector, at the arrival point, flying with `ship`'s numbers.
+func _enter(id: String, ship) -> void:
+	var s = sector_at(id)
+	if s == null:
+		return
+	s.enter()
+	if ship != null:
+		s.set_flight(ship)
 
 
 # --- the debt -----------------------------------------------------------------------------------------------
@@ -761,7 +904,15 @@ func to_dict() -> Dictionary:
 	return {"version": VERSION, "seed": seed_value, "rng_state": str(rng.state), "map": drift.to_dict(), "current": current,
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
 		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
-		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won}
+		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
+		"sectors": _sectors_dict(), "spool": spool.duplicate()}
+
+
+func _sectors_dict() -> Dictionary:
+	var out := {}
+	for id in _keys(sectors):
+		out[id] = sectors[id].to_save()
+	return out
 
 
 ## Replace the state with a saved one. Returns "" on success, else why not (and nothing changes).
@@ -779,6 +930,12 @@ func load_dict(d: Dictionary) -> String:
 			return "bad campaign data"
 	if not (d.get("rep") is Dictionary and d.get("offers") is Dictionary and d.has("seed") and d.has("rng_state") and d.has("debt") and d.has("paid") and d.has("jumps") and d.has("hull_loss")):
 		return "bad campaign data"
+	var made = _read_sectors(d, map)
+	if made == null:
+		return "bad campaign sectors"
+	var charge = _read_spool(d, map)
+	if charge == null:
+		return "bad campaign jump drive"
 	seed_value = int(d["seed"])
 	rng.state = int(str(d["rng_state"]))
 	drift = map
@@ -800,8 +957,40 @@ func load_dict(d: Dictionary) -> String:
 	events_seen = int(d.get("events_seen", 0))  # saves from before the game over screen have none
 	fights_won = int(d.get("fights_won", 0))
 	offers = d["offers"].duplicate(true)
+	sectors = made
+	spool = charge
+	last_jump = {}
 	_hull_key = -1
 	return ""
+
+
+## The sectors of a save (version 3), made again from the seed with their saved states; {} for an older save, null when
+## malformed.
+static func _read_sectors(d: Dictionary, map):
+	var raw = d.get("sectors", {})
+	if not raw is Dictionary:
+		return null
+	var out := {}
+	for id in raw:
+		if not (raw[id] is Dictionary and map.has(str(id))):
+			return null
+		var s = Sector.generate(int(d["seed"]), map.node(str(id)), _region_in(map, str(id)))
+		if s.load_save(raw[id]) != "":
+			return null
+		out[str(id)] = s
+	return out
+
+
+## The jump drive's charge of a save, {} when idle (or an older save), null when malformed.
+static func _read_spool(d: Dictionary, map):
+	var raw = d.get("spool", {})
+	if not raw is Dictionary:
+		return null
+	if raw.is_empty():
+		return {}
+	if not (raw.get("to") is String and map.has(raw["to"]) and (raw.get("t") is float or raw.get("t") is int)):
+		return null
+	return {"to": raw["to"], "t": maxf(float(raw["t"]), 0.0), "drift": bool(raw.get("drift", false)), "blocked": false}
 
 
 static func _to_set(list: Array) -> Dictionary:
