@@ -70,15 +70,13 @@ func test_a_bare_png_is_one_frame_and_the_art_is_cached() -> void:
 
 func test_a_part_without_art_borrows_the_lower_tier() -> void:
 	_use(FIXTURES)
-	check(Art.component("probe_mk2") == null, "no probe_mk1 here either")
-	_use(Art.DEFAULT_ROOT)
-	var mk1 = Art.component("engine_mk1")
-	check(mk1 != null, "the shipped Engine Mk1 art")
-	check(Art.component("engine_mk2") == mk1, "Engine Mk2 uses it until it has its own")
+	var mk1 = Art.component("probe_mk1")
+	check(mk1 != null, "the fixture Probe Mk1 art")
+	check(Art.component("probe_mk3") == mk1, "Probe Mk3 uses it until it has its own")
+	check(Art.component("probe_scrap_mk1") == null, "other lines never borrow")
 	Art.tier_fallback = false
 	Art.clear_cache()
-	check(Art.component("engine_mk2") == null, "unless the fallback is off")
-	check(Art.component("engine_scrap_mk1") == null, "other lines never borrow")
+	check(Art.component("probe_mk3") == null, "unless the fallback is off")
 	_done()
 
 
