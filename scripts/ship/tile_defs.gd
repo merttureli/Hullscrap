@@ -29,5 +29,7 @@ func color(id: String) -> Color:
 	return Color(get_def(id).get("color", "#ff00ff"))
 
 
-func cost(id: String) -> int:
-	return int(get_def(id).get("cost", 0))
+## Material cost of one tile, e.g. {"scrap": 3, "copper": 1}.
+func cost(id: String) -> Dictionary:
+	var c = get_def(id).get("cost", {})
+	return c if c is Dictionary else {}
