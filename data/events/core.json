@@ -1,0 +1,206 @@
+{
+	"_doc": "The core events of the Drift campaign: enough to play and test the loop (docs/CONTENT.md section 8). The big event packs live in the other files of this folder; scripts/space/events.gd loads every *.json here. Keys: id, type (a node type, or page for a follow-up reached by goto), weight, once, requires, text, choices, after_win. Station events name their station in requires.node.",
+	"events": [
+		{
+			"id": "station_debt_intro", "type": "station", "weight": 100, "once": true,
+			"requires": {"node": "rusthold", "not_flag": "met_ma"},
+			"text": "Ma Gantry meets you on the dock herself, which is never good. She is small, loud and holding a clipboard made from what used to be a door. \"That hull is mine,\" she says, \"until you've paid me a thousand credits. A hundred every eight jumps. I'm not a monster. I'm a lender.\"",
+			"choices": [
+				{"text": "\"Sign me up, Ma.\"", "outcomes": [
+					{"weight": 100, "text": "She has you thumbprint the clipboard. Something wet is already on it. \"Meridian's the Concord yard, a few lanes out. Don't tell them I sent you.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "rep": {"clans": 1}}}]},
+				{"text": "\"A thousand? For this?\"", "outcomes": [
+					{"weight": 70, "text": "\"For that,\" Ma agrees, tapping your hull with the clipboard. It rings like a dropped pan. She slides the paper over anyway.", "effects": {"flag": "met_ma", "reveal": "meridian"}},
+					{"weight": 30, "text": "\"Fifty more for the attitude,\" says Ma, and writes it in. The pen is chained to her wrist. You never saw her draw it.", "effects": {"flag": "met_ma", "reveal": "meridian", "debt": 50}}]},
+				{"text": "[Fenn] Read the fine print aloud, slowly.", "requires": {"species": "fenn"}, "outcomes": [
+					{"weight": 100, "text": "Your Fenn finds a clause about \"reasonable wear\" and reads it out twice. Ma stares, then laughs like a bolt coming loose. \"Hundred off. Never do that again.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "debt": -100, "rep": {"clans": 1}}}]}
+			]
+		},
+		{
+			"id": "station_rusthold_greeting", "type": "station", "weight": 10,
+			"requires": {"node": "rusthold", "flag": "met_ma"},
+			"text": "Gantry Rusthold turns slowly on its borrowed bearings. The dock lights flicker in a pattern that might be a welcome or might be a fault. Either way, a hand in a welding mask waves you toward bay six.",
+			"choices": [
+				{"text": "Dock.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]},
+				{"text": "Ask the dock hands about work.", "outcomes": [
+					{"weight": 50, "text": "\"Concord's paying double for Rustfang scalps,\" says one. \"Don't tell them we told you. Don't tell Ma either.\"", "effects": {}},
+					{"weight": 50, "text": "\"Wrecks are thick near the dead gates,\" says another. \"Thick as flies. Same smell, too.\"", "effects": {}}]}
+			]
+		},
+		{
+			"id": "station_meridian_greeting", "type": "station", "weight": 10,
+			"requires": {"node": "meridian"},
+			"text": "\"Concord Station Meridian. You are number one in the docking queue. Thank you for waiting.\" The voice is calm, tired and exactly on time. Behind it you can hear someone stamping something.",
+			"choices": [
+				{"text": "Dock.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]},
+				{"text": "File the full docking forms (10 credits).", "requires": {"credits": 10, "pay": true}, "outcomes": [
+					{"weight": 100, "text": "The clerk checks every box twice and looks, for a moment, almost moved. \"A pleasure to see someone use the process.\"", "effects": {"rep": {"concord": 1}}}]}
+			]
+		},
+		{
+			"id": "station_prism_greeting", "type": "station", "weight": 10,
+			"requires": {"node": "prism"},
+			"text": "The Prism hums a note you feel in your fillings. A voice, pleasant and several people at once, says: \"You are interesting. Come in. Mind the light.\"",
+			"choices": [
+				{"text": "Dock.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]},
+				{"text": "[Emberkin] Hum the note back.", "requires": {"species": "emberkin"}, "outcomes": [
+					{"weight": 100, "text": "Your Emberkin hums the fifth above it, warm as a stove. The Prism goes quiet, and then, you would swear, pleased.", "effects": {"rep": {"lumen": 1}}}]}
+			]
+		},
+		{
+			"id": "pirate_toll", "type": "pirate", "weight": 12,
+			"text": "Three Rustfang skiffs fan out across your bow. \"Toll's forty credits,\" crackles the lead one, \"and a smile.\" The smile is optional. Their guns are not.",
+			"choices": [
+				{"text": "Pay the toll (40 credits).", "requires": {"credits": 40, "pay": true}, "outcomes": [
+					{"weight": 100, "text": "The skiffs peel off, whooping. One flashes its lights at you in what you choose to read as thanks.", "effects": {}}]},
+				{"text": "Tell them where to put their toll.", "outcomes": [
+					{"weight": 100, "text": "\"Wrong answer,\" says the voice, almost sadly.", "effects": {"fight": "tier"}}]},
+				{"text": "[Artemis launcher] Paint them with a missile lock.", "requires": {"component": "artemis_mk1"}, "outcomes": [
+					{"weight": 60, "text": "Three skiffs discover urgent business elsewhere. One of them leaves a rude word in the plasma.", "effects": {"rep": {"clans": -1}}},
+					{"weight": 40, "text": "They don't blink. They've been painted by better.", "effects": {"fight": "tier"}}]}
+			]
+		},
+		{
+			"id": "pirate_ambush", "type": "pirate", "weight": 8,
+			"text": "No hail, no toll. The first you hear of them is the hull ringing like a dropped pan.",
+			"choices": [
+				{"text": "Man the guns.", "outcomes": [{"weight": 100, "text": "", "effects": {"fight": "tier"}}]},
+				{"text": "[Afterburner] Light the afterburner and run.", "requires": {"component": "afterburner"}, "outcomes": [
+					{"weight": 60, "text": "The afterburner roars and the Rustfangs shrink to a rumour. Something was clipped on the way out, but you are not complaining.", "effects": {"hull": -5}},
+					{"weight": 40, "text": "They were expecting that. They've got a faster engine and nothing but time.", "effects": {"fight": "tier"}}]}
+			]
+		},
+		{
+			"id": "repo_collectors", "type": "pirate", "weight": 60,
+			"requires": {"flag": "debt_missed"},
+			"text": "Rustfang colours, but the ship is too clean, and the man on the comm has a ledger voice. \"Ma Gantry sends her regards,\" he says. \"And her invoice. You missed a payment. We're here to collect, one way or the other.\"",
+			"choices": [
+				{"text": "Pay the hundred.", "requires": {"credits": 100, "pay": true}, "outcomes": [
+					{"weight": 100, "text": "The collector ticks a box with real tenderness. \"Pleasure doing business. Ma will be thrilled. She'll hide it.\"", "effects": {"debt": -100, "rep": {"clans": 1}}}]},
+				{"text": "\"Take it up with Ma.\"", "outcomes": [
+					{"weight": 100, "text": "\"Oh, we will,\" he says. \"After.\"", "effects": {"goto": "repo_fight"}}]},
+				{"text": "[Fenn] Argue the interest, clause by clause.", "requires": {"species": "fenn"}, "outcomes": [
+					{"weight": 70, "text": "Your Fenn finds a rounding error in the collector's favour, then one in yours. By the third, the man is sweating. \"Next time. Next time, understand?\"", "effects": {}},
+					{"weight": 30, "text": "The collector has a Fenn of his own, and the two of them smile at each other in a way that ends badly.", "effects": {"goto": "repo_fight"}}]}
+			]
+		},
+		{
+			"id": "repo_fight", "type": "page", "weight": 0,
+			"text": "The collector's ship swings broadside. It has a ram on the bow that someone has lovingly painted with the word MA. Their crew stops pretending to be pirates.",
+			"choices": [
+				{"text": "Man the guns.", "outcomes": [{"weight": 100, "text": "", "effects": {"fight": "tier"}}]}
+			],
+			"after_win": {"text": "Their ledger tumbles out of the wreck, still open. The last line reads: Gantry, one hull, 4 jumps overdue. You tear that page out and pocket the petty cash.", "effects": {"items": {"credits": 40}, "rep": {"clans": -1}}}
+		},
+		{
+			"id": "wreck_dead_freighter", "type": "wreck_field", "weight": 12,
+			"text": "A dead freighter turns end over end, hold doors open like a surprised mouth. Whatever killed her took the crew and left the cargo, which is the wrong way round for a pirate and the right way round for you.",
+			"choices": [
+				{"text": "Cut her open for scrap.", "outcomes": [
+					{"weight": 70, "text": "The cutting torch sings and the plates peel away like orange rind. A decent haul.", "effects": {"items": {"scrap": 50}}},
+					{"weight": 30, "text": "A bulkhead lets go mid-cut and takes a crewman with it for a moment. Everyone lives. The scrap is smaller than you hoped.", "effects": {"crew_hp": -15, "items": {"scrap": 20}}}]},
+				{"text": "Search the cargo bay for anything worth selling.", "outcomes": [
+					{"weight": 50, "text": "A crate of Concord ration chits, none of them expired yet. You sell them to yourself, for the credits.", "effects": {"items": {"credits": 35}}},
+					{"weight": 50, "text": "Copper wire, miles of it, wound round a dead man's reel.", "effects": {"items": {"copper": 20}}}]},
+				{"text": "[Basalt] Send your Basalt out onto the hull, no suit needed.", "requires": {"species": "basalt"}, "outcomes": [
+					{"weight": 100, "text": "He walks the outer plates like a man on a Sunday pier, and comes back with a sack of the good stuff and a calm expression.", "effects": {"items": {"scrap": 60, "titanium": 10}}}]},
+				{"text": "Leave her to the dark.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+			]
+		},
+		{
+			"id": "distress_stuck_airlock", "type": "distress", "weight": 10,
+			"text": "A Scrapper tug calls in a voice that gets a little less calm each time. Her airlock has jammed with two of her crew on the wrong side of it, and her air is going the way of all air.",
+			"choices": [
+				{"text": "Cut the airlock open from outside.", "outcomes": [
+					{"weight": 70, "text": "The torch bites through the seal and the pair tumbles into your arms, swearing. The tug's skipper pays what she can in scrap and credits.", "effects": {"items": {"scrap": 20, "credits": 30}, "rep": {"clans": 1}}},
+					{"weight": 30, "text": "The seal lets go all at once and takes a crewman's sleeve and some of the arm in it. The pair live, the skipper is mortified, the scrap is small.", "effects": {"crew_hp": -20, "items": {"scrap": 15}}}]},
+				{"text": "[Basalt] Send your Basalt out to hold the door while they climb through.", "requires": {"species": "basalt"}, "outcomes": [
+					{"weight": 100, "text": "He holds the jammed leaf with one hand like a man keeping a gate for a lady. The pair climb over him, and the skipper talks about it in Rusthold for a month.", "effects": {"items": {"scrap": 50}, "rep": {"clans": 2}}}]},
+				{"text": "Leave them to it.", "outcomes": [{"weight": 100, "text": "You listen to the tug's air meter count down until the signal fades. Nobody says anything for a while.", "effects": {"rep": {"clans": -1}}}]}
+			]
+		},
+		{
+			"id": "trader_fuel_peddler", "type": "trader", "weight": 10,
+			"text": "A one-man Fenn tanker, the Second Opinion, rides alongside with its lights blinking in what you suspect is laughter. Sixpence, says the hull stencil, will sell you fuel. At three times the usual price, because he can.",
+			"choices": [
+				{"text": "Buy one can (24 credits).", "requires": {"credits": 24, "pay": true}, "outcomes": [
+					{"weight": 100, "text": "A can arrives on a line. It is cold and it smells of money.", "effects": {"items": {"fuel": 1}}}]},
+				{"text": "Buy three cans (72 credits).", "requires": {"credits": 72, "pay": true}, "outcomes": [
+					{"weight": 100, "text": "\"Bulk,\" says Sixpence, as if it were a favour.", "effects": {"items": {"fuel": 3}}}]},
+				{"text": "[Fenn] Haggle in his own language (48 credits for three).", "requires": {"species": "fenn", "credits": 48, "pay": true}, "outcomes": [
+					{"weight": 100, "text": "Your Fenn trills something at the tanker, fast and rude. Sixpence trills back, slower and ruder, and then laughs. Three cans, a discount, and a promise never to trade with you again.", "effects": {"items": {"fuel": 3}}}]},
+				{"text": "Wave him off.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+			]
+		},
+		{
+			"id": "anomaly_lumen_hum", "type": "anomaly", "weight": 10,
+			"text": "Your instruments agree on something for the first time in a month: there is a light out here that isn't a star, and it is humming. Something about it is pointing at you.",
+			"choices": [
+				{"text": "Follow the hum.", "outcomes": [
+					{"weight": 100, "text": "The hum thickens, then resolves into a chord, and a lane you were sure was not on the chart folds open. Somewhere ahead, a crystal station is clearing its throat.", "effects": {"flag": "prism_revealed", "reveal": "prism", "rep": {"lumen": 1}}}]},
+				{"text": "Take a reading from a safe distance.", "outcomes": [
+					{"weight": 70, "text": "Your scanner prints a graph that looks like a signature. Someone at Meridian will pay for that.", "effects": {"items": {"credits": 30}}},
+					{"weight": 30, "text": "The scanner feeds back through every console on the bridge. Your crew say a few words that don't go in the log.", "effects": {"crew_hp": -10}}]},
+				{"text": "Back away slowly.", "outcomes": [{"weight": 100, "text": "The light dims, politely, as if it understood.", "effects": {}}]}
+			]
+		},
+		{
+			"id": "patrol_inspection", "type": "patrol", "weight": 10,
+			"text": "A Concord cutter, CS-114 Diligence, matches your speed and hails you. \"Officer Hallett. This is a routine inspection. Please do not make it exciting.\"",
+			"choices": [
+				{"text": "Submit to the inspection.", "outcomes": [
+					{"weight": 80, "text": "Stamps, forms, a long look at your reactor. \"Have a lawful day,\" says Hallett, and sounds like he means it.", "effects": {"rep": {"concord": 1}}},
+					{"weight": 20, "text": "Hallett finds an expired registration and a form for it. \"Twenty credits. I'm sorry. It's the form.\"", "effects": {"items": {"credits": -20}}}]},
+				{"text": "Slip him thirty credits.", "requires": {"credits": 30, "pay": true}, "outcomes": [
+					{"weight": 70, "text": "He pockets it with the dignity of a man who is very tired of being a man. \"Move along.\"", "effects": {"rep": {"concord": -1}}},
+					{"weight": 30, "text": "He writes down the serial number of the note. \"Thank you,\" he says. \"That will be exhibit A.\"", "effects": {"rep": {"concord": -3}}}]},
+				{"text": "Floor it.", "outcomes": [
+					{"weight": 100, "text": "\"Oh, come on,\" says Hallett, and the Diligence lights its guns with the air of someone who really wanted a quiet shift.", "effects": {"rep": {"concord": -2}, "fight": "tier"}}]}
+			]
+		},
+		{
+			"id": "empty_quiet", "type": "empty", "weight": 10,
+			"text": "Nothing out here but the hum of the ship and Ada eating something crunchy in the galley. For once, nothing is on fire.",
+			"choices": [
+				{"text": "Use the quiet to patch everyone up.", "outcomes": [{"weight": 100, "text": "Plasters, a hot drink, someone's stolen blanket. Everybody comes out the better for it.", "effects": {"crew_hp": 15}}]},
+				{"text": "Listen to the radio.", "outcomes": [
+					{"weight": 50, "text": "A Scrapper race broadcast, three hulls and a lot of swearing. You bet a stranger two credits and win ten.", "effects": {"items": {"credits": 10}}},
+					{"weight": 50, "text": "Static and a very old song. Nobody says anything for a while, and it's nice.", "effects": {}}]},
+				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+			]
+		},
+		{
+			"id": "asteroid_tumbling_rock", "type": "asteroid_field", "weight": 10,
+			"text": "A rock the size of a Rusthold wheel turns slowly ahead, its flanks streaked with orange where the iron shows. There are no claim beacons on it. Nobody has bothered, which means either it is picked clean or it is mean.",
+			"choices": [
+				{"text": "Surface mining.", "outcomes": [
+					{"weight": 30, "text": "A thin skin of iron comes away under the cutters. It isn't much, but it's honest.", "effects": {"items": {"scrap": 20}}},
+					{"weight": 40, "text": "The cutters find a good seam near the surface and follow it for an hour.", "effects": {"items": {"scrap": 30}}},
+					{"weight": 30, "text": "A fat iron vein, right under the crust. You fill the scoop twice.", "effects": {"items": {"scrap": 40}}}]},
+				{"text": "Crack the deep vein.", "outcomes": [
+					{"weight": 20, "text": "The rock splits along a copper line, bright as a new coin.", "effects": {"items": {"copper": 15}}},
+					{"weight": 20, "text": "Copper, and plenty of it. The scoop is groaning.", "effects": {"items": {"copper": 30}}},
+					{"weight": 10, "text": "A pale grey seam: titanium. A small one, but real.", "effects": {"items": {"titanium": 10}}},
+					{"weight": 10, "text": "A fat knuckle of titanium. Someone at Meridian is going to hug you.", "effects": {"items": {"titanium": 20}}},
+					{"weight": 40, "text": "The rock fractures the wrong way and a slab the size of a door comes back at the hull. You get some scrap out of it, and a dent.", "effects": {"hull": -10, "items": {"scrap": 10}}}]},
+				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+			]
+		},
+		{
+			"id": "asteroid_slag_belt", "type": "asteroid_field", "weight": 10,
+			"text": "A belt of slag and ice, left over from some Snap-day collision, drifts in a long slow shoal. The scanner pings iron, a little copper, and one blind spot that might be nothing.",
+			"choices": [
+				{"text": "Surface mining.", "outcomes": [
+					{"weight": 30, "text": "Slag, mostly, but slag melts down. A small, dull haul.", "effects": {"items": {"scrap": 20}}},
+					{"weight": 40, "text": "The loose chunks come away easily. You sweep up a decent load.", "effects": {"items": {"scrap": 30}}},
+					{"weight": 30, "text": "A drift of old hull plates, frozen into the belt. Free scrap, just sitting there.", "effects": {"items": {"scrap": 40}}}]},
+				{"text": "Crack the deep vein.", "outcomes": [
+					{"weight": 20, "text": "A copper seam under the ice, woven like wire.", "effects": {"items": {"copper": 15}}},
+					{"weight": 20, "text": "The ice breaks open on a solid copper core.", "effects": {"items": {"copper": 30}}},
+					{"weight": 10, "text": "Titanium, a little, in a pocket of ice.", "effects": {"items": {"titanium": 10}}},
+					{"weight": 10, "text": "The blind spot was a titanium nodule the size of a crate.", "effects": {"items": {"titanium": 20}}},
+					{"weight": 40, "text": "The blind spot was a gas pocket. The bang rattles every tooth you have, and scatters a little scrap back at you.", "effects": {"hull": -10, "items": {"scrap": 10}}}]},
+				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+			]
+		}
+	]
+}

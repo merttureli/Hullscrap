@@ -58,7 +58,7 @@ func _rustbucket() -> Dictionary:
 			["engine_scrap_mk1", 4, 24, 2], ["engine_scrap_mk1", 22, 24, 2], ["radiator", 14, 20],
 		],
 		"plates": [["scrap_plate", func(_c): return true]],
-		"cargo": {"scrap": 900, "copper": 60, "polymer": 12, "engine_scrap_mk1": 1, "radiator": 1, "bed": 1, "credits": 300},
+		"cargo": {"scrap": 900, "copper": 60, "polymer": 12, "engine_scrap_mk1": 1, "radiator": 1, "bed": 1, "credits": 300, "fuel": 6},
 	}
 
 
@@ -87,7 +87,7 @@ func _courier() -> Dictionary:
 			["engine_mk1", -2, 9, 3], ["engine_mk1", 24, 7, 1],  # the strafe pair: stand-ins on the side walls (push right and left)
 		],
 		"plates": [["titanium_alloy", func(c): return c.y == 0 and c.x >= 0 and c.x <= 23]],
-		"cargo": {"scrap": 220, "copper": 80, "titanium": 40, "polymer": 10, "engine_mk1": 1, "laser_mk1": 1, "afterburner": 1, "radiator": 1, "credits": 500},
+		"cargo": {"scrap": 220, "copper": 80, "titanium": 40, "polymer": 10, "engine_mk1": 1, "laser_mk1": 1, "afterburner": 1, "radiator": 1, "credits": 500, "fuel": 6},
 	}
 
 
@@ -112,7 +112,7 @@ func _prism() -> Dictionary:
 			["reactor_neon_mk1", 5, 13], ["radiator", 9, 13], ["radiator", 11, 13], ["engine_neon_mk1", 13, 18, 2],
 		],
 		"plates": [["reflective_coating", func(c): return c.y == 0]],
-		"cargo": {"scrap": 120, "copper": 60, "polymer": 10, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "radiator": 1, "bed": 1, "credits": 400},
+		"cargo": {"scrap": 120, "copper": 60, "polymer": 10, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "radiator": 1, "bed": 1, "credits": 400, "fuel": 6},
 	}
 
 

@@ -1,0 +1,138 @@
+{"events": [
+    {
+      "id": "station_rusthold_dock_queue", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_rusthold"},
+      "text": "The Rusthold's docking tower reads your name off a clipboard, wrongly, and waves you into Bay 4 with a flashlight. A fight is going on in the cargo bay. 'Mind the fight,' says the dockmaster, Hob, from behind a barricade of crates. 'It's mostly over.'",
+      "choices": [
+        {"text": "Ask what the fight is about.", "outcomes": [
+          {"weight": 100, "text": "'Whose turn it was with the good wrench,' says Hob. 'It's been going since Tuesday. I wasn't there on Tuesday. I'm pretty sure it was Tuesday.'", "effects": {}}
+        ]},
+        {"text": "Ask where the good salvage is.", "outcomes": [
+          {"weight": 100, "text": "Hob taps the side of his nose, then, being Hob, announces the answer to the whole bay. Three people write it down. One of them is you.", "effects": {"reveal": "wreck_field"}}
+        ]},
+        {"text": "Tip the dockmaster (5 credits).", "requires": {"credits": 5}, "outcomes": [
+          {"weight": 100, "text": "He pockets it with the dignity of a man who invented tipping. 'Bay 4 is the good one,' he says. 'Bays 1 to 3 don't exist. Don't ask.'", "effects": {"items": {"credits": -5}, "rep": {"clans": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_rusthold_ma_board", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_rusthold"},
+      "text": "On the dock wall, Ma Gantry's board: a slab of welded plate covered in chalk. WHO OWES, it says, and under that WHAT, and under that WHEN. Your hull is on the list, with a small drawing beside it. In smaller chalk, someone has added: 'Sweet kid. Pays late.'",
+      "choices": [
+        {"text": "Read the board.", "outcomes": [
+          {"weight": 100, "text": "The list is long, and every name has a little drawing beside it. Yours is a hull with a halo. It is not clear whether this is a compliment.", "effects": {}}
+        ]},
+        {"text": "Copy a rumour off the board.", "outcomes": [
+          {"weight": 100, "text": "Somebody has chalked DON'T GO WHERE THE TEETH ARE, with an arrow, a skull and a smiley face. Your chart finds the teeth.", "effects": {"reveal": "pirate"}}
+        ]},
+        {"text": "Draw a better halo.", "outcomes": [
+          {"weight": 100, "text": "You draw a halo with a flourish and a rude word underneath. A passing welder gives you a nod that means 'now you live here'.", "effects": {"rep": {"clans": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_rusthold_scrap_market", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_rusthold"},
+      "text": "The scrap market runs three floors and one rumour. A boy tries to sell you your own bolts back. A woman tries to sell you a map of the market. Both, you realise, are correct.",
+      "choices": [
+        {"text": "Buy the boy's bolts back (5 credits).", "requires": {"credits": 5}, "outcomes": [
+          {"weight": 100, "text": "You pay for your own bolts, then find they are better than you remember. You decide not to ask where he got the rest.", "effects": {"items": {"credits": -5, "scrap": 20}}}
+        ]},
+        {"text": "Trade the woman a bad joke for her map.", "outcomes": [
+          {"weight": 100, "text": "She groans, takes the joke, and gives you the map. It is of the market. In one corner is a doodle of a trader's barge and the words THIS ONE.", "effects": {"reveal": "trader"}}
+        ]},
+        {"text": "Walk the stalls and listen.", "outcomes": [
+          {"weight": 100, "text": "Six different people tell you six different prices for the same pipe. You leave with a rough idea of what a pipe is worth, and a headache.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_meridian_clean_floors", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_meridian"},
+      "text": "Meridian's floors are so clean you can see your boots reflected in them, looking disappointed. A custodian polishes the same square of deck with infinite tenderness. 'Forty years,' she says. 'I haven't missed a day. Nobody has asked me to stop.'",
+      "choices": [
+        {"text": "Ask what she is polishing.", "outcomes": [
+          {"weight": 100, "text": "'The floor,' she says. 'Somebody has to.' It is the most honest thing you hear all week.", "effects": {}}
+        ]},
+        {"text": "Wipe your boots on the mat provided (Form 4).", "outcomes": [
+          {"weight": 100, "text": "A clerk ticks a box. 'Compliant,' she says, as if it were your name. For about a minute, you feel like a citizen.", "effects": {"rep": {"concord": 1}}}
+        ]},
+        {"text": "Ask where the quiet places are.", "outcomes": [
+          {"weight": 100, "text": "She points with her cloth: down a corridor, past three doors that have been sealed since the Snap. Your chart marks the lanes beyond. 'It's quiet there,' she says. 'Quieter than here, and here is very quiet.'", "effects": {"reveal": "empty"}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_meridian_bounty_office", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_meridian"},
+      "text": "The bounty office has a ticket system and a queue of one. The clerk calls 'Forty-one' to an empty chair, sighs, and calls you. 'Rustfang bounties on the left. All the others are on the left too, but further.'",
+      "choices": [
+        {"text": "Look at the wanted board.", "outcomes": [
+          {"weight": 100, "text": "A wall of faces with sums under them. Captain Vex is smiling in every portrait, which is either his best feature or the reason he is wanted.", "effects": {"reveal": "pirate"}}
+        ]},
+        {"text": "Ask if there is work for a Hullscrapper.", "outcomes": [
+          {"weight": 100, "text": "The clerk checks the book, finds nothing, and writes HULLSCRAPPER: NOT A RECOGNISED PROFESSION on a card, and gives it to you. It is the nicest thing anyone has given you all week.", "effects": {}}
+        ]},
+        {"text": "Buy a pencil (5 credits).", "requires": {"credits": 5}, "outcomes": [
+          {"weight": 100, "text": "It is a perfectly good pencil. The clerk watches you walk away with it the way a man watches his firstborn leave for war.", "effects": {"items": {"credits": -5}}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_meridian_shipyard_queue", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_meridian"},
+      "text": "Outside the shipyard, a man in a good coat holds a place in a queue that has not moved in nineteen years. 'Hull frame, Mk2,' he says, proudly. 'Ordered the week of the Snap.' He does not turn his head. If he did, the queue would notice.",
+      "choices": [
+        {"text": "Ask what happens when he reaches the front.", "outcomes": [
+          {"weight": 100, "text": "'I'll be told it's the wrong form,' he says. 'And I'll be so happy.'", "effects": {}}
+        ]},
+        {"text": "Offer to buy his place (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "He looks at the money for a long time. 'No,' he says, 'but thank you for asking. Nobody has asked in nineteen years.'", "effects": {}}
+        ]},
+        {"text": "Sell him a folding chair (10 scrap).", "requires": {"items": {"scrap": 10}}, "outcomes": [
+          {"weight": 100, "text": "A folding chair. He sits for the first time in nineteen years, and for a moment looks like a man with a plan.", "effects": {"items": {"scrap": -10, "credits": 15}}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_prism_welcome", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_prism"},
+      "text": "The doors open before you reach them. A Lumen acolyte in pale robes bows. 'You are expected,' they say. 'You were expected earlier. It is no matter. We are patient, and we are early.'",
+      "choices": [
+        {"text": "Ask what they were expecting.", "outcomes": [
+          {"weight": 100, "text": "'You,' says the acolyte. 'In a different order.'", "effects": {}}
+        ]},
+        {"text": "Ask where the strange things are.", "outcomes": [
+          {"weight": 100, "text": "'Wherever the song is,' they say, which is not a direction. Your chart, however, marks one.", "effects": {"reveal": "anomaly"}}
+        ]},
+        {"text": "Bow and say nothing.", "outcomes": [
+          {"weight": 100, "text": "They seem delighted. They look as though they have waited years for somebody to do exactly this.", "effects": {"rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_prism_hum", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_prism"},
+      "text": "The station hums in the key of its corridors. Walk left and it drops a tone; walk right and it rises. Somebody has painted a line on the floor, marking where the hum becomes uncomfortable. The line is a long way inside your comfort.",
+      "choices": [
+        {"text": "Walk to the line.", "outcomes": [
+          {"weight": 100, "text": "At the line, the hum sounds like someone saying your name slowly, in a language you almost know. You step back. An acolyte hands you a cup of tea without comment.", "effects": {}}
+        ]},
+        {"text": "Buy a shard from the corridor stall (25 credits).", "requires": {"credits": 25}, "outcomes": [
+          {"weight": 100, "text": "'A fair price,' says the stall-keeper, 'for the shard. For the humming, there is no price.'", "effects": {"items": {"credits": -25, "crystal": 1}}}
+        ]},
+        {"text": "Ask what the line is for.", "outcomes": [
+          {"weight": 100, "text": "'It marks where the old gate's sound reaches,' says an acolyte. 'Past that, it reaches further.' Your chart marks the lanes where it carries.", "effects": {"reveal": "wreck_field"}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_prism_window", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_prism"},
+      "text": "A long window faces the nearest dead gate. A row of Lumen astronomers sit before it, counting. One looks up as you pass. 'Three thousand and twelve,' they say, 'and it is early yet.'",
+      "choices": [
+        {"text": "Count with them for a while.", "outcomes": [
+          {"weight": 100, "text": "You count until your eyes water. By the end you have lost the number and gained, somehow, the feeling of having been included.", "effects": {"rep": {"lumen": 1}}}
+        ]},
+        {"text": "Ask what they are counting.", "outcomes": [
+          {"weight": 100, "text": "'Stars,' they say. 'One of them is new. We are being kind to all of them, to be safe.'", "effects": {}}
+        ]},
+        {"text": "Trade a Rustfang joke for a shard of gate-glass.", "outcomes": [
+          {"weight": 60, "text": "They listen with grave attention, then laugh once, like a bell being struck. A sliver of gate-glass changes hands.", "effects": {"items": {"crystal": 1}}},
+          {"weight": 40, "text": "They listen with grave attention. They do not laugh. They thank you for the joke and keep the glass.", "effects": {}}
+        ]}
+      ]
+    }
+]}

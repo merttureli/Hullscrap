@@ -76,17 +76,37 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
     - If the weapon has `pierce`, leftover damage carries on into the next cells.
   - **Thick outer walls are armour.** A reactor in the middle is protected, and an exposed one is a target. Players will aim for engines and weapons, and flank to reach the soft side.
   - Every hull hit also lowers the ship's **hull integrity** pool: hull_hp = 20 + armour plates. At 0 the ship is **wrecked** and becomes a salvageable derelict.
-- **Shields** are a bubble (an ellipse around the hull) with **layers** from powered shield components.
+- **Shields** are a bubble around the hull (its shape is below) with **layers** from powered shield components.
   - A projectile or laser hitting the bubble uses up a layer, and layers recharge over time.
   - Missiles pass through. Ion removes layers and ion-locks systems.
 - **Firing opens your own shield (owner, 2026-10-30)**:
   - When you fire anything shields can stop (laser, bolt, flak, beam, ion), **your whole bubble is open** for `drops_shield_s`: laser 0.3 s, bolt 0.4 s, flak 0.6 s, ion 0.3 s, and a beam for its whole duration.
   - Layers aren't spent while it's open, and **missiles never open it**.
   - So you time your volleys, shield-heavy ships favour missiles, and an enemy who just fired is briefly exposed.
-- **Sectored shields (owner, 2026-10-30)**:
-  - The bubble is split into **sectors** around the ship. Their count comes from the best powered generator: level 1–2 has 1 sector (the whole bubble), **level 3 has 4**, **level 6 has 8**. Neon generators get 4 early.
-  - Firing opens **only the sector the shot leaves through**, and incoming hits check the sector at their impact angle. Layers stay one shared pool.
-  - Better shield tech means smaller openings when you fire. Levels 4–6 are future content.
+- **Shield shape (owner, 2026-10-30: "surround the whole ship, never clip the inside")**:
+  - The bubble is the **convex hull of the ship's solid cells** (outside mount halves included), **inflated by 1.5 cells with rounded corners**, rather than an ellipse.
+  - So it hugs any silhouette (long, wedge-shaped, lumpy) and never cuts through the hull. Hits test against that shape.
+  - It is rebuilt when the hull changes (building, a part lost); breaches don't change it.
+- **Sectors and balance, Star Wars: Squadrons-style (owner, 2026-10-30)**:
+  - The bubble's **sector count** comes from the best powered generator. Sectors are angle ranges from the ship's centre, starting at the bow.
+    - **1 sector** (Mk1, scrap): one piece, nothing to configure.
+    - **2 sectors** (Mk2): **bow and stern**.
+    - **4 sectors** (Mk3, and Neon from Mk1): bow, starboard, stern, port.
+    - **8 sectors** (Mk5, and late uniques): the 4 above plus the diagonals.
+  - **Balance**: each sector has a weight `w` in steps of 0.5, from 0 to 2, and the weights always sum to the sector count (even = every w is 1).
+    - A sector holds **`total layers × w`** layers.
+    - So with 2 layers on bow and stern: even is 2/2, "double the bow" is 4 bow and 0 stern, and 3/1 is in between.
+    - Protection is moved, never created.
+  - **Layers are per sector**: a hit spends a layer of the sector it hits, and each sector recharges its own.
+  - **Shifting takes time**: the losing sector drops at once, and the gaining sector fills at the recharge rate, so you can't swap for free as a volley lands.
+  - Firing opens **only the sector the shot leaves through**, for `drops_shield_s`.
+  - **In combat**: the arrow keys shift balance one step: ↑ bow, ↓ stern, ← port, → starboard (port and starboard need 4+ sectors). The step is taken from the opposite sector first, then evenly from the others. **End** returns to even.
+    - A small shield diagram by the weapon bar shows each sector's layers.
+  - **The Shields tab** (**H** in play or build mode): your ship's silhouette with its real bubble and sectors.
+    - Click a sector's + and − (the weights stay summed), or pick a preset: Even, Bow, Stern, Port, Starboard, plus 2 custom slots.
+    - The chosen balance is saved with the ship and is how every fight starts.
+  - The bubble is drawn along its shape: brightness and thickness by each sector's layers, a faint dashed line for a sector at 0, and a shimmer where layers are filling.
+  - **Pilot AI** with 2+ sectors shifts toward the side facing its enemy, at a speed set by `ai.aim_skill`.
 - **Shield-heavy builds**: layers are the sum of your powered generators, each a big power draw, so lots of energy plus generators is a real alternative to armour.
   - **Space = Shield Overcharge**: +1 temporary layer for 6 s, at +4 power draw while active, with a 20 s cooldown.
 - **Fires and breaches** come from hits (`fire_chance`, and walls reaching 0) and use the existing oxygen and fire rules.
@@ -140,6 +160,17 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Size balances itself**: more space means more walls to enclose it, more material cost, more mass (slower, turns worse), more armour, more oxygen to fill and more crew to run it. No artificial size cap beyond the grid limit (128×128).
 - **Credits** are the trading currency (buying frames, gear and crew; selling salvage). Materials stay physical cargo. Each starter ship starts with some credits.
 - The ship grid is a fixed 128×128 workspace. The hull marks which cells you own.
+- **Ship silhouettes (owner, 2026-10-30: "spaceships being rectangles is pretty goofy")**: no premade ship is a rectangle.
+  - Every designed ship (starters, enemies, NPCs, stations) uses **slopes and curves** (4d) for a bow, stern and flanks with character.
+  - It has a **non-rectangular footprint**: sponsons, wings, an engine block, a tapered nose, a raised bridge pod.
+  - **It reads at a glance in combat.** Guns sit on flat hull faces (mounts need a flat wall), and the slopes go everywhere else.
+  - The direction per ship:
+    - *Rustbucket*: a lumpy, asymmetric patched freighter. A blunt sloped bow, one fat cargo sponson on the port side, a rounded stern with the engines in a wide block, and a scrap-plate patch that sticks out.
+    - *Courier*: a sleek arrowhead. A long `slope2` bow taper, swept-back wings carrying the side Strafe Jets, and a narrow waist.
+    - *Prism*: a faceted crystal shape. Only 45° facets (a diamond or hexagon outline), a symmetric neon spine, and a pointed bow and stern.
+    - *Pirate raider*: a jagged wedge with a notched prow and asymmetric gun sponsons.
+    - *Rustfang rammer*: the ram-plated V bow (already shaped), a heavy engine block and short stubby flanks.
+  - The **build mode** helps the player do the same: the shape tool (T/R/Shift+R) is in the hint line, and later a "Round Off" tool.
 
 ## 4d. Angled and curved parts: slopes, curves and real ricochet (owner, 2026-10-30)
 Walls stop being only squares. **Any wall material can take a shape**, for style (ships with real silhouettes, inside and out) and for **physics** (sloped armour deflects).
@@ -361,6 +392,14 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), pay the debt, repair hull integrity (2 credits per point), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).
   - Gantry Rusthold sells Scrap-line parts, Meridian Standard-line parts, and the Prism Neon-line parts.
 - **After a won fight**: loot is credits 20–60 × tier, scrap 30–80 × tier, and a 25% chance of one of the enemy's components. Then a `wreck_field`-style salvage event runs (boarding the wreck on foot comes later).
+- **Conventions the content uses** (as built):
+  - **Event types** are the node types plus `debt` (picked by the debt clock from `requires`: the first call after jump 2, reminders when a payment is due within 2 jumps, repo talk after a miss) and `station` (one weighted greeting per docking, gated by the `at_rusthold` / `at_meridian` / `at_prism` flags that are set while docked).
+  - **Follow-up pages** have `weight: 0` and are reached only by `goto`. `after_win` is an event-level `{text, effects}`.
+  - **`once` events** are spent only when the chosen outcome has non-empty effects, so walking away doesn't burn a quest step.
+  - **Effects**: `log` (hands over a derelict log; kept once in `logs_found`), and `reveal` with a node type (reveals the nearest unrevealed node of that type). `lose_crew` is an int.
+  - **Requires**: `fuel_max` (true when fuel ≤ N). `pay` on a choice charges what its `requires` named.
+  - **Hull integrity** is a campaign number, repaired at stations. Events and drift jumps never take the last point.
+  - **Losing a fight ends the run** (a new campaign starts).
 - **Controls**: **M** opens the map from play mode. Click a linked node to jump; the event panel opens on arrival. Esc closes the map.
 - **Saves**: the campaign (seed, node positions, lanes and types, the current node, visited nodes, flags, reputation, debt, jump counter, and `once` events used) is saved with the ship. Bump the save version.
 
@@ -429,3 +468,177 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - Fields roll a richness (poor, rich, motherlode) and a danger tier. Crystal fields sit near Dead Gates and are Warden-guarded.
   - Before the mini-game exists, `asteroid_field` events offer a text version: surface mining (safe, small yield) or deep cracking (risky, bigger yield, hull damage chance).
 - **The same mini-game later salvages wrecks** (the "hullscrapper" fantasy): cut a dead ship apart and its components drop as chunks to scoop (`wreck` cells instead of ore). One mechanic, two content streams.
+
+## 11. Sector space: Raft in space (owner, 2026-10-30; this is the core loop)
+> "More Raft-like: shoot resources that float around space, build collection chambers to get a steady gain of resources. A radar or beacon shows where the big events are, and you set your course there. When you're done with a place, you light-speed to another. Every place has a few notable areas: mining, quests, unknown ships, a store, an abandoned station, a distress beacon."
+
+**Two scales**:
+- **The Drift map** (section 8) is the **macro** layer: places linked by lanes. Moving between them is a **light-speed jump** (fuel, a spool-up).
+- Each place is a **sector**: an open, real-time region of space you **fly through**. The ship is centred, space and debris drift past (like Raft), and the crew live and work inside while you travel.
+- **Combat, mining, salvage and events all happen in the sector.** The combat arena becomes sector space, with no separate screen.
+
+### The sector
+- **Generated from the node's seed and type**: a region about 24,000 × 24,000 px.
+  - A **current**: a direction and speed (20–60 px/s) that debris drifts along. The Drift literally drifts.
+  - A **debris density**, with the theme set by the node type: wreck fields are dense with salvage, asteroid fields with rock, empty sectors sparse.
+  - **2–6 points of interest (POIs)**, placed 3,000–12,000 px from where you arrive.
+- **POI types**:
+  - station or store, trader, distress beacon, wreck, abandoned station, mining field;
+  - unknown ship (could be a trader, a pirate, refugees or a derelict);
+  - pirate nest, Concord checkpoint, anomaly, quest site.
+  - The node type sets the mix: a `pirate` node has a nest plus a wreck or two; a `trader` node has a store plus a mining field; and so on (`data/sectors.json`).
+- **Approaching a POI** (within 800 px) runs **its event** (section 8's event system, unchanged). A `fight` effect spawns the enemy ship physically in the sector, near the POI. A store opens the station menu.
+  - POIs remember what's done. **The sector panel lists them, and when you've done what you want, you jump.**
+- **Ambient encounters**: while you're in a sector, a roll every ~90 s can spawn a passing ship (trader, patrol, pirate) at the radar's edge, which comes to you or passes by.
+
+### Drifting resources, the Raft loop
+- **Debris spawns continuously upstream of the ship**, in a ring 1,500–3,000 px out, drifts along the current, and despawns when far behind.
+- **Types** (`data/debris.json`, content):
+  - scrap chunk (scrap 2–5), copper coil (copper 1–3), polymer barrel (polymer 2), ice chunk (refills O2 10%);
+  - sealed crate (shoot it open: 1–2 random items or materials);
+  - an ore rock (shoot it to break it into chunks, the mining rules in section 10);
+  - a dead drone (salvage: a chance of a component);
+  - a fuel canister (fuel 1, rare).
+- **Collecting**: **Salvage Intakes**, the "collection chambers".
+  - An intake is a **hull mount** (section 4f) whose outside half is an open mouth with a magnetic net, and whose inside half is a sorting hopper that feeds cargo.
+  - Debris that **touches the mouth**, or comes within its **pull radius**, is drawn in and lands in cargo, up to the ore and hold capacity of section 10.
+  - Debris that hits plain hull just bounces (a scratch, if fast).
+  - So **where you put intakes, and how you fly into the current, decides your income.** Bow intakes catch what you fly into; side intakes catch the current as you drift.
+
+  | part | line | mouth | pull radius | notes |
+  |---|---|---|---|---|
+  | Net Mouth | scrap | 2×2 out / 2×2 in | 1 cell | no power; jams sometimes (reliability) |
+  | Salvage Intake Mk1–Mk3 | standard | 4×2 out / 4×2 in | 2 / 3 / 4 cells | power −1 / −1 / −2 |
+  | Lumen Siphon | neon | 4×2 out / 4×2 in | 6 cells | power −3; pulls only small debris |
+  | Tractor Beam Mk1–Mk2 | standard | turret | 300 / 450 px | **Q** held: pulls debris toward the nearest intake (section 10) |
+- **Shooting debris**: any weapon breaks a crate or rock into chunks. Mining lasers do it well (section 10).
+- **The target income**: idle drifting with one Mk1 intake brings ~15–25 scrap a minute plus a bit of copper and polymer. Actively chasing debris and breaking crates doubles that. Big hauls come from POIs (wrecks, mining fields, quests).
+  - This is the steady, reliable income the owner asked for. Fights and quests are the jackpots.
+
+### Materials by rarity and region (owner, 2026-10-30)
+> "Basic materials can float around, but key upgrade materials or rare ones are only found through fighting, special mining or questing. Different regions have different core materials floating around, and quest items are found too."
+
+- **Common** (they float everywhere; the Raft loop): scrap, copper, polymer, ice.
+- **Regional** (they float only in their region's sectors, and are bought dearly elsewhere):
+  - **titanium**: Concord space around Meridian, and wreck fields;
+  - **silicon**: asteroid regions;
+  - **crystal shards**: Lumen space around the Prism, and the Dead Gate approaches (small amounts);
+  - **plasma cells**: rare canisters near anomalies.
+- **Key materials** (**never float**; Mk4/Mk5 parts and uniques need them):
+  - `military_circuit`: from wrecked Concord patrols, Enforcers and pirate captains (fight loot);
+  - `gate_alloy`: from Dead Gate POIs and Warden drones;
+  - `void_crystal`: only from **motherlode** mining fields (special mining POIs, guarded or unstable);
+  - `nanite_paste` (exists): from wreck medbays, abandoned stations and quests.
+- **Quest items** (`kind: "quest"` in `items.json`): story objects found at POIs and given by events, such as Ma's ledger, the buoy's recording or Skarn's hat.
+  - Events `require` and consume them; they can't be sold, and they show in their own cargo section.
+- **Regions of the Drift**: every map node belongs to a region by its nearest landmark:
+  - **Clan space** (Rusthold): scrap-rich, Rustfangs;
+  - **Concord space** (Meridian): titanium, patrols;
+  - **Lumen space** (the Prism): crystal, Wardens;
+  - **the Boneyard**: dense wrecks, salvage, scavengers;
+  - **Gate approaches** (the Dead Gates): crystal, gate alloy, the Hollow.
+
+  The region sets each sector's debris table (`data/debris.json` per region), the enemy mix and its stores' stock. The map tints regions faintly.
+- **Recipes gate tiers this way**: Mk1–Mk3 need common and regional materials; **Mk4 needs a key material, and Mk5 needs two**. So the best parts come from fighting, special mining and questing, never from drifting alone.
+
+### Radar and beacons
+- **What you can see**:
+  - `beacon` POIs (stations, stores, traders, distress beacons, quest markers) **broadcast**: you always know their bearing, from anywhere in the sector.
+  - `signal` POIs (wrecks, abandoned stations, mining fields, unknown ships) need a **radar** within its range.
+  - `hidden` ones (ambushes, a ship running dark) show only within visual range (1,500 px) or to a Mk3 radar.
+- **Radar** (a hull mount: an inside console plus an outside dish that turns):
+  - Mk1: range 6,000 px, shows "contact" and the bearing.
+  - Mk2: 10,000 px, and **identifies the type**.
+  - Mk3: 16,000 px, sees hidden contacts.
+  - Scrap "Listening Horn": 5,000 px, cheap, no power. Neon "Lumen Eye": 14,000 px; identifies; ion-weak.
+  - Without a radar you see only beacons and what's in visual range.
+- **HUD**:
+  - A **compass ring** around the ship and **edge markers** for known contacts: an icon, the distance, and the type once identified.
+  - Debris shows on the ring as faint dots within 2,000 px.
+  - **Click a marker to set a course.**
+
+### Flying and the helm
+- **The ship moves when the helm is manned.** With a course set, a crew member at the helm **steers there on autopilot**: it rotates toward the course, thrusts, slows on arrival, and avoids rocks.
+- **The player can take the helm** (E at the helm) and fly by hand with the flight controls of section 4. **E again** hands the helm back to the autopilot.
+- With nobody at the helm, the ship drifts with the current (and still collects debris).
+- So you can walk around inside, fight fires, man a gun or build while the ship travels, which is Raft's core feeling.
+- **Combat while walking**: fixed guns fire only when someone aims them. The pilot at the helm aims the bow guns; a crew member at a weapon station fires at the nearest hostile within the gun's arc (with the AI's aim skill). Turrets fire on their own.
+
+### Light speed (leaving)
+- **M** opens the Drift map. Pick a linked place and the jump drive spools for **8 s**: a visible charge, and you can keep flying.
+- **It's blocked while a hostile ship is within 2,000 px** ("hostiles too close to jump"). Fuel is spent when it fires, as section 8 says (including `fuel_mult`).
+- Arriving puts you at the sector's arrival point. Sectors you've visited remember their POIs.
+
+### What changes in sections 8 and 10
+- A Drift **node's type is now its sector's theme**: it sets the POI mix and the debris density. Its events run at the matching POIs, not on arrival.
+- The debt clock, reputation, stations, loot and saves stay the same.
+- **Mining** happens at mining-field POIs and on the ore rocks drifting by, with the same cutting rules, in the same space.
+
+### Order (each step is a brief)
+1. **Sector core** (logic, headless tests):
+   - sector generation from a node;
+   - the debris spawner and bodies, intakes and collecting, breaking debris;
+   - radar visibility rules;
+   - the autopilot to a course;
+   - the jump spool;
+   - POI triggering into events;
+   - fights spawned in place.
+
+   It builds on the arena after the mounts and shields v2 merges.
+2. **Sector view**: the ship-centred interior while flying, parallax space, debris sprites, the compass ring and edge markers, click to set a course, zooming from interior to flight view, and combat inside the sector.
+3. **Content**: intakes, radars and debris data with art (drift pieces, intake mouths, radar dishes), POI types in `data/sectors.json`, and writer passes for POI events.
+4. **On foot** at POIs (docking, abandoned stations, boarding), later, as PLAN says.
+
+## 12. Processing: smelters and the material ladder (owner, 2026-10-30)
+> "Put smelters in the ship to smelt bad materials into better ones: smelt scrap (an early-game material with no late-game use) into forged steel armour or something."
+
+- **Scrap never becomes useless**: it's the feedstock of **steel**, and steel is what mid and late parts and armour are made of.
+- **Processing parts** (inside components, crew-operated; manned works 30% faster):
+  - **Smelter** (a Scrap "Slag Pot", Standard Mk1–Mk3, a Neon "Plasma Forge"). It runs hot (heat_per_s 8 and up), so Emberkin love working it, and give it a radiator.
+  - **Refinery** (section 10): ore into materials.
+  - Later, a **Fuel Cracker**: ice plus a plasma cell into fuel, slowly. Fuel stays scarce, so it is slow and expensive.
+- **The ladder** (`data/processing.json`, recipe-like: inputs → output, seconds, the minimum processing level):
+
+  | output | inputs | time | level | used for |
+  |---|---|---|---|---|
+  | `steel` | scrap ×4 | 6 s | Smelter Mk1 | Forged Steel Plate (a wall material: hp 8, kinetic resist 0.3); every Mk3+ recipe uses steel where Mk1 and Mk2 used raw scrap |
+  | `alloy` | steel ×2, titanium ×1 | 10 s | Smelter Mk2 | Alloy Armour (hp 10, all-round resist 0.2); Mk4+ hulls and housings |
+  | `conductor` | copper ×3, silicon ×1 | 8 s | Smelter Mk2 | Mk3+ power, shields and weapon capacitors |
+  | `glass_lattice` | silicon ×2, crystal ×1 | 12 s | Plasma Forge | Neon parts Mk2+, reflective coatings |
+  | `fuel` | ice ×10, plasma_cell ×1 | 60 s | Fuel Cracker | emergency fuel |
+- Processing **queues like the fabricator** (`crafting.gd`'s queue model) and pulls from cargo. A conveyor network (4f) can feed it, and a smelter can sit next to an ore hold.
+- **The early-to-late shape**:
+  - early, you drift and collect scrap and build with raw scrap;
+  - mid-game, you smelt steel and build the Mk3 parts and Forged Steel armour;
+  - late, you need alloy and conductor plus the key materials of section 11 (fights, special mining, quests) for Mk4 and Mk5.
+- Engine wave 1's Mk3+ recipes switch their scrap to steel (scrap 40 → steel 10) when processing lands.
+
+## 13. The end: endings, and why to start again (owner, 2026-10-30)
+> "We need an end goal so the game can end and give you a reason to restart with a new build: depending on the lore, finding an established civilisation that survived and is thriving (like I Am Legend), or multiple endings you can run into."
+
+- **A run is 4–8 hours.** It has an ending, a score, and **unlocks** that change how the next run starts. The 200 hours come from replaying with different ships, crews and paths (FTL / Multiverse-style).
+- **Pacing in acts and pressure clocks**:
+  - **Act 1, Clan space**: Ma's debt clock (section 8) is the early pressure.
+  - **Act 2, the Boneyard and Concord space**: the money is good, and the first fragments of **the Haven broadcast** turn up.
+  - **Act 3, the Gate approaches**: **the Hollow tide** is the late pressure. From about jump 30, the Hollow spreads from the Dead Gates one node every few jumps. Hollow nodes have ghost ships, no stores and dead beacons, so you can't stall forever.
+- **The endings** (each is a quest chain of events, flags and special POIs, and you can run into more than one in a run; the first one you **complete** ends the run):
+  1. **The Haven** (the owner's idea, *I Am Legend*): a looping broadcast, "If you can hear this, we're alive. Come to the Lantern Reach", is heard in fragments (logs, radar ghosts, distress beacons).
+     - Triangulate it with the radar across regions. Most fragments are real, and some are **Hollow lures**.
+     - At the end of the trail is **Halcyon**, a generation ship that was mid-jump at the Snap. For forty years it has quietly **thrived** in a hidden pocket of the Drift: gardens, children, working gates of its own design.
+     - You choose:
+       - **settle** (the peace ending);
+       - **lead others there** (bring Ma, the Concord or the Lumen, which needs reputation; the best Haven ending);
+       - or find that they are not what they seem (a dark variant, if you followed a lure).
+  2. **The Way Out**: restart a Dead Gate. That needs `gate_alloy`, a gate core from the Dead Gate dungeon, and a faction's backing. The faction decides the ending's tone:
+     - **Concord** (the Lattice returns, with paperwork);
+     - **Clans** (a free gate: chaos and freedom);
+     - **Lumen** (the gate opens somewhere new).
+  3. **The Hollow**: follow the hidden Hollow thread (the derelict logs) into the Scrapper Gate and learn what came out at the Snap. It is the hardest ending, the true-lore one, and changes the next run's map (Hollow nodes from the start, plus a Hollow-touched starter).
+  4. **Retire** (the short ending): pay off Ma, then buy a berth at Gantry Rusthold (5,000 credits) and hang up your helmet. It has a low score but it counts, and it's good for short sessions.
+- **Score**: endings are worth base points, plus credits, crew alive, POIs done, parts built, and jumps saved.
+- **Unlocks for the next run** (they widen choice, never raw power):
+  - **new starter ships**: the Concord frigate after the Concord Way Out, a Lumen skiff after the Lumen one, the Halcyon tender after the Haven;
+  - **new starting species** (Haven: any species you recruited this run);
+  - **starting blueprints** (one per ending, chosen from what you built this run);
+  - **map variants** (the Hollow ending).
+- **A run log** (a chronicle you can read on the ending screen) and a **hall of ships** (each finished ship's design is saved, and can be exported as a premade).

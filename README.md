@@ -5,7 +5,7 @@ A top-down 2D spaceship game. Start with a ready-made ship (or an empty hull), b
 ## Play the current build
 1. Install **Godot 4.6.3** (standard build, not .NET) from https://godotengine.org/download/archive/4.6.3-stable/.
 2. Open Godot, choose **Import**, and pick this folder's `project.godot`.
-3. Press **F5** to play. The game opens on **Choose your ship** (see [Starter ships](#starter-ships)): press **1**, **2** or **3**, then **B** for play mode and **K** to fight the test pirate.
+3. Press **F5** to play. The game opens on **Choose your ship** (see [Starter ships](#starter-ships)): press **1**, **2** or **3**, then **B** for play mode and **K** to fight the test pirate (**Shift+K**: the Rustfang rammer). **M** opens the map of the Drift (the campaign).
 
 ## Controls
 **B** switches between build mode (the default) and play mode. In play mode there is no ghost and the mouse buttons do nothing yet.

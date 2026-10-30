@@ -71,7 +71,7 @@ func test_data_is_complete() -> void:
 		"bolt_thrower_scrap": [-1, 5, 1], "artemis_mk1": [-2, 5, 1], "ion_blast_mk1": [-3, 5, 1], "siren_ion_neon": [-3, 5, 1],
 		"heat_lance_neon": [-4, 5, 1], "leech_laser": [-3, 5, 2], "breach_harpoon": [-2, 5, 2],
 		"shield_scrap_mk1": [-3, 3, 1], "shield_mk2": [-4, 3, 2], "shield_neon_mk1": [-4, 3, 1], "mirror_veil": [-3, 3, 2],
-		"afterburner": [-3, 4, 2], "inertial_dampener": [-2, 3, 2], "battering_bow": [0, 0, 2],
+		"afterburner": [-3, 4, 2], "inertial_dampener": [-2, 3, 2], "battering_bow": [0, 0, 2], "reactor_scrap_kettle": [8, 0, 1],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:
