@@ -21,7 +21,8 @@ Placement uses square hitboxes on the grid, but placed objects should look natur
    - You set priorities, not every step.
 5. **Two views.** An interior view with the ship centred and space scrolling past, and a tactical view with a free camera for ship-to-ship fights.
 6. **Docking is physical.** Airlocks connect, and you walk aboard another ship to trade or board it.
-7. **Salvage and craft (Subnautica-style).**
+7. **On foot: walk aboard other ships and stations.** This is what sets us apart from FTL, and it gets its own section below.
+8. **Salvage and craft (Subnautica-style).**
    - Structure (floors, walls, doors, cables) costs raw materials directly.
    - Systems (engines, reactors, weapons, shields...) are items crafted at a Fabricator from blueprints and materials, then placed from cargo. Removing a system returns the item.
    - Systems come in tiers (Mk1, Mk2, Mk3) with better stats.
@@ -40,6 +41,25 @@ Every system should be **unique, FTL Multiverse style**: not just "+10% thrust",
   - Past the component's limit it **overheats**: disabled until cooled, with a fire risk. This follows our "disable, don't destroy" rule.
 - **Manning requirements**: an ability can require the operator to have a trait: `no_breath`, `heat_resistant`, `suit`, `engineer_skill>=3`, ...
   - This is how crew choice matters.
+
+## On foot: docking, boarding, stations and NPCs (our biggest difference from FTL)
+- **Every ship and station is a "ship"**: the same grid, rooms, oxygen, power and systems as yours. Enemy ships, derelicts and trade stations are built (or generated) from the same data.
+- **Two camera modes**:
+  - **Ship mode**: our ship is centred and space scrolls past (flying, ship combat).
+  - **On-foot mode**: the camera follows **your character**. You switch to it automatically when docked or on an EVA; inside your own ship you can switch freely.
+- **Docking**: ships connect airlock to airlock (blast doors).
+  - **Decision**: when docking, the other ship snaps to a 90° orientation aligned with ours, with the two airlocks touching. The grids stay simple, and paths cross between ships through the airlock pair as a portal.
+- **Walking around another ship**: everything there is physical. Open doors, breathe its air (or not, if it's breached), read its consoles.
+  - **Salvage**: take apart its components with a tool, over time, for materials and items. **Scanning** an unknown component unlocks its blueprint.
+- **Fighting on foot** is real-time and top-down. Your soldier aims with the mouse and fires with LMB in play mode. Your crew follow simple orders (follow, hold, attack, heal). Enemy crew defend their ship.
+- **Stations and NPCs**: walk up to NPCs and talk to them (dialogue trees from data, `data/dialogue/*.json`).
+  - **Quest givers** offer missions in the style of No Man's Sky and Elite: salvage a derelict, deliver cargo, rescue someone, bounties, escort.
+  - Traders and recruiters are NPCs too. Quests replace FTL's random pop-up choices with people and places you visit.
+- **Away-team events** (text and choices, for places you can't walk, like planet surfaces) stay as the secondary kind of expedition. The risk of losing crew and their gear applies to both kinds.
+- **Modes**: B toggles build mode, so LMB places tiles. Otherwise you're in play mode: LMB fires, E interacts (doors, consoles, NPCs, salvage).
+- **Architecture consequence (from now on)**:
+  - A `Ship` object bundles the grid, components, cables, atmosphere, power, crew and a world transform.
+  - The game holds a list of ships. Nothing may assume there's only one ship.
 
 ## Crew species and suits
 - **Species are data** with traits.
@@ -114,8 +134,15 @@ Reference games for ideas, not code: Space Haven (closest), FTL, Cosmoteer, Baro
 4b. **Species and suits**: species traits from data, suits with an air supply, suit lockers.
 5. **Flight + quirks v1.** Abilities (active and passive), heat and overheating, operator requirements. The first quirky engines and reactors.
 5a. **Flight.** The ship-centred camera, with thrust and turning from the engines placed versus the ship's mass. The starfield drifts with velocity.
-5b. **Expeditions v1**: send a team to a derelict. Event and choice data, outcomes from skills and gear, permanent loss of crew and gear. Personal gear slots, with basic gear craftable and special gear only found.
-6. **Combat v1.**
+5b. **Docking and on foot v1**:
+   - Fly to a derelict, dock airlock to airlock, and the camera switches to your character.
+   - Walk its rooms (oxygen matters), salvage components, scan blueprints.
+   - Personal gear slots: basic gear craftable, special gear only found.
+5c. **Stations and NPCs v1**:
+   - A trade station with NPCs to talk to: dialogue from data, a quest giver, a trader, a recruiter.
+   - Quests: salvage, deliver, rescue.
+   - Away-team text events for places you can't walk.
+6. **Combat v1 (ship to ship, then boarding).**
    - A tactical view against one AI ship.
    - Weapons fire at targeted rooms. Shields absorb.
    - Hits damage components, start fires and cause breaches. Crew respond.
