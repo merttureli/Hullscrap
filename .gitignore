@@ -3,3 +3,6 @@
 /builds/
 *.tmp
 .DS_Store
+
+# Godot import metadata for art/: generated on import; the game loads art with Image.load, and committing them causes uid conflicts between art branches
+art/**/*.import
