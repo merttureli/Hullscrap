@@ -5,6 +5,7 @@ extends RefCounted
 ## walls stay one cell thick, so a crew body (2x2) needs a 2-wide opening.
 
 const VERSION := 2  # 2 adds door states; version 1 saves still load (all doors closed)
+# Combat damage (hp, hp_max, breached) is saved as optional keys, written only when there is damage.
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 
 var size: Vector2i
@@ -12,6 +13,9 @@ var defs  # tile_defs.gd instance, or null for a rule-less grid
 var hull := {}   # Vector2i -> true: cells where building is allowed
 var tiles := {}  # Vector2i -> tile id
 var door_open := {}  # Vector2i -> true for doors that are open; closed doors are absent
+var hp := {}  # Vector2i -> float: current hp of damaged cells (a cell not listed has full hp)
+var hp_max := {}  # Vector2i -> float: max hp of cells burnt below their tile's hp (ablative); others are absent
+var breached := {}  # Vector2i -> tile id: cells shot open (now empty), with the tile to restore on repair
 
 
 func _init(p_size := Vector2i(63, 63), p_defs = null) -> void:
@@ -125,14 +129,52 @@ func door_piece(c: Vector2i) -> Array[Vector2i]:
 	return out
 
 
-## Set the tile on `c` ("" clears it) without checking any rule, and close any door there.
-## Only for replaying recorded edits; use place() and remove() for user actions.
+## Set the tile on `c` ("" clears it) without checking any rule, close any door there and forget
+## any damage on the cell. Only for replaying recorded edits; use place() and remove() for user actions.
 func force_tile(c: Vector2i, id: String) -> void:
 	if id == "":
 		tiles.erase(c)
 	else:
 		tiles[c] = id
 	door_open.erase(c)
+	hp.erase(c)
+	hp_max.erase(c)
+	breached.erase(c)
+
+
+## Max hp of the tile on `c`: what ablative burn left of it, else its tile's `hp` (1 when the tile
+## has none, or the grid has no rules); 0 where there is no tile.
+func max_hp_of(c: Vector2i) -> float:
+	var id := get_tile(c)
+	if id == "":
+		return 0.0
+	if hp_max.has(c):
+		return hp_max[c]
+	return float(defs.get_def(id).get("hp", 1.0)) if defs != null else 1.0
+
+
+## Current hp of the tile on `c`; 0 where there is no tile.
+func hp_of(c: Vector2i) -> float:
+	return hp.get(c, max_hp_of(c))
+
+
+## Shoot the tile on `c` open: the cell becomes empty (so rooms see a hole there) and `breached`
+## remembers the tile for repair. Returns the tile id, "" when there was nothing to breach.
+func breach(c: Vector2i) -> String:
+	var id := get_tile(c)
+	if id == "":
+		return ""
+	force_tile(c, "")
+	breached[c] = id
+	return id
+
+
+## Put a breached cell's tile back at full hp. Returns false when `c` is not breached.
+func repair(c: Vector2i) -> bool:
+	if not breached.has(c):
+		return false
+	force_tile(c, breached[c])
+	return true
 
 
 func can_remove(c: Vector2i) -> String:
@@ -205,7 +247,14 @@ func to_dict() -> Dictionary:
 	var o := []
 	for c in _sorted(door_open.keys()):
 		o.append([c.x, c.y])
-	return {"version": VERSION, "size": [size.x, size.y], "hull": h, "tiles": t, "doors_open": o}
+	var d := {"version": VERSION, "size": [size.x, size.y], "hull": h, "tiles": t, "doors_open": o}
+	for pair in [["hp", hp], ["hp_max", hp_max], ["breached", breached]]:
+		if not pair[1].is_empty():
+			var list := []
+			for c in _sorted(pair[1].keys()):
+				list.append([c.x, c.y, pair[1][c]])
+			d[pair[0]] = list
+	return d
 
 
 ## Replace this grid with a saved one (version 1 or 2). Returns "" on success, else the reason;
@@ -229,14 +278,39 @@ func load_dict(d: Dictionary) -> String:
 		if defs != null and not defs.has(str(p[2])):
 			return "unknown tile " + str(p[2])
 		new_tiles[Vector2i(int(p[0]), int(p[1]))] = str(p[2])
+	var new_hp = _cell_values(d, "hp", false)
+	var new_hp_max = _cell_values(d, "hp_max", false)
+	var new_breached = _cell_values(d, "breached", true)
+	if new_hp == null or new_hp_max == null or new_breached == null:
+		return "bad ship data"
+	for c in new_breached:
+		if defs != null and not defs.has(new_breached[c]):
+			return "unknown tile " + new_breached[c]
 	size = new_size
 	hull = new_hull
 	tiles = new_tiles
+	hp = new_hp
+	hp_max = new_hp_max
+	breached = new_breached
 	door_open.clear()
 	for p in d.get("doors_open", []):
 		if p is Array and p.size() == 2 and _flag(get_tile(Vector2i(int(p[0]), int(p[1]))), "door"):
 			door_open[Vector2i(int(p[0]), int(p[1]))] = true
 	return ""
+
+
+## The optional save list `key` ([[x, y, value], ...]) as cell -> value (a string when `text`, else
+## a float); {} when absent, null when malformed.
+static func _cell_values(d: Dictionary, key: String, text: bool):
+	var list = d.get(key, [])
+	if not list is Array:
+		return null
+	var out := {}
+	for p in list:
+		if not (p is Array and p.size() == 3 and (p[2] is String if text else (p[2] is float or p[2] is int))):
+			return null
+		out[Vector2i(int(p[0]), int(p[1]))] = p[2] if text else float(p[2])
+	return out
 
 
 func _flag(id: String, key: String) -> bool:
