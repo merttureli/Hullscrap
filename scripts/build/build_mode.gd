@@ -18,7 +18,8 @@ extends Node2D
 ## mouse, O shows oxygen, P shows power, Ctrl+S saves to user://ship.json, Ctrl+L loads it, wheel zooms.
 ## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F sends the nearest
 ## crew member to repair the system under the mouse. Play mode only: N asks the ship picker (ship_picker.gd) for another ship,
-## M opens the map of the Drift (map_view.gd; the campaign is saved and loaded with the ship).
+## M opens the map of the Drift (map_view.gd; the campaign is saved and loaded with the ship). H (both modes) opens the Shields tab
+## (shield_panel.gd), where the shield balance of the ship is set.
 ## W, A, S, D are reserved for player movement: do not bind them without a modifier.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -32,6 +33,7 @@ const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const MapView = preload("res://scripts/ui/map_view.gd")
+const ShieldPanel = preload("res://scripts/ui/shield_panel.gd")
 const CELL := 32
 const SAVE_PATH := "user://ship.json"
 const OK_TINT := Color(0.35, 1, 0.45)
@@ -52,6 +54,7 @@ var sim: Node  ## the ShipSim that owns the ships
 var crew: Node  ## the crew view, for the player's position
 var picker: Node  ## the ship picker (ship_picker.gd): while it is open this node ignores input
 var drift: Node  ## the map of the Drift (map_view.gd), made in _ready if the scene has none; M opens it
+var shields: Node  ## the Shields tab (shield_panel.gd), made in _ready if the scene has none; H opens it
 var build_on := true  ## false = play mode
 var combat := false  ## a fight is on (combat_view.gd): this node ignores input and does not draw
 var group: int = Group.TILES
@@ -105,6 +108,9 @@ func _ready() -> void:
 	drift = get_node_or_null("../DriftLayer/MapView")
 	if drift == null and get_parent() != null:
 		_make_drift()
+	shields = get_node_or_null("../ShieldLayer/ShieldPanel")
+	if shields == null and get_parent() != null:
+		_make_shields()
 	selected = grid.defs.ids()[0]
 	for id in grid.defs.ids():
 		_add_material(grid.cost_of(id))
@@ -122,6 +128,18 @@ func _make_drift() -> void:
 	drift = MapView.new()
 	drift.name = "MapView"
 	layer.add_child(drift)
+	get_parent().add_child.call_deferred(layer)
+
+
+## The Shields tab, in a canvas layer of its own (above the crafting panel, under the picker).
+func _make_shields() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "ShieldLayer"
+	layer.layer = 4
+	shields = ShieldPanel.new()
+	shields.name = "ShieldPanel"
+	shields.sim = sim
+	layer.add_child(shields)
 	get_parent().add_child.call_deferred(layer)
 
 
@@ -229,6 +247,9 @@ func _on_key(e: InputEventKey) -> void:
 					message = "M: switch to play mode (B) to open the map"
 				elif drift != null:
 					drift.open()
+			KEY_H:
+				if shields != null:
+					shields.open()
 			_:
 				if build_on:
 					_build_key(e.keycode, e.shift_pressed)

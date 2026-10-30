@@ -16,12 +16,14 @@ const Stats = preload("res://scripts/sim/stats.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
+const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 
 ## Save format. 3 adds name, world transform, components, cables and oxygen on top of the
 ## grid and cargo of 2; versions 1 and 2 still load (no components, no cables). The optional
 ## "crafting" list (blueprints and queue) was added within 3: a save without it starts with the
-## blueprints known at the start.
-const VERSION := 3
+## blueprints known at the start. 4 adds the optional "shield_balance" (the chosen sector weights and the
+## two custom presets of the Shields tab); older saves load with it fresh (even weights, empty slots).
+const VERSION := 4
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
 const START_PATH := "res://data/start.json"
@@ -45,6 +47,7 @@ var clock := 0.0  ## seconds this ship has been simulated; the `t` of new events
 var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; not saved yet
 var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
+var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
 var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
 var ability_state := Abilities.fresh_state()  ## abilities running or resting (abilities.gd); not saved
@@ -203,6 +206,8 @@ func to_dict() -> Dictionary:
 	d["cables"] = cables.to_dict()
 	d["crafting"] = crafting.to_dict()
 	d["oxygen"] = atmosphere.pressure.duplicate()
+	if not ShieldBalance.is_fresh(shield_balance):  # optional: only written when the player set something
+		d["shield_balance"] = shield_balance.duplicate(true)
 	if not fires.is_empty():  # optional, like the grid's damage lists: only written when something burns
 		var list := []
 		for c in Fire.sorted_cells(fires.keys()):
@@ -259,6 +264,7 @@ func load_dict(d: Dictionary) -> String:
 		world_pos = Vector2(float(p[0]), float(p[1])) if p is Array and p.size() == 2 else Vector2.ZERO
 		rot_quarters = posmod(int(d.get("rot", 0)), 4)
 	fires = burning
+	shield_balance = ShieldBalance.sanitize(d.get("shield_balance"))
 	manned = {}
 	ability_state = Abilities.fresh_state()
 	if d.has("crafting"):

@@ -1,6 +1,6 @@
 extends RefCounted
 ## Shots in flight, and the collision test every shot uses (hitscan lasers and beams too).
-## A segment travelled is tested against each other ship: first its shield bubble, then its grid
+## A segment travelled is tested against each other ship: first its shield bubble (the sector it enters through), then its grid
 ## cells walked with a DDA, and in a shaped cell (slope, curve) the cell's real polygon. The earliest
 ## contact wins and the shot is spent there, unless the cell glanced it off (a ricochet or a deflect,
 ## see damage.gd): then it carries on reflected at half damage, and from then on it can hit any ship,
@@ -110,7 +110,7 @@ static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2, ou
 	if best.is_empty():
 		return false
 	if best["shield"]:
-		Shields.absorb(arena, best["ship"], w, out["end"], (p1 - p0).normalized())
+		Shields.absorb(arena, best["ship"], w, out["end"], (p1 - p0).normalized(), best["sector"])
 	else:
 		var res := Damage.march(arena, best["ship"], w, best["a"], best["b"], best["entries"], best["hit"])
 		if res.has("bounce"):
@@ -119,7 +119,7 @@ static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2, ou
 
 
 ## The first thing the segment meets on ship `i`: {} for nothing, else {ship, t (fraction of the
-## segment), shield, and for cells: entries (from the first cell hit on), a and b (the segment in
+## segment), shield (and `sector`, the one it entered through), and for cells: entries (from the first cell hit on), a and b (the segment in
 ## ship-local cell coordinates) and hit ({t, n} of that cell, see Damage.cell_hit)}. A shaped cell
 ## the segment only crosses the empty part of does not count. `skip`: a {ship, cell} to ignore.
 static func _contact(arena, i: int, w: Dictionary, p0: Vector2, p1: Vector2, skip := {}) -> Dictionary:
@@ -141,14 +141,18 @@ static func _contact(arena, i: int, w: Dictionary, p0: Vector2, p1: Vector2, ski
 			break
 	var t_cell: float = hit["t"] if first >= 0 else INF
 	var t_shield := INF
+	var hit_sector := -1
 	if Shields.blocks(co, w):
 		var ts := Shields.entry_t(co, a, b)
-		if ts >= 0.0 and not Shields.sector_open(co, Shields.sector_of(co, a.lerp(b, ts) - co.pivot), arena.tick):
-			t_shield = ts
+		if ts >= 0.0:
+			var s := Shields.sector_of(co, a.lerp(b, ts) - co.pivot)
+			if Shields.stops(co, s, w, arena.tick):
+				t_shield = ts
+				hit_sector = s
 	if first < 0 and t_shield == INF:
 		return {}
 	if t_shield <= t_cell:
-		return {"ship": i, "t": t_shield, "shield": true}
+		return {"ship": i, "t": t_shield, "shield": true, "sector": hit_sector}
 	return {"ship": i, "t": t_cell, "shield": false, "entries": entries.slice(first), "a": a, "b": b, "hit": hit}
 
 
