@@ -180,7 +180,7 @@ func test_damage_goes_with_the_square_of_the_speed() -> void:
 	near(dealt[2], e["energy"] * K, "which is E x damage_k", 1e-6)
 
 
-func test_two_couriers_head_on_at_150_each_lose_4_to_8_hull() -> void:  # was 8 to 12 before the guns stuck out: rams hit the outside halves first and those are not hull
+func test_two_couriers_head_on_at_150_each_lose_4_to_12_hull() -> void:  # was 8 to 12 before the guns stuck out (rams hit the outside halves first and those are not hull), then 4 to 8 with three guns on a flat nose; the arrowhead Courier has one gun on its tip, so the titanium bow behind it takes more
 	arena = Arena.new(1)  # the real damage_k
 	var a := Ship.from_design("res://data/ships/starter_courier.json")
 	var b := Ship.from_design("res://data/ships/starter_courier.json")
@@ -194,8 +194,8 @@ func test_two_couriers_head_on_at_150_each_lose_4_to_8_hull() -> void:  # was 8 
 	_run(4.0)
 	var lost0: float = h0 - arena.ships[0].hull
 	var lost1: float = h0 - arena.ships[1].hull
-	check(lost0 >= 4.0 and lost0 <= 8.0, "courier A lost %f hull" % lost0)
-	check(lost1 >= 4.0 and lost1 <= 8.0, "courier B lost %f hull" % lost1)
+	check(lost0 >= 4.0 and lost0 <= 12.0, "courier A lost %f hull" % lost0)
+	check(lost1 >= 4.0 and lost1 <= 12.0, "courier B lost %f hull" % lost1)
 	var guns_hit := 0
 	for e in arena.events:
 		guns_hit += int(e["type"] == "hit" and e.get("half", "") == "out")

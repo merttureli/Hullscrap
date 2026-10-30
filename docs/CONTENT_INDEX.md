@@ -157,11 +157,11 @@ By family, line and tier:
 
 | id | name | components | tiles | from |
 |---|---|---|---|---|
-| pirate_raider | Pirate Raider | 9 | 302 | core |
-| rustfang_rammer | Rustfang | 6 | 232 | core |
-| starter_courier | Courier | 16 | 456 | core |
-| starter_prism | Prism | 13 | 338 | core |
-| starter_rustbucket | Rustbucket | 15 | 720 | core |
+| pirate_raider | Pirate Raider | 9 | 284 | core |
+| rustfang_rammer | Rustfang | 6 | 270 | core |
+| starter_courier | Courier | 16 | 354 | core |
+| starter_prism | Prism | 13 | 294 | core |
+| starter_rustbucket | Rustbucket | 15 | 596 | core |
 
 ## Species (10)
 
