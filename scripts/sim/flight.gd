@@ -5,12 +5,13 @@ extends RefCounted
 ## turns clockwise on screen.
 
 const CONFIG_PATH := "res://data/flight.json"
+const TILES_PATH := "res://data/tiles.json"  ## the one source of tile masses
 const VERSION := 1
 const REVERSE := 0.5  ## reverse thrust as a fraction of forward thrust
 const UNKNOWN_TILE_MASS := 1.0
 const MIN_MASS := 1.0
 
-var tile_mass := {"floor": 1.0, "wall": 2.0, "door": 2.0}
+var tile_mass := {"floor": 1.0, "wall": 2.0, "door": 2.0}  ## code defaults; load_tile_masses() replaces them with data/tiles.json
 var component_mass := {"reactor_mk1": 14.0, "reactor_mk2": 16.0}  ## component id -> whole mass
 var component_mass_per_cell := 3.0  ## for components not in component_mass
 var cable_mass_per_cell := 0.1
@@ -26,10 +27,29 @@ var angle := 0.0  ## radians, kept in -PI..PI
 var ang_vel := 0.0  ## radians per second
 
 
-## Pass "" to skip the config file and keep the built-in defaults.
-func _init(config_path := CONFIG_PATH) -> void:
+## Pass "" to skip the config files and keep the built-in defaults. Tile masses come from `tiles_path`
+## (data/tiles.json, where every tile lists its own `mass`), everything else from `config_path`.
+func _init(config_path := CONFIG_PATH, tiles_path := TILES_PATH) -> void:
 	if config_path != "":
 		load_config(config_path)
+		if tiles_path != "":
+			load_tile_masses(tiles_path)
+
+
+## Read the mass of every tile from a tiles.json (a tile without `mass` weighs UNKNOWN_TILE_MASS).
+## Returns false (and keeps the current values) if unusable.
+func load_tile_masses(path: String) -> bool:
+	if not FileAccess.file_exists(path):
+		return false
+	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (data is Dictionary and data.get("tiles") is Array):
+		return false
+	var masses := {}
+	for t in data["tiles"]:
+		if t is Dictionary and t.has("id") and _is_num(t.get("mass")):
+			masses[str(t["id"])] = maxf(0.0, float(t["mass"]))
+	tile_mass = masses
+	return true
 
 
 ## Read the constants from a JSON file. Returns false (and keeps the current values) if unusable.
@@ -39,13 +59,12 @@ func load_config(path: String) -> bool:
 	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if not data is Dictionary:
 		return false
-	for k in ["tile_mass", "component_mass"]:
-		if data.get(k) is Dictionary:
-			var masses := {}
-			for id in data[k]:
-				if _is_num(data[k][id]):
-					masses[str(id)] = maxf(0.0, float(data[k][id]))
-			set(k, masses)
+	if data.get("component_mass") is Dictionary:
+		var masses := {}
+		for id in data["component_mass"]:
+			if _is_num(data["component_mass"][id]):
+				masses[str(id)] = maxf(0.0, float(data["component_mass"][id]))
+		component_mass = masses
 	for k in ["component_mass_per_cell", "cable_mass_per_cell", "linear_damping", "angular_damping", "thrust_to_accel", "turn_factor", "max_speed"]:
 		if _is_num(data.get(k)):
 			set(k, maxf(0.0, float(data[k])))

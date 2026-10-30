@@ -1,9 +1,9 @@
 {
   "_doc": "Buildable tiles. Content is data: add a tile here and it appears in build mode. Flags: solid (blocks movement, holds doors), door (needs solid tiles on two opposite sides). cost is a dict of material id -> count, paid from the ship's cargo. Combat fields (read by scripts/combat/): hp (cell health; a wall or door at 0 becomes a breach), mass (for flight), line (scrap / standard / neon), resist (damage multiplier per damage type, default 1.0), deflect (chance per damage type to bounce a shot away), quirk ('ablative': each energy hit lowers max hp by 1; 'lattice_power': part of the absorbed energy becomes ship power; '' for none). The plain 'wall' is the Steel Wall, the baseline material.",
   "tiles": [
-    {"id": "floor", "name": "Floor", "color": "#3b4352", "cost": {"scrap": 1}},
+    {"id": "floor", "name": "Floor", "color": "#3b4352", "cost": {"scrap": 1}, "mass": 1.0},
     {"id": "wall", "name": "Steel Wall", "color": "#9aa3b5", "cost": {"scrap": 2}, "solid": true, "hp": 4, "mass": 2.0, "line": "standard", "resist": {}, "deflect": {}, "quirk": ""},
-    {"id": "door", "name": "Door", "color": "#e0a83a", "cost": {"scrap": 3, "copper": 1}, "door": true, "hp": 3},
+    {"id": "door", "name": "Door", "color": "#e0a83a", "cost": {"scrap": 3, "copper": 1}, "door": true, "hp": 3, "mass": 2.0},
     {"id": "scrap_plate", "name": "Scrap Plate", "color": "#7d6f5e", "cost": {"scrap": 1}, "solid": true, "hp": 3, "mass": 2.0, "line": "scrap", "resist": {"explosive": 1.5}, "deflect": {}, "quirk": ""},
     {"id": "titanium_alloy", "name": "Titanium Alloy", "color": "#c3d0e0", "cost": {"scrap": 1, "titanium": 2}, "solid": true, "hp": 6, "mass": 1.5, "line": "standard", "resist": {"kinetic": 0.8}, "deflect": {}, "quirk": ""},
     {"id": "heavy_armor", "name": "Heavy Armour", "color": "#5b6577", "cost": {"scrap": 6, "titanium": 2}, "solid": true, "hp": 10, "mass": 5.0, "line": "standard", "resist": {"kinetic": 0.6, "explosive": 0.7}, "deflect": {}, "quirk": ""},

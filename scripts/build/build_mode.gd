@@ -39,6 +39,7 @@ const GROUP_NAMES: Array[String] = ["Tiles", "Systems", "Cables"]
 var sim: Node  ## the ShipSim that owns the ships
 var crew: Node  ## the crew view, for the player's position
 var build_on := true  ## false = play mode
+var combat := false  ## a fight is on (combat_view.gd): this node ignores input and does not draw
 var group: int = Group.TILES
 var selected := ""  ## tile id
 var sel_component := ""  ## system id
@@ -87,6 +88,8 @@ func _ready() -> void:
 
 
 func _process(_dt: float) -> void:
+	if combat:
+		return
 	queue_redraw()
 	_update_hud()
 
@@ -115,7 +118,7 @@ func _add_material(cost: Dictionary) -> void:
 
 
 func _unhandled_input(e: InputEvent) -> void:
-	if ship == null:
+	if ship == null or combat:
 		return
 	if e is InputEventMouseMotion:
 		hover = _cell_of(e)

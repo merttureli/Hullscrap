@@ -14,7 +14,7 @@ const LATTICE_FRACTION := 0.2  ## of the energy damage a neon lattice absorbs, c
 const DEFAULT_COMPONENT_HP := 4.0  ## for a part whose instance and definition give no hp
 
 
-## What stops a shot on `cell` of combatant `co`: {} where it passes (empty or floor), else
+## What stops a shot on `cell` of combatant `co`: {} where it passes (empty, floor, an open door), else
 ## {"kind": "wall" | "door" | "component", "def": tile def, "uid": component uid}.
 static func solid_at(co, cell: Vector2i) -> Dictionary:
 	var grid = co.ship.grid
@@ -23,8 +23,8 @@ static func solid_at(co, cell: Vector2i) -> Dictionary:
 		var d: Dictionary = grid.defs.get_def(id)
 		if bool(d.get("solid", false)):
 			return {"kind": "wall", "def": d}
-		if bool(d.get("door", false)):
-			return {"kind": "door", "def": d}
+		if bool(d.get("door", false)):  # an open door lets shots through
+			return {} if grid.is_door_open(cell) else {"kind": "door", "def": d}
 	var uid: int = co.ship.components.at(cell)
 	if uid >= 0:
 		return {"kind": "component", "uid": uid}
@@ -39,6 +39,7 @@ static func march(arena, idx: int, w: Dictionary, entries: Array, dir: Vector2) 
 	var pierce := int(w["pierce"])
 	var type: String = w["damage_type"]
 	var seen := {}  # component uids already hit by this shot
+	var wdir: Vector2 = dir.rotated(co.flight.angle)  # the shot's direction in the world, for the effects
 	var first := true
 	for e in entries:
 		var cell: Vector2i = e["c"]
@@ -52,13 +53,13 @@ static func march(arena, idx: int, w: Dictionary, entries: Array, dir: Vector2) 
 		else:
 			var chance := float(obj["def"].get("deflect", {}).get(type, 0.0))
 			if chance > 0.0 and arena.rng.randf() < chance:
-				arena.log_event("deflect", idx, cell)
+				arena.log_event("deflect", idx, cell, {"dir": wdir, "n": e["n"].rotated(co.flight.angle)})
 				return
 			var n: Vector2 = e["n"]
 			if type == "kinetic" and n != Vector2.ZERO and absf(dir.dot(n)) < RICOCHET_COS and arena.rng.randf() < RICOCHET_CHANCE:
-				arena.log_event("ricochet", idx, cell)
+				arena.log_event("ricochet", idx, cell, {"dir": wdir, "n": n.rotated(co.flight.angle)})
 				return
-		var res := apply(arena, idx, cell, obj, dmg, type)
+		var res := apply(arena, idx, cell, obj, dmg, type, {"dir": wdir, "n": e["n"].rotated(co.flight.angle)})
 		if first:
 			first = false
 			var fc := float(w.get("fire_chance", 0.0))
@@ -73,9 +74,10 @@ static func march(arena, idx: int, w: Dictionary, entries: Array, dir: Vector2) 
 		dmg = res["left"]
 
 
-## Apply `dmg` of `type` to the wall, door or part `obj` on `cell`. Returns {"dealt": hp removed,
-## "left": raw damage that carries on past it (0 unless it was used up)}.
-static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, type: String) -> Dictionary:
+## Apply `dmg` of `type` to the wall, door or part `obj` on `cell`. `info`: extra keys for the hit
+## event (the shot's dir and face normal). Returns {"dealt": hp removed, "left": raw damage that
+## carries on past it (0 unless it was used up)}.
+static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, type: String, info := {}) -> Dictionary:
 	var co = arena.ships[idx]
 	var comps = co.ship.components
 	var grid = co.ship.grid
@@ -93,7 +95,9 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 	var dealt := minf(eff, cur)
 	var left := dmg - cur / resist if eff > cur and resist > 0.0 else 0.0
 	cur -= dealt
-	arena.log_event("hit", idx, cell, {"dealt": dealt, "kind": obj["kind"]})
+	var hit := {"dealt": dealt, "kind": obj["kind"], "dtype": type}
+	hit.merge(info)  # dir and n of the shot, for the effects
+	arena.log_event("hit", idx, cell, hit)
 	if is_part:
 		inst["hp"] = cur
 		if cur <= 0.0 and inst.get("status", "") != "disabled":

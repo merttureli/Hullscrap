@@ -32,8 +32,9 @@ static func step(arena, dt: float) -> void:
 
 
 ## Send a shot of weapon `w` from `p0` to `p1` (world points). If it meets another ship the shield
-## or cells there resolve it and this returns true; else false.
-static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2) -> bool:
+## or cells there resolve it and this returns true; else false. `out` (optional) gets "end": where the
+## shot stopped (`p1` when it met nothing) and "shield": whether the bubble stopped it.
+static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2, out := {}) -> bool:
 	var best := {}
 	for i in arena.ships.size():
 		if i == owner:
@@ -42,10 +43,12 @@ static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2) ->
 		var hit := _contact(arena, i, w, p0, p1)
 		if not hit.is_empty() and (best.is_empty() or hit["t"] < best["t"]):
 			best = hit
+	out["end"] = p1 if best.is_empty() else p0.lerp(p1, best["t"])
+	out["shield"] = not best.is_empty() and best["shield"]
 	if best.is_empty():
 		return false
 	if best["shield"]:
-		Shields.absorb(arena, best["ship"], w)
+		Shields.absorb(arena, best["ship"], w, out["end"], (p1 - p0).normalized())
 	else:
 		Damage.march(arena, best["ship"], w, best["entries"], best["dir"])
 	return true
@@ -67,7 +70,7 @@ static func _contact(arena, i: int, w: Dictionary, p0: Vector2, p1: Vector2) -> 
 	var t_shield := INF
 	if Shields.blocks(co, w):
 		var ts := Shields.entry_t(co, a, b)
-		if ts >= 0.0:
+		if ts >= 0.0 and not Shields.sector_open(co, Shields.sector_of(co, a.lerp(b, ts) - co.pivot), arena.tick):
 			t_shield = ts
 	if first < 0 and t_shield == INF:
 		return {}
