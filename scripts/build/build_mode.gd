@@ -19,7 +19,8 @@ extends Node2D
 ## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F sends the nearest
 ## crew member to repair the system under the mouse. Play mode only: N asks the ship picker (ship_picker.gd) for another ship,
 ## M opens the map of the Drift (map_view.gd; the campaign is saved and loaded with the ship). H (both modes) opens the Shields tab
-## (shield_panel.gd), where the shield balance of the ship is set.
+## (shield_panel.gd), where the shield balance of the ship is set. Esc (when it has nothing to cancel) asks the front door
+## (front_door.gd) for the pause menu; F1 (How to play) is the help panel's own.
 ## W, A, S, D are reserved for player movement: do not bind them without a modifier.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -55,6 +56,7 @@ var crew: Node  ## the crew view, for the player's position
 var picker: Node  ## the ship picker (ship_picker.gd): while it is open this node ignores input
 var drift: Node  ## the map of the Drift (map_view.gd), made in _ready if the scene has none; M opens it
 var shields: Node  ## the Shields tab (shield_panel.gd), made in _ready if the scene has none; H opens it
+var front: Node  ## the front door (front_door.gd), if the scene has one: Esc asks it for the pause menu
 var build_on := true  ## false = play mode
 var combat := false  ## a fight is on (combat_view.gd): this node ignores input and does not draw
 var group: int = Group.TILES
@@ -108,6 +110,7 @@ func _ready() -> void:
 	drift = get_node_or_null("../DriftLayer/MapView")
 	if drift == null and get_parent() != null:
 		_make_drift()
+	front = get_node_or_null("../FrontDoor")
 	shields = get_node_or_null("../ShieldLayer/ShieldPanel")
 	if shields == null and get_parent() != null:
 		_make_shields()
@@ -250,6 +253,9 @@ func _on_key(e: InputEventKey) -> void:
 			KEY_H:
 				if shields != null:
 					shields.open()
+			KEY_ESCAPE:
+				if front != null:
+					front.open_pause()
 			_:
 				if build_on:
 					_build_key(e.keycode, e.shift_pressed)
