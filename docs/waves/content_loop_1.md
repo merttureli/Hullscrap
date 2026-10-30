@@ -68,6 +68,8 @@
     3. Playtest them through the soak test and the balance harness.
     4. At the end of the window, present the results to the owner: the doc plus merged features with screenshots.
   - **It coordinates with the lead** before touching shared systems (combat, campaign, ship), so its work merges cleanly.
+- **It loops** (owner, 2026-10-30): research → propose → build → playtest → refine, round after round, **until it is satisfied with the mechanics, or until the owner's usage reaches 25% of the weekly limit**, whichever comes first, and at the latest at the Beta 2 freeze. The lead can't read the usage meter: the owner tells the lead when it hits 25%, and the lead then stops the director's loop. Each round ends with a short progress line to the lead.
+- **Sector space step 2 notes (from step 1)**: out of combat the ship flies at a **cruise multiplier of ×3** on its flight numbers, so an 8,000 px trip takes about 25–30 s. In combat the flight numbers stay real. A Radar Mk3 stat `see_hidden` will be added with the radar content (step 3).
 - **The lead's cadence**: keep 6–10 builders running, merge continuously, keep `main` green and the beta builds green, and screenshot every big merge to the owner.
   - At about 16:00 UTC, **freeze features**: only fixes and balance from then on.
   - At about 17:00 UTC, **ship Beta 2**: a green build, a release note, and the presentation page.
