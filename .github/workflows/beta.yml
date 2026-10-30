@@ -1,0 +1,49 @@
+name: beta builds
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Godot 4.6.3
+        run: |
+          curl -sSL -o godot.zip https://github.com/godotengine/godot/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip
+          unzip -q godot.zip && mv Godot_v4.6.3-stable_linux.x86_64 godot && rm godot.zip
+      - name: Cache export templates
+        id: tpl
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates/4.6.3.stable
+          key: godot-templates-4.6.3
+      - name: Get export templates
+        if: steps.tpl.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o tpl.tpz https://github.com/godotengine/godot/releases/download/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/4.6.3.stable
+          unzip -q tpl.tpz -d tpl && mv tpl/templates/* ~/.local/share/godot/export_templates/4.6.3.stable/ && rm -rf tpl tpl.tpz
+      - name: Version label
+        run: echo "Beta 1 $(git rev-parse --short HEAD)" > version.txt
+      - name: Import
+        run: ./godot --headless --path . --import
+      - name: Export Windows, Linux and macOS
+        run: |
+          mkdir -p build/windows build/linux build/macos
+          ./godot --headless --path . --export-release "Windows Desktop" build/windows/Hullscrap.exe
+          ./godot --headless --path . --export-release "Linux" build/linux/Hullscrap.x86_64
+          ./godot --headless --path . --export-release "macOS" build/macos/Hullscrap.zip
+          ls -la build/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Hullscrap-Windows
+          path: build/windows/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Hullscrap-Linux
+          path: build/linux/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Hullscrap-macOS
+          path: build/macos/
