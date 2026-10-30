@@ -12,6 +12,10 @@
     {"id": "helm", "name": "Helm", "family": "helm", "tier": 1, "size": [1, 1], "color": "#d9dbe8", "power": -1, "priority": 2, "manned": true, "stats": {}},
     {"id": "medbay", "name": "Medbay", "family": "medbay", "tier": 1, "size": [2, 2], "color": "#4ad1b8", "power": -2, "priority": 3, "manned": false, "stats": {"heal": 1.0}},
     {"id": "bed", "name": "Bed", "family": "bed", "tier": 1, "size": [1, 2], "color": "#b98a6a", "power": 0, "priority": 0, "manned": false, "stats": {}},
-    {"id": "fabricator", "name": "Fabricator", "family": "fabricator", "tier": 1, "size": [2, 1], "color": "#c78ae0", "power": -2, "priority": 6, "manned": false, "stats": {}}
+    {"id": "fabricator", "name": "Fabricator", "family": "fabricator", "tier": 1, "size": [2, 1], "color": "#c78ae0", "power": -2, "priority": 6, "manned": false, "stats": {}},
+    {"id": "robot_arm", "name": "Robot Arm", "family": "workshop", "tier": 1, "size": [1, 1], "color": "#a7c957", "power": -1, "priority": 6, "manned": false, "stats": {}},
+    {"id": "laser_cutter", "name": "Laser Cutter", "family": "workshop", "tier": 1, "size": [1, 2], "color": "#f78fb3", "power": -2, "priority": 6, "manned": false, "stats": {}},
+    {"id": "assembly_rig", "name": "Assembly Rig", "family": "workshop", "tier": 1, "size": [2, 2], "color": "#8d99ae", "power": -2, "priority": 6, "manned": false, "stats": {}},
+    {"id": "nanoforge", "name": "Nanoforge", "family": "workshop", "tier": 1, "size": [2, 2], "color": "#00e5ff", "power": -4, "priority": 6, "manned": false, "stats": {}}
   ]
 }
