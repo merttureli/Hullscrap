@@ -184,13 +184,19 @@ func thrusts_of(components, powered: Dictionary, boost := {}) -> Dictionary:
 		if d.get("family", "") != "engine":
 			continue
 		var t := float(d.get("stats", {}).get("thrust", 0.0)) * maxf(0.0, float(boost.get(uid, 1.0)))
-		var push := -Vector2(Mounts.outward(int(components.instances[uid]["rot"])))
-		fwd += t * push.dot(Vector2.UP)
-		if push.x > 0.0:
-			right += t * push.x
-		elif push.x < 0.0:
-			left -= t * push.x
+		var part := split(t, -Vector2(Mounts.outward(int(components.instances[uid]["rot"]))))
+		fwd += part.y
+		if part.x > 0.0:
+			right += part.x
+		elif part.x < 0.0:
+			left -= part.x
 	return {"fwd": maxf(fwd, 0.0), "left": left, "right": right}
+
+
+## The parts of thrust `t` pushing along `push` (a unit vector, ship-local, up is forward): x is the
+## sideways part (t x sin of the angle off forward, positive to the right), y the forward part (t x cos).
+static func split(t: float, push: Vector2) -> Vector2:
+	return Vector2(t * push.x, t * push.dot(Vector2.UP))
 
 
 ## The helm turn (-1..1) that swings the heading toward `target` (an `angle`, radians) and stops it
