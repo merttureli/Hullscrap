@@ -216,9 +216,10 @@ func hull_max(ship) -> int:
 	return _hull_max
 
 
-## The integrity `ship` has left.
+## The integrity `ship` has left (at least 1: a damaged hull has a lower maximum than the one the loss was
+## counted against, and the number must never show as zero or less).
 func hull_left(ship) -> int:
-	return hull_max(ship) - hull_loss
+	return maxi(hull_max(ship) - hull_loss, 1)
 
 
 ## Change the hull integrity by `n` (negative = damage). It never drops below 1 or rises above the

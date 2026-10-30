@@ -1,0 +1,361 @@
+extends "res://tests/base_test.gd"
+## The soak test: a campaign played end to end without a screen. For each starter ship and three seeds it
+## makes 25 jumps along random lanes, takes random allowed event choices, docks at stations (fuel when
+## low, a payment on the debt) and fights through the real arena, the pilot AI flying the player's ship
+## too. A fight over FIGHT_CAP_S simulated seconds counts as a draw and the player retreats. After every
+## step it checks the numbers (no negative fuel, credits or hull, no unknown id) and that no event is a
+## dead end. Everything is seeded, so a failure replays.
+
+const Arena = preload("res://scripts/combat/arena.gd")
+const Campaign = preload("res://scripts/space/campaign.gd")
+const Events = preload("res://scripts/space/events.gd")
+const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
+const Session = preload("res://scripts/combat/combat_session.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+
+const STARTERS: Array[String] = ["res://data/ships/starter_rustbucket.json", "res://data/ships/starter_courier.json", "res://data/ships/starter_prism.json"]
+const SEEDS: Array[int] = [11, 22, 33]
+const JUMPS := 25
+const FIGHT_CAP_S := 120.0  ## a fight over this many simulated seconds is a draw and the player retreats
+const SHORT_CAP_S := 30.0  ## the cap for the second and third seed, so the whole test stays under a minute (SOAK_FULL=1 uses FIGHT_CAP_S for all)
+const SIM_STEP := 0.2  ## the ship sim (power, heat, fire, crew) runs this often during a fight (the game runs it each frame, at most 0.25 s)
+const MAX_PAGES := 12  ## pages of one event chain before it counts as stuck
+const REAL_FIGHTS_PER_RUN := 1  ## fights per run that go through the arena (the rest are stubbed, to keep the test fast); SOAK_FULL=1 in the environment runs them all
+const PLAYER_PILOT_EVERY := 3  ## the player's pilot AI thinks every this many ticks (a human is slower than the enemy's 60 Hz)
+const MAX_WAITS := 20  ## waits for a passing trader before a run with no fuel counts as stuck
+
+var _cap_s := FIGHT_CAP_S
+var _real_left := 0  # fights of this run still to go through the arena
+var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "runs": 0}
+
+
+func test_soak_every_starter_every_seed() -> void:
+	var t0 := Time.get_ticks_msec()
+	for design in STARTERS:
+		for s in SEEDS:
+			_soak(design, s)
+	print("soak: %s in %d ms" % [str(stats), Time.get_ticks_msec() - t0])
+	check(stats["jumps"] >= STARTERS.size() * SEEDS.size() * JUMPS, "every run made its jumps (%d)" % stats["jumps"])
+	check(stats["fights"] > 0, "the soak met at least one fight")
+
+
+## Every event with choices has a way out that needs nothing: a choice with no requirement that can
+## lack items, credits, a species, a trait or a part; or the panel adds Leave when none shows. An event
+## whose choices can all be grey (or all hidden but greyed ones) would lock the event panel.
+func test_no_event_is_a_dead_end() -> void:
+	var ev = Events.shared()
+	for id in ev.order:
+		var e: Dictionary = ev.events[id]
+		var choices = e.get("choices")
+		if not (choices is Array) or choices.is_empty():
+			continue
+		var free := false
+		for ch in choices:
+			var req = ch.get("requires", {})
+			if not (req is Dictionary) or not (req.has("items") or req.has("credits") or req.has("species") or req.has("trait") or req.has("component")):
+				free = true
+		check(free, "event '%s' has no choice that is always on offer" % id)
+
+
+# --- one run -------------------------------------------------------------------------------------------
+
+func _soak(design: String, seed_value: int) -> void:
+	var tag := "%s/%d" % [design.get_file().get_basename(), seed_value]
+	var sim := ShipSim.new()
+	var pick := RandomNumberGenerator.new()  # the test's own choices, apart from the campaign's rng
+	pick.seed = seed_value * 977 + 5
+	var made := 0
+	var guard := 0
+	var starts := 0
+	var c: Campaign = null
+	var full := OS.get_environment("SOAK_FULL") != ""
+	_real_left = 1000000 if full else REAL_FIGHTS_PER_RUN
+	_cap_s = FIGHT_CAP_S if full or seed_value == SEEDS[0] else SHORT_CAP_S
+	while made < JUMPS and guard < JUMPS * 6:
+		if c == null:  # a new run: the first, or after the ship was wrecked
+			starts += 1
+			check(sim.choose_ship(design) == "", tag + ": the design loads")
+			c = Campaign.new(seed_value + 1000 * (starts - 1))
+			stats["runs"] += 1
+			_audit(tag + " start", c, sim.player_ship())
+			if not _event_chain(tag + " arrival", c.arrive(sim.player_ship())["event"], c, sim, pick):
+				c = null
+				continue
+		guard += 1
+		var ship = sim.player_ship()
+		var where := "%s jump %d at %s (%s)" % [tag, made, c.current, c.node(c.current)["type"]]
+		_station(where, c, ship, pick)
+		var to := _choose_lane(where, c, sim, pick)
+		if to == "":
+			break
+		var drift: bool = ship.inventory.count("fuel") < 1
+		var r := c.jump(to, ship, drift)
+		check(r["ok"], "%s: the jump to %s was allowed (%s)" % [where, to, r.get("why", "")])
+		if not r["ok"]:
+			break
+		if drift:
+			stats["drifts"] += 1
+		made += 1
+		stats["jumps"] += 1
+		_audit(where + " after the jump", c, ship)
+		var a := c.arrive(ship)
+		if a["refused"] == "" and not a["event"].is_empty():
+			if not _event_chain(where, a["event"], c, sim, pick):
+				c = null  # wrecked: the run is over, a new one begins
+				continue
+		elif a["refused"] == "":
+			_station(where + " (docked)", c, ship, pick)
+		_audit(where + " after the event", c, ship)
+	check(made == JUMPS, "%s: made %d of %d jumps (the run got stuck at %s)" % [tag, made, JUMPS, c.current if c != null else "?"])
+
+
+## Pick a lane: a random neighbour that may be entered. With no fuel, a drift jump if the hull allows it,
+## else a wait for a trader. "" when nothing can be done (a soft-lock, which is reported).
+func _choose_lane(where: String, c: Campaign, sim, pick: RandomNumberGenerator) -> String:
+	var ship = sim.player_ship()
+	var open: Array = []
+	for o in c.neighbours(c.current):
+		if c.jump_block(o, ship, false) == "" and c.node(o)["type"] != "gate":
+			open.append(o)
+	if not open.is_empty():
+		if ship.inventory.count("fuel") <= 2:  # a sensible player heads for a station to refuel
+			var step := _towards_station(c)
+			if step != "" and open.has(step):
+				return step
+		return open[pick.randi() % open.size()]
+	var drifts: Array = []
+	for o in c.neighbours(c.current):
+		if c.jump_block(o, ship, true) == "":
+			drifts.append(o)
+	if not drifts.is_empty():
+		return drifts[pick.randi() % drifts.size()]
+	# No fuel, no drift: wait for a trader (time passes) and buy fuel off him if he comes.
+	for i in MAX_WAITS:
+		var w := c.wait(ship)
+		stats["waits"] += 1
+		if w["event"].is_empty():
+			continue
+		_event_chain(where + " (waiting)", w["event"], c, sim, pick)
+		if ship.inventory.count("fuel") > 0:
+			return _choose_lane(where, c, sim, pick)
+	check(false, "%s: stuck with no fuel, no drift jump and no trader (fuel %d, credits %d, hull left %d)" % [where, ship.inventory.count("fuel"), ship.inventory.count("credits"), c.hull_left(ship)])
+	return ""
+
+
+## The first node on the shortest lane path from the ship to a station it can dock at ("" when it is at
+## one, or none can be reached).
+func _towards_station(c: Campaign) -> String:
+	var came := {c.current: ""}
+	var queue: Array = [c.current]
+	while not queue.is_empty():
+		var at: String = queue.pop_front()
+		if at != c.current and not c.station_cfg(at).is_empty() and c.dock_block(at) == "" and c.node(at)["type"] != "gate":
+			while came[at] != c.current:
+				at = came[at]
+			return at
+		for o in c.neighbours(at):
+			if not came.has(o) and c.node(o)["type"] != "gate":
+				came[o] = at
+				queue.append(o)
+	return ""
+
+
+## Docked at a station: pay a due payment, buy fuel when low, sell a little, repair, and look at the stock.
+func _station(where: String, c: Campaign, ship, pick: RandomNumberGenerator) -> void:
+	if c.station_cfg(c.current).is_empty() or c.dock_block(c.current) != "":
+		return
+	stats["docks"] += 1
+	var st := c.station_cfg(c.current)
+	var services: Array = st["services"]
+	if services.has("debt") and c.behind() > 0 and ship.inventory.count("credits") >= int(c.cfg["debt"]["payment"]):
+		var r := c.pay_debt(ship, int(c.cfg["debt"]["payment"]))
+		check(r["ok"], where + ": paying the debt: " + str(r["text"]))
+	if services.has("fuel"):
+		var guard := 0
+		while ship.inventory.count("fuel") < 4 and guard < 12:
+			guard += 1
+			var r := c.buy_fuel(ship, c.current, 1)
+			if not r["ok"]:
+				break
+	if services.has("repair") and c.hull_loss > 0 and ship.inventory.count("credits") > 60:
+		var r := c.repair(ship, c.current, c.hull_loss)
+		check(r["ok"] or ship.inventory.count("credits") < 2 * c.hull_loss, where + ": repair: " + str(r["text"]))
+	if services.has("sell") and ship.inventory.count("scrap") > 100 and pick.randf() < 0.5:
+		check(c.sell(ship, "scrap", 50)["ok"], where + ": selling scrap")
+	if services.has("stock") and not st["stock"].is_empty() and pick.randf() < 0.3:
+		var ids: Array = st["stock"].keys()
+		ids.sort()
+		var item: String = ids[pick.randi() % ids.size()]
+		var r := c.buy(ship, c.current, item, 1)
+		check(r["ok"] or ship.inventory.count("credits") < c.stock_price(c.current, item), where + ": buying %s: %s" % [item, r["text"]])
+	if services.has("recruit") and pick.randf() < 0.3 and not c.offers.get(c.current, []).is_empty():
+		var r := c.recruit(ship, c.current, 0)
+		check(r["ok"] or ship.inventory.count("credits") < 150 or "room" in str(r["text"]), where + ": recruiting: " + str(r["text"]))
+	_audit(where + " after docking", c, ship)
+
+
+# --- events and fights ---------------------------------------------------------------------------------
+
+## Play an event and everything that follows (pages, fights, the salvage after a win) the way the event
+## panel and the map do. Returns false when the run ended with a lost fight.
+func _event_chain(where: String, ev: Dictionary, c: Campaign, sim, pick: RandomNumberGenerator) -> bool:
+	var ship = sim.player_ship()
+	var pages := 0
+	var queue: Array = [ev]
+	while not queue.is_empty():
+		var e: Dictionary = queue.pop_front()
+		if e.is_empty():
+			continue
+		pages += 1
+		stats["events"] += 1
+		if pages > MAX_PAGES:
+			check(false, "%s: more than %d pages in one chain (a goto loop?), last event '%s'" % [where, MAX_PAGES, e.get("id", "?")])
+			return true
+		var view := c.events.choice_view(e, c, ship, c.node(c.current))
+		var open: Array = view.filter(func(v): return not v["grey"])
+		if view.is_empty():
+			continue  # the panel shows Leave
+		if open.is_empty():
+			check(false, "%s: event '%s' shows only greyed choices: the panel has no way out" % [where, e.get("id", "?")])
+			continue
+		var v: Dictionary = open[pick.randi() % open.size()]
+		if ship.inventory.count("fuel") < 1:  # out of fuel: take what pays in fuel, then in credits
+			for gain in ["fuel", "credits"]:
+				var wanted: Array = open.filter(func(w): return _gives(e, int(w["index"]), gain))
+				if not wanted.is_empty():
+					v = wanted[pick.randi() % wanted.size()]
+					break
+		var r := c.events.choose(e, int(v["index"]), c, ship, c.node(c.current))
+		check(r["ok"], "%s: choice %d of '%s' was refused: %s" % [where, v["index"], e.get("id", "?"), r.get("why", "")])
+		if not r["ok"]:
+			continue
+		_audit("%s after '%s'" % [where, e.get("id", "?")], c, ship)
+		if str(r["fight"]) != "":
+			var res := _fight(where, str(r["fight"]), c, sim, pick)
+			var done := c.fight_done(res, ship, r["after_win"])
+			_audit(where + " after the fight", c, ship)
+			if done["state"] == "lost":
+				return false
+			if done["fight"] != "":
+				queue.append({"id": "(after_win fight)", "text": "-", "choices": [{"text": "Fight", "outcomes": [{"weight": 100, "effects": {"fight": done["fight"]}}]}]})
+			elif done["goto"] != "" and c.events.has(done["goto"]):
+				queue.append(c.events.get_event(done["goto"]))
+			elif done["state"] == "won":
+				queue.append(c.salvage_event(ship))
+		elif str(r["goto"]) != "":
+			check(c.events.has(r["goto"]), "%s: '%s' goes to an event that does not exist: %s" % [where, e.get("id", "?"), r["goto"]])
+			if c.events.has(r["goto"]):
+				queue.append(c.events.get_event(r["goto"]))
+	return true
+
+
+## Does some outcome of choice `index` of `e` add `item` to the cargo?
+func _gives(e: Dictionary, index: int, item: String) -> bool:
+	for o in e["choices"][index].get("outcomes", []):
+		var eff = o.get("effects", {})
+		if eff is Dictionary and eff.get("items") is Dictionary and float(eff["items"].get(item, 0)) > 0.0:
+			return true
+	return false
+
+
+## A fight through the real arena, both ships flown by the pilot AI. Returns the result dictionary the
+## combat view gives the map: {state, enemy, hull, hull_max}. Over FIGHT_CAP_S it is a draw ("fled").
+func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGenerator) -> Dictionary:
+	stats["fights"] += 1
+	var path := c.fight_path(value, str(c.node(c.current)["type"]))
+	var enemy = Session.load_ship(path)
+	check(enemy != null, "%s: the enemy design loads: %s" % [where, path])
+	if enemy == null:
+		return {"state": "fled"}
+	var player = sim.player_ship()
+	if _real_left <= 0:
+		return _stub_fight(enemy, player, c, pick)
+	_real_left -= 1
+	sim.ships.append(enemy)
+	var s := Session.new()
+	s.start(player, enemy, enemy.rng_seed)
+	var mine = s.arena.ships[Session.PLAYER]
+	mine.hull = maxf(1.0, mine.hull_max - float(c.hull_loss))  # what the campaign says is left of the hull
+	var pilot := PilotAI.new(s.arena, Session.PLAYER, Session.ENEMY, {})
+	var ticks := int(_cap_s * 60.0)
+	var n := 0
+	while s.state() == "fighting" and n < ticks:
+		if n % PLAYER_PILOT_EVERY == 0:
+			pilot.think(Session.STEP * PLAYER_PILOT_EVERY)
+		s.ai.think(Session.STEP)
+		s.arena.step(Session.STEP)
+		n += 1
+		if n % int(SIM_STEP * 60.0) == 0:
+			sim.step(SIM_STEP)
+		if n % 600 == 0:
+			_audit_fight(where, s)
+	_audit_fight(where, s)
+	var state := s.state()
+	if state == "fighting":
+		state = "fled"
+		stats["draw"] += 1
+	else:
+		stats[state] += 1
+	var foe = s.arena.ships[Session.ENEMY]
+	var res := {"state": state, "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max}
+	stats["fight_ticks"] += n
+	sim.ships.erase(enemy)
+	return res
+
+
+## A fight that is not simulated: the result the combat view would give, picked at random (a win, a
+## retreat or a loss, with some hull gone), so the campaign's loot, hull and run-over paths still run.
+func _stub_fight(enemy, player, c: Campaign, pick: RandomNumberGenerator) -> Dictionary:
+	var roll := pick.randf()
+	var state := "won" if roll < 0.55 else ("fled" if roll < 0.85 else "lost")
+	stats["won" if state == "won" else ("draw" if state == "fled" else "lost")] += 1
+	var hull_max := float(c.hull_max(player))
+	var hull := 0.0 if state == "lost" else maxf(1.0, hull_max - float(c.hull_loss) - pick.randf() * 60.0)
+	return {"state": state, "enemy": enemy, "hull": hull, "hull_max": hull_max}
+
+
+func _audit_fight(where: String, s: Session) -> void:
+	for i in 2:
+		var co = s.arena.ships[i]
+		check(co.hull >= 0.0 or co.wrecked, "%s: ship %d hull is %s" % [where, i, str(co.hull)])
+		check(is_finite(co.flight.pos.x) and is_finite(co.flight.pos.y) and is_finite(co.flight.angle), "%s: ship %d position is not a number: %s" % [where, i, str(co.flight.pos)])
+		check(is_finite(co.flight.vel.x) and is_finite(co.flight.vel.y), "%s: ship %d velocity is not a number" % [where, i])
+		check(co.layers >= 0.0 if typeof(co.layers) == TYPE_FLOAT else true, "%s: ship %d has negative shield layers" % [where, i])
+
+
+# --- the numbers ---------------------------------------------------------------------------------------
+
+## The state is sane: no negative cargo or hull, every held id known, the debt and reputation in range.
+func _audit(where: String, c: Campaign, ship) -> void:
+	for id in ship.inventory.counts:
+		var n: int = ship.inventory.counts[id]
+		check(n > 0, "%s: %d of %s in the cargo" % [where, n, id])
+		check(_known_item(ship, str(id)), "%s: unknown item id '%s' in the cargo" % [where, id])
+	check(ship.inventory.count("fuel") >= 0 and ship.inventory.count("credits") >= 0, where + ": negative fuel or credits")
+	check(c.hull_loss >= 0 and c.hull_left(ship) >= 1, "%s: hull integrity %d of %d" % [where, c.hull_left(ship), c.hull_max(ship)])
+	check(c.debt >= 0 and c.paid >= 0 and c.jumps >= 0, "%s: debt %d, paid %d, jumps %d" % [where, c.debt, c.paid, c.jumps])
+	check(c.drift.has(c.current), where + ": the ship is at a node that does not exist: " + c.current)
+	for f in c.rep:
+		check(c.rep[f] >= -10 and c.rep[f] <= 10, "%s: %s reputation %d" % [where, f, c.rep[f]])
+	for m in ship.crew:
+		check(m.hp >= 0.0 and m.hp <= m.max_hp + 0.01, "%s: %s has %s hp" % [where, m.name, str(m.hp)])
+		check(m.name != "", where + ": a crew member with no name")
+
+
+func _known_item(ship, id: String) -> bool:
+	return id in ["credits", "fuel"] or ship.components.has(id) or ship.crafting.materials.has(id) or Campaign._item_kinds().has(id)
+
+
+# --- regressions found by the soak ------------------------------------------------------------------------
+
+## A fight leaves breaches, and a damaged hull has a lower maximum than the one the loss was counted
+## against: the integrity shown went negative ("Hull -20/170"). It stays at 1 or more.
+func test_regression_hull_left_is_never_below_one() -> void:
+	var sim := ShipSim.new()
+	sim.choose_ship(STARTERS[0])
+	var ship = sim.player_ship()
+	var c := Campaign.new(1)
+	c.hull_loss = c.hull_max(ship) + 20
+	eq(c.hull_left(ship), 1, "a loss bigger than the maximum leaves 1")
+	c.hull_loss = 0
+	eq(c.hull_left(ship), c.hull_max(ship), "no loss leaves the maximum")
