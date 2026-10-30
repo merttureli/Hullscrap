@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/build/build_mode.gd" id="1_build"]
 [ext_resource type="Script" path="res://scripts/space/starfield.gd" id="2_stars"]
 [ext_resource type="Script" path="res://scripts/crew/crew_view.gd" id="3_crew"]
+[ext_resource type="Script" path="res://scripts/sim/ship_sim.gd" id="4_sim"]
 
 [node name="Main" type="Node2D"]
 
@@ -17,6 +18,9 @@ script = ExtResource("1_build")
 
 [node name="Crew" type="Node2D" parent="."]
 script = ExtResource("3_crew")
+
+[node name="ShipSim" type="Node" parent="."]
+script = ExtResource("4_sim")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 

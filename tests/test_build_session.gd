@@ -4,6 +4,7 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
+const Ship = preload("res://scripts/ship/ship.gd")
 const MID := Vector2i(5, 5)
 
 
@@ -12,9 +13,9 @@ func _session(scrap := 100, copper := 10) -> BuildSession:
 	defs.load_file("res://data/tiles.json")
 	var g := ShipGrid.new(Vector2i(15, 15), defs)
 	g.fill_circle_hull(7.0)
-	var inv := Inventory.new()
-	inv.load_dict({"scrap": scrap, "copper": copper})
-	return BuildSession.new(g, inv)
+	var ship := Ship.new("Test", g)
+	ship.inventory.load_dict({"scrap": scrap, "copper": copper})
+	return BuildSession.new(ship)
 
 
 func _put(id: String, cells: Array) -> Array:
@@ -336,7 +337,7 @@ func test_save_load_round_trip_with_doors_and_cargo() -> void:
 	s.apply(_put("floor", [Vector2i(5, 6)]))
 	s.grid.set_door_open(MID, true)
 	var d: Dictionary = JSON.parse_string(JSON.stringify(s.to_dict()))
-	eq(d["version"], 2, "saved as version 2")
+	eq(d["version"], 3, "saved as version 3")
 	var t := _session(1, 1)
 	t.apply(_put("floor", [MID]))
 	eq(t.load_dict(d), "", "loads")
@@ -377,3 +378,211 @@ func test_bad_saves_change_nothing() -> void:
 	eq(s.grid.tiles, tiles, "tiles untouched")
 	eq(s.inventory.to_dict(), cargo, "cargo untouched")
 	eq(s.undo_stack.size(), 1, "history untouched")
+
+
+# --- Systems and cables ---
+
+func _reactor(x := 4, y := 4) -> Dictionary:
+	return {"layer": "component", "id": "reactor_mk1", "anchor": Vector2i(x, y), "rot": 0}
+
+
+func _cable(c: Vector2i, remove := false) -> Dictionary:
+	return {"layer": "cable", "cell": c, "remove": remove}
+
+
+## A session with floor on (3,3)-(9,9), a reactor and two engines in the cargo, and a clean history.
+func _parts_session(copper := 20) -> BuildSession:
+	var s := _session(200, copper)
+	s.inventory.add("reactor_mk1", 1)
+	s.inventory.add("engine_mk1", 2)
+	s.apply(_put("floor", BuildSession.rect_cells(Vector2i(3, 3), Vector2i(9, 9))))
+	s.undo_stack.clear()
+	return s
+
+
+## The whole ship as text. The part uid counter only ever grows (a uid is never reused), so undo
+## can't wind it back: `keep_next_uid` false leaves it out.
+func _snapshot(s: BuildSession, keep_next_uid := true) -> String:
+	var d := s.to_dict()
+	if not keep_next_uid:
+		d["components"].erase("next_uid")
+	return JSON.stringify(d)
+
+
+func test_placing_a_system_takes_an_item_and_undo_returns_it() -> void:
+	var s := _parts_session()
+	var r := s.apply([_reactor()])
+	eq(r, {"applied": 1, "skipped": 0, "reason": ""}, "placed")
+	eq(s.inventory.count("reactor_mk1"), 0, "the item is used up")
+	var uid := s.ship.components.at(Vector2i(5, 5))
+	check(uid >= 0, "it covers its whole 2x2 footprint")
+	eq(s.ship.components.at(Vector2i(4, 4)), uid, "same part on the anchor cell")
+	check(s.undo(), "undo")
+	eq(s.inventory.count("reactor_mk1"), 1, "the item is back in the cargo")
+	eq(s.ship.components.instances.size(), 0, "and the part is gone")
+	check(s.redo(), "redo")
+	eq(s.ship.components.at(Vector2i(5, 5)), uid, "same uid after a redo")
+	eq(s.inventory.count("reactor_mk1"), 0, "item used again")
+
+
+func test_a_rotated_system_covers_its_rotated_footprint() -> void:
+	var s := _parts_session()
+	var r := s.apply([{"layer": "component", "id": "engine_mk1", "anchor": Vector2i(4, 4), "rot": 1}])
+	eq(r["applied"], 1, "engine placed on its side")
+	check(s.ship.components.at(Vector2i(4, 5)) >= 0 and s.ship.components.at(Vector2i(5, 4)) < 0, "2x1 turned into 1x2")
+
+
+func test_without_an_item_a_system_is_skipped_with_its_name() -> void:
+	var s := _parts_session()
+	s.inventory.add("reactor_mk1", -1)
+	var name: String = s.ship.components.def("reactor_mk1")["name"]
+	var r := s.apply([_reactor()])
+	eq(r, {"applied": 0, "skipped": 1, "reason": "no %s in cargo" % name}, "skipped, with the reason")
+	eq(s.ship.components.instances.size(), 0, "nothing built")
+	eq(s.undo_stack.size(), 0, "no step")
+	eq(s.preview([_reactor()])[0]["reason"], "no %s in cargo" % name, "the ghost says why")
+	eq(s.apply([{"layer": "component", "id": "engine_mk1", "anchor": Vector2i(0, 0), "rot": 0}])["reason"], "outside the hull", "placement rules come first")
+	eq(s.apply([{"layer": "component", "id": "engine_mk1", "anchor": Vector2i(10, 4), "rot": 0}])["reason"], "needs floor underneath", "needs floor")
+
+
+func test_removing_a_system_returns_the_item() -> void:
+	var s := _parts_session()
+	s.apply([_reactor()])
+	var uid := s.ship.components.at(Vector2i(4, 4))
+	var r := s.apply([{"layer": "component", "cell": Vector2i(5, 5)}])  # any cell of the footprint
+	eq(r["applied"], 1, "removed")
+	eq(s.inventory.count("reactor_mk1"), 1, "item back")
+	eq(s.apply([{"layer": "component", "cell": Vector2i(5, 5)}])["reason"], "nothing to remove", "nothing left")
+	check(s.undo(), "undo the removal")
+	eq(s.ship.components.at(Vector2i(4, 4)), uid, "same part, same uid")
+	eq(s.inventory.count("reactor_mk1"), 0, "item taken again")
+	check(s.redo(), "redo the removal")
+	eq(s.inventory.count("reactor_mk1"), 1, "and given back")
+
+
+func test_a_cable_costs_copper_and_undo_refunds_it() -> void:
+	var s := _parts_session()
+	eq(s.cable_cost, {"copper": 1}, "from data/build.json")
+	var r := s.apply([_cable(Vector2i(4, 4)), _cable(Vector2i(5, 4)), _cable(Vector2i(6, 4))])
+	eq(r["applied"], 3, "three cables")
+	eq(s.inventory.count("copper"), 17, "one copper each")
+	eq(s.apply([_cable(Vector2i(4, 4))])["reason"], "already a cable", "not twice")
+	check(s.undo(), "undo")
+	eq(s.inventory.count("copper"), 20, "all the copper is back")
+	eq(s.ship.cables.cells.size(), 0, "no cables")
+	check(s.redo(), "redo")
+	eq(s.inventory.count("copper"), 17, "paid again")
+	r = s.apply([_cable(Vector2i(5, 4), true), _cable(Vector2i(8, 8), true)])
+	eq(r, {"applied": 1, "skipped": 1, "reason": "nothing to remove"}, "removing one of two")
+	eq(s.inventory.count("copper"), 18, "100% refund")
+	check(s.undo(), "undo the removal")
+	check(s.ship.cables.has(Vector2i(5, 4)) and s.inventory.count("copper") == 17, "cable and cost restored")
+
+
+func test_cables_run_under_walls_and_need_copper() -> void:
+	var s := _parts_session(1)
+	s.apply(_put("wall", [Vector2i(4, 9)]))
+	var r := s.apply([_cable(Vector2i(4, 9)), _cable(Vector2i(5, 9))])
+	eq(r, {"applied": 1, "skipped": 1, "reason": "not enough copper"}, "one copper pays for one cell")
+	check(s.ship.cables.has(Vector2i(4, 9)), "under the wall")
+	eq(s.apply([_cable(Vector2i(0, 0))])["reason"], "outside the hull", "only on the hull")
+
+
+func test_a_cable_stroke_is_one_undo_step() -> void:
+	var s := _parts_session()
+	var path := BuildSession.trace_cells(Vector2i(3, 5), Vector2i(8, 5))
+	var pl := s.plan_cables(BuildSession.Mode.PAINT, false, path[0], path[-1], path)
+	eq(pl["changes"].size(), 6, "six cells")
+	eq(pl["changes"][0]["layer"], "cable", "cable changes")
+	s.apply(pl["changes"])
+	eq(s.undo_stack.size(), 1, "one step")
+	eq(s.inventory.count("copper"), 14, "paid")
+	check(s.undo(), "undo")
+	eq([s.ship.cables.cells.size(), s.inventory.count("copper")], [0, 20], "the whole stroke is gone and paid back")
+	pl = s.plan_cables(BuildSession.Mode.RECT, false, Vector2i(3, 3), Vector2i(4, 4))
+	eq(pl["changes"].size(), 4, "a rectangle is filled")
+	pl = s.plan_cables(BuildSession.Mode.LINE, true, Vector2i(3, 3), Vector2i(3, 6))
+	eq([pl["changes"].size(), pl["changes"][0]["remove"]], [4, true], "a line that removes")
+	eq(s.plan_cables(BuildSession.Mode.PAINT, false, Vector2i(-3, 3), Vector2i(-3, 3), [Vector2i(-3, 3)])["error"], "outside the hull", "off the grid")
+
+
+func test_a_floor_under_a_system_cannot_go() -> void:
+	var s := _parts_session()
+	s.apply([_reactor()])
+	var name: String = s.ship.components.def("reactor_mk1")["name"]
+	var why := "a %s stands here" % name
+	eq(s.apply([{"layer": "tile", "cell": Vector2i(4, 4), "to": ""}])["reason"], why, "removing the floor")
+	eq(s.apply(_put("wall", [Vector2i(5, 5)]))["reason"], why, "walling it over")
+	eq(s.apply(_put("door", [Vector2i(5, 4)]))["reason"] in [why, "doors need walls on two opposite sides"], true, "a door can't go there either")
+	eq(s.grid.get_tile(Vector2i(4, 4)), "floor", "the floor is still there")
+	eq(s.undo_stack.size(), 1, "and nothing was recorded")
+	var r := s.apply([{"layer": "tile", "cell": Vector2i(6, 4), "to": ""}])
+	eq(r["applied"], 1, "the floor beside it can go")
+	s.apply([{"layer": "component", "cell": Vector2i(4, 4)}])
+	eq(s.apply([{"layer": "tile", "cell": Vector2i(4, 4), "to": ""}])["applied"], 1, "once the system is removed")
+
+
+func test_redo_works_across_layers() -> void:
+	var s := _parts_session()
+	var start := _snapshot(s, false)
+	s.apply(_put("wall", [Vector2i(9, 9)]))
+	s.apply([_reactor()])
+	s.apply([_cable(Vector2i(4, 4)), _cable(Vector2i(5, 4))])
+	s.apply([_cable(Vector2i(5, 4), true), {"layer": "tile", "cell": Vector2i(8, 8), "to": "wall"}, {"layer": "component", "id": "engine_mk1", "anchor": Vector2i(6, 6), "rot": 0}])
+	var done := _snapshot(s, false)
+	eq(s.undo_stack.size(), 4, "four steps over three layers")
+	while s.undo():
+		pass
+	eq(_snapshot(s, false), start, "undone: exactly as at the start, cargo included")
+	eq(s.redo_stack.size(), 4, "four steps to redo")
+	while s.redo():
+		pass
+	eq(_snapshot(s, false), done, "redone: exactly as before the undo")
+	s.undo()
+	s.undo()
+	s.redo()
+	s.redo()
+	eq(_snapshot(s, false), done, "and again after a partial undo")
+	eq(s.inventory.count("engine_mk1"), 1, "one engine used")
+
+
+func test_preview_of_a_system_changes_nothing() -> void:
+	var s := _parts_session()
+	s.apply([_reactor(6, 6)])
+	var before := _snapshot(s)
+	var out := s.preview([_reactor(3, 3)])
+	eq(out[0]["reason"], "no Reactor Mk1 in cargo", "no second reactor")
+	s.inventory.add("reactor_mk1", 1)
+	before = _snapshot(s)
+	out = s.preview([_reactor(3, 3), _cable(Vector2i(3, 3)), {"layer": "component", "cell": Vector2i(6, 6)}])
+	eq([out[0]["reason"], out[1]["reason"], out[2]["reason"]], ["", "", ""], "all three would apply")
+	eq(out[0]["id"], "reactor_mk1", "the preview carries the change")
+	eq(_snapshot(s), before, "nothing changed, not even the next uid")
+	eq(s.undo_stack.size(), 1, "no history")
+
+
+func test_edits_mark_the_ship_dirty_and_previews_do_not() -> void:
+	var s := _parts_session()
+	s.ship.refresh()
+	s.preview([_reactor(), _cable(Vector2i(4, 4))])
+	check(not s.ship.refresh(), "a preview leaves the ship clean")
+	s.apply([_cable(Vector2i(4, 4))])
+	check(s.ship.refresh(), "an edit marks it")
+	s.undo()
+	check(s.ship.refresh(), "and so does undo")
+	s.redo()
+	check(s.ship.refresh(), "and redo")
+
+
+func test_save_load_round_trip_with_systems_and_cables() -> void:
+	var s := _parts_session()
+	s.apply([_reactor()])
+	s.apply([_cable(Vector2i(4, 4)), _cable(Vector2i(5, 4))])
+	var saved := _snapshot(s)
+	var t := _session(1, 1)
+	t.apply(_put("floor", [MID]))
+	eq(t.load_dict(JSON.parse_string(saved)), "", "loads")
+	eq(_snapshot(t), saved, "everything came back")
+	eq(t.undo_stack.size(), 0, "history cleared")
+	check(t.ship.components.at(Vector2i(5, 5)) >= 0 and t.ship.cables.has(Vector2i(5, 4)), "the system and the cable")
+	eq(t.apply([_reactor(6, 6)])["reason"], "no Reactor Mk1 in cargo", "the reactor in the save was the only one")

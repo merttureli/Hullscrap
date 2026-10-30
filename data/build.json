@@ -1,0 +1,4 @@
+{
+  "_doc": "Build rules. cable_cost: materials paid for each cable cell (refunded 100% when the cable is removed).",
+  "cable_cost": {"copper": 1}
+}
