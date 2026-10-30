@@ -1,0 +1,10 @@
+{
+  "_doc": "Combat stats of weapons, keyed by component id (read by scripts/combat/weapons.gd; the arena also fires the test_* ids without a placed component). kind: laser (hitscan), bolt (projectile), flak (several spread projectiles), missile (slow, homing, splash, passes shields) or beam (a hitscan line held for duration; damage is per second). damage_type: kinetic, energy, explosive or ion. cooldown and duration in seconds, range in pixels, arc in degrees (360 is a turret; the arc is centred on the direction from the ship's centre through the weapon), speed in px/s, turn in rad/s, spread in degrees, splash in cells. pierce: how many more solid cells leftover damage may punch through. fire_chance: chance per shot to start a fire at the first cell hit. Kinds have defaults for the keys left out (see weapons.gd).",
+  "weapons": {
+    "laser_mk1": {"kind": "laser", "damage_type": "energy", "damage": 2, "cooldown": 1.2, "range": 900, "arc": 120, "shots": 1, "pierce": 0, "fire_chance": 0.05},
+    "laser_mk2": {"kind": "laser", "damage_type": "energy", "damage": 3, "cooldown": 1.0, "range": 1000, "arc": 120, "shots": 1, "pierce": 0, "fire_chance": 0.05},
+    "test_bolt": {"kind": "bolt", "damage_type": "kinetic", "damage": 2, "cooldown": 0.5, "range": 900, "arc": 360, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 700},
+    "test_flak": {"kind": "flak", "damage_type": "kinetic", "damage": 1, "cooldown": 1.0, "range": 600, "arc": 360, "shots": 5, "pierce": 0, "fire_chance": 0.0, "speed": 600, "spread": 12},
+    "test_missile": {"kind": "missile", "damage_type": "explosive", "damage": 4, "cooldown": 3.0, "range": 1200, "arc": 360, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 300, "turn": 1.5, "splash": 2, "pass_shields": true}
+  }
+}
