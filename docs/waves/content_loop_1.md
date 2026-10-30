@@ -33,6 +33,10 @@
 9. **The race loop to 30** (owner: "loop the races until we reach 30 unique ones"): waves 2, 3 and 4 from `docs/waves/races_2_4.md`.
    - Each wave is a hooks code agent plus an art agent plus a data and writing agent.
    - Run them back to back, with the next wave's art starting while the previous wave's data lands, until 30 species are on main.
+10. **Regions** (CONTENT 15): the region graph code (8 stages, 2–3 choices at each exit, region data), then region packs: each race wave ships its homeland region with it.
+11. **Unique characters** (CONTENT 16): the crew active-ability code (G, the vocabulary, cooldowns, crew cards), then character packs of about 16 at a time (writer plus art) until 64.
+12. **Racial tech** (CONTENT 17): the new damage effects in combat, then per race 3 ship weapons, 3 components and 2 hand weapons (data plus art plus projectile and impact effects). It folds into the race loop: every race wave ships its arsenal, and waves 0–1 (the existing 10 races) get theirs first.
+13. **Rare factions** (CONTENT 18): one pack per faction (region, enemy table, events and quests, crew, relics), from uncommon to legendary.
 8. **Sector space steps 2 and 3**: the view, autopilot, fights in place, then its content (intakes Mk2/Mk3, radars, tractor), when step 1 lands.
 
 ## Order of starting

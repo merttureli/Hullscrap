@@ -693,3 +693,82 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **Headless AI-vs-AI fights** in the real arena: **reference player builds** per stage (early, mid, late; one per line and archetype: gunboat, shield brick, rammer, missile boat) against each faction's enemies at budgets for jumps 5, 15, 25 and 35.
   - 50 seeded fights per pairing. It records win rate, time to kill, and hull and crew lost.
   - It writes `docs/BALANCE_REPORT.md`, flagging pairings outside the targets above. The lead tunes the numbers from it, and every content wave re-runs it.
+
+## 15. Regions: every race has a home you can jump to (owner, 2026-10-30)
+> "Every race should have their own region we can jump to."
+
+- **The run is a journey through regions**, FTL/Multiverse-style:
+  - A run crosses **8 stages**. Each stage is one **region**: a Drift-style node map of 16–20 places (section 8, each place a sector of section 11).
+  - Stage 1 is always **Clan space** (Gantry Rusthold, Ma's debt).
+  - At a region's **exit beacon**, a region map offers **2–3 next regions** to choose from. It shows each one's theme, danger and (once scanned) its rarity.
+- **The region roster**:
+  - **30 race homelands**, one per species: their stations sell their tech, recruit their people and run their events. Their enemies, hazards and debris fit their world.
+  - **5 faction regions**: Clan space, Concord space, Lumen space, the Boneyard, the Gate approaches.
+  - **The Hollow tide** regions (late).
+  - **The rare faction regions** (section 18).
+  - So a run sees 8 of 40+, and every run differs.
+- **A region's data** (`data/regions/<id>.json`, one per pack): home race, faction, palette and backdrop tint, the debris table (section 11), the POI mix, stores, recruit table, the enemy table (section 14), hazards (ion storms, gas clouds, debris surges, radiation, a star's heat) and its event pool. Stage bands keep the difficulty curve: a region lists which stages it may appear in.
+- **Code**: the current single Drift map becomes **one region's map**. A region graph picks the stages and choices from the run seed. The debt, reputation and saves carry across regions.
+
+## 16. Unique characters: 60+ named crew with special abilities (owner, 2026-10-30)
+> "60+ unique characters that do or sometimes do not belong to a race, but have special abilities, just like FTL."
+
+- **`data/characters.json`** (per pack). Each character has: id, name, species (one of the 30, or a **one-of-a-kind** species of their own), portrait and rig variant (`_color` tints, a unique head or accessory layer), a passive trait bag (section 9 keys), **one active ability**, how you get them, and a lore line.
+  - Ways to get one: a quest, a landmark, a rare store, a rare event, beating a rare faction, or a starting crew unlock.
+- **Active crew abilities, a new mechanic**: select a crew member and press **G** (or click their ability on their crew card). Each has a cooldown. The vocabulary, built once and used by every character:
+  - `power_system` (the system they stand by gets +N power for T s, no reactor needed);
+  - `overclock` (the manned system ×1.5 for 10 s, then off 5 s);
+  - `heal_burst` (heal everyone in the room for N hp);
+  - `rally` (others in the room work ×1.5 for 15 s);
+  - `repair_burst` (instantly repair N hp of a system);
+  - `extinguish` (put out the room);
+  - `seal_breach` (seal it instantly);
+  - `shield_layer` (+1 layer for 10 s);
+  - `scan` (reveal the enemy for 20 s);
+  - `hack` (disable one enemy system for 5 s, from the helm);
+  - `berserk` (melee ×2 for 10 s);
+  - `phase` (walk through one wall to the next room).
+- **The roster target is 64 characters**: 30 tied to the races (one per race at least, two for the big cultures), 20 cross-race oddballs, and 14 one-of-a-kind beings.
+  - Examples: **Socket**, a Basalt who powers an adjacent system by hand; **Old Hob**, Ma Gantry's mechanic, who repairs Scrap parts instantly; **the Lamplighter**, an AI in a lantern; **Sister Vell**, a Choir who fights fires with a song.
+
+## 17. Racial tech: arsenals and components with trade-offs only their race erases (owner, 2026-10-30)
+> "Every race should have their own set of weapons and ship weapons with on-theme animations, effects or damage, and their own versions of components with different pros and cons. The cons should be averted by the race's own pros: an engine draining oxygen, but the race doesn't need it. A trade-off for a mixed crew, but not at all for a dedicated crew. Just like FTL."
+
+- **Per race**: **3 ship weapons, 3 components** (engine, reactor, shield, O2 or utility, whichever fits) and **2 hand weapons**, sold in their homeland and found in their wrecks.
+- **The rule**: each racial part has a **strong pro** and a **real con**, and **the con is something that race's own traits cancel**. A dedicated crew runs it free; a mixed crew pays.
+  - Basalt **Vacuum Forge** (reactor): +3 power, but it vents its room's air. Basalt don't breathe.
+  - Emberkin **Pyre Drive** (engine): thrust ×1.5, but its room runs at +40 heat. Emberkin shrug it off.
+  - Fenn **Twitch Cannon** (weapon): fires 40% faster, but malfunctions 20% per minute. Fenn fix it in no time.
+  - Kett **Hive Battery** (shield): it reaches full layers only with 3 operators. Kett swarm it.
+  - Mire **Steam Lance** (weapon): heavy damage, but a 10% fire chance in its own room per shot. Mire put fires out twice as fast.
+  - Sporeling **Bloom Reactor**: cheap, big power, but it eats the room's O2. Sporelings make O2.
+  - Gauntling **Arc Core** (reactor): it shocks organic crew in its room. Gauntlings are mechanical.
+  - Prismatic **Prism Lens** (weapon): full power only with a Prismatic manning it (50% otherwise). Prismatics also add power.
+  - Grundl **Slug Mortar** (weapon): huge hits, but it empties racks fast. Grundl restock twice as fast.
+  - New races follow the same rule (Wisp parts need no tools to run but can't be repaired by hand: Wisps can't repair anyway, they're built for crews of Wisps and Ferro...).
+- **On-theme effects and damage**: racial weapons bring their own projectile and impact art, and new damage effects built once in the combat vocabulary:
+  - `acid` (damage over time to a cell);
+  - `spores` (starts a slow O2 drain in the room hit);
+  - `shard` (pierce plus splinters);
+  - `sonic` (stuns crew in the room hit);
+  - `magnetic` (pulls the target ship, or drags debris);
+  - `frost` (slows the target system's charge);
+  - `corrode` (lowers the hit wall material's resist for 10 s).
+- **Numbers**: racial parts sit on their tier's band (section 3 of CONTENT_PLAN) but trade a +30–50% pro for a con that costs the same on a mixed crew. They carry a `quirk` explaining it, and the validator checks they have both.
+
+## 18. Rare factions: from uncommon to legendary (owner, 2026-10-30)
+> "Add factions that are rare to come by, from OK rarity to super rare, where some rare ones are really powerful ships, races or weapons, like the relic people in Multiverse. Getting them might be too strong and kill your run, but if you manage to complete the quests or beat them, getting their guns or tech might be super strong for you."
+
+| rarity | faction | what they are | meeting them | their prize |
+|---|---|---|---|---|
+| uncommon | **Salvage Barons** | rich pirate lords in heavy, gaudy ships | appear in Clan space and the Boneyard (5% of fights) | gilded weapons, credits, Baron crew |
+| uncommon | **Lattice Pilgrims** | gate monks walking the dead lanes | Gate approaches, Lumen space (event chains) | blessings (permanent small buffs), pilgrim crew |
+| rare | **Halcyon Wardens** | the Haven's defence fleet | after Haven fragments, as tests | Halcyon shields and gate-shunt drives |
+| rare | **Leviathans** | living ships from the deep Drift | their own rare region, or a 1% roaming encounter | living parts that self-repair (Starwhale Fin), bone armour |
+| very rare | **The Architects** | the gate builders' automated fleets, still working | their region appears in stages 5–8 at 3%; a landmark | **relic tech**: phase weapons that ignore shields, Architect cores |
+| legendary | **The First Lattice** | a ghost fleet from before the Snap, bending space | a 0.5% region in stages 6–8, or a 6-step quest chain | legendary relics that break the rules (time-slow, jump anywhere, a crew member who is a living gate) |
+
+- **Danger is the price**:
+  - Rare factions use budgets far above the stage (×1.5 to ×3) and tech the player can't match early. **Meeting one unprepared can end your run**; their encounters are telegraphed with a threat of 5 skulls and a choice to flee.
+  - Beating them, or finishing their quest chains, gives tech above the bands: legendary uniques that can carry the rest of a run.
+- **Data**: each rare faction is a pack with its region (if any), enemy table, events and quests, crew, and relic components marked `"relic": true`. Relics may ignore the bands, and the validator only requires a `quirk` or a cost.
