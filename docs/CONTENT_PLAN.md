@@ -198,5 +198,6 @@ godot --headless --path . --script res://tests/tool_content_index.gd       # rew
 4. **Processing** (CONTENT 12): smelters, steel, alloy and conductor, Forged Steel and Alloy armour; Mk3+ recipes switch to steel.
 5. **Engine wave 1** data (its art is in progress) and **race wave 1** data plus trait hooks (its art is in progress).
 6. **Mining in sector space** (CONTENT 10 inside 11): rocks, cutting, special motherlode POIs.
-7. **Endings** (CONTENT 13): the Haven chain first (the writer plus a small code brief for the ending screen, score and unlocks), then the Retire ending, the Way Out per faction, and the Hollow tide clock.
-8. On foot at POIs (docking, abandoned stations, boarding).
+7. **Enemy scaling and the balance harness** (CONTENT 14): faction enemy tables, budgets, threat ratings, the AI-vs-AI report. Run it after every content wave.
+8. **Endings and landmarks** (CONTENT 13): the Haven chain first (the writer plus a small code brief for the ending screen, score and unlocks), then the Retire ending, the Way Out per faction, and the Hollow tide clock.
+9. On foot at POIs (docking, abandoned stations, boarding).

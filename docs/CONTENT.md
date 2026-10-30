@@ -635,6 +635,16 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
      - **Lumen** (the gate opens somewhere new).
   3. **The Hollow**: follow the hidden Hollow thread (the derelict logs) into the Scrapper Gate and learn what came out at the Snap. It is the hardest ending, the true-lore one, and changes the next run's map (Hollow nodes from the start, plus a Hollow-touched starter).
   4. **Retire** (the short ending): pay off Ma, then buy a berth at Gantry Rusthold (5,000 credits) and hang up your helmet. It has a low score but it counts, and it's good for short sessions.
+- **Landmark events don't end the run (owner, 2026-10-30)**. Only endings end a run. Big story moments along the way are **landmarks**: one-off events (`"landmark": true`) that pay out **in the run** (a unique part, a named recruit, a blueprint, a key material, a reputation jump) **and unlock something for future runs**. Then you keep going.
+  - Examples:
+    - catching the first clean Haven fragment;
+    - meeting Ma Gantry in person;
+    - boarding the Concord flagship *CS-001 Patience*;
+    - standing inside a Dead Gate's shell;
+    - the Lumen showing you the first gate study;
+    - surviving a Hollow tide node.
+  - A new effect, **`unlock`** (an unlock id from `data/unlocks.json`), is recorded in the profile, not the run, and shown as "Unlocked: ..." on the event and the ending screen.
+  - Unlocks from landmarks and endings share one list: starter ships, starting species, starting blueprints, map variants, and cosmetic hull skins.
 - **Score**: endings are worth base points, plus credits, crew alive, POIs done, parts built, and jumps saved.
 - **Unlocks for the next run** (they widen choice, never raw power):
   - **new starter ships**: the Concord frigate after the Concord Way Out, a Lumen skiff after the Lumen one, the Halcyon tender after the Haven;
@@ -642,3 +652,34 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **starting blueprints** (one per ending, chosen from what you built this run);
   - **map variants** (the Hollow ending).
 - **A run log** (a chronicle you can read on the ending screen) and a **hall of ships** (each finished ship's design is saved, and can be exported as a premade).
+
+## 14. Difficulty and balance: FTL-hard, on purpose (owner, 2026-10-30)
+> "Enemy scaling should be like FTL. It's a very hard game: a good player survives most of the time, but a win isn't guaranteed. You might choose the wrong quest, meet a full-shield enemy you're not prepared for, and die. So game balance is important."
+
+- **Runs are permadeath**: the game saves on quit and at every jump, and death ends the run (with the ending screen and score). There's no reload of a lost fight.
+- **Targets** (Normal difficulty; checked by the balance harness below):
+  - a **prepared** ship against an enemy of its tier wins **85–95%** of fights, losing 20–40% hull;
+  - an **under-prepared** ship against an enemy that counters it (full shields with no ion or missiles; heavy armour with only lasers) wins **30–50%**;
+  - a skilled player finishes **40–60%** of runs, and a new player under 10%.
+- **Enemy scaling, the FTL way**: an enemy is a **hull** (a premade design per faction and size class: small, medium, large) plus a **loadout bought from a budget**.
+  - **Budget** = tier base × (1 + 0.04 × jumps) × the region's danger (Clan 1.0, Concord 1.1, the Boneyard 1.15, Lumen 1.2, the Gate approaches 1.4, the Hollow 1.6) × the difficulty (Easy 0.8, Normal 1.0, Hard 1.2).
+  - The budget buys from the faction's table (`data/enemy_tables.json`): weapon tiers, shield layers and sectors, armour layers on the outer walls, crew count and skill, the AI's `aim_skill`, and systems.
+    - Rustfangs buy armour, rams and flak.
+    - The Concord buys shields and missiles.
+    - Wardens buy neon guns and ion.
+    - The Hollow buys strange uniques.
+  - **Every faction has counters you must plan for**:
+    - a Concord shield wall needs ion, missiles or beams;
+    - a Rustfang rammer needs dampeners, range or speed;
+    - a Warden swarm needs flak or turrets;
+    - a Hollow ship needs something you only learn by meeting one.
+- **Danger is readable; ignoring it is your choice**:
+  - Radar Mk2+ shows an enemy's **threat rating** (1–5 skulls, against your own ship's strength) and, when scanned closer, its loadout.
+  - Events hint at danger in their text ("the hull bristles with guns", "her shield hums like a hive").
+  - The risky choice is often the lucrative one. **Choosing wrong can kill you, and that's intended.**
+- **Escape exists, but it costs**: jumping away needs the 8 s spool and no hostile within 2,000 px. Running from a fight means breaking contact first (speed, terrain, a smoke or decoy utility), as FTL players charge the FTL drive.
+- **Difficulty settings**: Easy (enemy budget ×0.8, debris +30%, prices −10%), Normal, and Hard (budget ×1.2, debris −20%, fewer stores).
+- **The balance harness** (a code brief; it runs in CI as a report, not a gate):
+  - **Headless AI-vs-AI fights** in the real arena: **reference player builds** per stage (early, mid, late; one per line and archetype: gunboat, shield brick, rammer, missile boat) against each faction's enemies at budgets for jumps 5, 15, 25 and 35.
+  - 50 seeded fights per pairing. It records win rate, time to kill, and hull and crew lost.
+  - It writes `docs/BALANCE_REPORT.md`, flagging pairings outside the targets above. The lead tunes the numbers from it, and every content wave re-runs it.
