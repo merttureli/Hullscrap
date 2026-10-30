@@ -10,7 +10,8 @@ extends Node2D
 ## would apply, red = not (the reason is in the HUD). Edits happen on mouse release.
 ## Play mode has no ghost and LMB/RMB do nothing yet. Both modes: E opens/closes the door piece under the
 ## mouse, O shows oxygen, P shows power, Ctrl+S saves to user://ship.json, Ctrl+L loads it, wheel zooms.
-## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag.
+## Build mode only: Ctrl+Z undo, Ctrl+Y / Ctrl+Shift+Z redo, Esc cancels a drag, F repairs the system
+## under the mouse (until crew jobs exist).
 ## W, A, S, D are reserved for player movement: do not bind them without a modifier.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -18,6 +19,7 @@ const Rooms = preload("res://scripts/sim/rooms.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const Visuals = preload("res://scripts/view/visuals.gd")
 const CELL := 32
 const SAVE_PATH := "user://ship.json"
 const OK_TINT := Color(0.35, 1, 0.45)
@@ -27,6 +29,7 @@ const O2_EMPTY := Color("#ff3b3b")
 const O2_FULL := Color("#3b7bff")
 const BREACH_COLOR := Color("#ffb020")
 const NET_TINTS: Array[Color] = [Color("#4ad1b8"), Color("#e8c13a"), Color("#c06bff"), Color("#ff7a59"), Color("#6bb5ff"), Color("#9be564")]
+const HUD_EVENTS := 3  ## chronicle lines the HUD shows
 const QUIET_REASONS: Array[String] = ["already there", "already a cable", "nothing to remove"]  ## not worth a message
 
 ## The palette groups Tab cycles through.
@@ -169,6 +172,9 @@ func _on_key(e: InputEventKey) -> void:
 				build_on = not build_on
 				message = ""
 				_fix_component()
+			KEY_F:
+				if build_on:
+					_repair_under_mouse()
 			KEY_O:
 				show_o2 = not show_o2
 			KEY_P:
@@ -303,6 +309,18 @@ func _toggle_door() -> void:
 	message = "door opened" if open else "door closed"
 
 
+func _repair_under_mouse() -> void:
+	var uid := ship.components.at(hover)
+	if uid < 0:
+		message = "no system under the mouse"
+		return
+	var inst: Dictionary = ship.components.instances[uid]
+	var name: String = ship.components.def(inst["id"]).get("name", inst["id"])
+	var fine: bool = inst["status"] == "ok" and inst["hp"] >= ship.effective(inst["id"])["hp"]
+	ship.repair(uid)
+	message = "%s needs no repair" % name if fine else "repaired " + name
+
+
 func _undo() -> void:
 	message = "undone" if session.undo() else "nothing to undo"
 
@@ -361,6 +379,8 @@ func hud_text() -> String:
 		lines.append("can't: " + why)
 	if message != "":
 		lines.append(message)
+	for e in ship.events.slice(-HUD_EVENTS):
+		lines.append("[%d:%02d] %s" % [floori(e["t"] / 60.0), floori(e["t"]) % 60, e["text"]])
 	return "\n".join(lines)
 
 
@@ -374,12 +394,17 @@ func _marked(labels: Array, chosen: int, numbered: bool) -> Array[String]:
 
 
 func _power_text() -> String:
-	var supply := 0
-	var demand := 0
+	var supply := 0.0
+	var demand := 0.0
 	for n in ship.power_state.get("networks", []):
 		supply += n["supply"]
 		demand += n["demand"]
-	return "power %d supply / %d demand" % [supply, demand]
+	return "power %s supply / %s demand" % [_num(supply), _num(demand)]
+
+
+## A power figure: whole numbers plain, line-adjusted ones (5.4) with one decimal.
+func _num(v: float) -> String:
+	return "%d" % roundi(v) if is_equal_approx(v, roundf(v)) else "%.1f" % v
 
 
 ## Oxygen in the room the player stands in ("--" in a doorway or with no player yet).
@@ -473,7 +498,7 @@ func _controls_text() -> String:
 		if grid.tile_flag(selected, "door"):
 			how = "LMB place a 2-cell door in a wall   RMB remove   R flip"
 	elif group == Group.SYSTEMS:
-		how = "LMB place   RMB remove   R rotate"
+		how = "LMB place   RMB remove   R rotate   F repair"
 	return "%s   E door   O oxygen   P power\nCtrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   wheel zoom" % how
 
 
@@ -563,41 +588,7 @@ func _draw_components() -> void:
 	uids.sort()
 	for uid in uids:
 		var inst: Dictionary = ship.components.instances[uid]
-		var def := ship.components.def(inst["id"])
-		var r := _cells_rect(inst["cells"]).grow(-2)
-		var unpowered: bool = int(def.get("power", 0)) < 0 and not powered.get(uid, false)
-		var col := Color(def.get("color", "#ff00ff"))
-		draw_rect(r, col.darkened(0.55) if unpowered else col)
-		draw_rect(r, col.darkened(0.4), false, 1.5)
-		_draw_label(def, r.get_center(), Color(0, 0, 0, 0.5 if unpowered else 0.85))
-		if unpowered:
-			_draw_no_power(r.position + Vector2(r.size.x - 8, 9))
-
-
-## A 1-2 letter name for a system: "R1" for Reactor Mk1, the initials of two words ("OG"), else two letters.
-func _label_of(def: Dictionary) -> String:
-	var words: PackedStringArray = str(def.get("name", def.get("id", "?"))).split(" ", false)
-	if words.is_empty():
-		return "?"
-	if words.size() > 1 and words[-1].begins_with("Mk"):
-		return words[0][0] + words[-1].substr(2)
-	return words[0][0] + words[1][0] if words.size() > 1 else words[0].substr(0, 2)
-
-
-func _draw_label(def: Dictionary, centre: Vector2, col: Color) -> void:
-	var font := ThemeDB.fallback_font
-	var text := _label_of(def)
-	var size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14)
-	draw_string(font, centre - Vector2(size.x / 2.0, size.y / 2.0 - font.get_ascent(14)), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
-
-
-## The "no power" mark: a red lightning bolt, or a red dot when the font has no such glyph.
-func _draw_no_power(at: Vector2) -> void:
-	var font := ThemeDB.fallback_font
-	if font.has_char(0x26A1):
-		draw_string(font, at + Vector2(-6, 5), "⚡", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.RED)
-	else:
-		draw_circle(at, 3.5, Color.RED)
+		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, {"powered": powered.get(uid, false)})
 
 
 ## Each room cell from red (empty) to blue (full); breached rooms get an outline.
@@ -637,7 +628,7 @@ func _draw_power() -> void:
 		for uid in n["members"]:
 			draw_rect(_cells_rect(ship.components.instances[uid]["cells"]).grow(-1), col, false, 2.0)
 		var at: Vector2 = cell_rect(n["cells"][0]).position + Vector2(0, -4)
-		var text := "supply %d / demand %d" % [n["supply"], n["demand"]]
+		var text := "supply %s / demand %s" % [_num(n["supply"]), _num(n["demand"])]
 		draw_string(font, at + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0, 0, 0, 0.8))
 		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, col.lightened(0.35))
 
@@ -708,8 +699,7 @@ func _draw_ghost_system(g: Dictionary, tint: Color) -> void:
 		cells = ship.components.instances[uid]["cells"]
 	var r := _cells_rect(cells).grow(-1)
 	if g.has("id"):
-		draw_rect(r, Color(Color(ship.components.def(id).get("color", "#ff00ff")), 0.5))
-		_draw_label(ship.components.def(id), r.get_center(), Color(0, 0, 0, 0.7))
+		Visuals.draw_component(self, _cells_rect(cells), ship.components.def(id), {"rot": g["rot"]}, CELL, {"alpha": 0.6})
 	else:
 		_draw_cross(r, tint)
 	draw_rect(r, tint, false, 2.0)

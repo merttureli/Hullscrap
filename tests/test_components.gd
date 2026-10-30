@@ -40,13 +40,15 @@ func test_data_is_complete() -> void:
 		"oxygen_gen": [-2, 1, 1], "shield_mk1": [-3, 3, 1], "laser_mk1": [-2, 5, 1], "laser_mk2": [-3, 5, 2],
 		"helm": [-1, 2, 1], "medbay": [-2, 3, 1], "bed": [0, 0, 1], "fabricator": [-2, 6, 1],
 		"robot_arm": [-1, 6, 1], "laser_cutter": [-2, 6, 1], "assembly_rig": [-2, 6, 1], "nanoforge": [-4, 6, 1],
+		"reactor_scrap_mk1": [6, 0, 1], "engine_scrap_mk1": [-2, 4, 1], "oxygen_scrap_mk1": [-2, 1, 1],
+		"reactor_neon_mk1": [16, 0, 1], "engine_neon_mk1": [-3, 4, 1], "radiator": [-1, 2, 1],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:
 		check(c.has(id), id + " exists")
 		var d := c.def(id)
 		eq([d["power"], d["priority"], d["tier"]], want[id], id + " power, priority, tier")
-		for k in ["name", "size", "color", "family", "manned", "stats"]:
+		for k in ["name", "size", "color", "family", "manned", "stats", "line", "hp", "heat_limit", "heat_per_s", "cooling"]:
 			check(d.has(k), "%s has %s" % [id, k])
 	eq(c.def("reactor_mk1")["size"], [4, 4], "reactor is 4x4 (a crew body is 2x2)")
 	eq(c.def("engine_mk1")["size"], [4, 2], "engine is 4x2")

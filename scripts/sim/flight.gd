@@ -52,8 +52,10 @@ func load_config(path: String) -> bool:
 	return true
 
 
-## Total mass of the ship (at least 1.0): tiles, components and cables.
-func mass_of(grid, components, cables) -> float:
+## Total mass of the ship (at least 1.0): tiles, components and cables. `mass_mult`: component id ->
+## the line's mass multiplier (Stats.mass_mults); ids it lacks weigh as listed. For line-adjusted
+## thrust pass thrust_of / can_fly a Stats.view(components, lines) instead of the components.
+func mass_of(grid, components, cables, mass_mult := {}) -> float:
 	var total := 0.0
 	var tiles := {}  # tile id -> count
 	for c in grid.tiles:
@@ -68,10 +70,11 @@ func mass_of(grid, components, cables) -> float:
 		e[1] += i["cells"].size()
 		comps[i["id"]] = e
 	for id in _sorted(comps.keys()):
+		var m := float(mass_mult.get(id, 1.0))
 		if component_mass.has(id):
-			total += float(comps[id][0]) * float(component_mass[id])
+			total += float(comps[id][0]) * float(component_mass[id]) * m
 		else:
-			total += float(comps[id][1]) * component_mass_per_cell
+			total += float(comps[id][1]) * component_mass_per_cell * m
 	total += float(cables.cells.size()) * cable_mass_per_cell
 	return maxf(total, MIN_MASS)
 

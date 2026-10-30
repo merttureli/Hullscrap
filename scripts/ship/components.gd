@@ -1,12 +1,18 @@
 extends RefCounted
 ## Component definitions (data/components.json) and the components placed on a ship.
-## A placed component is an instance with a footprint of grid cells. Pure data, no nodes.
+## A placed component is an instance with a footprint of grid cells and some runtime state
+## (hp, heat, status). Pure data, no nodes.
 
-const VERSION := 1
+const Stats = preload("res://scripts/sim/stats.gd")
+## Save format. 2 adds each instance's hp, heat and status; version 1 saves still load (full hp, cold, ok).
+const VERSION := 2
+const MIN_VERSION := 1
+## An instance's status: ok, or one of the ways it can be out of action.
+const STATUSES: Array[String] = ["ok", "overheated", "malfunction", "disabled"]
 
 var by_id := {}
 var order: Array[String] = []
-var instances := {}  # uid -> {uid, id, anchor, rot, cells}
+var instances := {}  # uid -> {uid, id, anchor, rot, cells, hp, heat, status}
 var _cell_uid := {}  # Vector2i -> uid of the component covering it
 var _next_uid := 1   # only grows, so a uid is never reused
 
@@ -17,6 +23,7 @@ func load_defs(path: String) -> void:
 	for d in data["components"]:
 		for k in ["power", "priority", "tier"]:
 			d[k] = int(d.get(k, 0))
+		d["hp"] = Stats.max_hp(d)
 		d["size"] = [int(d["size"][0]), int(d["size"][1])]
 		if not by_id.has(d["id"]):
 			order.append(d["id"])
@@ -25,6 +32,11 @@ func load_defs(path: String) -> void:
 
 func ids() -> Array[String]:
 	return order
+
+
+## Is `version` a save version this class can load?
+static func supports(version: int) -> bool:
+	return version >= MIN_VERSION and version <= VERSION
 
 
 func has(id: String) -> bool:
@@ -101,13 +113,14 @@ func to_dict() -> Dictionary:
 	var list := []
 	for uid in uids:
 		var i: Dictionary = instances[uid]
-		list.append({"uid": uid, "id": i["id"], "anchor": [i["anchor"].x, i["anchor"].y], "rot": i["rot"]})
+		list.append({"uid": uid, "id": i["id"], "anchor": [i["anchor"].x, i["anchor"].y], "rot": i["rot"],
+			"hp": i["hp"], "heat": i["heat"], "status": i["status"]})
 	return {"version": VERSION, "next_uid": _next_uid, "instances": list}
 
 
 ## Replace the placed components with a saved set. Returns "" on success, else the reason.
 func load_dict(d: Dictionary) -> String:
-	if int(d.get("version", 0)) != VERSION:
+	if not supports(int(d.get("version", 0))):
 		return "unsupported components version"
 	for i in d["instances"]:
 		if not by_id.has(str(i["id"])):
@@ -119,14 +132,28 @@ func load_dict(d: Dictionary) -> String:
 		var uid := int(i["uid"])
 		_next_uid = maxi(_next_uid, uid + 1)
 		_add(uid, str(i["id"]), Vector2i(int(i["anchor"][0]), int(i["anchor"][1])), int(i["rot"]))
+		_load_state(instances[uid], i)
 	return ""
 
 
 func _add(uid: int, id: String, anchor: Vector2i, rot: int) -> void:
 	var cells := footprint(id, anchor, rot)
-	instances[uid] = {"uid": uid, "id": id, "anchor": anchor, "rot": posmod(rot, 4), "cells": cells}
+	instances[uid] = {"uid": uid, "id": id, "anchor": anchor, "rot": posmod(rot, 4), "cells": cells,
+		"hp": Stats.max_hp(by_id[id]), "heat": 0.0, "status": "ok"}
 	for c in cells:
 		_cell_uid[c] = uid
+
+
+## Copy the saved runtime state of an instance (hp, heat, status), keeping the fresh value for
+## whatever is missing or out of range.
+func _load_state(inst: Dictionary, saved: Dictionary) -> void:
+	var max_hp := Stats.max_hp(by_id[inst["id"]])
+	if saved.get("hp") is float or saved.get("hp") is int:
+		inst["hp"] = clampi(int(saved["hp"]), 0, max_hp)
+	if saved.get("heat") is float or saved.get("heat") is int:
+		inst["heat"] = maxf(0.0, float(saved["heat"]))
+	if str(saved.get("status", "")) in STATUSES:
+		inst["status"] = str(saved["status"])
 
 
 ## A floor-type tile: something is built there and it is neither solid (wall) nor a door.

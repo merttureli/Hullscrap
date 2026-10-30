@@ -1,16 +1,22 @@
 extends Node
 ## Runs the game's ships every frame. It holds the list of ships (the first is the player's); each
-## frame, per ship: refresh the derived state if the structure changed, let powered oxygen
-## generators add air, let the crew breathe, then let the atmosphere flow.
+## frame, per ship: refresh the derived state if the structure changed, heat up and cool down the
+## components, roll their malfunctions, let powered oxygen generators add air, let the crew
+## breathe, then let the atmosphere flow.
+## The random rolls (malfunctions, fires) use one RandomNumberGenerator per ship, seeded with the
+## ship's rng_seed (default 1), so the same ship and inputs always play out the same.
 ## Auto doors: a door piece counts as open for the atmosphere while any crew body overlaps any of
 ## its cells. Crew breathe the room under the centre of their body.
 ## step() does one tick without the scene tree, so tests can drive it.
 
 const Ship = preload("res://scripts/ship/ship.gd")
+const Heat = preload("res://scripts/sim/heat.gd")
+const Reliability = preload("res://scripts/sim/reliability.gd")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
 const MAX_FRAME := 0.25  ## longest time step a slow frame may take, seconds
 
 var ships: Array = []
+var _rngs := {}  # ship -> its RandomNumberGenerator
 
 
 func _init() -> void:
@@ -32,6 +38,15 @@ func step(dt: float) -> void:
 		_step_ship(ship, dt)
 
 
+## The random number generator of `ship`, made on first use from ship.rng_seed.
+func rng_of(ship: Ship) -> RandomNumberGenerator:
+	if not _rngs.has(ship):
+		var rng := RandomNumberGenerator.new()
+		rng.seed = ship.rng_seed
+		_rngs[ship] = rng
+	return _rngs[ship]
+
+
 ## The door cells that are open right now: the doors someone opened (grid.door_open) plus every door
 ## piece that a crew body overlaps (auto doors). Cell -> true.
 static func open_door_cells(ship: Ship) -> Dictionary:
@@ -46,12 +61,17 @@ static func open_door_cells(ship: Ship) -> Dictionary:
 
 func _step_ship(ship: Ship, dt: float) -> void:
 	ship.refresh()
+	ship.clock += dt
+	var rng := rng_of(ship)
+	Heat.tick(ship, dt, rng)
+	Reliability.tick(ship, dt, rng)
+	ship.refresh()  # a part that went out of action or came back changes the power
 	var powered: Dictionary = ship.power_state.get("powered", {})
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
 	for uid in uids:
 		var inst: Dictionary = ship.components.instances[uid]
-		var rate := float(ship.components.def(inst["id"]).get("stats", {}).get("o2_rate", 0.0))
+		var rate: float = ship.effective(inst["id"])["stats"].get("o2_rate", 0.0)
 		if rate > 0.0 and powered.get(uid, false):
 			ship.atmosphere.add_oxygen(ship.atmosphere.room_at(inst["anchor"]), rate * dt)
 	for m in ship.crew:
