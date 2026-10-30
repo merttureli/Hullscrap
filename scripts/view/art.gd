@@ -24,11 +24,19 @@ static func component(id: String) -> RefCounted:
 	var s = _sheet("components", id)
 	if s != null or not tier_fallback:
 		return s
+	var key := "%s/components-tier/%s" % [root, id]  # the lower-tier answer is kept too, null included
+	if not _cache.has(key):
+		_cache[key] = _lower_tier(id)
+	return _cache[key]
+
+
+## The art of the highest lower tier of `id` ("engine_mk2" -> "engine_mk1"), or null.
+static func _lower_tier(id: String) -> RefCounted:
 	var m := RegEx.create_from_string("^(.+)_mk(\\d+)$").search(id)
 	if m == null:
 		return null
 	for tier in range(int(m.get_string(2)) - 1, 0, -1):
-		s = _sheet("components", "%s_mk%d" % [m.get_string(1), tier])
+		var s = _sheet("components", "%s_mk%d" % [m.get_string(1), tier])
 		if s != null:
 			return s
 	return null

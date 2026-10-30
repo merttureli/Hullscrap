@@ -85,9 +85,13 @@ func _unhandled_input(e: InputEvent) -> void:
 			Jobs.order_move(_ship(), ada, a, door_passable)  # she leaves the job board alone for a while
 
 
-## WASD by keycode (any layout). Ctrl/Cmd held means a shortcut like Ctrl+S, not walking.
+## WASD by keycode (any layout). Ctrl/Cmd held means a shortcut like Ctrl+S, not walking, and so
+## does the crafting panel (C) being open, whose keys must not walk the soldier about.
 func _wasd() -> Vector2:
 	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_META):
+		return Vector2.ZERO
+	var craft := get_node_or_null("../CraftLayer/CraftingPanel")
+	if craft != null and craft.visible:
 		return Vector2.ZERO
 	return Vector2(
 		float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A)),

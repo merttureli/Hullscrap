@@ -2,10 +2,11 @@ extends Node2D
 ## Combat mode on screen: press K in play mode to meet the test pirate. The camera zooms out to frame
 ## both ships, which are drawn at their arena transforms (ship_view.gd); the interior build mode
 ## and the walking crew are put away. W/S throttle, A/D turn, the mouse aims, LMB fires group 1 (lasers,
-## bolts, beams), RMB group 2 (missiles, flak), 1-9 a single weapon, Space overcharges the shield,
+## bolts, beams), RMB group 2 (missiles, flak), 1-9 a single weapon, Shift, Space and Q use the engine, shield and utility abilities,
 ## Esc leaves once the enemy is wrecked or 4000 px away, R restarts when you are wrecked.
 ## The rules live in combat_session.gd; this node reads input, runs the session, and draws the aim
-## wedges, shots, impacts and the HUD (schematics, weapon bar). Placeholder effects, no art.
+## wedges, shots, impacts and the HUD (schematics, weapon bar). Shots, beams and effects are drawn from
+## art/projectiles and art/fx (scripts/view/art.gd) when that art exists, else as code-drawn placeholders.
 
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
@@ -26,7 +27,7 @@ const MAX_FX := 500
 const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
-const HINT := "W/S throttle   A/D turn   mouse aims   LMB group 1   RMB group 2   1-9 single weapon   Space overcharge shield   Esc leave"
+const HINT := "W/S throttle   A/D turn   mouse aims   LMB group 1   RMB group 2   1-9 single weapon   Shift engine ability   Space shield ability   Q utility   Esc leave"
 
 var sim: Node  ## ShipSim
 var build: Node  ## BuildMode (put away during the fight)
@@ -418,7 +419,7 @@ func _on_event(e: Dictionary) -> void:
 		"shield":
 			var shot_dir := dir
 			if Art.fx("shield_ripple") != null:
-				_on_ship(idx, pos, {"k": "art", "name": "shield_ripple", "anchor": "impact", "life": 0.45, "scale": 1.5, "angle": (-shot_dir).angle() + PI / 2.0})
+				_on_ship(idx, pos, {"k": "art", "name": "shield_ripple", "anchor": "impact", "life": 0.45, "scale": 1.0, "angle": (-shot_dir).angle() + PI / 2.0})
 			else:
 				_on_ship(idx, pos, {"k": "ring", "life": 0.55, "r": 70.0, "color": Color("#7fe4ff") if e.get("dtype", "") != "ion" else Color("#b99bff")})
 			_on_ship(idx, pos, {"k": "flash", "life": 0.15, "r": 16.0, "color": Color("#bff2ff")})
@@ -516,7 +517,7 @@ func _fx_pos(f: Dictionary) -> Vector2:
 
 func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 	var age: float = (_clock - f["t0"]) / f["life"]
-	var col: Color = f["color"]
+	var col: Color = f.get("color", Color.WHITE)
 	var fade := 1.0 - age
 	match f["k"]:
 		"art":
