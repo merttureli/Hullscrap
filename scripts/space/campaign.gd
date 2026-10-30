@@ -14,6 +14,7 @@ const Arena = preload("res://scripts/combat/arena.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -23,7 +24,6 @@ const MIN_VERSION := 1
 const FUEL_PARTS := 100
 const CONFIG_PATH := "res://data/drift.json"
 const FACTIONS_PATH := "res://data/factions.json"
-const NAMES_PATH := "res://data/names.json"
 const ITEMS_PATH := "res://data/items.json"
 const SAVE_PATH := "user://campaign.json"
 const REFUSED_TEXT := "The dock master turns you away."
@@ -522,14 +522,13 @@ func salvage_event(ship) -> Dictionary:
 
 # --- crew --------------------------------------------------------------------------------------------------------
 
-## A name for a new `species` crew member nobody aboard has: from data/names.json when it exists
-## (crew -> species -> names), else the names of data/crew.json.
+## A name for a new `species` crew member nobody aboard has: from the name pools (crew -> species ->
+## names, data/names.json and the packs' names.json through the content loader), else the names of data/crew.json.
 func crew_name(species: String, ship) -> String:
 	var pool: Array = []
-	if FileAccess.file_exists(NAMES_PATH):
-		var data = JSON.parse_string(FileAccess.get_file_as_string(NAMES_PATH))
-		if data is Dictionary and data.get("crew") is Dictionary and data["crew"].get(species) is Array:
-			pool = data["crew"][species]
+	var crew_pools = Content.names().get("crew")
+	if crew_pools is Dictionary and crew_pools.get(species) is Array:
+		pool = crew_pools[species]
 	if pool.is_empty():
 		pool = CrewMember.config().get("names", [])
 	var free: Array = pool.filter(func(n): return not ship.crew.any(func(m): return m.name == n))

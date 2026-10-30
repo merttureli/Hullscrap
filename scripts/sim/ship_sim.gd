@@ -2,8 +2,8 @@ extends Node
 ## Runs the game's ships every frame. It holds the list of ships (the first is the player's); each
 ## frame, per ship: refresh the derived state if the structure changed, heat up and cool down the
 ## components, roll their malfunctions, let powered oxygen generators add air, let the crew
-## breathe, burn the fires, let the crew work (jobs.gd: walk, repair, fight fires, man stations,
-## heal), then let the atmosphere flow. A ship that is not the player's gets its own crew on its
+## breathe (each by their o2_use; auras add air: traits.gd), burn the fires, let the crew work
+## (jobs.gd: walk, repair, fight fires, man stations, heal), then let the atmosphere flow. A ship that is not the player's gets its own crew on its
 ## first tick (Jobs.spawn_enemy_crew).
 ## Abilities (abilities.gd) tick here while one ship is in the sim; in a fight (more than one) the
 ## arena ticks them itself, at its own rate. The fabricator's queue (ship.crafting) ticks for every
@@ -22,6 +22,7 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
 const MAX_FRAME := 0.25  ## longest time step a slow frame may take, seconds
 
@@ -148,9 +149,13 @@ func _step_ship(ship: Ship, dt: float) -> void:
 	if ship != player_ship() and not _crewed.has(ship):
 		if not ship.crew.is_empty() or not Jobs.spawn_enemy_crew(ship).is_empty():
 			_crewed[ship] = true
+	var auras := TraitSet.room_auras(ship)  # a Sporeling's spores add air to their room
+	for room in auras:
+		ship.atmosphere.add_oxygen(room, float(auras[room]["o2_per_s"]) * dt)
 	for m in ship.crew:
-		if not m.traits().has("no_breath"):  # Basalt don't use the air
-			ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * dt)
+		var use := float(TraitSet.of(m)["o2_use"])  # a Basalt uses none, a Gauntling half
+		if use > 0.0:
+			ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * use * dt)
 	Fire.tick(ship, dt, rng)
 	jobs_of(ship).tick(ship, dt, ships.size() > 1)  # more than one ship aboard the sim: a fight
 	ship.atmosphere.tick(dt, open_door_cells(ship))

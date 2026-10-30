@@ -15,6 +15,7 @@ const Power = preload("res://scripts/sim/power.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 
@@ -176,18 +177,22 @@ func mark_dirty() -> void:
 
 ## Bring the derived state up to date. Rooms are rebuilt after a structure change; power is
 ## re-solved then too, and also when a component or cable was added or removed behind our back or
-## a component went out of action or came back. Power uses the line-adjusted numbers (Stats).
+## a component went out of action or came back. Power uses the line-adjusted numbers (Stats), and
+## the bonus a manned part gets from its operator's traits (TraitSet.station_bonus).
 ## Returns true when something was recomputed. Cheap when nothing changed.
 func refresh() -> bool:
 	var uids := components.instances.keys()
 	uids.sort()
 	var off := disabled_uids()
-	var sig := hash([uids, cables.cells.size(), off.keys(), Abilities.rev(self)])
+	var bonus := TraitSet.station_bonus(self)
+	var sig := hash([uids, cables.cells.size(), off.keys(), Abilities.rev(self), bonus])
 	if not _structure_dirty and sig == _signature:
 		return false
 	if _structure_dirty:
 		atmosphere.rebuild(grid)
-	power_state = Power.solve(Stats.view(components, lines), cables, off, Abilities.power_mods(self))
+	var mods := Abilities.power_mods(self)
+	mods["bonus"] = bonus
+	power_state = Power.solve(Stats.view(components, lines), cables, off, mods)
 	_structure_dirty = false
 	_signature = sig
 	return true

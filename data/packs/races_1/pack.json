@@ -1,0 +1,7 @@
+{
+	"id": "races_1",
+	"name": "Races, wave 1",
+	"version": "1.0",
+	"requires": [],
+	"notes": "Six crew species: Kett, Mire, Sporeling, Gauntling, Prismatic and Grundl (docs/waves/races_1.md). Their traits are bags of keys of the trait library (data/traits.json); art is art/crew/<id>/. Recruited at Rusthold (Kett, Gauntling), Meridian (Mire, Grundl) and the Prism (Sporeling, Prismatic): data/drift.json."
+}
