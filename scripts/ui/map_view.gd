@@ -188,6 +188,18 @@ func wait() -> String:
 	return ""
 
 
+## Y with no fuel: Ma tows you home to Gantry Rusthold (debt +150, 2 fuel), then you arrive there.
+func tow() -> String:
+	var r := campaign.tow(ship())
+	if not r["ok"]:
+		_say(r["why"], true)
+		return r["why"]
+	refresh()
+	_say(" ".join(r["notes"]))
+	_arrive()
+	return ""
+
+
 ## The current node has been reached: refused at the dock, an event, a station menu or nothing.
 func _arrive() -> void:
 	var a := campaign.arrive(ship())
@@ -300,6 +312,8 @@ func _input(e: InputEvent) -> void:
 			dock()
 		KEY_T:
 			wait()
+		KEY_Y:
+			tow()
 
 
 func _gui_input(e: InputEvent) -> void:
@@ -482,7 +496,7 @@ func _draw_foot(p: Rect2) -> void:
 	var y := p.end.y - FOOT_H + 28.0  # the message, then the fuel warning, then the hint line, each on its own row
 	if message != "":
 		_text(message, Vector2(p.position.x + PAD, y), 16, BAD if message_bad else GOOD)
-	_text("Click a lane-linked node to jump (%s)    Enter: dock    T: wait for a trader (no fuel)    Shift+click: drift jump (no fuel, hull -%d)    M / Esc: close" % [jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
+	_text("Click a lane-linked node to jump (%s)    Enter: dock    T: wait for a trader (no fuel)    Y: Ma tows you home (no fuel, debt +150)    Shift+click: drift jump (no fuel, hull -%d)    M / Esc: close" % [jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
 		Vector2(p.position.x + PAD, p.end.y - 22.0), 13, DIM_TEXT)
 	var s = ship()
 	if s != null and campaign.fuel_short(s):

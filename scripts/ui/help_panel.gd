@@ -61,6 +61,7 @@ const COLUMNS: Array = [
 			["Click a lit neighbour", "Jump there for fuel (the tooltip says how much); an event or a station follows"],
 			["Shift+click", "Drift jump with no fuel (costs hull)"],
 			["T", "Wait for a passing trader (no fuel)"],
+			["Y", "Ma tows you home to Rusthold (no fuel, debt +150)"],
 			["Enter", "Dock at the station you are at"],
 			["Esc", "Close the map"],
 			["1 - 9 or click", "Pick a choice in an event"],

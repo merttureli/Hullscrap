@@ -108,6 +108,7 @@ In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_rai
 | Arrow keys | Shield balance, one step (half a weight) toward a side: **Up** the bow, **Down** the stern, **Left** port, **Right** starboard (port and starboard need 4+ sectors; the step is taken from the opposite sector first, then evenly from the others; no step past 0 or 2) |
 | End | Shield balance back to even |
 | Esc | Leave, once the pirate is wrecked or more than 4000 px away |
+| Y (map, no fuel) | Ma tows you home to Gantry Rusthold: debt +150, 2 fuel (so a run never gets stuck) |
 | J | Spool the jump drive: after 10 s you escape the fight from any range (a fled fight gives no loot) |
 | R | After your ship is wrecked: back to build mode with the empty starter hull reloaded (B, then N, picks a ship again) |
 
