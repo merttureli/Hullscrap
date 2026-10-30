@@ -6,8 +6,9 @@ extends RefCounted
 ## and applies its effects to the campaign and the ship. No nodes, no drawing; the event panel
 ## (scripts/ui/event_panel.gd) only shows what this returns.
 ## Rules in short:
-## - An event's `type` is the node type it can happen at. `page` (or any event named by a `goto`) is a
-##   follow-up page: it is never rolled at a node. `requires.node` matches a node type or a place id.
+## - An event's `type` is the node type it can happen at. A follow-up page (type `page`, weight 0, or any
+##   event named by a `goto`) is never rolled at a node. `requires.node` matches a node type or a place id.
+##   Type `debt` is no node: the debt clock (campaign.gd) picks those, by what their `requires` say.
 ## - A choice is hidden when its requirements are not met, greyed (with what it needs) when it only
 ##   lacks items or credits, and blue when it asks for a species, a trait or an installed component.
 ## - `items` and `credits` in a choice's requires must be held; they are paid only when `pay` is true
@@ -15,29 +16,28 @@ extends RefCounted
 ## - `after_win` ({text, effects}) on an event, or on an outcome, runs after a won fight.
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
 
-const Abilities = preload("res://scripts/sim/abilities.gd")
-
 const DIR := "res://data/events"
+const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
-const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page"]
+const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt"]
 const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "text", "choices", "after_win"]
-const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node"]
+const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay"]
-const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "species", "trait", "items", "pay", "component", "credits"]
+const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "species", "trait", "items", "pay", "component", "credits"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
-const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt"]
+const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log"]
 const RECRUIT_KEYS: Array = ["name", "species"]
 const SPECIES: Array = ["human", "basalt", "emberkin", "fenn"]
 const TRAITS: Array = ["no_breath", "heat_resistant", "fast_repair", "suit"]
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
-const SPECIES_TRAITS := {"basalt": ["no_breath"], "emberkin": ["heat_resistant"], "fenn": ["fast_repair"]}  ## until CrewMember.traits() merges them
 const SHIPS_DIR := "res://data/ships/"
 const DEFAULT_WEIGHT := 10.0
 
 static var _shared = null
 
 var events := {}  ## id -> the event dictionary as written
+var logs := {}  ## derelict log id -> {id, title, ship, faction, text} (data/logs/*.json)
 var files := {}  ## id -> the file it came from
 var order: Array[String] = []  ## ids, in file name order then file order
 var errors: Array[String] = []  ## problems met while loading (bad JSON, a missing id, a duplicate id)
@@ -66,6 +66,13 @@ func load_dir(dir: String) -> void:
 	names.sort()
 	for f in names:
 		_load_file(dir + "/" + f)
+	_load_logs()
+	_index_pages()
+
+
+## Remember which events are follow-up pages: every event some outcome names in a goto.
+func _index_pages() -> void:
+	_pages.clear()
 	for id in order:
 		var choices = events[id].get("choices")
 		for ch in choices if choices is Array else []:
@@ -74,6 +81,19 @@ func load_dir(dir: String) -> void:
 				var eff = o.get("effects") if o is Dictionary else null
 				if eff is Dictionary and eff.get("goto") is String:
 					_pages[eff["goto"]] = true
+
+
+## Read every data/logs/*.json ({"logs": [{id, title, ship, faction, text}]}) into `logs`.
+func _load_logs() -> void:
+	logs.clear()
+	var names: Array = Array(DirAccess.get_files_at(LOGS_DIR)).filter(func(f): return f.ends_with(".json"))
+	names.sort()
+	for f in names:
+		var data = JSON.parse_string(FileAccess.get_file_as_string(LOGS_DIR + "/" + f))
+		if data is Dictionary and data.get("logs") is Array:
+			for l in data["logs"]:
+				if l is Dictionary and l.get("id") is String:
+					logs[l["id"]] = l
 
 
 func _load_file(path: String) -> void:
@@ -91,12 +111,19 @@ func _load_file(path: String) -> void:
 		if not (ev is Dictionary and ev.get("id") is String and ev["id"] != ""):
 			errors.append("%s: event number %d has no id" % [path, n])
 			continue
-		if events.has(ev["id"]):
-			errors.append("%s: event '%s': the id is also used in %s" % [path, ev["id"], files[ev["id"]]])
-			continue
-		events[ev["id"]] = ev
-		files[ev["id"]] = path
-		order.append(ev["id"])
+		add(ev, path)
+
+
+## Add event `ev` (as if read from `file`); a duplicate id is reported in `errors` and not added.
+func add(ev: Dictionary, file := "(code)") -> void:
+	var id := str(ev["id"])
+	if events.has(id):
+		errors.append("%s: event '%s': the id is also used in %s" % [file, id, files[id]])
+		return
+	events[id] = ev
+	files[id] = file
+	order.append(id)
+	_index_pages()
 
 
 func has(id: String) -> bool:
@@ -116,8 +143,9 @@ func is_page(id: String) -> bool:
 
 ## The event that happens at `node` ({id, type, place}): a weighted roll with the campaign's rng among
 ## the events of the node's type whose requirements hold and that have not been used up (`once`).
-## {} when there is none. A `once` event is marked used by being picked.
-func pick(c, node: Dictionary) -> Dictionary:
+## `filter` (optional Callable(ev) -> bool) can narrow the pool further. {} when there is none. A `once`
+## event is marked used by being picked.
+func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 	var pool: Array = []
 	var total := 0.0
 	for id in order:
@@ -125,7 +153,7 @@ func pick(c, node: Dictionary) -> Dictionary:
 		if str(ev.get("type", "")) != str(node.get("type", "")) or is_page(id):
 			continue
 		var w := _weight(ev.get("weight", DEFAULT_WEIGHT))
-		if w <= 0.0 or not eligible(ev, c, node):
+		if w <= 0.0 or not eligible(ev, c, node, ship) or (filter.is_valid() and not filter.call(ev)):
 			continue
 		pool.append([ev, w])
 		total += w
@@ -143,10 +171,19 @@ func pick(c, node: Dictionary) -> Dictionary:
 
 
 ## May `ev` happen at `node` now (not used up, its requires hold)?
-func eligible(ev: Dictionary, c, node: Dictionary) -> bool:
+func eligible(ev: Dictionary, c, node: Dictionary, ship = null) -> bool:
 	if bool(ev.get("once", false)) and c.used.has(str(ev.get("id", ""))):
 		return false
-	return _world_ok(_dict(ev.get("requires")), c, node)
+	return _world_ok(_dict(ev.get("requires")), c, node, ship)
+
+
+## What a debt event is for, judged by its requires: "miss" (it asks for the flag debt_missed: the
+## collectors' talk), "first" (it asks for not_flag met_ma: Ma's first call), else "reminder".
+static func debt_kind(ev: Dictionary) -> String:
+	var req := _dict(ev.get("requires"))
+	if _list(req.get("flag")).has("debt_missed"):
+		return "miss"
+	return "first" if _list(req.get("not_flag")).has("met_ma") else "reminder"
 
 
 ## Mark `ev` as seen (a `once` event never comes back). Returns it.
@@ -170,8 +207,11 @@ static func _list(v) -> Array:
 	return [] if v == null else [v]
 
 
-## The parts of `requires` that depend only on the campaign: jumps, flags, reputation, node.
-func _world_ok(req: Dictionary, c, node: Dictionary) -> bool:
+## The parts of `requires` that depend on the campaign (and the fuel in the hold): jumps, flags,
+## reputation, node, fuel_max.
+func _world_ok(req: Dictionary, c, node: Dictionary, ship = null) -> bool:
+	if req.has("fuel_max") and (ship.inventory.count("fuel") if ship != null else 0) > int(req["fuel_max"]):
+		return false
 	if req.has("jumps_min") and c.jumps < int(req["jumps_min"]):
 		return false
 	if req.has("jumps_max") and c.jumps > int(req["jumps_max"]):
@@ -211,12 +251,9 @@ func _crew_ok(req: Dictionary, ship) -> bool:
 	return true
 
 
-## The traits of crew member `m`: CrewMember.traits() once it exists, else the personal traits of
-## data/crew.json plus those of the species.
+## The traits of crew member `m` (species, personal and gear traits: CrewMember.traits()).
 static func traits_of(m) -> Array:
-	if m.has_method("traits"):
-		return m.traits()
-	return Abilities.traits_of(m) + SPECIES_TRAITS.get(m.species, [])
+	return m.traits()
 
 
 # --- choices ------------------------------------------------------------------------------------------
@@ -236,7 +273,7 @@ func choice_view(ev: Dictionary, c, ship, node: Dictionary = {}) -> Array:
 	for i in choices.size():
 		var ch: Dictionary = _dict(choices[i])
 		var req := _dict(ch.get("requires"))
-		if not _world_ok(req, c, node) or not _crew_ok(req, ship):
+		if not _world_ok(req, c, node, ship) or not _crew_ok(req, ship):
 			continue
 		var short: Dictionary = ship.inventory.missing(needs(ch))
 		var blue := is_blue(ch)
@@ -286,9 +323,10 @@ static func _name(ship, id: String) -> String:
 
 
 ## Take choice `index` of `ev`: pay what it asks to pay, roll an outcome, apply its effects. Returns
-## {ok, why, text, lines, goto, fight, after_win}; `lines` are the changes in words ("-40 credits"),
-## `goto` an event id to show next, `fight` a design id or "tier" for the controller to start, and
-## `after_win` the {text, effects} to run if that fight is won. ok is false (and nothing changes) when
+## {ok, why, text, lines, goto, fight, logs, after_win}; `lines` are the changes in words ("-40 credits"),
+## `goto` an event id to show next, `fight` a design id or "tier" for the controller to start, `logs`
+## the derelict logs found (each {id, title, ship, faction, text}) and `after_win` the {text, effects}
+## to run if that fight is won. ok is false (and nothing changes) when
 ## the choice is not on offer or its price cannot be paid.
 func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dictionary:
 	var entry := {}
@@ -312,7 +350,7 @@ func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dicti
 	var res := apply(_dict(outcome.get("effects")), c, ship, node)
 	lines.append_array(res["lines"])
 	var after: Dictionary = _dict(outcome.get("after_win")) if outcome.has("after_win") else _dict(ev.get("after_win"))
-	return {"ok": true, "why": "", "text": str(outcome.get("text", "")), "lines": lines, "goto": res["goto"], "fight": res["fight"], "after_win": after}
+	return {"ok": true, "why": "", "text": str(outcome.get("text", "")), "lines": lines, "goto": res["goto"], "fight": res["fight"], "logs": res["logs"], "after_win": after}
 
 
 ## One of `outcomes` ({weight, ...}) by weight, with `rng`. {} for an empty list.
@@ -334,11 +372,12 @@ static func roll(outcomes, rng: RandomNumberGenerator) -> Dictionary:
 
 # --- effects ------------------------------------------------------------------------------------------
 
-## Apply `effects` to campaign `c` and `ship`. Returns {lines, goto, fight}: the changes in words, the
-## follow-up page and the fight to start (both "" when there is none). The fight itself is not started
-## here.
+## Apply `effects` to campaign `c` and `ship`. Returns {lines, goto, fight, logs}: the changes in words,
+## the follow-up page and the fight to start (both "" when there is none) and the derelict logs found.
+## The fight itself is not started here.
 func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 	var lines: Array = []
+	var found: Array = []
 	var items := _dict(effects.get("items"))
 	var ids: Array = items.keys()
 	ids.sort()
@@ -388,12 +427,18 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 		if who != "":
 			lines.append("%s (%s) joins the crew" % [who, species.capitalize()])
 	if effects.has("lose_crew"):
-		var n := 0 if effects["lose_crew"] == false else (1 if effects["lose_crew"] is bool else int(effects["lose_crew"]))
+		var count = effects["lose_crew"]
+		var n: int = (1 if count else 0) if count is bool else int(count)
 		for i in n:
 			var gone: String = c.lose_crew(ship)
 			if gone != "":
 				lines.append("%s is lost" % gone)
-	return {"lines": lines, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", ""))}
+	for id in _list(effects.get("log")):
+		if logs.has(str(id)):
+			c.logs_found[str(id)] = true
+			found.append(logs[str(id)])
+			lines.append("Log found: " + str(logs[str(id)].get("title", id)))
+	return {"lines": lines, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "logs": found}
 
 
 # --- validation ---------------------------------------------------------------------------------------
@@ -513,7 +558,7 @@ func _check_req(req, allowed: Array, where: String, known: Dictionary, bad: Call
 		bad.call(where + " must be an object")
 		return
 	_check_keys(req, allowed, where + ": ", bad)
-	for k in ["jumps_min", "jumps_max", "credits"]:
+	for k in ["jumps_min", "jumps_max", "credits", "fuel_max"]:
 		if req.has(k) and not _is_num(req[k]):
 			bad.call("%s: %s must be a number" % [where, k])
 	for k in ["flag", "not_flag"]:
@@ -610,6 +655,9 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 			bad.call("%s: fight must be \"tier\" or the id of a design in data/ships (got '%s')" % [where, f])
 	if eff.has("goto") and not (eff["goto"] is String and events.has(eff["goto"])):
 		bad.call("%s: goto '%s' is not an event id in data/events" % [where, eff["goto"]])
+	for l in _list(eff.get("log")):
+		if not logs.has(l):
+			bad.call("%s: unknown log id '%s' (not in data/logs/*.json)" % [where, l])
 	for r in _list(eff.get("reveal")):
 		if not (r is String and (known["places"].has(r) or _is_node_id(r))):
 			bad.call("%s: reveal '%s' is not a place id (or a node id like n07)" % [where, r])

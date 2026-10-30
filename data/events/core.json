@@ -107,15 +107,15 @@
 			]
 		},
 		{
-			"id": "distress_hauler_fire", "type": "distress", "weight": 10,
-			"text": "A Scrapper hauler is spinning, a fire glowing through its cargo windows. The distress call is a woman shouting at someone called Dennis, which is how you know it's real.",
+			"id": "distress_stuck_airlock", "type": "distress", "weight": 10,
+			"text": "A Scrapper tug calls in a voice that gets a little less calm each time. Her airlock has jammed with two of her crew on the wrong side of it, and her air is going the way of all air.",
 			"choices": [
-				{"text": "Dock and help fight the fire.", "outcomes": [
-					{"weight": 70, "text": "You get the fire out and the hauler's captain presses scrap and credits into your hands. Dennis is not mentioned.", "effects": {"items": {"scrap": 40, "credits": 30}, "rep": {"clans": 1}}},
-					{"weight": 30, "text": "The fire gets one of your crew on the way out. The captain is sorry and shows it with scrap.", "effects": {"crew_hp": -20, "items": {"scrap": 15}}}]},
-				{"text": "[Basalt] Send your Basalt out on the hull, no suit needed.", "requires": {"species": "basalt"}, "outcomes": [
-					{"weight": 100, "text": "He vents the cargo deck from the outside, calm as a rock in a river. The fire goes out. The captain stares, then pays.", "effects": {"items": {"scrap": 60}, "rep": {"clans": 2}}}]},
-				{"text": "Leave them to it.", "outcomes": [{"weight": 100, "text": "You listen to Dennis get shouted at until the signal fades.", "effects": {"rep": {"clans": -1}}}]}
+				{"text": "Cut the airlock open from outside.", "outcomes": [
+					{"weight": 70, "text": "The torch bites through the seal and the pair tumbles into your arms, swearing. The tug's skipper pays what she can in scrap and credits.", "effects": {"items": {"scrap": 20, "credits": 30}, "rep": {"clans": 1}}},
+					{"weight": 30, "text": "The seal lets go all at once and takes a crewman's sleeve and some of the arm in it. The pair live, the skipper is mortified, the scrap is small.", "effects": {"crew_hp": -20, "items": {"scrap": 15}}}]},
+				{"text": "[Basalt] Send your Basalt out to hold the door while they climb through.", "requires": {"species": "basalt"}, "outcomes": [
+					{"weight": 100, "text": "He holds the jammed leaf with one hand like a man keeping a gate for a lady. The pair climb over him, and the skipper talks about it in Rusthold for a month.", "effects": {"items": {"scrap": 50}, "rep": {"clans": 2}}}]},
+				{"text": "Leave them to it.", "outcomes": [{"weight": 100, "text": "You listen to the tug's air meter count down until the signal fades. Nobody says anything for a while.", "effects": {"rep": {"clans": -1}}}]}
 			]
 		},
 		{

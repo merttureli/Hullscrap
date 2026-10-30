@@ -47,6 +47,8 @@ var paid := 0  ## credits repaid so far
 var jumps := 0  ## the jump counter: drives the debt clock and the danger tier
 var used := {}  ## once-events already seen: id -> true
 var revealed := {}  ## node ids shown on the map although far from any visited node
+var logs_found := {}  ## derelict log ids found: id -> true
+var reminded := -1  ## the payment cycle (jumps / every) Ma's reminder was shown in
 var hull_loss := 0  ## hull integrity points lost; repaired at stations
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
 var _hull_key := -1
@@ -269,12 +271,13 @@ func wait(ship) -> Dictionary:
 	if ship.inventory.count("fuel") > 0:
 		return {"ok": false, "why": "you still have fuel", "notes": [], "event": {}}
 	var notes := _advance(1)
-	return {"ok": true, "why": "", "notes": notes, "event": events.pick(self, {"id": current, "type": "trader", "place": ""})}
+	return {"ok": true, "why": "", "notes": notes, "event": events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)}
 
 
 ## What happens on reaching the current node. Returns {node, refused, event}: `refused` is the text of a
 ## dock master who turns you away (a faction below the refusal line), `event` the event to show ({} if
-## none). A station you may dock at rolls its recruits.
+## none). A debt event (Ma's call, a reminder, the collectors' talk) interrupts the node's own event; a
+## station you may dock at rolls its recruits.
 func arrive(ship) -> Dictionary:
 	var n := drift.node(current)
 	var out := {"node": n, "refused": "", "event": {}}
@@ -285,11 +288,37 @@ func arrive(ship) -> Dictionary:
 			return out
 		if st["services"].has("recruit"):
 			roll_offers(current, ship)
+	if n["type"] != "gate":
+		var due := _debt_event(ship)
+		if not due.is_empty():
+			out["event"] = due
+			return out
 	if n["type"] == "patrol" and refuses("concord"):
 		out["event"] = HOSTILE_PATROL
 		return out
-	out["event"] = events.pick(self, n)
+	out["event"] = events.pick(self, n, ship)
 	return out
+
+
+## The debt event due now, {} if none. The debt events (type debt) say when by their requires: Ma's first
+## call (not_flag met_ma) once its jumps_min is reached, a reminder when a payment is due within 2 jumps
+## (once per payment cycle) and the collectors' talk (flag debt_missed) on the jump after a payment was missed.
+func _debt_event(ship) -> Dictionary:
+	var ev := events.pick(self, {"id": current, "type": "debt", "place": ""}, ship, _debt_timing)
+	if not ev.is_empty() and Events.debt_kind(ev) == "reminder":
+		reminded = jumps / int(cfg["debt"]["every"])
+	return ev
+
+
+## Is it the moment for debt event `e`? See _debt_event.
+func _debt_timing(e: Dictionary) -> bool:
+	var every := int(cfg["debt"]["every"])
+	match Events.debt_kind(e):
+		"miss":
+			return jumps > 1 and (jumps - 1) % every == 0 and behind() > 0
+		"reminder":
+			return debt > 0 and next_due_in() <= 2 and reminded != jumps / every
+	return true
 
 
 # --- the debt -----------------------------------------------------------------------------------------------
@@ -421,8 +450,8 @@ func loot(enemy, ship) -> Array:
 
 
 ## The salvage event that follows a won fight (a wreck_field one), or {}.
-func salvage_event() -> Dictionary:
-	return events.pick(self, {"id": current, "type": "wreck_field", "place": ""})
+func salvage_event(ship) -> Dictionary:
+	return events.pick(self, {"id": current, "type": "wreck_field", "place": ""}, ship)
 
 
 # --- crew --------------------------------------------------------------------------------------------------------
@@ -456,8 +485,7 @@ func add_crew(ship, who: String, species: String) -> String:
 	if spot == Pathfinder.NO_CELL:
 		return ""
 	var looks: Array = CrewMember.config()["looks"]
-	var m = Jobs._person(who, looks[ship.crew.size() % looks.size()], Pathfinder.centre_of(spot))
-	m.species = species
+	var m = Jobs._person(who, looks[ship.crew.size() % looks.size()], Pathfinder.centre_of(spot), species)
 	ship.crew.append(m)
 	return who
 
@@ -634,7 +662,8 @@ static func _keys(d: Dictionary) -> Array:
 func to_dict() -> Dictionary:
 	return {"version": VERSION, "seed": seed_value, "rng_state": str(rng.state), "map": drift.to_dict(), "current": current,
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
-		"used": _keys(used), "revealed": _keys(revealed), "hull_loss": hull_loss, "offers": offers.duplicate(true)}
+		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
+		"offers": offers.duplicate(true)}
 
 
 ## Replace the state with a saved one. Returns "" on success, else why not (and nothing changes).
@@ -647,7 +676,7 @@ func load_dict(d: Dictionary) -> String:
 	var at := str(d.get("current", ""))
 	if not map.has(at):
 		return "bad campaign position"
-	for k in ["visited", "flags", "used", "revealed"]:
+	for k in ["visited", "flags", "used", "revealed", "logs_found"]:
 		if not d.get(k) is Array:
 			return "bad campaign data"
 	if not (d.get("rep") is Dictionary and d.get("offers") is Dictionary and d.has("seed") and d.has("rng_state") and d.has("debt") and d.has("paid") and d.has("jumps") and d.has("hull_loss")):
@@ -660,6 +689,8 @@ func load_dict(d: Dictionary) -> String:
 	flags = _to_set(d["flags"])
 	used = _to_set(d["used"])
 	revealed = _to_set(d["revealed"])
+	logs_found = _to_set(d["logs_found"])
+	reminded = int(d.get("reminded", -1))
 	rep = {}
 	for f in rep_factions():
 		rep[f] = clampi(int(d["rep"].get(f, 0)), -10, 10)
