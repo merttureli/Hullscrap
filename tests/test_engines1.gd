@@ -89,7 +89,7 @@ func test_every_engine_has_the_numbers_of_the_table() -> void:
 		eq(d["power"], row[4], id + " power")
 		eq(d["hp"], row[5], id + " hp")
 		eq(float(d["heat_per_s"]), float(row[6]), id + " heat_per_s")
-		eq([float(d["heat_limit"]), float(d["cooling"]), int(d["priority"]), d["manned"]], [100.0, 3.0, 4, false], id + " heat limit, cooling, priority, not manned")
+		eq([float(d["heat_limit"]), float(d["cooling"]), int(d["priority"]), d["manned"]], [100.0, maxf(3.0, float(d["heat_per_s"])), 4, false], id + " heat limit, cooling (at least its heat, so it runs cool alone), priority, not manned")
 		eq(d["size"], row[7].duplicate() if id.begins_with("strafe") else [4, 2], id + " inside half")
 		eq(d["mount"]["outside"], row[7], id + " outside half")
 		eq(d["mount"]["outside_hp"], int(floor(row[5] * 0.75 + 0.5)), id + " outside_hp is 75 percent of hp, rounded")

@@ -99,7 +99,7 @@
       "hp": 8,
       "heat_limit": 100,
       "heat_per_s": 4,
-      "cooling": 3,
+      "cooling": 4,
       "stats": {
         "thrust": 18,
         "fuel_mult": 1.0

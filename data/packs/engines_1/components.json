@@ -19,7 +19,7 @@
       "hp": 10,
       "heat_limit": 100,
       "heat_per_s": 5,
-      "cooling": 3,
+      "cooling": 5,
       "stats": {
         "thrust": 26,
         "fuel_mult": 1.1
@@ -44,7 +44,7 @@
       "hp": 12,
       "heat_limit": 100,
       "heat_per_s": 6,
-      "cooling": 3,
+      "cooling": 6,
       "stats": {
         "thrust": 36,
         "fuel_mult": 1.2
@@ -69,7 +69,7 @@
       "hp": 14,
       "heat_limit": 100,
       "heat_per_s": 7,
-      "cooling": 3,
+      "cooling": 7,
       "stats": {
         "thrust": 48,
         "fuel_mult": 1.3
@@ -94,7 +94,7 @@
       "hp": 8,
       "heat_limit": 100,
       "heat_per_s": 4,
-      "cooling": 3,
+      "cooling": 4,
       "stats": {
         "thrust": 18,
         "fuel_mult": 1.0
@@ -144,7 +144,7 @@
       "hp": 10,
       "heat_limit": 100,
       "heat_per_s": 5,
-      "cooling": 3,
+      "cooling": 5,
       "stats": {
         "thrust": 26,
         "fuel_mult": 1.1
@@ -194,7 +194,7 @@
       "hp": 12,
       "heat_limit": 100,
       "heat_per_s": 6,
-      "cooling": 3,
+      "cooling": 6,
       "stats": {
         "thrust": 36,
         "fuel_mult": 1.2
@@ -244,7 +244,7 @@
       "hp": 8,
       "heat_limit": 100,
       "heat_per_s": 4,
-      "cooling": 3,
+      "cooling": 4,
       "stats": {
         "thrust": 18,
         "fuel_mult": 1.0
@@ -269,7 +269,7 @@
       "hp": 10,
       "heat_limit": 100,
       "heat_per_s": 5,
-      "cooling": 3,
+      "cooling": 5,
       "stats": {
         "thrust": 26,
         "fuel_mult": 1.1
@@ -315,7 +315,7 @@
       "hp": 12,
       "heat_limit": 100,
       "heat_per_s": 6,
-      "cooling": 3,
+      "cooling": 6,
       "stats": {
         "thrust": 36,
         "fuel_mult": 1.2
@@ -491,7 +491,7 @@
       "hp": 10,
       "heat_limit": 100,
       "heat_per_s": 4,
-      "cooling": 3,
+      "cooling": 4,
       "stats": {
         "thrust": 16,
         "fuel_mult": 0.45
