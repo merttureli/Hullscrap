@@ -14,6 +14,7 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
+const Abilities = preload("res://scripts/sim/abilities.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
@@ -40,8 +41,13 @@ class Combatant extends RefCounted:
 	var ion_lock := 0.0  ## seconds the shields stay offline
 	var sectors := 1  ## the bubble's sectors (the best powered generator's stats.sectors); layers are one pool
 	var sector_open := {}  ## sector -> Vector2i(first tick, last tick) it is open: shots pass, no layer used (after this ship fired through it)
-	var overcharge_left := 0.0  ## seconds the overcharge layer lasts
-	var overcharge_cd := 0.0  ## seconds until the shield may be overcharged again
+	var ability_rev := -1  ## the ship's Abilities.rev this combatant last computed its thrust and layers for
+	var overcharge_left: float:  ## seconds the running shield ability (Overcharge) has left
+		get:
+			return Abilities.key_active_left(ship, "shield")
+	var overcharge_cd: float:  ## seconds until a shield ability is ready again (0 when one is ready or running)
+		get:
+			return Abilities.key_cooldown_left(ship, "shield")
 	var input := {"throttle": 0.0, "turn": 0.0}
 	var dirty := true  ## parts or tiles changed: power, mass and shield cap need recomputing
 	var next_virtual := -1
@@ -115,13 +121,14 @@ func set_input(idx: int, throttle: float, turn: float) -> void:
 
 
 ## Fire mount `uid` of ship `idx` at the world point `aim`. False when it cannot (see Weapons.can_fire).
-## A weapon with a crew member at its station cools down faster (Jobs.cooldown_mult).
+## A weapon with a crew member at its station cools down faster (Jobs.cooldown_mult), and a running
+## ability can change every cooldown (Abilities.charge_mult).
 func fire(idx: int, uid: int, aim: Vector2) -> bool:
 	if not weapons.fire(self, idx, uid, aim):
 		return false
 	var co = ships[idx]
-	var mult: float = Jobs.cooldown_mult(co.ship, uid)
-	if mult < 1.0:
+	var mult: float = Jobs.cooldown_mult(co.ship, uid) * Abilities.charge_mult(co.ship)
+	if not is_equal_approx(mult, 1.0):
 		co.cooldowns[uid] = tick + int(ceil(float(int(co.cooldowns[uid]) - tick) * mult - 1e-6))
 	return true
 
@@ -143,6 +150,8 @@ func step(dt: float) -> void:
 func _substep() -> void:
 	tick += 1
 	for i in ships.size():
+		if not ships[i].wrecked:
+			Abilities.tick(ships[i].ship, SUBSTEP, rng)  # a fight is on: the arena ticks them, not ShipSim
 		sync(i)
 		var co = ships[i]
 		var fly: bool = not co.wrecked and co.flight.can_fly(co.ship.components, co.powered) == ""
@@ -159,7 +168,7 @@ func sync(idx: int) -> void:
 	if co.dirty:
 		co.ship.mark_dirty()
 	co.ship.refresh()
-	if co.dirty or not is_same(co.powered, co.ship.power_state.get("powered")):  # a new solve, here or in ShipSim
+	if co.dirty or co.ability_rev != Abilities.rev(co.ship) or not is_same(co.powered, co.ship.power_state.get("powered")):  # a new solve, here or in ShipSim
 		_recompute(co)
 
 
@@ -170,8 +179,9 @@ func _recompute(co) -> void:
 	co.powered = co.ship.power_state.get("powered", {})
 	var view = Stats.view(co.ship.components, co.ship.lines)
 	co.mass = co.flight.mass_of(co.ship.grid, co.ship.components, co.ship.cables, Stats.mass_mults(co.ship.components, co.ship.lines))
-	co.thrust = co.flight.thrust_of(view, co.powered)
+	co.thrust = co.flight.thrust_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	Shields.resync(co)
+	co.ability_rev = Abilities.rev(co.ship)
 	co.dirty = false
 
 
@@ -195,10 +205,48 @@ func log_event(type: String, ship: int, cell := Vector2i(-1, -1), extra := {}) -
 		Fire.ignite_near(ships[ship].ship, cell)
 
 
-## Overcharge the shield of ship `idx`: one extra layer for Shields.OVERCHARGE_S seconds, then a
-## cooldown. "" when it worked, else why not.
+## Trigger ability `ability_id` ("" for the first) of part `uid` of ship `idx`. "" when it started
+## (thrust, power and shield layers are refreshed at once), else why not (see Abilities.can_trigger).
+## Logs an event of the ability's `event` type ("ability" by default).
+func use_ability(idx: int, uid: int, ability_id := "") -> String:
+	var co = ships[idx]
+	if co.wrecked:
+		return "wrecked"
+	sync(idx)
+	var why := Abilities.trigger(co.ship, uid, ability_id)
+	if why != "":
+		return why
+	sync(idx)
+	var a := Abilities.find(co.ship, uid, ability_id)
+	log_event(str(a.get("event", "ability")), idx, Vector2i(-1, -1), {"ability": a["id"], "uid": uid})
+	return ""
+
+
+## Press the combat key `key` ("engine", "shield" or "utility") for ship `idx`: every ability with
+## that key starts if it can. Returns {"started": [slot ids], "refused": {slot id: reason}}.
+func use_key(idx: int, key: String) -> Dictionary:
+	var out := {"started": [], "refused": {}}
+	for s in Abilities.slots(ships[idx].ship):
+		if s["key"] != key:
+			continue
+		var why := use_ability(idx, s["uid"], s["id"])
+		if why == "":
+			out["started"].append(s["slot"])
+		else:
+			out["refused"][s["slot"]] = why
+	return out
+
+
+## Overcharge the shield of ship `idx` (the shield ability): "" when it worked, else why not, in the
+## words this call always used (wrecked, no shield, already overcharged, cooling down).
 func overcharge(idx: int) -> String:
-	return Shields.overcharge(self, idx)
+	var r := use_key(idx, "shield")
+	if not r["started"].is_empty():
+		return ""
+	var why: String = r["refused"].values()[0] if not r["refused"].is_empty() else "no shield"
+	if why.begins_with("on cooldown"):
+		return "cooling down"
+	return {"wrecked": "wrecked", "already active": "already overcharged"}.get(why, "no shield")
 
 
 ## A world point in ship `idx`'s grid, in (fractional) cell coordinates.

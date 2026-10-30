@@ -397,7 +397,8 @@ func test_overcharge_adds_a_layer_for_six_seconds_then_a_cooldown() -> void:
 	a.step(0.2)
 	eq([a.ships[1].layers, a.ships[1].layers_cap], [1, 1], "gone after 6 s")
 	eq(a.overcharge(1), "cooling down", "the cooldown is respected")
-	a.step(Shields.OVERCHARGE_COOLDOWN - 0.5)
+	var rest := float(a.ships[1].ship.components.def("shield_mk1")["abilities"][0]["cooldown"])  # the Overcharge ability's data
+	a.step(rest - 0.5)
 	eq(a.overcharge(1), "cooling down", "still resting")
 	a.step(0.6)
 	eq(a.overcharge(1), "", "ready again")

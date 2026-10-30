@@ -6,14 +6,15 @@ extends RefCounted
 ## The bubble is split into N equal sectors round the ship's centre, sector 0 centred on the bow (N =
 ## the best powered generator's `stats.sectors`, default 1). Firing opens the sector the shot leaves
 ## through for the weapon's drop time (see drop_seconds): shots pass an open sector and use no layer.
-## An overcharge adds one layer for OVERCHARGE_S seconds, then needs OVERCHARGE_COOLDOWN to rest.
+## Abilities with a shield_layer effect (the Overcharge of the shield parts, abilities.gd) add layers
+## while they run.
 ## Works on arena combatants (see arena.gd) and is deterministic: no randomness here.
+
+const Abilities = preload("res://scripts/sim/abilities.gd")
 
 const RECHARGE := 2.0  ## seconds until a used layer is back
 const ION_LOCK := 3.0  ## seconds an ion hit keeps the shields offline
 const MARGIN := 1.0  ## cells between the hull's bounding box and the bubble
-const OVERCHARGE_S := 6.0  ## seconds the extra layer lasts
-const OVERCHARGE_COOLDOWN := 15.0  ## seconds after the extra layer ends before the next one
 ## Seconds a shot opens its sector, by weapon kind (and for ion damage). A beam opens it for its whole
 ## duration; a missile never does. A weapon entry's own `drops_shield_s` wins.
 const DROP := {"laser": 0.3, "bolt": 0.4, "flak": 0.6, "ion": 0.3}
@@ -44,10 +45,10 @@ static func sectors_of(co) -> int:
 
 
 ## Re-read the layer cap and the sector count after power changed: new capacity arrives full, lost
-## capacity is dropped. The overcharge layer counts while it lasts and a generator is up.
+## capacity is dropped. The layers abilities add count while they run and a generator is up.
 static func resync(co) -> void:
 	var base := 0 if co.wrecked else layers_max(co)
-	var cap := base + (1 if co.overcharge_left > 0.0 and base > 0 else 0)
+	var cap := base + (Abilities.extra_layers(co.ship) if base > 0 else 0)
 	if cap > co.layers_cap:
 		co.layers += cap - co.layers_cap
 	co.layers_cap = cap
@@ -162,24 +163,6 @@ static func drop(arena, idx: int, w: Dictionary, origin: Vector2, dir: Vector2) 
 	co.sector_open[s] = Vector2i(from, until)
 
 
-## Add the overcharge layer to ship `idx`: "" when done, else why not.
-static func overcharge(arena, idx: int) -> String:
-	var co = arena.ships[idx]
-	if co.wrecked:
-		return "wrecked"
-	arena.sync(idx)
-	if co.layers_cap - (1 if co.overcharge_left > 0.0 else 0) <= 0:
-		return "no shield"
-	if co.overcharge_left > 0.0:
-		return "already overcharged"
-	if co.overcharge_cd > 0.0:
-		return "cooling down"
-	co.overcharge_left = OVERCHARGE_S
-	resync(co)
-	arena.log_event("overcharge", idx)
-	return ""
-
-
 ## A shot of weapon `w` hits the bubble of ship `idx` at the world point `point`, travelling along
 ## `dir`: one layer is used up (and, for ion, the shields lock).
 static func absorb(arena, idx: int, w: Dictionary, point := Vector2.ZERO, dir := Vector2.ZERO) -> void:
@@ -195,18 +178,10 @@ static func absorb(arena, idx: int, w: Dictionary, point := Vector2.ZERO, dir :=
 	arena.log_event("shield", idx, Vector2i(-1, -1), extra)
 
 
-## Advance recharge, the overcharge and the ion lock by `dt` seconds.
+## Advance recharge and the ion lock by `dt` seconds.
 static func tick(co, dt: float) -> void:
 	if co.wrecked:
 		return
-	if co.overcharge_left > 0.0:
-		co.overcharge_left -= dt
-		if co.overcharge_left <= 1e-9:
-			co.overcharge_left = 0.0
-			co.overcharge_cd = OVERCHARGE_COOLDOWN
-			resync(co)
-	elif co.overcharge_cd > 0.0:
-		co.overcharge_cd = maxf(co.overcharge_cd - dt, 0.0)
 	if co.ion_lock > 0.0:
 		co.ion_lock = maxf(co.ion_lock - dt, 0.0)
 		return

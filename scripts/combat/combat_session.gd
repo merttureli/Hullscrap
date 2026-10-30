@@ -4,6 +4,7 @@ extends RefCounted
 ## combat_view.gd draws it and feeds it input; every rule lives here so tests can drive it.
 ## The ships' power, heat, oxygen and reliability keep running in ShipSim (the same Ship objects).
 
+const Abilities = preload("res://scripts/sim/abilities.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
@@ -129,6 +130,36 @@ func slot_state(uid: int, aim: Vector2) -> Dictionary:
 		why = "out of arc"
 	return {"cooldown_left": arena.cooldown_left(PLAYER, uid), "cooldown": float(arena.weapons.def(m["id"])["cooldown"]),
 		"status": "ready" if why == "" else why, "in_arc": in_arc}
+
+
+## The player's ability slots in key order (Abilities.slots): [{uid, id, slot, key, name, part, ability}].
+func ability_slots() -> Array:
+	return Abilities.slots(arena.ships[PLAYER].ship)
+
+
+## The player presses ability key `key` ("engine" Shift, "shield" Space, "utility" Q): every ability
+## with that key starts if it can. Returns {"started": [slot ids], "refused": {slot id: reason}}.
+func press_ability(key: String) -> Dictionary:
+	return arena.use_key(PLAYER, key)
+
+
+## What the bar shows for ability slot `s` (an ability_slots() entry): {state ("active", "cooling",
+## "blocked" or "ready"), active_left, duration, cooldown_left, cooldown, reason}. `reason` is why it
+## cannot start now ("" when it can or is running).
+func ability_state(s: Dictionary) -> Dictionary:
+	var co = arena.ships[PLAYER]
+	var left := Abilities.active_left(co.ship, s["uid"], s["id"])
+	var cd := Abilities.cooldown_left(co.ship, s["uid"], s["id"])
+	var why := "wrecked" if co.wrecked else Abilities.can_trigger(co.ship, s["uid"], s["id"])
+	var state := "ready"
+	if left > 0.0:
+		state = "active"
+	elif cd > 0.0:
+		state = "cooling"
+	elif why != "":
+		state = "blocked"
+	return {"state": state, "active_left": left, "duration": float(s["ability"].get("duration", 0.0)), "cooldown_left": cd,
+		"cooldown": float(s["ability"].get("cooldown", 0.0)), "reason": "" if state in ["active", "ready"] else why}
 
 
 ## Where the camera should be and how far to zoom so both ships fit a viewport of `view` px:

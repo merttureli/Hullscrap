@@ -10,9 +10,13 @@ const EPS := 0.0001  ## slack for float power (line multipliers make 5.4 and 2.4
 
 ## `components`: a components.gd instance (or a Stats.View of one, for line-adjusted power); `cables`: a cables.gd instance; `disabled`: uid -> true
 ## for damaged parts that neither make nor use power (they still bridge cables).
+## `mods`: Abilities.power_mods, the abilities running now: {mult: uid -> factor on the part's power
+## figure, extra: uid -> power_spike draw added to its demand (a producer gives that much less)}.
 ## Returns {powered: {uid: bool}, networks: [{id, cells, members, supply, demand, used}],
 ## network_of: {uid: network id}}. Network ids follow each network's first cell in reading order.
-static func solve(components, cables, disabled := {}) -> Dictionary:
+static func solve(components, cables, disabled := {}, mods := {}) -> Dictionary:
+	var mults: Dictionary = mods.get("mult", {})
+	var extras: Dictionary = mods.get("extra", {})
 	var cells: Array = cables.cells.keys()
 	cells.sort_custom(_before)
 	var label := {}  # cable cell -> cable group
@@ -64,12 +68,19 @@ static func solve(components, cables, disabled := {}) -> Dictionary:
 				continue
 			var d: Dictionary = components.def(components.instances[uid]["id"])
 			var p = d.get("power", 0)  # an int, or a float for line-adjusted parts
+			var extra := float(extras.get(uid, 0.0))
+			if mults.has(uid):
+				p = p * float(mults[uid])
+			if p > 0 and extra > 0.0:
+				p = maxf(p - extra, 0.0)
+				extra = 0.0
 			if p > 0:
 				n["supply"] += p
 				powered[uid] = true
-			elif p < 0:
-				n["demand"] -= p
-				consumers.append([int(d.get("priority", 0)), uid, -p])
+			elif p < 0 or extra > 0.0:
+				var need = -p + extra if extra > 0.0 else -p  # stays an int for a plain part
+				n["demand"] += need
+				consumers.append([int(d.get("priority", 0)), uid, need])
 			else:
 				powered[uid] = true
 		consumers.sort_custom(func(a, b): return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))

@@ -14,13 +14,19 @@ const Atmosphere = preload("res://scripts/sim/atmosphere.gd")
 const Power = preload("res://scripts/sim/power.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
+const Abilities = preload("res://scripts/sim/abilities.gd")
+const Crafting = preload("res://scripts/craft/crafting.gd")
 
 ## Save format. 3 adds name, world transform, components, cables and oxygen on top of the
-## grid and cargo of 2; versions 1 and 2 still load (no components, no cables).
+## grid and cargo of 2; versions 1 and 2 still load (no components, no cables). The optional
+## "crafting" list (blueprints and queue) was added within 3: a save without it starts with the
+## blueprints known at the start.
 const VERSION := 3
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
 const START_PATH := "res://data/start.json"
+const RECIPES_PATH := "res://data/recipes.json"
+const MATERIALS_PATH := "res://data/materials.json"
 const MAX_EVENTS := 50
 const START_SIZE := Vector2i(63, 63)
 const START_RADIUS := 28.0
@@ -31,6 +37,7 @@ var components: Components
 var cables: Cables
 var atmosphere: Atmosphere
 var inventory: Inventory  ## the cargo: materials and items (crafted systems)
+var crafting: Crafting  ## the known blueprints and the fabricator's queue (saved); ShipSim ticks it
 var lines := {}  ## equipment lines (data/lines.json): line id -> multipliers
 var power_state := {}  ## the last Power.solve result; empty until the first refresh()
 var events: Array = []  ## the chronicle, newest last: {t, text}; at most MAX_EVENTS; not saved
@@ -39,6 +46,7 @@ var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; not saved yet
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
 var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
+var ability_state := Abilities.fresh_state()  ## abilities running or resting (abilities.gd); not saved
 var world_pos := Vector2.ZERO  ## pixels; for drawing, 0 for now
 var rot_quarters := 0  ## quarter turns; for drawing, 0 for now
 var _structure_dirty := true
@@ -54,6 +62,8 @@ func _init(p_name := "Ship", p_grid: ShipGrid = null, components_path := COMPONE
 	cables = Cables.new()
 	atmosphere = Atmosphere.new()
 	inventory = Inventory.new()
+	crafting = Crafting.new()
+	crafting.load(RECIPES_PATH, MATERIALS_PATH)
 
 
 ## The ship a new game starts with: the circular hull, no tiles, and the cargo of data/start.json.
@@ -135,12 +145,12 @@ func refresh() -> bool:
 	var uids := components.instances.keys()
 	uids.sort()
 	var off := disabled_uids()
-	var sig := hash([uids, cables.cells.size(), off.keys()])
+	var sig := hash([uids, cables.cells.size(), off.keys(), Abilities.rev(self)])
 	if not _structure_dirty and sig == _signature:
 		return false
 	if _structure_dirty:
 		atmosphere.rebuild(grid)
-	power_state = Power.solve(Stats.view(components, lines), cables, off)
+	power_state = Power.solve(Stats.view(components, lines), cables, off, Abilities.power_mods(self))
 	_structure_dirty = false
 	_signature = sig
 	return true
@@ -157,6 +167,7 @@ func to_dict() -> Dictionary:
 	d["cargo"] = inventory.to_dict()
 	d["components"] = components.to_dict()
 	d["cables"] = cables.to_dict()
+	d["crafting"] = crafting.to_dict()
 	d["oxygen"] = atmosphere.pressure.duplicate()
 	if not fires.is_empty():  # optional, like the grid's damage lists: only written when something burns
 		var list := []
@@ -189,6 +200,12 @@ func load_dict(d: Dictionary) -> String:
 	var burning = _read_fires(d)
 	if burning == null:
 		return "bad ship data"
+	if d.has("crafting"):
+		if not (d["crafting"] is Dictionary):
+			return "bad ship data"
+		var why: String = crafting.check_dict(d["crafting"])
+		if why != "":
+			return why
 	var gd := d.duplicate()
 	gd["version"] = mini(version, ShipGrid.VERSION)
 	var err: String = grid.load_dict(gd)
@@ -206,6 +223,11 @@ func load_dict(d: Dictionary) -> String:
 		rot_quarters = posmod(int(d.get("rot", 0)), 4)
 	fires = burning
 	manned = {}
+	ability_state = Abilities.fresh_state()
+	if d.has("crafting"):
+		crafting.load_dict(d["crafting"])
+	else:
+		crafting.reset()
 	atmosphere.rooms = []
 	atmosphere.room_of = {}
 	atmosphere.doors = []
