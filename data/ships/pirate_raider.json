@@ -262,6 +262,20 @@
     "next_uid": 9,
     "version": 2
   },
+  "crew": [
+    {
+      "name": "Grub",
+      "species": "human"
+    },
+    {
+      "name": "Skab",
+      "species": "human"
+    },
+    {
+      "name": "Vex",
+      "species": "basalt"
+    }
+  ],
   "doors_open": [],
   "hull": [
     [
