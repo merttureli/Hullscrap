@@ -69,3 +69,70 @@ func test_save_load_round_trip() -> void:
 	eq(h.hull, g.hull, "same hull")
 	eq(h.total_cost(), g.total_cost(), "same cost")
 	eq(h.load_dict({"version": 99}), "unsupported ship version", "future saves refused")
+
+
+func test_total_cost_sums_materials() -> void:
+	var g := _grid()
+	eq(g.total_cost(), {}, "empty ship costs nothing")
+	g.place("wall", Vector2i(4, 5))
+	g.place("wall", Vector2i(6, 5))
+	g.place("door", Vector2i(5, 5))
+	g.place("floor", Vector2i(5, 6))
+	eq(g.total_cost(), {"scrap": 2 + 2 + 3 + 1, "copper": 1}, "summed per material")
+	eq(g.cost_of("door"), {"scrap": 3, "copper": 1}, "door cost is a dict")
+	eq(g.cost_of("teleporter"), {}, "unknown tiles are free")
+
+
+func _door_grid() -> ShipGrid:
+	var g := _grid()
+	g.place("wall", Vector2i(4, 5))
+	g.place("wall", Vector2i(6, 5))
+	g.place("door", Vector2i(5, 5))
+	return g
+
+
+func test_doors_start_closed_and_toggle() -> void:
+	var g := _door_grid()
+	var c := Vector2i(5, 5)
+	check(not g.is_door_open(c), "doors start closed")
+	check(g.set_door_open(c, true), "door opens")
+	check(g.is_door_open(c), "now open")
+	check(g.set_door_open(c, false), "door closes")
+	check(not g.is_door_open(c), "now closed")
+	check(not g.set_door_open(Vector2i(4, 5), true), "a wall is not a door")
+	check(not g.is_door_open(Vector2i(4, 5)), "walls never open")
+
+
+func test_removing_a_door_clears_its_state() -> void:
+	var g := _door_grid()
+	var c := Vector2i(5, 5)
+	g.set_door_open(c, true)
+	check(g.remove(c), "door removed")
+	check(not g.is_door_open(c), "state cleared with the door")
+	check(g.place("door", c), "new door placed")
+	check(not g.is_door_open(c), "a new door starts closed")
+	g.set_door_open(c, true)
+	check(g.place("floor", c), "floor replaces the door")
+	check(g.door_open.is_empty(), "replacing a door clears its state too")
+
+
+func test_door_states_save_and_load() -> void:
+	var g := _door_grid()
+	g.set_door_open(Vector2i(5, 5), true)
+	var d: Dictionary = JSON.parse_string(JSON.stringify(g.to_dict()))
+	var h := ShipGrid.new(Vector2i.ZERO, g.defs)
+	eq(h.load_dict(d), "", "loads")
+	check(h.is_door_open(Vector2i(5, 5)), "open door stays open")
+	d["version"] = 1
+	d.erase("doors_open")
+	eq(h.load_dict(d), "", "version 1 saves still load")
+	check(not h.is_door_open(Vector2i(5, 5)), "version 1 has all doors closed")
+
+
+func test_bad_save_changes_nothing() -> void:
+	var g := _door_grid()
+	var before := g.to_dict()
+	eq(g.load_dict({"version": 2, "size": [3, 3], "hull": [], "tiles": [[0, 0, "teleporter"]]}),
+		"unknown tile teleporter", "unknown tile refused")
+	eq(g.load_dict({"version": 2}), "bad ship data", "missing fields refused")
+	eq(g.to_dict(), before, "grid untouched by failed loads")
