@@ -28,6 +28,24 @@ Placement uses square hitboxes on the grid, but placed objects should look natur
    - Systems come in tiers (Mk1, Mk2, Mk3) with better stats.
    - Blueprints unlock by salvaging and scanning wrecks; materials come from salvage, mining and trade.
 
+## Art direction (owner, 2026-10-30): an open problem that needs real effort
+- The first style boards (agent-drawn SVG, three looks for the three lines) were judged **"super AI"**: polished but generic.
+  - They're kept only as placeholders and references (in the lead's scratch area, not in the repo).
+- **The target is FTL's visual language, with real attention to detail on single elements**:
+  - muted, readable interiors: light flat floors, thin outlines, a visible room grid;
+  - **colour saved for state**: low oxygen, fire, breach, power, damage;
+  - systems shown as clear icons and consoles in their rooms;
+  - a detailed, hand-made exterior hull around the rooms;
+  - small, frame-animated crew with distinct species silhouettes;
+  - a chunky, high-contrast UI.
+- **Making the game look right will take great effort.** Options to decide later:
+  - a fixed-scale **pixel-art** pipeline, which is probably closer to FTL than vector;
+  - working with a **human pixel artist**;
+  - **asset packs** adapted to us;
+  - image-generation tools with heavy curation and hand cleanup.
+  - Agent-written SVG alone isn't enough for final art.
+- Until then, **gameplay and systems come first**, and the game keeps placeholder shapes. Code must keep drawing separate from logic (e.g. `person_drawer.gd`), so art can be swapped in later without touching gameplay.
+
 ## Equipment lines: Scrap, Standard and Neon (owner, 2026-10-30)
 Every system family (engines, reactors, weapons, shields, life support, workshop modules) and every gear type exists in **three lines** that you **mix and match** on one ship, as you like and can afford:
 
