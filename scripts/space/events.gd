@@ -1,6 +1,7 @@
 extends RefCounted
 ## The events of the Drift (docs/CONTENT.md section 8): FTL-style text with choices, read from every
-## data/events/*.json ({"events": [...]}). This script loads them, checks them (validate() names the
+## data/events/*.json ({"events": [...]}) and from the events/*.json of every content pack, through the
+## content loader (data/packs, scripts/data/content.gd). This script loads them, checks them (validate() names the
 ## file and the event in every message), picks the event of a node by weight with the campaign's
 ## seeded rng, filters the choices of an event (hidden, greyed or blue), rolls the outcome of a choice
 ## and applies its effects to the campaign and the ship. No nodes, no drawing; the event panel
@@ -15,6 +16,8 @@ extends RefCounted
 ##   (in requires or on the choice).
 ## - `after_win` ({text, effects}) on an event, or on an outcome, runs after a won fight.
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
+
+const Content = preload("res://scripts/data/content.gd")
 
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
@@ -35,6 +38,7 @@ const SHIPS_DIR := "res://data/ships/"
 const DEFAULT_WEIGHT := 10.0
 
 static var _shared = null
+static var _shared_key := ""
 
 var events := {}  ## id -> the event dictionary as written
 var logs := {}  ## derelict log id -> {id, title, ship, faction, text} (data/logs/*.json)
@@ -44,10 +48,12 @@ var errors: Array[String] = []  ## problems met while loading (bad JSON, a missi
 var _pages := {}  # id -> true for every event some outcome names in a goto
 
 
-## The events of data/events, loaded once.
+## The events of data/events and the packs, loaded once (again if the content loader was pointed elsewhere).
 static func shared():
-	if _shared == null:
+	var key := Content.root + "|" + Content.packs_root
+	if _shared == null or key != _shared_key:
 		_shared = new()
+		_shared_key = key
 	return _shared
 
 
@@ -55,17 +61,23 @@ func _init(dir := DIR) -> void:
 	load_dir(dir)
 
 
-## Read every *.json in `dir` (in name order). Problems go to `errors`, they do not stop the load.
+## Read the events: for the default folder everything the content loader knows (core files, then the
+## packs'); for any other folder (tests) every *.json in it, in name order. Problems go to `errors`, they
+## do not stop the load.
 func load_dir(dir: String) -> void:
 	events.clear()
 	files.clear()
 	order.clear()
 	errors.clear()
 	_pages.clear()
-	var names: Array = Array(DirAccess.get_files_at(dir)).filter(func(f): return f.ends_with(".json"))
-	names.sort()
-	for f in names:
-		_load_file(dir + "/" + f)
+	if dir == DIR:
+		for ev in Content.events():
+			add(ev, Content.file_of("events", str(ev["id"])))
+	else:
+		var names: Array = Array(DirAccess.get_files_at(dir)).filter(func(f): return f.ends_with(".json"))
+		names.sort()
+		for f in names:
+			_load_file(dir + "/" + f)
 	_load_logs()
 	_index_pages()
 
@@ -504,7 +516,9 @@ func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[S
 		bad.call("text must be a non-empty string")
 	if ev.has("after_win"):
 		_check_after(ev["after_win"], "after_win", known, bad)
-	var choices = ev.get("choices")
+	if not ev.has("choices"):
+		return  # a text with no choices is allowed: the panel offers a way out
+	var choices = ev["choices"]
 	if not (choices is Array and not choices.is_empty()):
 		bad.call("choices must be a non-empty list")
 		return
