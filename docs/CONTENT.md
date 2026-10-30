@@ -170,6 +170,36 @@ Ships are physical bodies made of their cells. **They collide, and both take dam
 - **Wrecks and debris**: wrecked ships stay physical. You can ram them, push them, and later tow them.
 - **Tuning** (`data/collision.json`): `restitution`, `min_speed`, `damage_k`, `crew_knock`, `separation_slop`.
 
+## 4f. Hull mounts: half outside, half inside (owner, 2026-10-30)
+Weapons and engines **straddle the hull wall**, not FTL's all-outside nor a box in a room:
+- the **outside part** (barrel and turret, nozzles) sits in space and **takes the hits you can see**;
+- the **inside part** (breech, capacitor, ammo feed, engine core) sits on the floor, where crew **repair it, wire power to it and feed it ammo**.
+
+- **Mount layout**: at rotation 0, **outward is UP**. The footprint is split into bands from top to bottom:
+  - `outside` rows (in space);
+  - **1 `wall` row** (a hull collar that replaces and seals the wall where it passes through);
+  - `inside` rows (on floor).
+  - Data: `"mount": {"outside": 2, "wall": 1, "inside": 2}`, and the size includes all bands (standard guns and engines are **4 wide × 5 tall**; heavy ones 4×6).
+  - **Rotate to put a mount on any wall**: guns face out from their wall, and rear engines use rotation 2.
+- **Placement rules**:
+  - `outside` cells must be **exterior**: hull-frame cells with no tile, connected to open space (not inside a room);
+  - `wall` cells must currently be solid wall (the collar sits on the wall, and the room stays sealed);
+  - `inside` cells must be floor.
+  - Reasons: "the barrel must stick out into space", "needs a wall to mount through", "the breech needs floor inside".
+- **Combat**:
+  - Outside cells are fully exposed. The collar row uses the wall's hp. Inside cells are behind the hull like everything else.
+  - Hits on the outside part damage the component (disabled at 0, "disable, don't destroy").
+  - The room **doesn't breach** unless the collar's wall cell itself is destroyed.
+- **Weapon aim**: the outside turret **rotates to follow the aim** within the weapon's arc. **The arc is centred on the mount's outward direction**, replacing "centre to weapon". Turrets with arc 360 can sweep fully. The shot leaves from the barrel's muzzle.
+- **Repair and power**: crew repair from the inside part (they stand next to inside cells), and cables connect only to inside cells.
+- **Engines**: thrust acts along the **opposite of the nozzle direction**. Forward thrust for W/S is the sum of each engine's thrust × cos(angle between its push and the ship's forward). Rear engines give full thrust, side engines none (lateral thrust and strafing come later). Turning still comes from total thrust, as now.
+- **Ammo racks** (logistics, Cosmoteer-style):
+  - `ammo_rack`: an inside component, 2×2, holds up to 20 units of one ammo item (missiles, scrap for the Bolt Thrower, ...). It shows its fill level.
+  - A weapon with `ammo` draws only from racks **in the same room as its inside part**. "No ammo rack in the room" and "rack empty" are its refusal reasons.
+  - **A crew job `restock`** (priority 40) carries ammo from ship cargo to any rack below 50%: 1 s per 5 units, walking to it.
+  - So build your gun rooms with racks, and if the rack room burns, the guns run dry.
+- **Ships to redesign**: the starters, the pirate raider and the rammer get their guns and engines re-mounted through their walls (the generator tool rebuilds them).
+
 ## 5. Abilities and quirks (`scripts/sim/abilities.gd`)
 - An ability is `{id, name, type: active|passive, duration, cooldown, effects, side_effects, operator_needs}`.
   - Active abilities are triggered by the player (or by an AI captain) when the component is powered and, if `operator_needs` is set, manned by a qualifying crew member.
