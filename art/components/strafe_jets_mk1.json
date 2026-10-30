@@ -1,0 +1,75 @@
+{
+ "frame": [
+  32,
+  36
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "strafe_jets_mk1_glow.png",
+  "frame": [
+   48,
+   50
+  ],
+  "offset": [
+   -8,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "power_coupling": [
+   21,
+   31
+  ],
+  "repair_hatch": [
+   8,
+   31
+  ]
+ },
+ "orientation": "inside half: rotation 0, outward is UP: the core sits on the floor with its top 4px overhanging the inner wall face (see offset); cable plugs into the power coupling",
+ "offset": [
+  0,
+  -4
+ ],
+ "mount": {
+  "part": "inside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Concord Strafe Jets Mk1, a small hull mount (outward is up; mount it on a side wall for A/D strafe): a pair of small steel bells angled slightly outward on a plate with a feed pipe between them, and inside a compact core with a spinning gyro, a lamp panel, a repair hatch and a green-ringed power coupling. Damaged: the left bell lip dented and hanging, the right bell cracked and sputtering, the gyro glass cracked and stalling, lamps red, sparks. Disabled: both bells bent over at the neck, the gyro dead and cracked, the hatch popped. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+}

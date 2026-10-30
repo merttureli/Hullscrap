@@ -115,13 +115,14 @@ func effective(id: String) -> Dictionary:
 	return Stats.effective(components.def(id), lines)
 
 
-## Components that are out of action (status is not "ok"): uid -> true. They neither make nor use power.
+## Components that are out of action (status is not "ok", or a hull mount whose outside half is
+## disabled or whose link is cut): uid -> true. They neither make nor use power.
 func disabled_uids() -> Dictionary:
 	var out := {}
 	var uids := components.instances.keys()
 	uids.sort()
 	for uid in uids:
-		if components.instances[uid]["status"] != "ok":
+		if components.instances[uid]["status"] != "ok" or components.offline_reason(grid, uid) != "":
 			out[uid] = true
 	return out
 
@@ -134,14 +135,38 @@ func log_event(text: String) -> void:
 
 
 ## Repair a component: status back to ok and hp to the maximum. Returns false for an unknown uid.
-## Heat is left alone, so a part that is still too hot trips again at once.
+## Heat is left alone, so a part that is still too hot trips again at once. A hull mount with a
+## damaged outside half and an intact link heals the outside half first (one repair each).
 func repair(uid: int) -> bool:
 	if not components.instances.has(uid):
 		return false
 	var inst: Dictionary = components.instances[uid]
+	if outside_hurt(uid):
+		inst["out_hp"] = components.outside_hp_max(inst["id"])
+		return true
 	inst["status"] = "ok"
 	inst["hp"] = Stats.max_hp(components.def(inst["id"]))
 	return true
+
+
+## Is mount `uid`'s outside half below its hp, with the link intact so a crew member can reach it?
+func outside_hurt(uid: int) -> bool:
+	var inst: Dictionary = components.instances.get(uid, {})
+	return not inst.is_empty() and components.has_outside(uid) and int(inst["out_hp"]) < components.outside_hp_max(inst["id"]) and components.link_intact(grid, uid)
+
+
+## What clearing the wreck of component `id` gives back: half its recipe materials, rounded down. A
+## unique (found) part has no recipe and gives nothing.
+func wreck_refund(id: String) -> Dictionary:
+	var out := {}
+	if bool(components.def(id).get("unique", false)):
+		return out
+	var mats: Dictionary = crafting.def(id).get("materials", {})
+	for m in mats:
+		var n := floori(float(mats[m]) / 2.0)
+		if n > 0:
+			out[m] = n
+	return out
 
 
 ## The structure changed (tiles, doors): the next refresh() rebuilds the rooms and re-solves power.
@@ -228,7 +253,10 @@ func load_dict(d: Dictionary) -> String:
 	inventory.counts = cargo.counts
 	var empty_parts := {"version": Components.VERSION, "next_uid": 1, "instances": []}
 	var empty_cables := {"version": Cables.VERSION, "cells": []}
-	components.load_dict(d["components"] if version >= 3 else empty_parts)
+	components.load_dict(d["components"] if version >= 3 else empty_parts, grid)
+	for r in components.returned:  # old weapons and engines with no wall to mount through
+		inventory.add(r["id"], 1)
+		log_event(r["text"])
 	cables.load_dict(d["cables"] if version >= 3 else empty_cables)
 	if version >= 3:
 		name = str(d.get("name", name))

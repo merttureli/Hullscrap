@@ -5,29 +5,31 @@ from px import *
 import crew_v2 as cv2
 from sp_common import POSES, glow_strip
 import sp_basalt, sp_emberkin, sp_fenn, sp_items, sp_fx, sp_gear
+import sp_kett, sp_mire, sp_sporeling, sp_gauntling, sp_prismatic, sp_grundl      # race wave 1 (docs/waves/races_1.md); sp_grundl is the large rig
 from sp_gear import outline_outer
 
-SPECIES = [sp_basalt.Basalt, sp_emberkin.Emberkin, sp_fenn.Fenn]
+SPECIES = [sp_basalt.Basalt, sp_emberkin.Emberkin, sp_fenn.Fenn,
+           sp_kett.Kett, sp_mire.Mire, sp_sporeling.Sporeling, sp_gauntling.Gauntling, sp_prismatic.Prismatic, sp_grundl.Grundl]
 
 def jdump(obj, path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f: json.dump(obj, f, indent=1); f.write('\n')
 
-def pair(d, name, sprs):
-    save(sheet([cv2.base_of(x) for x in sprs], len(sprs), cv2.N, cv2.N), '%s/%s.png' % (d, name))
-    save(sheet([cv2.mask_of(x) for x in sprs], len(sprs), cv2.N, cv2.N), '%s/%s_color.png' % (d, name))
+def pair(d, name, sprs, n=cv2.N):
+    save(sheet([cv2.base_of(x) for x in sprs], len(sprs), n, n), '%s/%s.png' % (d, name))
+    save(sheet([cv2.mask_of(x) for x in sprs], len(sprs), n, n), '%s/%s_color.png' % (d, name))
 
-def glow_json(image, n):
-    return {'image': image, 'frame': [cv2.N, cv2.N], 'offset': [0, 0], 'frames': n, 'blend': 'add (preferred) or alpha-over'}
+def glow_json(image, n, size=cv2.N):
+    return {'image': image, 'frame': [size, size], 'offset': [0, 0], 'frames': n, 'blend': 'add (preferred) or alpha-over'}
 
 def export_species(cls):
     sp = cls(); d = ART + '/crew/' + sp.id
     cv2.OUTLINE = True
     legs = sp.legs()
-    pair(d, 'legs', legs)
-    pair(d, 'torso', [sp.torso()])
-    pair(d, 'arms', [sp.arms(p) for p in POSES])
-    pair(d, 'head', [sp.head(h) for h in sp.head_names])
+    pair(d, 'legs', legs, sp.N)
+    pair(d, 'torso', [sp.torso()], sp.N)
+    pair(d, 'arms', [sp.arms(p) for p in POSES], sp.N)
+    pair(d, 'head', [sp.head(h) for h in sp.head_names], sp.N)
     layers = {
      'legs':  {'image': 'legs.png', 'color_mask': 'legs_color.png', 'anims': {'walk': [0, 6, sp.walk_fps], 'stand': [6, 1, 0]},
                'notes': 'frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted'},
@@ -36,23 +38,28 @@ def export_species(cls):
                'anchors': {p: {k: (list(v) if v else None) for k, v in a.items()} for p, a in sp.arm_anchors().items()},
                'notes': 'item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. '
                         'Mounts are identical on every species (and the human), so any item fits any body. Pose = the item\'s class: '
-                        'pistol, rifle, tool, heavy, melee.'},
+                        'pistol, rifle, tool, heavy, melee.' + ('' if sp.N == cv2.N else
+                        ' LARGE RIG: this frame is %dx%d with the pivot at (%d,%d), so every anchor here is the shared one moved by (+%d,+%d): '
+                        'mount - pivot and hand - pivot are identical to the human rig.' % (sp.N, sp.N, sp.C, sp.C, sp.C - cv2.C, sp.C - cv2.C))},
      'head':  {'image': 'head.png', 'color_mask': 'head_color.png', 'frames': {h: i for i, h in enumerate(sp.head_names)}},
     }
     g = sp.legs_glow()
-    if g: glow_strip(g).save(d + '/legs_glow.png'); layers['legs']['glow'] = glow_json('legs_glow.png', len(g))
+    if g: glow_strip(g).save(d + '/legs_glow.png'); layers['legs']['glow'] = glow_json('legs_glow.png', len(g), sp.N)
     g = sp.torso_glow()
-    if g: glow_strip(g).save(d + '/torso_glow.png'); layers['torso']['glow'] = glow_json('torso_glow.png', len(g))
+    if g:
+        glow_strip(g).save(d + '/torso_glow.png'); layers['torso']['glow'] = glow_json('torso_glow.png', len(g), sp.N)
+        if sp.glow_fps and len(g) > 1: layers['torso']['glow']['anims'] = {'on': [0, len(g), sp.glow_fps]}
     g = sp.head_glow()
     if g:
         glow_strip(g).save(d + '/head_glow.png')
         n = len(sp.head_names)
-        layers['head']['glow'] = dict(glow_json('head_glow.png', len(g)))
+        layers['head']['glow'] = dict(glow_json('head_glow.png', len(g), sp.N))
         if len(g) > n:
             layers['head']['glow']['variants'] = {h: [i + k * n for k in range(len(g) // n)] for i, h in enumerate(sp.head_names)}
             layers['head']['glow']['notes'] = 'per head variant, a list of glow frames: alternate them at ~6 fps for the heat shimmer'
-    J = {'species': sp.id, 'frame': [cv2.N, cv2.N], 'pivot': [cv2.C, cv2.C], 'notes': sp.notes + ' Same rig as human: every layer faces UP at '
-         'rotation 0 on one 33x33 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png '
+            if sp.glow_fps: layers['head']['glow']['notes'] = 'per head variant, a list of glow frames: alternate them at %d fps' % sp.glow_fps
+    J = {'species': sp.id, 'frame': [sp.N, sp.N], 'pivot': [sp.C, sp.C], 'notes': sp.notes + ' Same rig as human: every layer faces UP at '
+         'rotation 0 on one %dx%d frame, rotate about the pivot; ' % (sp.N, sp.N) + 'outfit pixels are neutral grey in the base PNG and white in *_color.png '
          '(multiply by the outfit colour there); no baked shadow.',
          'draw_order': ['legs', 'torso', 'arms', 'item', 'head'],
          'rotate': {'legs': 'move direction', 'torso': 'aim', 'arms': 'aim', 'item': 'aim', 'head': 'aim'},

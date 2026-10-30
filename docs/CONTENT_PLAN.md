@@ -191,11 +191,13 @@ godot --headless --path . --script res://tests/tool_content_index.gd       # rew
 4. **Blurb**: one line of flavour in `blurb`.
 5. **Band**: take `power`, `hp` and the main stat from the `data/balance.json` row for its family and tier; if the part must be off the table, give it a quirk (a trade-off) and say why.
 
-## 8. Order from here
-1. Merge the running work: physics, the Drift, species, the writing pack.
-2. **Foundation**: hull mounts (CONTENT 4f, fixed guns and turrets) and **the content pack loader with the validator and balance bands**.
-3. **Mining** (CONTENT section 10): rock asteroids in the arena, cutting, chunks, the ore hold, scoop and tractor, refining, field dangers, `asteroid_field` nodes. The same code salvages wrecks later.
-4. **Engine wave 1**: tiered lines A, plus Strafe Jets and Long-Burn from B. Hooks: `fuel_mult`, lateral thrust.
-5. **Race wave 1**: Kett, Mire, Sporeling, Gauntling, Prismatic, Grundl. Hooks: auras, mechanical, work_mult groups, and the large rig.
-6. Engine wave 2 (the rest of B and C) and race wave 2 (small-body races, which need the 1×1 body in the pathfinder: a code brief).
-7. Uniques with quests, as the event system grows quest chains.
+## 8. Order from here (updated 2026-10-30: the Raft loop and endings)
+1. Merge the running work: two-piece mounts, shields v2, the engine, race and sector art.
+2. **The ship redesign**: non-rectangular starters, pirate and rammer (CONTENT 4c).
+3. **Sector space** (CONTENT 11), in three briefs: the core logic, then the view, then content (intakes, radar, debris, POI events).
+4. **Processing** (CONTENT 12): smelters, steel, alloy and conductor, Forged Steel and Alloy armour; Mk3+ recipes switch to steel.
+5. **Engine wave 1** data (its art is in progress) and **race wave 1** data plus trait hooks (its art is in progress).
+6. **Mining in sector space** (CONTENT 10 inside 11): rocks, cutting, special motherlode POIs.
+7. **Enemy scaling and the balance harness** (CONTENT 14): faction enemy tables, budgets, threat ratings, the AI-vs-AI report. Run it after every content wave.
+8. **Endings and landmarks** (CONTENT 13): the Haven chain first (the writer plus a small code brief for the ending screen, score and unlocks), then the Retire ending, the Way Out per faction, and the Hollow tide clock.
+9. On foot at POIs (docking, abandoned stations, boarding).

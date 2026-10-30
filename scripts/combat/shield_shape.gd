@@ -49,8 +49,9 @@ static func from_cells(cells, centre := Vector2.INF, grow := INFLATE) -> RefCoun
 	return s
 
 
-## The cells that make a ship's bubble: every wall and door, every part's cell, every cell shot open
-## (a breach does not change the shape), and the hull cells when there is nothing else.
+## The cells that make a ship's bubble: every wall and door, every part's cell (a hull mount's outside
+## half too), every cell shot open (a breach does not change the shape), and the hull cells when there is
+## nothing else.
 static func cells_of(ship) -> Array:
 	var g = ship.grid
 	var solid := {}
@@ -61,7 +62,10 @@ static func cells_of(ship) -> Array:
 	for c in g.breached:
 		solid[c] = true
 	for uid in ship.components.instances:
-		for c in ship.components.instances[uid]["cells"]:
+		var inst: Dictionary = ship.components.instances[uid]
+		for c in inst["cells"]:
+			solid[c] = true
+		for c in inst.get("out_cells", []):  # the outside half of a hull mount sits in space: the bubble goes round it
 			solid[c] = true
 	return solid.keys() if not solid.is_empty() else g.hull.keys()
 

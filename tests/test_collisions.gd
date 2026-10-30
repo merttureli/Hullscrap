@@ -180,7 +180,7 @@ func test_damage_goes_with_the_square_of_the_speed() -> void:
 	near(dealt[2], e["energy"] * K, "which is E x damage_k", 1e-6)
 
 
-func test_two_couriers_head_on_at_150_each_lose_8_to_12_hull() -> void:
+func test_two_couriers_head_on_at_150_each_lose_4_to_8_hull() -> void:  # was 8 to 12 before the guns stuck out: rams hit the outside halves first and those are not hull
 	arena = Arena.new(1)  # the real damage_k
 	var a := Ship.from_design("res://data/ships/starter_courier.json")
 	var b := Ship.from_design("res://data/ships/starter_courier.json")
@@ -194,8 +194,12 @@ func test_two_couriers_head_on_at_150_each_lose_8_to_12_hull() -> void:
 	_run(4.0)
 	var lost0: float = h0 - arena.ships[0].hull
 	var lost1: float = h0 - arena.ships[1].hull
-	check(lost0 >= 8.0 and lost0 <= 12.0, "courier A lost %f hull" % lost0)
-	check(lost1 >= 8.0 and lost1 <= 12.0, "courier B lost %f hull" % lost1)
+	check(lost0 >= 4.0 and lost0 <= 8.0, "courier A lost %f hull" % lost0)
+	check(lost1 >= 4.0 and lost1 <= 8.0, "courier B lost %f hull" % lost1)
+	var guns_hit := 0
+	for e in arena.events:
+		guns_hit += int(e["type"] == "hit" and e.get("half", "") == "out")
+	check(guns_hit > 0, "and the gun housings on the noses took part of it (%d hits)" % guns_hit)
 	check(not arena.ships[0].wrecked and not arena.ships[1].wrecked, "neither is wrecked")
 
 
@@ -375,7 +379,7 @@ func test_the_bow_is_the_side_with_the_most_ram_plating() -> void:
 func test_the_rustfang_rammer_design() -> void:
 	var ship := Session.spawn_rammer()
 	check(ship != null, "the design loads")
-	eq(ship.get_meta("ai"), {"style": "rammer"}, "and carries its pilot style")
+	eq(ship.get_meta("ai"), {"style": "rammer", "aim_skill": 0.4}, "and carries its pilot style and its poor aim")
 	var plates := 0
 	var slopes := 0
 	for c in ship.grid.tiles:
@@ -389,14 +393,14 @@ func test_the_rustfang_rammer_design() -> void:
 		var id: String = ship.components.instances[uid]["id"]
 		kick += int(id == "engine_scrap_mk1")
 		guns += int(ship.components.def(id)["family"] == "weapon")
-	eq([kick, guns], [2, 2], "two Kickjets and two light guns")
+	eq([kick, guns], [2, 1], "two Kickjets and a bow gun")
 	arena = Arena.new(1)
 	var i := arena.add_ship(ship)
 	eq(PilotAI.bow_of(arena.ships[i]), Vector2.UP, "the bow is forward")
 	eq(arena.ships[i].flight.can_fly(ship.components, arena.ships[i].powered), "", "it can fly")
 	check(arena.ships[i].thrust * arena.ships[i].flight.thrust_to_accel / arena.ships[i].mass > 30.0, "and is not a brick")
 	var pirate := Session.load_ship(Session.PIRATE_PATH)
-	check(not pirate.has_meta("ai"), "the pirate has no pilot style")
+	eq(pirate.get_meta("ai"), {"aim_skill": 0.5}, "the pirate has no pilot style, only a middling aim")
 
 
 func _rammer_fight(target_path := "res://data/ships/starter_courier.json", seed_value := 3) -> Session:
@@ -415,7 +419,8 @@ func test_the_rammer_closes_and_hits_a_stationary_target_within_10_seconds() -> 
 			first = i * DT
 	check(first > 0.0 and first < 10.0, "it rammed within 10 s (at %f)" % first)
 	var tgt = s.arena.ships[Session.PLAYER]
-	check(tgt.hull < tgt.hull_max, "and hurt the target: %f of %f" % [tgt.hull, tgt.hull_max])
+	var hurt: bool = tgt.hull < tgt.hull_max or s.arena.events.any(func(e): return e["type"] == "hit" and e["ship"] == Session.PLAYER)  # the ram may only get as far as the gun housings on the nose
+	check(hurt, "and hurt the target: %f of %f" % [tgt.hull, tgt.hull_max])
 	check(s.arena.ships[Session.ENEMY].hull > 0.0 and not s.arena.ships[Session.ENEMY].wrecked, "the rammer is fine")
 
 

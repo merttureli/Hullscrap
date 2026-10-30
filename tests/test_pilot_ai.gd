@@ -30,6 +30,14 @@ func _count(a: Arena, type: String, ship := -1) -> int:
 	return n
 
 
+## Shots logged by ship `ship` with weapon `weapon`.
+func _shots_of(a: Arena, ship: int, weapon: String) -> int:
+	var n := 0
+	for e in a.events:
+		n += int(e["type"] == "shot" and e["ship"] == ship and e["weapon"] == weapon)
+	return n
+
+
 func near(got: float, want: float, msg: String, eps := 1e-3) -> void:
 	check(absf(got - want) <= eps, "%s: expected %s, got %s" % [msg, str(want), str(got)])
 
@@ -101,10 +109,14 @@ func _run(a: Arena, ais: Array, seconds: float) -> void:
 func test_the_ai_closes_to_its_preferred_range_and_shoots() -> void:
 	var d := _duel()
 	var a: Arena = d[0]
+	a.autofire[1] = false  # the sitting foe holds fire
 	_run(a, d[1], 20.0)
 	var dist: float = a.ships[0].flight.pos.distance_to(a.ships[1].flight.pos)
-	var want := PilotAI.RANGE_FRACTION * float(a.weapons.def("laser_mk1")["range"])
-	check(absf(dist - want) < 0.2 * want, "70%% of the laser range (%d), it holds %d" % [want, dist])
+	var radii: float = d[1][0]._radius(0) + d[1][0]._radius(1)
+	var want := maxf(PilotAI.RANGE_FRACTION * float(a.weapons.def("laser_mk1")["range"]), radii + PilotAI.HULL_MARGIN)
+	check(want > 0.7 * 900.0, "(the two hulls are wider than 70%% of the laser range: it must hold %d, not 630)" % want)
+	check(absf(dist - want) < 0.2 * want, "it holds %d between the centres, it holds %d" % [want, dist])
+	check(dist > radii, "so the hulls never clip")
 	check(_count(a, "shot", 0) >= 8, "it fires: %d shots" % _count(a, "shot", 0))
 	check(_count(a, "hit", 1) + _count(a, "shield", 1) > 0, "and hits")
 	check(a.ships[1].hull < a.ships[1].hull_max, "the foe's hull is hurt")
@@ -112,10 +124,11 @@ func test_the_ai_closes_to_its_preferred_range_and_shoots() -> void:
 	for e in a.events:  # the strafing pirate's wide hull may clip the foe's: that is the only way it can be hurt
 		if e["type"] == "hit" and e["ship"] == 0:
 			check(e.get("ram", false), "(and the only damage it took was from a collision)")
+	check(_shots_of(a, 0, "laser_mk1") >= 4 and _shots_of(a, 0, "rattle_burst_scrap") >= 2, "the laser and the turret both fire (%d, %d)" % [_shots_of(a, 0, "laser_mk1"), _shots_of(a, 0, "rattle_burst_scrap")])
 	var arcs := 0
 	for uid in a.ships[0].mounts:
 		arcs += int(a.weapons.in_arc(a, 0, a.ships[0].mounts[uid], a.ships[1].flight.pos))
-	check(arcs >= 1, "it keeps the foe inside an arc of its guns")
+	check(arcs >= 1, "it keeps the foe where one of its guns can bear")
 
 
 func test_the_ai_aims_at_weapons_then_engines_then_the_reactor() -> void:
@@ -157,9 +170,9 @@ func test_a_wrecked_pilot_stops() -> void:
 	a.wreck(0)
 	var shots := _count(a, "shot", 0)
 	_run(a, d[1], 3.0)
-	eq(a.ships[0].input, {"throttle": 0.0, "turn": 0.0}, "no helm input")
+	eq(a.ships[0].input, {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}, "no helm input")
 	eq(_count(a, "shot", 0), shots, "no more shots")
-	eq(a.ships[1].input, {"throttle": 0.0, "turn": 0.0}, "the other pilot stops when its foe is wrecked")
+	eq(a.ships[1].input, {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}, "the other pilot stops when its foe is wrecked")
 
 
 func test_with_a_sectored_shield_it_holds_weapons_aimed_into_the_sector_the_foe_is_about_to_hit() -> void:
@@ -170,17 +183,18 @@ func test_with_a_sectored_shield_it_holds_weapons_aimed_into_the_sector_the_foe_
 	a.ships[0].dirty = true
 	a.sync(0)
 	eq(a.ships[0].sectors, 4, "four sectors")
-	a.ships[1].flight.pos = Vector2(0.0, -600.0)
+	a.ships[1].flight.pos = Vector2(0.0, -1300.0)  # nose to nose with room between (the hulls are 450 px across the corner)
 	for uid in a.ships[0].mounts:
 		a.ships[0].cooldowns[uid] = 0
 	for uid in a.ships[1].mounts:
 		a.ships[1].cooldowns[uid] = 0
-	eq(ai._exposed_sectors(), [0], "the foe's loaded lasers point at my bow")
+	a.autofire[1] = false  # its turret stays loaded
+	eq(ai._exposed_sectors(), [0], "the foe's loaded guns point at my bow")
 	for k in 30:
 		ai.think(DT)
 		a.step(DT)
-	eq(_count(a, "shot", 0), 0, "so it holds its bow guns for now")
+	eq(_shots_of(a, 0, "laser_mk1"), 0, "so it holds its fixed bow gun for now")
 	for k in 120:
 		ai.think(DT)
 		a.step(DT)
-	check(_count(a, "shot", 0) > 0, "but not for ever")
+	check(_shots_of(a, 0, "laser_mk1") > 0, "but not for ever")

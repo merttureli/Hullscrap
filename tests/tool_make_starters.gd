@@ -1,10 +1,13 @@
 extends SceneTree
-## Not a test (the runner only loads test_*.gd). Rebuilds the three starter ships of data/ships/:
+## Not a test (the runner only loads test_*.gd). Rebuilds the three starter ships and the pirate raider of data/ships/:
 ##   godot --headless --path . --script res://tests/tool_make_starters.gd
 ## Each ship is described by room rectangles, doors, parts and plating below (local coordinates, the
 ## ship's top-left bounding-box cell is 0,0), built through BuildSession.apply, wired by a cheap
 ## router, then exported with Ship.to_dict(). The hull is the bounding box plus MARGIN cells, and
 ## the ship sits in the middle of the 63x63 grid. Prints a map and the stats of every ship.
+## A weapon or engine is a hull mount (docs/CONTENT.md 4f): its entry is [id, x, y, rot] with x, y the
+## top-left cell of its OUTSIDE half (in space, against the outer wall face; outward is up at rot 0,
+## so rear engines use rot 2); the inside half goes on the floor behind the wall by the placement rule.
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -24,7 +27,7 @@ var _bad := false
 
 
 func _init() -> void:
-	for spec in [_rustbucket(), _courier(), _prism()]:
+	for spec in [_rustbucket(), _courier(), _prism(), _pirate()]:
 		_make(spec)
 	quit(1 if _bad else 0)
 
@@ -49,18 +52,18 @@ func _rustbucket() -> Dictionary:
 			[6, 13, "h"], [14, 13, "h"], [20, 13, "h"], [8, 15, "v"], [14, 18, "h"], [20, 18, "h"],
 		],
 		"parts": [
-			["fabricator", 2, 2], ["shrapnel_cannon_scrap", 9, 2], ["rattle_burst_scrap", 13, 2], ["bolt_thrower_scrap", 17, 2],
+			["fabricator", 2, 2], ["shrapnel_cannon_scrap", 9, -3], ["rattle_burst_scrap", 13, -2], ["bolt_thrower_scrap", 17, -2],
 			["helm", 24, 3], ["bed", 19, 7], ["bed", 21, 7], ["oxygen_scrap_mk1", 23, 7], ["shield_scrap_mk1", 2, 14],
 			["reactor_scrap_mk1", 10, 14], ["reactor_mk2", 16, 14], ["reactor_scrap_mk1", 22, 14],
-			["engine_scrap_mk1", 4, 20], ["engine_scrap_mk1", 22, 20], ["radiator", 14, 20],
+			["engine_scrap_mk1", 4, 24, 2], ["engine_scrap_mk1", 22, 24, 2], ["radiator", 14, 20],
 		],
 		"plates": [["scrap_plate", func(_c): return true]],
 		"cargo": {"scrap": 900, "copper": 60, "polymer": 12, "engine_scrap_mk1": 1, "radiator": 1, "bed": 1, "credits": 300, "fuel": 6},
 	}
 
 
-## Standard line: small and quick. Two reactors (Mk2 and Mk1) because one cannot feed the guns, the
-## shield and both engines.
+## Standard line: small and quick. Two Mk2 reactors because one cannot feed the guns, the shield, both rear
+## engines and the strafe pair on the side walls.
 func _courier() -> Dictionary:
 	return {
 		"file": "starter_courier", "name": "Courier", "size": Vector2i(24, 19),
@@ -72,15 +75,16 @@ func _courier() -> Dictionary:
 			[0, 13, 5, 18], [5, 13, 18, 18], [18, 13, 23, 18],  # engine room, reactors, engine room
 		],
 		"doors": [
-			[3, 6, "h"], [10, 6, "h"], [17, 6, "h"], [8, 8, "v"], [14, 8, "v"],
+			[1, 6, "h"], [10, 6, "h"], [17, 6, "h"], [8, 8, "v"], [14, 8, "v"],
 			[2, 13, "h"], [10, 13, "h"], [19, 13, "h"],
 		],
 		"parts": [
-			["laser_mk1", 5, 2], ["pulse_mk1", 10, 2], ["laser_mk1", 15, 2],
-			["bed", 1, 7], ["bed", 3, 7], ["oxygen_gen", 5, 7],
-			["fabricator", 9, 10], ["helm", 16, 8], ["shield_mk1", 19, 7],
-			["reactor_mk2", 6, 14], ["reactor_mk1", 12, 14], ["radiator", 16, 14],
-			["engine_mk2", 1, 16], ["engine_mk2", 19, 16],
+			["laser_mk1", 5, -2], ["pulse_mk1", 10, -2], ["laser_mk1", 15, -2],
+			["bed", 3, 7], ["bed", 5, 7], ["oxygen_gen", 3, 11, 1],
+			["fabricator", 9, 10], ["helm", 17, 7], ["shield_mk1", 17, 9],
+			["reactor_mk2", 6, 14], ["reactor_mk2", 12, 14], ["radiator", 16, 14],
+			["engine_mk2", 1, 19, 2], ["engine_mk2", 19, 19, 2],
+			["engine_mk1", -2, 9, 3], ["engine_mk1", 24, 7, 1],  # the strafe pair: stand-ins on the side walls (push right and left)
 		],
 		"plates": [["titanium_alloy", func(c): return c.y == 0 and c.x >= 0 and c.x <= 23]],
 		"cargo": {"scrap": 220, "copper": 80, "titanium": 40, "polymer": 10, "engine_mk1": 1, "laser_mk1": 1, "afterburner": 1, "radiator": 1, "credits": 500, "fuel": 6},
@@ -102,13 +106,37 @@ func _prism() -> Dictionary:
 			[13, 6, "h"], [8, 8, "v"], [15, 10, "v"], [2, 12, "h"], [13, 12, "h"], [18, 12, "h"],
 		],
 		"parts": [
-			["heat_lance_neon", 6, 2], ["radiator", 10, 2], ["siren_ion_neon", 12, 2],
+			["heat_lance_neon", 6, -2], ["radiator", 10, 2], ["siren_ion_neon", 12, -2],
 			["bed", 1, 7], ["bed", 3, 7], ["oxygen_gen", 5, 7],
 			["shield_neon_mk1", 9, 7], ["helm", 13, 8], ["fabricator", 16, 7],
-			["reactor_neon_mk1", 5, 13], ["radiator", 9, 13], ["radiator", 11, 13], ["engine_neon_mk1", 13, 15],
+			["reactor_neon_mk1", 5, 13], ["radiator", 9, 13], ["radiator", 11, 13], ["engine_neon_mk1", 13, 18, 2],
 		],
 		"plates": [["reflective_coating", func(c): return c.y == 0]],
 		"cargo": {"scrap": 120, "copper": 60, "polymer": 10, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "radiator": 1, "bed": 1, "credits": 400, "fuel": 6},
+	}
+
+
+## The test pirate (combat_session.gd PIRATE_PATH): a small scrap-plated raider with one fixed laser and
+## one Rattle Burst turret on the nose, two rear engines, a shield and the aim of a pilot of skill 0.5.
+## A scrap reactor joins the Mk2 because the turret's scrap line draws 20% more than the laser it replaced.
+func _pirate() -> Dictionary:
+	return {
+		"file": "pirate_raider", "name": "Pirate Raider", "size": Vector2i(20, 15),
+		"crew": [{"name": "Grub", "species": "human"}, {"name": "Skab", "species": "human"}, {"name": "Vex", "species": "basalt"}],
+		"ai": {"aim_skill": 0.5},
+		"blurb": "A Rustfang raider: a laser to aim with the whole ship, a rattling turret that fires whether it is aimed or not.",
+		"rooms": [
+			[0, 1, 19, 8],  # nose deck
+			[0, 8, 19, 14],  # engine deck
+		],
+		"doors": [[8, 8, "h"]],
+		"parts": [
+			["laser_mk1", 5, -2], ["rattle_burst_scrap", 10, -2], ["shield_mk1", 15, 3], ["helm", 2, 3],
+			["reactor_mk2", 8, 9], ["reactor_scrap_mk1", 6, 4], ["oxygen_gen", 2, 9],
+			["engine_mk1", 4, 15, 2], ["engine_mk1", 13, 15, 2],
+		],
+		"plates": [["scrap_plate", func(c): return c.y == 0]],
+		"cargo": {"scrap": 120, "copper": 10},
 	}
 
 
@@ -179,6 +207,7 @@ func _make(spec: Dictionary) -> void:
 	var cells: Array = g.tiles.keys() + ship.cables.cells.keys()
 	for uid in ship.components.instances:
 		cells.append_array(ship.components.instances[uid]["cells"])
+		cells.append_array(ship.components.instances[uid]["out_cells"])
 	for c in cells:
 		lo = lo.min(c)
 		hi = hi.max(c)
@@ -196,6 +225,8 @@ func _make(spec: Dictionary) -> void:
 	var saved := ship.to_dict()
 	saved["blurb"] = spec["blurb"]
 	saved["crew"] = spec["crew"]  # who starts aboard and their species (Jobs.spawn_crew)
+	if spec.has("ai"):
+		saved["ai"] = spec["ai"]  # the pilot's style and aim skill (pilot_ai.gd)
 	var path: String = OUT_DIR + spec["file"] + ".json"
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(_format(saved))
@@ -355,6 +386,9 @@ func _report(spec: Dictionary, path: String) -> void:
 				var uid: int = ship.components.at(c)
 				if uid >= 0:
 					ch = glyph.get(ship.components.def(ship.components.instances[uid]["id"])["family"], "?")
+				var out_uid: int = ship.components.at_out(c)
+				if out_uid >= 0:  # the outside half of a mount, in lower case
+					ch = glyph.get(ship.components.def(ship.components.instances[out_uid]["id"])["family"], "?").to_lower()
 				if pass_no == 1 and ship.cables.has(c):
 					ch = "+"
 				row += ch

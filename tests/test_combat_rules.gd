@@ -50,7 +50,7 @@ func near(got: float, want: float, msg: String, eps := 1e-4) -> void:
 
 ## Define weapon `id` for the arena (a laser unless `d` says otherwise, any arc, no cooldown).
 func _def(a: Arena, id: String, d := {}) -> void:
-	var full := {"kind": "laser", "damage_type": "energy", "damage": 1, "arc": 360, "cooldown": 0.0, "range": 2000}
+	var full := {"kind": "laser", "damage_type": "energy", "damage": 1, "gimbal": 180, "cooldown": 0.0, "range": 2000}
 	full.merge(d, true)
 	a.weapons.defs[id] = full
 
@@ -59,24 +59,24 @@ func _def(a: Arena, id: String, d := {}) -> void:
 
 func test_the_pirate_is_a_flyable_armed_ship_with_two_rooms() -> void:
 	var s := _pirate()
-	eq(s.grid.hull.size(), 20 * 14, "20 x 14 hull cells")
+	eq(s.grid.hull.size(), 26 * 23, "26 x 23 hull cells: the 22 x 19 of its hull and mounts, and two more all round")
 	eq(s.atmosphere.rooms.size(), 2, "two rooms")
 	var count := {}
 	for uid in s.components.instances:
 		var id: String = s.components.instances[uid]["id"]
 		count[id] = int(count.get(id, 0)) + 1
 		check(s.power_state["powered"][uid], id + " is powered")
-	eq([count.get("laser_mk1"), count.get("engine_mk1"), count.get("shield_mk1"), count.get("helm"), count.get("oxygen_gen"), count.get("reactor_mk2")], [2, 2, 1, 1, 1, 1], "the parts")
+	eq([count.get("laser_mk1"), count.get("rattle_burst_scrap"), count.get("engine_mk1"), count.get("shield_mk1"), count.get("helm"), count.get("oxygen_gen"), count.get("reactor_mk2"), count.get("reactor_scrap_mk1")], [1, 1, 2, 1, 1, 1, 1, 1], "the parts: a fixed laser and a turret on the nose")
 	var plates := 0
 	var doors := 0
 	for c in s.grid.tiles:
 		plates += int(s.grid.tiles[c] == "scrap_plate")
 		doors += int(s.grid.tiles[c] == "door")
-	eq([plates, doors], [20, 2], "a scrap plate layer across the front and one 2-wide door")
+	eq([plates, doors], [22, 2], "a scrap plate layer across the front and one 2-wide door")
 	check(s.inventory.count("scrap") > 0, "cargo with scrap")
 	var a := Arena.new()
 	var i := a.add_ship(s)
-	eq(a.ships[i].mounts.size(), 2, "two laser mounts")
+	eq(a.ships[i].mounts.size(), 2, "a laser and a turret")
 	for uid in a.ships[i].mounts:
 		check(a.ships[i].mounts[uid]["pos"].y < a.ships[i].pivot.y - 2.0, "near the bow edge")
 	eq(a.ships[i].layers, 1, "one shield layer")

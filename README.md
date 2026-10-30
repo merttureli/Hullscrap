@@ -32,14 +32,14 @@ Build mode only:
 | Tab | Next palette: Tiles, Systems, Cables |
 | 1 / 2 / 3 | Tiles: Floor / Wall / Door |
 | 1 - 9 | Systems: pick a system you hold in cargo (the list shows how many) |
-| R | Systems: rotate the system by a quarter turn. Door: flip the piece across the way it fits. Wall: turn the shape a quarter turn |
+| R | Systems: rotate the system by a quarter turn (a weapon or engine points up at 0 degrees: rear engines are turned twice). Door: flip the piece across the way it fits. Wall: turn the shape a quarter turn |
 | T | Wall: cycle the wall tool through the shapes: full, slope45, slope2, round2 (pieces of `data/shapes.json`) |
 | Shift+R | Wall: mirror the shape |
 | F (over a system) | Send the nearest crew member to repair it. Unlike the job board, an order also covers a system that works but is damaged |
-| Left mouse (drag to paint) | Place; the whole stroke is one undo step. Green ghost = it will apply, red = not (reason in the HUD). A system is placed with its top-left cell on the mouse, on release; a door piece likewise (2x1 or 1x2, turned along the wall by itself), as one undo step. A shaped wall piece (T) is the same: top-left cell on the mouse, on release, one undo step, and its ghost is the real outline of each cell |
+| Left mouse (drag to paint) | Place; the whole stroke is one undo step. Green ghost = it will apply, red = not (reason in the HUD). A system is placed with its top-left cell on the mouse, on release; a **weapon or engine** is placed by its **outside half**, in space against the outer face of the hull: the game walks inward through the wall (any thickness of full wall cells, never a door, floor or shaped piece) and puts the inside half on the first free floor behind it, and the ghost shows both halves and the wall between (refusals: "the barrel must stick out into space", "needs a flat wall to mount through", "the breech needs 4x2 free floor behind the wall"); a door piece likewise (2x1 or 1x2, turned along the wall by itself), as one undo step. A shaped wall piece (T) is the same: top-left cell on the mouse, on release, one undo step, and its ghost is the real outline of each cell |
 | Shift + left mouse drag | Straight line, locked to the horizontal or vertical axis |
 | Ctrl + left mouse drag | Rectangle. Floor and cables fill it, a wall makes a room (walls round the edge, floor inside); doors and systems one at a time |
-| Right mouse (+ Shift / Ctrl) | Tiles and cables: the same three modes, but removing (100% refund). Systems: removes the one under the mouse and returns it to the cargo |
+| Right mouse (+ Shift / Ctrl) | Tiles and cables: the same three modes, but removing (100% refund). Systems: removes the one under the mouse (either half of a weapon or engine) and returns it to the cargo |
 | Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z) | Undo / redo (tiles, systems, cables and cargo) |
 | Esc | Cancel a drag |
 
@@ -49,10 +49,10 @@ The game opens on a centred panel, **Choose your ship**, with a card per design:
 | Key | Ship | Line | Character |
 |---|---|---|---|
 | 1 | Rustbucket (30x24 cells) | scrap | A brick: scrap-plate skin all round (most hull), 3 reactors (2 Rustbucket and a Mk2), 2 Kickjets, Bubble Rig shield, Shrapnel Cannon + Rattle Burst + Bolt Thrower (it eats scrap), a big hold with 900 scrap, 300 credits. Slow, and its scrap parts quit now and then. |
-| 2 | Courier (24x19) | standard | Reliable standard parts: Reactor Mk2 + Mk1, 2 Engine Mk1, Shield Mk1, 2 Laser Mk1 + Pulse Mk1, a titanium front row, 500 credits. |
+| 2 | Courier (24x19) | standard | Reliable standard parts: 2 Reactor Mk2, 2 Engine Mk2 on the rear wall and a strafe pair of Engine Mk1 on the side walls, Shield Mk1, 2 Laser Mk1 + Pulse Mk1, a titanium front row, 500 credits. |
 | 3 | Prism (22x18) | neon | A glass cannon: Prism Core (it runs hot: 2 radiators in its room, a third by the guns), Ion Drive, Neon Lattice shield (2 layers, 4 sectors), Heat Lance + Siren Ion, a thin reflective coat on the nose, the lightest and most agile, 400 credits. |
 
-Every starter is a working ship: closed rooms joined by 2-wide doors, every part on a cable with supply above demand, a helm and engines that fly, an oxygen generator, a fabricator alone in its workshop, crew beds, guns on the front edge, spare parts and some credits in the cargo (`"credits": N`; credits are just a cargo count for now). The hull is the ship's bounding box plus 2 cells, in the middle of the 63x63 grid.
+Every starter is a working ship: closed rooms joined by 2-wide doors, every part on a cable with supply above demand, a helm and engines that fly (engines on the rear wall, guns through the bow, each in two halves), an oxygen generator, a fabricator alone in its workshop, crew beds, spare parts and some credits in the cargo (`"credits": N`; credits are just a cargo count for now). The hull is the ship's bounding box plus 2 cells, in the middle of the 63x63 grid.
 
 The designs are `data/ships/starter_*.json`: the saved-ship format (Ctrl+S) plus a `blurb` line the picker shows. `Ship.from_design(path)` loads one and `ShipSim.choose_ship(path)` puts it in the player's slot. `tests/tool_make_starters.gd` builds them from room rectangles, doors, parts and plating through `BuildSession`, wires them and exports them (`godot --headless --path . --script res://tests/tool_make_starters.gd`, it prints a map and the stats of each); `tests/test_starter_ships.gd` checks them.
 
@@ -73,11 +73,12 @@ Every starter comes with four people: your soldier, Ada, and two more NPCs (Rook
 | 100 | Extinguish a burning cell | 0.5 intensity per second per crew member; two stack |
 | 95 | Revive a downed crew member | 3 s |
 | 90 | Repair a breach | 6 s x the repair multiplier of the wall's line; the wall comes back and the room seals |
-| 80 (90 for a weapon, engine or shield in a fight) | Repair a malfunctioning or disabled system | 5 s x the repair multiplier of the system's line (scrap 0.5, standard 1, neon 1.5). An overheated system just needs time |
+| 80 (90 for a weapon, engine or shield in a fight) | Repair a malfunctioning or disabled system, or a hull mount's damaged outside half (from the inside, while the wall between the halves is whole; the outside half heals first) | 5 s x the repair multiplier of the system's line (scrap 0.5, standard 1, neon 1.5). An overheated system just needs time |
 | 50 | Man a station: the helm, and weapons, shields or engines whose data says `manned: true` | stands next to it |
+| 30 | Clear a wreck: the debris of a part that was shot to pieces | 4 s; gives back half its recipe materials, rounded down |
 | 10 | Rest, when hurt: a powered medbay, else a bed | heals |
 
-A manned helm adds 10% evasion in a fight (`Jobs.evasion_bonus(ship)`; the arena does not read it yet) and a manned weapon cools down 10% faster (wired into `Arena.fire`). `ship.manned` maps each manned system's uid to the crew member at it.
+A manned helm adds 5% evasion in a fight (`Jobs.evasion_bonus(ship)`; the turrets' hit roll reads it) and a manned weapon cools down 10% faster (wired into `Arena.fire`). `ship.manned` maps each manned system's uid to the crew member at it.
 
 The HUD (bottom left) has one line, "Crew: Ada repairing Laser Mk1, Rook extinguishing, Juno at helm, ...", and the chronicle logs "Fire in engine room", "Fire out", "Breach sealed", "Kickjet repaired", "Rook is down", "Rook is back on their feet".
 
@@ -87,8 +88,9 @@ In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_rai
 | Input | Action |
 |---|---|
 | W / S | Throttle forward / reverse |
-| A / D | Turn left / right |
-| Mouse | Aim. A line runs from each weapon that can fire, with its arc as a faint wedge; a weapon whose arc misses the aim point is drawn grey |
+| A / D | Strafe left / right on the engines mounted on the side walls (no side engines, no strafe). With `"controls": {"steer": "keys"}` in `data/flight.json` they turn the ship instead |
+| Mouse | Steer: the ship turns toward the cursor at its turn rate, and **fixed guns aim where the ship points** (their barrels follow the cursor inside a few degrees of gimbal). A faint boresight line and cone shows where each fixed gun points; a turret shows its arc as a wedge and a ring, and tracks the enemy by itself |
+| T | Turrets autofire on / off (they fire when loaded and on target; the weapon bar shows each turret's hit chance and AUTO or HOLD) |
 | Left mouse (hold) | Fire group 1: lasers, bolts, beams |
 | Right mouse (hold) | Fire group 2: missiles, flak |
 | 1 - 9 | Fire that weapon (the slot numbers on the weapon bar) |
@@ -98,7 +100,9 @@ In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_rai
 | Esc | Leave, once the pirate is wrecked or more than 4000 px away |
 | R | After your ship is wrecked: back to build mode with the empty starter hull reloaded (B, then N, picks a ship again) |
 
-The panels at the top are the schematics (yours left, the enemy's right): rooms, walls, breaches in red, systems coloured by state (green ok, yellow damaged, red disabled, orange overheated, purple jammed, grey unpowered), a hull bar and the shield pips. **Firing opens your own shield**: the sector of the bubble the shot leaves through drops for 0.3 s (laser), 0.4 s (bolt), 0.6 s (flak) or the whole beam, while shots pass it and use no layer; the schematic shows "OPEN" and the sector ring goes dark. Missiles never drop it. Open doors let shots through; closed doors block them. The weapon bar shows each weapon's key, group, cooldown ring and state (ready, cooling, no power, jammed, no ammo, out of arc).
+The panels at the top are the schematics (yours left, the enemy's right): rooms, walls, breaches in red, systems coloured by state (green ok, yellow damaged, red disabled, orange overheated, purple jammed, grey unpowered), a hull bar and the shield pips. **Firing opens your own shield**: the sector of the bubble the shot leaves through drops for 0.3 s (laser), 0.4 s (bolt), 0.6 s (flak) or the whole beam, while shots pass it and use no layer; the schematic shows "OPEN" and the sector ring goes dark. Missiles never drop it. Open doors let shots through; closed doors block them. The weapon bar shows each weapon's key, group, cooldown ring and state (ready, cooling, no power, jammed, no ammo, disabled, offline, out of arc for a turret), and under each turret its hit chance against the enemy.
+
+**Hull mounts, fixed guns and turrets** (`docs/CONTENT.md` 4f, `scripts/ship/mounts.gd`). A weapon or engine is two halves joined through a wall of any thickness: the **outside half** (barrel or nozzles) sits in space against the hull and takes the hits you can see, with its own hp (75% of the part's), and is only ever **disabled**, never destroyed: shots and rams then go on into the wall behind it. The **inside half** is on the floor behind the wall, where crew man, wire and repair it. If any wall cell between the halves is breached the mount is **offline** until crew patch it. A direct hit on an interior part that is already disabled **wrecks** it (both halves of a mount): it is gone, with debris on its cells that a crew job (`clear_wreck`, 4 s) clears for half its recipe materials, rounded down (nothing for a unique). Fire, heat, ion and malfunctions never wreck. Most guns are **fixed** and fire along the mount's outward direction (up at rotation 0); **turrets** (Rattle Burst, Siren Ion, Leech Laser, Concord Point Turret) track within their arc and roll a hit (accuracy less the target's evasion, 25% at full speed, 5% more with a manned helm) for 60% of the damage. An engine pushes opposite its nozzle: rear engines (rotation 2) drive the ship, side engines strafe it.
 
 **Ramming and ricochets** (`scripts/combat/impact_fx.gd`). When two ships collide hard enough to hurt, sparks and debris fly from the contact points (`fx/sparks`, `fx/explosion`), the screen shakes by the impact energy, a banner and the chronicle say "Rammed the pirate: 14 hull damage (took 6)", and the walls take their damage as usual. A shot that glances off a hull shows a small spark at the bounce point.
 

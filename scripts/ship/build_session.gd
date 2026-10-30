@@ -10,14 +10,18 @@ extends RefCounted
 ##             takes that shape (left out = a full square). Its cost, hp and mass scale with the area.
 ##   piece     {"layer": "piece", "piece": id of shapes.gd, "tile": solid tile id, "anchor", "rot", "mirror"}
 ##             builds all the cells of a shaped piece (slope45, slope2, round2...) or none of them.
-##   component {"layer": "component", "id", "anchor", "rot"} places; {"layer": "component", "cell"} removes
+##   component {"layer": "component", "id", "anchor", "rot"} places; {"layer": "component", "cell"} removes.
+##             A hull mount (a weapon or engine) is placed by its OUTSIDE half: "anchor" is that half's
+##             top-left cell, and the inside half goes on the floor behind the wall (components.gd
+##             plan_mount). Removing it by a cell of either half takes both.
 ##   cable     {"layer": "cable", "cell"} places; add "remove": true to remove
 ## Placing a component takes one item with its id from the cargo; removing it gives the item back.
 ## A cable costs build.json's cable_cost per cell, refunded in full. A tile costs per cell, so a door
 ## piece costs twice. A step is the list of what was really done: tiles {layer, cell, from, to}
 ## (+ "from_open" for a removed open door, "from_shape" / "to_shape" for a shaped cell; a door piece
 ## and a shaped piece are one entry per cell),
-## components {layer, uid, id, anchor, rot, added}, cables {layer, cell, added}.
+## components {layer, uid, id, anchor (the inside half), rot, added, + out (the outside half's top-left) for a mount},
+## cables {layer, cell, added}.
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -163,7 +167,8 @@ func plan_piece(piece: String, tile: String, anchor: Vector2i, rot := 0, mirror 
 	return {"changes": [{"layer": "piece", "piece": piece, "tile": tile, "anchor": anchor, "rot": posmod(rot, 4), "mirror": mirror}], "error": ""}
 
 
-## Place component `id` with its top-left cell on `anchor`, turned `rot` quarter turns.
+## Place component `id` with its top-left cell on `anchor`, turned `rot` quarter turns. For a hull
+## mount `anchor` is the top-left cell of its outside half.
 func plan_component(id: String, anchor: Vector2i, rot: int) -> Dictionary:
 	if not grid.in_bounds(anchor):
 		return {"changes": [], "error": "outside the hull"}
@@ -172,7 +177,7 @@ func plan_component(id: String, anchor: Vector2i, rot: int) -> Dictionary:
 
 ## Remove the component covering `cell`.
 func plan_component_removal(cell: Vector2i) -> Dictionary:
-	if ship.components.at(cell) < 0:
+	if ship.components.any_at(cell) < 0:
 		return {"changes": [], "error": "nothing to remove"}
 	return {"changes": [{"layer": "component", "cell": cell}], "error": ""}
 
@@ -322,7 +327,7 @@ func _try_tile(c: Vector2i, to: String, step: Array, axis := Vector2i.ZERO, shap
 			cells = grid.door_piece(c)
 	if why == "":
 		for p in cells:
-			why = _stands_on(p, to)
+			why = _stands_on(p, to, shape)
 			if why != "":
 				break
 	if why != "":
@@ -365,12 +370,21 @@ func _add_cost(sum: Dictionary, cost: Dictionary) -> void:
 		sum[m] = int(sum.get(m, 0)) + int(cost[m])
 
 
-## A system can't be left without floor: a reason when `c` holds one and `to` is not a floor tile.
-func _stands_on(c: Vector2i, to: String) -> String:
-	var uid: int = ship.components.at(c)
+## A system can't be left without floor: a reason when `c` holds one and `to` is not a floor tile. A
+## hull mount's barrel needs open space, and the wall it is mounted through must stay a full wall
+## (any material): a reason for any other change there.
+func _stands_on(c: Vector2i, to: String, shape := {}) -> String:
+	var parts = ship.components
+	var out_uid: int = parts.at_out(c)
+	if out_uid >= 0 and to != "":
+		return "a %s sticks out here" % parts.def(parts.instances[out_uid]["id"]).get("name", "system")
+	var link_uid: int = parts.link_at(c)
+	if link_uid >= 0 and (to == "" or not grid.tile_flag(to, "solid") or grid.tile_flag(to, "door") or not shape.is_empty()):
+		return "a %s is mounted through this wall" % parts.def(parts.instances[link_uid]["id"]).get("name", "system")
+	var uid: int = parts.at(c)
 	if uid < 0 or (to != "" and not grid.tile_flag(to, "solid") and not grid.tile_flag(to, "door")):
 		return ""
-	return "a %s stands here" % ship.components.def(ship.components.instances[uid]["id"]).get("name", "system")
+	return "a %s stands here" % parts.def(parts.instances[uid]["id"]).get("name", "system")
 
 
 func _try_component(ch: Dictionary, step: Array) -> String:
@@ -379,22 +393,29 @@ func _try_component(ch: Dictionary, step: Array) -> String:
 		var id: String = ch["id"]
 		var anchor: Vector2i = ch["anchor"]
 		var rot := int(ch.get("rot", 0))
-		var why: String = parts.can_place(grid, id, anchor, rot)
+		var mount: bool = parts.is_mount(id)
+		var why: String = parts.can_place_mount(grid, id, anchor, rot) if mount else parts.can_place(grid, id, anchor, rot)
 		if why != "":
 			return why
 		if inventory.count(id) < 1:
 			return "no %s in cargo" % parts.def(id).get("name", id)
-		var new_uid: int = parts.place(grid, id, anchor, rot)
+		var new_uid: int = parts.place_mount(grid, id, anchor, rot) if mount else parts.place(grid, id, anchor, rot)
 		inventory.add(id, -1)
-		step.append({"layer": "component", "uid": new_uid, "id": id, "anchor": anchor, "rot": posmod(rot, 4), "added": true})
+		var e := {"layer": "component", "uid": new_uid, "id": id, "anchor": parts.instances[new_uid]["anchor"], "rot": posmod(rot, 4), "added": true}
+		if mount:
+			e["out"] = anchor
+		step.append(e)
 		return ""
-	var uid: int = parts.at(ch["cell"])
+	var uid: int = parts.any_at(ch["cell"])
 	if uid < 0:
 		return "nothing to remove"
 	var inst: Dictionary = parts.instances[uid]
-	parts.remove_at(ch["cell"])
+	var e := {"layer": "component", "uid": uid, "id": inst["id"], "anchor": inst["anchor"], "rot": inst["rot"], "added": false}
+	if parts.has_outside(uid):
+		e["out"] = inst["out_anchor"]
+	parts.remove_uid(uid)
 	inventory.add(inst["id"], 1)
-	step.append({"layer": "component", "uid": uid, "id": inst["id"], "anchor": inst["anchor"], "rot": inst["rot"], "added": false})
+	step.append(e)
 	return ""
 
 
@@ -447,10 +468,13 @@ func _set_component(e: Dictionary, present: bool) -> void:
 	var parts = ship.components
 	if present:
 		var d: Dictionary = parts.to_dict()
-		d["instances"].append({"uid": e["uid"], "id": e["id"], "anchor": [e["anchor"].x, e["anchor"].y], "rot": e["rot"]})
+		var rec := {"uid": e["uid"], "id": e["id"], "anchor": [e["anchor"].x, e["anchor"].y], "rot": e["rot"]}
+		if e.has("out"):
+			rec["out"] = [e["out"].x, e["out"].y]
+		d["instances"].append(rec)
 		parts.load_dict(d)
 	else:
-		parts.remove_at(e["anchor"])
+		parts.remove_uid(e["uid"])
 	inventory.add(e["id"], -1 if present else 1)
 
 

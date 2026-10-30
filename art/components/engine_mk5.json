@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "engine_mk5_glow.png",
+  "frame": [
+   84,
+   50
+  ],
+  "offset": [
+   -10,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "power_coupling": [
+   32,
+   29
+  ],
+  "repair_hatch": [
+   13,
+   29
+  ]
+ },
+ "orientation": "inside half: rotation 0, outward is UP: the core sits on the floor with its top 4px overhanging the inner wall face (see offset); cable plugs into the power coupling",
+ "offset": [
+  0,
+  -4
+ ],
+ "mount": {
+  "part": "inside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Concord Thruster Mk5, a hull mount (outward is up): the 4x3 nozzle housing with three full bells (the middle one tallest), gold collar rings, heat-sink fins and the Concord gold registry band across the reinforced collar; inside the Mk4 core with a gold-framed hatch and a gold registry band along the wall flange. Damaged: the left bell lip dented and hanging, the right bell cracked and sputtering, a fin torn off, the middle bell cracked, sparks. Disabled: all three bells bent or snapped, the fins gone, the collar cracked (the gold band scorched). THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+}

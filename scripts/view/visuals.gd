@@ -7,6 +7,7 @@ extends RefCounted
 ## and a row of hp pips when damaged. Drawing only, no game logic.
 
 const Stats = preload("res://scripts/sim/stats.gd")
+const Mounts = preload("res://scripts/ship/mounts.gd")
 const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
 const FIRE_WINDOW := 0.15  ## seconds a weapon shows its fire frame after a shot
@@ -65,6 +66,98 @@ static func draw_component(canvas, rect: Rect2, def: Dictionary, inst: Dictionar
 	else:
 		_draw_placeholder(canvas, rect.grow(-2), def, cell_px, m, bool(opts.get("powered", true)), alpha)
 	_draw_marks(canvas, rect.grow(-2), m, alpha)
+
+
+# --- hull mounts (docs/CONTENT.md 4f): the outside half, its barrel, and the debris of wrecked parts -----------
+
+## Draw the outside half of hull mount `def` (a placed one, `inst`, or a ghost: `inst` may only have rot, out_hp
+## and uid) into `rect`, the screen rectangle of its cells, and for a weapon its barrel about `pivot` (the
+## barrel's turning point in the canvas' pixels) pointing along `aim` (a ship-local unit vector; the
+## outward direction when left out). Art: <id>_out and <id>_barrel (art/README.md), else a flat block and a
+## line. `opts` as draw_component, plus: thrusting (an engine's flame is on; it is off otherwise),
+## fired_ago (seconds since the last shot, for the barrel's recoil and flash).
+static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect2, pivot: Vector2, cell_px: float, aim := Vector2.ZERO, opts := {}) -> void:
+	var mount: Dictionary = def["mount"]
+	var rot := int(inst.get("rot", 0))
+	var out_hp := int(inst.get("out_hp", mount["outside_hp"]))
+	var d2 := def.duplicate()
+	d2["size"] = mount["outside"]
+	d2["hp"] = mount["outside_hp"]
+	var i2 := {"rot": rot, "hp": out_hp, "heat": 0.0, "status": "disabled" if out_hp <= 0 else "ok", "uid": int(inst.get("uid", 0))}
+	var o2 := opts.duplicate()
+	if str(def.get("family", "")) == "engine":
+		o2["powered"] = bool(opts.get("thrusting", false)) and bool(opts.get("powered", true))
+	var alpha := float(opts.get("alpha", 1.0))
+	var sheet = Art.component(str(def.get("id", "")) + "_out")
+	if sheet != null:
+		_draw_sheet(canvas, sheet, rect, d2, i2, cell_px, o2)
+	else:
+		var m := marks(d2, i2)
+		_draw_placeholder(canvas, rect.grow(-2), d2, cell_px, m, bool(o2.get("powered", true)), alpha)
+		canvas.draw_rect(rect.grow(-2), Color(0, 0, 0, 0.25 * alpha))
+	if str(def.get("family", "")) != "weapon":
+		return
+	var dir := Vector2(Mounts.outward(rot))
+	var live := aim if aim != Vector2.ZERO and out_hp > 0 else dir  # a disabled barrel hangs along the mount
+	_draw_barrel(canvas, def, i2, pivot, cell_px, live, opts, Mounts.barrel(def, Mounts.NONE, rot)["reach"])
+
+
+## The barrel of weapon `def` about `pivot`, turned to point along `aim` (see draw_mount_out): its frame by the outside
+## half's state (disabled, fire for a moment after a shot, damaged, idle), the fire flash on the glow layer.
+static func _draw_barrel(canvas, def: Dictionary, i2: Dictionary, pivot: Vector2, cell_px: float, aim: Vector2, opts: Dictionary, reach: float) -> void:
+	var alpha := float(opts.get("alpha", 1.0))
+	var sheet = Art.component(str(def.get("id", "")) + "_barrel")
+	var angle := Vector2.UP.angle_to(aim)
+	if sheet == null:
+		canvas.draw_line(pivot, pivot + aim * reach * cell_px, Color(0.85, 0.87, 0.9, alpha), maxf(3.0, cell_px / 6.0))
+		canvas.draw_circle(pivot, cell_px * 0.25, Color(0.3, 0.32, 0.38, alpha))
+		return
+	var hp := int(i2["hp"])
+	var max_hp := int(def["mount"]["outside_hp"])
+	var t := float(opts.get("time", 0.0))
+	var anim := "idle"
+	var frame := 0
+	if hp <= 0 and sheet.has_anim("disabled"):
+		anim = "disabled"
+	elif opts.has("fired_ago") and float(opts["fired_ago"]) < FIRE_WINDOW + 0.1 and sheet.has_anim("fire"):
+		anim = "fire"
+	elif float(hp) < float(max_hp) * DAMAGED_BELOW and sheet.has_anim("damaged"):
+		anim = "damaged"
+	frame = sheet.frame_once("fire", float(opts.get("fired_ago", 0.0))) if anim == "fire" else sheet.frame_at(anim, t)
+	var k := cell_px / SpriteSheet.SRC_CELL
+	var pin: Vector2 = (sheet.anchors["pivot"] + Vector2(0.5, 0.5)) if sheet.anchors.has("pivot") else Vector2(sheet.frame) / 2.0
+	var xf := Transform2D(angle, pivot)
+	var dest := Rect2(-pin * k, Vector2(sheet.frame) * k)
+	canvas.draw_set_transform_matrix(xf)
+	canvas.draw_texture_rect_region(sheet.texture, dest, sheet.region(frame), Color(1, 1, 1, alpha))
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+	var g = sheet.glow
+	if g != null and anim in ["fire", "damaged"] and g.has_anim(anim):
+		var gf: int = g.frame_once("fire", float(opts.get("fired_ago", 0.0))) if anim == "fire" else g.frame_at(anim, t)
+		var quad := {"tex": g.texture, "rect": Rect2(dest.position + g.offset * k, Vector2(g.frame) * k), "src": g.region(gf), "xf": xf, "mod": Color(1, 1, 1, alpha)}
+		if opts.has("glow_out"):
+			opts["glow_out"].append(quad)
+		else:
+			canvas.draw_set_transform_matrix(xf)
+			canvas.draw_texture_rect_region(quad["tex"], quad["rect"], quad["src"], quad["mod"])
+			canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+## The debris of wrecked parts (`wrecks`: [{id, cells}] of components.gd): art/tiles/wreck (one of its 4 variants
+## by cell) on each cell, else a scorch with scraps. `origin`: where grid cell (0, 0) starts in the canvas' pixels.
+static func draw_wrecks(canvas, wrecks: Array, origin: Vector2, cell_px: float) -> void:
+	var sheet = Art.tiles("wreck")
+	for w in wrecks:
+		for c in w["cells"]:
+			var r := Rect2(origin + Vector2(c) * cell_px, Vector2(cell_px, cell_px))
+			if sheet != null:
+				canvas.draw_texture_rect_region(sheet.texture, r, sheet.region(posmod(hash(c) >> 2, sheet.count)))
+				continue
+			canvas.draw_rect(r.grow(-1), Color(0.05, 0.04, 0.04, 0.6))
+			var h := hash(c)
+			for n in 3:
+				var p := r.position + Vector2(float((h >> (n * 4)) & 15) / 15.0, float((h >> (n * 4 + 2)) & 15) / 15.0) * cell_px * 0.7
+				canvas.draw_rect(Rect2(p, Vector2(cell_px * 0.22, cell_px * 0.12)), Color(0.45, 0.4, 0.36, 0.9))
 
 
 ## What a component's art shows now: {"anim", "frame", "glow" (glow anim name or ""), "glow_frame",
