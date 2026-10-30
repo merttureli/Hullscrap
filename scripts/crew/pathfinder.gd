@@ -1,11 +1,15 @@
 extends RefCounted
 ## Walking rules and pathfinding on the ship grid: A* on 4-neighbours with a Manhattan heuristic.
 ## Walkable = a non-empty tile that is not solid, or a door that `door_passable` lets through.
+## A crew body is BODY x BODY cells (2x2), so paths run over body anchors: the top-left cell of the
+## body. An anchor is usable when all its cells are walkable (clearance), and the body centre is
+## the anchor plus (1, 1) in cell units. A 1-wide corridor is closed to bodies; a 2-wide one is open.
 ## Ties on f break on lower h, then lower (y, x), so the same grid always gives the same path.
 ## Everything is static: call it as `Pathfinder.find_path(...)`. No nodes, testable headless.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
-const NO_CELL := Vector2i(-1, -1)  ## "none found"; real cells are never negative
+const NO_CELL := Vector2i(-1, -1)  ## "none found"; real cells and anchors are never negative
+const BODY := 2  ## a crew body covers BODY x BODY cells
 const FAR := 1 << 30
 
 
@@ -21,11 +25,39 @@ static func walkable(grid: ShipGrid, c: Vector2i, door_passable: Callable = Call
 	return not def.get("solid", false)
 
 
-## Shortest path from `from` to `to`, both ends included. Empty when either end is not
-## walkable or no route exists.
+## Can a body stand with its top-left cell on `anchor`? All BODY x BODY cells must be walkable.
+static func body_ok(grid: ShipGrid, anchor: Vector2i, door_passable: Callable = Callable()) -> bool:
+	for y in BODY:
+		for x in BODY:
+			if not walkable(grid, anchor + Vector2i(x, y), door_passable):
+				return false
+	return true
+
+
+## The anchor of the body whose centre is nearest to `p` (cell units), whether or not it is usable.
+static func anchor_of(p: Vector2) -> Vector2i:
+	return Vector2i(roundi(p.x), roundi(p.y)) - Vector2i.ONE
+
+
+## The centre (cell units) of a body on `anchor`.
+static func centre_of(anchor: Vector2i) -> Vector2:
+	return Vector2(anchor) + Vector2.ONE
+
+
+## The cells a body on `anchor` covers, row by row.
+static func body_cells(anchor: Vector2i) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for y in BODY:
+		for x in BODY:
+			out.append(anchor + Vector2i(x, y))
+	return out
+
+
+## Shortest path of body anchors from `from` to `to`, both ends included. Empty when either end
+## is not usable (see body_ok) or no route exists.
 static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passable: Callable = Callable()) -> Array[Vector2i]:
 	var path: Array[Vector2i] = []
-	if not walkable(grid, from, door_passable) or not walkable(grid, to, door_passable):
+	if not body_ok(grid, from, door_passable) or not body_ok(grid, to, door_passable):
 		return path
 	var g_cost := {from: 0}
 	var came_from := {}
@@ -45,7 +77,7 @@ static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passabl
 		var g: int = g_cost[cur] + 1
 		for d in ShipGrid.SIDES:
 			var n := cur + d
-			if closed.has(n) or g >= g_cost.get(n, FAR) or not walkable(grid, n, door_passable):
+			if closed.has(n) or g >= g_cost.get(n, FAR) or not body_ok(grid, n, door_passable):
 				continue
 			g_cost[n] = g
 			came_from[n] = cur
@@ -62,16 +94,18 @@ static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passabl
 	return path
 
 
-## The walkable cell whose centre is nearest to `p` (cell units), skipping `exclude`.
-## Ties go to the lower (y, x). NO_CELL when there is none.
+## The usable body anchor whose body centre is nearest to `p` (cell units). Anchors whose body
+## would overlap a body on `exclude` are skipped. Ties go to the lower (y, x). NO_CELL when none.
 static func nearest_walkable(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), exclude := NO_CELL) -> Vector2i:
 	var best := NO_CELL
 	var best_d := INF
-	for c: Vector2i in grid.tiles:
-		if c == exclude or not walkable(grid, c, door_passable):
+	for c: Vector2i in grid.tiles:  # an anchor is itself a walkable tile
+		if exclude != NO_CELL and absi(c.x - exclude.x) < BODY and absi(c.y - exclude.y) < BODY:
 			continue
-		var d := (Vector2(c) + Vector2(0.5, 0.5) - p).length_squared()
-		if d < best_d or (d == best_d and (c.y < best.y or (c.y == best.y and c.x < best.x))):
+		var d := (centre_of(c) - p).length_squared()
+		if d > best_d or (d == best_d and (c.y > best.y or (c.y == best.y and c.x > best.x))):
+			continue
+		if body_ok(grid, c, door_passable):
 			best = c
 			best_d = d
 	return best
