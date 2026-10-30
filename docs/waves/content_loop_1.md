@@ -44,3 +44,30 @@
 - At 10 pm, start tracks 1, 4 (two writers), 5 (writer and code), 6, 7 (weapons wave 2: art plus data) and **9 (race wave 2: hooks, art and data; wave 3 art too)** at once.
 - Tracks 2 and 3 start when track 1 has a first merge, and track 8 when step 1 of the sector core merges.
 - The lead keeps about 6–8 agents running and merges continuously.
+
+## The 14-hour window and Beta 2 (owner, 2026-10-30)
+> "At 10 pm, keep the reasonable models: Sonnet for builds, Opus when it's needed. Spawn many in parallel. You have roughly 14 hours before we send another version in, with all the features implemented on the core gameplay loop and all the initial 10 races complete with their guns and game mechanics. One Opus agent must also be spawned to guide the game's mechanics forward: no unnecessary additions, but cleverly thought-out ones, so the challenge is worth the time and fun to play. Other games in this style are a good place to look. It develops them with its own crew of 3 Sonnet agents, and presents them to me at the end of the 14 hours."
+
+- **The window** runs from 10 pm Central (03:00 UTC, Oct 31) to about noon Central (17:00 UTC, Oct 31). At the end comes **Beta 2**: a green build, tagged, with a presentation for the owner.
+- **Models**: builders are **Sonnet**. **Opus** is used for the mechanics director and for any brief that needs design judgment or a hard, cross-cutting refactor (the region graph, the sector view integration).
+- **What Beta 2 must have** (in priority order):
+  1. **The core loop, complete**:
+     - regions (an 8-stage run with region choice);
+     - sector space with the Raft loop: open space, debris, intakes, radar, autopilot, light-speed jumps, fights in place;
+     - procedural enemies with threat ratings;
+     - endings, landmarks and unlocks;
+     - the hangar.
+  2. **All 10 existing races complete**: each has its homeland region, racial tech (3 ship weapons, 3 components, 2 hand weapons with on-theme effects), 1–3 starter ships, at least 2 unique characters with active abilities, and its events.
+  3. Everything else in this loop (race waves 2–4, rare factions, more characters) as time allows, **never at the cost of 1 and 2**.
+- **The mechanics director** (Opus, plus a crew of 3 Sonnet builders):
+  - **Mission**: make the game deeper, more challenging and more fun, with **few, clever, well-tested mechanics**, never bloat. Each idea must make choices harder and more interesting, not just add numbers.
+  - **Research**: games in this style (FTL and Multiverse, Cosmoteer, Space Haven, Raft, Barotrauma, Into the Breach, Slay the Spire's run structure, Subnautica). Write down what makes their loops work.
+  - **Workflow**:
+    1. Write `docs/MECHANICS_REVIEW.md`: what's weak in the current loop, then 5–8 proposed mechanics, each with the problem it solves, how it plays, its cost to build, and the risk of bloat.
+    2. Pick the best 3–5, write precise briefs, and have its 3 Sonnet builders implement them on their own branches, with tests and screenshots.
+    3. Playtest them through the soak test and the balance harness.
+    4. At the end of the window, present the results to the owner: the doc plus merged features with screenshots.
+  - **It coordinates with the lead** before touching shared systems (combat, campaign, ship), so its work merges cleanly.
+- **The lead's cadence**: keep 6–10 builders running, merge continuously, keep `main` green and the beta builds green, and screenshot every big merge to the owner.
+  - At about 16:00 UTC, **freeze features**: only fixes and balance from then on.
+  - At about 17:00 UTC, **ship Beta 2**: a green build, a release note, and the presentation page.
