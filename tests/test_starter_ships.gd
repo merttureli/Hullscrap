@@ -258,6 +258,9 @@ func test_courier_has_a_strafe_pair_on_its_side_walls() -> void:
 	for c in ship.grid.tiles:
 		bow += int(ship.grid.tiles[c] == "titanium_alloy" and c.y == _bounds(ship)[0].y)
 	check(bow >= 20, "and the bow is a titanium layer over the wall, two cells thick")
+	for uid in _family(ship, "weapon"):
+		var inst: Dictionary = ship.components.instances[uid]
+		eq(Mounts.depth_of(ship.components.def(inst["id"]), inst["anchor"], inst["rot"], inst["out_anchor"]), 2, "%s: its link is the whole 2-cell bow" % inst["id"])
 
 
 func test_prism_is_the_neon_ship() -> void:

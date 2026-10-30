@@ -18,6 +18,8 @@ const MAX_DEPTH := 32  ## how many wall layers the walk looks through
 const SRC_CELL := 16.0  ## art source px per grid cell
 const DEFAULT_REACH := 1.5  ## cells from the barrel pivot to its muzzle when there is no art
 
+static var _art := {}  # "<art root>/<id>" -> {pivot_px (in the rotation 0 art of the outside half), reach}
+
 
 static func is_mount(def: Dictionary) -> bool:
 	return def.get("mount") is Dictionary
@@ -182,9 +184,6 @@ static func barrel(def: Dictionary, out: Vector2i, rot: int) -> Dictionary:
 	var osz := turned(raw, rot)
 	var pivot_px: Vector2 = _art[key]["pivot_px"]
 	return {"pivot": Vector2(out) + Vector2(osz) / 2.0 + (pivot_px - half).rotated(posmod(rot, 4) * PI / 2.0) / SRC_CELL, "reach": _art[key]["reach"]}
-
-
-static var _art := {}  # "<art root>/<id>" -> {pivot_px (in the rotation 0 art of the outside half), reach}
 
 
 static func _read_barrel(def: Dictionary) -> Dictionary:

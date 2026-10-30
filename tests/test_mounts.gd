@@ -4,6 +4,8 @@ extends "res://tests/base_test.gd"
 ## wrecked parts and the job that clears them. The aim, the thrust and the pilot are in test_aiming.gd.
 
 const Wall = preload("res://tests/fixture_wall.gd")
+const BuildMode = preload("res://scripts/build/build_mode.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
@@ -103,41 +105,54 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 	eq(c.def("shrapnel_cannon_scrap")["mount"]["outside"], [4, 3], "the Shrapnel Cannon's outside half is 4x3")
 
 
-func test_the_refusals_say_why() -> void:
-	var ship := Wall.wall_ship(3)
+func test_the_refusals_say_why_on_every_thickness_and_in_every_direction() -> void:
+	for rot in 4:
+		for thick in WALLS:
+			_refusals(thick, rot)
+
+
+func _refusals(thick: int, rot: int) -> void:
+	var ship := Wall.wall_ship(thick, rot)
 	var parts: Components = ship.components
-	var ok := Wall.out_anchor(0)
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, 0), "", "the plain case works")
+	var ok := Wall.out_anchor(rot)
+	var tag := "rot %d, %d thick" % [rot, thick]
+	var toward := Vector2i(Mounts.outward(rot))  # one step out into space
+	var breech := "the breech needs %s free floor behind the wall" % ("4x2" if rot % 2 == 0 else "2x4")  # the footprint turns with the mount
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "", tag + ": the plain case works")
 	# the barrel must stick out into space
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok + Vector2i(0, 1), 0), "the barrel must stick out into space", "an outside half that overlaps the wall")
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", Vector2i(-1, 5), 0), "the barrel must stick out into space", "an outside half off the grid")
-	var first: int = parts.place_mount(ship.grid, "laser_mk1", ok, 0)
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok + Vector2i(2, 0), 0), "the barrel must stick out into space", "an outside half on another gun's")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok - toward, rot), "the barrel must stick out into space", tag + ": an outside half that overlaps the wall")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", Vector2i(-1, 5), rot), "the barrel must stick out into space", tag + ": an outside half off the grid")
+	var first: int = parts.place_mount(ship.grid, "laser_mk1", ok, rot)
+	var along := Wall.at(rot, 2, 0) - Wall.at(rot, 0, 0)
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok + along, rot), "the barrel must stick out into space", tag + ": an outside half on another gun's")
 	parts.remove_uid(first)
 	# needs a flat wall to mount through
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok + Vector2i(0, -1), 0), "needs a flat wall to mount through", "a gap between the barrel and the wall")
-	ship.grid.force_tile(Wall.at(0, 0, 0), "floor")
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, 0), "needs a flat wall to mount through", "a floor cell in the first wall layer")
-	ship.grid.force_tile(Wall.at(0, 0, 0), "door")
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, 0), "needs a flat wall to mount through", "a door in it")
-	ship.grid.force_tile(Wall.at(0, 0, 0), "wall")
-	ship.grid.set_shape(Wall.at(0, 0, 0), "tri", 0, false)
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, 0), "needs a flat wall to mount through", "a sloped cell in it")
-	ship.grid.set_shape(Wall.at(0, 0, 0), "full")
-	ship.grid.force_tile(Wall.at(0, 0, 0), "wall")
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, 0), "", "mended")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok + toward, rot), "needs a flat wall to mount through", tag + ": a gap between the barrel and the wall")
+	var layer0 := Wall.at(rot, 0, 0)
+	ship.grid.force_tile(layer0, "floor")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs a flat wall to mount through", tag + ": a floor cell in the first wall layer")
+	ship.grid.force_tile(layer0, "door")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs a flat wall to mount through", tag + ": a door in it")
+	ship.grid.force_tile(layer0, "wall")
+	ship.grid.set_shape(layer0, "tri", 0, false)
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs a flat wall to mount through", tag + ": a sloped cell in it")
+	ship.grid.set_shape(layer0, "full")
+	ship.grid.force_tile(layer0, "wall")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "", tag + ": mended")
 	# the breech needs 4x2 free floor behind the wall
-	ship.grid.force_tile(Wall.at(0, 1, 3), "")
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, 0), "the breech needs 4x2 free floor behind the wall", "a hole in the floor behind")
-	ship.grid.force_tile(Wall.at(0, 1, 3), "floor")
-	parts.place(ship.grid, "oxygen_gen", Wall.corner(0, 0, 1, 3, 6), 0)
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, 0), "the breech needs 4x2 free floor behind the wall", "another part in the way")
-	var thin := Wall.wall_ship(1)
-	for c in Mounts.rect_cells(Rect2i(Wall.corner(0, -7, 7, 1, 6), Vector2i(15, 6))):
-		thin.grid.force_tile(c, "wall")
-	eq(thin.components.can_place_mount(thin.grid, "laser_mk1", ok, 0), "the breech needs 4x2 free floor behind the wall", "a wall with solid metal behind it, no room")
-	eq(parts.can_place_mount(ship.grid, "reactor_mk1", ok, 0), "not a hull mount", "a reactor is not a mount")
-	eq(parts.can_place_mount(ship.grid, "warp_core", ok, 0), "unknown component", "unknown ids")
+	ship.grid.force_tile(Wall.at(rot, 1, thick), "")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), breech, tag + ": a hole in the floor behind")
+	ship.grid.force_tile(Wall.at(rot, 1, thick), "floor")
+	var gen: int = parts.place(ship.grid, "oxygen_gen", Wall.corner(rot, 0, 1, thick, thick + 3), rot % 2)
+	check(gen >= 0, tag + ": (setup: a generator behind the wall)")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), breech, tag + ": another part in the way")
+	var solid := Wall.wall_ship(thick, rot)  # metal all the way back: no room for the breech
+	for d in range(thick, thick + 6):
+		for u in range(-7, 8):
+			solid.grid.force_tile(Wall.at(rot, u, d), "wall")
+	eq(solid.components.can_place_mount(solid.grid, "laser_mk1", ok, rot), breech, tag + ": a wall with solid metal behind it, no room")
+	eq(parts.can_place_mount(ship.grid, "reactor_mk1", ok, rot), "not a hull mount", tag + ": a reactor is not a mount")
+	eq(parts.can_place_mount(ship.grid, "warp_core", ok, rot), "unknown component", tag + ": unknown ids")
 
 
 func test_wreckage_blocks_the_floor_behind_the_wall() -> void:
@@ -176,6 +191,51 @@ func test_the_build_session_places_mounts_by_their_outside_half_and_undoes_them(
 	check(ship.components.instances.is_empty(), "nothing left")
 	s.undo()
 	check(ship.components.any_at(out) >= 0, "undo brings both back")
+
+
+func test_build_mode_points_at_the_outside_half_and_shows_both_halves_and_the_reason() -> void:
+	var ship := Wall.wall_ship(3)
+	var sim := ShipSim.new()
+	sim.ships = [ship]
+	var b := BuildMode.new()
+	b.sim = sim
+	b.group = BuildMode.Group.SYSTEMS
+	b._fix_component()
+	b.sel_component = "laser_mk1"
+	b.rot = 0
+	b.hover = Wall.out_anchor(0)
+	b._refresh_ghost()
+	eq(b.ghost.size(), 1, "one ghost for the one item")
+	eq(b.ghost[0]["reason"], "", "the barrel in space against a 3-thick wall would apply")
+	check(b.hud_text().contains("outside half 4x2, pointing up"), "the HUD names the outside half and the direction: " + b.hud_text().split("\n")[3])
+	b.hover = Wall.out_anchor(0) + Vector2i(0, 2)  # the barrel on the wall itself
+	b._refresh_ghost()
+	eq(b.ghost[0]["reason"], "the barrel must stick out into space", "refused with its reason")
+	check(b.hud_text().contains("can't: the barrel must stick out into space"), "and the HUD says it")
+	b.hover = Wall.out_anchor(0)
+	b._refresh_ghost()
+	b._build_key(KEY_R)
+	eq(b.rot, 1, "R turns it a quarter")
+	b._refresh_ghost()
+	eq(b.ghost[0]["reason"], "the barrel must stick out into space", "turned sideways its taller barrel sinks into the wall")
+	b._build_key(KEY_R)
+	b._build_key(KEY_R)
+	b._build_key(KEY_R)
+	eq(b.rot, 0, "four quarter turns")
+	b._refresh_ghost()
+	b.dragging = true
+	b.drag_button = MOUSE_BUTTON_LEFT
+	b.drag_mode = BuildSession.Mode.PAINT
+	b.drag_start = b.hover
+	b.drag_path = [b.hover]
+	b._end_drag()
+	check(ship.components.any_at(b.hover) >= 0, "a click places it by its outside half")
+	b.drag_button = MOUSE_BUTTON_RIGHT
+	b.dragging = true
+	b._end_drag()
+	check(ship.components.instances.is_empty(), "and a right click on either half takes it away")
+	sim.free()
+	b.free()
 
 
 func test_the_wall_a_mount_stands_through_cannot_be_taken_away() -> void:

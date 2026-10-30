@@ -36,7 +36,7 @@ const KIND_DEFAULTS := {
 }
 
 const ON_TARGET_DEG := 4.0  ## a turret fires when its barrel is this close to the lead direction
-const TURN_RATE_EVASION := 0.25  ## evasion of a ship at full speed (docs/CONTENT.md 4)
+const SPEED_EVASION := 0.25  ## evasion of a ship at full speed (docs/CONTENT.md 4)
 const MISS_MARGIN := 40.0  ## px past the hull's edge that a missed turret shot aims at
 
 var defs := {}  ## weapon id -> entry as written in the data file
@@ -272,7 +272,7 @@ func target_of(arena, idx: int) -> int:
 ## any running ability's.
 func evasion(arena, idx: int) -> float:
 	var co = arena.ships[idx]
-	var e: float = TURN_RATE_EVASION * co.flight.vel.length() / maxf(co.flight.max_speed, 1.0)
+	var e: float = SPEED_EVASION * co.flight.vel.length() / maxf(co.flight.max_speed, 1.0)
 	return e + Jobs.evasion_bonus(co.ship) + Abilities.evasion_add(co.ship)
 
 
