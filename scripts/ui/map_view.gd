@@ -32,6 +32,9 @@ const BAD := Color("#e0413b")
 const AMBER := Color("#e1a136")
 const UNKNOWN := Color("#3a4350")
 
+## Emitted when a lost fight ends the run, with the campaign as it stood (front_door.gd shows the game over screen).
+signal run_over(campaign)
+
 var sim: Node  ## the ShipSim whose player ship travels
 var build: Node  ## the BuildMode (told about the new ship)
 var combat: Node  ## the combat view: fights started from events run there
@@ -234,6 +237,7 @@ func _on_fight_finished(result: Dictionary) -> void:
 	var r := campaign.fight_done(result, ship(), _after_win)
 	_after_win = {}
 	if r["state"] == "lost":
+		run_over.emit(campaign)
 		new_game()
 		_say("Wrecked. A new run begins.", true)
 		return
