@@ -28,6 +28,23 @@ Placement uses square hitboxes on the grid, but placed objects should look natur
    - Systems come in tiers (Mk1, Mk2, Mk3) with better stats.
    - Blueprints unlock by salvaging and scanning wrecks; materials come from salvage, mining and trade.
 
+## Equipment lines: Scrap, Standard and Neon (owner, 2026-10-30)
+Every system family (engines, reactors, weapons, shields, life support, workshop modules) and every gear type exists in **three lines** that you **mix and match** on one ship, as you like and can afford:
+
+| Line | Look | Pros | Cons |
+|---|---|---|---|
+| **Scrap** | Salvage Industrial: worn plates, bolts, welds, hazard stripes, warm lamps | Cheap (mostly scrap), craftable early, quick and cheap to repair | **Unreliable**: a chance to malfunction while running (about 15%); sometimes damages itself (sparks, small fires); slightly higher power draw |
+| **Standard (Mk)** | Clean Sci-fi: smooth panels, soft shading, colour-coded systems | Reliable baseline, tiers Mk1 to Mk3, mid cost | Nothing special |
+| **Neon** | Neon Blueprint: dark panels, crisp glowing edges | High output, lighter, energy abilities | Expensive (crystal, plasma, silicon), needs a high fabricator level, runs hot, extra vulnerable to ion/EMP hits |
+
+- **Data**: components get a `line` field (`scrap`, `standard`, `neon`). Line-wide modifiers live in `data/lines.json`: cost, power, output, heat, mass, reliability and repair multipliers, plus ion vulnerability. An item's effective stats are its family/tier base × its line modifiers, and any item can override them with its own quirks.
+- **Art consistency**: the three looks share one visual grammar, so mixed ships look coherent:
+  - strictly top-down;
+  - light from the top-left;
+  - the same outline weights, cell sizes and footprints;
+  - shared floors and walls (structure may get line variants later).
+  - Only the surface treatment differs: grit, polish or glow.
+
 ## Systems with character (quirks), the core of our content
 Every system should be **unique, FTL Multiverse style**: not just "+10% thrust", but a trade-off that changes how you build and crew the ship. Data-driven, so new systems are mostly JSON.
 - **Abilities**: each component can have abilities, either `passive` or `active` (with a duration and cooldown, triggered by the player or a crew member manning it).
