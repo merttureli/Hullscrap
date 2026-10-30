@@ -27,6 +27,49 @@ Placement uses square hitboxes on the grid, but placed objects should look natur
    - Systems come in tiers (Mk1, Mk2, Mk3) with better stats.
    - Blueprints unlock by salvaging and scanning wrecks; materials come from salvage, mining and trade.
 
+## Systems with character (quirks), the core of our content
+Every system should be **unique, FTL Multiverse style**: not just "+10% thrust", but a trade-off that changes how you build and crew the ship. Data-driven, so new systems are mostly JSON.
+- **Abilities**: each component can have abilities, either `passive` or `active` (with a duration and cooldown, triggered by the player or a crew member manning it).
+  - Each ability has **effects** (e.g. thrust +40%) and **side effects** on the component or its room:
+    - `drain_o2` (room oxygen per second), `heat` (see below), `power_spike` (extra draw while active);
+    - `noise` / `radiation` (hurts crew in the room without protection), `vent` (opens the room to space while active).
+  - Example, *Afterburner Engine Mk2*. Active: +40% thrust for 8 s. While active it drains room oxygen fast and adds a lot of heat.
+    - So you put it in its own sealed room and crew it with someone in a **suit**, or with a **species that doesn't breathe**.
+- **Heat**: components and rooms have heat.
+  - Heat rises from abilities and heavy load and falls through `cooling` (radiators, coolant pumps, vacuum around the room).
+  - Past the component's limit it **overheats**: disabled until cooled, with a fire risk. This follows our "disable, don't destroy" rule.
+- **Manning requirements**: an ability can require the operator to have a trait: `no_breath`, `heat_resistant`, `suit`, `engineer_skill>=3`, ...
+  - This is how crew choice matters.
+
+## Crew species and suits
+- **Species are data** with traits.
+  - Examples: Human (balanced, needs oxygen); a silicon-based species (`no_breath`, slow, bad medics); a heat-loving species (`heat_resistant`, needs warm rooms); an engineering species (faster repairs, fragile).
+  - You recruit them at stations.
+- **Suits** are crafted items. A crew member wearing one works in low oxygen or vacuum for a limited time (an air supply that refills in pressurised rooms). Suits take a slot from a suit locker.
+
+## Fabricator levels and workshop modules
+- Every recipe has a `fab_level` (1 to 4) and optional `tools` (e.g. `laser_cutter`, `robot_arm`, `nanoforge`, `plasma_furnace`).
+- The **Fabricator's level** comes from **workshop modules placed in the same room**:
+  - base level 1;
+  - a Robot Arm makes it level 2;
+  - a Laser Cutter adds the `laser_cutter` tool;
+  - an Assembly Rig plus two Robot Arms make level 3;
+  - a Nanoforge makes level 4.
+  - Modules need power, and some need crew.
+- So an advanced engine may be **too high-level to craft** until you build out a proper workshop room. That's another reason compartments matter.
+- Blueprints still have to be unlocked (salvage and scan). Knowing a blueprint and being able to craft it are separate.
+
+### Data sketch (component entry)
+```json
+{"id": "afterburner_mk2", "family": "engine", "tier": 2, "size": [2, 1], "power": -3, "priority": 4,
+ "stats": {"thrust": 16, "heat_limit": 100, "cooling": 4},
+ "abilities": [{"id": "afterburn", "type": "active", "duration": 8, "cooldown": 30,
+   "effects": {"thrust_mult": 1.4},
+   "side_effects": [{"type": "drain_o2", "rate": 0.15}, {"type": "heat", "rate": 12}],
+   "operator_needs": ["no_breath|suit"]}],
+ "recipe": {"fab_level": 3, "tools": ["laser_cutter"], "materials": {"scrap": 40, "titanium": 12, "plasma_cell": 2}, "time": 45}}
+```
+
 Reference games for ideas, not code: Space Haven (closest), FTL, Cosmoteer, Barotrauma, Raft, Among Us.
 
 ## Decisions so far
@@ -51,10 +94,13 @@ Reference games for ideas, not code: Space Haven (closest), FTL, Cosmoteer, Baro
    - A Fabricator component with a crafting queue.
    - Crafted system items are placed from cargo.
    - Structure costs materials.
+3c. **Fabricator levels**: workshop modules in the fabricator's room raise its level and add tools; recipes gated by `fab_level` and `tools`.
 4. **Crew.**
    - Your soldier moves with WASD.
    - NPC crew pathfind on the grid through doors and pick jobs by priority: man a station, repair, fight fire, heal, rest.
-5. **Flight.** The ship-centred camera, with thrust and turning from the engines placed versus the ship's mass. The starfield drifts with velocity.
+4b. **Species and suits**: species traits from data, suits with an air supply, suit lockers.
+5. **Flight + quirks v1.** Abilities (active and passive), heat and overheating, operator requirements. The first quirky engines and reactors.
+5a. **Flight.** The ship-centred camera, with thrust and turning from the engines placed versus the ship's mass. The starfield drifts with velocity.
 6. **Combat v1.**
    - A tactical view against one AI ship.
    - Weapons fire at targeted rooms. Shields absorb.
