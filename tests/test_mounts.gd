@@ -93,7 +93,7 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 	var n := 0
 	for id in c.ids():
 		var d := c.def(id)
-		if d["family"] in ["weapon", "engine"]:
+		if d["family"] in ["weapon", "engine", "intake"]:
 			n += 1
 			check(Mounts.is_mount(d), id + " is a hull mount")
 			var narrow: bool = d["size"][0] == 2  # Strafe Jets: 2x2 and 2x2 (docs/waves/engines_1.md)

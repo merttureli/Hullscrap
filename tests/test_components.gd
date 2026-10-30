@@ -72,6 +72,8 @@ func test_data_is_complete() -> void:
 		"heat_lance_neon": [-4, 5, 1], "leech_laser": [-3, 5, 2], "breach_harpoon": [-2, 5, 2],
 		"shield_scrap_mk1": [-3, 3, 1], "shield_mk2": [-4, 3, 2], "shield_neon_mk1": [-4, 3, 1], "mirror_veil": [-3, 3, 2],
 		"afterburner": [-3, 4, 2], "inertial_dampener": [-2, 3, 2], "battering_bow": [0, 0, 2], "reactor_scrap_kettle": [8, 0, 1],
+		# the Raft loop (docs/CONTENT.md section 11)
+		"net_mouth_scrap": [0, 0, 1], "intake_mk1": [-1, 6, 1],
 		# engine wave 1 (data/packs/engines_1)
 		"engine_mk3": [-4, 4, 3], "engine_mk4": [-5, 4, 4], "engine_mk5": [-6, 4, 5], "engine_scrap_mk2": [-3, 4, 2], "engine_scrap_mk3": [-4, 4, 3],
 		"engine_scrap_mk4": [-5, 4, 4], "engine_neon_mk2": [-3, 4, 2], "engine_neon_mk3": [-4, 4, 3], "engine_neon_mk4": [-5, 4, 4],
