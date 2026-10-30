@@ -64,6 +64,20 @@ static func new_starter(tiles_path := TILES_PATH, components_path := COMPONENTS_
 	return s
 
 
+## A ship from a design file (data/ships/*.json, the Ship.to_dict format), or null when it cannot be loaded.
+## The grid takes the file's size and hull; the starter designs sit in the middle of a 63x63 grid.
+static func from_design(path: String) -> RefCounted:
+	if not FileAccess.file_exists(path):
+		return null
+	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (d is Dictionary and d.get("size") is Array and d["size"].size() == 2):
+		return null
+	var defs := TileDefs.new()
+	defs.load_file(TILES_PATH)
+	var s := new("Ship", ShipGrid.new(Vector2i(int(d["size"][0]), int(d["size"][1])), defs))
+	return s if s.load_dict(d) == "" else null
+
+
 ## The cargo a new ship starts with (data/start.json).
 static func start_cargo(path := START_PATH) -> Dictionary:
 	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
