@@ -99,6 +99,22 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Build mode**: every wall material is in the Tiles palette. **Ctrl-drag a room** uses the selected wall material. A new **"Plating" tool** adds one layer around the whole outer hull (it expands outward if there's hull room).
 - Breached layers (hp 0) leave a hole. Repairing restores the original material.
 
+## 4c. Premade ships, hull frames and expansion (owner, 2026-10-30)
+- **Premade ships** are data: `data/ships/*.json`, in the same format as a saved ship (hull, tiles, components, cables, cargo, crew). They're used for:
+  - **starter ships**: choose one at a new game, then modify it freely. v1 has 3:
+    - *Rustbucket*: scrap-heavy, cheap, big cargo;
+    - *Courier*: small, fast, standard parts;
+    - *Prism*: a small neon ship with high power and fragile armour.
+  - **enemy and NPC ships**: pirates, traders, derelicts, stations.
+  - **test fixtures**.
+  - In build mode, Ctrl+E exports the current ship as a design file.
+- **The buildable area is the hull frame.** A ship can only build on its **hull cells**, and starter ships come with a small frame.
+  - To grow, you **buy Hull Frame** items at shipyards (stations) and place them **adjacent to the existing hull** (4-connected) to physically extend the space you may build on.
+- **Expansion gets more expensive with size**: price per frame cell = 20 credits × (1 + hull_cells / 400). So a very big, very good ship is possible, but costly.
+- **Size balances itself**: more space means more walls to enclose it, more material cost, more mass (slower, turns worse), more armour, more oxygen to fill and more crew to run it. No artificial size cap beyond the grid limit (128×128).
+- **Credits** are the trading currency (buying frames, gear and crew; selling salvage). Materials stay physical cargo. Each starter ship starts with some credits.
+- The ship grid is a fixed 128×128 workspace. The hull marks which cells you own.
+
 ## 5. Abilities and quirks (`scripts/sim/abilities.gd`)
 - An ability is `{id, name, type: active|passive, duration, cooldown, effects, side_effects, operator_needs}`.
   - Active abilities are triggered by the player (or by an AI captain) when the component is powered and, if `operator_needs` is set, manned by a qualifying crew member.
@@ -157,3 +173,4 @@ Tiers and lines follow the tables. Unique items (★) have no recipe.
 3. **Combat in the game**: the zoomed-out arena, flight controls, mouse aiming, the weapon bar, both schematics at the top, and a pirate ship with pilot AI.
 4. Abilities, with the Afterburner end to end.
 5. Crew jobs: repair, firefighting, manning stations (manned bonuses).
+6. Premade ships: the design file format, 3 starters plus 2 pirates, a start screen to choose one, Hull Frame items and the expansion tool, credits.
