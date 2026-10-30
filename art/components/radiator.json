@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   6
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   3,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "radiator_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    6
+   ],
+   "damaged": [
+    3,
+    3,
+    6
+   ]
+  }
+ },
+ "notes": "Heat shimmer loop (3 frames): hot pixels climb the fins."
+}
