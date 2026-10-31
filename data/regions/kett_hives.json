@@ -4,7 +4,7 @@
 	"home_species": "kett",
 	"faction": "clans",
 	"stages": [2, 5],
-	"weight": 10,
+	"weight": 14,
 	"rarity": "common",
 	"danger": 1.1,
 	"palette": {"tint": "#c8913a", "nebula": "clan"},
