@@ -459,41 +459,41 @@ func _draw_poi(poi: Dictionary, px: float) -> void:
 	var seed_h := hash(str(poi["id"]))
 	match str(poi["type"]):
 		"station", "store":
-			var r := 260.0 if poi["type"] == "station" else 170.0
+			var r := 900.0 if poi["type"] == "station" else 560.0
 			draw_circle(at, r, Color("#1b222c", a))
-			draw_arc(at, r, 0.0, TAU, 64, Color(col, a), 10.0)
-			draw_arc(at, r * 0.55, 0.0, TAU, 48, Color("#59667a", a), 6.0)
-			for k in 4:
-				var d := Vector2.from_angle(_clock * 0.05 + k * TAU / 4.0)
-				draw_line(at + d * r * 0.55, at + d * r, Color("#59667a", a), 8.0)
-				draw_circle(at + d * r, 10.0, Color(col.lightened(0.4), a * (0.5 + 0.5 * sin(_clock * 3.0 + k))))
+			draw_arc(at, r, 0.0, TAU, 96, Color(col, a), 28.0)
+			draw_arc(at, r * 0.55, 0.0, TAU, 64, Color("#59667a", a), 18.0)
+			for k in 6:
+				var d := Vector2.from_angle(_clock * 0.03 + k * TAU / 6.0)
+				draw_line(at + d * r * 0.55, at + d * r, Color("#59667a", a), 22.0)
+				draw_circle(at + d * r, 30.0, Color(col.lightened(0.4), a * (0.5 + 0.5 * sin(_clock * 3.0 + k))))
 			draw_circle(at, r * 0.25, Color("#2a3340", a))
 			draw_circle(at, r * 0.12, Color(col, a))
 		"wreck", "abandoned_station":
-			var big := 1.6 if poi["type"] == "abandoned_station" else 1.0
+			var big := 2.2 if poi["type"] == "abandoned_station" else 1.0
 			for k in 4:
-				var off := Vector2.from_angle(float((seed_h >> (k * 3)) % 628) / 100.0) * 60.0 * k * big
-				_hull(at + off, float((seed_h >> k) % 314) / 100.0 + k, 70.0 * big / (1.0 + k * 0.3), Color("#3a3f47", a), Color("#9a5428", a))
+				var off := Vector2.from_angle(float((seed_h >> (k * 3)) % 628) / 100.0) * 180.0 * k * big
+				_hull(at + off, float((seed_h >> k) % 314) / 100.0 + k, 260.0 * big / (1.0 + k * 0.3), Color("#3a3f47", a), Color("#9a5428", a))
 		"mining_field":
-			for k in 9:
+			for k in 11:
 				var ang := float((seed_h >> k) % 628) / 100.0 + k * 0.7
-				var off := Vector2.from_angle(ang) * (60.0 + 45.0 * k)
-				_rock(at + off, 34.0 + float((seed_h >> (k + 2)) % 40), k + seed_h, Color(col.darkened(0.35), a))
+				var off := Vector2.from_angle(ang) * (120.0 + 110.0 * k)
+				_rock(at + off, 70.0 + float((seed_h >> (k + 2)) % 90), k + seed_h, Color(col.darkened(0.35), a))
 		"distress", "quest":
-			draw_circle(at, 26.0, Color("#2a3340", a))
-			draw_circle(at, 12.0, Color(col, a))
+			draw_circle(at, 80.0, Color("#2a3340", a))
+			draw_circle(at, 36.0, Color(col, a))
 			var pulse := fmod(_clock, 1.6) / 1.6
-			draw_arc(at, 26.0 + 140.0 * pulse, 0.0, TAU, 48, Color(col, a * (1.0 - pulse)), 3.0 * px)
+			draw_arc(at, 80.0 + 400.0 * pulse, 0.0, TAU, 48, Color(col, a * (1.0 - pulse)), 3.0 * px)
 		"anomaly":
 			for k in 4:
-				draw_arc(at, 60.0 + 50.0 * k, _clock * (0.4 + 0.15 * k), _clock * (0.4 + 0.15 * k) + PI * 1.3, 32, Color(col, a * (0.7 - 0.12 * k)), 6.0)
+				draw_arc(at, 180.0 + 150.0 * k, _clock * (0.4 + 0.15 * k), _clock * (0.4 + 0.15 * k) + PI * 1.3, 32, Color(col, a * (0.7 - 0.12 * k)), 18.0)
 		"pirate_nest":
-			_rock(at, 150.0, seed_h, Color("#3b2f2a", a))
+			_rock(at, 480.0, seed_h, Color("#3b2f2a", a))
 			for k in 5:
-				draw_circle(at + Vector2.from_angle(k * 1.3) * 110.0, 9.0, Color(col, a * (0.5 + 0.5 * sin(_clock * 4.0 + k))))
+				draw_circle(at + Vector2.from_angle(k * 1.3) * 340.0, 26.0, Color(col, a * (0.5 + 0.5 * sin(_clock * 4.0 + k))))
 		_:  # a ship: unknown, trader, checkpoint, a passing contact
 			var heading: float = poi["vel"].angle() + PI / 2.0 if poi.get("vel") is Vector2 and poi["vel"] != Vector2.ZERO else float(seed_h % 628) / 100.0
-			_hull(at, heading, 90.0 if poi["type"] != "concord_checkpoint" else 150.0, Color(col.darkened(0.55), a), Color(col, a))
+			_hull(at, heading, 320.0 if poi["type"] != "concord_checkpoint" else 520.0, Color(col.darkened(0.55), a), Color(col, a))
 
 
 ## A pointed hull of `size` px at `at`, nose along `heading` (flight.gd convention).

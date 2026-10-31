@@ -18,6 +18,7 @@ const POP_LIFE := 1.0  ## seconds a "+N material" pop floats and fades
 const POP_RISE := 48.0  ## world px it rises in that time
 const STAR_PARALLAX := 0.6  ## the nearest stars drift this fraction of the debris' screen speed
 const OUTLINE := Color(0.05, 0.06, 0.09)
+const MIN_PX := 6.0  ## screen px a piece is drawn at the least, so debris still shows zoomed far out
 
 var sim: Node  ## the ShipSim, for the player's ship
 var build: Node  ## the BuildMode: play mode is build_on == false, a fight sets combat
@@ -96,7 +97,7 @@ func frame(dt: float) -> void:
 	var on := active()
 	visible = on
 	if _layer != null:
-		_layer.visible = on
+		_layer.visible = on and not build.combat  # a fight has its own HUD
 	if starfield != null and not on:
 		starfield.drift = _star_drift
 	if not on:
@@ -165,6 +166,7 @@ func _sheet(art_id: String) -> RefCounted:
 ## A piece from its art: a strip of tumble frames plays by itself; a one-frame sheet is turned with the piece.
 func _draw_art(sheet, p: Dictionary, quads: Array) -> void:
 	var k := DriftDebris.CELL / SpriteSheet.SRC_CELL
+	k *= maxf(1.0, MIN_PX / maxf(float(sheet.frame.x) * k * view_zoom.x, 0.01))
 	var size := Vector2(sheet.frame) * k
 	var t := float(p["age"]) + float(p["phase"])
 	var angle: float = p["angle"] if sheet.count <= 1 else 0.0
@@ -180,7 +182,7 @@ func _draw_art(sheet, p: Dictionary, quads: Array) -> void:
 ## No art yet: a lopsided polygon in the material colour (a crate and a canister are squarer), 1 screen px outline.
 func _draw_placeholder(p: Dictionary, t: Dictionary, px: float) -> void:
 	var col := Color(str(t["color"]))
-	var r: float = p["r"]
+	var r: float = maxf(p["r"], MIN_PX * 0.5 * px)
 	var n := 4 if t["id"] in ["sealed_crate", "fuel_canister"] else 7
 	var pts := PackedVector2Array()
 	for i in n:

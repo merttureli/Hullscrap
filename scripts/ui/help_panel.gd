@@ -57,12 +57,14 @@ const COLUMNS: Array = [
 	],
 	[
 		["THE MAP AND EVENTS (M in play mode)", [
+			["Click a marker", "Set a course to that point of interest; crew at the helm fly there (click again: cancel)"],
+			["E at the helm", "Fly the ship yourself (mouse, W/S, A/D); E again hands it back"],
 			["M", "Open / close the map"],
-			["Click a lit neighbour", "Jump there for fuel (the tooltip says how much); an event or a station follows"],
+			["Click a lit neighbour", "Spool the jump drive there (8 s, fuel when it fires; the same node again cancels)"],
 			["Shift+click", "Drift jump with no fuel (costs hull)"],
 			["T", "Wait for a passing trader (no fuel)"],
 			["Y", "Ma tows you home to Rusthold (no fuel, debt +150)"],
-			["Enter", "Dock at the station you are at"],
+			["Enter", "Close to a station's beacon its menu opens; Enter on the map says so"],
 			["Esc", "Close the map"],
 			["1 - 9 or click", "Pick a choice in an event"],
 			["Enter / Space", "Continue"],
@@ -78,7 +80,7 @@ const COLUMNS: Array = [
 			["Shift / Space / Q", "Engine / shield / utility ability"],
 			["Arrows / End", "Shift the shield toward a side / back to even"],
 			["Esc", "Leave, once the enemy is wrecked or far away"],
-			["J", "Spool the jump drive (10 s), then escape the fight"],
+			["J", "Open the map to spool the jump drive (held while the enemy is within 2,000 px)"],
 			["R", "After your ship is wrecked"],
 		]],
 	],
@@ -127,7 +129,7 @@ func _ready() -> void:
 static func first_run() -> Array[String]:
 	var d: Dictionary = Campaign.config()["debt"]
 	return [
-		"Press M to open the map, and jump to a neighbour.",
+		"Click a marker to fly there; M opens the map to jump on.",
 		"Read the event and pick a choice.",
 		"Keep fuel up: buy it at stations.",
 		"Pay %s %d credits every %d jumps." % [str(d["creditor"]).get_slice(" ", 0), int(d["payment"]), int(d["every"])],

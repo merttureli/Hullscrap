@@ -22,9 +22,9 @@ const Starfield = preload("res://scripts/space/starfield.gd")
 
 ## The first-run hints (profile.gd HINTS), by id.
 const HINT_TEXT := {
-	"picked": "B: play mode, M: map",
-	"map": "Click a lit neighbour to jump",
-	"fight": "Mouse steers, LMB fires, J spools the jump drive to escape",
+	"picked": "B: play mode, click a marker to set a course, M: map",
+	"map": "Click a lit neighbour to spool the jump there",
+	"fight": "Mouse steers, LMB fires, J opens the map to jump away",
 	"net": "Ma's Net Mouth is in your cargo: B, Tab to Systems, put it on an outer wall to catch drifting scrap",
 }
 

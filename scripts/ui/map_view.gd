@@ -143,6 +143,7 @@ func new_game(seed_value := 0) -> void:
 	_arrived = false
 	_queue.clear()
 	_forget_poi()
+	panel_only = false
 	event_panel.visible = false
 	station_panel.visible = false
 	_fighting = false
@@ -344,6 +345,8 @@ func _start_fight(value: String, after_win: Dictionary) -> void:
 	var why: String = combat.enter(path, {"enemy_pos": spot["pos"]} if not spot.is_empty() else {}) if combat != null else "no combat view"
 	if why != "":
 		_say("Cannot fight: " + why, true)
+		if sector_flow():
+			_poi_done()
 		return
 	var session = combat.get("session") if combat != null else null
 	if session != null:  # the fight starts with the integrity the campaign says is left
