@@ -622,7 +622,7 @@ class Corvin(Species):
         for f in (0, 1):
             g = ng(N)
             pts = [(21, 14), (8, 20), (24, 19), (12, 22), (18, 26)] if f == 0 else [(21, 14), (8, 20), (24, 19), (21, 25), (17, 26)]
-            glow_px_max(g, pts, (255, 244, 180), (0.5, 0.35)[f], 2.2, 1.5)
+            glow_px_max(g, pts, (244, 246, 248), (0.5, 0.35)[f], 2.2, 1.5)
             out.append(clear_under(g, t))
         return out
     def head_glow(self):
