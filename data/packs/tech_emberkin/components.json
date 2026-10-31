@@ -1,0 +1,242 @@
+{
+  "components": [
+    {
+      "id": "emberkin_pyre_lance",
+      "name": "Pyre Lance",
+      "blurb": "A forge on a stick. Where it sweeps, things stop being solid. The room it sits in is described as 'cosy'.",
+      "quirk": "A beam that lights fires wherever it sweeps (40% a tick), but each shot adds 40 heat to every part in its room: it runs hot without a radiator.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#e8742a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.5,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "emberkin_cinder_mortar",
+      "name": "Cinder Mortar",
+      "blurb": "Lobs a shell full of embers. The embers do not all go where it points, and the Emberkin consider that a feature.",
+      "quirk": "An incendiary shell with splash 2 and a 45% chance to light the target, but 15% of shots start a fire in its own room: the Emberkin shrug fire off.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#c9552a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "emberkin_flare_turret",
+      "name": "Flare Turret",
+      "blurb": "Bright enough to count as an argument. It runs hot and the Emberkin take that as a compliment.",
+      "quirk": "Blinding flares stun the enemy crew in the room hit for 1.6 s, but every shot adds 30 heat to the turret: it overheats fast.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#f2b134",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "emberkin_pyre_drive",
+      "name": "Pyre Drive",
+      "blurb": "A bell of brass with a fire inside it, and the fire is the point. The engine room becomes cosy within the minute.",
+      "quirk": "Thrust 27 (x1.5 over a Mk2), but it runs hot (it trips in about 80 seconds without a radiator) and scorches 1.6 hp a second off the crew in its room: Emberkin shrug the heat off.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 6
+      },
+      "color": "#e8742a",
+      "power": -3,
+      "priority": 4,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 4,
+      "stats": {
+        "thrust": 27,
+        "fuel_mult": 1.0
+      },
+      "abilities": [
+        {
+          "id": "burn",
+          "name": "Burns hot",
+          "type": "passive",
+          "effects": {},
+          "side_effects": [
+            {
+              "type": "heat",
+              "rate": 1.2
+            },
+            {
+              "type": "scorch",
+              "rate": 1.6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "emberkin_furnace_core",
+      "name": "Furnace Core",
+      "blurb": "A forge kept hot by a reactor, or the other way round. The Emberkin sleep on the housing in winter.",
+      "quirk": "+2 power over a Reactor Mk1, but it runs hot (it trips in about two minutes without a radiator) and scorches 1.2 hp a second off the crew in its room: Emberkin shrug the heat off.",
+      "family": "reactor",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#d9552a",
+      "power": 10,
+      "priority": 0,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 5,
+      "cooling": 5,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "furnace",
+          "name": "Furnace",
+          "type": "passive",
+          "effects": {},
+          "side_effects": [
+            {
+              "type": "heat",
+              "rate": 0.9
+            },
+            {
+              "type": "scorch",
+              "rate": 1.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "emberkin_hearth_shield",
+      "name": "Hearth Shield",
+      "blurb": "A shield warmed like a hearth: the hotter the room, the thicker the glow. Cold crews call it showing off.",
+      "quirk": "A third layer while its room is above 60 heat, but it warms itself (it trips in about two minutes) and scorches 0.5 hp a second off the crew in its room: Emberkin shrug the heat off.",
+      "family": "shield",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#e89a3a",
+      "power": -4,
+      "priority": 3,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3,
+      "cooling": 3,
+      "stats": {
+        "layers": 2,
+        "sectors": 2
+      },
+      "abilities": [
+        {
+          "id": "overcharge",
+          "name": "Overcharge",
+          "type": "active",
+          "key": "shield",
+          "duration": 6,
+          "cooldown": 15,
+          "event": "overcharge",
+          "effects": {
+            "shield_layer": 1
+          },
+          "side_effects": []
+        },
+        {
+          "id": "hearth",
+          "name": "Hearth",
+          "type": "passive",
+          "effects": {
+            "heat_above": {
+              "heat": 60,
+              "shield_layer": 1
+            }
+          },
+          "side_effects": [
+            {
+              "type": "heat",
+              "rate": 0.8
+            },
+            {
+              "type": "scorch",
+              "rate": 0.5
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

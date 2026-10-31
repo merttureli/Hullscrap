@@ -1,0 +1,102 @@
+{
+  "recipes": [
+    {
+      "id": "fenn_twitch_cannon",
+      "output": {
+        "item": "fenn_twitch_cannon",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 18,
+        "copper": 12,
+        "titanium": 4,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "fenn_spark_lattice",
+      "output": {
+        "item": "fenn_spark_lattice",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 18,
+        "copper": 14,
+        "silicon": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 35,
+      "category": "system"
+    },
+    {
+      "id": "fenn_market_missile",
+      "output": {
+        "item": "fenn_market_missile",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 8,
+        "polymer": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 28,
+      "category": "system"
+    },
+    {
+      "id": "fenn_haggle_engine",
+      "output": {
+        "item": "fenn_haggle_engine",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 16,
+        "titanium": 4,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "fenn_jury_reactor",
+      "output": {
+        "item": "fenn_jury_reactor",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 12,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 22,
+      "category": "system"
+    },
+    {
+      "id": "fenn_quickfix_bay",
+      "output": {
+        "item": "fenn_quickfix_bay",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 14,
+        "copper": 10,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 20,
+      "category": "system"
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "recipes": [
+    {
+      "id": "basalt_magma_spitter",
+      "output": {
+        "item": "basalt_magma_spitter",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 8,
+        "titanium": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "basalt_quarry_driver",
+      "output": {
+        "item": "basalt_quarry_driver",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 60,
+        "copper": 12,
+        "titanium": 16,
+        "void_crystal": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 55,
+      "category": "system"
+    },
+    {
+      "id": "basalt_pumice_flak",
+      "output": {
+        "item": "basalt_pumice_flak",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 28,
+        "copper": 8,
+        "titanium": 5
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "basalt_vacuum_forge",
+      "output": {
+        "item": "basalt_vacuum_forge",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 50,
+        "copper": 10,
+        "titanium": 8
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system"
+    },
+    {
+      "id": "basalt_stonehide_bay",
+      "output": {
+        "item": "basalt_stonehide_bay",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "titanium": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 25,
+      "category": "system"
+    },
+    {
+      "id": "basalt_gravity_anchor",
+      "output": {
+        "item": "basalt_gravity_anchor",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 8,
+        "titanium": 8,
+        "silicon": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    }
+  ]
+}
