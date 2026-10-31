@@ -5,6 +5,7 @@ const Fixture = preload("res://tests/fixture_ship.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
+const Hud = preload("res://scripts/ui/hud.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
@@ -138,9 +139,14 @@ func test_f_sends_the_nearest_crew_member_to_repair_the_part_under_the_mouse() -
 	eq(b.message, "Near will repair Fabricator", "the nearest one goes")
 	eq(near.job.get("type"), "repair_component", "and has the job")
 	check(far.job.is_empty(), "the other stays")
+	for i in 100:  # build mode pauses the world: the order waits
+		b.sim.step(0.1)
+	eq([inst["status"], inst["hp"]], ["malfunction", 3], "nothing is repaired while the world is paused")
+	b.build_on = false
 	for i in 100:  # 5 s of work after the walk
 		b.sim.step(0.1)
-	eq([inst["status"], inst["hp"]], ["ok", 4], "repaired")
+	eq([inst["status"], inst["hp"]], ["ok", 4], "repaired in play mode")
+	b.build_on = true
 	b._on_key(e)
 	eq(b.message, "Fabricator needs no repair", "nothing to do the second time")
 	b.hover = Vector2i(20, 14)
@@ -155,18 +161,22 @@ func test_f_sends_the_nearest_crew_member_to_repair_the_part_under_the_mouse() -
 	_done(b)
 
 
-func test_the_hud_shows_the_last_three_events() -> void:
+func test_the_hud_log_shows_the_last_three_events() -> void:
 	var ship := Fixture.room_ship()
 	ship.clock = 75.0
 	var b := _mode(ship)
-	check(not b.hud_text().contains("malfunctioned"), "no events, no lines")
+	var hud := Hud.new()
+	hud.setup(b)
+	var text := func() -> String: return "\n".join(hud.log_panel.lines().map(func(l): return l[0]))
+	check(not text.call().contains("malfunctioned"), "no events, no lines")
 	ship.log_event("Kickjet malfunctioned")
 	ship.log_event("Prism Core overheated")
 	ship.log_event("Third")
 	ship.log_event("Fourth")
-	var hud := b.hud_text()
-	check(not hud.contains("Kickjet malfunctioned"), "only the last three")
-	check(hud.contains("[1:15] Prism Core overheated") and hud.contains("[1:15] Fourth"), "with the time")
+	var log_text: String = text.call()
+	check(not log_text.contains("Kickjet malfunctioned"), "only the last three")
+	check(log_text.contains("[1:15] Prism Core overheated") and log_text.contains("[1:15] Fourth"), "with the time")
+	hud.free()
 	_done(b)
 
 
@@ -176,5 +186,9 @@ func test_the_hud_shows_fractional_power() -> void:
 	Fixture.put(d["ship"], "reactor_scrap_mk1", 10, 10)
 	d["ship"].refresh()
 	var b := _mode(d["ship"])
-	check(b.hud_text().contains("power 5.4 supply / 4 demand"), "5.4 supply: " + b.hud_text().split("\n")[0])
+	var hud := Hud.new()
+	hud.setup(b)
+	var power: Dictionary = hud.top_bar.items().filter(func(it): return it["id"] == "power")[0]
+	eq(power["text"], "5.4 / 4", "the top bar shows 5.4 supply against 4 demand")
+	hud.free()
 	_done(b)

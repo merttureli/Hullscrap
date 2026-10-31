@@ -18,6 +18,7 @@ extends RefCounted
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Shape = preload("res://scripts/combat/shield_shape.gd")
 const Balance = preload("res://scripts/combat/shield_balance.gd")
+const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 
 const RECHARGE := 2.0  ## seconds until a used layer is back
 const ION_LOCK := 3.0  ## seconds an ion hit keeps the shields offline
@@ -37,7 +38,7 @@ static func layers_of_ship(ship, powered: Dictionary) -> int:
 		if powered.get(uid, false):
 			var d: Dictionary = comps.def(comps.instances[uid]["id"])
 			if d.get("family", "") == "shield":
-				total += int(d.get("stats", {}).get("layers", 0))
+				total += Abilities.part_layers(ship, uid, int(d.get("stats", {}).get("layers", 0)))  # crew and heat can change a part's layers
 	return total
 
 
@@ -327,21 +328,25 @@ static func absorb(arena, idx: int, w: Dictionary, point := Vector2.ZERO, dir :=
 	arena.log_event("shield", idx, Vector2i(-1, -1), extra)
 
 
-## Advance recharge and the ion lock by `dt` seconds.
+## Advance recharge and the ion lock by `dt` seconds (recharge runs faster while a shield part is overclocked).
 static func tick(co, dt: float) -> void:
 	if co.wrecked:
 		return
 	if co.ion_lock > 0.0:
 		co.ion_lock = maxf(co.ion_lock - dt, 0.0)
 		return
+	dt *= CrewFx.family_mult(co.ship, "shield")
+	var rate := -1.0
 	for s in co.sectors:
 		var timers: Array = co.sector_timers[s]
 		if timers.is_empty():
 			continue
+		if rate < 0.0:
+			rate = Abilities.recharge_rate(co.ship, co.powered)  # crew_needed recharge: the crew a shield lacks slows it
 		var left := []
 		for t in timers:
-			if t.x - dt <= 1e-9:
+			if t.x - dt * rate <= 1e-9:
 				co.sector_layers[s] = minf(float(co.sector_layers[s]) + t.y, cap_of(co, s))
 			else:
-				left.append(Vector2(t.x - dt, t.y))
+				left.append(Vector2(t.x - dt * rate, t.y))
 		co.sector_timers[s] = left

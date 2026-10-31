@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "fenn_jury_reactor_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Fenn \"Jury Reactor\": a jury-rigged cream frame holding a round glass jar with a pulsing amber core, four mismatched capacitor cans in the corners (coloured caps that blink in turn), loops of wire and taped joints between them, and two blinking antennas. Damaged: the jar cracked and leaking light, a can hanging off its wire, sparks at a joint. Disabled: the jar dark and split, cans knocked loose, the tape peeled, the antennas bent."
+}

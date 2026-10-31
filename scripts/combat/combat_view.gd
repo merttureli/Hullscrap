@@ -11,12 +11,14 @@ extends Node2D
 
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ImpactFx = preload("res://scripts/combat/impact_fx.gd")
+const EffectFx = preload("res://scripts/combat/effect_fx.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const Art = preload("res://scripts/view/art.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
+const JumpBar = preload("res://scripts/ui/jump_bar.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
 
@@ -34,7 +36,8 @@ const HINT := "mouse steers   W/S throttle   A/D strafe   T turrets auto   LMB g
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
 
-## Emitted when the fight is left: {state ("won", "lost" or "fled"), enemy (its Ship), hull, hull_max (the player's)}.
+## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship), hull, hull_max (the player's),
+## offer ({item: count}, only when "spared")}.
 signal finished(result: Dictionary)
 
 var sim: Node  ## ShipSim
@@ -68,11 +71,11 @@ var _schem: Array = []
 var _bar: Control
 var _bar_extras: Control  # over the weapon bar: each turret's hit chance and whether it autofires
 var _banner: Label
+var _jump_bar: Control  # under the enemy schematic while it flees
 var _hint: Label
 var _note := ""
 var _note_until := 0.0
 var _starfield: Node
-var _hud_label: Node
 
 
 func _ready() -> void:
@@ -81,7 +84,6 @@ func _ready() -> void:
 	crew = get_node_or_null("../Crew")
 	cam = get_node_or_null("../Camera2D")
 	_starfield = get_node_or_null("../Space/Starfield")
-	_hud_label = get_node_or_null("../HUD/Label")
 	_rng.seed = 4242
 	_make_stars()
 	_make_hud()
@@ -124,8 +126,11 @@ func _make_hud() -> void:
 	_banner.add_theme_font_size_override("font_size", 30)
 	_banner.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_banner.add_theme_constant_override("outline_size", 8)
+	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_banner.visible = false
 	layer.add_child(_banner)
+	_jump_bar = JumpBar.new()
+	layer.add_child(_jump_bar)
 	_hint = Label.new()
 	_hint.size = Vector2(1000.0, 44.0)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -185,6 +190,8 @@ func leave() -> void:
 	var foe = session.arena.ships[Session.ENEMY]
 	var mine = session.arena.ships[Session.PLAYER]
 	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max}
+	if result["state"] == "spared":
+		result["offer"] = session.morale.offer.duplicate()
 	sim.ships.erase(session.arena.ships[Session.ENEMY].ship)
 	for v in _views:
 		v.queue_free()
@@ -235,8 +242,6 @@ func _put_away(away: bool) -> void:
 		_starfield.visible = not away
 	if _stars_node != null:
 		_stars_node.visible = away
-	if _hud_label != null:
-		_hud_label.visible = not away
 
 
 func _show_hud(on: bool) -> void:
@@ -246,6 +251,7 @@ func _show_hud(on: bool) -> void:
 		_bar.visible = on
 		_hint.visible = on
 		_banner.visible = false
+		_jump_bar.bind(session if on else null)
 
 
 # --- input ----------------------------------------------------------------------------------------
@@ -274,6 +280,10 @@ func _unhandled_input(e: InputEvent) -> void:
 				_say(why_jump if why_jump != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL))
 			KEY_R:
 				restart()
+			KEY_Y:
+				var why_y: String = session.accept_surrender()
+				if why_y != "":
+					_say(why_y)
 			KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT:
 				var why: String = session.shift_shield({KEY_UP: "up", KEY_DOWN: "down", KEY_LEFT: "left", KEY_RIGHT: "right"}[e.keycode])
 				if why != "":
@@ -286,6 +296,9 @@ func _unhandled_input(e: InputEvent) -> void:
 				var why := session.arena.overcharge(Session.PLAYER)
 				if why != "":
 					_say("Overcharge: " + why)
+			KEY_G:  # the selected crew member's ability (the crew bar shows how it went)
+				if crew != null and crew.has_method("press_ability"):
+					crew.press_ability()
 			_:
 				var n: int = e.keycode - KEY_1
 				if n >= 0 and n <= 8:
@@ -381,9 +394,12 @@ func _update_hud() -> void:
 	_schem[1].position = Vector2(vp.x - Schematic.PANEL.x - 10.0, 10.0)
 	_banner.position = Vector2((vp.x - _banner.size.x) / 2.0, vp.y * 0.28)
 	_hint.position = Vector2((vp.x - _hint.size.x) / 2.0, 10.0)
+	_jump_bar.position = _schem[1].position + Vector2(0.0, Schematic.PANEL.y + 6.0)
 	var text: String = session.end_text()
 	if text == "" and _clock < _note_until:
 		text = _note
+	if text == "":
+		text = session.morale.banner()
 	_banner.text = text
 	_banner.visible = text != ""
 	var co = session.arena.ships[Session.PLAYER]
@@ -461,13 +477,23 @@ func _on_event(e: Dictionary) -> void:
 				_add_fx({"k": "flash", "pos": e["origin"], "life": 0.09, "r": 10.0, "color": _shot_color(idx, "energy" if e["kind"] in ["laser", "beam"] else "kinetic")})
 		"beam":
 			_add_fx({"k": "beam", "a": e["from"], "b": e["to"], "life": BEAM_LIFE, "color": _shot_color(idx, e["dtype"]),
-				"kind": str(arena.weapons.def(str(e.get("weapon", "")))["kind"])})
+				"kind": str(arena.weapons.def(str(e.get("weapon", "")))["kind"]), "weapon": str(e.get("weapon", ""))})
+		"effect":  # a weapon effect (acid, spores, frost ...): effect_fx.gd says what it looks like
+			for f in EffectFx.of(arena, e):
+				_add_effect_fx(f)
 		"hit":
+			if e.has("dot"):  # a damage over time ticking: just a wisp
+				for f in EffectFx.dot(e):
+					_add_effect_fx(f)
+				return
+			var weapon_art := str(e.get("weapon", ""))
 			var big: bool = e["kind"] == "component"
 			var col := Color("#ffb347") if big else Color("#ffe9a8")
 			if e["dtype"] == "ion":
 				col = Color("#b99bff")
-			if big and Art.fx("explosion") != null:
+			if weapon_art != "" and Art.projectile(weapon_art + "_impact") != null:  # the weapon's own impact art, when it has some
+				_on_ship(idx, pos, {"k": "art", "src": "projectiles", "name": weapon_art + "_impact", "anchor": "center", "life": 0.45, "scale": 1.0})
+			elif big and Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.5, "scale": 0.7})
 			elif Art.fx("sparks") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "sparks", "life": 0.25, "scale": 0.7})
@@ -523,6 +549,12 @@ func _on_event(e: Dictionary) -> void:
 				_add_fx({"k": "puff", "pos": pos, "vel": Vector2.from_angle(_rng.randf() * TAU) * 30.0, "life": 1.0, "r": 12.0, "grow": 30.0, "color": Color("#8a8f99", 0.5)})
 		"overcharge":
 			_on_ship(idx, pos, {"k": "ring", "life": 0.8, "r": 260.0, "color": Color("#ffd24a")})
+		"escape":  # the enemy's jump drive fired: a flash where it was
+			if Art.fx("jump_flash") != null:
+				_add_fx({"k": "art", "name": "jump_flash", "pos": pos, "angle": e["angle"], "life": 0.5, "scale": 3.0})
+			else:
+				_add_fx({"k": "flash", "pos": pos, "life": 0.5, "r": 120.0, "color": Color("#bfe4ff")})
+			_add_fx({"k": "ring", "pos": pos, "life": 0.8, "r": 420.0, "color": Color("#7fe4ff")})
 		"wreck":
 			_on_ship(idx, pos, {"k": "ring", "life": 1.1, "r": 420.0, "color": Color("#ffb347")})
 			if Art.fx("explosion") != null:
@@ -532,6 +564,14 @@ func _on_event(e: Dictionary) -> void:
 			_sparks(pos, Vector2.ZERO, 36, Color("#ffcf7a"))
 			for i in 10:
 				_add_fx({"k": "puff", "pos": pos + Vector2.from_angle(_rng.randf() * TAU) * _rng.randf_range(0.0, 120.0), "vel": Vector2.from_angle(_rng.randf() * TAU) * 40.0, "life": 1.4, "r": 24.0, "grow": 50.0, "color": Color("#8a8f99", 0.5)})
+
+
+## An effect entry from EffectFx: on the hull it names (`stick`) or free in the world.
+func _add_effect_fx(f: Dictionary) -> void:
+	if f.has("stick"):
+		_on_ship(int(f["stick"]), f["pos"], f)
+	else:
+		_add_fx(f)
 
 
 ## An effect from ImpactFx: art when there is, else the flash of its fallback size.
@@ -627,7 +667,8 @@ func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 			var p := _fx_pos(f)
 			var smoke = Art.fx("smoke")
 			if smoke != null:
-				_blit_art(c, smoke, smoke.life_frame(age), p, 0.0, _art_k(px) * (0.5 + float(f["r"]) / 24.0 + age * 0.5), "", Color(1, 1, 1, fade))
+				var tint := Color(col.r, col.g, col.b, col.a * fade) if f.get("tint", false) else Color(1, 1, 1, fade)  # a gas of the effect's colour
+				_blit_art(c, smoke, smoke.life_frame(age), p, 0.0, _art_k(px) * (0.5 + float(f["r"]) / 24.0 + age * 0.5), "", tint)
 				return
 			c.draw_circle(p, (f["r"] + f["grow"] * age) * px * 0.5 if f["r"] < 4.0 else f["r"] + f["grow"] * age, Color(col, col.a * fade))
 		"debris":  # a chip of hull tumbling away
@@ -646,7 +687,7 @@ func _draw_shot(c: Node2D, p: Dictionary, px: float) -> void:
 	var at: Vector2 = p["pos"]
 	var v: Vector2 = p["vel"]
 	var d := v.normalized()
-	var art = Art.projectile(str(w["kind"]))
+	var art = Art.projectile_of(str(w.get("id", "")), str(w["kind"]))  # its own art by weapon id, else the kind's
 	if art != null:
 		_draw_art_shot(c, art, at, d, px)
 		return
@@ -696,7 +737,7 @@ func _draw_art_shot(c: Node2D, art, at: Vector2, d: Vector2, px: float) -> void:
 ## An effect (art/fx/<name>) at the fx's place, played once over its life, turned by f["angle"], its
 ## f["anchor"] pixel (else the middle) on the spot.
 func _draw_art_fx(c: Node2D, f: Dictionary, age: float, px: float) -> void:
-	var art = Art.fx(str(f["name"]))
+	var art = Art.projectile(str(f["name"])) if f.get("src", "") == "projectiles" else Art.fx(str(f["name"]))
 	if art != null:
 		_blit_art(c, art, art.life_frame(age), _fx_pos(f), float(f.get("angle", 0.0)), _art_k(px) * float(f.get("scale", 1.0)), str(f.get("anchor", "")))
 
@@ -717,7 +758,7 @@ static func beam_pieces(length: float, tile: float) -> Array:
 ## whole tiles and a cut last one (the sprite's head end), with its glow, and the kind's impact flare
 ## at `b`. False when there is no such art.
 func _draw_art_beam(c: Node2D, f: Dictionary, age: float, px: float) -> bool:
-	var art = Art.projectile(str(f.get("kind", "")))
+	var art = Art.projectile_of(str(f.get("weapon", "")), str(f.get("kind", "")))
 	if art == null:
 		return false
 	var a: Vector2 = f["a"]
@@ -738,7 +779,7 @@ func _draw_art_beam(c: Node2D, f: Dictionary, age: float, px: float) -> bool:
 			TileArt.emit(c, out, {"tex": g.texture, "rect": Rect2(at + Vector2(g.offset.x * k, 0.0), Vector2(float(g.frame.x) * k, p["len"])),
 				"src": Rect2(g.region(clampi(frame, 0, g.count - 1)).position, Vector2(g.frame.x, rows)), "xf": xf, "mod": Color(1, 1, 1, fade)})
 	c.draw_set_transform_matrix(Transform2D.IDENTITY)
-	var hit = Art.projectile(str(f["kind"]) + "_impact")
+	var hit = Art.projectile_of(str(f.get("weapon", "")), str(f["kind"]), "_impact")
 	if hit != null:
 		_blit_art(c, hit, hit.life_frame(age), b, 0.0, k, "center", Color(1, 1, 1, fade))
 	return true

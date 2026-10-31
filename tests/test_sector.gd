@@ -16,7 +16,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Content = preload("res://scripts/data/content.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
-const TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
+const TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "exit"]
 
 
 func near(got: float, want: float, msg: String, eps := 1e-3) -> void:
@@ -108,8 +108,10 @@ func test_a_sector_does_not_depend_on_when_it_is_made_and_leaves_the_campaigns_r
 
 func test_size_arrival_current_and_poi_distances_are_in_range() -> void:
 	var n := 0
+	var want := 0
 	for seed_value in [1, 2, 3, 4, 5, 6]:
 		var c := Campaign.new(seed_value)
+		want += c.drift.ids().size()
 		for id in c.drift.ids():
 			var s = c.sector_at(id)
 			n += 1
@@ -132,7 +134,7 @@ func test_size_arrival_current_and_poi_distances_are_in_range() -> void:
 				check(p["pos"] is Vector2 and p["enemy"] is String and p["event_type"] is String, tag + ": the fields")
 			eq(s.pois[0]["main"], true, tag + ": the first is the main POI")
 			eq(s.ship_pos, s.arrival, tag + ": the ship starts at the arrival point")
-	check(n == 6 * 28, "all sectors were checked (%d)" % n)
+	check(n == want and n >= 6 * 16, "all sectors were checked (%d)" % n)
 
 
 func test_the_poi_mix_follows_sectors_json() -> void:
@@ -198,9 +200,12 @@ func test_every_poi_type_turns_up_somewhere() -> void:
 
 
 func test_a_station_node_always_has_its_station_beacon() -> void:
-	for place in ["rusthold", "meridian", "prism"]:
+	for pair in [["rusthold", "clan_space"], ["meridian", "concord_space"], ["prism", "lumen_space"], ["ninefold", "kett_hives"]]:
+		var place: String = pair[0]
 		for seed_value in range(1, 11):
 			var c := Campaign.new(seed_value)
+			if pair[1] != "clan_space":
+				c.enter_region(pair[1])
 			var s = c.sector_at(place)
 			var stations: Array = s.pois.filter(func(p): return p["type"] == "station")
 			eq(stations.size(), 1, "%s/%d: exactly one station" % [place, seed_value])
@@ -214,28 +219,27 @@ func test_a_station_node_always_has_its_station_beacon() -> void:
 		eq(Sector.generate(i, {"id": "x", "name": "Somewhere", "type": "station", "place": "x"}, "clans", hidden).pois[0]["visibility"], "beacon", "a station is a beacon whatever the table says")
 
 
-func test_the_region_is_the_nearest_landmark() -> void:
+func test_every_node_is_in_its_regions_and_its_sector_follows_the_region() -> void:
 	var c := Campaign.new(3)
-	eq(c.region_of("rusthold"), "clans", "Rusthold")
-	eq(c.region_of("meridian"), "concord", "Meridian")
-	eq(c.region_of("prism"), "lumen", "the Prism")
-	for g in ["gate_1", "gate_2", "gate_3"]:
-		eq(c.region_of(g), "boneyard", "%s: a gate is not a landmark of any region" % g)
-	var places: Array = c.drift.nodes.filter(func(n): return str(n["place"]) != "")
-	var names := {"rusthold": "clans", "meridian": "concord", "prism": "lumen"}
-	var seen := {}
-	for n in c.drift.nodes:
-		var best := ""
-		var best_d := INF
-		for p in places:
-			var d: float = n["pos"].distance_to(p["pos"])
-			if d < best_d:
-				best = p["id"]
-				best_d = d
-		eq(c.region_of(n["id"]), names.get(best, "boneyard"), "%s: the region of its nearest landmark %s" % [n["id"], best])
-		seen[c.region_of(n["id"])] = true
-		eq(c.sector_at(n["id"]).region, c.region_of(n["id"]), "%s: its sector knows" % n["id"])
-	check(seen.size() >= 3, "the map has several regions (%s)" % str(seen.keys()))
+	for id in c.drift.ids():
+		eq(c.region_of(id), "clan_space", "%s: in Clan space" % id)
+		eq(c.sector_at(id).region, "clan_space", "%s: its sector knows" % id)
+	eq(c.region_of("nowhere"), "", "a node the map does not have is in no region")
+	c.enter_region("boneyard")
+	var r: Dictionary = c.region_data
+	var wreck := _of_type(c, "wreck_field")
+	var s = c.sector_at(wreck)
+	var plain = Sector.generate(c.region_seed, c.node(wreck), "boneyard")
+	for k in r["debris"]:
+		near(float(s.debris_mult.get(k, 1.0)), float(plain.debris_mult.get(k, 1.0)) * float(r["debris"][k]), "the Boneyard's %s multiplier lies over the wreck field's" % k)
+	eq(s.ambient_weights, r["ambient"], "and its passing ships are the region's")
+	var lots := 0
+	var few := 0
+	for i in 40:
+		var node := {"id": "w%d" % i, "name": "", "type": "wreck_field", "place": ""}
+		lots += Sector.generate(i, node, "x", {}, {"pois": {"abandoned_station": 50.0}}).pois.filter(func(p): return p["type"] == "abandoned_station").size()
+		few += Sector.generate(i, node, "x", {}, {"pois": {"abandoned_station": 0.0}}).pois.filter(func(p): return p["type"] == "abandoned_station").size()
+	check(lots > 30 and few == 0, "the region's POI multipliers change the mix (%d with x50, %d with x0)" % [lots, few])
 
 
 # --- the current feeds the debris ----------------------------------------------------------------------------
@@ -743,19 +747,19 @@ func test_an_ambient_contact_moves_leaves_and_fires_its_event() -> void:
 
 # --- saving and loading --------------------------------------------------------------------------------------
 
-func test_saves_are_version_3_and_old_ones_arrive_at_the_arrival_point() -> void:
-	eq(Campaign.VERSION, 3, "the campaign save version")
+func test_saves_are_version_4_and_old_ones_arrive_at_the_arrival_point() -> void:
+	eq(Campaign.VERSION, 4, "the campaign save version")
 	var c := _camp(1)
 	var ship := _ship()
 	_go(c, _next(c), ship)
 	var d: Dictionary = c.to_dict()
-	eq(d["version"], 3, "saved as version 3")
+	eq(d["version"], 4, "saved as version 4")
 	check(d["sectors"] is Dictionary and d["sectors"].has(c.current), "with the sectors visited")
 	check(d["spool"] is Dictionary, "and the spool")
 	for old in [2, 1]:
 		var e = JSON.parse_string(JSON.stringify(d))
-		e.erase("sectors")
-		e.erase("spool")
+		for k in ["sectors", "spool", "stage", "region", "route", "region_seed", "debt_stop"]:
+			e.erase(k)
 		e["version"] = old
 		if old == 1:
 			e.erase("fuel_part")
@@ -768,7 +772,7 @@ func test_saves_are_version_3_and_old_ones_arrive_at_the_arrival_point() -> void
 		eq(_sig(s), _sig(c.current_sector()), "%d: the same sector, made from the seed" % old)
 		check(c2.spool.is_empty(), "%d: no spool" % old)
 	var future = JSON.parse_string(JSON.stringify(d))
-	future["version"] = 4
+	future["version"] = 5
 	eq(_camp(1).load_dict(future), "unsupported campaign version", "a newer save is refused")
 
 
@@ -857,7 +861,8 @@ func test_sectors_json_is_sound() -> void:
 	var want := ["station", "store", "trader", "distress", "wreck", "abandoned_station", "mining_field", "unknown", "pirate_nest", "concord_checkpoint", "anomaly", "quest"]
 	for t in want:
 		check(types.has(t), "POI type %s exists" % t)
-	eq(types.size(), want.size(), "and no others")
+	eq(types.size(), want.size() + 1, "and the exit beacon, no others")
+	check(types.has("exit_beacon") and cfg["nodes"]["exit"]["main"] == "exit_beacon", "the exit node's main POI is the exit beacon")
 	for t in types:
 		var d: Dictionary = types[t]
 		var vis = d["visibility"]
@@ -880,12 +885,7 @@ func test_sectors_json_is_sound() -> void:
 		var debris: Array = Content.read(DriftDebris.PATH)["types"].map(func(x): return x["id"])
 		for k in n["debris"]:
 			check(debris.has(k), "%s: debris theme names a real debris type, %s" % [t, k])
-	var landmarks := {}
-	for p in Campaign.config()["places"]:
-		landmarks[str(p["id"])] = true
 	for r in cfg["regions"]:
-		var lm := str(cfg["regions"][r]["landmark"])
-		check(lm == "" or landmarks.has(lm), "region %s: landmark %s is a place" % [r, lm])
 		for k in cfg["regions"][r]["ambient"]:
 			check(["trader", "patrol", "pirate"].has(k), "region %s: ambient kind %s" % [r, k])
 	eq(cfg["size"], 24000, "24,000 px")

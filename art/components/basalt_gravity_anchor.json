@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   4
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   4
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "basalt_gravity_anchor_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    4
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "Basalt \"Gravity Anchor\": a squat stone block with four iron intake grilles (it pulls air from the rooms next to it) round a ring of heavy iron holding a dark gravity core. On loop (4): the ring segments turn, the core pulses cyan and pale motes drift in toward it through the grilles. Damaged: one intake grille torn off, the ring chipped and out of true, the core flickering. Disabled: the core dark and cold, the ring split, the block cracked, a grille hanging."
+}

@@ -1,8 +1,9 @@
 extends "res://tests/base_test.gd"
 ## The three starter ships (data/ships/starter_*.json): each loads, sits in the middle of the 63x63
-## grid with a hull of its bounding box plus 2 cells, is wired, sealed, connected, can fly, has guns and
-## engines mounted through its walls, a shield and the rest of a working ship, and runs for minutes
-## without overheating.
+## grid on a big hull frame (docs/CONTENT.md 4c, "Start with very little") with only the essentials
+## built (at most 10 parts) and most of the frame empty to build in, is wired, sealed, connected, can
+## fly, has its gun and engines mounted through its walls, a shield in the hold and the rest of a
+## working ship, and runs for minutes without overheating.
 ## tests/tool_make_starters.gd rebuilds the files.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -21,6 +22,12 @@ const PATHS := {
 }
 const PIRATE := "res://data/ships/pirate_raider.json"
 const MAX_COVER := 3  ## tiles between a gun and open space: a wall, a plate, one more at most
+const OLD_HULL := {"Rustbucket": 1122, "Courier": 864, "Prism": 624}  ## cells of the hull of the starters before the big frames (the bounding box plus 2)
+const MIN_GROWTH := 1.6  ## the frame is about 1.6 to 2 times as big as that
+const MAX_GROWTH := 2.0
+const MAX_PARTS := 10  ## placed components: the essentials only
+const MIN_EMPTY := 0.5  ## at least this share of the frame is empty hull (no tile, no outside half of a mount)
+const MIN_HULL_INTEGRITY := 150.0  ## every starter has real armour on its outer hull (arena.gd: 20 + 2 per plated cell)
 const BOW_ROWS := 6  ## the Courier is an arrowhead: its titanium skin covers the nose, shoulders included (docs/CONTENT.md 4c)
 
 
@@ -78,26 +85,52 @@ func test_each_starter_loads() -> void:
 			continue
 		eq(ship.name, key, key + " keeps its name")
 		eq(ship.grid.size, Vector2i(63, 63), key + " sits in a 63x63 grid")
-		check(ship.grid.tiles.size() > 200 and ship.components.instances.size() >= 10, key + " is a built ship")
+		check(ship.grid.tiles.size() > 200 and ship.components.instances.size() >= 8, key + " is a built ship")
 		var d = JSON.parse_string(FileAccess.get_file_as_string(PATHS[key]))
 		check(str(d.get("blurb", "")).length() > 30, key + " has a one-line character")
 	check(Ship.from_design("res://data/ships/nothing_here.json") == null, "a missing design is null, not a crash")
 	check(Ship.new_starter().grid.tiles.is_empty(), "the empty starter hull is unchanged")
 
 
-func test_the_hull_is_the_bounding_box_plus_two_cells_in_the_middle() -> void:  # the box of the hull, parts, cables and the outside halves of the mounts
+func test_the_hull_is_a_big_frame_in_the_middle_that_holds_everything_built() -> void:  # the box of the hull, parts, cables and the outside halves of the mounts
 	for key in PATHS:
 		var ship := _ship(key)
 		var b := _bounds(ship, true)
-		var lo: Vector2i = b[0] - Vector2i(2, 2)
-		var hi: Vector2i = b[1] + Vector2i(2, 2)
-		var want := {}
-		for y in range(lo.y, hi.y + 1):
-			for x in range(lo.x, hi.x + 1):
-				want[Vector2i(x, y)] = true
-		check(ship.grid.hull == want, key + ": the hull is the bounding box grown by 2")
+		var lo := Vector2i(1 << 20, 1 << 20)
+		var hi := Vector2i(-(1 << 20), -(1 << 20))
+		for c in ship.grid.hull:
+			lo = lo.min(c)
+			hi = hi.max(c)
+		check(ship.grid.hull.has(b[0]) and ship.grid.hull.has(b[1]), key + ": the frame holds the built ship, outside halves of the mounts included")
+		var built: Array = ship.grid.tiles.keys() + ship.cables.cells.keys()
+		for uid in ship.components.instances:
+			built.append_array(ship.components.instances[uid]["cells"])
+			built.append_array(ship.components.instances[uid]["out_cells"])
+		check(built.all(func(c): return ship.grid.hull.has(c)), key + ": every tile, cable and part is on the frame")
 		var centre := Vector2(lo + hi + Vector2i.ONE) / 2.0
-		check((centre - Vector2(31.5, 31.5)).length() <= 1.5, "%s: centred in the grid, give or take the barrels on one side (%s)" % [key, str(centre)])
+		check((centre - Vector2(31.5, 31.5)).length() <= 1.0, "%s: the frame is centred in the grid (%s)" % [key, str(centre)])
+		var box := (hi - lo + Vector2i.ONE)
+		check(ship.grid.hull.size() < 0.9 * box.x * box.y, "%s: the frame is a silhouette, not a rectangle (%d of %d cells)" % [key, ship.grid.hull.size(), box.x * box.y])
+		var growth := float(ship.grid.hull.size()) / float(OLD_HULL[key])
+		check(growth >= MIN_GROWTH and growth <= MAX_GROWTH, "%s: the frame is %.2fx today's old hull (%d cells), 1.6 to 2 wanted" % [key, growth, ship.grid.hull.size()])
+
+
+func test_each_starter_has_at_most_ten_parts_and_at_least_half_of_its_frame_empty() -> void:
+	for key in PATHS:
+		var ship := _ship(key)
+		var empty := 0
+		for c in ship.grid.hull:
+			empty += int(ship.grid.get_tile(c) == "" and ship.components.at_out(c) < 0)
+		var share := float(empty) / float(ship.grid.hull.size())
+		check(share >= MIN_EMPTY, "%s: %.0f%% of the frame is empty hull (%d of %d cells), at least 50%% wanted" % [key, 100.0 * share, empty, ship.grid.hull.size()])
+		check(ship.components.instances.size() <= MAX_PARTS, "%s: %d placed parts, at most %d" % [key, ship.components.instances.size(), MAX_PARTS])
+
+
+func test_each_starter_has_real_armour_on_its_outer_hull() -> void:
+	for key in PATHS:
+		var a := Arena.new(1)
+		a.add_ship(_ship(key))
+		check(a.ships[0].hull_max >= MIN_HULL_INTEGRITY, "%s: hull integrity %.0f, at least %.0f wanted" % [key, a.ships[0].hull_max, MIN_HULL_INTEGRITY])
 
 
 func test_every_component_is_powered_and_supply_covers_demand() -> void:
@@ -126,7 +159,7 @@ func test_rooms_are_sealed_doors_are_two_wide_and_everything_is_connected() -> v
 	for key in PATHS:
 		var ship := _ship(key)
 		var atmo = ship.atmosphere
-		check(atmo.rooms.size() >= 6, "%s has rooms (%d)" % [key, atmo.rooms.size()])
+		check(atmo.rooms.size() >= 4, "%s has rooms (%d)" % [key, atmo.rooms.size()])
 		for r in atmo.rooms:
 			check(r["sealed"], "%s: room %d is sealed" % [key, r["id"]])
 		for i in atmo.rooms.size():
@@ -167,16 +200,19 @@ func test_the_crew_can_walk_to_every_room() -> void:
 		eq(reached.size(), ship.atmosphere.rooms.size(), key + ": every room is reachable on foot")
 
 
-func test_each_has_guns_a_shield_and_the_rest_of_a_ship() -> void:
+func test_each_has_a_gun_the_essentials_and_a_shield_in_the_hold() -> void:
 	for key in PATHS:
 		var ship := _ship(key)
-		var powered: Dictionary = ship.power_state["powered"]
-		check(_family(ship, "weapon").size() >= 2, key + " has at least 2 weapons")
-		var shields := _family(ship, "shield")
-		check(shields.size() >= 1 and powered[shields[0]], key + " has a powered shield")
-		for family in ["reactor", "engine", "oxygen", "helm", "fabricator", "bed", "radiator"]:
+		check(_family(ship, "weapon").size() >= 1, key + " has a gun")
+		for family in ["reactor", "engine", "oxygen", "helm", "fabricator", "bed"]:
 			check(not _family(ship, family).is_empty(), "%s has a %s" % [key, family])
 		check(_family(ship, "bed").size() >= 2, key + " has crew beds")
+		check(_family(ship, "shield").is_empty(), key + ": the shield is not built yet")
+		var shields := 0
+		for id in ship.inventory.counts:
+			if ship.components.has(id) and ship.components.def(id).get("family", "") == "shield":
+				shields += ship.inventory.count(id)
+		eq(shields, 1, key + ": one shield waits in the hold")
 		var fab: int = _family(ship, "fabricator")[0]
 		var room: int = ship.atmosphere.room_at(ship.components.instances[fab]["anchor"])
 		var mates := 0
@@ -221,43 +257,42 @@ func test_nose_guns_point_forward_and_rear_engines_push_forward() -> void:
 func test_rustbucket_is_the_scrap_ship() -> void:
 	var ship := _ship("Rustbucket")
 	var b := _bounds(ship)
-	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(30, 24), "30x24 cells in use")
-	eq([_count(ship, "reactor_scrap_mk1") >= 1, _count(ship, "reactor_mk2") + _count(ship, "reactor_mk1") >= 1], [true, true], "a Rustbucket Reactor and a standard one")
-	eq([_count(ship, "engine_scrap_mk1"), _count(ship, "oxygen_scrap_mk1"), _count(ship, "shield_scrap_mk1")], [2, 1, 1], "2 Kickjets, Wheezer O2, Bubble Rig")
-	eq([_count(ship, "rattle_burst_scrap"), _count(ship, "shrapnel_cannon_scrap"), _count(ship, "bolt_thrower_scrap")], [1, 1, 1], "Rattle Burst, Shrapnel Cannon, Bolt Thrower")
-	check(_tiles(ship, "scrap_plate") > 80, "a scrap-plate outer layer all round")
-	check(ship.inventory.count("scrap") >= 500, "a lot of scrap in the hold (and the Bolt Thrower eats it)")
+	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(20, 21), "20x21 cells built")
+	eq([_count(ship, "reactor_mk2"), _count(ship, "radiator")], [1, 1], "one standard Reactor Mk2 (scrap parts draw 20% more) and a radiator (the Kickjets run hot)")
+	eq([_count(ship, "engine_scrap_mk1"), _count(ship, "oxygen_scrap_mk1"), _count(ship, "rattle_burst_scrap")], [2, 1, 1], "2 Kickjets, Wheezer O2, Rattle Burst")
+	eq([ship.inventory.count("shield_scrap_mk1"), ship.inventory.count("net_mouth_scrap")], [1, 1], "the Bubble Rig and a Net Mouth in the hold")
+	check(_tiles(ship, "scrap_plate") > 100, "a scrap-plate outer layer all round")
+	check(ship.inventory.count("scrap") >= 400, "a lot of scrap in the hold")
 	eq(ship.inventory.count("credits"), 300, "300 credits")
 
 
 func test_courier_is_the_standard_ship() -> void:
 	var ship := _ship("Courier")
 	var b := _bounds(ship)
-	check(b[1].x - b[0].x + 1 == 24 and b[1].y - b[0].y + 1 <= 19, "about 24x18 cells in use")
-	eq([_count(ship, "engine_mk2"), _count(ship, "shield_mk1"), _count(ship, "laser_mk1"), _count(ship, "pulse_mk1")], [2, 1, 2, 1], "2 Engine Mk2 (the fast ship), Shield Mk1, 2 Laser Mk1, Pulse Mk1")
-	check(_count(ship, "reactor_mk2") == 2 and _count(ship, "radiator") >= 1, "two Reactor Mk2 (the strafe pair needs the power) and a radiator")
-	check(_tiles(ship, "titanium_alloy") >= 20, "a titanium nose")
+	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(12, 21), "12x21 cells built: the fuselage of the arrowhead")
+	eq([_count(ship, "engine_mk2"), _count(ship, "pulse_mk1"), _count(ship, "reactor_mk2")], [2, 1, 1], "2 Engine Mk2 (the fast ship), Pulse Mk1, one Reactor Mk2")
+	eq([ship.inventory.count("shield_mk1"), ship.inventory.count("afterburner")], [1, 1], "a Shield Mk1 and an Afterburner in the hold")
+	check(_tiles(ship, "titanium_alloy") >= 60, "a titanium skin all round")
+	var nose := 0
 	for c in ship.grid.tiles:
-		if ship.grid.tiles[c] == "titanium_alloy":
-			check(c.y <= b[0].y + BOW_ROWS, "titanium only on the bow (the arrowhead's first %d rows): %s" % [BOW_ROWS + 1, str(c)])
+		nose += int(ship.grid.tiles[c] == "titanium_alloy" and c.y <= b[0].y + BOW_ROWS)
+	check(nose >= 20, "and the pointed bow is titanium over titanium (%d cells in its first %d rows)" % [nose, BOW_ROWS + 1])
 	eq(ship.inventory.count("credits"), 500, "500 credits")
 
 
-func test_courier_has_a_strafe_pair_on_its_side_walls() -> void:
+func test_courier_has_room_for_a_strafe_pair_on_its_flanks() -> void:
 	var ship := _ship("Courier")
 	var arena := Arena.new(1)
 	arena.add_ship(ship)
 	var t: Dictionary = arena.ships[0].thrusts
-	check(t["left"] > 0.0 and absf(t["left"] - t["right"]) < 1e-6, "equal thrust to the left and to the right: %s" % str(t))
-	var side := 0
-	for uid in _family(ship, "engine"):
-		var o := Mounts.outward(ship.components.instances[uid]["rot"])
-		side += int(o == Vector2i.LEFT or o == Vector2i.RIGHT)
-	eq(side, 2, "two engines on the side walls")
-	var bow := 0
-	for c in ship.grid.tiles:
-		bow += int(ship.grid.tiles[c] == "titanium_alloy" and c.y <= _bounds(ship)[0].y + BOW_ROWS)
-	check(bow >= 20, "and the pointed bow is a titanium skin over the wall, two cells thick")
+	check(t["fwd"] > 0.0 and t["left"] == 0.0 and t["right"] == 0.0, "it starts with rear engines only: %s" % str(t))
+	var found := {}
+	for rot in [1, 3]:  # nozzle to the right (on the right wall), nozzle to the left (on the left wall)
+		for y in ship.grid.size.y:
+			for x in ship.grid.size.x:
+				if not found.has(rot) and ship.components.can_place_mount(ship.grid, "engine_mk1", Vector2i(x, y), rot) == "":
+					found[rot] = Vector2i(x, y)
+	eq(found.keys().size(), 2, "an Engine Mk1 fits on each side wall: %s" % str(found))
 	for uid in _family(ship, "weapon"):
 		var inst: Dictionary = ship.components.instances[uid]
 		eq(Mounts.depth_of(ship.components.def(inst["id"]), inst["anchor"], inst["rot"], inst["out_anchor"]), 2, "%s: its link is the whole 2-cell bow" % inst["id"])
@@ -266,9 +301,9 @@ func test_courier_has_a_strafe_pair_on_its_side_walls() -> void:
 func test_prism_is_the_neon_ship() -> void:
 	var ship := _ship("Prism")
 	var b := _bounds(ship)
-	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(22, 18), "22x18 cells in use")
-	eq([_count(ship, "reactor_neon_mk1"), _count(ship, "engine_neon_mk1"), _count(ship, "shield_neon_mk1")], [1, 1, 1], "Prism Core, Ion Drive, Neon Lattice Shield")
-	eq([_count(ship, "heat_lance_neon"), _count(ship, "siren_ion_neon")], [1, 1], "Heat Lance and Siren Ion")
+	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(12, 22), "12x22 cells built: the spine of the crystal")
+	eq([_count(ship, "reactor_neon_mk1"), _count(ship, "engine_neon_mk1"), _count(ship, "heat_lance_neon")], [1, 1, 1], "Prism Core, Ion Drive, Heat Lance")
+	eq([ship.inventory.count("shield_neon_mk1"), ship.inventory.count("afterburner")], [1, 1], "the Neon Lattice Shield and an Afterburner in the hold")
 	var core: int = _family(ship, "reactor")[0]
 	var hot: int = ship.atmosphere.room_at(ship.components.instances[core]["anchor"])
 	var radiators := 0
@@ -277,8 +312,7 @@ func test_prism_is_the_neon_ship() -> void:
 			radiators += 1
 	check(radiators >= 2, "2 radiators in the Prism Core's room")
 	eq(ship.components.def("shield_neon_mk1")["stats"]["sectors"], 4, "a 4-sector shield")
-	check(_tiles(ship, "reflective_coating") >= 8 and _tiles(ship, "wall") > 0, "a reflective coating over steel")
-	check(_tiles(ship, "reflective_coating") <= 20, "little armour: a thin coat on the nose only")
+	check(_tiles(ship, "reflective_coating") >= 60 and _tiles(ship, "wall") > 0, "a reflective coating all round over steel")
 	eq(ship.inventory.count("credits"), 400, "400 credits")
 
 
@@ -311,9 +345,8 @@ func test_starters_are_ordered_by_hull_and_speed() -> void:
 		accel[key] = co.thrust * co.flight.thrust_to_accel / co.mass
 	check(hull["Rustbucket"] > hull["Courier"] and hull["Courier"] > hull["Prism"], "armour: Rustbucket > Courier > Prism: " + str(hull))
 	check(accel["Rustbucket"] < accel["Courier"] and accel["Rustbucket"] < accel["Prism"], "the Rustbucket is the slow one: " + str(accel))
-	var prism := Arena.new(1)
-	prism.add_ship(_ship("Prism"))
-	eq([prism.ships[0].layers_cap, prism.ships[0].sectors], [2, 4], "the Prism's shield: 2 layers, 4 sectors")
+	var stats: Dictionary = _ship("Prism").components.def("shield_neon_mk1")["stats"]
+	eq([int(stats["layers"]), int(stats["sectors"])], [2, 4], "the Prism's shield, in its hold: 2 layers, 4 sectors")
 
 
 func test_every_weapon_is_ready_against_an_enemy_ahead() -> void:
@@ -322,7 +355,7 @@ func test_every_weapon_is_ready_against_an_enemy_ahead() -> void:
 		s.start(_ship(key), Session.load_ship(PIRATE), 3)
 		var aim: Vector2 = s.arena.ships[Session.ENEMY].flight.pos
 		var list := s.weapons()
-		check(list.size() >= 2, key + " has weapons in the arena")
+		check(list.size() >= 1, key + " has a weapon in the arena")
 		for w in list:
 			eq(s.slot_state(w["uid"], aim)["status"], "ready", "%s: %s is ready, in arc, powered" % [key, w["name"]])
 		eq(s.fire_group(1, aim) + s.fire_group(2, aim), list.size(), key + ": every weapon fires on the first volley")

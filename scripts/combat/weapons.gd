@@ -19,6 +19,7 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Content = preload("res://scripts/data/content.gd")
+const Effects = preload("res://scripts/combat/effects.gd")
 
 const PATH := "res://data/weapons.json"
 const BASE := {"damage_type": "energy", "damage": 1.0, "cooldown": 1.0, "range": 900.0, "arc": 360.0,
@@ -66,6 +67,7 @@ func def(id: String) -> Dictionary:
 	var out := BASE.duplicate()
 	out.merge(KIND_DEFAULTS.get(e.get("kind", "laser"), {}), true)
 	out.merge(e, true)
+	out["id"] = id  # the art looks for art/projectiles/<id> before the kind's
 	if out["turret"]:
 		out["damage"] = float(out["damage"]) * turret_damage
 	return out
@@ -154,8 +156,9 @@ func can_fire(arena, idx: int, uid: int, aim: Vector2) -> String:
 		return status
 	if not (m["powered"] if m["virtual"] else co.powered.get(uid, false)):
 		return "unpowered"
-	var ammo := str(def(m["id"])["ammo"])
-	if ammo != "" and co.ship.inventory.count(ammo) < 1:
+	var w := def(m["id"])
+	var ammo := str(w["ammo"])
+	if ammo != "" and co.ship.inventory.count(ammo) < maxi(Effects.ammo_cost(m, w), 1):
 		return "no ammo"
 	if arena.tick < int(co.cooldowns.get(uid, 0)):
 		return "cooling down"
@@ -222,7 +225,7 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 		return false
 	var co = arena.ships[idx]
 	var m: Dictionary = co.mounts[uid]
-	var w := def(m["id"])
+	var w := Effects.adjust(arena, idx, uid, m, def(m["id"]))  # less power or rate without the operator or crew it needs
 	co.cooldowns[uid] = arena.tick + int(ceil(float(w["cooldown"]) / arena.SUBSTEP - 1e-6))
 	if w["turret"]:
 		var point := _turret_point(arena, idx, uid, m, w, target_of(arena, idx))
@@ -248,6 +251,7 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 				_line(arena, idx, w, m["id"], origin, origin + d * float(w["range"]))
 			else:
 				Projectiles.spawn(arena, idx, w, origin, d)
+	Effects.on_fire(arena, idx, uid, m, w)
 	Shields.drop(arena, idx, w, origin, dir)  # after the shots: those in contact this tick were resolved first
 	return true
 
@@ -377,7 +381,7 @@ func _in_range(arena, idx: int, m: Dictionary, w: Dictionary, target: int) -> bo
 func _spend(arena, idx: int, uid: int, m: Dictionary, w: Dictionary) -> void:
 	var co = arena.ships[idx]
 	if str(w["ammo"]) != "":
-		co.ship.inventory.add(str(w["ammo"]), -1)
+		co.ship.inventory.add(str(w["ammo"]), -Effects.ammo_cost(m, w, true))
 	var inst = null if m["virtual"] else co.ship.components.instances.get(uid)
 	if inst != null:
 		inst["heat"] = float(inst.get("heat", 0.0)) + float(w["heat_per_shot"])
@@ -414,6 +418,7 @@ func tick_beams(arena) -> void:
 		b["next"] += b["every"]
 		var w: Dictionary = b["w"].duplicate()
 		w["damage"] = float(w["damage"]) * b["every"] * arena.SUBSTEP
+		w["fx_k"] = float(b["every"]) * arena.SUBSTEP  # the effects that act per hit (shard, magnetic) scale the same way
 		var origin: Vector2 = arena.local_to_world(b["owner"], m["pos"] + Vector2(b["local_dir"]) * float(m["reach"]))
 		var d: Vector2 = b["local_dir"].rotated(co.flight.angle)
 		_line(arena, b["owner"], w, m["id"], origin, origin + d * float(w["range"]))

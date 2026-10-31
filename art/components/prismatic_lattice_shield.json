@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   6,
+   7
+  ],
+  "off": [
+   6,
+   1,
+   0
+  ],
+  "damaged": [
+   7,
+   2,
+   6
+  ],
+  "disabled": [
+   9,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "prismatic_lattice_shield_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    6,
+    7
+   ],
+   "damaged": [
+    6,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Prismatic Lattice Shield, 4x4: a gem-cut violet frame round two nested diamond lattices (two layers) of thin cyan lines with a node on every crossing and a big faceted crystal in the middle; light chases along the lattice lines and the nodes flash magenta in turn (the 6-frame loop). Off: dark grey lattice and a dull crystal. Damaged: a lattice line snapped and a node dark, a facet cracked, the light stutters. Disabled: the lattice broken and dull, the crystal split."
+}

@@ -6,7 +6,8 @@ extends Node
 ## (jobs.gd: walk, repair, fight fires, man stations, heal), then let the atmosphere flow. A ship that is not the player's gets its own crew on its
 ## first tick (Jobs.spawn_enemy_crew).
 ## Abilities (abilities.gd) tick here while one ship is in the sim; in a fight (more than one) the
-## arena ticks them itself, at its own rate. The fabricator's queue (ship.crafting) ticks for every
+## arena ticks them itself, at its own rate. The crew's active abilities (crew_abilities.gd: cooldowns and
+## their timed effects) tick here for every ship, always. The fabricator's queue (ship.crafting) ticks for every
 ## ship, at the level and tools of the ship's best powered fabricator (Workshop.best); finished
 ## items go to the cargo and the chronicle says so, and says when the fabricator stops the queue.
 ## The random rolls (malfunctions, fires) use one RandomNumberGenerator per ship, seeded with the
@@ -14,6 +15,11 @@ extends Node
 ## Auto doors: a door piece counts as open for the atmosphere while any crew body overlaps any of
 ## its cells. Crew breathe the room under the centre of their body.
 ## step() does one tick without the scene tree, so tests can drive it.
+## Pause (set_paused; build mode does it): step() then only refreshes the rooms and the power, so the plan on
+## screen stays right while the player rebuilds. Nothing else moves: no crew walking or jobs, fires, oxygen
+## (generators and breathing), heat, malfunctions, crafting or abilities, and the ships' clock stands still.
+## When the pause ends the rooms and the air are recomputed and crew who stand in a wall or in a pocket
+## sealed off from the rest of the ship are moved (relocate_crew).
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const Heat = preload("res://scripts/sim/heat.gd")
@@ -23,10 +29,16 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const Mortality = preload("res://scripts/crew/mortality.gd")
+const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
+const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
 const MAX_FRAME := 0.25  ## longest time step a slow frame may take, seconds
 
 var ships: Array = []
+var paused := false  ## the world stands still (build mode): see the header; set it with set_paused
+var pause_reason := ""  ## why, for the HUD: "build mode"
 var design_path := ""  ## the design file the player's ship was last loaded from; "" for the empty starter hull
 var _rngs := {}  # ship -> its RandomNumberGenerator
 var _jobs := {}  # ship -> its Jobs board
@@ -81,7 +93,7 @@ func _ready() -> void:
 func _process(dt: float) -> void:
 	step(minf(dt, MAX_FRAME))
 	if _ability_label != null:
-		_ability_label.text = hud_line()
+		_ability_label.text = hud_line() if not paused else ""  # paused, the build HUD's selection card has that corner
 
 
 ## The HUD line for the abilities running on the player's ship ("" when none): "Abilities: Afterburn 5 s".
@@ -90,10 +102,31 @@ func hud_line() -> String:
 	return Abilities.hud_line(ship) if ship != null else ""
 
 
-## Advance every ship by `dt` seconds.
+## "PAUSED: build mode" while the world is paused, else "" (the HUD's top bar shows it, hud_top_bar.gd).
+func pause_line() -> String:
+	return "PAUSED: " + (pause_reason if pause_reason != "" else "paused") if paused else ""
+
+
+## Stop (`on`, with the `reason` the HUD shows) or resume the world. Resuming recomputes the rooms and the
+## air of every ship and moves crew out of walls and sealed pockets (relocate_crew).
+func set_paused(on: bool, reason := "") -> void:
+	var was := paused
+	paused = on
+	pause_reason = reason if on else ""
+	if was and not on:
+		for ship in ships:
+			ship.mark_dirty()  # rooms and air again, even if nothing flagged a change
+			ship.refresh()
+			relocate_crew(ship)
+
+
+## Advance every ship by `dt` seconds (paused: only the rooms and the power are brought up to date).
 func step(dt: float) -> void:
 	for ship in ships:
-		_step_ship(ship, dt)
+		if paused:
+			ship.refresh()
+		else:
+			_step_ship(ship, dt)
 	for table in [_jobs, _crewed]:  # forget ships that left (a fight is over)
 		for ship in table.keys():
 			if not ships.has(ship):
@@ -128,10 +161,85 @@ static func open_door_cells(ship: Ship) -> Dictionary:
 	return open
 
 
+## Crew who stand in a wall (a body that overlaps a cell it cannot stand in) or in a pocket (walkable floor
+## cut off from the main walkable area, the biggest set of floor a body can walk between) go to the nearest
+## spot a body can stand on in the main area, and drop their path (a job re-plans on its own). With no such
+## spot anywhere they go to the helm's room. Doors count as open. Returns how many were moved.
+static func relocate_crew(ship: Ship) -> int:
+	var grid: ShipGrid = ship.grid
+	var cells: Array = grid.tiles.keys()
+	cells.sort_custom(func(a, b): return a.y < b.y or (a.y == b.y and a.x < b.x))
+	var comp := {}  # body anchor -> the number of the area it is in
+	var areas: Array = []  # area number -> its anchors
+	for c in cells:
+		if comp.has(c) or not Pathfinder.body_ok(grid, c):
+			continue
+		var list: Array[Vector2i] = [c]
+		comp[c] = areas.size()
+		var i := 0
+		while i < list.size():
+			for d in ShipGrid.SIDES:
+				var n: Vector2i = list[i] + d
+				if not comp.has(n) and Pathfinder.body_ok(grid, n):
+					comp[n] = areas.size()
+					list.append(n)
+			i += 1
+		areas.append(list)
+	var main := -1
+	for k in areas.size():
+		if main < 0 or areas[k].size() > areas[main].size():
+			main = k
+	var moved: Array[String] = []
+	for m in ship.crew:
+		if m.fits(grid, m.pos, Callable(), m.RADIUS - 0.01) and main >= 0 and comp.get(Pathfinder.anchor_of(m.pos), -1) == main:
+			continue
+		var to := Vector2.INF
+		var best := INF
+		if main >= 0:
+			for c in areas[main]:
+				var d: float = (Pathfinder.centre_of(c) - m.pos).length_squared()
+				if d < best:
+					best = d
+					to = Pathfinder.centre_of(c)
+		else:
+			to = _helm_spot(ship)
+		if to == Vector2.INF or to == m.pos:
+			continue
+		m.pos = to
+		m.path.clear()
+		moved.append(m.name)
+	if not moved.is_empty():
+		ship.log_event("Crew moved clear of the rebuild: " + ", ".join(moved))
+	return moved.size()
+
+
+## A spot in the helm's room (its cell nearest the helm), or Vector2.INF when the ship has no helm.
+static func _helm_spot(ship: Ship) -> Vector2:
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		var inst: Dictionary = ship.components.instances[uid]
+		if ship.components.def(inst["id"]).get("family", "") != "helm":
+			continue
+		var at: Vector2i = inst["anchor"]
+		var room: int = ship.atmosphere.room_at(at)
+		var best := Vector2(at) + Vector2(0.5, 0.5)
+		if room >= 0:
+			var best_d := INF
+			for c in ship.atmosphere.rooms[room]["cells"]:
+				var d := float((c - at).length_squared())
+				if d < best_d:
+					best_d = d
+					best = Vector2(c) + Vector2(0.5, 0.5)
+		return best
+	return Vector2.INF
+
+
 func _step_ship(ship: Ship, dt: float) -> void:
 	ship.refresh()
 	ship.clock += dt
 	var rng := rng_of(ship)
+	CrewAbilities.tick(ship, dt)  # crew ability cooldowns and effects, in a fight too (they stand still when the world does)
 	if ships.size() == 1:  # in a fight the arena ticks the abilities
 		Abilities.tick(ship, dt, rng)
 	Heat.tick(ship, dt, rng)
@@ -158,6 +266,8 @@ func _step_ship(ship: Ship, dt: float) -> void:
 			ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * use * dt)
 	Fire.tick(ship, dt, rng)
 	jobs_of(ship).tick(ship, dt, ships.size() > 1)  # more than one ship aboard the sim: a fight
+	for line in Mortality.tick(ship, dt):  # the downed bleed out
+		ship.log_event(line)
 	ship.atmosphere.tick(dt, open_door_cells(ship))
 
 

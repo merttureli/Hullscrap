@@ -1,0 +1,37 @@
+{
+ "frame": [
+  320,
+  180
+ ],
+ "cells": [
+  20,
+  11
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   3
+  ]
+ },
+ "glow": {
+  "image": "hollow_truth_glow.png",
+  "frame": [
+   320,
+   180
+  ],
+  "offset": [
+   0,
+   0
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    3
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Ending illustration, 320x180 per frame, 4 frames looping at 3 fps. Draw it at 3x or 4x with nearest filtering; add the glow strip over it (additive). Light comes from the top-left. Inside the Scrapper Gate: an empty bridge, a window onto the tunnel of the gate and the pale light at its end, eleven chairs in a horseshoe each turned a little, one amber lamp left on. Frames: the light at the end breathes, a dead lamp flickers, dust drifts in the window light."
+}

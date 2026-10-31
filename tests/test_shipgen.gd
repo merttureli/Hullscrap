@@ -14,6 +14,7 @@ const Session = preload("res://scripts/combat/combat_session.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Content = preload("res://scripts/data/content.gd")
+const Regions = preload("res://scripts/space/regions.gd")
 const HullOutline = preload("res://tests/hull_outline.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const Components = preload("res://scripts/ship/components.gd")
@@ -265,10 +266,9 @@ func test_the_tables_name_real_things() -> void:
 			check(f["layer_cost"].has(size), "%s: a layer costs something on a %s ship" % [fid, size])
 		for kind in ["gun", "bridge", "core", "aux", "engine"]:
 			check(f["hull"]["band"].has(kind), "%s: the grammar widens the %s deck" % [fid, kind])
-	for rid in t["regions"]:
+	for r in Regions.all():
 		for kind in ["pirate", "patrol"]:
-			for fid in t["regions"][rid][kind]:
-				check(t["factions"].has(fid), "region %s: %s is a faction with a table" % [rid, fid])
+			check(t["factions"].has(Shipgen.faction_for(r, kind)), "region %s: a %s fight has a faction with a table" % [r["id"], kind])
 	for sid in t["sizes"]:
 		check(Shipgen.tables()["sizes"][sid]["max"]["reactor"] >= 1, sid + " holds a reactor")
 	eq(t["threat"]["cuts"].size(), 4, "four cuts make five skulls")
@@ -289,8 +289,13 @@ func test_the_budget_follows_section_14() -> void:
 	near(Shipgen.budget_for(2, 10, 1.1), 80.0 * 1.4 * 1.1, "the region's danger")
 	near(Shipgen.budget_for(3, 25, 1.6, "hard"), 140.0 * 2.0 * 1.6 * 1.2, "the Hollow on hard")
 	near(Shipgen.budget_for(1, 0, 1.0, "easy"), 32.0, "easy")
-	near(Shipgen.danger_of("hollow"), 1.6, "the Hollow's danger")
-	near(Shipgen.danger_of("nowhere"), 1.0, "an unknown region is plain")
+	near(Shipgen.danger_of(Regions.get_region("gate_approaches")), 1.4, "the Gate approaches' danger comes from the region")
+	near(Shipgen.danger_of({}), 1.0, "a region with none is plain")
+	eq(Shipgen.faction_for(Regions.get_region("clan_space"), "pirate"), "rustfangs", "Clan space is raided by Rustfangs")
+	eq(Shipgen.faction_for(Regions.get_region("clan_space"), "patrol"), "concord", "and patrolled by the Concord")
+	eq(Shipgen.faction_for(Regions.get_region("lumen_space"), "pirate"), "wardens", "the Lumen's guards are the Wardens")
+	eq(Shipgen.faction_for(Regions.get_region("lumen_space"), "patrol"), "wardens", "who patrol it too")
+	eq(Shipgen.faction_for({}, "pirate"), "rustfangs", "an unknown region has Rustfangs")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
 	eq(Shipgen.pick_size(20.0, rng), "small", "a small budget is a small ship")
@@ -383,8 +388,7 @@ func test_the_campaign_rolls_tier_fights_from_the_region() -> void:
 		var spec := c.fight_path("tier", "pirate")
 		check(Shipgen.is_spec(spec), "a tier fight is a generated ship: " + spec)
 		seen[spec.split(":")[1]] = true
-	check(seen.has("rustfangs"), "Clan space meets Rustfangs")
-	check(not seen.has("wardens") and not seen.has("hollow"), "and not the Wardens or the Hollow: " + str(seen.keys()))
+	eq(seen.keys(), ["rustfangs"], "Clan space meets Rustfangs and nobody else")
 	var patrol := c.fight_path("tier", "patrol")
 	check(patrol.begins_with("gen:concord:"), "a Concord patrol: " + patrol)
 	eq(c.fight_path("pirate_raider", "pirate"), "res://data/ships/pirate_raider.json", "a design id stays a file")

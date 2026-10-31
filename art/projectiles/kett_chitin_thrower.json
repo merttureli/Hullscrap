@@ -1,0 +1,81 @@
+{
+ "frame": [
+  11,
+  14
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   16
+  ]
+ },
+ "anchors": {
+  "head": [
+   5,
+   0
+  ],
+  "tail": [
+   5,
+   13
+  ]
+ },
+ "glow": {
+  "image": "kett_chitin_thrower_glow.png",
+  "frame": [
+   17,
+   20
+  ],
+  "offset": [
+   -3,
+   -3
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    16
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "kett_chitin_thrower_impact.png",
+  "frame": [
+   14,
+   14
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    16
+   ]
+  },
+  "anchor": [
+   7,
+   7
+  ],
+  "glow": {
+   "image": "kett_chitin_thrower_impact_glow.png",
+   "frame": [
+    22,
+    22
+   ],
+   "offset": [
+    -4,
+    -4
+   ],
+   "anims": {
+    "play": [
+     0,
+     3,
+     16
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A fan of three amber chitin needles with pale tips, 11x14, over a thin second layer (3 frames). It is a cone: fire several at spread angles."
+}

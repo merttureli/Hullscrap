@@ -1,0 +1,81 @@
+{
+ "frame": [
+  5,
+  22
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   16
+  ]
+ },
+ "anchors": {
+  "head": [
+   2,
+   0
+  ],
+  "tail": [
+   2,
+   21
+  ]
+ },
+ "glow": {
+  "image": "human_concord_railgun_glow.png",
+  "frame": [
+   15,
+   32
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    16
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "human_concord_railgun_impact.png",
+  "frame": [
+   20,
+   20
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    16
+   ]
+  },
+  "anchor": [
+   10,
+   10
+  ],
+  "glow": {
+   "image": "human_concord_railgun_impact_glow.png",
+   "frame": [
+    30,
+    30
+   ],
+   "offset": [
+    -5,
+    -5
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     16
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A rail slug: a white-hot 9 px head with a cyan sheath and a long blue-white streak behind it (3 frames, the streak shimmers). 22 long; fast and thin: it pierces 2."
+}

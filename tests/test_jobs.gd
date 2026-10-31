@@ -738,6 +738,7 @@ func test_holding_e_next_to_a_fire_puts_it_out() -> void:
 	view.sim = sim
 	view.build = BuildMode.new()
 	view.build.sim = sim
+	view.build.build_on = false  # play mode: build mode pauses the world
 	var p := _player(13, 12)
 	ship.crew.append(p)
 	view.player = p

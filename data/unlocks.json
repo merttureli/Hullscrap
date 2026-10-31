@@ -1,0 +1,4 @@
+{
+	"_doc": "Unlocks (docs/CONTENT.md sections 13 and 19): things a landmark or an ending opens for the NEXT runs. They widen choice, never raw power. Kept in the profile (user://profile.json), not in the run; an event's `unlock` effect earns one (shown as \"Unlocked: <name>\"). Packs add theirs in their own unlocks.json. Each entry: id, kind, name, how (the hint the hangar shows on a locked starter: say how it is earned) and payload. kind and payload: starter_ship {ship: a design id of data/ships or a pack's ships/; the design's hangar.unlock names this unlock}, species_start {species}, blueprint {blueprint: a recipe id}, map_variant {variant}, skin {skin}. The core list is empty: the endings pack holds the first ones.",
+	"unlocks": []
+}

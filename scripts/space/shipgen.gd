@@ -97,9 +97,9 @@ static func budget_for(tier: int, jumps: int, danger: float, difficulty := "norm
 	return float(b["tier_base"][str(clampi(tier, 1, 3))]) * (1.0 + float(b["per_jump"]) * jumps) * danger * float(b["difficulty"].get(difficulty, 1.0))
 
 
-## The danger of a region (data/enemy_tables.json regions; 1.0 for one it does not list).
-static func danger_of(region: String) -> float:
-	return float(tables()["regions"].get(region, {}).get("danger", 1.0))
+## The danger of a region (`region` is its data, data/regions/*.json: the `danger` field; 1.0 for {}).
+static func danger_of(region: Dictionary) -> float:
+	return float(region.get("danger", 1.0))
 
 
 ## The size class a budget buys: medium and large from the thresholds of the table, blurred by the seed.
@@ -111,22 +111,13 @@ static func pick_size(budget: float, rng: RandomNumberGenerator) -> String:
 	return "large" if budget >= large else ("medium" if budget >= medium else "small")
 
 
-## A faction met in `region` by a fight of `kind` ("pirate" or "patrol"), by the table's weights.
-static func pick_faction(region: String, kind: String, rng: RandomNumberGenerator) -> String:
-	var regions: Dictionary = tables()["regions"]
-	var entry: Dictionary = regions.get(region, regions["boneyard"])
-	var weights: Dictionary = entry.get(kind, entry["pirate"])
-	var ids: Array = weights.keys()
-	ids.sort()
-	var total := 0.0
-	for id in ids:
-		total += float(weights[id])
-	var roll := rng.randf() * total
-	for id in ids:
-		roll -= float(weights[id])
-		if roll < 0.0:
-			return str(id)
-	return str(ids[ids.size() - 1])
+## The faction met in `region` (its data) in a fight of `kind` ("pirate" or "patrol"): the pirates are the region's `enemies`
+## faction; a patrol is the Concord's, unless the region is held by the Wardens or the Hollow, whose guards patrol it.
+static func faction_for(region: Dictionary, kind: String) -> String:
+	var enemies := str(region.get("enemies", "rustfangs"))
+	if kind == "patrol" and enemies != "wardens" and enemies != "hollow":
+		return "concord"
+	return enemies if tables()["factions"].has(enemies) else "rustfangs"
 
 
 static func spec(faction: String, size: String, seed_value: int, budget: float, ram := false) -> String:

@@ -1,0 +1,7 @@
+{
+	"id": "fx_ends",
+	"name": "Fixture endings",
+	"version": "1.0",
+	"requires": [],
+	"notes": "Test fixture: see tests/test_endings.gd."
+}

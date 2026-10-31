@@ -117,3 +117,64 @@ Generator: `art/_src/sector_all.py` (`debris.py`, `comp_salvage.py`, `comp_radar
 **Space backdrop** (`space/`, transparent, soft alpha: the one place soft gradients are allowed): `stars_far`, `stars_mid`, `stars_near` are 256x256 and TILE on both axes (draw repeated, offset by camera x `parallax` 0.04 / 0.12 / 0.35); `nebula_clan`, `_concord`, `_lumen`, `_boneyard`, `_gate` are 512x512 faint overlays in palette greys (at most 52..76 of 255 alpha, edges fade to nothing): multiply the `suggested_tints` of their JSON over them (clan rust, Concord blue-grey, Lumen cyan-violet, Boneyard murky olive, gate pale) and draw them big, behind the ship.
 
 **Jump drive** `fx/jump_spool.png` (64x64, 8 frames: a ring of light tightening, 1 fps over the 8 s spool, or stretch it to the timer) and `fx/jump_flash.png` (96x96, 6 frames at 14 fps: spark, white-out with a vertical streak, expanding shock ring, sparkles), each with a `_glow`.
+
+## Racial tech (docs/waves/racial_tech_1.md)
+
+### Group b: Mire, Sporeling, Gauntling, Prismatic, Grundl
+Generators: `art/_src/tech_<race>.py` (one module per race, on top of `tech_kit.py`), `tech_proj.py` (projectiles and impacts), `tech_b.py` (the lists `build_all.py` reads); `python3 art/_src/build_tech_b.py` builds just these, `python3 art/_src/sheet_tech_b.py out.png` draws the preview (run the build first). No palette colours were added. Each race has one visual signature: **Mire** wet green-teal, brass pipes, red hand-wheels, steam; **Sporeling** grown cream and brown housings, violet spore sacs, gills; **Gauntling** mismatched scrap, copper coils, cyan arcs; **Prismatic** faceted violet crystal with cyan and magenta light cores; **Grundl** dark riveted freight metal, amber stencils, chains.
+
+**Weapons**: the standard hull-mount format of "Weapons" above (inside half `<id>.png`, outside half `<id>_out.png`, `<id>_barrel.png`, each with its `_glow`; frames 64x36, `cells` [4,2] for both halves; anims `on`, `off`, `charge` (6), `fire`, `damaged`, `disabled`; barrel `idle`, `fire` (3), `damaged`, `disabled`). The charge strip is the race's own indicator (Mire water-gauge tubes, Sporeling spore sacs, Gauntling copper coils, Prismatic crystals, Grundl amber lamps); frame 5 is READY in every one. The ammo weapons (`sporeling_rot_pod`, `gauntling_scrap_shotgun`, `grundl_slug_mortar`, `grundl_barge_flak`) have a feed chute at the right edge of the inside half where an `ammo_rack` sits; `grundl_slug_mortar`'s charge animation shows the slug rolling in.
+| id | aim | what it is |
+|---|---|---|
+| `mire_steam_lance` | fixed | long teal lance with a brass nozzle, boiler tank and red hand-wheel |
+| `mire_bog_mortar` | fixed | squat mortar with a flared brass mouth, bubbling slurry vat |
+| `mire_mist_projector` | turret | head with a fan of three brass spray nozzles |
+| `sporeling_spore_cannon` | fixed | fleshy ringed tube, spotted bell mouth, violet spore sacs |
+| `sporeling_rot_pod` | fixed (missile) | claw cradle holding a violet rot pod, pod nursery |
+| `sporeling_pollen_turret` | turret | flower head, pink petals round a yellow stamen nozzle |
+| `gauntling_arc_hammer` | fixed | ram tube with copper windings and a battered hammer head with two ball electrodes |
+| `gauntling_scrap_shotgun` | fixed | two sawn-off pipes (steel and rust), junk hopper |
+| `gauntling_tesla_picket` | turret | copper-wound Tesla coil topped with a steel ball |
+| `prismatic_prism_lens` | fixed (beam) | violet tube, focusing lens ring, glass prism at the tip |
+| `prismatic_refractor` | fixed | short barrel with a big faceted crystal head |
+| `prismatic_glimmer_turret` | turret | ring head with a floating crystal and two orbiting shards |
+| `grundl_slug_mortar` | fixed | massive banded barrel, rack of fat slugs, hoist chain |
+| `grundl_grapple_harpoon` | fixed | launch tube with a barbed harpoon and chain winch |
+| `grundl_barge_flak` | turret | four fat banded barrels, ammo drum with a chain belt |
+
+**Components** (plain sprites, anims `on` (4 or 6 frames), `off`, `damaged` (2), `disabled`; engines are two halves):
+| id | cells | notes |
+|---|---|---|
+| `mire_rain_shield` | 4x4 | shield: a ripple spreads from a drop, rain falls, corner valves |
+| `mire_wetwell_reactor` | 4x4 | reactor: amber core under water, bubbles, steam vents |
+| `mire_spray_deck` | 2x2 | utility: drain grate, four spray heads |
+| `sporeling_bloom_reactor` | 4x4 | reactor: a flower blooms round an amber core |
+| `sporeling_mycelium_shield` | 4x4 | shield: a mycelium web, blue nodes pulse |
+| `sporeling_garden_bay` | 2x2 | O2: planter with mushrooms, a sprout and rising bubbles (the O2 family is 2x4 elsewhere, so set `size` to [2,2] or ask for a 2x4 redraw) |
+| `gauntling_arc_core` | 4x4 | reactor: copper ring round a steel ball, arcs to four corner posts |
+| `gauntling_overclock_engine` + `_out` | 4x2 + 4x2 | engine: two mismatched bells with copper coils and an arc between them (`on` 3 frames; anchors `exhaust_left`, `exhaust_right`) |
+| `gauntling_graft_bay` | 4x4 | utility: work table, two robot arms welding a limb, spares rack |
+| `prismatic_lattice_shield` | 4x4 | shield: two nested diamond lattices round a crystal (`on` 6 frames) |
+| `prismatic_song_reactor` | 4x4 | reactor: a singing crystal, rings of light spread out (`on` 6 frames) |
+| `prismatic_resonance_helm` | 2x2 | helm: console, cushion seat, a humming crystal |
+| `grundl_hauler_thrusters` + `_out` | 4x2 + 4x2 | engine: two huge riveted bells, strapped fuel cells (anchors as above) |
+| `grundl_freight_shield` | 4x4 | shield: a blue disc in a heavy cage, four fuel-cell lamps, chains |
+| `grundl_cargo_deck` | 4x4 | utility: crates, shell rack, a hoist with a swinging hook |
+
+**Projectiles and impacts** (`projectiles/<weapon id>.png` + `.json` + `_glow.png`, and `<weapon id>_impact.png` + `.json` + `_glow.png`; the `.json` of a projectile also carries an `impact` block). Hard pixels use the base palette only; the glow layers are palette hues.
+- **Bolts** (face up, anim `fly`, anchors `head` and `tail`): `mire_bog_mortar` (green glob), `mire_mist_projector` (white mist), `sporeling_spore_cannon` (spore ball), `sporeling_rot_pod` (spotted pod, spore thread), `sporeling_pollen_turret` (pollen grains), `gauntling_arc_hammer` (slug in cyan arcs), `gauntling_scrap_shotgun` (six scrap pellets), `prismatic_refractor` (crystal shard), `prismatic_glimmer_turret` (crystal dart), `grundl_slug_mortar` (heavy slug with smoke), `grundl_grapple_harpoon` (barbed head with its chain; the tether is the tiling `grundl_grapple_harpoon_chain.png`, anim `clank`), `grundl_barge_flak` (steel shell).
+- **Beams** (tile along y like `beam`, 8 px wide, 16 long, 3 flicker frames; use one tile if the weapon is a bolt kind): `mire_steam_lance` (steam jet), `gauntling_tesla_picket` (lightning thread), `prismatic_prism_lens` (white core, cyan edges, magenta fringe).
+- **Impacts** (anim `play`, once, anchor `center`): 16x16 and 3 or 4 frames, except `grundl_slug_mortar` 24x24 x5 and `grundl_barge_flak` 20x20 x4.
+Each race's parts share one visual signature that reads at 1x. Generators: `art/_src/techa_<race>.py` (group a: human, basalt, emberkin, fenn, kett), shared pieces in `techa_kit.py`, export + preview in `techa_all.py` (`build_all.py` calls `techa_all.export_all()`; `python3 art/_src/techa_all.py preview out.png` draws the preview). No palette colour was added: every part is drawn with existing palette letters. The ids below are the ones the data pack must use.
+
+**Group a: human, basalt, emberkin, fenn, kett.** Ship weapons are the usual three files (`<id>`, `<id>_out`, `<id>_barrel`, all 4x2 + 4x2 cells, outward is up); engines are two halves (`<id>` core 4x2, `<id>_out` nozzles 4x2); the rest are plain sprites. Every component has `on`, `off`, `damaged` (2) and `disabled`; shields also `hit` (3) and `recharge` (4) like `shield_mk2`; weapons also `charge` (6, frame 5 = ready) and `fire`. Each weapon id also has `projectiles/<id>.png` and `projectiles/<id>_impact.png` (+ `_glow` layers, one JSON each; the projectile JSON carries the `impact` block like `laser.json`).
+| race | signature | ship weapons (fixed / turret) | components |
+|---|---|---|---|
+| human | Concord clean steel, blue accent, Clan amber | `human_volley_rack` (fixed, missile), `human_concord_railgun` (fixed), `human_flak_screen` (turret) | `human_reactor_plus` (reactor 4x4), `human_comms_array` (utility 2x2), `human_crew_quarters_deluxe` (utility 2x2, the bed) |
+| basalt | rough stone, glowing magma seams | `basalt_magma_spitter` (fixed), `basalt_quarry_driver` (fixed), `basalt_pumice_flak` (turret) | `basalt_vacuum_forge` (reactor 4x4), `basalt_stonehide_bay` (utility 2x2), `basalt_gravity_anchor` (utility 2x2) |
+| emberkin | brass and fire, flame vents, navy enamel | `emberkin_pyre_lance` (fixed, beam), `emberkin_cinder_mortar` (fixed), `emberkin_flare_turret` (turret) | `emberkin_pyre_drive` (engine, two halves), `emberkin_furnace_core` (reactor 4x4), `emberkin_hearth_shield` (shield 4x4) |
+| fenn | delicate cream panels, antennas, many small parts | `fenn_twitch_cannon` (fixed), `fenn_spark_lattice` (turret), `fenn_market_missile` (fixed, missile) | `fenn_haggle_engine` (engine, two halves), `fenn_jury_reactor` (reactor 4x4), `fenn_quickfix_bay` (utility 2x2) |
+| kett | amber chitin plates, hive cells, drone bays | `kett_hive_swarm_launcher` (fixed, missile), `kett_chitin_thrower` (fixed), `kett_drone_picket` (turret) | `kett_hive_battery` (shield 4x4), `kett_nest_reactor` (reactor 4x4), `kett_brood_hold` (utility 2x2) |
+- Projectile art per weapon id (`projectiles/<id>`, anim `fly`, faces UP, anchors `head` and `tail`; the impact anim `play` is a one-shot, anchor = its centre): slag, rock slug, pumice rock (basalt); a tiling flame stream for the Pyre Lance (`tile: y`, 8x16, glow tiles too), a cinder shell, a flare (emberkin); a tiny bolt, spark splinters, a scrap missile with confetti (fenn); a drone swarm, chitin needles, an interceptor drone (kett); a small missile, a blue-white rail slug with a Concord rail flash, a flak tracer (human). `emberkin_pyre_lance` is a beam: draw it tiled from the lance to the hit, like `beam`.
+- Sizes worth knowing: `human_crew_quarters_deluxe` is 2x2 (a bunk pod), not the 2x4 of `bed`. Long barrels are drawn long: `basalt_quarry_driver` 72 px, `human_concord_railgun` 74 px, `emberkin_pyre_lance` 74 px (the barrel sprite may extend far above its outside half; the muzzle is in the JSON `barrel.muzzle`).
+- Engines: `emberkin_pyre_drive` breathes a hard-pixel flame over its bell (3-frame loop) and `fenn_haggle_engine` has four small nozzles; anchors `exhaust`/`exhaust_a..d`, `power_coupling`, `repair_hatch` are in the JSONs as for the other engines.

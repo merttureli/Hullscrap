@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "human_volley_rack_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Human Volley Rack: a three-slot missile cradle with a feed chute on the right; a small missile slides into each slot as it charges (frames 0..5 seat 0,1,1,2,2,3; frame 5 = three seated, strip green), power coupling, repair hatch. fire: all three slots empty and the strip discharges. damaged: chute cracked, a missile jammed crooked, lamps dead; disabled: a missile jammed half way in the chute. Barrel layer human_volley_rack_barrel: a three-tube launcher head, a small missile in each tube; fire: the three leave one after another, smoke.",
+ "offset": [
+  0,
+  -4
+ ]
+}

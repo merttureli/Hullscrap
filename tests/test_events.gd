@@ -490,14 +490,15 @@ func test_effect_goto_names_the_next_page() -> void:
 func test_effect_reveal_shows_a_node_or_a_station_on_the_map() -> void:
 	var c := _camp()
 	var ship := _ship()
-	check(not c.is_known("meridian") or c.visited.has("meridian") or c.neighbours("rusthold").has("meridian"), "Meridian is far away and unknown")
+	c.enter_region("gate_approaches")
+	check(not c.is_known("gate_1"), "the Concord Gate is far away and unknown")
 	var far := ""
 	for id in c.drift.ids():
-		if not c.is_known(id) and id != "prism":
+		if not c.is_known(id) and id != "gate_1":
 			far = id
 			break
-	var r := _fx({"reveal": [far, "meridian"]}, c, ship)
-	check(c.is_known(far) and c.is_known("meridian"), "revealed nodes show their type")
+	var r := _fx({"reveal": [far, "gate_1"]}, c, ship)
+	check(c.is_known(far) and c.is_known("gate_1"), "revealed nodes show their type")
 	check(r["lines"].size() == 2 and r["lines"][0].begins_with("On the map:"), "said: " + str(r["lines"]))
 	eq(_fx({"reveal": "no_such_place"}, c, ship)["lines"].size(), 0, "an unknown id does nothing")
 
@@ -531,7 +532,7 @@ func test_effect_log_shows_a_derelict_log_and_remembers_it() -> void:
 
 
 func test_every_effect_type_in_the_spec_is_known_to_the_validator() -> void:
-	var want := ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log"]
+	var want := ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending"]
 	for k in want:
 		check(Events.EFFECT_KEYS.has(k), k + " is an effect")
 	eq(Events.EFFECT_KEYS.size(), want.size(), "and there are no others")
@@ -575,28 +576,20 @@ func test_a_won_fight_calls_back_with_loot_and_the_after_win_text() -> void:
 	eq(c.hull_loss, 20, "the hull integrity left in the fight is kept")
 
 
-func test_loot_scales_with_the_tier_and_may_include_an_enemy_part() -> void:
+func test_loot_is_credits_times_the_tier_and_no_scrap_or_part_roll() -> void:
 	var enemy: Ship = Ship.from_design("res://data/ships/pirate_raider.json")
-	var parts := {}
-	for inst in enemy.components.instances.values():
-		parts[inst["id"]] = true
-	var got_part := 0
-	for seed_value in 60:
+	for seed_value in 30:
 		var c := _camp([], seed_value)
 		var ship := _ship()
 		c.jumps = 30  # tier 3
-		var credits := ship.inventory.count("credits")
-		var scrap := ship.inventory.count("scrap")
 		var before := ship.inventory.counts.duplicate()
-		c.loot(enemy, ship)
-		var dc: int = ship.inventory.count("credits") - credits
-		var ds: int = ship.inventory.count("scrap") - scrap
+		var lines := c.loot(enemy, ship)
+		var dc: int = ship.inventory.count("credits") - int(before.get("credits", 0))
 		check(dc >= 60 and dc <= 180, "credits 20-60 x tier 3 (%d)" % dc)
-		check(ds >= 90 and ds <= 240, "scrap 30-80 x tier 3 (%d)" % ds)
+		eq(lines, ["+%d credits" % dc], "the loot lines are the credits only: the player picks the parts from the wreck (salvage.gd)")
 		for id in ship.inventory.counts:
-			if parts.has(id) and ship.inventory.count(id) > int(before.get(id, 0)):
-				got_part += 1
-	check(got_part > 5 and got_part < 30, "about a quarter of the wins give one of the enemy's parts (%d of 60)" % got_part)
+			if id != "credits":
+				eq(ship.inventory.count(id), int(before.get(id, 0)), "no %s from the loot roll" % id)
 
 
 func test_a_lost_fight_ends_the_run_and_a_fled_one_gives_nothing() -> void:
@@ -687,7 +680,7 @@ func test_station_events_greet_each_station_and_the_debt_intro_opens_the_run() -
 	check(r["ok"] and c.flags.has("met_ma"), "signing sets met_ma")
 	var greeting: Dictionary = c.arrive(ship)["event"]
 	eq(greeting.get("type", ""), "station", "afterwards Rusthold greets you with a station event")
-	check(greeting.get("id", "") == "station_rusthold_greeting" or greeting["requires"].get("flag", "") == "at_rusthold", "one of Rusthold's: " + str(greeting.get("id", "")))
+	check(greeting.get("id", "") == "station_rusthold_greeting" or Events._list(greeting["requires"].get("flag")).has("at_rusthold"), "one of Rusthold's: " + str(greeting.get("id", "")))
 	c.flags.erase("at_rusthold")  # (picking at other stations without travelling there)
 	for place in ["meridian", "prism"]:
 		var ev := c.events.pick(c, {"id": place, "type": "station", "place": place}, ship)
@@ -732,6 +725,10 @@ func _neighbour(c: Campaign) -> String:
 
 func test_reveal_with_a_node_type_shows_the_nearest_unrevealed_node_of_that_type() -> void:
 	var c := _camp()
+	for seed_value in range(1, 60):  # a map with at least two pirate nodes out of sight
+		c = _camp([], seed_value)
+		if c.drift.nodes.filter(func(n): return n["type"] == "pirate" and not c.is_known(n["id"])).size() >= 2:
+			break
 	var ship := _ship()
 	var here: Vector2 = c.node(c.current)["pos"]
 	var want := ""

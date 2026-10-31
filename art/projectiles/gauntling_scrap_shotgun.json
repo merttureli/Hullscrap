@@ -1,0 +1,38 @@
+{
+ "frame": [12, 10],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 4, 14]
+ },
+ "anchors": {
+  "head": [6, 3],
+  "tail": [6, 9]
+ },
+ "glow": {
+  "image": "gauntling_scrap_shotgun_glow.png",
+  "frame": [20, 18],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 4, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Gauntling Scrap Shotgun load: a spray of six mismatched scrap pellets (steel, rust) tumbling with a few orange sparks (4 frames). Head anchor is the middle of the spread.",
+ "impact": {
+  "image": "gauntling_scrap_shotgun_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 3, 16]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "gauntling_scrap_shotgun_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 3, 16]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

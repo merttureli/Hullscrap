@@ -1,0 +1,128 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "grundl_slug_mortar_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   12
+  ]
+ },
+ "notes": "OUTSIDE half of the Grundl Slug Mortar (a FIXED gun, freight metal): a very wide riveted housing, a rack of two fat slugs on the left that a chain holds, a corrugated plate and a hoist arm with a swaying chain and hook on the right, amber stencils and rust streaks. damaged: the chain is snapped and a slug loose, the hoist bent; disabled: scorched, dented, plates sprung, the rack empty, never destroyed.",
+ "barrel": {
+  "image": "grundl_slug_mortar_barrel.png",
+  "frame": [
+   27,
+   58
+  ],
+  "pivot_on_base": [
+   32,
+   12
+  ],
+  "pivot_on_barrel": [
+   13,
+   50
+  ],
+  "muzzle": [
+   13,
+   15
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "gimbal_deg": 6,
+  "glow": {
+   "image": "grundl_slug_mortar_barrel_glow.png",
+   "frame": [
+    47,
+    78
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ]
+   }
+  }
+ }
+}

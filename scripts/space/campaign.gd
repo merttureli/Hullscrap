@@ -5,9 +5,14 @@ extends RefCounted
 ## (which event happens), fights (design choice, loot, the result), the station trades, save and load.
 ## Light speed (start_jump, tick_jump: an 8 s spool, no jump with hostiles near) and the sectors the nodes turn into
 ## (sector.gd, docs/CONTENT.md section 11) are here too; cfg `instant_jump` keeps the beta's instant jump for now.
-## No nodes, no drawing: map_view.gd, event_panel.gd and station_panel.gd are thin views over it.
-## All randomness is the one RandomNumberGenerator `rng`, seeded with the campaign seed and saved with it,
-## so a run replays exactly. Numbers come from data/drift.json, reputation rules from data/factions.json.
+## The run crosses regions (docs/CONTENT.md section 15, regions.gd): the map is the current region's, `stage` counts them
+## (1 = Clan space), `route` lists the regions of the run, and cross() leaves from the exit beacon for one of the regions on
+## offer. The debt, reputation, flags, the jump counter and the ship carry across; the map, the sectors, what is visited
+## and the recruits on offer are the region's own. Ma Gantry's debt clock runs only for the first run.debt_stages stages.
+## No nodes, no drawing: map_view.gd, event_panel.gd, station_panel.gd and region_choice.gd are thin views over it.
+## All randomness of play is the one RandomNumberGenerator `rng`, seeded with the campaign seed and saved with it, so a run
+## replays exactly; each region's map and sectors come from its own seed (Regions.seed_for: the run seed, the stage and the
+## region), and the offers at an exit from the run seed and the stage. Numbers come from data/drift.json, reputation rules from data/factions.json.
 ## `ship` below is the player's Ship (ship.gd): fuel and credits are cargo items.
 
 const Drift = preload("res://scripts/space/drift.gd")
@@ -15,16 +20,23 @@ const Events = preload("res://scripts/space/events.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Characters = preload("res://scripts/crew/characters.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Sector = preload("res://scripts/space/sector.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
+const Regions = preload("res://scripts/space/regions.gd")
+const Radar = preload("res://scripts/space/radar.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
 ## 3 adds `sectors` (the POI states and the ship's place of each sector visited, sector.gd) and `spool` (the jump
 ## drive's charge); older saves load with no sector yet, so the ship arrives at the arrival point of its node's sector.
-const VERSION := 3
+## 4 adds the regions: `stage`, `region`, `route` (the regions so far), `region_seed` and `debt_stop` (the jump count at
+## which Ma's clock paused). Older saves load as stage 1 in Clan space; a map with no exit beacon (one from before the
+## regions) is made again as Clan space's, with the ship at Gantry Rusthold.
+const VERSION := 4
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100
@@ -37,6 +49,7 @@ const DARK_TEXT := "The gate is dark."
 const NO_FUEL := "no fuel"
 const HOSTILES_TEXT := "hostiles too close to jump"
 const SPOOL_TEXT := "spool the jump drive first"
+const NOT_AT_EXIT := "not at the exit beacon"
 const TOW_DEBT := 150  ## what Ma adds to the debt for a tow home (tow)
 const TOW_FUEL := 2
 const HOSTILE_PATROL := {"id": "patrol_hostile", "type": "patrol", "once": false,
@@ -71,6 +84,17 @@ var offers := {}  ## station node id -> [{species, name}] recruits on offer
 var sectors := {}  ## node id -> Sector (sector.gd) for every node visited (made on first use from the seed, so only their states are saved)
 var spool := {}  ## the jump drive spooling: {to, t (seconds charged), drift (the no-fuel jump), blocked}; {} when idle
 var last_jump := {}  ## what the last spooled jump did: the jump() result ({ok, why, node, drift, notes})
+var stage := 1  ## the stage of the run: 1 (Clan space) to run.stages (8); one more is the ending region
+var region_id := ""  ## the region the ship is in (data/regions/<id>.json)
+var region_data := {}  ## that region's data (Regions.get_region), not saved
+var route: Array = []  ## the regions of the run in order, this one last
+var region_seed := 0  ## the seed of this region's map and sectors
+var debt_stop := -1  ## the jump count at which Ma's debt clock stopped (from stage run.debt_stages + 1), -1 while it runs
+var profile = null  ## the player's Profile (profile.gd), set by the map: unlocks and landmarks are written to it at once. null in tests
+var ending := ""  ## the id of the ending this run reached ("" while it goes on): the run is won (docs/CONTENT.md section 13)
+var landmarks: Array = []  ## ids of the landmark events (events.gd) met in this run, in order
+var unlocks_earned: Array = []  ## ids of the unlocks this run earned (new to the profile), in order
+var chronicle: Array = []  ## the run log, in order: {jumps, kind (landmark, unlock, ending), id, text}; the ending screen reads it
 var _hull_key := -1
 var _hull_max := 0
 
@@ -98,9 +122,7 @@ func _init(p_seed := 1, p_cfg := {}, p_events = null) -> void:
 	rng.seed = p_seed
 	cfg = p_cfg if not p_cfg.is_empty() else config()
 	events = p_events if p_events != null else Events.shared()
-	drift = Drift.generate(rng, cfg)
-	current = drift.start_id()
-	visited[current] = true
+	enter_region(str(Regions.run_of(cfg)["start"]))
 	debt = int(cfg["debt"]["total"])
 	for f in rep_factions():
 		rep[f] = 0
@@ -169,12 +191,12 @@ func is_hidden(id: String) -> bool:
 	return h != "" and not flags.has(h)
 
 
-## Does the map show the node's type? Visited nodes, the neighbours of visited nodes and revealed
-## nodes do; others show "?". A hidden node shows nothing at all.
+## Does the map show the node's type? Visited nodes, the neighbours of visited nodes, revealed nodes, the exit
+## beacon and beacon places (a homeland's station) do; others show "?". A hidden node shows nothing at all.
 func is_known(id: String) -> bool:
 	if is_hidden(id):
 		return false
-	if visited.has(id) or revealed.has(id):
+	if visited.has(id) or revealed.has(id) or drift.node(id).get("type", "") == "exit" or bool(drift.node(id).get("beacon", false)):
 		return true
 	for o in drift.neighbours(id):
 		if visited.has(o):
@@ -349,13 +371,13 @@ static func fuel_text(parts: int) -> String:
 	return ("%d.%02d" % [parts / FUEL_PARTS, parts % FUEL_PARTS]).rstrip("0") + " fuel"
 
 
-## Time passes by `n` jumps: the counter goes up and each payment date crossed is checked.
+## Time passes by `n` jumps: the counter goes up and each payment date crossed is checked (while Ma's clock runs).
 func _advance(n: int) -> Array:
 	var notes := []
 	var d: Dictionary = cfg["debt"]
 	for i in n:
 		jumps += 1
-		if debt > 0 and jumps % int(d["every"]) == 0:
+		if debt > 0 and debt_running() and jumps % int(d["every"]) == 0:
 			if behind() > 0:
 				flags["debt_missed"] = true
 				notes.append("%s's collectors have noted a missed payment." % d["creditor"])
@@ -375,8 +397,9 @@ func wait(ship) -> Dictionary:
 	return {"ok": true, "why": "", "notes": notes, "event": ev}
 
 
-## Stranded with no fuel: call Ma Gantry for a tow back to Gantry Rusthold. It costs TOW_DEBT on the debt and a
-## jump's time, and she throws in TOW_FUEL fuel. Always possible with no fuel, so a run can't soft-lock.
+## Stranded with no fuel: call Ma Gantry for a tow back to the region's start (Gantry Rusthold in Clan space). It costs
+## TOW_DEBT on the debt and a jump's time, and she throws in TOW_FUEL fuel. Always possible with no fuel, so a run can't
+## soft-lock.
 func tow(ship) -> Dictionary:
 	if ship.inventory.count("fuel") > 0:
 		return {"ok": false, "why": "you still have fuel", "notes": []}
@@ -387,18 +410,19 @@ func tow(ship) -> Dictionary:
 	_enter(current, ship)
 	notes.append_array(add_debt(ship, TOW_DEBT))
 	ship.inventory.add("fuel", TOW_FUEL)
-	notes.append("Ma's tug drags you home: debt +%d, fuel +%d" % [TOW_DEBT, TOW_FUEL])
+	notes.append("Ma's tug drags you to %s: debt +%d, fuel +%d" % [label(current), TOW_DEBT, TOW_FUEL])
 	return {"ok": true, "why": "", "notes": notes}
 
 
-## What happens on reaching the current node. Returns {node, refused, event}: `refused` is the text of a
+## What happens on reaching the current node. Returns {node, refused, event, exit}: `refused` is the text of a
 ## dock master who turns you away (a faction below the refusal line), `event` the event to show ({} if
-## none). A debt event (Ma's call, a reminder, the collectors' talk) interrupts the node's own event. At a
+## none), `exit` true at the region's exit beacon (the region choice comes after any event). A debt event (Ma's call,
+## a reminder, the collectors' talk; only while her clock runs) interrupts the node's own event. At a
 ## station you may dock at the flag at_<place> is set (until you jump away), its recruits are rolled, and
 ## the event is one of its greetings.
 func arrive(ship) -> Dictionary:
 	var n := drift.node(current)
-	var out := {"node": n, "refused": "", "event": {}}
+	var out := {"node": n, "refused": "", "event": {}, "exit": n.get("type", "") == "exit"}
 	var st := station_cfg(current)
 	if not st.is_empty():
 		if refuses(str(st.get("faction", ""))):
@@ -408,7 +432,7 @@ func arrive(ship) -> Dictionary:
 			flags["at_" + str(n["place"])] = true  # docked: the station greetings ask for it
 		if st["services"].has("recruit"):
 			roll_offers(current, ship)
-	if n["type"] != "gate":
+	if n["type"] != "gate" and debt_running():
 		var due := _debt_event(ship)
 		if not due.is_empty():
 			out["event"] = due
@@ -429,7 +453,7 @@ func arrive(ship) -> Dictionary:
 func _debt_event(ship) -> Dictionary:
 	var ev := events.pick(self, {"id": current, "type": "debt", "place": ""}, ship, _debt_timing)
 	if not ev.is_empty() and Events.debt_kind(ev) == "reminder":
-		reminded = jumps / int(cfg["debt"]["every"])
+		reminded = debt_jumps() / int(cfg["debt"]["every"])
 	return ev
 
 
@@ -440,7 +464,7 @@ func _debt_timing(e: Dictionary) -> bool:
 		"miss":
 			return jumps > 1 and (jumps - 1) % every == 0 and behind() > 0
 		"reminder":
-			return debt > 0 and next_due_in() <= 2 and reminded != jumps / every
+			return debt > 0 and next_due_in() <= 2 and reminded != debt_jumps() / every
 	return true
 
 
@@ -508,41 +532,18 @@ func tick_jump(dt: float, hostiles_near: bool, ship) -> String:
 
 # --- sectors ------------------------------------------------------------------------------------------------
 
-## The region of node `id`: that of its nearest landmark (a fixed place of the map; the landmark of each region is
-## in data/sectors.json): clans (Rusthold), concord (Meridian), lumen (the Prism), else the boneyard. Regions are not on
-## the map yet.
+## The region of node `id`: every node of the map is in the current region (region_id); "" for a node the map does not have.
 func region_of(id: String) -> String:
-	return _region_in(drift, id)
+	return region_id if drift.has(id) else ""
 
 
-static func _region_in(map, id: String) -> String:
-	var here: Dictionary = map.node(id)
-	var near := ""
-	var near_d := INF
-	for n in map.nodes:
-		if str(n.get("place", "")) == "" or here.is_empty():
-			continue
-		var d: float = here["pos"].distance_to(n["pos"])
-		if d < near_d or (d == near_d and str(n["id"]) < near):
-			near = str(n["id"])
-			near_d = d
-	var regions: Dictionary = Sector.config()["regions"]
-	var fallback := "boneyard"
-	for r in regions:
-		if str(regions[r]["landmark"]) == "":
-			fallback = str(r)
-		elif near != "" and str(regions[r]["landmark"]) == near:
-			return str(r)
-	return fallback
-
-
-## The sector of node `id`: made from the campaign seed and the node the first time it is asked for, the same every
-## time. null for a node the map does not have.
+## The sector of node `id`: made from the region seed, the node and the region's data the first time it is asked for, the
+## same every time. null for a node the map does not have.
 func sector_at(id: String):
 	if not sectors.has(id):
 		if not drift.has(id):
 			return null
-		sectors[id] = Sector.generate(seed_value, drift.node(id), region_of(id))
+		sectors[id] = Sector.generate(region_seed, drift.node(id), region_id, {}, region_data)
 	return sectors[id]
 
 
@@ -561,12 +562,135 @@ func _enter(id: String, ship) -> void:
 		s.set_flight(ship)
 
 
+# --- regions (docs/CONTENT.md section 15) ---------------------------------------------------------------------
+
+## The stages of a run (8).
+func stages() -> int:
+	return Regions.stages(cfg)
+
+
+## Is the ship in the ending region (past the last stage)? It has no exit beacon.
+func is_final() -> bool:
+	return stage > stages()
+
+
+## The region's name ("The Kett Hives").
+func region_name() -> String:
+	return str(region_data.get("name", region_id))
+
+
+## What the map says of where the run is: "Stage 3/8: The Kett Hives", or "Final region: ..." past the last stage.
+func stage_text() -> String:
+	if is_final():
+		return "Final region: " + region_name()
+	return "Stage %d/%d: %s" % [stage, stages(), region_name()]
+
+
+## Is the ship at the region's exit beacon?
+func at_exit() -> bool:
+	return drift.node(current).get("type", "") == "exit"
+
+
+## The regions on offer at this region's exit beacon (ids; Regions.offers: the same for the same seed and route).
+func region_offers() -> Array:
+	return Regions.offers(seed_value, stage, route, cfg)
+
+
+## Does the player know region `id`'s rarity: scanned (`ship` has a radar that identifies) or known (the flag known_<id>)?
+func rarity_known(id: String, ship) -> bool:
+	return flags.has("known_" + id) or (ship != null and float(Radar.ranges(ship)["identify_range"]) > 0.0)
+
+
+## Put the ship at the start of region `id` (the run's first region, a crossing, or a test): its map is rolled from the
+## region seed for this stage; what is visited, revealed, the sectors, the recruits on offer and the spool start afresh;
+## the flags at_<place> and in_<old region> go and in_<id> is set (for event packs that tag by flag). Flags, the debt,
+## reputation, the jump counter and the ship are kept. With a `ship` it arrives in the start's sector.
+func enter_region(id: String, ship = null) -> void:
+	if drift != null:
+		flags.erase("at_" + str(drift.node(current).get("place", "")))
+	flags.erase("in_" + region_id)
+	region_id = id
+	region_data = Regions.get_region(id)
+	route.append(id)
+	region_seed = Regions.seed_for(seed_value, stage, id)
+	drift = Regions.make_map(region_data, cfg, region_seed, is_final())
+	current = drift.start_id()
+	visited = {current: true}
+	revealed = {}
+	sectors = {}
+	offers = {}
+	spool = {}
+	flags["in_" + id] = true
+	if ship != null:
+		_enter(current, ship)
+
+
+## Leave the region from its exit beacon for region `id`, one of region_offers(): the next stage begins at the new
+## region's arrival node (the crossing takes no fuel and no jump). Entering stage run.debt_stages + 1 stops Ma's debt
+## clock. Returns {ok, why, notes}.
+func cross(id: String, ship) -> Dictionary:
+	if not at_exit():
+		return {"ok": false, "why": NOT_AT_EXIT, "notes": []}
+	if not region_offers().has(id):
+		return {"ok": false, "why": "that region is not on the beacon's charts", "notes": []}
+	var notes := []
+	stage += 1
+	if stage > int(Regions.run_of(cfg).get("debt_stages", 2)) and debt_stop < 0:
+		debt_stop = jumps
+		if debt > 0:
+			notes.append("Out here %s's collectors can't reach you: the debt clock stops (%d still owed)." % [cfg["debt"]["creditor"], debt])
+	enter_region(id, ship)
+	notes.append("You jump into %s." % region_name())
+	return {"ok": true, "why": "", "notes": notes}
+
+
+# --- unlocks, landmarks and the end ---------------------------------------------------------------------------
+
+## Earn unlock `id` (data/unlocks.json): kept in the profile at once, and in this run's list when it is new. Returns
+## true when the player did not have it yet (the event then says "Unlocked: ...").
+func unlock(id: String) -> bool:
+	var fresh: bool = profile.unlock(id) if profile != null else not unlocks_earned.has(id)
+	if fresh and not unlocks_earned.has(id):
+		unlocks_earned.append(id)
+		chronicle.append({"jumps": jumps, "kind": "unlock", "id": id, "text": ""})
+	return fresh
+
+
+## A landmark event `id` was met, with its `title`: once in the run log, and once ever in the profile. Returns true when it
+## is new to this run.
+func note_landmark(id: String, title: String) -> bool:
+	if landmarks.has(id):
+		return false
+	landmarks.append(id)
+	chronicle.append({"jumps": jumps, "kind": "landmark", "id": id, "text": title})
+	if profile != null:
+		profile.record_landmark(id, title)
+	return true
+
+
+## The run is won with ending `id`: the event panel then opens the ending screen.
+func finish(id: String) -> void:
+	ending = id
+	chronicle.append({"jumps": jumps, "kind": "ending", "id": id, "text": ""})
+
+
 # --- the debt -----------------------------------------------------------------------------------------------
+
+## Does Ma Gantry's debt clock run? Only in the first run.debt_stages stages (2): later regions are too far for the repo
+## crew, so from stage 3 no payment falls due, no debt event comes and no rammer is sent (the debt can still be paid).
+func debt_running() -> bool:
+	return debt_stop < 0
+
+
+## The jumps the debt clock has counted: the jump counter, held where it stood when the clock stopped.
+func debt_jumps() -> int:
+	return jumps if debt_stop < 0 else mini(jumps, debt_stop)
+
 
 ## Credits of payments that have fallen due and are not yet covered.
 func behind() -> int:
 	var d: Dictionary = cfg["debt"]
-	return maxi(0, jumps / int(d["every"]) * int(d["payment"]) - paid)
+	return maxi(0, debt_jumps() / int(d["every"]) * int(d["payment"]) - paid)
 
 
 ## How many payments in a row are behind (rounded up).
@@ -577,7 +701,7 @@ func misses() -> int:
 ## Jumps until the next payment date.
 func next_due_in() -> int:
 	var every := int(cfg["debt"]["every"])
-	return every - jumps % every
+	return every - debt_jumps() % every
 
 
 ## Pay `amount` of the debt (not more than owed). Returns {ok, text}.
@@ -630,76 +754,81 @@ func tier() -> int:
 
 
 ## The design for a `fight` effect: "tier" rolls from the table of the node's kind (a pirate node with two payments
-## missed sends the rammer); an entry is a design file or a generated ship ("gen:...", gen_spec). Anything else is a
-## design id in data/ships.
+## missed sends the rammer while Ma's clock runs); an entry is a design file or a generated ship ("gen:...", gen_spec).
+## Anything else is a design id in data/ships.
 func fight_path(value: String, node_type: String) -> String:
 	if value != "tier":
 		return value if value.begins_with("res://") else "res://data/ships/%s.json" % value
 	var kind := "patrol" if node_type == "patrol" else "pirate"
-	if node_type == "pirate" and misses() >= 2:
+	if node_type == "pirate" and misses() >= 2 and debt_running():
 		kind = "rammer"
 	var table: Array = cfg["enemies"][kind][str(tier())]
 	var pick := str(table[rng.randi() % table.size()])
 	return gen_spec(pick, kind) if Shipgen.is_spec(pick) else pick
 
 
-## A generated enemy (shipgen.gd) for a table entry "gen:<faction>[:ram]"; a bare "gen:" takes the faction the region of the
-## current node meets in a fight of `kind`. The budget is the tier's, the jumps', the region's danger and the difficulty's
+## A generated enemy (shipgen.gd) for a table entry "gen:<faction>[:ram]"; a bare "gen:" takes the faction the current
+## region meets in a fight of `kind` (Shipgen.faction_for). The budget is the tier's, the jumps', the region's danger and the difficulty's
 ## (docs/CONTENT.md 14), the size class follows from it. Returns the spec string Session.load_ship() reads.
 func gen_spec(entry: String, kind: String) -> String:
 	var p := entry.trim_prefix(Shipgen.PREFIX).split(":")
-	var region := region_of(current)
-	var faction := p[0] if p[0] != "" else Shipgen.pick_faction(region, "patrol" if kind == "patrol" else "pirate", rng)
-	var budget := Shipgen.budget_for(tier(), jumps, Shipgen.danger_of(region), str(cfg.get("difficulty", "normal")))
+	var faction := p[0] if p[0] != "" else Shipgen.faction_for(region_data, kind)
+	var budget := Shipgen.budget_for(tier(), jumps, Shipgen.danger_of(region_data), str(cfg.get("difficulty", "normal")))
 	return Shipgen.spec(faction, Shipgen.pick_size(budget, rng), rng.randi(), budget, p.has("ram"))
 
 
-## The fight is over. `res` is {state: "won" | "lost" | "fled", hull, hull_max, enemy (its Ship)} from the
-## combat view. A win gives loot and runs `after_win` ({text, effects}); the hull integrity left in the
-## fight is kept. A loss ends the run (the caller starts a new campaign). Returns {state, text, lines,
-## goto, fight}: `goto` and `fight` are what the after_win effects asked for next.
+## The fight is over. `res` is {state, hull, hull_max, enemy (its Ship)}, plus `offer` ({item: count}) when
+## spared; `state` is "won" | "captured" | "spared" | "escaped" | "fled" | "lost". A win pays credits (the caller
+## then shows Salvage.event_for); a captured ship pays 1.5x the credits and the strip scrap; a spared one pays its
+## offer (its credits times the tier) and gives no salvage; an escaped one pays nothing. Won, captured and spared
+## count as wins and run `after_win` ({text, effects}). The hull integrity left in the fight is kept. A loss ends
+## the run (the caller starts a new campaign). Returns {state, text, lines, goto, fight, ending}: `goto`,
+## `fight` and `ending` are what the after_win effects asked for next.
 func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary:
 	var state := str(res.get("state", "fled"))
-	var out := {"state": state, "text": "", "lines": [], "goto": "", "fight": ""}
+	var out := {"state": state, "text": "", "lines": [], "goto": "", "fight": "", "ending": ""}
 	if state == "lost":
 		out["text"] = "Your ship is wrecked. The Drift keeps what is left of it."
 		return out
 	if res.has("hull") and res.has("hull_max"):
 		hull_loss = clampi(roundi(float(res["hull_max"]) - float(res["hull"])), 0, maxi(roundi(float(res["hull_max"])) - 1, 0))
-	if state != "won":
-		out["text"] = "You break away. The fight is not finished, but you are."
+	if not state in ["won", "captured", "spared"]:
+		out["text"] = "They're gone, and whatever they carried went with them." if state == "escaped" else "You break away. The fight is not finished, but you are."
 		return out
 	fights_won += 1
 	out["text"] = "The wreck tumbles away, still venting."
-	out["lines"] = loot(res.get("enemy"), ship)
+	if state == "spared":
+		out["text"] = "They dump the goods out of the airlock and limp away."
+		var offer: Dictionary = res["offer"].duplicate() if res.get("offer") is Dictionary else {}
+		if offer.has("credits"):
+			offer["credits"] = int(offer["credits"]) * tier()
+		out["lines"] = events.apply({"items": offer}, self, ship)["lines"]
+	else:
+		out["lines"] = loot(res.get("enemy"), ship, state == "captured")
 	if not after_win.is_empty():
-		if str(after_win.get("text", "")) != "":
-			out["text"] = str(after_win["text"])
+		if str(after_win.get("text", "")) != "":  # replaces the wreck text; a spared ship's goods stay in the story
+			out["text"] = (str(out["text"]) + " " if state == "spared" else "") + str(after_win["text"])
 		var r: Dictionary = events.apply(after_win.get("effects", {}) if after_win.get("effects") is Dictionary else {}, self, ship, drift.node(current))
 		out["lines"].append_array(r["lines"])
 		out["goto"] = r["goto"]
 		out["fight"] = r["fight"]
+		out["ending"] = r["ending"]
 	return out
 
 
-## After a won fight: credits and scrap (times the tier) and maybe one of the enemy's parts. Returns lines.
-func loot(enemy, ship) -> Array:
+## After a won fight: the credits (times the tier) as lines. No scrap and no part roll: the player picks
+## from the wreck instead (salvage.gd). A `captured` ship pays 1.5x the credits and the strip scrap at once.
+func loot(enemy, ship, captured := false) -> Array:
 	var l: Dictionary = cfg["loot"]
-	var t := tier()
-	var credits := rng.randi_range(int(l["credits"][0]), int(l["credits"][1])) * t
-	var scrap := rng.randi_range(int(l["scrap"][0]), int(l["scrap"][1])) * t
+	var credits := rng.randi_range(int(l["credits"][0]), int(l["credits"][1])) * tier()
+	if captured:
+		credits = roundi(credits * 1.5)
 	ship.inventory.add("credits", credits)
-	ship.inventory.add("scrap", scrap)
-	var lines := ["+%d credits" % credits, "+%d scrap" % scrap]
-	if rng.randf() < float(l["component_chance"]) and enemy != null:
-		var ids := []
-		for inst in enemy.components.instances.values():
-			ids.append(str(inst["id"]))
-		ids.sort()
-		if not ids.is_empty():
-			var id: String = ids[rng.randi() % ids.size()]
-			ship.inventory.add(id, 1)
-			lines.append("+1 %s (salvaged)" % ship.components.def(id).get("name", id))
+	var lines := ["+%d credits" % credits]
+	if captured:
+		var scrap := Salvage.strip_scrap(enemy, self)
+		ship.inventory.add("scrap", scrap)
+		lines.append("+%d scrap (stripped)" % scrap)
 	return lines
 
 
@@ -728,9 +857,16 @@ func crew_name(species: String, ship) -> String:
 
 
 ## Put a new crew member of `species` aboard, at the next bed (or near the middle). `who` "" picks a name.
-## Returns the name, "" if there was no room for a body.
-func add_crew(ship, who: String, species: String) -> String:
-	if who == "":
+## `character`: the id of a unique character (data/characters.json): they come as themselves (name, species, look and
+## ability), and only once. Returns the name, "" if there was no room for a body (or the character is aboard already).
+func add_crew(ship, who: String, species: String, character := "") -> String:
+	var chr := Characters.entry(character)
+	if character != "" and (chr.is_empty() or ship.crew.any(func(m): return m.character == character or m.name == chr["name"])):
+		return ""
+	if not chr.is_empty():
+		who = str(chr["name"])
+		species = Characters.species_id(chr)
+	elif who == "":
 		who = crew_name(species, ship)
 	var near := Vector2(ship.grid.size) / 2.0
 	var beds: Array = Jobs._beds(ship)
@@ -741,6 +877,8 @@ func add_crew(ship, who: String, species: String) -> String:
 		return ""
 	var looks: Array = CrewMember.config()["looks"]
 	var m = Jobs._person(who, looks[ship.crew.size() % looks.size()], Pathfinder.centre_of(spot), species)
+	if not chr.is_empty():
+		Characters.apply(m, character)
 	ship.crew.append(m)
 	return who
 
@@ -757,15 +895,17 @@ func lose_crew(ship) -> String:
 
 # --- stations -------------------------------------------------------------------------------------------------------
 
-## The menu of node `id`: data/drift.json `stations` entry of the place, or the Scrapper trader's. {} when
-## there is nothing to dock at.
+## The menu of node `id`: the station menu of its place (Regions.station: data/drift.json `stations`, or made from its
+## region's stock and recruits), or the Scrapper trader's. `id` may also be the place id of a station in any region (its
+## menu is the same wherever it is asked for). {} when there is nothing to dock at.
 func station_cfg(id: String) -> Dictionary:
 	var n := drift.node(id)
-	var st: Dictionary = cfg["stations"]
-	if str(n.get("place", "")) != "" and st.has(n["place"]):
-		return st[n["place"]]
+	if n.is_empty():
+		return Regions.station(id, cfg)
+	if str(n.get("place", "")) != "":
+		return Regions.station(str(n["place"]), cfg)
 	if n.get("type", "") == "trader" and bool(n.get("clan", false)):
-		return st["clan_trader"]
+		return cfg["stations"]["clan_trader"]
 	return {}
 
 
@@ -919,7 +1059,9 @@ func to_dict() -> Dictionary:
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
 		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
 		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
-		"sectors": _sectors_dict(), "spool": spool.duplicate()}
+		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
+		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
+		"debt_stop": debt_stop}
 
 
 func _sectors_dict() -> Dictionary:
@@ -939,12 +1081,23 @@ func load_dict(d: Dictionary) -> String:
 	var at := str(d.get("current", ""))
 	if not map.has(at):
 		return "bad campaign position"
+	var where = _read_region(d)
+	if where == null:
+		return "bad campaign region"
+	if map.exit_id() == "" and where["stage"] <= Regions.stages(cfg):  # a map from before the regions: Clan space's, made again
+		map = Regions.make_map(Regions.get_region(where["region"]), cfg, where["seed"])
+		at = map.start_id()
+		d = d.duplicate()
+		d["visited"] = [at]
+		d["revealed"] = []
+		d["sectors"] = {}
+		d["spool"] = {}
 	for k in ["visited", "flags", "used", "revealed", "logs_found"]:
 		if not d.get(k) is Array:
 			return "bad campaign data"
 	if not (d.get("rep") is Dictionary and d.get("offers") is Dictionary and d.has("seed") and d.has("rng_state") and d.has("debt") and d.has("paid") and d.has("jumps") and d.has("hull_loss")):
 		return "bad campaign data"
-	var made = _read_sectors(d, map)
+	var made = _read_sectors(d, map, where["seed"], Regions.get_region(where["region"]))
 	if made == null:
 		return "bad campaign sectors"
 	var charge = _read_spool(d, map)
@@ -970,17 +1123,45 @@ func load_dict(d: Dictionary) -> String:
 	fuel_part = clampi(int(d.get("fuel_part", 0)), 0, FUEL_PARTS - 1)  # a version 1 save has none
 	events_seen = int(d.get("events_seen", 0))  # saves from before the game over screen have none
 	fights_won = int(d.get("fights_won", 0))
+	landmarks = _texts(d.get("landmarks"))  # saves from before the endings have none of these three
+	unlocks_earned = _texts(d.get("unlocks_earned"))
+	chronicle = _chronicle(d.get("chronicle"))
+	ending = ""
 	offers = d["offers"].duplicate(true)
 	sectors = made
 	spool = charge
+	stage = where["stage"]
+	region_id = where["region"]
+	region_data = Regions.get_region(region_id)
+	route = where["route"]
+	region_seed = where["seed"]
+	debt_stop = int(d.get("debt_stop", -1)) if d.get("debt_stop") is float or d.get("debt_stop") is int else -1
 	last_jump = {}
 	_hull_key = -1
 	return ""
 
 
-## The sectors of a save (version 3), made again from the seed with their saved states; {} for an older save, null when
-## malformed.
-static func _read_sectors(d: Dictionary, map):
+## {stage, region, route, seed} of a save; an old one (no `region`) is stage 1 in the run's start region, with the
+## region seed a new run of its seed has there. null when malformed.
+func _read_region(d: Dictionary):
+	if not d.has("region"):
+		var start := str(Regions.run_of(cfg)["start"])
+		return {"stage": 1, "region": start, "route": [start], "seed": Regions.seed_for(int(d.get("seed", seed_value)), 1, start)}
+	var r = d["region"]
+	var path = d.get("route")
+	var st = d.get("stage")
+	if not (r is String and Regions.has(r) and path is Array and not path.is_empty() and path[-1] == r and (st is float or st is int)):
+		return null
+	if int(st) < 1 or int(st) > Regions.stages(cfg) + 1 or not path.all(func(x): return x is String and Regions.has(x)):
+		return null
+	if not (d.get("region_seed") is String and str(d["region_seed"]).is_valid_int()):
+		return null
+	return {"stage": int(st), "region": r, "route": path.map(func(x): return str(x)), "seed": int(str(d["region_seed"]))}
+
+
+## The sectors of a save (version 3 on), made again from the region seed with their saved states; {} for an older save,
+## null when malformed.
+static func _read_sectors(d: Dictionary, map, rseed: int, rdata: Dictionary):
 	var raw = d.get("sectors", {})
 	if not raw is Dictionary:
 		return null
@@ -988,7 +1169,7 @@ static func _read_sectors(d: Dictionary, map):
 	for id in raw:
 		if not (raw[id] is Dictionary and map.has(str(id))):
 			return null
-		var s = Sector.generate(int(d["seed"]), map.node(str(id)), _region_in(map, str(id)))
+		var s = Sector.generate(rseed, map.node(str(id)), str(rdata.get("id", "")), {}, rdata)
 		if s.load_save(raw[id]) != "":
 			return null
 		out[str(id)] = s
@@ -1005,6 +1186,21 @@ static func _read_spool(d: Dictionary, map):
 	if not (raw.get("to") is String and map.has(raw["to"]) and (raw.get("t") is float or raw.get("t") is int)):
 		return null
 	return {"to": raw["to"], "t": maxf(float(raw["t"]), 0.0), "drift": bool(raw.get("drift", false)), "blocked": false}
+
+
+static func _texts(v) -> Array:
+	var out := []
+	for x in v if v is Array else []:
+		out.append(str(x))
+	return out
+
+
+static func _chronicle(v) -> Array:
+	var out := []
+	for x in v if v is Array else []:
+		if x is Dictionary:
+			out.append({"jumps": int(x.get("jumps", 0)), "kind": str(x.get("kind", "")), "id": str(x.get("id", "")), "text": str(x.get("text", ""))})
+	return out
 
 
 static func _to_set(list: Array) -> Dictionary:

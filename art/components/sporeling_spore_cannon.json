@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "sporeling_spore_cannon_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Sporeling Spore Cannon: a big violet spore chamber with green spores drifting in it, fibrous feed roots, a steel repair hatch, power coupling and five spore sacs that swell violet while charging and glow green when ready. fire: the sacs flash white then deflate. damaged: the chamber has a split and leaks, two sacs withered; disabled: the chamber collapsed and dry, withered. Barrel layer sporeling_spore_cannon_barrel: a fleshy ringed tube with a flared spotted bell mouth that puffs spores; fire: a green-yellow spore burst.",
+ "offset": [
+  0,
+  -4
+ ]
+}

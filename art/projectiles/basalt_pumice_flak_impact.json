@@ -1,0 +1,40 @@
+{
+ "frame": [
+  20,
+  20
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   14
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   10,
+   10
+  ]
+ },
+ "glow": {
+  "image": "basalt_pumice_flak_impact_glow.png",
+  "frame": [
+   28,
+   28
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    14
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "The rock bursts into a fiery puff with grey chips and a smoke ring (4 frames, 20x20)."
+}

@@ -1,0 +1,247 @@
+{"events": [
+    {
+      "id": "bazaar_gate_toll", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "The Bazaar has no walls, so it has a Gate: a painted line on the deck, a turnstile and a sign reading ADMISSION FREE. EXIT FEE APPLIES. A very small Fenn in a very large hat explains the exit fee, which has three tiers, a surcharge for leaving in a hurry, and a rebate for not leaving at all.",
+      "choices": [
+        {"text": "Pay the exit fee up front (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "The Fenn stamps your hand and gives you a receipt for a receipt. 'Preferred leaver,' he says. 'Discount on your next exit.' He means it. It is a very good discount, and a pellet of fuel for your trouble.", "effects": {"items": {"credits": -20, "fuel": 1}}}
+        ]},
+        {"text": "Argue that you are not leaving.", "outcomes": [
+          {"weight": 55, "text": "'Then you are staying,' says the Fenn, delighted, and charges a residency fee, but a lower one. The crew spend a pleasant day. You are, technically, a local.", "effects": {"items": {"credits": -10}, "crew_hp": 10}},
+          {"weight": 45, "text": "'Then you are a trespasser,' says the Fenn, equally delighted, and hands you a larger bill.", "effects": {"items": {"credits": -30}}}
+        ]},
+        {"text": "[Fenn] Find a loophole in the fee schedule.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn and the gatekeeper go through the schedule line by line, and find a clause that makes the fee payable in compliments. Your Fenn pays in volume. The gatekeeper is so pleased he adds a rebate.", "effects": {"items": {"credits": 25}, "crew_hp": 5}}
+        ]},
+        {"text": "[Gauntling] Offer an arm as collateral.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling unscrews an arm and hands it over as security. The gatekeeper is moved beyond words, gives you a receipt for the arm, and returns it, newly polished, with a tip.", "effects": {"items": {"credits": 20, "scrap": 10}}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_stall_row", "type": "trader", "weight": 12, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "Stall Row: four hundred stalls on tethers, drifting slowly round a central lamp, with a tide of Fenn traders rowing between them in little skiffs, calling prices. Everything is on sale. Everything is also on a hook. A sign swings overhead: ALL SALES FINAL (UNLESS).",
+      "choices": [
+        {"text": "Buy a mystery crate (35 credits).", "requires": {"credits": 35}, "outcomes": [
+          {"weight": 40, "text": "Inside: three polymer bricks and a note that says THANK YOU. You feel lighter and slightly tricked.", "effects": {"items": {"credits": -35, "polymer": 15}}},
+          {"weight": 30, "text": "Inside: a very good part, wrapped in a very bad newspaper.", "effects": {"items": {"credits": -35, "copper": 20, "scrap": 20}}},
+          {"weight": 20, "text": "Inside: a smaller mystery crate. Inside that, a smaller one. Inside the last: ten credits and an apology.", "effects": {"items": {"credits": -25}}},
+          {"weight": 10, "text": "Inside: a shield module, in its original box, with a warranty that expired during the unboxing.", "effects": {"items": {"credits": -35, "shield_mk1": 1}}}
+        ]},
+        {"text": "Sell 20 scrap at the market's best price.", "requires": {"items": {"scrap": 20}}, "outcomes": [
+          {"weight": 100, "text": "A trader in a skiff pays you in advance, in cash, then spends five minutes selling the scrap to someone else at the next stall, in plain view. You watch. It is educational. He hands you the receipt for the receipt.", "effects": {"items": {"scrap": -20, "credits": 40}, "log": "log_bazaar_receipt"}}
+        ]},
+        {"text": "[Fenn] Open a stall of your own for an hour.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 70, "text": "Your Fenn sets up a table, sells your crew's laundry, a bad song and a rock, and comes back with a profit and a rival.", "effects": {"items": {"credits": 60}}},
+          {"weight": 30, "text": "A rival sets up beside your Fenn and undercuts them with the same rock. Your Fenn shakes his hand with real admiration.", "effects": {"items": {"credits": 25}}}
+        ]},
+        {"text": "[Tinkerer] Offer to fix anything for a fee.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer sets up a toolbox and a sign: I FIX IT. FIVE MINUTES. The line is out the airlock. By closing they have repaired a dozen toasters, a prosthetic hand and somebody's clock, and been given a bundle of receipts.", "effects": {"items": {"credits": 50, "copper": 10}, "log": "log_bazaar_receipt"}}
+        ]},
+        {"text": "Walk the Row and buy nothing.", "outcomes": [
+          {"weight": 100, "text": "You make it all the way round without buying. A seller follows you the whole way, lowering his price out loud, until it is zero and he looks at you with real hurt. 'Take it,' he says. You do not. He sobs.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_underwriters", "type": "patrol", "weight": 10, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "A boxy blue-and-gold cutter, the Premium, pulls alongside: Fenn Underwriters, who sell insurance against being shot by Fenn Underwriters. 'Good news,' says the agent, Groat. 'You are uninsured. That is a risk. For you. For us, it is an opportunity.'",
+      "choices": [
+        {"text": "Buy a policy (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 70, "text": "Groat hands over a leather-bound policy and a sticker for your window: PROTECTED. Three jumps later a Rustfang boat reads the sticker, goes pale, and flies off. Or you imagine it did.", "effects": {"items": {"credits": -40}, "crew_hp": 5, "log": "log_bazaar_policy"}},
+          {"weight": 30, "text": "The policy has a clause that excludes 'all events'. Groat is sorry. He gives you a coupon for scrap.", "effects": {"items": {"credits": -40, "scrap": 15}, "log": "log_bazaar_policy"}}
+        ]},
+        {"text": "Refuse.", "outcomes": [
+          {"weight": 60, "text": "'Understood,' says Groat. 'A very brave decision. We will be watching with interest.' The Premium stays on your tail for an hour, close, hopeful.", "effects": {}},
+          {"weight": 40, "text": "Groat shrugs. 'A great pity.' The Premium fires a warning shot across your bow, 'for the paperwork', and bills you for it.", "effects": {"items": {"credits": -15}}}
+        ]},
+        {"text": "[Fenn] Counter-quote: sell the underwriter insurance.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 70, "text": "Your Fenn offers to insure the Premium against Underwriters. Groat's mouth opens, closes and opens again. After a short and furious hush he signs, and pays the first premium on the spot.", "effects": {"items": {"credits": 70}}},
+          {"weight": 30, "text": "Groat is a professional. He reads your quote, finds the flaw in eleven seconds, and bills you for the time.", "effects": {"items": {"credits": -20}}}
+        ]},
+        {"text": "[Medbay] Show your medbay's inspection tag.", "requires": {"component": "medbay"}, "outcomes": [
+          {"weight": 100, "text": "Groat studies the tag, applies a 'health and safety' discount to a policy you have not bought, and is so moved by the paperwork that he pays you for the privilege of reading it.", "effects": {"items": {"credits": 25}}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_closing_sale", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "The market barge Everything Must Go lies wrecked in the lane, every stall still hanging off her flanks. The banner reads GOING OUT OF BUSINESS SALE. The barge is going. Everything has gone. The stalls are bolted down and the till is still shut.",
+      "choices": [
+        {"text": "Break into the till.", "outcomes": [
+          {"weight": 55, "text": "The till holds exactly one hundred credits, a receipt for the barge and a note that says WE KNEW. A pad is clipped to the receipt.", "effects": {"items": {"credits": 100}, "log": "log_bazaar_closing_sale"}},
+          {"weight": 25, "text": "The till is wired. It goes off in your hands like a very small, very angry bank.", "effects": {"items": {"credits": 40}, "crew_hp": -10, "log": "log_bazaar_closing_sale"}},
+          {"weight": 20, "text": "The till is empty. The note says NICE TRY. A second note, under it, says 3 DAYS EARLY.", "effects": {}}
+        ]},
+        {"text": "Strip the stalls.", "outcomes": [
+          {"weight": 80, "text": "Forty stalls of stock, most of it junk, some of it good. The barge's owner, from beyond the veil, would have charged you for the privilege.", "effects": {"items": {"scrap": 40, "copper": 15, "polymer": 10}, "log": "log_bazaar_closing_sale"}},
+          {"weight": 20, "text": "One of the stalls goes off like a joke shop.", "effects": {"items": {"scrap": 25}, "hull": -5, "log": "log_bazaar_closing_sale"}}
+        ]},
+        {"text": "[Fenn] Read the barge's last sale ledger.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn reads the ledger like a thriller. The last sale was the barge to herself, at a loss, and the buyer's name belongs to a Fenn trader who now owns a debt on you. The ledger is full of tips, and one of them is a market.", "effects": {"items": {"credits": 60}, "reveal": "trader"}}
+        ]},
+        {"text": "[Quick hands] Open the till without setting off the alarm.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Your engineer finds the alarm wire in nine seconds and disables it in four. The till opens with a very small, very disappointed beep. A hundred credits, as promised, and a pad.", "effects": {"items": {"credits": 100}, "log": "log_bazaar_closing_sale"}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_terms_of_encounter", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "A document appears on your console that you did not ask for. TERMS OF ENCOUNTER, it says. By reading this notice you accept that you have encountered the Bazaar and are bound by its customs, rates and sense of humour. There is no signature line. You have already signed.",
+      "choices": [
+        {"text": "Read the terms.", "outcomes": [
+          {"weight": 60, "text": "The terms are forty pages and every clause is about the proper way to say goodbye. At the end a clause awards you a modest rebate for reading. Nobody reads. You are now a Reader.", "effects": {"items": {"credits": 25}, "log": "log_bazaar_free_sample"}},
+          {"weight": 40, "text": "On page thirty-eight you find you have agreed to give the Bazaar your second-best hat. You do not have a second-best hat. The Bazaar adds one to your account.", "effects": {"items": {"credits": -15}, "log": "log_bazaar_free_sample"}}
+        ]},
+        {"text": "Delete the document.", "outcomes": [
+          {"weight": 70, "text": "It deletes. A second copy appears, addressed to you personally, beginning: 'We regret that you chose to delete.' You do not read it.", "effects": {}},
+          {"weight": 30, "text": "It deletes. A third copy is delivered by a small drone, signed for.", "effects": {}}
+        ]},
+        {"text": "[Fenn] Counter-sign: add terms of your own.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn amends the contract with eleven new clauses, mostly about snacks, and sends it back. The Bazaar accepts nine and counter-proposes two. It is the most productive fight of your life. Both sides profit.", "effects": {"items": {"credits": 50, "fuel": 2}}}
+        ]},
+        {"text": "[Prismatic] Hum the terms back at it.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "The terms dissolve into a clean chord. A single line remains: AGREED. Nobody at the Bazaar can account for it, and they send you a rebate to be safe.", "effects": {"items": {"credits": 30}}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_runaway_stall", "type": "distress", "weight": 10, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "A trader's stall cart has lost its engine controls and is circling the main lamp at an ever-greater speed, with a Fenn clinging to the awning and shouting prices. 'Fifteen!' he cries as he passes. 'Twelve! Ten! HELP!' Stock is flying off in all directions.",
+      "choices": [
+        {"text": "Catch the cart with a tow line.", "outcomes": [
+          {"weight": 65, "text": "You snag the cart on the second pass. The Fenn lets go of the awning and falls into your arms, still muttering prices. He pays you in goods and a small stack of apologies.", "effects": {"items": {"credits": 40, "scrap": 20}}},
+          {"weight": 25, "text": "The line snaps and takes a sheet of hull with it. The Fenn is safe. The stock is everywhere. You pick up as much as you can.", "effects": {"items": {"scrap": 30, "copper": 10}, "hull": -5}},
+          {"weight": 10, "text": "You catch the cart. The cart catches you. A small, deeply embarrassing collision follows.", "effects": {"items": {"credits": 30}, "hull": -10}}
+        ]},
+        {"text": "[Quick hands] Shut the cart's engine off over the comm.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Your engineer hacks the cart's controls and kills the throttle. The cart drifts to a stop, the Fenn collapses on the awning, and the entire stock rains gently over you. You keep what you catch.", "effects": {"items": {"credits": 30, "copper": 15, "scrap": 20}}}
+        ]},
+        {"text": "[Grundl] Reach out and stop it with a hand.", "requires": {"species": "grundl"}, "outcomes": [
+          {"weight": 100, "text": "Your Grundl leans out of the airlock and catches the circling cart by its awning pole. The cart whips round, slows, stops. The Fenn lets go. 'Sorry,' says your Grundl, 'for stopping you.' The Fenn weeps with relief.", "effects": {"items": {"credits": 50}, "crew_hp": 5}}
+        ]},
+        {"text": "Sell tickets to watch.", "outcomes": [
+          {"weight": 100, "text": "You park at a safe distance and sell your crew front-row seats for a modest fee. The Fenn on the cart is furious, then, on reflection, impressed. He would have done the same.", "effects": {"items": {"credits": 25}}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_tuppence", "type": "trader", "weight": 6, "once": true, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "A junior broker called Tuppence has just been fired from the Brokers' Guild for honesty, the first time anyone has been. She stands by a pile of her things on the dock, mid-sentence, and sees you looking. 'I would like to leave the Bazaar,' she says. 'On a ship. With a deal.'",
+      "choices": [
+        {"text": "Offer her a berth.", "outcomes": [
+          {"weight": 100, "text": "'Terms,' says Tuppence at once. You give her yours. She gives you hers. By the end there are two contracts and a handshake, and she carries her boxes aboard talking all the way, one of them marked AUDIT.", "effects": {"recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
+        ]},
+        {"text": "[Fenn] Strike the deal like a professional.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn and Tuppence haggle for six minutes over terms of employment, ending in a perfectly fair contract and a drink. She boards, glowing, with a box of useful dirt on three Guild brokers.", "effects": {"items": {"credits": 40}, "recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
+        ]},
+        {"text": "[Human] Tell her honesty is still a virtue somewhere.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 100, "text": "Tuppence looks at your Human as if she had been handed a real coin. 'Somewhere,' she says. 'Where?' 'Here, maybe,' says your Human. She signs on, a little tearful, and pays her own berth in advance.", "effects": {"items": {"credits": 30}, "recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
+        ]},
+        {"text": "Wish her luck.", "outcomes": [
+          {"weight": 100, "text": "'Thanks,' she says, not looking up. 'I will invoice you for the encouragement.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_twitch_contract", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "Dib, the Bazaar's best gunsmith, will part with the Twitch Cannon schematics 'for a consideration'. It is a fast gun that jams; every Fenn knows how to keep it fed. The consideration is a contract. 'Sign here, here and here,' says Dib. 'The usual.' He slides over a pen. The contract is eleven pages.",
+      "choices": [
+        {"text": "Sign without reading.", "outcomes": [
+          {"weight": 50, "text": "You sign. The consideration is one afternoon cleaning the gunsmith's shop, which you do. The schematics are yours, and the shop has never been so clean.", "effects": {"crew_hp": -5, "flag": "tech_twitch_cannon"}},
+          {"weight": 30, "text": "You sign. The consideration is your second-best boots. Dib wears them out of the room.", "effects": {"items": {"credits": -20}, "flag": "tech_twitch_cannon"}},
+          {"weight": 20, "text": "You sign. Page nine says you owe Dib a favour. You do not know what it is. He will tell you later.", "effects": {"flag": ["tech_twitch_cannon", "owes_dib"]}}
+        ]},
+        {"text": "[Fenn] Read the contract.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn reads all eleven pages in the time it takes Dib to pour a drink, and finds the clause on page six: the consideration is a joke. 'Good,' says Dib, delighted. 'Nobody reads the joke.' He hands over the schematics and a discount on his future inventions.", "effects": {"items": {"credits": 40, "copper": 10}, "flag": "tech_twitch_cannon"}}
+        ]},
+        {"text": "[Tinkerer] Read the gun instead.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer ignores the contract, takes the Cannon apart on Dib's bench, and puts it back together faster. Dib is outraged and impressed and tears the contract up. 'Take it,' he says. 'You have earned it.'", "effects": {"flag": "tech_twitch_cannon"}}
+        ]},
+        {"text": "Ask for a copy of the contract first.", "outcomes": [
+          {"weight": 100, "text": "Dib presents you with a copy. It is also eleven pages. You politely decline.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_repo_party", "type": "pirate", "weight": 10, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "A fast blue boat, the Reasonable Terms, falls in beside you. 'Repossession,' says the voice, very politely. 'There is a lien on your ship. Do not worry about the details; we have counted them. Please power down and allow us to take what we are owed. If not, we shall be forced to be unreasonable.'",
+      "choices": [
+        {"text": "Pay the lien (80 credits).", "requires": {"credits": 80}, "outcomes": [
+          {"weight": 75, "text": "The boat takes the credits, stamps a receipt and wishes you a profitable day. 'Always a pleasure,' says the voice. 'Never a pleasure.'", "effects": {"items": {"credits": -80}}},
+          {"weight": 25, "text": "They take the money, check it, and find an error. They fine you for the error. You pay. You are not sure it was an error.", "effects": {"items": {"credits": -110}}}
+        ]},
+        {"text": "Contest the lien.", "outcomes": [
+          {"weight": 50, "text": "The lien turns out to be registered to a different ship called Teapot. The Reasonable Terms withdraws in confusion, taking its manners with it.", "effects": {"items": {"scrap": 20}}},
+          {"weight": 50, "text": "The lien is real. The boat is not pleased. It opens fire, politely.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Fenn] Argue the lien's jurisdiction.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 85, "text": "Your Fenn and the voice argue across the lane for twenty minutes, in a language of subclauses. At the end the Reasonable Terms hands over a receipt for the lien, marked VOID, and leaves with its dignity.", "effects": {"items": {"credits": 30}}},
+          {"weight": 15, "text": "Your Fenn argues well. The voice argues better.", "effects": {"items": {"credits": -40}}}
+        ]},
+        {"text": "Fight them.", "outcomes": [
+          {"weight": 100, "text": "You answer in the only language they cannot appeal.", "effects": {"fight": "pirate_raider"}}
+        ]}
+      ],
+      "after_win": {"text": "The Reasonable Terms' hold is full of lien forms, a till and a very sad bailiff. You take the till, and leave the bailiff a form for his own release.", "effects": {"items": {"credits": 70, "scrap": 20}}}
+    },
+    {
+      "id": "bazaar_claim_rock", "type": "asteroid_field", "weight": 9, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "Claim stakes on a rock: a hundred and nine of them, each with a flag and a registered number, planted in a crowd like birthday candles. The rock is small, dull and packed with copper. A sign reads CLAIMS WELCOME. CLAIMANTS ALSO WELCOME. DISPUTES SETTLED BY FISTS OR LAWYERS (CHOOSE ONE).",
+      "choices": [
+        {"text": "Plant your own stake and cut.", "outcomes": [
+          {"weight": 60, "text": "You plant a stake in a crowd of stakes and cut for an hour. Nobody objects, because nobody can find the edge of their own claim.", "effects": {"items": {"copper": 25, "scrap": 30}}},
+          {"weight": 25, "text": "Your stake lands on top of someone else's. A small, sad man appears with a lawyer. You settle for less.", "effects": {"items": {"copper": 10, "scrap": 10, "credits": -20}}},
+          {"weight": 15, "text": "Your stake lands on the one claim that is real. Its owner shoots at you.", "effects": {"items": {"copper": 15}, "hull": -5}}
+        ]},
+        {"text": "[Fenn] Buy up the other claims.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn goes down the line buying claims for pennies, selling them to each other for pounds, and finishes the afternoon as owner of the rock. They sell it back to the first claimant at a profit. 'Fair,' they say.", "effects": {"items": {"credits": 80, "copper": 15}}}
+        ]},
+        {"text": "[Kett] Offer to settle the dispute by fists. All eight.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett step forward, four-handed, and offer to settle. The claimants take one look and decide on lawyers. The lawyers take a look and decide on a settlement. Your Kett are paid in copper for the threat alone.", "effects": {"items": {"copper": 30, "credits": 20}}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "Somewhere in the crowd of stakes a lawyer has begun to cry.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_premium_blend", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_fenn_bazaar", "jumps_min": 3},
+      "text": "A fuel barge, Premium Blend, is venting white vapour from every seam. Her captain is on the comm, calm and cheerful: 'Nothing to worry about, friends, the fuel is entirely safe, we have never had a single incident, we are going to explode.' He says it in the same tone as 'good morning'.",
+      "choices": [
+        {"text": "Tow the barge clear of the market.", "outcomes": [
+          {"weight": 40, "text": "You tow the barge a few kilometres out as she comes apart in a long, quiet fizz of vapour. She does not blow. The captain pays you in the only currency he has left: fuel, a lot of it.", "effects": {"items": {"fuel": 6, "credits": 30}, "hull": -5}},
+          {"weight": 30, "text": "The barge blows while you are towing. You are thrown, shaken and showered with fuel pellets.", "effects": {"items": {"fuel": 4}, "crew_hp": -15, "hull": -15}},
+          {"weight": 20, "text": "The barge blows and the shockwave takes your engine pod. The captain's wave, as he goes past, is cheerful.", "effects": {"items": {"fuel": 3}, "crew_hp": -20, "hull": -15}},
+          {"weight": 10, "text": "The barge blows. One of your crew is thrown off the hull and does not come back. The captain's last words are 'Could be worse.'", "effects": {"crew_hp": -20, "hull": -15, "lose_crew": 1}}
+        ]},
+        {"text": "[Fenn] Talk the captain through the vent sequence.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 80, "text": "Your Fenn walks the captain through the seven valves in the right order in four minutes, while the barge fizzes. The last valve shuts with a clunk. 'See?' says the captain. 'Entirely safe.' He sells you fuel at cost.", "effects": {"items": {"fuel": 5, "credits": 20}}},
+          {"weight": 20, "text": "Your Fenn mixes up valves four and five. The barge does not blow, but the fuel does leave: a lot of it, over you.", "effects": {"items": {"fuel": 2}, "crew_hp": -10}}
+        ]},
+        {"text": "[Mire] Douse the barge with water and ice.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 85, "text": "Your Mire douses the seams with a fast, wide jet, and the vapour freezes into snow. The barge sits there, cold, white and silent. The captain is delighted. 'Snow!' he says.", "effects": {"items": {"fuel": 5, "credits": 30}}},
+          {"weight": 15, "text": "The jet hits a hot seam and the steam scalds your Mire. The vapour freezes anyway.", "effects": {"items": {"fuel": 2}, "crew_hp": -10}}
+        ]},
+        {"text": "Keep well back.", "outcomes": [
+          {"weight": 100, "text": "You keep well back. The barge stays whole, venting merrily, for another six hours, and then goes off like a very expensive fireworks display. You watch from a safe distance.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "bazaar_fixed_hour", "type": "empty", "weight": 8, "once": false, "requires": {"flag": "in_fenn_bazaar"},
+      "text": "For one hour a day the Bazaar goes quiet. The stalls shut, the skiffs moor, and the Fenn line the rails with nothing to say. It is the Hour of Fixed Prices, a pause in which no one haggles, to remember what a price is. A very small Fenn looks at you with enormous eyes. 'Please,' she whispers. 'Do not ask me for a discount.'",
+      "choices": [
+        {"text": "Respect the hour.", "outcomes": [
+          {"weight": 100, "text": "You stand with the crew at the rail, in silence, for an hour. It is the nicest stop of the trip. When the bells ring a Fenn presses a small bag into your hand: 'For not asking.' A pad lies beneath.", "effects": {"items": {"credits": 20}, "crew_hp": 10, "log": "log_bazaar_dead_quiet"}}
+        ]},
+        {"text": "Ask for a discount.", "outcomes": [
+          {"weight": 70, "text": "A gasp runs the length of the market. Forty Fenn turn to look. Then a small voice laughs, and the whole Bazaar follows. You are fined for the hour and tipped for the joke.", "effects": {"items": {"credits": 5}}},
+          {"weight": 30, "text": "The silence breaks like a plate. The Bazaar's wardens come aboard to explain the rules.", "effects": {"items": {"credits": -20}}}
+        ]},
+        {"text": "[Fenn] Stand at the rail and say nothing.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn stands at the rail with the others, perfectly silent, for the first time in their life. At the end they are shaking. 'I have never done that,' they say. 'It was awful. I want to do it again.' The Bazaar gives them a medal.", "effects": {"items": {"credits": 30}, "crew_hp": 10, "log": "log_bazaar_dead_quiet"}}
+        ]}
+      ]
+    }
+]}

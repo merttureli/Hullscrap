@@ -1,0 +1,40 @@
+{
+ "frame": [
+  14,
+  14
+ ],
+ "anims": {
+  "play": [
+   0,
+   3,
+   16
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   7,
+   7
+  ]
+ },
+ "glow": {
+  "image": "kett_chitin_thrower_impact_glow.png",
+  "frame": [
+   22,
+   22
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    16
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "The needles stick and splinter: a pale flash and amber shards flying out (3 frames, 14x14)."
+}

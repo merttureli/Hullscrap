@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "gauntling_scrap_shotgun_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Gauntling Scrap Shotgun: a junk hopper full of bolts and scrap above a gear train, a feed chute to the right (the ammo rack sits beside it), power coupling, patched hatch and five copper coils. damaged: a gear cracked and stuttering, bits spilling; disabled: the gear train jammed, the chute split. Barrel layer gauntling_scrap_shotgun_barrel: two sawn-off pipes of different widths (one steel, one rust) clamped with wire and hazard tape; fire: a spray of scrap pellets from both muzzles.",
+ "offset": [
+  0,
+  -4
+ ]
+}

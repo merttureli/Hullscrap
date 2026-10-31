@@ -1,0 +1,40 @@
+{
+ "frame": [
+  20,
+  20
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   12
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   10,
+   10
+  ]
+ },
+ "glow": {
+  "image": "emberkin_pyre_lance_impact_glow.png",
+  "frame": [
+   30,
+   30
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Where the lance lands: a white-yellow flash, then flame tongues standing up with embers and a trail of small fires (4 frames, 20x20); it sets fires."
+}

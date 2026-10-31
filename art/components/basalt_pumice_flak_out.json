@@ -1,0 +1,127 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "basalt_pumice_flak_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   15
+  ]
+ },
+ "notes": "OUTSIDE half of the Basalt Pumice Flak (a TURRET): a stone ring seat, a pumice hopper on the left and an iron valve wheel with a gunner hatch on the right (it is run airless). damaged: ring cracked and weeping magma, hopper lid hanging; disabled: scorched, dented, sparking.",
+ "barrel": {
+  "image": "basalt_pumice_flak_barrel.png",
+  "frame": [
+   21,
+   46
+  ],
+  "pivot_on_base": [
+   32,
+   15
+  ],
+  "pivot_on_barrel": [
+   10,
+   36
+  ],
+  "muzzle": [
+   10,
+   12
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "turret",
+  "glow": {
+   "image": "basalt_pumice_flak_barrel_glow.png",
+   "frame": [
+    41,
+    66
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ]
+   }
+  }
+ }
+}
