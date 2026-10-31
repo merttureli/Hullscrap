@@ -127,7 +127,7 @@ static func belt_entry(ship) -> Dictionary:
 		"size": Vector2i.ONE, "out_size": Vector2i.ZERO, "power": 0, "cost": Belts.cost(), "count": 0}, ship)
 	if not Ammo.belts_unlocked(ship):
 		e["ok"] = false
-		e["why"] = "needs a belt drive (found or traded)"
+		e["why"] = "needs a belt drive"
 	return e
 
 

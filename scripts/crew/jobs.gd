@@ -7,7 +7,7 @@ extends RefCounted
 ## `repair_breach` a shot-open wall (90), `repair_component` a malfunctioning or disabled part (80,
 ## +10 for a weapon, engine or shield in a fight; also a hull mount whose outside half is damaged and
 ## whose link is intact, from its inside half), `repair_crew` a hurt `mechanical` crew member (75,
-## done by any other crew member: beds do not heal them), `man_station` (50: the helm, and weapons,
+## done by any other crew member: beds do not heal them), `man_station` (50, out of a fight 45 but the helm: the helm, and weapons,
 ## shields and engines flagged manned), `restock` (40: carry ammo from the cargo to an ammo rack below half full,
 ## 1 s per 5 units at normal speed: scripts/sim/ammo.gd), `clear_wreck` (30: the debris of a part that was shot to pieces,
 ## which gives back half its recipe), and `repair_belt` (70: mend one conveyor-belt cell that damage cut). A job has `slots` places (two crew stack on a fire) and a place to
@@ -177,7 +177,10 @@ func build_board(ship) -> void:
 		if inst["status"] in FAULTY or ship.outside_hurt(uid):
 			_add(b, _fix_job(ship, uid))
 		if family == "helm" or (bool(def.get("manned", false)) and family in j["man_station"]["families"]):
-			_add(b, _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)}))
+			var post := _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)})
+			if family != "helm" and not combat:
+				post["priority"] -= int(j["man_station"].get("idle_penalty", 0))  # nothing to shoot at: the helm first, the autopilot needs it
+			_add(b, post)
 	var need := Ammo.restock_uids(ship, restocking)
 	for uid in restocking.keys():
 		if not need.has(uid):

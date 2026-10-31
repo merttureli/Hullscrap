@@ -603,7 +603,7 @@ func _redo() -> void:
 
 func _zoom(f: float) -> void:
 	if cam:
-		cam.zoom = (cam.zoom * f).clamp(Vector2(0.2, 0.2), Vector2(3, 3))
+		cam.zoom = (cam.zoom * f).clamp(Vector2(0.06, 0.06), Vector2(3, 3))  # far out: the ship in the sector
 
 
 func _save() -> void:
@@ -659,7 +659,7 @@ func _breached(room_id: int) -> bool:
 ## The key hints of the mode (the HUD shows them over the mode bar).
 func _controls_text() -> String:
 	if not build_on:
-		return "WASD walk   middle-click send Ada   E door   O oxygen   P power   K fight (Shift+K rammer)   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom"
+		return "WASD walk   click a marker: course   E at the helm: fly   middle-click send Ada   E door   O oxygen   P power   K fight (Shift+K rammer)   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom"
 	var how := "LMB paint   Shift+LMB line   Ctrl+LMB rectangle   RMB remove"
 	if group == Group.TILES:
 		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove" + ("   T shape" if grid.tile_flag(selected, "solid") else "")

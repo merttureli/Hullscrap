@@ -95,7 +95,7 @@ func test_menu_buttons_can_be_clicked() -> void:
 const HANDLER_KEYS: Array[String] = [
 	"W A S D", "E (hold)", "E on a door", "Middle click", "Left click", "G", "Mouse", "B", "O / P", "Wheel", "Ctrl+S / Ctrl+L", "N", "Esc", "F1",
 	"Tab / Shift+Tab", "1 - 9", "Left mouse", "Shift+Left drag", "Ctrl+Left drag", "Right mouse", "T", "R", "Shift+R", "F", "Ctrl+Z / Ctrl+Y",
-	"M", "Click a lit neighbour", "Shift+click", "Enter", "1 - 9 or click", "Enter / Space",
+	"M", "Click a lit neighbour", "Shift+click", "Enter", "1 - 9 or click", "Enter / Space", "Click a marker", "E at the helm",
 	"K", "W / S", "A / D", "Left / Right mouse", "Shift / Space / Q", "Arrows / End", "Y",
 	"Right click", "Esc / Enter / M", "H", "H / Esc",
 	"C", "Click, or Up / Down + Enter", "PgUp / PgDn", "Click a queued job", "U", "C / Esc",
@@ -218,9 +218,9 @@ func test_first_run_hints_are_shown_once_and_only_in_the_first_run() -> void:
 	for id in Profile.HINTS:
 		check(not q.hint_due(id), id + " is off once a run has ended")
 	eq(FrontDoor.HINT_TEXT.keys(), Profile.HINTS, "every hint has its text, in order")
-	eq(FrontDoor.HINT_TEXT["picked"], "B: play mode, M: map", "the first hint")
-	eq(FrontDoor.HINT_TEXT["map"], "Click a lit neighbour to jump", "the second hint")
-	eq(FrontDoor.HINT_TEXT["fight"], "Mouse steers, LMB fires, J spools the jump drive to escape", "the third hint")
+	eq(FrontDoor.HINT_TEXT["picked"], "B: play mode, click a marker to set a course, M: map", "the first hint")
+	eq(FrontDoor.HINT_TEXT["map"], "Click a lit neighbour to spool the jump there", "the second hint")
+	eq(FrontDoor.HINT_TEXT["fight"], "Mouse steers, LMB fires, J opens the map to jump away", "the third hint")
 	_clean()
 
 

@@ -21,6 +21,7 @@ const Abilities = preload("res://scripts/sim/abilities.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
+const Hazards = preload("res://scripts/combat/hazards.gd")
 
 const PATH := "res://data/weapons.json"
 const BASE := {"damage_type": "energy", "damage": 1.0, "cooldown": 1.0, "range": 900.0, "arc": 360.0,
@@ -289,7 +290,7 @@ func evasion(arena, idx: int) -> float:
 
 ## The chance a shot of turret `uid` of ship `idx` hits ship `target`: its accuracy less the target's evasion.
 func hit_chance(arena, idx: int, uid: int, target: int) -> float:
-	return clampf(float(def(arena.ships[idx].mounts[uid]["id"])["accuracy"]) - evasion(arena, target), 0.0, 1.0)
+	return clampf(float(def(arena.ships[idx].mounts[uid]["id"])["accuracy"]) + Hazards.accuracy_add(arena) - evasion(arena, target), 0.0, 1.0)
 
 
 ## The world point turret mount `m` of ship `idx` should aim at to hit ship `target`'s middle, with

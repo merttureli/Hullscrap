@@ -54,17 +54,20 @@ const COLUMNS: Array = [
 			["Esc", "Cancel a drag"],
 			["Mounts", "A weapon or engine goes outside the hull, against a wall; its inside half goes on the floor behind it"],
 			["Cables", "Every system needs a cable to a reactor (Cable is on Structure)"],
+			["Belts", "Ammo racks feed guns in their room; a belt drive and belts (Belt on Structure) carry ammo to the rest"],
 			["Mode bar", "Click Build, Play, Map, Shields, Crafting or Help"],
 		]],
 	],
 	[
 		["THE MAP AND EVENTS (M in play mode)", [
+			["Click a marker", "Set a course to that point of interest; crew at the helm fly there (click again: cancel)"],
+			["E at the helm", "Fly the ship yourself (mouse, W/S, A/D); E again hands it back"],
 			["M", "Open / close the map"],
-			["Click a lit neighbour", "Jump there for fuel (the tooltip says how much); an event or a station follows"],
+			["Click a lit neighbour", "Spool the jump drive there (8 s, fuel when it fires; the same node again cancels)"],
 			["Shift+click", "Drift jump with no fuel (costs hull)"],
 			["T", "Wait for a passing trader (no fuel)"],
 			["Y", "Out of fuel: Ma tows you to the region's start (no fuel, debt +150)"],
-			["Enter", "Dock at the station you are at; at the exit beacon, choose the next region (1 - 3)"],
+			["Enter", "Close to a station's beacon its menu opens; at the exit beacon, choose the next region (1 - 3)"],
 			["Esc", "Close the map"],
 			["1 - 9 or click", "Pick a choice in an event"],
 			["Enter / Space", "Continue"],
@@ -81,7 +84,7 @@ const COLUMNS: Array = [
 			["Arrows / End", "Shift the shield toward a side / back to even"],
 			["Esc", "Leave when it is over or far off"],
 			["Y", "Accept a surrender"],
-			["J", "Jump away after a 10 s spool"],
+			["J", "Open the map to spool the jump drive (held while the enemy is within 2,000 px)"],
 			["R", "After your ship is wrecked"],
 		]],
 	],
@@ -130,7 +133,7 @@ func _ready() -> void:
 static func first_run() -> Array[String]:
 	var d: Dictionary = Campaign.config()["debt"]
 	return [
-		"Press M to open the map, and jump to a neighbour.",
+		"Click a marker to fly there; M opens the map to jump on.",
 		"Read the event and pick a choice.",
 		"Keep fuel up: buy it at stations.",
 		"Pay %s %d credits every %d jumps." % [str(d["creditor"]).get_slice(" ", 0), int(d["payment"]), int(d["every"])],

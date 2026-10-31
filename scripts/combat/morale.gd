@@ -278,7 +278,7 @@ func _tick_offer(dt: float) -> void:
 func _is_attack(e: Dictionary) -> bool:
 	if e["type"] == "ram":
 		return int(e.get("a", -1)) == enemy or int(e.get("b", -1)) == enemy
-	return int(e["ship"]) == enemy and e["type"] in DAMAGE_EVENTS
+	return int(e["ship"]) == enemy and e["type"] in DAMAGE_EVENTS and not e.get("hazard", false)  # a surge hit is no refusal
 
 
 # --- flight -------------------------------------------------------------------------------------------

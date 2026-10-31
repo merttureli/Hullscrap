@@ -214,7 +214,7 @@ func test_a_jump_a_wait_and_a_tow_each_advance_the_tide() -> void:
 		if c.node(o)["type"] != "gate":
 			to = o
 			break
-	check(c.jump(to, ship)["ok"], "a jump")
+	check(_jump(c, to, ship)["ok"], "a jump")
 	eq([c.tide.steps, c.jumps], [1, 1], "pushed the tide one step")
 	ship.inventory.counts.erase("fuel")
 	check(c.wait(ship)["ok"], "a wait")
@@ -237,7 +237,7 @@ func test_the_note_says_how_many_places_fell() -> void:
 			if c.node(o)["type"] != "gate":
 				to = o
 				break
-		var r := c.jump(to, ship)
+		var r := _jump(c, to, ship)
 		check(r["ok"], "jump %d: %s" % [guard, r["why"]])
 		for line in r["notes"]:
 			if str(line).begins_with("The Hollow takes"):
@@ -285,14 +285,9 @@ func test_no_hollow_event_falls_back_to_a_fight() -> void:
 
 func test_hollow_places_send_ghost_ships_and_have_no_trade() -> void:
 	var c := Campaign.new(3)
-	var ghosts: Array = []
 	for t in ["1", "2", "3"]:
-		for p in c.cfg["enemies"]["hollow"][t]:
-			ghosts.append(p)
-	check(not ghosts.is_empty() and ghosts.all(func(p): return FileAccess.file_exists(p)), "the hollow table points at designs that exist")
-	check(ghosts.has("res://data/ships/pirate_raider.json") and ghosts.has("res://data/ships/rustfang_rammer.json"), "the raider and the rammer for now")
-	var table: Array = c.cfg["enemies"]["hollow"]["1"]
-	check(table.has(c.fight_path("tier", "hollow")), "fight_path(tier, hollow) rolls the hollow table")
+		eq(c.cfg["enemies"]["hollow"][t], ["gen:hollow"], "the hollow table builds ghost ships (shipgen's hollow faction), tier " + t)
+	check(c.fight_path("tier", "hollow").begins_with("gen:hollow:"), "fight_path(tier, hollow) rolls a generated ghost")
 	var other := ""
 	for n in c.drift.nodes:
 		if n["type"] == "pirate":
@@ -300,9 +295,9 @@ func test_hollow_places_send_ghost_ships_and_have_no_trade() -> void:
 			break
 	c.current = other
 	c.tide.steps = 0
-	check(c.cfg["enemies"]["pirate"]["1"].has(c.fight_path("tier", "pirate")), "a free place sends its own")
+	check(not c.fight_path("tier", "pirate").begins_with("gen:hollow:"), "a free place sends its own")
 	c.tide.steps = 40
-	check(table.has(c.fight_path("tier", "pirate")), "a Hollow place sends ghosts whatever it was")
+	check(c.fight_path("tier", "pirate").begins_with("gen:hollow:"), "a Hollow place sends ghosts whatever it was")
 	var trader := ""
 	for seed_value in 60:
 		var d := Campaign.new(seed_value)
@@ -349,7 +344,7 @@ func test_arriving_starts_the_linger_clock_again() -> void:
 	check(c.tide.linger_left() < 41.0, "40 s from a rise")
 	for o in c.neighbours(c.current):
 		if c.node(o)["type"] != "gate":
-			check(c.jump(o, ship)["ok"], "jump")
+			check(_jump(c, o, ship)["ok"], "jump")
 			break
 	eq(c.tide.linger_left(), c.tide.linger_s, "a new place, a full clock")
 
@@ -691,3 +686,13 @@ func test_the_pack_has_six_hollow_events_with_fights_and_a_free_way_out() -> voi
 	for i in 30:
 		var picked: Dictionary = ev.pick(c, {"id": "n01", "type": "hollow", "place": ""}, _ship())
 		eq(picked.get("type", ""), "hollow", "a pick is a hollow event")
+
+
+## A jump along a lane the way the game makes one now (docs/CONTENT.md section 11): spool the drive and let it fire.
+## The jump() result ({ok, why, node, drift, notes}).
+func _jump(c: Campaign, to: String, ship, drift := false) -> Dictionary:
+	var r: Dictionary = c.start_jump(to, ship, false, drift)
+	if not r["ok"]:
+		return {"ok": false, "why": r["why"], "notes": []}
+	c.tick_jump(c.spool_time(), false, ship)
+	return c.last_jump

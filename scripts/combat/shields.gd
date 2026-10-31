@@ -328,14 +328,15 @@ static func absorb(arena, idx: int, w: Dictionary, point := Vector2.ZERO, dir :=
 	arena.log_event("shield", idx, Vector2i(-1, -1), extra)
 
 
-## Advance recharge and the ion lock by `dt` seconds (recharge runs faster while a shield part is overclocked).
-static func tick(co, dt: float) -> void:
+## Advance recharge and the ion lock by `dt` seconds (recharge runs faster while a shield part is overclocked, and
+## `rate_mult` times as fast, 0.5 in an ion storm; the ion lock runs at the real rate).
+static func tick(co, dt: float, rate_mult := 1.0) -> void:
 	if co.wrecked:
 		return
 	if co.ion_lock > 0.0:
 		co.ion_lock = maxf(co.ion_lock - dt, 0.0)
 		return
-	dt *= CrewFx.family_mult(co.ship, "shield")
+	dt *= CrewFx.family_mult(co.ship, "shield") * rate_mult
 	var rate := -1.0
 	for s in co.sectors:
 		var timers: Array = co.sector_timers[s]

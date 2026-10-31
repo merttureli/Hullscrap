@@ -1,0 +1,39 @@
+{"events": [
+    {
+      "id": "char_brindle_toll_gun", "type": "patrol", "weight": 14, "once": true, "requires": {"region": "human_core", "stage_min": 3},
+      "text": "A grey Concord tug sits across the lane with one gun run out and a hand-painted sign taped over its registry: TOLL. The voice on the comm is a woman's, flat and parade-ground. 'Customs inspection, Haldane Ring authority, which is me. Toll is thirty credits. The gun works. Nobody has checked the paperwork since the Snap, so I have been checking everything else.' The gun follows every move you make, smoothly, like it has been drilled.",
+      "choices": [
+        {"text": "Refuse the toll and give her the fight she has been waiting for.", "outcomes": [
+          {"weight": 100, "text": "'Excellent,' she says, with real warmth, and the gun opens up.", "effects": {"fight": "tier"}, "after_win": {"text": "The tug drifts dead in the lane and a hatch clangs open. Brindle climbs out with her sign under one arm and a salute you have not entirely earned. 'Textbook,' she says. 'Poor, but textbook. I can fix poor. I will want a berth, a gun and a hot cup, in that order.'", "effects": {"recruit": {"character": "brindle"}, "rep": {"concord": -1}}}}
+        ]},
+        {"text": "Offer her a berth and her back wages (320 credits).", "requires": {"credits": 320, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "She counts it twice, handles the coins like live rounds, and stows the sign. 'Last stand of the Haldane Customs Authority,' she says, saluting the empty lane. 'It was a good run. Where is the gun deck?'", "effects": {"recruit": {"character": "brindle"}}}
+        ]},
+        {"text": "[Tinkerer] Offer to fix the jammed feed on her gun.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer takes one look at the gun and sucks air through their teeth. Eleven minutes later it is sweet as a nut, and Brindle is standing to attention in front of something she has not met since the Snap: a competent colleague. 'Permission to come aboard,' she says. 'I would like to see how you keep those.'", "effects": {"recruit": {"character": "brindle"}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Turn around and take the long way.", "outcomes": [
+          {"weight": 100, "text": "Her gun tracks you out of range, so politely you almost miss it. 'Come again,' she calls. 'The toll goes up.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_orla_rent_strike", "type": "distress", "weight": 24, "once": true, "requires": {"region": "human_core"},
+      "text": "The distress call is not a distress call. It is a formal notice, read out in a voice trained on three decades of waiting rooms. 'This is the Ward Four clinic at Haldane Ring, being repossessed. Matron Orla speaking. We have a waiting list, a very good bandage drawer and nine days of stitches. The landlords have the airlock. If anyone is passing with a sense of decency, we would be grateful for some.' Behind her, a bailiff is audibly eating a biscuit.",
+      "choices": [
+        {"text": "Cover the arrears (120 credits).", "requires": {"credits": 120, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The bailiff stops chewing. Orla signs the receipt with a flourish that has ended arguments in three languages, hands the clinic to her deputy with a list of instructions as long as her arm, and picks up her bag. 'That is the clinic saved and my notice served,' she says. 'I have wanted to see the Drift for thirty years. Does your ship have a sick bay? Everything has a sick bay, if you try hard enough.'", "effects": {"recruit": {"character": "orla"}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Argue the bailiff down (60 credits, no promises).", "requires": {"credits": 60, "pay": true}, "outcomes": [
+          {"weight": 60, "text": "The bailiff takes the money, looks at it, looks at Orla, and discovers a long-forgotten rule about compassion. The airlock opens. Orla is aboard before he finishes the sentence.", "effects": {"recruit": {"character": "orla"}}},
+          {"weight": 40, "text": "The bailiff takes the money, thanks you, and keeps the airlock shut. Orla's voice on the comm says, very evenly, a word you will not repeat.", "effects": {}}
+        ]},
+        {"text": "[Medbay] Show her your sick bay.", "requires": {"component": "medbay"}, "outcomes": [
+          {"weight": 100, "text": "Orla lets herself onto your ship, walks into your medbay and stands there for a full minute. 'Whoever fitted this,' she says, 'should be shot, then fined, then thanked. It needs me.' She hands the bailiff a slip that says RESIGNED, leaves the clinic to her deputy, and walks out with her bag.", "effects": {"recruit": {"character": "orla"}}}
+        ]},
+        {"text": "Say you are sorry, and fly on.", "outcomes": [
+          {"weight": 100, "text": "'Of course,' says Orla, in the voice of someone who has been told that many times, and by better. The comm clicks off.", "effects": {}}
+        ]}
+      ]
+    }
+]}

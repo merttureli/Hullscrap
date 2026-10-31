@@ -1,0 +1,196 @@
+{
+  "characters": [
+    {
+      "id": "brindle", "name": "Brindle", "species": "human",
+      "rig": {"tint": "#5e6b7d", "head": "helmet"},
+      "traits": {"work_mult": {"man": 1.2}},
+      "ability": {"id": "overclock", "cooldown": 42, "params": {"mult": 1.6, "duration": 10, "rest": 4}},
+      "obtained": "Haldane Ring (Human Core): beat her toll tug in a fight, pay her 320 credits of back wages, or have a tinkerer fix her gun.",
+      "lore": "The Retired Sergeant. Brindle drilled Concord gun crews until the Concord ran out of guns, then kept drilling on principle. She runs a weapon like a metronome and speaks to cargo as though it could be court-martialled. It has so far never answered back."
+    },
+    {
+      "id": "orla", "name": "Orla", "species": "human",
+      "rig": {"tint": "#e8e4d8", "head": "hair"},
+      "traits": {"work_mult": {"heal_others": 1.3}},
+      "ability": {"id": "heal_burst", "cooldown": 28},
+      "obtained": "Haldane Ring (Human Core): her clinic is being repossessed. Cover the arrears, haggle the bailiff down, or show her your medbay.",
+      "lore": "The Ring Matron. Orla has run Ward Four of the Haldane clinic for thirty years on a budget that was mostly optimism and biscuits. She can set a bone, a morale and a bailiff at forty paces. Her whole bedside manner is a firm hand on the shoulder and the word 'Sit.'"
+    },
+    {
+      "id": "skerry", "name": "Skerry", "species": "basalt",
+      "rig": {"tint": "#8c8478", "head": "rock_a"},
+      "traits": {"work_mult": {"breach": 1.5}},
+      "ability": {"id": "seal_breach", "cooldown": 36, "params": {"count": 2, "range": 10}},
+      "obtained": "Basalt Quarries: found mortaring a leaking hulk in hard vacuum. Pay for his mortar (60 scrap) or take the far end of the seam if your crew can work without air.",
+      "lore": "The Vacuum Mason. Skerry has mortared hull seams in hard vacuum for sixty years, one palm at a time, because somebody had to and nobody else could stand it. He speaks to the patches as he lays them. They have, on the whole, held."
+    },
+    {
+      "id": "hornfels", "name": "Hornfels", "species": "basalt",
+      "rig": {"tint": "#6e655c", "head": "rock_b"},
+      "traits": {"hp_mult": 1.15},
+      "ability": {"id": "shield_layer", "cooldown": 44, "params": {"layers": 1, "duration": 14}},
+      "obtained": "Basalt Quarries (stage 3+), hard to get: he holds a quarry tug's airlock against three Rustfang skiffs. Win the fight, or stand beside him with a Basalt of your own.",
+      "lore": "The Last Bulkhead. Hornfels says he helped pour the footings of the Concord Gate and warned them about the concrete. Nobody asked what he meant, so he has spent the forty years since standing quietly behind things, in case."
+    },
+    {
+      "id": "gleed", "name": "Gleed", "species": "emberkin",
+      "rig": {"tint": "#ffb347", "head": "crest"},
+      "traits": {"speed_mult": 1.1},
+      "ability": {"id": "overclock", "cooldown": 45, "params": {"mult": 1.75, "duration": 9, "rest": 6}},
+      "obtained": "Emberkin Forges: she races anyone round a slag rock. Pay 2 fuel for the race, or show her an installed afterburner.",
+      "lore": "The Afterburner Kid. Gleed has flown every kind of ship that was ever banned from a racing lane, sometimes in the same afternoon, and has been thrown out of the Kiln twice for cosiness violations near the fuel. She says the engine room is the only room that is the right temperature."
+    },
+    {
+      "id": "tindle", "name": "Tindle", "species": "emberkin",
+      "rig": {"tint": "#c8491c", "head": "helmet"},
+      "traits": {"station": {"power_bonus": 1}},
+      "ability": {"id": "power_system", "cooldown": 50, "params": {"power": 4, "duration": 25}},
+      "obtained": "Hard to get, a chain of two events: wake the cold reactor hall in the Emberkin Forges (a plasma cell, 120 credits, or an Emberkin's help), then answer the Lumen clerk's hail a few stages later.",
+      "lore": "The Reactor Whisperer. Tindle spent twenty years in a Lumen reactor hall where the coolant plan was optimism, and came out with eyebrows in a different shape. Ask for more power and he puts a hand flat on the casing and has a quiet word, and the numbers go up. He won't say what the word is, and the Lumen won't admit they've asked."
+    },
+    {
+      "id": "haggit", "name": "Haggit", "species": "fenn",
+      "rig": {"tint": "#7a5c3a", "head": "ears"},
+      "traits": {"work_mult": {"man": 1.15}},
+      "ability": {"id": "scan", "cooldown": 38, "params": {"duration": 26}},
+      "obtained": "Fenn Bazaar: a stall that sells nothing. Hire him for 140 credits, or haggle in click-talk with a Fenn of your own.",
+      "lore": "The Appraiser. Haggit can price a ship from the airlock: hull, crew, the last owner's regrets, and what you would pay to stop him listing them. He is wrong about nothing and right about it loudly. Never ask him what you are worth."
+    },
+    {
+      "id": "nimmik", "name": "Nimmik", "species": "fenn",
+      "rig": {"tint": "#2f2f3a", "head": "goggles"},
+      "traits": {"speed_mult": 1.1},
+      "ability": {"id": "phase", "cooldown": 12, "params": {"range": 8}},
+      "obtained": "Fenn Bazaar: she turns up inside a salvage crate. Offer her a job, or speak to her in click-talk.",
+      "lore": "The Cat Burglar. Nimmik is small even for a Fenn and treats walls as a courtesy rather than a rule. She has been between jobs since the Snap and has never once been locked in a room she had not chosen to be in. Please do not lock her in a room."
+    },
+    {
+      "id": "skrel", "name": "Skrel", "species": "kett",
+      "rig": {"tint": "#d8a838", "head": "antennae"},
+      "traits": {"swarm": {"per_other": 0.15, "max": 0.3}},
+      "ability": {"id": "rally", "cooldown": 42, "params": {"mult": 1.7, "duration": 16}},
+      "obtained": "Hive Ninefold (Kett Hives): the hive will only release her to a ship with the beds for a crew. Hand over 2 beds, or click the working-song back with a Kett of your own.",
+      "lore": "The Chorus-Leader. Skrel keeps the working-song, the click-pattern that gets forty hands lifting one beam at once. Alone she goes quiet, and a quiet Kett is a sad one. Give her four friends and a long job and she will hum a whole ship into shape."
+    },
+    {
+      "id": "zhikka", "name": "Zhikka", "species": "kett",
+      "rig": {"tint": "#4a7fa8", "head": "helmet"},
+      "traits": {"work_mult": {"man": 1.25}},
+      "ability": {"id": "hack", "cooldown": 52, "params": {"duration": 7, "families": ["shield", "engine", "weapon"]}},
+      "obtained": "Hard to get, a chain of two events: carry the warning of Ear Eleven's listener to a Ninefold convoy (Kett Hives), then take her aboard when the hive's tender hails you a stage or two later.",
+      "lore": "The Listener. Zhikka was the hive's ear on the long-wave until the long-wave started answering in complete sentences. She can tell what a ship is about to do from the tremble in its carrier tone, and has taken to saying what it is thinking, which she would rather you did not ask about."
+    },
+    {
+      "id": "sluice", "name": "Sluice", "species": "mire",
+      "rig": {"tint": "#e08a3c", "head": "helmet"},
+      "traits": {"work_mult": {"extinguish": 1.5}},
+      "ability": {"id": "extinguish", "cooldown": 14},
+      "obtained": "Mire Fens: the Fenwater fire marshal inspects your ship. Pass his inspection, put him on the payroll (90 credits), or greet him in the wet code with a Mire of your own.",
+      "lore": "The Wet Watch. Sluice has put out more fires than most ships have had, and takes each one personally. His idea of a quiet watch is a sealed room full of nothing. He can smell a smouldering cable through a bulkhead, and will tell you, kindly, how embarrassed it is."
+    },
+    {
+      "id": "gurgo", "name": "Gurgo", "species": "mire",
+      "rig": {"tint": "#3f7f6a", "head": "bare"},
+      "traits": {"work_mult": {"repair": 1.3}},
+      "ability": {"id": "repair_burst", "cooldown": 28, "params": {"amount": 5}},
+      "obtained": "Mire Fens: the engineer of a flooded ice-tender. Tow his hulk to a dock (2 fuel), or dive in and help bail with a Mire of your own.",
+      "lore": "The Bilge Engineer. Gurgo learned his trade in the flooded undeck of a Concord ice-tender, where every repair is done half underwater and entirely by feel. He fixes things by listening to them leak. Dry land confuses him, but only a little."
+    },
+    {
+      "id": "bracken", "name": "Bracken", "species": "sporeling",
+      "rig": {"tint": "#6fa86a", "head": "spotted"},
+      "traits": {"aura": {"heal_per_s": 0.5}},
+      "ability": {"id": "heal_burst", "cooldown": 30, "params": {"amount": 34}},
+      "obtained": "The Mother Grove (Sporeling Groves): she crews a ship with air worth breathing. Show her an installed oxygen generator, or pay her 110 credits.",
+      "lore": "The Gardener-General. Bracken tends hull-gardens with the stern gentleness of a field marshal and has been known to promote a tomato for valour. When a room is hurt she breathes out, and for a moment it is a spring morning."
+    },
+    {
+      "id": "dewcap", "name": "Dewcap", "species": "sporeling",
+      "rig": {"tint": "#c9b8a0", "head": "brown"},
+      "traits": {"o2_use": 0.7},
+      "ability": {"id": "seal_breach", "cooldown": 55, "params": {"count": 3, "range": 12}},
+      "obtained": "Sporeling Groves: stitching a hulk shut with white thread. Feed her threads 4 polymer, or sit and share the thread-song with a Sporeling of your own.",
+      "lore": "The Mycelium Plug. Dewcap's talent is for filling holes: in hulls, in conversations, in budgets. A breach is a polite invitation to her, and the white thread from her sleeves closes anything doorway-sized before the air has finished leaving. She apologises to the walls afterwards."
+    },
+    {
+      "id": "grommet", "name": "Grommet", "species": "gauntling",
+      "rig": {"tint": "#b8863a", "head": "helmet"},
+      "traits": {"work_mult": {"repair": 1.3}},
+      "ability": {"id": "repair_burst", "cooldown": 36, "params": {"amount": 6}},
+      "obtained": "Gauntling Scrapyards: a Gauntling with a workbench on her back. Trade her an honest Scrap engine, or hand her the right spanner with a tinkerer.",
+      "lore": "The Walking Workshop. Grommet is eleven percent original, and each replacement came with a story and no warranty. She carries her bench on her back and opens it mid-sentence, mid-fire and once mid-wedding. If it can be fixed she is already fixing it. If it can't, she is offended."
+    },
+    {
+      "id": "baud", "name": "Baud", "species": "gauntling",
+      "rig": {"tint": "#4a5a6a", "head": "lamp"},
+      "traits": {"damage_taken": {"ion": 0.5}},
+      "ability": {"id": "hack", "cooldown": 56, "params": {"duration": 8}},
+      "obtained": "Gauntling Scrapyards (stage 3+), expensive: he is lot fourteen at a pop-up auction. Outbid the Rustfangs (420 credits), or out-tinker them (250 credits).",
+      "lore": "The Wire-Tongue. Baud has a socket behind his left ear and a conviction that every machine is a very stubborn person. He plugs in, murmurs something encouraging, and the enemy's guns remember a prior engagement. What he says to them is between him and the guns."
+    },
+    {
+      "id": "zircon", "name": "Zircon", "species": "prismatic",
+      "rig": {"tint": "#c9e8ff", "head": "crown"},
+      "traits": {"station": {"manned_mult": 1.2}},
+      "ability": {"id": "shield_layer", "cooldown": 42, "params": {"layers": 1, "duration": 12}},
+      "obtained": "The Singing Lattice (Prismatic Choir): she is tutting at a crystal garden. Pay her 200 credits or 4 crystal, or show her an installed shield generator.",
+      "lore": "The Refractor. Zircon was grown facing a window and has never forgiven the sun for being plain. Stand her by a shield and the glare goes round the corner and the lasers go with it. Ion makes her ring like a dropped bell, and she is embarrassed every time."
+    },
+    {
+      "id": "jacinth", "name": "Jacinth", "species": "prismatic",
+      "rig": {"tint": "#8a8aa8", "head": "gem"},
+      "traits": {"damage_taken": {"ion": 0.7}},
+      "ability": {"id": "scan", "cooldown": 55, "params": {"duration": 40}},
+      "obtained": "Hard to get, a chain of two events: mend her cracked lens in the Prismatic Choir (3 crystal, 150 credits, or a Prismatic's harmonic), then meet her at a singing gate shard at stage 5+.",
+      "lore": "The Gate-Singer. Jacinth hums at the dead gates and swears they hum back. She can tell a real signal from a lure by the way it sits in her teeth, which makes her the most useful passenger in the Drift and the worst at parties."
+    },
+    {
+      "id": "brisket", "name": "Brisket", "species": "grundl",
+      "rig": {"tint": "#e8d8b0", "head": "cap"},
+      "traits": {"aura": {"work_mult": 1.08}},
+      "ability": {"id": "rally", "cooldown": 42, "params": {"mult": 1.6, "duration": 20}},
+      "obtained": "Grundl Barges: a market cook the Moor's quartermaster calls over capacity. Give her a proper berth (1 bed), or praise the stew in barge-dialect with a Grundl of your own.",
+      "lore": "The Galley Mother. Brisket has fed four barge families and a ship's worth of creditors, and has opinions about all of them. She believes in neither work without lunch nor lunch without seconds, and a room that has eaten her stew will lift anything you point it at. Please do not ask what is in the stew."
+    },
+    {
+      "id": "capstan", "name": "Capstan", "species": "grundl",
+      "rig": {"tint": "#7a5a3a", "head": "tusked"},
+      "traits": {"heal_mult": {"bed": 1.5}},
+      "ability": {"id": "power_system", "cooldown": 50, "params": {"power": 3, "duration": 30}},
+      "obtained": "Grundl Barges: three days on a hand crank keeping a barge's lights on. Take a turn yourself (costs the crew some hp), pay his arrears (90 credits), or swap cranks with a hauler.",
+      "lore": "The Winch-Hand. Capstan can turn a hand crank for an hour, which is exactly what half the Drift's emergency systems still need. Barge-bred and barge-built, he regards a reactor as a lot of fuss for what is basically a very expensive handle."
+    },
+    {
+      "id": "hydrant", "name": "Hydrant",
+      "unique_species": {"name": "Fire-Watch Drone", "hp": 120, "speed": 0.9, "traits": ["no_breath", "mechanical"], "rig": "gauntling", "sidearm": "multi_tool", "damage_taken": {"fire": 0.2}, "work_mult": {"extinguish": 2.0}, "notes": "a Concord firefighting drone: no air, nearly fireproof, puts fires out twice as fast"},
+      "rig": {"tint": "#d94a3a", "head": "lamp"},
+      "ability": {"id": "extinguish", "cooldown": 12},
+      "obtained": "Wanderer, any region (stage 2+): standing at attention in a burnt-out Concord tender. Give it a small, safe fire (1 fuel), or relieve its station with a Gauntling or any mechanical crew.",
+      "lore": "The Fire Dog. A Concord station firefighter drone that outlived its station, its manual and, apparently, its own off switch. It has been looking for a fire ever since, the useful kind rather than the nice kind. Say 'smoke' and something on it wags."
+    },
+    {
+      "id": "halfway", "name": "Halfway",
+      "unique_species": {"name": "Out-of-Step", "hp": 80, "speed": 1.05, "traits": [], "rig": "human", "sidearm": "service_pistol", "o2_use": 0.6, "damage_taken": {"no_air": 0.6}, "notes": "caught mid-jump by the Snap and still a half-second behind herself: breathes less, vents kindly"},
+      "rig": {"tint": "#a9c7e8", "head": "hair"},
+      "ability": {"id": "phase", "cooldown": 10, "params": {"range": 8}},
+      "obtained": "Hard to get, a chain of two events (any region, stage 3+): answer her questions when the radar paints her ship twice, then find her in your cargo hold a stage later.",
+      "lore": "Out of Step. Halfway was mid-jump when the Lattice died and came out the other side a little behind herself. She walks through walls on her good days, hates thresholds and avoids mirrors, which show her a half-second late. By all accounts she is good company, for a given value of 'accounts'."
+    },
+    {
+      "id": "plumb", "name": "Plumb",
+      "unique_species": {"name": "Warden Drone", "hp": 130, "speed": 0.95, "traits": ["no_breath", "mechanical", "ion_prone"], "rig": "prismatic", "sidearm": "gatekeepers_lance", "notes": "a Lumen gate guardian: no air, built of crystal and rules, ion-weak like the rest of the Wardens"},
+      "rig": {"tint": "#9be5ff", "head": "gem"},
+      "ability": {"id": "shield_layer", "cooldown": 60, "params": {"layers": 2, "duration": 8}},
+      "obtained": "Hard to get, a fight (any region, stage 4+): a Warden picket asks what it is guarding the debris from. Answer honestly and it may stand down, or shoot it and take the survivor.",
+      "lore": "The Turned Warden. Plumb was built to guard a gate shard and did, faithfully, until a scavenger asked what exactly it was guarding it from. It has been thinking about the answer ever since, and would like to do it somewhere with a better view."
+    },
+    {
+      "id": "plinth", "name": "Plinth", "species": "basalt",
+      "rig": {"tint": "#c0392b", "head": "rock_a"},
+      "traits": {"work_mult": {"man": 1.25}},
+      "ability": {"id": "overclock", "cooldown": 45, "params": {"mult": 1.5, "duration": 14, "rest": 3}},
+      "obtained": "Wanderer, any region (stage 2+): finishing the last lap of an old Gantry Cup. Idle beside him for 1 fuel, or tell him, slowly, that he has won, with a Basalt of your own.",
+      "lore": "The Slow Lane. Plinth won the last Gantry Cup by outlasting every other entrant, none of whom were still racing when he finished. He is the steadiest hand at a helm in the Drift and has never once been passed, because he has never once been in a hurry."
+    }
+  ]
+}

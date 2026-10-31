@@ -101,7 +101,7 @@ func test_the_vocabulary_has_the_twelve_abilities_and_the_data_passes_its_checks
 	eq(v.size(), IDS.size(), "and nothing else")
 	for p in CrewAbilities.problems():
 		check(false, p)
-	eq(Content.list("characters"), [], "the real character list starts empty")
+	eq(Content.list("characters").filter(func(c): return Content.origin("characters", c["id"]) == "core"), [], "the core character list is empty: the characters come from packs")
 	check(FileAccess.file_exists("res://data/characters.json"), "in its file")
 
 

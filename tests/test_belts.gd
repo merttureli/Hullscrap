@@ -14,6 +14,10 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Palette = preload("res://scripts/build/palette.gd")
 const Wall = preload("res://tests/fixture_wall.gd")
+const BuildMode = preload("res://scripts/build/build_mode.gd")
+const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
+const TileDefs = preload("res://scripts/ship/tile_defs.gd")
+const Hud = preload("res://scripts/ui/hud.gd")
 
 
 func near(got: float, want: float, msg: String, eps := 1e-6) -> void:
@@ -425,3 +429,35 @@ func test_the_palette_has_a_belt_card_that_is_locked_until_a_drive_is_aboard() -
 	check(belt["ok"], "unlocked with a drive aboard")
 	var info := Palette.info(belt, ship)
 	check(String(info["blurb"]).length() > 0 and info["rows"].size() >= 2, "the selection card says something")
+
+
+func test_the_belt_tool_in_build_mode() -> void:
+	var defs := TileDefs.new()
+	defs.load_file("res://data/tiles.json")
+	var g := ShipGrid.new(Vector2i(20, 20), defs)
+	g.fill_circle_hull(9.0)
+	for c in g.hull:
+		g.force_tile(c, "floor")
+	var ship := Ship.new("T", g)
+	ship.inventory.load_dict({"scrap": 50, "belt_drive_std": 1})
+	var sim := ShipSim.new()
+	sim.ships = [ship]
+	var b := BuildMode.new()
+	b.sim = sim
+	b.selected = "floor"
+	b.hover = Vector2i(8, 8)
+	b.hud = Hud.new()
+	b.hud.setup(b)
+	b.pick(Palette.belt_entry(ship))
+	eq(b.group, BuildMode.Group.BELTS, "the Belt card puts the belt tool in hand")
+	eq(b.tool_key(), "belt", "its key")
+	eq(b.selected_entry()["name"], "Belt", "its card")
+	b._refresh_ghost()
+	eq(b.ghost.size(), 1, "one cell under the mouse")
+	eq([b.ghost[0]["layer"], b.ghost[0]["reason"]], ["belt", ""], "a belt that would apply")
+	b.hover = Vector2i(0, 0)
+	b._refresh_ghost()
+	check(b.ghost.is_empty() or b.ghost[0]["reason"] != "", "outside the hull it is refused")
+	b.hud.free()
+	sim.free()
+	b.free()
