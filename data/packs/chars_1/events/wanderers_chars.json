@@ -1,0 +1,78 @@
+{"events": [
+    {
+      "id": "char_hydrant_standing_by", "type": "wreck_field", "weight": 14, "once": true, "requires": {"stage_min": 2},
+      "text": "The wreck is a Concord relief tender, gutted to the frame by something that burned very hot, very recently, and then went out by itself. In the middle of the burnt deck, standing at attention in a coat of soot, is a firefighting drone, barrel-bodied, red where the paint survives. It rotates to face you with a gentle mechanical whirr. 'Is there a fire?' it asks. Its voice has a little hopeful lift in it. 'I have been looking for forty years. I have not been given a fire. Are you a fire?'",
+      "choices": [
+        {"text": "Give it a fire. A small one, in a safe place (1 fuel).", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Your crew set a cautious little blaze in a drum on the deck. The drone watches it with something like love. Then it extinguishes it in one neat blast, and swivels. 'Thank you,' says Hydrant. 'That was the best day of my life. I will be extremely good at your fires.' It gets on the lift before anyone has asked.", "effects": {"recruit": {"character": "hydrant"}}}
+        ]},
+        {"text": "[Mechanical] Run its old protocol: 'Station relieved.'", "requires": {"trait": "mechanical"}, "outcomes": [
+          {"weight": 100, "text": "Your crewmate plugs in a cable, taps a dead-letter code, and Hydrant straightens. 'Station relieved,' it says. 'Reassignment: vessel.' It rolls aboard, wheels clicking, and stops at your fire panel, which it regards with silent joy.", "effects": {"recruit": {"character": "hydrant"}}}
+        ]},
+        {"text": "Tell it there is no fire, and go.", "outcomes": [
+          {"weight": 100, "text": "'Understood,' says Hydrant. 'I will stay on station.' It does. You can see it on the scope until you jump.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_halfway_double_contact", "type": "anomaly", "weight": 22, "once": true, "requires": {"stage_min": 3},
+      "text": "The radar paints the same contact twice. Two echoes of one small ship, half a second apart, one trailing the other like a bad dub. When you close on it, it is a single jump skiff with a Concord registry nobody has used in forty years, and on its hull a woman in a flight suit is waving at you, a half second late. 'Hello,' she says, and a moment later, 'Hello?', as though it had not gone through. 'Sorry. I am slightly behind. I came out of a jump a good while ago and I am not sure I have caught up. Would you mind answering some questions? They are easy. I keep asking them and getting the answers wrong.'",
+      "choices": [
+        {"text": "Answer her questions, slowly and kindly.", "outcomes": [
+          {"weight": 100, "text": "She asks what day it is, what year, which gate was last to go dark, and whether the tea in the Drift is still bad. You tell her. She nods after each answer, and her outline sharpens a little each time, until her voice is almost in the same place as she is. 'Thank you,' she says. 'That was helpful. I think I will see you again soon. Or I have. Is it Tuesday?'", "effects": {"flag": "char_halfway_met"}}
+        ]},
+        {"text": "[Tinkerer] Re-tune her transponder so she stops doubling.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer leans out of the lock with a screwdriver and a lot of patience. Halfway's echo slides, a hair at a time, into the same place as the rest of her. 'Oh,' she says, and for a whole second there is only one of her. 'Oh, that is much better. I will find you. I am quite certain I have.'", "effects": {"flag": "char_halfway_met", "items": {"copper": 10}}}
+        ]},
+        {"text": "Back away slowly.", "outcomes": [
+          {"weight": 100, "text": "The echo of her wave arrives after you have turned your back. It is a friendly wave. You keep going.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_halfway_in_your_cargo", "type": "empty", "weight": 50, "once": true, "requires": {"stage_min": 4, "flag": "char_halfway_met"},
+      "text": "Your crew call you to the cargo hold. Halfway is sitting on a crate there, perfectly at ease, in the flight suit, drinking a cup of tea you did not know you had. 'Hello,' she says, with, for once, no delay at all. 'I hope you do not mind. I have been here about a week. I am told it has not been a week yet, but I assure you it has.' She sips. 'I think I have caught up. Partly. I would like to stay with you until the rest of me arrives. I don't take up much room. Some of the time, I take up none.'",
+      "choices": [
+        {"text": "Welcome her aboard.", "outcomes": [
+          {"weight": 100, "text": "'Thank you,' says Halfway, and then, half a second later, 'Thank you,' again, warmer. Then she steps through the crate she was sitting on and into the next room. 'Sorry,' she says. 'Habit.'", "effects": {"recruit": {"character": "halfway"}}}
+        ]},
+        {"text": "Charge her passage up front (she insists on 60 credits).", "outcomes": [
+          {"weight": 100, "text": "'Oh, I can pay,' she says. 'I have been paid for three jobs I have not done yet.' She hands you 60 credits that, by the look of them, are due next month. They spend fine.", "effects": {"recruit": {"character": "halfway"}, "items": {"credits": 60}}}
+        ]},
+        {"text": "Tell her this is a cargo hold, not a hotel.", "outcomes": [
+          {"weight": 100, "text": "'Of course,' she says, and is gone from the crate so tidily that for a moment the tea is still steaming in the air.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_plumb_the_picket", "type": "patrol", "weight": 14, "once": true, "requires": {"stage_min": 4},
+      "text": "A Warden drone has set itself across the lane, as Wardens do, guarding a lump of gate debris you could not sell for a coin. It is a big, spare, crystalline thing, and it is hailing you on the Lumen band in a voice that is very old and very patient. 'Halt,' it says. 'This debris is protected.' A pause. 'May I ask a question? It is not in my protocols. A scavenger asked it in the year thirty-one, and I have been unable to stop thinking about it. What am I protecting it from?'",
+      "choices": [
+        {"text": "Tell it the truth: from nothing, really.", "outcomes": [
+          {"weight": 70, "text": "The drone is silent a long time. Its plating shifts, a ripple of colour running through it like a thought. 'Nothing,' it says. 'I have guarded a thing from nothing for forty years. That is, I find, a great relief.' It lowers its guns with a small click and falls in beside you. 'I will need a name,' says the Warden. 'I have been Picket Nine. It is unflattering. I would like a plumb line: something that tells you which way is down.'", "effects": {"recruit": {"character": "plumb"}, "rep": {"lumen": -1}}},
+          {"weight": 30, "text": "The drone considers 'nothing', and reacts as a rule-bound machine reacts to nothing: it decides you are the thing it is protecting the debris from. Its guns come up.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Shoot it, and take the survivor.", "outcomes": [
+          {"weight": 100, "text": "You answer the question the other way.", "effects": {"fight": "tier"}, "after_win": {"text": "The Warden's guns are dead and its core is not. It floats among its own plating, glowing faintly. 'You have answered the question,' it says. 'From you. That is what I was guarding it from. I find I am relieved.' It follows you out of the wreckage with the dignity of a retiree. 'Plumb,' it says, when asked its name. 'It is what I will be.'", "effects": {"recruit": {"character": "plumb"}, "rep": {"lumen": -2}}}}
+        ]},
+        {"text": "Back off and take another lane.", "outcomes": [
+          {"weight": 100, "text": "'Thank you for not answering,' says the Warden, with what might be gratitude. 'I have had longer to think than I expected.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_plinth_the_finish_line", "type": "distress", "weight": 14, "once": true, "requires": {"stage_min": 2},
+      "text": "A beacon is pinging from an old racing tug parked dead across the lane with its running lights on and its nose pointed at a rock. The signal is not MAYDAY. It reads RACE IN PROGRESS. In the cockpit a Basalt in a racing helmet two sizes too small sits utterly still, hands at ten and two. A banner on the hull, bleached by decades of starlight, reads: GANTRY CUP, FINAL LAP. He raises one finger from the wheel by an inch, which for a Basalt is waving. 'Hello,' he says, over eleven seconds. 'Please. Do not pass. It is a race.' There is nobody else for a thousand kilometres.",
+      "choices": [
+        {"text": "Wait out the final lap beside him (1 fuel for the idle burn).", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You idle in the lane beside him for an afternoon, which is, you slowly realise, the winning strategy: nobody else is on the course. At what passes for sundown Plinth crosses the line, a painted rock, with a tiny, majestic lurch. 'Won,' he says. A long silence. 'Alone. But won.' He spends the rest of the evening peeling off the banner and stowing the helmet. 'Where does the helm go?'", "effects": {"recruit": {"character": "plinth"}}}
+        ]},
+        {"text": "[Basalt] Tell him, slowly, that he has won.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt takes eight minutes to say it and Plinth takes eleven to answer, and between them they get through the whole thing in under an hour, which both agree is a record. 'Gratitude,' says Plinth. 'I will retire from racing. I would like to... pilot. Slowly. With people.'", "effects": {"recruit": {"character": "plinth"}}}
+        ]},
+        {"text": "Fly around him, quietly.", "outcomes": [
+          {"weight": 100, "text": "He does not stir. In the mirror his finger comes up an inch again, in what may be a blessing.", "effects": {}}
+        ]}
+      ]
+    }
+]}

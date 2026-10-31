@@ -8,7 +8,8 @@ extends RefCounted
 ##   flicker; a part that is gone switches it at once. The shown target is kept as meta on the pilot.
 ## - heavy: [{uid, name, eta}] for the enemy's weapons that can shoot (ok, powered, with ammo), are heavy and
 ##   have `eta` <= `warn_s` seconds of cooldown left, in uid order. Heavy: damage >= `heavy_damage`, or a shot
-##   kind in `heavy_kinds` (missile, beam), or a damage type in `heavy_damage_types` (ion).
+##   kind in `heavy_kinds` (missile, beam), or a damage type in `heavy_damage_types` (ion). A gun that fires faster
+##   than you can react (a cooldown under `min_cooldown`) is never warned about, whatever its damage.
 ## - Nothing once either ship is wrecked or the enemy pilot holds fire (surrendering) or has stopped.
 ## Numbers: data/combat_ui.json, "intent".
 
@@ -52,7 +53,7 @@ static func of(arena, ai, foe_idx: int) -> Dictionary:
 	for u in uids:
 		var m: Dictionary = co.mounts[u]
 		var w: Dictionary = arena.weapons.def(m["id"])
-		if not is_heavy(w, cfg) or not _can_shoot(arena, ai.me, u, m, w):
+		if not warns(w, cfg) or not _can_shoot(arena, ai.me, u, m, w):
 			continue
 		var eta: float = arena.cooldown_left(ai.me, u)
 		if eta <= warn + 1e-6:
@@ -64,6 +65,11 @@ static func of(arena, ai, foe_idx: int) -> Dictionary:
 static func is_heavy(w: Dictionary, cfg := config()) -> bool:
 	return float(w["damage"]) >= float(cfg.get("heavy_damage", 3.0)) or str(w["kind"]) in cfg.get("heavy_kinds", ["missile", "beam"]) \
 		or str(w["damage_type"]) in cfg.get("heavy_damage_types", ["ion"])
+
+
+## Does weapon `w` earn a warning row: heavy, and slow enough (cooldown >= `min_cooldown`) that the warning is a thing to react to?
+static func warns(w: Dictionary, cfg := config()) -> bool:
+	return is_heavy(w, cfg) and float(w["cooldown"]) >= float(cfg.get("min_cooldown", 3.0)) - 1e-6
 
 
 ## The target to show: the pilot's own, but a new one only after the shown one has been up for `hold_s`.

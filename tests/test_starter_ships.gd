@@ -20,7 +20,7 @@ const Hangar = preload("res://scripts/space/hangar.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
-const HullOutline = preload("res://tests/hull_outline.gd")
+const HullOutline = preload("res://scripts/ship/hull_outline.gd")
 
 const PATHS := {
 	"Rustbucket": "res://data/ships/starter_rustbucket.json",
