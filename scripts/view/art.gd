@@ -62,6 +62,16 @@ static func projectile(kind: String) -> RefCounted:
 	return _sheet("projectiles", kind)
 
 
+## The projectile art of weapon `id` (art/projectiles/<id><suffix>.png) when it has its own, else its kind's (art/projectiles/<kind><suffix>.png), or null.
+## `suffix` is "" for the shot itself and "_impact" for what it looks like where it lands.
+static func projectile_of(id: String, kind: String, suffix := "") -> RefCounted:
+	if id != "":
+		var own = projectile(id + suffix)
+		if own != null:
+			return own
+	return projectile(kind + suffix)
+
+
 ## A crew species (art/crew/<species>/): the torso sheet, with `layers` {"legs", "arms", "head"}
 ## and `poses` (see _poses). Null unless the torso and the legs both exist. crew.json holds the
 ## shared "frame" and "pivot" and a "layers" table (image, color_mask, anims, frames, anchors each).

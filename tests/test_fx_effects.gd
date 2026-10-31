@@ -15,6 +15,8 @@ const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Content = preload("res://scripts/data/content.gd")
+const EffectFx = preload("res://scripts/combat/effect_fx.gd")
+const Art = preload("res://scripts/view/art.gd")
 
 const DT := 1.0 / 60.0
 
@@ -582,3 +584,44 @@ func test_a_fight_with_every_effect_replays_exactly() -> void:
 		snaps.append(arena.snapshot())
 	eq(snaps[0], snaps[1], "the same seed and inputs give the same arena, effects included")
 	check(snaps[0]["fx"]["timed"].size() > 0 or snaps[0]["fx"]["corroded"].size() > 0, "(and the effects were running)")
+
+
+# --- what they look like ---------------------------------------------------------------------------------------------------------
+
+func test_every_effect_event_has_pictures_in_the_views_format_and_they_replay() -> void:
+	var entries := {}
+	var again := {}
+	for run in 2:
+		_duel({"cooldown": 0.2, "damage": 0.5, "effects": {"acid": {"dps": 1.0, "seconds": 2.0}, "spores": {"o2_drain": 0.05, "seconds": 3.0},
+			"shard": {"splinters": 3, "dmg": 0.3}, "sonic": {"stun_s": 1.0}, "magnetic": {"pull": 10.0}, "corrode": {"resist_mult": 0.6, "seconds": 3.0},
+			"frost": {"slow": 0.3, "seconds": 3.0}}}, null, 5)
+		_slab()
+		for i in 6:
+			_shoot()
+			arena.step(0.3)
+		for e in arena.events:
+			if e["type"] == "effect":
+				(entries if run == 0 else again)[e["kind"]] = EffectFx.of(arena, e)
+			elif e["type"] == "hit" and e.has("dot") and run == 0:
+				entries["dot"] = EffectFx.dot(e)
+	for kind in ["acid", "spores", "shard", "sonic", "magnetic", "corrode", "dot"]:
+		check(entries.has(kind) and not entries[kind].is_empty(), "%s has pictures" % kind)
+		for f in entries.get(kind, []):
+			check(f["k"] in ["flash", "ring", "spark", "puff", "streak"] and float(f["life"]) > 0.0 and f["pos"] is Vector2, "%s: an entry in the view's format (%s)" % [kind, str(f)])
+	for kind in again:
+		eq(again[kind], entries[kind], kind + " looks the same on a replay")
+	_self_duel({"effects": {"self_room": {"o2_drain": 0.2, "heat": 20.0, "shock_dps": 1.0}}})
+	_shoot()
+	var ev: Array = _events("self_room")
+	check(not ev.is_empty() and not EffectFx.of(arena, ev[0]).is_empty(), "the shooter's own side effects show too")
+
+
+func test_the_art_looks_for_the_weapons_own_projectile_before_the_kinds() -> void:
+	Art.root = "res://tests/fixtures/art"
+	Art.clear_cache()
+	check(Art.projectile_of("my_gun", "bolt") == Art.projectile("bolt") and Art.projectile("bolt") != null, "no art of its own: the kind's")
+	check(Art.projectile_of("laser", "bolt") == Art.projectile("laser"), "art under the weapon's id wins")
+	check(Art.projectile_of("my_gun", "bolt", "_impact") == null, "no impact art, none")
+	check(Art.projectile_of("", "laser") == Art.projectile("laser"), "no id: the kind's")
+	Art.root = Art.DEFAULT_ROOT
+	Art.clear_cache()
