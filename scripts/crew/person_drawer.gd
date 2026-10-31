@@ -6,6 +6,9 @@ extends RefCounted
 ## is missing. Static: draw(canvas, ...) draws onto any CanvasItem inside its _draw().
 ## Placeholder local frame: +x is where the person faces, +y their right-hand side, in cells;
 ## everything is turned by `facing` and scaled by `cell_px`.
+## Rig kinds (art/README.md, crew.json `kind`; RIGS has the frames): normal, large (grundl), small (art fits one cell:
+## the 1x1 body of the trait `body` 1) and floating, which has no walk cycle: its `legs` layer is a trailing tail
+## (the `float` animation, played by time, else the stand frame) and the whole body bobs over its shadow.
 
 const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
@@ -20,6 +23,11 @@ const DOWN_TINT := Color(0.5, 0.5, 0.55)
 const HAND_FRESH := 0.4  ## seconds a hand job (the player holding E) counts as going on after its last tick
 const JAB := 1.5  ## source px a tool jabs forward while working
 ## The held item by the job; anything else with a job holds nothing, no job holds a pistol for the player.
+const BOB := 1.5  ## source px a floating body rises and sinks about its middle
+const BOB_RATE := 2.4  ## radians a second of that bob
+const HOVER := 1.0  ## source px further than usual that the shadow of a floating body sits
+## The frame and pivot of each rig kind in source px (art/README.md): every rig is a square frame turned about its middle.
+const RIGS := {"normal": [33, 16], "large": [49, 24], "small": [25, 12], "floating": [49, 24]}
 const JOB_ITEMS := {"extinguish": "extinguisher", "repair_breach": "wrench", "repair_component": "wrench"}
 
 
@@ -67,6 +75,16 @@ static func job_aim(m) -> float:
 	return m.facing.angle()
 
 
+## The kind of rig a crew sheet is (its crew.json `kind`; "normal" when it says none).
+static func rig_kind(sheet) -> String:
+	return str(sheet.meta.get("kind", "normal"))
+
+
+## How far up (negative: down) a floating body is lifted at the pose's time `t`, in source px; 0 for one lying down.
+static func bob(pose: Dictionary) -> float:
+	return 0.0 if pose.get("down", false) else sin(float(pose.get("t", 0.0)) * BOB_RATE) * BOB
+
+
 ## The id of the item `m` holds: by the job (see JOB_ITEMS), a pistol for the player with no job, the
 ## species' sidearm (CrewMember.sidearm) for anyone else idle in a fight (`in_combat`), else "".
 ## `clock`: the ship's clock, to tell a hand job still going on from a stale one.
@@ -105,11 +123,13 @@ static func draw(canvas, centre_px: Vector2, pose: Dictionary, palette: Dictiona
 	var k := cell_px / SpriteSheet.SRC_CELL
 	var layers := plan(sheet, pose)
 	var base := Color(DOWN_TINT if pose.get("down", false) else Color.WHITE)
-	for l in layers:  # the shadow first: the same silhouettes, one source px down and right
-		_blit(canvas, l, l["sheet"].texture, centre_px + Vector2(k, k), k, SHADOW)
+	var floating := rig_kind(sheet) == "floating"
+	var lift := Vector2(0.0, -bob(pose) * k) if floating else Vector2.ZERO  # a floating body rides over its shadow
+	for l in layers:  # the shadow first: the same silhouettes, one source px down and right (a floating body: one more)
+		_blit(canvas, l, l["sheet"].texture, centre_px + Vector2(k, k) * (1.0 + HOVER if floating else 1.0), k, SHADOW)
 	var suit := Color(palette.get("suit", "#33c6d6"))
 	for l in layers:
-		_blit(canvas, l, l["sheet"].tinted(suit) if l["tint"] else l["sheet"].texture, centre_px, k, base)
+		_blit(canvas, l, l["sheet"].tinted(suit) if l["tint"] else l["sheet"].texture, centre_px + lift, k, base)
 
 
 ## The crew art the pose asks for (art/crew/<species>/), or null: then the placeholder is drawn.
@@ -120,7 +140,7 @@ static func art_of(pose: Dictionary) -> RefCounted:
 ## The layers to draw, back to front: [{layer, sheet, frame, angle (radians, to rotate by), pos
 ## (where the frame's top-left goes, in source px from the pivot's middle), tint (colour mask applies)}].
 ## Legs turn to `move`, everything else to `aim`; the walk frame follows `phase` (the stand frame
-## when not moving or down). The item sits with its grip on the arm pose's mount; the head is a
+## when not moving or down; a floating rig has no walk: its tail plays `float` by `t`). The item sits with its grip on the arm pose's mount; the head is a
 ## hair frame, or the helmet when the pose says "helmet".
 static func plan(sheet, pose: Dictionary) -> Array:
 	var down: bool = pose.get("down", false)
@@ -129,7 +149,10 @@ static func plan(sheet, pose: Dictionary) -> Array:
 	var out := []
 	var legs = sheet.layers["legs"]
 	var frame: int = legs.start_of("stand")
-	if pose.get("moving", false) and not down and legs.has_anim("walk"):
+	if rig_kind(sheet) == "floating":
+		if not down and legs.has_anim("float"):
+			frame = legs.frame_at("float", float(pose.get("t", 0.0)))
+	elif pose.get("moving", false) and not down and legs.has_anim("walk"):
 		var n: int = legs.anims["walk"]["count"]
 		frame = legs.start_of("walk") + int(fposmod(float(pose.get("phase", 0.0)), TAU) / TAU * n) % n
 	out.append({"layer": "legs", "sheet": legs, "frame": frame, "angle": move + PI / 2.0, "pos": legs.origin_of_frame(), "tint": true})

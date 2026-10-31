@@ -11,12 +11,18 @@
 			"heal_mult": "factors on what a bed and a medbay heal them (0 = it does not)",
 			"mechanical": "true: beds do not heal them; a hurt one gets a repair_crew job (priority 75) that any other crew member does",
 			"aura": "what they give to the room they stand in while up: o2_per_s (air added), heal_per_s (hp for everyone in the room), work_mult (factor on the work speed of the OTHERS in the room)",
-			"station": "power_bonus: the part they man gets this much power while they man it (added to its figure, so a consumer draws less); manned_mult: factor on the bonuses a manned helm, weapon or shield gives",
+			"station": "power_bonus: the part they man gets this much power while they man it (added to its figure, so a consumer draws less); manned_mult: factor on the bonuses a manned helm, weapon or shield gives; evasion_add: evasion added (on top of the helm's own, not scaled by manned_mult) while they man the helm, in a fight",
 			"melee_mult": "factor on their melee damage (kept for the on-foot fights)",
 			"ranged_mult": "factor on their ranged damage (kept for the on-foot fights)",
 			"swarm": "work speed +per_other for every OTHER up crew member of the same species in their room, at most +max",
 			"dries_out": "they lose hp_per_s hit points a second in a room whose hottest part is above heat_above",
-			"ion_stun": "seconds they are stunned (no walking, no work) when an ion hit lands on their room"
+			"ion_stun": "seconds they are stunned (no walking, no work) when an ion hit lands on their room",
+			"body": "the size of their body in cells: 2 (the default) is the normal 2x2 that needs 2-wide corridors; 1 is a small 1x1 body that also walks 1-wide corridors (crawlspaces). Read when the species is set; the smallest of their traits wins; only 1 and 2 are valid",
+			"reveal_enemy": "true: while they are aboard and up, your enemy schematic in a fight shows the enemy's crew (the systems' states always show)",
+			"heat_speed": "their walk speed is multiplied by cold when the hottest part in their room is below `below`, and by hot when above `above` (a room with no part is at heat 0); cold and hot multiply, the widest thresholds win",
+			"vacuum_walk": "true: no air penalties. They do not take damage in thin air, and the vacuum will not slow them. They still breathe unless o2_use is 0",
+			"no_tools": "true: they take no repair or extinguish jobs (extinguish, repair_breach, repair_component, repair_crew); every other job is theirs",
+			"hull_mend": "while idle (no job, not walking) they mend what is next to their body: rate = hit points a second, in all, of the damaged walls beside them; seal = seconds to close a breach beside them (0 = they cannot). Rates add, the quickest seal wins"
 		}
 	},
 	"traits": {
