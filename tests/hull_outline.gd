@@ -72,7 +72,9 @@ static func rasterize(outline: Array) -> Dictionary:
 ## Sort the cells of rasterize() into {Vector2i: {"tile": tile id, "shape": {}}}: the tile is "floor", "wall"
 ## (steel) or a plating tile. `skin_of` is a Callable(cell) -> the plating tile id of a skin cell, "" for steel;
 ## `behind_of` (optional) the same for a cell behind a plated skin cell ("" or no Callable: steel).
-static func layers(cells: Dictionary, skin_of: Callable, behind_of := Callable()) -> Dictionary:
+## `backed` (optional) is a Callable(cell) -> bool: does this plated skin cell get a wall behind it? (No Callable:
+## every one does.) A plated skin cell without one is the only layer there, so the rooms keep their floor.
+static func layers(cells: Dictionary, skin_of: Callable, behind_of := Callable(), backed := Callable()) -> Dictionary:
 	var out := {}
 	for c in cells:
 		var skin: bool = not cells[c].is_empty()
@@ -83,7 +85,7 @@ static func layers(cells: Dictionary, skin_of: Callable, behind_of := Callable()
 			out[c] = {"tile": id if id != "" else "wall", "shape": cells[c]}
 	var behind := {}
 	for c in out:
-		if out[c]["tile"] != "wall":
+		if out[c]["tile"] != "wall" and (not backed.is_valid() or backed.call(c)):
 			for d in SIDES:
 				if cells.has(c + d) and not out.has(c + d):
 					behind[c + d] = true
