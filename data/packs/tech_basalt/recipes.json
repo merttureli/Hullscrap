@@ -1,0 +1,53 @@
+{
+  "recipes": [
+    {
+      "id": "basalt_magma_spitter",
+      "output": {
+        "item": "basalt_magma_spitter",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 8,
+        "titanium": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "basalt_quarry_driver",
+      "output": {
+        "item": "basalt_quarry_driver",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 60,
+        "copper": 12,
+        "titanium": 16,
+        "void_crystal": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 55,
+      "category": "system"
+    },
+    {
+      "id": "basalt_pumice_flak",
+      "output": {
+        "item": "basalt_pumice_flak",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 28,
+        "copper": 8,
+        "titanium": 5
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    }
+  ]
+}

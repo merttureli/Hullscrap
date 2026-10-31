@@ -1,0 +1,91 @@
+{
+  "components": [
+    {
+      "id": "basalt_magma_spitter",
+      "name": "Magma Spitter",
+      "blurb": "Spits slag that keeps eating after it lands. The breech room is aired out with every shot, which the Basalt consider polite.",
+      "quirk": "Slag glob plus acid that burns on for 4 s (+30% damage a second over a Mk2 pulse), but each shot vents 30% of its room's air: Basalt do not breathe.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#d9602a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "basalt_quarry_driver",
+      "name": "Quarry Driver",
+      "blurb": "A quarry slug on a rail. It goes through what you point it at and a few things behind. The room airs out; the Basalt call it a breeze.",
+      "quirk": "A 9-damage slug that pierces 3, but it is slow, and each shot vents 40% of its room's air: Basalt do not breathe.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#8a7f74",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "basalt_pumice_flak",
+      "name": "Pumice Flak",
+      "blurb": "Throws rock in handfuls. It aims best in the dark and the quiet, where the old hands run it.",
+      "quirk": "A splashing flak turret, but at half damage unless a Basalt mans it: they work it airless, steady and unbothered.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#a89a8a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    }
+  ]
+}

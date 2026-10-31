@@ -1,0 +1,9 @@
+{
+  "id": "tech_human",
+  "name": "Racial tech: Human",
+  "version": "1.0",
+  "requires": [
+    "engines_1"
+  ],
+  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons. stock_hint: human_core."
+}

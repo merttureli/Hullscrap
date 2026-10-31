@@ -1,0 +1,56 @@
+{
+  "recipes": [
+    {
+      "id": "human_volley_rack",
+      "output": {
+        "item": "human_volley_rack",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 14,
+        "titanium": 5,
+        "silicon": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 32,
+      "category": "system"
+    },
+    {
+      "id": "human_concord_railgun",
+      "output": {
+        "item": "human_concord_railgun",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "copper": 18,
+        "titanium": 14,
+        "silicon": 8,
+        "military_circuit": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 50,
+      "category": "system"
+    },
+    {
+      "id": "human_flak_screen",
+      "output": {
+        "item": "human_flak_screen",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 12,
+        "titanium": 5,
+        "silicon": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 28,
+      "category": "system"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "components": [
+    {
+      "id": "kett_hive_swarm_launcher",
+      "name": "Hive Swarm Launcher",
+      "blurb": "A rack of hungry drones. Many hands make it fast; one hand makes it sad.",
+      "quirk": "Six tiny homing drones a salvo (+50% damage a second over the Artemis) but it fires at 0.4 the rate unless 3 crew stand in its room: Kett work in threes.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#c98a2a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "kett_chitin_thrower",
+      "name": "Chitin Thrower",
+      "blurb": "Throws shed plate in a cone. It takes two to feed it, and no Kett has ever wished to be fewer.",
+      "quirk": "A wide cone of chitin needles that splinter into the next cell, but it fires at half rate unless 2 crew stand in its room.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#b87a2a",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "kett_drone_picket",
+      "name": "Drone Picket",
+      "blurb": "Two crewmates, one watchful drone. The hive keeps its pickets in pairs.",
+      "quirk": "A twin-drone turret that hits 30% harder than a Mk2 pulse turret, but it fires at half rate unless 2 crew stand in its room.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#d9a24a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    }
+  ]
+}

@@ -74,6 +74,12 @@ func test_data_is_complete() -> void:
 		"heat_lance_neon": [-4, 5, 1], "leech_laser": [-3, 5, 2], "breach_harpoon": [-2, 5, 2],
 		"shield_scrap_mk1": [-3, 3, 1], "shield_mk2": [-4, 3, 2], "shield_neon_mk1": [-4, 3, 1], "mirror_veil": [-3, 3, 2],
 		"afterburner": [-3, 4, 2], "inertial_dampener": [-2, 3, 2], "battering_bow": [0, 0, 2], "reactor_scrap_kettle": [8, 0, 1],
+		# racial tech, human / basalt / emberkin / fenn / kett (data/packs/tech_*): weapons
+		"human_volley_rack": [-3, 5, 2], "human_concord_railgun": [-5, 5, 3], "human_flak_screen": [-4, 5, 2],
+		"basalt_magma_spitter": [-3, 5, 2], "basalt_quarry_driver": [-4, 5, 3], "basalt_pumice_flak": [-4, 5, 2],
+		"emberkin_pyre_lance": [-4, 5, 2], "emberkin_cinder_mortar": [-3, 5, 2], "emberkin_flare_turret": [-3, 5, 1],
+		"fenn_twitch_cannon": [-3, 5, 2], "fenn_spark_lattice": [-4, 5, 2], "fenn_market_missile": [-3, 5, 2],
+		"kett_hive_swarm_launcher": [-3, 5, 2], "kett_chitin_thrower": [-2, 5, 1], "kett_drone_picket": [-4, 5, 2],
 		# the Raft loop (docs/CONTENT.md section 11)
 		"net_mouth_scrap": [0, 0, 1], "intake_mk1": [-1, 6, 1],
 		# engine wave 1 (data/packs/engines_1)

@@ -1,0 +1,55 @@
+{
+  "recipes": [
+    {
+      "id": "emberkin_pyre_lance",
+      "output": {
+        "item": "emberkin_pyre_lance",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 10,
+        "titanium": 6,
+        "plasma_cell": 1
+      },
+      "fab_level": 2,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 45,
+      "category": "system"
+    },
+    {
+      "id": "emberkin_cinder_mortar",
+      "output": {
+        "item": "emberkin_cinder_mortar",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 28,
+        "copper": 10,
+        "titanium": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "emberkin_flare_turret",
+      "output": {
+        "item": "emberkin_flare_turret",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 14,
+        "copper": 10,
+        "silicon": 3
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 25,
+      "category": "system"
+    }
+  ]
+}

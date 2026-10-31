@@ -1,0 +1,53 @@
+{
+  "recipes": [
+    {
+      "id": "fenn_twitch_cannon",
+      "output": {
+        "item": "fenn_twitch_cannon",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 18,
+        "copper": 12,
+        "titanium": 4,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "fenn_spark_lattice",
+      "output": {
+        "item": "fenn_spark_lattice",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 18,
+        "copper": 14,
+        "silicon": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 35,
+      "category": "system"
+    },
+    {
+      "id": "fenn_market_missile",
+      "output": {
+        "item": "fenn_market_missile",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 8,
+        "polymer": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 28,
+      "category": "system"
+    }
+  ]
+}

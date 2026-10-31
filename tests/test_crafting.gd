@@ -156,7 +156,7 @@ func test_start_blueprints() -> void:
 		var d: Dictionary = comps.def(id)
 		if d.get("unique", false):
 			check(not c.is_known(id), "unique %s has no blueprint" % id)
-		elif d["family"] != "workshop" and d["tier"] == 1 and not id in NO_RECIPE_YET:
+		elif d["family"] != "workshop" and d["tier"] == 1 and not id in NO_RECIPE_YET and not Content.origin("components", id).begins_with("tech_"):  # racial tech (tech_<race> packs) is found or bought, never known at the start
 			if d.get("line", "standard") == "neon" or id in MK1_TO_UNLOCK:
 				check(not c.is_known(id), "Neon system %s must be unlocked" % id)
 			else:

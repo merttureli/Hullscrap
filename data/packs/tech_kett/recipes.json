@@ -1,0 +1,54 @@
+{
+  "recipes": [
+    {
+      "id": "kett_hive_swarm_launcher",
+      "output": {
+        "item": "kett_hive_swarm_launcher",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 26,
+        "copper": 8,
+        "polymer": 6,
+        "titanium": 3
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 32,
+      "category": "system"
+    },
+    {
+      "id": "kett_chitin_thrower",
+      "output": {
+        "item": "kett_chitin_thrower",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 14,
+        "copper": 4,
+        "polymer": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 22,
+      "category": "system"
+    },
+    {
+      "id": "kett_drone_picket",
+      "output": {
+        "item": "kett_drone_picket",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "polymer": 4,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    }
+  ]
+}

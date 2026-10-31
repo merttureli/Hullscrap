@@ -1,0 +1,9 @@
+{
+  "id": "tech_kett",
+  "name": "Racial tech: Kett",
+  "version": "1.0",
+  "requires": [
+    "races_1"
+  ],
+  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons. stock_hint: kett_hives."
+}
