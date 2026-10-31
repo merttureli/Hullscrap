@@ -8,8 +8,9 @@ const Content = preload("res://scripts/data/content.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 ## Save format. 2 adds each instance's hp, heat and status; 3 adds the outside half of a hull mount
 ## (`out`, `out_hp`) and the wrecks; versions 1 and 2 still load (full hp, cold, ok; a weapon or engine
-## with no `out` is mounted through the wall on its outward side if it can be, else back to the cargo).
-const VERSION := 3
+## with no `out` is mounted through the wall on its outward side if it can be, else back to the cargo). 4 adds the
+## optional contents of an ammo rack (`ammo`, `n`) and the units a gun has loaded from a belt (`loaded`).
+const VERSION := 4
 const MIN_VERSION := 1
 ## An instance's status: ok, or one of the ways it can be out of action.
 const STATUSES: Array[String] = ["ok", "overheated", "malfunction", "disabled"]
@@ -263,6 +264,11 @@ func to_dict() -> Dictionary:
 		if not i["out_cells"].is_empty():
 			rec["out"] = [i["out_anchor"].x, i["out_anchor"].y]
 			rec["out_hp"] = i["out_hp"]
+		if int(i.get("n", 0)) > 0 or str(i.get("ammo", "")) != "":  # an ammo rack's contents
+			rec["ammo"] = str(i.get("ammo", ""))
+			rec["n"] = int(i.get("n", 0))
+		if int(i.get("loaded", 0)) > 0:  # what a gun has taken off a belt
+			rec["loaded"] = int(i["loaded"])
 		list.append(rec)
 	var d := {"version": VERSION, "next_uid": _next_uid, "instances": list}
 	if not wrecks.is_empty():
@@ -362,6 +368,11 @@ func _load_state(inst: Dictionary, saved: Dictionary) -> void:
 		inst["status"] = str(saved["status"])
 	if not inst["out_cells"].is_empty() and (saved.get("out_hp") is float or saved.get("out_hp") is int):
 		inst["out_hp"] = clampi(int(saved["out_hp"]), 0, outside_hp_max(inst["id"]))
+	if saved.get("n") is float or saved.get("n") is int:
+		inst["n"] = maxi(0, int(saved["n"]))
+		inst["ammo"] = str(saved.get("ammo", ""))
+	if saved.get("loaded") is float or saved.get("loaded") is int:
+		inst["loaded"] = maxi(0, int(saved["loaded"]))
 
 
 ## A floor-type tile: something is built there and it is neither solid (wall) nor a door.
