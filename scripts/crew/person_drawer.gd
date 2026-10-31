@@ -95,7 +95,7 @@ static func is_working(m, clock: float) -> bool:
 
 ## Draw a person centred on `centre_px`. `pose`: {species ("human"), move (angle they walk, radians,
 ## 0 = right), aim (angle the torso points), phase (walk phase, radians), moving, item (id or ""),
-## down, work (the tool jabs), helmet, t (seconds)}. `palette`: "suit" colour tints the outfit.
+## down, work (the tool jabs), helmet, head (the name of a head frame to wear), t (seconds)}. `palette`: "suit" colour tints the outfit.
 static func draw(canvas, centre_px: Vector2, pose: Dictionary, palette: Dictionary, cell_px: float) -> void:
 	var sheet = art_of(pose)
 	if sheet == null:
@@ -151,6 +151,7 @@ static func plan(sheet, pose: Dictionary) -> Array:
 	var head = sheet.layers.get("head")
 	if head != null:
 		var hf: int = head.named_frames.get("helmet" if pose.get("helmet", false) else "hair", 0)
+		hf = head.named_frames.get(str(pose.get("head", "")), hf)  # a character's own head frame (CrewMember.head)
 		out.append({"layer": "head", "sheet": head, "frame": hf, "angle": aim + PI / 2.0, "pos": head.origin_of_frame(), "tint": true})
 	return out
 

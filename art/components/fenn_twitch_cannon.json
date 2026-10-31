@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "fenn_twitch_cannon_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Fenn Twitch Cannon: a small escapement gear that ticks half a step on every charge frame, a spring, and a row of ten tiny lamps that fill two per step (frame 5 = all green); power coupling, small hatch. fire: the lamps flash white and the spring is slack. damaged: the gear cracked and out of true, lamps dead, sparks; disabled: the gear off its axle, the spring sprung. Barrel layer fenn_twitch_cannon_barrel: a slim steel barrel with a coiled recoil spring and a slotted muzzle brake; it twitches (fire recoil 2/1/0).",
+ "offset": [
+  0,
+  -4
+ ]
+}

@@ -1,0 +1,20 @@
+{
+ "frame": [16, 16],
+ "anims": {
+  "play": [0, 4, 14]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [8, 8]
+ },
+ "glow": {
+  "image": "grundl_grapple_harpoon_impact_glow.png",
+  "frame": [24, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Grundl Grapple Harpoon hit: a metal clang, a pale ring and orange sparks with flying steel chips (4 frames)."
+}

@@ -1,9 +1,10 @@
 extends "res://tests/base_test.gd"
 ## No premade ship is a rectangle (docs/CONTENT.md 4c): the three starters, the pirate raider and the
-## Rustfang rammer each have a real silhouette of shaped cells, every gun and engine is mounted through
-## a flat wall run into open space, every floor cell can be reached by a crew body from the helm, and
-## each ship keeps what it was: the same parts and cargo, a mass and a hull integrity within 15% of the
-## rectangular ship it replaced, power that balances and rooms that hold air.
+## Rustfang rammer each have a real silhouette of shaped cells (a starter's silhouette is its big hull
+## frame, with shaped cells on the core built in it), every gun and engine is mounted through a flat wall
+## run into open space, every floor cell can be reached by a crew body from the helm, and each ship keeps
+## what it is: its parts and cargo, a mass and a hull integrity within 15% of the numbers pinned below,
+## power that balances and rooms that hold air.
 ## tests/tool_make_starters.gd and tests/tool_make_rammer.gd rebuild the files.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -13,26 +14,28 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 
-const MAX_FILL := 0.85  ## the area of a ship's built cells (a slope or a curve counts its solid part) over the area of their bounding box
+const MAX_FILL := 0.85  ## the area of a ship's built cells (a slope or a curve counts its solid part) over the area of their bounding box; for a starter, its hull frame over the box of the frame
 const MIN_SHAPED := 4  ## cells that are slopes or curves
-const TOLERANCE := 0.15  ## how far mass and hull integrity may drift from the rectangular ships
+const TOLERANCE := 0.15  ## how far mass and hull integrity may drift from the numbers pinned below
 
-## What each ship was as a rectangle: its flight mass and hull integrity, its parts and its cargo.
+## What each ship is: its flight mass and hull integrity, its parts and its cargo. The three starters
+## ("frame": true) are big hull frames with only the essentials built (docs/CONTENT.md 4c, "Start with
+## very little"); the pirate and the rammer are the ships they were.
 const SHIPS := {
 	"Rustbucket": {
-		"path": "res://data/ships/starter_rustbucket.json", "mass": 1567.0, "hull": 228.0,
-		"parts": {"bed": 2, "bolt_thrower_scrap": 1, "engine_scrap_mk1": 2, "fabricator": 1, "helm": 1, "oxygen_scrap_mk1": 1, "radiator": 1, "rattle_burst_scrap": 1, "reactor_mk2": 1, "reactor_scrap_mk1": 2, "shield_scrap_mk1": 1, "shrapnel_cannon_scrap": 1},
-		"cargo": {"scrap": 900, "copper": 60, "polymer": 12, "engine_scrap_mk1": 1, "radiator": 1, "bed": 1, "credits": 300, "fuel": 6},
+		"path": "res://data/ships/starter_rustbucket.json", "mass": 733.0, "hull": 246.0, "frame": true,
+		"parts": {"bed": 2, "engine_scrap_mk1": 2, "fabricator": 1, "helm": 1, "oxygen_scrap_mk1": 1, "radiator": 1, "rattle_burst_scrap": 1, "reactor_mk2": 1},
+		"cargo": {"scrap": 500, "copper": 80, "polymer": 30, "shield_scrap_mk1": 1, "net_mouth_scrap": 1, "credits": 300, "fuel": 6},
 	},
 	"Courier": {
-		"path": "res://data/ships/starter_courier.json", "mass": 1154.0, "hull": 68.0,
-		"parts": {"bed": 2, "engine_mk1": 2, "engine_mk2": 2, "fabricator": 1, "helm": 1, "laser_mk1": 2, "oxygen_gen": 1, "pulse_mk1": 1, "radiator": 1, "reactor_mk2": 2, "shield_mk1": 1},
-		"cargo": {"scrap": 220, "copper": 80, "titanium": 40, "polymer": 10, "engine_mk1": 1, "laser_mk1": 1, "afterburner": 1, "radiator": 1, "credits": 500, "fuel": 6},
+		"path": "res://data/ships/starter_courier.json", "mass": 574.0, "hull": 168.0, "frame": true,
+		"parts": {"bed": 2, "engine_mk2": 2, "fabricator": 1, "helm": 1, "oxygen_gen": 1, "pulse_mk1": 1, "reactor_mk2": 1},
+		"cargo": {"scrap": 400, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "shield_mk1": 1, "credits": 500, "fuel": 6},
 	},
 	"Prism": {
-		"path": "res://data/ships/starter_prism.json", "mass": 743.0, "hull": 48.0,
-		"parts": {"bed": 2, "engine_neon_mk1": 1, "fabricator": 1, "heat_lance_neon": 1, "helm": 1, "oxygen_gen": 1, "radiator": 3, "reactor_neon_mk1": 1, "shield_neon_mk1": 1, "siren_ion_neon": 1},
-		"cargo": {"scrap": 120, "copper": 60, "polymer": 10, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "radiator": 1, "bed": 1, "credits": 400, "fuel": 6},
+		"path": "res://data/ships/starter_prism.json", "mass": 451.0, "hull": 152.0, "frame": true,
+		"parts": {"bed": 2, "engine_neon_mk1": 1, "fabricator": 1, "heat_lance_neon": 1, "helm": 1, "oxygen_gen": 1, "radiator": 2, "reactor_neon_mk1": 1},
+		"cargo": {"scrap": 400, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "shield_neon_mk1": 1, "credits": 400, "fuel": 6},
 	},
 	"Pirate Raider": {
 		"path": "res://data/ships/pirate_raider.json", "mass": 732.0, "hull": 64.0,
@@ -101,10 +104,10 @@ func test_no_ship_is_a_rectangle() -> void:
 		var lo := Vector2i(1 << 20, 1 << 20)
 		var hi := Vector2i(-(1 << 20), -(1 << 20))
 		var area := 0.0
-		for c in g.tiles:
+		for c in (g.hull if SHIPS[key].get("frame", false) else g.tiles):  # a starter's silhouette is its frame
 			lo = lo.min(c)
 			hi = hi.max(c)
-			area += g.area_at(c)
+			area += 1.0 if SHIPS[key].get("frame", false) else g.area_at(c)
 		var box := float((hi.x - lo.x + 1) * (hi.y - lo.y + 1))
 		check(area < MAX_FILL * box, "%s: its solid cells fill %.0f%% of their bounding box (under %.0f%%)" % [key, 100.0 * area / box, 100.0 * MAX_FILL])
 		check(g.shapes.size() >= MIN_SHAPED, "%s: %d shaped cells (at least %d)" % [key, g.shapes.size(), MIN_SHAPED])
@@ -122,7 +125,7 @@ func test_every_mount_sits_on_a_flat_wall_with_its_outside_half_in_space() -> vo
 			if Mounts.is_mount(comps.def(comps.instances[uid]["id"])):
 				mounts.append(uid)
 		mounts.sort()
-		check(mounts.size() >= 3, "%s has its guns and engines mounted (%d)" % [key, mounts.size()])
+		check(mounts.size() >= 2, "%s has its guns and engines mounted (%d)" % [key, mounts.size()])
 		var rear := 0
 		for uid in mounts:
 			var inst: Dictionary = comps.instances[uid].duplicate(true)
@@ -165,7 +168,7 @@ func test_every_floor_cell_is_reachable_from_the_helm() -> void:
 func test_the_ships_keep_their_parts_cargo_and_numbers() -> void:
 	for key in SHIPS:
 		var ship := _ship(key)
-		eq(_parts(ship), SHIPS[key]["parts"], key + ": the same parts as the rectangular ship")
+		eq(_parts(ship), SHIPS[key]["parts"], key + ": the same parts")
 		eq(ship.inventory.to_dict(), SHIPS[key]["cargo"], key + ": the same cargo")
 		var arena := Arena.new(1)
 		arena.add_ship(ship)

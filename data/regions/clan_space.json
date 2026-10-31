@@ -1,0 +1,25 @@
+{
+	"id": "clan_space",
+	"name": "Clan Space",
+	"home_species": "",
+	"faction": "clans",
+	"stages": [1, 1],
+	"weight": 10,
+	"rarity": "common",
+	"danger": 1.0,
+	"palette": {"tint": "#e1a136", "nebula": "clan"},
+	"map": {},
+	"node_weights": {},
+	"places": [
+		{"id": "rusthold", "name": "Gantry Rusthold", "type": "station", "faction": "clans", "pos": [70, 500], "start": true}
+	],
+	"debris": {"scrap_chunk_s": 1.2, "scrap_chunk_m": 1.2},
+	"pois": {"pirate_nest": 1.3},
+	"ambient": {"pirate": 5, "trader": 3, "patrol": 1},
+	"stock": {},
+	"recruit": {},
+	"enemies": "rustfangs",
+	"hazards": ["debris_surge"],
+	"events": "clan_space",
+	"blurb": "Where every run begins: Gantry Rusthold, a hundred welded wrecks spinning on borrowed parts, and Ma Gantry's ledger with your name in it. Rustfangs work the lanes, and the scrap is thick and free for the shooting."
+}

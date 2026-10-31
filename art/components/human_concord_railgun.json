@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "human_concord_railgun_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Human Concord Railgun: a bank of four tall capacitors that fill with blue-white charge from the bottom (frame 5 = all four bright, strip green), thick power coupling, hatch. fire: the bank flashes white and drops dark. damaged: one capacitor cracked and weeping, two cells dead; disabled: the bank dark, a capacitor split. Barrel layer human_concord_railgun_barrel: two long parallel rails with blue field coils and a bright gap between them; fire: a blue-white flash and arc at the muzzle.",
+ "offset": [
+  0,
+  -4
+ ]
+}

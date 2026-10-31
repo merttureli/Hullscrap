@@ -1,0 +1,81 @@
+{
+ "frame": [
+  9,
+  14
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   18
+  ]
+ },
+ "anchors": {
+  "head": [
+   4,
+   1
+  ],
+  "tail": [
+   4,
+   12
+  ]
+ },
+ "glow": {
+  "image": "fenn_spark_lattice_glow.png",
+  "frame": [
+   17,
+   22
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    18
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "fenn_spark_lattice_impact.png",
+  "frame": [
+   16,
+   16
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    16
+   ]
+  },
+  "anchor": [
+   8,
+   8
+  ],
+  "glow": {
+   "image": "fenn_spark_lattice_impact_glow.png",
+   "frame": [
+    24,
+    24
+   ],
+   "offset": [
+    -4,
+    -4
+   ],
+   "anims": {
+    "play": [
+     0,
+     3,
+     16
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A fan of three cyan-white splinters, 9x14, that jitter over 3 frames: the lattice fires shards. Head anchor is the lead splinter tip."
+}

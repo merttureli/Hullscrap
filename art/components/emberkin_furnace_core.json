@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "emberkin_furnace_core_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Emberkin \"Furnace Core\" reactor: a gunmetal body in a riveted brass frame round a big arched furnace door full of live flame (4-frame flicker), four brass corner stacks with pilot lights chasing round, navy enamel plates north and south, pressure gauges east and west, and feed pipes. Damaged: the door ring dented with fire spilling out of the crack, the NE stack leaning and burning crooked, a gauge cracked. Disabled: cold ash in the door, the door buckled, a stack fallen, soot streaks."
+}

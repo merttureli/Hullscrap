@@ -1,0 +1,7 @@
+{
+  "id": "a_chars",
+  "name": "Fixture characters",
+  "version": "1.0",
+  "requires": [],
+  "notes": "Test fixture: three unique characters and a species with an ability, see tests/test_crew_abilities.gd."
+}

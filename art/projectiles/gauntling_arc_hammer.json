@@ -1,0 +1,38 @@
+{
+ "frame": [10, 14],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 4, 14]
+ },
+ "anchors": {
+  "head": [5, 6],
+  "tail": [5, 13]
+ },
+ "glow": {
+  "image": "gauntling_arc_hammer_glow.png",
+  "frame": [18, 22],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 4, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Gauntling Arc Hammer shot (ion plus kinetic): a dull steel slug wrapped in crackling cyan arcs that jump to new places every frame (4 frames).",
+ "impact": {
+  "image": "gauntling_arc_hammer_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "gauntling_arc_hammer_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 14]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

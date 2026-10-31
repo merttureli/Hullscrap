@@ -3,11 +3,11 @@ extends RefCounted
 ## (data/packs/<id>/) add to it. Every kind is read from the core file, then from the same file of every
 ## pack in alphabetical pack order, and merged by id:
 ##   Content.list("components")      the merged entries (copies: change them freely)
-##   Content.events() / ships() / names()
+##   Content.events() / ships() / regions() / names()
 ##   Content.read("res://data/components.json")   a drop-in for JSON.parse_string(FileAccess.get_file_as_string(path)):
 ##                                   the core file's own shape with the pack entries merged in (other paths are read as they are)
 ## A pack is a folder with a pack.json ({id, name, version, requires, notes}) and any of <kind>.json,
-## names.json, events/*.json and ships/*.json. An entry may be a list element with an `id` or a key of an
+## names.json, events/*.json, ships/*.json and regions/*.json. An entry may be a list element with an `id` or a key of an
 ## object (weapons.json is keyed by id); packs may use either. A duplicate id is an error unless the later
 ## entry says "override": true and gives a "reason"; it then replaces the earlier one whole. Problems never
 ## stop the load: they collect in errors() (tests/test_content.gd fails on them). Parsed files are cached;
@@ -16,14 +16,14 @@ extends RefCounted
 const DATA_ROOT := "res://data"
 const ART_ROOT := "res://art"
 ## The kinds that are one <kind>.json each. Their entries sit under the key of the same name unless FILE_KEYS says otherwise.
-const KINDS: Array[String] = ["components", "weapons", "recipes", "items", "materials", "tiles", "species", "traits", "hand_weapons", "factions", "unlocks", "endings"]
+const KINDS: Array[String] = ["components", "weapons", "recipes", "items", "materials", "tiles", "species", "traits", "hand_weapons", "factions", "unlocks", "endings", "characters"]
 const FILE_KEYS := {"hand_weapons": "weapons"}
-## The kinds that are read from folders of files.
-const FOLDER_KINDS: Array[String] = ["events", "ships"]
+## The kinds that are read from folders of files. A region file (regions/<id>.json) is one region object.
+const FOLDER_KINDS: Array[String] = ["events", "ships", "regions"]
 const PACK_FIELDS: Array[String] = ["id", "name", "version", "requires"]
 ## What else a pack folder may hold (anything .json or any folder not listed is reported as a typo).
 const PACK_EXTRA_FILES: Array[String] = ["pack.json", "names.json", "logs.json"]
-const PACK_FOLDERS: Array[String] = ["events", "ships", "logs"]
+const PACK_FOLDERS: Array[String] = ["events", "ships", "logs", "regions"]
 
 ## Where the core files are; tests point it at a fixture folder.
 static var root := DATA_ROOT
@@ -94,6 +94,12 @@ static func events() -> Array:
 ## Every ship design of data/ships/*.json and of every pack's ships/*.json: {id (the file name), name, path, pack, design}.
 static func ships() -> Array:
 	return list("ships")
+
+
+## Every region of data/regions/*.json and of every pack's regions/*.json (docs/CONTENT.md section 15): one object per
+## file, its id the `id` field (the file name when it has none).
+static func regions() -> Array:
+	return list("regions")
 
 
 ## The name pools of names.json (core, then the packs): pool -> names. Lists are joined and objects merged.
@@ -263,10 +269,8 @@ static func _load_kind(kind: String) -> Dictionary:
 		return _kinds[kind]
 	var k := {"ids": [], "map": {}, "origin": {}, "file": {}, "core": null, "body_key": FILE_KEYS.get(kind, kind), "dict": false}
 	_kinds[kind] = k
-	if kind == "events":
-		_add_folder(k, kind, "events")
-	elif kind == "ships":
-		_add_folder(k, kind, "ships")
+	if FOLDER_KINDS.has(kind):
+		_add_folder(k, kind, kind)
 	elif KINDS.has(kind):
 		_add_file(k, kind, root + "/" + kind + ".json", "core")
 		for p in _packs:
@@ -316,6 +320,12 @@ static func _add_folder(k: Dictionary, kind: String, folder: String) -> void:
 					_add(k, kind, id, {"id": id, "name": str(data.get("name", id)), "path": path, "pack": place[0], "design": data}, place[0], path, data)
 				else:
 					_errors.append("%s: expected a ship design object" % path)
+			elif kind == "regions":
+				if data is Dictionary:
+					var rid := str(data.get("id", f.get_basename()))
+					_add(k, kind, rid, data, place[0], path, data)
+				else:
+					_errors.append("%s: expected a region object" % path)
 			else:
 				var body = data.get("events") if data is Dictionary else data
 				for pair in _pairs(body, path):

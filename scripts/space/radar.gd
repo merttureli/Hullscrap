@@ -10,6 +10,7 @@ extends RefCounted
 ## identification). A part works when it is not disabled and, if it draws power, is powered (as an intake does).
 
 const Content = preload("res://scripts/data/content.gd")
+const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 
 const PATH := "res://data/sectors.json"
 const CONTACT := "contact"  ## known_type of a contact whose type is not known yet
@@ -64,14 +65,15 @@ static func reach(ship) -> float:
 ## `poi` is the sector's POI dictionary (an ambient contact too; a `done` POI stays listed, it is the HUD's call to
 ## dim it), `bearing` the direction to it in radians in flight.gd's convention (0 up, clockwise on screen, so
 ## `bearing - flight.angle` is the turn needed), `distance` in px, `known_type` the POI's type or CONTACT, and `via`
-## how it is seen: "beacon", "radar" or "visual".
+## how it is seen: "beacon", "radar" or "visual". While a crew member's scan ability runs (CrewFx.scan_left) the
+## radar also finds the hidden contacts within its range, and names what every contact is.
 static func contacts(sector, ship) -> Array:
 	var r := ranges(ship)
-	return contacts_for(sector, float(r["range"]), float(r["identify_range"]))
+	return contacts_for(sector, float(r["range"]), float(r["identify_range"]), ship != null and CrewFx.scan_left(ship) > 0.0)
 
 
-## contacts() for given radar numbers (px), so a test or a HUD can ask without a ship.
-static func contacts_for(sector, radar_range: float, identify_range: float) -> Array:
+## contacts() for given radar numbers (px), so a test or a HUD can ask without a ship. `reveal`: a scan is running.
+static func contacts_for(sector, radar_range: float, identify_range: float, reveal := false) -> Array:
 	var visual := float(config()["visual"])
 	var out := []
 	for poi in sector.all_pois():
@@ -86,9 +88,11 @@ static func contacts_for(sector, radar_range: float, identify_range: float) -> A
 			_:  # hidden
 				if d <= visual:
 					via = "visual"
+				elif reveal and d <= radar_range:
+					via = "radar"
 		if via == "":
 			continue
-		var known: bool = via == "beacon" or d <= identify_range or d <= visual
+		var known: bool = via == "beacon" or d <= identify_range or d <= visual or reveal
 		out.append({"poi": poi, "bearing": wrapf((poi["pos"] - sector.ship_pos).angle() + PI / 2.0, -PI, PI), "distance": d,
 			"known_type": str(poi["type"]) if known else CONTACT, "via": via})
 	out.sort_custom(func(a, b): return a["distance"] < b["distance"] or (a["distance"] == b["distance"] and str(a["poi"]["id"]) < str(b["poi"]["id"])))

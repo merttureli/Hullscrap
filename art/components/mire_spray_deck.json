@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   8
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "mire_spray_deck_glow.png",
+  "frame": [
+   44,
+   44
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    8
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Mire Spray Deck, 2x2: a teal frame round a drain grate, four brass spray heads in the corners that throw arcs of water in turn onto a puddle in the middle (the 4-frame loop), a red hand-wheel in the middle of each edge. Off: a dry grate, heads dull. Damaged: one head hangs loose and sprays sideways, the frame is cracked. Disabled: the heads are snapped, the grate dark and dry."
+}

@@ -1,0 +1,81 @@
+{
+ "frame": [
+  8,
+  14
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   4,
+   12
+  ]
+ },
+ "anchors": {
+  "head": [
+   4,
+   3
+  ],
+  "tail": [
+   4,
+   13
+  ]
+ },
+ "glow": {
+  "image": "basalt_magma_spitter_glow.png",
+  "frame": [
+   18,
+   24
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "fly": [
+    0,
+    4,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "basalt_magma_spitter_impact.png",
+  "frame": [
+   16,
+   16
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    12
+   ]
+  },
+  "anchor": [
+   8,
+   8
+  ],
+  "glow": {
+   "image": "basalt_magma_spitter_impact_glow.png",
+   "frame": [
+    26,
+    26
+   ],
+   "offset": [
+    -5,
+    -5
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     12
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A glob of glowing slag, 8x14: a yellow-white core in an orange skin with a red rim, and a tail of drips (4 frames, 12 fps; the core flutters). Head anchor is the glob centre."
+}

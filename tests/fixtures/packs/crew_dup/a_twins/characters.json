@@ -1,0 +1,6 @@
+{
+  "characters": [
+    {"id": "fx_twin_a", "name": "Twin", "species": "human", "ability": {"id": "rally"}, "obtained": "Test fixture.", "lore": "One."},
+    {"id": "fx_twin_b", "name": "Twin", "species": "human", "ability": {"id": "rally"}, "obtained": "Test fixture.", "lore": "Two."}
+  ]
+}

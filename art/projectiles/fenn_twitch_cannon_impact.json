@@ -1,0 +1,40 @@
+{
+ "frame": [
+  12,
+  12
+ ],
+ "anims": {
+  "play": [
+   0,
+   3,
+   18
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   6,
+   6
+  ]
+ },
+ "glow": {
+  "image": "fenn_twitch_cannon_impact_glow.png",
+  "frame": [
+   18,
+   18
+  ],
+  "offset": [
+   -3,
+   -3
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    18
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "A little spark pop: white disc, a ring of cyan and yellow sparks, scatter (3 frames, 12x12)."
+}

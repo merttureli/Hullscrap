@@ -8,6 +8,7 @@ extends RefCounted
 const Content = preload("res://scripts/data/content.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const Sector = preload("res://scripts/space/sector.gd")
+const Regions = preload("res://scripts/space/regions.gd")
 
 const PATH := "res://data/endings.json"
 const KEYS: Array[String] = ["id", "title", "epilogue", "base_score", "par_jumps", "override", "reason"]
@@ -71,17 +72,9 @@ static func pois_done(c) -> int:
 	return n
 
 
-## The labels of the regions the run visited, in the order of the sector config.
+## The names of the regions the run crossed, in order (the campaign's route, data/regions).
 static func regions_visited(c) -> Array:
-	var seen := {}
-	for id in c.visited:
-		seen[c.region_of(str(id))] = true
-	var regions: Dictionary = Sector.config()["regions"]
-	var out := []
-	for r in regions:
-		if seen.has(r):
-			out.append(str(regions[r].get("label", r)))
-	return out
+	return c.route.map(func(id): return str(Regions.get_region(str(id)).get("name", id)))
 
 
 ## How a run to `ending_id` adds up: {total, rows: [{label, detail, points}]}. The total is never below 0.

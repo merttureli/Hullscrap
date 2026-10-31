@@ -6,6 +6,7 @@ extends RefCounted
 
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
+const Morale = preload("res://scripts/combat/morale.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -24,9 +25,14 @@ const MAX_TICKS := 8  ## substeps one frame may run, so a stall does not snowbal
 const STEER_MIN_DISTANCE := 48.0  ## px: a cursor closer to the ship than this does not turn it
 const WON_TEXT := "Pirate wrecked. Esc to return"
 const LOST_TEXT := "Your ship is wrecked. R to restart"
+const CAPTURED_TEXT := "Nobody is left standing aboard. She's yours. Esc to return"
+const SPARED_TEXT := "Deal struck. Pirate stands down. Esc to return"
+const ESCAPED_TEXT := "They got away. Esc to return"
+const ESCAPE_LOOK_S := 1.5  ## seconds the camera keeps the place the enemy jumped from in view
 
 var arena: Arena
 var ai: PilotAI
+var morale: Morale  ## the enemy's morale (morale.gd): surrender, flight, capture
 var jump_charge := -1.0  ## seconds the jump drive has spooled (J); -1 while it is not spooling
 var input := {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}  ## the player's keys, set by the view: W/S throttle, A/D "turn" (keys steering) or "strafe" (mouse steering)
 var cursor: Variant = null  ## the world point the mouse is on, set by the view each frame; the ship turns toward it (mouse steering) and the fixed guns' barrels follow it. null: keys steering, barrels at rest
@@ -65,6 +71,8 @@ func start(player: Ship, enemy: Ship, seed_value := 1) -> void:
 	arena.add_ship(player, Vector2.ZERO, 0.0)
 	arena.add_ship(enemy, Vector2(0.0, -SPAWN_DISTANCE), PI)
 	ai = PilotAI.new(arena, ENEMY, PLAYER, enemy.get_meta("ai", {}))
+	morale = Morale.new(arena, ENEMY, PLAYER, str(enemy.get_meta("ai", {}).get("morale", "default")))
+	ai.morale = morale
 	input = {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
 	cursor = null
 	_acc = 0.0
@@ -96,6 +104,7 @@ func tick(dt: float) -> void:
 			arena.aim_points[PLAYER] = cursor
 		ai.think(STEP)
 		arena.step(STEP)
+		morale.tick(STEP)
 		if jump_charge >= 0.0 and state() == "fighting":
 			jump_charge += STEP
 
@@ -121,11 +130,19 @@ func toggle_autofire() -> bool:
 	return arena.autofire[PLAYER]
 
 
-## "fighting", "won" (the enemy is wrecked) or "lost" (the player is; this wins when both are).
+## "fighting", "won" (the enemy is wrecked), "captured" (its crew is all down), "spared" (the player took its
+## surrender), "escaped" (its jump drive finished) or "lost" (the player is wrecked; this wins over all).
 func state() -> String:
 	if arena.ships[PLAYER].wrecked:
 		return "lost"
-	return "won" if arena.ships[ENEMY].wrecked else "fighting"
+	if arena.ships[ENEMY].wrecked:
+		return "won"
+	return morale.end_state() if morale != null else "fighting"
+
+
+## Y: take the enemy's surrender offer. "" when taken (the fight ends "spared"), else why not.
+func accept_surrender() -> String:
+	return morale.accept() if state() == "fighting" else "The fight is over"
 
 
 ## The line for the end of the fight ("" while it goes on).
@@ -135,6 +152,12 @@ func end_text() -> String:
 			return WON_TEXT.replace("Pirate", enemy_label)
 		"lost":
 			return LOST_TEXT
+		"captured":
+			return CAPTURED_TEXT
+		"spared":
+			return SPARED_TEXT.replace("Pirate", enemy_label)
+		"escaped":
+			return ESCAPED_TEXT
 	return ""
 
 
@@ -142,9 +165,9 @@ func distance() -> float:
 	return arena.ships[PLAYER].flight.pos.distance_to(arena.ships[ENEMY].flight.pos)
 
 
-## May the player leave (Esc)? Once the enemy is wrecked, or when the two are far apart.
+## May the player leave (Esc)? Once the enemy is wrecked, captured, spared or gone, or when the two are far apart.
 func can_leave() -> bool:
-	return arena.ships[ENEMY].wrecked or distance() > LEAVE_DISTANCE or jump_ready()
+	return arena.ships[ENEMY].wrecked or morale.end_state() != "fighting" or distance() > LEAVE_DISTANCE or jump_ready()
 
 
 ## The player's weapons in slot order: [{uid, id, name, group, turret}]: placed ones by uid, then virtual mounts as added.
@@ -250,9 +273,12 @@ func shield_sectors() -> Array:
 func framing(view: Vector2, margin := 0.2) -> Dictionary:
 	var a = arena.ships[PLAYER]
 	var b = arena.ships[ENEMY]
+	var b_pos: Vector2 = b.flight.pos
+	if morale.state == "escaped":  # it jumped away: the camera keeps the place a moment, then the player alone
+		b_pos = morale.escape_pos if arena.time() - morale.escape_time < ESCAPE_LOOK_S else a.flight.pos
 	var reach_a: float = (Shields.reach(a) + 1.0) * arena.CELL
 	var reach_b: float = (Shields.reach(b) + 1.0) * arena.CELL
-	var centre: Vector2 = (a.flight.pos + b.flight.pos) / 2.0
-	var half: Vector2 = (a.flight.pos - b.flight.pos).abs() / 2.0 + Vector2.ONE * maxf(reach_a, reach_b)
+	var centre: Vector2 = (a.flight.pos + b_pos) / 2.0
+	var half: Vector2 = (a.flight.pos - b_pos).abs() / 2.0 + Vector2.ONE * maxf(reach_a, reach_b)
 	var zoom := minf(view.x / (2.0 * half.x), view.y / (2.0 * half.y)) * (1.0 - margin)
 	return {"center": centre, "zoom": clampf(zoom, 0.05, 1.0)}
