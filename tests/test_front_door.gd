@@ -141,6 +141,16 @@ func test_help_has_the_sections_and_the_first_run_box() -> void:
 				check(str(row[0]) != "" and str(row[1]) != "", "a row of %s has keys and text" % sec[0])
 
 
+## Every column of How to play ends above the footer line at the game's 1600 x 900 (the COMBAT column once ran off the screen).
+func test_help_columns_fit_the_screen() -> void:
+	var h := HelpPanel.new()
+	h.size = Vector2(1600.0, 900.0)
+	var limit: float = h.panel_rect().end.y - 28.0
+	for c in HelpPanel.COLUMNS.size():
+		check(h.column_end(c) <= limit, "help column %d ends at %d, under the footer line at %d" % [c, int(h.column_end(c)), int(limit)])
+	h.free()
+
+
 func test_f1_toggles_the_help_and_esc_closes_it() -> void:
 	var h := HelpPanel.new()
 	h.visible = false  # _ready does it in the scene
