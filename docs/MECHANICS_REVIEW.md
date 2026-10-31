@@ -109,6 +109,14 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 - **Wages and upkeep**: a second economic clock next to the tide. One clock is better.
 - **Stealth, smoke and decoys**: escape already exists (the J spool); more ways to avoid fights would dilute P2.
 
+## 4b. Round 1 results (measured)
+- **The probe after morale merged** (18 AI-vs-AI fights on main: 3 starters × pirate and rammer × 3 seeds, 240 s cap, morale ticking, surrender accepted on even seeds):
+  - fights that never ended fell from **12 to 8 of 18**;
+  - **4 ended in a capture** (every crew member down; 3 of them rammer fights that used to run forever), **1 rammer escaped**, and 3 enemies that broke fought on.
+  - The remaining stalemates are the Courier and Prism, which can't dent the pirate (F6, with the balance and starters tracks).
+- **The soak with the tide**: 38 fights (was 30), 22 won, 5 lost, 11 drawn, 13 runs. The pressure shows, and no run gets stuck: the tow is the no-soft-lock fallback.
+- **The soak with salvage and bleed out**: blueprints are now learned in play (199 known across the soak's runs, from scans), and no crew died in the soak's stubbed fights. Bleed out is rare and readable, as intended.
+
 ## 4. Round 1 plan
 - **Builder A, `claude/mech-tide`**: P1.
 - **Builder B, `claude/mech-salvage`**: P3 and P4.
