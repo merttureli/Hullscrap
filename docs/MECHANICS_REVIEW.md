@@ -90,16 +90,16 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 ### P7. Exit wardens (known region bosses) — round 2, after regions and shipgen
 - **Problem**: F10. **How**: the region-choice card names what guards the exit beacon ("Concord Bulwark: 4-sector shields; bring ion or missiles"). Beat it, or pay a toll, to leave the region. You build toward it all region. **Cost**: medium. **Bloat**: low (one fight per region, from shipgen). **Works when**: players buy or craft counters before the exit.
 
-### P8. Sector hazards (FTL's environments) — round 2 candidate
-- **Problem**: every fight happens in the same empty space, so sectors differ only by POIs. The regions spec lists hazards "for later".
-- **How it plays**: a small vocabulary of sector modifiers that a region or node rolls, each changing *how* you fight, not just how hard:
-  - **asteroid drift**: rocks on the current that ram both ships, so use them as cover or a weapon;
-  - **solar flare**: a fire chance in rooms facing the star every 25 s, so put your armour toward it;
-  - **ion storm**: shield layers recharge at half rate;
-  - **nebula**: radar range ×0.3, and turret accuracy −0.2;
-  - **gravity well**: a constant pull toward a point, so fights drift.
-  - *Example*: a Concord shield brick you can't crack in open space is beatable in an ion storm. That's a reason to pick the stormy region.
-- **Cost**: medium (5 modifiers in the sector and arena code, data per region). **Bloat**: low if capped at 5. **Works when**: players choose a route *because* of a hazard.
+### P8. Sector hazards (FTL's environments) — round 2, briefed
+- **Problem**: every fight happens in the same empty space, so sectors differ only by POIs. The regions already name hazards (`debris_surge`, `star_heat`, `radiation`, `ion_storm`, `gas_cloud`), but none does anything.
+- **How it plays**: some places in a region roll one of its hazards, shown on the map. Each changes *how* you fight, not just how hard:
+  - **ion storm**: shields recharge at half speed;
+  - **star heat**: a flare every 25 s lights fires next to the walls facing the star;
+  - **gas cloud**: turrets −0.2 accuracy, and enemy aim is worse;
+  - **radiation**: unsuited crew lose 0.5 hp/s while their ship has no shield layer up;
+  - **debris surge**: every 20 s, 4 kinetic hits land on the walls facing the current.
+  - *Example*: a Concord shield brick you can't crack in open space is beatable in an ion storm. That's a reason to take the stormy lane. In radiation, an ion hit on your shields becomes a crew emergency.
+- **Cost**: medium (a new `hazards.gd`, one-line hooks in the arena, weapons, pilot, campaign and map; data). **Bloat**: low, five entries, already named by the regions. **Works when**: players choose a route *because* of a hazard.
 
 ### P9. Cargo has mass — considered
 - Hauled materials add flight mass (a small factor per unit), so hoarding 900 scrap makes you sluggish. That's a reason to spend, sell or smelt (steel is denser value). Cheap (one number in `flight.gd`), but it could feel opaque. Revisit if the playtest shows hoarding.
