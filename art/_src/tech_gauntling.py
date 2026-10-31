@@ -477,10 +477,10 @@ class GraftBay(GauntC):
         ax = [0, 2, 3, 1][i] if on else 0
         for side, (bx, by) in enumerate(((8, 6), (50, 6))):                                    # two jointed robot arms
             dx = 1 if side == 0 else -1
-            ex, ey = (bx + dx * (10 + ax), by + 10), (32 - dx * 4 + (0 if on else -2), 31 if on else 25)
-            lcircle(s, bx + 2, by + 2, 4, 'S'); lcircle(s, bx + 2, by + 2, 2, 'E')
-            thick(s, bx + 2, by + 2, ex[0], ex[1], 3, 'S', 'M', 'W'); lcircle(s, ex[0], ex[1], 2.2, 'M')
-            thick(s, ex[0], ex[1], ey[0] if on else ey[0], ey[1], 2, 'W', 'S', 'E'); s.put(ey[0], ey[1], 'L')
+            ex, ey = (bx + dx * (9 + ax * 2), by + 11 - ax), (32 - dx * 4 + (0 if on else -2), 31 if on else 25)
+            lcircle(s, bx + 2, by + 2, 5, 'E'); lcircle(s, bx + 2, by + 2, 4, 'S'); lcircle(s, bx + 2, by + 2, 2, 'W'); s.put(bx + 1, by + 1, 'L')
+            thick(s, bx + 2, by + 2, ex[0], ex[1], 4, 'S', 'M', 'W'); lcircle(s, ex[0], ex[1], 3, 'M'); lcircle(s, ex[0], ex[1], 1.4, 'E'); s.put(ex[0] - 1, ex[1] - 1, 'L')
+            thick(s, ex[0], ex[1], ey[0], ey[1], 3, 'M', 'S', 'W'); s.put(ey[0], ey[1], 'L'); s.put(ey[0] - dx, ey[1] + 1, 'L'); s.put(ey[0] + dx, ey[1] + 1, 'L')
         if on:
             ax_, ay_ = 31 + [0, 1, 0, -1][i], 31
             arc(s, [(ax_ - 3, ay_ - 1), (ax_, ay_ + 1), (ax_ + 3, ay_ - 1)], 'H', 'c', 'C'); s.put(ax_, ay_, 'H')

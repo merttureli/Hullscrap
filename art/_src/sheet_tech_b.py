@@ -72,7 +72,7 @@ def build(out):
     def rowA_h(j): return max(max(a.h for a in j[1]) * 3, max(s.h for _, s in j[3]) * 3) + 40
     def rowB_h(j): return max(a.h for a in j[2]) * 2 + 30
     def rowC_h(j): return max(s.h for _, s in j[4]) * 2 + 30
-    proj_h = 15 * 150 // 2 + 120
+    proj_h = 8 * 170 + 120 + 420
     H = 30 + sum(60 + rowA_h(j) + rowB_h(j) + rowC_h(j) + 40 for j in jobs) + proj_h + 60
     cv = Rgba(W, H, BG)
     y = 14
@@ -103,14 +103,29 @@ def build(out):
         y += rowC_h(j) - 18 + 10
         for xx in range(W): cv.p[y][xx] = list(RGB['G']) + [255]
         y += 20
+    # ---- actual size
+    text(cv, 16, y, 'ACTUAL SIZE 1X: EVERY WEAPON MOUNTED THROUGH THE WALL, THEN EVERY COMPONENT (ON)', 'H', 3); y += 34
+    x = 16
+    for j in jobs:
+        for a in j[1]:
+            if x + a.w > W - 16: x = 16; y += a.h + 8
+            cv.blit_rgba(a, x, y, 1); x += a.w + 6
+    y += max(a.h for j in jobs for a in j[1]) + 14
+    x = 16
+    for j in jobs:
+        for kind, s in j[3]:
+            cv.blit_rgba(s, x, y, 1); x += s.w + 6
+    y += max(s.h for j in jobs for _, s in j[3]) + 20
+    for xx in range(W): cv.p[y][xx] = list(RGB['G']) + [255]
+    y += 20
     # ---- projectiles
     import tech_proj
-    text(cv, 16, y, 'PROJECTILES AND IMPACTS 4X WITH GLOW: BOLTS FACE UP, BEAMS (STEAM LANCE, TESLA PICKET, PRISM LENS, HARPOON CHAIN) TILE ALONG Y (SHOWN 3 TILES LONG)', 'H', 3); y += 34
+    text(cv, 16, y, 'PROJECTILES AND IMPACTS 4X WITH GLOW: BOLTS FACE UP, BEAMS TILE ALONG Y: STEAM LANCE, TESLA PICKET, PRISM LENS, HARPOON CHAIN SHOWN 2 TILES LONG', 'H', 3); y += 34
     ids = tech_proj.IDS + ['grundl_grapple_harpoon_chain']
     colw = W // 2 - 20
     row_y = y
     for n, id_ in enumerate(ids):
-        cx = 16 + (n % 2) * (W // 2); cy = row_y + (n // 2) * 150
+        cx = 16 + (n % 2) * (W // 2); cy = row_y + (n // 2) * 170
         J = meta('projectiles/%s.png' % id_)
         fw, fh = J['frame']
         frames = [conv(f) for f in split(load('projectiles/%s.png' % id_), fw, fh)]
@@ -119,14 +134,14 @@ def build(out):
         tile = J.get('tile') == 'y'
         K = 4
         # space backdrop strip
-        bgh = 140
+        bgh = 166
         for yy in range(cy, cy + bgh - 4):
             for xx in range(cx, cx + colw): cv.p[yy][xx] = [14, 18, 28, 255]
         text(cv, cx + 4, cy + 4, id_.upper(), 'H', 2)
         x = cx + 8; yy0 = cy + 22
         for k, f in enumerate(frames):
             if tile:
-                for rep in range(3):
+                for rep in range(2):
                     cv.blit_rgba(gfr[k].scaled(K), x + J['glow']['offset'][0] * K, yy0 + rep * fh * K, 1, add=True)
                     cv.blit_rgba(f.scaled(K), x, yy0 + rep * fh * K, 1)
                 x += (fw + 6) * K
