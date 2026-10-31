@@ -410,3 +410,60 @@ func test_a_bloom_reactor_empties_a_room_of_humans_but_not_one_of_sporelings() -
 	print("tech_gaps: a Bloom Reactor in a 36-cell room, air after a minute: two humans %.2f, two Sporelings %.2f" % [left["human"], left["sporeling"]])
 	check(left["human"] < 0.7, "with humans the Bloom Reactor eats the room's air (%.2f after a minute)" % left["human"])
 	check(left["sporeling"] > 0.97, "with two Sporelings the air stays (%.2f)" % left["sporeling"])
+
+
+# --- 5. scorch from a weapon's breech --------------------------------------------------------------------------
+
+## Ship 0 is the room ship, with the virtual gun inside its room (12.5, 12.5); ship 1 is the target. Returns ship 0.
+func _breech_duel(entry: Dictionary) -> Ship:
+	var shooter := Fixture.room_ship()
+	arena = Arena.new(1)
+	arena.add_ship(shooter)
+	target = Fixture.room_ship()
+	arena.add_ship(target, Vector2(800.0, 0.0))
+	var full := {"kind": "laser", "damage_type": "energy", "damage": 1, "gimbal": 180, "cooldown": 0.0, "range": 2000}
+	full.merge(entry, true)
+	arena.weapons.defs["tg_gun"] = full
+	gun = arena.add_mount(0, "tg_gun", Vector2(12.5, 12.5))
+	return shooter
+
+
+func test_scorch_dps_burns_the_crew_who_do_not_shrug_heat_off_for_the_cooldown() -> void:
+	var shooter := _breech_duel({"cooldown": 2.0, "effects": {"self_room": {"scorch_dps": 2.0}}})
+	var human := CrewMember.new("Human", Vector2(14.5, 12.5), "human")
+	var ember := CrewMember.new("Ember", Vector2(15.5, 12.5), "emberkin")
+	var outside := CrewMember.new("Out", Vector2(3.5, 3.5), "human")
+	shooter.crew.append_array([human, ember, outside])
+	var hp0 := human.hp
+	var ember0 := ember.hp
+	_shoot(Vector2(800.0, -300.0))
+	arena.step(1.0)
+	near(hp0 - human.hp, 2.0, "2 hp a second to the crew in the breech room", 0.05)
+	near(ember0 - ember.hp, 0.0, "none to an Emberkin (heat_resistant)")
+	near(outside.hp, outside.max_hp, "none outside the room")
+	arena.step(3.0)
+	near(hp0 - human.hp, 4.0, "and it stops with the cooldown: 2 s at 2 hp/s", 0.05)
+	_shoot(Vector2(800.0, -300.0))
+	arena.step(1.0)
+	near(hp0 - human.hp, 6.0, "the next shot burns again", 0.05)
+
+
+func test_scorch_and_shock_are_separate() -> void:
+	var shooter := _breech_duel({"cooldown": 2.0, "effects": {"self_room": {"scorch_dps": 1.0, "shock_dps": 3.0}}})
+	var robot := CrewMember.new("Robot", Vector2(14.5, 12.5), "gauntling")
+	var ember := CrewMember.new("Ember", Vector2(15.5, 12.5), "emberkin")
+	shooter.crew.append_array([robot, ember])
+	_shoot(Vector2(800.0, -300.0))
+	arena.step(1.0)
+	near(robot.max_hp - robot.hp, 1.0, "a mechanical crew member takes the scorch but not the shock", 0.05)
+	near(ember.max_hp - ember.hp, 3.0, "an Emberkin takes the shock but not the scorch", 0.05)
+
+
+func test_the_validator_knows_scorch_dps_and_the_emberkin_weapons_use_it() -> void:
+	eq(Effects.problems({"effects": {"self_room": {"heat": 40, "scorch_dps": 1.5}}}), [], "scorch_dps is a self_room key")
+	for bad in [-1.0, 80.0, "hot"]:
+		var p := Effects.problems({"effects": {"self_room": {"scorch_dps": bad}}})
+		check(p.any(func(s): return "self_room.scorch_dps" in s), "%s is caught (%s)" % [str(bad), str(p)])
+	var w = Weapons.new()
+	for id in ["emberkin_pyre_lance", "emberkin_flare_turret"]:
+		check(float(w.defs[id]["effects"]["self_room"].get("scorch_dps", 0.0)) > 0.0, "%s scorches its breech" % id)

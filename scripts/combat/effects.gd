@@ -15,7 +15,8 @@ extends RefCounted
 ##                                    bubble and meet it again: each uses a layer, or reaches the hull where the sector is down. They do not split again.
 ##                                    Needs a shot with a speed (bolt, flak, missile), not a laser or beam
 ## On the shooter, per shot:
-##   self_room {o2_drain, heat, fire_chance, shock_dps}   the room of the weapon's inside half loses o2_drain of its air, its parts gain `heat`, a fire may start, organic crew take shock_dps a second while it fires
+##   self_room {o2_drain, heat, fire_chance, shock_dps, scorch_dps}   the room of the weapon's inside half loses o2_drain of its air, its parts gain `heat`, a fire may start, organic crew take shock_dps a second while it fires,
+##                                    crew without the heat_resistant trait take scorch_dps a second (both for the weapon's cooldown after each shot, or the beam's duration if longer)
 ##   needs_operator {species, else_mult, stat?}           full damage (stat "damage", the default) or rate ("rate") only while a crew member of `species` (an id or a list) mans it; else x else_mult
 ##   needs_crew_in_room {count, else_mult, stat?}         the same with `count` crew in the weapon's room (stat defaults to "rate")
 ##   ammo_mult                                            ammo per shot x this (1.5 spends 1, 2, 1, 2 ...)
@@ -54,7 +55,7 @@ const SPEC := {
 	"needs_crew_in_room": {"count": [1.0, 12.0], "else_mult": [MIN_MULT, 1.0]},
 }
 const OPTIONAL := {"acid": ["type", "spread"], "needs_operator": ["species", "stat"], "needs_crew_in_room": ["stat"]}
-const SELF_ROOM := {"o2_drain": [0.0, 1.0], "heat": [0.0, 500.0], "fire_chance": [0.0, 1.0], "shock_dps": [0.0, 50.0]}
+const SELF_ROOM := {"o2_drain": [0.0, 1.0], "heat": [0.0, 500.0], "fire_chance": [0.0, 1.0], "shock_dps": [0.0, 50.0], "scorch_dps": [0.0, 50.0]}
 const STATS: Array[String] = ["damage", "rate"]
 const DAMAGE_TYPES: Array[String] = ["kinetic", "energy", "explosive", "ion"]
 
@@ -215,6 +216,8 @@ static func tick(arena, dt: float) -> void:
 				alive = _tick_spores(co, e, step)
 			"shock":
 				alive = _tick_shock(co, e, step)
+			"scorch":
+				alive = _tick_scorch(co, e, step)
 			"frost":
 				alive = _tick_frost(arena, co, e, step)
 		if alive and e["left"] > 1e-9:
@@ -647,18 +650,32 @@ static func on_fire(arena, idx: int, uid: int, m: Dictionary, w: Dictionary) -> 
 		_timed(arena, "shock:%d:%d" % [idx, uid], {"k": "shock", "ship": idx, "cell": cell, "dps": float(spec["shock_dps"]),
 			"left": maxf(float(w["cooldown"]), float(w.get("duration", 0.0)) if w["kind"] == "beam" else 0.0)})
 		seen["shock"] = true
+	if float(spec.get("scorch_dps", 0.0)) > 0.0:  # the heat of the breech burns the crew who do not shrug it off
+		_timed(arena, "scorch:%d:%d" % [idx, uid], {"k": "scorch", "ship": idx, "cell": cell, "dps": float(spec["scorch_dps"]),
+			"left": maxf(float(w["cooldown"]), float(w.get("duration", 0.0)) if w["kind"] == "beam" else 0.0)})
+		seen["scorch"] = true
 	if not seen.is_empty():
 		_log(arena, idx, cell, "self_room", id, {"has": seen.keys(), "room_pos": room_pos(arena, idx, room)})
 
 
 ## One step of a shock: the organic crew in the room (not the mechanical ones) take dps a second.
 static func _tick_shock(co, e: Dictionary, step: float) -> bool:
+	return _hurt_room(co, e, step, func(m): return bool(TraitSet.of(m)["mechanical"]))
+
+
+## One step of a scorch: the crew in the room who lack the heat_resistant trait take dps a second.
+static func _tick_scorch(co, e: Dictionary, step: float) -> bool:
+	return _hurt_room(co, e, step, func(m): return m.traits().has("heat_resistant"))
+
+
+## Hurt the crew in the room of effect `e` for `step` seconds, except those `immune` says are fine. False when the room is gone.
+static func _hurt_room(co, e: Dictionary, step: float, immune: Callable) -> bool:
 	var ship = co.ship
 	var room: int = ship.atmosphere.room_at(e["cell"])
 	if room < 0:
 		return false
 	for m in ship.crew:
-		if ship.atmosphere.room_at(m.cell()) != room or m.is_down() or bool(TraitSet.of(m)["mechanical"]):
+		if ship.atmosphere.room_at(m.cell()) != room or m.is_down() or immune.call(m):
 			continue
 		m.hurt(e["dps"] * step)
 		if m.is_down():

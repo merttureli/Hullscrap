@@ -106,7 +106,7 @@ static func of(arena, e: Dictionary) -> Array:
 					var p := _puff(rng, at, Color(COLORS["o2"], 0.5), 40.0, 1.0, 16.0, 28.0, 20.0)
 					p["stick"] = idx
 					out.append(p)
-			if "heat" in has:
+			if "heat" in has or "scorch" in has:
 				out.append({"k": "flash", "pos": at, "stick": idx, "life": 0.35, "r": 34.0, "color": COLORS["heat"]})
 			if "shock" in has:
 				out.append_array(_sparks(rng, at, COLORS["shock"], 7, Vector2.ZERO, 160.0))
