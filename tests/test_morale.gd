@@ -52,23 +52,27 @@ func _shots(s: Session, idx: int) -> int:
 	return s.arena.events.filter(func(e): return e["type"] == "shot" and e["ship"] == idx).size()
 
 
-## The uids of the enemy's parts of `family`.
-func _parts(s: Session, family: String) -> Array:
-	var comps = _foe(s).ship.components
+## The uids of the parts of `family` of ship `idx` (the enemy's by default).
+func _parts(s: Session, family: String, idx := Session.ENEMY) -> Array:
+	var comps = s.arena.ships[idx].ship.components
 	return comps.instances.keys().filter(func(u): return comps.def(comps.instances[u]["id"]).get("family", "") == family)
 
 
-func _set_status(s: Session, uids: Array, status: String) -> void:
+func _set_status(s: Session, uids: Array, status: String, idx := Session.ENEMY) -> void:
 	for u in uids:
-		var inst: Dictionary = _foe(s).ship.components.instances[u]
+		var inst: Dictionary = s.arena.ships[idx].ship.components.instances[u]
 		inst["status"] = status
 		inst["hp"] = 0 if status == "disabled" else 5
-	_foe(s).dirty = true
+	s.arena.ships[idx].dirty = true
 
 
-## Somebody stands at the enemy's helm (the sim does this; the arena alone does not).
-func _man_helm(s: Session) -> void:
-	_foe(s).ship.manned[_parts(s, "helm")[0]] = "Grub"
+## `n` crew members (all on their feet) for ship `idx`; the arena alone spawns none.
+func _crew_of(s: Session, idx: int, n: int) -> Array:
+	var list := []
+	for i in n:
+		list.append(CrewMember.new("Hand%d" % i))
+	s.arena.ships[idx].ship.crew = list
+	return list
 
 
 # --- the break ---------------------------------------------------------------------------------------------
@@ -299,7 +303,6 @@ func test_an_offer_nobody_answers_runs_out() -> void:
 func test_a_fleeing_enemy_spools_for_15_s_and_is_gone() -> void:
 	var s := _session()
 	_style(s, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
-	_man_helm(s)
 	_hurt(s, 0.3)
 	_run(s, 0.1)
 	eq(s.morale.state, "fleeing", "it runs")
@@ -324,10 +327,9 @@ func test_a_fleeing_enemy_spools_for_15_s_and_is_gone() -> void:
 	check(f["zoom"] > 0.0, "(and framed the jump first)")
 
 
-func test_the_spool_holds_while_no_engine_can_push() -> void:
+func test_the_spool_holds_while_every_engine_is_out() -> void:
 	var s := _session()
 	_style(s, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
-	_man_helm(s)
 	_hurt(s, 0.3)
 	_run(s, 5.0)
 	var charged: float = s.morale.spool
@@ -340,7 +342,7 @@ func test_the_spool_holds_while_no_engine_can_push() -> void:
 	var held: float = s.morale.spool
 	_run(s, 6.0)
 	eq(s.morale.spool, held, "disabled engines: the charge holds")
-	eq(s.morale.spool_block(), "no engine can push", "and says why")
+	eq(s.morale.hold(), "engines out", "and says why")
 	_set_status(s, engines, "ok")
 	_run(s, 1.0)
 	check(s.morale.spool > held + 0.9, "repaired: it charges again")
@@ -361,31 +363,115 @@ func test_the_spool_holds_while_no_engine_can_push() -> void:
 	eq(s.morale.spool, held, "no power: the charge holds")
 
 
-func test_the_spool_holds_while_the_helm_is_unmanned_or_disabled() -> void:
+func test_the_spool_ignores_who_stands_at_the_helm() -> void:
 	var s := _session()
 	_style(s, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
-	_man_helm(s)
+	_hurt(s, 0.3)
+	_run(s, 3.0)
+	var charged: float = s.morale.spool
+	check(charged > 2.5, "it charges: %s" % str(charged))
+	_foe(s).ship.manned.clear()  # the crew wandered off to fix a jam
+	_run(s, 2.0)
+	check(s.morale.spool > charged + 1.9, "an unmanned helm does not hold the charge")
+	eq(s.morale.hold(), "", "nothing holds it")
+	_foe(s).ship.manned[_parts(s, "helm")[0]] = "Grub"
+	_run(s, 1.0)
+	check(s.morale.spool > charged + 2.9, "and a manned one does not speed it up")
+
+
+func test_the_spool_holds_while_the_helm_is_down() -> void:
+	var s := _session()
+	_style(s, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
 	_hurt(s, 0.3)
 	_run(s, 3.0)
 	var held: float = s.morale.spool
 	check(held > 2.5, "it charges: %s" % str(held))
-	_foe(s).ship.manned.clear()
-	_run(s, 5.0)
-	eq(s.morale.spool, held, "nobody at the helm: the charge holds")
-	eq(s.morale.spool_block(), "the helm is not manned", "and says why")
-	_man_helm(s)
-	_run(s, 1.0)
-	check(s.morale.spool > held + 0.9, "somebody sits down: it goes on")
-	held = s.morale.spool
-	_set_status(s, _parts(s, "helm"), "disabled")
+	var helm := _parts(s, "helm")
+	_set_status(s, helm, "disabled")
 	_run(s, 4.0)
-	eq(s.morale.spool, held, "a disabled helm, even with a body at it: held")
+	eq(s.morale.spool, held, "a disabled helm: the charge holds")
+	eq(s.morale.hold(), "helm down", "and says why")
+	_set_status(s, helm, "ok")
+	_run(s, 1.0)
+	check(s.morale.spool > held + 0.9, "repaired: it goes on")
+
+
+func test_the_spool_holds_while_every_crew_member_is_down() -> void:
+	var s := _session()
+	_style(s, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
+	var crew := _crew_of(s, Session.ENEMY, 2)
+	_hurt(s, 0.3)
+	_run(s, 3.0)
+	var held: float = s.morale.spool
+	check(held > 2.5, "it charges: %s" % str(held))
+	crew[0].hp = 0.0
+	_run(s, 1.0)
+	check(s.morale.spool > held + 0.9, "one crew member down: it charges")
+	held = s.morale.spool
+	crew[1].hp = 0.0
+	_run(s, 2.0)  # (3 s of this would be a capture)
+	eq(s.morale.spool, held, "every crew member down: the charge holds")
+	eq(s.morale.hold(), "no crew", "and says why")
+	crew[1].hp = 30.0
+	_run(s, 1.0)
+	check(s.morale.spool > held + 0.9, "one is up again: it goes on")
+
+
+## Morale.spool_hold is one rule for both ships: the same reasons, for the enemy's flight and the player's J.
+func test_spool_hold_reasons_for_both_sides() -> void:
+	for idx in [Session.PLAYER, Session.ENEMY]:
+		var tag := "ship %d" % idx
+		var s := _session()
+		var co = s.arena.ships[idx]
+		eq(Morale.spool_hold(s.arena, idx), "", tag + ": free to charge")
+		# engines out: disabled, a nozzle shot off, no power
+		var engines := _parts(s, "engine", idx)
+		check(engines.size() >= 1, tag + ": (has engines)")
+		_set_status(s, engines.slice(0, 1), "disabled", idx)
+		eq(Morale.spool_hold(s.arena, idx), "", tag + ": one engine out of two: free")
+		_set_status(s, engines, "disabled", idx)
+		eq(Morale.spool_hold(s.arena, idx), "engines out", tag + ": every engine disabled")
+		_set_status(s, engines, "ok", idx)
+		for u in engines:
+			co.ship.components.instances[u]["out_hp"] = 0
+		eq(Morale.spool_hold(s.arena, idx), "engines out", tag + ": every nozzle shot off (offline)")
+		for u in engines:
+			co.ship.components.instances[u]["out_hp"] = 5
+		eq(Morale.spool_hold(s.arena, idx), "", tag + ": nozzles back")
+		for u in engines:
+			co.powered[u] = false
+		eq(Morale.spool_hold(s.arena, idx), "engines out", tag + ": every engine unpowered")
+		for u in engines:
+			co.powered[u] = true
+		# helm down: disabled, unpowered, none at all
+		var helm := _parts(s, "helm", idx)
+		_set_status(s, helm, "disabled", idx)
+		eq(Morale.spool_hold(s.arena, idx), "helm down", tag + ": helm disabled")
+		_set_status(s, helm, "ok", idx)
+		co.powered[helm[0]] = false
+		eq(Morale.spool_hold(s.arena, idx), "helm down", tag + ": helm unpowered")
+		co.powered[helm[0]] = true
+		eq(Morale.spool_hold(s.arena, idx), "", tag + ": helm back")
+		var inst: Dictionary = co.ship.components.instances[helm[0]]
+		co.ship.components.instances.erase(helm[0])
+		eq(Morale.spool_hold(s.arena, idx), "helm down", tag + ": no helm at all")
+		co.ship.components.instances[helm[0]] = inst
+		# crew: none listed is free; some up is free; all down holds
+		eq(Morale.spool_hold(s.arena, idx), "", tag + ": no crew list (none spawned): free")
+		var crew := _crew_of(s, idx, 3)
+		crew[0].hp = 0.0
+		crew[1].hp = 0.0
+		eq(Morale.spool_hold(s.arena, idx), "", tag + ": one on their feet: free")
+		crew[2].hp = 0.0
+		eq(Morale.spool_hold(s.arena, idx), "no crew", tag + ": every crew member down")
+		# engines are named first when several things are wrong
+		_set_status(s, engines, "disabled", idx)
+		eq(Morale.spool_hold(s.arena, idx), "engines out", tag + ": engines come first")
 
 
 func test_a_fleeing_ship_still_fires_when_its_guns_bear() -> void:
 	var s := _session()
 	_style(s, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
-	_man_helm(s)
 	_foe(s).flight.pos = Vector2(0.0, -900.0)
 	_hurt(s, 0.3)
 	_run(s, 0.1)
@@ -394,14 +480,78 @@ func test_a_fleeing_ship_still_fires_when_its_guns_bear() -> void:
 	check(_shots(s, Session.ENEMY) > before, "its rattle turret covers its stern and keeps shooting")
 
 
+# --- the player's own jump drive ------------------------------------------------------------------------------
+
+func test_the_players_jump_holds_with_all_engines_disabled_and_resumes() -> void:
+	var s := _session()
+	eq(s.start_jump(), "", "J starts the spool")
+	_run(s, 3.0)
+	check(s.jump_charge > 2.9 and s.jump_charge < 3.1, "it charges: %s" % str(s.jump_charge))
+	eq(s.jump_hold(), "", "nothing holds it")
+	var engines := _parts(s, "engine", Session.PLAYER)
+	check(engines.size() >= 2, "(the pirate has two engines)")
+	_set_status(s, engines, "disabled", Session.PLAYER)
+	_run(s, 0.1)
+	var held: float = s.jump_charge
+	_run(s, 5.0)
+	eq(s.jump_charge, held, "every engine disabled: the spool holds")
+	eq(s.jump_hold(), "Jump drive held: engines out", "and says why")
+	check(not s.jump_ready() and not s.can_leave(), "so you cannot jump")
+	_set_status(s, engines.slice(0, 1), "ok", Session.PLAYER)  # one engine repaired
+	_run(s, 1.0)
+	check(s.jump_charge > held + 0.9, "one engine back: it resumes")
+	eq(s.jump_hold(), "", "and nothing holds it")
+	_run(s, 7.0)
+	check(s.jump_ready() and s.can_leave(), "and the drive finishes after the whole spool")
+
+
+func test_the_players_jump_holds_for_a_down_helm_and_for_no_crew() -> void:
+	var s := _session()
+	s.start_jump()
+	_run(s, 2.0)
+	var held: float = s.jump_charge
+	var helm := _parts(s, "helm", Session.PLAYER)
+	_set_status(s, helm, "disabled", Session.PLAYER)
+	_run(s, 3.0)
+	eq(s.jump_charge, held, "a disabled helm holds the spool")
+	eq(s.jump_hold(), "Jump drive held: helm down", "and says why")
+	_set_status(s, helm, "ok", Session.PLAYER)
+	_run(s, 1.0)
+	check(s.jump_charge > held + 0.9, "the helm is back: it resumes")
+	held = s.jump_charge
+	var crew := _crew_of(s, Session.PLAYER, 2)
+	crew[0].hp = 0.0
+	_run(s, 1.0)
+	check(s.jump_charge > held + 0.9, "one crew member down: it goes on")
+	held = s.jump_charge
+	crew[1].hp = 0.0
+	_run(s, 3.0)
+	eq(s.jump_charge, held, "every crew member down: the spool holds")
+	eq(s.jump_hold(), "Jump drive held: no crew", "and says why")
+	crew[0].hp = 20.0
+	_run(s, 1.0)
+	check(s.jump_charge > held + 0.9, "somebody gets up: it resumes")
+
+
+func test_the_view_says_why_the_players_jump_is_held() -> void:
+	var made := _view()
+	var view: CombatView = made[0]
+	var ship = view.session.arena.ships[Session.PLAYER].ship
+	check(ship.components.instances.is_empty(), "(the starter ship has no engines at all)")
+	view._unhandled_input(_key(KEY_J))
+	eq(view._note, "Jump drive held: engines out", "J says it will not charge: " + view._note)
+	for i in 60:
+		view.frame(1.0 / 60.0)
+	eq(view.session.jump_charge, 0.0, "and the spool is on but not charging")
+	made[0].free()
+	made[1].free()
+	made[2].free()
+
+
 # --- capture ----------------------------------------------------------------------------------------------
 
 func _crew(s: Session, n: int) -> Array:
-	var list := []
-	for i in n:
-		list.append(CrewMember.new("Hand%d" % i))
-	_foe(s).ship.crew = list
-	return list
+	return _crew_of(s, Session.ENEMY, n)
 
 
 func test_all_crew_down_for_3_s_captures_the_ship() -> void:
@@ -493,7 +643,6 @@ func test_lost_wins_over_every_morale_state() -> void:
 
 func _outcome(seed_value: int) -> Session:
 	var s := _session(seed_value)
-	_man_helm(s)
 	_hurt(s, 0.3)
 	_run(s, 4.0)
 	return s
@@ -589,7 +738,6 @@ func test_the_view_results_for_the_other_endings() -> void:
 	# escaped
 	_fight(view)
 	_style(view.session, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
-	_man_helm(view.session)
 	var foe = view.session.arena.ships[Session.ENEMY]
 	foe.hull = 0.3 * foe.hull_max
 	for i in 60 * 16:
