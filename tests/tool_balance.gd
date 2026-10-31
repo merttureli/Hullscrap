@@ -585,7 +585,7 @@ func report(secs: float) -> String:
 		L.append("| %s | " % sh["name"] + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["ship"] == sh["id"] and r["jump"] == j))))) + " |")
 	L.append("| **all** | " + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["jump"] == j))))) + " |")
 	L.append("")
-	L.append("Projected win rate: the wins plus the draws the player was winning, by the rates of the fight (it would have brought the enemy to its morale break, 35%% of its hull, before the enemy wrecked it). The cap cuts many fights short; this is the curve the budgets are tuned on.")
+	L.append("Projected win rate: the wins plus the draws the player was winning, by the rates of the fight (it would have brought the enemy to its morale break, 35% of its hull, before the enemy wrecked it). The cap cuts many fights short; this is the curve the budgets are tuned on.")
 	L.append("")
 	L.append("| ship | " + " | ".join(jumps.map(func(j): return "jump %d" % j)) + " |")
 	L.append("|---|" + "---|".repeat(jumps.size()))

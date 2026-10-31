@@ -51,3 +51,22 @@ func test_starter_fights_at_jump_5_now_end() -> void:
 		if r[0] != "fighting":
 			ended.append("%s %s at %d s" % [f[0], r[0], r[1]])
 	check(ended.size() >= 2, "at least two of the three end: %s" % str(ended))
+
+
+## The threat cuts are the ones the harness measured (docs/BALANCE_REPORT.md: power ratio under 0.5 won about 85% of fights,
+## 0.85 to 1.6 about even, over 2.6 about 15%), and they rate known pairs that way: a jump 5 enemy is a skull or two to the
+## Courier, a jump 35 large one four or five.
+func test_the_threat_cuts_are_the_measured_ones() -> void:
+	var cuts: Array = Threat.config()["cuts"]
+	eq(cuts, [0.5, 0.85, 1.6, 2.6], "the cuts of the balance pass")
+	for k in 3:
+		check(float(cuts[k]) < float(cuts[k + 1]), "the cuts rise")
+	var courier: Ship = Ship.from_design(COURIER)
+	var early := Shipgen.budget_for(1, 5, 1.0)
+	var late := Shipgen.budget_for(3, 35, 1.0)
+	for f in ["clans", "rustfangs", "lumen"]:
+		var weak := Threat.rate(Shipgen.build(f, "small", 256, early), courier)
+		check(int(weak["skulls"]) <= 2, "%s at jump 5 (budget %d): %d skulls, ratio %.2f" % [f, early, weak["skulls"], weak["ratio"]])
+	for f in ["clans", "rustfangs", "concord"]:  # (a Lumen ship spends its budget on shields and its reactor: a softer late threat)
+		var strong := Threat.rate(Shipgen.build(f, "large", 256, late), courier)
+		check(int(strong["skulls"]) >= 4, "%s at jump 35 (budget %d): %d skulls, ratio %.2f" % [f, late, strong["skulls"], strong["ratio"]])
