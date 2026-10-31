@@ -47,6 +47,11 @@ static func item(id: String) -> RefCounted:
 	return _sheet("items", id)
 
 
+## An ending's illustration: art/endings/<ending id>.png (320x180 frames; a strip is its ambient animation, <id>_glow.png its light).
+static func ending(id: String) -> RefCounted:
+	return _sheet("endings", id)
+
+
 ## A tile sheet: art/tiles/<name>.png (floor, walls, door, breach, cable).
 static func tiles(name: String) -> RefCounted:
 	return _sheet("tiles", name)

@@ -1,0 +1,8 @@
+{
+	"unlocks": [
+		{"id": "fx_tender", "kind": "starter_ship", "name": "Fixture Tender", "how": "Reach the Fixture ending.", "payload": {"ship": "fx_tender"}},
+		{"id": "fx_wisp", "kind": "starter_ship", "name": "Fixture Wisp", "how": "Beat the Wisp quest.", "payload": {"ship": "fx_wisp_c"}},
+		{"id": "fx_fenn", "kind": "species_start", "name": "Fenn start", "how": "Meet a Fenn landmark.", "payload": {"species": "fenn"}},
+		{"id": "fx_skin", "kind": "skin", "name": "Gilt hull", "how": "Finish a run.", "payload": {"skin": "gilt"}}
+	]
+}
