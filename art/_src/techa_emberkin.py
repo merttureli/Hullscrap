@@ -667,7 +667,7 @@ oyynyyyo
 .oyyyyo.
 ..orro..
 """))
-        for (x, y) in ((3, 3), (6, 4)): s.put(x + 1, y + 0, 'n') if k % 2 == 0 else s.put(x + 1, y + 1, 'n')
+        s.put(1, 4 + k % 2, 'u'); s.put(8, 3 + (k + 1) % 2, 'u')
         tmp = Spr(9, 12); flame(tmp, 3, 11, 9 + (k % 2), 3, k); flame(tmp, 1, 11, 6 - (k % 3), 3, k + 1) ; flame(tmp, 5, 11, 5 + (k % 2), 3, k + 2)
         tmp = flipv(tmp)
         for yy in range(12):

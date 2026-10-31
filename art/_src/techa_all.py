@@ -144,7 +144,7 @@ def preview(path, K=3, W=1900):
         x = 20
         for (race, cid, sc) in r:
             img.blit_rgba(sc.scaled(K), x, y, 1)
-            text(img, x + 6, y + sc.h * K + 6, cid.upper(), 'H', 2)
+            text(img, x + 6, y + rh - 26, cid.upper(), 'H', 2)
             x += cw2
         y += rh
     text(img, 20, y, 'PROJECTILES AND IMPACTS AT 4X, WITH GLOW, ON SPACE. LEFT TO RIGHT: THE PROJECTILE FRAMES, THEN THE IMPACT', 'H', 3)

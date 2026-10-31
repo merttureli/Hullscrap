@@ -719,61 +719,40 @@ def _slug_impact():
     return f
 
 def _pumice():
-    out = []
-    rocks = [art("""
-.MLM..
-MLMSSW
-LMMSSW
-MSSSWE
-.SSWE.
-..WE..
-"""), art("""
-..MLM.
-.MLMSW
-MMSSSW
-MSMSWE
-.SSWE.
-..EE..
-"""), art("""
-.LMM..
-MLMSSW
-MSSMSE
-MSSSWE
-.SWWE.
-..E...
-"""), art("""
-..MM..
-.MLMSW
-MMSSMW
-.MSSWE
-.SSWE.
-..WE..
-""")]
+    """a light porous rock, 8x8, tumbling (the pores move), with a puff of grey smoke behind it: 8 wide x 15 tall."""
+    base = ["..MLLM..", ".MLMMSW.", "MLMMSSSW", "MMSMSSWE", "MSSSMSWE", ".SSSSWWE", "..SWWEE.", "...EE..."]
+    pores = [[(2, 2), (5, 3), (3, 5), (6, 5)], [(3, 2), (6, 3), (2, 4), (5, 6)], [(2, 3), (4, 2), (6, 4), (3, 6)], [(5, 2), (2, 4), (4, 5), (6, 6)]]
     smoke = [art("""
-.L.L.
-..M..
-.L..L
+..L..L..
+.LML....
+..L..L..
+.L...M..
 """), art("""
-L...L
-.LM..
-..L.L
+.L..L...
+..LML..L
+.L...L..
+...L..M.
 """), art("""
-.L..L
-..L..
-L..M.
+..L...L.
+.L.ML...
+...L..L.
+.M..L...
 """), art("""
-..L.L
-.M...
-L..L.
+.L...L..
+..LM..L.
+.L..L...
+..M...L.
 """)]
+    out = []
     for k in range(4):
-        s = Spr(6, 12); s.stamp(0, 0, rocks[k]); s.stamp(0, 7, smoke[k]) if False else None
-        s2 = Spr(6, 12); s2.stamp(0, 0, rocks[k])
+        s = Spr(8, 15)
+        s.stamp(0, 0, base)
+        for (x, y) in pores[k]: s.put(x, y, 'E')
+        for (x, y) in ((1, 1 + k % 2), (3, 4 - k % 2)): s.put(x + k % 2, y, 'H') if s.get(x + k % 2, y) == 'L' else None
         for j, row in enumerate(smoke[k]):
             for i, c in enumerate(row):
-                if c != '.' and i < 6: s2.put(i, 7 + j, c)
-        for (x, y) in ((2, 2), (3, 3)): s2.put(x, y, 'E') if k % 2 else None
-        out.append(s2)
+                if c != '.': s.put(i, 9 + j, c)
+        out.append(s)
     return out
 
 def _pumice_impact():
@@ -799,7 +778,7 @@ PROJECTILES = [
     Proj('basalt_quarry_driver', _slug(), _slug_impact(), (5, 5), (5, 11), fps=10, ifps=12, pad=4, ipad=6, src='HyoraA',
          notes='A huge rock slug, 10x20: a dark chipped stone ball with a glowing crack that turns over 3 frames, and a trail of embers. Pierces 3 targets: play the impact at every hit.',
          inotes='The slug shatters: a white-orange flash, then rock shards fly out with sparks, then a settling dust ring (4 frames, 24x24).'),
-    Proj('basalt_pumice_flak', _pumice(), _pumice_impact(), (3, 3), (3, 8), fps=12, ifps=14, pad=3, ipad=4, src='HyoraA',
-         notes='A pale pumice rock, 6x12, tumbling over 4 frames, with a small puff of grey smoke behind it. Splash flak: explode it at the target or when its time is up.',
+    Proj('basalt_pumice_flak', _pumice(), _pumice_impact(), (4, 4), (4, 9), fps=12, ifps=14, pad=3, ipad=4, src='HyoraA',
+         notes='A pale pumice rock, 8x15 with its smoke, tumbling over 4 frames (the pores move), a puff of grey smoke behind it. Splash flak: explode it at the target or when its time is up.',
          inotes='The rock bursts into a fiery puff with grey chips and a smoke ring (4 frames, 20x20).'),
 ]

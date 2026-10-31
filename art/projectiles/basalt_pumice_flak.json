@@ -1,7 +1,7 @@
 {
  "frame": [
-  6,
-  12
+  8,
+  15
  ],
  "orientation": "up: travels towards the top of the image at rotation 0",
  "anims": {
@@ -13,19 +13,19 @@
  },
  "anchors": {
   "head": [
-   3,
-   3
+   4,
+   4
   ],
   "tail": [
-   3,
-   8
+   4,
+   9
   ]
  },
  "glow": {
   "image": "basalt_pumice_flak_glow.png",
   "frame": [
-   12,
-   18
+   14,
+   21
   ],
   "offset": [
    -3,
@@ -77,5 +77,5 @@
    "blend": "add (preferred) or alpha-over"
   }
  },
- "notes": "A pale pumice rock, 6x12, tumbling over 4 frames, with a small puff of grey smoke behind it. Splash flak: explode it at the target or when its time is up."
+ "notes": "A pale pumice rock, 8x15 with its smoke, tumbling over 4 frames (the pores move), a puff of grey smoke behind it. Splash flak: explode it at the target or when its time is up."
 }
