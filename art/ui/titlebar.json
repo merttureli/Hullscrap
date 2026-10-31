@@ -1,0 +1,33 @@
+{
+ "frame": [
+  28,
+  14
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "normal": [
+   0,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 12,
+   "top": 4,
+   "right": 8,
+   "bottom": 4
+  },
+  "content_margins": {
+   "left": 14,
+   "top": 2,
+   "right": 10,
+   "bottom": 2
+  },
+  "center": "stretch"
+ },
+ "notes": "Panel header strip: steel bar with a hazard-tape cap on the left and a bolt on the right. Title text goes in the content margins (left 14 to clear the tape)."
+}

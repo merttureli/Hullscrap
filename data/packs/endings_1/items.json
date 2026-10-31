@@ -1,0 +1,6 @@
+{
+  "items": [
+    {"id": "gate_core", "name": "Gate Core", "kind": "special", "blurb": "The heart of a dead gate, still warm, still humming a note you can only hear when you stop trying. It will restart a gate, if the gate will have it."},
+    {"id": "hollow_kettle", "name": "Hollow Kettle", "kind": "special", "blurb": "It never boils over, and it is warm in your hands when nobody has lit anything. Its handle is a little too eager to be held. The Hollow take it as a sign that you have been to dinner."}
+  ]
+}

@@ -1,0 +1,157 @@
+{"events": [
+    {
+      "id": "station_wayout_concord_charter", "type": "station", "weight": 100, "once": true, "requires": {"flag": "at_meridian", "rep_min": {"concord": 5}, "not_flag": "wayout_concord_backed", "jumps_min": 22},
+      "text": "Behind Meridian's Records Hall is a door with a brass plate that says RESTORATION DESK (TEMPORARY). The plate has been up for forty years. Behind it a woman in a very good, very old uniform is stamping a form with the gravity of someone launching a ship. 'Director Imre Vasko, Lattice Authority, Restoration. Acting,' she says, without looking up. 'You have been recommended. By nobody; I checked. But yours is the shortest file that isn't empty, and I do like a short file.' She slides across a charter: nineteen pages and a ribbon. It authorises one party to restore the Concord Gate, subject to a gate core, four units of gate alloy and, in a box at the bottom marked BACKING, an Authority signature. 'Mine,' she says. 'It has been waiting for a name to go beside it.'",
+      "choices": [
+        {"text": "Sign the charter. File the fee (200 credits).", "requires": {"credits": 200, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Vasko stamps it, signs it, blots it, and for about one second forgets to be acting. 'The core is inside the gate,' she says. 'The alloy is in the walls. I would come with you, but I have a form.' She presses a pin into your palm, a small brass lattice, the Authority's mark. On your chart the Concord Gate lights up like a name on a door.", "effects": {"flag": "wayout_concord_backed", "rep": {"concord": 1}, "reveal": "gate_1"}}
+        ]},
+        {"text": "[Human] Complain loudly about the fee until she waives it.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 100, "text": "You complain with the depth and range of a species that invented it. At minute four, Vasko puts down her stamp. At minute six she says 'Please stop.' At minute seven she waives the fee, and at minute eight she says, with real feeling, 'Thank you. Nobody has complained properly in years.' The pin is warm when she hands it over.", "effects": {"flag": "wayout_concord_backed", "rep": {"concord": 1}, "reveal": "gate_1"}}
+        ]},
+        {"text": "Ask what the Authority will do if the gate comes back.", "outcomes": [
+          {"weight": 100, "text": "'File things,' says Vasko, and then, after a pause, 'Everything that goes through. It will be the first thing I have filed in forty years that someone wanted.' She is looking at the wall where the gate used to be on a map. 'Then I will retire,' she says. 'To a place with a window.'", "effects": {}}
+        ]},
+        {"text": "Not yet.", "outcomes": [
+          {"weight": 100, "text": "'The charter keeps,' says Vasko. 'It has kept for forty years. It is excellent at it.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "gate_wayout_concord_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_1", "flag": "wayout_concord_backed", "not_flag": "wayout_concord_core", "jumps_min": 30},
+      "text": "The Concord Gate is a ring the size of a small moon, with a hole in the middle where the sky should be. Its shell has been peeled and its ribs show, white as a wishbone, and inside, in the control ring, the desks are still set out in rows with their chairs tucked in, as if the shift were due back. The core hangs where the last operator left it, in a cage of Lattice Authority tags: PROPERTY OF, DO NOT REMOVE and, in smaller print, SERIOUSLY. A Warden drone, Unit 3, drifts in front of it, humming the polite hum of a thing that has been told to guard something and has not been told what from. 'Credentials,' says Unit 3. It sounds hopeful.",
+      "choices": [
+        {"text": "Present Vasko's charter.", "outcomes": [
+          {"weight": 60, "text": "Unit 3 reads the nineteen pages with its single lens, from the top, aloud, because it can. 'It is a very good form,' it says at the end, with feeling. It stamps it, stands aside and helps you carry the core to the airlock. In the walls there is alloy to be had, and you take what you need, and a little of what you don't.", "effects": {"items": {"gate_core": 1, "gate_alloy": 4}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}},
+          {"weight": 40, "text": "Unit 3 reads it twice and finds a missing initial on page nine. 'I must regretfully decline,' it says, and the guard drones that had been politely drifting behind it stop drifting.", "effects": {"fight": "tier"}, "after_win": {"text": "The Warden's lens goes dark with a sound like a sigh. Under the cage there is a core, in the walls there is alloy, and in Unit 3's housing, folded very neatly, a good form.", "effects": {"items": {"gate_core": 1, "gate_alloy": 4}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}}}
+        ]},
+        {"text": "Cut the core free while the Warden is reading.", "outcomes": [
+          {"weight": 60, "text": "The cutter bites the cage while Unit 3 is on page twelve. The core comes loose with a noise like a tray being set down in an empty canteen. Unit 3 notices at the very end, says 'Oh,' and lets you go.", "effects": {"items": {"gate_core": 1, "gate_alloy": 2}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}},
+          {"weight": 40, "text": "The cage fights back, with a flash and a great many Lattice Authority tags. Everyone aboard has a very bad evening and a very good core.", "effects": {"crew_hp": -20, "items": {"gate_core": 1, "gate_alloy": 2}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}}
+        ]},
+        {"text": "[Basalt] Ask your Basalt to carry it out. They know the door.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt walks the control ring without a suit, touches each chair as he passes, and lifts the core out of its cage like a man lifting a sleeping child. Unit 3 says 'Credentials,' once. He says, 'I was on the floor,' and Unit 3, for a long moment, says nothing. It stamps something. Nobody asks what.", "effects": {"items": {"gate_core": 1, "gate_alloy": 4}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}}
+        ]},
+        {"text": "Retreat to the airlock. You are not ready.", "outcomes": [
+          {"weight": 100, "text": "Unit 3 watches you go. 'Come again,' it says. 'With credentials.' It sounds, if anything, more hopeful than before.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "gate_wayout_concord_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_1", "flag": ["wayout_concord_backed", "wayout_concord_core"], "jumps_min": 34},
+      "text": "The ring waits. The chairs are tucked in. On the main console a brass plate has been polished by someone who did not expect to be there when it mattered, and underneath it a slot is cut exactly the size of a gate core. Your comm crackles. 'Restoration Desk,' says Vasko, across a great distance and a great deal of stamping. 'Whenever you are ready. Please do not hurry. Please hurry.'",
+      "choices": [
+        {"text": "Seat the core. Pour the alloy. Call Vasko.", "requires": {"items": {"gate_core": 1, "gate_alloy": 4}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The core goes in with a click that every dead gate in the Drift hears. The alloy runs along the ribs like warm honey, and the ring, for the first time in forty years, blinks. 'Restoration is now in effect,' says Vasko, in a voice you have not heard before, which turns out to be her own. 'Please remain seated. Please... please remain seated.'", "effects": {"unlock": "ship_concord_frigate", "ending": "wayout_concord"}}
+        ]},
+        {"text": "Not yet.", "outcomes": [
+          {"weight": 100, "text": "The slot waits. It has had practice.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_wayout_clans_moot", "type": "station", "weight": 100, "once": true, "requires": {"flag": "at_rusthold", "rep_min": {"clans": 5}, "not_flag": "wayout_clans_backed", "jumps_min": 22},
+      "text": "The Clan Moot meets in the big cargo bay, which is the only room large enough, and which is why most of the furniture is already on fire. Twelve clans, one table and one rule: whoever wants the floor must hold the Good Wrench. The Good Wrench is, in fact, not that good. Today it is in the hands of Ma Gantry, who is standing on a chair. 'The Concord wants the gates back,' she says. 'The Lumen want to listen to them. Who wants them open?' The bay answers with a noise like a hangar full of dropped pans. It is not yet a vote. A vote needs the Wrench.",
+      "choices": [
+        {"text": "Take the Wrench. Promise to open the Scrapper Gate for everybody, for free.", "outcomes": [
+          {"weight": 60, "text": "You say it. Nobody agrees, which is how you know it went well. The Gantries vote yes, the cousins vote yes under protest, the in-laws vote yes because the cousins did, and a woman at the back votes yes to a different question entirely. Ma takes the Wrench off you like a mother retrieving a knife. 'Motion carried,' she says. 'Somebody write that down. Somebody else, sit down.'", "effects": {"flag": "wayout_clans_backed", "rep": {"clans": 2}, "reveal": "gate_2"}},
+          {"weight": 40, "text": "A chair is thrown. You catch it, which the moot counts as a speech. It is the best-received thing anybody has said in that bay in a decade, and your hands will bruise for a week. 'Motion carried,' says Ma, over the noise.", "effects": {"crew_hp": -10, "flag": "wayout_clans_backed", "rep": {"clans": 2}, "reveal": "gate_2"}}
+        ]},
+        {"text": "Buy the bar a round. A big one. (300 credits)", "requires": {"credits": 300, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "It is an old and honourable form of democracy. The vote is unanimous, if you count the ones who were asleep, and the moot does. By the end of the night three clans have forgotten what the motion was, and all of them are for it.", "effects": {"flag": "wayout_clans_backed", "rep": {"clans": 1}, "reveal": "gate_2"}}
+        ]},
+        {"text": "[Grundl] Send your Grundl to stand at the back and be large.", "requires": {"species": "grundl"}, "outcomes": [
+          {"weight": 100, "text": "Your Grundl walks to the back of the bay and stands there. Nobody argues with the back row. The vote is held in a very quiet voice, and carried, and then everyone is extremely polite to the Grundl for a week. They are not sure why. They are delighted.", "effects": {"flag": "wayout_clans_backed", "rep": {"clans": 2}, "reveal": "gate_2"}}
+        ]},
+        {"text": "[Kett] Let the Kett vote as a bloc.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett vote as one, in a single click. The moot counts each of them. The Kett count themselves as a single vote. This causes a procedural crisis of such rare beauty that Ma suspends it in order to enjoy it, and carries the motion in the confusion.", "effects": {"flag": "wayout_clans_backed", "rep": {"clans": 2}, "reveal": "gate_2"}}
+        ]},
+        {"text": "Leave the Wrench where it is.", "outcomes": [
+          {"weight": 100, "text": "Somebody else picks up the Wrench and starts a speech about the price of bolts. You leave quietly. It is the most sensible thing you have done all week.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "gate_wayout_clans_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_2", "flag": "wayout_clans_backed", "not_flag": "wayout_clans_core", "jumps_min": 30},
+      "text": "The Scrapper Gate has tenants. The control ring has been cut into rooms, the rooms have been hung with lights and flags, and the old operator's desk has become a bar, which the Rustfangs call The Last Stop and which has a menu. The core hangs over the bar in its cage under a hand-painted sign: NOT FOR SALE. DON'T ASK. SERIOUSLY, DON'T. A man in Rustfang colours, with a ledger and a very friendly knife, looks you up and down. 'Customer,' he says, in the voice of a man who has not had one in a while. 'Or collector. It's all the same to the bar.'",
+      "choices": [
+        {"text": "Tell them the gate is going to be free. For everyone. Including them.", "outcomes": [
+          {"weight": 70, "text": "A silence. A glass is put down. 'Free,' says the man. 'Like, free-free? No toll?' 'No toll.' 'No Concord?' 'Some Concord.' 'No...' He looks around the bar at his tenants. Someone starts to cry. The core is lowered from its cage with bunting still wrapped round it, and the bar closes for the first time since the Snap. 'Come back and open it,' he says. 'We'll be on the doorstep.'", "effects": {"items": {"gate_core": 1, "gate_alloy": 4}, "flag": "wayout_clans_core", "rep": {"clans": 1}, "log": "log_wayout_clans_menu"}},
+          {"weight": 30, "text": "The man laughs. Then he stops laughing, and several other people don't. 'Nice speech,' he says. 'Shame about the ledger.'", "effects": {"fight": "tier"}, "after_win": {"text": "The Last Stop closes for repairs. In the wreck of the bar the cage hangs open, and a hand-painted sign says, a little crooked: SERIOUSLY.", "effects": {"items": {"gate_core": 1, "gate_alloy": 4}, "flag": "wayout_clans_core", "log": "log_wayout_clans_menu"}}}
+        ]},
+        {"text": "Buy a round, then ask. (200 credits)", "requires": {"credits": 200, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You buy a round for the house, which at the Last Stop is four hundred people and a parrot. By the third drink the man has remembered that the cage is not nailed down. 'Take it,' he says. 'Take it before I sober up.'", "effects": {"items": {"gate_core": 1, "gate_alloy": 3}, "flag": "wayout_clans_core", "rep": {"clans": 1}, "log": "log_wayout_clans_menu"}}
+        ]},
+        {"text": "[Tinkerer] Unbolt the cage while the bar argues about the soup.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer unbolts the cage in the time it takes the bar to decide between two kinds of soup. Nobody notices. Nobody ever does. The core comes loose with a noise like a spoon dropped in a church, and your tinkerer says 'Oops,' and takes it anyway.", "effects": {"items": {"gate_core": 1, "gate_alloy": 3}, "flag": "wayout_clans_core", "log": "log_wayout_clans_menu"}}
+        ]},
+        {"text": "Back away from the bar.", "outcomes": [
+          {"weight": 100, "text": "The man watches you go with the sad courtesy of a barman who has seen your type. 'Come back when you're thirsty,' he says.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "gate_wayout_clans_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_2", "flag": ["wayout_clans_backed", "wayout_clans_core"], "jumps_min": 34},
+      "text": "Half the Drift is on the doorstep. Somebody has brought a ribbon, and somebody else has brought a pair of scissors the size of a door. The Rustfangs have swept the ring and put out chairs. Ma Gantry's face is on every channel you own. 'The motion,' she says, 'is that someone turns it on. The Wrench is in the bay. Someone get the Wrench.' A cousin arrives with the Wrench. 'I'd like to say a few words,' says someone. 'Don't,' say several hundred people.",
+      "choices": [
+        {"text": "Seat the core. Pour the alloy. Hit it with the Wrench.", "requires": {"items": {"gate_core": 1, "gate_alloy": 4}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You hit it with the Wrench. It is not that good a wrench. The gate comes on regardless, loudly and crookedly, with scaffolding still on it and three toll booths already forming in the mouth of the ring. 'It works,' says someone, in a voice of pure surprise. 'Of course it works,' says Ma. 'I've been charging for it for forty years.'", "effects": {"unlock": "ship_door_prize", "ending": "wayout_clans"}}
+        ]},
+        {"text": "Not yet.", "outcomes": [
+          {"weight": 100, "text": "'Take your time,' says Ma. 'The bar's open.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_wayout_lumen_consent", "type": "station", "weight": 100, "once": true, "requires": {"flag": "at_prism", "rep_min": {"lumen": 5}, "not_flag": "wayout_lumen_backed", "jumps_min": 22},
+      "text": "The Prism has gone quiet in the way a room goes quiet before a speech. In the long chamber at its heart, where the Lumen keep their model of the Lattice, forty acolytes stand in a spiral with their eyes closed, and the model hums three notes, and stops. 'We want to study the gates, not restart them,' says the Hierophant, whose name is a chord. 'We have said so for forty years. But you have shown us something, and we have counted. A door opened by the Concord leads to the Concord. A door opened by the Clans leads to the Clans. A door opened by us would lead somewhere we have not been.' She opens her eyes. 'We would like you to open it. We would like to be asked properly.'",
+      "choices": [
+        {"text": "Sing the fourth note.", "outcomes": [
+          {"weight": 100, "text": "You sing it, badly. It does not matter. The spiral opens like a hand, and the model, after forty years of three notes, hums a fourth, and a fifth, and something that is not a note at all but sounds like a door that wants to be opened. The Hierophant laughs, which nobody has seen her do. 'Yes,' she says. 'Go and ask it.'", "effects": {"flag": "wayout_lumen_backed", "rep": {"lumen": 2}, "reveal": "gate_3"}}
+        ]},
+        {"text": "[Emberkin] Hum it warm, and let it find the heat.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin hums the fourth note, warm as a stove, and the crystal chamber glows the colour of toast. The acolytes sway. 'Home,' murmurs one, who is not Emberkin and has never been warm. The Hierophant presses a shard of the model into your palm. It is hot. 'Take the Prism with you,' she says.", "effects": {"flag": "wayout_lumen_backed", "rep": {"lumen": 3}, "reveal": "gate_3"}}
+        ]},
+        {"text": "[Prism Core] Let the reactor sing it.", "requires": {"component": "reactor_neon_mk1"}, "outcomes": [
+          {"weight": 100, "text": "Your Prism Core finds the note on its first attempt, as if it had been holding it for forty years. The chamber answers with a chord. The Hierophant bows to your reactor and then, politely, to you.", "effects": {"flag": "wayout_lumen_backed", "rep": {"lumen": 3}, "reveal": "gate_3", "items": {"crystal": 3}}}
+        ]},
+        {"text": "Ask what is on the other side.", "outcomes": [
+          {"weight": 100, "text": "'We do not know,' says the Hierophant. 'It is the entire point.'", "effects": {}}
+        ]},
+        {"text": "Say you need time.", "outcomes": [
+          {"weight": 100, "text": "'Of course,' says the Hierophant. 'We are early. We will wait.' Forty acolytes, in unison, resume not moving.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "gate_wayout_lumen_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_3", "flag": "wayout_lumen_backed", "not_flag": "wayout_lumen_core", "jumps_min": 30},
+      "text": "The Lumen Gate is the only dead gate that is not dark. Crystal has grown over it in slow ribbons of violet and white, and in the heart of the ring the core floats in a cradle of light, humming the fourth note. Between you and it a Warden drone hangs, polite, patient and wearing the nervous air of a thing that has recently begun to think. 'Hello,' it says. 'I am Unit 7. I have a question. I am not permitted to ask it, so I would like you to ask it for me.' A long pause. 'Who is on the other side of the gate?'",
+      "choices": [
+        {"text": "Say you don't know. That's why you're going.", "outcomes": [
+          {"weight": 100, "text": "Unit 7 is silent. Then it laughs, an exact, mechanical, delighted ha, ha, ha, as though it had read the word and never used it. 'An honest answer,' it says. 'My programming did not anticipate one.' It drifts aside, the cradle opens, and the core falls into your hands like a ripe thing.", "effects": {"items": {"gate_core": 1, "gate_alloy": 4}, "flag": "wayout_lumen_core", "rep": {"lumen": 1}, "log": "log_wayout_lumen_unit7"}}
+        ]},
+        {"text": "Say: friends. Probably friends.", "outcomes": [
+          {"weight": 70, "text": "'Probably,' says Unit 7, trying it out. 'I will put it in the log.' It stands aside. The core is yours, and so, apparently, is the log.", "effects": {"items": {"gate_core": 1, "gate_alloy": 3}, "flag": "wayout_lumen_core", "log": "log_wayout_lumen_unit7"}},
+          {"weight": 30, "text": "'Probably,' repeats Unit 7, and the word does something to its circuits that was not in the manual. The guard drones go from polite to loud, and you go from guests to burglars.", "effects": {"fight": "tier"}, "after_win": {"text": "The cradle opens as the last guard drone folds. Unit 7 is not among them: it hangs in the corner, saying 'Probably' to itself, over and over, in a tone of wonder.", "effects": {"items": {"gate_core": 1, "gate_alloy": 3}, "flag": "wayout_lumen_core", "log": "log_wayout_lumen_unit7"}}}
+        ]},
+        {"text": "[Prismatic] Answer it in the fourth note.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic answers in a crystal chord that lasts a long moment. Unit 7's lens widens. 'Oh,' it says. 'Oh.' The cradle opens by itself, and Unit 7, when you leave, is humming. It will be in trouble for that.", "effects": {"items": {"gate_core": 1, "gate_alloy": 4}, "flag": "wayout_lumen_core", "rep": {"lumen": 2}, "log": "log_wayout_lumen_unit7"}}
+        ]},
+        {"text": "Leave. You need to think.", "outcomes": [
+          {"weight": 100, "text": "'I will be here,' says Unit 7. 'I have been told to be here. I would like it noted that I would be here anyway.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "gate_wayout_lumen_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_3", "flag": ["wayout_lumen_backed", "wayout_lumen_core"], "jumps_min": 34},
+      "text": "The cradle waits, and the ring waits, and somewhere on the Prism forty acolytes are standing in a spiral with their eyes closed, holding a single note. Unit 7 hangs at your shoulder. 'I will not ask again,' it says. 'But I would like it noted that I am listening.'",
+      "choices": [
+        {"text": "Seat the core. Pour the alloy. Ask the gate, properly.", "requires": {"items": {"gate_core": 1, "gate_alloy": 4}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You ask. The gate answers, not with a flash but with a patience: the ring of crystal blooms, and the hole in its heart fills with stars. Not these stars. A sky with a different number of them, three thousand and twelve or some other number entirely. The Prism sings. Unit 7 says one word, which is 'Hello,' and it is not talking to you.", "effects": {"unlock": "ship_lumen_skiff", "ending": "wayout_lumen"}}
+        ]},
+        {"text": "Not yet.", "outcomes": [
+          {"weight": 100, "text": "The cradle keeps its light on, the way you leave a lamp for someone.", "effects": {}}
+        ]}
+      ]
+    }
+]}
