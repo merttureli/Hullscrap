@@ -22,6 +22,7 @@ const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const JumpBar = preload("res://scripts/ui/jump_bar.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
+const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
 
 const PLAYER_SHOT := {"energy": Color("#7dffe8"), "kinetic": Color("#ffe07a"), "explosive": Color("#ffb04a"), "ion": Color("#b99bff")}
 const ENEMY_SHOT := {"energy": Color("#ff6a4a"), "kinetic": Color("#ff9a6a"), "explosive": Color("#ff5a3a"), "ion": Color("#b99bff")}
@@ -73,6 +74,7 @@ var _bar: Control
 var _bar_extras: Control  # over the weapon bar: each turret's hit chance and whether it autofires
 var _banner: Label
 var _jump_bar: Control  # under the enemy schematic while it flees
+var _hazard_bar: Control  # the fight's hazard line, under the hint (hazards.gd)
 var _hint: Label
 var _note := ""
 var _note_until := 0.0
@@ -132,6 +134,8 @@ func _make_hud() -> void:
 	layer.add_child(_banner)
 	_jump_bar = JumpBar.new()
 	layer.add_child(_jump_bar)
+	_hazard_bar = HazardBar.new()
+	layer.add_child(_hazard_bar)
 	_hint = Label.new()
 	_hint.size = Vector2(1000.0, 44.0)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -253,6 +257,7 @@ func _show_hud(on: bool) -> void:
 		_hint.visible = on
 		_banner.visible = false
 		_jump_bar.bind(session if on else null)
+		_hazard_bar.bind(session.arena if on else null)
 
 
 # --- input ----------------------------------------------------------------------------------------
