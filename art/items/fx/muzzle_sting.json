@@ -1,0 +1,46 @@
+{
+ "frame": [
+  9,
+  13
+ ],
+ "mode": "once",
+ "anims": {
+  "play": [
+   0,
+   3,
+   24
+  ]
+ },
+ "anchors": {
+  "muzzle": [
+   4,
+   12
+  ]
+ },
+ "for_class": [
+  "pistol (sting_pistol)"
+ ],
+ "for_item": [
+  "sting_pistol"
+ ],
+ "glow": {
+  "image": "muzzle_sting_glow.png",
+  "frame": [
+   19,
+   23
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    24
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Hand-weapon muzzle flash, faces UP (rotation 0): put the muzzle anchor on the weapon's muzzle point and rotate with the weapon. Plays once per use."
+}

@@ -1,0 +1,20 @@
+{
+ "frame": [
+  13,
+  33
+ ],
+ "anchors": {
+  "grip": [
+   8,
+   21
+  ],
+  "muzzle": [
+   6,
+   0
+  ]
+ },
+ "class": "melee",
+ "pose": "melee",
+ "culture": "mire",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Mire hook gaff: a boathook. A steel pole with teal grip wraps, a brass socket, a big curved steel crook with a point, a red hand-wheel at the butt."
+}

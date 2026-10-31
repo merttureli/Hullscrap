@@ -1,0 +1,46 @@
+{
+ "frame": [
+  13,
+  15
+ ],
+ "mode": "once",
+ "anims": {
+  "play": [
+   0,
+   3,
+   16
+  ]
+ },
+ "anchors": {
+  "muzzle": [
+   6,
+   14
+  ]
+ },
+ "for_class": [
+  "rifle (bubble_rifle)"
+ ],
+ "for_item": [
+  "bubble_rifle"
+ ],
+ "glow": {
+  "image": "muzzle_bubble_glow.png",
+  "frame": [
+   23,
+   25
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    16
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Hand-weapon muzzle flash, faces UP (rotation 0): put the muzzle anchor on the weapon's muzzle point and rotate with the weapon. Plays once per use."
+}

@@ -6,6 +6,7 @@ extends "res://tests/base_test.gd"
 const Fixture = preload("res://tests/fixture_ship.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Art = preload("res://scripts/view/art.gd")
+const Content = preload("res://scripts/data/content.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
@@ -308,7 +309,7 @@ func test_every_species_has_its_rig_and_sidearm_art() -> void:
 	for id in TABLE:
 		check(table.has(id), id + ": one of the four species of the notes")
 	check(table.size() >= TABLE.size(), "and the species of the packs come on top")
-	var ids: Array = _weapons().map(func(w): return w["id"])
+	var ids: Array = Content.ids("hand_weapons")  # the base file and the packs (the race wave 1 sidearms live in the tech packs)
 	for id in table:
 		var def: Dictionary = table[id]
 		var m := CrewMember.new("X", Vector2.ZERO, id)
@@ -355,7 +356,36 @@ func test_the_hand_weapons_all_have_art_and_sensible_numbers() -> void:
 		if f.ends_with(".json"):
 			var js := Art.read_json("res://art/items/" + f)
 			if js.has("culture"):
-				check(seen.has(f.get_basename()), "%s: a cultured item in art/items is a hand weapon" % f)
+				check(seen.has(f.get_basename()) or Content.has("hand_weapons", f.get_basename()), "%s: a cultured item in art/items is a hand weapon" % f)  # the base file or a pack
+
+
+func test_every_pack_hand_weapon_has_matching_art_and_the_flashes_name_real_weapons() -> void:
+	_default_art()
+	var ids: Array[String] = Content.ids("hand_weapons")
+	check(ids.size() >= 24, "the base weapons and the race packs' (%d)" % ids.size())
+	for id in ids:
+		var w: Dictionary = Content.entry("hand_weapons", id)
+		var art = Art.item(str(w["art"]))
+		check(art != null, "%s: art/items/%s.png loads" % [id, w["art"]])
+		if art == null:
+			continue
+		eq(art.pose, w["class"], id + ": the art's arm pose is the weapon's class")
+		check(art.anchors.has("grip") and art.anchors.has("muzzle"), id + ": the art has a grip and a muzzle")
+		check(art.anchors["grip"].y > art.anchors["muzzle"].y and art.anchors["grip"].x < art.frame.x, id + ": the grip is below the muzzle, inside the frame")
+	var seen_for := {}
+	for f in DirAccess.get_files_at("res://art/items/fx"):
+		if not f.ends_with(".json"):
+			continue
+		var js := Art.read_json("res://art/items/fx/" + f)
+		var fr: Array = js["frame"]
+		var m: Array = js["anchors"]["muzzle"]
+		check(m[0] >= 0 and m[0] < fr[0] and m[1] >= 0 and m[1] < fr[1], f + ": the muzzle anchor is inside the frame")
+		check(js["anims"].has("play"), f + ": plays")
+		for it in js.get("for_item", []):
+			check(Content.has("hand_weapons", it), "%s: names the hand weapon %s" % [f, it])
+			seen_for[it] = true
+	for id in ["sting_pistol", "bubble_rifle", "spore_puffer", "rivet_fist", "arc_welder", "lens_pistol", "shard_lance", "chain_gun"]:
+		check(seen_for.has(id), id + ": has a muzzle flash")
 
 
 # --- drawing ------------------------------------------------------------------------------------------

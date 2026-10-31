@@ -1,0 +1,36 @@
+{
+ "frame": [
+  13,
+  25
+ ],
+ "anchors": {
+  "grip": [
+   6,
+   17
+  ],
+  "muzzle": [
+   6,
+   0
+  ],
+  "foregrip": [
+   6,
+   6
+  ]
+ },
+ "class": "heavy",
+ "pose": "heavy",
+ "culture": "gauntling",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Gauntling rivet fist: a rivet driver bolted to the forearm. A hot rivet in a copper-wound nozzle, a wide knuckle block of mismatched plates (pale steel, rust) with a row of rivet heads, a strapped forearm brace. It pierces (later).",
+ "glow": {
+  "image": "rivet_fist_glow.png",
+  "frame": [
+   21,
+   33
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

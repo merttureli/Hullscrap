@@ -24,12 +24,12 @@ const STEP := 0.1
 const LEGACY_ROOT := "res://tests/fixtures/traits_legacy"
 ## The races_1 pack: species -> [hp, speed, traits, sidearm].
 const RACES := {
-	"kett": [80.0, 1.0, ["swarm"], "rivet_gun"],
-	"mire": [100.0, 1.0, ["firefighter", "dries_out"], "service_pistol"],
-	"sporeling": [100.0, 0.8, ["aura_spores", "flammable"], "flare_gun"],
-	"gauntling": [100.0, 1.0, ["mechanical", "half_lungs", "ion_prone", "tinkerer"], "multi_tool"],
-	"prismatic": [100.0, 1.0, ["crystal_conduit", "crystal_body"], "gatekeepers_lance"],
-	"grundl": [180.0, 0.7, ["hauler", "clumsy"], "quarry_hammer"],
+	"kett": [80.0, 1.0, ["swarm"], "sting_pistol"],
+	"mire": [100.0, 1.0, ["firefighter", "dries_out"], "bubble_rifle"],
+	"sporeling": [100.0, 0.8, ["aura_spores", "flammable"], "spore_puffer"],
+	"gauntling": [100.0, 1.0, ["mechanical", "half_lungs", "ion_prone", "tinkerer"], "rivet_fist"],
+	"prismatic": [100.0, 1.0, ["crystal_conduit", "crystal_body"], "lens_pistol"],
+	"grundl": [180.0, 0.7, ["hauler", "clumsy"], "freight_hammer"],
 }
 
 

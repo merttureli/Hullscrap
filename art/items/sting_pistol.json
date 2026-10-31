@@ -1,0 +1,32 @@
+{
+ "frame": [
+  9,
+  17
+ ],
+ "anchors": {
+  "grip": [
+   4,
+   13
+  ],
+  "muzzle": [
+   4,
+   0
+  ]
+ },
+ "class": "pistol",
+ "pose": "pistol",
+ "culture": "kett",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Kett sting pistol: a cream chitin needle through an amber collar, a green venom sac behind a window, a dark compound-eye lamp for a sight. Short, quick, light.",
+ "glow": {
+  "image": "sting_pistol_glow.png",
+  "frame": [
+   17,
+   25
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

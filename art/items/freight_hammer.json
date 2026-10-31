@@ -1,0 +1,20 @@
+{
+ "frame": [
+  15,
+  41
+ ],
+ "anchors": {
+  "grip": [
+   7,
+   25
+  ],
+  "muzzle": [
+   7,
+   0
+  ]
+ },
+ "class": "melee",
+ "pose": "melee",
+ "culture": "grundl",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Grundl freight hammer: a long-hafted dock sledge. A squared riveted gunmetal head with an amber stencil band, a hazard-taped haft, a wrist chain. Knocks a target back (later)."
+}
