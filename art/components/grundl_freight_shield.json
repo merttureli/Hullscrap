@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "grundl_freight_shield_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Grundl Freight Shield, 4x4: a riveted steel frame with corrugated side panels and amber stencil bands, round a blue shield disc held in a cage of heavy bars; four fuel-cell lamps along the bottom (the cells the crew restock) light blue one by one on the 4-frame loop and a chain hangs slack from each top corner. Off: a dull disc and dark cells. Damaged: a cage bar bent, a chain snapped, a cell dark, the disc stuttering. Disabled: the disc dead, the cage twisted, a plate sprung."
+}

@@ -1,0 +1,20 @@
+{
+ "frame": [16, 16],
+ "anims": {
+  "play": [0, 3, 16]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [8, 8]
+ },
+ "glow": {
+  "image": "gauntling_scrap_shotgun_impact_glow.png",
+  "frame": [24, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "play": [0, 3, 16]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Gauntling Scrap Shotgun hit: orange sparks and bits of scrap ricocheting off (3 frames)."
+}

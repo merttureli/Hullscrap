@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "sporeling_pollen_turret_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Sporeling Pollen Turret: a pollen bellows (cream sac that breathes), two yellow pollen jars, a fibrous feed root, power coupling and five spore sacs. damaged: a jar has cracked and spilt, sacs withered; disabled: the bellows collapsed. The rotating head sporeling_pollen_turret_barrel: a flower head, pink petals round a yellow stamen nozzle, with a sensor eye on a stalk; fire: a yellow pollen cloud.",
+ "offset": [
+  0,
+  -4
+ ]
+}
