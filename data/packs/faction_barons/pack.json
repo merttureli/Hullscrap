@@ -1,0 +1,7 @@
+{
+	"id": "faction_barons",
+	"name": "Rare faction: the Salvage Barons",
+	"version": "1.0",
+	"requires": ["races_1"],
+	"notes": "The first rare faction (docs/CONTENT.md section 18, uncommon): rich pirate lords in heavy, gaudy yachts. enemy_tables.json adds the shipgen faction `barons` (hulls of medium size at least, budget x1.5-2 the stage and never under 200 before that factor, so a fight with one rates 4-5 skulls against the starters; a Baron surrenders more often than he flees); factions.json lists them as hostile (no reputation bar). They meet you only in Clan space and the Boneyard, through the six events in events/baron_events.json (a toll, a duel, a gilded wreck, a recruit, a feast, a bounty), about 5% of the pirate encounters there: every fight in them is `fight: gen:barons`, rated by the threat tag of the choice, and every one of those events has a choice with no effects (the way out). components.json/weapons.json: three gilded weapons (Gilded Lance, Tithe Gun, Sovereign Turret, all unique: found, not built) and one relic, the Sovereign Aegis (`relic: true`, a three-layer shield with a quirk); a Baron carries them from budget 60 up, so the salvage pick after a won fight offers them. characters.json: Pomfrey (the accountant, scan) and Sterling (the champion, overclock). unlocks.json: the Baron's Yacht starter (`pending: true`: the design is not built yet; the duel earns the unlock). Ship names come from names.json (`barons`)."
+}

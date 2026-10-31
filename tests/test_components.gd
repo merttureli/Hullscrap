@@ -112,6 +112,8 @@ func test_data_is_complete() -> void:
 		"ammo_rack": [0, 0, 1], "belt_drive_scrap": [-1, 2, 1], "belt_drive_std": [-1, 2, 2], "belt_drive_neon": [-1, 2, 3],
 		# the smelters (docs/CONTENT.md section 12, data/packs/processing_1)
 		"smelter_scrap_mk1": [-3, 7, 1], "smelter_mk1": [-3, 7, 1], "smelter_mk2": [-4, 7, 2], "smelter_mk3": [-5, 7, 3], "smelter_neon_mk1": [-4, 7, 1],
+		# the rare factions (docs/CONTENT.md 18, data/packs/faction_barons, faction_leviathans)
+		"gilded_lance": [-4, 5, 3], "baron_tithe_gun": [-4, 5, 3], "sovereign_turret": [-3, 5, 3], "sovereign_aegis": [-7, 3, 3], "starwhale_fin": [-4, 4, 4],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:

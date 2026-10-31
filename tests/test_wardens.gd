@@ -59,7 +59,7 @@ func test_the_data_is_sound_and_every_region_has_a_guard() -> void:
 	var cfg := Wardens.config()
 	var ids: Array = cfg["wardens"].keys()
 	ids.sort()
-	eq(ids, ["clans", "concord", "hollow", "lumen", "rustfangs"], "an entry per guarding faction")
+	eq(ids, ["clans", "concord", "hollow", "leviathans", "lumen", "rustfangs"], "an entry per guarding faction")
 	eq([cfg["stage_size"].size(), cfg["stage_budget_mult"].size(), int(cfg["jumps_ahead"])], [8, 8, 8], "eight stages, eight jumps ahead")
 	for r in Regions.all():
 		check(cfg["wardens"].has(Wardens.faction_of(r)), "region %s has a guard with an entry" % r["id"])

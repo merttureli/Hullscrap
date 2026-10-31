@@ -1,0 +1,18 @@
+{
+	"tiles": [
+		{
+			"id": "bone_armour",
+			"name": "Bone Armour",
+			"color": "#e9e2cf",
+			"cost": {"scrap": 2, "leviathan_bone": 1},
+			"solid": true,
+			"hp": 12,
+			"mass": 1.8,
+			"line": "standard",
+			"resist": {"kinetic": 0.7, "explosive": 0.7, "energy": 1.4},
+			"deflect": {"kinetic": 0.15},
+			"quirk": "",
+			"relic": true
+		}
+	]
+}

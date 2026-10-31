@@ -1,0 +1,325 @@
+{
+	"events": [
+		{
+			"id": "leviathan_deep_shed",
+			"type": "wreck_field",
+			"weight": 36,
+			"once": false,
+			"requires": {"region": "leviathan_deep"},
+			"title": "A Shed Skin",
+			"text": "A sheet of grey hide the size of a freight barge hangs in the debris, still glistening, ribbed with bone as pale as a plate. Something moulted here, recently, and not far off. The bone along the edge is already loosening in the cold. The deep is very quiet. Your hull ticks.",
+			"choices": [
+				{
+					"text": "Cut the loose bone along the edge (safe).",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "A careful hour with a bone saw and a held breath. You come away with a few clean ribs and the feeling of having stolen from a church.",
+							"effects": {"items": {"leviathan_bone": 1, "scrap": 6}}
+						}
+					]
+				},
+				{
+					"text": "Strip the whole hide for its bone.",
+					"outcomes": [
+						{
+							"weight": 65,
+							"text": "It takes all hands and two cutters, and you come away with a hold full of pale, light, humming bone. Nothing watched. Nothing at all.",
+							"effects": {"items": {"leviathan_bone": 4, "scrap": 15}, "crew_hp": -5}
+						},
+						{
+							"weight": 35,
+							"text": "The bone hums louder as you cut. Far off in the dark a note answers, and keeps rising. The owner has noticed its coat.",
+							"effects": {"fight": "gen:leviathans"},
+							"after_win": {
+								"text": "It dies slowly, and enormously, and the hull around you rings like a bell for a full minute after. The hide is yours, and what is left of its owner.",
+								"effects": {"items": {"leviathan_bone": 6}, "flag": "leviathan_slain"}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave it. Some coats are not for sale.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You back away from the hide with your lights low. Behind you, in the dark, something very large breathes out.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "leviathan_deep_song",
+			"type": "anomaly",
+			"weight": 36,
+			"once": false,
+			"requires": {"region": "leviathan_deep"},
+			"title": "The Long Note",
+			"text": "A note comes through the hull: so low the cups buzz on their hooks and the floor hums in your feet. It rises for a full minute, holds, and falls away into the deep. Your crew look at each other. Somebody laughs, shortly. 'It sounds like a question,' says the youngest, and nobody argues. After a while it asks again.",
+			"choices": [
+				{
+					"text": "Listen from a distance and log it.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You record all of it. Played back, it is not a question at all, but a name, said over and over. Whose, nobody can say.",
+							"effects": {"flag": "leviathan_song"}
+						}
+					]
+				},
+				{
+					"text": "[Sporeling] Hum back along the mycelium.",
+					"requires": {"species": "sporeling"},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Sporeling presses both palms to the bulkhead and hums, off-key and with great confidence. The deep goes quiet for a long moment. Then, very faintly, the note comes back a third higher, and kinder. 'It said hello,' says your Sporeling, and cries a little.",
+							"effects": {"flag": "leviathan_kin", "crew_hp": 15}
+						}
+					]
+				},
+				{
+					"text": "Cut the lights and drift on.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The note rises behind you twice more, then stops. You decide it was not about you.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "leviathan_deep_hunt",
+			"type": "empty",
+			"weight": 36,
+			"once": false,
+			"requires": {"region": "leviathan_deep"},
+			"title": "The Pod Rises",
+			"text": "The stars to port go out, one by one, in a line. Something is rising between you and them: a ridge of black, studded with pale bone, longer than any ship you have ever flown beside. It has a sail on its back. The sail turns, very slowly, towards you. The hull hums. Every sensor you own reads the same number, and it has only one digit.",
+			"choices": [
+				{
+					"text": "Stand and fight.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The sail unfolds. Spore-guns the size of barns open along its flank, and it comes on without any hurry at all.",
+							"effects": {"fight": "gen:leviathans"},
+							"after_win": {
+								"text": "It comes apart in a long, slow bloom of bone and spores, and the whole deep seems to hold its breath. In what is left there is a great deal of bone, and a fin still twitching.",
+								"effects": {"items": {"leviathan_bone": 6}, "flag": "leviathan_slain"}
+							}
+						}
+					]
+				},
+				{
+					"text": "Throw it your scrap (20) and see if it is satisfied.",
+					"requires": {"items": {"scrap": 20}, "pay": true},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It eats. It is not grateful, but it is, for the time being, full, and it sinks away into the dark with a long sigh that rattles the glasses.",
+							"effects": {"flag": "leviathan_fed"}
+						}
+					]
+				},
+				{
+					"text": "Cut your lights and drift out of its way.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "A rib of bone as long as a street slides past your bow, close enough to count the barnacles. The sail turns after you, and loses interest. You do not breathe for some time.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "leviathan_deep_calf",
+			"type": "distress",
+			"weight": 40,
+			"once": true,
+			"requires": {"region": "leviathan_deep"},
+			"title": "The Calf in the Wreck",
+			"text": "A young Leviathan, no bigger than a freighter, is tangled in the cables of a dead gate hulk and crying about it. Every cry shakes the cups. The cables have cut into its flank in long wet lines. It cannot get free, and it is getting tired. Somewhere in the dark, a lot further away than you would like, there is a very large silence listening.",
+			"choices": [
+				{
+					"text": "Cut it free (10 scrap, and a bad hour).",
+					"requires": {"items": {"scrap": 10}, "pay": true},
+					"outcomes": [
+						{
+							"weight": 85,
+							"text": "It takes all of you, and a great many careful cuts, and the calf does not struggle once. When it comes loose it noses your hull, once, like a very large dog, and is gone. Your cups are still humming.",
+							"effects": {"flag": "leviathan_calf_freed", "crew_hp": 10}
+						},
+						{
+							"weight": 15,
+							"text": "The calf thrashes as the last cable parts and a flipper takes your side. The hull rings like a gong. But it is free, and when it is gone you find the dent is clean and shallow, and the metal is warm.",
+							"effects": {"flag": "leviathan_calf_freed", "hull": -10}
+						}
+					]
+				},
+				{
+					"text": "Take the bone while it is helpless.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The calf screams, and the deep screams back, and something enormous starts to move. The bone will not be easy to keep.",
+							"effects": {"fight": "gen:leviathans", "flag": "leviathan_calf_hunted"},
+							"after_win": {
+								"text": "It was a long way down for the bone, and you do not look at what is left of the calf. The deep is very quiet now. It will not forget you, and you are not sure you would want it to.",
+								"effects": {"items": {"leviathan_bone": 8}, "flag": "leviathan_slain"}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave it. This is not your fight.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The cries follow you for a long way, getting fainter. You tell yourself the big silence will see to it.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "leviathan_deep_mother",
+			"type": "anomaly",
+			"weight": 80,
+			"once": true,
+			"requires": {"region": "leviathan_deep", "flag": "leviathan_calf_freed", "not_flag": "leviathan_calf_hunted"},
+			"title": "The Mother",
+			"text": "The deep goes still. Lights you did not notice swim up out of the dark: a line of them, then a field, each as pale as a lamp under ice. They resolve into a shape that does not end. Along its side, pressed close, is a small one, rubbing a flank against the huge hide. The great shape stops. The note it sounds is not a question. It is the shortest, plainest sound you have ever heard. Thank you.",
+			"choices": [
+				{
+					"text": "Hold station and let her come close.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "She rolls, once, slowly, and a fin comes loose in the water beside you: black-blue, trailing nets of light, the length of a corridor. It is still alive. It settles against your hull like a hand. The bone follows it, in a drift, gently, as if returned.",
+							"effects": {"items": {"starwhale_fin": 1, "leviathan_bone": 4}, "flag": "leviathan_kin", "crew_hp": 20}
+						}
+					]
+				},
+				{
+					"text": "Back away. A gift this large has a bill.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "She waits while you go. It takes a long time. The note comes after you once, and sounds, to your relief, only sad.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "leviathan_deep_carcass",
+			"type": "wreck_field",
+			"weight": 36,
+			"once": false,
+			"requires": {"region": "leviathan_deep"},
+			"title": "Where They Come to Die",
+			"text": "A Leviathan lies on its side across the lane, dead a long time: ribs like the arches of a cathedral, a spine you could fly down, a sail gone to lace. Small things have made it a city. Nothing in the whole sky here has eaten it. In the way a hull knows without being told, you know that is not an accident.",
+			"choices": [
+				{
+					"text": "Take one rib and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It is lighter than a ship's wall and stronger than you expect. You sling it across the hold with a cargo net and do not say anything about it.",
+							"effects": {"items": {"leviathan_bone": 1}}
+						}
+					]
+				},
+				{
+					"text": "Harvest the ribs (a long cut).",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "Hours of cutting in the lee of the spine. The bone comes away in pale sheets and your crew, who had no idea they were so strong, stack it in the hold like cord-wood.",
+							"effects": {"items": {"leviathan_bone": 6, "scrap": 20}, "crew_hp": -5}
+						},
+						{
+							"weight": 10,
+							"text": "The cutters bite into a hollow, and out of the hollow comes a fin, whole, wrapped in a dry membrane, folded like a sail. Whatever lived here left something behind for whoever came to take it.",
+							"effects": {"items": {"starwhale_fin": 1, "leviathan_bone": 2}}
+						},
+						{
+							"weight": 30,
+							"text": "The bone hums against the cutters. Down the lane, a sail turns. A guardian, young and furious, comes out of the dark to see who is robbing its grandmother.",
+							"effects": {"fight": "gen:leviathans"},
+							"after_win": {
+								"text": "It comes apart against the carcass, and for a moment the two of them lie there together in the dark. You take the bone. You do not take much.",
+								"effects": {"items": {"leviathan_bone": 5}, "flag": "leviathan_slain"}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the dead to the dark.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You back off in silence. Behind you, among the ribs, something small and bright turns to watch you go.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "leviathan_surfaces",
+			"type": "empty",
+			"weight": 2,
+			"once": false,
+			"requires": {"stage_min": 4},
+			"title": "Something Surfaces",
+			"text": "The stars ahead dim in a line, the way they do behind an eclipse. Something very large is rising out of the deep Drift into ordinary space, and it has not noticed you yet. Pale bone rolls past in the dark. A note comes through the hull, so low you feel it in your teeth. Every sensor on the bridge agrees about the number, and it has one digit.",
+			"choices": [
+				{
+					"text": "Hold still and let it pass.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It goes by like a weather front, taking its time, close enough to count the barnacles on its flank. It does not look at you. You are not sure it needs to.",
+							"effects": {}
+						}
+					]
+				},
+				{
+					"text": "Toss it a fuel can (1 fuel).",
+					"requires": {"items": {"fuel": 1}, "pay": true},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It takes the can the way a whale takes a krill. A long pause. Then something comes loose from its flank, turning slowly in the light, and drifts to you: a pale rib, warm, humming.",
+							"effects": {"items": {"leviathan_bone": 1}}
+						}
+					]
+				},
+				{
+					"text": "Open fire.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The first round rings off its hide like a bell. The note stops. Then it turns, with great and deliberate slowness, and every sensor you own starts to scream.",
+							"effects": {"fight": "gen:leviathans"},
+							"after_win": {
+								"text": "It comes apart at last, in a long bloom of light, and goes out. In the wreck of it there is a great deal of bone. You do not feel clever.",
+								"effects": {"items": {"leviathan_bone": 6}, "flag": "leviathan_slain"}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

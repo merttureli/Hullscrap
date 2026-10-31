@@ -1,0 +1,13 @@
+{
+	"factions": [
+		{
+			"id": "leviathans",
+			"name": "Leviathans",
+			"short": "Leviathans",
+			"line": "standard",
+			"color": "#5fc9c0",
+			"name_style": "none",
+			"hostile": true
+		}
+	]
+}

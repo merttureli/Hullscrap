@@ -871,8 +871,8 @@ func tier() -> int:
 ## node with two payments missed sends the rammer while Ma's clock runs); an entry is a design file or a generated ship
 ## ("gen:...", gen_spec). Anything else is a design id in data/ships.
 func fight_path(value: String, node_type: String) -> String:
-	if Shipgen.is_spec(value):  # a generated ship named outright (the exit warden)
-		return value
+	if Shipgen.is_spec(value):  # a generated ship named outright (the exit warden), or a faction to meet ("gen:barons": foe_of)
+		return value if value.split(":").size() >= 4 else foe_of(value)
 	if value != "tier":
 		return value if value.begins_with("res://") else "res://data/ships/%s.json" % value
 	var kind := "patrol" if node_type == "patrol" else "pirate"
@@ -899,6 +899,17 @@ func foe_for(node_id: String, kind: String) -> String:
 	return foes[key]
 
 
+## The enemy an event names by its table entry ("gen:barons", "gen:leviathans"): rolled the first time at this node and kept, as
+## foe_for does, so the threat the event panel rates is the ship that attacks.
+func foe_of(entry: String) -> String:
+	var key := "%s/%s/%s" % [region_id, current, entry]
+	if not foes.has(key):
+		var roll := RandomNumberGenerator.new()
+		roll.seed = _foe_seed(current, entry)
+		foes[key] = gen_spec(entry, "pirate", roll)
+	return foes[key]
+
+
 func _foe_seed(node_id: String, kind: String) -> int:
 	var h := posmod(seed_value, 2147483647) * 31 + posmod(region_seed, 2147483647)
 	for ch in ("%s/%s" % [node_id, kind]).to_utf8_buffer():
@@ -914,8 +925,10 @@ func gen_spec(entry: String, kind: String, roller: RandomNumberGenerator = null)
 	var r: RandomNumberGenerator = roller if roller != null else rng
 	var p := entry.trim_prefix(Shipgen.PREFIX).split(":")
 	var faction := p[0] if p[0] != "" else Shipgen.faction_for(region_data, kind)
-	var budget := Shipgen.budget_for(tier(), jumps, Shipgen.danger_of(region_data), str(cfg.get("difficulty", "normal")))
-	return Shipgen.spec(faction, Shipgen.pick_size(budget, r), r.randi(), budget, p.has("ram"))
+	var difficulty := str(cfg.get("difficulty", "normal"))
+	var budget := maxf(Shipgen.budget_for(tier(), jumps, Shipgen.danger_of(region_data), difficulty), Shipgen.budget_floor(faction, difficulty))
+	budget *= Shipgen.budget_mult(faction, r)  # a rare faction (CONTENT 18) fights far above the stage, from the first jump on; the others roll nothing here
+	return Shipgen.spec(faction, Shipgen.at_least(faction, Shipgen.pick_size(budget, r)), r.randi(), budget, p.has("ram"))
 
 
 ## The fight is over. `res` is {state, hull, hull_max, enemy (its Ship)}, plus `offer` ({item: count}) when

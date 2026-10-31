@@ -41,6 +41,13 @@
 			"hail": "Nothing hails you. The beacon is dark, and the hulls round it turn towards you in the same instant.",
 			"hint": "Mirror veils, leech lasers and harpoons. What beats it you learn by meeting one: bring a little of everything.",
 			"rep_on_fight": 0
+		},
+		"leviathans": {
+			"name": "Leviathan Sail",
+			"hail": "The beacon hangs in the throat of something enormous. A sail the size of a station unfolds against the stars, and a note rolls through the hull that is not quite a word. It is waiting.",
+			"hint": "Living bone plate that shrugs off kinetic and explosive hits but burns to energy, spore guns that foul the air, fins that mend themselves. Bring lasers or beams, and plenty of hands for repairs.",
+			"toll": 60,
+			"rep_on_fight": 0
 		}
 	}
 }

@@ -45,8 +45,16 @@ static func expected(table: Dictionary, def: Dictionary, lines: Dictionary) -> D
 	return out
 
 
+## Does `def` state a `cost` (a text or a non-empty object saying what it costs to run)? With a quirk it is what excuses a relic
+## (docs/CONTENT.md 18: `"relic": true`); a relic with neither fails check().
+static func has_cost(def: Dictionary) -> bool:
+	var c = def.get("cost")
+	return (c is String and c.strip_edges() != "") or (c is Dictionary and not c.is_empty())
+
+
 ## How `def` stands against its band: {status, problems}. status is
 ## - "none": its family has no bands; "unique": a unique part is not held to them;
+## - "relic": a relic (`"relic": true`) is never held to the bands but must have a quirk or a cost (else "fail");
 ## - "no_band": its family has bands but not its tier (problems says so);
 ## - "ok": every stat is within the tolerance; "quirk": off, but it has a quirk;
 ## - "waived": off, and listed in the table's `waivers`; "fail": off, with nothing to excuse it;
@@ -57,7 +65,13 @@ static func check(table: Dictionary, def: Dictionary, lines: Dictionary) -> Dict
 	var waived: bool = table.get("waivers", {}).has(id)
 	var problems: Array[String] = []
 	var status := "ok"
-	if not table.get("bands", {}).has(str(def.get("family", ""))):
+	if def.get("relic", false) == true:  # above the bands on purpose, if it says what it costs
+		if has_quirk(def) or has_cost(def):
+			status = "relic"
+		else:
+			status = "fail"
+			problems = ["%s: a relic needs a quirk or a cost" % id]
+	elif not table.get("bands", {}).has(str(def.get("family", ""))):
 		status = "none"
 	elif def.get("unique", false) == true:
 		status = "unique"

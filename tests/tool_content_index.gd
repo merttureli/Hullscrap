@@ -231,8 +231,8 @@ func _balance(out: Array[String]) -> void:
 	out.append("## Balance bands (`data/balance.json`)")
 	out.append("")
 	var fams: Array = table.get("bands", {}).keys()
-	out.append("Families with bands: %s. Parts: %d within the band, %d with a quirk, %d unique (not held to it), %d waived, %d in a family without bands." % [
-		", ".join(PackedStringArray(fams)), counts.get("ok", 0), counts.get("quirk", 0), counts.get("unique", 0), counts.get("waived", 0), counts.get("none", 0)])
+	out.append("Families with bands: %s. Parts: %d within the band, %d with a quirk, %d unique (not held to it), %d relics (excused by a quirk or a cost), %d waived, %d in a family without bands." % [
+		", ".join(PackedStringArray(fams)), counts.get("ok", 0), counts.get("quirk", 0), counts.get("unique", 0), counts.get("relic", 0), counts.get("waived", 0), counts.get("none", 0)])
 	if not waived.is_empty():
 		out.append("")
 		out.append("Waived (off the band today, to be fixed by their wave):")

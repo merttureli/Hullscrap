@@ -1,0 +1,24 @@
+{
+	"characters": [
+		{
+			"id": "pomfrey",
+			"name": "Pomfrey",
+			"species": "human",
+			"rig": {"tint": "#8c7b4a", "head": "hair"},
+			"traits": {"loot_bonus": 1, "haggler": 0.08},
+			"ability": {"id": "scan", "cooldown": 40, "params": {"duration": 24}},
+			"obtained": "Clan space or the Boneyard (a distress call): a dismissed Baron's accountant in a life pod. Take him aboard; a Fenn can compare ledgers with him first.",
+			"lore": "The Baron's Accountant. Pomfrey kept the books of the yacht Seventh Helping for nineteen years and can tell you what every Baron within three lanes owes the others, to the credit. He reads a ship's hull like a balance sheet and an enemy's loadout like a confession. He has no gun and does not want one."
+		},
+		{
+			"id": "sterling",
+			"name": "Sterling",
+			"species": "human",
+			"rig": {"tint": "#d4af37", "head": "helmet"},
+			"traits": {"work_mult": {"man": 1.2}},
+			"ability": {"id": "overclock", "cooldown": 44, "params": {"mult": 1.8, "duration": 9, "rest": 5}},
+			"obtained": "Clan space or the Boneyard: a Baroness's champion, who joins the crew after you beat her yacht in the formal duel (A Matter of Honour).",
+			"lore": "The Champion. Dame Sterling fights the way other people dance: to a count, in gloves, with a bow at the end. She has never lost a duel and has never been paid for one, and on the whole thinks this is how it should be. She asks only that nobody call her gun a weapon in front of the guests."
+		}
+	]
+}

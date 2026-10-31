@@ -17,6 +17,7 @@ const Content = preload("res://scripts/data/content.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const FACTION_REGIONS := ["clan_space", "concord_space", "lumen_space", "boneyard", "gate_approaches"]
+const RARE_REGIONS := ["leviathan_deep"]  ## the rare factions' own regions (docs/CONTENT.md 18)
 const HOMELANDS := {"human_core": "human", "basalt_quarries": "basalt", "emberkin_forges": "emberkin", "fenn_bazaar": "fenn", "kett_hives": "kett",
 	"murrow_diggings": "murrow", "siltborn_rings": "siltborn", "corvin_roost": "corvin", "brine_yards": "brine", "echo_glassways": "echo", "ferro_lodes": "ferro",
 	"mire_fens": "mire", "sporeling_groves": "sporeling", "gauntling_scrapyards": "gauntling", "prismatic_choir": "prismatic", "grundl_barges": "grundl",
@@ -97,7 +98,7 @@ func test_the_graph_is_deterministic_per_seed() -> void:
 func test_offers_are_valid_for_the_stage_and_never_repeat_over_many_runs() -> void:
 	var ship := _ship()
 	var seen := {}
-	for seed_value in range(1, 61):
+	for seed_value in range(1, 121):
 		ship.inventory.add("fuel", 50)
 		var c := _play(seed_value, ship)
 		eq(c.route[0], "clan_space", "seed %d: starts in Clan space" % seed_value)
@@ -112,9 +113,9 @@ func test_offers_are_valid_for_the_stage_and_never_repeat_over_many_runs() -> vo
 		eq(c.stage, 9, "seed %d: past the last stage" % seed_value)
 		check(c.is_final() and c.drift.exit_id() == "" and c.region_offers().is_empty(), "seed %d: the ending region has no exit and no offers" % seed_value)
 	for id in HOMELANDS:
-		check(seen.has(id), "60 runs pass through %s" % id)
+		check(seen.has(id), "120 runs pass through %s" % id)
 	for id in FACTION_REGIONS.slice(1):
-		check(seen.has(id), "60 runs pass through %s" % id)
+		check(seen.has(id), "120 runs pass through %s" % id)
 
 
 func test_rarity_weights_the_offers() -> void:
@@ -332,9 +333,9 @@ func test_an_old_save_loads_as_stage_1_in_clan_space() -> void:
 
 func test_the_regions_pass_the_validator() -> void:
 	var ids := Content.ids("regions")
-	for id in FACTION_REGIONS + HOMELANDS.keys():
+	for id in FACTION_REGIONS + HOMELANDS.keys() + RARE_REGIONS:
 		check(ids.has(id), id + " exists")
-	eq(ids.size(), FACTION_REGIONS.size() + HOMELANDS.size(), "5 faction regions and a homeland per race")
+	eq(ids.size(), FACTION_REGIONS.size() + HOMELANDS.size() + RARE_REGIONS.size(), "5 faction regions, a homeland per race and the rare factions' regions")
 	for p in Regions.problems():
 		check(false, p)
 	eq(Regions.get_region("clan_space")["stages"], [1.0, 1.0], "Clan space is stage 1 only")

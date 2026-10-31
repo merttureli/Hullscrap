@@ -9,7 +9,7 @@ extends RefCounted
 ##                                   a list the core file has next to its entries (recipes.json `start_known`) also gets the
 ##                                   items of the same list in the packs' files
 ## A pack is a folder with a pack.json ({id, name, version, requires, notes}) and any of <kind>.json,
-## names.json, events/*.json, ships/*.json and regions/*.json. An entry may be a list element with an `id` or a key of an
+## names.json, enemy_tables.json (the `factions` it adds to the enemy tables: Shipgen.tables), events/*.json, ships/*.json and regions/*.json. An entry may be a list element with an `id` or a key of an
 ## object (weapons.json is keyed by id); packs may use either. A duplicate id is an error unless the later
 ## entry says "override": true and gives a "reason"; it then replaces the earlier one whole. Problems never
 ## stop the load: they collect in errors() (tests/test_content.gd fails on them). Parsed files are cached;
@@ -24,7 +24,7 @@ const FILE_KEYS := {"hand_weapons": "weapons"}
 const FOLDER_KINDS: Array[String] = ["events", "ships", "regions"]
 const PACK_FIELDS: Array[String] = ["id", "name", "version", "requires"]
 ## What else a pack folder may hold (anything .json or any folder not listed is reported as a typo).
-const PACK_EXTRA_FILES: Array[String] = ["pack.json", "names.json", "logs.json"]
+const PACK_EXTRA_FILES: Array[String] = ["pack.json", "names.json", "logs.json", "enemy_tables.json"]  ## enemy_tables.json: the `factions` a pack adds to data/enemy_tables.json (Shipgen.tables)
 const PACK_FOLDERS: Array[String] = ["events", "ships", "logs", "regions"]
 
 ## Where the core files are; tests point it at a fixture folder.

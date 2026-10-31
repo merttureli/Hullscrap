@@ -454,7 +454,7 @@ func test_the_hangar_holds_the_seven_event_starters_and_twenty_race_starters() -
 		eq(by_group.get(group, []), ["A", "B"], group + ": a layout A and a layout B")
 	eq(Hangar.validate(), [], "the hangar is sound (every ship has its group, layout and a known unlock)")
 	for id in Content.ids("unlocks"):
-		check(not Content.entry("unlocks", id).has("pending"), id + ": no unlock is pending any more")
+		check(not Content.entry("unlocks", id).has("pending") or Content.origin("unlocks", id).begins_with("faction_"), id + ": no unlock is pending any more (but the rare factions' starters, packs faction_*, are still to be built)")
 
 
 func test_each_pack_starter_has_its_unlock_and_sits_where_the_unlock_says() -> void:
