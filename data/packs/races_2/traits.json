@@ -7,12 +7,12 @@
 		"console_ghost": {"name": "Console ghost", "blurb": "Lives in the wiring: the bonuses a manned post gives are 1.5 times as good.", "station": {"manned_mult": 1.5}},
 		"ion_kin": {"name": "Ion kin", "blurb": "Made of the thing ion breaks: takes double ion damage.", "damage_taken": {"ion": 2.0}},
 		"shell_breather": {"name": "Shell breather", "blurb": "Breathes half as much air.", "o2_use": 0.5},
-		"folded": {"name": "Folded", "blurb": "Small enough to walk a 1-wide crawlspace."},
-		"third_eye": {"name": "Third eye", "blurb": "While one is aboard and up, your schematic shows the enemy's crew."},
-		"cold_blooded": {"name": "Cold-blooded", "blurb": "Slow in a cold room (x0.7 under 20 heat), quick in a hot one (x1.2 over 50)."},
-		"living_current": {"name": "Living current", "blurb": "Does not breathe and does not mind a breach or a vacuum.", "o2_use": 0},
-		"handless": {"name": "Handless", "blurb": "A current cannot hold a wrench: no repair or extinguish jobs."},
-		"hull_mender": {"name": "Hull mender", "blurb": "Idle, they mend the walls beside them (1 hp a second) and seal a breach, slowly."},
-		"born_pilot": {"name": "Born pilot", "blurb": "Flies by lamplight: +0.05 evasion while they man the helm."}
+		"folded": {"name": "Folded", "blurb": "Small enough to walk a 1-wide crawlspace.", "body": 1},
+		"third_eye": {"name": "Third eye", "blurb": "While one is aboard and up, your schematic shows the enemy's crew.", "reveal_enemy": true},
+		"cold_blooded": {"name": "Cold-blooded", "blurb": "Slow in a cold room (x0.7 under 20 heat), quick in a hot one (x1.2 over 50).", "heat_speed": {"cold": 0.7, "hot": 1.2, "below": 20, "above": 50}},
+		"living_current": {"name": "Living current", "blurb": "Does not breathe and does not mind a breach or a vacuum.", "o2_use": 0, "vacuum_walk": true},
+		"handless": {"name": "Handless", "blurb": "A current cannot hold a wrench: no repair or extinguish jobs.", "no_tools": true},
+		"hull_mender": {"name": "Hull mender", "blurb": "Idle, they mend the walls beside them (1 hp a second) and seal a breach, slowly.", "hull_mend": {"rate": 1, "seal": 12}},
+		"born_pilot": {"name": "Born pilot", "blurb": "Flies by lamplight: +0.05 evasion while they man the helm.", "station": {"evasion_add": 0.05}}
 	}
 }
