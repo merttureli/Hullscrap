@@ -16,6 +16,8 @@ const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
 const RegionChoice = preload("res://scripts/ui/region_choice.gd")
+const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
+const Hazards = preload("res://scripts/combat/hazards.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -279,6 +281,7 @@ func _start_fight(value: String, after_win: Dictionary) -> void:
 	if session != null:  # the fight starts with the integrity the campaign says is left
 		var mine = session.arena.ships[0]
 		mine.hull = campaign.fight_hull(mine.hull_max)
+		session.arena.hazard = campaign.hazard_at(campaign.current)  # the node's sector hazard, if any (hazards.gd)
 	_fighting = true
 	_after_win = after_win
 	_fight_node = str(campaign.node(campaign.current)["type"])
@@ -510,6 +513,8 @@ func _draw_node(id: String) -> void:
 	draw_circle(at, NODE_R - 3.0, col)
 	var glyph := str(Campaign.type_info(str(n["type"]))["glyph"]) if known else "?"
 	_text(glyph, at + Vector2(-5.0, 6.0), 16, Color("#10151c") if known and n["type"] != "gate" else TEXT)
+	if known:  # a place with a sector hazard wears its badge (hazards.gd)
+		HazardBar.badge(self, at + Vector2(NODE_R * 0.8, -NODE_R * 0.8), campaign.hazard_at(id))
 	if campaign.visited.has(id):
 		draw_arc(at, NODE_R + 3.0, 0.0, TAU, 28, EDGE_DIM, 1.5, true)
 	if reach:
@@ -545,6 +550,8 @@ func _draw_tip(id: String) -> void:
 			lines.append("The way to the next region")
 		if n["type"] != "gate" and campaign.drift.linked(campaign.current, id):
 			lines.append(jump_cost_text())
+	if campaign.is_known(id):
+		lines.append_array(Hazards.map_lines(campaign.hazard_at(id)))
 	var w := 0.0
 	for l in lines:
 		w = maxf(w, ThemeDB.fallback_font.get_string_size(l, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x)
@@ -553,7 +560,7 @@ func _draw_tip(id: String) -> void:
 		box.position.x -= box.size.x + 36.0
 	_panel(box, Color("#10151c"))
 	for i in lines.size():
-		_text(lines[i], box.position + Vector2(10.0, 22.0 + 20.0 * i), 14, TEXT if i == 0 else DIM_TEXT)
+		_text(lines[i], box.position + Vector2(10.0, 22.0 + 20.0 * i), 14, TEXT if i == 0 else (AMBER if lines[i].begins_with("Hazard:") else DIM_TEXT))
 
 
 func _draw_foot(p: Rect2) -> void:
