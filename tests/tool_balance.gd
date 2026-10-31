@@ -31,6 +31,7 @@ const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Content = preload("res://scripts/data/content.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
+const Morale = preload("res://scripts/combat/morale.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12  ## substeps between ShipSim steps (0.2 s, as the soak)
@@ -249,7 +250,7 @@ func fight(sh: Dictionary, spec: String, faction: String, j: int, s: int) -> Dic
 	var me = a.ships[Session.PLAYER]
 	var foe = a.ships[Session.ENEMY]
 	row.merge({"state": st, "end": END_OF.get(st, "draw"), "t": n * STEP, "hull": me.hull / maxf(me.hull_max, 1.0),
-		"foe_hull": foe.hull / maxf(foe.hull_max, 1.0), "morale": sess.morale.state})
+		"foe_hull": foe.hull / maxf(foe.hull_max, 1.0), "hp": me.hull, "foe_hp": foe.hull, "foe_hp_max": foe.hull_max, "morale": sess.morale.state})
 	row.merge(d)
 	sim.free()
 	return row
@@ -508,23 +509,30 @@ static func _rate(list: Array) -> Dictionary:
 		elif r["state"] == "lost":
 			l += 1
 		elif _lean(r) > 0.5:
-			ahead += 1
+			ahead += 1  # a draw it was winning (_lean)
 	var n := list.size()
 	return {"n": n, "w": w, "l": l, "d": n - w - l, "win": float(w) / maxf(n, 1), "draw": float(n - w - l) / maxf(n, 1),
 		"t": t / maxf(n, 1), "hull": hull / maxf(w, 1), "ahead": ahead, "proj": float(w + ahead) / maxf(n, 1)}
 
 
-## A fight's result as a number: won 1, lost 0; a draw 0.75 when the player has more of its hull left (as a share) than the
-## enemy, 0.25 when less, 0.5 when even (an escape is 0.5).
+## A fight's result as a number: won 1, lost 0, an escape 0.5; a draw (the cap) by projection at the rates of the fight: 1
+## when the player would have brought the enemy to its morale break (break_hull of its hull) before the enemy wrecked it,
+## 0 when not, 0.5 when neither was hurting the other.
 static func _lean(r: Dictionary) -> float:
 	if r["state"] in WIN_STATES:
 		return 1.0
 	if r["state"] == "lost":
 		return 0.0
-	if r["state"] == "escaped":
+	if r["state"] == "escaped" or not r.has("hp"):
 		return 0.5
-	var d := float(r["hull"]) - float(r["foe_hull"])
-	return 0.75 if d > 0.05 else (0.25 if d < -0.05 else 0.5)
+	var t := maxf(float(r["t"]), 1.0)
+	var mine := float(r["p_hull"]) / t  # hull a second the player takes off the enemy
+	var theirs := float(r["e_hull"]) / t
+	var t_win := maxf(float(r["foe_hp"]) - float(Morale.config().get("break_hull", 0.35)) * float(r["foe_hp_max"]), 0.0) / mine if mine > 1e-3 else INF
+	var t_lose := float(r["hp"]) / theirs if theirs > 1e-3 else INF
+	if t_win == INF and t_lose == INF:
+		return 0.5
+	return 1.0 if t_win < t_lose else 0.0
 
 
 static func _cell(r: Dictionary) -> String:
@@ -577,7 +585,7 @@ func report(secs: float) -> String:
 		L.append("| %s | " % sh["name"] + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["ship"] == sh["id"] and r["jump"] == j))))) + " |")
 	L.append("| **all** | " + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["jump"] == j))))) + " |")
 	L.append("")
-	L.append("Projected win rate (the wins plus the draws in which the player had more of its hull left than the enemy, as shares: the fights the cap cut short that it was winning):")
+	L.append("Projected win rate: the wins plus the draws the player was winning, by the rates of the fight (it would have brought the enemy to its morale break, 35%% of its hull, before the enemy wrecked it). The cap cuts many fights short; this is the curve the budgets are tuned on.")
 	L.append("")
 	L.append("| ship | " + " | ".join(jumps.map(func(j): return "jump %d" % j)) + " |")
 	L.append("|---|" + "---|".repeat(jumps.size()))
@@ -617,7 +625,7 @@ func report(secs: float) -> String:
 		var r := _rate(list)
 		L.append("| %d | %d | %d%% | %d%% | %d%% | %.2f |" % [k, r["n"], roundi(100 * r["win"]), roundi(100.0 * r["l"] / maxf(r["n"], 1)), roundi(100 * r["draw"]), _mean(list, "ratio")])
 	L.append("")
-	L.append("Cuts these fights suggest: %s (a falling fit of the result, won 1, lost 0, a draw 0.75 ahead on hull or 0.25 behind, against the power ratio, cut where it crosses %s)." % [
+	L.append("Cuts these fights suggest: %s (a falling fit of the result, won 1, lost 0, a draw 1 or 0 by its projection, against the power ratio, cut where it crosses %s)." % [
 		str(suggest_cuts().map(func(c): return snappedf(c, 0.01))), str(CUT_SCORES)])
 	L.append("")
 	L.append("## How fights end")

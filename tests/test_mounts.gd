@@ -66,7 +66,7 @@ func test_a_mount_goes_through_a_wall_of_any_thickness_in_all_four_directions() 
 			var inst: Dictionary = ship.components.instances[uid]
 			eq(inst["cells"].size(), 8, tag + ": the inside half is 4x2")
 			eq(inst["out_cells"].size(), 8, tag + ": and so is the outside half")
-			eq(inst["out_hp"], 4, tag + ": the outside half has its own hp (75 percent of 5)")
+			eq(inst["out_hp"], 10, tag + ": the outside half has its own hp (twice the part's 5)")
 			eq(ship.components.at(inst["cells"][0]), uid, tag + ": the inside half answers at()")
 			eq(ship.components.at_out(inst["out_cells"][0]), uid, tag + ": the outside half answers at_out()")
 			eq(ship.components.at(inst["out_cells"][0]), -1, tag + ": and not at()")
@@ -84,7 +84,7 @@ func test_the_heavy_shrapnel_cannon_has_a_three_row_outside_half() -> void:
 	check(uid >= 0, "placed")
 	var inst: Dictionary = ship.components.instances[uid]
 	eq([inst["cells"].size(), inst["out_cells"].size()], [8, 12], "a 4x2 inside half and a 4x3 outside half")
-	eq(inst["out_hp"], 5, "75 percent of 6, rounded")
+	eq(inst["out_hp"], 12, "twice the part's 6")
 	eq(inst["anchor"], Wall.corner(0, -2, 1, 2, 3), "the inside half is two rows behind a two-thick wall")
 
 
@@ -100,7 +100,10 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 			var narrow: bool = d["size"][0] == 2  # Strafe Jets: 2x2 and 2x2 (docs/waves/engines_1.md)
 			eq(d["size"], [2, 2] if narrow else [4, 2], id + ": the inside half is 4x2 (a Strafe Jets one 2x2)")
 			eq(d["mount"]["outside"][0], d["size"][0], id + ": and the outside half is as wide")
-			eq(d["mount"]["outside_hp"], int(floor(d["hp"] * 0.75 + 0.5)), id + ": outside_hp is 75 percent of hp, rounded")
+			if d["family"] == "weapon":  # an armoured barrel housing (the balance pass: at 75% a bow gun went at the first volley)
+				eq(d["mount"]["outside_hp"], 2 * int(d["hp"]), id + ": a weapon's outside_hp is twice its hp")
+			else:
+				eq(d["mount"]["outside_hp"], int(floor(d["hp"] * 0.75 + 0.5)), id + ": outside_hp is 75 percent of hp, rounded")
 		else:
 			check(not Mounts.is_mount(d), id + " is a plain part")
 	check(n >= 19, "every weapon and engine was checked (%d)" % n)
@@ -308,7 +311,7 @@ func test_an_old_save_gets_its_weapons_and_engines_mounted_through_the_wall() ->
 		check(back.components.instances.has(d["uid"]), "the laser is still aboard")
 		var got: Dictionary = back.components.instances[d["uid"]]
 		eq([got["out_anchor"], got["out_cells"], got["rot"]], [d["ship"].components.instances[d["uid"]]["out_anchor"], d["ship"].components.instances[d["uid"]]["out_cells"], rot], "mounted by the same rule: where it would have been placed")
-		eq([got["hp"], got["out_hp"]], [2, 4], "its hp kept, the new outside half whole")
+		eq([got["hp"], got["out_hp"]], [2, 10], "its hp kept, the new outside half whole")
 		eq(back.inventory.count("laser_mk1"), 2, "nothing went to the cargo")
 
 
@@ -354,7 +357,7 @@ func test_the_outside_half_takes_the_hits_and_is_only_ever_disabled() -> void:
 	var co = a.ships[0]
 	var obj := Damage.solid_at(co, barrel)
 	eq([obj["kind"], obj["half"], obj["uid"]], ["component", "out", d["uid"]], "a shot meets the outside half first")
-	Damage.apply(a, 0, barrel, obj, 3.0, "energy")
+	Damage.apply(a, 0, barrel, obj, 9.0, "energy")
 	eq([float(inst["out_hp"]), inst["hp"], inst["status"]], [1.0, 5, "ok"], "it took the damage, the inside half did not")
 	check(co.powered.get(d["uid"], false), "still powered and working")
 	Damage.apply(a, 0, barrel, obj, 9.0, "energy")
@@ -401,10 +404,10 @@ func test_a_repair_from_inside_heals_the_outside_half_first_when_the_link_is_who
 	inst["status"] = "disabled"
 	check(ship.outside_hurt(d["uid"]), "the barrel needs repair")
 	check(ship.repair(d["uid"]), "one repair")
-	eq([inst["out_hp"], inst["hp"], inst["status"]], [4, 0, "disabled"], "mends the outside half first")
+	eq([inst["out_hp"], inst["hp"], inst["status"]], [10, 0, "disabled"], "mends the outside half first")
 	check(not ship.outside_hurt(d["uid"]), "now only the inside half does")
 	ship.repair(d["uid"])
-	eq([inst["out_hp"], inst["hp"], inst["status"]], [4, 5, "ok"], "the second mends the inside half")
+	eq([inst["out_hp"], inst["hp"], inst["status"]], [10, 5, "ok"], "the second mends the inside half")
 	# with the link cut the outside half cannot be reached
 	inst["out_hp"] = 1
 	ship.grid.breach(inst["link"][0])
@@ -435,7 +438,7 @@ func test_the_crew_repair_a_hurt_barrel_from_the_inside_and_patch_a_cut_link_fir
 	ship.crew.append(m)
 	for i in 160:
 		jobs.tick(ship, 0.1)
-	eq(inst["out_hp"], 4, "the barrel is whole after a while")
+	eq(inst["out_hp"], 10, "the barrel is whole after a while")
 	check(ship.events.any(func(e): return e["text"].ends_with("repaired")), "and the chronicle says so")
 
 
@@ -453,7 +456,7 @@ func test_a_breached_link_cell_takes_the_mount_offline_until_it_is_patched() -> 
 	eq(ship.components.offline_reason(ship.grid, d["uid"]), "link cut", "the link is cut")
 	check(not co.powered.get(d["uid"], false), "no power reaches it")
 	eq(a.weapons.can_fire(a, 0, d["uid"], Vector2(0, -1000)), "offline", "it cannot fire")
-	eq(ship.components.instances[d["uid"]]["out_hp"], 4, "though its barrel is fine")
+	eq(ship.components.instances[d["uid"]]["out_hp"], 10, "though its barrel is fine")
 	check(ship.grid.repair(cell), "the crew patch the breach")
 	ship.mark_dirty()
 	a.sync(0)

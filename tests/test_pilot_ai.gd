@@ -219,6 +219,9 @@ func test_who_aims_at_what() -> void:
 	var p: Vector2 = ai.hull_point()
 	var t: String = foe.grid.get_tile(Vector2i(floori(p.x), floori(p.y)))
 	check(foe.grid.tile_flag(t, "solid") or foe.grid.tile_flag(t, "door"), "at a wall (%s)" % t)
+	var pc := Vector2i(floori(p.x), floori(p.y))
+	check(PilotAI.SIDES.any(func(dd): return foe.grid.get_tile(pc + dd) == "" and foe.components.any_at(pc + dd) < 0), "on the outside of the hull, not a bulkhead inside")
+	check((p - a.ships[1].com).dot(ai.arena.world_to_local(1, a.ships[0].flight.pos) - a.ships[1].com) > 0.0, "on the side that faces it")
 	for uid in foe.components.instances:
 		for c in foe.components.instances[uid]["out_cells"]:
 			if family.call(uid) == "weapon":

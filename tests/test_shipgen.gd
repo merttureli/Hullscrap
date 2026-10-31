@@ -303,11 +303,14 @@ func test_generated_ships_carry_a_morale_style_a_pilot_and_a_crew() -> void:
 # --- the budget --------------------------------------------------------------------------------------
 
 func test_the_budget_follows_section_14() -> void:
-	near(Shipgen.budget_for(1, 0, 1.0), 40.0, "tier 1, no jumps, danger 1")
-	near(Shipgen.budget_for(1, 10, 1.0), 56.0, "+4% a jump")
-	near(Shipgen.budget_for(2, 10, 1.1), 80.0 * 1.4 * 1.1, "the region's danger")
-	near(Shipgen.budget_for(3, 25, 1.6, "hard"), 140.0 * 2.0 * 1.6 * 1.2, "the Hollow on hard")
-	near(Shipgen.budget_for(1, 0, 1.0, "easy"), 32.0, "easy")
+	var base: Dictionary = Shipgen.tables()["budget"]["tier_base"]  # the tier bases are tuned by the balance harness (docs/BALANCE_REPORT.md)
+	var t1 := float(base["1"])
+	near(Shipgen.budget_for(1, 0, 1.0), t1, "tier 1, no jumps, danger 1")
+	near(Shipgen.budget_for(1, 10, 1.0), t1 * 1.4, "+4% a jump")
+	near(Shipgen.budget_for(2, 10, 1.1), float(base["2"]) * 1.4 * 1.1, "the region's danger")
+	near(Shipgen.budget_for(3, 25, 1.6, "hard"), float(base["3"]) * 2.0 * 1.6 * 1.2, "the Hollow on hard")
+	near(Shipgen.budget_for(1, 0, 1.0, "easy"), t1 * 0.8, "easy")
+	check(t1 < float(base["2"]) and float(base["2"]) < float(base["3"]), "each tier's base is above the one before")
 	near(Shipgen.danger_of(Regions.get_region("gate_approaches")), 1.4, "the Gate approaches' danger comes from the region")
 	near(Shipgen.danger_of({}), 1.0, "a region with none is plain")
 	eq(Shipgen.faction_for(Regions.get_region("clan_space"), "pirate"), "rustfangs", "Clan space is raided by Rustfangs")

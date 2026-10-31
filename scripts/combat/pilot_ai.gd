@@ -40,6 +40,7 @@ const RANGE_FRACTION := 0.7  ## of a gun's range: the gap it keeps for it
 const HULL_MARGIN := 96.0  ## px kept between the two hulls, at least (three cells: an orbit at less clips the foe's hull)
 const DEFAULT_RANGE := 600.0
 const SNIPE_SKILL := 0.8  ## a pilot of this aim_skill or better aims at the foe's weapons first; a worse one at its hull
+const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const GUN_CLEARANCE := 2  ## cells: the point of the hull it aims at keeps this far from a weapon's outside half
 const DEFAULT_AIM_SKILL := 0.6
 const AIM_ERROR_DEG := 12.0  ## aim error either way of a pilot with no skill; a pilot of skill s is off by up to (1 - s) of it
@@ -371,8 +372,8 @@ func priority() -> Array[String]:
 	return out
 
 
-## The point of the foe's hull it aims at when it aims at no part (the foe's cell coordinates): of the outer wall and door
-## cells on the side facing it and at least GUN_CLEARANCE cells from the outside half of a weapon (shots at the middle of a
+## The point of the foe's hull it aims at when it aims at no part (the foe's cell coordinates): of the wall and door cells
+## that border space on the side facing it and at least GUN_CLEARANCE cells from the outside half of a weapon (shots at the middle of a
 ## bow meet the bow gun), the one nearest the line from it to the foe's centre of mass; that centre when there is none.
 func hull_point() -> Vector2:
 	var f = arena.ships[foe]
@@ -391,6 +392,8 @@ func hull_point() -> Vector2:
 		var t: String = g.get_tile(c)
 		if t == "" or not (g.tile_flag(t, "solid") or g.tile_flag(t, "door")):
 			continue
+		if not SIDES.any(func(d): return g.get_tile(c + d) == "" and comps.any_at(c + d) < 0):
+			continue  # a bulkhead inside (it borders a floor, not space)
 		var at := Vector2(c) + Vector2(0.5, 0.5)
 		if (at - com).dot(look) > 0.0:
 			continue  # the far side
