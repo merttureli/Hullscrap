@@ -8,8 +8,9 @@ extends RefCounted
 ##   `stat` (power, thrust or shield_layer), at most `max` in all. Power is added to the part's output after its
 ##   factors, thrust to the engine's thrust, shield_layer to the layers of a shield part (rounded down).
 ## - crew_needed {count, stat, else_mult, who?}: unless `count` up crew (matching `who`, if given) stand in the
-##   room, `stat` (power, thrust, shield_layer or recharge) is multiplied by `else_mult`. Layers are rounded
-##   down; recharge is the speed at which the shield's used layers come back (0.5 = twice as long).
+##   room, `stat` (power, thrust, shield_layer, recharge or evasion) is multiplied by `else_mult`. Layers are rounded
+##   down; recharge is the speed at which the shield's used layers come back (0.5 = twice as long); evasion is
+##   the ability's own `evasion_add` (a Resonance Helm).
 ## - room_wall_hp_mult: factor on the hp of the wall cells round the part's room (Abilities.wall_hp_mults).
 ## - heat_above {heat, shield_layer}: that many extra layers while the room's hottest part is above `heat`.
 ## - room_work_mult {mult, who?, else_mult?}: factor on the work speed of the crew in the room (Abilities.work_mult).
@@ -28,7 +29,7 @@ const EFFECTS: Array[String] = ["stat_mult", "shield_layer", "charge_mult", "eva
 const SIDE_EFFECTS: Array[String] = ["drain_o2", "heat", "power_spike", "fire_risk", "self_damage", "shock_organic", "wet"]
 const CREW_KEYS: Array[String] = ["crew_bonus", "crew_needed", "heat_above"]  ## the effects whose figures change with the crew or the heat
 const BONUS_STATS: Array[String] = ["power", "thrust", "shield_layer"]
-const NEEDED_STATS: Array[String] = ["power", "thrust", "shield_layer", "recharge"]
+const NEEDED_STATS: Array[String] = ["power", "thrust", "shield_layer", "recharge", "evasion"]
 const WET_COOLING := 30.0  ## heat every part of a wet room loses at the start of each second
 const WET_PERIOD := 1.0
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]

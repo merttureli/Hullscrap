@@ -348,11 +348,17 @@ static func charge_mult(ship) -> float:
 	return m
 
 
-## Evasion the running abilities add. Nothing in the arena dodges yet (Jobs.evasion_bonus has no reader either).
+## Evasion the running abilities add (Weapons.evasion reads it): `evasion_add`, times the `crew_needed` evasion factor
+## of its ability (the crew it lacks).
 static func evasion_add(ship) -> float:
 	var v := 0.0
 	for r in running(ship):
-		v += float(r["ability"].get("effects", {}).get("evasion_add", 0.0))
+		var fx: Dictionary = r["ability"].get("effects", {})
+		var add := float(fx.get("evasion_add", 0.0))
+		for cn in PartEffects.entries(fx.get("crew_needed")):
+			if add != 0.0 and cn.get("stat") == "evasion":
+				add *= PartEffects.needed_mult(ship, r["uid"], cn)
+		v += add
 	return v
 
 

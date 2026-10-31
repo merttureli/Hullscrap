@@ -137,7 +137,7 @@ func test_the_validator_catches_unknown_keys_and_bad_values() -> void:
 		_bad({"id": "x", "type": "passive", "effects": {"crew_bonus": e}}, "needs '%s'" % k)
 	_bad({"id": "x", "type": "passive", "effects": {"crew_bonus": {"who": "kett", "stat": "power", "per": 3, "max": 2}}}, "max is below per")
 	var cn := {"count": 3, "stat": "power", "else_mult": 0.5}
-	for k in [["count", 0, "whole number"], ["count", 1.5, "whole number"], ["stat", "evasion", "not one of"], ["else_mult", -1, "factor"], ["who", "nobody", "not a species"], ["extra", 1, "unknown key 'extra'"]]:
+	for k in [["count", 0, "whole number"], ["count", 1.5, "whole number"], ["stat", "fuel", "not one of"], ["else_mult", -1, "factor"], ["who", "nobody", "not a species"], ["extra", 1, "unknown key 'extra'"]]:
 		var e := cn.duplicate()
 		e[k[0]] = k[1]
 		_bad({"id": "x", "type": "passive", "effects": {"crew_needed": e}}, k[2])
@@ -335,6 +335,23 @@ func test_crew_needed_recharge_slows_the_layers_coming_back() -> void:
 	_crew(d2["ship"], "C", "human", 12, 14)
 	a2.step(2.1)
 	eq(a2.ships[0].layers, 1, "and it comes back once they are")
+
+
+func test_crew_needed_evasion_is_the_resonance_helm() -> void:
+	var fx := {"evasion_add": 0.1, "crew_needed": {"count": 1, "stat": "evasion", "else_mult": 0.0, "who": "prismatic"}}
+	var d := _rig("helm", {"helm": {"abilities": _passive(fx)}})
+	var ship: Ship = d["ship"]
+	var a := Arena.new(1)
+	a.add_ship(ship)
+	var base: float = a.weapons.evasion(a, 0)
+	near(Abilities.evasion_add(ship), 0.0, "no Prismatic aboard: the helm adds nothing")
+	_crew(ship, "H", "human", 12, 14)
+	near(Abilities.evasion_add(ship), 0.0, "a human at the helm neither")
+	var p := _crew(ship, "P", "prismatic", 14, 14)
+	near(Abilities.evasion_add(ship), 0.1, "a Prismatic in the room: +0.1")
+	near(a.weapons.evasion(a, 0) - base, 0.1, "and the arena's evasion has it")
+	p.hp = 0.0
+	near(Abilities.evasion_add(ship), 0.0, "a downed one does not")
 
 
 # --- room_wall_hp_mult -----------------------------------------------------------------------------
