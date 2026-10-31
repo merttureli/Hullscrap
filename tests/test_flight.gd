@@ -206,14 +206,14 @@ func test_speed_is_clamped() -> void:
 	var f := Flight.new()
 	f.vel = Vector2(0.0, -5000.0)
 	f.step(0.1, {}, 100.0, 20.0)
-	near(f.vel.length(), 600.0, "a huge speed is cut to max_speed", 1e-3)
+	near(f.vel.length(), f.max_speed, "a huge speed is cut to max_speed", 1e-3)
 	var g := Flight.new()
 	for i in 200:
 		g.step(0.1, {"throttle": 1.0}, 1.0, 1000000.0)
-		check(g.vel.length() <= 600.0 + 1e-3, "never above max_speed")
-	near(g.vel.length(), 600.0, "and it reaches it", 1e-3)
+		check(g.vel.length() <= g.max_speed + 1e-3, "never above max_speed")
+	near(g.vel.length(), g.max_speed, "and it reaches it", 1e-3)
 	g.step(0.1, {"throttle": -1.0}, 1.0, 1000000.0)
-	near(g.vel.length(), 600.0, "reverse is clamped too", 1e-3)
+	near(g.vel.length(), g.max_speed, "reverse is clamped too", 1e-3)
 
 
 func test_a_heavier_ship_accelerates_slower() -> void:
@@ -250,7 +250,7 @@ func test_turning_changes_the_angle_and_damping_stops_the_spin() -> void:
 	check(f.angle > spun, "it drifted on a little while stopping")
 	near(f.angle, spun + 0.0, "but not far", 0.5)
 	var g := Flight.new()
-	g.step(0.5, {"turn": -1.0}, 50.0, 20.0)
+	g.step(0.05, {"turn": -1.0}, 50.0, 20.0)  # (short: the real turn_factor would spin it past PI in half a second)
 	check(g.angle < 0.0 and g.ang_vel < 0.0, "negative turn is counter-clockwise")
 
 

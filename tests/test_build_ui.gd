@@ -363,3 +363,16 @@ func test_the_log_folds_and_shows_the_crew() -> void:
 	log._gui_input(click)
 	check(not log.collapsed, "and opens it again")
 	_done(b)
+
+
+func test_the_top_bar_shows_the_cargo_and_the_pause() -> void:
+	var b := _build({"scrap": 120, "copper": 7, "credits": 300, "fuel": 4})
+	var items: Array = b.hud.top_bar.items()
+	var ids: Array = items.map(func(it): return it["id"])
+	eq(ids, Palette.BAR_IDS + ["power", "o2", "hull"], "the materials, credits and fuel, then power, O2 and hull")
+	eq([items[0]["text"], items[1]["text"], items[6]["text"], items[7]["text"]], ["120", "7", "300", "4"], "with the cargo's counts")
+	eq(items[-1]["text"], "--", "no run yet: no hull integrity")
+	eq(b.hud.top_bar.status(), ["BUILD MODE", "PAUSED: build mode"] as Array[String], "build mode pauses the world and the top bar says so")
+	b.set_build(false)
+	eq(b.hud.top_bar.status(), ["PLAY MODE"] as Array[String], "play mode runs it")
+	_done(b)

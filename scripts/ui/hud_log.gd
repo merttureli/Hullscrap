@@ -1,6 +1,6 @@
 extends Control
-## The log, bottom left: what the crew are doing, what the trip has salvaged (play mode), the abilities running and
-## the last lines of the ship's chronicle with their time. A click on its title bar folds it to the newest line
+## The log, bottom left: what the crew are doing, what the trip has salvaged (play mode) and the last lines of the
+## ship's chronicle with their time. A click on its title bar folds it to the newest line
 ## and opens it again. Draws only.
 
 const Jobs = preload("res://scripts/crew/jobs.gd")
@@ -37,9 +37,6 @@ func lines() -> Array:
 	var deb = b.get_parent().get_node_or_null("Debris") if b.get_parent() != null else null
 	if deb != null and deb.has_method("active") and deb.active() and deb.get("debris") != null:
 		out.append([deb.debris.hud_line(), UiKit.AMBER])
-	var ab: String = b.sim.hud_line() if b.sim != null and b.sim.has_method("hud_line") else ""
-	if ab != "":
-		out.append([ab, Color("#ffd24a")])
 	for e in ship.events.slice(-EVENTS):
 		out.append([event_text(e), UiKit.DIM_TEXT])
 	return out

@@ -1,7 +1,8 @@
 extends Control
 ## The resource bar across the top of the screen (build and play mode): the materials, credits and fuel of the
 ## cargo (palette.gd BAR_IDS) with their icons, then the power supply against demand, the oxygen where the soldier
-## stands and the hull integrity of the run; on the right the mode, with "PAUSED: build mode" while building.
+## stands and the hull integrity of the run; on the right the mode, and the pause while the world stands still
+## (ShipSim.pause_line(): "PAUSED: build mode").
 ## The name of a figure shows under the mouse. Reads the ship through the HUD's build node; draws only.
 
 const Palette = preload("res://scripts/build/palette.gd")
@@ -10,7 +11,6 @@ const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const ICON := 20.0
 const SIZE := 15  ## font size of the figures
 const GAP := 18.0  ## between two figures
-const PAUSED := "PAUSED: build mode"
 
 var hud: Control
 var hover := -1  ## the figure under the mouse
@@ -74,11 +74,13 @@ func item_rects(list: Array) -> Array:
 	return out
 
 
-## The words on the right: the mode, and the pause while building.
+## The words on the right: the mode, and the pause while the world stands still.
 func status() -> Array[String]:
 	var out: Array[String] = ["BUILD MODE" if hud.build.build_on else "PLAY MODE"]
-	if hud.build.build_on:
-		out.append(PAUSED)
+	var sim: Node = hud.build.sim
+	var pause: String = sim.pause_line() if sim != null and sim.has_method("pause_line") else ""
+	if pause != "":
+		out.append(pause)
 	return out
 
 
@@ -114,7 +116,7 @@ func _draw() -> void:
 	var x := size.x - 14.0
 	var st := status()
 	for j in range(st.size() - 1, -1, -1):
-		var paused := st[j] == PAUSED
+		var paused := j > 0  # the pause, after the mode
 		var w := UiKit.text_width(st[j], 13, UiKit.bold()) + (40.0 if paused else 0.0)
 		var at := Vector2(x - w, size.y / 2.0 + 5.0)
 		if paused:

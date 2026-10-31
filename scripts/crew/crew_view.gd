@@ -45,9 +45,11 @@ func _process(dt: float) -> void:
 		return
 	_clock += dt
 	_spawn(ship)
-	for m: CrewMember in ship.crew:
-		m.resolve(ship.grid, door_passable)  # the ship changed under them (a wall built on a body)
-	if player != null:
+	var frozen: bool = sim != null and bool(sim.get("paused"))  # build mode: nobody walks (ShipSim.relocate_crew sorts them out on leaving it)
+	if not frozen:
+		for m: CrewMember in ship.crew:
+			m.resolve(ship.grid, door_passable)  # the ship changed under them (a wall built on a body)
+	if player != null and not frozen:
 		player.move_input(ship.grid, _wasd(), dt, door_passable)
 		if Input.is_key_pressed(KEY_E) and not Input.is_key_pressed(KEY_CTRL) and sim.has_method("jobs_of"):
 			sim.jobs_of(ship).hand_work(ship, player, dt)  # E held: work on what is in reach
