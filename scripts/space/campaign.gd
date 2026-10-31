@@ -29,6 +29,7 @@ const Salvage = preload("res://scripts/space/salvage.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Radar = preload("res://scripts/space/radar.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
+const Wardens = preload("res://scripts/space/wardens.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -38,7 +39,8 @@ const Shipgen = preload("res://scripts/space/shipgen.gd")
 ## which Ma's clock paused). Older saves load as stage 1 in Clan space; a map with no exit beacon (one from before the
 ## regions) is made again as Clan space's, with the ship at Gantry Rusthold.
 ## 5 adds `tide` (the Hollow tide of the region, tide.gd); older saves load with a fresh tide (at their jump count in stage 1).
-const VERSION := 5
+## 6 adds `warden` (the warden of the exit beacon, wardens.gd); older saves roll it on load. Its flag is in `flags`.
+const VERSION := 6
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100
@@ -97,6 +99,7 @@ var region_data := {}  ## that region's data (Regions.get_region), not saved
 var route: Array = []  ## the regions of the run in order, this one last
 var region_seed := 0  ## the seed of this region's map and sectors
 var debt_stop := -1  ## the jump count at which Ma's debt clock stopped (from stage run.debt_stages + 1), -1 while it runs
+var warden := {}  ## the warden of this region's exit beacon (Wardens.for_region), rolled on entering; {} in the ending region
 var profile = null  ## the player's Profile (profile.gd), set by the map: unlocks and landmarks are written to it at once. null in tests
 var ending := ""  ## the id of the ending this run reached ("" while it goes on): the run is won (docs/CONTENT.md section 13)
 var landmarks: Array = []  ## ids of the landmark events (events.gd) met in this run, in order
@@ -445,13 +448,20 @@ func tow(ship) -> Dictionary:
 
 ## What happens on reaching the current node. Returns {node, refused, event, exit}: `refused` is the text of a
 ## dock master who turns you away (a faction below the refusal line), `event` the event to show ({} if
-## none), `exit` true at the region's exit beacon (the region choice comes after any event). A debt event (Ma's call,
+## none), `exit` true at the region's exit beacon once its warden is dealt with (the region choice comes after any event; while
+## the warden holds the lane `event` is its hail and `warden` is true). A debt event (Ma's call,
 ## a reminder, the collectors' talk; only while her clock runs) interrupts the node's own event. At a
 ## station you may dock at the flag at_<place> is set (until you jump away), its recruits are rolled, and
 ## the event is one of its greetings.
 func arrive(ship) -> Dictionary:
 	var n := drift.node(current)
-	var out := {"node": n, "refused": "", "event": {}, "exit": n.get("type", "") == "exit"}
+	var out := {"node": n, "refused": "", "event": {}, "exit": n.get("type", "") == "exit", "warden": false}
+	if n.get("type", "") == "exit" and warden_up():  # the warden holds the lane: its hail, and no region choice until it is dealt with
+		out["event"] = warden_event(ship)
+		out["exit"] = false
+		out["warden"] = true
+		events_seen += 1
+		return out
 	var st := station_cfg(current)
 	if not st.is_empty():
 		if refuses(str(st.get("faction", ""))):
@@ -627,6 +637,16 @@ func at_exit() -> bool:
 	return drift.node(current).get("type", "") == "exit"
 
 
+## Does the warden still hold this region's exit beacon (wardens.gd)? The ending region has none.
+func warden_up() -> bool:
+	return not warden.is_empty() and not flags.has(str(warden["flag"]))
+
+
+## The warden's event at the beacon ({} when it is not up).
+func warden_event(ship) -> Dictionary:
+	return Wardens.event(warden, self, ship) if warden_up() else {}
+
+
 ## The regions on offer at this region's exit beacon (ids; Regions.offers: the same for the same seed and route).
 func region_offers() -> Array:
 	return Regions.offers(seed_value, stage, route, cfg)
@@ -652,6 +672,7 @@ func enter_region(id: String, ship = null) -> void:
 	drift = Regions.make_map(region_data, cfg, region_seed, is_final())
 	current = drift.start_id()
 	tide = Tide.make(drift, current, Tide.config(), drift.exit_id(), stage)  # a Hollow tide of the region's own, from its entry
+	warden = Wardens.for_region(seed_value, stage, region_data, jumps, str(cfg.get("difficulty", "normal")))
 	visited = {current: true}
 	revealed = {}
 	sectors = {}
@@ -794,6 +815,8 @@ func tier() -> int:
 ## missed sends the rammer while Ma's clock runs); an entry is a design file or a generated ship ("gen:...", gen_spec).
 ## Anything else is a design id in data/ships.
 func fight_path(value: String, node_type: String) -> String:
+	if Shipgen.is_spec(value):  # a generated ship named outright (the exit warden)
+		return value
 	if value != "tier":
 		return value if value.begins_with("res://") else "res://data/ships/%s.json" % value
 	var kind := "patrol" if node_type == "patrol" else "pirate"
@@ -831,6 +854,9 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 		return out
 	if res.has("hull") and res.has("hull_max"):
 		hull_loss = clampi(roundi(float(res["hull_max"]) - float(res["hull"])), 0, maxi(roundi(float(res["hull_max"])) - 1, 0))
+	if state == "escaped" and after_win.has("clears"):  # the warden left the lane
+		flags[str(after_win["clears"])] = true
+		out["lines"].append("The lane is clear.")
 	if not state in ["won", "captured", "spared"]:
 		out["text"] = "They're gone, and whatever they carried went with them." if state == "escaped" else "You break away. The fight is not finished, but you are."
 		return out
@@ -1108,7 +1134,7 @@ func to_dict() -> Dictionary:
 		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
 		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
 		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
-		"debt_stop": debt_stop, "tide": tide.to_save()}
+		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate()}
 
 
 func _sectors_dict() -> Dictionary:
@@ -1150,6 +1176,9 @@ func load_dict(d: Dictionary) -> String:
 	var charge = _read_spool(d, map)
 	if charge == null:
 		return "bad campaign jump drive"
+	var held := Wardens.clean(d.get("warden"), where["region"], where["stage"])  # an older save, or a bad one, rolls its warden again
+	if held.is_empty():
+		held = Wardens.for_region(int(d["seed"]), where["stage"], Regions.get_region(where["region"]), int(d["jumps"]), str(cfg.get("difficulty", "normal")))
 	var rising = Tide.make(map, map.start_id(), Tide.config(), map.exit_id(), where["stage"])
 	if d.get("tide") is Dictionary:
 		if rising.load_save(d["tide"]) != "":
@@ -1184,6 +1213,7 @@ func load_dict(d: Dictionary) -> String:
 	sectors = made
 	spool = charge
 	tide = rising
+	warden = held
 	stage = where["stage"]
 	region_id = where["region"]
 	region_data = Regions.get_region(region_id)

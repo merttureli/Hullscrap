@@ -27,10 +27,12 @@ func _ship() -> Ship:
 	return s
 
 
-## Put the campaign at its region's exit beacon (no jump counted).
+## Put the campaign at its region's exit beacon (no jump counted), its warden (tests/test_wardens.gd) already dealt with.
 func _to_exit(c: Campaign) -> void:
 	c.current = c.drift.exit_id()
 	c.visited[c.current] = true
+	if not c.warden.is_empty():
+		c.flags[c.warden["flag"]] = true
 
 
 ## Play a whole route from seed `seed_value`: at every exit take an offer chosen by `pick` (a seeded rng). Returns the
