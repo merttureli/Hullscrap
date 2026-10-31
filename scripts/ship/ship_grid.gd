@@ -17,6 +17,7 @@ var tiles := {}  # Vector2i -> tile id
 var door_open := {}  # Vector2i -> true for doors that are open; closed doors are absent
 var hp := {}  # Vector2i -> float: current hp of damaged cells (a cell not listed has full hp)
 var hp_max := {}  # Vector2i -> float: max hp of cells burnt below their tile's hp (ablative); others are absent
+var hp_mult := {}  # Vector2i -> float: factor on a wall's max hp from a part in the room it bounds (Stonehide bay), set when a fight starts; not saved
 var breached := {}  # Vector2i -> tile id: cells shot open (now empty), with the tile to restore on repair
 var shapes := {}  # Vector2i -> {shape, rot, mirror}: solid cells that are not a full square (see shapes.gd); a cell not listed is full
 var breached_shapes := {}  # Vector2i -> {shape, rot, mirror}: the shape of a breached cell, restored on repair
@@ -190,7 +191,7 @@ func max_hp_of(c: Vector2i) -> float:
 		return 0.0
 	if hp_max.has(c):
 		return hp_max[c]
-	var base := float(defs.get_def(id).get("hp", 1.0)) if defs != null else 1.0
+	var base := (float(defs.get_def(id).get("hp", 1.0)) if defs != null else 1.0) * float(hp_mult.get(c, 1.0))
 	return maxf(base * area_at(c), 1.0) if shapes.has(c) else base
 
 

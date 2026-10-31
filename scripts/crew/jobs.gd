@@ -123,9 +123,10 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 
 ## How fast `m` does a job of `type`, 1.0 being normal: the work_mult of their traits for it (fast_repair
 ## works a repair or a breach 1 / 0.6 times as fast, a Basalt revives at half speed), with the swarm and
-## aura bonuses of the crew in their room (TraitSet.work_rate).
+## aura bonuses of the crew in their room (TraitSet.work_rate), times what the parts in their room do to the work
+## (Abilities.work_mult: room_work_mult, wet).
 static func _work_rate(ship, m, type: String) -> float:
-	return TraitSet.work_rate(ship, m, WORK_KIND.get(type, "repair"))
+	return TraitSet.work_rate(ship, m, WORK_KIND.get(type, "repair")) * Abilities.work_mult(ship, m)
 
 
 ## Is `job` the mending of `m` themselves? Nobody mends their own body.
@@ -765,7 +766,7 @@ static func spawn_crew(ship) -> Array:
 		ship.crew.append(player)
 		out.append(player)
 	var ada_name: String = cfg["ada"]["name"]
-	if _find(ship, func(m): return m.name == ada_name) == null:
+	if _find(ship, func(m): return m.name == ada_name) == null and not ship.dead_crew.has(ada_name):
 		var c := Pathfinder.nearest_walkable(grid, mid, Callable(), player.anchor())
 		if c == Pathfinder.NO_CELL:
 			return out
@@ -773,7 +774,7 @@ static func spawn_crew(ship) -> Array:
 		ship.crew.append(ada)
 		out.append(ada)
 	var beds := _beds(ship)
-	var have: int = ship.crew.filter(func(m): return not m.is_player and m.name != ada_name).size()
+	var have: int = ship.crew.filter(func(m): return not m.is_player and m.name != ada_name).size() + ship.dead_crew.filter(func(n): return n != ada_name).size()  # the dead stay dead
 	while have < int(cfg.get("extra_crew", 0)):
 		var near := mid
 		if not beds.is_empty():
@@ -807,7 +808,7 @@ static func _spawn_planned(ship) -> Array:
 		var nth := npc
 		if not is_player and not is_ada:
 			npc += 1
-		if _find(ship, func(m): return m.name == who) != null:
+		if _find(ship, func(m): return m.name == who) != null or ship.dead_crew.has(who):
 			continue
 		var near := mid
 		var look: Dictionary = cfg["player"]["look"] if is_player else cfg["ada"]["look"]
