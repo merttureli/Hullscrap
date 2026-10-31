@@ -903,4 +903,170 @@ class Echo(Species):
                 g = ng(N); h = ec_head(nm); sheen(g, h, c, 90); out.append(clear_under(g, h))
         return out
 
-SPECIES = [WardenFrame, Murrow, Siltborn, Corvin, Brine, Echo]
+# ================================================================== FERRO: living ferrofluid born in the Boneyard's magnetic wrecks (standard rig)
+# A glossy gunmetal liquid body (E, lit rim S, deep D, a hot specular L/H on every lit tip) that stands up in a field of spikes: a lattice of little cones over the body,
+# and a ring of longer spikes round its edge, in the hexagonal pattern real ferrofluid makes. Liquid arms that end in three spikes for fingers, legs that are columns of
+# fluid ending in a spiky puddle (with a droplet that lifts and falls as they step), a smooth dome of a head with a crown of spikes and two faint cyan eyes. The sparks are
+# the glow layers (3 frames, ~4 fps): little blue-white arcs that jump between neighbouring spike tips. Outfit = a magnetised strap round the waist and the helm's band.
+def fr_ring_spikes(cx, cy, rx, ry, n, skip=(), lens=(4, 5, 6), start=0.0, ymax=30):
+    """tips and bases of n spikes round an ellipse; the pattern of lengths is fixed (no randomness)."""
+    out = []
+    for k in range(n):
+        if k in skip: continue
+        th = start + 2 * math.pi * k / n
+        c, sn = math.cos(th), math.sin(th)
+        R = 1.0 / math.sqrt((c / rx) ** 2 + (sn / ry) ** 2)
+        L = lens[(k * 5 + 1) % len(lens)]
+        tip = (cx + (R + L) * c, cy + (R + L) * sn)
+        if tip[1] > ymax: L = max(1, L - int(tip[1] - ymax) - 1); tip = (cx + (R + L) * c, cy + (R + L) * sn)
+        base = [(cx + (R - 1.2) * c - 2.1 * sn, cy + (R - 1.2) * sn + 2.1 * c), (cx + (R - 1.2) * c + 2.1 * sn, cy + (R - 1.2) * sn - 2.1 * c)]
+        out.append((base, tip))
+    return out
+def fr_spike_poly(s, base, tip, c='E'): poly(s, base + [tip], c)
+def fr_tips(spikes): return [(int(round(t[0])), int(round(t[1]))) for _, t in spikes]
+FR_SPIKES = fr_ring_spikes(16, 19, 8.4, 7.4, 20)
+
+FR_FOOT = {
+ 'plant': art("""
+.S.L.S.
+.SESESE
+ESEEEED
+SEEEEED
+.EDDDD.
+"""),
+ 'lift': art("""
+.S.L.S.
+.SESESE
+ESEEEED
+.EEEED.
+..DDD..
+"""),
+}
+def fr_leg_frame(dl, dr, lift_l=False, lift_r=False, drop=0):
+    s = Spr(N, N)
+    for lx, d, lift in ((10, dl, lift_l), (22, dr, lift_r)):
+        fy = 16 - d
+        step = -1 if fy < 16 else 1
+        ys = list(range(16, fy + step, step))
+        t = Spr(N, N)
+        for i, y in enumerate(ys): t.hline(lx - 2, y, 5, 'E')
+        merge(s, shade_gen(t, 'E', 'S', 'D'))
+        for i, y in enumerate(ys):
+            if i % 3 == 1 and len(ys) > 4: s.put(lx - 3, y, 'S'); s.put(lx + 3, y, 'D')       # little spikes along the column
+        b = FR_FOOT['lift' if lift else 'plant']
+        s.stamp(lx - 3, fy - len(b) // 2 - (1 if fy < 16 else 0), b)
+        if lift: s.put(lx + drop, fy + 3, 'E')                                                  # a droplet left behind by the lifted foot
+    return s
+FR_WALK = walk_cycle(8, 4)
+
+def fr_torso(sparks=False):
+    s = Spr(N, N)
+    b = Spr(N, N); ell(b, 16, 19, 8.2, 7.4, 'E')
+    for sd in (-1, 1): ell(b, 16 + sd * 8, 15, 3.6, 3.4, 'E')
+    for base, tip in FR_SPIKES: fr_spike_poly(b, base, tip)
+    merge(s, shade_gen(b, 'E', 'S', 'D'))
+    for gy in range(12, 28, 4):                                                              # the lattice of cones over the body: a lit point with a shadowed lee
+        for gx in range(8 + (2 if (gy // 4) % 2 else 0), 25, 4):
+            if all(s.get(gx + i, gy + j) == 'E' for i in (0, 1) for j in (0, 1)):
+                s.put(gx, gy, 'L'); s.put(gx + 1, gy, 'S'); s.put(gx, gy + 1, 'S'); s.put(gx + 1, gy + 1, 'D')
+    for (x, y) in fr_tips(FR_SPIKES):                                                        # the specular glint on each lit tip
+        if s.get(x, y) in ('E', 'S') and (x < 16 or y < 19): s.put(x, y, 'L')
+        if s.get(x, y) in ('E', 'S') and x < 14 and y < 16: s.put(x, y, 'H')
+    # the magnetised strap (outfit) round the waist, spikes poking through it
+    for x in range(8, 25):
+        if s.get(x, 19) != '.': s.put(x, 19, 'B'); s.put(x, 18, 'A') if s.get(x, 18) != '.' else None; s.put(x, 20, 'C') if s.get(x, 20) != '.' else None
+    for x in (10, 14, 18, 22): s.put(x, 18, 'L')
+    return s
+
+FR_HEADS = ['crown', 'ripple', 'helmet']
+def fr_head(kind):
+    s = Spr(N, N)
+    ell(s, 16, 14, 3.0, 2.0, 'E')                                                            # the neck
+    if kind == 'crown':
+        for base, tip in fr_ring_spikes(16, 11, 4.4, 4.8, 12, skip=(0, 1, 2, 3, 4, 8, 9, 10, 11) if False else (4, 5, 6, 7, 8), lens=(3, 4, 5, 4)):
+            fr_spike_poly(s, base, tip)
+    d = Spr(N, N); ell(d, 16, 11, 4.6, 5.0, 'E'); merge(s, shade_gen(d, 'E', 'S', 'D'))
+    if kind == 'ripple':                                                                     # concentric ripple rings spreading over the dome
+        for y in range(5, 17):
+            for x in range(11, 22):
+                dd = math.hypot((x - 16) / 4.6, (y - 11) / 5.0)
+                if s.get(x, y) == 'E' and (0.46 < dd < 0.6 or 0.76 < dd < 0.88): s.put(x, y, 'W')
+    s.put(13, 8, 'H'); s.put(14, 8, 'L'); s.put(13, 9, 'L'); s.put(14, 7, 'S')               # the specular streak
+    if kind != 'helmet':
+        for ex in (14, 18): s.put(ex, 11, 'c')                                              # two faint cyan eyes
+    if kind == 'helmet':                                                                     # a steel pot helm the fluid clings to, a tinted band, spikes pulled up round it
+        h = Spr(N, N); ell(h, 16, 9, 5.8, 4.6, 'S'); merge(s, shade_gen(h, 'S', 'L', 'W'))
+        s.hline(10, 11, 13, 'B'); s.hline(10, 10, 13, 'A'); s.hline(11, 12, 11, 'C')
+        s.hline(13, 8, 7, 'N'); s.put(15, 8, 'c'); s.put(17, 8, 'c'); s.put(12, 7, 'H'); s.put(13, 6, 'H')
+        for base, tip in fr_ring_spikes(16, 9, 5.8, 4.6, 14, skip=(0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 13), lens=(3, 4)):
+            sp = Spr(N, N); fr_spike_poly(sp, base, tip); merge(s, shade_gen(sp, 'E', 'S', 'D'))
+        for (x, y) in ((9, 5), (23, 6), (21, 3)): s.put(x, y, 'L')
+    return s
+
+def fr_hand(s, x, y):
+    s.rect(x - 1, y - 1, 3, 3, 'E'); s.put(x - 1, y - 1, 'S'); s.put(x + 1, y + 1, 'D')
+    for (dx, h) in ((-1, 2), (0, 3), (1, 2)):                                                # three spike fingers
+        for k in range(h): s.put(x + dx, y - 2 - k, 'S' if k < h - 1 else 'L')
+    s.put(x, y - 5, 'H') if False else None
+def fr_arm(s, a, b):
+    m = ((a[0] + b[0]) // 2 + (1 if a[0] < 16 else -1), (a[1] + b[1]) // 2)
+    t = Spr(N, N); seg(t, a[0], a[1], m[0], m[1], 3, 'E'); seg(t, m[0], m[1], b[0], b[1], 2, 'E'); merge(s, shade_gen(t, 'E', 'S', 'D'))
+    sd = -1 if a[0] < 16 else 1
+    for k in (0.3, 0.6):
+        x = a[0] + round((b[0] - a[0]) * k) + sd * 2; y = a[1] + round((b[1] - a[1]) * k); s.put(x, y, 'S'); s.put(x + sd, y, 'L')      # spike nubs along the arm
+    s.put(b[0] + sd * 3, b[1] - 1, 'E'); s.put(b[0] + sd * 3, b[1], 'S')                      # a droplet drifting off
+FR_UNARMED = ((6, 21), (26, 21))
+def fr_arms(pose):
+    s = Spr(N, N); A = pose_anchors(*FR_UNARMED)[pose]
+    if pose == 'unarmed':
+        fr_arm(s, (8, 15), (6, 21)); fr_arm(s, (24, 15), (26, 21)); fr_hand(s, 6, 22); fr_hand(s, 26, 22)
+        return s
+    for sh, k in (((8, 15), 'hand_l'), ((24, 15), 'hand_r')):
+        fr_arm(s, sh, (A[k][0], A[k][1] + 1)); fr_hand(s, A[k][0], A[k][1] + 1)
+    return s
+
+def arc(layer, a, b, a_core=0.9, a_edge=0.45):
+    """a spark arc between two tips: a white core line with a cyan halo (alpha only, palette hues)."""
+    n = max(abs(b[0] - a[0]), abs(b[1] - a[1]), 1)
+    for i in range(n + 1):
+        x = a[0] + round((b[0] - a[0]) * i / n); y = a[1] + round((b[1] - a[1]) * i / n)
+        if 0 <= x < layer.w and 0 <= y < layer.h: layer.p[y][x] = [244, 246, 248, int(255 * a_core)]
+    glow_px_max(layer, [a, b], (60, 242, 255), a_edge, 2.6, 1.4)
+
+class Ferro(Species):
+    id = 'ferro'
+    walk_fps = 8
+    glow_fps = 4
+    head_names = FR_HEADS
+    notes = ('Ferro: living ferrofluid born in the Boneyard\'s magnetic wrecks (standard rig). A glossy gunmetal liquid body with a hot specular on every lit tip, standing in the '
+             'hexagonal field of spikes real ferrofluid makes: a lattice of little cones over the body and a ring of longer spikes round its edge. Liquid arms ending in three spike '
+             'fingers (a droplet drifts off each), legs that are columns of fluid ending in a spiky puddle (a droplet is left behind by the lifted foot), a smooth dome of a head with '
+             'a crown of spikes and two faint cyan eyes. The sparks are the glow layers: torso_glow and head_glow have 3 frames (head_glow 3 per head variant) at ~4 fps, little '
+             'blue-white arcs that jump between neighbouring spike tips. Head variants: crown, ripple (concentric ripple rings), helmet (a steel pot helm the fluid clings to, with '
+             'a tinted band and spikes pulled up round it). Outfit mask = the magnetised waist strap and the helm band.')
+    def legs(self): return [outlined(fr_leg_frame(*w, drop=(1 if i % 2 else -1))) for i, w in enumerate(FR_WALK)] + [outlined(fr_leg_frame(1, -1))]
+    def torso(self): return outlined(fr_torso())
+    def arms(self, pose): return outlined(fr_arms(pose))
+    def head(self, name): return outlined(fr_head(name))
+    def torso_anchors(self): return {'head': [16, 11], 'back': [16, 25], 'shoulder_l': [8, 15], 'shoulder_r': [24, 15]}
+    def arm_anchors(self): return pose_anchors(*FR_UNARMED)
+    def torso_glow(self):
+        out = []; t = fr_torso(); tips = fr_tips(FR_SPIKES)
+        for f in range(3):
+            g = ng(N)
+            for i in range(f * 2, len(tips) - 1, 7): arc(g, tips[i], tips[i + 1], 0.9, 0.3)
+            out.append(clear_under(g, t))
+        return out
+    def head_glow(self):
+        out = []
+        for f in range(3):
+            for nm in self.head_names:
+                g = ng(N)
+                if nm == 'helmet': arc(g, [(9, 5), (23, 6), (21, 3)][f][:2], [(10, 7), (22, 8), (20, 5)][f], 0.9, 0.4)
+                else:
+                    glow_px_max(g, [(14, 11), (18, 11)], (60, 242, 255), (0.8, 0.5, 0.65)[f], 3.0, 1.5)
+                    arc(g, [(11, 5), (21, 5), (16, 3)][f], [(9, 4), (23, 4), (13, 4)][f], 0.8, 0.35)
+                out.append(g)
+        return out
+
+SPECIES = [WardenFrame, Murrow, Siltborn, Corvin, Brine, Echo, Ferro]

@@ -858,6 +858,17 @@ Source and licence of every art and audio file in the repo.
 | `art/crew/fenn/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/fenn/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/fenn/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/head.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/head_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/head_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/legs.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/ferro/torso_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/gauntling/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/gauntling/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/gauntling/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |

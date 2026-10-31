@@ -1,0 +1,223 @@
+{
+ "species": "ferro",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "notes": "Ferro: living ferrofluid born in the Boneyard's magnetic wrecks (standard rig). A glossy gunmetal liquid body with a hot specular on every lit tip, standing in the hexagonal field of spikes real ferrofluid makes: a lattice of little cones over the body and a ring of longer spikes round its edge. Liquid arms ending in three spike fingers (a droplet drifts off each), legs that are columns of fluid ending in a spiky puddle (a droplet is left behind by the lifted foot), a smooth dome of a head with a crown of spikes and two faint cyan eyes. The sparks are the glow layers: torso_glow and head_glow have 3 frames (head_glow 3 per head variant) at ~4 fps, little blue-white arcs that jump between neighbouring spike tips. Head variants: crown, ripple (concentric ripple rings), helmet (a steel pot helm the fluid clings to, with a tinted band and spikes pulled up round it). Outfit mask = the magnetised waist strap and the helm band. Same rig as human: every layer faces UP at rotation 0 on one 33x33 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     8
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     16,
+     11
+    ],
+    "back": [
+     16,
+     25
+    ],
+    "shoulder_l": [
+     8,
+     15
+    ],
+    "shoulder_r": [
+     24,
+     15
+    ]
+   },
+   "glow": {
+    "image": "torso_glow.png",
+    "frame": [
+     33,
+     33
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 3,
+    "blend": "add (preferred) or alpha-over",
+    "anims": {
+     "on": [
+      0,
+      3,
+      4
+     ]
+    }
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      6,
+      21
+     ],
+     "hand_r": [
+      26,
+      21
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      14,
+      5
+     ],
+     "hand_r": [
+      18,
+      5
+     ],
+     "mount": [
+      16,
+      5
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      17,
+      1
+     ],
+     "hand_r": [
+      21,
+      9
+     ],
+     "mount": [
+      20,
+      8
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      13,
+      9
+     ],
+     "hand_r": [
+      21,
+      4
+     ],
+     "mount": [
+      21,
+      4
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      14,
+      3
+     ],
+     "hand_r": [
+      21,
+      12
+     ],
+     "mount": [
+      19,
+      11
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      12,
+      7
+     ],
+     "hand_r": [
+      23,
+      8
+     ],
+     "mount": [
+      23,
+      8
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "crown": 0,
+    "ripple": 1,
+    "helmet": 2
+   },
+   "glow": {
+    "image": "head_glow.png",
+    "frame": [
+     33,
+     33
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 9,
+    "blend": "add (preferred) or alpha-over",
+    "variants": {
+     "crown": [
+      0,
+      3,
+      6
+     ],
+     "ripple": [
+      1,
+      4,
+      7
+     ],
+     "helmet": [
+      2,
+      5,
+      8
+     ]
+    },
+    "notes": "per head variant, a list of glow frames: alternate them at 4 fps"
+   }
+  }
+ }
+}
