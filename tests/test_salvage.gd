@@ -94,6 +94,7 @@ func test_the_event_has_the_texts_and_the_rows_in_order() -> void:
 	var enemy := _enemy()
 	var won := Salvage.event_for(enemy, "won", Campaign.new(3), _ship())
 	eq([won["id"], won["type"], won["once"]], ["salvage", "salvage", false], "id, type and once")
+	eq(won["title"], "Salvage: Pirate Raider", "the panel is titled by the wreck, not the node")
 	eq(won["text"], "The Pirate Raider hangs dead, venting. Your cutters have time for one job before she breaks up.", "the won text")
 	var texts: Array = won["choices"].map(func(ch): return ch["text"])
 	check(texts[0].begins_with("Cut out the ") and texts[2].begins_with("Cut out the "), "the cut rows come first")

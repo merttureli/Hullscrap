@@ -74,7 +74,7 @@ static func event_for(enemy, state: String, c, ship) -> Dictionary:
 		text = "The %s hangs dead, venting. Your cutters have time for one job before she breaks up." % foe
 	if choices.is_empty():
 		return {}
-	return {"id": "salvage", "type": "salvage", "once": false, "text": text, "choices": choices}
+	return {"id": "salvage", "type": "salvage", "once": false, "title": "Salvage: %s" % foe, "text": text, "choices": choices}
 
 
 static func _row(text: String, outcome_text: String, effects: Dictionary) -> Dictionary:
