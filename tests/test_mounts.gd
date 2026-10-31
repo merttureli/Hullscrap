@@ -94,16 +94,17 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 	var n := 0
 	for id in c.ids():
 		var d := c.def(id)
-		if d["family"] in ["weapon", "engine", "intake"]:
+		if d["family"] in ["weapon", "engine", "intake", "radar", "tractor"]:
 			n += 1
 			check(Mounts.is_mount(d), id + " is a hull mount")
 			var narrow: bool = d["size"][0] == 2  # Strafe Jets: 2x2 and 2x2 (docs/waves/engines_1.md)
 			eq(d["size"], [2, 2] if narrow else [4, 2], id + ": the inside half is 4x2 (a Strafe Jets one 2x2)")
-			eq(d["mount"]["outside"][0], d["size"][0], id + ": and the outside half is as wide")
+			var console: bool = d["family"] == "radar" and not narrow  # a Radar Mk2 or Mk3 console is 4x2 behind a 2x2 dish (art/README.md)
+			eq(d["mount"]["outside"][0], 2 if console else d["size"][0], id + ": and the outside half is as wide (a radar's dish is 2 wide)")
 			eq(d["mount"]["outside_hp"], int(floor(d["hp"] * 0.75 + 0.5)), id + ": outside_hp is 75 percent of hp, rounded")
 		else:
 			check(not Mounts.is_mount(d), id + " is a plain part")
-	check(n >= 19, "every weapon and engine was checked (%d)" % n)
+	check(n >= 19, "every weapon, engine, intake, radar and tractor was checked (%d)" % n)
 	eq(c.def("shrapnel_cannon_scrap")["mount"]["outside"], [4, 3], "the Shrapnel Cannon's outside half is 4x3")
 
 

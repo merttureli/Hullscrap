@@ -9,6 +9,9 @@ extends RefCounted
 ## - A POI is {id, type, name, pos, visibility (beacon, signal, hidden), event_type, state (new, done), enemy ("" or a
 ##   ship design id), main (the node's own arrival event happens here)}; an ambient contact is a POI with `ambient`
 ##   true, a `vel` and a `ttl`; the wreck a won fight leaves is a POI with `wreck` true (add_wreck). All are in all_pois().
+## - A `quest` POI is only made in a region that has a quest event of its own (has_quest: the homeland tech quests of
+##   data/packs/regions_1 ask for their region by the flag in_<id>): no quest site where there is no quest. A sector made
+##   with no region data (a test's) may roll any POI type.
 ## - Only the POI states, the ship's place, the wrecks and the ambient clock are saved (to_save): the layout is
 ##   regenerated.
 ## - Ambient rolls and fight spawn points use the sector's own rng (saved), so real-time play never moves the
@@ -26,6 +29,8 @@ const DONE := "done"
 const VISIBILITIES: Array[String] = ["beacon", "signal", "hidden"]
 
 static var _cfg := {}
+static var _quest_for := {}  # region id or events tag -> true for the regions with a quest event; "*" when a quest asks for no region
+static var _quest_key := ""
 
 var cfg: Dictionary
 var seed_value := 0  ## this sector's own seed (seed_for)
@@ -122,7 +127,7 @@ func _build(r: RandomNumberGenerator, node: Dictionary, region_data: Dictionary)
 	var over: Dictionary = region_data.get("debris", {})
 	for k in over:
 		debris_mult[k] = float(debris_mult.get(k, 1.0)) * float(over[k])
-	var types := _mix(r, n, region_data.get("pois", {}))
+	var types := _mix(r, n, region_data.get("pois", {}), region_data.is_empty() or has_quest(region, str(region_data.get("events", ""))))
 	var pc: Dictionary = cfg["poi"]
 	var types_cfg: Dictionary = cfg["poi_types"]
 	for i in types.size():
@@ -140,8 +145,8 @@ func _build(r: RandomNumberGenerator, node: Dictionary, region_data: Dictionary)
 
 ## The POI types of the sector in order: the node's main one, the ones it always has (`also`), then others rolled by the
 ## node's weights (times the region's `pois` multipliers), within each type's `max`, until the count (rolled in the node's
-## range, kept within the sector's) is reached.
-func _mix(r: RandomNumberGenerator, n: Dictionary, mults: Dictionary = {}) -> Array:
+## range, kept within the sector's) is reached. `quests`: the region has a quest, so a `quest` POI may be rolled.
+func _mix(r: RandomNumberGenerator, n: Dictionary, mults: Dictionary = {}, quests := true) -> Array:
 	var pc: Dictionary = cfg["poi"]
 	var count := clampi(r.randi_range(int(n["count"][0]), int(n["count"][1])), int(pc["count"][0]), int(pc["count"][1]))
 	var types: Array = [str(n["main"])]
@@ -155,6 +160,8 @@ func _mix(r: RandomNumberGenerator, n: Dictionary, mults: Dictionary = {}) -> Ar
 		var open := {}
 		for t in weights:
 			var w := float(weights[t]) * float(mults.get(t, 1.0))
+			if t == "quest" and not quests:
+				continue
 			if w > 0.0 and int(made.get(t, 0)) < int(cfg["poi_types"][t].get("max", 3)):
 				open[t] = w
 		if open.is_empty():
@@ -163,6 +170,31 @@ func _mix(r: RandomNumberGenerator, n: Dictionary, mults: Dictionary = {}) -> Ar
 		types.append(pick)
 		made[pick] = int(made.get(pick, 0)) + 1
 	return types
+
+
+## Does region `region_id` (its events tag `tag`) have a quest event of its own: a `quest` event that asks for it by
+## `requires.region` (its id or tag) or by the flag in_<id> (set while the run is in it), or one that asks for no region at
+## all? Read from the events (data/events and the packs), so a region that gets a quest gets quest sites with it.
+static func has_quest(region_id: String, tag := "") -> bool:
+	var key := "%s|%s|%d" % [Content.root, Content.packs_root, Content.ids("events").size()]
+	if key != _quest_key:
+		_quest_key = key
+		_quest_for = {}
+		for ev in Content.events():
+			if str(ev.get("type", "")) != "quest":
+				continue
+			var req: Dictionary = ev["requires"] if ev.get("requires") is Dictionary else {}
+			var names := []
+			for k in ["region", "flag"]:
+				var v = req.get(k, [])
+				for x in (v if v is Array else [v]):
+					if k == "region" or str(x).begins_with("in_"):
+						names.append(str(x).trim_prefix("in_") if k == "flag" else str(x))
+			if names.is_empty():
+				_quest_for["*"] = true
+			for nm in names:
+				_quest_for[nm] = true
+	return _quest_for.has("*") or _quest_for.has(region_id) or (tag != "" and _quest_for.has(tag))
 
 
 ## A spot 3,000 to 12,000 px from the arrival point, inside the margin, at least `gap` from the others (the gap

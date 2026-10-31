@@ -601,6 +601,12 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 3. **Content**: intakes, radars and debris data with art (drift pieces, intake mouths, radar dishes), POI types in `data/sectors.json`, and writer passes for POI events.
 4. **On foot** at POIs (docking, abandoned stations, boarding), later, as PLAN says.
 
+**Step 3 notes (the Raft content, `claude/sector3`)**:
+- Salvage Intake Mk2/Mk3, Radar Mk1-Mk3 and Tractor Beam Mk1-Mk2 are in `data/components.json` (recipes in `data/recipes.json`: blueprints, not known at the start; Meridian sells them at the tier price rule). Radar stats: `radar_range`, `identify` (Mk2+: names what it sees and rates a fighter's threat in skulls), `see_hidden` (Mk3). Tractor stats: `tractor_range` (300 / 450 px) and `tractor_pull` (px/s); **Q held** in play mode only (Q is the utility key in a fight). Power numbers (radar -1/-2/-3, tractor -2/-3) are the builder's, not in the tables above.
+- The income target is measured, not assumed (`tests/test_sector3.gd`): `data/debris.json` spawns one piece every 1.4 s and scatters 80% of them over the whole view (the old 0.6 s and 35% made an idle Mk1 earn about 70 a minute), which gives about 15-25 scrap a minute idle with a Mk1 and about double with a Mk3 and a chase.
+- `quest` POIs are only made in a region with a quest event (`Sector.has_quest`: `requires.region`, or the flag `in_<id>` the homeland tech quests use); the node tables carry a `quest` weight of 3-4, about a third to a half of a homeland's sectors have one.
+- Not built (art exists): Listening Horn (scrap radar), Lumen Eye (neon radar), Lumen Siphon (neon intake, small debris only). They need a design call on their numbers.
+
 ## 12. Processing: smelters and the material ladder (owner, 2026-10-30)
 > "Put smelters in the ship to smelt bad materials into better ones: smelt scrap (an early-game material with no late-game use) into forged steel armour or something."
 

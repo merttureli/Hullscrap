@@ -94,6 +94,9 @@ const COLUMNS: Array = [
 			["H", "Shields tab: click a sector's + or -, or pick a preset or a custom slot"],
 			["H / Esc", "Close it"],
 		]],
+		["RAFT LOOP (flying)", [
+			["Q (hold)", "Not in a fight: tractor beams haul nearby debris to the nearest intake"],
+		]],
 		["CRAFTING (C)", [
 			["C", "Crafting panel, in build or play mode"],
 			["Click, or Up / Down + Enter", "Queue a recipe"],

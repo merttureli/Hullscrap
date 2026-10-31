@@ -52,7 +52,7 @@
 		},
 		"meridian": {
 			"faction": "concord", "services": ["fuel", "sell", "stock", "repair", "recruit"],
-			"stock": {"engine_mk1": 120, "engine_mk2": 270, "engine_mk3": 480, "strafe_jets_mk1": 60, "strafe_jets_mk2": 140, "longburn_mk1": 120, "reactor_mk1": 150, "reactor_mk2": 320, "shield_mk1": 160, "shield_mk2": 330, "laser_mk1": 140, "laser_mk2": 280, "pulse_mk1": 130, "oxygen_gen": 90, "medbay": 180, "helm": 70, "intake_mk1": 120, "artemis_mk1": 220, "missile": 14, "ammo_rack": 70, "belt_drive_std": 340},
+			"stock": {"engine_mk1": 120, "engine_mk2": 270, "engine_mk3": 480, "strafe_jets_mk1": 60, "strafe_jets_mk2": 140, "longburn_mk1": 120, "reactor_mk1": 150, "reactor_mk2": 320, "shield_mk1": 160, "shield_mk2": 330, "laser_mk1": 140, "laser_mk2": 280, "pulse_mk1": 130, "oxygen_gen": 90, "medbay": 180, "helm": 70, "intake_mk1": 120, "intake_mk2": 270, "intake_mk3": 480, "radar_mk1": 130, "radar_mk2": 290, "radar_mk3": 520, "tractor_mk1": 160, "tractor_mk2": 360, "artemis_mk1": 220, "missile": 14, "ammo_rack": 70, "belt_drive_std": 340},
 			"recruit": {"human": 6, "fenn": 2, "mire": 2, "grundl": 1}
 		},
 		"prism": {
