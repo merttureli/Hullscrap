@@ -1,7 +1,7 @@
 {
 	"_doc": "The exit wardens (scripts/space/wardens.gd, docs/MECHANICS_REVIEW.md P7): every region's exit beacon is held by a warden, a strong generated ship (scripts/space/shipgen.gd) you can read about on the region's card before you choose the region. At the beacon you pay its toll, are waved through on good terms, or break through. The guarding faction of a region is its `faction` when that is one of the entries here, else its `enemies` faction (else the Rustfangs); the ending region has no exit and no warden. stage_size: the hull class of the warden at stage 1..8. stage_budget_mult: its budget over what a pirate of that place would get, by stage. jumps_ahead: the warden is built for the budget you will meet about this many jumps into the region (the exit), so a region's warden is known when you choose it. wardens: per guarding faction (an id of data/enemy_tables.json): name (the warden's name), hail (what it says at the beacon), hint (one line on its real loadout and what beats it, from that faction's menu in data/enemy_tables.json), toll (credits per stage; 0 or missing = no toll), pass_rep (the reputation with that faction at which it waves you through; missing = never), rep_on_fight (the reputation change for shooting your way through; 0 for hostile factions, who have no bar). A won, spared or captured warden, or one that escaped, leaves the lane; winning also pays 50 credits per stage.",
 	"stage_size": ["medium", "medium", "large", "large", "large", "large", "large", "large"],
-	"stage_budget_mult": [1.0, 1.1, 1.2, 1.25, 1.3, 1.35, 1.4, 1.5],
+	"stage_budget_mult": [1.25, 1.35, 1.45, 1.5, 1.55, 1.6, 1.65, 1.75],
 	"jumps_ahead": 8,
 	"fight_credits": 50,
 	"wardens": {

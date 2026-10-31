@@ -1,0 +1,117 @@
+{"events": [
+    {
+      "id": "mile_bay_nine", "type": "station", "weight": 10, "once": false, "requires": {"region": "tessellate_mend"},
+      "text": "Repair Bay Nine is a huge Concord drydock lit like a surgery. The rail down its length has been mended a thousand times, and every weld is a slightly different colour. At the reception desk a tall figure made of tiny bots, with small gaps at the knees where a few of them have wandered off, smiles at you in chorus. 'Welcome to Repair Bay Nine,' it says. 'Please state the nature of the damage.' A bot on its shoulder drops off, looks about, and runs to fix the corner of the desk.",
+      "choices": [
+        {"text": "Have the hull repaired (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "Ten thousand bots go over your ship with a small, exact industry. Panels you had given up on are straight, scorched patches are bright, and every fastener on the starboard side has been tightened to the same torque. They submit an invoice for one conversation, which they reckon you have already paid.", "effects": {"items": {"credits": -20}, "hull": 15}}
+        ]},
+        {"text": "Talk to them about your trip.", "outcomes": [
+          {"weight": 100, "text": "The receptionist hears you out with great intensity, the bots in its head leaning in. When you stop, it says, 'Thank you. It has been eleven days.' They repair a scratch on your hull as a gift, and send a scout out in your wake who comes back with the location of a wreck.", "effects": {"hull": 5, "reveal": "wreck_field"}}
+        ]},
+        {"text": "[Tessellate] Join the greeter at the desk.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate steps behind the desk and the two of them stand shoulder to shoulder, two people-shapes that are really one, bots passing between them in streams. The rest of the Bay stops working to watch. By the time they separate, the Bay has repaired your ship twice, thanked you six times, and put a quantity of fine alloy in your hold with a note: FAMILY.", "effects": {"items": {"credits": 50, "titanium": 4}, "hull": 10}}
+        ]},
+        {"text": "Take on a bay hand (80 credits).", "requires": {"credits": 80, "not_flag": "mile_hired"}, "outcomes": [
+          {"weight": 100, "text": "Grout is a bright, interested swarm, given to wandering off to look at things and coming back with a part. 'I should like to see what is outside the Mile,' they say. 'It sounds unfinished.' The Bay waves them off, and a thousand bots in the rafters wave with it.", "effects": {"items": {"credits": -80}, "recruit": {"species": "tessellate", "name": "Grout"}, "flag": "mile_hired"}}
+        ]},
+        {"text": "Say you only came for the view.", "outcomes": [
+          {"weight": 100, "text": "'We have no view,' the receptionist says, sadly. 'But we do have a very nice floor.' It is, in fairness, a very nice floor.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "mile_ship_of_forty", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "tessellate_mend"},
+      "text": "Forty wrecks have been mended into one ship that almost flies. She has the nose of a Concord frigate, the stern of a Scrapper tug, the wings of a Lumen yacht, and a bridge from a ferry that still has its tour-guide sign. There is nobody aboard. Her reactor is a patchwork of eleven different reactors, humming in a rough harmony, and every plate on her is shining with the care of a thousand tiny hands.",
+      "choices": [
+        {"text": "Strip her for parts.", "outcomes": [
+          {"weight": 50, "text": "You get a few plates off before the swarm notices, and then a few more before it minds. You leave with an armful. The swarm is already mending the hole you left, and, a little reproachfully, the arm you cut.", "effects": {"items": {"titanium": 4, "scrap": 30}}},
+          {"weight": 50, "text": "The swarm mends the hull faster than you cut. By the time you have your arms full, it has repaired the door behind you shut. You are let out after an hour, and nobody says sorry.", "effects": {"items": {"scrap": 15}, "crew_hp": -10}}
+        ]},
+        {"text": "Climb aboard and try the helm.", "outcomes": [
+          {"weight": 100, "text": "The helm is a ferry's, with the tour-guide's voice still on a loop. She rises half a metre, shudders, and flies in a gentle arc for the length of a docking lane before the engines of three different eras pull in three directions. The swarm repairs the landing. You step off giddy and slightly dented, with a souvenir.", "effects": {"hull": -5, "items": {"credits": 30}}}
+        ]},
+        {"text": "[Tessellate] Ask her for her best plates.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate walks up the hull and lays a hand against it. A ripple runs up the plating and the swarm in her seams reaches out, curious, to say hello. For a minute the two of them stand there, being introduced. Then the hull opens its own seam and a stack of plates, perfectly finished, slides into your hold.", "effects": {"items": {"titanium": 5, "silicon": 3}, "hull": 5}}
+        ]},
+        {"text": "Admire her and fly on.", "outcomes": [
+          {"weight": 100, "text": "You circle her once. She is the most beautiful thing you have seen all month, and quite useless, and you do not tell anyone this.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "mile_recovery_crew", "type": "patrol", "weight": 9, "once": false, "requires": {"region": "tessellate_mend", "jumps_min": 2},
+      "text": "A Concord recovery cutter hails: 'Recovery Notice. One repair swarm, Model R-40, forty thousand units, property of Concord Works, absconded forty years ago. Reward for information.' The officer is reading it off a slate and looking at your crew with a steady, tired suspicion. At the edge of the screen, in the dark behind her cutter, something is slowly mending the cutter's antenna.",
+      "choices": [
+        {"text": "Tell them where the swarm lives.", "outcomes": [
+          {"weight": 100, "text": "She enters the coordinates, thanks you for your cooperation, and transfers a reward. It is a good reward. You find that you do not want to look at the Mile on your way out.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "crew_hp": -10}}
+        ]},
+        {"text": "Say you have seen nothing.", "outcomes": [
+          {"weight": 70, "text": "She looks at you for a long moment, then at her slate, and then, wearily, at her antenna, which has just been mended. 'Safe lanes,' she says.", "effects": {"items": {"credits": 10}}},
+          {"weight": 30, "text": "The cutter's sensors catch a bot on your sleeve. She takes it away for analysis, fines you for obstruction, and reads the receipt aloud.", "effects": {"items": {"credits": -30}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "[Tessellate] Call the Mile.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate sends a short signal on a band the cutter's receivers don't know. In a minute the nearest wreck erupts in tiny bots, which arrange themselves into a perfectly ordinary Concord inspector, with a sash, who salutes the recovery officer and tells her there are no swarms in this sector. She checks her paperwork. The paperwork, which the swarm mended on the way in, agrees. She leaves with a slightly puzzled look, and an extra stamp.", "effects": {"items": {"scrap": 30, "copper": 20}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Plead ignorance and fly on.", "outcomes": [
+          {"weight": 100, "text": "You smile, shrug, and ask if the Notice has a picture. It does not. 'They all look the same,' says the officer, with real bitterness. She lets you go.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "mile_remendery", "type": "trader", "weight": 8, "once": false, "requires": {"region": "tessellate_mend"},
+      "text": "The Remendery is a market where everything for sale has been repaired at least eleven times. A sign over the stalls reads MENDED TOOLS. MENDED BOOTS. MENDED PLATES. MENDED HEARTS (SEE RECEPTION). A swarm in the shape of a smiling stall-keeper holds up a spanner, whose handle is a patchwork of four metals, and polishes it with a rag that is also, on closer inspection, a swarm.",
+      "choices": [
+        {"text": "Buy a mended spanner (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "It is the best spanner you have ever held. It is also, you notice, faintly warm, and the nut it was made to fit seems to have moved to the right place. Your engineer refuses to give it back.", "effects": {"items": {"credits": -30, "scrap": 30, "copper": 15}}}
+        ]},
+        {"text": "Ask what a mended heart is.", "outcomes": [
+          {"weight": 100, "text": "The stall-keeper takes your hand and, with great delicacy, a hundred bots run over your wrist and up your sleeve. They find something you did not know was loose, and fix it. It is small, and a little embarrassing. Your whole crew queue for the same.", "effects": {"crew_hp": 15}}
+        ]},
+        {"text": "[Tessellate] Bargain as one.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate and the stall-keeper stand at opposite ends of the counter and talk for a quarter of an hour in static. At the end the stall-keeper puts a stack of crates in your arms and refuses all payment. 'Mended to order,' it says. 'For one of the family.'", "effects": {"items": {"copper": 30, "polymer": 20, "titanium": 3}}}
+        ]},
+        {"text": "Look, but do not buy.", "outcomes": [
+          {"weight": 100, "text": "You admire everything. A small swarm follows you for a while, quietly mending the buttons on your coat.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "mile_jar_catchers", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "tessellate_mend", "jumps_min": 2},
+      "text": "Rustfangs with nets and glass jars are catching bots. A sign on their tug reads FORTY CREDITS A LITRE. DON'T ASK WHAT FOR. They have a swarm trapped in a mesh across the nose of the tug, buzzing and shrinking, and the bots are busily mending the net. It is going rather well for the net.",
+      "choices": [
+        {"text": "Drive them off.", "outcomes": [
+          {"weight": 100, "text": "You put yourself between the tug and the mesh. The Rustfang captain holds up a jar in a kind of salute. 'Fair's fair,' she says, and her lads go for the guns.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Buy the net off them (50 credits).", "requires": {"credits": 50}, "outcomes": [
+          {"weight": 100, "text": "They hand it over with a shrug. You open the net and the bots pour out in a grey cloud, mending the Rustfangs' tug as they go, and your hull on the way past. The captain stares at her new paint. 'That's not what I paid for,' she says, with real feeling.", "effects": {"items": {"credits": -50}, "hull": 10}}
+        ]},
+        {"text": "[Tessellate] Open the net.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate walks along the tug's nose, lays a hand on the mesh, and every strand comes apart at the same moment. The trapped swarm pours out and spreads over your Tessellate in a cheering ripple. The Rustfangs, jars still in their hands, are suddenly aware that there are forty thousand bots very close and one of them is wearing a face. They leave in a hurry and forget the jars.", "effects": {"items": {"scrap": 30, "credits": 25, "copper": 15}}}
+        ]},
+        {"text": "None of your business.", "outcomes": [
+          {"weight": 100, "text": "You steer away. In the mirror, the net grows a neat little patch.", "effects": {}}
+        ]}
+      ],
+      "after_win": {"text": "The tug is crippled and the mesh falls open, and the freed swarm streams out into the dark, in a hundred small bright runs. A bot lands on your hull and spends a minute straightening a dent before it follows the others. The Rustfangs' jars, still full, are yours.", "effects": {"items": {"scrap": 35, "credits": 30}, "hull": 5}}
+    },
+    {
+      "id": "mile_lost_half", "type": "distress", "weight": 7, "once": false, "requires": {"region": "tessellate_mend"},
+      "text": "A single small figure, no bigger than a child, sits on a drifting piece of wing with its legs crossed, calling over every channel. It is made of tiny bots, and there are visible gaps in it, as if it were made of half the number it should be. 'Have you seen my other half?' it asks, politely, as you come alongside. 'We were split in a hit. I am the part that is left. I think the rest went that way.' It points at a dark stretch full of wrecks.",
+      "choices": [
+        {"text": "Help it look.", "outcomes": [
+          {"weight": 60, "text": "You find the other half in the third wreck, jammed in a crawlway and fixing a pipe, and the two halves run together with a sound like pouring sand. The whole of it stands up, and is taller than you expected. It pays you from the wreck's cargo, and thanks you in a single, doubled voice.", "effects": {"items": {"credits": 40, "scrap": 25}}},
+          {"weight": 40, "text": "You search all afternoon. The other half is not in any of the wrecks. The small figure thanks you politely and goes on looking, but it seems to have been comforted by the company. It gives you what it has: a small pouch of salvage.", "effects": {"items": {"scrap": 15}, "crew_hp": 5}}
+        ]},
+        {"text": "Take the small one aboard.", "outcomes": [
+          {"weight": 100, "text": "It climbs into your airlock with its legs still crossed, and stays the shape of a child for the rest of the afternoon. 'Smalt,' it says. 'Half of me is not here, but I can work. I do half as much work, which is the same as the other half at twice the speed.' It goes straight to the engine room and starts to mend a pipe, and does not stop.", "effects": {"recruit": {"species": "tessellate", "name": "Smalt"}}}
+        ]},
+        {"text": "[Tessellate] Share your bots with it.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate kneels by the wing and holds out a hand. A thin stream of bots crosses from one to the other, and the gaps in the small figure close up, and it stands up, taller, steadier. 'Oh,' it says. 'Oh, that is much better. I was only half a person.' It looks at your Tessellate in wonder, and asks if it may come. In its hand is the pouch it was minding: salvage from the wing.", "effects": {"recruit": {"species": "tessellate", "name": "Smalt"}, "items": {"scrap": 30, "credits": 20}}}
+        ]},
+        {"text": "Say you are sorry, and go.", "outcomes": [
+          {"weight": 100, "text": "It waves politely as you leave, with both hands, to make up the numbers.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    }
+  ]}

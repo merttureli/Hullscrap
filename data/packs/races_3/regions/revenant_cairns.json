@@ -1,0 +1,25 @@
+{
+	"id": "revenant_cairns",
+	"name": "The Cairns",
+	"home_species": "revenant",
+	"faction": "hollow",
+	"stages": [5, 8],
+	"weight": 8,
+	"rarity": "rare",
+	"danger": 1.35,
+	"palette": {"tint": "#8d9aa8", "nebula": "gate"},
+	"map": {},
+	"node_weights": {"anomaly": 20, "wreck_field": 20, "empty": 18, "distress": 12, "asteroid_field": 10, "pirate": 8, "trader": 6, "patrol": 4},
+	"places": [
+		{"id": "tallyhouse", "name": "Tallyhouse", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"scrap_chunk_s": 1.3, "sealed_crate": 1.3},
+	"pois": {"wreck": 1.5, "abandoned_station": 1.4, "anomaly": 1.3},
+	"ambient": {"pirate": 2, "patrol": 1, "trader": 1},
+	"stock": {"engine_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130, "helm": 70, "radiator": 40, "ammo_rack": 70, "bed": 30, "missile": 14},
+	"recruit": {"revenant": 8, "human": 1, "basalt": 1},
+	"enemies": "hollow",
+	"hazards": ["radiation"],
+	"events": "revenant_cairns",
+	"blurb": "A scatter of cairns, each one a stack of empty pressure-suits lashed together with the lamps facing out, one suit for every person who went into a dead gate and did not come back. The Revenants, who did, keep the roll at Tallyhouse and add to it every shift. Nobody else comes here by choice. Those who do are always surprised how tidy it is."
+}

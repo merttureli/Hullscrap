@@ -1,0 +1,60 @@
+{"events": [
+    {
+      "id": "quillback_satisfaction", "type": "station", "weight": 8, "once": true, "requires": {"flag": ["at_rusthold", "met_ma"]},
+      "text": "A Quillback in a long coat, quills combed flat for the occasion, stops in front of you on the Rusthold concourse and bows from exactly the correct angle. 'You looked at my Second,' she says, 'for slightly longer than courtesy allows. I must therefore ask for satisfaction.' Behind her stands a smaller Quillback in a waistcoat, holding a case of knives and looking mortified. This, evidently, is the Second. The concourse has gone quiet in a pleased way. Someone has started taking bets.",
+      "choices": [
+        {"text": "Apologise handsomely.", "outcomes": [
+          {"weight": 100, "text": "You apologise in the most elaborate terms you can think of, bowing at three different angles. The Quillback's quills rise by a degree, and fall. 'Accepted,' she says, with a faint regret, 'and honour is satisfied.' The Second lets out a breath. Someone in the crowd demands their money back.", "effects": {"rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Accept the duel: send your best fighter.", "outcomes": [
+          {"weight": 50, "text": "Your fighter wins on points, to a thunder of clan applause, and the Quillback bows lower than anyone you have ever seen bow. 'You are the better,' she says. 'I would be honoured to carry your knives.' Gorse picks up her case, nods to the Second, and walks up your gangway with her quills combed back for the trip.", "effects": {"recruit": {"species": "quillback", "name": "Gorse"}, "items": {"credits": 30}, "rep": {"clans": 1}}},
+          {"weight": 50, "text": "Your fighter is a little too slow, and the lesson is well delivered. The Quillback is gracious in victory, and gives the purse to the Second's mother. You get a bruise, an apology, and the clan's good opinion of your sportsmanship.", "effects": {"crew_hp": -15, "items": {"credits": -20}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Quillback] Name your Second and choose the weapons.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback bows at precisely the same angle, to the millimetre. The challenger's quills come up, fully, in a gleaming fan. 'A formal party,' she breathes. 'At last.' They hold a duel with ember knives that lasts nine seconds and ends in a draw and a seven-course dinner. By dessert she has asked for a place on your crew, and a very large share of the table has joined in the toast.", "effects": {"recruit": {"species": "quillback", "name": "Gorse"}, "items": {"credits": 40}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Walk away.", "outcomes": [
+          {"weight": 100, "text": "You turn and walk away. A Quillback challenged and refused is a Quillback who follows you for three docks, respectfully, at ten paces. It is very hard to eat your lunch.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "quillback_letter_of_challenge", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 3},
+      "text": "A boarding tube comes across the gap, empty, and with a letter in it. The paper is cream-laid, the hand is exquisite. 'The Honourable Captain Thrale, of the Point of Honour, requests the pleasure of a duel between champions, to settle the matter of tolls. Weapons: knives. Seconds: yes. Refreshments: to follow.' Through the window of the raider you can see a crew of Quillbacks lined up along the rail, all in matching waistcoats, bristling gently.",
+      "choices": [
+        {"text": "Accept: send your best fighter.", "outcomes": [
+          {"weight": 40, "text": "Your champion wins, on points and a lucky parry. Captain Thrale bows, pays the stake, and invites your crew to dinner, which you decline out of nerves. They send a hamper.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"clans": 1}}},
+          {"weight": 60, "text": "Your champion is out-fought, in a very polite way, and is returned to you in the tube with a handshake. The Captain takes the toll, as agreed, and sends back a small tin of liniment.", "effects": {"items": {"credits": -30}, "crew_hp": -10}}
+        ]},
+        {"text": "Decline politely, in writing (20 credits for the paper).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "It takes ten minutes and your best pen. The Captain reads your regrets, replies with a note of her own, and extracts a modest fee for the paper. You are free to go. She adds, in her own hand: 'Another time.'", "effects": {"items": {"credits": -20}}}
+        ]},
+        {"text": "Refuse the pleasantries and fight the ship.", "outcomes": [
+          {"weight": 100, "text": "A long silence. Then, on the comm, quite grieved: 'It is not usual.' The guns, however, come up in good order.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Quillback] Accept in person.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback walks into the tube with ember knife drawn and quills flared, and meets Captain Thrale in the middle. She lunges once, exactly as the book says, and comes away with a palm full of spines and a look of delighted surprise. A draw is declared in less than a minute. The Captain pays the stake out of her own pocket, invites you to dinner, and undertakes to pass the word along the Lanes.", "effects": {"items": {"credits": 60, "scrap": 20}, "rep": {"clans": 2}}}
+        ]}
+      ],
+      "after_win": {"text": "The Point of Honour hauls down her colours with a flourish and sends a launch across with the stake and a note: 'We were beaten, and very well. Please accept our compliments.' It is, for pirates, remarkable manners.", "effects": {"items": {"credits": 35, "scrap": 30}, "rep": {"clans": 1}}}
+    },
+    {
+      "id": "quillback_unyielding", "type": "wreck_field", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "Two Quillbacks have been duelling on a wreck for eleven days. Neither will yield. Neither will be the first to leave. Each bows, politely, before every attack, and each parry is followed by a nod of respect. A few metres away their Seconds sit at a folding table, eating sandwiches. The wreck is very clean. Whenever one of the duellists lands a hit the other thanks them for it. There is a hand-lettered sign: THIS MATCH IS NOT OVER.",
+      "choices": [
+        {"text": "Offer to act as Marshal.", "outcomes": [
+          {"weight": 60, "text": "You solemnly declare the match a draw, with honour to both sides, and read it aloud off the sign. The duellists look at each other and, with identical expressions of relief, sit down. Their Seconds pay you with sandwiches and credits.", "effects": {"items": {"credits": 40}, "rep": {"clans": 1}}},
+          {"weight": 40, "text": "Both of them demand that you choose a winner. You pick one. The other is gracious about it, and then unexpectedly takes it out on you, in a polite and well-scored fashion.", "effects": {"crew_hp": -10, "items": {"credits": 15}}}
+        ]},
+        {"text": "Bring them tea and wait.", "outcomes": [
+          {"weight": 100, "text": "You send over a flask and a plate of biscuits. Both duellists thank you formally and take a sip without stopping. The Seconds make room at the folding table. You spend a pleasant half-hour, and they pay you with a small, ceremonial knife that is no use at all.", "effects": {"items": {"scrap": 15}, "crew_hp": 5}}
+        ]},
+        {"text": "[Quillback] Step in as neutral Marshal and call the draw.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback walks in between them with quills flat and raises a hand. 'Hold,' they say, in the voice of the Lists. Both duellists freeze. The three of them bow, to each other and to the wreck, and your Quillback declares the match honourably drawn. The duellists weep with relief. In gratitude their Seconds offer their finest, a case of fine salvage and a weighty purse.", "effects": {"items": {"credits": 50, "titanium": 3}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You turn the ship away. On the comm, as you go, one of them says 'Do come back,' and the other says 'Yes, do,' and then the clash of knives resumes.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

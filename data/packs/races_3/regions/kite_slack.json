@@ -1,0 +1,25 @@
+{
+	"id": "kite_slack",
+	"name": "The Long Slack",
+	"home_species": "kite",
+	"faction": "",
+	"stages": [2, 7],
+	"weight": 3,
+	"rarity": "uncommon",
+	"danger": 1.1,
+	"palette": {"tint": "#7fb0b8", "nebula": "boneyard"},
+	"map": {},
+	"node_weights": {"empty": 32, "wreck_field": 16, "asteroid_field": 12, "distress": 12, "trader": 10, "pirate": 8, "anomaly": 6, "patrol": 4},
+	"places": [
+		{"id": "tether_knot", "name": "Tether Knot", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"polymer_barrel": 1.4, "fuel_canister": 1.3},
+	"pois": {"unknown": 1.4, "wreck": 1.3},
+	"ambient": {"trader": 3, "pirate": 1, "patrol": 1},
+	"stock": {"strafe_jets_mk1": 60, "strafe_jets_mk2": 140, "longburn_mk1": 120, "engine_mk1": 120, "reactor_mk1": 150, "intake_mk1": 120, "inertial_dampener": 260, "oxygen_gen": 90, "helm": 70, "radiator": 40},
+	"recruit": {"kite": 8, "human": 1, "lantern": 1},
+	"enemies": "rustfangs",
+	"hazards": [],
+	"events": "kite_slack",
+	"blurb": "A tangle of hulls from the Snap, wedged so close that the gaps between them are the streets: dark, narrow, weightless and strung with washing. The Kite were born in those gaps and have never once needed a floor. Tether Knot is the one place they tie up, a bundle of ropes, hammocks and market stalls. You will need something to hold on to."
+}

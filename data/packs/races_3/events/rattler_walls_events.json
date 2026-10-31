@@ -1,0 +1,124 @@
+{"events": [
+    {
+      "id": "walls_understairs", "type": "station", "weight": 10, "once": false, "requires": {"region": "rattler_walls"},
+      "text": "The Understairs is a market in the dark behind a wall: a hundred stalls the size of toolboxes, strung under pipes and lit by welders' sparks and glow-worm lamps. Everything is a third of the size it should be, and you hit your head on a banner. A Rattler in goggles runs the till, standing on an upturned bucket. A sign says: NO HAGGLING OVER TWELVE CREDITS. UNDER TWELVE, WE WILL HAGGLE TILL YOU CRY. Above you, in the pipes, something is knocking.",
+      "choices": [
+        {"text": "Buy a bag of mixed bolts (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 70, "text": "A bag of bolts, all sizes, sorted by a Rattler who disapproves of your fastenings. There is a note in the bag: 'These are better than yours.' They are.", "effects": {"items": {"credits": -15, "scrap": 40}}},
+          {"weight": 30, "text": "The bag is lighter than it looks and heavier than it should be. Under the bolts, wrapped in cloth, there is a small good coil of copper that nobody has admitted to losing.", "effects": {"items": {"credits": -15, "scrap": 25, "copper": 25}}}
+        ]},
+        {"text": "Ask for a tour of the walls.", "outcomes": [
+          {"weight": 100, "text": "A Rattler of about nine, with extremely large goggles, takes you through four vents, a laundry chute, and a stretch of conduit so narrow you have to leave your shoulders at the door. At the end of the tour she points out the way to a stash behind a dead pump, and asks for a tip, which is a button.", "effects": {"reveal": "wreck_field", "items": {"scrap": 15}}}
+        ]},
+        {"text": "[Rattler] Give the knock at the door.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler raps three short and one long on the till. The Rattler on the bucket stops mid-sentence, and then, with a squeal, climbs down and hugs your Rattler's leg. In a minute the whole market has crowded round, and a stall-holder is pressing a bag of Scrap-line spares and a purse into your hands. 'Family rate,' she says. 'Family rate, family rate.'", "effects": {"items": {"credits": 40, "scrap": 25}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Hire a stall-boy who wants to see space (80 credits).", "requires": {"credits": 80, "not_flag": "walls_hired"}, "outcomes": [
+          {"weight": 100, "text": "Tack has never been out of the walls, and cannot say what a window is for. He has a spanner, a lamp, and a very large cap. 'Does it have pipes?' he asks, looking at your ship. 'Lots,' you say. He is aboard and into the ventilation inside a minute, knocking on every wall to see who answers.", "effects": {"items": {"credits": -80}, "recruit": {"species": "rattler", "name": "Tack"}, "flag": "walls_hired"}}
+        ]},
+        {"text": "Duck out under the banner.", "outcomes": [
+          {"weight": 100, "text": "You duck out under a banner that reads, in a hurry, WE ARE NOT A PEST PROBLEM. It is hung at ankle height.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "walls_lost_bolt_office", "type": "trader", "weight": 8, "once": false, "requires": {"region": "rattler_walls"},
+      "text": "The Lost Bolt Office is a counter in the side of a hulk with a brass bell and a card index of every bolt that has ever gone missing on a Scrapper ship. 'Every one,' says the clerk, a Rattler with a quill behind her ear. 'We put them in the walls. They keep. We never throw out a bolt. They do come home sooner or later.' The index fills the wall behind her to the ceiling.",
+      "choices": [
+        {"text": "Ask if they have one of yours.", "outcomes": [
+          {"weight": 60, "text": "She runs a finger down the cards, stops, pulls a drawer, and puts a bolt in your hand. It is the one from the loose plate on your port side. 'Eleven years,' she says. 'It missed you.' You fit it. The plate stops rattling.", "effects": {"hull": 5, "items": {"scrap": 5}}},
+          {"weight": 40, "text": "Nothing in the index fits. She looks genuinely sorry. 'It will turn up,' she says. 'They always do.' She hands you a lollipop made of boiled sugar, for the trouble.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "Buy a sack of orphan bolts (25 credits).", "requires": {"credits": 25}, "outcomes": [
+          {"weight": 100, "text": "A sack the weight of a small child, rattling gently. The clerk writes every one of them in the book as 'adopted' and hands you the receipt. You will not be able to put a spanner on any of them without feeling slightly watched.", "effects": {"items": {"credits": -25, "scrap": 45}}}
+        ]},
+        {"text": "[Rattler] Identify the owner of an orphan.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler turns a strange bolt over in their fingers, sniffs it, taps it twice on the counter, and says a name. The clerk is stunned. A drawer opens. In it, behind the bolt, there is a small sealed tin that has been waiting forty years for its owner: spares, and a few cells. 'Finders keep,' she whispers, 'if the finder is family.'", "effects": {"items": {"plasma_cell": 1, "titanium": 3, "scrap": 20}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Browse the index.", "outcomes": [
+          {"weight": 100, "text": "You flick through a few drawers. Forty years of the Drift's carelessness, in handwriting. There is a card for a bolt that went missing on the day of the Snap, with a small sad drawing.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "walls_fumigation", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "rattler_walls", "jumps_min": 2},
+      "text": "Rustfangs in respirators have rolled a smoke cart up to a vent and put a hose in it. 'Pest control,' the captain tells you cheerfully on the comm. 'On contract from the Gantry Council. Don't worry about the noise.' Out of the vent comes a thin chorus of coughing, and swearing in a very small voice. The Rustfangs are being paid by the vent.",
+      "choices": [
+        {"text": "Drive the smoke cart off.", "outcomes": [
+          {"weight": 100, "text": "You put yourself between the cart and the vent. The captain sighs. 'It's only pest control,' he says, with some feeling. 'It's only pest control.' His lads take out their wrenches.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Pay them to go home (50 credits).", "requires": {"credits": 50}, "outcomes": [
+          {"weight": 100, "text": "They take the credits, reel in the hose, and trundle away, grumbling that you've cost them a good contract. From the vent, a very small voice says 'Thanks', and a very small hand passes up a gift: a button on a string.", "effects": {"items": {"credits": -50, "scrap": 25}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Clan standing] Mention Ma Gantry by name.", "requires": {"rep_min": {"clans": 3}}, "blue": true, "outcomes": [
+          {"weight": 100, "text": "You hail the captain and mention, lightly, the name of Ma Gantry. A long pause. 'Pest control,' he says again, much smaller, 'is not really in our line.' The cart goes into reverse. A line of grateful ears appears at every vent, and a delegation of Rattlers presents you with a tin of something illegally good.", "effects": {"items": {"scrap": 30, "credits": 25}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Rattler] Plug the hose from inside.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler is out of the airlock and into the vent faster than you can say it. Thirty seconds later the hose bucks, bulges, and spits a long yellow plume back down the line into the cart. The Rustfangs retreat in a cloud, coughing, and your Rattler emerges from the wall with a spanner over one shoulder and an air of tremendous modesty.", "effects": {"items": {"scrap": 30, "credits": 30}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Mind your own business.", "outcomes": [
+          {"weight": 100, "text": "You sail past. The coughing recedes into the ventilation. Someone in your crew has gone very quiet.", "effects": {"crew_hp": -5}}
+        ]}
+      ],
+      "after_win": {"text": "The cart goes over on its side and the hose whips about like a snake. The vents sprout ears and goggles, and a small cheer goes up from every wall. Someone slides a tray of boiled sweets out of the nearest grille, and the Council's contract, which turns out to be forged, is added to your trophies.", "effects": {"items": {"scrap": 35, "credits": 30}, "rep": {"clans": 2}}}
+    },
+    {
+      "id": "walls_junk_nest", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "rattler_walls"},
+      "text": "Every cavity of the wreck Brass Partridge has been turned into a Rattler hoard: a hundred drawers, each labelled, spare parts sorted by function, a whole wall of nothing but washers. It is not abandoned. Two Rattlers sit on top of it with a wrench each, in the attitude of a hen. 'It's ours,' says the left one. 'It's not for sale,' says the right one. 'It might be for sale,' says the left one, after a moment.",
+      "choices": [
+        {"text": "Trade for parts (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "They haggle for twenty minutes, mostly with each other. At the end, you leave with a crate of sorted parts, labelled in a hand like a doctor's, and a polite request not to ask what is in drawer fourteen.", "effects": {"items": {"credits": -30, "scrap": 40, "copper": 20}}}
+        ]},
+        {"text": "Raid the hoard.", "outcomes": [
+          {"weight": 50, "text": "The two hens are not as many as they look. You fill your arms and run before anyone has the nerve to throw the wrench. The good bolts are in drawer nine.", "effects": {"items": {"titanium": 4, "scrap": 30}, "rep": {"clans": -1}}},
+          {"weight": 50, "text": "There are more than two. There are a hundred, in the ventilation, with wrenches. You leave with a lump on every part of your head.", "effects": {"crew_hp": -15, "rep": {"clans": -1}}}
+        ]},
+        {"text": "[Rattler] Swear the Oath of the Drawer.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler steps forward and puts one hand on a drawer, and recites a short fierce oath about bolts. The two hens lower their wrenches, as one. 'Family,' says the left one. 'Why didn't you say?' The whole hoard is opened to you: they press a crate of the best into your arms and are visibly sorry it is not more.", "effects": {"items": {"copper": 30, "titanium": 4, "polymer": 20}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Leave them to their hoard.", "outcomes": [
+          {"weight": 100, "text": "You tip an imaginary hat. They do not tip theirs, but the wrench-tips come down a degree.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "walls_burst_main", "type": "distress", "weight": 9, "once": false, "requires": {"region": "rattler_walls"},
+      "text": "A coolant main has burst in the deep walls of Rusthold's oldest deck, and the cold is spreading through the crawlways in a white fog. A whole nest of Rattlers is shut behind a bulkhead in a dead-end duct, banging on it with their spanners and keeping the beat so that they can find each other. The valve that would stop the leak is inside the nest. The bulkhead is solid steel and the duct is thirty centimetres wide.",
+      "choices": [
+        {"text": "Open the hull plating and pull them out.", "outcomes": [
+          {"weight": 60, "text": "Two hours with a torch and a pry bar and the plating comes away. Forty Rattlers pour out into the corridor, blue with cold and furious about the delay. They press a pile of salvage on you before disappearing into the nearest vent.", "effects": {"items": {"scrap": 30, "credits": 20}, "rep": {"clans": 1}}},
+          {"weight": 40, "text": "You cut a duct you should not have, and the fog gets worse. Everyone makes it out in the end, but it is a long cold evening and someone loses a glove.", "effects": {"items": {"scrap": 10}, "crew_hp": -10}}
+        ]},
+        {"text": "Pump heat into the main from your reactor (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You run a line from your exhaust into the coolant main. The fog thins, steams, then clears. The Rattlers in the nest crawl out blinking and reach the valve on their own. They shut it with a cheer.", "effects": {"items": {"fuel": -1, "credits": 35}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Rattler] Go in and crank the valve.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler goes into the fog, finds the sound of the knocking, and follows it to the nest. Four minutes later the valve is cranked shut by a hundred small hands, and the bulkhead opens from the inside. A nest-mother in a cap three sizes too big salutes your Rattler gravely. 'Our best,' she says, and pushes forward a sleepy young Rattler with goggles on the wrong way up. 'Dowel. They will be useful.' She also pays.", "effects": {"recruit": {"species": "rattler", "name": "Dowel"}, "items": {"credits": 50}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "[Vellum] Fold through the duct.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Your Vellum folds into the crawlway as flat as a letter and slides toward the knocking. It takes three trips to bring the Rattlers back along the duct, one by one, tucked in the folds like secrets. At the end, they shut the valve themselves and give your Vellum a medal made of a washer.", "effects": {"items": {"credits": 35, "scrap": 25}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Leave the Wallworks to it.", "outcomes": [
+          {"weight": 100, "text": "You turn away. Behind you, the knocking goes on, a little slower. You do not sleep well.", "effects": {"rep": {"clans": -1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "walls_great_knock", "type": "empty", "weight": 8, "once": false, "requires": {"region": "rattler_walls"},
+      "text": "At exactly noon by Rusthold time, every wall in the Wallworks knocks once. It is a low, soft, enormous thump, a thousand spanners in a thousand ducts at the same instant, and it travels through your hull like a heartbeat. Then silence. Then, tentatively, a second knock: three short and one long. A small voice comes on the comm. 'It's the Great Knock,' it says. 'You may join in, if you like. Everyone's invited. You do have walls?'",
+      "choices": [
+        {"text": "Knock along with the crew.", "outcomes": [
+          {"weight": 100, "text": "You line your crew up in the mess and every one of them takes a spanner and raps the wall: three short, one long. It is ridiculous, and moving, and the whole ship hums with it afterwards. The Rattlers send a little cheer over the comm, and a bag of scrap, for the thought.", "effects": {"crew_hp": 10, "items": {"scrap": 15}}}
+        ]},
+        {"text": "Ask what it is for.", "outcomes": [
+          {"weight": 100, "text": "'It's for saying we are still here,' says the voice. 'The first Rattlers got into the walls on this day, when Rusthold was only four hulls welded together. We knocked, to see if anyone would knock back. They did. It was a Basalt. He's still in the south wall, I think.' You are given a small map as a thank-you.", "effects": {"reveal": "trader", "items": {"scrap": 10}}}
+        ]},
+        {"text": "[Rattler] Lead the knock.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler raps the opening beat on the hull with a spanner and the whole Wallworks takes it up, deck by deck, from your bow to the farthest duct, in the order of the old pattern. By the time it comes round again your Rattler is crying a little and is invited to a hundred dinners. The Wallworks sends a purse, a crate of spares, and the freedom of the walls.", "effects": {"items": {"credits": 40, "scrap": 30}, "rep": {"clans": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Stay quiet and listen.", "outcomes": [
+          {"weight": 100, "text": "You turn off the engines and sit in the dark. The knocking goes on for ten minutes, everywhere, in every wall. It is the nicest noise you have ever heard in a space you could not see the ends of.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    }
+  ]}

@@ -1,0 +1,119 @@
+{"events": [
+    {
+      "id": "moorings_long_table", "type": "station", "weight": 10, "once": false, "requires": {"region": "sable_moorings"},
+      "text": "The Long Table is a single enormous cargo bay with one table the length of it and benches down both sides and a black flag at the head. Forty cutter families eat here between jobs: the loud ones, the quiet ones, the cooks, the children under the benches. Nobody in the room is armed. It is the one rule, and the torches hang from pegs by the door like coats. A broad woman at the head of the table, the Matriarch, beckons you with a ladle. 'You will sit,' she says. 'You will eat. Then we will talk about what you want cut.'",
+      "choices": [
+        {"text": "Sit and eat.", "outcomes": [
+          {"weight": 100, "text": "You sit between a child and a grandmother and are given a bowl of something enormous. For an hour the Long Table is just a table, with all its noise. When you leave your crew are full, and talking, and a little afraid of how much they liked it.", "effects": {"crew_hp": 15}}
+        ]},
+        {"text": "Ask the Matriarch for work.", "outcomes": [
+          {"weight": 100, "text": "She looks you over with a long steady stare. 'There is a Rustfang hulk three jumps back with its paymaster's door shut. We have not got to it. You might.' She slides a chit down the table. 'Tell them it was our idea.' You come away with the bearings and a purse.", "effects": {"items": {"credits": 25}, "reveal": "wreck_field"}}
+        ]},
+        {"text": "[Sable] Take the seat beside the Matriarch.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable hangs their torches on the peg and walks the length of the Table, and the noise stops one bench at a time. The Matriarch moves her ladle, and a seat appears. 'Whose are you?' she says, and your Sable names their family, and an old woman three benches down puts her hand on her chest and starts, quietly, to cry. By dinner's end the whole Table has toasted you and your captain. You are sent off with a heavy purse and a cutter's blessing.", "effects": {"items": {"credits": 60, "scrap": 20}, "crew_hp": 10}}
+        ]},
+        {"text": "Hire a cutter (80 credits).", "requires": {"credits": 80, "not_flag": "moorings_hired"}, "outcomes": [
+          {"weight": 100, "text": "Vane has a dark coat, a quiet smile and four years of unfinished contracts. 'I would like to work for someone,' they say, 'who tells me where the door is before I cut it.' They hang their torches on their forearms, shake your hand hard, and walk up the gangway like someone leaving home for the first time who has a coat for it.", "effects": {"items": {"credits": -80}, "recruit": {"species": "sable", "name": "Vane"}, "flag": "moorings_hired"}}
+        ]},
+        {"text": "Say thank you and leave.", "outcomes": [
+          {"weight": 100, "text": "You thank the Matriarch. 'Come back hungry,' she says, and means it, and a child under the table reaches out and hands you a roll for the road.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "moorings_contract_cutters", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "sable_moorings", "jumps_min": 2},
+      "text": "A Sable family cutter moors alongside, without hurry, and a broad woman with a torch on each forearm leans on her rail. 'Sorry about this,' she says on the comm. 'It is a contract. A trader says you cheated him on a deal at Rusthold. We will be quick, and we will not touch the galley.' Behind her, the boarders take their places by the tube, politely, like people lining up for a bus.",
+      "choices": [
+        {"text": "Refuse and fight.", "outcomes": [
+          {"weight": 100, "text": "'Understood,' says the woman, without ill will. The torches come up.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Pay them off (50 credits).", "requires": {"credits": 50}, "outcomes": [
+          {"weight": 100, "text": "She counts it, twice, with no hurry. 'We will tell the trader we were late,' she says. 'It will be true by the time we are done.' The cutter peels away, and a little red flag is left on your rail: PAID.", "effects": {"items": {"credits": -50}}}
+        ]},
+        {"text": "Ask who hired them.", "outcomes": [
+          {"weight": 60, "text": "She tells you straight; it is the Sable way to be honest in a contract. You send the trader a message and a refund. The cutter stands down with a salute. 'Professional,' she says. 'We will remember the courtesy.'", "effects": {"items": {"credits": -20}, "crew_hp": 5}},
+          {"weight": 40, "text": "'I cannot say,' she says, kindly, and the tube comes on.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Sable] Invoke kin: ask for the family hearing.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable takes the comm and asks for a hearing, the old right of any cutter. A long silence. 'Cousin,' says the woman, with feeling, 'you should have said.' The torches go down. There is a hearing, in the mess of your ship, lasting twenty minutes and a great deal of tea, and the trader's complaint is thrown out. The family leave you a gift, and a promise.", "effects": {"items": {"scrap": 30, "credits": 30}}}
+        ]}
+      ],
+      "after_win": {"text": "The cutter drifts off, torches out, to bury its wounded in the old way. The woman leaves you a message on the comm: 'Fair fight. We keep the receipt.' There is a purse in your hold, and a very polite apology.", "effects": {"items": {"scrap": 35, "credits": 30}}}
+    },
+    {
+      "id": "moorings_torch_swap", "type": "trader", "weight": 8, "once": false, "requires": {"region": "sable_moorings"},
+      "text": "Torch Swap is a stall of second-hand cutter torches, hung in rows on a rail, each with a family's mark burned into the handle. 'Keep it clean and it will cut your name in a bulkhead,' says the stall-holder, an old man with scarred forearms and no eyebrows. 'Keep it dirty and it will cut your name in you.' On a nail by his chair hangs a very old torch with no mark on it at all.",
+      "choices": [
+        {"text": "Buy a used torch (45 credits).", "requires": {"credits": 45}, "outcomes": [
+          {"weight": 100, "text": "A good torch, clean and warm, with some other family's mark on it. Your engineer takes it away. By dinner the galley hatch has been cut in half, cleanly, and twice as useful.", "effects": {"items": {"credits": -45, "scrap": 30, "titanium": 2}}}
+        ]},
+        {"text": "Ask about the one with no mark.", "outcomes": [
+          {"weight": 100, "text": "He takes it down and turns it over in his hands. 'A family that was cut out,' he says. 'There was a quarrel. This was the last torch they made. I keep it. Somebody should.' He puts it back on the nail, very gently.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "[Sable] Show your torch marks.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable holds out both forearms, and the old man looks at the marks along them for a long time, and then at the rail. He takes down a pair of torches without a word and hands them over. 'I know that hand,' he says. 'Your grandmother cut my first door.' He will take nothing. You leave with the torches and a small box of tips.", "effects": {"items": {"titanium": 4, "credits": 30, "scrap": 20}}}
+        ]},
+        {"text": "Look, but do not buy.", "outcomes": [
+          {"weight": 100, "text": "You look at forty torches that have each cut ten thousand doors. The old man watches you with a sad calm. 'Come back,' he says. 'We are here.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "moorings_family_hulk", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "sable_moorings"},
+      "text": "A mothballed cutter hangs in the shadow of the rock, her hull scored from bow to stern with white burn marks, each a name. Nobody lives on her. Sable families bring their children here when they are old enough to hold a torch, and each cuts their name into the hull, once, with a parent's hand over theirs. There are four thousand names. There is a gap in the plating, at about shoulder height, where a name was started and not finished.",
+      "choices": [
+        {"text": "Strip the hulk for plate.", "outcomes": [
+          {"weight": 40, "text": "You have four sheets in the hold before a single cutter notices. Then eleven notice. You are not harmed, but the families stand along the rail and say nothing at all while you leave.", "effects": {"items": {"titanium": 5, "scrap": 30}, "rep": {"clans": -1}}},
+          {"weight": 60, "text": "A cutter comes alongside and does not say a word. It does not need to. You put the plate back, and you do the repair yourselves, in silence, with them watching. It takes six hours.", "effects": {"crew_hp": -10}}
+        ]},
+        {"text": "Cut a name in the hull (1 fuel for the torch).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You cut a name, a small one, near the gap, with your engineer's hand over yours. The family cutter that was watching you from the shadows moves up, slowly, and one of them leans out and nods. It is a very small thing. It is not nothing.", "effects": {"items": {"fuel": -1}, "crew_hp": 10, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Sable] Finish the name in the gap.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable floats to the gap in the plating and stays there a while, and then lights a torch and finishes the name, in four steady strokes. It is a girl's name. From the shadow, an entire family cutter turns on its running lights, one by one, and holds them there. A woman's voice says on the comm: 'She was my sister's.' A parcel of salvage is waiting at your lock.", "effects": {"items": {"titanium": 3, "credits": 40, "scrap": 25}, "crew_hp": 10}}
+        ]},
+        {"text": "Pay your respects and go.", "outcomes": [
+          {"weight": 100, "text": "You drift by slowly with your lights off. Four thousand names go past your window, and you read as many as you can.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "moorings_stuck_tube", "type": "distress", "weight": 9, "once": false, "requires": {"region": "sable_moorings"},
+      "text": "A boarding tube is jammed between a Sable cutter and the ship it was boarding, and both crews are on the wrong side of it. The ring on the cutter's end has locked, the torches are on the far side of the tube, and the ship it is attached to, a bulky and frightened freighter, will not unlock its end because it thinks it is being attacked. Which it was. The Sable captain is shouting through the tube. The freighter's captain is shouting back. Nobody is listening to anybody.",
+      "choices": [
+        {"text": "Cut the ring from your side.", "outcomes": [
+          {"weight": 60, "text": "You work a torch along the ring for twenty minutes while both captains cheer you on and abuse each other. It pops. The cutter backs away, the freighter breathes. Both captains pay, for different reasons.", "effects": {"items": {"credits": 55}, "rep": {"clans": 1}}},
+          {"weight": 40, "text": "The ring was under tension. When it goes, it takes a bit of your rail and a bit of your wall. The tube is cleared. You are not thanked, exactly, but nobody shoots.", "effects": {"items": {"credits": 25}, "hull": -5, "crew_hp": -5}}
+        ]},
+        {"text": "Talk the freighter's captain into opening her end.", "outcomes": [
+          {"weight": 100, "text": "You tell the freighter that it was a misunderstanding and the Sable are very sorry. A pause. 'Are they?' says the freighter's captain. 'Very,' says the Sable captain, hoarsely. The ring pops. They shake hands over the comm, grumpily, and both pay you.", "effects": {"items": {"credits": 40, "scrap": 15}}}
+        ]},
+        {"text": "[Sable] Cut it. Their way is yours.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable is out of the airlock and on the tube in a moment, one torch on the ring and one on the seam, and the ring goes in a bright clean arc in less than a minute. The Sable captain on the other side shouts something very fond. Both crews pay up, and the cutters send word through the Moorings that you are to be fed and watered wherever you land.", "effects": {"items": {"credits": 60, "scrap": 25}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Leave them to sort it out.", "outcomes": [
+          {"weight": 100, "text": "You sail past. Both captains are still shouting. It is, you suppose, a kind of conversation.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "moorings_warrant", "type": "patrol", "weight": 8, "once": false, "requires": {"region": "sable_moorings", "jumps_min": 3},
+      "text": "A Concord cutter hails you with a warrant. 'For one Sable, name unknown, for fourteen counts of unauthorised entry,' the officer reads, in a voice that says he did not choose this posting. 'We believe the suspect boarded a ship in this lane. We are asking everyone to open their holds.' Beyond him, three more cutters are making the same request of three more ships. A little way off, the Sable moorings are very quiet.",
+      "choices": [
+        {"text": "Open your holds and cooperate.", "outcomes": [
+          {"weight": 100, "text": "They go through your holds and find nothing. The officer thanks you for the trouble and files a note. The Moorings, which are watching the traffic, will remember who cooperated, and for what.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1, "clans": -1}}}
+        ]},
+        {"text": "Stonewall: demand to see the suspect's description.", "outcomes": [
+          {"weight": 50, "text": "'Dark coat,' reads the officer. 'Lean. Torches.' He looks up at your crew, who are all in dark coats. A silence. He sighs, and lets you go. 'It is not a very good description,' he admits.", "effects": {"items": {"credits": 10}}},
+          {"weight": 50, "text": "The officer takes this as a challenge and goes over your ship personally, in detail. It takes two hours, and a stack of forms, and you are fined for the form.", "effects": {"items": {"credits": -25}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "[Sable] Give the harbour sign.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable steps to the window and makes a small sign with two fingers, a thing the cutters do at the door of a friend. The officer's shoulders drop. He makes it back, and clicks the slate shut. 'Cousin,' he mutters. 'Clean lane today.' He is Sable himself, it turns out, third cousin on his mother's side, and has a whole drawer of awkward warrants. He lets you through and slips you a tip about a safe lane, and a few credits to cover the lunch you would otherwise have to buy.", "effects": {"items": {"credits": 40}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Slip away while they look at someone else.", "outcomes": [
+          {"weight": 60, "text": "You edge your ship out of the queue and through the gap between two cutters. Nobody follows. You feel the whole Moorings breathe out.", "effects": {"rep": {"clans": 1}}},
+          {"weight": 40, "text": "A cutter turns its spotlight on you and holds it. 'Stop, please,' says a patient voice. It takes an hour to explain, and a fine to finish.", "effects": {"items": {"credits": -30}, "rep": {"concord": -1}}}
+        ]}
+      ]
+    }
+  ]}
