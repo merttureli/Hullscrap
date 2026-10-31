@@ -765,4 +765,142 @@ class Brine(Species):
     def torso_anchors(self): return {'head': [DC, DC - 8], 'back': [DC, DC + 12], 'shoulder_l': [DC - 14, DC - 4], 'shoulder_r': [DC + 14, DC - 4]}
     def arm_anchors(self): return pose_anchors(*BR_UNARMED, shift=DSH)
 
-SPECIES = [WardenFrame, Murrow, Siltborn, Corvin, Brine]
+# ================================================================== ECHO: a polite shimmering mimic (standard rig)
+# A smooth chrome body with no seams: every surface is shaded like a mirror ball (a bright sky band, a hard dark horizon line right under it, a ground tone with a faint
+# violet bounce light, a vertical specular streak), a long smooth head, tube limbs ending in plain rounded mitts, slim capsule legs. It copies whoever is near: a faint
+# lilac figure of a person is mirrored in a pane on the back, and the `mimic` head wears a faint copy of a face. The shimmer is the glow layers (4 frames, ~4 fps): a
+# soft diagonal sheen that sweeps across the whole body. Outfit = a thin sash, armbands and the cap band (the only tinted parts).
+def ec_chrome(s, cx, cy, rx, ry, hz=0.05, lean=0.35, spec=True):
+    """a chrome ball: an ellipse shaded with a mirror's environment (sky, a hard horizon, ground, a bounce light)."""
+    for y in range(int(cy - ry - 1), int(cy + ry + 2)):
+        for x in range(int(cx - rx - 1), int(cx + rx + 2)):
+            nx = (x - cx) / rx; ny = (y - cy) / ry
+            if nx * nx + ny * ny > 1.0: continue
+            tt = ny - hz - lean * nx
+            if tt < -0.9: c = 'M'
+            elif tt < -0.45: c = 'L'
+            elif tt < -0.1: c = 'H'
+            elif tt < 0.1: c = 'W'
+            elif tt < 0.5: c = 'S'
+            elif tt < 1.1: c = 'M'
+            else: c = 'X' if nx > 0.2 else 'M'                                              # a faint violet bounce light on the lower right rim only
+            if spec and -0.62 < nx < -0.38 and -0.65 < ny < 0.35: c = 'H'
+            if tt < -0.9 and nx < -0.3 and ny < -0.5: c = 'Y'                                  # a cyan reflection of the sky at the top left
+            s.put(x, y, c)
+def ec_tube(s, a, b, w=3):
+    t = Spr(N, N); seg(t, a[0], a[1], b[0], b[1], w, 'M'); merge(s, shade_gen(t, 'M', 'H', 'S'))
+    n = max(abs(b[0] - a[0]), abs(b[1] - a[1]), 1)
+    for k in (0.3, 0.6): s.put(a[0] + round((b[0] - a[0]) * k), a[1] + round((b[1] - a[1]) * k), 'L')     # a gleam along the tube
+
+EC_FOOT = {
+ 'plant': art("""
+.LMM.
+LMMMS
+MMMSS
+.SSW.
+"""),
+ 'lift': art("""
+.LMM.
+LMMMS
+MMMSS
+MMSSS
+.SSW.
+"""),
+}
+def ec_leg_frame(dl, dr, lift_l=False, lift_r=False):
+    s = Spr(N, N)
+    for lx, d, lift in ((10, dl, lift_l), (22, dr, lift_r)):
+        fy = 16 - d
+        step = -1 if fy < 16 else 1
+        ys = list(range(16, fy + step, step))
+        for y in ys:                                                                       # a smooth capsule leg, shaded across like a tube
+            for k, c in enumerate('LMSW'): s.put(lx - 2 + k, y, c)
+        for k, c in enumerate('LMMS'): s.put(lx - 2 + k, 16, c)
+        b = EC_FOOT['lift' if lift else 'plant']
+        s.stamp(lx - 2, fy - len(b) // 2 - (1 if fy < 16 else 0), b)
+    return s
+EC_WALK = walk_cycle(8, 4)
+
+def ec_torso():
+    s = Spr(N, N)
+    ec_chrome(s, 16, 19, 7.4, 8.6)
+    for sd in (-1, 1): ec_chrome(s, 16 + sd * 8, 15, 3.4, 3.4, spec=False)                  # the shoulders: smooth balls
+    # the reflection pane on the back: a faint lilac figure of a person mirrored in the chrome (a head, shoulders, a body)
+    for (x, y) in ((16, 20), (17, 20), (16, 21), (17, 21)): s.put(x, y, 'L')
+    s.put(16, 20, 'X'); s.put(17, 21, 'X')
+    s.hline(13, 23, 8, 'L'); s.hline(12, 24, 10, 'L'); s.hline(14, 25, 6, 'L'); s.hline(14, 26, 6, 'M')
+    s.put(12, 24, 'X'); s.put(21, 24, 'X'); s.put(13, 23, 'X'); s.put(20, 23, 'X')
+    # the sash (outfit) across the chest, and an armband on each shoulder ball
+    for i in range(14):
+        x = 9 + i; y = 13 + (i * 8) // 14
+        s.put(x, y - 1, 'A'); s.put(x, y, 'B'); s.put(x, y + 1, 'C')
+    for sd in (-1, 1): s.hline(16 + sd * 8 - 1, 13 + (1 if sd > 0 else 0), 3, 'B')
+    return s
+
+EC_HEADS = ['smooth', 'mimic', 'helmet']
+def ec_head(kind):
+    s = Spr(N, N)
+    ell(s, 16, 14, 2.2, 1.6, 'S')                                                           # the neck, smooth
+    ec_chrome(s, 16, 10, 4.3, 5.4, hz=-0.05)
+    if kind == 'mimic':                                                                     # a faint copy of a face: two eye hollows, a nose, a mouth line (lilac, soft)
+        for ex in (14, 18): s.put(ex, 9, 'V'); s.put(ex, 10, 'X')
+        s.put(16, 11, 'X'); s.hline(15, 13, 3, 'V')
+    if kind == 'helmet':                                                                    # a polished cap with a tinted band and a mirror visor strip
+        for y in range(5, 10):
+            for x in range(11, 22):
+                if s.get(x, y) != '.': s.put(x, y, 'L' if (x - 16) + (y - 9) < 0 else 'M')
+        s.hline(11, 9, 11, 'B'); s.hline(11, 8, 11, 'A'); s.hline(12, 10, 9, 'C')
+        s.hline(13, 11, 6, 'N'); s.put(13, 11, 'c'); s.put(14, 11, 'Y'); s.hline(13, 12, 6, 'S')
+        s.put(13, 6, 'H'); s.put(14, 5, 'H')
+    return s
+
+def ec_mitt(s, x, y):
+    s.rect(x - 1, y - 1, 3, 3, 'M'); s.put(x - 1, y - 1, 'H'); s.put(x, y - 1, 'L'); s.put(x + 1, y + 1, 'S'); s.put(x, y + 1, 'S'); s.put(x - 1, y - 2, 'L'); s.put(x, y - 2, 'M')   # a plain rounded mitt, no fingers
+EC_UNARMED = ((6, 22), (26, 22))
+def ec_arms(pose):
+    s = Spr(N, N); A = pose_anchors(*EC_UNARMED)[pose]
+    if pose == 'unarmed':
+        ec_tube(s, (8, 15), (6, 21)); ec_tube(s, (24, 15), (26, 21)); ec_mitt(s, 6, 22); ec_mitt(s, 26, 22)
+    else:
+        for sh, k in (((8, 15), 'hand_l'), ((24, 15), 'hand_r')):
+            ec_tube(s, sh, (A[k][0], A[k][1] + 1)); ec_mitt(s, *A[k])
+    return s
+
+def sheen(layer, spr, c, a=100):
+    """a soft diagonal sheen: the band x + y = c on every pixel of `spr` (white core, a cyan fringe), alpha only: the hue stays a palette colour."""
+    for y in range(spr.h):
+        for x in range(spr.w):
+            if spr.g[y][x] == '.': continue
+            d = abs(x + y - c)
+            if d <= 1: layer.p[y][x] = [244, 246, 248, a]
+            elif d == 2: layer.p[y][x] = [60, 242, 255, int(a * 0.45)]
+
+class Echo(Species):
+    id = 'echo'
+    walk_fps = 8
+    glow_fps = 4
+    head_names = EC_HEADS
+    notes = ('Echo: a polite shimmering mimic (standard rig). A smooth chrome body with no seams: every surface is shaded like a mirror ball (a bright sky band, a hard dark horizon '
+             'line under it, a ground tone with a faint violet bounce, a vertical specular streak), a long smooth head, tube limbs ending in plain rounded mitts, slim capsule '
+             'legs. It copies whoever is near: a faint lilac figure of a person is mirrored in a pane on the back, and the mimic head wears a faint copy of a face. The shimmer is '
+             'the glow layers: torso_glow and head_glow have 4 frames (head_glow 4 per head variant) at ~4 fps, a soft diagonal sheen sweeping across the body. Head variants: smooth, '
+             'mimic (a faint face), helmet (a polished cap with a tinted band and a mirror visor strip). Outfit mask = the sash, the armbands, the cap band.')
+    def legs(self): return [outlined(ec_leg_frame(*w)) for w in EC_WALK] + [outlined(ec_leg_frame(1, -1))]
+    def torso(self): return outlined(ec_torso())
+    def arms(self, pose): return outlined(ec_arms(pose))
+    def head(self, name): return outlined(ec_head(name))
+    def torso_anchors(self): return {'head': [16, 11], 'back': [16, 25], 'shoulder_l': [8, 15], 'shoulder_r': [24, 15]}
+    def arm_anchors(self): return pose_anchors(*EC_UNARMED)
+    def torso_glow(self):
+        out = []; t = ec_torso()
+        for c in (18, 26, 34, 44):
+            g = ng(N); sheen(g, t, c); out.append(clear_under(g, t))
+        return out
+    def head_glow(self):
+        out = []
+        for c in (14, 22, 30, 38):
+            for nm in self.head_names:
+                g = ng(N); h = ec_head(nm); sheen(g, h, c, 90); out.append(clear_under(g, h))
+        return out
+
+SPECIES = [WardenFrame, Murrow, Siltborn, Corvin, Brine, Echo]
