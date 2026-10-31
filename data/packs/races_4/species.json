@@ -1,0 +1,11 @@
+{
+	"species": {
+		"warden_frame": {"name": "Warden-frame", "hp": 100, "speed": 1.0, "traits": ["rebuilt_drone", "gatekeeper_optics"], "rig": "warden_frame", "sidearm": "gatekeepers_lance", "notes": "a rebuilt Lumen drone, joined only by the quest that reboots a Warden: mechanical, o2_use 0, ranged x1.5, ion damage x3"},
+		"murrow": {"name": "Murrow", "hp": 120, "speed": 0.9, "traits": ["digger"], "rig": "murrow", "sidearm": "quarry_hammer", "notes": "mole-folk diggers, the large rig over the normal 2x2 body: hp x1.2, speed x0.9, mining_mult 1.5 (rock damage when manning a mining tool or cutting)"},
+		"siltborn": {"name": "Siltborn", "hp": 100, "speed": 1.0, "traits": ["gas_floater", "thin_air_bloom"], "rig": "siltborn", "notes": "gas-giant floaters, the floating rig, no sidearm: o2_use 0.5, fire damage x2, low_pressure_heal 1 hp/s in a room under 50% air"},
+		"corvin": {"name": "Corvin", "hp": 100, "speed": 1.0, "traits": ["glint_eye", "pocketed"], "rig": "corvin", "sidearm": "service_pistol", "notes": "crow-like wreck traders: haggler (station prices -10%), loot_bonus (+1 roll on wreck, salvage and loot tables)"},
+		"brine": {"name": "Brine", "hp": 100, "speed": 0.85, "traits": ["carapace", "dock_hauler", "shell_back"], "rig": "brine", "sidearm": "rivet_gun", "notes": "crab-shelled dockworkers, the large rig over the normal 2x2 body: melee and ranged damage taken x0.7, restock x1.5, speed x0.85, no_suit"},
+		"echo": {"name": "Echo", "hp": 100, "speed": 1.0, "traits": ["mirror_skin"], "rig": "echo", "sidearm": "spark_pistol", "notes": "a polite shimmering mimic: mimic (copies the best non-body trait of another crew member in the same room, while there)"},
+		"ferro": {"name": "Ferro", "hp": 100, "speed": 1.0, "traits": ["ferrofluid", "magnet_hands"], "rig": "ferro", "sidearm": "multi_tool", "notes": "living ferrofluid: ion damage x0 (immune), hull_mend 0.5 (idle, mends the walls beside them), station.pull_bonus +1 (the salvage intake they man pulls 1 cell further)"}
+	}
+}

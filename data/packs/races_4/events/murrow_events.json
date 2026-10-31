@@ -1,0 +1,61 @@
+{"events": [
+    {
+      "id": "murrow_knock_on_rock", "type": "asteroid_field", "weight": 8, "once": true, "requires": {"jumps_min": 2},
+      "text": "The asteroid has a door in it. Not a hatch: a door, painted green, set into a rock the size of a city block, with a brass knocker in the shape of a fist and a mat that says WIPE YOUR CLAWS. Eleven kilometres of tunnel run under the crust, if your scanner is right, lit by lamps the size of fireflies. A Murrow stands at the threshold in a dust-caked harness, squinting at your ship with eyes like two black seeds. Behind her a small one is digging a hole in the doormat, with great concentration and no apparent purpose.",
+      "choices": [
+        {"text": "Knock, and wait.", "outcomes": [
+          {"weight": 100, "text": "The door opens before your hand lands. A whole family of Murrow, in descending sizes, line up in the passage and sniff the air. After a long, polite silence you are served tea in a cup with no handle, and sent away with a sack of the good ore from the lower seams. They watch you leave with the great anxious fondness of people who rarely get visitors.", "effects": {"items": {"titanium": 4, "scrap": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "Ask if any of the youngsters want to see the surface.", "outcomes": [
+          {"weight": 100, "text": "The small one stops digging and looks up. There is a short, solemn family conference, mostly in sniffs. Then Grubb is pushed forward, harness straightened, a sack of sandwiches in each claw. 'Back by the spring,' says the grandmother. 'Whichever spring that is.' Grubb stares at your ship, at the stars behind it, at the very large amount of nothing in between. 'It is a lot of room,' says Grubb, 'to dig.'", "effects": {"recruit": {"species": "murrow", "name": "Grubb"}}}
+        ]},
+        {"text": "[Murrow] Dig the last metre of their new passage with them.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow is out of the airlock and into the rock before the greetings are over, claws going like pistons, in step with three cousins nobody has met yet. By the end of the shift the new passage opens into a lamplit gallery, and the whole warren cheers. They send you off with a purse, a crate of ore, and a young cousin with a hammer, who has a restless eye and a very good seat in the heart of your sleeping Murrow's affections.", "effects": {"recruit": {"species": "murrow", "name": "Mattock"}, "items": {"titanium": 6, "credits": 35, "scrap": 15}, "crew_hp": 5}}
+        ]},
+        {"text": "Leave them to their digging.", "outcomes": [
+          {"weight": 100, "text": "You nod to the Murrow at the door. She nods back. Behind her, the small one has dug all the way through the doormat and is now, with enormous satisfaction, digging through the floor.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "murrow_cave_in", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The call is thin and flat, fed through a speaker half full of dust. A mining crew of six is behind a collapse in the lower bore of a rock, eight hundred metres from the surface. The air is good for a day. The way out is a ceiling of fresh rubble the size of a house, still ticking as it settles. The foreman on the speaker is calm. 'We can hear someone digging,' he says. 'It sounds like a very long way off.'",
+      "choices": [
+        {"text": "Cut a way in with your own tools (10 scrap).", "requires": {"items": {"scrap": 10}}, "outcomes": [
+          {"weight": 55, "text": "You cut from above, in a careful spiral, shoring each metre with scrap plate. It takes the rest of the shift, and one nasty moment when a slab shifts above the cutter. At the end, six grey faces blink up at the lamp. The foreman shakes your hand with both of his, and presses a bag of ore on you.", "effects": {"items": {"scrap": -10, "titanium": 4, "credits": 25}}},
+          {"weight": 45, "text": "The slab shifts in earnest at the fifth metre. Nobody is crushed, but it takes a long time to dig out, and by the end you are exhausted and so are they. The foreman pays what the mine has, which is not much.", "effects": {"items": {"scrap": -10, "credits": 10}, "crew_hp": -10}}
+        ]},
+        {"text": "Pull the rubble clear with the tractor beam (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You hold the beam on the top slab and ease it up, a handspan at a time, while a thin dusty line of lamps picks its way out underneath. It is slow, tense, enormously boring work, and at the end every one of the six is alive and furious about the fuss. The foreman presses an ore-sample into your hand, grumbling that it was only a small cave-in.", "effects": {"items": {"fuel": -1, "titanium": 3, "credits": 30}}}
+        ]},
+        {"text": "[Murrow] Go in by ear.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow lies down on the rubble with a claw against the rock and listens, long enough that you begin to worry. Then they stand, mark a spot with a chalk cross, and dig, straight down, in a cloud of grit. In eleven minutes there is a hole, a ladder, and six grey Murrow climbing out of it, hugging everything in sight. The foreman gives your Murrow a mining lamp with his name scratched on the base and forty credits' worth of ore, 'because you dug like one of us'.", "effects": {"items": {"titanium": 5, "credits": 40}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Basalt] Ask the rock where it will let go.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt walks the rubble slowly, tapping with a knuckle, and stops. A single tap, a nod, and a long steady push on one particular boulder. The whole pile shifts as one and opens like a door. The foreman, gazing at the Basalt, makes a quiet noise of professional envy. 'We would hire you,' he says. 'But we could not afford the quiet.'", "effects": {"items": {"titanium": 4, "scrap": 25}}}
+        ]},
+        {"text": "Radio a rescue crew and keep going.", "outcomes": [
+          {"weight": 100, "text": "You send a courtesy relay and go. The voice on the speaker says thank you. It sounds, quite clearly, like someone who knows how far off a rescue crew is.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "murrow_assay_stall", "type": "trader", "weight": 7, "once": false, "requires": {"jumps_min": 1},
+      "text": "Assay-Mother Sump runs the ore-grading stall on the rim of a mining colony, and she grades by tasting. A dish of crushed rock sits at her elbow, a bowl of water, a spoon with a bite out of it. Customers queue with sacks. She tastes each sack, makes a face, and names a price with the sureness of a surgeon. 'This is a Tuesday vein,' she says, of one. 'Sulky. It will sell, but the buyer will remember.' There is a hand-written sign at her side: NO WHINGEING. THE ROCK DOES NOT LIE.",
+      "choices": [
+        {"text": "Sell her a sack of scrap (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
+          {"weight": 60, "text": "She tastes a flake, spits, and thinks it over. 'Honest rubbish,' she says. 'Sixty.' Forty credits above what any dealer would pay. She puts the sack with the rest, unconcerned.", "effects": {"items": {"scrap": -20, "credits": 60}}},
+          {"weight": 40, "text": "She tastes a flake, and her whole face closes like a drawer. 'Salted with polymer,' she says. 'Somebody has been at this.' She pays the plain price and tells you, kindly, that it is a pity.", "effects": {"items": {"scrap": -20, "credits": 25}}}
+        ]},
+        {"text": "Buy a claim chart (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "It is a sheet of hide, covered in tiny scratched numbers. You can read perhaps a fifth of them. But the fifth shows where a Murrow crew has already been, and, therefore, where a good seam is likely to be left. It is the best thing sold in the colony.", "effects": {"items": {"credits": -30, "titanium": 3}, "reveal": "asteroid_field"}}
+        ]},
+        {"text": "[Murrow] Taste a sample yourself and argue the grade.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow steps up, takes a pinch of the rock, tastes it, and says, in the old tongue, a very long sentence. Sump stares. Then she answers, equally long, with a sniff at the end, and the whole queue goes quiet. She takes down the grade board and writes a new figure on it. 'Good teeth,' she says. 'Honest mouth. Double.' She pays twice the going price on everything you have, and a dish of the good stuff besides.", "effects": {"items": {"credits": 60, "titanium": 4}, "crew_hp": 5}}
+        ]},
+        {"text": "Watch her grade a few sacks.", "outcomes": [
+          {"weight": 100, "text": "She tastes a sack of green rock and weeps, briefly, at how good it is. The line falls silent. When she is done she wipes her eyes and thanks the crowd for their patience. It is, you suspect, a regular part of the show.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

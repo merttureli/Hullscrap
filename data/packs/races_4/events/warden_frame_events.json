@@ -1,0 +1,64 @@
+{"events": [
+    {
+      "id": "warden_dark_lens", "type": "wreck_field", "weight": 14, "once": true, "requires": {"stage_min": 4, "jumps_min": 6, "not_flag": "warden_chassis"},
+      "text": "In the middle of the wreck field, ringed by drifting plate and nothing else, stands a Warden. Not a wreck: a Warden, the long Lumen gatekeeper drone with its neon panels the colour of old milk, standing upright in the debris as if it had been told to wait there and no one had come back to say otherwise. Its single lens is dark. Its limbs are folded in the way a sentry folds them at the end of a watch. Nothing has touched it in forty years. The wreckers have gone round it in a wide circle, the way you go round a sleeping dog.",
+      "choices": [
+        {"text": "Tow the Warden aboard, very carefully.", "outcomes": [
+          {"weight": 70, "text": "The tractor takes the weight and the Warden comes in through the cargo door in one piece, upright, still folded. It does not move. Your crew keep the width of the hold between themselves and it for the rest of the day, and nothing happens, which is the worst part.", "effects": {"flag": "warden_chassis"}},
+          {"weight": 30, "text": "The grapple catches a limb and the whole frame flinches. Every panel on it flashes once, white, and goes dark again. The flash scorches the hull plate and the nerves of three people. But it is aboard, it is intact, and it did not do the thing everyone was braced for.", "effects": {"flag": "warden_chassis", "hull": -5, "crew_hp": -5}}
+        ]},
+        {"text": "Strip it for parts.", "outcomes": [
+          {"weight": 100, "text": "It takes six hours and a great many hands, and by the end the Warden is a pile of neon panels, optic glass, cable and a light-core the size of a fist. All of it is good. The lens is the last to come off; it catches the light as it goes, and for a moment looks very much as if it were looking at you.", "effects": {"items": {"silicon": 4, "crystal": 3, "copper": 15}, "rep": {"lumen": -1}}}
+        ]},
+        {"text": "[Gauntling] Plug into its maintenance port and read its last log.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling finds the port under the chin-plate, the way you find a keyhole in the dark, and plugs in a cable. A minute of silence. 'Nine thousand hours of standing watch,' they say, 'and one order. HOLD.' They look up. 'It was never relieved. Nobody came. It held.' The Gauntling unplugs, quietly, and helps you carry it aboard like something asleep. 'It will wake up,' they say, 'if we give it something to hold.'", "effects": {"items": {"silicon": 3}, "flag": "warden_chassis"}}
+        ]},
+        {"text": "[Prismatic] Hum the Lumen call-sign at it.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic takes a step forward and hums three notes, rising, the call-sign every Lumen gatekeeper is tuned to. The Warden's lens does not light. But a single panel on its chest brightens for a heartbeat, the exact colour of your crystal's own glow, and fades. 'It heard,' your Prismatic says, softly. 'It is only very tired.' They carry it aboard themselves, in both arms, as if lifting a sleeping child.", "effects": {"flag": "warden_chassis", "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Leave it standing at its post.", "outcomes": [
+          {"weight": 100, "text": "You steer wide of it, as the wreckers do. When you look back, the Warden is a small neon shape in the debris, on guard, patient, perfectly still.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "warden_cold_start", "type": "anomaly", "weight": 60, "once": false, "requires": {"stage_min": 4, "flag": "warden_chassis", "not_flag": "warden_lit"},
+      "text": "The Warden stands in your hold, folded and dark, with a cold lens and a power plant that has been empty since the Snap. Your engineers have been over it three times. There is nothing wrong with it. What it lacks is a first spark: a clean jolt of old Lumen light, the kind its core was made to hold. The anomaly ahead hums at just about the right frequency, a wide pale glow with the taste of an old gate in it. It would be easy to stand the chassis in the middle of it and see.",
+      "choices": [
+        {"text": "Stand the Warden in the glow.", "requires": {"not_flag": "warden_lit"}, "outcomes": [
+          {"weight": 55, "text": "The light moves through the frame like water through a sponge. Panel by panel the neon comes up, from the feet to the chest, and then the lens. It opens, slowly, a pale disc of white, and fixes on the ceiling. It does not speak. It lowers its head and looks at you.", "effects": {"flag": "warden_lit", "goto": "warden_first_light"}},
+          {"weight": 45, "text": "The glow takes hold and then lets go. The chassis jerks, shudders, throws a handful of sparks across the hold and falls still. It is warm, which it was not before. Two panels are scorched, and one of your crew has a burn on the palm. Another try, perhaps, in a better light.", "effects": {"crew_hp": -10, "hull": -5}}
+        ]},
+        {"text": "Feed the core three crystals (3 crystal).", "requires": {"items": {"crystal": 3}, "not_flag": "warden_lit"}, "outcomes": [
+          {"weight": 100, "text": "You slot the crystals into the core cradle one by one, each with a small clean click. The third seats. The Warden's panels come up in a ripple, slow and then fast, and the lens opens like an eye that has just been told something good. You made it very bright. It will take a while to forgive you for that.", "effects": {"items": {"crystal": -3}, "flag": "warden_lit", "goto": "warden_first_light"}}
+        ]},
+        {"text": "[Prismatic] Sing the Warden awake.", "requires": {"species": "prismatic", "not_flag": "warden_lit"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic stands in the anomaly's glow with a hand on the Warden's chest and sings it a note, long and low, with a lift at the end. The light finds the core through your Prismatic like current finding a wire. The lens opens on the same pale blue-white as your crystal's own. For a moment the two of them look at each other, as kin do, and say nothing.", "effects": {"flag": "warden_lit", "goto": "warden_first_light"}}
+        ]},
+        {"text": "[Gauntling] Splice your own reactor into its core.", "requires": {"species": "gauntling", "not_flag": "warden_lit"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling runs a line from the ship's reactor into the Warden's chest with the care of someone who has done this to themselves. A hiss of current, a spill of white sparks, and the cold in the machine breaks. The lens opens. 'There,' your Gauntling says, and sags a little. 'That is a whole lot more life than I expected to share.'", "effects": {"hull": -5, "flag": "warden_lit", "goto": "warden_first_light"}}
+        ]},
+        {"text": "Not here. Not yet.", "outcomes": [
+          {"weight": 100, "text": "You pass the glow with the Warden still dark in the hold. The anomaly hums on behind you, patient, as if it had been waiting for longer than you.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "warden_first_light", "type": "page", "weight": 0, "once": true, "requires": {}, "landmark": "A Warden Wakes",
+      "text": "The lens focuses. For a long moment the Warden looks at the ceiling, at the cables, at your crew in a half-circle at the edge of the lamp, and at its own hands, as if counting. Its voice, when it comes, is level and soft and has been unused for a long while. 'Watch relieved,' it says. 'Duty log closed at nine thousand and four hours. I have no post. I have no gate.' It is very still. 'Is there something I should be holding?'",
+      "choices": [
+        {"text": "Give it a name, and a place on the roster.", "outcomes": [
+          {"weight": 100, "text": "'A name,' says the Warden, and it is quiet for a second. 'I was given a number. It was longer.' It looks around the hold and settles on a doorframe by the hatch, and speaks, a little wonderingly. 'Lintel. The beam over the door that holds the weight and is never looked at. May I be that?' You tell it that it may. It stands up very straight, the neon in its panels the colour of morning, and takes the post by the hatch as if it had always been there.", "effects": {"recruit": {"species": "warden_frame", "name": "Lintel"}, "rep": {"lumen": 1}, "flag": "warden_rebooted"}}
+        ]},
+        {"text": "Tell it the gate is gone, and it is relieved.", "outcomes": [
+          {"weight": 100, "text": "'Relieved,' it repeats. 'By whom?' You tell it: by the Snap, by forty years, by nobody. The lens dims a little, and then, slowly, brightens. 'Then the watch is closed. I am not required to do anything.' It looks at its own hands again. 'I should like to do something anyway. Is there a post on this ship?' There is. It takes the one by the hatch and stands in it, as straight as a doorframe, and calls itself Jamb.", "effects": {"recruit": {"species": "warden_frame", "name": "Jamb"}, "rep": {"lumen": 1}, "flag": "warden_rebooted"}}
+        ]},
+        {"text": "[Prismatic] Introduce yourself in the Lumen tongue.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums the long formal greeting and the Warden's lens swings to them at once. A pause. Then, in a voice pitched very carefully to match, it hums back. They talk in tones for ten minutes, and you do not understand a note. At the end your Prismatic turns with wet eyes. 'It says it will follow the Lumen's light,' they say, 'wherever it goes. We are that light, this ship. It has chosen.' The Warden gives a small precise bow. 'Sill,' it says, shyly. 'You may call me that. It is the beam beneath a doorway. I am to be the thing people step over.'", "effects": {"recruit": {"species": "warden_frame", "name": "Sill"}, "items": {"crystal": 2}, "rep": {"lumen": 2}, "flag": "warden_rebooted"}}
+        ]},
+        {"text": "[Gauntling] Offer it a hand: a rebuilt one's welcome aboard.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling holds out the half-machine hand, plates and cables and all, and the Warden regards it for a long second. Then it takes it, carefully, as one might shake a child's. 'You are rebuilt,' it says. 'So am I.' Something in the lens shifts. 'I think that is a very good thing to be. Threshold. Call me that. It is the line you cross to get in.'", "effects": {"recruit": {"species": "warden_frame", "name": "Threshold"}, "items": {"copper": 15}, "rep": {"lumen": 1}, "flag": "warden_rebooted"}}
+        ]}
+      ]
+    }
+  ]}

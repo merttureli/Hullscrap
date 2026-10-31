@@ -1,0 +1,18 @@
+{
+	"_doc": "Traits of race wave 4. Each is a bag of keys of the trait library (data/traits.json `_doc`). Work speeds are factors on speed (2 = twice as fast). The keys mining_mult, low_pressure_heal, haggler, loot_bonus, mimic and station.pull_bonus come from the race4-hooks track (docs/CONTENT_PLAN.md section 2).",
+	"traits": {
+		"rebuilt_drone": {"name": "Rebuilt drone", "blurb": "A Lumen Warden in a crew's keeping: a crewmate's repair mends it, not a bed, and it does not breathe.", "mechanical": true, "o2_use": 0},
+		"gatekeeper_optics": {"name": "Gatekeeper optics", "blurb": "One lens that never blinks: hits half again as hard at range, and takes triple ion damage.", "ranged_mult": 1.5, "damage_taken": {"ion": 3.0}},
+		"digger": {"name": "Digger", "blurb": "Rock gives way: hits rock half as hard again when manning a mining tool or cutting."},
+		"gas_floater": {"name": "Gas floater", "blurb": "Breathes half as much air, and burns twice as easily.", "o2_use": 0.5, "damage_taken": {"fire": 2.0}},
+		"thin_air_bloom": {"name": "Thin-air bloom", "blurb": "In a room under half its air, a Siltborn mends a hit point a second."},
+		"glint_eye": {"name": "Glint-eye", "blurb": "Knows what a thing is worth by its shine: station prices are 10% lower while one is aboard."},
+		"pocketed": {"name": "Pocketed", "blurb": "Pockets everywhere: one more roll on wreck, salvage and loot tables while aboard."},
+		"carapace": {"name": "Carapace", "blurb": "A broad shell: takes 30% less from melee and ranged hits.", "damage_taken": {"melee": 0.7, "ranged": 0.7}},
+		"dock_hauler": {"name": "Dock hauler", "blurb": "Union dockers restock racks and stores half again as fast.", "work_mult": {"restock": 1.5}},
+		"shell_back": {"name": "Shell back", "blurb": "A carapace does not fit in a suit or armour: they wear none.", "no_suit": true},
+		"mirror_skin": {"name": "Mirror skin", "blurb": "A smooth surface that shows whoever is near. In a room with another crew member, it copies their best trait."},
+		"ferrofluid": {"name": "Ferrofluid", "blurb": "Liquid metal does not mind an ion strike: immune to ion damage. Idle, it presses against a wall and slowly mends it.", "damage_taken": {"ion": 0.0}, "hull_mend": {"rate": 0.5, "seal": 0}},
+		"magnet_hands": {"name": "Magnet hands", "blurb": "The salvage intake they man pulls one cell further."}
+	}
+}

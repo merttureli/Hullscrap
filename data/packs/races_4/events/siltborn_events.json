@@ -1,0 +1,66 @@
+{"events": [
+    {
+      "id": "siltborn_ring_chime", "type": "anomaly", "weight": 8, "once": true, "requires": {"jumps_min": 2},
+      "text": "The anomaly is a cloud of pale gas with a pulse in it, slow, like a heart in a jar, and in the pulse, bells. Glassy translucent domes the size of a person hang in the cloud, trailing tendrils a metre long, glowing from the inside in soft blues and pinks. They drift together and apart, chiming. It is the loveliest thing you have seen in a month. One bell is tangled in a snarl of old cable, pulsing fast and thin. The others cluster nearby, helplessly chiming, and do not touch it.",
+      "choices": [
+        {"text": "Cut the tangled one free.", "outcomes": [
+          {"weight": 100, "text": "It takes a pair of snips, a steady hand and a great deal of patience with something that wobbles when it breathes. The bell comes loose with a soft pop, bobs once, and presses itself against your visor, glowing a happy pink. It follows you back to the airlock. The rest of the cloud chimes, in what is very clearly a round of applause.", "effects": {"recruit": {"species": "siltborn", "name": "Maelu"}}}
+        ]},
+        {"text": "Hail them on every band you have.", "outcomes": [
+          {"weight": 100, "text": "Nothing you send comes back in words. But the pulse in the cloud speeds up, the bells swing round to face your ship, and a slow wave of soft light passes through them from end to end. A minute later your sensors show a gas pocket, nearby, rich in something your reactor likes. It is a gift. You take it.", "effects": {"items": {"fuel": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Siltborn] Drift among them.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn goes out through the airlock and floats in the cloud, tendrils trailing, and the bells gather round with a long happy ringing. They touch bells. They sing, in a chord that you feel in your teeth. When your Siltborn comes back they are glowing a bright warm gold, with a clean small bell in tow, and a sense of having been talked about at length. 'Her name is Oshe,' they say. 'She would like to see what it is like to stand on a floor.'", "effects": {"recruit": {"species": "siltborn", "name": "Oshe"}, "items": {"fuel": 2, "crystal": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "[Wisp] Flicker a greeting in their own light.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp ripples out into the cloud like smoke on a draught, and the bells hold still for the first time since you arrived. A long pause. Then a bell drifts across and presses against the Wisp, and the two of them glow together, each in the other's colours, for as long as it takes you to forget the time. When your Wisp returns, a gift is trailing from its light: a heap of bright fuel crystals, spun out of the cloud like candy floss.", "effects": {"items": {"fuel": 2, "crystal": 3}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave the cloud alone.", "outcomes": [
+          {"weight": 100, "text": "You turn away. The tangled bell goes on pulsing fast and thin behind you for as long as your instruments can hear it.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "siltborn_thin_air_rescue", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The freighter Evening Quiet has lost its air. Not to a breach: to a failed scrubber loop that dumped the lot into space four hours ago and left twenty-two crew in a sealed hold with a faint hiss of nothing. They have six minutes of suit air each, and their rescue ship is a day away. Their chief engineer talks through a mask, clearly and fast. 'We can still walk,' she says. 'But everything is a matter of minutes now.'",
+      "choices": [
+        {"text": "Send boarding parties in suits.", "outcomes": [
+          {"weight": 50, "text": "Three trips, each with a rack of spare bottles, through a hold where you can hear nothing but your own heart. Every one of the twenty-two comes out. Two of yours are lightheaded for the rest of the day. The engineer sits in your corridor and sobs quietly into her mask.", "effects": {"items": {"credits": 55}, "crew_hp": -10, "rep": {"concord": 1}}},
+          {"weight": 50, "text": "One suit seal fails halfway and the rescue becomes two. It is a near thing and it is done, and not well. The freighter pays what she can.", "effects": {"items": {"credits": 30}, "crew_hp": -20}}
+        ]},
+        {"text": "Pump your own air across (2 fuel).", "requires": {"items": {"fuel": 2}}, "outcomes": [
+          {"weight": 100, "text": "You run a hose between the airlocks and bleed air in until the hold reads thin but breathable. It takes most of the night and a good deal of the reactor's patience. By dawn the freighter has a scrubber running again and a crew who will be giving your name to their children.", "effects": {"items": {"fuel": -2, "credits": 50}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "[Siltborn] Drift into the hold and tend them.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn goes in with no suit at all and floats into the middle of the airless dark, bell glowing, tendrils out, and calmly goes about the work. They hold wounds shut. They carry the weak to the lock one by one, a glimmering little lamp in the black. There is no air; they breathe what there is. Nobody dies. The chief engineer asks quietly, after, whether they would consider working for anyone else, and takes the 'no' like a gentleman.", "effects": {"items": {"credits": 65, "silicon": 3}, "rep": {"concord": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Emberkin] Burn a way through with a heat-lance.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin walks along the hull with a heat-lance and burns a clean slot into the hold's side. The air stops hissing; the hull drinks warmth; the survivors crawl out through the gap in a line, grimy and furious and alive. It is not subtle. It works.", "effects": {"items": {"credits": 45}, "crew_hp": -5}}
+        ]},
+        {"text": "Relay their call and go.", "outcomes": [
+          {"weight": 100, "text": "You relay the call to the nearest station and leave the channel open until the carrier fades. The engineer thanks you in a voice as steady as a rail. It is the worst thing you hear that week.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "siltborn_lamp_tender", "type": "empty", "weight": 6, "once": false, "requires": {"jumps_min": 1},
+      "text": "A single Siltborn is tending a lamp in the dark lane, a beacon the size of a barrel with a glass globe and a wick of cold white light. The bell tilts as you pass, a polite little tilt of the head, and holds up one tendril to show a small glowing tag: DO NOT LIGHT FLAMES. They are not rude about it. They have made, you can see, a number of signs. A hand-lettered one is stuck to the lamp: ASK FOR A TOUR.",
+      "choices": [
+        {"text": "Ask for the tour.", "outcomes": [
+          {"weight": 100, "text": "The Siltborn takes you round the beacon with a slow serious air, pointing out each cell of the lamp with a tendril. It is the sort of tour you get from someone who has done this alone for fourteen years and is delighted by the company. At the end you are given a bag of the glowing powder that feeds the lamp, which makes a good lantern for the cabin and warms the crew's spirits all week.", "effects": {"crew_hp": 10, "items": {"crystal": 1}}}
+        ]},
+        {"text": "Strike a flare to say hello.", "outcomes": [
+          {"weight": 100, "text": "The flare goes up with a hiss and a flash, and the Siltborn flinches back, glowing a sharp alarmed pink. It takes ten minutes of apology, and the loss of a sealed crate, to make up for it. You are not asked to leave. You are only very politely not asked to stay.", "effects": {"crew_hp": -5, "items": {"scrap": -10}}}
+        ]},
+        {"text": "[Siltborn] Hum back the lamp's tune.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn drifts up to the lamp and hums along to its slow glow, note for note. The beacon-keeper turns, delighted, and the pair sit side by side in the dark for an hour, trading tunes and tales. At the end the keeper presses a heap of crystal dust and a bag of fuel on you, with the words, 'for the long road. And for the music.'", "effects": {"items": {"crystal": 3, "fuel": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "[Mire] Offer a drink of fresh water.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire brings a flask and a small bowl and sets them out with a damp, warm formality. The Siltborn, who has not had water that wasn't from a pipe in fourteen years, takes a long tendril-sip and glows a deep calm blue. 'Oh,' they say. They write it on a sign and hang it at the beacon: GOOD WATER. THE NAME IS MIRE. They pay you with a beacon-fix on the safest lane out.", "effects": {"reveal": "trader", "crew_hp": 5}}
+        ]},
+        {"text": "Pass with a nod.", "outcomes": [
+          {"weight": 100, "text": "You nod. The keeper nods back, and a sign goes up as you leave: THANK YOU FOR PASSING. It is the nicest thing to be written about you this month.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

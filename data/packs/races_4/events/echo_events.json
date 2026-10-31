@@ -1,0 +1,63 @@
+{"events": [
+    {
+      "id": "echo_after_you", "type": "anomaly", "weight": 7, "once": true, "requires": {"jumps_min": 3},
+      "text": "On the hull of a dead tender, in the light of a pale star, stands a figure that looks very much like your captain. It is not quite right. The outline is smooth, a little glassy; the face is a kind of soft mirror, showing not a face but a faint likeness of the one looking at it; and when you wave, it waves a moment late. It stands aside on the plating to let you pass. It does not speak. It has the unmistakable air of someone who has been waiting, very patiently, to be introduced.",
+      "choices": [
+        {"text": "Wave back, and wait.", "outcomes": [
+          {"weight": 100, "text": "It waves. Then it tilts its head, very slightly, and you find yourself tilting yours. A long silence. It points to its own chest, then to your ship, then to its chest again. 'After you,' it says, in your voice, and steps back to let you pass. You step on the plating. It steps beside you. It follows you into the airlock, apologising, and sits in a corner of the mess, nodding at everything anybody says. By the end of the evening its face has a new look: faintly, politely, your cook's.", "effects": {"recruit": {"species": "echo", "name": "Pardon"}}}
+        ]},
+        {"text": "Hail it politely on the comm.", "outcomes": [
+          {"weight": 100, "text": "The voice that answers is yours, but with an unfamiliar, careful warmth. 'Hello,' it says. 'Hello. I am sorry. I am Pardon. I have been a long time on this tender.' It asks about the stars, and the ship, and your name. It repeats your answers with great attention. When you leave, it asks if it might keep your coat. You have another.", "effects": {"items": {"credits": 15, "crystal": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Echo] Meet it at the edge of the hull.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo steps out of the airlock and the figure on the hull stops dead. For a long moment the two of them stand face to face, each a little glass reflection of the other, and neither moving. Then both raise a hand, at the same instant, and the faint likenesses on their faces blur and drift and settle, and for a second they are exactly each other. Both laugh, in the same voice. 'Likewise,' says the new arrival, and bows. It comes aboard with its hand in your Echo's, and it will not be told it is not welcome.", "effects": {"recruit": {"species": "echo", "name": "Likewise"}, "items": {"crystal": 2, "credits": 30}, "crew_hp": 10}}
+        ]},
+        {"text": "[Oorth] Read it.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth stands quite still before the figure for a long time, hooded, third eye alight. Then they let out a breath. 'There is nothing in it,' they say, wonderingly. 'Not nothing: nothing yet. It is a mirror with the whole of the room in it, waiting for a face to keep.' They lay a hand on its shoulder. 'It is shy. It has been waiting for someone kind.' The figure bows deeply. It follows your Oorth into the airlock like a quiet shadow.", "effects": {"recruit": {"species": "echo", "name": "Indeed"}, "items": {"crystal": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Nod politely and fly on.", "outcomes": [
+          {"weight": 100, "text": "You nod. It nods. You fly on. In the stern window it is still on the tender's hull, small and shining, with one hand raised.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "echo_borrowed_voice", "type": "empty", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The hail comes in on your own channel, in your own captain's voice, saying precisely what your captain was about to say. It is uncanny. 'Is anyone there? We are a small ship, in need of a favour. We seem to have lost our way.' It pauses. It sounds eager. 'I am sorry. I find that I have your voice. It is a good voice. May I keep it?' On the scope there is a small, round, mirror-bright pod, hanging in the dark, glinting like a sequin.",
+      "choices": [
+        {"text": "Answer, and ask what it needs.", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "The voice is delighted. It asks the way to the nearest port, and the name of the sun, and whether you have ever seen an ocean. You give it the way and a bag of fuel, and it thanks you in a series of small precise echoes, one for each thing you say. It leaves a gift in your lock: a quartz that shows, faintly, your own face from a very kind angle.", "effects": {"items": {"fuel": -1, "crystal": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "Ignore it.", "outcomes": [
+          {"weight": 100, "text": "The voice goes on for a while, saying everything you said in the last hour, with small variations. Then it falls silent, and you realise you can still hear it, faintly, in the ventilation.", "effects": {"crew_hp": -5}}
+        ]},
+        {"text": "[Echo] Answer in your own voice, for a change.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo takes the comm, and says, in a voice that is clearly their own, something quiet and strange and not yet a sentence. The pod goes silent. A long breath on the line. Then the other voice returns, gentler, and different: another's, not yours. 'Oh,' it says. 'That is a good one. May I keep that one instead?' It is the first time anyone has asked. They talk until the pod's battery is low, and your Echo gives it the coordinates of a quiet harbour. In payment a gift floats across: a cluster of mirrored shards, worth a great deal to the right buyer.", "effects": {"items": {"crystal": 3, "credits": 40}, "crew_hp": 10}}
+        ]},
+        {"text": "[Oorth] Listen to it, and answer in kind.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth listens for a long moment to the thing in the pod, third eye pale. 'It is afraid of being nobody,' they say. They take the comm and, softly, in the quiet old tongue, tell the pod it is already somebody. The pod is still. Then a new voice answers, hesitating and new. 'Thank you,' it says. 'That is... mine?' 'Yes,' says your Oorth. A moment later a small bright shard floats across to the airlock, a keepsake.", "effects": {"items": {"crystal": 2, "credits": 25}, "crew_hp": 5}}
+        ]},
+        {"text": "[Warden-frame] Issue a clear challenge.", "requires": {"species": "warden_frame"}, "outcomes": [
+          {"weight": 100, "text": "Your Warden-frame takes the comm, its lens steady, and issues the gatekeeper's challenge: 'State your name, your post and your reason.' A pause. The voice on the line, which has been in your voice, flickers through five others, and settles. 'My name is... nobody,' it says. 'My reason is to be someone.' The Warden-frame considers. 'Then you are a traveller,' it says. 'Pass, traveller.' The pod goes by, glittering, with a small wave.", "effects": {"rep": {"lumen": 1}, "items": {"crystal": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "echo_two_captains", "type": "patrol", "weight": 6, "once": false, "requires": {"jumps_min": 3},
+      "text": "The Concord patrol hails you with an odd hush in the channel. 'Captain,' says the officer carefully, 'we have a problem. You are already docked at Meridian. You have been for three days. You checked in at the front desk, a bit shy, with a cup of tea. Your ship has not moved. And yet here you are.' There is a short pause. 'We would like to see your papers. Both sets.'",
+      "choices": [
+        {"text": "Show your papers, and sort it out.", "outcomes": [
+          {"weight": 65, "text": "The officer compares them for a long time. Then he compares the photographs. 'It's you,' he says at last. 'And it's also, curiously, you.' He gives them both back and apologises. 'Mind how you go,' he says. 'There's a polite shimmering thing in the Meridian canteen wearing your jacket. Be gentle with it.'", "effects": {"rep": {"concord": 1}}},
+          {"weight": 35, "text": "The officer isn't convinced. He keeps your papers for an hour while he rings round, and returns them with a stamp that says RESOLVED, in red, and a small bill for 'the paperwork of being in two places'.", "effects": {"items": {"credits": -20}}}
+        ]},
+        {"text": "Insist it must be an impostor, and demand the other one be arrested.", "outcomes": [
+          {"weight": 100, "text": "The officer sighs. 'I'm afraid we have to ask you to wait,' he says. It takes four hours for the other you to be traced, brought round, apologised to and sent off with a pat on the shoulder. They leave you with a bill, and a slight sense of having been unkind to yourself.", "effects": {"crew_hp": -5, "rep": {"concord": -1}}}
+        ]},
+        {"text": "[Echo] Introduce yourselves.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo steps up to the comm and, in your captain's voice, says: 'Good afternoon, officer. It is I.' A second voice, from the Meridian canteen, joins in over the relay: 'And I.' The officer is very still. After a while he says, 'I think I need to sit down.' He sits. Your Echo explains, with great courtesy, who they are and what they are, and by the end of it the officer has stamped both sets of papers, written a small note in the file, and invited the other Echo to dinner. You are waved on, with a hamper from the patrol's own stores.", "effects": {"items": {"credits": 35, "fuel": 1}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "[Fenn] Charge the Concord for the confusion.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn takes the comm, tells the officer that to be accused of being in two places is a clear case of defamation, and begins to draft an invoice. The officer, who has seen a few Fenn in his time, quickly offers a small payment 'for your trouble', and a quick wave off.", "effects": {"items": {"credits": 55}, "rep": {"concord": -1}}}
+        ]}
+      ]
+    }
+  ]}
