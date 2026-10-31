@@ -55,10 +55,10 @@ The pace is slower than the Beta 2 night: **two builders at a time**, in four wa
 ## Waves (two builders each)
 | wave | builder A | builder B |
 |---|---|---|
-| 1 | `feel`: F1–F6 | `pace`: C1–C3 |
-| 2 | `space`: S1–S4 | `parts`: P1–P4 |
-| 3 | `alone`: A1, A2, K3 | `info`: I1–I3 |
-| 4 | `command`: K1, K2 | `angles`: G1 (after `parts`, which changes mount sizes) |
+| 1 | `feel`: F1–F6 | `pace`: C1–C4 |
+| 2 | `space`: S1–S4 | `parts`: P1, P2 (tier 1–2 parts smaller inside; mounts get a narrower breech) |
+| 3 | `alone`: A1, A2, P3, P4 (start alone, rare crew, starter loadouts, bigger starters) | `info`: I1–I3 |
+| 4 | `command`: K1–K3 | `angles`: G1 (after `parts`, which changes mount sizes) |
 | 5 | QA playthrough, Beta 3 build | |
 
 ## Budget
