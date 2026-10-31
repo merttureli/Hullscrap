@@ -1,0 +1,13 @@
+{
+	"factions": [
+		{
+			"id": "barons",
+			"name": "Salvage Barons",
+			"short": "Barons",
+			"line": "standard",
+			"color": "#d9b44a",
+			"name_style": "none",
+			"hostile": true
+		}
+	]
+}

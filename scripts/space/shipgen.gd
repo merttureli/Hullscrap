@@ -38,6 +38,7 @@ const AMMO_STOCK := 40  ## units of ammo a weapon that uses some starts with
 const ESSENTIAL := 1  ## rooms of this priority or better (the helm room, the reactors) are never dropped for lack of floor
 
 static var _tables := {}
+static var _tables_for := ["", ""]  # Content.root and packs_root the tables were read for
 static var _defs: Components = null
 static var _lines := {}
 static var _weapons: Weapons = null
@@ -48,12 +49,20 @@ static var last_failed: Array = []  ## why the attempts of the last build() fail
 
 # --- data ----------------------------------------------------------------------------------------
 
-## data/enemy_tables.json, read once.
+## data/enemy_tables.json, read once, with the `factions` of every pack's enemy_tables.json added (a pack may not replace a faction
+## that is already there). Read again when the content loader is pointed elsewhere.
 static func tables() -> Dictionary:
-	if _tables.is_empty():
+	if _tables.is_empty() or _tables_for[0] != Content.root or _tables_for[1] != Content.packs_root:
 		var data = JSON.parse_string(FileAccess.get_file_as_string(TABLES_PATH))
 		assert(data is Dictionary and data.get("factions") is Dictionary, "bad enemy tables: " + TABLES_PATH)
+		for p in Content.packs():
+			var more = JSON.parse_string(FileAccess.get_file_as_string(p["dir"] + "/enemy_tables.json")) if FileAccess.file_exists(p["dir"] + "/enemy_tables.json") else null
+			if more is Dictionary and more.get("factions") is Dictionary:
+				for id in more["factions"]:
+					if not data["factions"].has(id):
+						data["factions"][id] = more["factions"][id]
 		_tables = data
+		_tables_for = [Content.root, Content.packs_root]
 	return _tables
 
 
@@ -118,6 +127,26 @@ static func faction_for(region: Dictionary, kind: String) -> String:
 	if kind == "patrol" and enemies != "wardens" and enemies != "hollow":
 		return "concord"
 	return enemies if tables()["factions"].has(enemies) else "rustfangs"
+
+
+## The least stage budget a rare faction is built for (CONTENT 18: `budget_floor` in its table, times the difficulty), so it is
+## dangerous at the first jumps too; 0 for the others.
+static func budget_floor(faction: String, difficulty := "normal") -> float:
+	return float(tables()["factions"].get(faction, {}).get("budget_floor", 0.0)) * float(tables()["budget"]["difficulty"].get(difficulty, 1.0))
+
+
+## The budget factor a rare faction fights at over the stage's budget (CONTENT 18: `budget_mult` [least, most] in its table), rolled
+## with `rng`; 1.0 for a faction with none (and no roll is made, so the others' ships do not move).
+static func budget_mult(faction: String, rng: RandomNumberGenerator) -> float:
+	var m = tables()["factions"].get(faction, {}).get("budget_mult")
+	return rng.randf_range(float(m[0]), float(m[1])) if m is Array and m.size() == 2 else 1.0
+
+
+## `size` or, for a faction with a `min_size` (heavy hulls only), the bigger of the two.
+static func at_least(faction: String, size: String) -> String:
+	var order: Array = ["small", "medium", "large"]
+	var want := str(tables()["factions"].get(faction, {}).get("min_size", "small"))
+	return size if order.find(size) >= order.find(want) else want
 
 
 static func spec(faction: String, size: String, seed_value: int, budget: float, ram := false) -> String:

@@ -1,0 +1,13 @@
+{
+	"_doc": "The unlocks of the faction_barons pack: the Baron's Yacht starter ship (docs/CONTENT.md sections 18 and 19). `pending: true`: the design (a heavy, gilded yacht; layout C) is not built yet, so the hangar has nothing to show until it lands; the duel event (baron_duel) already earns the unlock.",
+	"unlocks": [
+		{
+			"id": "ship_barons_yacht",
+			"kind": "starter_ship",
+			"name": "Baron's Yacht",
+			"how": "Beat a Salvage Baron in a formal duel (Clan space or the Boneyard).",
+			"pending": true,
+			"payload": {"ship": "barons_yacht", "group": "clans", "layout": "C"}
+		}
+	]
+}

@@ -1,0 +1,73 @@
+{
+	"factions": {
+		"leviathans": {
+			"line": "standard",
+			"name_pool": "",
+			"min_size": "large",
+			"budget_floor": 150,
+			"budget_mult": [2.0, 3.0],
+			"ship_names": [
+				"The Long Hunger",
+				"Slow Weather",
+				"Undertow",
+				"Old Pressure",
+				"Moon-Eater",
+				"Mother of Nothing",
+				"Low Note",
+				"Drowned Cathedral",
+				"The Patient One",
+				"Tide With Teeth"
+			],
+			"crew": {
+				"species": ["sporeling", "mire"],
+				"names": ["Barnacle", "Remora", "Krill", "Plankton", "Limpet", "Cilia", "Polyp", "Sargasso"]
+			},
+			"ai": {"morale": "hollow", "aim_skill": [0.8, 1.0], "rammer": 0.0},
+			"weights": {"weapons": 3, "armour": 5, "shield": 2, "engine": 2, "crew": 1, "skill": 3, "systems": 1},
+			"armour": {"tiles": ["bone_armour", "bone_armour", "bone_armour"], "factor": {"bone_armour": 1.5}},
+			"layer_cost": {"small": 13, "medium": 22, "large": 31},
+			"parts": {
+				"base": {
+					"helm": "helm",
+					"o2": "oxygen_gen",
+					"bed": "bed",
+					"reactor": "reactor_mk1",
+					"engine": "starwhale_fin",
+					"weapon": "sporeling_spore_cannon"
+				},
+				"weapons": [
+					{"id": "sporeling_spore_cannon", "cost": 14, "weight": 4},
+					{"id": "sporeling_rot_pod", "cost": 16, "weight": 3},
+					{"id": "sporeling_pollen_turret", "cost": 10, "weight": 2},
+					{"id": "leech_laser", "cost": 18, "weight": 2},
+					{"id": "breach_harpoon", "cost": 14, "weight": 2, "from": 70}
+				],
+				"shields": [
+					{"id": "sporeling_mycelium_shield", "cost": 26, "weight": 3},
+					{"id": "shield_mk2", "cost": 30, "weight": 1, "from": 80}
+				],
+				"engines": [{"id": "starwhale_fin", "cost": 14}],
+				"reactors": [{"id": "reactor_mk1", "cost": 10}, {"id": "reactor_mk2", "cost": 22, "from": 40}],
+				"systems": [
+					{"id": "medbay", "cost": 14, "weight": 1},
+					{"id": "inertial_dampener", "cost": 12, "weight": 1, "from": 80}
+				]
+			},
+			"hull": {
+				"prow": [2, 4],
+				"tail": [2, 4],
+				"band": {"gun": 0.55, "bridge": 0.85, "core": 1.0, "aux": 0.95, "engine": 0.7},
+				"jitter_w": [2, 5],
+				"jitter_c": 2,
+				"asym": true,
+				"ops": [
+					{"op": "wedge", "at": "bow", "slope": ["shallow"], "chance": 0.8},
+					{"op": "chamfer", "at": "shoulder", "kind": ["shallow", "45"], "n": [1, 2], "chance": 0.8},
+					{"op": "arc", "at": "tip", "count": [1, 2]},
+					{"op": "arc", "at": "shoulder", "count": [2, 4]},
+					{"op": "arc", "at": "stern_end", "count": [1, 2]}
+				]
+			}
+		}
+	}
+}

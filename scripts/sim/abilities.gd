@@ -9,7 +9,8 @@ extends RefCounted
 ## - side_effects, per second while it runs: drain_o2 (fraction of the part's room air lost), heat,
 ##   power_spike (extra power draw, taken in the power solve), fire_risk (chance), self_damage (hp),
 ##   shock_organic (hp a second to the crew in the room who are not mechanical), scorch (the same to those without
-##   heat_resistant), wet (crew in the room work slower, parts in it cool).
+##   heat_resistant), wet (crew in the room work slower, parts in it cool), self_repair (a living part: hp a second back to
+##   the part and to the outside half of its mount, powered or not; _self_repair).
 ## - the racial keys of effects, which depend on who stands in the part's room (part_effects.gd has the rules):
 ##   crew_bonus {who, stat, per, max}, crew_needed {count, stat, else_mult, who?}, room_wall_hp_mult,
 ##   heat_above {heat, shield_layer}, room_work_mult {mult, who?, else_mult?}. They are read by the power solve
@@ -189,6 +190,30 @@ static func tick(ship, dt: float, rng: RandomNumberGenerator = null) -> void:
 		for a in ship.components.def(inst["id"]).get("abilities", []):
 			if a.get("type", "active") == "passive":
 				_side_effects(ship, uid, a, dt, rng)
+	_self_repair(ship, dt)
+
+
+## The side effect `self_repair` of a passive ability (a living part, CONTENT 18's Starwhale Fin): `rate` hp a second to the part and to
+## the outside half of its mount. It needs no power and no crew, so a part that was knocked out comes back by itself (a disabled one
+## is ok again once it has hp).
+static func _self_repair(ship, dt: float) -> void:
+	for uid in _uids(ship):
+		var inst: Dictionary = ship.components.instances[uid]
+		var rate := 0.0
+		for a in ship.components.def(inst["id"]).get("abilities", []):
+			if a.get("type", "active") == "passive":
+				for se in a.get("side_effects", []):
+					if str(se.get("type", "")) == "self_repair":
+						rate += float(se.get("rate", 0.0))
+		if rate <= 0.0:
+			continue
+		var top := float(ship.effective(inst["id"])["hp"])
+		if float(inst["hp"]) < top:
+			inst["hp"] = minf(float(inst["hp"]) + rate * dt, top)
+			if inst["status"] == "disabled" and float(inst["hp"]) > 0.0:
+				inst["status"] = "ok"
+		if not inst["out_cells"].is_empty() and float(inst["out_hp"]) < float(ship.components.outside_hp_max(inst["id"])):
+			inst["out_hp"] = minf(float(inst["out_hp"]) + rate * dt, float(ship.components.outside_hp_max(inst["id"])))
 
 
 # --- ion --------------------------------------------------------------------------------------------

@@ -1,0 +1,35 @@
+{
+	"components": [
+		{
+			"id": "starwhale_fin",
+			"name": "Starwhale Fin",
+			"blurb": "A fin the colour of the sea at night, cut from something that is not entirely finished being alive. It twitches when the ship turns. Do not name it.",
+			"quirk": "Relic. Thrust 38 (a Concord Mk4 makes 36) for 4 power, and it heals itself 0.5 hp a second, its mount's outside half too, with no power and no crew: a fin that is knocked out grows back. It eats: the jump fuel of a ship flown on Fins is half as much again.",
+			"family": "engine",
+			"line": "standard",
+			"tier": 4,
+			"size": [4, 2],
+			"mount": {"outside": [4, 2], "outside_hp": 9},
+			"color": "#5fc9c0",
+			"power": -4,
+			"priority": 4,
+			"manned": false,
+			"hp": 12,
+			"heat_limit": 100,
+			"heat_per_s": 3,
+			"cooling": 4,
+			"stats": {"thrust": 38, "fuel_mult": 1.5},
+			"abilities": [
+				{
+					"id": "regrow",
+					"name": "Regrows",
+					"type": "passive",
+					"effects": {},
+					"side_effects": [{"type": "self_repair", "rate": 0.5}]
+				}
+			],
+			"relic": true,
+			"unique": true
+		}
+	]
+}

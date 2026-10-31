@@ -33,6 +33,7 @@ const TraitSet = preload("res://scripts/crew/traits.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Characters = preload("res://scripts/crew/characters.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
@@ -739,8 +740,8 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 			bad.call("%s: unknown blueprint (recipe) '%s'" % [where, b])
 	if eff.has("fight"):
 		var f = eff["fight"]
-		if not (f is String and (f == "tier" or FileAccess.file_exists(SHIPS_DIR + f + ".json"))):
-			bad.call("%s: fight must be \"tier\" or the id of a design in data/ships (got '%s')" % [where, f])
+		if not (f is String and (f == "tier" or FileAccess.file_exists(SHIPS_DIR + f + ".json") or _is_foe(f))):
+			bad.call("%s: fight must be \"tier\", a faction to meet (\"gen:barons\") or the id of a design in data/ships (got '%s')" % [where, f])
 	if eff.has("goto") and not (eff["goto"] is String and events.has(eff["goto"])):
 		bad.call("%s: goto '%s' is not an event id in data/events" % [where, eff["goto"]])
 	for l in _list(eff.get("log")):
@@ -754,6 +755,12 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 			bad.call("%s: unknown unlock id '%s' (not in data/unlocks.json or a pack's unlocks.json)" % [where, u])
 	if eff.has("ending") and not (eff["ending"] is String and known["endings"].has(eff["ending"])):
 		bad.call("%s: unknown ending id '%s' (not in data/endings.json or a pack's endings.json)" % [where, eff["ending"]])
+
+
+## "gen:<faction>" or "gen:<faction>:ram": a faction of the enemy tables, whose ship Campaign.foe_of rolls.
+static func _is_foe(f: String) -> bool:
+	var p := f.split(":")
+	return p.size() >= 2 and p.size() <= 3 and p[0] == "gen" and Shipgen.tables()["factions"].has(p[1]) and (p.size() == 2 or p[2] == "ram")
 
 
 static func _is_landmark(ev: Dictionary) -> bool:

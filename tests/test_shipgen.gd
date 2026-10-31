@@ -230,7 +230,7 @@ func test_the_tables_name_real_things() -> void:
 	var t := Shipgen.tables()
 	var comps := Components.new()
 	comps.load_defs(Ship.COMPONENTS_PATH)
-	var weapons = JSON.parse_string(FileAccess.get_file_as_string("res://data/weapons.json"))["weapons"]
+	var weapons = Content.read("res://data/weapons.json")["weapons"]  # with the packs' weapons (the rare factions use some)
 	var tiles := Content.ids("tiles")
 	var fac_ids: Array = []
 	for f in Content.list("factions"):

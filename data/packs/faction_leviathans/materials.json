@@ -1,0 +1,12 @@
+{
+	"materials": [
+		{
+			"id": "leviathan_bone",
+			"name": "Leviathan Bone",
+			"color": "#e9e2cf",
+			"rarity": "very_rare",
+			"kind": "material",
+			"blurb": "Light as a promise and harder than most. It is faintly warm, and it hums when something large is near."
+		}
+	]
+}

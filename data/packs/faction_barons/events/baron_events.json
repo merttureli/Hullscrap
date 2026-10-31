@@ -1,0 +1,306 @@
+{
+	"events": [
+		{
+			"id": "baron_toll",
+			"type": "pirate",
+			"weight": 5,
+			"once": false,
+			"requires": {"region": ["clan_space", "boneyard"], "jumps_min": 3},
+			"title": "The Baron's Toll",
+			"text": "A yacht the size of a small station slides across the lane, gilded to the waterline, chandeliers lit in every port. 'Baron Aurelio Pell, Salvage Barons, Limited,' says a voice that sounds ironed. 'This lane is a private road. The toll is two hundred credits. For old friends of the family, two hundred and one.' Every gun on her has been polished by someone. The hull bristles with them.",
+			"choices": [
+				{
+					"text": "Pay the toll (200 credits).",
+					"requires": {"credits": 200, "pay": true},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "She dips a flag, which costs the Baron nothing, and the lane opens. 'A pleasure doing business,' says the voice. 'I shall remember your face. I do not remember faces I have not been paid by.'",
+							"effects": {"flag": "baron_toll_paid"}
+						}
+					]
+				},
+				{
+					"text": "[Fenn] Haggle. The Fenn have read this ledger before (80 credits).",
+					"requires": {"species": "fenn", "credits": 80, "pay": true},
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "Your Fenn finds three clauses the Baron signed in a hurry and one he did not sign at all. Eighty credits, a handshake, and a receipt in gold ink. The Baron is delighted to have been beaten by a professional.",
+							"effects": {"flag": "baron_toll_paid", "rep": {"clans": 1}}
+						},
+						{
+							"weight": 30,
+							"text": "Your Fenn finds the Baron has read the same ledger. 'Charming,' he says. 'One hundred and sixty.' The Fenn pays it with the face of someone who has just learned something.",
+							"effects": {"flag": "baron_toll_paid"}
+						}
+					]
+				},
+				{
+					"text": "Refuse. Let him try it.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'How refreshing,' says the Baron, and the polished guns come round with a sound like cutlery.",
+							"effects": {"fight": "gen:barons"},
+							"after_win": {
+								"text": "The yacht wallows, venting perfume and smoke. In the wreck of the saloon there are a great many gold things, and a tidy strongbox with your name on it, since you were so keen to collect.",
+								"effects": {"items": {"credits": 350}, "flag": "baron_beaten", "rep": {"clans": 1}}
+							}
+						}
+					]
+				},
+				{
+					"text": "Back away slowly, hands where the guns can see them.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The yacht turns to watch you go, every chandelier swinging. 'Another time,' says the voice, with real regret. 'I do so enjoy the explaining.'",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "baron_duel",
+			"type": "pirate",
+			"weight": 4,
+			"once": true,
+			"requires": {"region": ["clan_space", "boneyard"], "jumps_min": 4},
+			"title": "A Matter of Honour",
+			"text": "A thin gold yacht matches your speed and opens a channel on every frequency at once. 'Captain! You have been observed to own a gun. Baroness Ysolde Vane, Salvage Barons, requests the pleasure of a duel: one ship each, no boarders, no interference, and salvage rights to the wreck to the winner.' A pause. 'Do say yes. My champion has had nothing to do all week and has begun to polish the hallways.'",
+			"choices": [
+				{
+					"text": "Accept the duel.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Splendid!' Gunports open along the whole length of her, all at once, in a pattern that was clearly rehearsed.",
+							"effects": {"fight": "gen:barons"},
+							"after_win": {
+								"text": "The yacht drifts, ticking. A hatch opens on her sound deck and a woman in a gold-trimmed flight coat climbs out, adjusting her gloves. 'Well fought. I was told you would be dull.' She salutes the wreck, then you. 'Dame Sterling, her champion. I find I am between engagements. Do you have a gun I may look after?'",
+								"effects": {
+									"items": {"credits": 300},
+									"recruit": {"character": "sterling"},
+									"flag": "baron_duelled",
+									"unlock": ["ship_barons_yacht"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Decline with a bow.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Oh, what a pity,' says the Baroness, and sounds as if she means it. The channel closes with a click like a jewel box.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "baron_gilded_wreck",
+			"type": "wreck_field",
+			"weight": 5,
+			"once": true,
+			"requires": {"region": ["clan_space", "boneyard"], "jumps_min": 2},
+			"title": "A Gilded Wreck",
+			"text": "A yacht's hulk hangs in the debris, gold leaf still bright on the side that faced away from the fighting. The vault door is open. Three of the bodies in the lifeboat are mannequins in good coats, which is either a sign of vanity or of a very expensive joke. Something on her bridge is still, faintly, warm.",
+			"choices": [
+				{
+					"text": "Open the vault.",
+					"outcomes": [
+						{
+							"weight": 25,
+							"text": "The vault holds one thing that mattered to somebody: a gilded lance in its velvet case, with a bill of sale made out to a name that has been crossed out.",
+							"effects": {"items": {"gilded_lance": 1}}
+						},
+						{
+							"weight": 20,
+							"text": "Behind the shelves of deeds there is a rack, and on the rack a short gilded gun with a chandelier mount and a note: PAID IN FULL.",
+							"effects": {"items": {"baron_tithe_gun": 1}}
+						},
+						{
+							"weight": 15,
+							"text": "The twin barrels of a turret lie wrapped in a monogrammed towel. Someone loved it very much.",
+							"effects": {"items": {"sovereign_turret": 1}}
+						},
+						{
+							"weight": 20,
+							"text": "Gold coin, loose, in a drift against the back wall. You fill every pocket you own.",
+							"effects": {"items": {"credits": 220, "scrap": 10}}
+						},
+						{
+							"weight": 20,
+							"text": "The 'warm' thing is the Baron's guard yacht, and it has been waiting for you with its guns dark.",
+							"effects": {"fight": "gen:barons"}
+						}
+					]
+				},
+				{
+					"text": "Strip the gilt from the hull plates (takes a while).",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "An hour with a cutter and a very small bucket. Gold leaf is mostly air, but the plate under it is good: scrap, and a handful of credits when you sell the leaf.",
+							"effects": {"items": {"scrap": 20, "credits": 60}, "crew_hp": -5}
+						}
+					]
+				},
+				{
+					"text": "Leave the gold where it lies.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You note the position of a very expensive ghost and keep going.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "baron_recruit",
+			"type": "distress",
+			"weight": 4,
+			"once": true,
+			"requires": {"region": ["clan_space", "boneyard"], "jumps_min": 2},
+			"title": "The Accounts Office",
+			"text": "A life pod in Baron livery is broadcasting: 'This is the accounts office of the yacht Seventh Helping. We have been dismissed, with some force.' Inside is a tidy man in sleeve garters, hugging a ledger as thick as a door. 'I can tell you,' he says, 'to the credit, what everything you own is worth, and what every Baron within three lanes owes the others. I am told that is no longer a career.'",
+			"choices": [
+				{
+					"text": "Take Pomfrey aboard.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "He steps over the coaming like a man crossing a customs line and opens his ledger before he has found a chair. 'Your fuel gauge,' he says, 'is lying to you. Also, I have questions about the scrap.'",
+							"effects": {"recruit": {"character": "pomfrey"}, "flag": "baron_defector"}
+						}
+					]
+				},
+				{
+					"text": "[Fenn] Compare ledgers with him first.",
+					"requires": {"species": "fenn"},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Fenn and the accountant disappear into the book for an hour and come out the best of friends, having found nine errors in the Barons' favour and two in yours. He comes aboard with a rebate in his pocket.",
+							"effects": {"recruit": {"character": "pomfrey"}, "flag": "baron_defector", "items": {"credits": 60}}
+						}
+					]
+				},
+				{
+					"text": "Wish him luck and move on.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "He watches you go through the pod's little port, still holding the ledger up like a shield. You hope the next ship is more appreciative of arithmetic.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "baron_feast",
+			"type": "trader",
+			"weight": 4,
+			"once": false,
+			"requires": {"region": ["clan_space", "boneyard"], "jumps_min": 3},
+			"title": "Whoever Arrives",
+			"text": "A chain of lit barges is tethered at the trade point, and down the middle of them runs a table forty metres long, laid for sixty and occupied by nine. The invitation, in gold on card, is addressed to WHOEVER ARRIVES. At its head a man in a coat that could stop a bolt waves a drumstick in greeting. 'Sit! Eat! I am Baron Orsolo. I find that a man who has dined with me can no longer in conscience shoot at me. It has worked four times out of five.'",
+			"choices": [
+				{
+					"text": "Take a seat at the table.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "The food is real, and it is wonderful, and your crew eat as if it is the last meal on the Drift. The Baron tells a story about his grandfather's yacht that takes an hour and has no ending. When you rise he presses a purse into your hand. 'For listening.'",
+							"effects": {"crew_hp": 25, "items": {"credits": 70}, "flag": "baron_guest"}
+						},
+						{
+							"weight": 20,
+							"text": "A good meal, and a long toast, and a bill in the shape of a sprained stomach: something in the soup does not agree with the crew. The Baron is mortified and has his physician send over a basket of fruit.",
+							"effects": {"crew_hp": -10, "items": {"fuel": 1}}
+						},
+						{
+							"weight": 20,
+							"text": "The toast is a signal. Down the long table, in perfect time, nine napkins are placed on nine plates, and the barges' gunports open.",
+							"effects": {"fight": "gen:barons"}
+						}
+					]
+				},
+				{
+					"text": "[Fenn] Work the room.",
+					"requires": {"species": "fenn"},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Fenn eats three courses and sells four rumours, one of them to the Baron himself, at a price he describes as 'frankly an honour'.",
+							"effects": {"items": {"credits": 110}, "crew_hp": 10}
+						}
+					]
+				},
+				{
+					"text": "Send your regrets and keep your distance.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The Baron raises the drumstick in salute. 'The ones who refuse always live longest,' he calls across the gap. 'It is the first thing I learned. It has never once stopped me inviting them.'",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "baron_bounty",
+			"type": "trader",
+			"weight": 3,
+			"once": true,
+			"requires": {"region": ["clan_space", "boneyard"], "jumps_min": 3},
+			"title": "A Baron's Bounty",
+			"text": "A Baron's agent in a velvet coat has pinned a poster to the trade-point board: WANTED, THE YACHT GILDED MEAN, BY ORDER OF HER OWN COUSIN. 'A family matter,' he says, not looking up from his ledger. 'Four hundred credits and the signet ring from her captain's finger. The Gilded Mean is a Baron's yacht, as you will see. She will hit back. Cousins do.'",
+			"choices": [
+				{
+					"text": "Take the contract.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Excellent. She is in the next lane over. Do try to leave the ring finger intact.' The agent pencils your name into a column headed EXPENDABLE, and then, after thought, rubs it out and writes it under the other heading.",
+							"effects": {"fight": "gen:barons", "flag": "baron_bounty_taken"},
+							"after_win": {
+								"text": "The Gilded Mean breaks up in a haze of confetti, which turns out to be shredded banknotes. The signet ring comes out of the wreck on its own, on a cut finger, with the finger. You are not sure the agent will want the finger.",
+								"effects": {"items": {"credits": 400}, "flag": "baron_bounty_done"}
+							}
+						}
+					]
+				},
+				{
+					"text": "Read the small print.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The small print says the bounty is paid in three instalments, the last of which is conditional on the death of the agent. You put the poster back.",
+							"effects": {}
+						}
+					]
+				},
+				{
+					"text": "Not your family. Not your problem.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The agent shrugs, rubs a thumb over the poster, and pins it a little straighter for the next ship.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}

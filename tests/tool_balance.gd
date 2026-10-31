@@ -74,7 +74,7 @@ func _initialize() -> void:
 	cap = float(args.get("cap", cap))
 	if args.has("jumps"):
 		jumps = Array(str(args["jumps"]).split(",")).map(func(s): return int(s))
-	factions = Array(str(args["factions"]).split(",")) if args.has("factions") else Shipgen.factions()
+	factions = Array(str(args["factions"]).split(",")) if args.has("factions") else Shipgen.factions().filter(func(f): return not Shipgen.tables()["factions"][f].has("budget_mult"))  # the rare factions (CONTENT 18) fight above the stage budget this tool uses: name them with factions= to see them anyway
 	out_path = str(args.get("out", out_path))
 	save_path = str(args.get("save", ""))
 	compare_path = str(args.get("compare", ""))
