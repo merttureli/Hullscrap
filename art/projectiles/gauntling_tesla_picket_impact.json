@@ -1,0 +1,20 @@
+{
+ "frame": [16, 16],
+ "anims": {
+  "play": [0, 4, 14]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [8, 8]
+ },
+ "glow": {
+  "image": "gauntling_tesla_picket_impact_glow.png",
+  "frame": [24, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Gauntling Tesla Picket hit: an arc flare, cyan forks leaving a white point (4 frames)."
+}

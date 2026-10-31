@@ -4,9 +4,11 @@ from px import *
 import export_crew, comp_base, comp_laser, comp_new, sp_export, comp_weapons, tile_wreck
 import pal_races1                 # race wave 1: three Mire skin greens + two private cyan letters (before the palette is written)
 import lines_reactor, lines_engine, lines_engine1, lines_o2_shield, lines_shield, lines_shop, lines_belt     # equipment lines + workshop + belts (extra palette letters register on import)
+import tech_b                     # racial tech, group b: Mire, Sporeling, Gauntling, Prismatic, Grundl (docs/waves/racial_tech_1.md)
 LINES = lines_reactor.ALL + lines_engine.ALL + lines_engine1.ALL + lines_o2_shield.ALL + lines_shield.ALL + lines_shop.ALL + lines_belt.ALL
 REPLACED = {'engine_mk1', 'shield_mk1'}            # redrawn by the lines modules (engine split into core + _out, shield with the new animation); comp_engine.py is the old west-facing engine, superseded
 COMPS = [C for C in [comp_laser.Laser] + comp_new.ALL if C.id not in REPLACED] + LINES + comp_weapons.ALL
+COMPS += tech_b.ALL
 def _sector_colours():
     """pal_sector's colours, read without importing it (its letters clash with pal_races1), under private keys."""
     import ast
@@ -28,6 +30,7 @@ if __name__ == '__main__':
         print(c.id, J['frame'], list(J['anims']))
     lines_belt.export_tiles(ART + '/tiles')
     tile_wreck.export()
+    tech_b.export_projectiles()      # racial tech projectiles + impacts (group b)
     # sector space art (debris, intakes, radars, tractor, HUD icons, backdrop, jump fx) runs in its own process: its palette
     # letters (pal_sector) reuse letters that race wave 1 (pal_races1) gives other colours, so the two can't share px.PAL
     subprocess.run([sys.executable, '-c', 'import sector_all; sector_all.export_all()'], check=True, cwd=os.path.dirname(os.path.abspath(__file__)))

@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "gauntling_tesla_picket_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Gauntling Tesla Picket: two big copper-wound coils side by side with a ball-electrode gap that arcs on the loop, a patched hatch, power coupling and five copper coils. damaged: a coil is scorched and arcs to the casing; disabled: both coils unwound. The rotating head gauntling_tesla_picket_barrel swivels in the ring: a tall copper-wound Tesla coil topped with a steel ball, arcs crawling off it, and a lamp eye; fire: forked lightning from the ball.",
+ "offset": [
+  0,
+  -4
+ ]
+}

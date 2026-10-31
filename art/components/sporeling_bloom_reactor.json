@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   5
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "sporeling_bloom_reactor_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    5
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Sporeling Bloom Reactor, 4x4: a brown, root-veined basin round a flower that blooms around a glowing amber core: eight cream-and-pink petals that open and close on the 4-frame loop, spore specks drifting up. Off: the bloom is a closed bud over a dark core. Damaged: two petals torn and drooping, the basin cracked and weeping, the core stuttering. Disabled: withered brown petals, a dead dry core, the basin split."
+}
