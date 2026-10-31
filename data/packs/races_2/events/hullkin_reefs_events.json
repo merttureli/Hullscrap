@@ -67,7 +67,7 @@
           {"weight": 50, "text": "She does not haggle. She stares. After a while, you leave.", "effects": {}}
         ]},
         {"text": "[Gauntling] Talk shop with the stall-keeper.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling runs a thumb along a plate's edge, holds it to the light, and starts naming the ship it came off. The stall-keeper slowly puts down her cloth. 'You know them,' she says. They spend three hours naming wrecks. She lets your Gauntling have the pick of the stall at cost.", "effects": {"items": {"titanium": 10, "scrap": 30}}}
+          {"weight": 100, "text": "Your Gauntling runs a thumb along a plate's edge, holds it to the light, and starts naming the ship it came off. The stall-keeper slowly puts down her cloth. 'You know them,' she says. They spend three hours naming wrecks. She lets your Gauntling have the pick of the stall at cost.", "effects": {"items": {"titanium": 8, "scrap": 25}}}
         ]},
         {"text": "[Hullkin] Pay in kind: a day's mending.", "requires": {"species": "hullkin"}, "outcomes": [
           {"weight": 100, "text": "Your Hullkin offers a day's mending for the stall in exchange for plate. The stall-keeper looks at the quality of their shell with deep respect and agrees. By evening the stall has no cracks at all, and your hold has plenty of plate.", "effects": {"items": {"titanium": 10, "scrap": 20}, "crew_hp": 5}}
@@ -85,7 +85,7 @@
           {"weight": 100, "text": "You cut in by a side hatch. The hold is full of steel and the corridor is full of Hullkin, standing in a slow silent line all the way to your ship. They don't stop you. They watch you carry. By the time you leave, your arms ache, and your conscience, somehow, aches more.", "effects": {"items": {"titanium": 14, "scrap": 50}, "crew_hp": -10}}
         ]},
         {"text": "[Hullkin] Ask the reef.", "requires": {"species": "hullkin"}, "outcomes": [
-          {"weight": 100, "text": "Your Hullkin climbs the side of the flagship, a metre a minute, and speaks to the elders in shell-script. It takes two days. At the end the elders open the bridge: the brass, the charts, the captain's chair, all of it, as a gift to a returning child of the Reef. 'She is one of ours,' they tell your crew. 'Take it all.' The bridge is yours, and a corner of the Reef's trust.", "effects": {"items": {"titanium": 10, "scrap": 30, "credits": 60}, "reveal": "wreck_field", "hull": 10}}
+          {"weight": 100, "text": "Your Hullkin climbs the side of the flagship, a metre a minute, and speaks to the elders in shell-script. It takes two days. At the end the elders open the bridge: the brass, the charts, the captain's chair, all of it, as a gift to a returning child of the Reef. 'She is one of ours,' they tell your crew. 'Take it all.' The bridge is yours, and a corner of the Reef's trust.", "effects": {"items": {"titanium": 10, "scrap": 30, "credits": 40}, "reveal": "wreck_field", "hull": 10}}
         ]},
         {"text": "Leave the fleet in peace.", "outcomes": [
           {"weight": 100, "text": "You turn away. Behind you the line of eyestalks shifts, each a little, and you feel better about yourself for the rest of the day.", "effects": {"crew_hp": 5}}

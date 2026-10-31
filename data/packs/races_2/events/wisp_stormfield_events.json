@@ -44,14 +44,14 @@
       "text": "Forty dead reactors have been drawn into a ring, nose to nose, with their cores glowing a faint cold violet. They hum in unison. It is not a tune, quite; it is a breath, in and out, with a patient little crackle at the top. In the middle of the ring a stack of plasma cells has been laid with great neatness, like candles on a cake.",
       "choices": [
         {"text": "Take the plasma cells.", "outcomes": [
-          {"weight": 60, "text": "The reactors go quiet as you reach in. The cells are good, and the quiet has an edge to it.", "effects": {"items": {"plasma_cell": 4}, "crew_hp": -5}},
-          {"weight": 40, "text": "The reactors do not like this. A long white arc crosses the ring and your hull, and takes most of the afternoon with it.", "effects": {"items": {"plasma_cell": 3}, "hull": -10, "crew_hp": -10}}
+          {"weight": 60, "text": "The reactors go quiet as you reach in. The cells are good, and the quiet has an edge to it.", "effects": {"items": {"plasma_cell": 3}, "crew_hp": -5}},
+          {"weight": 40, "text": "The reactors do not like this. A long white arc crosses the ring and your hull, and takes most of the afternoon with it.", "effects": {"items": {"plasma_cell": 2}, "hull": -10, "crew_hp": -10}}
         ]},
         {"text": "Listen.", "outcomes": [
           {"weight": 100, "text": "You stay an hour. The hum rises and falls and goes through you like a long bath. When it is done, a single plasma cell has rolled across the ring to your hull and sits there, glowing, as a tip.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": 10}}
         ]},
         {"text": "[Wisp] Ask them to release one.", "requires": {"species": "wisp"}, "outcomes": [
-          {"weight": 100, "text": "Your Wisp drifts into the ring, small and bright, and hums at the nearest reactor. It hums back. There is a long exchange in a language of crackles. Then, one by one, the dead reactors go dark, and the cells are rolled, politely, to your hull. 'They were holding it for someone,' your Wisp says. 'They had forgotten who.'", "effects": {"items": {"plasma_cell": 6, "copper": 15}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Wisp drifts into the ring, small and bright, and hums at the nearest reactor. It hums back. There is a long exchange in a language of crackles. Then, one by one, the dead reactors go dark, and the cells are rolled, politely, to your hull. 'They were holding it for someone,' your Wisp says. 'They had forgotten who.'", "effects": {"items": {"plasma_cell": 4, "copper": 10}, "crew_hp": 5}}
         ]},
         {"text": "Leave the choir alone.", "outcomes": [
           {"weight": 100, "text": "You steer round the ring. Behind you the hum goes on, in and out, and you find that you are breathing along.", "effects": {}}
@@ -89,7 +89,7 @@
           {"weight": 50, "text": "The Wardens decide you are the more interesting target.", "effects": {"fight": "tier"}}
         ]},
         {"text": "[Wisp] Call the storm.", "requires": {"species": "wisp"}, "outcomes": [
-          {"weight": 100, "text": "Your Wisp goes out through the hull and lifts both arms. The storm answers. Every cloud in the field lights at once, and a long fork of white fire walks the picket from end to end. The Wardens, whose sensors have never been taught to be afraid, put their scanners out and sit in the dark, slowly turning. The small bright thing lands on your Wisp, shaking. 'A cousin,' they tell you. 'She says thanks, in the usual way.' The hold is full of burnt Warden parts.", "effects": {"items": {"crystal": 4, "plasma_cell": 2, "scrap": 30}}}
+          {"weight": 100, "text": "Your Wisp goes out through the hull and lifts both arms. The storm answers. Every cloud in the field lights at once, and a long fork of white fire walks the picket from end to end. The Wardens, whose sensors have never been taught to be afraid, put their scanners out and sit in the dark, slowly turning. The small bright thing lands on your Wisp, shaking. 'A cousin,' they tell you. 'She says thanks, in the usual way.' The hold is full of burnt Warden parts.", "effects": {"items": {"crystal": 3, "plasma_cell": 1, "scrap": 20}}}
         ]},
         {"text": "[Prismatic] Dazzle their scanners.", "requires": {"species": "prismatic"}, "outcomes": [
           {"weight": 100, "text": "Your Prismatic turns their facets to catch the lightning and throws it back at the picket in a hundred hard colours. The Wardens' scanners, tuned for the old light, spin in confusion. The picket scatters, and the small bright thing comes to sit on your hull, shaking and grateful, and glows its thanks all the way to the exit.", "effects": {"items": {"crystal": 3, "plasma_cell": 1}}}

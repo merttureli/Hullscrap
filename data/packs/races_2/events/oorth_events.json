@@ -45,7 +45,7 @@
         {"text": "Bid forty on lot nine.", "requires": {"credits": 40}, "outcomes": [
           {"weight": 45, "text": "Lot nine is forty pounds of good copper wire, a sandwich, and a card that says THANK YOU FOR YOUR CUSTOM.", "effects": {"items": {"credits": -40, "copper": 30}}},
           {"weight": 35, "text": "Lot nine is a crate of left boots. Gil looks briefly at the ceiling.", "effects": {"items": {"credits": -40, "scrap": 15}}},
-          {"weight": 20, "text": "Lot nine is a crate of nanite paste that Gil was too lazy to read. Gil is not too lazy to look sick about it afterwards.", "effects": {"items": {"credits": -40, "nanite_paste": 3}}}
+          {"weight": 20, "text": "Lot nine is a crate of nanite paste that Gil was too lazy to read. Gil is not too lazy to look sick about it afterwards.", "effects": {"items": {"credits": -40, "nanite_paste": 2}}}
         ]},
         {"text": "Watch the bidding.", "outcomes": [
           {"weight": 100, "text": "You learn that the tall man in row three has not won a lot in a year, and that the woman beside him bids on everything. You learn nothing useful, and enjoy it.", "effects": {}}
