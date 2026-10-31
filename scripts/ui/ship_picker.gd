@@ -158,6 +158,7 @@ func choose(i: int) -> String:
 		if build != null:
 			build.message = why
 		return why
+	_prepare(sim.player_ship())
 	if crew != null:
 		crew.set("player", null)  # they respawn on the new ship
 		crew.set("ada", null)
@@ -172,6 +173,11 @@ func choose(i: int) -> String:
 	on_escape = Callable()
 	chosen.emit()
 	return ""
+
+
+## The chosen ship, just loaded and before its run starts (the hangar puts the unlocks of the new-run row on it).
+func _prepare(_ship) -> void:
+	pass
 
 
 # --- input -------------------------------------------------------------------------------------------

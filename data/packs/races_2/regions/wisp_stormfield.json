@@ -1,0 +1,25 @@
+{
+	"id": "wisp_stormfield",
+	"name": "The Stormfield",
+	"home_species": "wisp",
+	"faction": "",
+	"stages": [4, 8],
+	"weight": 10,
+	"rarity": "rare",
+	"danger": 1.3,
+	"palette": {"tint": "#9ee7ff", "nebula": "lumen"},
+	"map": {},
+	"node_weights": {"anomaly": 28, "wreck_field": 18, "asteroid_field": 12, "empty": 12, "distress": 10, "pirate": 8, "trader": 6, "patrol": 6},
+	"places": [
+		{"id": "earthing_post", "name": "The Earthing Post", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"copper_coil": 1.6, "scrap_chunk_s": 1.2},
+	"pois": {"anomaly": 2.0, "wreck": 1.3},
+	"ambient": {"trader": 2, "pirate": 2, "patrol": 1},
+	"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "shield_neon_mk1": 340, "siren_ion_neon": 400, "longburn_mk2": 270, "radiator": 50, "helm": 70, "oxygen_gen": 90},
+	"recruit": {"wisp": 8, "prismatic": 1, "emberkin": 1},
+	"enemies": "wardens",
+	"hazards": ["ion_storm"],
+	"events": "wisp_stormfield",
+	"blurb": "A storm that never ended: forty years of lightning looping through a field of reactors left holding their charge. The Wisps were born here from the first night's flash and still arrive with the weather. The Earthing Post is the only station in the Drift with a lightning rod where a dock should be."
+}

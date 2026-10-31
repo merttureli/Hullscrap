@@ -21,7 +21,8 @@ extends RefCounted
 ## What the crew's traits change (traits.gd, the library in data/traits.json) is asked there: work speed
 ## (work_rate: repair, extinguish, breach, revive, swarm and aura bonuses), air and fire damage, room heat
 ## (dries_out, heat_speed), healing (heal_mult, auras), ion hits (ion_hit: damage and stun), vacuum_walk (no suffocation),
-## no_tools (no repair or extinguish jobs) and hull_mend (idle crew mend the walls and breaches next to them).
+## vacuum_speed (the walk in thin air), line_affinity (repairing a part of a line), no_tools (no repair or extinguish jobs) and
+## hull_mend (idle crew mend the walls and breaches next to them). revive_once, split_on_death: mortality.gd.
 ## Repairs take `seconds` x the repair multiplier of the part's line (of the wall's line for a
 ## breach). A crew member at a station marks it in `ship.manned` (uid -> name): a manned helm adds
 ## evasion in a fight and a manned weapon cools down faster (see evasion_bonus, cooldown_mult).
@@ -131,7 +132,8 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 				_since = 1.0e9
 		"repair_breach", "repair_component", "revive", "clear_wreck", "repair_belt":
 			var key: String = job["key"]
-			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(ship, m, job["type"])
+			var line: String = TraitSet.part_line(ship, job["uid"]) if job["type"] == "repair_component" else ""  # their line_affinity
+			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(ship, m, job["type"], line)
 			if progress[key] >= float(job["work"]) - 1e-6:
 				_finish(ship, job)
 		"repair_crew":  # mends the hurt crewmate (hp a second) until they are whole
@@ -146,9 +148,9 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 ## How fast `m` does a job of `type`, 1.0 being normal: the work_mult of their traits for it (fast_repair
 ## works a repair or a breach 1 / 0.6 times as fast, a Basalt revives at half speed), with the swarm and
 ## aura bonuses of the crew in their room (TraitSet.work_rate), times what the parts in their room do to the work
-## (Abilities.work_mult: room_work_mult, wet).
-static func _work_rate(ship, m, type: String) -> float:
-	return TraitSet.work_rate(ship, m, WORK_KIND.get(type, "repair")) * Abilities.work_mult(ship, m)
+## (Abilities.work_mult: room_work_mult, wet). `line`: the equipment line of the part they work on (their line_affinity).
+static func _work_rate(ship, m, type: String, line := "") -> float:
+	return TraitSet.work_rate(ship, m, WORK_KIND.get(type, "repair"), line) * Abilities.work_mult(ship, m)
 
 
 ## Is `job` the mending of `m` themselves? Nobody mends their own body.
@@ -167,16 +169,17 @@ func build_board(ship) -> void:
 		_add(b, _job("extinguish", "fire:%d,%d" % [c.x, c.y], [c], {"cell": c}))
 	for m in ship.crew:
 		if m.is_down():
-			_add(b, _job("revive", "revive:" + m.name, m.body_cells(), {"who": m.name}))
+			if m.revive_t < 0.0:  # one who is about to get up by themselves (revive_once) is left alone
+				_add(b, _job("revive", "revive:" + m.name, m.body_cells(), {"who": m.name}))
 		elif m.hp < m.max_hp and TraitSet.of(m)["mechanical"]:
 			_add(b, _job("repair_crew", "mend:" + m.name, m.body_cells(), {"who": m.name}))
 	for c in Fire.sorted_cells(grid.breached.keys()):
 		var tile: Dictionary = grid.defs.get_def(grid.breached[c]) if grid.defs != null else {}
 		var mult := float(ship.lines.get(str(tile.get("line", "standard")), {}).get("repair", 1.0))
 		var extra := {"cell": c, "work": float(j["repair_breach"]["seconds"]) * mult}
-		var mount: int = ship.components.link_at(c)
-		if mount >= 0:  # a breach in a hull mount's wall: its own inside half may fill the only floor beside it, so it is worked from there
-			extra["reach"] = ship.components.instances[mount]["cells"].duplicate()
+		var near := _parts_by_breach(ship, c)
+		if not near.is_empty():  # a part (a hull mount's inside half) may fill the only floor beside it, so it is worked from beside the part
+			extra["reach"] = near
 		_add(b, _job("repair_breach", "breach:%d,%d" % [c.x, c.y], [c], extra))
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
@@ -529,6 +532,8 @@ func _health(ship, dt: float) -> void:
 			if heat > float(dry["heat_above"]) and float(dry["hp_per_s"]) > 0.0:
 				dmg += float(dry["hp_per_s"])
 		m.speed_mod = TraitSet.heat_factor(t, heat) if room >= 0 and by_heat else 1.0
+		if room >= 0 and float(t["vacuum_speed"]) != 1.0:  # in thin air (vacuum_speed)
+			m.speed_mod *= TraitSet.thin_air_factor(t, ship.atmosphere.pressure_of(room))
 		if dmg > 0.0:
 			m.hurt(dmg * dt)
 		var heal := _heal_rate(ship, m) + float(auras.get(room, {}).get("heal_per_s", 0.0))
@@ -680,6 +685,26 @@ func stand_spots(ship, job: Dictionary, body := Pathfinder.BODY) -> Array[Vector
 	if not clear.is_empty():
 		all.assign(clear)
 	return all
+
+
+## The cells of the parts round breach cell `c`: the mount whose wall it is in or beside, and any part on a cell beside it.
+func _parts_by_breach(ship, c: Vector2i) -> Array:
+	var uids := {}
+	if ship.components.link_at(c) >= 0:
+		uids[ship.components.link_at(c)] = true
+	for d in SIDES:
+		var uid: int = ship.components.at(c + d)
+		if uid >= 0:
+			uids[uid] = true
+		var mount: int = ship.components.link_at(c + d)  # the wall beside a mount's wall: its inside half fills the floor there too
+		if mount >= 0:
+			uids[mount] = true
+	var keys: Array = uids.keys()
+	keys.sort()
+	var out: Array = []
+	for uid in keys:
+		out.append_array(ship.components.instances[uid]["cells"])
+	return out
 
 
 func _beside(c: Vector2i, inside: Dictionary) -> Array[Vector2i]:
@@ -841,7 +866,7 @@ static func _works(ship, uid: int) -> bool:
 # --- people -------------------------------------------------------------------------------------
 
 ## Make sure `ship` has its starting crew: the design's crew list when it has one (`ship.crew_plan`,
-## names and species), else the player's soldier, Ada, and `extra_crew` more NPCs at the beds
+## names and species; the entry named like the player in data/crew.json, or marked `player`, is the soldier), else the player's soldier, Ada, and `extra_crew` more NPCs at the beds
 ## (data/crew.json). Only adds what is missing, and stops at the first one that finds no place for a
 ## body yet. Returns the new members.
 static func spawn_crew(ship) -> Array:
@@ -898,7 +923,7 @@ static func _spawn_planned(ship) -> Array:
 	var npc := 0
 	for e in ship.crew_plan:
 		var who: String = e["name"]
-		var is_player: bool = who == cfg["player"]["name"]
+		var is_player: bool = who == cfg["player"]["name"] or bool(e.get("player", false))  # a renamed soldier is marked `player` (run_start.gd)
 		var is_ada: bool = who == cfg["ada"]["name"]
 		var nth := npc
 		if not is_player and not is_ada:

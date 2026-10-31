@@ -1403,6 +1403,222 @@
         "belt_interval": 0.3
       },
       "quirk": "8 cells a second, one unit every 0.3 s. Neon: an ion hit shuts it (and the belt) down twice as long as it does the other drives."
+    },
+    {
+      "id": "intake_mk2",
+      "name": "Salvage Intake Mk2",
+      "blurb": "A wider mouth with two coils a cheek and a second belt in the hopper. Draws in what drifts within four cells.",
+      "family": "intake",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#49b8e8",
+      "power": -1,
+      "priority": 6,
+      "manned": false,
+      "hp": 7,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "pull_radius": 4
+      }
+    },
+    {
+      "id": "intake_mk3",
+      "name": "Salvage Intake Mk3",
+      "blurb": "Heavy rims, three fat coils a cheek and a field stabiliser. Hauls in what drifts within five cells, and drinks more power doing it.",
+      "family": "intake",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 6
+      },
+      "color": "#38c9ea",
+      "power": -2,
+      "priority": 6,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "pull_radius": 5
+      }
+    },
+    {
+      "id": "radar_mk1",
+      "name": "Radar Mk1",
+      "blurb": "A dish on a turntable outside and a small round scope inside. Shows a contact and its bearing out to 6,000 px, but not what it is.",
+      "family": "radar",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 3
+      },
+      "color": "#6fd6a8",
+      "power": -1,
+      "priority": 6,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "radar_range": 6000,
+        "identify": 0
+      }
+    },
+    {
+      "id": "radar_mk2",
+      "name": "Radar Mk2",
+      "blurb": "A bigger dish and a wide console. Sees 10,000 px, names what it sees, and rates how dangerous a ship is in skulls.",
+      "family": "radar",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#5fe0b4",
+      "power": -2,
+      "priority": 6,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "radar_range": 10000,
+        "identify": 1
+      }
+    },
+    {
+      "id": "radar_mk3",
+      "name": "Radar Mk3",
+      "blurb": "A phased array on a boom. Sees 16,000 px, names what it sees, and finds the contacts that are running dark.",
+      "family": "radar",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#4feac0",
+      "power": -3,
+      "priority": 6,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "radar_range": 16000,
+        "identify": 1,
+        "see_hidden": 1
+      }
+    },
+    {
+      "id": "tractor_mk1",
+      "name": "Tractor Beam Mk1",
+      "blurb": "A bank of copper coils behind a swivelling emitter. Hold Q and it hauls the debris within 300 px toward the nearest working intake.",
+      "family": "tractor",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#8ff0c8",
+      "power": -2,
+      "priority": 6,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "tractor_range": 300,
+        "tractor_pull": 150
+      }
+    },
+    {
+      "id": "tractor_mk2",
+      "name": "Tractor Beam Mk2",
+      "blurb": "Five coils and a flared emitter. Hold Q and it hauls the debris within 450 px toward the nearest intake, faster than the Mk1.",
+      "family": "tractor",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#7af5cf",
+      "power": -3,
+      "priority": 6,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "tractor_range": 450,
+        "tractor_pull": 220
+      }
     }
   ]
 }

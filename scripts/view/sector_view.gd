@@ -12,12 +12,14 @@ extends Node2D
 ##   block, the real flight numbers), and when it ends the ship takes the fight's place. A win or a capture leaves the
 ##   wreck as a POI, already salvaged: the salvage pick comes from the map (map_view.gd, Salvage.event_for).
 ## - Red alert: BuildMode's hostiles_source is red_alert_hostiles() (the fight's enemy and the passing pirates).
+## - When the Hollow tide takes the place the ship is in (sector.hollow), the HUD says FALL_TEXT; debris_view.gd thins the field.
 ## - in_play() and the `played` signal say when the sector runs (play mode, nothing open over it, no fight), for clocks
 ##   that count play time (the Hollow tide's linger).
 ## - Under the ship: the POIs the radar sees (flat placeholder shapes), the passing ships, the course line and the
 ##   spool ring. On the HUD: the compass ring (contacts, the course and debris within 2,000 px as dots), edge markers
 ##   (art/ui/poi_icons.png: the icon, the distance, the type once identified; Radar.contacts) that set a course when
-##   clicked (again: cancel), and the sector, helm and jump drive lines.
+##   clicked (again: cancel), and the sector, helm and jump drive lines. A radar that identifies (Mk2 and up) also names a
+##   passing ship by its kind and rates the threat of one that may fight in skulls under its marker (Radar.threat).
 ## Off on the build screen (build mode is the old upright view at the origin, and the world holds) and with the old
 ## instant jump. frame(dt) runs one tick without the scene tree, so tests can drive it.
 
@@ -28,8 +30,11 @@ const Session = preload("res://scripts/combat/combat_session.gd")
 const Art = preload("res://scripts/view/art.gd")
 
 const DEBRIS_DOTS := 2000.0  ## px: debris this near shows on the compass ring
+const THREAT_S := 2.0  ## seconds a contact's skulls are kept before they are rated again
+const SKULL_STEP := 13.0  ## screen px between two skulls under a marker
 const FLASH_S := 0.45  ## seconds the jump flash plays on arrival
 const SAY_S := 4.0  ## seconds a message stays
+const FALL_TEXT := "The tide is here. Something is coming."  ## the HUD line when the Hollow tide takes the place the ship is in
 const ICON := 32.0  ## screen px of a marker icon (the 16 px art at 2x)
 const EDGE := 46.0  ## screen px the edge markers keep from the border
 const TOP := 66.0  ## screen px down to the sector's lines (under the HUD's top bar)
@@ -64,7 +69,9 @@ var _clock := 0.0
 var _said := -100.0
 var _posed := false  # BuildMode and the crew are moved to the ship's place
 var _flash := 0.0
+var _hollow_seen := false  # whether the sector was Hollow at the last look: the HUD tells when it falls
 var _markers: Array = []  # [{rect (screen), id}] of the last HUD frame, for clicks
+var _threats := {}  # POI id -> {n (skulls), t (the clock it was rated at)} for this sector
 var _layer: CanvasLayer
 var _hud: Control
 var _icons = null
@@ -236,6 +243,10 @@ func frame(dt: float) -> void:
 				_say("Arrived at %s." % helm.arrived)
 		if not s.tick(dt, ship).is_empty():
 			_say("A ship shows on the radar.")
+		if s.hollow != _hollow_seen:
+			_hollow_seen = s.hollow
+			if s.hollow:
+				_say(FALL_TEXT)
 		_spool(dt, c, ship)
 		if not fighting and _sector == s and map != null and not map.visible:
 			var res: Dictionary = s.trigger(c, ship)
@@ -262,6 +273,8 @@ func _sync(c, ship) -> void:
 		return
 	_campaign = c
 	_sector = s
+	_threats.clear()
+	_hollow_seen = s.hollow
 	helm.refresh(ship)
 	helm.place(s.ship_pos, s.ship_vel, s.ship_angle)
 	helm.clear_course()
@@ -421,9 +434,22 @@ static func dist_text(d: float) -> String:
 	return "%.1fk px" % (d / 1000.0) if d >= 1000.0 else "%d px" % roundi(d)
 
 
-## The name a contact shows: its name once its type is known, else "Contact".
+## The name a contact shows: its name once its type is known (a passing ship by its kind), else "Contact".
 static func contact_name(ct: Dictionary) -> String:
-	return "Contact" if ct["known_type"] == Radar.CONTACT else str(ct["poi"]["name"])
+	return Radar.title(ct)
+
+
+## The skulls (1 to 5) of the ship behind contact `ct`, 0 when it shows none (Radar.threat: a radar that identifies, a ship that
+## may fight). Kept THREAT_S seconds a contact, as building the enemy to rate it costs a little.
+func threat_of(ct: Dictionary) -> int:
+	if Radar.fighter_kind(ct["poi"]) == "" or not bool(ct.get("scanned", false)):
+		return 0
+	var id := str(ct["poi"]["id"])
+	var e: Dictionary = _threats.get(id, {})
+	if e.is_empty() or _clock - float(e["t"]) > THREAT_S:
+		e = {"n": Radar.threat(campaign(), _ship(), ct), "t": _clock}
+		_threats[id] = e
+	return int(e["n"])
 
 
 ## The sector's title: the node and the region.
@@ -685,7 +711,30 @@ func _draw_marker(ct: Dictionary, xf: Transform2D, centre: Vector2, vp: Vector2)
 	var tp := Vector2(clampf(at.x - tw / 2.0, 4.0, vp.x - tw - 4.0), at.y + ICON * 0.5 + 14.0)
 	_hud.draw_string_outline(font, tp, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color(0, 0, 0, 0.9 * alpha))
 	_hud.draw_string(font, tp, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(CYAN if course else TEXT, alpha))
-	_markers.append({"rect": Rect2(at - Vector2(ICON, ICON) * 0.6, Vector2(ICON, ICON) * 1.2).merge(Rect2(tp + Vector2(0.0, -12.0), Vector2(tw, 16.0))), "id": poi["id"]})
+	var rect := Rect2(at - Vector2(ICON, ICON) * 0.6, Vector2(ICON, ICON) * 1.2).merge(Rect2(tp + Vector2(0.0, -12.0), Vector2(tw, 16.0)))
+	var skulls := threat_of(ct)
+	if skulls > 0:
+		var row := Vector2(tp.x + tw / 2.0 - SKULL_STEP * 2.5, tp.y + 12.0)
+		_draw_skulls(row, skulls, alpha)
+		rect = rect.merge(Rect2(row + Vector2(0.0, -8.0), Vector2(SKULL_STEP * 5.0 + 24.0, 16.0)))
+	_markers.append({"rect": rect, "id": poi["id"]})
+
+
+## `n` of 5 small skulls in a row from `at` (the row's left middle) and "n/5" after them: lit ones in the band's colour
+## (1-2 dim, 3 amber, 4-5 red), as the region cards and the enemy's schematic show a rating.
+func _draw_skulls(at: Vector2, n: int, alpha: float) -> void:
+	var on := RED if n >= 4 else (AMBER if n == 3 else DIM_TEXT)
+	for i in 5:
+		var c := Color(on if i < n else Color("#3a4350"), alpha)
+		var o := at + Vector2(SKULL_STEP * i + 6.0, 0.0)
+		_hud.draw_circle(o, 5.0, c)
+		_hud.draw_rect(Rect2(o + Vector2(-3.0, 3.0), Vector2(6.0, 4.0)), c)
+		_hud.draw_circle(o + Vector2(-2.0, 0.0), 1.4, Color("#10151c", alpha))
+		_hud.draw_circle(o + Vector2(2.0, 0.0), 1.4, Color("#10151c", alpha))
+	var font := ThemeDB.fallback_font
+	var tx := at + Vector2(SKULL_STEP * 5.0 + 8.0, 4.0)
+	_hud.draw_string_outline(font, tx, "%d/5" % n, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 3, Color(0, 0, 0, 0.9 * alpha))
+	_hud.draw_string(font, tx, "%d/5" % n, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(on, alpha))
 
 
 ## Where the line from `from` toward `to` leaves `box`.

@@ -462,7 +462,7 @@ func test_recruit_for_150_credits() -> void:
 	c.roll_offers("rusthold", ship)
 	eq(c.offers["rusthold"].size(), 2, "2 recruits on offer")
 	for o in c.offers["rusthold"]:
-		check(o["species"] in ["human", "basalt", "fenn", "kett", "gauntling"], "species weighted by the station: " + o["species"])
+		check(o["species"] in ["human", "basalt", "fenn", "kett", "gauntling", "drakkin"], "species weighted by the station: " + o["species"])
 		check(o["name"] != "", "each has a name")
 	var first: Dictionary = c.offers["rusthold"][0]
 	var crew := ship.crew.size()

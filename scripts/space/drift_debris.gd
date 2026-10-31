@@ -5,6 +5,8 @@ extends RefCounted
 ## of the view. A piece within an intake's pull radius of its outside half (the mouth) is drawn toward it, and
 ## one that touches the mouth lands in ship.inventory (refused when the hold cannot take it: it bounces). A
 ## piece that touches any other solid cell (a tile, an outside half) bounces off and keeps drifting.
+## While `tractor_on` (Q held, debris_view.gd) the working tractor beams (tractor.gd) haul every piece within their range
+## toward the nearest working intake, faster than an intake's own pull.
 ## A sector (sector.gd) can set the current and the density (for_sector); with none, the numbers of debris.json run.
 ## Positions are world px. On the build screen that is the space the build view draws the ship in (ship.world_pos is
 ## the grid centre); in a sector the pieces live in sector px and `frame` says where the ship's cells are (its place and
@@ -13,11 +15,13 @@ extends RefCounted
 ## Randomness comes from one RandomNumberGenerator seeded by the caller (the ship's rng_seed): same seed, same run.
 
 const Content = preload("res://scripts/data/content.gd")
+const Tractor = preload("res://scripts/space/tractor.gd")
 const PATH := "res://data/debris.json"
 const CELL := 32.0  ## world px per grid cell (build_mode.gd CELL)
 const SUBSTEP := 0.05  ## longest time step the pieces move by
 const PULL_GLOW := 0.35  ## seconds a mouth keeps `pulling` after it last drew a piece
 const LANE_REFRESH := 1.0  ## seconds between looks at the ship's outline
+const BEAM_LINES := 4  ## most pieces a tractor beam is drawn to at once
 const MAX_EVENTS := 64
 const HUD_ORDER: Array[String] = ["scrap", "copper", "polymer", "fuel", "missile", "ice"]  ## the order the HUD lists what was taken
 const COMPASS: Array[String] = ["east", "south-east", "south", "south-west", "west", "north-west", "north", "north-east"]
@@ -30,6 +34,9 @@ var picked := 0  ## pieces collected in this session
 var events: Array = []  ## for the view, until take_events(): {kind: "collect", pos (the mouth), text, uid, type}
 var pulling := {}  ## intake uid -> seconds it still shows the pulling animation
 var mouth_count := 0  ## working intakes at the last step
+var tractor_on := false  ## Q is held: the working tractor beams haul pieces toward the nearest intake (the view sets it)
+var beams_on: Array = []  ## uids of the tractor beams that work now, while tractor_on (the view lights their emitters)
+var beam_lines: Array = []  ## while a beam hauls: [{uid, from (its emitter), to (a piece), aim (a unit vector in the ship's own frame)}], nearest piece first
 var time := 0.0  ## seconds of drifting; the current's wobble follows it
 var rng := RandomNumberGenerator.new()
 var view_centre := Vector2.ZERO  ## world point at the middle of the screen (the view sets it)
@@ -41,6 +48,8 @@ var _total_weight := 0.0
 var _spawn_in := 0.0
 var _phase: Array[float] = [0.0, 0.0, 0.0]
 var _next_uid := 1
+var _beams: Array = []  # the working tractor beams of this step (tractor.gd beams)
+var _hauls := {}  # beam uid -> [{d, at, lp, pos}] the pieces it hauled in the last sub-step (distance to its emitter, the emitter and the piece in the ship's px, the piece in world px)
 var _bounds := Rect2()
 var _bounds_age := 1.0e9
 
@@ -61,6 +70,12 @@ func _init(seed_value := 1, p_cfg: Dictionary = {}) -> void:
 ## its node type, on top of data/debris.json. The ship in `sector` moves; the pieces still drift with the current.
 static func for_sector(sector, seed_value := 1):
 	return new(seed_value, sector.debris_cfg(Content.read(PATH)))
+
+
+## `sector` changed its density (the Hollow tide took it, sector.gd hollow): take its spawn numbers again. The pieces already
+## adrift stay, and no more come until fewer than the new cap are about.
+func rescale(sector) -> void:
+	cfg["spawn"] = sector.debris_cfg(Content.read(PATH))["spawn"]
 
 
 # --- the current ---------------------------------------------------------------------------------------
@@ -108,6 +123,10 @@ func step(ship, dt: float) -> void:
 		return
 	var mouths := intakes(ship)
 	mouth_count = mouths.size()
+	_beams = Tractor.beams(ship, _origin(ship)) if tractor_on else []
+	beams_on = _beams.map(func(b): return b["uid"])
+	if _beams.is_empty():
+		beam_lines = []
 	var left := dt
 	while left > 1.0e-6:
 		var h := minf(SUBSTEP, left)
@@ -158,12 +177,15 @@ func _sub(ship, mouths: Array, h: float) -> void:
 	var dir := flow_dir()
 	var lane := _lane(ship)
 	var limit := {"vel": current_dir() * current_speed(), "along": _reach(lane), "across": _cross_reach(lane), "dir": dir, "inv": frame.affine_inverse()}
+	_hauls.clear()
 	var i := 0
 	while i < pieces.size():
 		if _move(ship, pieces[i], mouths, limit, h):
 			i += 1
 		else:
 			pieces.remove_at(i)
+	if not _beams.is_empty():
+		_note_hauls()
 
 
 ## Move one piece by `h`; `now`: the current's vel and dir and the despawn distances (along, across). False when it is gone.
@@ -181,10 +203,23 @@ func _move(ship, p: Dictionary, mouths: Array, now: Dictionary, h: float) -> boo
 			if d - r <= float(m["pull"]) and d < best_d:
 				best = m
 				best_d = d
+		var speed := 0.0
+		var to := Vector2.ZERO
 		if not best.is_empty():
-			var to: Vector2 = frame.basis_xform(best["rect"].get_center() - lp)
-			p["vel"] = p["vel"].lerp(frame_vel + to.normalized() * float(cfg["pull"]["speed"]), 1.0 - exp(-float(cfg["pull"]["ease"]) * h))
+			speed = float(cfg["pull"]["speed"])
+			to = best["rect"].get_center()
 			pulling[best["uid"]] = PULL_GLOW
+		if not _beams.is_empty():  # Q: a tractor beam hauls it, faster than a mouth does
+			var t := Tractor.pull(_beams, mouths, lp, r)
+			if not t.is_empty():
+				var list: Array = _hauls.get(t["beam"], [])
+				list.append({"d": lp.distance_to(t["at"]), "at": t["at"], "lp": lp, "pos": p["pos"]})
+				_hauls[t["beam"]] = list
+				if float(t["speed"]) > speed:
+					speed = float(t["speed"])
+					to = t["to"]
+		if speed > 0.0:
+			p["vel"] = p["vel"].lerp(frame_vel + frame.basis_xform(to - lp).normalized() * speed, 1.0 - exp(-float(cfg["pull"]["ease"]) * h))
 	p["pos"] += p["vel"] * h
 	p["angle"] += p["spin"] * h
 	for m in mouths:  # touching the mouth: into the hold
@@ -202,6 +237,28 @@ func _move(ship, p: Dictionary, mouths: Array, now: Dictionary, h: float) -> boo
 	var rel: Vector2 = p["pos"] - view_centre
 	var dir: Vector2 = now["dir"]
 	return p["age"] < float(cfg["spawn"]["max_age"]) and rel.dot(dir) <= now["along"] and absf(rel.dot(Vector2(-dir.y, dir.x))) <= now["across"]
+
+
+## The beams' lines of the last sub-step: for each beam that hauled, the BEAM_LINES nearest pieces it holds, nearest first.
+func _note_hauls() -> void:
+	beam_lines = []
+	var uids: Array = _hauls.keys()
+	uids.sort()
+	for uid in uids:
+		var list: Array = _hauls[uid]
+		list.sort_custom(func(a, b): return a["d"] < b["d"])
+		for k in mini(list.size(), BEAM_LINES):
+			var e: Dictionary = list[k]
+			beam_lines.append({"uid": uid, "from": frame * e["at"], "to": e["pos"], "aim": (e["lp"] - e["at"]).normalized()})
+
+
+## The way each beam that hauls points, in the ship's own frame: uid -> unit vector (its nearest piece).
+func beam_aims() -> Dictionary:
+	var out := {}
+	for l in beam_lines:
+		if not out.has(l["uid"]):
+			out[l["uid"]] = l["aim"]
+	return out
 
 
 # --- spawning ------------------------------------------------------------------------------------------

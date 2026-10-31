@@ -351,7 +351,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
     - **Gantry Rusthold** is the start, at the left edge.
     - **Meridian** is mid-map.
     - **The Prism** exists from the start but stays hidden until the flag `prism_revealed` is set.
-    - **Three Dead Gates** sit on the far edges (`gate` nodes, not enterable yet: "the gate is dark").
+    - **Three Dead Gates** sit on the far edges (`gate` nodes; "the gate is dark" everywhere but in the ending region, where their shells can be approached: section 13).
   - Every other node rolls a type by weight: `pirate` 22, `wreck_field` 18, `distress` 16, `trader` 10, `anomaly` 8 (Lumen), `patrol` 8 (Concord), `empty` 18.
   - **Fog**: you see the types of nodes next to ones you've visited. Others show "?". Stations are always visible once you've heard of them (a flag).
 - **Jumping**:
@@ -420,6 +420,12 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
 | gauntling | 100 | 1.0 | `mechanical` (beds do not heal; a crewmate's `repair_crew` job does), `half_lungs` (air ×0.5), `ion_prone` (stunned 3 s by ion), `tinkerer` (repair time ×0.8) | pack `races_1`; multi-tool |
 | prismatic | 100 | 1.0 | `crystal_conduit` (+1 power to the system they man), `crystal_body` (ion damage ×2, melee ×0.5) | pack `races_1`; Gatekeeper's lance |
 | grundl | 180 | 0.7 | `hauler` (restock ×2, melee ×2), `clumsy` (repair time ×1.3) | pack `races_1`; quarry hammer; the large rig over the normal 2×2 body |
+| vellum | 50 | 1.2 | `folded` (`body` 1: walks 1-wide crawlspaces), `paper_skin` (fire damage ×2) | pack `races_2`; spark pistol; the small rig (art fits 1 cell); homeland `vellum_stacks` |
+| oorth | 100 | 1.0 | `third_eye` (`reveal_enemy`: the enemy schematic shows its crew while one is aboard and up), `gentle_hands` (melee ×0.5) | pack `races_2`; service pistol; homeland `oorth_quietude` |
+| drakkin | 120 | 1.0 | `pit_fighter` (melee ×1.75), `cold_blooded` (`heat_speed`: ×0.7 in a room whose heat is under 20, ×1.2 over 50) | pack `races_2`; quarry hammer; the large rig over the normal 2×2 body; homeland `drakkin_pits` |
+| wisp | 100 | 1.0 | `living_current` (`vacuum_walk`, `o2_use` 0), `handless` (`no_tools`: no repair or extinguish jobs), `console_ghost` (manned bonuses ×1.5), `ion_kin` (ion damage ×2) | pack `races_2`; no sidearm; the floating rig; homeland `wisp_stormfield` |
+| hullkin | 100 | 0.5 | `hull_mender` (`hull_mend`: idle, repairs the walls beside them 1 hp/s and seals a breach in 12 s), `shell_breather` (`o2_use` 0.5) | pack `races_2`; multi-tool; homeland `hullkin_reefs` |
+| lantern | 80 | 1.3 | `born_pilot` (+0.05 evasion while they man the helm) | pack `races_2`; carbine; the floating rig when gliding; homeland `lantern_lanes` |
 - **Traits are a library** (`data/traits.json`, plus the `traits.json` of every pack): each is a bag of generic keys that `scripts/crew/traits.gd` (`TraitSet.of(member)`) merges into numbers, and every rule a key changes reads them there, so a new race is data only. The keys and what they do are in `data/traits.json` `_doc`; a species entry may also carry keys inline (Basalt's `work_mult.heal_others`).
   - Work speeds are factors on speed (2 = twice as fast); a race spec's repair "×0.8" is a time factor (as Fenn's ×0.6), so its work speed is 1 / 0.8.
   - Room heat is the heat of the hottest part in the room (`Heat.room_heat`).
@@ -601,6 +607,12 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 3. **Content**: intakes, radars and debris data with art (drift pieces, intake mouths, radar dishes), POI types in `data/sectors.json`, and writer passes for POI events.
 4. **On foot** at POIs (docking, abandoned stations, boarding), later, as PLAN says.
 
+**Step 3 notes (the Raft content, `claude/sector3`)**:
+- Salvage Intake Mk2/Mk3, Radar Mk1-Mk3 and Tractor Beam Mk1-Mk2 are in `data/components.json` (recipes in `data/recipes.json`: blueprints, not known at the start; Meridian sells them at the tier price rule). Radar stats: `radar_range`, `identify` (Mk2+: names what it sees and rates a fighter's threat in skulls), `see_hidden` (Mk3). Tractor stats: `tractor_range` (300 / 450 px) and `tractor_pull` (px/s); **Q held** in play mode only (Q is the utility key in a fight). Power numbers (radar -1/-2/-3, tractor -2/-3) are the builder's, not in the tables above.
+- The income target is measured, not assumed (`tests/test_sector3.gd`): `data/debris.json` spawns one piece every 1.4 s and scatters 80% of them over the whole view (the old 0.6 s and 35% made an idle Mk1 earn about 70 a minute), which gives about 15-25 scrap a minute idle with a Mk1 and about double with a Mk3 and a chase.
+- `quest` POIs are only made in a region with a quest event (`Sector.has_quest`: `requires.region`, or the flag `in_<id>` the homeland tech quests use); the node tables carry a `quest` weight of 3-4, about a third to a half of a homeland's sectors have one.
+- Not built (art exists): Listening Horn (scrap radar), Lumen Eye (neon radar), Lumen Siphon (neon intake, small debris only). They need a design call on their numbers.
+
 ## 12. Processing: smelters and the material ladder (owner, 2026-10-30)
 > "Put smelters in the ship to smelt bad materials into better ones: smelt scrap (an early-game material with no late-game use) into forged steel armour or something."
 
@@ -664,6 +676,11 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **starting blueprints** (one per ending, chosen from what you built this run);
   - **map variants** (the Hollow ending).
 - **A run log** (a chronicle you can read on the ending screen) and a **hall of ships** (each finished ship's design is saved, and can be exported as a premade).
+- **As built, where the endings are placed** (pack `endings_1`; events carry `requires.region` and `stage_min` / `stage_max`, the ending region is stage 9; `tests/test_endings_route.gd` walks every ending on a route of regions):
+  - **The Haven**: the trail is stages 2 to 7. The first fragment is 2 to 5, each link opens a stage after the one before and stays open to stage 6 or 7, the bearings across the chart are 6 to 8 and the Lantern Reach (true or wrong) is on offer from stage 6, in the ending region too. A lure is the same carrier type as the real link it replaces.
+  - **The Way Out**: backed at a faction's station, finished at its Dead Gate. The Concord's Restoration Desk is at Meridian (Concord space, stages 3 to 6), the Clan Moot at the station of any Clans-faction homeland (the Basalt Quarries, the Gauntling Scrapyards, the Kett Hives; stages 3 to 7) and the Lumen's consent at the Prism (Lumen space, stages 4 to 8). The cores and the restarts are at the Dead Gates of **the ending region** (stage 9): a gate is dark everywhere else, and in the ending region its shell can be approached (`campaign.gd gate_dark`); the Hollow tide never takes a gate.
+  - **The Hollow**: the green ship from stage 3, Hallett's roll call from 4, the listening post and the Knucklehead from 5, the Basalt camp from 6 (these last can happen in the ending region), then the approach and the table at the Scrapper Gate (stage 9).
+  - **Retire** and Ma's dinner are at Rusthold, which is Clan space (stage 1) only.
 
 ## 14. Difficulty and balance: FTL-hard, on purpose (owner, 2026-10-30)
 > "Enemy scaling should be like FTL. It's a very hard game: a good player survives most of the time, but a win isn't guaranteed. You might choose the wrong quest, meet a full-shield enemy you're not prepared for, and die. So game balance is important."
@@ -850,3 +867,8 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - Each design file carries its own `hangar` field `{group, layout, unlock}` (a pack has no hangar.json); the group is the race's name (`Human`, `Kett`, ...), the faction's for the event starters (`Clans`, `Concord`, `Lumen`) or `Haven` and `Hollow`.
   - The tool draws every ship as a list of rooms inside a silhouette (every other cell is wall) and uses a part of the race's tech pack where it is loaded, else its standard stand-in, so run it again after a tech pack changes. `tests/test_starter_ships.gd` holds every hangar ship to the starter rules.
   - Earning them: layout A of a race in its homeland's dock event, layout B in its homeland's tech quest (the outcomes that win the tech), both through an `unlock` effect in `data/packs/regions_1/events/`.
+- **What the other unlocks do at a new run** (`scripts/space/run_start.gd`; the payloads are documented in `data/unlocks.json`): the hangar has a **new-run row** under the ship (S, V and K or a click move its choices, Shift or a right click go back; it shows only what the profile has earned, and the profile remembers the choice):
+  - **`species_start`**: the soldier of the ship's crew list is that species (and named `name`, when the payload has one). Crew entries marked `player` keep the soldier's place under a new name.
+  - **`blueprint`**: known in the fabricator at the start of every new run once earned; it is not a choice.
+  - **`map_variant`**: an opt-in harder map. The payload's `tide_steps` is how far ahead the Hollow tide of every region starts (`hollow_tide`: 2); the run carries the flag `variant_<id>`.
+  - **`skin`**: tints the exterior hull plating of the ship in a fight (`tint`, a multiply colour over the line's own) and colours its lamps (`lamp`). The ship keeps it (`Ship.skin`, saved).

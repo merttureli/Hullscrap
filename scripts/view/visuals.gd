@@ -12,6 +12,8 @@ const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const FIRE_WINDOW := 0.15  ## seconds a weapon shows its fire frame after a shot
+const BARRELS: Array[String] = ["weapon", "radar", "tractor"]  ## the families whose outside half carries a head that turns: a gun, a dish, an emitter
+const DISH_SPIN := 2.1  ## radians a second a radar dish turns while the radar works
 const DAMAGED_BELOW := 0.5  ## hp fraction under which a part looks damaged
 const DIM := Color(0.45, 0.45, 0.5)
 const HEAT_RED := Color(1.0, 0.18, 0.1)
@@ -88,7 +90,8 @@ static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect
 	d2["hp"] = mount["outside_hp"]
 	var i2 := {"rot": rot, "hp": out_hp, "heat": 0.0, "status": "disabled" if out_hp <= 0 else "ok", "uid": int(inst.get("uid", 0))}
 	var o2 := opts.duplicate()
-	if str(def.get("family", "")) == "engine":
+	var family := str(def.get("family", ""))
+	if family == "engine":
 		o2["powered"] = bool(opts.get("thrusting", false)) and bool(opts.get("powered", true))
 	var alpha := float(opts.get("alpha", 1.0))
 	var sheet = Art.component(str(def.get("id", "")) + "_out")
@@ -98,9 +101,11 @@ static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect
 		var m := marks(d2, i2)
 		_draw_placeholder(canvas, rect.grow(-2), d2, cell_px, m, bool(o2.get("powered", true)), alpha)
 		canvas.draw_rect(rect.grow(-2), Color(0, 0, 0, 0.25 * alpha))
-	if str(def.get("family", "")) != "weapon":
+	if not family in BARRELS:
 		return
 	var dir := Vector2(Mounts.outward(rot))
+	if family == "radar" and aim == Vector2.ZERO and bool(opts.get("powered", true)):  # the dish turns by itself while it works
+		aim = Vector2.UP.rotated(float(opts.get("time", 0.0)) * DISH_SPIN)
 	var live := aim if aim != Vector2.ZERO and out_hp > 0 else dir  # a disabled barrel hangs along the mount
 	_draw_barrel(canvas, def, i2, pivot, cell_px, live, opts, Mounts.barrel(def, Mounts.NONE, rot)["reach"])
 

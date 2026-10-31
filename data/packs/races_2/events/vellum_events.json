@@ -1,0 +1,62 @@
+{"events": [
+    {
+      "id": "vellum_chart_room", "type": "wreck_field", "weight": 8, "once": true, "requires": {"jumps_min": 3},
+      "text": "The survey ship Long Division is a wreck from the bridge back, but her chart room is shut tight and dry, and when you cut your way in the air smells of old glue. Every wall is pigeonholes, and every pigeonhole holds a chart folded small. One sits alone on the table under the lamp, folded in a long fall of creases that, from the door, looks very much like a person sitting with their knees up.",
+      "choices": [
+        {"text": "Bag the charts and leave the folded one.", "outcomes": [
+          {"weight": 70, "text": "You carry out forty charts of lanes that are no longer there. A Fenn will pay for the paper alone, and a Lumen will pay for the lanes. You are careful not to look back at the table.", "effects": {"items": {"credits": 45}}},
+          {"weight": 30, "text": "Half the charts are brittle with age and come apart in your hands as dust. The rest are good enough, and the sneeze lasts all the way home.", "effects": {"items": {"credits": 20}}}
+        ]},
+        {"text": "Finish the fold, carefully.", "outcomes": [
+          {"weight": 60, "text": "You press the last crease in with a thumbnail, valley then mountain, the way your hands somehow know. The paper draws a breath. The face, which was a sketch, is a face. 'What,' it asks, in a voice like a page turning, 'is the date?' You tell it. It takes this badly for about a minute and then asks if you have a pencil. Folio signs on, with opinions about your charts.", "effects": {"recruit": {"species": "vellum", "name": "Folio"}}},
+          {"weight": 40, "text": "The fold goes wrong. The paper rustles, huffs, becomes a sulky lopsided crane, and flaps out through the hole you cut. It was a very good chart. You will never know of where.", "effects": {}}
+        ]},
+        {"text": "[Vellum] Finish the fold the way it was meant.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Your Vellum does not so much fold it as remind it. Two quick creases, a tuck the shape of an apology, and the stranger sits up on the table with ink-dot eyes. 'Oh,' says Folio. 'Someone who does it properly.' They share a long and tender look at each other's edges. Then Folio notices the spare charts on the wall, and the two of them spend an hour tutting at the margins. They come out with the best of the lot.", "effects": {"recruit": {"species": "vellum", "name": "Folio"}, "items": {"credits": 30}}}
+        ]},
+        {"text": "Leave the room as you found it.", "outcomes": [
+          {"weight": 100, "text": "You close the door the way you opened it. You cannot say why this feels like the right thing to do. Your crew feel it too, and are quiet and kind to each other for the rest of the day.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "vellum_archive_barge", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The Concord record barge Retention Schedule is on fire in the one place a record barge should never be on fire: the middle. A tinny voice repeats, 'Please do not panic. Panic is not an approved procedure.' The vault doors are sealed against the smoke, and the clerk who sealed them is on the wrong side with an extinguisher he has not worked out how to use. Behind the doors: forty years of Concord filing.",
+      "choices": [
+        {"text": "Dock and help fight the fire.", "outcomes": [
+          {"weight": 65, "text": "You put the fire out. The clerks give you a receipt for it. It is stamped, in triplicate, and the third copy is for you.", "effects": {"items": {"credits": 30}, "rep": {"concord": 1}}},
+          {"weight": 35, "text": "The fire has had a long head start. You save the front half of the archive, one clerk's lunch, and not much else.", "effects": {"items": {"credits": 10}, "crew_hp": -10}}
+        ]},
+        {"text": "Cut the vault door and carry the files out.", "outcomes": [
+          {"weight": 60, "text": "The files come out stacked on your deck: ten thousand forms, each worth something to somebody. A harassed supervisor files a complaint about the door, and then, in the next box, a commendation.", "effects": {"items": {"credits": 45}, "rep": {"concord": 1}}},
+          {"weight": 40, "text": "A torch is the wrong tool in a room made of paper. It is a short, loud afternoon.", "effects": {"items": {"scrap": 10}, "crew_hp": -15}}
+        ]},
+        {"text": "[Vellum] Slip through the vent crawlspace and open the vault from inside.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 80, "text": "Your Vellum folds down flat and goes into the vent like a letter into a slot. Ninety seconds later, from the far side of the vault door: a click, and a very small voice saying 'smoke, smoke, smoke'. The door swings open on a vault of unburned records and one clerk holding an extinguisher. The Concord adds a hand-lettered commendation: EXCEPTIONAL FILING.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}}},
+          {"weight": 20, "text": "Your Vellum gets the door open, and also gets close enough to a spark to be browned along one sleeve. They hold the sleeve up, mortified, as the clerks cheer. The Concord pays double for the bravery and nothing for the sleeve.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "crew_hp": -10}}
+        ]},
+        {"text": "Keep going. It is not your archive.", "outcomes": [
+          {"weight": 100, "text": "You pass the burning barge on a long curve. On the comm, the tinny voice says, 'Please do not panic,' and you do not, quite.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "vellum_form_12d", "type": "patrol", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "Inspector Quarto of the Concord Cartographic Office has stopped your ship to count your charts. 'Regulation 12-D,' he says, with the joy of a man whose regulation has been waiting forty years for its turn. 'Any chart not on the manifest must be filed. Any unfiled chart in transit is contraband, and may be fined at the going rate per crease.' He has brought a very large ruler.",
+      "choices": [
+        {"text": "File everything. Pay the fee (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "Quarto stamps eleven forms with a sound like a small, happy gun. You are, for the first time since the Snap, fully documented. It is not as comforting as it sounds.", "effects": {"items": {"credits": -20}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Tell him you carry no charts.", "outcomes": [
+          {"weight": 50, "text": "Quarto looks at your console, at your face, and at the ruler. 'The Office accepts that,' he says, wounded, 'on its honour.' He has never been lied to so politely.", "effects": {}},
+          {"weight": 50, "text": "He finds a sketch on a napkin. 'Chart,' he says, delighted. He writes you a fine for the creases in the napkin.", "effects": {"items": {"credits": -25}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "[Vellum] Point out that your Vellum is crew, not a chart.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Quarto looks at the Vellum for a long time. The Vellum looks back, politely, with two ink dots. 'It has creases,' says the Inspector. 'So do you,' says the Vellum, 'and nobody has filed you.' Quarto fills in Form 12-D, crosses it out, fills in Form 12-E (Person, Folded), and waves you on with a face the colour of old paper. Somewhere in the Office a clerk is going to have a very interesting week.", "effects": {"items": {"credits": 20}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "[Fenn] Haggle the fee down.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn begins in the second person and ends in the fourth. Quarto agrees to a fee of nothing in exchange for a promise never to be spoken to like that again. He does not mean it. He wants it again at once.", "effects": {"rep": {"concord": 1}, "items": {"credits": 10}}}
+        ]}
+      ]
+    }
+  ]}

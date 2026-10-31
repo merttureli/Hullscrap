@@ -26,6 +26,7 @@ const RegionChoice = preload("res://scripts/ui/region_choice.gd")
 const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
+const RunStart = preload("res://scripts/space/run_start.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -196,6 +197,8 @@ func new_game(seed_value := 0) -> void:
 	var s := seed_value if seed_value != 0 else (new_seed if new_seed != 0 else randi())
 	campaign = Campaign.new(s)
 	campaign.profile = profile
+	if profile != null:
+		RunStart.apply_campaign(campaign, profile.start, profile)  # the map variant picked in the hangar
 	_arrived = false
 	_queue.clear()
 	_forget_poi()
@@ -702,9 +705,10 @@ func _draw_node(id: String) -> void:
 	var n := campaign.node(id)
 	var known := campaign.is_known(id)
 	var here := id == campaign.current
-	var reach: bool = campaign.drift.linked(campaign.current, id) and n["type"] != "gate"
+	var dark: bool = campaign.gate_dark(id)
+	var reach: bool = campaign.drift.linked(campaign.current, id) and not dark
 	var col := _node_color(id)
-	if n["type"] == "gate" and known:
+	if dark and known:
 		col = Color("#2b3340")
 	var hollow := campaign.is_hollow(id)
 	if hollow:
@@ -712,7 +716,7 @@ func _draw_node(id: String) -> void:
 	draw_circle(at, NODE_R, col.darkened(0.45))
 	draw_circle(at, NODE_R - 3.0, col)
 	var glyph := str(Campaign.type_info(str(n["type"]))["glyph"]) if known else "?"
-	_text(glyph, at + Vector2(-5.0, 6.0), 16, Color("#10151c") if known and n["type"] != "gate" else TEXT)
+	_text(glyph, at + Vector2(-5.0, 6.0), 16, Color("#10151c") if known and not dark else TEXT)
 	if known:  # a place with a sector hazard wears its badge (hazards.gd)
 		HazardBar.badge(self, at + Vector2(-NODE_R * 0.8, -NODE_R * 0.8), campaign.hazard_at(id))
 	if hollow:  # a broken ring: three arcs with gaps
@@ -748,12 +752,14 @@ func _draw_tip(id: String) -> void:
 		lines.append(campaign.label(id) + (" (Scrapper trader)" if n.get("clan", false) else ""))
 		if (n["place"] != "" or n.get("clan", false)) and type_label != campaign.label(id):
 			lines.append(type_label)
-		if n["type"] == "gate":
+		if campaign.gate_dark(id):
 			lines.append(Campaign.DARK_TEXT)
+		elif n["type"] == "gate":
+			lines.append("A Dead Gate: its shell can be approached")
 		elif n["type"] == "exit":
 			lines.append("The way to the next region")
 			lines.append_array(warden_tip())
-		if n["type"] != "gate" and campaign.drift.linked(campaign.current, id):
+		if not campaign.gate_dark(id) and campaign.drift.linked(campaign.current, id):
 			lines.append(jump_cost_text())
 	if campaign.is_known(id):
 		lines.append_array(Hazards.map_lines(campaign.hazard_at(id)))

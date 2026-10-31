@@ -5,6 +5,9 @@ extends Node2D
 ## with a dark outline. A "+3 scrap" pop floats up from the mouth that took a piece, an intake plays its `pulling` animation
 ## while a piece is drawn in (a child node over the ship does both), the HUD's log shows debris.hud_line(), and the starfield drifts
 ## the way the current runs. frame(dt) does one tick without the scene tree, so tests can drive it.
+## Q held in play mode (not in a fight, where Q is the utility ability) turns the tractor beams on (tractor.gd): they haul the
+## debris near them toward the nearest intake, and a beam of art/projectiles/tractor_beam is drawn from each emitter to the
+## pieces it holds.
 ## In sector space (the Sector node, sector_view.gd, is flying) the debris is the sector's (DriftDebris.for_sector: its
 ## current, density and theme), lives in sector px round the flying ship (its frame and velocity each tick), keeps
 ## drifting through a fight in the sector, and the sky is the sector view's.
@@ -30,8 +33,10 @@ var view_size := Vector2(1600.0, 900.0)  ## the viewport, screen px (set every f
 var view_zoom := Vector2(0.5, 0.5)
 var view_centre := Vector2.ZERO  ## the world point at the middle of the screen
 var pops: Array = []  ## {pos, text, age}
+var q_held := false  ## Q is down; _process reads the key, a test sets it
 var _ship: RefCounted
 var _sector_of = null  # the sector (sector.gd) the debris was made for, null on the build screen's own
+var _hollow := false  # whether that sector was Hollow when the spawner took its numbers
 var _clock := 0.0
 var _sheets := {}  # art id -> SpriteSheet, or null when there is no art yet
 var _top: Node2D  # over the ship: the pulling mouths and the pops
@@ -63,6 +68,7 @@ func _process(dt: float) -> void:
 	if cam != null:
 		view_zoom = cam.zoom
 		view_centre = cam.get_screen_center_position()
+	q_held = Input.is_key_pressed(KEY_Q) and not Input.is_key_pressed(KEY_CTRL) and not Input.is_key_pressed(KEY_META)
 	frame(minf(dt, 0.25))
 
 
@@ -76,6 +82,12 @@ func _flying() -> bool:
 	return sector != null and sector.flying()
 
 
+## Do the tractor beams run now: Q is held in play mode, not in a fight (Q is the utility ability there) and not under the map or an event?
+func tractor_ok() -> bool:
+	var map = build.get("drift") if build != null else null
+	return q_held and active() and not build.combat and not (map != null and map.visible)
+
+
 ## One tick of `dt` seconds: step the debris when active, collect the pops, point the starfield.
 func frame(dt: float) -> void:
 	var on := active()
@@ -83,6 +95,9 @@ func frame(dt: float) -> void:
 	if starfield != null and not on:
 		starfield.drift = _star_drift
 	if not on:
+		_set_fx({})
+		if debris != null:
+			debris.tractor_on = false
 		return
 	var ship = sim.player_ship()
 	var here = sector.current() if _flying() else null
@@ -90,12 +105,18 @@ func frame(dt: float) -> void:
 		_ship = ship
 		_sector_of = here
 		debris = DriftDebris.for_sector(here, ship.rng_seed) if here != null else DriftDebris.new(ship.rng_seed)
+		_hollow = here != null and here.hollow
 		pops.clear()
 		_place(ship)
 		debris.prewarm(ship)
+	elif here != null and here.hollow != _hollow:  # the tide took this place with the ship in it: the current thins, the pieces adrift stay
+		_hollow = here.hollow
+		debris.rescale(here)
 	_clock += dt
 	_place(ship)
+	debris.tractor_on = tractor_ok()
 	debris.step(ship, dt)
+	_set_fx(debris.beam_aims() if debris.tractor_on else {}, debris.beams_on)
 	for e in debris.take_events():
 		pops.append({"pos": e["pos"], "text": e["text"], "age": 0.0})
 	for p in pops:
@@ -106,6 +127,17 @@ func frame(dt: float) -> void:
 	queue_redraw()
 	if _top != null:
 		_top.queue_redraw()
+
+
+## Light the emitters of the beams that are on (BuildMode.mount_fx): `aims` is uid -> the way a beam that hauls points.
+func _set_fx(aims: Dictionary, on: Array = []) -> void:
+	if build == null or not "mount_fx" in build:
+		return
+	var fx := {}
+	for uid in on:
+		fx[uid] = {"aim": aims.get(uid, Vector2.ZERO)}
+	if fx != build.mount_fx:
+		build.mount_fx = fx
 
 
 ## Tell the debris where the view is and, in a sector, where the ship flies.
@@ -195,6 +227,8 @@ func _draw_top() -> void:
 		if in_sheet != null and in_sheet.has_anim("pulling"):
 			Visuals.draw_component(_top, _cells_rect(inst["cells"]), def, inst, DriftDebris.CELL, opts)
 	_top.draw_set_transform_matrix(Transform2D.IDENTITY)
+	for l in debris.beam_lines:
+		_draw_beam(l["from"], l["to"], quads)
 	_top_glow.show_quads(quads)
 	var font := ThemeDB.fallback_font
 	var size := roundi(18.0 / maxf(view_zoom.x, 0.05))
@@ -203,6 +237,42 @@ func _draw_top() -> void:
 		var at: Vector2 = p["pos"] + Vector2(0.0, -DriftDebris.CELL * 1.2 - POP_RISE * f)
 		_top.draw_string_outline(font, at, p["text"], HORIZONTAL_ALIGNMENT_CENTER, -1.0, size, maxi(2, size / 6), Color(0, 0, 0, 1.0 - f))
 		_top.draw_string(font, at, p["text"], HORIZONTAL_ALIGNMENT_CENTER, -1.0, size, Color(1.0, 0.92, 0.55, 1.0 - f))
+
+
+## A tractor beam from its emitter `a` to the piece `b` it holds (world px): art/projectiles/tractor_beam laid along the line from
+## whole tiles and a cut last one (its head end), the wave crawling toward the emitter; a plain mint line without the art. The
+## glow goes in `quads`, which `_top_glow` draws in the ship's frame.
+func _draw_beam(a: Vector2, b: Vector2, quads: Array) -> void:
+	var art = Art.projectile("tractor_beam")
+	if art == null:
+		_top.draw_line(a, b, Color(0.55, 1.0, 0.8, 0.7), 3.0 / maxf(view_zoom.x, 0.05))
+		return
+	var k := DriftDebris.CELL / SpriteSheet.SRC_CELL
+	var xf := Transform2D((b - a).angle() + PI / 2.0, a)
+	var frame: int = art.loop_frame(_clock)
+	var w := float(art.frame.x) * k
+	var g = art.glow
+	_top.draw_set_transform_matrix(xf)
+	for p in beam_pieces(a.distance_to(b), float(art.frame.y) * k):
+		var rows: float = p["len"] / k  # source rows of this piece, from the head end of the frame
+		var at := Vector2(-w / 2.0, -(p["from"] + p["len"]))
+		_top.draw_texture_rect_region(art.texture, Rect2(at, Vector2(w, p["len"])), Rect2(art.region(frame).position, Vector2(art.frame.x, rows)))
+		if g != null:
+			quads.append({"tex": g.texture, "rect": Rect2(at + Vector2(g.offset.x * k, 0.0), Vector2(float(g.frame.x) * k, p["len"])),
+				"src": Rect2(g.region(clampi(frame, 0, g.count - 1)).position, Vector2(g.frame.x, rows)), "xf": debris.frame.affine_inverse() * xf, "mod": Color(1, 1, 1, 1)})
+	_top.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+## The pieces a beam `length` px long is tiled from when one tile is `tile` px: [{"from": distance from the start, "len": px}],
+## all full tiles but the last (the same cut as combat_view.gd beam_pieces).
+static func beam_pieces(length: float, tile: float) -> Array:
+	var out := []
+	var done := 0.0
+	while done < length - 0.001 and tile > 0.0:
+		var h := minf(tile, length - done)
+		out.append({"from": done, "len": h})
+		done += h
+	return out
 
 
 ## The world rectangle of `cells` (ship grid cells).

@@ -1,0 +1,25 @@
+{
+	"id": "lantern_lanes",
+	"name": "The Lamplit Lanes",
+	"home_species": "lantern",
+	"faction": "concord",
+	"stages": [2, 7],
+	"weight": 10,
+	"rarity": "uncommon",
+	"danger": 1.1,
+	"palette": {"tint": "#e8c46a", "nebula": "concord"},
+	"map": {},
+	"node_weights": {"patrol": 16, "empty": 16, "trader": 14, "distress": 14, "asteroid_field": 14, "pirate": 12, "wreck_field": 8, "anomaly": 6},
+	"places": [
+		{"id": "vesper_field", "name": "Vesper Field", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"fuel_canister": 1.5, "polymer_barrel": 1.2},
+	"pois": {"concord_checkpoint": 1.5, "trader": 1.3},
+	"ambient": {"patrol": 4, "trader": 3, "pirate": 1},
+	"stock": {"engine_mk1": 120, "engine_mk2": 270, "engine_mk3": 480, "strafe_jets_mk1": 60, "strafe_jets_mk2": 140, "longburn_mk1": 120, "helm": 70, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130},
+	"recruit": {"lantern": 8, "human": 1, "oorth": 1},
+	"enemies": "concord",
+	"hazards": ["debris_surge"],
+	"events": "lantern_lanes",
+	"blurb": "A chain of Concord lane-lamps, left burning since the Snap and tended ever since by the Lantern, moth-folk who have always flown by lamplight. Vesper Field trains the Concord's pilots and sells the engines they crash. Do not stare at the beacons. Your crew will."
+}

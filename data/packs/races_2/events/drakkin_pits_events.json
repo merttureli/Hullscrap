@@ -1,0 +1,119 @@
+{"events": [
+    {
+      "id": "pits_heat_sink_dock", "type": "station", "weight": 10, "once": false, "requires": {"region": "drakkin_pits"},
+      "text": "The Heat Sink is five cargo bays welded in a ring with a reactor vent under every floor, so the whole station is as warm as a loaf. The Drakkin are everywhere: sprawled on the plating with their eyes shut and their ribs rising, hanging by their tails from the rafters like sleeping cats, heaped on a hot grille. When a bell rings they wake all at once, and the station is suddenly all elbows. The dockmaster, a Drakkin the shape of a wardrobe, is polite in a tired way. 'Mind the floor,' she says. 'It's somebody.'",
+      "choices": [
+        {"text": "Bet on tonight's card (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 55, "text": "Your pick, a young Drakkin with more crest than sense, goes down in round one and gets up in round two, which is all it takes. The Fenn pays out through his teeth.", "effects": {"items": {"credits": 40}}},
+          {"weight": 45, "text": "Your pick goes down in round one and stays there, peacefully, with a small smile. The Fenn takes your thirty with enormous sympathy.", "effects": {"items": {"credits": -30}}}
+        ]},
+        {"text": "Lie down in the sleeping pile for an hour.", "outcomes": [
+          {"weight": 100, "text": "You lie down on the grille among eleven snoring Drakkin. It is the warmest you have been since the Snap. A scale tickles your ear. You wake with a tail across your chest and an unaccountable sense of belonging, and your crew, who followed you, wake the same way.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "[Drakkin] Take the bell.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Drakkin lifts the great brass bell and rings it, and the whole station, which has only just settled, wakes and stares. 'The Pit remembers you,' says the dockmaster, delighted. 'A berth, a round of drinks, and a refit.' She slides a roll of bay credit across the table, and her people patch your hull while you drink.", "effects": {"items": {"credits": 50}, "hull": 10, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Hire a washed-up fighter (80 credits).", "requires": {"credits": 80, "not_flag": "pits_hired"}, "outcomes": [
+          {"weight": 100, "text": "Grazz lost a belt to a Fenn's bet and a tooth to a pirate's door, and wears both losses with pride. 'I fight,' they say. 'I carry. I snore, a bit.' They accept the contract with a handshake that hurts for most of an hour.", "effects": {"items": {"credits": -80}, "recruit": {"species": "drakkin", "name": "Grazz"}, "flag": "pits_hired"}}
+        ]},
+        {"text": "Stay out of the way.", "outcomes": [
+          {"weight": 100, "text": "You flatten against a wall as a fight goes by, in two directions. Nobody apologises. It is oddly comforting.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "pits_cold_pit", "type": "distress", "weight": 9, "once": false, "requires": {"region": "drakkin_pits"},
+      "text": "The Number Three Pit has lost its vent, mid-match. The fighters are lying down where they stopped, tails curled, breathing very slowly as the floor cools from orange to grey, and a small gang of Rustfangs in warm coats is strolling across the plating toward the prize box. The bookie, a Fenn, is hiding in the prize box. 'It's an accident,' he calls to you from inside it. 'It's all an accident.'",
+      "choices": [
+        {"text": "Warm the pit with your reactor (2 fuel).", "requires": {"items": {"fuel": 2}}, "outcomes": [
+          {"weight": 100, "text": "You run a line from your exhaust to the vent, and the floor goes orange in minutes. The fighters wake in a ripple. The Rustfangs look down at forty furious Drakkin stretching, and leave without their dignity. The bookie climbs out and kisses your hull.", "effects": {"items": {"fuel": -2, "credits": 40}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Drive the Rustfangs off.", "outcomes": [
+          {"weight": 100, "text": "You put your nose between the gang and the box. The leader looks at your guns, and at the sleepers, and reaches for his own.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Drakkin] Roar them awake.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Drakkin steps into the ring and lets out the Pit roar, a sound with a body in it. Forty crests lift. Forty cold, furious Drakkin rise from the floor and stagger at the Rustfangs, who run. The match resumes, and your Drakkin takes the first round, for hospitality, with a bruised crest.", "effects": {"items": {"credits": 50}, "rep": {"clans": 2}, "crew_hp": -5}}
+        ]},
+        {"text": "Leave them to the weather.", "outcomes": [
+          {"weight": 100, "text": "You turn away. Word gets round the Pits, as it does, and nobody says anything to your face.", "effects": {"rep": {"clans": -1}}}
+        ]}
+      ],
+      "after_win": {"text": "The Rustfangs scatter. The vent is fixed with an inch of tape and a bucket, and the bookie climbs out of the prize box and counts the purse twice. He gives you a share, and a hot drink, and an opinion of Rustfangs.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"clans": 1}}}
+    },
+    {
+      "id": "pits_debt_collectors", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "drakkin_pits", "jumps_min": 2},
+      "text": "A Rustfang collection crew has put a boarding tube on the Pit's loading ramp and is leaning on a Drakkin the size of a door. 'You owe the book three hundred,' says the crew boss. 'You threw round four.' The Drakkin has a black eye and his chin on his chest. 'I did not throw it,' he says. 'I was cold.' Nobody, in the whole history of the Pits, has ever believed this about anyone.",
+      "choices": [
+        {"text": "Take the Drakkin's side.", "outcomes": [
+          {"weight": 100, "text": "You train your guns on the tube. The boss sighs, as if it is all rather tiresome, and calls the lads.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Pay the debt for him (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 100, "text": "The boss counts it twice and takes his crew away, humiliated by good manners. The Drakkin looks at you with a wet, stunned face. 'A debt,' he says. 'Mine now. To you.' He presses a Pit token into your hand, a lucky tooth on a string, and tells half the ring about it.", "effects": {"items": {"credits": -60}, "rep": {"clans": 3}}}
+        ]},
+        {"text": "[Drakkin] Cite Pit law: the cold is an excuse the book accepts.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Drakkin steps up to the boss and says, in Pit, that the debt is cancelled by the cold, by precedent, and by the strong right arm of the speaker. The boss, a clan man, knows his Pit law. He thinks it over. 'Cold's an excuse,' he says. 'But the precedent's good.' He cancels the debt. The Drakkin weeps on your Drakkin's shoulder, and the collectors, mollified with a round of heat and a snack, go home.", "effects": {"items": {"credits": 25}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Mind your own business.", "outcomes": [
+          {"weight": 100, "text": "You steer past. Over the comm, a heavy voice says, 'I was cold,' again, without much hope.", "effects": {}}
+        ]}
+      ],
+      "after_win": {"text": "The collectors break off in a hurry, trailing their tube. The Drakkin sits down on the ramp and laughs until he has to be helped inside. The Pit sends you a thank-you in the only currency it has: a crate of the good scrap.", "effects": {"items": {"scrap": 40, "credits": 30}, "rep": {"clans": 2}}}
+    },
+    {
+      "id": "pits_hotplate_stall", "type": "trader", "weight": 8, "once": false, "requires": {"region": "drakkin_pits"},
+      "text": "Hotplate Dag's Warm Goods has set up on the sunward side of an old cooling tower. The stall is a field of heated bricks laid out like loaves, each with a tag: WARM. WARMER. VERY WARM. DO NOT SIT ON. A line of cold Drakkin shuffles along it with their tails dragging, paying in whatever they have. 'Fuel,' says Dag. 'I take fuel. Or credit. Or you tell me a story that makes me cry, and I give you a brick.'",
+      "choices": [
+        {"text": "Buy a warm brick (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "The brick goes under the mess table. For a week your crew's feet are warm, dinner is a pleasure, and nobody remembers why they were so short with each other.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+        ]},
+        {"text": "Tell him a story that makes him cry.", "outcomes": [
+          {"weight": 40, "text": "It is the one about your first ship, and the first wall you fell through. Dag cries into his apron and gives you a brick and a hug that goes on a while.", "effects": {"items": {"fuel": 1}, "crew_hp": 5}},
+          {"weight": 60, "text": "Dag does not cry. Dag eats a sandwich through the whole thing, nods at the end, and says 'nice'. You don't get a brick. You do get a sandwich.", "effects": {}}
+        ]},
+        {"text": "Sell him fuel (2 fuel).", "requires": {"items": {"fuel": 2}}, "outcomes": [
+          {"weight": 100, "text": "Dag gives you forty credits for two canisters, and a sad look at the canisters, which are for the stall's fire. 'Every little helps,' he says. 'Every little is warm.'", "effects": {"items": {"fuel": -2, "credits": 40}}}
+        ]},
+        {"text": "[Drakkin] Join the queue.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Drakkin shuffles into the line with a dragging tail and is moved, a little, by how well they fit in. At the front Dag recognises the Pit stance and gives them the largest, warmest, most terrible brick in the stall, for free, with a speech about the old days. Your Drakkin carries it back like a baby.", "effects": {"crew_hp": 15, "rep": {"clans": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "pits_hatchling_pile", "type": "wreck_field", "weight": 8, "once": true, "requires": {"region": "drakkin_pits"},
+      "text": "A dead tug, its reactor still ticking at seventy degrees, and across its casing, eleven Drakkin asleep in a heap like seals on a rock. They are all quite young. Most are snoring. One has opened an eye and is regarding you with perfect, unhurried suspicion. The tug's name is MOSTLY OVER. The log on the console reads: LEFT THE PIT. COULDN'T TAKE IT. BACK AFTER BREAKFAST.",
+      "choices": [
+        {"text": "Wake them gently.", "outcomes": [
+          {"weight": 100, "text": "It takes a cup of warm water and a long explanation. Eleven Drakkin sit up one at a time, blinking, and the oldest, a lanky bruiser with her crest still sprouting, announces that they have been thinking about a change of career. Ten want to go back to bed. One wants a job. 'Hissa,' she says. 'I carry, I fight, and I can sleep standing.'", "effects": {"recruit": {"species": "drakkin", "name": "Hissa"}}}
+        ]},
+        {"text": "Take the tug's parts and leave the sleepers.", "outcomes": [
+          {"weight": 100, "text": "You work quietly round the sleepers, the casing warm under your gloves. One of them mutters 'thief' and rolls over. It is, as far as you can tell, the most polite theft in the history of the trade.", "effects": {"items": {"copper": 20, "scrap": 30}}}
+        ]},
+        {"text": "[Drakkin] Lie down on the casing with them.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Drakkin looks at the pile, looks at you, and lies down on the end of the heap. Within a minute they are snoring. Hissa, the eldest, wakes and squints at the stranger on her rock. 'You're one of us,' she says, slow and slurred. 'I'll come with you. Wake me for breakfast.' The pile takes a while to forgive the lost warmth, but the tug's parts are yours.", "effects": {"recruit": {"species": "drakkin", "name": "Hissa"}, "items": {"scrap": 30, "copper": 15}}}
+        ]},
+        {"text": "Leave them to sleep.", "outcomes": [
+          {"weight": 100, "text": "You back away from a tug full of sleeping children, which is, you feel, the right call. Your crew are kinder to each other for an hour.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "pits_rock_breaking", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"region": "drakkin_pits"},
+      "text": "A rock-breaking contest is going on in the shadow of a big asteroid. The prize is a trophy in the shape of a boot. The rules are on a sign: ONE HAMMER. ONE ROCK. WHOEVER BREAKS IT FIRST KEEPS THE BOOT. Seven Drakkin are in line taking practice swings, none of them over-confident. A Fenn is selling water. A bad-tempered woman in a mining jacket stands on the rock itself, holding the rules and a stopwatch.",
+      "choices": [
+        {"text": "Enter your best swinger (10 credits).", "requires": {"credits": 10}, "outcomes": [
+          {"weight": 35, "text": "Your swinger hits the rock like it owes them money. It splits. The woman with the stopwatch hands over the boot and sixty credits, and wipes her eye.", "effects": {"items": {"credits": 50}}},
+          {"weight": 65, "text": "The rock wins. Your swinger comes away with a bruised palm and a new respect for geology.", "effects": {"items": {"credits": -10}, "crew_hp": -5}}
+        ]},
+        {"text": "Bet on a contestant (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 50, "text": "Your pick, a Drakkin built like a fridge, breaks the rock in eleven swings and cries. You are paid, and a little bit hugged.", "effects": {"items": {"credits": 30}}},
+          {"weight": 50, "text": "Your pick hits the rock once, gently, and thinks about it. The Fenn selling water takes your twenty with gratitude.", "effects": {"items": {"credits": -20}}}
+        ]},
+        {"text": "[Drakkin] Take the hammer.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Drakkin steps up and does not swing. They look at the rock, tap it twice, find the seam by feel, and put the hammer down on it once. The rock opens like a book. The woman looks at the stopwatch, at the rock, at the stopwatch. 'Four seconds,' she says. 'A record.' They give your Drakkin the boot. The boot is awful. They love it. The ore from the seam comes free.", "effects": {"items": {"credits": 60, "titanium": 4}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Watch and move on.", "outcomes": [
+          {"weight": 100, "text": "You watch seven Drakkin lose to a rock in a row. The eighth, a small one, tickles it, and it splits. Nobody saw how.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

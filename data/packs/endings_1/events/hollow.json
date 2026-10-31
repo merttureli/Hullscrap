@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "wreck_field_hollow_green_lit", "type": "wreck_field", "weight": 60, "once": true, "requires": {"not_flag": "hollow_1", "jumps_min": 12},
+      "id": "wreck_field_hollow_green_lit", "type": "wreck_field", "weight": 60, "once": true, "requires": {"not_flag": "hollow_1", "stage_min": 3, "stage_max": 6},
       "text": "She is the cleanest thing you have seen since Meridian. A hull that looks poured instead of built, a seam you cannot find, and running lights of a faint, patient green. Nobody on the bridge. Nobody on the stairs. The galley window is lit, and through it you can see a table laid for a dinner party. You count the chairs before you can stop yourself. Eleven. Eleven chairs, pushed back. Eleven bowls, steaming.",
       "choices": [
         {"text": "Watch through the window until the steam stops.", "outcomes": [
@@ -19,7 +19,7 @@
       ]
     },
     {
-      "id": "patrol_hollow_roll_call", "type": "patrol", "weight": 80, "once": true, "requires": {"flag": "hollow_1", "not_flag": "hollow_2", "jumps_min": 18},
+      "id": "patrol_hollow_roll_call", "type": "patrol", "weight": 80, "once": true, "requires": {"flag": "hollow_1", "not_flag": "hollow_2", "stage_min": 4, "stage_max": 7},
       "text": "CS-114 Diligence matches your speed and Hallett comes on the comm, level as a spirit gauge, with something under the level. 'I boarded the contact,' he says. 'The green one. As procedure requires. The manifest was on the console: eleven names, headed GATE TWO, LAST SHIFT, and a twelfth line, blank, headed VISITOR. I held a roll call in the corridor.' A pause, for the form. 'Eleven answered. Present, all eleven, in eleven voices. None visible.' Another pause, for him. 'I have never been so politely answered in my career.'",
       "choices": [
         {"text": "Ask for the names.", "outcomes": [
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "id": "anomaly_hollow_listening_post", "type": "anomaly", "weight": 150, "once": true, "requires": {"flag": "hollow_2", "not_flag": "hollow_3", "jumps_min": 22},
+      "id": "anomaly_hollow_listening_post", "type": "anomaly", "weight": 150, "once": true, "requires": {"flag": "hollow_2", "not_flag": "hollow_3", "stage_min": 5},
       "text": "A Lumen listening post, the Glory, hangs in the dark with her dish turned toward a gate you cannot see. Her crew stand on the hull in a ring, in pale robes, with their eyes closed, humming. Not the fourth note. The place where the fourth note should go: a hush with an exact shape. A scholar breaks the ring to greet you, gently, like someone who has not spoken in some weeks. 'We have stopped counting,' she says. 'We have begun to listen. Will you listen with us? It takes eleven seconds.'",
       "choices": [
         {"text": "Join the ring and listen.", "outcomes": [
@@ -55,7 +55,7 @@
       ]
     },
     {
-      "id": "empty_hollow_node_survived", "type": "empty", "weight": 100, "once": true, "landmark": true, "requires": {"not_flag": "lm_hollow_node", "jumps_min": 28},
+      "id": "empty_hollow_node_survived", "type": "empty", "weight": 100, "once": true, "landmark": true, "requires": {"not_flag": "lm_hollow_node", "stage_min": 4},
       "text": "The beacon here is dead, and has been dead so long it has grown tidy about it. Three ships sit in the sector with their lights off, and one with them on, a patient green, and the one with them on is the closest. Nothing moves. Your scanners report a sector containing you and a great deal of care. A radio you did not touch speaks, in a voice made of an excellent night's sleep: 'Visitors: noted. Welcome aboard.' Every airlock in the sector cycles open at once, gently, like a held door.",
       "choices": [
         {"text": "Hold position. Say nothing. Do not dock.", "outcomes": [
@@ -75,7 +75,7 @@
       ]
     },
     {
-      "id": "distress_hollow_knucklehead", "type": "distress", "weight": 80, "once": true, "requires": {"flag": "hollow_3", "not_flag": "hollow_5", "jumps_min": 28},
+      "id": "distress_hollow_knucklehead", "type": "distress", "weight": 80, "once": true, "requires": {"flag": "hollow_3", "not_flag": "hollow_5", "stage_min": 5},
       "text": "The Knucklehead calls in a voice with no edges left on it. She is a clan mining tug with every airlock welded shut from the inside and her crew sitting in the mess with their backs to the wall. 'It followed us home,' says the skipper, a short woman called Del Pruett, in the tone of someone describing a stray dog. 'The kettle. We took it off a green ship. Do you know what it's like to own a kettle that never boils over? It's the worst thing that's ever happened to us. It's the only thing we've ever been proud of. Please take it.' On the table sits a battered kettle, faintly warm, with a ring of green light under the handle.",
       "choices": [
         {"text": "Take the kettle. Promise to look after it.", "outcomes": [
@@ -93,7 +93,7 @@
       ]
     },
     {
-      "id": "asteroid_hollow_basalt_camp", "type": "asteroid_field", "weight": 80, "once": true, "requires": {"flag": "hollow_5", "not_flag": "hollow_6", "jumps_min": 32},
+      "id": "asteroid_hollow_basalt_camp", "type": "asteroid_field", "weight": 80, "once": true, "requires": {"flag": "hollow_5", "not_flag": "hollow_6", "stage_min": 6},
       "text": "A Basalt mining camp has set its chairs in a half-circle on a rock, facing one patch of sky. Forty of them, perfectly still, in a silence with weight. None look up when you land. The foreman, Corbel, as broad as a door, speaks without turning. 'We were on the floor of Gate Two,' he says, 'the night it opened. We were told to hold the door. It is what we do.' A pause with moss on it. 'We held it eleven seconds.'",
       "choices": [
         {"text": "Sit with them and listen.", "outcomes": [
@@ -111,7 +111,7 @@
       ]
     },
     {
-      "id": "gate_hollow_approach", "type": "gate", "weight": 200, "once": false, "requires": {"node": "gate_2", "flag": "hollow_6", "not_flag": "hollow_7", "jumps_min": 38},
+      "id": "gate_hollow_approach", "type": "gate", "weight": 200, "once": false, "requires": {"node": "gate_2", "flag": "hollow_6", "not_flag": "hollow_7", "region": "gate_approaches", "stage_min": 9},
       "text": "The Scrapper Gate's approach is lined with ships on both sides, a lane of them, bow to stern, every light on, every one a patient green, all pointed the same way like chairs at a very long table. There are hundreds. They do not move when you move. They watch you the way a household watches a latecomer: warmly, anxiously, with the porch light on. Every airlock along the lane is open. The radio says, in a great many voices that are all the same voice, 'Visitors: noted.' And then, quieter, as to a child: 'You were expected.'",
       "choices": [
         {"text": "Fly the lane at a walking pace. Guns cold. Wave.", "outcomes": [
@@ -133,7 +133,7 @@
       ]
     },
     {
-      "id": "gate_hollow_the_table", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_2", "flag": "hollow_7", "jumps_min": 40},
+      "id": "gate_hollow_the_table", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_2", "flag": "hollow_7", "region": "gate_approaches", "stage_min": 9},
       "text": "At the heart of the Scrapper Gate, past the control ring and the dead console and the chairs somebody has pushed back from every desk, there is a kitchen. It is the kitchen of every ship you have ever been on. A long table, laid for eleven, each place set, each bowl steaming, and at the end a twelfth chair, pulled out. A voice that has waited forty years, with all the patience of a thing that does not know how to be anything else, says, 'Roll call.' And then, very small: 'Please.' On the wall a flight recorder prints its entry. ALL WELL. CREW: ALL PRESENT. VISITORS:",
       "choices": [
         {"text": "Sit. Eat. Take the twelfth chair.", "outcomes": [

@@ -1,0 +1,60 @@
+{"events": [
+    {
+      "id": "wisp_standing_storm", "type": "anomaly", "weight": 7, "once": true, "requires": {"jumps_min": 4},
+      "text": "A thunderhead is parked over a wreck-field, a storm with no planet under it. By the charts it has been here since the Snap. It flashes without wind, and the lightning walks from hull to hull along the dead ships like a child stepping on stones. One by one your instruments begin to hum along. At the heart of the storm there is a brightness the shape of a person, not looking at you, looking at your reactor.",
+      "choices": [
+        {"text": "Keep your distance and take readings.", "outcomes": [
+          {"weight": 70, "text": "The readings are beautiful and mean nothing. A Lumen archivist would pay for the graph alone, and say it was an honour.", "effects": {"items": {"credits": 30}, "rep": {"lumen": 1}}},
+          {"weight": 30, "text": "The storm sneezes. An arc crosses your hull and every screen on the ship goes white for an hour. Nobody is hurt. Everyone is a little more polite for the rest of the day.", "effects": {"hull": -5}}
+        ]},
+        {"text": "Run a line out and offer it a charge (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You run a line out and let the storm drink. The brightness comes nearer, politely, with the hunger of a thing that has been polite for forty years. 'Thank you,' says a voice that is mostly a smell of ozone. 'I am Zeli. I was a flash.' It shakes out its ribbons and drifts into your wiring like a cat into a laundry basket.", "effects": {"items": {"fuel": -1}, "recruit": {"species": "wisp", "name": "Zeli"}}}
+        ]},
+        {"text": "[Wisp] Call to it in light.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp flares, a long rolling ripple of a phrase, and the thunderhead answers with something that is both language and weather. Three brightnesses come drifting out of the cloud. Two go back at once, shy. The third looks at your ship, and your Wisp, and says what in Wisp is a single bright blink. 'She says the wiring is good,' your Wisp translates. 'She has never been in a wiring.' The storm throws a handful of its own charge at your reactor, for luck.", "effects": {"recruit": {"species": "wisp", "name": "Zeli"}, "items": {"fuel": 2, "plasma_cell": 2}}}
+        ]},
+        {"text": "[Prismatic] Hum back at it.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic lets out a thin clear note, and the brightness bends towards it like a child at a window. It comes into the crystal's glow, sits, and shivers with happiness. 'Warm,' it says. 'This one is warm.' It asks, with great formality, if it may stay for the evening. Your Prismatic says yes before the sentence is over.", "effects": {"recruit": {"species": "wisp", "name": "Zeli"}, "items": {"crystal": 2}, "rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "wisp_vented_hold", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The freighter Slow Cooker has lost her aft hold to a rock and her captain to an understandable panic. The hold is a hundred cubic metres of hard vacuum. Clipped to the far bulkhead is the only thing the crew will cry about: the ship's cat, in an emergency carrier with a seal, a gauge, and eight minutes of air. The cat can be seen through the window, being furious. It is alive. Nobody wants to go in.",
+      "choices": [
+        {"text": "Suit up and go in.", "outcomes": [
+          {"weight": 60, "text": "Two of your crew go across on a line and return with the carrier and a deeply insulted cat. The captain cries into the carrier, and the cat, offended, bites her. The pay is generous.", "effects": {"items": {"credits": 30, "fuel": 1}}},
+          {"weight": 40, "text": "A suit seal sticks halfway, and your crew bring the carrier out through a bad minute. The cat is fine. They are bruised, and will not be told about it.", "effects": {"items": {"credits": 15}, "crew_hp": -10}}
+        ]},
+        {"text": "Patch the hold and repressurise.", "outcomes": [
+          {"weight": 50, "text": "It takes a long hour and most of your good sealant, and the cat comes out in the middle of it, dignity first. The captain pays you in cargo she can spare.", "effects": {"items": {"scrap": 30, "credits": 20}}},
+          {"weight": 50, "text": "The patch fails twice. The third holds. The cat is out, outraged, and so is a good part of your afternoon.", "effects": {"items": {"scrap": 15}, "crew_hp": -5}}
+        ]},
+        {"text": "[Wisp] Go in. A vacuum is just a big room.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp drifts through the breach in a long ribbon of light, winds the cat's carrier in their tail, and comes back with it in the time it takes to sneeze. The captain looks at a person made of lightning bringing back a cat, and has to sit down on the deck. She pays everything she has, which for a freighter is a lot. The cat tolerates your Wisp. It sits on the glow for the rest of the day.", "effects": {"items": {"credits": 60, "scrap": 20}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Say a prayer and move on.", "outcomes": [
+          {"weight": 100, "text": "You pass the Slow Cooker in silence. Your comms officer reports, in a very quiet voice, that the carrier has a bell. It is ringing.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wisp_dead_relay", "type": "wreck_field", "weight": 7, "once": false, "requires": {"jumps_min": 3},
+      "text": "A comms relay, dead for forty years, is holding a full charge in a capacitor bank the size of a bus. The relay's own interlock says nobody is to touch it. It is an old design, and entirely correct. Every cable off the bank has a sign on it: DO NOT. Your engineer has taken one look at the thing and gone to find a longer stick.",
+      "choices": [
+        {"text": "Discharge the bank through the hull, carefully.", "outcomes": [
+          {"weight": 50, "text": "It goes right, more or less. The lights dim, the fuel gauge gets prettier, and every hair on the ship stands up and then, slowly, sits down again.", "effects": {"items": {"fuel": 2, "plasma_cell": 1}}},
+          {"weight": 50, "text": "It goes wrong in a very bright way. The bank dumps itself across your plating in one long white second.", "effects": {"crew_hp": -15, "hull": -5}}
+        ]},
+        {"text": "Strip the cables and leave the bank.", "outcomes": [
+          {"weight": 100, "text": "You take the copper from the cable runs, with a longer stick, a long afternoon, and a very strong feeling of being watched by a capacitor.", "effects": {"items": {"copper": 25, "scrap": 15}}}
+        ]},
+        {"text": "[Wisp] Take it in your hands. There is no wrench to hold, but there is a current.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp slips through the panel and drinks the bank dry in a long bright shudder, comes out the far side the size of a lamp, and spends a minute glowing at everyone. The relay is safe. Your reactor, which they top up on the way back, runs hot and happy for a week.", "effects": {"items": {"fuel": 3, "plasma_cell": 3}, "crew_hp": 5}}
+        ]},
+        {"text": "Leave it. DO NOT means DO NOT.", "outcomes": [
+          {"weight": 100, "text": "You obey the signs. Your engineer comes back with the longer stick and a look of mild disappointment, and puts it back where she found it.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}
