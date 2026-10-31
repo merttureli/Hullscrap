@@ -15,6 +15,7 @@ const Mortality = preload("res://scripts/crew/mortality.gd")
 const Art = preload("res://scripts/view/art.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
+const Unlocks = preload("res://scripts/space/unlocks.gd")
 
 const CELL := 32.0
 const HOLE := Color("#06080c")
@@ -42,6 +43,8 @@ var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state, 
 var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
 var _skin := {}  # TileArt.skin_plan() of the grid, remade when _skin_sig changes
 var _skin_sig := []
+var _paint := {}  # Unlocks.skin_paint() of the ship's hull skin, remade when the skin changes
+var _paint_skin := "?"
 
 
 ## Follow ship `idx` of `p_arena`.
@@ -201,7 +204,10 @@ func _draw_skin(grid) -> void:
 	if sig != _skin_sig:
 		_skin = TileArt.skin_plan(grid, _part_lines())
 		_skin_sig = sig
-	TileArt.draw_skin(self, _skin, px(Vector2.ZERO), CELL, _clock, _glow_quads)
+	if ship.skin != _paint_skin:
+		_paint = Unlocks.skin_paint(ship.skin)
+		_paint_skin = ship.skin
+	TileArt.draw_skin(self, _skin, px(Vector2.ZERO), CELL, _clock, _glow_quads, _paint)
 
 
 ## Line -> cells of the ship's parts, so a ship full of neon parts wears the neon skin even on standard plates.

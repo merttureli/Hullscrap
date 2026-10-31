@@ -4,6 +4,10 @@
 		{"id": "bad_ship", "kind": "starter_ship", "name": "X", "how": "Y", "payload": {"ship": "no_such_design"}},
 		{"id": "bad_payload", "kind": "species_start", "name": "X", "how": "Y", "payload": {}},
 		{"id": "bad_text", "kind": "skin", "name": "", "payload": {"skin": "x"}, "extra": 1},
-		{"id": "bad_blueprint", "kind": "blueprint", "name": "X", "how": "Y", "payload": {"blueprint": "no_such_recipe"}}
+		{"id": "bad_blueprint", "kind": "blueprint", "name": "X", "how": "Y", "payload": {"blueprint": "no_such_recipe"}},
+		{"id": "bad_variant", "kind": "map_variant", "name": "X", "how": "Y", "payload": {"variant": "tidal"}},
+		{"id": "bad_tint", "kind": "skin", "name": "X", "how": "Y", "payload": {"skin": "x", "tint": "nope"}},
+		{"id": "bad_name", "kind": "species_start", "name": "X", "how": "Y", "payload": {"species": "fenn", "name": ""}},
+		{"id": "bad_key", "kind": "species_start", "name": "X", "how": "Y", "payload": {"species": "fenn", "colour": 1}}
 	]
 }

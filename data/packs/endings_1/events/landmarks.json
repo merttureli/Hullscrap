@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "station_ma_in_person", "type": "station", "weight": 80, "once": true, "landmark": true, "requires": {"flag": ["at_rusthold", "met_ma"], "not_flag": "lm_ma_table", "rep_min": {"clans": 2}, "jumps_min": 8},
+      "id": "station_ma_in_person", "type": "station", "weight": 80, "once": true, "landmark": true, "requires": {"flag": ["at_rusthold", "met_ma"], "not_flag": "lm_ma_table", "rep_min": {"clans": 2}, "region": "clan_space", "jumps_min": 8},
       "text": "A dock hand hands you a folded card in handwriting like a ransom note. DINNER. TONIGHT. DON'T BRING ANYTHING. IF YOU BRING SOMETHING I'LL KNOW IT'S AN APOLOGY. - M. Ma Gantry lives in the oldest hull in the Rusthold, a rust-red freighter called the Mother Plate, the first wreck anyone ever welded another wreck to. The door is a hatch with a cat flap. Inside is a kitchen, a long table, a kettle that has seen things, and a very small woman stirring a very big pot with something that used to be an oar. Her sleeves are rolled up. She does not have the clipboard. It is the first time you have seen her without it, and you do not know where to look.",
       "choices": [
         {"text": "Sit. Eat. Say nothing.", "outcomes": [
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "id": "wreck_field_cs001_patience", "type": "wreck_field", "weight": 50, "once": true, "landmark": true, "requires": {"not_flag": "lm_patience", "jumps_min": 18},
+      "id": "wreck_field_cs001_patience", "type": "wreck_field", "weight": 50, "once": true, "landmark": true, "requires": {"not_flag": "lm_patience", "region": ["concord_space", "human_core", "grundl_barges", "mire_fens"], "stage_min": 3},
       "text": "The Concord's flagship has not moved in forty years, and she is the size of the Rusthold. CS-001 Patience: every light on, every flag flying, every gun under its cover, and on her long white bridge a captain's chair turned to face the empty windows, waiting for orders from the Lattice Authority. No orders have come. She has not stopped listening. Along her flank, in letters four metres high, someone has painted a single word: STANDING BY.",
       "choices": [
         {"text": "Hail her with the old Concord courtesy code. (Concord trust)", "requires": {"rep_min": {"concord": 3}}, "outcomes": [
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "id": "gate_inside_the_shell", "type": "gate", "weight": 100, "once": true, "landmark": true, "requires": {"not_flag": "gate_shell_seen", "jumps_min": 28},
+      "id": "gate_inside_the_shell", "type": "gate", "weight": 100, "once": true, "landmark": true, "requires": {"not_flag": "gate_shell_seen", "region": "gate_approaches", "stage_min": 9},
       "text": "You fly in through the break where a ship used to be. Inside the shell a Dead Gate is a cathedral nobody finished: ribs of dead lattice, white as bone, rising out of sight in every direction, and between them a silence with a texture, like a sheet pulled tight. Your suit lights find the first rib and lose the last. Somewhere ahead a drop of old condensation falls, and the sound arrives a full second late. The gate is not quite dead. It is dead the way a bell is quiet.",
       "choices": [
         {"text": "Walk the ribs by suit light.", "outcomes": [
@@ -56,7 +56,7 @@
       ]
     },
     {
-      "id": "station_lumen_first_gate_study", "type": "station", "weight": 80, "once": true, "landmark": true, "requires": {"flag": "at_prism", "not_flag": "lm_lumen_study", "rep_min": {"lumen": 2}, "jumps_min": 14},
+      "id": "station_lumen_first_gate_study", "type": "station", "weight": 80, "once": true, "landmark": true, "requires": {"flag": "at_prism", "not_flag": "lm_lumen_study", "rep_min": {"lumen": 2}, "region": "lumen_space", "stage_min": 3},
       "text": "Deep in the Prism there is a room the acolytes call the Quiet Lab, which is the loudest room you have ever been in. It contains one thing: a model of a gate, no bigger than a hat, grown from crystal, with a small red light on its rim. 'Experiment 4411,' says the researcher who shows you in. Her name is Mira, and she has not slept since the experiment was new. 'We send a pulse. The gate answers. It has answered every pulse we have ever sent. Yesterday it answered one we had not sent yet.' She taps the rim. 'It is a timing fault,' she says, in the voice of a woman who has said it for years. 'Watch. I will send the pulse in nine seconds.'",
       "choices": [
         {"text": "Watch it twice.", "outcomes": [

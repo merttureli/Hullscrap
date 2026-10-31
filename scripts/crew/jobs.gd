@@ -749,7 +749,7 @@ static func _works(ship, uid: int) -> bool:
 # --- people -------------------------------------------------------------------------------------
 
 ## Make sure `ship` has its starting crew: the design's crew list when it has one (`ship.crew_plan`,
-## names and species), else the player's soldier, Ada, and `extra_crew` more NPCs at the beds
+## names and species; the entry named like the player in data/crew.json, or marked `player`, is the soldier), else the player's soldier, Ada, and `extra_crew` more NPCs at the beds
 ## (data/crew.json). Only adds what is missing, and stops at the first one that finds no place for a
 ## body yet. Returns the new members.
 static func spawn_crew(ship) -> Array:
@@ -806,7 +806,7 @@ static func _spawn_planned(ship) -> Array:
 	var npc := 0
 	for e in ship.crew_plan:
 		var who: String = e["name"]
-		var is_player: bool = who == cfg["player"]["name"]
+		var is_player: bool = who == cfg["player"]["name"] or bool(e.get("player", false))  # a renamed soldier is marked `player` (run_start.gd)
 		var is_ada: bool = who == cfg["ada"]["name"]
 		var nth := npc
 		if not is_player and not is_ada:

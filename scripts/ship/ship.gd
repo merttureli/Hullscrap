@@ -24,7 +24,8 @@ const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 ## grid and cargo of 2; versions 1 and 2 still load (no components, no cables). The optional
 ## "crafting" list (blueprints and queue) was added within 3: a save without it starts with the
 ## blueprints known at the start. 4 adds the optional "shield_balance" (the chosen sector weights and the
-## two custom presets of the Shields tab); older saves load with it fresh (even weights, empty slots).
+## two custom presets of the Shields tab); older saves load with it fresh (even weights, empty slots). The optional "skin"
+## (the hull skin id the player chose in the hangar, run_start.gd) was added within 4: a save without it has the plain hull.
 const VERSION := 4
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
@@ -50,6 +51,7 @@ var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; not saved yet
 var dead_crew: Array = []  ## names of crew who bled out (mortality.gd): Jobs.spawn_crew does not bring them back
 var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
+var skin := ""  ## the hull skin of the exterior plating (a skin unlock's payload `skin`, unlocks.gd skin_paint); "" = the plain hull; saved when set
 var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
 var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
@@ -225,6 +227,8 @@ func to_dict() -> Dictionary:
 	d["oxygen"] = atmosphere.pressure.duplicate()
 	if not ShieldBalance.is_fresh(shield_balance):  # optional: only written when the player set something
 		d["shield_balance"] = shield_balance.duplicate(true)
+	if skin != "":
+		d["skin"] = skin
 	if not fires.is_empty():  # optional, like the grid's damage lists: only written when something burns
 		var list := []
 		for c in Fire.sorted_cells(fires.keys()):
@@ -282,6 +286,7 @@ func load_dict(d: Dictionary) -> String:
 		rot_quarters = posmod(int(d.get("rot", 0)), 4)
 	fires = burning
 	shield_balance = ShieldBalance.sanitize(d.get("shield_balance"))
+	skin = str(d.get("skin", ""))
 	manned = {}
 	ability_state = Abilities.fresh_state()
 	if d.has("crafting"):

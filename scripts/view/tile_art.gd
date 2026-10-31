@@ -383,16 +383,17 @@ static func _tint(sheet, key: String) -> Color:
 
 ## Draw a skin plan (skin_plan) of a grid whose cell (0, 0) starts at `origin` px, `cell_px` per cell:
 ## the skin over every planned cell, then the decals over them (`t`: seconds, for the lamps). Neon
-## skin adds its edge glow. False when there is no skin art.
-static func draw_skin(canvas, plan: Dictionary, origin: Vector2, cell_px: float, t: float, glow_out = null) -> bool:
+## skin adds its edge glow. `paint` ({tint, lamp}: Unlocks.skin_paint, the player's hull skin) multiplies the line's tint by
+## `tint` and replaces the lamp colour with `lamp`. False when there is no skin art.
+static func draw_skin(canvas, plan: Dictionary, origin: Vector2, cell_px: float, t: float, glow_out = null, paint := {}) -> bool:
 	var plain = Art.tiles("hull_skin")
 	var shaped = Art.tiles("hull_skin_shapes")
 	if plain == null:
 		return false
 	var line: String = plan["line"]
-	var tint := skin_tint(plain, line)
+	var tint: Color = skin_tint(plain, line) * paint.get("tint", Color.WHITE)
 	var edge = skin_glow(plain, line)
-	var lamp := _tint(plain, "lamp_glow")
+	var lamp: Color = paint.get("lamp", _tint(plain, "lamp_glow"))
 	for e in plan["cells"]:
 		var s = shaped if e["row"] >= 0 else plain
 		if s == null:

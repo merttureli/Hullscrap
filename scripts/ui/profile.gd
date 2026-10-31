@@ -3,12 +3,13 @@ extends RefCounted
 ## one-line record of every finished run (the main menu lists the last five), the unlocks earned
 ## (data/unlocks.json: the hangar reads them), the landmarks met (docs/CONTENT.md section 13) and the hall of
 ## ships (the design of the ship of each run that ended in an ending, the last 20, one file each in the
-## folder next to the profile). No nodes. A missing or broken file is an empty profile. Also the version label of the main menu and the save helpers the
+## folder next to the profile) and the new-run options picked in the hangar (`start`). No nodes. A missing or broken file is an empty profile. Also the version label of the main menu and the save helpers the
 ## front door uses (is there a run to continue, wipe the saves when the ship is scrap).
 
 const PATH := "user://profile.json"
 ## 2 adds `unlocks`, `landmarks`, `hall` and `hall_seq`; a version 1 file loads with none.
-const VERSION := 2
+## 3 adds `start` (the new-run options chosen last time, run_start.gd); an older file loads with the plain defaults.
+const VERSION := 3
 const MAX_RUNS := 20  ## records kept
 const SHOWN_RUNS := 5  ## records the main menu lists
 const HALL_MAX := 20  ## ships the hall of ships keeps
@@ -23,6 +24,7 @@ var unlocks := {}  ## unlock id -> the date it was earned
 var landmarks := {}  ## landmark (event) id -> {title, date}
 var hall: Array = []  ## the hall of ships, oldest first: {file, ship, ending, score, date}
 var hall_seq := 0  ## the number of the next hall file
+var start := {}  ## the new-run options chosen in the hangar: {species, variant, skin} (run_start.gd), each an unlock id or ""; {} = the defaults
 
 
 func _init(p_path := PATH) -> void:
@@ -38,6 +40,7 @@ func load_file() -> void:
 	landmarks = {}
 	hall = []
 	hall_seq = 0
+	start = {}
 	if not FileAccess.file_exists(path):
 		return
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -65,6 +68,9 @@ func load_file() -> void:
 				hall.append(h)
 		hall = hall.slice(maxi(hall.size() - HALL_MAX, 0))
 	hall_seq = int(d.get("hall_seq", hall.size()))
+	if d.get("start") is Dictionary:
+		for k in d["start"]:
+			start[str(k)] = str(d["start"][k])
 
 
 ## Write the file. Returns "" or why not.
@@ -72,7 +78,7 @@ func save() -> String:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
 		return "could not write " + ProjectSettings.globalize_path(path)
-	f.store_string(JSON.stringify({"version": VERSION, "hints": hints, "runs": runs, "unlocks": unlocks, "landmarks": landmarks, "hall": hall, "hall_seq": hall_seq}, "  "))
+	f.store_string(JSON.stringify({"version": VERSION, "hints": hints, "runs": runs, "unlocks": unlocks, "landmarks": landmarks, "hall": hall, "hall_seq": hall_seq, "start": start}, "  "))
 	return ""
 
 
