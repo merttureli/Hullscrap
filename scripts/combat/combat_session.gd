@@ -208,7 +208,8 @@ func fire_slot(slot: int, aim: Vector2) -> bool:
 
 
 ## What the weapon bar shows for the player's weapon `uid` aiming at `aim`: {cooldown_left, cooldown,
-## status ("ready", "cooling down", "out of arc" (a turret), "no target", "unpowered", "no ammo", "malfunction",
+## status ("ready", "cooling down", "out of arc" (a turret), "no target", "unpowered", "no ammo" (or, with ammo racks, "no ammo rack in
+## reach", "rack empty", "belt stopped", "feeding": ammo.gd), "malfunction",
 ## "overheated", "disabled" (an outside half shot out), "offline" (a cut link), "wrecked"), in_arc (the
 ## point is inside the gun's gimbal cone, or the turret's arc), turret, hit (a turret's chance to hit the
 ## enemy, 0..1; -1 for a fixed gun)}.

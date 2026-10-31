@@ -30,6 +30,7 @@ const BLOCKED_TEXT := {"unpowered": "NO POWER", "disabled": "DISABLED", "overhea
 const GROUP_COLORS := {1: Color("#5fd4ff"), 2: Color("#ff9a3c")}
 const STATUS_TEXT := {
 	"ready": "READY", "cooling down": "COOLING", "out of arc": "OUT OF ARC", "unpowered": "NO POWER", "no ammo": "NO AMMO",
+	"no ammo rack in reach": "NO RACK", "rack empty": "RACK EMPTY", "belt stopped": "BELT STOPPED", "feeding": "FEEDING",
 	"malfunction": "JAMMED", "overheated": "OVERHEATED", "disabled": "DISABLED", "wrecked": "WRECKED", "no such weapon": "-",
 }
 
@@ -104,7 +105,7 @@ func _draw() -> void:
 func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2) -> void:
 	var st: Dictionary = session.slot_state(w["uid"], target)
 	var status: String = st["status"]
-	var col: Color = READY if status == "ready" else (COOLING if status == "cooling down" else (GREY if status == "out of arc" else BAD))
+	var col: Color = READY if status == "ready" else (COOLING if status in ["cooling down", "feeding"] else (GREY if status == "out of arc" else BAD))
 	draw_rect(Rect2(at, SLOT), BG)
 	draw_rect(Rect2(at, SLOT), Color(col, 0.9), false, 2.0)
 	var c := at + Vector2(30.0, SLOT.y / 2.0)

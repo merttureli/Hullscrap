@@ -163,7 +163,7 @@ static func refusal(ship, uid: int, item: String, cost: int) -> String:
 					racks.append(r)
 				if item_in(ship, r) == item:
 					net_stock += count_in(ship, r)
-		if _net_speed(ship, net) > 0.0:
+		if net_speed(ship, net) > 0.0:
 			moving = true
 	if racks.is_empty():
 		return "no ammo rack in reach"
@@ -212,7 +212,8 @@ static func drive_speed(ship, uid: int) -> float:
 	return float(ship.components.def(inst["id"]).get("stats", {}).get("belt_speed", 0.0))
 
 
-static func _net_speed(ship, net: Dictionary) -> float:
+## The best working drive speed on `net` (a Belts.analyze net): 0 when none works.
+static func net_speed(ship, net: Dictionary) -> float:
 	var best := 0.0
 	for d in net["drives"]:
 		best = maxf(best, drive_speed(ship, d))
@@ -223,7 +224,7 @@ static func _net_speed(ship, net: Dictionary) -> float:
 static func moving_at(ship, cell: Vector2i) -> bool:
 	var plan: Dictionary = ship.belts.analyze(ship)
 	var id: int = plan["net_of"].get(cell, -1)
-	return id >= 0 and _net_speed(ship, plan["nets"][id]) > 0.0
+	return id >= 0 and net_speed(ship, plan["nets"][id]) > 0.0
 
 
 ## Does the ship hold or carry a belt drive (the first one comes with the belt blueprint)?
@@ -517,3 +518,22 @@ static func stow_units(ship, comps: Dictionary) -> void:
 			if int(rec["uid"]) == int(u["from"]):
 				rec["ammo"] = u["item"]
 				rec["n"] = int(rec.get("n", 0)) + 1
+
+
+# --- drawing helpers ----------------------------------------------------------------------------------
+
+## The animation of a rack's art for what it holds (fill_0..4 for missiles, scrap_0..4, slug_0..4), "" when the part is no
+## rack or the sheet has none. `opts.fill_cap`: what the rack holds at most (draw_opts), else its stats.capacity.
+static func fill_anim(def: Dictionary, inst: Dictionary, sheet, opts := {}) -> String:
+	if str(def.get("family", "")) != "ammo_rack" or not inst.has("n"):
+		return ""
+	var cap := maxi(1, int(opts.get("fill_cap", def.get("stats", {}).get("capacity", cfg()["rack"]["capacity"]))))
+	var level := clampi(ceili(4.0 * float(int(inst["n"])) / float(cap) - 1e-6), 0, 4)
+	var prefix: String = {"scrap": "scrap", "slug": "slug"}.get(str(inst.get("ammo", "")), "fill")
+	var name := "%s_%d" % [prefix, level]
+	return name if sheet.has_anim(name) else ""
+
+
+## Extra draw options for component `uid` (Visuals.draw_component's opts): a rack's real capacity.
+static func draw_opts(ship, uid: int) -> Dictionary:
+	return {"fill_cap": capacity(ship, uid)} if is_rack(ship, uid) else {}
