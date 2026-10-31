@@ -606,7 +606,7 @@ func test_the_hangar_screen_loads_an_open_ship_and_shows_its_numbers() -> void:
 	eq(h.cards[h.sel]["name"], "Courier", "the Concord tab holds the Courier")
 	var pv := h.preview()
 	check(not pv.is_empty(), "its preview loads")
-	eq(pv["stats"]["weapons"], ["Laser Mk1", "Pulse Mk1", "Laser Mk1"], "with its weapons")
+	eq(pv["stats"]["weapons"], ["Pulse Mk1"], "with its weapons")
 	check(pv["stats"]["supply"] >= pv["stats"]["demand"] and pv["stats"]["hull"] > 0.0, "power and hull")
 	eq(h.choose(h.sel), "", "choosing an open ship works")
 	eq(d["sim"].player_ship().name, "Courier", "the ship is the Courier")

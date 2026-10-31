@@ -322,7 +322,7 @@ func test_the_ship_turns_toward_the_mouse_and_the_keys_mode_still_turns_with_a_a
 	s.input = {"throttle": 0.0, "turn": 1.0, "strafe": 1.0}
 	var before: float = co.flight.angle
 	co.flight.ang_vel = 0.0
-	for i in 60:
+	for i in 20:  # a light ship turns fast: a longer wait would wrap past half a turn
 		s.tick(DT)
 	check(co.flight.angle - before > 0.1, "keys steering: D turns clockwise")
 	s.cursor = null
@@ -330,7 +330,7 @@ func test_the_ship_turns_toward_the_mouse_and_the_keys_mode_still_turns_with_a_a
 	s.input = {"throttle": 0.0, "turn": 1.0, "strafe": 0.0}
 	co.flight.ang_vel = 0.0
 	before = co.flight.angle
-	for i in 60:
+	for i in 20:  # a light ship turns fast: a longer wait would wrap past half a turn
 		s.tick(DT)
 	check(co.flight.angle - before > 0.1, "and with no cursor yet the keys work too")
 
