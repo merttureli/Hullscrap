@@ -117,4 +117,15 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 - P5 goes to the lead, F6 to the balance harness and the starters, F7 to the lead.
 
 ## 5. What changed and why it's more fun
-*(Filled in at the end of the window, with screenshots in `/home/user/hs/shots/mech_*`.)*
+*(Kept up to date as features land; screenshots in `/home/user/hs/shots/mech_*`.)*
+
+**In one line**: the Drift now pushes you forward, fights can end four ways, and what you beat is what you get, so every jump and every shot is a decision with a price.
+
+| Before (Beta 1) | After (Beta 2) | Why it's more fun |
+|---|---|---|
+| You could sit at any node with a Net Mouth and farm forever (`mech_before_idle_farming.png`). | **The Hollow tide** sweeps each region a step per jump, and every 4 minutes of lingering (`mech_tide_1_map.png`, `mech_tide_3_hud_amber.png`). Places behind it go Hollow: ghost ships, dead beacons, no trade (`mech_tide_4_hollow_event.png`). | "One more beacon?" is now a gamble, as in FTL. Idling has a cost, and a run has a shape. |
+| A fight ended one way: shoot the hull to 0. An enemy with its whole crew down kept fighting. | **Enemy morale**: a beaten enemy surrenders (Y takes the offer, `mech_morale_1_surrender_banner.png`), runs (a 15 s jump spool you stop by shooting its engines or helm, `mech_morale_2_jump_bar.png`), or is **captured** when its crew is all down (`mech_morale_4_captured.png`). | What you aim at matters: engines to stop a runner, fire and vents to capture a ship whole. Mercy or greed is your call. |
+| "Pirate wrecked. Salvage comes later." A 25% roll for one random part (`mech_before_fight_won.png`). | **Salvage what survives**: pick one of the wreck's surviving parts, scan one for its blueprint, or strip her for scrap (`mech_salvage_2_pick.png`). A captured ship gives 4 picks plus the scrap. | The title fantasy, in the loop. Slay the Spire's "pick 1 of 3", and scans finally give blueprints. |
+| Crew went down and always got back up. | **Bleed out**: a downed crew member dies in 45 s unless someone reaches them or a medbay is powered. A red ring counts down (`mech_salvage_3_bleed_ring.png`). | Fires, vents and breaches have stakes. "Vent the room with Rook inside?" is a real question. |
+
+Round 2 (in progress): enemy intent on your schematic (P6), and the five region hazards made real (P8).
