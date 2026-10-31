@@ -45,6 +45,9 @@ static func step(arena, dt: float) -> void:
 		if p["left"] > 0.0:
 			alive.append(p)
 	arena.projectiles = alive
+	for sp in arena.fx["spawn"]:  # the shots a shield split this step fly on from the next one
+		spawn(arena, sp[0], sp[1], sp[2], sp[3])
+	arena.fx["spawn"].clear()
 
 
 ## Turn projectile `p` round on the bounce `b` (Damage.march): half the damage, the new heading, off the surface.
@@ -112,6 +115,7 @@ static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2, ou
 		return false
 	if best["shield"]:
 		Shields.absorb(arena, best["ship"], w, out["end"], (p1 - p0).normalized(), best["sector"])
+		Effects.on_shield(arena, owner, best["ship"], w, out["end"], (p1 - p0).normalized())  # a shot that splits on the bubble
 	else:
 		var first := {}
 		var res := Damage.march(arena, best["ship"], w, best["a"], best["b"], best["entries"], best["hit"], first)

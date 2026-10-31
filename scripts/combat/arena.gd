@@ -71,7 +71,7 @@ var rng := RandomNumberGenerator.new()
 var weapons := Weapons.new()
 var projectiles: Array = []
 var beams: Array = []
-var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed; n: the contact normal; points: up to 6 contact points, world), breach, disable (uid; half "out": the outside half of a mount), wreck_part (uid, id: a disabled part was hit again and is gone, debris on its cells), ignite (a hit started a fire), effect (kind: acid, corrode, spores, sonic, shard, frost, magnetic or self_room; weapon: its id; see effects.gd), wreck
+var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock (the bubble), ion_part (uid, seconds: ion shut a part down, Abilities.ion_lock), hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed; n: the contact normal; points: up to 6 contact points, world), breach, disable (uid; half "out": the outside half of a mount), wreck_part (uid, id: a disabled part was hit again and is gone, debris on its cells), ignite (a hit started a fire), effect (kind: acid, corrode, spores, sonic, shard, frost, magnetic, split (origin, dirs: a shield stopped a split_on_shield shot), intercept (hit: a point-defence turret shot at a missile) or self_room; weapon: its id; see effects.gd), wreck
 var autofire := {}  ## ship index -> false when its turrets hold fire (the T key); a ship not listed autofires
 var aim_points := {}  ## ship index -> the world point its fixed guns' barrels follow (the player's cursor), set by the caller
 var power_bonus := {}  ## ship index -> power the neon lattice has made of absorbed energy (counted, not used yet)
@@ -218,6 +218,7 @@ func _recompute(co) -> void:
 	co.hit_cache = {}
 	if co.dirty:
 		co.shape = null  # the cells may have changed: the bubble's outline is rebuilt on its next use
+	co.flight.turn_mult = Abilities.turn_mult(co.ship)  # a Gravity Anchor turns the ship faster
 	co.thrust = co.flight.thrust_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	co.thrusts = co.flight.thrusts_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	Shields.resync(co)

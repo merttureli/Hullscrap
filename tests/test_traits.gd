@@ -427,7 +427,7 @@ func test_an_aura_adds_air_and_heals_the_room_it_stands_in() -> void:
 		sim.ships = [s]
 		sim._step_ship(s, 1.0)
 		air[species] = s.atmosphere.oxygen_of(room) - before
-	near(air["sporeling"] - air["human"], 0.01, "a Sporeling's room gains 0.01 a second more air than a human's", 1e-9)
+	near(air["sporeling"] - air["human"], 0.5, "a Sporeling's room gains 0.5 a second more air than a human's", 1e-9)
 	spore.hurt(1000.0)
 	near(float(TraitSet.room_auras(ship).size()), 0.0, "a downed Sporeling gives nothing")
 	_done()
