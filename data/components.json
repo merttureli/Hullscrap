@@ -933,7 +933,7 @@
       "hp": 5,
       "heat_limit": 100,
       "heat_per_s": 1.5,
-      "cooling": 3,
+      "cooling": 6,
       "stats": {},
       "blurb": "A beam that sets rooms on fire as a hobby. Runs hot enough to cook itself."
     },
