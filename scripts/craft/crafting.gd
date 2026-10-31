@@ -1,18 +1,28 @@
 extends RefCounted
-## Recipes (data/recipes.json), the blueprints the player knows and the fabricator's job queue.
+## Recipes (data/recipes.json), the blueprints the player knows and the job queues of the ship's stations: the
+## fabricator's (`queue`) and the smelter's (`others["smelter"]`, docs/CONTENT.md section 12). A recipe names the
+## `station` that runs it (default "fabricator"); `fab_level` and `tools` are then the level and tools of that station.
+## Each station has its own queue, and the station a recipe needs is asked of the `fab` dictionary a caller passes in
+## (`station`, default "fabricator"; `speed`, default 1: work done per second), see workshop.gd and processing.gd.
 ## Materials are spent when a job is queued and refunded if it is cancelled. Pure data, no nodes.
 
 const Content = preload("res://scripts/data/content.gd")
 const VERSION := 1
 const QUEUE_MAX := 8
 const ITEMS_PATH := "res://data/items.json"  ## names of ammo, gear and special items
+const FABRICATOR := "fabricator"
+const STATIONS := {"fabricator": "Fabricator", "smelter": "Smelter"}  ## the stations a recipe can name -> their names
 
 var recipes := {}    # id -> {id, output {item, count}, materials, fab_level, tools, time, category}
 var order: Array[String] = []
 var materials := {}  # id -> {id, name, color, rarity}
 var known := {}      # recipe id -> true; the blueprints the player has (a set)
-var queue: Array = []  # FIFO jobs: {recipe, progress (seconds done), paid (materials spent)}
+var queue: Array = []  # the fabricator's FIFO jobs: {recipe, progress (seconds of work done), paid (materials spent)}
 var paused := false  ## the first job could not run during the last tick (fabricator offline or too weak); not saved
+var others := {}  ## station id -> its FIFO jobs, for every station but the fabricator (the smelter); read through queue_of()
+var paused_at := {}  ## station id -> true: its first job could not run during the last tick; not saved
+var working := {}  ## part uid -> true: the smelters that worked during the last tick (heat.gd reads it); not saved
+var lead := {}  ## station id -> uid of the part running that station's queue during the last tick (crew man it: jobs.gd); not saved
 var _start_known: Array[String] = []
 var _item_names := {}  # item id -> name (data/items.json)
 
@@ -28,7 +38,7 @@ func load(recipes_path: String, materials_path: String) -> void:
 	order.clear()
 	known.clear()
 	queue.clear()
-	paused = false
+	_clear_stations()
 	_start_known.clear()
 	_item_names.clear()
 	if FileAccess.file_exists(ITEMS_PATH):
@@ -40,6 +50,8 @@ func load(recipes_path: String, materials_path: String) -> void:
 		materials[d["id"]] = d
 	for d in r["recipes"]:
 		d["fab_level"] = int(d["fab_level"])
+		d["station"] = str(d.get("station", FABRICATOR))
+		assert(STATIONS.has(d["station"]), "recipe %s has an unknown station %s" % [d["id"], d["station"]])
 		d["time"] = float(d["time"])
 		d["output"] = {"item": str(d["output"]["item"]), "count": int(d["output"]["count"])}
 		var cost := {}
@@ -61,7 +73,7 @@ func reset() -> void:
 	for id in _start_known:
 		known[id] = true
 	queue.clear()
-	paused = false
+	_clear_stations()
 
 
 func ids() -> Array[String]:
@@ -85,6 +97,25 @@ func def(id: String) -> Dictionary:
 	return recipes.get(id, {})
 
 
+## The station that runs recipe `id` ("fabricator" for an unknown one).
+func station_of(id: String) -> String:
+	return str(recipes.get(id, {}).get("station", FABRICATOR))
+
+
+## The jobs queued at `station` (the live array: the fabricator's `queue`, or the station's own, made on first use).
+func queue_of(station: String) -> Array:
+	if station == FABRICATOR:
+		return queue
+	if not others.has(station):
+		others[station] = []
+	return others[station]
+
+
+## Did the first job of `station` stop during the last tick (the station offline or too weak)?
+func is_paused(station: String) -> bool:
+	return paused if station == FABRICATOR else bool(paused_at.get(station, false))
+
+
 func is_known(id: String) -> bool:
 	return known.has(id)
 
@@ -97,19 +128,23 @@ func unlock(id: String) -> bool:
 	return true
 
 
-## Why `recipe_id` cannot be crafted now, or "" when it can. `fab` is workshop.gd's level_of result.
-## Gives the first failing reason: unknown recipe, blueprint, offline, level, tool, materials.
+## Why `recipe_id` cannot be crafted now, or "" when it can. `fab` is the station's result (workshop.gd level_of or
+## processing.gd best): {level, tools, station (default "fabricator")}.
+## Gives the first failing reason: unknown recipe, blueprint, wrong station, offline, level, tool, materials.
 func can_craft(recipe_id: String, inventory, fab: Dictionary) -> String:
 	if not recipes.has(recipe_id):
 		return "unknown recipe"
 	if not known.has(recipe_id):
 		return "blueprint not known"
 	var r: Dictionary = recipes[recipe_id]
+	if r["station"] != str(fab.get("station", FABRICATOR)):
+		return "needs a " + str(STATIONS[r["station"]]).to_lower()
+	var sname := str(STATIONS[r["station"]]).to_lower()
 	var level := int(fab.get("level", 0))
 	if level <= 0:
-		return "fabricator offline"
+		return sname + " offline"
 	if level < r["fab_level"]:
-		return "needs fabricator level %d" % r["fab_level"]
+		return "needs %s level %d" % [sname, r["fab_level"]]
 	var tools := PackedStringArray()
 	for t in r["tools"]:
 		if not fab.get("tools", []).has(t):
@@ -131,27 +166,32 @@ func enqueue(recipe_id: String, inventory, fab: Dictionary) -> String:
 	var why := can_craft(recipe_id, inventory, fab)
 	if why != "":
 		return why
-	if queue.size() >= QUEUE_MAX:
+	var jobs := queue_of(recipes[recipe_id]["station"])
+	if jobs.size() >= QUEUE_MAX:
 		return "queue full"
 	var paid: Dictionary = recipes[recipe_id]["materials"].duplicate()
 	inventory.spend(paid)
-	queue.append({"recipe": recipe_id, "progress": 0.0, "paid": paid})
+	jobs.append({"recipe": recipe_id, "progress": 0.0, "paid": paid})
 	return ""
 
 
-## Advance the first job by `dt` seconds. It only progresses while the fabricator has the level and
-## tools it needs (so it pauses when power drops). Finished items go into `inventory`; spare time
-## carries on into the next job. Returns the recipe ids finished, in order. `paused` says whether the
-## first job was stopped by the fabricator.
+## Advance the first job of the station `fab` describes by `dt` seconds (times `fab.speed`, default 1: a manned
+## smelter works faster). It only progresses while the station has the level and tools it needs (so it pauses when
+## power drops). Finished items go into `inventory`; spare time carries on into the next job. Returns the recipe ids
+## finished, in order. `paused` (is_paused) says whether the first job was stopped by the station.
 func tick(dt: float, inventory, fab: Dictionary) -> Array[String]:
+	var station := str(fab.get("station", FABRICATOR))
+	var jobs := queue_of(station)
 	var done: Array[String] = []
-	var left := dt
-	paused = false
-	while left > 0.0 and not queue.is_empty():
-		var job: Dictionary = queue[0]
+	var left := dt * float(fab.get("speed", 1.0))
+	_pause(station, false)
+	while not jobs.is_empty():
+		var job: Dictionary = jobs[0]
 		var r: Dictionary = recipes[job["recipe"]]
 		if not _can_run(r, fab):
-			paused = true
+			_pause(station, true)
+			break
+		if left <= 0.0:
 			break
 		var need: float = r["time"] - job["progress"]
 		if left < need:
@@ -160,31 +200,36 @@ func tick(dt: float, inventory, fab: Dictionary) -> Array[String]:
 		left -= need
 		inventory.add(r["output"]["item"], r["output"]["count"])
 		done.append(job["recipe"])
-		queue.pop_front()
+		jobs.pop_front()
 	return done
 
 
-## Drop the job at `index` and give back everything it cost. False when there is no such job.
-func cancel(index: int, inventory) -> bool:
-	if index < 0 or index >= queue.size():
+## Drop the job at `index` of `station`'s queue and give back everything it cost. False when there is no such job.
+func cancel(index: int, inventory, station := FABRICATOR) -> bool:
+	var jobs := queue_of(station)
+	if index < 0 or index >= jobs.size():
 		return false
-	inventory.refund(queue[index]["paid"])
-	queue.remove_at(index)
-	if queue.is_empty():
-		paused = false
+	inventory.refund(jobs[index]["paid"])
+	jobs.remove_at(index)
+	if jobs.is_empty():
+		_pause(station, false)
 	return true
 
 
 func to_dict() -> Dictionary:
 	var ids_known: Array = known.keys()
 	ids_known.sort()
-	var jobs := []
-	for j in queue:
-		jobs.append({"recipe": j["recipe"], "progress": j["progress"], "paid": j["paid"].duplicate()})
-	return {"version": VERSION, "known": ids_known, "queue": jobs}
+	var d := {"version": VERSION, "known": ids_known, "queue": _jobs_out(queue)}
+	var extra := {}  # optional, like a save's belts: only written when another station has work
+	for st in others:
+		if not others[st].is_empty():
+			extra[st] = _jobs_out(others[st])
+	if not extra.is_empty():
+		d["queues"] = extra
+	return d
 
 
-## Replace the known blueprints and the queue with a saved set. Returns "" on success, else the
+## Replace the known blueprints and the queues with a saved set. Returns "" on success, else the
 ## reason (nothing changes then).
 func load_dict(d: Dictionary) -> String:
 	var r := _read(d)
@@ -192,7 +237,11 @@ func load_dict(d: Dictionary) -> String:
 		return r["error"]
 	known = r["known"]
 	queue = r["queue"]
+	others = r["queues"]
 	paused = false
+	paused_at.clear()
+	working.clear()
+	lead.clear()
 	return ""
 
 
@@ -201,7 +250,7 @@ func check_dict(d: Dictionary) -> String:
 	return str(_read(d).get("error", ""))
 
 
-## Parse a saved set: {known, queue}, or {error} for the first problem.
+## Parse a saved set: {known, queue, queues}, or {error} for the first problem.
 func _read(d: Dictionary) -> Dictionary:
 	if int(d.get("version", 0)) != VERSION:
 		return {"error": "unsupported crafting version"}
@@ -210,13 +259,35 @@ func _read(d: Dictionary) -> Dictionary:
 		if not recipes.has(str(id)):
 			return {"error": "unknown recipe " + str(id)}
 		fresh_known[str(id)] = true
-	var jobs: Array = d.get("queue", [])
+	var fab := _read_jobs(d.get("queue", []), FABRICATOR)
+	if fab.has("error"):
+		return fab
+	var fresh_others := {}
+	var extra = d.get("queues", {})
+	if not extra is Dictionary:
+		return {"error": "bad station queues"}
+	for st in extra:
+		if not STATIONS.has(str(st)) or str(st) == FABRICATOR:
+			return {"error": "unknown station " + str(st)}
+		var r := _read_jobs(extra[st], str(st))
+		if r.has("error"):
+			return r
+		fresh_others[str(st)] = r["jobs"]
+	return {"known": fresh_known, "queue": fab["jobs"], "queues": fresh_others}
+
+
+## Parse one saved queue of `station`: {jobs}, or {error}.
+func _read_jobs(jobs, station: String) -> Dictionary:
+	if not jobs is Array:
+		return {"error": "bad job list"}
 	if jobs.size() > QUEUE_MAX:
 		return {"error": "queue too long"}
 	var fresh_queue := []
 	for j in jobs:
 		if not (j is Dictionary and recipes.has(str(j.get("recipe", "")))):
 			return {"error": "bad job in the queue"}
+		if station_of(str(j["recipe"])) != station:
+			return {"error": "job %s is in the wrong queue" % str(j["recipe"])}
 		var p = j.get("progress", -1)
 		if not (p is int or p is float) or p < 0:
 			return {"error": "bad job progress"}
@@ -229,10 +300,33 @@ func _read(d: Dictionary) -> Dictionary:
 				return {"error": "bad job cost for " + str(id)}
 			paid[str(id)] = int(v)
 		fresh_queue.append({"recipe": str(j["recipe"]), "progress": float(p), "paid": paid})
-	return {"known": fresh_known, "queue": fresh_queue}
+	return {"jobs": fresh_queue}
 
 
-## True when the fabricator is level enough and has every tool this recipe needs.
+func _jobs_out(jobs: Array) -> Array:
+	var out := []
+	for j in jobs:
+		out.append({"recipe": j["recipe"], "progress": j["progress"], "paid": j["paid"].duplicate()})
+	return out
+
+
+func _pause(station: String, on: bool) -> void:
+	if station == FABRICATOR:
+		paused = on
+	else:
+		paused_at[station] = on
+
+
+## Forget every other station's queue and the runtime state of all of them.
+func _clear_stations() -> void:
+	paused = false
+	others.clear()
+	paused_at.clear()
+	working.clear()
+	lead.clear()
+
+
+## True when the station is level enough and has every tool this recipe needs.
 func _can_run(r: Dictionary, fab: Dictionary) -> bool:
 	if int(fab.get("level", 0)) < r["fab_level"]:
 		return false

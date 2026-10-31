@@ -29,7 +29,8 @@ const PX := 2.0  ## screen px per source px of the kit
 const ICON_SHEETS: Array[String] = ["icons_res", "icons_mode", "icons_cat"]
 const MATERIAL_COLORS := {"scrap": Color("#9aa0a6"), "copper": Color("#d98a4e"), "polymer": Color("#e8e1c8"), "titanium": Color("#b9c6d6"),
 	"silicon": Color("#6c7a89"), "crystal": Color("#7fdbff"), "plasma_cell": Color("#ff7ae0"), "nanite_paste": Color("#7dff9b"),
-	"credits": Color("#e1a136"), "fuel": Color("#ff8a1e"), "missile": Color("#c9ced6")}
+	"credits": Color("#e1a136"), "fuel": Color("#ff8a1e"), "missile": Color("#c9ced6"),
+	"steel": Color("#7c8aa5"), "alloy": Color("#a9c4a0"), "conductor": Color("#e8c15a"), "glass_lattice": Color("#9fe8e0")}
 
 static var _nine := {}  # "sheet:frame" -> StyleBoxTexture, or null when the kit has no such frame
 static var _icons := {}  # id -> [texture, region] or null
@@ -322,6 +323,19 @@ static func _glyph(cv: CanvasItem, id: String, r: Rect2, mod: Color) -> void:
 		"crystal":
 			poly.call([[8, 1], [13, 6], [8, 15], [3, 6]], col)
 			poly.call([[8, 1], [10, 6], [8, 15], [6, 6]], col.lightened(0.3))
+		"steel", "alloy":  # a bar with a bright edge (no art yet: the smelter materials are drawn by code)
+			poly.call([[2, 11], [4, 6], [14, 6], [12, 11]], col)
+			poly.call([[4, 6], [6, 3], [14, 3], [14, 6]], col.lightened(0.3))
+			box.call(5, 8, 6, 1.2, col.lightened(0.45))
+		"conductor":  # a coil
+			for k in 3:
+				cv.draw_arc(o + Vector2(8, 4.5 + k * 3.2) * u, 5.0 * u.x, 0.0, PI, 10, col * mod, 1.6 * u.x)
+				cv.draw_arc(o + Vector2(8, 6.1 + k * 3.2) * u, 5.0 * u.x, PI, TAU, 10, col.darkened(0.3) * mod, 1.6 * u.x)
+		"glass_lattice":  # a net of panes
+			poly.call([[8, 1], [15, 8], [8, 15], [1, 8]], col.darkened(0.2))
+			cv.draw_line(o + Vector2(4.5, 4.5) * u, o + Vector2(11.5, 11.5) * u, col.lightened(0.5) * mod, 1.0)
+			cv.draw_line(o + Vector2(11.5, 4.5) * u, o + Vector2(4.5, 11.5) * u, col.lightened(0.5) * mod, 1.0)
+			cv.draw_line(o + Vector2(8, 2.5) * u, o + Vector2(8, 13.5) * u, col.lightened(0.5) * mod, 1.0)
 		"plasma_cell", "nanite_paste":
 			box.call(5, 2, 6, 12, col.darkened(0.2))
 			box.call(6, 4, 4, 8, col)

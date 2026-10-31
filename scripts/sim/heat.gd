@@ -1,7 +1,8 @@
 extends RefCounted
 ## Heat per component (docs/CONTENT.md section 3). A running part (powered, status ok) gains
 ## heat_per_s x line heat each second; every part loses cooling plus the cooling bonus of the
-## radiators running in its room. At heat_limit a part overheats: it is out of action (unpowered)
+## radiators running in its room. A part with stats.work_heat (a smelter) gains its heat only while it works
+## (ship.crafting.working, set by ShipSim). At heat_limit a part overheats: it is out of action (unpowered)
 ## until its heat drops below half the limit, and the trip may start a fire (fire.gd) on the part's
 ## first cell. Deterministic: the fire roll comes from the rng the caller passes (ShipSim's).
 
@@ -25,7 +26,7 @@ static func tick(ship, dt: float, rng: RandomNumberGenerator = null) -> void:
 		var inst: Dictionary = ship.components.instances[uid]
 		var e: Dictionary = ship.effective(inst["id"])
 		var heat: float = inst["heat"]
-		if inst["status"] == "ok" and powered.get(uid, false):
+		if inst["status"] == "ok" and powered.get(uid, false) and (not e["stats"].has("work_heat") or ship.crafting.working.has(uid)):
 			heat += e["heat_per_s"] * dt
 		heat -= (e["cooling"] + float(bonus.get(ship.atmosphere.room_at(inst["anchor"]), 0.0))) * dt
 		heat = clampf(heat, 0.0, e["heat_limit"])

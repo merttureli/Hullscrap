@@ -155,25 +155,27 @@ func test_the_balance_bands_hold_for_all_19_and_the_waivers_are_gone() -> void:
 
 
 func test_recipes_follow_the_spec() -> void:
+	# the Mk3+ costs are the processing pack's overrides (docs/CONTENT.md section 12): steel for scrap, alloy for steel + titanium
+	# at Mk4+, glass lattice for silicon + crystal in the Neon Mk2+ (the same raw materials, smelted first)
 	var recipes := {}
 	for r in Content.list("recipes"):
 		recipes[r["id"]] = r
 	var want := {
-		"engine_mk3": [2, {"scrap": 40, "copper": 24, "titanium": 12, "silicon": 4}],
-		"engine_mk4": [2, {"scrap": 55, "copper": 32, "titanium": 20, "silicon": 8, "military_circuit": 1}],
-		"engine_mk5": [3, {"scrap": 75, "copper": 40, "titanium": 30, "silicon": 12, "crystal": 2, "military_circuit": 2, "gate_alloy": 1}],
+		"engine_mk3": [2, {"copper": 24, "titanium": 12, "silicon": 4, "steel": 10}],
+		"engine_mk4": [2, {"copper": 32, "titanium": 13, "silicon": 8, "military_circuit": 1, "alloy": 7}],
+		"engine_mk5": [3, {"copper": 40, "titanium": 21, "silicon": 12, "crystal": 2, "military_circuit": 2, "gate_alloy": 1, "steel": 1, "alloy": 9}],
 		"engine_scrap_mk2": [1, {"scrap": 26, "copper": 6}],
-		"engine_scrap_mk3": [2, {"scrap": 36, "copper": 12, "titanium": 4}],
-		"engine_scrap_mk4": [2, {"scrap": 50, "copper": 18, "titanium": 10, "military_circuit": 1}],
-		"engine_neon_mk2": [2, {"scrap": 30, "copper": 16, "titanium": 6, "crystal": 4, "silicon": 8}],
-		"engine_neon_mk3": [3, {"scrap": 40, "copper": 24, "titanium": 12, "crystal": 6, "silicon": 16}],
-		"engine_neon_mk4": [3, {"scrap": 55, "copper": 32, "titanium": 20, "crystal": 8, "silicon": 24, "military_circuit": 1, "void_crystal": 1}],
+		"engine_scrap_mk3": [2, {"copper": 12, "titanium": 4, "steel": 9}],
+		"engine_scrap_mk4": [2, {"copper": 18, "titanium": 4, "military_circuit": 1, "steel": 1, "alloy": 6}],
+		"engine_neon_mk2": [2, {"scrap": 30, "copper": 16, "titanium": 6, "glass_lattice": 4}],
+		"engine_neon_mk3": [3, {"copper": 24, "titanium": 12, "silicon": 4, "steel": 10, "glass_lattice": 6}],
+		"engine_neon_mk4": [3, {"copper": 32, "titanium": 13, "silicon": 8, "military_circuit": 1, "void_crystal": 1, "alloy": 7, "glass_lattice": 8}],
 		"strafe_jets_mk1": [1, {"scrap": 10, "copper": 5}],
 		"strafe_jets_mk2": [1, {"scrap": 15, "copper": 8, "titanium": 3}],
-		"strafe_jets_mk3": [2, {"scrap": 20, "copper": 12, "titanium": 6, "silicon": 2}],
+		"strafe_jets_mk3": [2, {"copper": 12, "titanium": 6, "silicon": 2, "steel": 5}],
 		"longburn_mk1": [1, {"scrap": 20, "copper": 15}],
 		"longburn_mk2": [1, {"scrap": 30, "copper": 24, "titanium": 6}],
-		"longburn_mk3": [2, {"scrap": 40, "copper": 36, "titanium": 12, "silicon": 4}],
+		"longburn_mk3": [2, {"copper": 36, "titanium": 12, "silicon": 4, "steel": 10}],
 	}
 	eq(want.size(), 15, "a recipe for each new engine")
 	for id in want:

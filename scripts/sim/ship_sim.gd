@@ -9,7 +9,8 @@ extends Node
 ## arena ticks them itself, at its own rate. The crew's active abilities (crew_abilities.gd: cooldowns and
 ## their timed effects) tick here for every ship, always. The fabricator's queue (ship.crafting) ticks for every
 ## ship, at the level and tools of the ship's best powered fabricator (Workshop.best); finished
-## items go to the cargo and the chronicle says so, and says when the fabricator stops the queue.
+## items go to the cargo and the chronicle says so, and says when the fabricator stops the queue. The smelter's
+## queue ticks the same way at the level, tools and speed of the ship's powered smelters (Processing.best).
 ## The random rolls (malfunctions, fires) use one RandomNumberGenerator per ship, seeded with the
 ## ship's rng_seed (default 1), so the same ship and inputs always play out the same.
 ## Auto doors: a door piece counts as open for the atmosphere while any crew body overlaps any of
@@ -28,6 +29,8 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
+const Processing = preload("res://scripts/craft/processing.gd")
+const Crafting = preload("res://scripts/craft/crafting.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
@@ -286,19 +289,35 @@ func _step_ship(ship: Ship, dt: float) -> void:
 	ship.atmosphere.tick(dt, open_door_cells(ship))
 
 
-## Run the fabricator's queue of `ship` for `dt` seconds and tell the chronicle what happened.
+## Run the queues of `ship` (the smelter's, then the fabricator's) for `dt` seconds and tell the chronicle what happened.
 func _craft(ship: Ship, dt: float) -> void:
+	ship.crafting.working.clear()  # heat.gd: a smelter only heats up while it works
+	ship.crafting.lead.clear()
+	_run_station(ship, dt, Processing.SMELTER)
+	_run_station(ship, dt, Crafting.FABRICATOR)
+
+
+## Run the queue of `station` for `dt` seconds at the level, tools and speed of its best powered parts.
+func _run_station(ship: Ship, dt: float, station: String) -> void:
 	var c = ship.crafting
-	if c.queue.is_empty():
+	var jobs: Array = c.queue_of(station)
+	if jobs.is_empty():
 		return
-	var fab := Workshop.best(ship)
-	var was: bool = c.paused
-	for id in c.tick(dt, ship.inventory, fab):
-		ship.log_event("Crafted " + c.name_of(c.def(id)["output"]["item"], ship.components))
-	if c.paused and not was:
-		if int(fab["level"]) <= 0:
-			ship.log_event("Fabricator offline: crafting paused")
+	var smelting := station == Processing.SMELTER
+	var st: Dictionary = Processing.best(ship) if smelting else Workshop.best(ship)
+	var label: String = Crafting.STATIONS[station]
+	var verb := "smelting" if smelting else "crafting"
+	var was: bool = c.is_paused(station)
+	for id in c.tick(dt, ship.inventory, st):
+		ship.log_event("%s %s" % ["Smelted" if smelting else "Crafted", c.name_of(c.def(id)["output"]["item"], ship.components)])
+	if smelting and int(st["uid"]) >= 0:
+		c.lead[station] = int(st["uid"])
+		if not c.is_paused(station):
+			c.working[int(st["uid"])] = true
+	if c.is_paused(station) and not was:
+		if int(st["level"]) <= 0:
+			ship.log_event("%s offline: %s paused" % [label, verb])
 		else:
-			ship.log_event("Fabricator too weak for %s: crafting paused" % c.name_of(c.def(c.queue[0]["recipe"])["output"]["item"], ship.components))
-	elif was and not c.paused:
-		ship.log_event("Fabricator online: crafting resumed")
+			ship.log_event("%s too weak for %s: %s paused" % [label, c.name_of(c.def(jobs[0]["recipe"])["output"]["item"], ship.components), verb])
+	elif was and not c.is_paused(station):
+		ship.log_event("%s online: %s resumed" % [label, verb])
