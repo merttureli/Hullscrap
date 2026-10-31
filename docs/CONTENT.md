@@ -23,6 +23,7 @@ Each entry has:
   - **25%** of malfunctions also deal 1 damage to the component and have a 30% chance to **start a fire** in its room.
   - The chronicle says what happened.
 - Output means the family's main stat: thrust, power produced, damage, shield recharge, O2 rate.
+- **Ion vulnerability is real** (`Abilities.ion_lock`, `Shields.absorb`): an ion hit on a part shuts it down (no power made or used, crew cannot repair it, it wears off) for 3 s times its line's `ion_vulnerability`, and an ion hit on the shield bubble strips that many layers (1 times the layers-weighted mean `ion_vulnerability` of the powered shield parts) and locks the bubble 3 s times it. A neon part therefore stays down 6 s and a neon shield loses 2 layers per ion hit and is locked for 6 s. The Prismatic Lattice Shield ("ion strips 2") and Song Reactor ("ion shuts it down twice as long") are this rule, with no key of their own.
 
 ## 3. Heat (`scripts/sim/heat.gd`)
 - Each component has `heat`.
