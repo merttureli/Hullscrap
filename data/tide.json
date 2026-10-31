@@ -1,0 +1,8 @@
+{
+	"_doc": "The Hollow tide (scripts/space/tide.gd, docs/MECHANICS_REVIEW.md P1): a front sweeps over a region's map from its entry along +x, and places behind it go Hollow (ghost ships, no rewards). Stations and the region's exit hold. grace = steps before the front starts to move; jumps_to_cross = steps the front takes to cross the whole map (the width of the farthest node from the entry); stage_jumps_to_cross = the same for stage 1, 2, 3 ... of a run (stage 1 uses 16; later ones are quicker, for the regions); linger_s = seconds of play in one place (no map, no build mode, no fight) that push the tide one step; linger_warn = seconds left at which the tide warns once. The ghost ships of a Hollow place come from data/drift.json enemies.hollow (the raider and the rammer until shipgen replaces them); its events are the `hollow` ones of data/packs/mech_tide.",
+	"grace": 3,
+	"jumps_to_cross": 16,
+	"linger_s": 240,
+	"linger_warn": [60, 15],
+	"stage_jumps_to_cross": [16, 14, 13, 12, 12, 11, 11, 10]
+}
