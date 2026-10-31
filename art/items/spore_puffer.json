@@ -1,0 +1,32 @@
+{
+ "frame": [
+  11,
+  19
+ ],
+ "anchors": {
+  "grip": [
+   5,
+   15
+  ],
+  "muzzle": [
+   5,
+   0
+  ]
+ },
+ "class": "tool",
+ "pose": "tool",
+ "culture": "sporeling",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Sporeling spore puffer: a cream nozzle on a ribbed bellows, a violet spore sac with gills, a brown handle. Puffs spores that put a target to sleep.",
+ "glow": {
+  "image": "spore_puffer_glow.png",
+  "frame": [
+   19,
+   27
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

@@ -266,7 +266,7 @@ func test_a_mount_survives_a_save_and_load_with_its_halves_and_its_damage() -> v
 		inst["hp"] = 3
 		var saved: Dictionary = JSON.parse_string(JSON.stringify(ship.to_dict()))
 		var rec: Dictionary = saved["components"]["instances"][0]
-		eq(saved["components"]["version"], 3, "version 3")
+		eq(saved["components"]["version"], 4, "version 4")
 		eq(Vector2i(int(rec["out"][0]), int(rec["out"][1])), inst["out_anchor"], "a record keeps the outside half's top-left")
 		eq(Vector2i(int(rec["anchor"][0]), int(rec["anchor"][1])), inst["anchor"], "and the inside half's")
 		eq(rec["rot"], rot, "and the rotation")

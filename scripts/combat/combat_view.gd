@@ -26,6 +26,7 @@ const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const JumpBar = preload("res://scripts/ui/jump_bar.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
+const Skulls = preload("res://scripts/ui/skulls.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
 const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
 
@@ -45,7 +46,7 @@ const SHIELD_HINT := "   arrows shift the shield balance   End even"
 const WRECK_LINGER := 3.0  ## seconds a decided sector fight goes on showing its end before it ends by itself
 
 ## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship), hull, hull_max (the player's),
-## offer ({item: count}, only when "spared"), in_sector, pose ({pos, vel, angle, ang_vel}: where the player's ship is now), enemy_pos}.
+## threat (the enemy's skulls, 1-5), offer ({item: count}, only when "spared"), in_sector, pose ({pos, vel, angle, ang_vel}: where the player's ship is now), enemy_pos}.
 signal finished(result: Dictionary)
 
 var sim: Node  ## ShipSim
@@ -197,6 +198,7 @@ func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 	if not _schem.is_empty():
 		_schem[0].bind(session.arena, Session.PLAYER, player.name if player.name != "Ship" else "Your ship")
 		_schem[1].bind(session.arena, Session.ENEMY, enemy.name)
+		_schem[1].threat = session.threat
 		_bar.bind(session, _aim)
 	_show_hud(true)
 	return ""
@@ -209,7 +211,7 @@ func leave() -> void:
 	var foe = session.arena.ships[Session.ENEMY]
 	var mine = session.arena.ships[Session.PLAYER]
 	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max,
-		"in_sector": in_sector, "pose": {"pos": mine.flight.pos, "vel": mine.flight.vel, "angle": mine.flight.angle, "ang_vel": mine.flight.ang_vel}, "enemy_pos": foe.flight.pos}
+		"in_sector": in_sector, "pose": {"pos": mine.flight.pos, "vel": mine.flight.vel, "angle": mine.flight.angle, "ang_vel": mine.flight.ang_vel}, "enemy_pos": foe.flight.pos, "threat": session.threat}
 	if result["state"] == "spared":
 		result["offer"] = session.morale.offer.duplicate()
 	sim.ships.erase(session.arena.ships[Session.ENEMY].ship)
@@ -436,6 +438,10 @@ func _update_hud() -> void:
 	_hint.position = Vector2((vp.x - _hint.size.x) / 2.0, 10.0)
 	_jump_bar.position = _schem[1].position + Vector2(0.0, Schematic.PANEL.y + 6.0)
 	var text: String = session.end_text()
+	var rated := false
+	if text == "":
+		text = session.threat_banner()
+		rated = text != ""
 	if text == "" and _clock < _note_until:
 		text = _note
 	if text == "" and session.jump_charge >= 0.0:
@@ -444,6 +450,10 @@ func _update_hud() -> void:
 		text = session.morale.banner()
 	_banner.text = text
 	_banner.visible = text != ""
+	if rated:
+		_banner.add_theme_color_override("font_color", Skulls.color(session.threat))
+	else:
+		_banner.remove_theme_color_override("font_color")
 	var co = session.arena.ships[Session.PLAYER]
 	_hint.text = "%s\nenemy %d px   speed %d px/s%s" % [HINT, session.distance(), co.flight.vel.length(), SHIELD_HINT if co.sectors > 1 and co.layers_cap > 0 else ""]
 

@@ -3,8 +3,8 @@ extends Node2D
 ## Build mode edits three layers through BuildSession, which pays, refunds and keeps the undo history.
 ## The HUD (scripts/ui/hud.gd, made here) shows the palette: Tab and Shift+Tab cycle its category tabs (Structure,
 ## Shapes, Systems, Weapons, Engines, Utility, Cargo: scripts/build/palette.gd) and 1-9 or a click pick a card,
-## which sets the tool: a tile (group TILES, `selected`, a shape in `wall_piece`), the cable (CABLES) or a system
-## (SYSTEMS, `sel_component`, placed from the cargo). R rotates a system. A weapon or engine is a hull mount (docs/CONTENT.md 4f): point at the cell where
+## which sets the tool: a tile (group TILES, `selected`, a shape in `wall_piece`), the cable (CABLES), the conveyor belt
+## (BELTS: a floor overlay laid like a cable, once a belt drive is aboard) or a system (SYSTEMS, `sel_component`, placed from the cargo). R rotates a system. A weapon or engine is a hull mount (docs/CONTENT.md 4f): point at the cell where
 ## its OUTSIDE half goes, in space against the outer wall face (outward is up at 0 degrees, R turns it); the
 ## game walks inward through the wall and puts the inside half on the floor behind it, and the ghost shows both
 ## halves and the wall between them. Cables: nothing to pick. A door is a piece of two cells (a crew body
@@ -40,19 +40,22 @@ const ShieldPanel = preload("res://scripts/ui/shield_panel.gd")
 const Palette = preload("res://scripts/build/palette.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const RedAlert = preload("res://scripts/sim/red_alert.gd")
+const BeltArt = preload("res://scripts/view/belt_art.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const CELL := 32
 const SAVE_PATH := "user://ship.json"
 const OK_TINT := Color(0.35, 1, 0.45)
 const BAD_TINT := Color(1, 0.35, 0.35)
 const CABLE_COLOR := Color("#d98a4e")
+const BELT_COLOR := Color("#c9b878")
 const O2_EMPTY := Color("#ff3b3b")
 const O2_FULL := Color("#3b7bff")
 const BREACH_COLOR := Color("#ffb020")
 const NET_TINTS: Array[Color] = [Color("#4ad1b8"), Color("#e8c13a"), Color("#c06bff"), Color("#ff7a59"), Color("#6bb5ff"), Color("#9be564")]
-const QUIET_REASONS: Array[String] = ["already there", "already a cable", "nothing to remove"]  ## not worth a message
+const QUIET_REASONS: Array[String] = ["already there", "already a cable", "already a belt", "nothing to remove"]  ## not worth a message
 
 ## The kinds of tool a palette card puts in hand.
-enum Group { TILES, SYSTEMS, CABLES }
+enum Group { TILES, SYSTEMS, CABLES, BELTS }
 
 var sim: Node:  ## the ShipSim that owns the ships
 	set(v):
@@ -341,6 +344,8 @@ func tool_key() -> String:
 	match group:
 		Group.CABLES:
 			return "cable"
+		Group.BELTS:
+			return "belt"
 		Group.SYSTEMS:
 			return "part:" + sel_component
 	return "piece:%s:%s" % [wall_piece, selected] if _shaped_wall() else "tile:" + selected
@@ -351,6 +356,8 @@ func selected_entry() -> Dictionary:
 	match group:
 		Group.CABLES:
 			return Palette.cable_entry(ship, session.cable_cost)
+		Group.BELTS:
+			return Palette.belt_entry(ship)
 		Group.SYSTEMS:
 			return Palette.part_entry(ship, sel_component) if ship.components.has(sel_component) else {}
 	return Palette.piece_entry(ship, wall_piece, selected) if _shaped_wall() else Palette.tile_entry(ship, selected)
@@ -365,6 +372,8 @@ func pick(e: Dictionary) -> void:
 			wall_piece = e["piece"]
 		"cable":
 			group = Group.CABLES
+		"belt":
+			group = Group.BELTS
 		"part":
 			group = Group.SYSTEMS
 			sel_component = e["id"]
@@ -532,6 +541,8 @@ func _plan() -> Dictionary:
 			return session.plan_component(sel_component, hover, rot)
 		Group.CABLES:
 			return session.plan_cables(mode, remove, start, hover, path)
+		Group.BELTS:
+			return session.plan_belts(mode, remove, start, hover, path)
 	return session.plan(mode, selected, remove, start, hover, path)
 
 
@@ -660,6 +671,8 @@ func _controls_text() -> String:
 			how = "LMB place a 2-cell door in a wall   RMB remove   R flip"
 	elif group == Group.SYSTEMS:
 		how = "LMB place (a weapon or engine: its outside half on the mouse)   RMB remove   R rotate   F repair"
+	elif group == Group.BELTS:
+		how = "LMB lay belt   Shift+LMB line   Ctrl+LMB rectangle   RMB remove (belts touch racks, guns and drives by an edge)"
 	return "%s   E door   O oxygen   P power\nTab / Shift+Tab palette tab   1-9 pick   Ctrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   wheel zoom" % how
 
 
@@ -689,6 +702,7 @@ func _draw() -> void:
 		_draw_tile(c, grid.tiles[c], open_doors)
 	if build_on or show_power:
 		_draw_cables(_network_tints() if show_power else {})
+	BeltArt.draw(self, ship, _origin(), CELL, _clock)  # the conveyor belts and the ammo riding them
 	Visuals.draw_wrecks(self, ship.components.wrecks, _origin(), CELL)
 	_draw_components()
 	if show_o2:
@@ -767,6 +781,7 @@ func _draw_components() -> void:
 	for uid in uids:
 		var inst: Dictionary = ship.components.instances[uid]
 		var opts := {"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads}
+		opts.merge(Ammo.draw_opts(ship, uid))
 		if mount_fx.has(uid):
 			opts["fired_ago"] = fmod(_clock, 0.3)  # a beam that is on pulses its strip
 		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
@@ -846,6 +861,8 @@ func _draw_ghost(g: Dictionary) -> void:
 			_draw_ghost_system(g, tint)
 		"cable":
 			_draw_ghost_cell(g["cell"], Color.TRANSPARENT if g.get("remove", false) else Color(CABLE_COLOR, 0.45), tint)
+		"belt":
+			_draw_ghost_cell(g["cell"], Color.TRANSPARENT if g.get("remove", false) else Color(BELT_COLOR, 0.45), tint)
 		"piece":
 			_draw_ghost_piece(g, tint)
 		_:

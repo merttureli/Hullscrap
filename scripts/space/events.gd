@@ -40,7 +40,7 @@ const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress
 const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest", "hollow"]
 const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark"]
 const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max"]
-const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay"]
+const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue"]
 const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "species", "trait", "items", "pay", "component", "credits"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
@@ -297,10 +297,10 @@ static func traits_of(m) -> Array:
 
 # --- choices ------------------------------------------------------------------------------------------
 
-## Is the choice blue (it asks for a species, a trait or an installed component)?
+## Is the choice blue (it asks for a species, a trait or an installed component, or says `blue`: good standing at the exit)?
 static func is_blue(ch: Dictionary) -> bool:
 	var req := _dict(ch.get("requires"))
-	return req.has("species") or req.has("trait") or req.has("component")
+	return req.has("species") or req.has("trait") or req.has("component") or bool(ch.get("blue", false))
 
 
 ## The choices of `ev` that show, in order: {index (into ev.choices), text, blue, grey, need}. A

@@ -1,0 +1,32 @@
+{
+ "frame": [
+  13,
+  33
+ ],
+ "anchors": {
+  "grip": [
+   6,
+   25
+  ],
+  "muzzle": [
+   6,
+   0
+  ]
+ },
+ "class": "melee",
+ "pose": "melee",
+ "culture": "sporeling",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Sporeling thorn lash: a whip of thorns. A brown vine bristling with cream thorns, a violet bud at the tip, a leaf-wrapped grip and a violet bulb pommel.",
+ "glow": {
+  "image": "thorn_lash_glow.png",
+  "frame": [
+   21,
+   41
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

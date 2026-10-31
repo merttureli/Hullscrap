@@ -1,0 +1,36 @@
+{
+ "frame": [
+  13,
+  40
+ ],
+ "anchors": {
+  "grip": [
+   5,
+   32
+  ],
+  "muzzle": [
+   5,
+   0
+  ],
+  "foregrip": [
+   5,
+   17
+  ]
+ },
+ "class": "heavy",
+ "pose": "heavy",
+ "culture": "grundl",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Grundl chain gun: a ribbed barrel jacket, a dark riveted receiver with an amber stencil and lamps, a belt of brass slugs on a chain, a pistol grip. Lighter slugs, faster.",
+ "glow": {
+  "image": "chain_gun_glow.png",
+  "frame": [
+   21,
+   48
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

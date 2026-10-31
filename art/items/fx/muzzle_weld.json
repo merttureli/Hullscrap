@@ -1,0 +1,46 @@
+{
+ "frame": [
+  11,
+  11
+ ],
+ "mode": "once",
+ "anims": {
+  "play": [
+   0,
+   3,
+   24
+  ]
+ },
+ "anchors": {
+  "muzzle": [
+   5,
+   10
+  ]
+ },
+ "for_class": [
+  "tool (arc_welder)"
+ ],
+ "for_item": [
+  "arc_welder"
+ ],
+ "glow": {
+  "image": "muzzle_weld_glow.png",
+  "frame": [
+   21,
+   21
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    24
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Hand-weapon muzzle flash, faces UP (rotation 0): put the muzzle anchor on the weapon's muzzle point and rotate with the weapon. Plays once per use."
+}

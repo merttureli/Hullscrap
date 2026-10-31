@@ -13,6 +13,7 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
+const Threat = preload("res://scripts/space/threat.gd")
 
 const PIRATE_PATH := "res://data/ships/pirate_raider.json"
 const RAMMER_PATH := "res://data/ships/rustfang_rammer.json"  ## the test rammer (Shift+K in the combat view)
@@ -29,6 +30,7 @@ const LOST_TEXT := "Your ship is wrecked. R to restart"
 const CAPTURED_TEXT := "Nobody is left standing aboard. She's yours. Esc to return"
 const SPARED_TEXT := "Deal struck. Pirate stands down. Esc to return"
 const ESCAPED_TEXT := "They got away. Esc to return"
+const THREAT_BANNER_S := 3.0  ## seconds of the fight the banner names the enemy and its threat
 const ESCAPE_LOOK_S := 1.5  ## seconds the camera keeps the place the enemy jumped from in view
 
 var arena: Arena
@@ -38,6 +40,7 @@ var jump_charge := -1.0  ## seconds the jump drive has spooled (J); -1 while it 
 var input := {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}  ## the player's keys, set by the view: W/S throttle, A/D "turn" (keys steering) or "strafe" (mouse steering)
 var cursor: Variant = null  ## the world point the mouse is on, set by the view each frame; the ship turns toward it (mouse steering) and the fixed guns' barrels follow it. null: keys steering, barrels at rest
 var enemy_label := "Pirate"
+var threat := 0  ## the enemy's threat against the player's ship, 1-5 skulls (Shipgen.threat), rated once at start()
 var _acc := 0.0
 
 
@@ -71,6 +74,7 @@ static func spawn_rammer() -> Ship:
 ## seeds every roll of the fight and the pilot. `place` puts the fight somewhere else (a fight in a sector, in its px):
 ## {player_pos, player_angle, player_vel, player_ang_vel, enemy_pos}; the enemy always starts facing the player.
 func start(player: Ship, enemy: Ship, seed_value := 1, place := {}) -> void:
+	threat = int(Shipgen.threat(enemy, player)["skulls"])
 	arena = Arena.new(seed_value)
 	var at: Vector2 = place.get("player_pos", Vector2.ZERO)
 	arena.add_ship(player, at, float(place.get("player_angle", 0.0)))
@@ -160,6 +164,13 @@ func accept_surrender() -> String:
 	return morale.accept() if state() == "fighting" else "The fight is over"
 
 
+## "Rustfang Cutter: Threat 4/5" for the first THREAT_BANNER_S seconds of the fight, else "".
+func threat_banner() -> String:
+	if threat <= 0 or arena.time() >= THREAT_BANNER_S:
+		return ""
+	return "%s: %s" % [arena.ships[ENEMY].ship.name, Threat.label(threat)]
+
+
 ## The line for the end of the fight ("" while it goes on).
 func end_text() -> String:
 	match state():
@@ -216,7 +227,8 @@ func fire_slot(slot: int, aim: Vector2) -> bool:
 
 
 ## What the weapon bar shows for the player's weapon `uid` aiming at `aim`: {cooldown_left, cooldown,
-## status ("ready", "cooling down", "out of arc" (a turret), "no target", "unpowered", "no ammo", "malfunction",
+## status ("ready", "cooling down", "out of arc" (a turret), "no target", "unpowered", "no ammo" (or, with ammo racks, "no ammo rack in
+## reach", "rack empty", "belt stopped", "feeding": ammo.gd), "malfunction",
 ## "overheated", "disabled" (an outside half shot out), "offline" (a cut link), "wrecked"), in_arc (the
 ## point is inside the gun's gimbal cone, or the turret's arc), turret, hit (a turret's chance to hit the
 ## enemy, 0..1; -1 for a fixed gun)}.

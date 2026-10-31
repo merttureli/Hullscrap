@@ -1,0 +1,32 @@
+{
+ "frame": [
+  11,
+  18
+ ],
+ "anchors": {
+  "grip": [
+   5,
+   14
+  ],
+  "muzzle": [
+   5,
+   0
+  ]
+ },
+ "class": "tool",
+ "pose": "tool",
+ "culture": "gauntling",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Gauntling arc welder: twin ball electrodes with a live cyan arc between them, a copper coil, a colour-coded wire to a patched handle. Repairs, and shocks organic targets (later).",
+ "glow": {
+  "image": "arc_welder_glow.png",
+  "frame": [
+   19,
+   26
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

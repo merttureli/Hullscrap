@@ -1,0 +1,32 @@
+{
+ "frame": [
+  9,
+  27
+ ],
+ "anchors": {
+  "grip": [
+   4,
+   19
+  ],
+  "muzzle": [
+   4,
+   0
+  ]
+ },
+ "class": "melee",
+ "pose": "melee",
+ "culture": "kett",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Kett hive prod: a long amber chitin pole topped by two honeycomb cells (one yellow, one green) round a cream stinger; a quick jab. Wrapped grip, a dark eye-lamp in the pommel.",
+ "glow": {
+  "image": "hive_prod_glow.png",
+  "frame": [
+   17,
+   35
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

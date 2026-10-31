@@ -10,6 +10,7 @@ const Stats = preload("res://scripts/sim/stats.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const FIRE_WINDOW := 0.15  ## seconds a weapon shows its fire frame after a shot
 const BARRELS: Array[String] = ["weapon", "radar", "tractor"]  ## the families whose outside half carries a head that turns: a gun, a dish, an emitter
 const DISH_SPIN := 2.1  ## radians a second a radar dish turns while the radar works
@@ -68,6 +69,8 @@ static func draw_component(canvas, rect: Rect2, def: Dictionary, inst: Dictionar
 	else:
 		_draw_placeholder(canvas, rect.grow(-2), def, cell_px, m, bool(opts.get("powered", true)), alpha)
 	_draw_marks(canvas, rect.grow(-2), m, alpha)
+	if inst.has("n") and str(def.get("family", "")) == "ammo_rack":  # a rack's count
+		_draw_text(canvas, str(int(inst["n"])), rect.end - Vector2(11.0, 9.0), 11, Color(1, 1, 1, alpha), true)
 
 
 # --- hull mounts (docs/CONTENT.md 4f): the outside half, its barrel, and the debris of wrecked parts -----------
@@ -208,6 +211,8 @@ static func anim_state(sheet, def: Dictionary, inst: Dictionary, opts := {}) -> 
 			anim = "charge"
 		elif hurt and sheet.has_anim("damaged"):
 			anim = "damaged"
+		elif Ammo.fill_anim(def, inst, sheet, opts) != "":  # an ammo rack shows how full it is
+			anim = Ammo.fill_anim(def, inst, sheet, opts)
 	st["anim"] = anim
 	st["sparks"] = hurt and anim != "damaged"
 	match anim:
@@ -220,6 +225,8 @@ static func anim_state(sheet, def: Dictionary, inst: Dictionary, opts := {}) -> 
 	var g = sheet.glow
 	if g != null and powered and anim != "off":
 		var gname: String = anim if g.has_anim(anim) else ("on" if g.has_anim("on") else "")
+		if anim.ends_with("_0") and not g.has_anim(anim):  # an empty rack's lamps are out
+			gname = ""
 		st["glow"] = gname
 		match gname:
 			"charge":

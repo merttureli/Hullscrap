@@ -1,0 +1,7 @@
+{
+  "_doc": "Ammo racks, the restock job and conveyor belts (docs/CONTENT.md 4f; scripts/sim/ammo.gd, scripts/sim/belts.gd). rack.capacity: units one ammo rack holds when its component gives no stats.capacity (a Cargo Deck's stats.ammo_cap_mult multiplies it for the racks in its room). rack.restock_below: a rack under this fraction of its capacity gets a restock job (data/crew.json: restock); once a crew member has started it they fill the rack. chamber_shots: a belt-fed gun keeps this many shots' worth of ammo in its feed (loaded plus riding the belt). blast_per_unit: damage per unit of explosive ammo (items.json `explosive: true`) in a wrecked rack, dealt to every part in the rack's room and the walls and doors round it. unit_colors: the colour of a unit riding a belt, by ammo item (default: amber). Belt drives are components (family belt_drive; stats.belt_speed in cells a second, stats.belt_interval seconds between two units it feeds); belt cells cost build.json belt_cost.",
+  "rack": {"capacity": 20, "restock_below": 0.5},
+  "chamber_shots": 2,
+  "blast_per_unit": 2.0,
+  "unit_colors": {"missile": "#ff5a4a", "scrap": "#b9a58a", "default": "#ffc94a"}
+}

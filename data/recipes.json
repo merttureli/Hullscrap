@@ -22,7 +22,8 @@
     "shrapnel_cannon_scrap",
     "bolt_thrower_scrap",
     "shield_scrap_mk1",
-    "net_mouth_scrap"
+    "net_mouth_scrap",
+    "ammo_rack"
   ],
   "recipes": [
     {
@@ -735,6 +736,70 @@
       "fab_level": 1,
       "tools": [],
       "time": 20,
+      "category": "system"
+    },
+    {
+      "id": "ammo_rack",
+      "output": {
+        "item": "ammo_rack",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 14,
+        "copper": 5
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 10,
+      "category": "system"
+    },
+    {
+      "id": "belt_drive_scrap",
+      "output": {
+        "item": "belt_drive_scrap",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 8
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "belt_drive_std",
+      "output": {
+        "item": "belt_drive_std",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 14,
+        "titanium": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 28,
+      "category": "system"
+    },
+    {
+      "id": "belt_drive_neon",
+      "output": {
+        "item": "belt_drive_neon",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 12,
+        "silicon": 8,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 45,
       "category": "system"
     },
     {
