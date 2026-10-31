@@ -315,10 +315,13 @@ func _draw_plan(r: Rect2, cur: Dictionary) -> void:
 	else:
 		_text("This design cannot be loaded.", r.position + Vector2(20.0, 40.0), 16, BAD)
 	if is_locked(sel):
-		draw_rect(r, Color(0.0, 0.0, 0.0, 0.62))
-		_lock(r.get_center() + Vector2(-6.0, -34.0), AMBER)
-		_centered_in(r, "LOCKED", r.get_center().y + 4.0, 26, AMBER)
-		draw_multiline_string(ThemeDB.fallback_font, Vector2(r.position.x + 40.0, r.get_center().y + 34.0), Hangar.hint(cur), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 80.0, 16, 4, TEXT)
+		draw_rect(r, Color(0.0, 0.0, 0.0, 0.6))
+		var note := Rect2(r.get_center() - Vector2(220.0, 62.0), Vector2(440.0, 124.0))
+		draw_rect(note, Color("#0b0f16"))
+		draw_rect(note, AMBER, false, 2.0)
+		_lock(note.position + Vector2(note.size.x / 2.0 - 6.0, 14.0), AMBER)
+		_centered_in(note, "LOCKED", note.position.y + 56.0, 24, AMBER)
+		draw_multiline_string(ThemeDB.fallback_font, Vector2(note.position.x + 16.0, note.position.y + 82.0), Hangar.hint(cur), HORIZONTAL_ALIGNMENT_CENTER, note.size.x - 32.0, 16, 2, TEXT)
 	draw_rect(r, EDGE, false, 2.0)
 
 

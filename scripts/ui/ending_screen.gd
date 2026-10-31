@@ -12,6 +12,7 @@ const Schematic = preload("res://scripts/ui/schematic.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 
 const GOOD := Color("#6bd34a")
+const BACKDROP := Color(0.02, 0.03, 0.05, 0.96)  ## nearly opaque: the HUD of the ship behind it must not show through
 const SIZE := Vector2(1440.0, 820.0)
 const PAD := 30.0
 const ART_PX := Vector2(320.0, 180.0)  ## the illustration's size in source px
@@ -129,12 +130,12 @@ func unlock_lines() -> Array[String]:
 # --- drawing --------------------------------------------------------------------------------------------------
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), DIM)
+	draw_rect(Rect2(Vector2.ZERO, size), BACKDROP)
 	var lay := layout()
 	var p: Rect2 = lay["panel"]
 	_panel(p)
 	var e: Dictionary = report.get("ending", {})
-	_text("THE END", p.position + Vector2(PAD, 36.0), 14, DIM_TEXT)
+	_text("ENDING", p.position + Vector2(PAD, 36.0), 14, DIM_TEXT)
 	_text(str(e.get("title", "The End")).to_upper(), p.position + Vector2(PAD, 80.0), 40, AMBER)
 	_draw_art(lay)
 	var ep: Rect2 = lay["epilogue"]
