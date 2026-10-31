@@ -14,8 +14,8 @@ extends RefCounted
 ## - Ambient rolls and fight spawn points use the sector's own rng (saved), so real-time play never moves the
 ##   campaign's rng, which events and loot use.
 ## - The Hollow tide (docs/MECHANICS_REVIEW.md P1): the campaign tells the sector it is `hollow` (set_hollow, the one
-##   setter; the sector never reads the tide). Then its debris thins and ghosts come for the ship (ambient `hollow` in
-##   data/sectors.json). Not saved: the campaign sets it again on a load.
+##   setter; the sector never reads the tide). Then its debris thins, ghosts come for the ship (ambient `hollow` in
+##   data/sectors.json) and every POI but a station or store runs a `hollow` event. Not saved: the campaign sets it again on a load.
 
 const Content = preload("res://scripts/data/content.gd")
 const Radar = preload("res://scripts/space/radar.gd")
@@ -295,8 +295,11 @@ func trigger(c, ship) -> Dictionary:
 func _event_for(c, ship, poi: Dictionary) -> Dictionary:
 	if poi["main"] and c.current == node_id:
 		return c.arrive(ship)
-	var ev: Dictionary = c.HOSTILE_PATROL if poi["event_type"] == "patrol" and c.refuses("concord") else c.events.pick(c, {"id": node_id, "type": poi["event_type"], "place": ""}, ship)
-	if ev.is_empty() and poi["event_type"] == "hollow":  # a ghost always meets the ship (the tide pack has the real events)
+	var kind := str(poi["event_type"])
+	if hollow and not bool(cfg["poi_types"].get(poi["type"], {}).get("repeat", false)):
+		kind = "hollow"  # the tide has taken the place: every POI but a station or store sends ghosts and dead beacons, no rewards
+	var ev: Dictionary = c.HOSTILE_PATROL if kind == "patrol" and c.refuses("concord") else c.events.pick(c, {"id": node_id, "type": kind, "place": ""}, ship)
+	if ev.is_empty() and kind == "hollow":  # a ghost always meets the ship (the tide pack has the real events)
 		ev = c.HOSTILE_HOLLOW
 	c.events_seen += int(not ev.is_empty())
 	return {"node": c.node(node_id), "refused": "", "event": ev}
@@ -327,7 +330,7 @@ func fight_design(c, id: String, value := "tier") -> String:
 	var poi := find(id)
 	if poi.is_empty():
 		return ""
-	return c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" else c.fight_path(value, str(poi["event_type"]))
+	return c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" and not hollow else c.fight_path(value, str(poi["event_type"]))
 
 
 ## A `fight` effect at POI `id` (`value`: "tier" or a design id, as in events.gd): {design (a res:// path), pos (where

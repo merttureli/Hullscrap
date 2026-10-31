@@ -3,7 +3,8 @@ extends "res://tests/base_test.gd"
 ## data/sectors.json `ambient`): in a Hollow sector a ghost comes for the ship every 60 s and always closes in, one comes at once
 ## when the place falls with the ship in it (and only once), the debris spawns at 0.3 x, the flag is set by the campaign (on
 ## arrival, on a load, when lingering, a wait or a jump takes the place) and survives a save, a ghost contact runs a hollow event
-## and ghost fights, and the sector view tells the player and thins the debris field.
+## and ghost fights, every other POI of a Hollow sector (but a station or store) runs a hollow event too, and the sector view
+## tells the player, thins the debris field and keeps a red line up while the place is Hollow.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Sector = preload("res://scripts/space/sector.gd")
@@ -15,6 +16,7 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const SectorView = preload("res://scripts/view/sector_view.gd")
 const DebrisView = preload("res://scripts/view/debris_view.gd")
+const TideHud = preload("res://scripts/ui/tide_hud.gd")
 const SectorViewTest = preload("res://tests/test_sector_view.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
@@ -379,6 +381,68 @@ func test_a_ghost_is_a_hostile_for_red_alert_and_shows_on_the_radar() -> void:
 	check(not s.hostile_ships().has(trader["pos"]), "a trader is no hostile")
 
 
+# --- the other POIs of a Hollow sector --------------------------------------------------------------------
+
+## A POI of type `type` as _event_for sees it: its event type is the one the type always runs (or `event`).
+func _poi(type: String, event := "") -> Dictionary:
+	var t = Sector.config()["poi_types"][type]
+	return {"id": "z_" + type, "type": type, "name": type, "pos": Vector2.ZERO, "visibility": "signal", "state": Sector.NEW, "enemy": "", "main": false,
+		"event_type": event if event != "" else (t["event"] if t["event"] is String else "wreck_field")}
+
+
+func test_every_poi_but_a_station_or_store_runs_a_hollow_event_in_a_hollow_sector() -> void:
+	var e := _on_the_edge()
+	var c: Campaign = e["c"]
+	var s = e["s"]
+	var free := {}
+	for type in Sector.config()["poi_types"]:
+		free[type] = str(s._event_for(c, e["ship"], _poi(type))["event"].get("type", ""))
+	eq(free["wreck"], "wreck_field", "a free place: a wreck runs its own event")
+	eq(free["distress"], "distress", "and a distress call")
+	check(free["pirate_nest"] != "hollow" and free["mining_field"] != "hollow", "none is a hollow event")
+	c.linger(c.tide.linger_s)
+	check(s.hollow, "the place has fallen")
+	for type in Sector.config()["poi_types"]:
+		var ev: Dictionary = s._event_for(c, e["ship"], _poi(type))["event"]
+		if bool(Sector.config()["poi_types"][type].get("repeat", false)):
+			check(str(ev.get("type", "")) != "hollow", "%s holds: it keeps its own event (%s)" % [type, str(ev.get("type", ""))])
+		else:
+			eq(str(ev.get("type", "")), "hollow", "%s runs a hollow event" % type)
+	var concord: Dictionary = s._event_for(c, e["ship"], _poi("concord_checkpoint"))
+	eq(concord["event"]["type"], "hollow", "even a Concord checkpoint: its patrol is a ghost")
+	var store: Dictionary = s._event_for(c, e["ship"], _poi("store", "trader"))
+	eq(str(store["event"].get("type", "")), "trader", "a store still trades")
+
+
+func test_a_wreck_and_a_passing_ship_in_a_hollow_sector_trigger_hollow_events() -> void:
+	var e := _on_the_edge()
+	var c: Campaign = e["c"]
+	var s = e["s"]
+	c.linger(c.tide.linger_s)
+	var w: Dictionary = s.add_wreck(s.ship_pos + Vector2(300.0, 0.0))
+	var r: Dictionary = s.trigger(c, e["ship"])
+	eq(r["poi"]["id"], w["id"], "the wreck fires")
+	eq(r["event"]["type"], "hollow", "and it is a hollow event, not a wreck_field one")
+	s.resolve(w["id"])
+	var trader := {"id": "a9", "type": "unknown", "name": "Unknown ship", "pos": s.ship_pos + Vector2(200.0, 0.0), "visibility": "signal",
+		"event_type": "trader", "state": Sector.NEW, "enemy": "", "main": false, "ambient": true, "vel": Vector2.ZERO, "ttl": 100.0}
+	s.ambient.append(trader)
+	eq(s.trigger(c, e["ship"])["event"]["type"], "hollow", "a trader that was already about is a ghost now")
+
+
+func test_a_pois_own_enemy_gives_way_to_ghosts_in_a_hollow_sector() -> void:
+	var e := _on_the_edge()
+	var c: Campaign = e["c"]
+	var s = e["s"]
+	var poi := _poi("pirate_nest")
+	poi["enemy"] = "pirate_raider"
+	s.pois.append(poi)
+	eq(s.fight_design(c, poi["id"], "tier"), "res://data/ships/pirate_raider.json", "a free place: the POI's own enemy")
+	c.linger(c.tide.linger_s)
+	check(s.fight_design(c, poi["id"], "tier").begins_with("gen:hollow:"), "a Hollow one: ghost ships")
+	eq(s.fight_design(c, poi["id"], "res://data/ships/pirate_raider.json"), "res://data/ships/pirate_raider.json", "a design a fight names outright is still that design")
+
+
 # --- the view ---------------------------------------------------------------------------------------------
 
 func test_the_hud_tells_when_the_tide_takes_the_place_and_not_on_arrival() -> void:
@@ -446,4 +510,38 @@ func test_the_debris_field_thins_once_when_the_place_falls() -> void:
 	dv.frame(0.1)
 	eq(dv.debris.cfg["spawn"], rescaled, "and once")
 	dv.free()
+	h._free(d)
+
+
+func test_the_hollow_place_line_stays_while_the_current_place_is_hollow() -> void:
+	var h = SectorViewTest.new()
+	var d: Dictionary = h._screen(8)
+	var map = d["map"]
+	var c: Campaign = map.campaign
+	var hud := TideHud.new()
+	hud.map = map
+	eq(hud.warning(), "", "the first place is free: no warning")
+	var id := _edge_node(c)
+	c.current = id
+	c.visited[id] = true
+	c._enter(id, d["sim"].player_ship())
+	eq(hud.warning(), "", "a free place one step from falling: none")
+	c.linger(c.tide.linger_s)
+	eq(hud.warning(), "Hollow place: ghosts every 60 s", "the tide has taken it: the line is up")
+	check(hud.line() != "", "next to the tide's clock")
+	c.linger(100.0)
+	eq(hud.warning(), "Hollow place: ghosts every 60 s", "and it stays")
+	d["build"].build_on = true
+	eq(hud.warning(), "", "hidden in build mode, like the clock")
+	d["build"].build_on = false
+	map.visible = true
+	eq(hud.warning(), "", "and while the map is open")
+	map.visible = false
+	c.tide.steps = 99
+	eq(hud.line(), "", "once the tide has taken everything the clock is gone")
+	eq(hud.warning(), "Hollow place: ghosts every 60 s", "but the place is still Hollow")
+	c.cfg = c.cfg.duplicate(true)  # the config is shared by every campaign: change a copy
+	c.cfg["instant_jump"] = true
+	eq(hud.warning(), "", "with the old instant jump there is no sector and no ghost")
+	hud.free()
 	h._free(d)
