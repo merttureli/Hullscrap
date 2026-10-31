@@ -285,10 +285,23 @@ def validate_crew():
                     for x in range(w):
                         r, g, b, a = row[x * 4:x * 4 + 4]
                         if a and (r, g, b) not in pal: print('GLOW OFF-PALETTE', sp, G['image'], x, y, (r, g, b)); bad += 1
+        kind = d.get('kind', 'normal')
+        if kind not in ('normal', 'large', 'small', 'floating'): print('KIND', sp, kind); bad += 1
         for pose in layers['arms']['frames']:
             if pose == 'unarmed': continue
             for key in ('mount', 'hand_l', 'hand_r'):
-                if rel(d, pose, key) != rel(ref, pose, key): print('MOUNT', sp, pose, key, rel(d, pose, key), 'human', rel(ref, pose, key)); bad += 1
+                if kind == 'small' and key != 'mount':                  # the small rig's hands are art only, but must sit inside the frame
+                    v = layers['arms']['anchors'][pose][key]
+                    if not (0 <= v[0] < fw and 0 <= v[1] < fh): print('HAND OUTSIDE', sp, pose, key, v); bad += 1
+                elif rel(d, pose, key) != rel(ref, pose, key): print('MOUNT', sp, pose, key, rel(d, pose, key), 'human', rel(ref, pose, key)); bad += 1
+        if kind == 'small':                                            # legs, torso and every head stay inside the central 15x15 (pivot +-7): only the arms reach out
+            px_, py_ = d['pivot']
+            for name in ('legs', 'torso', 'head'):
+                w, h, rows = read_png(os.path.join(base, layers[name]['image']))
+                for y, row in enumerate(rows):
+                    for x in range(w):
+                        if row[x * 4 + 3] and (abs(x % fw - px_) > 7 or abs(y - py_) > 7): print('SMALL RIG BODY OUTSIDE 15x15', sp, name, x % fw, y); bad += 1
+        if kind == 'floating' and 'float' not in layers['legs']['anims']: print('FLOATING RIG WITHOUT float', sp); bad += 1
     print('crew:', 'OK' if not bad else '%d problems' % bad)
     return bad
 

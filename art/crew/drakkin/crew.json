@@ -1,0 +1,173 @@
+{
+ "species": "drakkin",
+ "frame": [
+  49,
+  49
+ ],
+ "pivot": [
+  24,
+  24
+ ],
+ "notes": "Drakkin: reptile pit-fighters on THE LARGE RIG: the frame is 49x49 with the pivot at (24,24) (the normal 2x2 body, 32 px, sits at the centre, its shadow and pathing stay there; the art overhangs it). Mounts and hands are the shared targets moved by (+8,+8), identical relative to the pivot, so every item fits (item top-left = mount - item.grip). A rust and ochre scaled hide, a ridge of bone plates down the spine, shoulder spurs, cream claws, a fan crest on a blunt-snouted head and a thick tail behind (in the legs layer: it swishes with the walk at 7 fps). Head variants: crest, helmet (an iron-banded cap, tinted), scarred. Outfit mask = waist wrap, chest strap, wrist and ankle wraps, the helmet band. Same rig as human: every layer faces UP at rotation 0 on one 49x49 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     7
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     24,
+     22
+    ],
+    "back": [
+     24,
+     36
+    ],
+    "shoulder_l": [
+     11,
+     21
+    ],
+    "shoulder_r": [
+     37,
+     21
+    ]
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      4,
+      35
+     ],
+     "hand_r": [
+      44,
+      35
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      22,
+      13
+     ],
+     "hand_r": [
+      26,
+      13
+     ],
+     "mount": [
+      24,
+      13
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      25,
+      9
+     ],
+     "hand_r": [
+      29,
+      17
+     ],
+     "mount": [
+      28,
+      16
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      21,
+      17
+     ],
+     "hand_r": [
+      29,
+      12
+     ],
+     "mount": [
+      29,
+      12
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      22,
+      11
+     ],
+     "hand_r": [
+      29,
+      20
+     ],
+     "mount": [
+      27,
+      19
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      20,
+      15
+     ],
+     "hand_r": [
+      31,
+      16
+     ],
+     "mount": [
+      31,
+      16
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee. RIG KIND large: this frame is 49x49 with the pivot at (24,24), so every mount here is the shared one moved by (+8,+8): mount - pivot is identical to the human rig."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "crest": 0,
+    "helmet": 1,
+    "scarred": 2
+   }
+  }
+ },
+ "kind": "large"
+}
