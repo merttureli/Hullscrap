@@ -240,6 +240,7 @@ func _screen(seed_value := 5) -> Dictionary:
 	view.cam = Camera2D.new()
 	combat.sector = view
 	combat.finished.connect(view._on_fight_finished)
+	build.hostiles_source = view.red_alert_hostiles
 	map.new_game(seed_value)
 	map.visible = false  # as _ready leaves it
 	map.save_path = SAVE
@@ -404,7 +405,7 @@ func test_a_fight_in_the_sector_starts_where_the_ship_flies_and_a_win_leaves_a_w
 	eq(s.wrecks.size(), 1, "the wreck stays as a POI")
 	if s.wrecks.size() == 1:
 		check(s.wrecks[0]["pos"].distance_to(wreck_at) < 50.0, "where the pirate died")
-		eq(s.wrecks[0]["event_type"], "wreck_field", "salvage")
+		eq(s.wrecks[0]["state"], Sector.DONE, "marked salvaged (the map's salvage pick is the only one)")
 		check(Radar.contacts(s, d["sim"].player_ship()).any(func(ct): return ct["poi"]["id"] == s.wrecks[0]["id"]), "on the radar")
 	eq(view.helm.flight.pos, mine.flight.pos, "the ship is where the fight left it")
 	check(s.hostiles.is_empty(), "no hostile left")
@@ -442,9 +443,13 @@ func test_an_event_fight_spawns_at_its_poi_and_resolves_it_after() -> void:
 			combat.frame(0.5)
 	check(map.visible and map.event_panel.visible, "the loot notice")
 	map.event_panel.proceed()
+	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "salvage", "then the salvage pick of the pirate's parts, as from any fight")
+	map.event_panel.choose(map.event_panel.view.size() - 1)
+	map.event_panel.proceed()
 	check(not map.visible, "then the sector")
 	check(s.main_poi()["state"] == Sector.DONE or bool(s.cfg["poi_types"][s.main_poi()["type"]].get("repeat", false)), "the POI is resolved")
-	eq(s.wrecks.size(), 1, "and the wreck waits to be salvaged")
+	eq(s.wrecks.size(), 1, "the wreck stays where it died")
+	check(s.wrecks.all(func(w): return w["state"] == Sector.DONE), "already salvaged: no second pick from it")
 	_free(d)
 
 
@@ -567,4 +572,82 @@ func test_debris_keeps_drifting_through_a_fight_in_the_sector() -> void:
 	check(dv.debris.time > t, "the debris drifts on through it")
 	check(dv.debris.frame.is_equal_approx(d["view"].ship_frame()), "round the fighting ship")
 	dv.free()
+	_free(d)
+
+
+# --- morale, red alert, play time ------------------------------------------------------------------------------
+
+func test_a_decided_fight_in_the_sector_keeps_the_six_states_and_ends_by_itself() -> void:
+	var d := _screen()
+	var combat = d["combat"]
+	var s = d["map"].campaign.current_sector()
+	var got := []
+	combat.finished.connect(func(r): got.append(r))
+	eq(combat.enter(Session.PIRATE_PATH), "", "a fight in the sector")
+	combat.session.morale.state = "offering"
+	combat.session.morale.offer = {"credits": 30}
+	eq(combat.session.accept_surrender(), "", "Y: the surrender is taken")
+	eq(combat.session.state(), "spared", "spared")
+	for i in 8:
+		if combat.active:
+			combat.frame(0.5)
+	check(not combat.active, "a deal: the fight ends by itself")
+	check(got.size() == 1 and got[0]["state"] == "spared" and got[0].get("offer", {}).has("credits") and got[0]["in_sector"], "the result keeps its state and offer: %s" % str(got))
+	check(s.wrecks.is_empty(), "a spared ship leaves no wreck")
+	got.clear()
+	eq(combat.enter(Session.PIRATE_PATH), "", "another")
+	combat.session.morale.state = "captured"  # its crew all down (morale.gd)
+	eq(combat.session.state(), "captured", "captured")
+	for i in 8:
+		if combat.active:
+			combat.frame(0.5)
+	check(got.size() == 1 and got[0]["state"] == "captured", "the fight ends captured")
+	eq(s.wrecks.size(), 1, "the captured hulk stays as a POI")
+	_free(d)
+
+
+func test_red_alert_in_sector_space_refuses_the_build_screen() -> void:
+	var d := _screen()
+	var view = d["view"]
+	var build = d["build"]
+	var s = d["map"].campaign.current_sector()
+	eq(build.can_build(), "", "nothing hostile about: build mode is open")
+	s.ambient.append({"id": "a9", "type": "unknown", "name": "Unknown ship", "pos": s.ship_pos + Vector2(1800.0, 0.0), "visibility": "signal",
+		"event_type": "pirate", "state": Sector.NEW, "enemy": "", "main": false, "ambient": true, "vel": Vector2.ZERO, "ttl": 100.0})
+	check(build.can_build() != "", "a pirate 1,800 px off: red alert")
+	build.set_build(true)
+	check(not build.build_on, "B is refused")
+	s.ambient[-1]["pos"] = s.ship_pos + Vector2(2600.0, 0.0)
+	eq(build.can_build(), "", "past 2,500 px it is clear")
+	s.ambient[-1]["pos"] = s.ship_pos + Vector2(100.0, 0.0)
+	s.ambient[-1]["event_type"] = "trader"
+	eq(build.can_build(), "", "a trader is no hostile")
+	s.ambient.clear()
+	view.helm.place(Vector2(9000.0, 9000.0))
+	eq(d["combat"].enter(Session.PIRATE_PATH), "", "a fight")
+	view.frame(0.05)
+	check(view.red_alert_hostiles().size() == 1 and view.red_alert_hostiles()[0].distance_to(d["sim"].player_ship().world_pos) < Session.SPAWN_DISTANCE + 50.0, "its enemy is on the list, in the build screen's frame")
+	_free(d)
+
+
+func test_in_play_and_the_played_signal_count_only_play_time() -> void:
+	var d := _screen()
+	var view = d["view"]
+	var t := [0.0]
+	view.played.connect(func(dt): t[0] += dt)
+	view.frame(0.5)
+	check(view.in_play(), "play mode in the sector: in play")
+	near(t[0], 0.5, "played: 0.5 s")
+	d["map"].open()
+	view.frame(0.5)
+	check(not view.in_play(), "the map open: not")
+	d["map"].close()
+	d["build"].build_on = true
+	view.frame(0.5)
+	check(not view.in_play(), "build mode: not")
+	d["build"].build_on = false
+	d["combat"].enter(Session.PIRATE_PATH)
+	view.frame(0.5)
+	check(not view.in_play(), "a fight: not")
+	near(t[0], 0.5, "only the play time was counted")
 	_free(d)

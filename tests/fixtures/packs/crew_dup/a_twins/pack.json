@@ -1,0 +1,7 @@
+{
+  "id": "a_twins",
+  "name": "Fixture twins",
+  "version": "1.0",
+  "requires": [],
+  "notes": "Test fixture: two characters with one name, see tests/test_crew_abilities.gd."
+}

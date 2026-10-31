@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "human_reactor_plus_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Human \"Standard Reactor Plus\" (+1 power): the Concord Mk2 housing (corner capacitors with green lamps, four feed pipes, registry stencils) with a plus-shaped core: a cross of amber light in a dark octagon, breathing over 4 frames, and a lit \"+\" module with a blue stripe on the north edge. Damaged: a corner capacitor split and sparking, a pipe slipped its flange, the cross stutters. Disabled: the cross dark, the casing split corner to corner, the plus module blown out."
+}

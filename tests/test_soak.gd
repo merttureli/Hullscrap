@@ -3,8 +3,8 @@ extends "res://tests/base_test.gd"
 ## starter ship and three seeds it makes 25 light-speed jumps along random lanes (the drive spools, then fires). In each
 ## sector the autopilot (helm.gd, at a time scale) flies the ship to the node's own POI and sometimes to one more, so
 ## their events run (random allowed choices), stations dock (fuel when low, a payment on the debt), passing ships come
-## by, and fights happen in place through the real arena, the pilot AI flying the player's ship too; a win leaves a
-## wreck the ship then flies to and salvages. A fight over FIGHT_CAP_S simulated seconds counts as a draw and the player
+## by, and fights happen in place through the real arena, the pilot AI flying the player's ship too; a win or a capture
+## ends in the salvage pick (salvage.gd). A fight over FIGHT_CAP_S simulated seconds counts as a draw and the player
 ## retreats; one ends too when the enemy is out of range. After every step it checks the numbers (no negative fuel,
 ## credits or hull, no unknown id), that the autopilot gets where it was sent, and that no event is a dead end.
 ## Everything is seeded, so a failure replays.
@@ -14,6 +14,7 @@ const Campaign = preload("res://scripts/space/campaign.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Helm = preload("res://scripts/space/helm.gd")
 const Sector = preload("res://scripts/space/sector.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
@@ -39,9 +40,9 @@ const OTHER_POI := 0.5  ## the chance the ship also visits one other new POI of 
 var _cap_s := FIGHT_CAP_S
 var _real_left := 0  # fights of this run still to go through the arena
 var _helm: Helm  # the ship's helm in the sector of the run now
-var _goals: Array = []  # POI ids still to fly to in this sector (a won fight adds its wreck)
-var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "runs": 0,
-	"pois": 0, "flown_s": 0, "wrecks": 0, "contacts": 0, "grounded": 0}
+var _goals: Array = []  # POI ids still to fly to in this sector
+var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "runs": 0, "known": 0, "dead": 0,
+	"pois": 0, "flown_s": 0, "salvage": 0, "contacts": 0, "grounded": 0}
 
 
 func test_soak_every_starter_every_seed() -> void:
@@ -53,7 +54,7 @@ func test_soak_every_starter_every_seed() -> void:
 	check(stats["jumps"] >= STARTERS.size() * SEEDS.size() * JUMPS, "every run made its jumps (%d)" % stats["jumps"])
 	check(stats["fights"] > 0, "the soak met at least one fight")
 	check(stats["pois"] >= stats["jumps"], "a POI or more a sector (%d)" % stats["pois"])
-	check(stats["wrecks"] > 0, "a won fight left its wreck in the sector")
+	check(stats["salvage"] > 0, "a won fight led to the salvage of the enemy's parts")
 
 
 ## Every event with choices has a way out that needs nothing: a choice with no requirement that can
@@ -114,10 +115,12 @@ func _soak(design: String, seed_value: int) -> void:
 		stats["jumps"] += 1
 		_audit(where + " after the jump", c, ship)
 	check(made == JUMPS, "%s: made %d of %d jumps (the run got stuck at %s)" % [tag, made, JUMPS, c.current if c != null else "?"])
+	stats["known"] += sim.player_ship().crafting.known.size()  # blueprints at the end of the run (salvage scans add to it)
+	stats["dead"] += sim.player_ship().dead_crew.size()  # crew who bled out
 
 
-## In the sector of the current node: fly to its own POI (its event, a station's dock), maybe to one other new POI, and
-## to the wrecks fights leave, running whatever triggers on the way. False when the run ended with a lost fight.
+## In the sector of the current node: fly to its own POI (its event, a station's dock) and maybe to one other new POI,
+## running whatever triggers on the way. False when the run ended with a lost fight.
 func _visit(where: String, c: Campaign, sim, pick: RandomNumberGenerator) -> bool:
 	var s = c.current_sector()
 	var ship = sim.player_ship()
@@ -320,6 +323,10 @@ func _event_chain(where: String, ev: Dictionary, c: Campaign, sim, pick: RandomN
 			check(false, "%s: event '%s' shows only greyed choices: the panel has no way out" % [where, e.get("id", "?")])
 			continue
 		var v: Dictionary = open[pick.randi() % open.size()]
+		if e.get("id", "") == "salvage":  # a sensible player scans a blueprint they can learn
+			var scans: Array = open.filter(func(w): return str(w["text"]).begins_with("Scan"))
+			if not scans.is_empty():
+				v = scans[0]
 		if ship.inventory.count("fuel") < 1:  # out of fuel: take what pays in fuel, then in credits
 			for gain in ["fuel", "credits"]:
 				var wanted: Array = open.filter(func(w): return _gives(e, int(w["index"]), gain))
@@ -337,13 +344,13 @@ func _event_chain(where: String, ev: Dictionary, c: Campaign, sim, pick: RandomN
 			_audit(where + " after the fight", c, ship)
 			if done["state"] == "lost":
 				return false
-			if done["state"] == "won":
-				_goals.push_front(c.current_sector().add_wreck(res["enemy_pos"])["id"])  # the wreck stays to salvage
-				stats["wrecks"] += 1
 			if done["fight"] != "":
 				queue.append({"id": "(after_win fight)", "text": "-", "choices": [{"text": "Fight", "outcomes": [{"weight": 100, "effects": {"fight": done["fight"]}}]}]})
 			elif done["goto"] != "" and c.events.has(done["goto"]):
 				queue.append(c.events.get_event(done["goto"]))
+			elif done["state"] in ["won", "captured"]:
+				queue.append(Salvage.event_for(res.get("enemy"), done["state"], c, ship))
+				stats["salvage"] += 1
 		elif str(r["goto"]) != "":
 			check(c.events.has(r["goto"]), "%s: '%s' goes to an event that does not exist: %s" % [where, e.get("id", "?"), r["goto"]])
 			if c.events.has(r["goto"]):
@@ -362,8 +369,9 @@ func _gives(e: Dictionary, index: int, item: String) -> bool:
 
 ## A fight in place through the real arena, both ships flown by the pilot AI: the enemy spawns at POI `poi`
 ## (Sector.fight_spawn; ahead of the ship for a wait), the player's ship starts where it flies (Helm.fight_place). It
-## ends with a wreck, out of range (LEAVE_DISTANCE: "fled"), or as a draw over FIGHT_CAP_S. Returns the result the combat
-## view gives the map: {state, enemy, hull, hull_max, enemy_pos}; the helm takes the ship's place after it.
+## ends decided (won, captured, spared: the player takes a surrender when one is offered, escaped), out of range
+## (LEAVE_DISTANCE: "fled"), or as a draw over FIGHT_CAP_S. Returns the result the combat view gives the map: {state,
+## enemy, hull, hull_max, enemy_pos, offer (spared)}; the helm takes the ship's place after it.
 func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGenerator, poi := "") -> Dictionary:
 	stats["fights"] += 1
 	var s = c.current_sector()
@@ -392,8 +400,11 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 	while ses.state() == "fighting" and n < ticks and ses.distance() <= Session.LEAVE_DISTANCE:
 		if n % PLAYER_PILOT_EVERY == 0:
 			pilot.think(Session.STEP * PLAYER_PILOT_EVERY)
+		if ses.morale.state == "offering":
+			ses.accept_surrender()  # the player takes a surrender when it is offered
 		ses.ai.think(Session.STEP)
 		ses.arena.step(Session.STEP)
+		ses.morale.tick(Session.STEP)
 		n += 1
 		if n % int(SIM_STEP * 60.0) == 0:
 			sim.step(SIM_STEP)
@@ -407,12 +418,12 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 	var state := ses.state()
 	if state == "fighting":
 		state = "fled"
-		stats["draw"] += 1
-	else:
-		stats[state] += 1
+	stats[{"won": "won", "captured": "won", "spared": "won", "lost": "lost"}.get(state, "draw")] += 1  # escaped and fled are draws
 	_helm.place(mine.flight.pos, mine.flight.vel, mine.flight.angle, mine.flight.ang_vel)
 	_helm.sync_to(s)
 	var res := {"state": state, "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max, "enemy_pos": foe.flight.pos}
+	if state == "spared":
+		res["offer"] = ses.morale.offer.duplicate()
 	stats["fight_ticks"] += n
 	sim.ships.erase(enemy)
 	return res

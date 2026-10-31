@@ -1,0 +1,38 @@
+{
+ "frame": [8, 12],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 4, 12]
+ },
+ "anchors": {
+  "head": [4, 4],
+  "tail": [4, 11]
+ },
+ "glow": {
+  "image": "mire_bog_mortar_glow.png",
+  "frame": [16, 20],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 4, 12]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Mire Bog Mortar glob: a green blob of bog slime that wobbles as it flies, dripping (4 frames). Head anchor is the glob centre.",
+ "impact": {
+  "image": "mire_bog_mortar_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 4, 12]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "mire_bog_mortar_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 12]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

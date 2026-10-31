@@ -1,0 +1,38 @@
+{
+ "frame": [5, 10],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 4, 16]
+ },
+ "anchors": {
+  "head": [2, 2],
+  "tail": [2, 9]
+ },
+ "glow": {
+  "image": "prismatic_glimmer_turret_glow.png",
+  "frame": [13, 18],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 4, 16]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Prismatic Glimmer Turret dart: a small bright crystal dart with a white core and a twinkling magenta spark (4 frames).",
+ "impact": {
+  "image": "prismatic_glimmer_turret_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 3, 14]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "prismatic_glimmer_turret_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 3, 14]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

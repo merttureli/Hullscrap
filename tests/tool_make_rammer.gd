@@ -111,7 +111,7 @@ func _init() -> void:
 
 	var saved := ship.to_dict()
 	saved["blurb"] = "A scrap wedge with ram plating for a nose and two Kickjets for a temper. Flies straight at you, backs off, comes round again."
-	saved["ai"] = {"style": "rammer", "aim_skill": 0.4}
+	saved["ai"] = {"style": "rammer", "aim_skill": 0.4, "morale": "ram"}
 	var f := FileAccess.open(OUT, FileAccess.WRITE)
 	f.store_string(_format(saved))
 	f.close()

@@ -1,0 +1,33 @@
+{
+ "frame": [
+  48,
+  20
+ ],
+ "nine_slice": true,
+ "margins": [
+  12,
+  0,
+  12,
+  0
+ ],
+ "axis_stretch": "tile",
+ "glow": {
+  "image": "hall_plate_glow.png",
+  "frame": [
+   48,
+   20
+  ],
+  "offset": [
+   0,
+   0
+  ],
+  "blend": "add (preferred) or alpha-over"
+ },
+ "text_rect": [
+  14,
+  4,
+  20,
+  12
+ ],
+ "notes": "The nameplate under a hall-of-ships frame (standard line): three slices, 12 px caps and a 24 px middle that tiles horizontally (it is a flat strip, so stretching also works). Print the ship name in the dark inset (text_rect, in source px)."
+}

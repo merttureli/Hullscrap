@@ -3,7 +3,7 @@ extends Node2D
 ## draws on top) and steps it, in play mode only: not in build mode and not in a fight. Each piece is art/debris/<art>.png
 ## (a strip of tumble frames, art/README.md) when that art exists, else a small rotated polygon in its material colour
 ## with a dark outline. A "+3 scrap" pop floats up from the mouth that took a piece, an intake plays its `pulling` animation
-## while a piece is drawn in (a child node over the ship does both), the HUD gets one line, and the starfield drifts
+## while a piece is drawn in (a child node over the ship does both), the HUD's log shows debris.hud_line(), and the starfield drifts
 ## the way the current runs. frame(dt) does one tick without the scene tree, so tests can drive it.
 ## In sector space (the Sector node, sector_view.gd, is flying) the debris is the sector's (DriftDebris.for_sector: its
 ## current, density and theme), lives in sector px round the flying ship (its frame and velocity each tick), keeps
@@ -37,8 +37,6 @@ var _sheets := {}  # art id -> SpriteSheet, or null when there is no art yet
 var _top: Node2D  # over the ship: the pulling mouths and the pops
 var _glow: Node2D  # additive glow of the pieces that have it (a fuel canister), under the ship
 var _top_glow: Node2D  # additive glow of the pulling mouths, over the ship
-var _layer: CanvasLayer
-var _label: Label
 var _star_drift := Vector2.ZERO  # the starfield's own drift, put back when play mode ends
 
 
@@ -58,20 +56,6 @@ func _ready() -> void:
 	add_child(_top)
 	_top_glow = GlowLayer.new()
 	_top.add_child(_top_glow)
-	_layer = CanvasLayer.new()
-	_layer.layer = 2
-	_label = Label.new()
-	_label.anchor_top = 1.0
-	_label.anchor_bottom = 1.0
-	_label.offset_left = 14.0
-	_label.offset_top = -68.0
-	_label.offset_right = 1500.0
-	_label.offset_bottom = -42.0
-	_label.add_theme_color_override("font_color", Color("#ffd24a"))
-	_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	_label.add_theme_constant_override("outline_size", 6)
-	_layer.add_child(_label)
-	add_child(_layer)
 
 
 func _process(dt: float) -> void:
@@ -96,8 +80,6 @@ func _flying() -> bool:
 func frame(dt: float) -> void:
 	var on := active()
 	visible = on
-	if _layer != null:
-		_layer.visible = on and not build.combat  # a fight has its own HUD
 	if starfield != null and not on:
 		starfield.drift = _star_drift
 	if not on:
@@ -121,8 +103,6 @@ func frame(dt: float) -> void:
 	pops = pops.filter(func(p): return p["age"] < POP_LIFE)
 	if starfield != null:
 		starfield.drift = debris.current_vel() * view_zoom.x * STAR_PARALLAX if here == null else Vector2.ZERO
-	if _label != null:
-		_label.text = debris.hud_line()
 	queue_redraw()
 	if _top != null:
 		_top.queue_redraw()

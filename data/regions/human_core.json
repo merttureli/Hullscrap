@@ -1,0 +1,25 @@
+{
+	"id": "human_core",
+	"name": "The Human Core",
+	"home_species": "human",
+	"faction": "concord",
+	"stages": [2, 6],
+	"weight": 10,
+	"rarity": "common",
+	"danger": 1.05,
+	"palette": {"tint": "#d9c7a0", "nebula": "concord"},
+	"map": {},
+	"node_weights": {"trader": 18, "distress": 16, "patrol": 14, "pirate": 14, "wreck_field": 12, "asteroid_field": 12, "anomaly": 4, "empty": 10},
+	"places": [
+		{"id": "haldane", "name": "Haldane Ring", "type": "station", "faction": "concord", "pos": [760, 520], "jitter": 100, "beacon": true}
+	],
+	"debris": {"polymer_barrel": 1.4},
+	"pois": {"trader": 1.5, "store": 1.5},
+	"ambient": {"trader": 4, "patrol": 3, "pirate": 2},
+	"stock": {"engine_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130, "artemis_mk1": 220, "oxygen_gen": 90, "medbay": 180, "helm": 70, "intake_mk1": 120, "radiator": 40, "bed": 30, "missile": 14},
+	"recruit": {"human": 8, "fenn": 1, "mire": 1},
+	"enemies": "concord",
+	"hazards": [],
+	"events": "human_core",
+	"blurb": "Old colony rings packed with people. Most of the Drift is human, and most of the humans are here, trading, arguing and filing complaints. Haldane Ring sells honest Mk parts and hires anyone who can hold a wrench."
+}

@@ -1,0 +1,128 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "mire_bog_mortar_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   12
+  ]
+ },
+ "notes": "OUTSIDE half of the Mire Bog Mortar (a FIXED gun): a teal housing, a round slurry vat with a bubbling green surface and brass band on the left, a steel feed drum with a hand-wheel and a feed pipe on the right. damaged: a vat seam split and weeping green, the feed pipe cracked, bubbles gone sluggish; disabled: scorched, dented, the vat cracked and spilled, the hand-wheel off, never destroyed.",
+ "barrel": {
+  "image": "mire_bog_mortar_barrel.png",
+  "frame": [
+   19,
+   46
+  ],
+  "pivot_on_base": [
+   32,
+   12
+  ],
+  "pivot_on_barrel": [
+   9,
+   39
+  ],
+  "muzzle": [
+   9,
+   11
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "gimbal_deg": 6,
+  "glow": {
+   "image": "mire_bog_mortar_barrel_glow.png",
+   "frame": [
+    39,
+    66
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ]
+   }
+  }
+ }
+}

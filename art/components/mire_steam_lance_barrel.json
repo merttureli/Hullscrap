@@ -1,0 +1,68 @@
+{
+ "frame": [
+  13,
+  58
+ ],
+ "pivot_on_base": [
+  32,
+  12
+ ],
+ "aim": "fixed",
+ "anims": {
+  "idle": [
+   0,
+   1,
+   0
+  ],
+  "fire": [
+   1,
+   3,
+   14
+  ],
+  "damaged": [
+   4,
+   2,
+   4
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   6,
+   51
+  ],
+  "muzzle": [
+   6,
+   13
+  ]
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of mire_steam_lance_out. fire: 3 frames, recoil 2/1/0 px with a muzzle flash.",
+ "gimbal_deg": 6,
+ "glow": {
+  "image": "mire_steam_lance_barrel_glow.png",
+  "frame": [
+   33,
+   78
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ]
+  }
+ }
+}

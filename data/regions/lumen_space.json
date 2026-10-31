@@ -1,0 +1,25 @@
+{
+	"id": "lumen_space",
+	"name": "Lumen Space",
+	"home_species": "",
+	"faction": "lumen",
+	"stages": [3, 8],
+	"weight": 10,
+	"rarity": "uncommon",
+	"danger": 1.2,
+	"palette": {"tint": "#c06bff", "nebula": "lumen"},
+	"map": {},
+	"node_weights": {"anomaly": 22, "asteroid_field": 16, "wreck_field": 14, "distress": 10, "trader": 10, "pirate": 8, "patrol": 6, "empty": 14},
+	"places": [
+		{"id": "prism", "name": "The Prism", "type": "station", "faction": "lumen", "pos": [1100, 380], "jitter": 80, "hidden_until": "prism_revealed"}
+	],
+	"debris": {"ice_chunk_s": 1.5},
+	"pois": {"anomaly": 2.0, "quest": 1.5},
+	"ambient": {"trader": 3, "patrol": 2, "pirate": 1},
+	"stock": {},
+	"recruit": {},
+	"enemies": "wardens",
+	"hazards": ["ion_storm"],
+	"events": "lumen_space",
+	"blurb": "Crystal hums in the dark here, and the Wardens guard gate debris nobody else may touch. Somewhere a station called the Prism takes visitors it finds interesting. It hasn't decided about you yet."
+}

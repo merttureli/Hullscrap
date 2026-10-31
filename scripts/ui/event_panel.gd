@@ -71,7 +71,7 @@ func _node() -> Dictionary:
 func open_event(ev: Dictionary) -> void:
 	var c = _campaign()
 	event = ev
-	title = c.label(c.current)
+	title = str(ev.get("title", c.label(c.current)))  # an event built in code (salvage) may name its own title
 	view = c.events.choice_view(ev, c, map.ship(), _node())
 	var leave := {"index": -1, "text": "Leave.", "blue": false, "grey": false, "need": ""}
 	if view.is_empty():

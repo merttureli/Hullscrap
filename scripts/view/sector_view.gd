@@ -9,7 +9,11 @@ extends Node2D
 ## - The camera follows the ship, and BuildMode and the crew are drawn moved and turned to its place (the interior at
 ##   normal zoom; the wheel zooms out to the sector). The starfield moves with the camera and takes the region's nebula.
 ## - Fights in place: the combat view asks fight_place(); while one is on its hostile is in Sector.hostiles (the jump
-##   block, the real flight numbers), and when it ends the ship takes the fight's place and a win leaves a wreck POI.
+##   block, the real flight numbers), and when it ends the ship takes the fight's place. A win or a capture leaves the
+##   wreck as a POI, already salvaged: the salvage pick comes from the map (map_view.gd, Salvage.event_for).
+## - Red alert: BuildMode's hostiles_source is red_alert_hostiles() (the fight's enemy and the passing pirates).
+## - in_play() and the `played` signal say when the sector runs (play mode, nothing open over it, no fight), for clocks
+##   that count play time (the Hollow tide's linger).
 ## - Under the ship: the POIs the radar sees (flat placeholder shapes), the passing ships, the course line and the
 ##   spool ring. On the HUD: the compass ring (contacts, the course and debris within 2,000 px as dots), edge markers
 ##   (art/ui/poi_icons.png: the icon, the distance, the type once identified; Radar.contacts) that set a course when
@@ -35,6 +39,9 @@ const AMBER := Color("#e1a136")
 const RED := Color("#e0413b")
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
+## Emitted each frame the ship is in play in its sector (in_play()), with the seconds that passed.
+signal played(dt: float)
+
 const TYPE_COLORS := {"station": Color("#e1a136"), "store": Color("#6bd34a"), "trader": Color("#6bd34a"), "distress": Color("#e0413b"),
 	"wreck": Color("#9aa0a6"), "abandoned_station": Color("#8c96a3"), "mining_field": Color("#c2956a"), "unknown": Color("#c8ced8"),
 	"pirate_nest": Color("#e0413b"), "concord_checkpoint": Color("#4fa3ff"), "anomaly": Color("#c06bff"), "quest": Color("#f2c744")}
@@ -85,6 +92,8 @@ func _ready() -> void:
 	starfield = get_node_or_null("../Space/Starfield")
 	if combat != null and combat.has_signal("finished"):
 		combat.finished.connect(_on_fight_finished)
+	if build != null and "hostiles_source" in build:
+		build.hostiles_source = red_alert_hostiles
 
 
 func _process(dt: float) -> void:
@@ -127,6 +136,27 @@ func piloting() -> bool:
 func hostile_near(radius: float) -> bool:
 	var s = current()
 	return s != null and s.hostile_near(radius)
+
+
+## Is the ship in play in its sector now: play mode, the map and its panels shut, no fight? The sector's clocks run
+## then (`played` is emitted with each frame of it).
+func in_play() -> bool:
+	var map = _map()
+	return flying() and build != null and not build.build_on and not (map != null and map.visible) and not (combat != null and combat.get("active"))
+
+
+## The hostile ships about for BuildMode's red alert (hostiles_source): the enemy of a fight in the sector and the
+## passing pirates (Sector.hostile_ships), in the build screen's frame (ship.world_pos for the ship), so their distance
+## to it is right.
+func red_alert_hostiles() -> Array:
+	var s = current()
+	var ship = _ship()
+	var out := []
+	if s == null or ship == null:
+		return out
+	for p in s.hostile_ships():
+		out.append(ship.world_pos + (p - s.ship_pos))
+	return out
 
 
 ## The arena ship of the player in a fight in the sector, else null.
@@ -217,6 +247,8 @@ func frame(dt: float) -> void:
 		_unpose()
 	visible = playing
 	_layer.visible = playing
+	if in_play():
+		played.emit(dt)
 	if starfield != null:
 		starfield.set("region", "gate" if str(c.node(c.current).get("type", "")) == "gate" else str(_sector.region))
 	queue_redraw()
@@ -303,7 +335,8 @@ func _unpose() -> void:
 	_posed = false
 
 
-## A fight in the sector is over: the ship is where the fight left it, and a win leaves the enemy's wreck to salvage.
+## A fight in the sector is over: the ship is where the fight left it, and a win or a capture leaves the enemy's wreck
+## (marked salvaged: the map shows the salvage pick).
 func _on_fight_finished(result: Dictionary) -> void:
 	if not result.get("in_sector", false) or _sector == null:
 		return
@@ -311,10 +344,10 @@ func _on_fight_finished(result: Dictionary) -> void:
 	helm.place(p["pos"], p["vel"], p["angle"], p["ang_vel"])
 	helm.sync_to(_sector)
 	_sector.hostiles.clear()
-	if result.get("state", "") == "won":
+	if result.get("state", "") in ["won", "captured"]:
 		var foe = result.get("enemy")
 		var label := "Wreck of %s" % foe.name if foe != null and str(foe.name) not in ["", "Ship"] else ""
-		_sector.add_wreck(result["enemy_pos"], label)
+		_sector.add_wreck(result["enemy_pos"], label)["state"] = Sector.DONE  # the salvage pick is the map's, once
 
 
 func _say(text: String) -> void:

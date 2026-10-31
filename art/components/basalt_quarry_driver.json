@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "basalt_quarry_driver_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Basalt Quarry Driver: a hydraulic ram whose piston head draws back as it charges (frame 5 = fully drawn, spring glowing, strip yellow), a round rock slug waiting in the cradle, iron-strapped stone housing, power coupling, hatch. fire: the piston slams forward and the cradle is empty. damaged: the ram cylinder cracked and leaking magma, slits dead; disabled: the piston jammed half way, a slug cracked in two. Barrel layer basalt_quarry_driver_barrel: a long thick stone barrel with three iron collars; fire: the slug leaves in a flash and the breech vents flame.",
+ "offset": [
+  0,
+  -4
+ ]
+}

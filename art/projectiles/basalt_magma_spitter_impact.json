@@ -1,0 +1,40 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   12
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "glow": {
+  "image": "basalt_magma_spitter_impact_glow.png",
+  "frame": [
+   26,
+   26
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "The slag splats: a bright disc, a spatter of droplets, a cooling puddle, embers (4 frames)."
+}

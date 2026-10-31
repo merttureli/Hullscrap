@@ -1,0 +1,128 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "grundl_grapple_harpoon_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   12
+  ]
+ },
+ "notes": "OUTSIDE half of the Grundl Grapple Harpoon (a FIXED gun, freight metal): a riveted housing with a chain winch drum on the left whose chain coils turn on the loop and a heavy pulley and counterweight on the right, with amber stencils. damaged: the chain has jumped the pulley and hangs, the drum is dented; disabled: scorched, dented, the chain snapped and coiled on the deck, never destroyed.",
+ "barrel": {
+  "image": "grundl_grapple_harpoon_barrel.png",
+  "frame": [
+   19,
+   60
+  ],
+  "pivot_on_base": [
+   32,
+   12
+  ],
+  "pivot_on_barrel": [
+   9,
+   53
+  ],
+  "muzzle": [
+   9,
+   15
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "gimbal_deg": 6,
+  "glow": {
+   "image": "grundl_grapple_harpoon_barrel_glow.png",
+   "frame": [
+    39,
+    80
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,128 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "sporeling_spore_cannon_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   12
+  ]
+ },
+ "notes": "OUTSIDE half of the Sporeling Spore Cannon (a FIXED gun, grown): a rounded cream-and-brown housing with the barrel in a stalk-like sleeve, a cluster of three violet spore sacs that bob on the left, a gill vent on the right with a drifting puff of yellow spores. damaged: a sac has burst and weeps, the vent is torn and puffs unevenly; disabled: scorched, withered, the sacs shrivelled and dark, never destroyed.",
+ "barrel": {
+  "image": "sporeling_spore_cannon_barrel.png",
+  "frame": [
+   17,
+   58
+  ],
+  "pivot_on_base": [
+   32,
+   12
+  ],
+  "pivot_on_barrel": [
+   8,
+   51
+  ],
+  "muzzle": [
+   8,
+   15
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "gimbal_deg": 6,
+  "glow": {
+   "image": "sporeling_spore_cannon_barrel_glow.png",
+   "frame": [
+    37,
+    78
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ]
+   }
+  }
+ }
+}

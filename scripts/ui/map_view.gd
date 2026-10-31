@@ -4,8 +4,9 @@ extends Control
 ## tank is a drift jump that costs 15 hull integrity; T waits for a passing trader). The event of the node
 ## opens in the event panel, a station opens its menu in the station panel (Enter or a click on your own
 ## node docks again). Esc or M closes the map. It owns the Campaign (campaign.gd, saved in
-## user://campaign.json with the ship) and the two panels, and it carries the flow: jump, arrive, event,
-## fight, loot, salvage, station.
+## user://campaign.json with the ship) and the three panels, and it carries the flow: jump, arrive, event,
+## fight, loot, salvage, station, and at the region's exit beacon the region choice (region_choice.gd; Enter or a
+## click on the beacon opens it again). The footer names the stage and the region ("Stage 3/8: The Kett Hives").
 ## While open it takes every key and click; it stays shut during a fight and under the ship picker.
 ## All rules live in campaign.gd, events.gd and drift.gd; this node reads input and draws, in the UI
 ## colours of docs/ART_STYLE.md.
@@ -18,6 +19,8 @@ extends Control
 const Campaign = preload("res://scripts/space/campaign.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
+const RegionChoice = preload("res://scripts/ui/region_choice.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -50,6 +53,7 @@ var campaign: Campaign
 var profile = null  ## the player's Profile (front_door.gd sets it): the campaigns write their unlocks and landmarks to it
 var event_panel: Control
 var station_panel: Control
+var region_choice: Control
 var hover := ""  ## the node id under the mouse
 var message := ""
 var message_bad := false
@@ -65,6 +69,7 @@ var panel_only := false  ## shown only to hold the event or station panel of a s
 var _poi := ""  # the id of the POI whose event is up (open_poi), "" when none
 var _poi_sector = null  # its sector
 var _dock := false  # its station menu opens when the event is done
+var _exit_due := false  # the ship came to the exit beacon: the region choice opens once its events are done
 
 
 func _ready() -> void:
@@ -80,7 +85,7 @@ func _ready() -> void:
 
 
 func _process(_dt: float) -> void:
-	if visible and panel_only and not event_panel.visible and not station_panel.visible and not _fighting:
+	if visible and panel_only and not event_panel.visible and not station_panel.visible and not region_choice.visible and not _fighting:
 		_hide_panels()  # nothing left to show over the sector
 	if visible:
 		queue_redraw()
@@ -109,6 +114,9 @@ func _ensure_panels() -> void:
 	station_panel.map = self
 	station_panel.closed.connect(_on_station_closed)
 	add_child(station_panel)
+	region_choice = RegionChoice.new()
+	region_choice.map = self
+	add_child(region_choice)
 
 
 # --- actions (the keys and clicks call these) -----------------------------------------------------------------
@@ -129,7 +137,7 @@ func open() -> void:
 
 
 func close() -> void:
-	if event_panel.visible or station_panel.visible:
+	if event_panel.visible or station_panel.visible or region_choice.visible:
 		return
 	visible = false
 
@@ -144,8 +152,10 @@ func new_game(seed_value := 0) -> void:
 	_queue.clear()
 	_forget_poi()
 	panel_only = false
+	_exit_due = false
 	event_panel.visible = false
 	station_panel.visible = false
+	region_choice.visible = false
 	_fighting = false
 	message = ""
 	refresh()
@@ -214,8 +224,12 @@ func jump_cost_text() -> String:
 	return Campaign.fuel_text(campaign.jump_cost(s) if s != null else Campaign.FUEL_PARTS)
 
 
-## Dock at the station of the current node. Returns "" or why not. In sector space you dock by flying to its beacon.
+## Dock at the station of the current node (at the exit beacon: open the region choice). Returns "" or why not. In
+## sector space a station's menu opens by flying to its beacon.
 func dock() -> String:
+	if campaign.at_exit():
+		region_choice.open()
+		return ""
 	if sector_flow():
 		_say("Fly to the station's beacon to dock.", true)
 		return "fly to the station"
@@ -242,7 +256,7 @@ func wait() -> String:
 	return ""
 
 
-## Y with no fuel: Ma tows you home to Gantry Rusthold (debt +150, 2 fuel), then you arrive there.
+## Y with no fuel: Ma tows you to the region's start (Gantry Rusthold in Clan space; debt +150, 2 fuel), then you arrive there.
 func tow() -> String:
 	var r := campaign.tow(ship())
 	if not r["ok"]:
@@ -257,30 +271,61 @@ func tow() -> String:
 	return ""
 
 
-## The current node has been reached: refused at the dock, an event, a station menu or nothing.
+## Leave the region from its exit beacon for region `id` (the region choice's pick): the next stage, then the arrival
+## there. Returns "" or why not.
+func cross_to(id: String) -> String:
+	var r := campaign.cross(id, ship())
+	if not r["ok"]:
+		return r["why"]
+	_say(" ".join(r["notes"]))
+	refresh()
+	if sector_flow():
+		_hide_panels()  # the sector view takes the ship in at the new region's arrival point
+	else:
+		_arrive()
+	return ""
+
+
+## The current node has been reached: refused at the dock, an event, a station menu, the region choice (at the exit
+## beacon, after any event) or nothing.
 func _arrive() -> void:
 	var a := campaign.arrive(ship())
 	refresh()
+	_exit_due = a["exit"]
 	if a["refused"] != "":
 		event_panel.open_notice(campaign.label(campaign.current), a["refused"], [])
 	elif not a["event"].is_empty():
 		event_panel.open_event(a["event"])
+	elif _exit_due:
+		_open_exit()
 	elif campaign.dock_block(campaign.current) == "" and not campaign.station_cfg(campaign.current).is_empty():
 		station_panel.open(campaign.current)
 
 
-## The event panel has no more to show: whatever was queued (a fight's follow-up), else the station menu.
+func _open_exit() -> void:
+	_exit_due = false
+	region_choice.open()
+
+
+## The event panel has no more to show: whatever was queued (a fight's follow-up), else the region choice at the exit
+## beacon, else the station menu.
 func _on_events_finished() -> void:
 	refresh()
 	if not _queue.is_empty():
 		_queue.pop_front().call()
 		return
 	if sector_flow():
-		if _dock and campaign.dock_block(campaign.current) == "":
+		if _exit_due and campaign.at_exit():
+			_poi_resolve()
+			_open_exit()
+		elif _dock and campaign.dock_block(campaign.current) == "":
 			station_panel.open(campaign.current)
 		else:
 			_poi_done()
 		_dock = false
+		return
+	if _exit_due and campaign.at_exit():
+		_open_exit()
 		return
 	if campaign.dock_block(campaign.current) == "" and not campaign.station_cfg(campaign.current).is_empty():
 		station_panel.open(campaign.current)
@@ -294,13 +339,14 @@ func _on_station_closed() -> void:
 # --- sector POIs ------------------------------------------------------------------------------------------------------------
 
 ## A POI of the sector the ship is in has triggered (`res`: Sector.trigger() of `sector`): the dock master's refusal, its
-## event (then the station menu if it docks) or the station menu, over the sector. When that is all done the POI is
-## resolved (Sector.resolve).
+## event (then the station menu if it docks, or the region choice at the exit beacon) or the station menu, over the
+## sector. When that is all done the POI is resolved (Sector.resolve).
 func open_poi(res: Dictionary, sector) -> void:
 	_ensure_panels()
 	_poi = str(res["poi"]["id"])
 	_poi_sector = sector
 	_dock = bool(res.get("dock", false))
+	_exit_due = bool(res.get("exit", false))
 	panel_only = true
 	visible = true
 	refresh()
@@ -309,6 +355,9 @@ func open_poi(res: Dictionary, sector) -> void:
 		event_panel.open_notice(str(res["poi"]["name"]), str(res["refused"]), [])
 	elif not res.get("event", {}).is_empty():
 		event_panel.open_event(res["event"])
+	elif _exit_due:
+		_poi_resolve()
+		_open_exit()
 	elif _dock:
 		_dock = false
 		station_panel.open(campaign.current)
@@ -318,11 +367,15 @@ func open_poi(res: Dictionary, sector) -> void:
 
 ## The POI's chain is over: it is resolved, and the panels make way for the sector.
 func _poi_done() -> void:
+	_poi_resolve()
+	if panel_only and not event_panel.visible and not station_panel.visible and not region_choice.visible:
+		_hide_panels()
+
+
+func _poi_resolve() -> void:
 	if _poi_sector != null and _poi != "":
 		_poi_sector.resolve(_poi)
 	_forget_poi()
-	if panel_only and not event_panel.visible and not station_panel.visible:
-		_hide_panels()
 
 
 func _forget_poi() -> void:
@@ -373,7 +426,8 @@ func _on_fight_finished(result: Dictionary) -> void:
 	visible = true
 	panel_only = sector_flow()
 	refresh()
-	event_panel.open_notice("The fight is over" if r["state"] == "won" else "You get away", r["text"], r["lines"])
+	var title := "Salvage" if r["state"] in ["won", "captured", "spared"] else ("The fight is over" if r["state"] == "escaped" else "You get away")
+	event_panel.open_notice(title, r["text"], r["lines"])
 	if r["ending"] != "":
 		var done: String = r["ending"]
 		_queue.append(func(): _on_ending(done))
@@ -383,8 +437,8 @@ func _on_fight_finished(result: Dictionary) -> void:
 	elif r["goto"] != "" and campaign.events.has(r["goto"]):
 		var page: String = r["goto"]
 		_queue.append(func(): event_panel.open_event(campaign.events.get_event(page)))
-	elif r["state"] == "won" and not sector_flow():  # in sector space the wreck stays as a POI to salvage
-		var salvage := campaign.salvage_event(ship())
+	elif r["state"] in ["won", "captured"]:
+		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship())
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
 
@@ -416,8 +470,10 @@ func load_campaign() -> String:
 		_queue.clear()
 		_forget_poi()
 		panel_only = false
+		_exit_due = false
 		event_panel.visible = false
 		station_panel.visible = false
+		region_choice.visible = false
 		_fighting = false
 		refresh()
 		return ""
@@ -430,7 +486,7 @@ func load_campaign() -> String:
 func _input(e: InputEvent) -> void:
 	if not visible or panel_only or not (e is InputEventKey):
 		return
-	if event_panel.visible or station_panel.visible:
+	if event_panel.visible or station_panel.visible or region_choice.visible:
 		return  # they take the keys
 	if get_viewport() != null:
 		get_viewport().set_input_as_handled()
@@ -475,7 +531,7 @@ func map_rect() -> Rect2:
 
 
 func _region() -> Vector2:
-	var s: Array = Campaign.config()["map"]["size"]
+	var s: Array = campaign.cfg["map"]["size"]
 	return Vector2(float(s[0]), float(s[1]))
 
 
@@ -515,7 +571,7 @@ func _draw() -> void:
 	_text("THE DRIFT", p.position + Vector2(PAD, 38.0), 26, TEXT)
 	_draw_status(p)
 	var m := map_rect()
-	draw_rect(m, SPACE_BG)
+	draw_rect(m, SPACE_BG.lerp(_tint(), 0.07))
 	draw_rect(m, EDGE_DIM, false, 1.0)
 	_draw_lanes()
 	for id in campaign.drift.ids():
@@ -538,7 +594,9 @@ func _draw_status(p: Rect2) -> void:
 	_text("Hull %d/%d" % [hull.x, hull.y], Vector2(x + 340.0, y), 18, TEXT if hull.x * 2 > hull.y else AMBER)
 	var owed := "Debt %d" % campaign.debt
 	var due := ""
-	if campaign.debt > 0:
+	if campaign.debt > 0 and not campaign.debt_running():
+		due = "  (clock stopped)"
+	elif campaign.debt > 0:
 		due = "  (%d behind!)" % campaign.behind() if campaign.behind() > 0 else "  (%d due in %d)" % [int(campaign.cfg["debt"]["payment"]), campaign.next_due_in()]
 	_text(owed + due, Vector2(x + 470.0, y), 18, BAD if campaign.behind() > 0 else (GOOD if campaign.debt == 0 else AMBER))
 	var rx := p.end.x - PAD - 380.0
@@ -598,7 +656,9 @@ func _draw_tip(id: String) -> void:
 	var lines: Array[String] = []
 	if id == campaign.current:
 		lines.append("You are here")
-		if campaign.dock_block(id) == "" and not campaign.station_cfg(id).is_empty():
+		if campaign.at_exit():
+			lines.append("Enter or click: choose the next region")
+		elif campaign.dock_block(id) == "" and not campaign.station_cfg(id).is_empty():
 			lines.append("Enter or click: dock")
 	elif not campaign.is_known(id):
 		lines.append("Unknown")
@@ -606,11 +666,13 @@ func _draw_tip(id: String) -> void:
 	else:
 		var type_label := str(Campaign.type_info(str(n["type"]))["label"])
 		lines.append(campaign.label(id) + (" (Scrapper trader)" if n.get("clan", false) else ""))
-		if n["place"] != "" or n.get("clan", false):
+		if (n["place"] != "" or n.get("clan", false)) and type_label != campaign.label(id):
 			lines.append(type_label)
 		if n["type"] == "gate":
 			lines.append(Campaign.DARK_TEXT)
-		elif campaign.drift.linked(campaign.current, id):
+		elif n["type"] == "exit":
+			lines.append("The way to the next region")
+		if n["type"] != "gate" and campaign.drift.linked(campaign.current, id):
 			lines.append(jump_cost_text())
 	var w := 0.0
 	for l in lines:
@@ -625,6 +687,9 @@ func _draw_tip(id: String) -> void:
 
 func _draw_foot(p: Rect2) -> void:
 	var y := p.end.y - FOOT_H + 28.0  # the message, then the fuel warning, then the hint line, each on its own row
+	var where := campaign.stage_text()
+	var where_w := ThemeDB.fallback_font.get_string_size(where, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+	_text(where, Vector2(p.end.x - PAD - where_w, y), 18, _tint().lightened(0.25))
 	if message != "":
 		_text(message, Vector2(p.position.x + PAD, y), 16, BAD if message_bad else GOOD)
 	var how := "spool the jump drive there, 8 s" if sector_flow() else "jump"
@@ -633,6 +698,11 @@ func _draw_foot(p: Rect2) -> void:
 	var s = ship()
 	if s != null and campaign.fuel_short(s):
 		_text("Out of fuel!", Vector2(p.position.x + PAD, y + 20.0), 16, BAD)
+
+
+## The region's tint (its palette), for the map's background and the stage line.
+func _tint() -> Color:
+	return Color(str(campaign.region_data.get("palette", {}).get("tint", "#cfd6df")))
 
 
 ## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.

@@ -1,0 +1,38 @@
+{
+ "frame": [8, 18],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 2, 12]
+ },
+ "anchors": {
+  "head": [4, 3],
+  "tail": [4, 17]
+ },
+ "glow": {
+  "image": "grundl_grapple_harpoon_glow.png",
+  "frame": [16, 26],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 2, 12]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Grundl Grapple Harpoon head: a barbed steel harpoon with its chain trailing behind (2 frames, the chain sways). The tether to the ship is `grundl_grapple_harpoon_chain.png`.",
+ "impact": {
+  "image": "grundl_grapple_harpoon_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "grundl_grapple_harpoon_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 14]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

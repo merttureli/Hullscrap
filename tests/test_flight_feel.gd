@@ -12,7 +12,6 @@ const Ship = preload("res://scripts/ship/ship.gd")
 ## The Beta 1 numbers (data/flight.json and data/collision.json before this change).
 const BETA1 := {"thrust_to_accel": 2000.0, "turn_factor": 48.0, "max_speed": 600.0, "damage_k": 6e-7}
 const COURIER := "res://data/ships/starter_courier.json"
-const PRISM := "res://data/ships/starter_prism.json"
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const PIRATE := "res://data/ships/pirate_raider.json"
 
@@ -73,7 +72,7 @@ func test_the_safe_docking_speed_is_unchanged_and_a_bump_does_not_one_shot() -> 
 
 func test_an_ai_fight_still_resolves() -> void:
 	var s := Session.new()
-	s.start(Ship.from_design(PRISM), Session.load_ship(PIRATE), 5)
+	s.start(Session.load_ship(PIRATE), Session.load_ship(PIRATE), 5)  # a pirate against a pirate: the starters have one bare gun each now, and the pirate snipes it in the first seconds
 	s.arena.ships[Session.ENEMY].hull = 14.0  # a pirate already hurt: the fight has to end
 	var pilot := PilotAI.new(s.arena, Session.PLAYER, Session.ENEMY, {})
 	var n := 0
