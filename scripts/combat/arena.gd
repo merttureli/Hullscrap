@@ -17,6 +17,7 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
+const Hazards = preload("res://scripts/combat/hazards.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
@@ -70,7 +71,7 @@ var rng := RandomNumberGenerator.new()
 var weapons := Weapons.new()
 var projectiles: Array = []
 var beams: Array = []
-var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed; n: the contact normal; points: up to 6 contact points, world), breach, disable (uid; half "out": the outside half of a mount), wreck_part (uid, id: a disabled part was hit again and is gone, debris on its cells), ignite (a hit started a fire), effect (kind: acid, corrode, spores, sonic, shard, frost, magnetic or self_room; weapon: its id; see effects.gd), wreck
+var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock (the bubble), ion_part (uid, seconds: ion shut a part down, Abilities.ion_lock), hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed; n: the contact normal; points: up to 6 contact points, world), breach, disable (uid; half "out": the outside half of a mount), wreck_part (uid, id: a disabled part was hit again and is gone, debris on its cells), ignite (a hit started a fire), effect (kind: acid, corrode, spores, sonic, shard, frost, magnetic, split (origin, dirs: a shield stopped a split_on_shield shot), intercept (hit: a point-defence turret shot at a missile) or self_room; weapon: its id; see effects.gd), wreck
 var autofire := {}  ## ship index -> false when its turrets hold fire (the T key); a ship not listed autofires
 var aim_points := {}  ## ship index -> the world point its fixed guns' barrels follow (the player's cursor), set by the caller
 var power_bonus := {}  ## ship index -> power the neon lattice has made of absorbed energy (counted, not used yet)
@@ -78,6 +79,7 @@ var collision := Collisions.load_config()  ## data/collision.json: restitution, 
 var contact_tick := {}  ## ship index -> the last tick it touched another ship
 var fx := Effects.fresh()  ## running weapon effects: acid, spores, frost, shocks, corroded walls, drag-able debris (effects.gd)
 var tethers: Array = []  ## bow latches: {a, b (ships), la, lb (anchors in each ship's cell coordinates), left (seconds)}
+var hazard := {}  ## the fight's sector hazard, {id, dir} or {} (hazards.gd): set by the caller after add_ship
 var tick := 0  ## substeps run so far
 var _acc := 0.0
 
@@ -179,7 +181,7 @@ func _substep() -> void:
 		var co = ships[i]
 		var fly: bool = not co.wrecked and co.flight.can_fly(co.ship.components, co.powered) == ""
 		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust, co.thrusts)
-		Shields.tick(co, SUBSTEP)
+		Shields.tick(co, SUBSTEP, Hazards.recharge_mult(self))
 		if aim_points.has(i) and not co.wrecked:  # fixed guns follow the cursor
 			for uid in co.mounts:
 				weapons.point_barrel(self, i, uid, aim_points[i])
@@ -188,6 +190,7 @@ func _substep() -> void:
 	weapons.tick_beams(self)
 	Projectiles.step(self, SUBSTEP)
 	Effects.tick(self, SUBSTEP)
+	Hazards.tick(self, SUBSTEP)
 
 
 ## Recompute power, mass, thrust and the shield cap of ship `idx` if a part or tile changed here, or
@@ -215,6 +218,7 @@ func _recompute(co) -> void:
 	co.hit_cache = {}
 	if co.dirty:
 		co.shape = null  # the cells may have changed: the bubble's outline is rebuilt on its next use
+	co.flight.turn_mult = Abilities.turn_mult(co.ship)  # a Gravity Anchor turns the ship faster
 	co.thrust = co.flight.thrust_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	co.thrusts = co.flight.thrusts_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	Shields.resync(co)

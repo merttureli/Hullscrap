@@ -9,6 +9,8 @@ extends RefCounted
 ## itself when ready and on target (the owner's T key toggles it); each of its shots rolls a hit
 ## against the target's evasion on the arena's rng: a hit aims at a random outer cell facing the
 ## turret, a miss at a point just off the hull. A turret deals `turret_damage` of its entry's damage.
+## A turret with an `intercept` {range} effect (point defence, effects.gd) turns on the nearest enemy missile within that
+## range before any ship, and each shot rolls its accuracy to destroy the missile outright.
 ## Works on the arena (arena.gd).
 
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
@@ -20,6 +22,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
+const Hazards = preload("res://scripts/combat/hazards.gd")
 
 const PATH := "res://data/weapons.json"
 const BASE := {"damage_type": "energy", "damage": 1.0, "cooldown": 1.0, "range": 900.0, "arc": 360.0,
@@ -162,11 +165,12 @@ func can_fire(arena, idx: int, uid: int, aim: Vector2) -> String:
 		return "no ammo"
 	if arena.tick < int(co.cooldowns.get(uid, 0)):
 		return "cooling down"
-	if def(m["id"])["turret"]:
+	if w["turret"]:
+		var mis = missile_target(arena, idx, m, w)
 		var tgt := target_of(arena, idx)
-		if tgt < 0:
+		if tgt < 0 and mis == null:
 			return "no target"
-		if not in_arc(arena, idx, m, lead_point_of(arena, idx, m, tgt)):
+		if not in_arc(arena, idx, m, missile_point(arena, idx, m, w, mis) if mis != null else lead_point_of(arena, idx, m, tgt)):
 			return "out of arc"
 	return ""
 
@@ -227,8 +231,9 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 	var m: Dictionary = co.mounts[uid]
 	var w := Effects.adjust(arena, idx, uid, m, def(m["id"]))  # less power or rate without the operator or crew it needs
 	co.cooldowns[uid] = arena.tick + int(ceil(float(w["cooldown"]) / arena.SUBSTEP - 1e-6))
+	var mis = missile_target(arena, idx, m, w) if w["turret"] else null  # point defence shoots a missile before a ship
 	if w["turret"]:
-		var point := _turret_point(arena, idx, uid, m, w, target_of(arena, idx))
+		var point: Vector2 = missile_point(arena, idx, m, w, mis) if mis != null else _turret_point(arena, idx, uid, m, w, target_of(arena, idx))
 		var want: Vector2 = (point - arena.local_to_world(idx, m["pos"])).rotated(-co.flight.angle)
 		m["aim"] = clamp_dir(want, m["dir"], float(w["arc"]) * 0.5)
 	else:
@@ -237,6 +242,10 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 	var dir: Vector2 = Vector2(m["aim"]).rotated(co.flight.angle)
 	arena.log_event("shot", idx, Vector2i(-1, -1), {"weapon": m["id"], "uid": uid, "kind": w["kind"], "origin": origin, "dir": dir})
 	_spend(arena, idx, uid, m, w)
+	if mis != null:
+		_intercept(arena, idx, w, origin, mis)
+		Effects.on_fire(arena, idx, uid, m, w)
+		return true  # (a point-defence shot leaves through its own port: it does not open the shield)
 	if w["kind"] == "beam":
 		var every := maxi(1, roundi(float(w["tick"]) / arena.SUBSTEP))
 		arena.beams.append({"owner": idx, "uid": uid, "w": w, "local_dir": m["aim"],
@@ -272,6 +281,42 @@ func target_of(arena, idx: int) -> int:
 	return best
 
 
+## The enemy missile (an entry of arena.projectiles) turret mount `m` of ship `idx` would shoot down now: the nearest one within the
+## `intercept` range of its entry `w`, or null (a weapon without the effect, or no missile near).
+func missile_target(arena, idx: int, m: Dictionary, w: Dictionary):
+	var spec = Effects.of(w).get("intercept")
+	if not spec is Dictionary:
+		return null
+	var from: Vector2 = arena.local_to_world(idx, m["pos"])
+	var best = null
+	var best_d := float(spec["range"]) * float(spec["range"])
+	for p in arena.projectiles:
+		if p["owner"] == idx or str(p["w"]["kind"]) != "missile":
+			continue
+		var d := from.distance_squared_to(p["pos"])
+		if d <= best_d:
+			best_d = d
+			best = p
+	return best
+
+
+## The world point turret mount `m` of ship `idx` aims at to hit the missile `mis`, with perfect lead for the shot's speed.
+func missile_point(arena, idx: int, m: Dictionary, w: Dictionary, mis: Dictionary) -> Vector2:
+	var speed := float(w["speed"]) if w["kind"] in ["bolt", "flak", "missile"] else 0.0
+	return PilotAI.lead_point(arena.local_to_world(idx, m["pos"]), mis["pos"], mis["vel"], speed)
+
+
+## A point-defence shot at the missile `mis` from `origin`: a tracer to where it is, and it is destroyed when the shot rolls
+## its accuracy (no evasion: a missile does not dodge). Logs an `intercept` effect event ({weapon, hit}, at the missile).
+func _intercept(arena, idx: int, w: Dictionary, origin: Vector2, mis: Dictionary) -> void:
+	var id := str(w["id"])
+	var hit: bool = arena.rng.randf() < float(w["accuracy"])
+	arena.log_event("beam", idx, Vector2i(-1, -1), {"weapon": id, "from": origin, "to": mis["pos"], "dtype": w["damage_type"], "shield": false, "bounce": false})
+	arena.log_event("effect", idx, Vector2i(-1, -1), {"kind": "intercept", "weapon": id, "hit": hit, "pos": mis["pos"]})
+	if hit:
+		arena.projectiles.erase(mis)
+
+
 ## Evasion of ship `idx` (docs/CONTENT.md 4): 0.25 x speed / max speed, plus a manned helm's bonus and
 ## any running ability's.
 func evasion(arena, idx: int) -> float:
@@ -282,7 +327,7 @@ func evasion(arena, idx: int) -> float:
 
 ## The chance a shot of turret `uid` of ship `idx` hits ship `target`: its accuracy less the target's evasion.
 func hit_chance(arena, idx: int, uid: int, target: int) -> float:
-	return clampf(float(def(arena.ships[idx].mounts[uid]["id"])["accuracy"]) - evasion(arena, target), 0.0, 1.0)
+	return clampf(float(def(arena.ships[idx].mounts[uid]["id"])["accuracy"]) + Hazards.accuracy_add(arena) - evasion(arena, target), 0.0, 1.0)
 
 
 ## The world point turret mount `m` of ship `idx` should aim at to hit ship `target`'s middle, with
@@ -349,9 +394,10 @@ func tick_turrets(arena) -> void:
 			if not w["turret"] or status_of(arena, idx, uid) != "ok" or not (m["powered"] if m["virtual"] else co.powered.get(uid, false)):
 				continue
 			var tgt := target_of(arena, idx)
-			if tgt < 0:
+			var mis = missile_target(arena, idx, m, w)  # point defence turns on a missile before a ship
+			if tgt < 0 and mis == null:
 				continue
-			var lead := lead_point_of(arena, idx, m, tgt)
+			var lead: Vector2 = missile_point(arena, idx, m, w, mis) if mis != null else lead_point_of(arena, idx, m, tgt)
 			var want: Vector2 = (lead - arena.local_to_world(idx, m["pos"])).rotated(-co.flight.angle)
 			var half := deg_to_rad(float(w["arc"]) * 0.5)
 			var goal := clampf(Vector2(m["dir"]).angle_to(want), -half, half)  # the barrel's angle from dir that points best
@@ -360,7 +406,7 @@ func tick_turrets(arena) -> void:
 			cur += clampf(angle_difference(cur, goal), -step, step)
 			m["aim"] = Vector2(m["dir"]).rotated(cur)
 			if arena.autofire.get(idx, true) and absf(angle_difference(cur, Vector2(m["dir"]).angle_to(want))) <= deg_to_rad(ON_TARGET_DEG) \
-					and arena.cooldown_left(idx, uid) <= 0.0 and _in_range(arena, idx, m, w, tgt):
+					and arena.cooldown_left(idx, uid) <= 0.0 and (mis != null or _in_range(arena, idx, m, w, tgt)):
 				arena.fire(idx, uid, lead)
 
 

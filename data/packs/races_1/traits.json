@@ -4,7 +4,7 @@
 		"swarm": {"name": "Hive-minded", "blurb": "Works harder beside the hive: +25% work speed per other Kett in the room, at most +50%.", "swarm": {"per_other": 0.25, "max": 0.5}},
 		"firefighter": {"name": "Firefighter", "blurb": "Shipboard firefighters by tradition: puts fires out twice as fast and takes half the burn.", "work_mult": {"extinguish": 2.0}, "damage_taken": {"fire": 0.5}},
 		"dries_out": {"name": "Dries out", "blurb": "Loses 2 hp a second in a room whose hottest part is above 60.", "dries_out": {"heat_above": 60, "hp_per_s": 2}},
-		"aura_spores": {"name": "Spore cloud", "blurb": "Their room gains a little air and everyone in it heals 1 hp a second.", "aura": {"o2_per_s": 0.01, "heal_per_s": 1.0}},
+		"aura_spores": {"name": "Spore cloud", "blurb": "Their room gains half a cell of air a second each (a Garden Bay's worth) and everyone in it heals 1 hp a second.", "aura": {"o2_per_s": 0.5, "heal_per_s": 1.0}},
 		"flammable": {"name": "Flammable", "blurb": "Burns half as hard again: fire damage x1.5.", "damage_taken": {"fire": 1.5}},
 		"mechanical": {"name": "Mechanical", "blurb": "Half the body is machine: beds do nothing, but a crewmate with a spanner mends them.", "mechanical": true},
 		"half_lungs": {"name": "Half-lunged", "blurb": "Breathes half as much air.", "o2_use": 0.5},

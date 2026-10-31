@@ -5,7 +5,7 @@ extends RefCounted
 ## then rests for `cooldown` seconds (counted from the end of the effect). A passive one runs for as
 ## long as its part works.
 ## - effects: stat_mult {thrust, power} (a factor on that part's own figure), shield_layer (extra
-##   layers), charge_mult (a factor on every weapon's cooldown), evasion_add.
+##   layers), charge_mult (a factor on every weapon's cooldown), evasion_add, turn_mult (a factor on the ship's turn rate).
 ## - side_effects, per second while it runs: drain_o2 (fraction of the part's room air lost), heat,
 ##   power_spike (extra power draw, taken in the power solve), fire_risk (chance), self_damage (hp),
 ##   shock_organic (hp a second to the crew in the room who are not mechanical), scorch (the same to those without
@@ -36,10 +36,11 @@ const SIDE_EFFECTS: Array[String] = PartEffects.SIDE_EFFECTS  ## the `type`s of 
 const EPS := 1e-9
 const DEFAULT_RECHARGE := 2.0  ## seconds a used shield layer takes to come back: Shields.RECHARGE, which a part's stats.recharge scales
 const MIN_RECHARGE := 0.05  ## the quickest a stats.recharge can count
+const ION_LOCK_S := 3.0  ## seconds an ion hit shuts a part down, times its line's ion_vulnerability (Shields.ION_LOCK is the same for the bubble)
 
 
 static func fresh_state() -> Dictionary:
-	return {"rev": 0, "slots": {}, "pulse": {}, "fx": []}
+	return {"rev": 0, "slots": {}, "pulse": {}, "fx": [], "ion": {}}
 
 
 ## How many starts and ends this ship's abilities have had.
@@ -155,6 +156,7 @@ static func trigger(ship, uid: int, ability_id := "") -> String:
 static func tick(ship, dt: float, rng: RandomNumberGenerator = null) -> void:
 	if dt <= 0.0:
 		return
+	_tick_ion(ship, dt)
 	ship.refresh()
 	var powered: Dictionary = ship.power_state.get("powered", {})
 	var table: Dictionary = ship.ability_state["slots"]
@@ -187,6 +189,63 @@ static func tick(ship, dt: float, rng: RandomNumberGenerator = null) -> void:
 		for a in ship.components.def(inst["id"]).get("abilities", []):
 			if a.get("type", "active") == "passive":
 				_side_effects(ship, uid, a, dt, rng)
+
+
+# --- ion --------------------------------------------------------------------------------------------
+
+## The damage multiplier of ion on part `uid`: its line's ion_vulnerability (data/lines.json, neon 2.0).
+static func ion_vulnerability(ship, uid: int) -> float:
+	if not ship.components.instances.has(uid):
+		return 1.0
+	return float(ship.effective(ship.components.instances[uid]["id"])["ion_vulnerability"])
+
+
+## An ion hit lands on part `uid`: it is shut down (it neither makes nor uses power) for ION_LOCK_S x its line's
+## ion_vulnerability seconds, or what it had left if that is longer. Crew cannot repair it, it wears off. Returns the seconds.
+static func ion_lock(ship, uid: int) -> float:
+	var secs := ION_LOCK_S * ion_vulnerability(ship, uid)
+	var table: Dictionary = ship.ability_state["ion"]
+	table[uid] = maxf(float(table.get(uid, 0.0)), secs)
+	return secs
+
+
+## Seconds part `uid` is still shut down by ion (0 when it is not).
+static func ion_left(ship, uid: int) -> float:
+	return float(ship.ability_state["ion"].get(uid, 0.0))
+
+
+## uid -> true for the parts ion holds down (Ship.disabled_uids).
+static func ion_locked(ship) -> Dictionary:
+	var out := {}
+	for uid in ship.ability_state["ion"]:
+		if ship.components.instances.has(uid):
+			out[uid] = true
+	return out
+
+
+## How hard ion hits the shield bubble: the layers-weighted mean of the ion_vulnerability of the powered shield parts
+## (1 with none). It multiplies the layers an ion hit strips and the seconds it locks the bubble (Shields.absorb).
+static func shield_ion_vulnerability(ship, powered: Dictionary) -> float:
+	var weight := 0.0
+	var sum := 0.0
+	for uid in _uids(ship):
+		var def: Dictionary = ship.components.def(ship.components.instances[uid]["id"])
+		if def.get("family", "") != "shield" or not powered.get(uid, false):
+			continue
+		var layers := float(def.get("stats", {}).get("layers", 0))
+		weight += layers
+		sum += layers * ion_vulnerability(ship, uid)
+	return sum / weight if weight > 0.0 else 1.0
+
+
+static func _tick_ion(ship, dt: float) -> void:
+	var table: Dictionary = ship.ability_state["ion"]
+	if table.is_empty():
+		return
+	for uid in table.keys():
+		table[uid] = float(table[uid]) - dt
+		if table[uid] <= EPS or not ship.components.instances.has(uid):
+			table.erase(uid)
 
 
 # --- what the running abilities change ------------------------------------------------------------
@@ -262,6 +321,15 @@ static func power_mods(ship) -> Dictionary:
 			if add > 0.0:
 				bonus[r["uid"]] = float(bonus.get(r["uid"], 0.0)) + add
 	return {"mult": stat_mults(ship, "power", false), "extra": extra, "bonus": bonus}
+
+
+## The factor on the ship's turn rate from the abilities in effect: the product of their `turn_mult` (1 with none). Arena._recompute
+## hands it to the flight body.
+static func turn_mult(ship) -> float:
+	var f := 1.0
+	for r in running(ship):
+		f *= float(r["ability"].get("effects", {}).get("turn_mult", 1.0))
+	return f
 
 
 ## The layers shield part `uid` gives (called by Shields.layers_of_ship for a powered part): `base`, its stats.layers,

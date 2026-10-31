@@ -4,16 +4,16 @@
       "text": "Knot Eleven runs the Hive-lane dock: four Kett on four consoles, working in the same rhythm, so that the whole dock sounds like one very organised insect. They greet you in sequence. 'Welcome.' 'Welcome.' 'Welcome.' 'Welcome.' Each one is a quarter of the word, and the full welcome is in the spaces.",
       "choices": [
         {"text": "Welcome them back, in sequence.", "outcomes": [
-          {"weight": 100, "text": "Your crew try it. It goes badly, and then well. By the fifth go the four Kett are nodding in the same rhythm as your crew, and the dock is two seconds faster than usual. They tip you in fuel.", "effects": {"items": {"fuel": 1}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your crew try it. It goes badly, and then well. By the fifth go the four Kett are nodding in the same rhythm as your crew, and the dock is two seconds faster than usual. They tip you in fuel.", "effects": {"items": {"fuel": 1}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
         ]},
         {"text": "Ask for dock services.", "outcomes": [
-          {"weight": 100, "text": "The quartet processes your request in a rolling chorus, each pass a little more correct than the last. The fee is split four ways. You pay four quarters.", "effects": {"items": {"credits": -10, "fuel": 2}}}
+          {"weight": 100, "text": "The quartet processes your request in a rolling chorus, each pass a little more correct than the last. The fee is split four ways. You pay four quarters.", "effects": {"items": {"credits": -10, "fuel": 2}, "unlock": "ship_kett_ninefold_cell"}}
         ]},
         {"text": "[Kett] Join the rhythm.", "requires": {"species": "kett"}, "outcomes": [
-          {"weight": 100, "text": "Your Kett steps to the fifth console without a word and falls into the beat. For a whole shift the dock is five-handed and nobody has been so happy in years. The foreman, dazed, pays a full quarter share.", "effects": {"items": {"credits": 40, "scrap": 20}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Kett steps to the fifth console without a word and falls into the beat. For a whole shift the dock is five-handed and nobody has been so happy in years. The foreman, dazed, pays a full quarter share.", "effects": {"items": {"credits": 40, "scrap": 20}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
         ]},
         {"text": "[Human] Try to learn the beat. Humans are bad at this.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 100, "text": "Your Human claps along half a beat behind, then a full beat, then in exactly the right place for one glorious second. The Kett erupt in applause, four times over.", "effects": {"items": {"credits": 15}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Human claps along half a beat behind, then a full beat, then in exactly the right place for one glorious second. The Kett erupt in applause, four times over.", "effects": {"items": {"credits": 15}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
         ]}
       ]
     },
@@ -196,14 +196,14 @@
       "text": "Matron Tcha runs the knot-yard that builds the Hive Battery, a shield that charges fully only when three hands work it at once. 'It is not hard,' she says, 'if you do not mind being close.' Her test console is in a very small room, with an expectation that you will stand in it with two friends. The room is built for four Kett. There is no handle on the inside of the door.",
       "choices": [
         {"text": "Squeeze in three crew and work the console.", "outcomes": [
-          {"weight": 55, "text": "Three of your crew squeeze into a room built for insects and run the Battery together. It hums, it flares, it takes the Matron's test shots without a flicker. They come out rumpled, closer, and slightly in love. Tcha hands over the schematics.", "effects": {"crew_hp": 5, "flag": "tech_hive_battery"}},
-          {"weight": 45, "text": "Three crew in a room that small: nobody is graceful. But the shield holds on the third try, and the Matron concedes. 'Good enough for a non-Kett,' she says.", "effects": {"flag": "tech_hive_battery"}}
+          {"weight": 55, "text": "Three of your crew squeeze into a room built for insects and run the Battery together. It hums, it flares, it takes the Matron's test shots without a flicker. They come out rumpled, closer, and slightly in love. Tcha hands over the schematics.", "effects": {"crew_hp": 5, "flag": "tech_hive_battery", "unlock": "ship_kett_picket_nest"}},
+          {"weight": 45, "text": "Three crew in a room that small: nobody is graceful. But the shield holds on the third try, and the Matron concedes. 'Good enough for a non-Kett,' she says.", "effects": {"flag": "tech_hive_battery", "unlock": "ship_kett_picket_nest"}}
         ]},
         {"text": "[Kett] Work it with your Kett.", "requires": {"species": "kett"}, "outcomes": [
-          {"weight": 100, "text": "Your Kett steps in, finds the beat, and the Battery sings. The Matron weeps. She gives them the schematics, a quarter-share of her pension, and the key to the knot-yard.", "effects": {"items": {"credits": 40, "polymer": 15}, "rep": {"clans": 1}, "flag": "tech_hive_battery"}}
+          {"weight": 100, "text": "Your Kett steps in, finds the beat, and the Battery sings. The Matron weeps. She gives them the schematics, a quarter-share of her pension, and the key to the knot-yard.", "effects": {"items": {"credits": 40, "polymer": 15}, "rep": {"clans": 1}, "flag": "tech_hive_battery", "unlock": "ship_kett_picket_nest"}}
         ]},
         {"text": "[Gauntling] Plug in as the second and third hands.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling plugs two cables into the console and works it as three. The Matron checks the output, checks the Gauntling, and checks her notes. 'That should not work,' she says. It does. She hands over the schematics, with some suspicion.", "effects": {"items": {"copper": 12}, "flag": "tech_hive_battery"}}
+          {"weight": 100, "text": "Your Gauntling plugs two cables into the console and works it as three. The Matron checks the output, checks the Gauntling, and checks her notes. 'That should not work,' she says. It does. She hands over the schematics, with some suspicion.", "effects": {"items": {"copper": 12}, "flag": "tech_hive_battery", "unlock": "ship_kett_picket_nest"}}
         ]},
         {"text": "Come back with more crew.", "outcomes": [
           {"weight": 100, "text": "'The door will be here,' says Tcha. 'Do bring friends.'", "effects": {}}

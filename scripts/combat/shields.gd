@@ -8,7 +8,8 @@ extends RefCounted
 ##   RECHARGE seconds later. shift() moves a step of weight toward a side: the sector that loses it drops
 ##   at once, the one that gains it fills at the recharge rate. A changed N starts again from even weights.
 ## - A shot is stopped by the sector it enters through when that holds a whole layer. Missiles pass. An
-##   ion hit also locks the whole bubble for ION_LOCK seconds: it stops nothing and does not recharge.
+##   ion hit also locks the whole bubble for ION_LOCK seconds: it stops nothing and does not recharge. Ion strips
+##   and locks x the shield parts' line ion_vulnerability (neon 2: two layers, 6 s).
 ## - Firing opens only the sector the shot leaves through for the weapon's drop time (see drop_seconds):
 ##   shots pass an open sector and use no layer.
 ## - Abilities with a shield_layer effect (the Overcharge of the shield parts, abilities.gd) add layers
@@ -310,17 +311,24 @@ static func drop(arena, idx: int, w: Dictionary, origin: Vector2, dir: Vector2) 
 
 ## A shot of weapon `w` hits the bubble of ship `idx` at the world point `point`, travelling along
 ## `dir`: a layer of the sector it entered through (`sector`, else the one `point` is in) is used up and
-## comes back later, and for ion the whole bubble locks.
+## comes back later, and for ion the whole bubble locks (an ion-weak shield, Abilities.shield_ion_vulnerability, loses more layers and locks longer).
 static func absorb(arena, idx: int, w: Dictionary, point := Vector2.ZERO, dir := Vector2.ZERO, sector := -1) -> void:
 	var co = arena.ships[idx]
 	var s := sector
 	if s < 0:
 		s = sector_of(co, arena.world_to_local(idx, point) - co.pivot) if point != Vector2.ZERO else 0
-	co.sector_layers[s] = maxf(float(co.sector_layers[s]) - 1.0, 0.0)
-	co.sector_timers[s].append(Vector2(RECHARGE, 1.0))
+	var strip := 1.0  # ion strips and locks more on an ion-weak line (neon x2): the shield parts' ion_vulnerability
+	var lock := ION_LOCK
+	var ion: bool = w.get("damage_type", "") == "ion"
+	if ion:
+		strip = Abilities.shield_ion_vulnerability(co.ship, co.powered)
+		lock = ION_LOCK * strip
+	var before := float(co.sector_layers[s])
+	co.sector_layers[s] = maxf(before - strip, 0.0)
+	co.sector_timers[s].append(Vector2(RECHARGE, minf(strip, maxf(before, 1.0))))  # what was really lost comes back
 	co.sector_hit[s] = arena.tick
-	if w.get("damage_type", "") == "ion":
-		co.ion_lock = ION_LOCK
+	if ion:
+		co.ion_lock = maxf(co.ion_lock, lock)
 		arena.log_event("ion_lock", idx)
 	var extra := {"layers": co.layers, "sector": s, "sector_layers": float(co.sector_layers[s]), "dir": dir, "dtype": w.get("damage_type", "")}
 	if point != Vector2.ZERO:
@@ -328,14 +336,15 @@ static func absorb(arena, idx: int, w: Dictionary, point := Vector2.ZERO, dir :=
 	arena.log_event("shield", idx, Vector2i(-1, -1), extra)
 
 
-## Advance recharge and the ion lock by `dt` seconds (recharge runs faster while a shield part is overclocked).
-static func tick(co, dt: float) -> void:
+## Advance recharge and the ion lock by `dt` seconds (recharge runs faster while a shield part is overclocked, and
+## `rate_mult` times as fast, 0.5 in an ion storm; the ion lock runs at the real rate).
+static func tick(co, dt: float, rate_mult := 1.0) -> void:
 	if co.wrecked:
 		return
 	if co.ion_lock > 0.0:
 		co.ion_lock = maxf(co.ion_lock - dt, 0.0)
 		return
-	dt *= CrewFx.family_mult(co.ship, "shield")
+	dt *= CrewFx.family_mult(co.ship, "shield") * rate_mult
 	var rate := -1.0
 	for s in co.sectors:
 		var timers: Array = co.sector_timers[s]

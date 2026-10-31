@@ -1,0 +1,225 @@
+{
+  "_doc": "The unlocks of the starters_2 pack: one starter_ship for each of the 20 race starters (layout A opens by reaching the race's homeland, in its dock event; layout B by its homeland's quest, on the outcomes that win the tech). The design of each is in this pack's ships/, with its hangar field {group, layout, unlock}. Payload: {ship, group, layout}.",
+  "unlocks": [
+    {
+      "id": "ship_human_ring_runner",
+      "kind": "starter_ship",
+      "name": "Ring Runner",
+      "how": "Reach the Human Core.",
+      "payload": {
+        "ship": "human_ring_runner",
+        "group": "human",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_human_formal_complaint",
+      "kind": "starter_ship",
+      "name": "Formal Complaint",
+      "how": "Win the Flak Screen from the quartermaster of the Human Core (a quest).",
+      "payload": {
+        "ship": "human_formal_complaint",
+        "group": "human",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_basalt_deepcut",
+      "kind": "starter_ship",
+      "name": "Deepcut",
+      "how": "Reach the Basalt Quarries.",
+      "payload": {
+        "ship": "basalt_deepcut",
+        "group": "basalt",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_basalt_long_quiet",
+      "kind": "starter_ship",
+      "name": "Long Quiet",
+      "how": "Sit through Old Schist's settling in the Basalt Quarries (the Magma Spitter quest).",
+      "payload": {
+        "ship": "basalt_long_quiet",
+        "group": "basalt",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_emberkin_ember_kite",
+      "kind": "starter_ship",
+      "name": "Ember Kite",
+      "how": "Reach the Emberkin Forges.",
+      "payload": {
+        "ship": "emberkin_ember_kite",
+        "group": "emberkin",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_emberkin_flashpan",
+      "kind": "starter_ship",
+      "name": "Flashpan",
+      "how": "Pass the Pyre Lance trial in the Emberkin Forges (a quest).",
+      "payload": {
+        "ship": "emberkin_flashpan",
+        "group": "emberkin",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_fenn_sold_twice",
+      "kind": "starter_ship",
+      "name": "Sold Twice",
+      "how": "Reach the Fenn Bazaar.",
+      "payload": {
+        "ship": "fenn_sold_twice",
+        "group": "fenn",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_fenn_closing_sale",
+      "kind": "starter_ship",
+      "name": "Closing Sale",
+      "how": "Take the Twitch Cannon contract in the Fenn Bazaar and see it through (a quest).",
+      "payload": {
+        "ship": "fenn_closing_sale",
+        "group": "fenn",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_kett_ninefold_cell",
+      "kind": "starter_ship",
+      "name": "Ninefold Cell",
+      "how": "Reach the Kett Hives.",
+      "payload": {
+        "ship": "kett_ninefold_cell",
+        "group": "kett",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_kett_picket_nest",
+      "kind": "starter_ship",
+      "name": "Picket Nest",
+      "how": "Pass the Hive Battery trial in the Kett Hives (a quest).",
+      "payload": {
+        "ship": "kett_picket_nest",
+        "group": "kett",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_mire_wet_watch",
+      "kind": "starter_ship",
+      "name": "Wet Watch",
+      "how": "Reach the Mire Fens.",
+      "payload": {
+        "ship": "mire_wet_watch",
+        "group": "mire",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_mire_geyser_season",
+      "kind": "starter_ship",
+      "name": "Geyser Season",
+      "how": "Pass the Steam Lance trial in the Mire Fens (a quest).",
+      "payload": {
+        "ship": "mire_geyser_season",
+        "group": "mire",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_sporeling_first_bloom",
+      "kind": "starter_ship",
+      "name": "First Bloom",
+      "how": "Reach the Sporeling Groves.",
+      "payload": {
+        "ship": "sporeling_first_bloom",
+        "group": "sporeling",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_sporeling_mycelium_wall",
+      "kind": "starter_ship",
+      "name": "Mycelium Wall",
+      "how": "Pass the Bloom trial in the Sporeling Groves (a quest).",
+      "payload": {
+        "ship": "sporeling_mycelium_wall",
+        "group": "sporeling",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_gauntling_graft_row",
+      "kind": "starter_ship",
+      "name": "Graft Row",
+      "how": "Reach the Gauntling Scrapyards.",
+      "payload": {
+        "ship": "gauntling_graft_row",
+        "group": "gauntling",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_gauntling_lamp_post",
+      "kind": "starter_ship",
+      "name": "Lamp Post",
+      "how": "Survive the Arc Core trial in the Gauntling Scrapyards (a quest).",
+      "payload": {
+        "ship": "gauntling_lamp_post",
+        "group": "gauntling",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_prismatic_tuning_bell",
+      "kind": "starter_ship",
+      "name": "Tuning Bell",
+      "how": "Reach the Prismatic Choir.",
+      "payload": {
+        "ship": "prismatic_tuning_bell",
+        "group": "prismatic",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_prismatic_flat_note",
+      "kind": "starter_ship",
+      "name": "Flat Note",
+      "how": "Pass the Lens trial in the Prismatic Choir (a quest).",
+      "payload": {
+        "ship": "prismatic_flat_note",
+        "group": "prismatic",
+        "layout": "B"
+      }
+    },
+    {
+      "id": "ship_grundl_second_helping",
+      "kind": "starter_ship",
+      "name": "Second Helping",
+      "how": "Reach the Grundl Barges.",
+      "payload": {
+        "ship": "grundl_second_helping",
+        "group": "grundl",
+        "layout": "A"
+      }
+    },
+    {
+      "id": "ship_grundl_tow_rope",
+      "kind": "starter_ship",
+      "name": "Tow Rope",
+      "how": "Pass the Slug Mortar trial on the Grundl Barges (a quest).",
+      "payload": {
+        "ship": "grundl_tow_rope",
+        "group": "grundl",
+        "layout": "B"
+      }
+    }
+  ]
+}
