@@ -1,0 +1,221 @@
+{
+ "species": "lantern",
+ "frame": [
+  49,
+  49
+ ],
+ "pivot": [
+  24,
+  24
+ ],
+ "notes": "Lantern: moth-folk, Concord pilots by tradition; a FLOATING rig when gliding (kind \"floating\": 49x49, pivot (24,24)). Dusty wings folded on the back like a swept tent with a swallow-tail, a fuzzy cream ruff, big dark compound eyes and feathery antennae; the body is the normal body in the middle of the frame (the drawer bobs it). The legs layer is what hangs behind it: thin legs under the swallow-tail and a pair of wing tips that open and close at the sides (`float`: 6 frames, 6 fps, played by time; `stand`: wings folded). The mounts are the human's moved by (+8,+8). torso_glow (2 pulse frames at ~2 fps) lights the wings' eye-spots, head_glow the antenna lamps. Head variants: antennae (default), goggles (tinted frames, blue glass), helmet (a tinted leather cap, antennae out through slits). Outfit mask = the pilot's scarf, the goggle frames and the cap. Same rig as human: every layer faces UP at rotation 0 on one 49x49 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "float": [
+     0,
+     6,
+     6
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0-5 are the float cycle (a closed loop played by time, whether or not they move), frame 6 the idle: this layer is what trails behind the body (drawn pointing back, turned to the movement direction)"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     24,
+     18
+    ],
+    "back": [
+     24,
+     32
+    ],
+    "shoulder_l": [
+     17,
+     22
+    ],
+    "shoulder_r": [
+     31,
+     22
+    ]
+   },
+   "glow": {
+    "image": "torso_glow.png",
+    "frame": [
+     49,
+     49
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 2,
+    "blend": "add (preferred) or alpha-over",
+    "anims": {
+     "on": [
+      0,
+      2,
+      2
+     ]
+    }
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      14,
+      28
+     ],
+     "hand_r": [
+      34,
+      28
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      22,
+      13
+     ],
+     "hand_r": [
+      26,
+      13
+     ],
+     "mount": [
+      24,
+      13
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      25,
+      9
+     ],
+     "hand_r": [
+      29,
+      17
+     ],
+     "mount": [
+      28,
+      16
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      21,
+      17
+     ],
+     "hand_r": [
+      29,
+      12
+     ],
+     "mount": [
+      29,
+      12
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      22,
+      11
+     ],
+     "hand_r": [
+      29,
+      20
+     ],
+     "mount": [
+      27,
+      19
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      20,
+      15
+     ],
+     "hand_r": [
+      31,
+      16
+     ],
+     "mount": [
+      31,
+      16
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee. RIG KIND floating: this frame is 49x49 with the pivot at (24,24), so every mount here is the shared one moved by (+8,+8): mount - pivot is identical to the human rig."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "antennae": 0,
+    "goggles": 1,
+    "helmet": 2
+   },
+   "glow": {
+    "image": "head_glow.png",
+    "frame": [
+     49,
+     49
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 6,
+    "blend": "add (preferred) or alpha-over",
+    "variants": {
+     "antennae": [
+      0,
+      3
+     ],
+     "goggles": [
+      1,
+      4
+     ],
+     "helmet": [
+      2,
+      5
+     ]
+    },
+    "notes": "per head variant, a list of glow frames: alternate them at 2 fps"
+   }
+  }
+ },
+ "kind": "floating"
+}

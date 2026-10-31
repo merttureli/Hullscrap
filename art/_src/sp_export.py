@@ -6,10 +6,12 @@ import crew_v2 as cv2
 from sp_common import POSES, glow_strip
 import sp_basalt, sp_emberkin, sp_fenn, sp_items, sp_fx, sp_gear
 import sp_kett, sp_mire, sp_sporeling, sp_gauntling, sp_prismatic, sp_grundl      # race wave 1 (docs/waves/races_1.md); sp_grundl is the large rig
+import sp_races2                                                                  # race wave 2 (docs/waves/races_2_4.md): small, large and floating rigs
 from sp_gear import outline_outer
 
 SPECIES = [sp_basalt.Basalt, sp_emberkin.Emberkin, sp_fenn.Fenn,
-           sp_kett.Kett, sp_mire.Mire, sp_sporeling.Sporeling, sp_gauntling.Gauntling, sp_prismatic.Prismatic, sp_grundl.Grundl]
+           sp_kett.Kett, sp_mire.Mire, sp_sporeling.Sporeling, sp_gauntling.Gauntling, sp_prismatic.Prismatic, sp_grundl.Grundl,
+           sp_races2.Vellum, sp_races2.Oorth, sp_races2.Drakkin, sp_races2.Wisp, sp_races2.Hullkin, sp_races2.Lantern]
 
 def jdump(obj, path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -31,8 +33,10 @@ def export_species(cls):
     pair(d, 'arms', [sp.arms(p) for p in POSES], sp.N)
     pair(d, 'head', [sp.head(h) for h in sp.head_names], sp.N)
     layers = {
-     'legs':  {'image': 'legs.png', 'color_mask': 'legs_color.png', 'anims': {'walk': [0, 6, sp.walk_fps], 'stand': [6, 1, 0]},
-               'notes': 'frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted'},
+     'legs':  {'image': 'legs.png', 'color_mask': 'legs_color.png', 'anims': {getattr(sp, 'legs_anim', 'walk'): [0, 6, sp.walk_fps], 'stand': [6, 1, 0]},
+               'notes': ('frames 0-5 are the float cycle (a closed loop played by time, whether or not they move), frame 6 the idle: this layer is what trails behind the '
+                         'body (drawn pointing back, turned to the movement direction)' if getattr(sp, 'legs_anim', '') == 'float' else
+                         'frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted')},
      'torso': {'image': 'torso.png', 'color_mask': 'torso_color.png', 'anchors': sp.torso_anchors()},
      'arms':  {'image': 'arms.png', 'color_mask': 'arms_color.png', 'frames': {p: i for i, p in enumerate(POSES)},
                'anchors': {p: {k: (list(v) if v else None) for k, v in a.items()} for p, a in sp.arm_anchors().items()},
@@ -40,7 +44,10 @@ def export_species(cls):
                         'Mounts are identical on every species (and the human), so any item fits any body. Pose = the item\'s class: '
                         'pistol, rifle, tool, heavy, melee.' + ('' if sp.N == cv2.N else
                         ' LARGE RIG: this frame is %dx%d with the pivot at (%d,%d), so every anchor here is the shared one moved by (+%d,+%d): '
-                        'mount - pivot and hand - pivot are identical to the human rig.' % (sp.N, sp.N, sp.C, sp.C, sp.C - cv2.C, sp.C - cv2.C))},
+                        'mount - pivot and hand - pivot are identical to the human rig.' % (sp.N, sp.N, sp.C, sp.C, sp.C - cv2.C, sp.C - cv2.C) if not getattr(sp, 'kind', None) else
+                        ' RIG KIND %s: this frame is %dx%d with the pivot at (%d,%d), so every mount here is the shared one moved by (%+d,%+d): '
+                        'mount - pivot is identical to the human rig.' % (sp.kind, sp.N, sp.N, sp.C, sp.C, sp.C - cv2.C, sp.C - cv2.C) +
+                        (' The hand anchors are art only (kept inside the frame).' if sp.kind == 'small' else ''))},
      'head':  {'image': 'head.png', 'color_mask': 'head_color.png', 'frames': {h: i for i, h in enumerate(sp.head_names)}},
     }
     g = sp.legs_glow()
@@ -64,6 +71,7 @@ def export_species(cls):
          'draw_order': ['legs', 'torso', 'arms', 'item', 'head'],
          'rotate': {'legs': 'move direction', 'torso': 'aim', 'arms': 'aim', 'item': 'aim', 'head': 'aim'},
          'layers': layers}
+    if getattr(sp, 'kind', None): J['kind'] = sp.kind                              # race wave 2: 'small' | 'large' | 'floating' (art/README.md "Crew", PersonDrawer.RIGS)
     jdump(J, d + '/crew.json')
     return sp.id
 
