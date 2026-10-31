@@ -29,6 +29,11 @@ var speed := BASE_SPEED  ## cells per second
 var speed_mod := 1.0  ## factor on `speed` right now (the heat of their room, trait heat_speed): Jobs sets it every tick
 var body_size := Pathfinder.BODY  ## cells across the body: 2, or 1 for a small body (trait `body`, read when the species is set)
 var mend_t := 0.0  ## seconds a hull_mend crew member has spent sealing the breach next to them (Jobs)
+var revived := false  ## their revive_once is spent: they went down once already (Mortality). The crew live as long as the run does, so it is once a run
+var revive_t := -1.0  ## seconds a revive_once has been pending since they went down; -1 = none pending (Mortality)
+var is_half := false  ## one of the two halves of a split_on_death body: it does not split again, and stays small when the other half dies (Mortality)
+var split_pair := ""  ## while the two halves are apart: the name of the other half, "" otherwise
+var split_t := -1.0  ## on the half that counts (the original): seconds the halves have been apart; -1 on the other one
 var facing := Vector2.DOWN
 var path: Array[Vector2i] = []
 var hp := 100.0
@@ -101,6 +106,22 @@ func traits() -> Array:
 			if not out.has(t):
 				out.append(t)
 	return out
+
+
+## "" when this person may wear the gear that gives trait `id`, else why not ("<name> cannot wear a suit or armour": the
+## no_suit trait refuses the SUIT_TRAITS). Nothing else is refused.
+func can_wear(id: String) -> String:
+	if TraitSet.SUIT_TRAITS.has(id) and TraitSet.of(self)["no_suit"]:
+		return "%s cannot wear a suit or armour" % name
+	return ""
+
+
+## Wear the gear that gives trait `id` (it joins `gear_traits`). Returns "" when worn, else the reason it was refused (can_wear).
+func equip(id: String) -> String:
+	var why := can_wear(id)
+	if why == "" and not gear_traits.has(id):
+		gear_traits.append(id)
+	return why
 
 
 ## A new crew member that is the unique character `id` (Characters.apply), standing at `p_pos`. Null for an unknown id.
