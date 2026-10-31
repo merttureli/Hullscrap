@@ -13,6 +13,7 @@ const RED := Color("#e0413b")
 const WARN_S := 60.0
 const ALARM_S := 15.0
 const FONT := 18
+const TOP := 48.0  ## px: under the resource bar of the HUD
 
 var map: Control  ## the MapView: campaign, play mode and fight state
 
@@ -49,7 +50,7 @@ func _draw() -> void:
 		return
 	var font := ThemeDB.fallback_font
 	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT).x
-	var r := Rect2(Vector2(size.x - w - 44.0, 10.0), Vector2(w + 28.0, 34.0))
+	var r := Rect2(Vector2(size.x - w - 44.0, TOP), Vector2(w + 28.0, 34.0))
 	var col := tint()
 	draw_rect(r, Color(PANEL_BG, 0.9))
 	draw_rect(r, col, false, 2.0)
