@@ -174,9 +174,9 @@ func build_board(ship) -> void:
 		var tile: Dictionary = grid.defs.get_def(grid.breached[c]) if grid.defs != null else {}
 		var mult := float(ship.lines.get(str(tile.get("line", "standard")), {}).get("repair", 1.0))
 		var extra := {"cell": c, "work": float(j["repair_breach"]["seconds"]) * mult}
-		var mount: int = ship.components.link_at(c)
-		if mount >= 0:  # a breach in a hull mount's wall: its own inside half may fill the only floor beside it, so it is worked from there
-			extra["reach"] = ship.components.instances[mount]["cells"].duplicate()
+		var near := _parts_by_breach(ship, c)
+		if not near.is_empty():  # a part (a hull mount's inside half) may fill the only floor beside it, so it is worked from beside the part
+			extra["reach"] = near
 		_add(b, _job("repair_breach", "breach:%d,%d" % [c.x, c.y], [c], extra))
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
@@ -680,6 +680,26 @@ func stand_spots(ship, job: Dictionary, body := Pathfinder.BODY) -> Array[Vector
 	if not clear.is_empty():
 		all.assign(clear)
 	return all
+
+
+## The cells of the parts round breach cell `c`: the mount whose wall it is in or beside, and any part on a cell beside it.
+func _parts_by_breach(ship, c: Vector2i) -> Array:
+	var uids := {}
+	if ship.components.link_at(c) >= 0:
+		uids[ship.components.link_at(c)] = true
+	for d in SIDES:
+		var uid: int = ship.components.at(c + d)
+		if uid >= 0:
+			uids[uid] = true
+		var mount: int = ship.components.link_at(c + d)  # the wall beside a mount's wall: its inside half fills the floor there too
+		if mount >= 0:
+			uids[mount] = true
+	var keys: Array = uids.keys()
+	keys.sort()
+	var out: Array = []
+	for uid in keys:
+		out.append_array(ship.components.instances[uid]["cells"])
+	return out
 
 
 func _beside(c: Vector2i, inside: Dictionary) -> Array[Vector2i]:
