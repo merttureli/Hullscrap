@@ -107,6 +107,9 @@
         {"text": "[Echo] Haggle with another Echo.", "requires": {"species": "echo"}, "outcomes": [
           {"weight": 100, "text": "Your Echo and the trader face each other and say nothing at all. A pause. A smile, on each side. The trader hands over its entire stock list, and your Echo hands over nothing, and the two of them sit side by side for an hour. When it is over the trader has given you everything it has for the price of a small, polite thank-you. 'We understood each other,' it says, wondering.", "effects": {"items": {"credits": 20, "silicon": 6, "crystal": 3}, "crew_hp": 10}}
         ]},
+        {"text": "Browse the shelves and leave.", "outcomes": [
+          {"weight": 100, "text": "You browse. Everything you pick up, the trader says is a good choice, and everything you put down, it says the same. You leave with nothing, feeling thoroughly understood.", "effects": {"crew_hp": 5}}
+        ]},
         {"text": "[Oorth] Skip the haggling.", "requires": {"species": "oorth"}, "outcomes": [
           {"weight": 100, "text": "Your Oorth steps up, looks the trader in its blank eye and says: 'You want to be liked.' A silence. The trader laughs, in a silvery peal, and sets the whole stock before you at cost. It will not let you pay more. 'Please,' it says, 'be a friend.'", "effects": {"items": {"silicon": 6, "crystal": 2}, "crew_hp": 5}}
         ]}
