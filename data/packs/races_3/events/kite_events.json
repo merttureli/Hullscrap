@@ -1,0 +1,63 @@
+{"events": [
+    {
+      "id": "kite_between_the_plates", "type": "empty", "weight": 8, "once": true, "requires": {"jumps_min": 2},
+      "text": "A dead hull drifts in the lane with no lights on, but stuck out of its side on a long thin pole is a white shirt, flapping in no wind. When you look closer there is a gap between the inner and outer plating, forty centimetres wide and the length of the ship, and in the gap, curled round the pipes with their tails wrapped for grip, is a family of Kite. Long thin limbs, enormous eyes, quiet. They have been living there for years. A very small one has pushed its face out of a vent to stare at your ship.",
+      "choices": [
+        {"text": "Knock politely on the plating.", "outcomes": [
+          {"weight": 100, "text": "A tall Kite unfolds from the vent, tail first, and bows at the waist, upside down. They have been waiting for a ship to the next cluster for three weeks and are very glad to be asked. You carry them as far as you were going, and they pay in the only currency the gaps know: directions, and a bag of fuel they have been hoarding.", "effects": {"items": {"fuel": 2}, "reveal": "trader", "crew_hp": 5}}
+        ]},
+        {"text": "Say hello to the youngest.", "outcomes": [
+          {"weight": 100, "text": "The small one swings out of the vent by its tail and hangs there, looking at your airlock with huge eyes. 'Is that a floor?' it asks. 'In there. A real one?' The elders confer, in a rustle of tails. 'She has never stood on one,' says the tall Kite. 'She would like to try. She may come back and visit.' Pennant steps across with one hand on the rail and a very serious face, and takes her first step on a deck, and sits down in surprise.", "effects": {"recruit": {"species": "kite", "name": "Pennant"}}}
+        ]},
+        {"text": "[Kite] Hang on the line and talk.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite swings across on a line and hangs by the tail among them, and the whole family wriggles out of the plating to look. For an hour they talk upside down in rapid, light, unbroken sentences, about routes and relatives. At the end the family presses on you a heap of what they have: their hoard of fuel, a bag of polymer, and little Pennant, who has been staring at your Kite all this time. The elders nod. 'She will learn faster from one of her own,' they say.", "effects": {"recruit": {"species": "kite", "name": "Pennant"}, "items": {"fuel": 2, "polymer": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "Leave the family in peace.", "outcomes": [
+          {"weight": 100, "text": "You steer away. The white shirt shrinks in your window. The small face in the vent goes on staring until you are out of sight, and, you suspect, a good while after.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "kite_thin_air", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The tanker Sweet Reason has split a tank. Her crew are in the forward section, which has air, and the aft section, where the engines are, has none: between the two is thirty metres of passage that is now hard vacuum. The captain is on the comm, strangely calm. 'Our spare suits are aft,' she says. 'So is the thing that makes the repair. Nobody can get there. We have forty minutes of air in the front.'",
+      "choices": [
+        {"text": "Run a pressure tube from your airlock (15 scrap).", "requires": {"items": {"scrap": 15}}, "outcomes": [
+          {"weight": 60, "text": "You run a tube along the hull, patch it at three points, and press it into the aft hatch with a crew of grim faces. It holds. The aft section is reached, the repair is made, and the captain is quietly overwhelmed.", "effects": {"items": {"scrap": -15, "credits": 45}, "rep": {"concord": 1}}},
+          {"weight": 40, "text": "The tube holds long enough to get them across, and then splits like a sausage. Everybody gets out. The tube does not, and several of your crew have to be stitched.", "effects": {"items": {"scrap": -15, "credits": 25}, "crew_hp": -10}}
+        ]},
+        {"text": "Suit up and cross the passage.", "outcomes": [
+          {"weight": 50, "text": "Your crew go across on a line in two shifts, wearing everything the ship has. They reach the aft section, repair the break, and return. The captain pays with the manifest's emergency float and a very wet hug.", "effects": {"items": {"credits": 40}, "crew_hp": -5}},
+          {"weight": 50, "text": "A suit seal fails halfway. It is a near thing, and everybody is rescued, and nobody is happy. The captain pays what she can.", "effects": {"items": {"credits": 20}, "crew_hp": -15}}
+        ]},
+        {"text": "[Kite] Cross the vacuum on the line.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite is out of the airlock with a coil of line over one shoulder, and is gone along the hull like a spider, tail gripping the rungs. They cross the thirty metres in nine seconds. They are in the aft section, repairing the break, with the tail of a long cord tied to the rail. Six minutes later the aft hatch is sealed, the air comes back, and your Kite hangs by the tail at the door, grinning. The captain pays what the ship has, and tells you they will want to meet your Kite's family.", "effects": {"items": {"credits": 65}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Wisp] Float across.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp drifts out of the airlock like smoke, gentle and bright, and crosses the passage in a single curl of light. In a minute the aft hatch has been opened from inside. Wisps cannot hold a wrench, but they can pull a cord, and the cord was the repair. The captain pays, and keeps looking at the Wisp as if she wished to apologise to it for something.", "effects": {"items": {"credits": 55}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Say a prayer and move on.", "outcomes": [
+          {"weight": 100, "text": "You stay on the channel as far as you can, until the carrier fades. The captain is still calm. It is the worst thing about it.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "kite_tag", "type": "asteroid_field", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "A pack of small Kite are playing tag round an asteroid in free fall, long limbs flung out, shrieking with joy. The rules, you gather from the shouting, are that the one who is 'it' has to touch a ship, any ship, and tag it with a splash of chalk. They have clearly chosen yours. One is already on your hull, three are on the other side of the cockpit window, and a fourth is hanging off your antenna by its tail, waving.",
+      "choices": [
+        {"text": "Play along: fly smooth and let them tag you.", "outcomes": [
+          {"weight": 60, "text": "You fly a long gentle arc round the asteroid, and the children swarm over the hull in a happy chalk-flinging cloud. When they have all tagged you, they shout the score in unison and shoot off to tell their parents. Your hull has stripes, your crew have grins, and a dad on the rock sends a bag of fuel.", "effects": {"crew_hp": 10, "items": {"fuel": 1}}},
+          {"weight": 40, "text": "One of them tags the intake with a fistful of chalk. It sneezes. You spend twenty minutes cleaning it and the children, who have not yet gone, supervise.", "effects": {"hull": -5, "crew_hp": 5}}
+        ]},
+        {"text": "Bet on the smallest one (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 50, "text": "The smallest is the quickest by a mile, and shrieks it across the field. The older ones throw their caps. A grandmother on a rock pays out.", "effects": {"items": {"credits": 25}}},
+          {"weight": 50, "text": "The smallest stops to examine a bolt and loses the game gloriously. Everybody is delighted, except you.", "effects": {"items": {"credits": -20}, "crew_hp": 5}}
+        ]},
+        {"text": "[Kite] Join the game.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite is out of the airlock before you can say it, long limbs flung out, whooping. For half an hour the field is nothing but laughter and chalk. At the end they are all out of breath, in a heap on the asteroid, and the grown-ups come out of the rock with a hamper and a purse and tell you that the tag winner gets to name a place. Your Kite names a place. It turns out to be a good one.", "effects": {"items": {"credits": 30, "fuel": 2}, "reveal": "wreck_field", "crew_hp": 10}}
+        ]},
+        {"text": "Wave and fly on.", "outcomes": [
+          {"weight": 100, "text": "You wave. They wave back, with three arms each. The chalk on your hull will stay there for a week.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

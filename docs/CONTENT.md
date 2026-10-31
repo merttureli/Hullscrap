@@ -426,6 +426,13 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
 | wisp | 100 | 1.0 | `living_current` (`vacuum_walk`, `o2_use` 0), `handless` (`no_tools`: no repair or extinguish jobs), `console_ghost` (manned bonuses ×1.5), `ion_kin` (ion damage ×2) | pack `races_2`; no sidearm; the floating rig; homeland `wisp_stormfield` |
 | hullkin | 100 | 0.5 | `hull_mender` (`hull_mend`: idle, repairs the walls beside them 1 hp/s and seals a breach in 12 s), `shell_breather` (`o2_use` 0.5) | pack `races_2`; multi-tool; homeland `hullkin_reefs` |
 | lantern | 80 | 1.3 | `born_pilot` (+0.05 evasion while they man the helm) | pack `races_2`; carbine; the floating rig when gliding; homeland `lantern_lanes` |
+| revenant | 110 | 1.0 | `returned` (`o2_use` 0, `revive_once`: the first downing, back up after a while), `stitched` (bed heal x0, medbay x0.5) | pack `races_3`; rivet gun; homeland `revenant_cairns` (stages 5-8, rare); joins through events |
+| choir | 100 | 1.0 | `choral_voice` (`aura` work x1.15 for the others in their room), `hollow_body` (melee x0.3) | pack `races_3`; no sidearm; homeland `choir_chantry`; recruited at the Prism |
+| rattler | 60 | 1.0 | `gremlin` (`body` 1), `scrap_sense` (`line_affinity` scrap: work x2) | pack `races_3`; multi-tool; the small rig; homeland `rattler_walls`; recruited at Rusthold |
+| tessellate | 100 | 1.0 | `many_bodies` (`o2_use` 0, `split_on_death`: two small 1x1 bodies that reform), `circuit_kin` (ion damage x2) | pack `races_3`; spark pistol; homeland `tessellate_mend`; art also has the `tessellate_half` rig; joins through events |
+| sable | 90 | 1.0 | `cutter_torches` (breach work x2), `boarders_eye` (ranged x1.25) | pack `races_3`; carbine; homeland `sable_moorings`; joins through events |
+| quillback | 110 | 1.0 | `quill_coat` (`counter_melee` 10), `proud_back` (`no_suit`) | pack `races_3`; ember knife; homeland `quillback_lists`; recruited at Rusthold |
+| kite | 90 | 1.0 | `drift_born` (suffocate damage x0.5), `tail_grip` (`vacuum_speed` x1.5 in a room under 30% air) | pack `races_3`; flare gun; homeland `kite_slack`; joins through events |
 - **Traits are a library** (`data/traits.json`, plus the `traits.json` of every pack): each is a bag of generic keys that `scripts/crew/traits.gd` (`TraitSet.of(member)`) merges into numbers, and every rule a key changes reads them there, so a new race is data only. The keys and what they do are in `data/traits.json` `_doc`; a species entry may also carry keys inline (Basalt's `work_mult.heal_others`).
   - Work speeds are factors on speed (2 = twice as fast); a race spec's repair "×0.8" is a time factor (as Fenn's ×0.6), so its work speed is 1 / 0.8.
   - Room heat is the heat of the hottest part in the room (`Heat.room_heat`).

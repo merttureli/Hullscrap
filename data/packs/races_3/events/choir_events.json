@@ -1,0 +1,68 @@
+{"events": [
+    {
+      "id": "choir_held_note", "type": "station", "weight": 8, "once": true, "requires": {"flag": "at_prism"},
+      "text": "In the atrium of the Prism, on the long crystal benches, sits a hollow glass figure with its sound-holes open and a ring of tuning prongs trembling over its head. It is holding one note. It has held it since you docked, and the dock has gone warm with it. A Lumen steward leans in. 'She is a chantry instrument,' she whispers. 'Her choir was aboard the barge Descant when the Lattice went. She keeps singing her part. Nobody has had the heart to tell her that it is solo.'",
+      "choices": [
+        {"text": "Sit and listen for a while.", "outcomes": [
+          {"weight": 100, "text": "You sit on the next bench. The note goes on and the atrium fills with it, like a bath, and when you stand up it is an hour later and you cannot remember what you were worried about. The steward has brought you something hot.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Hum along, badly.", "outcomes": [
+          {"weight": 50, "text": "The note wavers, considers you with the whole ring of prongs, and slides half a tone down to meet you. Between you there is, for a moment, a chord. The steward weeps into her sleeve. 'It's the first time she has moved,' she says, and she hands you a Prism chit.", "effects": {"items": {"credits": 25}, "rep": {"lumen": 1}}},
+          {"weight": 50, "text": "The note stops. All the prongs turn toward you, quite slowly. Nothing is said for ten seconds, and it is the most eloquent ten seconds you have had all year. The steward steers you toward the exit by the elbow.", "effects": {"rep": {"lumen": -1}}}
+        ]},
+        {"text": "Offer her a berth. 'A ship has a lot of rooms to sing in.'", "outcomes": [
+          {"weight": 100, "text": "The note breaks off. It is the loudest silence in the Prism. 'Rooms,' she says, in a voice of splintered glass, 'with people in them?' 'Yes.' She rises, and every prong sings a quick little scale. Aubade crosses to your ship humming a work-song under her breath, and two dockhands, passing, find themselves unloading in time.", "effects": {"recruit": {"species": "choir", "name": "Aubade"}}}
+        ]},
+        {"text": "[Choir] Take the second part.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir sits down beside her and finds the note a third above. The two voices lock, and the whole atrium answers: every crystal pane, every bench, the floor. The steward has to sit down. When the chord finally releases, Aubade turns to your Choir with every prong trembling. 'May I?' she says. She follows them back to your ship as if she had always meant to.", "effects": {"recruit": {"species": "choir", "name": "Aubade"}, "items": {"credits": 40}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Prismatic] Hum the answer.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic lets out the low clear hum of their kind, and the figure turns its whole ring of prongs toward it. The note and the hum find each other, and settle into an interval no one has heard in the Prism since the Snap. The steward gives them a small cut crystal, and Aubade, shy and glowing, asks if she may come too.", "effects": {"recruit": {"species": "choir", "name": "Aubade"}, "items": {"crystal": 1}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Leave her to her note.", "outcomes": [
+          {"weight": 100, "text": "You go past the benches with your boots quiet on the crystal. The note follows you to the airlock. You hum it for the rest of the day, and it will not leave.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_ringing_wreck", "type": "wreck_field", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The wreck rings like a bell. Every scrape of a boot, every tap, brings up a long, clear, trembling note: the Marguerite is a Lumen survey barge whose hull is crystal lattice seamed with bell-metal, and she has struck a chord she cannot stop. Your boarders say it is making their teeth ache. At the heart of her a sealed hold door vibrates with it, and behind the door there is something worth the trip.",
+      "choices": [
+        {"text": "Cut your way in with a torch.", "outcomes": [
+          {"weight": 50, "text": "The torch makes a note of its own, a high one, and the whole barge screams along with it. When the screaming stops, the door is open, and so is the cargo. Your boarders are deaf in one ear for an hour but richer.", "effects": {"items": {"silicon": 4, "scrap": 25}, "crew_hp": -5}},
+          {"weight": 50, "text": "A crystal panel lets go in the middle of the cut and the shards ring all the way down the hull. You get out with half the cargo and a lot of tiny cuts.", "effects": {"items": {"silicon": 2}, "crew_hp": -10}}
+        ]},
+        {"text": "Pack the seams with polymer first (10 polymer).", "requires": {"items": {"polymer": 10}}, "outcomes": [
+          {"weight": 100, "text": "You stuff polymer into every seam from the airlock to the hold door. The ringing dies to a mutter, and then a hum, and then, as you work, to blessed quiet. The door opens like any other.", "effects": {"items": {"polymer": -10, "silicon": 4, "scrap": 30}}}
+        ]},
+        {"text": "[Choir] Sing the door open.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir listens to the barge with every prong, finds the note she is stuck on, and answers it a fifth below. The ringing resolves, for the first time in forty years, like a sentence finished. The door swings open on its own. Inside, in rows, are the Marguerite's survey crystals, tuned and untouched.", "effects": {"items": {"crystal": 3, "silicon": 3}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "[Prismatic] Hum her quiet.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic lays a hand on the crystal and hums, low and slow. The barge's note slides toward it and sinks, a little at a time, and the hold door settles in its frame with a sigh. You walk in, and nobody has to say anything.", "effects": {"items": {"crystal": 2, "silicon": 3}}}
+        ]},
+        {"text": "Leave her ringing.", "outcomes": [
+          {"weight": 100, "text": "You back off to a polite distance. The barge goes on, one long clean note over the wreck-field, and you hear it in your fillings for a day.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_hull_ordinance", "type": "patrol", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The patrol cutter hails you with a sound meter on a boom. 'Your hull is resonant at 112 decibels,' the officer says, reading it off a gauge. 'Concord Ordinance 44: no vessel shall ring above 90 in a docking lane. Fine of forty credits, or you may take a free tune-up at the inspection yard, which takes a day.' He says this like a man who has never once had a complaint. Behind him, his shipmates are rubbing their ears.",
+      "choices": [
+        {"text": "Pay the fine (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "He logs the payment with a grunt that is almost an apology. 'Do take it to a tuner,' he says. 'There are good ones in the Chantry.' The cutter heads off, ringing mildly.", "effects": {"items": {"credits": -40}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Take the free tune-up.", "outcomes": [
+          {"weight": 70, "text": "A day at the yard, a patient mechanic with a fork, and your hull comes out singing the right note. The officer waves you off with a ticket stub. 'Mind the harmonics,' he says.", "effects": {"hull": 5, "crew_hp": 5}},
+          {"weight": 30, "text": "The mechanic tunes one pipe and detunes four. By the time you notice, the yard is shut and the cutter long gone.", "effects": {"hull": -5, "items": {"credits": -15}}}
+        ]},
+        {"text": "[Choir] Sing him the certificate tone.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir steps up to the open channel and sings a pure low note, exactly 88 decibels. The needle swings and holds. 'That,' the officer says, in a voice with a catch in it, 'is a perfect fundamental.' He tears up the form. He asks, a little shyly, if your Choir does weddings. The patrol sends a small bounty and an honest recommendation, and leaves you alone for the rest of the lane.", "effects": {"items": {"credits": 40}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Argue that a hull should ring.", "outcomes": [
+          {"weight": 100, "text": "You argue for ten minutes. He logs every word. At the end of it you have a fine, a lecture, and a leaflet on the benefits of felt.", "effects": {"items": {"credits": -25}, "rep": {"concord": -1}}}
+        ]}
+      ]
+    }
+  ]}

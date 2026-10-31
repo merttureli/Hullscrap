@@ -1,0 +1,118 @@
+{"events": [
+    {
+      "id": "lists_second_blood", "type": "station", "weight": 10, "once": false, "requires": {"region": "quillback_lists"},
+      "text": "Second Blood is a long bar under old tournament banners, with a chalked floor. Every table has a framed code of conduct, and every code has a small dark stain. The barman, a Quillback in an immaculate waistcoat, is explaining the house rules to a newcomer: 'No fighting inside the Lists. No fighting outside the Lists. Fighting at the Lists is by appointment.' At the next table, by appointment, two regulars cross knives over a plate of chips, with extraordinary good manners. Their Seconds applaud.",
+      "choices": [
+        {"text": "Buy the bar a round (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "The barman bows. The bar bows back. By the end of the evening you have been challenged four times, courteously declined each, and been named in three toasts. When you leave, a stranger presses your hand, and says 'Honour, friend.'", "effects": {"items": {"credits": -20}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Bet on the match at the next table (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 55, "text": "Your duellist's quills go up at the crucial moment, and the other is so impressed she forgets to parry. The Second pays out with a tip of the hat.", "effects": {"items": {"credits": 25}}},
+          {"weight": 45, "text": "Your duellist yields, with a bow, in the third exchange, and your thirty is on the bar. The barman puts his hand on his heart in sympathy and makes you a drink.", "effects": {"items": {"credits": -30}, "crew_hp": 5}}
+        ]},
+        {"text": "[Quillback] Take the champion's table.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback walks to the empty table at the head of the room, under a banner nobody has sat under for a year, and the whole bar goes quiet. A tall old duellist rises from the next table, bows, and says: 'The Lists are glad of you.' Over dinner you hear forty stories, and a number of apologies, and the clan quietly passes the hat in your favour.", "effects": {"items": {"credits": 55}, "rep": {"clans": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Hire a Second for the road (80 credits).", "requires": {"credits": 80, "not_flag": "lists_hired"}, "outcomes": [
+          {"weight": 100, "text": "Teasel has a waistcoat, a pocket watch, a case of impeccable knives and an air of long-suffering patience. 'I have served as Second for thirty-one duels,' they say. 'I am yet to hold the knife. I should like to see what happens.' They shake your hand, quills carefully flat, and ask where they may hang the coat.", "effects": {"items": {"credits": -80}, "recruit": {"species": "quillback", "name": "Teasel"}, "flag": "lists_hired"}}
+        ]},
+        {"text": "Finish your drink and go.", "outcomes": [
+          {"weight": 100, "text": "You finish your drink and leave, unchallenged. At the door a Quillback bows you out and you feel, absurdly, a little disappointed.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lists_shaved_back", "type": "distress", "weight": 8, "once": false, "requires": {"region": "quillback_lists"},
+      "text": "A small pod drifts at the edge of the Lists with a single Quillback in it. Her back has been shaved to the skin, an old and terrible sign: she lost a duel she should not have lost, and has been put out of the Lists, and her quills with her. She has not eaten in days. She is sitting very upright, with the dignity of a monument. 'I cannot accept charity,' she says through the glass. 'I would not want you to be put to the trouble of offering it.'",
+      "choices": [
+        {"text": "Offer her a job (40 credits a month).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "'Employment,' she says, after a long pause. 'That I can accept.' She lets herself be helped across, takes the first month's pay with a bow, and eats. It takes some time. Bramble does not speak of the Lists, and the quills, in a week, begin to come back. They are very good quills.", "effects": {"items": {"credits": -40}, "recruit": {"species": "quillback", "name": "Bramble"}}}
+        ]},
+        {"text": "Leave a ration pack on her hull, quietly.", "outcomes": [
+          {"weight": 100, "text": "You say nothing, and leave a pack on the hull and a flask of tea. By the time you have gone a short way, the pack has gone from the hull. A small light flickers on in the pod, and flickers twice, which you decide is a thank-you.", "effects": {"crew_hp": 5, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Quillback] Speak for her before the Lists.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback puts a hand to the glass and speaks, low and steady, in the code of the Lists. They name the match, the Second who failed her, and the clause that was never read. The pod's light flickers. Then a bell sounds across the Lists, and a Marshal's cutter swings round to take the shaved Quillback home with honour, and a modest reward is wired to your account. The Marshal asks if your Quillback would carry her case; she sends them with a bow of thanks.", "effects": {"recruit": {"species": "quillback", "name": "Bramble"}, "items": {"credits": 30}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Leave her to her dignity.", "outcomes": [
+          {"weight": 100, "text": "You respect her wishes and steer away. It is an act of manners. It does not feel like one.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "lists_by_the_book", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "quillback_lists", "jumps_min": 2},
+      "text": "The Rustfangs who stop you are gentlemen. A launch slides across with a cream-coloured envelope. 'Dear Sir or Madam,' reads the letter, 'we are about to rob you. Pursuant to the Code of the Lists we shall allow you thirty minutes to reply in writing. Should you fail to reply, we shall proceed. Yours faithfully, The Crew of the Dutiful.' On their hull, a banner: ROBBERY IS NOT AN EXCUSE FOR BAD MANNERS.",
+      "choices": [
+        {"text": "Reply in writing, at some length (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "You compose a long and civil letter, in which you regret that your cargo is unavailable and suggest a modest payment in lieu. They accept with a note: 'Your terms are reasonable.' A launch comes for the twenty credits and leaves a receipt.", "effects": {"items": {"credits": -20}}}
+        ]},
+        {"text": "Pay without reply (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 100, "text": "They take it with a hurt bow. 'We should have preferred a letter,' says the captain, 'but we shall not insist.' A receipt arrives, and with it a small leaflet on correspondence.", "effects": {"items": {"credits": -60}}}
+        ]},
+        {"text": "[Quillback] Reply in the correct form.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback sits down with the good pen and writes a reply in the grand manner of the Lists, with three flourishes and a quotation. The captain reads it aloud to his crew, and there is a long respectful silence. 'We are outclassed,' he says. 'We withdraw, with apologies, and a modest compensation for your trouble.' The launch comes back with the envelope full of credits.", "effects": {"items": {"credits": 40, "scrap": 25}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Burn the letter and fight.", "outcomes": [
+          {"weight": 100, "text": "A long silence. Then the comm: 'Very well.' It is the most disappointed thing you have ever heard.", "effects": {"fight": "tier"}}
+        ]}
+      ],
+      "after_win": {"text": "The Dutiful drifts, hatches open, her crew in good order on the deck with their hands behind their backs. 'We yield,' says the captain, 'with thanks for a good game.' They hand over their strongbox in a velvet bag, and the letter you did not reply to, signed.", "effects": {"items": {"credits": 40, "scrap": 30}, "rep": {"clans": 1}}}
+    },
+    {
+      "id": "lists_burr_and_balm", "type": "trader", "weight": 8, "once": false, "requires": {"region": "quillback_lists"},
+      "text": "Burr and Balm is an apothecary in a dented cargo pod, run by a very old Quillback whose own back has gone entirely bald. Her shelves are rows of oils, salves and tonics, each in a labelled tin: QUILL OIL. BURR SALVE. TONIC FOR HONOUR (NOT ACCEPTED BY ALL AUTHORITIES). 'They all come in at the end of a long day,' she says, 'with something that hurts, and a story about why it does not matter.'",
+      "choices": [
+        {"text": "Buy a tin of tonic (25 credits).", "requires": {"credits": 25}, "outcomes": [
+          {"weight": 100, "text": "It tastes of smoke and ginger. Within the hour, every bruise on the ship has dulled to a quiet ache and the crew are in better spirits than they have been in a week. You will not ask what is in it.", "effects": {"items": {"credits": -25}, "crew_hp": 15}}
+        ]},
+        {"text": "Buy a pot of burr salve (10 credits).", "requires": {"credits": 10}, "outcomes": [
+          {"weight": 100, "text": "A small pot of green paste. It works on every scrape on the ship and several things that were not scrapes. It is also very good on hinges.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+        ]},
+        {"text": "[Quillback] Have your quills oiled and combed.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback sits on the apothecary's stool and the old woman combs them out with a bone comb, a stroke at a time, muttering the names of her dead husbands. By the end of it the quills are a proud shining fan, and your Quillback is humming. She will not take payment. 'You will tell the young ones,' she says, 'what a back should look like.' She pushes a case of salve and a few coils on you.", "effects": {"items": {"polymer": 15, "copper": 10, "credits": 20}, "crew_hp": 10}}
+        ]},
+        {"text": "Smell the oils and go.", "outcomes": [
+          {"weight": 100, "text": "You smell eleven oils, nod at the old woman, and go. The smell of quill oil stays on the ship for days. It is not unpleasant. It is, however, a lot.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lists_marshals_check", "type": "patrol", "weight": 8, "once": false, "requires": {"region": "quillback_lists", "jumps_min": 2},
+      "text": "A Marshal's cutter stops you at the edge of the Lists, flying a banner. 'Weapons check,' says the Marshal, a Quillback in a tricorne with a large and well-kept moustache. 'No energy weapons inside the Lists. No missiles. Knives and honour only. Please present your armament.' Behind the Marshal, a junior Marshal is writing something on a slate with her tongue between her teeth.",
+      "choices": [
+        {"text": "Present your armament and lock your guns.", "outcomes": [
+          {"weight": 100, "text": "You safe your guns and the Marshal passes his eye over each of them with a loupe. He nods. 'Correct,' he says, with the tiniest shade of regret, and stamps a tag onto your hull. The Lists are pleased with your manners, and you are free to go.", "effects": {"rep": {"clans": 1}, "items": {"credits": 15}}}
+        ]},
+        {"text": "Offer a contribution to the Lists fund (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 50, "text": "'The Lists are always grateful,' says the Marshal, who pockets it with a flourish. Your guns are never mentioned again.", "effects": {"items": {"credits": -40}, "rep": {"clans": 1}}},
+          {"weight": 50, "text": "The Marshal is deeply offended. He takes your forty, tears up the receipt, and fines you ten more for the attempt.", "effects": {"items": {"credits": -50}, "rep": {"clans": -1}}}
+        ]},
+        {"text": "[Quillback] Swear on your quills.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback raises the right hand and flares the quills, in the Oath of the Lists, and the Marshal's moustache quivers. He lowers his loupe. 'No search is needed,' he says, 'for a back like that.' He salutes with his tricorne and offers an escort through the Lists, a courtesy that includes the best berth at Second Blood, and a small purse of apology for the trouble of being asked.", "effects": {"items": {"credits": 40, "fuel": 1}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Say you are only a merchant, and have no guns.", "outcomes": [
+          {"weight": 40, "text": "The Marshal looks at the weapon mounts. He looks at you. 'A merchant,' he says, gently. 'Very good, sir. Carry on.' He is not, strictly, a fool.", "effects": {}},
+          {"weight": 60, "text": "The Marshal looks at the weapon mounts, and then writes for a long time. The fine is large. The receipt is gracious.", "effects": {"items": {"credits": -30}, "rep": {"clans": -1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "lists_empty_field", "type": "empty", "weight": 8, "once": false, "requires": {"region": "quillback_lists"},
+      "text": "An abandoned duelling field: twelve ember knives stuck point-down in a hull plate at regular intervals, each with a coloured ribbon tied round its hilt. Nobody has pulled them out. A small notice board at the end of the field reads DUELS HERE ARE FINISHED. THE KNIVES REMAIN FOR THE NEXT. The ribbons stir in the faint draught from a nearby vent, and in the quiet it looks very much like a field that is waiting for someone.",
+      "choices": [
+        {"text": "Leave a coin at each knife (12 credits).", "requires": {"credits": 12}, "outcomes": [
+          {"weight": 100, "text": "You walk the field and leave a coin at every knife, which is the custom, though you did not know it. The ribbons seem to settle. Later, when you are far down the lane, a gift is left at your airlock by hands you did not see: a small tin of balm.", "effects": {"items": {"credits": -12}, "crew_hp": 5, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Take a knife.", "outcomes": [
+          {"weight": 100, "text": "You pull a knife from the plate, and the ribbon comes with it. It is a good knife. You feel eleven pairs of eyes along the knife-line, though there is nobody there. You take it, anyway, and hope that nobody notices.", "effects": {"items": {"scrap": 25, "titanium": 2}, "rep": {"clans": -1}}}
+        ]},
+        {"text": "Stand in the field and wait for a challenger.", "outcomes": [
+          {"weight": 50, "text": "After a quarter of an hour a young Quillback comes out of the vent, bows, and asks, very formally, if you are in need of a Second. You are not, but somehow Furze is on your gangway before you can say so, with a small suitcase and a case of knives.", "effects": {"recruit": {"species": "quillback", "name": "Furze"}}},
+          {"weight": 50, "text": "Nobody comes. The ribbons stir. After an hour you leave, a little embarrassed, and a little moved.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "[Quillback] Pull the knife with the green ribbon and stand ready.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback draws the knife with the green ribbon, steps to the centre of the field and waits, quills flared. A challenger comes out of the dark with an answering knife, and they fight, formally, for about two minutes. At the end the challenger bows, and with a trembling hand hands your Quillback the stake. 'You are a true back,' she says. 'Take it. And if there is a place on your crew...' Furze is already at the airlock.", "effects": {"recruit": {"species": "quillback", "name": "Furze"}, "items": {"credits": 40}, "rep": {"clans": 2}}}
+        ]}
+      ]
+    }
+  ]}

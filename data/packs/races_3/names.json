@@ -1,0 +1,11 @@
+{
+	"crew": {
+		"revenant": ["Okafor", "Brandt", "Ibarra", "Halloran", "Nakamura", "Duarte", "Szabo", "Ferreira", "Lindqvist", "Adeyemi", "Kovacs", "Moreau"],
+		"choir": ["Aubade", "Motet", "Canticle", "Introit", "Antiphon", "Cantor", "Gradual", "Kyrie", "Sequence", "Offertory", "Plainsong", "Lauda"],
+		"rattler": ["Washer", "Shim", "Tack", "Dowel", "Skitter", "Nub", "Clink", "Fizzle", "Pinch", "Widget", "Brad", "Sprocket"],
+		"tessellate": ["Tessel", "Grout", "Mote", "Fleck", "Smalt", "Quorum", "Tally", "Dapple", "Mosaic", "Chit", "Inlay", "Ormolu"],
+		"sable": ["Vane", "Sabine", "Tarn", "Keld", "Marek", "Vesna", "Nox", "Corbin", "Ilka", "Dray", "Jessop", "Rhys"],
+		"quillback": ["Gorse", "Teasel", "Bramble", "Burdock", "Thistle", "Furze", "Blackthorn", "Hawthorn", "Briar", "Caltrop", "Spurge", "Barberry"],
+		"kite": ["Pennant", "Streamer", "Bunting", "Tassel", "Burgee", "Ensign", "Lanyard", "Halyard", "Jib", "Painter", "Whip", "Slack"]
+	}
+}

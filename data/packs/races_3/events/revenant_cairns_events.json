@@ -1,0 +1,117 @@
+{"events": [
+    {
+      "id": "cairns_tallyhouse", "type": "station", "weight": 10, "once": false, "requires": {"region": "revenant_cairns"},
+      "text": "Tallyhouse is a ring of grey hulls sewn together with cable, with a lamp in every porthole and none of them lit. In the great hall a Revenant in an old Concord uniform stands at a lectern and reads names, one a minute, steadily, from a list that has no end. When she reaches the last name on a page she turns it over and begins the next. A line of pale, stitched folk waits with their eyes down to add a name of their own. 'The roll is for anyone who went through a gate,' the keeper tells you, mildly. 'We cannot say how many came back. We have a lot of time to count.'",
+      "choices": [
+        {"text": "Add a name to the roll (10 credits).", "requires": {"credits": 10}, "outcomes": [
+          {"weight": 100, "text": "You give the keeper the name of someone you lost, and she writes it in a clear round hand and reads it out to the hall at once, and the hall inclines its head, all together, like wheat. It is a small thing. It sits in your chest for a long time.", "effects": {"items": {"credits": -10}, "crew_hp": 10}}
+        ]},
+        {"text": "Ask to see the roll.", "outcomes": [
+          {"weight": 100, "text": "The keeper lets you turn the pages. There are names in your own ship's registry from forty years back. She marks one with a ribbon, gently, and says nothing about it. On the margin, in the same round hand, is a note of where that ship was last seen.", "effects": {"reveal": "wreck_field"}}
+        ]},
+        {"text": "[Revenant] Read a page.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant takes the lectern for one page in a plain, careful voice, and when they reach the last name the whole hall says it with them, a soft stitched murmur. The keeper wipes her visor with her glove. 'It is always better in two voices,' she says. She sends a hand to your hold with a crate of fuel and a purse, and tells the dockmaster that your people drink free for as long as they are here.", "effects": {"items": {"credits": 50, "fuel": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "Hire a returned hand (80 credits).", "requires": {"credits": 80, "not_flag": "cairns_hired"}, "outcomes": [
+          {"weight": 100, "text": "Ibarra has a mended jaw, a notebook of other people's last words, and an unexpected talent for carrying heavy things up ladders. 'I have been here eleven years,' they say. 'I would like to see what the roll is for.' They shake your hand with a cold dry grip and ask which of your bunks is least used, so they can lie in it politely and not sleep.", "effects": {"items": {"credits": -80}, "recruit": {"species": "revenant", "name": "Ibarra"}, "flag": "cairns_hired"}}
+        ]},
+        {"text": "Leave the hall.", "outcomes": [
+          {"weight": 100, "text": "You go out through the porthole-lit corridor with the names still going on behind you. By the time you reach the airlock you have counted fourteen of them, and you do not know why.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "cairns_snagged_line", "type": "distress", "weight": 9, "once": false, "requires": {"region": "revenant_cairns"},
+      "text": "A Revenant hangs at the end of a hundred-metre line, a long way from the cairn she was building. The line has fouled on a drifting wreck, and she is held there at full stretch like a kite. By the stencil on her suit she has been hanging for nineteen days. She does not seem to mind. The cairn behind her, ninety suits high and still unfinished, is leaning toward her in the way a cairn leans toward the last stone. 'Do not hurry,' she says on the channel. 'It is only the top that is cross.'",
+      "choices": [
+        {"text": "Tow her in on the line.", "outcomes": [
+          {"weight": 60, "text": "You take the strain slowly and the wreck lets go with a groan. She comes in hand over hand, apologising, and then goes straight back out to put the last suit on the cairn. When she returns she hands you a spare lamp from her belt, a good one.", "effects": {"items": {"scrap": 20, "plasma_cell": 1}}},
+          {"weight": 40, "text": "The line parts halfway. It takes two of your crew an hour to catch her, and she is polite about it throughout. The cairn does not fall, but it thinks about it.", "effects": {"items": {"scrap": 10}, "crew_hp": -5}}
+        ]},
+        {"text": "Cut the wreck loose from the line.", "outcomes": [
+          {"weight": 100, "text": "A cutting torch and a steady hand do it in a minute. The wreck sails off with a snarl of cable and its clean chrome showing in the light. She drops back to the cairn on a slack line and sets the last suit on top, lamp outward, and the whole pile steadies. 'Thank you,' she says. 'I would have been all right, but it is nice to be finished.'", "effects": {"items": {"copper": 20, "credits": 20}}}
+        ]},
+        {"text": "[Revenant] Go out and work the knot.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant goes out hand over hand and finds the knot with their eyes shut. The two of them hang there for a time, a pair of pale shapes on one line, and it is clear that something is being said in the language of knots. The line comes free. The cairn gets its last suit. The other Revenant presses something into your Revenant's palm: a lamp, with its glass cleaned, that lights.", "effects": {"items": {"plasma_cell": 2, "scrap": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "Leave her to it.", "outcomes": [
+          {"weight": 100, "text": "'No trouble,' she says on the channel, as you go. 'Only it is rather a long time.' The cairn behind her leans another degree, and you do not look back.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "cairns_suit_thieves", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "revenant_cairns", "jumps_min": 2},
+      "text": "Rustfangs are stripping a cairn for its pressure seals and good boots, lashing the suits to a tug like a string of sausages. A crowd of Revenants stands on the nearest hull, perfectly still, watching. They are not doing anything. They are making notes. The tug captain waves at you. 'Don't mind them,' he calls. 'They never do anything.' One of the watchers lifts a pencil, and writes his name.",
+      "choices": [
+        {"text": "Drive the tug off.", "outcomes": [
+          {"weight": 100, "text": "You put your bow between the tug and the cairn. The captain's face falls, and then he tells the lads to open up.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Buy the string of suits back (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 100, "text": "The captain takes the money and the sausages go back to their cairn in a line of forty polite tugs. The watchers do not thank you. A week later, a small package arrives at your airlock with a note: THE ROLL HAS A PAGE FOR YOU. You are not sure whether that is an honour.", "effects": {"items": {"credits": -60, "scrap": 25}, "crew_hp": 5}}
+        ]},
+        {"text": "[Revenant] Stand with the watchers.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant climbs onto the hull and joins the line, one more pale shape with cold dots for eyes, one more pencil. The tug captain looks at the watchers, and then at the one that was not there a minute ago, and counts. He counts again. The tug lets go of the whole string and leaves at a speed that cannot be good for its engine. The watchers write that down too.", "effects": {"items": {"scrap": 30, "credits": 25}}}
+        ]},
+        {"text": "Stay out of it.", "outcomes": [
+          {"weight": 100, "text": "You hold your course and watch the cairn lose a suit and gain a few new notes. The Revenants on the hull look in your direction, all together. It is nothing, probably. It is only the lamps.", "effects": {"crew_hp": -5}}
+        ]}
+      ],
+      "after_win": {"text": "The tug breaks away, trailing its string of suits like a banner. The watchers on the hull take them down one by one and lay them back on the cairn in the order they came off. One of them, on the way, hands you a notebook page with a single line on it, in a neat round hand: THANK YOU. A purse follows.", "effects": {"items": {"scrap": 35, "credits": 30}}}
+    },
+    {
+      "id": "cairns_dead_lamps", "type": "trader", "weight": 8, "once": false, "requires": {"region": "revenant_cairns"},
+      "text": "Dessa's Dead Lamps has set up its stall on the shoulder of a cairn. She sells every make of suit lamp the Drift ever turned out, laid in rows on black velvet, and every one of them is dark. 'Lamp that doesn't light,' she tells you, polishing a visor. 'Lamp that never will. Restful. For the person who is tired of being looked at.' At the back of the stall, under a cloth, something is glowing.",
+      "choices": [
+        {"text": "Buy a dead lamp for the mess (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "You hang it by the table. For a week the crew find, to their surprise, that they like having it there. Nobody talks about why. Arguments end a little sooner. Somebody puts a hat on it.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
+        ]},
+        {"text": "Ask about the one under the cloth (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 100, "text": "Dessa lifts the cloth. It is a lamp that lights, a warm white one, with a plasma cell in it that has been burning since the Snap. 'Do not sell it,' she says. 'It is only a loan.' You take it. The cell is good for something.", "effects": {"items": {"credits": -60, "plasma_cell": 2}}}
+        ]},
+        {"text": "[Revenant] Haggle in the old way.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant looks at the stall, and at Dessa, and says a single word in a flat whisper. She puts down the visor. They haggle for an hour in a language made mostly of silences, and at the end of it she hands over the glowing lamp, a coil of cable, and a hat for the dead one, and refuses all payment. 'You knew the price,' she says.", "effects": {"items": {"plasma_cell": 2, "copper": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "Browse and move on.", "outcomes": [
+          {"weight": 100, "text": "You look at lamps for a quarter of an hour. It is a very restful stall. You leave it feeling rather as if you had been to church.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "cairns_the_door", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "revenant_cairns", "jumps_min": 3},
+      "text": "Something is passing through the Cairns, slow and square and dark, with no crew aboard and every system running. The Revenants stop what they are doing and turn, all together, and stand in rows on the cairns with their dead lamps toward it like sunflowers. The thing does not seem to notice them. As it drifts by, a few of the empty suits on the nearest cairn stir on their lashings, as if remembering.",
+      "choices": [
+        {"text": "Keep your distance and take readings.", "outcomes": [
+          {"weight": 70, "text": "The readings are blank where a hull should be, and the blank has edges, which is worth something to a Lumen archivist. Nothing else happens. Several of the crew would like to talk about it.", "effects": {"items": {"credits": 30}, "rep": {"lumen": 1}}},
+          {"weight": 30, "text": "For a minute every screen on your ship shows the same grey square. When it passes, nobody says anything, and the hull plating on the sunward side is a little colder than it was.", "effects": {"hull": -5, "crew_hp": -5}}
+        ]},
+        {"text": "Open fire on it.", "outcomes": [
+          {"weight": 100, "text": "The square turns without a sound, and the rows of Revenants turn with it, and the guns of the thing come round.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Revenant] Stand with them on the cairn.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant climbs onto the cairn and takes a place in the rows. For half a minute the square pauses, and one running light on it, that was off, shows a single dim amber. Then it drifts on. When your Revenant climbs back down they are shaking a little, and not surprised. 'It knew me,' they say. 'It couldn't place me.' In the hold, afterwards, a small cold cell has appeared that nobody put there.", "effects": {"items": {"plasma_cell": 2, "crystal": 1}, "crew_hp": -10}}
+        ]},
+        {"text": "Look away and keep flying.", "outcomes": [
+          {"weight": 100, "text": "You keep your eyes on the instruments until the Cairns are behind you. Nobody on the bridge has said a word for some time. The helmsman is quietly counting something under her breath.", "effects": {}}
+        ]}
+      ],
+      "after_win": {"text": "It does not burn, quite. It comes apart along its seams, square by square, and the pieces drift among the cairns. The Revenants gather them up and lay them in a line, and the keeper of Tallyhouse sends you a plate of something she says is food, and a quantity of salvage.", "effects": {"items": {"scrap": 40, "crystal": 2, "credits": 40}}}
+    },
+    {
+      "id": "cairns_witness", "type": "empty", "weight": 8, "once": false, "requires": {"region": "revenant_cairns"},
+      "text": "A procession is coming down the lane: forty Revenants in a line, towing a long grey box on a cable, every lamp turned toward it. They stop at the edge of your lane and the leader raises one hand, slowly. The box is a pressure-suit, an ordinary Concord one, empty, with a name stencilled across the chest in fresh white paint. 'We are taking him home,' the leader says. 'We would be glad if someone saw.'",
+      "choices": [
+        {"text": "Stand witness. Cut the engines and the lights.", "outcomes": [
+          {"weight": 100, "text": "You cut the engines and the lights, and the whole bridge stands. It takes a full minute. The line goes by without a sound, forty pairs of cold dots turned your way, and then forty pairs turned away. 'It counts more,' the leader says, 'when it is someone who did not have to.'", "effects": {"crew_hp": 10, "items": {"credits": 15}}}
+        ]},
+        {"text": "Offer fuel for the road (2 fuel).", "requires": {"items": {"fuel": 2}}, "outcomes": [
+          {"weight": 100, "text": "A Revenant at the back of the line steps out and takes the fuel with both hands, and holds it a little too long. 'I was going home with them,' they say. 'I do not think I have a home. I think I would rather go on.' They look at your ship. 'Would you have a spare bunk?' The leader nods, once, and the line moves on.", "effects": {"items": {"fuel": -2}, "recruit": {"species": "revenant", "name": "Moreau"}}}
+        ]},
+        {"text": "[Revenant] Take a corner of the cable.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant takes a corner of the cable and walks with them for an hour, in step. Nobody speaks. At the end the leader turns, and presses something into your Revenant's palm: a small stitched pouch of old salvage pay, a pressure seal, and a bundle of silver coil.", "effects": {"items": {"titanium": 4, "credits": 30}, "crew_hp": 10}}
+        ]},
+        {"text": "Wait for them to pass.", "outcomes": [
+          {"weight": 100, "text": "You hold your lane until the last lamp has gone. Nobody on the bridge is quite sure whether they were just looked at, or counted.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}
