@@ -3,8 +3,8 @@ extends RefCounted
 ## its cards say and what the selection card says about one of them. Read-only views of the ship's data: no
 ## nodes and no drawing (scripts/ui/hud_palette.gd and hud_card.gd draw them, build_mode.gd picks from them).
 ## A card (an entry) is a Dictionary:
-##   key       the tool it picks: "tile:<id>", "piece:<piece>:<tile>", "cable" or "part:<id>"
-##   kind      tile, piece, cable or part; id: the tile or component id ("cable"); piece: the shape of a piece
+##   key       the tool it picks: "tile:<id>", "piece:<piece>:<tile>", "cable", "belt" or "part:<id>"
+##   kind      tile, piece, cable, belt or part; id: the tile or component id ("cable", "belt"); piece: the shape of a piece
 ##   name, line (scrap, standard, neon or unique: the card's border), tier (0 for structure)
 ##   size      Vector2i (a door is 2x1, a piece its footprint, a mount its inside half); out_size: a mount's outside half, else ZERO
 ##   power     line-adjusted (+ makes, - draws; 0 for structure)
@@ -16,12 +16,14 @@ const Shapes = preload("res://scripts/ship/shapes.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
 const Content = preload("res://scripts/data/content.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
+const Belts = preload("res://scripts/sim/belts.gd")
 
 enum Tab { STRUCTURE, SHAPES, SYSTEMS, WEAPONS, ENGINES, UTILITY, CARGO }
 const TAB_NAMES: Array[String] = ["Structure", "Shapes", "Systems", "Weapons", "Engines", "Utility", "Cargo"]
 const TAB_ICONS: Array[String] = ["structure", "shapes", "systems", "weapons", "engines", "utility", "cargo"]
 ## The families on the Utility tab. Weapons and engines have their own tabs; every other family is a System.
-const UTILITY_FAMILIES: Array[String] = ["intake", "radar", "tractor", "shield", "oxygen", "bed", "workshop", "fabricator", "utility"]
+const UTILITY_FAMILIES: Array[String] = ["intake", "radar", "tractor", "shield", "oxygen", "bed", "workshop", "fabricator", "utility", "ammo_rack", "belt_drive"]
 ## The cargo the top bar shows (scripts/ui/hud_top_bar.gd), in its order; the Cargo tab lists everything else held.
 const BAR_IDS: Array[String] = ["scrap", "copper", "polymer", "titanium", "silicon", "crystal", "credits", "fuel"]
 const LINE_ORDER: Array[String] = ["standard", "scrap", "neon"]
@@ -57,6 +59,7 @@ static func entries(tab: int, ship, cable_cost: Dictionary) -> Array:
 			for id in g.defs.ids():
 				out.append(tile_entry(ship, id))
 			out.append(cable_entry(ship, cable_cost))
+			out.append(belt_entry(ship))
 		Tab.SHAPES:
 			for id in g.defs.ids():
 				if g.tile_flag(id, "solid") and not g.tile_flag(id, "door"):
@@ -116,6 +119,16 @@ static func piece_entry(ship, piece: String, tile: String) -> Dictionary:
 static func cable_entry(ship, cable_cost: Dictionary) -> Dictionary:
 	return _priced({"key": "cable", "kind": "cable", "id": "cable", "piece": Shapes.FULL, "name": "Cable", "line": "standard", "tier": 0,
 		"size": Vector2i.ONE, "out_size": Vector2i.ZERO, "power": 0, "cost": cable_cost.duplicate(), "count": 0}, ship)
+
+
+## The conveyor belt (docs/CONTENT.md 4f): locked (not ok) until the belt blueprint is known, which the first belt drive brings.
+static func belt_entry(ship) -> Dictionary:
+	var e := _priced({"key": "belt", "kind": "belt", "id": "belt", "piece": Shapes.FULL, "name": "Belt", "line": "standard", "tier": 0,
+		"size": Vector2i.ONE, "out_size": Vector2i.ZERO, "power": 0, "cost": Belts.cost(), "count": 0}, ship)
+	if not Ammo.belts_unlocked(ship):
+		e["ok"] = false
+		e["why"] = "needs a belt drive (found or traded)"
+	return e
 
 
 static func part_entry(ship, id: String) -> Dictionary:
@@ -208,6 +221,10 @@ static func info(e: Dictionary, ship, rot := 0) -> Dictionary:
 			out["rows"] = [["Size", "1x1 per cell"], ["Cost", cost_text(e["cost"]) + " a cell"]]
 			out["blurb"] = "Carries power from the reactors to the systems. Each joined run of cable is one network."
 			out["place"] = "Anywhere in the hull, under floors and systems. Drag to lay a run; every system needs a cable to a reactor."
+		"belt":
+			out["rows"] = [["Size", "1x1 per cell"], ["Cost", cost_text(e["cost"]) + " a cell"]]
+			out["blurb"] = "A conveyor floor. Joined cells are a network; a powered belt drive moves ammo along it from racks to the guns it touches."
+			out["place"] = "On floor and doors, never under a system. A rack, gun or drive must have a belt cell against its edge. Drag to lay a run." if Ammo.belts_unlocked(ship) else "Locked: it comes with your first belt drive, a part found or traded for (Rusthold, Meridian and Prism sell them)."
 		_:
 			_tile_info(out, e, ship)
 	return out
@@ -270,6 +287,11 @@ static func _part_info(out: Dictionary, e: Dictionary, ship, rot: int) -> void:
 			rows.append(["Recharge", num(float(st.get("recharge", 2.0))) + " s a layer"])
 		"weapon":
 			rows.append_array(_weapon_rows(e["id"]))
+		"belt_drive":
+			rows.append(["Belt speed", "%s cells a second" % num(float(st.get("belt_speed", 0.0)))])
+			rows.append(["Feeds", "1 unit every %s s" % num(float(st.get("belt_interval", 1.0)))])
+		"ammo_rack":
+			rows.append(["Holds", "%d units of one ammo" % int(st.get("capacity", 20))])
 		_:
 			for k in st:
 				rows.append([_label(k), num(float(st[k]))])
@@ -289,6 +311,8 @@ static func _part_info(out: Dictionary, e: Dictionary, ship, rot: int) -> void:
 			tags = tags + w["effects"]
 	if not tags.is_empty():
 		quirks.append("Effects: " + ", ".join(tags.map(func(t): return str(t).replace("_", " "))))
+	if str(def.get("family", "")) in ["ammo_rack", "belt_drive"]:
+		quirks.append(str(def.get("quirk", "")))
 	out["quirk"] = ". ".join(quirks)
 	for a in def.get("abilities", []):
 		if str(a.get("type", "")) == "passive":

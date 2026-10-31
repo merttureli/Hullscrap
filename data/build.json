@@ -1,5 +1,6 @@
 {
-  "_doc": "Build rules. cable_cost: materials paid for each cable cell (refunded 100% when the cable is removed). red_alert_px: build mode can't be entered while a hostile ship is this close (scripts/sim/red_alert.gd).",
+  "_doc": "Build rules. cable_cost: materials paid for each cable cell (refunded 100% when the cable is removed). belt_cost: the same for each conveyor-belt cell (docs/CONTENT.md 4f; scripts/sim/belts.gd). red_alert_px: build mode can't be entered while a hostile ship is this close (scripts/sim/red_alert.gd).",
   "cable_cost": {"copper": 1},
+  "belt_cost": {"scrap": 1},
   "red_alert_px": 2500
 }

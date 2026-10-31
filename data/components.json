@@ -1304,6 +1304,106 @@
       "stats": {
         "pull_radius": 3
       }
+    },
+    {
+      "id": "ammo_rack",
+      "name": "Ammo Rack",
+      "blurb": "Four bays, a clamp and a hand-lettered sign saying NOT A SEAT. Holds twenty rounds of one kind, and wants them all to stay put.",
+      "family": "ammo_rack",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#c9a24a",
+      "power": 0,
+      "priority": 0,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 0,
+      "cooling": 3,
+      "stats": {
+        "capacity": 20
+      },
+      "quirk": "Guns in its room (or on its belt) draw from it. Crew restock it from the cargo below half full. If it is wrecked while holding missiles, it explodes."
+    },
+    {
+      "id": "belt_drive_scrap",
+      "name": "Clan Chain Drive",
+      "blurb": "A bicycle chain the length of a corridor, a motor off a garbage lift and a sign: KICK TO START. The Clans swear by it.",
+      "family": "belt_drive",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#8a6a3a",
+      "power": -1,
+      "priority": 2,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "belt_speed": 3,
+        "belt_interval": 0.8
+      },
+      "quirk": "3 cells a second, one unit every 0.8 s. Like every Scrap part it jams (malfunctions) now and then, and the belt stops until a crew member kicks it."
+    },
+    {
+      "id": "belt_drive_std",
+      "name": "Concord Autoloader",
+      "blurb": "Registered, certified and quiet. A spoked wheel turns in a window, and the rounds go where the form says they go.",
+      "family": "belt_drive",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#5aa9e6",
+      "power": -1,
+      "priority": 2,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "belt_speed": 5,
+        "belt_interval": 0.5
+      },
+      "quirk": "5 cells a second, one unit every 0.5 s. Nothing clever."
+    },
+    {
+      "id": "belt_drive_neon",
+      "name": "Lumen Mag-Rail",
+      "blurb": "A rail of lit glass that carries each round on a cushion of light, faster than you can follow it. Faint, humming, and allergic to ion.",
+      "family": "belt_drive",
+      "line": "neon",
+      "tier": 3,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#3ef0ff",
+      "power": -1,
+      "priority": 2,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3,
+      "stats": {
+        "belt_speed": 8,
+        "belt_interval": 0.3,
+        "belt_ion_stop": 1
+      },
+      "quirk": "8 cells a second, one unit every 0.3 s. An ion hit stops it for the ion duration (3 s)."
     }
   ]
 }

@@ -8,8 +8,9 @@ extends RefCounted
 ## +10 for a weapon, engine or shield in a fight; also a hull mount whose outside half is damaged and
 ## whose link is intact, from its inside half), `repair_crew` a hurt `mechanical` crew member (75,
 ## done by any other crew member: beds do not heal them), `man_station` (50: the helm, and weapons,
-## shields and engines flagged manned), `clear_wreck` (30: the debris of a part that was shot to pieces,
-## which gives back half its recipe). A job has `slots` places (two crew stack on a fire) and a place to
+## shields and engines flagged manned), `restock` (40: carry ammo from the cargo to an ammo rack below half full,
+## 1 s per 5 units at normal speed: scripts/sim/ammo.gd), `clear_wreck` (30: the debris of a part that was shot to pieces,
+## which gives back half its recipe), and `repair_belt` (70: mend one conveyor-belt cell that damage cut). A job has `slots` places (two crew stack on a fire) and a place to
 ## stand next to it. Numbers are in data/crew.json.
 ## Each hand-out, an idle crew member takes the highest-priority job with a free place, preferring
 ## jobs nobody works on, then the nearest by walking distance (only the nearest few get a path
@@ -31,6 +32,7 @@ const Abilities = preload("res://scripts/sim/abilities.gd")
 const Heat = preload("res://scripts/sim/heat.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewFx = preload("res://scripts/crew/crew_fx.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
 const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
@@ -38,11 +40,12 @@ const FAULTY: Array[String] = ["malfunction", "disabled"]  ## part statuses a cr
 const NO_FIRE := Vector2i(-1, -1)  ## "no burning cell"
 const HAND_SHOWN := 0.6  ## seconds the HUD still says what the player was doing by hand
 ## The TraitSet work_mult a job type is done at.
-const WORK_KIND := {"extinguish": "extinguish", "repair_breach": "breach", "repair_component": "repair", "repair_crew": "repair", "revive": "heal_others"}
+const WORK_KIND := {"extinguish": "extinguish", "repair_breach": "breach", "repair_component": "repair", "repair_crew": "repair", "revive": "heal_others", "restock": "restock", "repair_belt": "repair"}
 
 var board := {}  ## job key -> job: {key, type, priority, cells, slots, work, label, ...}
 var progress := {}  ## job key -> seconds of work done so far (kept while the job stays on the board)
 var orders := {}  ## job key -> job: repairs the player ordered (F), kept until done
+var restocking := {}  ## rack uid -> true: racks a crew member has started filling (they fill them to the top, not just to half)
 var combat := false  ## a fight is on: weapons, engines and shields get repaired first
 var paths_used := 0  ## path searches the last hand-out made
 var _since := 1.0e9  ## seconds since the board was rebuilt (huge: build it on the first tick)
@@ -107,7 +110,20 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 				_since = 1.0e9
 		"man_station":
 			ship.manned[job["uid"]] = m.name
-		"repair_breach", "repair_component", "revive", "clear_wreck":
+		"restock":  # carries Ammo rate units a second (times their restock work_mult) from the cargo, until the rack is full
+			var rack: int = job["uid"]
+			restocking[rack] = true
+			var per_s := float(jcfg()["restock"]["rate"])
+			progress[job["key"]] = float(progress.get(job["key"], 0.0)) + dt * _work_rate(ship, m, "restock")
+			var whole := int(float(progress[job["key"]]) * per_s + 1e-6)
+			if whole > 0:
+				progress[job["key"]] = float(progress[job["key"]]) - float(Ammo.restock(ship, rack, whole)) / per_s
+			if Ammo.restock_done(ship, rack):
+				restocking.erase(rack)
+				progress.erase(job["key"])
+				board.erase(job["key"])
+				_since = 1.0e9
+		"repair_breach", "repair_component", "revive", "clear_wreck", "repair_belt":
 			var key: String = job["key"]
 			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(ship, m, job["type"])
 			if progress[key] >= float(job["work"]) - 1e-6:
@@ -162,6 +178,14 @@ func build_board(ship) -> void:
 			_add(b, _fix_job(ship, uid))
 		if family == "helm" or (bool(def.get("manned", false)) and family in j["man_station"]["families"]):
 			_add(b, _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)}))
+	var need := Ammo.restock_uids(ship, restocking)
+	for uid in restocking.keys():
+		if not need.has(uid):
+			restocking.erase(uid)
+	for uid in need:
+		_add(b, _job("restock", "stock:%d" % uid, ship.components.instances[uid]["cells"], {"uid": uid, "name": ship.crafting.name_of(Ammo.wanted_item(ship, uid), ship.components)}))
+	for c in ship.belts.cut_cells():
+		_add(b, _job("repair_belt", "belt:%d,%d" % [c.x, c.y], [c], {"cell": c}))
 	for w in ship.components.wrecks:
 		_add(b, _job("clear_wreck", "wreck:%d,%d" % [w["cells"][0].x, w["cells"][0].y], w["cells"], {"id": w["id"], "name": ship.components.def(w["id"]).get("name", w["id"])}))
 	for key in orders.keys():
@@ -437,6 +461,9 @@ func _finish(ship, job: Dictionary) -> void:
 			if ship.grid.repair(job["cell"]):
 				ship.mark_dirty()
 				ship.log_event("Breach sealed")
+		"repair_belt":
+			if ship.belts.repair(job["cell"]):
+				ship.log_event("Belt repaired")
 		"repair_component":
 			if ship.repair(job["uid"]):
 				ship.log_event("%s repaired" % job["name"])
