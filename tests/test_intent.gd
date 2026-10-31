@@ -42,6 +42,7 @@ func test_the_numbers_are_in_the_data_file() -> void:
 	near(float(cfg["warn_s"]), 1.5, "warns 1.5 s ahead")
 	near(float(cfg["heavy_damage"]), 3.0, "heavy from damage 3")
 	near(float(cfg["hold_s"]), 0.5, "a target is held 0.5 s")
+	near(float(cfg["min_cooldown"]), 3.0, "a warned gun takes at least 3 s to reload")
 	eq(cfg["heavy_kinds"], ["missile", "beam"], "missiles and beams are heavy")
 	eq(cfg["heavy_damage_types"], ["ion"], "ion is heavy")
 	check(str(JSON.parse_string(FileAccess.get_file_as_string(Intent.CONFIG_PATH)).get("_doc", "")) != "", "the file explains itself")
@@ -145,6 +146,31 @@ func test_a_heavy_weapon_shows_only_inside_the_warning_with_its_true_eta() -> vo
 	s.arena.step(1.0)
 	near(_of(s)["heavy"][0]["eta"], 0.0, "ready")
 	eq(_of(s)["heavy"].size(), 1, "a ready weapon still shows (it fires as soon as it can bear)")
+
+
+func test_a_heavy_gun_that_fires_faster_than_you_can_react_never_shows() -> void:
+	var w := Weapons.new()
+	for id in ["laser_mk2", "pulse_mk2"]:
+		check(float(w.def(id)["damage"]) >= 3.0 and float(w.def(id)["cooldown"]) < 3.0, id + " hits hard but reloads inside 3 s")
+		check(not Intent.warns(w.def(id)), id + " earns no row")
+	for id in ["artemis_mk1", "test_missile", "heat_lance_neon", "ion_blast_mk1", "siren_ion_neon", "bolt_thrower_scrap"]:
+		check(Intent.warns(w.def(id)), id + " earns a row (3 s or more)")
+	var s := _session()
+	var foe = s.arena.ships[Session.ENEMY]
+	s.arena.weapons.defs["fast_missile"] = {"kind": "missile", "damage": 4, "cooldown": 1.3, "range": 1200}
+	var fast := [s.arena.add_mount(Session.ENEMY, "pulse_mk2", Vector2(20.0, 20.0)), s.arena.add_mount(Session.ENEMY, "laser_mk2", Vector2(22.0, 20.0)), s.arena.add_mount(Session.ENEMY, "fast_missile", Vector2(24.0, 20.0))]
+	foe.ship.inventory.add("missile", 9)
+	for u in fast:
+		foe.cooldowns[u] = s.arena.tick + 60  # ready in 1 s: inside the warning
+	eq(_of(s)["heavy"], [], "heavy guns with a 1.3 s cooldown or less: no row, even a missile")
+	for u in fast:
+		foe.cooldowns[u] = 0
+	eq(_of(s)["heavy"], [], "nor when they are ready")
+	var art := _artemis(s)
+	_ready_in(s, art, 1.0)
+	eq(_of(s)["heavy"].map(func(h): return h["uid"]), [art], "the Artemis still does")
+	s.arena.weapons.defs["fast_missile"]["cooldown"] = 3.0
+	eq(_of(s)["heavy"].size(), 2, "and a gun with a 3 s cooldown (the line) is warned about too")
 
 
 func test_a_heavy_weapon_that_cannot_fire_does_not_show() -> void:
