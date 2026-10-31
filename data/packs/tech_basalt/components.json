@@ -4,7 +4,7 @@
       "id": "basalt_magma_spitter",
       "name": "Magma Spitter",
       "blurb": "Spits slag that keeps eating after it lands. The breech room is aired out with every shot, which the Basalt consider polite.",
-      "quirk": "Slag glob plus acid that burns on for 4 s (+30% damage a second over a Mk2 pulse), but each shot vents 30% of its room's air: Basalt do not breathe.",
+      "quirk": "Slag glob plus acid that burns on for 4 s and may creep to a neighbouring cell (15% a tick; +30% damage a second over a Mk2 pulse), but each shot vents 30% of its room's air: Basalt do not breathe.",
       "family": "weapon",
       "line": "standard",
       "tier": 2,

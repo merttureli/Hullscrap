@@ -6,6 +6,7 @@ extends "res://tests/base_test.gd"
 const Arena = preload("res://scripts/combat/arena.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
+const Weapons = preload("res://scripts/combat/weapons.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -154,3 +155,98 @@ func test_a_second_ion_hit_does_not_stack_and_a_wall_is_not_locked() -> void:
 	_duel({"damage_type": "ion", "damage": 1})
 	_shoot()
 	eq(_events("ion_part").size(), 0, "an ion hit on a plain wall shuts nothing down")
+
+
+# --- 2. acid spread ------------------------------------------------------------------------------------------
+
+## A target of solid wall, x 8..16, y 12..18, in the line of fire (row 15): the shot lands on (8, 15).
+func _slab() -> void:
+	for y in range(12, 19):
+		for x in range(8, 17):
+			target.grid.force_tile(Vector2i(x, y), "wall")
+
+
+func _cloud() -> Dictionary:
+	var acids: Array = arena.fx["timed"].filter(func(e): return e["k"] == "acid")
+	return acids[0] if not acids.is_empty() else {}
+
+
+func test_a_spreading_acid_creeps_to_neighbouring_cells_and_eats_them() -> void:
+	_duel({"effects": {"acid": {"dps": 1.0, "seconds": 3.0, "spread": 1.0}}})
+	_slab()
+	_shoot()
+	eq(_cloud()["cells"].size(), 1, "it starts on the cell hit")
+	arena.step(1.0)
+	var cells: Array = _cloud()["cells"]
+	check(cells.size() >= 4, "at spread 1.0 it gained about a cell a tick (%d cells after 1 s)" % cells.size())
+	for c in cells.slice(0, cells.size() - 1):  # (the newest cell is first hit by the next tick)
+		check(target.grid.hp_of(c) < 4.0, "cell %s is being eaten" % str(c))
+		check(c == Vector2i(8, 15) or cells.any(func(o): return o != c and (o - c).length_squared() == 1), "cell %s touches another of the cloud" % str(c))
+	var spread := arena.events.filter(func(e): return e["type"] == "effect" and e["kind"] == "acid" and e.get("spread", false))
+	eq(spread.size(), cells.size() - 1, "every creep is reported (for the picture)")
+	arena.step(3.0)
+	eq(arena.fx["timed"].size(), 0, "the whole cloud ends with the acid's seconds")
+
+
+func test_an_acid_without_spread_stays_on_one_cell() -> void:
+	_duel({"effects": {"acid": {"dps": 1.0, "seconds": 3.0}}})
+	_slab()
+	_shoot()
+	arena.step(2.0)
+	eq(_cloud()["cells"].size(), 1, "no spread key, one cell")
+	var hurt := 0
+	for c in target.grid.hp:
+		hurt += 1
+	eq(hurt, 1, "and only that cell was damaged")
+
+
+func test_acid_creeps_into_a_part_once_and_never_past_the_cell_cap() -> void:
+	_duel({"effects": {"acid": {"dps": 0.1, "seconds": 20.0, "spread": 1.0}}})
+	var uid := Fixture.put(target, "radiator", 9, 15)  # a 2x2 part just inside the wall hit: only one of its cells may join
+	check(uid >= 0, "(setup)")
+	_shoot()
+	arena.step(10.0)
+	var cells: Array = _cloud()["cells"]
+	var mine := cells.filter(func(c): return target.components.at(c) == uid)
+	eq(mine.size(), 1, "a part joins the cloud once, not once a cell")
+	eq(cells.size(), Effects.ACID_MAX_CELLS, "and the cloud stops at ACID_MAX_CELLS")
+
+
+func test_a_hit_on_a_cell_the_cloud_eats_renews_that_cloud() -> void:
+	_duel({"effects": {"acid": {"dps": 0.1, "seconds": 3.0, "spread": 1.0}}})
+	_slab()
+	_shoot()
+	arena.step(1.0)
+	var inside: Vector2i = _cloud()["cells"][1]
+	_shoot(arena.cell_to_world(1, inside))
+	eq(arena.fx["timed"].size(), 1, "still one cloud: the second shot renewed it")
+	check(_cloud()["left"] > 2.9, "with its time back")
+
+
+func test_a_spreading_acid_replays_exactly() -> void:
+	var snaps := []
+	for run in 2:
+		_duel({"cooldown": 0.2, "effects": {"acid": {"dps": 0.5, "seconds": 3.0, "spread": 0.5}}}, null, 9)
+		_slab()
+		for i in 6:
+			arena.ships[0].cooldowns.clear()
+			arena.fire(0, gun, arena.cell_to_world(1, Vector2i(8, 15)))
+			arena.step(0.5)
+		snaps.append(arena.snapshot())
+	eq(snaps[0], snaps[1], "the same seed gives the same cloud")
+	check(snaps[0]["fx"]["timed"].any(func(t): return t[2] > 1), "(and it did spread)")
+
+
+func test_the_validator_checks_spread() -> void:
+	eq(Effects.problems({"effects": {"acid": {"dps": 1, "seconds": 4, "spread": 0.3}}}), [], "spread 0.3 is fine")
+	for bad in [1.5, -0.1, "lots"]:
+		var p := Effects.problems({"effects": {"acid": {"dps": 1, "seconds": 4, "spread": bad}}})
+		check(p.any(func(s): return "acid.spread" in s), "spread %s is caught (%s)" % [str(bad), str(p)])
+	var p2 := Effects.problems({"effects": {"spores": {"o2_drain": 0.1, "seconds": 4, "spread": 0.3}}})
+	check(p2.any(func(s): return "unknown key" in s), "and spread belongs to acid only")
+
+
+func test_the_magma_spitter_and_the_rot_pod_spread() -> void:
+	var w = Weapons.new()
+	for id in ["basalt_magma_spitter", "sporeling_rot_pod"]:
+		check(float(w.defs[id]["effects"]["acid"].get("spread", 0.0)) > 0.0, "%s has an acid spread" % id)

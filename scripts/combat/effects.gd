@@ -3,7 +3,8 @@ extends RefCounted
 ## `"effects": {...}`: a Dictionary of the keys below (an old-style list of tags, ["lock_doors"], stays
 ## valid and means nothing here). Every effect is built once, here, and read from data.
 ## On the target, when a shot first meets a ship's cells (a shield that stops the shot stops the effect too):
-##   acid {dps, seconds, type?}       the hit cell takes dps damage a second for `seconds` (never wrecks a part that is already out)
+##   acid {dps, seconds, type?, spread?}  the hit cell takes dps damage a second for `seconds` (never wrecks a part that is already out);
+##                                    spread: each 0.25 s tick the acid has this chance (0 to 1) to creep to one more neighbouring wall, door or part (once each, at most ACID_MAX_CELLS)
 ##   spores {o2_drain, seconds}       the room hit loses o2_drain of its air (a fraction of full pressure) a second
 ##   shard {splinters, dmg}           `splinters` of the neighbouring solid cells take dmg each (the weapon's damage type)
 ##   sonic {stun_s}                   the crew in the room hit are stunned: no walking, no work
@@ -33,6 +34,7 @@ const PULL_MASS := 1000.0  ## the ship mass at which magnetic `pull` is a speed 
 const DEBRIS_RADIUS := 320.0  ## px round the impact within which magnetic drags debris
 const DEBRIS_DAMPING := 0.25  ## per second
 const MIN_MULT := 0.05  ## the smallest else_mult
+const ACID_MAX_CELLS := 12  ## the most cells one acid cloud (a `spread` acid) eats at once
 ## Required numbers of each effect: key -> [lowest, highest]. Optional keys are in OPTIONAL.
 const SPEC := {
 	"acid": {"dps": [0.001, 100.0], "seconds": [0.1, 60.0]},
@@ -45,7 +47,7 @@ const SPEC := {
 	"needs_operator": {"else_mult": [MIN_MULT, 1.0]},
 	"needs_crew_in_room": {"count": [1.0, 12.0], "else_mult": [MIN_MULT, 1.0]},
 }
-const OPTIONAL := {"acid": ["type"], "needs_operator": ["species", "stat"], "needs_crew_in_room": ["stat"]}
+const OPTIONAL := {"acid": ["type", "spread"], "needs_operator": ["species", "stat"], "needs_crew_in_room": ["stat"]}
 const SELF_ROOM := {"o2_drain": [0.0, 1.0], "heat": [0.0, 500.0], "fire_chance": [0.0, 1.0], "shock_dps": [0.0, 50.0]}
 const STATS: Array[String] = ["damage", "rate"]
 const DAMAGE_TYPES: Array[String] = ["kinetic", "energy", "explosive", "ion"]
@@ -122,6 +124,8 @@ static func _spec_problems(out: Array[String], k: String, v, species: Array) -> 
 			out.append("%s needs '%s'" % [k, p])
 		else:
 			_check(out, "%s.%s" % [k, p], v[p], SPEC[k][p][0], SPEC[k][p][1], p in ["splinters", "count"])
+	if k == "acid" and v.has("spread"):
+		_check(out, "acid.spread", v["spread"], 0.0, 1.0)
 	if v.has("stat") and not str(v["stat"]) in STATS:
 		out.append("%s.stat must be one of %s" % [k, str(STATS)])
 	if v.has("type") and not str(v["type"]) in DAMAGE_TYPES:
@@ -175,7 +179,7 @@ static func _timed(arena, key: String, e: Dictionary) -> void:
 	for old in arena.fx["timed"]:
 		if old["key"] == key:
 			old["left"] = maxf(old["left"], e["left"])
-			for p in ["dps", "rate", "slow", "stun"]:
+			for p in ["dps", "rate", "slow", "stun", "spread"]:
 				if e.has(p):
 					old[p] = maxf(old[p], e[p])
 			return
@@ -222,7 +226,7 @@ static func tick(arena, dt: float) -> void:
 static func summary(arena) -> Dictionary:
 	var timed := []
 	for e in arena.fx["timed"]:
-		timed.append([e["key"], snappedf(float(e["left"]), 1e-6)])
+		timed.append([e["key"], snappedf(float(e["left"]), 1e-6), e["cells"].size() if e.has("cells") else 0])
 	var cor := {}
 	for key in arena.fx["corroded"]:
 		cor[str(key)] = [arena.fx["corroded"][key][0], snappedf(float(arena.fx["corroded"][key][1]), 1e-6)]
@@ -303,25 +307,71 @@ static func _acid(arena, idx: int, id: String, w: Dictionary, spec: Dictionary, 
 	var type := str(spec.get("type", w.get("damage_type", "energy")))
 	if type == "ion":
 		type = "energy"
-	_timed(arena, "acid:%d:%d,%d" % [idx, cell.x, cell.y], {"k": "acid", "ship": idx, "cell": cell, "dps": float(spec["dps"]),
+	var key := "acid:%d:%d,%d" % [idx, cell.x, cell.y]
+	for e in arena.fx["timed"]:  # a cell an acid cloud already eats is renewed through that cloud, not eaten twice
+		if e["k"] == "acid" and e["ship"] == idx and cell in e["cells"]:
+			key = e["key"]
+	_timed(arena, key, {"k": "acid", "ship": idx, "cell": cell, "cells": [cell], "dps": float(spec["dps"]), "spread": float(spec.get("spread", 0.0)),
 		"left": float(spec["seconds"]), "acc": 0.0, "type": type, "weapon": id})
 	_log(arena, idx, cell, "acid", id)
 
 
-## One step of an acid: every TICK seconds (and at its end) the cell takes the damage of that time. False when it is done with.
+## One step of an acid: every TICK seconds (and at its end) each cell of the cloud takes the damage of that time, and a
+## spreading acid may creep on. A cell with nothing left to eat leaves the cloud. False when the cloud is done with.
 static func _tick_acid(arena, co, e: Dictionary, step: float) -> bool:
 	e["acc"] += step
 	if e["acc"] < TICK - 1e-9 and e["left"] > 1e-9:
 		return true
-	var amount: float = e["dps"] * e["acc"]
+	var span: float = e["acc"]
+	var amount: float = e["dps"] * span
 	e["acc"] = 0.0
-	var obj := Damage.solid_at(co, e["cell"])
-	if obj.is_empty():
-		return false
-	if obj["kind"] == "component" and _part_hp(co, obj) <= 0.0:
-		return false  # acid wears a part down to out of action, it does not finish it off
-	Damage.apply(arena, e["ship"], e["cell"], obj, amount, e["type"], {"dot": "acid", "weapon": e["weapon"]})
-	return true
+	var keep: Array = []
+	for cell in e["cells"]:
+		var obj := Damage.solid_at(co, cell)
+		if obj.is_empty():
+			continue
+		if obj["kind"] == "component" and _part_hp(co, obj) <= 0.0:
+			continue  # acid wears a part down to out of action, it does not finish it off
+		Damage.apply(arena, e["ship"], cell, obj, amount, e["type"], {"dot": "acid", "weapon": e["weapon"]})
+		keep.append(cell)
+	e["cells"] = keep
+	if float(e["spread"]) > 0.0 and not keep.is_empty() and e["left"] > 1e-9 and keep.size() < ACID_MAX_CELLS \
+			and arena.rng.randf() < float(e["spread"]) * span / TICK:
+		_creep(arena, co, e)
+	return not keep.is_empty()
+
+
+## The acid cloud `e` of ship `co` eats one more cell: a wall, door or part beside its cells (a part once, one that is already
+## out of action never), and none that another cloud holds. Which one is the arena's rng's pick.
+static func _creep(arena, co, e: Dictionary) -> void:
+	var held := {}  # cells and parts any acid on this ship holds already
+	for other in arena.fx["timed"]:
+		if other["k"] == "acid" and other["ship"] == e["ship"]:
+			_hold(co, other["cells"], held)
+	_hold(co, e["cells"], held)
+	var cands: Array = []
+	for c in e["cells"]:
+		for d in Fire.SIDES:
+			var n: Vector2i = c + d
+			var obj := Damage.solid_at(co, n)
+			if obj.is_empty() or held.has(n) or cands.has(n):
+				continue
+			if obj["kind"] == "component" and (held.has(Damage.part_key(obj)) or _part_hp(co, obj) <= 0.0):
+				continue
+			cands.append(n)
+	if cands.is_empty():
+		return
+	var pick: Vector2i = cands[arena.rng.randi_range(0, cands.size() - 1)]
+	e["cells"].append(pick)
+	_log(arena, e["ship"], pick, "acid", str(e["weapon"]), {"spread": true})
+
+
+static func _hold(co, cells: Array, held: Dictionary) -> void:
+	for c in cells:
+		held[c] = true
+		var obj := Damage.solid_at(co, c)
+		if obj.get("kind", "") == "component":
+			held[Damage.part_key(obj)] = true
 
 
 static func _part_hp(co, obj: Dictionary) -> float:
