@@ -22,6 +22,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 
 const PATH := "res://data/weapons.json"
@@ -143,7 +144,8 @@ func repair(arena, idx: int, uid: int) -> void:
 
 ## "" when mount `uid` of ship `idx` can fire at the world point `aim`, else why not: wrecked, no
 ## such weapon, its status (malfunction, overheated, disabled: an outside half shot out; offline: a
-## cut link), unpowered, no ammo, cooling down. A fixed gun fires wherever it points, so it is never
+## cut link), unpowered, no ammo (ammo.gd: "no ammo", "no ammo rack in reach", "rack empty", "belt stopped"), cooling down,
+## then "feeding" (the belt has not delivered the next unit yet). A fixed gun fires wherever it points, so it is never
 ## out of arc; a turret is, when the enemy it would shoot at is outside its arc, and has "no target"
 ## when nothing is left to shoot at (`aim` is not used by a turret).
 func can_fire(arena, idx: int, uid: int, aim: Vector2) -> String:
@@ -161,10 +163,15 @@ func can_fire(arena, idx: int, uid: int, aim: Vector2) -> String:
 		return "unpowered"
 	var w := def(m["id"])
 	var ammo := str(w["ammo"])
-	if ammo != "" and co.ship.inventory.count(ammo) < maxi(Effects.ammo_cost(m, w), 1):
-		return "no ammo"
+	var feed := ""  # a placed gun on a ship with ammo racks draws from them (ammo.gd), else from the cargo
+	if ammo != "":
+		feed = Ammo.refusal(co.ship, uid, ammo, maxi(Effects.ammo_cost(m, w), 1))
+		if feed != "" and feed != "feeding":
+			return feed
 	if arena.tick < int(co.cooldowns.get(uid, 0)):
 		return "cooling down"
+	if feed != "":
+		return feed  # the next unit is on its way along the belt: the reload waits for it
 	if w["turret"]:
 		var mis = missile_target(arena, idx, m, w)
 		var tgt := target_of(arena, idx)
@@ -427,7 +434,7 @@ func _in_range(arena, idx: int, m: Dictionary, w: Dictionary, target: int) -> bo
 func _spend(arena, idx: int, uid: int, m: Dictionary, w: Dictionary) -> void:
 	var co = arena.ships[idx]
 	if str(w["ammo"]) != "":
-		co.ship.inventory.add(str(w["ammo"]), -Effects.ammo_cost(m, w, true))
+		Ammo.spend(co.ship, uid, str(w["ammo"]), Effects.ammo_cost(m, w, true))
 	var inst = null if m["virtual"] else co.ship.components.instances.get(uid)
 	if inst != null:
 		inst["heat"] = float(inst.get("heat", 0.0)) + float(w["heat_per_shot"])

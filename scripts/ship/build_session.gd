@@ -15,18 +15,22 @@ extends RefCounted
 ##             top-left cell, and the inside half goes on the floor behind the wall (components.gd
 ##             plan_mount). Removing it by a cell of either half takes both.
 ##   cable     {"layer": "cable", "cell"} places; add "remove": true to remove
+##   belt      {"layer": "belt", "cell"} lays a conveyor-belt cell (docs/CONTENT.md 4f; floor and doors, once the belt blueprint
+##             is known: Ammo.belts_unlocked); add "remove": true to remove. A belt cell costs build.json's belt_cost.
 ## Placing a component takes one item with its id from the cargo; removing it gives the item back.
 ## A cable costs build.json's cable_cost per cell, refunded in full. A tile costs per cell, so a door
 ## piece costs twice. A step is the list of what was really done: tiles {layer, cell, from, to}
 ## (+ "from_open" for a removed open door, "from_shape" / "to_shape" for a shaped cell; a door piece
 ## and a shaped piece are one entry per cell),
 ## components {layer, uid, id, anchor (the inside half), rot, added, + out (the outside half's top-left) for a mount},
-## cables {layer, cell, added}.
+## cables {layer, cell, added}, belts {layer, cell, added}; a component removal also has "stock" (the ammo it held, now in the cargo).
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
+const Belts = preload("res://scripts/sim/belts.gd")
 const MAX_HISTORY := 200
 const BUILD_PATH := "res://data/build.json"
 
@@ -35,6 +39,7 @@ enum Mode { PAINT, LINE, RECT }
 
 var ship: Ship
 var cable_cost := {}  ## material id -> count per cable cell
+var belt_cost := {}  ## material id -> count per belt cell
 var last_preview_cost := {}  ## what the last preview() would take from the cargo: id -> count (negative = given back)
 var undo_stack: Array = []
 var redo_stack: Array = []
@@ -52,6 +57,7 @@ func _init(p_ship: Ship, build_path := BUILD_PATH) -> void:
 	assert(data is Dictionary and data.get("cable_cost") is Dictionary, "bad build data: " + build_path)
 	for m in data["cable_cost"]:
 		cable_cost[str(m)] = int(data["cable_cost"][m])
+	belt_cost = Belts.cost()
 
 
 ## The cargo a new ship starts with (data/start.json).
@@ -158,6 +164,14 @@ func plan_cables(mode: int, remove: bool, a: Vector2i, b: Vector2i, path: Array 
 	var changes := []
 	for c in _unique(drag_cells(mode, a, b, path)):
 		changes.append({"layer": "cable", "cell": c, "remove": remove})
+	return _clip(changes)
+
+
+## Turn one belt drag into changes, with the same drag modes as tiles (a RECT is filled).
+func plan_belts(mode: int, remove: bool, a: Vector2i, b: Vector2i, path: Array = []) -> Dictionary:
+	var changes := []
+	for c in _unique(drag_cells(mode, a, b, path)):
+		changes.append({"layer": "belt", "cell": c, "remove": remove})
 	return _clip(changes)
 
 
@@ -296,6 +310,8 @@ func _run(changes: Array) -> Dictionary:
 				reasons.append(_try_component(ch, step))
 			"cable":
 				reasons.append(_try_cable(ch["cell"], bool(ch.get("remove", false)), step))
+			"belt":
+				reasons.append(_try_belt(ch["cell"], bool(ch.get("remove", false)), step))
 			_:
 				reasons.append("unknown layer")
 	return {"step": step, "reasons": reasons}
@@ -388,6 +404,8 @@ func _stands_on(c: Vector2i, to: String, shape := {}) -> String:
 	var link_uid: int = parts.link_at(c)
 	if link_uid >= 0 and (to == "" or not grid.tile_flag(to, "solid") or grid.tile_flag(to, "door") or not shape.is_empty()):
 		return "a %s is mounted through this wall" % parts.def(parts.instances[link_uid]["id"]).get("name", "system")
+	if ship.belts.has(c) and (to == "" or grid.tile_flag(to, "solid")):
+		return "a belt runs here"
 	var uid: int = parts.at(c)
 	if uid < 0 or (to != "" and not grid.tile_flag(to, "solid") and not grid.tile_flag(to, "door")):
 		return ""
@@ -404,6 +422,9 @@ func _try_component(ch: Dictionary, step: Array) -> String:
 		var why: String = parts.can_place_mount(grid, id, anchor, rot) if mount else parts.can_place(grid, id, anchor, rot)
 		if why != "":
 			return why
+		for c in (parts.plan_mount(grid, id, anchor, rot)["cells"] if mount else parts.footprint(id, anchor, rot)):
+			if ship.belts.has(c):
+				return "a belt runs here"
 		if inventory.count(id) < 1:
 			return "no %s in cargo" % parts.def(id).get("name", id)
 		var new_uid: int = parts.place_mount(grid, id, anchor, rot) if mount else parts.place(grid, id, anchor, rot)
@@ -420,6 +441,9 @@ func _try_component(ch: Dictionary, step: Array) -> String:
 	var e := {"layer": "component", "uid": uid, "id": inst["id"], "anchor": inst["anchor"], "rot": inst["rot"], "added": false}
 	if parts.has_outside(uid):
 		e["out"] = inst["out_anchor"]
+	var held := Ammo.unload(ship, uid)  # a rack's ammo (and a gun's loaded units) go back to the cargo
+	if not held.is_empty():
+		e["stock"] = held
 	parts.remove_uid(uid)
 	inventory.add(inst["id"], 1)
 	step.append(e)
@@ -445,6 +469,28 @@ func _try_cable(c: Vector2i, remove: bool, step: Array) -> String:
 	return ""
 
 
+func _try_belt(c: Vector2i, remove: bool, step: Array) -> String:
+	if remove:
+		if not ship.belts.has(c):
+			return "nothing to remove"
+		ship.belts.remove(c)
+		inventory.refund(belt_cost)
+	else:
+		if not Ammo.belts_unlocked(ship):
+			return "needs a belt drive (found or traded) first"
+		var why: String = ship.belts.can_place(grid, ship.components, c)
+		if why != "":
+			return why
+		var short: Dictionary = inventory.missing(belt_cost)
+		if not short.is_empty():
+			return "not enough " + str(short.keys()[0])
+		inventory.spend(belt_cost)
+		ship.belts.place(grid, ship.components, c)
+		Ammo.learn(ship)
+	step.append({"layer": "belt", "cell": c, "added": not remove})
+	return ""
+
+
 ## Undo a step, newest change first. Skips the placement rules.
 func _revert(step: Array) -> void:
 	for i in range(step.size() - 1, -1, -1):
@@ -458,6 +504,8 @@ func _replay(e: Dictionary, forward: bool) -> void:
 			_set_component(e, e["added"] == forward)
 		"cable":
 			_set_cable(e["cell"], e["added"] == forward)
+		"belt":
+			_set_belt(e["cell"], e["added"] == forward)
 		_:
 			var from: String = e["from"] if forward else e["to"]
 			var to: String = e["to"] if forward else e["from"]
@@ -478,9 +526,19 @@ func _set_component(e: Dictionary, present: bool) -> void:
 		var rec := {"uid": e["uid"], "id": e["id"], "anchor": [e["anchor"].x, e["anchor"].y], "rot": e["rot"]}
 		if e.has("out"):
 			rec["out"] = [e["out"].x, e["out"].y]
+		if e.has("stock"):  # it takes back what it held
+			var st: Dictionary = e["stock"]
+			Ammo.stock_into(rec, st)
+			if int(st.get("n", 0)) > 0:
+				inventory.add(str(st["ammo"]), -int(st["n"]))
+			if int(st.get("loaded", 0)) > 0:
+				inventory.add(Ammo.ammo_item(e["id"]), -int(st["loaded"]))
 		d["instances"].append(rec)
 		parts.load_dict(d)
 	else:
+		var held := Ammo.unload(ship, e["uid"])
+		if not held.is_empty():
+			e["stock"] = held
 		parts.remove_uid(e["uid"])
 	inventory.add(e["id"], -1 if present else 1)
 
@@ -491,6 +549,16 @@ func _set_cable(c: Vector2i, present: bool) -> void:
 	else:
 		ship.cables.cells.erase(c)
 	_shift(cable_cost, -1 if present else 1)
+
+
+func _set_belt(c: Vector2i, present: bool) -> void:
+	if present:
+		ship.belts.cells[c] = true
+	else:
+		ship.belts.cells.erase(c)
+		ship.belts.cut.erase(c)
+	ship.belts.rev += 1
+	_shift(belt_cost, -1 if present else 1)
 
 
 ## Add (`sign` 1) or take (-1) `cost` to or from the cargo.

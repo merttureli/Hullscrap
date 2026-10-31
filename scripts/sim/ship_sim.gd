@@ -31,6 +31,7 @@ const Workshop = preload("res://scripts/craft/workshop.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
@@ -278,6 +279,7 @@ func _step_ship(ship: Ship, dt: float) -> void:
 		if use > 0.0:
 			ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * use * dt)
 	Fire.tick(ship, dt, rng)
+	Ammo.tick(ship, dt)  # belt drives feed the guns that want ammo; units ride the belts
 	jobs_of(ship).tick(ship, dt, ships.size() > 1)  # more than one ship aboard the sim: a fight
 	for line in Mortality.tick(ship, dt):  # the downed bleed out
 		ship.log_event(line)

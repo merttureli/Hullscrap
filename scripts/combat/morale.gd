@@ -13,6 +13,7 @@ extends RefCounted
 ## - captured: the enemy had crew aboard and all of it is down (or gone) for `captured_s`: guns and helm stop.
 ## The session ticks it every substep after the arena; the pilot reads pilot_mode(). No nodes, no drawing.
 
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const CONFIG_PATH := "res://data/morale.json"
 const END_STATES: Array[String] = ["spared", "escaped", "captured"]
 const DAMAGE_EVENTS: Array[String] = ["hit", "shield", "deflect", "ricochet"]  ## arena events on the enemy that are the player's attack
@@ -209,7 +210,7 @@ func _can_shoot() -> bool:
 		if arena.weapons.status_of(arena, enemy, uid) != "ok" or not (m["powered"] if m["virtual"] else co.powered.get(uid, false)):
 			continue
 		var ammo := str(arena.weapons.def(m["id"])["ammo"])
-		if ammo == "" or co.ship.inventory.count(ammo) >= 1:
+		if ammo == "" or Ammo.can_supply(co.ship, uid, ammo, 1):
 			return true
 	return false
 

@@ -54,6 +54,7 @@ const COLUMNS: Array = [
 			["Esc", "Cancel a drag"],
 			["Mounts", "A weapon or engine goes outside the hull, against a wall; its inside half goes on the floor behind it"],
 			["Cables", "Every system needs a cable to a reactor (Cable is on Structure)"],
+			["Belts", "Ammo racks feed guns in their room; a belt drive and belts (Belt on Structure) carry ammo to the rest"],
 			["Mode bar", "Click Build, Play, Map, Shields, Crafting or Help"],
 		]],
 	],
