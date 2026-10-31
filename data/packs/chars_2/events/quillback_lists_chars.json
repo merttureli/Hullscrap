@@ -1,0 +1,21 @@
+{"events": [
+    {
+      "id": "char_pyracantha_challenge_in_writing", "type": "pirate", "weight": 14, "once": true, "requires": {"region": "quillback_lists", "stage_min": 3},
+      "text": "A ceremonial launch with banners on its aerials pulls alongside and fires a single, formal flare. A hatch opens, and a Quillback in a tabard (a Second, you gather, from the clipboard) passes across a sealed envelope on the end of a pole. It reads: 'Marshal Pyracantha of the Lists requests the honour of satisfaction. Your approach to the tournament decks was noted as an insult, of a kind. Weapons: ships' guns. Terms: first blood, or a draw, or dinner.' In the launch's window a vast, spined woman in a captain's coat salutes you, courteously, and goes on saluting until you do something.",
+      "choices": [
+        {"text": "Accept. Ships' guns, first blood.", "outcomes": [
+          {"weight": 100, "text": "The launch peels away, banners flying, and a long grey Lists cutter slides out from behind a deck to take its place. 'Satisfaction,' says the comm, with great warmth.", "effects": {"fight": "tier"}, "after_win": {"text": "Pyracantha's ship drifts, scored and smoking, with one drop of her pride on the hull. She is out of the hatch before it settles, gloves off, quills flat in respect. 'First blood to you,' she says, in a voice that carries. 'Satisfaction given. The custom is a dinner, and a clause says the loser serves the winner a season. I shall be your gun-captain until the dinner is paid for.' She looks at your gunnery. 'I had better start with the recoil.'", "effects": {"recruit": {"character": "pyracantha"}, "rep": {"clans": 1}}}}
+        ]},
+        {"text": "Propose a draw, and pay for the dinner (50 credits).", "requires": {"credits": 50, "pay": true}, "outcomes": [
+          {"weight": 60, "text": "The Marshal weighs it for the length of one long breath, and then, with immense courtesy, accepts. Dinner is a formal and very long affair; the toasts go on until the soup is cold, and by pudding you are friends. 'A draw,' she says, 'is the finest result in the Lists. I should like to see what else you do with it.'", "effects": {"recruit": {"character": "pyracantha"}}},
+          {"weight": 40, "text": "The Marshal is very sorry, but a dinner at that price would be an insult to her Second. She regrets the following. The Lists cutter comes round with a formal bow.", "effects": {"fight": "tier"}, "after_win": {"text": "The cutter lists, smoking, and the Marshal climbs out of the hatch with her quills flat. 'Well struck,' she says. 'The dinner is on me. And since I am in your debt, so is the rest of me, for a season.'", "effects": {"recruit": {"character": "pyracantha"}}}}
+        ]},
+        {"text": "[Quillback] Name your Quillback as Second.", "requires": {"species": "quillback"}, "outcomes": [
+          {"weight": 100, "text": "Your Quillback steps up in the lock with a tabard borrowed from the launch and reads the acceptance in the old form. The Marshal's quills go flat, one row at a time. 'A Second of the Lists,' she says, with deep feeling, 'aboard a ship. There is a place for this.' The terms are a draw, a long dinner and a transfer. She is on your roster by dessert.", "effects": {"recruit": {"character": "pyracantha"}}}
+        ]},
+        {"text": "Decline, by letter.", "outcomes": [
+          {"weight": 100, "text": "The launch withdraws with perfect decorum. Your reply, a short apology in your best handwriting, is returned the next day with corrections.", "effects": {}}
+        ]}
+      ]
+    }
+]}

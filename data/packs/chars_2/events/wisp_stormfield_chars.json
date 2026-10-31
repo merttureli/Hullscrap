@@ -1,0 +1,21 @@
+{"events": [
+    {
+      "id": "char_arci_loose_arc", "type": "anomaly", "weight": 22, "once": true, "requires": {"region": "wisp_stormfield", "stage_min": 4},
+      "text": "A knot of white light is playing catch with itself between two dead reactors, throwing a bolt from one cooling stack to the other and catching it, with a delighted crackle every time. It is the size of a person and the shape of a ribbon, and it has noticed your hull. The ribbon unrolls toward you, all manners and no brakes. 'Hello!' it says, in a voice like a radio between stations. 'Hello. You have a lot of reactor. May I earth? I have been doing the same two for eleven days and they are not as interesting as you.' It strikes your antenna mast and the cabin lights stutter. 'Sorry. Sorry. It is hard to be polite when you are mostly voltage.'",
+      "choices": [
+        {"text": "Let it earth on your hull. Brace for impact.", "outcomes": [
+          {"weight": 70, "text": "It strikes the plating and spreads over it in a long blue ripple, slides down into the wiring and, to everyone's relief, goes quiet. 'Better,' it says. 'I am Arci. May I stay in the wires? I will be very helpful. I will only occasionally be on fire.'", "effects": {"recruit": {"character": "arci"}}},
+          {"weight": 30, "text": "It earths a little hard. The whole hull rings, the lights go out for three seconds, and a fine blue haze comes out of the vents. When the lights come back the ribbon is gone, leaving a thank-you note burned into the paintwork and a scorch on the deck.", "effects": {"hull": -6}}
+        ]},
+        {"text": "Offer it a proper earth: a spike of copper (6 copper).", "requires": {"items": {"copper": 6}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You sink six copper rods in the deck as a ground-spike. Arci pours into them with a sigh like a bath being drawn. 'Oh, that is a good earth,' it says. 'That is a really good earth.' It stays for the soup, though it does not eat any.", "effects": {"recruit": {"character": "arci"}}}
+        ]},
+        {"text": "[Neon reactor] Show it your neon core.", "requires": {"component": "reactor_neon_mk1"}, "outcomes": [
+          {"weight": 100, "text": "Arci goes quiet for the first time since it arrived. Then it slides into the neon core's housing like a hand into a glove, and rings. 'I know this note,' it says. 'The first storm hummed it.' It does not come out again for two hours, and every light on the ship is a little brighter for it.", "effects": {"recruit": {"character": "arci"}}}
+        ]},
+        {"text": "Shut the shutters and let the storm pass.", "outcomes": [
+          {"weight": 100, "text": "The ribbon waits at the glass for a while, hopefully, then drifts back to its two reactors and throws the bolt again. It catches it. It looks, you think, a little less pleased.", "effects": {}}
+        ]}
+      ]
+    }
+]}

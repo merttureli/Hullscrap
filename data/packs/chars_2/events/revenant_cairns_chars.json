@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_ostrander_burning_cairn", "type": "wreck_field", "weight": 20, "once": true, "requires": {"region": "revenant_cairns", "stage_min": 5},
+      "text": "A cairn is on fire. Forty empty pressure-suits are lashed in a tower with their lamps facing out, and an oxygen line from an old gate-camp has split along one of the lashings and is feeding a flame inside the stack. The suits are burning with a low, steady, oddly respectful light. A Revenant is standing in the middle of it, pulling suits out of the tower one at a time and laying them on the deck in a row, calmly, the way you would carry children out of a house. A scorched patch on his chest reads OSTRANDER. 'Do not come in,' he calls, without hurry. 'It is only warm. But they are somebody. Each of these is somebody.'",
+      "choices": [
+        {"text": "Foam the stack down (3 polymer).", "requires": {"items": {"polymer": 3}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Your crew rig a foam line from the hold, and the fire goes down in a long white sigh. Ostrander stands up in the smoke with a suit in each arm and soot where his face should be. 'Thank you,' he says. 'I counted forty-one. I should like to count them somewhere else for a while.' He does not look back at the cairn. He reads the names aloud as he walks to your lock, one a minute, and does not stop until he has finished.", "effects": {"recruit": {"character": "ostrander"}}}
+        ]},
+        {"text": "[Firefighter] Go in and take the fire out properly.", "requires": {"trait": "firefighter"}, "outcomes": [
+          {"weight": 100, "text": "Your firefighter goes in with a hose and a plan, and Ostrander, without a word, falls into step beside them like a man joining a bucket chain. Between the two of them the stack is out in six minutes. 'You do this on purpose,' he says, with deep respect. 'I have only ever done it by accident.'", "effects": {"recruit": {"character": "ostrander"}}}
+        ]},
+        {"text": "Fly through the plume and vent the oxygen line.", "outcomes": [
+          {"weight": 100, "text": "You take the ship in through the burning smoke and bleed the line into your own hull's cold. The fire gutters and dies, and your plating is blistered from stem to stern. Ostrander climbs aboard with a suit under each arm and a polite nod. 'That was either brave or inexpensive,' he says. 'I could not tell which.'", "effects": {"recruit": {"character": "ostrander"}, "hull": -8}}
+        ]},
+        {"text": "Watch the cairn burn.", "outcomes": [
+          {"weight": 100, "text": "'Thank you for witnessing,' says Ostrander, to the flames, in the voice of a man who has been told this many times, and by better. He goes back in.", "effects": {}}
+        ]}
+      ]
+    }
+]}

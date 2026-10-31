@@ -1,0 +1,17 @@
+{"events": [
+    {
+      "id": "char_quoin_the_arch", "type": "wreck_field", "weight": 40, "once": true, "requires": {"stage_min": 5, "flag": "warden_lit"},
+      "text": "The gate arch is the last piece of a dead gate station: two broken piers and a curve of crystal and neon between them that should have fallen forty years ago. It has not fallen because a Warden is standing under it with its back to the keystone and its arms braced, holding up what is left of the arch's weight. Its lens is lit. Not dark, as yours was, but lit, steady and quite clearly awake. It has stood there so long that a crust of micrometeor dust has grown on its shoulders. As you close, it speaks on the Lumen band, in the level voice of a thing that has been alone with one task. 'Watch not relieved. I am holding the arch. I woke when the last spark came down the pier, which I understand is not how it is done. I find I do not wish to put it down.'",
+      "choices": [
+        {"text": "[Warden-frame] Tell it a post can be held by a post.", "requires": {"species": "warden_frame"}, "outcomes": [
+          {"weight": 100, "text": "Your Warden stands under the arch beside the other and says nothing for a long while, lenses level. Then: 'There is a procedure. A post may be held by a post.' It points at the wrecks round the pier. Together, in perfect silence, the two Wardens drag in six girders from the debris and wedge them under the keystone until the arch stands on its own. The arch's Warden takes its back off the stone with a creak and looks at the weight it is no longer carrying. 'Relieved,' it says, wondering. 'By girders.' It would like a name, something that holds up a corner. 'Quoin,' says your Warden, at once, as though it had been waiting to be asked.", "effects": {"recruit": {"character": "quoin"}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Shore the arch with struts (6 titanium).", "requires": {"items": {"titanium": 6}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Your crew bring over six titanium struts, wedge them under the keystone and tension them with a crane-beam. The arch groans, shifts and settles. The Warden, very slowly, takes its back off the stone, flexes its hands, and examines the weight it has just been relieved of. 'Relieved,' it says. 'By struts.' A pause. 'I should like a name, and a post. Something to hold that is not an arch.' Your engineer suggests Quoin. It says that will do.", "effects": {"recruit": {"character": "quoin"}}}
+        ]},
+        {"text": "Leave it at its post.", "outcomes": [
+          {"weight": 100, "text": "'Watch not relieved,' says the Warden, to your retreating stern. It sounds less like a report than a request.", "effects": {}}
+        ]}
+      ]
+    }
+]}

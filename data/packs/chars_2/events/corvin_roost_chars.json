@@ -1,0 +1,21 @@
+{"events": [
+    {
+      "id": "char_filigree_lot_nine", "type": "trader", "weight": 14, "once": true, "requires": {"region": "corvin_roost", "stage_min": 3},
+      "text": "Lot nine at the Tinsel Row auction is not an object. The auctioneer, an old Corvin in a feathered hat, taps a card on the lectern and announces it quietly: 'Lot nine: one appraiser, Filigree, good for fifteen years of honest valuation, selling her own contract at her own price. Reserve: three hundred and sixty credits. She is not accepting offers.' The Corvin on the block, sleek in a cloak of foil and verdigris, has her head cocked at the crowd with the look of a person who is certain of the number. 'It is what I am worth,' she says. 'I have valued everything else in the Roost. I am not going to undervalue myself for the sake of a sale.'",
+      "choices": [
+        {"text": "Meet the reserve (360 credits).", "requires": {"credits": 360, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The hammer comes down on the card. The Roost applauds, a dry rustle of feathers. Filigree steps off the block, tilts her head at you, at your ship, at your credit chip, at your teeth, and says nothing for a good ten seconds. 'Fair,' she says, in a tone that is almost warm. 'You paid it without blinking. Nobody does. I will take four per cent off my first estimate of you.'", "effects": {"recruit": {"character": "filigree"}}}
+        ]},
+        {"text": "Haggle her down (200 credits, and she may take offence).", "requires": {"credits": 200}, "outcomes": [
+          {"weight": 50, "text": "You open at two hundred and she stops, genuinely, as if you had drawn a hat out of her own sleeve. 'You are not supposed to,' she says. 'I told them I am not accepting offers.' She takes a long, slow look at her own valuation and, very carefully, finds a flaw in it. 'Two hundred,' she says, wondering. 'Fine. You win. It has never happened.'", "effects": {"items": {"credits": -200}, "recruit": {"character": "filigree"}}},
+          {"weight": 50, "text": "You open at two hundred. Filigree turns the full weight of her glint-eye on you. 'Two hundred,' she says, 'is what I would have paid for you,' and returns her attention to the room. The auctioneer collects a bidder's fee of forty for wasting the lectern's time.", "effects": {"items": {"credits": -40}}}
+        ]},
+        {"text": "[Corvin] Click her a counter-valuation.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin steps up and clicks a number back at her. A long, rapid, very rude exchange follows, in which the words 'frankly' and 'with respect' are used as weapons. When it ends both of them are glittering with satisfaction. 'That,' says Filigree, 'was the correct price. I did not know it until you said it.' She steps down from the block unaided, and the auctioneer, who has seen this before, strikes lot nine from the book.", "effects": {"recruit": {"character": "filigree"}}}
+        ]},
+        {"text": "Admire the lot, and bid on a candlestick instead.", "outcomes": [
+          {"weight": 100, "text": "A candlestick goes for eleven credits. You were not the bidder. You feel curiously cheated, and Filigree, on the block, appears to have worked out to the credit how much.", "effects": {}}
+        ]}
+      ]
+    }
+]}

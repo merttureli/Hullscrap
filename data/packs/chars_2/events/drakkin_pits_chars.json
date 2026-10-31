@@ -1,0 +1,21 @@
+{"events": [
+    {
+      "id": "char_kharra_house_tug", "type": "pirate", "weight": 14, "once": true, "requires": {"region": "drakkin_pits", "stage_min": 3},
+      "text": "A pit-house tug is hauling a Drakkin down the lane by her apron strings. The tug is painted with odds, in chalk, and half of them have been crossed out. The Drakkin hangs from the tow cable by one claw, holding a bag of bandages clear of the vacuum with the other. 'House property,' says the comm, in the voice of a bookmaker who has recently been shouted at. 'One cutman, in arrears for forty years of stitches given on credit. We are repossessing the fingers.' The Drakkin waves cheerfully at you with the bag. 'He is lying about the forty years,' she calls. 'It is thirty-eight.'",
+      "choices": [
+        {"text": "Take the house's tug on.", "outcomes": [
+          {"weight": 100, "text": "'Wonderful,' says the bookmaker, with real relief. 'Odds are against you.' The tug swings its guns round.", "effects": {"fight": "tier"}, "after_win": {"text": "The tug drifts dead in the lane with its chalked odds all rubbed out by the blast. The Drakkin climbs hand over hand along what is left of the tow cable, dusts her apron and counts her bandages. 'Kharra,' she says. 'I will want a hot room, a clean bench, and a stranger who is about to be hit. In that order.'", "effects": {"recruit": {"character": "kharra"}, "rep": {"clans": -1}}}}
+        ]},
+        {"text": "Pay her debt to the house (340 credits).", "requires": {"credits": 340, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The bookmaker counts it twice, rubs a line out of his ledger and lets the cable go. Kharra rights herself in the lane and sniffs the air of your ship through the lock like a connoisseur. 'Your engine room,' she says. 'Is it warm?'", "effects": {"recruit": {"character": "kharra"}}}
+        ]},
+        {"text": "[Drakkin] Let your Drakkin settle it in the pit, house rules.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 60, "text": "Your Drakkin steps onto the tug's open deck in a borrowed glove. The house champion goes down in the second round and does not see the third. 'Debt paid in blood,' the bookmaker concedes, which is how they like it. Kharra slaps your Drakkin on the shoulder with a hand like a shovel and steps across.", "effects": {"recruit": {"character": "kharra"}}},
+          {"weight": 40, "text": "The champion is bigger than described and the tow cable is thicker than the odds. Your Drakkin comes back with a swollen eye and a very detailed excuse. The tug moves off with Kharra still waving, her bag of bandages held high.", "effects": {"crew_hp": -12}}
+        ]},
+        {"text": "Wave back and fly on.", "outcomes": [
+          {"weight": 100, "text": "'Next time!' calls the Drakkin, as the cable reels her in. 'Bring a stranger!' The tug's chalked odds slide off the edge of your scope.", "effects": {}}
+        ]}
+      ]
+    }
+]}

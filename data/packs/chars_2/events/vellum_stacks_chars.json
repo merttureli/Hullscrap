@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_graticule_withdrawn_cart", "type": "empty", "weight": 20, "once": true, "requires": {"region": "vellum_stacks", "stage_min": 3},
+      "text": "An archive tug is hauling a cart of paper down the lane at a walking pace, and the cart is stencilled in red: WITHDRAWN FROM CIRCULATION. Its destination is painted on the side in a steady hand: THE FURNACE. The charts on it are folded, stacked and numbered, and one near the top has sat up and is looking at you with two ink dots. 'Excuse me,' says a very small, very polite voice. 'I understand I am obsolete. The lane I was drawn from was filled in by the Snap. I do not mind. But I should like it noted that I am still entirely accurate.' The tug's archivist checks a ledger without looking up. 'Surplus,' she says. 'Thirty credits handling to release a unit. Otherwise it goes in at the fourth bell.'",
+      "choices": [
+        {"text": "Sign the chart out and pay the handling (30 credits).", "requires": {"credits": 30, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The archivist stamps three forms, one of them twice, and hands the chart across still folded. It unfolds itself on your table, becomes briefly a person, and looks around the room with enormous interest. 'Graticule,' it says. 'That is the grid I was drawn on, and I kept the name. I will tell you where every ship you meet is going. I would ask only that you keep your lighter in a drawer.'", "effects": {"recruit": {"character": "graticule"}}}
+        ]},
+        {"text": "[Vellum] Re-file it as current, in the archivist's own hand.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Your Vellum takes the pen, finds the ledger line that says OBSOLETE, and with three small, immaculate strokes amends it to PERIODIC (REVISION PENDING). The archivist reads it twice and discovers she has no rule against it. 'Pending,' she says, and sighs, and releases the unit with a stamp. Graticule steps down from the cart and bows to your Vellum, and your Vellum bows back, creases and all.", "effects": {"recruit": {"character": "graticule"}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "[Radar] Show the archivist what a live chart is for.", "requires": {"component": "radar_mk1"}, "outcomes": [
+          {"weight": 100, "text": "The archivist follows you across to your radar room and watches the sweep go round with the face of a woman seeing a tide for the first time. Then she looks back at the cart. 'I had forgotten,' she says. 'They are meant to be used.' She wheels Graticule across herself, unstamped, and goes back to her ledger looking faintly ashamed of it.", "effects": {"recruit": {"character": "graticule"}}}
+        ]},
+        {"text": "Not your paperwork.", "outcomes": [
+          {"weight": 100, "text": "The cart goes on at a walking pace. From the top of the stack a small voice says, 'Thank you for your time,' with no reproach in it at all, which is worse.", "effects": {}}
+        ]}
+      ]
+    }
+]}
