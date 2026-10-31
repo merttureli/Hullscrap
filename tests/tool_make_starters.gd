@@ -14,6 +14,12 @@ extends SceneTree
 ## top-left cell of its OUTSIDE half (in space, against a flat stretch of the outer wall face; outward
 ## is up at rot 0, so rear engines use rot 2); the inside half goes on the floor behind the wall by the
 ## placement rule, so the part has to be placed where the real mount rules (mounts.gd) allow it.
+## A STARTER (docs/CONTENT.md 4c, "Start with very little") has a "frame" outline too: the hull frame, a big
+## silhouette of cells you may build on, in the same local coordinates as everything else (its bounding box
+## starts at 0,0, the ship sits in the middle of the grid). The "outline" of such a ship is only its built
+## core, somewhere inside the frame: the essentials and the walls of their rooms. The rest of the frame is
+## empty hull for the player to build in. Everything built has to stay inside the frame (the tool fails
+## if not). The pirate has no frame: its hull stays the bounding box plus MARGIN.
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -51,83 +57,84 @@ func _init() -> void:
 # rot] (mounts: the outside half). Each ship keeps the parts, crew and cargo of the rectangle it replaced,
 # and its mass and hull integrity stay within 15% of it (tests/test_ship_silhouettes.gd).
 
-## Scrap line: a lumpy freighter, a hold full of junk, unreliable parts. Three reactors, because scrap
-## parts draw 20% more and make 10% less.
-## Lumpy and lopsided: a blunt bow cut by 45 degree slopes (short on the port side, long on the starboard),
-## one fat cargo sponson on the port side, a scrap-plate patch sticking out of the starboard side, and a
-## wide engine block at the stern with round2 corners.
+## Scrap line: a lumpy freighter, scrap-plated all round, unreliable parts. One Mk2 reactor, because scrap
+## parts draw 20% more and make 10% less, and the Wheezer, both Kickjets and the Rattle Burst add up to more
+## than a scrap reactor gives.
+## The frame is lumpy and lopsided: a blunt bow cut by 45 degree slopes (short on the port side, long on the
+## starboard), a fat cargo sponson on the port side, a patch sticking out of the starboard side and a
+## rounded stern. Only the core is built: a plated bow with the Rattle Burst and the bridge, a workshop under
+## the bridge's port half (the starboard half hangs over a notch), the engine room with a wide stern block
+## and round2 corners, and the quarters in the port sponson. The Bubble Rig and a Net Mouth wait in the hold.
 func _rustbucket() -> Dictionary:
 	return {
-		"file": "starter_rustbucket", "name": "Rustbucket",
+		"file": "starter_rustbucket", "name": "Rustbucket", "was_hull": 1122, "at": [6, 5],
 		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Rook", "species": "basalt"}, {"name": "Juno", "species": "fenn"}],
-		"blurb": "Welded together from scrap: cheap, thick-skinned, a hold full of junk. Parts rattle and quit, but it hits back.",
-		"outline": [[8, 0], [21, 0], [26, 5], [26, 7], [30, 11], [30, 15], [26, 15], [26, 16], [28, 18], [28, 22], ["arc", 26, 22, 0, 90], [4, 24], ["arc", 4, 22, 90, 180], [2, 19], [0, 17], [0, 12], [5, 7], [5, 3]],
-		"plate": "scrap_plate", "plated": func(c): return true, "thick": func(c): return c.y <= 1,
+		"blurb": "Welded together from scrap: cheap, thick-skinned, a lumpy hull with a lot of empty frame to weld more onto. Parts rattle and quit, but it hits back.",
+		"frame": [[12, 0], [38, 0], [46, 8], [46, 14], [52, 20], [52, 28], [46, 34], ["arc", 44, 42, 0, 90], [12, 44], ["arc", 12, 42, 90, 180], [10, 36], [0, 26], [0, 18], [6, 12], [6, 8], [12, 2]],
+		"outline": [[20, 6], [26, 6], [30, 10], [30, 13], [24, 13], [24, 17], [30, 17], [30, 25], ["arc", 28, 25, 0, 90], [19, 27], ["arc", 19, 25, 90, 180], [17, 22], [11, 22], [10, 21], [10, 15], [11, 14], [17, 14], [17, 9]],
+		"plate": "scrap_plate", "plated": func(c): return true, "backed": func(c): return c.y <= 9 or c.x >= 29 or c.y >= 25, "thick": func(c): return true,
 		"walls": [
-			[7, 6, 23, 6], [11, 7, 11, 18], [6, 7, 10, 7], [3, 10, 3, 10], [2, 11, 10, 11],  # the weapons deck's floor, the workshop, the cargo hold's wall
-			[18, 7, 18, 12], [12, 13, 25, 13], [24, 14, 24, 14], [25, 17, 25, 17], [3, 18, 25, 18],  # the bridge, the engineering hall (its corners squared off), the engine deck's ceiling
+			[18, 12, 23, 12], [18, 16, 23, 16], [17, 14, 17, 21],  # the bridge's floor, the workshop's floor, the quarters' wall
 		],
-		"doors": [[13, 6, "h"], [21, 6, "h"], [18, 9, "v"], [11, 8, "v"], [11, 14, "v"], [14, 13, "h"], [12, 18, "h"], [20, 18, "h"]],
+		"doors": [[19, 12, "h"], [19, 16, "h"], [17, 18, "v"]],
 		"parts": [
-			["shrapnel_cannon_scrap", 9, -3], ["rattle_burst_scrap", 13, -2], ["bolt_thrower_scrap", 17, -2],
-			["fabricator", 7, 8], ["bed", 12, 8], ["bed", 14, 8], ["oxygen_scrap_mk1", 16, 8], ["helm", 21, 7], ["shield_scrap_mk1", 20, 9],
-			["reactor_scrap_mk1", 12, 14], ["reactor_mk2", 16, 14], ["reactor_scrap_mk1", 20, 14],
-			["radiator", 14, 20], ["engine_scrap_mk1", 5, 24, 2], ["engine_scrap_mk1", 21, 24, 2],
+			["rattle_burst_scrap", 21, 4], ["helm", 26, 10], ["fabricator", 18, 13],
+			["bed", 11, 15], ["bed", 13, 15], ["oxygen_scrap_mk1", 15, 15],
+			["reactor_mk2", 21, 18], ["radiator", 26, 18], ["engine_scrap_mk1", 19, 27, 2], ["engine_scrap_mk1", 24, 27, 2],
 		],
-		"cargo": {"scrap": 900, "copper": 60, "polymer": 12, "engine_scrap_mk1": 1, "radiator": 1, "bed": 1, "credits": 300, "fuel": 6},
+		"cargo": {"scrap": 500, "copper": 80, "polymer": 30, "shield_scrap_mk1": 1, "net_mouth_scrap": 1, "credits": 300, "fuel": 6},
 	}
 
 
-## Standard line: small and quick. Two Mk2 reactors because one cannot feed the guns, the shield, both rear
-## engines and the strafe pair on the side walls.
-## A sleek arrowhead: a long slope2 taper to a flat tip that carries the pulse gun, a narrow neck, a laser
-## on each shoulder step, and swept-back wings (45 degree leading edges) whose tips carry the strafe
-## engines, with a notch between the rear engines. Symmetric about x = 12.
+## Standard line: small and quick. One Mk2 reactor feeds the pulse gun, both rear engines, the O2 and the workshop.
+## The frame is an arrowhead (a long slope2 taper to a flat tip, swept-back wings with 45 degree edges, a tail
+## block), symmetric about x = 24. Only the fuselage is built: a titanium nose with the pulse gun on its tip,
+## the bridge, the quarters, the workshop and the engine room with the two Mk2 engines. The wings and the
+## rest of the frame are empty hull; the strafe pair and a light shield wait in the hold.
 func _courier() -> Dictionary:
 	return {
-		"file": "starter_courier", "name": "Courier",
+		"file": "starter_courier", "name": "Courier", "was_hull": 864,
 		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Bram", "species": "basalt"}],
-		"blurb": "Small, quick and reliable: standard parts, a titanium nose and a light shield. Stays out of trouble or shoots its way out.",
-		"outline": [[9, 0], [15, 0], [18, 6], [22, 6], [24, 8], [24, 19], [19, 19], [15, 17], [9, 17], [5, 19], [0, 19], [0, 8], [2, 6], [6, 6]],
-		"plate": "titanium_alloy", "plated": func(c): return c.y <= 6,
+		"blurb": "Small, quick and reliable: a titanium nose, a pulse gun and a roomy empty frame. The strafe jets and a light shield wait in the hold.",
+		"frame": [[20, 0], [28, 0], [34, 12], [36, 12], [48, 24], [48, 34], [42, 40], [34, 40], [34, 44], [14, 44], [14, 40], [6, 40], [0, 34], [0, 24], [12, 12], [14, 12]],
+		"outline": [[20, 9], [28, 9], [30, 13], [30, 29], [29, 30], [19, 30], [18, 29], [18, 13]],
+		"plate": "titanium_alloy", "plated": func(c): return true, "backed": func(c): return c.y <= 13, "thick": func(c): return c.y <= 13,
 		"walls": [
-			[7, 6, 7, 6], [16, 6, 16, 6], [6, 7, 7, 7], [16, 7, 17, 7], [7, 8, 16, 8], [7, 8, 7, 16], [16, 8, 16, 16], [8, 11, 15, 11], [8, 16, 8, 16], [15, 16, 15, 16],  # the bridge's floor, the wings' inner walls, the workshop's floor
-			[17, 14, 22, 14],  # the right wing's engine room
+			[19, 14, 28, 14], [24, 15, 24, 20], [19, 21, 28, 21],  # the bridge's floor, the quarters' wall, the engine room's ceiling
 		],
-		"doors": [[10, 8, "h"], [10, 11, "h"], [7, 9, "v"], [7, 13, "v"], [16, 9, "v"], [16, 12, "v"], [19, 14, "h"]],
+		"doors": [[21, 14, "h"], [26, 14, "h"], [21, 21, "h"], [26, 21, "h"]],
 		"parts": [
-			["laser_mk1", 2, 4], ["pulse_mk1", 10, -2], ["laser_mk1", 18, 4],
-			["shield_mk1", 10, 4], ["helm", 8, 6], ["fabricator", 10, 9],
-			["bed", 3, 10, 1], ["bed", 3, 12, 1], ["oxygen_gen", 3, 14, 1],
-			["reactor_mk2", 8, 12], ["reactor_mk2", 12, 12], ["radiator", 17, 10],
-			["engine_mk2", 1, 19, 2], ["engine_mk2", 19, 19, 2],
-			["engine_mk1", -2, 10, 3], ["engine_mk1", 24, 10, 1],  # the strafe pair on the wing tips (push right and left)
+			["pulse_mk1", 22, 7], ["helm", 26, 12],
+			["bed", 19, 15, 1], ["bed", 19, 17, 1], ["oxygen_gen", 19, 19, 1], ["fabricator", 25, 17],
+			["reactor_mk2", 22, 22], ["engine_mk2", 20, 30, 2], ["engine_mk2", 24, 30, 2],
 		],
-		"cargo": {"scrap": 220, "copper": 80, "titanium": 40, "polymer": 10, "engine_mk1": 1, "laser_mk1": 1, "afterburner": 1, "radiator": 1, "credits": 500, "fuel": 6},
+		"cargo": {"scrap": 400, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "shield_mk1": 1, "credits": 500, "fuel": 6},
 	}
 
 
-## Neon line: a glass cannon with a lot of power. A third radiator keeps the Heat Lance from cooking.
-## A faceted crystal: only 45 degree facets, symmetric about x = 11, a coated spire on the bow with a gun on
-## each step beside it, a pointed stern and a spine down the middle (shield, reactor, radiators, engine).
+## Neon line: a glass cannon with a lot of power. One Prism Core gives more than the whole ship draws.
+## The frame is a faceted crystal: only 45 degree facets (a long hexagon with a pointed bow and stern),
+## symmetric about x = 19. Only the spine is built: a coated spire with the Heat Lance on its tip, the
+## bridge, the quarters and the workshop side by side, and the engine room with the Ion Drive at the pointed
+## stern. The four-sector Neon Lattice Shield and the Siren Ion wait in the hold.
 func _prism() -> Dictionary:
 	return {
-		"file": "starter_prism", "name": "Prism",
+		"file": "starter_prism", "name": "Prism", "was_hull": 624, "at": [7, 9],
 		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Tess", "species": "emberkin"}, {"name": "Quill", "species": "fenn"}, {"name": "Wren", "species": "basalt"}],
-		"blurb": "A neon glass cannon: huge power, a snappy four-sector shield, thin skin, and everything runs hot.",
-		"outline": [[10, 0], [12, 0], [14, 2], [18, 2], [22, 6], [22, 10], [14, 18], [8, 18], [0, 10], [0, 6], [4, 2], [8, 2]],
-		"plate": "reflective_coating", "plated": func(c): return c.y <= 2 and (c.x in range(9, 13) or c.x in range(4, 8) or c.x in range(14, 18) or c.y < 2),
+		"blurb": "A neon glass cannon: huge power, thin skin, a big empty crystal frame to grow in, and everything runs hot. The shield waits in the hold.",
+		"frame": [[15, 0], [23, 0], [38, 15], [38, 25], [23, 40], [15, 40], [0, 25], [0, 15]],
+		"outline": [[9, 0], [15, 0], [18, 3], [18, 19], [15, 22], [9, 22], [6, 19], [6, 3]],
+		"plate": "reflective_coating", "plated": func(c): return true, "backed": func(c): return c.y <= 2, "thick": func(c): return c.y <= 2,
 		"walls": [
-			[3, 3, 3, 3], [18, 3, 18, 3], [1, 5, 1, 5], [20, 5, 20, 5], [1, 6, 20, 6], [8, 3, 8, 6], [13, 3, 13, 6],  # the nose deck's floor and corners, the walls round the shield room
-			[8, 7, 8, 14], [13, 7, 13, 14], [5, 14, 8, 14], [13, 14, 16, 14], [6, 15, 6, 15], [15, 15, 15, 15],  # the spine's walls, the wings' floor, the engine room's corners
+			[7, 6, 16, 6], [12, 7, 12, 12], [7, 13, 16, 13],  # the bridge's floor, the quarters' wall, the engine room's ceiling
 		],
-		"doors": [[4, 6, "h"], [10, 6, "h"], [16, 6, "h"], [8, 8, "v"], [13, 8, "v"]],
+		"doors": [[9, 6, "h"], [14, 6, "h"], [9, 13, "h"], [14, 13, "h"]],
 		"parts": [
-			["heat_lance_neon", 4, 0], ["siren_ion_neon", 14, 0], ["radiator", 2, 4], ["helm", 18, 4], ["shield_neon_mk1", 9, 2],
-			["bed", 2, 7], ["bed", 4, 7], ["oxygen_gen", 6, 7], ["fabricator", 16, 7],
-			["reactor_neon_mk1", 9, 7], ["radiator", 9, 11], ["radiator", 11, 11], ["engine_neon_mk1", 9, 18, 2],
+			["heat_lance_neon", 10, -2], ["helm", 11, 4],
+			["bed", 7, 7, 1], ["bed", 7, 9, 1], ["oxygen_gen", 7, 11, 1], ["fabricator", 13, 8],
+			["reactor_neon_mk1", 10, 14], ["radiator", 7, 15], ["radiator", 14, 15], ["engine_neon_mk1", 10, 22, 2],
 		],
-		"cargo": {"scrap": 120, "copper": 60, "polymer": 10, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "radiator": 1, "bed": 1, "credits": 400, "fuel": 6},
+		"cargo": {"scrap": 400, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "shield_neon_mk1": 1, "credits": 400, "fuel": 6},
 	}
 
 
@@ -157,20 +164,60 @@ func _pirate() -> Dictionary:
 
 # --- building ------------------------------------------------------------------------------------------
 
+## A starter is authored in the local coordinates of its built core and carries "at": [x, y], where the core
+## sits in the frame. Returns the spec with the outline, bulkheads, doors and parts moved there.
+func _placed(spec: Dictionary) -> Dictionary:
+	if not spec.has("at"):
+		return spec
+	var d := Vector2i(spec["at"][0], spec["at"][1])
+	var out := spec.duplicate()
+	out["outline"] = spec["outline"].map(func(p): return [p[0], p[1] + d.x, p[2] + d.y, p[3], p[4]] if p[0] is String else [p[0] + d.x, p[1] + d.y])
+	out["walls"] = spec["walls"].map(func(w): return [w[0] + d.x, w[1] + d.y, w[2] + d.x, w[3] + d.y])
+	out["doors"] = spec["doors"].map(func(w): return [w[0] + d.x, w[1] + d.y, w[2]])
+	out["parts"] = spec["parts"].map(func(p): return [p[0], p[1] + d.x, p[2] + d.y] + p.slice(3))
+	var plated: Callable = spec["plated"]
+	out["plated"] = func(c): return plated.call(c - d)
+	for key in ["thick", "backed"]:
+		if spec.has(key):
+			var fn: Callable = spec[key]
+			out[key] = func(c): return fn.call(c - d)
+	out.erase("at")
+	return out
+
+
 func _make(spec: Dictionary, skin_only := false) -> void:
+	spec = _placed(spec)
 	var name: String = spec["name"]
 	var ras := HullOutline.rasterize(spec["outline"])
 	for e in ras["errors"]:
 		_fail("%s: %s" % [name, e])
+	var frame := {}  # Vector2i -> true: the hull frame (starters), else empty
+	var flo := Vector2i.ZERO
+	var fhi := Vector2i.ZERO
+	if spec.has("frame"):
+		var fr := HullOutline.rasterize(spec["frame"])
+		for e in fr["errors"]:
+			_fail("%s frame: %s" % [name, e])
+		flo = Vector2i(1 << 20, 1 << 20)
+		fhi = Vector2i(-(1 << 20), -(1 << 20))
+		for c in fr["cells"]:
+			frame[c] = true
+			flo = flo.min(c)
+			fhi = fhi.max(c)
+		if flo != Vector2i.ZERO:
+			_fail("%s: the frame starts at %s, not 0,0" % [name, str(flo)])
 	var plate: String = spec["plate"]
-	var skin := HullOutline.layers(ras["cells"], func(c): return plate if spec["plated"].call(c) else "", func(c): return plate if spec.has("thick") and spec["thick"].call(c) else "")
+	var skin := HullOutline.layers(ras["cells"], func(c): return plate if spec["plated"].call(c) else "", func(c): return plate if spec.has("thick") and spec["thick"].call(c) else "", spec.get("backed", Callable()))
 	var lo := Vector2i(1 << 20, 1 << 20)
 	var hi := Vector2i(-(1 << 20), -(1 << 20))
 	for c in skin:
 		lo = lo.min(c)
 		hi = hi.max(c)
-	if lo != Vector2i.ZERO:
+	if lo != Vector2i.ZERO and frame.is_empty():
 		_fail("%s: the outline starts at %s, not 0,0" % [name, str(lo)])
+	if not frame.is_empty():
+		lo = flo  # the grid position comes from the frame
+		hi = fhi
 	for w in spec["walls"]:
 		for y in range(w[1], w[3] + 1):
 			for x in range(w[0], w[2] + 1):
@@ -181,7 +228,7 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 					skin[c]["tile"] = "wall"
 	if skin_only:
 		print("==== %s (skin only)" % name)
-		_print_skin(skin, lo, hi)
+		_print_skin(skin, lo, hi, frame)
 		return
 
 	var defs := TileDefs.new()
@@ -225,14 +272,21 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 	for c in all:
 		blo = blo.min(c)
 		bhi = bhi.max(c)
-	blo -= Vector2i(MARGIN, MARGIN)
-	bhi += Vector2i(MARGIN, MARGIN)
-	if blo.x < 0 or blo.y < 0 or bhi.x >= GRID.x or bhi.y >= GRID.y:
-		_fail(name + ": the hull does not fit the grid")
 	g.hull.clear()
-	for y in range(blo.y, bhi.y + 1):
-		for x in range(blo.x, bhi.x + 1):
-			g.hull[Vector2i(x, y)] = true
+	if frame.is_empty():
+		blo -= Vector2i(MARGIN, MARGIN)
+		bhi += Vector2i(MARGIN, MARGIN)
+		if blo.x < 0 or blo.y < 0 or bhi.x >= GRID.x or bhi.y >= GRID.y:
+			_fail(name + ": the hull does not fit the grid")
+		for y in range(blo.y, bhi.y + 1):
+			for x in range(blo.x, bhi.x + 1):
+				g.hull[Vector2i(x, y)] = true
+	else:
+		for c in frame:
+			g.hull[c + off] = true
+		var outside := all.filter(func(c): return not g.hull.has(c))
+		if not outside.is_empty():
+			_fail("%s: %d built cells leave the frame, first %s" % [name, outside.size(), str(outside.slice(0, 6).map(func(c): return c - off))])
 	ship.inventory.load_dict(spec["cargo"])
 	ship.refresh()
 
@@ -259,15 +313,16 @@ func _fail(text: String) -> void:
 	_bad = true
 
 
-## The skin map of a hull before anything is built in it: P plate, # steel, . floor, triangles and o for shaped cells.
-func _print_skin(skin: Dictionary, lo: Vector2i, hi: Vector2i) -> void:
+## The skin map of a hull before anything is built in it: P plate, # steel, . floor, triangles and o for shaped cells,
+## : for a cell of the empty frame.
+func _print_skin(skin: Dictionary, lo: Vector2i, hi: Vector2i, frame := {}) -> void:
 	print(HullOutline.ruler(lo, hi))
 	for y in range(lo.y, hi.y + 1):
 		var row := "%3d " % y
 		for x in range(lo.x, hi.x + 1):
 			var c := Vector2i(x, y)
 			if not skin.has(c):
-				row += " "
+				row += ":" if frame.has(c) else " "  # empty hull frame
 				continue
 			var sd: Dictionary = skin[c]["shape"]
 			row += HullOutline.shape_glyph(sd) if not sd.is_empty() else {"wall": "#", "floor": "."}.get(skin[c]["tile"], "P")
@@ -407,6 +462,8 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 	var cells: Array = g.tiles.keys()
 	for uid in ship.components.instances:
 		cells.append_array(ship.components.instances[uid]["out_cells"])
+	if spec.has("frame"):
+		cells.append_array(g.hull.keys())  # the map shows the whole frame
 	for c in cells:
 		lo = lo.min(c)
 		hi = hi.max(c)
@@ -417,6 +474,8 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 			for x in range(lo.x, hi.x + 1):
 				var c := Vector2i(x, y)
 				var ch := " "
+				if spec.has("frame") and g.hull.has(c):
+					ch = ":"  # empty hull to build on
 				var t: String = g.get_tile(c)
 				if t != "":
 					ch = tile_glyph.get(t, "?")
@@ -460,6 +519,12 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 	print("   mass %.0f  thrust %.1f  accel %.1f px/s2  turn %.2f rad/s2  hull %d  shield %d layers x %d sectors  weapons %d  cables %d  tiles %d  cargo %s" % [
 		co.mass, co.thrust, co.thrust * co.flight.thrust_to_accel / co.mass, co.thrust * co.flight.turn_factor / co.mass,
 		co.hull_max, co.layers_cap, co.sectors, co.mounts.size(), ship.cables.cells.size(), g.tiles.size(), str(ship.inventory.to_dict())])
+	if spec.has("frame"):
+		var empty := 0
+		for c in g.hull:
+			empty += int(g.get_tile(c) == "" and ship.components.at_out(c) < 0)
+		print("   frame %d cells (%.2fx the old hull of %d), %d tiles, %d components, empty %d = %.0f%%" % [
+			g.hull.size(), float(g.hull.size()) / spec["was_hull"], spec["was_hull"], g.tiles.size(), ship.components.instances.size(), empty, 100.0 * empty / g.hull.size()])
 	var pockets := HullOutline.pockets(ship)
 	if not pockets.is_empty():
 		_fail("%s: %d floor cells no crew body reaches from the helm: %s" % [spec["name"], pockets.size(), str(pockets.map(func(c): return c - off))])
