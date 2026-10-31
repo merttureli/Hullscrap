@@ -178,3 +178,15 @@ Each race's parts share one visual signature that reads at 1x. Generators: `art/
 - Projectile art per weapon id (`projectiles/<id>`, anim `fly`, faces UP, anchors `head` and `tail`; the impact anim `play` is a one-shot, anchor = its centre): slag, rock slug, pumice rock (basalt); a tiling flame stream for the Pyre Lance (`tile: y`, 8x16, glow tiles too), a cinder shell, a flare (emberkin); a tiny bolt, spark splinters, a scrap missile with confetti (fenn); a drone swarm, chitin needles, an interceptor drone (kett); a small missile, a blue-white rail slug with a Concord rail flash, a flak tracer (human). `emberkin_pyre_lance` is a beam: draw it tiled from the lance to the hit, like `beam`.
 - Sizes worth knowing: `human_crew_quarters_deluxe` is 2x2 (a bunk pod), not the 2x4 of `bed`. Long barrels are drawn long: `basalt_quarry_driver` 72 px, `human_concord_railgun` 74 px, `emberkin_pyre_lance` 74 px (the barrel sprite may extend far above its outside half; the muzzle is in the JSON `barrel.muzzle`).
 - Engines: `emberkin_pyre_drive` breathes a hard-pixel flame over its bell (3-frame loop) and `fenn_haggle_engine` has four small nozzles; anchors `exhaust`/`exhaust_a..d`, `power_coupling`, `repair_hatch` are in the JSONs as for the other engines.
+
+### Racial hand weapons (race wave 1: Kett, Mire, Sporeling, Gauntling, Prismatic, Grundl)
+Generator `art/_src/hand_race.py` (one module, no new palette colours; `build_all.py` calls it), preview `python3 art/_src/sheet_hand.py out.png`. Same format as the other hand weapons of `items/`: ONE PNG per weapon (faces UP, 1 px outline, `anchors.grip` / `muzzle`, `class` = the arm pose), which is both the held sprite and the item's icon, plus `<id>_glow.png`. The id is the `art` of the weapon in `data/packs/tech_<race>/hand_weapons.json`. Muzzle flashes go in `items/fx/muzzle_<name>.png` (3 frames, anim `play`, faces UP, anchor `muzzle` on the weapon's muzzle; `for_item` names the weapon); the melee weapons have none, like the quarry hammer and the ember knife.
+| weapon (class) | race signature | flash |
+|---|---|---|
+| `sting_pistol` (pistol), `hive_prod` (melee) | Kett: amber chitin, cream needle, green venom, honeycomb cells | `muzzle_sting` |
+| `bubble_rifle` (rifle), `hook_gaff` (melee) | Mire: wet teal housing, brass, glass foam tank, red hand-wheel, steel crook | `muzzle_bubble` |
+| `spore_puffer` (tool), `thorn_lash` (melee) | Sporeling: cream and brown growth, violet spore sac, thorns | `muzzle_puff` |
+| `rivet_fist` (heavy), `arc_welder` (tool) | Gauntling: mismatched steel and rust, copper winding, cyan arc | `muzzle_rivet`, `muzzle_weld` |
+| `lens_pistol` (pistol), `shard_lance` (heavy) | Prismatic: faceted violet and navy, cyan and magenta cores | `muzzle_lens`, `muzzle_shard` |
+| `freight_hammer` (melee), `chain_gun` (heavy) | Grundl: dark riveted gunmetal, amber stencil, chains | `muzzle_chain` |
+Each race's `sidearm` in `data/packs/races_1/species.json` is its first weapon of this list.

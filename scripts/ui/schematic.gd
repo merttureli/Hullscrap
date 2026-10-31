@@ -10,6 +10,7 @@ const Visuals = preload("res://scripts/view/visuals.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Intent = preload("res://scripts/combat/intent.gd")
+const Skulls = preload("res://scripts/ui/skulls.gd")
 
 const PANEL := Vector2(280.0, 200.0)
 const MAP := Rect2(8.0, 26.0, 264.0, 132.0)
@@ -28,11 +29,13 @@ const GOLD := Color("#ffd24a")
 const ION := Color("#a07bff")
 const THREAT := Color("#ff3a3a")  ## the intent reticle and its rows
 const ROW_H := 16.0  ## px per line of the intent strip under the panel
+const SKULL_K := 0.6  ## the size of the threat skulls in the title bar
 
 var arena
 var index := 0
 var title := ""
 var intent: Dictionary = {}  ## Intent.of(...), set each frame on the player's panel; {} draws nothing
+var threat := 0  ## the enemy's panel: its threat in skulls (1-5), drawn small at the right of the title bar; 0 draws none
 
 
 func _init() -> void:
@@ -137,7 +140,10 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, PANEL), BG)
 	draw_rect(Rect2(Vector2.ZERO, PANEL), EDGE, false, 2.0)
 	draw_rect(Rect2(2, 2, PANEL.x - 4, 20), Color(0.12, 0.2, 0.3, 0.7))
-	_text(title.to_upper(), Vector2(10, 17), 13, TEXT)
+	var skulls_w := Skulls.width(SKULL_K) + 8.0 if threat > 0 else 0.0
+	draw_string(ThemeDB.fallback_font, Vector2(10, 17), title.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, PANEL.x - 20.0 - skulls_w, 13, TEXT)
+	if threat > 0:
+		Skulls.draw(self, Vector2(PANEL.x - 8.0 - Skulls.width(SKULL_K), 12.0), threat, Skulls.color(threat), SKULL_K)
 	if grid.hull.is_empty():
 		return
 	var map := draw_map(self, co.ship, co.powered, MAP)

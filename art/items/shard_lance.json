@@ -1,0 +1,36 @@
+{
+ "frame": [
+  11,
+  43
+ ],
+ "anchors": {
+  "grip": [
+   5,
+   35
+  ],
+  "muzzle": [
+   5,
+   0
+  ],
+  "foregrip": [
+   5,
+   18
+  ]
+ },
+ "class": "heavy",
+ "pose": "heavy",
+ "culture": "prismatic",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Prismatic shard lance: a long faceted violet and navy shaft with cyan edge lines, a magenta core, a big cyan crystal head with a shard floating either side. Its shots split on hit (later).",
+ "glow": {
+  "image": "shard_lance_glow.png",
+  "frame": [
+   19,
+   51
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

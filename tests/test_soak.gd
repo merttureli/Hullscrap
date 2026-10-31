@@ -17,6 +17,7 @@ const Sector = preload("res://scripts/space/sector.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const CombatView = preload("res://scripts/combat/combat_view.gd")
@@ -387,7 +388,7 @@ func _event_chain(where: String, ev: Dictionary, c: Campaign, sim, pick: RandomN
 			elif done["goto"] != "" and c.events.has(done["goto"]):
 				queue.append(c.events.get_event(done["goto"]))
 			elif done["state"] in ["won", "captured"]:
-				queue.append(Salvage.event_for(res.get("enemy"), done["state"], c, ship))
+				queue.append(Salvage.event_for(res.get("enemy"), done["state"], c, ship, null, int(done["threat"])))
 				stats["salvage"] += 1
 		elif str(r["goto"]) != "":
 			check(c.events.has(r["goto"]), "%s: '%s' goes to an event that does not exist: %s" % [where, e.get("id", "?"), r["goto"]])
@@ -460,7 +461,7 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 	stats[{"won": "won", "captured": "won", "spared": "won", "lost": "lost"}.get(state, "draw")] += 1  # escaped and fled are draws
 	_helm.place(mine.flight.pos, mine.flight.vel, mine.flight.angle, mine.flight.ang_vel)
 	_helm.sync_to(s)
-	var res := {"state": state, "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max, "enemy_pos": foe.flight.pos}
+	var res := {"state": state, "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max, "enemy_pos": foe.flight.pos, "threat": ses.threat}
 	if state == "spared":
 		res["offer"] = ses.morale.offer.duplicate()
 	stats["fight_ticks"] += n
@@ -476,7 +477,7 @@ func _stub_fight(enemy, player, c: Campaign, pick: RandomNumberGenerator, at: Ve
 	stats["won" if state == "won" else ("draw" if state == "fled" else "lost")] += 1
 	var hull_max := float(c.hull_max(player))
 	var hull := 0.0 if state == "lost" else maxf(1.0, hull_max - float(c.hull_loss) - pick.randf() * 60.0)
-	return {"state": state, "enemy": enemy, "hull": hull, "hull_max": hull_max, "enemy_pos": at}
+	return {"state": state, "enemy": enemy, "hull": hull, "hull_max": hull_max, "enemy_pos": at, "threat": int(Shipgen.threat(enemy, player)["skulls"])}
 
 
 func _audit_fight(where: String, s: Session) -> void:
