@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_nerithe_mislabelled", "type": "anomaly", "weight": 20, "once": true, "requires": {"region": "siltborn_rings", "stage_min": 4},
+      "text": "A harbour hail from the Gossamer rings across the ring-ice: 'Unit sorted FLAMMABLE, please collect.' The unit in question is a Siltborn drifting alone at the edge of the lock, a pale bell with tendrils glowing a miserable pinkish orange and the word FLAMMABLE in marker across her dome. 'I am not flammable,' she says, to the sorting machine, to you, to the ring. 'My tendrils do that when I am embarrassed. I have been sorted FLAMMABLE for nine days. The flock will not take me back until the label is withdrawn, and the label can only be withdrawn by a person in the HEAVY category, and I am not allowed to be HEAVY.' A sorting arm clanks.",
+      "choices": [
+        {"text": "Vouch for her at the lock, and pay for the form (30 credits).", "requires": {"credits": 30, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You file Form 11, Withdrawal of a Hazard Label, with your name and a signature in the HEAVY column. The sorting arm considers you and your thirty credits, and peels the label from her bell with a small clean sound. Nerithe's tendrils change from orange to soft, relieved violet. 'Thank you,' she says. 'The flock will ask where I was. I do not think I will tell them. I would like, if I may, to see what you are heavy with.'", "effects": {"recruit": {"character": "nerithe"}}}
+        ]},
+        {"text": "[Siltborn] Hum the flock-note to her.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn drifts alongside and hums the flock's low note, and Nerithe's tendrils settle at once. The sorting arm hesitates, unable to classify a thing that hums. 'I do not wish to go back,' says Nerithe, after a while. 'They sorted me on the day I most needed a place. I should like to see the places that sort differently.'", "effects": {"recruit": {"character": "nerithe"}}}
+        ]},
+        {"text": "[Medbay] Show her the sick room: 'We have a place for the poorly.'", "requires": {"component": "medbay"}, "outcomes": [
+          {"weight": 100, "text": "Nerithe floats into your medbay and her tendrils glow a soft, grateful gold. 'A room with hardly any air, and a bed in it,' she says. 'Do you know how long I have waited for somebody to build one?' She is on the roster before you have finished your sentence, and the label is quietly gone from her dome. Nobody asks how.", "effects": {"recruit": {"character": "nerithe"}}}
+        ]},
+        {"text": "Leave her in the queue.", "outcomes": [
+          {"weight": 100, "text": "'It is quite all right,' says Nerithe, glowing a tactful pink. 'I am sure they will get to me.' The sorting arm clanks again, and moves her one place along.", "effects": {}}
+        ]}
+      ]
+    }
+]}

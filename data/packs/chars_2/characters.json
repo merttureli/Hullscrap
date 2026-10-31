@@ -103,6 +103,62 @@
       "ability": {"id": "repair_burst", "cooldown": 24, "params": {"amount": 5}},
       "obtained": "The Long Slack (stage 2+): holding a patch on a leaking hull at the middle of a kilometre of washing line. Hold station for him (1 fuel), take the other end of the line with a Kite of your own, or pin the plate with a tractor beam.",
       "lore": "The Rope Walker. Bowline mends hulls on the outside, where the air is thin and the cold is thinner, at the end of a kilometre of line tied to his own tail. He has never worn a suit and finds the idea claustrophobic. He sends his regards to your gravity, and asks if it is always this heavy."
+    },
+    {
+      "id": "quoin", "name": "Quoin", "species": "warden_frame",
+      "rig": {"tint": "#cfd8e3", "head": "lens"},
+      "traits": {"damage_taken": {"ion": 0.7}},
+      "ability": {"id": "shield_layer", "cooldown": 36, "params": {"layers": 1, "duration": 20}},
+      "obtained": "Hard to get (stage 5+, any region): only after you have woken a Warden of your own in the reboot quest (the flag warden_lit). A second Warden-frame is holding up a dying gate arch with its back. Relieve its post with your own Warden-frame, or shore the arch with struts (6 titanium).",
+      "lore": "The Cornerstone. Quoin was woken by the last spark off a gate pier, which is not how it is done, and found the arch above it cracked to the exact width of its back. It has held the arch up ever since, on the principle that somebody should. It holds your shield just as steadily, and will not be hurried off a post by anything short of a very good reason."
+    },
+    {
+      "id": "winze", "name": "Winze", "species": "murrow",
+      "rig": {"tint": "#a8825a", "head": "lamp"},
+      "traits": {"mining_mult": 1.3},
+      "ability": {"id": "phase", "cooldown": 22, "params": {"range": 8}},
+      "obtained": "The Murrow Diggings (stage 3+): he comes up through the floor of your hold, aiming for the neighbours. Hire him on (30 credits), dig the neighbours' tunnel with a Murrow of your own, or show him a laser cutter.",
+      "lore": "The Wrong Turn. Winze has dug through the walls of four colonies, two freighters and a wedding, and apologised for every one. He has no sense of direction and a perfect sense of rock: aim him at a bulkhead and he arrives in the next room dusty and sorry. He still owes the Hendersons a pie."
+    },
+    {
+      "id": "nerithe", "name": "Nerithe", "species": "siltborn",
+      "rig": {"tint": "#b8d6e8", "head": "bloom"},
+      "traits": {"low_pressure_heal": 0.5},
+      "ability": {"id": "heal_burst", "cooldown": 28, "params": {"amount": 32}},
+      "obtained": "The Siltborn Rings (stage 4+): sorted FLAMMABLE by the Gossamer's lock and refused re-entry to her flock. Vouch for her and pay the form (30 credits), hum the flock-note with a Siltborn of your own, or show her your medbay.",
+      "lore": "The Mislabelled. Nerithe was sorted FLAMMABLE for blushing, and spent nine days in the wrong queue before anybody asked. In a room with hardly any air she is the best thing in the Drift to be hurt beside: her tendrils go soft gold and the hurt get up. She would be grateful if you did not light a flame."
+    },
+    {
+      "id": "filigree", "name": "Filigree", "species": "corvin",
+      "rig": {"tint": "#4a3d5c", "head": "loupe"},
+      "traits": {"haggler": 0.05},
+      "ability": {"id": "hack", "cooldown": 48, "params": {"duration": 7, "families": ["shield", "weapon", "engine"]}},
+      "obtained": "The Corvin Roost (stage 3+), expensive: lot nine at the Tinsel Row auction is Filigree herself, reserve 360 credits. Meet the reserve, haggle (200 credits, and she may take offence and 40 of them), or name her a price in clicks with a Corvin of your own.",
+      "lore": "The Appraiser. Filigree has an eye for value and a pickpocket's hands, and the two have never been formally introduced. Sit her at a helm and the enemy's guns go missing for a few seconds, then turn up in the same place looking embarrassed. She has put a price on everything in the Roost, herself included. It is the only one she has never been argued down from."
+    },
+    {
+      "id": "quigley", "name": "Quigley", "species": "brine",
+      "rig": {"tint": "#d9a032", "head": "helmet"},
+      "traits": {"work_mult": {"restock": 1.2}},
+      "ability": {"id": "rally", "cooldown": 38, "params": {"mult": 1.6, "duration": 20}},
+      "obtained": "The Brine Yards (stage 2+): a picket line across the lane, out over the tea break. Hold station for the shift (1 fuel), walk the line with a Brine of your own, or cross it and see where the tea goes.",
+      "lore": "The Shop Steward. Quigley has called four strikes, lost two, won two and made tea at all of them. When a shift flags she stands on a crate and says what the foreman will not, and the whole room finds it has more in it than it thought. Nothing moves until she moves it, and she moves it with a mug of tea in the small hand."
+    },
+    {
+      "id": "obliged", "name": "Obliged", "species": "echo",
+      "rig": {"tint": "#c9d3e6", "head": "mimic"},
+      "traits": {"damage_taken": {"ion": 0.8}},
+      "ability": {"id": "shield_layer", "cooldown": 34, "params": {"layers": 1, "duration": 12}},
+      "obtained": "Hard to get, a chain of two events: answer the late reply in the Echo Glassways (stage 5+), then find it already standing in your airlock a stage or two later (any region, stage 6+).",
+      "lore": "The Courtesy. Obliged arrives a day before it is expected and is sorry to have been early. It wears the face of whoever is looking at it, slightly improved, and turns a shot aside the same way, returned a little kinder than it came. It says it is much obliged. It means it, and tomorrow it will have meant it too."
+    },
+    {
+      "id": "lenz", "name": "Lenz", "species": "ferro",
+      "rig": {"tint": "#8a8f9c", "head": "ripple"},
+      "traits": {"hp_mult": 1.1},
+      "ability": {"id": "power_system", "cooldown": 42, "params": {"power": 4, "duration": 24}},
+      "obtained": "The Ferro Lodes (stage 4+): wound round a dead reactor's coil and unwilling to move. Offer him a bigger coil (6 copper), show him a running reactor, or merge currents with a Ferro of your own.",
+      "lore": "The Dynamo. Lenz opposes change; it is his nature and, he points out, a law. He will not move house, take a new name or be talked out of a coil he likes, but put him beside a system and he pours his whole current into it, steadily, stubbornly, in the way he does everything. The lights stay on. He would like them to stay exactly as they are."
     }
   ]
 }
