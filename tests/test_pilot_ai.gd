@@ -8,7 +8,10 @@ const Session = preload("res://scripts/combat/combat_session.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
+const Collisions = preload("res://scripts/combat/collisions.gd")
 const PIRATE := "res://data/ships/pirate_raider.json"
+const COURIER := "res://data/ships/starter_courier.json"
+const LARGE := "gen:concord:large:7:30000"  ## a large Concord ship (radius 600+ px): a row of 3 bow guns and 4 flank turrets
 const DT := 1.0 / 60.0
 
 
@@ -109,14 +112,15 @@ func _run(a: Arena, ais: Array, seconds: float) -> void:
 func test_the_ai_closes_to_its_preferred_range_and_shoots() -> void:
 	var d := _duel()
 	var a: Arena = d[0]
+	var ai: PilotAI = d[1][0]
 	a.autofire[1] = false  # the sitting foe holds fire
 	_run(a, d[1], 20.0)
 	var dist: float = a.ships[0].flight.pos.distance_to(a.ships[1].flight.pos)
-	var radii: float = d[1][0]._radius(0) + d[1][0]._radius(1)
-	var want := maxf(PilotAI.RANGE_FRACTION * float(a.weapons.def("laser_mk1")["range"]), radii + PilotAI.HULL_MARGIN)
-	check(want > 0.7 * 900.0, "(the two hulls are wider than 70%% of the laser range: it must hold %d, not 630)" % want)
+	var u: Vector2 = (a.ships[1].flight.pos - a.ships[0].flight.pos) / dist
+	var want := ai.hold_distance(u, ai._intact())
+	var gap := dist - ai.extent(0, u) - ai.extent(1, -u)
 	check(absf(dist - want) < 0.2 * want, "it holds %d between the centres, it holds %d" % [want, dist])
-	check(dist > radii, "so the hulls never clip")
+	check(gap > 0.5 * PilotAI.HULL_MARGIN, "so the hulls never clip (a gap of %d px)" % gap)
 	check(_count(a, "shot", 0) >= 8, "it fires: %d shots" % _count(a, "shot", 0))
 	check(_count(a, "hit", 1) + _count(a, "shield", 1) > 0, "and hits")
 	check(a.ships[1].hull < a.ships[1].hull_max, "the foe's hull is hurt")
@@ -131,24 +135,102 @@ func test_the_ai_closes_to_its_preferred_range_and_shoots() -> void:
 	check(arcs >= 1, "it keeps the foe where one of its guns can bear")
 
 
-func test_the_ai_aims_at_weapons_then_engines_then_the_reactor() -> void:
+## The gap it keeps is RANGE_FRACTION of a bow gun's range between the hulls (each hull's reach along the line between the
+## centres, not a bounding circle), and a flank turret far behind the bow asks for a closer one.
+func test_the_hold_distance_counts_each_hull_and_each_gun() -> void:
+	var a := Arena.new(1)
+	a.add_ship(Ship.from_design(COURIER), Vector2.ZERO)
+	a.add_ship(Session.load_ship(LARGE), Vector2(0.0, -2000.0), PI)
+	var ai := PilotAI.new(a, 0, 1)
+	var u := Vector2.UP
+	var ext: float = ai.extent(0, u)
+	var pulse := 0.7 * float(a.weapons.def("pulse_mk1")["range"])
+	near(ai.hold_distance(u, ai._intact()) - ext - ai.extent(1, -u), pulse, "one bow gun: a gap of 70% of its range", 40.0)
+	var big := PilotAI.new(a, 1, 0)
+	var gap: float = big.hold_distance(-u, big._intact()) - big.extent(1, -u) - big.extent(0, u)
+	check(gap < 0.7 * 900.0 - 50.0 and gap >= PilotAI.HULL_MARGIN - 1e-3, "the large ship's flank turrets ask for a closer gap than its bow guns would (%d)" % gap)
+
+
+## A starter flown by the AI reaches a large generated enemy (radius 600+ px, more than the starter's gun range between
+## the bounding circles) and hits it.
+func test_a_starter_reaches_a_large_enemy_and_hits_it() -> void:
+	var s := Session.new()
+	s.start(Ship.from_design(COURIER), Session.load_ship(LARGE), 3)
+	var a: Arena = s.arena
+	check(float(Collisions.hit_cells(a, 1)["radius"]) + float(Collisions.hit_cells(a, 0)["radius"]) > float(a.weapons.def("pulse_mk1")["range"]), "(the two bounding circles are wider than the pulse's range)")
+	a.autofire[1] = false
+	var pilot := PilotAI.new(a, 0, 1, {"aim_skill": 0.75})
+	for k in 25 * 60:
+		pilot.think(DT)
+		a.step(DT)
+	check(_shots_of(a, 0, "pulse_mk1") >= 8, "it fires its pulse (%d shots)" % _shots_of(a, 0, "pulse_mk1"))
+	check(_count(a, "hit", 1) + _count(a, "shield", 1) >= 5, "and its shots land (%d)" % (_count(a, "hit", 1) + _count(a, "shield", 1)))
+
+
+## A large enemy's pilot fires every gun of its bow row (a row of fixed guns cannot all point at one part, but each lines up
+## on the hull) and its flank turrets, at a starter that sits still.
+func test_a_large_enemy_brings_its_guns_to_bear() -> void:
+	var s := Session.new()
+	s.start(Ship.from_design(COURIER), Session.load_ship(LARGE), 3)
+	var a: Arena = s.arena
+	for k in 30 * 60:
+		s.ai.think(DT)
+		a.step(DT)
+	var fixed := 0
+	var turrets := 0
+	for uid in a.ships[1].mounts:
+		var id: String = a.ships[1].mounts[uid]["id"]
+		var n := 0
+		for e in a.events:
+			n += int(e["type"] == "shot" and e["ship"] == 1 and e["uid"] == uid)
+		if a.weapons.def(id)["turret"]:
+			turrets += int(n > 0)
+		else:
+			check(n >= 3, "the bow gun %s (%d) fires (%d shots)" % [id, uid, n])
+			fixed += 1
+	check(fixed >= 2, "(it has a row of bow guns: %d)" % fixed)
+	check(turrets >= 1, "and a flank turret fires too")
+
+
+func test_a_shot_lines_up_on_the_hull_or_not() -> void:
+	var d := _duel()
+	var a: Arena = d[0]
+	var ai: PilotAI = d[1][0]
+	var from: Vector2 = a.ships[0].flight.pos + Vector2(0.0, -400.0)
+	var to_foe: Vector2 = (a.ships[1].flight.pos - from).normalized()
+	check(ai.on_hull(from, to_foe, 2000.0), "straight at the foe")
+	check(not ai.on_hull(from, -to_foe, 2000.0), "not away from it")
+	check(not ai.on_hull(from, to_foe.rotated(PI / 2.0), 2000.0), "not sideways")
+	check(not ai.on_hull(from, to_foe, 200.0), "not beyond the gun's range")
+
+
+## A pilot of SNIPE_SKILL or better aims at the foe's weapons, then its hull; a worse one at its hull from the start, at a
+## wall clear of the guns' outside halves; a fleeing foe's engines come first.
+func test_who_aims_at_what() -> void:
 	var d := _duel()
 	var a: Arena = d[0]
 	var ai: PilotAI = d[1][0]
 	var foe: Ship = a.ships[1].ship
 	var family := func(uid: int) -> String: return foe.components.def(foe.components.instances[uid]["id"])["family"]
-	eq(family.call(ai.pick_target()), "weapon", "weapons first")
+	ai.aim_skill = 0.9
+	eq(family.call(ai.pick_target()), "weapon", "a sniper aims at the weapons first")
+	ai.aim_skill = 0.5
+	eq(ai.pick_target(), -1, "a brute aims at the hull")
+	var p: Vector2 = ai.hull_point()
+	var t: String = foe.grid.get_tile(Vector2i(floori(p.x), floori(p.y)))
+	check(foe.grid.tile_flag(t, "solid") or foe.grid.tile_flag(t, "door"), "at a wall (%s)" % t)
+	for uid in foe.components.instances:
+		for c in foe.components.instances[uid]["out_cells"]:
+			if family.call(uid) == "weapon":
+				check(maxi(absi(c.x - floori(p.x)), absi(c.y - floori(p.y))) > PilotAI.GUN_CLEARANCE, "clear of the guns' outside halves")
+	ai.foe_morale = {"state": "fleeing"}  # morale.gd's state is all the pilot reads
+	eq(family.call(ai.pick_target()), "engine", "a fleeing foe's engines first")
+	ai.foe_morale = null
+	ai.aim_skill = 0.9
 	for uid in foe.components.instances:
 		if family.call(uid) == "weapon":
 			foe.components.instances[uid]["status"] = "disabled"
-	eq(family.call(ai.pick_target()), "engine", "then engines")
-	for uid in foe.components.instances:
-		if family.call(uid) == "engine":
-			foe.components.instances[uid]["status"] = "disabled"
-	eq(family.call(ai.pick_target()), "reactor", "then the reactor")
-	for uid in foe.components.instances:
-		foe.components.instances[uid]["status"] = "disabled"
-	eq(ai.pick_target(), -1, "with everything out it aims at the hull")
+	eq(ai.pick_target(), -1, "with the guns out the sniper aims at the hull too")
 
 
 func test_the_same_seed_replays_the_same_fight() -> void:

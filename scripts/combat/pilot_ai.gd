@@ -2,17 +2,23 @@ extends RefCounted
 ## The enemy pilot: flies one ship of the arena against another and shoots. Deterministic: its few
 ## random choices (aim jitter, which way it strafes) come from its own generator, seeded from the
 ## arena's seed, and it only reads the arena. Call think(dt) once per arena substep, before stepping.
-## - Range: it keeps RANGE_FRACTION of its shortest weapon range between the ships' centres, and at
-##   least both hulls' radii plus HULL_MARGIN (it used to hold 630 px between centres and clip the
-##   player's hull with its own).
+## - Range: it keeps a gap of RANGE_FRACTION of its shortest weapon range (at least HULL_MARGIN) between the two hulls,
+##   measured along the line between the centres from each hull's reach that way (extent()), since muzzles and the parts
+##   it aims at sit on the hull's edge. (It used to hold that between the centres, and later at least both bounding circles
+##   apart: a large hull, or a starter's frame round a small core, then kept it out of its own guns' range.)
 ## - Pointing: it turns its nose so the fixed guns (their mean outward direction) lead the target, off by
 ##   an aim error that shrinks with `aim_skill` (the design's `ai.aim_skill`, 0..1, default 0.6): up to
 ##   (1 - aim_skill) x AIM_ERROR_DEG degrees either way, re-rolled every RETARGET_S. It fires a fixed gun
-##   only when the gun can bear (its gimbal reaches the aim point). Turrets track and fire by themselves
+##   when the gun can bear (its gimbal reaches the aim point, in range), or when its barrel at the edge of the
+##   gimbal still lines up on the foe's hull within range (on_hull()). Turrets track and fire by themselves
 ##   in the arena (Weapons.tick_turrets). It strafes with side engines when it has them.
-## - Aim: the player's weapons first, then engines, then the reactor (the outside half of a mount, the part
-##   it can see), led by the part's own velocity for shots that fly (hitscan lasers and beams go at the part
-##   as it is).
+## - Aim (pick_target()): a pilot of SNIPE_SKILL or better aims at the foe's weapons first (the outside half of a
+##   mount, the part it can see), a worse one at its hull; once the guns are out, everyone aims at the hull: the
+##   facing wall nearest its line to the foe's centre, clear of the guns' outside halves (hull_point()), so the shots
+##   meet walls and the hull integrity drops. A foe that flees (`foe_morale`, set for the player's pilot in tests and tools) has
+##   its engines aimed at first: they hold its jump drive. A part its guns can reach (within its longest range of
+##   the hull's near edge) comes before one that is not. Shots that fly are led by the part's own velocity
+##   (hitscan lasers and beams go at the part as it is).
 ## - With a sectored shield it holds back weapons whose shot would open the sector the player's loaded
 ##   guns are pointing at, for at most HOLD_MAX seconds.
 ## - With 2+ shield sectors it shifts the balance toward the side that faces its foe, one step every
@@ -30,10 +36,11 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 
-const RANGE_FRACTION := 0.7
-const HULL_MARGIN := 40.0  ## px kept between the two hulls' bounding circles, at least
+const RANGE_FRACTION := 0.7  ## of a gun's range: the gap it keeps for it
+const HULL_MARGIN := 96.0  ## px kept between the two hulls, at least (three cells: an orbit at less clips the foe's hull)
 const DEFAULT_RANGE := 600.0
-const PRIORITY: Array[String] = ["weapon", "engine", "reactor"]  ## families it shoots at first
+const SNIPE_SKILL := 0.8  ## a pilot of this aim_skill or better aims at the foe's weapons first; a worse one at its hull
+const GUN_CLEARANCE := 2  ## cells: the point of the hull it aims at keeps this far from a weapon's outside half
 const DEFAULT_AIM_SKILL := 0.6
 const AIM_ERROR_DEG := 12.0  ## aim error either way of a pilot with no skill; a pilot of skill s is off by up to (1 - s) of it
 const LATERAL_MAX := 225.0  ## px/s of sideways drift before it turns the other way
@@ -44,6 +51,8 @@ const HOLD_THROTTLE := 0.5  ## at the preferred range it still pushes this hard
 const HOLD_MAX := 1.5  ## seconds a weapon waits for a safer sector
 const SHIFT_BASE_S := 1.5  ## a shield balance step comes every this many seconds less the aim skill
 const RETARGET_S := 0.5
+const HOLD_EVERY_S := 0.25  ## seconds between two workings-out of the distance it holds
+const LINE_EVERY := 6  ## substeps an on_hull() answer for a gun is kept
 const RAM_BACKOFF_S := 2.0  ## seconds a rammer reverses after a collision
 const RAM_ABILITY_RANGE := 600.0  ## px from the foe's hull (its centre less its bounding radius): a rammer presses its engine ability inside this
 const RAM_FINAL := 240.0  ## px: inside this a rammer steers straight at the foe
@@ -60,9 +69,11 @@ var rng := RandomNumberGenerator.new()
 var aim_skill := DEFAULT_AIM_SKILL  ## 0..1: how true the pilot's aim is and how quickly it shifts its shield balance (the design's ai.aim_skill)
 var side := 1.0  ## +1 or -1: which way it strafes (when it has side engines)
 var bias := 0.0  ## radians: its aim error now, re-rolled with each retarget
-var target_uid := -1  ## the part of the foe it aims at (-1: the ship's centre)
+var target_uid := -1  ## the part of the foe it aims at (-1: its hull, at hull_aim)
+var hull_aim := Vector2.ZERO  ## with no part to aim at: the point of the foe's hull it aims at (the foe's cell coordinates, hull_point())
 var style := ""  ## "" (keeps its range and strafes) or "rammer"
 var morale = null  ## morale.gd of this fight (the session sets it): pilot_mode() says hold, flee or stop
+var foe_morale = null  ## the foe's morale.gd, when the foe is the enemy (the player's pilot in tests and tools): a fleeing foe's engines come first
 var _flip := 0.0
 var _retarget := 0.0
 var _hold := {}  # weapon uid -> seconds held back
@@ -70,6 +81,9 @@ var _bow := Vector2.UP  # ship-local direction of a rammer's bow
 var _shift_in := 0.0  # seconds until the next shield balance step
 var _backoff := 0.0  # seconds a rammer still reverses
 var _contact_seen := -1  # the last arena.contact_tick this pilot has reacted to
+var _hold_d := -1.0  # the distance it holds (hold_distance()), and seconds until it is worked out again
+var _hold_in := 0.0
+var _lined := {}  # weapon uid -> [arena tick, on_hull()] of its last check
 
 
 ## `p_ai`: the `ai` entry of the ship's design ({"style": "rammer"}), if it has one.
@@ -81,6 +95,7 @@ func _init(p_arena, p_me: int, p_foe: int, p_ai := {}) -> void:
 	aim_skill = clampf(float(p_ai.get("aim_skill", DEFAULT_AIM_SKILL)), 0.0, 1.0)
 	_shift_in = shift_interval()
 	_bow = bow_of(arena.ships[me])
+	hull_aim = hull_point()
 	rng.seed = int(arena.rng.seed) * 7919 + me * 104729 + 17
 	side = 1.0 if rng.randf() < 0.5 else -1.0
 	_flip = rng.randf_range(2.0, 4.0)
@@ -95,9 +110,11 @@ func think(dt: float) -> void:
 		arena.set_input(me, 0.0, 0.0)
 		return
 	_retarget -= dt
-	if _retarget <= 0.0 or not _part_ok(target_uid):
+	if _retarget <= 0.0 or (target_uid >= 0 and not _part_ok(target_uid)):
 		_retarget = RETARGET_S
 		target_uid = pick_target()
+		if target_uid < 0:
+			hull_aim = hull_point()
 		_bow = bow_of(co)
 		var e := deg_to_rad((1.0 - aim_skill) * AIM_ERROR_DEG * Hazards.aim_error_mult(arena))
 		bias = rng.randf_range(-e, e)
@@ -129,21 +146,31 @@ func _armed() -> Dictionary:
 	return out
 
 
+## The weapons not shot out or cut off, and powered (a jammed or overheated one will be back): uid -> mount, in uid order.
+func _intact() -> Dictionary:
+	var out := {}
+	var uids: Array = arena.ships[me].mounts.keys()
+	uids.sort()
+	for uid in uids:
+		var m: Dictionary = arena.ships[me].mounts[uid]
+		if not arena.weapons.status_of(arena, me, uid) in ["disabled", "offline"] and (m["powered"] if m["virtual"] else arena.ships[me].powered.get(uid, false)):
+			out[uid] = m
+	return out
+
+
 func _fly(dt: float) -> void:
 	var co = arena.ships[me]
 	var tgt = arena.ships[foe]
 	var armed := _armed()
-	# The axis its fixed guns point along (ship-local: the mean of their outward directions), the
-	# first of them, and its shortest range.
+	# The axis its fixed guns point along (ship-local: the mean of their outward directions) and the
+	# first of them.
 	var axis := Vector2.ZERO
-	var reach := INF
 	var lead_mount := {}
 	var pivots := Vector2.ZERO  # where the fixed guns turn, summed
 	var fixed := 0
 	for uid in armed:
 		var m: Dictionary = armed[uid]
 		var w: Dictionary = arena.weapons.def(m["id"])
-		reach = minf(reach, float(w["range"]))
 		if not w["turret"]:
 			axis += Vector2(m["dir"])
 			pivots += Vector2(m["pos"])
@@ -151,10 +178,14 @@ func _fly(dt: float) -> void:
 			if lead_mount.is_empty():
 				lead_mount = m
 	axis = axis.normalized() if axis.length_squared() > 1e-6 else Vector2.UP
-	var preferred := maxf(RANGE_FRACTION * (reach if reach < INF else DEFAULT_RANGE), _radius(me) + _radius(foe) + HULL_MARGIN)
 	var to_foe: Vector2 = tgt.flight.pos - co.flight.pos
 	var dist := to_foe.length()
 	var u := to_foe / maxf(dist, 1.0)
+	_hold_in -= dt
+	if _hold_in <= 0.0 or _hold_d < 0.0:  # the hulls' reach changes slowly: worked out a few times a second
+		_hold_in = HOLD_EVERY_S
+		_hold_d = hold_distance(u, _intact())
+	var preferred := _hold_d
 	# Flip the strafe now and then, and when the sideways drift gets too big.
 	_flip -= dt
 	if _flip <= 0.0:
@@ -186,9 +217,35 @@ func _fly(dt: float) -> void:
 	arena.set_input(me, throttle, turn, strafe)
 
 
-## Px from the pivot of ship `idx` to its farthest cell corner: how far its hull reaches.
-func _radius(idx: int) -> float:
-	return float(Collisions.hit_cells(arena, idx)["radius"])
+## The distance between the centres it keeps with the foe along the world direction `u` (from it to the foe), with the
+## weapons `armed` (_intact(): a jam or a reload does not move it): each hull's extent() that way plus the gap that brings
+## every gun within RANGE_FRACTION of its range of the foe's near edge, its place counted (a flank turret far behind the bow needs a closer gap
+## than a bow gun); at least HULL_MARGIN. A gun too far to the side to reach the line between the centres is left out.
+func hold_distance(u: Vector2, armed: Dictionary) -> float:
+	var co = arena.ships[me]
+	var ext := extent(me, u)
+	var gap := INF
+	for uid in armed:
+		var m: Dictionary = armed[uid]
+		var r := RANGE_FRACTION * float(arena.weapons.def(m["id"])["range"])
+		var mo: Vector2 = arena.local_to_world(me, m["pos"]) - co.flight.pos
+		var off := absf(mo.cross(u))
+		if off < r:
+			gap = minf(gap, mo.dot(u) + sqrt(r * r - off * off) - ext)
+	if gap == INF:
+		gap = RANGE_FRACTION * DEFAULT_RANGE
+	return ext + extent(foe, -u) + maxf(HULL_MARGIN, gap)
+
+
+## Px from the pivot of ship `idx` to the farthest point of its hull along the world direction `u`: its outer cells' centres
+## projected on `u`, plus half a cell's diagonal. How far it reaches toward a ship that lies that way.
+func extent(idx: int, u: Vector2) -> float:
+	var hc: Dictionary = Collisions.hit_cells(arena, idx)
+	var lu: Vector2 = u.rotated(-arena.ships[idx].flight.angle)
+	var far := 0.0
+	for c in hc["cells"]:
+		far = maxf(far, Vector2(hc["info"][c]["ctr"]).dot(lu))
+	return far + arena.CELL * 0.71
 
 
 ## The ship's bow, ship-local: the unit vector toward the side (up, down, left, right of its centre)
@@ -275,27 +332,84 @@ func _balance(dt: float) -> void:
 
 # --- shooting ------------------------------------------------------------------------------------
 
-## The foe's part to aim at: its first alive part of the first family in PRIORITY that has one, else
-## any alive part; -1 when everything is out (it then aims at the ship's centre). Nearest wins.
+## The foe's part to aim at: the first family of priority() it has an alive part of, nearest first, a part within reach()
+## of the near edge of its own hull before one that is not; -1 when none is (it aims at the foe's centre of mass: the hull).
 func pick_target() -> int:
 	var tgt = arena.ships[foe]
 	var comps = tgt.ship.components
 	var uids: Array = comps.instances.keys()
 	uids.sort()
 	var from: Vector2 = arena.ships[me].flight.pos
-	for family in PRIORITY + [""]:
-		var best := -1
-		var best_d := INF
-		for uid in uids:
-			if not _part_ok(uid) or (family != "" and comps.def(comps.instances[uid]["id"]).get("family", "") != family):
-				continue
-			var d := from.distance_squared_to(arena.local_to_world(foe, part_centre(foe, uid)))
-			if d < best_d:
-				best_d = d
-				best = uid
-		if best >= 0:
-			return best
+	var to_foe: Vector2 = tgt.flight.pos - from
+	var limit := extent(me, to_foe.normalized()) + reach()
+	for family in priority():
+		for near in [true, false]:
+			var best := -1
+			var best_d := INF
+			for uid in uids:
+				if not _part_ok(uid) or comps.def(comps.instances[uid]["id"]).get("family", "") != family:
+					continue
+				var d := from.distance_squared_to(arena.local_to_world(foe, part_centre(foe, uid)))
+				if near and d > limit * limit:
+					continue
+				if d < best_d:
+					best_d = d
+					best = uid
+			if best >= 0:
+				return best
 	return -1
+
+
+## The part families it aims at before the hull, in order: the engines of a fleeing foe, then the weapons for a pilot of
+## SNIPE_SKILL or better.
+func priority() -> Array[String]:
+	var out: Array[String] = []
+	if foe_morale != null and foe_morale.state == "fleeing":
+		out.append("engine")
+	if aim_skill >= SNIPE_SKILL - 1e-6:
+		out.append("weapon")
+	return out
+
+
+## The point of the foe's hull it aims at when it aims at no part (the foe's cell coordinates): of the outer wall and door
+## cells on the side facing it and at least GUN_CLEARANCE cells from the outside half of a weapon (shots at the middle of a
+## bow meet the bow gun), the one nearest the line from it to the foe's centre of mass; that centre when there is none.
+func hull_point() -> Vector2:
+	var f = arena.ships[foe]
+	var comps = f.ship.components
+	var g = f.ship.grid
+	var guns: Array = []
+	for uid in comps.instances:
+		if comps.def(comps.instances[uid]["id"]).get("family", "") == "weapon":
+			guns.append_array(comps.instances[uid]["out_cells"])
+	var from: Vector2 = arena.world_to_local(foe, arena.ships[me].flight.pos)
+	var com: Vector2 = f.com
+	var look: Vector2 = (com - from).normalized()
+	var best: Vector2 = com
+	var best_d := INF
+	for c in Collisions.hit_cells(arena, foe)["cells"]:
+		var t: String = g.get_tile(c)
+		if t == "" or not (g.tile_flag(t, "solid") or g.tile_flag(t, "door")):
+			continue
+		var at := Vector2(c) + Vector2(0.5, 0.5)
+		if (at - com).dot(look) > 0.0:
+			continue  # the far side
+		if guns.any(func(o): return absi(o.x - c.x) <= GUN_CLEARANCE and absi(o.y - c.y) <= GUN_CLEARANCE):
+			continue
+		var d := absf((at - from).cross(look))
+		if d < best_d:
+			best_d = d
+			best = at
+	return best
+
+
+## The longest range of its weapons that can shoot (DEFAULT_RANGE with none).
+func reach() -> float:
+	var r := 0.0
+	var armed := _armed()
+	for uid in armed:
+		r = maxf(r, float(arena.weapons.def(armed[uid]["id"])["range"]))
+	return r if r > 0.0 else DEFAULT_RANGE
 
 
 func _part_ok(uid: int) -> bool:
@@ -348,7 +462,7 @@ func point_velocity(idx: int, local: Vector2) -> Vector2:
 ## The world point to aim mount `m` at: the chosen part (or the centre of the ship), led, and turned off
 ## by the pilot's aim error `bias` when `jitter`.
 func aim_for(m: Dictionary, jitter := true) -> Vector2:
-	var local: Vector2 = part_centre(foe, target_uid) if target_uid >= 0 and _part_ok(target_uid) else arena.ships[foe].pivot
+	var local: Vector2 = part_centre(foe, target_uid) if target_uid >= 0 and _part_ok(target_uid) else hull_aim
 	var origin: Vector2 = arena.local_to_world(me, m["pos"])
 	var w: Dictionary = arena.weapons.def(m["id"])
 	var speed := float(w["speed"]) if w["kind"] in ["bolt", "flak", "missile"] else 0.0
@@ -375,8 +489,17 @@ func _shoot(dt: float) -> void:
 		if arena.cooldown_left(me, uid) > 0.0:
 			continue
 		var origin: Vector2 = arena.weapons.muzzle_of(arena, me, m)
-		if origin.distance_to(aim) > float(w["range"]) or arena.weapons.can_fire(arena, me, uid, aim) != "" or not arena.weapons.in_arc(arena, me, m, aim):
+		if arena.weapons.can_fire(arena, me, uid, aim) != "":
 			continue
+		if origin.distance_to(aim) > float(w["range"]) or not arena.weapons.in_arc(arena, me, m, aim):
+			# It cannot bear on the part it aims at: it fires anyway when its barrel, at the edge of its gimbal, still lines up on
+			# the foe's hull within range (a row of bow guns cannot all point at one part, but each can hit the ship).
+			var seen: Array = _lined.get(uid, [-1000, false])
+			if arena.tick - int(seen[0]) >= LINE_EVERY:
+				seen = [arena.tick, on_hull(origin, Vector2(m["aim"]).rotated(co.flight.angle), float(w["range"]))]
+				_lined[uid] = seen
+			if not seen[1]:
+				continue
 		if not danger.is_empty() and Shields.drop_seconds(w) > 0.0:
 			var s := Shields.outgoing_sector(co, m["pos"], (aim - origin).rotated(-co.flight.angle))
 			if s in danger and float(_hold.get(uid, 0.0)) < HOLD_MAX:
@@ -384,6 +507,21 @@ func _shoot(dt: float) -> void:
 				continue
 		_hold.erase(uid)
 		arena.fire(me, uid, aim)
+
+
+## Does a shot from the world point `origin` along the unit vector `dir` meet an outer cell of the foe's hull within `reach_px`?
+func on_hull(origin: Vector2, dir: Vector2, reach_px: float) -> bool:
+	var f = arena.ships[foe]
+	var hc: Dictionary = Collisions.hit_cells(arena, foe)
+	var to_c: Vector2 = f.flight.pos - origin
+	if absf(to_c.cross(dir)) > float(hc["radius"]) or to_c.dot(dir) < -float(hc["radius"]):
+		return false
+	for c in hc["cells"]:
+		var v: Vector2 = to_c + Vector2(hc["info"][c]["ctr"]).rotated(f.flight.angle)
+		var t := v.dot(dir)
+		if t > 0.0 and t <= reach_px and absf(v.cross(dir)) <= arena.CELL * 0.5:
+			return true
+	return false
 
 
 ## The sectors of its own bubble that the foe's loaded guns (ready within 0.4 s, aimed at it) would hit.

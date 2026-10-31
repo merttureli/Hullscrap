@@ -7,10 +7,13 @@ extends SceneTree
 ## draw by ship, jump and faction, time to end, hull left, how fights end, the threat rating against the measured win rate,
 ## and what the guns did.
 ##   godot --headless --path . --script res://tests/tool_balance.gd [-- key=value ...]
-## Keys: seeds (per pairing, default 2), cap (s, default 180), jumps (5,15,25,35), factions (all), ships (hangar ids, all),
-## kit_jumps (the jumps at which each ship also fights with the upgrade kit, default 15,25; "none" for never),
-## jobs (run in this many processes at once, default 1), out (res://docs/BALANCE_REPORT.md), save (a JSON of the numbers, for a
-## later compare), compare (such a JSON: adds a before / after table), label (the run's name in the report). Internal: shard
+## Keys: seeds (per pairing, default 1), cap (s, default 180), jumps (5,15,25,35), factions (all), ships (hangar ids, or
+## "all" for every hangar ship, packs included; default the ones open from the start), kit_jumps (the jumps at which each
+## ship also fights with the upgrade kit, default 15; "none" for never),
+## jobs (run in this many processes at once, default 3), out (res://docs/BALANCE_REPORT.md), save (a JSON of the numbers, for a
+## later compare), compare (such a JSON: adds a before / after table), label (the run's name in the report), dump (write
+## every fight's row there, JSON), out_hp (a
+## what-if: every weapon's outside_hp times this, on both ships, for this run only). Internal: shard
 ## (k/n: only every n-th pairing from the k-th) and rows (write the fights' rows there instead of a report), merge (row files).
 ## The upgrade kit ("a few upgrades", apply_kit()): an annex room built onto the core in the starter's empty frame, holding the
 ## shield generator the starter carries in its hold, a Mk1 reactor to power it and a Mk1 laser turret through the annex's
@@ -27,7 +30,6 @@ const Hangar = preload("res://scripts/space/hangar.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Content = preload("res://scripts/data/content.gd")
-const Collisions = preload("res://scripts/combat/collisions.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 
 const STEP := 1.0 / 60.0
@@ -38,11 +40,12 @@ const ENDS: Array[String] = ["wreck", "capture", "surrender", "escape", "lost", 
 const END_OF := {"won": "wreck", "captured": "capture", "spared": "surrender", "escaped": "escape", "lost": "lost", "fighting": "draw"}
 ## Targets (docs/CONTENT.md 14 and the balance brief) for the flags of the reading: jump -> [low, high] win share.
 const TARGETS := {5: [0.7, 0.9], 15: [0.45, 0.65], 25: [0.2, 0.5], 35: [0.0, 0.3]}
+const CUT_SCORES: Array[float] = [0.85, 0.65, 0.35, 0.15]  ## the result (won 1, drawn 0.5) between 1|2, 2|3, 3|4 and 4|5 skulls
 const KIT_PARTS: Array[String] = ["laser_turret_mk1", "reactor_mk1"]  ## bought for the kit (the shield comes from the hold)
 const KIT_STOCK := {"scrap": 5000, "copper": 600, "titanium": 400, "silicon": 400, "crystal": 200, "polymer": 200}
 const ANNEX := Vector2i(10, 10)  ## the annex room, walls included: 8 x 8 floor
 
-var seeds := 2
+var seeds := 1
 var cap := 180.0
 var jumps: Array = [5, 15, 25, 35]
 var factions: Array = []
@@ -54,7 +57,8 @@ var label := ""
 var tier2 := 10
 var tier3 := 25
 var rows: Array = []  ## one dictionary per fight
-var kit_jumps: Array = [15, 25]
+var kit_jumps: Array = [15]
+var out_hp := 1.0  ## the what-if multiplier of every weapon's outside_hp
 var _kit_plans := {}  # ship id -> the kit's build steps (apply_kit), found once
 var args := {}
 
@@ -64,6 +68,7 @@ func _initialize() -> void:
 		var kv := str(a).split("=", true, 1)
 		args[kv[0]] = kv[1] if kv.size() > 1 else ""
 	seeds = int(args.get("seeds", seeds))
+	out_hp = float(args.get("out_hp", out_hp))
 	cap = float(args.get("cap", cap))
 	if args.has("jumps"):
 		jumps = Array(str(args["jumps"]).split(",")).map(func(s): return int(s))
@@ -79,7 +84,7 @@ func _initialize() -> void:
 		kit_jumps = [] if str(args["kit_jumps"]) == "none" else Array(str(args["kit_jumps"]).split(",")).map(func(x): return int(x))
 	var want: Array = Array(str(args["ships"]).split(",")) if args.has("ships") else []
 	for s in Hangar.starters():
-		if want.is_empty() or want.has(s["id"]):
+		if want.has(s["id"]) or want == ["all"] or (want.is_empty() and str(s["unlock"]) == ""):
 			ships.append({"id": s["id"], "name": s["name"], "path": s["path"], "kit": false})
 	if not kit_jumps.is_empty():
 		for sh in ships.duplicate():
@@ -89,15 +94,16 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var t0 := Time.get_ticks_msec()
-	var jobs := int(args.get("jobs", 1))
+	var jobs := int(args.get("jobs", 3))
 	if args.has("merge"):
 		for path in str(args["merge"]).split(","):
 			rows.append_array(JSON.parse_string(FileAccess.get_file_as_string(path)))
-	elif jobs > 1:
+	elif jobs > 1 and not args.has("shard"):
 		_fan_out(jobs)
 	else:
 		var shard := Array(str(args.get("shard", "0/1")).split("/")).map(func(x): return int(x))
-		var total := ships.size() * factions.size() * jumps.size() * seeds
+		var kits := ships.filter(func(x): return x["kit"]).size()
+		var total := ((ships.size() - kits) * jumps.size() + kits * jumps.filter(func(j): return kit_jumps.has(j)).size()) * factions.size() * seeds
 		print("balance: %d ships x %d factions x %d jumps x %d seeds = %d fights, cap %d s, shard %s" % [ships.size(), factions.size(), jumps.size(), seeds, total, cap, str(shard)])
 		var k := 0
 		for f in factions:
@@ -119,6 +125,8 @@ func _run() -> void:
 	_write(out_path, report(secs))
 	if save_path != "":
 		_write(save_path, JSON.stringify(summary(), "\t"))
+	if args.has("dump"):
+		_write(str(args["dump"]), JSON.stringify(rows))
 	print("balance: wrote %s in %.0f s" % [out_path, secs])
 	quit(0)
 
@@ -134,7 +142,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["seeds", "cap", "jumps", "factions", "ships", "kit_jumps"]:
+	for key in ["seeds", "cap", "jumps", "factions", "ships", "kit_jumps", "out_hp"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
@@ -192,6 +200,18 @@ func fight(sh: Dictionary, spec: String, faction: String, j: int, s: int) -> Dic
 	if player == null or enemy == null:
 		row["state"] = "error"
 		return row
+	if not is_equal_approx(out_hp, 1.0):  # each ship holds its own copy of the part data
+		for each in [player, enemy]:
+			var done := {}
+			for uid in each.components.instances:
+				var inst: Dictionary = each.components.instances[uid]
+				var dd: Dictionary = each.components.by_id[inst["id"]]
+				if str(dd.get("family", "")) != "weapon" or not dd.has("mount"):
+					continue
+				if not done.has(inst["id"]):
+					done[inst["id"]] = true
+					dd["mount"]["outside_hp"] = roundi(float(dd["mount"]["outside_hp"]) * out_hp)
+				inst["out_hp"] = dd["mount"]["outside_hp"]
 	var gen: Dictionary = enemy.get_meta("shipgen", {})
 	row.merge({"size": gen.get("size", "?"), "budget": gen.get("budget", 0.0), "ram": gen.get("ram", false),
 		"e_weapons": gen.get("weapons", []).size(), "e_shields": gen.get("shields", []).size(), "e_armour": gen.get("armour", 0)})
@@ -427,7 +447,8 @@ func _sample(sess: Session, pilot: PilotAI, d: Dictionary) -> void:
 	var a = sess.arena
 	var co = a.ships[Session.PLAYER]
 	d["samples"] += 1
-	d["gap"] += co.flight.pos.distance_to(a.ships[Session.ENEMY].flight.pos) - float(Collisions.hit_cells(a, 0)["radius"]) - float(Collisions.hit_cells(a, 1)["radius"])
+	var to_foe: Vector2 = a.ships[Session.ENEMY].flight.pos - co.flight.pos
+	d["gap"] += to_foe.length() - pilot.extent(0, to_foe.normalized()) - pilot.extent(1, -to_foe.normalized())
 	var armed := false
 	var reach := false
 	var intact := false  # a gun not shot out (a jam or the heat only stops it a while)
@@ -476,6 +497,7 @@ func _sel(filter: Callable) -> Array:
 static func _rate(list: Array) -> Dictionary:
 	var w := 0
 	var l := 0
+	var ahead := 0
 	var t := 0.0
 	var hull := 0.0
 	for r in list:
@@ -485,15 +507,34 @@ static func _rate(list: Array) -> Dictionary:
 			hull += float(r["hull"])
 		elif r["state"] == "lost":
 			l += 1
+		elif _lean(r) > 0.5:
+			ahead += 1
 	var n := list.size()
 	return {"n": n, "w": w, "l": l, "d": n - w - l, "win": float(w) / maxf(n, 1), "draw": float(n - w - l) / maxf(n, 1),
-		"t": t / maxf(n, 1), "hull": hull / maxf(w, 1)}
+		"t": t / maxf(n, 1), "hull": hull / maxf(w, 1), "ahead": ahead, "proj": float(w + ahead) / maxf(n, 1)}
+
+
+## A fight's result as a number: won 1, lost 0; a draw 0.75 when the player has more of its hull left (as a share) than the
+## enemy, 0.25 when less, 0.5 when even (an escape is 0.5).
+static func _lean(r: Dictionary) -> float:
+	if r["state"] in WIN_STATES:
+		return 1.0
+	if r["state"] == "lost":
+		return 0.0
+	if r["state"] == "escaped":
+		return 0.5
+	var d := float(r["hull"]) - float(r["foe_hull"])
+	return 0.75 if d > 0.05 else (0.25 if d < -0.05 else 0.5)
 
 
 static func _cell(r: Dictionary) -> String:
 	if r["n"] == 0:
 		return "-"
 	return "%d%% (%d/%d/%d) %ds" % [roundi(100.0 * r["win"]), r["w"], r["l"], r["d"], roundi(r["t"])]
+
+
+static func _proj(r: Dictionary) -> String:
+	return "-" if r["n"] == 0 else "%d%%" % roundi(100.0 * r["proj"])
 
 
 static func _mean(list: Array, key: String) -> float:
@@ -521,8 +562,8 @@ func report(secs: float) -> String:
 	var all := _rate(_sel(func(r): return true))
 	L.append("# Balance report")
 	L.append("")
-	L.append("Written by `tests/tool_balance.gd`%s (docs/CONTENT.md 14). %d fights: %d ships x %d factions x jumps %s x %d seeds, capped at %d s, run in %d s." % [
-		" (run: %s)" % label if label != "" else "", rows.size(), ships.size(), factions.size(), str(jumps), seeds, cap, secs])
+	L.append("Written by `tests/tool_balance.gd`%s (docs/CONTENT.md 14). %d fights: %d ships x %d factions x jumps %s x %d seeds (the kitted ships at jumps %s), capped at %d s, run in %d s." % [
+		" (run: %s)" % label if label != "" else "", rows.size(), ships.size(), factions.size(), str(jumps), seeds, str(kit_jumps), cap, secs])
 	L.append("Both ships are flown by the pilot AI (the player's at aim %.2f, thinking every %d ticks); crews run in ShipSim; morale can end a fight (the player takes every surrender). A cell is `win%% (won/lost/drawn) mean seconds`; a draw is the cap or an enemy that escaped. Budgets: Shipgen.budget_for(tier, jump, danger of the faction's first region): %s." % [
 		float(Threat.config()["player_aim"]), PLAYER_EVERY, ", ".join(factions.map(func(f): return "%s %.2f" % [f, danger_for(f)]))])
 	L.append("")
@@ -535,6 +576,13 @@ func report(secs: float) -> String:
 	for sh in ships:
 		L.append("| %s | " % sh["name"] + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["ship"] == sh["id"] and r["jump"] == j))))) + " |")
 	L.append("| **all** | " + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["jump"] == j))))) + " |")
+	L.append("")
+	L.append("Projected win rate (the wins plus the draws in which the player had more of its hull left than the enemy, as shares: the fights the cap cut short that it was winning):")
+	L.append("")
+	L.append("| ship | " + " | ".join(jumps.map(func(j): return "jump %d" % j)) + " |")
+	L.append("|---|" + "---|".repeat(jumps.size()))
+	for sh in ships:
+		L.append("| %s | " % sh["name"] + " | ".join(jumps.map(func(j): return _proj(_rate(_sel(func(r): return r["ship"] == sh["id"] and r["jump"] == j))))) + " |")
 	L.append("")
 	if compare_path != "" and FileAccess.file_exists(compare_path):
 		_compare(L)
@@ -569,6 +617,9 @@ func report(secs: float) -> String:
 		var r := _rate(list)
 		L.append("| %d | %d | %d%% | %d%% | %d%% | %.2f |" % [k, r["n"], roundi(100 * r["win"]), roundi(100.0 * r["l"] / maxf(r["n"], 1)), roundi(100 * r["draw"]), _mean(list, "ratio")])
 	L.append("")
+	L.append("Cuts these fights suggest: %s (a falling fit of the result, won 1, lost 0, a draw 0.75 ahead on hull or 0.25 behind, against the power ratio, cut where it crosses %s)." % [
+		str(suggest_cuts().map(func(c): return snappedf(c, 0.01))), str(CUT_SCORES)])
+	L.append("")
 	L.append("## How fights end")
 	L.append("")
 	L.append("| jump | " + " | ".join(ENDS) + " | mean time | enemy hull left |")
@@ -579,7 +630,7 @@ func report(secs: float) -> String:
 	L.append("")
 	L.append("## What the guns did (means per fight)")
 	L.append("")
-	L.append("Shots fired; damage to the hull pool (walls, doors) and to parts; shield layers spent; the share of the time the player had a working gun, and had the pilot's target within a gun's range; the mean hull-to-hull gap (centres less both bounding radii); when the player's last gun was shot out (disabled or cut off, not jammed).")
+	L.append("Shots fired; damage to the hull pool (walls, doors) and to parts; shield layers spent; the share of the time the player had a working gun, and had the pilot's target within a gun's range; the mean hull-to-hull gap (along the line between the centres, PilotAI.extent(); the before run measured it between the bounding circles); when the player's last gun was shot out (disabled or cut off, not jammed).")
 	L.append("")
 	L.append("| ship | jump | shots (you/foe) | hull dmg (you/foe) | part dmg (you/foe) | shields hit (you/foe) | armed | in range | gap px | guns out at |")
 	L.append("|---|---|---|---|---|---|---|---|---|---|")
@@ -600,6 +651,32 @@ func report(secs: float) -> String:
 		L.append("- " + line)
 	L.append("")
 	return "\n".join(L)
+
+
+## The power ratios at which the measured result crosses CUT_SCORES: a non-increasing fit (pool adjacent violators) of the
+## score of every fight (_lean()) over its ratio, cut halfway between the last fight above a score and the
+## first below it. A score nothing falls under gets a cut past the highest ratio seen.
+func suggest_cuts() -> Array:
+	var pts := _sel(func(r): return true).map(func(r): return [float(r["ratio"]), _lean(r)])
+	pts.sort_custom(func(a, b): return a[0] < b[0])
+	var blocks := []  # [score sum, count, lowest ratio, highest ratio]
+	for p in pts:
+		blocks.append([p[1], 1.0, p[0], p[0]])
+		while blocks.size() > 1 and blocks[-2][0] / blocks[-2][1] < blocks[-1][0] / blocks[-1][1] - 1e-9:
+			var b: Array = blocks.pop_back()
+			blocks[-1][0] += b[0]
+			blocks[-1][1] += b[1]
+			blocks[-1][3] = b[3]
+	var cuts := []
+	var top: float = pts[-1][0] * 1.25 if not pts.is_empty() else 1.0
+	for score in CUT_SCORES:
+		var cut := top
+		for k in blocks.size():
+			if blocks[k][0] / blocks[k][1] < score:
+				cut = (blocks[k][2] + blocks[k - 1][3]) / 2.0 if k > 0 else blocks[k][2] * 0.9
+				break
+		cuts.append(maxf(cut, cuts[-1] + 0.01) if not cuts.is_empty() else cut)
+	return cuts
 
 
 static func _share(list: Array, key: String) -> float:
