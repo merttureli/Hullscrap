@@ -1,0 +1,81 @@
+{
+ "frame": [
+  9,
+  18
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   4,
+   12
+  ]
+ },
+ "anchors": {
+  "head": [
+   5,
+   3
+  ],
+  "tail": [
+   5,
+   17
+  ]
+ },
+ "glow": {
+  "image": "emberkin_cinder_mortar_glow.png",
+  "frame": [
+   17,
+   26
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "fly": [
+    0,
+    4,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "emberkin_cinder_mortar_impact.png",
+  "frame": [
+   24,
+   24
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    10
+   ]
+  },
+  "anchor": [
+   12,
+   12
+  ],
+  "glow": {
+   "image": "emberkin_cinder_mortar_impact_glow.png",
+   "frame": [
+    34,
+    34
+   ],
+   "offset": [
+    -5,
+    -5
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     10
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "An incendiary cinder shell, 9x18: a glowing coal ball with dark clinker flecks and a flame plume streaming behind it with embers (4 frames)."
+}

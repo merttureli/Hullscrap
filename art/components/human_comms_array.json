@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "human_comms_array_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "Human \"Concord Comms Array\": a steel console with a small dish on a pedestal (the feed horn blinks), a round radar scope with a green sweep that jumps a step each frame and a blip, and a navy stencilled panel with blue lamps. Damaged: the dish knocked askew, the scope glitching with a dead lamp, sparks. Disabled: the dish snapped, the scope dark and cracked."
+}

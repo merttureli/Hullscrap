@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "basalt_pumice_flak_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Basalt Pumice Flak: a feed rail where pumice rocks roll in one by one as it charges (frame 5 = five rocks loaded, strip yellow), power coupling, stone hatch. fire: the rail is empty and the strip flashes. damaged: the rail cracked, a rock jammed, slits dead; disabled: rocks spilled, rail snapped. Barrel layer basalt_pumice_flak_barrel: a porous grey pumice dome head with a short fat mortar mouth and a gunner slit (no sensor: a crew member aims it, in vacuum).",
+ "offset": [
+  0,
+  -4
+ ]
+}

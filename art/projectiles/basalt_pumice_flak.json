@@ -1,0 +1,81 @@
+{
+ "frame": [
+  6,
+  12
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   4,
+   12
+  ]
+ },
+ "anchors": {
+  "head": [
+   3,
+   3
+  ],
+  "tail": [
+   3,
+   8
+  ]
+ },
+ "glow": {
+  "image": "basalt_pumice_flak_glow.png",
+  "frame": [
+   12,
+   18
+  ],
+  "offset": [
+   -3,
+   -3
+  ],
+  "anims": {
+   "fly": [
+    0,
+    4,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "basalt_pumice_flak_impact.png",
+  "frame": [
+   20,
+   20
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    14
+   ]
+  },
+  "anchor": [
+   10,
+   10
+  ],
+  "glow": {
+   "image": "basalt_pumice_flak_impact_glow.png",
+   "frame": [
+    28,
+    28
+   ],
+   "offset": [
+    -4,
+    -4
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     14
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A pale pumice rock, 6x12, tumbling over 4 frames, with a small puff of grey smoke behind it. Splash flak: explode it at the target or when its time is up."
+}
