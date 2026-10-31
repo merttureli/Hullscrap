@@ -298,6 +298,27 @@ func test_an_offer_nobody_answers_runs_out() -> void:
 	eq(s.state(), "fighting", "the fight goes on")
 
 
+## A note (a collision line, a refused key) must not hide a standing surrender offer or a flight: the banner shows those.
+func test_a_note_does_not_hide_an_offer_or_a_flight() -> void:
+	var note := "Collision with the pirate: it took no hull damage, we took no hull damage"
+	var s := _session()
+	_style(s, {"surrender": 1.0, "flee": 0.0, "fight": 0.0})
+	_hurt(s, 0.3)
+	_run(s, 4.0)
+	eq(s.morale.state, "offering", "it offers")
+	eq(CombatView.banner_line(s, note)["text"], s.morale.banner(), "the offer shows over a note")
+	var f := _session()
+	_style(f, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
+	_hurt(f, 0.3)
+	_run(f, 4.0)
+	eq(f.morale.state, "fleeing", "it runs")
+	eq(CombatView.banner_line(f, note)["text"], f.morale.banner(), "the flight shows over a note")
+	var c := _session()
+	_run(c, 4.0)
+	eq(CombatView.banner_line(c, note)["text"], note, "with nothing pressing the note shows")
+	eq(CombatView.banner_line(c, "")["text"], "", "and with no note there is no line")
+
+
 # --- flight -----------------------------------------------------------------------------------------------
 
 func test_a_fleeing_enemy_spools_for_15_s_and_is_gone() -> void:

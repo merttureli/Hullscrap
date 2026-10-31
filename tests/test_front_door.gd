@@ -211,6 +211,7 @@ func test_run_line_is_one_line_with_the_numbers() -> void:
 	eq(line, "2026-10-30  Courier: 14 jumps, 230 cr, debt 480, 3 crew, 9 events, 4 fights won", "the line")
 	check(not line.contains("\n"), "one line")
 	eq(Profile.run_line({}), "?: 0 jumps, 0 cr, debt 0, 0 crew, 0 events, 0 fights won", "an empty record still reads")
+	eq(Profile.run_line({"ship": "X", "jumps": 1, "events": 1, "fights": 1}), "X: 1 jump, 0 cr, debt 0, 0 crew, 1 event, 1 fight won", "one of each is singular")
 
 
 func test_first_run_hints_are_shown_once_and_only_in_the_first_run() -> void:

@@ -112,12 +112,17 @@ func last_runs(n := SHOWN_RUNS) -> Array:
 	return out.slice(0, n)
 
 
+## "1 jump", "3 jumps".
+static func _count(n: int, word: String) -> String:
+	return "%d %s" % [n, word if n == 1 else word + "s"]
+
+
 ## One line for a record: "Courier: 14 jumps, 230 cr, debt 480, 3 crew, 9 events, 4 fights won"; a win adds
 ## " - The Haven, score 1250".
 static func run_line(r: Dictionary) -> String:
-	var line := "%s: %d jumps, %d cr, debt %d, %d crew, %d events, %d fights won" % [
-		str(r.get("ship", "?")), int(r.get("jumps", 0)), int(r.get("credits", 0)), int(r.get("debt", 0)),
-		int(r.get("crew", 0)), int(r.get("events", 0)), int(r.get("fights", 0))]
+	var line := "%s: %s, %d cr, debt %d, %d crew, %s, %s won" % [
+		str(r.get("ship", "?")), _count(int(r.get("jumps", 0)), "jump"), int(r.get("credits", 0)), int(r.get("debt", 0)),
+		int(r.get("crew", 0)), _count(int(r.get("events", 0)), "event"), _count(int(r.get("fights", 0)), "fight")]
 	if bool(r.get("won", false)):
 		line += " - %s, score %d" % [str(r.get("ending_title", "The End")), int(r.get("score", 0))]
 	var date := str(r.get("date", ""))
