@@ -695,6 +695,13 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - 50 seeded fights per pairing. It records win rate, time to kill, and hull and crew lost.
   - It writes `docs/BALANCE_REPORT.md`, flagging pairings outside the targets above. The lead tunes the numbers from it, and every content wave re-runs it.
 
+- **Procedural enemy ships (built: `scripts/space/shipgen.gd`, tables in `data/enemy_tables.json`)**:
+  - `Shipgen.build(faction, size, seed, budget)` gives a valid ship (power, sealed rooms, crew paths, mounts through the real rules, flies, no rectangle); the same arguments always give the same ship. A spec string `gen:<faction>:<size>:<seed>:<budget x 100>[:ram]` names one, and `Session.load_ship` loads it like a design file.
+  - **Loadout**: the free base ship (helm, life support, the faction's cheapest reactor, two engines, one gun) plus purchases drawn from the faction's weights, each priced in `enemy_tables.json` and each needing the hull's room and the power its reactors give. Armour layers are real wall layers (2 hull integrity a cell, `arena.gd`).
+  - **Hull**: `scripts/space/hullgen.gd` draws the faction's silhouette round the decks (gun deck, decks between, engine room) from the faction's `hull` grammar: wedge, chamfer, spikes, round2 arcs. A hull that comes out a box is narrowed at both ends, then gives up bow guns and engines, until it is under 85% of its bounding box.
+  - **Campaign**: `fight: "tier"` rolls the `gen:` entry of `data/drift.json` `enemies`; the faction is the region's `enemies`, the budget is tier base x (1 + 0.04 x jumps) x the region's `danger` x the difficulty.
+  - **Threat**: `Shipgen.threat(enemy, player)` / `Shipgen.threat_of(design, player)` give 1-5 skulls from sqrt(damage per second x effective hp) x a speed factor, enemy over player (`scripts/space/threat.gd`, cuts in the table); `Threat.label(n)` is the text for the radar and HUD.
+
 ## 15. Regions: every race has a home you can jump to (owner, 2026-10-30)
 > "Every race should have their own region we can jump to."
 

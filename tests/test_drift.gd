@@ -9,6 +9,7 @@ const Content = preload("res://scripts/data/content.gd")
 const Drift = preload("res://scripts/space/drift.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Events = preload("res://scripts/space/events.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Components = preload("res://scripts/ship/components.gd")
@@ -235,14 +236,13 @@ func test_a_pirate_node_with_two_missed_payments_sends_the_rammer() -> void:
 	for t in ["1", "2", "3"]:
 		cfg["enemies"]["rammer"][t] = ["res://data/ships/starter_courier.json"]
 	var c := Campaign.new(1, cfg)
-	var pirate := "res://data/ships/pirate_raider.json"
-	eq(c.fight_path("tier", "pirate"), pirate, "no payments missed: a raider")
+	check(Shipgen.is_spec(c.fight_path("tier", "pirate")), "no payments missed: a generated raider")
 	c.jumps = 8
-	eq(c.fight_path("tier", "pirate"), pirate, "one missed: still a raider")
+	check(Shipgen.is_spec(c.fight_path("tier", "pirate")), "one missed: still a generated raider")
 	c.jumps = 16
 	eq(c.misses(), 2, "two payments in a row missed")
 	eq(c.fight_path("tier", "pirate"), "res://data/ships/starter_courier.json", "the next pirate fight is the rammer")
-	eq(c.fight_path("tier", "patrol"), pirate, "patrols do not")
+	check(Shipgen.is_spec(c.fight_path("tier", "patrol")), "patrols do not")
 
 
 # --- the debt ------------------------------------------------------------------------------------------------------------
@@ -362,7 +362,7 @@ func test_hostile_concord_patrols_attack() -> void:
 	eq(ev.get("id", ""), "patrol_hostile", "below -5 the patrol opens fire")
 	var r := c.events.choose(ev, 0, c, ship, c.node(patrol))
 	eq(r["fight"], "tier", "and the fight starts")
-	eq(c.fight_path("tier", "patrol"), "res://data/ships/pirate_raider.json", "from the patrol table")
+	check(c.fight_path("tier", "patrol").begins_with("gen:concord:"), "a Concord ship from the patrol table")
 
 
 func test_at_plus_five_prices_are_twenty_percent_off() -> void:
@@ -596,8 +596,12 @@ func test_drift_data_names_things_that_exist() -> void:
 		for t in ["1", "2", "3"]:
 			check(cfg["enemies"][kind].has(t) and not cfg["enemies"][kind][t].is_empty(), "%s has designs for tier %s" % [kind, t])
 			for path in cfg["enemies"][kind][t]:
-				check(FileAccess.file_exists(path), "%s tier %s: %s exists" % [kind, t, path])
-	check("res://data/ships/pirate_raider.json" in cfg["enemies"]["pirate"]["1"], "tier 1 uses the Pirate Raider")
+				if Shipgen.is_spec(path):  # gen:, gen:<faction> or gen:<faction>:ram
+					var parts: Array = path.trim_prefix(Shipgen.PREFIX).split(":")
+					check(parts[0] == "" or Shipgen.tables()["factions"].has(parts[0]), "%s tier %s: %s names a faction of enemy_tables.json" % [kind, t, path])
+				else:
+					check(FileAccess.file_exists(path), "%s tier %s: %s exists" % [kind, t, path])
+	check(cfg["enemies"]["pirate"]["1"].all(func(e): return Shipgen.is_spec(e)), "the pirates of tier 1 are generated")
 	for r in Regions.all():
 		for p in r.get("places", []):
 			check(cfg["types"].has(p["type"]), "the place %s of %s has a known type" % [p["id"], r["id"]])
@@ -818,7 +822,7 @@ func test_a_fight_from_an_event_starts_combat_and_calls_back_with_the_result() -
 	panel.open_event(map.campaign.events.get_event("repo_fight"))
 	panel.choose(0)
 	panel.proceed()
-	eq(fake.entered, "res://data/ships/pirate_raider.json", "the combat view was asked to fight the raider")
+	check(Shipgen.is_spec(fake.entered), "the combat view was asked to fight a generated raider: " + fake.entered)
 	check(not map.visible, "the map steps aside")
 	var credits := ship.inventory.count("credits")
 	var foe: Ship = Ship.from_design("res://data/ships/pirate_raider.json")

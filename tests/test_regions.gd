@@ -245,7 +245,7 @@ func test_mas_debt_clock_runs_in_stages_1_and_2_and_stops_from_stage_3() -> void
 	c.flags["debt_missed"] = true
 	eq(c.misses(), 2, "(two payments behind from before the clock stopped)")
 	c.tide.steps = 0  # (the Hollow tide of the region would send ghosts here: not what this is about)
-	eq(c.fight_path("tier", "pirate"), c.cfg["enemies"]["pirate"][str(c.tier())][0], "but no rammer is sent out here")
+	check(not c.fight_path("tier", "pirate").ends_with(":ram"), "but no rammer is sent out here")
 	c.flags.erase("debt_missed")
 	c.current = c.drift.start_id()
 	c.flags.erase("met_ma")
