@@ -7,6 +7,7 @@ extends "res://tests/base_test.gd"
 
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Sector = preload("res://scripts/space/sector.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const DriftDebris = preload("res://scripts/space/drift_debris.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
@@ -467,7 +468,7 @@ func test_a_fight_spawns_an_enemy_design_near_the_poi() -> void:
 	var poi: Dictionary = s.pois[0]
 	var f: Dictionary = s.fight_spawn(c, "p0", "tier")
 	eq(f["poi"], "p0", "the POI")
-	check(str(f["design"]).begins_with("res://data/ships/") and FileAccess.file_exists(f["design"]), "a design that exists (%s)" % str(f["design"]))
+	check(Shipgen.from_spec(str(f["design"])) != null, "a generated ship that builds (%s)" % str(f["design"]))
 	var d: float = f["pos"].distance_to(poi["pos"])
 	check(d >= 250.0 - 0.01 and d <= 600.0 + 0.01, "250 to 600 px from the POI (%s)" % str(d))
 	eq(s.fight_spawn(c, "p0", "pirate_raider")["design"], "res://data/ships/pirate_raider.json", "a named design is that design")
