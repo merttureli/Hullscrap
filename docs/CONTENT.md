@@ -843,3 +843,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 
   The run-start screen shows the hangar: ships grouped by race and faction, with the A/B/C tabs, the unlock hint on locked ones, and stats and crew for the selected ship.
 - **Building them**: hand-tuned designs written by generator tools, like `tests/tool_make_starters.gd`. Each race wave ships its starters. The procedural ship generator (track 1) can propose hulls that a designer agent then tunes.
+- **Built so far (pack `starters_2`, `tests/tool_make_starters2.gd`)**: the 7 event starters (Halcyon Tender, Ma's Kettle-class Tug, Concord Frigate Resolve, Door Prize, Lumen Skiff Afterimage, Hollow-Touched, CS-002 Forbearance) and layouts A and B for the 10 races of waves 0 and 1 (27 ships, 30 with the first three).
+  - Each design file carries its own `hangar` field `{group, layout, unlock}` (a pack has no hangar.json); the group is the race's name (`Human`, `Kett`, ...), the faction's for the event starters (`Clans`, `Concord`, `Lumen`) or `Haven` and `Hollow`.
+  - The tool draws every ship as a list of rooms inside a silhouette (every other cell is wall) and uses a part of the race's tech pack where it is loaded, else its standard stand-in, so run it again after a tech pack changes. `tests/test_starter_ships.gd` holds every hangar ship to the starter rules.
+  - Earning them: layout A of a race in its homeland's dock event, layout B in its homeland's tech quest (the outcomes that win the tech), both through an `unlock` effect in `data/packs/regions_1/events/`.

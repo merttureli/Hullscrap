@@ -4,17 +4,17 @@
       "text": "The Grove dock is a hollowed hulk grown over with moss and pale ferns, lit by glowing caps. The dockhand is a Sporeling called Lull, who greets you with a gentle puff of spores and an apology. 'Sorry about the smell,' they say. 'It is the good smell. It is the smell of something becoming something else.'",
       "choices": [
         {"text": "Breathe deep.", "outcomes": [
-          {"weight": 80, "text": "The spores are warm and damp and faintly sweet, and the crew have not slept this well in a month. The air tastes of rain and bread.", "effects": {"crew_hp": 10}},
-          {"weight": 20, "text": "The spores tickle. Everyone sneezes, in sequence, for an hour. The dockhand apologises for each sneeze in turn.", "effects": {"crew_hp": 5}}
+          {"weight": 80, "text": "The spores are warm and damp and faintly sweet, and the crew have not slept this well in a month. The air tastes of rain and bread.", "effects": {"crew_hp": 10, "unlock": "ship_sporeling_first_bloom"}},
+          {"weight": 20, "text": "The spores tickle. Everyone sneezes, in sequence, for an hour. The dockhand apologises for each sneeze in turn.", "effects": {"crew_hp": 5, "unlock": "ship_sporeling_first_bloom"}}
         ]},
         {"text": "Hold your breath and hurry.", "outcomes": [
-          {"weight": 100, "text": "Lull takes this in stride. 'Many do,' they say, kindly, and hold the lamp for you. You come out a little blue, and unharmed.", "effects": {}}
+          {"weight": 100, "text": "Lull takes this in stride. 'Many do,' they say, kindly, and hold the lamp for you. You come out a little blue, and unharmed.", "effects": {"unlock": "ship_sporeling_first_bloom"}}
         ]},
         {"text": "[Sporeling] Trade spore-notes with the dockhand.", "requires": {"species": "sporeling"}, "outcomes": [
-          {"weight": 100, "text": "Your Sporeling and Lull stand close and exchange a long slow puff, a kind of handshake. 'Cousins,' says Lull. 'Related by the same hulk.' The dock opens its supplies to you at friends' rates.", "effects": {"items": {"polymer": 15, "credits": 20}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Sporeling and Lull stand close and exchange a long slow puff, a kind of handshake. 'Cousins,' says Lull. 'Related by the same hulk.' The dock opens its supplies to you at friends' rates.", "effects": {"items": {"polymer": 15, "credits": 20}, "crew_hp": 5, "unlock": "ship_sporeling_first_bloom"}}
         ]},
         {"text": "[Emberkin] Keep well back. Warm things make them nervous.", "requires": {"species": "emberkin"}, "outcomes": [
-          {"weight": 100, "text": "Your Emberkin stays at the airlock, hands in pockets, trying very hard to be cold. Lull, touched, produces a damp towel. 'It is the thought,' they say. The two stand in companionable, sweating silence for an hour.", "effects": {"items": {"credits": 15}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Emberkin stays at the airlock, hands in pockets, trying very hard to be cold. Lull, touched, produces a damp towel. 'It is the thought,' they say. The two stand in companionable, sweating silence for an hour.", "effects": {"items": {"credits": 15}, "crew_hp": 5, "unlock": "ship_sporeling_first_bloom"}}
         ]}
       ]
     },
@@ -144,14 +144,14 @@
       "text": "Elder Morel tends the Bloom Reactor: a squat, bulbous, mushroom-like power core in a room full of ferns. It makes enormous power cheaply and drinks the room's air to do it. 'For most crews, a bad bargain,' she says. 'For us it is a garden that makes electricity. Can you keep it fed?' She hands you a watering can, a pair of gloves and a tray of seedlings.",
       "choices": [
         {"text": "Tend the reactor for a shift.", "outcomes": [
-          {"weight": 55, "text": "You water, prune and fan the bloom for six hours, and it purrs. The room gets a little stuffy, then very stuffy; the seedlings help. Morel inspects you at the end and says, with wonder, 'You have the hands.' She gives you the schematics.", "effects": {"crew_hp": -5, "flag": "tech_bloom_reactor"}},
-          {"weight": 45, "text": "The reactor drinks the room dry in the third hour. The crew come out gasping and the seedlings are very smug. Morel is not displeased. 'Everybody does that once,' she says, and hands over the schematics.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_bloom_reactor"}}
+          {"weight": 55, "text": "You water, prune and fan the bloom for six hours, and it purrs. The room gets a little stuffy, then very stuffy; the seedlings help. Morel inspects you at the end and says, with wonder, 'You have the hands.' She gives you the schematics.", "effects": {"crew_hp": -5, "flag": "tech_bloom_reactor", "unlock": "ship_sporeling_mycelium_wall"}},
+          {"weight": 45, "text": "The reactor drinks the room dry in the third hour. The crew come out gasping and the seedlings are very smug. Morel is not displeased. 'Everybody does that once,' she says, and hands over the schematics.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_bloom_reactor", "unlock": "ship_sporeling_mycelium_wall"}}
         ]},
         {"text": "[Sporeling] Tend it with the Grove.", "requires": {"species": "sporeling"}, "outcomes": [
-          {"weight": 100, "text": "Your Sporeling kneels by the bloom and hums, and the reactor hums back. The room never gets stuffy. The fern walls breathe out, the bloom breathes in, and for six hours the Grove is a single quiet organism. Morel gives your Sporeling the schematics, a seedling and a blessing.", "effects": {"items": {"polymer": 20, "crystal": 2}, "rep": {"lumen": 1}, "crew_hp": 10, "flag": "tech_bloom_reactor"}}
+          {"weight": 100, "text": "Your Sporeling kneels by the bloom and hums, and the reactor hums back. The room never gets stuffy. The fern walls breathe out, the bloom breathes in, and for six hours the Grove is a single quiet organism. Morel gives your Sporeling the schematics, a seedling and a blessing.", "effects": {"items": {"polymer": 20, "crystal": 2}, "rep": {"lumen": 1}, "crew_hp": 10, "flag": "tech_bloom_reactor", "unlock": "ship_sporeling_mycelium_wall"}}
         ]},
         {"text": "[Oxygen generator] Feed the bloom from your own air supply.", "requires": {"component": "oxygen_gen"}, "outcomes": [
-          {"weight": 100, "text": "Your oxygen generator feeds the bloom as fast as it drinks. Morel is impressed in a sceptical sort of way. 'A machine that makes air for a machine that eats it,' she says. 'It is the most Lumen thing I have ever seen.' She signs over the schematics.", "effects": {"items": {"polymer": 10}, "flag": "tech_bloom_reactor"}}
+          {"weight": 100, "text": "Your oxygen generator feeds the bloom as fast as it drinks. Morel is impressed in a sceptical sort of way. 'A machine that makes air for a machine that eats it,' she says. 'It is the most Lumen thing I have ever seen.' She signs over the schematics.", "effects": {"items": {"polymer": 10}, "flag": "tech_bloom_reactor", "unlock": "ship_sporeling_mycelium_wall"}}
         ]},
         {"text": "Ask for a day to get ready.", "outcomes": [
           {"weight": 100, "text": "'The bloom is patient,' says Morel. 'It has been waiting forty years. A day is nothing.'", "effects": {}}
