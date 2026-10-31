@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "mire_bog_mortar_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Mire Bog Mortar: a glass slurry tank of green bog water with rising bubbles, a feed pipe, repair hatch, power coupling and the five water-gauge tubes (frame 5 = ready). fire: the tubes flash and the slurry sloshes. damaged: the tank leaks green drips, tubes dead; disabled: the tank is cracked and empty, slurry spilled. Barrel layer mire_bog_mortar_barrel: a short wide mortar tube with brass bands and a flared brass mouth rimmed with green slime that drips; fire: a green lob of slime.",
+ "offset": [
+  0,
+  -4
+ ]
+}

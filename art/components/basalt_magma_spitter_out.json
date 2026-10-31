@@ -1,0 +1,133 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "basalt_magma_spitter_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   12
+  ]
+ },
+ "notes": "OUTSIDE half of the Basalt Magma Spitter: a chipped basalt block with a spout sleeve, a bank of room-vent slots (it dumps its breech air) on the left and a slag cistern with a magma gauge on the right, lit seams between. damaged: a stone corner cracked and leaking magma, the cistern lid hanging, sparks; disabled: cold seams, chunks knocked off, dented, sparking.",
+ "barrel": {
+  "image": "basalt_magma_spitter_barrel.png",
+  "frame": [
+   19,
+   48
+  ],
+  "pivot_on_base": [
+   32,
+   12
+  ],
+  "pivot_on_barrel": [
+   9,
+   41
+  ],
+  "muzzle": [
+   9,
+   10
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "gimbal_deg": 6,
+  "glow": {
+   "image": "basalt_magma_spitter_barrel_glow.png",
+   "frame": [
+    39,
+    68
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ],
+    "damaged": [
+     4,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,40 @@
+{
+ "frame": [
+  24,
+  24
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   12
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   12,
+   12
+  ]
+ },
+ "glow": {
+  "image": "basalt_quarry_driver_impact_glow.png",
+  "frame": [
+   36,
+   36
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "The slug shatters: a white-orange flash, then rock shards fly out with sparks, then a settling dust ring (4 frames, 24x24)."
+}

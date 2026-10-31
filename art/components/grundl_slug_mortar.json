@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "grundl_slug_mortar_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Grundl Slug Mortar: a heavy breech block with a round slug in it, a ribbed feed chute to the right (the ammo rack sits beside it), a big hatch with rivets, power coupling and five amber lamps. charge: a slug rolls in from the chute (frame 5 = seated and ready, lamps green); fire: the breech is empty. damaged: a lamp dead, the chute dented and leaking, sparks; disabled: a slug jammed half-way in the chute. Barrel layer grundl_slug_mortar_barrel: a massive banded barrel with rows of big rivets and a heavy muzzle ring; fire: a huge flash and recoil.",
+ "offset": [
+  0,
+  -4
+ ]
+}

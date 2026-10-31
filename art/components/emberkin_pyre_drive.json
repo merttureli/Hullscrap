@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "emberkin_pyre_drive_glow.png",
+  "frame": [
+   84,
+   50
+  ],
+  "offset": [
+   -10,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "power_coupling": [
+   33,
+   29
+  ],
+  "repair_hatch": [
+   13,
+   29
+  ]
+ },
+ "orientation": "inside half: rotation 0, outward is UP: the core sits on the floor with its top 4px overhanging the inner wall face (see offset); cable plugs into the power coupling",
+ "offset": [
+  0,
+  -4
+ ],
+ "mount": {
+  "part": "inside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Emberkin \"Pyre Drive\" (thrust x1.5, hot), a hull mount (outward is up): outside, one big brass bell breathing a real flame (hard flame tongues over the mouth, 3-frame flicker) with two small pilot nozzles; a brass collar through the wall; inside, a brass furnace core with a flame window, three pressure gauges, a hatch and a power coupling. Damaged: the bell lip dented and a side pilot burning crooked, the gauges cracked, sparks at the coupling. Disabled: the flame out, the bell split and slumped, the furnace dark. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+}

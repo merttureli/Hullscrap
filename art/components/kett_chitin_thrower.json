@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "kett_chitin_thrower_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Kett Chitin Thrower: a magazine of spines racked like a comb; the racks fill with amber spines as it charges (frame 5 = full, cells green), two crank stations, power coupling, hatch. fire: the magazine flashes and empties. damaged: the comb cracked, a spine jammed crooked, cells dead; disabled: spines scattered, the comb split. Barrel layer kett_chitin_thrower_barrel: a grown chitin horn flaring into a spined mouth with two grips; fire: a cone of needles leaves it.",
+ "offset": [
+  0,
+  -4
+ ]
+}

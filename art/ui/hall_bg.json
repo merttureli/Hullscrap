@@ -1,0 +1,8 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "tile": "xy",
+ "notes": "The display backdrop for the hall of ships: a dark blueprint grid (8 px cells) that tiles on both axes. Draw it inside the frame opening, under the ship silhouette."
+}

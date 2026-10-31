@@ -1,0 +1,42 @@
+{
+ "frame": [8, 16],
+ "length": 16,
+ "width": 8,
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "tile": "y",
+ "anims": {
+  "flicker": [0, 3, 12]
+ },
+ "anchors": {
+  "head": [4, 0],
+  "tail": [4, 15]
+ },
+ "glow": {
+  "image": "mire_steam_lance_glow.png",
+  "frame": [16, 16],
+  "offset": [-4, 0],
+  "anims": {
+   "flicker": [0, 3, 12]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "tile": "y"
+ },
+ "notes": "Mire Steam Lance jet (a beam, tile along y): a white-hot core in a puffing column of steam that swells and thins along its length, cyan droplets in the swells (3 flicker frames). Repeat along y to the target.",
+ "impact": {
+  "image": "mire_steam_lance_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "mire_steam_lance_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 14]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

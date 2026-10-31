@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "prismatic_glimmer_turret_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Prismatic Glimmer Turret: a single tall crystal on a violet pedestal with two small light-guides, a steel hatch, power coupling and five crystals. damaged: the crystal cracked and dark; disabled: split and dull. The rotating head prismatic_glimmer_turret_barrel swivels in the ring: a violet ring head carrying a floating faceted crystal that points where it aims, two orbiting shards and a sensor crystal; fire: the crystal flares and a bright shard darts out.",
+ "offset": [
+  0,
+  -4
+ ]
+}

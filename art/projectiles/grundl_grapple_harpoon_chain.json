@@ -1,0 +1,25 @@
+{
+ "frame": [6, 16],
+ "length": 16,
+ "width": 6,
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "tile": "y",
+ "anims": {
+  "clank": [0, 2, 6]
+ },
+ "anchors": {
+  "head": [3, 0],
+  "tail": [3, 15]
+ },
+ "glow": {
+  "image": "grundl_grapple_harpoon_chain_glow.png",
+  "frame": [14, 16],
+  "offset": [-4, 0],
+  "anims": {
+   "clank": [0, 2, 6]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "tile": "y"
+ },
+ "notes": "Grundl harpoon chain (tile along y): a chain of alternating flat and edge-on links, drawn from the ship (tail) to the harpoon (head); the 2 frames shift the links by a pixel for a clank. Repeat along y."
+}

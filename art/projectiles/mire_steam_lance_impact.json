@@ -1,0 +1,20 @@
+{
+ "frame": [16, 16],
+ "anims": {
+  "play": [0, 4, 14]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [8, 8]
+ },
+ "glow": {
+  "image": "mire_steam_lance_impact_glow.png",
+  "frame": [24, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Mire Steam Lance hit: a ring of white steam puffs spreading and thinning, cyan droplets flying out (4 frames)."
+}

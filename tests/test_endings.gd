@@ -314,7 +314,7 @@ func test_the_report_has_what_the_screen_shows() -> void:
 	eq(rep["log"].map(func(x): return x["kind"]), ["landmark", "unlock", "unlock", "ending"], "the run log in order")
 	eq(rep["log"][1]["text"], "Gilt hull", "an unlock reads as its name")
 	eq(rep["log"][3]["text"], "The Fixture Ending", "and the ending as its title")
-	check(rep["regions"].has("Clan space"), "the regions visited include the start's: " + str(rep["regions"]))
+	check(rep["regions"].has("Clan Space"), "the regions visited include the start's: " + str(rep["regions"]))
 	eq(rep["crew"].size(), ship.crew.size(), "the crew alive")
 	eq(rep["ship"], ship.name, "the ship's name")
 	check(Endings.report(c, null, "no_such_ending")["ending"]["title"] == "The End", "an unknown ending still reads")
