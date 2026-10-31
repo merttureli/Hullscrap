@@ -797,6 +797,17 @@ Source and licence of every art and audio file in the repo.
 | `art/crew/choir/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/choir/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/choir/torso_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/head.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/head_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/head_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/legs.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/corvin/torso_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/drakkin/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/drakkin/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/drakkin/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |

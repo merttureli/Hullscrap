@@ -481,4 +481,157 @@ class Siltborn(Species):
                 out.append(lift_glow(g, FN, 8))
         return out
 
-SPECIES = [WardenFrame, Murrow, Siltborn]
+# ================================================================== CORVIN: crow-like wreck traders with an eye for shine (standard rig)
+# Blue-black feathers (D lit E, deep N, a sheen of j) in a scalloped feather cloak over the shoulders and back, a beaked head (an amber beak, bright gold eyes), a fan of
+# long tail feathers behind (in the legs layer: it sways with the walk), thin scaly bird legs with three-toed talons, pockets everywhere (outfit: a bandolier with
+# pouches and a belt of pouches at each hip) and shiny trinkets pinned on the cloak (a coin, a bead, a spark of glass).
+CV_FOOT = {
+ 'plant': art("""
+f.f.f
+Q.Q.Q
+QQqQQ
+.qqq.
+"""),
+ 'lift': art("""
+f.f.f
+Q.Q.Q
+QQqQQ
+QQqQQ
+.qqq.
+"""),
+}
+def cv_leg_frame(dl, dr, lift_l=False, lift_r=False, sway=0):
+    s = Spr(N, N)
+    for k, ang in enumerate((-36, -18, 0, 18, 36)):                                         # the tail: five long feathers fanning from the rump
+        a = math.radians(ang); L = 9 if k == 2 else 8
+        tx = 16 + int(round(L * math.sin(a) + sway * (1 if k % 2 else 0.6))); ty = 22 + int(round(L * math.cos(a)))
+        t = Spr(N, N); seg(t, 16, 21, tx, ty, 2, 'D'); merge(s, shade_gen(t, 'D', 'E', 'N'))
+        s.put(tx, ty, 'j')
+    for lx, d, lift in ((10, dl, lift_l), (22, dr, lift_r)):
+        fy = 16 - d
+        step = -1 if fy < 16 else 1
+        ys = list(range(16, fy + step, step))
+        t = Spr(N, N); t.rect(lx - 2, 14, 5, 4, 'D'); merge(s, shade_gen(t, 'D', 'E', 'N'))            # the feathered thigh
+        for y in ys: s.put(lx - 1, y, 'Q'); s.put(lx, y, 'q')                                  # a thin scaly shin
+        if len(ys) > 5: s.put(lx, ys[len(ys) // 2], 'n')                                       # the ankle joint
+        b = CV_FOOT['lift' if lift else 'plant']
+        s.stamp(lx - 2, fy - len(b) // 2 - (1 if fy < 16 else 0), b)
+    return s
+CV_WALK = [(8, -8, False, False, 2), (4, -4, False, True, 1), (-4, 4, False, True, -1), (-8, 8, False, False, -2), (-4, 4, True, False, -1), (4, -4, True, False, 1)]
+
+CV_CLOAK = [(10, 11), (22, 11), (26, 13), (28, 18), (27, 24), (26, 27), (24, 26), (22, 29), (19, 28), (17, 30), (16, 28), (15, 30), (13, 28), (10, 29), (8, 26), (6, 27), (5, 24), (4, 18), (6, 13)]   # a ragged feather hem
+def cv_pouch(s, x, y):
+    s.rect(x, y, 3, 3, 'B'); s.hline(x, y, 3, 'A'); s.hline(x, y + 2, 3, 'C'); s.put(x + 1, y + 1, 'a')
+def cv_torso():
+    s = Spr(N, N)
+    c = Spr(N, N); poly(c, CV_CLOAK, 'D'); merge(s, shade_gen(c, 'D', 'E', 'N'))
+    for r, y0 in enumerate((12, 16, 20, 24)):                                                # rows of overlapping feathers
+        off = 2 * (r % 2)
+        for x in range(4, 29):
+            for y in (y0 + 2, y0 + 3):
+                if s.get(x, y) in ('D', 'E'):
+                    k = (x + off) % 4
+                    if y == y0 + 3 and k in (0, 1): s.put(x, y, 'E')
+                    if y == y0 + 3 and k == 3: s.put(x, y, 'N')
+                    if y == y0 + 2 and k == 0: s.put(x, y, 'j')                              # the blue sheen on a feather
+    for y in range(13, 28): s.put(16, y, 'N') if y % 4 else None                              # a broken spine seam
+    # the bandolier (outfit) from the left shoulder to the right hip, with three pouches on it, and a pouch belt at each hip
+    for i in range(16):
+        x = 8 + i; y = 13 + (i * 11) // 16
+        s.put(x, y - 1, 'A'); s.put(x, y, 'B'); s.put(x, y + 1, 'C')
+    for (x, y) in ((10, 15), (14, 18), (19, 22)): cv_pouch(s, x, y + 1)
+    for sd in (-1, 1):
+        for y in (17, 21):
+            cv_pouch(s, 16 + sd * 11 - (1 if sd < 0 else 0), y)
+    # shiny trinkets pinned on the cloak: a gold coin, a bead, a spark of glass, a gem
+    s.put(12, 22, 'y'); s.put(13, 22, 'a'); s.put(21, 14, 'c'); s.put(8, 20, 'H'); s.put(24, 19, 'm'); s.put(18, 26, 'y'); s.put(17, 26, 'a'); s.put(21, 25, 'H')
+    return s
+
+CV_HEADS = ['beak', 'loupe', 'helmet']
+def cv_head(kind):
+    s = Spr(N, N)
+    h = Spr(N, N); ell(h, 16, 11, 4.4, 4.6, 'E'); poly(h, [(13, 9), (19, 9), (18, 5), (14, 5)], 'E'); merge(s, shade_gen(h, 'E', 'j', 'D'))
+    # the beak: long, pointed, amber with a bright ridge and a dark underside
+    s.stamp(14, 1, art("""
+..y..
+..a..
+.yan.
+.yan.
+yaaan
+yaaan
+.nnn.
+"""))
+    s.put(15, 4, 'N'); s.put(17, 4, 'N')                                                    # the nostrils
+    for sd in (-1, 1):                                                                       # bright gold eyes with a dark pupil
+        ex = 16 + sd * 3
+        s.put(ex, 9, 'y'); s.put(ex + sd, 9, 'y'); s.put(ex, 10, 'N'); s.put(ex + sd, 10, 'y')
+        s.put(ex, 8, 'D')                                                                    # a brow
+    for (x, y) in ((13, 13), (19, 13), (16, 14)): s.put(x, y, 'N')                           # throat feathers
+    if kind == 'loupe':                                                                      # a jeweller's loupe over the right eye on a cord
+        for (x, y) in ((17, 7), (18, 7), (19, 7), (20, 8), (20, 9), (20, 10), (20, 11), (19, 11), (18, 11), (17, 10), (17, 9), (17, 8)): s.put(x, y, 'a')
+        s.put(18, 8, 'c'); s.put(19, 8, 'c'); s.put(18, 9, 'N'); s.put(19, 9, 'c'); s.put(18, 10, 'c'); s.put(19, 10, 'c'); s.put(17, 8, 'H'); s.put(18, 7, 'y')
+        for (x, y) in ((21, 11), (21, 12), (21, 13), (20, 14)): s.put(x, y, 'n')
+    if kind == 'helmet':                                                                     # a dented pot helm of scrap steel with a rust patch and a pinned trinket
+        pt = Spr(N, N); ell(pt, 16, 8, 5.4, 3.6, 'S'); merge(s, shade_gen(pt, 'S', 'L', 'W'))
+        s.hline(11, 10, 11, 'B'); s.hline(11, 11, 11, 'C'); s.put(11, 10, 'A')                    # a tinted strap round the helm's rim
+        for (x, y) in ((13, 7), (14, 6), (19, 8)): s.put(x, y, 'u')
+        s.put(12, 8, 'H'); s.put(20, 7, 'H'); s.put(15, 9, 'M')
+        s.put(18, 6, 'y'); s.put(19, 6, 'a')
+        s.rect(15, 5, 3, 2, 'E')                                                             # the helm's nose bar over the beak's root
+        for x in (13, 19): s.put(x, 9, 'N')
+        for sd in (-1, 1):
+            ex = 16 + sd * 3; s.put(ex, 9, 'y'); s.put(ex + sd, 9, 'y'); s.put(ex, 10, 'N'); s.put(ex + sd, 10, 'y')
+    return s
+
+def cv_talon(s, x, y):
+    for (dx, dy, c) in ((-1, -2, 'f'), (1, -2, 'f'), (-1, -1, 'Q'), (0, -1, 'Q'), (1, -1, 'Q'), (-1, 0, 'q'), (0, 0, 'q'), (1, 0, 'n')): s.put(x + dx, y + dy, c)   # three long toes with pale claws
+def cv_arm(s, a, b):
+    t = Spr(N, N); seg(t, a[0], a[1], b[0], b[1], 3, 'D'); merge(s, shade_gen(t, 'D', 'E', 'N'))
+    n = max(abs(b[0] - a[0]), abs(b[1] - a[1]), 1)
+    s.put(a[0] + round((b[0] - a[0]) * 0.4), a[1] + round((b[1] - a[1]) * 0.4), 'j')         # a blue sheen
+    cx = a[0] + round((b[0] - a[0]) * 0.82); cy = a[1] + round((b[1] - a[1]) * 0.82)
+    s.hline(cx - 1, cy, 3, 'B'); s.put(cx - 1, cy - 1, 'A'); s.put(cx + 1, cy + 1, 'C')       # a tinted cuff
+CV_UNARMED = ((6, 21), (26, 21))
+def cv_arms(pose):
+    s = Spr(N, N); A = pose_anchors(*CV_UNARMED)[pose]
+    if pose == 'unarmed':
+        cv_arm(s, (8, 15), (6, 20)); cv_arm(s, (24, 15), (26, 20)); cv_talon(s, 6, 22); cv_talon(s, 26, 22)
+        return s
+    for sh, k in (((8, 15), 'hand_l'), ((24, 15), 'hand_r')):
+        cv_arm(s, sh, (A[k][0], A[k][1] + 1)); cv_talon(s, A[k][0], A[k][1] + 2)
+    return s
+
+class Corvin(Species):
+    id = 'corvin'
+    walk_fps = 8
+    glow_fps = 1
+    head_names = CV_HEADS
+    notes = ('Corvin: crow-like wreck traders with an eye for shine (standard rig). Blue-black feathers in a scalloped feather cloak over the shoulders and back, a beaked head '
+             '(an amber beak, bright gold eyes), a fan of five long tail feathers behind (in the legs layer: it sways with the walk), thin scaly bird legs ending in three-toed '
+             'talons, pockets everywhere (a bandolier with three pouches and a belt of pouches at each hip) and shiny trinkets pinned on the cloak (a gold coin, a bead, a spark of '
+             'glass, a gem). Head variants: beak, loupe (a jeweller\'s loupe over one eye, brass ring and cyan glass), helmet (a dented scrap pot helm with a tinted strap and a pinned '
+             'trinket). head_glow lights the loupe glass; torso_glow the glint of the trinkets (2 frames, ~1 fps). Outfit mask = the bandolier, the pouches, the cuffs, the helm strap.')
+    def legs(self): return [outlined(cv_leg_frame(*w[:4], sway=w[4])) for w in CV_WALK] + [outlined(cv_leg_frame(1, -1, sway=0))]
+    def torso(self): return outlined(cv_torso())
+    def arms(self, pose): return outlined(cv_arms(pose))
+    def head(self, name): return outlined(cv_head(name))
+    def torso_anchors(self): return {'head': [16, 11], 'back': [16, 26], 'shoulder_l': [8, 15], 'shoulder_r': [24, 15]}
+    def arm_anchors(self): return pose_anchors(*CV_UNARMED)
+    def torso_glow(self):
+        out = []; t = cv_torso()
+        for f in (0, 1):
+            g = ng(N)
+            pts = [(21, 14), (8, 20), (24, 19), (12, 22), (18, 26)] if f == 0 else [(21, 14), (8, 20), (24, 19), (21, 25), (17, 26)]
+            glow_px_max(g, pts, (255, 244, 180), (0.5, 0.35)[f], 2.2, 1.5)
+            out.append(clear_under(g, t))
+        return out
+    def head_glow(self):
+        out = []
+        for f in (0, 1):
+            for nm in self.head_names:
+                g = ng(N)
+                if nm == 'loupe': glow_px_max(g, [(18, 9), (19, 9), (18, 10), (19, 10)], (60, 242, 255), (0.6, 0.4)[f], 2.6, 1.5)
+                out.append(g)
+        return out
+
+SPECIES = [WardenFrame, Murrow, Siltborn, Corvin]
