@@ -32,8 +32,8 @@ const FLASH_S := 0.45  ## seconds the jump flash plays on arrival
 const SAY_S := 4.0  ## seconds a message stays
 const ICON := 32.0  ## screen px of a marker icon (the 16 px art at 2x)
 const EDGE := 46.0  ## screen px the edge markers keep from the border
-const TOP := 128.0  ## screen px down to the sector's lines (under the HUD text at the top left)
-const BOTTOM := 124.0  ## screen px the edge markers keep from the bottom (the salvage and crew lines)
+const TOP := 66.0  ## screen px down to the sector's lines (under the HUD's top bar)
+const BOTTOM := 180.0  ## screen px the edge markers keep from the bottom (the HUD's mode bar and key hints)
 const CYAN := Color("#43e6ff")
 const AMBER := Color("#e1a136")
 const RED := Color("#e0413b")
@@ -429,8 +429,7 @@ static func contact_name(ct: Dictionary) -> String:
 ## The sector's title: the node and the region.
 func title() -> String:
 	var c = campaign()
-	var regions: Dictionary = Sector.config()["regions"]
-	return "%s  -  %s" % [c.label(c.current), str(regions.get(_sector.region, {}).get("label", _sector.region))]
+	return "%s  -  %s" % [c.label(c.current), c.region_name()]
 
 
 ## What the helm is doing, in words.
@@ -612,13 +611,15 @@ func _draw_hud() -> void:
 		var contacts := Radar.contacts(_sector, _ship())
 		for ct in contacts:
 			_draw_marker(ct, xf, centre, vp)
-	var lines: Array = [[title(), DIM_TEXT, 14]] if _fighting() else [[title(), DIM_TEXT, 14], [helm_line(), CYAN if helm.state == "autopilot" else TEXT, 15]]
+	var lines: Array = [] if _fighting() else [[title(), DIM_TEXT, 14], [helm_line(), CYAN if helm.state == "autopilot" else TEXT, 15]]  # a fight has its own HUD
 	var sl := spool_line()
 	if sl != "":
 		lines.append([sl, RED if campaign().jump_status()["blocked"] else AMBER, 16])
 	if message != "" and _clock - _said < SAY_S:
 		lines.append([message, TEXT, 14])
-	var y := 62.0 if _fighting() else TOP
+	if lines.is_empty():
+		return
+	var y := 76.0 if _fighting() else TOP  # under the fight's key hints
 	var w := 0.0
 	for l in lines:
 		w = maxf(w, font.get_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, l[2]).x)

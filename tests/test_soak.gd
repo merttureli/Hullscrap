@@ -53,7 +53,7 @@ func test_soak_every_starter_every_seed() -> void:
 	print("soak: %s in %d ms" % [str(stats), Time.get_ticks_msec() - t0])
 	check(stats["jumps"] >= STARTERS.size() * SEEDS.size() * JUMPS, "every run made its jumps (%d)" % stats["jumps"])
 	check(stats["fights"] > 0, "the soak met at least one fight")
-	check(stats["pois"] >= stats["jumps"], "a POI or more a sector (%d)" % stats["pois"])
+	check(stats["pois"] + stats["grounded"] >= stats["jumps"], "a POI or more a sector, unless a fight left the ship unable to fly (%d POIs, %d grounded)" % [stats["pois"], stats["grounded"]])
 	check(stats["salvage"] > 0, "a won fight led to the salvage of the enemy's parts")
 
 
@@ -140,6 +140,8 @@ func _visit(where: String, c: Campaign, sim, pick: RandomNumberGenerator) -> boo
 		var r := _fly(where, c, sim, pick, s, id)
 		if r == "wrecked":
 			return false
+		if r == "grounded":  # a fight shot away its helm or reactor for good: it only jumps on now
+			break
 		if r == "lost":
 			check(false, "%s: the autopilot did not reach %s (%s) in %d s: %d px away, speed %d, state %s" % [where, id, poi["type"], FLY_CAP_S,
 				_helm.flight.pos.distance_to(s.find(id)["pos"]), _helm.flight.vel.length(), _helm.state])
@@ -147,7 +149,8 @@ func _visit(where: String, c: Campaign, sim, pick: RandomNumberGenerator) -> boo
 
 
 ## Fly to POI `id` with the autopilot, at the time scale, until it triggers: "reached", "wrecked" (a fight was lost on
-## the way), "grounded" (the ship cannot fly even after the crew had time to repair it) or "lost" (the autopilot failed).
+## the way), "grounded" (the ship cannot fly even after the crew had time to repair it: a wrecked helm, reactor or
+## engine stays wrecked) or "lost" (the autopilot failed).
 func _fly(where: String, c: Campaign, sim, pick: RandomNumberGenerator, s, id: String) -> String:
 	var ship = sim.player_ship()
 	_helm.set_course(id)

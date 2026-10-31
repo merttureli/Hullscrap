@@ -395,7 +395,9 @@ func _hide_panels() -> void:
 func _start_fight(value: String, after_win: Dictionary) -> void:
 	var spot: Dictionary = _poi_sector.fight_spawn(campaign, _poi, value) if sector_flow() and _poi_sector != null and _poi != "" else {}
 	var path: String = spot["design"] if not spot.is_empty() else campaign.fight_path(value, str(campaign.node(campaign.current)["type"]))
-	var why: String = combat.enter(path, {"enemy_pos": spot["pos"]} if not spot.is_empty() else {}) if combat != null else "no combat view"
+	var why := "no combat view"
+	if combat != null:
+		why = combat.enter(path, {"enemy_pos": spot["pos"]}) if not spot.is_empty() else combat.enter(path)
 	if why != "":
 		_say("Cannot fight: " + why, true)
 		if sector_flow():
