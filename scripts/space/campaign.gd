@@ -31,6 +31,7 @@ const Radar = preload("res://scripts/space/radar.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
+const Unlocks = preload("res://scripts/space/unlocks.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -301,7 +302,7 @@ func change_hull(ship, n: int) -> int:
 func jump_block(to: String, ship, drift_jump := false) -> String:
 	if not drift.has(to) or is_hidden(to) or not drift.linked(current, to):
 		return "no lane there"
-	if drift.node(to)["type"] == "gate":
+	if gate_dark(to):
 		return DARK_TEXT
 	if drift_jump:
 		if not fuel_short(ship):
@@ -310,6 +311,12 @@ func jump_block(to: String, ship, drift_jump := false) -> String:
 			return "the hull would not survive a drift jump"
 		return ""
 	return NO_FUEL if fuel_short(ship) else ""
+
+
+## Is node `id` a Dead Gate that cannot be entered? The gates are dark everywhere but in the ending region (the Gate approaches
+## past the last stage), where their shells can be approached: the Way Out and the Hollow endings wait there.
+func gate_dark(id: String) -> bool:
+	return drift.has(id) and drift.node(id)["type"] == "gate" and not is_final()
 
 
 ## Is the old instant jump on (cfg `instant_jump`, true for now)? The map then jumps with jump() at once; with it off
@@ -409,9 +416,10 @@ func _tide_notes(fell: int) -> Array:
 	return ["The Hollow takes %d more place%s." % [fell, "" if fell == 1 else "s"]] if fell > 0 else []
 
 
-## Has the Hollow tide taken node `id` (tide.gd)? Stations and the exit never fall.
+## Has the Hollow tide taken node `id` (tide.gd)? Stations and the exit never fall, nor do the Dead Gates: it comes from them,
+## and their own events (the Way Out, the Hollow endings) are what waits there.
 func is_hollow(id: String) -> bool:
-	return tide.is_hollow(id)
+	return tide.is_hollow(id) and drift.node(id).get("type", "") != "gate"
 
 
 ## Tell the current sector whether the tide has taken it (Sector.set_hollow): the one place that flag is set. `mid_stay`: the
@@ -699,6 +707,7 @@ func enter_region(id: String, ship = null) -> void:
 	drift = Regions.make_map(region_data, cfg, region_seed, is_final())
 	current = drift.start_id()
 	tide = Tide.make(drift, current, Tide.config(), drift.exit_id(), stage)  # a Hollow tide of the region's own, from its entry
+	tide.steps = tide_head()  # a map variant may start it on
 	warden = Wardens.for_region(seed_value, stage, region_data, jumps, str(cfg.get("difficulty", "normal")))
 	visited = {current: true}
 	revealed = {}
@@ -751,6 +760,24 @@ func note_landmark(id: String, title: String) -> bool:
 	if profile != null:
 		profile.record_landmark(id, title)
 	return true
+
+
+## Map variant `id` (the payload `variant` of a map_variant unlock, run_start.gd) is on for this run: the flag variant_<id>, which
+## the save keeps, and the Hollow tide of this region and every later one starts its `tide_steps` on (tide_head).
+func set_variant(id: String) -> void:
+	if id == "":
+		return
+	flags["variant_" + id] = true
+	tide.steps = maxi(tide.steps, tide_head())
+
+
+## The steps the Hollow tide starts a region with: the greatest `tide_steps` of the map variants on (0 for none).
+func tide_head() -> int:
+	var n := 0
+	for f in flags:
+		if str(f).begins_with("variant_"):
+			n = maxi(n, Unlocks.tide_steps(str(f).substr(8)))
+	return n
 
 
 ## The run is won with ending `id`: the event panel then opens the ending screen.

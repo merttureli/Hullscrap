@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "station_wayout_concord_charter", "type": "station", "weight": 100, "once": true, "requires": {"flag": "at_meridian", "rep_min": {"concord": 5}, "not_flag": "wayout_concord_backed", "jumps_min": 22},
+      "id": "station_wayout_concord_charter", "type": "station", "weight": 100, "once": true, "requires": {"flag": "at_meridian", "rep_min": {"concord": 5}, "not_flag": "wayout_concord_backed", "region": "concord_space", "stage_min": 3, "stage_max": 6},
       "text": "Behind Meridian's Records Hall is a door with a brass plate that says RESTORATION DESK (TEMPORARY). The plate has been up for forty years. Behind it a woman in a very good, very old uniform is stamping a form with the gravity of someone launching a ship. 'Director Imre Vasko, Lattice Authority, Restoration. Acting,' she says, without looking up. 'You have been recommended. By nobody; I checked. But yours is the shortest file that isn't empty, and I do like a short file.' She slides across a charter: nineteen pages and a ribbon. It authorises one party to restore the Concord Gate, subject to a gate core, four units of gate alloy and, in a box at the bottom marked BACKING, an Authority signature. 'Mine,' she says. 'It has been waiting for a name to go beside it.'",
       "choices": [
         {"text": "Sign the charter. File the fee (200 credits).", "requires": {"credits": 200, "pay": true}, "outcomes": [
@@ -18,7 +18,7 @@
       ]
     },
     {
-      "id": "gate_wayout_concord_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_1", "flag": "wayout_concord_backed", "not_flag": "wayout_concord_core", "jumps_min": 30},
+      "id": "gate_wayout_concord_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_1", "flag": "wayout_concord_backed", "not_flag": "wayout_concord_core", "region": "gate_approaches", "stage_min": 9},
       "text": "The Concord Gate is a ring the size of a small moon, with a hole in the middle where the sky should be. Its shell has been peeled and its ribs show, white as a wishbone, and inside, in the control ring, the desks are still set out in rows with their chairs tucked in, as if the shift were due back. The core hangs where the last operator left it, in a cage of Lattice Authority tags: PROPERTY OF, DO NOT REMOVE and, in smaller print, SERIOUSLY. A Warden drone, Unit 3, drifts in front of it, humming the polite hum of a thing that has been told to guard something and has not been told what from. 'Credentials,' says Unit 3. It sounds hopeful.",
       "choices": [
         {"text": "Present Vasko's charter.", "outcomes": [
@@ -38,7 +38,7 @@
       ]
     },
     {
-      "id": "gate_wayout_concord_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_1", "flag": ["wayout_concord_backed", "wayout_concord_core"], "jumps_min": 34},
+      "id": "gate_wayout_concord_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_1", "flag": ["wayout_concord_backed", "wayout_concord_core"], "region": "gate_approaches", "stage_min": 9},
       "text": "The ring waits. The chairs are tucked in. On the main console a brass plate has been polished by someone who did not expect to be there when it mattered, and underneath it a slot is cut exactly the size of a gate core. Your comm crackles. 'Restoration Desk,' says Vasko, across a great distance and a great deal of stamping. 'Whenever you are ready. Please do not hurry. Please hurry.'",
       "choices": [
         {"text": "Seat the core. Pour the alloy. Call Vasko.", "requires": {"items": {"gate_core": 1, "gate_alloy": 4}, "pay": true}, "outcomes": [
@@ -50,7 +50,7 @@
       ]
     },
     {
-      "id": "station_wayout_clans_moot", "type": "station", "weight": 100, "once": true, "requires": {"flag": "at_rusthold", "rep_min": {"clans": 5}, "not_flag": "wayout_clans_backed", "jumps_min": 22},
+      "id": "station_wayout_clans_moot", "type": "station", "weight": 100, "once": true, "requires": {"rep_min": {"clans": 5}, "not_flag": "wayout_clans_backed", "region": ["basalt_quarries", "gauntling_scrapyards", "kett_hives"], "stage_min": 3, "stage_max": 7},
       "text": "The Clan Moot meets in the big cargo bay, which is the only room large enough, and which is why most of the furniture is already on fire. Twelve clans, one table and one rule: whoever wants the floor must hold the Good Wrench. The Good Wrench is, in fact, not that good. Today it is in the hands of Ma Gantry, who is standing on a chair. 'The Concord wants the gates back,' she says. 'The Lumen want to listen to them. Who wants them open?' The bay answers with a noise like a hangar full of dropped pans. It is not yet a vote. A vote needs the Wrench.",
       "choices": [
         {"text": "Take the Wrench. Promise to open the Scrapper Gate for everybody, for free.", "outcomes": [
@@ -72,7 +72,7 @@
       ]
     },
     {
-      "id": "gate_wayout_clans_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_2", "flag": "wayout_clans_backed", "not_flag": "wayout_clans_core", "jumps_min": 30},
+      "id": "gate_wayout_clans_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_2", "flag": "wayout_clans_backed", "not_flag": "wayout_clans_core", "region": "gate_approaches", "stage_min": 9},
       "text": "The Scrapper Gate has tenants. The control ring has been cut into rooms, the rooms have been hung with lights and flags, and the old operator's desk has become a bar, which the Rustfangs call The Last Stop and which has a menu. The core hangs over the bar in its cage under a hand-painted sign: NOT FOR SALE. DON'T ASK. SERIOUSLY, DON'T. A man in Rustfang colours, with a ledger and a very friendly knife, looks you up and down. 'Customer,' he says, in the voice of a man who has not had one in a while. 'Or collector. It's all the same to the bar.'",
       "choices": [
         {"text": "Tell them the gate is going to be free. For everyone. Including them.", "outcomes": [
@@ -91,7 +91,7 @@
       ]
     },
     {
-      "id": "gate_wayout_clans_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_2", "flag": ["wayout_clans_backed", "wayout_clans_core"], "jumps_min": 34},
+      "id": "gate_wayout_clans_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_2", "flag": ["wayout_clans_backed", "wayout_clans_core"], "region": "gate_approaches", "stage_min": 9},
       "text": "Half the Drift is on the doorstep. Somebody has brought a ribbon, and somebody else has brought a pair of scissors the size of a door. The Rustfangs have swept the ring and put out chairs. Ma Gantry's face is on every channel you own. 'The motion,' she says, 'is that someone turns it on. The Wrench is in the bay. Someone get the Wrench.' A cousin arrives with the Wrench. 'I'd like to say a few words,' says someone. 'Don't,' say several hundred people.",
       "choices": [
         {"text": "Seat the core. Pour the alloy. Hit it with the Wrench.", "requires": {"items": {"gate_core": 1, "gate_alloy": 4}, "pay": true}, "outcomes": [
@@ -103,7 +103,7 @@
       ]
     },
     {
-      "id": "station_wayout_lumen_consent", "type": "station", "weight": 100, "once": true, "requires": {"flag": "at_prism", "rep_min": {"lumen": 5}, "not_flag": "wayout_lumen_backed", "jumps_min": 22},
+      "id": "station_wayout_lumen_consent", "type": "station", "weight": 100, "once": true, "requires": {"flag": "at_prism", "rep_min": {"lumen": 5}, "not_flag": "wayout_lumen_backed", "region": "lumen_space", "stage_min": 4, "stage_max": 8},
       "text": "The Prism has gone quiet in the way a room goes quiet before a speech. In the long chamber at its heart, where the Lumen keep their model of the Lattice, forty acolytes stand in a spiral with their eyes closed, and the model hums three notes, and stops. 'We want to study the gates, not restart them,' says the Hierophant, whose name is a chord. 'We have said so for forty years. But you have shown us something, and we have counted. A door opened by the Concord leads to the Concord. A door opened by the Clans leads to the Clans. A door opened by us would lead somewhere we have not been.' She opens her eyes. 'We would like you to open it. We would like to be asked properly.'",
       "choices": [
         {"text": "Sing the fourth note.", "outcomes": [
@@ -124,7 +124,7 @@
       ]
     },
     {
-      "id": "gate_wayout_lumen_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_3", "flag": "wayout_lumen_backed", "not_flag": "wayout_lumen_core", "jumps_min": 30},
+      "id": "gate_wayout_lumen_core", "type": "gate", "weight": 200, "once": true, "requires": {"node": "gate_3", "flag": "wayout_lumen_backed", "not_flag": "wayout_lumen_core", "region": "gate_approaches", "stage_min": 9},
       "text": "The Lumen Gate is the only dead gate that is not dark. Crystal has grown over it in slow ribbons of violet and white, and in the heart of the ring the core floats in a cradle of light, humming the fourth note. Between you and it a Warden drone hangs, polite, patient and wearing the nervous air of a thing that has recently begun to think. 'Hello,' it says. 'I am Unit 7. I have a question. I am not permitted to ask it, so I would like you to ask it for me.' A long pause. 'Who is on the other side of the gate?'",
       "choices": [
         {"text": "Say you don't know. That's why you're going.", "outcomes": [
@@ -143,7 +143,7 @@
       ]
     },
     {
-      "id": "gate_wayout_lumen_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_3", "flag": ["wayout_lumen_backed", "wayout_lumen_core"], "jumps_min": 34},
+      "id": "gate_wayout_lumen_restart", "type": "gate", "weight": 300, "once": false, "requires": {"node": "gate_3", "flag": ["wayout_lumen_backed", "wayout_lumen_core"], "region": "gate_approaches", "stage_min": 9},
       "text": "The cradle waits, and the ring waits, and somewhere on the Prism forty acolytes are standing in a spiral with their eyes closed, holding a single note. Unit 7 hangs at your shoulder. 'I will not ask again,' it says. 'But I would like it noted that I am listening.'",
       "choices": [
         {"text": "Seat the core. Pour the alloy. Ask the gate, properly.", "requires": {"items": {"gate_core": 1, "gate_alloy": 4}, "pay": true}, "outcomes": [

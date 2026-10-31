@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "anomaly_haven_ghost_first", "type": "anomaly", "weight": 120, "once": true, "landmark": true, "requires": {"jumps_min": 6, "not_flag": "haven_1"},
+      "id": "anomaly_haven_ghost_first", "type": "anomaly", "weight": 120, "once": true, "landmark": true, "requires": {"not_flag": "haven_1", "stage_min": 2, "stage_max": 5},
       "text": "The radar paints a contact with nothing in it. When you close, the contact turns out to be a rock, and the rock has a dish bolted to it, and the dish is turning to follow you. The comm clears its throat, in a manner of speaking, and a voice says, small and far away and very tired: 'If you can hear this, we're alive. Come to the Lantern Reach.' It stops. It starts again. Under the words there is a room: a chair scraping, a cough, someone asking 'is it still on?' in a voice that has not yet learned to be embarrassed. Then a second channel opens, and a man says, delighted and a little frightened, 'You hear that? You can hear it? I've been telling everybody.'",
       "choices": [
         {"text": "Record the whole loop, start to finish.", "outcomes": [
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "id": "distress_haven_lantern_blind", "type": "distress", "weight": 90, "once": true, "requires": {"flag": "haven_1", "not_flag": "haven_2", "jumps_min": 10},
+      "id": "distress_haven_lantern_blind", "type": "distress", "weight": 90, "once": true, "requires": {"flag": "haven_1", "not_flag": "haven_2", "stage_min": 3, "stage_max": 6},
       "text": "A Scrapper tug, the Long Odds, turns in slow circles with every light on and her fuel gauge reading a polite zero. She is not broadcasting a mayday. She is broadcasting the loop: 'If you can hear this, we're alive.' Then, over the top of it, a human voice, hoarse: 'That's not us. That's what we're following. Please. We've been following it three years, and we're very nearly out of the things you follow things with.' Behind the speaker, on a bulkhead, you can see a wall of chalk.",
       "choices": [
         {"text": "Give them 3 fuel.", "requires": {"items": {"fuel": 3}, "pay": true}, "outcomes": [
@@ -39,7 +39,7 @@
       ]
     },
     {
-      "id": "wreck_field_haven_relay_log", "type": "wreck_field", "weight": 60, "once": true, "requires": {"flag": "haven_2", "not_flag": "haven_3", "jumps_min": 14},
+      "id": "wreck_field_haven_relay_log", "type": "wreck_field", "weight": 60, "once": true, "requires": {"flag": "haven_2", "not_flag": "haven_3", "stage_min": 4, "stage_max": 7},
       "text": "Concord relay buoy RB-9 hangs in the wreck field with its panel open and its status lamp green. The lamp says RECEIVING. A paper tag is zip-tied to the antenna in careful capitals: SIGNAL LOGGED 3,411 TIMES. CLASSIFIED: HOAX (RESOLVED). Underneath, in pencil: 'Resolved how?' And under that, in a different pencil: 'Don't.'",
       "choices": [
         {"text": "Pull the buoy's log.", "outcomes": [
@@ -58,7 +58,7 @@
       ]
     },
     {
-      "id": "wreck_field_haven_clean_shrine", "type": "wreck_field", "weight": 40, "once": true, "requires": {"flag": "haven_2", "not_flag": ["haven_3", "haven_spot_3"], "jumps_min": 14},
+      "id": "wreck_field_haven_clean_shrine", "type": "wreck_field", "weight": 40, "once": true, "requires": {"flag": "haven_2", "not_flag": ["haven_3", "haven_spot_3"], "stage_min": 4, "stage_max": 7},
       "text": "A wreck with her lights on, in the middle of the field, and every light is the same warm yellow. Somebody has been tidying. The plates are polished, the airlock is swept, there is a mat. From a speaker over the door comes a voice as clear as a bell in a bath: 'If you can hear this, we're alive. Come to the Lantern Reach.' It starts again the instant it ends. Exactly on time, every time, like a bus in a story.",
       "choices": [
         {"text": "Take the bearing from the speaker.", "outcomes": [
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "id": "station_haven_signals_desk", "type": "station", "weight": 100, "once": true, "requires": {"flag": "haven_3", "not_flag": "haven_4", "jumps_min": 18},
+      "id": "station_haven_signals_desk", "type": "station", "weight": 100, "once": true, "requires": {"flag": "haven_3", "not_flag": "haven_4", "stage_min": 4, "stage_max": 7},
       "text": "Every station has a signals desk, and every signals desk has one person who has waited forty years for someone to ask about the weird stuff. This one wears a lanyard that says ASK ME ABOUT FORM 14-H. 'Hoax (Persistent),' she says, before you have said a word. 'You've been listening to the loop. I can tell. People who have heard it hold their coffee differently.' She pats a drawer. 'I have every recording the Drift ever made of it, with timings. Would you like to hear what I think? Nobody ever does.'",
       "choices": [
         {"text": "Let her compare your recordings with hers.", "requires": {"not_flag": "haven_lured"}, "outcomes": [
@@ -97,7 +97,7 @@
       ]
     },
     {
-      "id": "distress_haven_fig_skiff", "type": "distress", "weight": 60, "once": true, "requires": {"flag": "haven_4", "not_flag": "haven_5", "jumps_min": 22},
+      "id": "distress_haven_fig_skiff", "type": "distress", "weight": 60, "once": true, "requires": {"flag": "haven_4", "not_flag": "haven_5", "stage_min": 5, "stage_max": 7},
       "text": "A two-seat skiff is tumbling gently in the lane with a little green flag taped to its antenna. Its hull is spotless. That is the first thing wrong with it. The second is the transmission: two young voices arguing about whether to tell you the name of their ship. 'It's Fig,' says one. 'You're not supposed to say.' 'It's painted on the side.' It is: FIG, in cheerful letters, beside a drawing of a tomato. They have gone quiet, looking at the wreckage drifting past their window, and the older one says, in the voice of a person in a museum, 'Is everything out here broken?'",
       "choices": [
         {"text": "Tow them in and patch the drive. (20 scrap)", "requires": {"items": {"scrap": 20}, "pay": true}, "outcomes": [
@@ -118,7 +118,7 @@
       ]
     },
     {
-      "id": "distress_haven_voice_beacon", "type": "distress", "weight": 40, "once": true, "requires": {"flag": "haven_4", "not_flag": ["haven_5", "haven_spot_5"], "jumps_min": 22},
+      "id": "distress_haven_voice_beacon", "type": "distress", "weight": 40, "once": true, "requires": {"flag": "haven_4", "not_flag": ["haven_5", "haven_spot_5"], "stage_min": 5, "stage_max": 7},
       "text": "A distress beacon, no ship attached, repeating one sentence in a child's voice: 'Please help, we're lost, we followed the lantern.' It doesn't repeat the way a recording does. It repeats the way a story does, the same words with the weight in a slightly different place each time: 'Please help. We're lost. We followed the lantern. Please help.' The voice is lovely. It is almost exactly the voice you were hoping for.",
       "choices": [
         {"text": "Answer it. Ask where they are.", "outcomes": [
@@ -139,7 +139,7 @@
       ]
     },
     {
-      "id": "anomaly_haven_bearings_cross", "type": "anomaly", "weight": 150, "once": true, "requires": {"flag": "haven_5", "not_flag": "haven_reach", "jumps_min": 28},
+      "id": "anomaly_haven_bearings_cross", "type": "anomaly", "weight": 150, "once": true, "requires": {"flag": "haven_5", "not_flag": "haven_reach", "stage_min": 6, "stage_max": 8},
       "text": "You lay your bearings across the radar plot, one over another, the way the chalk wall did. They don't meet. They almost meet, and then they swing, and then they close like a hand around a place on the chart where there is nothing at all. A ship is waiting there. It's small, painted in lamp-colours, and it's shadowing your port quarter with its lights off, which is rude, and then on, which is a code. Your comms officer reads it out slowly, as if it might change. 'ARE YOU THE KIND WHO TAKES?'",
       "choices": [
         {"text": "Flash back: NO. WE FIX THINGS.", "outcomes": [
@@ -160,7 +160,7 @@
       ]
     },
     {
-      "id": "empty_haven_lantern_reach", "type": "empty", "weight": 300, "once": false, "requires": {"flag": "haven_reach", "not_flag": "haven_lured", "jumps_min": 34},
+      "id": "empty_haven_lantern_reach", "type": "empty", "weight": 300, "once": false, "requires": {"flag": "haven_reach", "not_flag": "haven_lured", "stage_min": 6},
       "text": "The chart's blank gives way. First one lamp: a small yellow light on a cable, swinging. Then another, and another, strung across the dark in a long curve, hundreds of them, each on its own line, each with a paper shade. They are no use for lighting. They are for finding. Beyond them, in a pocket of the Drift so quiet it has its own weather, a ship the size of a town hangs with every window lit: terraces, and green on every one. A school bell rings, off-key. A great many children go quiet, and then loud. The loop is on every channel you own, and for the first time you hear the end of it: '...Come to the Lantern Reach. We kept a lamp on for you.' A cutter in lamp-colours falls into place at your wing. 'Welcome to Halcyon,' says a voice, with the deliberate kindness of a person reading from a card. 'We have never done this before. Please be patient. Please do not take our gates. And if you know anyone we could trust, we would like to know who.'",
       "choices": [
         {"text": "Ask if you can stay.", "outcomes": [
@@ -181,7 +181,7 @@
       ]
     },
     {
-      "id": "empty_haven_lantern_reach_wrong", "type": "empty", "weight": 300, "once": false, "requires": {"flag": ["haven_reach", "haven_lured"], "jumps_min": 34},
+      "id": "empty_haven_lantern_reach_wrong", "type": "empty", "weight": 300, "once": false, "requires": {"flag": ["haven_reach", "haven_lured"], "stage_min": 6},
       "text": "Lamps. Hundreds of them, strung on cables across the dark in a long curve, each with a paper shade, and every one of them lit. None of them swings. In the middle a ship the size of a town hangs with every window glowing, and the windows are very evenly spaced. The loop is on every channel you have, and it is perfect; even the end is perfect: '...We kept a lamp on for you.' A voice that has your ship's name exactly right says, 'Welcome. Please come in. We have been so looking forward to visitors.' Behind it, very faintly, a kettle is coming to the boil, and does not boil over.",
       "choices": [
         {"text": "Dock. It's what you came for.", "outcomes": [

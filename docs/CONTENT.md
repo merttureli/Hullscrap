@@ -351,7 +351,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
     - **Gantry Rusthold** is the start, at the left edge.
     - **Meridian** is mid-map.
     - **The Prism** exists from the start but stays hidden until the flag `prism_revealed` is set.
-    - **Three Dead Gates** sit on the far edges (`gate` nodes, not enterable yet: "the gate is dark").
+    - **Three Dead Gates** sit on the far edges (`gate` nodes; "the gate is dark" everywhere but in the ending region, where their shells can be approached: section 13).
   - Every other node rolls a type by weight: `pirate` 22, `wreck_field` 18, `distress` 16, `trader` 10, `anomaly` 8 (Lumen), `patrol` 8 (Concord), `empty` 18.
   - **Fog**: you see the types of nodes next to ones you've visited. Others show "?". Stations are always visible once you've heard of them (a flag).
 - **Jumping**:
@@ -670,6 +670,11 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **starting blueprints** (one per ending, chosen from what you built this run);
   - **map variants** (the Hollow ending).
 - **A run log** (a chronicle you can read on the ending screen) and a **hall of ships** (each finished ship's design is saved, and can be exported as a premade).
+- **As built, where the endings are placed** (pack `endings_1`; events carry `requires.region` and `stage_min` / `stage_max`, the ending region is stage 9; `tests/test_endings_route.gd` walks every ending on a route of regions):
+  - **The Haven**: the trail is stages 2 to 7. The first fragment is 2 to 5, each link opens a stage after the one before and stays open to stage 6 or 7, the bearings across the chart are 6 to 8 and the Lantern Reach (true or wrong) is on offer from stage 6, in the ending region too. A lure is the same carrier type as the real link it replaces.
+  - **The Way Out**: backed at a faction's station, finished at its Dead Gate. The Concord's Restoration Desk is at Meridian (Concord space, stages 3 to 6), the Clan Moot at the station of any Clans-faction homeland (the Basalt Quarries, the Gauntling Scrapyards, the Kett Hives; stages 3 to 7) and the Lumen's consent at the Prism (Lumen space, stages 4 to 8). The cores and the restarts are at the Dead Gates of **the ending region** (stage 9): a gate is dark everywhere else, and in the ending region its shell can be approached (`campaign.gd gate_dark`); the Hollow tide never takes a gate.
+  - **The Hollow**: the green ship from stage 3, Hallett's roll call from 4, the listening post and the Knucklehead from 5, the Basalt camp from 6 (these last can happen in the ending region), then the approach and the table at the Scrapper Gate (stage 9).
+  - **Retire** and Ma's dinner are at Rusthold, which is Clan space (stage 1) only.
 
 ## 14. Difficulty and balance: FTL-hard, on purpose (owner, 2026-10-30)
 > "Enemy scaling should be like FTL. It's a very hard game: a good player survives most of the time, but a win isn't guaranteed. You might choose the wrong quest, meet a full-shield enemy you're not prepared for, and die. So game balance is important."
@@ -856,3 +861,8 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - Each design file carries its own `hangar` field `{group, layout, unlock}` (a pack has no hangar.json); the group is the race's name (`Human`, `Kett`, ...), the faction's for the event starters (`Clans`, `Concord`, `Lumen`) or `Haven` and `Hollow`.
   - The tool draws every ship as a list of rooms inside a silhouette (every other cell is wall) and uses a part of the race's tech pack where it is loaded, else its standard stand-in, so run it again after a tech pack changes. `tests/test_starter_ships.gd` holds every hangar ship to the starter rules.
   - Earning them: layout A of a race in its homeland's dock event, layout B in its homeland's tech quest (the outcomes that win the tech), both through an `unlock` effect in `data/packs/regions_1/events/`.
+- **What the other unlocks do at a new run** (`scripts/space/run_start.gd`; the payloads are documented in `data/unlocks.json`): the hangar has a **new-run row** under the ship (S, V and K or a click move its choices, Shift or a right click go back; it shows only what the profile has earned, and the profile remembers the choice):
+  - **`species_start`**: the soldier of the ship's crew list is that species (and named `name`, when the payload has one). Crew entries marked `player` keep the soldier's place under a new name.
+  - **`blueprint`**: known in the fabricator at the start of every new run once earned; it is not a choice.
+  - **`map_variant`**: an opt-in harder map. The payload's `tide_steps` is how far ahead the Hollow tide of every region starts (`hollow_tide`: 2); the run carries the flag `variant_<id>`.
+  - **`skin`**: tints the exterior hull plating of the ship in a fight (`tint`, a multiply colour over the line's own) and colours its lamps (`lamp`). The ship keeps it (`Ship.skin`, saved).

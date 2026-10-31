@@ -5,21 +5,32 @@ extends "res://scripts/ui/ship_picker.gd"
 ## how to earn it; the selected ship shows its plan, its pitch, its power / mass / hull / shield / weapons and its crew.
 ## Left / Right change the tab, Up / Down or A / B / C the layout, Enter or a click on "Fly this ship" loads it into the
 ## player's ship (ShipPicker.choose does that, with the same API: open, ask, close, `chosen`, `on_escape`), Esc goes back.
+## Under the ship sits the new-run row (space/run_start.gd): the unlocks that apply at the start of the run. S, V and K (Shift
+## goes back) or a click (right click goes back) move its three choices over what the profile has earned: the soldier's species, a
+## map variant and a hull skin; the blueprints earned are simply listed (they are known in every new run). The choices are kept in
+## the profile and put on the ship and the campaign when the ship is flown.
 ## While it is open it swallows every key and click. Rules are in space/hangar.gd; this node only draws and reads input.
 
 const Hangar = preload("res://scripts/space/hangar.gd")
+const RunStart = preload("res://scripts/space/run_start.gd")
+const Unlocks = preload("res://scripts/space/unlocks.gd")
 
-const SIZE := Vector2(1320.0, 760.0)
+const SIZE := Vector2(1320.0, 820.0)
 const MAP := Vector2(600.0, 470.0)  ## the plan of the selected ship
 const TAB_H := 36.0
 const AMBER := Color("#e1a136")
 const LAYOUT_NOTE := {"A": "The signature ship", "B": "A different strategy", "C": "The odd one"}
+const ROW_H := 58.0  ## the new-run row
+const OPT_KEYS := {"species": "S", "variant": "V", "skin": "K"}
 
 var profile = null  ## the Profile (profile.gd) whose unlocks decide what is open; null = nothing earned
 var sel := 0  ## the selected ship: an index into `cards`
 var tab_first := 0  ## the first group tab shown (the row scrolls when there are many)
 var hot := {}  ## (the parent keeps `hover` for its cards) what the mouse is over: {kind: "group" | "layout" | "button", index}
 var message := ""  ## why the last choice was refused
+var start := {}  ## the new-run choices (run_start.gd): {species, variant, skin}, each an unlock id of the profile or ""
+var _row: Array = []  # the new-run row as shown: [{slot, label, value, count, paint}] for the choices; made again when `start` changes
+var _bp_names: Array = []  # the names of the blueprints the profile has (known in every new run)
 var _prev_path := ""  # the ship the preview below was made for
 var _prev := {}  # {ship, arena, co, stats} of that ship
 
@@ -49,6 +60,8 @@ func open() -> void:
 			break
 	select(first)
 	message = ""
+	start = RunStart.clean(profile.start if profile != null else {}, profile)
+	_refresh_row()
 	super.open()
 
 
@@ -122,7 +135,32 @@ func choose(i: int) -> String:
 		queue_redraw()
 		return message
 	message = ""
+	if profile != null:
+		profile.start = RunStart.clean(start, profile)  # kept for the next run, and read by the new campaign (map_view.gd)
+		profile.save()
 	return super.choose(i)
+
+
+## The ship is loaded: put the new-run choices and the blueprints on it (ShipPicker.choose calls this).
+func _prepare(ship) -> void:
+	RunStart.apply_ship(ship, start, profile)
+
+
+## Move the new-run choice `slot` ("species", "variant" or "skin") `step` options on over what the profile has earned (wrapping).
+func cycle_option(slot: String, step := 1) -> void:
+	start = RunStart.cycle(start, profile, slot, step)
+	_refresh_row()
+	queue_redraw()
+
+
+## Make the row's text again from `start` and the profile.
+func _refresh_row() -> void:
+	_row = []
+	for slot in RunStart.SLOTS:
+		var id: String = RunStart.clean(start, profile)[slot]
+		var paint := Unlocks.skin_paint(str(Unlocks.payload_of(id).get("skin", ""))) if slot == "skin" and id != "" else {}
+		_row.append({"slot": slot, "label": RunStart.LABELS[slot], "value": RunStart.name_of(start, profile, slot), "count": RunStart.options(profile, slot).size() - 1, "paint": paint, "on": id != ""})
+	_bp_names = RunStart.owned(profile, "blueprint").map(func(u): return str(u.get("name", u["id"])))
 
 
 ## The selected ship made ready to show: {ship, arena, co (its arena ship), stats (ShipPicker.stats_of)}; {} when it cannot be
@@ -162,6 +200,12 @@ func _input(e: InputEvent) -> void:
 			step_layout(1)
 		KEY_A, KEY_B, KEY_C:
 			select_layout(OS.get_keycode_string(e.keycode))
+		KEY_S:
+			cycle_option("species", -1 if e.shift_pressed else 1)
+		KEY_V:
+			cycle_option("variant", -1 if e.shift_pressed else 1)
+		KEY_K:
+			cycle_option("skin", -1 if e.shift_pressed else 1)
 		KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
 			choose(sel)
 
@@ -172,14 +216,16 @@ func _gui_input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion:
 		hot = zone_at(e.position)
 		queue_redraw()
-	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
-		click(e.position)
+	elif e is InputEventMouseButton and e.pressed and e.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]:
+		click(e.position, e.button_index == MOUSE_BUTTON_RIGHT)
 
 
-## A click at `p`: a group tab, a layout tab or the button.
-func click(p: Vector2) -> void:
+## A click at `p`: a group tab, a layout tab, a choice of the new-run row (`back`: a right click goes back) or the button.
+func click(p: Vector2, back := false) -> void:
 	var z := zone_at(p)
 	match z.get("kind", ""):
+		"option":
+			cycle_option(RunStart.SLOTS[z["index"]], -1 if back else 1)
 		"group":
 			select_group(visible_tabs(groups())[z["index"]], cards[sel]["layout"] if not cards.is_empty() else "")
 		"layout":
@@ -188,7 +234,8 @@ func click(p: Vector2) -> void:
 			choose(sel)
 
 
-## What is at `p`: {kind: "group", index (into the tabs shown)}, {kind: "layout", index (0..2)}, {kind: "button"} or {}.
+## What is at `p`: {kind: "group", index (into the tabs shown)}, {kind: "layout", index (0..2)}, {kind: "option", index (0..2: a
+## choice of the new-run row that has something to choose)}, {kind: "button"} or {}.
 func zone_at(p: Vector2) -> Dictionary:
 	var lay := layout()
 	for i in lay["groups"].size():
@@ -197,6 +244,9 @@ func zone_at(p: Vector2) -> Dictionary:
 	for i in lay["layouts"].size():
 		if lay["layouts"][i].has_point(p) and Hangar.find(cards, cards[sel]["group"], Hangar.LAYOUTS[i]) >= 0:
 			return {"kind": "layout", "index": i}
+	for i in lay["opts"].size():
+		if i < _row.size() and lay["opts"][i].has_point(p) and int(_row[i]["count"]) > 0:
+			return {"kind": "option", "index": i}
 	if lay["button"].has_point(p):
 		return {"kind": "button"}
 	return {}
@@ -231,7 +281,8 @@ func _tab_label(group: String) -> String:
 	return group if n[0] == n[1] else "%s %d/%d" % [group, n[0], n[1]]
 
 
-## Where everything goes, in screen px: {panel, groups (the tabs shown), layouts (A, B, C), map, info, button}.
+## Where everything goes, in screen px: {panel, groups (the tabs shown), layouts (A, B, C), map, info, button, opts (the three
+## choices of the new-run row), blueprints (the row's last cell)}.
 func layout() -> Dictionary:
 	var p := panel_rect()
 	var tabs := []
@@ -245,7 +296,12 @@ func layout() -> Dictionary:
 		layouts.append(Rect2(p.position.x + PAD + i * 74.0, p.position.y + 144.0, 68.0, TAB_H))
 	var map := Rect2(p.position + Vector2(PAD, 196.0), MAP)
 	var info := Rect2(map.end.x + 30.0, map.position.y, p.end.x - PAD - map.end.x - 30.0, MAP.y)
-	return {"panel": p, "groups": tabs, "layouts": layouts, "map": map, "info": info,
+	var opts := []
+	var cell := (p.size.x - 2.0 * PAD - 3.0 * 10.0) / 4.0
+	for i in 3:
+		opts.append(Rect2(p.position.x + PAD + i * (cell + 10.0), map.end.y + 14.0, cell, ROW_H))
+	return {"panel": p, "groups": tabs, "layouts": layouts, "map": map, "info": info, "opts": opts,
+		"blueprints": Rect2(p.position.x + PAD + 3.0 * (cell + 10.0), map.end.y + 14.0, cell, ROW_H),
 		"button": Rect2(info.position.x, info.end.y - 50.0, info.size.x, 50.0)}
 
 
@@ -283,8 +339,48 @@ func _draw() -> void:
 	_text(LAYOUT_NOTE.get(cur["layout"], ""), Vector2(lay["layouts"][2].end.x + 16.0, lay["layouts"][2].position.y + 24.0), 15, DIM_TEXT)
 	_draw_plan(lay["map"], cur)
 	_draw_info(lay, cur)
-	_text("Left / Right: tab      Up / Down or A B C: layout      Enter: fly this ship      Esc: back",
+	_draw_row(lay)
+	_text("Left / Right: tab      Up / Down or A B C: layout      S V K: start options      Enter: fly this ship      Esc: back",
 		p.position + Vector2(PAD, p.size.y - 22.0), 14, DIM_TEXT)
+
+
+## The new-run row: the three choices (soldier, map, hull skin) and the blueprints known from the start. With nothing earned yet
+## it says so, once.
+func _draw_row(lay: Dictionary) -> void:
+	if _row.is_empty():
+		return
+	if not RunStart.has_choices(profile) and _bp_names.is_empty():
+		var r: Rect2 = lay["opts"][0]
+		_text("New-run options: starting species, map variants, hull skins and blueprints unlock with endings and landmarks.", r.position + Vector2(0.0, 34.0), 14, DIM_TEXT)
+		return
+	for i in 3:
+		var r: Rect2 = lay["opts"][i]
+		var o: Dictionary = _row[i]
+		var open: bool = int(o["count"]) > 0
+		var on: bool = o["on"]
+		draw_rect(r, CARD_BG)
+		draw_rect(r, EDGE_HOT if open and hot.get("kind") == "option" and hot.get("index") == i else (AMBER if on else EDGE), false, 2.0 if on else 1.0)
+		_text("%s  (%s)" % [o["label"], OPT_KEYS[o["slot"]]], r.position + Vector2(12.0, 20.0), 13, DIM_TEXT)
+		_text(str(o["value"]), r.position + Vector2(12.0 + (26.0 if not o["paint"].is_empty() else 0.0), 45.0), 18, (AMBER if o["slot"] == "variant" else TEXT) if on else (DIM_TEXT if not open else TEXT))
+		if not o["paint"].is_empty():
+			_swatch(r.position + Vector2(12.0, 31.0), o["paint"])
+		if open:
+			_text("<  >", Vector2(r.end.x - 44.0, r.position.y + 20.0), 14, AMBER)
+		else:
+			_text("none earned", Vector2(r.end.x - 94.0, r.position.y + 20.0), 12, Color(DIM_TEXT, 0.6))
+	var b: Rect2 = lay["blueprints"]
+	draw_rect(b, CARD_BG)
+	draw_rect(b, GOOD if not _bp_names.is_empty() else EDGE, false, 1.0)
+	_text("Known from the start", b.position + Vector2(12.0, 20.0), 13, DIM_TEXT)
+	draw_multiline_string(ThemeDB.fallback_font, b.position + Vector2(12.0, 42.0), ", ".join(_bp_names) if not _bp_names.is_empty() else "no extra blueprints", HORIZONTAL_ALIGNMENT_LEFT, b.size.x - 24.0, 14, 2, TEXT if not _bp_names.is_empty() else DIM_TEXT)
+
+
+## A little hull plate in the colours of a skin (`paint`: Unlocks.skin_paint) with a lamp on it.
+func _swatch(at: Vector2, paint: Dictionary) -> void:
+	var plate: Color = Color("#ecfaff") * paint.get("tint", Color.WHITE)
+	draw_rect(Rect2(at, Vector2(20.0, 14.0)), plate)
+	draw_rect(Rect2(at, Vector2(20.0, 14.0)), plate.darkened(0.45), false, 1.0)
+	draw_circle(at + Vector2(14.0, 7.0), 2.5, paint.get("lamp", Color("#ffd98c")))
 
 
 func _draw_layout_tab(i: int, r: Rect2, cur: Dictionary) -> void:
@@ -349,7 +445,7 @@ func _draw_info(lay: Dictionary, cur: Dictionary) -> void:
 	y += 116.0
 	_text("Crew", Vector2(x, y), 14, DIM_TEXT)
 	var names: Array[String] = []
-	for m in cur["crew"]:
+	for m in RunStart.crew_shown(cur["crew"], start, profile):
 		names.append("%s (%s)" % [m["name"], str(m["species"]).capitalize()])
 	draw_multiline_string(ThemeDB.fallback_font, Vector2(x + 70.0, y), ", ".join(names) if not names.is_empty() else "none", HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 70.0, 14, 3, TEXT)
 	if message != "":

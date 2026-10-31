@@ -1,5 +1,5 @@
 {
-  "_doc": "The unlocks of the endings_1 pack. id, kind (starter_ship, species_start, blueprint, map_variant, skin), name, how (the hint shown on a locked entry) and payload (what the kind needs: starter_ship {ship, group, layout}, species_start {species, name?}, blueprint {recipe}, map_variant {variant}, skin {skin}). The 'unlock' effect of an event records one in the profile.",
+  "_doc": "The unlocks of the endings_1 pack. id, kind (starter_ship, species_start, blueprint, map_variant, skin), name, how (the hint shown on a locked entry) and payload (what the kind needs: starter_ship {ship, group, layout}, species_start {species, name?}, blueprint {blueprint}, map_variant {variant, tide_steps}, skin {skin, tint?, lamp?}). The 'unlock' effect of an event records one in the profile. What each does at the start of a run is in data/unlocks.json's _doc.",
   "unlocks": [
     {
       "id": "ship_halcyon_tender",
@@ -130,7 +130,8 @@
       "name": "The Tide Comes Early",
       "how": "Sit down at the Table in the Scrapper Gate (the Hollow ending).",
       "payload": {
-        "variant": "hollow_tide"
+        "variant": "hollow_tide",
+        "tide_steps": 2
       }
     },
     {
@@ -139,7 +140,9 @@
       "name": "Lantern Lights",
       "how": "Catch the first clean fragment of the Haven broadcast (landmark).",
       "payload": {
-        "skin": "lantern_lights"
+        "skin": "lantern_lights",
+        "tint": "#ffe3b0",
+        "lamp": "#ffb347"
       }
     },
     {
@@ -148,7 +151,9 @@
       "name": "Green Running Lights",
       "how": "Survive a Hollow node (landmark).",
       "payload": {
-        "skin": "green_running_lights"
+        "skin": "green_running_lights",
+        "tint": "#c9efd6",
+        "lamp": "#4dff8a"
       }
     },
     {
@@ -157,7 +162,9 @@
       "name": "Cold Lanterns",
       "how": "Follow the wrong voice all the way to the Reach (the dark Haven ending).",
       "payload": {
-        "skin": "lantern_hollow"
+        "skin": "lantern_hollow",
+        "tint": "#b8c9ea",
+        "lamp": "#9fe4ff"
       }
     }
   ]
