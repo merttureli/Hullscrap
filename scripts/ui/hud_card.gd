@@ -31,6 +31,8 @@ func _process(dt: float) -> void:
 
 func _gui_input(e: InputEvent) -> void:
 	hud.pass_release(e)
+	if UiKit.is_wheel(e):
+		accept_event()  # nothing to scroll here, and the world behind must not zoom
 
 
 ## The card shown: the palette card under the mouse, else the tool in hand ({} when there is neither).

@@ -217,10 +217,8 @@ func _unhandled_input(e: InputEvent) -> void:
 				MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT:
 					if build_on:
 						_begin_drag(e)
-				MOUSE_BUTTON_WHEEL_UP:
-					_zoom(1.1)
-				MOUSE_BUTTON_WHEEL_DOWN:
-					_zoom(1.0 / 1.1)
+				MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN:
+					wheel(e)
 		elif dragging and e.button_index == drag_button:
 			_extend_path()
 			_end_drag()
@@ -600,6 +598,14 @@ func _undo() -> void:
 
 func _redo() -> void:
 	message = "redone" if session.redo() else "nothing to redo"
+
+
+## A wheel step on the world zooms the camera. Over a panel it never does (the panel scrolls, or nothing happens);
+## the panels swallow the event themselves, and this also covers the HUD's rects.
+func wheel(e: InputEventMouseButton) -> void:
+	if hud != null and hud.over_ui(e.position):
+		return
+	_zoom(1.1 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.1)
 
 
 func _zoom(f: float) -> void:

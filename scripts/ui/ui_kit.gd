@@ -39,6 +39,11 @@ static var _cursors := {}  # cursor name -> [ImageTexture, hotspot] or null
 static var _bold: Font
 
 
+## Is `e` a mouse wheel step (either axis)? A panel under the pointer marks these handled (accept_event), so the world behind it never zooms.
+static func is_wheel(e: InputEvent) -> bool:
+	return e is InputEventMouseButton and e.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN, MOUSE_BUTTON_WHEEL_LEFT, MOUSE_BUTTON_WHEEL_RIGHT]
+
+
 # --- fonts and text ----------------------------------------------------------------------------------------------
 
 static func font() -> Font:
