@@ -4,18 +4,18 @@
       "text": "The Fens dock is a raft of lily-pad platforms joined by plank walkways, each painted with a fire-risk rating, each rated higher than the last. A Mire in a dripping slicker greets you with a bucket in each hand. 'Welcome,' they say. 'Please do not strike a match. Please do not think about striking a match. We are monitoring your thoughts.'",
       "choices": [
         {"text": "Hand over your lighter and any matches.", "outcomes": [
-          {"weight": 80, "text": "The Mire sorts your things with solemn care and gives you a damp ticket for each. 'Good,' they say. 'You are now officially a safe person.' You are, for the first time in your life, calm.", "effects": {"crew_hp": 10}},
-          {"weight": 20, "text": "The Mire finds a second lighter in your boot. There is a silence. You are issued a bucket.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+          {"weight": 80, "text": "The Mire sorts your things with solemn care and gives you a damp ticket for each. 'Good,' they say. 'You are now officially a safe person.' You are, for the first time in your life, calm.", "effects": {"crew_hp": 10, "unlock": "ship_mire_wet_watch"}},
+          {"weight": 20, "text": "The Mire finds a second lighter in your boot. There is a silence. You are issued a bucket.", "effects": {"items": {"credits": -10}, "crew_hp": 5, "unlock": "ship_mire_wet_watch"}}
         ]},
         {"text": "Say you are a fire safety inspector.", "outcomes": [
-          {"weight": 50, "text": "The Mire's eyes go wide. They offer you a tour, three meals and a hat. You are an excellent inspector. You find nothing, because there is nothing; it is a Fen.", "effects": {"items": {"credits": 15}, "crew_hp": 10}},
-          {"weight": 50, "text": "The Mire asks which fire. You say 'Any'. They ask which standard. You say 'Any'. They lead you gently to a free course in fire safety.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+          {"weight": 50, "text": "The Mire's eyes go wide. They offer you a tour, three meals and a hat. You are an excellent inspector. You find nothing, because there is nothing; it is a Fen.", "effects": {"items": {"credits": 15}, "crew_hp": 10, "unlock": "ship_mire_wet_watch"}},
+          {"weight": 50, "text": "The Mire asks which fire. You say 'Any'. They ask which standard. You say 'Any'. They lead you gently to a free course in fire safety.", "effects": {"items": {"credits": -10}, "crew_hp": 5, "unlock": "ship_mire_wet_watch"}}
         ]},
         {"text": "[Mire] Compare tank sizes.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Your Mire and the dockhand stand back to back to compare backpacks. The dockhand's tank is a litre bigger; yours has a nicer finish. They shake hands solemnly and swap one tank-badge each. The dock tops up your fuel for the honour.", "effects": {"items": {"fuel": 2}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Mire and the dockhand stand back to back to compare backpacks. The dockhand's tank is a litre bigger; yours has a nicer finish. They shake hands solemnly and swap one tank-badge each. The dock tops up your fuel for the honour.", "effects": {"items": {"fuel": 2}, "crew_hp": 5, "unlock": "ship_mire_wet_watch"}}
         ]},
         {"text": "[Emberkin] Ask them to be gentle with you.", "requires": {"species": "emberkin"}, "outcomes": [
-          {"weight": 100, "text": "The dockhand blinks at your Emberkin, who is steaming gently on the planks. A hush. The dockhand puts a bucket over their own head in solidarity and then, shaken, over yours. You are issued a lanyard that says FIRE RISK: ACCEPTED.", "effects": {"items": {"credits": 20}}}
+          {"weight": 100, "text": "The dockhand blinks at your Emberkin, who is steaming gently on the planks. A hush. The dockhand puts a bucket over their own head in solidarity and then, shaken, over yours. You are issued a lanyard that says FIRE RISK: ACCEPTED.", "effects": {"items": {"credits": 20}, "unlock": "ship_mire_wet_watch"}}
         ]}
       ]
     },
@@ -144,14 +144,14 @@
       "text": "Mother Moll, chief of the Wet Watch, keeps a steam lance in a rack by her bunk: a heavy, hissing beam that cooks what it touches and, every tenth shot, makes the room a little too warm. 'Mire put fires out,' she says. 'The lance puts them in. We built it by accident.' She nods at a training room with a wall of sandbags. 'Fire it. Put out what you start. Then it is yours.'",
       "choices": [
         {"text": "Fire the lance and put out the fire yourself.", "outcomes": [
-          {"weight": 55, "text": "You fire. The sandbags steam, the room fills with a fog that smells of hot laundry, and a small fire starts in the corner. You put it out with a bucket and a lot of shouting. Moll signs a chit. 'Adequate,' she says. 'Keep it clean.'", "effects": {"crew_hp": -5, "flag": "tech_steam_lance"}},
-          {"weight": 45, "text": "You fire. The room goes hot, the fire gets up, and you put it out about three seconds after the crew would have liked. Moll hands over the schematics with a long, level look.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_steam_lance"}}
+          {"weight": 55, "text": "You fire. The sandbags steam, the room fills with a fog that smells of hot laundry, and a small fire starts in the corner. You put it out with a bucket and a lot of shouting. Moll signs a chit. 'Adequate,' she says. 'Keep it clean.'", "effects": {"crew_hp": -5, "flag": "tech_steam_lance", "unlock": "ship_mire_geyser_season"}},
+          {"weight": 45, "text": "You fire. The room goes hot, the fire gets up, and you put it out about three seconds after the crew would have liked. Moll hands over the schematics with a long, level look.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_steam_lance", "unlock": "ship_mire_geyser_season"}}
         ]},
         {"text": "[Mire] Fire it and put out what you start.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Your Mire fires the lance, lets the fire catch, and puts it out with a single sweep of the tank. The training room is a cloud of steam, and your Mire emerges wet and beaming. Moll hands over the schematics, a plaque and a spare nozzle. 'It likes you.'", "effects": {"items": {"polymer": 15, "fuel": 2}, "rep": {"concord": 1}, "flag": "tech_steam_lance"}}
+          {"weight": 100, "text": "Your Mire fires the lance, lets the fire catch, and puts it out with a single sweep of the tank. The training room is a cloud of steam, and your Mire emerges wet and beaming. Moll hands over the schematics, a plaque and a spare nozzle. 'It likes you.'", "effects": {"items": {"polymer": 15, "fuel": 2}, "rep": {"concord": 1}, "flag": "tech_steam_lance", "unlock": "ship_mire_geyser_season"}}
         ]},
         {"text": "[Radiator] Cool the room while you fire.", "requires": {"component": "radiator"}, "outcomes": [
-          {"weight": 100, "text": "Your radiators drink the lance's heat as fast as it makes it, and the room never gets above sauna. Moll nods slowly. 'Cheating,' she says. 'But you set nothing on fire.' She signs the chit.", "effects": {"flag": "tech_steam_lance"}}
+          {"weight": 100, "text": "Your radiators drink the lance's heat as fast as it makes it, and the room never gets above sauna. Moll nods slowly. 'Cheating,' she says. 'But you set nothing on fire.' She signs the chit.", "effects": {"flag": "tech_steam_lance", "unlock": "ship_mire_geyser_season"}}
         ]},
         {"text": "Say you will come back with a bucket.", "outcomes": [
           {"weight": 100, "text": "'Bring two,' says Moll.", "effects": {}}

@@ -32,7 +32,7 @@ static func _sparks(rng: RandomNumberGenerator, pos: Vector2, col: Color, n: int
 	return out
 
 
-## The entries for the "effect" event `e` of `arena` (`e["kind"]`: acid, corrode, spores, sonic, shard, frost, magnetic or self_room).
+## The entries for the "effect" event `e` of `arena` (`e["kind"]`: acid, corrode, spores, sonic, shard, frost, magnetic, split, intercept or self_room).
 static func of(arena, e: Dictionary) -> Array:
 	var rng := _rng(e)
 	var idx: int = e["ship"]
@@ -92,6 +92,17 @@ static func of(arena, e: Dictionary) -> Array:
 			out.append({"k": "ring", "pos": pos, "stick": idx, "life": 0.5, "r": 130.0, "color": col})
 			out.append({"k": "streak", "pos": pos, "dir": toward, "len": 220.0, "life": 0.4, "color": col})
 			out.append_array(_sparks(rng, pos, col, 6, toward, 420.0))
+		"split":
+			var col: Color = COLORS["shard"]
+			out.append({"k": "flash", "pos": pos, "stick": idx, "life": 0.25, "r": 20.0, "color": col})
+			for d in e.get("dirs", []):
+				out.append({"k": "streak", "pos": e.get("origin", pos), "dir": d, "len": 110.0, "life": 0.3, "color": col})
+			out.append_array(_sparks(rng, pos, col, 5))
+		"intercept":  # point defence shot at a missile: a burst where it was, if it was hit
+			if bool(e.get("hit", false)):
+				out.append({"k": "flash", "pos": pos, "life": 0.3, "r": 26.0, "color": Color("#ffd27a")})
+				out.append({"k": "ring", "pos": pos, "life": 0.35, "r": 60.0, "color": Color("#ffd27a")})
+				out.append_array(_sparks(rng, pos, Color("#ffd27a"), 8, Vector2.ZERO, 200.0))
 		"self_room":
 			var at: Vector2 = e.get("room_pos", pos)
 			var has: Array = e.get("has", [])
@@ -100,7 +111,7 @@ static func of(arena, e: Dictionary) -> Array:
 					var p := _puff(rng, at, Color(COLORS["o2"], 0.5), 40.0, 1.0, 16.0, 28.0, 20.0)
 					p["stick"] = idx
 					out.append(p)
-			if "heat" in has:
+			if "heat" in has or "scorch" in has:
 				out.append({"k": "flash", "pos": at, "stick": idx, "life": 0.35, "r": 34.0, "color": COLORS["heat"]})
 			if "shock" in has:
 				out.append_array(_sparks(rng, at, COLORS["shock"], 7, Vector2.ZERO, 160.0))

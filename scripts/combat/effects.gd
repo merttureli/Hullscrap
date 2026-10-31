@@ -3,15 +3,22 @@ extends RefCounted
 ## `"effects": {...}`: a Dictionary of the keys below (an old-style list of tags, ["lock_doors"], stays
 ## valid and means nothing here). Every effect is built once, here, and read from data.
 ## On the target, when a shot first meets a ship's cells (a shield that stops the shot stops the effect too):
-##   acid {dps, seconds, type?}       the hit cell takes dps damage a second for `seconds` (never wrecks a part that is already out)
+##   acid {dps, seconds, type?, spread?}  the hit cell takes dps damage a second for `seconds` (never wrecks a part that is already out);
+##                                    spread: each 0.25 s tick the acid has this chance (0 to 1) to creep to one more neighbouring wall, door or part (once each, at most ACID_MAX_CELLS)
 ##   spores {o2_drain, seconds}       the room hit loses o2_drain of its air (a fraction of full pressure) a second
 ##   shard {splinters, dmg}           `splinters` of the neighbouring solid cells take dmg each (the weapon's damage type)
 ##   sonic {stun_s}                   the crew in the room hit are stunned: no walking, no work
 ##   magnetic {pull}                  the target ship is pulled toward the shooter: it gains `pull` px/s at PULL_MASS (lighter ships more); debris within DEBRIS_RADIUS is dragged too
 ##   frost {slow, seconds}            the system hit (a wall: the systems in the room hit) charges slower: its weapon cooldown, shield recharge and ability cooldowns run at 1 - slow
 ##   corrode {resist_mult, seconds}   the wall or door hit takes 1 / resist_mult times the damage
+##   split_on_shield {count, damage_mult}  when a shield stops the shot, `count` weaker shots (damage x damage_mult) fan out from just outside the
+##                                    bubble and meet it again: each uses a layer, or reaches the hull where the sector is down. They do not split again.
+##                                    Needs a shot with a speed (bolt, flak, missile), not a laser or beam
+##   intercept {range}                a turret's point defence: it turns on the nearest enemy missile within `range` px (before any ship) and each
+##                                    shot rolls the turret's accuracy to destroy it. Turrets only (Weapons.missile_target)
 ## On the shooter, per shot:
-##   self_room {o2_drain, heat, fire_chance, shock_dps}   the room of the weapon's inside half loses o2_drain of its air, its parts gain `heat`, a fire may start, organic crew take shock_dps a second while it fires
+##   self_room {o2_drain, heat, fire_chance, shock_dps, scorch_dps}   the room of the weapon's inside half loses o2_drain of its air, its parts gain `heat`, a fire may start, organic crew take shock_dps a second while it fires,
+##                                    crew without the heat_resistant trait take scorch_dps a second (both for the weapon's cooldown after each shot, or the beam's duration if longer)
 ##   needs_operator {species, else_mult, stat?}           full damage (stat "damage", the default) or rate ("rate") only while a crew member of `species` (an id or a list) mans it; else x else_mult
 ##   needs_crew_in_room {count, else_mult, stat?}         the same with `count` crew in the weapon's room (stat defaults to "rate")
 ##   ammo_mult                                            ammo per shot x this (1.5 spends 1, 2, 1, 2 ...)
@@ -33,6 +40,9 @@ const PULL_MASS := 1000.0  ## the ship mass at which magnetic `pull` is a speed 
 const DEBRIS_RADIUS := 320.0  ## px round the impact within which magnetic drags debris
 const DEBRIS_DAMPING := 0.25  ## per second
 const MIN_MULT := 0.05  ## the smallest else_mult
+const SPLIT_BACK := 8.0  ## px outside the bubble that the shots of a split_on_shield start
+const SPLIT_FAN_DEG := 25.0  ## the split shots fan out this many degrees each side of the shot that was stopped
+const ACID_MAX_CELLS := 12  ## the most cells one acid cloud (a `spread` acid) eats at once
 ## Required numbers of each effect: key -> [lowest, highest]. Optional keys are in OPTIONAL.
 const SPEC := {
 	"acid": {"dps": [0.001, 100.0], "seconds": [0.1, 60.0]},
@@ -42,11 +52,13 @@ const SPEC := {
 	"magnetic": {"pull": [0.001, 1000.0]},
 	"frost": {"slow": [0.01, 0.95], "seconds": [0.1, 60.0]},
 	"corrode": {"resist_mult": [0.05, 1.0], "seconds": [0.1, 60.0]},
+	"split_on_shield": {"count": [1.0, 8.0], "damage_mult": [0.05, 1.0]},
+	"intercept": {"range": [20.0, 2000.0]},
 	"needs_operator": {"else_mult": [MIN_MULT, 1.0]},
 	"needs_crew_in_room": {"count": [1.0, 12.0], "else_mult": [MIN_MULT, 1.0]},
 }
-const OPTIONAL := {"acid": ["type"], "needs_operator": ["species", "stat"], "needs_crew_in_room": ["stat"]}
-const SELF_ROOM := {"o2_drain": [0.0, 1.0], "heat": [0.0, 500.0], "fire_chance": [0.0, 1.0], "shock_dps": [0.0, 50.0]}
+const OPTIONAL := {"acid": ["type", "spread"], "needs_operator": ["species", "stat"], "needs_crew_in_room": ["stat"]}
+const SELF_ROOM := {"o2_drain": [0.0, 1.0], "heat": [0.0, 500.0], "fire_chance": [0.0, 1.0], "shock_dps": [0.0, 50.0], "scorch_dps": [0.0, 50.0]}
 const STATS: Array[String] = ["damage", "rate"]
 const DAMAGE_TYPES: Array[String] = ["kinetic", "energy", "explosive", "ion"]
 
@@ -104,6 +116,10 @@ static func problems(entry: Dictionary, species: Array = []) -> Array[String]:
 			_self_room_problems(out, v)
 		elif SPEC.has(k):
 			_spec_problems(out, str(k), v, species)
+			if k == "intercept" and not bool(entry.get("turret", false)):
+				out.append("intercept needs a turret (turret: true)")
+			if k == "split_on_shield" and str(entry.get("kind", "")) in ["laser", "beam"]:
+				out.append("split_on_shield needs a shot that flies (a bolt, flak or missile), not a %s" % str(entry["kind"]))
 		else:
 			out.append("unknown effect '%s'" % str(k))
 	return out
@@ -122,6 +138,8 @@ static func _spec_problems(out: Array[String], k: String, v, species: Array) -> 
 			out.append("%s needs '%s'" % [k, p])
 		else:
 			_check(out, "%s.%s" % [k, p], v[p], SPEC[k][p][0], SPEC[k][p][1], p in ["splinters", "count"])
+	if k == "acid" and v.has("spread"):
+		_check(out, "acid.spread", v["spread"], 0.0, 1.0)
 	if v.has("stat") and not str(v["stat"]) in STATS:
 		out.append("%s.stat must be one of %s" % [k, str(STATS)])
 	if v.has("type") and not str(v["type"]) in DAMAGE_TYPES:
@@ -158,9 +176,10 @@ static func _check(out: Array[String], what: String, v, lo: float, hi: float, wh
 
 # --- state ----------------------------------------------------------------------------------------------
 
-## A fresh arena.fx: {timed (running effects, see _timed), corroded (Vector3i(ship, x, y) -> [resist_mult, seconds left]), debris (bodies {pos, vel, mass} magnetic can drag)}.
+## A fresh arena.fx: {timed (running effects, see _timed), corroded (Vector3i(ship, x, y) -> [resist_mult, seconds left]), debris (bodies {pos, vel, mass} magnetic can drag),
+## spawn (shots a split_on_shield made during this step: [owner, weapon, origin, dir]; Projectiles.step launches them)}.
 static func fresh() -> Dictionary:
-	return {"timed": [], "corroded": {}, "debris": []}
+	return {"timed": [], "corroded": {}, "debris": [], "spawn": []}
 
 
 ## A piece of debris drifting in the arena for magnetic to drag: `mass` in the units of ship mass. Returns its index.
@@ -175,7 +194,7 @@ static func _timed(arena, key: String, e: Dictionary) -> void:
 	for old in arena.fx["timed"]:
 		if old["key"] == key:
 			old["left"] = maxf(old["left"], e["left"])
-			for p in ["dps", "rate", "slow", "stun"]:
+			for p in ["dps", "rate", "slow", "stun", "spread"]:
 				if e.has(p):
 					old[p] = maxf(old[p], e[p])
 			return
@@ -202,6 +221,8 @@ static func tick(arena, dt: float) -> void:
 				alive = _tick_spores(co, e, step)
 			"shock":
 				alive = _tick_shock(co, e, step)
+			"scorch":
+				alive = _tick_scorch(co, e, step)
 			"frost":
 				alive = _tick_frost(arena, co, e, step)
 		if alive and e["left"] > 1e-9:
@@ -222,7 +243,7 @@ static func tick(arena, dt: float) -> void:
 static func summary(arena) -> Dictionary:
 	var timed := []
 	for e in arena.fx["timed"]:
-		timed.append([e["key"], snappedf(float(e["left"]), 1e-6)])
+		timed.append([e["key"], snappedf(float(e["left"]), 1e-6), e["cells"].size() if e.has("cells") else 0])
 	var cor := {}
 	for key in arena.fx["corroded"]:
 		cor[str(key)] = [arena.fx["corroded"][key][0], snappedf(float(arena.fx["corroded"][key][1]), 1e-6)]
@@ -260,6 +281,30 @@ static func on_hit(arena, owner: int, idx: int, w: Dictionary, first: Dictionary
 		_frost(arena, idx, id, fx["frost"], first, room)
 	if fx.has("magnetic"):
 		_magnetic(arena, owner, idx, id, w, fx["magnetic"], cell)
+
+
+## A shot of weapon `w`, fired by ship `owner`, was stopped by the shield of ship `idx` at the world point `point`, flying along the unit vector `dir`:
+## split_on_shield sends its weaker shots on (queued in arena.fx["spawn"], Projectiles.step launches them), fanned out from just outside the bubble.
+static func on_shield(arena, owner: int, idx: int, w: Dictionary, point: Vector2, dir: Vector2) -> void:
+	var fx := of(w)
+	if not fx.has("split_on_shield") or not w.has("speed"):
+		return
+	var spec: Dictionary = fx["split_on_shield"]
+	var mult := float(spec["damage_mult"])
+	var child := w.duplicate()
+	child["damage"] = float(w["damage"]) * mult
+	child["fx_k"] = float(w.get("fx_k", 1.0)) * mult  # shard and magnetic scale with it
+	var kept := fx.duplicate()
+	kept.erase("split_on_shield")  # a split shot does not split again
+	child["effects"] = kept
+	var n := roundi(float(spec["count"]))
+	var origin := point - dir * SPLIT_BACK
+	var dirs := []
+	for i in n:
+		var d := dir.rotated(0.0 if n == 1 else deg_to_rad(SPLIT_FAN_DEG) * (2.0 * float(i) / float(n - 1) - 1.0))
+		dirs.append(d)
+		arena.fx["spawn"].append([owner, child, origin, d])
+	_log(arena, idx, arena.world_to_cell(idx, point), "split", str(w.get("id", "")), {"pos": point, "origin": origin, "dirs": dirs})
 
 
 ## The room a shot that struck `cell` heading `dir` (ship-local unit vector) reaches: the room at the cell, else the first
@@ -303,25 +348,71 @@ static func _acid(arena, idx: int, id: String, w: Dictionary, spec: Dictionary, 
 	var type := str(spec.get("type", w.get("damage_type", "energy")))
 	if type == "ion":
 		type = "energy"
-	_timed(arena, "acid:%d:%d,%d" % [idx, cell.x, cell.y], {"k": "acid", "ship": idx, "cell": cell, "dps": float(spec["dps"]),
+	var key := "acid:%d:%d,%d" % [idx, cell.x, cell.y]
+	for e in arena.fx["timed"]:  # a cell an acid cloud already eats is renewed through that cloud, not eaten twice
+		if e["k"] == "acid" and e["ship"] == idx and cell in e["cells"]:
+			key = e["key"]
+	_timed(arena, key, {"k": "acid", "ship": idx, "cell": cell, "cells": [cell], "dps": float(spec["dps"]), "spread": float(spec.get("spread", 0.0)),
 		"left": float(spec["seconds"]), "acc": 0.0, "type": type, "weapon": id})
 	_log(arena, idx, cell, "acid", id)
 
 
-## One step of an acid: every TICK seconds (and at its end) the cell takes the damage of that time. False when it is done with.
+## One step of an acid: every TICK seconds (and at its end) each cell of the cloud takes the damage of that time, and a
+## spreading acid may creep on. A cell with nothing left to eat leaves the cloud. False when the cloud is done with.
 static func _tick_acid(arena, co, e: Dictionary, step: float) -> bool:
 	e["acc"] += step
 	if e["acc"] < TICK - 1e-9 and e["left"] > 1e-9:
 		return true
-	var amount: float = e["dps"] * e["acc"]
+	var span: float = e["acc"]
+	var amount: float = e["dps"] * span
 	e["acc"] = 0.0
-	var obj := Damage.solid_at(co, e["cell"])
-	if obj.is_empty():
-		return false
-	if obj["kind"] == "component" and _part_hp(co, obj) <= 0.0:
-		return false  # acid wears a part down to out of action, it does not finish it off
-	Damage.apply(arena, e["ship"], e["cell"], obj, amount, e["type"], {"dot": "acid", "weapon": e["weapon"]})
-	return true
+	var keep: Array = []
+	for cell in e["cells"]:
+		var obj := Damage.solid_at(co, cell)
+		if obj.is_empty():
+			continue
+		if obj["kind"] == "component" and _part_hp(co, obj) <= 0.0:
+			continue  # acid wears a part down to out of action, it does not finish it off
+		Damage.apply(arena, e["ship"], cell, obj, amount, e["type"], {"dot": "acid", "weapon": e["weapon"]})
+		keep.append(cell)
+	e["cells"] = keep
+	if float(e["spread"]) > 0.0 and not keep.is_empty() and e["left"] > 1e-9 and keep.size() < ACID_MAX_CELLS \
+			and arena.rng.randf() < float(e["spread"]) * span / TICK:
+		_creep(arena, co, e)
+	return not keep.is_empty()
+
+
+## The acid cloud `e` of ship `co` eats one more cell: a wall, door or part beside its cells (a part once, one that is already
+## out of action never), and none that another cloud holds. Which one is the arena's rng's pick.
+static func _creep(arena, co, e: Dictionary) -> void:
+	var held := {}  # cells and parts any acid on this ship holds already
+	for other in arena.fx["timed"]:
+		if other["k"] == "acid" and other["ship"] == e["ship"]:
+			_hold(co, other["cells"], held)
+	_hold(co, e["cells"], held)
+	var cands: Array = []
+	for c in e["cells"]:
+		for d in Fire.SIDES:
+			var n: Vector2i = c + d
+			var obj := Damage.solid_at(co, n)
+			if obj.is_empty() or held.has(n) or cands.has(n):
+				continue
+			if obj["kind"] == "component" and (held.has(Damage.part_key(obj)) or _part_hp(co, obj) <= 0.0):
+				continue
+			cands.append(n)
+	if cands.is_empty():
+		return
+	var pick: Vector2i = cands[arena.rng.randi_range(0, cands.size() - 1)]
+	e["cells"].append(pick)
+	_log(arena, e["ship"], pick, "acid", str(e["weapon"]), {"spread": true})
+
+
+static func _hold(co, cells: Array, held: Dictionary) -> void:
+	for c in cells:
+		held[c] = true
+		var obj := Damage.solid_at(co, c)
+		if obj.get("kind", "") == "component":
+			held[Damage.part_key(obj)] = true
 
 
 static func _part_hp(co, obj: Dictionary) -> float:
@@ -564,18 +655,32 @@ static func on_fire(arena, idx: int, uid: int, m: Dictionary, w: Dictionary) -> 
 		_timed(arena, "shock:%d:%d" % [idx, uid], {"k": "shock", "ship": idx, "cell": cell, "dps": float(spec["shock_dps"]),
 			"left": maxf(float(w["cooldown"]), float(w.get("duration", 0.0)) if w["kind"] == "beam" else 0.0)})
 		seen["shock"] = true
+	if float(spec.get("scorch_dps", 0.0)) > 0.0:  # the heat of the breech burns the crew who do not shrug it off
+		_timed(arena, "scorch:%d:%d" % [idx, uid], {"k": "scorch", "ship": idx, "cell": cell, "dps": float(spec["scorch_dps"]),
+			"left": maxf(float(w["cooldown"]), float(w.get("duration", 0.0)) if w["kind"] == "beam" else 0.0)})
+		seen["scorch"] = true
 	if not seen.is_empty():
 		_log(arena, idx, cell, "self_room", id, {"has": seen.keys(), "room_pos": room_pos(arena, idx, room)})
 
 
 ## One step of a shock: the organic crew in the room (not the mechanical ones) take dps a second.
 static func _tick_shock(co, e: Dictionary, step: float) -> bool:
+	return _hurt_room(co, e, step, func(m): return bool(TraitSet.of(m)["mechanical"]))
+
+
+## One step of a scorch: the crew in the room who lack the heat_resistant trait take dps a second.
+static func _tick_scorch(co, e: Dictionary, step: float) -> bool:
+	return _hurt_room(co, e, step, func(m): return m.traits().has("heat_resistant"))
+
+
+## Hurt the crew in the room of effect `e` for `step` seconds, except those `immune` says are fine. False when the room is gone.
+static func _hurt_room(co, e: Dictionary, step: float, immune: Callable) -> bool:
 	var ship = co.ship
 	var room: int = ship.atmosphere.room_at(e["cell"])
 	if room < 0:
 		return false
 	for m in ship.crew:
-		if ship.atmosphere.room_at(m.cell()) != room or m.is_down() or bool(TraitSet.of(m)["mechanical"]):
+		if ship.atmosphere.room_at(m.cell()) != room or m.is_down() or immune.call(m):
 			continue
 		m.hurt(e["dps"] * step)
 		if m.is_down():

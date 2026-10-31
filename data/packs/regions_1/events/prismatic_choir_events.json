@@ -4,17 +4,17 @@
       "text": "The Choir's dock is a ring of crystal pylons, each ringing a different note as your ship passes between them. A Prismatic greeter hums a warm rising chord that your translator renders as 'Welcome, welcome, welcome' and also 'You are slightly flat'. The pylons chime in agreement.",
       "choices": [
         {"text": "Hum along (badly).", "outcomes": [
-          {"weight": 60, "text": "Your crew hum. It is awful. The pylons wince in a cascade of tiny chimes. But the greeter's core glows a warm, forgiving gold. 'Brave,' it hums. 'Flat, but brave.'", "effects": {"crew_hp": 5}},
-          {"weight": 40, "text": "Your crew hum. The greeter's core flickers, flat as a coin. A pylon cracks gently from the effort. You are asked, with great politeness, to stop.", "effects": {"rep": {"lumen": -1}}}
+          {"weight": 60, "text": "Your crew hum. It is awful. The pylons wince in a cascade of tiny chimes. But the greeter's core glows a warm, forgiving gold. 'Brave,' it hums. 'Flat, but brave.'", "effects": {"crew_hp": 5, "unlock": "ship_prismatic_tuning_bell"}},
+          {"weight": 40, "text": "Your crew hum. The greeter's core flickers, flat as a coin. A pylon cracks gently from the effort. You are asked, with great politeness, to stop.", "effects": {"rep": {"lumen": -1}, "unlock": "ship_prismatic_tuning_bell"}}
         ]},
         {"text": "Stay silent and bow.", "outcomes": [
-          {"weight": 100, "text": "The greeter's glow warms to gold. In the Choir, silence is a kindness and bowing is a language. You are given a small bell and a place to dock.", "effects": {"items": {"crystal": 2}, "crew_hp": 5}}
+          {"weight": 100, "text": "The greeter's glow warms to gold. In the Choir, silence is a kindness and bowing is a language. You are given a small bell and a place to dock.", "effects": {"items": {"crystal": 2}, "crew_hp": 5, "unlock": "ship_prismatic_tuning_bell"}}
         ]},
         {"text": "[Prismatic] Hum the proper greeting.", "requires": {"species": "prismatic"}, "outcomes": [
-          {"weight": 100, "text": "Your Prismatic hums the greeting in perfect pitch and the pylons ring with it all the way down the ring. The greeter's core flares white with delight. A choir of Prismatics hum back from their windows. 'Cousin,' says the greeter. 'You are in tune.'", "effects": {"items": {"crystal": 4, "credits": 20}, "rep": {"lumen": 1}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Prismatic hums the greeting in perfect pitch and the pylons ring with it all the way down the ring. The greeter's core flares white with delight. A choir of Prismatics hum back from their windows. 'Cousin,' says the greeter. 'You are in tune.'", "effects": {"items": {"crystal": 4, "credits": 20}, "rep": {"lumen": 1}, "crew_hp": 5, "unlock": "ship_prismatic_tuning_bell"}}
         ]},
         {"text": "[Emberkin] Offer to be the bass note.", "requires": {"species": "emberkin"}, "outcomes": [
-          {"weight": 100, "text": "Your Emberkin hums, a deep warm buzz almost below hearing. The greeter pauses, then adds a note a fifth above. The pylons chime a chord. For one minute the dock is a single instrument, and it is the nicest sound you have ever made.", "effects": {"items": {"crystal": 2}, "crew_hp": 10}}
+          {"weight": 100, "text": "Your Emberkin hums, a deep warm buzz almost below hearing. The greeter pauses, then adds a note a fifth above. The pylons chime a chord. For one minute the dock is a single instrument, and it is the nicest sound you have ever made.", "effects": {"items": {"crystal": 2}, "crew_hp": 10, "unlock": "ship_prismatic_tuning_bell"}}
         ]}
       ]
     },
@@ -122,14 +122,14 @@
       "text": "Cantor Spectra, who conducts the Choir, keeps the Prism Lens in a hall of mirrors: a beam weapon that works at full power only when a Prismatic is at its controls, and at half for everyone else. 'It is not prejudice,' she hums, a little defensively. 'It is a matter of pitch.' She sets a tuning fork on the console. 'Run it. Hum with it. Let us hear what you are.'",
       "choices": [
         {"text": "Run the Lens and hum along.", "outcomes": [
-          {"weight": 45, "text": "You sit at the Lens and hum. It is not good. The beam wobbles, flares, steadies. Spectra listens with her core dimmed, nodding. 'Half power,' she hums, 'but honest.' She gives you the schematics and a tuning fork to practise.", "effects": {"items": {"crystal": 2}, "flag": "tech_prism_lens"}},
-          {"weight": 55, "text": "You hum. The beam throws a rainbow across the hall and a dozen Prismatics clap their hands. 'Not bad,' hums Spectra. 'For someone with a mouth.'", "effects": {"flag": "tech_prism_lens"}}
+          {"weight": 45, "text": "You sit at the Lens and hum. It is not good. The beam wobbles, flares, steadies. Spectra listens with her core dimmed, nodding. 'Half power,' she hums, 'but honest.' She gives you the schematics and a tuning fork to practise.", "effects": {"items": {"crystal": 2}, "flag": "tech_prism_lens", "unlock": "ship_prismatic_flat_note"}},
+          {"weight": 55, "text": "You hum. The beam throws a rainbow across the hall and a dozen Prismatics clap their hands. 'Not bad,' hums Spectra. 'For someone with a mouth.'", "effects": {"flag": "tech_prism_lens", "unlock": "ship_prismatic_flat_note"}}
         ]},
         {"text": "[Prismatic] Run the Lens at full power.", "requires": {"species": "prismatic"}, "outcomes": [
-          {"weight": 100, "text": "Your Prismatic sits at the Lens and the beam goes white, a clean blade of light that cuts a target drone in two without a flicker. The whole hall hums with pride. Spectra gives them the schematics, a baton, and a bar of music on a slip of paper: their own part, in the Choir's score.", "effects": {"items": {"crystal": 5}, "rep": {"lumen": 2}, "flag": "tech_prism_lens"}}
+          {"weight": 100, "text": "Your Prismatic sits at the Lens and the beam goes white, a clean blade of light that cuts a target drone in two without a flicker. The whole hall hums with pride. Spectra gives them the schematics, a baton, and a bar of music on a slip of paper: their own part, in the Choir's score.", "effects": {"items": {"crystal": 5}, "rep": {"lumen": 2}, "flag": "tech_prism_lens", "unlock": "ship_prismatic_flat_note"}}
         ]},
         {"text": "[Mirror Veil] Let your Mirror Veil answer the Lens.", "requires": {"component": "mirror_veil"}, "outcomes": [
-          {"weight": 100, "text": "Your Mirror Veil catches the beam and throws it back into the hall, and the hall sings. A dozen reflected beams cross and braid in the air, and Spectra weeps with delight. 'A new voice,' she hums. 'We shall use it.' She gives you the schematics.", "effects": {"items": {"crystal": 3}, "flag": "tech_prism_lens"}}
+          {"weight": 100, "text": "Your Mirror Veil catches the beam and throws it back into the hall, and the hall sings. A dozen reflected beams cross and braid in the air, and Spectra weeps with delight. 'A new voice,' she hums. 'We shall use it.' She gives you the schematics.", "effects": {"items": {"crystal": 3}, "flag": "tech_prism_lens", "unlock": "ship_prismatic_flat_note"}}
         ]},
         {"text": "Ask to come back and practise.", "outcomes": [
           {"weight": 100, "text": "'Practise,' hums Spectra, with approval. 'The Lens is patient. It is the rest of us who aren't.'", "effects": {}}
