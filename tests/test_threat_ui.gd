@@ -341,3 +341,29 @@ func test_a_five_skull_win_on_the_map_offers_five_parts() -> void:
 	eq(_cut_rows(map.event_panel.event), 5, "five parts to cut out")
 	check(str(map.event_panel.event["text"]).contains("She was dangerous"), "and the page says why")
 	_free(d)
+
+
+# --- in sector space -----------------------------------------------------------------------------------------
+
+func test_a_poi_rates_the_foe_its_fight_will_send() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var c: Campaign = map.campaign
+	var sector = c.current_sector()
+	var poi: Dictionary = sector.pois[0]
+	poi["event_type"] = "patrol"
+	poi["enemy"] = ""
+	var design: String = sector.fight_design(c, poi["id"], "tier")
+	check(design.begins_with("gen:concord:"), "a patrol POI sends the Concord: " + design)
+	eq(design, c.fight_path("tier", "patrol"), "the same foe the campaign keeps for that kind here")
+	eq(sector.fight_design(c, "nope", "tier"), "", "an unknown POI sends nothing")
+	eq(sector.fight_spawn(c, poi["id"], "tier")["design"], design, "and fight_spawn hands out that design")
+	map._poi_sector = sector
+	map._poi = poi["id"]
+	eq(map.fight_design("tier"), design, "the map rates the POI's foe while its event is up")
+	eq(map.fight_design("pirate_raider"), RAIDER, "a named design stays a file")
+	map.event_panel.open_event(_event())
+	var skulls := int(Shipgen.threat(Session.load_ship(design), map.ship())["skulls"])
+	eq(map.event_panel.view[0].get("tag", ""), "[Threat %d/5]" % skulls, "so the tag on its choice rates that foe")
+	map._forget_poi()
+	_free(d)

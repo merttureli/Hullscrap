@@ -300,7 +300,7 @@ func _skulls_of(value: String) -> int:
 	var ship = map.ship()
 	if ship == null:
 		return 0
-	var path: String = _campaign().fight_path(value, str(_node()["type"]))
+	var path: String = map.fight_design(value)
 	var key := "%s|%d" % [path, ship_key(ship)]
 	if not _rated.has(key):
 		if _rated.size() >= RATED_CAP:

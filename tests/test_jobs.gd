@@ -125,7 +125,11 @@ func test_only_the_helm_is_manned_unless_the_data_says_so() -> void:
 	ship.components.by_id["laser_mk1"]["manned"] = true  # weapons are manned stations in the data (lead decision)
 	jobs.build_board(ship)
 	check(jobs.board.has("post:%d" % laser), "a weapon with manned: true gets a post")
-	eq(jobs.board["post:%d" % laser]["priority"], 50, "at 50")
+	eq(jobs.board["post:%d" % laser]["priority"], 45, "at 45 out of a fight: the helm (50) is manned first, the autopilot needs it")
+	eq(jobs.board["post:%d" % helm]["priority"], 50, "the helm at 50")
+	jobs.combat = true
+	jobs.build_board(ship)
+	eq(jobs.board["post:%d" % laser]["priority"], 50, "in a fight at 50 like the helm")
 
 
 # --- who takes what ------------------------------------------------------------------------------

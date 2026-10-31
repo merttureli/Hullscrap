@@ -613,7 +613,7 @@ func _hop(c: Campaign, ship: Ship, n: int) -> Dictionary:
 			if c.node(o)["type"] != "gate":
 				to = o
 				break
-		last = c.jump(to, ship)
+		last = _jump(c, to, ship)
 		check(last["ok"], "hop %d: %s" % [i, last["why"]])
 	return last
 
@@ -699,7 +699,7 @@ func test_the_station_flag_is_set_while_docked_and_cleared_on_leaving() -> void:
 	c.rep["clans"] = 0
 	c.arrive(ship)
 	check(c.flags.has("at_rusthold"), "docked again")
-	check(c.jump(_neighbour(c), ship)["ok"], "jumped away")
+	check(_jump(c, _neighbour(c), ship)["ok"], "jumped away")
 	check(not c.flags.has("at_rusthold"), "undocked: the flag is cleared")
 	var back := Campaign.new(2)
 	back.arrive(ship)
@@ -770,3 +770,13 @@ func test_a_log_found_again_is_shown_again_but_kept_once() -> void:
 	eq(again["logs"].size(), 1, "the log is shown again")
 	check(first["lines"][0].begins_with("Log found: ") and again["lines"][0].begins_with("Log read again: "), "and the line says so")
 	eq(c.logs_found.keys(), [id], "but it is in the campaign's list once")
+
+
+## A jump along a lane the way the game makes one now (docs/CONTENT.md section 11): spool the drive and let it fire.
+## The jump() result ({ok, why, node, drift, notes}).
+func _jump(c: Campaign, to: String, ship, drift := false) -> Dictionary:
+	var r: Dictionary = c.start_jump(to, ship, false, drift)
+	if not r["ok"]:
+		return {"ok": false, "why": r["why"], "notes": []}
+	c.tick_jump(c.spool_time(), false, ship)
+	return c.last_jump

@@ -8,8 +8,9 @@ extends RefCounted
 ## - Positions are px in the sector, x right and y down, (0, 0) the top-left corner of the 24,000 px square.
 ## - A POI is {id, type, name, pos, visibility (beacon, signal, hidden), event_type, state (new, done), enemy ("" or a
 ##   ship design id), main (the node's own arrival event happens here)}; an ambient contact is a POI with `ambient`
-##   true, a `vel` and a `ttl`. Both are in all_pois().
-## - Only the POI states, the ship's place and the ambient clock are saved (to_save): the layout is regenerated.
+##   true, a `vel` and a `ttl`; the wreck a won fight leaves is a POI with `wreck` true (add_wreck). All are in all_pois().
+## - Only the POI states, the ship's place, the wrecks and the ambient clock are saved (to_save): the layout is
+##   regenerated.
 ## - Ambient rolls and fight spawn points use the sector's own rng (saved), so real-time play never moves the
 ##   campaign's rng, which events and loot use.
 
@@ -39,9 +40,11 @@ var density := 1.0  ## the debris density: x the base spawn rate and cap of data
 var debris_mult := {}  ## debris type id -> weight multiplier: the theme of the node type times the region's `debris`
 var pois: Array = []  ## the generated POIs, main first
 var ambient: Array = []  ## the passing ships now about (transient; not generated)
+var wrecks: Array = []  ## the wrecks won fights left here (add_wreck); saved
 var hostiles: Array = []  ## positions (Vector2, px) of the hostile ships about; the fight in place keeps this list for the jump block
 var ship_pos := Vector2.ZERO
 var ship_vel := Vector2.ZERO
+var ship_angle := 0.0  ## the ship's heading (flight.gd: 0 up, clockwise); it arrives facing the middle of the sector
 var accel := 0.0  ## px/s^2 at full thrust: set_flight() reads it from the ship, 0 = the ship cannot fly
 var max_speed := 600.0
 var damping := 0.25  ## per second
@@ -50,6 +53,7 @@ var rng := RandomNumberGenerator.new()  ## ambient rolls and spawn points
 var ambient_weights := {}  ## kind (trader, patrol, pirate) -> weight of the passing ships: the region's `ambient`
 var _amb_t := 0.0  # seconds since the last ambient roll
 var _next_amb := 1
+var _next_wreck := 1
 var _engaged := {}  # POI id -> true while its event is open (or, for a station, until the ship has left); not saved
 var _greeted := {}  # station and store POI ids that have greeted this visit; not saved
 
@@ -200,9 +204,9 @@ static func _pick(r: RandomNumberGenerator, weights: Dictionary) -> String:
 
 # --- the POIs --------------------------------------------------------------------------------------------
 
-## Every POI the sector has now: the generated ones, then the passing ships.
+## Every POI the sector has now: the generated ones, the wrecks, then the passing ships.
 func all_pois() -> Array:
-	return pois + ambient
+	return pois + wrecks + ambient
 
 
 ## The POI with id `id`, {} when there is none.
@@ -210,7 +214,7 @@ func find(id: String) -> Dictionary:
 	for p in pois:
 		if p["id"] == id:
 			return p
-	for p in ambient:
+	for p in wrecks + ambient:
 		if p["id"] == id:
 			return p
 	return {}
@@ -226,6 +230,7 @@ func main_poi() -> Dictionary:
 func enter() -> void:
 	ship_pos = arrival
 	ship_vel = Vector2.ZERO
+	ship_angle = wrapf((Vector2(size, size) / 2.0 - arrival).angle() + PI / 2.0, -PI, PI)
 	ambient.clear()
 	hostiles.clear()
 	_engaged.clear()
@@ -308,6 +313,15 @@ func cleared() -> bool:
 	return pois.all(func(p): return p["state"] == DONE or bool(cfg["poi_types"].get(p["type"], {}).get("repeat", false)))
 
 
+## The design a `fight` effect of `value` at POI `id` sends ("" for an unknown POI): what fight_spawn hands the combat, and
+## what the event panel rates before the fight is chosen (it rolls nothing of the sector's own).
+func fight_design(c, id: String, value := "tier") -> String:
+	var poi := find(id)
+	if poi.is_empty():
+		return ""
+	return c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" else c.fight_path(value, str(poi["event_type"]))
+
+
 ## A `fight` effect at POI `id` (`value`: "tier" or a design id, as in events.gd): {design (a res:// path), pos (where
 ## the enemy appears, 250 to 600 px from the POI), poi (its id)}. The design is the POI's own `enemy` when it has one
 ## and the effect says "tier", else Campaign.fight_path()'s (the tier tables; a rammer for a pirate after two missed
@@ -316,10 +330,34 @@ func fight_spawn(c, id: String, value := "tier") -> Dictionary:
 	var poi := find(id)
 	if poi.is_empty():
 		return {}
-	var design: String = c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" else c.fight_path(value, str(poi["event_type"]))
+	var design := fight_design(c, id, value)
 	var s: Array = cfg["poi"]["spawn"]
 	var pos: Vector2 = poi["pos"] + Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(float(s[0]), float(s[1]))
 	return {"design": design, "pos": pos.clamp(Vector2.ZERO, Vector2(size, size)), "poi": id}
+
+
+## A won fight leaves the enemy's wreck at `pos`: a new `wreck` POI (a signal, its event a wreck_field one: the salvage)
+## that stays until it is done and is saved with the sector. Returns it.
+func add_wreck(pos: Vector2, label := "") -> Dictionary:
+	var w := _wreck("w%d" % _next_wreck, pos, label)
+	_next_wreck += 1
+	wrecks.append(w)
+	return w
+
+
+func _wreck(id: String, pos: Vector2, label: String) -> Dictionary:
+	return {"id": id, "type": "wreck", "name": label if label != "" else str(cfg["poi_types"]["wreck"]["label"]), "pos": pos.clamp(Vector2.ZERO, Vector2(size, size)),
+		"visibility": "signal", "event_type": "wreck_field", "state": NEW, "enemy": "", "main": false, "wreck": true}
+
+
+## Where the hostile ships about are (px): the enemy of a fight in place (hostiles) and the passing pirates still to meet.
+## Build mode's red alert reads it.
+func hostile_ships() -> Array:
+	var out := hostiles.duplicate()
+	for a in ambient:
+		if a["event_type"] == "pirate" and a["state"] == NEW:
+			out.append(a["pos"])
+	return out
 
 
 ## Is a hostile ship within `radius` px of the ship (the jump drive does not spool then)?
@@ -458,8 +496,8 @@ func _roll_ambient(ship) -> Dictionary:
 
 # --- save format -----------------------------------------------------------------------------------------
 
-## What is saved of the sector: the POI states, the ship's place and speed, the ambient clock and the ships about.
-## The layout itself comes from the seed.
+## What is saved of the sector: the POI states, the ship's place, speed and heading, the wrecks, the ambient clock and
+## the ships about. The layout itself comes from the seed.
 func to_save() -> Dictionary:
 	var states := {}
 	for p in pois:
@@ -467,12 +505,16 @@ func to_save() -> Dictionary:
 	var list := []
 	for a in ambient:
 		list.append({"id": a["id"], "kind": a["event_type"], "pos": [a["pos"].x, a["pos"].y], "vel": [a["vel"].x, a["vel"].y], "ttl": a["ttl"], "state": a["state"]})
-	return {"pois": states, "ship": [ship_pos.x, ship_pos.y], "vel": [ship_vel.x, ship_vel.y], "ambient": list, "amb_t": _amb_t,
-		"next_amb": _next_amb, "clock": clock, "rng": str(rng.state)}
+	var hulks := []
+	for w in wrecks:
+		hulks.append({"id": w["id"], "name": w["name"], "pos": [w["pos"].x, w["pos"].y], "state": w["state"]})
+	return {"pois": states, "ship": [ship_pos.x, ship_pos.y], "vel": [ship_vel.x, ship_vel.y], "angle": ship_angle, "ambient": list, "amb_t": _amb_t,
+		"next_amb": _next_amb, "clock": clock, "rng": str(rng.state), "wrecks": hulks, "next_wreck": _next_wreck}
 
 
-## Replace the POI states, the ship's place and the ambient state with a saved one. Returns "" or why not (and nothing
-## changes). A saved POI this layout does not have is ignored.
+## Replace the POI states, the ship's place, the wrecks and the ambient state with a saved one. Returns "" or why not
+## (and nothing changes). A saved POI this layout does not have is ignored; a save from before the heading and the
+## wrecks has none of them.
 func load_save(d: Dictionary) -> String:
 	if not (d.get("pois") is Dictionary and d.get("ambient") is Array and _vec(d.get("ship")) != null and _vec(d.get("vel")) != null):
 		return "bad sector data"
@@ -486,11 +528,24 @@ func load_save(d: Dictionary) -> String:
 		var state := str(e.get("state", NEW))
 		contacts.append({"id": e["id"], "type": "unknown", "name": str(cfg["poi_types"]["unknown"]["label"]), "pos": _vec(e["pos"]), "visibility": "signal",
 			"event_type": e["kind"], "state": state if [NEW, DONE].has(state) else NEW, "enemy": "", "main": false, "ambient": true, "vel": _vec(e["vel"]), "ttl": float(e["ttl"])})
+	var hulks := []
+	if not d.get("wrecks", []) is Array:
+		return "bad sector data"
+	for e in d.get("wrecks", []):
+		if not (e is Dictionary and e.get("id") is String and _vec(e.get("pos")) != null):
+			return "bad sector data"
+		var w := _wreck(e["id"], _vec(e["pos"]), str(e.get("name", "")))
+		w["state"] = str(e.get("state", NEW)) if [NEW, DONE].has(str(e.get("state", NEW))) else NEW
+		hulks.append(w)
 	for p in pois:
 		if d["pois"].has(p["id"]):
 			p["state"] = d["pois"][p["id"]]
 	ship_pos = _vec(d["ship"]).clamp(Vector2.ZERO, Vector2(size, size))
 	ship_vel = _vec(d["vel"])
+	if _is_num(d.get("angle")):
+		ship_angle = wrapf(float(d["angle"]), -PI, PI)
+	wrecks = hulks
+	_next_wreck = int(d.get("next_wreck", hulks.size() + 1)) if _is_num(d.get("next_wreck")) else hulks.size() + 1
 	ambient = contacts
 	_amb_t = float(d.get("amb_t", 0.0)) if _is_num(d.get("amb_t")) else 0.0
 	_next_amb = int(d.get("next_amb", 1)) if _is_num(d.get("next_amb")) else 1

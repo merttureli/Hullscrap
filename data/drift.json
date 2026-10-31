@@ -25,7 +25,7 @@
 		"entry": {"id": "entry", "name": "Arrival point", "type": "empty", "pos": [90, 500], "jitter": 50},
 		"exit": {"id": "exit", "name": "Exit beacon", "type": "exit", "pos": [1500, 500], "jitter": 70}
 	},
-	"instant_jump": true,
+	"instant_jump": false,
 	"jump": {"spool": 8.0, "hostile_range": 2000.0},
 	"fuel": {"start": 6, "price": 8, "trader_multiplier": 3, "drift_hull": 15},
 	"debt": {"total": 1000, "payment": 100, "every": 8, "creditor": "Ma Gantry", "kettle": "reactor_scrap_kettle"},
