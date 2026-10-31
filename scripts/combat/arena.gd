@@ -17,6 +17,7 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
+const Hazards = preload("res://scripts/combat/hazards.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
@@ -78,6 +79,7 @@ var collision := Collisions.load_config()  ## data/collision.json: restitution, 
 var contact_tick := {}  ## ship index -> the last tick it touched another ship
 var fx := Effects.fresh()  ## running weapon effects: acid, spores, frost, shocks, corroded walls, drag-able debris (effects.gd)
 var tethers: Array = []  ## bow latches: {a, b (ships), la, lb (anchors in each ship's cell coordinates), left (seconds)}
+var hazard := {}  ## the fight's sector hazard, {id, dir} or {} (hazards.gd): set by the caller after add_ship
 var tick := 0  ## substeps run so far
 var _acc := 0.0
 
@@ -179,7 +181,7 @@ func _substep() -> void:
 		var co = ships[i]
 		var fly: bool = not co.wrecked and co.flight.can_fly(co.ship.components, co.powered) == ""
 		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust, co.thrusts)
-		Shields.tick(co, SUBSTEP)
+		Shields.tick(co, SUBSTEP, Hazards.recharge_mult(self))
 		if aim_points.has(i) and not co.wrecked:  # fixed guns follow the cursor
 			for uid in co.mounts:
 				weapons.point_barrel(self, i, uid, aim_points[i])
@@ -188,6 +190,7 @@ func _substep() -> void:
 	weapons.tick_beams(self)
 	Projectiles.step(self, SUBSTEP)
 	Effects.tick(self, SUBSTEP)
+	Hazards.tick(self, SUBSTEP)
 
 
 ## Recompute power, mass, thrust and the shield cap of ship `idx` if a part or tile changed here, or
