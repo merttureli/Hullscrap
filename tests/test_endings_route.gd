@@ -315,11 +315,7 @@ func test_every_landmark_can_be_met_where_it_is_placed() -> void:
 	c.flags["prism_revealed"] = true
 	_meet("station_lumen_first_gate_study", [0])
 	_go(5, "mire_fens")
-	var hollow := {"id": "n0", "type": "hollow", "place": ""}
-	var e: Dictionary = c.events.get_event("empty_hollow_node_survived")
-	eq(str(e["type"]), "hollow", "the Hollow node landmark happens at a place the tide has taken")
-	check(c.events.eligible(e, c, hollow, ship), "and is on offer there from stage 4")
-	check(c.events.choose(e, 0, c, ship, hollow)["ok"], "and can be taken")
+	_meet("empty_hollow_node_survived", [0])
 	_go(6, "basalt_quarries")
 	_go(7, "emberkin_forges")
 	_go(8, "grundl_barges")

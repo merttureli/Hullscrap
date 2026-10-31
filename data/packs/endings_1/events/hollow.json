@@ -55,7 +55,7 @@
       ]
     },
     {
-      "id": "empty_hollow_node_survived", "type": "hollow", "weight": 100, "once": true, "landmark": true, "requires": {"not_flag": "lm_hollow_node", "stage_min": 4},
+      "id": "empty_hollow_node_survived", "type": "empty", "weight": 100, "once": true, "landmark": true, "requires": {"not_flag": "lm_hollow_node", "stage_min": 4},
       "text": "The beacon here is dead, and has been dead so long it has grown tidy about it. Three ships sit in the sector with their lights off, and one with them on, a patient green, and the one with them on is the closest. Nothing moves. Your scanners report a sector containing you and a great deal of care. A radio you did not touch speaks, in a voice made of an excellent night's sleep: 'Visitors: noted. Welcome aboard.' Every airlock in the sector cycles open at once, gently, like a held door.",
       "choices": [
         {"text": "Hold position. Say nothing. Do not dock.", "outcomes": [
