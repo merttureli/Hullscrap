@@ -1,0 +1,25 @@
+{
+	"id": "siltborn_rings",
+	"name": "The Siltborn Rings",
+	"home_species": "siltborn",
+	"faction": "",
+	"stages": [4, 8],
+	"weight": 2,
+	"rarity": "uncommon",
+	"danger": 1.2,
+	"palette": {"tint": "#8fb8c9", "nebula": "lumen"},
+	"map": {},
+	"node_weights": {"anomaly": 26, "empty": 18, "distress": 14, "asteroid_field": 12, "wreck_field": 10, "trader": 8, "pirate": 8, "patrol": 4},
+	"places": [
+		{"id": "gossamer", "name": "The Gossamer", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"ice_chunk_s": 2.0, "fuel_canister": 1.3},
+	"pois": {"anomaly": 1.8, "unknown": 1.3},
+	"ambient": {"trader": 2, "pirate": 2, "patrol": 1},
+	"stock": {"oxygen_gen": 90, "medbay": 180, "helm": 70, "reactor_neon_mk1": 360, "shield_neon_mk1": 340, "longburn_mk2": 270, "intake_mk1": 120, "tractor_mk1": 160, "radiator": 50, "bed": 30},
+	"recruit": {"siltborn": 8, "wisp": 1, "sporeling": 1},
+	"enemies": "wardens",
+	"hazards": ["gas_cloud"],
+	"events": "siltborn_rings",
+	"blurb": "The ring system of a gas giant, a glittering belt of ice with a flare front breathing up out of the planet below. The Siltborn float there in flocks, glowing bells with trailing tendrils, and net the ring-ice for fuel. Please do not light a flame. The Gossamer will sort you into LIGHT, HEAVY and FLAMMABLE at the lock."
+}

@@ -1,0 +1,11 @@
+{
+	"crew": {
+		"warden_frame": ["Lintel", "Jamb", "Sill", "Threshold", "Wicket", "Turnstile", "Bollard", "Tollgate", "Keystone", "Hasp", "Baluster", "Portico"],
+		"murrow": ["Mulch", "Hummock", "Grubb", "Hodge", "Mattock", "Sump", "Tump", "Bracken", "Culm", "Burl", "Thrum", "Cobb"],
+		"siltborn": ["Maelu", "Oshe", "Pelagi", "Nauli", "Ysmae", "Ondri", "Lumae", "Thallo", "Meiru", "Aethe", "Selumi", "Brael"],
+		"corvin": ["Kesh", "Tikka", "Pica", "Chough", "Skerrick", "Spangle", "Jenks", "Corbie", "Tarnish", "Gaudy", "Sequin", "Corvo"],
+		"brine": ["Corrigan", "Tully", "Rennick", "Mackle", "Brannock", "Dougal", "Fergal", "Orla", "Cullen", "Dunne", "Hennessy", "Mulvey"],
+		"echo": ["Pardon", "Likewise", "Indeed", "Quite", "Again", "Ditto", "Encore", "Rather", "Reprise", "Verily", "Thanks", "Touche"],
+		"ferro": ["Gauss", "Oersted", "Weber", "Farad", "Lode", "Neel", "Henry", "Tesla", "Ampere", "Curie", "Maxwell", "Biot"]
+	}
+}

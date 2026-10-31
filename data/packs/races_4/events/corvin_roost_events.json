@@ -1,0 +1,121 @@
+{"events": [
+    {
+      "id": "roost_tinsel_row_dock", "type": "station", "weight": 10, "once": false, "requires": {"region": "corvin_roost"},
+      "text": "Tinsel Row is a bazaar built out of a thousand hulls, every one of them hung with something shiny. Mirrors, lenses, foil, glass, brass; the whole row twinkles like a magpie's nest in morning sun. Corvin everywhere, in good coats with too many pockets, calling prices in short sharp clicks. A tall one in a feathered hat stops you at the lock, looks at your buckle, your ring, your lamp, your teeth, and says, without malice, 'That is a very nice pair of boots. What do you want for them?'",
+      "choices": [
+        {"text": "Haggle for a bag of polished bits (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 60, "text": "She holds up a bag, you hold up a coin, and for ten minutes you trade clicks and glares. In the end you buy a fistful of bright trinkets for far less than you meant, and find two of them are valuable.", "effects": {"items": {"credits": 10, "silicon": 3, "crystal": 1}}},
+          {"weight": 40, "text": "You haggle badly. You leave with a bag of polished bolts and a strong impression of having been looked at, very thoroughly, by a professional.", "effects": {"items": {"credits": -20, "scrap": 10}}}
+        ]},
+        {"text": "Hire a young Corvin from the perch (80 credits).", "requires": {"credits": 80, "not_flag": "roost_hired"}, "outcomes": [
+          {"weight": 100, "text": "Tikka is perched on a lamp-post, small and glossy, with a feather cloak twice too big and pockets that clink when they move. 'I find things,' they say, quickly. 'I will not steal from you. Not on purpose. If I do, you can have it back, and I will explain.' A small bright button falls out of a pocket. They pick it up, look at it, and put it in yours.", "effects": {"items": {"credits": -80}, "recruit": {"species": "corvin", "name": "Tikka"}, "flag": "roost_hired"}}
+        ]},
+        {"text": "Ask what is going round the Row.", "outcomes": [
+          {"weight": 100, "text": "A knot of Corvin gather and, with a good deal of ruffling, tell you everything they know, which is a surprising amount: who has what, where it came from, and who wants it back. You leave with a tip about a wreck-field lane, and the feeling of being a minor celebrity.", "effects": {"reveal": "wreck_field", "crew_hp": 5}}
+        ]},
+        {"text": "[Corvin] Show them what you have on you.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin empties their pockets onto the counter one by one: a button, a brass compass, a green bead, a Lumen shard, a bent spoon. The Row falls silent. Then, one by one, the other Corvin gather round and begin to trade, in long delighted trills. By the end of the hour your Corvin has traded up three times, and the Row has been told what a good eye looks like. You are paid in credits, and a long, respectful whistle.", "effects": {"items": {"credits": 60, "silicon": 3, "crystal": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Walk the Row and look.", "outcomes": [
+          {"weight": 100, "text": "You walk the whole Row, from end to end. A hundred small bright eyes track you, politely. A child offers you a spoon.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "roost_wreck_auction", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "corvin_roost"},
+      "text": "There is a wreck at the heart of the field, a good one, whole and gleaming, with a banner draped across the bow: AUCTION. A hundred Corvin sit in a ring of lifeboats, each in a feathered hat, each holding a numbered card. The auctioneer stands on the wreck's nose with a tiny hammer. 'Lot one,' he cries. 'The hold. Sealed. Contents unknown. Who will start me at ten?' The ring ruffles. A card goes up. The hammer hovers. 'Eleven,' says a quiet voice at the back, and it is yours.",
+      "choices": [
+        {"text": "Bid for the hold (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 55, "text": "The hold opens to a murmur: crates of Lumen glass, a tray of silicon, a good Concord toolkit. You came out ahead, by a mile, and the ring watches you with admiration and a small amount of resentment.", "effects": {"items": {"credits": -40, "silicon": 6, "copper": 20, "crystal": 2}}},
+          {"weight": 45, "text": "The hold opens to a murmur and a groan. Crates of sawdust. A tin of sardines. A single sock. The ring hoots with delight. You are, briefly, the favourite of the auction.", "effects": {"items": {"credits": -40, "scrap": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "Watch the auction and bid on the small lots (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "You bid on a dull little crate and win it for fifteen. It contains, to your great relief, a perfectly good spare coil, and a sandwich. The ring applauds your restraint.", "effects": {"items": {"credits": -15, "copper": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "[Corvin] Raise your card and bid by the eye.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin sits up, raises a single feather, and bids on a lot nobody else has noticed: a small sealed locker in the corner of the hold. The ring is puzzled. The hammer drops. Your Corvin opens it, on the spot, and out spills a purse of old Concord gold, a fistful of Lumen crystal and a note that says 'I KNEW YOU'D FIND IT'. The auctioneer, a very old Corvin, bows from the bow. 'Twelve years I have been hiding that,' he says. 'Come back any time.'", "effects": {"items": {"credits": 75, "crystal": 4, "silicon": 3}, "rep": {"concord": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "[Fenn] Run a side-bet on every lot.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn works the ring like a gambler works a crowd, taking half-bets on lots and counter-bets on bids. By the end of the auction the Fenn has made a modest killing, and the auctioneer has been quietly asked to move to a different ring. The Corvin tip their hats.", "effects": {"items": {"credits": 60}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "Admire the wreck and leave.", "outcomes": [
+          {"weight": 100, "text": "You watch three lots go. The wreck is a thing of beauty. You leave without a bid, and feel only a little cheated.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "roost_missing_medal", "type": "patrol", "weight": 8, "once": false, "requires": {"region": "corvin_roost", "jumps_min": 2},
+      "text": "A Concord patrol has pulled alongside, with a very polite hail. 'Routine inspection,' says the officer. 'A medal of the Third Fleet was lost from a ceremony on Meridian two days ago. We are checking vessels in the area.' She looks at your ship, politely. 'It is not an accusation. It is simply a bright, shiny, very valuable thing, and we are in a region that has a reputation.' In your hold, in a dusty corner, a small cloaked figure is trying very hard to look like a crate.",
+      "choices": [
+        {"text": "Let them search the hold.", "outcomes": [
+          {"weight": 65, "text": "They search it. They find nothing, apart from the small cloaked figure, who has switched, with great self-possession, to looking like a barrel. The officer sighs, writes a form, and leaves. The figure unfolds, hands you something bright, and says 'It was only a loan'. You return it to a patrol drone by hand.", "effects": {"rep": {"concord": 2}, "crew_hp": -5}},
+          {"weight": 35, "text": "They search it with great thoroughness and find nothing at all. The officer apologises, gives you a form and a pen, and asks you to write a short note on your feelings about it.", "effects": {"rep": {"concord": 1}}}
+        ]},
+        {"text": "Refuse the search.", "outcomes": [
+          {"weight": 100, "text": "The officer's voice cools. 'That is a pity,' she says, and the patrol's guns come round with the slow patience of a cat.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Corvin] Explain that nobody here has touched it.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin rises to their full height, ruffles, and delivers a speech about the Corvin code: that a thief takes what is not given, and a trader takes what is not guarded, and the Third Fleet's medal was, by any honest reading, 'placed unguarded in a public hall, and therefore up for sale'. The officer opens her mouth. Closes it. Opens it again. 'That is... astonishingly wrong,' she says. 'But I cannot argue with the way you said it.' She waves you on.", "effects": {"rep": {"concord": 1}, "items": {"credits": 25}, "crew_hp": 5}}
+        ]},
+        {"text": "[Warden-frame] Request that they stand down.", "requires": {"species": "warden_frame"}, "outcomes": [
+          {"weight": 100, "text": "Your Warden-frame steps to the comm, lens steady, and in a calm and level voice issues the Lumen gatekeeper's formal clearance. The officer is silent. Then, 'Ma'am,' she says, in a voice like a salute. 'Apologies for the trouble.' The patrol sheers off. The cloaked figure in the hold lets out a long breath and slides a small bright something under a crate.", "effects": {"rep": {"lumen": 1, "concord": 1}, "items": {"credits": 20}}}
+        ]}
+      ],
+      "after_win": {"text": "The patrol cutter drifts, venting. Her hold has the missing medal in a drawer, a number of other missing medals, and a surprising amount of cheese. You take what is useful, and give back the medal, from a safe distance.", "effects": {"items": {"scrap": 40, "credits": 40}, "rep": {"concord": -1}}}
+    },
+    {
+      "id": "roost_glitter_raiders", "type": "pirate", "weight": 8, "once": false, "requires": {"region": "corvin_roost", "jumps_min": 2},
+      "text": "The raiders are dressed as magpies. Every one of them wears a feather cloak and a polished brass beak, and the cutter's hull is covered in mirrors and glittering foil, so that she flashes and winks like a chandelier. 'We only want the shiny,' says the captain, in a voice like a hawker's. 'Your lamp. Your buttons. Your ring. Hand it over, and you can keep the rest.' Behind her, on the bridge, a real Corvin is sitting in a corner with his head in his hands.",
+      "choices": [
+        {"text": "Hand over the shiny (15 credits and a little pride).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "You hand over your lamp, your buttons and a spare ring. The captain bows. They go off in a shower of glitter, a great winking cloud, and the real Corvin gives you a look of deep apology as they pass.", "effects": {"items": {"credits": -15}, "rep": {"clans": -1}, "crew_hp": -5}}
+        ]},
+        {"text": "Fight them.", "outcomes": [
+          {"weight": 100, "text": "The captain sighs. 'Not even a sweet word,' she says. The guns come round.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Corvin] Call out the fake beaks.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin takes the comm and says, in a clear and very cold voice, that the brass beaks are not real, the cloaks are not real, and the captain has never in her life been closer to a Corvin than the cutter's hull. A pause. The real Corvin in the corner looks up. 'I told them,' he says. 'I told them.' The crew of the cutter, ashamed, give you their entire loot and slink off to remove their beaks.", "effects": {"items": {"credits": 55, "silicon": 4, "scrap": 25}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Prismatic] Dazzle them with your own glow.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic steps into the lock and lets their core brighten, a clean, wide, blue-white glow, the brightest thing in the lane. The raiders gape. The captain drops her beak. 'We... are not worthy,' she says, falling to her knees, 'of such a shine.' She hands over the whole cutter's hold in tribute and flees.", "effects": {"items": {"credits": 40, "crystal": 3}, "rep": {"lumen": 1}}}
+        ]}
+      ],
+      "after_win": {"text": "The cutter drifts, winking weakly. In her hold is a magpie's treasure of everything that glittered: buttons, foil, lenses, a hundred lamps and a surprising amount of good brass. The real Corvin in the corner thanks you in a whisper, and asks for his own beak back.", "effects": {"items": {"scrap": 35, "credits": 45}}}
+    },
+    {
+      "id": "roost_pod_and_crystal", "type": "distress", "weight": 8, "once": false, "requires": {"region": "corvin_roost"},
+      "text": "An escape pod is drifting, tumbling slowly, with a lamp flashing SOS in a rhythm that is very slightly wrong. Inside is a Corvin, alone, in a good coat, clutching to their chest a crystal the size of a head. They have been holding it for eleven days. They have not let go to eat. The pod's air is thin; the pod's fuel is long gone; and the Corvin's eyes, when they find yours through the window, are huge and bright with the awful clear certainty of someone who would rather die than put it down.",
+      "choices": [
+        {"text": "Take the pod aboard and feed them.", "outcomes": [
+          {"weight": 100, "text": "It takes an hour to coax them from the pod and four to persuade them to eat anything. They eat one-handed, the crystal in the crook of the other arm. At the end they give you a small bright button, which seems, from their face, to be a great deal.", "effects": {"items": {"credits": 20}, "crew_hp": 5, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Ask what the crystal is for.", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "A long, shaky account follows, in clicks. The crystal is a wedding gift, for a sister who has been waiting for a fortnight. The Corvin had been carrying it across the Roost, when the pod's engine blew. You tow the pod to the sister's mooring, and are greeted by a crowd, a cake, and a very pleased bride.", "effects": {"items": {"fuel": -1, "credits": 55, "crystal": 1}, "rep": {"concord": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "[Corvin] Offer to hold it for them.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin goes across to the pod, kneels, and holds out both hands. A long silence. The stranded Corvin looks at the open hands, then at the crystal, then at your Corvin, and slowly, as one lowering a child into a cot, places it in the offered palms. Then they collapse, sobbing, and are caught. Your Corvin carries the crystal carefully back to the lock, the stranger in their other arm. The sister arrives at the mooring and the wedding goes ahead. You are paid very well, and given a place at the table.", "effects": {"items": {"credits": 70, "crystal": 3}, "rep": {"concord": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Relay the signal.", "outcomes": [
+          {"weight": 100, "text": "You relay the signal and fly on. The pod grows small, still tumbling, the lamp still flashing in the slow wrong rhythm.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "roost_cloak_stall", "type": "trader", "weight": 7, "once": false, "requires": {"region": "corvin_roost"},
+      "text": "A tailor's stall in a gutted shuttle, hung with cloaks from floor to ceiling: feather cloaks, fur cloaks, foil cloaks, a cloak made of a hundred tiny mirrors that clinks softly in the draught. A Corvin tailor in a monocle works at a bench, sewing pockets into a coat. 'Pockets,' she says, without looking up. 'The whole art of the thing is pockets. A cloak with no pockets is a tent. A cloak with one pocket is a thought. A cloak with twenty-three pockets,' and she holds it up, 'is a way of life.'",
+      "choices": [
+        {"text": "Buy a cloak with plenty of pockets (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "She fits you with ritual care, tucking a hem here and a pocket there. You walk out in a coat that clinks, with twenty-three pockets of different sizes, in which, by the end of the week, your crew have found two forgotten coins, a nail, and a half-eaten pie.", "effects": {"items": {"credits": -30, "scrap": 10}, "crew_hp": 5}}
+        ]},
+        {"text": "Trade a spare part for a cloak (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
+          {"weight": 100, "text": "The tailor weighs your scrap in her hand, checks it for shine, and, after some thought, accepts. In return she produces, from under the bench, a small foil-lined bag with a drawstring that clicks. It holds a surprising amount.", "effects": {"items": {"scrap": -20, "copper": 15, "silicon": 2}}}
+        ]},
+        {"text": "[Corvin] Be fitted by the tailor.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin is measured, turned round, pinned, tucked, and tailored. The tailor circles twice and steps back, eyes wet. 'Perfect,' she says. 'Perfect. They have the shoulders.' She will not take a coin. Instead she folds a gleaming new cloak into your Corvin's arms and presses three pockets-worth of silver thread, crystal and bright buttons into your hands. 'Come back,' she says. 'I will make you another.'", "effects": {"items": {"credits": 35, "silicon": 3, "crystal": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Watch her sew.", "outcomes": [
+          {"weight": 100, "text": "She stitches a pocket into the lining of a coat in four moves, so fast the needle is a blur. When it is done, she holds it up to the light, and the whole stall sighs.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    }
+  ]}

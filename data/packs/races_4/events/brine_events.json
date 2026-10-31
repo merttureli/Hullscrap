@@ -1,0 +1,68 @@
+{"events": [
+    {
+      "id": "brine_union_hall", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_meridian"},
+      "text": "Local Nine of the Dock Workers' Union keeps a hall at the back of Meridian's cargo deck: a long room of benches, a kettle the size of a drum, a hiring board, and a banner that says WE MOVE THE WEIGHT. The Brine are everywhere, broad as doors in their slate-blue shells, one huge work claw each and one small fine hand, the great claw resting on the table while the small one stirs the tea. A steward with a clipboard in the small hand looks you up and down. 'Lifting, lashing or loading?' she asks. 'Or just looking? Looking's free.'",
+      "choices": [
+        {"text": "Ask what the board has on it.", "outcomes": [
+          {"weight": 100, "text": "The board is thick with chits: a pallet to a ship in berth nine, a crane to be coaxed down, a drum of coolant that wants a Brine to stand on it. You take a lashing job. It is easy, boring, honest work, and the union pays on the day. You come away with credits and a soft ache in the shoulders.", "effects": {"items": {"credits": 30}, "crew_hp": -5, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Buy the hall a round of tea (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "The kettle is lifted by two Brine and tipped, with the gravity of a ceremony. It goes round the benches, claw to claw. By the end half the hall has told you its troubles, and one of the old hands tells you, kindly, where the best price on fuel is in the lower bay.", "effects": {"items": {"credits": -15, "fuel": 2}, "crew_hp": 5, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Hire a hand from the bench (90 credits).", "requires": {"credits": 90, "not_flag": "brine_hall_hired"}, "outcomes": [
+          {"weight": 100, "text": "A broad, calm Brine in a patched jacket rises from the bench and tucks a rolled mattress under the small arm. 'Corrigan,' they say, and hold out the great claw, carefully, to be shaken. 'I carry. I lash. I load. I do not do tricks.' The steward stamps a card and hands it across, along with a small speech about the proper order of lifting and the proper way to be thanked.", "effects": {"items": {"credits": -90}, "recruit": {"species": "brine", "name": "Corrigan"}, "flag": "brine_hall_hired"}}
+        ]},
+        {"text": "[Brine] Show your union card.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine slaps the great claw on the table and shows the steward a worn card with a thumbprint on it. The hall goes quiet. 'Seventh generation,' murmurs someone. A bench is cleared. A cup is filled. The steward takes the card, reads the back, and nods slowly. 'You will be given the good berth,' she says. 'And a share of the day's lifts, since we are short.' You leave with a pocketful of credits, a ration chit and a cheerful wave from the entire hall.", "effects": {"items": {"credits": 55, "fuel": 1}, "crew_hp": 10, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Browse and leave.", "outcomes": [
+          {"weight": 100, "text": "You look at the banner for a while. It's a good banner. On your way out a Brine in a hard hat holds the door with the great claw as though it weighed nothing.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "brine_picket_line", "type": "patrol", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "A Concord patrol cutter is stopped dead in the lane, her engines idling, facing a line of ships hung across the route nose to tail: tugs, lighters, a floating crane, two lifeboats and a barge. On the barge hangs a banner: STRIKE. Brine climb about its deck in hard hats, great claws raised, chanting something rhythmic and well rehearsed. The cutter's captain hails you with the long-suffering manner of a man who has been stuck here for two hours. 'You can go round,' he says. 'It's only another six jumps. Or you can talk to them.'",
+      "choices": [
+        {"text": "Go round the picket (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "It is a long way. The captain thanks you for your cooperation in a voice like paper. You rejoin the lane an hour late and a little grumpy, with the sound of the chant still in your hull.", "effects": {"items": {"fuel": -1}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Ask the picket what they want.", "outcomes": [
+          {"weight": 60, "text": "A steward in a hard hat takes the comm. The list is long and mostly fair: a second tea break, a broken crane mended, and a decent bed in berth four. You relay it to the captain. He sighs, and grunts, and writes it down, and the Brine let you through with a cheer and a bag of dock rations.", "effects": {"items": {"scrap": 15, "credits": 20}, "rep": {"concord": 1}}},
+          {"weight": 40, "text": "The steward takes the comm, listens, and says, with great courtesy, 'Come back when you have read our demands.' The captain says the same, more bluntly. An hour later the picket hasn't moved, and neither have you.", "effects": {"crew_hp": -5}}
+        ]},
+        {"text": "[Brine] Join the line for an hour.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine climbs onto the barge, great claw high, and falls into the chant as if born to it, which in a sense they were. The picket cheers. A chair is found. After an hour the captain, outflanked by a very polite wall of shell and solidarity, calls the matter closed and sends his own quartermaster over with a letter of passage. The Brine send you off with a ration crate, a Local Nine pin, and a standing invitation to any berth in the sector.", "effects": {"items": {"credits": 40, "scrap": 25}, "rep": {"concord": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Warden-frame] Ask the captain to stand down.", "requires": {"species": "warden_frame"}, "outcomes": [
+          {"weight": 100, "text": "Your Warden-frame stands at the patrol's comm, lens steady, and says in its calm level voice: 'Gentlemen, a picket is a form of gate. A gate is to be respected.' A silence on the line. The captain, who has never been lectured by a gatekeeper, finds that he agrees. He stands the cutter down. The Brine, delighted, send over a crate of tinned fish and a pamphlet.", "effects": {"items": {"credits": 30, "polymer": 10}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Wait for them to sort it out.", "outcomes": [
+          {"weight": 100, "text": "You wait, with the engines cold, until a deal is struck. It takes three hours and a plate of biscuits.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "brine_stuck_gantry", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "A cargo gantry has seized in the middle of a lift, with a container the size of a house hanging over the workers' deck by a single stubborn latch. Fourteen dockers are trapped below it, working to shore up the deck, as the latch slowly gives. The foreman is on the comm, level and cool. 'We can hold her a few minutes more,' she says. 'But the latch is going. Anyone with a clamp, a crane or a fine pair of shoulders, now would be the time.'",
+      "choices": [
+        {"text": "Tractor the container clear (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 65, "text": "You lock the beam on the container and lift. The latch snaps, the container swings, you catch it in the nick of time, and swing it out over the dark. Fourteen dockers cheer in a cloud of grit.", "effects": {"items": {"fuel": -1, "credits": 45}, "rep": {"concord": 1}}},
+          {"weight": 35, "text": "The container swings wild. You get it clear, but the swing takes a gantry arm with it, and the dockers have to run. Nobody is hurt. The foreman is gracious, in a tight sort of way.", "effects": {"items": {"fuel": -1, "credits": 20}, "hull": -5}}
+        ]},
+        {"text": "Send a crew to shore up the deck.", "outcomes": [
+          {"weight": 55, "text": "You throw all the spare plate and every pair of hands into the deck-shoring, and the dockers hold, and the latch holds, long enough for the rescue crane to arrive. A close, sweaty business.", "effects": {"items": {"credits": 30, "scrap": -10}, "crew_hp": -10, "rep": {"concord": 1}}},
+          {"weight": 45, "text": "The latch goes before the shoring is done. The container comes down on the far end of the deck, on nobody, but the shock throws two of yours into a wall.", "effects": {"crew_hp": -20, "items": {"credits": 20}}}
+        ]},
+        {"text": "[Brine] Take the weight.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine walks out under the hanging container, plants both feet, braces the great claw against the latch, and takes the weight. Sparks spray from the plating. The dockers' foreman stops speaking. Your Brine holds. Holds. A minute passes, and then another, and then, with a groan, the crane arrives and takes the load. Your Brine sets down the claw and examines it with interest, as if surprised it still worked. The dockers lift them on their shoulders and carry them round the deck. The foreman kisses them on the shell.", "effects": {"items": {"credits": 65, "titanium": 3}, "rep": {"concord": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Grundl] Hold the latch with your back.", "requires": {"species": "grundl"}, "outcomes": [
+          {"weight": 100, "text": "Your Grundl crosses the deck in four strides, sets a shoulder under the latch and, with a rumble of simple effort, holds it. The Brine look up in respect. 'Hmm,' says the foreman. 'Not bad for a freighter.' The gantry is freed in twenty minutes and your Grundl is bought a drink by fourteen dockers, who then fall asleep on them.", "effects": {"items": {"credits": 45, "scrap": 20}, "rep": {"concord": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Relay the call and move on.", "outcomes": [
+          {"weight": 100, "text": "You relay the call to the nearest dock and fly on. On the comm, the foreman says, quite calmly, 'Understood.'", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    }
+  ]}

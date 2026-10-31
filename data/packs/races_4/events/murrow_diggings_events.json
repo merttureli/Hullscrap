@@ -1,0 +1,123 @@
+{"events": [
+    {
+      "id": "diggings_burrowgate_dock", "type": "station", "weight": 10, "once": false, "requires": {"region": "murrow_diggings"},
+      "text": "Burrowgate is a hole in a rock with a lip round it and a sign: MIND THE TUNNEL. Inside, it is warm and dusty and lit by a thousand small yellow lamps, a city of burrows laid out like a termite mound, with Murrow everywhere in dust-caked harnesses, trundling barrows, hauling sacks, arguing in sniffs. The dock-master is a very old Murrow with a ledger. He squints at your ship, then at your boots. 'Wipe them,' he says. 'Then you may buy something.'",
+      "choices": [
+        {"text": "Buy a dust-tea at the stall (10 credits).", "requires": {"credits": 10}, "outcomes": [
+          {"weight": 100, "text": "It is grey, gritty and surprisingly good. The stall-keeper watches you drink it with the anxious pride of someone who has made a thing for fifty years and has never been told. You are given a second cup for free.", "effects": {"items": {"credits": -10}, "crew_hp": 10}}
+        ]},
+        {"text": "Hire a young digger from the notice board (80 credits).", "requires": {"credits": 80, "not_flag": "diggings_hired"}, "outcomes": [
+          {"weight": 100, "text": "The board is a wall of scratched cards. One of them has a drawing of a claw. Hummock turns out to be a broad, shy Murrow with a mattock slung across the harness and a very small, very serious expression. 'I dig,' they say. 'I do other things as well. But the digging is the thing.' They put their bag in your hold, and a sandwich in your hand.", "effects": {"items": {"credits": -80}, "recruit": {"species": "murrow", "name": "Hummock"}, "flag": "diggings_hired"}}
+        ]},
+        {"text": "Ask for a tour of the lower galleries.", "outcomes": [
+          {"weight": 100, "text": "A lamp, a rope and a long way down. At the bottom is a lake of black water, a hall of hanging crystal, and a great flat seam of ore, gleaming. The guide lets you pick three pieces of the dross. They turn out to be good. She waves your thanks aside. 'It is only rock,' she says.", "effects": {"items": {"titanium": 3, "scrap": 15}, "reveal": "asteroid_field"}}
+        ]},
+        {"text": "[Murrow] Take a shift at the face.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow is down the nearest shaft before the dock-master can finish the sentence. By the end of the shift they are caked grey from head to claw and have cleared more rock than any three of the day crew. The foreman writes something in the ledger, slowly, with the air of an event. 'Pay,' he says. 'Double. And a lamp.'", "effects": {"items": {"credits": 55, "titanium": 4}, "crew_hp": 5}}
+        ]},
+        {"text": "Wipe your boots and look round.", "outcomes": [
+          {"weight": 100, "text": "You wipe your boots. It is a very clean dock, for a rock. On the way out, a small Murrow offers you a sandwich, wrapped in a leaf, with a solemn nod.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "diggings_bore_race", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"region": "murrow_diggings"},
+      "text": "It is the Quarterly Bore, and the whole colony is out for it. Six teams of Murrow stand at the foot of six identical rock-faces, with six identical stacks of timber and a clock on a pole. A drum rolls, a flag drops, and six sets of claws begin to move. Rock goes everywhere. A crowd of children bets sweets on the favourite. A rather portly Murrow in a sash is acting as judge, and is looking about for a visitor to hold the flag. 'You,' he says. 'You look neutral.'",
+      "choices": [
+        {"text": "Hold the flag, and watch.", "outcomes": [
+          {"weight": 100, "text": "You hold the flag. You drop it. A cloud of dust goes up, six teams vanish into it, and five minutes later someone emerges with a trophy and a sneeze. The judge thanks you, awkwardly, and pays you a dish of the prize ore for your trouble.", "effects": {"items": {"titanium": 2, "credits": 15}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Bet on the favourite (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 45, "text": "The favourites win, in a landslide, and the children cheer. You collect with the grace of a person who has put money on a mole.", "effects": {"items": {"credits": 35}}},
+          {"weight": 55, "text": "The favourites strike a lode of soft rock and finish their tunnel in a dead heat with the underdogs, who win on a technicality. The children are devastated. You are poorer.", "effects": {"items": {"credits": -30}}}
+        ]},
+        {"text": "[Murrow] Take the empty seventh bench and bore.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow strips off their harness, tosses it to you and vaults to the seventh face. For the next four minutes they are a blur. Dust rises in a pillar. The crowd goes quiet, then very loud. They finish first by a full body length, to the delight of the children and the sorrow of the favourites. The judge awards them the golden mattock, a tin one, and the winning purse.", "effects": {"items": {"credits": 65, "titanium": 5}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Drakkin] Challenge the winning team to a brawl.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Drakkin cracks their knuckles and steps up. The Murrow look at each other. Nobody in the colony has ever been challenged to a brawl by a visitor. After a long sniff, they agree. The match lasts eleven seconds and ends with a draw, a bow, and a feast. 'Come back,' says the champion, 'and we will do it again.'", "effects": {"items": {"credits": 40, "titanium": 3}, "crew_hp": -5, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Watch from the edge of the crowd.", "outcomes": [
+          {"weight": 100, "text": "You watch the bore from a safe distance. At the end a child gives you half a sweet, with great ceremony, and goes off to tell its parents.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "diggings_claim_jumpers", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "murrow_diggings", "jumps_min": 2},
+      "text": "Rustfangs have a drill rig on the lip of a Murrow claim and are grinding it open like a tin. The Murrow claim-holders stand in a thin line at the edge, in their harnesses, with picks and one rather gentle shovel. The Rustfang boss leans on the rig with a smile that is all gaps. 'Finders keepers,' he says. 'You can have a share. Or a lift out of here, with a limp.' He looks at your ship. 'Or you can have a share.'",
+      "choices": [
+        {"text": "Drive the jumpers off.", "outcomes": [
+          {"weight": 100, "text": "The boss tuts. 'Everyone's a hero,' he says, and the rig is swung round to face you.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Take the share and keep out of it (rep -2).", "outcomes": [
+          {"weight": 100, "text": "He gives you a heavy bag of ore, off the Murrow's own seam. The Murrow stare at you across the gap, without anger, which is worse. You take the bag and go.", "effects": {"items": {"titanium": 6, "scrap": 25}, "rep": {"clans": -2}, "crew_hp": -5}}
+        ]},
+        {"text": "[Murrow] Tell the claim-holders how to drop the roof.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow shouts down a line of sniffs and clicks to the Murrow on the lip. A moment later, below the rig, there is a deep and unhappy sound. The ground sags. The rig lists, and sinks, with the jumpers scrambling out of the cab and up the slope, and the Murrow, in a neat line, step back and watch. The boss ends the day with a dusty face and a lot of new respect. The Murrow pay with a lump of the good ore.", "effects": {"items": {"titanium": 7, "credits": 40}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Basalt] Stand on the rig.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt walks across the lip, climbs onto the rig, and sits on it. The rig stops. A grinding sound, a puff of smoke, and the boss, who is no fool, looks at the sitting stone man and decides that it is a good day for going home. The Murrow queue to shake the Basalt's hand. It takes some time.", "effects": {"items": {"titanium": 4, "credits": 25}, "rep": {"clans": 1}}}
+        ]}
+      ],
+      "after_win": {"text": "The rig sits dead on the claim lip, and the Murrow, shy and grateful, come out with sacks. They do not say much. They stack the sacks neatly by your airlock and go back in. There is a lot of ore.", "effects": {"items": {"titanium": 5, "scrap": 30}, "rep": {"clans": 2}}}
+    },
+    {
+      "id": "diggings_filter_failure", "type": "distress", "weight": 8, "once": false, "requires": {"region": "murrow_diggings"},
+      "text": "The call is a cough. Burrowgate's lower galleries are failing: the air filters are clogged with a century of rock-dust, and the Murrow, who breathe it all day, are beginning to feel it. A dozen children are in the lower gallery, sleeping. The shaft-boss on the comm sounds hoarse and embarrassed. 'It's nothing,' she says. 'A few filters. We just seem to be out of the stuff the filters are made of.'",
+      "choices": [
+        {"text": "Give them polymer for new filters (15 polymer).", "requires": {"items": {"polymer": 15}}, "outcomes": [
+          {"weight": 100, "text": "They fall on the polymer like a long-lost friend. By the end of the shift, the filters have been cut and fitted and the air in the lower galleries has cleared to a clean pale gold. The children sleep through the whole thing. The shaft-boss presses a sack of ore on you, shyly.", "effects": {"items": {"polymer": -15, "titanium": 5, "credits": 30}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Share your own air (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You run a hose between your scrubbers and the shaft, and for the night the lower galleries breathe on your lungs. By morning, the Murrow have the filters patched with scrap and sticky tape and a great deal of professional pride. They give you a share of the day's find.", "effects": {"items": {"fuel": -1, "titanium": 3, "credits": 25}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Murrow] Dig a new vent from the surface.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow sinks a claw in the rock above the failing gallery and starts to dig. It takes the better part of two hours. When the vent is through, there is a cough, a sigh, a long gold breath of clean air coming down, and a sleepy line of children rubbing their eyes in the dark. The shaft-boss cannot speak. She presses a heavy lamp into your Murrow's claw: it has a name scratched on the base, and the name is hers.", "effects": {"items": {"titanium": 6, "credits": 45}, "rep": {"clans": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Sporeling] Grow a moss filter.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling spreads their hands and sheds a soft cloud of spores across the failing vents. In an hour the vents are lined with a fine green moss that drinks the dust and breathes out clean. The Murrow stare, then clap, politely, with their claws. They say it is the best thing to happen to the lower galleries in a century.", "effects": {"items": {"titanium": 4, "credits": 35}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Relay the call.", "outcomes": [
+          {"weight": 100, "text": "You relay the call to the nearest station and press on. The shaft-boss thanks you in a cough.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "diggings_dead_ore_barge", "type": "wreck_field", "weight": 8, "once": true, "requires": {"region": "murrow_diggings", "jumps_min": 2},
+      "text": "An ore barge has died in the lane, split along a seam, its hold open to the dark like a lunchbox. The ore is still in it: a hundred tonnes of grey, glittering rock, held in place by the barge's own frozen ribs. A few Murrow work crews are already on it, patching the hull with flat steel plates and arguing over who has the claim. In the pilot's chair, in the dark, a small shape is curled up with its claws over its eyes. It has been there, evidently, for some time.",
+      "choices": [
+        {"text": "Haul out a share of the ore.", "outcomes": [
+          {"weight": 65, "text": "The Murrow let you take a fair share, after much sniffing and a very formal count. You load three crates before they close the books.", "effects": {"items": {"titanium": 6, "scrap": 25}}},
+          {"weight": 35, "text": "A rival crew shows up and the argument becomes loud. You take what you can in the confusion. It is less than fair, but it is yours.", "effects": {"items": {"titanium": 3, "scrap": 15}, "crew_hp": -5}}
+        ]},
+        {"text": "Wake the one in the pilot's chair.", "outcomes": [
+          {"weight": 100, "text": "It is a very young Murrow, grey-faced with dust and cold, who has been sitting here since the barge died, waiting for someone to come. They stand up slowly, shake out the harness, and fix on you with two tiny black eyes. 'Culm,' they say, hoarsely. 'I can dig.' They look at your ship. 'I think I have always wanted to see the other side of the rock.'", "effects": {"recruit": {"species": "murrow", "name": "Culm"}}}
+        ]},
+        {"text": "[Murrow] Call into the barge in the old tongue.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow cups their claws round their mouth and calls into the dark: a long low rumble, with a click at the end. From the pilot's chair comes an answering click, small and cracked. Then the shape unfolds, a very young Murrow, and walks down the barge like someone walking out of a dream. Your Murrow takes them into a great warm hug. When they come aboard they carry a bag of the barge's best ore, which the other crews, watching, let them take.", "effects": {"recruit": {"species": "murrow", "name": "Burl"}, "items": {"titanium": 8, "scrap": 20}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave the barge to the crews.", "outcomes": [
+          {"weight": 100, "text": "You leave the Murrow crews to their quarrel. The small shape in the chair does not move, and you do not wake it.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "diggings_hum_below", "type": "anomaly", "weight": 7, "once": false, "requires": {"region": "murrow_diggings", "jumps_min": 3},
+      "text": "The colony has dug into something. A gallery near the bottom of the rock opens on a wall that hums, a low, endless, sweet note, like a finger on the rim of a glass. The Murrow have sealed it with three doors and a sign. DO NOT DIG HERE. The colony's elders stand in front of it with their claws folded, very quiet, listening. One of them has sat down on the floor with their back to the wall and is gently weeping. 'It sounds,' says the old foreman, 'like my mother.'",
+      "choices": [
+        {"text": "Listen to the wall for an hour.", "outcomes": [
+          {"weight": 100, "text": "You sit with the elders and listen. The note is steady, huge and kind. It does not change, and does not ask. When you leave, the foreman gives you a sack of ore and a squeeze of the arm, and you carry the note with you for the rest of the day.", "effects": {"items": {"titanium": 3}, "crew_hp": 10}}
+        ]},
+        {"text": "Open the doors and take a core sample.", "outcomes": [
+          {"weight": 50, "text": "The doors give. The note grows, sweet and huge, until it fills the whole gallery and every one of your crew has to sit down. A shining shard comes out of the wall and drops into your hand, warm as an egg. The elders are not pleased.", "effects": {"items": {"plasma_cell": 1, "crystal": 2}, "rep": {"clans": -2}, "crew_hp": -5}},
+          {"weight": 50, "text": "The note stops. The wall is quiet, and a little dull. The elders turn from you, slowly, and you understand that something has been taken that cannot be put back.", "effects": {"rep": {"clans": -2}, "crew_hp": -10}}
+        ]},
+        {"text": "[Murrow] Put your claws on the wall and hum back.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow lays both claws flat against the humming wall and, after a long silence, hums back the same note. For a moment nothing. Then the wall turns warm, the note rises, and the whole gallery rings like a bell. The elders sit down all together. When it is over a seam in the wall has opened by itself, a single bright vein of pure crystal, laid bare like a gift. The foreman takes a piece and puts it in your Murrow's hand. 'It is for you,' he says. 'It knew.'", "effects": {"items": {"crystal": 5, "titanium": 5}, "rep": {"clans": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "[Prismatic] Sing the wall a harmony.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic steps up to the wall and hums a third above its note. The wall brightens. The two notes hold, a long still chord of ore and crystal, and the Murrow lean on one another and listen. When it ends your Prismatic is glowing faintly from within. 'It is a very old song,' they say. 'It is only the rock, remembering the Lumen.'", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 1}, "crew_hp": 10}}
+        ]}
+      ]
+    }
+  ]}
