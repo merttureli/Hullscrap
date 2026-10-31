@@ -5,6 +5,9 @@ extends Node2D
 ## with a dark outline. A "+3 scrap" pop floats up from the mouth that took a piece, an intake plays its `pulling` animation
 ## while a piece is drawn in (a child node over the ship does both), the HUD's log shows debris.hud_line(), and the starfield drifts
 ## the way the current runs. frame(dt) does one tick without the scene tree, so tests can drive it.
+## In sector space (the Sector node, sector_view.gd, is flying) the debris is the sector's (DriftDebris.for_sector: its
+## current, density and theme), lives in sector px round the flying ship (its frame and velocity each tick), keeps
+## drifting through a fight in the sector, and the sky is the sector view's.
 
 const DriftDebris = preload("res://scripts/space/drift_debris.gd")
 const Art = preload("res://scripts/view/art.gd")
@@ -15,17 +18,20 @@ const POP_LIFE := 1.0  ## seconds a "+N material" pop floats and fades
 const POP_RISE := 48.0  ## world px it rises in that time
 const STAR_PARALLAX := 0.6  ## the nearest stars drift this fraction of the debris' screen speed
 const OUTLINE := Color(0.05, 0.06, 0.09)
+const MIN_PX := 6.0  ## screen px a piece is drawn at the least, so debris still shows zoomed far out
 
 var sim: Node  ## the ShipSim, for the player's ship
 var build: Node  ## the BuildMode: play mode is build_on == false, a fight sets combat
 var cam: Camera2D
 var starfield: Node  ## Space/Starfield: its drift follows the current in play mode
+var sector: Node  ## the Sector node (sector_view.gd), if the scene has one
 var debris: DriftDebris  ## made when the ship first shows, again when the player's ship is replaced
 var view_size := Vector2(1600.0, 900.0)  ## the viewport, screen px (set every frame in the tree)
 var view_zoom := Vector2(0.5, 0.5)
 var view_centre := Vector2.ZERO  ## the world point at the middle of the screen
 var pops: Array = []  ## {pos, text, age}
 var _ship: RefCounted
+var _sector_of = null  # the sector (sector.gd) the debris was made for, null on the build screen's own
 var _clock := 0.0
 var _sheets := {}  # art id -> SpriteSheet, or null when there is no art yet
 var _top: Node2D  # over the ship: the pulling mouths and the pops
@@ -39,6 +45,7 @@ func _ready() -> void:
 	build = get_node_or_null("../BuildMode")
 	cam = get_node_or_null("../Camera2D")
 	starfield = get_node_or_null("../Space/Starfield")
+	sector = get_node_or_null("../Sector")
 	if starfield != null:
 		_star_drift = starfield.drift
 	_glow = GlowLayer.new()
@@ -59,9 +66,14 @@ func _process(dt: float) -> void:
 	frame(minf(dt, 0.25))
 
 
-## Debris runs while the player is in play mode on their ship: not in build mode, not in a fight.
+## Debris runs while the player is in play mode on their ship: not in build mode, not in a fight (unless the fight is
+## in the sector).
 func active() -> bool:
-	return build != null and sim != null and sim.player_ship() != null and not build.build_on and not build.combat
+	return build != null and sim != null and sim.player_ship() != null and not build.build_on and (not build.combat or _flying())
+
+
+func _flying() -> bool:
+	return sector != null and sector.flying()
 
 
 ## One tick of `dt` seconds: step the debris when active, collect the pops, point the starfield.
@@ -73,16 +85,16 @@ func frame(dt: float) -> void:
 	if not on:
 		return
 	var ship = sim.player_ship()
-	if debris == null or ship != _ship:
+	var here = sector.current() if _flying() else null
+	if debris == null or ship != _ship or here != _sector_of:
 		_ship = ship
-		debris = DriftDebris.new(ship.rng_seed)
+		_sector_of = here
+		debris = DriftDebris.for_sector(here, ship.rng_seed) if here != null else DriftDebris.new(ship.rng_seed)
 		pops.clear()
-		debris.view_centre = view_centre
-		debris.view_half = view_size / view_zoom / 2.0
+		_place(ship)
 		debris.prewarm(ship)
 	_clock += dt
-	debris.view_centre = view_centre
-	debris.view_half = view_size / view_zoom / 2.0
+	_place(ship)
 	debris.step(ship, dt)
 	for e in debris.take_events():
 		pops.append({"pos": e["pos"], "text": e["text"], "age": 0.0})
@@ -90,10 +102,21 @@ func frame(dt: float) -> void:
 		p["age"] += dt
 	pops = pops.filter(func(p): return p["age"] < POP_LIFE)
 	if starfield != null:
-		starfield.drift = debris.current_vel() * view_zoom.x * STAR_PARALLAX
+		starfield.drift = debris.current_vel() * view_zoom.x * STAR_PARALLAX if here == null else Vector2.ZERO
 	queue_redraw()
 	if _top != null:
 		_top.queue_redraw()
+
+
+## Tell the debris where the view is and, in a sector, where the ship flies.
+func _place(ship) -> void:
+	debris.view_centre = view_centre
+	debris.view_half = view_size / view_zoom / 2.0
+	if _sector_of != null:
+		debris.frame = sector.ship_frame()
+		debris.frame_vel = sector.ship_velocity()
+		if not is_inside_tree():
+			debris.view_centre = debris.frame * (Vector2.ZERO if ship == null else ship.world_pos)
 
 
 # --- drawing -------------------------------------------------------------------------------------------
@@ -123,6 +146,7 @@ func _sheet(art_id: String) -> RefCounted:
 ## A piece from its art: a strip of tumble frames plays by itself; a one-frame sheet is turned with the piece.
 func _draw_art(sheet, p: Dictionary, quads: Array) -> void:
 	var k := DriftDebris.CELL / SpriteSheet.SRC_CELL
+	k *= maxf(1.0, MIN_PX / maxf(float(sheet.frame.x) * k * view_zoom.x, 0.01))
 	var size := Vector2(sheet.frame) * k
 	var t := float(p["age"]) + float(p["phase"])
 	var angle: float = p["angle"] if sheet.count <= 1 else 0.0
@@ -138,7 +162,7 @@ func _draw_art(sheet, p: Dictionary, quads: Array) -> void:
 ## No art yet: a lopsided polygon in the material colour (a crate and a canister are squarer), 1 screen px outline.
 func _draw_placeholder(p: Dictionary, t: Dictionary, px: float) -> void:
 	var col := Color(str(t["color"]))
-	var r: float = p["r"]
+	var r: float = maxf(p["r"], MIN_PX * 0.5 * px)
 	var n := 4 if t["id"] in ["sealed_crate", "fuel_canister"] else 7
 	var pts := PackedVector2Array()
 	for i in n:
@@ -156,6 +180,8 @@ func _draw_top() -> void:
 	if debris == null or not visible or _ship == null:
 		return
 	var quads := []
+	_top.draw_set_transform_matrix(debris.frame)  # the mouths are drawn in the ship's frame
+	_top_glow.transform = debris.frame
 	for uid in debris.pulling:
 		var inst: Dictionary = _ship.components.instances.get(uid, {})
 		if inst.is_empty() or inst["out_cells"].is_empty():
@@ -168,6 +194,7 @@ func _draw_top() -> void:
 		var in_sheet = Art.component(str(inst["id"]))
 		if in_sheet != null and in_sheet.has_anim("pulling"):
 			Visuals.draw_component(_top, _cells_rect(inst["cells"]), def, inst, DriftDebris.CELL, opts)
+	_top.draw_set_transform_matrix(Transform2D.IDENTITY)
 	_top_glow.show_quads(quads)
 	var font := ThemeDB.fallback_font
 	var size := roundi(18.0 / maxf(view_zoom.x, 0.05))

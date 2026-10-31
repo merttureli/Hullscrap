@@ -7,7 +7,7 @@ extends RefCounted
 ## `repair_breach` a shot-open wall (90), `repair_component` a malfunctioning or disabled part (80,
 ## +10 for a weapon, engine or shield in a fight; also a hull mount whose outside half is damaged and
 ## whose link is intact, from its inside half), `repair_crew` a hurt `mechanical` crew member (75,
-## done by any other crew member: beds do not heal them), `man_station` (50: the helm, and weapons,
+## done by any other crew member: beds do not heal them), `man_station` (50, out of a fight 45 but the helm: the helm, and weapons,
 ## shields and engines flagged manned), `clear_wreck` (30: the debris of a part that was shot to pieces,
 ## which gives back half its recipe). A job has `slots` places (two crew stack on a fire) and a place to
 ## stand next to it. Numbers are in data/crew.json.
@@ -161,7 +161,10 @@ func build_board(ship) -> void:
 		if inst["status"] in FAULTY or ship.outside_hurt(uid):
 			_add(b, _fix_job(ship, uid))
 		if family == "helm" or (bool(def.get("manned", false)) and family in j["man_station"]["families"]):
-			_add(b, _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)}))
+			var post := _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)})
+			if family != "helm" and not combat:
+				post["priority"] -= int(j["man_station"].get("idle_penalty", 0))  # nothing to shoot at: the helm first, the autopilot needs it
+			_add(b, post)
 	for w in ship.components.wrecks:
 		_add(b, _job("clear_wreck", "wreck:%d,%d" % [w["cells"][0].x, w["cells"][0].y], w["cells"], {"id": w["id"], "name": ship.components.def(w["id"]).get("name", w["id"])}))
 	for key in orders.keys():

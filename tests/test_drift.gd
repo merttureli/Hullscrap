@@ -49,7 +49,7 @@ func _next(c: Campaign) -> String:
 
 func _hop(c: Campaign, ship: Ship, n: int) -> void:
 	for i in n:
-		var r := c.jump(_next(c), ship)
+		var r := _jump(c, _next(c), ship)
 		check(r["ok"], "hop %d: %s" % [i, r["why"]])
 
 
@@ -146,7 +146,7 @@ func test_fog_lifts_round_the_new_node_after_a_jump() -> void:
 	var c := _camp(3)
 	var ship := _ship()
 	var to := _next(c)
-	check(c.jump(to, ship)["ok"], "jumped")
+	check(_jump(c, to, ship)["ok"], "jumped")
 	for o in c.neighbours(to):
 		check(c.is_known(o), "%s next to the new node is revealed" % o)
 	check(c.is_known("rusthold") and c.is_known(to), "the visited ones stay known")
@@ -179,10 +179,10 @@ func test_a_jump_costs_one_fuel_and_one_on_the_counter_along_a_lane_only() -> vo
 	for id in c.drift.ids():
 		if id != c.current and not c.drift.linked(c.current, id):
 			far = id
-	eq(c.jump(far, ship)["why"], "no lane there", "not along a lane")
+	eq(_jump(c, far, ship)["why"], "no lane there", "not along a lane")
 	eq([ship.inventory.count("fuel"), c.jumps], [6, 0], "nothing was spent")
 	var to := _next(c)
-	var r := c.jump(to, ship)
+	var r := _jump(c, to, ship)
 	check(r["ok"], "along a lane")
 	eq([ship.inventory.count("fuel"), c.jumps, c.current], [5, 1, to], "1 fuel, 1 jump, and we are there")
 	check(c.visited.has(to), "it is visited")
@@ -192,7 +192,7 @@ func test_no_fuel_refuses_the_jump() -> void:
 	var c := _camp(2)
 	var ship := _ship()
 	ship.inventory.counts.erase("fuel")
-	var r := c.jump(_next(c), ship)
+	var r := _jump(c, _next(c), ship)
 	check(not r["ok"] and r["why"] == "no fuel", "refused with: no fuel")
 	eq([c.jumps, c.current], [0, "rusthold"], "nowhere moved")
 
@@ -200,16 +200,16 @@ func test_no_fuel_refuses_the_jump() -> void:
 func test_a_drift_jump_costs_hull_integrity_instead_of_fuel() -> void:
 	var c := _camp(2)
 	var ship := _ship()
-	check(not c.jump(_next(c), ship, true)["ok"], "not while there is fuel")
+	check(not _jump(c, _next(c), ship, true)["ok"], "not while there is fuel")
 	ship.inventory.counts.erase("fuel")
 	var top := c.hull_max(ship)
 	var to := _next(c)
-	var r := c.jump(to, ship, true)
+	var r := _jump(c, to, ship, true)
 	check(r["ok"] and r["drift"], "allowed with an empty tank")
 	eq(c.hull_left(ship), top - 15, "15 hull integrity")
 	eq([c.jumps, c.current], [1, to], "and the jump counted")
 	c.hull_loss = top - 10
-	check(not c.jump(_next(c), ship, true)["ok"], "a hull too weak to survive it refuses")
+	check(not _jump(c, _next(c), ship, true)["ok"], "a hull too weak to survive it refuses")
 
 
 func test_the_dead_gates_are_dark() -> void:
@@ -218,7 +218,7 @@ func test_the_dead_gates_are_dark() -> void:
 	var ship := _ship()
 	var gate: String = "gate_1"
 	c.current = c.drift.neighbours(gate)[0]
-	var r := c.jump(gate, ship)
+	var r := _jump(c, gate, ship)
 	check(not r["ok"] and r["why"] == "The gate is dark.", "the gate is dark")
 	eq(ship.inventory.count("fuel"), 6, "and it costs nothing")
 
@@ -637,7 +637,7 @@ class FakeCombat extends Node:
 	var active := false
 	var entered := ""
 
-	func enter(path := "") -> String:
+	func enter(path := "", _opts := {}) -> String:
 		entered = path
 		active = true
 		return ""
@@ -689,26 +689,33 @@ func _click(node: Control, at: Vector2) -> void:
 	node._gui_input(e)
 
 
-func test_a_new_run_opens_with_ma_gantry_then_the_station_menu() -> void:
+## A new run in sector space: the map opens with nothing up (arrivals happen at a sector's POIs); flying to Rusthold's
+## beacon brings Ma Gantry's introduction over the sector, then the station menu, and then the sector again.
+func test_a_new_run_meets_ma_gantry_at_rustholds_beacon_then_the_station_menu() -> void:
 	var d := _screen()
 	var map: MapView = d["map"]
-	check(map.visible, "the map is open")
+	var c: Campaign = map.campaign
+	check(map.visible and not map.event_panel.visible and not map.station_panel.visible, "the map is open with no event on it")
+	_press(map, KEY_M)
+	check(not map.visible, "M closes the map")
+	var s = c.current_sector()
+	s.ship_pos = s.main_poi()["pos"]
+	map.open_poi(s.trigger(c, d["sim"].player_ship()), s)
+	check(map.visible and map.panel_only, "the panels open over the sector, with no map")
 	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "station_debt_intro", "Ma Gantry's introduction is up")
 	check(not map.station_panel.visible, "the menu waits")
 	eq(map.event_panel.choose(0), "", "'Sign me up'")
 	check(map.event_panel.page == "result" and map.event_panel.result["text"] != "", "the outcome is shown")
-	check(map.campaign.flags.has("met_ma"), "met_ma is set")
+	check(c.flags.has("met_ma"), "met_ma is set")
 	_press(map.event_panel, KEY_ENTER)
 	check(not map.event_panel.visible, "Enter goes on")
 	check(map.station_panel.visible and map.station_panel.station == "rusthold", "and Rusthold's menu opens")
 	_press(map.station_panel, KEY_ESCAPE)
-	check(not map.station_panel.visible and map.visible, "Esc leaves the menu for the map")
-	_press(map, KEY_M)
-	check(not map.visible, "M closes the map")
+	check(not map.station_panel.visible and not map.visible, "Esc leaves the menu, back to the sector")
 	_free_screen(d)
 
 
-func test_clicking_a_linked_node_jumps_and_a_far_one_does_not() -> void:
+func test_clicking_a_linked_node_spools_the_jump_and_a_far_one_does_not() -> void:
 	var d := _screen()
 	var map: MapView = d["map"]
 	var c: Campaign = map.campaign
@@ -716,8 +723,18 @@ func test_clicking_a_linked_node_jumps_and_a_far_one_does_not() -> void:
 	var ship: Ship = d["sim"].player_ship()
 	var to := _next(c)
 	_click(map, map.node_pos(to))
-	eq(c.current, to, "the click on a linked node jumped")
+	check(c.jump_status()["active"] and c.jump_status()["to"] == to, "the click on a linked node spools the jump drive")
+	check(not map.visible, "and the map makes way")
+	eq([ship.inventory.count("fuel"), c.jumps, c.current], [6, 0, "rusthold"], "nothing is spent yet")
+	eq(c.tick_jump(c.spool_time(), false, ship), "jumped", "8 s later it fires")
+	eq(c.current, to, "there")
 	eq([ship.inventory.count("fuel"), c.jumps], [5, 1], "1 fuel, 1 jump")
+	map.open()
+	_click(map, map.node_pos(_next(c)))
+	check(c.jump_status()["active"], "spooling again")
+	map.open()
+	_click(map, map.node_pos(c.jump_status()["to"]))
+	check(not c.jump_status()["active"], "the same node again cancels it")
 	map.event_panel.close()
 	map.station_panel.close()
 	var far := ""
@@ -872,6 +889,7 @@ func test_station_menu_trades_pays_repairs_and_recruits() -> void:
 	var st: StationPanel = map.station_panel
 	map.event_panel.close()
 	c.hull_loss = 40
+	c.roll_offers("rusthold", ship)  # docking rolls them
 	st.open("rusthold")
 	ship.inventory.add("credits", 2000)
 	var rows0 := st.rows(0)
@@ -933,11 +951,14 @@ func test_a_refused_dock_shows_the_dock_masters_words() -> void:
 	var d := _screen()
 	var map: MapView = d["map"]
 	map.event_panel.close()
-	map.campaign.rep["clans"] = -8
-	check(map.dock() == "The dock master turns you away.", "dock() is refused")
+	var c: Campaign = map.campaign
+	c.rep["clans"] = -8
+	check(map.dock() != "" and not map.station_panel.visible, "the map does not dock: you fly to the beacon")
+	var s = c.current_sector()
+	s.ship_pos = s.main_poi()["pos"]
+	map.open_poi(s.trigger(c, d["sim"].player_ship()), s)
 	check(not map.station_panel.visible, "no menu")
-	map._arrive()
-	check(map.event_panel.visible and map.event_panel.result["text"] == "The dock master turns you away.", "arriving shows it as a notice")
+	check(map.event_panel.visible and map.event_panel.result["text"] == "The dock master turns you away.", "reaching the station shows it as a notice")
 	_free_screen(d)
 
 
@@ -1030,3 +1051,13 @@ func test_a_ship_with_no_fuel_can_always_be_towed_home() -> void:
 	eq(c.debt, debt + Campaign.TOW_DEBT, "the tow goes on the debt")
 	eq(ship.inventory.count("fuel"), Campaign.TOW_FUEL, "and Ma throws in some fuel")
 	check(not c.tow(ship)["ok"], "no tow while you have fuel")
+
+
+## A jump along a lane the way the game makes one now (docs/CONTENT.md section 11): spool the drive and let it fire.
+## The jump() result ({ok, why, node, drift, notes}).
+func _jump(c: Campaign, to: String, ship, drift := false) -> Dictionary:
+	var r: Dictionary = c.start_jump(to, ship, false, drift)
+	if not r["ok"]:
+		return {"ok": false, "why": r["why"], "notes": []}
+	c.tick_jump(c.spool_time(), false, ship)
+	return c.last_jump
