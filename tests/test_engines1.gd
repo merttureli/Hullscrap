@@ -379,7 +379,7 @@ func _next(c: Campaign) -> String:
 func _hops(c: Campaign, ship: Ship, n: int) -> Array:
 	var out := []
 	for i in n:
-		var r := c.jump(_next(c), ship)
+		var r := _jump(c, _next(c), ship)
 		check(r["ok"], "hop %d: %s" % [i, r["why"]])
 		out.append(ship.inventory.count("fuel"))
 	return out
@@ -416,7 +416,7 @@ func test_with_an_empty_tank_a_long_burn_still_makes_the_free_half_and_then_stop
 	ship.inventory.counts.erase("fuel")
 	check(c.jump_block(_next(c), ship) == "", "no fuel, but the next jump is already paid for")
 	check(c.jump_block(_next(c), ship, true) != "", "so a drift jump is not on offer")
-	check(c.jump(_next(c), ship)["ok"], "it jumps")
+	check(_jump(c, _next(c), ship)["ok"], "it jumps")
 	eq(ship.inventory.count("fuel"), 0, "and the cargo is still empty")
 	eq(c.jump_block(_next(c), ship), "no fuel", "the second half needs a whole fuel")
 	check(not c.fuel_short(_fuel_ship(["longburn_mk2"])), "(a full tank is not short)")
@@ -569,3 +569,13 @@ func test_a_station_sells_a_listed_engine_into_the_cargo() -> void:
 	check(not c.buy(ship, "meridian", "engine_mk4")["ok"], "a Mk4 is not sold")
 	check(not c.buy(ship, "rusthold", "strafe_jets_mk1")["ok"], "and Rusthold does not sell Concord parts")
 	check(not c.buy(ship, "prism", "engine_scrap_mk2")["ok"], "nor the Prism Scrapper ones")
+
+
+## A jump along a lane the way the game makes one now (docs/CONTENT.md section 11): spool the drive and let it fire.
+## The jump() result ({ok, why, node, drift, notes}).
+func _jump(c: Campaign, to: String, ship, drift := false) -> Dictionary:
+	var r: Dictionary = c.start_jump(to, ship, false, drift)
+	if not r["ok"]:
+		return {"ok": false, "why": r["why"], "notes": []}
+	c.tick_jump(c.spool_time(), false, ship)
+	return c.last_jump

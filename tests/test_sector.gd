@@ -7,6 +7,7 @@ extends "res://tests/base_test.gd"
 
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Sector = preload("res://scripts/space/sector.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const DriftDebris = preload("res://scripts/space/drift_debris.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
@@ -467,7 +468,7 @@ func test_a_fight_spawns_an_enemy_design_near_the_poi() -> void:
 	var poi: Dictionary = s.pois[0]
 	var f: Dictionary = s.fight_spawn(c, "p0", "tier")
 	eq(f["poi"], "p0", "the POI")
-	check(str(f["design"]).begins_with("res://data/ships/") and FileAccess.file_exists(f["design"]), "a design that exists (%s)" % str(f["design"]))
+	check(Shipgen.from_spec(str(f["design"])) != null, "a generated ship that builds (%s)" % str(f["design"]))
 	var d: float = f["pos"].distance_to(poi["pos"])
 	check(d >= 250.0 - 0.01 and d <= 600.0 + 0.01, "250 to 600 px from the POI (%s)" % str(d))
 	eq(s.fight_spawn(c, "p0", "pirate_raider")["design"], "res://data/ships/pirate_raider.json", "a named design is that design")
@@ -481,20 +482,21 @@ func test_a_fight_spawns_an_enemy_design_near_the_poi() -> void:
 
 # --- the jump ------------------------------------------------------------------------------------------------
 
-func test_the_old_instant_jump_is_on_by_default() -> void:
-	eq(Campaign.config()["instant_jump"], true, "data/drift.json: instant_jump is true for now")
-	var c := Campaign.new(1)
-	check(c.instant_jump(), "so the campaign jumps at once")
+func test_the_light_speed_flow_is_on_and_the_old_instant_jump_still_works_when_asked() -> void:
+	eq(Campaign.config()["instant_jump"], false, "data/drift.json: instant_jump is off, the sector flow is on")
+	var off := Campaign.new(1)
 	var ship := _ship()
+	check(not off.instant_jump(), "so the campaign spools its jumps")
+	var why: Dictionary = off.jump(_next(off), ship)
+	check(not why["ok"] and why["why"] == Campaign.SPOOL_TEXT, "jump() asks for the spool")
+	eq(off.current, off.drift.start_id(), "and does not move")
+	var c := _camp(1, true)
+	check(c.instant_jump(), "with the flag on the campaign jumps at once")
 	var to := _next(c)
 	var r := c.jump(to, ship)
 	check(r["ok"], "jump() works as it did")
 	eq(c.current, to, "and arrives")
 	check(c.sectors.has(to), "the sector of the node is there when it is wanted")
-	var off := _camp(1)
-	var why: Dictionary = off.jump(_next(off), ship)
-	check(not why["ok"] and why["why"] == Campaign.SPOOL_TEXT, "with the flag off jump() asks for the spool")
-	eq(off.current, off.drift.start_id(), "and does not move")
 
 
 func test_the_jump_drive_spools_for_8_seconds_and_spends_fuel_when_it_fires() -> void:

@@ -4,6 +4,7 @@ extends "res://tests/base_test.gd"
 ## every effect type, goto pages, once, fights calling back, the debt events and the pack conventions.
 
 const Events = preload("res://scripts/space/events.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
@@ -478,7 +479,7 @@ func test_effect_fight_is_handed_back_not_started() -> void:
 	eq(_fx({"fight": "tier"}, c, ship)["fight"], "tier", "tier")
 	eq(_fx({"fight": "pirate_raider"}, c, ship)["fight"], "pirate_raider", "a design id")
 	eq(c.fight_path("pirate_raider", "pirate"), "res://data/ships/pirate_raider.json", "which is a file in data/ships")
-	check(FileAccess.file_exists(c.fight_path("tier", "pirate")), "tier rolls a design that exists")
+	check(Shipgen.from_spec(c.fight_path("tier", "pirate")) != null, "tier rolls a generated ship that builds")
 
 
 func test_effect_goto_names_the_next_page() -> void:
@@ -612,7 +613,7 @@ func _hop(c: Campaign, ship: Ship, n: int) -> Dictionary:
 			if c.node(o)["type"] != "gate":
 				to = o
 				break
-		last = c.jump(to, ship)
+		last = _jump(c, to, ship)
 		check(last["ok"], "hop %d: %s" % [i, last["why"]])
 	return last
 
@@ -698,7 +699,7 @@ func test_the_station_flag_is_set_while_docked_and_cleared_on_leaving() -> void:
 	c.rep["clans"] = 0
 	c.arrive(ship)
 	check(c.flags.has("at_rusthold"), "docked again")
-	check(c.jump(_neighbour(c), ship)["ok"], "jumped away")
+	check(_jump(c, _neighbour(c), ship)["ok"], "jumped away")
 	check(not c.flags.has("at_rusthold"), "undocked: the flag is cleared")
 	var back := Campaign.new(2)
 	back.arrive(ship)
@@ -769,3 +770,13 @@ func test_a_log_found_again_is_shown_again_but_kept_once() -> void:
 	eq(again["logs"].size(), 1, "the log is shown again")
 	check(first["lines"][0].begins_with("Log found: ") and again["lines"][0].begins_with("Log read again: "), "and the line says so")
 	eq(c.logs_found.keys(), [id], "but it is in the campaign's list once")
+
+
+## A jump along a lane the way the game makes one now (docs/CONTENT.md section 11): spool the drive and let it fire.
+## The jump() result ({ok, why, node, drift, notes}).
+func _jump(c: Campaign, to: String, ship, drift := false) -> Dictionary:
+	var r: Dictionary = c.start_jump(to, ship, false, drift)
+	if not r["ok"]:
+		return {"ok": false, "why": r["why"], "notes": []}
+	c.tick_jump(c.spool_time(), false, ship)
+	return c.last_jump

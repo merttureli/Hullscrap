@@ -12,6 +12,7 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 
 const PIRATE_PATH := "res://data/ships/pirate_raider.json"
 const RAMMER_PATH := "res://data/ships/rustfang_rammer.json"  ## the test rammer (Shift+K in the combat view)
@@ -40,9 +41,11 @@ var enemy_label := "Pirate"
 var _acc := 0.0
 
 
-## A ship from a saved-ship JSON file (Ship.to_dict format), or null when it cannot be loaded. A
-## design's `ai` entry ({"style": "rammer"}) is kept on the ship as the meta value "ai" and read by start().
+## A ship from a saved-ship JSON file (Ship.to_dict format) or a generated one (a Shipgen spec), or null when it cannot be
+## loaded. A design's `ai` entry ({"style": "rammer"}) is kept on the ship as the meta value "ai" and read by start().
 static func load_ship(path: String) -> Ship:
+	if Shipgen.is_spec(path):  # a generated enemy: "gen:<faction>:<size>:<seed>:<budget x 100>[:ram]"
+		return Shipgen.from_spec(path)
 	if not FileAccess.file_exists(path):
 		return null
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -65,11 +68,16 @@ static func spawn_rammer() -> Ship:
 
 
 ## Put `player` at the origin and `enemy` SPAWN_DISTANCE ahead of it (up), facing it. `seed_value`
-## seeds every roll of the fight and the pilot.
-func start(player: Ship, enemy: Ship, seed_value := 1) -> void:
+## seeds every roll of the fight and the pilot. `place` puts the fight somewhere else (a fight in a sector, in its px):
+## {player_pos, player_angle, player_vel, player_ang_vel, enemy_pos}; the enemy always starts facing the player.
+func start(player: Ship, enemy: Ship, seed_value := 1, place := {}) -> void:
 	arena = Arena.new(seed_value)
-	arena.add_ship(player, Vector2.ZERO, 0.0)
-	arena.add_ship(enemy, Vector2(0.0, -SPAWN_DISTANCE), PI)
+	var at: Vector2 = place.get("player_pos", Vector2.ZERO)
+	arena.add_ship(player, at, float(place.get("player_angle", 0.0)))
+	arena.ships[PLAYER].flight.vel = place.get("player_vel", Vector2.ZERO)
+	arena.ships[PLAYER].flight.ang_vel = float(place.get("player_ang_vel", 0.0))
+	var foe: Vector2 = place.get("enemy_pos", at + Vector2(0.0, -SPAWN_DISTANCE))
+	arena.add_ship(enemy, foe, (at - foe).angle() + PI / 2.0)
 	ai = PilotAI.new(arena, ENEMY, PLAYER, enemy.get_meta("ai", {}))
 	morale = Morale.new(arena, ENEMY, PLAYER, str(enemy.get_meta("ai", {}).get("morale", "default")))
 	ai.morale = morale

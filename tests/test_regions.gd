@@ -189,7 +189,7 @@ func test_crossing_keeps_the_campaign_and_starts_the_new_region_afresh() -> void
 	for o in c.neighbours(c.current):
 		to = o
 		break
-	check(c.jump(to, ship)["ok"], "a jump in Clan space")
+	check(_jump(c, to, ship)["ok"], "a jump in Clan space")
 	c.flags["met_ma"] = true
 	c.rep["concord"] = 4
 	c.debt = 700
@@ -245,7 +245,7 @@ func test_mas_debt_clock_runs_in_stages_1_and_2_and_stops_from_stage_3() -> void
 	c.flags["debt_missed"] = true
 	eq(c.misses(), 2, "(two payments behind from before the clock stopped)")
 	c.tide.steps = 0  # (the Hollow tide of the region would send ghosts here: not what this is about)
-	eq(c.fight_path("tier", "pirate"), c.cfg["enemies"]["pirate"][str(c.tier())][0], "but no rammer is sent out here")
+	check(not c.fight_path("tier", "pirate").ends_with(":ram"), "but no rammer is sent out here")
 	c.flags.erase("debt_missed")
 	c.current = c.drift.start_id()
 	c.flags.erase("met_ma")
@@ -497,3 +497,13 @@ func test_the_last_exit_offers_only_the_ending_region() -> void:
 	eq(c.drift.exit_id(), "", "no way on from there")
 	d["map"].free()
 	d["sim"].free()
+
+
+## A jump along a lane the way the game makes one now (docs/CONTENT.md section 11): spool the drive and let it fire.
+## The jump() result ({ok, why, node, drift, notes}).
+func _jump(c: Campaign, to: String, ship, drift := false) -> Dictionary:
+	var r: Dictionary = c.start_jump(to, ship, false, drift)
+	if not r["ok"]:
+		return {"ok": false, "why": r["why"], "notes": []}
+	c.tick_jump(c.spool_time(), false, ship)
+	return c.last_jump

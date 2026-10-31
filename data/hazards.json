@@ -1,0 +1,58 @@
+{
+  "_doc": "Sector hazards (scripts/combat/hazards.gd, README 'Hazards'). Some nodes of a region have one of the region's `hazards` (data/regions/*.json); it changes HOW you fight there. `chances`: per node type, the chance a node in a region that lists hazards has one (`default` for a type not listed; stations, the exit and dead gates never). The roll picks evenly among the region's hazards and a direction (`dir`: degrees, 0 east, 90 south, as sector.gd; it points TOWARD the star or UPSTREAM, to where the debris comes from), once per node (Hazards.roll: the region seed and the node alone). `hazards`: id -> name, the one-line HUD text (`hud`), a one-letter map glyph and a colour, plus its numbers. A wall 'faces' the hazard when an exposed face of it has a normal within `face_dot` (a cosine, 0.5 = 60 degrees) of `dir`. ion_storm: shield layers come back at `recharge_mult` of the usual speed (the ion lock timer is not slowed). star_heat: every `every_s` a flare lights up to `fires` fires on each ship, on floor cells beside the outer walls that face the star; the HUD warns `warn_s` before. gas_cloud: every turret's accuracy changes by `accuracy_add` (hit chance 0..1), and the enemy pilot's aim error is multiplied by `aim_error_mult`. radiation: while a ship has no shield layer up (none left, or the shields ion-locked), every crew member aboard without the `suit` trait loses `hp_per_s`. debris_surge: every `every_s`, `hits` kinetic hits of `damage` land on random outer wall cells that face the current, on each ship, through the normal damage rules (resist, slopes, breaches). Timers run on the arena tick, so a fight starts with the first flare or surge `every_s` in.",
+  "chances": {
+    "empty": 0.5,
+    "anomaly": 0.6,
+    "asteroid_field": 0.4,
+    "wreck_field": 0.3,
+    "default": 0.2,
+    "station": 0.0,
+    "exit": 0.0,
+    "gate": 0.0
+  },
+  "hazards": {
+    "ion_storm": {
+      "name": "Ion storm",
+      "hud": "ION STORM: shields recharge at half speed",
+      "glyph": "I",
+      "color": "#b99bff",
+      "recharge_mult": 0.5
+    },
+    "star_heat": {
+      "name": "Star heat",
+      "hud": "STAR HEAT: a flare every 25 s lights fires on the star side",
+      "glyph": "H",
+      "color": "#ff9a3c",
+      "every_s": 25.0,
+      "warn_s": 3.0,
+      "fires": 3,
+      "face_dot": 0.5
+    },
+    "gas_cloud": {
+      "name": "Gas cloud",
+      "hud": "GAS CLOUD: turrets -20% accuracy, enemy aim is worse",
+      "glyph": "G",
+      "color": "#8fd45a",
+      "accuracy_add": -0.2,
+      "aim_error_mult": 1.5
+    },
+    "radiation": {
+      "name": "Radiation",
+      "hud": "RADIATION: with no shield layer up, unsuited crew lose 0.5 hp/s",
+      "glyph": "R",
+      "color": "#e8e04a",
+      "hp_per_s": 0.5
+    },
+    "debris_surge": {
+      "name": "Debris surge",
+      "hud": "DEBRIS SURGE: hits every 20 s on the side facing the current",
+      "glyph": "D",
+      "color": "#c2956a",
+      "every_s": 20.0,
+      "warn_s": 3.0,
+      "hits": 4,
+      "damage": 1.0,
+      "face_dot": 0.5
+    }
+  }
+}
