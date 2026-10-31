@@ -12,6 +12,9 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const BuildSession = preload("res://scripts/ship/build_session.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 
 var arena: Arena
 var target: Ship  ## ship 1, at (800, 0); row 15 of its grid is the line of fire
@@ -347,3 +350,63 @@ func test_the_refractor_splits_into_three() -> void:
 	var spec: Dictionary = w.defs["prismatic_refractor"]["effects"]["split_on_shield"]
 	eq(int(spec["count"]), 3, "the Refractor splits 1 into 3")
 	check(float(spec["damage_mult"]) < 1.0, "weaker")
+
+
+# --- 4. the Sporeling aura against the air their parts eat -----------------------------------------------------
+
+const REFERENCE_ROOM := 40.0  ## cells: about the median room of the starter ships (rooms of 15 to 76 cells, median 37)
+
+
+func _drain_per_s(component_id: String) -> float:
+	var c := Ship.new("c").components
+	for a in c.def(component_id)["abilities"]:
+		for se in a["side_effects"]:
+			if se["type"] == "drain_o2":
+				return float(se["rate"])
+	return 0.0
+
+
+func test_two_sporelings_cancel_a_spore_cannon_and_a_bloom_reactor_in_a_typical_room() -> void:
+	var cannon: Dictionary = Weapons.new().defs["sporeling_spore_cannon"]
+	var per_shot := float(cannon["effects"]["self_room"]["o2_drain"])  # a fraction of the room's air
+	var cannon_per_s := per_shot / float(cannon["cooldown"])
+	var bloom_per_s := _drain_per_s("sporeling_bloom_reactor")  # a fraction of the air left, a full room to begin with
+	var eaten := (cannon_per_s + bloom_per_s) * REFERENCE_ROOM  # cell units of air a second at full pressure
+	var given := 2.0 * float(TraitSet.of(CrewMember.new("Sp", Vector2.ZERO, "sporeling"))["aura"]["o2_per_s"])
+	var ratio := given / eaten
+	print("tech_gaps: in a %d-cell room a firing Spore Cannon and a Bloom Reactor eat %.2f air a second, two Sporelings give %.2f (%.0f%%)" % [int(REFERENCE_ROOM), eaten, given, ratio * 100.0])
+	check(ratio >= 0.85 and ratio <= 1.25, "two Sporelings give back about what they eat (%.0f%%)" % (ratio * 100.0))
+
+
+func _bloom_room(species: String) -> Ship:
+	var defs := TileDefs.new()
+	defs.load_file("res://data/tiles.json")
+	var g := ShipGrid.new(Vector2i(31, 31), defs)
+	g.fill_circle_hull(15.0)
+	var s := Ship.new("Bloom", g)
+	s.inventory.load_dict({"scrap": 800, "copper": 40})
+	BuildSession.new(s).apply(BuildSession.room_changes(Vector2i(8, 8), Vector2i(15, 15), "wall", "floor"))  # a sealed room of 6 x 6 = 36 cells
+	var uid := Fixture.put(s, "sporeling_bloom_reactor", 9, 9)
+	check(uid >= 0, "(bloom placed)")
+	Fixture.wire(s, [Vector2i(10, 10)])
+	s.crew.append(CrewMember.new("A", Vector2(13.5, 13.5), species))
+	s.crew.append(CrewMember.new("B", Vector2(13.5, 12.5), species))
+	s.refresh()
+	return s
+
+
+func test_a_bloom_reactor_empties_a_room_of_humans_but_not_one_of_sporelings() -> void:
+	var left := {}
+	for species in ["human", "sporeling"]:
+		var s := _bloom_room(species)
+		var room := s.atmosphere.room_at(Vector2i(13, 13))
+		eq(int(s.atmosphere.rooms[room]["size"]), 36, "(the room is 36 cells)")
+		var sim := ShipSim.new()
+		sim.ships = [s]
+		for i in 600:
+			sim._step_ship(s, 0.1)
+		left[species] = s.atmosphere.pressure_of(room)
+		check(s.atmosphere.room_at(s.crew[0].cell()) == room, "(the crew stayed in the room)")
+	print("tech_gaps: a Bloom Reactor in a 36-cell room, air after a minute: two humans %.2f, two Sporelings %.2f" % [left["human"], left["sporeling"]])
+	check(left["human"] < 0.7, "with humans the Bloom Reactor eats the room's air (%.2f after a minute)" % left["human"])
+	check(left["sporeling"] > 0.97, "with two Sporelings the air stays (%.2f)" % left["sporeling"])

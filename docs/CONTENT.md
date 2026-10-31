@@ -416,7 +416,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
 | fenn | 75 | 1.15 | `fast_repair` (repair and breach-patch time ×0.6) | — |
 | kett | 80 | 1.0 | `swarm` (work +25% per other Kett in the room, at most +50%) | pack `races_1`; rivet gun |
 | mire | 100 | 1.0 | `firefighter` (extinguish ×2, fire damage ×0.5), `dries_out` (−2 hp/s in a room whose hottest part is above 60) | pack `races_1`; service pistol |
-| sporeling | 100 | 0.8 | `aura_spores` (their room gains 0.01 air/s and heals everyone 1 hp/s), `flammable` (fire damage ×1.5) | pack `races_1`; flare gun |
+| sporeling | 100 | 0.8 | `aura_spores` (their room gains 0.5 air/s each, about a room's worth of what a Bloom Reactor and a Spore Cannon eat: see section 17, and heals everyone 1 hp/s), `flammable` (fire damage ×1.5) | pack `races_1`; flare gun |
 | gauntling | 100 | 1.0 | `mechanical` (beds do not heal; a crewmate's `repair_crew` job does), `half_lungs` (air ×0.5), `ion_prone` (stunned 3 s by ion), `tinkerer` (repair time ×0.8) | pack `races_1`; multi-tool |
 | prismatic | 100 | 1.0 | `crystal_conduit` (+1 power to the system they man), `crystal_body` (ion damage ×2, melee ×0.5) | pack `races_1`; Gatekeeper's lance |
 | grundl | 180 | 0.7 | `hauler` (restock ×2, melee ×2), `clumsy` (repair time ×1.3) | pack `races_1`; quarry hammer; the large rig over the normal 2×2 body |
