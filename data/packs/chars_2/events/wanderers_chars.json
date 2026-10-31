@@ -1,0 +1,75 @@
+{"events": [
+    {
+      "id": "char_tilley_is_it_dusk", "type": "empty", "weight": 16, "once": true, "requires": {"stage_min": 2},
+      "text": "A single lamp is drifting in the lane, a brass storm-lantern the size of a bucket, burning a steady yellow with its wick turned low. There is no ship it belongs to. It turns its glass to you as you pass, with a faint squeak, and a small tinny voice says, 'Excuse me. Is it dusk?' You say you are not sure how dusk works in space. 'No,' it says, 'nor am I. I was set to light the lane-lamps at dusk. There has not been a dusk since the Snap. I have been waiting forty years for the light to go. It has been so very bright.' The wick flickers, hopefully. 'Is it dusk yet?'",
+      "choices": [
+        {"text": "Tell it, gently, that it is dusk.", "outcomes": [
+          {"weight": 100, "text": "The lantern is silent. Then the wick drops a notch, and another, and at last the glass lights from deep inside to the colour of late afternoon. 'Dusk,' it says, as though the word were a hand on its shoulder. 'Then the lamps are due. I must go and light them. Please do not leave without me.' It bobs away down the lane, singing a very small song about oil.", "effects": {"flag": "char_tilley_dusk"}}
+        ]},
+        {"text": "[Mechanical] Read its clock, and set it to evening.", "requires": {"trait": "mechanical"}, "outcomes": [
+          {"weight": 100, "text": "Your crewmate opens the lantern's back, finds a clockwork nobody has wound since the Snap, and sets it to six in the evening with a thumbnail. The lantern gives a little shudder of relief. 'Dusk,' it says. 'It was dusk the whole time. I was only misinformed.' It presses a few copper wicks into your hand, as a tip, and floats off, humming. 'I shall light the lamps. Please wait for me.'", "effects": {"flag": "char_tilley_dusk", "items": {"copper": 5}}}
+        ]},
+        {"text": "Tell it there is no dusk out here, and fly on.", "outcomes": [
+          {"weight": 100, "text": "'No,' says the lantern. 'I suppose not.' Its wick burns a little lower. It does not look away as you go.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_tilley_lights_the_way", "type": "empty", "weight": 50, "once": true, "requires": {"stage_min": 4, "flag": "char_tilley_dusk"},
+      "text": "The brass lantern is waiting for you at the next node, bobbing in the lane with its wick turned up bright. You are not sure how it got here, and you are sure it did not get here at lantern speed. 'Is it dusk?' it says, brightly. 'Only I lit the lamps along your way. It seemed a shame not to. There were four hundred and twelve. It took me a very long time.' It turns its glass to you. 'I should like to keep lighting. Out here, I am told, the dark comes with you. I could go ahead of you, with a lamp.'",
+      "choices": [
+        {"text": "Take the lamplighter aboard.", "outcomes": [
+          {"weight": 100, "text": "'Tilley,' says the lantern, bobbing. 'That is what they called me at the oil depot, after the make, and because I was small.' It floats to your helm, finds the dark corner of the room, and makes it very slightly less so. 'I will go ahead,' it says, 'and light the way. You will not even know I have done it.'", "effects": {"recruit": {"character": "tilley"}}}
+        ]},
+        {"text": "Tell it you have no room for a lamp.", "outcomes": [
+          {"weight": 100, "text": "'Of course,' says the lantern. It brightens its wick, a little, as though to help you see your way out. It does.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_pettifer_have_you_filed", "type": "patrol", "weight": 14, "once": true, "requires": {"stage_min": 2},
+      "text": "A Concord customs launch with its running lights on and its engines cold pulls across your bow and hails you in a clerk's voice, in perfect order: 'Third Fleet Customs, Shipping Office, Section Nine. Have you filed?' You ask what you should have filed. 'Form Seven-B,' says the voice. 'Declaration of Existence. It is due by the tenth of each month. I have been waiting forty years for anyone to hand me one. I have not been paid since the Snap. I have not been told to stop.' The hatch opens and a thin man in sleeve-guards and a green eyeshade peers out of it, holding a rubber stamp over his head like a flag.",
+      "choices": [
+        {"text": "Fill in Form Seven-B and witness his signature (25 credits stamp duty).", "requires": {"credits": 25, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "He takes the form in both hands, examines it for forty seconds and stamps it with a sound like a rifle shot. 'Pettifer,' he says, to the form. 'Customs clerk, Third Fleet. Declaration accepted.' His face does something it has not done in forty years. 'Would you like to go on declaring? I can do a month in an afternoon. I have a form for an enemy's weapon, as well.'", "effects": {"recruit": {"character": "pettifer"}}}
+        ]},
+        {"text": "[Concord standing] Tell him you are an official visitor.", "blue": true, "requires": {"rep_min": {"concord": 2}}, "outcomes": [
+          {"weight": 100, "text": "'An official visitor,' says Pettifer, in the voice of a man seeing a long-lost uncle. He stamps the nearest surface (the hatch, the sill, his own wrist) and is in your lock before the ink has dried. 'I shall come as your clerk,' he says. 'Please say you will need a clerk.'", "effects": {"recruit": {"character": "pettifer"}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Tell him you do not file.", "outcomes": [
+          {"weight": 100, "text": "'Then you are not on the register,' he says, with infinite sorrow, 'and I cannot help you.' He stamps the air in your direction regardless, and withdraws.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_tinder_the_last_act", "type": "distress", "weight": 14, "once": true, "requires": {"stage_min": 2},
+      "text": "The liner Grand Variety is dark but for one lit gallery, and in the gallery a fire is burning on a stage. It is an Emberkin in a sequinned waistcoat holding a torch in each hand, tipping her head back to take the flame from the right-hand one into her mouth and out of the left, to the silence of two hundred empty velvet seats. She finishes the act with a bow. Nobody claps. She bows again, steadily, to nobody, and puts the torches out in her mouth with a hiss. 'The last act,' she tells you, hoarse. 'I have done it every night since the Snap. I should like, if I am honest, an audience. Even one that is here to rob me.'",
+      "choices": [
+        {"text": "Take a seat, and lend her the torches for an encore (1 fuel).", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You and your crew fill the front row, and she lights the torches from your fuel with a flourish. It is the best act you have ever seen. It is also, as she admits, the only act you have ever seen. At the curtain call she throws her sequinned waistcoat into the crowd, and in the grand tradition of the stage, it hits you. 'Tinder,' she says. 'Fire-eater. I will put out anything you set alight. Mostly in a good cause.'", "effects": {"recruit": {"character": "tinder"}}}
+        ]},
+        {"text": "[Heat-proof] Take the second torch and finish the act with her.", "requires": {"trait": "heat_resistant"}, "outcomes": [
+          {"weight": 100, "text": "Your crewmate takes the spare torch, steps up into the spotlight and, in front of two hundred empty seats, eats the fire. Tinder stares. 'Where did you train?' she whispers. 'I have been waiting forty years for a partner.' The curtain falls of its own accord. She is in your lock before it settles.", "effects": {"recruit": {"character": "tinder"}}}
+        ]},
+        {"text": "Slip out the back.", "outcomes": [
+          {"weight": 100, "text": "'Tonight only,' the Emberkin calls to the empty room. 'Thank you, thank you.' She takes another bow, and then another.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_cadence_dismissed", "type": "wreck_field", "weight": 14, "once": true, "requires": {"stage_min": 2},
+      "text": "A Concord bandstand barge drifts in the lane with bunting still strung from its rails. On the stage a lone drum-major in a plumed hat is marching in place to a drum beat that has not changed in forty years. The band is long gone; their chairs are bolted down in rows with the music still on the stands. He turns smartly at the end of each count and keeps going. 'Evening retreat,' he calls to you across the gap, without breaking step. 'It was to end with a dismissal. The colonel was to give it. He was called away before he did. I am under orders to continue until I am dismissed.' He turns again. 'I have been continuing for some time.'",
+      "choices": [
+        {"text": "Give the order: 'Dismissed.'", "outcomes": [
+          {"weight": 75, "text": "'Sir!' says the drum-major. The sticks stop in mid-air. For a long moment he stands quite still in the empty band, taking in the drifting chairs, the bunting, the quiet. Then he tucks the drum under one arm and salutes the music stands, one at a time. 'Cadence, sir,' he says. 'Late of the Third Fleet Band. I find I have a great deal of time to make up. May I march with you?'", "effects": {"recruit": {"character": "cadence"}}},
+          {"weight": 25, "text": "'You are not the colonel, sir,' says the drum-major, politely, and resumes the beat with a vengeance. You retreat across the gap to the sound of the evening retreat, at tempo.", "effects": {}}
+        ]},
+        {"text": "[Concord standing] Give the order as an officer would, with a salute.", "blue": true, "requires": {"rep_min": {"concord": 2}}, "outcomes": [
+          {"weight": 100, "text": "You give the order in the old form, heels together, and the drum-major's sticks come to rest as if on a rail. He has not heard it said properly in forty years. His salute is perfect, and slightly wet. 'Cadence, sir,' he says. 'Dismissed, and reporting for duty, if the officer will have me.' The beat resumes, softer, in time with your footsteps.", "effects": {"recruit": {"character": "cadence"}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Fly on, quietly.", "outcomes": [
+          {"weight": 100, "text": "The drumbeat follows you across the lane for an hour. You are fairly sure you are walking in time with it.", "effects": {}}
+        ]}
+      ]
+    }
+]}

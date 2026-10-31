@@ -159,6 +159,38 @@
       "ability": {"id": "power_system", "cooldown": 42, "params": {"power": 4, "duration": 24}},
       "obtained": "The Ferro Lodes (stage 4+): wound round a dead reactor's coil and unwilling to move. Offer him a bigger coil (6 copper), show him a running reactor, or merge currents with a Ferro of your own.",
       "lore": "The Dynamo. Lenz opposes change; it is his nature and, he points out, a law. He will not move house, take a new name or be talked out of a coil he likes, but put him beside a system and he pours his whole current into it, steadily, stubbornly, in the way he does everything. The lights stay on. He would like them to stay exactly as they are."
+    },
+    {
+      "id": "tilley", "name": "Tilley",
+      "unique_species": {"name": "Lane-Lamp Keeper", "hp": 70, "speed": 1.0, "traits": ["no_breath", "mechanical"], "rig": "gauntling", "sidearm": "flare_gun", "work_mult": {"man": 1.1}, "notes": "the lighting program of a lane-lamp, running in a brass storm-lantern: no air, mechanical, small and steady"},
+      "rig": {"tint": "#ffd27a", "head": "lamp"},
+      "ability": {"id": "scan", "cooldown": 34, "params": {"duration": 34}},
+      "obtained": "Hard to get, a chain of two events (any region, stage 2+): tell the drifting lantern, gently, that it is dusk, then find it waiting at a later node (stage 4+) after it has lit your way.",
+      "lore": "The Lamplighter. Tilley is the lighting program of a lane-lamp, set to switch the lamps on at dusk, and has been waiting forty years for a dusk the Snap never sent. Out here the dark travels with you, so it goes ahead with its wick turned up and shows you what is in it. It has never once been asked to put the light out. It is not sure it would."
+    },
+    {
+      "id": "pettifer", "name": "Pettifer", "species": "human",
+      "rig": {"tint": "#5b7a5a", "head": "hair"},
+      "traits": {"work_mult": {"man": 1.2}},
+      "ability": {"id": "hack", "cooldown": 46, "params": {"duration": 6, "families": ["weapon", "engine", "shield"]}},
+      "obtained": "Wanderer, any region (stage 2+): a Concord customs launch asks whether you have filed. Fill in Form 7-B and pay the stamp duty (25 credits), or vouch for yourself as an official visitor with good Concord standing.",
+      "lore": "The Filing Clerk. Pettifer has not been paid since the Snap and has not been told to stop. Sit him at a helm console and he serves the enemy's guns with a Notice of Stay, in triplicate, in a voice of such gentle finality that they appear to feel they ought to wait for the paperwork. They generally do."
+    },
+    {
+      "id": "tinder", "name": "Tinder", "species": "emberkin",
+      "rig": {"tint": "#d4a017", "head": "crest"},
+      "traits": {"work_mult": {"extinguish": 1.3}},
+      "ability": {"id": "extinguish", "cooldown": 18},
+      "obtained": "Wanderer, any region (stage 2+): the last act aboard a dark variety liner, played to two hundred empty seats. Lend her the torches (1 fuel), or step into the spotlight and finish the act with a heat-proof crew member.",
+      "lore": "The Fire-Eater. Tinder swallowed her first flame at nine and has been working without an audience since the Snap. She can clear a room of fire by the simple expedient of eating it, bowing, and waiting for the applause. It is not always forthcoming. Please clap."
+    },
+    {
+      "id": "cadence", "name": "Cadence", "species": "human",
+      "rig": {"tint": "#a8333a", "head": "helmet"},
+      "traits": {"speed_mult": 1.05},
+      "ability": {"id": "rally", "cooldown": 46, "params": {"mult": 1.8, "duration": 14}},
+      "obtained": "Wanderer, any region (stage 2+): a lone drum-major still marching on a dead Concord bandstand barge, waiting to be dismissed. Dismiss him (and hope he believes you), or give the order as an officer would, with good Concord standing.",
+      "lore": "The Drum-Major. Cadence marched the evening retreat of the Third Fleet Band for forty years after the band went home, waiting to be dismissed. Now he marches your crew instead. A ship that has heard him keep time for an hour finds it can do anything in step and a good deal of it faster, and nobody can say who started whistling."
     }
   ]
 }
