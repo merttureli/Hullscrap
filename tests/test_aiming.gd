@@ -113,7 +113,8 @@ func test_a_turret_deals_sixty_percent_of_its_fixed_equivalent() -> void:
 		elif not id.begins_with("test_"):
 			eq(w.def(id)["damage"], float(w.defs[id]["damage"]), id + ": a fixed gun deals its whole damage")
 	turrets.sort()
-	eq(turrets, ["laser_turret_mk1", "leech_laser", "rattle_burst_scrap", "siren_ion_neon"], "the four turrets")
+	for id in ["laser_turret_mk1", "leech_laser", "rattle_burst_scrap", "siren_ion_neon"]:  # the core turrets; packs add more
+		check(turrets.has(id), id + " is a turret")
 	near(w.def("laser_turret_mk1")["damage"], 0.6 * w.def("laser_mk1")["damage"], "the Concord Point Turret against Laser Mk1", 1e-9)
 	eq([float(w.defs["laser_turret_mk1"]["arc"]), float(w.defs["laser_turret_mk1"]["track"]), float(w.defs["laser_turret_mk1"]["accuracy"]), float(w.defs["laser_turret_mk1"]["cooldown"])], [270.0, 120.0, 0.8, 4.0], "arc 270, 120 degrees a second, accuracy 0.8, cooldown 4")
 

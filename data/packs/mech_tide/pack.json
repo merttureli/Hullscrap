@@ -1,0 +1,7 @@
+{
+  "id": "mech_tide",
+  "name": "Mechanics: the Hollow tide",
+  "version": "1.0",
+  "requires": [],
+  "notes": "Six events of type `hollow` (events/hollow.json): what happens when you arrive at a place the Hollow tide has taken (docs/MECHANICS_REVIEW.md P1, scripts/space/tide.gd). Five of them can end in a fight; every one has a free way out."
+}

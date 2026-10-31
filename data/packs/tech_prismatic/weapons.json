@@ -1,0 +1,7 @@
+{
+"weapons": {
+	"prismatic_prism_lens": {"kind": "beam", "damage_type": "energy", "damage": 5, "cooldown": 5.0, "range": 800, "shots": 1, "pierce": 1, "fire_chance": 0.0, "duration": 1.5, "effects": {"needs_operator": {"species": "prismatic", "else_mult": 0.5, "stat": "damage"}}, "turret": false, "gimbal": 8},
+	"prismatic_refractor": {"kind": "bolt", "damage_type": "energy", "damage": 3, "cooldown": 1.4, "range": 900, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 800, "effects": {"shard": {"splinters": 2, "dmg": 0.75}}, "turret": false, "gimbal": 5},
+	"prismatic_glimmer_turret": {"kind": "bolt", "damage_type": "energy", "damage": 3, "cooldown": 3.0, "range": 900, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 900, "effects": {"needs_operator": {"species": "prismatic", "else_mult": 0.4, "stat": "rate"}}, "turret": true, "gimbal": 0, "arc": 300, "track": 170, "accuracy": 0.85}
+}
+}
