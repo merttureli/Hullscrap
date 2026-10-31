@@ -873,3 +873,40 @@ func test_a_breach_in_a_mount_wall_is_worked_from_beside_the_mount() -> void:
 		check(not jobs.stand_spots(ship, job).is_empty(), path + ": somewhere to stand to work it")
 		_run(jobs, ship, 40.0)
 		check(not ship.grid.breached.has(cell), path + ": the crew seal it")
+
+
+func test_a_breach_beside_a_mount_wall_is_worked_from_beside_the_mount_too() -> void:
+	var tried := 0
+	for path in STARTERS:
+		var ship := Ship.from_design(path)
+		var uids: Array = ship.components.instances.keys()
+		uids.sort()
+		var cell := Vector2i(-1, -1)
+		for uid in uids:
+			var link: Array = ship.components.instances[uid]["link"]
+			for l in link:
+				for side in [Vector2i.LEFT, Vector2i.RIGHT]:
+					var n: Vector2i = l + side
+					if not link.has(n) and ship.grid.tile_flag(ship.grid.get_tile(n), "solid") and ship.components.at(n) < 0:
+						cell = n
+						break
+				if cell.x >= 0:
+					break
+			if cell.x >= 0:
+				break
+		if cell.x < 0:
+			continue
+		tried += 1
+		ship.grid.breach(cell)
+		ship.mark_dirty()
+		ship.refresh()
+		var view := CrewView.new()
+		view._spawn(ship)
+		view.free()
+		var jobs := Jobs.new()
+		jobs.build_board(ship)
+		var job: Dictionary = jobs.board["breach:%d,%d" % [cell.x, cell.y]]
+		check(not jobs.stand_spots(ship, job).is_empty(), "%s: somewhere to stand by the breach at %s" % [path, cell])
+		_run(jobs, ship, 40.0)
+		check(not ship.grid.breached.has(cell), "%s: the crew seal the breach at %s" % [path, cell])
+	check(tried > 0, "a starter has a wall cell beside a mount's wall")
