@@ -244,3 +244,22 @@ func test_a_dead_ada_is_not_respawned_either() -> void:
 	_down(first_extra).down_t = 99.0
 	Mortality.tick(plain, 1.0)
 	eq(Jobs.spawn_crew(plain), [], "the default crew does not refill either (%d extras)" % extras)
+
+
+func test_nobody_bleeds_while_the_world_is_paused() -> void:
+	var sim := ShipSim.new()
+	var ship := Fixture.room_ship()
+	sim.ships = [ship]
+	var rook := _down(_npc("Rook", 18, 12))
+	var juno := _down(_npc("Juno", 12, 12))  # all down, so nobody can revive anyone
+	ship.crew.append_array([rook, juno])
+	sim.set_paused(true, "build mode")
+	for i in 60:
+		sim.step(1.0)
+	near(rook.down_t, 0.0, "a minute in build mode: no bleeding")
+	check(ship.crew.has(rook), "nobody died")
+	sim.set_paused(false)
+	for i in 46:
+		sim.step(1.0)
+	check(not ship.crew.has(rook) and not ship.crew.has(juno), "unpaused, the clock runs and they die")
+	sim.free()
