@@ -157,7 +157,7 @@ func test_start_blueprints() -> void:
 		if d.get("unique", false):
 			check(not c.is_known(id), "unique %s has no blueprint" % id)
 		elif d["family"] != "workshop" and d["tier"] == 1 and not id in NO_RECIPE_YET:
-			if d.get("line", "standard") == "neon" or id in MK1_TO_UNLOCK:
+			if d.get("line", "standard") == "neon" or id in MK1_TO_UNLOCK or Content.origin("components", id).begins_with("tech_"):  # racial tech is earned
 				check(not c.is_known(id), "Neon system %s must be unlocked" % id)
 			else:
 				check(c.is_known(id), "Mk1 system %s is known" % id)

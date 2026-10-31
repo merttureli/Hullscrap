@@ -1,0 +1,6 @@
+{
+"weapons": [
+	{"id": "bubble_rifle", "name": "Bubble Rifle", "culture": "mire", "class": "rifle", "damage": 11.2, "rate": 2.0, "range": 400, "art": "bubble_rifle", "notes": "damage -20%, range -20%: it fires foam, not slugs, and the foam puts fires out (later)"},
+	{"id": "hook_gaff", "name": "Hook Gaff", "culture": "mire", "class": "melee", "damage": 20, "rate": 1.2, "range": 48, "art": "hook_gaff", "notes": "damage -20%, range +20%: a boathook on a pole; it hooks a target and drags them in (later)"}
+]
+}
