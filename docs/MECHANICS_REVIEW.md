@@ -60,6 +60,7 @@ This doc is the director's working notes: what the reference games get right, wh
   - **Flee**: it turns away, burns, and **spools its jump drive (15 s)**, shown as a red bar on its schematic. The spool stops while its engines are all disabled or its helm is unmanned. If it finishes, they're gone, with their loot.
   - **Captured**: if every enemy crew member is down at once for 3 s, the ship goes dark: you win and its hull is whole (better salvage, P3).
   - *Example*: the pirate drops to 30% and starts spooling. You have 15 s: swing round and put the Bolt Thrower into its engine block, or ion its helm room. Or ignore it and take the surrender offer next fight. A Heat Lance build sets fires to drop the crew and capture ships whole; a Shrapnel build shreds hulls fast but can't stop a runner.
+- **Symmetry (round 2)**: the player's own J spool should follow the same rule, holding while all your engines are out or your helm is unmanned (FTL needs engines and a pilot to jump). Then protecting your engine room matters when you want to run.
 - **Cost**: medium. A new `morale.gd`, small hooks in `pilot_ai.gd` (flee, hold fire), `combat_session.gd` (end states) and `combat_view.gd` (banner, Y, spool bar), `data/morale.json`.
 - **Bloat risk**: low. It's three outcomes of one roll, all data-driven by faction.
 - **We'll know it works when**: AI-vs-AI fights stop stalemating (draws in the soak drop well below 13/30); in the probe, part hits on engines and helm rise; playtesters aim at engines on purpose.
@@ -88,6 +89,20 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 
 ### P7. Exit wardens (known region bosses) — round 2, after regions and shipgen
 - **Problem**: F10. **How**: the region-choice card names what guards the exit beacon ("Concord Bulwark: 4-sector shields; bring ion or missiles"). Beat it, or pay a toll, to leave the region. You build toward it all region. **Cost**: medium. **Bloat**: low (one fight per region, from shipgen). **Works when**: players buy or craft counters before the exit.
+
+### P8. Sector hazards (FTL's environments) — round 2 candidate
+- **Problem**: every fight happens in the same empty space, so sectors differ only by POIs. The regions spec lists hazards "for later".
+- **How it plays**: a small vocabulary of sector modifiers that a region or node rolls, each changing *how* you fight, not just how hard:
+  - **asteroid drift**: rocks on the current that ram both ships, so use them as cover or a weapon;
+  - **solar flare**: a fire chance in rooms facing the star every 25 s, so put your armour toward it;
+  - **ion storm**: shield layers recharge at half rate;
+  - **nebula**: radar range ×0.3, and turret accuracy −0.2;
+  - **gravity well**: a constant pull toward a point, so fights drift.
+  - *Example*: a Concord shield brick you can't crack in open space is beatable in an ion storm. That's a reason to pick the stormy region.
+- **Cost**: medium (5 modifiers in the sector and arena code, data per region). **Bloat**: low if capped at 5. **Works when**: players choose a route *because* of a hazard.
+
+### P9. Cargo has mass — considered
+- Hauled materials add flight mass (a small factor per unit), so hoarding 900 scrap makes you sluggish. That's a reason to spend, sell or smelt (steel is denser value). Cheap (one number in `flight.gd`), but it could feel opaque. Revisit if the playtest shows hoarding.
 
 ### Considered and rejected for now
 - **Crew veterancy** (skills grow with use): good for attachment, but bleed-out plus unique characters already give crew weight; it adds numbers to tune. Revisit after the owner's playtest.
