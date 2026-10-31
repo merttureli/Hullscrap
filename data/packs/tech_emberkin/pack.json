@@ -1,0 +1,7 @@
+{
+  "id": "tech_emberkin",
+  "name": "Racial tech: Emberkin",
+  "version": "1.0",
+  "requires": [],
+  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons, 3 components (Pyre Drive, Furnace Core, Hearth Shield). Sold at emberkin_forges (data/regions/emberkin_forges.json, stock)."
+}

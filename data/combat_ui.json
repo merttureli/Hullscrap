@@ -1,0 +1,28 @@
+{
+  "_doc": "Numbers for the combat HUD, read by scripts/combat/intent.gd and scripts/ui/schematic.gd. INTENT (enemy intent on your schematic): a red reticle sits on the part of your ship the enemy pilot aims at, and every enemy weapon that is heavy and ready within warn_s seconds gets a row ('Artemis in 1.2 s', red under red_under_s). A weapon is HEAVY when its damage is at least heavy_damage (a turret's damage is already scaled down), its shot kind is one of heavy_kinds, or its damage type is one of heavy_damage_types. A new target is shown only after the old one has been up for hold_s seconds (a target that is gone switches at once), so the reticle does not flicker. At most max_rows rows are drawn, then '+N more'. family_names: how the reticle's line names the family of the part ('Targeting: Weapons'; a family not listed is capitalised).",
+  "intent": {
+    "warn_s": 1.5,
+    "heavy_damage": 3,
+    "heavy_kinds": ["missile", "beam"],
+    "heavy_damage_types": ["ion"],
+    "hold_s": 0.5,
+    "red_under_s": 0.5,
+    "max_rows": 4,
+    "family_names": {
+      "weapon": "Weapons",
+      "engine": "Engines",
+      "reactor": "Reactor",
+      "shield": "Shields",
+      "oxygen": "Life support",
+      "helm": "Helm",
+      "medbay": "Medbay",
+      "bed": "Bunks",
+      "fabricator": "Fabricator",
+      "workshop": "Workshop",
+      "radiator": "Radiator",
+      "intake": "Intake",
+      "ram": "Ram",
+      "utility": "Utility"
+    }
+  }
+}

@@ -105,7 +105,7 @@ func test_the_validator_accepts_every_key_of_the_racial_vocabulary() -> void:
 		"crew_needed": [{"count": 3, "stat": "shield_layer", "else_mult": 0.5}, {"count": 1, "stat": "recharge", "else_mult": 0.25, "who": "mechanical|kett"}],
 		"room_wall_hp_mult": 1.5, "heat_above": {"heat": 60, "shield_layer": 1},
 		"room_work_mult": {"mult": 1.2, "who": "kett", "else_mult": 0.8}},
-		"side_effects": [{"type": "shock_organic", "rate": 2}, {"type": "wet", "rate": 0.8}, {"type": "heat", "rate": 5}],
+		"side_effects": [{"type": "shock_organic", "rate": 2}, {"type": "scorch", "rate": 1}, {"type": "wet", "rate": 0.8}, {"type": "heat", "rate": 5}],
 		"operator_needs": ["no_breath|suit"]}
 	eq(PartEffects.problems(a, _who_ids(), ["no_breath", "suit"]), [], "a full ability is fine")
 	eq(PartEffects.problems({"id": "p", "type": "passive"}), [], "so is a bare passive")
@@ -121,6 +121,9 @@ func test_the_validator_catches_unknown_keys_and_bad_values() -> void:
 	_bad({"id": "x", "type": "passive", "side_effects": [{"type": "wet", "rate": 1.5}]}, "fraction")
 	_bad({"id": "x", "type": "passive", "side_effects": [{"type": "shock_organic"}]}, "needs a rate")
 	_bad({"id": "x", "type": "passive", "side_effects": [{"type": "shock_organic", "rate": -1}]}, "needs a rate")
+	_bad({"id": "x", "type": "passive", "side_effects": [{"type": "scorch"}]}, "needs a rate")
+	_bad({"id": "x", "type": "passive", "side_effects": [{"type": "scorch", "rate": -2}]}, "needs a rate")
+	_bad({"id": "x", "type": "passive", "side_effects": [{"type": "scorch", "rate": 1, "who": "human"}]}, "unknown key 'who'")
 	_bad({"id": "x", "type": "active", "key": "engine"}, "needs a duration")
 	_bad({"id": "x", "type": "passive", "key": "cargo"}, "key 'cargo'")
 	_bad({"id": "x", "type": "ghost"}, "type must be")
@@ -166,6 +169,9 @@ func test_the_component_rules_catch_a_shield_effect_on_a_non_shield_and_a_bad_ma
 	eq(PartEffects.component_problems({"family": "weapon", "stats": {"malfunction_per_min": 0.2}}), [], "a malfunction rate is a chance per minute")
 	for bad in [1.5, -0.1, "often"]:
 		check(not PartEffects.component_problems({"family": "weapon", "stats": {"malfunction_per_min": bad}}).is_empty(), "malfunction_per_min %s is refused" % str(bad))
+	eq(PartEffects.component_problems({"family": "shield", "stats": {"layers": 1, "recharge": 1.4}}), [], "a recharge time is fine")
+	for bad in [0, -1.0, "fast"]:
+		check(not PartEffects.component_problems({"family": "shield", "stats": {"layers": 1, "recharge": bad}}).is_empty(), "recharge %s is refused" % str(bad))
 
 
 # --- crew_bonus ------------------------------------------------------------------------------------
@@ -354,6 +360,54 @@ func test_crew_needed_evasion_is_the_resonance_helm() -> void:
 	near(Abilities.evasion_add(ship), 0.0, "a downed one does not")
 
 
+# --- stats.recharge --------------------------------------------------------------------------------
+
+## Seconds until sector 0 of a shield part has its used layer back (10 at most).
+func _back_after(ship: Ship) -> float:
+	var a := Arena.new(1)
+	a.add_ship(ship)
+	Shields.absorb(a, 0, {"damage_type": "energy"}, Vector2.ZERO, Vector2.ZERO, 0)
+	var before: float = a.ships[0].sector_layers[0]
+	var t := 0.0
+	while a.ships[0].sector_layers[0] < before + 1.0 - 1e-6 and t < 20.0:
+		a.step(0.05)
+		t += 0.05
+	return t
+
+
+func test_stats_recharge_sets_how_fast_a_used_layer_comes_back() -> void:
+	var times := {}
+	for recharge in [2.0, 1.0, 4.0]:
+		var d := _rig("shield_mk1", {"shield_mk1": {"stats": {"recharge": recharge}}})
+		times[recharge] = _back_after(d["ship"])
+	near(times[2.0], 2.0, "2.0 is the normal 2 s", 0.1)
+	near(times[1.0], 1.0, "1.0 comes back in 1 s", 0.1)
+	near(times[4.0], 4.0, "4.0 takes 4 s", 0.1)
+	var d2 := _rig("shield_mk1", {})
+	near(_back_after(d2["ship"]), 2.0, "a shield with no stats.recharge is normal", 0.1)
+
+
+func test_the_neon_lattice_shield_recharges_in_its_1_4_seconds() -> void:
+	var d := _rig("shield_neon_mk1", {})
+	var ship: Ship = d["ship"]
+	near(Abilities.recharge_rate(ship, ship.power_state["powered"]), 2.0 / 1.4, "x1.43", 1e-6)
+	near(_back_after(ship), 1.4, "a used layer is back after 1.4 s", 0.1)
+
+
+func test_crew_needed_recharge_multiplies_the_parts_own_speed_and_several_shields_average_by_layers() -> void:
+	var fx := {"crew_needed": {"count": 1, "stat": "recharge", "else_mult": 0.5}}
+	var d := _rig("shield_mk1", {"shield_mk1": {"abilities": _passive(fx), "stats": {"recharge": 1.0}}})
+	var ship: Ship = d["ship"]
+	near(Abilities.recharge_rate(ship, ship.power_state["powered"]), 1.0, "x2 from the part, x0.5 for no crew")
+	_crew(ship, "C", "human", 12, 14)
+	near(Abilities.recharge_rate(ship, ship.power_state["powered"]), 2.0, "x2 with the crew there")
+	_two_rooms(ship)
+	var neon := Fixture.put(ship, "shield_neon_mk1", 10, 20)
+	var rate := Abilities.recharge_rate(ship, {d["part"]: true, neon: true})
+	near(rate, (1.0 * 2.0 + 2.0 * (2.0 / 1.4)) / 3.0, "a 1-layer x2 and a 2-layer x1.43 average by layers", 1e-6)
+	near(Abilities.recharge_rate(ship, {}), 1.0, "no powered shield: 1")
+
+
 # --- room_wall_hp_mult -----------------------------------------------------------------------------
 
 func test_room_wall_hp_mult_toughens_the_walls_round_the_room_when_a_fight_starts() -> void:
@@ -510,6 +564,69 @@ func test_shock_organic_runs_in_a_fight_and_drops_a_crew_member_once() -> void:
 	eq(downs.size(), 1, "the chronicle says so once")
 	a.step(1.0)
 	eq(ship.events.filter(func(e): return e["text"] == "H is down").size(), 1, "and not again")
+
+
+# --- scorch ----------------------------------------------------------------------------------------
+
+func test_scorch_burns_the_crew_in_the_room_who_are_not_heat_resistant() -> void:
+	var d := _rig("oxygen_gen", {"oxygen_gen": {"abilities": _passive({}, [{"type": "scorch", "rate": 2.0}])}})
+	var ship: Ship = d["ship"]
+	_two_rooms(ship)
+	var human := _crew(ship, "H", "human", 12, 14)
+	var ember := _crew(ship, "E", "emberkin", 14, 14)
+	var mire := _crew(ship, "M", "mire", 16, 14)
+	var gaunt := _crew(ship, "G", "gauntling", 18, 14)  # mechanical, but not heat resistant
+	var away := _crew(ship, "A", "human", 12, 22)
+	var downed := _crew(ship, "D", "human", 20, 14)
+	downed.hp = 0.0
+	var sim := ShipSim.new()
+	sim.ships = [ship]
+	sim._step_ship(ship, 1.0)
+	near(human.hp, 98.0, "a human takes 2 hp a second (out of a fight, ShipSim ticks it)")
+	near(ember.max_hp - ember.hp, 0.0, "an Emberkin (heat_resistant) takes nothing")
+	near(mire.hp, 98.0, "a Mire is not heat resistant")
+	near(gaunt.hp, 98.0, "nor is a Gauntling: scorch is not shock_organic")
+	near(away.hp, 100.0, "the other room is safe")
+	near(downed.hp, 0.0, "a downed one is left alone")
+	ship.components.instances[d["part"]]["status"] = "disabled"
+	sim._step_ship(ship, 1.0)
+	near(human.hp, 98.0, "no scorch from a part that is out of action")
+
+
+func test_scorch_runs_in_a_fight_and_a_personal_heat_resistant_trait_counts() -> void:
+	var d := _rig("oxygen_gen", {"oxygen_gen": {"abilities": _passive({}, [{"type": "scorch", "rate": 3.0}])}})
+	var ship: Ship = d["ship"]
+	var human := _crew(ship, "H", "human", 12, 14)
+	var geared := _crew(ship, "S", "human", 14, 14)
+	geared.gear_traits = ["heat_resistant"]  # a fire suit
+	var ember := _crew(ship, "E", "emberkin", 16, 14)
+	human.hp = 4.0
+	var a := Arena.new(1)
+	a.add_ship(ship)
+	a.step(1.0)
+	near(human.hp, 1.0, "3 hp in the arena's second")
+	near(geared.hp, 100.0, "the human in heat-resistant gear is spared")
+	near(ember.hp, ember.max_hp, "so is the Emberkin")
+	a.step(1.0)
+	near(human.hp, 0.0, "down")
+	eq(ship.events.filter(func(e): return e["text"] == "H is down").size(), 1, "the chronicle says so once")
+
+
+func test_a_pyre_drive_pairs_heat_with_scorch_and_only_the_emberkin_crew_runs_it_free() -> void:
+	var lost := {}
+	var state := {}
+	for species in ["human", "emberkin"]:
+		var d := _rig("engine_mk1", {"engine_mk1": {"abilities": _passive({"stat_mult": {"thrust": 1.5}}, [{"type": "heat", "rate": 1.0}, {"type": "scorch", "rate": 1.0}])}})
+		var ship: Ship = d["ship"]
+		var m := _crew(ship, "Wren", species, 17, 14)
+		for i in 100:
+			Abilities.tick(ship, 0.1)
+			Heat.tick(ship, 0.1)
+		lost[species] = m.max_hp - m.hp
+		state[species] = ship.components.instances[d["part"]]["status"]
+	near(lost["human"], 10.0, "a mixed crew pays 1 hp a second for the 10 s")
+	near(lost["emberkin"], 0.0, "an Emberkin crew pays nothing")
+	eq([state["human"], state["emberkin"]], ["ok", "ok"], "and the engine is the same for both (a mild heat here)")
 
 
 # --- wet -------------------------------------------------------------------------------------------

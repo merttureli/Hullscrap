@@ -1,0 +1,26 @@
+{
+  "weapons": [
+    {
+      "id": "sting_pistol",
+      "name": "Sting Pistol",
+      "culture": "kett",
+      "class": "pistol",
+      "damage": 8,
+      "rate": 1.8,
+      "range": 240,
+      "art": "sting_pistol",
+      "notes": "damage -20%, rate +20%, range -20%: a needle gun that stings fast and short; a numbing toxin later"
+    },
+    {
+      "id": "hive_prod",
+      "name": "Hive Prod",
+      "culture": "kett",
+      "class": "melee",
+      "damage": 20,
+      "rate": 1.44,
+      "range": 48,
+      "art": "hive_prod",
+      "notes": "damage -20%, rate +20%, range +20%: a quick jab on a long handle; it stuns later"
+    }
+  ]
+}

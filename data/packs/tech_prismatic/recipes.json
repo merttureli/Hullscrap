@@ -1,0 +1,10 @@
+{
+"recipes": [
+	{"id": "prismatic_prism_lens", "output": {"item": "prismatic_prism_lens", "count": 1}, "materials": {"scrap": 14, "copper": 6, "silicon": 8, "crystal": 3}, "fab_level": 2, "tools": [], "time": 38, "category": "system"},
+	{"id": "prismatic_refractor", "output": {"item": "prismatic_refractor", "count": 1}, "materials": {"scrap": 14, "titanium": 2, "silicon": 6, "crystal": 3}, "fab_level": 3, "tools": ["laser_cutter"], "time": 34, "category": "system"},
+	{"id": "prismatic_glimmer_turret", "output": {"item": "prismatic_glimmer_turret", "count": 1}, "materials": {"scrap": 12, "copper": 6, "silicon": 6, "crystal": 2}, "fab_level": 2, "tools": [], "time": 32, "category": "system"},
+	{"id": "prismatic_lattice_shield", "output": {"item": "prismatic_lattice_shield", "count": 1}, "materials": {"scrap": 15, "titanium": 4, "silicon": 8, "crystal": 4}, "fab_level": 3, "tools": ["laser_cutter"], "time": 42, "category": "system"},
+	{"id": "prismatic_song_reactor", "output": {"item": "prismatic_song_reactor", "count": 1}, "materials": {"scrap": 20, "copper": 6, "silicon": 8, "crystal": 4}, "fab_level": 3, "tools": ["laser_cutter"], "time": 40, "category": "system"},
+	{"id": "prismatic_resonance_helm", "output": {"item": "prismatic_resonance_helm", "count": 1}, "materials": {"scrap": 10, "copper": 4, "silicon": 4, "crystal": 1}, "fab_level": 2, "tools": [], "time": 18, "category": "system"}
+]
+}

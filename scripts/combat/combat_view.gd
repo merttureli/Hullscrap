@@ -13,6 +13,7 @@ const Session = preload("res://scripts/combat/combat_session.gd")
 const ImpactFx = preload("res://scripts/combat/impact_fx.gd")
 const EffectFx = preload("res://scripts/combat/effect_fx.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
+const Intent = preload("res://scripts/combat/intent.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const Art = preload("res://scripts/view/art.gd")
@@ -277,7 +278,8 @@ func _unhandled_input(e: InputEvent) -> void:
 					_say("Cannot disengage: wreck the enemy, get %d px away, or press J to spool the jump drive" % Session.LEAVE_DISTANCE)
 			KEY_J:
 				var why_jump: String = session.start_jump()
-				_say(why_jump if why_jump != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL))
+				var held: String = session.jump_hold()
+				_say(why_jump if why_jump != "" else (held if held != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL)))
 			KEY_R:
 				restart()
 			KEY_Y:
@@ -392,12 +394,15 @@ func _update_hud() -> void:
 	var vp := _view_size()
 	_schem[0].position = Vector2(10.0, 10.0)
 	_schem[1].position = Vector2(vp.x - Schematic.PANEL.x - 10.0, 10.0)
+	_schem[0].intent = Intent.of(session.arena, session.ai, Session.PLAYER)
 	_banner.position = Vector2((vp.x - _banner.size.x) / 2.0, vp.y * 0.28)
 	_hint.position = Vector2((vp.x - _hint.size.x) / 2.0, 10.0)
 	_jump_bar.position = _schem[1].position + Vector2(0.0, Schematic.PANEL.y + 6.0)
 	var text: String = session.end_text()
 	if text == "" and _clock < _note_until:
 		text = _note
+	if text == "" and session.jump_charge >= 0.0:
+		text = session.jump_hold()
 	if text == "":
 		text = session.morale.banner()
 	_banner.text = text
