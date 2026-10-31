@@ -5,14 +5,15 @@ Race signatures (docs/waves/racial_tech_1.md): Kett amber chitin (y/a/u, seams n
 Mire wet teal housings (U/T/t), brass pipes (y/a/u), red hand-wheels (r), glass and steam (c/C/H); Sporeling cream and brown (f/Q/q/n) grown housings,
 violet spore sacs (X/V/Z), gill lines; Gauntling mismatched steel / rust / copper (a/u) with colour-coded wires and cyan arcs; Prismatic faceted violet
 and navy (V/Z/N/J) with cyan / magenta / white cores; Grundl dark riveted gunmetal (E/D/W) with amber stencils and chains.
-ORDER lists the ids; export_all() writes the items and the flashes (build_all.py calls it)."""
+ORDER lists the ids; export_all() writes the items and the flashes (build_all.py calls it); python3 hand_race.py does just that.
+The glow of an item is "strongest light wins" per pixel (glow_max), so every glow pixel is an exact palette hue (only its alpha varies)."""
 import os, json
 from px import *
 import pal_races1          # noqa: F401  the three Mire greens (T t U) must exist before the sprites are drawn
 import pal_lines           # noqa: F401  navy, neon cyan / magenta and violet letters
-from mach import glow, outline_all
+from mach import glow
 import sp_items
-from sp_fx import poly_cells, depth_map, draw, glow_frame, PAD
+from sp_fx import PAD
 
 def A(name, rows, w, h):
     """a strictly rectangular ASCII sprite of w x h."""
@@ -55,11 +56,6 @@ def stroke(s, pts, c, w=2):
             for j in range(w):
                 for k in range(w): s.put(x + k, y + j, c)
 
-def line(s, x0, y0, x1, y1, c):
-    n = max(abs(x1 - x0), abs(y1 - y0), 1)
-    for i in range(n + 1): s.put(x0 + round((x1 - x0) * i / n), y0 + round((y1 - y0) * i / n), c)
-
-
 # ===================================================================== KETT: amber chitin, green venom, dark compound-eye lamps
 # ---- sting_pistol: a grown needle gun. A cream needle through a chitin collar, a green venom sac under a hex window, an eye-lamp sight.
 item('sting_pistol', A('sting_pistol', """
@@ -95,7 +91,7 @@ s = A('hive_prod', """
 .ugHgu.
 ..uuu..
 """, 7, 10)
-t = Spr(7, 27); t.stamp(0, 0, s.rows()); s = t
+t = Spr(7, 25); t.stamp(0, 0, s.rows()); s = t
 for y in range(10, 22): tube(s, 2, y, 3, 1, 'y', 'a', 'u')
 for y in (13, 21): band(s, 1, y, 5, 'Q', 'q', 'n')                      # joints
 for y in range(15, 21):                                                 # wrapped grip
@@ -105,10 +101,7 @@ s.stamp(1, 22, """
 .yaaau.
 .unrnu.
 ..aua..
-.......
-.......
 """.strip('\n'))
-for y in range(25, 27): s.hline(2, y, 3, '.')
 item('hive_prod', s, grip=(3, 18), muzzle=(3, -1), cls='melee', culture='kett',
      glow=[('g', (107, 211, 74), 2.4, 0.5), ('y', (255, 210, 58), 2.0, 0.4)],
      notes='Kett hive prod: a long amber chitin pole topped by two honeycomb cells (one yellow, one green) round a cream stinger; a quick jab. Wrapped grip, a dark eye-lamp in the pommel.')
@@ -235,7 +228,7 @@ item('rivet_fist', A('rivet_fist', """
 ...EyaaE...
 ...EuuuE...
 ..EEEEEEE..
-.ELMLMLMWE.
+EMLMEEEMLME
 ELMSSSSuuWE
 EMSSLSSuQuE
 EMSSSSSuuuE
@@ -331,7 +324,7 @@ item('shard_lance', s, grip=(4, 34), foregrip=(4, 17), muzzle=(4, -1), cls='heav
 
 # ===================================================================== GRUNDL: dark riveted freight metal, amber stencils, chains
 # ---- freight_hammer: a dock sledge. A squared riveted gunmetal head with an amber stencil band, a long haft with a hazard-tape grip, a wrist chain.
-s = Spr(13, 39)
+s = Spr(13, 38)
 s.stamp(0, 0, """
 .EEEEEEEEEEE.
 EWSSSSSSSSSWE

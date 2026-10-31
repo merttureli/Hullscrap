@@ -1,7 +1,7 @@
 {
  "frame": [
   9,
-  29
+  27
  ],
  "anchors": {
   "grip": [
@@ -21,7 +21,7 @@
   "image": "hive_prod_glow.png",
   "frame": [
    17,
-   37
+   35
   ],
   "offset": [
    -4,
