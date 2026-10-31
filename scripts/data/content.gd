@@ -16,7 +16,7 @@ extends RefCounted
 const DATA_ROOT := "res://data"
 const ART_ROOT := "res://art"
 ## The kinds that are one <kind>.json each. Their entries sit under the key of the same name unless FILE_KEYS says otherwise.
-const KINDS: Array[String] = ["components", "weapons", "recipes", "items", "materials", "tiles", "species", "traits", "hand_weapons", "factions", "characters"]
+const KINDS: Array[String] = ["components", "weapons", "recipes", "items", "materials", "tiles", "species", "traits", "hand_weapons", "factions", "unlocks", "endings", "characters"]
 const FILE_KEYS := {"hand_weapons": "weapons"}
 ## The kinds that are read from folders of files.
 const FOLDER_KINDS: Array[String] = ["events", "ships"]

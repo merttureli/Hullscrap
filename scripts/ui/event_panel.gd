@@ -3,7 +3,8 @@ extends Control
 ## choices (keys 1-9 or a click). A blue choice (cyan, its reason in brackets) is open to a species,
 ## a trait or an installed part; a greyed one shows what it needs; the rest are hidden. A chosen choice
 ## shows its outcome, the changes in words and any derelict log found; Continue (Enter, Space or a
-## click) goes on to the next page (goto), starts a fight, or ends. open_notice() shows a plain page.
+## click) goes on to the next page (goto), starts a fight, opens the ending screen (an outcome with the `ending`
+## effect) or ends. open_notice() shows a plain page.
 ## While open it takes every key and click, over the map. The rules are in events.gd and campaign.gd; this
 ## node only reads input and draws, in the UI colours of docs/ART_STYLE.md.
 
@@ -11,6 +12,8 @@ extends Control
 signal finished
 ## Emitted when an outcome asked for a fight: `value` is "tier" or a design id, `after_win` {text, effects}.
 signal fight_requested(value: String, after_win: Dictionary)
+## Emitted when an outcome ended the run (the `ending` effect): `id` is the ending. The map turns it into the ending screen.
+signal ending_reached(id: String)
 
 const WIDTH := 940.0
 const PAD := 26.0
@@ -86,7 +89,7 @@ func open_notice(p_title: String, text: String, lines: Array) -> void:
 	event = {}
 	view = []
 	title = p_title
-	result = {"text": text, "lines": lines, "logs": [], "goto": "", "fight": "", "after_win": {}}
+	result = {"text": text, "lines": lines, "logs": [], "goto": "", "fight": "", "ending": "", "after_win": {}}
 	page = "result"
 	message = ""
 	visible = true
@@ -125,7 +128,7 @@ func choose(i: int) -> String:
 	return ""
 
 
-## Leave the result page: the next page, a fight, or the end.
+## Leave the result page: the next page, a fight, the ending screen, or the end.
 func proceed() -> void:
 	if page != "result":
 		return
@@ -134,6 +137,9 @@ func proceed() -> void:
 	if str(r.get("fight", "")) != "":
 		close()
 		fight_requested.emit(str(r["fight"]), r.get("after_win", {}))
+	elif str(r.get("ending", "")) != "":
+		close()
+		ending_reached.emit(str(r["ending"]))
 	elif str(r.get("goto", "")) != "" and c.events.has(str(r["goto"])):
 		open_event(c.events.get_event(str(r["goto"])))
 	else:
@@ -295,16 +301,17 @@ func _draw_result(lay: Dictionary) -> void:
 		draw_multiline_string(_font(), lr.position + Vector2(12.0, 46.0), str(l.get("text", "")), HORIZONTAL_ALIGNMENT_LEFT, lr.size.x - 24.0, 15, -1, DIM_TEXT)
 	var b: Rect2 = lay["button"]
 	var fighting := str(result.get("fight", "")) != ""
+	var ended := str(result.get("ending", "")) != "" and not fighting
 	draw_rect(b, ROW_BG)
-	draw_rect(b, BAD if fighting else EDGE, false, 2.0)
-	_text("To battle (Enter)" if fighting else "Continue (Enter)", b.position + Vector2(24.0, 28.0), 17, BAD if fighting else TEXT)
+	draw_rect(b, BAD if fighting else (AMBER if ended else EDGE), false, 2.0)
+	_text("To battle (Enter)" if fighting else ("The end (Enter)" if ended else "Continue (Enter)"), b.position + Vector2(24.0, 28.0), 17, BAD if fighting else (AMBER if ended else TEXT))
 
 
 ## How a change line reads: 1 good (a gain, a debt paid), -1 bad (a loss, a debt grown), 0 neither.
 static func tone_of(line: String) -> int:
 	if line.contains("is lost"):
 		return -1
-	if line.contains("joins") or line.contains("learned") or line.begins_with("Log ") or line.begins_with("On the map"):
+	if line.contains("joins") or line.contains("learned") or line.begins_with("Log ") or line.begins_with("On the map") or line.begins_with("Unlocked") or line.begins_with("Landmark"):
 		return 1
 	var re := RegEx.new()
 	re.compile("[+-][0-9]+")

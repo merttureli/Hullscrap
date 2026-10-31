@@ -1,0 +1,33 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "normal": [
+   0,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 4,
+   "top": 4,
+   "right": 4,
+   "bottom": 4
+  },
+  "content_margins": {
+   "left": 5,
+   "top": 4,
+   "right": 5,
+   "bottom": 4
+  },
+  "center": "stretch"
+ },
+ "notes": "Floating tooltip / hover-card body: near-black outer line, light steel rim, dark fill. Sits over the world as well as over panels."
+}

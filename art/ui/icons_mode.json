@@ -1,0 +1,54 @@
+{
+ "frame": [
+  24,
+  24
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "build": [
+   0,
+   1,
+   0
+  ],
+  "play": [
+   1,
+   1,
+   0
+  ],
+  "map": [
+   2,
+   1,
+   0
+  ],
+  "shields": [
+   3,
+   1,
+   0
+  ],
+  "crafting": [
+   4,
+   1,
+   0
+  ],
+  "help": [
+   5,
+   1,
+   0
+  ],
+  "pause": [
+   6,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "center": [
+   12,
+   12
+  ]
+ },
+ "notes": "Mode-bar icons, 24x24 (anim name = the mode): build (wrench and hammer), play, map (star chart), shields, crafting (anvil), help, pause. Steel bodies with one accent each; for the active mode use the button `hover` or `pressed` frame behind it, and tint the icon with modulate if you want it lit."
+}

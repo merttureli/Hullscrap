@@ -19,23 +19,29 @@ extends RefCounted
 ## - `items` and `credits` in a choice's requires must be held; they are paid only when `pay` is true
 ##   (in requires or on the choice).
 ## - `after_win` ({text, effects}) on an event, or on an outcome, runs after a won fight.
+## - `landmark` (true, or a title) on an event makes it a landmark (docs/CONTENT.md section 13): when a choice with
+##   effects is taken (the rule of `once`) it is recorded in the profile (the first time ever) and in the run log. A landmark
+##   does not end the run. The effect `unlock` (an id of data/unlocks.json, or a list) earns something for the next runs and
+##   shows "Unlocked: <name>"; the effect `ending` (an id of data/endings.json) ends the run as a win: choose() and
+##   apply() hand it back and the event panel opens the ending screen.
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
 
 const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Characters = preload("res://scripts/crew/characters.gd")
+const Unlocks = preload("res://scripts/space/unlocks.gd")
 
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
 const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest"]
-const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "text", "choices", "after_win"]
+const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "text", "choices", "after_win", "landmark"]
 const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay"]
 const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "species", "trait", "items", "pay", "component", "credits"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
-const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log"]
+const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending"]
 const RECRUIT_KEYS: Array = ["name", "species", "character"]
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
 const SHIPS_DIR := "res://data/ships/"
@@ -99,17 +105,32 @@ func _index_pages() -> void:
 					_pages[eff["goto"]] = true
 
 
-## Read every data/logs/*.json ({"logs": [{id, title, ship, faction, text}]}) into `logs`.
+## Read every data/logs/*.json ({"logs": [{id, title, ship, faction, text}]}) into `logs`, then each pack's
+## logs.json and logs/*.json, in pack order.
 func _load_logs() -> void:
 	logs.clear()
-	var names: Array = Array(DirAccess.get_files_at(LOGS_DIR)).filter(func(f): return f.ends_with(".json"))
-	names.sort()
-	for f in names:
-		var data = JSON.parse_string(FileAccess.get_file_as_string(LOGS_DIR + "/" + f))
+	var paths: Array[String] = _json_files(LOGS_DIR)
+	for p in Content.packs():
+		if FileAccess.file_exists(p["dir"] + "/logs.json"):
+			paths.append(p["dir"] + "/logs.json")
+		paths.append_array(_json_files(p["dir"] + "/logs"))
+	for path in paths:
+		var data = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if data is Dictionary and data.get("logs") is Array:
 			for l in data["logs"]:
 				if l is Dictionary and l.get("id") is String:
 					logs[l["id"]] = l
+
+
+static func _json_files(dir: String) -> Array[String]:
+	var out: Array[String] = []
+	if not DirAccess.dir_exists_absolute(dir):
+		return out
+	var names: Array = Array(DirAccess.get_files_at(dir)).filter(func(f): return f.ends_with(".json"))
+	names.sort()
+	for f in names:
+		out.append(dir + "/" + f)
+	return out
 
 
 func _load_file(path: String) -> void:
@@ -330,10 +351,10 @@ static func _name(ship, id: String) -> String:
 
 
 ## Take choice `index` of `ev`: pay what it asks to pay, roll an outcome, apply its effects. Returns
-## {ok, why, text, lines, goto, fight, logs, after_win}; `lines` are the changes in words ("-40 credits"),
-## `goto` an event id to show next, `fight` a design id or "tier" for the controller to start, `logs`
-## the derelict logs found (each {id, title, ship, faction, text}) and `after_win` the {text, effects}
-## to run if that fight is won. ok is false (and nothing changes) when
+## {ok, why, text, lines, goto, fight, ending, logs, after_win}; `lines` are the changes in words ("-40 credits"),
+## `goto` an event id to show next, `fight` a design id or "tier" for the controller to start, `ending` the id of the
+## ending the outcome reached ("" for none), `logs` the derelict logs found (each {id, title, ship, faction, text}) and
+## `after_win` the {text, effects} to run if that fight is won. ok is false (and nothing changes) when
 ## the choice is not on offer or its price cannot be paid.
 func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dictionary:
 	var entry := {}
@@ -356,10 +377,21 @@ func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dicti
 	var outcome := roll(ch.get("outcomes", []), c.rng)
 	if bool(ev.get("once", false)) and not _dict(outcome.get("effects")).is_empty():
 		c.used[str(ev["id"])] = true  # spent: an outcome that does something
+	var mark := landmark_title(ev)
+	if mark != "" and not _dict(outcome.get("effects")).is_empty() and c.note_landmark(str(ev["id"]), mark):
+		lines.append("Landmark: " + mark)  # first, as it was met before what it gave
 	var res := apply(_dict(outcome.get("effects")), c, ship, node)
 	lines.append_array(res["lines"])
 	var after: Dictionary = _dict(outcome.get("after_win")) if outcome.has("after_win") else _dict(ev.get("after_win"))
-	return {"ok": true, "why": "", "text": str(outcome.get("text", "")), "lines": lines, "goto": res["goto"], "fight": res["fight"], "logs": res["logs"], "after_win": after}
+	return {"ok": true, "why": "", "text": str(outcome.get("text", "")), "lines": lines, "goto": res["goto"], "fight": res["fight"], "ending": res["ending"], "logs": res["logs"], "after_win": after}
+
+
+## The title of landmark event `ev` ("" when it is not one): its `landmark` text, else its id as words.
+static func landmark_title(ev: Dictionary) -> String:
+	var v = ev.get("landmark")
+	if v is String and v != "":
+		return v
+	return str(ev.get("id", "")).replace("_", " ").capitalize() if v is bool and v else ""
 
 
 ## One of `outcomes` ({weight, ...}) by weight, with `rng`. {} for an empty list.
@@ -381,9 +413,9 @@ static func roll(outcomes, rng: RandomNumberGenerator) -> Dictionary:
 
 # --- effects ------------------------------------------------------------------------------------------
 
-## Apply `effects` to campaign `c` and `ship`. Returns {lines, goto, fight, logs}: the changes in words,
-## the follow-up page and the fight to start (both "" when there is none) and the derelict logs found.
-## The fight itself is not started here.
+## Apply `effects` to campaign `c` and `ship`. Returns {lines, goto, fight, ending, logs}: the changes in words,
+## the follow-up page, the fight to start and the ending reached (each "" when there is none) and the derelict logs
+## found. The fight is not started here, and the ending screen is not opened (the event panel does).
 func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 	var lines: Array = []
 	var found: Array = []
@@ -449,7 +481,13 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 			c.logs_found[str(id)] = true
 			found.append(logs[str(id)])
 			lines.append(("Log read again: " if again else "Log found: ") + str(logs[str(id)].get("title", id)))
-	return {"lines": lines, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "logs": found}
+	for id in _list(effects.get("unlock")):
+		if Unlocks.has(str(id)) and c.unlock(str(id)):
+			lines.append("Unlocked: " + Unlocks.name_of(str(id)))
+	var ending := str(effects.get("ending", ""))
+	if ending != "":
+		c.finish(ending)
+	return {"lines": lines, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "ending": ending, "logs": found}
 
 
 # --- validation ---------------------------------------------------------------------------------------
@@ -477,9 +515,10 @@ static func _ids_of(path: String, key: String) -> Dictionary:
 
 
 static func _known() -> Dictionary:
-	var items := _ids_of("res://data/items.json", "items")
-	items.merge(_ids_of("res://data/components.json", "components"))
-	items.merge(_ids_of("res://data/materials.json", "materials"))
+	var items := {}  # core and pack items, components and materials
+	for kind in ["items", "components", "materials"]:
+		for id in Content.ids(kind):
+			items[id] = true
 	items["credits"] = true
 	items["fuel"] = true
 	var places := {}
@@ -499,11 +538,17 @@ static func _known() -> Dictionary:
 	var traits := {}
 	for id in TraitSet.library():
 		traits[id] = true
+	var unlocks := {}
+	for id in Content.ids("unlocks"):
+		unlocks[id] = true
+	var endings := {}
+	for id in Content.ids("endings"):
+		endings[id] = true
 	var characters := {}
 	for id in Content.ids("characters"):
 		characters[id] = true
 	return {"characters": characters, "items": items, "components": _ids_of("res://data/components.json", "components"), "recipes": _ids_of("res://data/recipes.json", "recipes"),
-		"places": places, "factions": factions, "species": species, "traits": traits}
+		"places": places, "factions": factions, "species": species, "traits": traits, "unlocks": unlocks, "endings": endings}
 
 
 func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[String]) -> void:
@@ -518,12 +563,16 @@ func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[S
 		bad.call("weight must be a number, 0 or more")
 	if ev.has("once") and not ev["once"] is bool:
 		bad.call("once must be true or false")
+	if ev.has("landmark") and not (ev["landmark"] is bool or (ev["landmark"] is String and ev["landmark"] != "")):
+		bad.call("landmark must be true, false or a title")
 	if ev.has("requires"):
 		_check_req(ev["requires"], EVENT_REQ_KEYS, "requires", known, bad)
 	if not (ev.get("text") is String and ev["text"] != ""):
 		bad.call("text must be a non-empty string")
 	if ev.has("after_win"):
 		_check_after(ev["after_win"], "after_win", known, bad)
+	if _is_landmark(ev) and not _has_effects(ev):
+		bad.call("a landmark needs a choice with effects (it is recorded when one is taken)")
 	if not ev.has("choices"):
 		return  # a text with no choices is allowed: the panel offers a way out
 	var choices = ev["choices"]
@@ -620,7 +669,7 @@ func _check_items(items, where: String, known: Dictionary, bad: Callable, positi
 		return
 	for id in items:
 		if not known["items"].has(id):
-			bad.call("%s: unknown item id '%s' (not in items.json, components.json, materials.json, credits or fuel)" % [where, id])
+			bad.call("%s: unknown item id '%s' (not an item, component or material of the core or a pack, credits or fuel)" % [where, id])
 		if not _is_int(items[id]) or (positive and items[id] <= 0) or items[id] == 0:
 			bad.call("%s: the count of '%s' must be a whole number%s" % [where, id, ", more than 0" if positive else ", not 0"])
 
@@ -682,10 +731,29 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 		bad.call("%s: goto '%s' is not an event id in data/events" % [where, eff["goto"]])
 	for l in _list(eff.get("log")):
 		if not logs.has(l):
-			bad.call("%s: unknown log id '%s' (not in data/logs/*.json)" % [where, l])
+			bad.call("%s: unknown log id '%s' (not in data/logs/*.json or a pack's logs)" % [where, l])
 	for r in _list(eff.get("reveal")):
 		if not (r is String and (known["places"].has(r) or _is_node_id(r) or NODE_TYPES.has(r))):
 			bad.call("%s: reveal '%s' is not a place id, a node type or a node id like n07" % [where, r])
+	for u in _list(eff.get("unlock")):
+		if not known["unlocks"].has(u):
+			bad.call("%s: unknown unlock id '%s' (not in data/unlocks.json or a pack's unlocks.json)" % [where, u])
+	if eff.has("ending") and not (eff["ending"] is String and known["endings"].has(eff["ending"])):
+		bad.call("%s: unknown ending id '%s' (not in data/endings.json or a pack's endings.json)" % [where, eff["ending"]])
+
+
+static func _is_landmark(ev: Dictionary) -> bool:
+	var v = ev.get("landmark")
+	return (v is bool and v) or (v is String and v != "")
+
+
+## Does some outcome of some choice of `ev` have effects?
+static func _has_effects(ev: Dictionary) -> bool:
+	for ch in _list(ev.get("choices")):
+		for o in _list(_dict(ch).get("outcomes")):
+			if not _dict(_dict(o).get("effects")).is_empty():
+				return true
+	return false
 
 
 static func _is_num(v) -> bool:

@@ -1,0 +1,8 @@
+{
+	"events": [
+		{"id": "fx_landmark", "type": "anomaly", "weight": 0, "landmark": "Seeing the Fixture", "text": "A landmark.",
+			"choices": [{"text": "Look.", "outcomes": [{"text": "You look.", "effects": {"items": {"scrap": 5}, "unlock": "fx_skin"}}]}]},
+		{"id": "fx_finale", "type": "page", "text": "The end.",
+			"choices": [{"text": "Settle.", "outcomes": [{"text": "Home.", "effects": {"ending": "fx_end", "unlock": ["fx_tender", "fx_fenn"]}}]}]}
+	]
+}
