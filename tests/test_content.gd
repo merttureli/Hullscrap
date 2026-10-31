@@ -11,6 +11,7 @@ const Abilities = preload("res://scripts/sim/abilities.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
 const Regions = preload("res://scripts/space/regions.gd")
@@ -317,6 +318,7 @@ func all_problems() -> Array[String]:
 	out.append_array(trait_problems(Content.list("traits")))
 	out.append_array(crew_key_problems(Content.list("species"), CrewMember.config().get("traits", {}), _known_traits()))
 	out.append_array(balance_problems(Content.list("components"), Balance.load_table(), lines))
+	out.append_array(CrewAbilities.problems())  # the ability vocabulary, species abilities and every unique character
 	out.append_array(event_problems())
 	return out
 

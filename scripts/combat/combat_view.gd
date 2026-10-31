@@ -287,6 +287,9 @@ func _unhandled_input(e: InputEvent) -> void:
 				var why := session.arena.overcharge(Session.PLAYER)
 				if why != "":
 					_say("Overcharge: " + why)
+			KEY_G:  # the selected crew member's ability (the crew bar shows how it went)
+				if crew != null and crew.has_method("press_ability"):
+					crew.press_ability()
 			_:
 				var n: int = e.keycode - KEY_1
 				if n >= 0 and n <= 8:
