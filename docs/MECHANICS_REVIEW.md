@@ -136,15 +136,43 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 - **Handed to balance**: large generated enemies sit outside starter gun range, because the pilot keeps bounding circles apart. The recommendation is a hull-to-hull gap.
 
 ## 5. What changed and why it's more fun
-*(Kept up to date as features land; screenshots in `/home/user/hs/shots/mech_*`.)*
+*(The presentation for the owner. Screenshots are in `/home/user/hs/shots/mech_*`.)*
 
-**In one line**: the Drift now pushes you forward, fights can end four ways, and what you beat is what you get, so every jump and every shot is a decision with a price.
+**In one line**: the Drift now pushes you forward, you can read the danger before you choose it, fights end in more than one way, and what you beat is what you get. Every jump and every shot is a decision with a price. That's FTL's hardness, made fair.
 
+**The rule we kept**: no new resource, no new screen, no content for its own sake. Eight mechanics, each one rule that makes an existing system matter, built on the vocabulary the game already had (events, the arena, the crew sim, shipgen). Every number is in data.
+
+### The run: a reason to move, and a reason to choose
 | Before (Beta 1) | After (Beta 2) | Why it's more fun |
 |---|---|---|
-| You could sit at any node with a Net Mouth and farm forever (`mech_before_idle_farming.png`). | **The Hollow tide** sweeps each region a step per jump, and every 4 minutes of lingering (`mech_tide_1_map.png`, `mech_tide_3_hud_amber.png`). Places behind it go Hollow: ghost ships, dead beacons, no trade (`mech_tide_4_hollow_event.png`). | "One more beacon?" is now a gamble, as in FTL. Idling has a cost, and a run has a shape. |
-| A fight ended one way: shoot the hull to 0. An enemy with its whole crew down kept fighting. | **Enemy morale**: a beaten enemy surrenders (Y takes the offer, `mech_morale_1_surrender_banner.png`), runs (a 15 s jump spool you stop by shooting its engines or helm, `mech_morale_2_jump_bar.png`), or is **captured** when its crew is all down (`mech_morale_4_captured.png`). | What you aim at matters: engines to stop a runner, fire and vents to capture a ship whole. Mercy or greed is your call. |
-| "Pirate wrecked. Salvage comes later." A 25% roll for one random part (`mech_before_fight_won.png`). | **Salvage what survives**: pick one of the wreck's surviving parts, scan one for its blueprint, or strip her for scrap (`mech_salvage_2_pick.png`). A captured ship gives 4 picks plus the scrap. | The title fantasy, in the loop. Slay the Spire's "pick 1 of 3", and scans finally give blueprints. |
-| Crew went down and always got back up. | **Bleed out**: a downed crew member dies in 45 s unless someone reaches them or a medbay is powered. A red ring counts down (`mech_salvage_3_bleed_ring.png`). | Fires, vents and breaches have stakes. "Vent the room with Rook inside?" is a real question. |
+| You could sit at any node with a Net Mouth and farm forever: one idle minute paid as much as an event, with no risk (`mech_before_idle_farming.png`). | **The Hollow tide** sweeps each region from the entry toward the exit, a step per jump and a step per 4 minutes spent in one place (`mech_tide_1_map.png`, `mech_tide_3_hud_amber.png`). Places behind it go Hollow: ghost ships, dead beacons, no trade (`mech_tide_4_hollow_event.png`). Hollow fights pay only scrap, so they can't be farmed. | "One more beacon?" is a gamble, as in FTL. A run has a shape and a pace. |
+| A region's exit was just a door. | **Exit wardens**: every exit is held by a known ship you see on the region card ("Exit warden: Clan Hulk, Threat 2/5" plus its counter, `mech_wardens_cards.png`). At the exit, pay the toll, be waved through on good standing, or break through (`mech_wardens_event.png`, `mech_wardens_fight.png`). | Slay the Spire's known boss. You build toward it all region, and picking a region is picking a challenge. |
+| You couldn't see how dangerous a fight was until it started. | **Threat you can read**: fight choices carry "[Threat 4/5]" (`mech_threat_1_event.png`), the fight opens with a threat banner, and the enemy schematic shows skulls (`mech_threat_2_fight_banner.png`). | CONTENT 14's "danger is readable; ignoring it is your choice". A death is your call, not a surprise. |
+| Every fight happened in the same empty space. | **Hazards**: regions roll ion storms, star heat, gas clouds, radiation and debris surges, shown on the map (`mech_hazards_map_tooltip.png`). Each changes *how* you fight: shields recharge at half speed in a storm (`mech_hazards_ion_storm.png`), and flares light fires on the side facing the star (`mech_hazards_flare_fires.png`). | FTL's environments. A route can be chosen *because* of a storm: a shield brick you can't crack in open space is beatable in one. |
 
-Round 2 (in progress): enemy intent on your schematic (P6), and the five region hazards made real (P8).
+### The fight: what you aim at matters
+| Before | After | Why it's more fun |
+|---|---|---|
+| A fight ended one way: shoot the hull to 0. An enemy with all its crew down kept fighting. | **Enemy morale**: a beaten enemy surrenders (Y takes the offer, `mech_morale_1_surrender_banner.png`), runs (a 15 s jump spool you stop by knocking out its engines or helm, `mech_morale_2_jump_bar.png`), or is **captured** when its whole crew is down (`mech_morale_4_captured.png`). Your own J spool follows the same rule. | Targeting decisions in real time: engines to stop a runner, fire and vents to take a ship whole. Mercy or greed is your call. A third of the old endless stalemates now end. |
+| Shield balance was a guess. | **Enemy intent**: your schematic marks the part the enemy is aiming at and counts down its heavy shots ("Artemis in 1.2 s", `mech_intent_2_two_rows.png`). | Into the Breach's lesson in real time: you see the blow coming, so turning and shifting shields are decisions. |
+
+### After the fight: the hullscrapper's reward, and a real cost
+| Before | After | Why it's more fun |
+|---|---|---|
+| "Pirate wrecked. Salvage comes later." A 25% roll for one random part (`mech_before_fight_won.png`). | **Salvage what survives**: pick one of the wreck's surviving parts, scan one for its blueprint, or strip her for scrap (`mech_salvage_2_pick.png`). Parts you wrecked aren't offered. A captured ship and a dangerous one offer more picks (`mech_threat_6_salvage_5.png`). | The game's title, in the loop: Slay the Spire's "pick 1 of 3", and scanning finally gives blueprints. |
+| Crew went down and always got back up. | **Bleed out**: a downed crew member dies in 45 s unless a crewmate reaches them or a powered medbay holds them. A red ring counts down (`mech_salvage_3_bleed_ring.png`). | Fires, vents and breaches have stakes. "Vent the room with Rook inside?" is a real question, and medbays and fire doors are worth building. |
+
+### How to try it (Beta 2)
+- **Tide**: M opens the map. Watch the band and the "Tide" clock in the status bar; sit in one place in play mode and the top-right line counts down.
+- **Wardens**: reach a region's exit beacon (always shown on the map). The next region's warden is on its card.
+- **Threat**: any event with a fight choice shows "[Threat N/5]".
+- **Morale**: in a fight, bring the enemy below a third of its hull. Y accepts a surrender; hit its engines or helm to stop a jump.
+- **Salvage**: win a fight; the salvage panel opens.
+- **Bleed out**: let a crew member go down in a fire; watch the ring.
+- **Intent**: the panel under your schematic, top left, in any fight.
+- **Hazards**: the map's node badges and tooltips; the fight HUD names the hazard.
+
+### What we measured
+- AI-vs-AI fights that never ended fell from 12 to 8 of 18 once morale was in. 4 of them ended in a capture, 3 of those rammer fights that used to run forever.
+- The soak (3 starters × 3 seeds × 25 jumps) stays green through every merge. On main at round 3: 1450 tests passed, and the soak met 15 wardens (9 cleared) and 15 salvages, and learned blueprints from scans.
+- Still with the balance track: the Courier and Prism starters struggle against the basic pirate when AI-flown (F6), and large generated enemies sat outside starter gun range. The fix is the hull-to-hull gap I recommended.
