@@ -173,7 +173,11 @@ func build_board(ship) -> void:
 	for c in Fire.sorted_cells(grid.breached.keys()):
 		var tile: Dictionary = grid.defs.get_def(grid.breached[c]) if grid.defs != null else {}
 		var mult := float(ship.lines.get(str(tile.get("line", "standard")), {}).get("repair", 1.0))
-		_add(b, _job("repair_breach", "breach:%d,%d" % [c.x, c.y], [c], {"cell": c, "work": float(j["repair_breach"]["seconds"]) * mult}))
+		var extra := {"cell": c, "work": float(j["repair_breach"]["seconds"]) * mult}
+		var mount: int = ship.components.link_at(c)
+		if mount >= 0:  # a breach in a hull mount's wall: its own inside half may fill the only floor beside it, so it is worked from there
+			extra["reach"] = ship.components.instances[mount]["cells"].duplicate()
+		_add(b, _job("repair_breach", "breach:%d,%d" % [c.x, c.y], [c], extra))
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
 	for uid in uids:
@@ -626,7 +630,7 @@ func in_reach(m, job: Dictionary) -> bool:
 	if job["type"] == "rest":
 		return job["cells"].has(m.cell())
 	var body: Array[Vector2i] = m.body_cells()
-	for c in job["cells"]:
+	for c in job["cells"] + job.get("reach", []):
 		for b in body:
 			if absi(b.x - c.x) + absi(b.y - c.y) <= 1:
 				return true
@@ -651,6 +655,15 @@ func stand_spots(ship, job: Dictionary, body := Pathfinder.BODY) -> Array[Vector
 			for oy in body:
 				for ox in body:
 					_try_spot(grid, n - Vector2i(ox, oy), inside, seen, all, body)
+	if all.is_empty() and job.has("reach"):  # a breach in a mount's wall: beside the mount's inside half
+		var near := {}
+		for c in job["reach"]:
+			near[c] = true
+		for c in job["reach"]:
+			for n in _beside(c, near):
+				for oy in body:
+					for ox in body:
+						_try_spot(grid, n - Vector2i(ox, oy), near, seen, all, body)
 	if all.is_empty() and job["type"] != "rest":  # no room beside it: stand on it
 		for c in job["cells"]:
 			for oy in body:
