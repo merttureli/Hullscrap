@@ -1,0 +1,53 @@
+{"events": [
+    {
+      "id": "char_zircon_bad_light", "type": "asteroid_field", "weight": 22, "once": true, "requires": {"region": "prismatic_choir"},
+      "text": "A crystal garden the size of a barge drifts through the Choir, throwing off hard coloured light. In the middle of it a Prismatic, tall and pale as a chandelier, stands in a ring of her own reflected glow, tutting at the angle of every shard. 'No, no, no,' she tells the nearest one. 'That is a fourth-order caustic and you know it.' She sees you. 'You. That ship has a shield. Is it aligned? I can tell from here that it is not. It is making my teeth sing.'",
+      "choices": [
+        {"text": "Hire her as a shield tuner (200 credits).", "requires": {"credits": 200, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Zircon accepts the credits like a bird accepting a worm, pockets two shards from the garden, and leaves the rest in a ring on your hull to settle. By the time she is on your bridge she has corrected your shield's focus by two degrees and your attitude by several more. 'That is better,' she says. 'Now. Where is the glare?'", "effects": {"recruit": {"character": "zircon"}}}
+        ]},
+        {"text": "Pay her in crystal (4 crystal).", "requires": {"items": {"crystal": 4}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "She sorts the crystal by temper, mutters at two pieces, and gives you one back. 'This is cut wrong,' she says. 'I forgive you. I will recut it myself.' She is aboard before you finish saying yes, and has already moved a lamp.", "effects": {"recruit": {"character": "zircon"}}}
+        ]},
+        {"text": "[Shield] Show her your shield generator.", "requires": {"component": "shield_mk1"}, "outcomes": [
+          {"weight": 100, "text": "She stands in front of it for a full minute and says, 'Oh dear.' Then, with enormous tenderness, she puts one hand to the emitter and adjusts it by a hair. Every light in the room softens. 'I will stay,' says Zircon, 'until I have fixed all of it. That might be a while. I have a lot to say about your lamps.'", "effects": {"recruit": {"character": "zircon"}}}
+        ]},
+        {"text": "Admire the garden and move on.", "outcomes": [
+          {"weight": 100, "text": "'Mind the caustic,' she says, and then, as you go, a little wistfully, 'It is making my teeth sing.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_jacinth_cracked_lens", "type": "anomaly", "weight": 20, "once": true, "requires": {"region": "prismatic_choir", "stage_min": 5},
+      "text": "Somewhere in the Choir a note is wrong, and a Prismatic in a plain grey shawl is standing in the gap in the music, crying quietly into a cracked lens. 'It is no use,' she says. 'The lens split in the last ion front. I cannot hear the gates without it. And I can hear them, you see. I always could. The Choir has stopped believing me.' She turns the lens in her hands. It flashes once and goes dull. 'I need three crystals to cut another. I have no crystals. I have a very good ear.'",
+      "choices": [
+        {"text": "Give her three crystal.", "requires": {"items": {"crystal": 3}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "She cuts the new lens on the spot, with a wet stone and a hum, and holds it up to the dark. A pure thin note goes out across the Choir, and something very far away, impossibly, answers. Jacinth sits down hard. 'There,' she whispers. 'I am not mad.' She kisses your hand. 'I am not allowed to leave yet,' she says. 'They would think I was running away. But I am going to the gates, and I would like you to be there.'", "effects": {"flag": "char_jacinth_lens", "rep": {"lumen": 2}}}
+        ]},
+        {"text": "Pay for the cutting (150 credits).", "requires": {"credits": 150, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "A passing Lumen glass-cutter does the work for a fee that includes a wince. The new lens takes the dark and sings. Something far away answers it, once. 'Thank you,' says Jacinth. 'I will be at the gates. Be there too, if you can.'", "effects": {"flag": "char_jacinth_lens"}}
+        ]},
+        {"text": "[Prismatic] Hum the missing harmonic.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums the counterpoint, a clean fifth under the broken note, and the cracked lens catches it and glows. Jacinth stares at them. 'You can hear it too,' she says. 'Then it is not me.' She holds the lens up and it sings on its own, mended in all but the crack. 'I will find you,' she says. 'Soon, I think. It is already very loud out there.'", "effects": {"flag": "char_jacinth_lens", "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Say you are sorry, and move on.", "outcomes": [
+          {"weight": 100, "text": "'I understand,' says Jacinth, to the lens. 'Nobody believes the singer until the song comes back.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_jacinth_gate_shard", "type": "anomaly", "weight": 50, "once": true, "requires": {"stage_min": 5, "flag": "char_jacinth_lens"},
+      "text": "A Lumen survey scout is turning circles beside a shard of dead gate no bigger than a house, and the shard is humming. The scout's pilot hails you, very fast. 'Is this yours? There is a woman in my airlock who says it is hers. She has a lens that has been playing the same note since we arrived, and the shard is playing it back. She will not leave the airlock. She says you will be along. She is very polite about it, and the lock has been shut for six hours.' Through the scout's port a Prismatic in a grey shawl raises a lens and beams at you like sunrise.",
+      "choices": [
+        {"text": "Take her aboard.", "outcomes": [
+          {"weight": 100, "text": "Jacinth steps across with her lens held out in front of her like a lantern, and the shard behind her goes quiet, as if it knew she would not be needing it. 'Thank you,' she says. 'The Choir said I was mad. I would like to be mad where I can see more of the sky.'", "effects": {"recruit": {"character": "jacinth"}}}
+        ]},
+        {"text": "Ask the scout for a finder's fee first (80 credits).", "outcomes": [
+          {"weight": 100, "text": "The pilot, who would have paid twice that, transfers the credits with the speed of someone who has stopped feeling her hands. Jacinth steps across. 'Never be shy about the fee,' she says kindly, and begins, softly, to hum at your hull.", "effects": {"recruit": {"character": "jacinth"}, "items": {"credits": 80}, "rep": {"lumen": -1}}}
+        ]},
+        {"text": "Tell the pilot it is not your problem.", "outcomes": [
+          {"weight": 100, "text": "'Oh,' says the scout pilot. Behind her, in the airlock, a lens gives out one long, patient note.", "effects": {}}
+        ]}
+      ]
+    }
+]}

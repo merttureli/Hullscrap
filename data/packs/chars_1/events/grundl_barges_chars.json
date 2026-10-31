@@ -1,0 +1,35 @@
+{"events": [
+    {
+      "id": "char_brisket_galley_door", "type": "trader", "weight": 24, "once": true, "requires": {"region": "grundl_barges"},
+      "text": "The barge market has one stall nobody is allowed to stand in front of for less than twenty minutes. The Galley Mother who runs it has the build of a small freighter and the temper of a pressure cooker just about to rattle. She feeds you something warm from an iron pot before you have said a word. It is delicious and you cannot work out what it is. 'Eat,' she says. 'Everyone eats first. Then we discuss. The Moor's quartermaster says I am over capacity. I am a kitchen. A kitchen is meant to be over capacity. Take me somewhere with a proper galley and I will make your whole crew work like they love you.'",
+      "choices": [
+        {"text": "Offer her a proper berth (1 bed).", "requires": {"items": {"bed": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Brisket looks at the bed the way another person might look at a rescued puppy. 'It is enough for a start,' she says. She shoulders her pot, her ladle and a sack of something that moves, and walks aboard, taking up roughly the whole hatch. 'Don't touch the sack,' she adds. 'It is for later.'", "effects": {"recruit": {"character": "brisket"}}}
+        ]},
+        {"text": "[Grundl] Praise the stew in barge-dialect.", "requires": {"species": "grundl"}, "outcomes": [
+          {"weight": 100, "text": "Your Grundl rumbles something warm and long in the barge tongue, hand on stomach. Brisket's eyes go wet. 'He knows the third pot,' she tells the market. 'Nobody knows the third pot.' She is coming with you. The stall is left to a cousin who is already stirring.", "effects": {"recruit": {"character": "brisket"}}}
+        ]},
+        {"text": "Eat, say thanks, and go.", "outcomes": [
+          {"weight": 100, "text": "You eat three bowls out of politeness and will be thinking about it for days. 'Come back hungry,' Brisket says, and means it as a threat.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_capstan_hand_crank", "type": "distress", "weight": 22, "once": true, "requires": {"region": "grundl_barges"},
+      "text": "The barge Slow Mercy has lost her reactor and is running her lights, pumps and lifts off a hand crank. On the crank is a Grundl, who has been turning it for three days. The Slow Mercy's owner is on the comm, shouting about whether this is what he pays for. The Grundl, Capstan, says nothing; he simply turns. There are dents in the deck under the crank housing the exact shape of his heels. 'He doesn't tire,' says the owner, sounding almost proud. 'He just doesn't like being told how long.'",
+      "choices": [
+        {"text": "Take a turn on the crank yourself.", "outcomes": [
+          {"weight": 100, "text": "Your crew take turns, and it is astonishing how heavy a handle can be. By the end everyone is sweating and nobody is talking. Capstan watches, impressed. 'You turned,' he says. 'Most only watch. I will come.' The owner, bewildered, lets him go.", "effects": {"recruit": {"character": "capstan"}, "crew_hp": -10, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Pay his wages in arrears (90 credits).", "requires": {"credits": 90, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The owner is so astonished to see money change hands that he forgets to argue. Capstan steps away from the crank for the first time in three days and stands in the middle of the deck. 'The lights stay on,' he says, wondering. 'It is the owner's reactor. He has to fix it now.' He follows you out, still flexing his hands.", "effects": {"recruit": {"character": "capstan"}}}
+        ]},
+        {"text": "[Hauler] Swap cranks with him.", "requires": {"trait": "hauler"}, "outcomes": [
+          {"weight": 100, "text": "Your hauler grips the handle and settles in. Capstan stretches, slowly, with the noise of a bridge being repaired. 'You keep it,' he says, 'when the lights flicker. I will go.' He lifts his bag with one finger and follows you to the lock. Behind you your hauler turns on, in perfect rhythm.", "effects": {"recruit": {"character": "capstan"}}}
+        ]},
+        {"text": "Wish them well and fly on.", "outcomes": [
+          {"weight": 100, "text": "The crank squeaks on. Capstan does not look up. You hear him, faintly, count the turns under his breath.", "effects": {}}
+        ]}
+      ]
+    }
+]}
