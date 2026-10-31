@@ -22,7 +22,7 @@ This doc is the director's working notes: what the reference games get right, wh
 
 ## 2. Where our loop is weak
 
-**F1. Time in space costs nothing (the idle-farming hole).** The debt clock and the danger tier count *jumps*, not time. Intake income counts *minutes*. One Net Mouth brings ~25 scrap a minute, and a Mk1 part costs 20–30 scrap. So the best strategy is to sit at a safe node and wait. Sector space (the Raft loop, this window) makes it the dominant strategy. Raft has the shark, Subnautica oxygen, FTL the fleet. We have nothing yet.
+**F1. Time in space costs nothing (the idle-farming hole).** The debt clock and the danger tier count *jumps*, not time. Intake income counts *minutes*. One Net Mouth brings ~25 scrap a minute, and a Mk1 part costs 20–30 scrap. The average event pays about **11 scrap and 4 credits (wreck fields), 5 scrap and 11 credits (distress), 19 scrap (asteroid fields)**, taking each choice equally often. So **one idle minute is worth about one event**, with no risk. The best strategy is to sit at a safe node and wait. Sector space (the Raft loop, this window) makes it the dominant strategy. Raft has the shark, Subnautica oxygen, FTL the fleet. We have nothing yet.
 
 **F2. Nothing pushes you through a region after stage 2.** The regions brief pauses Ma's debt from stage 3. A region has 16–20 places and a run has 8 regions. With no clock, the right play is to visit every place (~150 jumps), which kills node choice and stretches a 4–8 h run far past its target. FTL's fleet exists precisely for this.
 
