@@ -1,0 +1,7 @@
+{
+  "weapons": {
+    "human_volley_rack": {"kind": "missile", "damage_type": "explosive", "damage": 1.5, "cooldown": 5.0, "range": 1100, "shots": 3, "pierce": 0, "fire_chance": 0.0, "speed": 340, "turn": 1.8, "splash": 1, "spread": 14, "pass_shields": true, "ammo": "missile", "ammo_mult": 1.5, "turret": false, "gimbal": 5},
+    "human_concord_railgun": {"kind": "bolt", "damage_type": "kinetic", "damage": 6, "cooldown": 2.0, "range": 1300, "shots": 1, "pierce": 2, "fire_chance": 0.0, "speed": 1500, "heat_per_shot": 8, "turret": false, "gimbal": 3},
+    "human_flak_screen": {"kind": "flak", "damage_type": "kinetic", "damage": 0.6, "cooldown": 1.2, "range": 420, "shots": 4, "pierce": 0, "fire_chance": 0.0, "speed": 700, "spread": 18, "turret": true, "gimbal": 0, "arc": 300, "track": 160, "accuracy": 0.85}
+  }
+}

@@ -8,8 +8,8 @@ extends RefCounted
 ##   layers), charge_mult (a factor on every weapon's cooldown), evasion_add.
 ## - side_effects, per second while it runs: drain_o2 (fraction of the part's room air lost), heat,
 ##   power_spike (extra power draw, taken in the power solve), fire_risk (chance), self_damage (hp),
-##   shock_organic (hp a second to the crew in the room who are not mechanical), wet (crew in the room work
-##   slower, parts in it cool).
+##   shock_organic (hp a second to the crew in the room who are not mechanical), scorch (the same to those without
+##   heat_resistant), wet (crew in the room work slower, parts in it cool).
 ## - the racial keys of effects, which depend on who stands in the part's room (part_effects.gd has the rules):
 ##   crew_bonus {who, stat, per, max}, crew_needed {count, stat, else_mult, who?}, room_wall_hp_mult,
 ##   heat_above {heat, shield_layer}, room_work_mult {mult, who?, else_mult?}. They are read by the power solve
@@ -34,6 +34,8 @@ const KEYS: Array[String] = ["engine", "shield", "utility"]  ## the combat keys:
 const EFFECTS: Array[String] = PartEffects.EFFECTS  ## the keys of an ability's `effects` that something reads
 const SIDE_EFFECTS: Array[String] = PartEffects.SIDE_EFFECTS  ## the `type`s of its `side_effects`
 const EPS := 1e-9
+const DEFAULT_RECHARGE := 2.0  ## seconds a used shield layer takes to come back: Shields.RECHARGE, which a part's stats.recharge scales
+const MIN_RECHARGE := 0.05  ## the quickest a stats.recharge can count
 
 
 static func fresh_state() -> Dictionary:
@@ -274,7 +276,8 @@ static func part_layers(ship, uid: int, base: int) -> int:
 
 
 ## How fast the used layers of the shield come back, 1 being normal: the layers-weighted mean over the powered
-## shield parts of their crew_needed recharge factors (a part with the crew it needs, or with none, counts 1).
+## shield parts of their own speed, DEFAULT_RECHARGE / stats.recharge (2.0 s is normal, the Neon shield's 1.4 is
+## 1.43 times as fast), times their crew_needed recharge factors (a part with the crew it needs, or with none, counts 1).
 static func recharge_rate(ship, powered: Dictionary) -> float:
 	var weight := 0.0
 	var sum := 0.0
@@ -282,8 +285,9 @@ static func recharge_rate(ship, powered: Dictionary) -> float:
 		var def: Dictionary = ship.components.def(ship.components.instances[uid]["id"])
 		if def.get("family", "") != "shield" or not powered.get(uid, false):
 			continue
-		var layers := float(def.get("stats", {}).get("layers", 0))
-		var f := 1.0
+		var stats: Dictionary = def.get("stats", {})
+		var layers := float(stats.get("layers", 0))
+		var f := DEFAULT_RECHARGE / maxf(float(stats.get("recharge", DEFAULT_RECHARGE)), MIN_RECHARGE)
 		for a in _live(ship, uid):
 			for cn in PartEffects.entries(a.get("effects", {}).get("crew_needed")):
 				if cn.get("stat") == "recharge":
@@ -478,5 +482,7 @@ static func _side_effects(ship, uid: int, a: Dictionary, dt: float, rng: RandomN
 					ship.log_event("%s is disabled" % name)
 			"shock_organic":
 				PartEffects.shock(ship, uid, rate, dt)
+			"scorch":
+				PartEffects.scorch(ship, uid, rate, dt)
 			"wet":
 				PartEffects.wet(ship, uid, slot_key(uid, str(a.get("id", ""))), dt)

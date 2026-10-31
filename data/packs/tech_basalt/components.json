@@ -1,0 +1,204 @@
+{
+  "components": [
+    {
+      "id": "basalt_magma_spitter",
+      "name": "Magma Spitter",
+      "blurb": "Spits slag that keeps eating after it lands. The breech room is aired out with every shot, which the Basalt consider polite.",
+      "quirk": "Slag glob plus acid that burns on for 4 s (+30% damage a second over a Mk2 pulse), but each shot vents 30% of its room's air: Basalt do not breathe.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#d9602a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "basalt_quarry_driver",
+      "name": "Quarry Driver",
+      "blurb": "A quarry slug on a rail. It goes through what you point it at and a few things behind. The room airs out; the Basalt call it a breeze.",
+      "quirk": "A 9-damage slug that pierces 3, but it is slow, and each shot vents 40% of its room's air: Basalt do not breathe.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#8a7f74",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "basalt_pumice_flak",
+      "name": "Pumice Flak",
+      "blurb": "Throws rock in handfuls. It aims best in the dark and the quiet, where the old hands run it.",
+      "quirk": "A splashing flak turret, but at half damage unless a Basalt mans it: they work it airless, steady and unbothered.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#a89a8a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "basalt_vacuum_forge",
+      "name": "Vacuum Forge",
+      "blurb": "A reactor that runs best with no air in the way. It lets the room out through a polite little valve. The Basalt do not notice.",
+      "quirk": "+3 power over a Reactor Mk1 (11 against 8), but it vents 5% of its room's air a second: Basalt do not breathe.",
+      "family": "reactor",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#c8662a",
+      "power": 11,
+      "priority": 0,
+      "manned": false,
+      "hp": 9,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "vent",
+          "name": "Vents its room",
+          "type": "passive",
+          "effects": {},
+          "side_effects": [
+            {
+              "type": "drain_o2",
+              "rate": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "basalt_stonehide_bay",
+      "name": "Stonehide Plating Bay",
+      "blurb": "Quarried plate laid thick over every wall of the room. The walls are very sure of themselves. The air is not invited.",
+      "quirk": "The walls of its room get +50% hp in a fight, but the room cannot keep its air (3% a second): Basalt do not breathe.",
+      "family": "utility",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#9a8c7a",
+      "power": -1,
+      "priority": 3,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 0.5,
+      "cooling": 3.0,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "stonehide",
+          "name": "Stonehide",
+          "type": "passive",
+          "effects": {
+            "room_wall_hp_mult": 1.5
+          },
+          "side_effects": [
+            {
+              "type": "drain_o2",
+              "rate": 0.03
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "basalt_gravity_anchor",
+      "name": "Gravity Anchor",
+      "blurb": "A heavy core that makes the whole ship hard to push around. It pulls on everything near it, air included, and says nothing about it.",
+      "quirk": "Ram damage to the ship's plain cells x0.35 and the crew keep their feet in a ram, but it pulls the air out of its room (3% a second): Basalt do not breathe.",
+      "family": "utility",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#5a6a7a",
+      "power": -2,
+      "priority": 3,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3.0,
+      "stats": {
+        "ram_take": 0.35,
+        "no_knock": 1
+      },
+      "abilities": [
+        {
+          "id": "pull",
+          "name": "Pulls the air",
+          "type": "passive",
+          "effects": {},
+          "side_effects": [
+            {
+              "type": "drain_o2",
+              "rate": 0.03
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
