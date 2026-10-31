@@ -34,21 +34,21 @@ So the rule from now on is: **mechanics are a fixed vocabulary, and content is d
   - `jump_range` (nodes per jump);
   - `fuel_mult`;
   - `reveal_enemy` (show enemy interior and crew on the schematic).
-- **Crew traits**: a **trait library in `data/traits.json`**, resolved in one place (`scripts/crew/traits.gd`, `TraitSet.of(member)`; its `_doc` and the `##` lines say what each key does). Built: `hp_mult`, `speed_mult`, `o2_use`, `suffocate_mult`, `damage_taken`, `work_mult` (as speed factors), `heal_mult`, `mechanical`, `aura` {o2_per_s, heal_per_s, work_mult}, `station` {power_bonus, manned_mult}, `melee_mult` and `ranged_mult` (kept for on-foot fights), `swarm`, `dries_out`, `ion_stun`, and for race wave 2 `body`, `reveal_enemy`, `heat_speed`, `vacuum_walk`, `no_tools`, `hull_mend` and `station.evasion_add` (the true/false ones are `mechanical`, `vacuum_walk`, `no_tools` and `reveal_enemy`: `TraitSet.FLAGS`). Still to come: `line_affinity`, the other `aura` and `station` keys, `counter_melee` and the rest of the Special list. Every trait is a bag of generic keys:
-  - **Body**: `hp_mult`, `speed_mult`, `body` (2 = the normal 2×2; 1 = a small body that fits 1-cell crawlspaces: the pathfinder, `CrewMember.body_size`, the job spots and the collision radius all follow it), `heat_speed` {cold, hot, below, above} (walk speed ×cold when the room's hottest part is below `below`, ×hot above `above`).
+- **Crew traits**: a **trait library in `data/traits.json`**, resolved in one place (`scripts/crew/traits.gd`, `TraitSet.of(member)`; its `_doc` and the `##` lines say what each key does). Built: `hp_mult`, `speed_mult`, `o2_use`, `suffocate_mult`, `damage_taken`, `work_mult` (as speed factors), `heal_mult`, `mechanical`, `aura` {o2_per_s, heal_per_s, work_mult}, `station` {power_bonus, manned_mult}, `melee_mult` and `ranged_mult` (kept for on-foot fights), `swarm`, `dries_out`, `ion_stun`, and for race wave 2 `body`, `reveal_enemy`, `heat_speed`, `vacuum_walk`, `no_tools`, `hull_mend` and `station.evasion_add` and for race wave 3 `revive_once`, `line_affinity`, `split_on_death`, `counter_melee`, `no_suit` and `vacuum_speed` (the true/false ones are `mechanical`, `vacuum_walk`, `no_tools`, `reveal_enemy` and `no_suit`: `TraitSet.FLAGS`). Still to come: the other `aura` and `station` keys and the rest of the Special list. Every trait is a bag of generic keys:
+  - **Body**: `hp_mult`, `speed_mult`, `vacuum_speed` (walk speed ×mult in a room with under 30% of its air, `TraitSet.THIN_AIR`; stacks with `heat_speed`), `body` (2 = the normal 2×2; 1 = a small body that fits 1-cell crawlspaces: the pathfinder, `CrewMember.body_size`, the job spots and the collision radius all follow it), `heat_speed` {cold, hot, below, above} (walk speed ×cold when the room's hottest part is below `below`, ×hot above `above`).
   - **Air**: `o2_use` (0 = doesn't breathe), `suffocate_mult`.
   - **Damage taken**: `damage_taken` {fire, no_air, melee, ranged, ion}, plus `ion_stun` (seconds stunned by ion).
-  - **Work**: `work_mult` {repair, extinguish, breach, man, restock, craft, heal_others}, and `line_affinity` {line: work_mult} (e.g. faster on scrap parts).
+  - **Work**: `work_mult` {repair, extinguish, breach, man, restock, craft, heal_others}, and `line_affinity` {line id: factor} (`{"scrap": 2.0}`: repairing and manning a scrap-line part twice as fast; only parts, not walls; the line ids are those of `data/lines.json`).
   - **Healing**: `heal_mult` {bed, medbay}, `mechanical` (healed by the repair job, not beds).
-  - **Room auras**: `aura` {o2_per_s, heal_per_s, work_mult, heat_per_s, fire_suppress}.
+  - **Room auras**: `aura` {o2_per_s, heal_per_s, work_mult, heat_per_s, fire_suppress}. `aura.work_mult` is the Choir's "others in the room work ×1.15"; no separate key.
   - **Stations**: `station` {manned_mult, power_bonus, evasion_add (flat evasion at the helm)}.
-  - **Fighting**: `melee_mult`, `ranged_mult`, `counter_melee`.
+  - **Fighting**: `melee_mult`, `ranged_mult`, `counter_melee` (damage dealt straight back to whoever hits them in a melee: `CrewAbilities.melee_hit` is the hook the on-foot fights will call). Sable's "breach work ×2, ranged ×1.25" is `work_mult` {breach: 2} and `ranged_mult` 1.25: no new key.
   - **Special**:
     - `vacuum_walk` (no breach or vacuum penalties: built as no suffocation damage; combine it with `o2_use` 0);
-    - `revive_once`;
-    - `split_on_death` (into 2 small bodies that reform);
+    - `revive_once` {after, hp} (the first downing, once a run: no bleeding meanwhile, up again after `after` s at `hp`);
+    - `split_on_death` {reform_s} (bleeding out they become two 1×1 halves with half the max hp each, full; both aboard and up after `reform_s` s: they merge back at the summed hp; if one dies the other stays small);
     - `no_tools` (can't repair or extinguish: `Jobs.TOOL_JOBS`);
-    - `no_suit`;
+    - `no_suit` (`CrewMember.can_wear` / `equip` refuse the gear traits in `TraitSet.SUIT_TRAITS`, with a reason);
     - `regen_in_power` (heals in powered rooms);
     - `hull_mend` {rate, seal} (idle: repairs adjacent wall hp at `rate`/s and seals a breach beside them in `seal` s);
     - `haggler` (prices −10%);

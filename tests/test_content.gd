@@ -190,7 +190,9 @@ func _key_problems(at: String, e: Dictionary, strict: bool) -> Array[String]:
 			continue
 		var subs: Array = TraitSet.KEYS[k]
 		var v = e[k]
-		if subs.is_empty():
+		if TraitSet.OPEN.has(k):
+			out.append_array(TraitSet.extra_problems(at, k, v))
+		elif subs.is_empty():
 			var flag: bool = TraitSet.FLAGS.has(k)
 			if not (v is bool if flag else (v is float or v is int)):
 				out.append("%s: '%s' must be %s" % [at, k, "true or false" if flag else "a number"])
@@ -204,6 +206,7 @@ func _key_problems(at: String, e: Dictionary, strict: bool) -> Array[String]:
 					out.append("%s: '%s' has the unknown key '%s' (known: %s)" % [at, k, sub, ", ".join(subs)])
 				elif not (v[sub] is float or v[sub] is int):
 					out.append("%s: '%s.%s' must be a number" % [at, k, sub])
+			out.append_array(TraitSet.extra_problems(at, k, v))
 	return out
 
 
