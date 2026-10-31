@@ -77,16 +77,16 @@ func _crew_of(s: Session, idx: int, n: int) -> Array:
 
 # --- the break ---------------------------------------------------------------------------------------------
 
-func test_it_breaks_at_35_percent_hull_and_not_before() -> void:
+func test_it_breaks_at_half_hull_and_not_before() -> void:
 	var s := _session()
 	eq(s.morale.state, "steady", "a fresh fight")
-	_hurt(s, 0.36)
+	_hurt(s, 0.51)
 	_run(s, 1.0)
-	eq(s.morale.state, "steady", "36% hull is no break")
+	eq(s.morale.state, "steady", "51% hull is no break")
 	eq(s.morale.rolls, 0, "and nothing was rolled")
-	_hurt(s, 0.35)
+	_hurt(s, 0.5)
 	_run(s, 0.1)
-	check(s.morale.state != "steady", "35% hull breaks it: " + s.morale.state)
+	check(s.morale.state != "steady", "50% hull breaks it: " + s.morale.state)
 	eq(s.morale.rolls, 1, "with one roll")
 
 
@@ -142,7 +142,7 @@ func test_the_styles_weights_come_from_the_data() -> void:
 	eq(s.morale.style, "rustfang", "the pirate raider picks the Rustfang style")
 	eq(_session(3, "res://data/ships/rustfang_rammer.json").morale.style, "ram", "the rammer picks ram")
 	eq(_session(3, COURIER).morale.style, "default", "a design with no morale entry uses the default")
-	check(cfg["break_hull"] == 0.35 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
+	check(cfg["break_hull"] == 0.5 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
 
 
 func test_the_roll_follows_the_weights() -> void:
