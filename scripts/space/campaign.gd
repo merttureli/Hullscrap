@@ -18,12 +18,14 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Sector = preload("res://scripts/space/sector.gd")
+const Tide = preload("res://scripts/space/tide.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
 ## 3 adds `sectors` (the POI states and the ship's place of each sector visited, sector.gd) and `spool` (the jump
 ## drive's charge); older saves load with no sector yet, so the ship arrives at the arrival point of its node's sector.
-const VERSION := 3
+## 4 adds `tide` (the Hollow tide, tide.gd); older saves load with a fresh tide at their jump count.
+const VERSION := 4
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100
@@ -40,6 +42,10 @@ const TOW_DEBT := 150  ## what Ma adds to the debt for a tow home (tow)
 const TOW_FUEL := 2
 const HOSTILE_PATROL := {"id": "patrol_hostile", "type": "patrol", "once": false,
 	"text": "The Concord cutter does not hail you. It has your registry on a list, and the list has changed. Every gun on her flank swings round at once.",
+	"choices": [{"text": "Raise shields.", "outcomes": [{"weight": 100, "text": "", "effects": {"fight": "tier"}}]}]}
+## The event of a Hollow place when no hollow event fits (data/packs/mech_tide has the real ones).
+const HOSTILE_HOLLOW := {"id": "hollow_hostile", "type": "hollow", "once": false,
+	"text": "The beacon here has been dead a long time, and something is still answering it. Lights come up on the dark hulls around you, one after another, all pointing your way.",
 	"choices": [{"text": "Raise shields.", "outcomes": [{"weight": 100, "text": "", "effects": {"fight": "tier"}}]}]}
 
 static var _cfg := {}
@@ -68,6 +74,7 @@ var events_seen := 0  ## events met at nodes, waits and wrecks (the game over sc
 var fights_won := 0  ## fights of the run that were won
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
 var sectors := {}  ## node id -> Sector (sector.gd) for every node visited (made on first use from the seed, so only their states are saved)
+var tide: Tide  ## the Hollow tide over the map (tide.gd): jumps, waits, tows and lingering push it
 var spool := {}  ## the jump drive spooling: {to, t (seconds charged), drift (the no-fuel jump), blocked}; {} when idle
 var last_jump := {}  ## what the last spooled jump did: the jump() result ({ok, why, node, drift, notes})
 var _hull_key := -1
@@ -100,6 +107,7 @@ func _init(p_seed := 1, p_cfg := {}, p_events = null) -> void:
 	drift = Drift.generate(rng, cfg)
 	current = drift.start_id()
 	visited[current] = true
+	tide = Tide.make(drift, current, Tide.config())
 	debt = int(cfg["debt"]["total"])
 	for f in rep_factions():
 		rep[f] = 0
@@ -190,11 +198,13 @@ static func type_info(type: String) -> Dictionary:
 	return config()["types"].get(type, {"label": type, "color": "#ffffff", "glyph": "?"})
 
 
-## What the map calls a node: its name or type when known, "?" otherwise.
+## What the map calls a node: its name or type when known ("The Hollow" for an unnamed place the tide has taken), "?" otherwise.
 func label(id: String) -> String:
 	if not is_known(id):
 		return "?"
 	var n := drift.node(id)
+	if str(n["name"]) == "" and is_hollow(id):
+		return "The Hollow"  # ghosts, whatever the place was
 	return str(n["name"]) if str(n["name"]) != "" else str(type_info(str(n["type"]))["label"])
 
 
@@ -360,7 +370,27 @@ func _advance(n: int) -> Array:
 				notes.append("%s's collectors have noted a missed payment." % d["creditor"])
 			else:
 				notes.append("A payment fell due, and you are paid up.")
+	notes.append_array(_tide_notes(tide.advance(n)))
 	return notes
+
+
+## The line for `fell` places the Hollow tide has just taken (none for 0).
+func _tide_notes(fell: int) -> Array:
+	return ["The Hollow takes %d more place%s." % [fell, "" if fell == 1 else "s"]] if fell > 0 else []
+
+
+## Has the Hollow tide taken node `id` (tide.gd)? Stations and the exit never fall.
+func is_hollow(id: String) -> bool:
+	return tide.is_hollow(id)
+
+
+## A stretch of `dt` seconds is lived in the same place (play mode, no fight, no map): the tide creeps on. Returns lines for
+## the HUD and the chronicle. It never moves the jump counter or the debt.
+func linger(dt: float) -> Array:
+	var fell := tide.hollow_count()
+	var lines := tide.linger(dt)
+	lines.append_array(_tide_notes(tide.hollow_count() - fell))
+	return lines
 
 
 ## With no fuel: wait for a passing trader. Time passes (one jump on the counter) and a trader event
@@ -413,6 +443,12 @@ func arrive(ship) -> Dictionary:
 			out["event"] = due
 			events_seen += 1
 			return out
+	if is_hollow(current):  # the tide has taken this place: ghost ships instead of its own event
+		out["event"] = events.pick(self, {"id": current, "type": "hollow", "place": ""}, ship)
+		if out["event"].is_empty():
+			out["event"] = HOSTILE_HOLLOW
+		events_seen += 1
+		return out
 	if n["type"] == "patrol" and refuses("concord"):
 		out["event"] = HOSTILE_PATROL
 		events_seen += 1
@@ -552,6 +588,7 @@ func current_sector():
 
 ## The ship arrives at node `id` (a jump or a tow): in its sector, at the arrival point, flying with `ship`'s numbers.
 func _enter(id: String, ship) -> void:
+	tide.reset_linger()
 	var s = sector_at(id)
 	if s == null:
 		return
@@ -634,7 +671,9 @@ func fight_path(value: String, node_type: String) -> String:
 	if value != "tier":
 		return value if value.begins_with("res://") else "res://data/ships/%s.json" % value
 	var kind := "patrol" if node_type == "patrol" else "pirate"
-	if node_type == "pirate" and misses() >= 2:
+	if node_type == "hollow" or is_hollow(current):  # a Hollow place sends ghost ships whatever it was
+		kind = "hollow"
+	elif node_type == "pirate" and misses() >= 2:
 		kind = "rammer"
 	var table: Array = cfg["enemies"][kind][str(tier())]
 	return str(table[rng.randi() % table.size()])
@@ -746,6 +785,8 @@ func lose_crew(ship) -> String:
 ## The menu of node `id`: data/drift.json `stations` entry of the place, or the Scrapper trader's. {} when
 ## there is nothing to dock at.
 func station_cfg(id: String) -> Dictionary:
+	if is_hollow(id):  # no trade in a place the tide has taken
+		return {}
 	var n := drift.node(id)
 	var st: Dictionary = cfg["stations"]
 	if str(n.get("place", "")) != "" and st.has(n["place"]):
@@ -905,7 +946,7 @@ func to_dict() -> Dictionary:
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
 		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
 		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
-		"sectors": _sectors_dict(), "spool": spool.duplicate()}
+		"sectors": _sectors_dict(), "spool": spool.duplicate(), "tide": tide.to_save()}
 
 
 func _sectors_dict() -> Dictionary:
@@ -936,6 +977,12 @@ func load_dict(d: Dictionary) -> String:
 	var charge = _read_spool(d, map)
 	if charge == null:
 		return "bad campaign jump drive"
+	var rising = Tide.make(map, map.start_id(), Tide.config())
+	if d.get("tide") is Dictionary:
+		if rising.load_save(d["tide"]) != "":
+			return "bad campaign tide"
+	else:
+		rising.steps = int(d["jumps"])  # an older save: a fresh tide at its jump count
 	seed_value = int(d["seed"])
 	rng.state = int(str(d["rng_state"]))
 	drift = map
@@ -959,6 +1006,7 @@ func load_dict(d: Dictionary) -> String:
 	offers = d["offers"].duplicate(true)
 	sectors = made
 	spool = charge
+	tide = rising
 	last_jump = {}
 	_hull_key = -1
 	return ""

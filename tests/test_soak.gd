@@ -29,7 +29,7 @@ const MAX_WAITS := 20  ## waits for a passing trader before a run with no fuel c
 
 var _cap_s := FIGHT_CAP_S
 var _real_left := 0  # fights of this run still to go through the arena
-var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "runs": 0}
+var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "tows": 0, "runs": 0}
 
 
 func test_soak_every_starter_every_seed() -> void:
@@ -141,8 +141,12 @@ func _choose_lane(where: String, c: Campaign, sim, pick: RandomNumberGenerator) 
 		_event_chain(where + " (waiting)", w["event"], c, sim, pick)
 		if ship.inventory.count("fuel") > 0:
 			return _choose_lane(where, c, sim, pick)
-	check(false, "%s: stuck with no fuel, no drift jump and no trader (fuel %d, credits %d, hull left %d)" % [where, ship.inventory.count("fuel"), ship.inventory.count("credits"), c.hull_left(ship)])
-	return ""
+	# Still nothing (a broke run in the Hollow tide's far reaches can't afford the trader's fuel): Ma's tow home, which
+	# the map always offers with an empty tank so that a run never soft-locks (Y).
+	var tow := c.tow(ship)
+	stats["tows"] += 1
+	check(tow["ok"], "%s: stuck with no fuel, no drift jump, no trader and no tow (fuel %d, credits %d, hull left %d): %s" % [where, ship.inventory.count("fuel"), ship.inventory.count("credits"), c.hull_left(ship), tow["why"]])
+	return _choose_lane(where, c, sim, pick) if tow["ok"] else ""
 
 
 ## The first node on the shortest lane path from the ship to a station it can dock at ("" when it is at
