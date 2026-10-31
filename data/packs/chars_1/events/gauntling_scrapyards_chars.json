@@ -1,0 +1,32 @@
+{"events": [
+    {
+      "id": "char_grommet_bench_on_her_back", "type": "wreck_field", "weight": 24, "once": true, "requires": {"region": "gauntling_scrapyards"},
+      "text": "A Gauntling is stripping a reactor casing with the unhurried competence of a woman who has done it eleven thousand times. She has a bench strapped to her back, a vice bolted to her left forearm and three different hands in a bandolier. 'Morning,' she says, without looking up. 'Hand me that spanner. No, the other spanner.' You hand her a spanner. 'No. The spanner I am thinking of.' She looks at you for the first time. 'You didn't get it, did you. Never mind. It is why I need a crew.'",
+      "choices": [
+        {"text": "Trade her an honest Scrap engine for her services.", "requires": {"items": {"engine_scrap_mk1": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Grommet turns the engine over twice, sniffs it, and clips it to her belt. 'It has got a lot of history,' she says approvingly. 'Someone has cried on this.' She unstraps the bench and sets it down on your cargo deck with a clunk. 'Where is your tool wall? Don't say you haven't got one.'", "effects": {"recruit": {"character": "grommet"}}}
+        ]},
+        {"text": "[Tinkerer] Hand her the right spanner.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer reaches in, comes out with a socket wrench with an odd head, and drops it in her palm. Grommet looks at it for a long moment, the way one cat looks at another cat's good fortune. 'Right one,' she says. 'It is a thing, you know. People can tell.' She packs up. 'I will come. You will need me. Someone has to teach them where it goes.'", "effects": {"recruit": {"character": "grommet"}}}
+        ]},
+        {"text": "Hand her another spanner and go.", "outcomes": [
+          {"weight": 100, "text": "It is, again, the wrong spanner. She says something short and Gauntling. You are fairly sure it is a blessing.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_baud_lot_fourteen", "type": "trader", "weight": 14, "once": true, "requires": {"region": "gauntling_scrapyards", "stage_min": 3},
+      "text": "A pop-up auction is selling off a dead shipwright's yard from the back of a cargo sled. The auctioneer has reached lot fourteen. 'One (1) Gauntling, slightly used, speaks fluent appliance. Wired for sound. Does not respond to the name Ron.' In the lot, a Gauntling with a socket behind his left ear stands on a crate with the expression of a man at his own estate sale. 'I would like it noted,' he says, 'that I did agree to this.' Two Rustfangs at the back are bidding for sport, and the price is already past three hundred.",
+      "choices": [
+        {"text": "Outbid the Rustfangs (420 credits).", "requires": {"credits": 420, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The Rustfangs bid 410, look at your face, and stop. The hammer falls with a noise like a door closing on an argument. Baud steps down, straightens his collar and plugs a finger into the nearest cargo lift, which promptly plays a jaunty tune. 'Thank you,' he says. 'I will hack the opposition for you. Within reason. It is mostly manners.'", "effects": {"recruit": {"character": "baud"}}}
+        ]},
+        {"text": "[Tinkerer] Fix the auctioneer's jammed PA mid-bid, and take the lot as your fee (250 credits).", "requires": {"trait": "tinkerer", "credits": 250, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer slips behind the sled, taps the failing PA, and the whole yard hears the auctioneer say, quite clearly, 'The bidding is rigged and I am sorry.' In the confusion the Rustfangs leave, and the hammer comes down at 250. Baud steps over. 'I would have said that sooner,' he says, 'but nobody asked.'", "effects": {"recruit": {"character": "baud"}}}
+        ]},
+        {"text": "Watch the bidding and move on.", "outcomes": [
+          {"weight": 100, "text": "The hammer falls at 460 to a man who immediately looks as if he wants to take it back. Baud tips his socket to you from the crate. 'Next time,' he says.", "effects": {}}
+        ]}
+      ]
+    }
+]}

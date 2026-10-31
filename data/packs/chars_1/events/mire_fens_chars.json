@@ -1,0 +1,36 @@
+{"events": [
+    {
+      "id": "char_sluice_fire_marshal", "type": "patrol", "weight": 22, "once": true, "requires": {"region": "mire_fens"},
+      "text": "A Fenwater launch pulls alongside, hull streaming with moss, and a Mire in a damp tabard raps on your lock. 'Fire inspection,' he says, in a voice like a drain being pleasant. 'Section nine of the Fen Safety Code. Show me your extinguishers, your sprinklers and your plan for a fire on a Tuesday.' He is holding a clipboard in a waterproof bag. The clipboard is also, somehow, damp. He peers past you. 'Is that a naked cable?'",
+      "choices": [
+        {"text": "Show him your extinguishers and pass with honours.", "outcomes": [
+          {"weight": 70, "text": "Sluice goes through the ship with a torch and a sniff and a hum of disapproval, and at the end, for the first time in his career, he has nothing to write. 'Immaculate,' he says, as though the word hurts. 'I have inspected nine hundred ships and none of them wanted me for the whole voyage. Do you want me for the whole voyage?'", "effects": {"recruit": {"character": "sluice"}, "rep": {"concord": 1}}},
+          {"weight": 30, "text": "He finds a loose cable, a missing sign and a sprinkler head painted over. The fine is 40 credits. He leaves, sniffing, with the air of a man who has been right again and is sad about it.", "effects": {"items": {"credits": -40}}}
+        ]},
+        {"text": "Offer him the post of ship's fire marshal (90 credits up front).", "requires": {"credits": 90, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Sluice reads the offer twice, lips moving. 'A post,' he says. 'With a title. And a clipboard.' He hands in his launch keys to the other inspector without ceremony and steps across with a bag of damp rags. 'First thing,' he says. 'That cable.'", "effects": {"recruit": {"character": "sluice"}}}
+        ]},
+        {"text": "[Firefighter] Greet him in the wet code.", "requires": {"trait": "firefighter"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire gives the double gurgle, hand over heart. Sluice stops mid-clipboard. 'A proper crew,' he says. 'I have waited nine years for someone on this lake to understand.' He hands in his resignation to the clipboard, which is, naturally, also damp. 'I believe you have a cable,' he adds.", "effects": {"recruit": {"character": "sluice"}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Politely decline the inspection and fly on.", "outcomes": [
+          {"weight": 100, "text": "'Noted,' says Sluice, writing it down on the damp clipboard. 'Noted with disappointment.' The launch peels away, still dripping.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_gurgo_flooded_engine", "type": "wreck_field", "weight": 22, "once": true, "requires": {"region": "mire_fens"},
+      "text": "An ice-tender hulk hangs in the fens with its undeck flooded to the ceiling, which is where its engineer lives. You find him by the bubbles: a Mire in a diving collar, elbow-deep in the engine bay, tapping valves with a spanner and nodding at the replies. He surfaces for a gulp. 'She is nearly running!' he calls. 'She has been nearly running since the Snap, I think. Want to see?' The engine coughs, as if embarrassed.",
+      "choices": [
+        {"text": "Tow the tender to a dock (2 fuel) so he can look after her.", "requires": {"items": {"fuel": 2}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You tow her to Fenwater's lee, and he thanks you with a wet handshake. Then he stands looking at your ship, then at his hands. 'I am told yours leaks,' he says. 'Mine never did, but they never told me why.' He climbs your ladder with his spanner, still dripping.", "effects": {"recruit": {"character": "gurgo"}}}
+        ]},
+        {"text": "[Mire] Slip in and help him bail.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire dives in, and for an hour the two of them are down there, tapping, listening, passing the spanner in the dark. The engine catches, lurches, and runs. Gurgo bobs up beaming. 'Smooth as a grandmother!' he cries. 'Smoother!' He leaves the tender running, wrings his collar out on your deck, and follows you without being asked.", "effects": {"recruit": {"character": "gurgo"}, "items": {"copper": 12}}}
+        ]},
+        {"text": "Leave him to it.", "outcomes": [
+          {"weight": 100, "text": "'Nearly running!' he calls after you, and the engine coughs again, politely, to back him up.", "effects": {}}
+        ]}
+      ]
+    }
+]}

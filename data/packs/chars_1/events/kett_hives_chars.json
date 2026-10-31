@@ -1,0 +1,50 @@
+{"events": [
+    {
+      "id": "char_skrel_quiet_cell", "type": "station", "weight": 24, "once": true, "requires": {"region": "kett_hives"},
+      "text": "A Kett sits alone on a bench at the Ninefold dock with her hands folded and her antennae down. Everyone else on the dock hums, in the rhythm of the shift. She does not. A foreman explains, out of the side of his mouth. 'That is Skrel. Best chorus-leader we had. Her crew went to the outer cells, and the hive will not release her to a ship that has not got the beds for a proper crew. She has been like that three days.' Skrel looks up. 'Please,' she says, very quietly. 'I only need four friends and a long job.'",
+      "choices": [
+        {"text": "Hand over two beds for her berth.", "requires": {"items": {"bed": 2}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The foreman counts the beds, grunts, and stamps the release. Skrel stands slowly. Then, from somewhere under her ribs, she begins to click: a low, steady working-song, and every Kett on the dock, without turning their heads, clicks back. 'Thank you,' she says, in the language you can hear. 'I cannot carry a tune alone. Let us find some friends.'", "effects": {"recruit": {"character": "skrel"}}}
+        ]},
+        {"text": "[Kett] Click the working-song back to her.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett takes the first beat and Skrel takes the second, and the dock stops to listen. By the fourth bar there are six of them clicking, and the foreman is stamping the paper without reading it. Skrel does not walk to your ship. She follows the song there.", "effects": {"recruit": {"character": "skrel"}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Say you will come back when you have the beds.", "outcomes": [
+          {"weight": 100, "text": "'The beds,' says Skrel to her folded hands. 'Yes.' The dock goes on humming round her like water round a rock.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_zhikka_ear_eleven", "type": "distress", "weight": 20, "once": true, "requires": {"region": "kett_hives"},
+      "text": "Ear Eleven is a hive listening post: a stack of dishes on a rock, a hundred metres of cable, and one Kett in a headset three sizes too tall. She hails you in a rush. 'I have been logging a pattern for nine days. A Rustfang skiff, always the same lane, always the same hour. A Ninefold convoy goes through that lane in two days. The hive says I am imagining it. The hive says that about most of what I hear. Please, will you tell the convoy? I am not allowed to leave the post.'",
+      "choices": [
+        {"text": "Carry her warning to the convoy (1 fuel).", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You burn a jump out of your way and put the warning in the convoy master's own hand. He frowns at the logbook, then at you, then reroutes. Over the comm Zhikka sends a long delighted click. 'They will have to send someone to tell me I was right,' she says. 'I am looking forward to being insufferable about it.'", "effects": {"flag": "char_zhikka_warned", "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Tinkerer] Re-aim her dish while she keeps listening.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer swings the dish three degrees and the whole lane sings. Zhikka goes quiet, then very loud. 'Four skiffs,' she says. 'Not one. Four. They are coming for the convoy.' Your tinkerer sends the warning on the spot, over the hive band, and the convoy turns away before you have finished your tea. 'I owe you,' says Zhikka. 'A lot. In the long-wave.'", "effects": {"flag": "char_zhikka_warned", "items": {"copper": 10}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Say it is not your lane.", "outcomes": [
+          {"weight": 100, "text": "'They never are,' says Zhikka, not unkindly, and goes back to listening.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_zhikka_the_listener", "type": "distress", "weight": 45, "once": true, "requires": {"stage_min": 3, "flag": "char_zhikka_warned"},
+      "text": "A Ninefold tender is hailing you on an open channel with an almost embarrassing quantity of manners. 'The convoy master sends his thanks,' says the voice. 'There were four skiffs. We lost no one. The hive has voted to apologise to the listener of Ear Eleven, the first time it has voted to apologise to anyone. She declined to stay. She says the post is too quiet now she has been proved right, and she would like to go where the noise is.' A small figure in an oversized headset waves from the tender's lock.",
+      "choices": [
+        {"text": "Take her aboard.", "outcomes": [
+          {"weight": 100, "text": "Zhikka hops the gap with a duffel, two dishes folded into a backpack, and an apologetic look at your radio. 'It is very loud in here,' she says happily. 'It is wonderful.' She turns to your comms and begins, with great care, to listen.", "effects": {"recruit": {"character": "zhikka"}}}
+        ]},
+        {"text": "Take her aboard, and accept the convoy master's reward (40 credits).", "outcomes": [
+          {"weight": 100, "text": "The tender sends the credits across with a note: PLEASE ACCEPT THIS AS A HIVE VOTE OF GRATITUDE. Zhikka reads it over your shoulder and clicks, delighted. 'They have never voted gratitude before,' she says. 'It is usually just apologies.'", "effects": {"recruit": {"character": "zhikka"}, "items": {"credits": 40}}}
+        ]},
+        {"text": "[Kett] Click the hive's welcome.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett clicks the full welcome, the long one the hive saves for the returning. Zhikka stops dead in the lock, antennae up. Then she answers it back, note for note, and every Kett on the tender joins in, and for half a minute the three ships hum in tune. She steps across glowing. Your whole crew feel a little lighter.", "effects": {"recruit": {"character": "zhikka"}, "crew_hp": 10}}
+        ]},
+        {"text": "Say you cannot fit her right now.", "outcomes": [
+          {"weight": 100, "text": "'Of course,' says the tender. 'She will wait.' You can hear her, faintly, tuning something.", "effects": {}}
+        ]}
+      ]
+    }
+]}
