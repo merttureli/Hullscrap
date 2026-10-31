@@ -192,12 +192,14 @@ func refresh() -> bool:
 	var off := disabled_uids()
 	var bonus := TraitSet.station_bonus(self)
 	var hand := CrewFx.power_bonus(self)
-	var sig := hash([uids, cables.cells.size(), off.keys(), Abilities.rev(self), bonus, hand])
+	var sig := hash([uids, cables.cells.size(), off.keys(), Abilities.rev(self), bonus, hand, Abilities.crew_sig(self)])
 	if not _structure_dirty and sig == _signature:
 		return false
 	if _structure_dirty:
 		atmosphere.rebuild(grid)
 	var mods := Abilities.power_mods(self)
+	for uid in mods["bonus"]:  # the power a crew adds to a part (Nest Reactor) comes on top of its operator's
+		bonus[uid] = float(bonus.get(uid, 0.0)) + float(mods["bonus"][uid])
 	mods["bonus"] = bonus
 	mods["hand"] = hand
 	power_state = Power.solve(Stats.view(components, lines), cables, off, mods)
