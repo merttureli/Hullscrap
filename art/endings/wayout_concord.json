@@ -1,0 +1,37 @@
+{
+ "frame": [
+  320,
+  180
+ ],
+ "cells": [
+  20,
+  11
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   3
+  ]
+ },
+ "glow": {
+  "image": "wayout_concord_glow.png",
+  "frame": [
+   320,
+   180
+  ],
+  "offset": [
+   0,
+   0
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    3
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Ending illustration, 320x180 per frame, 4 frames looping at 3 fps. Draw it at 3x or 4x with nearest filtering; add the glow strip over it (additive). Light comes from the top-left. The Concord way out: the gate restarted as a calm lattice of light, ringed by 68 escorts in three neat rows, all nose-in. Frames: pulses ripple out of the gate, the running lights walk round, nav lights blink in step."
+}

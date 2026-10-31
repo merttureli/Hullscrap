@@ -1,0 +1,25 @@
+{
+ "frame": [
+  48,
+  28
+ ],
+ "anchors": {
+  "bottom_centre": [
+   24,
+   26
+  ]
+ },
+ "glow": {
+  "image": "hall_crest_neon_glow.png",
+  "frame": [
+   48,
+   28
+  ],
+  "offset": [
+   0,
+   0
+  ],
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "A crest (a gate ring on a medallion between laurels, neon line) that sits over the middle of the frame top edge: put its bottom centre on the frame edge, 2 px into the border."
+}
