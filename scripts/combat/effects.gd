@@ -26,7 +26,6 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 
 const TAGS: Array[String] = ["lock_doors", "drain_power", "tether"]  ## the old list-style effect tags
-const HIT: Array[String] = ["acid", "spores", "shard", "sonic", "magnetic", "frost", "corrode"]
 const NONE := {}
 const TICK := 0.25  ## seconds between the hits of a damage over time
 const ROOM_REACH := 6.0  ## cells a shot is followed into the hull to find the room it hits
