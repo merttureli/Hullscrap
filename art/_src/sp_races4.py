@@ -336,4 +336,149 @@ class Murrow(Species):
                 out.append(g)
         return out
 
-SPECIES = [WardenFrame, Murrow]
+# ================================================================== SILTBORN: gas-giant ring floaters, jellyfish-like. A FLOATING rig (49x49, pivot (24,24))
+# A translucent bell seen from above (a round disc with a frilled, scalloped rim: pale cream, a dithered glassy shoulder, eight radial canals), an amber gas sac
+# in the crown (the head layer) lighting it from inside, tentacle arms with a curled tip, and in the LEGS layer a ruffled skirt and five wavy trailing tendrils with
+# amber beads (`float` = frames 0-5 played by time, a closed loop; `stand` = frame 6). The body is drawn on the 33x33 grid and lifted to the middle (+8,+8): the drawer
+# bobs it, so no bob is baked in. Outfit = a cloth sling across the bell with a streamer hanging behind (the only tinted part).
+SB_R = 12.0
+def sb_rim(th): return SB_R + 1.1 * math.cos(12 * th)
+def sb_torso():
+    s = Spr(N, N)
+    for y in range(N):
+        for x in range(N):
+            dx, dy = x - 16, y - 16; r = math.hypot(dx, dy); R = sb_rim(math.atan2(dy, dx))
+            if r > R + 0.4: continue
+            lit = (dx + dy) < 1
+            if r > R - 2.3:                                                                  # the frill: a pink band with a bright (or deep) outer edge
+                c = ('H' if lit else 'v') if r > R - 1.2 else 'p'
+            elif r > 5.0:                                                                    # the glassy shoulder: a dither of two tones
+                c = (('H' if (x + y) % 2 else 'f') if lit else ('f' if (x + y) % 2 else 's'))
+            else: c = 'f' if lit else 's'
+            s.put(x, y, c)
+    for k in range(8):                                                                       # eight radial canals
+        a = k * math.pi / 4.0
+        for r in range(5, int(SB_R - 2.4) + 1):
+            s.put(int(round(16 + r * math.cos(a))), int(round(16 + r * math.sin(a))), 'p')
+    for (x, y) in ((10, 9), (22, 11), (9, 21), (23, 22), (15, 25), (18, 8), (12, 24)):          # gas bubbles trapped in the bell
+        s.put(x, y, 'H'); s.put(x + 1, y, 'p')
+    # the sling (outfit): a band across the bell and a streamer hanging off its low end, behind
+    for i in range(24):
+        x = 4 + i; y = 9 + (i * 13) // 24
+        s.put(x, y - 1, 'A'); s.put(x, y, 'B'); s.put(x, y + 1, 'C')
+    for j in range(9):
+        x = 26 + (j * 2) // 9; s.put(x, 22 + j, 'B' if j % 2 else 'A'); s.put(x + 1, 22 + j, 'C')
+    s.put(26, 31, 'C'); s.put(27, 31, 'C')
+    return s
+
+SB_HEADS = ['crown', 'bloom', 'helmet']
+def sb_head(kind):
+    s = Spr(N, N)
+    if kind == 'bloom':                                                                      # an open bloom: six rose petals round the sac
+        for k in range(6):
+            a = k * math.pi / 3.0 + math.pi / 6.0
+            p = Spr(N, N); ell(p, 16 + 6.3 * math.cos(a), 15 + 6.3 * math.sin(a), 2.6, 2.6, 'p'); merge(s, shade_gen(p, 'p', 'f', 'v'))
+    sc = Spr(N, N); ell(sc, 16, 15, 5.2, 5.2, 'a'); merge(s, shade_gen(sc, 'a', 'y', 'o'))
+    ell(s, 16, 15, 2.8, 2.8, 'y'); s.put(15, 14, 'H'); s.put(16, 14, 'H'); s.put(15, 15, 'H')                    # the gas sac and its hot core
+    if kind == 'crown':
+        for k in range(8):
+            a = k * math.pi / 4.0 + math.pi / 8.0
+            x = int(round(16 + 7.2 * math.cos(a))); y = int(round(15 + 7.2 * math.sin(a))); s.put(x, y, 'f'); s.put(x + 1, y, 'p')   # cilia beads round the sac
+    if kind == 'helmet':                                                                     # a salvaged bubble helm: a steel ring, the glass tinted blue, glints
+        for y in range(N):
+            for x in range(N):
+                r = math.hypot(x - 16, y - 15)
+                if 6.0 <= r <= 7.6: s.put(x, y, 'L' if (x - 16) + (y - 15) < 0 else ('S' if r < 7.0 else 'W'))
+                elif r < 6.0 and ((x + y) % 3 == 0) and (x - 16) + (y - 15) < 2: s.put(x, y, 'b')
+        for (x, y) in ((11, 11), (12, 10), (13, 9)): s.put(x, y, 'H')
+        s.put(21, 20, 'M'); s.put(22, 19, 'M')
+        for (x, y) in ((16, 8), (16, 22)): s.put(x, y, 'M')                                  # two clamps
+    return s
+
+def sb_tentacle(s, a, b, bend):
+    mid = (int(round((a[0] + b[0]) / 2.0 + bend)), int(round((a[1] + b[1]) / 2.0)))
+    t = Spr(N, N); seg(t, a[0], a[1], mid[0], mid[1], 2, 'p'); seg(t, mid[0], mid[1], b[0], b[1], 2, 'p')
+    merge(s, shade_gen(t, 'p', 'f', 'v'))
+    for k in (0.3, 0.65):                                                                    # pale sucker beads along the arm
+        s.put(a[0] + round((b[0] - a[0]) * k) + (1 if bend > 0 else -1) * 0, a[1] + round((b[1] - a[1]) * k), 'H')
+def sb_curl(s, x, y, sd):
+    """the tip: a little curled loop that wraps whatever it holds, with an amber bead."""
+    for (dx, dy, c) in ((0, 0, 'p'), (sd, 0, 'f'), (sd, -1, 'p'), (0, -1, 'f'), (-sd, 0, 'v'), (0, 1, 'v')): s.put(x + dx, y + dy, c)
+    s.put(x, y - 2, 'a'); s.put(x + sd, y - 2, 'y')
+SB_UNARMED = ((5, 22), (27, 22))
+def sb_arms(pose):
+    s = Spr(N, N); A = pose_anchors(*SB_UNARMED)[pose]
+    if pose == 'unarmed':
+        sb_tentacle(s, (7, 14), (5, 22), -3); sb_tentacle(s, (25, 14), (27, 22), 3)
+        sb_curl(s, 5, 23, -1); sb_curl(s, 27, 23, 1)
+        return s
+    for sh, k, bend, sd in (((7, 14), 'hand_l', -3, -1), ((25, 14), 'hand_r', 3, 1)):
+        sb_tentacle(s, sh, (A[k][0], A[k][1] + 1), bend); sb_curl(s, A[k][0], A[k][1] + 1, sd)
+    return s
+
+SB_PH = [i * math.pi / 3.0 for i in range(6)]                       # 6 steps = one full wave, so the loop closes
+SB_TIPS = {-10: 40, -5: 44, 0: 47, 5: 44, 10: 40}
+def sb_leg_frame(i):
+    s = Spr(FN, FN)
+    ph = SB_PH[i] if i < 6 else 0.7; amp = 2.6 if i < 6 else 1.0
+    for dx in range(-10, 11):                                                                # the ruffled skirt under the bell: pale lobes with a pink edge
+        yb = int(round(36 + 3.0 * math.cos(dx * 0.95 - ph) * (1.0 - abs(dx) / 14.0)))
+        for y in range(30, yb + 1): s.put(FC + dx, y, 'f' if y < yb else 'p')
+    for k, off in enumerate((-10, -5, 0, 5, 10)):
+        ymax = SB_TIPS[off]
+        for y in range(31, ymax + 1):
+            tt = (y - 31) / float(ymax - 31)
+            x = FC + off * (1.0 + 0.1 * tt) + amp * math.sin(0.55 * (y - 31) - ph + k * 1.1) * (0.25 + tt)
+            xi = int(round(x))
+            s.put(xi, y, 'p' if (y // 2) % 3 else 'f')
+            if (y - 31) % 6 == 5 and y < ymax - 1: s.put(xi, y, 'a')                       # an amber bead every few px
+        tx = int(round(FC + off * 1.1 + amp * math.sin(0.55 * (ymax - 31) - ph + k * 1.1) * 1.25))
+        s.put(tx, ymax, 'y'); s.put(tx, ymax - 1, 'a')
+    return s
+
+class Siltborn(Species):
+    id = 'siltborn'
+    N = FN; C = FC
+    kind = 'floating'; legs_anim = 'float'
+    walk_fps = 5
+    glow_fps = 2
+    head_names = SB_HEADS
+    notes = ('Siltborn: gas-giant ring floaters, jellyfish-like; a FLOATING rig (kind "floating": 49x49, pivot (24,24)). No walk: the legs layer is a ruffled skirt and five wavy trailing '
+             'tendrils with amber beads, drawn pointing back (down at rotation 0) and turned to the movement direction (`float`: 6 frames, 5 fps, a closed loop played by time; '
+             '`stand`: the calm idle frame). The body (torso, head, arms) sits in the middle of the frame as a normal body and the drawer bobs it, so no bob is baked in: a translucent '
+             'bell seen from above (a frilled, scalloped rim, a dithered glassy shoulder, eight radial canals, trapped bubbles), an amber gas sac in the crown (head layer) lighting it '
+             'from inside, tentacle arms ending in a curl round the item. The mounts are the human\'s moved by (+8,+8). torso_glow (2 frames, ~2 fps) is the faint glow of the canals, head_glow '
+             '(2 frames per head) the sac, legs_glow (one frame per legs frame) the tendril tips. Head variants: crown (a ring of cilia beads), bloom (six rose petals), helmet '
+             '(a salvaged bubble helm). Outfit mask = the cloth sling across the bell and its streamer.')
+    def legs(self): return [outlined(sb_leg_frame(i)) for i in range(7)]
+    def torso(self): return outlined(lift(sb_torso(), FN, 8))
+    def arms(self, pose): return outlined(lift(sb_arms(pose), FN, 8))
+    def head(self, name): return outlined(lift(sb_head(name), FN, 8))
+    def torso_anchors(self): return {'head': [FC, FC - 1], 'back': [FC, FC + 8], 'shoulder_l': [FC - 9, FC - 2], 'shoulder_r': [FC + 9, FC - 2]}
+    def arm_anchors(self): return pose_anchors((5 + 8, 22 + 8), (27 + 8, 22 + 8), shift=8)
+    def legs_glow(self):
+        out = []
+        for i in range(7):
+            g = ng(FN); t = sb_leg_frame(i)
+            glow_px_max(g, spr_pts(t, 'y'), (255, 210, 58), 0.6, 3.0, 1.5)
+            glow_px_max(g, spr_pts(t, 'a'), (225, 161, 54), 0.3, 2.2, 1.5)
+            out.append(g)
+        return out
+    def torso_glow(self):
+        out = []
+        for f in (0, 1):
+            g = ng(33); t = sb_torso()
+            glow_px_max(g, spr_pts(t, 'p'), (232, 138, 160), (0.3, 0.18)[f], 2.4, 1.5)
+            glow_px_max(g, [(16, 15)], (255, 138, 30), (0.4, 0.25)[f], (11.0, 9.0)[f], 1.8)
+            out.append(lift_glow(clear_under(g, t), FN, 8))
+        return out
+    def head_glow(self):
+        out = []
+        for f in (0, 1):
+            for nm in self.head_names:
+                g = ng(33)
+                glow_px_max(g, [(16, 15), (15, 14), (16, 14)], (255, 210, 58), (0.85, 0.55)[f], (6.0, 4.6)[f], 1.4)
+                out.append(lift_glow(g, FN, 8))
+        return out
+
+SPECIES = [WardenFrame, Murrow, Siltborn]
