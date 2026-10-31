@@ -1,0 +1,234 @@
+{
+ "species": "siltborn",
+ "frame": [
+  49,
+  49
+ ],
+ "pivot": [
+  24,
+  24
+ ],
+ "notes": "Siltborn: gas-giant ring floaters, jellyfish-like; a FLOATING rig (kind \"floating\": 49x49, pivot (24,24)). No walk: the legs layer is a ruffled skirt and five wavy trailing tendrils with amber beads, drawn pointing back (down at rotation 0) and turned to the movement direction (`float`: 6 frames, 5 fps, a closed loop played by time; `stand`: the calm idle frame). The body (torso, head, arms) sits in the middle of the frame as a normal body and the drawer bobs it, so no bob is baked in: a translucent bell seen from above (a frilled, scalloped rim, a dithered glassy shoulder, eight radial canals, trapped bubbles), an amber gas sac in the crown (head layer) lighting it from inside, tentacle arms ending in a curl round the item. The mounts are the human's moved by (+8,+8). torso_glow (2 frames, ~2 fps) is the faint glow of the canals, head_glow (2 frames per head) the sac, legs_glow (one frame per legs frame) the tendril tips. Head variants: crown (a ring of cilia beads), bloom (six rose petals), helmet (a salvaged bubble helm). Outfit mask = the cloth sling across the bell and its streamer. Same rig as human: every layer faces UP at rotation 0 on one 49x49 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "float": [
+     0,
+     6,
+     5
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0-5 are the float cycle (a closed loop played by time, whether or not they move), frame 6 the idle: this layer is what trails behind the body (drawn pointing back, turned to the movement direction)",
+   "glow": {
+    "image": "legs_glow.png",
+    "frame": [
+     49,
+     49
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 7,
+    "blend": "add (preferred) or alpha-over"
+   }
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     24,
+     23
+    ],
+    "back": [
+     24,
+     32
+    ],
+    "shoulder_l": [
+     15,
+     22
+    ],
+    "shoulder_r": [
+     33,
+     22
+    ]
+   },
+   "glow": {
+    "image": "torso_glow.png",
+    "frame": [
+     49,
+     49
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 2,
+    "blend": "add (preferred) or alpha-over",
+    "anims": {
+     "on": [
+      0,
+      2,
+      2
+     ]
+    }
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      13,
+      30
+     ],
+     "hand_r": [
+      35,
+      30
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      22,
+      13
+     ],
+     "hand_r": [
+      26,
+      13
+     ],
+     "mount": [
+      24,
+      13
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      25,
+      9
+     ],
+     "hand_r": [
+      29,
+      17
+     ],
+     "mount": [
+      28,
+      16
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      21,
+      17
+     ],
+     "hand_r": [
+      29,
+      12
+     ],
+     "mount": [
+      29,
+      12
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      22,
+      11
+     ],
+     "hand_r": [
+      29,
+      20
+     ],
+     "mount": [
+      27,
+      19
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      20,
+      15
+     ],
+     "hand_r": [
+      31,
+      16
+     ],
+     "mount": [
+      31,
+      16
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee. RIG KIND floating: this frame is 49x49 with the pivot at (24,24), so every mount here is the shared one moved by (+8,+8): mount - pivot is identical to the human rig."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "crown": 0,
+    "bloom": 1,
+    "helmet": 2
+   },
+   "glow": {
+    "image": "head_glow.png",
+    "frame": [
+     49,
+     49
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 6,
+    "blend": "add (preferred) or alpha-over",
+    "variants": {
+     "crown": [
+      0,
+      3
+     ],
+     "bloom": [
+      1,
+      4
+     ],
+     "helmet": [
+      2,
+      5
+     ]
+    },
+    "notes": "per head variant, a list of glow frames: alternate them at 2 fps"
+   }
+  }
+ },
+ "kind": "floating"
+}
