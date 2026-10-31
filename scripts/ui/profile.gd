@@ -14,7 +14,7 @@ const MAX_RUNS := 20  ## records kept
 const SHOWN_RUNS := 5  ## records the main menu lists
 const HALL_MAX := 20  ## ships the hall of ships keeps
 const HINTS: Array[String] = ["picked", "map", "fight", "net"]  ## the first-run hints, in the order they come
-const BETA := "Beta 1"
+const BETA := "Beta 2"
 const VERSION_PATH := "res://version.txt"  ## the short git hash, written when the game is exported
 
 var path := PATH
@@ -199,8 +199,8 @@ static func clear_saves(paths: Array) -> void:
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
 
 
-## "Beta 1 (a1b2c3d)" with the short git hash from version.txt (the export writes "Beta 1 <hash>"; a bare
-## hash works too), else "Beta 1 (dev)".
+## "Beta 2 (a1b2c3d)" with the short git hash from version.txt (the export writes "Beta 2 <hash>"; a bare
+## hash works too), else "Beta 2 (dev)".
 static func version_label(file := VERSION_PATH) -> String:
 	var short := "dev"
 	if FileAccess.file_exists(file):
