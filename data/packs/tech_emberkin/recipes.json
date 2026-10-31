@@ -50,6 +50,58 @@
       "tools": [],
       "time": 25,
       "category": "system"
+    },
+    {
+      "id": "emberkin_pyre_drive",
+      "output": {
+        "item": "emberkin_pyre_drive",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 18,
+        "titanium": 8,
+        "plasma_cell": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system"
+    },
+    {
+      "id": "emberkin_furnace_core",
+      "output": {
+        "item": "emberkin_furnace_core",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 32,
+        "copper": 14,
+        "silicon": 4,
+        "plasma_cell": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 35,
+      "category": "system"
+    },
+    {
+      "id": "emberkin_hearth_shield",
+      "output": {
+        "item": "emberkin_hearth_shield",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 26,
+        "copper": 12,
+        "titanium": 6,
+        "silicon": 4,
+        "plasma_cell": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system"
     }
   ]
 }

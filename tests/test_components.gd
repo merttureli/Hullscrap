@@ -82,7 +82,8 @@ func test_data_is_complete() -> void:
 		"emberkin_pyre_lance": [-4, 5, 2], "emberkin_cinder_mortar": [-3, 5, 2], "emberkin_flare_turret": [-3, 5, 1],
 		"fenn_twitch_cannon": [-3, 5, 2], "fenn_spark_lattice": [-4, 5, 2], "fenn_market_missile": [-3, 5, 2],
 		"kett_hive_swarm_launcher": [-3, 5, 2], "kett_chitin_thrower": [-2, 5, 1], "kett_drone_picket": [-4, 5, 2],
-		# racial tech, group a: components (the Emberkin's come with the scorch key)
+		# racial tech, group a: components
+		"emberkin_pyre_drive": [-3, 4, 2], "emberkin_furnace_core": [10, 0, 1], "emberkin_hearth_shield": [-4, 3, 2],
 		"human_reactor_plus": [9, 0, 1], "human_comms_array": [-2, 3, 1], "human_crew_quarters_deluxe": [-1, 3, 1],
 		"basalt_vacuum_forge": [11, 0, 1], "basalt_stonehide_bay": [-1, 3, 2], "basalt_gravity_anchor": [-2, 3, 2],
 		"fenn_haggle_engine": [-3, 4, 2], "fenn_jury_reactor": [10, 0, 1], "fenn_quickfix_bay": [-2, 3, 1],

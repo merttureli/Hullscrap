@@ -27,6 +27,8 @@ const PARTS := {
 	"human_crew_quarters_deluxe": ["medbay", 1, [2, 2], -1, 3],
 	"basalt_vacuum_forge": ["reactor", 1, [4, 4], 11, 0], "basalt_stonehide_bay": ["utility", 2, [2, 2], -1, 3],
 	"basalt_gravity_anchor": ["utility", 2, [2, 2], -2, 3],
+	"emberkin_pyre_drive": ["engine", 2, [4, 2], -3, 4], "emberkin_furnace_core": ["reactor", 1, [4, 4], 10, 0],
+	"emberkin_hearth_shield": ["shield", 2, [4, 4], -4, 3],
 	"fenn_haggle_engine": ["engine", 2, [4, 2], -3, 4], "fenn_jury_reactor": ["reactor", 1, [4, 4], 10, 0],
 	"fenn_quickfix_bay": ["utility", 1, [2, 2], -2, 3],
 	"kett_hive_battery": ["shield", 2, [4, 4], -5, 3], "kett_nest_reactor": ["reactor", 1, [4, 4], 7, 0],
@@ -103,7 +105,7 @@ func test_every_part_is_what_the_spec_says() -> void:
 		eq(PartEffects.component_problems(c, [], []), [], id + ": passes the ability validator")
 		if c["family"] == "engine":
 			eq([int(c["mount"]["outside"][0]), int(c["mount"]["outside"][1])], [4, 2], id + ": an engine with a 4x2 outside half")
-	for r in ["human", "basalt", "fenn", "kett"]:  # the Emberkin follow with their own scorch key
+	for r in ["human", "basalt", "emberkin", "fenn", "kett"]:
 		eq(per.get(r, 0), 3, r + ": three components")
 
 
@@ -130,7 +132,7 @@ func test_the_homeland_stores_sell_the_components() -> void:
 # --- reactors ----------------------------------------------------------------------------------------------------
 
 func test_the_reactors_make_what_the_spec_says_over_a_reactor_mk1() -> void:
-	var want := {"human_reactor_plus": 1.0, "basalt_vacuum_forge": 3.0, "fenn_jury_reactor": 2.0}
+	var want := {"human_reactor_plus": 1.0, "basalt_vacuum_forge": 3.0, "emberkin_furnace_core": 2.0, "fenn_jury_reactor": 2.0}
 	for id in want:
 		var d := _rig(id)
 		near(_supply(d["ship"]) - 8.0, 8.0 + want[id], id + ": its own output", 1e-6)
@@ -171,6 +173,23 @@ func test_the_forge_vents_the_room_and_only_a_human_suffers() -> void:
 	near(hp["basalt"], 140.0, "a Basalt loses nothing", 1e-6)
 
 
+func test_the_furnace_core_runs_hot_and_trips_without_a_radiator_for_any_crew() -> void:
+	var tripped := {}
+	for species in ["human", "emberkin"]:
+		var d := _rig("emberkin_furnace_core")
+		var ship: Ship = d["ship"]
+		_crew(ship, "Wren", species, 12, 14)
+		check(not _run(ship, 60.0, true), species + ": it has not tripped after a minute")
+		near(float(ship.components.instances[d["part"]]["heat"]), 54.0, species + ": 0.9 a second beyond what it sheds, a minute in", 1.5)
+		tripped[species] = _run(ship, 90.0, true)
+	eq(tripped, {"human": true, "emberkin": true}, "it overheats whoever is aboard: heat is cancelled by nobody")
+	var d := _rig("emberkin_furnace_core")
+	Fixture.put(d["ship"], "radiator", 19, 10)
+	Fixture.wire(d["ship"], [Vector2i(17, 11), Vector2i(18, 11), Vector2i(19, 11)])
+	d["ship"].refresh()
+	check(not _run(d["ship"], 300.0, true), "a radiator in the room keeps it from ever tripping")
+
+
 func test_the_jury_reactor_and_the_haggle_engine_malfunction_at_their_rates() -> void:
 	var ship := Fixture.room_ship()
 	near(ship.effective("fenn_jury_reactor")["malfunction_per_min"], 0.15, "Jury Reactor 15 percent a minute")
@@ -197,7 +216,32 @@ func test_a_fenn_mends_the_unreliable_parts_in_three_seconds_and_a_human_in_five
 	near(seconds["fenn"], 3.0, "a Fenn in 3 s", 0.15)
 
 
+func test_the_hot_parts_scorch_a_mixed_crew_and_an_emberkin_crew_runs_them_free() -> void:
+	var rates := {"emberkin_pyre_drive": 1.6, "emberkin_furnace_core": 1.2, "emberkin_hearth_shield": 0.5}
+	for id in rates:
+		var d := _rig(id)
+		var ship: Ship = d["ship"]
+		var human := _crew(ship, "Ada", "human", 12, 14)
+		var ember := _crew(ship, "Tess", "emberkin", 14, 14)
+		var away := _crew(ship, "Away", "human", 12, 22)
+		_run(ship, 10.0)
+		near(human.max_hp - human.hp, rates[id] * 10.0, id + ": a human in its room loses its scorch rate", 0.2)
+		near(ember.hp, ember.max_hp, id + ": an Emberkin loses nothing", 1e-6)
+		near(away.hp, away.max_hp, id + ": nor does anyone in another room", 1e-6)
+
+
 # --- engines -----------------------------------------------------------------------------------------------------
+
+func test_the_pyre_drive_pushes_27_and_heats_itself_until_it_trips() -> void:
+	var d := _rig("emberkin_pyre_drive")
+	var ship: Ship = d["ship"]
+	var a := Arena.new(1)
+	a.add_ship(ship)
+	near(a.ships[0].thrust, 27.0, "thrust 27, x1.5 over a Mk2's 18")
+	check(not _run(ship, 60.0, true), "it has not tripped after a minute")
+	near(float(ship.components.instances[d["part"]]["heat"]), 72.0, "1.2 a second beyond what it sheds, a minute in", 2.0)
+	check(_run(ship, 60.0, true), "and it trips in the second minute without a radiator")
+
 
 func test_the_haggle_engine_pushes_23() -> void:
 	var d := _rig("fenn_haggle_engine")
@@ -207,6 +251,22 @@ func test_the_haggle_engine_pushes_23() -> void:
 
 
 # --- shields -----------------------------------------------------------------------------------------------------
+
+func test_the_hearth_shield_gives_a_third_layer_while_the_room_is_hot() -> void:
+	var d := _rig("emberkin_hearth_shield")
+	var ship: Ship = d["ship"]
+	var a := Arena.new(1)
+	a.add_ship(ship)
+	eq(a.ships[0].layers_cap, 2, "cool: two layers, like a Mk2")
+	ship.components.instances[d["reactor"]]["heat"] = 70.0  # any part of the room counts: a Furnace Core beside it
+	a.step(0.05)
+	eq([a.ships[0].layers_cap, a.ships[0].layers], [3, 6], "a hot room: three layers (a Mk2's two sectors hold them twice)")
+	ship.components.instances[d["reactor"]]["heat"] = 20.0
+	a.step(0.05)
+	eq(a.ships[0].layers_cap, 2, "cooled: two again")
+	_run(ship, 60.0, true)
+	near(float(ship.components.instances[d["part"]]["heat"]), 48.0, "and it warms itself 0.8 a second beyond what it sheds, a minute in", 1.5)
+
 
 func test_the_hive_battery_blooms_with_three_crew_and_sulks_with_fewer() -> void:
 	var d := _rig("kett_hive_battery")
