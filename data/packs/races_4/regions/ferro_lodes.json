@@ -3,7 +3,7 @@
 	"name": "The Ferro Lodes",
 	"home_species": "ferro",
 	"faction": "",
-	"stages": [3, 8],
+	"stages": [4, 8],
 	"weight": 4,
 	"rarity": "uncommon",
 	"danger": 1.2,
