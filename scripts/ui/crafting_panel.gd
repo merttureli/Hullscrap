@@ -322,10 +322,10 @@ func queue_rect() -> Rect2:
 	return Rect2(r.position + Vector2(0.0, FAB_H + GAP), Vector2(r.size.x, r.size.y - FAB_H - GAP))
 
 
-## The tab button of station `i` of STATION_IDS, on the right of the title row.
+## The tab button of station `i` of STATION_IDS, in the title row after the title (the top right is under the HUD's tide box).
 func tab_rect(i: int) -> Rect2:
 	var p := panel_rect()
-	return Rect2(p.end.x - PAD - (STATION_IDS.size() - i) * 124.0 + 4.0, p.position.y + 12.0, 120.0, 32.0)
+	return Rect2(p.position.x + 250.0 + i * 124.0, p.position.y + 12.0, 120.0, 32.0)
 
 
 ## The tab at `p`, or -1.
@@ -413,7 +413,7 @@ func _draw() -> void:
 	var p := panel_rect()
 	_panel(p)
 	_text(str(Crafting.STATIONS[station]).to_upper(), p.position + Vector2(PAD, 36.0), 26, TEXT)
-	_text(message, p.position + Vector2(220.0, 34.0), 16, BAD if message_bad else GOOD)
+	_text(message, p.position + Vector2(520.0, 34.0), 16, BAD if message_bad else GOOD)
 	_draw_tabs()
 	var fab := station_info(s)
 	_draw_list(s, fab)
@@ -528,7 +528,7 @@ func _draw_smelter(s, st: Dictionary) -> void:
 	_text(status, box.position + Vector2(10.0, 54.0), 22, col)
 	var tools: Array = st["tools"]
 	if int(st["level"]) > 0:
-		var speed := "Speed x%s, %s" % [_num(snappedf(float(st["speed"]), 0.01)), "manned" if st["manned"] else "unmanned: a crew member at the smelter adds %d%%" % roundi(Processing.manned_speed() * 100.0)]
+		var speed := "Speed x%s, %s" % [str(snappedf(float(st["speed"]), 0.01)), "manned" if st["manned"] else "unmanned: a crew member at the smelter adds %d%%" % roundi(Processing.manned_speed() * 100.0)]
 		_text(speed, box.position + Vector2(10.0, 78.0), 14, TEXT)
 		var heat := ""
 		var lead := int(st["uid"])
