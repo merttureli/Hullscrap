@@ -92,6 +92,13 @@ func start_jump() -> String:
 	return ""
 
 
+## Why the player's jump drive is not charging, in words ("" when it is): "Jump drive held: engines out", "...: helm
+## down" or "...: no crew". The enemy's drive follows the same rule (Morale.spool_hold).
+func jump_hold() -> String:
+	var why := Morale.spool_hold(arena, PLAYER)
+	return "" if why == "" else "Jump drive held: " + why
+
+
 ## True once the jump drive has spooled: the player can leave at any range.
 func jump_ready() -> bool:
 	return jump_charge >= JUMP_SPOOL
@@ -108,7 +115,7 @@ func tick(dt: float) -> void:
 		ai.think(STEP)
 		arena.step(STEP)
 		morale.tick(STEP)
-		if jump_charge >= 0.0 and state() == "fighting":
+		if jump_charge >= 0.0 and state() == "fighting" and jump_hold() == "":
 			jump_charge += STEP
 
 

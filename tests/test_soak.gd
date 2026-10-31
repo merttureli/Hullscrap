@@ -269,8 +269,9 @@ func _gives(e: Dictionary, index: int, item: String) -> bool:
 
 
 ## A fight through the real arena, both ships flown by the pilot AI. Returns the result dictionary the
-## combat view gives the map: {state, enemy, hull, hull_max}. Over FIGHT_CAP_S it is a draw ("fled"). A captured
-## or spared enemy counts as a win and one that escaped as a draw (the campaign's own handling of those comes with salvage).
+## combat view gives the map: {state, enemy, hull, hull_max} (plus offer when spared): state is won, captured, spared,
+## escaped or lost, and over FIGHT_CAP_S a draw ("fled"). A captured or spared enemy counts as a win in the stats and one
+## that escaped as a draw; the campaign handles each state itself. The player takes any surrender that is offered.
 func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGenerator) -> Dictionary:
 	stats["fights"] += 1
 	var path := c.fight_path(value, str(c.node(c.current)["type"]))
@@ -305,14 +306,13 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 			_audit_fight(where, s)
 	_audit_fight(where, s)
 	var state := s.state()
-	state = {"captured": "won", "spared": "won", "escaped": "fighting"}.get(state, state)  # morale: a captured or spared enemy is a win, one that jumped away a draw
+	stats[{"won": "won", "captured": "won", "spared": "won", "lost": "lost"}.get(state, "draw")] += 1
 	if state == "fighting":
 		state = "fled"
-		stats["draw"] += 1
-	else:
-		stats[state] += 1
 	var foe = s.arena.ships[Session.ENEMY]
 	var res := {"state": state, "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max}
+	if state == "spared":
+		res["offer"] = s.morale.offer.duplicate()
 	stats["fight_ticks"] += n
 	sim.ships.erase(enemy)
 	return res

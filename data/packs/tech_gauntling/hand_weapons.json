@@ -1,0 +1,6 @@
+{
+"weapons": [
+	{"id": "rivet_fist", "name": "Rivet Fist", "culture": "gauntling", "class": "heavy", "damage": 36, "rate": 0.48, "range": 280, "art": "rivet_fist", "notes": "damage +20%, rate -20%, range -20%: a rivet driver bolted to the forearm; it pierces (later)"},
+	{"id": "arc_welder", "name": "Arc Welder", "culture": "gauntling", "class": "tool", "damage": 7.2, "rate": 1.0, "range": 60, "art": "arc_welder", "notes": "damage +20%: an arc welder repairs and shocks; it stuns organic targets (later)"}
+]
+}
