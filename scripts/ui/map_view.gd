@@ -6,7 +6,7 @@ extends Control
 ## node docks again). Esc or M closes the map. It owns the Campaign (campaign.gd, saved in
 ## user://campaign.json with the ship) and the three panels, and it carries the flow: jump, arrive, event,
 ## fight, loot, salvage, station, and at the region's exit beacon the region choice (region_choice.gd; Enter or a
-## click on the beacon opens it again). The footer names the stage and the region ("Stage 3/8: The Kett Hives").
+## click on the beacon opens it again) once the beacon's warden is dealt with (wardens.gd: Enter there brings its hail back). The footer names the stage and the region ("Stage 3/8: The Kett Hives").
 ## While open it takes every key and click; it stays shut during a fight and under the ship picker.
 ## All rules live in campaign.gd, events.gd and drift.gd; this node reads input and draws, in the UI
 ## colours of docs/ART_STYLE.md.
@@ -25,6 +25,7 @@ const Salvage = preload("res://scripts/space/salvage.gd")
 const RegionChoice = preload("res://scripts/ui/region_choice.gd")
 const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
+const Wardens = preload("res://scripts/space/wardens.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -271,11 +272,15 @@ func jump_cost_text() -> String:
 	return Campaign.fuel_text(campaign.jump_cost(s) if s != null else Campaign.FUEL_PARTS)
 
 
-## Dock at the station of the current node (at the exit beacon: open the region choice). Returns "" or why not. In
-## sector space a station's menu opens by flying to its beacon.
+## Dock at the station of the current node (at the exit beacon: the region choice, or the warden's hail while it holds the
+## lane). Returns "" or why not. In sector space a station's menu opens by flying to its beacon.
 func dock() -> String:
 	if campaign.at_exit():
-		region_choice.open()
+		if campaign.warden_up():
+			_exit_due = true
+			event_panel.open_event(campaign.warden_event(ship()))
+		else:
+			region_choice.open()
 		return ""
 	if sector_flow():
 		_say("Fly to the station's beacon to dock.", true)
@@ -321,6 +326,8 @@ func tow() -> String:
 ## Leave the region from its exit beacon for region `id` (the region choice's pick): the next stage, then the arrival
 ## there. Returns "" or why not.
 func cross_to(id: String) -> String:
+	if campaign.warden_up():
+		return "the warden still holds the exit lane"
 	var r := campaign.cross(id, ship())
 	if not r["ok"]:
 		return r["why"]
@@ -338,7 +345,7 @@ func cross_to(id: String) -> String:
 func _arrive() -> void:
 	var a := campaign.arrive(ship())
 	refresh()
-	_exit_due = a["exit"]
+	_exit_due = a["exit"] or a["warden"]
 	if a["refused"] != "":
 		event_panel.open_notice(campaign.label(campaign.current), a["refused"], [])
 	elif not a["event"].is_empty():
@@ -349,9 +356,11 @@ func _arrive() -> void:
 		station_panel.open(campaign.current)
 
 
+## The region choice, once the warden of the exit beacon is dealt with; if it still holds the lane (you turned back) nothing opens.
 func _open_exit() -> void:
 	_exit_due = false
-	region_choice.open()
+	if not campaign.warden_up():
+		region_choice.open()
 
 
 ## The event panel has no more to show: whatever was queued (a fight's follow-up), else the region choice at the exit
@@ -363,7 +372,10 @@ func _on_events_finished() -> void:
 		return
 	if sector_flow():
 		if _exit_due and campaign.at_exit():
-			_poi_resolve()
+			if campaign.warden_up():
+				_forget_poi()  # turned back: the beacon stays live, and the warden hails again when you fly back to it
+			else:
+				_poi_resolve()
 			_open_exit()
 		elif _dock and campaign.dock_block(campaign.current) == "":
 			station_panel.open(campaign.current)
@@ -393,7 +405,7 @@ func open_poi(res: Dictionary, sector) -> void:
 	_poi = str(res["poi"]["id"])
 	_poi_sector = sector
 	_dock = bool(res.get("dock", false))
-	_exit_due = bool(res.get("exit", false))
+	_exit_due = bool(res.get("exit", false)) or bool(res.get("warden", false))
 	panel_only = true
 	visible = true
 	refresh()
@@ -717,7 +729,8 @@ func _draw_tip(id: String) -> void:
 	if id == campaign.current:
 		lines.append("You are here")
 		if campaign.at_exit():
-			lines.append("Enter or click: choose the next region")
+			lines.append("Enter or click: parley with the warden" if campaign.warden_up() else "Enter or click: choose the next region")
+			lines.append_array(warden_tip())
 		elif campaign.dock_block(id) == "" and not campaign.station_cfg(id).is_empty():
 			lines.append("Enter or click: dock")
 	elif not campaign.is_known(id):
@@ -732,6 +745,7 @@ func _draw_tip(id: String) -> void:
 			lines.append(Campaign.DARK_TEXT)
 		elif n["type"] == "exit":
 			lines.append("The way to the next region")
+			lines.append_array(warden_tip())
 		if n["type"] != "gate" and campaign.drift.linked(campaign.current, id):
 			lines.append(jump_cost_text())
 	if campaign.is_known(id):
@@ -747,6 +761,15 @@ func _draw_tip(id: String) -> void:
 	_panel(box, Color("#10151c"))
 	for i in lines.size():
 		_text(lines[i], box.position + Vector2(10.0, 22.0 + 20.0 * i), 14, TEXT if i == 0 else (AMBER if lines[i].begins_with("Hazard:") else DIM_TEXT))
+
+
+## The exit beacon's tooltip lines about its warden: its name and threat against your ship while it holds the lane.
+func warden_tip() -> Array[String]:
+	var out: Array[String] = []
+	var w: Dictionary = campaign.warden
+	if not w.is_empty():
+		out.append(Wardens.line(w, ship()) if campaign.warden_up() else "%s has let you through" % w["name"])
+	return out
 
 
 ## The tooltip lines about the tide for node `id`: Hollow, or when it will be, or that it holds.

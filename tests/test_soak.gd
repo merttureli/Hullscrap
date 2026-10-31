@@ -36,13 +36,14 @@ const FLY_STEP := 0.25  ## seconds of one autopilot step: the time scale of the 
 const FLY_CAP_S := 240.0  ## simulated seconds the autopilot has to reach a POI before it counts as lost
 const REPAIR_CAP_S := 120.0  ## seconds the crew get to make a ship that cannot fly fly again (the sim runs meanwhile)
 const OTHER_POI := 0.5  ## the chance the ship also visits one other new POI of a sector
+const WARDEN_TRIES := 8  ## times a run meets the exit warden (pay, pass, fight or turn back, at random) before it gives up on the lane
 
 var _cap_s := FIGHT_CAP_S
 var _real_left := 0  # fights of this run still to go through the arena
 var _helm: Helm  # the ship's helm in the sector of the run now
 var _goals: Array = []  # POI ids still to fly to in this sector
 var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "tows": 0, "runs": 0, "known": 0, "dead": 0,
-	"pois": 0, "flown_s": 0, "salvage": 0, "contacts": 0, "grounded": 0}
+	"pois": 0, "flown_s": 0, "salvage": 0, "contacts": 0, "grounded": 0, "wardens": 0, "cleared": 0}
 
 
 func test_soak_every_starter_every_seed() -> void:
@@ -55,6 +56,7 @@ func test_soak_every_starter_every_seed() -> void:
 	check(stats["fights"] > 0, "the soak met at least one fight")
 	check(stats["pois"] + stats["grounded"] >= stats["jumps"], "a POI or more a sector, unless a fight left the ship unable to fly (%d POIs, %d grounded)" % [stats["pois"], stats["grounded"]])
 	check(stats["salvage"] > 0, "a won fight led to the salvage of the enemy's parts")
+	check(stats["wardens"] > 0 and stats["cleared"] > 0, "the exit warden was met and cleared (%d meetings, %d runs got through)" % [stats["wardens"], stats["cleared"]])
 
 
 ## Every event with choices has a way out that needs nothing: a choice with no requirement that can
@@ -115,8 +117,37 @@ func _soak(design: String, seed_value: int) -> void:
 		stats["jumps"] += 1
 		_audit(where + " after the jump", c, ship)
 	check(made == JUMPS, "%s: made %d of %d jumps (the run got stuck at %s)" % [tag, made, JUMPS, c.current if c != null else "?"])
+	if c != null:
+		_warden(tag, c, sim, pick)
 	stats["known"] += sim.player_ship().crafting.known.size()  # blueprints at the end of the run (salvage scans add to it)
 	stats["dead"] += sim.player_ship().dead_crew.size()  # crew who bled out
+
+
+## The region's exit beacon (docs/MECHANICS_REVIEW.md P7): its warden holds the lane. The ship arrives as the beacon's POI makes it
+## (Campaign.arrive) and meets the warden like any event (pay the toll, good standing, break through or turn back, at random), up
+## to WARDEN_TRIES times; once it is cleared the exit is open and the crossing works. False when the run ended with a lost fight.
+func _warden(tag: String, c: Campaign, sim, pick: RandomNumberGenerator) -> bool:
+	var ship = sim.player_ship()
+	c.current = c.drift.exit_id()
+	c.visited[c.current] = true
+	c._enter(c.current, ship)
+	var poi := str(c.current_sector().main_poi()["id"])
+	var at := tag + " at the exit"
+	for i in WARDEN_TRIES:
+		var a := c.arrive(ship)
+		if not c.warden_up():
+			check(a["exit"] and not a["warden"], at + ": the warden is gone, the exit is open")
+			var r := c.cross(c.region_offers()[0], ship)
+			check(r["ok"], "%s: crossing after the warden: %s" % [at, r["why"]])
+			check(c.is_final() or not c.warden.is_empty(), at + ": the next region has its warden")
+			stats["cleared"] += 1
+			return true
+		check(a["warden"] and not a["exit"] and a["event"].get("title", "") == c.warden["name"], at + ": the warden's event and no exit")
+		stats["wardens"] += 1
+		if not _event_chain(at, a["event"], c, sim, pick, poi):
+			return false
+		_audit(at + " after the warden", c, ship)
+	return true
 
 
 ## In the sector of the current node: fly to its own POI (its event, a station's dock) and maybe to one other new POI,

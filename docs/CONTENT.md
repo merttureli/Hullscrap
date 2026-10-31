@@ -725,6 +725,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **Events**: `requires.region` (a region id or its `events` tag, or a list) and `stage_min` / `stage_max`, on an event or a choice. The flag `in_<region id>` is also set while in a region.
   - **Ma's debt clock** runs in stages 1–2 only: from stage 3 no payment falls due, no debt event comes and no rammer is sent (the debt can still be paid). Ma's tow takes you to the current region's start.
   - **Saves** are version 4 (stage, region, route, region seed); older saves load as stage 1 in Clan space.
+  - **Exit wardens** (`scripts/space/wardens.gd`, `data/wardens.json`): every region's exit beacon is held by a strong generated ship that the region card names ("Exit warden: Concord Bulwark (Threat 4/5)" and a hint at what beats it). At the beacon you pay its toll (credits x the stage), are waved through when your standing with its faction is high enough, or break through (a win, a capture, a surrender or an escape clears the lane); the region choice stays shut until then. The ending region has no warden. Saves gained `warden` (version 6).
 
 ## 16. Unique characters: 60+ named crew with special abilities (owner, 2026-10-30)
 > "60+ unique characters that do or sometimes do not belong to a race, but have special abilities, just like FTL."
