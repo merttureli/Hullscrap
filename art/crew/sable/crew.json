@@ -1,0 +1,172 @@
+{
+ "species": "sable",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "notes": "Sable: lean boarding-crew families (standard rig). A long charcoal coat with narrow shoulders, a high collar and tails that flare behind, a bandolier of amber cartridges and the collar lining (the tinted outfit), a cutter fuel tank on the back with hoses over the shoulders, and long-striding dark legs. A lean dark-furred head with a cream muzzle and amber eyes. A cutter torch is strapped to the outside of each forearm (a steel tube, a nozzle at the hand end) with a small blue-white flame burning forward along the arm in every pose (hard pixels, no glow layer). Head variants: bare, hood (the coat's hood), helmet (a breacher's helm with a lamp). Outfit mask = the bandolier, the collar lining, the cuffs, the helm's chin strap. Same rig as human: every layer faces UP at rotation 0 on one 33x33 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     8
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     16,
+     11
+    ],
+    "back": [
+     16,
+     24
+    ],
+    "shoulder_l": [
+     10,
+     16
+    ],
+    "shoulder_r": [
+     22,
+     16
+    ]
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      6,
+      21
+     ],
+     "hand_r": [
+      26,
+      21
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      14,
+      5
+     ],
+     "hand_r": [
+      18,
+      5
+     ],
+     "mount": [
+      16,
+      5
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      17,
+      1
+     ],
+     "hand_r": [
+      21,
+      9
+     ],
+     "mount": [
+      20,
+      8
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      13,
+      9
+     ],
+     "hand_r": [
+      21,
+      4
+     ],
+     "mount": [
+      21,
+      4
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      14,
+      3
+     ],
+     "hand_r": [
+      21,
+      12
+     ],
+     "mount": [
+      19,
+      11
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      12,
+      7
+     ],
+     "hand_r": [
+      23,
+      8
+     ],
+     "mount": [
+      23,
+      8
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "bare": 0,
+    "hood": 1,
+    "helmet": 2
+   }
+  }
+ }
+}

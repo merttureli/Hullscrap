@@ -1,0 +1,173 @@
+{
+ "species": "rattler",
+ "frame": [
+  25,
+  25
+ ],
+ "pivot": [
+  12,
+  12
+ ],
+ "notes": "Rattler: scrap gremlins who live in Rusthold's walls. THE SMALL RIG (kind \"small\": 25x25, pivot (12,12)): legs, torso and every head stay inside the central 15x15 (pivot +-7), so the body fits the 1x1 cell of the trait `body` 1 and a 1-wide crawlspace; only the thin arms reach beyond it, out to the shared mounts (the human's, moved by (-4,-4): item top-left = mount - item.grip as everywhere; hand anchors are art only). Gunmetal-grey skin, two huge pink-lined ears, brass goggles with blue glass, rust leather gloves and boots, a tool belt that bristles with a wrench, a screwdriver and a hammer. Head variants: goggles (over the eyes), pushed (goggles up on the brow, bright eyes), helmet (a bucket hard hat with a lamp, tinted). Outfit mask = the overalls, the knee patches, the hard hat. Same rig as human: every layer faces UP at rotation 0 on one 25x25 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     9
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     12,
+     9
+    ],
+    "back": [
+     12,
+     16
+    ],
+    "shoulder_l": [
+     8,
+     12
+    ],
+    "shoulder_r": [
+     16,
+     12
+    ]
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      6,
+      15
+     ],
+     "hand_r": [
+      18,
+      15
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      10,
+      1
+     ],
+     "hand_r": [
+      14,
+      1
+     ],
+     "mount": [
+      12,
+      1
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      13,
+      1
+     ],
+     "hand_r": [
+      17,
+      5
+     ],
+     "mount": [
+      16,
+      4
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      9,
+      5
+     ],
+     "hand_r": [
+      17,
+      1
+     ],
+     "mount": [
+      17,
+      0
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      10,
+      1
+     ],
+     "hand_r": [
+      17,
+      8
+     ],
+     "mount": [
+      15,
+      7
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      8,
+      3
+     ],
+     "hand_r": [
+      19,
+      4
+     ],
+     "mount": [
+      19,
+      4
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee. RIG KIND small: this frame is 25x25 with the pivot at (12,12), so every mount here is the shared one moved by (-4,-4): mount - pivot is identical to the human rig. The hand anchors are art only (kept inside the frame)."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "goggles": 0,
+    "pushed": 1,
+    "helmet": 2
+   }
+  }
+ },
+ "kind": "small"
+}

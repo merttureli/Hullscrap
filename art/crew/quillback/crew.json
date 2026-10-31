@@ -1,0 +1,172 @@
+{
+ "species": "quillback",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "notes": "Quillback: spined, proud Clan duellists (standard rig). Warm brown fur; the back is a fan of long banded quills (cream and dark, a pale tip) that lie swept back at rest (the torso layer). THE FLARE is a pose of the arms layer: in the `melee` pose (their sidearm, the ember knife, is a melee weapon) the arms layer also carries a full sunburst of longer quills round the back and sides (the forward 80 degrees stay clear). The drawer draws arms over the torso and the item and head over the arms, so the flare opens over the resting fan without hiding the weapon or the face. The torso layer is one frame (the validator and the drawer take one), so this is the way a drawer shows the flare without code: pick the melee pose. A duelist's cravat and epaulettes (the tinted outfit), a crest of short quills over the brow, a pointed snout, amber eyes, claw hands, bare clawed feet. Head variants: crest, helmet (an open steel cap with a tinted band), scarred. Outfit mask = the cravat, the epaulettes, the cuffs and ankle wraps, the cap band. Same rig as human: every layer faces UP at rotation 0 on one 33x33 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     7
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     16,
+     11
+    ],
+    "back": [
+     16,
+     26
+    ],
+    "shoulder_l": [
+     9,
+     16
+    ],
+    "shoulder_r": [
+     23,
+     16
+    ]
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      6,
+      21
+     ],
+     "hand_r": [
+      26,
+      21
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      14,
+      5
+     ],
+     "hand_r": [
+      18,
+      5
+     ],
+     "mount": [
+      16,
+      5
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      17,
+      1
+     ],
+     "hand_r": [
+      21,
+      9
+     ],
+     "mount": [
+      20,
+      8
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      13,
+      9
+     ],
+     "hand_r": [
+      21,
+      4
+     ],
+     "mount": [
+      21,
+      4
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      14,
+      3
+     ],
+     "hand_r": [
+      21,
+      12
+     ],
+     "mount": [
+      19,
+      11
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      12,
+      7
+     ],
+     "hand_r": [
+      23,
+      8
+     ],
+     "mount": [
+      23,
+      8
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "crest": 0,
+    "helmet": 1,
+    "scarred": 2
+   }
+  }
+ }
+}
