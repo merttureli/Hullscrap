@@ -18,7 +18,8 @@ const Content = preload("res://scripts/data/content.gd")
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const FACTION_REGIONS := ["clan_space", "concord_space", "lumen_space", "boneyard", "gate_approaches"]
 const HOMELANDS := {"human_core": "human", "basalt_quarries": "basalt", "emberkin_forges": "emberkin", "fenn_bazaar": "fenn", "kett_hives": "kett",
-	"mire_fens": "mire", "sporeling_groves": "sporeling", "gauntling_scrapyards": "gauntling", "prismatic_choir": "prismatic", "grundl_barges": "grundl"}
+	"mire_fens": "mire", "sporeling_groves": "sporeling", "gauntling_scrapyards": "gauntling", "prismatic_choir": "prismatic", "grundl_barges": "grundl",
+	"vellum_stacks": "vellum", "oorth_quietude": "oorth", "drakkin_pits": "drakkin", "wisp_stormfield": "wisp", "hullkin_reefs": "hullkin", "lantern_lanes": "lantern"}
 
 
 func _ship() -> Ship:
@@ -330,7 +331,7 @@ func test_the_regions_pass_the_validator() -> void:
 	var ids := Content.ids("regions")
 	for id in FACTION_REGIONS + HOMELANDS.keys():
 		check(ids.has(id), id + " exists")
-	eq(ids.size(), 15, "5 faction regions and 10 homelands")
+	eq(ids.size(), FACTION_REGIONS.size() + HOMELANDS.size(), "5 faction regions and a homeland per race")
 	for p in Regions.problems():
 		check(false, p)
 	eq(Regions.get_region("clan_space")["stages"], [1.0, 1.0], "Clan space is stage 1 only")

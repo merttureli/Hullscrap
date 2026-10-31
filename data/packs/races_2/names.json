@@ -1,0 +1,10 @@
+{
+	"crew": {
+		"vellum": ["Folio", "Verso", "Quire", "Rubric", "Margin", "Hachure", "Colophon", "Gutter", "Errata", "Legend", "Isoline", "Scale"],
+		"oorth": ["Ohm", "Ulla", "Orrun", "Hollu", "Moor", "Oona", "Dorun", "Ummo", "Ollo", "Ruun", "Hoom", "Nolu"],
+		"drakkin": ["Rask", "Grazz", "Vossk", "Skarra", "Zekka", "Korrug", "Hissa", "Dagrr", "Sharrak", "Ruzk", "Thazz", "Ossk"],
+		"wisp": ["Zeli", "Fiyu", "Wisi", "Ilyi", "Vessi", "Syli", "Zephi", "Yissa", "Fiel", "Ezzi", "Lyssi", "Sizzi"],
+		"hullkin": ["Strake", "Garboard", "Scupper", "Gunwale", "Chine", "Transom", "Skeg", "Futtock", "Sheer", "Bilge", "Thole", "Rabbet"],
+		"lantern": ["Wick", "Taper", "Tallow", "Vesper", "Gloam", "Curfew", "Dimity", "Evensong", "Cresset", "Sconce", "Votive", "Nightjar"]
+	}
+}

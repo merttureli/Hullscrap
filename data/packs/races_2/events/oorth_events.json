@@ -1,0 +1,58 @@
+{"events": [
+    {
+      "id": "oorth_unadjourned", "type": "distress", "weight": 7, "once": true, "requires": {"jumps_min": 3},
+      "text": "The beacon says MEETING IN PROGRESS, PLEASE HOLD. It has said so for forty years. The ship is a Concord briefing barge, the Item Seven, and when you dock the lights are on, the chairs are out and a recorder is still taking minutes, because nobody told it that it could stop. Round a long table sit nine Oorth in grey hoods, quite still, every one of them facing the empty chair at the head. They are waiting to be asked something.",
+      "choices": [
+        {"text": "Ask them a question.", "outcomes": [
+          {"weight": 100, "text": "'Which way is the nearest trouble?' you ask. All nine hoods turn at once. There is a long, heavy quiet, and then eight of them look at the ninth, and the ninth says, very small, 'Port.' The relief in the room is like a window opening. They give you three more answers you did not ask for, and a fourth, kindly, for free.", "effects": {"reveal": "pirate", "items": {"credits": 15}}}
+        ]},
+        {"text": "Move that the meeting be adjourned.", "outcomes": [
+          {"weight": 100, "text": "The recorder's lamp goes from red to green. 'Carried,' it says. Nine Oorth rise as one, stretch, and discover that they have legs. Eight go to find a dock. The ninth stays in the doorway, looking at your ship with the face of someone who has finally been invited to something. 'Ohm,' they say. 'If you will have me.' They bring the recorder.", "effects": {"recruit": {"species": "oorth", "name": "Ohm"}, "items": {"fuel": 1}}}
+        ]},
+        {"text": "[Oorth] Take the chair at the head and call the first item.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth crosses the room, sits in the chair nobody sat in, and says, aloud, in a voice you have never heard them use: 'Item one. Are we all right?' The silence breaks. Nine voices, then eighteen, then a great many at once, the sound of forty years of things that went unsaid. The meeting runs for six hours. The minutes are a treasure, and one of the nine takes a berth.", "effects": {"recruit": {"species": "oorth", "name": "Ohm"}, "items": {"credits": 40, "fuel": 2}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You back out of the room on tiptoe. Behind you the recorder says, 'Noted,' and the beacon goes on saying PLEASE HOLD.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "oorth_read_the_hull", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 4},
+      "text": "A Rustfang boarding sled slides alongside with its lamps off, which is a thing people only do when they mean it. Out in the dark a second sled waits with its engines cold. Your crew count the angles. Nobody has hailed. Somewhere out there the raiders' captain is being quiet very hard.",
+      "choices": [
+        {"text": "Open fire on the nearest sled.", "outcomes": [
+          {"weight": 100, "text": "You light up the first sled. The second one wakes at once.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Hail them and offer a toll (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 70, "text": "A voice takes the credits with a mumble that might be thanks. The sleds melt back into the dark.", "effects": {"items": {"credits": -30}}},
+          {"weight": 30, "text": "They take the toll and then attack anyway, which is, you reflect, a normal sort of afternoon.", "effects": {"items": {"credits": -30}, "fight": "tier"}}
+        ]},
+        {"text": "[Oorth] Read the dark.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth sits with eyes closed for the length of a held breath. 'Two sleds. The one in the dark holds the captain. She is more frightened than you are, and she has not eaten since Tuesday.' You hail the second sled and offer a hot meal. A shaky voice says yes. The sleds come alongside with their lamps on, and the raiders leave fed, with a story about a ship that knew. They leave a tithe on the way out, out of embarrassment.", "effects": {"items": {"scrap": 35, "credits": 20}}}
+        ]},
+        {"text": "Run for it.", "outcomes": [
+          {"weight": 60, "text": "You burn hard. The sleds snap a few shots at your stern and drop back, panting.", "effects": {"hull": -5}},
+          {"weight": 40, "text": "The sleds are faster than they look.", "effects": {"fight": "tier"}}
+        ]}
+      ],
+      "after_win": {"text": "The sleds break up in the dark. In the captain's locker: a tin of beans, an unpaid fine, and a photograph of a smaller ship. You take the parts, and the beans.", "effects": {"items": {"scrap": 40, "credits": 25}}}
+    },
+    {
+      "id": "oorth_auction_lot", "type": "trader", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "Honest Gil runs an auction out of a hollowed freighter, selling salvage lots sight unseen. 'Lot nine!' he calls over a stack of crates stencilled MISC. 'Starting bid forty!' His regulars bid on feel. Nobody has ever opened a lot before paying for it. That is the whole charm, Gil says, and also the whole legal position.",
+      "choices": [
+        {"text": "Bid forty on lot nine.", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 45, "text": "Lot nine is forty pounds of good copper wire, a sandwich, and a card that says THANK YOU FOR YOUR CUSTOM.", "effects": {"items": {"credits": -40, "copper": 30}}},
+          {"weight": 35, "text": "Lot nine is a crate of left boots. Gil looks briefly at the ceiling.", "effects": {"items": {"credits": -40, "scrap": 15}}},
+          {"weight": 20, "text": "Lot nine is a crate of nanite paste that Gil was too lazy to read. Gil is not too lazy to look sick about it afterwards.", "effects": {"items": {"credits": -40, "nanite_paste": 3}}}
+        ]},
+        {"text": "Watch the bidding.", "outcomes": [
+          {"weight": 100, "text": "You learn that the tall man in row three has not won a lot in a year, and that the woman beside him bids on everything. You learn nothing useful, and enjoy it.", "effects": {}}
+        ]},
+        {"text": "[Oorth] Sit at the back and read the lots.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth lays a hand on each crate in turn and listens. 'Not this one,' they murmur. 'This one has a sandwich in it. This one is good, but it knows it. This one,' and they stop, 'is a reactor in a coat.' You bid on the one that is a reactor in a coat. Gil, who has never been outbid by a quiet person, goes the colour of the crates and takes your forty like a man selling his own ship.", "effects": {"items": {"credits": -40, "plasma_cell": 2, "copper": 20}}}
+        ]}
+      ]
+    }
+  ]}

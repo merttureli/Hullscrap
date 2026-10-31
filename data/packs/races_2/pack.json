@@ -1,0 +1,7 @@
+{
+	"id": "races_2",
+	"name": "Races, wave 2",
+	"version": "1.0",
+	"requires": ["races_1"],
+	"notes": "Six crew species: Vellum, Oorth, Drakkin, Wisp, Hullkin and Lantern (docs/waves/races_2_4.md), each with a homeland region (regions/) and its events (events/). Their traits are bags of keys of the trait library (data/traits.json); art is art/crew/<id>/ (claude/art-race2; until it lands the art loader falls back to the human rig). Sidearms are the existing hand weapons (Wisp has none). Recruited at the Prism (Vellum), Meridian (Oorth, Lantern) and Rusthold (Drakkin): data/drift.json; Wisp and Hullkin join through events at anomaly and wreck-field nodes. Three events per race (events/<race>_events.json: one where the race is the story, two with a blue option for it) and six per homeland (events/<region>_events.json, every one asks for requires.region)."
+}

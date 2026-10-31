@@ -1,0 +1,57 @@
+{"events": [
+    {
+      "id": "lantern_cadet_circling", "type": "distress", "weight": 7, "once": true, "requires": {"jumps_min": 2},
+      "text": "A Concord trainer-glider has been flying circles round a lane-lamp for six hours, and the pilot has stopped answering the radio. The lamp is one of the big old lane-lamps that keep the lanes legible; the pilot is a cadet in a moth-wing flight jacket, who is looking at it the way a person looks at a cake. 'It's very bright,' says a small voice on the comm. 'It's very, very bright. I think I should go and look at it.' The glider is down to its last ten minutes of fuel.",
+      "choices": [
+        {"text": "Shoot out the lamp's power coupling.", "outcomes": [
+          {"weight": 100, "text": "A single shot, and the lane goes dark. The glider wobbles, finds a heading, and lands on your deck like a leaf. 'Thank you,' says the cadet, rather faint. 'I'd have gone in.' She takes off her goggles. She has lost her licence for the day and, as it turns out, her instructor, who left in a huff the previous Tuesday. 'I don't suppose,' says Wick, 'you need a pilot.'", "effects": {"recruit": {"species": "lantern", "name": "Wick"}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "Throw a line and tow the glider out of the circle (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You catch the glider with a line and drag it out of orbit, cadet kicking all the way. She stops, sulks, sags, and then apologises for twenty minutes. 'I wanted to look,' she says. 'Just look. It was the best thing I ever saw.' She offers to work off the tow. Wick takes the second helm and does not look at the lamp again.", "effects": {"items": {"fuel": -1}, "recruit": {"species": "lantern", "name": "Wick"}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Lantern] Fly out beside her and drift her home.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "Your Lantern takes a glider off the rack and flies out into the lamplight, wings wide, and matches the cadet's loops. Then, one degree at a time, they flatten the loop until it is a line. The cadet follows because the other moth is the brighter thing now. They land side by side. 'Never look straight at it,' says your Lantern. 'Look at the dark it makes.' Wick, who has never been taught that, cries a little and asks if the lesson is free. The Concord pays you for the rescue.", "effects": {"recruit": {"species": "lantern", "name": "Wick"}, "items": {"credits": 40}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Leave her to it.", "outcomes": [
+          {"weight": 100, "text": "Another ship takes the glider in tow a minute later, but you do not get to see it. You feel rotten for the rest of the day, and it is not even a good kind of rotten.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "lantern_rock_garden", "type": "asteroid_field", "weight": 7, "once": false, "requires": {},
+      "text": "A Concord dispatch lane runs through the middle of a rock garden, a thick drifting field of ice and stone, and the courier is behind. 'Fifty credits to anyone who takes the letter through the rocks in ten minutes,' says a note on the beacon. The dispatch tube is clipped to the buoy; its postmark is the shape of a bird. There is a track through the garden, if you can see it. Nobody ever can.",
+      "choices": [
+        {"text": "Fly the rocks yourself.", "outcomes": [
+          {"weight": 55, "text": "You make it by the skin of the hull. The courier pays fifty and a thank-you in two colours.", "effects": {"items": {"credits": 50}, "hull": -3}},
+          {"weight": 45, "text": "The rocks have other ideas. You deliver the letter late and a little dented, to a clerk who docks you for both.", "effects": {"items": {"credits": 20}, "hull": -10}}
+        ]},
+        {"text": "Go round the garden (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "It takes four extra hours and a lot of patience. The courier pays the late rate, which is half, and reflects that the letter was never that urgent.", "effects": {"items": {"fuel": -1, "credits": 25}}}
+        ]},
+        {"text": "[Lantern] Take the helm.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "Your Lantern takes the helm, folds their wings back, and the ship begins to move differently, like a leaf choosing which way to fall. Ten minutes later you are out the far side with the letter, six minutes early and without a scratch. The courier pays the fifty and a bonus for the style, and asks, in a small voice, whether your Lantern has ever thought of a career in post.", "effects": {"items": {"credits": 80}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Leave the letter.", "outcomes": [
+          {"weight": 100, "text": "The tube rocks on its buoy as you pass. You decide not to look at the postmark.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lantern_lamp_keepers", "type": "patrol", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "A Concord lamp-keepers' skiff has pulled you over to ask about your running lights. 'Lane-lamp visibility,' says a woman with a ladder strapped to her back and a face the colour of someone who has spent her life on a ladder. 'Your navigation lamps are out of specification by two candela.' She says this the way a doctor says it is a small lump. 'I must note it.'",
+      "choices": [
+        {"text": "Apologise and pay the fee (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "She notes it, thanks you, and gives you a receipt that doubles as a bookmark. 'Most people argue,' she says. 'It's nice not to be argued with. I get the feeling people are fond of the dark.'", "effects": {"items": {"credits": -15}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Offer to fix the lamp yourself.", "outcomes": [
+          {"weight": 100, "text": "You fix it with a spanner and a bit of wire. The keeper watches your hands with the sorrow of someone who tends a thousand lamps and has never been thanked for one. She gives you a coil of the good wire to keep, and a short lecture on the dark.", "effects": {"items": {"copper": 10}}}
+        ]},
+        {"text": "[Lantern] Explain that your Lantern lights the way by themselves.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "The keeper looks at your Lantern, and your Lantern looks at the keeper, and between them passes something old. 'Oh,' she says. 'You're one of ours.' She tears up the fine and gives you a handful of fuel cells and the code to a lamp-keepers' cache two lanes on. 'Mind the dark,' she says. 'It's where we live.'", "effects": {"items": {"fuel": 2}, "reveal": "trader", "rep": {"concord": 2}}}
+        ]},
+        {"text": "Argue about candela.", "outcomes": [
+          {"weight": 100, "text": "You argue for an hour. She wins. She has the ladder.", "effects": {"items": {"credits": -25}, "rep": {"concord": -1}}}
+        ]}
+      ]
+    }
+  ]}

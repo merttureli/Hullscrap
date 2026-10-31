@@ -1,0 +1,25 @@
+{
+	"id": "oorth_quietude",
+	"name": "The Oorth Quietude",
+	"home_species": "oorth",
+	"faction": "concord",
+	"stages": [4, 8],
+	"weight": 10,
+	"rarity": "uncommon",
+	"danger": 1.25,
+	"palette": {"tint": "#7f86b8", "nebula": "concord"},
+	"map": {},
+	"node_weights": {"empty": 20, "patrol": 18, "distress": 12, "trader": 12, "anomaly": 10, "pirate": 10, "wreck_field": 10, "asteroid_field": 8},
+	"places": [
+		{"id": "listening_gallery", "name": "The Listening Gallery", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"copper_coil": 1.2, "polymer_barrel": 1.1},
+	"pois": {"concord_checkpoint": 1.3, "anomaly": 1.3},
+	"ambient": {"patrol": 4, "trader": 2, "pirate": 1},
+	"stock": {"helm": 70, "reactor_mk1": 150, "reactor_mk2": 320, "shield_mk1": 160, "shield_mk2": 330, "laser_mk1": 140, "laser_mk2": 280, "pulse_mk1": 130, "artemis_mk1": 220, "medbay": 180, "oxygen_gen": 90},
+	"recruit": {"oorth": 8, "human": 1, "lantern": 1},
+	"enemies": "concord",
+	"hazards": [],
+	"events": "oorth_quietude",
+	"blurb": "The Concord's old briefing rooms, moored together in a hush. The Oorth sat at the back of Meridian's meetings for forty years and were never asked a single question, so they came here to be quiet in better company. The Listening Gallery sells sound Concord gear and says nothing about what it already knows you want."
+}
