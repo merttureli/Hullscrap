@@ -52,13 +52,14 @@ func test_three_cards_with_a_name_a_character_and_the_numbers() -> void:
 		check(c["blurb"].length() > 30, c["name"] + " has a one-line character")
 		var st: Dictionary = c["stats"]
 		check(st["supply"] >= st["demand"] and st["demand"] > 0.0, c["name"] + ": power supply covers demand")
-		check(st["mass"] > 100.0 and st["hull"] >= 20.0 and st["layers"] >= 1, c["name"] + ": mass, hull and shield layers")
-		check(st["weapons"].size() >= 2, c["name"] + " lists its weapons")
+		check(st["mass"] > 100.0 and st["hull"] >= 150.0 and st["layers"] >= 0, c["name"] + ": mass, armour and shield layers (the shield waits in the hold)")
+		check(st["weapons"].size() >= 1, c["name"] + " lists its weapon")
 		check(c["schematic"].arena != null, c["name"] + " has a schematic bound to an arena")
-	eq(p.cards[0]["stats"]["weapons"], ["Shrapnel Cannon", "Rattle Burst", "Bolt Thrower"], "Rustbucket weapons by name")
-	eq(p.cards[1]["stats"]["weapons"], ["Laser Mk1", "Pulse Mk1", "Laser Mk1"], "Courier weapons by name")
-	eq([p.cards[2]["stats"]["layers"], p.cards[2]["stats"]["sectors"]], [2, 4], "Prism: 2 layers in 4 sectors")
-	eq([p.cards[0]["stats"]["layers"], p.cards[0]["stats"]["sectors"]], [1, 1], "Rustbucket: 1 layer")
+	eq(p.cards[0]["stats"]["weapons"], ["Rattle Burst"], "Rustbucket weapons by name")
+	eq(p.cards[1]["stats"]["weapons"], ["Pulse Mk1"], "Courier weapons by name")
+	eq(p.cards[2]["stats"]["weapons"], ["Heat Lance"], "Prism weapons by name")
+	for i in 3:
+		eq(p.cards[i]["stats"]["layers"], 0, "%s: no shield built yet" % p.cards[i]["name"])
 	check(p.cards[0]["stats"]["mass"] > p.cards[1]["stats"]["mass"] and p.cards[1]["stats"]["mass"] > p.cards[2]["stats"]["mass"], "masses: Rustbucket > Courier > Prism")
 	check(p.cards[0]["stats"]["hull"] > p.cards[1]["stats"]["hull"] and p.cards[1]["stats"]["hull"] > p.cards[2]["stats"]["hull"], "hulls: Rustbucket > Courier > Prism")
 	_done(d)
@@ -121,7 +122,7 @@ func test_choosing_resets_the_crew_the_camera_and_the_build_palette() -> void:
 	_done(d)
 
 
-func test_the_camera_fit_shows_the_whole_hull_below_the_hud() -> void:
+func test_the_camera_fit_shows_the_whole_hull_between_the_hud_panels() -> void:
 	for path in ShipPicker.DESIGNS:
 		var ship = preload("res://scripts/ship/ship.gd").from_design(path)
 		for view in [Vector2(1600.0, 900.0), Vector2(1280.0, 720.0)]:
@@ -135,8 +136,8 @@ func test_the_camera_fit_shows_the_whole_hull_below_the_hud() -> void:
 					var s: Vector2 = (corner - f["pos"]) * z + view / 2.0  # screen position
 					lo = Vector2(minf(lo.x, s.x), minf(lo.y, s.y))
 					hi = Vector2(maxf(hi.x, s.x), maxf(hi.y, s.y))
-			check(lo.x >= 0.0 and hi.x <= view.x and hi.y <= view.y, "%s: the hull is on screen at %s" % [path.get_file(), str(view)])
-			check(lo.y >= ShipPicker.HUD_H - 1.0, "%s: and below the HUD text at %s (top %d)" % [path.get_file(), str(view), lo.y])
+			check(lo.x >= ShipPicker.HUD_SIDE - 1.0 and hi.x <= view.x - ShipPicker.HUD_SIDE + 1.0, "%s: the hull is between the palette and the card at %s" % [path.get_file(), str(view)])
+			check(lo.y >= ShipPicker.HUD_TOP - 1.0 and hi.y <= view.y - ShipPicker.HUD_BOTTOM + 1.0, "%s: and between the top bar and the mode bar at %s (%d..%d)" % [path.get_file(), str(view), lo.y, hi.y])
 
 
 func test_escape_keeps_the_ship_and_a_bad_number_does_nothing() -> void:

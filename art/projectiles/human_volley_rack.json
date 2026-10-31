@@ -1,0 +1,81 @@
+{
+ "frame": [
+  5,
+  14
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   14
+  ]
+ },
+ "anchors": {
+  "head": [
+   2,
+   0
+  ],
+  "tail": [
+   2,
+   11
+  ]
+ },
+ "glow": {
+  "image": "human_volley_rack_glow.png",
+  "frame": [
+   13,
+   22
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    14
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "human_volley_rack_impact.png",
+  "frame": [
+   16,
+   16
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    14
+   ]
+  },
+  "anchor": [
+   8,
+   8
+  ],
+  "glow": {
+   "image": "human_volley_rack_impact_glow.png",
+   "frame": [
+    24,
+    24
+   ],
+   "offset": [
+    -4,
+    -4
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     14
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A small missile, 5x14: steel body, red ogive, small tail fins and a 3-frame exhaust. Three leave per salvo."
+}

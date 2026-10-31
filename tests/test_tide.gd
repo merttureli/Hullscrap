@@ -15,6 +15,7 @@ const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const MapView = preload("res://scripts/ui/map_view.gd")
 const TideHud = preload("res://scripts/ui/tide_hud.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 ## A small config with round numbers: the front moves 100 px a step after 2 steps of grace on the 1000 px test map.
@@ -261,13 +262,13 @@ func test_a_hollow_place_sends_a_hollow_event_and_a_station_docks_as_usual() -> 
 	eq(a["event"].get("type", ""), "hollow", "a hollow event instead of the node's own")
 	check(str(a["event"].get("id", "")).begins_with("hollow_"), "one of the pack's: " + str(a["event"].get("id", "")))
 	check(c.events_seen >= 1, "it counts as an event met")
-	c.current = "meridian"
-	check(not c.is_hollow("meridian"), "Meridian holds")
+	c.current = "rusthold"
+	check(not c.is_hollow("rusthold"), "Rusthold holds")
 	a = c.arrive(ship)
 	eq(a["refused"], "", "the dock master lets you in")
 	check(a["event"].get("type", "") != "hollow", "its own greeting, not a ghost")
-	check(c.flags.has("at_meridian"), "docked")
-	check(c.dock_block("meridian") == "" and not c.station_cfg("meridian").is_empty(), "and the menu is there")
+	check(c.flags.has("at_rusthold"), "docked")
+	check(c.dock_block("rusthold") == "" and not c.station_cfg("rusthold").is_empty(), "and the menu is there")
 
 
 func test_no_hollow_event_falls_back_to_a_fight() -> void:
@@ -399,6 +400,136 @@ func test_a_broken_tide_is_refused_and_nothing_changes() -> void:
 	eq(other.tide.steps, 9, "and nothing changed")
 
 
+# --- one tide per region ----------------------------------------------------------------------------------
+
+## Walk the campaign's ship to the region's exit beacon (the jump does not matter here: the test sets the place).
+func _at_exit(c: Campaign) -> void:
+	c.current = c.drift.exit_id()
+	c.visited[c.current] = true
+
+
+func test_each_region_has_a_tide_of_its_own_from_its_entry_with_its_exit_holding() -> void:
+	var ship := _ship()
+	ship.inventory.add("fuel", 10)
+	var c := Campaign.new(11)
+	var exit := c.drift.exit_id()
+	check(exit != "", "Clan space has an exit beacon")
+	eq([c.tide.entry_id, c.tide.exit_id, c.tide.jumps_to_cross], [c.drift.start_id(), exit, 16], "stage 1: from Rusthold, the exit holds, 16 steps")
+	c.tide.steps = 99
+	check(not c.is_hollow(exit) and not c.is_hollow("rusthold"), "the exit and the station hold when everything else has fallen")
+	eq(c.tide.jumps_until(exit), -1, "the exit never falls")
+	var first := c.tide
+	_at_exit(c)
+	c.tide.linger_t = 100.0
+	var r := c.cross(c.region_offers()[0], ship)
+	check(r["ok"], "crossing: " + str(r["why"]))
+	check(c.tide != first, "a new tide for the new region")
+	eq([c.stage, c.tide.steps, c.tide.linger_t], [2, 0, 0.0], "stage 2 begins with the tide at the start")
+	eq([c.tide.entry_id, c.tide.exit_id, c.tide.jumps_to_cross], [c.drift.start_id(), c.drift.exit_id(), 14], "from its own entry, its own exit, 14 steps")
+	check(c.drift.exit_id() != "" and c.tide.axis_len > 0.0, "and its own axis")
+	c.tide.steps = 99
+	check(not c.is_hollow(c.drift.exit_id()), "this exit holds too")
+	_at_exit(c)
+	check(c.cross(c.region_offers()[0], ship)["ok"], "the next crossing")
+	eq([c.stage, c.tide.jumps_to_cross], [3, 13], "stage 3: 13 steps")
+
+
+func test_the_regions_tide_is_saved_and_old_saves_load_a_fresh_one() -> void:
+	var ship := _ship()
+	var c := Campaign.new(11)
+	_at_exit(c)
+	check(c.cross(c.region_offers()[0], ship)["ok"], "into stage 2")
+	c.tide.steps = 6
+	c.tide.linger_t = 30.0
+	var text := JSON.stringify(c.to_dict())
+	var d := Campaign.new(2)
+	eq(d.load_dict(JSON.parse_string(text)), "", "loads")
+	eq([d.stage, d.tide.steps, d.tide.linger_t, d.tide.jumps_to_cross, d.tide.exit_id], [2, 6, 30.0, 14, d.drift.exit_id()], "the region's tide as it was, with its stage's speed")
+	eq(JSON.stringify(d.to_dict()), text, "and saves the same again")
+	var old: Dictionary = JSON.parse_string(text)
+	old.erase("tide")
+	old["version"] = 4
+	var e := Campaign.new(2)
+	eq(e.load_dict(old), "", "a regions-era save with no tide loads")
+	eq([e.stage, e.tide.steps, e.tide.jumps_to_cross], [2, 0, 14], "a fresh tide, since its jump count is not this region's")
+	var first := Campaign.new(3)
+	first.jumps = 5
+	var older: Dictionary = JSON.parse_string(JSON.stringify(first.to_dict()))
+	older.erase("tide")
+	older["version"] = 4
+	var f := Campaign.new(2)
+	eq(f.load_dict(older), "", "so does one from stage 1")
+	eq([f.tide.steps, f.tide.exit_id], [5, f.drift.exit_id()], "at its jump count, with the exit holding")
+
+
+# --- a fight at a Hollow place pays almost nothing ---------------------------------------------------------
+
+## A Hollow place of campaign `c` (steps 40) with the ship standing there, and a beaten enemy to cut up.
+func _ghost_fight() -> Dictionary:
+	var ship := _ship()
+	var c := Campaign.new(3)
+	for n in c.drift.nodes:
+		if n["type"] in ["pirate", "wreck_field", "distress", "asteroid_field", "empty"]:
+			c.current = n["id"]
+			break
+	c.tide.steps = 40
+	var enemy = Ship.from_design("res://data/ships/pirate_raider.json")
+	return {"c": c, "ship": ship, "enemy": enemy}
+
+
+func test_a_ghost_fight_pays_no_credits_and_no_scrap_up_front() -> void:
+	for state in ["won", "captured"]:
+		var g := _ghost_fight()
+		var c: Campaign = g["c"]
+		var ship: Ship = g["ship"]
+		check(c.is_hollow(c.current), "the ship is at a Hollow place")
+		var credits := ship.inventory.count("credits")
+		var scrap := ship.inventory.count("scrap")
+		var r := c.fight_done({"state": state, "enemy": g["enemy"]}, ship)
+		eq(r["lines"], [], state + ": nothing is paid at the fight")
+		eq([ship.inventory.count("credits"), ship.inventory.count("scrap")], [credits, scrap], state + ": no credits, no scrap (a captured ghost pays no strip scrap either)")
+		eq(c.fights_won, 1, state + ": still a win")
+		check(str(r["text"]).contains("ghost"), state + ": the ghost goes dark")
+	var s := _ghost_fight()
+	var c2: Campaign = s["c"]
+	var ship2: Ship = s["ship"]
+	var credits2 := ship2.inventory.count("credits")
+	var spared := c2.fight_done({"state": "spared", "enemy": s["enemy"], "offer": {"credits": 50, "fuel": 2}}, ship2)
+	eq(spared["lines"], [], "a ghost's offer to be spared is refused")
+	eq(ship2.inventory.count("credits"), credits2, "and not paid")
+	var free := Campaign.new(3)  # the same fight at a free place still pays
+	var ship3 := _ship()
+	free.fight_done({"state": "won", "enemy": s["enemy"]}, ship3)
+	check(ship3.inventory.count("credits") > 300, "a free place pays its credits (the Rustbucket starts with 300)")
+
+
+func test_a_ghost_wreck_offers_only_the_strip_row_at_half_the_scrap() -> void:
+	var g := _ghost_fight()
+	var c: Campaign = g["c"]
+	var ship: Ship = g["ship"]
+	var enemy = g["enemy"]
+	var full := Salvage.strip_scrap(enemy, c)
+	eq(Salvage.strip_scrap(enemy, c, true), full / 2, "half the formula")
+	for state in ["won", "captured"]:
+		for flag in [null, true]:  # the flag left out reads the campaign: the ship is at a Hollow place
+			var ev := Salvage.event_for(enemy, state, c, ship, flag)
+			eq(ev["choices"].size(), 1, "%s, flag %s: one row, no part and no scan" % [state, str(flag)])
+			var row: Dictionary = ev["choices"][0]
+			eq(row["text"], "Strip her for scrap (+%d)" % (full / 2), "the half strip row")
+			eq(row["outcomes"][0]["text"], "Nothing aboard is right. Your cutters take the plating and leave the rest.", "its text")
+			eq(row["outcomes"][0]["effects"], {"items": {"scrap": full / 2}}, "pays the half scrap")
+			eq([ev["id"], ev["type"]], ["salvage", "salvage"], "an event the panel shows as it is")
+	var before := ship.inventory.count("scrap")
+	var ev2 := Salvage.event_for(enemy, "won", c, ship)
+	var r := c.events.choose(ev2, 0, c, ship, c.node(c.current))
+	check(r["ok"], "the row can be taken")
+	eq(ship.inventory.count("scrap"), before + full / 2, "and gives the half scrap")
+	var normal := Salvage.event_for(enemy, "won", c, ship, false)
+	check(normal["choices"].size() > 1, "with the flag off the ghost rule is off: the parts are there again")
+	c.tide.steps = 0
+	check(Salvage.event_for(enemy, "won", c, ship)["choices"].size() > 1, "and at a free place the full salvage is offered")
+
+
 # --- the map view and the clock line -----------------------------------------------------------------------
 
 ## A map view in play mode on a sim with the Rustbucket: the map shut, build mode off, a fake combat view.
@@ -441,10 +572,9 @@ func test_the_map_view_lingers_only_in_play_mode_with_the_map_shut_and_no_fight(
 	map.tick_linger(10.0)
 	eq(map.campaign.tide.linger_t, 10.0, "the open map does not count")
 	map.visible = false
+	var before: int = map.ship().events.size()
 	var lines := map.tick_linger(230.0)
 	eq([map.campaign.tide.steps, lines.has(Tide.RISES_TEXT)], [1, true], "and 240 s in all raise the tide")
-	var before: int = map.ship().events.size()
-	map._tide_say(lines)
 	check(map.ship().events.size() > before and map.ship().events[-1]["text"] == Tide.RISES_TEXT, "the lines reach the chronicle")
 	_free_play(d)
 

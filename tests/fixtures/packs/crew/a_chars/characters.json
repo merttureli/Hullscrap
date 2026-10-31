@@ -1,0 +1,32 @@
+{
+  "characters": [
+    {
+      "id": "fx_socket",
+      "name": "Socket",
+      "species": "basalt",
+      "rig": {"tint": "#8a6f4a", "head": "rock_b"},
+      "traits": ["suit"],
+      "ability": {"id": "power_system", "cooldown": 30, "params": {"power": 2, "duration": 12}},
+      "obtained": "Test fixture: a quest reward.",
+      "lore": "A Basalt who powers a system by hand."
+    },
+    {
+      "id": "fx_lamp",
+      "name": "Lamplighter",
+      "unique_species": {"name": "Lantern Spirit", "hp": 60, "speed": 1.2, "traits": ["no_breath"], "rig": "gauntling", "sidearm": "service_pistol", "aura": {"heal_per_s": 0.5}},
+      "rig": {"tint": "#ffd98a", "head": "lamp"},
+      "traits": {"work_mult": {"repair": 1.5}},
+      "ability": {"id": "heal_burst", "params": {"amount": 25}},
+      "obtained": "Test fixture: found in a derelict.",
+      "lore": "An AI in a lantern."
+    },
+    {
+      "id": "fx_medic",
+      "name": "Doc Fixture",
+      "species": "human",
+      "ability": {"id": "heal_burst"},
+      "obtained": "Test fixture: a rare store.",
+      "lore": "Heals everyone, once."
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "kett_drone_picket_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Kett Drone Picket: a rack of five drone cells; each drone wakes and lights up as it charges (frame 5 = five awake, cells green), power coupling, hatch. fire: the cells flash and the drones are gone. damaged: a cell cracked and dark, a drone stuck half out; disabled: drones dead and grey. Barrel layer kett_drone_picket_barrel: a round chitin dome with two open drone bays, compound-eye blobs on the front and a launch slit; fire: the drones leave the bays.",
+ "offset": [
+  0,
+  -4
+ ]
+}

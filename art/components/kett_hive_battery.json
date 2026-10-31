@@ -1,0 +1,76 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "hit": [
+   9,
+   3,
+   12
+  ],
+  "recharge": [
+   12,
+   4,
+   10
+  ],
+  "damaged": [
+   16,
+   2,
+   6
+  ],
+  "disabled": [
+   18,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "kett_hive_battery_glow.png",
+  "frame": [
+   88,
+   88
+  ],
+  "offset": [
+   -12,
+   -12
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "hit": [
+    8,
+    3,
+    12
+   ],
+   "recharge": [
+    11,
+    4,
+    10
+   ],
+   "damaged": [
+    15,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Kett \"Hive Battery\" (full layers only with 3 operators): an amber chitin frame holding a flower of seven big hive cells, each a blue shield cell. On loop (8): a wave of light runs round the six outer cells while the centre cell breathes; arcs crawl between the corner plates. hit (3): flare and ripple. recharge (4): the cells spinning up from dim. Damaged: one outer cell cracked and dark, the frame split at the corner with a flap hanging, the wave stutters. Disabled: every cell dark and grey, the frame split, the centre cell burst."
+}

@@ -1,0 +1,51 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   2
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "human_crew_quarters_deluxe_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    2
+   ]
+  }
+ },
+ "notes": "Human \"Crew Quarters Deluxe\" (a bed: heals x2): a made bunk seen from above with a white pillow at the head and a navy Concord blanket with a blue stripe, a bedside table with a warm amber lamp, and a small vitals monitor whose green line blips on the 2-frame loop. Damaged: the monitor cracked and flickering, the lamp dead, the blanket torn, sparks. Disabled: the lamp and monitor dark, the blanket slumped, the frame cracked."
+}

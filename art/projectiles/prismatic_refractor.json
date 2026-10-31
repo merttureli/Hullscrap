@@ -1,0 +1,38 @@
+{
+ "frame": [6, 14],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 4, 14]
+ },
+ "anchors": {
+  "head": [3, 3],
+  "tail": [3, 13]
+ },
+ "glow": {
+  "image": "prismatic_refractor_glow.png",
+  "frame": [14, 22],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 4, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Prismatic Refractor shard: a cyan crystal shard with a white ridge and a magenta glint that moves, a thin trail (4 frames). Splits into three on a shield.",
+ "impact": {
+  "image": "prismatic_refractor_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "prismatic_refractor_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 14]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

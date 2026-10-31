@@ -180,7 +180,7 @@ func test_damage_goes_with_the_square_of_the_speed() -> void:
 	near(dealt[2], e["energy"] * K, "which is E x damage_k", 1e-6)
 
 
-func test_two_couriers_head_on_at_150_each_lose_4_to_12_hull() -> void:  # was 8 to 12 before the guns stuck out (rams hit the outside halves first and those are not hull), then 4 to 8 with three guns on a flat nose; the arrowhead Courier has one gun on its tip, so the titanium bow behind it takes more
+func test_two_couriers_head_on_at_150_each_lose_2_to_12_hull() -> void:  # was 8 to 12 before the guns stuck out (rams hit the outside halves first and those are not hull), then 4 to 8 with three guns on a flat nose, then 4 to 12 for the arrowhead with one gun on its tip; the Courier is now a light fuselage in a big empty frame (574 against 1009 mass), so the reduced mass and the hit are smaller
 	arena = Arena.new(1)  # the real damage_k
 	var a := Ship.from_design("res://data/ships/starter_courier.json")
 	var b := Ship.from_design("res://data/ships/starter_courier.json")
@@ -194,8 +194,8 @@ func test_two_couriers_head_on_at_150_each_lose_4_to_12_hull() -> void:  # was 8
 	_run(4.0)
 	var lost0: float = h0 - arena.ships[0].hull
 	var lost1: float = h0 - arena.ships[1].hull
-	check(lost0 >= 4.0 and lost0 <= 12.0, "courier A lost %f hull" % lost0)
-	check(lost1 >= 4.0 and lost1 <= 12.0, "courier B lost %f hull" % lost1)
+	check(lost0 >= 2.0 and lost0 <= 12.0, "courier A lost %f hull" % lost0)
+	check(lost1 >= 2.0 and lost1 <= 12.0, "courier B lost %f hull" % lost1)
 	var guns_hit := 0
 	for e in arena.events:
 		guns_hit += int(e["type"] == "hit" and e.get("half", "") == "out")
@@ -379,7 +379,7 @@ func test_the_bow_is_the_side_with_the_most_ram_plating() -> void:
 func test_the_rustfang_rammer_design() -> void:
 	var ship := Session.spawn_rammer()
 	check(ship != null, "the design loads")
-	eq(ship.get_meta("ai"), {"style": "rammer", "aim_skill": 0.4}, "and carries its pilot style and its poor aim")
+	eq(ship.get_meta("ai"), {"style": "rammer", "aim_skill": 0.4, "morale": "ram"}, "and carries its pilot style, its poor aim and its morale")
 	var plates := 0
 	var slopes := 0
 	for c in ship.grid.tiles:
@@ -400,7 +400,7 @@ func test_the_rustfang_rammer_design() -> void:
 	eq(arena.ships[i].flight.can_fly(ship.components, arena.ships[i].powered), "", "it can fly")
 	check(arena.ships[i].thrust * arena.ships[i].flight.thrust_to_accel / arena.ships[i].mass > 30.0, "and is not a brick")
 	var pirate := Session.load_ship(Session.PIRATE_PATH)
-	eq(pirate.get_meta("ai"), {"aim_skill": 0.5}, "the pirate has no pilot style, only a middling aim")
+	eq(pirate.get_meta("ai"), {"aim_skill": 0.5, "morale": "rustfang"}, "the pirate has no pilot style, only a middling aim and a Rustfang morale")
 
 
 func _rammer_fight(target_path := "res://data/ships/starter_courier.json", seed_value := 3) -> Session:

@@ -18,6 +18,9 @@ extends RefCounted
 ## - With 2+ shield sectors it shifts the balance toward the side that faces its foe, one step every
 ##   SHIFT_BASE_S - aim_skill seconds (the design's `ai.aim_skill`, default 0.6).
 ## - It overcharges its shield when the layers are gone, and does nothing once wrecked.
+## - Morale (morale.gd, set by the session): surrendering it holds fire and cuts the throttle; fleeing it turns
+##   its stern to the foe and burns at full throttle (the guns still fire when they bear); once captured, spared
+##   or gone it does nothing.
 ## - Style "rammer" (a ship design's `"ai": {"style": "rammer"}`) does not keep a range: it finds its
 ##   bow (the side with the most ram plating, else forward), points it at where the foe will be and
 ##   closes at full throttle, uses its engine ability within RAM_ABILITY_RANGE of the foe's hull, and after a collision
@@ -47,6 +50,7 @@ const RAM_CLOSE_SPEED := 480.0  ## px/s a rammer steers to close at
 const RAM_MIN_CLOSE := 150.0  ## px/s: the closing speed it assumes when working out the time to contact
 const RAM_MAX_LEAD_S := 4.0
 const RAM_ALIGNED := 0.45  ## rad: full throttle when the heading is this close to the steering direction
+const FLEE_ALIGNED := 0.6  ## rad: a fleeing ship burns once its nose is this close to straight away from the foe
 
 var arena
 var me: int
@@ -57,6 +61,7 @@ var side := 1.0  ## +1 or -1: which way it strafes (when it has side engines)
 var bias := 0.0  ## radians: its aim error now, re-rolled with each retarget
 var target_uid := -1  ## the part of the foe it aims at (-1: the ship's centre)
 var style := ""  ## "" (keeps its range and strafes) or "rammer"
+var morale = null  ## morale.gd of this fight (the session sets it): pilot_mode() says hold, flee or stop
 var _flip := 0.0
 var _retarget := 0.0
 var _hold := {}  # weapon uid -> seconds held back
@@ -84,7 +89,8 @@ func _init(p_arena, p_me: int, p_foe: int, p_ai := {}) -> void:
 func think(dt: float) -> void:
 	var co = arena.ships[me]
 	var tgt = arena.ships[foe]
-	if co.wrecked or tgt.wrecked:
+	var mode: String = morale.pilot_mode() if morale != null else ""
+	if co.wrecked or tgt.wrecked or mode == "stop":
 		arena.set_input(me, 0.0, 0.0)
 		return
 	_retarget -= dt
@@ -94,7 +100,13 @@ func think(dt: float) -> void:
 		_bow = bow_of(co)
 		var e := deg_to_rad((1.0 - aim_skill) * AIM_ERROR_DEG)
 		bias = rng.randf_range(-e, e)
-	if style == "rammer":
+	if mode == "hold":  # surrendering: no throttle, no fire
+		arena.set_input(me, 0.0, 0.0)
+		_balance(dt)
+		return
+	if mode == "flee":
+		_flee()
+	elif style == "rammer":
 		_ram(dt)
 	else:
 		_fly(dt)
@@ -232,6 +244,15 @@ func _ram(dt: float) -> void:
 	arena.set_input(me, 1.0 if heading.dot(steer) > cos(RAM_ALIGNED) else 0.0, turn)
 	if dist - float(Collisions.hit_cells(arena, foe)["radius"]) < RAM_ABILITY_RANGE:
 		arena.use_key(me, "engine")
+
+
+## Fleeing: nose straight away from the foe (stern to it), full throttle once it points that way.
+func _flee() -> void:
+	var co = arena.ships[me]
+	var away: Vector2 = co.flight.pos - arena.ships[foe].flight.pos
+	away = away.normalized() if away.length_squared() > 1.0 else Vector2.UP
+	var turn: float = co.flight.steer_toward(away.angle() + PI / 2.0, co.mass, co.thrust)
+	arena.set_input(me, 1.0 if Vector2.UP.rotated(co.flight.angle).dot(away) > cos(FLEE_ALIGNED) else 0.0, turn)
 
 
 ## Seconds between two steps of shield balance.

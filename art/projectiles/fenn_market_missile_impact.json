@@ -1,0 +1,40 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   12
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "glow": {
+  "image": "fenn_market_missile_impact_glow.png",
+  "frame": [
+   24,
+   24
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "A pop: a small fireball, then a burst of coloured scraps like confetti (pink, yellow, cyan, green), settling (4 frames, 16x16)."
+}

@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "kett_hive_swarm_launcher_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Kett Hive Swarm Launcher: a brood chamber of honeycomb cells that fill with drones as it charges (frame 5 = every cell holds a drone, strip green), power coupling, hatch. fire: the cells flash white and empty. damaged: cells cracked and dark, a plate hanging; disabled: cold grey cells, the chamber split. Barrel layer kett_hive_swarm_launcher_barrel: a flower of seven honeycomb cells, each with a drone in its mouth; fire: the cells flash and a cloud of drones leaves in a fan.",
+ "offset": [
+  0,
+  -4
+ ]
+}

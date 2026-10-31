@@ -1,0 +1,20 @@
+{
+ "frame": [16, 16],
+ "anims": {
+  "play": [0, 3, 10]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [8, 8]
+ },
+ "glow": {
+  "image": "sporeling_pollen_turret_impact_glow.png",
+  "frame": [24, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "play": [0, 3, 10]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Sporeling Pollen Turret hit: a puff of yellow pollen drifting up with pale motes (3 frames)."
+}

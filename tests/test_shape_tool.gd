@@ -125,7 +125,7 @@ func test_a_refused_piece_shows_red_with_the_reason() -> void:
 	b.hover = Vector2i(0, 0)  # in the grid, outside the hull
 	b._refresh_ghost()
 	eq(b.ghost[0]["reason"], "outside the hull", "the reason")
-	check(b.hud_text().contains("can't: outside the hull"), "it is in the HUD")
+	check(b.cursor_note()["text"].contains("can't: outside the hull"), "it is next to the cursor")
 	b.hover = Vector2i(19, 19)  # the piece would leave the grid: plan_piece itself refuses
 	b._refresh_ghost()
 	eq(b.ghost.size(), 1, "there is still a ghost to draw red")
@@ -192,13 +192,13 @@ func test_a_drag_with_a_piece_places_one_piece_and_the_right_button_removes_cell
 
 func test_the_hint_line_shows_the_shape_keys() -> void:
 	var b := _build()
-	check(b.hud_text().contains("T shape"), "a wall: T is offered")
+	check(b._controls_text().contains("T shape"), "a wall: T is offered")
 	_pick(b, "slope45")
-	var hud := b.hud_text()
+	var hints := b._controls_text()
 	for k in ["T shape", "R rotate", "Shift+R mirror", "slope45"]:
-		check(hud.contains(k), "the hint line has %s" % k)
+		check(hints.contains(k), "the hint line has %s" % k)
 	b.selected = "floor"
-	check(not b.hud_text().contains("T shape"), "the floor tool has no shapes")
+	check(not b._controls_text().contains("T shape"), "the floor tool has no shapes")
 	b.selected = "door"
-	check(b.hud_text().contains("R flip"), "the door keeps R flip")
+	check(b._controls_text().contains("R flip"), "the door keeps R flip")
 	_done(b)

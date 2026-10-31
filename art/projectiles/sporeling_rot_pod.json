@@ -1,0 +1,38 @@
+{
+ "frame": [8, 16],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 3, 12]
+ },
+ "anchors": {
+  "head": [4, 4],
+  "tail": [4, 15]
+ },
+ "glow": {
+  "image": "sporeling_rot_pod_glow.png",
+  "frame": [16, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 3, 12]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Sporeling Rot Pod: a brown, pink-spotted pod with a green sprout trailing a thread of spores (3 frames). Head anchor is the pod centre.",
+ "impact": {
+  "image": "sporeling_rot_pod_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 4, 10]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "sporeling_rot_pod_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 10]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

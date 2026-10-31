@@ -1,0 +1,81 @@
+{
+ "frame": [
+  7,
+  12
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   4,
+   16
+  ]
+ },
+ "anchors": {
+  "head": [
+   3,
+   1
+  ],
+  "tail": [
+   3,
+   10
+  ]
+ },
+ "glow": {
+  "image": "kett_drone_picket_glow.png",
+  "frame": [
+   13,
+   18
+  ],
+  "offset": [
+   -3,
+   -3
+  ],
+  "anims": {
+   "fly": [
+    0,
+    4,
+    16
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "kett_drone_picket_impact.png",
+  "frame": [
+   14,
+   14
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    14
+   ]
+  },
+  "anchor": [
+   7,
+   7
+  ],
+  "glow": {
+   "image": "kett_drone_picket_impact_glow.png",
+   "frame": [
+    22,
+    22
+   ],
+   "offset": [
+    -4,
+    -4
+   ],
+   "anims": {
+    "play": [
+     0,
+     3,
+     14
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "An interceptor drone, 7x12: an amber dart with red eye and a short exhaust, wings beating over 4 frames. It homes on missiles and boarders."
+}

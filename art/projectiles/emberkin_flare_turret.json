@@ -1,0 +1,81 @@
+{
+ "frame": [
+  7,
+  17
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   14
+  ]
+ },
+ "anchors": {
+  "head": [
+   3,
+   3
+  ],
+  "tail": [
+   3,
+   11
+  ]
+ },
+ "glow": {
+  "image": "emberkin_flare_turret_glow.png",
+  "frame": [
+   17,
+   27
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    14
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "emberkin_flare_turret_impact.png",
+  "frame": [
+   16,
+   16
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    14
+   ]
+  },
+  "anchor": [
+   8,
+   8
+  ],
+  "glow": {
+   "image": "emberkin_flare_turret_impact_glow.png",
+   "frame": [
+    26,
+    26
+   ],
+   "offset": [
+    -5,
+    -5
+   ],
+   "anims": {
+    "play": [
+     0,
+     3,
+     14
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A signal flare, 7x17: a white-yellow four-pointed star that pulses over 3 frames, trailing orange sparks. Its glow is deliberately large: it blinds."
+}

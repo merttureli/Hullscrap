@@ -1,0 +1,67 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "emberkin_pyre_drive_out_glow.png",
+  "frame": [
+   84,
+   70
+  ],
+  "offset": [
+   -10,
+   -34
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "exhaust": [
+   32,
+   8
+  ]
+ },
+ "orientation": "outside half: rotation 0, outward is UP: nozzles point up into space; the exhaust glow overhangs above the frame (see glow.offset); the bottom 4px are the flange onto the outer wall face",
+ "mount": {
+  "part": "outside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Emberkin \"Pyre Drive\" (thrust x1.5, hot), a hull mount (outward is up): outside, one big brass bell breathing a real flame (hard flame tongues over the mouth, 3-frame flicker) with two small pilot nozzles; a brass collar through the wall; inside, a brass furnace core with a flame window, three pressure gauges, a hatch and a power coupling. Damaged: the bell lip dented and a side pilot burning crooked, the gauges cracked, sparks at the coupling. Disabled: the flame out, the bell split and slumped, the furnace dark. THIS FILE: the OUTSIDE half (nozzles, in space against the outer wall face; its bottom 4px are the flange onto the wall). It is never destroyed, only disabled (bent, dead, fixable)."
+}

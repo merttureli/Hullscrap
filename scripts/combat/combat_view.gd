@@ -18,6 +18,7 @@ const ShipView = preload("res://scripts/view/ship_view.gd")
 const Art = preload("res://scripts/view/art.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
+const JumpBar = preload("res://scripts/ui/jump_bar.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
 
@@ -35,7 +36,8 @@ const HINT := "mouse steers   W/S throttle   A/D strafe   T turrets auto   LMB g
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
 
-## Emitted when the fight is left: {state ("won", "lost" or "fled"), enemy (its Ship), hull, hull_max (the player's)}.
+## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship), hull, hull_max (the player's),
+## offer ({item: count}, only when "spared")}.
 signal finished(result: Dictionary)
 
 var sim: Node  ## ShipSim
@@ -69,11 +71,11 @@ var _schem: Array = []
 var _bar: Control
 var _bar_extras: Control  # over the weapon bar: each turret's hit chance and whether it autofires
 var _banner: Label
+var _jump_bar: Control  # under the enemy schematic while it flees
 var _hint: Label
 var _note := ""
 var _note_until := 0.0
 var _starfield: Node
-var _hud_label: Node
 
 
 func _ready() -> void:
@@ -82,7 +84,6 @@ func _ready() -> void:
 	crew = get_node_or_null("../Crew")
 	cam = get_node_or_null("../Camera2D")
 	_starfield = get_node_or_null("../Space/Starfield")
-	_hud_label = get_node_or_null("../HUD/Label")
 	_rng.seed = 4242
 	_make_stars()
 	_make_hud()
@@ -125,8 +126,11 @@ func _make_hud() -> void:
 	_banner.add_theme_font_size_override("font_size", 30)
 	_banner.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_banner.add_theme_constant_override("outline_size", 8)
+	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_banner.visible = false
 	layer.add_child(_banner)
+	_jump_bar = JumpBar.new()
+	layer.add_child(_jump_bar)
 	_hint = Label.new()
 	_hint.size = Vector2(1000.0, 44.0)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -186,6 +190,8 @@ func leave() -> void:
 	var foe = session.arena.ships[Session.ENEMY]
 	var mine = session.arena.ships[Session.PLAYER]
 	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max}
+	if result["state"] == "spared":
+		result["offer"] = session.morale.offer.duplicate()
 	sim.ships.erase(session.arena.ships[Session.ENEMY].ship)
 	for v in _views:
 		v.queue_free()
@@ -236,8 +242,6 @@ func _put_away(away: bool) -> void:
 		_starfield.visible = not away
 	if _stars_node != null:
 		_stars_node.visible = away
-	if _hud_label != null:
-		_hud_label.visible = not away
 
 
 func _show_hud(on: bool) -> void:
@@ -247,6 +251,7 @@ func _show_hud(on: bool) -> void:
 		_bar.visible = on
 		_hint.visible = on
 		_banner.visible = false
+		_jump_bar.bind(session if on else null)
 
 
 # --- input ----------------------------------------------------------------------------------------
@@ -275,6 +280,10 @@ func _unhandled_input(e: InputEvent) -> void:
 				_say(why_jump if why_jump != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL))
 			KEY_R:
 				restart()
+			KEY_Y:
+				var why_y: String = session.accept_surrender()
+				if why_y != "":
+					_say(why_y)
 			KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT:
 				var why: String = session.shift_shield({KEY_UP: "up", KEY_DOWN: "down", KEY_LEFT: "left", KEY_RIGHT: "right"}[e.keycode])
 				if why != "":
@@ -287,6 +296,9 @@ func _unhandled_input(e: InputEvent) -> void:
 				var why := session.arena.overcharge(Session.PLAYER)
 				if why != "":
 					_say("Overcharge: " + why)
+			KEY_G:  # the selected crew member's ability (the crew bar shows how it went)
+				if crew != null and crew.has_method("press_ability"):
+					crew.press_ability()
 			_:
 				var n: int = e.keycode - KEY_1
 				if n >= 0 and n <= 8:
@@ -382,9 +394,12 @@ func _update_hud() -> void:
 	_schem[1].position = Vector2(vp.x - Schematic.PANEL.x - 10.0, 10.0)
 	_banner.position = Vector2((vp.x - _banner.size.x) / 2.0, vp.y * 0.28)
 	_hint.position = Vector2((vp.x - _hint.size.x) / 2.0, 10.0)
+	_jump_bar.position = _schem[1].position + Vector2(0.0, Schematic.PANEL.y + 6.0)
 	var text: String = session.end_text()
 	if text == "" and _clock < _note_until:
 		text = _note
+	if text == "":
+		text = session.morale.banner()
 	_banner.text = text
 	_banner.visible = text != ""
 	var co = session.arena.ships[Session.PLAYER]
@@ -534,6 +549,12 @@ func _on_event(e: Dictionary) -> void:
 				_add_fx({"k": "puff", "pos": pos, "vel": Vector2.from_angle(_rng.randf() * TAU) * 30.0, "life": 1.0, "r": 12.0, "grow": 30.0, "color": Color("#8a8f99", 0.5)})
 		"overcharge":
 			_on_ship(idx, pos, {"k": "ring", "life": 0.8, "r": 260.0, "color": Color("#ffd24a")})
+		"escape":  # the enemy's jump drive fired: a flash where it was
+			if Art.fx("jump_flash") != null:
+				_add_fx({"k": "art", "name": "jump_flash", "pos": pos, "angle": e["angle"], "life": 0.5, "scale": 3.0})
+			else:
+				_add_fx({"k": "flash", "pos": pos, "life": 0.5, "r": 120.0, "color": Color("#bfe4ff")})
+			_add_fx({"k": "ring", "pos": pos, "life": 0.8, "r": 420.0, "color": Color("#7fe4ff")})
 		"wreck":
 			_on_ship(idx, pos, {"k": "ring", "life": 1.1, "r": 420.0, "color": Color("#ffb347")})
 			if Art.fx("explosion") != null:

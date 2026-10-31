@@ -1,0 +1,20 @@
+{
+ "frame": [16, 16],
+ "anims": {
+  "play": [0, 3, 14]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [8, 8]
+ },
+ "glow": {
+  "image": "prismatic_prism_lens_impact_glow.png",
+  "frame": [24, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "play": [0, 3, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Prismatic Prism Lens hit: a white point with six rays in cyan, magenta, yellow and blue, like light through a prism (3 frames)."
+}

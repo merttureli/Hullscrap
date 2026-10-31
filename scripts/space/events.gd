@@ -19,6 +19,8 @@ extends RefCounted
 ## - `items` and `credits` in a choice's requires must be held; they are paid only when `pay` is true
 ##   (in requires or on the choice).
 ## - `after_win` ({text, effects}) on an event, or on an outcome, runs after a won fight.
+## - `requires.region` (a region id or a region's `events` tag, or a list of them: any one) and `stage_min` / `stage_max`
+##   tie an event or a choice to the regions of the run (docs/CONTENT.md section 15, regions.gd).
 ## - `landmark` (true, or a title) on an event makes it a landmark (docs/CONTENT.md section 13): when a choice with
 ##   effects is taken (the rule of `once`) it is recorded in the profile (the first time ever) and in the run log. A landmark
 ##   does not end the run. The effect `unlock` (an id of data/unlocks.json, or a list) earns something for the next runs and
@@ -28,20 +30,22 @@ extends RefCounted
 
 const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const Regions = preload("res://scripts/space/regions.gd")
+const Characters = preload("res://scripts/crew/characters.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
 const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest", "hollow"]
-const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "text", "choices", "after_win", "landmark"]
-const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max"]
+const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark"]
+const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay"]
-const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "species", "trait", "items", "pay", "component", "credits"]
+const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "species", "trait", "items", "pay", "component", "credits"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
 const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending"]
-const RECRUIT_KEYS: Array = ["name", "species"]
+const RECRUIT_KEYS: Array = ["name", "species", "character"]
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
 const SHIPS_DIR := "res://data/ships/"
 const DEFAULT_WEIGHT := 10.0
@@ -235,8 +239,16 @@ static func _list(v) -> Array:
 
 
 ## The parts of `requires` that depend on the campaign (and the fuel in the hold): jumps, flags,
-## reputation, node, fuel_max.
+## reputation, node, fuel_max, region and stage.
 func _world_ok(req: Dictionary, c, node: Dictionary, ship = null) -> bool:
+	if req.has("stage_min") and c.stage < int(req["stage_min"]):
+		return false
+	if req.has("stage_max") and c.stage > int(req["stage_max"]):
+		return false
+	if req.has("region"):
+		var tag := str(c.region_data.get("events", ""))
+		if not _list(req["region"]).any(func(r): return str(r) == c.region_id or (tag != "" and str(r) == tag)):
+			return false
 	if req.has("fuel_max") and (ship.inventory.count("fuel") if ship != null else 0) > int(req["fuel_max"]):
 		return false
 	if req.has("jumps_min") and c.jumps < int(req["jumps_min"]):
@@ -463,9 +475,10 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 	for r in _list(effects.get("recruit")):
 		var rd := _dict(r)
 		var species := str(rd.get("species", "human"))
-		var who: String = c.add_crew(ship, str(rd.get("name", "")), species)
+		var chr := Characters.entry(str(rd.get("character", "")))  # a unique character comes as themselves
+		var who: String = c.add_crew(ship, str(rd.get("name", "")), species, str(rd.get("character", "")))
 		if who != "":
-			lines.append("%s (%s) joins the crew" % [who, species.capitalize()])
+			lines.append("%s (%s) joins the crew" % [who, Characters.label(chr) if not chr.is_empty() else species.capitalize()])
 	if effects.has("lose_crew"):
 		var count = effects["lose_crew"]
 		var n: int = (1 if count else 0) if count is bool else int(count)
@@ -519,12 +532,12 @@ static func _known() -> Dictionary:
 			items[id] = true
 	items["credits"] = true
 	items["fuel"] = true
-	var places := {}
+	var places := Regions.place_ids()  # the fixed places of every region
+	var regions := {}  # region ids and event tags
+	for r in Regions.all():
+		regions[str(r["id"])] = true
+		regions[str(r.get("events", r["id"]))] = true
 	var factions := {}
-	var drift = JSON.parse_string(FileAccess.get_file_as_string("res://data/drift.json"))
-	if drift is Dictionary:
-		for p in drift.get("places", []):
-			places[str(p["id"])] = true
 	var fac = JSON.parse_string(FileAccess.get_file_as_string("res://data/factions.json"))
 	if fac is Dictionary:
 		for f in fac.get("factions", []):
@@ -542,8 +555,11 @@ static func _known() -> Dictionary:
 	var endings := {}
 	for id in Content.ids("endings"):
 		endings[id] = true
-	return {"items": items, "components": _ids_of("res://data/components.json", "components"), "recipes": _ids_of("res://data/recipes.json", "recipes"),
-		"places": places, "factions": factions, "species": species, "traits": traits, "unlocks": unlocks, "endings": endings}
+	var characters := {}
+	for id in Content.ids("characters"):
+		characters[id] = true
+	return {"characters": characters, "items": items, "components": _ids_of("res://data/components.json", "components"), "recipes": _ids_of("res://data/recipes.json", "recipes"),
+		"places": places, "factions": factions, "species": species, "traits": traits, "unlocks": unlocks, "endings": endings, "regions": regions}
 
 
 func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[String]) -> void:
@@ -624,9 +640,12 @@ func _check_req(req, allowed: Array, where: String, known: Dictionary, bad: Call
 		bad.call(where + " must be an object")
 		return
 	_check_keys(req, allowed, where + ": ", bad)
-	for k in ["jumps_min", "jumps_max", "credits", "fuel_max"]:
+	for k in ["jumps_min", "jumps_max", "credits", "fuel_max", "stage_min", "stage_max"]:
 		if req.has(k) and not _is_num(req[k]):
 			bad.call("%s: %s must be a number" % [where, k])
+	for r in _list(req.get("region")):
+		if not known["regions"].has(r):
+			bad.call("%s: region '%s' is neither a region id nor a region's events tag (data/regions)" % [where, r])
 	for k in ["flag", "not_flag"]:
 		for f in _list(req.get(k)):
 			if not (f is String and f != ""):
@@ -705,10 +724,13 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 				bad.call("%s: %s must be a flag name or a list of them" % [where, k])
 	for r in _list(eff.get("recruit")):
 		if not r is Dictionary:
-			bad.call(where + ": recruit must be {name?, species}")
+			bad.call(where + ": recruit must be {name?, species} or {character}")
 			continue
 		_check_keys(r, RECRUIT_KEYS, where + " recruit: ", bad)
-		if not known["species"].has(r.get("species")):
+		if r.has("character"):  # a unique character (data/characters.json) needs neither species nor name
+			if not known["characters"].has(r["character"]):
+				bad.call("%s: recruit has unknown character '%s' (known: %s)" % [where, r["character"], ", ".join(known["characters"].keys())])
+		elif not known["species"].has(r.get("species")):
 			bad.call("%s: recruit has unknown species '%s' (known: %s)" % [where, r.get("species"), ", ".join(known["species"].keys())])
 	if eff.has("lose_crew") and not (eff["lose_crew"] is bool or _is_int(eff["lose_crew"])):
 		bad.call(where + ": lose_crew must be true or a count")

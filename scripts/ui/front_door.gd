@@ -25,7 +25,7 @@ const HINT_TEXT := {
 	"picked": "B: play mode, M: map",
 	"map": "Click a lit neighbour to jump",
 	"fight": "Mouse steers, LMB fires, J spools the jump drive to escape",
-	"net": "Ma's Net Mouth is in your cargo: B, Tab to Systems, put it on an outer wall to catch drifting scrap",
+	"net": "Ma's Net Mouth is in your cargo: B, the Cargo tab, put it on an outer wall to catch drifting scrap",
 }
 
 var sim: Node
@@ -105,7 +105,7 @@ func _process(_dt: float) -> void:
 			_hint("net")  # Ma's gift is in the hold: show where it goes
 	if combat != null:
 		var fighting: bool = combat.active
-		toast.top = 62.0 if fighting else 6.0
+		toast.top = 62.0 if fighting else 48.0  # out of play: under the HUD's top bar
 		if fighting and not _fight_seen:
 			_hint("fight")
 		_fight_seen = fighting

@@ -1,0 +1,38 @@
+{
+ "frame": [10, 12],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 4, 12]
+ },
+ "anchors": {
+  "head": [5, 4],
+  "tail": [5, 11]
+ },
+ "glow": {
+  "image": "sporeling_spore_cannon_glow.png",
+  "frame": [18, 20],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 4, 12]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Sporeling Spore Cannon shot: a ball of green-yellow spores trailing loose spores (4 frames). Head anchor is the cloud centre.",
+ "impact": {
+  "image": "sporeling_spore_cannon_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 4, 10]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "sporeling_spore_cannon_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 10]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

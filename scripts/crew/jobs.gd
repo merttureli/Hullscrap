@@ -30,6 +30,7 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Heat = preload("res://scripts/sim/heat.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
 const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
@@ -122,9 +123,10 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 
 ## How fast `m` does a job of `type`, 1.0 being normal: the work_mult of their traits for it (fast_repair
 ## works a repair or a breach 1 / 0.6 times as fast, a Basalt revives at half speed), with the swarm and
-## aura bonuses of the crew in their room (TraitSet.work_rate).
+## aura bonuses of the crew in their room (TraitSet.work_rate), times what the parts in their room do to the work
+## (Abilities.work_mult: room_work_mult, wet).
 static func _work_rate(ship, m, type: String) -> float:
-	return TraitSet.work_rate(ship, m, WORK_KIND.get(type, "repair"))
+	return TraitSet.work_rate(ship, m, WORK_KIND.get(type, "repair")) * Abilities.work_mult(ship, m)
 
 
 ## Is `job` the mending of `m` themselves? Nobody mends their own body.
@@ -713,19 +715,22 @@ static func crew_line(ship) -> String:
 	return "Crew: " + (", ".join(parts) if not parts.is_empty() else "none")
 
 
-## The evasion a manned helm adds in a fight (0 when nobody is at it), times the operator's manned factor.
+## The evasion a manned helm adds in a fight (0 when nobody is at it), times the operator's manned factor
+## (and an overclock of the helm).
 static func evasion_bonus(ship) -> float:
 	for uid in ship.manned:
 		if _family(ship, uid) == "helm" and _works(ship, uid):
-			return float(CrewMember.config()["manned"]["helm_evasion"]) * TraitSet.manned_factor(ship, uid)
+			return float(CrewMember.config()["manned"]["helm_evasion"]) * TraitSet.manned_factor(ship, uid) * CrewFx.overclock_mult(ship, uid)
 	return 0.0
 
 
-## Multiplier on the cooldown of weapon `uid`: shorter while somebody mans it (by the operator's manned factor, at most 90%).
+## Multiplier on the cooldown of weapon `uid`: shorter while somebody mans it (by the operator's manned factor, at
+## most 90%), and shorter still by the factor of an overclock running on it.
 static func cooldown_mult(ship, uid: int) -> float:
+	var f := 1.0
 	if ship.manned.has(uid) and _family(ship, uid) == "weapon" and _works(ship, uid):
-		return 1.0 - minf(float(CrewMember.config()["manned"]["weapon_cooldown"]) * TraitSet.manned_factor(ship, uid), 0.9)
-	return 1.0
+		f = 1.0 - minf(float(CrewMember.config()["manned"]["weapon_cooldown"]) * TraitSet.manned_factor(ship, uid), 0.9)
+	return f / CrewFx.overclock_mult(ship, uid)
 
 
 static func _family(ship, uid: int) -> String:
@@ -761,7 +766,7 @@ static func spawn_crew(ship) -> Array:
 		ship.crew.append(player)
 		out.append(player)
 	var ada_name: String = cfg["ada"]["name"]
-	if _find(ship, func(m): return m.name == ada_name) == null:
+	if _find(ship, func(m): return m.name == ada_name) == null and not ship.dead_crew.has(ada_name):
 		var c := Pathfinder.nearest_walkable(grid, mid, Callable(), player.anchor())
 		if c == Pathfinder.NO_CELL:
 			return out
@@ -769,7 +774,7 @@ static func spawn_crew(ship) -> Array:
 		ship.crew.append(ada)
 		out.append(ada)
 	var beds := _beds(ship)
-	var have: int = ship.crew.filter(func(m): return not m.is_player and m.name != ada_name).size()
+	var have: int = ship.crew.filter(func(m): return not m.is_player and m.name != ada_name).size() + ship.dead_crew.filter(func(n): return n != ada_name).size()  # the dead stay dead
 	while have < int(cfg.get("extra_crew", 0)):
 		var near := mid
 		if not beds.is_empty():
@@ -803,7 +808,7 @@ static func _spawn_planned(ship) -> Array:
 		var nth := npc
 		if not is_player and not is_ada:
 			npc += 1
-		if _find(ship, func(m): return m.name == who) != null:
+		if _find(ship, func(m): return m.name == who) != null or ship.dead_crew.has(who):
 			continue
 		var near := mid
 		var look: Dictionary = cfg["player"]["look"] if is_player else cfg["ada"]["look"]

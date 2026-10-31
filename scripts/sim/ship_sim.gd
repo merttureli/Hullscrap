@@ -6,7 +6,8 @@ extends Node
 ## (jobs.gd: walk, repair, fight fires, man stations, heal), then let the atmosphere flow. A ship that is not the player's gets its own crew on its
 ## first tick (Jobs.spawn_enemy_crew).
 ## Abilities (abilities.gd) tick here while one ship is in the sim; in a fight (more than one) the
-## arena ticks them itself, at its own rate. The fabricator's queue (ship.crafting) ticks for every
+## arena ticks them itself, at its own rate. The crew's active abilities (crew_abilities.gd: cooldowns and
+## their timed effects) tick here for every ship, always. The fabricator's queue (ship.crafting) ticks for every
 ## ship, at the level and tools of the ship's best powered fabricator (Workshop.best); finished
 ## items go to the cargo and the chronicle says so, and says when the fabricator stops the queue.
 ## The random rolls (malfunctions, fires) use one RandomNumberGenerator per ship, seeded with the
@@ -28,9 +29,10 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const Mortality = preload("res://scripts/crew/mortality.gd")
+const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
-const PAUSE_COLOR := Color("#ffd24a")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
 const MAX_FRAME := 0.25  ## longest time step a slow frame may take, seconds
 
@@ -42,7 +44,6 @@ var _rngs := {}  # ship -> its RandomNumberGenerator
 var _jobs := {}  # ship -> its Jobs board
 var _crewed := {}  # ship -> true once its own crew was spawned
 var _ability_label: Label  # the HUD line of the running abilities, made in _ready when the scene has a HUD
-var _pause_label: Label  # "PAUSED: build mode", made in _ready when the scene has a HUD
 
 
 func _init() -> void:
@@ -87,26 +88,12 @@ func _ready() -> void:
 	_ability_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_ability_label.add_theme_constant_override("outline_size", 6)
 	hud.add_child(_ability_label)
-	_pause_label = Label.new()
-	_pause_label.anchor_left = 0.5
-	_pause_label.anchor_right = 0.5
-	_pause_label.offset_left = -300.0
-	_pause_label.offset_right = 300.0
-	_pause_label.offset_top = 10.0
-	_pause_label.offset_bottom = 44.0
-	_pause_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_pause_label.add_theme_font_size_override("font_size", 22)
-	_pause_label.add_theme_color_override("font_color", PAUSE_COLOR)
-	_pause_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	_pause_label.add_theme_constant_override("outline_size", 6)
-	hud.add_child(_pause_label)
-	_pause_label.text = pause_line()
 
 
 func _process(dt: float) -> void:
 	step(minf(dt, MAX_FRAME))
 	if _ability_label != null:
-		_ability_label.text = hud_line()
+		_ability_label.text = hud_line() if not paused else ""  # paused, the build HUD's selection card has that corner
 
 
 ## The HUD line for the abilities running on the player's ship ("" when none): "Abilities: Afterburn 5 s".
@@ -115,7 +102,7 @@ func hud_line() -> String:
 	return Abilities.hud_line(ship) if ship != null else ""
 
 
-## "PAUSED: build mode" while the world is paused, else "".
+## "PAUSED: build mode" while the world is paused, else "" (the HUD's top bar shows it, hud_top_bar.gd).
 func pause_line() -> String:
 	return "PAUSED: " + (pause_reason if pause_reason != "" else "paused") if paused else ""
 
@@ -126,8 +113,6 @@ func set_paused(on: bool, reason := "") -> void:
 	var was := paused
 	paused = on
 	pause_reason = reason if on else ""
-	if _pause_label != null:
-		_pause_label.text = pause_line()
 	if was and not on:
 		for ship in ships:
 			ship.mark_dirty()  # rooms and air again, even if nothing flagged a change
@@ -254,6 +239,7 @@ func _step_ship(ship: Ship, dt: float) -> void:
 	ship.refresh()
 	ship.clock += dt
 	var rng := rng_of(ship)
+	CrewAbilities.tick(ship, dt)  # crew ability cooldowns and effects, in a fight too (they stand still when the world does)
 	if ships.size() == 1:  # in a fight the arena ticks the abilities
 		Abilities.tick(ship, dt, rng)
 	Heat.tick(ship, dt, rng)
@@ -280,6 +266,8 @@ func _step_ship(ship: Ship, dt: float) -> void:
 			ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * use * dt)
 	Fire.tick(ship, dt, rng)
 	jobs_of(ship).tick(ship, dt, ships.size() > 1)  # more than one ship aboard the sim: a fight
+	for line in Mortality.tick(ship, dt):  # the downed bleed out
+		ship.log_event(line)
 	ship.atmosphere.tick(dt, open_door_cells(ship))
 
 

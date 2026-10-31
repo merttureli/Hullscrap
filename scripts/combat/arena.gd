@@ -114,6 +114,7 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 	for c in grid.tiles:
 		if grid.tiles[c] != "wall" and grid.tile_flag(grid.tiles[c], "solid"):
 			armor += 1
+	grid.hp_mult = Abilities.wall_hp_mults(ship)  # a Stonehide bay: tougher walls round its room, from the start of the fight
 	co.hull_max = HULL_BASE + HULL_PER_ARMOR * armor
 	co.hull = co.hull_max
 	co.mounts = weapons.mounts_of(ship)

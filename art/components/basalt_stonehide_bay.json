@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "basalt_stonehide_bay_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "Basalt \"Stonehide Plating Bay\": a stone cradle with a pale polished slab lying between two iron presses; on loop (2): the presses close on the slab and a magma seam runs along it, then they open. A stack of finished plates sits in the corner. Damaged: a press arm bent, the slab chipped with a crack leaking light, sparks. Disabled: presses jammed open, the slab split, plates scattered, cold seams."
+}

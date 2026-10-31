@@ -1,0 +1,27 @@
+{
+ "frame": [
+  96,
+  96
+ ],
+ "nine_slice": true,
+ "margins": [
+  24,
+  24,
+  24,
+  24
+ ],
+ "axis_stretch": "tile",
+ "glow": {
+  "image": "hall_frame_neon_glow.png",
+  "frame": [
+   96,
+   96
+  ],
+  "offset": [
+   0,
+   0
+  ],
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Hall of ships frame, neon line. 96x96, nine-slice with 24 px margins: the four 24x24 corners (chamfered plate, a fillet boss that reaches into the opening, a gem and an inlay that curls round it) stay as they are; the 48 px edges repeat every 8 px (rivet, seam), so TILE them (not stretch). The centre is a flat dark fill: draw the display backdrop (hall_bg.png, tiled) and the ship silhouette over it, inside the opening (inset 12 px from each side). The glow adds a soft light on the four gems and a faint line along the inlay."
+}

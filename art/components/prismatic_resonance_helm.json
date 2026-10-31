@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "prismatic_resonance_helm_glow.png",
+  "frame": [
+   44,
+   44
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Prismatic Resonance Helm, 2x2: a violet pilot console with a lattice-star screen along the top, a violet cushion seat, and a crystal on a pedestal at the left that hums: cyan rings spread from it on the 4-frame loop and the screen scans. Off: dark screen, dull crystal. Damaged: the screen glitches and the crystal is cracked. Disabled: the crystal snapped, the screen dead."
+}

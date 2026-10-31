@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "emberkin_flare_turret_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Emberkin Flare Turret: a magazine rack where flare cartridges (brass casings, coloured caps) slide into the chamber one by one as it charges (frame 5 = five loaded, strip yellow), power coupling, brass hatch. fire: the chamber flashes and the rack is empty. damaged: a cartridge jammed crooked, the rack cracked, lamps dead; disabled: cartridges spilled, rack bent. Barrel layer emberkin_flare_turret_barrel: a brass dome head with a short flare gun, a flared muzzle and a small heat-sink fin stack.",
+ "offset": [
+  0,
+  -4
+ ]
+}
