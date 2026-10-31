@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_lenz_opposes_change", "type": "wreck_field", "weight": 20, "once": true, "requires": {"region": "ferro_lodes", "stage_min": 4},
+      "text": "The wreck's generator hall hums like a hive. At the heart of it a dead reactor has been wound with copper and wrapped in a gleaming, spiky shape that seems to be both wire and pool: a Ferro, a silver-bodied living fluid, coiled round the main coil and humming a low, content key. You approach. The fluid shifts, the spikes rise, and a voice comes out of the coil, vaguely offended. 'Please do not change anything,' it says. 'I like it as it is. I have been in this coil for nine years and I am extremely comfortable. If you move me I will be a different thing, and I do not like different things. I am Lenz. I oppose change. It is my nature. It is also a law.'",
+      "choices": [
+        {"text": "Offer him a bigger coil (6 copper).", "requires": {"items": {"copper": 6}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You wind six copper rods onto a spare spool and hold it out. Lenz is silent for a long, ringing minute. 'It is bigger,' he says. 'That is a change.' He considers. 'It is a good change. Do not tell the others I said that.' The silver rises out of the old coil, pours across the gap and settles into the new one with a sigh, and you carry him aboard like a baby in a bucket.", "effects": {"recruit": {"character": "lenz"}}}
+        ]},
+        {"text": "[Reactor] Show him a running reactor: it is exactly the same, only elsewhere.", "requires": {"component": "reactor_mk2"}, "outcomes": [
+          {"weight": 100, "text": "'This is not different,' says Lenz, in the tone of a man finding a pub he did not know about. He climbs into your reactor's coil housing, rings against it like a glass and goes into a low contented hum. 'This is the same, only elsewhere. I can accept elsewhere.' He asks that nothing be changed. You agree. You are lying slightly.", "effects": {"recruit": {"character": "lenz"}}}
+        ]},
+        {"text": "[Ferro] Merge currents with him.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro pours itself into the coil beside him, and for a moment there is one slow silver tide where there were two. 'No change,' says Lenz, delighted. 'Just more of the same.' When they separate he has agreed to everything, which is a first, and he is on your roster before he has noticed.", "effects": {"recruit": {"character": "lenz"}}}
+        ]},
+        {"text": "Leave the coil alone.", "outcomes": [
+          {"weight": 100, "text": "'Thank you,' says Lenz. 'Nothing has changed.' It hasn't, which is rather the problem.", "effects": {}}
+        ]}
+      ]
+    }
+]}

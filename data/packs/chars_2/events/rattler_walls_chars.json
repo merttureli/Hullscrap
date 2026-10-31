@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_hobnail_lost_property", "type": "trader", "weight": 22, "once": true, "requires": {"region": "rattler_walls", "stage_min": 2},
+      "text": "The Understairs has a lost-property counter with a brass bell and a handwritten sign: ENQUIRE WITHIN. Behind it is a shelf of tagged objects: a boot, a violin, a pressure gauge, a wedding ring and, tagged item 31, a small elderly Rattler asleep in a toolbox with his goggles pushed up on his forehead. The tag reads ONE MECHANIC, SMALL, SLIGHTLY USED, UNCLAIMED SIX YEARS. The clerk explains. 'That is Hobnail, though everyone says Old Hob. Ma Gantry's. Best hands in the Rusthold, and the form to collect him says Claimant Must Acknowledge That Rattlers Exist. Nobody will sign it. Nobody will say it. He is very good about it.' Item 31 opens one eye. 'I can hear you,' says Hob. 'The tea is cold, love.'",
+      "choices": [
+        {"text": "Sign the claim form and pay the storage (40 credits).", "requires": {"credits": 40, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You sign the form in full, where it says Rattlers Exist, and a brisk silence goes round the whole counter. The clerk stamps it as if it might go off. Hob climbs out of his toolbox with a great deal of dignity and a spanner longer than his arm. 'Well,' he says. 'That is the first time anyone has put it in writing. Hobnail, if you want it spelled out. Old Hob if you do not. Where is the engine room, love? Mind if I look?'", "effects": {"recruit": {"character": "hobnail"}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Rattler] Claim him as kin, in wall-code.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler raps three on the counter, two on the shelf, and one very long scrape on the toolbox, and Hob sits bolt upright. 'Kin,' he says. 'In my own tongue, in front of customers.' The clerk, to her credit, looks the other way. Hob is out of the toolbox and into your crew before she remembers the form.", "effects": {"recruit": {"character": "hobnail"}}}
+        ]},
+        {"text": "[Tinkerer] Fix the till they have been meaning to fix since the Snap.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer lifts the till's cover, swears gently, and has it ringing true in nine minutes. Hob, sitting up in his toolbox, watches with the open-mouthed envy of a professional. 'That is a nice bit of work,' he says. 'I would have used a bigger hammer. Can I go with them?' The clerk opens her mouth to say the form, closes it, and writes on the tag: FOUND.", "effects": {"recruit": {"character": "hobnail"}}}
+        ]},
+        {"text": "Leave item 31 on the shelf.", "outcomes": [
+          {"weight": 100, "text": "'Mind the third rivet on the way out, love,' says the toolbox, without opening its eyes. 'She has been wanting to go for a week.' You mind it. It goes anyway.", "effects": {}}
+        ]}
+      ]
+    }
+]}

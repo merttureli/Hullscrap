@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_quigley_picket_line", "type": "patrol", "weight": 20, "once": true, "requires": {"region": "brine_yards", "stage_min": 2},
+      "text": "A picket line has been drawn across the lane in hulls: forty Brine dock-ships nose to tail, with banners reading NOTHING MOVES UNTIL WE MOVE IT and a great painted fist. A shell-backed steward in a hard hat strolls out along the line to meet you, one huge claw holding a clipboard and the other, small and fine, a mug of tea. 'Steward Quigley, Local Nine,' she says. 'You are not Concord, are you? Good. We are out over the tea break. Fourteen minutes, they wanted to cut. Fourteen! You can cross the line if you like. Nobody will stop you. But I would like it noted that everyone who crosses it is a bit less of a person after.' She sips. 'Tea?'",
+      "choices": [
+        {"text": "Honour the line: hold station for the shift (1 fuel).", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You cut your engines and sit with the line through the long afternoon, passing a flask. At change of shift the dispatcher gives in, restores the break, and a roar goes up that shakes the lane-lamps. Quigley finds you in the crowd and puts one enormous claw on your arm, with great care. 'Local Nine looks after those who looked after Local Nine,' she says. 'I am owed leave. I should like to see what your ship does with a day off.'", "effects": {"recruit": {"character": "quigley"}}}
+        ]},
+        {"text": "[Brine] Walk the line with them for a shift.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine takes a banner, falls into step, and walks the line for six hours. At change of shift the steward looks at the stranger's shell, the stranger's claw, the fist on the banner, and clinks her mug against it. 'Brother in the Local,' she says. 'I would be proud to have you aboard anything you are a member of.' She is at your lock before the others have finished clapping.", "effects": {"recruit": {"character": "quigley"}}}
+        ]},
+        {"text": "Cross the line anyway.", "outcomes": [
+          {"weight": 100, "text": "A thousand claws rise in a slow, grave gesture. The line parts, and as you pass, a mug of lukewarm tea arcs over the rail and lands, with great precision, on your cockpit glass. Nobody speaks. You come away with a clear lane, a stained window, and the Yard management's warm regards.", "effects": {"rep": {"concord": 1}}}
+        ]},
+        {"text": "Turn back and take the long way round.", "outcomes": [
+          {"weight": 100, "text": "'Mind how you go,' says Quigley, raising the mug. 'Solidarity looks good on you. It will look better with a bit of practice.'", "effects": {}}
+        ]}
+      ]
+    }
+]}

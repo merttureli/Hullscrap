@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_winze_through_the_floor", "type": "asteroid_field", "weight": 20, "once": true, "requires": {"region": "murrow_diggings", "stage_min": 3},
+      "text": "Your crew are working a claim on a drifting rock when something starts knocking from underneath the cargo hold. It is a polite knock. It repeats. Then a crescent of deck plating bulges, and a hole opens in your floor with a sound like a very large spoon, and a Murrow climbs out of it, dust-caked, miner's lamp on his forehead, holding an unfurled tunnel plan. 'Oh,' he says. 'This is not the Hendersons'.' He looks at the ceiling, the crates, the astonished crew. 'I am terribly sorry. I was aiming for the neighbours. I have been digging towards their pantry for three weeks. Do you know where the Hendersons are? I owe them a pie.' Behind him a clean round tunnel runs back into the rock and a good way beyond it.",
+      "choices": [
+        {"text": "Hire him on the spot (30 credits and a share of the finds).", "requires": {"credits": 30, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "'A share of the finds,' says the Murrow, wiping his claws on his harness. 'I like that. In my family it is called a pie.' He stamps the deck plate back into the hole with his boot, gently, where it sits as if it had never moved, which you suspect is not how plates work. 'Winze,' he says. 'I dig. I am extremely bad at maps.'", "effects": {"recruit": {"character": "winze"}}}
+        ]},
+        {"text": "[Murrow] Dig the neighbours' tunnel with him.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow shoulders a pick, takes one look at the plan, and the two of them go down the hole headfirst like a pair of well-trained ferrets. They are gone four hours. They come back with the Hendersons' pie, a cousin's address, and one grin between them. 'He is good,' says your Murrow. 'He is the worst navigator I have ever met.' Winze is already looking at your bulkheads.", "effects": {"recruit": {"character": "winze"}}}
+        ]},
+        {"text": "[Laser cutter] Show him how a real cutter eats rock.", "requires": {"component": "laser_cutter"}, "outcomes": [
+          {"weight": 100, "text": "Winze watches the beam slice a boulder in half and goes completely silent. 'Oh, you beauty,' he says. 'You absolute beauty. Where has this been all my life?' He is half through the hatch with his plan and his pick before anyone has said yes.", "effects": {"recruit": {"character": "winze"}}}
+        ]},
+        {"text": "Make him fill in the hole and send him home.", "outcomes": [
+          {"weight": 100, "text": "He fills the hole with surprising neatness, apologises eleven times and goes back down, taking a left turn too early. For the next day you hear him knocking, faintly, somewhere under the rock, getting no closer to the Hendersons.", "effects": {}}
+        ]}
+      ]
+    }
+]}

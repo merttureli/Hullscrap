@@ -1,0 +1,32 @@
+{"events": [
+    {
+      "id": "char_obliged_late_reply", "type": "anomaly", "weight": 22, "once": true, "requires": {"region": "echo_glassways", "stage_min": 5},
+      "text": "Your own voice comes back down the lane a day late. It is your hail from yesterday, word for word, only a little kinder: the grumbling is gone, a 'please' has been added, and the end is longer. The whole Glassways does this. Signals arrive late and improved. Then a second voice arrives underneath yours, smooth and polite and nobody's you recognise. 'Good morning,' it says. 'Forgive the intrusion. I am the echo of a ship that was not yours, in a lane that was. I am looking for a vessel with room to carry something. I would be much obliged. You need not answer now. I will have heard the answer by the time you give it.'",
+      "choices": [
+        {"text": "Answer: 'You are welcome aboard. Come when you can.'", "outcomes": [
+          {"weight": 100, "text": "The reply goes out into the glass. Nothing happens. Then, a day after you sent it, a polite acknowledgement comes back, slightly improved: 'Much obliged. Expect me yesterday.' The lane goes quiet in a satisfied way.", "effects": {"flag": "char_obliged_invited"}}
+        ]},
+        {"text": "[Echo] Reply in kind, and add a courtesy.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo composes a reply twice as warm as the one you would have sent and sends it with a small flourish at the end. The Glassways takes a very long time to answer, and when it does it is in your Echo's own voice, saying thank you for the invitation to itself. 'That will do it,' says your Echo, pleased. 'It will have been very flattered.'", "effects": {"flag": "char_obliged_invited", "items": {"crystal": 1}}}
+        ]},
+        {"text": "Switch the receiver off.", "outcomes": [
+          {"weight": 100, "text": "The lane goes quiet. A day later, when you are far away, a courteous little message arrives on a dead channel: 'No trouble at all.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_obliged_arrives_yesterday", "type": "empty", "weight": 50, "once": true, "requires": {"stage_min": 6, "flag": "char_obliged_invited"},
+      "text": "A thing is standing in your airlock. It is tall, smooth and glassy, with a face that is a faint, flattering likeness of whoever opens the inner door. It holds its hands in front of it, politely, and a thin line of frost on the outer hatch suggests that it arrived sometime yesterday, though the lock was shut. 'Good morning,' says the Echo. 'I am so sorry to be early. I was told I would be welcome, and I find I have already been here for a day. Might I stay? I am quite a decent mimic. I will be whoever you most need.' For a moment it looks exactly like you. 'Or someone else, if you prefer.'",
+      "choices": [
+        {"text": "Welcome it aboard.", "outcomes": [
+          {"weight": 100, "text": "'Obliged,' says the Echo, and the name settles on it as if it had been waiting. 'That is what I am called. Or that is what I will have been called.' Its face resolves into something neutral and pleased. 'I shall be a great deal of help. I shall probably also say what you said a moment ago.'", "effects": {"recruit": {"character": "obliged"}}}
+        ]},
+        {"text": "Take the 40 credits it found yesterday, and welcome it aboard.", "outcomes": [
+          {"weight": 100, "text": "'Forty,' says the Echo, laying it on the sill, a little shyly. 'I found it yesterday. I think it was yours tomorrow.' The credits spend perfectly well. It follows you down the corridor, trying on your gait, then your voice, then settling for neither.", "effects": {"recruit": {"character": "obliged"}, "items": {"credits": 40}}}
+        ]},
+        {"text": "Refuse. Your lock has no room for a mirror.", "outcomes": [
+          {"weight": 100, "text": "The Echo bows. 'I understand,' it says. 'I will have understood already.' It is gone from the lock before the sentence ends, though the frost is still on the hatch.", "effects": {}}
+        ]}
+      ]
+    }
+]}
