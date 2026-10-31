@@ -8,6 +8,8 @@ const Weapons = preload("res://scripts/combat/weapons.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
+const PartEffects = preload("res://scripts/sim/part_effects.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 
 const COMPONENTS := "res://data/components.json"
 const MATERIALS := "res://data/materials.json"
@@ -314,6 +316,25 @@ func test_weapon_stats_use_known_kinds_and_damage_types() -> void:
 			check(float(d["duration"]) > 0.0, id + " beam has a duration")
 		for problem in Effects.problems(e, _species_ids()):  # effects: old-style tags, or the keys of effects.gd
 			check(false, "%s: %s" % [id, problem])
+
+
+## Every id a crew_bonus / crew_needed / room_work_mult `who` may name: species, library traits, and "mechanical".
+func _who_ids() -> Array:
+	var out := _species_ids()
+	out.append_array(TraitSet.library().keys())
+	out.append("mechanical")
+	return out
+
+
+func test_every_ability_and_component_stat_passes_the_part_effects_validator() -> void:
+	var who := _who_ids()
+	var traits: Array = TraitSet.library().keys()
+	var n := 0
+	for c in Content.list("components"):
+		n += c.get("abilities", []).size()
+		for p in PartEffects.component_problems(c, who, traits):
+			check(false, "%s: %s" % [c["id"], p])
+	check(n >= 10, "the validator looked at the abilities (%d)" % n)
 
 
 func test_every_ammo_id_is_cargo() -> void:

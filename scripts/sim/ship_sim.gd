@@ -29,6 +29,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const Mortality = preload("res://scripts/crew/mortality.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -265,6 +266,8 @@ func _step_ship(ship: Ship, dt: float) -> void:
 			ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * use * dt)
 	Fire.tick(ship, dt, rng)
 	jobs_of(ship).tick(ship, dt, ships.size() > 1)  # more than one ship aboard the sim: a fight
+	for line in Mortality.tick(ship, dt):  # the downed bleed out
+		ship.log_event(line)
 	ship.atmosphere.tick(dt, open_door_cells(ship))
 
 

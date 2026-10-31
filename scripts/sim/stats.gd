@@ -39,7 +39,8 @@ static func max_hp(def: Dictionary) -> int:
 ## The numbers a component really has (`power` is an int when it comes out whole): {power, hp, heat_limit, heat_per_s, cooling, mass_mult,
 ## malfunction_per_min, repair_mult, ion_vulnerability, cost_mult, line, stats}.
 ## - positive power (a producer) is scaled by the line's output, a draw (negative) by its power factor;
-## - `stats` is a copy of the def's stats with thrust and o2_rate scaled by the line's output;
+## - `stats` is a copy of the def's stats with thrust and o2_rate scaled by the line's output; a `stats.malfunction_per_min`
+##   replaces the line's rate;
 ## - heat_per_s is scaled by the line's heat; cooling is the def's own (a radiator adds on top).
 static func effective(def: Dictionary, lines: Dictionary) -> Dictionary:
 	var ln := line_of(def, lines)
@@ -60,7 +61,7 @@ static func effective(def: Dictionary, lines: Dictionary) -> Dictionary:
 		"heat_per_s": float(def.get("heat_per_s", 0.0)) * float(ln.get("heat", 1.0)),
 		"cooling": float(def.get("cooling", 0.0)),
 		"mass_mult": float(ln.get("mass", 1.0)),
-		"malfunction_per_min": float(ln.get("malfunction_per_min", 0.0)),
+		"malfunction_per_min": float(stats.get("malfunction_per_min", ln.get("malfunction_per_min", 0.0))),  # a part's own stat beats its line's
 		"repair_mult": float(ln.get("repair", 1.0)),
 		"ion_vulnerability": float(ln.get("ion_vulnerability", 1.0)),
 		"cost_mult": float(ln.get("cost", 1.0)),
