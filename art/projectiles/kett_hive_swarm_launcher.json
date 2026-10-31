@@ -1,0 +1,81 @@
+{
+ "frame": [
+  12,
+  17
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   4,
+   16
+  ]
+ },
+ "anchors": {
+  "head": [
+   6,
+   8
+  ],
+  "tail": [
+   6,
+   16
+  ]
+ },
+ "glow": {
+  "image": "kett_hive_swarm_launcher_glow.png",
+  "frame": [
+   20,
+   25
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "fly": [
+    0,
+    4,
+    16
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "kett_hive_swarm_launcher_impact.png",
+  "frame": [
+   16,
+   16
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    14
+   ]
+  },
+  "anchor": [
+   8,
+   8
+  ],
+  "glow": {
+   "image": "kett_hive_swarm_launcher_impact_glow.png",
+   "frame": [
+    24,
+    24
+   ],
+   "offset": [
+    -4,
+    -4
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     14
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A swarm of eight tiny drones, 12x17: amber bodies with pale wings that beat out of step; the loose cloud reshuffles over 4 frames. One sprite = the whole volley (the weapon fires many at full rate)."
+}

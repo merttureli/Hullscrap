@@ -1,0 +1,40 @@
+{
+ "frame": [
+  24,
+  24
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   10
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   12,
+   12
+  ]
+ },
+ "glow": {
+  "image": "emberkin_cinder_mortar_impact_glow.png",
+  "frame": [
+   34,
+   34
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    10
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "A fireball: flash, a boiling flame ball with tongues, falling embers, small fires left burning (4 frames, 24x24)."
+}

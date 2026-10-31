@@ -1,0 +1,133 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "emberkin_pyre_lance_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   12
+  ]
+ },
+ "notes": "OUTSIDE half of the Emberkin Pyre Lance: a gunmetal block with a brass sleeve, a riveted brass boiler on the left (pressure gauge, navy enamel plate) and two flame-vent stacks on the right whose pilot flames flicker. damaged: boiler seam split and leaking fire, a stack bent over, sparks; disabled: pilots out, scorched, dented, sparking.",
+ "barrel": {
+  "image": "emberkin_pyre_lance_barrel.png",
+  "frame": [
+   17,
+   74
+  ],
+  "pivot_on_base": [
+   32,
+   12
+  ],
+  "pivot_on_barrel": [
+   8,
+   67
+  ],
+  "muzzle": [
+   8,
+   14
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "gimbal_deg": 6,
+  "glow": {
+   "image": "emberkin_pyre_lance_barrel_glow.png",
+   "frame": [
+    37,
+    94
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ],
+    "damaged": [
+     4,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}
