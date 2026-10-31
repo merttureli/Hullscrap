@@ -35,18 +35,19 @@ const DEFAULT_RANGE := 600.0
 const PRIORITY: Array[String] = ["weapon", "engine", "reactor"]  ## families it shoots at first
 const DEFAULT_AIM_SKILL := 0.6
 const AIM_ERROR_DEG := 12.0  ## aim error either way of a pilot with no skill; a pilot of skill s is off by up to (1 - s) of it
-const LATERAL_MAX := 150.0  ## px/s of sideways drift before it turns the other way
-const CLOSE_MAX := 260.0  ## px/s it closes at, at most
-const BACK_MAX := 120.0  ## px/s it backs off at, at most
+const LATERAL_MAX := 225.0  ## px/s of sideways drift before it turns the other way
+const CLOSE_MAX := 390.0  ## px/s it closes at, at most
+const BACK_MAX := 180.0  ## px/s it backs off at, at most
+const THROTTLE_BAND := 135.0  ## px/s of closing-speed error that asks for full throttle
 const HOLD_THROTTLE := 0.5  ## at the preferred range it still pushes this hard
 const HOLD_MAX := 1.5  ## seconds a weapon waits for a safer sector
 const SHIFT_BASE_S := 1.5  ## a shield balance step comes every this many seconds less the aim skill
 const RETARGET_S := 0.5
 const RAM_BACKOFF_S := 2.0  ## seconds a rammer reverses after a collision
 const RAM_ABILITY_RANGE := 600.0  ## px from the foe's hull (its centre less its bounding radius): a rammer presses its engine ability inside this
-const RAM_FINAL := 160.0  ## px: inside this a rammer steers straight at the foe
-const RAM_CLOSE_SPEED := 320.0  ## px/s a rammer steers to close at
-const RAM_MIN_CLOSE := 100.0  ## px/s: the closing speed it assumes when working out the time to contact
+const RAM_FINAL := 240.0  ## px: inside this a rammer steers straight at the foe
+const RAM_CLOSE_SPEED := 480.0  ## px/s a rammer steers to close at
+const RAM_MIN_CLOSE := 150.0  ## px/s: the closing speed it assumes when working out the time to contact
 const RAM_MAX_LEAD_S := 4.0
 const RAM_ALIGNED := 0.45  ## rad: full throttle when the heading is this close to the steering direction
 const FLEE_ALIGNED := 0.6  ## rad: a fleeing ship burns once its nose is this close to straight away from the foe
@@ -177,7 +178,7 @@ func _fly(dt: float) -> void:
 	var heading := Vector2.UP.rotated(co.flight.angle)
 	var throttle := 0.0
 	if heading.dot(u) > 0.5:
-		throttle = clampf((want_closing - closing) / 90.0, -1.0, 1.0)
+		throttle = clampf((want_closing - closing) / THROTTLE_BAND, -1.0, 1.0)
 		if absf(gap) < preferred * 0.15 and absf(throttle) < HOLD_THROTTLE:
 			throttle = HOLD_THROTTLE * (1.0 if gap >= 0.0 else -1.0)  # keep pushing: the hold is a slow orbit
 	var strafe := side if float(co.thrusts["left"]) + float(co.thrusts["right"]) > 0.0 else 0.0
