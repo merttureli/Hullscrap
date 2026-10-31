@@ -1,0 +1,32 @@
+{"events": [
+    {
+      "id": "char_skerry_seam_job", "type": "wreck_field", "weight": 24, "once": true, "requires": {"region": "basalt_quarries"},
+      "text": "A freight hulk is leaking air from a seam the length of a bus, and a Basalt is standing in the vacuum beside it, pressing the metal shut with one flat palm. He has a trowel of grey mortar in the other hand. By the frost on his shoulders he has been at this since before you were on the scope. 'Hello,' he says on the open channel, in the unhurried way of his people. 'Please excuse me. I am about a third of the way along. The seam will wait. I will not be hurried.'",
+      "choices": [
+        {"text": "Pay for his mortar (60 scrap).", "requires": {"items": {"scrap": 60}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "He weighs the sack in his palm like a verdict. 'Good mortar,' he says. 'Better than the last owner's promises.' He finishes the seam in the time it takes you to forget you were watching, climbs onto your hull with his trowel, and sits. 'Where would you like a seam?'", "effects": {"recruit": {"character": "skerry"}}}
+        ]},
+        {"text": "[Doesn't breathe] Step out and take the other end of the seam.", "requires": {"trait": "no_breath"}, "outcomes": [
+          {"weight": 100, "text": "Your crewmate floats out and presses the far end shut, and the two of them work toward each other, saying nothing, for most of an afternoon. When they meet in the middle Skerry taps the join twice with his trowel. 'Good seam,' he says. After a long minute: 'Good company.' He gets his bag.", "effects": {"recruit": {"character": "skerry"}, "items": {"scrap": 20}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Wave, and leave him to it.", "outcomes": [
+          {"weight": 100, "text": "He lifts the trowel an inch, which from a Basalt is a long speech. By the time you are out of range he has covered another handspan.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_hornfels_last_stand", "type": "pirate", "weight": 14, "once": true, "requires": {"region": "basalt_quarries", "stage_min": 3},
+      "text": "Three Rustfang skiffs have a quarry tug pinned against a rock and are working up to boarding it. The tug has no weapons. It has an airlock, and in the airlock, filling it completely, stands one very large Basalt with a quarry hammer, who has been told twice to open up and has declined twice by not moving. The comm says, slowly: 'I am standing here. The door is behind me. I will go on standing here.' One of the skiffs has begun to look uncertain.",
+      "choices": [
+        {"text": "Drive off the raiders.", "outcomes": [
+          {"weight": 100, "text": "You swing in on the nearest skiff and the other two discover errands elsewhere. The fight is short and loud.", "effects": {"fight": "pirate_raider"}, "after_win": {"text": "When the last skiff is a spreading cloud, the airlock opens. Hornfels steps out into the vacuum, looks at the sky, looks at you, and sets the hammer down on your hull as if it were a table. 'I was holding that door for a very long time,' he says. 'Thank you for relieving me. I would like to keep standing, if it is all the same. Somewhere with more doors.'", "effects": {"recruit": {"character": "hornfels"}, "rep": {"clans": 2}}}}
+        ]},
+        {"text": "[Basalt] Take the other side of the airlock beside him.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt crosses to the tug without a word, picks up a spare hammer and takes the far side of the door. The skiffs count two hammers, then count again, and leave in a hurry. Hornfels turns, very slowly, and regards your Basalt for most of a minute. 'Company,' he says at last. 'I had forgotten the word.' He follows them home.", "effects": {"recruit": {"character": "hornfels"}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "This is not your fight. Fly on.", "outcomes": [
+          {"weight": 100, "text": "The comm says, patiently, 'I will go on standing here,' and goes on saying it as you leave. It is the loudest quiet you have ever heard.", "effects": {}}
+        ]}
+      ]
+    }
+]}

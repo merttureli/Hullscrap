@@ -1,0 +1,35 @@
+{"events": [
+    {
+      "id": "char_haggit_free_valuation", "type": "trader", "weight": 24, "once": true, "requires": {"region": "fenn_bazaar"},
+      "text": "A stall the size of a coffin sells nothing at all. Its owner, a Fenn in a waistcoat with eleven pockets, offers you a free valuation of your ship. 'Free,' he says, 'meaning I look, I tell you, and you wonder how I knew.' He looks. 'Hull is good but your reactor is lying about its age. Your third crew member is wondering about quitting. You paid too much for those radiators, and your last trading partner had a thumb on the scale.' All of this is true. He smiles like a drawer opening.",
+      "choices": [
+        {"text": "Hire him on the spot (140 credits).", "requires": {"credits": 140, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "He bites the coin, a ritual no coin has ever failed, and writes your name in a ledger with a very small pen. 'Haggit,' he says. 'Appraiser. I will tell you what everything is worth, including the people who owe you. Especially them.'", "effects": {"recruit": {"character": "haggit"}}}
+        ]},
+        {"text": "[Fenn] Haggle him down in click-talk (60 credits).", "requires": {"species": "fenn", "credits": 60, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn and the stallholder rattle at each other for four minutes, with a great deal of finger flicking. At the end they shake hands, both visibly cheated, both delighted. 'Sixty,' says your Fenn. 'He wanted a hundred forty. He will come for sixty if you let him tell people he took you for a hundred forty.' Haggit is already packing the stall into a pocket.", "effects": {"recruit": {"character": "haggit"}}}
+        ]},
+        {"text": "Take the free valuation, and nothing else.", "outcomes": [
+          {"weight": 100, "text": "He tells you, in detail, to the credit. It is depressing. He charges you nothing and looks hopeful, which is worse.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_nimmik_crate_thief", "type": "wreck_field", "weight": 20, "once": true, "requires": {"region": "fenn_bazaar"},
+      "text": "The wreck has one intact crate, and it is lighter than it should be. When your crew pry it open there is a Fenn inside, small as a toolbox, in a coat so full of pockets it clinks. 'I can explain,' she says. 'You would have to want to hear it.' She is, you notice, now standing behind you. The crate's lid has not moved. Nobody saw her get out.",
+      "choices": [
+        {"text": "Offer her a job.", "outcomes": [
+          {"weight": 100, "text": "'A job,' she says, tasting the word. 'With walls?' You say there are a great many walls. 'Perfect.' Nimmik puts a heap of copper lumps on the crate lid without being asked, a little sheepishly. 'Deposit.'", "effects": {"recruit": {"character": "nimmik"}, "items": {"copper": 10}}}
+        ]},
+        {"text": "Turn her over to the Bazaar wardens.", "outcomes": [
+          {"weight": 100, "text": "The warden's launch arrives inside the hour and takes custody with a form. The reward is 40 credits. The coat, they note, was empty on arrival. You cannot prove otherwise.", "effects": {"items": {"credits": 40}}}
+        ]},
+        {"text": "[Fenn] Say it in click-talk: 'Kin. I won't tell.'", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Her ears flick. She answers in a dialect of Fenn with no word for 'caught'. By the end she has handed you a small flat object that was, until recently, the wreck's reactor key. 'Then I am yours till the debts are paid,' says Nimmik. 'Whoever's debts they are.'", "effects": {"recruit": {"character": "nimmik"}, "items": {"titanium": 2}}}
+        ]},
+        {"text": "Close the lid and walk away.", "outcomes": [
+          {"weight": 100, "text": "The lid shuts with a tidy click. There is a faint sound of a coat being rearranged. Nobody follows you. You count your pockets twice anyway.", "effects": {}}
+        ]}
+      ]
+    }
+]}
