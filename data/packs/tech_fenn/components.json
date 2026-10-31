@@ -27,13 +27,15 @@
       "heat_limit": 100,
       "heat_per_s": 2.0,
       "cooling": 3,
-      "stats": {}
+      "stats": {
+        "malfunction_per_min": 0.2
+      }
     },
     {
       "id": "fenn_spark_lattice",
       "name": "Spark Lattice",
       "blurb": "Every hit throws sparks into the neighbours. A Fenn engineer calls it free damage, then checks the wiring.",
-      "quirk": "Splinters hit 3 cells beside the impact (+30% damage a second over a Mk2 pulse turret), but the turret takes 0.2 hp a second while it runs: the Fenn mend it in no time.",
+      "quirk": "Splinters hit 3 cells beside the impact (+30% damage a second over a Mk2 pulse turret), but the turret takes 0.1 hp a second while it runs: the Fenn mend it in no time.",
       "family": "weapon",
       "line": "standard",
       "tier": 2,
@@ -56,7 +58,21 @@
       "heat_limit": 100,
       "heat_per_s": 2.0,
       "cooling": 3,
-      "stats": {}
+      "stats": {},
+      "abilities": [
+        {
+          "id": "overstrung",
+          "name": "Overstrung",
+          "type": "passive",
+          "effects": {},
+          "side_effects": [
+            {
+              "type": "self_damage",
+              "rate": 0.1
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "fenn_market_missile",
