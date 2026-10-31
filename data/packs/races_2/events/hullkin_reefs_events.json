@@ -1,0 +1,113 @@
+{"events": [
+    {
+      "id": "reef_barnacle_row", "type": "station", "weight": 10, "once": false, "requires": {"region": "hullkin_reefs"},
+      "text": "Barnacle Row has no doors. Every ship docks against the outside of the next one along, and the front door of each home is the place on the hull where the shell is thinnest, so you knock. The knocker's code is painted on every porch: THREE SLOW FOR FRIENDS. ONE LONG FOR FAMILY. NONE FOR THE REPO MAN. A Hullkin the size of a hearthrug creeps out to meet you at the speed of a tide. 'We saw you coming,' she says. 'Last Thursday.'",
+      "choices": [
+        {"text": "Knock three slow, and wait.", "outcomes": [
+          {"weight": 100, "text": "You knock three slow, and wait. Eventually an eyestalk appears over the lintel, and a small grasping hand holds out a welcome-mend: a patch of shell the size of your palm that will spread, in time, across your hull. The Row's idea of hospitality is a long, slow nothing, and you leave feeling hugged.", "effects": {"hull": 10, "crew_hp": 5}}
+        ]},
+        {"text": "Scrape a sample off the wall.", "outcomes": [
+          {"weight": 100, "text": "You scrape a piece of shell off the Row's wall for your own use, and it is lovely clear shell. Every eyestalk on the porch swivels to follow you. By the time you get back to the ship there is not a single Hullkin in range willing to tell you the time.", "effects": {"items": {"titanium": 4, "scrap": 10}, "crew_hp": -5}}
+        ]},
+        {"text": "[Hullkin] Knock one long.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin raps one long knock: family. The porch erupts, as far as a porch can, which is to say that after a minute a chain of eyestalks rises over the rail and a cousin your Hullkin has never met, but knows in every ridge, shuffles out with a basket. A feast is held in your honour that takes four days, so you are served only the first course. The Row mends your hull in your sleep.", "effects": {"hull": 15, "items": {"fuel": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Take on a youngster who wants to see inside a ship.", "requires": {"not_flag": "reef_hired"}, "outcomes": [
+          {"weight": 100, "text": "A small Hullkin, hardly more than a barnacle with ambitions, presses against your airlock and does not move. 'I want to see the inside,' it says. 'I have lived on the outside my whole life. Is the inside nice?' You say it depends. 'I will mend,' it says. 'I will mend everything. It is all I can do.' It starts on the airlock. Chine signs on, at the speed of a drip.", "effects": {"recruit": {"species": "hullkin", "name": "Chine"}, "flag": "reef_hired"}}
+        ]}
+      ]
+    },
+    {
+      "id": "reef_scrapers", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "hullkin_reefs", "jumps_min": 2},
+      "text": "Rustfang scrapers with a flamethrower and a barge are working along a reef of old hull-plate, stripping off the shell for resale. The reef's Hullkin do not scream. They simply creep, as fast as they can, which is not fast, away along the plating, trailing a thin line of mended steel, while a woman with a visor and a blowtorch eats her sandwich and watches them go. 'Free money,' she says to her mate. 'It's like picking mushrooms.'",
+      "choices": [
+        {"text": "Fight the scrapers.", "outcomes": [
+          {"weight": 100, "text": "You put your bow between the barge and the reef. The woman with the visor puts down her sandwich.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Pay them to stop (50 credits).", "requires": {"credits": 50}, "outcomes": [
+          {"weight": 70, "text": "She counts it, shrugs, and says 'oh well'. The barge turns away. On the plating the Hullkin stop creeping, one by one, and a line of them presses a mend onto your hull as you pass.", "effects": {"items": {"credits": -50}, "hull": 10}},
+          {"weight": 30, "text": "She takes the credits, and also, on reflection, the principle.", "effects": {"items": {"credits": -50}, "fight": "tier"}}
+        ]},
+        {"text": "[Hullkin] Call the reef.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin presses a hand to the plating and knocks out a slow, heavy rhythm. All along the reef every Hullkin stops creeping and turns. Then the whole reef closes: plating folding on plating, shell sliding over shell, until the scrapers' barge is hemmed in by a wall of ridged steel with no door in it. The woman with the visor puts down her sandwich. 'Fine,' she says. 'We'll go.' The Hullkin let them, after about an hour.", "effects": {"items": {"scrap": 30, "titanium": 6}, "hull": 10}}
+        ]},
+        {"text": "Look the other way.", "outcomes": [
+          {"weight": 100, "text": "You look the other way, with some effort. On the plating a Hullkin stops creeping to watch you go. Your crew are very quiet.", "effects": {"crew_hp": -5}}
+        ]}
+      ],
+      "after_win": {"text": "The barge limps off trailing flame-gas. Along the reef a ripple runs, plate by plate, down to the last Hullkin, who knocks once on your hull in what you suppose is thanks. They have mended your guns while you were not looking.", "effects": {"items": {"scrap": 40, "titanium": 3}, "hull": 5}}
+    },
+    {
+      "id": "reef_slow_wedding", "type": "empty", "weight": 8, "once": false, "requires": {"region": "hullkin_reefs"},
+      "text": "A wedding is taking place on a hull-plate in the middle of nowhere. It has been taking place, judging by the garlands, for about three weeks. The bride and groom, two Hullkin, are approaching each other along the plate at a speed that makes sense to them, and the guests have set out deckchairs along the way, with blankets and flasks. A cousin hails you. 'You're just in time for the vows,' she says. 'They'll be in eight days.'",
+      "choices": [
+        {"text": "Stay for the vows (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You stay eight days. The vows take four minutes, and they are the most moving four minutes you have ever heard. The couple, shy and slow, present your ship with a plate of their shell for luck, and the whole crew goes home with a lump in the throat and a hull stronger than before.", "effects": {"items": {"fuel": -1}, "hull": 10, "crew_hp": 10}}
+        ]},
+        {"text": "Leave a gift and go.", "outcomes": [
+          {"weight": 100, "text": "You leave a tin of something sweet on the plate and slip away. A grateful cousin sends a message after you: 'The groom thinks it is a very good tin.'", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "[Hullkin] Give the bride away.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin is pressed into the role of uncle, which they take with the gravity of someone being handed a baby. They walk the bride the last half-metre of the aisle in just under a day. Everybody weeps. The groom's mother, a vast ridged matriarch, presses a cargo of salvage into your Hullkin's hands that she has been saving for just this occasion.", "effects": {"items": {"titanium": 8, "scrap": 30}, "crew_hp": 10}}
+        ]},
+        {"text": "Move on. You have a schedule.", "outcomes": [
+          {"weight": 100, "text": "You pass the wedding on a long curve. In the mirror, forty deckchairs, three flasks, and nobody in a hurry. You feel, briefly, like the odd one out.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "reef_plating_market", "type": "trader", "weight": 8, "once": false, "requires": {"region": "hullkin_reefs"},
+      "text": "The Plating Market is held on the flat of a dreadnought's back, where a few hundred Hullkin have laid out salvaged plate in rows, shell-side up, sorted by thickness. Prices are quoted per barnacle, and the barnacle varies. A stall-keeper the size of a coffee table tells you the rate with the patience of someone who has told it ten thousand times. 'Per barnacle,' she says. 'Per good barnacle. Not that kind.' She points at a barnacle with contempt.",
+      "choices": [
+        {"text": "Buy plating (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "She counts out your plates one by one, with a ritual commentary on each. By the end you have learned a great deal about plate, and you own a great deal of it.", "effects": {"items": {"credits": -40, "titanium": 6, "scrap": 20}}}
+        ]},
+        {"text": "Haggle per barnacle.", "outcomes": [
+          {"weight": 50, "text": "You and she negotiate for two hours. At the end the price per barnacle is lower and the barnacles are smaller. Nobody can say who won.", "effects": {"items": {"titanium": 3, "scrap": 10}}},
+          {"weight": 50, "text": "She does not haggle. She stares. After a while, you leave.", "effects": {}}
+        ]},
+        {"text": "[Gauntling] Talk shop with the stall-keeper.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling runs a thumb along a plate's edge, holds it to the light, and starts naming the ship it came off. The stall-keeper slowly puts down her cloth. 'You know them,' she says. They spend three hours naming wrecks. She lets your Gauntling have the pick of the stall at cost.", "effects": {"items": {"titanium": 10, "scrap": 30}}}
+        ]},
+        {"text": "[Hullkin] Pay in kind: a day's mending.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin offers a day's mending for the stall in exchange for plate. The stall-keeper looks at the quality of their shell with deep respect and agrees. By evening the stall has no cracks at all, and your hold has plenty of plate.", "effects": {"items": {"titanium": 10, "scrap": 20}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "reef_drowned_fleet", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "hullkin_reefs", "jumps_min": 2},
+      "text": "The flagship of a drowned fleet lies at the heart of the Reef, her outer hull a township of Hullkin, her inner decks sealed. A sign at her airlock, in shell-script, reads ASK FIRST. Under it, in a smaller and cleaner hand, someone has added OR DON'T. WE'LL KNOW. Her hold is full of good steel; her bridge is full of Concord brass. A long line of eyestalks watches your ship from every window.",
+      "choices": [
+        {"text": "Ask first.", "outcomes": [
+          {"weight": 100, "text": "You ask. It takes a day. A committee of elders considers the question in a thousand tiny motions and says: 'Take what you can carry. Leave the bridge.' You do. The brass on the bridge, you notice as you pass, is polished. Someone has been polishing it for forty years.", "effects": {"items": {"titanium": 8, "scrap": 30}}}
+        ]},
+        {"text": "Don't ask.", "outcomes": [
+          {"weight": 100, "text": "You cut in by a side hatch. The hold is full of steel and the corridor is full of Hullkin, standing in a slow silent line all the way to your ship. They don't stop you. They watch you carry. By the time you leave, your arms ache, and your conscience, somehow, aches more.", "effects": {"items": {"titanium": 14, "scrap": 50}, "crew_hp": -10}}
+        ]},
+        {"text": "[Hullkin] Ask the reef.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin climbs the side of the flagship, a metre a minute, and speaks to the elders in shell-script. It takes two days. At the end the elders open the bridge: the brass, the charts, the captain's chair, all of it, as a gift to a returning child of the Reef. 'She is one of ours,' they tell your crew. 'Take it all.' The bridge is yours, and a corner of the Reef's trust.", "effects": {"items": {"titanium": 10, "scrap": 30, "credits": 60}, "reveal": "wreck_field", "hull": 10}}
+        ]},
+        {"text": "Leave the fleet in peace.", "outcomes": [
+          {"weight": 100, "text": "You turn away. Behind you the line of eyestalks shifts, each a little, and you feel better about yourself for the rest of the day.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "reef_peeled_plate", "type": "distress", "weight": 7, "once": true, "requires": {"region": "hullkin_reefs"},
+      "text": "A beacon from a single hull-plate, adrift. It is the plate of a reef-home peeled off in a collision, and on it a Hullkin is clinging with every limb. The beacon says, in careful shell-script transcribed into your language, I AM VERY SORRY ABOUT THIS. She has been adrift three days. She is mortified. She has taken the trouble to polish the part of the plate she is sitting on.",
+      "choices": [
+        {"text": "Take her aboard.", "outcomes": [
+          {"weight": 100, "text": "You take the plate in tow and the Hullkin aboard. She apologises for each deck she crosses and mends each crack she passes. 'Gunwale,' she says. 'It's a good word for a hull.' She is the most apologetic crew member you have ever had, and the best at sealing a wall.", "effects": {"recruit": {"species": "hullkin", "name": "Gunwale"}}}
+        ]},
+        {"text": "Tow her plate home (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "It takes a lot of fuel and more patience. At the far end the reef greets you with a ceremony so slow you leave in the middle of it. They mend your hull, in thanks, while you are gone.", "effects": {"items": {"fuel": -1}, "hull": 15}}
+        ]},
+        {"text": "[Hullkin] Press the family knock.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin presses against the plate and knocks, long, long, short. The stranded Hullkin lifts her head. 'Oh,' she says, very small. 'Oh, I know that one.' She lets go of the plate for the first time in three days and crosses to your ship at the speed of a drip. She decides to stay, and is, for a long time, unable to stop thanking everybody.", "effects": {"recruit": {"species": "hullkin", "name": "Gunwale"}, "items": {"scrap": 20}, "crew_hp": 10}}
+        ]},
+        {"text": "Wish her well and go.", "outcomes": [
+          {"weight": 100, "text": "You wish her well on the open channel. A very small voice says thank you, I'm sorry, thank you, until you are out of range.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    }
+  ]}

@@ -1,0 +1,114 @@
+{"events": [
+    {
+      "id": "quiet_listening_gallery", "type": "station", "weight": 10, "once": false, "requires": {"region": "oorth_quietude"},
+      "text": "The Listening Gallery is a long curved hall lined with grey-hooded Oorth, one on each bench, each looking at nothing in particular with the ridge on their forehead glowing a dim, steady blue. A sign hangs over the door, in four languages and a drawing: PLEASE ASK US SOMETHING. Under it, smaller: ANYTHING. WE HAVE BEEN ASKED NOTHING SINCE THE SNAP. A young Oorth at the door touches your sleeve. 'Would you like to be read?' they ask. 'It is free. It is very quiet.'",
+      "choices": [
+        {"text": "Be read.", "outcomes": [
+          {"weight": 100, "text": "The young Oorth closes their eyes, the ridge flares, and for nine seconds you feel gently, thoroughly noticed, like a coat being found. 'You are tired,' they say. 'You are worried about the debt. Your engineer likes the cook. The left engine will go before the right.' You thank them. You check the left engine.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Ask them something.", "outcomes": [
+          {"weight": 100, "text": "'What is through the exit?' you ask. The gallery goes quiet in a way you feel in your fillings. Forty hoods turn. One says, 'Something large. It is more afraid of you than you are of it. It is pretending it is not.' A bench sighs with relief; nobody has asked in months. They press a handwritten summary of the next lane into your hand, and a few credits for having asked.", "effects": {"reveal": "trader", "items": {"credits": 20}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Oorth] Sit on a bench and be quiet with them.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth takes the empty bench at the end of the row, folds their hands, and the ridges all down the hall flare to the same blue. For an hour the Gallery says nothing at all, together, and it is the best conversation your Oorth has had in years. The Gallery's warden, a small old Oorth who has not smiled since the Snap, comes to say thank you. She pays in the only coin she has: credits, and directions.", "effects": {"items": {"credits": 60}, "crew_hp": 10, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Hire a retired advisor (80 credits).", "requires": {"credits": 80, "not_flag": "oorth_hired"}, "outcomes": [
+          {"weight": 100, "text": "An elderly Oorth in the third row gets up the instant you ask, with the speed of someone who has been waiting to be hired for forty years. 'I used to advise a minister,' they say. 'I advised him to resign. He did not take it well. Is your ship loud?' 'Sometimes.' 'Good. I am ready.' Orrun picks up a bag the size of a hat.", "effects": {"items": {"credits": -80}, "recruit": {"species": "oorth", "name": "Orrun"}, "flag": "oorth_hired"}}
+        ]},
+        {"text": "Leave quietly.", "outcomes": [
+          {"weight": 100, "text": "You go out as quietly as you can, which is not very. Forty ridges flicker in your wake, politely.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quiet_unasked_question", "type": "empty", "weight": 8, "once": true, "requires": {"region": "oorth_quietude"},
+      "text": "A Concord shuttle sits on a dead patch of nothing with its engines cold and its running lights on. Through the window a hooded figure sits in the passenger seat, upright, belted in, facing the empty pilot's seat. There is a note on the dash: BACK IN FIVE MINUTES. It is dated thirty-one years ago. The figure has not moved.",
+      "choices": [
+        {"text": "Knock on the window.", "outcomes": [
+          {"weight": 100, "text": "The figure turns its head very slowly. A ridge flickers. 'Ah,' it says, in a voice that has not been used for a while. 'You are not the pilot.' 'No.' 'No,' it says, with the heartbreaking mildness of someone ticking a box. 'He did say five minutes.' You ask if they would like a lift. They think about it for what you suspect is an hour. 'Yes,' says Ulla. 'Please. But I would like to leave a note.'", "effects": {"recruit": {"species": "oorth", "name": "Ulla"}}}
+        ]},
+        {"text": "[Oorth] Ask them if they would like to be asked.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth stands at the window and the figure turns, and the two ridges glow the same blue. For some time neither says anything. 'Would you like to come with us?' says your Oorth. The figure weeps without making a sound. 'Nobody has asked me that,' they say, 'in thirty-one years.' Ulla leaves a note on the dash, GONE WITH FRIENDS, and squares it with the edge of the panel.", "effects": {"recruit": {"species": "oorth", "name": "Ulla"}, "items": {"credits": 25}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Leave them. It is not your shuttle.", "outcomes": [
+          {"weight": 100, "text": "You turn away. In the mirror the shuttle's lights seem to be on for you alone, which is probably a trick of the dark. Your crew are quiet for a while.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "quiet_loud_captain", "type": "patrol", "weight": 9, "once": false, "requires": {"region": "oorth_quietude"},
+      "text": "Captain Bellow of the Concord cutter Resolute is the loudest man in the Quietude. He shouts at his own bridge over a perfectly good intercom, and every shout is followed by a pause in which three Oorth advisors turn their ridges to a dim grey and stare at nothing. 'I want a SECOND OPINION,' he roars at you on the comm. 'I want a second opinion on whether I am being LISTENED to!' His advisors, you notice, have all quietly unclipped their belts.",
+      "choices": [
+        {"text": "Tell him he is loud.", "outcomes": [
+          {"weight": 100, "text": "There is a long, shocked silence. Then Bellow laughs. It is a huge, helpless laugh. 'My wife says that,' he says. 'My wife and nobody else.' He sends over a fuel cell and a sheepish note, in a small voice.", "effects": {"items": {"fuel": 1}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Side with the captain.", "outcomes": [
+          {"weight": 100, "text": "You agree with him vigorously. He thanks you at a volume that cracks a speaker. The advisors do not look at you, and your ship's mess goes oddly quiet for the rest of the day.", "effects": {"rep": {"concord": 2}, "crew_hp": -5}}
+        ]},
+        {"text": "Ask his advisors what they actually think.", "outcomes": [
+          {"weight": 100, "text": "You ask them directly, on the open channel. The three Oorth look at each other and then at the floor. Nobody speaks. Then Bellow, in a much smaller voice, asks them again himself. Nobody hears what comes next, because he turns the channel off. When he comes back he is quiet, and a little pink. He sends a case of supplies by way of apology and a pass for the Quietude's better docks.", "effects": {"items": {"credits": 30}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "[Oorth] Say what they cannot.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth takes the mic and says, very gently, the thing his three advisors have been trying to say for eleven years. Bellow listens. He is silent for a full minute, then thanks your Oorth, rather faintly, and gives all three the week off. They wave. In gratitude the captain sends his cutter's chart of the rest of the Quietude and a purse.", "effects": {"items": {"credits": 50}, "reveal": "trader", "rep": {"concord": 2}}}
+        ]}
+      ]
+    },
+    {
+      "id": "quiet_foil_hats", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "oorth_quietude", "jumps_min": 3},
+      "text": "The Rustfang boarding party that pulls alongside has a plan. You can tell, because every raider is wearing a hat. The hats are foil. Some are carefully fitted; one is a saucepan lined with foil; the captain's is a full helmet of it with antennae. They have heard about the Oorth, you gather, and have thought hard about it. 'WE CAN'T BE READ,' the captain announces on every frequency, in a carrying voice. 'IT'S ALL FOIL. TRY IT. GO ON.'",
+      "choices": [
+        {"text": "Fight them.", "outcomes": [
+          {"weight": 100, "text": "You open fire. The hats are no help whatever, but they glint very prettily.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Tell them it is a good hat.", "outcomes": [
+          {"weight": 60, "text": "The captain preens. 'It is,' she says. 'It's the best hat.' The raiders leave, pleased, to be seen elsewhere.", "effects": {}},
+          {"weight": 40, "text": "She takes the compliment as a threat, and the antennae quiver.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Oorth] Read past the foil.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth does not even close their eyes. 'Foil does not matter,' they say, 'to a ship. I am reading the ship.' They tell you which skiff has the gunnery, which the engine, and who is hoping the whole boarding will be cancelled. You hail the nervous one by name. The raiders surrender at once, hats and all, and the captain asks, in a very small voice, how you knew.", "effects": {"items": {"scrap": 40, "credits": 30}}}
+        ]},
+        {"text": "Run for it.", "outcomes": [
+          {"weight": 60, "text": "You run. The raiders chase for a minute, radios full of the sound of foil, and give up.", "effects": {"hull": -5}},
+          {"weight": 40, "text": "The boarding party is faster than the hats suggest.", "effects": {"fight": "tier"}}
+        ]}
+      ],
+      "after_win": {"text": "The hats float away in a glinting cloud. Inside the captain's helmet is a note: THEY CAN'T READ FOIL (WE THINK). You take the parts, and the helmet.", "effects": {"items": {"scrap": 45, "credits": 30}}}
+    },
+    {
+      "id": "quiet_sound_of_nobody", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "oorth_quietude", "jumps_min": 3},
+      "text": "A Concord survey drone hangs in the dark on a single working beacon. It has no crew, no autopilot, and no power. It has, your instruments agree, nothing aboard it at all. And yet it is the quietest object you have ever seen, and the quiet is pointed at you. Your cook says it feels like being looked at by a coat.",
+      "choices": [
+        {"text": "Stay clear and take a reading.", "outcomes": [
+          {"weight": 100, "text": "The reading is a straight line. It shakes you more than a spike would. The Lumen will pay for it, if they can be persuaded it is real.", "effects": {"items": {"credits": 20}, "crew_hp": -5}}
+        ]},
+        {"text": "Board it.", "outcomes": [
+          {"weight": 50, "text": "The drone is empty, and clean, and politely, completely empty. You take its parts, and feel oddly thanked.", "effects": {"items": {"copper": 20, "scrap": 30}}},
+          {"weight": 50, "text": "The drone is empty. The drone is also aware. The lights go out on the way back and come on again as you leave, one by one, as if to see you off.", "effects": {"items": {"scrap": 10}, "crew_hp": -15}}
+        ]},
+        {"text": "[Oorth] Listen back.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth puts a hand on the drone's hull, ridge faintly violet, for ten minutes. 'There is no one aboard,' they say at last. 'It is a ship that has learned to be polite to nobody. It is very kind. It is waiting for someone to ask it to stop.' They say a single quiet word, and the beacon, which has ticked for forty years, stops. The drone's hold opens like an exhale. Inside is the data it has been holding all that time, and a little of the cargo it was never told to deliver.", "effects": {"items": {"credits": 60, "nanite_paste": 2}, "crew_hp": 10, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Leave. Fast.", "outcomes": [
+          {"weight": 100, "text": "You turn and burn. The beacon, behind you, ticks once and falls silent, in a tone you will not forget.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quiet_bottled_silence", "type": "trader", "weight": 8, "once": false, "requires": {"region": "oorth_quietude"},
+      "text": "A salesman in a coat the colour of fog is working the lane with a cart. SILENCE, says the cart. BOTTLED. ONE MINUTE PER CANISTER. SAVE IT FOR WHEN YOU NEED IT. He shakes a canister at you and it makes no sound whatever, which he is plainly proud of. 'Twenty credits,' he whispers. 'Imagine the dinner.'",
+      "choices": [
+        {"text": "Buy a canister (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "You open it at dinner. For one minute the mess is silent and everybody stares at their soup. Nobody has ever eaten so well. The cook cries. You decide it was worth it, and then, a little later, that it was not, and then that it was.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
+        ]},
+        {"text": "Ask what is in it.", "outcomes": [
+          {"weight": 100, "text": "'Nothing,' says the salesman, with deep satisfaction. 'The finest nothing in the Quietude. I distil it myself.' He seems to be telling the truth, and that is the trouble.", "effects": {}}
+        ]},
+        {"text": "[Oorth] Hold a canister to your ear.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth holds the canister up and a ridge flickers. 'This is not silence,' they say. 'This is only a lack of noise. Silence has something in it. It is attention.' The salesman's face falls through three emotions. 'Is it still silence,' he asks, 'if it is the real kind?' Your Oorth thinks about this and says yes. They spend an hour together at the cart, saying nothing, and he pays them a purse for the lesson and a canister of the good stuff for the road.", "effects": {"items": {"credits": 30}, "crew_hp": 5}}
+        ]},
+        {"text": "Walk on. You are the noise.", "outcomes": [
+          {"weight": 100, "text": "You walk on. Behind you the salesman rattles his canister at the next ship, with all the confidence of a man who has never been heard.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}
