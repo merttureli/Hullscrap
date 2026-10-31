@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_keelson_the_long_patch", "type": "wreck_field", "weight": 20, "once": true, "requires": {"region": "hullkin_reefs", "stage_min": 2},
+      "text": "The hulk's flank has a hole in it, and in the hole, with his back to you and one small hand pressed flat to the plating, is a Hullkin in a coat of barnacles. He is laying a seam by feel, a finger's width at a time, and the finished seam behind him is as tidy as a stitched coat. At the far end of the hull are the marks of fresh cutting: scavengers, you assume, who opened it again overnight. 'Eleven years,' says the Hullkin, to nobody, in a voice like a tide coming in. 'I close it. They open it. We have never been introduced. I think they like the company.' His eye stalk turns to you, slowly. 'Do not hurry me. It is rude to hurry a seam.'",
+      "choices": [
+        {"text": "Take a turn with the sealant (4 polymer).", "requires": {"items": {"polymer": 4}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You and your crew lay a seam beside his, slowly, as slowly as you can bear, and it is much more peaceful than you expected. At sundown he stops and puts his hand over his own work. 'Done,' he says. 'Properly. Not even they will open this.' He considers you for a full minute. 'I am Keelson. I would like to see how you do things with a hull that moves.'", "effects": {"recruit": {"character": "keelson"}}}
+        ]},
+        {"text": "[Hullkin] Press your shell to the seam beside him, and wait.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin goes to the wall and leans, and the two of them stand against the plating for three hours without a word, mending. When it is done the seam looks as if it grew there. 'Kin,' says Keelson, with deep satisfaction. 'I have not had kin at a seam in eleven years. I will come with you. It will take me a day to say goodbye to the hole.'", "effects": {"recruit": {"character": "keelson"}}}
+        ]},
+        {"text": "Tell him to hurry up.", "outcomes": [
+          {"weight": 100, "text": "A silence falls, about three weeks long, in the middle of which the Hullkin goes on laying seam. You back away with the vague sense of having kicked a cathedral.", "effects": {}}
+        ]},
+        {"text": "Leave him to his argument.", "outcomes": [
+          {"weight": 100, "text": "'Mind the edge,' he says, not turning round. 'It is somebody's front door.' It is. You scrape it anyway, on the way out, and feel the whole reef watching you.", "effects": {}}
+        ]}
+      ]
+    }
+]}

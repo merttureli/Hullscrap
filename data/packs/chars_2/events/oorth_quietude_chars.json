@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_tholu_back_row", "type": "empty", "weight": 18, "once": true, "requires": {"region": "oorth_quietude", "stage_min": 4},
+      "text": "A Concord briefing room has been moored in the quiet since the Snap, its lights on, its long table laid with forty chairs and forty folders of minutes nobody has opened. In the last chair, at the back, under a hand-lettered sign reading ASK ME SOMETHING, sits an Oorth with his hood up and the ridge on his brow glowing the colour of waiting. 'Fuel is two jumps north,' he says, before you have spoken. 'Your second engine is fine. It is only afraid. Yes, it will hold.' A pause. 'Forgive me. I do that. It is just that nobody ever asks.'",
+      "choices": [
+        {"text": "Ask him the question nobody has: 'Would you like to come with us?'", "outcomes": [
+          {"weight": 100, "text": "The ridge on his brow goes from candle to lamp. For a long moment he does not answer, and you realise it is the first time he has not known what was coming. 'No one has asked me that,' says Tholu, 'in any briefing.' He does not know the answer. He would like to find out. He takes the sign down from the wall, folds it, and puts it in his pocket for later.", "effects": {"recruit": {"character": "tholu"}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Ask him something useful: where the nearest station is.", "outcomes": [
+          {"weight": 100, "text": "'Four jumps, a little to the left,' he says at once, and then, softer: 'Thank you for asking.' He says it like a man reading a prayer he has had to write for himself. The chart on your screen fills in a little more.", "effects": {"reveal": "station"}}
+        ]},
+        {"text": "[Oorth] Take the next chair, and say nothing together.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth takes the chair beside him, and the two of them sit with their hoods up in the silence of a held breath. An hour goes by. 'Thank you,' says Tholu at last, to the room. 'That was the first conversation I have been able to follow.' He gets up, and the chairs, one by one, seem to settle.", "effects": {"recruit": {"character": "tholu"}}}
+        ]},
+        {"text": "Leave the minutes undisturbed.", "outcomes": [
+          {"weight": 100, "text": "'You will want to take the left lane,' says the Oorth, as you go. A beat. 'Sorry.' The sign says ASK ME SOMETHING all the way out of range.", "effects": {}}
+        ]}
+      ]
+    }
+]}

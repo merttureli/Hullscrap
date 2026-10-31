@@ -1,0 +1,196 @@
+{
+  "characters": [
+    {
+      "id": "graticule", "name": "Graticule", "species": "vellum",
+      "rig": {"tint": "#e2d3a6", "head": "cap"},
+      "traits": {"work_mult": {"man": 1.15}},
+      "ability": {"id": "scan", "cooldown": 36, "params": {"duration": 30}},
+      "obtained": "Vellum Stacks (stage 3+): on an archive cart marked WITHDRAWN FROM CIRCULATION, due at the furnace. Pay the handling (30 credits), re-file it as current with a Vellum of your own, or show the archivist a working radar.",
+      "lore": "The Lane Reader. Graticule was folded from the master chart of a lane the Snap filled in, and has never forgiven the geography. Hold a hull's heading up to its creases and it will tell you where that ship was going in the year thirty-nine, and where it would have got to. It is always right, and mortified every time."
+    },
+    {
+      "id": "tholu", "name": "Tholu", "species": "oorth",
+      "rig": {"tint": "#6f759f", "head": "hood"},
+      "traits": {"station": {"evasion_add": 0.04}},
+      "ability": {"id": "shield_layer", "cooldown": 38, "params": {"layers": 1, "duration": 16}},
+      "obtained": "Oorth Quietude (stage 4+): the last chair at the back of a Concord briefing room, under a sign that says ASK ME SOMETHING. Ask him the question nobody has, or sit beside him and say nothing with an Oorth of your own.",
+      "lore": "The Back-Row Advisor. Tholu sat behind the Concord's briefing table for forty years and was never once asked a question, which he took, correctly, as a comment. He can feel a shot leave the other ship's gun a heartbeat before it does, and braces the shield for it the way you brace for a sneeze. He answers questions people have not asked yet, and is very sorry about that."
+    },
+    {
+      "id": "kharra", "name": "Kharra", "species": "drakkin",
+      "rig": {"tint": "#b5523a", "head": "scarred"},
+      "traits": {"work_mult": {"heal_others": 1.4}},
+      "ability": {"id": "heal_burst", "cooldown": 26, "params": {"amount": 38}},
+      "obtained": "Drakkin Pits (stage 3+), hard to get: the Heat Sink's house tug is dragging her off for a debt of stitches. Beat the tug, pay her debt (340 credits), or have a Drakkin of your own settle it in the pit.",
+      "lore": "The Cutman. Kharra has patched forty years of pit-fighters between rounds, on credit, in a hot room, with one eye on the clock and one on the bookmaker. She can put a loser back on his feet in the time it takes to say 'last bets', and her apron reads NOT THE FACE. It is the face about half the time."
+    },
+    {
+      "id": "arci", "name": "Arci", "species": "wisp",
+      "rig": {"tint": "#b9f0ff", "head": "forked"},
+      "traits": {"speed_mult": 1.1},
+      "ability": {"id": "power_system", "cooldown": 40, "params": {"power": 5, "duration": 14}},
+      "obtained": "The Stormfield (stage 4+): playing catch with herself between two dead reactors. Let her earth on your hull and brace, sink a copper earth for her (6 copper), or show her a neon core.",
+      "lore": "The Spare Lightning. Arci is exactly as old as the storm, and has not yet learned to sit still in a wire. Park her by a system and she pours into it until the numbers go up and the lights go a little blue. She says it tickles. Your engineer says it does not."
+    },
+    {
+      "id": "keelson", "name": "Keelson", "species": "hullkin",
+      "rig": {"tint": "#6f8f86", "head": "twin"},
+      "traits": {"hp_mult": 1.15},
+      "ability": {"id": "seal_breach", "cooldown": 34, "params": {"count": 2, "range": 16}},
+      "obtained": "Hullkin Reefs: eleven years into the same patch on the same hulk. Take a turn with the sealant (4 polymer), or press your shell to the seam beside him with a Hullkin of your own. Do not tell him to hurry.",
+      "lore": "The Old Patch. Keelson has been closing the same hole in the same hulk for eleven years, because scavengers keep opening it, and he regards this as a long and friendly argument. He does not hurry. A seam he has closed does not open again, which is why the scavengers have started to avoid him."
+    },
+    {
+      "id": "rushlight", "name": "Rushlight", "species": "lantern",
+      "rig": {"tint": "#3d4660", "head": "goggles"},
+      "traits": {"station": {"evasion_add": 0.03}},
+      "ability": {"id": "overclock", "cooldown": 40, "params": {"mult": 1.7, "duration": 11, "rest": 4}},
+      "obtained": "Lamplit Lanes (stage 3+), expensive: her glider is mortgaged to Concord Dispatch. Clear the bond (320 credits), vouch for her with good Concord standing, or show her a radar that can find her dead addresses.",
+      "lore": "The Night Mail. Rushlight flew the Concord dispatch lanes with no running lights, on the theory that a courier nobody can see cannot be shot, and was right for thirty-one years. She still delivers letters to ships that no longer exist, and has a sack of nine hundred to prove it. Put her at a helm and the whole ship feels late for something."
+    },
+    {
+      "id": "ostrander", "name": "Ostrander", "species": "revenant",
+      "rig": {"tint": "#8d9aa8", "head": "hood"},
+      "traits": {"damage_taken": {"fire": 0.7}},
+      "ability": {"id": "extinguish", "cooldown": 20},
+      "obtained": "The Cairns (stage 5+): a stack of empty suits is burning from a split oxygen line and he is carrying them out by hand. Foam it down (3 polymer), put it out properly with a trained firefighter, or fly through the plume to vent it (costs hull).",
+      "lore": "The Smoke-Eater. Ostrander does not breathe, so a burning hold is only a warm one, and he walks into them with the unhurried air of a man on his way to a meeting. He has been dead once and found it unremarkable, mostly for the paperwork. The name on his patch is not his; he says he has grown into it."
+    },
+    {
+      "id": "compline", "name": "Compline", "species": "choir",
+      "rig": {"tint": "#b6c8ff", "head": "mitre"},
+      "traits": {"work_mult": {"man": 1.1}},
+      "ability": {"id": "rally", "cooldown": 40, "params": {"mult": 1.65, "duration": 18}},
+      "obtained": "The Chantry (stage 3+): singing the last hour to a dead tender, alone and a part short. Sing the third part yourselves (badly), hold it in crystal with a Prismatic of your own, or light the dead their candles (2 crystal).",
+      "lore": "The Last Hour. Compline sings the evening office to wrecks, because somebody should and the chantry would not send anyone. She sings to a room until it remembers it has a job, and everyone in it picks up whatever they were holding a little more firmly. It is not clear whether this is faith or acoustics. She says the distinction has never helped a hymn."
+    },
+    {
+      "id": "hobnail", "name": "Hobnail", "species": "rattler",
+      "rig": {"tint": "#a97c4a", "head": "goggles"},
+      "traits": {"line_affinity": {"scrap": 1.4}},
+      "ability": {"id": "repair_burst", "cooldown": 20, "params": {"amount": 5}},
+      "obtained": "The Wallworks (stage 2+): item 31 on the Understairs' lost-property shelf. Sign the claim and pay the storage (40 credits), claim him as kin in wall-code with a Rattler of your own, or fix the counter's till with a tinkerer.",
+      "lore": "Ma Gantry's Mechanic. Hobnail, known to everyone as Old Hob, has kept the Rusthold's oldest decks flying from inside the walls for forty years, and has been listed as lost property for six, because nobody will sign the form that says Rattlers exist. A Scrap part mends for him the way a dog comes to its name. He calls every machine 'love' and every rivet 'you'."
+    },
+    {
+      "id": "parquet", "name": "Parquet", "species": "tessellate",
+      "rig": {"tint": "#9fb1c9", "head": "visor"},
+      "traits": {"work_mult": {"breach": 1.3}},
+      "ability": {"id": "seal_breach", "cooldown": 32, "params": {"count": 2, "range": 10}},
+      "obtained": "The Mended Mile (stage 3+): waiting in a wreck for a breach of the right size. Let it seal the dent in your hull, or countersign its Work Order with a mechanical crew member.",
+      "lore": "Work Order 4471. Parquet is a small flock of Repair Bay Nine's swarm that wandered off forty years ago holding a single clause: seal the nearest breach. It has been looking for a hole of the right size ever since, and is easily the most enthusiastic person in the Mile about yours."
+    },
+    {
+      "id": "tamsin", "name": "Tamsin", "species": "sable",
+      "rig": {"tint": "#2e3547", "head": "hood"},
+      "traits": {"speed_mult": 1.08},
+      "ability": {"id": "phase", "cooldown": 16, "params": {"range": 5}},
+      "obtained": "Sable Moorings (stage 4+), hard to get, a fight: she is the door on a cutter that has a contract to board you. Beat the cutter, out-bid the contract (260 credits), or call the Long Table with a Sable of your own.",
+      "lore": "The Second Signature. Tamsin has one rule above every contract: it ends when the client does. She cuts doors for a living, then out of tidiness the next wall too, and the one after, and by the time the dust settles she is generally in the room she meant to be in. Nobody is armed at the Long Table. Nobody has ever needed to be, with her sitting at it."
+    },
+    {
+      "id": "pyracantha", "name": "Pyracantha", "species": "quillback",
+      "rig": {"tint": "#7a2f2a", "head": "crest"},
+      "traits": {"work_mult": {"man": 1.15}},
+      "ability": {"id": "overclock", "cooldown": 44, "params": {"mult": 1.6, "duration": 10, "rest": 5}},
+      "obtained": "The Lists (stage 3+), hard to get, a duel: a challenge in writing arrives by launch. Meet her guns, offer a draw and a dinner (50 credits, and she may refuse), or name a Quillback of your own as your Second.",
+      "lore": "The Marshal of the Lists. Pyracantha has fought three hundred duels, drawn two hundred and ninety, and eaten the dinner after every one. Put her at a gun and it fires with the clean, unhurried regularity of a woman who has already decided how this ends. Calling her Pyra is a challenge. She will send you a letter."
+    },
+    {
+      "id": "bowline", "name": "Bowline", "species": "kite",
+      "rig": {"tint": "#7fb0b8", "head": "goggles"},
+      "traits": {"work_mult": {"repair": 1.2}},
+      "ability": {"id": "repair_burst", "cooldown": 24, "params": {"amount": 5}},
+      "obtained": "The Long Slack (stage 2+): holding a patch on a leaking hull at the middle of a kilometre of washing line. Hold station for him (1 fuel), take the other end of the line with a Kite of your own, or pin the plate with a tractor beam.",
+      "lore": "The Rope Walker. Bowline mends hulls on the outside, where the air is thin and the cold is thinner, at the end of a kilometre of line tied to his own tail. He has never worn a suit and finds the idea claustrophobic. He sends his regards to your gravity, and asks if it is always this heavy."
+    },
+    {
+      "id": "quoin", "name": "Quoin", "species": "warden_frame",
+      "rig": {"tint": "#cfd8e3", "head": "lens"},
+      "traits": {"damage_taken": {"ion": 0.7}},
+      "ability": {"id": "shield_layer", "cooldown": 36, "params": {"layers": 1, "duration": 20}},
+      "obtained": "Hard to get (stage 5+, any region): only after you have woken a Warden of your own in the reboot quest (the flag warden_lit). A second Warden-frame is holding up a dying gate arch with its back. Relieve its post with your own Warden-frame, or shore the arch with struts (6 titanium).",
+      "lore": "The Cornerstone. Quoin was woken by the last spark off a gate pier, which is not how it is done, and found the arch above it cracked to the exact width of its back. It has held the arch up ever since, on the principle that somebody should. It holds your shield just as steadily, and will not be hurried off a post by anything short of a very good reason."
+    },
+    {
+      "id": "winze", "name": "Winze", "species": "murrow",
+      "rig": {"tint": "#a8825a", "head": "lamp"},
+      "traits": {"mining_mult": 1.3},
+      "ability": {"id": "phase", "cooldown": 22, "params": {"range": 8}},
+      "obtained": "The Murrow Diggings (stage 3+): he comes up through the floor of your hold, aiming for the neighbours. Hire him on (30 credits), dig the neighbours' tunnel with a Murrow of your own, or show him a laser cutter.",
+      "lore": "The Wrong Turn. Winze has dug through the walls of four colonies, two freighters and a wedding, and apologised for every one. He has no sense of direction and a perfect sense of rock: aim him at a bulkhead and he arrives in the next room dusty and sorry. He still owes the Hendersons a pie."
+    },
+    {
+      "id": "nerithe", "name": "Nerithe", "species": "siltborn",
+      "rig": {"tint": "#b8d6e8", "head": "bloom"},
+      "traits": {"low_pressure_heal": 0.5},
+      "ability": {"id": "heal_burst", "cooldown": 28, "params": {"amount": 32}},
+      "obtained": "The Siltborn Rings (stage 4+): sorted FLAMMABLE by the Gossamer's lock and refused re-entry to her flock. Vouch for her and pay the form (30 credits), hum the flock-note with a Siltborn of your own, or show her your medbay.",
+      "lore": "The Mislabelled. Nerithe was sorted FLAMMABLE for blushing, and spent nine days in the wrong queue before anybody asked. In a room with hardly any air she is the best thing in the Drift to be hurt beside: her tendrils go soft gold and the hurt get up. She would be grateful if you did not light a flame."
+    },
+    {
+      "id": "filigree", "name": "Filigree", "species": "corvin",
+      "rig": {"tint": "#4a3d5c", "head": "loupe"},
+      "traits": {"haggler": 0.05},
+      "ability": {"id": "hack", "cooldown": 48, "params": {"duration": 7, "families": ["shield", "weapon", "engine"]}},
+      "obtained": "The Corvin Roost (stage 3+), expensive: lot nine at the Tinsel Row auction is Filigree herself, reserve 360 credits. Meet the reserve, haggle (200 credits, and she may take offence and 40 of them), or name her a price in clicks with a Corvin of your own.",
+      "lore": "The Appraiser. Filigree has an eye for value and a pickpocket's hands, and the two have never been formally introduced. Sit her at a helm and the enemy's guns go missing for a few seconds, then turn up in the same place looking embarrassed. She has put a price on everything in the Roost, herself included. It is the only one she has never been argued down from."
+    },
+    {
+      "id": "quigley", "name": "Quigley", "species": "brine",
+      "rig": {"tint": "#d9a032", "head": "helmet"},
+      "traits": {"work_mult": {"restock": 1.2}},
+      "ability": {"id": "rally", "cooldown": 38, "params": {"mult": 1.6, "duration": 20}},
+      "obtained": "The Brine Yards (stage 2+): a picket line across the lane, out over the tea break. Hold station for the shift (1 fuel), walk the line with a Brine of your own, or cross it and see where the tea goes.",
+      "lore": "The Shop Steward. Quigley has called four strikes, lost two, won two and made tea at all of them. When a shift flags she stands on a crate and says what the foreman will not, and the whole room finds it has more in it than it thought. Nothing moves until she moves it, and she moves it with a mug of tea in the small hand."
+    },
+    {
+      "id": "obliged", "name": "Obliged", "species": "echo",
+      "rig": {"tint": "#c9d3e6", "head": "mimic"},
+      "traits": {"damage_taken": {"ion": 0.8}},
+      "ability": {"id": "shield_layer", "cooldown": 34, "params": {"layers": 1, "duration": 12}},
+      "obtained": "Hard to get, a chain of two events: answer the late reply in the Echo Glassways (stage 5+), then find it already standing in your airlock a stage or two later (any region, stage 6+).",
+      "lore": "The Courtesy. Obliged arrives a day before it is expected and is sorry to have been early. It wears the face of whoever is looking at it, slightly improved, and turns a shot aside the same way, returned a little kinder than it came. It says it is much obliged. It means it, and tomorrow it will have meant it too."
+    },
+    {
+      "id": "lenz", "name": "Lenz", "species": "ferro",
+      "rig": {"tint": "#8a8f9c", "head": "ripple"},
+      "traits": {"hp_mult": 1.1},
+      "ability": {"id": "power_system", "cooldown": 42, "params": {"power": 4, "duration": 24}},
+      "obtained": "The Ferro Lodes (stage 4+): wound round a dead reactor's coil and unwilling to move. Offer him a bigger coil (6 copper), show him a running reactor, or merge currents with a Ferro of your own.",
+      "lore": "The Dynamo. Lenz opposes change; it is his nature and, he points out, a law. He will not move house, take a new name or be talked out of a coil he likes, but put him beside a system and he pours his whole current into it, steadily, stubbornly, in the way he does everything. The lights stay on. He would like them to stay exactly as they are."
+    },
+    {
+      "id": "tilley", "name": "Tilley",
+      "unique_species": {"name": "Lane-Lamp Keeper", "hp": 70, "speed": 1.0, "traits": ["no_breath", "mechanical"], "rig": "gauntling", "sidearm": "flare_gun", "work_mult": {"man": 1.1}, "notes": "the lighting program of a lane-lamp, running in a brass storm-lantern: no air, mechanical, small and steady"},
+      "rig": {"tint": "#ffd27a", "head": "lamp"},
+      "ability": {"id": "scan", "cooldown": 34, "params": {"duration": 34}},
+      "obtained": "Hard to get, a chain of two events (any region, stage 2+): tell the drifting lantern, gently, that it is dusk, then find it waiting at a later node (stage 4+) after it has lit your way.",
+      "lore": "The Lamplighter. Tilley is the lighting program of a lane-lamp, set to switch the lamps on at dusk, and has been waiting forty years for a dusk the Snap never sent. Out here the dark travels with you, so it goes ahead with its wick turned up and shows you what is in it. It has never once been asked to put the light out. It is not sure it would."
+    },
+    {
+      "id": "pettifer", "name": "Pettifer", "species": "human",
+      "rig": {"tint": "#5b7a5a", "head": "hair"},
+      "traits": {"work_mult": {"man": 1.2}},
+      "ability": {"id": "hack", "cooldown": 46, "params": {"duration": 6, "families": ["weapon", "engine", "shield"]}},
+      "obtained": "Wanderer, any region (stage 2+): a Concord customs launch asks whether you have filed. Fill in Form 7-B and pay the stamp duty (25 credits), or vouch for yourself as an official visitor with good Concord standing.",
+      "lore": "The Filing Clerk. Pettifer has not been paid since the Snap and has not been told to stop. Sit him at a helm console and he serves the enemy's guns with a Notice of Stay, in triplicate, in a voice of such gentle finality that they appear to feel they ought to wait for the paperwork. They generally do."
+    },
+    {
+      "id": "tinder", "name": "Tinder", "species": "emberkin",
+      "rig": {"tint": "#d4a017", "head": "crest"},
+      "traits": {"work_mult": {"extinguish": 1.3}},
+      "ability": {"id": "extinguish", "cooldown": 18},
+      "obtained": "Wanderer, any region (stage 2+): the last act aboard a dark variety liner, played to two hundred empty seats. Lend her the torches (1 fuel), or step into the spotlight and finish the act with a heat-proof crew member.",
+      "lore": "The Fire-Eater. Tinder swallowed her first flame at nine and has been working without an audience since the Snap. She can clear a room of fire by the simple expedient of eating it, bowing, and waiting for the applause. It is not always forthcoming. Please clap."
+    },
+    {
+      "id": "cadence", "name": "Cadence", "species": "human",
+      "rig": {"tint": "#a8333a", "head": "helmet"},
+      "traits": {"speed_mult": 1.05},
+      "ability": {"id": "rally", "cooldown": 46, "params": {"mult": 1.8, "duration": 14}},
+      "obtained": "Wanderer, any region (stage 2+): a lone drum-major still marching on a dead Concord bandstand barge, waiting to be dismissed. Dismiss him (and hope he believes you), or give the order as an officer would, with good Concord standing.",
+      "lore": "The Drum-Major. Cadence marched the evening retreat of the Third Fleet Band for forty years after the band went home, waiting to be dismissed. Now he marches your crew instead. A ship that has heard him keep time for an hour finds it can do anything in step and a good deal of it faster, and nobody can say who started whistling."
+    }
+  ]
+}

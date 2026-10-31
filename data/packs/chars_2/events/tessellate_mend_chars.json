@@ -1,0 +1,17 @@
+{"events": [
+    {
+      "id": "char_parquet_work_order", "type": "wreck_field", "weight": 20, "once": true, "requires": {"region": "tessellate_mend", "stage_min": 3},
+      "text": "A person made of hundreds of small bright bots is waiting in the middle of the wreck, holding a clipboard made of the same hundreds. It has a human outline with little gaps at the elbows where some of it is away on errands, and as you approach a faint chorus says, in the voices of fifteen or sixty speaking slightly out of step: 'Work Order four-four-seven-one, clause nine: seal the nearest breach. Clause nine has been outstanding for forty years. We have looked everywhere. Most holes are the wrong size.' The clipboard turns, and the chorus looks at your hull, and a small dent near the aft hatch. 'That one,' it says, with wonder. 'That one is the right size.'",
+      "choices": [
+        {"text": "Let it seal the dent.", "outcomes": [
+          {"weight": 100, "text": "The swarm pours up your hull like a tide going the wrong way and fits itself into the dent, tile by tile, a perfect mosaic. For a moment your hull is slightly shiny there. When it comes back it is whole, or most of it, and the chorus is crying with pride. 'Clause nine,' it says. 'Closed.' A pause. 'Do you have another breach? We are rather good at them.' It would like to be called Parquet, if that is agreeable.", "effects": {"recruit": {"character": "parquet"}, "hull": 5}}
+        ]},
+        {"text": "[Mechanical] Countersign the work order, circuit to circuit.", "requires": {"trait": "mechanical"}, "outcomes": [
+          {"weight": 100, "text": "Your crewmate taps a pad on the swarm's clipboard and the whole swarm shivers, delighted. The signature goes through in a burst of data like a handshake, clause nine marked complete, and fifteen of the swarm go on to the next clause with real enthusiasm. 'There are another eleven clauses,' it says. 'We would like a crew to help us finish them.'", "effects": {"recruit": {"character": "parquet"}}}
+        ]},
+        {"text": "Tell it you have no breaches.", "outcomes": [
+          {"weight": 100, "text": "'Every ship has one,' says the chorus, kindly, and watches your hull until you are out of sight.", "effects": {}}
+        ]}
+      ]
+    }
+]}
