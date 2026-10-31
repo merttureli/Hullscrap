@@ -519,7 +519,7 @@ def cv_leg_frame(dl, dr, lift_l=False, lift_r=False, sway=0):
     return s
 CV_WALK = [(8, -8, False, False, 2), (4, -4, False, True, 1), (-4, 4, False, True, -1), (-8, 8, False, False, -2), (-4, 4, True, False, -1), (4, -4, True, False, 1)]
 
-CV_CLOAK = [(10, 11), (22, 11), (26, 13), (28, 18), (27, 24), (26, 27), (24, 26), (22, 29), (19, 28), (17, 30), (16, 28), (15, 30), (13, 28), (10, 29), (8, 26), (6, 27), (5, 24), (4, 18), (6, 13)]   # a ragged feather hem
+CV_CLOAK = [(10, 11), (22, 11), (26, 13), (30, 18), (27, 24), (26, 27), (24, 26), (22, 29), (19, 28), (17, 30), (16, 28), (15, 30), (13, 28), (10, 29), (8, 26), (6, 27), (5, 24), (2, 18), (6, 13)]   # a ragged feather hem and pointed wing tips
 def cv_pouch(s, x, y):
     s.rect(x, y, 3, 3, 'B'); s.hline(x, y, 3, 'A'); s.hline(x, y + 2, 3, 'C'); s.put(x + 1, y + 1, 'a')
 def cv_torso():
@@ -818,6 +818,9 @@ def ec_leg_frame(dl, dr, lift_l=False, lift_r=False):
         for k, c in enumerate('LMMS'): s.put(lx - 2 + k, 16, c)
         b = EC_FOOT['lift' if lift else 'plant']
         s.stamp(lx - 2, fy - len(b) // 2 - (1 if fy < 16 else 0), b)
+    for hw, y0, c in ((8, 28, 'L'), (5, 31, 'M')):                                           # two ripples trail behind it, like an echo (they follow the move direction)
+        for dx in range(-hw, hw + 1):
+            s.put(16 + dx, y0 - int(round(2.4 * (1 - (dx / float(hw)) ** 2))), c if dx < 0 else 'S')
     return s
 EC_WALK = walk_cycle(8, 4)
 
@@ -908,7 +911,7 @@ class Echo(Species):
 # and a ring of longer spikes round its edge, in the hexagonal pattern real ferrofluid makes. Liquid arms that end in three spikes for fingers, legs that are columns of
 # fluid ending in a spiky puddle (with a droplet that lifts and falls as they step), a smooth dome of a head with a crown of spikes and two faint cyan eyes. The sparks are
 # the glow layers (3 frames, ~4 fps): little blue-white arcs that jump between neighbouring spike tips. Outfit = a magnetised strap round the waist and the helm's band.
-def fr_ring_spikes(cx, cy, rx, ry, n, skip=(), lens=(4, 5, 6), start=0.0, ymax=30):
+def fr_ring_spikes(cx, cy, rx, ry, n, skip=(), lens=(5, 7, 6), start=0.0, ymax=30):
     """tips and bases of n spikes round an ellipse; the pattern of lengths is fixed (no randomness)."""
     out = []
     for k in range(n):
@@ -924,7 +927,7 @@ def fr_ring_spikes(cx, cy, rx, ry, n, skip=(), lens=(4, 5, 6), start=0.0, ymax=3
     return out
 def fr_spike_poly(s, base, tip, c='E'): poly(s, base + [tip], c)
 def fr_tips(spikes): return [(int(round(t[0])), int(round(t[1]))) for _, t in spikes]
-FR_SPIKES = fr_ring_spikes(16, 19, 8.4, 7.4, 20)
+FR_SPIKES = fr_ring_spikes(16, 18, 7.0, 6.6, 16)
 
 FR_FOOT = {
  'plant': art("""
@@ -961,7 +964,7 @@ FR_WALK = walk_cycle(8, 4)
 
 def fr_torso(sparks=False):
     s = Spr(N, N)
-    b = Spr(N, N); ell(b, 16, 19, 8.2, 7.4, 'E')
+    b = Spr(N, N); ell(b, 16, 19, 7.4, 7.0, 'E')
     for sd in (-1, 1): ell(b, 16 + sd * 8, 15, 3.6, 3.4, 'E')
     for base, tip in FR_SPIKES: fr_spike_poly(b, base, tip)
     merge(s, shade_gen(b, 'E', 'S', 'D'))
