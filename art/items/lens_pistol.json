@@ -1,0 +1,32 @@
+{
+ "frame": [
+  9,
+  16
+ ],
+ "anchors": {
+  "grip": [
+   4,
+   12
+  ],
+  "muzzle": [
+   4,
+   0
+  ]
+ },
+ "class": "pistol",
+ "pose": "pistol",
+ "culture": "prismatic",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Prismatic lens pistol: a faceted violet body, a ring lens at the muzzle that focuses a cyan core, a magenta light in the receiver. Range +20%.",
+ "glow": {
+  "image": "lens_pistol_glow.png",
+  "frame": [
+   17,
+   24
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}

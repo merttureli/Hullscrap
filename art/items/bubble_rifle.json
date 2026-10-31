@@ -1,0 +1,36 @@
+{
+ "frame": [
+  11,
+  33
+ ],
+ "anchors": {
+  "grip": [
+   5,
+   27
+  ],
+  "muzzle": [
+   5,
+   0
+  ],
+  "foregrip": [
+   5,
+   12
+  ]
+ },
+ "class": "rifle",
+ "pose": "rifle",
+ "culture": "mire",
+ "notes": "faces UP. grip = where the hand closes (goes on the arms pose mount of the item's class); muzzle = where shots, spray, sparks or the tip are. This one sprite is both the held item and the item's icon. Mire bubble rifle: a flared brass mouth on a steel pipe, a glass foam tank in a wet teal housing with bubbles in it, a red hand-wheel valve, a rubber grip. Fires foam; foam puts fires out.",
+ "glow": {
+  "image": "bubble_rifle_glow.png",
+  "frame": [
+   19,
+   41
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "blend": "add (preferred) or alpha-over"
+ }
+}
