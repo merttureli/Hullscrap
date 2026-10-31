@@ -27,6 +27,7 @@ Built in one night after the Beta 1 playtest ("combat is amazing"). Play it from
 - **30 species** (the original 10 plus waves 2, 3 and 4), each with its own homeland region and events (the Warden-frame is recruited by a quest instead).
 - **The first 10 races are complete**: racial weapons, components and hand weapons whose drawbacks their own race cancels; 2 starter ships each; 2 unique characters each with an active ability (G).
 - **48 unique characters** with active abilities, **30 starter ships** in the hangar.
+- **Rare factions**: the **Salvage Barons** (uncommon: gaudy pirate lords in Clan space and the Boneyard, gilded weapons, a relic shield) and the **Leviathans** (rare: living ships in their own region, the Deep Drift, and a roaming encounter; the self-repairing Starwhale Fin and bone armour). Meeting either unprepared can end a run; they show 4–5 skulls and always offer a way out.
 
 ## Balance (docs/BALANCE_REPORT.md)
 - A harness flies the starters against generated enemies of every faction at jumps 5, 15, 25 and 35.
