@@ -610,6 +610,8 @@ static func _key_problems(at: String, e: Dictionary) -> Array[String]:
 				out.append("%s: '%s' must be %s" % [at, k, "true or false" if flag else "a number"])
 			elif k == "body" and not TraitSet.BODIES.has(int(v)):
 				out.append("%s: 'body' must be %s" % [at, " or ".join(TraitSet.BODIES.map(func(b): return str(b)))])
+			else:
+				out.append_array(TraitSet.extra_problems(at, k, v))
 		elif not v is Dictionary:
 			out.append("%s: '%s' must be an object of %s" % [at, k, ", ".join(subs)])
 		else:

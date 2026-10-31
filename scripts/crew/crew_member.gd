@@ -31,6 +31,7 @@ var body_size := Pathfinder.BODY  ## cells across the body: 2, or 1 for a small 
 var mend_t := 0.0  ## seconds a hull_mend crew member has spent sealing the breach next to them (Jobs)
 var revived := false  ## their revive_once is spent: they went down once already (Mortality). The crew live as long as the run does, so it is once a run
 var revive_t := -1.0  ## seconds a revive_once has been pending since they went down; -1 = none pending (Mortality)
+var mimicking: Array = []  ## the trait ids a `mimic` copies right now (TraitSet.update_mimics, set by Jobs.tick); TraitSet.of merges their keys. Not saved
 var is_half := false  ## one of the two halves of a split_on_death body: it does not split again, and stays small when the other half dies (Mortality)
 var split_pair := ""  ## while the two halves are apart: the name of the other half, "" otherwise
 var split_t := -1.0  ## on the half that counts (the original): seconds the halves have been apart; -1 on the other one

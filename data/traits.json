@@ -11,7 +11,7 @@
 			"heal_mult": "factors on what a bed and a medbay heal them (0 = it does not)",
 			"mechanical": "true: beds do not heal them; a hurt one gets a repair_crew job (priority 75) that any other crew member does",
 			"aura": "what they give to the room they stand in while up: o2_per_s (air added), heal_per_s (hp for everyone in the room), work_mult (factor on the work speed of the OTHERS in the room)",
-			"station": "power_bonus: the part they man gets this much power while they man it (added to its figure, so a consumer draws less); manned_mult: factor on the bonuses a manned helm, weapon or shield gives; evasion_add: evasion added (on top of the helm's own, not scaled by manned_mult) while they man the helm, in a fight",
+			"station": "power_bonus: the part they man gets this much power while they man it (added to its figure, so a consumer draws less); manned_mult: factor on the bonuses a manned helm, weapon or shield gives; evasion_add: evasion added (on top of the helm's own, not scaled by manned_mult) while they man the helm, in a fight; pull_bonus: cells the intake or tractor beam they man reaches further (an intake's pull radius, a beam's range)",
 			"melee_mult": "factor on their melee damage (kept for the on-foot fights)",
 			"ranged_mult": "factor on their ranged damage (kept for the on-foot fights)",
 			"swarm": "work speed +per_other for every OTHER up crew member of the same species in their room, at most +max",
@@ -28,7 +28,12 @@
 			"split_on_death": "{reform_s}: bleeding out, they do not die: they become two small 1x1 bodies (body 1) with half their max hp each, at full. If both are still aboard and up reform_s seconds later they merge back into one, at the sum of their hp (a downed half holds the merge back until it is up or dead). If one dies the other stays small for good, and a half never splits again. 0 or missing = they just die",
 			"counter_melee": "damage they deal straight back to whoever hits them in a melee (CrewAbilities.melee_hit, through the attacker's damage_taken.melee). Amounts add. Nothing fights on foot yet; the hook is ready",
 			"no_suit": "true: they cannot wear a suit or armour: CrewMember.equip refuses the suit gear traits (TraitSet.SUIT_TRAITS) with a reason",
-			"vacuum_speed": "factor on their walk speed in a room whose air is below 30% of full (TraitSet.THIN_AIR); factors multiply, and it stacks with heat_speed. Combine with vacuum_walk to also take no damage there"
+			"vacuum_speed": "factor on their walk speed in a room whose air is below 30% of full (TraitSet.THIN_AIR); factors multiply, and it stacks with heat_speed. Combine with vacuum_walk to also take no damage there",
+			"mining_mult": "factor on the damage to rocks and asteroids of a mining tool or cutter they man (TraitSet.mining_factor), or of their hands cutting; factors multiply. Nothing breaks rocks yet: the hook is ready",
+			"low_pressure_heal": "hit points a second they heal in a room with less than 50% of its air (TraitSet.LOW_AIR), on top of beds and auras; amounts add",
+			"haggler": "a fraction (0.1 = 10%) off the prices of a station while they are aboard and up (Campaign.price, added to the faction's discount); the best haggler aboard counts, amounts add on one person",
+			"loot_bonus": "a whole number: extra rows in a salvage pick (Salvage.picks_for) and extra rolls of a loot table (a sealed crate) while they are aboard and up; the best one aboard counts, amounts add on one person",
+			"mimic": "true: while in a room with another crew member who is up, they copy the best trait of the others there (TraitSet.mimic_pick: the trait whose first key comes first in TraitSet.MIMIC_ORDER; never a body trait (body, hp_mult, speed_mult), another mimic's, or one they have). It ends when they or the other leave the room"
 		}
 	},
 	"traits": {
