@@ -33,7 +33,8 @@
 	"enemies": {
 		"pirate": {"1": ["res://data/ships/pirate_raider.json"], "2": ["res://data/ships/pirate_raider.json"], "3": ["res://data/ships/pirate_raider.json"]},
 		"patrol": {"1": ["res://data/ships/pirate_raider.json"], "2": ["res://data/ships/pirate_raider.json"], "3": ["res://data/ships/pirate_raider.json"]},
-		"rammer": {"1": ["res://data/ships/pirate_raider.json"], "2": ["res://data/ships/pirate_raider.json"], "3": ["res://data/ships/pirate_raider.json"]}
+		"rammer": {"1": ["res://data/ships/pirate_raider.json"], "2": ["res://data/ships/pirate_raider.json"], "3": ["res://data/ships/pirate_raider.json"]},
+		"hollow": {"1": ["res://data/ships/pirate_raider.json", "res://data/ships/rustfang_rammer.json"], "2": ["res://data/ships/pirate_raider.json", "res://data/ships/rustfang_rammer.json"], "3": ["res://data/ships/pirate_raider.json", "res://data/ships/rustfang_rammer.json"]}
 	},
 	"loot": {"credits": [20, 60], "strip_base": 20, "strip_per_part": 6},
 	"prices": {"repair": 2, "sell_fraction": 0.5, "recruit": 150, "offers": 2},

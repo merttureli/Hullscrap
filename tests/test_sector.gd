@@ -747,13 +747,13 @@ func test_an_ambient_contact_moves_leaves_and_fires_its_event() -> void:
 
 # --- saving and loading --------------------------------------------------------------------------------------
 
-func test_saves_are_version_4_and_old_ones_arrive_at_the_arrival_point() -> void:
-	eq(Campaign.VERSION, 4, "the campaign save version")
+func test_saves_are_versioned_and_old_ones_arrive_at_the_arrival_point() -> void:
+	check(Campaign.VERSION >= 4, "the campaign save version is 4 or later")
 	var c := _camp(1)
 	var ship := _ship()
 	_go(c, _next(c), ship)
 	var d: Dictionary = c.to_dict()
-	eq(d["version"], 4, "saved as version 4")
+	eq(d["version"], Campaign.VERSION, "saved at the current version")
 	check(d["sectors"] is Dictionary and d["sectors"].has(c.current), "with the sectors visited")
 	check(d["spool"] is Dictionary, "and the spool")
 	for old in [2, 1]:
@@ -772,7 +772,7 @@ func test_saves_are_version_4_and_old_ones_arrive_at_the_arrival_point() -> void
 		eq(_sig(s), _sig(c.current_sector()), "%d: the same sector, made from the seed" % old)
 		check(c2.spool.is_empty(), "%d: no spool" % old)
 	var future = JSON.parse_string(JSON.stringify(d))
-	future["version"] = 5
+	future["version"] = Campaign.VERSION + 1
 	eq(_camp(1).load_dict(future), "unsupported campaign version", "a newer save is refused")
 
 

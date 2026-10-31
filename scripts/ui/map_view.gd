@@ -19,6 +19,8 @@ extends Control
 const Campaign = preload("res://scripts/space/campaign.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
+const TideHud = preload("res://scripts/ui/tide_hud.gd")
+const Tide = preload("res://scripts/space/tide.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
 const RegionChoice = preload("res://scripts/ui/region_choice.gd")
 
@@ -39,6 +41,9 @@ const GOOD := Color("#6bd34a")
 const BAD := Color("#e0413b")
 const AMBER := Color("#e1a136")
 const UNKNOWN := Color("#3a4350")
+const HOLLOW := Color("#6d6679")  ## a place the Hollow tide has taken: dead violet-grey
+const HOLLOW_BAND := Color(0.42, 0.34, 0.58, 0.2)  ## the faint band over the consumed part of the map
+const HOLLOW_EDGE := Color(0.62, 0.52, 0.82, 0.55)
 
 ## Emitted when a lost fight ends the run, with the campaign as it stood (front_door.gd shows the game over screen).
 signal run_over(campaign)
@@ -53,6 +58,7 @@ var campaign: Campaign
 var profile = null  ## the player's Profile (front_door.gd sets it): the campaigns write their unlocks and landmarks to it
 var event_panel: Control
 var station_panel: Control
+var tide_hud: Control  ## the play-mode line of the Hollow tide (tide_hud.gd), a sibling in this canvas layer
 var region_choice: Control
 var hover := ""  ## the node id under the mouse
 var message := ""
@@ -82,13 +88,16 @@ func _ready() -> void:
 	_ensure_panels()
 	if combat != null and combat.has_signal("finished"):
 		combat.finished.connect(_on_fight_finished)
+	_make_tide_hud.call_deferred()
 
 
-func _process(_dt: float) -> void:
+func _process(dt: float) -> void:
 	if visible and panel_only and not event_panel.visible and not station_panel.visible and not region_choice.visible and not _fighting:
 		_hide_panels()  # nothing left to show over the sector
 	if visible:
 		queue_redraw()
+	else:
+		tick_linger(minf(dt, 0.25))
 
 
 ## The light-speed flow is on (the campaign's instant jump is off).
@@ -117,6 +126,42 @@ func _ensure_panels() -> void:
 	region_choice = RegionChoice.new()
 	region_choice.map = self
 	add_child(region_choice)
+
+
+## The Hollow tide's clock line, in the canvas layer this map lives in (no scene edit).
+func _make_tide_hud() -> void:
+	if tide_hud == null and get_parent() != null:
+		tide_hud = TideHud.new()
+		tide_hud.map = self
+		get_parent().add_child(tide_hud)
+
+
+## Is the game in play mode with the map shut and no fight on (the time the tide clock counts)?
+func playing() -> bool:
+	return campaign != null and not visible and can_open() and build != null and not build.build_on
+
+
+## The one place linger time is counted: `dt` seconds of play pass and the tide creeps on (campaign.linger) while
+## playing() and the tree is not paused. The lines it says go to the chronicle and the toast; they are returned too.
+## Whatever surface the game is played on (the map's play mode, the sector view) calls this each frame.
+func tick_linger(dt: float) -> Array:
+	if not playing() or (is_inside_tree() and get_tree().paused):
+		return []
+	var lines := campaign.linger(dt)
+	_tide_say(lines)
+	return lines
+
+
+## Tell the player what the tide did: the ship's chronicle, and a toast when the front door has one.
+func _tide_say(lines: Array) -> void:
+	var s = ship()
+	var door = get_node_or_null("../../FrontDoor")
+	var toast = door.get("toast") if door != null else null
+	for l in lines:
+		if s != null:
+			s.log_event(str(l))
+		if toast != null:
+			toast.push(str(l))
 
 
 # --- actions (the keys and clicks call these) -----------------------------------------------------------------
@@ -575,6 +620,7 @@ func _draw() -> void:
 	var m := map_rect()
 	draw_rect(m, SPACE_BG.lerp(_tint(), 0.07))
 	draw_rect(m, EDGE_DIM, false, 1.0)
+	_draw_tide(m)
 	_draw_lanes()
 	for id in campaign.drift.ids():
 		if not campaign.is_hidden(id):
@@ -602,6 +648,7 @@ func _draw_status(p: Rect2) -> void:
 		due = "  (%d behind!)" % campaign.behind() if campaign.behind() > 0 else "  (%d due in %d)" % [int(campaign.cfg["debt"]["payment"]), campaign.next_due_in()]
 	_text(owed + due, Vector2(x + 470.0, y), 18, BAD if campaign.behind() > 0 else (GOOD if campaign.debt == 0 else AMBER))
 	var rx := p.end.x - PAD - 380.0
+	_text(tide_status(), Vector2(x + 705.0, y), 16, HOLLOW if campaign.is_hollow(campaign.current) else DIM_TEXT)
 	for f in Campaign.rep_factions():
 		var seg := "%s %+d" % [Campaign.faction_name(f), campaign.rep[f]]
 		_text(seg, Vector2(rx, p.position.y + 38.0), 16, Campaign.faction_color(f))
@@ -637,11 +684,17 @@ func _draw_node(id: String) -> void:
 	var col := _node_color(id)
 	if n["type"] == "gate" and known:
 		col = Color("#2b3340")
+	var hollow := campaign.is_hollow(id)
+	if hollow:
+		col = HOLLOW
 	draw_circle(at, NODE_R, col.darkened(0.45))
 	draw_circle(at, NODE_R - 3.0, col)
 	var glyph := str(Campaign.type_info(str(n["type"]))["glyph"]) if known else "?"
 	_text(glyph, at + Vector2(-5.0, 6.0), 16, Color("#10151c") if known and n["type"] != "gate" else TEXT)
-	if campaign.visited.has(id):
+	if hollow:  # a broken ring: three arcs with gaps
+		for i in 3:
+			draw_arc(at, NODE_R + 4.0, TAU * i / 3.0 + 0.3, TAU * (i + 1) / 3.0 - 0.3, 10, HOLLOW.lightened(0.25), 2.0, true)
+	elif campaign.visited.has(id):
 		draw_arc(at, NODE_R + 3.0, 0.0, TAU, 28, EDGE_DIM, 1.5, true)
 	if reach:
 		draw_arc(at, NODE_R + 5.0, 0.0, TAU, 28, GOOD if id != hover else TEXT, 2.5, true)
@@ -676,6 +729,8 @@ func _draw_tip(id: String) -> void:
 			lines.append("The way to the next region")
 		if n["type"] != "gate" and campaign.drift.linked(campaign.current, id):
 			lines.append(jump_cost_text())
+	if n["type"] != "gate":
+		lines.append_array(tide_tip(id))
 	var w := 0.0
 	for l in lines:
 		w = maxf(w, ThemeDB.fallback_font.get_string_size(l, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x)
@@ -685,6 +740,41 @@ func _draw_tip(id: String) -> void:
 	_panel(box, Color("#10151c"))
 	for i in lines.size():
 		_text(lines[i], box.position + Vector2(10.0, 22.0 + 20.0 * i), 14, TEXT if i == 0 else DIM_TEXT)
+
+
+## The tooltip lines about the tide for node `id`: Hollow, or when it will be, or that it holds.
+func tide_tip(id: String) -> Array[String]:
+	var t = campaign.tide
+	if t.is_hollow(id):
+		return ["Hollow: ghost ships, no trade"]
+	var n: int = t.jumps_until(id)
+	if n < 0:
+		return ["Holds against the tide"]
+	return ["The tide reaches here in %d jump%s" % [n, "" if n == 1 else "s"]]
+
+
+## The status bar's tide: "Tide: 5 jumps / 2:41" (jumps until it reaches the ship's place, time until it rises by itself).
+func tide_status() -> String:
+	var t = campaign.tide
+	var n: int = t.jumps_until(campaign.current)
+	var where := "Hollow" if t.is_hollow(campaign.current) else ("holds" if n < 0 else "%d jump%s" % [n, "" if n == 1 else "s"])
+	return "Tide: %s / %s" % [where, "--" if t.spent() else Tide.clock(t.linger_left())]
+
+
+## The faint band over the part of the map the tide has taken, edged at the front. The front sits between the entry
+## node and the farthest one on the screen, as it does on the map.
+func _draw_tide(m: Rect2) -> void:
+	var t = campaign.tide
+	if t.front() <= 0.0 or t.axis_len <= 0.0:
+		return
+	var x0 := node_pos(t.entry_id).x
+	var fx := clampf(x0 + (node_pos(t.far_id).x - x0) * t.front() / t.axis_len, m.position.x, m.end.x)
+	draw_rect(Rect2(m.position, Vector2(fx - m.position.x, m.size.y)), HOLLOW_BAND)
+	var y := m.position.y
+	while y < m.end.y:  # a ragged, dashed edge
+		var a := Vector2(fx + 3.0 * sin(y * 0.09 + Time.get_ticks_msec() / 700.0), y)
+		draw_line(a, a + Vector2(0.0, 9.0), HOLLOW_EDGE, 2.0)
+		y += 14.0
 
 
 func _draw_foot(p: Rect2) -> void:

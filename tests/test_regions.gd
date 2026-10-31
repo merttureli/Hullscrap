@@ -239,11 +239,12 @@ func test_mas_debt_clock_runs_in_stages_1_and_2_and_stops_from_stage_3() -> void
 	c.jumps = 40
 	eq([c.behind(), c.misses()], [0, 0], "no payment falls due after that")
 	eq(c.next_due_in(), 3, "the date stays where it was")
-	check(c._advance(8).is_empty(), "jumps bring no payment news")
+	check(c._advance(8).all(func(n): return not str(n).contains("payment")), "jumps bring no payment news")
 	c.paid = 0
 	c.debt_stop = 16
 	c.flags["debt_missed"] = true
 	eq(c.misses(), 2, "(two payments behind from before the clock stopped)")
+	c.tide.steps = 0  # (the Hollow tide of the region would send ghosts here: not what this is about)
 	eq(c.fight_path("tier", "pirate"), c.cfg["enemies"]["pirate"][str(c.tier())][0], "but no rammer is sent out here")
 	c.flags.erase("debt_missed")
 	c.current = c.drift.start_id()
@@ -273,7 +274,7 @@ func test_a_save_mid_run_keeps_the_stage_the_route_and_the_region() -> void:
 		check(c.cross(c.region_offers()[-1], ship)["ok"], "crossing %d" % i)
 	c.sector_at(c.current).pois[0]["state"] = "done"
 	var d = JSON.parse_string(JSON.stringify(c.to_dict()))
-	eq([int(d["version"]), int(d["stage"]), d["region"]], [4, 4, c.region_id], "saved as version 4 with the stage and the region")
+	eq([int(d["version"]), int(d["stage"]), d["region"]], [Campaign.VERSION, 4, c.region_id], "saved at the current version with the stage and the region")
 	var back := Campaign.new(1)
 	eq(back.load_dict(d), "", "loads")
 	eq([back.stage, back.region_id, back.route, back.region_seed, back.debt_stop], [c.stage, c.region_id, c.route, c.region_seed, c.debt_stop], "the run's place")

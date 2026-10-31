@@ -469,7 +469,7 @@ func test_the_fraction_survives_save_and_load_and_an_old_save_loads_with_none() 
 	_hops(c, ship, 1)
 	eq([c.fuel_part, ship.inventory.count("fuel")], [50, 6], "half a fuel is owed")
 	var d: Dictionary = JSON.parse_string(JSON.stringify(c.to_dict()))  # through real JSON
-	eq(d["version"], 4, "saved as version 4")
+	eq(d["version"], Campaign.VERSION, "saved at the current version")
 	eq(d["fuel_part"], 50, "with the fraction in it")
 	var back := Campaign.new(1)
 	eq(back.load_dict(d), "", "loaded")
@@ -485,7 +485,7 @@ func test_the_fraction_survives_save_and_load_and_an_old_save_loads_with_none() 
 	eq(legacy.load_dict(old), "", "a version 1 save still loads")
 	eq([legacy.fuel_part, legacy.jumps, legacy.current], [0, c.jumps, c.current], "with no fraction owed")
 	var future := d.duplicate(true)
-	future["version"] = 5
+	future["version"] = Campaign.VERSION + 1
 	check(Campaign.new(1).load_dict(future) != "", "a newer version is refused")
 	var zero := d.duplicate(true)
 	zero["version"] = 0

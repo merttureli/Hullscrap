@@ -1,0 +1,92 @@
+{"events": [
+    {
+      "id": "hollow_counting_beacon", "type": "hollow", "weight": 10, "once": false, "requires": {},
+      "text": "A navigation beacon hangs in the dark with its casing cold and its lamp out. It is counting. Not hailing, not pinging: counting, in a flat voice, one number a second. Four thousand one hundred and six. Four thousand one hundred and seven. Your engineer says it is a firmware fault. Your engineer is whispering.",
+      "choices": [
+        {"text": "Cut its power and take the cell.", "outcomes": [
+          {"weight": 60, "text": "The count stops mid-number. The cell comes away warm, which it should not be, and your engineer decides not to mention it.", "effects": {"items": {"fuel": 1, "scrap": 15}}},
+          {"weight": 40, "text": "The count stops. A second later, somewhere behind you, it starts again from the same number, and a great many lights come on.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Listen. Somebody ought to know what it is counting.", "outcomes": [
+          {"weight": 65, "text": "At four thousand two hundred the voice stops counting and reads out a set of coordinates, twice, in the tone of a clerk closing a ledger. You write them down. They are a trader's lane, and it is not one you knew.", "effects": {"reveal": ["trader"]}},
+          {"weight": 35, "text": "You listen until the numbers start to mean something, and then until they stop meaning anything. Nobody sleeps well for a day. Nobody can say why.", "effects": {"crew_hp": -8}}
+        ]},
+        {"text": "Leave it to its sums.", "outcomes": [
+          {"weight": 100, "text": "You turn away. The count follows you for a while, politely, and loses your place.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_ghost_convoy", "type": "hollow", "weight": 10, "once": false, "requires": {},
+      "text": "A convoy is crossing ahead of you: six haulers in a tidy line, running lights on, cargo doors latched. Every one of them is dead in the way that matters, and every one is still keeping lane. When the leader drifts a few degrees off, the whole line corrects, politely, like a queue at a Concord counter.",
+      "choices": [
+        {"text": "Fall in at the tail and ride through.", "outcomes": [
+          {"weight": 70, "text": "You hold lane for eleven minutes. The convoy asks nothing of you. When you peel off, the tail hauler flashes its lights twice, and you have never felt so thoroughly waved at. You coasted the whole way, and the tank thanks you.", "effects": {"items": {"fuel": 1}}},
+          {"weight": 30, "text": "The tail hauler turns what you had taken for a bumper and was a gun. You make your turn very quick, and the bumper is not as quick as you.", "effects": {"hull": -8}}
+        ]},
+        {"text": "Cut the last hauler out of the line.", "outcomes": [
+          {"weight": 100, "text": "The line closes up without her and does not look round. The tail does. Her guns come about, slow and certain, like a tired person turning to see who is knocking.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Wait for them to pass.", "outcomes": [
+          {"weight": 100, "text": "It takes a long time. Nobody on the crew says anything until the last running light is gone, and then they all say something at once.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_dead_callsign", "type": "hollow", "weight": 10, "once": false, "requires": {},
+      "text": "The radio clears its throat. A voice says a callsign that was retired three years ago, and says it the way its owner did, down to the cough: come back to me, I'm on your six, I'm cold, somebody has left the gate open. Your cook has gone very quiet. \"That's Dunnock,\" she says. \"That's Dunnock's callsign. That's the right cough.\"",
+      "choices": [
+        {"text": "Answer: \"Dunnock? Where are you?\"", "outcomes": [
+          {"weight": 70, "text": "\"Right behind you,\" says the voice, in the cook's own voice. Then in everyone's. The dark behind you fills in with hulls.", "effects": {"fight": "tier"}},
+          {"weight": 30, "text": "It gives you a heading and says nothing else. At the end of it you find a supply pod, real and cold and chalked with a name that is not Dunnock's. The cook says that will do.", "effects": {"items": {"fuel": 2, "scrap": 10}}}
+        ]},
+        {"text": "Cut the channel and put some music on.", "outcomes": [
+          {"weight": 100, "text": "Somebody finds something loud, Clan-made and bad. By the third chorus the cook is humming. The voice comes back once, low and courteous, and goes away again.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_following_lights", "type": "hollow", "weight": 10, "once": false, "requires": {},
+      "text": "A relay station hangs off your bow with its docking lights on, in a place where no relay should have power. As you pass, the lights go out and come on again, one bay at a time, tracking you along the hull like a head turning. When you stop, they stop. A hail comes through, a docking clerk's voice saying \"Welcome, welcome\" on a loop.",
+      "choices": [
+        {"text": "Take the lit bay.", "outcomes": [
+          {"weight": 45, "text": "The bay is warm and stocked, as if somebody expected you and has gone to fetch the kettle. You fill your arms and do not stay for tea.", "effects": {"items": {"scrap": 25, "copper": 10, "fuel": 1}}},
+          {"weight": 30, "text": "The doors close behind you on the way out, slowly, the way a hand closes. You cut free with a bad noise and a worse smell.", "effects": {"hull": -12}},
+          {"weight": 25, "text": "The welcome loop changes to something shorter. The bay was not empty after all.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Keep your heading and your manners.", "outcomes": [
+          {"weight": 100, "text": "The lights follow you all the way out of range. When you straighten out they dim, a little, like someone who had a speech ready.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_open_all_hours", "type": "hollow", "weight": 10, "once": false, "requires": {},
+      "text": "A trader's pod drifts at the lane mouth with its OPEN sign lit in four languages and a fifth that isn't one. The shelves behind the window are full. The till light is blinking. Nobody has been aboard for a long time, and the pod has not noticed.",
+      "choices": [
+        {"text": "Leave 20 credits at the till and take a crate.", "requires": {"credits": 20}, "pay": true, "outcomes": [
+          {"weight": 80, "text": "The till takes your credits and says Thank You in a voice that has stopped practising. A hatch drops a crate, neatly wrapped, the right way up.", "effects": {"items": {"fuel": 2, "scrap": 10}}},
+          {"weight": 20, "text": "The crate is empty. The till says Thank You anyway, and means it exactly as much as it did last time.", "effects": {}}
+        ]},
+        {"text": "Take what you can carry.", "outcomes": [
+          {"weight": 60, "text": "The shelves give up their stock without a fuss. Behind you the OPEN sign goes dark, politely.", "effects": {"items": {"scrap": 35, "copper": 12, "fuel": 1}}},
+          {"weight": 40, "text": "The sign flips to CLOSED. In the back of the pod something begins the shop's closing routine, and the routine has guns.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Leave the shop to its customers.", "outcomes": [
+          {"weight": 100, "text": "You back out of the lane mouth. The sign stays lit behind you for a long time, patient as a lamp.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_same_wreck", "type": "hollow", "weight": 10, "once": false, "requires": {},
+      "text": "The wreck ahead is the Second Mortgage. You know her: the stencilled name, the scorched port nacelle, the ugly orange patch on the bow. You passed her two beacons back, venting, and you remember thinking somebody ought to come for her. Here she is again, venting, with the same fire in the same window.",
+      "choices": [
+        {"text": "Cut into her hold.", "outcomes": [
+          {"weight": 65, "text": "She gives up the same cargo she gave the last time you looked. You are too busy hauling to count it twice.", "effects": {"items": {"scrap": 40, "copper": 10}}},
+          {"weight": 35, "text": "The fire in the window turns out to be a lamp. It swings round and looks at you, and the plating you were cutting lets go all at once.", "effects": {"hull": -10, "items": {"scrap": 20}}}
+        ]},
+        {"text": "Give her a wide berth, and don't look back, whatever the cook says.", "outcomes": [
+          {"weight": 100, "text": "You give her a very wide berth. The cook looks back anyway, and says only that the window was empty, and then that it wasn't.", "effects": {}}
+        ]}
+      ]
+    }
+]}
