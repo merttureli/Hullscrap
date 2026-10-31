@@ -1,0 +1,6 @@
+{
+"weapons": [
+	{"id": "spore_puffer", "name": "Spore Puffer", "culture": "sporeling", "class": "tool", "damage": 4.8, "rate": 1.0, "range": 72, "art": "spore_puffer", "notes": "damage -20%, range +20%: a puffball bellows; the spores put a target to sleep (later)"},
+	{"id": "thorn_lash", "name": "Thorn Lash", "culture": "sporeling", "class": "melee", "damage": 22.5, "rate": 1.44, "range": 48, "art": "thorn_lash", "notes": "damage -10%, rate +20%, range +20%: a whip of thorns, quick and long but light; it bleeds (later)"}
+]
+}
