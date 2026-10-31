@@ -678,9 +678,10 @@ func _draw() -> void:
 	if ship == null:
 		return
 	_glow_quads = []
-	for c in grid.hull:
-		draw_rect(cell_rect(c), Color("#141922"))
-		draw_rect(cell_rect(c), Color(1, 1, 1, 0.05), false, 1.0)
+	if build_on:  # the empty frame you can build in shows only in build mode, not while flying
+		for c in grid.hull:
+			draw_rect(cell_rect(c), Color("#141922"))
+			draw_rect(cell_rect(c), Color(1, 1, 1, 0.05), false, 1.0)
 	var open_doors := ShipSim.open_door_cells(ship)  # doors someone opened, and doors a body is in
 	for c in grid.tiles:
 		_draw_tile(c, grid.tiles[c], open_doors)
