@@ -1,0 +1,21 @@
+{
+  "_doc": "The unlocks of the endings_1 pack. id, kind (starter_ship, species_start, blueprint, map_variant, skin), name, how (the hint shown on a locked entry) and payload (what the kind needs: starter_ship {ship, group, layout}, species_start {species, name?}, blueprint {recipe}, map_variant {variant}, skin {skin}). The 'unlock' effect of an event records one in the profile.",
+  "unlocks": [
+    {"id": "ship_halcyon_tender", "kind": "starter_ship", "name": "Halcyon Tender", "how": "Reach Halcyon: settle in the Haven, or lead others there.", "payload": {"ship": "halcyon_tender", "group": "haven", "layout": "A"}},
+    {"id": "ship_kettle_tug", "kind": "starter_ship", "name": "Ma's Kettle-class Tug", "how": "Pay off Ma Gantry, then buy a berth at Gantry Rusthold (the Retire ending).", "payload": {"ship": "kettle_tug", "group": "clans", "layout": "C"}},
+    {"id": "ship_concord_frigate", "kind": "starter_ship", "name": "Concord Frigate Resolve", "how": "Restart the Concord Gate with the Authority's backing (the Way Out, Concord).", "payload": {"ship": "concord_frigate", "group": "concord", "layout": "B"}},
+    {"id": "ship_door_prize", "kind": "starter_ship", "name": "Door Prize", "how": "Restart the Scrapper Gate with the Clans' backing (the Way Out, Clans).", "payload": {"ship": "door_prize", "group": "clans", "layout": "B"}},
+    {"id": "ship_lumen_skiff", "kind": "starter_ship", "name": "Lumen Skiff Afterimage", "how": "Open the Lumen Gate somewhere new with the Prism's backing (the Way Out, Lumen).", "payload": {"ship": "lumen_skiff", "group": "lumen", "layout": "B"}},
+    {"id": "ship_hollow_touched", "kind": "starter_ship", "name": "Hollow-Touched: Welcome Aboard", "how": "Learn what came out at the Snap, and stay to dinner (the Hollow ending).", "payload": {"ship": "hollow_touched", "group": "hollow", "layout": "A"}},
+    {"id": "ship_patience_sister", "kind": "starter_ship", "name": "CS-002 Forbearance", "how": "Board the Concord flagship CS-001 Patience (landmark).", "payload": {"ship": "patience_sister", "group": "concord", "layout": "C"}},
+    {"id": "start_halcyon_scout", "kind": "species_start", "name": "Halcyon Scout", "how": "Meet the children of the skiff Fig and keep their secret (a Haven fragment).", "payload": {"species": "human", "name": "Wick"}},
+    {"id": "start_halcyon_gardener", "kind": "species_start", "name": "Halcyon Gardener", "how": "Bring others to Halcyon (the Haven exodus).", "payload": {"species": "sporeling"}},
+    {"id": "start_basalt_gatewright", "kind": "species_start", "name": "Basalt Gatewright", "how": "Stand inside a Dead Gate's shell (landmark).", "payload": {"species": "basalt"}},
+    {"id": "bp_ma_shrapnel", "kind": "blueprint", "name": "Ma's Shrapnel", "how": "Eat at Ma Gantry's table (landmark).", "payload": {"recipe": "shrapnel_cannon_scrap"}},
+    {"id": "bp_lumen_siren", "kind": "blueprint", "name": "The Quiet Lab's Siren", "how": "Watch the Lumen's first gate study answer early (landmark).", "payload": {"recipe": "siren_ion_neon"}},
+    {"id": "map_hollow_tide", "kind": "map_variant", "name": "The Tide Comes Early", "how": "Sit down at the Table in the Scrapper Gate (the Hollow ending).", "payload": {"variant": "hollow_tide"}},
+    {"id": "skin_lantern_lights", "kind": "skin", "name": "Lantern Lights", "how": "Catch the first clean fragment of the Haven broadcast (landmark).", "payload": {"skin": "lantern_lights"}},
+    {"id": "skin_green_running_lights", "kind": "skin", "name": "Green Running Lights", "how": "Survive a Hollow node (landmark).", "payload": {"skin": "green_running_lights"}},
+    {"id": "skin_lantern_hollow", "kind": "skin", "name": "Cold Lanterns", "how": "Follow the wrong voice all the way to the Reach (the dark Haven ending).", "payload": {"skin": "lantern_hollow"}}
+  ]
+}
