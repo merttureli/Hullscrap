@@ -751,6 +751,11 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - A character joins through the campaign's recruit effect: `{"recruit": {"character": "<id>"}}` (once per run; the event validator knows the ids).
 - **The roster target is 64 characters**: 30 tied to the races (one per race at least, two for the big cultures), 20 cross-race oddballs, and 14 one-of-a-kind beings.
   - Examples: **Socket**, a Basalt who powers an adjacent system by hand; **Old Hob**, Ma Gantry's mechanic, who repairs Scrap parts instantly; **the Lamplighter**, an AI in a lantern; **Sister Vell**, a Choir who fights fires with a song.
+- **Wave 1, as built** (`data/packs/chars_1`: 24 characters, 28 events; the tests are `tests/test_chars_1.gd`):
+  - Two per race for the ten homelands (one combat or helm, one ship-craft or crew) and four wanderers found in any region (a firefighting drone, Halfway who walks through walls, a turned Warden, a slow Basalt racer). The three one-of-a-kind ones use a `unique_species`.
+  - The schema has no title key, so a character's one-line title opens their `lore` ("The Vacuum Mason. Skerry has ..."), and the bio follows.
+  - Each is recruited by an event with `recruit: {character}`, placed with `requires.region` (the homeland) and a stage band; every event has a free way out and most a blue choice. Eight are hard to get: a fight (the win pays through `after_win`), a high price, or a chain of two events joined by a flag (the second needs only the flag, so it finds you in any region).
+  - Abilities used: all of the vocabulary but `berserk`, which nothing reads until there are on-foot fights. A strong one has a longer cooldown and better params than the vocabulary's; a weak or constant one has a short cooldown.
 
 ## 17. Racial tech: arsenals and components with trade-offs only their race erases (owner, 2026-10-30)
 > "Every race should have their own set of weapons and ship weapons with on-theme animations, effects or damage, and their own versions of components with different pros and cons. The cons should be averted by the race's own pros: an engine draining oxygen, but the race doesn't need it. A trade-off for a mixed crew, but not at all for a dedicated crew. Just like FTL."
