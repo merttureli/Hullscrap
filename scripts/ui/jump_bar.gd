@@ -26,7 +26,7 @@ func bind(p_session) -> void:
 
 
 func _process(_dt: float) -> void:
-	visible = session != null and session.morale.state == "fleeing"
+	visible = session != null and session.morale.state == "fleeing" and session.state() == "fighting"  # not once it is wrecked or gone
 	if visible:
 		queue_redraw()
 

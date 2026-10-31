@@ -7,6 +7,7 @@ extends "res://tests/base_test.gd"
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const CombatView = preload("res://scripts/combat/combat_view.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const JumpBar = preload("res://scripts/ui/jump_bar.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
@@ -317,6 +318,23 @@ func test_a_note_does_not_hide_an_offer_or_a_flight() -> void:
 	_run(c, 4.0)
 	eq(CombatView.banner_line(c, note)["text"], note, "with nothing pressing the note shows")
 	eq(CombatView.banner_line(c, "")["text"], "", "and with no note there is no line")
+
+
+## The red JUMP bar shows while the enemy flees and goes when it is wrecked (it showed "JUMP held: engines out" over a wreck).
+func test_the_jump_bar_goes_when_the_fleeing_enemy_is_wrecked() -> void:
+	var s := _session()
+	_style(s, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
+	_hurt(s, 0.3)
+	_run(s, 0.1)
+	eq(s.morale.state, "fleeing", "it runs")
+	var bar := JumpBar.new()
+	bar.bind(s)
+	bar._process(0.0)
+	check(bar.visible, "the bar shows while it flees")
+	s.arena.wreck(Session.ENEMY)
+	bar._process(0.0)
+	check(not bar.visible, "and is gone once the enemy is wrecked")
+	bar.free()
 
 
 # --- flight -----------------------------------------------------------------------------------------------
