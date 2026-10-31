@@ -334,6 +334,37 @@ func test_the_regions_pass_the_validator() -> void:
 	eq(Regions.get_region("gate_approaches")["stages"], [6.0, 8.0], "the Gate approaches are stages 6 to 8")
 
 
+func test_a_pack_adds_a_region_and_can_override_one() -> void:
+	var dir := "user://test_region_packs"
+	DirAccess.make_dir_recursive_absolute(dir + "/zz_regions/regions")
+	var f := FileAccess.open(dir + "/zz_regions/pack.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify({"id": "zz_regions", "name": "Test regions", "version": "1", "requires": []}))
+	f.close()
+	var mine: Dictionary = Regions.get_region("boneyard")
+	mine["id"] = "fx_reach"
+	mine["name"] = "The Test Reach"
+	f = FileAccess.open(dir + "/zz_regions/regions/fx_reach.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify(mine))
+	f.close()
+	var over: Dictionary = Regions.get_region("kett_hives")
+	over["blurb"] = "Rewritten."
+	over["override"] = true
+	over["reason"] = "a test"
+	f = FileAccess.open(dir + "/zz_regions/regions/kett_hives.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify(over))
+	f.close()
+	Content.packs_root = dir
+	check(Regions.has("fx_reach") and Regions.get_region("fx_reach")["name"] == "The Test Reach", "a pack's regions/ folder adds a region")
+	eq(Content.origin("regions", "fx_reach"), "zz_regions", "from that pack")
+	eq(Regions.get_region("kett_hives")["blurb"], "Rewritten.", "an override with a reason replaces one")
+	check(Regions.has("clan_space"), "the core regions stay")
+	check(Content.errors().is_empty(), "no loader errors: " + str(Content.errors()))
+	Content.packs_root = ""
+	check(not Regions.has("fx_reach"), "gone with the pack")
+	for p in ["zz_regions/regions/fx_reach.json", "zz_regions/regions/kett_hives.json", "zz_regions/pack.json", "zz_regions/regions", "zz_regions", ""]:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + "/" + p))
+
+
 func test_the_validator_catches_broken_regions() -> void:
 	var good: Dictionary = Regions.get_region("kett_hives")
 	eq(Regions.problems([good]).filter(func(p): return not p.begins_with("stage ") and not p.begins_with("data/drift.json")).size(), 0, "a good region")

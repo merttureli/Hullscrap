@@ -518,7 +518,7 @@ func _draw_tip(id: String) -> void:
 	else:
 		var type_label := str(Campaign.type_info(str(n["type"]))["label"])
 		lines.append(campaign.label(id) + (" (Scrapper trader)" if n.get("clan", false) else ""))
-		if n["place"] != "" or n.get("clan", false):
+		if (n["place"] != "" or n.get("clan", false)) and type_label != campaign.label(id):
 			lines.append(type_label)
 		if n["type"] == "gate":
 			lines.append(Campaign.DARK_TEXT)

@@ -14,7 +14,7 @@ const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 
 const PAD := 26.0
 const GAP := 20.0
-const CARD_H := 470.0
+const CARD_H := 430.0
 const CONFIRM_W := 720.0
 const CONFIRM_H := 250.0
 const DIM := Color(0.0, 0.0, 0.0, 0.6)
@@ -33,6 +33,7 @@ const RARITY_COLORS := {"common": Color("#cfd6df"), "uncommon": Color("#6bd34a")
 var map: Control  ## the MapView: its campaign, its ship and cross_to()
 var page := "confirm"  ## "confirm", then "choose"
 var options: Array = []  ## the regions on offer: their data (Regions.get_region), in order
+var known: Array = []  ## per option: is its rarity known (Campaign.rarity_known), worked out when the cards open
 var hover := -1  ## the card (or, on the confirm page, the row) under the mouse
 var message := ""
 
@@ -63,6 +64,7 @@ func open() -> void:
 func show_choices() -> void:
 	var c = map.campaign
 	options = c.region_offers().map(func(id): return Regions.get_region(str(id)))
+	known = options.map(func(r): return c.rarity_known(str(r["id"]), map.ship()))
 	page = "choose"
 	hover = -1
 	message = "" if not options.is_empty() else "The charts are blank: there is no way on from here."
@@ -207,7 +209,6 @@ func _draw_choose() -> void:
 
 
 func _draw_card(i: int, r: Dictionary) -> void:
-	var c = map.campaign
 	var box := card_rect(i)
 	var tint := Color(str(r.get("palette", {}).get("tint", "#cfd6df")))
 	draw_rect(box, CARD_BG)
@@ -239,10 +240,10 @@ func _draw_card(i: int, r: Dictionary) -> void:
 	_text("Danger", Vector2(x, y), 15, DIM_TEXT)
 	_skulls(Vector2(x + 72.0, y - 6.0), Regions.skulls(r))
 	y += 26.0
-	var known: bool = c.rarity_known(str(r["id"]), map.ship())
+	var seen: bool = known[i]
 	var rarity := str(r.get("rarity", "common"))
 	_text("Rarity", Vector2(x, y), 15, DIM_TEXT)
-	_text(rarity.replace("_", " ").capitalize() if known else "? (scan with a radar)", Vector2(x + 72.0, y), 15, RARITY_COLORS.get(rarity, TEXT) if known else DIM_TEXT)
+	_text(rarity.replace("_", " ").capitalize() if seen else "? (scan with a radar)", Vector2(x + 72.0, y), 15, RARITY_COLORS.get(rarity, TEXT) if seen else DIM_TEXT)
 	y += 18.0
 	draw_line(Vector2(x, y), Vector2(x + w, y), EDGE_DIM, 1.0)
 	draw_multiline_string(ThemeDB.fallback_font, Vector2(x, y + 24.0), str(r.get("blurb", "")), HORIZONTAL_ALIGNMENT_LEFT, w, 14, 9, DIM_TEXT)
