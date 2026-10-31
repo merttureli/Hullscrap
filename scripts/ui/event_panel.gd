@@ -5,6 +5,10 @@ extends Control
 ## shows its outcome, the changes in words and any derelict log found; Continue (Enter, Space or a
 ## click) goes on to the next page (goto), starts a fight, opens the ending screen (an outcome with the `ending`
 ## effect) or ends. open_notice() shows a plain page.
+## A choice whose outcomes include a fight ends with a threat tag, "[Threat 4/5]" ("[may fight: Threat 4/5]" when only some of
+## its outcomes fight): the skulls of the enemy that fight would send, against your ship (Shipgen.threat), coloured dim
+## for 1-2, amber for 3 and red for 4-5. The campaign rolls that enemy when the page opens and keeps it (Campaign.foe_for),
+## so the fight is the one that was rated.
 ## While open it takes every key and click, over the map. The rules are in events.gd and campaign.gd; this
 ## node only reads input and draws, in the UI colours of docs/ART_STYLE.md.
 
@@ -15,12 +19,18 @@ signal fight_requested(value: String, after_win: Dictionary)
 ## Emitted when an outcome ended the run (the `ending` effect): `id` is the ending. The map turns it into the ending screen.
 signal ending_reached(id: String)
 
+const Session = preload("res://scripts/combat/combat_session.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
+const Skulls = preload("res://scripts/ui/skulls.gd")
+
 const WIDTH := 940.0
 const PAD := 26.0
 const TITLE_H := 52.0
 const GAP := 14.0
 const ROW_PAD := 11.0
 const ROW_GAP := 8.0
+const ROW_TEXT_W := 90.0  ## px kept free at the right of a row's text
+const RATED_CAP := 128  ## ratings kept (_rated) before the cache starts over
 const TEXT_SIZE := 18
 const ROW_SIZE := 17
 const DIM := Color(0.0, 0.0, 0.0, 0.55)
@@ -44,6 +54,8 @@ var result := {}  ## the outcome shown: {text, lines, logs, goto, fight, after_w
 var title := ""
 var message := ""  ## why a choice was refused
 var hover := -1  ## the choice under the mouse
+
+static var _rated := {}  ## "design path|ship key" -> the skulls of that enemy against that ship, so the panel does not rebuild ships
 
 
 func _ready() -> void:
@@ -78,6 +90,8 @@ func open_event(ev: Dictionary) -> void:
 		view = [leave]
 	elif view.all(func(v): return v["grey"]):
 		view.append(leave)  # every choice needs something you lack: never leave the panel without a way out
+	for v in view:
+		_tag_threat(v)
 	page = "choices"
 	message = ""
 	hover = -1
@@ -215,7 +229,7 @@ func layout() -> Dictionary:
 	y += text_h + GAP * 1.5
 	if page == "choices":
 		for v in view:
-			var h := maxf(_wrapped(_row_label(v), inner - 90.0, ROW_SIZE) + 2.0 * ROW_PAD, 40.0)
+			var h := maxf((v["lines"].size() * _font().get_height(ROW_SIZE) if v.has("lines") else _wrapped(_row_label(v), inner - ROW_TEXT_W, ROW_SIZE)) + 2.0 * ROW_PAD, 40.0)
 			out["rows"].append(Rect2(Vector2(PAD, y), Vector2(inner, h)))
 			y += h + ROW_GAP
 		if message != "":
@@ -250,6 +264,58 @@ func _row_label(v: Dictionary) -> String:
 	return "%s%s" % [v["text"], ("   (needs %s)" % v["need"]) if v["grey"] else ""]
 
 
+# --- threat tags ----------------------------------------------------------------------------------------------------
+
+## Mark choice `v` (an entry of `view`) with the threat of the fight it may start: `threat` (skulls), `tag` ("[Threat 4/5]" or
+## "[may fight: Threat 4/5]") and `lines` (its label wrapped with the tag at the end of the last line). Nothing for a choice with no fight.
+func _tag_threat(v: Dictionary) -> void:
+	if int(v["index"]) < 0:
+		return
+	var outcomes: Array = event["choices"][v["index"]].get("outcomes", [])
+	var fights := 0
+	var worst := 0
+	for o in outcomes:
+		var eff = o.get("effects") if o is Dictionary else null
+		if eff is Dictionary and str(eff.get("fight", "")) != "":
+			fights += 1
+			worst = maxi(worst, _skulls_of(str(eff["fight"])))
+	if fights == 0 or worst == 0:
+		return
+	v["threat"] = worst
+	v["tag"] = Skulls.tag(worst, fights < outcomes.size())
+	var para := TextParagraph.new()  # the tag's spaces do not break, so it never splits over two lines
+	para.width = WIDTH - 2.0 * PAD - ROW_TEXT_W
+	var text := "%s %s" % [_row_label(v), str(v["tag"]).replace(" ", "\u00a0")]
+	para.add_string(text, _font(), ROW_SIZE)
+	var lines := []
+	for k in para.get_line_count():
+		var span := para.get_line_range(k)
+		lines.append(text.substr(span.x, span.y - span.x).replace("\u00a0", " ").strip_edges(false, true))
+	v["lines"] = lines
+
+
+## The skulls (0 when the design does not load) of the enemy a `fight` effect of `value` ("tier" or a design id) sends now,
+## against the player's ship; kept per (design path, ship) in _rated.
+func _skulls_of(value: String) -> int:
+	var ship = map.ship()
+	if ship == null:
+		return 0
+	var path: String = _campaign().fight_path(value, str(_node()["type"]))
+	var key := "%s|%d" % [path, ship_key(ship)]
+	if not _rated.has(key):
+		if _rated.size() >= RATED_CAP:
+			_rated.clear()
+		var foe = Session.load_ship(path)  # as the fight loads it, with the design's pilot skill, so the skulls agree with the banner
+		_rated[key] = 0 if foe == null else int(Shipgen.threat(foe, ship)["skulls"])
+	return _rated[key]
+
+
+## A number that changes when the ship's hull, parts, damage or power do (what its threat rating depends on).
+static func ship_key(ship) -> int:
+	ship.refresh()
+	return hash([ship.grid.tiles.hash(), ship.components.instances.hash(), ship.power_state.hash()])
+
+
 # --- drawing -------------------------------------------------------------------------------------------------------
 
 func _draw() -> void:
@@ -280,7 +346,19 @@ func _draw_row(i: int, r: Rect2) -> void:
 	draw_rect(r, AMBER if hot else edge, false, 3.0 if hot else (2.0 if v["blue"] else 1.0))
 	var col := DIM_TEXT if v["grey"] else (CYAN if v["blue"] else TEXT)
 	_text("%d" % (i + 1), r.position + Vector2(14.0, ROW_PAD + 15.0), ROW_SIZE, AMBER if not v["grey"] else EDGE_DIM)
-	draw_multiline_string(_font(), r.position + Vector2(44.0, ROW_PAD + 14.0), _row_label(v), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 90.0, ROW_SIZE, -1, col)
+	if not v.has("lines"):
+		draw_multiline_string(_font(), r.position + Vector2(44.0, ROW_PAD + 14.0), _row_label(v), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - ROW_TEXT_W, ROW_SIZE, -1, col)
+		return
+	var lines: Array = v["lines"]  # the text wrapped with its threat tag at the end, which has a colour of its own
+	for k in lines.size():
+		var at := r.position + Vector2(44.0, ROW_PAD + 14.0 + k * _font().get_height(ROW_SIZE))
+		var line := str(lines[k])
+		if k < lines.size() - 1:
+			_text(line, at, ROW_SIZE, col)
+			continue
+		var head := line.substr(0, line.length() - str(v["tag"]).length())
+		_text(head, at, ROW_SIZE, col)
+		_text(str(v["tag"]), at + Vector2(_font().get_string_size(head, HORIZONTAL_ALIGNMENT_LEFT, -1, ROW_SIZE).x, 0.0), ROW_SIZE, Skulls.color(int(v["threat"])))
 
 
 func _draw_result(lay: Dictionary) -> void:

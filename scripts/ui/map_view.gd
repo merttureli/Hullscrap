@@ -356,7 +356,7 @@ func _on_fight_finished(result: Dictionary) -> void:
 		var page: String = r["goto"]
 		_queue.append(func(): event_panel.open_event(campaign.events.get_event(page)))
 	elif r["state"] in ["won", "captured"]:
-		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship())
+		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship(), null, int(r["threat"]))
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
 

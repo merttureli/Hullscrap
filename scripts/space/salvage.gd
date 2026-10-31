@@ -9,6 +9,7 @@ extends RefCounted
 
 const NOT_OFFERED: Array = ["bed", "helm"]  ## families and ids nobody cuts out of a wreck
 const PICKS := {"won": 3, "captured": 4}  ## parts offered by the state of the fight
+const DANGEROUS_TEXT := " She was dangerous. There's more worth cutting."  ## added to the page when the threat bonus gave more rows
 
 
 ## The ids of the parts still on `enemy` that can be cut out, one entry per part (a ship with two engines
@@ -23,6 +24,13 @@ static func parts(enemy) -> Array:
 			out.append(id)
 	out.sort()
 	return out
+
+
+## The parts offered after a fight in `state` against an enemy of `threat` skulls: the state's base, plus the bonus of
+## data/drift.json `loot.threat_picks` ({"4": 1, "5": 2}: a dangerous enemy pays better).
+static func picks_for(state: String, threat: int, c) -> int:
+	var bonus: Dictionary = c.cfg["loot"].get("threat_picks", {})
+	return int(PICKS.get(state, PICKS["won"])) + int(bonus.get(str(clampi(threat, 0, 5)), 0))
 
 
 ## The scrap a stripped ship gives: (strip_base + strip_per_part x its parts) x the tier (data/drift.json loot); half
@@ -49,8 +57,9 @@ static func recipe_for(ship, item: String) -> String:
 ## and for a win "Strip her for scrap". A captured ship's scrap was paid already (Campaign.fight_done).
 ## A ghost ship (`hollow`: it came from a place the Hollow tide has taken, which is what the campaign says when the
 ## flag is left out) offers only the strip row, at half the scrap, whatever the state: nothing aboard is worth cutting
-## out or scanning, and its scrap was not paid at the fight.
-static func event_for(enemy, state: String, c, ship, hollow = null) -> Dictionary:
+## out or scanning, and its scrap was not paid at the fight. `threat` (1-5 skulls, 0 when unknown) adds parts to the
+## pick (picks_for) and a line to the page when that gave more rows.
+static func event_for(enemy, state: String, c, ship, hollow = null, threat := 0) -> Dictionary:
 	var ghost: bool = c.is_hollow(c.current) if hollow == null else bool(hollow)
 	if ghost:
 		return _ghost_event(enemy, c)
@@ -59,7 +68,8 @@ static func event_for(enemy, state: String, c, ship, hollow = null) -> Dictionar
 		if not pool.has(id):
 			pool.append(id)
 	var picked := []
-	for i in int(PICKS.get(state, PICKS["won"])):
+	var base := int(PICKS.get(state, PICKS["won"]))
+	for i in picks_for(state, threat, c):
 		if pool.is_empty():
 			break
 		picked.append(pool.pop_at(c.rng.randi() % pool.size()))
@@ -76,10 +86,12 @@ static func event_for(enemy, state: String, c, ship, hollow = null) -> Dictionar
 		choices.append(_row("Scan the %s (learn its blueprint)" % _name(ship, scan), "The scanner maps every weld and wire of the %s." % _name(ship, scan), {"blueprint": [recipe_for(ship, scan)]}))
 	var foe := str(enemy.name) if enemy != null else "ship"
 	var text := "Nobody is left standing aboard the %s. Your crew strip her hold, then pick one prize to cut loose." % foe
+	var more := DANGEROUS_TEXT if picked.size() > base else ""
 	if state != "captured":
 		var scrap := strip_scrap(enemy, c)
 		choices.append(_row("Strip her for scrap (+%d)" % scrap, "You cut her down to the frame. What is left breaks up behind you.", {"items": {"scrap": scrap}}))
 		text = "The %s hangs dead, venting. Your cutters have time for one job before she breaks up." % foe
+	text += more
 	if choices.is_empty():
 		return {}
 	return {"id": "salvage", "type": "salvage", "once": false, "title": "Salvage: %s" % foe, "text": text, "choices": choices}
