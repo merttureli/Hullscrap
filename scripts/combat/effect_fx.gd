@@ -32,7 +32,7 @@ static func _sparks(rng: RandomNumberGenerator, pos: Vector2, col: Color, n: int
 	return out
 
 
-## The entries for the "effect" event `e` of `arena` (`e["kind"]`: acid, corrode, spores, sonic, shard, frost, magnetic, split or self_room).
+## The entries for the "effect" event `e` of `arena` (`e["kind"]`: acid, corrode, spores, sonic, shard, frost, magnetic, split, intercept or self_room).
 static func of(arena, e: Dictionary) -> Array:
 	var rng := _rng(e)
 	var idx: int = e["ship"]
@@ -98,6 +98,11 @@ static func of(arena, e: Dictionary) -> Array:
 			for d in e.get("dirs", []):
 				out.append({"k": "streak", "pos": e.get("origin", pos), "dir": d, "len": 110.0, "life": 0.3, "color": col})
 			out.append_array(_sparks(rng, pos, col, 5))
+		"intercept":  # point defence shot at a missile: a burst where it was, if it was hit
+			if bool(e.get("hit", false)):
+				out.append({"k": "flash", "pos": pos, "life": 0.3, "r": 26.0, "color": Color("#ffd27a")})
+				out.append({"k": "ring", "pos": pos, "life": 0.35, "r": 60.0, "color": Color("#ffd27a")})
+				out.append_array(_sparks(rng, pos, Color("#ffd27a"), 8, Vector2.ZERO, 200.0))
 		"self_room":
 			var at: Vector2 = e.get("room_pos", pos)
 			var has: Array = e.get("has", [])

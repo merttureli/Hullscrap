@@ -14,6 +14,8 @@ extends RefCounted
 ##   split_on_shield {count, damage_mult}  when a shield stops the shot, `count` weaker shots (damage x damage_mult) fan out from just outside the
 ##                                    bubble and meet it again: each uses a layer, or reaches the hull where the sector is down. They do not split again.
 ##                                    Needs a shot with a speed (bolt, flak, missile), not a laser or beam
+##   intercept {range}                a turret's point defence: it turns on the nearest enemy missile within `range` px (before any ship) and each
+##                                    shot rolls the turret's accuracy to destroy it. Turrets only (Weapons.missile_target)
 ## On the shooter, per shot:
 ##   self_room {o2_drain, heat, fire_chance, shock_dps, scorch_dps}   the room of the weapon's inside half loses o2_drain of its air, its parts gain `heat`, a fire may start, organic crew take shock_dps a second while it fires,
 ##                                    crew without the heat_resistant trait take scorch_dps a second (both for the weapon's cooldown after each shot, or the beam's duration if longer)
@@ -51,6 +53,7 @@ const SPEC := {
 	"frost": {"slow": [0.01, 0.95], "seconds": [0.1, 60.0]},
 	"corrode": {"resist_mult": [0.05, 1.0], "seconds": [0.1, 60.0]},
 	"split_on_shield": {"count": [1.0, 8.0], "damage_mult": [0.05, 1.0]},
+	"intercept": {"range": [20.0, 2000.0]},
 	"needs_operator": {"else_mult": [MIN_MULT, 1.0]},
 	"needs_crew_in_room": {"count": [1.0, 12.0], "else_mult": [MIN_MULT, 1.0]},
 }
@@ -113,6 +116,8 @@ static func problems(entry: Dictionary, species: Array = []) -> Array[String]:
 			_self_room_problems(out, v)
 		elif SPEC.has(k):
 			_spec_problems(out, str(k), v, species)
+			if k == "intercept" and not bool(entry.get("turret", false)):
+				out.append("intercept needs a turret (turret: true)")
 			if k == "split_on_shield" and str(entry.get("kind", "")) in ["laser", "beam"]:
 				out.append("split_on_shield needs a shot that flies (a bolt, flak or missile), not a %s" % str(entry["kind"]))
 		else:

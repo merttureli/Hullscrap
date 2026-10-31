@@ -523,3 +523,123 @@ func test_the_validator_knows_turn_mult() -> void:
 	for bad in [0, -1.0, "fast"]:
 		var p := PartEffects.problems({"id": "a", "type": "passive", "effects": {"turn_mult": bad}})
 		check(p.any(func(s): return "turn_mult" in s), "%s is caught (%s)" % [str(bad), str(p)])
+
+
+# --- 7. missile interception ---------------------------------------------------------------------------------------
+
+const VOLLEY := {"kind": "missile", "shots": 3, "spread": 16.0, "damage": 4.0, "cooldown": 0.0, "range": 1400}
+
+
+## Ship 0 fires a volley of three missiles at ship 1 (the room ship), which has a point-defence turret on its west side
+## with `intercept` {range} and the given accuracy; `with_turret` false leaves it out.
+func _volley_duel(with_turret: bool, accuracy := 1.0, range_px := 300.0, seed_value := 1, cooldown := 0.15) -> void:
+	_duel(VOLLEY, null, seed_value)
+	arena.weapons.defs["tg_pd"] = {"kind": "bolt", "damage_type": "kinetic", "damage": 1.0, "cooldown": cooldown, "range": 900.0, "speed": 900.0,
+		"turret": true, "arc": 300.0, "track": 720.0, "accuracy": accuracy, "effects": {"intercept": {"range": range_px}}}
+	if with_turret:
+		arena.add_mount(1, "tg_pd", Vector2(10.5, 15.5), true, Vector2.LEFT)
+
+
+func _fly_volley(seconds := 5.0) -> void:
+	check(_shoot(aim), "(the volley fires)")
+	eq(arena.projectiles.size(), 3, "(three missiles)")
+	arena.step(seconds)
+
+
+func test_a_point_defence_turret_shoots_a_missile_volley_down() -> void:
+	_volley_duel(false)
+	_fly_volley()
+	var undefended := _hits().size()
+	check(undefended >= 2, "without the turret the missiles hit the hull (%d hits)" % undefended)
+	_volley_duel(true)
+	_fly_volley()
+	var shot := _events("effect").filter(func(e): return e["kind"] == "intercept" and e["hit"])
+	eq(shot.size(), 3, "with it every missile is shot down (accuracy 1)")
+	eq(_hits().size(), 0, "and none reaches the hull")
+	eq(arena.projectiles.size(), 0, "nothing is left flying")
+	eq(arena.projectiles.filter(func(p): return p["owner"] == 1).size(), 0, "(the turret fired no real shots: its intercepts are instant)")
+	check(_events("beam").size() >= 3, "each shot shows a tracer")
+
+
+func test_the_real_flak_screen_and_drone_picket_lose_a_volley_missiles() -> void:
+	_volley_duel(false)
+	_fly_volley()
+	var undefended := _hits().size()
+	for id in ["human_flak_screen", "kett_drone_picket"]:
+		_volley_duel(false)
+		var uid := arena.add_mount(1, id, Vector2(10.5, 15.5), true, Vector2.LEFT)
+		check(uid < 0, "(%s mounted)" % id)
+		_fly_volley()
+		var shot := _events("effect").filter(func(e): return e["kind"] == "intercept" and e["hit"]).size()
+		print("tech_gaps: %s shot down %d of 3 missiles, %d hull hits (undefended: %d)" % [id, shot, _hits().size(), undefended])
+		check(shot >= 1, "%s shoots down at least one of three missiles (%d)" % [id, shot])
+		check(_hits().size() < undefended, "so fewer reach the hull than undefended (%d against %d)" % [_hits().size(), undefended])
+
+
+func test_a_miss_leaves_the_missile_flying() -> void:
+	_volley_duel(true, 0.0)
+	_fly_volley()
+	var shots := _events("effect").filter(func(e): return e["kind"] == "intercept")
+	check(shots.size() >= 1 and shots.all(func(e): return not e["hit"]), "accuracy 0: it fires and misses (%d shots)" % shots.size())
+	check(_hits().size() >= 2, "so the missiles still arrive")
+
+
+func test_it_only_looks_at_missiles_inside_its_range() -> void:
+	_volley_duel(true, 1.0, 40.0)  # a range of 40 px: the missiles are never that close to the turret before they hit
+	var w: Dictionary = arena.weapons.def("tg_pd")
+	var m: Dictionary = arena.ships[1].mounts.keys().filter(func(u): return arena.ships[1].mounts[u]["id"] == "tg_pd").map(func(u): return arena.ships[1].mounts[u])[0]
+	var at: Vector2 = arena.local_to_world(1, m["pos"])
+	arena.projectiles.append({"owner": 0, "w": arena.weapons.def("tg_gun"), "pos": at + Vector2(-200.0, 0.0), "vel": Vector2(300.0, 0.0), "left": 1000.0, "target": 1, "bounces": 0, "skip": {}})
+	check(arena.weapons.missile_target(arena, 1, m, w) == null, "a missile 200 px away is outside a range of 40")
+	arena.weapons.defs["tg_pd"]["effects"]["intercept"]["range"] = 300.0
+	check(arena.weapons.missile_target(arena, 1, m, arena.weapons.def("tg_pd")) != null, "and inside a range of 300")
+	arena.projectiles.append({"owner": 0, "w": arena.weapons.def("tg_gun"), "pos": at + Vector2(-100.0, 0.0), "vel": Vector2(300.0, 0.0), "left": 1000.0, "target": 1, "bounces": 0, "skip": {}})
+	var near_one = arena.weapons.missile_target(arena, 1, m, arena.weapons.def("tg_pd"))
+	near(near_one["pos"].distance_to(at), 100.0, "the nearest one is the target")
+	arena.projectiles.append({"owner": 1, "w": arena.weapons.def("tg_gun"), "pos": at + Vector2(-20.0, 0.0), "vel": Vector2(-300.0, 0.0), "left": 1000.0, "target": 0, "bounces": 0, "skip": {}})
+	near(arena.weapons.missile_target(arena, 1, m, arena.weapons.def("tg_pd"))["pos"].distance_to(at), 100.0, "its own ship's missiles are not shot at")
+
+
+func test_a_turret_without_intercept_ignores_missiles_and_a_missile_comes_before_a_ship() -> void:
+	_volley_duel(false)
+	arena.weapons.defs["tg_plain"] = arena.weapons.defs["tg_pd"].duplicate(true)
+	arena.weapons.defs["tg_plain"].erase("effects")
+	arena.add_mount(1, "tg_plain", Vector2(10.5, 15.5), true, Vector2.LEFT)
+	_fly_volley()
+	eq(_events("effect").filter(func(e): return e["kind"] == "intercept").size(), 0, "a plain turret never intercepts")
+	# with intercept, a missile in range comes before the ship in range: the turret shoots the missile, not a real shot at the ship
+	_volley_duel(true)
+	_shoot(aim)
+	arena.step(1.4)
+	check(not _events("effect").filter(func(e): return e["kind"] == "intercept").is_empty(), "it shot at a missile while the enemy ship was in range of its normal fire too")
+	eq(arena.projectiles.filter(func(p): return p["owner"] == 1).size(), 0, "and fired no shot at the ship in that time")
+
+
+func test_point_defence_fights_replay_exactly() -> void:
+	var snaps := []
+	for run in 2:
+		_volley_duel(true, 0.6, 300.0, 7)
+		_fly_volley()
+		snaps.append(arena.snapshot())
+	eq(snaps[0], snaps[1], "the same seed gives the same interceptions")
+
+
+func test_the_validator_knows_intercept() -> void:
+	eq(Effects.problems({"turret": true, "effects": {"intercept": {"range": 300}}}), [], "a turret may intercept")
+	var cases := [
+		[{"turret": true, "effects": {"intercept": {}}}, "needs 'range'"],
+		[{"turret": true, "effects": {"intercept": {"range": 5}}}, "intercept.range"],
+		[{"turret": true, "effects": {"intercept": {"range": 300, "arc": 3}}}, "unknown key"],
+		[{"turret": false, "effects": {"intercept": {"range": 300}}}, "needs a turret"],
+		[{"effects": {"intercept": {"range": 300}}}, "needs a turret"],
+	]
+	for case in cases:
+		var p := Effects.problems(case[0])
+		check(p.any(func(s): return case[1] in s), "%s is caught as '%s' (got %s)" % [str(case[0]), case[1], str(p)])
+
+
+func test_the_flak_screen_and_the_drone_picket_intercept_at_300_px() -> void:
+	var w = Weapons.new()
+	for id in ["human_flak_screen", "kett_drone_picket"]:
+		near(float(w.defs[id]["effects"]["intercept"]["range"]), 300.0, "%s intercepts missiles within 300 px" % id)
+		check(bool(w.defs[id]["turret"]), "%s is a turret" % id)
