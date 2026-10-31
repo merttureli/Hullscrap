@@ -456,6 +456,7 @@ func test_the_real_data_and_the_fixture_pack_validate() -> void:
 	eq(Events.new().validate(), [], "and its events: unlock and ending ids exist")
 	eq(Unlocks.for_ship("fx_wisp_c"), "fx_wisp", "an unlock names the ship it opens")
 	eq(Unlocks.for_ship("starter_courier"), "", "and the starters have none")
+	check(not Content.has("ships", "fx_not_built"), "a pending starter unlock names a design not built yet, and still validates")
 	eq(Endings.title_of("fx_end"), "The Fixture Ending", "an ending's title")
 	eq(Endings.title_of("nope"), "The End", "an unknown one reads The End")
 	_done()

@@ -2,7 +2,7 @@ extends RefCounted
 ## The unlock catalogue (data/unlocks.json and the unlocks.json of every pack, docs/CONTENT.md sections 13 and 19),
 ## read through the content loader. An unlock is something a landmark or an ending opens for the next runs: a starter
 ## ship, a starting species, a starting blueprint, a map variant or a hull skin. Which ones a player has is the
-## profile's (profile.gd); the event effect `unlock` earns one (events.gd). Entry: {id, kind, name, how, payload}.
+## profile's (profile.gd); the event effect `unlock` earns one (events.gd). Entry: {id, kind, name, how, payload}; `pending: true` marks a starter_ship whose design is not built yet (it validates, and the hangar has nothing to show for it until the design lands).
 ## No nodes, no drawing.
 
 const Content = preload("res://scripts/data/content.gd")
@@ -11,7 +11,7 @@ const Content = preload("res://scripts/data/content.gd")
 const KINDS := {"starter_ship": "ship", "species_start": "species", "blueprint": "blueprint", "map_variant": "variant", "skin": "skin"}
 ## How each kind is called on the ending screen.
 const LABELS := {"starter_ship": "starter ship", "species_start": "starting species", "blueprint": "starting blueprint", "map_variant": "map variant", "skin": "hull skin"}
-const KEYS: Array[String] = ["id", "kind", "name", "how", "payload", "override", "reason"]
+const KEYS: Array[String] = ["id", "kind", "name", "how", "payload", "override", "reason", "pending"]
 
 
 static func all() -> Array:
@@ -69,7 +69,7 @@ static func validate() -> Array[String]:
 			var value = u["payload"].get(key)
 			if not (value is String and value != ""):
 				bad.call("payload needs \"%s\" (a %s id)" % [key, kind])
-			elif kind == "starter_ship" and not Content.has("ships", value):
+			elif kind == "starter_ship" and not Content.has("ships", value) and not u.get("pending", false):
 				bad.call("payload ship '%s' is not a design in data/ships or a pack's ships/" % value)
 			elif kind == "species_start" and not Content.has("species", value):
 				bad.call("payload species '%s' is unknown" % value)

@@ -104,17 +104,32 @@ func _index_pages() -> void:
 					_pages[eff["goto"]] = true
 
 
-## Read every data/logs/*.json ({"logs": [{id, title, ship, faction, text}]}) into `logs`.
+## Read every data/logs/*.json ({"logs": [{id, title, ship, faction, text}]}) into `logs`, then each pack's
+## logs.json and logs/*.json, in pack order.
 func _load_logs() -> void:
 	logs.clear()
-	var names: Array = Array(DirAccess.get_files_at(LOGS_DIR)).filter(func(f): return f.ends_with(".json"))
-	names.sort()
-	for f in names:
-		var data = JSON.parse_string(FileAccess.get_file_as_string(LOGS_DIR + "/" + f))
+	var paths: Array[String] = _json_files(LOGS_DIR)
+	for p in Content.packs():
+		if FileAccess.file_exists(p["dir"] + "/logs.json"):
+			paths.append(p["dir"] + "/logs.json")
+		paths.append_array(_json_files(p["dir"] + "/logs"))
+	for path in paths:
+		var data = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if data is Dictionary and data.get("logs") is Array:
 			for l in data["logs"]:
 				if l is Dictionary and l.get("id") is String:
 					logs[l["id"]] = l
+
+
+static func _json_files(dir: String) -> Array[String]:
+	var out: Array[String] = []
+	if not DirAccess.dir_exists_absolute(dir):
+		return out
+	var names: Array = Array(DirAccess.get_files_at(dir)).filter(func(f): return f.ends_with(".json"))
+	names.sort()
+	for f in names:
+		out.append(dir + "/" + f)
+	return out
 
 
 func _load_file(path: String) -> void:
@@ -498,9 +513,10 @@ static func _ids_of(path: String, key: String) -> Dictionary:
 
 
 static func _known() -> Dictionary:
-	var items := _ids_of("res://data/items.json", "items")
-	items.merge(_ids_of("res://data/components.json", "components"))
-	items.merge(_ids_of("res://data/materials.json", "materials"))
+	var items := {}  # core and pack items, components and materials
+	for kind in ["items", "components", "materials"]:
+		for id in Content.ids(kind):
+			items[id] = true
 	items["credits"] = true
 	items["fuel"] = true
 	var places := {}
@@ -648,7 +664,7 @@ func _check_items(items, where: String, known: Dictionary, bad: Callable, positi
 		return
 	for id in items:
 		if not known["items"].has(id):
-			bad.call("%s: unknown item id '%s' (not in items.json, components.json, materials.json, credits or fuel)" % [where, id])
+			bad.call("%s: unknown item id '%s' (not an item, component or material of the core or a pack, credits or fuel)" % [where, id])
 		if not _is_int(items[id]) or (positive and items[id] <= 0) or items[id] == 0:
 			bad.call("%s: the count of '%s' must be a whole number%s" % [where, id, ", more than 0" if positive else ", not 0"])
 
@@ -707,7 +723,7 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 		bad.call("%s: goto '%s' is not an event id in data/events" % [where, eff["goto"]])
 	for l in _list(eff.get("log")):
 		if not logs.has(l):
-			bad.call("%s: unknown log id '%s' (not in data/logs/*.json)" % [where, l])
+			bad.call("%s: unknown log id '%s' (not in data/logs/*.json or a pack's logs)" % [where, l])
 	for r in _list(eff.get("reveal")):
 		if not (r is String and (known["places"].has(r) or _is_node_id(r) or NODE_TYPES.has(r))):
 			bad.call("%s: reveal '%s' is not a place id, a node type or a node id like n07" % [where, r])
