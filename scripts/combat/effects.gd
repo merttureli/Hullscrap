@@ -11,6 +11,9 @@ extends RefCounted
 ##   magnetic {pull}                  the target ship is pulled toward the shooter: it gains `pull` px/s at PULL_MASS (lighter ships more); debris within DEBRIS_RADIUS is dragged too
 ##   frost {slow, seconds}            the system hit (a wall: the systems in the room hit) charges slower: its weapon cooldown, shield recharge and ability cooldowns run at 1 - slow
 ##   corrode {resist_mult, seconds}   the wall or door hit takes 1 / resist_mult times the damage
+##   split_on_shield {count, damage_mult}  when a shield stops the shot, `count` weaker shots (damage x damage_mult) fan out from just outside the
+##                                    bubble and meet it again: each uses a layer, or reaches the hull where the sector is down. They do not split again.
+##                                    Needs a shot with a speed (bolt, flak, missile), not a laser or beam
 ## On the shooter, per shot:
 ##   self_room {o2_drain, heat, fire_chance, shock_dps}   the room of the weapon's inside half loses o2_drain of its air, its parts gain `heat`, a fire may start, organic crew take shock_dps a second while it fires
 ##   needs_operator {species, else_mult, stat?}           full damage (stat "damage", the default) or rate ("rate") only while a crew member of `species` (an id or a list) mans it; else x else_mult
@@ -34,6 +37,8 @@ const PULL_MASS := 1000.0  ## the ship mass at which magnetic `pull` is a speed 
 const DEBRIS_RADIUS := 320.0  ## px round the impact within which magnetic drags debris
 const DEBRIS_DAMPING := 0.25  ## per second
 const MIN_MULT := 0.05  ## the smallest else_mult
+const SPLIT_BACK := 8.0  ## px outside the bubble that the shots of a split_on_shield start
+const SPLIT_FAN_DEG := 25.0  ## the split shots fan out this many degrees each side of the shot that was stopped
 const ACID_MAX_CELLS := 12  ## the most cells one acid cloud (a `spread` acid) eats at once
 ## Required numbers of each effect: key -> [lowest, highest]. Optional keys are in OPTIONAL.
 const SPEC := {
@@ -44,6 +49,7 @@ const SPEC := {
 	"magnetic": {"pull": [0.001, 1000.0]},
 	"frost": {"slow": [0.01, 0.95], "seconds": [0.1, 60.0]},
 	"corrode": {"resist_mult": [0.05, 1.0], "seconds": [0.1, 60.0]},
+	"split_on_shield": {"count": [1.0, 8.0], "damage_mult": [0.05, 1.0]},
 	"needs_operator": {"else_mult": [MIN_MULT, 1.0]},
 	"needs_crew_in_room": {"count": [1.0, 12.0], "else_mult": [MIN_MULT, 1.0]},
 }
@@ -106,6 +112,8 @@ static func problems(entry: Dictionary, species: Array = []) -> Array[String]:
 			_self_room_problems(out, v)
 		elif SPEC.has(k):
 			_spec_problems(out, str(k), v, species)
+			if k == "split_on_shield" and str(entry.get("kind", "")) in ["laser", "beam"]:
+				out.append("split_on_shield needs a shot that flies (a bolt, flak or missile), not a %s" % str(entry["kind"]))
 		else:
 			out.append("unknown effect '%s'" % str(k))
 	return out
@@ -162,9 +170,10 @@ static func _check(out: Array[String], what: String, v, lo: float, hi: float, wh
 
 # --- state ----------------------------------------------------------------------------------------------
 
-## A fresh arena.fx: {timed (running effects, see _timed), corroded (Vector3i(ship, x, y) -> [resist_mult, seconds left]), debris (bodies {pos, vel, mass} magnetic can drag)}.
+## A fresh arena.fx: {timed (running effects, see _timed), corroded (Vector3i(ship, x, y) -> [resist_mult, seconds left]), debris (bodies {pos, vel, mass} magnetic can drag),
+## spawn (shots a split_on_shield made during this step: [owner, weapon, origin, dir]; Projectiles.step launches them)}.
 static func fresh() -> Dictionary:
-	return {"timed": [], "corroded": {}, "debris": []}
+	return {"timed": [], "corroded": {}, "debris": [], "spawn": []}
 
 
 ## A piece of debris drifting in the arena for magnetic to drag: `mass` in the units of ship mass. Returns its index.
@@ -264,6 +273,30 @@ static func on_hit(arena, owner: int, idx: int, w: Dictionary, first: Dictionary
 		_frost(arena, idx, id, fx["frost"], first, room)
 	if fx.has("magnetic"):
 		_magnetic(arena, owner, idx, id, w, fx["magnetic"], cell)
+
+
+## A shot of weapon `w`, fired by ship `owner`, was stopped by the shield of ship `idx` at the world point `point`, flying along the unit vector `dir`:
+## split_on_shield sends its weaker shots on (queued in arena.fx["spawn"], Projectiles.step launches them), fanned out from just outside the bubble.
+static func on_shield(arena, owner: int, idx: int, w: Dictionary, point: Vector2, dir: Vector2) -> void:
+	var fx := of(w)
+	if not fx.has("split_on_shield") or not w.has("speed"):
+		return
+	var spec: Dictionary = fx["split_on_shield"]
+	var mult := float(spec["damage_mult"])
+	var child := w.duplicate()
+	child["damage"] = float(w["damage"]) * mult
+	child["fx_k"] = float(w.get("fx_k", 1.0)) * mult  # shard and magnetic scale with it
+	var kept := fx.duplicate()
+	kept.erase("split_on_shield")  # a split shot does not split again
+	child["effects"] = kept
+	var n := roundi(float(spec["count"]))
+	var origin := point - dir * SPLIT_BACK
+	var dirs := []
+	for i in n:
+		var d := dir.rotated(0.0 if n == 1 else deg_to_rad(SPLIT_FAN_DEG) * (2.0 * float(i) / float(n - 1) - 1.0))
+		dirs.append(d)
+		arena.fx["spawn"].append([owner, child, origin, d])
+	_log(arena, idx, arena.world_to_cell(idx, point), "split", str(w.get("id", "")), {"pos": point, "origin": origin, "dirs": dirs})
 
 
 ## The room a shot that struck `cell` heading `dir` (ship-local unit vector) reaches: the room at the cell, else the first

@@ -53,6 +53,14 @@ func _shoot(at := Vector2.INF) -> bool:
 	return arena.fire(0, gun, arena.cell_to_world(1, Vector2i(8, 15)) if at == Vector2.INF else at)
 
 
+## Step the arena until an event of `type` is logged (at most `max_s` seconds).
+func _until(type: String, max_s := 3.0) -> void:
+	var t := 0.0
+	while t < max_s and _events(type).is_empty():
+		arena.step(1.0 / 60.0)
+		t += 1.0 / 60.0
+
+
 func _events(type: String) -> Array:
 	return arena.events.filter(func(e): return e["type"] == type)
 
@@ -250,3 +258,92 @@ func test_the_magma_spitter_and_the_rot_pod_spread() -> void:
 	var w = Weapons.new()
 	for id in ["basalt_magma_spitter", "sporeling_rot_pod"]:
 		check(float(w.defs[id]["effects"]["acid"].get("spread", 0.0)) > 0.0, "%s has an acid spread" % id)
+
+
+# --- 3. split on a shield --------------------------------------------------------------------------------------
+
+func _splitter(count := 3, mult := 0.5) -> Dictionary:
+	return {"kind": "bolt", "speed": 800.0, "damage": 4.0, "effects": {"split_on_shield": {"count": count, "damage_mult": mult}}}
+
+
+func _hits() -> Array:
+	return _events("hit").filter(func(e): return e["ship"] == 1)
+
+
+func test_a_shot_a_shield_stops_splits_into_weaker_shots_that_meet_the_bubble_again() -> void:
+	_duel(_splitter(), _shielded("prismatic_lattice_shield"))  # 4 layers in each of 4 sectors
+	var sector_before := 0.0
+	for x in arena.ships[1].sector_layers:
+		sector_before += float(x)
+	check(_shoot(), "fires")
+	_until("shield")
+	eq(_events("shield").size(), 1, "the shot itself is stopped first")
+	eq(_events("effect").filter(func(e): return e["kind"] == "split").size(), 1, "and it splits (reported for the picture)")
+	eq(arena.projectiles.size(), 3, "into three")
+	arena.step(0.6)
+	eq(_events("shield").size(), 4, "each fragment is stopped by the bubble in its turn: 1 + 3 layers used")
+	var sector_after := 0.0
+	for x in arena.ships[1].sector_layers:
+		sector_after += float(x)
+	near(sector_before - sector_after, 4.0, "four layers of the sector are gone")
+	eq(_hits().size(), 0, "and nothing reached the hull")
+	eq(arena.projectiles.size(), 0, "no fragment splits again")
+
+
+func test_fragments_reach_the_hull_past_a_broken_layer_with_their_weaker_damage() -> void:
+	_duel(_splitter(3, 0.5), _shielded("shield_mk1"))  # one sector, one layer
+	var wall_hp := target.grid.hp_of(Vector2i(3, 15))
+	check(_shoot(), "fires")
+	arena.step(1.0)
+	eq(_events("shield").size(), 1, "the one layer stops the shot")
+	var hits := _hits()
+	check(hits.size() >= 1, "and the fragments, with the bubble down, hit the hull (%d hits)" % hits.size())
+	for h in hits:
+		check(float(h["dealt"]) <= 2.0 + 1e-6, "a fragment does 4 x 0.5 at most (dealt %s)" % str(h["dealt"]))
+	check(target.grid.hp_of(Vector2i(3, 15)) >= wall_hp - 2.0 * 3.0 - 1e-6, "(it is the hull they hit)")
+
+
+func test_a_shot_with_no_shield_in_the_way_does_not_split() -> void:
+	_duel(_splitter(), _shielded("shield_mk1"))
+	arena.ships[1].ion_lock = 100.0  # the bubble is offline: nothing stops the shot
+	_shoot()
+	arena.step(0.6)
+	eq(_events("shield").size(), 0, "(no shield event)")
+	eq(_events("effect").filter(func(e): return e["kind"] == "split").size(), 0, "no split")
+	eq(_hits().size(), 1, "one hit, the shot itself")
+
+
+func test_a_split_keeps_the_other_effects_scaled_and_one_fragment_is_one_shot() -> void:
+	var e := _splitter(1, 0.5)
+	e["effects"]["shard"] = {"splinters": 2, "dmg": 1.0}
+	_duel(e, _shielded("shield_mk1"))
+	_shoot()
+	_until("shield")
+	eq(arena.projectiles.size(), 1, "count 1 is one fragment")
+	var w: Dictionary = arena.projectiles[0]["w"]
+	near(float(w["damage"]), 2.0, "with half the damage")
+	near(float(w["fx_k"]), 0.5, "and half the shard splinter damage")
+	check(not Effects.of(w).has("split_on_shield") and Effects.of(w).has("shard"), "it keeps its shard and cannot split again")
+
+
+func test_the_validator_knows_split_on_shield() -> void:
+	eq(Effects.problems({"kind": "bolt", "effects": {"split_on_shield": {"count": 3, "damage_mult": 0.35}}}), [], "a good one")
+	var cases := [
+		[{"kind": "bolt", "effects": {"split_on_shield": {"count": 3}}}, "needs 'damage_mult'"],
+		[{"kind": "bolt", "effects": {"split_on_shield": {"count": 2.5, "damage_mult": 0.5}}}, "whole number"],
+		[{"kind": "bolt", "effects": {"split_on_shield": {"count": 0, "damage_mult": 0.5}}}, "split_on_shield.count"],
+		[{"kind": "bolt", "effects": {"split_on_shield": {"count": 3, "damage_mult": 1.5}}}, "damage_mult"],
+		[{"kind": "bolt", "effects": {"split_on_shield": {"count": 3, "damage_mult": 0.5, "angle": 3}}}, "unknown key"],
+		[{"kind": "laser", "effects": {"split_on_shield": {"count": 3, "damage_mult": 0.5}}}, "not a laser"],
+		[{"kind": "beam", "effects": {"split_on_shield": {"count": 3, "damage_mult": 0.5}}}, "not a beam"],
+	]
+	for case in cases:
+		var p := Effects.problems(case[0])
+		check(p.any(func(s): return case[1] in s), "%s is caught as '%s' (got %s)" % [str(case[0]), case[1], str(p)])
+
+
+func test_the_refractor_splits_into_three() -> void:
+	var w = Weapons.new()
+	var spec: Dictionary = w.defs["prismatic_refractor"]["effects"]["split_on_shield"]
+	eq(int(spec["count"]), 3, "the Refractor splits 1 into 3")
+	check(float(spec["damage_mult"]) < 1.0, "weaker")
