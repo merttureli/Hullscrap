@@ -1001,6 +1001,17 @@ Source and licence of every art and audio file in the repo.
 | `art/crew/vellum/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/vellum/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/vellum/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/head.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/head_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/head_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/legs.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/warden_frame/torso_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/wisp/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/wisp/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/wisp/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
