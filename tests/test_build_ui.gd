@@ -1,0 +1,383 @@
+extends "res://tests/base_test.gd"
+## The build UI (docs/waves/content_loop_1.md, priority 0.3) without a screen: the palette's tabs and cards
+## (scripts/build/palette.gd), picking with the keys and the mouse, the selection card, the mode bar, the log,
+## the note at the cursor while dragging, the red alert, and that no two HUD panels overlap (scripts/ui/hud.gd).
+
+const BuildMode = preload("res://scripts/build/build_mode.gd")
+const BuildSession = preload("res://scripts/ship/build_session.gd")
+const Palette = preload("res://scripts/build/palette.gd")
+const Hud = preload("res://scripts/ui/hud.gd")
+const RedAlert = preload("res://scripts/sim/red_alert.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const Ship = preload("res://scripts/ship/ship.gd")
+const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
+const TileDefs = preload("res://scripts/ship/tile_defs.gd")
+const Shapes = preload("res://scripts/ship/shapes.gd")
+const MapView = preload("res://scripts/ui/map_view.gd")
+const ShieldPanel = preload("res://scripts/ui/shield_panel.gd")
+const CraftingPanel = preload("res://scripts/ui/crafting_panel.gd")
+const HelpPanel = preload("res://scripts/ui/help_panel.gd")
+const Fixture = preload("res://tests/fixture_ship.gd")
+const AT := Vector2i(8, 8)
+
+
+## The front door's part the HUD uses: the help panel.
+class FakeFront extends Node:
+	var help: Control
+
+
+## A build mode on a 20x20 round hull with `cargo`, the mouse on AT, and its HUD laid out for 1600x900.
+func _build(cargo := {"scrap": 200, "copper": 20}) -> BuildMode:
+	var defs := TileDefs.new()
+	defs.load_file("res://data/tiles.json")
+	var g := ShipGrid.new(Vector2i(20, 20), defs)
+	g.fill_circle_hull(9.0)
+	var ship := Ship.new("T", g)
+	ship.inventory.load_dict(cargo)
+	var sim := ShipSim.new()
+	sim.ships = [ship]
+	var b := BuildMode.new()
+	b.sim = sim
+	b.selected = "floor"
+	b.hover = AT
+	b.hud = Hud.new()
+	b.hud.setup(b)
+	return b
+
+
+func _done(b: BuildMode) -> void:
+	b.hud.free()
+	b.sim.free()
+	b.free()
+
+
+func _key(b: BuildMode, code: Key, shift := false) -> void:
+	var e := InputEventKey.new()
+	e.keycode = code
+	e.pressed = true
+	e.shift_pressed = shift
+	b._on_key(e)
+
+
+func _keys(cards: Array) -> Array:
+	return cards.map(func(e): return e["key"])
+
+
+func test_the_palette_lists_every_placeable_id_by_category() -> void:
+	var b := _build()
+	var ship: Ship = b.ship
+	var structure := _keys(Palette.entries(Palette.Tab.STRUCTURE, ship, b.session.cable_cost))
+	for id in ship.grid.defs.ids():
+		check(structure.has("tile:" + id), "Structure has the tile " + id)
+	check(structure.has("cable"), "and the cable")
+	var shapes := _keys(Palette.entries(Palette.Tab.SHAPES, ship, b.session.cable_cost))
+	for id in ship.grid.defs.ids():
+		for p in Shapes.piece_ids():
+			var want: bool = p != Shapes.FULL and ship.grid.tile_flag(id, "solid") and not ship.grid.tile_flag(id, "door")
+			eq(shapes.has("piece:%s:%s" % [p, id]), want, "Shapes has %s in %s exactly when it is a wall shape" % [p, id])
+	var seen := {}
+	for tab in [Palette.Tab.SYSTEMS, Palette.Tab.WEAPONS, Palette.Tab.ENGINES, Palette.Tab.UTILITY]:
+		for e in Palette.entries(tab, ship, b.session.cable_cost):
+			check(not seen.has(e["id"]), e["id"] + " is on one tab only")
+			seen[e["id"]] = tab
+	for id in ship.components.ids():
+		check(seen.has(id), "every part is on a tab: " + id)
+	for id in seen:
+		var fam := str(ship.components.def(id).get("family", ""))
+		eq(seen[id] == Palette.Tab.WEAPONS, fam == "weapon", id + ": Weapons holds the weapons")
+		eq(seen[id] == Palette.Tab.ENGINES, fam == "engine", id + ": Engines holds the engines")
+	for id in ["intake_mk1", "shield_mk1", "oxygen_gen", "bed", "robot_arm", "fabricator"]:
+		eq(seen.get(id), Palette.Tab.UTILITY, id + " is a utility")
+	for id in ["reactor_mk1", "helm", "medbay", "radiator"]:
+		eq(seen.get(id), Palette.Tab.SYSTEMS, id + " is a system")
+	eq(_keys(Palette.entries(Palette.Tab.CARGO, ship, b.session.cable_cost)), [], "an empty hold lists nothing but the top bar's materials")
+	ship.inventory.add("laser_mk1", 2)
+	ship.inventory.add("plasma_cell", 3)
+	eq(_keys(Palette.entries(Palette.Tab.CARGO, ship, b.session.cable_cost)), ["part:laser_mk1", "item:plasma_cell"], "Cargo: the parts held, then the rest off the top bar")
+	_done(b)
+
+
+func test_cards_follow_the_cargo_and_what_it_can_pay() -> void:
+	var b := _build({"scrap": 1, "laser_mk1": 2})
+	var ship: Ship = b.ship
+	var floor_card := Palette.tile_entry(ship, "floor")
+	check(floor_card["ok"], "1 scrap pays for a floor")
+	var wall := Palette.tile_entry(ship, "wall")
+	check(not wall["ok"], "but not for a steel wall (2 scrap)")
+	eq(wall["why"], "short of 1 scrap", "and it says what is short")
+	eq(Palette.tile_entry(ship, "door")["cost"], {"scrap": 6, "copper": 2}, "a door costs its two cells")
+	var laser := Palette.part_entry(ship, "laser_mk1")
+	check(laser["ok"] and laser["count"] == 2, "a held part: ok, x2")
+	eq(laser["out_size"], Vector2i(4, 2), "with its outside half")
+	eq(laser["power"], -2, "and its power draw")
+	var not_held := Palette.part_entry(ship, "laser_mk2")
+	check(not not_held["ok"] and not_held["why"] == "none in cargo", "a part not held is greyed")
+	eq(Palette.part_entry(ship, "reactor_scrap_mk1")["power"], 5.4, "power is line-adjusted (scrap 6 x 0.9)")
+	eq(Palette.part_entry(ship, "leech_laser")["line"], "unique", "a unique part has the gold border")
+	eq(Palette.piece_entry(ship, "slope2", "wall")["cost"], {"scrap": 3}, "a piece costs by area, rounded up per cell")
+	ship.inventory.add("scrap", 1)
+	check(Palette.tile_entry(ship, "wall")["ok"], "more scrap and the wall is affordable")
+	var titan := Palette.tile_entry(ship, "titanium_alloy")
+	check(not titan["ok"], "no titanium, no titanium alloy")
+	ship.inventory.add("titanium", 2)
+	check(Palette.tile_entry(ship, "titanium_alloy")["ok"], "until titanium arrives")
+	_done(b)
+
+
+func test_number_keys_tab_and_t_move_through_the_palette() -> void:
+	var b := _build({"scrap": 200, "engine_mk1": 1})
+	eq(b.tab, Palette.Tab.STRUCTURE, "the palette opens on Structure")
+	_key(b, KEY_2)
+	eq([b.group, b.selected], [BuildMode.Group.TILES, "wall"], "2 picks the second card: the Steel Wall")
+	_key(b, KEY_T)
+	eq(b.tab, Palette.Tab.SHAPES, "T shapes the wall and the palette shows Shapes")
+	eq(b.tool_key(), "piece:slope45:wall", "with the slope picked")
+	for i in 3:
+		_key(b, KEY_T)
+	eq([b.tab, b.tool_key()], [Palette.Tab.STRUCTURE, "tile:wall"], "round to full: back on Structure")
+	_key(b, KEY_TAB)
+	_key(b, KEY_TAB)
+	eq(b.tab, Palette.Tab.SYSTEMS, "Tab cycles the tabs")
+	_key(b, KEY_TAB)
+	_key(b, KEY_TAB)
+	eq(b.tab, Palette.Tab.ENGINES, "to Engines")
+	eq([b.group, b.sel_component], [BuildMode.Group.SYSTEMS, "engine_mk1"], "which puts its first engine in hand")
+	_key(b, KEY_TAB, true)
+	eq(b.tab, Palette.Tab.WEAPONS, "Shift+Tab goes back")
+	_key(b, KEY_TAB)
+	eq(b.sel_component, "engine_mk1", "and coming back picks what was picked there")
+	b.set_tab(Palette.Tab.STRUCTURE)
+	eq(b.tool_key(), "tile:wall", "Structure remembers the wall")
+	var cable: Dictionary = Palette.entries(Palette.Tab.STRUCTURE, b.ship, b.session.cable_cost).back()
+	b.pick(cable)
+	eq(b.group, BuildMode.Group.CABLES, "the cable card picks the cable tool")
+	b.pick(Palette.item_entry(b.ship, "scrap"))
+	eq(b.group, BuildMode.Group.CABLES, "a cargo item picks nothing")
+	_done(b)
+
+
+func test_a_click_on_a_tab_or_a_card_picks_it() -> void:
+	var b := _build({"scrap": 200, "laser_mk1": 1})
+	var pal: Control = b.hud.palette
+	pal.click(pal.tab_rect(Palette.Tab.WEAPONS).get_center())
+	eq(b.tab, Palette.Tab.WEAPONS, "a click on a tab opens it")
+	pal.click(pal.list_rect().position + pal.card_rect(1).get_center())
+	eq(b.sel_component, Palette.entries(Palette.Tab.WEAPONS, b.ship, b.session.cable_cost)[1]["id"], "a click on a card picks it")
+	pal.hover_key = "part:laser_mk1"
+	eq(b.hud.card.entry()["id"], "laser_mk1", "the card under the mouse is what the selection card shows")
+	pal.hover_key = ""
+	eq(b.hud.card.entry()["key"], b.tool_key(), "else the tool in hand")
+	_done(b)
+
+
+func test_the_selection_card_shows_the_stats_of_the_selected_def() -> void:
+	var b := _build({"scrap": 200, "engine_mk1": 1})
+	b.pick(Palette.part_entry(b.ship, "engine_mk1"))
+	var inf: Dictionary = b.hud.card.info()
+	eq(inf["title"], "Concord Thruster Mk1", "the name")
+	eq([inf["line"], inf["tier"]], ["Standard", 1], "the line and tier")
+	var rows := {}
+	for r in inf["rows"]:
+		rows[r[0]] = r[1]
+	eq(rows.get("Size"), "4x2 + 4x2 outside", "the size of both halves")
+	eq(rows.get("Power"), "-2", "the power")
+	eq(rows.get("HP"), "6 (outside 5)", "hp of both halves")
+	eq(rows.get("Thrust"), "10", "and the key stat")
+	check(inf["blurb"] != "", "the blurb")
+	check(inf["recipe"].contains("20 scrap + 10 copper"), "the recipe: " + inf["recipe"])
+	check(inf["place"].begins_with("Hull mount: outside half 4x2, pointing up"), "where it goes: " + inf["place"])
+	b.rot = 1
+	check(b.hud.card.info()["place"].contains("2x4, pointing right"), "turned, it says so")
+	b.pick(Palette.part_entry(b.ship, "laser_mk1"))
+	rows = {}
+	for r in b.hud.card.info()["rows"]:
+		rows[r[0]] = r[1]
+	eq([rows.get("Damage"), rows.get("Cooldown"), rows.get("Aim")], ["2 energy", "1.2 s", "fixed, 5 deg gimbal"], "a weapon's damage, cooldown and aim")
+	b.pick(Palette.part_entry(b.ship, "shield_mk1"))
+	inf = b.hud.card.info()
+	check(inf["rows"].has(["Layers", "1"]), "a shield's layers")
+	check(inf["abilities"][0].begins_with("Overcharge: shield key"), "and its ability: " + str(inf["abilities"]))
+	check(inf["place"].begins_with("On floor"), "an inside part goes on floor")
+	b.pick(Palette.tile_entry(b.ship, "ablative_plating"))
+	inf = b.hud.card.info()
+	check(inf["quirk"].begins_with("Ablative"), "a wall's quirk: " + inf["quirk"])
+	check(inf["rows"].has(["Resists", "energy x0.5"]), "and its resistances")
+	_done(b)
+
+
+func test_the_mode_bar_switches_modes() -> void:
+	var b := _build()
+	var main := Node.new()
+	main.add_child(b)
+	var craft_layer := Node.new()
+	craft_layer.name = "CraftLayer"
+	var craft := CraftingPanel.new()
+	craft.name = "CraftingPanel"
+	craft.sim = b.sim
+	craft_layer.add_child(craft)
+	main.add_child(craft_layer)
+	b.shields = ShieldPanel.new()
+	b.shields.sim = b.sim
+	var front := FakeFront.new()
+	front.help = HelpPanel.new()
+	b.front = front
+	var map := MapView.new()
+	map.sim = b.sim
+	map.size = Vector2(1600.0, 900.0)
+	b.drift = map
+	for panel in [craft, b.shields, front.help, map]:
+		panel.visible = false  # as their _ready leaves them in the game
+	var bar: Control = b.hud.mode_bar
+	eq(b.hud.active_mode(), "build", "build mode is lit")
+	bar.size = Vector2(bar.full_width(), 52.0)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = bar.button_rect(1).get_center()
+	bar._gui_input(click)
+	check(not b.build_on, "a click on Play leaves build mode")
+	eq(b.hud.active_mode(), "play", "and Play is lit")
+	eq(b.hud.switch_mode("build"), "build", "Build")
+	check(b.build_on, "goes back")
+	eq(b.hud.switch_mode("shields"), "shields", "Shields")
+	check(b.shields.visible and b.hud.active_mode() == "shields", "opens the Shields tab, lit")
+	b.shields.close()
+	eq(b.hud.switch_mode("crafting"), "crafting", "Crafting")
+	check(craft.visible and b.hud.active_mode() == "crafting", "opens the crafting panel, lit")
+	craft.close()
+	eq(b.hud.switch_mode("help"), "help", "Help")
+	check(front.help.visible and b.hud.active_mode() == "help", "opens How to play, lit")
+	front.help.close()
+	eq(b.hud.switch_mode("map"), "map", "Map")
+	check(map.visible and not b.build_on, "opens the map, out of build mode")
+	eq(b.hud.active_mode(), "map", "lit")
+	b.combat = true
+	eq(b.hud.switch_mode("build"), "", "nothing switches in a fight")
+	b.combat = false
+	main.remove_child(b)
+	for n in [map, front.help, front, b.shields, main]:
+		n.free()
+	_done(b)
+
+
+func test_no_hud_panels_overlap() -> void:
+	var b := _build({"scrap": 200, "laser_mk1": 1})
+	for i in 12:
+		b.ship.log_event("a long chronicle line about something that happened on the ship, number %d" % i)
+	for view in [Vector2(1600, 900), Vector2(1280, 720)]:
+		for on in [true, false]:
+			for folded in [false, true]:
+				b.build_on = on
+				b.hud.log_panel.collapsed = folded
+				b.pick(Palette.part_entry(b.ship, "laser_mk1"))
+				b.message = "a message long enough to wrap over the hints: " + "words ".repeat(40)
+				b.hud.sync(view)
+				var rects: Dictionary = b.hud.panel_rects()
+				var tag := "%s %s%s" % [str(view), "build" if on else "play", " folded" if folded else ""]
+				eq(rects.has("palette"), on, tag + ": the palette only in build mode")
+				eq(rects.has("card"), on, tag + ": the card only in build mode")
+				for n in ["top_bar", "mode_bar", "log_panel", "hints"]:
+					check(rects.has(n), tag + ": shows " + n)
+				var names: Array = rects.keys()
+				for i in names.size():
+					var r: Rect2 = rects[names[i]]
+					check(Rect2(Vector2.ZERO, view).encloses(r), "%s: %s is on screen" % [tag, names[i]])
+					check(r.size.x > 0.0 and r.size.y > 0.0, "%s: %s has room" % [tag, names[i]])
+					for j in range(i + 1, names.size()):
+						check(not r.intersects(rects[names[j]]), "%s: %s and %s do not overlap" % [tag, names[i], names[j]])
+	_done(b)
+
+
+func test_a_wall_drag_shows_its_count_and_cost_at_the_cursor() -> void:
+	var b := _build({"scrap": 9})
+	_key(b, KEY_2)  # the Steel Wall, 2 scrap
+	b.dragging = true
+	b.drag_button = MOUSE_BUTTON_LEFT
+	b.drag_mode = BuildSession.Mode.LINE
+	b.drag_start = Vector2i(4, 8)
+	b.hover = Vector2i(7, 8)
+	b._refresh_ghost()
+	eq(b.cursor_note(), {"text": "4 cells, costs 8 scrap", "bad": false}, "four walls, before the release")
+	b.hover = Vector2i(8, 8)
+	b._refresh_ghost()
+	eq(b.cursor_note(), {"text": "4 cells, costs 8 scrap, 1 refused: not enough scrap", "bad": true}, "a fifth is more than the cargo holds")
+	b.dragging = false
+	b.hover = Vector2i(0, 0)
+	b._refresh_ghost()
+	eq(b.cursor_note(), {"text": "can't: outside the hull", "bad": true}, "a hover that can't be built says why")
+	b.hover = AT
+	b._refresh_ghost()
+	eq(b.cursor_note(), {"text": "", "bad": false}, "a hover that can says nothing")
+	eq(b.hud.wanted_cursor(Vector2(800, 400)), "place", "and the cursor is the place reticle")
+	b.hover = Vector2i(0, 0)
+	b._refresh_ghost()
+	eq(b.hud.wanted_cursor(Vector2(800, 400)), "invalid", "a refused one shows the no-entry cursor")
+	eq(b.hud.wanted_cursor(Vector2(100, 400)), "", "over the palette the system cursor is back")
+	_done(b)
+
+
+func test_preview_cost_is_what_the_cargo_would_pay() -> void:
+	var b := _build({"scrap": 20})
+	var s: BuildSession = b.session
+	s.apply(s.plan(BuildSession.Mode.LINE, "floor", false, Vector2i(5, 5), Vector2i(7, 5))["changes"])
+	s.preview(s.plan(BuildSession.Mode.LINE, "wall", false, Vector2i(5, 5), Vector2i(8, 5))["changes"])
+	eq(s.last_preview_cost, {"scrap": 5}, "three floors become walls (1 more each) and one new wall (2)")
+	s.preview(s.plan(BuildSession.Mode.LINE, "floor", true, Vector2i(5, 5), Vector2i(6, 5))["changes"])
+	eq(s.last_preview_cost, {"scrap": -2}, "removing two floors gives 2 back")
+	eq(b.ship.inventory.count("scrap"), 17, "and the cargo is as it was")
+	_done(b)
+
+
+func test_red_alert_refuses_build_mode_near_a_hostile() -> void:
+	eq(RedAlert.alert_range(), 2500.0, "2,500 px, from data/build.json")
+	eq(RedAlert.can_build({"at": Vector2.ZERO, "hostiles": []}), "", "no hostiles: build away")
+	eq(RedAlert.can_build({"at": Vector2(100, 100), "hostiles": [Vector2(100, 2601)]}), "", "one 2,501 px off is far enough")
+	eq(RedAlert.can_build({"at": Vector2(100, 100), "hostiles": [Vector2(9000, 0), Vector2(100, 2500)]}), RedAlert.REASON, "one at 2,400 px is not")
+	var b := _build()
+	b.set_build(false)
+	var near := [Vector2(1200, 0)]
+	b.hostiles_source = func() -> Array: return near
+	eq(b.can_build(), "Red alert: hostiles too close to build", "a hostile from sector space")
+	_key(b, KEY_B)
+	check(not b.build_on, "B is refused")
+	eq(b.message, RedAlert.REASON, "and says why")
+	eq(b.hud.switch_mode("build"), "build", "the mode bar's Build")
+	check(not b.build_on, "is refused too")
+	near[0] = Vector2(4000, 0)
+	_key(b, KEY_B)
+	check(b.build_on, "once it is far off, B works")
+	near[0] = Vector2(10, 0)
+	_key(b, KEY_B)
+	check(not b.build_on, "and leaving build mode is never refused")
+	_done(b)
+
+
+func test_the_log_folds_and_shows_the_crew() -> void:
+	var b := _build()
+	var log: Control = b.hud.log_panel
+	check(log.lines()[0][0].begins_with("Crew: "), "the crew line comes first")
+	b.ship.log_event("Hull breached")
+	check(log.lines().back()[0].ends_with("Hull breached"), "the newest chronicle line last")
+	var open_h: float = log.wanted_height()
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = Vector2(20, 10)
+	log._gui_input(click)
+	check(log.collapsed and log.wanted_height() < open_h, "a click on the title folds it")
+	log._gui_input(click)
+	check(not log.collapsed, "and opens it again")
+	_done(b)
+
+
+func test_the_top_bar_shows_the_cargo_and_the_pause() -> void:
+	var b := _build({"scrap": 120, "copper": 7, "credits": 300, "fuel": 4})
+	var items: Array = b.hud.top_bar.items()
+	var ids: Array = items.map(func(it): return it["id"])
+	eq(ids, Palette.BAR_IDS + ["power", "o2", "hull"], "the materials, credits and fuel, then power, O2 and hull")
+	eq([items[0]["text"], items[1]["text"], items[6]["text"], items[7]["text"]], ["120", "7", "300", "4"], "with the cargo's counts")
+	eq(items[-1]["text"], "--", "no run yet: no hull integrity")
+	eq(b.hud.top_bar.status(), ["BUILD MODE", "PAUSED: build mode"] as Array[String], "build mode pauses the world and the top bar says so")
+	b.set_build(false)
+	eq(b.hud.top_bar.status(), ["PLAY MODE"] as Array[String], "play mode runs it")
+	_done(b)

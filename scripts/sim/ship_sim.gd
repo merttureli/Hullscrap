@@ -32,7 +32,6 @@ const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
-const PAUSE_COLOR := Color("#ffd24a")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
 const MAX_FRAME := 0.25  ## longest time step a slow frame may take, seconds
 
@@ -44,7 +43,6 @@ var _rngs := {}  # ship -> its RandomNumberGenerator
 var _jobs := {}  # ship -> its Jobs board
 var _crewed := {}  # ship -> true once its own crew was spawned
 var _ability_label: Label  # the HUD line of the running abilities, made in _ready when the scene has a HUD
-var _pause_label: Label  # "PAUSED: build mode", made in _ready when the scene has a HUD
 
 
 func _init() -> void:
@@ -89,26 +87,12 @@ func _ready() -> void:
 	_ability_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_ability_label.add_theme_constant_override("outline_size", 6)
 	hud.add_child(_ability_label)
-	_pause_label = Label.new()
-	_pause_label.anchor_left = 0.5
-	_pause_label.anchor_right = 0.5
-	_pause_label.offset_left = -300.0
-	_pause_label.offset_right = 300.0
-	_pause_label.offset_top = 10.0
-	_pause_label.offset_bottom = 44.0
-	_pause_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_pause_label.add_theme_font_size_override("font_size", 22)
-	_pause_label.add_theme_color_override("font_color", PAUSE_COLOR)
-	_pause_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	_pause_label.add_theme_constant_override("outline_size", 6)
-	hud.add_child(_pause_label)
-	_pause_label.text = pause_line()
 
 
 func _process(dt: float) -> void:
 	step(minf(dt, MAX_FRAME))
 	if _ability_label != null:
-		_ability_label.text = hud_line()
+		_ability_label.text = hud_line() if not paused else ""  # paused, the build HUD's selection card has that corner
 
 
 ## The HUD line for the abilities running on the player's ship ("" when none): "Abilities: Afterburn 5 s".
@@ -117,7 +101,7 @@ func hud_line() -> String:
 	return Abilities.hud_line(ship) if ship != null else ""
 
 
-## "PAUSED: build mode" while the world is paused, else "".
+## "PAUSED: build mode" while the world is paused, else "" (the HUD's top bar shows it, hud_top_bar.gd).
 func pause_line() -> String:
 	return "PAUSED: " + (pause_reason if pause_reason != "" else "paused") if paused else ""
 
@@ -128,8 +112,6 @@ func set_paused(on: bool, reason := "") -> void:
 	var was := paused
 	paused = on
 	pause_reason = reason if on else ""
-	if _pause_label != null:
-		_pause_label.text = pause_line()
 	if was and not on:
 		for ship in ships:
 			ship.mark_dirty()  # rooms and air again, even if nothing flagged a change

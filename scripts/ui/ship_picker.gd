@@ -18,7 +18,11 @@ const DESIGNS: Array[String] = [
 	"res://data/ships/starter_prism.json",
 ]
 const CELL_PX := 32.0  ## the build view's cell size, for fitting the camera to a ship
-const HUD_H := 220.0  ## screen pixels at the top the build HUD text may cover: the ship is centred below them
+## Screen px the build HUD (hud.gd) covers: the top bar, the mode bar with its hints, and the palette and the card at
+## the sides. A chosen ship is fitted in the space between them.
+const HUD_TOP := 48.0
+const HUD_BOTTOM := 120.0
+const HUD_SIDE := 376.0
 const CARD := Vector2(300.0, 390.0)
 const GAP := 18.0
 const PAD := 22.0
@@ -101,7 +105,7 @@ static func stats_of(co) -> Dictionary:
 
 
 ## The camera ({zoom, pos}) that shows the whole hull of `grid` in a viewport of `view` px, centred
-## in the part of the screen under the HUD text. The grid sits at the world origin, as build_mode.gd draws it.
+## in the part of the screen the HUD leaves free. The grid sits at the world origin, as build_mode.gd draws it.
 static func fit(grid, view: Vector2) -> Dictionary:
 	var lo := Vector2(INF, INF)
 	var hi := Vector2(-INF, -INF)
@@ -111,9 +115,9 @@ static func fit(grid, view: Vector2) -> Dictionary:
 	if grid.hull.is_empty():
 		return {"zoom": 0.5, "pos": Vector2.ZERO}
 	var px := (hi - lo) * CELL_PX
-	var z := clampf(minf(view.x / px.x, (view.y - HUD_H) / px.y) * 0.95, 0.2, 1.2)
+	var z := clampf(minf((view.x - 2.0 * HUD_SIDE) / px.x, (view.y - HUD_TOP - HUD_BOTTOM) / px.y) * 0.95, 0.2, 1.2)
 	var centre := ((lo + hi) / 2.0 - Vector2(grid.size) / 2.0) * CELL_PX
-	return {"zoom": z, "pos": centre - Vector2(0.0, HUD_H / 2.0 / z)}
+	return {"zoom": z, "pos": centre - Vector2(0.0, (HUD_TOP - HUD_BOTTOM) / 2.0 / z)}
 
 
 # --- opening and closing -----------------------------------------------------------------------------
