@@ -1,0 +1,9 @@
+{
+  "id": "processing_1",
+  "name": "Processing: smelters and the material ladder",
+  "version": "1.0",
+  "requires": [
+    "engines_1"
+  ],
+  "notes": "docs/CONTENT.md section 12: five smelter parts (Slag Pot, Smelter Mk1-3, Plasma Forge), the ladder scrap -> steel -> alloy, copper + silicon -> conductor, silicon + crystal -> glass lattice (recipes with station smelter), Forged Steel Plate and Alloy Armour tiles, and the engine wave 1 recipes re-costed with steel (Mk3+), alloy (Mk4+) and glass lattice (Neon Mk2+). Every re-costed recipe is raw-material neutral. Not built: the Refinery (needs ore, CONTENT 10) and the Fuel Cracker (ice is not cargo yet)."
+}

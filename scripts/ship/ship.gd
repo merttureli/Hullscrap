@@ -29,7 +29,8 @@ const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 ## two custom presets of the Shields tab); older saves load with it fresh (even weights, empty slots). 5 adds the
 ## optional "belts" (the conveyor-belt layer) and, inside "components" (version 4 there), the contents of ammo racks
 ## and the loaded units of guns; older saves load with no belts and empty racks. The optional "skin" (the hull skin id the
-## player chose in the hangar, run_start.gd) was added within 5: a save without it has the plain hull.
+## player chose in the hangar, run_start.gd) was added within 5: a save without it has the plain hull. The optional "queues"
+## inside "crafting" (the jobs of the stations but the fabricator: the smelter's) was added within 5 as well: older saves have none.
 const VERSION := 5
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"

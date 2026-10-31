@@ -7,11 +7,12 @@ from sp_common import POSES, glow_strip
 import sp_basalt, sp_emberkin, sp_fenn, sp_items, sp_fx, sp_gear
 import sp_kett, sp_mire, sp_sporeling, sp_gauntling, sp_prismatic, sp_grundl      # race wave 1 (docs/waves/races_1.md); sp_grundl is the large rig
 import sp_races2                                                                  # race wave 2 (docs/waves/races_2_4.md): small, large and floating rigs
+import sp_races3                                                                  # race wave 3: revenant, choir, rattler (small), tessellate (+ the small tessellate_half), sable, quillback, kite
 from sp_gear import outline_outer
 
 SPECIES = [sp_basalt.Basalt, sp_emberkin.Emberkin, sp_fenn.Fenn,
            sp_kett.Kett, sp_mire.Mire, sp_sporeling.Sporeling, sp_gauntling.Gauntling, sp_prismatic.Prismatic, sp_grundl.Grundl,
-           sp_races2.Vellum, sp_races2.Oorth, sp_races2.Drakkin, sp_races2.Wisp, sp_races2.Hullkin, sp_races2.Lantern]
+           sp_races2.Vellum, sp_races2.Oorth, sp_races2.Drakkin, sp_races2.Wisp, sp_races2.Hullkin, sp_races2.Lantern] + sp_races3.SPECIES
 
 def jdump(obj, path):
     os.makedirs(os.path.dirname(path), exist_ok=True)

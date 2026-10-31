@@ -6,6 +6,7 @@ const Components = preload("res://scripts/ship/components.gd")
 const Cables = preload("res://scripts/ship/cables.gd")
 const Power = preload("res://scripts/sim/power.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 var grid: ShipGrid
 var comps: Components
@@ -42,7 +43,7 @@ func near(got: float, want: float, msg: String, eps := 1e-6) -> void:
 
 func test_config_matches_the_data_file() -> void:
 	var f := Flight.new()
-	var tiles: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/tiles.json"))
+	var tiles: Dictionary = Content.read("res://data/tiles.json")  # the core file and the packs' tiles
 	for t in tiles["tiles"]:
 		eq(f.tile_mass.get(t["id"]), float(t["mass"]), "mass of tile " + t["id"] + " comes from tiles.json")
 	eq(f.tile_mass.size(), tiles["tiles"].size(), "and no tile is missing a mass")

@@ -1,0 +1,42 @@
+{
+  "tiles": [
+    {
+      "id": "forged_steel_plate",
+      "name": "Forged Steel Plate",
+      "color": "#7f8ea8",
+      "cost": {
+        "steel": 1,
+        "scrap": 1
+      },
+      "solid": true,
+      "hp": 8,
+      "mass": 3.0,
+      "line": "standard",
+      "resist": {
+        "kinetic": 0.7
+      },
+      "deflect": {},
+      "quirk": ""
+    },
+    {
+      "id": "alloy_armor",
+      "name": "Alloy Armour",
+      "color": "#b4c8a6",
+      "cost": {
+        "alloy": 1,
+        "steel": 1
+      },
+      "solid": true,
+      "hp": 10,
+      "mass": 2.5,
+      "line": "standard",
+      "resist": {
+        "kinetic": 0.8,
+        "energy": 0.8,
+        "explosive": 0.8
+      },
+      "deflect": {},
+      "quirk": ""
+    }
+  ]
+}

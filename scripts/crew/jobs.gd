@@ -25,7 +25,8 @@ extends RefCounted
 ## hull_mend (idle crew mend the walls and breaches next to them). revive_once, split_on_death: mortality.gd.
 ## Repairs take `seconds` x the repair multiplier of the part's line (of the wall's line for a
 ## breach). A crew member at a station marks it in `ship.manned` (uid -> name): a manned helm adds
-## evasion in a fight and a manned weapon cools down faster (see evasion_bonus, cooldown_mult).
+## evasion in a fight and a manned weapon cools down faster (see evasion_bonus, cooldown_mult), and a manned
+## smelter works faster (processing.gd; its post is on the board only while it has a queue).
 
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
@@ -35,6 +36,7 @@ const Heat = preload("res://scripts/sim/heat.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
+const Processing = preload("res://scripts/craft/processing.gd")
 const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
 const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
@@ -189,10 +191,12 @@ func build_board(ship) -> void:
 		var family := str(def.get("family", ""))
 		if inst["status"] in FAULTY or ship.outside_hurt(uid):
 			_add(b, _fix_job(ship, uid))
-		if family == "helm" or (bool(def.get("manned", false)) and family in j["man_station"]["families"]):
+		if family == "helm" or (bool(def.get("manned", false)) and family in j["man_station"]["families"] and Processing.post_wanted(ship, uid)):
 			var post := _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)})
-			if family != "helm" and not combat:
-				post["priority"] -= int(j["man_station"].get("idle_penalty", 0))  # nothing to shoot at: the helm first, the autopilot needs it
+			if family != "helm" and (combat if family == "smelter" else not combat):
+				# nothing to shoot at: the helm first, the autopilot needs it; a smelter's post only exists while it has work, so it
+				# keeps its priority then and gives way to the guns in a fight
+				post["priority"] -= int(j["man_station"].get("idle_penalty", 0))
 			_add(b, post)
 	var need := Ammo.restock_uids(ship, restocking)
 	for uid in restocking.keys():

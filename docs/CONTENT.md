@@ -644,6 +644,14 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - late, you need alloy and conductor plus the key materials of section 11 (fights, special mining, quests) for Mk4 and Mk5.
 - Engine wave 1's Mk3+ recipes switch their scrap to steel (scrap 40 → steel 10) when processing lands.
 
+**Built (`claude/smelters`, the pack `data/packs/processing_1`, `tests/test_processing.gd`)**:
+- **Where it lives**: the ladder is not a `data/processing.json` but ordinary recipes with `"station": "smelter"` (default `"fabricator"`), so packs, the content validators and blueprints work unchanged; `fab_level` and `tools` are then the smelter's level and tools (a Plasma Forge gives the tool `plasma`). `Crafting` keeps one queue per station (`queue` is the fabricator's, `queue_of("smelter")` the smelter's; saved as the optional `queues`); `Processing.best(ship)` (`scripts/craft/processing.gd`) is to the smelter what `Workshop.best` is to the fabricator.
+- **Parts**: Slag Pot (Scrap, level 1, x0.9), Smelter Mk1-3 (levels 1-3, speeds x1 / x1.3 / x1.6), Plasma Forge (Neon, level 2, x1.3, tool plasma). Stats: `smelt_level`, `smelt_speed` (the line's output multiplies it), `plasma`, `work_heat`. Heat is 8 / 8 / 10 / 12 / 8 (x1.5 for Neon) and only accrues while the smelter works (`heat.gd`); cooling 3, so one radiator (+6) holds a Mk1. The numbers (speeds, powers -3 to -5, part recipes, prices 280 / 500 / 380) are the builder's; the spec gives only the ladder.
+- **Crew**: the family `smelter` is a manned station (`data/crew.json`): its post is on the job board only while the lead smelter has a queue, at priority 50 (out of a fight the other posts drop to 45); manned, the lead works `1 + manned.process_speed (0.3) x manned factor` as fast.
+- **Armour**: Forged Steel Plate hp 8 / mass 3 / kinetic x0.7 and Alloy Armour hp 10 / mass 2.5 / kinetic, energy, explosive x0.8: the spec's "resist 0.3" and "all-round resist 0.2" are read as damage reduced by 30% and 20%.
+- **Engine wave 1** is re-costed by `override` entries in the pack (every one raw-material neutral): Mk3+ scrap becomes steel (40 -> 10), Mk4+ steel + titanium becomes alloy, Neon Mk2+ silicon + crystal becomes glass lattice. Conductor has no consumer yet except the Smelter Mk3 (power, shield and weapon parts of Mk3+ do not exist yet); Reflective Coating still costs silicon + crystal.
+- **Not built**: the Refinery (needs ore from section 10), the Fuel Cracker and the `fuel` rung (ice is not a cargo material), belts feeding a smelter, and art (the parts and the four materials are drawn by code placeholders).
+
 ## 13. The end: endings, and why to start again (owner, 2026-10-30)
 > "We need an end goal so the game can end and give you a reason to restart with a new build: depending on the lore, finding an established civilisation that survived and is thriving (like I Am Legend), or multiple endings you can run into."
 
