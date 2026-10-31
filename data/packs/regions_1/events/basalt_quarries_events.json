@@ -44,7 +44,7 @@
       "text": "A Basalt hauler sits dead in the lane, running lights out, hatches shut. The beacon says LONG QUIET: DO NOT HAIL. Beside it two more Basalt ships are parked in a polite circle, also not hailing, also not moving. It appears to be a vigil, or an argument, or lunch.",
       "choices": [
         {"text": "Wait with them.", "outcomes": [
-          {"weight": 70, "text": "You wait. Nothing happens for five hours. At the end the hauler's hatch opens, a Basalt waves one hand, and all three ships leave in order. They leave you a pad on a buoy. Your crew are rested, a little embarrassed, and strangely proud.", "effects": {"crew_hp": 15}},
+          {"weight": 70, "text": "You wait. Nothing happens for five hours. At the end the hauler's hatch opens, a Basalt waves one hand, and all three ships leave in order. They leave you a pad on a buoy. Your crew are rested, a little embarrassed, and strangely proud.", "effects": {"crew_hp": 15, "log": "log_quarry_hello"}},
           {"weight": 30, "text": "You wait. You wait some more. The Long Quiet ends when it ends, which is after you have jumped. The crew say it was the most restful stop of the run anyway.", "effects": {"crew_hp": 10}}
         ]},
         {"text": "Hail them anyway.", "outcomes": [
@@ -68,11 +68,11 @@
           {"weight": 30, "text": "A block you thought was loose is not. It remembers its weight.", "effects": {"items": {"silicon": 6}, "hull": -5}}
         ]},
         {"text": "Tell the crew that the Snap was forty years ago.", "outcomes": [
-          {"weight": 100, "text": "A long silence. Then, in the slow tongue, over the comm: 'We know. We are waiting for the delivery slot.' You decide not to ask which one. One of them hands you a pad and a block, for the trouble of telling.", "effects": {"items": {"silicon": 10, "titanium": 4}}}
+          {"weight": 100, "text": "A long silence. Then, in the slow tongue, over the comm: 'We know. We are waiting for the delivery slot.' You decide not to ask which one. One of them hands you a pad and a block, for the trouble of telling.", "effects": {"items": {"silicon": 10, "titanium": 4}, "log": "log_quarry_delivery"}}
         ]},
         {"text": "[Basalt] Read the marks.", "requires": {"species": "basalt"}, "outcomes": [
-          {"weight": 80, "text": "Your Basalt runs a hand along the carved sign for a long time. 'It is a count,' they say. 'It counts something that is not here yet.' They take a rubbing. It feels important, and you cannot say why.", "effects": {"items": {"silicon": 6}}},
-          {"weight": 20, "text": "Your Basalt reads the marks and says nothing, which is a different nothing than before. They will not say more.", "effects": {"items": {"silicon": 6}}}
+          {"weight": 80, "text": "Your Basalt runs a hand along the carved sign for a long time. 'It is a count,' they say. 'It counts something that is not here yet.' They take a rubbing. It feels important, and you cannot say why.", "effects": {"items": {"silicon": 6}, "log": "log_quarry_count"}},
+          {"weight": 20, "text": "Your Basalt reads the marks and says nothing, which is a different nothing than before. They will not say more.", "effects": {"items": {"silicon": 6}, "log": "log_quarry_count"}}
         ]},
         {"text": "[Fenn] Count the stone and sell it by the cubic metre.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 100, "text": "Your Fenn works out the volume, the market rate and your commission in four seconds. The Basalt crew, listening, say 'Tell us again, slowly,' and then 'No.' The commission stands.", "effects": {"items": {"credits": 30}}}
@@ -104,9 +104,9 @@
       "text": "A cavern drive has collapsed in the heart of the Quarry: a tunnel of stone sealed at both ends, with six Basalt workers inside. Their beacon says in a slow, calm voice: 'No hurry. We have air. We do not need air. Please dig at your leisure.' Their foreman adds: 'Leisure within the week, if possible.'",
       "choices": [
         {"text": "Dig them out with your cutters.", "outcomes": [
-          {"weight": 55, "text": "You work for three hours, tunnelling toward the sound of someone humming. When the last slab goes, the six workers file out one by one and thank you in order of seniority. It takes a while. They pay in stone, and one lets you read his lamp log.", "effects": {"items": {"silicon": 10, "titanium": 8}, "rep": {"clans": 1}}},
-          {"weight": 30, "text": "The roof groans and drops a slab on your cutter arm. Nobody inside is hurt. Everybody outside is.", "effects": {"items": {"silicon": 6}, "crew_hp": -5, "hull": -10}},
-          {"weight": 15, "text": "While digging you break into a vault: a pocket of pure, old, grey crystal. The workers say they put it there on purpose, for later.", "effects": {"items": {"silicon": 10, "crystal": 3}}}
+          {"weight": 55, "text": "You work for three hours, tunnelling toward the sound of someone humming. When the last slab goes, the six workers file out one by one and thank you in order of seniority. It takes a while. They pay in stone, and one lets you read his lamp log.", "effects": {"items": {"silicon": 10, "titanium": 8}, "rep": {"clans": 1}, "log": "log_quarry_lamp"}},
+          {"weight": 30, "text": "The roof groans and drops a slab on your cutter arm. Nobody inside is hurt. Everybody outside is.", "effects": {"items": {"silicon": 6}, "crew_hp": -5, "hull": -10, "log": "log_quarry_lamp"}},
+          {"weight": 15, "text": "While digging you break into a vault: a pocket of pure, old, grey crystal. The workers say they put it there on purpose, for later.", "effects": {"items": {"silicon": 10, "crystal": 3}, "log": "log_quarry_lamp"}}
         ]},
         {"text": "[Basalt] Tunnel in from the side, as one of theirs.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 100, "text": "Your Basalt walks into the rock the way you would walk into a doorway, finds the workers by touch, and leads them out through a seam nobody knew about. They bow. It takes a while. It is worth it.", "effects": {"items": {"silicon": 12, "titanium": 8}, "rep": {"clans": 2}}}
@@ -181,8 +181,8 @@
       "text": "An old stone arch floats alone in a bare patch of the Quarry: two uprights and a lintel, forty metres high, cut from a single block. Nothing passes through it, because there is nothing to pass through. Basalt crews bow a little as they pass. A tag on one pillar says NOT FINISHED.",
       "choices": [
         {"text": "Fly through the arch.", "outcomes": [
-          {"weight": 60, "text": "Your ship passes through. Nothing happens. A quiet note, like an interval, hums in your hull and fades. For eleven seconds you feel counted. A survey pad drifts out of the stone, plumb and patient.", "effects": {"items": {"crystal": 2}}},
-          {"weight": 40, "text": "Nothing. Only the stones, turning slowly, and the sense of having been very rude. A survey pad bumps your hull on the way past.", "effects": {"rep": {"clans": -1}}}
+          {"weight": 60, "text": "Your ship passes through. Nothing happens. A quiet note, like an interval, hums in your hull and fades. For eleven seconds you feel counted. A survey pad drifts out of the stone, plumb and patient.", "effects": {"items": {"crystal": 2}, "log": "log_quarry_plumb"}},
+          {"weight": 40, "text": "Nothing. Only the stones, turning slowly, and the sense of having been very rude. A survey pad bumps your hull on the way past.", "effects": {"rep": {"clans": -1}, "log": "log_quarry_plumb"}}
         ]},
         {"text": "[Basalt] Ask the arch what it is for.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 100, "text": "Your Basalt lays a palm on the stone and stays there most of a day. When they take it away they say only: 'We cut the stones. The Lumen set the light. Somebody else made the door.' Then, quietly: 'They came back for it.' They will not say who.", "effects": {"items": {"silicon": 6}, "flag": "quarry_door_heard"}}
@@ -207,13 +207,13 @@
           {"weight": 8, "text": "The blast comes early and from the wrong side. You get the ship out. One of the crew did not get back to the hatch in time.", "effects": {"crew_hp": -20, "hull": -15, "lose_crew": 1}}
         ]},
         {"text": "Ride the blast and mine the loosened rock.", "outcomes": [
-          {"weight": 40, "text": "You sit at the edge and take the blast on the shield side. The east face comes apart in a cloud of fresh-cut stone and the cutters fill like pockets. It is a lot of rock. It is a lot of rock coming at you.", "effects": {"items": {"silicon": 16, "titanium": 10, "scrap": 40}, "crew_hp": -10, "hull": -5}},
-          {"weight": 30, "text": "The blast rolls over you like a wall. You come out the other side with a full hold and half a hull.", "effects": {"items": {"silicon": 16, "titanium": 8}, "crew_hp": -20, "hull": -15}},
-          {"weight": 20, "text": "The shockwave takes the cutter arm off and puts it in the next system. You get the haul. You do not get the arm.", "effects": {"items": {"silicon": 14, "titanium": 10}, "hull": -10}},
-          {"weight": 10, "text": "The blast catches the hull in the worst place. You get the haul out. You do not get everyone back.", "effects": {"items": {"silicon": 14, "titanium": 8}, "crew_hp": -20, "hull": -15, "lose_crew": 1}}
+          {"weight": 40, "text": "You sit at the edge and take the blast on the shield side. The east face comes apart in a cloud of fresh-cut stone and the cutters fill like pockets. It is a lot of rock. It is a lot of rock coming at you.", "effects": {"items": {"silicon": 16, "titanium": 10, "scrap": 40}, "crew_hp": -10, "hull": -5, "log": "log_quarry_imminent"}},
+          {"weight": 30, "text": "The blast rolls over you like a wall. You come out the other side with a full hold and half a hull.", "effects": {"items": {"silicon": 16, "titanium": 8}, "crew_hp": -20, "hull": -15, "log": "log_quarry_imminent"}},
+          {"weight": 20, "text": "The shockwave takes the cutter arm off and puts it in the next system. You get the haul. You do not get the arm.", "effects": {"items": {"silicon": 14, "titanium": 10}, "hull": -10, "log": "log_quarry_imminent"}},
+          {"weight": 10, "text": "The blast catches the hull in the worst place. You get the haul out. You do not get everyone back.", "effects": {"items": {"silicon": 14, "titanium": 8}, "crew_hp": -20, "hull": -15, "lose_crew": 1, "log": "log_quarry_imminent"}}
         ]},
         {"text": "[Basalt] Call the demolition foreman and ask for a delay.", "requires": {"species": "basalt"}, "outcomes": [
-          {"weight": 100, "text": "Your Basalt tells the foreman, in the slow tongue, that a ship is in the zone. The foreman is silent for six minutes. Then, with infinite courtesy, he postpones the blast by one settling. You use it to cut the east face yourself, at leisure.", "effects": {"items": {"silicon": 14, "titanium": 8}, "rep": {"clans": 1}}}
+          {"weight": 100, "text": "Your Basalt tells the foreman, in the slow tongue, that a ship is in the zone. The foreman is silent for six minutes. Then, with infinite courtesy, he postpones the blast by one settling. You use it to cut the east face yourself, at leisure.", "effects": {"items": {"silicon": 14, "titanium": 8}, "rep": {"clans": 1}, "log": "log_quarry_imminent"}}
         ]},
         {"text": "[Shield] Angle the shield and drift through.", "requires": {"component": "shield_mk1"}, "outcomes": [
           {"weight": 70, "text": "You angle the shield and let the blast roll over you. It screams, then holds. You come out blackened and rich.", "effects": {"items": {"silicon": 12, "titanium": 8}, "hull": -5}},

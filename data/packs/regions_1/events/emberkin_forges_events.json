@@ -23,15 +23,15 @@
       "text": "A Forge freighter lies dark in the lane, her whole crew huddled in the one cool room with the vents open and their teeth chattering. A banner over the door reads COLD NIGHT. DO NOT HELP. A thermometer held to the window says twenty degrees. It is a dare, and they are winning.",
       "choices": [
         {"text": "Respect the dare and wave.", "outcomes": [
-          {"weight": 100, "text": "You wave. They wave back, shivering, with grim pride. One of them tosses a pad out of the airlock for you, and holds up a thermometer: eighteen degrees. They have never been braver.", "effects": {"crew_hp": 5}}
+          {"weight": 100, "text": "You wave. They wave back, shivering, with grim pride. One of them tosses a pad out of the airlock for you, and holds up a thermometer: eighteen degrees. They have never been braver.", "effects": {"crew_hp": 5, "log": "log_forge_cold_night"}}
         ]},
         {"text": "Offer them a blanket.", "outcomes": [
           {"weight": 70, "text": "Mortally offended, the whole crew refuses. Then they take the blanket, in secret, and give you a crate of fuel pellets as an apology.", "effects": {"items": {"fuel": 2}}},
           {"weight": 30, "text": "You hold up the blanket. The youngest bursts into tears. The captain apologises for the cold on everyone's behalf.", "effects": {"crew_hp": -5}}
         ]},
         {"text": "[Emberkin] Join the Cold Night.", "requires": {"species": "emberkin"}, "outcomes": [
-          {"weight": 90, "text": "Your Emberkin goes aboard and sits in the cold for forty minutes, wrapped in nothing, shaking and proud. They come back with a medal, a small red rag on a pin, and a hold of pellets.", "effects": {"items": {"plasma_cell": 2, "fuel": 2}, "crew_hp": -5}},
-          {"weight": 10, "text": "Your Emberkin lasts four minutes and passes out with dignity. The crew carry them back, reverent.", "effects": {"crew_hp": -10}}
+          {"weight": 90, "text": "Your Emberkin goes aboard and sits in the cold for forty minutes, wrapped in nothing, shaking and proud. They come back with a medal, a small red rag on a pin, and a hold of pellets.", "effects": {"items": {"plasma_cell": 2, "fuel": 2}, "crew_hp": -5, "log": "log_forge_cold_night"}},
+          {"weight": 10, "text": "Your Emberkin lasts four minutes and passes out with dignity. The crew carry them back, reverent.", "effects": {"crew_hp": -10, "log": "log_forge_cold_night"}}
         ]},
         {"text": "[Mire] Offer to cool the room properly.", "requires": {"species": "mire"}, "outcomes": [
           {"weight": 100, "text": "Your Mire walks in and opens a tap on their backpack, and the Cold Night becomes a rain shower. The Emberkin scream with delight. It is the best Cold Night in the Forge's history, and they pay in plasma cells.", "effects": {"items": {"plasma_cell": 2, "fuel": 2}}}
@@ -43,9 +43,9 @@
       "text": "The slag-barge Cinder Queen sits in a crown of her own molten cargo, glowing a dull orange from stem to stern. Forty years in the open and she is still warm enough to toast bread. A pair of boots stands by her airlock, steaming.",
       "choices": [
         {"text": "Cut your way in through the warm side.", "outcomes": [
-          {"weight": 60, "text": "The cutter parts the hull like candle wax, and the hold is a treasure of cast ingots, cooled by a hair. You load what you can carry, and a crew bunk yields a heat-curled pad.", "effects": {"items": {"scrap": 40, "copper": 15}}},
-          {"weight": 25, "text": "A pocket of molten slag lets go as you cut. The splash is mostly on the hull.", "effects": {"items": {"scrap": 25}, "hull": -10}},
-          {"weight": 15, "text": "In the foreman's cabin, a locked box of plasma cells, still glowing, with a label: FOR THE COLD.", "effects": {"items": {"plasma_cell": 3, "scrap": 20}}}
+          {"weight": 60, "text": "The cutter parts the hull like candle wax, and the hold is a treasure of cast ingots, cooled by a hair. You load what you can carry, and a crew bunk yields a heat-curled pad.", "effects": {"items": {"scrap": 40, "copper": 15}, "log": "log_forge_heat_haze"}},
+          {"weight": 25, "text": "A pocket of molten slag lets go as you cut. The splash is mostly on the hull.", "effects": {"items": {"scrap": 25}, "hull": -10, "log": "log_forge_heat_haze"}},
+          {"weight": 15, "text": "In the foreman's cabin, a locked box of plasma cells, still glowing, with a label: FOR THE COLD.", "effects": {"items": {"plasma_cell": 3, "scrap": 20}, "log": "log_forge_heat_haze"}}
         ]},
         {"text": "[Emberkin] Walk into the molten hold.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 90, "text": "Your Emberkin wades into the hold like a hot spring, lifts out a dozen ingots one by one, and asks if there is any more. 'It is lovely in here,' they say, scorched to the elbows and perfectly happy.", "effects": {"items": {"scrap": 60, "copper": 25, "plasma_cell": 2}}},
@@ -64,8 +64,8 @@
       "text": "A Lumen assessor's skiff, Halation, drifts alongside with her hull set to a polite glow. 'Inspection of the lease,' says Assessor Vane. 'The Forge has fallen behind on its output. The Lumen would like to assess whether the Forge is trying.' Three Emberkin stand at the Forge's open hatch, trying very hard not to catch fire with embarrassment.",
       "choices": [
         {"text": "Ask about the lease.", "outcomes": [
-          {"weight": 60, "text": "The assessor explains the lease in terms that appear to be about music. You come away with a pamphlet and the impression that the Forge pays rent for its own sunlight.", "effects": {"rep": {"lumen": 1}}},
-          {"weight": 40, "text": "Vane asks you to witness the lease. You do, on a page that turns out to be a different lease.", "effects": {"rep": {"lumen": -1}}}
+          {"weight": 60, "text": "The assessor explains the lease in terms that appear to be about music. You come away with a pamphlet and the impression that the Forge pays rent for its own sunlight.", "effects": {"rep": {"lumen": 1}, "log": "log_forge_rent_in_light"}},
+          {"weight": 40, "text": "Vane asks you to witness the lease. You do, on a page that turns out to be a different lease.", "effects": {"rep": {"lumen": -1}, "log": "log_forge_rent_in_light"}}
         ]},
         {"text": "Vouch for the Forge's output.", "outcomes": [
           {"weight": 50, "text": "You tell Vane the Forge's output has been exceptional. Vane glows cooler, which means disbelief, but the Forge workers beam. They hand you ingots in thanks.", "effects": {"items": {"plasma_cell": 2, "scrap": 30}, "rep": {"lumen": -1}}},
@@ -111,7 +111,7 @@
           {"weight": 100, "text": "Your radiators turn the flare into stored heat, which you sell to the Forge's cold stores at a fair price. The Forge calls it theft. It is also, they agree, a favour.", "effects": {"items": {"credits": 50, "plasma_cell": 1}}}
         ]},
         {"text": "[Emberkin] Stand on the hull and soak it up.", "requires": {"species": "emberkin"}, "outcomes": [
-          {"weight": 100, "text": "Your Emberkin stands on the hull in the flare for an hour, glowing. When they come in their eyes are bright and their pockets full of tiny crystallised sparks. 'They fall,' they say. 'You just have to be there.' A Forge recorder drifts in beside the haul.", "effects": {"items": {"plasma_cell": 3, "crystal": 1}, "crew_hp": 10}}
+          {"weight": 100, "text": "Your Emberkin stands on the hull in the flare for an hour, glowing. When they come in their eyes are bright and their pockets full of tiny crystallised sparks. 'They fall,' they say. 'You just have to be there.' A Forge recorder drifts in beside the haul.", "effects": {"items": {"plasma_cell": 3, "crystal": 1}, "crew_hp": 10, "log": "log_forge_the_coal"}}
         ]},
         {"text": "Shield up and wait it out.", "outcomes": [
           {"weight": 100, "text": "You wait out the flare behind full shields, which is the sensible thing. Forty Emberkin on their hulls wave at you, laughing, as the light rolls over.", "effects": {}}
@@ -164,8 +164,8 @@
       "text": "A Rustfang slag-runner, Hot Potato, is stealing slag from the Forge's cooling pits. She is overloaded, glowing, and trailing a line of molten drops like a comet. Her crew shout at you across the lane: 'It is all stolen! It is all hot! We cannot hold it much longer!' They would very much like to be rescued.",
       "choices": [
         {"text": "Take the slag off their hands.", "outcomes": [
-          {"weight": 70, "text": "They hand you the cargo across a boom, wincing. You cool it in a bay and sell it by the pound. The pirates, weeping with relief, pay you to keep quiet. Their manifest comes with the slag.", "effects": {"items": {"scrap": 40, "credits": 30}}},
-          {"weight": 30, "text": "The slag cools in your hold and cracks the bay floor. The pirates get away laughing, with a copy of their manifest for you.", "effects": {"items": {"scrap": 30}, "hull": -10}}
+          {"weight": 70, "text": "They hand you the cargo across a boom, wincing. You cool it in a bay and sell it by the pound. The pirates, weeping with relief, pay you to keep quiet. Their manifest comes with the slag.", "effects": {"items": {"scrap": 40, "credits": 30}, "log": "log_forge_slag_manifest"}},
+          {"weight": 30, "text": "The slag cools in your hold and cracks the bay floor. The pirates get away laughing, with a copy of their manifest for you.", "effects": {"items": {"scrap": 30}, "hull": -10, "log": "log_forge_slag_manifest"}}
         ]},
         {"text": "Fight them.", "outcomes": [
           {"weight": 100, "text": "You open fire. The slag-runner glows even brighter in protest.", "effects": {"fight": "pirate_raider"}}
@@ -228,7 +228,7 @@
       "text": "A relief ship drifts by with a banner: BLANKET DRIVE. She is collecting spare blankets for the cold ones, meaning anyone on Forge-adjacent ships who is not Emberkin. Her crew are Emberkin to a man, delighted with their own generosity. A tag on the nearest bale reads: ONE SIZE FITS ALL COLDS.",
       "choices": [
         {"text": "Take a blanket. You are cold.", "outcomes": [
-          {"weight": 100, "text": "The crew are thrilled to have an excuse to be kind. They give you three blankets, a hot water bottle and a handwritten card: HOW TO BE COLD (A GUIDE). A small pad is tucked inside.", "effects": {"crew_hp": 10}}
+          {"weight": 100, "text": "The crew are thrilled to have an excuse to be kind. They give you three blankets, a hot water bottle and a handwritten card: HOW TO BE COLD (A GUIDE). A small pad is tucked inside.", "effects": {"crew_hp": 10, "log": "log_forge_to_the_cold"}}
         ]},
         {"text": "Donate 10 polymer for the drive.", "requires": {"items": {"polymer": 10}}, "outcomes": [
           {"weight": 100, "text": "They weigh the polymer with real reverence and press a plasma cell into your hand. 'For the cold,' they say. You are not sure whose.", "effects": {"items": {"polymer": -10, "plasma_cell": 2}, "rep": {"lumen": 1}}}
@@ -237,7 +237,7 @@
           {"weight": 100, "text": "The Emberkin crew listen in total silence, then solemnly add a bucket of water to the next bale. 'For the wet ones,' they write on the tag. It is the kindest, wrongest thing you have ever seen.", "effects": {"items": {"fuel": 2}, "crew_hp": 5}}
         ]},
         {"text": "[Kett] Knit them a blanket on the spot.", "requires": {"species": "kett"}, "outcomes": [
-          {"weight": 100, "text": "Your Kett knit a blanket in a quarter of an hour, four hands in a rhythm, humming. The relief crew, who have never seen a blanket made, hold it up to the light and cry. They give you a bale of fuel cells and a pad of their own.", "effects": {"items": {"fuel": 3, "plasma_cell": 1}}}
+          {"weight": 100, "text": "Your Kett knit a blanket in a quarter of an hour, four hands in a rhythm, humming. The relief crew, who have never seen a blanket made, hold it up to the light and cry. They give you a bale of fuel cells and a pad of their own.", "effects": {"items": {"fuel": 3, "plasma_cell": 1}, "log": "log_forge_to_the_cold"}}
         ]}
       ]
     }

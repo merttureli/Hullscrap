@@ -29,14 +29,14 @@
           {"weight": 10, "text": "Inside: a shield module, in its original box, with a warranty that expired during the unboxing.", "effects": {"items": {"credits": -35, "shield_mk1": 1}}}
         ]},
         {"text": "Sell 20 scrap at the market's best price.", "requires": {"items": {"scrap": 20}}, "outcomes": [
-          {"weight": 100, "text": "A trader in a skiff pays you in advance, in cash, then spends five minutes selling the scrap to someone else at the next stall, in plain view. You watch. It is educational. He hands you the receipt for the receipt.", "effects": {"items": {"scrap": -20, "credits": 40}}}
+          {"weight": 100, "text": "A trader in a skiff pays you in advance, in cash, then spends five minutes selling the scrap to someone else at the next stall, in plain view. You watch. It is educational. He hands you the receipt for the receipt.", "effects": {"items": {"scrap": -20, "credits": 40}, "log": "log_bazaar_receipt"}}
         ]},
         {"text": "[Fenn] Open a stall of your own for an hour.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 70, "text": "Your Fenn sets up a table, sells your crew's laundry, a bad song and a rock, and comes back with a profit and a rival.", "effects": {"items": {"credits": 60}}},
           {"weight": 30, "text": "A rival sets up beside your Fenn and undercuts them with the same rock. Your Fenn shakes his hand with real admiration.", "effects": {"items": {"credits": 25}}}
         ]},
         {"text": "[Tinkerer] Offer to fix anything for a fee.", "requires": {"trait": "tinkerer"}, "outcomes": [
-          {"weight": 100, "text": "Your tinkerer sets up a toolbox and a sign: I FIX IT. FIVE MINUTES. The line is out the airlock. By closing they have repaired a dozen toasters, a prosthetic hand and somebody's clock, and been given a bundle of receipts.", "effects": {"items": {"credits": 50, "copper": 10}}}
+          {"weight": 100, "text": "Your tinkerer sets up a toolbox and a sign: I FIX IT. FIVE MINUTES. The line is out the airlock. By closing they have repaired a dozen toasters, a prosthetic hand and somebody's clock, and been given a bundle of receipts.", "effects": {"items": {"credits": 50, "copper": 10}, "log": "log_bazaar_receipt"}}
         ]},
         {"text": "Walk the Row and buy nothing.", "outcomes": [
           {"weight": 100, "text": "You make it all the way round without buying. A seller follows you the whole way, lowering his price out loud, until it is zero and he looks at you with real hurt. 'Take it,' he says. You do not. He sobs.", "effects": {}}
@@ -48,8 +48,8 @@
       "text": "A boxy blue-and-gold cutter, the Premium, pulls alongside: Fenn Underwriters, who sell insurance against being shot by Fenn Underwriters. 'Good news,' says the agent, Groat. 'You are uninsured. That is a risk. For you. For us, it is an opportunity.'",
       "choices": [
         {"text": "Buy a policy (40 credits).", "requires": {"credits": 40}, "outcomes": [
-          {"weight": 70, "text": "Groat hands over a leather-bound policy and a sticker for your window: PROTECTED. Three jumps later a Rustfang boat reads the sticker, goes pale, and flies off. Or you imagine it did.", "effects": {"items": {"credits": -40}, "crew_hp": 5}},
-          {"weight": 30, "text": "The policy has a clause that excludes 'all events'. Groat is sorry. He gives you a coupon for scrap.", "effects": {"items": {"credits": -40, "scrap": 15}}}
+          {"weight": 70, "text": "Groat hands over a leather-bound policy and a sticker for your window: PROTECTED. Three jumps later a Rustfang boat reads the sticker, goes pale, and flies off. Or you imagine it did.", "effects": {"items": {"credits": -40}, "crew_hp": 5, "log": "log_bazaar_policy"}},
+          {"weight": 30, "text": "The policy has a clause that excludes 'all events'. Groat is sorry. He gives you a coupon for scrap.", "effects": {"items": {"credits": -40, "scrap": 15}, "log": "log_bazaar_policy"}}
         ]},
         {"text": "Refuse.", "outcomes": [
           {"weight": 60, "text": "'Understood,' says Groat. 'A very brave decision. We will be watching with interest.' The Premium stays on your tail for an hour, close, hopeful.", "effects": {}},
@@ -69,19 +69,19 @@
       "text": "The market barge Everything Must Go lies wrecked in the lane, every stall still hanging off her flanks. The banner reads GOING OUT OF BUSINESS SALE. The barge is going. Everything has gone. The stalls are bolted down and the till is still shut.",
       "choices": [
         {"text": "Break into the till.", "outcomes": [
-          {"weight": 55, "text": "The till holds exactly one hundred credits, a receipt for the barge and a note that says WE KNEW. A pad is clipped to the receipt.", "effects": {"items": {"credits": 100}}},
-          {"weight": 25, "text": "The till is wired. It goes off in your hands like a very small, very angry bank.", "effects": {"items": {"credits": 40}, "crew_hp": -10}},
+          {"weight": 55, "text": "The till holds exactly one hundred credits, a receipt for the barge and a note that says WE KNEW. A pad is clipped to the receipt.", "effects": {"items": {"credits": 100}, "log": "log_bazaar_closing_sale"}},
+          {"weight": 25, "text": "The till is wired. It goes off in your hands like a very small, very angry bank.", "effects": {"items": {"credits": 40}, "crew_hp": -10, "log": "log_bazaar_closing_sale"}},
           {"weight": 20, "text": "The till is empty. The note says NICE TRY. A second note, under it, says 3 DAYS EARLY.", "effects": {}}
         ]},
         {"text": "Strip the stalls.", "outcomes": [
-          {"weight": 80, "text": "Forty stalls of stock, most of it junk, some of it good. The barge's owner, from beyond the veil, would have charged you for the privilege.", "effects": {"items": {"scrap": 40, "copper": 15, "polymer": 10}}},
-          {"weight": 20, "text": "One of the stalls goes off like a joke shop.", "effects": {"items": {"scrap": 25}, "hull": -5}}
+          {"weight": 80, "text": "Forty stalls of stock, most of it junk, some of it good. The barge's owner, from beyond the veil, would have charged you for the privilege.", "effects": {"items": {"scrap": 40, "copper": 15, "polymer": 10}, "log": "log_bazaar_closing_sale"}},
+          {"weight": 20, "text": "One of the stalls goes off like a joke shop.", "effects": {"items": {"scrap": 25}, "hull": -5, "log": "log_bazaar_closing_sale"}}
         ]},
         {"text": "[Fenn] Read the barge's last sale ledger.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 100, "text": "Your Fenn reads the ledger like a thriller. The last sale was the barge to herself, at a loss, and the buyer's name belongs to a Fenn trader who now owns a debt on you. The ledger is full of tips, and one of them is a market.", "effects": {"items": {"credits": 60}, "reveal": "trader"}}
         ]},
         {"text": "[Quick hands] Open the till without setting off the alarm.", "requires": {"trait": "fast_repair"}, "outcomes": [
-          {"weight": 100, "text": "Your engineer finds the alarm wire in nine seconds and disables it in four. The till opens with a very small, very disappointed beep. A hundred credits, as promised, and a pad.", "effects": {"items": {"credits": 100}}}
+          {"weight": 100, "text": "Your engineer finds the alarm wire in nine seconds and disables it in four. The till opens with a very small, very disappointed beep. A hundred credits, as promised, and a pad.", "effects": {"items": {"credits": 100}, "log": "log_bazaar_closing_sale"}}
         ]}
       ]
     },
@@ -90,8 +90,8 @@
       "text": "A document appears on your console that you did not ask for. TERMS OF ENCOUNTER, it says. By reading this notice you accept that you have encountered the Bazaar and are bound by its customs, rates and sense of humour. There is no signature line. You have already signed.",
       "choices": [
         {"text": "Read the terms.", "outcomes": [
-          {"weight": 60, "text": "The terms are forty pages and every clause is about the proper way to say goodbye. At the end a clause awards you a modest rebate for reading. Nobody reads. You are now a Reader.", "effects": {"items": {"credits": 25}}},
-          {"weight": 40, "text": "On page thirty-eight you find you have agreed to give the Bazaar your second-best hat. You do not have a second-best hat. The Bazaar adds one to your account.", "effects": {"items": {"credits": -15}}}
+          {"weight": 60, "text": "The terms are forty pages and every clause is about the proper way to say goodbye. At the end a clause awards you a modest rebate for reading. Nobody reads. You are now a Reader.", "effects": {"items": {"credits": 25}, "log": "log_bazaar_free_sample"}},
+          {"weight": 40, "text": "On page thirty-eight you find you have agreed to give the Bazaar your second-best hat. You do not have a second-best hat. The Bazaar adds one to your account.", "effects": {"items": {"credits": -15}, "log": "log_bazaar_free_sample"}}
         ]},
         {"text": "Delete the document.", "outcomes": [
           {"weight": 70, "text": "It deletes. A second copy appears, addressed to you personally, beginning: 'We regret that you chose to delete.' You do not read it.", "effects": {}},
@@ -130,13 +130,13 @@
       "text": "A junior broker called Tuppence has just been fired from the Brokers' Guild for honesty, the first time anyone has been. She stands by a pile of her things on the dock, mid-sentence, and sees you looking. 'I would like to leave the Bazaar,' she says. 'On a ship. With a deal.'",
       "choices": [
         {"text": "Offer her a berth.", "outcomes": [
-          {"weight": 100, "text": "'Terms,' says Tuppence at once. You give her yours. She gives you hers. By the end there are two contracts and a handshake, and she carries her boxes aboard talking all the way, one of them marked AUDIT.", "effects": {"recruit": {"species": "fenn", "name": "Tuppence"}}}
+          {"weight": 100, "text": "'Terms,' says Tuppence at once. You give her yours. She gives you hers. By the end there are two contracts and a handshake, and she carries her boxes aboard talking all the way, one of them marked AUDIT.", "effects": {"recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
         ]},
         {"text": "[Fenn] Strike the deal like a professional.", "requires": {"species": "fenn"}, "outcomes": [
-          {"weight": 100, "text": "Your Fenn and Tuppence haggle for six minutes over terms of employment, ending in a perfectly fair contract and a drink. She boards, glowing, with a box of useful dirt on three Guild brokers.", "effects": {"items": {"credits": 40}, "recruit": {"species": "fenn", "name": "Tuppence"}}}
+          {"weight": 100, "text": "Your Fenn and Tuppence haggle for six minutes over terms of employment, ending in a perfectly fair contract and a drink. She boards, glowing, with a box of useful dirt on three Guild brokers.", "effects": {"items": {"credits": 40}, "recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
         ]},
         {"text": "[Human] Tell her honesty is still a virtue somewhere.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 100, "text": "Tuppence looks at your Human as if she had been handed a real coin. 'Somewhere,' she says. 'Where?' 'Here, maybe,' says your Human. She signs on, a little tearful, and pays her own berth in advance.", "effects": {"items": {"credits": 30}, "recruit": {"species": "fenn", "name": "Tuppence"}}}
+          {"weight": 100, "text": "Tuppence looks at your Human as if she had been handed a real coin. 'Somewhere,' she says. 'Where?' 'Here, maybe,' says your Human. She signs on, a little tearful, and pays her own berth in advance.", "effects": {"items": {"credits": 30}, "recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
         ]},
         {"text": "Wish her luck.", "outcomes": [
           {"weight": 100, "text": "'Thanks,' she says, not looking up. 'I will invoice you for the encouragement.'", "effects": {}}
@@ -233,14 +233,14 @@
       "text": "For one hour a day the Bazaar goes quiet. The stalls shut, the skiffs moor, and the Fenn line the rails with nothing to say. It is the Hour of Fixed Prices, a pause in which no one haggles, to remember what a price is. A very small Fenn looks at you with enormous eyes. 'Please,' she whispers. 'Do not ask me for a discount.'",
       "choices": [
         {"text": "Respect the hour.", "outcomes": [
-          {"weight": 100, "text": "You stand with the crew at the rail, in silence, for an hour. It is the nicest stop of the trip. When the bells ring a Fenn presses a small bag into your hand: 'For not asking.' A pad lies beneath.", "effects": {"items": {"credits": 20}, "crew_hp": 10}}
+          {"weight": 100, "text": "You stand with the crew at the rail, in silence, for an hour. It is the nicest stop of the trip. When the bells ring a Fenn presses a small bag into your hand: 'For not asking.' A pad lies beneath.", "effects": {"items": {"credits": 20}, "crew_hp": 10, "log": "log_bazaar_dead_quiet"}}
         ]},
         {"text": "Ask for a discount.", "outcomes": [
           {"weight": 70, "text": "A gasp runs the length of the market. Forty Fenn turn to look. Then a small voice laughs, and the whole Bazaar follows. You are fined for the hour and tipped for the joke.", "effects": {"items": {"credits": 5}}},
           {"weight": 30, "text": "The silence breaks like a plate. The Bazaar's wardens come aboard to explain the rules.", "effects": {"items": {"credits": -20}}}
         ]},
         {"text": "[Fenn] Stand at the rail and say nothing.", "requires": {"species": "fenn"}, "outcomes": [
-          {"weight": 100, "text": "Your Fenn stands at the rail with the others, perfectly silent, for the first time in their life. At the end they are shaking. 'I have never done that,' they say. 'It was awful. I want to do it again.' The Bazaar gives them a medal.", "effects": {"items": {"credits": 30}, "crew_hp": 10}}
+          {"weight": 100, "text": "Your Fenn stands at the rail with the others, perfectly silent, for the first time in their life. At the end they are shaking. 'I have never done that,' they say. 'It was awful. I want to do it again.' The Bazaar gives them a medal.", "effects": {"items": {"credits": 30}, "crew_hp": 10, "log": "log_bazaar_dead_quiet"}}
         ]}
       ]
     }

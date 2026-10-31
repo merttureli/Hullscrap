@@ -24,14 +24,14 @@
       "text": "The yard's Gauntlings are holding a contest: Best Accident. A circle of crates, forty contestants, a panel of three judges with scoring cards. The current leader lost both legs to a reactor, a goat and a pair of dice. A banner reads NO BORING ACCIDENTS. A judge looks at you. 'You. Do you have one?'",
       "choices": [
         {"text": "Tell the story of your worst day.", "outcomes": [
-          {"weight": 55, "text": "You tell it. The judges listen politely and give you 6, 6 and 7, the best score for a non-Gauntling in the history of the contest. They award you a medal made of washers, and a printed copy of the results.", "effects": {"items": {"credits": 30, "scrap": 20}, "crew_hp": 5}},
-          {"weight": 45, "text": "You tell it. The judges give you 2, 2 and 3. 'Too safe,' says one. 'Try falling off something.' The crowd laughs with you, mostly.", "effects": {"crew_hp": 5}}
+          {"weight": 55, "text": "You tell it. The judges listen politely and give you 6, 6 and 7, the best score for a non-Gauntling in the history of the contest. They award you a medal made of washers, and a printed copy of the results.", "effects": {"items": {"credits": 30, "scrap": 20}, "crew_hp": 5, "log": "log_scrapyard_best_accident"}},
+          {"weight": 45, "text": "You tell it. The judges give you 2, 2 and 3. 'Too safe,' says one. 'Try falling off something.' The crowd laughs with you, mostly.", "effects": {"crew_hp": 5, "log": "log_scrapyard_best_accident"}}
         ]},
         {"text": "Say you have never had an accident.", "outcomes": [
           {"weight": 100, "text": "The circle goes quiet. A judge puts down her card. 'No accidents,' she says, as if you had confessed to a crime. 'Then what are you for?' You are escorted gently out, with a bag of consolation washers.", "effects": {"items": {"scrap": 10}}}
         ]},
         {"text": "[Gauntling] Tell the one about your own arm.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling takes the floor, rolls up a sleeve, and tells the story of their arm. It ends with an explosion, an apology and a man on fire. The judges score it 9, 9, 10. They award the grand prize: a crate of spare parts, a cup, the title of Best Accident, and the results.", "effects": {"items": {"scrap": 50, "copper": 20, "credits": 40}, "crew_hp": 10}}
+          {"weight": 100, "text": "Your Gauntling takes the floor, rolls up a sleeve, and tells the story of their arm. It ends with an explosion, an apology and a man on fire. The judges score it 9, 9, 10. They award the grand prize: a crate of spare parts, a cup, the title of Best Accident, and the results.", "effects": {"items": {"scrap": 50, "copper": 20, "credits": 40}, "crew_hp": 10, "log": "log_scrapyard_best_accident"}}
         ]},
         {"text": "[Basalt] Say it was not an accident, it was erosion.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 100, "text": "Your Basalt says, slowly, 'It happened over six hundred years.' Silence. Then the judges applaud. 'Longest accident ever,' says one. They give your Basalt a lifetime achievement award: a washer.", "effects": {"items": {"credits": 25, "scrap": 25}, "crew_hp": 5}}
@@ -43,7 +43,7 @@
       "text": "The sky ahead flickers violet: an ion storm, rolling over the yard in a wall of static. Every Gauntling on the Row is lashing down hatches, killing lamps and wrapping their dreadlocks in foil. 'Ion!' someone yells. 'Get your arm in!' A Gauntling sits down on the dock, folds her hands and waits to be stunned, with the air of a woman who has done this before.",
       "choices": [
         {"text": "Shelter on the Row.", "outcomes": [
-          {"weight": 60, "text": "You tuck in behind the yard's old reactor shield as the storm roars over. Inside the shelter the Gauntlings play cards in the dark, laughing, waiting for their pins to clear. When it passes, the whole Row cheers, and deals you in.", "effects": {"crew_hp": 5}},
+          {"weight": 60, "text": "You tuck in behind the yard's old reactor shield as the storm roars over. Inside the shelter the Gauntlings play cards in the dark, laughing, waiting for their pins to clear. When it passes, the whole Row cheers, and deals you in.", "effects": {"crew_hp": 5, "log": "log_scrapyard_ion_day"}},
           {"weight": 25, "text": "The storm finds a gap in the shield. Every system on your ship flickers and every Gauntling in the room freezes for three seconds, mid-sentence. The crew wait politely.", "effects": {"crew_hp": -5, "hull": -5}},
           {"weight": 15, "text": "A discharge arcs through the hull. The lights die, the helm freezes, and you drift for ten minutes while everything reboots.", "effects": {"crew_hp": -10, "hull": -10}}
         ]},
@@ -54,7 +54,7 @@
           {"weight": 10, "text": "A discharge finds a crew member in the corridor. You find the haul, and not them.", "effects": {"items": {"scrap": 50, "copper": 20}, "crew_hp": -15, "hull": -10, "lose_crew": 1}}
         ]},
         {"text": "[Mechanical] Lead the Row's hatch-lashing crew.", "requires": {"trait": "mechanical"}, "outcomes": [
-          {"weight": 90, "text": "Your Gauntling, ion-prone, wraps themselves in foil and stands in the middle of the Row, shouting orders in a voice like a cannon. The Row lashes down in record time. When the storm hits it frizzes their hair and stuns them for three seconds. They do not mind. They are a hero, and a card player's log lands in their lap.", "effects": {"items": {"scrap": 40, "credits": 40}, "rep": {"clans": 1}}},
+          {"weight": 90, "text": "Your Gauntling, ion-prone, wraps themselves in foil and stands in the middle of the Row, shouting orders in a voice like a cannon. The Row lashes down in record time. When the storm hits it frizzes their hair and stuns them for three seconds. They do not mind. They are a hero, and a card player's log lands in their lap.", "effects": {"items": {"scrap": 40, "credits": 40}, "rep": {"clans": 1}, "log": "log_scrapyard_ion_day"}},
           {"weight": 10, "text": "The storm catches your Gauntling mid-sentence, and they freeze for eleven seconds with a heroic face. It is photographed.", "effects": {"items": {"scrap": 30}}}
         ]},
         {"text": "[Prismatic] Hum a counter-tone.", "requires": {"species": "prismatic"}, "outcomes": [
@@ -89,13 +89,13 @@
       "choices": [
         {"text": "Buy a spare part (25 credits).", "requires": {"credits": 25}, "outcomes": [
           {"weight": 70, "text": "Lefty hands over a coil of cable, a tin of washers and a lamp that works. 'Guaranteed,' he says. 'Mostly.'", "effects": {"items": {"credits": -25, "copper": 20, "scrap": 15}}},
-          {"weight": 30, "text": "The part is excellent. It is also, you realise later, someone's thumb. It comes with a note: ABOUT DENNIS.", "effects": {"items": {"credits": -25, "copper": 15}}}
+          {"weight": 30, "text": "The part is excellent. It is also, you realise later, someone's thumb. It comes with a note: ABOUT DENNIS.", "effects": {"items": {"credits": -25, "copper": 15}, "log": "log_scrapyard_about_dennis"}}
         ]},
         {"text": "Sell your old spares (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
           {"weight": 100, "text": "Lefty weighs your scrap on a scale shaped like a hand, tuts, and pays more than he has to. 'Proper scrap,' he says. 'None of this fancy stuff.'", "effects": {"items": {"scrap": -20, "credits": 45}}}
         ]},
         {"text": "[Gauntling] Swap parts with Lefty.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling and Lefty compare spare arms for an hour, trade a hand for a better one, and part with a promise to write. Your Gauntling returns stronger in a way nobody can quite name. You get a bag of parts for the ship, and a very old note.", "effects": {"items": {"copper": 25, "scrap": 30}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Gauntling and Lefty compare spare arms for an hour, trade a hand for a better one, and part with a promise to write. Your Gauntling returns stronger in a way nobody can quite name. You get a bag of parts for the ship, and a very old note.", "effects": {"items": {"copper": 25, "scrap": 30}, "crew_hp": 5, "log": "log_scrapyard_about_dennis"}}
         ]},
         {"text": "[Tinkerer] Offer to refit Lefty's counter.", "requires": {"trait": "tinkerer"}, "outcomes": [
           {"weight": 100, "text": "Your tinkerer fixes the counter, rewires the lamps and tunes the scale. Lefty can't believe it. 'It is like having a new body,' he says. He pays in parts.", "effects": {"items": {"copper": 30, "scrap": 30, "credits": 20}}}
@@ -114,11 +114,11 @@
           {"weight": 50, "text": "The Gauntling puts up a spirited fight, and wins, and runs. Marrow is furious. She pays you half for the effort and is nowhere to be found.", "effects": {"items": {"credits": 30}, "rep": {"clans": 1}}}
         ]},
         {"text": "Help the Gauntling.", "outcomes": [
-          {"weight": 55, "text": "You distract Marrow with a long and complicated question about her warrant. The Gauntling slips out of the airlock into the yard. Marrow looks at you for a very long time. 'Next time,' she says. A copy of the warrant is left in your hold.", "effects": {"items": {"scrap": 30}, "rep": {"clans": -2}}},
-          {"weight": 45, "text": "Marrow figures it out and is cross. A scuffle follows. The Gauntling escapes in the confusion. You are left holding the paperwork.", "effects": {"items": {"scrap": 20}, "rep": {"clans": -2}, "crew_hp": -5, "hull": -5}}
+          {"weight": 55, "text": "You distract Marrow with a long and complicated question about her warrant. The Gauntling slips out of the airlock into the yard. Marrow looks at you for a very long time. 'Next time,' she says. A copy of the warrant is left in your hold.", "effects": {"items": {"scrap": 30}, "rep": {"clans": -2}, "log": "log_scrapyard_warrant"}},
+          {"weight": 45, "text": "Marrow figures it out and is cross. A scuffle follows. The Gauntling escapes in the confusion. You are left holding the paperwork.", "effects": {"items": {"scrap": 20}, "rep": {"clans": -2}, "crew_hp": -5, "hull": -5, "log": "log_scrapyard_warrant"}}
         ]},
         {"text": "[Gauntling] Offer to pay for the arm.", "requires": {"species": "gauntling", "credits": 40}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling pays the debt, in credits and in scrap, with a speech about the dignity of parts. Marrow tears up the warrant, and the Row cheers. Marrow, under her hard hat, is smiling. The Row repays you with the yard's best coil, and a pad.", "effects": {"items": {"credits": -40, "copper": 25, "scrap": 40}, "rep": {"clans": 2}}}
+          {"weight": 100, "text": "Your Gauntling pays the debt, in credits and in scrap, with a speech about the dignity of parts. Marrow tears up the warrant, and the Row cheers. Marrow, under her hard hat, is smiling. The Row repays you with the yard's best coil, and a pad.", "effects": {"items": {"credits": -40, "copper": 25, "scrap": 40}, "rep": {"clans": 2}, "log": "log_scrapyard_warrant"}}
         ]},
         {"text": "[Fenn] Argue who owns the arm.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 100, "text": "Your Fenn finds the Gantry Clan's receipt for the arm: it was sold as scrap, three years ago, to the Gauntling. The sale was legal. The warrant is invalid. Marrow, who is not a fool, thanks your Fenn and leaves.", "effects": {"items": {"credits": 40}, "rep": {"clans": 1}}}
@@ -130,13 +130,13 @@
       "text": "A half-built Gauntling, a torso and one arm on a hand-cart, is trying to push the cart up a ramp. A sign is taped to the cart: TAKE ME WITH YOU. A second sign: I AM NOT FINISHED. A third: THAT IS THE POINT. The Gauntling called Splice looks up at you with one lamp eye. 'I need a ship,' says the torso. 'I will build the rest on the way.'",
       "choices": [
         {"text": "Take Splice aboard.", "outcomes": [
-          {"weight": 100, "text": "You lift the cart into the airlock. Splice is much lighter than they look, and enormously cheerful. By the end of the first week they have three legs, a toolbelt and an opinion about your wiring. Their first-day note stays pinned above the cart.", "effects": {"recruit": {"species": "gauntling", "name": "Splice"}}}
+          {"weight": 100, "text": "You lift the cart into the airlock. Splice is much lighter than they look, and enormously cheerful. By the end of the first week they have three legs, a toolbelt and an opinion about your wiring. Their first-day note stays pinned above the cart.", "effects": {"recruit": {"species": "gauntling", "name": "Splice"}, "log": "log_scrapyard_splice_day_one"}}
         ]},
         {"text": "[Gauntling] Offer Splice a spare arm.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling unbolts a spare arm from the ship's locker and clamps it onto Splice, and Splice lifts it, turns it, flexes it. 'It is the best arm I ever had,' says Splice, with tears in the lamp. They climb aboard upside-down with joy.", "effects": {"items": {"credits": 20}, "recruit": {"species": "gauntling", "name": "Splice"}}}
+          {"weight": 100, "text": "Your Gauntling unbolts a spare arm from the ship's locker and clamps it onto Splice, and Splice lifts it, turns it, flexes it. 'It is the best arm I ever had,' says Splice, with tears in the lamp. They climb aboard upside-down with joy.", "effects": {"items": {"credits": 20}, "recruit": {"species": "gauntling", "name": "Splice"}, "log": "log_scrapyard_splice_day_one"}}
         ]},
         {"text": "[Tinkerer] Help assemble the rest of them.", "requires": {"trait": "tinkerer"}, "outcomes": [
-          {"weight": 100, "text": "Your tinkerer sets to work with a toolkit and a flask of tea. In three hours Splice has a full second arm, a left leg and a better attitude. Splice promptly hires them as a mentor. 'I will pay in parts,' says Splice.", "effects": {"items": {"copper": 20, "scrap": 20}, "recruit": {"species": "gauntling", "name": "Splice"}}}
+          {"weight": 100, "text": "Your tinkerer sets to work with a toolkit and a flask of tea. In three hours Splice has a full second arm, a left leg and a better attitude. Splice promptly hires them as a mentor. 'I will pay in parts,' says Splice.", "effects": {"items": {"copper": 20, "scrap": 20}, "recruit": {"species": "gauntling", "name": "Splice"}, "log": "log_scrapyard_splice_day_one"}}
         ]},
         {"text": "Wish Splice luck.", "outcomes": [
           {"weight": 100, "text": "'Thank you,' says the torso, and gets the cart halfway up the ramp. Behind you, a gasp, and the sound of someone helping.", "effects": {}}
@@ -208,18 +208,18 @@
       "text": "A dead gunship, the Final Notice, drifts at the edge of the Row, and every plate on her hull crackles with blue-white light. Her reactor is still live, still arcing, still sending bolts through the walls. A scavenger who flew into her docking bay is frozen in a ball of static, waving politely. 'Do not touch the hull,' says the Row's warning buoy. 'Do not touch anything.'",
       "choices": [
         {"text": "Go aboard and salvage.", "outcomes": [
-          {"weight": 40, "text": "You edge through the arcing corridors with rubber gloves and a prayer. The reactor room is a cathedral of lightning. You pry loose a coil, a plate and a core, and walk out with your hair on end. The bank's last notice is pinned to the bridge door.", "effects": {"items": {"copper": 35, "titanium": 10, "scrap": 40}, "crew_hp": -15}},
-          {"weight": 30, "text": "A bolt catches your shoulder. The crew drag you out, twitching. Everything you grabbed is still in your hand.", "effects": {"items": {"copper": 30, "scrap": 30}, "crew_hp": -25}},
-          {"weight": 20, "text": "The reactor room surges while you are in it. Your gloves melt. Your crew are lucky to be alive, and your hold is full.", "effects": {"items": {"copper": 40, "titanium": 12, "scrap": 40}, "crew_hp": -20, "hull": -10}},
-          {"weight": 10, "text": "A surge finds one of your crew in the corridor. They do not come out.", "effects": {"items": {"copper": 25, "scrap": 30}, "crew_hp": -15, "lose_crew": 1}}
+          {"weight": 40, "text": "You edge through the arcing corridors with rubber gloves and a prayer. The reactor room is a cathedral of lightning. You pry loose a coil, a plate and a core, and walk out with your hair on end. The bank's last notice is pinned to the bridge door.", "effects": {"items": {"copper": 35, "titanium": 10, "scrap": 40}, "crew_hp": -15, "log": "log_scrapyard_final_notice"}},
+          {"weight": 30, "text": "A bolt catches your shoulder. The crew drag you out, twitching. Everything you grabbed is still in your hand.", "effects": {"items": {"copper": 30, "scrap": 30}, "crew_hp": -25, "log": "log_scrapyard_final_notice"}},
+          {"weight": 20, "text": "The reactor room surges while you are in it. Your gloves melt. Your crew are lucky to be alive, and your hold is full.", "effects": {"items": {"copper": 40, "titanium": 12, "scrap": 40}, "crew_hp": -20, "hull": -10, "log": "log_scrapyard_final_notice"}},
+          {"weight": 10, "text": "A surge finds one of your crew in the corridor. They do not come out.", "effects": {"items": {"copper": 25, "scrap": 30}, "crew_hp": -15, "lose_crew": 1, "log": "log_scrapyard_final_notice"}}
         ]},
         {"text": "[Mechanical] Send a Gauntling in.", "requires": {"trait": "mechanical"}, "outcomes": [
-          {"weight": 85, "text": "Your Gauntling walks into the arcing corridors, lit up like a Christmas tree, takes the whole reactor room apart in an hour and walks out whistling. 'Tickles,' they say. The haul is superb, with the bank's notice on top.", "effects": {"items": {"copper": 45, "titanium": 14, "scrap": 50}}},
-          {"weight": 15, "text": "A surge stuns your Gauntling for three seconds in the middle of the room. They stand there, wired, until it passes. They are very calm about it.", "effects": {"items": {"copper": 35, "titanium": 10, "scrap": 40}, "crew_hp": -10}}
+          {"weight": 85, "text": "Your Gauntling walks into the arcing corridors, lit up like a Christmas tree, takes the whole reactor room apart in an hour and walks out whistling. 'Tickles,' they say. The haul is superb, with the bank's notice on top.", "effects": {"items": {"copper": 45, "titanium": 14, "scrap": 50}, "log": "log_scrapyard_final_notice"}},
+          {"weight": 15, "text": "A surge stuns your Gauntling for three seconds in the middle of the room. They stand there, wired, until it passes. They are very calm about it.", "effects": {"items": {"copper": 35, "titanium": 10, "scrap": 40}, "crew_hp": -10, "log": "log_scrapyard_final_notice"}}
         ]},
         {"text": "[Basalt] Walk the corridors. Rock does not conduct.", "requires": {"species": "basalt"}, "outcomes": [
-          {"weight": 90, "text": "Your Basalt walks the arcing corridors in no hurry, lightning crawling harmlessly down their back, and takes what they want. They return with a haul, a faint smell of ozone and a new haircut.", "effects": {"items": {"copper": 40, "titanium": 12, "scrap": 45}}},
-          {"weight": 10, "text": "A bolt finds a seam in the rock, and your Basalt winces, politely. They carry on.", "effects": {"items": {"copper": 30, "titanium": 8}, "crew_hp": -10}}
+          {"weight": 90, "text": "Your Basalt walks the arcing corridors in no hurry, lightning crawling harmlessly down their back, and takes what they want. They return with a haul, a faint smell of ozone and a new haircut.", "effects": {"items": {"copper": 40, "titanium": 12, "scrap": 45}, "log": "log_scrapyard_final_notice"}},
+          {"weight": 10, "text": "A bolt finds a seam in the rock, and your Basalt winces, politely. They carry on.", "effects": {"items": {"copper": 30, "titanium": 8}, "crew_hp": -10, "log": "log_scrapyard_final_notice"}}
         ]},
         {"text": "Free the scavenger and leave the rest.", "outcomes": [
           {"weight": 100, "text": "You use a long pole to push the scavenger out of the static ball. He hangs in the lane, waving, then drifts off, grateful. His cargo drifts with him. He tosses you thirty credits from a very long way off.", "effects": {"items": {"credits": 30}}}

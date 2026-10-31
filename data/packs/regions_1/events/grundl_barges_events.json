@@ -47,11 +47,11 @@
       "text": "A cargo pallet drifts in the lane, wrapped in a net, beeping. Inside, a Grundl child, Dunnage, nine years old and the size of a refrigerator, is wedged between two crates, eating something. 'Hello,' says Dunnage through a mouthful. 'I am lost. I am fine. I am also stuck. Do you have a snack?'",
       "choices": [
         {"text": "Cut Dunnage free.", "outcomes": [
-          {"weight": 70, "text": "You cut the net, slide the pallet apart, and Dunnage rolls out into the airlock like a friendly boulder. They eat your crew's rations in a single happy sitting and ask for more. The Convoy pays handsomely for the return, and the net's tag says whose barge it was.", "effects": {"items": {"credits": 60, "fuel": 3}, "rep": {"concord": 1}, "crew_hp": -5}},
-          {"weight": 30, "text": "You cut the net and the pallet shifts. A crate catches your arm. Dunnage hugs you in gratitude and cracks two ribs.", "effects": {"items": {"credits": 50, "fuel": 2}, "rep": {"concord": 1}, "crew_hp": -10}}
+          {"weight": 70, "text": "You cut the net, slide the pallet apart, and Dunnage rolls out into the airlock like a friendly boulder. They eat your crew's rations in a single happy sitting and ask for more. The Convoy pays handsomely for the return, and the net's tag says whose barge it was.", "effects": {"items": {"credits": 60, "fuel": 3}, "rep": {"concord": 1}, "crew_hp": -5, "log": "log_barge_sorry"}},
+          {"weight": 30, "text": "You cut the net and the pallet shifts. A crate catches your arm. Dunnage hugs you in gratitude and cracks two ribs.", "effects": {"items": {"credits": 50, "fuel": 2}, "rep": {"concord": 1}, "crew_hp": -10, "log": "log_barge_sorry"}}
         ]},
         {"text": "Give Dunnage a snack first.", "outcomes": [
-          {"weight": 100, "text": "Dunnage eats the snack in two bites and says, 'Thank you. More?' You give them another. By the sixth they are friends. The Convoy arrives and pays a reward, and Dunnage waves goodbye with a tin of the barge's logs.", "effects": {"items": {"credits": 70}, "rep": {"concord": 1}, "crew_hp": 5}}
+          {"weight": 100, "text": "Dunnage eats the snack in two bites and says, 'Thank you. More?' You give them another. By the sixth they are friends. The Convoy arrives and pays a reward, and Dunnage waves goodbye with a tin of the barge's logs.", "effects": {"items": {"credits": 70}, "rep": {"concord": 1}, "crew_hp": 5, "log": "log_barge_sorry"}}
         ]},
         {"text": "[Grundl] Lift Dunnage out like a cousin.", "requires": {"species": "grundl"}, "outcomes": [
           {"weight": 100, "text": "Your Grundl picks up the pallet with one hand, tears the net with the other, and sets Dunnage on their feet. 'Cousin,' says Dunnage, solemn. 'You are very good at that.' The Convoy pays in cargo, hugs and a thousand sorries.", "effects": {"items": {"credits": 60, "fuel": 4, "missile": 2}, "rep": {"concord": 2}, "crew_hp": 5}}
@@ -75,10 +75,10 @@
           {"weight": 30, "text": "A section of the hull gives way as you cut. The sound is like a very long sigh.", "effects": {"items": {"titanium": 6, "scrap": 30}, "hull": -5}}
         ]},
         {"text": "[Grundl] Read the barge's name-board.", "requires": {"species": "grundl"}, "outcomes": [
-          {"weight": 100, "text": "Your Grundl walks the length of the barge, reading the family names on the doors. At the last one they stop, and sit down on the floor. 'My cousin's,' they say. After a long time they stand and take a plaque from the door. In the captain's cabin is a log, and a stash of spare cells.", "effects": {"items": {"fuel": 4, "credits": 40}}}
+          {"weight": 100, "text": "Your Grundl walks the length of the barge, reading the family names on the doors. At the last one they stop, and sit down on the floor. 'My cousin's,' they say. After a long time they stand and take a plaque from the door. In the captain's cabin is a log, and a stash of spare cells.", "effects": {"items": {"fuel": 4, "credits": 40}, "log": "log_barge_name_board"}}
         ]},
         {"text": "[Quick hands] Cut the hold doors off their hinges.", "requires": {"trait": "fast_repair"}, "outcomes": [
-          {"weight": 100, "text": "Your engineer takes the hold doors off in four neat cuts and floats them out into the lane. They are the best plate you have ever held, and they weigh as much as a small house. A log pad lies in the door frame.", "effects": {"items": {"titanium": 12, "scrap": 40}}}
+          {"weight": 100, "text": "Your engineer takes the hold doors off in four neat cuts and floats them out into the lane. They are the best plate you have ever held, and they weigh as much as a small house. A log pad lies in the door frame.", "effects": {"items": {"titanium": 12, "scrap": 40}, "log": "log_barge_name_board"}}
         ]}
       ]
     },
@@ -87,13 +87,13 @@
       "text": "A Convoy barge, the Plenty, floats dead in the lane with all her lamps lit. A Grundl in a chef's hat leans out of the airlock, waving a ladle. 'Visitors! Thank goodness! We have been cooking for three days and no one has come to eat. Please come in. Please eat. We have made too much. We always make too much.'",
       "choices": [
         {"text": "Go in and eat.", "outcomes": [
-          {"weight": 100, "text": "The Plenty has eleven courses, each a pot the size of a cauldron. The Grundl serve in silence, tears of happiness running down their enormous faces. You eat until you cannot see. When you leave they press on you a hamper, a bag of fuel and the galley log.", "effects": {"items": {"fuel": 2, "credits": 15}, "crew_hp": 20}}
+          {"weight": 100, "text": "The Plenty has eleven courses, each a pot the size of a cauldron. The Grundl serve in silence, tears of happiness running down their enormous faces. You eat until you cannot see. When you leave they press on you a hamper, a bag of fuel and the galley log.", "effects": {"items": {"fuel": 2, "credits": 15}, "crew_hp": 20, "log": "log_barge_soup_day_three"}}
         ]},
         {"text": "Decline politely and ask what happened.", "outcomes": [
-          {"weight": 100, "text": "The captain explains: Concord sent a route marshal to say there would be no cargo this quarter. The family cooked all the stores out of grief. 'We always cook when we are sad,' she says. 'We have a great deal of grief.' You buy the stores for a fair price, and the galley log with them.", "effects": {"items": {"credits": -20, "fuel": 3, "polymer": 15}, "crew_hp": 10}}
+          {"weight": 100, "text": "The captain explains: Concord sent a route marshal to say there would be no cargo this quarter. The family cooked all the stores out of grief. 'We always cook when we are sad,' she says. 'We have a great deal of grief.' You buy the stores for a fair price, and the galley log with them.", "effects": {"items": {"credits": -20, "fuel": 3, "polymer": 15}, "crew_hp": 10, "log": "log_barge_soup_day_three"}}
         ]},
         {"text": "[Grundl] Eat as much as you can.", "requires": {"species": "grundl"}, "outcomes": [
-          {"weight": 100, "text": "Your Grundl sits at the table and eats. And eats. The chef watches in awe. At the fourth pot the chef weeps for joy. 'Finally,' he says. 'Someone who understands.' Your Grundl is carried to the airlock on a stretcher, content.", "effects": {"items": {"credits": 40, "fuel": 3}, "crew_hp": 20}}
+          {"weight": 100, "text": "Your Grundl sits at the table and eats. And eats. The chef watches in awe. At the fourth pot the chef weeps for joy. 'Finally,' he says. 'Someone who understands.' Your Grundl is carried to the airlock on a stretcher, content.", "effects": {"items": {"credits": 40, "fuel": 3}, "crew_hp": 20, "log": "log_barge_soup_day_three"}}
         ]},
         {"text": "[Sporeling] Offer to cook something with spores.", "requires": {"species": "sporeling"}, "outcomes": [
           {"weight": 100, "text": "Your Sporeling asks the chef to step aside. They add a tablespoon of something from a pouch, stir, and the stew blooms. The chef's face changes. 'What is this?' he whispers. 'It is nothing,' says your Sporeling. 'It is bread.' The chef asks for the recipe on his knees.", "effects": {"items": {"credits": 40, "polymer": 15}, "crew_hp": 10}}
@@ -105,11 +105,11 @@
       "text": "Route Marshal Peck of the Concord Freight Office is in the lane with a chart and a headache. 'The Convoy has not had a route in forty years,' she says. 'They keep asking me for one. I keep saying there is nowhere to go. They keep asking where. I do not know. I am a clerk.' She looks at you with sudden hope. 'Do you know anywhere?'",
       "choices": [
         {"text": "Suggest a route.", "outcomes": [
-          {"weight": 60, "text": "You sketch a route through three systems that are not empty. Peck stares at it, and her eyes fill. 'It is a route,' she whispers. 'It is a real route.' She pays for the chart and gives you her notes.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}}},
-          {"weight": 40, "text": "You suggest a route. Peck points out that it goes through a Rustfang nest. She thanks you anyway, and files it under 'ambitious'.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}}}
+          {"weight": 60, "text": "You sketch a route through three systems that are not empty. Peck stares at it, and her eyes fill. 'It is a route,' she whispers. 'It is a real route.' She pays for the chart and gives you her notes.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "log": "log_barge_no_route"}},
+          {"weight": 40, "text": "You suggest a route. Peck points out that it goes through a Rustfang nest. She thanks you anyway, and files it under 'ambitious'.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}, "log": "log_barge_no_route"}}
         ]},
         {"text": "Tell her the Convoy is the route.", "outcomes": [
-          {"weight": 100, "text": "Peck blinks. 'The Convoy is the route,' she repeats. It goes through her like a bell. She writes it down in capital letters and laughs, loud and unexpected. 'The Concord will fund it,' she says, 'once I have worked out how to say it in forms.'", "effects": {"items": {"credits": 30}, "rep": {"concord": 3}}}
+          {"weight": 100, "text": "Peck blinks. 'The Convoy is the route,' she repeats. It goes through her like a bell. She writes it down in capital letters and laughs, loud and unexpected. 'The Concord will fund it,' she says, 'once I have worked out how to say it in forms.'", "effects": {"items": {"credits": 30}, "rep": {"concord": 3}, "log": "log_barge_no_route"}}
         ]},
         {"text": "[Grundl] Speak to the Convoy on her behalf.", "requires": {"species": "grundl"}, "outcomes": [
           {"weight": 100, "text": "Your Grundl lowers themselves to Peck's chair and speaks to her gently, as to a child, about the long road. Peck cries. Your Grundl pats her head with one enormous finger. The Convoy, listening, decides that evening to go. Peck pays in credits and in sobs.", "effects": {"items": {"credits": 70, "fuel": 3}, "rep": {"concord": 3}}}
@@ -178,18 +178,18 @@
       "text": "A barge, the Grace, has lost her engine governor and is accelerating, slowly and inevitably, toward the Convoy: forty kilometres of mass at an ever-increasing pace. Her crew are on the comm, very calm. 'Sorry,' says the captain. 'We seem to be moving. If you could help us stop, we would be so grateful. If you could get out of the way, we would be grateful for that too.'",
       "choices": [
         {"text": "Try to slow the barge with tow cables.", "outcomes": [
-          {"weight": 40, "text": "You hook on to the Grace's prow and burn hard against her. Your engines scream, your hull groans, the cable sings. She slows. She slows. She stops. The Grace's crew cheer and bow in four languages. They pay with an entire pallet, and the governor's log.", "effects": {"items": {"fuel": 6, "credits": 60}, "rep": {"concord": 2}, "crew_hp": -5, "hull": -10}},
-          {"weight": 30, "text": "The cable snaps with a noise like a gunshot and whips through your hull. You get out of the way. The Grace goes on, then stops of her own accord a day later, out of fuel.", "effects": {"items": {"fuel": 2, "credits": 20}, "crew_hp": -10, "hull": -15}},
+          {"weight": 40, "text": "You hook on to the Grace's prow and burn hard against her. Your engines scream, your hull groans, the cable sings. She slows. She slows. She stops. The Grace's crew cheer and bow in four languages. They pay with an entire pallet, and the governor's log.", "effects": {"items": {"fuel": 6, "credits": 60}, "rep": {"concord": 2}, "crew_hp": -5, "hull": -10, "log": "log_barge_governor"}},
+          {"weight": 30, "text": "The cable snaps with a noise like a gunshot and whips through your hull. You get out of the way. The Grace goes on, then stops of her own accord a day later, out of fuel.", "effects": {"items": {"fuel": 2, "credits": 20}, "crew_hp": -10, "hull": -15, "log": "log_barge_governor"}},
           {"weight": 20, "text": "The Grace clips your side as she goes past. It is like being hit by a mountain.", "effects": {"items": {"fuel": 3}, "rep": {"concord": 1}, "crew_hp": -15, "hull": -20}},
           {"weight": 10, "text": "The Grace clips you. One of the crew is lost in the collision. The Grace's crew send a long, shaking message of apology.", "effects": {"rep": {"concord": 1}, "crew_hp": -20, "hull": -20, "lose_crew": 1}}
         ]},
         {"text": "[Grundl] Brace the Grace's prow with your hands.", "requires": {"species": "grundl"}, "outcomes": [
-          {"weight": 80, "text": "Your Grundl climbs out on the hull, plants both feet on the Grace's nose, and leans. The barge slows by degrees and stops, with a sound like a very large cow lying down. The crew cheer. Your Grundl, shaking, says, 'Sorry. I could not hold it longer.'", "effects": {"items": {"fuel": 6, "credits": 70}, "rep": {"concord": 3}, "crew_hp": -5}},
-          {"weight": 20, "text": "Your Grundl braces, and the Grace dents the hull of your own ship. They hold on. They stop her.", "effects": {"items": {"fuel": 4, "credits": 50}, "rep": {"concord": 3}, "crew_hp": -10, "hull": -10}}
+          {"weight": 80, "text": "Your Grundl climbs out on the hull, plants both feet on the Grace's nose, and leans. The barge slows by degrees and stops, with a sound like a very large cow lying down. The crew cheer. Your Grundl, shaking, says, 'Sorry. I could not hold it longer.'", "effects": {"items": {"fuel": 6, "credits": 70}, "rep": {"concord": 3}, "crew_hp": -5, "log": "log_barge_governor"}},
+          {"weight": 20, "text": "Your Grundl braces, and the Grace dents the hull of your own ship. They hold on. They stop her.", "effects": {"items": {"fuel": 4, "credits": 50}, "rep": {"concord": 3}, "crew_hp": -10, "hull": -10, "log": "log_barge_governor"}}
         ]},
         {"text": "[Quick hands] Rewire the governor remotely.", "requires": {"trait": "fast_repair"}, "outcomes": [
-          {"weight": 85, "text": "Your engineer gets into the Grace's governor over the comm in four minutes and kills the throttle. The barge coasts to a halt a hair from the Convoy's hull. 'Fascinating,' says the captain. They pay in cargo.", "effects": {"items": {"fuel": 5, "credits": 60, "copper": 20}, "rep": {"concord": 2}}},
-          {"weight": 15, "text": "The governor fights back. The Grace skips, and stops, and your engineer is left with a very stern look.", "effects": {"items": {"fuel": 3, "credits": 30}, "crew_hp": -5}}
+          {"weight": 85, "text": "Your engineer gets into the Grace's governor over the comm in four minutes and kills the throttle. The barge coasts to a halt a hair from the Convoy's hull. 'Fascinating,' says the captain. They pay in cargo.", "effects": {"items": {"fuel": 5, "credits": 60, "copper": 20}, "rep": {"concord": 2}, "log": "log_barge_governor"}},
+          {"weight": 15, "text": "The governor fights back. The Grace skips, and stops, and your engineer is left with a very stern look.", "effects": {"items": {"fuel": 3, "credits": 30}, "crew_hp": -5, "log": "log_barge_governor"}}
         ]},
         {"text": "Get clear and watch.", "outcomes": [
           {"weight": 100, "text": "You get out of the way, with plenty of room. The Grace goes past, slowly, like a hill moving. A crew member waves from a window. The Convoy, with great courtesy, moves aside.", "effects": {}}
@@ -219,13 +219,13 @@
       "text": "Two barges are being lashed together in the lane, with a ceremony. Forty Grundl line the hulls in their best harnesses, and a bride and a groom, each the size of a small moon, are fastening the final cable between their families' sterns. A band plays something slow and huge and tuba-ish. Someone sees you and waves. 'Guests! There must be guests! Come aboard!'",
       "choices": [
         {"text": "Attend the lashing.", "outcomes": [
-          {"weight": 100, "text": "You are seated at the family table between a grandmother and a great-uncle and fed the contents of a pantry. At the toast the bride's father makes a speech of eleven words, three of which are 'sorry'. You dance. It is like dancing with a house. You leave laden with fuel and hampers and a lot of love, and a copy of the ceremony's log.", "effects": {"items": {"fuel": 4, "credits": 30}, "rep": {"concord": 2}, "crew_hp": 20}}
+          {"weight": 100, "text": "You are seated at the family table between a grandmother and a great-uncle and fed the contents of a pantry. At the toast the bride's father makes a speech of eleven words, three of which are 'sorry'. You dance. It is like dancing with a house. You leave laden with fuel and hampers and a lot of love, and a copy of the ceremony's log.", "effects": {"items": {"fuel": 4, "credits": 30}, "rep": {"concord": 2}, "crew_hp": 20, "log": "log_barge_lashing"}}
         ]},
         {"text": "Offer a gift (20 credits).", "requires": {"credits": 20}, "outcomes": [
           {"weight": 100, "text": "You give the couple a small silver bell, bought at the last stop. They place it on the cable with the greatest tenderness. 'It will ring,' says the bride, 'for as long as we are lashed.' It is perhaps the nicest thing anyone has done on your ship.", "effects": {"items": {"credits": -20, "fuel": 3}, "rep": {"concord": 2}, "crew_hp": 10}}
         ]},
         {"text": "[Grundl] Stand as a witness.", "requires": {"species": "grundl"}, "outcomes": [
-          {"weight": 100, "text": "Your Grundl stands at the cable between the two families and holds up one enormous hand. 'I witness,' they say, and the whole crowd hums. They are given a harness, a cup and a place at the head table for life.", "effects": {"items": {"credits": 50, "fuel": 4}, "rep": {"concord": 3}, "crew_hp": 15}}
+          {"weight": 100, "text": "Your Grundl stands at the cable between the two families and holds up one enormous hand. 'I witness,' they say, and the whole crowd hums. They are given a harness, a cup and a place at the head table for life.", "effects": {"items": {"credits": 50, "fuel": 4}, "rep": {"concord": 3}, "crew_hp": 15, "log": "log_barge_lashing"}}
         ]},
         {"text": "[Prismatic] Hum the wedding march.", "requires": {"species": "prismatic"}, "outcomes": [
           {"weight": 100, "text": "Your Prismatic lights its core and hums a tune the Grundl have never heard, rising, warm and slow. The band catches up, and the two barges, fastened, begin to rotate in time. The bride weeps. The groom weeps. The great-uncle weeps most of all.", "effects": {"items": {"credits": 40, "crystal": 2}, "rep": {"concord": 2}, "crew_hp": 10}}

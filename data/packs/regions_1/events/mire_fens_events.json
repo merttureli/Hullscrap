@@ -24,12 +24,12 @@
       "text": "A trade barge, the Dampener, is on fire. Not badly: gently, thoroughly, in the way of a fire that has all the time in the world. Her crew stand in a row at the rail passing buckets hand to hand, and apologise to each other every time one slops over. The fire is not impressed.",
       "choices": [
         {"text": "Join the bucket line.", "outcomes": [
-          {"weight": 65, "text": "You pass buckets for an hour. The fire sulks, shrinks and goes out. The crew drop their buckets and cry 'Oh, thank you, oh, we are so sorry!' all at once, and press a crate of polymer into your hands. A damp inventory comes with it.", "effects": {"items": {"polymer": 20}, "rep": {"concord": 1}, "crew_hp": -5}},
-          {"weight": 25, "text": "The fire flares as you arrive, burns a bucket-man's apron, and goes out in a hiss of pure embarrassment. You are singed. They are mortified, and apologise with a list of buckets.", "effects": {"items": {"polymer": 15}, "crew_hp": -10}},
+          {"weight": 65, "text": "You pass buckets for an hour. The fire sulks, shrinks and goes out. The crew drop their buckets and cry 'Oh, thank you, oh, we are so sorry!' all at once, and press a crate of polymer into your hands. A damp inventory comes with it.", "effects": {"items": {"polymer": 20}, "rep": {"concord": 1}, "crew_hp": -5, "log": "log_fen_bucket_inventory"}},
+          {"weight": 25, "text": "The fire flares as you arrive, burns a bucket-man's apron, and goes out in a hiss of pure embarrassment. You are singed. They are mortified, and apologise with a list of buckets.", "effects": {"items": {"polymer": 15}, "crew_hp": -10, "log": "log_fen_bucket_inventory"}},
           {"weight": 10, "text": "A tank on the barge goes. You get out; so do they.", "effects": {"items": {"polymer": 10, "credits": 30}, "hull": -10}}
         ]},
         {"text": "[Mire] Take the lead of the bucket line.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Your Mire walks the length of the barge, takes one look at the fire, and rearranges the whole line in a minute. The fire goes out in six. The crew look at your Mire the way people look at a saint with a tank, and give you everything, plus their bucket book.", "effects": {"items": {"polymer": 25, "credits": 50}, "rep": {"concord": 2, "clans": 1}}}
+          {"weight": 100, "text": "Your Mire walks the length of the barge, takes one look at the fire, and rearranges the whole line in a minute. The fire goes out in six. The crew look at your Mire the way people look at a saint with a tank, and give you everything, plus their bucket book.", "effects": {"items": {"polymer": 25, "credits": 50}, "rep": {"concord": 2, "clans": 1}, "log": "log_fen_bucket_inventory"}}
         ]},
         {"text": "[Quick hands] Cut the burning cargo loose.", "requires": {"trait": "fast_repair"}, "outcomes": [
           {"weight": 100, "text": "Your engineer cuts the burning pallets free with four clean strokes and kicks them overboard. The barge breathes out. The crew hug each other, then your engineer, then the nearest bucket.", "effects": {"items": {"polymer": 15, "credits": 30}}}
@@ -70,10 +70,10 @@
         {"text": "Follow the voice.", "outcomes": [
           {"weight": 40, "text": "The voice leads you to a drifting lamp, a floating pot of tea and a note: THIS WAY IS FINE. You drink the tea. It is very good. The note is signed 'Moll'.", "effects": {"items": {"fuel": 2}, "crew_hp": 10}},
           {"weight": 40, "text": "The voice leads you into the thick of it. By the time you get out a day has gone, and your crew are wearing each other's hats.", "effects": {"crew_hp": -5}},
-          {"weight": 20, "text": "The voice leads you to the bank's heart: an old Concord cutter, her crew at their posts, fog pouring from her vents. The log is the last thing aboard.", "effects": {"items": {"scrap": 30}}}
+          {"weight": 20, "text": "The voice leads you to the bank's heart: an old Concord cutter, her crew at their posts, fog pouring from her vents. The log is the last thing aboard.", "effects": {"items": {"scrap": 30}, "log": "log_fen_fog_log"}}
         ]},
         {"text": "[Mire] Sing the Wet Watch call.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Your Mire sings the old brigade call: three notes up, one down. The fog thins at once and parts like a curtain. Moored in the lane beyond are forty tiny lamps and a hundred Mire in slickers, all waving. 'We heard,' says the leader. 'We came.' They toast with tea and give you fuel, and a log from the cutter they found.", "effects": {"items": {"fuel": 4, "credits": 30}, "rep": {"concord": 1}}}
+          {"weight": 100, "text": "Your Mire sings the old brigade call: three notes up, one down. The fog thins at once and parts like a curtain. Moored in the lane beyond are forty tiny lamps and a hundred Mire in slickers, all waving. 'We heard,' says the leader. 'We came.' They toast with tea and give you fuel, and a log from the cutter they found.", "effects": {"items": {"fuel": 4, "credits": 30}, "rep": {"concord": 1}, "log": "log_fen_fog_log"}}
         ]},
         {"text": "[Prismatic] Burn the fog off with a beam.", "requires": {"species": "prismatic"}, "outcomes": [
           {"weight": 100, "text": "Your Prismatic opens its core and the fog glows pink, gold, white, then lifts like breath off a mirror. Behind it a long string of Fen lamps. The Mire cheer and ask your Prismatic to do it every Tuesday.", "effects": {"items": {"crystal": 2, "credits": 20}}}
@@ -85,12 +85,12 @@
       "text": "A freighter, the Slow Leak, sits in a bubble of Fen water, sunk to her topmost deck. Fish, or something fish-like, swim through her bridge windows. Her cargo bay is a rippling green pond. A sign nailed to the lock: SALVAGE ONLY IF DRY. IT IS NOT DRY.",
       "choices": [
         {"text": "Pump the hold and strip it.", "outcomes": [
-          {"weight": 55, "text": "You rig a pump, drain the hold, and find the cargo has sat under water forty years. The crates are swollen, the labels are runny and the contents are mostly fine. A soggy manifest comes up with them.", "effects": {"items": {"scrap": 35, "polymer": 20, "copper": 15}}},
-          {"weight": 30, "text": "The pump hits a pocket of old gas and burps a huge bubble. The crew come up soaked and stunned.", "effects": {"items": {"scrap": 25}, "crew_hp": -10}},
-          {"weight": 15, "text": "Under the hold, a locker of dry clothes in a plastic bag. Inside: a Concord spare part and a smell of lavender.", "effects": {"items": {"titanium": 5, "credits": 40}}}
+          {"weight": 55, "text": "You rig a pump, drain the hold, and find the cargo has sat under water forty years. The crates are swollen, the labels are runny and the contents are mostly fine. A soggy manifest comes up with them.", "effects": {"items": {"scrap": 35, "polymer": 20, "copper": 15}, "log": "log_fen_slow_leak"}},
+          {"weight": 30, "text": "The pump hits a pocket of old gas and burps a huge bubble. The crew come up soaked and stunned.", "effects": {"items": {"scrap": 25}, "crew_hp": -10, "log": "log_fen_slow_leak"}},
+          {"weight": 15, "text": "Under the hold, a locker of dry clothes in a plastic bag. Inside: a Concord spare part and a smell of lavender.", "effects": {"items": {"titanium": 5, "credits": 40}, "log": "log_fen_slow_leak"}}
         ]},
         {"text": "[Mire] Dive in and bring it up by hand.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Your Mire dives into the green pond and comes up an hour later with a net of crates, a manifest and a very small fish in the hair. It is the best afternoon they have had.", "effects": {"items": {"scrap": 40, "polymer": 25, "titanium": 6}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Mire dives into the green pond and comes up an hour later with a net of crates, a manifest and a very small fish in the hair. It is the best afternoon they have had.", "effects": {"items": {"scrap": 40, "polymer": 25, "titanium": 6}, "crew_hp": 5, "log": "log_fen_slow_leak"}}
         ]},
         {"text": "[Quick hands] Weld the leak and refloat her.", "requires": {"trait": "fast_repair"}, "outcomes": [
           {"weight": 80, "text": "Your engineer patches the Slow Leak from inside and the sunken freighter, with a sigh, lifts out of her pond. The salvage rights revert to you for the refloat. The cargo is intact.", "effects": {"items": {"scrap": 50, "copper": 20, "credits": 40}}},
@@ -106,8 +106,8 @@
       "text": "A Fen patrol cutter pulls alongside, flashing a polite lamp. 'Surprise drill,' says the voice. 'You will have three minutes.' Before you can ask, an alarm sounds on your ship that is not yours. A Mire in a slicker steps through your airlock holding a stopwatch. 'Fire in the galley,' they say. 'Go.'",
       "choices": [
         {"text": "Play along.", "outcomes": [
-          {"weight": 55, "text": "Your crew run the drill: foam, buckets, a lot of shouting. The stopwatch says 2:41. The Mire nods, writes 'adequate', and awards each of you a sticker. Your crew are quietly delighted. The Mire's log pad is left behind.", "effects": {"items": {"credits": 10}, "rep": {"concord": 1}, "crew_hp": 5}},
-          {"weight": 45, "text": "Your crew run the drill. Someone takes the wrong exit; someone else takes the right one in the wrong order. The Mire writes 'educational' and sticks a poster on your wall, along with a log pad.", "effects": {"crew_hp": 5}}
+          {"weight": 55, "text": "Your crew run the drill: foam, buckets, a lot of shouting. The stopwatch says 2:41. The Mire nods, writes 'adequate', and awards each of you a sticker. Your crew are quietly delighted. The Mire's log pad is left behind.", "effects": {"items": {"credits": 10}, "rep": {"concord": 1}, "crew_hp": 5, "log": "log_fen_three_am"}},
+          {"weight": 45, "text": "Your crew run the drill. Someone takes the wrong exit; someone else takes the right one in the wrong order. The Mire writes 'educational' and sticks a poster on your wall, along with a log pad.", "effects": {"crew_hp": 5, "log": "log_fen_three_am"}}
         ]},
         {"text": "Refuse the drill.", "outcomes": [
           {"weight": 100, "text": "The Mire looks at you for a long time, with the compassion of a nurse. 'Fire does not refuse,' they say, and leave a poster on your wall. FIRE DOES NOT REFUSE.", "effects": {}}
@@ -125,11 +125,11 @@
       "text": "A Concord clerk in a leaking cutter, CS-044 Remittance, is signalling the Fens: 'Pay. Pay. Pay.' It takes a moment to realise he is begging them to accept his money. 'Forty years of wages,' he says. 'Owed to the Wet Watch since the Snap. The Concord has just remembered. I have a hold of credits and I cannot make them take it.' The Mire stand in a row, arms folded.",
       "choices": [
         {"text": "Offer to carry the money across to them.", "outcomes": [
-          {"weight": 60, "text": "You carry the credits across and set them at the Watch's feet. The Mire look at it for a long time. Then the chief says, 'A donation, then,' and everyone nods. The clerk bursts into tears. You get a finder's fee and the clerk's ledger.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}}},
-          {"weight": 40, "text": "The Mire send you back with the credits and a note: THANK YOU BUT NO. You return the hold to the clerk, who weeps harder. He tips you for the effort.", "effects": {"items": {"credits": 30}, "rep": {"concord": 1}}}
+          {"weight": 60, "text": "You carry the credits across and set them at the Watch's feet. The Mire look at it for a long time. Then the chief says, 'A donation, then,' and everyone nods. The clerk bursts into tears. You get a finder's fee and the clerk's ledger.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "log": "log_fen_wages"}},
+          {"weight": 40, "text": "The Mire send you back with the credits and a note: THANK YOU BUT NO. You return the hold to the clerk, who weeps harder. He tips you for the effort.", "effects": {"items": {"credits": 30}, "rep": {"concord": 1}, "log": "log_fen_wages"}}
         ]},
         {"text": "[Mire] Explain it as a gift, not a wage.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Your Mire speaks to the chief in the old brigade way, and the chief's folded arms unfold. 'A gift from the clerk's heart,' she says. 'A different thing.' The money is accepted in a ceremony involving one bucket. The clerk is carried off on shoulders, and you get a cut of the euphoria.", "effects": {"items": {"credits": 80, "fuel": 2}, "rep": {"concord": 3}}}
+          {"weight": 100, "text": "Your Mire speaks to the chief in the old brigade way, and the chief's folded arms unfold. 'A gift from the clerk's heart,' she says. 'A different thing.' The money is accepted in a ceremony involving one bucket. The clerk is carried off on shoulders, and you get a cut of the euphoria.", "effects": {"items": {"credits": 80, "fuel": 2}, "rep": {"concord": 3}, "log": "log_fen_wages"}}
         ]},
         {"text": "[Fenn] Restructure the debt as a donation.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 100, "text": "Your Fenn drafts a deed in four minutes: the wages become a Brigade Fund, to be spent on buckets and tea. The Mire sign with relief. The clerk signs with joy. Your Fenn takes a fee from the fund, which both sides agree is fair.", "effects": {"items": {"credits": 70}, "rep": {"concord": 1}}}
@@ -206,13 +206,13 @@
       "text": "At the end of a plank walkway a Mire in an old brigade slicker sits on a bucket and looks at nothing. The slicker has a chief's badge. The badge has a date: forty years of service. 'I am Glub,' he says to no one. 'I am done with fire. I am tired of the wet. I would like to see somewhere dry. Do you know anywhere dry?'",
       "choices": [
         {"text": "Tell him you know a dry ship.", "outcomes": [
-          {"weight": 100, "text": "Glub considers this for a long time, as a man might consider an unlikely loan. Then he stands, picks up his bucket, and walks aboard. He will dry out in a week. He is willing to try. His old mate's notes on dry weeks are in the bucket.", "effects": {"recruit": {"species": "mire", "name": "Glub"}}}
+          {"weight": 100, "text": "Glub considers this for a long time, as a man might consider an unlikely loan. Then he stands, picks up his bucket, and walks aboard. He will dry out in a week. He is willing to try. His old mate's notes on dry weeks are in the bucket.", "effects": {"recruit": {"species": "mire", "name": "Glub"}, "log": "log_fen_dry_week"}}
         ]},
         {"text": "[Mire] Offer to trade a dry place for a good chief.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Your Mire and Glub talk quietly for a very long time. In the end Glub hangs his slicker on the walkway, badge on top, and comes aboard in a plain tunic. Your Mire carries the slicker back to the dock and returns damp, solemn and a little proud.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}, "recruit": {"species": "mire", "name": "Glub"}}}
+          {"weight": 100, "text": "Your Mire and Glub talk quietly for a very long time. In the end Glub hangs his slicker on the walkway, badge on top, and comes aboard in a plain tunic. Your Mire carries the slicker back to the dock and returns damp, solemn and a little proud.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}, "recruit": {"species": "mire", "name": "Glub"}, "log": "log_fen_dry_week"}}
         ]},
         {"text": "[Emberkin] Sit beside him and radiate, gently.", "requires": {"species": "emberkin"}, "outcomes": [
-          {"weight": 100, "text": "Your Emberkin sits beside him and glows. Glub sniffs. 'Dry,' he says, with horror. He edges away, then closer, then shifts to the warm side. After an hour he is cheerful enough to sign on, steam rising off his shoulders. 'You are the most terrifying person I have ever met,' he says. 'Thank you.'", "effects": {"recruit": {"species": "mire", "name": "Glub"}}}
+          {"weight": 100, "text": "Your Emberkin sits beside him and glows. Glub sniffs. 'Dry,' he says, with horror. He edges away, then closer, then shifts to the warm side. After an hour he is cheerful enough to sign on, steam rising off his shoulders. 'You are the most terrifying person I have ever met,' he says. 'Thank you.'", "effects": {"recruit": {"species": "mire", "name": "Glub"}, "log": "log_fen_dry_week"}}
         ]},
         {"text": "Offer him a bucket.", "outcomes": [
           {"weight": 100, "text": "He looks at it in his hands for a long time. 'No,' he says, gently. 'Not today.' But he smiles, and for the first time since you came, he looks up.", "effects": {}}
