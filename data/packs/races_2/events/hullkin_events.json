@@ -1,0 +1,58 @@
+{"events": [
+    {
+      "id": "hullkin_the_old_lady", "type": "wreck_field", "weight": 8, "once": true, "requires": {"jumps_min": 3},
+      "text": "The Concord cruiser Constancy has been dead for forty years, and she is not empty. Her whole outer hull is a town. Shell-backed figures with small grasping hands and eyes on stalks creep along the plating in slow rows, scraping, patching, laying new shell over old, the way you tend a garden. A sign on her flank, in barnacle-script, reads PLEASE DON'T CUT. THIS IS OUR HOUSE. Her hold, you can see from here, is full of good steel.",
+      "choices": [
+        {"text": "Cut her up anyway.", "outcomes": [
+          {"weight": 70, "text": "The Hullkin do not stop you. They put their small hands flat against the plating wherever you cut, and stand in a long slow line watching you work, and none of them says anything at all. You get the steel. Your crew do not sleep well.", "effects": {"items": {"titanium": 10, "scrap": 40}, "crew_hp": -5}},
+          {"weight": 30, "text": "The Hullkin have been welding the inner doors shut, quietly, one a month, for a decade. You come away with a quarter of what you planned and a good deal of sympathy for a door.", "effects": {"items": {"scrap": 15}, "crew_hp": -5}}
+        ]},
+        {"text": "Knock, and ask permission.", "outcomes": [
+          {"weight": 100, "text": "You knock on her hull with a spanner, three slow times, and wait. After a while a Hullkin the size of a barrel comes to the airlock and, taking a very long time about it, says 'Yes.' The price is that you leave the shell on. A careful slow day later you have the hold's steel, though not the plates, and one of the young ones is standing in your airlock with a bag on its back. 'To see the inside of a ship,' it says. 'Only the inside.' Strake signs on.", "effects": {"items": {"titanium": 10, "scrap": 20, "fuel": -1}, "recruit": {"species": "hullkin", "name": "Strake"}}}
+        ]},
+        {"text": "[Hullkin] Knock the family knock.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin presses their shell against the Constancy's plating and taps a long-short-long-long. All along her flank the creeping stops. A hundred eyes on stalks turn, slowly, as one. Then the whole hull opens like a door held for a guest: the hold, the airlocks, the pantry. The steel is a gift, and one of the elders presses a plate of her own shell onto your hull, as a mend.", "effects": {"items": {"titanium": 12, "scrap": 30}, "hull": 10}}
+        ]},
+        {"text": "Leave her be.", "outcomes": [
+          {"weight": 100, "text": "You turn the ship slowly, as if she might wake. Down on the plating a hundred small hands lift in what you decide, afterwards, was a wave.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "hullkin_leaking_freighter", "type": "distress", "weight": 7, "once": false, "requires": {},
+      "text": "The tanker Last Orders has a crack in her belly that runs from stem to stern like a bad idea. She is losing coolant in a long white thread, and her crew are running between buckets and holes. The captain has radioed for a patch crew, and another patch crew, and a third. 'They said four hours,' she says. 'That was an hour ago. I'd settle for anyone with a thumb.'",
+      "choices": [
+        {"text": "Lend your repair crew.", "outcomes": [
+          {"weight": 60, "text": "Two hours of sealing, swearing and passing tools down a corridor. The crack closes along its whole length. The captain pays what she can, and a good deal of coffee.", "effects": {"items": {"credits": 30}}},
+          {"weight": 40, "text": "The crack gets worse before it gets better, and so does the swearing. At the end of it the coolant is in the tank and your crew are in the hold, asleep on a pile of tarps.", "effects": {"items": {"credits": 15}, "crew_hp": -5}}
+        ]},
+        {"text": "Sell her a patch kit (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
+          {"weight": 100, "text": "You hand over twenty scrap of the right kind, in the right-sized bags, with instructions the captain does not read. It works anyway. She is so grateful she overpays, which she will find out about later.", "effects": {"items": {"scrap": -20, "credits": 50}}}
+        ]},
+        {"text": "[Hullkin] Press into the crack.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin crosses the gap at their usual pace, which the captain finds unbearable, climbs into the crack, and stays there. Slowly, shell by shell, the long white thread thins, thins, and stops. 'It will hold,' they say. 'It will hold a long time. It likes it here.' The captain is overcome. She pays in fuel and a tin of real coffee.", "effects": {"items": {"fuel": 3, "credits": 40}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Wish them luck.", "outcomes": [
+          {"weight": 100, "text": "You wish them luck on the open channel. A voice says, from far away, 'We've got a thumb now.' You decide not to ask.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hullkin_lone_sitter", "type": "empty", "weight": 7, "once": false, "requires": {},
+      "text": "A single hull-plate the size of a house drifts in the middle of nowhere. On it, one Hullkin, sitting. When you hail, it turns out to have been sitting there for nine years. 'Waiting,' it says, after a while. It does not say for what.",
+      "choices": [
+        {"text": "Ask what it is waiting for.", "outcomes": [
+          {"weight": 100, "text": "The answer takes forty minutes. 'For the rest of the plate,' it says. 'This is only a piece. We came off together. We are going to find each other.' It points a small hand in a direction, very slowly, and says 'that way, probably'. Your chart takes this seriously.", "effects": {"reveal": "wreck_field"}}
+        ]},
+        {"text": "Offer a tow (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "The Hullkin thinks about it for most of a day. Then it accepts, with great gravity, and you tow the plate half a lane and set it down beside a bigger wreck. In thanks it presses a handful of seed-barnacles to your hull. They will mend it for years.", "effects": {"items": {"fuel": -1}, "hull": 10}}
+        ]},
+        {"text": "[Hullkin] Sit with them.", "requires": {"species": "hullkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Hullkin walks out onto the plate, sits, and the two of them say nothing together for a day and a half. It is the happiest your Hullkin has ever looked. At the end the stranger tells your Hullkin where a family of Hullkin keeps a stash under a wreck near here, in a sentence that takes an hour, and gives them a blessing and a lump of good steel.", "effects": {"items": {"titanium": 6, "scrap": 25}, "reveal": "wreck_field", "crew_hp": 10}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You pull away. In the mirror the Hullkin does not move, which is, you suppose, the point.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

@@ -1,0 +1,65 @@
+{"events": [
+    {
+      "id": "drakkin_bay_four", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
+      "text": "The fight in Bay 4 has a bookie now. A Fenn in a waistcoat is working the rail with a heat lamp and a chalk board, taking bets from a crowd that has been standing in the cold for three days. In the ring of cargo straps sits the champion, a vast Drakkin the colour of old rust, with an ochre crest and one eyelid that opens about once a minute. 'He warms up around lunch,' says Hob, from behind his barricade. 'It's mostly over.'",
+      "choices": [
+        {"text": "Bet 30 credits on the champion.", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 55, "text": "Somebody points the reactor vent at Bay 4. By noon the champion is a different animal, and finishes the fight in the time it takes to say so. The bookie pays out through his teeth.", "effects": {"items": {"credits": 30}}},
+          {"weight": 45, "text": "The vent stays shut. The champion falls asleep mid-round, upright, to a long and respectful silence. The Fenn tips his hat to you and keeps your thirty.", "effects": {"items": {"credits": -30}}}
+        ]},
+        {"text": "Open the reactor vent on Bay 4 (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "In ten minutes the bay is warm as soup and every Drakkin in it is on their feet in a ripple, which delights the crowd and ruins the bookie's night. Hob gives you a bay pass and the bookie a long look. You are, briefly, popular.", "effects": {"items": {"fuel": -1, "credits": 15}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "[Drakkin] Step over the strap and take the champion's challenge.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 70, "text": "Your Drakkin steps into the ring with the heat lamp on their scales and the whole crowd leaning in. It is over in nine seconds, and it is lovely. The champion bows, slowly, for the first time in a year. The Fenn pays the purse, and then, with great caution, his respects.", "effects": {"items": {"credits": 60}, "rep": {"clans": 2}}},
+          {"weight": 30, "text": "A close, ugly, magnificent draw, the kind the Pit calls a cancellation. Both fighters lie on the plating and laugh. The purse is split, and so, a little, is your Drakkin's lip.", "effects": {"items": {"credits": 25}, "rep": {"clans": 1}, "crew_hp": -10}}
+        ]},
+        {"text": "Hire one of the retired fighters in the stands (80 credits).", "requires": {"credits": 80, "not_flag": "drakkin_hired"}, "outcomes": [
+          {"weight": 100, "text": "Rask has a cracked crest, a pension of nothing, and the polite shy dignity of someone who has been hit by every kind of person. They shake your hand the way you hold a baby. 'I can do the other thing too,' they say. 'Carrying. I'm good at carrying.' They pick up your bag and the bag next to it.", "effects": {"items": {"credits": -80}, "recruit": {"species": "drakkin", "name": "Rask"}, "flag": "drakkin_hired"}}
+        ]},
+        {"text": "Watch a round and leave.", "outcomes": [
+          {"weight": 100, "text": "You watch three rounds. At the end of the third, the champion has moved his left hand. The crowd goes wild and the Fenn sells a great many hot drinks.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "drakkin_duel_challenge", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 3},
+      "text": "The raiders hail you with a chime instead of a threat. 'Pit rules,' says a voice. 'Our champion against yours. If yours wins, we leave. If ours wins, we take your cargo bay and nobody needs to be hurt who isn't already.' A boarding tube snakes across the gap. At the far end, in the airlock, stands a fighter two heads taller than the door, hands taped, with the face of someone who has been in more than one cargo bay.",
+      "choices": [
+        {"text": "Send your biggest crew member.", "outcomes": [
+          {"weight": 40, "text": "Your champion wins on points and one unfair bite. The raiders pay up with ill grace, a groan and a bag of scrap, and the tube retracts like a sulk.", "effects": {"items": {"scrap": 40}}},
+          {"weight": 60, "text": "Your champion is lifted off the deck, spoken to firmly, and put down in the corridor. The raiders take a share of your hold, as promised. Nobody is hurt who wasn't already.", "effects": {"items": {"scrap": -30}, "crew_hp": -10}}
+        ]},
+        {"text": "Refuse the pit and fight the ship.", "outcomes": [
+          {"weight": 100, "text": "'No one likes a coward in the Pit,' says the voice. 'But we also don't mind a fight.' The tube snaps shut.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Drakkin] Take the airlock.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 85, "text": "Your Drakkin ducks the first swing, takes the second on the crest, and answers with three. The raider champion sits down on the deck with a sound like a bellows. 'Good fight,' she says, in perfect Pit. She hands over the toll she would have charged you and asks whether your Drakkin has ever thought about a different crew.", "effects": {"items": {"credits": 50, "scrap": 30}, "rep": {"clans": 1}}},
+          {"weight": 15, "text": "A draw, which the Pit calls a cancellation. Both slump against the airlock and agree it was the best fight in years. The raiders pay half the purse and wish you a safe lane.", "effects": {"items": {"credits": 25}, "crew_hp": -10}}
+        ]},
+        {"text": "Pay them off (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "They take the forty with a shrug that says they would rather have had the fight. The tube retracts. Your crew, to their credit, do not look relieved until it is gone.", "effects": {"items": {"credits": -40}}}
+        ]}
+      ],
+      "after_win": {"text": "The raiders drift apart and the champion's locker floats out: tape, a trophy shaped like a boot, and a tin of beans with a name scratched on it. You take the parts.", "effects": {"items": {"scrap": 45, "credits": 30}}}
+    },
+    {
+      "id": "drakkin_stuck_drill", "type": "asteroid_field", "weight": 7, "once": false, "requires": {},
+      "text": "A mining crew of four stands round a drill rig that has jammed in the rock and will not turn. The foreman has tried everything on the manual, then everything not on the manual, then kicked it. It is a good drill, and the vein under it is the kind that pays for a roof. 'It's the bit,' he says. 'Stuck in the seam. We could cut it out, but then we lose the bit.'",
+      "choices": [
+        {"text": "Lend a hand with a pry bar.", "outcomes": [
+          {"weight": 50, "text": "Six people and a pry bar. It shifts at last with a bang you feel in your teeth, and the vein behind it is fat. The foreman splits it fairly, which is a first.", "effects": {"items": {"scrap": 30, "titanium": 3}}},
+          {"weight": 50, "text": "It does not shift. Your back, however, does. The foreman pays you for the effort, which is not the same as the result.", "effects": {"items": {"scrap": 10}, "crew_hp": -10}}
+        ]},
+        {"text": "[Drakkin] Hit it.", "requires": {"species": "drakkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Drakkin looks at the drill, looks at the foreman, draws the quarry hammer and addresses the bit with a single very personal blow. The rock lets go like a tooth. The foreman weeps. The vein pays out, and the miners put a drink in your Drakkin's hand and a second one in the other.", "effects": {"items": {"titanium": 8, "scrap": 30, "credits": 20}}}
+        ]},
+        {"text": "[Basalt] Listen to the rock.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt taps the seam, murmurs, and points. A second tap, in a different place. The bit comes free in a rattle of stone without anybody swinging anything. The foreman looks at the Basalt, then at the pry bar, then at nothing for a while.", "effects": {"items": {"titanium": 6, "scrap": 20}}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You pass with a wave. Behind you, the foreman kicks the drill again, for old times' sake.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

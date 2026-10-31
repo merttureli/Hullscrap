@@ -1,0 +1,118 @@
+{"events": [
+    {
+      "id": "stacks_folding_room", "type": "station", "weight": 10, "once": false, "requires": {"region": "vellum_stacks"},
+      "text": "The Folding Room is the quietest loud place in the Drift. Forty Lumen archivists stand at long tables, each with a sheet of old chart in front of them, and each is folding it, one crease at a time, in perfect silence. Along the far wall, in rows, stand the finished ones: people the height of your shoulder, a lane for a coat and two ink dots for eyes. An archivist in white gloves takes your hand. 'You may watch,' she says. 'Please do not breathe on the paper.'",
+      "choices": [
+        {"text": "Watch one fold from start to finish.", "outcomes": [
+          {"weight": 100, "text": "It takes an hour. The sheet goes from flat to a figure by a series of folds that look exactly like thinking. At the very last crease two ink dots appear, which the archivist blows on to dry. The figure sits up and asks her what the date is. She tells it. They both look a little sad. You are given tea, in a cup so thin you drink it carefully.", "effects": {"crew_hp": 5, "reveal": "anomaly"}}
+        ]},
+        {"text": "Commission a fold (80 credits).", "requires": {"credits": 80, "not_flag": "vellum_commissioned"}, "outcomes": [
+          {"weight": 100, "text": "The archivist chooses a chart from a drawer and folds it for you while you wait. 'The lanes south of Meridian,' she says. 'Forty years out of date. Please do not ask it about them. It will be sad.' Verso opens its eyes, reads the room, reads you, and says gravely that it will do its best. It asks if there is a window.", "effects": {"items": {"credits": -80}, "recruit": {"species": "vellum", "name": "Verso"}, "flag": "vellum_commissioned"}}
+        ]},
+        {"text": "[Vellum] Put the last crease in for the new one.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "The archivist hesitates, then nods, and hands your Vellum the sheet. Your Vellum puts in the breath crease, the one that in the Stacks only a folded hand may do. The new one's eyes open and fix on your Vellum's with a look that is not quite family and not quite not. The archivist is crying a little, in the quiet, careful way of someone who does not want to drip on the paper. She pays you for the courtesy.", "effects": {"items": {"credits": 40}, "rep": {"lumen": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "Keep your hands in your pockets and go.", "outcomes": [
+          {"weight": 100, "text": "You leave on tiptoe. Behind you, forty people go on folding, without a sound.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "stacks_live_chart", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "vellum_stacks"},
+      "text": "A chart pinned to a drifting shelf is changing. The ink moves as you watch: a lane redraws itself, a hazard marker slides across the margin, and a little dotted line crawls from your ship's position to a place off the edge of the sheet. Whoever drew it did not draw it for the past. The archivists have pinned a note beside it: DO NOT TRUST. DO NOT THROW AWAY.",
+      "choices": [
+        {"text": "Read it for the nearest lane.", "outcomes": [
+          {"weight": 60, "text": "The dotted line leads you to a lane with a trader at the end of it. You note the lane. The chart shifts a hair, as if satisfied.", "effects": {"reveal": "trader"}},
+          {"weight": 40, "text": "The line leads to a hazard marker, drawn with some relish. It is a pirate nest. You note it, so that you can avoid it, or visit.", "effects": {"reveal": "pirate"}}
+        ]},
+        {"text": "Take the chart.", "outcomes": [
+          {"weight": 100, "text": "The chart does not mind. It sits quietly in your hold, and by morning it is a chart of your hold, with all your cargo marked in neat ink and a small annotation: 'less than you think.' A Fenn will pay for it. The archivists, you hear later, said DO NOT THROW AWAY, not DO NOT TAKE, and are still deciding which of the two was a mistake.", "effects": {"items": {"credits": 30}, "rep": {"lumen": -1}}}
+        ]},
+        {"text": "[Vellum] Read it as one of its own.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Your Vellum bends over the moving ink and reads it aloud in a murmur, the way you read a letter from a sister. 'It is not a chart of anywhere,' they say. 'It is a chart of what you are about to need.' The dotted line stops at a set of coordinates. When you follow them the sky has left a small cache there, floating, as if it had been waiting.", "effects": {"items": {"fuel": 2, "credits": 30, "plasma_cell": 1}, "reveal": "wreck_field"}}
+        ]},
+        {"text": "Pin it back and leave.", "outcomes": [
+          {"weight": 100, "text": "You pin it back as you found it. The dotted line, as you go, makes a small, disappointed hook.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "stacks_collapsed_shelf", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "vellum_stacks"},
+      "text": "A twelve-storey shelf has toppled across the lane and spread its contents over a hundred kilometres: charts, atlases, folded gazetteers, bound runs of a periodical called Lanes Monthly, all drifting in a slow cloud of paper. The archivists in their suits are out collecting, and they look as if somebody has died. At the foot of the wreck a scorched drawer is wedged behind a girder, behind a gap about a hand wide.",
+      "choices": [
+        {"text": "Help collect the paper.", "outcomes": [
+          {"weight": 100, "text": "You spend an afternoon in a suit, catching atlases like butterflies. The archivists give you a stack of duplicates by way of thanks, and paper, as everybody knows, is money to a Fenn.", "effects": {"items": {"credits": 30}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Cut the girder and take the drawer.", "outcomes": [
+          {"weight": 60, "text": "The drawer holds a trading licence stamped across the corner of a chart, which somebody will pay a lot for. The archivists watch you take it with eyes like wet stones.", "effects": {"items": {"credits": 50}, "rep": {"lumen": -1}}},
+          {"weight": 40, "text": "The girder drops on a foot, and the drawer holds forty years of ash. A tidy ending, in its way.", "effects": {"items": {"scrap": 15}, "crew_hp": -10}}
+        ]},
+        {"text": "[Vellum] Slip through the gap and open the drawer from inside.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "The gap is a hand wide. Your Vellum goes through it like a thought. The drawer holds forty years of one archivist's private charts of a lane that was never on the official map. The archivist, in tears, offers you the lane, the charts, and a pass to the Folding Room's back door.", "effects": {"items": {"credits": 60}, "rep": {"lumen": 2}, "reveal": "anomaly"}}
+        ]},
+        {"text": "Leave the archivists to their grief.", "outcomes": [
+          {"weight": 100, "text": "You steer round the cloud. On the comm, in the quiet, someone is reading a gazetteer aloud to no one, in the voice you use for the dead.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "stacks_false_charts", "type": "trader", "weight": 8, "once": false, "requires": {"region": "vellum_stacks"},
+      "text": "A Fenn in a long coat has opened a stall on a spar between two shelves: PRE-SNAP CHARTS. AUTHENTIC. SLIGHTLY USED. NO REFUNDS. The charts hang on strings, one for each lane of the old Lattice, in a long handsome pennant. They all have the same coffee ring.",
+      "choices": [
+        {"text": "Buy a chart (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 55, "text": "The chart is a fine thing and a fake. The crew hang it in the mess anyway, where it makes everyone feel better about the distance.", "effects": {"items": {"credits": -30}, "crew_hp": 5}},
+          {"weight": 45, "text": "The chart is real, to everyone's surprise, including the Fenn's. He looks briefly ill about it. The lane at the end of it has a trader on it.", "effects": {"items": {"credits": -30}, "reveal": "trader"}}
+        ]},
+        {"text": "Haggle on the coffee ring.", "outcomes": [
+          {"weight": 100, "text": "You point out that the coffee ring is on every chart. The Fenn puts a hand over his heart and offers, in return for your discretion, a canister of fuel.", "effects": {"items": {"fuel": 1}}}
+        ]},
+        {"text": "[Vellum] Read the chart's edges.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Your Vellum runs a thumb along the edge of a chart, reads it as easily as a family recipe, and goes quiet. 'They are all the same sheet,' they say. 'Cut seventeen ways. The real one is under the counter.' The Fenn goes the colour of tea. 'It was a very good sheet,' he says. 'It deserved to be seen.' He hands over the original in apology, with a roll of credits for your silence.", "effects": {"items": {"credits": 50}, "reveal": "trader"}}
+        ]},
+        {"text": "[Fenn] Compliment his technique.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn tips an invisible hat. The two spend an hour in professional respect, and swap three secrets, one of them true: the best trader in the Stacks is in the lane behind the lamp.", "effects": {"items": {"credits": 20}, "reveal": "trader"}}
+        ]},
+        {"text": "Move along.", "outcomes": [
+          {"weight": 100, "text": "You walk the length of the pennant without buying. The Fenn watches you go with the face of a man who has seen it all, twice.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "stacks_match_pirates", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "vellum_stacks", "jumps_min": 3},
+      "text": "Four Rustfang skiffs have taken up station in front of the Folding Room, and their leader is on every channel at once. 'Nobody move,' he says. 'We've got lighters. We've got three hundred lighters. This is a hold-up. This is the first hold-up in history where the other side is made of kindling.' Behind him a very long shelf of charts shines in the lamplight like a woodpile. The archivists do not seem to know what a lighter is.",
+      "choices": [
+        {"text": "Fight the skiffs.", "outcomes": [
+          {"weight": 100, "text": "You open fire. The skiffs scatter, lighters flaring in the dark like small, stupid stars.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Pay them off (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 80, "text": "They take the credits and go, throwing the lighters out of the airlock as they leave, one by one, in sulks. They light one first, for the principle. The archivists send a note of thanks, pressed between two sheets of cedar.", "effects": {"items": {"credits": -60}, "rep": {"lumen": 2}}},
+          {"weight": 20, "text": "They take the credits and then try the lighters anyway.", "effects": {"items": {"credits": -60}, "fight": "tier"}}
+        ]},
+        {"text": "[Mire] Offer to put out anything they light.", "requires": {"trait": "firefighter"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire stands in front of the shelf with a wet sleeve and a calm face. 'Go on, then,' they say. The pirate leader does. The Mire puts it out. He lights another. They put that one out too. By the fifth the pirates are laughing, and by the tenth they have gone home with their lighters in their pockets and their pride in tatters. The archivists pay you in tea and, more usefully, credits.", "effects": {"items": {"credits": 40}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Vellum] Cross to their skiff, hands up, and have a word.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Your Vellum, who weighs about as much as a loaf, walks across and stands in front of the pirate leader. 'Do you know what I am,' they say, 'when you strike a match? I'm the thing you are about to burn.' There is a long silence. The leader puts his lighter away. 'We didn't know they were people,' he says, miserably. 'We thought they were shelving.' The skiffs leave. One leaves a lighter on the deck with a note saying sorry.", "effects": {"items": {"credits": 30, "scrap": 20}, "rep": {"lumen": 2}}}
+        ]}
+      ],
+      "after_win": {"text": "The skiffs break up in a bloom of small fires that go out at once, in vacuum, to a muted cheer from the archivists. You collect the lighters, in a bag, carefully, and some parts.", "effects": {"items": {"scrap": 35, "credits": 25}, "rep": {"lumen": 1}}}
+    },
+    {
+      "id": "stacks_unfolded_draft", "type": "distress", "weight": 7, "once": true, "requires": {"region": "vellum_stacks"},
+      "text": "A beacon from a wastepaper drawer. There is no other way to put it. The beacon is in a trash chute at the back of the Stacks, a long shaft of discarded drafts, and it repeats in a small flat voice: 'Excuse me. Excuse me. I think there has been a mistake.' Down in the drift of ruined folds sits a Vellum with a crease in the wrong place, a long diagonal across the face that makes one eye look slightly surprised. They are holding a label. REJECT: MISFOLD.",
+      "choices": [
+        {"text": "Fish them out.", "outcomes": [
+          {"weight": 100, "text": "You pull them out of the chute by one sleeve. The Vellum looks themself over, finds all the limbs, and says with great dignity, 'I would like to be useful. I have been in a drawer for eleven years.' The crease, you notice, has healed somewhat of its own accord; it gives the face character. 'Margin,' they say. 'It was on the label.' They sign on.", "effects": {"recruit": {"species": "vellum", "name": "Margin"}}}
+        ]},
+        {"text": "[Vellum] Refold the crease.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Your Vellum takes the reject by the wrist, finds the wrong crease in under a second, and folds it gently back the other way. The misfold gives. 'Oh,' says the stranger, 'oh, that is where it went.' Their face rights itself, both eyes the same. They look at your Vellum for a long time. 'May I come with you?' they ask. Margin comes, and brings the label, which your Vellum files with great ceremony in the bin.", "effects": {"recruit": {"species": "vellum", "name": "Margin"}, "items": {"credits": 20}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Report it to the archivists.", "outcomes": [
+          {"weight": 100, "text": "The archivists thank you and take the Vellum away. They are not unkind. They say it will be 'refolded', which they say the way a doctor says 'a procedure'. As you go you hear a small voice behind you asking, 'Is that the date?' You tell yourself it is not your business.", "effects": {"items": {"credits": 10}, "rep": {"lumen": 1}, "crew_hp": -5}}
+        ]},
+        {"text": "Leave them.", "outcomes": [
+          {"weight": 100, "text": "The beacon goes on repeating, 'Excuse me,' behind you, getting smaller. Nobody on your ship says anything for an hour.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    }
+  ]}

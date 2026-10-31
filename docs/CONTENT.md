@@ -420,6 +420,12 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
 | gauntling | 100 | 1.0 | `mechanical` (beds do not heal; a crewmate's `repair_crew` job does), `half_lungs` (air ×0.5), `ion_prone` (stunned 3 s by ion), `tinkerer` (repair time ×0.8) | pack `races_1`; multi-tool |
 | prismatic | 100 | 1.0 | `crystal_conduit` (+1 power to the system they man), `crystal_body` (ion damage ×2, melee ×0.5) | pack `races_1`; Gatekeeper's lance |
 | grundl | 180 | 0.7 | `hauler` (restock ×2, melee ×2), `clumsy` (repair time ×1.3) | pack `races_1`; quarry hammer; the large rig over the normal 2×2 body |
+| vellum | 50 | 1.2 | `folded` (`body` 1: walks 1-wide crawlspaces), `paper_skin` (fire damage ×2) | pack `races_2`; spark pistol; the small rig (art fits 1 cell); homeland `vellum_stacks` |
+| oorth | 100 | 1.0 | `third_eye` (`reveal_enemy`: the enemy schematic shows its crew while one is aboard and up), `gentle_hands` (melee ×0.5) | pack `races_2`; service pistol; homeland `oorth_quietude` |
+| drakkin | 120 | 1.0 | `pit_fighter` (melee ×1.75), `cold_blooded` (`heat_speed`: ×0.7 in a room whose heat is under 20, ×1.2 over 50) | pack `races_2`; quarry hammer; the large rig over the normal 2×2 body; homeland `drakkin_pits` |
+| wisp | 100 | 1.0 | `living_current` (`vacuum_walk`, `o2_use` 0), `handless` (`no_tools`: no repair or extinguish jobs), `console_ghost` (manned bonuses ×1.5), `ion_kin` (ion damage ×2) | pack `races_2`; no sidearm; the floating rig; homeland `wisp_stormfield` |
+| hullkin | 100 | 0.5 | `hull_mender` (`hull_mend`: idle, repairs the walls beside them 1 hp/s and seals a breach in 12 s), `shell_breather` (`o2_use` 0.5) | pack `races_2`; multi-tool; homeland `hullkin_reefs` |
+| lantern | 80 | 1.3 | `born_pilot` (+0.05 evasion while they man the helm) | pack `races_2`; carbine; the floating rig when gliding; homeland `lantern_lanes` |
 - **Traits are a library** (`data/traits.json`, plus the `traits.json` of every pack): each is a bag of generic keys that `scripts/crew/traits.gd` (`TraitSet.of(member)`) merges into numbers, and every rule a key changes reads them there, so a new race is data only. The keys and what they do are in `data/traits.json` `_doc`; a species entry may also carry keys inline (Basalt's `work_mult.heal_others`).
   - Work speeds are factors on speed (2 = twice as fast); a race spec's repair "×0.8" is a time factor (as Fenn's ×0.6), so its work speed is 1 / 0.8.
   - Room heat is the heat of the hottest part in the room (`Heat.room_heat`).

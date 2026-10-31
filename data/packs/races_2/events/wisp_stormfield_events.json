@@ -1,0 +1,121 @@
+{"events": [
+    {
+      "id": "storm_earthing_post", "type": "station", "weight": 10, "once": false, "requires": {"region": "wisp_stormfield"},
+      "text": "The Earthing Post has no dock. It has a lightning rod, forty metres of copper spike, and a platform at the foot of it where the weather comes down. The stationmaster, a Wisp the colour of a held breath, hovers a hand above the grating with her ribbons trailing. 'Mind the arcs,' she says. 'We try to warn people. We are not good at the warning. We are mostly weather.' Lightning walks the rod. Everything on the platform smells of ozone and hot coins.",
+      "choices": [
+        {"text": "Stand at the foot of the rod in the charge.", "outcomes": [
+          {"weight": 100, "text": "The rod takes a stroke while you stand under it. Every hair rises. Your fillings sing. You feel clean and very slightly famous, and your crew, who followed you out, come back giggling.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Buy a jar of lightning (25 credits).", "requires": {"credits": 25}, "outcomes": [
+          {"weight": 100, "text": "The stationmaster fills a jar from the rod's collar. It is warm, buzzing, and faintly offended to be in a jar. Poured into your tanks it is three jumps of fuel, and your gauge sulks for a minute and then reads full.", "effects": {"items": {"credits": -25, "fuel": 3}}}
+        ]},
+        {"text": "[Wisp] Ride the rod.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp goes up the rod in a single stroke and comes down again as a rolling gold storm, shouting the Wisp word for joy. The stationmaster laughs, bright and electric. 'They have not stopped smiling,' she says, 'since they were a flash.' She grants you the post's reserve: a tank of storm, and a cell or two she says were lying about.", "effects": {"items": {"fuel": 3, "plasma_cell": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Take a Wisp on as crew (80 credits).", "requires": {"credits": 80, "not_flag": "storm_hired"}, "outcomes": [
+          {"weight": 100, "text": "A Wisp comes down the rod in the next flash and settles on the grating in front of you, ribbons coiling. 'This one is Fiyu,' says the stationmaster. 'This one would like to see what is at the end of a wire.' Fiyu looks at your cabling the way a child looks in a sweet shop, and signs on without a word.", "effects": {"items": {"credits": -80}, "recruit": {"species": "wisp", "name": "Fiyu"}, "flag": "storm_hired"}}
+        ]},
+        {"text": "Keep to the edge, and leave.", "outcomes": [
+          {"weight": 100, "text": "You hug the rail, and leave with your hair on end. A Wisp waves goodbye with six arms at once.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "storm_ball_lightning", "type": "anomaly", "weight": 9, "once": false, "requires": {"region": "wisp_stormfield"},
+      "text": "Ball lightning has taken up residence in a gutted engine bay. It is the size of a person's head and the colour of hot glass, and it rolls along the bulkhead as if looking for something it left in a drawer. Every few seconds it pauses, turns, and appears to look at you. The wreck is a Concord runabout. In her hold: crates of fine components, stencilled DO NOT DROP, and the ball.",
+      "choices": [
+        {"text": "Grab the crates and run.", "outcomes": [
+          {"weight": 50, "text": "You make it out with the crates. The ball watches you go with a small, sad pulse.", "effects": {"items": {"copper": 20, "silicon": 8}}},
+          {"weight": 50, "text": "The ball follows you out and takes a long thoughtful bite of your hull. It is not malicious. It is just a curious ball.", "effects": {"items": {"copper": 10}, "hull": -10}}
+        ]},
+        {"text": "Coax it out with a lamp.", "outcomes": [
+          {"weight": 100, "text": "You wave a lamp. The ball follows at a dignified roll, out of the bay and into the dark, where it detaches and drifts off leaving the smell of burnt toast. The crates are yours.", "effects": {"items": {"copper": 20, "silicon": 10}}}
+        ]},
+        {"text": "[Wisp] Say hello.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp slips out of the bulkhead and glows at the ball. It glows back. For a minute they drift round each other, wary, curious, brightening. Then, with a kind of shrug, the ball rolls over and settles inside your Wisp, and they come out twice as bright. 'A cousin,' your Wisp says. 'A shy one.' The crates, they explain, were a gift.", "effects": {"items": {"copper": 20, "silicon": 10, "plasma_cell": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave it be.", "outcomes": [
+          {"weight": 100, "text": "You back out of the bay. The ball rolls to the door and watches you off, glowing a little less than before.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "storm_reactor_choir", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "wisp_stormfield"},
+      "text": "Forty dead reactors have been drawn into a ring, nose to nose, with their cores glowing a faint cold violet. They hum in unison. It is not a tune, quite; it is a breath, in and out, with a patient little crackle at the top. In the middle of the ring a stack of plasma cells has been laid with great neatness, like candles on a cake.",
+      "choices": [
+        {"text": "Take the plasma cells.", "outcomes": [
+          {"weight": 60, "text": "The reactors go quiet as you reach in. The cells are good, and the quiet has an edge to it.", "effects": {"items": {"plasma_cell": 3}, "crew_hp": -5}},
+          {"weight": 40, "text": "The reactors do not like this. A long white arc crosses the ring and your hull, and takes most of the afternoon with it.", "effects": {"items": {"plasma_cell": 2}, "hull": -10, "crew_hp": -10}}
+        ]},
+        {"text": "Listen.", "outcomes": [
+          {"weight": 100, "text": "You stay an hour. The hum rises and falls and goes through you like a long bath. When it is done, a single plasma cell has rolled across the ring to your hull and sits there, glowing, as a tip.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "[Wisp] Ask them to release one.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp drifts into the ring, small and bright, and hums at the nearest reactor. It hums back. There is a long exchange in a language of crackles. Then, one by one, the dead reactors go dark, and the cells are rolled, politely, to your hull. 'They were holding it for someone,' your Wisp says. 'They had forgotten who.'", "effects": {"items": {"plasma_cell": 4, "copper": 10}, "crew_hp": 5}}
+        ]},
+        {"text": "Leave the choir alone.", "outcomes": [
+          {"weight": 100, "text": "You steer round the ring. Behind you the hum goes on, in and out, and you find that you are breathing along.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "storm_charge_bar", "type": "trader", "weight": 8, "once": false, "requires": {"region": "wisp_stormfield"},
+      "text": "Cordelia's Charge Bar has a sign made of tubing, a counter made of an old shield generator, and a barman who is a Wisp and does not stand behind anything. The menu is a long glow along one wall. LIGHTNING IN A JAR. STATIC SHOT. THE FULL STORM (NO REFUNDS). The regulars are a hum. Cordelia herself, a Mire in an apron, is wiping a glass that is mostly ozone and hope.",
+      "choices": [
+        {"text": "Buy a jar of lightning (25 credits).", "requires": {"credits": 25}, "outcomes": [
+          {"weight": 100, "text": "Cordelia hands over a jar with a lid that glows. Poured into the tank it is three jumps of fuel, and the jar's last spark jumps back out and up your sleeve with a squeak.", "effects": {"items": {"credits": -25, "fuel": 3}}}
+        ]},
+        {"text": "Order a static shot (10 credits).", "requires": {"credits": 10}, "outcomes": [
+          {"weight": 100, "text": "Your hair stands straight up for an hour. Nobody can look at you. You feel wonderful, and the whole crew wants the same.", "effects": {"items": {"credits": -10}, "crew_hp": 10}}
+        ]},
+        {"text": "Order the Full Storm (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 50, "text": "It is, quite literally, the Full Storm. The bar lights up, the glass fogs, the barman screams with joy, and you float, briefly, an inch above your stool. Everyone gets a refill.", "effects": {"items": {"credits": -60, "fuel": 5}, "crew_hp": 10}},
+          {"weight": 50, "text": "It is a small thunderclap. Your ears ring for an hour and the bar cheers. You have seen better storms, but not many.", "effects": {"items": {"credits": -60, "fuel": 3}, "crew_hp": -5}}
+        ]},
+        {"text": "[Wisp] Buy the barman a round.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp tops up the barman's glow from their own, and the two sit and shine at each other for a long, rippling hour. Cordelia refuses payment. 'On the house,' she says. 'They don't get many in.' She fills your tank and sends your Wisp home with a jar.", "effects": {"items": {"fuel": 4, "plasma_cell": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "Nurse a glass of water and watch the glow.", "outcomes": [
+          {"weight": 100, "text": "You nurse a glass of water at the end of the counter while a thousand volts argue over a card game. Cordelia tops it up without comment. It is, you decide, the cheapest good evening in the Drift.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "storm_warden_hunt", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "wisp_stormfield", "jumps_min": 4},
+      "text": "A Warden picket is hunting. It moves in a line across the storm, five drone hulls abreast, sweeping the clouds with violet scanners, and ahead of them a small bright thing is fleeing through the lightning, pausing to flare and dodge. The Wardens do not hail. They never do. The small thing flares once, in what could be a call for help, and the picket turns toward you.",
+      "choices": [
+        {"text": "Fight the Wardens.", "outcomes": [
+          {"weight": 100, "text": "You light up the line. The little bright thing, relieved, ducks behind a cloud and does not stop watching.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Put your hull between them.", "outcomes": [
+          {"weight": 50, "text": "The Wardens' fire goes past the small thing and into a better target, which is you. The bright thing escapes into the clouds. The Wardens, baffled, loiter, and leave.", "effects": {"hull": -10, "items": {"plasma_cell": 1}}},
+          {"weight": 50, "text": "The Wardens decide you are the more interesting target.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Wisp] Call the storm.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp goes out through the hull and lifts both arms. The storm answers. Every cloud in the field lights at once, and a long fork of white fire walks the picket from end to end. The Wardens, whose sensors have never been taught to be afraid, put their scanners out and sit in the dark, slowly turning. The small bright thing lands on your Wisp, shaking. 'A cousin,' they tell you. 'She says thanks, in the usual way.' The hold is full of burnt Warden parts.", "effects": {"items": {"crystal": 3, "plasma_cell": 1, "scrap": 20}}}
+        ]},
+        {"text": "[Prismatic] Dazzle their scanners.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic turns their facets to catch the lightning and throws it back at the picket in a hundred hard colours. The Wardens' scanners, tuned for the old light, spin in confusion. The picket scatters, and the small bright thing comes to sit on your hull, shaking and grateful, and glows its thanks all the way to the exit.", "effects": {"items": {"crystal": 3, "plasma_cell": 1}}}
+        ]}
+      ],
+      "after_win": {"text": "The picket breaks up in the clouds, hulls still glowing violet, and the storm closes behind them like a hand. The small bright thing comes out of hiding, circles your ship once, and is gone. You take the parts.", "effects": {"items": {"crystal": 2, "plasma_cell": 1, "scrap": 30}}}
+    },
+    {
+      "id": "storm_wiring_ghost", "type": "distress", "weight": 7, "once": true, "requires": {"region": "wisp_stormfield"},
+      "text": "A Concord supply tug has been sending a message by flickering its lights. The transmitter does not work. The cabin lamps do. The console, the reading light over the bunk, the toaster: a pattern, very slow, very patient. Dot, dash, dot dot. You decode it on a napkin. HELP I AM IN THE WIRING. ALSO HELLO. The tug's crew are in the galley with their arms folded. 'It's not that it's rude,' says the cook. 'It's that it keeps doing the toaster.'",
+      "choices": [
+        {"text": "Open the panel and let it out.", "outcomes": [
+          {"weight": 100, "text": "You open the panel. A bright little thing the size of a hand pours out of the junction box, spirals twice round the room, and settles on your shoulder, shivering with warmth. 'Hello,' it says, in a voice like a spark. 'This one is Wisi. I was a short circuit. I would like to be a person.' The tug's crew cheer, then ask whether it can fix the toaster.", "effects": {"recruit": {"species": "wisp", "name": "Wisi"}, "items": {"credits": 15}}}
+        ]},
+        {"text": "[Tinkerer] Splice a lead out and give it somewhere to go.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer splices a lead from the junction box to a spare work lamp. The little glow pours down the lead, sits in the lamp, and gleams. 'Home,' it says. 'A good one.' Your tinkerer, a little embarrassed, builds it a better lamp on the spot. Wisi comes aboard in the lamp, and the tug's crew pay in copper.", "effects": {"recruit": {"species": "wisp", "name": "Wisi"}, "items": {"copper": 15}}}
+        ]},
+        {"text": "[Wisp] Answer it in the lamps.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp flickers the cabin lamps back, faster. The ghost answers, slower, then in a rush. They talk for ten minutes in dots and dashes, and then something small and bright pours out of the junction box and into your Wisp's arms like a child. 'A sister,' your Wisp says. 'Half a sister.' She comes aboard, and the tug's crew, relieved, press credits on you and ask nothing about the toaster.", "effects": {"recruit": {"species": "wisp", "name": "Wisi"}, "items": {"credits": 30}}}
+        ]},
+        {"text": "Leave it. It is rude.", "outcomes": [
+          {"weight": 100, "text": "You turn away. As you go every lamp on the tug flickers, once, in a way that says 'sorry'. Your crew look at you.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    }
+  ]}

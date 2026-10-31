@@ -1,0 +1,25 @@
+{
+	"id": "vellum_stacks",
+	"name": "The Vellum Stacks",
+	"home_species": "vellum",
+	"faction": "lumen",
+	"stages": [3, 8],
+	"weight": 10,
+	"rarity": "uncommon",
+	"danger": 1.2,
+	"palette": {"tint": "#e6d6a8", "nebula": "lumen"},
+	"map": {},
+	"node_weights": {"anomaly": 18, "wreck_field": 16, "empty": 14, "distress": 12, "trader": 12, "asteroid_field": 10, "pirate": 10, "patrol": 8},
+	"places": [
+		{"id": "folding_room", "name": "The Folding Room", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"sealed_crate": 1.5, "ice_chunk_s": 1.2},
+	"pois": {"abandoned_station": 1.5, "quest": 1.3},
+	"ambient": {"trader": 3, "patrol": 2, "pirate": 1},
+	"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "engine_neon_mk2": 680, "shield_neon_mk1": 340, "siren_ion_neon": 400, "heat_lance_neon": 420, "intake_mk1": 120, "helm": 70, "radiator": 50, "oxygen_gen": 90},
+	"recruit": {"vellum": 8, "fenn": 1, "prismatic": 1},
+	"enemies": "wardens",
+	"hazards": ["gas_cloud"],
+	"events": "vellum_stacks",
+	"blurb": "Shelving the size of freighters drifts here in slow orbit, loaded with every chart the Lumen archivists could not bear to throw away: lanes that no longer exist, drawn by people who no longer exist. The Vellum are folded here one chart at a time, in the Folding Room. Keep your lighter in your pocket."
+}

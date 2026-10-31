@@ -1,0 +1,10 @@
+{
+	"species": {
+		"vellum": {"name": "Vellum", "hp": 50, "speed": 1.2, "traits": ["folded", "paper_skin"], "rig": "vellum", "sidearm": "spark_pistol", "notes": "folded paper-folk, the small rig: hp x0.5, speed x1.2, fire damage x2, body 1 (fits 1-cell crawlspaces)"},
+		"oorth": {"name": "Oorth", "hp": 100, "speed": 1.0, "traits": ["third_eye", "gentle_hands"], "rig": "oorth", "sidearm": "service_pistol", "notes": "quiet hooded telepaths: reveal_enemy (your schematic shows the enemy's crew), melee x0.5"},
+		"drakkin": {"name": "Drakkin", "hp": 120, "speed": 1.0, "traits": ["pit_fighter", "cold_blooded"], "rig": "drakkin", "sidearm": "quarry_hammer", "notes": "reptile brawlers, the large rig over the normal 2x2 body: hp x1.2, melee x1.75, heat_speed (x0.7 in a room under 20 heat, x1.2 over 50)"},
+		"wisp": {"name": "Wisp", "hp": 100, "speed": 1.0, "traits": ["living_current", "handless", "console_ghost", "ion_kin"], "rig": "wisp", "notes": "living current, the floating rig, no sidearm: vacuum_walk, o2_use 0, no_tools, manned stations x1.5, ion damage x2"},
+		"hullkin": {"name": "Hullkin", "hp": 100, "speed": 0.5, "traits": ["hull_mender", "shell_breather"], "rig": "hullkin", "sidearm": "multi_tool", "notes": "barnacle-folk: hull_mend (idle, mends the walls beside them and seals breaches slowly), speed x0.5, o2_use 0.5"},
+		"lantern": {"name": "Lantern", "hp": 80, "speed": 1.3, "traits": ["born_pilot"], "rig": "lantern", "sidearm": "carbine", "notes": "moth-folk Concord pilots: speed x1.3, hp x0.8, +0.05 evasion at the helm"}
+	}
+}

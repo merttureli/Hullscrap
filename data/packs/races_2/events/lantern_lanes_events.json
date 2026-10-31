@@ -1,0 +1,119 @@
+{"events": [
+    {
+      "id": "lanes_vesper_field", "type": "station", "weight": 10, "once": false, "requires": {"region": "lantern_lanes"},
+      "text": "Vesper Field is a flight school on a ring of old lane-lamps, and the first thing you notice is the noise: a thousand soft thumps, like a crowd clapping very gently, as the cadets flutter between the lamps. Moth-folk in grey flight jackets dart across the sky with their wings out like paper kites, banking round the beacons in great slow loops, and every few minutes one misjudges and bumps into a lamp. Instructor Cresset, a grey old Lantern with silver powder on her wings, is shouting through a megaphone. 'DON'T LOOK AT IT. LOOK AT THE DARK IT MAKES.'",
+      "choices": [
+        {"text": "Watch the cadets fly.", "outcomes": [
+          {"weight": 100, "text": "You watch an hour of drills. A cadet pulls out of a spin so close to your window you can see the dust on her wing. Cresset sends over a hot cup of something amber and a flight manual with half the pages missing. In the margin of the chapter on lamps someone has written: DON'T.", "effects": {"crew_hp": 5, "items": {"fuel": 1}}}
+        ]},
+        {"text": "Put one of your crew through a flight lesson (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "Cresset puts your chosen crew member in a trainer for an hour and returns them with a silvered grin and a better sense of angles. 'They have wings in the heart,' she says, which she says to everyone. The Concord board adds a good mark to your log.", "effects": {"items": {"credits": -40}, "crew_hp": 10, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Lantern] Take the second glider.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "Cresset spots your Lantern across the field and puts down the megaphone. 'You're one of the old squadron,' she says. 'Show them how it's done.' Your Lantern takes a glider, climbs, rolls, and drops through the middle of the field in a falling spiral that makes forty cadets stop flying to watch. 'That,' says Cresset to the cadets, 'was a Lantern.' She pays your Lantern a squadron's wage, and nobody bumps into anything for the rest of the afternoon.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Hire a washed-out cadet (80 credits).", "requires": {"credits": 80, "not_flag": "lanes_hired"}, "outcomes": [
+          {"weight": 100, "text": "Taper failed the night-landing test four times, on the grounds that they kept landing on the lamp. 'It was a very good lamp,' they say. 'It was warm.' They are quick, honest and soft-spoken, and they pass the one test that matters, which is whether they will fly your ship home. They take the contract with both hands.", "effects": {"items": {"credits": -80}, "recruit": {"species": "lantern", "name": "Taper"}, "flag": "lanes_hired"}}
+        ]},
+        {"text": "Leave quietly.", "outcomes": [
+          {"weight": 100, "text": "You slip out between lessons. Somewhere above you a cadet hits a lamp, softly, and says 'sorry' to it.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lanes_lamp_out", "type": "empty", "weight": 9, "once": false, "requires": {"region": "lantern_lanes"},
+      "text": "Lamp 114 has gone out. It is the main lamp of the sector and the only light for two lanes in either direction. A string of Lantern pilots, who have been flying the dark home by it for forty years, are circling the dead lamp in a loose sad ring, waiting for the light to come back. It does not. A very small voice on the comm says, 'I can't see the lane.' Another says, 'I can't see anything.'",
+      "choices": [
+        {"text": "Burn a fuel canister as a beacon (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You burn a canister off the stern and it blazes in the dark like a small sun. The pilots turn as one, stream towards it, and fall in behind your ship in a ragged line. You lead them home at a stately speed. At Vesper Field the instructors stand on the dock with their wings folded, in silence, which is how a Lantern says thank you.", "effects": {"items": {"fuel": -1, "credits": 40}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Relight the lamp (10 scrap).", "requires": {"items": {"scrap": 10}}, "outcomes": [
+          {"weight": 60, "text": "You fix the lamp's power coupling with a rivet and a prayer. It lights with a groan, and the pilots all together make a sound like a wave of cheering paper.", "effects": {"items": {"scrap": -10, "credits": 30}, "rep": {"concord": 2}}},
+          {"weight": 40, "text": "It lights, flickers, and goes out. It lights again. It is going to be a long day, and a longer night, but the pilots find their way home in the end.", "effects": {"items": {"scrap": -10, "credits": 15}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Lantern] Be the lamp.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "Your Lantern opens their wings and glows, with the dusty gold shimmer of their kind, a small lamp of their own. The circling pilots turn, one by one, and fall in behind it. Your Lantern leads them home in a long gold line, humming an old lamplighter's tune. At the field they all land at once. The Concord gives your Lantern a lamp-keeper's pin, and a purse that goes further than the pin.", "effects": {"items": {"credits": 50}, "rep": {"concord": 3}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave them. It is not your lamp.", "outcomes": [
+          {"weight": 100, "text": "You leave the ring turning in the dark. Somebody on your ship says, quietly, that they'd have liked to have done something. Nobody answers.", "effects": {"rep": {"concord": -1}, "crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "lanes_proving_run", "type": "patrol", "weight": 8, "once": false, "requires": {"region": "lantern_lanes"},
+      "text": "An examiner's cutter pulls alongside, a flag reading CONCORD FLIGHT BOARD flapping from a mast that has no business flapping in space. 'Proving run,' says a bored voice. 'Lane Nine is a licensed course. Anyone who flies it clean gets the Board's seal and a purse. Anyone who doesn't gets a lecture. The lecture is longer.' Ahead, nine lamps hang in a gentle S with a quiet stripe of dark between each.",
+      "choices": [
+        {"text": "Fly the course.", "outcomes": [
+          {"weight": 40, "text": "You clip no lamp. The Board's seal goes on your log and a purse into your hand. The examiner says 'adequate' with a trace of surprise.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}}},
+          {"weight": 60, "text": "You clip two lamps and a feeling. The lecture is longer than the course.", "effects": {"hull": -5, "crew_hp": -5}}
+        ]},
+        {"text": "Let the autopilot fly it.", "outcomes": [
+          {"weight": 100, "text": "The examiner reviews the autopilot's run and writes in the margin, 'adequate, but dead inside'. You get the seal, a small purse, and a long note about the soul.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Lantern] Fly it by the dark between the lamps.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "Your Lantern takes the helm, folds back, and flies the course with half-shut eyes, watching the dark between the lamps rather than the lamps, as the old pilots teach. It takes ninety seconds and every lamp in the line seems to bow. The examiner, who has been bored since the Snap, sits up very straight. He seals the log, pays the purse and a bonus, and asks, shyly, for an autograph for his daughter.", "effects": {"items": {"credits": 80}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Decline politely.", "outcomes": [
+          {"weight": 100, "text": "'Next time,' says the examiner. He says it to every ship. Nobody has ever been sure what happens next time.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lanes_moth_trap", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "lantern_lanes", "jumps_min": 3},
+      "text": "A lamp where no lamp should be. A single lane-lamp hangs in the middle of a black sector, brilliant white, humming a soft soothing note, and round it at a respectful distance drift three Rustfang skiffs with their lights out and a net strung between them. A lamp like that is a fine thing to see, if you are a moth. It is a trap, if you are a moth. Your crew are looking at it. Your crew are looking at it a lot.",
+      "choices": [
+        {"text": "Look away, and fly on past.", "outcomes": [
+          {"weight": 50, "text": "You turn your head, the hard way, and fly past with your hands over half the windows. In the dark the skiffs hiss, and let you go.", "effects": {}},
+          {"weight": 50, "text": "Half your crew keep looking. You have to shout. The skiffs close in.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Shoot out the lamp.", "outcomes": [
+          {"weight": 100, "text": "You put a shot into the lamp. It goes out with a wail, and in the dark three skiffs turn and open fire, furious.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Lantern] Say what the lamp really is.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "Your Lantern looks at the lamp for exactly two seconds, then away, then at you. 'It is a fake,' they say. 'It has no keeper's mark and the colour is wrong.' They take the helm and fly a long curve through the dark, round the net. The skiffs, whose plan was a good one, are left staring at their own bait. Your Lantern signals the real lamp-keepers on the way out, and a Concord cutter arrives to pick up the trap.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Pay them to let you pass (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 70, "text": "A voice from the dark takes the credits and allows you through the net's mouth, grudgingly, like a doorman.", "effects": {"items": {"credits": -40}}},
+          {"weight": 30, "text": "A voice from the dark takes the credits and closes the net.", "effects": {"items": {"credits": -40}, "fight": "tier"}}
+        ]}
+      ],
+      "after_win": {"text": "The lamp goes out when the last skiff does. In its housing: a very pretty lamp, a good deal of netting, and a handwritten list headed MOTHS: ORDER OF PREFERENCE. You take the parts, and burn the list.", "effects": {"items": {"scrap": 40, "credits": 30}, "rep": {"concord": 1}}}
+    },
+    {
+      "id": "lanes_lamp_oil", "type": "trader", "weight": 8, "once": false, "requires": {"region": "lantern_lanes"},
+      "text": "Old Tallow's Lamp Oil is a barge with a hand-painted sign: HONEST LAMP OIL (FOR LAMPS). The oil is in glass jugs, and each jug has a candle floating in it. Tallow is a Lantern with a hundred tiny scorch-holes in his wings and the serenity of a man who has been close to the sun and decided against it. 'For lamps,' he repeats. 'I mean it. Not for engines. Do not put it in the engines. People put it in the engines.'",
+      "choices": [
+        {"text": "Buy a jug for the ship's lamps (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "You put the oil in the lamps. They burn warm and amber. Your crew sit in the glow at dinner and, for the first time in weeks, tell each other the truth.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
+        ]},
+        {"text": "Put it in the engines (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 50, "text": "It runs, hot and loud, and gets you three jumps for the price of one. Tallow shakes his head as you go. 'People always do,' he says.", "effects": {"items": {"credits": -20, "fuel": 3}}},
+          {"weight": 50, "text": "It runs. For about ten seconds. Tallow watches the smoke from the rail with the weariness of a man proved right.", "effects": {"items": {"credits": -20}, "hull": -5, "crew_hp": -5}}
+        ]},
+        {"text": "[Lantern] Trade lamp-lore.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "Tallow looks at your Lantern and for a moment says nothing. Then he puts down his jug, folds his wings, and for an hour the two of them trade lamp-lore: how to trim a wick, how to find a dead lamp by the quiet, the names of the old keepers. At the end Tallow presses a jug into your Lantern's hands, and a second, and sends you off with a month's oil and one valuable tip.", "effects": {"items": {"fuel": 3, "credits": 20}, "reveal": "distress"}}
+        ]},
+        {"text": "Move on.", "outcomes": [
+          {"weight": 100, "text": "'For lamps,' Tallow calls after you, as you go. Over the comm it sounds more like a prayer.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lanes_old_pilot", "type": "distress", "weight": 7, "once": true, "requires": {"region": "lantern_lanes"},
+      "text": "An old tug, the Third Wind, limps along a dim lane with one engine out and a pilot who will not ask for help. You know she is a pilot by the way the tug leans into each curve, as if remembering how it used to be done. When you hail, a cracked, dignified voice says 'Thank you, no. I have it in hand.' The hand, through the cockpit glass, is shaking. She has the grey wings of a very old Lantern and a flight jacket with forty years of stripes on the cuff.",
+      "choices": [
+        {"text": "Offer a tow.", "outcomes": [
+          {"weight": 100, "text": "She refuses twice and accepts the third time with the grace of a queen taking a seat. Once aboard she looks over your helm for a long time, and says, 'Your trim is off by a degree.' She is right. 'Dimity,' she says, 'if you have a berth. I don't take much. I take up a corner. I fly.'", "effects": {"recruit": {"species": "lantern", "name": "Dimity"}}}
+        ]},
+        {"text": "Ask her for a lesson (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "She has been waiting for someone to ask. She gives you an hour of free advice on your helm, then a second hour that costs the twenty, and her card. 'If you ever need a pilot,' she says, 'I'm in the book. Under D.' You come away flying better, and a little ashamed of how you flew before.", "effects": {"items": {"credits": -20}, "crew_hp": 10, "reveal": "trader"}}
+        ]},
+        {"text": "[Lantern] Hail her in the lamp-code.", "requires": {"species": "lantern"}, "outcomes": [
+          {"weight": 100, "text": "Your Lantern blinks a slow greeting on the running lights, the old form that only the first squadron used. The tug's lights answer, with a pause, then a flood. 'Oh,' says the voice on the comm, no longer cracked. 'Oh, you're a pilot.' She takes the tow without a word and flies the last stretch in your Lantern's wake. 'I'll fly with you,' she says. 'If the lights are right.' Dimity brings her jacket, her logbook, and a very good opinion of your helm.", "effects": {"recruit": {"species": "lantern", "name": "Dimity"}, "rep": {"concord": 1}, "items": {"credits": 30}}}
+        ]},
+        {"text": "Leave her to it.", "outcomes": [
+          {"weight": 100, "text": "You respect her wishes, which is not the same as being right. The tug limps off along the dim lane, leaning into every curve.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    }
+  ]}
