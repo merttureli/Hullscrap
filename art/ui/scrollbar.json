@@ -1,0 +1,48 @@
+{
+ "frame": [
+  8,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "track": [
+   0,
+   1,
+   0
+  ],
+  "thumb": [
+   1,
+   1,
+   0
+  ],
+  "thumb_hover": [
+   2,
+   1,
+   0
+  ],
+  "thumb_pressed": [
+   3,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 3,
+   "top": 3,
+   "right": 3,
+   "bottom": 3
+  },
+  "content_margins": {
+   "left": 1,
+   "top": 1,
+   "right": 1,
+   "bottom": 1
+  },
+  "center": "stretch"
+ },
+ "notes": "Vertical scrollbar, 8x16 frames: `track` (sunk) and `thumb` in normal / hover (amber rim) / pressed. Stretch the thumb to the visible fraction; `scrollbar_grip` is the 3-ridge grip to centre on it when it is 14 px or longer. `scrollbar_h` is the same rotated for a horizontal bar."
+}

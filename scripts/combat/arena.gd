@@ -16,6 +16,7 @@ const Stats = preload("res://scripts/sim/stats.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
+const Effects = preload("res://scripts/combat/effects.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
@@ -69,12 +70,13 @@ var rng := RandomNumberGenerator.new()
 var weapons := Weapons.new()
 var projectiles: Array = []
 var beams: Array = []
-var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed; n: the contact normal; points: up to 6 contact points, world), breach, disable (uid; half "out": the outside half of a mount), wreck_part (uid, id: a disabled part was hit again and is gone, debris on its cells), ignite (a hit started a fire), wreck
+var events: Array = []  ## {tick, type, ship, cell, pos (world), ...}: shot (origin, dir, kind), beam (from, to: a laser or beam line; bounce: it is the part after a bounce), jam, shield, ion_lock, hit, deflect, ricochet (pos: the hit point; dir, n, new_dir: the shot's direction, the face normal and the way it leaves, world), ram (pos, energy, a, b: a collision hard enough to hurt, at that point; speed: the closing speed; n: the contact normal; points: up to 6 contact points, world), breach, disable (uid; half "out": the outside half of a mount), wreck_part (uid, id: a disabled part was hit again and is gone, debris on its cells), ignite (a hit started a fire), effect (kind: acid, corrode, spores, sonic, shard, frost, magnetic or self_room; weapon: its id; see effects.gd), wreck
 var autofire := {}  ## ship index -> false when its turrets hold fire (the T key); a ship not listed autofires
 var aim_points := {}  ## ship index -> the world point its fixed guns' barrels follow (the player's cursor), set by the caller
 var power_bonus := {}  ## ship index -> power the neon lattice has made of absorbed energy (counted, not used yet)
 var collision := Collisions.load_config()  ## data/collision.json: restitution, min_speed, damage_k, crew_knock, separation_slop...
 var contact_tick := {}  ## ship index -> the last tick it touched another ship
+var fx := Effects.fresh()  ## running weapon effects: acid, spores, frost, shocks, corroded walls, drag-able debris (effects.gd)
 var tethers: Array = []  ## bow latches: {a, b (ships), la, lb (anchors in each ship's cell coordinates), left (seconds)}
 var tick := 0  ## substeps run so far
 var _acc := 0.0
@@ -184,6 +186,7 @@ func _substep() -> void:
 	weapons.tick_turrets(self)
 	weapons.tick_beams(self)
 	Projectiles.step(self, SUBSTEP)
+	Effects.tick(self, SUBSTEP)
 
 
 ## Recompute power, mass, thrust and the shield cap of ship `idx` if a part or tile changed here, or
@@ -316,4 +319,4 @@ func snapshot() -> Dictionary:
 		list.append({"pos": [co.flight.pos.x, co.flight.pos.y], "vel": [co.flight.vel.x, co.flight.vel.y], "angle": co.flight.angle, "ang_vel": co.flight.ang_vel,
 			"hull": co.hull, "wrecked": co.wrecked, "layers": co.layers, "weights": co.weights.duplicate(), "sector_layers": co.sector_layers.duplicate(), "ion_lock": co.ion_lock,
 			"grid": co.ship.grid.to_dict(), "parts": parts})
-	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "tethers": tethers.size(), "events": events.size(), "power_bonus": power_bonus.duplicate()}
+	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "tethers": tethers.size(), "events": events.size(), "power_bonus": power_bonus.duplicate(), "fx": Effects.summary(self)}
