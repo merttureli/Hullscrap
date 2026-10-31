@@ -171,9 +171,10 @@ func test_the_hit_roll_goes_by_accuracy_less_evasion_and_replays_for_a_seed() ->
 		var t := _target(a, Vector2(0.0, -700.0))
 		var weapons: Weapons = a.weapons
 		near(weapons.hit_chance(a, 0, g["uid"], t), 0.8, "a target at rest is hit 80 percent of the time", 1e-9)
-		a.ships[t].flight.vel = Vector2(0.0, -600.0)
+		var top: float = a.ships[t].flight.max_speed
+		a.ships[t].flight.vel = Vector2(0.0, -top)
 		near(weapons.hit_chance(a, 0, g["uid"], t), 0.8 - 0.25, "at full speed its evasion is 0.25", 1e-9)
-		a.ships[t].flight.vel = Vector2(0.0, -300.0)
+		a.ships[t].flight.vel = Vector2(0.0, -top / 2.0)
 		a.ships[t].ship.manned[1] = "Ada"  # nobody at a helm: no bonus
 		near(weapons.hit_chance(a, 0, g["uid"], t), 0.8 - 0.125, "half speed, half the evasion", 1e-9)
 		a.ships[t].flight.vel = Vector2.ZERO
