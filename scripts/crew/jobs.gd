@@ -30,6 +30,7 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Heat = preload("res://scripts/sim/heat.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
 const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
@@ -714,19 +715,22 @@ static func crew_line(ship) -> String:
 	return "Crew: " + (", ".join(parts) if not parts.is_empty() else "none")
 
 
-## The evasion a manned helm adds in a fight (0 when nobody is at it), times the operator's manned factor.
+## The evasion a manned helm adds in a fight (0 when nobody is at it), times the operator's manned factor
+## (and an overclock of the helm).
 static func evasion_bonus(ship) -> float:
 	for uid in ship.manned:
 		if _family(ship, uid) == "helm" and _works(ship, uid):
-			return float(CrewMember.config()["manned"]["helm_evasion"]) * TraitSet.manned_factor(ship, uid)
+			return float(CrewMember.config()["manned"]["helm_evasion"]) * TraitSet.manned_factor(ship, uid) * CrewFx.overclock_mult(ship, uid)
 	return 0.0
 
 
-## Multiplier on the cooldown of weapon `uid`: shorter while somebody mans it (by the operator's manned factor, at most 90%).
+## Multiplier on the cooldown of weapon `uid`: shorter while somebody mans it (by the operator's manned factor, at
+## most 90%), and shorter still by the factor of an overclock running on it.
 static func cooldown_mult(ship, uid: int) -> float:
+	var f := 1.0
 	if ship.manned.has(uid) and _family(ship, uid) == "weapon" and _works(ship, uid):
-		return 1.0 - minf(float(CrewMember.config()["manned"]["weapon_cooldown"]) * TraitSet.manned_factor(ship, uid), 0.9)
-	return 1.0
+		f = 1.0 - minf(float(CrewMember.config()["manned"]["weapon_cooldown"]) * TraitSet.manned_factor(ship, uid), 0.9)
+	return f / CrewFx.overclock_mult(ship, uid)
 
 
 static func _family(ship, uid: int) -> String:

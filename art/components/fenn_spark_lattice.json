@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "fenn_spark_lattice_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Fenn Spark Lattice: a row of three small coils on a rail that charge up cyan one after another (frame 5 = all lit, white sparks between them, lamps green), power coupling, hatch. fire: the coils flash white and go dark. damaged: one coil unwound and dead, lamps dead, sparks; disabled: coils cold, a coil off its post. Barrel layer fenn_spark_lattice_barrel: an open lattice cage of thin struts round a crackling spark core, with three aerial whiskers; fire: sparks fly.",
+ "offset": [
+  0,
+  -4
+ ]
+}

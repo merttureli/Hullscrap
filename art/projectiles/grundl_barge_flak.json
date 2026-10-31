@@ -1,0 +1,38 @@
+{
+ "frame": [8, 10],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 2, 12]
+ },
+ "anchors": {
+  "head": [4, 3],
+  "tail": [4, 9]
+ },
+ "glow": {
+  "image": "grundl_barge_flak_glow.png",
+  "frame": [16, 18],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 2, 12]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Grundl Barge Flak shell: a fat steel shell with an amber band and a ragged orange spark behind it (2 frames).",
+ "impact": {
+  "image": "grundl_barge_flak_impact.png",
+  "frame": [20, 20],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "anchor": [10, 10],
+  "glow": {
+   "image": "grundl_barge_flak_impact_glow.png",
+   "frame": [28, 28],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 14]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

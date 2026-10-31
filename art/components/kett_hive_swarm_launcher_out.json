@@ -1,0 +1,133 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "kett_hive_swarm_launcher_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   12
+  ]
+ },
+ "notes": "OUTSIDE half of the Kett Hive Swarm Launcher: overlapping chitin plates round a honeycomb face of lit cells, a round brood sac on the left with drones crawling on it, and a pair of antennae and compound-eye lamps on the right. damaged: a plate peeled back, two cells dark and leaking, sparks; disabled: plates cracked and grey, cells dead, the sac slumped.",
+ "barrel": {
+  "image": "kett_hive_swarm_launcher_barrel.png",
+  "frame": [
+   29,
+   58
+  ],
+  "pivot_on_base": [
+   32,
+   12
+  ],
+  "pivot_on_barrel": [
+   14,
+   51
+  ],
+  "muzzle": [
+   14,
+   17
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "gimbal_deg": 6,
+  "glow": {
+   "image": "kett_hive_swarm_launcher_barrel_glow.png",
+   "frame": [
+    49,
+    78
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ],
+    "damaged": [
+     4,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}

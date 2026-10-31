@@ -1,0 +1,38 @@
+{
+ "frame": [10, 16],
+ "orientation": "up",
+ "anims": {
+  "fly": [0, 3, 12]
+ },
+ "anchors": {
+  "head": [5, 5],
+  "tail": [5, 15]
+ },
+ "glow": {
+  "image": "grundl_slug_mortar_glow.png",
+  "frame": [18, 24],
+  "offset": [-4, -4],
+  "anims": {
+   "fly": [0, 3, 12]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Grundl Slug Mortar slug: a fat steel shell with a rust band and an amber stripe, a tail of dark smoke and one ember (3 frames).",
+ "impact": {
+  "image": "grundl_slug_mortar_impact.png",
+  "frame": [24, 24],
+  "anims": {
+   "play": [0, 5, 12]
+  },
+  "anchor": [12, 12],
+  "glow": {
+   "image": "grundl_slug_mortar_impact_glow.png",
+   "frame": [32, 32],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 5, 12]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}

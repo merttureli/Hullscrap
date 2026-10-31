@@ -221,6 +221,13 @@ func test_a_hit_aims_at_an_outer_cell_facing_the_turret_and_a_miss_just_off_the_
 ## Engine Mk1s turned `rots` (bare: no wall needed) in a row on the floor of a wall ship, with a reactor and
 ## a helm and one cable bus along the floor's top row, all powered.
 func _engine_ship(rots: Array) -> Arena:
+	var a := Arena.new(1)
+	a.add_ship(_engine_ship_ship(rots))
+	return a
+
+
+## The ship of _engine_ship().
+func _engine_ship_ship(rots: Array) -> Ship:
 	var ship := Wall.wall_ship(1)  # floor x 8..22, y 16..21
 	ship.components.place(ship.grid, "reactor_mk1", Vector2i(8, 17), 0)
 	ship.components.place(ship.grid, "helm", Vector2i(12, 17), 0)
@@ -235,9 +242,7 @@ func _engine_ship(rots: Array) -> Arena:
 	for cell in tops:
 		ship.cables.place(ship.grid, cell)
 	ship.refresh()
-	var a := Arena.new(1)
-	a.add_ship(ship)
-	return a
+	return ship
 
 
 func test_thrust_follows_the_nozzle_rear_engines_all_forward_side_engines_only_sideways() -> void:
@@ -294,7 +299,7 @@ func test_the_ship_moves_the_way_the_engines_push() -> void:
 
 func test_the_ship_turns_toward_the_mouse_and_the_keys_mode_still_turns_with_a_and_d() -> void:
 	var s := Session.new()
-	s.start(Session.load_ship("res://data/ships/starter_courier.json"), Session.load_ship(PIRATE), 3)
+	s.start(_engine_ship_ship([2, 1, 3]), _engine_ship_ship([2]), 3)  # a rear engine and a strafe pair against an unarmed ship (the Courier starts without a pair, and a pirate would shoot the bare engines off)
 	var co = s.arena.ships[Session.PLAYER]
 	eq(co.flight.steer, "mouse", "data/flight.json: the mouse steers")
 	s.cursor = Vector2(1000.0, 0.0)  # due east
@@ -317,7 +322,7 @@ func test_the_ship_turns_toward_the_mouse_and_the_keys_mode_still_turns_with_a_a
 	s.input = {"throttle": 0.0, "turn": 1.0, "strafe": 1.0}
 	var before: float = co.flight.angle
 	co.flight.ang_vel = 0.0
-	for i in 60:
+	for i in 20:  # a light ship turns fast: a longer wait would wrap past half a turn
 		s.tick(DT)
 	check(co.flight.angle - before > 0.1, "keys steering: D turns clockwise")
 	s.cursor = null
@@ -325,7 +330,7 @@ func test_the_ship_turns_toward_the_mouse_and_the_keys_mode_still_turns_with_a_a
 	s.input = {"throttle": 0.0, "turn": 1.0, "strafe": 0.0}
 	co.flight.ang_vel = 0.0
 	before = co.flight.angle
-	for i in 60:
+	for i in 20:  # a light ship turns fast: a longer wait would wrap past half a turn
 		s.tick(DT)
 	check(co.flight.angle - before > 0.1, "and with no cursor yet the keys work too")
 

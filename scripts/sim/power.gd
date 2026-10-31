@@ -13,13 +13,15 @@ const EPS := 0.0001  ## slack for float power (line multipliers make 5.4 and 2.4
 ## `mods`: Abilities.power_mods, the abilities running now: {mult: uid -> factor on the part's power
 ## figure, extra: uid -> power_spike draw added to its demand (a producer gives that much less),
 ## bonus: uid -> power added to the part's figure, after the factor: the manned-station bonus of an
-## operator's traits, TraitSet.station_bonus}.
+## operator's traits, TraitSet.station_bonus; hand: uid -> power a crew member gives the part by hand (crew
+## ability power_system, CrewFx.power_bonus): added like a bonus, and enough of it runs a part that is on no cable}.
 ## Returns {powered: {uid: bool}, networks: [{id, cells, members, supply, demand, used}],
 ## network_of: {uid: network id}}. Network ids follow each network's first cell in reading order.
 static func solve(components, cables, disabled := {}, mods := {}) -> Dictionary:
 	var mults: Dictionary = mods.get("mult", {})
 	var extras: Dictionary = mods.get("extra", {})
 	var bonuses: Dictionary = mods.get("bonus", {})
+	var hands: Dictionary = mods.get("hand", {})
 	var cells: Array = cables.cells.keys()
 	cells.sort_custom(_before)
 	var label := {}  # cable cell -> cable group
@@ -76,6 +78,8 @@ static func solve(components, cables, disabled := {}, mods := {}) -> Dictionary:
 				p = p * float(mults[uid])
 			if bonuses.has(uid):
 				p = p + float(bonuses[uid])
+			if hands.has(uid):
+				p = p + float(hands[uid])
 			if p > 0 and extra > 0.0:
 				p = maxf(p - extra, 0.0)
 				extra = 0.0
@@ -95,6 +99,12 @@ static func solve(components, cables, disabled := {}, mods := {}) -> Dictionary:
 				left -= k[2]
 				n["used"] += k[2]
 				powered[k[1]] = true
+	for uid in uids:  # a part on no cable runs by hand when the power it is given covers what it needs
+		if hands.has(uid) and touched[uid].is_empty() and not disabled.get(uid, false):
+			var p = components.def(components.instances[uid]["id"]).get("power", 0)
+			if mults.has(uid):
+				p = p * float(mults[uid])
+			powered[uid] = p + float(hands[uid]) >= -EPS
 	return {"powered": powered, "networks": nets, "network_of": network_of}
 
 

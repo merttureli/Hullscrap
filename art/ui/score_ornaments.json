@@ -1,0 +1,105 @@
+{
+ "frame": [
+  256,
+  96
+ ],
+ "regions": {
+  "divider_l": [
+   0,
+   0,
+   16,
+   9
+  ],
+  "divider_mid": [
+   20,
+   0,
+   8,
+   9
+  ],
+  "divider_c": [
+   32,
+   0,
+   24,
+   9
+  ],
+  "divider_r": [
+   60,
+   0,
+   16,
+   9
+  ],
+  "corner_tl": [
+   80,
+   0,
+   16,
+   16
+  ],
+  "corner_tr": [
+   100,
+   0,
+   16,
+   16
+  ],
+  "corner_bl": [
+   120,
+   0,
+   16,
+   16
+  ],
+  "corner_br": [
+   140,
+   0,
+   16,
+   16
+  ],
+  "pip_on": [
+   160,
+   0,
+   10,
+   10
+  ],
+  "pip_off": [
+   172,
+   0,
+   10,
+   10
+  ],
+  "laurel_l": [
+   190,
+   0,
+   20,
+   36
+  ],
+  "laurel_r": [
+   214,
+   0,
+   20,
+   36
+  ],
+  "seal": [
+   0,
+   20,
+   32,
+   40
+  ],
+  "banner_l": [
+   40,
+   20,
+   16,
+   20
+  ],
+  "banner_mid": [
+   60,
+   20,
+   8,
+   20
+  ],
+  "banner_r": [
+   72,
+   20,
+   16,
+   20
+  ]
+ },
+ "notes": "Score-panel ornaments, one atlas (rects are [x, y, w, h] in source px). Divider: divider_l + divider_mid repeated + divider_c + divider_mid repeated + divider_r (a rule with a diamond in the middle). corner_tl/tr/bl/br: 16x16 amber brackets for the corners of a panel. pip_on/pip_off: rating and counter diamonds. laurel_l/laurel_r: a wreath either side of the score number. seal: a rosette medal with ribbon tails and a blank centre for a rank glyph. banner_l + banner_mid repeated + banner_r: a steel ribbon behind the ending title. Amber on transparent; tint only if you must."
+}

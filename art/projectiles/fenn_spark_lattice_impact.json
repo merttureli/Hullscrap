@@ -1,0 +1,40 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "anims": {
+  "play": [
+   0,
+   3,
+   16
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "glow": {
+  "image": "fenn_spark_lattice_impact_glow.png",
+  "frame": [
+   24,
+   24
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    16
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "A starburst of splinters: a white flash and twelve cyan rays, then fading shards (3 frames, 16x16)."
+}

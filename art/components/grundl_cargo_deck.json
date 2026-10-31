@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   5
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "grundl_cargo_deck_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    5
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Grundl Cargo Deck, 4x4: a top-down freight hold: hazard-striped lane edges, a stack of crates (brown wood and steel containers with amber stripes), a rack of big shells at the right, a loading hoist whose chain and hook swing on the 4-frame loop, a blinking amber lamp. Off: dim, the hook at rest. Damaged: a crate toppled and split, the chain bent, a lamp dead. Disabled: crates spilled and dark, the hoist hanging snapped."
+}

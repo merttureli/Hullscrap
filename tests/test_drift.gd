@@ -1,11 +1,13 @@
 extends "res://tests/base_test.gd"
-## The Drift campaign without a screen: the seeded map (same seed, same map; connected; 2 to 4 lanes;
-## spacing; the fixed places), fog, jumping and fuel, the debt clock and Ma's Kettle, reputation, the
-## danger tiers, the station trades, saving and loading, and the data files that feed it.
+## The Drift campaign without a screen: the seeded map of a region (same seed, same map; connected; 2 to 4 lanes;
+## spacing; the fixed places of the regions), fog, jumping and fuel, the debt clock and Ma's Kettle, reputation, the
+## danger tiers, the station trades, saving and loading, and the data files that feed it. The region graph itself is
+## tests/test_regions.gd.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Drift = preload("res://scripts/space/drift.gd")
+const Regions = preload("res://scripts/space/regions.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
@@ -31,10 +33,9 @@ func _camp(seed_value := 1) -> Campaign:
 	return Campaign.new(seed_value)
 
 
-func _map(seed_value: int) -> Drift:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value
-	return Drift.generate(rng, Campaign.config())
+## A map of region `region` (Clan space by default) from `seed_value`.
+func _map(seed_value: int, region := "clan_space") -> Drift:
+	return Regions.make_map(Regions.get_region(region), Campaign.config(), seed_value)
 
 
 ## The first neighbour of the current node that can be jumped to (not a gate).
@@ -56,7 +57,7 @@ func _hop(c: Campaign, ship: Ship, n: int) -> void:
 func test_same_seed_same_map() -> void:
 	var a := _camp(1234)
 	var b := _camp(1234)
-	eq(a.drift.nodes.size(), 28, "28 nodes")
+	check(a.drift.nodes.size() >= 16 and a.drift.nodes.size() <= 20, "16 to 20 nodes (%d)" % a.drift.nodes.size())
 	for i in a.drift.nodes.size():
 		var x: Dictionary = a.drift.nodes[i]
 		var y: Dictionary = b.drift.nodes[i]
@@ -68,9 +69,9 @@ func test_same_seed_same_map() -> void:
 
 func test_graph_is_connected_with_2_to_4_lanes_and_spacing_holds() -> void:
 	var min_gap := float(Campaign.config()["map"]["min_spacing"])
-	var fixed := ["rusthold", "meridian", "prism", "gate_1", "gate_2", "gate_3"]
 	for seed_value in 40:
-		var d := _map(seed_value)
+		var d := _map(seed_value, ["clan_space", "concord_space", "gate_approaches", "kett_hives"][seed_value % 4])
+		var fixed: Array = d.nodes.filter(func(n): return str(n["place"]) != "").map(func(n): return n["id"])
 		check(d.connected(), "seed %d: connected" % seed_value)
 		check(d.min_distance() >= min_gap - 0.001, "seed %d: spacing %.1f" % [seed_value, d.min_distance()])
 		for n in d.nodes:
@@ -85,19 +86,21 @@ func test_graph_is_connected_with_2_to_4_lanes_and_spacing_holds() -> void:
 
 func test_fixed_places_exist_and_rusthold_is_the_start() -> void:
 	var d := _map(7)
-	for id in ["rusthold", "meridian", "prism", "gate_1", "gate_2", "gate_3"]:
-		check(d.has(id), id + " exists")
-	eq(d.start_id(), "rusthold", "Rusthold is the start")
+	eq(d.start_id(), "rusthold", "Rusthold is the start of Clan space")
 	check(d.node("rusthold")["pos"].x < 120.0, "at the left edge")
-	check(absf(d.node("meridian")["pos"].x - 800.0) <= 100.0 and absf(d.node("meridian")["pos"].y - 500.0) <= 100.0, "Meridian is mid-map")
+	check(d.node(d.exit_id())["pos"].x > 1400.0, "the exit beacon is on the far side")
+	var m := _map(7, "concord_space")
+	check(absf(m.node("meridian")["pos"].x - 800.0) <= 100.0 and absf(m.node("meridian")["pos"].y - 500.0) <= 100.0, "Meridian is mid-map in Concord space")
+	eq(m.node(m.start_id())["pos"].x < 150.0 and m.start_id() == "entry", true, "which begins at its arrival point on the left")
+	var g := _map(7, "gate_approaches")
 	var edge := 0
-	for g in ["gate_1", "gate_2", "gate_3"]:
-		var p: Vector2 = d.node(g)["pos"]
-		eq(d.node(g)["type"], "gate", g + " is a gate")
+	for id in ["gate_1", "gate_2", "gate_3"]:
+		var p: Vector2 = g.node(id)["pos"]
+		eq(g.node(id)["type"], "gate", id + " is a gate")
 		if p.x < 80.0 or p.x > 1520.0 or p.y < 80.0 or p.y > 920.0:
 			edge += 1
-	eq(edge, 3, "the three Dead Gates sit on the far edges")
-	eq(d.node("prism")["hidden_until"], "prism_revealed", "the Prism is hidden until prism_revealed")
+	eq(edge, 3, "the three Dead Gates sit on the far edges of the Gate approaches")
+	eq(_map(7, "lumen_space").node("prism")["hidden_until"], "prism_revealed", "the Prism is hidden until prism_revealed")
 	eq(_camp(7).current, "rusthold", "a campaign starts at Rusthold")
 
 
@@ -129,8 +132,10 @@ func test_fog_at_the_start_shows_only_rusthold_and_its_neighbours() -> void:
 				known.append(id)
 		known.sort()
 		var want: Array = ["rusthold"] + c.neighbours("rusthold")
+		if not want.has(c.drift.exit_id()):
+			want.append(c.drift.exit_id())
 		want.sort()
-		eq(known, want, "seed %d: only Rusthold and its lanes show a type" % seed_value)
+		eq(known, want, "seed %d: only Rusthold, its lanes and the exit beacon show a type" % seed_value)
 		for id in c.drift.ids():
 			if not c.is_known(id) and not c.is_hidden(id):
 				eq(c.label(id), "?", "an unknown node shows ?")
@@ -148,8 +153,9 @@ func test_fog_lifts_round_the_new_node_after_a_jump() -> void:
 
 func test_the_prism_is_hidden_until_the_flag_is_set() -> void:
 	var c := _camp(4)
+	c.enter_region("lumen_space")
 	check(c.is_hidden("prism") and not c.is_known("prism"), "hidden at the start")
-	check(not c.neighbours("gate_3").has("prism"), "hidden nodes drop out of the neighbour lists")
+	check(not c.neighbours(c.drift.neighbours("prism")[0]).has("prism"), "hidden nodes drop out of the neighbour lists")
 	for o in c.drift.neighbours("prism"):
 		c.visited[o] = true
 	check(c.is_hidden("prism") and not c.is_known("prism"), "still hidden next to a visited node")
@@ -207,6 +213,7 @@ func test_a_drift_jump_costs_hull_integrity_instead_of_fuel() -> void:
 
 func test_the_dead_gates_are_dark() -> void:
 	var c := _camp(2)
+	c.enter_region("gate_approaches")
 	var ship := _ship()
 	var gate: String = "gate_1"
 	c.current = c.drift.neighbours(gate)[0]
@@ -471,7 +478,8 @@ func test_recruit_for_150_credits() -> void:
 	check(not c.recruit(ship, "rusthold", 5)["ok"], "nobody at that index")
 	var meridian := _camp(3)
 	meridian.roll_offers("meridian", ship)
-	check(meridian.offers["meridian"].all(func(o): return o["species"] in ["human", "fenn"]), "Meridian's recruits are Human or Fenn")
+	var table: Dictionary = meridian.station_cfg("meridian")["recruit"]
+	check(meridian.offers["meridian"].all(func(o): return table.has(o["species"])), "Meridian's recruits come from its own table")
 	meridian.roll_offers("prism", ship)
 	check(meridian.offers["prism"].size() == 2, "the Prism has its own")
 
@@ -550,7 +558,7 @@ func test_loading_a_bad_or_old_save_changes_nothing() -> void:
 	check(c.load_dict(bad) != "", "a missing list is refused")
 	eq(JSON.stringify(c.to_dict()), snapshot, "after all that the campaign is as it was")
 	check(c.load_file("user://no_such_campaign.json") != "", "a missing file is an error, not a crash")
-	eq(Campaign.VERSION, 3, "the save format is version 3 (version 1 has no fuel_part, versions 1 and 2 have no sectors; they still load: see test_engines1.gd and test_sector.gd)")
+	eq(Campaign.VERSION, 4, "the save format is version 4 (version 1 has no fuel_part, versions 1 and 2 have no sectors, versions 1 to 3 no regions; they still load: see test_engines1.gd, test_sector.gd and test_regions.gd)")
 
 
 func test_save_file_round_trip() -> void:
@@ -590,8 +598,9 @@ func test_drift_data_names_things_that_exist() -> void:
 			for path in cfg["enemies"][kind][t]:
 				check(FileAccess.file_exists(path), "%s tier %s: %s exists" % [kind, t, path])
 	check("res://data/ships/pirate_raider.json" in cfg["enemies"]["pirate"]["1"], "tier 1 uses the Pirate Raider")
-	for p in cfg["places"]:
-		check(cfg["types"].has(p["type"]), "the place %s has a known type" % p["id"])
+	for r in Regions.all():
+		for p in r.get("places", []):
+			check(cfg["types"].has(p["type"]), "the place %s of %s has a known type" % [p["id"], r["id"]])
 	for t in cfg["node_weights"]:
 		check(cfg["types"].has(t), "the type %s is drawn on the map" % t)
 	check(comps.has(cfg["debt"]["kettle"]), "the Kettle exists")
@@ -732,6 +741,7 @@ func test_node_positions_fit_the_map_area_and_hit_testing_agrees() -> void:
 		if not map.campaign.is_hidden(id):
 			eq(map.node_at(p), id, "%s is found at its own position" % id)
 	eq(map.node_at(Vector2(2.0, 2.0)), "", "empty space finds nothing")
+	map.campaign.enter_region("lumen_space")
 	check(map.node_at(map.node_pos("prism")) != "prism", "the hidden Prism cannot be clicked")
 	_free_screen(d)
 

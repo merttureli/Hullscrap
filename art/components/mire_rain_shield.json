@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "mire_rain_shield_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Mire Rain Shield, 4x4: a teal housing with a brass hand-wheel valve in every corner and a round water-lens well in the middle, where a ripple spreads from a falling drop and rain streaks fall over it (the 4-frame loop). Off: still dull water, wheels at rest. Damaged: the upper-left valve has sprung a steam jet, the rim is cracked and the ripple stutters. Disabled: the well is drained and dark, a valve snapped off, the housing split."
+}

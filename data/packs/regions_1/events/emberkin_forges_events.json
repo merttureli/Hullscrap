@@ -1,0 +1,244 @@
+{"events": [
+    {
+      "id": "forge_dock_heat", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "The Forge dock is forty degrees hotter than it needs to be and the dockhands are fanning themselves, which for Emberkin means they are comfortable. A hand-lettered sign reads: WE HAVE TURNED IT DOWN FOR YOU. The thermometer behind it says fifty-eight.",
+      "choices": [
+        {"text": "Thank them for the courtesy.", "outcomes": [
+          {"weight": 80, "text": "The dockhands beam. They bring you a mug of tea that is still boiling and a damp cloth for your forehead. The crew drink the tea, sweating, and are surprisingly moved.", "effects": {"crew_hp": 5}},
+          {"weight": 20, "text": "The tea is hot enough to take the first layer off the mug. Your crew are very moved and quite blistered.", "effects": {"items": {"credits": 10}, "crew_hp": -5}}
+        ]},
+        {"text": "Ask them to turn it down further.", "outcomes": [
+          {"weight": 100, "text": "A shocked silence. Then three dockhands throw open the vents and pull on coats, with the solemn faces of people undertaking a great sacrifice. It gets down to thirty-five. You are very comfortable and slightly ashamed.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "[Emberkin] Share a cold drink with the dockhands. Room temperature.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "The dockhands crowd round your Emberkin to see the drink, which is at room temperature. It is a dare. Your Emberkin finishes it in one go, shuddering. A cheer goes up, and a dockhand presses two plasma cells into their hand, for courage.", "effects": {"items": {"plasma_cell": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Mire] Stand in the doorway and steam.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire stands in the doorway, dripping, and a dockhand brings a bucket of cold water without being asked. Then a second bucket, then a third. They have never met anyone so brave about being cold. The Lumen office hears of it by evening.", "effects": {"rep": {"lumen": 1}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_cold_night", "type": "empty", "weight": 9, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "A Forge freighter lies dark in the lane, her whole crew huddled in the one cool room with the vents open and their teeth chattering. A banner over the door reads COLD NIGHT. DO NOT HELP. A thermometer held to the window says twenty degrees. It is a dare, and they are winning.",
+      "choices": [
+        {"text": "Respect the dare and wave.", "outcomes": [
+          {"weight": 100, "text": "You wave. They wave back, shivering, with grim pride. One of them tosses a pad out of the airlock for you, and holds up a thermometer: eighteen degrees. They have never been braver.", "effects": {"crew_hp": 5, "log": "log_forge_cold_night"}}
+        ]},
+        {"text": "Offer them a blanket.", "outcomes": [
+          {"weight": 70, "text": "Mortally offended, the whole crew refuses. Then they take the blanket, in secret, and give you a crate of fuel pellets as an apology.", "effects": {"items": {"fuel": 2}}},
+          {"weight": 30, "text": "You hold up the blanket. The youngest bursts into tears. The captain apologises for the cold on everyone's behalf.", "effects": {"crew_hp": -5}}
+        ]},
+        {"text": "[Emberkin] Join the Cold Night.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 90, "text": "Your Emberkin goes aboard and sits in the cold for forty minutes, wrapped in nothing, shaking and proud. They come back with a medal, a small red rag on a pin, and a hold of pellets.", "effects": {"items": {"plasma_cell": 2, "fuel": 2}, "crew_hp": -5, "log": "log_forge_cold_night"}},
+          {"weight": 10, "text": "Your Emberkin lasts four minutes and passes out with dignity. The crew carry them back, reverent.", "effects": {"crew_hp": -10, "log": "log_forge_cold_night"}}
+        ]},
+        {"text": "[Mire] Offer to cool the room properly.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire walks in and opens a tap on their backpack, and the Cold Night becomes a rain shower. The Emberkin scream with delight. It is the best Cold Night in the Forge's history, and they pay in plasma cells.", "effects": {"items": {"plasma_cell": 2, "fuel": 2}}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_slag_wreck", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "The slag-barge Cinder Queen sits in a crown of her own molten cargo, glowing a dull orange from stem to stern. Forty years in the open and she is still warm enough to toast bread. A pair of boots stands by her airlock, steaming.",
+      "choices": [
+        {"text": "Cut your way in through the warm side.", "outcomes": [
+          {"weight": 60, "text": "The cutter parts the hull like candle wax, and the hold is a treasure of cast ingots, cooled by a hair. You load what you can carry, and a crew bunk yields a heat-curled pad.", "effects": {"items": {"scrap": 40, "copper": 15}, "log": "log_forge_heat_haze"}},
+          {"weight": 25, "text": "A pocket of molten slag lets go as you cut. The splash is mostly on the hull.", "effects": {"items": {"scrap": 25}, "hull": -10, "log": "log_forge_heat_haze"}},
+          {"weight": 15, "text": "In the foreman's cabin, a locked box of plasma cells, still glowing, with a label: FOR THE COLD.", "effects": {"items": {"plasma_cell": 3, "scrap": 20}, "log": "log_forge_heat_haze"}}
+        ]},
+        {"text": "[Emberkin] Walk into the molten hold.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 90, "text": "Your Emberkin wades into the hold like a hot spring, lifts out a dozen ingots one by one, and asks if there is any more. 'It is lovely in here,' they say, scorched to the elbows and perfectly happy.", "effects": {"items": {"scrap": 60, "copper": 25, "plasma_cell": 2}}},
+          {"weight": 10, "text": "The hold is a little hotter than hoped. Your Emberkin comes out smouldering and delighted.", "effects": {"items": {"scrap": 60, "copper": 25}, "crew_hp": -10}}
+        ]},
+        {"text": "[Radiator] Run your radiators flat out and cut fast.", "requires": {"component": "radiator"}, "outcomes": [
+          {"weight": 100, "text": "Your radiators glow cherry-red but the hull holds, and you cut in half the time. The ingots come out with a cold sigh.", "effects": {"items": {"scrap": 50, "copper": 20}}}
+        ]},
+        {"text": "Leave her to cool.", "outcomes": [
+          {"weight": 100, "text": "You leave the Cinder Queen glowing quietly to herself. Somebody's boots steam by the airlock, forever.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_lumen_assessor", "type": "patrol", "weight": 10, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "A Lumen assessor's skiff, Halation, drifts alongside with her hull set to a polite glow. 'Inspection of the lease,' says Assessor Vane. 'The Forge has fallen behind on its output. The Lumen would like to assess whether the Forge is trying.' Three Emberkin stand at the Forge's open hatch, trying very hard not to catch fire with embarrassment.",
+      "choices": [
+        {"text": "Ask about the lease.", "outcomes": [
+          {"weight": 60, "text": "The assessor explains the lease in terms that appear to be about music. You come away with a pamphlet and the impression that the Forge pays rent for its own sunlight.", "effects": {"rep": {"lumen": 1}, "log": "log_forge_rent_in_light"}},
+          {"weight": 40, "text": "Vane asks you to witness the lease. You do, on a page that turns out to be a different lease.", "effects": {"rep": {"lumen": -1}, "log": "log_forge_rent_in_light"}}
+        ]},
+        {"text": "Vouch for the Forge's output.", "outcomes": [
+          {"weight": 50, "text": "You tell Vane the Forge's output has been exceptional. Vane glows cooler, which means disbelief, but the Forge workers beam. They hand you ingots in thanks.", "effects": {"items": {"plasma_cell": 2, "scrap": 30}, "rep": {"lumen": -1}}},
+          {"weight": 50, "text": "Vane checks the records, the output and you, and finds all three wanting. The Forge pays a fine; you pay a smaller one.", "effects": {"items": {"credits": -30}, "rep": {"lumen": -1}}}
+        ]},
+        {"text": "[Prismatic] Answer the assessor in the Choir's own register.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic and the assessor trade three notes that mean something. Vane glows pink, then a deeper rose, then sets the lease aside and offers a grace period of one season. The Forge workers faint, politely.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Emberkin] Say the Forge is working as hard as the sun allows.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin points out that the Forge is two degrees under the Lumen's own spec. Vane checks, and it is. The lease is amended by hand, in light, and the workers carry your Emberkin off on their shoulders.", "effects": {"items": {"plasma_cell": 3}, "rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_kiln_apprentice", "type": "distress", "weight": 8, "once": true, "requires": {"flag": "in_emberkin_forges"},
+      "text": "An apprentice has locked herself inside a runaway kiln, and the kiln is doing what runaway kilns do. Taper, fourteen years old, is on the inside of the door, and says over the comm, not at all frightened: 'It is a bit hot, but the door is jammed and I am very fast at being rescued.' The Forge's fire crew have gone for tea.",
+      "choices": [
+        {"text": "Cut her out.", "outcomes": [
+          {"weight": 70, "text": "You cut the door, haul Taper out, and she dusts herself off like she has done this before. She has. She asks to come with you, 'because the kilns here are boring'.", "effects": {"recruit": {"species": "emberkin", "name": "Taper"}}},
+          {"weight": 30, "text": "You cut the door and the kiln roars out to meet you. Everyone gets out, scorched and laughing. Taper decides you are her new hero.", "effects": {"crew_hp": -10, "recruit": {"species": "emberkin", "name": "Taper"}}}
+        ]},
+        {"text": "[Mire] Smother the kiln with water.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire opens the tank and drowns the kiln in one long, practised jet. The roar dies. Taper stumbles out, steaming, delighted. 'Again,' she says. The fire crew return, see your Mire, and take off their hats.", "effects": {"items": {"credits": 20}, "recruit": {"species": "emberkin", "name": "Taper"}}}
+        ]},
+        {"text": "[Quick hands] Pick the jammed lock.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Your engineer slides a pick into the jammed latch, listens, turns it twice, and the door swings open. Taper walks out, singed at the edges, and asks if your engineer does apprenticeships.", "effects": {"items": {"copper": 10}, "recruit": {"species": "emberkin", "name": "Taper"}}}
+        ]},
+        {"text": "Wait for the fire crew.", "outcomes": [
+          {"weight": 100, "text": "The fire crew arrive an hour later with a ladder, a flask and an air of grievance. Taper climbs out, unharmed and bored. You did nothing. She will remember.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_coal_flare", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "The Coal, the red ember of a star the Forges orbit, is flaring: a slow tide of light rolling across the dark. The Emberkin on the Forge rings are out on their hulls in their shirtsleeves, faces upturned. 'Free heat!' someone shouts. 'FREE HEAT!' They are, to a person, thrilled. Your radiators are screaming.",
+      "choices": [
+        {"text": "Soak up the flare. Open the radiators.", "outcomes": [
+          {"weight": 55, "text": "The flare washes over your hull for an hour, charging the radiators and warming every cold corner of the ship. The crew complain of nothing. It is the nicest hour of the run.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": 10}},
+          {"weight": 30, "text": "The flare is bigger than forecast. The radiators cry out, the hull ticks, and one cabin gets very, very warm.", "effects": {"items": {"plasma_cell": 2}, "crew_hp": -10, "hull": -5}},
+          {"weight": 15, "text": "A prominence kisses your hull and leaves a scorch that will be there for the rest of your life.", "effects": {"items": {"plasma_cell": 3}, "hull": -10}}
+        ]},
+        {"text": "[Radiator] Spin the radiators up and sell the heat.", "requires": {"component": "radiator"}, "outcomes": [
+          {"weight": 100, "text": "Your radiators turn the flare into stored heat, which you sell to the Forge's cold stores at a fair price. The Forge calls it theft. It is also, they agree, a favour.", "effects": {"items": {"credits": 50, "plasma_cell": 1}}}
+        ]},
+        {"text": "[Emberkin] Stand on the hull and soak it up.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin stands on the hull in the flare for an hour, glowing. When they come in their eyes are bright and their pockets full of tiny crystallised sparks. 'They fall,' they say. 'You just have to be there.' A Forge recorder drifts in beside the haul.", "effects": {"items": {"plasma_cell": 3, "crystal": 1}, "crew_hp": 10, "log": "log_forge_the_coal"}}
+        ]},
+        {"text": "Shield up and wait it out.", "outcomes": [
+          {"weight": 100, "text": "You wait out the flare behind full shields, which is the sensible thing. Forty Emberkin on their hulls wave at you, laughing, as the light rolls over.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_furnace_row", "type": "trader", "weight": 11, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "At the Furnace Row market every stall is a forge: ingots, cast parts, a man selling soup that is simply boiling. They take credits, but they prefer cold coins. 'Cold coins,' says the stallholder, Brand, holding yours up to the light. 'You carry them near your heart. I can tell.' The nearest stall is on fire. Nobody minds.",
+      "choices": [
+        {"text": "Buy a crate of plasma cells (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 80, "text": "Four cells, warm to the touch and hand-packed in straw. Brand pats the crate. 'Treat them well,' he says. 'They would never forgive you.'", "effects": {"items": {"credits": -60, "plasma_cell": 4}}},
+          {"weight": 20, "text": "Three cells and a long pause. Brand has oversold, and throws in a rebate in scrap.", "effects": {"items": {"credits": -60, "plasma_cell": 3, "scrap": 20}}}
+        ]},
+        {"text": "Sell 30 scrap at forge prices.", "requires": {"items": {"scrap": 30}}, "outcomes": [
+          {"weight": 100, "text": "Brand weighs the scrap and melts one lump to check. 'Honest,' he says, as if it were a surprise. He pays well.", "effects": {"items": {"scrap": -30, "credits": 60}}}
+        ]},
+        {"text": "[Emberkin] Bargain in the old warm manner.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin and Brand shake hands, hold on, and keep holding on. The haggle is who lets go first. It is a hundred and ten degrees in the stall. Your Emberkin wins, barely, and leaves with a discount, a medal and a first-degree handshake.", "effects": {"items": {"plasma_cell": 3, "credits": 30}, "crew_hp": -5}}
+        ]},
+        {"text": "[Mire] Ask for a bowl of the soup.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire holds a ladle over the pot, and the soup steams alarmingly. 'Dry out in here and I will sell you a pint,' says Brand, kindly. The soup is superb. Your Mire sits down on a bucket and has three bowls.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Walk the Row without buying.", "outcomes": [
+          {"weight": 100, "text": "You walk the whole Row, three hundred stalls, and buy nothing. By the end someone has put a free bun in your hand and warmed you in a dozen small ways. You leave glowing.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_pyre_trial", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_emberkin_forges"},
+      "text": "Forgemother Cinder keeps the Forge's best work in a cold room, which is itself a joke: a Pyre Lance, a beam gun that sets fire to everything it sweeps and makes its own room twenty degrees hotter than it has any right to be. 'It needs someone who can stand in that room when it fires,' she says. 'You are not Emberkin. What can you do?' She sets out a chair, and a thermometer.",
+      "choices": [
+        {"text": "Man the Lance during a test burn.", "outcomes": [
+          {"weight": 55, "text": "You sit in the chair and fire. The room goes to a hundred and twenty degrees in ten seconds. You hold on for a whole sweep. When you come out steaming, Cinder hands you the schematics and a damp towel. 'Brave,' she says. 'Stupid. But brave.'", "effects": {"crew_hp": -15, "flag": "tech_pyre_lance"}},
+          {"weight": 45, "text": "You sit and fire. The beam is superb. The room is a furnace. You last four sweeps and get carried out by the crew. Cinder is not offended. 'It is a start,' she says, and hands over the schematics.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": -20, "flag": "tech_pyre_lance"}}
+        ]},
+        {"text": "[Emberkin] Man the Lance. It is a lovely warm room.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin settles into the chair at a hundred and thirty degrees and starts to hum. The sweep is perfect, and the beam sets a target drone alight from forty paces. Cinder weeps a little, from the heat. 'Keep it,' she says, and hands over the schematics, spare coils and a box of fire-starters.", "effects": {"items": {"plasma_cell": 3, "copper": 12}, "flag": "tech_pyre_lance"}}
+        ]},
+        {"text": "[Radiator] Wire your radiators to the Lance room.", "requires": {"component": "radiator"}, "outcomes": [
+          {"weight": 100, "text": "Your radiators drink the room's heat and the trial is a breeze. Cinder, impressed and a little offended, signs off. 'Cheating,' she says. 'But elegant cheating.'", "effects": {"items": {"plasma_cell": 1}, "flag": "tech_pyre_lance"}}
+        ]},
+        {"text": "Come back with a cooler plan.", "outcomes": [
+          {"weight": 100, "text": "'We will be here,' says Cinder. 'It is always warm.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_slag_runner", "type": "pirate", "weight": 10, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "A Rustfang slag-runner, Hot Potato, is stealing slag from the Forge's cooling pits. She is overloaded, glowing, and trailing a line of molten drops like a comet. Her crew shout at you across the lane: 'It is all stolen! It is all hot! We cannot hold it much longer!' They would very much like to be rescued.",
+      "choices": [
+        {"text": "Take the slag off their hands.", "outcomes": [
+          {"weight": 70, "text": "They hand you the cargo across a boom, wincing. You cool it in a bay and sell it by the pound. The pirates, weeping with relief, pay you to keep quiet. Their manifest comes with the slag.", "effects": {"items": {"scrap": 40, "credits": 30}, "log": "log_forge_slag_manifest"}},
+          {"weight": 30, "text": "The slag cools in your hold and cracks the bay floor. The pirates get away laughing, with a copy of their manifest for you.", "effects": {"items": {"scrap": 30}, "hull": -10, "log": "log_forge_slag_manifest"}}
+        ]},
+        {"text": "Fight them.", "outcomes": [
+          {"weight": 100, "text": "You open fire. The slag-runner glows even brighter in protest.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Emberkin] Offer to sit on the cargo. It is only warm.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin boards the slag-runner and sits on the hold. The pirates thank them, hand over a share of the loot, and promise never to steal slag again. They will steal rubber instead.", "effects": {"items": {"scrap": 50, "plasma_cell": 2, "credits": 40}}}
+        ]},
+        {"text": "Let it burn.", "outcomes": [
+          {"weight": 100, "text": "The slag-runner glows brighter and brighter, then dumps her cargo in an orange arc and runs. It is the most beautiful thing you have seen all week.", "effects": {}}
+        ]}
+      ],
+      "after_win": {"text": "The slag-runner's hold is still hot, and so is her loot. You wait for it to cool, and it is worth the wait.", "effects": {"items": {"scrap": 45, "credits": 35, "plasma_cell": 1}}}
+    },
+    {
+      "id": "forge_crucible_rock", "type": "asteroid_field", "weight": 9, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "A cinder-red lump of old ore the Forge calls the Crucible, hot to the touch and humming. A survey beacon says PLASMA SEAM, MIND THE HEAT. Emberkin prospectors work it in their shirtsleeves, peeling off bits and tossing them to each other like a game.",
+      "choices": [
+        {"text": "Cut a safe chunk from the cool side.", "outcomes": [
+          {"weight": 80, "text": "The cool side is only a little warm. You take a decent haul of copper and a pinch of plasma, and the Emberkin cheer you on, mostly ironically.", "effects": {"items": {"copper": 20, "scrap": 30, "plasma_cell": 1}}},
+          {"weight": 20, "text": "The cool side turns out to be a trap for tourists. The chunk goes off in your hold like a brass band.", "effects": {"items": {"copper": 15, "plasma_cell": 1}, "hull": -5}}
+        ]},
+        {"text": "Go for the seam.", "outcomes": [
+          {"weight": 45, "text": "You cut deep. The seam opens in a sheet of white and the cells come out like peas. Your cutters scream and your hull smokes, but the hold is heavy.", "effects": {"items": {"plasma_cell": 4, "copper": 25}, "hull": -10}},
+          {"weight": 35, "text": "The seam goes up. The pressure wave picks the ship up and sets her down a kilometre away. You still have the cells.", "effects": {"items": {"plasma_cell": 3}, "crew_hp": -10, "hull": -10}},
+          {"weight": 20, "text": "The seam opens clean as a book and gives up everything it has. For once nothing goes wrong, and the Emberkin find it suspicious.", "effects": {"items": {"plasma_cell": 5, "copper": 30}}}
+        ]},
+        {"text": "[Emberkin] Join the prospectors in their game.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin catches a glowing lump, throws it back, catches another. After an hour they have won, by popular agreement, three cells, a hat and a nickname. They are unbearable about it.", "effects": {"items": {"plasma_cell": 3, "copper": 20}}}
+        ]},
+        {"text": "Leave it to the people in shirtsleeves.", "outcomes": [
+          {"weight": 100, "text": "You leave the Crucible to them. Behind you, someone yelps and laughs and says 'warm!'.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_meltdown", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_emberkin_forges", "jumps_min": 3},
+      "text": "A reactor ship, Afterglow, is going critical in the lane: her core glowing white through the hull, her crew hanging off the outside in a ring. Emberkin engineers in thin shirts are trying to hold the core steady with their bare hands. 'Not hot yet!' someone calls. 'Not hot yet!' It is very, very hot.",
+      "choices": [
+        {"text": "Go in and help vent the core.", "outcomes": [
+          {"weight": 40, "text": "You vent the core into space in a white plume. The ship stops glowing and the Emberkin cheer. They give you everything in the cargo, which is reactor fuel.", "effects": {"items": {"plasma_cell": 4, "credits": 50}, "rep": {"lumen": 1}, "crew_hp": -10}},
+          {"weight": 30, "text": "The core coughs a flame the length of your ship. You get out with half your paint.", "effects": {"items": {"plasma_cell": 3}, "crew_hp": -15, "hull": -15}},
+          {"weight": 20, "text": "The core goes while you are alongside. Your shield screams, the crew get singed, and the Afterglow's crew are saved, which is the thing.", "effects": {"items": {"plasma_cell": 2}, "rep": {"lumen": 1}, "crew_hp": -20, "hull": -10}},
+          {"weight": 10, "text": "The core goes all at once. You get the Afterglow's crew off. You lose one of your own to the glare.", "effects": {"rep": {"lumen": 2}, "crew_hp": -20, "hull": -15, "lose_crew": 1}}
+        ]},
+        {"text": "[Emberkin] Go in and hold the core with them.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 90, "text": "Your Emberkin links hands with the others round the core. They sing, in off-key unison, a very old song for cooling. The core dims, reluctantly, like a child told to go to bed. They return singed, laughing and proud, with the ship's cells.", "effects": {"items": {"plasma_cell": 4, "credits": 60}, "rep": {"lumen": 2}}},
+          {"weight": 10, "text": "The core flares once, and they pay for it. They are all fine. They are all quite red.", "effects": {"items": {"plasma_cell": 3, "credits": 30}, "crew_hp": -15}}
+        ]},
+        {"text": "[Mire] Flood the core room.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 90, "text": "Your Mire puts out the core with a long, careful wash of water, which instantly becomes steam, then a cloud. The ship disappears for a minute. When it clears she is cool, soaked and slightly bent. The Emberkin ask whether your Mire does weddings.", "effects": {"items": {"credits": 60, "plasma_cell": 2}, "rep": {"lumen": 1}}},
+          {"weight": 10, "text": "The steam scalds your Mire and boils the crew's tea. The core cools anyway.", "effects": {"items": {"credits": 30}, "crew_hp": -15}}
+        ]},
+        {"text": "Keep your distance and offer advice.", "outcomes": [
+          {"weight": 100, "text": "You stay out of range and shout cooling advice over the comm. The Emberkin thank you, politely, and ignore every word. Somehow it works.", "effects": {"items": {"credits": 10}}}
+        ]}
+      ]
+    },
+    {
+      "id": "forge_blanket_drive", "type": "empty", "weight": 8, "once": false, "requires": {"flag": "in_emberkin_forges"},
+      "text": "A relief ship drifts by with a banner: BLANKET DRIVE. She is collecting spare blankets for the cold ones, meaning anyone on Forge-adjacent ships who is not Emberkin. Her crew are Emberkin to a man, delighted with their own generosity. A tag on the nearest bale reads: ONE SIZE FITS ALL COLDS.",
+      "choices": [
+        {"text": "Take a blanket. You are cold.", "outcomes": [
+          {"weight": 100, "text": "The crew are thrilled to have an excuse to be kind. They give you three blankets, a hot water bottle and a handwritten card: HOW TO BE COLD (A GUIDE). A small pad is tucked inside.", "effects": {"crew_hp": 10, "log": "log_forge_to_the_cold"}}
+        ]},
+        {"text": "Donate 10 polymer for the drive.", "requires": {"items": {"polymer": 10}}, "outcomes": [
+          {"weight": 100, "text": "They weigh the polymer with real reverence and press a plasma cell into your hand. 'For the cold,' they say. You are not sure whose.", "effects": {"items": {"polymer": -10, "plasma_cell": 2}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "[Mire] Explain that a Mire needs water, not blankets.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "The Emberkin crew listen in total silence, then solemnly add a bucket of water to the next bale. 'For the wet ones,' they write on the tag. It is the kindest, wrongest thing you have ever seen.", "effects": {"items": {"fuel": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Kett] Knit them a blanket on the spot.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett knit a blanket in a quarter of an hour, four hands in a rhythm, humming. The relief crew, who have never seen a blanket made, hold it up to the light and cry. They give you a bale of fuel cells and a pad of their own.", "effects": {"items": {"fuel": 3, "plasma_cell": 1}, "log": "log_forge_to_the_cold"}}
+        ]}
+      ]
+    }
+]}

@@ -1,0 +1,72 @@
+{
+ "frame": [
+  25,
+  46
+ ],
+ "pivot_on_base": [
+  32,
+  15
+ ],
+ "aim": "turret",
+ "anims": {
+  "idle": [
+   0,
+   1,
+   0
+  ],
+  "fire": [
+   1,
+   3,
+   14
+  ],
+  "damaged": [
+   4,
+   2,
+   4
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   12,
+   37
+  ],
+  "muzzle": [
+   12,
+   11
+  ]
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of gauntling_tesla_picket_out. fire: 3 frames, recoil 2/1/0 px with a muzzle flash.",
+ "glow": {
+  "image": "gauntling_tesla_picket_barrel_glow.png",
+  "frame": [
+   45,
+   66
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ]
+  }
+ }
+}

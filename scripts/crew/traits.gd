@@ -25,6 +25,8 @@ extends RefCounted
 ## The result is shared and cached: read it, do not change it.
 
 const Content = preload("res://scripts/data/content.gd")
+const Characters = preload("res://scripts/crew/characters.gd")
+const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 
 const LEGACY_PATH := "res://data/species.json"  ## its `traits` table is the old home of the library
 const DAMAGE: Array[String] = ["fire", "no_air", "melee", "ranged", "ion"]
@@ -86,11 +88,13 @@ static func _ensure() -> void:
 static func of(member) -> Dictionary:
 	_ensure()
 	var ids: Array = member.traits()
-	var key := "%s|%s" % [member.species, ",".join(PackedStringArray(ids))]
+	var key := "%s|%s|%s" % [member.species, ",".join(PackedStringArray(ids)), member.character]
 	if _cache.has(key):
 		return _cache[key]
 	var out := _fresh()
-	_merge(out, bag_of(Content.entry("species", str(member.species))))
+	var sp := Content.entry("species", str(member.species))
+	_merge(out, bag_of(sp if not sp.is_empty() else Characters.unique_species(str(member.species))))
+	_merge(out, bag_of(Characters.bag(member.character)))  # a unique character's own keys
 	for id in ids:
 		_merge(out, bag_of(_library.get(id, {})))
 	if out["mechanical"]:
@@ -173,7 +177,7 @@ static func _merge(out: Dictionary, bag: Dictionary) -> void:
 
 ## How fast `m` does a job of `kind` (WORK) on `ship`, 1.0 being the normal speed: their work_mult for it,
 ## times the swarm bonus (1 + per_other per other up crew member of their species in their room, at most
-## 1 + max), times the aura work_mult of every other up crew member in their room.
+## 1 + max), times the aura work_mult of every other up crew member in their room, times a crewmate's rally there.
 static func work_rate(ship, m, kind: String) -> float:
 	var t := of(m)
 	var rate := float(t["work_mult"].get(kind, 1.0))
@@ -190,6 +194,7 @@ static func work_rate(ship, m, kind: String) -> float:
 			kin += 1
 	if float(sw["per_other"]) > 0.0:
 		rate *= 1.0 + minf(float(sw["max"]), float(sw["per_other"]) * kin)
+	rate *= CrewFx.rally_factor(ship, m, room)  # a crewmate's rally ability
 	return maxf(rate, 0.0)
 
 

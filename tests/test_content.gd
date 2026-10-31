@@ -11,8 +11,10 @@ const Abilities = preload("res://scripts/sim/abilities.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
+const Regions = preload("res://scripts/space/regions.gd")
 
 const FIXTURES := "res://tests/fixtures/packs/"
 const EVENTS_SCRIPT := "res://scripts/space/events.gd"  ## the Drift's loader and validator, once it is on main
@@ -316,6 +318,7 @@ func all_problems() -> Array[String]:
 	out.append_array(trait_problems(Content.list("traits")))
 	out.append_array(crew_key_problems(Content.list("species"), CrewMember.config().get("traits", {}), _known_traits()))
 	out.append_array(balance_problems(Content.list("components"), Balance.load_table(), lines))
+	out.append_array(CrewAbilities.problems())  # the ability vocabulary, species abilities and every unique character
 	out.append_array(event_problems())
 	return out
 
@@ -375,6 +378,11 @@ func test_traits_use_only_known_keys() -> void:
 
 func test_events_pass_the_drift_validator_when_it_exists() -> void:
 	_none(event_problems())
+
+
+func test_regions_pass_the_region_rules() -> void:
+	check(Content.regions().size() >= 15, "the 5 faction regions and the 10 homelands")
+	_none(Regions.problems())  # the real data only (the homelands use pack species and parts); the rules: tests/test_regions.gd
 
 
 func test_parts_are_within_their_balance_bands() -> void:

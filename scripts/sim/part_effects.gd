@@ -45,6 +45,8 @@ static func entries(v) -> Array:
 
 ## The room of part `uid` (its anchor's), -1 when it has none.
 static func room_of_part(ship, uid: int) -> int:
+	if not ship.components.instances.has(uid):  # a crew ability's effect (uid -1) is on no part
+		return -1
 	return ship.atmosphere.room_at(ship.components.instances[uid]["anchor"])
 
 

@@ -28,6 +28,7 @@ extends RefCounted
 const Fire = preload("res://scripts/sim/fire.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const PartEffects = preload("res://scripts/sim/part_effects.gd")
+const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 
 const KEYS: Array[String] = ["engine", "shield", "utility"]  ## the combat keys: Shift, Space and Q
 const EFFECTS: Array[String] = PartEffects.EFFECTS  ## the keys of an ability's `effects` that something reads
@@ -36,7 +37,7 @@ const EPS := 1e-9
 
 
 static func fresh_state() -> Dictionary:
-	return {"rev": 0, "slots": {}, "pulse": {}}
+	return {"rev": 0, "slots": {}, "pulse": {}, "fx": []}
 
 
 ## How many starts and ends this ship's abilities have had.
@@ -189,7 +190,8 @@ static func tick(ship, dt: float, rng: RandomNumberGenerator = null) -> void:
 # --- what the running abilities change ------------------------------------------------------------
 
 ## The abilities in effect now: [{uid, ability}]. Active ones that are running, and the passive ones
-## of working parts (powered too when `need_power`; the power solve itself passes false).
+## of working parts (powered too when `need_power`; the power solve itself passes false), then what crew
+## abilities leave on the ship (CrewFx.running: an overclock, extra shield layers).
 static func running(ship, need_power := true) -> Array:
 	var out := []
 	var table: Dictionary = ship.ability_state["slots"]
@@ -209,6 +211,7 @@ static func running(ship, need_power := true) -> Array:
 		for a in ship.components.def(inst["id"]).get("abilities", []):
 			if a.get("type", "active") == "passive":
 				out.append({"uid": uid, "ability": a})
+	out.append_array(CrewFx.running(ship))
 	return out
 
 

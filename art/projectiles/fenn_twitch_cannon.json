@@ -1,0 +1,81 @@
+{
+ "frame": [
+  5,
+  11
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   18
+  ]
+ },
+ "anchors": {
+  "head": [
+   2,
+   3
+  ],
+  "tail": [
+   2,
+   10
+  ]
+ },
+ "glow": {
+  "image": "fenn_twitch_cannon_glow.png",
+  "frame": [
+   13,
+   19
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    18
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "fenn_twitch_cannon_impact.png",
+  "frame": [
+   12,
+   12
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    18
+   ]
+  },
+  "anchor": [
+   6,
+   6
+  ],
+  "glow": {
+   "image": "fenn_twitch_cannon_impact_glow.png",
+   "frame": [
+    18,
+    18
+   ],
+   "offset": [
+    -3,
+    -3
+   ],
+   "anims": {
+    "play": [
+     0,
+     3,
+     18
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A tiny quick bolt, 5x11: a small yellow-white pellet with a short orange tail and cyan sparks (3 frames, 18 fps, it flickers fast)."
+}

@@ -1,0 +1,42 @@
+{
+ "frame": [8, 16],
+ "length": 16,
+ "width": 8,
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "tile": "y",
+ "anims": {
+  "flicker": [0, 3, 14]
+ },
+ "anchors": {
+  "head": [4, 0],
+  "tail": [4, 15]
+ },
+ "glow": {
+  "image": "gauntling_tesla_picket_glow.png",
+  "frame": [16, 16],
+  "offset": [-4, 0],
+  "anims": {
+   "flicker": [0, 3, 14]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "tile": "y"
+ },
+ "notes": "Gauntling Tesla Picket arc (a beam, tile along y): a jagged cyan-white lightning thread with a blue halo that kinks differently each frame (3 frames; the kink pattern repeats every 8 rows so the tiles join).",
+ "impact": {
+  "image": "gauntling_tesla_picket_impact.png",
+  "frame": [16, 16],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "anchor": [8, 8],
+  "glow": {
+   "image": "gauntling_tesla_picket_impact_glow.png",
+   "frame": [24, 24],
+   "offset": [-4, -4],
+   "anims": {
+    "play": [0, 4, 14]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ }
+}
