@@ -1,0 +1,32 @@
+{"events": [
+    {
+      "id": "char_bracken_hull_garden", "type": "station", "weight": 22, "once": true, "requires": {"region": "sporeling_groves"},
+      "text": "At the Mother Grove's dock a small Sporeling in a gardening apron is inspecting a row of seedling crates with the severe courtesy of a field marshal. She stops at your hatch and looks at it, then at the wall beside it, then at your life support. 'Gardener-General Bracken,' she says. 'I am between gardens. The Grove has more gardeners than gardens, and I am too good to weed. I will crew a ship with air worth breathing. Show me yours and I will tell you whether I can bear it.'",
+      "choices": [
+        {"text": "[Oxygen generator] Show her your life support.", "requires": {"component": "oxygen_gen"}, "outcomes": [
+          {"weight": 100, "text": "She tours it with a hand lens and a notebook. 'Adequate,' she says, which from a Sporeling gardener is a medal. 'I can improve it. I would like to improve everything. Where do I put my seedlings?' By the time you reach the bridge she has potted a fern in your cargo bay, apologetically, as a deposit.", "effects": {"recruit": {"character": "bracken"}, "crew_hp": 5}}
+        ]},
+        {"text": "Hire her with a retainer (110 credits).", "requires": {"credits": 110, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "She counts the coins with a fingertip, then counts the fingertip. 'Seeds,' she says. 'Very expensive, seeds.' She shoulders her crate, her trowel and a small severe fern. 'I shall start with the hull.'", "effects": {"recruit": {"character": "bracken"}}}
+        ]},
+        {"text": "Politely decline.", "outcomes": [
+          {"weight": 100, "text": "'A pity,' she says, writing something in her notebook. You are fairly sure it is your name.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_dewcap_hull_stitcher", "type": "wreck_field", "weight": 24, "once": true, "requires": {"region": "sporeling_groves"},
+      "text": "The hulk is half fungus and half argument. A Sporeling in a patched smock stands on its plating, letting white threads run from her sleeves into a gash in the hull the size of a doorway. Where the threads go, the metal closes, tidily, like a mouth deciding not to say something. 'Almost,' she tells you, apologetically. 'It is very rude to rush a hull. I am sorry for the delay. And for the wall.'",
+      "choices": [
+        {"text": "Feed her threads some polymer (4 polymer) and let her patch you too.", "requires": {"items": {"polymer": 4}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You bring the ship alongside. She lays a skin of pale thread over every scorch and dent on your plating, murmuring apologies at each. By the end the hull is a tighter ship than it was, and she is sitting on your bridge as if she had always been there. 'It is yours,' she says. 'I am yours. If that is all right.'", "effects": {"recruit": {"character": "dewcap"}, "hull": 10}}
+        ]},
+        {"text": "[Sporeling] Sit and share the thread-song.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling climbs up and sits cross-legged beside her, and the two of them hum a long low note while the threads thicken. The gash closes. Neither says a word. When it is done, Dewcap looks at your ship, and then at the hull of it, with undisguised longing. 'May I?' she asks the wall. You are not sure whether she means yours.", "effects": {"recruit": {"character": "dewcap"}, "hull": 5}}
+        ]},
+        {"text": "Leave her to her patching.", "outcomes": [
+          {"weight": 100, "text": "'Thank you,' she says to the wall, to the hull and, a moment late, to you. 'Mind the gap. It is still a little shy.'", "effects": {}}
+        ]}
+      ]
+    }
+]}

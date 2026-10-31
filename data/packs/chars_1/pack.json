@@ -1,0 +1,7 @@
+{
+	"id": "chars_1",
+	"name": "Unique characters, wave 1",
+	"version": "1.0",
+	"requires": ["races_1"],
+	"notes": "24 named crew with an active ability (docs/CONTENT.md section 16): two for each of the ten race homelands (Human, Basalt, Emberkin, Fenn, Kett, Mire, Sporeling, Gauntling, Prismatic, Grundl) and four wanderers (a firefighting drone, a woman out of step, a turned Warden and a slow Basalt racer). characters.json is the roster; events/*_chars.json holds one recruit event per character (`recruit: {character}`), placed with requires.region (the homeland) or none (the wanderers) and stage bands. Eight are hard to get (a fight, a high price, or a chain of two events joined by a flag: char_tindle_cell, char_zhikka_warned, char_jacinth_lens, char_halfway_met). The title of each character opens its `lore` (the schema has no title key). File names avoid the suffix core.json, which tests/test_events.gd matches."
+}

@@ -1,0 +1,50 @@
+{"events": [
+    {
+      "id": "char_gleed_afterburner_lap", "type": "asteroid_field", "weight": 24, "once": true, "requires": {"region": "emberkin_forges"},
+      "text": "A skiff the size of a boiler is flying laps around a slag rock, trailing a tail of white flame that has certainly never passed an inspection. The pilot, a lean Emberkin in a scorched scarf, waves at you on every pass and shouts the same sentence into the comm each time. 'Race you round the rock! Loser buys the fuel!' Her afterburner is held together with what looks like prayer and a coat hanger.",
+      "choices": [
+        {"text": "Race her round the rock (2 fuel).", "requires": {"items": {"fuel": 2}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You lose by one paint flake, and she is delighted about it. 'Best race since the Snap!' she crows, and then, quieter, looking at your engine bay: 'Is that room warm? Because I would like to sleep in it.' She has already hauled a kit bag aboard.", "effects": {"recruit": {"character": "gleed"}}}
+        ]},
+        {"text": "[Afterburner] Show her your afterburner.", "requires": {"component": "afterburner"}, "outcomes": [
+          {"weight": 100, "text": "Gleed docks, walks into your engine room, puts a palm on the afterburner housing and closes her eyes like someone in church. 'Oh, you beauty,' she tells it. 'Who has been feeding you? Doesn't matter. I will feed you.' Nobody has asked her aboard. Nobody needs to.", "effects": {"recruit": {"character": "gleed"}}}
+        ]},
+        {"text": "Wave her off and fly on.", "outcomes": [
+          {"weight": 100, "text": "'Chicken!' she calls after you, and you hear the afterburner light as she goes round again. It lights at a worrying angle.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_tindle_cold_hall", "type": "anomaly", "weight": 20, "once": true, "requires": {"region": "emberkin_forges", "stage_min": 3},
+      "text": "The reactor hall of a Lumen relay has gone cold: no glow in the windows, no hum in the plating, a skin of frost on the inside of the glass where there should be steam. One Emberkin sits cross-legged on the casing with his bare palms flat on the metal, talking to it in a murmur. 'She is not dead,' he says, without turning round. 'She is sulking. Neon cores get lonely. I need one plasma cell to remind her what she is for, and the Lumen won't lend me one because I have exceeded my talking allowance.'",
+      "choices": [
+        {"text": "Hand over a plasma cell.", "requires": {"items": {"plasma_cell": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Tindle slots the cell into the housing with a gentle hand, like tucking in a child, and says three words you do not catch. The hall lights from the inside out in a slow amber bloom, and the frost on the glass runs. He sits back with soot on his nose. 'I am on the books here two more cycles,' he says. 'Then they will find a certified man. Someone will be in touch when they do. I will be somewhere warm.'", "effects": {"flag": "char_tindle_cell", "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Buy a cell off a Lumen tender for him (120 credits).", "requires": {"credits": 120, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The tender's quartermaster sells you a cell at a price that includes a lecture. Tindle takes it with both hands, whispers to the housing, and the hall wakes with a long contented sigh. 'I am on the books here two more cycles,' he says. 'Then they will find a certified man. Someone will be in touch.'", "effects": {"flag": "char_tindle_cell"}}
+        ]},
+        {"text": "[Emberkin] Sit with him and warm her up by hand.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin sits down on the casing beside him, and the two of them hum without a word for an hour. At the end of it the hall lights, soft as a held breath, and the frost runs off the glass. 'No cell,' says Tindle, delighted. 'Just company. She wanted company.' He presses a few lumps of cooled slag into your Emberkin's hands. 'I am on the books here two more cycles. Someone will be in touch after.'", "effects": {"flag": "char_tindle_cell", "items": {"copper": 10}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Leave him to his sulking reactor.", "outcomes": [
+          {"weight": 100, "text": "'She will come round,' he says, to nobody, and goes on talking to the casing. You are fairly sure it answers.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "char_tindle_certified_man", "type": "trader", "weight": 50, "once": true, "requires": {"stage_min": 4, "flag": "char_tindle_cell"},
+      "text": "A Lumen freight clerk hails you in the careful voice of someone about to be unhelpful on company time. 'I understand you are acquainted with an Emberkin called Tindle,' she says. 'The Kiln has hired a certified reactor operator, a very nice man with a licence, and Tindle's contract is therefore void. He has refused to leave the hall, on the grounds that the licensed man cannot make it hum. It does not hum. We have put him on our freighter, in the freight lift, with his bag. He has made the lift very warm. I cannot stress enough how much I would like this to be over.'",
+      "choices": [
+        {"text": "Take him off her hands.", "outcomes": [
+          {"weight": 100, "text": "A cargo lock opens and Tindle steps across with a battered bag, a loaf of fused sand he swears is bread, and the serene look of a man who has finally been fired by experts. 'Where is your reactor?' he says. 'Don't tell me. I will feel for her.' The clerk waves. She is already filing the form.", "effects": {"recruit": {"character": "tindle"}}}
+        ]},
+        {"text": "Take him, and mention the paperwork has a cost (60 credits).", "outcomes": [
+          {"weight": 100, "text": "The clerk, past caring, pays. Tindle steps across with his bag and a faint smile. 'I am worth sixty credits of paperwork,' he says. 'I have always suspected it.' He puts his hand on your bulkhead, flat, and listens.", "effects": {"recruit": {"character": "tindle"}, "items": {"credits": 60}, "rep": {"lumen": -1}}}
+        ]},
+        {"text": "Tell her you have never heard of him.", "outcomes": [
+          {"weight": 100, "text": "'Of course,' says the clerk, with enormous dignity, and closes the channel. Somewhere behind her a freight lift is glowing faintly orange.", "effects": {}}
+        ]}
+      ]
+    }
+]}
