@@ -180,7 +180,7 @@ func species_problems(species: Array, traits: Dictionary) -> Array[String]:
 
 ## Problems in the trait keys of one entry (a trait, or a species with keys inline): a key that is not in
 ## TraitSet.KEYS (only `strict` entries, the traits; a species has fields of its own), a group that is not an
-## object of known sub-keys, a value that is not a number (a flag for `mechanical`).
+## object of known sub-keys, a value that is not a number (a flag for the keys in TraitSet.FLAGS), a `body` that is not 1 or 2.
 func _key_problems(at: String, e: Dictionary, strict: bool) -> Array[String]:
 	var out: Array[String] = []
 	for k in e:
@@ -191,8 +191,11 @@ func _key_problems(at: String, e: Dictionary, strict: bool) -> Array[String]:
 		var subs: Array = TraitSet.KEYS[k]
 		var v = e[k]
 		if subs.is_empty():
-			if not (v is bool if k == "mechanical" else (v is float or v is int)):
-				out.append("%s: '%s' must be %s" % [at, k, "true or false" if k == "mechanical" else "a number"])
+			var flag: bool = TraitSet.FLAGS.has(k)
+			if not (v is bool if flag else (v is float or v is int)):
+				out.append("%s: '%s' must be %s" % [at, k, "true or false" if flag else "a number"])
+			elif k == "body" and not TraitSet.BODIES.has(int(v)):
+				out.append("%s: 'body' must be %s" % [at, " or ".join(TraitSet.BODIES.map(func(b): return str(b)))])
 		elif not v is Dictionary:
 			out.append("%s: '%s' must be an object of %s" % [at, k, ", ".join(subs)])
 		else:

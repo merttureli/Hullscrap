@@ -20,7 +20,8 @@ extends RefCounted
 ## nothing to do rest on a bed (5 hp/s) or in a powered medbay (15 hp/s).
 ## What the crew's traits change (traits.gd, the library in data/traits.json) is asked there: work speed
 ## (work_rate: repair, extinguish, breach, revive, swarm and aura bonuses), air and fire damage, room heat
-## (dries_out), healing (heal_mult, auras) and ion hits (ion_hit: damage and stun).
+## (dries_out, heat_speed), healing (heal_mult, auras), ion hits (ion_hit: damage and stun), vacuum_walk (no suffocation),
+## no_tools (no repair or extinguish jobs) and hull_mend (idle crew mend the walls and breaches next to them).
 ## Repairs take `seconds` x the repair multiplier of the part's line (of the wall's line for a
 ## breach). A crew member at a station marks it in `ship.manned` (uid -> name): a manned helm adds
 ## evasion in a fight and a manned weapon cools down faster (see evasion_bonus, cooldown_mult).
@@ -39,6 +40,8 @@ const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vect
 const FAULTY: Array[String] = ["malfunction", "disabled"]  ## part statuses a crew member can repair
 const NO_FIRE := Vector2i(-1, -1)  ## "no burning cell"
 const HAND_SHOWN := 0.6  ## seconds the HUD still says what the player was doing by hand
+## The jobs that need tools: a crew member with the trait no_tools takes none of them.
+const TOOL_JOBS: Array[String] = ["extinguish", "repair_breach", "repair_component", "repair_crew", "repair_belt"]
 ## The TraitSet work_mult a job type is done at.
 const WORK_KIND := {"extinguish": "extinguish", "repair_breach": "breach", "repair_component": "repair", "repair_crew": "repair", "revive": "heal_others", "restock": "restock", "repair_belt": "repair"}
 
@@ -72,6 +75,8 @@ func tick(ship, dt: float, in_combat := false) -> void:
 		m.step(dt)
 		if not m.job.is_empty():
 			_do(ship, m, dt)
+		elif m.path.is_empty():
+			_mend(ship, m, dt)
 	_health(ship, dt)
 
 
@@ -80,9 +85,10 @@ func tick(ship, dt: float, in_combat := false) -> void:
 func hand_work(ship, m, dt: float) -> String:
 	if m.is_down() or m.is_stunned():
 		return ""
+	var tools: bool = not TraitSet.of(m)["no_tools"]
 	for key in by_priority(board.values()).map(func(j): return j["key"]):
 		var job: Dictionary = board[key]
-		if job["type"] != "man_station" and in_reach(m, job) and not _is_own(job, m):
+		if job["type"] != "man_station" and in_reach(m, job) and not _is_own(job, m) and (tools or not job["type"] in TOOL_JOBS):
 			work(ship, m, job, dt)
 			m.job = {"key": key, "type": job["type"], "label": job["label"], "hand": true, "t": ship.clock}
 			return key
@@ -167,7 +173,11 @@ func build_board(ship) -> void:
 	for c in Fire.sorted_cells(grid.breached.keys()):
 		var tile: Dictionary = grid.defs.get_def(grid.breached[c]) if grid.defs != null else {}
 		var mult := float(ship.lines.get(str(tile.get("line", "standard")), {}).get("repair", 1.0))
-		_add(b, _job("repair_breach", "breach:%d,%d" % [c.x, c.y], [c], {"cell": c, "work": float(j["repair_breach"]["seconds"]) * mult}))
+		var extra := {"cell": c, "work": float(j["repair_breach"]["seconds"]) * mult}
+		var mount: int = ship.components.link_at(c)
+		if mount >= 0:  # a breach in a hull mount's wall: its own inside half may fill the only floor beside it, so it is worked from there
+			extra["reach"] = ship.components.instances[mount]["cells"].duplicate()
+		_add(b, _job("repair_breach", "breach:%d,%d" % [c.x, c.y], [c], extra))
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
 	for uid in uids:
@@ -218,7 +228,7 @@ func order_repair(ship, uid: int) -> String:
 	var best = null
 	var best_d := 1 << 30
 	for m in ship.crew:
-		if m.is_player or m.is_down():
+		if m.is_player or m.is_down() or TraitSet.of(m)["no_tools"]:
 			continue
 		var d := absi(m.anchor().x - inst["anchor"].x) + absi(m.anchor().y - inst["anchor"].y)
 		if d < best_d:
@@ -312,9 +322,10 @@ func _still_valid(ship, m) -> bool:
 ## The best job for `m` with a priority of at least `floor_p`: {job, spot}, or {} when none.
 func _pick(ship, m, claims: Dictionary, floor_p: int) -> Dictionary:
 	var open: Array = []
+	var tools: bool = not TraitSet.of(m)["no_tools"]
 	for key in board:
 		var job: Dictionary = board[key]
-		if job["priority"] < floor_p or (not m.job.is_empty() and m.job["key"] == key) or _is_own(job, m):
+		if job["priority"] < floor_p or (not m.job.is_empty() and m.job["key"] == key) or _is_own(job, m) or (not tools and job["type"] in TOOL_JOBS):
 			continue
 		if int(claims.get(key, 0)) < int(job["slots"]):
 			open.append(job)
@@ -362,7 +373,7 @@ func _route(ship, m, job: Dictionary, taken: Array) -> Dictionary:
 		return {"cost": 0, "spot": m.anchor()}
 	var grid = ship.grid
 	var start := _start(grid, m)
-	var spots := stand_spots(ship, job).filter(func(s): return not _clashes(s, taken))
+	var spots := stand_spots(ship, job, m.body_size).filter(func(s): return not _clashes(s, taken))
 	spots.sort_custom(func(a, b):
 		var da := absi(a.x - start.x) + absi(a.y - start.y)
 		var db := absi(b.x - start.x) + absi(b.y - start.y)
@@ -372,7 +383,7 @@ func _route(ship, m, job: Dictionary, taken: Array) -> Dictionary:
 		if paths_used >= int(jcfg()["search"]["paths"]):
 			break
 		paths_used += 1
-		var path := Pathfinder.find_path(grid, start, spot)
+		var path := Pathfinder.find_path(grid, start, spot, Callable(), m.body_size)
 		if not path.is_empty() and (best.is_empty() or path.size() - 1 < best["cost"]):
 			best = {"cost": path.size() - 1, "spot": spot}
 	return best
@@ -487,7 +498,8 @@ func _fire_under(ship, m) -> Vector2i:
 
 
 ## Hurt and heal every crew member: fire, thin air, hot rooms (dries_out), beds, medbays and auras
-## (data/crew.json, and the traits of each: damage_taken, o2_use, suffocate_mult, heal_mult, aura).
+## (data/crew.json, and the traits of each: damage_taken, o2_use, suffocate_mult, vacuum_walk, heal_mult, aura),
+## and set how fast each walks in the heat of their room (CrewMember.speed_mod, trait heat_speed).
 func _health(ship, dt: float) -> void:
 	var cfg := CrewMember.config()
 	var dps: Dictionary = cfg["damage_per_s"]
@@ -503,15 +515,20 @@ func _health(ship, dt: float) -> void:
 				dmg += float(dps["fire"]) * float(t["damage_taken"]["fire"])
 				break
 		var room: int = ship.atmosphere.room_at(m.cell())
-		if room >= 0 and ship.atmosphere.pressure_of(room) < float(cfg["no_air_below"]) and float(t["o2_use"]) > 0.0:
+		if room >= 0 and ship.atmosphere.pressure_of(room) < float(cfg["no_air_below"]) and float(t["o2_use"]) > 0.0 and not t["vacuum_walk"]:
 			dmg += float(dps["no_air"]) * float(t["damage_taken"]["no_air"]) * float(t["suffocate_mult"])
 		var dry: Dictionary = t["dries_out"]
-		if room >= 0 and float(dry["hp_per_s"]) > 0.0:
+		var hs: Dictionary = t["heat_speed"]
+		var by_heat: bool = float(hs["cold"]) != 1.0 or float(hs["hot"]) != 1.0
+		var heat := 0.0
+		if room >= 0 and (float(dry["hp_per_s"]) > 0.0 or by_heat):
 			if not heats_read:
 				heats = Heat.room_heat(ship)
 				heats_read = true
-			if float(heats.get(room, 0.0)) > float(dry["heat_above"]):
+			heat = float(heats.get(room, 0.0))
+			if heat > float(dry["heat_above"]) and float(dry["hp_per_s"]) > 0.0:
 				dmg += float(dry["hp_per_s"])
+		m.speed_mod = TraitSet.heat_factor(t, heat) if room >= 0 and by_heat else 1.0
 		if dmg > 0.0:
 			m.hurt(dmg * dt)
 		var heal := _heal_rate(ship, m) + float(auras.get(room, {}).get("heal_per_s", 0.0))
@@ -523,6 +540,44 @@ func _health(ship, dt: float) -> void:
 			ship.log_event("%s is down" % m.name)
 		elif was_down and not m.is_down():
 			ship.log_event("%s is back on their feet" % m.name)
+
+
+## An idle crew member with the trait hull_mend mends what is next to their body: `rate` hp a second go to the
+## damaged walls beside them (the first in (y, x) order first), and a breach is sealed after `seal` seconds beside it
+## (CrewMember.mend_t counts them, and starts over when no breach is beside them). Nothing without the trait; a crew
+## member with a job or a path does not mend.
+func _mend(ship, m, dt: float) -> void:
+	var mend: Dictionary = TraitSet.of(m)["hull_mend"]
+	var rate := float(mend["rate"])
+	var seal := float(mend["seal"])
+	var grid = ship.grid
+	var breach := NO_FIRE
+	if rate > 0.0 or seal > 0.0:
+		var body: Array[Vector2i] = m.body_cells()
+		var beside := {}
+		for c in body:
+			for d in SIDES:
+				if not body.has(c + d):
+					beside[c + d] = true
+		var budget := rate * dt
+		for c in Fire.sorted_cells(beside.keys()):
+			if budget > 0.0 and grid.hp.has(c) and grid.tile_flag(grid.get_tile(c), "solid"):
+				var top: float = grid.max_hp_of(c)
+				var now := minf(float(grid.hp[c]) + budget, top)
+				budget -= now - float(grid.hp[c])
+				if now >= top:
+					grid.hp.erase(c)  # a cell that is not listed has full hp
+				else:
+					grid.hp[c] = now
+			if seal > 0.0 and breach == NO_FIRE and grid.breached.has(c):
+				breach = c
+	if breach == NO_FIRE:
+		m.mend_t = 0.0
+		return
+	m.mend_t += dt
+	if m.mend_t >= seal - 1e-6:
+		m.mend_t = 0.0
+		_finish(ship, {"key": "breach:%d,%d" % [breach.x, breach.y], "type": "repair_breach", "cell": breach})
 
 
 ## hp per second where `m` lies: a bed, or a medbay that is on (its stats.heal scales the rate), times
@@ -575,7 +630,7 @@ func in_reach(m, job: Dictionary) -> bool:
 	if job["type"] == "rest":
 		return job["cells"].has(m.cell())
 	var body: Array[Vector2i] = m.body_cells()
-	for c in job["cells"]:
+	for c in job["cells"] + job.get("reach", []):
 		for b in body:
 			if absi(b.x - c.x) + absi(b.y - c.y) <= 1:
 				return true
@@ -584,7 +639,8 @@ func in_reach(m, job: Dictionary) -> bool:
 
 ## Body anchors from which a crew member reaches `job`: next to its cells, not on them (rest: with
 ## the body's centre on the bed). Spots clear of fire, of doorways, then of parts, are preferred; (y, x) order.
-func stand_spots(ship, job: Dictionary) -> Array[Vector2i]:
+## `body`: the size of the body that stands there (a small one, 1, also finds spots in crawlspaces).
+func stand_spots(ship, job: Dictionary, body := Pathfinder.BODY) -> Array[Vector2i]:
 	var grid = ship.grid
 	var inside := {}
 	for c in job["cells"]:
@@ -593,25 +649,34 @@ func stand_spots(ship, job: Dictionary) -> Array[Vector2i]:
 	var all: Array[Vector2i] = []
 	for c in job["cells"]:
 		if job["type"] == "rest":
-			_try_spot(grid, c - Vector2i.ONE, [], seen, all)
+			_try_spot(grid, c - Vector2i.ONE * (body - 1), [], seen, all, body)
 			continue
 		for n in _beside(c, inside):
-			for oy in Pathfinder.BODY:
-				for ox in Pathfinder.BODY:
-					_try_spot(grid, n - Vector2i(ox, oy), inside, seen, all)
+			for oy in body:
+				for ox in body:
+					_try_spot(grid, n - Vector2i(ox, oy), inside, seen, all, body)
+	if all.is_empty() and job.has("reach"):  # a breach in a mount's wall: beside the mount's inside half
+		var near := {}
+		for c in job["reach"]:
+			near[c] = true
+		for c in job["reach"]:
+			for n in _beside(c, near):
+				for oy in body:
+					for ox in body:
+						_try_spot(grid, n - Vector2i(ox, oy), near, seen, all, body)
 	if all.is_empty() and job["type"] != "rest":  # no room beside it: stand on it
 		for c in job["cells"]:
-			for oy in Pathfinder.BODY:
-				for ox in Pathfinder.BODY:
-					_try_spot(grid, c - Vector2i(ox, oy), [], seen, all)
+			for oy in body:
+				for ox in body:
+					_try_spot(grid, c - Vector2i(ox, oy), [], seen, all, body)
 	all.sort_custom(func(a: Vector2i, b: Vector2i): return a.y < b.y or (a.y == b.y and a.x < b.x))
-	var safe := all.filter(func(a): return not Pathfinder.body_cells(a).any(func(c): return ship.fires.has(c)))
+	var safe := all.filter(func(a): return not Pathfinder.body_cells(a, body).any(func(c): return ship.fires.has(c)))
 	if not safe.is_empty():
 		all.assign(safe)
-	var apart := all.filter(func(a): return not Pathfinder.body_cells(a).any(func(c): return ship.grid.tile_flag(ship.grid.get_tile(c), "door")))
+	var apart := all.filter(func(a): return not Pathfinder.body_cells(a, body).any(func(c): return ship.grid.tile_flag(ship.grid.get_tile(c), "door")))
 	if not apart.is_empty():  # not in a doorway: a body there holds the door open
 		all.assign(apart)
-	var clear := all.filter(func(a): return not Pathfinder.body_cells(a).any(func(c): return ship.components.at(c) >= 0))
+	var clear := all.filter(func(a): return not Pathfinder.body_cells(a, body).any(func(c): return ship.components.at(c) >= 0))
 	if not clear.is_empty():
 		all.assign(clear)
 	return all
@@ -626,13 +691,13 @@ func _beside(c: Vector2i, inside: Dictionary) -> Array[Vector2i]:
 
 
 ## Add `anchor` to `out` once if a body fits there and none of its cells is in `avoid`.
-func _try_spot(grid, anchor: Vector2i, avoid, seen: Dictionary, out: Array[Vector2i]) -> void:
+func _try_spot(grid, anchor: Vector2i, avoid, seen: Dictionary, out: Array[Vector2i], body := Pathfinder.BODY) -> void:
 	if seen.has(anchor):
 		return
 	seen[anchor] = true
-	if not Pathfinder.body_ok(grid, anchor):
+	if not Pathfinder.body_ok(grid, anchor, Callable(), body):
 		return
-	for c in Pathfinder.body_cells(anchor):
+	for c in Pathfinder.body_cells(anchor, body):
 		if avoid.has(c):
 			return
 	out.append(anchor)
@@ -641,7 +706,7 @@ func _try_spot(grid, anchor: Vector2i, avoid, seen: Dictionary, out: Array[Vecto
 ## Where `m` starts walking from: their own anchor, or the nearest one a body fits on.
 func _start(grid, m) -> Vector2i:
 	var a: Vector2i = m.anchor()
-	return a if Pathfinder.body_ok(grid, a) else Pathfinder.nearest_walkable(grid, m.pos)
+	return a if Pathfinder.body_ok(grid, a, Callable(), m.body_size) else Pathfinder.nearest_walkable(grid, m.pos, Callable(), Pathfinder.NO_CELL, m.body_size)
 
 
 ## Spots other crew are standing on or heading for (so two bodies do not end up on one spot).
@@ -746,11 +811,11 @@ static func crew_line(ship) -> String:
 
 
 ## The evasion a manned helm adds in a fight (0 when nobody is at it), times the operator's manned factor
-## (and an overclock of the helm).
+## (and an overclock of the helm), plus the operator's own station.evasion_add.
 static func evasion_bonus(ship) -> float:
 	for uid in ship.manned:
 		if _family(ship, uid) == "helm" and _works(ship, uid):
-			return float(CrewMember.config()["manned"]["helm_evasion"]) * TraitSet.manned_factor(ship, uid) * CrewFx.overclock_mult(ship, uid)
+			return float(CrewMember.config()["manned"]["helm_evasion"]) * TraitSet.manned_factor(ship, uid) * CrewFx.overclock_mult(ship, uid) + TraitSet.helm_evasion_add(ship, uid)
 	return 0.0
 
 
