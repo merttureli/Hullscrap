@@ -41,7 +41,7 @@ static func _part(cv: CanvasItem, def: Dictionary, r: Rect2, t: float) -> void:
 		Visuals.draw_component(cv, rect, def, {"rot": 0}, k, {"time": t})
 		return
 	var out := Vector2(float(def["mount"]["outside"][0]), float(def["mount"]["outside"][1]))
-	var head := 1.0 if str(def.get("family", "")) == "weapon" else 0.0  # the barrel sticks out above
+	var head := 1.0 if str(def.get("family", "")) in Visuals.BARRELS else 0.0  # the barrel (a gun, a dish, an emitter) sticks out above
 	var wall := 0.5
 	var k := _cell(r, Vector2(maxf(size.x, out.x), head + out.y + wall + size.y))
 	var top := r.get_center().y - (head + out.y + wall + size.y) * k / 2.0 + head * k

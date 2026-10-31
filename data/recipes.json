@@ -736,6 +736,123 @@
       "tools": [],
       "time": 20,
       "category": "system"
+    },
+    {
+      "id": "intake_mk2",
+      "output": {
+        "item": "intake_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 36,
+        "copper": 14,
+        "titanium": 4,
+        "polymer": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 28,
+      "category": "system"
+    },
+    {
+      "id": "intake_mk3",
+      "output": {
+        "item": "intake_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 48,
+        "copper": 20,
+        "titanium": 10,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system"
+    },
+    {
+      "id": "radar_mk1",
+      "output": {
+        "item": "radar_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 16,
+        "polymer": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 20,
+      "category": "system"
+    },
+    {
+      "id": "radar_mk2",
+      "output": {
+        "item": "radar_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 28,
+        "copper": 18,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 32,
+      "category": "system"
+    },
+    {
+      "id": "radar_mk3",
+      "output": {
+        "item": "radar_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "copper": 26,
+        "titanium": 12,
+        "silicon": 10
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 45,
+      "category": "system"
+    },
+    {
+      "id": "tractor_mk1",
+      "output": {
+        "item": "tractor_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 22,
+        "polymer": 4
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 22,
+      "category": "system"
+    },
+    {
+      "id": "tractor_mk2",
+      "output": {
+        "item": "tractor_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "copper": 30,
+        "titanium": 8,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 34,
+      "category": "system"
     }
   ]
 }

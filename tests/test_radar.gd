@@ -124,6 +124,7 @@ func test_a_powered_helm_has_a_3000_px_radar_that_does_not_identify() -> void:
 	var r := Radar.ranges(ship)
 	eq(r["range"], 3000.0, "the helm's Mk0 radar: 3,000 px")
 	eq(r["identify_range"], 0.0, "with no identification")
+	eq(r["hidden_range"], 0.0, "and no sight of hidden contacts")
 	var s = _sector([_poi("in", "signal", 2900.0), _poi("out", "signal", 3100.0), _poi("beacon", "beacon", 15000.0, Vector2.UP, "store")])
 	var list := Radar.contacts(s, ship)
 	eq(_ids(list), ["in", "beacon"], "the Mk0 sees 2,900 px, not 3,100, and the beacon")
@@ -145,15 +146,15 @@ func test_a_ship_with_no_working_helm_sees_by_eye_only() -> void:
 func test_radar_parts_set_the_range_and_identification() -> void:
 	var ship := _helm_ship(true)
 	var mk1 := _part(ship, "radar_mk1", 1, {"radar_range": 6000, "identify": 0}, Wall.at(0, 0, 1))
-	eq(Radar.ranges(ship), {"range": 6000.0, "identify_range": 0.0}, "a Mk1-like radar: 6,000 px, no identification")
+	eq(Radar.ranges(ship), {"range": 6000.0, "identify_range": 0.0, "hidden_range": 0.0}, "a Mk1-like radar: 6,000 px, no identification")
 	var mk2 := _part(ship, "radar_mk2", 1, {"radar_range": 10000, "identify": 1}, Wall.at(0, -1, 1))
-	eq(Radar.ranges(ship), {"range": 10000.0, "identify_range": 10000.0}, "a Mk2-like one: 10,000 px, and it identifies")
+	eq(Radar.ranges(ship), {"range": 10000.0, "identify_range": 10000.0, "hidden_range": 0.0}, "a Mk2-like one: 10,000 px, and it identifies")
 	var s = _sector([_poi("mid", "signal", 8000.0), _poi("far", "signal", 12000.0)])
 	var list := Radar.contacts(s, ship)
 	eq(_ids(list), ["mid"], "the best range counts")
 	eq(_find(list, "mid")["known_type"], "wreck", "and the identifying radar names it")
 	ship.components.instances[mk2]["status"] = "disabled"
-	eq(Radar.ranges(ship), {"range": 6000.0, "identify_range": 0.0}, "a disabled radar does not count")
+	eq(Radar.ranges(ship), {"range": 6000.0, "identify_range": 0.0, "hidden_range": 0.0}, "a disabled radar does not count")
 	ship.components.instances[mk1]["status"] = "disabled"
 	eq(Radar.ranges(ship)["range"], 3000.0, "back to the helm's own")
 

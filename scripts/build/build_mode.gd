@@ -65,6 +65,7 @@ var shields: Node  ## the Shields tab (shield_panel.gd), made in _ready if the s
 var front: Node  ## the front door (front_door.gd), if the scene has one: Esc asks it for the pause menu
 var hud: Control  ## the HUD (hud.gd), made in _ready when the scene has room for it
 var hostiles_source: Callable  ## () -> Array of hostile ship positions (px, the frame of ship.world_pos) for the red alert; sector space sets it
+var mount_fx := {}  ## uid -> {aim (a unit vector in the ship's frame)}: tractor beams that are on, for their emitters; debris_view.gd sets it while Q is held
 var build_on := true:  ## false = play mode. Build mode pauses the world (ShipSim.set_paused)
 	set(v):
 		build_on = v
@@ -648,7 +649,8 @@ func _breached(room_id: int) -> bool:
 ## The key hints of the mode (the HUD shows them over the mode bar).
 func _controls_text() -> String:
 	if not build_on:
-		return "WASD walk   click a marker: course   E at the helm: fly   middle-click send Ada   E door   O oxygen   P power   K fight (Shift+K rammer)   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom"
+		var tractor := "   Q hold: tractor" if ship != null and ship.components.instances.values().any(func(i): return str(ship.components.def(i["id"]).get("family", "")) == "tractor") else ""
+		return "WASD walk   click a marker: course   E at the helm: fly%s   middle-click send Ada   E door   O oxygen   P power   K fight (Shift+K rammer)   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom" % tractor
 	var how := "LMB paint   Shift+LMB line   Ctrl+LMB rectangle   RMB remove"
 	if group == Group.TILES:
 		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove" + ("   T shape" if grid.tile_flag(selected, "solid") else "")
@@ -764,14 +766,19 @@ func _draw_components() -> void:
 	uids.sort()
 	for uid in uids:
 		var inst: Dictionary = ship.components.instances[uid]
-		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL,
-			{"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads})
+		var opts := {"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads}
+		if mount_fx.has(uid):
+			opts["fired_ago"] = fmod(_clock, 0.3)  # a beam that is on pulses its strip
+		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
 	for uid in uids:  # the outside half and barrel of each hull mount, over the edge of the wall
 		var inst: Dictionary = ship.components.instances[uid]
 		if not inst["out_cells"].is_empty():
 			var def: Dictionary = ship.components.def(inst["id"])
-			Visuals.draw_mount_out(self, def, inst, _cells_rect(inst["out_cells"]), _pivot_px(def, inst["out_anchor"], inst["rot"]), CELL, Vector2.ZERO,
-				{"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads})
+			var opts := {"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads}
+			if mount_fx.has(uid):
+				opts["fired_ago"] = fmod(_clock, 0.3)
+			Visuals.draw_mount_out(self, def, inst, _cells_rect(inst["out_cells"]), _pivot_px(def, inst["out_anchor"], inst["rot"]), CELL,
+				mount_fx.get(uid, {}).get("aim", Vector2.ZERO), opts)
 
 
 ## Where the barrel of mount `def` turns, in the canvas' pixels, for an outside half at `out` turned `rot`.

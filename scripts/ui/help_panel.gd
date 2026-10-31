@@ -92,6 +92,11 @@ const COLUMNS: Array = [
 			["H", "Shields tab: click a sector's + or -, or pick a preset or a custom slot"],
 			["H / Esc", "Close it"],
 		]],
+		["FLYING AND SALVAGE", [
+			["Q (hold)", "Play mode, not in a fight: tractor beams haul the debris near them toward the nearest working intake (in a fight Q is the utility ability)"],
+			["Intakes", "Salvage intakes (Utility tab, on an outer wall) pull in what drifts near their mouth: face them into the current"],
+			["Radar", "Mk2 and up name what they see and rate a ship's threat in skulls; the Mk3 also finds contacts running dark"],
+		]],
 		["CRAFTING (C)", [
 			["C", "Crafting panel, in build or play mode"],
 			["Click, or Up / Down + Enter", "Queue a recipe"],
