@@ -489,14 +489,15 @@ func test_effect_goto_names_the_next_page() -> void:
 func test_effect_reveal_shows_a_node_or_a_station_on_the_map() -> void:
 	var c := _camp()
 	var ship := _ship()
-	check(not c.is_known("meridian") or c.visited.has("meridian") or c.neighbours("rusthold").has("meridian"), "Meridian is far away and unknown")
+	c.enter_region("gate_approaches")
+	check(not c.is_known("gate_1"), "the Concord Gate is far away and unknown")
 	var far := ""
 	for id in c.drift.ids():
-		if not c.is_known(id) and id != "prism":
+		if not c.is_known(id) and id != "gate_1":
 			far = id
 			break
-	var r := _fx({"reveal": [far, "meridian"]}, c, ship)
-	check(c.is_known(far) and c.is_known("meridian"), "revealed nodes show their type")
+	var r := _fx({"reveal": [far, "gate_1"]}, c, ship)
+	check(c.is_known(far) and c.is_known("gate_1"), "revealed nodes show their type")
 	check(r["lines"].size() == 2 and r["lines"][0].begins_with("On the map:"), "said: " + str(r["lines"]))
 	eq(_fx({"reveal": "no_such_place"}, c, ship)["lines"].size(), 0, "an unknown id does nothing")
 
@@ -686,7 +687,7 @@ func test_station_events_greet_each_station_and_the_debt_intro_opens_the_run() -
 	check(r["ok"] and c.flags.has("met_ma"), "signing sets met_ma")
 	var greeting: Dictionary = c.arrive(ship)["event"]
 	eq(greeting.get("type", ""), "station", "afterwards Rusthold greets you with a station event")
-	check(greeting.get("id", "") == "station_rusthold_greeting" or greeting["requires"].get("flag", "") == "at_rusthold", "one of Rusthold's: " + str(greeting.get("id", "")))
+	check(greeting.get("id", "") == "station_rusthold_greeting" or Events._list(greeting["requires"].get("flag")).has("at_rusthold"), "one of Rusthold's: " + str(greeting.get("id", "")))
 	c.flags.erase("at_rusthold")  # (picking at other stations without travelling there)
 	for place in ["meridian", "prism"]:
 		var ev := c.events.pick(c, {"id": place, "type": "station", "place": place}, ship)
@@ -731,6 +732,10 @@ func _neighbour(c: Campaign) -> String:
 
 func test_reveal_with_a_node_type_shows_the_nearest_unrevealed_node_of_that_type() -> void:
 	var c := _camp()
+	for seed_value in range(1, 60):  # a map with at least two pirate nodes out of sight
+		c = _camp([], seed_value)
+		if c.drift.nodes.filter(func(n): return n["type"] == "pirate" and not c.is_known(n["id"])).size() >= 2:
+			break
 	var ship := _ship()
 	var here: Vector2 = c.node(c.current)["pos"]
 	var want := ""

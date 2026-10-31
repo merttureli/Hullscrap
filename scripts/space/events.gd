@@ -19,19 +19,22 @@ extends RefCounted
 ## - `items` and `credits` in a choice's requires must be held; they are paid only when `pay` is true
 ##   (in requires or on the choice).
 ## - `after_win` ({text, effects}) on an event, or on an outcome, runs after a won fight.
+## - `requires.region` (a region id or a region's `events` tag, or a list of them: any one) and `stage_min` / `stage_max`
+##   tie an event or a choice to the regions of the run (docs/CONTENT.md section 15, regions.gd).
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
 
 const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const Regions = preload("res://scripts/space/regions.gd")
 
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
 const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest"]
 const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "text", "choices", "after_win"]
-const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max"]
+const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay"]
-const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "species", "trait", "items", "pay", "component", "credits"]
+const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "species", "trait", "items", "pay", "component", "credits"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
 const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log"]
@@ -214,8 +217,16 @@ static func _list(v) -> Array:
 
 
 ## The parts of `requires` that depend on the campaign (and the fuel in the hold): jumps, flags,
-## reputation, node, fuel_max.
+## reputation, node, fuel_max, region and stage.
 func _world_ok(req: Dictionary, c, node: Dictionary, ship = null) -> bool:
+	if req.has("stage_min") and c.stage < int(req["stage_min"]):
+		return false
+	if req.has("stage_max") and c.stage > int(req["stage_max"]):
+		return false
+	if req.has("region"):
+		var tag := str(c.region_data.get("events", ""))
+		if not _list(req["region"]).any(func(r): return str(r) == c.region_id or (tag != "" and str(r) == tag)):
+			return false
 	if req.has("fuel_max") and (ship.inventory.count("fuel") if ship != null else 0) > int(req["fuel_max"]):
 		return false
 	if req.has("jumps_min") and c.jumps < int(req["jumps_min"]):
@@ -480,12 +491,12 @@ static func _known() -> Dictionary:
 	items.merge(_ids_of("res://data/materials.json", "materials"))
 	items["credits"] = true
 	items["fuel"] = true
-	var places := {}
+	var places := Regions.place_ids()  # the fixed places of every region
+	var regions := {}  # region ids and event tags
+	for r in Regions.all():
+		regions[str(r["id"])] = true
+		regions[str(r.get("events", r["id"]))] = true
 	var factions := {}
-	var drift = JSON.parse_string(FileAccess.get_file_as_string("res://data/drift.json"))
-	if drift is Dictionary:
-		for p in drift.get("places", []):
-			places[str(p["id"])] = true
 	var fac = JSON.parse_string(FileAccess.get_file_as_string("res://data/factions.json"))
 	if fac is Dictionary:
 		for f in fac.get("factions", []):
@@ -498,7 +509,7 @@ static func _known() -> Dictionary:
 	for id in TraitSet.library():
 		traits[id] = true
 	return {"items": items, "components": _ids_of("res://data/components.json", "components"), "recipes": _ids_of("res://data/recipes.json", "recipes"),
-		"places": places, "factions": factions, "species": species, "traits": traits}
+		"places": places, "factions": factions, "species": species, "traits": traits, "regions": regions}
 
 
 func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[String]) -> void:
@@ -575,9 +586,12 @@ func _check_req(req, allowed: Array, where: String, known: Dictionary, bad: Call
 		bad.call(where + " must be an object")
 		return
 	_check_keys(req, allowed, where + ": ", bad)
-	for k in ["jumps_min", "jumps_max", "credits", "fuel_max"]:
+	for k in ["jumps_min", "jumps_max", "credits", "fuel_max", "stage_min", "stage_max"]:
 		if req.has(k) and not _is_num(req[k]):
 			bad.call("%s: %s must be a number" % [where, k])
+	for r in _list(req.get("region")):
+		if not known["regions"].has(r):
+			bad.call("%s: region '%s' is neither a region id nor a region's events tag (data/regions)" % [where, r])
 	for k in ["flag", "not_flag"]:
 		for f in _list(req.get(k)):
 			if not (f is String and f != ""):

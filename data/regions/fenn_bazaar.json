@@ -1,0 +1,25 @@
+{
+	"id": "fenn_bazaar",
+	"name": "The Fenn Bazaar",
+	"home_species": "fenn",
+	"faction": "",
+	"stages": [2, 8],
+	"weight": 10,
+	"rarity": "common",
+	"danger": 1.05,
+	"palette": {"tint": "#f2c744", "nebula": "clan"},
+	"map": {},
+	"node_weights": {"trader": 30, "pirate": 16, "distress": 14, "wreck_field": 10, "asteroid_field": 10, "empty": 8, "anomaly": 6, "patrol": 6},
+	"places": [
+		{"id": "long_bazaar", "name": "The Long Bazaar", "type": "station", "faction": "", "pos": [780, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"sealed_crate": 1.5, "polymer_barrel": 1.2},
+	"pois": {"trader": 2.0, "store": 2.0, "unknown": 1.3},
+	"ambient": {"trader": 6, "pirate": 2, "patrol": 1},
+	"stock": {"engine_mk1": 120, "engine_scrap_mk1": 90, "strafe_jets_mk1": 60, "reactor_mk1": 150, "reactor_scrap_mk1": 140, "shield_scrap_mk1": 110, "laser_mk1": 140, "pulse_mk1": 130, "rattle_burst_scrap": 130, "intake_mk1": 120, "radiator": 40, "bed": 30, "missile": 12},
+	"recruit": {"fenn": 8, "human": 2, "kett": 1},
+	"enemies": "rustfangs",
+	"hazards": [],
+	"events": "fenn_bazaar",
+	"blurb": "A market that grew until it needed a region of its own. Fenn traders sell everything twice, fix it once, and argue about the price the whole time. Bring credits. Count your fingers after."
+}

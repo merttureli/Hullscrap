@@ -1,0 +1,25 @@
+{
+	"id": "mire_fens",
+	"name": "The Mire Fens",
+	"home_species": "mire",
+	"faction": "concord",
+	"stages": [3, 8],
+	"weight": 10,
+	"rarity": "uncommon",
+	"danger": 1.15,
+	"palette": {"tint": "#3fae8f", "nebula": "concord"},
+	"map": {},
+	"node_weights": {"distress": 20, "asteroid_field": 14, "wreck_field": 14, "trader": 12, "patrol": 12, "pirate": 12, "empty": 10, "anomaly": 6},
+	"places": [
+		{"id": "fenwater", "name": "Fenwater Station", "type": "station", "faction": "concord", "pos": [800, 520], "jitter": 90, "beacon": true}
+	],
+	"debris": {"ice_chunk_s": 2.5},
+	"pois": {"distress": 1.5},
+	"ambient": {"patrol": 3, "trader": 3, "pirate": 1},
+	"stock": {"oxygen_gen": 90, "medbay": 180, "shield_mk1": 160, "shield_mk2": 330, "laser_mk1": 140, "pulse_mk1": 130, "helm": 70, "radiator": 40},
+	"recruit": {"mire": 8, "human": 2, "grundl": 1},
+	"enemies": "concord",
+	"hazards": ["gas_cloud"],
+	"events": "mire_fens",
+	"blurb": "Ice comets and flooded stations kept wet on purpose. The Mire are the Concord's firefighters by tradition, and they keep their homes humid enough to grow moss on the hull. Fenwater Station sells sound Concord gear and lets you dry out afterwards."
+}

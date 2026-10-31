@@ -1,0 +1,25 @@
+{
+	"id": "gauntling_scrapyards",
+	"name": "The Gauntling Scrapyards",
+	"home_species": "gauntling",
+	"faction": "clans",
+	"stages": [2, 6],
+	"weight": 10,
+	"rarity": "common",
+	"danger": 1.1,
+	"palette": {"tint": "#b06a4c", "nebula": "boneyard"},
+	"map": {"clan_trader": 0.6},
+	"node_weights": {"wreck_field": 28, "pirate": 18, "trader": 12, "distress": 12, "asteroid_field": 10, "empty": 10, "anomaly": 6, "patrol": 4},
+	"places": [
+		{"id": "spare_parts", "name": "Spare Parts", "type": "station", "faction": "clans", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"scrap_chunk_m": 1.6, "copper_coil": 1.4, "sealed_crate": 1.3},
+	"pois": {"wreck": 1.5, "abandoned_station": 1.3},
+	"ambient": {"pirate": 4, "trader": 3, "patrol": 1},
+	"stock": {"engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "engine_scrap_mk3": 360, "reactor_scrap_mk1": 140, "bolt_thrower_scrap": 150, "shrapnel_cannon_scrap": 160, "radiator": 40},
+	"recruit": {"gauntling": 8, "kett": 1, "human": 1},
+	"enemies": "rustfangs",
+	"hazards": ["debris_surge"],
+	"events": "gauntling_scrapyards",
+	"blurb": "Scrapper outcasts rebuilt after accidents, living where the junk is deepest. Every Gauntling is proud of every part, and every part used to be someone else's. Spare Parts sells Scrapper engines by the kilo."
+}

@@ -1,0 +1,25 @@
+{
+	"id": "prismatic_choir",
+	"name": "The Prismatic Choir",
+	"home_species": "prismatic",
+	"faction": "lumen",
+	"stages": [5, 8],
+	"weight": 10,
+	"rarity": "rare",
+	"danger": 1.3,
+	"palette": {"tint": "#43e6ff", "nebula": "lumen"},
+	"map": {},
+	"node_weights": {"anomaly": 26, "asteroid_field": 16, "wreck_field": 12, "empty": 12, "distress": 10, "trader": 8, "pirate": 8, "patrol": 8},
+	"places": [
+		{"id": "singing_lattice", "name": "The Singing Lattice", "type": "station", "faction": "lumen", "pos": [820, 480], "jitter": 90, "beacon": true}
+	],
+	"debris": {"ice_chunk_s": 1.4},
+	"pois": {"anomaly": 2.0, "quest": 1.5},
+	"ambient": {"patrol": 3, "trader": 2, "pirate": 1},
+	"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "engine_neon_mk2": 680, "shield_neon_mk1": 340, "siren_ion_neon": 400, "heat_lance_neon": 420},
+	"recruit": {"prismatic": 8, "emberkin": 1, "sporeling": 1},
+	"enemies": "wardens",
+	"hazards": ["ion_storm", "radiation"],
+	"events": "prismatic_choir",
+	"blurb": "Crystal growths the size of stations, ringing with a note you feel in your teeth. The Prismatic were born in the Prism's growth chambers; out here they sing to the gate debris, and some say it answers. Ion storms are common, and crystal does not like ion."
+}

@@ -1,0 +1,25 @@
+{
+	"id": "concord_space",
+	"name": "Concord Space",
+	"home_species": "",
+	"faction": "concord",
+	"stages": [2, 6],
+	"weight": 10,
+	"rarity": "common",
+	"danger": 1.1,
+	"palette": {"tint": "#4fa3ff", "nebula": "concord"},
+	"map": {},
+	"node_weights": {"patrol": 22, "trader": 16, "distress": 14, "wreck_field": 12, "asteroid_field": 14, "pirate": 8, "anomaly": 4, "empty": 10},
+	"places": [
+		{"id": "meridian", "name": "Concord Station Meridian", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"polymer_barrel": 1.3, "copper_coil": 1.2},
+	"pois": {"concord_checkpoint": 1.5, "pirate_nest": 0.6},
+	"ambient": {"patrol": 5, "trader": 3, "pirate": 1},
+	"stock": {},
+	"recruit": {},
+	"enemies": "concord",
+	"hazards": [],
+	"events": "concord_space",
+	"blurb": "The last orderly lanes in the Drift: checkpoints, inspection beacons and Concord Station Meridian, whose shipyard still turns out new Mk parts. The patrols are polite until your paperwork isn't."
+}
