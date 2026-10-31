@@ -1,0 +1,1 @@
+{"name": "Fixture Tender", "blurb": "A locked test ship that opens with fx_tender.", "crew": [{"name": "Pia", "species": "human"}, {"name": "Oro", "species": "fenn"}], "hangar": {"group": "Fixture", "layout": "A", "unlock": "fx_tender"}}

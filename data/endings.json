@@ -1,0 +1,5 @@
+{
+	"_doc": "Endings (docs/CONTENT.md section 13): an event's `ending` effect ends the run as a win with one of these and opens the ending screen (scripts/ui/ending_screen.gd). Packs add theirs in their own endings.json. Each entry: id, title, epilogue (4-8 sentences, shown under the art; the art is art/endings/<id>.png) and base_score; par_jumps (optional) replaces score.par_jumps for that ending. score is how a run adds up (scripts/space/endings.gd): the ending's base_score, plus credits / credits_per_point, plus per_crew for each crew member alive, per_poi for each point of interest done, per_landmark for each landmark met, minus per_jump_over for each jump over par_jumps.",
+	"score": {"credits_per_point": 10, "per_crew": 50, "per_poi": 10, "per_landmark": 100, "per_jump_over": 1, "par_jumps": 40},
+	"endings": []
+}
