@@ -1,0 +1,118 @@
+{"events": [
+    {
+      "id": "yards_slip_nine_dock", "type": "station", "weight": 10, "once": false, "requires": {"region": "brine_yards"},
+      "text": "Slip Nine is the biggest union yard on the Concord lanes: a mile of berths, cranes and gantries, with a banner across the lock that says NOTHING MOVES UNTIL WE MOVE IT. The Brine are everywhere in hard hats and slate-blue shells, great claws balancing crates as easily as cups. At the gate a shift steward, in a sash, checks you against a list and gives you a ticket that says VISITOR, and a pamphlet on the proper way to be a visitor, which is quietly, and with your hands where the Brine can see them.",
+      "choices": [
+        {"text": "Take a casual lashing shift (no fee).", "outcomes": [
+          {"weight": 100, "text": "Three hours of lashing crates in the heat of the yard. The steward pays you in credits and a hot meal and a strong warning that this is not a precedent. You come away tired and, oddly, happy.", "effects": {"items": {"credits": 30}, "crew_hp": -5, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Hire a Brine hand from the bench (90 credits).", "requires": {"credits": 90, "not_flag": "yards_hired"}, "outcomes": [
+          {"weight": 100, "text": "The bench is full of broad people in good boots, eating sandwiches. One of them, Tully, rises, brushes the crumbs from their shell with the small hand, and holds out the great claw to be shaken. 'Four generations on the cranes,' they say. 'Two on the bridge. I know a good berth from a bad one and a good ship from a bad one, and yours is the first I have seen in a month with its lashing done right.'", "effects": {"items": {"credits": -90}, "recruit": {"species": "brine", "name": "Tully"}, "flag": "yards_hired"}}
+        ]},
+        {"text": "Buy a round of tea in the canteen (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "The kettle is the size of a drum and the cups are the size of buckets. The canteen goes quiet as the round is poured, and then loud with thanks. By the end of the hour half the canteen has told you its life story and one of the old hands has marked a safe berth for you on a map.", "effects": {"items": {"credits": -15, "fuel": 2}, "crew_hp": 5, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Brine] Stand with the shift for the evening song.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine takes the place at the end of the line, claw over the shoulder of the next, and joins the shift song: a long slow work-chant that has been sung on the Slips for six generations. The whole yard hums. At the end, the steward comes down the line, takes your Brine's card, and writes something on it. 'Yours,' she says. 'Any berth. Any hour. And a share of the shift.' You leave with credits and a pin.", "effects": {"items": {"credits": 55, "fuel": 2}, "rep": {"concord": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Read the pamphlet and look around.", "outcomes": [
+          {"weight": 100, "text": "The pamphlet has seventeen rules and a drawing of a claw. The yard is worth a long look. The cranes move all night.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "yards_scab_ship", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "brine_yards", "jumps_min": 2},
+      "text": "A Rustfang cutter has rammed in among the picket-ships of a Brine strike, scattering barges, and a boarding party is hacking the strikers' tugs loose. 'Scab work,' says the boss, cheerfully, to you, as if to a colleague. 'Pays by the hour. We break the line, the Concord pays us, everybody wins.' On the nearest tug a Brine is wedged in a hatch with its great claw clamped over the boarders' ladder, holding it by itself. The ladder is bending.",
+      "choices": [
+        {"text": "Break up the scab crew.", "outcomes": [
+          {"weight": 100, "text": "The boss shrugs. 'Pays by the hour,' he says again, and the guns come round.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Mind your business (rep -1).", "outcomes": [
+          {"weight": 100, "text": "You go round. Behind you the line breaks, a tug spins free, and a claw lets go of a ladder. It is quiet for a while. A Brine in a hard hat sees you pass and does not wave.", "effects": {"rep": {"concord": -1, "clans": 1}, "crew_hp": -5}}
+        ]},
+        {"text": "[Brine] Take the other end of the ladder.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine crosses the gap in a bound and clamps their great claw over the ladder next to the first. Two claws, two Brine, one ladder: the boarders on the rungs look down, look at each other, and carefully climb back. The boss, outclassed, withdraws. The Brine on the tug unfolds, wipes its face, and says: 'Local Nine will remember that.' The yards put up a banner for you the next morning.", "effects": {"items": {"credits": 55, "scrap": 25}, "rep": {"concord": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Warden-frame] Declare the picket a gate.", "requires": {"species": "warden_frame"}, "outcomes": [
+          {"weight": 100, "text": "Your Warden-frame takes the comm, lens steady, and declares in calm level tones that the picket is a gate, and that no one passes a gate without the gatekeeper's leave. The boss starts to laugh. Then stops, because every gun in the lane has turned to face his hull, at the quiet command of a Concord officer who has just remembered what a gatekeeper is. The boss withdraws, protesting. The yards are grateful.", "effects": {"items": {"credits": 40, "polymer": 10}, "rep": {"concord": 1, "lumen": 1}}}
+        ]}
+      ],
+      "after_win": {"text": "The cutter drifts, venting. The strikers cheer from their tugs, and a procession of Brine in hard hats comes across the gap to shake your hand with the small one, solemnly, one by one. There is a lot of scrap, and a union pin.", "effects": {"items": {"scrap": 35, "credits": 40}, "rep": {"concord": 2}}}
+    },
+    {
+      "id": "yards_overdue_barge", "type": "distress", "weight": 8, "once": false, "requires": {"region": "brine_yards"},
+      "text": "The barge Fair Share is nine days overdue. She is turning very slowly in the lane with her engines dead, a mile of loaded containers behind her, and a crew of nine Brine standing on her roof in hard hats, waving at you with great calm. 'Nothing's wrong,' says the steward on the comm. 'Just the engines. Just the reactor. Just the crew, who have eaten everything but the paperwork. We are in no hurry.' Her voice is very even. 'We are quite hungry, mind.'",
+      "choices": [
+        {"text": "Feed the crew (20 scrap of rations).", "outcomes": [
+          {"weight": 100, "text": "You pass over a crate of ration packs and a case of hot drinks. The Brine eat with the slow good manners of the properly starved. In return the steward unseals a container and pushes a heavy crate of salvage toward you. 'Union share,' she says. 'Nobody argues with the share.'", "effects": {"items": {"scrap": 20, "credits": 35}, "rep": {"concord": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Tow the barge to Slip Nine (2 fuel).", "requires": {"items": {"fuel": 2}}, "outcomes": [
+          {"weight": 100, "text": "The tow takes a day and two engines' worth of attention. At the end the barge is eased into her berth by a flock of tugs, the crew walk ashore to a cheer, and the yard pays your fee in credits, tea and a spare coil.", "effects": {"items": {"fuel": -2, "credits": 65, "copper": 10}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "[Brine] Take the reactor apart with the crew.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine crosses to the barge, sits down on the reactor casing and talks for twenty minutes in quick low sentences to the nine on the roof. By the end of it all ten are inside the reactor bay, claws in the works, heaving. A great groaning clank. A cough. A pulse of blue light. The engines come up. The steward embraces your Brine in both arms, claws and all, and the crew insists on giving you the hold's best container.", "effects": {"items": {"credits": 70, "titanium": 4, "copper": 15}, "rep": {"concord": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Gauntling] Offer a grafted reactor core.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling opens a plate on their own chest, and shows the barge's engineer an arc core that has no business working, and does. A quick trade of cables and knowing looks, and the barge's reactor is running again off a Gauntling graft. The Brine are impressed beyond words. They pay in kind.", "effects": {"items": {"credits": 50, "copper": 20}, "rep": {"concord": 1}, "crew_hp": -5}}
+        ]},
+        {"text": "Relay the call and go.", "outcomes": [
+          {"weight": 100, "text": "You relay the call to the nearest yard and fly on. The steward thanks you with great calm. The nine Brine on the roof go on waving until you are out of sight.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "yards_safety_inspector", "type": "patrol", "weight": 8, "once": false, "requires": {"region": "brine_yards"},
+      "text": "A Concord safety inspector with a clipboard has stopped the entire lane to inspect a Brine crane. She is a small and exact person, who has found something wrong with the crane's third hinge. 'It's out of true,' she says, to nobody. 'It is nine millimetres out of true. This is a hazard.' A crowd of Brine have gathered, claws folded. 'We have lifted fifty thousand tonnes on that hinge,' says the steward, politely. 'It has never once been in true.' The inspector sniffs. 'I should like a second opinion,' she says. She looks at you.",
+      "choices": [
+        {"text": "Back the inspector.", "outcomes": [
+          {"weight": 100, "text": "You measure the hinge. It is, indeed, nine millimetres out of true. The inspector writes a long form and the crane is closed for a day. The Brine take it with perfect politeness, and you do not forget the look.", "effects": {"rep": {"concord": 2, "clans": -1}, "items": {"credits": 25}}}
+        ]},
+        {"text": "Back the Brine.", "outcomes": [
+          {"weight": 100, "text": "You measure the hinge and declare it fine. The inspector stares at you. 'You are measuring from the wrong side,' she says. 'Probably,' you say. A silence. The steward coughs. The crane is reopened. The Brine pay you in kind.", "effects": {"rep": {"concord": -1, "clans": 1}, "items": {"scrap": 20, "credits": 20}}}
+        ]},
+        {"text": "[Brine] Stamp the hinge.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine steps to the crane, puts the great claw round the hinge and, with a terrible grinding squeal, bends it nine millimetres into true. The crowd inhales. The inspector, who has never seen it done, writes 'Complied' on her form, in amazement. The crane is cleared. Your Brine is carried out of the yard on four shoulders.", "effects": {"items": {"credits": 50, "scrap": 20}, "rep": {"concord": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Oorth] Mediate between the two.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth stands between the two and, in a calm voice, repeats the inspector's concern, then the steward's. The tension drains from the lane. A compromise is found, involving a shim and a month of review. Both sides thank you; neither pays; but a bag of ration chits comes your way.", "effects": {"items": {"credits": 20, "fuel": 1}, "rep": {"concord": 1, "clans": 1}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "yards_union_salvage", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "brine_yards"},
+      "text": "A union salvage lot: a dead freighter being stripped by a hundred Brine in neat shifts, in hard hats, with a chalk grid on the hull assigning every plate to a pair of hands. At the foot of the grid hangs a ledger. 'SHARES,' says the heading, in capitals. Every worker's name is listed, and what they are owed. At the bottom, the steward has left a line blank. 'Visitors share if they work,' she says. 'It's only fair. The first plate is yours.'",
+      "choices": [
+        {"text": "Work a plate for a share.", "outcomes": [
+          {"weight": 75, "text": "It is dull, honest, back-breaking work, on a plate nobody wanted, and at the end of it the steward writes your name in the ledger, a full share, to the last credit. The Brine nod. It is, evidently, a compliment.", "effects": {"items": {"scrap": 30, "credits": 20}, "crew_hp": -5, "rep": {"concord": 1}}},
+          {"weight": 25, "text": "The plate comes loose and takes a nasty piece out of your forearm. The steward pays you full share all the same, and tells you off for the fumble.", "effects": {"items": {"scrap": 20, "credits": 15}, "crew_hp": -15}}
+        ]},
+        {"text": "Buy a share of the lot (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "You pay the steward, who writes it in the ledger, and your share is a good one: a heap of plate and cable and a crate of good tools, delivered to your lock by a procession of Brine, with a small ceremony.", "effects": {"items": {"credits": -40, "scrap": 50, "copper": 20}}}
+        ]},
+        {"text": "[Brine] Join a shift and lead the lift.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine takes a place on the grid and for four hours leads a pair of lifts, great claw straining, small hand chalking. The shift takes a plate in the time it normally takes three. At the end the steward writes your name at the top of the ledger and holds it up to the whole lot. 'Double share,' she says. A cheer goes up and a drink goes round.", "effects": {"items": {"scrap": 55, "copper": 25, "credits": 40}, "rep": {"concord": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Grundl] Lend a back.", "requires": {"species": "grundl"}, "outcomes": [
+          {"weight": 100, "text": "Your Grundl lifts a plate on their own, a plate meant for six, and carries it to the lock at a trot. A hush falls over the lot. 'Well,' says the steward, 'that's the gentlest thing I've seen in a month.' She writes a double share, and a note to the effect that they are always welcome.", "effects": {"items": {"scrap": 45, "credits": 30}, "rep": {"concord": 1}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "yards_tea_wagon", "type": "trader", "weight": 7, "once": false, "requires": {"region": "brine_yards"},
+      "text": "The tea wagon is a flat barge with a kettle on it. A big Brine in an apron, with a great claw for the kettle and a small hand for the cups, ladles out tea to a long queue of dockers on break. The queue is quiet. The tea is free, or as near to it as a union can make it. A chalkboard hangs on the kettle. TEA. BISCUITS. A STORY, IF YOU ASK. 'Go on,' says the brewer, to you. 'The line is slow. Ask.'",
+      "choices": [
+        {"text": "Ask for a story.", "outcomes": [
+          {"weight": 100, "text": "It is about a young Brine named Dunne who dropped a container into the sea of Meridian and lifted it out again, on his back, with nobody watching. It is a long story and a good one. By the end, the line has gone, and you have a second cup, and a feeling of being a person who has been told something.", "effects": {"crew_hp": 10, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Buy the wagon's last biscuits (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "The brewer hands over a tin with great ceremony. They are hard biscuits, the kind that last a month in a locker and taste of a long evening. Your crew goes through them in a day.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+        ]},
+        {"text": "[Brine] Take a turn on the kettle.", "requires": {"species": "brine"}, "outcomes": [
+          {"weight": 100, "text": "Your Brine takes the ladle in the small hand, lifts the kettle in the great claw and, with a practised twist, pours six cups in a single pass. The queue applauds. The brewer, delighted, hands over the apron. The tea is free for you from now on, they say, and they press a bag of the wagon's best, along with a travelling ration, into your Brine's arms.", "effects": {"items": {"credits": 35, "fuel": 2}, "rep": {"concord": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "[Mire] Offer to chill the kettle water.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire cups a hand over the kettle and, with a damp, rippling flourish, draws the extra heat off the water into the air. The tea cools to the exact temperature of a good evening. The brewer sniffs it, nods slowly, and pours a cup for your Mire, with a very small, private look of respect.", "effects": {"items": {"credits": 20, "fuel": 1}, "crew_hp": 5}}
+        ]}
+      ]
+    }
+  ]}

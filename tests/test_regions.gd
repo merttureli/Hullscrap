@@ -18,6 +18,7 @@ const Content = preload("res://scripts/data/content.gd")
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const FACTION_REGIONS := ["clan_space", "concord_space", "lumen_space", "boneyard", "gate_approaches"]
 const HOMELANDS := {"human_core": "human", "basalt_quarries": "basalt", "emberkin_forges": "emberkin", "fenn_bazaar": "fenn", "kett_hives": "kett",
+	"murrow_diggings": "murrow", "siltborn_rings": "siltborn", "corvin_roost": "corvin", "brine_yards": "brine", "echo_glassways": "echo", "ferro_lodes": "ferro",
 	"mire_fens": "mire", "sporeling_groves": "sporeling", "gauntling_scrapyards": "gauntling", "prismatic_choir": "prismatic", "grundl_barges": "grundl",
 	"vellum_stacks": "vellum", "oorth_quietude": "oorth", "drakkin_pits": "drakkin", "wisp_stormfield": "wisp", "hullkin_reefs": "hullkin", "lantern_lanes": "lantern"}
 

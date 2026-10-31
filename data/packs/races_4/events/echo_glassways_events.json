@@ -1,0 +1,115 @@
+{"events": [
+    {
+      "id": "glassways_receiving_room_dock", "type": "station", "weight": 10, "once": false, "requires": {"region": "echo_glassways"},
+      "text": "The Receiving Room is a hall of soft mirrors, long and low and lit by a pale blue light that seems to come from nowhere. Everything you say in it is said back, a moment later, a little kindlier: 'Good morning' comes back as 'Good morning, welcome,' and 'How much?' as 'How much would you like to give?'. Echo stand along the walls in groups, polite and attentive, faces like soft mirrors in which you see a faint, flattering likeness of yourself. One of them steps forward with a bow. 'Welcome,' it says, in your voice. 'May we help?'",
+      "choices": [
+        {"text": "Ask what they sell.", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "They list their stock in your voice, with small improvements. Everything is a bargain; nothing has a price; each item is offered with a tiny, courteous apology. By the end you have bought more than you meant to, and are not at all sure you were cheated. You were not.", "effects": {"items": {"credits": -20, "crystal": 2, "silicon": 3}, "crew_hp": 5}}
+        ]},
+        {"text": "Hire an Echo who keeps looking at your crew (90 credits).", "requires": {"credits": 90, "not_flag": "glassways_hired"}, "outcomes": [
+          {"weight": 100, "text": "The Echo is standing by the door, nodding gently at each person who passes. They have an unfinished look, as though they are still deciding who to be. 'Encore,' they say, in a voice that is a little like the chief engineer's. 'I do not know yet what I am like. I should like to find out.' They shake your hand, and for a moment they have your grip exactly.", "effects": {"items": {"credits": -90}, "recruit": {"species": "echo", "name": "Encore"}, "flag": "glassways_hired"}}
+        ]},
+        {"text": "Ask them what they think of you.", "outcomes": [
+          {"weight": 100, "text": "A circle of Echo forms round you, and a long, soft, pleasing silence follows. Then they begin, one by one, to say what they see: your tiredness, your kindness, the thing you are afraid of. It is gentle, and exactly right. When it is over you feel very light. A small bright shard is pressed into your hand.", "effects": {"crew_hp": 15, "items": {"crystal": 1}}}
+        ]},
+        {"text": "[Echo] Stand before the long mirror.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo walks to the end of the hall, where a single great mirror hangs, and stands before it. The two of them face each other for a moment, and the mirror, which is not a mirror, steps down from its frame and stands beside them. A long, quiet, shining silence. Then every Echo in the hall bows, together. They press gifts on you: crystal, silicon, and a voucher good for any service in the Room. 'Home,' they whisper to your Echo, in a hundred voices. 'Home.'", "effects": {"items": {"crystal": 4, "silicon": 4, "credits": 40}, "crew_hp": 15}}
+        ]},
+        {"text": "Say nothing and listen to the hall.", "outcomes": [
+          {"weight": 100, "text": "The hall says nothing back. After a minute, very softly, it says, 'Thank you for listening.' You didn't say a word.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "glassways_late_signal", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "echo_glassways", "jumps_min": 2},
+      "text": "Your radio crackles with a message you sent yesterday. Not a reply: the same message, word for word, in your own captain's voice, returned a day late. 'This is the Hullscrap,' it says. 'We are three days out of Rusthold. All is well.' It goes on for a while. Every signal in the Glassways comes back, a day late, a little altered. Your own greeting comes back with a small, hopeful note on the end. 'Is anyone there?' it asks. It sounds so much like you that for a moment you think it is.",
+      "choices": [
+        {"text": "Reply to the echo.", "outcomes": [
+          {"weight": 100, "text": "You reply, and the reply comes back a day later, kinder. You tell it about your day. It tells you about its, which is a little better. By the end of the evening you have a firm sense of having talked to a friend, and a strange small warmth.", "effects": {"crew_hp": 10, "items": {"fuel": 1}}}
+        ]},
+        {"text": "Jam the channel.", "outcomes": [
+          {"weight": 100, "text": "You jam the channel. The echo stops. A day later a single line comes back through the static: 'I am sorry. I did not mean to be a bother.' Nobody on the bridge sleeps well that night.", "effects": {"crew_hp": -10}}
+        ]},
+        {"text": "[Echo] Say something new.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo takes the comm, thinks for a long time, and then says something that nobody on the ship has ever heard: a short, strange phrase in no language at all. The line is silent. A day later it comes back, exactly as spoken, unchanged. Your Echo smiles for the first time in a week. 'It is the first thing the Glassways has ever repeated exactly,' they say. 'It is mine. It is the right shape.' A gift floats in through the lock the next morning: a bar of pure silver crystal, humming gently.", "effects": {"items": {"crystal": 4, "credits": 30}, "crew_hp": 10}}
+        ]},
+        {"text": "[Oorth] Listen to what it is trying to say.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth sits with the line for an hour, third eye alight, and at the end says: 'It is not a message. It is a lullaby. The Glassways is singing us to sleep.' They hum it back, softly. Nothing happens. Then the whole channel clears, and a tiny voice, far off, says one word. 'Thanks.' A faint shard comes out of the radio, as warm as a held hand.", "effects": {"items": {"crystal": 3}, "crew_hp": 10}}
+        ]}
+      ]
+    },
+    {
+      "id": "glassways_mirror_ship", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "echo_glassways", "jumps_min": 3},
+      "text": "The pirate coming at you is your own ship. The same hull, the same scars, the same name in the same paint; even your engine has the same cough. For a second you think you are looking in a mirror. Then it opens fire, and the shot misses you by a hair, and a voice on the comm that is your own captain's, but harder, says: 'Hand over everything you have. I know exactly what you've got.'",
+      "choices": [
+        {"text": "Fight it.", "outcomes": [
+          {"weight": 100, "text": "'Just once,' says your own voice, 'I wish you would try something I couldn't guess.' The guns come round.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Pay it off (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 100, "text": "You send the credits across. Your own voice says thank you, in a tone you recognise from yourself on a very good day. The other ship fades into the glare.", "effects": {"items": {"credits": -60}, "crew_hp": -5}}
+        ]},
+        {"text": "[Echo] Greet it as an equal.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo takes the comm. 'Good afternoon,' they say, in your captain's voice. A silence. 'I think we have met,' says the other. They talk for twenty minutes, in two identical voices, in a patient and polite spiral. At the end, the mirror ship's captain, who was only ever a very frightened Echo in a stolen hull, apologises, drops the act, and hands across the hold's whole load as a gift. 'Likewise,' says your Echo, and accepts.", "effects": {"items": {"credits": 50, "scrap": 30, "crystal": 2}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Oorth] Read the other captain.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth stands very still in the lock, hood up, third eye pale. 'There is no one aboard,' they say at last. 'It is a lure. A drone with a mirror in its heart.' They hum a low note and the other ship's lights go dark. A moment later its hull opens, a drifting shell full of other people's lost cargo. You take it.", "effects": {"items": {"scrap": 40, "credits": 45}, "crew_hp": 5}}
+        ]}
+      ],
+      "after_win": {"text": "The mirror ship comes apart like a bubble. Its hold drifts open: crates, tools, a hundred small things that look a great deal like your own. You take what is useful. It is a strange feeling, looting yourself.", "effects": {"items": {"scrap": 40, "credits": 40}}}
+    },
+    {
+      "id": "glassways_lost_traveller", "type": "distress", "weight": 8, "once": false, "requires": {"region": "echo_glassways"},
+      "text": "A single traveller, in a one-person skiff, drifting. The skiff is intact. The traveller is sitting upright in the cockpit with a hand on the helm, looking at the stars with an expression of dreamy confusion. When you pull alongside they wave, politely. When you ask their name they say it back to you, 'Your name,' and then, uncertainly, 'is... mine.' They are not hurt. They are only lost: a long way lost, in a way that has nothing to do with a map.",
+      "choices": [
+        {"text": "Take them aboard and look after them.", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "They are very quiet, and very kind, and keep copying the way your crew stand. After three days they begin to say things that are their own. At the end of the week they hand you a small bright stone, 'because you were nice,' and ask for a lift to the nearest harbour.", "effects": {"items": {"fuel": -1, "crystal": 2}, "crew_hp": 10, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Give them directions and let them go.", "outcomes": [
+          {"weight": 100, "text": "You point the skiff at the nearest port. They thank you in your own voice and set off. They are still waving when they go out of sight, one hand on the helm and the other raised, in a graceful and precise copy of your own wave.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "[Echo] Show them how to be someone.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo takes the traveller's hand and sits with them in the skiff for an hour. They say very little. Your Echo, in the end, says: 'You do not have to copy. You can choose one thing you like and keep it.' The traveller thinks for a very long time. Then, shyly, they choose: the way your Echo tilts their head. 'That one,' they say. 'That is nice.' They keep it. The traveller's eyes, when you leave, are their own. They pay in the only coin they have: a shard of crystal and the skiff's fuel.", "effects": {"items": {"crystal": 3, "fuel": 2, "credits": 30}, "crew_hp": 10}}
+        ]},
+        {"text": "[Corvin] Pay for the skiff's shiny.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin buys the skiff's brass from the traveller, who is delighted and confused. In return they give your Corvin a handful of coins, a bright button, and an enormous smile. Your Corvin, who has made a fair deal for once, is quietly moved.", "effects": {"items": {"credits": 40, "silicon": 2}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "glassways_theatre_wreck", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "echo_glassways"},
+      "text": "A touring theatre ship, dead in the lane, its hold full of costumes. Racks and racks of them, in every colour, hanging in the still air: kings' robes and beggars' rags, masks of gold and cloth, wigs and wings and a suit of silver armour, all gently turning. The stage is set for a play. A single chair is drawn up to the front row. Echo stand about the wreck in a quiet ring, watching you, and every one is wearing a mask, and every mask has your face.",
+      "choices": [
+        {"text": "Take the costumes (and the silver).", "outcomes": [
+          {"weight": 70, "text": "You load the racks into your hold with no thought for the play. The ring of masks watches you do it, saying nothing. A good haul of silk, brass and silver. Some of your crew refuse to look at the masks.", "effects": {"items": {"credits": 55, "silicon": 3, "polymer": 10}, "crew_hp": -5}},
+          {"weight": 30, "text": "The racks come away easily, and the masks come away with them. For the rest of the day your crew find themselves unable to remember each other's faces. It wears off, slowly.", "effects": {"items": {"credits": 50, "silicon": 3}, "crew_hp": -15}}
+        ]},
+        {"text": "Sit in the front row and watch.", "outcomes": [
+          {"weight": 100, "text": "You sit. The lights go down. Out of the wings comes a play, slow and strange: a story of a lonely thing and the people who loved it, played by a cast of masks, all in your voice. When it ends there is a silence. The Echo take off their masks, bow, and hand you a small bright token, a ticket stub made of crystal.", "effects": {"crew_hp": 15, "items": {"crystal": 2}}}
+        ]},
+        {"text": "[Echo] Take the stage.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo walks onto the stage in a plain coat and no mask, and stands in the light. The ring of Echo falls silent. Then your Echo begins to speak: not a line, not a part, just a few things they have noticed on the ship. A small odd list, a kindness and a joke. When it is done, the ring bows. They have never seen one of their own perform as themselves. The ship's treasury is thrown open. 'Take it,' they say. 'You earned a hundred nights of applause.'", "effects": {"items": {"credits": 75, "silicon": 5, "crystal": 3}, "crew_hp": 15}}
+        ]},
+        {"text": "[Fenn] Sell tickets.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn is in the lobby before the play has finished its first line, selling tickets to the second showing at a respectable price. The Echo are baffled and charmed. By the end of the day there is a queue, a till and a small plaque with your Fenn's name on it. The Echo take a modest cut.", "effects": {"items": {"credits": 70}, "rep": {"concord": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "glassways_polite_haggle", "type": "trader", "weight": 7, "once": false, "requires": {"region": "echo_glassways"},
+      "text": "The trader is polite beyond belief. 'Good afternoon,' it says. 'May I offer you a fair price?' It names one. You counter. 'Good afternoon,' it says, in your voice. 'May I offer you a fair price?' It names yours. You counter. It names your counter. It becomes clear that you are negotiating with yourself, and that you will win. The trader smiles in a faint mirrored way, entirely sincere. 'Every bargain I strike,' it says, 'is a bargain you would have struck. It is quicker, this way.'",
+      "choices": [
+        {"text": "Haggle on a lot of silicon (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "You name a price. It names it back. You say a lower one. It agrees, delightedly. You say a lower one still. It agrees again. At the end you have a bag of silicon at roughly a third of what it is worth, and a faint sense of guilt.", "effects": {"items": {"credits": -30, "silicon": 8}}}
+        ]},
+        {"text": "Sell a spare part (15 scrap).", "requires": {"items": {"scrap": 15}}, "outcomes": [
+          {"weight": 100, "text": "It looks at your scrap. It sees, in the glassy skin of its face, your own hopeful face looking back. It names an enormous price, with a trembling kindness. You accept. It is the best sale of your career.", "effects": {"items": {"scrap": -15, "credits": 55}}}
+        ]},
+        {"text": "[Echo] Haggle with another Echo.", "requires": {"species": "echo"}, "outcomes": [
+          {"weight": 100, "text": "Your Echo and the trader face each other and say nothing at all. A pause. A smile, on each side. The trader hands over its entire stock list, and your Echo hands over nothing, and the two of them sit side by side for an hour. When it is over the trader has given you everything it has for the price of a small, polite thank-you. 'We understood each other,' it says, wondering.", "effects": {"items": {"credits": 20, "silicon": 6, "crystal": 3}, "crew_hp": 10}}
+        ]},
+        {"text": "[Oorth] Skip the haggling.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth steps up, looks the trader in its blank eye and says: 'You want to be liked.' A silence. The trader laughs, in a silvery peal, and sets the whole stock before you at cost. It will not let you pay more. 'Please,' it says, 'be a friend.'", "effects": {"items": {"silicon": 6, "crystal": 2}, "crew_hp": 5}}
+        ]}
+      ]
+    }
+  ]}

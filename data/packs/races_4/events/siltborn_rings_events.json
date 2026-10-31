@@ -1,0 +1,120 @@
+{"events": [
+    {
+      "id": "rings_gossamer_dock", "type": "station", "weight": 10, "once": false, "requires": {"region": "siltborn_rings"},
+      "text": "The Gossamer is a hull wrapped in glowing netting, strung with soft lights, with a dozen bells drifting round the docking ring like jellyfish round a pier. Docking is a matter of being sorted by tendrils: a gentle, thorough pat-down by a Siltborn in a harbour-master's sash, who sorts you into LIGHT, HEAVY and FLAMMABLE with a long glowing finger. There is a small, courteous sign by the lock. PLEASE DO NOT LIGHT A FLAME. WE ARE VERY FLAMMABLE. THANK YOU.",
+      "choices": [
+        {"text": "Buy a jar of lantern jelly (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "It is a soft glowing paste in a screw-top jar, and when spread on a wound it hums. The whole crew uses it for a week and swears by it. The Siltborn stall-keeper glows pink and tells you not to put it on toast.", "effects": {"items": {"credits": -20}, "crew_hp": 15}}
+        ]},
+        {"text": "Hire a young Siltborn from the harbour school (80 credits).", "requires": {"credits": 80, "not_flag": "rings_hired"}, "outcomes": [
+          {"weight": 100, "text": "A small bell, barely half the size of the others, drifts up to your elbow. Selumi is thin and shy and glows a soft lavender, and has a satchel of lessons tied to a tendril. 'I am not good at floors,' they say. 'But I am very good at the air.' The teacher waves from the dock, wiping an eye.", "effects": {"items": {"credits": -80}, "recruit": {"species": "siltborn", "name": "Selumi"}, "flag": "rings_hired"}}
+        ]},
+        {"text": "Ask the harbour-master for the news of the Rings.", "outcomes": [
+          {"weight": 100, "text": "She tells you at length, in a long soft glowing sentence, about every drift, every eddy and every thing that has gone wrong with the tides this season. At the end she sorts you gently into LUCKY and tells you where the safe lane is.", "effects": {"reveal": "trader", "items": {"fuel": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Siltborn] Sing in the harbour choir.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn drifts to the middle of the ring, and the whole harbour glows together as the bells gather in a circle. The choir begins, a long slow chord that moves through the net like a tide. Your Siltborn sings in the high part. By the time it ends, the whole station is glowing a deep calm gold, and the harbour-master is crying into three of her tendrils. They give your Siltborn a handful of the harbour's best, and a jar for the crew.", "effects": {"items": {"credits": 45, "fuel": 2, "crystal": 2}, "crew_hp": 15}}
+        ]},
+        {"text": "Admire the lights and move on.", "outcomes": [
+          {"weight": 100, "text": "You float round the ring until your eyes hurt. A child bell bumps gently into you and apologises, and drifts away glowing a quick embarrassed pink.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "rings_ice_harvest", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"region": "siltborn_rings"},
+      "text": "The ring-ice is out. A flock of Siltborn is working the glittering edge of a great shining belt with fine nets spun from their own tendrils, hauling in the loose ice by the shimmering sackful. They drift in long, slow lines, humming. Each net holds a hundred small ice-chunks, blue and clear as glass. It is a quiet, wonderful scene; a foreman bell glows an urgent orange and drifts up to your window. 'Visitors,' it says. 'Do you want to help, or are you only looking?'",
+      "choices": [
+        {"text": "Help haul a net.", "outcomes": [
+          {"weight": 70, "text": "The nets are as light as breath and as heavy as water. You haul one in with four crew, slowly, a chunk at a time, and are given a sackful of the ice for your pains. Melted, it makes good fuel. The Siltborn glow with approval.", "effects": {"items": {"fuel": 2}, "crew_hp": -5}},
+          {"weight": 30, "text": "A net tangles in your engine. It takes an hour to pick the tendril-silk out of the intake. The Siltborn are very polite about it.", "effects": {"hull": -5, "items": {"fuel": 1}}}
+        ]},
+        {"text": "Trade scrap for ice-fuel (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
+          {"weight": 100, "text": "The foreman bell weighs your scrap with a long glowing finger and finds it good. 'We make no metal here,' it says. 'It is very fine.' It gives you three sacks of the clear ice, which burns, when melted, like a clean candle.", "effects": {"items": {"scrap": -20, "fuel": 3}}}
+        ]},
+        {"text": "[Siltborn] Ride the ring-current with the flock.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn goes out through the lock and slides into the glittering stream, tendrils trailing, and for an hour is carried along in the long line of bells in a soft glowing dance. They come back with a net as big as a house, and the whole flock follows in a procession to the airlock to help unload. The foreman gives them the net, and the fuel in it, as a gift.", "effects": {"items": {"fuel": 5, "credits": 25, "crystal": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "[Mire] Bring a bucket of warm water.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire sets out a bucket of warm water on the lock sill, and the foreman bell drifts down to it and presses against the rim like a child at a cold window. Warm water, it turns out, is a rare delight in the Rings. In payment the flock presses on you a net of their best ice, glowing very faintly blue.", "effects": {"items": {"fuel": 3, "crystal": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Admire the ice and go.", "outcomes": [
+          {"weight": 100, "text": "You hang in the shimmering belt for a while and admire it. It is the kind of sight that makes a person sit up straighter.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "rings_flare_front", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "siltborn_rings", "jumps_min": 2},
+      "text": "The Rings are going dark. A flare front is coming up out of the gas giant, a wall of white, humming plasma, and the Siltborn are scattering. Bells turn off their lights one by one, in a long soft ripple, so as not to be eaten by the flare. In half a minute the whole Ring is as dark as a pocket, with nothing to see but your lights, and a faint, nervous chiming. A voice calls on the channel, very small. 'Please,' it says. 'Dim your lamps. It sees them.'",
+      "choices": [
+        {"text": "Cut your lights and hold still.", "outcomes": [
+          {"weight": 70, "text": "The flare front comes through. It is white and long and terribly bright, and the Rings go quiet while it passes. You count slowly to ten thousand. When it is over, a thousand bells relight together in a soft rush, like stars coming out. The voice thanks you, gravely.", "effects": {"crew_hp": 5, "items": {"fuel": 1}}},
+          {"weight": 30, "text": "The flare front is wider than anyone said. It scorches your outer hull on the way through, and sets off a fire in the aft locker. By the time it is out, the front is gone, and the Rings are relighting in the dark. The voice does not reproach you.", "effects": {"hull": -10, "crew_hp": -5}}
+        ]},
+        {"text": "Run for the shadow of the planet (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You haul the ship round in a long, steep curve and into the planet's shadow, where the flare cannot find you. You come out the other side with an hour's lead and a small, shaken crew. The Siltborn bless you in a long glowing sentence that you do not understand.", "effects": {"items": {"fuel": -1, "credits": 25}, "crew_hp": 5}}
+        ]},
+        {"text": "[Siltborn] Gather the small ones in your bell.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn flows out of the lock and opens wide, bell-skirts spread, and the children of the Ring come to them in a rush, a hundred little bells, tucking into the shelter of the big one like chicks. Your Siltborn goes dark, glowing nothing, and holds them. The flare passes over, white and vast. When it is gone, the bells relight one by one in a ripple of colour, and every parent in the Ring comes to say thank you.", "effects": {"items": {"credits": 50, "fuel": 3, "crystal": 2}, "crew_hp": 15, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "[Wisp] Draw the flare away.", "requires": {"species": "wisp"}, "outcomes": [
+          {"weight": 100, "text": "Your Wisp slides into the flare's edge like a leaf into a stream and, at the last second, turns and draws the whole wall of plasma away along a curl of light. The flare follows, a vast white serpent, chasing a small and laughing spark. When your Wisp returns, a little singed and very pleased, the Rings are lit again, and a thousand bells are glowing around you.", "effects": {"items": {"fuel": 2, "credits": 35}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "rings_lamp_poachers", "type": "pirate", "weight": 8, "once": false, "requires": {"region": "siltborn_rings", "jumps_min": 2},
+      "text": "Rustfangs with long nets are working the edge of the ring, dragging bells into a hold. 'Lamp-oil,' says the captain over the comm, without shame. 'A single bell makes enough to light a street for a year. It is perfectly humane. They do not suffer. They just go very dim.' The hold behind him is a pale glittering heap of bells, glowing faintly, their tendrils limp. A few are chiming softly, again and again, the same three notes.",
+      "choices": [
+        {"text": "Fight them off.", "outcomes": [
+          {"weight": 100, "text": "The captain sighs. 'You will cost me a season,' he says, and swings the guns round.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Buy the lot (90 credits).", "requires": {"credits": 90}, "outcomes": [
+          {"weight": 100, "text": "He names a price and you meet it, grim-faced. The nets open and the bells pour out into the dark, glowing again as they go, a stream of living lamps. One of them lingers at your window and presses its tendrils to the glass, in thanks.", "effects": {"items": {"credits": -90}, "rep": {"clans": -1, "lumen": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "[Siltborn] Call the school.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn steps out of the lock and sings three notes, high and fierce. From the dark of the Ring a thousand lamps come on at once, in a vast shining cloud, and sweep over the poachers' ship in a glow so bright it blinds every sensor aboard. When it dims, the nets are empty, the hold is open, and the captain is in the middle of a very long and unhappy apology. The Ring does not forgive, but it pays: a heap of crystal, a net of fuel.", "effects": {"items": {"fuel": 3, "crystal": 3, "credits": 50}, "rep": {"lumen": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Emberkin] Offer them a fight they will remember.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin steps onto the hull in the dark, strikes a flare, and holds it up. The poachers' captain goes grey. The Siltborn in the nets glow a violent panicked pink. Then your Emberkin, with great care, lights only the nets, and burns them clean through, and the bells float free. 'I did not have to burn them,' says your Emberkin, quietly, afterwards. The bells hum, and glow, and are not afraid.", "effects": {"items": {"credits": 30, "fuel": 2}, "rep": {"lumen": 1}}}
+        ]}
+      ],
+      "after_win": {"text": "The poachers' hold opens and the bells drift out into the dark, their lamps coming back one by one. A thousand small lights fill the Ring. Some press against your window as they go.", "effects": {"items": {"scrap": 30, "fuel": 2}, "rep": {"lumen": 1}}}
+    },
+    {
+      "id": "rings_ice_wreck", "type": "wreck_field", "weight": 8, "once": true, "requires": {"region": "siltborn_rings", "jumps_min": 2},
+      "text": "A ship frozen in the ring-ice, intact, glassy, its hull lined with frost. Through the portholes you can see the lamp still burning in the mess, lighting a row of empty chairs. The Siltborn say nothing about it. The nearest bell drifts a respectful distance away and watches. Inside, the cold is perfect. Inside, the cargo is perfect. There is, in the lifeboat bay, a sealed pod with a faint glow: a slow-pulsing, pale blue, and a very faint chime.",
+      "choices": [
+        {"text": "Open the cargo hold.", "outcomes": [
+          {"weight": 70, "text": "The hold is full of crates of fine Lumen glass, packed in sawdust and frozen solid. You take three before the ice begins to creak. A good haul, though the Siltborn watch you go with a certain reserve.", "effects": {"items": {"silicon": 5, "crystal": 2, "credits": 20}}},
+          {"weight": 30, "text": "The ice begins to crack as you cut in. A slab comes down on the hold and takes two of the crates with it. You get out in a hurry with what you can carry.", "effects": {"items": {"silicon": 2, "crystal": 1}, "crew_hp": -10}}
+        ]},
+        {"text": "Open the lifeboat pod.", "outcomes": [
+          {"weight": 100, "text": "The pod opens with a sigh. Inside, curled in a heap of blue-glowing tendrils, is a Siltborn elder, asleep. The glow has been slow for years. They wake, with a long quiet chime, and look at the lamp in the mess for a while. 'I fell asleep,' they say, 'at the end of a long watch.' They take their time. 'I would like to see the Ring again, please.' Thallo comes aboard on the second day.", "effects": {"recruit": {"species": "siltborn", "name": "Thallo"}}}
+        ]},
+        {"text": "[Siltborn] Slide in through the vents.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn flattens, oozes through a vent no wider than a hand, and is gone. A long minute passes. Then a hatch opens from within and your Siltborn is in the doorway, glowing a soft, sad gold, with a small bundle of letters and a ring in two tendrils. 'There was a family,' they say. 'They went to sleep. They are all in the lifeboat.' They open the pod, and a Siltborn elder blinks awake. The elder comes aboard, with the letters, and a gift for the finder: a crate of the cargo.", "effects": {"recruit": {"species": "siltborn", "name": "Aethe"}, "items": {"silicon": 4, "crystal": 3}, "crew_hp": 5}}
+        ]},
+        {"text": "Leave the ship to its ice.", "outcomes": [
+          {"weight": 100, "text": "You leave it. The lamp in the mess goes on lighting the empty chairs, and the Siltborn watching nod, very slowly, in approval.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "rings_quiet_hour", "type": "empty", "weight": 7, "once": false, "requires": {"region": "siltborn_rings"},
+      "text": "Without any signal, the lights go slowly down across the Ring, one bell after another, to a single faint blue. The chimes stop. Every Siltborn in the lane hangs motionless in the dark, tendrils drifting, and the only sound is the hush of your own engines. It is the Quiet Hour, a hundred years old, held every cycle for no reason anyone can quite explain. A bell drifts up to your window, glowing very low. 'Please,' it says. 'It is only an hour. Stay.'",
+      "choices": [
+        {"text": "Cut the engines and wait.", "outcomes": [
+          {"weight": 100, "text": "You cut the engines. The lane goes silent. In the dark a thousand bells hang round you, faintly blue. Nobody speaks. By the end of the hour the whole crew is lying on the floor of the cockpit, staring at the ceiling, wishing it would never end. When the lights come back, in a rush, each bell flashes your ship a thank-you.", "effects": {"crew_hp": 15, "items": {"fuel": 1}}}
+        ]},
+        {"text": "Carry on regardless.", "outcomes": [
+          {"weight": 100, "text": "The lane is very quiet. Several bells flicker, uncertainly, as you pass. Nobody scolds you. It is just very clear that you have done something, and you cannot quite say what.", "effects": {"rep": {"lumen": -1}, "crew_hp": -5}}
+        ]},
+        {"text": "[Siltborn] Join the hush, and sing the last note.", "requires": {"species": "siltborn"}, "outcomes": [
+          {"weight": 100, "text": "Your Siltborn drifts out into the middle of the lane and glows the faintest blue of all. At the end of the hour, as the lights begin to rise, they hum a single long note, low and warm. The bells answer it. For a moment the whole lane rings, like a struck glass. The old ones weep, softly. In the morning a heap of gifts is waiting at your airlock: a net of ice, a handful of glowing crystal, and a small bright seed.", "effects": {"items": {"fuel": 3, "crystal": 3, "credits": 30}, "crew_hp": 15}}
+        ]},
+        {"text": "[Oorth] Keep the stillness with them.", "requires": {"species": "oorth"}, "outcomes": [
+          {"weight": 100, "text": "Your Oorth sits down in the lock with their hood up and their third eye dim and is perfectly, entirely still. The bells drift near. For an hour the two kinds of quiet sit together. At the end a bell lays a tendril on your Oorth's hand, as one might on a sleeping friend. 'You understood,' it chimes. 'We are glad.' A bag of crystal is left in the lock.", "effects": {"items": {"crystal": 3, "fuel": 1}, "crew_hp": 10}}
+        ]}
+      ]
+    }
+  ]}

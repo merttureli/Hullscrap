@@ -1,0 +1,25 @@
+{
+	"id": "murrow_diggings",
+	"name": "The Murrow Diggings",
+	"home_species": "murrow",
+	"faction": "",
+	"stages": [2, 6],
+	"weight": 3,
+	"rarity": "common",
+	"danger": 1.1,
+	"palette": {"tint": "#a8825a", "nebula": "boneyard"},
+	"map": {},
+	"node_weights": {"asteroid_field": 28, "pirate": 16, "wreck_field": 12, "distress": 12, "trader": 10, "empty": 8, "anomaly": 8, "patrol": 4},
+	"places": [
+		{"id": "burrowgate", "name": "Burrowgate", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"scrap_chunk_m": 1.5, "copper_coil": 1.5, "ice_chunk_s": 0.8},
+	"pois": {"mining_field": 2.5, "abandoned_station": 1.2},
+	"ambient": {"pirate": 3, "trader": 3, "patrol": 1},
+	"stock": {"intake_mk1": 120, "intake_mk2": 270, "tractor_mk1": 160, "laser_cutter": 110, "robot_arm": 110, "smelter_scrap_mk1": 130, "engine_scrap_mk1": 90, "reactor_scrap_mk1": 140, "shield_scrap_mk1": 110, "bolt_thrower_scrap": 150, "bed": 30, "missile": 12},
+	"recruit": {"murrow": 8, "human": 1, "basalt": 1},
+	"enemies": "rustfangs",
+	"hazards": ["debris_surge"],
+	"events": "murrow_diggings",
+	"blurb": "A cluster of asteroid colonies, each a rock with a green door in it and eleven kilometres of lamplit tunnel under the crust. The Murrow dig for a living and for love, and they sell the tools that do it: intakes, tractors and cutters by the crate. Burrowgate is the biggest warren. Wipe your boots."
+}
