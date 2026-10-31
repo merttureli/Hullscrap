@@ -16,6 +16,8 @@ extends RefCounted
 ## - room_work_mult {mult, who?, else_mult?}: factor on the work speed of the crew in the room (Abilities.work_mult).
 ## `side_effects`, per second while the part works:
 ## - shock_organic (rate = hp/s): every up crew member in the room who is not `mechanical` takes that.
+## - scorch (rate = hp/s): every crew member in the room without the `heat_resistant` trait takes that (the mirror of
+##   shock_organic: an Emberkin crew runs a hot part free). It does not touch the part's own heat: `heat` does.
 ## - wet (rate = work factor): crew in the room work at that factor unless their work_mult.extinguish is above 1,
 ##   and every part in the room loses WET_COOLING heat at the start of each second.
 ## "Up" means not downed and not stunned. `who` is a species id, a trait id of the library or a flag of the
@@ -26,7 +28,7 @@ const TraitSet = preload("res://scripts/crew/traits.gd")
 const ABILITY_KEYS: Array[String] = ["engine", "shield", "utility"]  ## the combat keys of an active ability (Abilities.KEYS)
 const TOP_KEYS: Array[String] = ["id", "name", "type", "key", "duration", "cooldown", "effects", "side_effects", "operator_needs", "event", "blurb", "notes"]
 const EFFECTS: Array[String] = ["stat_mult", "shield_layer", "charge_mult", "evasion_add", "crew_bonus", "crew_needed", "room_wall_hp_mult", "heat_above", "room_work_mult"]
-const SIDE_EFFECTS: Array[String] = ["drain_o2", "heat", "power_spike", "fire_risk", "self_damage", "shock_organic", "wet"]
+const SIDE_EFFECTS: Array[String] = ["drain_o2", "heat", "power_spike", "fire_risk", "self_damage", "shock_organic", "scorch", "wet"]
 const CREW_KEYS: Array[String] = ["crew_bonus", "crew_needed", "heat_above"]  ## the effects whose figures change with the crew or the heat
 const BONUS_STATS: Array[String] = ["power", "thrust", "shield_layer"]
 const NEEDED_STATS: Array[String] = ["power", "thrust", "shield_layer", "recharge", "evasion"]
@@ -155,15 +157,25 @@ static func work_of(m, a: Dictionary) -> float:
 
 # --- what a working part does to the room each second ---------------------------------------------
 
-## shock_organic: `rate` hp a second for every up-or-stunned crew member in the room of part `uid` who is not mechanical.
+## shock_organic: `rate` hp a second for every crew member (stunned or not) in the room of part `uid` who is not mechanical.
 static func shock(ship, uid: int, rate: float, dt: float) -> void:
+	_hurt_room(ship, uid, rate * dt, func(m): return bool(TraitSet.of(m)["mechanical"]))
+
+
+## scorch: `rate` hp a second for every crew member in the room of part `uid` who lacks the heat_resistant trait.
+static func scorch(ship, uid: int, rate: float, dt: float) -> void:
+	_hurt_room(ship, uid, rate * dt, func(m): return m.traits().has("heat_resistant"))
+
+
+## Hurt every crew member in the room of part `uid` who is not down and for whom `immune` is false.
+static func _hurt_room(ship, uid: int, amount: float, immune: Callable) -> void:
 	var room := room_of_part(ship, uid)
 	if room < 0:
 		return
 	for m in ship.crew:
-		if m.is_down() or ship.atmosphere.room_at(m.cell()) != room or bool(TraitSet.of(m)["mechanical"]):
+		if m.is_down() or ship.atmosphere.room_at(m.cell()) != room or immune.call(m):
 			continue
-		m.hurt(rate * dt)
+		m.hurt(amount)
 		if m.is_down():
 			m.job = {}
 			m.path.clear()
@@ -251,12 +263,15 @@ static func problems(a: Dictionary, who_ids: Array = [], trait_ids: Array = []) 
 
 
 ## Problems in a whole component def: its abilities (prefixed with their id), a shield-only effect on a part that is not a
-## shield, and a `stats.malfunction_per_min` that is not a chance.
+## shield, a `stats.malfunction_per_min` that is not a chance and a `stats.recharge` that is not a time.
 static func component_problems(c: Dictionary, who_ids: Array = [], trait_ids: Array = []) -> Array[String]:
 	var out: Array[String] = []
 	var m = c.get("stats", {}).get("malfunction_per_min") if c.get("stats") is Dictionary else null
 	if m != null and not (_num(m) and float(m) >= 0.0 and float(m) <= 1.0):
 		out.append("stats.malfunction_per_min must be a chance from 0 to 1 per minute, not '%s'" % str(m))
+	var rc = c.get("stats", {}).get("recharge") if c.get("stats") is Dictionary else null
+	if rc != null and not (_num(rc) and float(rc) > 0.0):
+		out.append("stats.recharge must be the seconds a used layer takes to come back (2.0 is normal), above 0, not '%s'" % str(rc))
 	var list = c.get("abilities", [])
 	if not list is Array:
 		return out

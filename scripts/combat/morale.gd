@@ -7,8 +7,9 @@ extends RefCounted
 ##   running out, makes it "fighting_on": it fights to the end and morale never triggers again. The player's
 ##   turrets hold fire while it stands (a turret hit would refuse it) and go back to how they were after.
 ## - flee ("fleeing"): the pilot burns away stern to the player (pilot_ai.gd) while the jump drive charges for
-##   `spool_s`; the charge holds while no engine can push or the helm is not manned. Full: "escaped", the ship
-##   is moved `escape_distance` px away and stopped.
+##   `spool_s`; the charge holds by spool_hold(): every engine out, the helm down or every crew member down (the
+##   same rule holds the player's own J spool, combat_session.gd). Full: "escaped", the ship is moved
+##   `escape_distance` px away and stopped.
 ## - captured: the enemy had crew aboard and all of it is down (or gone) for `captured_s`: guns and helm stop.
 ## The session ticks it every substep after the arena; the pilot reads pilot_mode(). No nodes, no drawing.
 
@@ -151,12 +152,37 @@ func offer_text() -> String:
 	return ", ".join(bits)
 
 
-## Why the jump drive is not charging: "" when it is, "no engine can push" or "the helm is not manned".
-func spool_block() -> String:
-	if not _engine_pushes():
-		return "no engine can push"
-	if not _helm_manned():
-		return "the helm is not manned"
+## Why the enemy's jump drive is not charging ("" when it is): see spool_hold().
+func hold() -> String:
+	return spool_hold(arena, enemy)
+
+
+## Why the jump drive of ship `idx` cannot charge, for a fleeing enemy and the player's J alike: "engines out"
+## (every engine disabled, offline or unpowered, or none), "helm down" (no helm, or none working and powered) or
+## "no crew" (crew aboard and every one down); "" when it charges. Things the player can cause and see; whether
+## somebody happens to stand at the helm does not count. A ship with an empty crew list (the arena alone spawns
+## none) is not "no crew".
+static func spool_hold(arena, idx: int) -> String:
+	var co = arena.ships[idx]
+	var comps = co.ship.components
+	var engine := false
+	var helm := false
+	for uid in comps.instances:
+		var inst: Dictionary = comps.instances[uid]
+		var family: String = comps.def(inst["id"]).get("family", "")
+		if family != "engine" and family != "helm":
+			continue
+		if inst.get("status", "ok") != "ok" or not co.powered.get(uid, false) or comps.offline_reason(co.ship.grid, uid) != "":
+			continue
+		engine = engine or family == "engine"
+		helm = helm or family == "helm"
+	if not engine:
+		return "engines out"
+	if not helm:
+		return "helm down"
+	var crew: Array = co.ship.crew
+	if not crew.is_empty() and crew.all(func(m): return m.is_down()):
+		return "no crew"
 	return ""
 
 
@@ -257,32 +283,10 @@ func _is_attack(e: Dictionary) -> bool:
 # --- flight -------------------------------------------------------------------------------------------
 
 func _tick_flee(dt: float) -> void:
-	if spool_block() == "":
+	if hold() == "":
 		spool += dt
 	if spool >= float(cfg["spool_s"]) - 1e-6:
 		_escape()
-
-
-## Does some engine of the enemy push (working, linked, powered)?
-func _engine_pushes() -> bool:
-	var co = arena.ships[enemy]
-	var comps = co.ship.components
-	for uid in comps.instances:
-		var inst: Dictionary = comps.instances[uid]
-		if comps.def(inst["id"]).get("family", "") == "engine" and inst.get("status", "ok") == "ok" and co.powered.get(uid, false) \
-				and comps.offline_reason(co.ship.grid, uid) == "":
-			return true
-	return false
-
-
-## Is the enemy's helm working with somebody at it?
-func _helm_manned() -> bool:
-	var ship = arena.ships[enemy].ship
-	for uid in ship.components.instances:
-		var inst: Dictionary = ship.components.instances[uid]
-		if ship.components.def(inst["id"]).get("family", "") == "helm" and inst.get("status", "ok") != "disabled" and ship.manned.has(uid):
-			return true
-	return false
 
 
 ## The jump drive is charged: the enemy is gone, far away along the line from the player and at rest.
