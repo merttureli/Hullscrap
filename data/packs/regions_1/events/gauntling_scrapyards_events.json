@@ -4,18 +4,18 @@
       "text": "Graft Row dock: a long gantry of welded plate, lit by a thousand work lamps, staffed by Gauntlings in every stage of repair. A sign over the airlock reads ASK ME ABOUT MY ARM. The dock foreman, Gasket, is already telling you about hers. It involves a reactor, a sunrise and a man called Dennis.",
       "choices": [
         {"text": "Listen to the whole story.", "outcomes": [
-          {"weight": 80, "text": "Forty minutes later you know more about Dennis than you ever wanted, and the crew are in tears of laughter. Gasket tips you a spare coil for being a good audience.", "effects": {"items": {"copper": 10}, "crew_hp": 10}},
-          {"weight": 20, "text": "The story has a second half. And a third. And a sequel about Dennis's cousin. You leave, richer in anecdote, poorer in time.", "effects": {"crew_hp": 5}}
+          {"weight": 80, "text": "Forty minutes later you know more about Dennis than you ever wanted, and the crew are in tears of laughter. Gasket tips you a spare coil for being a good audience.", "effects": {"items": {"copper": 10}, "crew_hp": 10, "unlock": "ship_gauntling_graft_row"}},
+          {"weight": 20, "text": "The story has a second half. And a third. And a sequel about Dennis's cousin. You leave, richer in anecdote, poorer in time.", "effects": {"crew_hp": 5, "unlock": "ship_gauntling_graft_row"}}
         ]},
         {"text": "Tell your own story, bigger.", "outcomes": [
-          {"weight": 50, "text": "You tell the story of the worst day of your life, with embellishments. Gasket listens, nods, and says 'Not bad. Needs more explosion.' She adds one. Everyone cheers.", "effects": {"items": {"credits": 20}, "rep": {"clans": 1}, "crew_hp": 5}},
-          {"weight": 50, "text": "Gasket tops it in a single sentence. You lose with grace, and are bought a drink.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+          {"weight": 50, "text": "You tell the story of the worst day of your life, with embellishments. Gasket listens, nods, and says 'Not bad. Needs more explosion.' She adds one. Everyone cheers.", "effects": {"items": {"credits": 20}, "rep": {"clans": 1}, "crew_hp": 5, "unlock": "ship_gauntling_graft_row"}},
+          {"weight": 50, "text": "Gasket tops it in a single sentence. You lose with grace, and are bought a drink.", "effects": {"items": {"credits": -10}, "crew_hp": 5, "unlock": "ship_gauntling_graft_row"}}
         ]},
         {"text": "[Gauntling] Compare parts.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling and Gasket line up their arms side by side, name every bolt, and settle whose is older. It is a tie. They hug, with a sound like a scrapyard falling down a hill. The dock gives you a discount on the whole gantry.", "effects": {"items": {"scrap": 30, "copper": 10}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Gauntling and Gasket line up their arms side by side, name every bolt, and settle whose is older. It is a tie. They hug, with a sound like a scrapyard falling down a hill. The dock gives you a discount on the whole gantry.", "effects": {"items": {"scrap": 30, "copper": 10}, "crew_hp": 5, "unlock": "ship_gauntling_graft_row"}}
         ]},
         {"text": "[Mire] Ask if anyone has been on fire.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Gasket's lamp lights. 'Do tell,' she says. Your Mire and the dock foreman swap fire stories for an hour, comparing burns like medals. The dock gives your Mire a welding mask as a trophy.", "effects": {"items": {"scrap": 25}, "crew_hp": 10}}
+          {"weight": 100, "text": "Gasket's lamp lights. 'Do tell,' she says. Your Mire and the dock foreman swap fire stories for an hour, comparing burns like medals. The dock gives your Mire a welding mask as a trophy.", "effects": {"items": {"scrap": 25}, "crew_hp": 10, "unlock": "ship_gauntling_graft_row"}}
         ]}
       ]
     },
@@ -148,15 +148,15 @@
       "text": "Old Weld, who is more machine than anything else by now, keeps an Arc Core in a cage: a reactor that burns bright and mean and arcs a bolt through any soft thing in its room. 'Organic crew take two a second,' she says, cheerfully. 'Ion-hardened crew take nothing. It is a hell of a reactor.' She opens the cage. 'Run it for an hour in a closed room. Tell me how it feels.'",
       "choices": [
         {"text": "Run it yourself. You are organic.", "outcomes": [
-          {"weight": 40, "text": "You run it, wearing rubber gloves and a very large hat. You feel it in your fillings. At the hour mark Weld opens the door, looks at you, and nods. 'You are daft,' she says, with real warmth. She gives you the schematics.", "effects": {"crew_hp": -15, "flag": "tech_arc_core"}},
-          {"weight": 35, "text": "You run it with the crew taking turns, ten minutes each. It is the funniest hour of the trip. Everyone has hair like a dandelion. Weld hands over the schematics.", "effects": {"crew_hp": -10, "flag": "tech_arc_core"}},
-          {"weight": 25, "text": "A bolt finds the fillings of one of the crew. They will be fine in the morning. Weld, deeply impressed, signs.", "effects": {"crew_hp": -20, "flag": "tech_arc_core"}}
+          {"weight": 40, "text": "You run it, wearing rubber gloves and a very large hat. You feel it in your fillings. At the hour mark Weld opens the door, looks at you, and nods. 'You are daft,' she says, with real warmth. She gives you the schematics.", "effects": {"crew_hp": -15, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}},
+          {"weight": 35, "text": "You run it with the crew taking turns, ten minutes each. It is the funniest hour of the trip. Everyone has hair like a dandelion. Weld hands over the schematics.", "effects": {"crew_hp": -10, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}},
+          {"weight": 25, "text": "A bolt finds the fillings of one of the crew. They will be fine in the morning. Weld, deeply impressed, signs.", "effects": {"crew_hp": -20, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}}
         ]},
         {"text": "[Gauntling] Run it with a Gauntling.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling sits in the cage with the Arc Core for an hour, perfectly calm, lit up by bolts. 'Tickles,' they report. Old Weld whoops. She hands over the schematics, a coil of her best cable and a crate of washers.", "effects": {"items": {"copper": 25, "scrap": 30}, "rep": {"clans": 1}, "flag": "tech_arc_core"}}
+          {"weight": 100, "text": "Your Gauntling sits in the cage with the Arc Core for an hour, perfectly calm, lit up by bolts. 'Tickles,' they report. Old Weld whoops. She hands over the schematics, a coil of her best cable and a crate of washers.", "effects": {"items": {"copper": 25, "scrap": 30}, "rep": {"clans": 1}, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}}
         ]},
         {"text": "Line the room with 20 polymer first.", "requires": {"items": {"polymer": 20}}, "pay": true, "outcomes": [
-          {"weight": 100, "text": "You line the room with polymer. The bolts splash off, harmless. Weld says it is cheating, and also the first sensible thing anyone has done. She signs.", "effects": {"flag": "tech_arc_core"}}
+          {"weight": 100, "text": "You line the room with polymer. The bolts splash off, harmless. Weld says it is cheating, and also the first sensible thing anyone has done. She signs.", "effects": {"flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}}
         ]},
         {"text": "Come back with rubber gloves.", "outcomes": [
           {"weight": 100, "text": "'Bring a hat,' says Weld. 'Hair will go.'", "effects": {}}

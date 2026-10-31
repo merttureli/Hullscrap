@@ -145,7 +145,7 @@ func _halcyon_tender() -> Dictionary:
 		"hangar": {"group": "Haven", "layout": "A", "unlock": "ship_halcyon_tender"},
 		"crew": _crew("human", ["Odette"]) + [{"name": "Mallow", "species": "sporeling"}],
 		"blurb": "A garden tender from Halcyon: round, soft-plated and unarmoured in spirit. One pulse gun, a medbay in the hold, and forty years of seeds' worth of room to grow in.",
-		"frame": _sym(20, [["arc", 12, 2, 270, 360], [4, 14], [10, 20], [28, 20], [34, 14], ["arc", 12, 38, 0, 90]]),
+		"frame": _sym(24, [["arc", 8, 2, 270, 360], [16, 24], [26, 24], [40, 10], ["arc", 8, 40, 0, 90]]),
 		"outline": _sym(CX, [["arc", 4, 2, 270, 360], [6, 6], ["arc", 7, 8, 270, 360], ["arc", 7, 14, 0, 90], [16, 6], ["arc", 4, 19, 0, 90]]),
 		"plate": "whipple_spacer",
 		"cargo": {"scrap": 300, "copper": 80, "polymer": 80, "silicon": 20, "medbay": 1, "shield_mk1": 1, "credits": 300, "fuel": 8},
@@ -162,7 +162,7 @@ func _kettle_tug() -> Dictionary:
 		"hangar": {"group": "Clans", "layout": "C", "unlock": "ship_kettle_tug"},
 		"crew": _crew("human", ["Hob", "Nan"]) + [{"name": "Rook", "species": "basalt"}],
 		"blurb": "Ma Gantry's own tug: a round, scrap-plated pot with her Kettle in the engine room. Two more power than it has any right to, a room that smells of tea and smoke, and a scrap-fed bolt gun.",
-		"frame": _sym(20, [[0, 8], [6, 14], [9, 20], [32, 20], [35, 14], [41, 8]]),
+		"frame": _sym(20, [[0, 6], [8, 14], [11, 20], [32, 20], [35, 14], [43, 6]]),
 		"outline": _sym(CX, [["arc", 4, 2, 270, 360], [5, 6], ["arc", 7, 7, 270, 360], ["arc", 7, 19, 0, 90]]),
 		"plate": "scrap_plate",
 		"cargo": {"scrap": 700, "copper": 80, "polymer": 30, "shield_scrap_mk1": 1, "net_mouth_scrap": 1, "credits": 300, "fuel": 8},
@@ -213,7 +213,7 @@ func _lumen_skiff() -> Dictionary:
 		"frame": _sym(18, [[0, 6], [6, 12], [10, 12], [16, 18], [28, 18], [34, 12], [40, 6]]),
 		"outline": _sym(CX, [[0, 3], [3, 6], [8, 6], [12, 10], [14, 10], [16, 8], [20, 8], [21, 6]]),
 		"plate": "neon_lattice",
-		"cargo": {"scrap": 300, "copper": 60, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "shield_neon_mk1": 1, "credits": 400, "fuel": 6},
+		"cargo": {"scrap": 300, "copper": 60, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "shield_neon_mk1": 1, "engine_neon_mk1": 1, "credits": 400, "fuel": 6},
 	}))
 
 
@@ -226,10 +226,10 @@ func _hollow_touched() -> Dictionary:
 		"hangar": {"group": "Hollow", "layout": "A", "unlock": "ship_hollow_touched"},
 		"crew": _crew("human", ["Calder"]) + [{"name": "Tor", "species": "basalt"}],
 		"blurb": "Everything works, and everything is a little too clean. A lopsided hull, plating polished to a mirror, a Leech Laser that takes your power and a Mirror Veil in the hold. Stay to dinner.",
-		"frame": _sym(22, [[0, 8], [8, 16], [14, 22], [30, 22], [36, 16], [42, 10]]),
-		"outline": _sym(CX, [[0, 4], [4, 6], [20, 6], [21, 5]]),
+		"frame": _sym(22, [["arc", 8, 2, 270, 360], [4, 10], [14, 20], [28, 20], [38, 10], [40, 10]], [[0, 8], [8, 16], [14, 16], [14, 22], [26, 22], [26, 16], [34, 16], [40, 10]]),
+		"outline": _sym(CX, [["arc", 4, 2, 270, 360], [4, 6], ["arc", 8, 6, 270, 360], ["arc", 8, 17, 0, 90], [19, 6], ["arc", 4, 19, 0, 90]], [[0, 4], [4, 6], [7, 6], [7, 8], [10, 8], [10, 7], [13, 7], [13, 9], [16, 9], [16, 6], [20, 6], [21, 5]]),
 		"plate": "reflective_coating",
-		"cargo": {"scrap": 300, "copper": 60, "polymer": 40, "silicon": 20, "mirror_veil": 1, "credits": 250, "fuel": 6},
+		"cargo": {"scrap": 300, "copper": 60, "polymer": 40, "silicon": 20, "mirror_veil": 1, "inertial_dampener": 1, "credits": 250, "fuel": 6},
 	}))
 
 
@@ -243,9 +243,9 @@ func _patience_sister() -> Dictionary:
 		"crew": _crew("human", ["Teodor"]),
 		"blurb": "The Patience's little sister, never launched: a flagship's frame and a skeleton built in it. One engine, one pulse gun, a skeleton crew and military circuit boards in the hold. A hard start with room to grow.",
 		"frame": _sym(24, [[0, 8], [8, 8], [16, 16], [20, 16], [28, 24], [44, 24], [52, 16], [58, 16]]),
-		"outline": _sym(CX, [[0, 4], [4, 6], [22, 6], [23, 5]]),
+		"outline": _sym(CX, [[0, 4], [4, 6], [8, 6], [8, 8], [14, 8], [16, 6], [22, 6], [23, 5]]),
 		"plate": "titanium_alloy",
-		"cargo": {"scrap": 500, "copper": 100, "titanium": 60, "polymer": 40, "military_circuit": 4, "shield_mk1": 1, "credits": 300, "fuel": 6},
+		"cargo": {"scrap": 500, "copper": 100, "titanium": 60, "polymer": 40, "military_circuit": 4, "shield_mk1": 1, "engine_mk1": 1, "credits": 300, "fuel": 6},
 	}))
 
 
@@ -278,7 +278,7 @@ func _human_ring_runner() -> Dictionary:
 	return _race_ship("human_ring_runner", "Ring Runner", "Human", "A", _crew("human", ["Pell", "Ines"]),
 		"The balanced ship of the Haldane Ring: swept wings, a titanium skin, a laser, two good engines and nothing to apologise for. Deluxe quarters in the engine room, a spare Reactor Plus in the hold.",
 		k, _sym(CX, [[0, 4], [4, 6], [8, 6], [11, 9], [14, 9], [17, 6], [20, 6], [21, 5]]),
-		_sym(20, [[0, 6], [6, 12], [10, 12], [18, 20], [28, 20], [36, 12], [46, 12]]), "titanium_alloy",
+		_sym(21, [[0, 5], [16, 21], [30, 21], [30, 10], [46, 10]]), "titanium_alloy",
 		_cargo({"titanium": 40}, ["shield_mk1", _p("human_reactor_plus", "reactor_mk1")]))
 
 
@@ -288,7 +288,7 @@ func _human_formal_complaint() -> Dictionary:
 	return _race_ship("human_formal_complaint", "Formal Complaint", "Human", "B", _crew("human", ["Maud", "Teodor"]),
 		"Filed in triplicate and fired in salvos: a Volley Rack on a pylon-shouldered hull, ten missiles in the rack and a Flak Screen in the hold for the replies.",
 		k, _sym(CX, [[0, 3], [2, 5], [5, 5], [5, 9], [9, 9], [12, 6], [20, 6], [21, 5]]),
-		_sym(18, [[0, 8], [10, 8], [20, 18], [30, 18], [40, 8], [46, 8]]), "titanium_alloy",
+		_sym(18, [[0, 18], [12, 18], [36, 6], [46, 6]]), "titanium_alloy",
 		_cargo({"missile": 10}, ["shield_mk1", _p("human_flak_screen", "laser_turret_mk1")]))
 
 
@@ -298,7 +298,7 @@ func _basalt_deepcut() -> Dictionary:
 	return _race_ship("basalt_deepcut", "Deepcut", "Basalt", "A", _crew("basalt", ["Slate", "Tuff", "Flint"]),
 		"A quarry block with an engine: heavy plating, a Vacuum Forge that runs best with no air in the room and a Magma Spitter that keeps eating. The crew do not mind the vacuum. The Soldier does.",
 		k, _sym(CX, [[0, 4], [4, 8], [19, 8], [20, 7], [21, 6]]),
-		_sym(22, [[0, 10], [8, 18], [14, 18], [18, 22], [34, 22], [38, 18], [44, 18], [52, 10]]), "heavy_armor",
+		_sym(22, [[0, 6], [16, 22], [36, 22], [52, 6]]), "heavy_armor",
 		_cargo({"titanium": 40, "silicon": 20}, ["shield_mk1", _p("basalt_stonehide_bay", "inertial_dampener")]),
 		{"backed": func(c): return c.y <= 1, "thick": func(c): return c.y <= 3})
 
@@ -309,7 +309,7 @@ func _basalt_long_quiet() -> Dictionary:
 	return _race_ship("basalt_long_quiet", "Long Quiet", "Basalt", "B", _crew("basalt", ["Shale", "Gabbro"]),
 		"Nobody has ever hurried it. A stepped monolith of heavy armour, a Quarry Driver that fires one slug that pierces three walls, small engines, a Mk2 shield in the hold and a long silence.",
 		k, _sym(CX, [[0, 3], [2, 5], [4, 5], [4, 7], [8, 7], [8, 9], [14, 9], [16, 7], [20, 7], [21, 6]]),
-		_sym(20, [[0, 8], [8, 16], [14, 16], [18, 20], [30, 20], [34, 16], [44, 16], [50, 10]]), "heavy_armor",
+		_sym(20, [[0, 8], [6, 8], [6, 14], [14, 14], [14, 20], [38, 20], [38, 14], [44, 14], [44, 8], [50, 8]]), "heavy_armor",
 		_cargo({"titanium": 60}, ["shield_mk2", _p("basalt_stonehide_bay", "inertial_dampener")]),
 		{"backed": func(c): return c.y <= 1 or (c.y >= 5 and c.y <= 19), "thick": func(_c): return true})
 
@@ -327,12 +327,12 @@ func _emberkin_ember_kite() -> Dictionary:
 
 ## Emberkin B. A fire ship: a round-shouldered pan of a hull, a Cinder Mortar that lobs incendiaries, two engines and crew who stand in the flames.
 func _emberkin_flashpan() -> Dictionary:
-	var k := _spine({"gun": _p("emberkin_cinder_mortar", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2", "engine_mk2"], "extra": [["radiator", CX - 5, 15]]})
+	var k := _spine({"gun": _p("emberkin_cinder_mortar", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2", "engine_mk2"]})
 	return _race_ship("emberkin_flashpan", "Flashpan", "Emberkin", "B", _crew("emberkin", ["Ziv", "Wick"]),
 		"Round-shouldered and quick to catch: a Cinder Mortar that lobs fire, two engines and a hull that does not mind it. The Emberkin crew stand in the flames and call for more.",
 		k, _sym(CX, [["arc", 4, 2, 270, 360], ["arc", 6, 6, 270, 360], ["arc", 6, 17, 0, 90], ["arc", 4, 19, 0, 90]]),
-		_sym(18, [[0, 6], [6, 12], [10, 12], [16, 18], [30, 18], [36, 12], [40, 12], [46, 6]]), "ablative_plating",
-		_cargo({"polymer": 50}, ["shield_mk1", "heat_suit"]))
+		_sym(18, [[0, 12], [6, 18], [28, 18], [34, 12], [34, 4], [52, 4]]), "ablative_plating",
+		_cargo({"polymer": 50, "heat_suit": 2}, [_p("emberkin_hearth_shield", "shield_mk1"), "radiator"]), {"at": [10, 8]})
 
 
 ## Fenn A. A quick stall on long ears: a Twitch Cannon, a Haggle Engine and a Mk1 beside it, all fixed by quick hands. Fragile.
@@ -340,7 +340,7 @@ func _fenn_sold_twice() -> Dictionary:
 	var k := _spine({"gun": _p("fenn_twitch_cannon", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": [_p("fenn_haggle_engine", "engine_mk2"), "engine_mk1"]})
 	return _race_ship("fenn_sold_twice", "Sold Twice", "Fenn", "A", _crew("fenn", ["Quill", "Fizz", "Tuppence"]),
 		"Quick, light and sold twice before it left the dock: a Twitch Cannon that fires fast and sulks, a Haggle Engine, a Jury Reactor in the hold. The Fenn crew mend it faster than it breaks.",
-		k, _sym(CX, [[0, 2], [0, 4], [-6, 4], [-6, 6], [4, 6], [8, 6], [20, 6], [21, 5]]),
+		k, _sym(CX, [[0, 2], [0, 4], [-5, 4], [-6, 5], [-5, 6], [4, 6], [20, 6], [21, 5]]),
 		_sym(18, [[0, 4], [8, 12], [14, 12], [20, 18], [30, 18], [40, 8], [46, 8]]), "whipple_spacer",
 		_cargo({"silicon": 20}, ["shield_mk1", _p("fenn_jury_reactor", "reactor_mk1"), _p("fenn_quickfix_bay", "inertial_dampener")]),
 		{"top": 8})
@@ -353,7 +353,7 @@ func _fenn_closing_sale() -> Dictionary:
 		"Everything must go, preferably at someone else. A wide canopy for a bow, a Market Missile that runs on scrap (a quarter of them duds), and a salvage intake in the hold to restock from the wrecks.",
 		k, _sym(CX, [[0, 8], [3, 8], [5, 6], [20, 6], [21, 5]]),
 		_sym(22, [[0, 14], [6, 14], [10, 18], [20, 18], [24, 22], [34, 22], [42, 14], [46, 14]]), "titanium_alloy",
-		_cargo({"scrap": 600}, ["shield_mk1", "intake_mk1"]))
+		_cargo({"scrap": 600}, ["shield_mk1", "intake_mk1", _p("fenn_jury_reactor", "reactor_mk1")]))
 
 
 ## Kett A. A segmented hive cell: a scrap hull in bumps like body rings, a Chitin Thrower that wants two hands, a Brood Hold in the engine room.
@@ -363,7 +363,7 @@ func _kett_ninefold_cell() -> Dictionary:
 		"One cell of the hive: ringed like a body, a Chitin Thrower that wants two Kett on it and a Brood Hold in the engine room where they work together. Alone, a Kett sulks.",
 		k, _sym(CX, [[0, 4], [4, 6], [6, 6], [6, 7], [8, 7], [8, 6], [10, 6], [10, 7], [12, 7], [12, 6], [14, 6], [14, 7], [16, 7], [16, 6], [20, 6], [21, 5]]),
 		_sym(20, [[0, 6], [6, 12], [10, 12], [14, 16], [18, 16], [22, 20], [30, 20], [34, 16], [38, 16], [42, 12], [46, 12]]), "scrap_plate",
-		_cargo({"polymer": 50}, ["shield_mk1", _p("kett_hive_battery", "shield_mk2")]))
+		_cargo({"polymer": 50}, [_p("kett_hive_battery", "shield_mk1"), "engine_mk1"]))
 
 
 ## Kett B. A boarder: a nest with swollen rear sacs, a Hive Swarm Launcher, a Breach Harpoon to latch on and four Kett to go over.
@@ -373,7 +373,7 @@ func _kett_picket_nest() -> Dictionary:
 		"A nest that goes visiting: a Hive Swarm Launcher, a Breach Harpoon in the hold to latch on, and five hands on the rivet guns. Four Kett and a Soldier make a very quick crew.",
 		k, _sym(CX, [[0, 4], [4, 6], [11, 6], ["arc", 7, 13, 270, 360], ["arc", 7, 18, 0, 90], [20, 6], [21, 5]]),
 		_sym(20, [[0, 8], [4, 12], [8, 12], [12, 16], [16, 16], [20, 20], [32, 20], [38, 14], [44, 14]]), "scrap_plate",
-		_cargo({"missile": 8}, ["shield_mk1", "breach_harpoon"]))
+		_cargo({"missile": 8}, [_p("kett_hive_battery", "shield_mk1"), "breach_harpoon"]))
 
 
 ## Mire A. A fire tender: a teardrop with a belly of water at the stern, a Steam Lance and a Wetwell Reactor in the hold. Crew who put fires out twice as fast.
@@ -392,7 +392,7 @@ func _mire_geyser_season() -> Dictionary:
 	return _race_ship("mire_geyser_season", "Geyser Season", "Mire", "B", _crew("mire", ["Mool", "Plom"]),
 		"A siege ship with a steam stack on each flank: a Bog Mortar whose slurry eats the wall it lands on and a Mist Projector in the hold to slow what is left. Wet, loud and quite safe from fire.",
 		k, _sym(CX, [[0, 4], [4, 6], [8, 6], [8, 8], [10, 8], [10, 9], [16, 9], [16, 8], [18, 8], [18, 6], [20, 6], [21, 5]]),
-		_sym(20, [[0, 10], [6, 16], [10, 16], [14, 20], [30, 20], [34, 16], [40, 16], [46, 10]]), "titanium_alloy",
+		_sym(20, [[0, 6], [10, 16], [14, 16], [18, 20], [30, 20], [34, 16], [38, 16], [48, 6]]), "titanium_alloy",
 		_cargo({"polymer": 50}, [_p("mire_rain_shield", "shield_mk1"), _p("mire_mist_projector", "laser_turret_mk1")]))
 
 
@@ -404,8 +404,8 @@ func _sporeling_first_bloom() -> Dictionary:
 	return _race_ship("sporeling_first_bloom", "First Bloom", "Sporeling", "A", _crew("sporeling", ["Mallow", "Morel", "Sorrel"]),
 		"A mushroom with an engine: a round cap for a bridge on a narrow stalk, a Bloom Reactor that eats its room's air (the crew make more), a Garden Bay and a Spore Cannon that thins the enemy's.",
 		k, _sym(CX, [["arc", 7, 2, 270, 360], ["arc", 7, 5, 0, 90], [7, 6], [20, 6], [21, 5]]),
-		_sym(18, [[0, 8], [6, 14], [10, 14], [14, 18], [30, 18], [38, 10], [44, 10]]), "whipple_spacer",
-		_cargo({"polymer": 80}, ["shield_mk1", _p("sporeling_mycelium_shield", "shield_mk1")]))
+		_sym(22, [[0, 10], [12, 22], [16, 22], [22, 16], [32, 16], [38, 22], [44, 22], [50, 16]]), "whipple_spacer",
+		_cargo({"polymer": 80}, [_p("sporeling_mycelium_shield", "shield_mk1"), _p("sporeling_pollen_turret", "laser_turret_mk1")]))
 
 
 ## Sporeling B. A shield wall: a round slab of a hull, a Rot Pod and a Mycelium Shield in the hold that regrows.
@@ -415,8 +415,8 @@ func _sporeling_mycelium_wall() -> Dictionary:
 	return _race_ship("sporeling_mycelium_wall", "Mycelium Wall", "Sporeling", "B", _crew("sporeling", ["Hush", "Nettle"]),
 		"A slab that grows back: a rounded wall of a hull, a Rot Pod that spreads along the wall it hits and a Mycelium Shield in the hold that regrows its layers. Patient, damp and hard to shift.",
 		k, _sym(CX, [["arc", 7, 2, 270, 360], ["arc", 7, 19, 0, 90]]),
-		_sym(22, [[0, 12], [6, 18], [10, 18], [14, 22], [34, 22], [38, 18], [42, 18], [48, 12]]), "whipple_spacer",
-		_cargo({"polymer": 80, "missile": 6}, [_p("sporeling_mycelium_shield", "shield_mk2")]),
+		_sym(26, [[0, 10], [16, 26], [26, 26], [40, 12]]), "whipple_spacer",
+		_cargo({"polymer": 80, "missile": 6}, [_p("sporeling_mycelium_shield", "shield_mk2"), _p("sporeling_garden_bay", "oxygen_gen")]),
 		{"backed": func(c): return c.y <= 1, "thick": func(c): return c.y <= 3})
 
 
@@ -429,7 +429,7 @@ func _gauntling_graft_row() -> Dictionary:
 		_sym(20, [[0, 6], [6, 12], [10, 12], [18, 20], [28, 20], [36, 12], [46, 12]], [[0, 10], [10, 20], [16, 20], [22, 14], [36, 14], [40, 10], [46, 10]]),
 		func(c): return "titanium_alloy" if (c.x + c.y * 2) % 5 == 0 else "scrap_plate",
 		_cargo({"scrap": 600}, ["shield_scrap_mk1", _p("gauntling_graft_bay", "robot_arm")]),
-		{"plated": func(c): return (c.x * 5 + c.y * 3) % 7 > 1})
+		{"plated": func(c): return (c.x * 3 + c.y * 2) % 11 > 0, "backed": func(c): return c.y <= 1 or (c.x >= 15 and c.y >= 9 and c.y <= 17), "thick": func(_c): return true})
 
 
 ## Gauntling B. A scavenger: a mast and a lamp on a lopsided hull, a Scrap Shotgun that jams, a salvage intake and a Net Mouth in the hold.
@@ -437,15 +437,15 @@ func _gauntling_lamp_post() -> Dictionary:
 	var k := _spine({"gun": _p("gauntling_scrap_shotgun", "pulse_mk1"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2", "engine_mk1"]})
 	return _race_ship("gauntling_lamp_post", "Lamp Post", "Gauntling", "B", _crew("gauntling", ["Gasket", "Shunt"]),
 		"A scavenger with a mast and a work lamp: a Scrap Shotgun that jams one volley in seven, a salvage intake and a Net Mouth in the hold, and a Tesla Picket to bolt on when someone is rude about the lamp.",
-		k, _sym(CX, [[0, 4], [4, 6], [20, 6], [21, 5]]),
+		k, _sym(CX, [[0, 2], [0, 6], [-8, 6], [-8, 8], [4, 8], [4, 6], [20, 6], [21, 5]], [[0, 4], [4, 6], [20, 6], [21, 5]]),
 		_sym(20, [[0, 8], [8, 16], [14, 16], [18, 20], [30, 20], [38, 12], [44, 12]]), "scrap_plate",
-		_cargo({"scrap": 600}, ["shield_scrap_mk1", "intake_mk1", "net_mouth_scrap", _p("gauntling_tesla_picket", "laser_turret_mk1")]))
+		_cargo({"scrap": 600}, ["shield_scrap_mk1", "intake_mk1", "net_mouth_scrap", _p("gauntling_tesla_picket", "laser_turret_mk1")]), {"top": 10})
 
 
 ## Prismatic A. A bell of crystal: a pointed bow flaring to the stern, a Prism Lens that wants a Prismatic on it, a Resonance Helm, an Ion Drive Halo.
 func _prismatic_tuning_bell() -> Dictionary:
 	var k := _spine({"gun": _p("prismatic_prism_lens", "heat_lance_neon"), "reactor": "reactor_neon_mk1", "o2": "oxygen_gen", "helm": _p("prismatic_resonance_helm", "helm"), "engines": ["engine_neon_mk2"],
-		"extra": [["radiator", CX - 5, 15]]})
+		"extra": [["radiator", CX - 5, 15], ["radiator", CX + 3, 15]]})
 	return _race_ship("prismatic_tuning_bell", "Tuning Bell", "Prismatic", "A", _crew("prismatic", ["Gleam", "Facet", "Chime"]),
 		"A bell struck once: a faceted hull flaring to the stern, a Prism Lens at full power only with a crystal-born hand on it, a Resonance Helm that evades for a Prismatic and a Song Reactor in the hold.",
 		k, _sym(CX, [[0, 3], [3, 6], [10, 6], [14, 10], [20, 10], [21, 9]]),
@@ -459,8 +459,8 @@ func _prismatic_flat_note() -> Dictionary:
 	return _race_ship("prismatic_flat_note", "Flat Note", "Prismatic", "B", _crew("prismatic", ["Prism", "Sheen"]),
 		"A note a little off true: a lozenge of reflective plating, a Refractor that splits its shots on a shield and a Lattice Shield in the hold. Brilliant, thin-skinned and fatally afraid of ion.",
 		k, _sym(CX, [[0, 4], [4, 8], [8, 10], [12, 10], [16, 8], [20, 6], [21, 5]]),
-		_sym(22, [[0, 6], [8, 14], [12, 14], [20, 22], [24, 22], [34, 12], [44, 12]]), "reflective_coating",
-		_cargo({"silicon": 40, "crystal": 12, "plasma_cell": 3}, [_p("prismatic_lattice_shield", "shield_neon_mk1")]))
+		_sym(20, [[0, 4], [16, 20], [26, 20], [42, 4]]), "reflective_coating",
+		_cargo({"silicon": 40, "crystal": 12, "plasma_cell": 3}, [_p("prismatic_lattice_shield", "shield_neon_mk1"), "radiator"]))
 
 
 ## Grundl A. A barge: a wide boxed hull with a notch in the stern, a Slug Mortar that empties its racks fast and Hauler Thrusters that need a Grundl to restock.
@@ -469,7 +469,7 @@ func _grundl_second_helping() -> Dictionary:
 	return _race_ship("grundl_second_helping", "Second Helping", "Grundl", "A", _crew("grundl", ["Hodd", "Brack"]),
 		"A barge with the bow of a warship: a Slug Mortar that throws half the cargo, Hauler Thrusters that a Grundl keeps fed, a hold you could live in and a freight shield for the way home.",
 		k, _sym(CX, [[0, 5], [2, 7], [4, 7], [4, 9], [19, 9], [21, 7]]),
-		_sym(22, [[0, 12], [6, 18], [10, 18], [14, 22], [34, 22], [38, 18], [44, 18], [52, 10]]), "heavy_armor",
+		_sym(24, [[0, 10], [10, 20], [14, 20], [18, 24], [34, 24], [38, 20], [42, 20], [52, 10]]), "heavy_armor",
 		_cargo({"scrap": 800, "titanium": 40}, [_p("grundl_freight_shield", "shield_mk1"), _p("grundl_cargo_deck", "inertial_dampener")]),
 		{"backed": func(c): return c.y <= 1, "thick": func(c): return c.y <= 3})
 
@@ -479,7 +479,7 @@ func _grundl_tow_rope() -> Dictionary:
 	var k := _spine({"gun": _p("grundl_grapple_harpoon", "breach_harpoon"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2", "engine_mk2"]})
 	return _race_ship("grundl_tow_rope", "Tow Rope", "Grundl", "B", _crew("grundl", ["Moll", "Grace"]),
 		"A tug with two long tongs for a bow: a Grapple Harpoon that drags the enemy in close and a crew who hit twice as hard in a corridor. It brings the fight to you, slowly.",
-		k, _sym(CX, [[0, 2], [0, 6], [-8, 6], [-8, 9], [4, 9], [4, 7], [8, 7], [20, 7], [21, 6]]),
+		k, _sym(CX, [[0, 2], [0, 6], [-6, 6], [-8, 8], [-8, 9], [4, 9], [4, 7], [20, 7], [21, 6]]),
 		_sym(22, [[0, 10], [6, 16], [10, 16], [16, 22], [34, 22], [40, 16], [46, 10]]), "heavy_armor",
 		_cargo({"scrap": 600}, [_p("grundl_freight_shield", "shield_mk1"), _p("grundl_cargo_deck", "inertial_dampener")]),
 		{"top": 10, "backed": func(c): return c.y <= 1, "thick": func(c): return c.y <= 3})

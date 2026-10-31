@@ -10,8 +10,7 @@
         "ship": "halcyon_tender",
         "group": "haven",
         "layout": "A"
-      },
-      "pending": true
+      }
     },
     {
       "id": "ship_kettle_tug",
@@ -22,8 +21,7 @@
         "ship": "kettle_tug",
         "group": "clans",
         "layout": "C"
-      },
-      "pending": true
+      }
     },
     {
       "id": "ship_concord_frigate",
@@ -34,8 +32,7 @@
         "ship": "concord_frigate",
         "group": "concord",
         "layout": "B"
-      },
-      "pending": true
+      }
     },
     {
       "id": "ship_door_prize",
@@ -46,8 +43,7 @@
         "ship": "door_prize",
         "group": "clans",
         "layout": "B"
-      },
-      "pending": true
+      }
     },
     {
       "id": "ship_lumen_skiff",
@@ -58,8 +54,7 @@
         "ship": "lumen_skiff",
         "group": "lumen",
         "layout": "B"
-      },
-      "pending": true
+      }
     },
     {
       "id": "ship_hollow_touched",
@@ -70,8 +65,7 @@
         "ship": "hollow_touched",
         "group": "hollow",
         "layout": "A"
-      },
-      "pending": true
+      }
     },
     {
       "id": "ship_patience_sister",
@@ -82,8 +76,7 @@
         "ship": "patience_sister",
         "group": "concord",
         "layout": "C"
-      },
-      "pending": true
+      }
     },
     {
       "id": "start_halcyon_scout",
