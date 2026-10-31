@@ -4,6 +4,7 @@ extends "res://tests/base_test.gd"
 ## every effect type, goto pages, once, fights calling back, the debt events and the pack conventions.
 
 const Events = preload("res://scripts/space/events.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
@@ -478,7 +479,7 @@ func test_effect_fight_is_handed_back_not_started() -> void:
 	eq(_fx({"fight": "tier"}, c, ship)["fight"], "tier", "tier")
 	eq(_fx({"fight": "pirate_raider"}, c, ship)["fight"], "pirate_raider", "a design id")
 	eq(c.fight_path("pirate_raider", "pirate"), "res://data/ships/pirate_raider.json", "which is a file in data/ships")
-	check(FileAccess.file_exists(c.fight_path("tier", "pirate")), "tier rolls a design that exists")
+	check(Shipgen.from_spec(c.fight_path("tier", "pirate")) != null, "tier rolls a generated ship that builds")
 
 
 func test_effect_goto_names_the_next_page() -> void:

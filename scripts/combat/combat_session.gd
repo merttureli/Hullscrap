@@ -11,6 +11,7 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 
 const PIRATE_PATH := "res://data/ships/pirate_raider.json"
 const RAMMER_PATH := "res://data/ships/rustfang_rammer.json"  ## the test rammer (Shift+K in the combat view)
@@ -34,9 +35,11 @@ var enemy_label := "Pirate"
 var _acc := 0.0
 
 
-## A ship from a saved-ship JSON file (Ship.to_dict format), or null when it cannot be loaded. A
-## design's `ai` entry ({"style": "rammer"}) is kept on the ship as the meta value "ai" and read by start().
+## A ship from a saved-ship JSON file (Ship.to_dict format) or a generated one (a Shipgen spec), or null when it cannot be
+## loaded. A design's `ai` entry ({"style": "rammer"}) is kept on the ship as the meta value "ai" and read by start().
 static func load_ship(path: String) -> Ship:
+	if Shipgen.is_spec(path):  # a generated enemy: "gen:<faction>:<size>:<seed>:<budget x 100>[:ram]"
+		return Shipgen.from_spec(path)
 	if not FileAccess.file_exists(path):
 		return null
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
