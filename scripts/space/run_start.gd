@@ -93,24 +93,39 @@ static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 	return lines
 
 
-## Make the ship's soldier (the player's crew member of its crew list) a `species`, named `name` when given. The list entry is
-## marked `player` so the new name still takes the soldier's place (jobs.gd). False when the ship has no crew list (the
-## default crew is the soldier and Ada, both human) or `species` is empty.
+## Make the ship's soldier (the player's crew member of its crew list) a `species`, named `name` when given. False when the ship
+## has no crew list (the default crew is the soldier and Ada, both human) or `species` is empty.
 static func soldier(ship, species: String, who := "") -> bool:
-	if species == "" or ship.crew_plan.is_empty():
+	return swap_soldier(ship.crew_plan, species, who)
+
+
+## The same on a crew list [{name, species}]: the entry named like the player in data/crew.json, or marked `player`, becomes the
+## species (and the name), marked `player` so the new name still takes the soldier's place (jobs.gd); a list with none gets one at the front.
+static func swap_soldier(plan: Array, species: String, who := "") -> bool:
+	if species == "" or plan.is_empty():
 		return false
 	var home: String = CrewMember.config()["player"]["name"]
 	var at := -1
-	for i in ship.crew_plan.size():
-		if bool(ship.crew_plan[i].get("player", false)) or ship.crew_plan[i]["name"] == home:
+	for i in plan.size():
+		if bool(plan[i].get("player", false)) or plan[i]["name"] == home:
 			at = i
 			break
 	var entry := {"name": who if who != "" else home, "species": species, "player": true}
 	if at >= 0:
-		ship.crew_plan[at] = entry
+		plan[at] = entry
 	else:
-		ship.crew_plan.push_front(entry)
+		plan.push_front(entry)
 	return true
+
+
+## `crew` (a design's crew list) as it would be flown with `choice`: the soldier of the chosen species. A copy.
+static func crew_shown(crew: Array, choice: Dictionary, profile) -> Array:
+	var out := crew.duplicate(true)
+	var id := str(clean(choice, profile)["species"])
+	if id != "":
+		var p := Unlocks.payload_of(id)
+		swap_soldier(out, str(p.get("species", "")), str(p.get("name", "")))
+	return out
 
 
 ## Put the map variant of `choice` on the new campaign `c` (campaign.gd set_variant).

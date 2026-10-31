@@ -124,6 +124,17 @@ func test_a_starting_species_swaps_the_soldier() -> void:
 	_clean()
 
 
+func test_the_hangar_shows_the_crew_with_the_chosen_soldier() -> void:
+	var p := _profile(["start_halcyon_scout"])
+	var crew := [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Rook", "species": "basalt"}]
+	var shown := RunStart.crew_shown(crew, {"species": "start_halcyon_scout"}, p)
+	eq(shown[0], {"name": "Wick", "species": "human", "player": true}, "Wick takes the soldier's place")
+	eq(shown.slice(1), crew.slice(1), "the others are as designed")
+	eq(crew[0], {"name": "Soldier", "species": "human"}, "and the design's own list is not touched")
+	eq(RunStart.crew_shown(crew, {}, p), crew, "with nothing chosen it is the design's")
+	_clean()
+
+
 func test_a_starting_species_needs_the_unlock_and_a_crew_list() -> void:
 	var p := _profile(["start_halcyon_scout"])
 	var ship: Ship = Ship.from_design(RUSTBUCKET)

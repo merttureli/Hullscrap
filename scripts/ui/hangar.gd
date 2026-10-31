@@ -445,7 +445,7 @@ func _draw_info(lay: Dictionary, cur: Dictionary) -> void:
 	y += 116.0
 	_text("Crew", Vector2(x, y), 14, DIM_TEXT)
 	var names: Array[String] = []
-	for m in cur["crew"]:
+	for m in RunStart.crew_shown(cur["crew"], start, profile):
 		names.append("%s (%s)" % [m["name"], str(m["species"]).capitalize()])
 	draw_multiline_string(ThemeDB.fallback_font, Vector2(x + 70.0, y), ", ".join(names) if not names.is_empty() else "none", HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 70.0, 14, 3, TEXT)
 	if message != "":
