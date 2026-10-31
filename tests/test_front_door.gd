@@ -96,7 +96,7 @@ const HANDLER_KEYS: Array[String] = [
 	"W A S D", "E (hold)", "E on a door", "Middle click", "Mouse", "B", "O / P", "Wheel", "Ctrl+S / Ctrl+L", "N", "Esc", "F1",
 	"Tab", "1 2 3", "1 - 9", "Left mouse", "Shift+Left drag", "Ctrl+Left drag", "Right mouse", "T", "R", "Shift+R", "F", "Ctrl+Z / Ctrl+Y",
 	"M", "Click a lit neighbour", "Shift+click", "Enter", "1 - 9 or click", "Enter / Space",
-	"K", "W / S", "A / D", "Left / Right mouse", "Shift / Space / Q", "Arrows / End",
+	"K", "W / S", "A / D", "Left / Right mouse", "Shift / Space / Q", "Arrows / End", "Y",
 	"Right click", "Esc / Enter / M", "H", "H / Esc",
 	"C", "Click, or Up / Down + Enter", "PgUp / PgDn", "Click a queued job", "U", "C / Esc",
 ]
@@ -106,6 +106,25 @@ func test_help_lists_every_key_of_the_input_handlers() -> void:
 	var keys := HelpPanel.keys_text()
 	for k in HANDLER_KEYS:
 		check(keys.contains(k), "How to play has the key '%s'" % k)
+
+
+## Y does two jobs: on the map it is the tow when you are out of fuel, in a fight it accepts a surrender.
+func test_help_lists_y_for_the_map_and_for_the_fight() -> void:
+	var where := {}
+	for col in HelpPanel.COLUMNS:
+		for sec in col:
+			for row in sec[1]:
+				if row[0] == "Y":
+					where[str(sec[0])] = str(row[1])
+	var map_text := ""
+	var fight_text := ""
+	for title in where:
+		if title.begins_with("THE MAP"):
+			map_text = where[title]
+		elif title.begins_with("COMBAT"):
+			fight_text = where[title]
+	check(map_text.to_lower().contains("fuel") and map_text.contains("tow"), "map: Y tows you home when you are out of fuel: '%s'" % map_text)
+	check(fight_text.contains("surrender"), "fight: Y accepts a surrender: '%s'" % fight_text)
 
 
 func test_help_has_the_sections_and_the_first_run_box() -> void:
