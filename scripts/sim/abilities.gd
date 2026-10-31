@@ -5,7 +5,7 @@ extends RefCounted
 ## then rests for `cooldown` seconds (counted from the end of the effect). A passive one runs for as
 ## long as its part works.
 ## - effects: stat_mult {thrust, power} (a factor on that part's own figure), shield_layer (extra
-##   layers), charge_mult (a factor on every weapon's cooldown), evasion_add.
+##   layers), charge_mult (a factor on every weapon's cooldown), evasion_add, turn_mult (a factor on the ship's turn rate).
 ## - side_effects, per second while it runs: drain_o2 (fraction of the part's room air lost), heat,
 ##   power_spike (extra power draw, taken in the power solve), fire_risk (chance), self_damage (hp),
 ##   shock_organic (hp a second to the crew in the room who are not mechanical), scorch (the same to those without
@@ -321,6 +321,15 @@ static func power_mods(ship) -> Dictionary:
 			if add > 0.0:
 				bonus[r["uid"]] = float(bonus.get(r["uid"], 0.0)) + add
 	return {"mult": stat_mults(ship, "power", false), "extra": extra, "bonus": bonus}
+
+
+## The factor on the ship's turn rate from the abilities in effect: the product of their `turn_mult` (1 with none). Arena._recompute
+## hands it to the flight body.
+static func turn_mult(ship) -> float:
+	var f := 1.0
+	for r in running(ship):
+		f *= float(r["ability"].get("effects", {}).get("turn_mult", 1.0))
+	return f
 
 
 ## The layers shield part `uid` gives (called by Shields.layers_of_ship for a powered part): `base`, its stats.layers,

@@ -11,6 +11,7 @@ extends RefCounted
 ##   room, `stat` (power, thrust, shield_layer, recharge or evasion) is multiplied by `else_mult`. Layers are rounded
 ##   down; recharge is the speed at which the shield's used layers come back (0.5 = twice as long); evasion is
 ##   the ability's own `evasion_add` (a Resonance Helm).
+## - turn_mult: factor on the ship's turn rate while the part works (Abilities.turn_mult; the arena hands it to the flight body). Gravity Anchor.
 ## - room_wall_hp_mult: factor on the hp of the wall cells round the part's room (Abilities.wall_hp_mults).
 ## - heat_above {heat, shield_layer}: that many extra layers while the room's hottest part is above `heat`.
 ## - room_work_mult {mult, who?, else_mult?}: factor on the work speed of the crew in the room (Abilities.work_mult).
@@ -27,7 +28,7 @@ const TraitSet = preload("res://scripts/crew/traits.gd")
 
 const ABILITY_KEYS: Array[String] = ["engine", "shield", "utility"]  ## the combat keys of an active ability (Abilities.KEYS)
 const TOP_KEYS: Array[String] = ["id", "name", "type", "key", "duration", "cooldown", "effects", "side_effects", "operator_needs", "event", "blurb", "notes"]
-const EFFECTS: Array[String] = ["stat_mult", "shield_layer", "charge_mult", "evasion_add", "crew_bonus", "crew_needed", "room_wall_hp_mult", "heat_above", "room_work_mult"]
+const EFFECTS: Array[String] = ["stat_mult", "shield_layer", "charge_mult", "evasion_add", "turn_mult", "crew_bonus", "crew_needed", "room_wall_hp_mult", "heat_above", "room_work_mult"]
 const SIDE_EFFECTS: Array[String] = ["drain_o2", "heat", "power_spike", "fire_risk", "self_damage", "shock_organic", "scorch", "wet"]
 const CREW_KEYS: Array[String] = ["crew_bonus", "crew_needed", "heat_above"]  ## the effects whose figures change with the crew or the heat
 const BONUS_STATS: Array[String] = ["power", "thrust", "shield_layer"]
@@ -323,6 +324,9 @@ static func _effect_problems(fx: Dictionary, who_ids: Array, out: Array[String])
 			"evasion_add":
 				if not _num(v):
 					out.append("evasion_add must be a number")
+			"turn_mult":
+				if not (_num(v) and float(v) > 0.0):
+					out.append("turn_mult must be a factor above 0 (1.5 = turns 50% faster)")
 			"crew_bonus":
 				var list := entries(v)
 				if list.is_empty():

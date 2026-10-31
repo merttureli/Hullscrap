@@ -215,6 +215,7 @@ func _recompute(co) -> void:
 	co.hit_cache = {}
 	if co.dirty:
 		co.shape = null  # the cells may have changed: the bubble's outline is rebuilt on its next use
+	co.flight.turn_mult = Abilities.turn_mult(co.ship)  # a Gravity Anchor turns the ship faster
 	co.thrust = co.flight.thrust_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	co.thrusts = co.flight.thrusts_of(view, co.powered, Abilities.thrust_boost(co.ship))
 	Shields.resync(co)

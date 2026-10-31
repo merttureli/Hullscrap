@@ -165,7 +165,7 @@
       "id": "basalt_gravity_anchor",
       "name": "Gravity Anchor",
       "blurb": "A heavy core that makes the whole ship hard to push around. It pulls on everything near it, air included, and says nothing about it.",
-      "quirk": "Ram damage to the ship's plain cells x0.35 and the crew keep their feet in a ram, but it pulls the air out of its room (3% a second): Basalt do not breathe.",
+      "quirk": "The ship turns 50% faster while it works, ram damage to its plain cells is x0.35 and the crew keep their feet in a ram, but it pulls the air out of its room (3% a second): Basalt do not breathe.",
       "family": "utility",
       "line": "standard",
       "tier": 2,
@@ -190,7 +190,9 @@
           "id": "pull",
           "name": "Pulls the air",
           "type": "passive",
-          "effects": {},
+          "effects": {
+            "turn_mult": 1.5
+          },
           "side_effects": [
             {
               "type": "drain_o2",

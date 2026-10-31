@@ -7,6 +7,8 @@ const Arena = preload("res://scripts/combat/arena.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
+const Flight = preload("res://scripts/sim/flight.gd")
+const PartEffects = preload("res://scripts/sim/part_effects.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -467,3 +469,57 @@ func test_the_validator_knows_scorch_dps_and_the_emberkin_weapons_use_it() -> vo
 	var w = Weapons.new()
 	for id in ["emberkin_pyre_lance", "emberkin_flare_turret"]:
 		check(float(w.defs[id]["effects"]["self_room"].get("scorch_dps", 0.0)) > 0.0, "%s scorches its breech" % id)
+
+
+# --- 6. turn_mult -----------------------------------------------------------------------------------------------
+
+func _anchored() -> Ship:
+	var s := _floor_ship()
+	check(Fixture.put(s, "reactor_mk1", 10, 10) > 0, "(reactor placed)")
+	var uid := Fixture.put(s, "basalt_gravity_anchor", 14, 10)
+	check(uid > 0, "(anchor placed)")
+	Fixture.wire(s, range(10, 16).map(func(x): return Vector2i(x, 10)))
+	return s
+
+
+func test_a_gravity_anchor_turns_the_ship_faster_while_it_works() -> void:
+	var s := _anchored()
+	var uid: int = s.components.instances.keys().filter(func(u): return s.components.instances[u]["id"] == "basalt_gravity_anchor")[0]
+	arena = Arena.new(1)
+	arena.add_ship(s)
+	near(Abilities.turn_mult(s), 1.5, "the anchor's turn_mult counts while it is powered")
+	near(arena.ships[0].flight.turn_mult, 1.5, "and the arena hands it to the flight body")
+	s.components.instances[uid]["status"] = "disabled"
+	arena.step(0.1)
+	near(arena.ships[0].flight.turn_mult, 1.0, "a disabled anchor turns nothing")
+	s.components.instances[uid]["status"] = "ok"
+	arena.step(0.1)
+	near(arena.ships[0].flight.turn_mult, 1.5, "repaired, it does again")
+	Abilities.ion_lock(s, uid)
+	arena.step(0.1)
+	near(arena.ships[0].flight.turn_mult, 1.0, "and an ion hit shuts it down for a while")
+
+
+func test_turn_mult_scales_the_spin_and_the_steering() -> void:
+	var plain := Flight.new()
+	var heavy := Flight.new()
+	heavy.turn_mult = 1.5
+	for f in [plain, heavy]:
+		for i in 10:
+			f.step(0.1, {"turn": 1.0}, 600.0, 20.0)
+	near(heavy.ang_vel, 1.5 * plain.ang_vel, "1 s of full turn: 1.5x the spin", 1e-6)
+	var p := Flight.new()
+	var h := Flight.new()
+	h.turn_mult = 1.5
+	var want := PI / 2.0
+	for f in [p, h]:
+		for i in 600:
+			f.step(0.01, {"turn": f.steer_toward(want, 600.0, 20.0)}, 600.0, 20.0)
+	check(absf(wrapf(h.angle - want, -PI, PI)) < 0.05 and absf(wrapf(p.angle - want, -PI, PI)) < 0.05, "steer_toward still settles on the heading with the faster turn")
+
+
+func test_the_validator_knows_turn_mult() -> void:
+	eq(PartEffects.problems({"id": "a", "type": "passive", "effects": {"turn_mult": 1.5}}), [], "turn_mult 1.5 is fine")
+	for bad in [0, -1.0, "fast"]:
+		var p := PartEffects.problems({"id": "a", "type": "passive", "effects": {"turn_mult": bad}})
+		check(p.any(func(s): return "turn_mult" in s), "%s is caught (%s)" % [str(bad), str(p)])
