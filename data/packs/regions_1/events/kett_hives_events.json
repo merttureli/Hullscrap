@@ -1,0 +1,255 @@
+{"events": [
+    {
+      "id": "hive_knot_dock", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_kett_hives"},
+      "text": "Knot Eleven runs the Hive-lane dock: four Kett on four consoles, working in the same rhythm, so that the whole dock sounds like one very organised insect. They greet you in sequence. 'Welcome.' 'Welcome.' 'Welcome.' 'Welcome.' Each one is a quarter of the word, and the full welcome is in the spaces.",
+      "choices": [
+        {"text": "Welcome them back, in sequence.", "outcomes": [
+          {"weight": 100, "text": "Your crew try it. It goes badly, and then well. By the fifth go the four Kett are nodding in the same rhythm as your crew, and the dock is two seconds faster than usual. They tip you in fuel.", "effects": {"items": {"fuel": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Ask for dock services.", "outcomes": [
+          {"weight": 100, "text": "The quartet processes your request in a rolling chorus, each pass a little more correct than the last. The fee is split four ways. You pay four quarters.", "effects": {"items": {"credits": -10, "fuel": 2}}}
+        ]},
+        {"text": "[Kett] Join the rhythm.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett steps to the fifth console without a word and falls into the beat. For a whole shift the dock is five-handed and nobody has been so happy in years. The foreman, dazed, pays a full quarter share.", "effects": {"items": {"credits": 40, "scrap": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "[Human] Try to learn the beat. Humans are bad at this.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 100, "text": "Your Human claps along half a beat behind, then a full beat, then in exactly the right place for one glorious second. The Kett erupt in applause, four times over.", "effects": {"items": {"credits": 15}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_lone_kett", "type": "distress", "weight": 7, "once": true, "requires": {"flag": "in_kett_hives"},
+      "text": "A single pod, drifting. Inside, a Kett, alone, all four hands wrapped round themselves, rocking. The beacon is a thin little tick, tick, tick, the sound a Kett makes when it has lost the others. The pod's log reads, in tidy script: 'This one is alone. This one would like not to be.'",
+      "choices": [
+        {"text": "Take the pod aboard.", "outcomes": [
+          {"weight": 100, "text": "The Kett unfolds, one hand at a time. Your crew shift to make room and, without thinking, begin to stand a little closer together. 'Thank you,' says the Kett, in a very small clicking voice. 'Ktik. This one will work. This one will work very hard.'", "effects": {"recruit": {"species": "kett", "name": "Ktik"}}}
+        ]},
+        {"text": "[Kett] Answer the beacon in the hive-tick.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett ticks back and the lone Kett's beacon speeds up, and answers, and answers again. By the time you have docked the two are holding hands, all eight of them, and the pod's Kett is crying in quarter-notes. They sign on together.", "effects": {"items": {"credits": 20}, "recruit": {"species": "kett", "name": "Ktik"}}}
+        ]},
+        {"text": "Radio ahead and wait for someone to collect them.", "outcomes": [
+          {"weight": 60, "text": "A dock hand answers: 'Knot Eleven is sending a ship. Please wait with them.' You wait an hour. The Kett clings to your hull-hand the whole time. When the ship comes, the knot cheers, and one presses fuel pellets into your hand.", "effects": {"items": {"fuel": 3}, "rep": {"clans": 1}}},
+          {"weight": 40, "text": "No one answers. You stay with the pod until your fuel is thin, and leave a beacon. The Kett watches you go with four enormous eyes.", "effects": {"items": {"fuel": -1}}}
+        ]},
+        {"text": "Leave them. You have a schedule.", "outcomes": [
+          {"weight": 100, "text": "The tick follows you for an hour over the comm. Then it stops. You cannot tell if it was because it got out of range.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_shared_pay", "type": "trader", "weight": 10, "once": false, "requires": {"flag": "in_kett_hives"},
+      "text": "A knot of five Kett is selling labour from a hulled-out pod, under a hand-painted sign: WORK FOR HIRE. SHARES EQUAL. NO ONE LEFT BEHIND. They will weld, haul, patch, or sit very close together near anything cold. The price is posted as a fraction, and the fraction is the same for all five, and they are very proud of it.",
+      "choices": [
+        {"text": "Hire the knot to patch your hull (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 85, "text": "Five Kett swarm your hull and patch it in neat, overlapping ticks. They finish with a flourish. Your hull is stronger than when you came.", "effects": {"items": {"credits": -40}, "hull": 10}},
+          {"weight": 15, "text": "Five Kett patch your hull, then patch it again, then once more for luck. The repair is excellent and the paint is a work of art.", "effects": {"items": {"credits": -40}, "crew_hp": 5, "hull": 10}}
+        ]},
+        {"text": "Hire them to haul your cargo (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "The knot loads your hold in a rolling relay of twenty hands passing one box to the next without anyone seeming to move. They also find thirty-five scrap under your bunks, and give you a receipt for it. A pad of the day's shares comes with the bill.", "effects": {"items": {"credits": -30, "scrap": 35}}}
+        ]},
+        {"text": "[Kett] Join the knot for a shift.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett takes the sixth place in the knot for one long shift and comes back tired and glowing with a full share and a new nickname: 'Six'. The knot's pad of shares is theirs to keep.", "effects": {"items": {"credits": 55}, "crew_hp": 5}}
+        ]},
+        {"text": "[Mechanical] Offer a spare pair of hands.", "requires": {"trait": "mechanical"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling bolts on to the end of the line as an extra pair, perfectly in time. The knot, thrilled, offers to make them an honorary Kett. They decline, politely. The share is paid in full.", "effects": {"items": {"credits": 50}}}
+        ]},
+        {"text": "Watch the knot work for a while.", "outcomes": [
+          {"weight": 100, "text": "Five Kett patch a wall in perfect rhythm. You watch for ten minutes. At the end the knot bows, in sequence, five times, and you bow back, once, feeling inadequate.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_mother_song", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_kett_hives"},
+      "text": "A buoy drifts here, rusted and ragged, still looping a long low hum that is not quite a note and not quite a word. Every Kett in range has stopped what it is doing. The ones on your ship are standing very still. The buoy is old. The hum is older. It sounds like a mother, very far away, calling children home.",
+      "choices": [
+        {"text": "Let the hum play.", "outcomes": [
+          {"weight": 100, "text": "The hum plays all the way through, forty minutes. Nobody speaks. At the end every Kett in range gives a small sigh in unison, and the buoy goes silent for the first time in forty years. You find a pad in its hull.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Silence the buoy.", "outcomes": [
+          {"weight": 70, "text": "You cut the buoy's power. The hum stops. A thin cry runs through every Kett in range, then fades. They will not look at you for the rest of the day.", "effects": {"rep": {"clans": -2}, "crew_hp": -5}},
+          {"weight": 30, "text": "The buoy fights back, shocks you, and goes off the air with a long and mournful sigh.", "effects": {"rep": {"clans": -1}, "crew_hp": -10}}
+        ]},
+        {"text": "[Kett] Answer the song.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett hums back, a thin and broken answer. For a moment the buoy's hum changes, a note higher, a note nearer, as if the sound at the other end had turned its head. Then it fades. Your Kett sits down. 'She is still there,' they say. 'Far. But she is.' A pad sits in the buoy's hull.", "effects": {"items": {"scrap": 20}, "crew_hp": 10, "flag": "hive_song_answered"}}
+        ]},
+        {"text": "[Prismatic] Harmonise with the buoy.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic lights a gentle glow and hums a counter-melody. The buoy's drone steadies and widens, like a drop of ink in water. Every Kett in range weeps in quarter-notes. A crowd of knots gathers to listen, and presses a bag of resin into your Prismatic's hands.", "effects": {"items": {"polymer": 15, "credits": 20}, "rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_cell_hulk", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_kett_hives"},
+      "text": "A hive-hulk, a Kett cell-ship, lies dark with her outer shell split open. Inside, hundreds of empty brood cells run down the walls in neat honeycomb rows, each lid scratched with a faded name. Nothing moves. The cells are quiet, except for a faint clicking from deep in the hull, like a clock a long way off.",
+      "choices": [
+        {"text": "Search the outer cells.", "outcomes": [
+          {"weight": 60, "text": "The outer cells hold tools, resin and the odd forgotten lunch. The names on the lids all end in the same sound. You take what is useful and feel like a burglar.", "effects": {"items": {"polymer": 20, "scrap": 25}}},
+          {"weight": 25, "text": "You open a cell that was not empty. A wave of brood-mites, small, harmless and extremely loud, pours out. They are all over the crew for an hour.", "effects": {"items": {"polymer": 15}, "crew_hp": -5}},
+          {"weight": 15, "text": "In one cell: a perfect brood-egg, cold and shining. Whatever was inside is long gone. The shell is worth a surprising amount.", "effects": {"items": {"credits": 60, "polymer": 10}}}
+        ]},
+        {"text": "Follow the clicking.", "outcomes": [
+          {"weight": 100, "text": "You follow the sound down a long corridor of closed doors, getting louder, steadier, closer.", "effects": {"goto": "hive_hulk_ticker"}}
+        ]},
+        {"text": "[Kett] Read the names on the lids.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett walks the rows, ticking at each lid. By the end they have recited all four hundred names, and cried at about half. They ask to take one lid with them. You say yes. It is the right thing; the crew sign it in turn.", "effects": {"items": {"polymer": 20}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_hulk_ticker", "type": "wreck_field", "weight": 0, "once": false, "requires": {},
+      "text": "At the heart of the hulk you find the source: a small automatic ticker, a mechanical heart that has kept the beat of the hive for a crew that is not there. It has run for forty years. It is still on the beat. Around it the cells lie quiet, as if the whole ship were holding its breath.",
+      "choices": [
+        {"text": "Take the ticker.", "outcomes": [
+          {"weight": 100, "text": "You unclip the little heart. It fights you, ticking, for a moment, then goes still. In your hands it is a lump of brass and silence. Somewhere in the hulk a click echoes, and stops.", "effects": {"items": {"copper": 20, "scrap": 30}}}
+        ]},
+        {"text": "Leave it ticking.", "outcomes": [
+          {"weight": 100, "text": "You leave the ticker in the dark, keeping time for no one. You feel better, and poorer.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "[Kett] Sit with the ticker.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett sits by the ticker and ticks with it, softly, keeping time. After an hour another click joins in from deeper in the hulk. And another. The dead hulk fills with the sound of waking. A hundred small drones that were waiting for the beat unfold and sprint out into the lane, and your Kett laughs, a sound like gravel in a drum. They leave you scrap in thanks.", "effects": {"items": {"scrap": 40, "polymer": 20}, "crew_hp": 10}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_feral_picket", "type": "pirate", "weight": 10, "once": false, "requires": {"flag": "in_kett_hives", "jumps_min": 3},
+      "text": "A Drone Picket, a Kett defence turret on a lonely mount, has gone feral. It has guarded this lane for forty years with no hive to guard, and it has taken every ship that passes for a threat. It swivels toward you with the slow, aggrieved dignity of a guard dog that has not been fed. Three smaller drones peel off to join it.",
+      "choices": [
+        {"text": "Fight the pickets.", "outcomes": [
+          {"weight": 100, "text": "You open fire. The big picket tilts its head, as if surprised that anyone remembered how.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Try to talk them down on the old Kett frequency.", "outcomes": [
+          {"weight": 45, "text": "You ping the old frequency. The picket pauses, waits, and logs you as a visitor. The drones fall in beside you like an honour guard and see you out of the lane.", "effects": {"items": {"scrap": 20}}},
+          {"weight": 55, "text": "The picket takes your ping as a trick. The drones attack.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Kett] Sing the hive-call.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett ticks a slow, strange rhythm at the picket. The picket stops, tilts, and ticks back, the way a very old dog hears a very old whistle. The drones drop their guns and flutter round your Kett like children. You get a free escort, and the old picket gets a visitor at last.", "effects": {"items": {"scrap": 30, "copper": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "[Gauntling] Plug in and talk it down in binary.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 90, "text": "Your Gauntling plugs a cable into the picket's feed, reads forty years of lonely logs, and talks it down. 'He just wanted someone to say hello,' your Gauntling reports. The picket powers down and offers its cargo.", "effects": {"items": {"scrap": 40, "copper": 25, "credits": 25}}},
+          {"weight": 10, "text": "Your Gauntling is zapped by a very lonely, very powerful picket.", "effects": {"crew_hp": -15}}
+        ]},
+        {"text": "Run for it.", "outcomes": [
+          {"weight": 60, "text": "The picket opens up as you flee, hitting everything but you, and then settles back into its lonely vigil.", "effects": {"hull": -5}},
+          {"weight": 40, "text": "The drones are faster than you hoped.", "effects": {"fight": "tier"}}
+        ]}
+      ],
+      "after_win": {"text": "The pickets break up into confused drones, and a sad hum falls over the lane. In the main drone's casing: a hive-mark, a note of thanks, and nobody home. You take the parts.", "effects": {"items": {"scrap": 50, "copper": 25, "credits": 30}}}
+    },
+    {
+      "id": "hive_labour_inspector", "type": "patrol", "weight": 10, "once": false, "requires": {"flag": "in_kett_hives"},
+      "text": "Inspector Ordo of the Concord Labour Office is counting Kett arms. 'Four arms,' he says, writing. 'Two contracts.' 'Four hands,' says the knot, in quartet. 'One contract.' 'Four arms, two contracts,' says Ordo. This has been going on for three days. The knot has a bucket of resin and the patience of the very patient.",
+      "choices": [
+        {"text": "Side with the Kett: four arms, one worker.", "outcomes": [
+          {"weight": 60, "text": "You explain that the Kett are one worker with four arms, per their own constitution and the Labour Office's own rule nine. Ordo reads rule nine and goes pale. The knot pays you in resin and a rousing chorus. He leaves his working copy behind.", "effects": {"items": {"polymer": 20}, "rep": {"clans": 1, "concord": -1}}},
+          {"weight": 40, "text": "Ordo checks rule nine. Rule nine says he is right. The knot, deflated, thanks you anyway. He leaves his working copy behind, out of embarrassment.", "effects": {"rep": {"clans": 1}}}
+        ]},
+        {"text": "Side with the inspector: count the hands.", "outcomes": [
+          {"weight": 100, "text": "Ordo thanks you and ticks off a box. The knot lowers four heads at once and says 'Oh.' You feel, for the first time in years, the full weight of being correct. Ordo's notes go in your hold, with thanks.", "effects": {"items": {"credits": 30}, "rep": {"concord": 2, "clans": -2}}}
+        ]},
+        {"text": "[Kett] Present the knot's case.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett steps up and recites the knot's case in four voices, one of which is a hum. Ordo listens, weeps, and signs a new form: Collective Worker (Kett), Four Arms, One Contract. He frames it. The knot throws a party that lasts a week, and you get a share.", "effects": {"items": {"credits": 50, "polymer": 15}, "rep": {"clans": 2, "concord": 1}}}
+        ]},
+        {"text": "[Fenn] Negotiate a rate per arm.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn works out a rate: two arms count as one worker, four as a worker and a half, and the half is voluntary. Ordo signs. The knot signs. Everybody feels cheated, evenly. Your Fenn collects a broker's fee from both sides.", "effects": {"items": {"credits": 60}}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_resin_rock", "type": "asteroid_field", "weight": 9, "once": false, "requires": {"flag": "in_kett_hives"},
+      "text": "A rock the knots call the Pot: a fat black clot of resin fused with stone, dripping from every crack and tacky as a bad promise. Kett work crews swarm it in ranks, scraping, rolling, passing blobs hand to hand in a rhythm so good it hurts to watch. They stop to look at you. All twenty heads turn at once.",
+      "choices": [
+        {"text": "Ask to harvest a share.", "outcomes": [
+          {"weight": 80, "text": "A knot lead hands you a scraper and a bucket and asks you to keep the beat. You do, more or less. The crews applaud. Your hold fills with resin, polymer and the smell of sap.", "effects": {"items": {"polymer": 25, "scrap": 20}}},
+          {"weight": 20, "text": "Out of beat, your cutters hit the same spot twice and the Pot spits back at you. The Kett pat your arm, gently, kindly.", "effects": {"items": {"polymer": 15}, "hull": -5}}
+        ]},
+        {"text": "Buy a bucket from the crews (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "The knot sells you a bucket, the price split four ways. The resin is excellent. They throw in a brush.", "effects": {"items": {"credits": -20, "polymer": 20}}}
+        ]},
+        {"text": "[Kett] Work the line with them.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett steps into the line, picks up the beat in two bars, and works the Pot for a whole shift. They get a full share and a place in the song.", "effects": {"items": {"polymer": 35, "scrap": 30, "credits": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "[Sporeling] Ask if your Sporeling may grow on it.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "The lead thinks, ticks, and says yes. Your Sporeling seeds a corner of the Pot with spore-mat, and by evening a green sheen has bound the resin into a stable gel. The knots are delighted. They pay in resin by the sack.", "effects": {"items": {"polymer": 40, "credits": 20}}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_quiet_knot", "type": "empty", "weight": 8, "once": false, "requires": {"flag": "in_kett_hives"},
+      "text": "A knot of three Kett sits in the dark of a dead cargo pod, packed shoulder to shoulder, not working, not speaking. A fourth place is empty: a small gap with a folded jacket in it. The beacon says KNOT SEVEN. ONE ABSENT. PLEASE DO NOT DISTURB. This is not a rescue. It is a wake.",
+      "choices": [
+        {"text": "Sit with them.", "outcomes": [
+          {"weight": 100, "text": "You tie off alongside and sit with the three in the dark for an hour. Nobody says anything. At the end one gives you a quarter-share of the fourth's belongings: a lump of resin, a hand-carved bead and a pad of her notes. They thank you in three overlapping voices.", "effects": {"items": {"polymer": 10}, "crew_hp": 10}}
+        ]},
+        {"text": "Offer to fill the fourth place.", "outcomes": [
+          {"weight": 70, "text": "The three look at you for a long time. Then one shakes her head, slowly, kindly. 'That place is hers,' says the knot. 'But thank you.' They give you a hand-carved bead.", "effects": {"crew_hp": 5}},
+          {"weight": 30, "text": "They look at you for a long time. Then a very small voice says, 'Not yet.' The way she says it, you know she means maybe, one day.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "[Kett] Take the fourth place for an hour.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett sits in the gap, in the folded jacket, wearing someone else's absence like a coat. The knot closes round them, and for an hour the four of them are a four. When it is over the knot gives your Kett the bead and the pad: 'She would have wanted a good listener.'", "effects": {"items": {"polymer": 15}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave them be.", "outcomes": [
+          {"weight": 100, "text": "You fly on quietly, and nobody on your ship speaks for a long time.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_battery_trial", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_kett_hives"},
+      "text": "Matron Tcha runs the knot-yard that builds the Hive Battery, a shield that charges fully only when three hands work it at once. 'It is not hard,' she says, 'if you do not mind being close.' Her test console is in a very small room, with an expectation that you will stand in it with two friends. The room is built for four Kett. There is no handle on the inside of the door.",
+      "choices": [
+        {"text": "Squeeze in three crew and work the console.", "outcomes": [
+          {"weight": 55, "text": "Three of your crew squeeze into a room built for insects and run the Battery together. It hums, it flares, it takes the Matron's test shots without a flicker. They come out rumpled, closer, and slightly in love. Tcha hands over the schematics.", "effects": {"crew_hp": 5, "flag": "tech_hive_battery"}},
+          {"weight": 45, "text": "Three crew in a room that small: nobody is graceful. But the shield holds on the third try, and the Matron concedes. 'Good enough for a non-Kett,' she says.", "effects": {"flag": "tech_hive_battery"}}
+        ]},
+        {"text": "[Kett] Work it with your Kett.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett steps in, finds the beat, and the Battery sings. The Matron weeps. She gives them the schematics, a quarter-share of her pension, and the key to the knot-yard.", "effects": {"items": {"credits": 40, "polymer": 15}, "rep": {"clans": 1}, "flag": "tech_hive_battery"}}
+        ]},
+        {"text": "[Gauntling] Plug in as the second and third hands.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling plugs two cables into the console and works it as three. The Matron checks the output, checks the Gauntling, and checks her notes. 'That should not work,' she says. It does. She hands over the schematics, with some suspicion.", "effects": {"items": {"copper": 12}, "flag": "tech_hive_battery"}}
+        ]},
+        {"text": "Come back with more crew.", "outcomes": [
+          {"weight": 100, "text": "'The door will be here,' says Tcha. 'Do bring friends.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_hatching", "type": "wreck_field", "weight": 7, "once": false, "requires": {"flag": "in_kett_hives", "jumps_min": 3},
+      "text": "A hive-hulk with every cell closed and a low roar coming from inside. The beacon says BROOD HATCHING. DO NOT ENTER. KEEP THE DOORS CLOSED. The roar is the sound of ten thousand very new Kett, all learning at once what they are and who is theirs. The doors are bulging.",
+      "choices": [
+        {"text": "Go in and shepherd the brood.", "outcomes": [
+          {"weight": 40, "text": "You step into a river of tiny, furious, hungry Kett who take you for their mother. By the time you get out, the brood has a name for you and a very strong opinion about your hat.", "effects": {"items": {"polymer": 20, "credits": 40}, "crew_hp": -15}},
+          {"weight": 30, "text": "The doors give. The brood pours out like water, over the crew, over the hull, into every vent. Everything is sticky for a week.", "effects": {"items": {"polymer": 25}, "crew_hp": -20, "hull": -10}},
+          {"weight": 20, "text": "You get lost in the cells. The crew find you after three hours, covered in resin and cuddled by two hundred newborns.", "effects": {"items": {"polymer": 30, "credits": 30}, "crew_hp": -10}},
+          {"weight": 10, "text": "The brood takes one of your crew. They are not hurt; they are adopted. They stay.", "effects": {"items": {"credits": 50}, "lose_crew": 1}}
+        ]},
+        {"text": "[Kett] Tick them the first song.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett ticks the oldest song they know into the closed door. The roar drops, and drops again. A thousand tiny voices answer, a thousand ticks at once. The doors open, and a stream of brood files out to follow your Kett down the corridor. By evening the hulk is quiet, and the nearest knot gives you the first harvest.", "effects": {"items": {"polymer": 40, "credits": 60}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "[Sporeling] Calm them with a slow cloud of spores.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 80, "text": "Your Sporeling opens a cap and breathes out a slow cloud of calm. The roar fades to a mutter, then a murmur, and the brood falls asleep in piles. You walk out with a quarter of the hulk's resin and a pocketful of tiny sleepy Kett.", "effects": {"items": {"polymer": 25, "credits": 30}}},
+          {"weight": 20, "text": "The brood love the spores too much. Your Sporeling is stuck under a pile for six hours.", "effects": {"items": {"polymer": 20}, "crew_hp": -10}}
+        ]},
+        {"text": "Seal the doors from outside.", "outcomes": [
+          {"weight": 70, "text": "You weld the doors shut and mark them DO NOT OPEN. The brood will cook for another day. You feel only a little bad.", "effects": {"items": {"scrap": 20}, "rep": {"clans": 1}}},
+          {"weight": 30, "text": "The weld fails. The doors burst. You run.", "effects": {"crew_hp": -10, "hull": -10}}
+        ]}
+      ]
+    },
+    {
+      "id": "hive_foreman_offer", "type": "trader", "weight": 10, "once": false, "requires": {"flag": "in_kett_hives"},
+      "text": "A Gantry foreman in a loud coat wants to hire a Kett crew cheaply. 'Five of them for the price of one,' he says to you, as if you were in charge. The knot is standing behind him, listening, very still. 'They are quick and neat and they never complain,' he adds. 'It is the cheapest labour in the Drift.'",
+      "choices": [
+        {"text": "Agree with him.", "outcomes": [
+          {"weight": 100, "text": "The foreman pays you a finder's fee. Behind him the knot lowers its heads in unison. They do not look at you.", "effects": {"items": {"credits": 50}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Tell him the knot must be paid in five equal shares.", "outcomes": [
+          {"weight": 70, "text": "The foreman splutters, checks, finds you right, and agrees. The knot straightens, together. 'Five,' says one, quietly. 'Five.' They look at you as if you had given them a gift.", "effects": {"items": {"polymer": 20}, "rep": {"clans": 2}}},
+          {"weight": 30, "text": "The foreman storms off. The knot sighs, relieved and unemployed.", "effects": {"rep": {"clans": 1}}}
+        ]},
+        {"text": "[Kett] Speak for the knot.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett steps between the foreman and the knot and recites, in four voices, the knot's terms: equal shares, no splits, a bed each, a month's notice. The foreman agrees to all four because it is easier than arguing. The knot gives you a banner.", "effects": {"items": {"credits": 40, "polymer": 20}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "[Fenn] Broker the deal and take a cut from both sides.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn brokers a fair deal, takes a cut from each side, and leaves them both pleased. The knot gets a day's paid rest. The foreman gets a stern look. Your Fenn gets the money.", "effects": {"items": {"credits": 70}, "rep": {"clans": 1}}}
+        ]}
+      ]
+    }
+]}

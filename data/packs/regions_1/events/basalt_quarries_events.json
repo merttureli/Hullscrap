@@ -1,0 +1,243 @@
+{"events": [
+    {
+      "id": "quarry_slow_greeting", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "The Quarry dock is staffed by one Basalt called Marl, who has been saying 'welcome' since you were on approach. He is about to finish. The word is nine syllables long and every one is meant. A sign beside him reads: PLEASE ALLOW TIME FOR HELLO.",
+      "choices": [
+        {"text": "Wait for the whole greeting.", "outcomes": [
+          {"weight": 80, "text": "Marl finishes, three minutes later, and the effect is odd: you feel welcomed in a way you have not felt anywhere in the Drift. The crew stand a little straighter. He offers a bowl of warm grit, which is a joke, mostly.", "effects": {"crew_hp": 10}},
+          {"weight": 20, "text": "Marl finishes, and begins the second greeting. There are four. By the end you are all friends, and half an hour older.", "effects": {"items": {"credits": 10}, "crew_hp": 5}}
+        ]},
+        {"text": "Hurry him along.", "outcomes": [
+          {"weight": 100, "text": "'Hurry,' says Marl, trying the word as if it were an unfamiliar tool. He nods slowly and says nothing for so long that you leave.", "effects": {"rep": {"clans": -1}}}
+        ]},
+        {"text": "[Basalt] Answer in the slow tongue.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt and Marl stand facing each other for most of an hour, saying almost nothing. At the end they touch palms. 'He says you may take what you need from the yard,' says your Basalt. The yard is full.", "effects": {"items": {"scrap": 40, "silicon": 6}, "crew_hp": 5}}
+        ]},
+        {"text": "[Fenn] Say it fast, then say it again slowly.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 70, "text": "Your Fenn gabbles the greeting back at four times speed, then repeats it slowly, with feeling. Marl considers this for a minute and declares it 'a very small version of a very good greeting', which from a Basalt is a compliment.", "effects": {"items": {"credits": 10}, "crew_hp": 5}},
+          {"weight": 30, "text": "Marl takes the fast version as an insult and the slow one as a threat. You are asked to wait outside.", "effects": {"rep": {"clans": -1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_cut_stone", "type": "asteroid_field", "weight": 10, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "A foundation block cut for a gate that was never finished: forty metres of grey stone, true to a hair on every face, left to float where the cutters stopped. Basalt crews are working it now, patiently, with chisels, and singing to it a note so low your hull plates buzz.",
+      "choices": [
+        {"text": "Ask to take the offcuts.", "outcomes": [
+          {"weight": 90, "text": "The foreman, Chert, thinks about it for most of an hour and nods once. The offcuts are as flat as plates and heavier than they look.", "effects": {"items": {"silicon": 8, "titanium": 4, "scrap": 20}}},
+          {"weight": 10, "text": "Chert thinks about it for most of an hour and says no. Then the crew say it one at a time. You leave with their blessing and nothing else.", "effects": {}}
+        ]},
+        {"text": "Cut a corner off it with your own cutters.", "outcomes": [
+          {"weight": 55, "text": "The block parts like butter under a hot knife and the cutter shrieks. Chert watches you do it, and the singing stops mid-note. He does not say a word. It is worse than if he had.", "effects": {"items": {"silicon": 10, "scrap": 20}, "rep": {"clans": -2}}},
+          {"weight": 45, "text": "The cutters skate off the stone and take your own paint with them. The Basalt watch with mild interest.", "effects": {"hull": -5}}
+        ]},
+        {"text": "[Basalt] Join the singing.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt joins the low note and the block hums back. For an hour the whole yard is one chord. Afterwards Chert gives them a chip of the stone, no bigger than a thumb, and they carry it like a child.", "effects": {"items": {"silicon": 10, "titanium": 6}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Quick hands] Fix the foreman's stuck winch.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Chert's winch has been stuck since the previous settling. Your engineer fixes it in four minutes. Chert looks at it for ten, then thanks you in a long, low, slow sentence you only partly follow. A crate of silicon arrives later.", "effects": {"items": {"silicon": 8, "copper": 10}}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_long_quiet", "type": "empty", "weight": 9, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "A Basalt hauler sits dead in the lane, running lights out, hatches shut. The beacon says LONG QUIET: DO NOT HAIL. Beside it two more Basalt ships are parked in a polite circle, also not hailing, also not moving. It appears to be a vigil, or an argument, or lunch.",
+      "choices": [
+        {"text": "Wait with them.", "outcomes": [
+          {"weight": 70, "text": "You wait. Nothing happens for five hours. At the end the hauler's hatch opens, a Basalt waves one hand, and all three ships leave in order. They leave you a pad on a buoy. Your crew are rested, a little embarrassed, and strangely proud.", "effects": {"crew_hp": 15}},
+          {"weight": 30, "text": "You wait. You wait some more. The Long Quiet ends when it ends, which is after you have jumped. The crew say it was the most restful stop of the run anyway.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Hail them anyway.", "outcomes": [
+          {"weight": 50, "text": "The comm squeals back with a single word in the slow tongue that your translator renders as 'Please.' You cut the channel. Nobody is angry. Everybody has noticed.", "effects": {"rep": {"clans": -1}}},
+          {"weight": 50, "text": "The hauler's hatch opens and a Basalt looks at you for a very long time. Then it hands you a rock, very gently, and shuts the hatch.", "effects": {"items": {"silicon": 5}}}
+        ]},
+        {"text": "[Basalt] Join the Quiet on the hull.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt goes out and stands facing the hauler. After some hours the hauler's crew stand on their own hull, facing back. When the Quiet ends, an elder says something low to your Basalt, who tells you it was 'a good silence'. They return with a stone and a lighter step.", "effects": {"items": {"silicon": 8}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You slip away without hailing. The circle does not notice, or is too polite to say.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_gate_stones", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "A scatter of cut stone: dozens of finished blocks, each marked with a sign you half-recognise and cannot read. Whoever shipped them never delivered. Their transport floats among them with a Basalt crew still strapped in, perfectly still, perfectly fine, waiting politely for a delivery slot.",
+      "choices": [
+        {"text": "Strip the stone blocks, not the transport.", "outcomes": [
+          {"weight": 70, "text": "The blocks come away clean. The crew, silent, seem to approve of the distinction.", "effects": {"items": {"silicon": 8, "titanium": 6, "scrap": 20}}},
+          {"weight": 30, "text": "A block you thought was loose is not. It remembers its weight.", "effects": {"items": {"silicon": 6}, "hull": -5}}
+        ]},
+        {"text": "Tell the crew that the Snap was forty years ago.", "outcomes": [
+          {"weight": 100, "text": "A long silence. Then, in the slow tongue, over the comm: 'We know. We are waiting for the delivery slot.' You decide not to ask which one. One of them hands you a pad and a block, for the trouble of telling.", "effects": {"items": {"silicon": 10, "titanium": 4}}}
+        ]},
+        {"text": "[Basalt] Read the marks.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 80, "text": "Your Basalt runs a hand along the carved sign for a long time. 'It is a count,' they say. 'It counts something that is not here yet.' They take a rubbing. It feels important, and you cannot say why.", "effects": {"items": {"silicon": 6}}},
+          {"weight": 20, "text": "Your Basalt reads the marks and says nothing, which is a different nothing than before. They will not say more.", "effects": {"items": {"silicon": 6}}}
+        ]},
+        {"text": "[Fenn] Count the stone and sell it by the cubic metre.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn works out the volume, the market rate and your commission in four seconds. The Basalt crew, listening, say 'Tell us again, slowly,' and then 'No.' The commission stands.", "effects": {"items": {"credits": 30}}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_clan_buyers", "type": "trader", "weight": 11, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "Three Clan buyers in a gunboat have been at the Quarry dock for nine days, trying to buy silicon. The Basalt foreman keeps explaining, in the slow tongue, that the price will be decided after the next settling. The buyers have heard this nine times. One is weeping. 'Please,' he says to you. 'Anyone. Tell them it's urgent.'",
+      "choices": [
+        {"text": "Tell the foreman it is urgent.", "outcomes": [
+          {"weight": 50, "text": "The foreman looks at you for four minutes, then says that urgent is a word for things that are not important. The buyers' faces go grey. They pay you to stop helping.", "effects": {"items": {"credits": 20}}},
+          {"weight": 50, "text": "The foreman looks at you for a long time, then nods. 'For the weeper,' he says, and names a price. The buyers pay at once, and tip.", "effects": {"items": {"credits": 45}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Buy silicon for yourself (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "The foreman, to the buyers' despair, sells you a hold of silicon on the spot. 'You did not rush,' he says. 'You asked in the right order.'", "effects": {"items": {"credits": -40, "silicon": 12}}}
+        ]},
+        {"text": "[Basalt] Settle the price with the foreman, at his speed.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt and the foreman reach an agreement in the time it takes the buyers to drink one cup of tea. The buyers get their silicon, the Quarry gets paid, and your Basalt takes a third for the translation.", "effects": {"items": {"credits": 60, "silicon": 6}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "[Fenn] Broker a deal between the two sides.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 70, "text": "Your Fenn translates the buyers' panic into slow-tongue politeness and the foreman's silence into figures. Both sides leave happy and neither knows how. The brokerage fee is a joy.", "effects": {"items": {"credits": 55}}},
+          {"weight": 30, "text": "Your Fenn tries to translate. The foreman is offended by the speed, the buyers by the pauses, and your Fenn leaves through a hatch.", "effects": {"rep": {"clans": -1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_collapse", "type": "distress", "weight": 9, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "A cavern drive has collapsed in the heart of the Quarry: a tunnel of stone sealed at both ends, with six Basalt workers inside. Their beacon says in a slow, calm voice: 'No hurry. We have air. We do not need air. Please dig at your leisure.' Their foreman adds: 'Leisure within the week, if possible.'",
+      "choices": [
+        {"text": "Dig them out with your cutters.", "outcomes": [
+          {"weight": 55, "text": "You work for three hours, tunnelling toward the sound of someone humming. When the last slab goes, the six workers file out one by one and thank you in order of seniority. It takes a while. They pay in stone, and one lets you read his lamp log.", "effects": {"items": {"silicon": 10, "titanium": 8}, "rep": {"clans": 1}}},
+          {"weight": 30, "text": "The roof groans and drops a slab on your cutter arm. Nobody inside is hurt. Everybody outside is.", "effects": {"items": {"silicon": 6}, "crew_hp": -5, "hull": -10}},
+          {"weight": 15, "text": "While digging you break into a vault: a pocket of pure, old, grey crystal. The workers say they put it there on purpose, for later.", "effects": {"items": {"silicon": 10, "crystal": 3}}}
+        ]},
+        {"text": "[Basalt] Tunnel in from the side, as one of theirs.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt walks into the rock the way you would walk into a doorway, finds the workers by touch, and leads them out through a seam nobody knew about. They bow. It takes a while. It is worth it.", "effects": {"items": {"silicon": 12, "titanium": 8}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "[Grundl] Lift the slab off.", "requires": {"species": "grundl"}, "outcomes": [
+          {"weight": 90, "text": "Your Grundl asks the rock for forgiveness and lifts it, an inch at a time. The workers file out beneath. The slab is put back in the same place, with a pat.", "effects": {"items": {"silicon": 8, "titanium": 5}, "rep": {"clans": 1}}},
+          {"weight": 10, "text": "The slab is heavier than it looks. Your Grundl is sorry, in a way that dents the floor.", "effects": {"items": {"silicon": 6}, "crew_hp": -10}}
+        ]},
+        {"text": "Tell them to wait while you fetch help.", "outcomes": [
+          {"weight": 100, "text": "'Of course,' says the foreman, with total calm. You fly away. Behind you the beacon goes on, patient as a stone, saying 'No hurry. No hurry.' You feel worse than if they had begged.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_apprentice_post", "type": "trader", "weight": 8, "once": true, "requires": {"flag": "in_basalt_quarries"},
+      "text": "At the Quarry's hiring post, young Basalt line up with their bags to hire out for a season: thirty-one years old, the slow tongue still new in their mouths, eyes bright as flint. Old Schist, the recruiter, is trying to find them all a berth. One has a sign: ASK ME ABOUT HORIZONS.",
+      "choices": [
+        {"text": "Offer Pebble, the one with the sign, a berth.", "outcomes": [
+          {"weight": 100, "text": "Pebble thinks about it for most of an afternoon. Then they pick up the bag, very slowly, and walk to your airlock. 'Horizons,' they say. 'Show me one.'", "effects": {"recruit": {"species": "basalt", "name": "Pebble"}}}
+        ]},
+        {"text": "[Basalt] Speak for Pebble to the elders.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt and Old Schist trade a handful of long sentences. At the end Pebble is released from the Quarry with a stone for luck and an elder's blessing, and your Basalt is released from a debt they did not know they owed.", "effects": {"items": {"silicon": 8}, "rep": {"clans": 1}, "recruit": {"species": "basalt", "name": "Pebble"}}}
+        ]},
+        {"text": "Wish them luck and go.", "outcomes": [
+          {"weight": 100, "text": "Old Schist nods once. Pebble's sign droops, very slowly.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_spitter_settling", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_basalt_quarries"},
+      "text": "Old Schist keeps a Magma Spitter in a locked bay: a cutting gun that throws slag, with a breech room that loses a third of its air with every shot. 'Built for ones who do not breathe,' he says. 'It has waited for someone who can sit through a settling without speaking. Can you?' He sits down. He appears to be asking you to sit too.",
+      "choices": [
+        {"text": "Sit with him for a settling.", "outcomes": [
+          {"weight": 50, "text": "You sit. Nothing happens for six hours, in the best way. When Schist finally stirs he says one word, 'Yes,' and hands you the Spitter's schematics on a slab of slate.", "effects": {"items": {"silicon": 8}, "crew_hp": 10, "flag": "tech_magma_spitter"}},
+          {"weight": 30, "text": "Three hours in, the crew's fidgeting sounds like a band of mice. Schist does not move. At hour six he says 'Almost.' He gives you the slate anyway, with a look.", "effects": {"items": {"silicon": 5}, "flag": "tech_magma_spitter"}},
+          {"weight": 20, "text": "You break at hour two. Schist opens one eye and says 'Come again.' The bay stays locked.", "effects": {}}
+        ]},
+        {"text": "[Basalt] Sit with him, properly.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt sits down across from Schist and says nothing for nine hours. Then both stand, as one. 'Good silence,' says Schist. He gives your Basalt the Spitter's schematics, a bag of slag-glass, and a look of fond hope that they will come back.", "effects": {"items": {"silicon": 10, "titanium": 5}, "rep": {"clans": 1}, "flag": "tech_magma_spitter"}}
+        ]},
+        {"text": "[Fenn] Try to sit still. Fenn have never managed it.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 55, "text": "Your Fenn sits for fourteen minutes, a Fenn record, then recites the entire cargo manifest in one breath. Schist, delighted by the sheer noise, hands over the schematics for the novelty.", "effects": {"items": {"credits": 20}, "flag": "tech_magma_spitter"}},
+          {"weight": 45, "text": "Your Fenn lasts four minutes, then asks Schist if he would like to buy a clock. The bay stays locked.", "effects": {}}
+        ]},
+        {"text": "Say you will come back when you have rested.", "outcomes": [
+          {"weight": 100, "text": "'Yes,' says Schist, with the patience of a hill. 'We will be here.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_rockfall_pirates", "type": "pirate", "weight": 10, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "Two Rustfang boats are ramming a Basalt hauler for its silicon. The hauler is not fleeing, because it has not noticed. Its crew are in the middle of a Long Quiet. The Rustfangs have rammed it eleven times. The hauler has not moved. One Rustfang's bow is on fire.",
+      "choices": [
+        {"text": "Drive the pirates off.", "outcomes": [
+          {"weight": 100, "text": "You open fire on the Rustfangs. Behind them, the hauler's hatch opens a crack, as if someone had heard a noise.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Join the pirates.", "outcomes": [
+          {"weight": 60, "text": "You hit the hauler on the twelfth go. It is like punching a hill. The Rustfangs, amazed, give you a cut of the dent.", "effects": {"items": {"scrap": 50}, "rep": {"clans": -3}}},
+          {"weight": 40, "text": "The hauler's crew finally notice. A Basalt steps onto the hull and waves, slowly. The Rustfangs flee. You are left holding a ram and an apology.", "effects": {"rep": {"clans": -2}, "hull": -10}}
+        ]},
+        {"text": "[Basalt] Hail the hauler in the slow tongue.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt says one long, low word and the hauler hears it from far off. The crew, six days into a Long Quiet, finally move. They deploy a cargo net that wraps both Rustfang boats like presents. You collect a finder's fee.", "effects": {"items": {"credits": 50, "scrap": 40}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Watch for a while, then leave.", "outcomes": [
+          {"weight": 100, "text": "Rustfang rams, Basalt does not notice. It is a good show. You leave before the end.", "effects": {}}
+        ]}
+      ],
+      "after_win": {"text": "The hauler's crew finally come out and thank you at length. It takes an hour. The gift is silicon, a lot of it, and a pat on the hull.", "effects": {"items": {"silicon": 12, "titanium": 6}, "rep": {"clans": 2}}}
+    },
+    {
+      "id": "quarry_old_door", "type": "anomaly", "weight": 7, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "An old stone arch floats alone in a bare patch of the Quarry: two uprights and a lintel, forty metres high, cut from a single block. Nothing passes through it, because there is nothing to pass through. Basalt crews bow a little as they pass. A tag on one pillar says NOT FINISHED.",
+      "choices": [
+        {"text": "Fly through the arch.", "outcomes": [
+          {"weight": 60, "text": "Your ship passes through. Nothing happens. A quiet note, like an interval, hums in your hull and fades. For eleven seconds you feel counted. A survey pad drifts out of the stone, plumb and patient.", "effects": {"items": {"crystal": 2}}},
+          {"weight": 40, "text": "Nothing. Only the stones, turning slowly, and the sense of having been very rude. A survey pad bumps your hull on the way past.", "effects": {"rep": {"clans": -1}}}
+        ]},
+        {"text": "[Basalt] Ask the arch what it is for.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt lays a palm on the stone and stays there most of a day. When they take it away they say only: 'We cut the stones. The Lumen set the light. Somebody else made the door.' Then, quietly: 'They came back for it.' They will not say who.", "effects": {"items": {"silicon": 6}, "flag": "quarry_door_heard"}}
+        ]},
+        {"text": "[Prismatic] Hum at the arch.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums a note. The arch hums it back, a third lower, and holds it. Neither will stop first. After an hour both do, at the same moment. Your Prismatic is shaken and will only say the arch has perfect pitch.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Chip a piece off for the hold.", "outcomes": [
+          {"weight": 70, "text": "Hairline cracks run across the lintel as you cut. The chip comes away heavy and warm. Every Basalt in range watches you do it.", "effects": {"items": {"silicon": 8}, "rep": {"clans": -3}}},
+          {"weight": 30, "text": "The arch rings like a bell and your cutter arm shatters. You will not be doing that again.", "effects": {"rep": {"clans": -3}, "hull": -10}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_blast_day", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"flag": "in_basalt_quarries", "jumps_min": 2},
+      "text": "Today is Blast Day: the Quarry's controlled demolition of the east face. The notice went up forty years ago, in the slow tongue, and says the blast is 'imminent'. This is the day. You are in the middle of the notice's 'imminent'. A voice, calm as granite, says: 'Please leave the area. Please leave it soon. Thank you.'",
+      "choices": [
+        {"text": "Get out immediately.", "outcomes": [
+          {"weight": 55, "text": "You burn hard out of the blast zone. The east face lets go behind you, a silent, orange bloom of stone. The Basalt applaud, slowly. You came out with a hold of debris scooped from the edge.", "effects": {"items": {"silicon": 8, "scrap": 30}}},
+          {"weight": 25, "text": "You are nearly clear when the first shockwave catches your tail. The ship tumbles. The crew bounce.", "effects": {"items": {"scrap": 20}, "crew_hp": -15, "hull": -10}},
+          {"weight": 12, "text": "The blast comes early. 'Imminent', it turns out, has a wide margin. You get out trailing smoke, short a handrail and a few teeth.", "effects": {"crew_hp": -20, "hull": -15}},
+          {"weight": 8, "text": "The blast comes early and from the wrong side. You get the ship out. One of the crew did not get back to the hatch in time.", "effects": {"crew_hp": -20, "hull": -15, "lose_crew": 1}}
+        ]},
+        {"text": "Ride the blast and mine the loosened rock.", "outcomes": [
+          {"weight": 40, "text": "You sit at the edge and take the blast on the shield side. The east face comes apart in a cloud of fresh-cut stone and the cutters fill like pockets. It is a lot of rock. It is a lot of rock coming at you.", "effects": {"items": {"silicon": 16, "titanium": 10, "scrap": 40}, "crew_hp": -10, "hull": -5}},
+          {"weight": 30, "text": "The blast rolls over you like a wall. You come out the other side with a full hold and half a hull.", "effects": {"items": {"silicon": 16, "titanium": 8}, "crew_hp": -20, "hull": -15}},
+          {"weight": 20, "text": "The shockwave takes the cutter arm off and puts it in the next system. You get the haul. You do not get the arm.", "effects": {"items": {"silicon": 14, "titanium": 10}, "hull": -10}},
+          {"weight": 10, "text": "The blast catches the hull in the worst place. You get the haul out. You do not get everyone back.", "effects": {"items": {"silicon": 14, "titanium": 8}, "crew_hp": -20, "hull": -15, "lose_crew": 1}}
+        ]},
+        {"text": "[Basalt] Call the demolition foreman and ask for a delay.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt tells the foreman, in the slow tongue, that a ship is in the zone. The foreman is silent for six minutes. Then, with infinite courtesy, he postpones the blast by one settling. You use it to cut the east face yourself, at leisure.", "effects": {"items": {"silicon": 14, "titanium": 8}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Shield] Angle the shield and drift through.", "requires": {"component": "shield_mk1"}, "outcomes": [
+          {"weight": 70, "text": "You angle the shield and let the blast roll over you. It screams, then holds. You come out blackened and rich.", "effects": {"items": {"silicon": 12, "titanium": 8}, "hull": -5}},
+          {"weight": 30, "text": "The shield breaks and the hull takes the rest.", "effects": {"items": {"silicon": 10}, "hull": -15}}
+        ]}
+      ]
+    },
+    {
+      "id": "quarry_survey_cutter", "type": "patrol", "weight": 10, "once": false, "requires": {"flag": "in_basalt_quarries"},
+      "text": "A Concord survey cutter, CS-808 Tolerance, is trying to assess the Quarry for taxation. Surveyor Pim has been at the dock a week with a clipboard. He has asked the Basalt foreman one question a day. The foreman has answered one question in six days. The answer was 'Mm.' Pim has written it down as 'assent'.",
+      "choices": [
+        {"text": "Help Pim with the translation.", "outcomes": [
+          {"weight": 70, "text": "You explain that 'Mm' has eleven meanings and ask which one he would like. Pim writes this down with enormous relief. By evening he has an accurate survey, a tax schedule and a deep respect for the Quarry. The Concord pays you a translation fee.", "effects": {"items": {"credits": 40}, "rep": {"concord": 2, "clans": 1}}},
+          {"weight": 30, "text": "You mistranslate one nuance. The tax schedule is now off by a factor of nine. Pim files it. The Quarry will find out in about forty years.", "effects": {"items": {"credits": 25}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Basalt] Speak to the foreman on Pim's behalf.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt and the foreman converse for most of the afternoon in a sequence of long pauses. Pim writes it all down, increasingly baffled. At the end the foreman says one sentence, and Pim reads it aloud: 'The Quarry is not for sale.' He frames the clipboard.", "effects": {"items": {"credits": 30, "silicon": 6}, "rep": {"concord": 1, "clans": 2}}}
+        ]},
+        {"text": "Tip off the foreman that Concord wants a tax.", "outcomes": [
+          {"weight": 100, "text": "The foreman considers this for a good while and says, 'Ah.' The word fills the dock. Pim's cutter is politely surrounded by a cairn of stone. Nobody is hurt. Pim is later found, rather pleased with it, as a protected monument.", "effects": {"items": {"silicon": 8}, "rep": {"concord": -3, "clans": 3}}}
+        ]},
+        {"text": "Leave them to their paperwork.", "outcomes": [
+          {"weight": 100, "text": "Pim writes something on his clipboard. It may be your name. It may be 'assent'.", "effects": {}}
+        ]}
+      ]
+    }
+]}

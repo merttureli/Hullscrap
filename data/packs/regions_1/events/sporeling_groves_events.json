@@ -1,0 +1,244 @@
+{"events": [
+    {
+      "id": "grove_spore_dock", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "The Grove dock is a hollowed hulk grown over with moss and pale ferns, lit by glowing caps. The dockhand is a Sporeling called Lull, who greets you with a gentle puff of spores and an apology. 'Sorry about the smell,' they say. 'It is the good smell. It is the smell of something becoming something else.'",
+      "choices": [
+        {"text": "Breathe deep.", "outcomes": [
+          {"weight": 80, "text": "The spores are warm and damp and faintly sweet, and the crew have not slept this well in a month. The air tastes of rain and bread.", "effects": {"crew_hp": 10}},
+          {"weight": 20, "text": "The spores tickle. Everyone sneezes, in sequence, for an hour. The dockhand apologises for each sneeze in turn.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "Hold your breath and hurry.", "outcomes": [
+          {"weight": 100, "text": "Lull takes this in stride. 'Many do,' they say, kindly, and hold the lamp for you. You come out a little blue, and unharmed.", "effects": {}}
+        ]},
+        {"text": "[Sporeling] Trade spore-notes with the dockhand.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling and Lull stand close and exchange a long slow puff, a kind of handshake. 'Cousins,' says Lull. 'Related by the same hulk.' The dock opens its supplies to you at friends' rates.", "effects": {"items": {"polymer": 15, "credits": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "[Emberkin] Keep well back. Warm things make them nervous.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin stays at the airlock, hands in pockets, trying very hard to be cold. Lull, touched, produces a damp towel. 'It is the thought,' they say. The two stand in companionable, sweating silence for an hour.", "effects": {"items": {"credits": 15}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_lumen_collectors", "type": "patrol", "weight": 10, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "A Lumen skiff, Photic, holds station in the lane with her nets out, a team of researchers in sterile white sweeping the Grove's drifting spore-clouds into jars. 'For the study,' says Doctor Ilex through her mask. 'They are so extraordinary. May we have a sample? Of anything? Of you?' A Sporeling stands at the Grove's hatch, watching the jars with an expression of polite dread.",
+      "choices": [
+        {"text": "Help the researchers.", "outcomes": [
+          {"weight": 60, "text": "You hold the nets while the researchers collect. They are thrilled. You are paid in crystal and a promise of a paper, and Ilex lends you a field notebook. The Sporeling at the hatch will not look at you.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}}},
+          {"weight": 40, "text": "You help; a jar breaks; a cloud of spores gets into the researchers' lab, which is now a forest. They thank you. The Sporeling thanks you more. Ilex presses a notebook into your hands.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Ask the Grove for its view.", "outcomes": [
+          {"weight": 100, "text": "The Sporeling at the hatch hums, a long breath of relief. 'They collect,' she says. 'They do not ask. Thank you for asking.' The Grove gives you a basket of dried caps, and a consent form someone drew in crayon.", "effects": {"items": {"polymer": 10, "credits": 20}, "rep": {"lumen": -1}}}
+        ]},
+        {"text": "[Sporeling] Offer yourself as the sample.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling steps forward and offers a single cap to the researchers, gently, on their own terms. Ilex takes it with trembling hands and writes for an hour. It is the first consented sample in the history of the study. The Lumen pay in crystal; the Grove pays in love. The form they signed is yours to keep.", "effects": {"items": {"crystal": 4, "polymer": 10}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Prismatic] Translate between them.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums to the researchers and the Sporeling in turn, finding a tone both can hear. The result is a treaty: samples by consent, a sample every Tuesday, one cake for every jar. Both sides are pleased and baffled. Ilex hands over the draft.", "effects": {"items": {"crystal": 3, "credits": 20}, "rep": {"lumen": 2}}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_hulk_forest", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "A derelict freighter, the Long Weekend, grown entirely into a forest. Moss on every deck, ferns in the corridors, glowing mushroom trees in the engine bays, and a gentle drip of condensation from a ceiling made of roots. Somewhere in the heart of it something is humming, a long way off.",
+      "choices": [
+        {"text": "Strip the useful bits from the roots.", "outcomes": [
+          {"weight": 60, "text": "The hull is bound together by roots, but gentle ones. You cut your way to the electronics and take what you need. The roots close behind you like a sigh. A note is pinned to the bridge door.", "effects": {"items": {"copper": 20, "polymer": 20, "scrap": 20}}},
+          {"weight": 25, "text": "A root takes a dislike to the cutter and tightens. You lose a wrench, a glove and about ten minutes.", "effects": {"items": {"copper": 15, "polymer": 10}, "crew_hp": -5}},
+          {"weight": 15, "text": "Hidden in the roots: a medbay, intact, with a locker of nanite paste.", "effects": {"items": {"nanite_paste": 2, "polymer": 15}}}
+        ]},
+        {"text": "Harvest the fruiting bodies.", "outcomes": [
+          {"weight": 70, "text": "The mushroom trees drop their fruit at the first touch. They are edible, filling, and faintly luminous. The crew eat well, glow slightly, and complain of nothing.", "effects": {"items": {"polymer": 10}, "crew_hp": 15}},
+          {"weight": 30, "text": "One of the mushrooms is not edible. The crew learn which, collectively.", "effects": {"items": {"polymer": 10}, "crew_hp": -10}}
+        ]},
+        {"text": "[Sporeling] Ask the forest to let you in.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling stands at the airlock and hums to the moss. The roots part like a curtain. Deep in the forest they find the freighter's reactor, perfectly preserved, wrapped in ferns. 'It was kept,' says your Sporeling. 'It was looked after.'", "effects": {"items": {"copper": 25, "polymer": 25, "scrap": 30}, "crew_hp": 5}}
+        ]},
+        {"text": "[Mire] Soak the roots so they let go.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire damps the roots with a soft, fine rain. They swell, soften and let go. The forest sighs in gratitude. You walk through to a good salvage and a quiet pat on the arm.", "effects": {"items": {"copper": 25, "scrap": 30, "polymer": 15}}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_mushroom_market", "type": "trader", "weight": 11, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "A Sporeling market run from a floating hollow tree: stalls of dried caps, jars of pickled spores, tea made from something that was alive this morning. The stallholder, Nettle, offers you a tasting spoon and a warning. 'Everything here is edible,' she says. 'Some of it is also a story.'",
+      "choices": [
+        {"text": "Buy a basket of dried caps (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 85, "text": "Good eating, light as paper, with a taste like bread and old books. The crew eat them for a week and sleep like stones.", "effects": {"items": {"credits": -20, "polymer": 10}, "crew_hp": 15}},
+          {"weight": 15, "text": "One of the caps whispers. Nobody mentions it. Everybody hears.", "effects": {"items": {"credits": -20, "polymer": 10}, "crew_hp": 5}}
+        ]},
+        {"text": "Trade 15 polymer for spore tea.", "requires": {"items": {"polymer": 15}}, "outcomes": [
+          {"weight": 100, "text": "Nettle weighs the polymer, nods, and fills a flask with something amber, warm, and faintly lit from within. 'Drink it slow,' she says. It tastes of rain and rust and your grandmother.", "effects": {"items": {"polymer": -15}, "crew_hp": 20}}
+        ]},
+        {"text": "[Sporeling] Swap recipes with Nettle.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling and Nettle spend an hour swapping recipes in a rapid cloud of gestures. The result is a loaf of bread that grows in the oven. They split the profits. You get the second loaf.", "effects": {"items": {"credits": 40, "polymer": 15}, "crew_hp": 10}}
+        ]},
+        {"text": "[Kett] Share a basket among the knot.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Four hands, one basket, a lot of tiny ticks of delight. Your Kett divides the caps into exact quarters by weight, and each takes a bite at the same moment. Nettle watches them, says nothing, and then gives them a fifth quarter for free.", "effects": {"items": {"polymer": 15}, "crew_hp": 10}}
+        ]},
+        {"text": "Smell the stalls and move on.", "outcomes": [
+          {"weight": 100, "text": "You breathe in the stalls: bread, rain, old books. A Sporeling presses a dried cap into your hand for free, with an apology and a little puff of goodwill.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_fire_scare", "type": "distress", "weight": 10, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "A fire in the Grove! A bonfire, mostly, started by a visiting trader who wanted to cook lunch. The flames are climbing the moss, and the Sporelings are standing back with their caps drooping, humming a high thin note of alarm. A Sporeling kid with a bucket runs up and down the shore, too short to help, too stubborn to stop.",
+      "choices": [
+        {"text": "Fight the fire with foam.", "outcomes": [
+          {"weight": 65, "text": "You spray foam over the moss until the flames fall back. It takes an hour, a lot of foam and a lot of shouting. Afterwards the Sporelings come forward and cover you in a soft rain of spores in thanks.", "effects": {"items": {"polymer": 15, "credits": 25}, "rep": {"lumen": 1}, "crew_hp": 10}},
+          {"weight": 25, "text": "The foam runs short. The fire gets a third of the grove before you get it out. The Sporelings are very quiet. They do not blame you, which is worse.", "effects": {"items": {"polymer": 10}, "crew_hp": -5}},
+          {"weight": 10, "text": "The fire flares and takes your radio mast. The grove is saved, with a bill.", "effects": {"items": {"credits": 30}, "hull": -10}}
+        ]},
+        {"text": "[Mire] Smother it with water.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire marches in, tank blazing, and douses the fire with a long cold arc. The moss hisses and steams. The Sporelings, who were just about to cry, stare, then clap. The kid with the bucket follows your Mire everywhere for the rest of the day.", "effects": {"items": {"polymer": 25, "credits": 40}, "rep": {"lumen": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Emberkin] Ask the fire to stop.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin walks into the flames, speaks to them in a language of crackle, and the fire sits down. It goes to embers, then to nothing. 'Rude of it,' your Emberkin says. 'It was only hungry.'", "effects": {"items": {"polymer": 15, "credits": 30}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "Carry the kid with the bucket to safety.", "outcomes": [
+          {"weight": 100, "text": "You scoop up the kid and carry them, kicking, to the dock. They sit in the airlock and watch the fire like a film. When it is over, they hand you the bucket. It is the best gift in the Grove.", "effects": {"rep": {"lumen": 1}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_roots_hum", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "The Grove's roots run for kilometres through the dark, thin and pale and glowing, joining one hulk to the next. Tonight they carry a signal: a hum that rises, falls, and rises again, as if the whole network were thinking one thought. A Sporeling at the rail says, in the voice of someone repeating a lesson, 'There is a voice in the roots. We do not know whose.'",
+      "choices": [
+        {"text": "Listen to the roots.", "outcomes": [
+          {"weight": 100, "text": "You put an ear to the hull and hear, dimly, in the hum, a voice saying the same words again and again: 'If you can hear this, we are alive. Come to the Lantern Reach.' The Sporelings have been listening for years. Your crew are very quiet.", "effects": {"items": {"crystal": 1}, "crew_hp": 5, "flag": "groves_heard_lantern"}}
+        ]},
+        {"text": "Ask the Grove what it means.", "outcomes": [
+          {"weight": 100, "text": "The elder, Morel, takes a long time to answer. 'It came in the roots,' she says, 'before the roots were ours. Some of us follow it in our dreams. None of us has come back to say.' She gives you a small cap, sealed in wax. 'Keep it dry.'", "effects": {"items": {"polymer": 10}, "flag": "groves_heard_lantern"}}
+        ]},
+        {"text": "[Sporeling] Join the hum.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling kneels, presses a palm to the deck, and joins the hum. For an hour the ship thrums, the lights flicker, and the whole Grove sings one note. When your Sporeling surfaces they are weeping and glowing. 'It is a place,' they say. 'It is warm, and a long way, and it is expecting someone.'", "effects": {"items": {"crystal": 2}, "crew_hp": 10, "flag": "groves_heard_lantern"}}
+        ]},
+        {"text": "[Prismatic] Match the hum's pitch.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic matches the hum and holds it. The hum resolves, for a moment, into a clean phrase, almost a name. Then it breaks. The crew will talk about it for weeks.", "effects": {"items": {"crystal": 3}, "flag": "groves_heard_lantern"}}
+        ]},
+        {"text": "Cut the signal.", "outcomes": [
+          {"weight": 100, "text": "You cut the line. The hum chokes, and the whole Grove moans at once. You feel, quite suddenly, like someone who has switched off a lullaby.", "effects": {"rep": {"lumen": -1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_dry_corridor", "type": "distress", "weight": 6, "once": true, "requires": {"flag": "in_sporeling_groves"},
+      "text": "Hush, a young Sporeling, is stuck in the Grove's one dry corridor. They went in to pick a rare lichen, and the drying fan came on. Their cap is crisp at the edges. They say, in a whisper that sounds like paper: 'Hello. I am a little dry. I think I should be less dry. Do you have a damp place?'",
+      "choices": [
+        {"text": "Carry Hush out to the damp.", "outcomes": [
+          {"weight": 100, "text": "You scoop Hush up, soft as a loaf, and carry them to the nearest wet corridor. They unfurl. Within a minute their cap is plump again, and they have decided you are their favourite person. 'Take me with you,' they say. 'I am small. I am damp. I am very good at plants.'", "effects": {"recruit": {"species": "sporeling", "name": "Hush"}}}
+        ]},
+        {"text": "[Mire] Douse Hush with water.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire lets a gentle shower down from the tank and Hush stands in it, eyes closed, with a face of pure bliss. When they are plump again they bow to your Mire. 'Brother,' they say, in the voice of a person who has found their people.", "effects": {"items": {"polymer": 10}, "recruit": {"species": "sporeling", "name": "Hush"}}}
+        ]},
+        {"text": "[Sporeling] Share some of your own damp.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling takes Hush's hand and breathes a long slow cloud of spores into the dry cap. Hush sighs and plumps. They stay close for the rest of the trip, holding your Sporeling's sleeve. 'Cousin,' they say. 'I did not know there were cousins out here.'", "effects": {"items": {"polymer": 10}, "crew_hp": 5, "recruit": {"species": "sporeling", "name": "Hush"}}}
+        ]},
+        {"text": "Leave a bucket of water and go.", "outcomes": [
+          {"weight": 100, "text": "You leave a bucket by the door. Hush thanks you in a whisper that carries a long way. You feel, as you fly off, that you have forgotten something important.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_bloom_trial", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_sporeling_groves"},
+      "text": "Elder Morel tends the Bloom Reactor: a squat, bulbous, mushroom-like power core in a room full of ferns. It makes enormous power cheaply and drinks the room's air to do it. 'For most crews, a bad bargain,' she says. 'For us it is a garden that makes electricity. Can you keep it fed?' She hands you a watering can, a pair of gloves and a tray of seedlings.",
+      "choices": [
+        {"text": "Tend the reactor for a shift.", "outcomes": [
+          {"weight": 55, "text": "You water, prune and fan the bloom for six hours, and it purrs. The room gets a little stuffy, then very stuffy; the seedlings help. Morel inspects you at the end and says, with wonder, 'You have the hands.' She gives you the schematics.", "effects": {"crew_hp": -5, "flag": "tech_bloom_reactor"}},
+          {"weight": 45, "text": "The reactor drinks the room dry in the third hour. The crew come out gasping and the seedlings are very smug. Morel is not displeased. 'Everybody does that once,' she says, and hands over the schematics.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_bloom_reactor"}}
+        ]},
+        {"text": "[Sporeling] Tend it with the Grove.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling kneels by the bloom and hums, and the reactor hums back. The room never gets stuffy. The fern walls breathe out, the bloom breathes in, and for six hours the Grove is a single quiet organism. Morel gives your Sporeling the schematics, a seedling and a blessing.", "effects": {"items": {"polymer": 20, "crystal": 2}, "rep": {"lumen": 1}, "crew_hp": 10, "flag": "tech_bloom_reactor"}}
+        ]},
+        {"text": "[Oxygen generator] Feed the bloom from your own air supply.", "requires": {"component": "oxygen_gen"}, "outcomes": [
+          {"weight": 100, "text": "Your oxygen generator feeds the bloom as fast as it drinks. Morel is impressed in a sceptical sort of way. 'A machine that makes air for a machine that eats it,' she says. 'It is the most Lumen thing I have ever seen.' She signs over the schematics.", "effects": {"items": {"polymer": 10}, "flag": "tech_bloom_reactor"}}
+        ]},
+        {"text": "Ask for a day to get ready.", "outcomes": [
+          {"weight": 100, "text": "'The bloom is patient,' says Morel. 'It has been waiting forty years. A day is nothing.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_pruners", "type": "pirate", "weight": 10, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "A Rustfang gardening crew has come to the Grove: raiders in sun hats, wielding hedge-cutters the size of doors. 'Pruning,' says the leader, a woman called Bess. 'We are pruning your forest and selling the clippings to a man who makes tea. It is, I will admit, a low-effort crime.' The Sporelings stand in rows and wave frantically.",
+      "choices": [
+        {"text": "Fight the pruners.", "outcomes": [
+          {"weight": 100, "text": "You open fire. Bess takes her sun hat off and holds it over her heart, as a courtesy.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Buy the clippings from Bess (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 70, "text": "Bess takes the money, hands over a sack of clippings, and goes home to have a think about her life. The Sporelings take the clippings and replant them. You get a seedling and a thank-you in spores.", "effects": {"items": {"credits": -30, "polymer": 10}, "rep": {"lumen": 2}}},
+          {"weight": 30, "text": "Bess takes the money, then remembers she is a pirate. 'Prune me a tip,' she says, and her crew open fire.", "effects": {"items": {"credits": -30}, "fight": "pirate_raider"}}
+        ]},
+        {"text": "[Sporeling] Grow a hedge across the lane.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling kneels, breathes, and in four minutes a thorn-hedge twelve metres high rises across the lane. Bess looks at it, looks at the clippers, and goes home. The Sporelings leave a wreath of moss on your airlock.", "effects": {"items": {"polymer": 20, "scrap": 30}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Gauntling] Offer to take the hedge-cutters apart.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling steps up, takes the pruners' hedge-cutter in two hands, and quietly dismantles it, bolt by bolt, in front of Bess. She watches, faintly hypnotised. By the end she is handing over her tools one at a time.", "effects": {"items": {"scrap": 60, "credits": 30}}}
+        ]}
+      ],
+      "after_win": {"text": "The pruners' hold is full of clippings, tea and a pair of very good hedge-cutters. The Sporelings hold a small, damp ceremony. You get a pot plant.", "effects": {"items": {"polymer": 25, "scrap": 40, "credits": 30}, "rep": {"lumen": 1}}}
+    },
+    {
+      "id": "grove_compost_rock", "type": "asteroid_field", "weight": 9, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "A rock that has been dead ten thousand years, quietly fertile: sprouting green from every crack, each crack bright with moss and tiny white flowers. The Grove calls it the Compost, and tends it like a garden. 'Everything ends up as soil,' says the gardener, kindly. 'No offence.'",
+      "choices": [
+        {"text": "Cut a seam of the rich ore.", "outcomes": [
+          {"weight": 70, "text": "The ore is dark, dense, and smells of earth and rain. It yields quietly under the cutters, and the moss grows back over the scar almost at once.", "effects": {"items": {"copper": 15, "silicon": 6, "scrap": 20}}},
+          {"weight": 30, "text": "A hidden vein of old spore-gas pops and fogs the lane. The crew come up giggling for an hour.", "effects": {"items": {"silicon": 4, "scrap": 10}, "crew_hp": 5}}
+        ]},
+        {"text": "Help the gardener turn the soil.", "outcomes": [
+          {"weight": 100, "text": "Three hours with a spade, in the dirt, with the gardener telling stories about the rock's last ten thousand years. At the end you are muddy, content, and carrying a little pot of black soil. The gardener says it is worth more than gold. It is mud, but you believe her.", "effects": {"items": {"nanite_paste": 1, "polymer": 10}, "crew_hp": 10}}
+        ]},
+        {"text": "[Sporeling] Lie down in the moss.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling lies down in the moss and does not move for two hours. When they rise, the moss has taken a shape: a small soft bed with their outline in it. The gardener bows. 'You are always welcome,' she says. Your Sporeling returns with their cap glowing and a pocketful of the finest nanite paste.", "effects": {"items": {"nanite_paste": 2, "polymer": 15}, "crew_hp": 10}}
+        ]},
+        {"text": "[Mire] Water the beds.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire waters the Compost with a fine, careful rain. Overnight the flowers triple in number. The gardener cries. She gives your Mire the first pick of the harvest.", "effects": {"items": {"silicon": 8, "copper": 15, "polymer": 15}}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_spore_storm", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_sporeling_groves", "jumps_min": 3},
+      "text": "A spore storm sweeps in: a rolling wall of pale gold dust a kilometre high, glowing from within. The Sporelings run for shelter, lashing down their hatches. 'Do not breathe it,' says the Grove's warning bell. 'Do not look into it. Do not listen to what it says.' The storm is already saying things.",
+      "choices": [
+        {"text": "Run for shelter in the Grove.", "outcomes": [
+          {"weight": 55, "text": "You thread the lane into a Sporeling dock, hatches slamming behind you. The storm roars over the hulls like a tide. Inside, the Sporelings pass round tea and wait. Nothing gets in.", "effects": {"crew_hp": 5}},
+          {"weight": 25, "text": "A thin trickle of spores gets in through a vent. For an hour the crew see their own ghosts. Everyone is shaken, and a little sad.", "effects": {"crew_hp": -10}},
+          {"weight": 15, "text": "The storm catches your tail. The hull sings for a day, and the crew's dreams are very, very vivid.", "effects": {"crew_hp": -15, "hull": -10}},
+          {"weight": 5, "text": "The storm takes one of your crew, who walks out of the airlock after a voice nobody else heard. They are gone before you notice.", "effects": {"hull": -10, "lose_crew": 1}}
+        ]},
+        {"text": "Fly through the storm for the gold dust.", "outcomes": [
+          {"weight": 40, "text": "The dust is fine, glowing and strange. You scoop it up in the intakes and come out the other side with a hold of spores and a headache that lasts a week.", "effects": {"items": {"nanite_paste": 2, "crystal": 3, "polymer": 20}, "crew_hp": -15}},
+          {"weight": 30, "text": "The storm shows each of you your worst day. You live through it. The dust you collect is worth a fortune.", "effects": {"items": {"nanite_paste": 3, "crystal": 4}, "crew_hp": -20}},
+          {"weight": 20, "text": "The storm shows each of you your best day. Nobody wants to leave. It takes the whole crew pulling on the helm to get out.", "effects": {"items": {"crystal": 3, "polymer": 20}, "crew_hp": -10, "hull": -10}},
+          {"weight": 10, "text": "The storm takes one of your crew. They walk into it, smiling.", "effects": {"items": {"nanite_paste": 3, "crystal": 4}, "crew_hp": -15, "lose_crew": 1}}
+        ]},
+        {"text": "[Sporeling] Call the storm down.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 85, "text": "Your Sporeling stands in the airlock, spreads their arms, and hums to the storm. The wall of dust wavers, leans in, and settles round the ship like a blanket. For an hour you sail through a warm gold hush, and the storm passes through you without taking anything. You collect a little of it, as a gift.", "effects": {"items": {"nanite_paste": 2, "crystal": 3, "polymer": 15}, "crew_hp": 10}},
+          {"weight": 15, "text": "The storm hears your Sporeling, and answers. Your Sporeling listens to the answer for a very long time.", "effects": {"items": {"crystal": 2}, "crew_hp": -10}}
+        ]},
+        {"text": "[Mechanical] Run the watch through filters.", "requires": {"trait": "mechanical"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling's lungs are half-sized and filtered. They stand at the hatch, breathing through a grille, and keep watch through the whole storm, noting the voices and paying them no mind. Nobody else is affected. They are reported to be bored.", "effects": {"items": {"crystal": 2, "polymer": 10}}}
+        ]}
+      ]
+    },
+    {
+      "id": "grove_naming_council", "type": "empty", "weight": 8, "once": false, "requires": {"flag": "in_sporeling_groves"},
+      "text": "A Sporeling council is in session in the lane: forty of them sitting in a ring in the middle of nowhere, in perfect stillness, with a small potted tulip in the centre. They have been here three days. A banner reads DECIDING WHAT TO CALL THE TULIP. PLEASE WAIT QUIETLY. The Sporeling nearest you opens an eye, slowly. 'We could use another vote,' she whispers.",
+      "choices": [
+        {"text": "Cast a vote.", "outcomes": [
+          {"weight": 70, "text": "You vote for 'Gerald'. There is a ripple of consideration. It goes on the shortlist, and the council falls silent for six hours. 'Gerald' is eventually chosen. The tulip is thrilled. The Sporelings hold a feast and give you a bulb, a basket and the council's minutes.", "effects": {"items": {"polymer": 15, "credits": 20}, "crew_hp": 10}},
+          {"weight": 30, "text": "You vote for 'Gerald'. The vote is struck: you are not a Sporeling. The council thanks you for your interest. The tulip is named Bulb. They press the minutes into your hand as an apology.", "effects": {"items": {"polymer": 5}}}
+        ]},
+        {"text": "Suggest they just call it Tulip.", "outcomes": [
+          {"weight": 100, "text": "There is a long, long silence. Forty caps turn slowly to look at you. Then the eldest says, in a voice of great awe, 'Tulip.' They pass it round in turn, trying it. The council breaks up in an hour. They give you everything they have: a bag of seeds, three caps, a kiss on the cheek and the minutes.", "effects": {"items": {"polymer": 20, "credits": 30}, "crew_hp": 10}}
+        ]},
+        {"text": "[Sporeling] Propose a name.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling stands, hums a three-note name nobody else can pronounce, and the whole council breathes out. 'That is the one,' says the eldest. The tulip blooms on the spot. Your Sporeling is carried on the council's shoulders to the feast and made a fellow of the Grove.", "effects": {"items": {"polymer": 25, "crystal": 2}, "rep": {"lumen": 1}, "crew_hp": 15}}
+        ]},
+        {"text": "[Fenn] Offer to hurry things along.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn takes the floor, summarises the three-day debate in forty seconds, puts it to a vote, counts it, and declares 'Fennick' the winner by a nose. The council gasps. The tulip, offended, wilts, then blooms in protest. Your Fenn is asked to leave, with a medal.", "effects": {"items": {"credits": 30}, "crew_hp": 5}}
+        ]}
+      ]
+    }
+]}

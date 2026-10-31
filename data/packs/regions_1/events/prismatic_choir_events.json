@@ -1,0 +1,242 @@
+{"events": [
+    {
+      "id": "choir_hum_dock", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "The Choir's dock is a ring of crystal pylons, each ringing a different note as your ship passes between them. A Prismatic greeter hums a warm rising chord that your translator renders as 'Welcome, welcome, welcome' and also 'You are slightly flat'. The pylons chime in agreement.",
+      "choices": [
+        {"text": "Hum along (badly).", "outcomes": [
+          {"weight": 60, "text": "Your crew hum. It is awful. The pylons wince in a cascade of tiny chimes. But the greeter's core glows a warm, forgiving gold. 'Brave,' it hums. 'Flat, but brave.'", "effects": {"crew_hp": 5}},
+          {"weight": 40, "text": "Your crew hum. The greeter's core flickers, flat as a coin. A pylon cracks gently from the effort. You are asked, with great politeness, to stop.", "effects": {"rep": {"lumen": -1}}}
+        ]},
+        {"text": "Stay silent and bow.", "outcomes": [
+          {"weight": 100, "text": "The greeter's glow warms to gold. In the Choir, silence is a kindness and bowing is a language. You are given a small bell and a place to dock.", "effects": {"items": {"crystal": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Prismatic] Hum the proper greeting.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums the greeting in perfect pitch and the pylons ring with it all the way down the ring. The greeter's core flares white with delight. A choir of Prismatics hum back from their windows. 'Cousin,' says the greeter. 'You are in tune.'", "effects": {"items": {"crystal": 4, "credits": 20}, "rep": {"lumen": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Emberkin] Offer to be the bass note.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin hums, a deep warm buzz almost below hearing. The greeter pauses, then adds a note a fifth above. The pylons chime a chord. For one minute the dock is a single instrument, and it is the nicest sound you have ever made.", "effects": {"items": {"crystal": 2}, "crew_hp": 10}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_tuning_bells", "type": "trader", "weight": 11, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "The Choir's market is a hall of hanging crystal bells, each tuned to a different note, each for sale. The seller, a Prismatic named Gleam, taps one, listens, taps another, and hums satisfaction. 'You are a G,' she hums. 'A tired G. You need an A.' She hands you a bell without waiting for a reply.",
+      "choices": [
+        {"text": "Buy the A bell (25 credits).", "requires": {"credits": 25}, "outcomes": [
+          {"weight": 80, "text": "You take the bell home. It hums in your cabin whenever you are about to lose your temper. It saves two arguments before breakfast.", "effects": {"items": {"credits": -25, "crystal": 2}, "crew_hp": 10}},
+          {"weight": 20, "text": "The bell is slightly sharp. The crew find themselves humming at the wrong pitch for a week.", "effects": {"items": {"credits": -25, "crystal": 2}}}
+        ]},
+        {"text": "Sell 3 crystal shards to the Choir.", "requires": {"items": {"crystal": 3}}, "outcomes": [
+          {"weight": 100, "text": "Gleam rolls each shard on her palm, listens, and hums approval. 'Good grain,' she says. She pays in credits, and a small bell as a gift.", "effects": {"items": {"crystal": -3, "credits": 75}}}
+        ]},
+        {"text": "[Prismatic] Tune the whole stall.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic walks the length of the hall, tapping and adjusting each bell by a hair. By the end the whole hall rings a single perfect chord. Gleam is speechless. She hums a thank-you in a note nobody has heard in years, and gives you the best bell in the stall.", "effects": {"items": {"crystal": 5, "credits": 30}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Gauntling] Ring the cracked bells on the bottom shelf.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling picks the cracked bells off the bottom shelf and rings them with a grin. Each has a flat, rattling edge that Gleam cannot bear. She gives them away for free, to stop the noise.", "effects": {"items": {"crystal": 2, "scrap": 30}}}
+        ]},
+        {"text": "Listen to the bells and leave.", "outcomes": [
+          {"weight": 100, "text": "You stand in the hall and listen. The bells ring one another, quietly, without being touched. Gleam hums at you, kindly, and does not mention the time.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_flat_note", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "A flat note drifts through the Choir: low, hollow, wrong. It comes from nowhere and everywhere, and every Prismatic in range has gone dim, cores flickering. The pylons are silent. A young Prismatic hums at the edge of the ring, a thin frightened line, over and over: 'Where is it from? Where is it from?'",
+      "choices": [
+        {"text": "Trace the flat note.", "outcomes": [
+          {"weight": 55, "text": "You triangulate it on three pylons and find the source: a fractured spire in an empty bay, ringing in the solar wind. It is only a crack. You brace it with a strut. The note sweetens, and the Choir brightens by degrees. An apprentice gives you her score.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}, "crew_hp": 5}},
+          {"weight": 30, "text": "You trace it to a Lumen buoy broadcasting, very quietly, a single wrong note on repeat. You turn it off. The Choir lights up like a morning, and the buoy's tech log comes with it.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}}},
+          {"weight": 15, "text": "You trace it a long way into the dark and then lose it. A feeling of being listened to stays with you for the rest of the day.", "effects": {"crew_hp": -5}}
+        ]},
+        {"text": "[Prismatic] Hum the true note over it.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums the true note, steady and clear, over the flat. The two beat against each other, then slide together, and the flat dissolves into a cluster of overtones. Across the ring cores flare back to gold. The Choir hums its gratitude for an hour, and a score is pressed into your Prismatic's hands.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "[Gauntling] Mute it with a hammer.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling finds the cracked spire and gives it one precise clunk. It stops ringing. The Choir stares. 'Rude,' hums an elder; then, 'effective'; then, 'thank you'.", "effects": {"items": {"crystal": 2, "scrap": 20}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Ignore it.", "outcomes": [
+          {"weight": 100, "text": "You fly through. The flat note follows you out of the ring and a long way into the lane. The crew all hum the same wrong note for a day, and nobody can stop.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_shattered_spire", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "A spire, one of the Choir's singing towers, lies shattered in the lane: a hundred metres of crystal broken in half and still faintly humming. A Prismatic funeral drifts nearby, mourners in a ring, cores dimmed, humming a long low line that has no end. A tag on the spire says ION. IT WAS THE ION.",
+      "choices": [
+        {"text": "Take crystal from the broken spire.", "outcomes": [
+          {"weight": 40, "text": "You cut from the base. The mourners stop humming. One turns, and its core goes dim, and then, slowly, it hums a note of permission. You take what you need, and a bit less.", "effects": {"items": {"crystal": 6}, "rep": {"lumen": -2}}},
+          {"weight": 40, "text": "You cut. The spire sings one last note as the cutters go in. The mourners go still. You take the crystal and feel it for a week.", "effects": {"items": {"crystal": 8}, "rep": {"lumen": -3}, "crew_hp": -5}},
+          {"weight": 20, "text": "The spire cracks the rest of the way and falls on you. The mourners watch.", "effects": {"items": {"crystal": 6}, "rep": {"lumen": -3}, "hull": -10}}
+        ]},
+        {"text": "Join the mourners.", "outcomes": [
+          {"weight": 100, "text": "You turn off your lamps and drift into the ring. The hum fills your hull. At the end the mourners give you a shard from the spire's tip, warm, still ringing, and the elegy's score. 'For remembering,' they hum.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 3}, "crew_hp": 10}}
+        ]},
+        {"text": "[Prismatic] Hum the elegy.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic takes a place in the ring and hums the elegy, a hundred and twelve bars, without a flat note. The mourners' cores warm. At the end the spire gives a long soft chime and goes silent. They give your Prismatic its tip, glowing, and the score.", "effects": {"items": {"crystal": 6, "credits": 20}, "rep": {"lumen": 3}, "crew_hp": 10}}
+        ]},
+        {"text": "[Basalt] Carry the spire's base to the funeral bay.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt takes the broken base on their back and carries it, hour after hour, to the funeral bay. The mourners hum a note of thanks that your Basalt hears with their feet. They are given a keepsake, a small perfect cube of clear crystal.", "effects": {"items": {"crystal": 4, "silicon": 6}, "rep": {"lumen": 2}}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_lumen_audit", "type": "patrol", "weight": 10, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "A Lumen engineering tender, Parhelion, has come to inspect the Choir. 'Routine audit of equipment,' says Engineer Halo, tapping a clipboard. 'Prismatic units, serial numbers one to four hundred.' The Prismatics stand in a line, humming a long flat note of protest. 'Equipment,' repeats Halo, flinching. 'It is a perfectly accurate term.'",
+      "choices": [
+        {"text": "Side with the Choir.", "outcomes": [
+          {"weight": 60, "text": "You tell Halo that a person is not a unit. He blinks at you for a very long time. The Choir hums a rising chord of thanks. Halo, unexpectedly, writes it down. 'Persons,' he mutters. 'Persons (units).' He leaves his working notes behind.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 1}}},
+          {"weight": 40, "text": "Halo is unmoved, and logs you as a source of friction. The Choir hums a sad little line of thanks anyway.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": -1}}}
+        ]},
+        {"text": "Side with the Lumen.", "outcomes": [
+          {"weight": 100, "text": "You agree that the audit is routine. Halo is delighted. He ticks a box. The Choir's cores dim one by one, and a long flat note falls over the room.", "effects": {"items": {"credits": 40}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Prismatic] Hum a request to be counted as people.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums a clear rising line, at once a plea and a statement. The Choir joins in. Halo, who cannot hum, tries. It is terrible. It is sincere. The word on his clipboard changes from 'units' to 'colleagues'.", "effects": {"items": {"crystal": 3, "credits": 30}, "rep": {"lumen": 3}}}
+        ]},
+        {"text": "[Fenn] Negotiate a serial number for each of them.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn works out that if the Prismatics are equipment, they can be leased, and if they can be leased, they can be paid. Halo is stunned. By the end of the afternoon the Choir has a rate card and your Fenn has a commission.", "effects": {"items": {"credits": 70}, "rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_young_leaver", "type": "distress", "weight": 6, "once": true, "requires": {"flag": "in_prismatic_choir"},
+      "text": "A young Prismatic, Opal, sits alone on a crystal shard at the edge of the Choir, core dim, humming a thin tuneless line. 'I was grown to sing in the spire,' she hums, when you hail. 'I cannot find my part. I would like to find a different one. Somewhere. Anywhere else.' The Choir's ring is a long way back. Nobody has noticed she is gone.",
+      "choices": [
+        {"text": "Offer Opal a berth.", "outcomes": [
+          {"weight": 100, "text": "Opal's core brightens by degrees as she crosses your airlock. She hums for the first time in a clear note: 'Thank you.' By the end of the first hour your engine room hums with her. It is, the crew agree, the best the engine has ever sounded.", "effects": {"recruit": {"species": "prismatic", "name": "Opal"}}}
+        ]},
+        {"text": "[Prismatic] Hum the missing part.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums a line, a counter-line, and a third line that fits between them. Opal listens, then adds her own, the missing part, thin and clear. They finish together. Opal's core is bright as noon. 'That was it,' she hums. 'That was mine.' She signs on, singing.", "effects": {"items": {"crystal": 3}, "recruit": {"species": "prismatic", "name": "Opal"}}}
+        ]},
+        {"text": "[Emberkin] Keep her warm while she decides.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin sits beside Opal, radiating gently, saying nothing. Opal leans against their shoulder and, after an hour, hums a faint decided note. 'Yes,' it says.", "effects": {"items": {"crystal": 1}, "recruit": {"species": "prismatic", "name": "Opal"}}}
+        ]},
+        {"text": "Wish her well and go.", "outcomes": [
+          {"weight": 100, "text": "'Thank you for stopping,' she hums, 'for a bar.' It is the kindest rejection you have ever received. You fly on, and the shard falls behind.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_lens_trial", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_prismatic_choir"},
+      "text": "Cantor Spectra, who conducts the Choir, keeps the Prism Lens in a hall of mirrors: a beam weapon that works at full power only when a Prismatic is at its controls, and at half for everyone else. 'It is not prejudice,' she hums, a little defensively. 'It is a matter of pitch.' She sets a tuning fork on the console. 'Run it. Hum with it. Let us hear what you are.'",
+      "choices": [
+        {"text": "Run the Lens and hum along.", "outcomes": [
+          {"weight": 45, "text": "You sit at the Lens and hum. It is not good. The beam wobbles, flares, steadies. Spectra listens with her core dimmed, nodding. 'Half power,' she hums, 'but honest.' She gives you the schematics and a tuning fork to practise.", "effects": {"items": {"crystal": 2}, "flag": "tech_prism_lens"}},
+          {"weight": 55, "text": "You hum. The beam throws a rainbow across the hall and a dozen Prismatics clap their hands. 'Not bad,' hums Spectra. 'For someone with a mouth.'", "effects": {"flag": "tech_prism_lens"}}
+        ]},
+        {"text": "[Prismatic] Run the Lens at full power.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic sits at the Lens and the beam goes white, a clean blade of light that cuts a target drone in two without a flicker. The whole hall hums with pride. Spectra gives them the schematics, a baton, and a bar of music on a slip of paper: their own part, in the Choir's score.", "effects": {"items": {"crystal": 5}, "rep": {"lumen": 2}, "flag": "tech_prism_lens"}}
+        ]},
+        {"text": "[Mirror Veil] Let your Mirror Veil answer the Lens.", "requires": {"component": "mirror_veil"}, "outcomes": [
+          {"weight": 100, "text": "Your Mirror Veil catches the beam and throws it back into the hall, and the hall sings. A dozen reflected beams cross and braid in the air, and Spectra weeps with delight. 'A new voice,' she hums. 'We shall use it.' She gives you the schematics.", "effects": {"items": {"crystal": 3}, "flag": "tech_prism_lens"}}
+        ]},
+        {"text": "Ask to come back and practise.", "outcomes": [
+          {"weight": 100, "text": "'Practise,' hums Spectra, with approval. 'The Lens is patient. It is the rest of us who aren't.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_crystal_garden", "type": "asteroid_field", "weight": 9, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "A crystal growth, the Choir's garden: blue-white spires, thick as trees, growing out of a rock in the slow deliberate way of things that have all the time in the world. Prismatics tend it with soft cloths and low humming. A sign reads THIS IS HOW WE GROW. PLEASE ASK BEFORE TAKING. IT CAN HEAR YOU.",
+      "choices": [
+        {"text": "Ask the garden, then take a small shard.", "outcomes": [
+          {"weight": 70, "text": "You hum to the garden, as nearly as you can, and wait. A spire clicks. A small shard drops into your hand, warm. A Prismatic nods gravely. 'It likes you,' she hums, and lends you her notes.", "effects": {"items": {"crystal": 5}}},
+          {"weight": 30, "text": "You ask. Nothing happens. You wait longer. The Prismatic gives you a pat on the arm, a cloth, and a task: polish the nearest spire. You do. It hums contentedly. You get a shard as a wage.", "effects": {"items": {"crystal": 3}, "crew_hp": 5}}
+        ]},
+        {"text": "Take what you want.", "outcomes": [
+          {"weight": 50, "text": "You cut a spire at the base. It lets out a thin high note, and every Prismatic in the garden goes still. The shard is large and bright. The Choir's glow dims and does not come back for a long time.", "effects": {"items": {"crystal": 10}, "rep": {"lumen": -4}}},
+          {"weight": 50, "text": "The spire cracks, then falls, and takes a piece of the rock with it. The Choir turns to look at you. Nobody says anything.", "effects": {"items": {"crystal": 8}, "rep": {"lumen": -4}, "hull": -5}}
+        ]},
+        {"text": "[Prismatic] Hum a duet with the spire.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic sits among the spires and hums. The nearest spire hums back, a third higher. For an hour they sing a duet. When it ends the spire drops a long clear shard at your Prismatic's feet, like a gift. The gardeners clap, and press their log into your hands.", "effects": {"items": {"crystal": 8, "credits": 20}, "rep": {"lumen": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Sporeling] Ask it nicely, in spores.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling breathes out a slow sweet cloud. The spires lean in, glow and chime. The gardeners have never seen it so happy. They send your Sporeling home with a hold of shards.", "effects": {"items": {"crystal": 6, "polymer": 10}, "rep": {"lumen": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_ion_front", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_prismatic_choir", "jumps_min": 3},
+      "text": "An ion front is coming in over the Choir: a wall of violet static a hundred kilometres wide, rolling toward the spires. The Prismatics are lashing down, humming a low frightened line. They take double damage from ion, and each of them knows what that means. A voice from the Cantor's balcony: 'Everyone who can fly, please come and help.'",
+      "choices": [
+        {"text": "Fly into the front to blunt it.", "outcomes": [
+          {"weight": 40, "text": "You angle the shield into the front and take the worst of the static on your hull. It sings like a bell. Behind you the Choir lies untouched. When it passes the Prismatics file out and hum a thank-you so loud your plates ring.", "effects": {"items": {"crystal": 5}, "rep": {"lumen": 3}, "crew_hp": -10, "hull": -10}},
+          {"weight": 30, "text": "The front hits harder than forecast. Every system flickers. The crew are stunned for seconds and the hull is scored, but the Choir holds.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}, "crew_hp": -15, "hull": -15}},
+          {"weight": 20, "text": "The static goes through you like a wire. The Choir is saved. You are not at your best for a day.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 3}, "crew_hp": -20, "hull": -15}},
+          {"weight": 10, "text": "The front takes one of your crew. The Choir hums a long low line for the rest of the day, and it is for them.", "effects": {"rep": {"lumen": 3}, "crew_hp": -20, "hull": -15, "lose_crew": 1}}
+        ]},
+        {"text": "Help rig reflectors round the spires.", "outcomes": [
+          {"weight": 70, "text": "You and the Prismatics rig reflectors round the spires, a net of mirrors and wire. The front breaks round them like surf round a rock. It takes all night. The Cantor presents you with a crystal the size of your fist.", "effects": {"items": {"crystal": 6, "credits": 30}, "rep": {"lumen": 3}, "crew_hp": -5}},
+          {"weight": 30, "text": "The net holds, mostly. One spire cracks, with a long sad chime. The Cantor thanks you anyway.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}, "hull": -5}}
+        ]},
+        {"text": "[Basalt] Stand in front of the spires.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt walks out onto the lip of the ring and stands in the front like a statue. The ion pours off them. They stand there an hour, unmoving, as the front breaks on them. When it passes they have a small bright burn on each shoulder and a Choir weeping at their feet.", "effects": {"items": {"crystal": 8, "silicon": 8}, "rep": {"lumen": 4}, "crew_hp": -5}}
+        ]},
+        {"text": "[Mirror Veil] Spread the Veil over the spires.", "requires": {"component": "mirror_veil"}, "outcomes": [
+          {"weight": 100, "text": "Your Mirror Veil spreads over the spires in a shimmering net. The front hits it, bends, and flows around. The Choir stares in awe. The Cantor hums a three-note phrase of respect, the first you have heard her use for anyone.", "effects": {"items": {"crystal": 6, "credits": 40}, "rep": {"lumen": 3}}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You turn away. Behind you the front breaks on the spires, and a long low note rises and falls and rises again. It is the sound of something breaking and being mended.", "effects": {"rep": {"lumen": -2}}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_the_eleven", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "A single sustained note hangs in the Choir, from nowhere: very deep, very pure, a note the Prismatics call the Eleven. They gather for it once a year, in rows. 'It is the note the Door made,' hums the Cantor, 'before it closed. We do not know why we remember it. We were not there. We were grown in its echo.' Every core in the hall glows the same pale blue.",
+      "choices": [
+        {"text": "Stand in silence for the Eleven.", "outcomes": [
+          {"weight": 100, "text": "You stand with the Choir for exactly eleven seconds, in a hum so deep your teeth vibrate. When it stops, everyone breathes at once. A Prismatic touches your hand lightly with a facet. 'Now you know,' it hums. 'You were here.' It leaves you a pad.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Try to record the note.", "outcomes": [
+          {"weight": 50, "text": "Your recorder captures the note. It plays back as a flat hiss. The Choir looks pained. 'It cannot be kept,' hums the Cantor. 'Only shared.'", "effects": {"rep": {"lumen": -1}}},
+          {"weight": 50, "text": "The recorder catches the note, and plays it back, and every Prismatic in range falls silent. You turn it off. It has frightened them. It sounded, to you, like a door.", "effects": {"rep": {"lumen": -2}, "crew_hp": -5}}
+        ]},
+        {"text": "[Prismatic] Hum the Eleven with them.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic joins the Eleven, a pure steady note in a hall of notes. At the eleventh second your Prismatic's core flares so bright it casts a shadow on the far wall: a door-shaped shadow, a pair of uprights and a lintel. Then it fades. 'We have never seen that,' hums the Cantor, in a very small chord.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 3}, "crew_hp": 5, "flag": "choir_door_shadow"}}
+        ]},
+        {"text": "[Basalt] Hum it low. Basalt remember.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt hums one slow note beneath the Eleven, and the Choir falters, because they have never heard it from below. Then a Prismatic adds a third, and it holds. 'That is what it was missing,' hums the Cantor. 'The floor.' Your Basalt says nothing. They look as though they have heard it before.", "effects": {"items": {"crystal": 3, "silicon": 6}, "rep": {"lumen": 2}, "flag": "choir_floor_note"}}
+        ]}
+      ]
+    },
+    {
+      "id": "choir_poachers", "type": "pirate", "weight": 10, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "A Rustfang boat, the Glitter, is stripping the Choir's outer spires with a whaling harpoon and a lot of enthusiasm. Her crew wear ear defenders; the Choir's alarm hum is, they note, rather loud. 'Lovely crystal!' calls the captain. 'Free of charge! Do join in!' Prismatics line the far rail, humming one flat, dreadful, outraged note.",
+      "choices": [
+        {"text": "Fight the poachers.", "outcomes": [
+          {"weight": 100, "text": "You open fire. The Glitter's captain takes off her ear defenders to see what the noise is. She regrets it.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Warn them off with a broadside of pure noise.", "outcomes": [
+          {"weight": 60, "text": "You blast the Glitter's hull with every alarm you own. The poachers' ear defenders fail. They scatter, clutching their heads, and the Choir sings you a victory chord.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 2}}},
+          {"weight": 40, "text": "Your alarms are weaker than theirs. The poachers laugh, then retaliate.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Prismatic] Match the flat note and turn it back on them.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic takes the Choir's outraged note, tunes it, sharpens it, and sends it across the lane at the Glitter in a beam of vibration that shatters her windows. The poachers flee. The Choir hums a two-part victory chant, with a descant.", "effects": {"items": {"crystal": 6, "credits": 30}, "rep": {"lumen": 3}}}
+        ]},
+        {"text": "[Gauntling] Cut the harpoon line.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling leans out of the airlock with a cutter, severs the harpoon line with a precise snip, and gives the Glitter a friendly wave. The harpoon flies off into the dark. So does the Glitter, a little later.", "effects": {"items": {"crystal": 4, "scrap": 30}, "rep": {"lumen": 2}}}
+        ]}
+      ],
+      "after_win": {"text": "The Glitter's hold is full of the Choir's crystal, and the Choir has sent a hum of thanks that will ring in your hull for a week. They have also sent a small recital, for free.", "effects": {"items": {"crystal": 8, "credits": 40}, "rep": {"lumen": 3}}}
+    },
+    {
+      "id": "choir_resting_voices", "type": "empty", "weight": 8, "once": false, "requires": {"flag": "in_prismatic_choir"},
+      "text": "The Choir is silent. All four hundred of them stand in rows on the crystal terraces, cores lit, saying nothing. It is not mourning and it is not a protest. A banner in light reads WE ARE RESTING OUR VOICES. DO NOT SPEAK. DO NOT HUM. DO NOT, PLEASE, WHISTLE. On the next ship over, a trader's parrot is whistling. It is a crisis.",
+      "choices": [
+        {"text": "Keep quiet.", "outcomes": [
+          {"weight": 100, "text": "You keep quiet. The crew, who cannot remember when they last did, sit in the silence. After an hour a Prismatic comes over and presses a small bell into your hand. It has no clapper. 'For hush,' she hums, softly, and drifts away, leaving her notebook.", "effects": {"items": {"crystal": 2}, "crew_hp": 15}}
+        ]},
+        {"text": "Hum something gentle anyway.", "outcomes": [
+          {"weight": 55, "text": "You hum a lullaby. It is very flat. For a moment the Choir's cores flinch. Then, one by one, they begin to hum back, a tone at a time. The silence ends, kindly, in the middle of your song. A Prismatic gives you a shard in thanks.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 1}, "crew_hp": 5}},
+          {"weight": 45, "text": "You hum. The Choir lets out a collective wince. A hundred cores dim. You are asked to leave, with real regret.", "effects": {"rep": {"lumen": -1}}}
+        ]},
+        {"text": "[Prismatic] Break the silence with one clean note.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic hums a single clear note. A second Prismatic joins in, then a third. In a minute the whole Choir is singing, a vast soft chord that rolls over the terraces like warm water. They had been waiting for someone to start. The Cantor weeps, a little, in light.", "effects": {"items": {"crystal": 5, "credits": 20}, "rep": {"lumen": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "[Fenn] Make the parrot go quiet.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn sells the parrot's owner a muffler at a heavy discount. The whistling stops. The Choir hums its first note in an hour: relief. Your Fenn is paid by both sides.", "effects": {"items": {"credits": 50}, "rep": {"lumen": 1}}}
+        ]}
+      ]
+    }
+]}

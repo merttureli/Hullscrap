@@ -1,0 +1,266 @@
+{"events": [
+    {
+      "id": "core_dock_queue", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "Ring Three Dock has a queue of four hundred for ration tickets and a second queue, shorter and angrier, for people who want to complain about the first. A sign over both says THE QUEUE IS FAIR. Someone has crossed out FAIR and written LONG, and someone else has crossed out LONG and written MINE.",
+      "choices": [
+        {"text": "Take a ticket and wait your turn.", "outcomes": [
+          {"weight": 70, "text": "Four hours later you are served by a clerk who apologises for the wait, the queue and the weather. The crew nap in line, shoulder to shoulder, in the best rest they have had all month.", "effects": {"crew_hp": 10}},
+          {"weight": 30, "text": "Four hours in, the clerk goes to lunch. The line takes it like weather. You come away with rations and a ten-credit queue levy, which nobody can explain.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+        ]},
+        {"text": "Skip the queue (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 80, "text": "Pell the dispatcher waves you through a side door with the face of a man who disapproves of himself. The queue watches you go. Nobody says a word. It is the loudest nothing you have ever heard.", "effects": {"items": {"credits": -30}, "crew_hp": 10}},
+          {"weight": 20, "text": "Pell takes the thirty and the queue notices. A man in a cardigan climbs on a crate and begins a speech. You leave during the part about principle.", "effects": {"items": {"credits": -30}, "rep": {"concord": -1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Human] Complain about the queue. Properly, with citations.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 75, "text": "You raise the queue's three faults, in order, with the bylaw each one breaks. The line goes quiet the way a church does. By the hour's end the queue has a second window and you have a standing ovation and a ration voucher.", "effects": {"items": {"credits": 25}, "rep": {"concord": 1}, "crew_hp": 5}},
+          {"weight": 25, "text": "Your complaint is so good the queue adopts it as a motion. You are elected chair of the subcommittee on queues. You resign instantly, to applause, and leave with the vouchers.", "effects": {"items": {"credits": 15}, "crew_hp": 5}}
+        ]},
+        {"text": "[Fenn] Sell your place in the queue to the highest bidder.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 85, "text": "Your Fenn has been in line eleven minutes and has already sold their spot twice, and the second buyer's spot to a third. By the time the first buyer notices, your Fenn is on the dock with a profit and a clean conscience.", "effects": {"items": {"credits": 40}}},
+          {"weight": 15, "text": "The third buyer is Pell's mother. Your Fenn returns with ten credits, a bruise and a lecture.", "effects": {"items": {"credits": 10}, "crew_hp": -5}}
+        ]},
+        {"text": "Leave before the queue notices you.", "outcomes": [
+          {"weight": 100, "text": "The queue notices you anyway. It watches you leave with real sorrow.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_swap_meet", "type": "trader", "weight": 12, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "Ring Two's swap meet fills a whole docking spoke: tables of salvage, hot noodles, a man selling genuine Concord forms, stamped, and a woman selling the stamps. Everything is second-hand. Some of it is first-hand, which is worse.",
+      "choices": [
+        {"text": "Buy hot noodles (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "The noodles are hot, salty and made by someone's aunt. The crew eat standing up and look, briefly, like people with a future.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+        ]},
+        {"text": "Buy a bag of missiles from the back of a cart (45 credits).", "requires": {"credits": 45}, "outcomes": [
+          {"weight": 70, "text": "The missiles are real and only slightly dented. The seller counts your change twice, to show he can.", "effects": {"items": {"credits": -45, "missile": 3}}},
+          {"weight": 30, "text": "Two of the three are real. The third is a very convincing pipe, and the seller has moved to another table.", "effects": {"items": {"credits": -45, "missile": 2}}}
+        ]},
+        {"text": "[Tinkerer] Hold the Concord stamps up to the lamp.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 85, "text": "Your tinkerer sniffs the stamp, names the exact press it came from, and asks the seller to try again. The seller returns your credits and gives you the press, out of respect.", "effects": {"items": {"credits": 30, "scrap": 20}}},
+          {"weight": 15, "text": "The stamp is real. That is somehow worse. You are asked to leave by the genuine officials.", "effects": {"rep": {"concord": -1}}}
+        ]},
+        {"text": "Browse, buy nothing.", "outcomes": [
+          {"weight": 100, "text": "You walk the whole spoke and buy nothing. A seller follows you all the way, lowering his price out loud, until he is paying you to leave. In the bin by his table is a bundle of old ration tickets, every one numbered, and you take them for the story.", "effects": {"items": {"credits": 5}}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_stuck_lift", "type": "distress", "weight": 10, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "Spoke Ferry Nine hangs half a kilometre from either ring with her motor dead and sixty passengers aboard. Her beacon says HELP in four languages. Her comm channel says the passengers have formed a committee to decide who pays for the rescue, and the committee has formed a subcommittee.",
+      "choices": [
+        {"text": "Tow the ferry to the nearest ring.", "outcomes": [
+          {"weight": 65, "text": "You hook on and haul. The ferry's committee votes to thank you, unanimously, after three recounts. The skipper hands over the spoke fare for sixty, and her logbook as a keepsake.", "effects": {"items": {"credits": 40}, "rep": {"concord": 1}}},
+          {"weight": 25, "text": "The tow line sings and snaps. You catch the ferry on the second go, with a dent in your bow and sixty passengers cheering the wrong ship.", "effects": {"items": {"credits": 30}, "hull": -5}},
+          {"weight": 10, "text": "Halfway there the ferry's motor restarts itself and tries to go the other way. You are towed, for ten minutes, to a ring you did not choose.", "effects": {"items": {"fuel": -1, "credits": 20}}}
+        ]},
+        {"text": "[Grundl] Put your Grundl on the hull to push the ferry the rest of the way.", "requires": {"species": "grundl"}, "outcomes": [
+          {"weight": 90, "text": "Your Grundl lays two hands on the ferry's nose, apologises to it, and leans. Sixty passengers get a smooth ride and a view of a very large person saying sorry to a ship. The skipper pays in cash and noodles.", "effects": {"items": {"credits": 50}, "crew_hp": 5}},
+          {"weight": 10, "text": "The ferry accepts the push and then keeps going, because nobody told it to stop. Your Grundl chases it, sorry the entire way.", "effects": {"items": {"credits": 30}, "hull": -5}}
+        ]},
+        {"text": "[Quick hands] Rewire the ferry's motor from your own parts.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 85, "text": "Four minutes inside the motor housing. When the engine coughs back to life the whole ferry cheers, and the skipper is so moved she waives the committee.", "effects": {"items": {"credits": 40, "copper": 10}}},
+          {"weight": 15, "text": "The motor starts and promptly eats a wrench. You are allowed to keep the ferry's spare, out of fairness.", "effects": {"items": {"copper": 15}}}
+        ]},
+        {"text": "Tell the committee you will consider their proposal.", "outcomes": [
+          {"weight": 100, "text": "The committee thanks you and puts you on the agenda for next month. You jump. The ferry is still there, probably, still voting.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_ward_nine", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "Ward Nine, a whole habitat section, unbolted itself from Ring Four by popular vote and drifted away. It is still pressurised. There is a banner on its airlock: WE WILL BE BACK WHEN YOU ARE SORRY. The banner is forty years old.",
+      "choices": [
+        {"text": "Search the ward.", "outcomes": [
+          {"weight": 60, "text": "Forty years of private life, tidily left behind: kitchens, a library, a stack of vote slips. You take what is useful and read the last slip aloud. It says NO.", "effects": {"items": {"scrap": 40, "copper": 10}}},
+          {"weight": 25, "text": "The ward's air is old and its lights are on a timer that still thinks it is the vote. Something in the walls goes off with a bang. Nobody is badly hurt.", "effects": {"items": {"scrap": 30}, "crew_hp": -10}},
+          {"weight": 15, "text": "In the ward's strongroom, a ballot box, the meeting fund and a note: FOR WHEN WE ARE SORRY. You are not sorry. You take it.", "effects": {"items": {"credits": 70}}}
+        ]},
+        {"text": "[Medbay] Open the ward's old clinic and take the stock.", "requires": {"component": "medbay"}, "outcomes": [
+          {"weight": 100, "text": "The clinic's cabinets are labelled, alphabetised and fully stocked. You leave the labels.", "effects": {"items": {"nanite_paste": 2, "credits": 30}}}
+        ]},
+        {"text": "[Human] Read the ward's last minutes aloud to the crew.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 100, "text": "The minutes are a masterpiece of grievance. Your Human reads them in full, with timing, to a crew that has not laughed so hard since the Snap. A line near the end promises the airlock code to whoever finishes. It is 4-4-4-4.", "effects": {"items": {"scrap": 25}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave the ward its banner.", "outcomes": [
+          {"weight": 100, "text": "You leave the banner up. If they ever do come back, they will want to know someone noticed.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_joint_checkpoint", "type": "patrol", "weight": 11, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "A joint Clan and Concord checkpoint: one cutter, two flags, two officers. Officer Voss (Concord) and Officer Dunn (Clans) are cousins. They agree on three things: the checkpoint should exist, you should stop, and neither of them will say what happens next.",
+      "choices": [
+        {"text": "Stop and let them argue.", "outcomes": [
+          {"weight": 50, "text": "Voss says you are clear. Dunn says you are clear, and that Voss said it wrong. They wave you through together, for the first time in eleven years.", "effects": {"rep": {"clans": 1, "concord": 1}}},
+          {"weight": 35, "text": "Voss wants a Concord stamp. Dunn wants a Clan favour. You pay both. They are so pleased to have agreed on something that they take only half.", "effects": {"items": {"credits": -30}}},
+          {"weight": 15, "text": "They disagree about whose jurisdiction you are in, then whose cousin you are, then the soup. You leave while the cutters are ramming each other.", "effects": {"hull": -5}}
+        ]},
+        {"text": "[Human] Ask after the cousin who owes them both money.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 80, "text": "Both officers go quiet. 'Not Aunt Meg's boy,' says Voss. 'Always Aunt Meg's boy,' says Dunn. They wave you through and begin shouting at each other as you go.", "effects": {"items": {"credits": 20}, "rep": {"clans": 1, "concord": 1}}},
+          {"weight": 20, "text": "Wrong cousin. You have now insulted both families.", "effects": {"rep": {"clans": -1, "concord": -1}}}
+        ]},
+        {"text": "[Kett] Hand over all four forms at once.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "Your Kett holds out four forms, one in each hand, each in a different office's format. Both officers stamp the one they like best and neither notices it is the same form four times.", "effects": {"items": {"credits": 15}, "rep": {"clans": 1, "concord": 1}}}
+        ]},
+        {"text": "Run the checkpoint.", "outcomes": [
+          {"weight": 50, "text": "You light the drive and go through between the two cutters while they argue over whose turn it is to chase. Neither does.", "effects": {"rep": {"concord": -1}}},
+          {"weight": 30, "text": "They stop arguing long enough to agree on one thing. The Concord side fires, the Clans side fires, and both miss in different directions.", "effects": {"rep": {"clans": -1, "concord": -1}, "hull": -5}},
+          {"weight": 20, "text": "They agree. It takes them nine seconds. Then they both give chase.", "effects": {"rep": {"clans": -2, "concord": -2}, "fight": "tier"}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_hold_music", "type": "empty", "weight": 9, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "A dead relay buoy is still broadcasting on the Meridian pensions line: a looping tune on a single synth and a recorded voice that says, every forty seconds, 'Your call is important to us.' Someone has tied a chair to the buoy. Someone is sitting in it.",
+      "choices": [
+        {"text": "Say hello.", "outcomes": [
+          {"weight": 100, "text": "The woman in the chair holds up one finger, without turning her head. She is on the phone.", "effects": {"goto": "core_hold_tarr"}}
+        ]},
+        {"text": "Pretend to be Meridian and pick up the call.", "outcomes": [
+          {"weight": 60, "text": "Mrs. Tarr gasps and delivers her whole case in one breath. You say 'noted', which no one has ever said to her. She gives you everything in her chair: a thermos, a clock, a hundred credits of emergency money.", "effects": {"items": {"credits": 100}}},
+          {"weight": 40, "text": "She asks for your name and badge number. You have neither. She stays on hold. You stay quiet, having discovered a new kind of shame.", "effects": {"rep": {"concord": -1}}}
+        ]},
+        {"text": "Listen to the tune for a while.", "outcomes": [
+          {"weight": 100, "text": "It is a surprisingly good tune. The crew hum along, then argue about the second verse, then agree on it. Somewhere out there the buoy goes on playing it for no one.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_hold_tarr", "type": "empty", "weight": 0, "once": false, "requires": {},
+      "text": "Mrs. Agnes Tarr has been on hold for forty years, and says so with pride. She is eighty-one, has a flask, and the patience of a saint with a grudge. 'Pension reference four-four-one,' she says. 'Someone has to pick up. It might as well be me that's here when they do.'",
+      "choices": [
+        {"text": "Relay her reference to Meridian for her.", "outcomes": [
+          {"weight": 80, "text": "A clerk at Meridian picks up on the first ring, bewildered, and finds her file. It is thick and somehow unpaid. The Concord pays what it can, with an apology and a form, and Mrs. Tarr shares the first instalment with you.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}}},
+          {"weight": 20, "text": "Meridian picks up, hears the reference, and hangs up. Mrs. Tarr nods. 'They do that.' She gives you a biscuit out of thanks and sits back down.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "[Human] Sit with her and hold together.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 100, "text": "You take turns for an hour, trading stories about bureaucrats. At minute fifty-one a human voice says 'Pensions, how can I help?' and Mrs. Tarr screams with joy. She is paid in full. She pays you, and weeps, and the chair comes loose from the buoy at last.", "effects": {"items": {"credits": 80}, "rep": {"concord": 3}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave her a sandwich and go.", "outcomes": [
+          {"weight": 100, "text": "She takes the sandwich without a word and holds it up in salute. The tune begins again.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_allotments", "type": "asteroid_field", "weight": 9, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "A shell of hollowed rocks, each with a hatch, a lamp and a hand-painted number. Allotments: gardens, goats, a pocket of real earth in every one. The residents defend them with mining lasers, politely. One has put up a sign: PLEASE DO NOT SHOOT THE TOMATOES.",
+      "choices": [
+        {"text": "Trade for the surplus (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 85, "text": "Four tomatoes, a sack of onions and a goat's blessing. The crew eat like kings for a week.", "effects": {"items": {"credits": -20}, "crew_hp": 15}},
+          {"weight": 15, "text": "The goat gets into the ship. It is a long afternoon.", "effects": {"items": {"credits": -20}, "crew_hp": 5}}
+        ]},
+        {"text": "Work the unclaimed rock at the edge.", "outcomes": [
+          {"weight": 70, "text": "The edge is rock nobody wants, and you cut a decent haul from it without annoying anyone.", "effects": {"items": {"scrap": 35, "titanium": 5}}},
+          {"weight": 30, "text": "A resident objects, loudly and with a mining laser, to your definition of unclaimed. You back off, singed.", "effects": {"items": {"scrap": 20}, "hull": -5}}
+        ]},
+        {"text": "[Sporeling] Offer to help with the soil.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling kneels in a stranger's allotment and hums to the beds, and the whole garden leans in. The owner offers everything she owns, which is mostly tomatoes. You take some, and a sack of seed.", "effects": {"items": {"polymer": 10}, "crew_hp": 15}}
+        ]},
+        {"text": "[Grundl] Carry the harvest to the ring market.", "requires": {"species": "grundl"}, "outcomes": [
+          {"weight": 100, "text": "Your Grundl carries nine crates to the ring in one trip, eating one tomato on the way with great apologies. The allotment pays in kind and in credits.", "effects": {"items": {"credits": 45}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_landlords", "type": "pirate", "weight": 11, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "A Rustfang gunboat flies the flag of the Core Landlords' Association, which she painted on herself this morning. 'We are your landlord now,' says a voice. 'You are in our airspace. The airspace is rented. This is the lease.' A document arrives on your console. It is eleven pages long and every page says PAY.",
+      "choices": [
+        {"text": "Pay the lease (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 75, "text": "They stamp the lease, wish you a pleasant tenancy, and ask if you would like to renew. You would not.", "effects": {"items": {"credits": -60}}},
+          {"weight": 25, "text": "They take the money, then remember that pirates raise rents. 'Amended lease,' says the voice, and fires.", "effects": {"items": {"credits": -60}, "fight": "pirate_raider"}}
+        ]},
+        {"text": "Dispute the lease.", "outcomes": [
+          {"weight": 55, "text": "On page seven you find a clause that says the landlord must provide heating. Their ship has no heating. They are in breach. They withdraw in confusion, leaving the lease and a pile of paperwork behind.", "effects": {"items": {"scrap": 20}}},
+          {"weight": 45, "text": "The clause is on page seven, and it says the landlord may evict by force.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Human] Serve them a Notice of Disrepair, in writing.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 85, "text": "Your Human drafts a formal notice about the pirate gunboat's cracked windscreen. The captain, mortally offended, withdraws to fix it, citing a tenant's right to quiet enjoyment.", "effects": {"items": {"credits": 25, "scrap": 20}}},
+          {"weight": 15, "text": "The captain reads the notice, agrees with every word, and shoots you for the effort.", "effects": {"hull": -10}}
+        ]},
+        {"text": "Fight them.", "outcomes": [
+          {"weight": 100, "text": "You answer with the only form they accept.", "effects": {"fight": "pirate_raider"}}
+        ]}
+      ],
+      "after_win": {"text": "The gunboat's lease turns out to be eleven copies of the same page. You find the real rent box in her hold, and it is nicely full.", "effects": {"items": {"credits": 50, "scrap": 40}}}
+    },
+    {
+      "id": "core_blackout_vigil", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_human_core"},
+      "text": "Every ring in the Core goes dark at the same hour once a year. Not a fault. The hour is the Snap's, ship time, and the Core keeps it. Out here the dark is total, and in every window of every ring someone has put a single candle.",
+      "choices": [
+        {"text": "Cut your lights and join them.", "outcomes": [
+          {"weight": 100, "text": "You switch off the lamps and sit in the dark with your crew, and across the gap sixty thousand candles burn in the windows. Nobody speaks for eleven minutes. When the lights come back you are a little different, and so is everyone else. A ring-keeper sends you a count of the candles, for the record.", "effects": {"rep": {"concord": 1, "clans": 1}, "crew_hp": 15}}
+        ]},
+        {"text": "Fly through the dark with your lights on.", "outcomes": [
+          {"weight": 70, "text": "A ring-keeper flashes the vigil code at you, twice. You switch off, ashamed, and a little late.", "effects": {"rep": {"concord": -1}}},
+          {"weight": 30, "text": "You pass through unobserved. It is very quiet. The quiet gets in.", "effects": {"crew_hp": -5}}
+        ]},
+        {"text": "[Prismatic] Hum for them.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic lights its core to a single steady note and hums, the pitch of a held breath. Across the ring the candles lean as if in a draught. A woman at a window holds her candle up to you, and keeps it up.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "[Emberkin] Light the candle for a window that has none.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin finds a dark window and puts a finger to a wick. The old man on the other side sits down on the floor and cries. In the morning there is a loaf on your airlock.", "effects": {"items": {"credits": 20}, "rep": {"clans": 1}, "crew_hp": 10}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_flak_quartermaster", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_human_core"},
+      "text": "Quartermaster Ivey of the Core Militia keeps the Core's only Flak Screen test range on a rock nobody wanted. 'The clans fire missiles at each other and miss,' she says, handing you tea the colour of rust. 'So we built a Screen that shoots them down. It works. I need someone to prove it to the committee, in person, at speed. We have a Volley Rack too, but nobody tests that for free.'",
+      "choices": [
+        {"text": "Fly the drill. Be the target.", "outcomes": [
+          {"weight": 55, "text": "You fly the range with six dummy missiles on your tail, and the Screen shoots down every one. The committee watches through a telescope and approves the Flak Screen unanimously. Ivey hands you the schematics in a biscuit tin.", "effects": {"items": {"credits": 40, "missile": 2}, "flag": "tech_flak_screen"}},
+          {"weight": 30, "text": "Five of six. The sixth finds your tail and sets off a firework. Ivey writes it down as acceptable, and gives you the biscuit tin anyway.", "effects": {"items": {"credits": 30}, "hull": -5, "flag": "tech_flak_screen"}},
+          {"weight": 15, "text": "The Screen shoots down all six, plus your radio antenna, plus the committee's telescope. 'Two out of three,' says Ivey. The tin is yours.", "effects": {"items": {"credits": 20, "scrap": 30}, "hull": -5, "flag": "tech_flak_screen"}}
+        ]},
+        {"text": "[Quick hands] Retune the Screen's tracker before the drill.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Your engineer lays a hand on the targeting rig, moves one wire, and the Screen tracks like a hawk. The test is a formality. Ivey gives you the schematics and, unasked, the spare parts.", "effects": {"items": {"titanium": 6, "copper": 12}, "flag": "tech_flak_screen"}}
+        ]},
+        {"text": "[Gauntling] Plug your Gauntling into the targeting loop.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling plugs a cable into the loop and is, for twelve minutes, the Screen. Every missile dies. 'That felt amazing,' says the Gauntling. 'Do it again.' Ivey writes this down under testimonials and hands over the schematics.", "effects": {"items": {"credits": 40, "copper": 10}, "flag": "tech_flak_screen"}}
+        ]},
+        {"text": "Say you will come back when the range is quieter.", "outcomes": [
+          {"weight": 100, "text": "'It is never quieter,' says Ivey, and tops up your mug. 'But come when you can.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_minute_taker", "type": "distress", "weight": 6, "once": true, "requires": {"flag": "in_human_core"},
+      "text": "A one-seat lifeboat is drifting away from Ring Three, painted with a single word: MINUTES. Inside, a thin man in a cardigan clutches a box of recordings and what remains of his dignity. 'I have been voted off the committee,' he says over the comm. 'For being accurate.'",
+      "choices": [
+        {"text": "Take him aboard.", "outcomes": [
+          {"weight": 100, "text": "Teodor Pike climbs through your airlock with the box of minutes, which he will not let anyone else carry, and the face of a man who has been allowed to leave a meeting. 'Thank you,' he says. 'I will take notes.'", "effects": {"recruit": {"species": "human", "name": "Pike"}}}
+        ]},
+        {"text": "[Human] Offer him a seat at your table, with a vote.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 100, "text": "Your Human tells him the crew has a vote, and that he may record it. Pike nearly cries. He signs on for the pleasure of being asked, and his box of minutes comes with useful dirt on three clan reps.", "effects": {"items": {"credits": 30}, "rep": {"clans": 1}, "recruit": {"species": "human", "name": "Pike"}}}
+        ]},
+        {"text": "Wave and keep flying.", "outcomes": [
+          {"weight": 100, "text": "You wave. He logs it.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "core_ring_breach", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_human_core", "jumps_min": 2},
+      "text": "Ring Five has split along a seam, and the rooms are venting one at a time, in order, like news travelling down a corridor. Residents crowd the hull-side corridor with sealant guns and the expressions of people who were warned about this for years.",
+      "choices": [
+        {"text": "Go in with your crew and patch the seam.", "outcomes": [
+          {"weight": 40, "text": "You and your crew work the seam from both ends, sealant in one hand, residents in the other. The last door shuts with a fist-sized hole in it, and sixty people breathe in at the same time. They pay what they can, which is a lot.", "effects": {"items": {"credits": 60}, "rep": {"concord": 1}, "crew_hp": -10}},
+          {"weight": 30, "text": "The seam gives while you are on it. You are blown out of the breach, tethered, the whole crew with you. You all come back, bruised, to a ring that thanks you with its last credits.", "effects": {"items": {"credits": 40}, "crew_hp": -25, "hull": -10}},
+          {"weight": 20, "text": "A corridor goes while you cross it. Someone's family is lost, and one of your crew is hurt badly enough that they will limp for a week.", "effects": {"items": {"credits": 20}, "crew_hp": -20}},
+          {"weight": 10, "text": "The seam goes all at once. You get the survivors out; the ring does not survive. One of yours does not come back from the dark.", "effects": {"rep": {"concord": 1}, "crew_hp": -20, "lose_crew": 1}}
+        ]},
+        {"text": "[Basalt] Send your Basalt into the venting section. No air, no problem.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 90, "text": "Your Basalt walks into the hole where the air used to be and holds the seam shut with both hands for forty minutes. Nobody is hurt. The residents bring tea they cannot drink and hang a sign: OUR HERO.", "effects": {"items": {"credits": 70}, "rep": {"concord": 2, "clans": 1}}},
+          {"weight": 10, "text": "The seam shifts and pins your Basalt for a while. They are fine. They are sulking.", "effects": {"items": {"credits": 40}, "crew_hp": -10}}
+        ]},
+        {"text": "[Mire] Flood the corridor and freeze the seam with water.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 90, "text": "Your Mire opens the tank on their back and lays a sheet of water over the seam. In vacuum it freezes solid in seconds. The ring holds. The residents think they have seen a miracle; your Mire says it is Tuesday.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}}},
+          {"weight": 10, "text": "The ice holds for ten minutes, then does not. They get everyone out anyway, wet and furious.", "effects": {"items": {"credits": 30}, "crew_hp": -10}}
+        ]},
+        {"text": "Sell them patch plates from a safe distance.", "requires": {"items": {"polymer": 10}}, "outcomes": [
+          {"weight": 100, "text": "You hail the ring and sell them a few spare plates at a fair price, from a very safe distance. It is honest work. It does not feel like it.", "effects": {"items": {"polymer": -10, "credits": 50}}}
+        ]},
+        {"text": "Do not. Ring Five has a very good insurance scheme.", "outcomes": [
+          {"weight": 100, "text": "You jump. Behind you, the rooms go on venting in order. They are very orderly about it.", "effects": {}}
+        ]}
+      ]
+    }
+]}
