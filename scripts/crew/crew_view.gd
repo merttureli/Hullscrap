@@ -86,8 +86,8 @@ func _unhandled_input(e: InputEvent) -> void:
 		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_MIDDLE:
 		var p: Vector2 = (make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL
-		var a := Pathfinder.nearest_walkable(_ship().grid, p, door_passable)  # where a body can stand nearest the click
-		if a != Pathfinder.NO_CELL and (Pathfinder.centre_of(a) - p).length() <= 1.5:
+		var a := Pathfinder.nearest_walkable(_ship().grid, p, door_passable, Pathfinder.NO_CELL, ada.body_size)  # where her body can stand nearest the click
+		if a != Pathfinder.NO_CELL and (Pathfinder.centre_of(a, ada.body_size) - p).length() <= 1.5:
 			Jobs.order_move(_ship(), ada, a, door_passable)  # she leaves the job board alone for a while
 
 

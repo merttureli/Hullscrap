@@ -148,7 +148,7 @@ func test_number_keys_tab_and_t_move_through_the_palette() -> void:
 	eq(b.sel_component, "engine_mk1", "and coming back picks what was picked there")
 	b.set_tab(Palette.Tab.STRUCTURE)
 	eq(b.tool_key(), "tile:wall", "Structure remembers the wall")
-	var cable: Dictionary = Palette.entries(Palette.Tab.STRUCTURE, b.ship, b.session.cable_cost).back()
+	var cable: Dictionary = Palette.cable_entry(b.ship, b.session.cable_cost)
 	b.pick(cable)
 	eq(b.group, BuildMode.Group.CABLES, "the cable card picks the cable tool")
 	b.pick(Palette.item_entry(b.ship, "scrap"))

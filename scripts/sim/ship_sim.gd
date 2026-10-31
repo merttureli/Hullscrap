@@ -31,6 +31,7 @@ const Workshop = preload("res://scripts/craft/workshop.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
@@ -164,43 +165,30 @@ static func open_door_cells(ship: Ship) -> Dictionary:
 ## Crew who stand in a wall (a body that overlaps a cell it cannot stand in) or in a pocket (walkable floor
 ## cut off from the main walkable area, the biggest set of floor a body can walk between) go to the nearest
 ## spot a body can stand on in the main area, and drop their path (a job re-plans on its own). With no such
-## spot anywhere they go to the helm's room. Doors count as open. Returns how many were moved.
+## spot anywhere they go to the helm's room. Doors count as open. A small body (trait `body` 1) has its own
+## areas, so a crawlspace it walks is not a pocket for it. Returns how many were moved.
 static func relocate_crew(ship: Ship) -> int:
 	var grid: ShipGrid = ship.grid
 	var cells: Array = grid.tiles.keys()
 	cells.sort_custom(func(a, b): return a.y < b.y or (a.y == b.y and a.x < b.x))
-	var comp := {}  # body anchor -> the number of the area it is in
-	var areas: Array = []  # area number -> its anchors
-	for c in cells:
-		if comp.has(c) or not Pathfinder.body_ok(grid, c):
-			continue
-		var list: Array[Vector2i] = [c]
-		comp[c] = areas.size()
-		var i := 0
-		while i < list.size():
-			for d in ShipGrid.SIDES:
-				var n: Vector2i = list[i] + d
-				if not comp.has(n) and Pathfinder.body_ok(grid, n):
-					comp[n] = areas.size()
-					list.append(n)
-			i += 1
-		areas.append(list)
-	var main := -1
-	for k in areas.size():
-		if main < 0 or areas[k].size() > areas[main].size():
-			main = k
+	var maps := {}  # body size -> {comp, areas, main}, made when a crew member of that size is met
 	var moved: Array[String] = []
 	for m in ship.crew:
-		if m.fits(grid, m.pos, Callable(), m.RADIUS - 0.01) and main >= 0 and comp.get(Pathfinder.anchor_of(m.pos), -1) == main:
+		if not maps.has(m.body_size):
+			maps[m.body_size] = _body_areas(grid, cells, m.body_size)
+		var comp: Dictionary = maps[m.body_size]["comp"]
+		var areas: Array = maps[m.body_size]["areas"]
+		var main: int = maps[m.body_size]["main"]
+		if m.fits(grid, m.pos, Callable(), m.body_radius() - 0.01) and main >= 0 and comp.get(m.anchor(), -1) == main:
 			continue
 		var to := Vector2.INF
 		var best := INF
 		if main >= 0:
 			for c in areas[main]:
-				var d: float = (Pathfinder.centre_of(c) - m.pos).length_squared()
+				var d: float = (Pathfinder.centre_of(c, m.body_size) - m.pos).length_squared()
 				if d < best:
 					best = d
-					to = Pathfinder.centre_of(c)
+					to = Pathfinder.centre_of(c, m.body_size)
 		else:
 			to = _helm_spot(ship)
 		if to == Vector2.INF or to == m.pos:
@@ -211,6 +199,32 @@ static func relocate_crew(ship: Ship) -> int:
 	if not moved.is_empty():
 		ship.log_event("Crew moved clear of the rebuild: " + ", ".join(moved))
 	return moved.size()
+
+
+## The areas a body of `body` cells can walk between: {comp: body anchor -> area number, areas: area number -> its
+## anchors, main: the biggest area (-1 when there is none)}. `cells`: the tiles of `grid` in (y, x) order.
+static func _body_areas(grid: ShipGrid, cells: Array, body: int) -> Dictionary:
+	var comp := {}
+	var areas: Array = []
+	for c in cells:
+		if comp.has(c) or not Pathfinder.body_ok(grid, c, Callable(), body):
+			continue
+		var list: Array[Vector2i] = [c]
+		comp[c] = areas.size()
+		var i := 0
+		while i < list.size():
+			for d in ShipGrid.SIDES:
+				var n: Vector2i = list[i] + d
+				if not comp.has(n) and Pathfinder.body_ok(grid, n, Callable(), body):
+					comp[n] = areas.size()
+					list.append(n)
+			i += 1
+		areas.append(list)
+	var main := -1
+	for k in areas.size():
+		if main < 0 or areas[k].size() > areas[main].size():
+			main = k
+	return {"comp": comp, "areas": areas, "main": main}
 
 
 ## A spot in the helm's room (its cell nearest the helm), or Vector2.INF when the ship has no helm.
@@ -265,6 +279,7 @@ func _step_ship(ship: Ship, dt: float) -> void:
 		if use > 0.0:
 			ship.atmosphere.consume(ship.atmosphere.room_at(m.cell()), BREATH_RATE * use * dt)
 	Fire.tick(ship, dt, rng)
+	Ammo.tick(ship, dt)  # belt drives feed the guns that want ammo; units ride the belts
 	jobs_of(ship).tick(ship, dt, ships.size() > 1)  # more than one ship aboard the sim: a fight
 	for line in Mortality.tick(ship, dt):  # the downed bleed out
 		ship.log_event(line)

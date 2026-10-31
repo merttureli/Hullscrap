@@ -5,11 +5,13 @@ extends Control
 ## bind() it to an arena ship; it redraws every frame. Drawing only.
 ## The player's panel can show the enemy's intent (`intent`, intent.gd): a pulsing red reticle on the part the pilot
 ## aims at, and under the panel "Targeting: Weapons" and a row per heavy enemy weapon about to fire.
+## The enemy's panel shows its crew as dots (`reveal`) while a crew member of yours with reveal_enemy is up (traits.gd).
 
 const Visuals = preload("res://scripts/view/visuals.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Intent = preload("res://scripts/combat/intent.gd")
+const Skulls = preload("res://scripts/ui/skulls.gd")
 
 const PANEL := Vector2(280.0, 200.0)
 const MAP := Rect2(8.0, 26.0, 264.0, 132.0)
@@ -28,11 +30,16 @@ const GOLD := Color("#ffd24a")
 const ION := Color("#a07bff")
 const THREAT := Color("#ff3a3a")  ## the intent reticle and its rows
 const ROW_H := 16.0  ## px per line of the intent strip under the panel
+const SKULL_K := 0.6  ## the size of the threat skulls in the title bar
+const CREW_DOT := Color("#e9f6ff")  ## a revealed crew member; the down ones are CREW_DOWN
+const CREW_DOWN := Color("#ff5a4a")
 
 var arena
 var index := 0
 var title := ""
 var intent: Dictionary = {}  ## Intent.of(...), set each frame on the player's panel; {} draws nothing
+var threat := 0  ## the enemy's panel: its threat in skulls (1-5), drawn small at the right of the title bar; 0 draws none
+var reveal := false  ## draw the ship's crew on the map (set each frame on the enemy's panel from TraitSet.reveals_enemy)
 
 
 func _init() -> void:
@@ -137,10 +144,15 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, PANEL), BG)
 	draw_rect(Rect2(Vector2.ZERO, PANEL), EDGE, false, 2.0)
 	draw_rect(Rect2(2, 2, PANEL.x - 4, 20), Color(0.12, 0.2, 0.3, 0.7))
-	_text(title.to_upper(), Vector2(10, 17), 13, TEXT)
+	var skulls_w := Skulls.width(SKULL_K) + 8.0 if threat > 0 else 0.0
+	draw_string(ThemeDB.fallback_font, Vector2(10, 17), title.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, PANEL.x - 20.0 - skulls_w, 13, TEXT)
+	if threat > 0:
+		Skulls.draw(self, Vector2(PANEL.x - 8.0 - Skulls.width(SKULL_K), 12.0), threat, Skulls.color(threat), SKULL_K)
 	if grid.hull.is_empty():
 		return
 	var map := draw_map(self, co.ship, co.powered, MAP)
+	if reveal:
+		_draw_crew(co.ship, map)
 	# Hull integrity bar and the shield pips.
 	var frac := clampf(co.hull / maxf(co.hull_max, 0.01), 0.0, 1.0)
 	_text("HULL", Vector2(10, 172), 11, TEXT)
@@ -154,6 +166,28 @@ func _draw() -> void:
 	if co.wrecked:
 		draw_rect(Rect2(Vector2.ZERO, PANEL), Color(0.25, 0.0, 0.0, 0.45))
 		_text("WRECKED", Vector2(70, 100), 26, Color("#ff5a4a"))
+
+
+## Where the crew of `ship` stand on its map (`map`: what draw_map returned): [{at: px, down: bool}], one per crew member.
+static func crew_marks(ship, map: Dictionary) -> Array:
+	var out := []
+	if map.is_empty():
+		return out
+	for m in ship.crew:
+		out.append({"at": map["origin"] + m.pos * float(map["s"]), "down": m.is_down()})
+	return out
+
+
+## A dot for each crew member (a red one with a cross for the down).
+func _draw_crew(ship, map: Dictionary) -> void:
+	var r := clampf(float(map.get("s", 8.0)) * 0.45, 2.5, 6.0)
+	for mark in crew_marks(ship, map):
+		var at: Vector2 = mark["at"]
+		draw_circle(at, r + 1.5, Color(0, 0, 0, 0.75))
+		draw_circle(at, r, CREW_DOWN if mark["down"] else CREW_DOT)
+		if mark["down"]:
+			draw_line(at + Vector2(-r, -r) * 0.7, at + Vector2(r, r) * 0.7, Color(0.2, 0, 0), 1.5)
+			draw_line(at + Vector2(-r, r) * 0.7, at + Vector2(r, -r) * 0.7, Color(0.2, 0, 0), 1.5)
 
 
 ## Where the intent marks go on `ship`'s map (`map`: what draw_map returned): {ring: the reticle's centre (px), radius,

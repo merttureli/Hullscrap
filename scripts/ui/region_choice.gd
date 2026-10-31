@@ -2,19 +2,23 @@ extends Control
 ## The region choice at a region's exit beacon (docs/CONTENT.md section 15). First a confirm: leave the region for good?
 ## (Enter or a click reads the beacon's charts, Esc stays.) Then a card for each region on offer (Campaign.region_offers,
 ## 2 or 3; the ending region alone at the last stage's exit): its name, the home race (drawn) or the faction's mark, the
-## faction, the danger in skulls, the rarity once scanned or known, and the blurb. 1-3 or a click on a card jumps there
+## faction, the danger in skulls, the rarity once scanned or known, the blurb, and the exit warden that will hold that region's
+## exit beacon (wardens.gd: its name, its threat against your ship and a hint at what beats it). 1-3 or a click on a card jumps there
 ## (the map's cross_to), Esc goes back to the map. While open it takes every key and click, over the map. The rules live
 ## in campaign.gd and regions.gd; this node only reads input and draws, in the UI colours of docs/ART_STYLE.md.
 
 const Content = preload("res://scripts/data/content.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Regions = preload("res://scripts/space/regions.gd")
+const Wardens = preload("res://scripts/space/wardens.gd")
+const Threat = preload("res://scripts/space/threat.gd")
 const Art = preload("res://scripts/view/art.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
+const Skulls = preload("res://scripts/ui/skulls.gd")
 
 const PAD := 26.0
 const GAP := 20.0
-const CARD_H := 430.0
+const CARD_H := 540.0
 const CONFIRM_W := 720.0
 const CONFIRM_H := 250.0
 const DIM := Color(0.0, 0.0, 0.0, 0.6)
@@ -27,13 +31,14 @@ const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
 const BAD := Color("#e0413b")
-const SKULL_OFF := Color("#3a4350")
 const RARITY_COLORS := {"common": Color("#cfd6df"), "uncommon": Color("#6bd34a"), "rare": Color("#4fa3ff"), "very_rare": Color("#c06bff"), "legendary": Color("#e1a136")}
 
 var map: Control  ## the MapView: its campaign, its ship and cross_to()
 var page := "confirm"  ## "confirm", then "choose"
 var options: Array = []  ## the regions on offer: their data (Regions.get_region), in order
 var known: Array = []  ## per option: is its rarity known (Campaign.rarity_known), worked out when the cards open
+var wardens: Array = []  ## per option: the warden of its exit beacon (Wardens.for_region at the next stage; {} for the ending region)
+var warden_skulls: Array = []  ## per option: that warden's threat against the ship, 1-5 (0 when it cannot be rated)
 var hover := -1  ## the card (or, on the confirm page, the row) under the mouse
 var message := ""
 
@@ -65,6 +70,8 @@ func show_choices() -> void:
 	var c = map.campaign
 	options = c.region_offers().map(func(id): return Regions.get_region(str(id)))
 	known = options.map(func(r): return c.rarity_known(str(r["id"]), map.ship()))
+	wardens = options.map(func(r): return Wardens.for_region(c.seed_value, c.stage + 1, r, c.jumps, str(c.cfg.get("difficulty", "normal"))))
+	warden_skulls = wardens.map(func(w): return Wardens.skulls(w, map.ship()))
 	page = "choose"
 	hover = -1
 	message = "" if not options.is_empty() else "The charts are blank: there is no way on from here."
@@ -74,6 +81,13 @@ func show_choices() -> void:
 func close() -> void:
 	visible = false
 	options = []
+	wardens = []
+	warden_skulls = []
+
+
+## Card `i`'s warden line, "Exit warden: Concord Bulwark (Threat 4/5)", "" for a region with no exit (the last one).
+func warden_line(i: int) -> String:
+	return Wardens.line(wardens[i], map.ship()) if i >= 0 and i < wardens.size() and not wardens[i].is_empty() else ""
 
 
 ## Jump to option `i`. Returns "" or why not.
@@ -238,7 +252,7 @@ func _draw_card(i: int, r: Dictionary) -> void:
 	_text(Campaign.faction_name(faction) if faction != "" else "No faction", Vector2(x, y), 15, fcol)
 	y += 26.0
 	_text("Danger", Vector2(x, y), 15, DIM_TEXT)
-	_skulls(Vector2(x + 72.0, y - 6.0), Regions.skulls(r))
+	Skulls.draw(self, Vector2(x + 72.0, y - 6.0), Regions.skulls(r))
 	y += 26.0
 	var seen: bool = known[i]
 	var rarity := str(r.get("rarity", "common"))
@@ -247,17 +261,34 @@ func _draw_card(i: int, r: Dictionary) -> void:
 	y += 18.0
 	draw_line(Vector2(x, y), Vector2(x + w, y), EDGE_DIM, 1.0)
 	draw_multiline_string(ThemeDB.fallback_font, Vector2(x, y + 24.0), str(r.get("blurb", "")), HORIZONTAL_ALIGNMENT_LEFT, w, 14, 9, DIM_TEXT)
+	_draw_warden(i, box)
 
 
-## `n` of 5 skulls, from `at` (their row's left middle).
-func _skulls(at: Vector2, n: int) -> void:
-	for k in 5:
-		var col := BAD if k < n else SKULL_OFF
-		var o := at + Vector2(18.0 * k + 7.0, 0.0)
-		draw_circle(o, 7.0, col)
-		draw_rect(Rect2(o + Vector2(-4.0, 4.0), Vector2(8.0, 5.0)), col)
-		draw_circle(o + Vector2(-2.5, 0.0), 1.8, CARD_BG)
-		draw_circle(o + Vector2(2.5, 0.0), 1.8, CARD_BG)
+## The card's exit warden at its foot: a rule, "Exit warden: <name> (Threat n/5)" with the threat coloured by its skulls (1-2 dim,
+## 3 amber, 4-5 red), and the warden's hint in dim text.
+func _draw_warden(i: int, box: Rect2) -> void:
+	if i >= wardens.size() or wardens[i].is_empty():
+		return
+	var w: Dictionary = wardens[i]
+	var x := box.position.x + 16.0
+	var width := box.size.x - 32.0
+	var y := box.end.y - 98.0
+	draw_line(Vector2(x, y), Vector2(x + width, y), EDGE_DIM, 1.0)
+	var font := ThemeDB.fallback_font
+	var n: int = warden_skulls[i]
+	var parts := [["Exit warden: ", DIM_TEXT], [str(w["name"]), TEXT]]
+	if n > 0:
+		parts.append([" (%s)" % Threat.label(n), threat_color(n)])
+	var at := x
+	for part in parts:
+		_text(part[0], Vector2(at, y + 22.0), 14, part[1])
+		at += font.get_string_size(part[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	draw_multiline_string(font, Vector2(x, y + 44.0), str(w["hint"]), HORIZONTAL_ALIGNMENT_LEFT, width, 13, 4, DIM_TEXT)
+
+
+## The colour of a threat of `n` skulls: 1-2 dim, 3 amber, 4-5 red.
+static func threat_color(n: int) -> Color:
+	return Skulls.color(n)
 
 
 ## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.

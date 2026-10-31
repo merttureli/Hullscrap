@@ -51,6 +51,18 @@ Top-down and layered; every layer faces UP at rotation 0 and shares one frame (`
 - Colour masks tint the outfit with the crew member's `suit` colour (cached per colour). A 1 px shadow is drawn in code.
 - Species rigs: `human`, `basalt`, `emberkin`, `fenn`, and race wave 1 `kett`, `mire`, `sporeling`, `gauntling`, `prismatic`, `grundl` (`python3 art/_src/build_all.py` rebuilds them; `python3 art/_src/build.py` checks palette, sizes and that every mount sits where the human's does, relative to the pivot).
   - **Large rig (`grundl`)**: its `frame` is 49x49 with `pivot` (24,24), so read both from `crew.json` and never assume 33/16. The art overhangs the 2x2 body (32 px); the shadow and pathing stay at the pivot. Every `mount` and `hand` anchor is the shared one moved by (+8,+8): identical relative to the pivot, so the same item formula (`mount - item.grip`, then rotate about the pivot) puts every item in the right place.
+  - **Rig kinds (race wave 2)**: `crew.json` may carry `"kind"`: `normal` (the default when absent), `large`, `small` or `floating`. The kind fixes the frame, the pivot and what the drawer does (`scripts/crew/person_drawer.gd`). In EVERY kind the arms `mount` anchors are the human's moved by `pivot - (16,16)`, i.e. identical relative to the pivot, so any item fits any body; `hand_*` anchors are art only (keep them inside the frame). Never assume 33/16: read `frame` and `pivot` from `crew.json`.
+
+    | kind | frame | pivot | body and pathing | the art | used by |
+    |---|---|---|---|---|---|
+    | `normal` | 33x33 | (16,16) | 2x2 cells (32 px) | fills the 32 px body | human, basalt, ... |
+    | `large` | 49x49 | (24,24) | still the 2x2 body; shadow and pivot at the 2x2 centre | overhangs the body | grundl, drakkin |
+    | `small` | 25x25 | (12,12) | 1x1 cell (the trait `body` 1: 16 px); the pivot is the cell centre | legs, torso and head inside the central 15x15 (pivot +-7) so it fits a 1-wide crawlspace; only the arms may reach beyond it, to the shared mounts (at most 12 px ahead, 7 to the side) | vellum |
+    | `floating` | 49x49 | (24,24) | the 2x2 body | no legs: the `legs` layer is the TRAILING TAIL (drawn pointing back, i.e. down at rotation 0, and turned to the movement direction, so it streams behind a mover); the torso and head are the body; the tail may run to the frame edge (24 px behind the pivot, 8 px past the 2x2 body) | wisp, lantern (gliding) |
+
+    - `legs` anims for `floating`: no `walk`. A `float` anim (a flowing tail, any frame count and fps, played by time) and a `stand` frame (used when there is no `float`). The drawer ignores `walk` on a floating rig and never advances it with distance.
+    - The drawer bobs a `floating` body: every layer but the shadow rides up and down about 1.5 source px (a slow sine of time), and the shadow sits 1 px further away (it hovers). Do not bake a bob into the frames.
+    - `small` and `large` have no special drawing: the same `walk` / `stand` legs, `pistol`/`rifle`/`tool`/`heavy`/`melee`/`unarmed` arm poses and `hair`/`helmet` heads as the human, on the smaller or bigger frame. A `small` figure is drawn at the same 16 px per cell as everything else, so it is half a normal body wide.
   - `kett` has four arms: the lower pair is small, tucked, and drawn into every arms pose. The glow layers of `sporeling` (spore puffs, 2 drifting frames), `gauntling` (lamp eye, lit LEDs) and `prismatic` (core and lit edges, 2 pulse frames) are multi-frame strips: `torso_glow` carries `anims.on`, `head_glow` lists one frame per head variant per step (see its notes for the fps).
   - Preview sheet: `python3 art/_src/sheet_races1.py out.png`.
 - Held item: a wrench while repairing, an extinguisher while extinguishing (the wrench if there is no extinguisher art), a pistol for the player with nothing to do, nothing otherwise.
@@ -178,3 +190,15 @@ Each race's parts share one visual signature that reads at 1x. Generators: `art/
 - Projectile art per weapon id (`projectiles/<id>`, anim `fly`, faces UP, anchors `head` and `tail`; the impact anim `play` is a one-shot, anchor = its centre): slag, rock slug, pumice rock (basalt); a tiling flame stream for the Pyre Lance (`tile: y`, 8x16, glow tiles too), a cinder shell, a flare (emberkin); a tiny bolt, spark splinters, a scrap missile with confetti (fenn); a drone swarm, chitin needles, an interceptor drone (kett); a small missile, a blue-white rail slug with a Concord rail flash, a flak tracer (human). `emberkin_pyre_lance` is a beam: draw it tiled from the lance to the hit, like `beam`.
 - Sizes worth knowing: `human_crew_quarters_deluxe` is 2x2 (a bunk pod), not the 2x4 of `bed`. Long barrels are drawn long: `basalt_quarry_driver` 72 px, `human_concord_railgun` 74 px, `emberkin_pyre_lance` 74 px (the barrel sprite may extend far above its outside half; the muzzle is in the JSON `barrel.muzzle`).
 - Engines: `emberkin_pyre_drive` breathes a hard-pixel flame over its bell (3-frame loop) and `fenn_haggle_engine` has four small nozzles; anchors `exhaust`/`exhaust_a..d`, `power_coupling`, `repair_hatch` are in the JSONs as for the other engines.
+
+### Racial hand weapons (race wave 1: Kett, Mire, Sporeling, Gauntling, Prismatic, Grundl)
+Generator `art/_src/hand_race.py` (one module, no new palette colours; `build_all.py` calls it), preview `python3 art/_src/sheet_hand.py out.png`. Same format as the other hand weapons of `items/`: ONE PNG per weapon (faces UP, 1 px outline, `anchors.grip` / `muzzle`, `class` = the arm pose), which is both the held sprite and the item's icon, plus `<id>_glow.png`. The id is the `art` of the weapon in `data/packs/tech_<race>/hand_weapons.json`. Muzzle flashes go in `items/fx/muzzle_<name>.png` (3 frames, anim `play`, faces UP, anchor `muzzle` on the weapon's muzzle; `for_item` names the weapon); the melee weapons have none, like the quarry hammer and the ember knife.
+| weapon (class) | race signature | flash |
+|---|---|---|
+| `sting_pistol` (pistol), `hive_prod` (melee) | Kett: amber chitin, cream needle, green venom, honeycomb cells | `muzzle_sting` |
+| `bubble_rifle` (rifle), `hook_gaff` (melee) | Mire: wet teal housing, brass, glass foam tank, red hand-wheel, steel crook | `muzzle_bubble` |
+| `spore_puffer` (tool), `thorn_lash` (melee) | Sporeling: cream and brown growth, violet spore sac, thorns | `muzzle_puff` |
+| `rivet_fist` (heavy), `arc_welder` (tool) | Gauntling: mismatched steel and rust, copper winding, cyan arc | `muzzle_rivet`, `muzzle_weld` |
+| `lens_pistol` (pistol), `shard_lance` (heavy) | Prismatic: faceted violet and navy, cyan and magenta cores | `muzzle_lens`, `muzzle_shard` |
+| `freight_hammer` (melee), `chain_gun` (heavy) | Grundl: dark riveted gunmetal, amber stencil, chains | `muzzle_chain` |
+Each race's `sidearm` in `data/packs/races_1/species.json` is its first weapon of this list.

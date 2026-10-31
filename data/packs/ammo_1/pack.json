@@ -1,0 +1,7 @@
+{
+	"id": "ammo_1",
+	"name": "Ammo racks and conveyor belts",
+	"version": "1.0",
+	"requires": [],
+	"notes": "Three wreck-field events (events/belts.json), one per region of the three belt-drive lines, where a belt drive can be cut out of a wreck: the Clan Chain Drive in Clan space, the Concord Autoloader in Concord space, the Lumen Mag-Rail in Lumen space (docs/CONTENT.md 4f). The drives are also sold at Rusthold, Meridian and Prism (data/drift.json). The first drive aboard teaches the belt blueprint."
+}

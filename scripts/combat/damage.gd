@@ -15,6 +15,7 @@ extends RefCounted
 
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 
 const RICOCHET_FROM_DEG := 40.0  ## kinetic shots never glance off a face closer to straight on than this
@@ -184,6 +185,8 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 	if outside:
 		hit["half"] = "out"
 	arena.log_event("hit", idx, cell, hit)
+	if dealt > 0.0 and Ammo.cut_near(co.ship, cell) > 0:  # a belt beside the damage is cut until crew mend it
+		arena.log_event("belt_cut", idx, cell)
 	if type == "ion":
 		Jobs.ion_hit(co.ship, cell, dmg)  # the crew in that room are jolted and may be stunned
 		if is_part:  # and the part is shut down for a few seconds, longer on an ion-weak line (neon x2)
@@ -236,6 +239,7 @@ static func wreck_part(arena, idx: int, uid: int) -> void:
 	var inst: Dictionary = ship.components.instances[uid]
 	var id: String = inst["id"]
 	var at: Vector2i = inst["cells"][0]
+	var blast := Ammo.blast(ship, uid)  # an ammo rack with explosive ammo goes up
 	ship.components.wreck(uid)
 	co.mounts.erase(uid)
 	co.cooldowns.erase(uid)
@@ -244,6 +248,32 @@ static func wreck_part(arena, idx: int, uid: int) -> void:
 	ship.mark_dirty()
 	ship.log_event("%s wrecked" % ship.components.def(id).get("name", id))
 	arena.log_event("wreck_part", idx, at, {"uid": uid, "id": id})
+	if not blast.is_empty():
+		rack_blast(arena, idx, blast)
+
+
+## A wrecked ammo rack's blast (Ammo.blast): `damage` of explosive type to every part in its room and every wall and
+## door round the room (docs/CONTENT.md 4f: 2 damage a unit). Logs a "rack_blast" event.
+static func rack_blast(arena, idx: int, blast: Dictionary) -> void:
+	var co = arena.ships[idx]
+	var hits: Array = []  # [cell, obj]
+	var seen := {}
+	for c in blast["cells"]:
+		var around: Array = [c]
+		for d in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+			around.append(c + d)
+		for q in around:
+			var obj := solid_at(co, q)
+			if obj.is_empty() or (obj["kind"] == "component" and q != c):
+				continue  # a part only if it stands in the room
+			var key := part_key(obj) if obj["kind"] == "component" else "%d,%d" % [q.x, q.y]
+			if not seen.has(key):
+				seen[key] = true
+				hits.append([q, obj])
+	arena.log_event("rack_blast", idx, blast["at"], {"units": blast["units"], "item": blast["item"], "damage": blast["damage"]})
+	co.ship.log_event("The ammo rack blew up (%d %s)" % [blast["units"], blast["item"]])
+	for h in hits:
+		apply(arena, idx, h[0], h[1], float(blast["damage"]), "explosive")
 
 
 ## An explosion at `impact`: every solid cell within `radius` cells takes `amount` of `type`

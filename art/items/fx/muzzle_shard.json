@@ -1,0 +1,46 @@
+{
+ "frame": [
+  15,
+  19
+ ],
+ "mode": "once",
+ "anims": {
+  "play": [
+   0,
+   3,
+   18
+  ]
+ },
+ "anchors": {
+  "muzzle": [
+   7,
+   18
+  ]
+ },
+ "for_class": [
+  "heavy (shard_lance)"
+ ],
+ "for_item": [
+  "shard_lance"
+ ],
+ "glow": {
+  "image": "muzzle_shard_glow.png",
+  "frame": [
+   25,
+   29
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    3,
+    18
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Hand-weapon muzzle flash, faces UP (rotation 0): put the muzzle anchor on the weapon's muzzle point and rotate with the weapon. Plays once per use."
+}
