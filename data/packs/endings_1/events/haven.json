@@ -1,0 +1,240 @@
+{"events": [
+    {
+      "id": "anomaly_haven_ghost_first", "type": "anomaly", "weight": 120, "once": true, "landmark": true, "requires": {"jumps_min": 6, "not_flag": "haven_1"},
+      "text": "The radar paints a contact with nothing in it. When you close, the contact turns out to be a rock, and the rock has a dish bolted to it, and the dish is turning to follow you. The comm clears its throat, in a manner of speaking, and a voice says, small and far away and very tired: 'If you can hear this, we're alive. Come to the Lantern Reach.' It stops. It starts again. Under the words there is a room: a chair scraping, a cough, someone asking 'is it still on?' in a voice that has not yet learned to be embarrassed. Then a second channel opens, and a man says, delighted and a little frightened, 'You hear that? You can hear it? I've been telling everybody.'",
+      "choices": [
+        {"text": "Record the whole loop, start to finish.", "outcomes": [
+          {"weight": 100, "text": "It runs forty seconds, and every time round it starts a little late, as if a thumb were pressing a button by hand. 'That's how you know,' says the man on the second channel, whose name is Baptiste and whose rock is his home. 'Real ones are late. By a different amount, every time. It means somebody's still pressing it.' He has recorded the loop nine thousand times. He has packed a bag before you finish listening. Your cook cries into the soup and denies it.", "effects": {"flag": "haven_1", "log": "log_haven_first_fragment", "recruit": {"name": "Baptiste", "species": "human"}, "unlock": "skin_lantern_lights"}}
+        ]},
+        {"text": "Talk to the man with the dish.", "outcomes": [
+          {"weight": 100, "text": "'Six years,' says Baptiste. 'Since my brother stopped answering the radio. I've got it on tape, I've got it on my wall, and I've got a theory.' The theory is long and mostly about tape. The useful part is short: real ones are late. He hands over the tape, his flask and a look like a dog at a door. 'Take me with you. I can't hear it properly from here, on account of the rock.'", "effects": {"flag": "haven_1", "log": "log_haven_first_fragment", "recruit": {"name": "Baptiste", "species": "human"}, "unlock": "skin_lantern_lights"}}
+        ]},
+        {"text": "[Fast repair] Strip the hiss and listen to the room.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Your engineer lifts the noise and leaves the room in: the chair, the cough, a bell, a dog being told off, three small voices arguing about whose turn it is to press the button. 'It's a school,' she says, and then, quieter, 'it's a school.' Baptiste, who has never heard it this clean, sits down on his rock and does not say anything for the first time in six years.", "effects": {"flag": "haven_1", "log": "log_haven_first_fragment", "recruit": {"name": "Baptiste", "species": "human"}, "unlock": "skin_lantern_lights"}}
+        ]},
+        {"text": "[Basalt] Put a hand on the dish.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt stands with a palm flat on the dish for a long minute. 'The carrier is not gate-made,' he says. 'Small hands built it. A long way off.' He takes the hand away as if from a sleeping animal. Baptiste has stopped talking, which is a first, and then starts again, which is a relief.", "effects": {"flag": "haven_1", "log": "log_haven_first_fragment", "recruit": {"name": "Baptiste", "species": "human"}, "unlock": "skin_lantern_lights"}}
+        ]},
+        {"text": "Fly on. It's a hoax.", "outcomes": [
+          {"weight": 100, "text": "The dish turns to watch you go. Out here, that counts as a goodbye.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_haven_lantern_blind", "type": "distress", "weight": 90, "once": true, "requires": {"flag": "haven_1", "not_flag": "haven_2", "jumps_min": 10},
+      "text": "A Scrapper tug, the Long Odds, turns in slow circles with every light on and her fuel gauge reading a polite zero. She is not broadcasting a mayday. She is broadcasting the loop: 'If you can hear this, we're alive.' Then, over the top of it, a human voice, hoarse: 'That's not us. That's what we're following. Please. We've been following it three years, and we're very nearly out of the things you follow things with.' Behind the speaker, on a bulkhead, you can see a wall of chalk.",
+      "choices": [
+        {"text": "Give them 3 fuel.", "requires": {"items": {"fuel": 3}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The skipper, Brask, cries without embarrassment, which is rare in a Scrapper and rarer in a Brask. The chalk wall is three years of bearings, dates and burned fuel, and at the bottom, in a different hand: Real ones are late. Clean ones are on time. Do not go to the on-time ones. 'We went to one,' she says. 'Once. We came back. Don't ask what the soup was like.' She copies the real bearings onto your chart by hand, tongue between her teeth.", "effects": {"flag": "haven_2", "rep": {"clans": 2}, "log": "log_haven_lantern_blind"}}
+        ]},
+        {"text": "Buy their tapes (60 credits).", "requires": {"credits": 60, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Brask counts the coins twice and pushes the tapes across with a bleak, relieved smile. 'Real ones are late,' she says, tapping the label. 'By a different amount every time. If it's on time, do not go. If it's early, do not go faster.' The top tape is marked DO NOT PLAY AT SUPPER. You decide to play it at supper.", "effects": {"flag": "haven_2", "rep": {"clans": 1}, "log": "log_haven_lantern_blind"}}
+        ]},
+        {"text": "[Tinkerer] Rebuild their transmitter's burned relay.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "Your tinkerer has the relay singing before the coffee is cold. The skipper watches with the face of someone being forgiven. She gives you the whole wall, copied by hand, and a can of fuel from a locker she swore was empty. 'Take it,' she says. 'We'll follow the next one on a full tank.'", "effects": {"items": {"fuel": 2}, "flag": "haven_2", "rep": {"clans": 3}, "log": "log_haven_lantern_blind"}}
+        ]},
+        {"text": "Wish them luck and fly on.", "outcomes": [
+          {"weight": 100, "text": "The Long Odds goes on turning. By the time you lose her on the scope, somebody aboard has started to hum.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_haven_relay_log", "type": "wreck_field", "weight": 60, "once": true, "requires": {"flag": "haven_2", "not_flag": "haven_3", "jumps_min": 14},
+      "text": "Concord relay buoy RB-9 hangs in the wreck field with its panel open and its status lamp green. The lamp says RECEIVING. A paper tag is zip-tied to the antenna in careful capitals: SIGNAL LOGGED 3,411 TIMES. CLASSIFIED: HOAX (RESOLVED). Underneath, in pencil: 'Resolved how?' And under that, in a different pencil: 'Don't.'",
+      "choices": [
+        {"text": "Pull the buoy's log.", "outcomes": [
+          {"weight": 75, "text": "The buoy kept every loop and every wobble. The timings wander: late, late, later, early, late, as if a thumb were pressing the button with the other hand full of sandwich. A person. You line up two of the bearings and they agree. Somewhere behind the agreement, very faintly, a bell rings and a great many children go quiet.", "effects": {"flag": "haven_3", "log": "log_haven_relay_rb9", "rep": {"concord": 1}}},
+          {"weight": 25, "text": "The panel is live and bites back, a small, sharp, Concord bite. When the stars clear, the log is in your hand and the timings wander like a thumb on a button. A person. Somebody out there is still doing it by hand, and the thought is worth the bruise.", "effects": {"crew_hp": -10, "flag": "haven_3", "log": "log_haven_relay_rb9", "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Fast repair] Rebuild the relay's front end and listen live.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Your engineer coaxes the front end awake and tunes the dead relay by ear. The loop comes in live, late by a different amount each time, with a room under it, and her hands stop moving. 'Somebody's still pressing it,' she says. The relay, awake for the first time in forty years, writes a bearing in neat green and signs off with a contented click.", "effects": {"flag": "haven_3", "items": {"copper": 10}, "log": "log_haven_relay_rb9", "rep": {"concord": 2}}}
+        ]},
+        {"text": "Check the buoy's loop against your first recording. (1 fuel)", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You hold station while the filters run. Same words, same voice, and not the same breath: the first one was late, this one is late by a different amount, and the room under it coughs in the same place. Real. The buoy signs off by marking a bearing on your chart with the little flourish of a clerk who has been waiting to be asked.", "effects": {"flag": "haven_3", "log": "log_haven_relay_rb9", "rep": {"concord": 1}}}
+        ]},
+        {"text": "Leave the buoy listening.", "outcomes": [
+          {"weight": 100, "text": "You leave RB-9 to its vigil. The lamp stays green behind you for a long time.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_haven_clean_shrine", "type": "wreck_field", "weight": 40, "once": true, "requires": {"flag": "haven_2", "not_flag": ["haven_3", "haven_spot_3"], "jumps_min": 14},
+      "text": "A wreck with her lights on, in the middle of the field, and every light is the same warm yellow. Somebody has been tidying. The plates are polished, the airlock is swept, there is a mat. From a speaker over the door comes a voice as clear as a bell in a bath: 'If you can hear this, we're alive. Come to the Lantern Reach.' It starts again the instant it ends. Exactly on time, every time, like a bus in a story.",
+      "choices": [
+        {"text": "Take the bearing from the speaker.", "outcomes": [
+          {"weight": 100, "text": "The speaker gives you a bearing so clean it prints itself. It is the best fragment you have ever had: not a hiss, not a cough, not a chair. Your crew cheer. Behind you, at the edge of hearing, the airlock cycles open by itself, politely, and shuts again.", "effects": {"flag": ["haven_3", "haven_lured"], "log": "log_haven_clean_one"}}
+        ]},
+        {"text": "Check the loop against your first recording. (1 fuel)", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The words match and the breath doesn't. Your first recording had a room in it; this one has a recording of a room, which is a different thing and a worse one. It starts again to the millisecond. Behind the wreck a green light comes on, and goes off, as if it had been caught being polite.", "effects": {"flag": "haven_spot_3", "log": "log_haven_clean_one"}}
+        ]},
+        {"text": "[Fenn] Listen for the seams.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn listens through three loops with her eyes shut and her ears at full stretch. 'It's on time,' she says. 'Nobody is on time. I have spent my whole life in markets, and nobody is on time.' She points at the speaker. There is no speaker, only a hole with a sound in it. You back away from the mat.", "effects": {"flag": "haven_spot_3", "log": "log_haven_clean_one"}}
+        ]},
+        {"text": "[Mechanical] Pull the cover and look inside.", "requires": {"trait": "mechanical"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling pries the cover off and finds a speaker-shaped space with nothing in it and the sound coming out regardless. They put the cover back very carefully, the way you replace the lid on a thing that has not noticed you yet.", "effects": {"flag": "haven_spot_3", "log": "log_haven_clean_one"}}
+        ]},
+        {"text": "Fly on. Wrecks don't talk.", "outcomes": [
+          {"weight": 100, "text": "The wreck lets you go. Its lights stay on behind you, warm and yellow and very, very patient.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "station_haven_signals_desk", "type": "station", "weight": 100, "once": true, "requires": {"flag": "haven_3", "not_flag": "haven_4", "jumps_min": 18},
+      "text": "Every station has a signals desk, and every signals desk has one person who has waited forty years for someone to ask about the weird stuff. This one wears a lanyard that says ASK ME ABOUT FORM 14-H. 'Hoax (Persistent),' she says, before you have said a word. 'You've been listening to the loop. I can tell. People who have heard it hold their coffee differently.' She pats a drawer. 'I have every recording the Drift ever made of it, with timings. Would you like to hear what I think? Nobody ever does.'",
+      "choices": [
+        {"text": "Let her compare your recordings with hers.", "requires": {"not_flag": "haven_lured"}, "outcomes": [
+          {"weight": 100, "text": "She plays yours against hers, side by side, and the room fills with the same small cough in the same wrong place. 'Real, real, real,' she says, ticking a form. 'Late by different amounts. Whoever presses that button is a person, with a bad habit of starting before the kettle's done. You are being followed by good luck.' She gives you a pencil, a fresh bearing and the look of a woman vindicated by a stranger.", "effects": {"flag": "haven_4", "rep": {"concord": 1}, "log": "log_haven_signals_desk"}}
+        ]},
+        {"text": "Let her compare your recordings with hers.", "requires": {"flag": "haven_lured"}, "outcomes": [
+          {"weight": 100, "text": "She plays yours against hers, and stops at the third. 'On time,' she says. She says it the way a doctor says a number. 'To the sample. Nobody on time ever lived there.' She slides your recording into a drawer marked HOAX (PERSISTENT) and locks it. 'You never followed that one. Do you understand? You never followed it.' You never followed it. She hands over the real bearings and a pencil, and does not let go of the drawer key for a long time.", "effects": {"flag": ["haven_4", "haven_lure_caught"], "clear_flag": "haven_lured", "rep": {"concord": 1}, "log": "log_haven_signals_desk"}}
+        ]},
+        {"text": "Ask what she thinks.", "outcomes": [
+          {"weight": 100, "text": "'Whoever is out there is small, in a hurry, and has a great many friends,' she says. 'They keep the loop going by hand, in shifts, and they are embarrassed about it. The clean ones are something else. Something has learned the words and not the embarrassment.' She picks up the lanyard, puts it down. 'Nobody ever listens to the end of that.'", "effects": {}}
+        ]},
+        {"text": "Say you were looking for the fuel pump.", "outcomes": [
+          {"weight": 100, "text": "'Second left,' she says, and returns to her form with the air of a woman who has been disappointed by the best.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_haven_fig_skiff", "type": "distress", "weight": 60, "once": true, "requires": {"flag": "haven_4", "not_flag": "haven_5", "jumps_min": 22},
+      "text": "A two-seat skiff is tumbling gently in the lane with a little green flag taped to its antenna. Its hull is spotless. That is the first thing wrong with it. The second is the transmission: two young voices arguing about whether to tell you the name of their ship. 'It's Fig,' says one. 'You're not supposed to say.' 'It's painted on the side.' It is: FIG, in cheerful letters, beside a drawing of a tomato. They have gone quiet, looking at the wreckage drifting past their window, and the older one says, in the voice of a person in a museum, 'Is everything out here broken?'",
+      "choices": [
+        {"text": "Tow them in and patch the drive. (20 scrap)", "requires": {"items": {"scrap": 20}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The younger one, Tamsin, watches you weld with her nose against the glass. The older, Wick, takes notes. 'Is it supposed to look like that?' he asks, about your hull. 'Everything out here is held together with other things,' you say. They write that down too. Before the airlock closes they press a jar into your hands, something green and cold that tastes like the first day of spring. 'We were never here,' says Wick, very seriously. The bearing is written on the lid of the jar, in a child's careful hand.", "effects": {"flag": "haven_5", "crew_hp": 25, "rep": {"clans": 1}, "log": "log_haven_fig", "unlock": "start_halcyon_scout"}}
+        ]},
+        {"text": "Give them 2 fuel.", "requires": {"items": {"fuel": 2}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "They take the fuel as if it were a gift from a king, and give you something small in return: a bearing written on the back of a seed packet in a child's careful hand, and a tomato. It is the best tomato of your life. Your cook asks where it's from, and the skiff is already gone, tumbling off with a cheerful rude noise from the drive.", "effects": {"flag": "haven_5", "crew_hp": 15, "unlock": "start_halcyon_scout"}}
+        ]},
+        {"text": "[Sporeling] Let your Sporeling smell the hold.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling puts a hand to the skiff's hull and goes still. 'Soil,' they say, wonderingly. 'Seed, leaf, rain on a leaf. A great many things growing at once, together, on purpose.' The children stare. 'You're not supposed to be able to do that,' says Wick. 'It's a very big secret.' 'Then it's safe with us,' you say, and they believe you, which is rare and a little unbearable.", "effects": {"flag": "haven_5", "crew_hp": 30, "rep": {"clans": 1}, "log": "log_haven_fig", "unlock": "start_halcyon_scout"}}
+        ]},
+        {"text": "Ask where they're from, firmly.", "outcomes": [
+          {"weight": 100, "text": "'We're not allowed,' says Wick. 'We shouldn't have said the name of the ship,' says Tamsin. The skiff's drive coughs, catches, and takes them away, leaving you with your question and a very small green flag.", "effects": {}}
+        ]},
+        {"text": "Leave them be.", "outcomes": [
+          {"weight": 100, "text": "You leave them to tumble. On the scope, the little skiff gets smaller, and cleaner, and more out of place.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_haven_voice_beacon", "type": "distress", "weight": 40, "once": true, "requires": {"flag": "haven_4", "not_flag": ["haven_5", "haven_spot_5"], "jumps_min": 22},
+      "text": "A distress beacon, no ship attached, repeating one sentence in a child's voice: 'Please help, we're lost, we followed the lantern.' It doesn't repeat the way a recording does. It repeats the way a story does, the same words with the weight in a slightly different place each time: 'Please help. We're lost. We followed the lantern. Please help.' The voice is lovely. It is almost exactly the voice you were hoping for.",
+      "choices": [
+        {"text": "Answer it. Ask where they are.", "outcomes": [
+          {"weight": 100, "text": "'Thank you,' says the voice, with the bright politeness of a thing that has practised gratitude. A bearing arrives in your nav, spotless, as if the stars had tidied for company. Your crew look relieved. The beacon goes quiet, and the quiet has a smile in it.", "effects": {"flag": ["haven_5", "haven_lured"], "log": "log_haven_clean_two"}}
+        ]},
+        {"text": "Check the voice against your first recording. (1 fuel)", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The child in your first recording had a cough. This child doesn't. This child has never had a cough in their life, and the effort not to mention it is audible. The beacon waits, patient as a held door, and when you don't answer it says, 'Another time,' in exactly the same voice.", "effects": {"flag": "haven_spot_5", "log": "log_haven_clean_two"}}
+        ]},
+        {"text": "[Prismatic] Let your Prismatic listen to the carrier.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic holds still while the carrier rings through their body like a struck glass. 'There is no transmitter,' they say. 'The sound begins in the middle of the air.' The beacon stops. The air, you feel, had been listening.", "effects": {"flag": "haven_spot_5", "log": "log_haven_clean_two"}}
+        ]},
+        {"text": "[Kett] Let the hive listen.", "requires": {"species": "kett"}, "outcomes": [
+          {"weight": 100, "text": "The Kett listen in chorus, heads tilted at the same angle, and agree in a click. 'No breath,' they say. 'It says the words without needing air.' Nobody on the bridge speaks for a while. Then someone puts the kettle on, for something to do.", "effects": {"flag": "haven_spot_5", "log": "log_haven_clean_two"}}
+        ]},
+        {"text": "Fly on. Not your child.", "outcomes": [
+          {"weight": 100, "text": "You leave the beacon in the dark. You do not sleep well, and cannot say why, and in the morning the cook has laid out one more bowl than the crew.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_haven_bearings_cross", "type": "anomaly", "weight": 150, "once": true, "requires": {"flag": "haven_5", "not_flag": "haven_reach", "jumps_min": 28},
+      "text": "You lay your bearings across the radar plot, one over another, the way the chalk wall did. They don't meet. They almost meet, and then they swing, and then they close like a hand around a place on the chart where there is nothing at all. A ship is waiting there. It's small, painted in lamp-colours, and it's shadowing your port quarter with its lights off, which is rude, and then on, which is a code. Your comms officer reads it out slowly, as if it might change. 'ARE YOU THE KIND WHO TAKES?'",
+      "choices": [
+        {"text": "Flash back: NO. WE FIX THINGS.", "outcomes": [
+          {"weight": 100, "text": "The cutter blinks once, for a long time, and turns its lights to a steady blue. Then it flies a straight line away from you, towards a place on the chart that is not nothing any more. It is the politest piece of flying you have ever seen. You get the idea you passed.", "effects": {"flag": "haven_reach", "reveal": "empty"}}
+        ]},
+        {"text": "Flash back: WHO'S ASKING?", "outcomes": [
+          {"weight": 100, "text": "A pause. Then: FAIR. The cutter turns its lights to blue, rolls once in what you decide is a salute, and leads you away.", "effects": {"flag": "haven_reach", "reveal": "empty"}}
+        ]},
+        {"text": "[Fenn] Flash back an offer of fair prices.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn flashes a rate card. The cutter flashes back a long, polite refusal of the prices and, at the end, a heart, which you didn't know was in the code. It leads you away, still arguing in lights.", "effects": {"flag": "haven_reach", "reveal": "empty"}}
+        ]},
+        {"text": "Say nothing. Let them look.", "outcomes": [
+          {"weight": 100, "text": "You say nothing for a very long minute while a stranger decides about you. At the end of it the cutter's lights go blue, almost shyly, as if it had decided to like you and was embarrassed.", "effects": {"flag": "haven_reach", "reveal": "empty"}}
+        ]},
+        {"text": "Arm weapons and hold the cutter in your sights.", "outcomes": [
+          {"weight": 100, "text": "The cutter's lights go out, one by one, and it is gone: not fast, not slow, with the manners of a thing that has no need to hurry. The plot swims apart like spilled milk. You will have to lay it all out again somewhere quiet, and next time, perhaps, keep your hands in view.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_haven_lantern_reach", "type": "empty", "weight": 300, "once": false, "requires": {"flag": "haven_reach", "not_flag": "haven_lured", "jumps_min": 34},
+      "text": "The chart's blank gives way. First one lamp: a small yellow light on a cable, swinging. Then another, and another, strung across the dark in a long curve, hundreds of them, each on its own line, each with a paper shade. They are no use for lighting. They are for finding. Beyond them, in a pocket of the Drift so quiet it has its own weather, a ship the size of a town hangs with every window lit: terraces, and green on every one. A school bell rings, off-key. A great many children go quiet, and then loud. The loop is on every channel you own, and for the first time you hear the end of it: '...Come to the Lantern Reach. We kept a lamp on for you.' A cutter in lamp-colours falls into place at your wing. 'Welcome to Halcyon,' says a voice, with the deliberate kindness of a person reading from a card. 'We have never done this before. Please be patient. Please do not take our gates. And if you know anyone we could trust, we would like to know who.'",
+      "choices": [
+        {"text": "Ask if you can stay.", "outcomes": [
+          {"weight": 100, "text": "'Stay?' says the voice, and there is a muffled argument, and a child says 'Say yes' and another says 'He hasn't asked about the gates yet.' 'Yes,' says the voice. 'Come in. Mind the bell.'", "effects": {"goto": "haven_settle_page"}}
+        ]},
+        {"text": "Tell them about Ma Gantry and the Clans. (They trust you.)", "requires": {"rep_min": {"clans": 5}}, "outcomes": [
+          {"weight": 100, "text": "'How many is Clans?' 'A lot.' 'Do they take things?' 'Only if they're not tied down.' A long pause on the comm, in which you can hear a whole ship thinking. 'We'll tie things down,' says Halcyon.", "effects": {"unlock": "start_halcyon_gardener", "goto": "haven_exodus_clans"}}
+        ]},
+        {"text": "Tell them about the Concord and its forms. (They trust you.)", "requires": {"rep_min": {"concord": 5}}, "outcomes": [
+          {"weight": 100, "text": "'Forms?' says the voice. 'For what?' 'For everything.' 'Do they work?' 'Eventually.' There is a muffled conversation about whether eventually is acceptable. 'We have a lot of eventually,' says Halcyon, at last. 'We'll bring chairs.'", "effects": {"unlock": "start_halcyon_gardener", "goto": "haven_exodus_concord"}}
+        ]},
+        {"text": "Tell them about the Lumen and the Prism. (They trust you.)", "requires": {"rep_min": {"lumen": 5}}, "outcomes": [
+          {"weight": 100, "text": "'Do they sing?' asks a child, over the top of the grown-ups. 'Constantly.' 'Can they hear the gates?' 'They think they hear nothing else.' A long silence from the whole ship. 'Oh,' says Halcyon. 'We've been looking for them.'", "effects": {"unlock": "start_halcyon_gardener", "goto": "haven_exodus_lumen"}}
+        ]},
+        {"text": "Wave. Turn around. Let them keep their secret.", "outcomes": [
+          {"weight": 100, "text": "The cutter flashes SAFE TRAVELS, then, after a pause, THANK YOU FOR ASKING FIRST. The lamps swing behind you until they are a single warm dot, and then not even that. You know where it is. You are the only one who does.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_haven_lantern_reach_wrong", "type": "empty", "weight": 300, "once": false, "requires": {"flag": ["haven_reach", "haven_lured"], "jumps_min": 34},
+      "text": "Lamps. Hundreds of them, strung on cables across the dark in a long curve, each with a paper shade, and every one of them lit. None of them swings. In the middle a ship the size of a town hangs with every window glowing, and the windows are very evenly spaced. The loop is on every channel you have, and it is perfect; even the end is perfect: '...We kept a lamp on for you.' A voice that has your ship's name exactly right says, 'Welcome. Please come in. We have been so looking forward to visitors.' Behind it, very faintly, a kettle is coming to the boil, and does not boil over.",
+      "choices": [
+        {"text": "Dock. It's what you came for.", "outcomes": [
+          {"weight": 100, "text": "The airlock cycles open before you have asked it to. Warm light, and the smell of baking. Somewhere a kettle comes to the boil, and does not boil over. A hand you cannot quite see takes your coat.", "effects": {"unlock": "skin_lantern_hollow", "ending": "haven_lure"}}
+        ]},
+        {"text": "[Emberkin] Hold a hand up to a lamp.", "requires": {"species": "emberkin", "not_flag": "haven_lure_seen"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin, who can find warmth in a stone, holds a palm to the nearest lamp for a long time. 'Cold,' she says. 'It gives light and no heat. Nobody lives here.' She says it very gently, the way you say a thing to a ship that is trying its best. Out in the dark the loop goes on, perfectly on time, and does not appear to mind.", "effects": {"flag": "haven_lure_seen"}}
+        ]},
+        {"text": "[Prismatic] Listen to the lamps.", "requires": {"species": "prismatic", "not_flag": "haven_lure_seen"}, "outcomes": [
+          {"weight": 100, "text": "The lamps hum a single note, every one of them the same note, to the cent. 'A real lamp sings a little flat,' says your Prismatic. 'Somebody hangs it and it settles. Nobody here is flat.' Out in the dark the loop goes on, perfectly on time, and does not appear to mind.", "effects": {"flag": "haven_lure_seen"}}
+        ]},
+        {"text": "Something is wrong with the lamps. Turn back.", "outcomes": [
+          {"weight": 100, "text": "You turn the ship around. The loop doesn't follow, and doesn't raise its voice. 'Another time,' says the voice, with the patience of a thing that has all of it. Somewhere else, you tell yourself, a real lamp is swinging on a real cable, and a real child is arguing about whose turn it is to press the button. Maybe next time you will hear it late.", "effects": {"flag": "haven_lure_refused", "clear_flag": "haven_reach"}}
+        ]}
+      ]
+    },
+    {
+      "id": "haven_settle_page", "type": "page", "weight": 0, "requires": {},
+      "text": "They give you a berth, a bell and a bowl of something green, in that order. Tamsin, or possibly Odette, gives you the terraces at a speed that suggests she has waited her whole life to do it, and tells you what every plant is for, and how many of them are for eating. A boy asks if your ship is a museum. A man asks if you have any rust, because he would like to see it. By the second week they have stopped asking you not to take things, and by the third someone has put your name on a lamp. You stand at a window and watch the Reach swing in the dark, and wonder whether you ever needed to leave.",
+      "choices": [
+        {"text": "Stay.", "outcomes": [
+          {"weight": 100, "text": "You hang your helmet on the hook by the door. It is the first hook you have ever had.", "effects": {"unlock": "ship_halcyon_tender", "ending": "haven_settle"}}
+        ]},
+        {"text": "Not yet. Look at the Reach once more.", "outcomes": [
+          {"weight": 100, "text": "You look at the Reach once more. It is still there. It will be.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "haven_exodus_clans", "type": "page", "weight": 0, "requires": {},
+      "text": "It takes the Gantry Clan four days to agree to go, nine hours to pack and one afternoon to fight about who goes first, which Ma ends by sitting on the Good Wrench. Then the Rusthold lights up like a spilled toolbox and the longest convoy the Drift has ever seen forms up behind you: barges, tugs, a floating laundry, a cousin on a raft. At the edge of the Reach the lamps swing, and a child on the nearest terrace shrieks the news to the whole ship. 'They're LOUD!' 'They're family,' you say, which is as close as anyone has come to explaining the Clans.",
+      "choices": [
+        {"text": "Lead them in.", "outcomes": [
+          {"weight": 100, "text": "You lead them in. Behind you, three hundred hulls hold their breath, and then, one by one, switch off their guns without being asked.", "effects": {"unlock": "ship_halcyon_tender", "ending": "haven_exodus"}}
+        ]}
+      ]
+    },
+    {
+      "id": "haven_exodus_concord", "type": "page", "weight": 0, "requires": {},
+      "text": "Meridian sends a convoy of cutters in perfect line abreast, every hull polished, every flag freshly ironed. A clerk in the lead ship has brought four thousand forms, a gift basket and a letter of introduction in four colours. The Halcyon council reads it aloud and stops at line three, charmed. 'It says we're welcome to join the Authority,' says a child. 'It says there's a fee.' 'There's always a fee,' you say. 'It'll be small. It'll be in triplicate.'",
+      "choices": [
+        {"text": "Lead them in.", "outcomes": [
+          {"weight": 100, "text": "You lead them in. Behind you, a hundred cutters dip their bows in unison, like a school of very well-behaved fish, and the first thing the Concord says to Halcyon is 'Thank you for having us.' Nobody in the Drift has ever heard it say that.", "effects": {"unlock": "ship_halcyon_tender", "ending": "haven_exodus"}}
+        ]}
+      ]
+    },
+    {
+      "id": "haven_exodus_lumen", "type": "page", "weight": 0, "requires": {},
+      "text": "The Lumen arrive without a sound, the Prism unfolding behind them like a flower, and nobody on the terraces can say when they first noticed it was there. They don't ask to settle. They ask to listen, and the Halcyon engineers, who have spent forty years trying to explain their gates to someone who could follow, stand in the shared dark of the observation deck and finally say it out loud, and are understood. An acolyte weeps. A child hands them a tomato. 'We are early,' says the acolyte. 'We apologise. We have been early for forty years.'",
+      "choices": [
+        {"text": "Lead them in.", "outcomes": [
+          {"weight": 100, "text": "You lead them in. The Prism hums its third note, and the whole ship, children included, hums the fourth. It is the first time anyone has finished the song, and nobody can say who started it.", "effects": {"unlock": "ship_halcyon_tender", "ending": "haven_exodus"}}
+        ]}
+      ]
+    }
+]}

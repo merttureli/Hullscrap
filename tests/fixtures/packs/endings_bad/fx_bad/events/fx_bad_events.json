@@ -1,0 +1,8 @@
+{
+	"events": [
+		{"id": "bad_refs", "type": "anomaly", "landmark": 3, "text": "Bad references.",
+			"choices": [{"text": "Go.", "outcomes": [{"text": "x", "effects": {"unlock": "no_such_unlock", "ending": "no_such_ending"}}]}]},
+		{"id": "bad_landmark", "type": "anomaly", "landmark": true, "text": "A landmark nothing can record.",
+			"choices": [{"text": "Leave.", "outcomes": [{"text": "x"}]}]}
+	]
+}

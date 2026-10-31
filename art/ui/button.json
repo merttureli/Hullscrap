@@ -1,0 +1,48 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "normal": [
+   0,
+   1,
+   0
+  ],
+  "hover": [
+   1,
+   1,
+   0
+  ],
+  "pressed": [
+   2,
+   1,
+   0
+  ],
+  "disabled": [
+   3,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 4,
+   "top": 4,
+   "right": 4,
+   "bottom": 4
+  },
+  "content_margins": {
+   "left": 5,
+   "top": 4,
+   "right": 5,
+   "bottom": 4
+  },
+  "center": "stretch"
+ },
+ "notes": "Push button, 4 frames: normal (steel, light top/left), hover (same face, amber inner rim and a lit lip), pressed (sunk face, dim amber rim; shift the label 1 px down-right) and disabled (flat dark slate; use a #565e6a label). White labels read on the first three."
+}

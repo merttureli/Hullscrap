@@ -1,0 +1,54 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "structure": [
+   0,
+   1,
+   0
+  ],
+  "shapes": [
+   1,
+   1,
+   0
+  ],
+  "systems": [
+   2,
+   1,
+   0
+  ],
+  "weapons": [
+   3,
+   1,
+   0
+  ],
+  "engines": [
+   4,
+   1,
+   0
+  ],
+  "utility": [
+   5,
+   1,
+   0
+  ],
+  "cargo": [
+   6,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "notes": "Build-palette category icons, 16x16 (anim name = the tab): structure, shapes, systems, weapons, engines, utility, cargo. Steel with one accent each; they sit inside the 16x16 tab content area."
+}

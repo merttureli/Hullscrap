@@ -11,6 +11,7 @@ extends Node2D
 
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ImpactFx = preload("res://scripts/combat/impact_fx.gd")
+const EffectFx = preload("res://scripts/combat/effect_fx.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
@@ -461,13 +462,23 @@ func _on_event(e: Dictionary) -> void:
 				_add_fx({"k": "flash", "pos": e["origin"], "life": 0.09, "r": 10.0, "color": _shot_color(idx, "energy" if e["kind"] in ["laser", "beam"] else "kinetic")})
 		"beam":
 			_add_fx({"k": "beam", "a": e["from"], "b": e["to"], "life": BEAM_LIFE, "color": _shot_color(idx, e["dtype"]),
-				"kind": str(arena.weapons.def(str(e.get("weapon", "")))["kind"])})
+				"kind": str(arena.weapons.def(str(e.get("weapon", "")))["kind"]), "weapon": str(e.get("weapon", ""))})
+		"effect":  # a weapon effect (acid, spores, frost ...): effect_fx.gd says what it looks like
+			for f in EffectFx.of(arena, e):
+				_add_effect_fx(f)
 		"hit":
+			if e.has("dot"):  # a damage over time ticking: just a wisp
+				for f in EffectFx.dot(e):
+					_add_effect_fx(f)
+				return
+			var weapon_art := str(e.get("weapon", ""))
 			var big: bool = e["kind"] == "component"
 			var col := Color("#ffb347") if big else Color("#ffe9a8")
 			if e["dtype"] == "ion":
 				col = Color("#b99bff")
-			if big and Art.fx("explosion") != null:
+			if weapon_art != "" and Art.projectile(weapon_art + "_impact") != null:  # the weapon's own impact art, when it has some
+				_on_ship(idx, pos, {"k": "art", "src": "projectiles", "name": weapon_art + "_impact", "anchor": "center", "life": 0.45, "scale": 1.0})
+			elif big and Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.5, "scale": 0.7})
 			elif Art.fx("sparks") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "sparks", "life": 0.25, "scale": 0.7})
@@ -532,6 +543,14 @@ func _on_event(e: Dictionary) -> void:
 			_sparks(pos, Vector2.ZERO, 36, Color("#ffcf7a"))
 			for i in 10:
 				_add_fx({"k": "puff", "pos": pos + Vector2.from_angle(_rng.randf() * TAU) * _rng.randf_range(0.0, 120.0), "vel": Vector2.from_angle(_rng.randf() * TAU) * 40.0, "life": 1.4, "r": 24.0, "grow": 50.0, "color": Color("#8a8f99", 0.5)})
+
+
+## An effect entry from EffectFx: on the hull it names (`stick`) or free in the world.
+func _add_effect_fx(f: Dictionary) -> void:
+	if f.has("stick"):
+		_on_ship(int(f["stick"]), f["pos"], f)
+	else:
+		_add_fx(f)
 
 
 ## An effect from ImpactFx: art when there is, else the flash of its fallback size.
@@ -627,7 +646,8 @@ func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 			var p := _fx_pos(f)
 			var smoke = Art.fx("smoke")
 			if smoke != null:
-				_blit_art(c, smoke, smoke.life_frame(age), p, 0.0, _art_k(px) * (0.5 + float(f["r"]) / 24.0 + age * 0.5), "", Color(1, 1, 1, fade))
+				var tint := Color(col.r, col.g, col.b, col.a * fade) if f.get("tint", false) else Color(1, 1, 1, fade)  # a gas of the effect's colour
+				_blit_art(c, smoke, smoke.life_frame(age), p, 0.0, _art_k(px) * (0.5 + float(f["r"]) / 24.0 + age * 0.5), "", tint)
 				return
 			c.draw_circle(p, (f["r"] + f["grow"] * age) * px * 0.5 if f["r"] < 4.0 else f["r"] + f["grow"] * age, Color(col, col.a * fade))
 		"debris":  # a chip of hull tumbling away
@@ -646,7 +666,7 @@ func _draw_shot(c: Node2D, p: Dictionary, px: float) -> void:
 	var at: Vector2 = p["pos"]
 	var v: Vector2 = p["vel"]
 	var d := v.normalized()
-	var art = Art.projectile(str(w["kind"]))
+	var art = Art.projectile_of(str(w.get("id", "")), str(w["kind"]))  # its own art by weapon id, else the kind's
 	if art != null:
 		_draw_art_shot(c, art, at, d, px)
 		return
@@ -696,7 +716,7 @@ func _draw_art_shot(c: Node2D, art, at: Vector2, d: Vector2, px: float) -> void:
 ## An effect (art/fx/<name>) at the fx's place, played once over its life, turned by f["angle"], its
 ## f["anchor"] pixel (else the middle) on the spot.
 func _draw_art_fx(c: Node2D, f: Dictionary, age: float, px: float) -> void:
-	var art = Art.fx(str(f["name"]))
+	var art = Art.projectile(str(f["name"])) if f.get("src", "") == "projectiles" else Art.fx(str(f["name"]))
 	if art != null:
 		_blit_art(c, art, art.life_frame(age), _fx_pos(f), float(f.get("angle", 0.0)), _art_k(px) * float(f.get("scale", 1.0)), str(f.get("anchor", "")))
 
@@ -717,7 +737,7 @@ static func beam_pieces(length: float, tile: float) -> Array:
 ## whole tiles and a cut last one (the sprite's head end), with its glow, and the kind's impact flare
 ## at `b`. False when there is no such art.
 func _draw_art_beam(c: Node2D, f: Dictionary, age: float, px: float) -> bool:
-	var art = Art.projectile(str(f.get("kind", "")))
+	var art = Art.projectile_of(str(f.get("weapon", "")), str(f.get("kind", "")))
 	if art == null:
 		return false
 	var a: Vector2 = f["a"]
@@ -738,7 +758,7 @@ func _draw_art_beam(c: Node2D, f: Dictionary, age: float, px: float) -> bool:
 			TileArt.emit(c, out, {"tex": g.texture, "rect": Rect2(at + Vector2(g.offset.x * k, 0.0), Vector2(float(g.frame.x) * k, p["len"])),
 				"src": Rect2(g.region(clampi(frame, 0, g.count - 1)).position, Vector2(g.frame.x, rows)), "xf": xf, "mod": Color(1, 1, 1, fade)})
 	c.draw_set_transform_matrix(Transform2D.IDENTITY)
-	var hit = Art.projectile(str(f["kind"]) + "_impact")
+	var hit = Art.projectile_of(str(f.get("weapon", "")), str(f["kind"]), "_impact")
 	if hit != null:
 		_blit_art(c, hit, hit.life_frame(age), b, 0.0, k, "center", Color(1, 1, 1, fade))
 	return true

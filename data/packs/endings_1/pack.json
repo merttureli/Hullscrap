@@ -1,0 +1,9 @@
+{
+  "id": "endings_1",
+  "name": "Endings, landmarks and their quest chains, wave 1",
+  "version": "1.0",
+  "requires": [
+    "engines_1"
+  ],
+  "notes": "docs/CONTENT.md section 13. Eight endings (haven_settle, haven_exodus, haven_lure, wayout_concord, wayout_clans, wayout_lumen, hollow_truth, retire), the Haven chain (10 events, 2 of them Hollow lures, plus 4 pages), the Way Out x3 (backing, core, restart), the Hollow thread into the Scrapper Gate (8 events), Retire, and the 6 landmarks (anomaly_haven_ghost_first, station_ma_in_person, wreck_field_cs001_patience, gate_inside_the_shell, station_lumen_first_gate_study, empty_hollow_node_survived). Needs the effects unlock, ending and the event key landmark. gate_alloy comes from engines_1; gate_core and hollow_kettle are in this pack's items.json. Placement is by jumps_min and flags (the schema has no stage or region key yet): Haven jumps 6 to 34, Way Out 22 to 34, Hollow 12 to 40. Events of type gate name their gate in requires.node (gate_1 Concord, gate_2 Scrapper, gate_3 Lumen) and wait for dead gates to be enterable; the lure events are the same carrier type as the real fragment they replace (haven_3 wreck_field, haven_5 distress)."
+}

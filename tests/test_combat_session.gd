@@ -97,7 +97,7 @@ func test_the_weapon_bar_states() -> void:
 	st = s.slot_state(turret, ahead)
 	eq([st["status"], st["turret"], st["in_arc"]], ["ready", true, true], "the Rattle Burst turret: ready, the enemy is inside its arc")
 	near(st["hit"], 0.6, "its hit chance against a ship that stands still: its accuracy")
-	arena.ships[Session.ENEMY].flight.vel = Vector2(0.0, -300.0)
+	arena.ships[Session.ENEMY].flight.vel = Vector2(0.0, -arena.ships[Session.ENEMY].flight.max_speed / 2.0)
 	near(s.slot_state(turret, ahead)["hit"], 0.6 - 0.125, "less the target's evasion at half its top speed")
 	eq(s.slot_state(turret, Vector2(0.0, 1500.0))["status"], "ready", "a turret shoots at the enemy whatever the cursor says")
 	arena.ships[Session.ENEMY].flight.pos = Vector2(0.0, 1200.0)

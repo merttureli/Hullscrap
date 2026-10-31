@@ -530,7 +530,7 @@ func test_effect_log_shows_a_derelict_log_and_remembers_it() -> void:
 
 
 func test_every_effect_type_in_the_spec_is_known_to_the_validator() -> void:
-	var want := ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log"]
+	var want := ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending"]
 	for k in want:
 		check(Events.EFFECT_KEYS.has(k), k + " is an effect")
 	eq(Events.EFFECT_KEYS.size(), want.size(), "and there are no others")
