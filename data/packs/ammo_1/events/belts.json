@@ -1,0 +1,40 @@
+{
+	"events": [
+		{
+			"id": "wreck_chain_hauler", "type": "wreck_field", "weight": 9, "once": true,
+			"requires": {"region": "clan_space"},
+			"text": "A Scrapper loader barge, her cargo deck laid open and a chain drive still clanking round in the dark, like a metronome for a funeral. Somebody left a boot on the belt.",
+			"choices": [
+				{"text": "Cut the drive out and haul it aboard.", "outcomes": [
+					{"weight": 70, "text": "The chain comes away in one piece, grease and all. It has a sign on it that says KICK TO START. You decide to believe it.", "effects": {"items": {"belt_drive_scrap": 1}}},
+					{"weight": 30, "text": "The chain snaps on the first cut and takes a glove with it. The housing is salvageable, which is something.", "effects": {"items": {"scrap": 35}}}
+				]},
+				{"text": "Leave her to clank.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+			]
+		},
+		{
+			"id": "wreck_autoloader_barge", "type": "wreck_field", "weight": 9, "once": true,
+			"requires": {"region": "concord_space"},
+			"text": "A Concord ordnance tender, adrift and entirely intact apart from the part where her crew left. Her magazine lamps are green. The paperwork on the hatch is in triplicate, and somebody has signed all three.",
+			"choices": [
+				{"text": "Unbolt the autoloader from the magazine.", "outcomes": [
+					{"weight": 70, "text": "The spoked wheel comes out of its window with a polite click. Form 14-B is attached. You file it under 'found'.", "effects": {"items": {"belt_drive_std": 1}}},
+					{"weight": 30, "text": "The bolts are registered, and they do not want to leave. You take the copper wiring instead and the tender keeps her dignity.", "effects": {"items": {"copper": 20}}}
+				]},
+				{"text": "Leave her to her paperwork.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+			]
+		},
+		{
+			"id": "wreck_maglev_cache", "type": "wreck_field", "weight": 9, "once": true,
+			"requires": {"region": "lumen_space"},
+			"text": "A Lumen survey skiff, dark and cold, but along her spine a rail of lit glass still carries a single bead of light from one end to the other and back, unhurried, as though nobody had told it.",
+			"choices": [
+				{"text": "Take the rail drive off her spine.", "outcomes": [
+					{"weight": 70, "text": "The bead of light stops, politely, when you cut the lead. The rail comes away humming. It is faintly warm and slightly offended.", "effects": {"items": {"belt_drive_neon": 1}}},
+					{"weight": 30, "text": "The glass cracks along its length and the light goes out of it all at once. A little silicon is the only thing left to take.", "effects": {"items": {"silicon": 6}}}
+				]},
+				{"text": "Leave the light to its walk.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+			]
+		}
+	]
+}
