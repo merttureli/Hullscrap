@@ -1,0 +1,53 @@
+{
+ "frame": [
+  24,
+  24
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "scrap": [
+   0,
+   1,
+   0
+  ],
+  "steel": [
+   1,
+   1,
+   0
+  ],
+  "neon": [
+   2,
+   1,
+   0
+  ],
+  "gold": [
+   3,
+   1,
+   0
+  ],
+  "locked": [
+   4,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 7,
+   "top": 7,
+   "right": 7,
+   "bottom": 7
+  },
+  "content_margins": {
+   "left": 6,
+   "top": 6,
+   "right": 6,
+   "bottom": 6
+  },
+  "center": "stretch"
+ },
+ "notes": "Palette / info card frame, 5 frames by line colour: scrap (rust, bolt heads, hazard lip), steel (standard, clean rivets), neon (cyan on navy, magenta ticks), gold (unique), locked (greyed out). Fill is flat, so put icon and text straight on it."
+}

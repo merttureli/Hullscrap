@@ -1,0 +1,6 @@
+{
+	"endings": [
+		{"id": "fx_end", "title": "The Fixture Ending", "epilogue": "The test ship comes home. Nobody mentions the paperwork.", "base_score": 1000},
+		{"id": "fx_quick", "title": "The Quick Ending", "epilogue": "It was over before it began.", "base_score": 500, "par_jumps": 10}
+	]
+}

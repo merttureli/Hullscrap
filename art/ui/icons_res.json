@@ -1,0 +1,109 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "scrap": [
+   0,
+   1,
+   0
+  ],
+  "copper": [
+   1,
+   1,
+   0
+  ],
+  "polymer": [
+   2,
+   1,
+   0
+  ],
+  "titanium": [
+   3,
+   1,
+   0
+  ],
+  "silicon": [
+   4,
+   1,
+   0
+  ],
+  "crystal": [
+   5,
+   1,
+   0
+  ],
+  "plasma_cell": [
+   6,
+   1,
+   0
+  ],
+  "nanite_paste": [
+   7,
+   1,
+   0
+  ],
+  "military_circuit": [
+   8,
+   1,
+   0
+  ],
+  "gate_alloy": [
+   9,
+   1,
+   0
+  ],
+  "void_crystal": [
+   10,
+   1,
+   0
+  ],
+  "credits": [
+   11,
+   1,
+   0
+  ],
+  "fuel": [
+   12,
+   1,
+   0
+  ],
+  "power": [
+   13,
+   1,
+   0
+  ],
+  "o2": [
+   14,
+   1,
+   0
+  ],
+  "hull": [
+   15,
+   1,
+   0
+  ],
+  "heat": [
+   16,
+   1,
+   0
+  ],
+  "crew": [
+   17,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "notes": "Resource and gauge icons, 16x16 (anim name = the resource id, in the order of the top bar): scrap, copper, polymer, titanium, silicon, crystal, plasma_cell, nanite_paste, military_circuit, gate_alloy, void_crystal, credits, fuel, power, o2, hull, heat, crew. Each is its own hue (scrap grey and rust, copper orange, polymer pale blue, titanium cool grey, silicon navy, crystal cyan, plasma cell orange, nanite mint, circuit amber and red, gate alloy violet, void crystal dark violet and magenta, credits gold, fuel amber, power green, O2 pale cyan, hull steel and amber, heat red and orange, crew cyan). Bold at 1x; draw at 2x."
+}
