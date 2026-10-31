@@ -140,12 +140,12 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 
 **In one line**: the Drift now pushes you forward, you can read the danger before you choose it, fights end in more than one way, and what you beat is what you get. Every jump and every shot is a decision with a price. That's FTL's hardness, made fair.
 
-**The rule we kept**: no new resource, no new screen, no content for its own sake. Eight mechanics, each one rule that makes an existing system matter, built on the vocabulary the game already had (events, the arena, the crew sim, shipgen). Every number is in data.
+**The rule we kept**: no new resource, no new screen, no content for its own sake. Nine mechanics, each one rule that makes an existing system matter, built on the vocabulary the game already had (events, the arena, the crew sim, shipgen). Every number is in data.
 
 ### The run: a reason to move, and a reason to choose
 | Before (Beta 1) | After (Beta 2) | Why it's more fun |
 |---|---|---|
-| You could sit at any node with a Net Mouth and farm forever: one idle minute paid as much as an event, with no risk (`mech_before_idle_farming.png`). | **The Hollow tide** sweeps each region from the entry toward the exit, a step per jump and a step per 4 minutes spent in one place (`mech_tide_1_map.png`, `mech_tide_3_hud_amber.png`). Places behind it go Hollow: ghost ships, dead beacons, no trade (`mech_tide_4_hollow_event.png`). Hollow fights pay only scrap, so they can't be farmed. | "One more beacon?" is a gamble, as in FTL. A run has a shape and a pace. |
+| You could sit at any node with a Net Mouth and farm forever: one idle minute paid as much as an event, with no risk (`mech_before_idle_farming.png`). | **The Hollow tide** sweeps each region from the entry toward the exit, a step per jump and a step per 4 minutes spent in one place (`mech_tide_1_map.png`, `mech_tide_3_hud_amber.png`). Places behind it go Hollow: ghost ships, dead beacons, no trade (`mech_tide_4_hollow_event.png`). Hollow fights pay only scrap. **Linger in a Hollow place and ghost ships come for you** every 60 s while the debris thins (`mech_ghosts_3_ghost_closing.png`, `mech_ghosts_5_hollow_place_line.png`). | "One more beacon?" is a gamble, as in FTL. A run has a shape and a pace, and there's no safe corner to farm in: Raft's shark. |
 | A region's exit was just a door. | **Exit wardens**: every exit is held by a known ship you see on the region card ("Exit warden: Clan Hulk, Threat 2/5" plus its counter, `mech_wardens_cards.png`). At the exit, pay the toll, be waved through on good standing, or break through (`mech_wardens_event.png`, `mech_wardens_fight.png`). | Slay the Spire's known boss. You build toward it all region, and picking a region is picking a challenge. |
 | You couldn't see how dangerous a fight was until it started. | **Threat you can read**: fight choices carry "[Threat 4/5]" (`mech_threat_1_event.png`), the fight opens with a threat banner, and the enemy schematic shows skulls (`mech_threat_2_fight_banner.png`). | CONTENT 14's "danger is readable; ignoring it is your choice". A death is your call, not a surprise. |
 | Every fight happened in the same empty space. | **Hazards**: regions roll ion storms, star heat, gas clouds, radiation and debris surges, shown on the map (`mech_hazards_map_tooltip.png`). Each changes *how* you fight: shields recharge at half speed in a storm (`mech_hazards_ion_storm.png`), and flares light fires on the side facing the star (`mech_hazards_flare_fires.png`). | FTL's environments. A route can be chosen *because* of a storm: a shield brick you can't crack in open space is beatable in one. |
@@ -163,7 +163,7 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 | Crew went down and always got back up. | **Bleed out**: a downed crew member dies in 45 s unless a crewmate reaches them or a powered medbay holds them. A red ring counts down (`mech_salvage_3_bleed_ring.png`). | Fires, vents and breaches have stakes. "Vent the room with Rook inside?" is a real question, and medbays and fire doors are worth building. |
 
 ### How to try it (Beta 2)
-- **Tide**: M opens the map. Watch the band and the "Tide" clock in the status bar; sit in one place in play mode and the top-right line counts down.
+- **Tide**: M opens the map. Watch the band and the "Tide" clock in the status bar; sit in one place in play mode and the top-right line counts down. Stay in a Hollow place and watch the radar ring for ghosts.
 - **Wardens**: reach a region's exit beacon (always shown on the map). The next region's warden is on its card.
 - **Threat**: any event with a fight choice shows "[Threat N/5]".
 - **Morale**: in a fight, bring the enemy below a third of its hull. Y accepts a surrender; hit its engines or helm to stop a jump.
@@ -172,7 +172,13 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 - **Intent**: the panel under your schematic, top left, in any fight.
 - **Hazards**: the map's node badges and tooltips; the fight HUD names the hazard.
 
+### The tuning pass (end of window, data only, `claude/mech-tuning`)
+- **Enemies break at half hull (was 35%).** The balance harness showed slow fights, with most "draws" ending with the enemy above 80% hull. Breaking earlier gives more surrenders and runners and shorter fights, and still asks you to do real damage first.
+- **Wardens are a clear step above the fights around them** (stage factors ×1.25 → ×1.75, were ×1.0 → ×1.5). A warden is rolled at region entry with the budget of about 8 jumps on. Its old ×1.0–1.1 in the first stages let ordinary pirates past the tier step at jump 10 out-gun the boss.
+- **Left alone on purpose**: the tide speed (no stuck runs in any soak), the 45 s bleed out (no surprise deaths in the soak; the ring warns), the salvage counts, and the hazard numbers. All are in data, ready for the owner's playtest.
+
 ### What we measured
 - AI-vs-AI fights that never ended fell from 12 to 8 of 18 once morale was in. 4 of them ended in a capture, 3 of those rammer fights that used to run forever.
 - The soak (3 starters × 3 seeds × 25 jumps) stays green through every merge. On main at round 3: 1450 tests passed, and the soak met 15 wardens (9 cleared) and 15 salvages, and learned blueprints from scans.
+- The balance track took up the hull-to-hull standoff I recommended for the pilot. The Courier at jump 5 went from 33% to 67% wins; the remaining draws are slow fights it's still tuning (heat, tier budgets, threat cuts).
 - Still with the balance track: the Courier and Prism starters struggle against the basic pirate when AI-flown (F6), and large generated enemies sat outside starter gun range. The fix is the hull-to-hull gap I recommended.
