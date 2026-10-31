@@ -1,0 +1,7 @@
+{
+  "weapons": {
+    "fenn_twitch_cannon": {"kind": "bolt", "damage_type": "energy", "damage": 2.5, "cooldown": 0.8, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 800, "turret": false, "gimbal": 6},
+    "fenn_spark_lattice": {"kind": "bolt", "damage_type": "energy", "damage": 2.4, "cooldown": 1.8, "range": 750, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 750, "turret": true, "gimbal": 0, "arc": 270, "track": 140, "accuracy": 0.8, "effects": {"shard": {"splinters": 3, "dmg": 0.6}}},
+    "fenn_market_missile": {"kind": "missile", "damage_type": "explosive", "damage": 3, "cooldown": 3.5, "range": 1000, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 340, "turn": 2.0, "splash": 1, "pass_shields": true, "ammo": "scrap", "turret": false, "gimbal": 5}
+  }
+}
