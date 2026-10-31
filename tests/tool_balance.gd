@@ -39,8 +39,9 @@ const PLAYER_EVERY := 3  ## the player's pilot thinks every this many substeps (
 const WIN_STATES: Array[String] = ["won", "captured", "spared"]
 const ENDS: Array[String] = ["wreck", "capture", "surrender", "escape", "lost", "draw"]
 const END_OF := {"won": "wreck", "captured": "capture", "spared": "surrender", "escaped": "escape", "lost": "lost", "fighting": "draw"}
-## Targets (docs/CONTENT.md 14 and the balance brief) for the flags of the reading: jump -> [low, high] win share.
-const TARGETS := {5: [0.7, 0.9], 15: [0.45, 0.65], 25: [0.2, 0.5], 35: [0.0, 0.3]}
+## Targets (the balance brief) for the flags of the reading: jump -> [low, high] projected win share, and which ships they are
+## for: a bare starter about 80% at jump 5, 50-60% with a few upgrades (the kit) at jump 15, clearly outmatched bare at jump 35.
+const TARGETS := {5: [0.7, 0.9, false], 15: [0.45, 0.65, true], 35: [0.0, 0.3, false]}
 const CUT_SCORES: Array[float] = [0.85, 0.65, 0.35, 0.15]  ## the result (won 1, drawn 0.5) between 1|2, 2|3, 3|4 and 4|5 skulls
 const KIT_PARTS: Array[String] = ["laser_turret_mk1", "reactor_mk1"]  ## bought for the kit (the shield comes from the hold)
 const KIT_STOCK := {"scrap": 5000, "copper": 600, "titanium": 400, "silicon": 400, "crystal": 200, "polymer": 200}
@@ -737,19 +738,26 @@ static func _delta(key: String, b: Dictionary, a: Dictionary) -> String:
 	return "%d%% -> %d%%" % [roundi(100.0 * float(b[key])), roundi(100.0 * float(a[key]))]
 
 
-## Short flags against the targets: jump win rates out of band, the draw rate, the threat rating's order.
+## Short flags against the targets: projected win rates by jump against TARGETS, the draw rate, the threat rating's order.
 func reading() -> Array:
 	var out := []
 	var all := _rate(_sel(func(r): return true))
-	out.append("Draws are %d%% of all fights%s." % [roundi(100 * all["draw"]), " (too many: fights that do not end)" if all["draw"] > 0.15 else ""])
+	out.append("Draws are %d%% of all fights%s; %d%% of all fights are won or were being won at the cap." % [roundi(100 * all["draw"]),
+		" (many: fights are long, the cap cuts them short)" if all["draw"] > 0.15 else "", roundi(100 * all["proj"])])
 	for j in jumps:
 		if not TARGETS.has(j):
 			continue
 		var band: Array = TARGETS[j]
+		var r := _rate(_sel(func(x): return x["jump"] == j and str(x["ship"]).ends_with("+kit") == band[2]))
+		if r["n"] == 0:
+			continue
+		var inside: bool = r["proj"] >= band[0] - 1e-6 and r["proj"] <= band[1] + 1e-6
+		out.append("Jump %d, the starters %s: projected %d%% (won %d%%), target %d-%d%%: %s." % [j, "with the kit" if band[2] else "bare",
+			roundi(100 * r["proj"]), roundi(100 * r["win"]), roundi(100 * band[0]), roundi(100 * band[1]), "on target" if inside else "OFF TARGET"])
 		for sh in ships:
-			var r := _rate(_sel(func(x): return x["ship"] == sh["id"] and x["jump"] == j))
-			if r["n"] > 0 and (r["win"] < band[0] or r["win"] > band[1]):
-				out.append("%s at jump %d wins %d%%, outside the target %d-%d%%." % [sh["name"], j, roundi(100 * r["win"]), roundi(100 * band[0]), roundi(100 * band[1])])
+			var rs := _rate(_sel(func(x): return x["ship"] == sh["id"] and x["jump"] == j))
+			if rs["n"] > 0 and (rs["proj"] < band[0] - 0.15 or rs["proj"] > band[1] + 0.15):
+				out.append("  %s at jump %d: projected %d%%, well outside it." % [sh["name"], j, roundi(100 * rs["proj"])])
 	var last := 2.0
 	for k in range(1, 6):
 		var r := _rate(_sel(func(x): return x["skulls"] == k))
