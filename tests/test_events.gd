@@ -574,28 +574,20 @@ func test_a_won_fight_calls_back_with_loot_and_the_after_win_text() -> void:
 	eq(c.hull_loss, 20, "the hull integrity left in the fight is kept")
 
 
-func test_loot_scales_with_the_tier_and_may_include_an_enemy_part() -> void:
+func test_loot_is_credits_times_the_tier_and_no_scrap_or_part_roll() -> void:
 	var enemy: Ship = Ship.from_design("res://data/ships/pirate_raider.json")
-	var parts := {}
-	for inst in enemy.components.instances.values():
-		parts[inst["id"]] = true
-	var got_part := 0
-	for seed_value in 60:
+	for seed_value in 30:
 		var c := _camp([], seed_value)
 		var ship := _ship()
 		c.jumps = 30  # tier 3
-		var credits := ship.inventory.count("credits")
-		var scrap := ship.inventory.count("scrap")
 		var before := ship.inventory.counts.duplicate()
-		c.loot(enemy, ship)
-		var dc: int = ship.inventory.count("credits") - credits
-		var ds: int = ship.inventory.count("scrap") - scrap
+		var lines := c.loot(enemy, ship)
+		var dc: int = ship.inventory.count("credits") - int(before.get("credits", 0))
 		check(dc >= 60 and dc <= 180, "credits 20-60 x tier 3 (%d)" % dc)
-		check(ds >= 90 and ds <= 240, "scrap 30-80 x tier 3 (%d)" % ds)
+		eq(lines, ["+%d credits" % dc], "the loot lines are the credits only: the player picks the parts from the wreck (salvage.gd)")
 		for id in ship.inventory.counts:
-			if parts.has(id) and ship.inventory.count(id) > int(before.get(id, 0)):
-				got_part += 1
-	check(got_part > 5 and got_part < 30, "about a quarter of the wins give one of the enemy's parts (%d of 60)" % got_part)
+			if id != "credits":
+				eq(ship.inventory.count(id), int(before.get(id, 0)), "no %s from the loot roll" % id)
 
 
 func test_a_lost_fight_ends_the_run_and_a_fled_one_gives_nothing() -> void:

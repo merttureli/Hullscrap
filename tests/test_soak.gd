@@ -9,6 +9,7 @@ extends "res://tests/base_test.gd"
 const Arena = preload("res://scripts/combat/arena.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Events = preload("res://scripts/space/events.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
@@ -29,7 +30,7 @@ const MAX_WAITS := 20  ## waits for a passing trader before a run with no fuel c
 
 var _cap_s := FIGHT_CAP_S
 var _real_left := 0  # fights of this run still to go through the arena
-var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "runs": 0}
+var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "runs": 0, "known": 0, "dead": 0}
 
 
 func test_soak_every_starter_every_seed() -> void:
@@ -110,6 +111,8 @@ func _soak(design: String, seed_value: int) -> void:
 			_station(where + " (docked)", c, ship, pick)
 		_audit(where + " after the event", c, ship)
 	check(made == JUMPS, "%s: made %d of %d jumps (the run got stuck at %s)" % [tag, made, JUMPS, c.current if c != null else "?"])
+	stats["known"] += sim.player_ship().crafting.known.size()  # blueprints at the end of the run (salvage scans add to it)
+	stats["dead"] += sim.player_ship().dead_crew.size()  # crew who bled out
 
 
 ## Pick a lane: a random neighbour that may be entered. With no fuel, a drift jump if the hull allows it,
@@ -243,8 +246,8 @@ func _event_chain(where: String, ev: Dictionary, c: Campaign, sim, pick: RandomN
 				queue.append({"id": "(after_win fight)", "text": "-", "choices": [{"text": "Fight", "outcomes": [{"weight": 100, "effects": {"fight": done["fight"]}}]}]})
 			elif done["goto"] != "" and c.events.has(done["goto"]):
 				queue.append(c.events.get_event(done["goto"]))
-			elif done["state"] == "won":
-				queue.append(c.salvage_event(ship))
+			elif done["state"] in ["won", "captured"]:
+				queue.append(Salvage.event_for(res.get("enemy"), done["state"], c, ship))
 		elif str(r["goto"]) != "":
 			check(c.events.has(r["goto"]), "%s: '%s' goes to an event that does not exist: %s" % [where, e.get("id", "?"), r["goto"]])
 			if c.events.has(r["goto"]):

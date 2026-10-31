@@ -818,7 +818,7 @@ func test_a_fight_from_an_event_starts_combat_and_calls_back_with_the_result() -
 	check(ship.inventory.count("credits") >= credits + 60, "the loot (and the 40 of the ledger) is in the cargo")
 	eq(map.campaign.hull_loss, 28, "the damage of the fight stays")
 	panel.proceed()
-	check(panel.visible and panel.event.get("type", "") == "wreck_field", "then a salvage event")
+	check(panel.visible and panel.event.get("id", "") == "salvage", "then the salvage pick of the enemy's surviving parts")
 	_free_screen(d)
 
 

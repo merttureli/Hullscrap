@@ -13,6 +13,7 @@ extends Control
 const Campaign = preload("res://scripts/space/campaign.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -255,15 +256,16 @@ func _on_fight_finished(result: Dictionary) -> void:
 		return
 	visible = true
 	refresh()
-	event_panel.open_notice("The fight is over" if r["state"] == "won" else "You get away", r["text"], r["lines"])
+	var title := "Salvage" if r["state"] in ["won", "captured", "spared"] else ("The fight is over" if r["state"] == "escaped" else "You get away")
+	event_panel.open_notice(title, r["text"], r["lines"])
 	if r["fight"] != "":
 		var next: String = r["fight"]
 		_queue.append(func(): _start_fight(next, {}))
 	elif r["goto"] != "" and campaign.events.has(r["goto"]):
 		var page: String = r["goto"]
 		_queue.append(func(): event_panel.open_event(campaign.events.get_event(page)))
-	elif r["state"] == "won":
-		var salvage := campaign.salvage_event(ship())
+	elif r["state"] in ["won", "captured"]:
+		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship())
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
 

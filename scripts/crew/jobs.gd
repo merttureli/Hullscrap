@@ -761,7 +761,7 @@ static func spawn_crew(ship) -> Array:
 		ship.crew.append(player)
 		out.append(player)
 	var ada_name: String = cfg["ada"]["name"]
-	if _find(ship, func(m): return m.name == ada_name) == null:
+	if _find(ship, func(m): return m.name == ada_name) == null and not ship.dead_crew.has(ada_name):
 		var c := Pathfinder.nearest_walkable(grid, mid, Callable(), player.anchor())
 		if c == Pathfinder.NO_CELL:
 			return out
@@ -769,7 +769,7 @@ static func spawn_crew(ship) -> Array:
 		ship.crew.append(ada)
 		out.append(ada)
 	var beds := _beds(ship)
-	var have: int = ship.crew.filter(func(m): return not m.is_player and m.name != ada_name).size()
+	var have: int = ship.crew.filter(func(m): return not m.is_player and m.name != ada_name).size() + ship.dead_crew.filter(func(n): return n != ada_name).size()  # the dead stay dead
 	while have < int(cfg.get("extra_crew", 0)):
 		var near := mid
 		if not beds.is_empty():
@@ -803,7 +803,7 @@ static func _spawn_planned(ship) -> Array:
 		var nth := npc
 		if not is_player and not is_ada:
 			npc += 1
-		if _find(ship, func(m): return m.name == who) != null:
+		if _find(ship, func(m): return m.name == who) != null or ship.dead_crew.has(who):
 			continue
 		var near := mid
 		var look: Dictionary = cfg["player"]["look"] if is_player else cfg["ada"]["look"]

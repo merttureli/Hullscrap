@@ -33,6 +33,7 @@ var look := {}  ## PersonDrawer palette ("suit", "hair", "tool"); empty = the vi
 var job := {}  ## what they are doing now (a Jobs board entry plus its "spot"); empty = idle
 var hold := 0.0  ## seconds left of a manual order, during which the job board leaves them alone
 var stun := 0.0  ## seconds left stunned (an ion hit on their room, trait ion_stun): no walking, no work
+var down_t := 0.0  ## seconds spent at 0 hp (mortality.gd: they die at crew.json bleed_out_s unless someone is saving them)
 
 
 func _init(p_name := "", p_pos := Vector2.ZERO, p_species := "human") -> void:

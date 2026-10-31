@@ -11,6 +11,7 @@ const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
+const Mortality = preload("res://scripts/crew/mortality.gd")
 const Art = preload("res://scripts/view/art.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
@@ -133,7 +134,7 @@ func _draw() -> void:
 		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
 			"item": PersonDrawer.item_for(m, ship.clock, arena != null), "down": m.is_down(), "work": PersonDrawer.is_working(m, ship.clock), "t": _clock}
 		PersonDrawer.draw(self, px(m.pos), pose, look, CELL)
-		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL)
+		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL, Mortality.bleed_frac(m))
 	if _glow != null:
 		_glow.show_quads(_glow_quads)
 	if arena != null:
@@ -297,8 +298,10 @@ static func draw_fire(canvas: CanvasItem, fires: Dictionary, origin: Vector2, ce
 		canvas.draw_circle(mid + Vector2(0.0, -0.14) * cell_px, r * 0.36 * flick, Color(1.0, 0.9, 0.4, 0.9))
 
 
-## A small health bar over the head of a person at `centre` (pixels), only when hurt or down.
-static func draw_health(canvas: CanvasItem, centre: Vector2, frac: float, down: bool, cell_px: float) -> void:
+## A small health bar over the head of a person at `centre` (pixels), only when hurt or down. A downed person
+## with `bleed` above 0 (0..1, the share of their bleed-out time gone: Mortality.bleed_frac) also gets a red ring
+## that empties as it grows.
+static func draw_health(canvas: CanvasItem, centre: Vector2, frac: float, down: bool, cell_px: float, bleed := 0.0) -> void:
 	if frac >= 1.0 and not down:
 		return
 	var w := cell_px * 1.8
@@ -310,6 +313,9 @@ static func draw_health(canvas: CanvasItem, centre: Vector2, frac: float, down: 
 		var k := cell_px * 0.7
 		canvas.draw_line(centre + Vector2(-k, -k), centre + Vector2(k, k), Color(1, 0.2, 0.2, 0.8), 3.0)
 		canvas.draw_line(centre + Vector2(-k, k), centre + Vector2(k, -k), Color(1, 0.2, 0.2, 0.8), 3.0)
+		if bleed > 0.0:  # the bleed-out ring: full when they fall, empty (clockwise from the top) when they die
+			canvas.draw_arc(centre, cell_px * 1.2, 0.0, TAU, 40, Color(0, 0, 0, 0.55), 5.0)
+			canvas.draw_arc(centre, cell_px * 1.2, -PI / 2.0 + TAU * clampf(bleed, 0.0, 1.0), 1.5 * PI, 40, Color(1.0, 0.18, 0.15, 0.95), 3.5)
 
 
 # --- shield bubble ----------------------------------------------------------------------------

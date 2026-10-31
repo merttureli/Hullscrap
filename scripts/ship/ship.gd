@@ -47,6 +47,7 @@ var events: Array = []  ## the chronicle, newest last: {t, text}; at most MAX_EV
 var clock := 0.0  ## seconds this ship has been simulated; the `t` of new events
 var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; not saved yet
+var dead_crew: Array = []  ## names of crew who bled out (mortality.gd): Jobs.spawn_crew does not bring them back
 var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
 var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list

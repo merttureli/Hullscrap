@@ -12,6 +12,7 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
+const Mortality = preload("res://scripts/crew/mortality.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const Art = preload("res://scripts/view/art.gd")
 const AIM_DEAD_ZONE := 0.3  ## cells: with the mouse this close to the player, the aim stays where it was
@@ -103,7 +104,7 @@ func _wasd() -> Vector2:
 ## and find the soldier and Ada among them (a design may leave Ada out).
 func _spawn(ship) -> void:
 	var ada_name: String = CrewMember.config()["ada"]["name"]
-	var wants_ada: bool = ship.crew_plan.is_empty() or ship.crew_plan.any(func(e): return e["name"] == ada_name)
+	var wants_ada: bool = (ship.crew_plan.is_empty() or ship.crew_plan.any(func(e): return e["name"] == ada_name)) and not ship.dead_crew.has(ada_name)
 	if player != null and ship.crew.has(player) and (not wants_ada or (ada != null and ship.crew.has(ada))):
 		return
 	Jobs.spawn_crew(ship)
@@ -177,4 +178,4 @@ func _draw_person(m: CrewMember) -> void:
 	var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
 		"item": PersonDrawer.item_for(m, clock, fight), "down": m.is_down(), "work": PersonDrawer.is_working(m, clock), "t": _clock}
 	PersonDrawer.draw(self, _world(m.pos), pose, look_of(m), build.CELL)
-	ShipView.draw_health(self, _world(m.pos), m.hp / m.max_hp, m.is_down(), build.CELL)
+	ShipView.draw_health(self, _world(m.pos), m.hp / m.max_hp, m.is_down(), build.CELL, Mortality.bleed_frac(m))

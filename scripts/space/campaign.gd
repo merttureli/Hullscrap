@@ -18,6 +18,7 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Sector = preload("res://scripts/space/sector.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -640,10 +641,13 @@ func fight_path(value: String, node_type: String) -> String:
 	return str(table[rng.randi() % table.size()])
 
 
-## The fight is over. `res` is {state: "won" | "lost" | "fled", hull, hull_max, enemy (its Ship)} from the
-## combat view. A win gives loot and runs `after_win` ({text, effects}); the hull integrity left in the
-## fight is kept. A loss ends the run (the caller starts a new campaign). Returns {state, text, lines,
-## goto, fight}: `goto` and `fight` are what the after_win effects asked for next.
+## The fight is over. `res` is {state, hull, hull_max, enemy (its Ship)}, plus `offer` ({item: count}) when
+## spared; `state` is "won" | "captured" | "spared" | "escaped" | "fled" | "lost". A win pays credits (the caller
+## then shows Salvage.event_for); a captured ship pays 1.5x the credits and the strip scrap; a spared one pays its
+## offer (its credits times the tier) and gives no salvage; an escaped one pays nothing. Won, captured and spared
+## count as wins and run `after_win` ({text, effects}). The hull integrity left in the fight is kept. A loss ends
+## the run (the caller starts a new campaign). Returns {state, text, lines, goto, fight}: `goto` and `fight` are
+## what the after_win effects asked for next.
 func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary:
 	var state := str(res.get("state", "fled"))
 	var out := {"state": state, "text": "", "lines": [], "goto": "", "fight": ""}
@@ -652,15 +656,22 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 		return out
 	if res.has("hull") and res.has("hull_max"):
 		hull_loss = clampi(roundi(float(res["hull_max"]) - float(res["hull"])), 0, maxi(roundi(float(res["hull_max"])) - 1, 0))
-	if state != "won":
-		out["text"] = "You break away. The fight is not finished, but you are."
+	if not state in ["won", "captured", "spared"]:
+		out["text"] = "They're gone, and whatever they carried went with them." if state == "escaped" else "You break away. The fight is not finished, but you are."
 		return out
 	fights_won += 1
 	out["text"] = "The wreck tumbles away, still venting."
-	out["lines"] = loot(res.get("enemy"), ship)
+	if state == "spared":
+		out["text"] = "They dump the goods out of the airlock and limp away."
+		var offer: Dictionary = res["offer"].duplicate() if res.get("offer") is Dictionary else {}
+		if offer.has("credits"):
+			offer["credits"] = int(offer["credits"]) * tier()
+		out["lines"] = events.apply({"items": offer}, self, ship)["lines"]
+	else:
+		out["lines"] = loot(res.get("enemy"), ship, state == "captured")
 	if not after_win.is_empty():
-		if str(after_win.get("text", "")) != "":
-			out["text"] = str(after_win["text"])
+		if str(after_win.get("text", "")) != "":  # replaces the wreck text; a spared ship's goods stay in the story
+			out["text"] = (str(out["text"]) + " " if state == "spared" else "") + str(after_win["text"])
 		var r: Dictionary = events.apply(after_win.get("effects", {}) if after_win.get("effects") is Dictionary else {}, self, ship, drift.node(current))
 		out["lines"].append_array(r["lines"])
 		out["goto"] = r["goto"]
@@ -668,24 +679,19 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 	return out
 
 
-## After a won fight: credits and scrap (times the tier) and maybe one of the enemy's parts. Returns lines.
-func loot(enemy, ship) -> Array:
+## After a won fight: the credits (times the tier) as lines. No scrap and no part roll: the player picks
+## from the wreck instead (salvage.gd). A `captured` ship pays 1.5x the credits and the strip scrap at once.
+func loot(enemy, ship, captured := false) -> Array:
 	var l: Dictionary = cfg["loot"]
-	var t := tier()
-	var credits := rng.randi_range(int(l["credits"][0]), int(l["credits"][1])) * t
-	var scrap := rng.randi_range(int(l["scrap"][0]), int(l["scrap"][1])) * t
+	var credits := rng.randi_range(int(l["credits"][0]), int(l["credits"][1])) * tier()
+	if captured:
+		credits = roundi(credits * 1.5)
 	ship.inventory.add("credits", credits)
-	ship.inventory.add("scrap", scrap)
-	var lines := ["+%d credits" % credits, "+%d scrap" % scrap]
-	if rng.randf() < float(l["component_chance"]) and enemy != null:
-		var ids := []
-		for inst in enemy.components.instances.values():
-			ids.append(str(inst["id"]))
-		ids.sort()
-		if not ids.is_empty():
-			var id: String = ids[rng.randi() % ids.size()]
-			ship.inventory.add(id, 1)
-			lines.append("+1 %s (salvaged)" % ship.components.def(id).get("name", id))
+	var lines := ["+%d credits" % credits]
+	if captured:
+		var scrap := Salvage.strip_scrap(enemy, self)
+		ship.inventory.add("scrap", scrap)
+		lines.append("+%d scrap (stripped)" % scrap)
 	return lines
 
 
