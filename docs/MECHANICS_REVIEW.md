@@ -84,10 +84,10 @@ This doc is the director's working notes: what the reference games get right, wh
 ### P5. Red alert — **a rule, handed to the lead** (F8)
 Build mode refuses while a hostile ship is within 2,500 px. One check, so it lives with the build UI and sector view tracks.
 
-### P6. Enemy intent on your schematic — round 2
+### P6. Enemy intent on your schematic — round 2, merged
 - **Problem**: F9. **How**: your schematic (top left) marks the room the enemy pilot is aiming at with a red reticle, and a heavy weapon charging (a missile, a lance) shows its target 1.5 s before it fires. Then shield balance and turning to put armour toward it become informed decisions. **Cost**: small (the pilot AI already has `target_uid`). **Bloat**: none. **Works when**: players move the shield balance *before* hits, not after.
 
-### P7. Exit wardens (known region bosses) — round 2, after regions and shipgen
+### P7. Exit wardens (known region bosses) — round 3, briefed (`claude/mech-wardens`)
 - **Problem**: F10. **How**: the region-choice card names what guards the exit beacon ("Concord Bulwark: 4-sector shields; bring ion or missiles"). Beat it, or pay a toll, to leave the region. You build toward it all region. **Cost**: medium. **Bloat**: low (one fight per region, from shipgen). **Works when**: players buy or craft counters before the exit.
 
 ### P8. Sector hazards (FTL's environments) — round 2, briefed
@@ -123,6 +123,17 @@ Build mode refuses while a hostile ship is within 2,500 px. One check, so it liv
 - **Builder C, `claude/mech-morale`**: P2.
 - **The contract between B and C**: a fight's result dict gains `state` = `won` | `captured` | `spared` | `escaped` | `fled` | `lost`, and `offer` ({item: count}) when spared. C produces these in the combat code; B handles every state in the campaign. Neither edits the other's files.
 - P5 goes to the lead, F6 to the balance harness and the starters, F7 to the lead.
+
+## 4c. Rounds 2 and 3
+- **Round 2**:
+  - **P6 enemy intent**: merged. Warning rows only for heavy guns with a 3 s+ cooldown, so a row always means "react now".
+  - **The tide**: merged and seated per region. Hollow fights pay only half the strip scrap, and a ghost's surrender is refused, so Hollow places can't be farmed.
+  - **P8 hazards**: building.
+  - **Morale's follow-up**: merged. One spool-hold rule for both sides: engines out, helm down, or no crew.
+- **Round 3** (briefed after shipgen landed):
+  - **P7 exit wardens** (`claude/mech-wardens`).
+  - **Threat you can read** (`claude/mech-threat`): the foe of a node is pre-rolled so fight choices show "[Threat N/5]", with a fight-start banner and skulls on the enemy schematic. Salvage picks +1 at 4 skulls and +2 at 5 (Slay the Spire's elites).
+- **Handed to balance**: large generated enemies sit outside starter gun range, because the pilot keeps bounding circles apart. The recommendation is a hull-to-hull gap.
 
 ## 5. What changed and why it's more fun
 *(Kept up to date as features land; screenshots in `/home/user/hs/shots/mech_*`.)*
