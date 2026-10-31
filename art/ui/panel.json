@@ -1,0 +1,33 @@
+{
+ "frame": [
+  28,
+  28
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "normal": [
+   0,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 10,
+   "top": 10,
+   "right": 10,
+   "bottom": 10
+  },
+  "content_margins": {
+   "left": 7,
+   "top": 7,
+   "right": 7,
+   "bottom": 7
+  },
+  "center": "stretch"
+ },
+ "notes": "The main window frame (palette, info card, dialogs): riveted steel with a recessed lip and a flat dark-slate (#2a2f37) fill. Corners carry the bolts, so stretch it freely."
+}

@@ -1,0 +1,38 @@
+{
+ "frame": [
+  24,
+  24
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "hover": [
+   0,
+   1,
+   0
+  ],
+  "selected": [
+   1,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 7,
+   "top": 7,
+   "right": 7,
+   "bottom": 7
+  },
+  "content_margins": {
+   "left": 0,
+   "top": 0,
+   "right": 0,
+   "bottom": 0
+  },
+  "center": "stretch"
+ },
+ "notes": "Overlays for a hovered / selected card or slot. They are a 2 px frame (outer near-black, inner light steel for hover, amber for selected) with a transparent middle: draw them 2 px OUTSIDE the target rect (rect grown by 2 on every side) so the target keeps its own outline."
+}
