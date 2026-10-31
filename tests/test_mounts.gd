@@ -5,6 +5,7 @@ extends "res://tests/base_test.gd"
 
 const Wall = preload("res://tests/fixture_wall.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
+const Palette = preload("res://scripts/build/palette.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Components = preload("res://scripts/ship/components.gd")
@@ -208,11 +209,12 @@ func test_build_mode_points_at_the_outside_half_and_shows_both_halves_and_the_re
 	b._refresh_ghost()
 	eq(b.ghost.size(), 1, "one ghost for the one item")
 	eq(b.ghost[0]["reason"], "", "the barrel in space against a 3-thick wall would apply")
-	check(b.hud_text().contains("outside half 4x2, pointing up"), "the HUD names the outside half and the direction: " + b.hud_text().split("\n")[3])
+	var place: String = Palette.info(b.selected_entry(), ship, b.rot)["place"]
+	check(place.contains("outside half 4x2, pointing up"), "the selection card names the outside half and the direction: " + place)
 	b.hover = Wall.out_anchor(0) + Vector2i(0, 2)  # the barrel on the wall itself
 	b._refresh_ghost()
 	eq(b.ghost[0]["reason"], "the barrel must stick out into space", "refused with its reason")
-	check(b.hud_text().contains("can't: the barrel must stick out into space"), "and the HUD says it")
+	check(b.cursor_note()["text"].contains("can't: the barrel must stick out into space"), "and the note at the cursor says it")
 	b.hover = Wall.out_anchor(0)
 	b._refresh_ghost()
 	b._build_key(KEY_R)
