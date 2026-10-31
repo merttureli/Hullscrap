@@ -5,6 +5,8 @@ const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const Cables = preload("res://scripts/ship/cables.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
+const Effects = preload("res://scripts/combat/effects.gd")
+const Content = preload("res://scripts/data/content.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 
 const COMPONENTS := "res://data/components.json"
@@ -283,6 +285,13 @@ func test_weapon_parts_and_weapon_stats_match() -> void:
 			eq(c.def(id)["family"], "weapon", id + " is in the weapon family")
 
 
+func _species_ids() -> Array:
+	var out := []
+	for s in Content.list("species"):
+		out.append(s["id"])
+	return out
+
+
 func test_weapon_stats_use_known_kinds_and_damage_types() -> void:
 	var w := Weapons.new()
 	for id in w.defs:
@@ -297,10 +306,8 @@ func test_weapon_stats_use_known_kinds_and_damage_types() -> void:
 		check(float(d.get("heat_per_shot", 0.0)) >= 0.0, id + " heat_per_shot is not negative")
 		if e.get("kind", "") == "beam":
 			check(float(d["duration"]) > 0.0, id + " beam has a duration")
-		if e.has("effects"):
-			check(e["effects"] is Array and not e["effects"].is_empty(), id + " effects is a list")
-			for tag in e["effects"]:
-				check(tag is String and tag != "", id + " effect tags are names")
+		for problem in Effects.problems(e, _species_ids()):  # effects: old-style tags, or the keys of effects.gd
+			check(false, "%s: %s" % [id, problem])
 
 
 func test_every_ammo_id_is_cargo() -> void:
