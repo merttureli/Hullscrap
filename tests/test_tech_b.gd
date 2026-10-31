@@ -120,7 +120,7 @@ func test_every_weapon_has_the_tier_and_aim_of_the_spec() -> void:
 	for id in table:
 		eq([c.def(id)["tier"], w.defs[id]["kind"], bool(w.defs[id]["turret"])], table[id], id + ": tier, kind, aim")
 		eq(c.def(id)["mount"]["outside"], [4, 2], id + ": a 4x2 outside half like the art")
-		eq(c.def(id)["mount"]["outside_hp"], int(floor(c.def(id)["hp"] * 0.75 + 0.5)), id + ": outside_hp is 75 percent of hp")
+		eq(c.def(id)["mount"]["outside_hp"], 2 * int(c.def(id)["hp"]), id + ": a weapon's outside_hp is twice its hp")
 	eq(w.defs["grundl_slug_mortar"]["ammo"], "scrap", "the Slug Mortar fires scrap")
 	eq(Effects.of(w.defs["grundl_slug_mortar"])["ammo_mult"], 3, "three a shot")
 	eq(Effects.of(w.defs["grundl_barge_flak"])["ammo_mult"], 2, "the Barge Flak spends two")
