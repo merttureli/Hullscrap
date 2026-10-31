@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "emberkin_pyre_lance_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Emberkin Pyre Lance: a brass boiler drum above a firebox whose flames climb with the charge (frame 5 = tall white-tipped flames, strip yellow), power coupling, brass hatch, a pipe to the right. fire: the firebox flashes white and the flames drop. damaged: the boiler seam cracked and weeping steam-fire, two lamps dead; disabled: cold firebox, the drum split, a pipe hanging. Barrel layer emberkin_pyre_lance_barrel: a long slim brass lance with cooling rings, a flared burner nozzle and a pilot flame; fire: a roaring jet.",
+ "offset": [
+  0,
+  -4
+ ]
+}

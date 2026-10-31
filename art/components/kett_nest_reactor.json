@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "kett_nest_reactor_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Kett \"Nest Reactor\" (+1 power per Kett in the room): a round chitin dome of overlapping plates grown over an amber egg-core that pulses (4 frames), six hive cells round the rim that light green in turn, four corner drone bays with a drone in each. Damaged: a dome plate peeled back with light leaking, two rim cells dark, a bay door hanging, the core stutters. Disabled: the plates grey and cracked, the core a dull husk, cells dead, a bay broken."
+}

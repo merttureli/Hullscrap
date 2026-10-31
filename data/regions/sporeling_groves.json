@@ -1,0 +1,25 @@
+{
+	"id": "sporeling_groves",
+	"name": "The Sporeling Groves",
+	"home_species": "sporeling",
+	"faction": "lumen",
+	"stages": [4, 8],
+	"weight": 10,
+	"rarity": "rare",
+	"danger": 1.2,
+	"palette": {"tint": "#b5c96a", "nebula": "lumen"},
+	"map": {},
+	"node_weights": {"wreck_field": 22, "anomaly": 14, "distress": 14, "empty": 14, "pirate": 12, "trader": 10, "asteroid_field": 10, "patrol": 4},
+	"places": [
+		{"id": "mother_grove", "name": "The Mother Grove", "type": "station", "faction": "lumen", "pos": [820, 480], "jitter": 90, "beacon": true}
+	],
+	"debris": {"ice_chunk_s": 1.3, "polymer_barrel": 0.8},
+	"pois": {"wreck": 1.3, "abandoned_station": 1.5},
+	"ambient": {"trader": 3, "pirate": 2, "patrol": 1},
+	"stock": {"oxygen_gen": 90, "oxygen_scrap_mk1": 80, "medbay": 180, "reactor_neon_mk1": 360, "shield_neon_mk1": 340, "bed": 30},
+	"recruit": {"sporeling": 8, "emberkin": 1, "human": 1},
+	"enemies": "wardens",
+	"hazards": ["gas_cloud"],
+	"events": "sporeling_groves",
+	"blurb": "Derelicts gone green: whole hulls of fungus breathing out good air. The Sporelings grew here on the dead, and the Lumen come to study them. Watch your fires; the gardens burn."
+}

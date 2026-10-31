@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "gauntling_arc_hammer_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Gauntling Arc Hammer: three steel capacitor cans with copper bands, exposed contacts between them that spit an arc on the loop, a patched hatch, power coupling and five copper coils that light cyan while charging (frame 5 = ready, green). fire: the coils flash white then go out. damaged: a can dented and arcing to the casing, two coils dead; disabled: a can split, the contacts burnt, wires hanging. Barrel layer gauntling_arc_hammer_barrel: a ram tube with copper windings ending in a battered hammer head with two ball electrodes and an arc between them; fire: the head slams forward and a blue-white flash.",
+ "offset": [
+  0,
+  -4
+ ]
+}

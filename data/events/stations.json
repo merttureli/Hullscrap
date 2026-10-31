@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "station_rusthold_dock_queue", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_rusthold"},
+      "id": "station_rusthold_dock_queue", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
       "text": "The Rusthold's docking tower reads your name off a clipboard, wrongly, and waves you into Bay 4 with a flashlight. A fight is going on in the cargo bay. 'Mind the fight,' says the dockmaster, Hob, from behind a barricade of crates. 'It's mostly over.'",
       "choices": [
         {"text": "Ask what the fight is about.", "outcomes": [
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "id": "station_rusthold_ma_board", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_rusthold"},
+      "id": "station_rusthold_ma_board", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
       "text": "On the dock wall, Ma Gantry's board: a slab of welded plate covered in chalk. WHO OWES, it says, and under that WHAT, and under that WHEN. Your hull is on the list, with a small drawing beside it. In smaller chalk, someone has added: 'Sweet kid. Pays late.'",
       "choices": [
         {"text": "Read the board.", "outcomes": [
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "id": "station_rusthold_scrap_market", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_rusthold"},
+      "id": "station_rusthold_scrap_market", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
       "text": "The scrap market runs three floors and one rumour. A boy tries to sell you your own bolts back. A woman tries to sell you a map of the market. Both, you realise, are correct.",
       "choices": [
         {"text": "Buy the boy's bolts back (5 credits).", "requires": {"credits": 5}, "outcomes": [

@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "mire_wetwell_reactor_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Mire Wetwell Reactor, 4x4: a teal casing round a round water well; the amber core glows under the water, bubbles rise and a steam puff leaves each corner vent in turn (the 4-frame loop), brass hand-wheel valves on the four pipes. Off: the core is dark under still water. Damaged: a feed pipe has burst and jets steam, the casing is cracked and the core stutters. Disabled: the well is drained, the dead core sits dry and cracked, a pipe snapped."
+}

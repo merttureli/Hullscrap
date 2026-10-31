@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "mire_steam_lance_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Mire Steam Lance: a steel boiler with brass bands and a glass sight tube, a teal housing, repair hatch, power coupling and five glass water-gauge tubes that fill while charging (frame 5 = all green = ready); fire: the tubes flash white then empty. damaged: the boiler seam weeps steam, two tubes dead; disabled: boiler split, the sight glass cracked and dry. Barrel layer mire_steam_lance_barrel: a long teal lance tube with brass bands, side steam ports and a brass nozzle; fire: a white steam jet.",
+ "offset": [
+  0,
+  -4
+ ]
+}

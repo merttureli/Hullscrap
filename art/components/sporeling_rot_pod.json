@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "sporeling_rot_pod_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Sporeling Rot Pod: the pod cradle with a feed root to the right (the ammo rack sits beside it), power coupling, repair hatch and five spore sacs. charge: a rot pod rolls in from the root into the cradle (frame 5 = seated and ready); fire: the cradle is empty. damaged: root cracked, sacs withered; disabled: a pod stuck half-way in the root. Barrel layer sporeling_rot_pod_barrel: a cradle of two curved fingers holding a violet rot pod; fire: the pod leaves, a spore puff follows.",
+ "offset": [
+  0,
+  -4
+ ]
+}

@@ -4,7 +4,9 @@ extends RefCounted
 ## minimum spacing, each given a type by weight; then lanes between near neighbours, 2 to 4 per node,
 ## always one connected graph. Everything random comes from the RandomNumberGenerator the caller
 ## passes (the campaign's), so the same seed makes the same map.
-## A node is {id, name, type, place ("" for random nodes), faction, hidden_until, clan, pos}.
+## A node is {id, name, type, place ("" for random nodes), faction, hidden_until, beacon (always on the map), start, clan, pos}.
+## `map.nodes` is the count of nodes in all, or [least, most] to roll it; a region's map (regions.gd) has one node of type
+## `exit`, its exit beacon.
 
 var nodes: Array = []  ## node dictionaries, fixed places first
 var lanes: Array = []  ## [a, b] node ids with a < b
@@ -50,6 +52,14 @@ func start_id() -> String:
 		if n.get("start", false):
 			return n["id"]
 	return nodes[0]["id"] if not nodes.is_empty() else ""
+
+
+## The id of the region's exit beacon (the node of type `exit`), "" when the map has none.
+func exit_id() -> String:
+	for n in nodes:
+		if n["type"] == "exit":
+			return n["id"]
+	return ""
 
 
 ## Is every node reachable from every other along the lanes?
@@ -127,21 +137,22 @@ func _place_nodes(rng: RandomNumberGenerator, cfg: Dictionary) -> void:
 					pos = q
 					break
 		_add({"id": str(p["id"]), "name": str(p["name"]), "type": str(p["type"]), "place": str(p["id"]), "faction": str(p.get("faction", "")),
-			"hidden_until": str(p.get("hidden_until", "")), "start": bool(p.get("start", false)), "clan": false, "pos": pos})
+			"hidden_until": str(p.get("hidden_until", "")), "beacon": bool(p.get("beacon", false)), "start": bool(p.get("start", false)), "clan": false, "pos": pos})
 	var weights: Dictionary = cfg["node_weights"]
 	var keys: Array = weights.keys()
 	keys.sort()
 	var attempts := int(m.get("attempts", 400))
+	var count: int = rng.randi_range(int(m["nodes"][0]), int(m["nodes"][1])) if m["nodes"] is Array else int(m["nodes"])
 	var k := 1
 	var tries := 0
 	var sp := spacing
-	while nodes.size() < int(m["nodes"]):
+	while nodes.size() < count:
 		var q := Vector2(rng.randf_range(margin, size.x - margin), rng.randf_range(margin, size.y - margin))
 		tries += 1
 		if _spaced(q, sp):
 			var type := _roll_type(rng, weights, keys)
 			var clan: bool = type == "trader" and rng.randf() < float(m.get("clan_trader", 0.0))
-			_add({"id": "n%02d" % k, "name": "", "type": type, "place": "", "faction": "", "hidden_until": "", "start": false, "clan": clan, "pos": q})
+			_add({"id": "n%02d" % k, "name": "", "type": type, "place": "", "faction": "", "hidden_until": "", "beacon": false, "start": false, "clan": clan, "pos": q})
 			k += 1
 			tries = 0
 		elif tries >= attempts:  # crowded: relax the spacing (never happens with the shipped numbers)

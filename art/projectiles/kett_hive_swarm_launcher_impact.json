@@ -1,0 +1,40 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   14
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "glow": {
+  "image": "kett_hive_swarm_launcher_impact_glow.png",
+  "frame": [
+   24,
+   24
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    14
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "The swarm lands: a small flash, the drones scatter and burst into specks (4 frames, 16x16)."
+}

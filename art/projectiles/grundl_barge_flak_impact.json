@@ -1,0 +1,20 @@
+{
+ "frame": [20, 20],
+ "anims": {
+  "play": [0, 4, 14]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [10, 10]
+ },
+ "glow": {
+  "image": "grundl_barge_flak_impact_glow.png",
+  "frame": [28, 28],
+  "offset": [-4, -4],
+  "anims": {
+   "play": [0, 4, 14]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "Grundl Barge Flak burst: a dark smoke puff with an orange flash and steel shards flying out (4 frames, 20x20)."
+}

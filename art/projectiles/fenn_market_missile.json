@@ -1,0 +1,81 @@
+{
+ "frame": [
+  7,
+  16
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   14
+  ]
+ },
+ "anchors": {
+  "head": [
+   3,
+   1
+  ],
+  "tail": [
+   3,
+   12
+  ]
+ },
+ "glow": {
+  "image": "fenn_market_missile_glow.png",
+  "frame": [
+   15,
+   24
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    14
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "fenn_market_missile_impact.png",
+  "frame": [
+   16,
+   16
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    12
+   ]
+  },
+  "anchor": [
+   8,
+   8
+  ],
+  "glow": {
+   "image": "fenn_market_missile_impact_glow.png",
+   "frame": [
+    24,
+    24
+   ],
+   "offset": [
+    -4,
+    -4
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     12
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A cheap scrap missile, 7x16: a tin body, a red nose, two crooked fins of mismatched cardboard-brown, a sputtering exhaust (3 frames). 25% of them are duds: stop them early with no impact."
+}

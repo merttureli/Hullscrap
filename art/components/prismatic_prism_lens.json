@@ -1,0 +1,80 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "prismatic_prism_lens_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "fire": [
+    8,
+    2,
+    12
+   ],
+   "damaged": [
+    10,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Prismatic Prism Lens: a big cyan crystal in a violet cradle with light shafts to two small lenses, a steel hatch, power coupling and five crystals that light magenta while charging and cyan-white when ready. fire: the crystals flash white. damaged: the crystal is cracked and flickers, two crystals dark; disabled: the crystal split and dull. Barrel layer prismatic_prism_lens_barrel: a long violet tube with cyan inlays, a focusing lens ring and a glass prism at the tip; fire: a white beam splits into magenta, cyan and yellow at the prism.",
+ "offset": [
+  0,
+  -4
+ ]
+}

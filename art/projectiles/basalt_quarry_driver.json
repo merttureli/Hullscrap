@@ -1,0 +1,81 @@
+{
+ "frame": [
+  10,
+  20
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   10
+  ]
+ },
+ "anchors": {
+  "head": [
+   5,
+   5
+  ],
+  "tail": [
+   5,
+   11
+  ]
+ },
+ "glow": {
+  "image": "basalt_quarry_driver_glow.png",
+  "frame": [
+   18,
+   28
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    10
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "basalt_quarry_driver_impact.png",
+  "frame": [
+   24,
+   24
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    12
+   ]
+  },
+  "anchor": [
+   12,
+   12
+  ],
+  "glow": {
+   "image": "basalt_quarry_driver_impact_glow.png",
+   "frame": [
+    36,
+    36
+   ],
+   "offset": [
+    -6,
+    -6
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     12
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A huge rock slug, 10x20: a dark chipped stone ball with a glowing crack that turns over 3 frames, and a trail of embers. Pierces 3 targets: play the impact at every hit."
+}
