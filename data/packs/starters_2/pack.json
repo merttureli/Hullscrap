@@ -1,0 +1,22 @@
+{
+  "id": "starters_2",
+  "name": "Starter ships, wave 2",
+  "version": "1.0",
+  "requires": [
+    "endings_1",
+    "engines_1",
+    "races_1",
+    "regions_1",
+    "tech_human",
+    "tech_basalt",
+    "tech_emberkin",
+    "tech_fenn",
+    "tech_kett",
+    "tech_mire",
+    "tech_sporeling",
+    "tech_gauntling",
+    "tech_prismatic",
+    "tech_grundl"
+  ],
+  "notes": "The seven event starters (halcyon_tender, kettle_tug, concord_frigate, door_prize, lumen_skiff, hollow_touched, patience_sister: the pending unlocks of endings_1) and two starters for each of the ten races, layouts A and B (docs/CONTENT.md 19): ships/*.json, written by tests/tool_make_starters2.gd, each with a `hangar` field {group, layout, unlock}; unlocks.json holds the 20 race unlocks. Layout A of a race opens in its homeland's dock event, layout B in its tech quest (regions_1 events, an `unlock` effect)."
+}

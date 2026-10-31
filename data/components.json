@@ -1400,10 +1400,9 @@
       "cooling": 3,
       "stats": {
         "belt_speed": 8,
-        "belt_interval": 0.3,
-        "belt_ion_stop": 1
+        "belt_interval": 0.3
       },
-      "quirk": "8 cells a second, one unit every 0.3 s. An ion hit stops it for the ion duration (3 s)."
+      "quirk": "8 cells a second, one unit every 0.3 s. Neon: an ion hit shuts it (and the belt) down twice as long as it does the other drives."
     }
   ]
 }

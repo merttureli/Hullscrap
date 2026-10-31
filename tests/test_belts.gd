@@ -5,6 +5,7 @@ extends "res://tests/base_test.gd"
 const Fx = preload("res://tests/fixture_ammo.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Belts = preload("res://scripts/sim/belts.gd")
+const Abilities = preload("res://scripts/sim/abilities.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
@@ -317,22 +318,22 @@ func test_no_working_drive_means_the_belt_is_stopped() -> void:
 	near(Ammo.drive_speed(ship, d["drive"]), 0.0, "no power, no belt")
 
 
-func test_an_ion_hit_stops_a_mag_rail_for_the_ion_duration_but_not_the_others() -> void:
-	var d := Fx.belts("artemis_mk1", "belt_drive_neon")
-	var ship: Ship = d["ship"]
-	var a := Fx.arena(ship)
-	check(Ammo.drive_speed(ship, d["drive"]) > 0.0, "it runs")
-	Damage.apply(a, 0, Vector2i(14, 19), Damage.solid_at(a.ships[0], Vector2i(14, 19)), 3.0, "ion")
-	near(Ammo.drive_speed(ship, d["drive"]), 0.0, "an ion hit stops it")
-	Fx.stock(ship, d["rack"], "missile", 10)
-	_run(ship, 2.9)
-	eq(ship.belts.units.size() + Ammo.loaded(ship, d["gun"]), 0, "nothing moved for 2.9 s")
-	_run(ship, 0.3)
-	check(Ammo.drive_speed(ship, d["drive"]) > 0.0, "3 s later it runs again")
-	var d2 := Fx.belts("artemis_mk1", "belt_drive_std")
-	var a2 := Fx.arena(d2["ship"])
-	Damage.apply(a2, 0, Vector2i(14, 19), Damage.solid_at(a2.ships[0], Vector2i(14, 19)), 3.0, "ion")
-	check(Ammo.drive_speed(d2["ship"], d2["drive"]) > 0.0, "an Autoloader shrugs it off")
+func test_an_ion_hit_shuts_a_drive_down_and_the_belt_stops_until_it_wears_off() -> void:
+	for id in ["belt_drive_neon", "belt_drive_std"]:
+		var d := Fx.belts("artemis_mk1", id)
+		var ship: Ship = d["ship"]
+		var a := Fx.arena(ship)
+		check(Ammo.drive_speed(ship, d["drive"]) > 0.0, id + " runs")
+		Damage.apply(a, 0, Vector2i(14, 19), Damage.solid_at(a.ships[0], Vector2i(14, 19)), 3.0, "ion")
+		ship.refresh()
+		near(Ammo.drive_speed(ship, d["drive"]), 0.0, id + ": an ion hit shuts it down")
+		Fx.stock(ship, d["rack"], "missile", 10)
+		_run(ship, 1.0)
+		eq(ship.belts.units.size() + Ammo.loaded(ship, d["gun"]), 0, id + ": nothing moves while it is shut down")
+		check(Abilities.ion_left(ship, d["drive"]) >= 3.0, id + ": for the general ion lock (3 s, x2 for the Neon line)")
+		ship.ability_state["ion"].erase(d["drive"])
+		ship.refresh()
+		check(Ammo.drive_speed(ship, d["drive"]) > 0.0, id + ": runs again once it wears off")
 
 
 func test_a_scrap_chain_drive_jams_on_a_malfunction_until_kicked() -> void:

@@ -202,12 +202,13 @@ static func spend(ship, uid: int, item: String, cost: int) -> void:
 
 # --- belts: drives, networks, the feed ----------------------------------------------------------------
 
-## Cells a second belt drive `uid` moves its belt at: 0 when it is not working (not ok, no power, an ion hit).
+## Cells a second belt drive `uid` moves its belt at: 0 when it is not working (not ok, or no power: an ion hit shuts a part
+## down for a few seconds, Abilities.ion_lock, so a drive that was hit stops its belt).
 static func drive_speed(ship, uid: int) -> float:
 	var inst = ship.components.instances.get(uid)
 	if inst == null or inst["status"] != "ok" or not bool(ship.power_state.get("powered", {}).get(uid, false)):
 		return 0.0
-	if float(ship.belts.ion.get(uid, 0.0)) > 0.0 or ship.components.offline_reason(ship.grid, uid) != "":
+	if ship.components.offline_reason(ship.grid, uid) != "":
 		return 0.0
 	return float(ship.components.def(inst["id"]).get("stats", {}).get("belt_speed", 0.0))
 
@@ -270,10 +271,6 @@ static func _slice(ship, h: float) -> void:
 	ship.refresh()
 	var plan: Dictionary = b.analyze(ship)
 	b.clock += h
-	for uid in b.ion.keys():
-		b.ion[uid] = float(b.ion[uid]) - h
-		if b.ion[uid] <= 0.0:
-			b.ion.erase(uid)
 	var speed := {}  # net id -> the best working drive's cells a second
 	var working := {}  # net id -> its working drives
 	for net in plan["nets"]:
@@ -388,13 +385,6 @@ static func cut_near(ship, cell: Vector2i) -> int:
 		if b.cut_cell(cell + d):
 			n += 1
 	return n
-
-
-## An ion hit on part `uid`: a belt drive with stats.belt_ion_stop stops for data/ammo.json ion_stop_s.
-static func ion_hit(ship, uid: int) -> void:
-	var inst = ship.components.instances.get(uid)
-	if inst != null and float(ship.components.def(inst["id"]).get("stats", {}).get("belt_ion_stop", 0.0)) > 0.0:
-		ship.belts.ion[uid] = float(cfg()["ion_stop_s"])
 
 
 # --- the restock job --------------------------------------------------------------------------------

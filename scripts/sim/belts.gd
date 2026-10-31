@@ -19,7 +19,6 @@ var known := false  ## the belt blueprint is learned (with the first belt drive 
 var units: Array = []  ## ammo riding the belts: {item, from (rack uid), to (weapon uid), path (cells, rack side first), p (cells travelled), plan}; not saved
 var clock := 0.0  ## seconds the belts have run
 var drive_free := {}  ## drive uid -> clock at which it may feed its next unit
-var ion := {}  ## drive uid -> seconds an ion hit still stops it
 var learn_wait := 0.0  ## seconds until Ammo.tick next looks for a belt drive aboard (the blueprint)
 var rev := 0  ## bumped by every change to the cells or the cuts
 var plan_id := 0  ## bumped when analyze() builds a new plan
@@ -267,10 +266,9 @@ func load_dict(d: Dictionary) -> String:
 	return ""
 
 
-## Forget the running state (units, feed clocks, ion stops); the layer itself stays.
+## Forget the running state (units, feed clocks); the layer itself stays.
 func reset_run() -> void:
 	units = []
 	clock = 0.0
 	drive_free = {}
-	ion = {}
 	rev += 1

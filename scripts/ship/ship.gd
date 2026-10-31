@@ -125,7 +125,7 @@ func effective(id: String) -> Dictionary:
 
 
 ## Components that are out of action (status is not "ok", or a hull mount whose outside half is
-## disabled or whose link is cut, or a crew ability holds it offline: a hack): uid -> true. They neither make nor use power.
+## disabled or whose link is cut, or a crew ability holds it offline: a hack, or ion does: Abilities.ion_lock): uid -> true. They neither make nor use power.
 func disabled_uids() -> Dictionary:
 	var out := {}
 	var uids := components.instances.keys()
@@ -136,6 +136,8 @@ func disabled_uids() -> Dictionary:
 	for uid in CrewFx.offline(self):
 		if components.instances.has(uid):
 			out[uid] = true
+	for uid in Abilities.ion_locked(self):  # an ion hit shuts a part down for a few seconds
+		out[uid] = true
 	return out
 
 

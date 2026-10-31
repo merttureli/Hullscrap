@@ -4,17 +4,17 @@
       "text": "The Bazaar has no walls, so it has a Gate: a painted line on the deck, a turnstile and a sign reading ADMISSION FREE. EXIT FEE APPLIES. A very small Fenn in a very large hat explains the exit fee, which has three tiers, a surcharge for leaving in a hurry, and a rebate for not leaving at all.",
       "choices": [
         {"text": "Pay the exit fee up front (20 credits).", "requires": {"credits": 20}, "outcomes": [
-          {"weight": 100, "text": "The Fenn stamps your hand and gives you a receipt for a receipt. 'Preferred leaver,' he says. 'Discount on your next exit.' He means it. It is a very good discount, and a pellet of fuel for your trouble.", "effects": {"items": {"credits": -20, "fuel": 1}}}
+          {"weight": 100, "text": "The Fenn stamps your hand and gives you a receipt for a receipt. 'Preferred leaver,' he says. 'Discount on your next exit.' He means it. It is a very good discount, and a pellet of fuel for your trouble.", "effects": {"items": {"credits": -20, "fuel": 1}, "unlock": "ship_fenn_sold_twice"}}
         ]},
         {"text": "Argue that you are not leaving.", "outcomes": [
-          {"weight": 55, "text": "'Then you are staying,' says the Fenn, delighted, and charges a residency fee, but a lower one. The crew spend a pleasant day. You are, technically, a local.", "effects": {"items": {"credits": -10}, "crew_hp": 10}},
-          {"weight": 45, "text": "'Then you are a trespasser,' says the Fenn, equally delighted, and hands you a larger bill.", "effects": {"items": {"credits": -30}}}
+          {"weight": 55, "text": "'Then you are staying,' says the Fenn, delighted, and charges a residency fee, but a lower one. The crew spend a pleasant day. You are, technically, a local.", "effects": {"items": {"credits": -10}, "crew_hp": 10, "unlock": "ship_fenn_sold_twice"}},
+          {"weight": 45, "text": "'Then you are a trespasser,' says the Fenn, equally delighted, and hands you a larger bill.", "effects": {"items": {"credits": -30}, "unlock": "ship_fenn_sold_twice"}}
         ]},
         {"text": "[Fenn] Find a loophole in the fee schedule.", "requires": {"species": "fenn"}, "outcomes": [
-          {"weight": 100, "text": "Your Fenn and the gatekeeper go through the schedule line by line, and find a clause that makes the fee payable in compliments. Your Fenn pays in volume. The gatekeeper is so pleased he adds a rebate.", "effects": {"items": {"credits": 25}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Fenn and the gatekeeper go through the schedule line by line, and find a clause that makes the fee payable in compliments. Your Fenn pays in volume. The gatekeeper is so pleased he adds a rebate.", "effects": {"items": {"credits": 25}, "crew_hp": 5, "unlock": "ship_fenn_sold_twice"}}
         ]},
         {"text": "[Gauntling] Offer an arm as collateral.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling unscrews an arm and hands it over as security. The gatekeeper is moved beyond words, gives you a receipt for the arm, and returns it, newly polished, with a tip.", "effects": {"items": {"credits": 20, "scrap": 10}}}
+          {"weight": 100, "text": "Your Gauntling unscrews an arm and hands it over as security. The gatekeeper is moved beyond words, gives you a receipt for the arm, and returns it, newly polished, with a tip.", "effects": {"items": {"credits": 20, "scrap": 10}, "unlock": "ship_fenn_sold_twice"}}
         ]}
       ]
     },
@@ -148,15 +148,15 @@
       "text": "Dib, the Bazaar's best gunsmith, will part with the Twitch Cannon schematics 'for a consideration'. It is a fast gun that jams; every Fenn knows how to keep it fed. The consideration is a contract. 'Sign here, here and here,' says Dib. 'The usual.' He slides over a pen. The contract is eleven pages.",
       "choices": [
         {"text": "Sign without reading.", "outcomes": [
-          {"weight": 50, "text": "You sign. The consideration is one afternoon cleaning the gunsmith's shop, which you do. The schematics are yours, and the shop has never been so clean.", "effects": {"crew_hp": -5, "flag": "tech_twitch_cannon"}},
-          {"weight": 30, "text": "You sign. The consideration is your second-best boots. Dib wears them out of the room.", "effects": {"items": {"credits": -20}, "flag": "tech_twitch_cannon"}},
+          {"weight": 50, "text": "You sign. The consideration is one afternoon cleaning the gunsmith's shop, which you do. The schematics are yours, and the shop has never been so clean.", "effects": {"crew_hp": -5, "flag": "tech_twitch_cannon", "unlock": "ship_fenn_closing_sale"}},
+          {"weight": 30, "text": "You sign. The consideration is your second-best boots. Dib wears them out of the room.", "effects": {"items": {"credits": -20}, "flag": "tech_twitch_cannon", "unlock": "ship_fenn_closing_sale"}},
           {"weight": 20, "text": "You sign. Page nine says you owe Dib a favour. You do not know what it is. He will tell you later.", "effects": {"flag": ["tech_twitch_cannon", "owes_dib"]}}
         ]},
         {"text": "[Fenn] Read the contract.", "requires": {"species": "fenn"}, "outcomes": [
-          {"weight": 100, "text": "Your Fenn reads all eleven pages in the time it takes Dib to pour a drink, and finds the clause on page six: the consideration is a joke. 'Good,' says Dib, delighted. 'Nobody reads the joke.' He hands over the schematics and a discount on his future inventions.", "effects": {"items": {"credits": 40, "copper": 10}, "flag": "tech_twitch_cannon"}}
+          {"weight": 100, "text": "Your Fenn reads all eleven pages in the time it takes Dib to pour a drink, and finds the clause on page six: the consideration is a joke. 'Good,' says Dib, delighted. 'Nobody reads the joke.' He hands over the schematics and a discount on his future inventions.", "effects": {"items": {"credits": 40, "copper": 10}, "flag": "tech_twitch_cannon", "unlock": "ship_fenn_closing_sale"}}
         ]},
         {"text": "[Tinkerer] Read the gun instead.", "requires": {"trait": "tinkerer"}, "outcomes": [
-          {"weight": 100, "text": "Your tinkerer ignores the contract, takes the Cannon apart on Dib's bench, and puts it back together faster. Dib is outraged and impressed and tears the contract up. 'Take it,' he says. 'You have earned it.'", "effects": {"flag": "tech_twitch_cannon"}}
+          {"weight": 100, "text": "Your tinkerer ignores the contract, takes the Cannon apart on Dib's bench, and puts it back together faster. Dib is outraged and impressed and tears the contract up. 'Take it,' he says. 'You have earned it.'", "effects": {"flag": "tech_twitch_cannon", "unlock": "ship_fenn_closing_sale"}}
         ]},
         {"text": "Ask for a copy of the contract first.", "outcomes": [
           {"weight": 100, "text": "Dib presents you with a copy. It is also eleven pages. You politely decline.", "effects": {}}

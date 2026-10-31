@@ -4,23 +4,23 @@
       "text": "Ring Three Dock has a queue of four hundred for ration tickets and a second queue, shorter and angrier, for people who want to complain about the first. A sign over both says THE QUEUE IS FAIR. Someone has crossed out FAIR and written LONG, and someone else has crossed out LONG and written MINE.",
       "choices": [
         {"text": "Take a ticket and wait your turn.", "outcomes": [
-          {"weight": 70, "text": "Four hours later you are served by a clerk who apologises for the wait, the queue and the weather. The crew nap in line, shoulder to shoulder, in the best rest they have had all month.", "effects": {"crew_hp": 10}},
-          {"weight": 30, "text": "Four hours in, the clerk goes to lunch. The line takes it like weather. You come away with rations and a ten-credit queue levy, which nobody can explain.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+          {"weight": 70, "text": "Four hours later you are served by a clerk who apologises for the wait, the queue and the weather. The crew nap in line, shoulder to shoulder, in the best rest they have had all month.", "effects": {"crew_hp": 10, "unlock": "ship_human_ring_runner"}},
+          {"weight": 30, "text": "Four hours in, the clerk goes to lunch. The line takes it like weather. You come away with rations and a ten-credit queue levy, which nobody can explain.", "effects": {"items": {"credits": -10}, "crew_hp": 5, "unlock": "ship_human_ring_runner"}}
         ]},
         {"text": "Skip the queue (30 credits).", "requires": {"credits": 30}, "outcomes": [
-          {"weight": 80, "text": "Pell the dispatcher waves you through a side door with the face of a man who disapproves of himself. The queue watches you go. Nobody says a word. It is the loudest nothing you have ever heard.", "effects": {"items": {"credits": -30}, "crew_hp": 10}},
-          {"weight": 20, "text": "Pell takes the thirty and the queue notices. A man in a cardigan climbs on a crate and begins a speech. You leave during the part about principle.", "effects": {"items": {"credits": -30}, "rep": {"concord": -1}, "crew_hp": 5}}
+          {"weight": 80, "text": "Pell the dispatcher waves you through a side door with the face of a man who disapproves of himself. The queue watches you go. Nobody says a word. It is the loudest nothing you have ever heard.", "effects": {"items": {"credits": -30}, "crew_hp": 10, "unlock": "ship_human_ring_runner"}},
+          {"weight": 20, "text": "Pell takes the thirty and the queue notices. A man in a cardigan climbs on a crate and begins a speech. You leave during the part about principle.", "effects": {"items": {"credits": -30}, "rep": {"concord": -1}, "crew_hp": 5, "unlock": "ship_human_ring_runner"}}
         ]},
         {"text": "[Human] Complain about the queue. Properly, with citations.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 75, "text": "You raise the queue's three faults, in order, with the bylaw each one breaks. The line goes quiet the way a church does. By the hour's end the queue has a second window and you have a standing ovation and a ration voucher.", "effects": {"items": {"credits": 25}, "rep": {"concord": 1}, "crew_hp": 5}},
-          {"weight": 25, "text": "Your complaint is so good the queue adopts it as a motion. You are elected chair of the subcommittee on queues. You resign instantly, to applause, and leave with the vouchers.", "effects": {"items": {"credits": 15}, "crew_hp": 5}}
+          {"weight": 75, "text": "You raise the queue's three faults, in order, with the bylaw each one breaks. The line goes quiet the way a church does. By the hour's end the queue has a second window and you have a standing ovation and a ration voucher.", "effects": {"items": {"credits": 25}, "rep": {"concord": 1}, "crew_hp": 5, "unlock": "ship_human_ring_runner"}},
+          {"weight": 25, "text": "Your complaint is so good the queue adopts it as a motion. You are elected chair of the subcommittee on queues. You resign instantly, to applause, and leave with the vouchers.", "effects": {"items": {"credits": 15}, "crew_hp": 5, "unlock": "ship_human_ring_runner"}}
         ]},
         {"text": "[Fenn] Sell your place in the queue to the highest bidder.", "requires": {"species": "fenn"}, "outcomes": [
-          {"weight": 85, "text": "Your Fenn has been in line eleven minutes and has already sold their spot twice, and the second buyer's spot to a third. By the time the first buyer notices, your Fenn is on the dock with a profit and a clean conscience.", "effects": {"items": {"credits": 40}}},
-          {"weight": 15, "text": "The third buyer is Pell's mother. Your Fenn returns with ten credits, a bruise and a lecture.", "effects": {"items": {"credits": 10}, "crew_hp": -5}}
+          {"weight": 85, "text": "Your Fenn has been in line eleven minutes and has already sold their spot twice, and the second buyer's spot to a third. By the time the first buyer notices, your Fenn is on the dock with a profit and a clean conscience.", "effects": {"items": {"credits": 40}, "unlock": "ship_human_ring_runner"}},
+          {"weight": 15, "text": "The third buyer is Pell's mother. Your Fenn returns with ten credits, a bruise and a lecture.", "effects": {"items": {"credits": 10}, "crew_hp": -5, "unlock": "ship_human_ring_runner"}}
         ]},
         {"text": "Leave before the queue notices you.", "outcomes": [
-          {"weight": 100, "text": "The queue notices you anyway. It watches you leave with real sorrow.", "effects": {}}
+          {"weight": 100, "text": "The queue notices you anyway. It watches you leave with real sorrow.", "effects": {"unlock": "ship_human_ring_runner"}}
         ]}
       ]
     },
@@ -207,15 +207,15 @@
       "text": "Quartermaster Ivey of the Core Militia keeps the Core's only Flak Screen test range on a rock nobody wanted. 'The clans fire missiles at each other and miss,' she says, handing you tea the colour of rust. 'So we built a Screen that shoots them down. It works. I need someone to prove it to the committee, in person, at speed. We have a Volley Rack too, but nobody tests that for free.'",
       "choices": [
         {"text": "Fly the drill. Be the target.", "outcomes": [
-          {"weight": 55, "text": "You fly the range with six dummy missiles on your tail, and the Screen shoots down every one. The committee watches through a telescope and approves the Flak Screen unanimously. Ivey hands you the schematics in a biscuit tin.", "effects": {"items": {"credits": 40, "missile": 2}, "flag": "tech_flak_screen"}},
-          {"weight": 30, "text": "Five of six. The sixth finds your tail and sets off a firework. Ivey writes it down as acceptable, and gives you the biscuit tin anyway.", "effects": {"items": {"credits": 30}, "hull": -5, "flag": "tech_flak_screen"}},
-          {"weight": 15, "text": "The Screen shoots down all six, plus your radio antenna, plus the committee's telescope. 'Two out of three,' says Ivey. The tin is yours.", "effects": {"items": {"credits": 20, "scrap": 30}, "hull": -5, "flag": "tech_flak_screen"}}
+          {"weight": 55, "text": "You fly the range with six dummy missiles on your tail, and the Screen shoots down every one. The committee watches through a telescope and approves the Flak Screen unanimously. Ivey hands you the schematics in a biscuit tin.", "effects": {"items": {"credits": 40, "missile": 2}, "flag": "tech_flak_screen", "unlock": "ship_human_formal_complaint"}},
+          {"weight": 30, "text": "Five of six. The sixth finds your tail and sets off a firework. Ivey writes it down as acceptable, and gives you the biscuit tin anyway.", "effects": {"items": {"credits": 30}, "hull": -5, "flag": "tech_flak_screen", "unlock": "ship_human_formal_complaint"}},
+          {"weight": 15, "text": "The Screen shoots down all six, plus your radio antenna, plus the committee's telescope. 'Two out of three,' says Ivey. The tin is yours.", "effects": {"items": {"credits": 20, "scrap": 30}, "hull": -5, "flag": "tech_flak_screen", "unlock": "ship_human_formal_complaint"}}
         ]},
         {"text": "[Quick hands] Retune the Screen's tracker before the drill.", "requires": {"trait": "fast_repair"}, "outcomes": [
-          {"weight": 100, "text": "Your engineer lays a hand on the targeting rig, moves one wire, and the Screen tracks like a hawk. The test is a formality. Ivey gives you the schematics and, unasked, the spare parts.", "effects": {"items": {"titanium": 6, "copper": 12}, "flag": "tech_flak_screen"}}
+          {"weight": 100, "text": "Your engineer lays a hand on the targeting rig, moves one wire, and the Screen tracks like a hawk. The test is a formality. Ivey gives you the schematics and, unasked, the spare parts.", "effects": {"items": {"titanium": 6, "copper": 12}, "flag": "tech_flak_screen", "unlock": "ship_human_formal_complaint"}}
         ]},
         {"text": "[Gauntling] Plug your Gauntling into the targeting loop.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling plugs a cable into the loop and is, for twelve minutes, the Screen. Every missile dies. 'That felt amazing,' says the Gauntling. 'Do it again.' Ivey writes this down under testimonials and hands over the schematics.", "effects": {"items": {"credits": 40, "copper": 10}, "flag": "tech_flak_screen"}}
+          {"weight": 100, "text": "Your Gauntling plugs a cable into the loop and is, for twelve minutes, the Screen. Every missile dies. 'That felt amazing,' says the Gauntling. 'Do it again.' Ivey writes this down under testimonials and hands over the schematics.", "effects": {"items": {"credits": 40, "copper": 10}, "flag": "tech_flak_screen", "unlock": "ship_human_formal_complaint"}}
         ]},
         {"text": "Say you will come back when the range is quieter.", "outcomes": [
           {"weight": 100, "text": "'It is never quieter,' says Ivey, and tops up your mug. 'But come when you can.'", "effects": {}}

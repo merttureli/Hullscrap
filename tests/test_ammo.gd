@@ -45,7 +45,6 @@ func test_the_rack_and_the_three_drives_are_in_the_data() -> void:
 		eq(ship.effective(id)["power"] < 0, true, id + " draws power")
 		check(not ship.crafting.is_known(id), id + " is not a starting blueprint")
 	near(float(ship.effective("belt_drive_std")["power"]), -1.0, "the Autoloader draws 1")
-	eq(Ammo.cfg()["ion_stop_s"], 3.0, "the ion stop is the shields' ion lock")
 	check(Ammo.explosive("missile") and not Ammo.explosive("scrap"), "missiles explode, scrap does not")
 
 

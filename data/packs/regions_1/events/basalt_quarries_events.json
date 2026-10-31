@@ -4,18 +4,18 @@
       "text": "The Quarry dock is staffed by one Basalt called Marl, who has been saying 'welcome' since you were on approach. He is about to finish. The word is nine syllables long and every one is meant. A sign beside him reads: PLEASE ALLOW TIME FOR HELLO.",
       "choices": [
         {"text": "Wait for the whole greeting.", "outcomes": [
-          {"weight": 80, "text": "Marl finishes, three minutes later, and the effect is odd: you feel welcomed in a way you have not felt anywhere in the Drift. The crew stand a little straighter. He offers a bowl of warm grit, which is a joke, mostly.", "effects": {"crew_hp": 10}},
-          {"weight": 20, "text": "Marl finishes, and begins the second greeting. There are four. By the end you are all friends, and half an hour older.", "effects": {"items": {"credits": 10}, "crew_hp": 5}}
+          {"weight": 80, "text": "Marl finishes, three minutes later, and the effect is odd: you feel welcomed in a way you have not felt anywhere in the Drift. The crew stand a little straighter. He offers a bowl of warm grit, which is a joke, mostly.", "effects": {"crew_hp": 10, "unlock": "ship_basalt_deepcut"}},
+          {"weight": 20, "text": "Marl finishes, and begins the second greeting. There are four. By the end you are all friends, and half an hour older.", "effects": {"items": {"credits": 10}, "crew_hp": 5, "unlock": "ship_basalt_deepcut"}}
         ]},
         {"text": "Hurry him along.", "outcomes": [
-          {"weight": 100, "text": "'Hurry,' says Marl, trying the word as if it were an unfamiliar tool. He nods slowly and says nothing for so long that you leave.", "effects": {"rep": {"clans": -1}}}
+          {"weight": 100, "text": "'Hurry,' says Marl, trying the word as if it were an unfamiliar tool. He nods slowly and says nothing for so long that you leave.", "effects": {"rep": {"clans": -1}, "unlock": "ship_basalt_deepcut"}}
         ]},
         {"text": "[Basalt] Answer in the slow tongue.", "requires": {"species": "basalt"}, "outcomes": [
-          {"weight": 100, "text": "Your Basalt and Marl stand facing each other for most of an hour, saying almost nothing. At the end they touch palms. 'He says you may take what you need from the yard,' says your Basalt. The yard is full.", "effects": {"items": {"scrap": 40, "silicon": 6}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Basalt and Marl stand facing each other for most of an hour, saying almost nothing. At the end they touch palms. 'He says you may take what you need from the yard,' says your Basalt. The yard is full.", "effects": {"items": {"scrap": 40, "silicon": 6}, "crew_hp": 5, "unlock": "ship_basalt_deepcut"}}
         ]},
         {"text": "[Fenn] Say it fast, then say it again slowly.", "requires": {"species": "fenn"}, "outcomes": [
-          {"weight": 70, "text": "Your Fenn gabbles the greeting back at four times speed, then repeats it slowly, with feeling. Marl considers this for a minute and declares it 'a very small version of a very good greeting', which from a Basalt is a compliment.", "effects": {"items": {"credits": 10}, "crew_hp": 5}},
-          {"weight": 30, "text": "Marl takes the fast version as an insult and the slow one as a threat. You are asked to wait outside.", "effects": {"rep": {"clans": -1}}}
+          {"weight": 70, "text": "Your Fenn gabbles the greeting back at four times speed, then repeats it slowly, with feeling. Marl considers this for a minute and declares it 'a very small version of a very good greeting', which from a Basalt is a compliment.", "effects": {"items": {"credits": 10}, "crew_hp": 5, "unlock": "ship_basalt_deepcut"}},
+          {"weight": 30, "text": "Marl takes the fast version as an insult and the slow one as a threat. You are asked to wait outside.", "effects": {"rep": {"clans": -1}, "unlock": "ship_basalt_deepcut"}}
         ]}
       ]
     },
@@ -140,15 +140,15 @@
       "text": "Old Schist keeps a Magma Spitter in a locked bay: a cutting gun that throws slag, with a breech room that loses a third of its air with every shot. 'Built for ones who do not breathe,' he says. 'It has waited for someone who can sit through a settling without speaking. Can you?' He sits down. He appears to be asking you to sit too.",
       "choices": [
         {"text": "Sit with him for a settling.", "outcomes": [
-          {"weight": 50, "text": "You sit. Nothing happens for six hours, in the best way. When Schist finally stirs he says one word, 'Yes,' and hands you the Spitter's schematics on a slab of slate.", "effects": {"items": {"silicon": 8}, "crew_hp": 10, "flag": "tech_magma_spitter"}},
-          {"weight": 30, "text": "Three hours in, the crew's fidgeting sounds like a band of mice. Schist does not move. At hour six he says 'Almost.' He gives you the slate anyway, with a look.", "effects": {"items": {"silicon": 5}, "flag": "tech_magma_spitter"}},
+          {"weight": 50, "text": "You sit. Nothing happens for six hours, in the best way. When Schist finally stirs he says one word, 'Yes,' and hands you the Spitter's schematics on a slab of slate.", "effects": {"items": {"silicon": 8}, "crew_hp": 10, "flag": "tech_magma_spitter", "unlock": "ship_basalt_long_quiet"}},
+          {"weight": 30, "text": "Three hours in, the crew's fidgeting sounds like a band of mice. Schist does not move. At hour six he says 'Almost.' He gives you the slate anyway, with a look.", "effects": {"items": {"silicon": 5}, "flag": "tech_magma_spitter", "unlock": "ship_basalt_long_quiet"}},
           {"weight": 20, "text": "You break at hour two. Schist opens one eye and says 'Come again.' The bay stays locked.", "effects": {}}
         ]},
         {"text": "[Basalt] Sit with him, properly.", "requires": {"species": "basalt"}, "outcomes": [
-          {"weight": 100, "text": "Your Basalt sits down across from Schist and says nothing for nine hours. Then both stand, as one. 'Good silence,' says Schist. He gives your Basalt the Spitter's schematics, a bag of slag-glass, and a look of fond hope that they will come back.", "effects": {"items": {"silicon": 10, "titanium": 5}, "rep": {"clans": 1}, "flag": "tech_magma_spitter"}}
+          {"weight": 100, "text": "Your Basalt sits down across from Schist and says nothing for nine hours. Then both stand, as one. 'Good silence,' says Schist. He gives your Basalt the Spitter's schematics, a bag of slag-glass, and a look of fond hope that they will come back.", "effects": {"items": {"silicon": 10, "titanium": 5}, "rep": {"clans": 1}, "flag": "tech_magma_spitter", "unlock": "ship_basalt_long_quiet"}}
         ]},
         {"text": "[Fenn] Try to sit still. Fenn have never managed it.", "requires": {"species": "fenn"}, "outcomes": [
-          {"weight": 55, "text": "Your Fenn sits for fourteen minutes, a Fenn record, then recites the entire cargo manifest in one breath. Schist, delighted by the sheer noise, hands over the schematics for the novelty.", "effects": {"items": {"credits": 20}, "flag": "tech_magma_spitter"}},
+          {"weight": 55, "text": "Your Fenn sits for fourteen minutes, a Fenn record, then recites the entire cargo manifest in one breath. Schist, delighted by the sheer noise, hands over the schematics for the novelty.", "effects": {"items": {"credits": 20}, "flag": "tech_magma_spitter", "unlock": "ship_basalt_long_quiet"}},
           {"weight": 45, "text": "Your Fenn lasts four minutes, then asks Schist if he would like to buy a clock. The bay stays locked.", "effects": {}}
         ]},
         {"text": "Say you will come back when you have rested.", "outcomes": [

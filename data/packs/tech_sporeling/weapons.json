@@ -1,7 +1,7 @@
 {
 "weapons": {
 	"sporeling_spore_cannon": {"kind": "bolt", "damage_type": "kinetic", "damage": 2, "cooldown": 1.8, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 600, "effects": {"spores": {"o2_drain": 0.06, "seconds": 8}, "self_room": {"o2_drain": 0.03}}, "turret": false, "gimbal": 5},
-	"sporeling_rot_pod": {"kind": "missile", "damage_type": "explosive", "damage": 2, "cooldown": 4.5, "range": 1100, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 280, "turn": 1.2, "splash": 1, "pass_shields": true, "ammo": "missile", "effects": {"acid": {"dps": 0.75, "seconds": 8}, "self_room": {"o2_drain": 0.02}}, "turret": false, "gimbal": 5},
+	"sporeling_rot_pod": {"kind": "missile", "damage_type": "explosive", "damage": 2, "cooldown": 4.5, "range": 1100, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 280, "turn": 1.2, "splash": 1, "pass_shields": true, "ammo": "missile", "effects": {"acid": {"dps": 0.75, "seconds": 8, "spread": 0.3}, "self_room": {"o2_drain": 0.02}}, "turret": false, "gimbal": 5},
 	"sporeling_pollen_turret": {"kind": "bolt", "damage_type": "kinetic", "damage": 1, "cooldown": 3.5, "range": 700, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 500, "effects": {"sonic": {"stun_s": 3.0}, "self_room": {"o2_drain": 0.05}}, "turret": true, "gimbal": 0, "arc": 270, "track": 100, "accuracy": 0.8}
 }
 }
