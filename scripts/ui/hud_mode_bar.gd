@@ -17,7 +17,7 @@ const MODES: Array = [
 const BTN_W := 112.0
 const BTN_W_COMPACT := 56.0
 const GAP := 6.0
-const PAD := 6.0
+const PAD := 8.0
 const ICON := 24.0
 
 var hud: Control
@@ -72,7 +72,7 @@ func _gui_input(e: InputEvent) -> void:
 func _draw() -> void:
 	if hud == null or hud.build == null:
 		return
-	UiKit.panel(self, Rect2(Vector2.ZERO, size))
+	UiKit.bar(self, Rect2(Vector2.ZERO, size))
 	var lit: String = hud.active_mode()
 	for i in MODES.size():
 		var m: Dictionary = MODES[i]

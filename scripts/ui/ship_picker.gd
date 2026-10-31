@@ -22,7 +22,7 @@ const CELL_PX := 32.0  ## the build view's cell size, for fitting the camera to 
 ## the sides. A chosen ship is fitted in the space between them.
 const HUD_TOP := 48.0
 const HUD_BOTTOM := 120.0
-const HUD_SIDE := 356.0
+const HUD_SIDE := 376.0
 const CARD := Vector2(300.0, 390.0)
 const GAP := 18.0
 const PAD := 22.0

@@ -1,10 +1,10 @@
 extends RefCounted
-## The game's UI skin (docs/ART_STYLE.md "UI"): panels, insets, cards, tabs, buttons and icons, drawn on any
-## CanvasItem from its _draw. Each piece first looks for the pixel UI kit in art/ui/ (a 9-slice PNG with a JSON
-## giving its margins, icons as single PNGs or as named frames of an icon sheet) and draws the flat code
-## version in the same palette when it is not there, so the kit can land one file at a time. Static, drawing only.
-## 9-slices: art/ui/<name>.png + <name>.json {"margins": [left, top, right, bottom]} (or "margin": n), drawn at
-## 2 screen px per source px. Icons: art/ui/icons/<id>.png, or the frame named <id> of an ICON_SHEETS sheet.
+## The game's UI skin (docs/ART_STYLE.md "UI"): panels, bars, insets, cards, tabs, buttons, tooltips and icons, drawn
+## on any CanvasItem from its _draw. Each piece first looks for the pixel UI kit in art/ui/ (art/_src/ui_kit.py: a
+## sheet per piece whose frames are its states, e.g. button normal/hover/pressed, card scrap/steel/neon/gold, with
+## the 9-slice margins in its JSON's "nine_slice"; the icons are named frames of icons_res, icons_mode and icons_cat)
+## and draws a flat code version in the same palette when it is not there. The kit is drawn at PX screen px per
+## source px. Static, drawing only.
 
 const Art = preload("res://scripts/view/art.gd")
 
@@ -24,15 +24,17 @@ const SHIELD := Color("#4fa3ff")
 const O2_LOW := Color("#e88aa0")
 ## Card borders by line (docs/ART_STYLE.md lines): scrap rust, standard steel, neon cyan, unique gold.
 const LINE_COLORS := {"scrap": Color("#9c5a33"), "standard": Color("#8d9aab"), "neon": Color("#3cf2ff"), "unique": Color("#f2c14e")}
+const CARD_FRAMES := {"scrap": "scrap", "standard": "steel", "neon": "neon", "unique": "gold"}  ## line -> frame of the kit's card sheet
 const PX := 2.0  ## screen px per source px of the kit
-const ICON_SHEETS: Array[String] = ["icons", "icons_resources", "icons_modes", "icons_categories", "resource_icons", "mode_icons", "category_icons"]
+const ICON_SHEETS: Array[String] = ["icons_res", "icons_mode", "icons_cat"]
 const MATERIAL_COLORS := {"scrap": Color("#9aa0a6"), "copper": Color("#d98a4e"), "polymer": Color("#e8e1c8"), "titanium": Color("#b9c6d6"),
 	"silicon": Color("#6c7a89"), "crystal": Color("#7fdbff"), "plasma_cell": Color("#ff7ae0"), "nanite_paste": Color("#7dff9b"),
 	"credits": Color("#e1a136"), "fuel": Color("#ff8a1e"), "missile": Color("#c9ced6")}
 
-static var _nine := {}  # name -> StyleBoxTexture or null
+static var _nine := {}  # "sheet:frame" -> StyleBoxTexture, or null when the kit has no such frame
 static var _icons := {}  # id -> [texture, region] or null
-static var _sheets := {}  # icon sheet name -> SpriteSheet or null
+static var _sheets := {}  # kit sheet name -> SpriteSheet or null
+static var _cursors := {}  # cursor name -> [ImageTexture, hotspot] or null
 static var _bold: Font
 
 
@@ -94,29 +96,46 @@ static func wrap(s: String, width: float, size: int, f: Font = null, sep := " ")
 
 # --- frames -------------------------------------------------------------------------------------------------------
 
-## The kit's 9-slice `name`, or null when it has not landed.
-static func nine_slice(name: String) -> StyleBoxTexture:
-	if _nine.has(name):
-		return _nine[name]
+## The kit's sheet `name` (art/ui/<name>.png + .json), or null.
+static func kit(name: String) -> RefCounted:
+	if not _sheets.has(name):
+		_sheets[name] = Art.load_sheet("%s/ui/%s" % [Art.root, name])
+	return _sheets[name]
+
+
+## Forget the kit (tests point Art.root elsewhere).
+static func clear_cache() -> void:
+	_nine.clear()
+	_icons.clear()
+	_sheets.clear()
+	_cursors.clear()
+
+
+## The 9-slice of frame `frame` of the kit's sheet `name`, or null when it has not landed.
+static func nine_slice(name: String, frame := "normal") -> StyleBoxTexture:
+	var key := name + ":" + frame
+	if _nine.has(key):
+		return _nine[key]
 	var sb: StyleBoxTexture = null
-	var img := Art.load_image("%s/ui/%s.png" % [Art.root, name])
-	if img != null:
-		var d := Art.read_json("%s/ui/%s.json" % [Art.root, name])
-		var m = d.get("margins", d.get("margin", 4))
-		var mm: Array = m if m is Array and m.size() == 4 else [m, m, m, m]
+	var s = kit(name)
+	var ns = s.meta.get("nine_slice") if s != null else null
+	if ns is Dictionary and s.has_anim(frame):
+		var m = ns.get("margins", {})
+		var mm: Array = [m.get("left", 4), m.get("top", 4), m.get("right", 4), m.get("bottom", 4)] if m is Dictionary else [4, 4, 4, 4]
 		sb = StyleBoxTexture.new()
-		sb.texture = ImageTexture.create_from_image(img)
+		sb.texture = s.texture
+		sb.region_rect = s.region(s.start_of(frame))
 		sb.texture_margin_left = float(mm[0])
 		sb.texture_margin_top = float(mm[1])
 		sb.texture_margin_right = float(mm[2])
 		sb.texture_margin_bottom = float(mm[3])
-	_nine[name] = sb
+	_nine[key] = sb
 	return sb
 
 
-## Draw the kit's 9-slice `name` over `r` (true), or nothing when it is not there (false).
-static func nine(cv: CanvasItem, name: String, r: Rect2, mod := Color.WHITE) -> bool:
-	var sb := nine_slice(name)
+## Draw frame `frame` of the kit's 9-slice `name` over `r` (true), or nothing when it is not there (false).
+static func nine(cv: CanvasItem, name: String, r: Rect2, frame := "normal", mod := Color.WHITE) -> bool:
+	var sb := nine_slice(name, frame)
 	if sb == null:
 		return false
 	sb.modulate_color = mod
@@ -126,9 +145,9 @@ static func nine(cv: CanvasItem, name: String, r: Rect2, mod := Color.WHITE) -> 
 	return true
 
 
-## A chunky panel: slate fill, 2 px light border, a 1 px inner highlight and rivets in the corners.
+## A chunky window (the palette, the card): slate fill, 2 px light border, a 1 px inner highlight, rivets in the corners.
 static func panel(cv: CanvasItem, r: Rect2, alpha := 0.95) -> void:
-	if nine(cv, "panel", r, Color(1, 1, 1, alpha)):
+	if nine(cv, "panel", r, "normal", Color(1, 1, 1, alpha)):
 		return
 	cv.draw_rect(r, Color(PANEL_BG, alpha))
 	cv.draw_rect(r.grow(-1), EDGE, false, 2.0)
@@ -138,7 +157,27 @@ static func panel(cv: CanvasItem, r: Rect2, alpha := 0.95) -> void:
 		cv.draw_rect(Rect2(c, Vector2(2, 2)), EDGE_DIM)
 
 
-## A sunken well (a list, a portrait).
+## The thin HUD frame (the top bar, the mode bar, the log, the hints).
+static func bar(cv: CanvasItem, r: Rect2, alpha := 0.95) -> void:
+	if nine(cv, "bar", r, "normal", Color(1, 1, 1, alpha)):
+		return
+	cv.draw_rect(r, Color(PANEL_BG, alpha))
+	cv.draw_rect(r.grow(-1), EDGE_DIM.lightened(0.25), false, 2.0)
+	cv.draw_line(r.position + Vector2(3, 3), Vector2(r.end.x - 3, r.position.y + 3), HIGHLIGHT, 1.0)
+
+
+## A header strip with `title` on it.
+static func title_bar(cv: CanvasItem, r: Rect2, title: String, size := 14) -> void:
+	var x := 10.0
+	if nine(cv, "titlebar", r):
+		x = 14.0 * PX
+	else:
+		cv.draw_rect(r, ROW_BG)
+		cv.draw_rect(Rect2(r.position, Vector2(4, r.size.y)), AMBER)
+	text(cv, title, Vector2(r.position.x + x, r.get_center().y + size * 0.36), size, TEXT, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - x - 6.0, bold())
+
+
+## A sunken well (a list, a picture).
 static func inset(cv: CanvasItem, r: Rect2) -> void:
 	if nine(cv, "inset", r):
 		return
@@ -147,13 +186,24 @@ static func inset(cv: CanvasItem, r: Rect2) -> void:
 	cv.draw_line(r.position, Vector2(r.end.x, r.position.y), SHADE, 1.0)
 
 
-## A palette card: the line's border, lit when `hover`, an amber frame when `selected`.
+## A floating note (the cursor note, a tooltip), its rim in `edge` when the kit is not there.
+static func tooltip(cv: CanvasItem, r: Rect2, edge: Color) -> void:
+	if not nine(cv, "tooltip", r):
+		cv.draw_rect(r, Color(PANEL_BG, 0.96))
+		cv.draw_rect(r, edge, false, 1.0)
+
+
+## A palette card: the line's frame, lit when `hover`, framed in amber when `selected`.
 static func card(cv: CanvasItem, r: Rect2, line: String, selected: bool, hover: bool) -> void:
 	var edge: Color = LINE_COLORS.get(line, LINE_COLORS["standard"])
-	if not nine(cv, "card_" + line, r, Color(1.15, 1.15, 1.15) if hover else Color.WHITE):
-		cv.draw_rect(r, ROW_BG.lightened(0.08) if hover else ROW_BG)
-		cv.draw_rect(r.grow(-1), edge, false, 2.0)
-		cv.draw_line(r.position + Vector2(2, 2), Vector2(r.end.x - 2, r.position.y + 2), HIGHLIGHT, 1.0)
+	if nine(cv, "card", r, CARD_FRAMES.get(line, "steel")):
+		var hl := "selected" if selected else ("hover" if hover else "")
+		if hl != "":
+			nine(cv, "highlight", r.grow(2.0 * PX), hl)
+		return
+	cv.draw_rect(r, ROW_BG.lightened(0.08) if hover else ROW_BG)
+	cv.draw_rect(r.grow(-1), edge, false, 2.0)
+	cv.draw_line(r.position + Vector2(2, 2), Vector2(r.end.x - 2, r.position.y + 2), HIGHLIGHT, 1.0)
 	if selected:
 		cv.draw_rect(r.grow(1), AMBER, false, 2.0)
 		cv.draw_rect(r.grow(3), Color(AMBER, 0.3), false, 2.0)
@@ -161,7 +211,7 @@ static func card(cv: CanvasItem, r: Rect2, line: String, selected: bool, hover: 
 
 ## A category tab: raised and lit when `on`.
 static func tab(cv: CanvasItem, r: Rect2, on: bool, hover: bool) -> void:
-	if nine(cv, "tab_on" if on else "tab_off", r, Color(1.15, 1.15, 1.15) if hover and not on else Color.WHITE):
+	if nine(cv, "tab", r, "on" if on else "off", Color(1.2, 1.2, 1.2) if hover and not on else Color.WHITE):
 		return
 	cv.draw_rect(r, ROW_BG.lightened(0.12) if on else (ROW_BG.lightened(0.05) if hover else INSET_BG))
 	cv.draw_rect(r, AMBER if on else EDGE_DIM, false, 2.0 if on else 1.0)
@@ -169,17 +219,27 @@ static func tab(cv: CanvasItem, r: Rect2, on: bool, hover: bool) -> void:
 		cv.draw_line(Vector2(r.position.x + 2, r.end.y - 2), Vector2(r.end.x - 2, r.end.y - 2), AMBER, 2.0)
 
 
-## A button: `lit` (the active mode) in amber, `hover` lighter.
-static func button(cv: CanvasItem, r: Rect2, lit: bool, hover: bool, pressed := false) -> void:
-	var name := "button_pressed" if pressed or lit else ("button_hover" if hover else "button_normal")
-	if nine(cv, name, r, Color(1.0, 0.85, 0.55) if lit else Color.WHITE):
+## A button: `lit` (the active mode) pressed in, `hover` with its amber rim.
+static func button(cv: CanvasItem, r: Rect2, lit: bool, hover: bool) -> void:
+	if nine(cv, "button", r, "pressed" if lit else ("hover" if hover else "normal")):
 		return
 	cv.draw_rect(r, Color("#3a3020") if lit else (ROW_BG.lightened(0.08) if hover else ROW_BG))
 	cv.draw_rect(r.grow(-1), AMBER if lit else EDGE_DIM, false, 2.0)
 	cv.draw_line(r.position + Vector2(2, 2), Vector2(r.end.x - 2, r.position.y + 2), Color(1, 1, 1, 0.16 if lit else 0.08), 1.0)
 
 
-## A small rounded tag ("Mk2", "Unique") in colour `col`, `at` its top-left; returns its width.
+## A vertical scroll bar in `r`: the thumb shows `frac` of the content, `at` (0..1) down it.
+static func scrollbar(cv: CanvasItem, r: Rect2, frac: float, at: float) -> void:
+	var h := maxf(r.size.y * frac, 24.0)
+	var thumb := Rect2(r.position.x, r.position.y + (r.size.y - h) * at, r.size.x, h)
+	if nine(cv, "scrollbar", r, "track"):
+		nine(cv, "scrollbar", thumb, "thumb")
+		return
+	cv.draw_rect(r, Color(0, 0, 0, 0.35))
+	cv.draw_rect(thumb, EDGE_DIM)
+
+
+## A small tag ("Mk2", "Unique") in colour `col`, `at` its top-left; returns its width.
 static func chip(cv: CanvasItem, s: String, at: Vector2, col: Color, size := 11) -> float:
 	var w := text_width(s, size, bold()) + 10.0
 	var r := Rect2(at, Vector2(w, size + 7))
@@ -189,6 +249,20 @@ static func chip(cv: CanvasItem, s: String, at: Vector2, col: Color, size := 11)
 	return w
 
 
+## The kit's mouse cursor `name` (pointer, place, remove, invalid; the 32 px set) as [texture, hotspot], or null.
+static func cursor(name: String) -> Variant:
+	if _cursors.has(name):
+		return _cursors[name]
+	var found = null
+	var s = kit("cursors_x2")
+	if s != null and s.has_anim(name):
+		var img: Image = s.image.get_region(Rect2i(s.region(s.start_of(name))))
+		var hot = s.anchors.get(name, Vector2.ZERO)
+		found = [ImageTexture.create_from_image(img), Vector2(hot)]
+	_cursors[name] = found
+	return found
+
+
 # --- icons ----------------------------------------------------------------------------------------------------------
 
 ## The kit's icon `id` as [texture, source region], or null.
@@ -196,17 +270,11 @@ static func icon_art(id: String) -> Variant:
 	if _icons.has(id):
 		return _icons[id]
 	var found = null
-	var img := Art.load_image("%s/ui/icons/%s.png" % [Art.root, id])
-	if img != null:
-		found = [ImageTexture.create_from_image(img), Rect2(Vector2.ZERO, img.get_size())]
-	else:
-		for sheet_name in ICON_SHEETS:
-			if not _sheets.has(sheet_name):
-				_sheets[sheet_name] = Art.load_sheet("%s/ui/%s" % [Art.root, sheet_name])
-			var s = _sheets[sheet_name]
-			if s != null and s.has_anim(id):
-				found = [s.texture, s.region(s.start_of(id))]
-				break
+	for sheet_name in ICON_SHEETS:
+		var s = kit(sheet_name)
+		if s != null and s.has_anim(id):
+			found = [s.texture, s.region(s.start_of(id))]
+			break
 	_icons[id] = found
 	return found
 

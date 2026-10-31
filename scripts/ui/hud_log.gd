@@ -10,7 +10,7 @@ const EVENTS := 3  ## chronicle lines shown
 const HEAD_H := 26.0
 const SIZE := 12
 const LINE := 15.0
-const PAD := 10.0
+const PAD := 12.0
 const MAX_LINES := 9
 
 var hud: Control
@@ -59,7 +59,7 @@ func wrapped() -> Array:
 func wanted_height() -> float:
 	if collapsed or hud == null or hud.build == null:
 		return HEAD_H + 4.0
-	return HEAD_H + wrapped().size() * LINE + 10.0
+	return HEAD_H + wrapped().size() * LINE + 12.0
 
 
 func _gui_input(e: InputEvent) -> void:
@@ -72,17 +72,17 @@ func _gui_input(e: InputEvent) -> void:
 func _draw() -> void:
 	if hud == null or hud.build == null or hud.build.ship == null:
 		return
-	UiKit.panel(self, Rect2(Vector2.ZERO, size), 0.9)
-	var tri := PackedVector2Array([Vector2(PAD, 9), Vector2(PAD + 10, 9), Vector2(PAD + 5, 17)]) if not collapsed \
-		else PackedVector2Array([Vector2(PAD + 2, 7), Vector2(PAD + 9, 12), Vector2(PAD + 2, 18)])
+	UiKit.bar(self, Rect2(Vector2.ZERO, size), 0.92)
+	var tri := PackedVector2Array([Vector2(PAD, 10), Vector2(PAD + 10, 10), Vector2(PAD + 5, 18)]) if not collapsed \
+		else PackedVector2Array([Vector2(PAD + 2, 8), Vector2(PAD + 9, 13), Vector2(PAD + 2, 19)])
 	draw_colored_polygon(tri, UiKit.EDGE)
-	UiKit.text(self, "LOG", Vector2(PAD + 16.0, 18.0), 12, UiKit.TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
+	UiKit.text(self, "LOG", Vector2(PAD + 16.0, 19.0), 12, UiKit.TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
 	var all := lines()
 	if collapsed:
 		if not all.is_empty():
-			UiKit.text(self, all[-1][0], Vector2(PAD + 52.0, 18.0), SIZE, UiKit.DIM_TEXT, HORIZONTAL_ALIGNMENT_LEFT, size.x - PAD * 2.0 - 52.0)
+			UiKit.text(self, all[-1][0], Vector2(PAD + 52.0, 19.0), SIZE, UiKit.DIM_TEXT, HORIZONTAL_ALIGNMENT_LEFT, size.x - PAD * 2.0 - 52.0)
 		return
-	UiKit.text(self, "click to fold", Vector2(PAD, 18.0), 10, UiKit.EDGE_DIM.lightened(0.2), HORIZONTAL_ALIGNMENT_RIGHT, size.x - 2.0 * PAD)
+	UiKit.text(self, "click to fold", Vector2(PAD, 19.0), 10, UiKit.EDGE_DIM.lightened(0.2), HORIZONTAL_ALIGNMENT_RIGHT, size.x - 2.0 * PAD)
 	draw_line(Vector2(PAD, HEAD_H), Vector2(size.x - PAD, HEAD_H), UiKit.EDGE_DIM, 1.0)
 	var y := HEAD_H + 2.0
 	for l in wrapped():

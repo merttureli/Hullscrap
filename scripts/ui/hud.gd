@@ -14,10 +14,11 @@ const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const MARGIN := 8.0
 const TOP_H := 40.0
-const SIDE_W := 340.0
+const SIDE_W := 360.0
 const MODE_H := 52.0
 const HINT_SIZE := 12  ## font size of the key hints
 const HINT_LINE := 16.0
+const HINT_PAD := 10.0  ## inside the hints' frame
 const MSG_SIZE := 14
 const TIP_SIZE := 13
 
@@ -29,6 +30,7 @@ var mode_bar: Control
 var log_panel: Control
 var hint_rect := Rect2()  ## where the message and the key hints are drawn
 var view := Vector2(1600, 900)  ## the screen size of the last layout
+var cursor_state := ""  ## the kit cursor on show: "" (the system's), place, remove or invalid
 var _tip: Control  # the note at the cursor, over everything
 
 
@@ -63,6 +65,7 @@ func _process(_dt: float) -> void:
 	if build == null:
 		return
 	sync(get_viewport_rect().size)
+	_set_cursor(wanted_cursor(get_viewport().get_mouse_position()))
 	queue_redraw()
 	_tip.queue_redraw()
 
@@ -90,8 +93,8 @@ func layout(p_view: Vector2) -> void:
 	var mw: float = mode_bar.full_width()
 	_place(mode_bar, Rect2(floorf((view.x - mw) / 2.0), view.y - MARGIN - MODE_H, mw, MODE_H))
 	_place(card, Rect2(view.x - MARGIN - SIDE_W, TOP_H + MARGIN, SIDE_W, minf(card.wanted_height(), view.y - TOP_H - 2.0 * MARGIN)))
-	var lines := hint_lines(view.x - 2.0 * side)
-	var h := lines.size() * HINT_LINE + (8.0 if not lines.is_empty() else 0.0)
+	var lines := hint_lines(view.x - 2.0 * side - 2.0 * HINT_PAD)
+	var h := lines.size() * HINT_LINE + (2.0 * HINT_PAD if not lines.is_empty() else 0.0)
 	hint_rect = Rect2(side, mode_bar.position.y - MARGIN - h, view.x - 2.0 * side, h)
 
 
@@ -181,6 +184,27 @@ func active_mode() -> String:
 	return "build" if build.build_on else "play"
 
 
+## The kit cursor for the mouse at screen point `p`: in build mode over the world, place (the edit would apply),
+## invalid (refused) or remove (a right-button stroke); "" elsewhere.
+func wanted_cursor(p: Vector2) -> String:
+	if build == null or not visible or not build.build_on or over_ui(p) or build.ghost.is_empty():
+		return ""
+	if build.dragging and build.drag_button == MOUSE_BUTTON_RIGHT:
+		return "remove"
+	return "invalid" if build.cursor_note()["bad"] else "place"
+
+
+func _set_cursor(state: String) -> void:
+	if state == cursor_state:
+		return
+	cursor_state = state
+	var c = UiKit.cursor(state) if state != "" else null
+	if c == null:
+		Input.set_custom_mouse_cursor(null)
+	else:
+		Input.set_custom_mouse_cursor(c[0], Input.CURSOR_ARROW, c[1])
+
+
 ## A mouse release over a panel while a stroke is being drawn in the world still ends the stroke. True when it did.
 func pass_release(e: InputEvent) -> bool:
 	if e is InputEventMouseButton and not e.pressed and build != null and build.dragging and e.button_index == build.drag_button:
@@ -192,12 +216,12 @@ func pass_release(e: InputEvent) -> bool:
 func _draw() -> void:
 	if build == null or hint_rect.size.y <= 0.0:
 		return
-	var lines := hint_lines(hint_rect.size.x)
-	draw_rect(hint_rect, Color(UiKit.PANEL_BG, 0.72))
-	var y := hint_rect.position.y + 4.0
+	var lines := hint_lines(hint_rect.size.x - 2.0 * HINT_PAD)
+	UiKit.bar(self, hint_rect, 0.8)
+	var y := hint_rect.position.y + HINT_PAD - 2.0
 	for l in lines:
 		y += HINT_LINE
-		UiKit.text(self, l[0], Vector2(hint_rect.position.x, y - 4.0), l[2], l[1], HORIZONTAL_ALIGNMENT_CENTER, hint_rect.size.x)
+		UiKit.text(self, l[0], Vector2(hint_rect.position.x + HINT_PAD, y - 4.0), l[2], l[1], HORIZONTAL_ALIGNMENT_CENTER, hint_rect.size.x - 2.0 * HINT_PAD)
 
 
 ## The note at the cursor: build_mode.gd cursor_note(), kept inside the world area between the panels.
@@ -210,8 +234,8 @@ func _draw_tip() -> void:
 	var note: Dictionary = build.cursor_note()
 	if note["text"] == "":
 		return
-	var w := UiKit.text_width(note["text"], TIP_SIZE) + 20.0
-	var r := Rect2(mouse + Vector2(22, 20), Vector2(w, 26))
+	var w := UiKit.text_width(note["text"], TIP_SIZE) + 30.0
+	var r := Rect2(mouse + Vector2(22, 20), Vector2(w, 30))
 	var lo := Vector2((SIDE_W + 2.0 * MARGIN) if palette.visible else MARGIN, TOP_H + MARGIN)
 	var hi := Vector2(view.x - ((SIDE_W + 2.0 * MARGIN) if card.visible else MARGIN), hint_rect.position.y - MARGIN)
 	if r.end.x > hi.x:
@@ -220,6 +244,6 @@ func _draw_tip() -> void:
 		r.position.y = mouse.y - 46.0
 	r.position = r.position.clamp(lo, (hi - r.size).max(lo))
 	var col: Color = UiKit.BAD if note["bad"] else UiKit.GOOD
-	_tip.draw_rect(r, Color(UiKit.PANEL_BG, 0.94))
-	_tip.draw_rect(r, col, false, 2.0)
-	UiKit.text(_tip, note["text"], r.position + Vector2(10, 18), TIP_SIZE, UiKit.TEXT)
+	UiKit.tooltip(_tip, r, col)
+	_tip.draw_rect(Rect2(r.position + Vector2(6, 7), Vector2(4, r.size.y - 14)), col)
+	UiKit.text(_tip, note["text"], r.position + Vector2(16, 20), TIP_SIZE, col.lerp(UiKit.TEXT, 0.55))

@@ -450,7 +450,7 @@ func cursor_note() -> Dictionary:
 			n += 1
 	if n == 0 or not dragging:
 		var why := _ghost_note()
-		return {"text": "can't: " + why if why != "" else "", "bad": true}
+		return {"text": "can't: " + why if why != "" else "", "bad": n == 0}
 	var pay := {}
 	var back := {}
 	for id in session.last_preview_cost:

@@ -10,11 +10,11 @@ const Palette = preload("res://scripts/build/palette.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
 
-const PAD := 10.0
+const PAD := 14.0
 const TAB_H := 38.0
 const TAB_GAP := 4.0
 const HEAD_H := 30.0
-const CARD_H := 100.0
+const CARD_H := 104.0
 const GAP := 8.0
 const COLS := 2
 const SCROLL_STEP := 54.0
@@ -61,8 +61,8 @@ func entries() -> Array:
 
 ## The rect of the grid (local px).
 func list_rect() -> Rect2:
-	var top := PAD + TAB_H + HEAD_H
-	return Rect2(PAD, top, size.x - 2.0 * PAD, maxf(0.0, size.y - top - PAD))
+	var top := PAD + TAB_H + HEAD_H + 4.0
+	return Rect2(PAD + 2.0, top, size.x - 2.0 * PAD - 4.0, maxf(0.0, size.y - top - PAD - 2.0))
 
 
 func tab_rect(i: int) -> Rect2:
@@ -72,7 +72,7 @@ func tab_rect(i: int) -> Rect2:
 
 
 func card_size() -> Vector2:
-	return Vector2((list_rect().size.x - (COLS - 1) * GAP - 8.0) / COLS, CARD_H)  # 8 px for the scroll bar
+	return Vector2((list_rect().size.x - (COLS - 1) * GAP - 12.0) / COLS, CARD_H)  # 12 px for the scroll bar
 
 
 ## Card `i`'s rect in the grid's own px (scrolled).
@@ -173,21 +173,18 @@ func _draw() -> void:
 		var s := minf(22.0, r.size.y - 12.0)
 		UiKit.icon(self, Palette.TAB_ICONS[i], Rect2(r.get_center() - Vector2(s, s) / 2.0, Vector2(s, s)), Color.WHITE if i == b.tab else Color(1, 1, 1, 0.7))
 	var shown: int = hover_tab if hover_tab >= 0 else b.tab
-	var y := PAD + TAB_H + 21.0
-	UiKit.text(self, Palette.TAB_NAMES[shown].to_upper(), Vector2(PAD + 2.0, y), 15, UiKit.TEXT if shown == b.tab else UiKit.DIM_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
+	var head := Rect2(PAD, PAD + TAB_H + 2.0, size.x - 2.0 * PAD, HEAD_H - 6.0)
+	UiKit.title_bar(self, head, Palette.TAB_NAMES[shown].to_upper(), 13)
 	var list_e := entries()
 	var note := "Tab: next   1-9: pick"
 	if b.tab == Palette.Tab.CARGO and list_e.is_empty():
 		note = "nothing in the hold"
-	UiKit.text(self, note, Vector2(PAD, y), 11, UiKit.DIM_TEXT, HORIZONTAL_ALIGNMENT_RIGHT, size.x - 2.0 * PAD - 2.0)
+	UiKit.text(self, note, Vector2(head.position.x, head.get_center().y + 4.0), 10, UiKit.DIM_TEXT, HORIZONTAL_ALIGNMENT_RIGHT, head.size.x - 22.0)
 	var lr := list_rect()
-	UiKit.inset(self, lr.grow(3))
+	UiKit.inset(self, lr.grow(4))
 	var total := content_height(list_e.size())
-	if total > lr.size.y:  # the scroll bar
-		var bar := Rect2(lr.end.x - 5.0, lr.position.y, 4.0, lr.size.y)
-		draw_rect(bar, Color(0, 0, 0, 0.35))
-		var h := maxf(24.0, lr.size.y * lr.size.y / total)
-		draw_rect(Rect2(bar.position.x, lr.position.y + (lr.size.y - h) * scroll / maxf(1.0, total - lr.size.y), 4.0, h), UiKit.EDGE_DIM)
+	if total > lr.size.y:
+		UiKit.scrollbar(self, Rect2(lr.end.x - 8.0, lr.position.y, 8.0, lr.size.y), lr.size.y / total, scroll / maxf(1.0, total - lr.size.y))
 
 
 func _draw_list() -> void:
@@ -207,24 +204,24 @@ func _draw_list() -> void:
 func draw_card(cv: CanvasItem, e: Dictionary, r: Rect2, selected: bool, hot: bool, index: int) -> void:
 	var b: Node = hud.build
 	UiKit.card(cv, r, e["line"], selected, hot)
-	var pic := Rect2(r.position + Vector2(8, 8), Vector2(r.size.x - 16.0, 50.0))
+	var pic := Rect2(r.position + Vector2(10, 10), Vector2(r.size.x - 20.0, 48.0))
 	Thumbs.draw(cv, e, b.ship, pic, _clock)
 	if index < 9:
-		var k := Rect2(r.position + Vector2(4, 4), Vector2(16, 16))
+		var k := Rect2(r.position + Vector2(7, 7), Vector2(16, 16))
 		cv.draw_rect(k, Color(0, 0, 0, 0.7))
 		cv.draw_rect(k, UiKit.EDGE_DIM, false, 1.0)
 		cv.draw_string(UiKit.bold(), k.position + Vector2(4.5, 12.5), str(index + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, UiKit.AMBER if selected else UiKit.TEXT)
-	var x := r.position.x + 8.0
-	var w := r.size.x - 16.0
+	var x := r.position.x + 10.0
+	var w := r.size.x - 20.0
 	UiKit.text(cv, e["name"], Vector2(x, r.position.y + 74.0), 12, UiKit.TEXT, HORIZONTAL_ALIGNMENT_LEFT, w, UiKit.bold())
 	var line := Palette.size_text(e["size"])  # a mount's outside half shows in the picture
-	UiKit.text(cv, line, Vector2(x, r.end.y - 9.0), 11, UiKit.DIM_TEXT)
+	UiKit.text(cv, line, Vector2(x, r.end.y - 12.0), 11, UiKit.DIM_TEXT)
 	var pw := float(e["power"])
 	if pw != 0.0:
-		UiKit.text(cv, Palette.power_text(pw), Vector2(x + UiKit.text_width(line, 11) + 6.0, r.end.y - 9.0), 11, UiKit.GOOD if pw > 0.0 else UiKit.AMBER)
-	_draw_price(cv, e, Vector2(r.end.x - 8.0, r.end.y - 9.0))
+		UiKit.text(cv, Palette.power_text(pw), Vector2(x + UiKit.text_width(line, 11) + 6.0, r.end.y - 12.0), 11, UiKit.GOOD if pw > 0.0 else UiKit.AMBER)
+	_draw_price(cv, e, Vector2(r.end.x - 10.0, r.end.y - 12.0))
 	if not e["ok"]:
-		cv.draw_rect(r.grow(-2), GREY)
+		cv.draw_rect(r.grow(-3), GREY)
 
 
 ## Right-aligned at `right` (its baseline): how many are held for a part, else each material of the cost with its icon.

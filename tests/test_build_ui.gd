@@ -307,7 +307,12 @@ func test_a_wall_drag_shows_its_count_and_cost_at_the_cursor() -> void:
 	eq(b.cursor_note(), {"text": "can't: outside the hull", "bad": true}, "a hover that can't be built says why")
 	b.hover = AT
 	b._refresh_ghost()
-	eq(b.cursor_note()["text"], "", "a hover that can says nothing")
+	eq(b.cursor_note(), {"text": "", "bad": false}, "a hover that can says nothing")
+	eq(b.hud.wanted_cursor(Vector2(800, 400)), "place", "and the cursor is the place reticle")
+	b.hover = Vector2i(0, 0)
+	b._refresh_ghost()
+	eq(b.hud.wanted_cursor(Vector2(800, 400)), "invalid", "a refused one shows the no-entry cursor")
+	eq(b.hud.wanted_cursor(Vector2(100, 400)), "", "over the palette the system cursor is back")
 	_done(b)
 
 

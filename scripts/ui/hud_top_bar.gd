@@ -98,11 +98,7 @@ func _gui_input(e: InputEvent) -> void:
 func _draw() -> void:
 	if hud == null or hud.build == null or hud.build.ship == null:
 		return
-	var r := Rect2(Vector2.ZERO, size)
-	if not UiKit.nine(self, "title_bar", r):
-		draw_rect(r, Color(UiKit.PANEL_BG, 0.96))
-		draw_line(Vector2(0, size.y - 1), Vector2(size.x, size.y - 1), UiKit.EDGE, 2.0)
-		draw_line(Vector2(0, 1), Vector2(size.x, 1), UiKit.HIGHLIGHT, 1.0)
+	UiKit.bar(self, Rect2(Vector2.ZERO, size), 0.97)
 	var list := items()
 	var rs := item_rects(list)
 	for i in list.size():
@@ -130,7 +126,6 @@ func _draw() -> void:
 	if hover >= 0 and hover < list.size():
 		var tip: String = list[hover]["tip"]
 		var tw := UiKit.text_width(tip, 12) + 14.0
-		var tr := Rect2(Vector2(rs[hover].position.x, size.y + 4), Vector2(tw, 22))
-		draw_rect(tr, Color(UiKit.PANEL_BG, 0.96))
-		draw_rect(tr, UiKit.EDGE_DIM, false, 1.0)
-		UiKit.text(self, tip, tr.position + Vector2(7, 15), 12, UiKit.TEXT)
+		var tr := Rect2(Vector2(rs[hover].position.x, size.y + 4), Vector2(tw + 6.0, 26))
+		UiKit.tooltip(self, tr, UiKit.EDGE_DIM)
+		UiKit.text(self, tip, tr.position + Vector2(10, 17), 12, UiKit.TEXT)
