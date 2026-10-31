@@ -10,6 +10,7 @@ extends RefCounted
 
 const Damage = preload("res://scripts/combat/damage.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
+const Effects = preload("res://scripts/combat/effects.gd")
 
 const MAX_BOUNCES := 2
 const LASER_BOUNCES := 1
@@ -112,9 +113,12 @@ static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2, ou
 	if best["shield"]:
 		Shields.absorb(arena, best["ship"], w, out["end"], (p1 - p0).normalized(), best["sector"])
 	else:
-		var res := Damage.march(arena, best["ship"], w, best["a"], best["b"], best["entries"], best["hit"])
+		var first := {}
+		var res := Damage.march(arena, best["ship"], w, best["a"], best["b"], best["entries"], best["hit"], first)
 		if res.has("bounce"):
 			out["bounce"] = res["bounce"]
+		if not first.is_empty() and w.get("effects") is Dictionary:  # the weapon's effects (acid, spores ...) land where it first hit
+			Effects.on_hit(arena, owner, best["ship"], w, first)
 	return true
 
 

@@ -39,11 +39,15 @@ const UNKNOWN := Color("#3a4350")
 
 ## Emitted when a lost fight ends the run, with the campaign as it stood (front_door.gd shows the game over screen).
 signal run_over(campaign)
+## Emitted when an ending ends the run as a win (an event's `ending` effect), with the campaign as it stood and the ending's id
+## (front_door.gd shows the ending screen).
+signal run_won(campaign, ending_id)
 
 var sim: Node  ## the ShipSim whose player ship travels
 var build: Node  ## the BuildMode (told about the new ship)
 var combat: Node  ## the combat view: fights started from events run there
 var campaign: Campaign
+var profile = null  ## the player's Profile (front_door.gd sets it): the campaigns write their unlocks and landmarks to it
 var event_panel: Control
 var station_panel: Control
 var hover := ""  ## the node id under the mouse
@@ -99,6 +103,7 @@ func _ensure_panels() -> void:
 	event_panel.map = self
 	event_panel.finished.connect(_on_events_finished)
 	event_panel.fight_requested.connect(_start_fight)
+	event_panel.ending_reached.connect(_on_ending)
 	add_child(event_panel)
 	station_panel = StationPanel.new()
 	station_panel.map = self
@@ -134,6 +139,7 @@ func new_game(seed_value := 0) -> void:
 	_ensure_panels()
 	var s := seed_value if seed_value != 0 else (new_seed if new_seed != 0 else randi())
 	campaign = Campaign.new(s)
+	campaign.profile = profile
 	_arrived = false
 	_queue.clear()
 	_forget_poi()
@@ -365,7 +371,10 @@ func _on_fight_finished(result: Dictionary) -> void:
 	panel_only = sector_flow()
 	refresh()
 	event_panel.open_notice("The fight is over" if r["state"] == "won" else "You get away", r["text"], r["lines"])
-	if r["fight"] != "":
+	if r["ending"] != "":
+		var done: String = r["ending"]
+		_queue.append(func(): _on_ending(done))
+	elif r["fight"] != "":
 		var next: String = r["fight"]
 		_queue.append(func(): _start_fight(next, {}))
 	elif r["goto"] != "" and campaign.events.has(r["goto"]):
@@ -375,6 +384,13 @@ func _on_fight_finished(result: Dictionary) -> void:
 		var salvage := campaign.salvage_event(ship())
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
+
+
+## An outcome ended the run with ending `id`: it is won. The front door shows the ending screen and a new campaign waits behind it.
+func _on_ending(id: String) -> void:
+	visible = false
+	run_won.emit(campaign, id)
+	new_game()
 
 
 # --- saving ---------------------------------------------------------------------------------------------------------------------
@@ -389,6 +405,7 @@ func save_campaign() -> String:
 func load_campaign() -> String:
 	_ensure_panels()
 	var fresh := Campaign.new(new_seed if new_seed != 0 else randi())
+	fresh.profile = profile
 	var why := fresh.load_file(save_path)
 	if why == "":
 		campaign = fresh

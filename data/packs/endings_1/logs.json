@@ -1,0 +1,95 @@
+{
+  "logs": [
+    {
+      "id": "log_haven_first_fragment",
+      "title": "Forty seconds",
+      "ship": "Baptiste's rock",
+      "faction": "clans",
+      "text": "Transcript, forty seconds, as heard.\n'If you can hear this, we're alive. Come to the Lantern Reach.'\n[a chair scrapes] [a cough] 'Is it still on?' 'Yes. Say the thing.' 'If you can hear this...'\nIt starts late every time. Somebody's thumb is on the button."
+    },
+    {
+      "id": "log_haven_lantern_blind",
+      "title": "The wall",
+      "ship": "Long Odds",
+      "faction": "clans",
+      "text": "Chalk on the bulkhead, three years deep: bearings, dates, a tally of fuel.\nAt the bottom, in a different hand: Real ones are late. Clean ones are on time. Do not go to the on-time ones.\nUnder that, smaller: We went to one.\nUnder that, smaller still: We came back."
+    },
+    {
+      "id": "log_haven_relay_rb9",
+      "title": "Hoax (Resolved)",
+      "ship": "RB-9, Concord relay",
+      "faction": "concord",
+      "text": "Signal received 3,411 times. Origin: not on any chart. Content: a looping message, 40 seconds, human speech.\nTiming variance: considerable. Conclusion: a person.\nPer Annex 4, an unverifiable person is a hoax. Classification: HOAX (RESOLVED).\nPersonal note, in pencil: I have started to wait for it."
+    },
+    {
+      "id": "log_haven_clean_one",
+      "title": "Clean",
+      "ship": "(no registry)",
+      "faction": "hollow",
+      "text": "Transcript, forty-one seconds, exactly. Repeat: forty-one seconds, exactly. Repeat.\n'If you can hear this, we're alive. Come to the Lantern Reach.'\nNo chair. No cough. No room.\nIt is the best loop you have ever heard, which is what you do not like about it."
+    },
+    {
+      "id": "log_haven_signals_desk",
+      "title": "Form 14-H",
+      "ship": "Station signals desk",
+      "faction": "concord",
+      "text": "FORM 14-H, HOAX (PERSISTENT). Instructions: describe the hoax. Describe who is making it. Describe why.\nHoax: a message that says it is alive. Maker: a person. Reason: she would like to be heard.\nI have filled in this form 3,411 times and it has never once asked whether I believe it.\nI believe it."
+    },
+    {
+      "id": "log_haven_fig",
+      "title": "Notebook, in pencil",
+      "ship": "Fig",
+      "faction": "lumen",
+      "text": "Things that are broken out here (list): everything.\nThings that are not broken: people. (Tamsin says that is not a thing. I am leaving it in.)\nThe tow ship smells of rust and burnt toast. We have been told not to say where we are from. I have not said it. I have written it down, which is different.\nI will draw a tomato at the end so I know it was a good day."
+    },
+    {
+      "id": "log_haven_clean_two",
+      "title": "Please help",
+      "ship": "(beacon, no ship)",
+      "faction": "hollow",
+      "text": "Transcript. 'Please help, we're lost, we followed the lantern.' Repeat, with the weight in a different place. Repeat.\nNo cough. No sniff. No breath taken between the words.\nA child who has never had to stop for air.\nSomebody has learned the words and not the embarrassment."
+    },
+    {
+      "id": "log_hollow_manifest",
+      "title": "Last shift",
+      "ship": "Gate Two, transit manifest",
+      "faction": "concord",
+      "text": "TRANSIT MANIFEST, GATE TWO, LAST SHIFT. Eleven names, all in night-shift ink.\nA twelfth line, headed VISITOR, in the same ink, left blank.\nSomebody has written a name there in pencil and rubbed it out, and written it again, and rubbed it out.\nFiled by CS-114 Diligence as 'pending'."
+    },
+    {
+      "id": "log_hollow_basalt_floor",
+      "title": "The floor",
+      "ship": "Corbel's camp",
+      "faction": "clans",
+      "text": "We held the door. It is what we do. We were told to hold it, and we held it eleven seconds.\nThe night shift came out of the galley with their tea.\nThe door did not shut on them. It shut around them.\nIt is trying to set the table. Somebody should sit."
+    },
+    {
+      "id": "log_concord_patience_bridge",
+      "title": "Captain's log, unchanged",
+      "ship": "CS-001 Patience",
+      "faction": "concord",
+      "text": "Captain's log. Standing by. Orders from the Lattice Authority: none received.\nStanding by. Orders: none received. Crew: dispersed on liberty, expected back.\nStanding by.\n(Forty years of entries, one line each. The last, in a newer hand: Visitors aboard. Thank God. Thank you.)"
+    },
+    {
+      "id": "log_wayout_concord_chairs",
+      "title": "Notice",
+      "ship": "Gate One, control ring",
+      "faction": "concord",
+      "text": "NOTICE, posted over every desk: PLEASE PUSH YOUR CHAIR IN WHEN YOU LEAVE.\nEvery chair is pushed in. Whoever left, they left politely, in order, and all at once.\nUnder the notice, in another pen: 'Did anyone remember to turn off the gate?'\nUnder that: 'It was off when I got here.'"
+    },
+    {
+      "id": "log_wayout_clans_menu",
+      "title": "Today at the Last Stop",
+      "ship": "The Last Stop, Scrapper Gate",
+      "faction": "clans",
+      "text": "SOUP: the one. OTHER SOUP: the other one. DRINK: it's a drink.\nSPECIAL: ask about the gate. (Don't.)\nPAY AT THE BAR. IF THE BAR ISN'T THERE, PAY THE BAR'S COUSIN.\nNO TOLLS. THIS IS A FREE ESTABLISHMENT. SEE TOLL BOOTH."
+    },
+    {
+      "id": "log_wayout_lumen_unit7",
+      "title": "Unit 7, question log",
+      "ship": "Unit 7",
+      "faction": "lumen",
+      "text": "Questions asked today: one.\nAnswers received: none, but the asking was permitted.\nThe unit reports a sensation not listed in its manual, and has filed it under 'warm'.\nIt would like it noted that it is listening."
+    }
+  ]
+}

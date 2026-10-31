@@ -51,14 +51,23 @@ const QUIET_REASONS: Array[String] = ["already there", "already a cable", "nothi
 enum Group { TILES, SYSTEMS, CABLES }
 const GROUP_NAMES: Array[String] = ["Tiles", "Systems", "Cables"]
 
-var sim: Node  ## the ShipSim that owns the ships
+var sim: Node:  ## the ShipSim that owns the ships
+	set(v):
+		sim = v
+		_sync_pause()
 var crew: Node  ## the crew view, for the player's position
 var picker: Node  ## the ship picker (ship_picker.gd): while it is open this node ignores input
 var drift: Node  ## the map of the Drift (map_view.gd), made in _ready if the scene has none; M opens it
 var shields: Node  ## the Shields tab (shield_panel.gd), made in _ready if the scene has none; H opens it
 var front: Node  ## the front door (front_door.gd), if the scene has one: Esc asks it for the pause menu
-var build_on := true  ## false = play mode
-var combat := false  ## a fight is on (combat_view.gd): this node ignores input and does not draw
+var build_on := true:  ## false = play mode. Build mode pauses the world (ShipSim.set_paused)
+	set(v):
+		build_on = v
+		_sync_pause()
+var combat := false:  ## a fight is on (combat_view.gd): this node ignores input and does not draw
+	set(v):
+		combat = v
+		_sync_pause()
 var group: int = Group.TILES
 var selected := ""  ## tile id
 var sel_component := ""  ## system id
@@ -121,6 +130,13 @@ func _ready() -> void:
 	_fix_component()
 	_refresh_ghost()
 	_update_hud()
+
+
+## Build mode pauses the sim (crew, fires, air, heat, crafting...); play mode and fights run it. Leaving build mode
+## makes ShipSim recompute the rooms and move crew out of the new walls.
+func _sync_pause() -> void:
+	if sim != null and sim.has_method("set_paused"):
+		sim.set_paused(build_on and not combat, "build mode")
 
 
 ## The Drift map and its panels, in a canvas layer of their own (above the crafting panel, under the picker).

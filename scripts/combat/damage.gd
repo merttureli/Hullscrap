@@ -49,6 +49,14 @@ static func solid_at(co, cell: Vector2i, hitbox := false) -> Dictionary:
 	return {}
 
 
+## The factor a corroded wall or door at `cell` of ship `idx` divides its resist by (effects.gd keeps them in `arena.fx`): 1 when it is sound.
+static func corrode_mult(arena, idx: int, cell: Vector2i) -> float:
+	var c: Dictionary = arena.fx["corroded"]
+	if c.is_empty():
+		return 1.0
+	return float(c[Vector3i(idx, cell.x, cell.y)][0]) if c.has(Vector3i(idx, cell.x, cell.y)) else 1.0
+
+
 ## The key of the part `obj` (a solid_at result) hit: its uid, plus "o" for the outside half of a mount.
 static func part_key(obj: Dictionary) -> String:
 	return "%d%s" % [obj["uid"], "o" if obj.get("half", "") == "out" else ""]
@@ -80,7 +88,9 @@ static func cell_hit(co, cell: Vector2i, a: Vector2, b: Vector2, entry: Dictiona
 ## already a solid one that `first_hit` ({t, n}, see cell_hit) was found for) of ship `idx` along the
 ## segment a -> b (ship-local). Resolves it to the end: {} when it was spent, {"bounce": {pos (world),
 ## n (world face normal), dir (new world direction), ship, cell, dmg, pierce}} when a cell glanced it off.
-static func march(arena, idx: int, w: Dictionary, a: Vector2, b: Vector2, entries: Array, first_hit: Dictionary) -> Dictionary:
+## `first_out` (optional) is filled with the first cell it damaged: {cell, obj (solid_at), dir (ship-local unit
+## vector)}, for the weapon effects (effects.gd) the caller applies.
+static func march(arena, idx: int, w: Dictionary, a: Vector2, b: Vector2, entries: Array, first_hit: Dictionary, first_out := {}) -> Dictionary:
 	var co = arena.ships[idx]
 	var dmg := float(w["damage"])
 	var pierce := int(w["pierce"])
@@ -115,9 +125,10 @@ static func march(arena, idx: int, w: Dictionary, a: Vector2, b: Vector2, entrie
 				if p > 1e-6 and arena.rng.randf() < p:
 					return {"bounce": _bounce(arena, "ricochet", idx, cell, a.lerp(b, h["t"]), wdir, nw, dmg, pierce)}
 			factor = slope_factor(type, cos_t)
-		var res := apply(arena, idx, cell, obj, dmg * factor, type, {"dir": wdir, "n": nw})
+		var res := apply(arena, idx, cell, obj, dmg * factor, type, {"dir": wdir, "n": nw, "weapon": str(w.get("id", ""))})
 		if first:
 			first = false
+			first_out.merge({"cell": cell, "obj": obj, "dir": dir})
 			var fc := float(w.get("fire_chance", 0.0))
 			if fc > 0.0 and arena.rng.randf() < fc:
 				arena.log_event("ignite", idx, cell)
@@ -160,7 +171,7 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 		inst = comps.instances[obj["uid"]]
 		cur = float(inst["out_hp"]) if outside else float(inst.get("hp", comps.def(inst["id"]).get("hp", DEFAULT_COMPONENT_HP)))
 	else:
-		resist = float(obj["def"].get("resist", {}).get(type, 1.0))
+		resist = float(obj["def"].get("resist", {}).get(type, 1.0)) / corrode_mult(arena, idx, cell)  # a corroded wall takes more
 		cur = grid.hp_of(cell)
 	var eff := 0.0 if type == "ion" else dmg * resist  # ion does no structural damage
 	var dealt := minf(eff, cur)

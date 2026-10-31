@@ -31,4 +31,6 @@ if __name__ == '__main__':
     # sector space art (debris, intakes, radars, tractor, HUD icons, backdrop, jump fx) runs in its own process: its palette
     # letters (pal_sector) reuse letters that race wave 1 (pal_races1) gives other colours, so the two can't share px.PAL
     subprocess.run([sys.executable, '-c', 'import sector_all; sector_all.export_all()'], check=True, cwd=os.path.dirname(os.path.abspath(__file__)))
+    # the pixel UI kit (9-slice frames, icons, cursors in art/ui) also runs in its own process, for the same palette-letter reason
+    subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ui_kit.py')], check=True, cwd=os.path.dirname(os.path.abspath(__file__)))
     subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets_md.py')], check=True)
