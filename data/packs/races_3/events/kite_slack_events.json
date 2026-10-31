@@ -1,0 +1,117 @@
+{"events": [
+    {
+      "id": "slack_tether_knot", "type": "station", "weight": 10, "once": false, "requires": {"region": "kite_slack"},
+      "text": "Tether Knot is a bundle of ropes, nets, hammocks and market stalls strung between four hulls in the dark. There is no floor anywhere. You hold on, or you drift. The Kite have one rule for visitors: always have a hand on a line. A Kite woman clipped to a cable calls the prices from upside down, and everyone from solid ships is handed a rope and a little bell, so they can be found. Overhead, in the gaps, there are lights, and washing, and an entire school of children going by like fish.",
+      "choices": [
+        {"text": "Buy a hammock for the mess (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "A real Kite hammock, strung from the ceiling, that holds you at no angle at all. For a week your crew sleep in it in shifts and wake up with their backs a good deal better.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+        ]},
+        {"text": "Ask for a guide through the Slack.", "outcomes": [
+          {"weight": 100, "text": "A girl of about eleven attaches herself to your belt with a carabiner and, giving you a running commentary, takes you through six hull-gaps and a laundry. At the end she tells you where the good salvage is and asks for a tip, which is a button.", "effects": {"reveal": "wreck_field", "items": {"scrap": 10}}}
+        ]},
+        {"text": "[Kite] Grip the rope with your tail and call the news.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite swings out onto the main rope, tail around the cable, and sings out the news of the lanes in the Kite tongue: a long fast list of gaps and routes. The Knot stops. Then every stall-holder is calling back. By the end of it you have been given a tour, a feast, a heap of fuel and a cut of the day's takings. 'You tell it right,' says the woman. 'You tell it like home.'", "effects": {"items": {"credits": 40, "fuel": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "Hire a young Kite who wants a floor (80 credits).", "requires": {"credits": 80, "not_flag": "slack_hired"}, "outcomes": [
+          {"weight": 100, "text": "Streamer has a long face, a longer tail, and a set of opinions about gravity. 'They tell me a floor is a thing that pushes back,' they say, uncertain. 'I am told it is rude.' They hold out a long thin hand to shake yours, and grab the rail with the other to be safe.", "effects": {"items": {"credits": -80}, "recruit": {"species": "kite", "name": "Streamer"}, "flag": "slack_hired"}}
+        ]},
+        {"text": "Find a rope and hold on.", "outcomes": [
+          {"weight": 100, "text": "You stay where you are, one hand on a rope, and watch the Knot go by. It takes about an hour for your stomach to give up. When it does, it is rather lovely.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "slack_the_long_line", "type": "empty", "weight": 8, "once": false, "requires": {"region": "kite_slack"},
+      "text": "A line of washing a kilometre long runs through the dark: thousands of flags and shirts and sheets in every colour, pegged in careful clusters. It is not laundry. Each cluster is a message, in the Kite's cloth-language, hung for any passing nomad to read: a lane that is safe, a gap that has closed, a family that has moved. The line sways, very slowly, in no wind at all. There is a sign pegged to the end, in plain script: IF YOU CAN READ THIS, PLEASE DO NOT SIT ON IT.",
+      "choices": [
+        {"text": "Try to read it.", "outcomes": [
+          {"weight": 50, "text": "You make out three flags and a sock. They seem to say that the lane ahead is clear and there is a trader a jump along. It is the best you can do, and it turns out to be right.", "effects": {"reveal": "trader", "items": {"credits": 10}}},
+          {"weight": 50, "text": "You read it with great confidence and are wrong. The red sock apparently says something about your mother. A nearby Kite has to be calmed down, and your helmsman is not allowed to go near the line.", "effects": {"crew_hp": -5}}
+        ]},
+        {"text": "Peg a message of your own (5 scrap).", "requires": {"items": {"scrap": 5}}, "outcomes": [
+          {"weight": 100, "text": "You peg a rag and a bolt to the line, with a note that nobody can read. A family comes along on a rope the next day, reads it, understands it entirely, and leaves a gift in your lock: a full canister of fuel.", "effects": {"items": {"scrap": -5, "fuel": 1}}}
+        ]},
+        {"text": "[Kite] Read it properly.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite swings along the line from end to end, reading as they go, tail brushing each flag with a small murmur. It is longer than any letter you have ever received. At the end they come back with a full account: a lane closed by a collapse, a family looking for a cousin, a wreck with a vault full of stores. They also found their own name, pegged in a corner, three years old.", "effects": {"reveal": "wreck_field", "items": {"credits": 30, "fuel": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "Leave it be.", "outcomes": [
+          {"weight": 100, "text": "You pass underneath it with the engines at idle. Several flags turn, slowly, as if to look.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "slack_gap_goods", "type": "trader", "weight": 8, "once": false, "requires": {"region": "kite_slack"},
+      "text": "Gap Goods sells everything out of the gaps between hulls. The stall pulls out of a crack on a rope, with a flourish, and a Kite merchant hangs by the tail from the ceiling with a clipboard. 'Fuel,' she says. 'Cans. Floating cans, you'll want a net. Polymer barrels. Odd socks. A single boot, left foot, very fine.' Behind her, in the crack, there is a heap of canisters, a little dusty with age and polish.",
+      "choices": [
+        {"text": "Buy a pair of fuel cans (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "Two canisters float across to you on a rope, tied with a bow, and clink gently together. They are full. They smell faintly of someone's bedroom.", "effects": {"items": {"credits": -15, "fuel": 2}}}
+        ]},
+        {"text": "Trade scrap for fuel (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
+          {"weight": 100, "text": "She weighs your scrap on a string scale with her tail, nods, and ties off two cans with a flourish. 'Scrap is lovely,' she says. 'It gives my husband something to do.'", "effects": {"items": {"scrap": -20, "fuel": 2}}}
+        ]},
+        {"text": "[Kite] Haggle with a tail-grip.", "requires": {"species": "kite", "credits": 15}, "outcomes": [
+          {"weight": 100, "text": "Your Kite swings up beside her, tail looped round the same rope, and the two of them haggle upside down for twenty minutes in a language like birdsong. At the end, she gives you four cans for the price of two, a polymer barrel, and a sock, 'for luck'. The sock is left foot. It is the other half of the boot.", "effects": {"items": {"credits": -15, "fuel": 4, "polymer": 15}}}
+        ]},
+        {"text": "Browse the odd socks.", "outcomes": [
+          {"weight": 100, "text": "There are a great many odd socks. You find one that matches a sock you have lost, and buy it for a button, and are inordinately pleased.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "slack_net_catchers", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "kite_slack", "jumps_min": 2},
+      "text": "Rustfangs with long nets are working the gaps, catching Kite. 'Long arms are in demand,' the captain tells you cheerfully, 'in engine rooms. A few years in a cramped hold and they get used to it.' Behind him, a dozen of them hang in the mesh of the hold, silently, with their tails curled up. They look at you with enormous eyes. A little one has bitten through one strand and is working on the next.",
+      "choices": [
+        {"text": "Free the nets with your guns.", "outcomes": [
+          {"weight": 100, "text": "The captain sighs. 'Everybody has a rival,' he says. His lads take their places at the guns.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Buy the captives' freedom (70 credits).", "requires": {"credits": 70}, "outcomes": [
+          {"weight": 100, "text": "The captain counts it twice, then waves a hand, and the nets come open. A dozen Kite pour out in a long untidy ribbon, into the dark, all talking at once. One of them, a young one with a bitten finger, stops at your airlock. 'Bunting,' it says, and holds out a hand. 'I would like to see where the money came from.'", "effects": {"items": {"credits": -70}, "recruit": {"species": "kite", "name": "Bunting"}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Kite] Cut the nets and lead them through the gaps.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite slips out of the airlock like a thrown rope and is among the nets in a moment, tail looped, a knife in each hand. The mesh parts. The captives pour out into the dark and your Kite leads them into the gaps between the hulls, and the Rustfangs, whose tug is much too big for a gap that size, can only watch. The captain stays very polite on the comm. The Kite, in thanks, empty a heap of what the nets had caught in your lock.", "effects": {"items": {"scrap": 35, "credits": 35}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Keep out of it.", "outcomes": [
+          {"weight": 100, "text": "You turn away. In your mirror, the little one gets through its second strand, and then a third, and is then, abruptly, no longer in the mirror.", "effects": {"crew_hp": -5}}
+        ]}
+      ],
+      "after_win": {"text": "The nets fall slack and a dozen Kite drift out of the hold in the long careful fashion of people who have been very still for a long time. They vanish into the gaps one by one, until only the smallest is left, who hangs on your antenna by the tail, waves once, and goes. The Rustfangs' hold is full of what they took.", "effects": {"items": {"scrap": 35, "credits": 30}, "rep": {"clans": 1}}}
+    },
+    {
+      "id": "slack_cut_tether", "type": "distress", "weight": 9, "once": false, "requires": {"region": "kite_slack"},
+      "text": "A Kite child has lost her tether and is tumbling slowly away from the Slack, out into open space, where there are no hulls to catch. She is laughing. She is perhaps six. Behind her, at the edge of the Knot, her parents hang in a tangle of ropes with their arms stretched out and their tails thrashing, talking very fast. The child's course is a long slow curve away from every handhold on the whole Slack, and she is accelerating, gently, with delight.",
+      "choices": [
+        {"text": "Match speed and catch her with the tractor (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You line up on her drift, hold steady, and the tractor beam takes her with the gentleness of a hand around a moth. She laughs the whole way in. Her parents are at your airlock in seconds, each trying to hug the other and the child and you all at once. They give you everything their stall has.", "effects": {"items": {"fuel": -1, "credits": 40, "polymer": 15}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Throw her a line.", "outcomes": [
+          {"weight": 60, "text": "You run out a line and she catches it on the second pass, in a delighted squeal. You reel her in like a kite on a string, and her parents pass you a bag of fuel.", "effects": {"items": {"fuel": 1}, "crew_hp": 5}},
+          {"weight": 40, "text": "The line drifts past her, and she misses it, giggling. It takes four tries and most of an hour. Her father pays what he can, and never mentions the hour.", "effects": {"items": {"credits": 20}, "crew_hp": -5}}
+        ]},
+        {"text": "[Kite] Go after her.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite is out of the airlock and across the dark in four long bounds, tail whipping, and catches the child by the ankle in a single smooth swing. She squeals. They tumble together for a moment, in perfect balance, and come home hand in hand, her small tail round your Kite's arm. The parents cry, and the entire Knot rings every bell it owns. It takes your crew an hour to leave.", "effects": {"items": {"credits": 40, "fuel": 2, "polymer": 15}, "rep": {"clans": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "You cannot get there in time.", "outcomes": [
+          {"weight": 100, "text": "You turn away. Someone else, no doubt, will catch her. You do not look to see.", "effects": {"crew_hp": -10}}
+        ]}
+      ]
+    },
+    {
+      "id": "slack_hull_pack", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "kite_slack"},
+      "text": "A knot of hulls from the Snap, wedged so tight that there is no way through. A Kite guide, hanging by her tail from a gantry, says she knows one: a path through the gaps, ninety metres of turns, which a person with a tail can walk and a ship cannot. At the end is a sealed vault the size of a bus, intact. She will take you for a small fee. 'You will need to hold on,' she says. 'You will need to not look down. There is no down.'",
+      "choices": [
+        {"text": "Squeeze through on foot with a line.", "outcomes": [
+          {"weight": 50, "text": "You get through the first three turns, lose the line at the fourth, and spend an unpleasant quarter-hour wedged. At the end there is a vault and you have just enough breath to open it. A good haul, if you can carry it.", "effects": {"items": {"scrap": 35, "silicon": 3}, "crew_hp": -10}},
+          {"weight": 50, "text": "You get stuck at the second turn, in a gap that tried to eat your shoulder. You come back with a bruise and an apology from the guide, who gives you a lollipop.", "effects": {"crew_hp": -10}}
+        ]},
+        {"text": "Hire the guide (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "She leads you through the gaps at a steady crawl, tail round each handhold, calling out the turns. You do not look down. At the end the vault opens with a hiss and a sigh, and you take what you can carry. She is paid, and offers to teach you a better knot.", "effects": {"items": {"credits": -30, "scrap": 30, "silicon": 4}}}
+        ]},
+        {"text": "[Kite] Walk the gaps yourself.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite listens to the guide's directions once, laughs, and goes into the pack head first, tail gripping, like a fish into a weir. In four minutes they are at the vault. In five they are back, with a rope of cargo, a grin on their face, and a sealed case of silicon. The guide, who has never seen anyone do it without a lesson, offers to marry them, or at least to buy them a drink.", "effects": {"items": {"titanium": 4, "silicon": 3, "credits": 30}}}
+        ]},
+        {"text": "Admire the pack and move on.", "outcomes": [
+          {"weight": 100, "text": "You admire the pack from outside. It is a pity about the vault. The guide waves from her gantry, the same arm and the tail.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

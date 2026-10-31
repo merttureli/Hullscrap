@@ -8,7 +8,7 @@ const DEFAULT_LINE := "standard"
 const DEFAULT_HP := 4
 const DEFAULT_HEAT_LIMIT := 100.0
 ## Stats scaled by the line's `output` (the family's main output). Positive power is scaled too.
-const OUTPUT_STATS: Array[String] = ["thrust", "o2_rate"]
+const OUTPUT_STATS: Array[String] = ["thrust", "o2_rate", "smelt_speed"]
 
 
 ## The lines of a lines.json: line id -> {cost, power, output, mass, heat, repair, malfunction_per_min,

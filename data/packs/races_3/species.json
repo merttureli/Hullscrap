@@ -1,0 +1,11 @@
+{
+	"species": {
+		"revenant": {"name": "Revenant", "hp": 110, "speed": 1.0, "traits": ["returned", "stitched"], "rig": "revenant", "sidearm": "rivet_gun", "notes": "Hollow-touched survivors in salvaged pressure-suits: o2_use 0, revive_once (the first downing: back up at 50 hp after 10 s), bed heal x0, medbay x0.5, hp x1.1"},
+		"choir": {"name": "Choir", "hp": 100, "speed": 1.0, "traits": ["choral_voice", "hollow_body"], "rig": "choir", "notes": "crystal singers, no sidearm: others in their room work x1.15 (aura work), melee x0.3"},
+		"rattler": {"name": "Rattler", "hp": 60, "speed": 1.0, "traits": ["gremlin", "scrap_sense"], "rig": "rattler", "sidearm": "multi_tool", "notes": "scrap gremlins, the small rig: body 1 (fits 1-cell crawlspaces), line_affinity scrap work x2, hp x0.6"},
+		"tessellate": {"name": "Tessellate", "hp": 100, "speed": 1.0, "traits": ["many_bodies", "circuit_kin"], "rig": "tessellate", "sidearm": "spark_pistol", "notes": "a swarm of tiny bots in a person's shape: split_on_death (two small 1x1 bodies that reform in 30 s if both live), o2_use 0, ion damage x2"},
+		"sable": {"name": "Sable", "hp": 90, "speed": 1.0, "traits": ["cutter_torches", "boarders_eye"], "rig": "sable", "sidearm": "carbine", "notes": "boarding-crew families: breach work x2 (cutting doors), ranged x1.25, hp x0.9"},
+		"quillback": {"name": "Quillback", "hp": 110, "speed": 1.0, "traits": ["quill_coat", "proud_back"], "rig": "quillback", "sidearm": "ember_knife", "notes": "spined clan duellists: counter_melee 10, hp x1.1, no_suit"},
+		"kite": {"name": "Kite", "hp": 90, "speed": 1.0, "traits": ["drift_born", "tail_grip"], "rig": "kite", "sidearm": "flare_gun", "notes": "born in zero-g: suffocate x0.5, vacuum_speed x1.5 (in rooms under 30% air), hp x0.9"}
+	}
+}

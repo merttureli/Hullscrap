@@ -1,0 +1,66 @@
+{"events": [
+    {
+      "id": "rattler_knock_in_the_wall", "type": "station", "weight": 8, "once": true, "requires": {"flag": ["at_rusthold", "met_ma"]},
+      "text": "Something is knocking inside the wall of the Rusthold dock office, three short and one long, over and over, in a rhythm that is getting impatient. Dockmaster Orla puts down her clipboard, sighs, and takes a hammer from her belt. 'That'll be them,' she says. 'Ma knows. Ma has always known. Do not tell anyone that Ma knows.' A grille pops out of the wall at ankle height. Out of it, in welding goggles and a lot of ear, climbs a creature the size of a fuel can, holding a rolled scrap of paper. 'We have been hearing,' it says, 'that you have no engineer who fits in the walls.'",
+      "choices": [
+        {"text": "Ask what the walls have to offer.", "outcomes": [
+          {"weight": 100, "text": "The Rattler unrolls the paper, which is a map drawn on the back of a ration label, with very small arrows. It leads to a cache behind the third bulkhead of Bay 9. You follow it with a torch, and find a tin of bolts and a good coil of cable, and the sense that you have been let in on something.", "effects": {"items": {"scrap": 25, "copper": 15}, "reveal": "wreck_field"}}
+        ]},
+        {"text": "Hire the Rattler (80 credits).", "requires": {"credits": 80, "not_flag": "rattler_knock_hired"}, "outcomes": [
+          {"weight": 100, "text": "'Shim,' says the Rattler, shaking your finger with both hands. 'I know every wall on this deck. I have a spanner. I have two. Where do you keep your ducts?' They are on your ship before you have signed the form, are inside your ventilation within a minute, and are heard knocking, three short and one long, from the galley wall, for the rest of the evening. You do not mind. It is company.", "effects": {"items": {"credits": -80}, "recruit": {"species": "rattler", "name": "Shim"}, "flag": "rattler_knock_hired"}}
+        ]},
+        {"text": "[Rattler] Knock back: three short, one long, and one extra, rude.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler hammers the wall with a spanner and the wall answers with a ripple of knocking down the length of the deck. Ten ears pop out of ten grilles. A very small court is held on the dock floor, and the Rattlers of Rusthold, who have been waiting years for an outside contact, hand over a heap of freshly scavenged stock as a gift, and an apology for the extra knock.", "effects": {"items": {"scrap": 30, "copper": 20, "credits": 20}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "Tell Orla you did not see anything.", "outcomes": [
+          {"weight": 100, "text": "'Good,' says Orla, and shuts the grille with her foot. The knocking stops. In a minute it starts again somewhere else, further along. 'Smart,' she says. 'Ma likes people who don't see things.'", "effects": {"items": {"credits": 10}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Walk on.", "outcomes": [
+          {"weight": 100, "text": "You go on. Behind you the knocking resumes, a little hurt.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "rattler_duct_job", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The salvage freighter Tin Mother has a leak behind a panel, in a duct forty centimetres across. Her engineer, a very large Basalt, has had his arm in it to the shoulder for an hour. 'It is the coolant valve,' he says through his teeth. 'It is right there. It is right there.' The rest of the crew stand round him at a respectful distance, holding tools of the wrong size. Somewhere inside the wall the coolant is hissing like a kettle.",
+      "choices": [
+        {"text": "Cut the duct open from outside.", "outcomes": [
+          {"weight": 60, "text": "A torch, some swearing, and the whole run of duct comes away in a single curl. The valve is found, shut, and the Basalt retrieves his arm with great tenderness. The crew pays what they can: parts, mostly.", "effects": {"items": {"scrap": 30, "copper": 10}}},
+          {"weight": 40, "text": "The cut goes through a coolant line you hadn't known was there. A cold fog fills the corridor and everyone retreats in disorder. The valve is shut in the end, but the Tin Mother pays less than she meant to.", "effects": {"items": {"scrap": 15}, "crew_hp": -10}}
+        ]},
+        {"text": "Talk the Basalt through it by feel.", "outcomes": [
+          {"weight": 100, "text": "'A quarter turn left. No, right. Your other right.' It takes forty minutes and a great deal of Basalt dignity. The valve closes with a click, and everybody applauds. The crew sends over a crate of what they have.", "effects": {"items": {"scrap": 20, "polymer": 10}}}
+        ]},
+        {"text": "[Rattler] Climb in.", "requires": {"species": "rattler"}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler goes into the duct head first with a lamp in their teeth and a spanner in each hand, and the valve is shut in under two minutes, with a running commentary on the quality of the weld. The Basalt looks at the duct, at your Rattler, and at his own arm. 'Hire them,' he says. 'Hire everyone.' The Tin Mother pays properly, and the Rattler keeps the valve handle as a trophy.", "effects": {"items": {"credits": 55, "scrap": 25}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Vellum] Fold in.", "requires": {"species": "vellum"}, "outcomes": [
+          {"weight": 100, "text": "Your Vellum goes into the duct as a flat folded shape, a single crisp sheet of care, and reappears two minutes later holding the valve handle, with a coolant stain on the third fold. The Tin Mother cheers. Her crew press a purse and a handful of scrap into the folded hand.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Leave them to the hissing.", "outcomes": [
+          {"weight": 100, "text": "You sail past the Tin Mother and the Basalt's reproachful arm. The kettle noise carries over the comm for quite a long time.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "rattler_everything_heap", "type": "trader", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "Gunnar's Everything Heap is a barge whose hold is stacked with scrap in a way that looks random and is not. Crates, coils, drums, a whole sofa. A hand-lettered sign: ELEVEN CREDITS A CRATE. NO RETURNS. NO LOOKING INSIDE. Gunnar sits on a drum with a mug of something, watching you with the air of a man who knows exactly what is in each crate and expects you to guess wrong.",
+      "choices": [
+        {"text": "Buy a crate (11 credits).", "requires": {"credits": 11}, "outcomes": [
+          {"weight": 45, "text": "A crate of bent brackets and half a ration. You carry it on board anyway, out of pride.", "effects": {"items": {"credits": -11, "scrap": 15}}},
+          {"weight": 40, "text": "A crate of cable, tangled in a way that took talent. Copper, a lot of it.", "effects": {"items": {"credits": -11, "copper": 25, "scrap": 5}}},
+          {"weight": 15, "text": "The crate is heavy. Inside, under four layers of packing, is a block of titanium alloy the size of a loaf. Gunnar's mug stops halfway to his mouth.", "effects": {"items": {"credits": -11, "titanium": 4}}}
+        ]},
+        {"text": "Haggle: two crates for eleven.", "outcomes": [
+          {"weight": 50, "text": "Gunnar looks at you for a while. 'Two for eleven,' he agrees, 'and I get to pick.' He picks. You get a crate of bolts and a crate of other bolts.", "effects": {"items": {"scrap": 25}}},
+          {"weight": 50, "text": "He laughs until he coughs, then throws you a crate for free, to be rid of you. It is a crate of bolts.", "effects": {"items": {"scrap": 12}}}
+        ]},
+        {"text": "[Rattler] Read the heap.", "requires": {"species": "rattler", "credits": 44}, "outcomes": [
+          {"weight": 100, "text": "Your Rattler walks round the heap once, twice, sniffing, and then points to four crates. 'Not those, they are hollow. That one has a reactor coil. That one has a smaller one inside it.' You buy exactly what they point at, at eleven credits apiece. Gunnar goes pale, and then, slowly, offers your Rattler a job. They decline, but take a free mug.", "effects": {"items": {"credits": -44, "copper": 30, "scrap": 30, "titanium": 3}}}
+        ]},
+        {"text": "No looking inside is no deal.", "outcomes": [
+          {"weight": 100, "text": "'Your loss,' Gunnar says comfortably, and takes another sip. The sofa seems to be looking at you.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

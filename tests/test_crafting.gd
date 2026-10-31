@@ -14,7 +14,7 @@ const ITEM_KINDS := ["ammo", "gear", "special"]
 const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1", "laser_turret_mk1", "strafe_jets_mk1", "longburn_mk1", "intake_mk1", "belt_drive_scrap", "radar_mk1", "tractor_mk1"]  # intake_mk1, radar_mk1 and tractor_mk1 (the Raft loop): bought at Meridian or found, not known at the start; belt_drive_scrap: bought at Rusthold or found, its blueprint comes with the first drive (docs/CONTENT.md 4f)
 const RARITIES := ["common", "uncommon", "rare", "very_rare"]
 const CATEGORIES := ["system", "gear", "material", "module"]
-const WORKSHOP_TOOLS := ["laser_cutter", "nanoforge"]  # what workshop.gd can provide
+const WORKSHOP_TOOLS := ["laser_cutter", "nanoforge", "plasma"]  # what workshop.gd and processing.gd can provide
 ## Scrap and Neon line parts and the radiator, added with the lines (docs/CONTENT.md step 1): they
 ## have no recipe yet. Remove an id from here when its recipe is added.
 const NO_RECIPE_YET: Array[String] = []

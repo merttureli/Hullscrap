@@ -1,0 +1,36 @@
+{
+  "materials": [
+    {
+      "id": "steel",
+      "name": "Steel",
+      "color": "#7c8aa5",
+      "rarity": "uncommon",
+      "kind": "material",
+      "blurb": "Scrap that has been told what it is for. Four scrap in, one bar out, and the bar is straight."
+    },
+    {
+      "id": "alloy",
+      "name": "Alloy",
+      "color": "#a9c4a0",
+      "rarity": "rare",
+      "kind": "material",
+      "blurb": "Steel married to titanium in a very hot room. Lighter than it looks and prouder than it should be."
+    },
+    {
+      "id": "conductor",
+      "name": "Conductor",
+      "color": "#e8c15a",
+      "rarity": "uncommon",
+      "kind": "material",
+      "blurb": "Copper drawn fine and doped with silicon. Carries a reactor's mood to the far end of the ship."
+    },
+    {
+      "id": "glass_lattice",
+      "name": "Glass Lattice",
+      "color": "#9fe8e0",
+      "rarity": "rare",
+      "kind": "material",
+      "blurb": "Silicon and crystal spun into a net that bends light the way you ask. Cold to the touch, and it hums."
+    }
+  ]
+}

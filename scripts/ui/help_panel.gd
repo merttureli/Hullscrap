@@ -99,6 +99,7 @@ const COLUMNS: Array = [
 		]],
 		["CRAFTING (C)", [
 			["C", "Crafting panel, in build or play mode"],
+			["Tab", "Switch between the fabricator and the smelter (steel, alloy, conductor, glass lattice)"],
 			["Click, or Up / Down + Enter", "Queue a recipe"],
 			["PgUp / PgDn", "Scroll fast"],
 			["Click a queued job", "Cancel it"],

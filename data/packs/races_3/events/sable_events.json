@@ -1,0 +1,63 @@
+{"events": [
+    {
+      "id": "sable_apprentice_cook", "type": "trader", "weight": 8, "once": true, "requires": {"jumps_min": 2},
+      "text": "A trader barge is moored to a rock under a black flag with a white torch on it. The Sable family aboard sell cutting torches, boarding hooks, and fine second-hand locks (do not ask where the keys went). At the back of the stall, on a crate, sits a teenager in a lean dark coat with a torch on each forearm, staring at the dock with the look of someone who has just been told what she is doing for the rest of her life. 'My aunt says I am to be a boarder,' she says, to nobody. 'I would rather like to be a cook.'",
+      "choices": [
+        {"text": "Buy a boarding kit (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "A canvas roll of cutting tips, two hooks, a coil of line and a small wedge for doors. The aunt weighs your money and throws in a lock, 'for luck'. The teenager watches the roll as if it were a prison sentence, packed neatly.", "effects": {"items": {"credits": -40, "scrap": 35, "polymer": 10}}}
+        ]},
+        {"text": "Ask her about the cooking.", "outcomes": [
+          {"weight": 100, "text": "She lights up like a stove. She tells you about a stew made on a torch, with three kinds of pepper and a smoky glaze, and you find that you are being fed on the crate, on a plate made of an old shield. It is the best meal you have had since the Snap. Your crew come out of the barge with their eyes shining.", "effects": {"crew_hp": 15}}
+        ]},
+        {"text": "Offer her a place in your galley (60 credits to the aunt).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 100, "text": "The aunt names a price, because a family does not give anyone away for free, and you pay it. She looks at her niece's face for a long moment, and sighs from somewhere near her boots. 'Fine,' she says. 'She can cut vegetables.' Sabine hugs the aunt hard, climbs onto your ship with both torches in a bag, and begins, at once, to inspect the stove.", "effects": {"items": {"credits": -60}, "recruit": {"species": "sable", "name": "Sabine"}}}
+        ]},
+        {"text": "[Sable] Speak for her to the aunt, family to family.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable steps up to the aunt and speaks to her, quietly, in the cutters' family tongue: so-and-so's girl, a good cook, a place in a galley with a table in it. The aunt listens with her arms folded, and then unfolds them. 'Her mother wanted a cook,' she says. 'I am not made of stone.' Sabine comes aboard with both torches and a family blessing, and a purse of scrap that the aunt presses on you in lieu of a dowry.", "effects": {"recruit": {"species": "sable", "name": "Sabine"}, "items": {"scrap": 30, "credits": 20}}}
+        ]},
+        {"text": "Leave them to the stall.", "outcomes": [
+          {"weight": 100, "text": "You turn away. Behind you, the aunt calls the girl by name, and the girl gets up very slowly, and goes to where the torches are.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "sable_vault_door", "type": "wreck_field", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The Concord vault-ship Prudent has drifted since the Snap with her strongroom door sealed against the world: a three-metre slab of hardened steel, its keypad dead, a plate on it reading FOR AUTHORISED PERSONS ONLY. Her crew's logs say there are payroll chests for the whole Rim Fleet inside. Somebody has already tried the door with a hammer. The hammer is on the floor, bent.",
+      "choices": [
+        {"text": "Try the crew's old codes.", "outcomes": [
+          {"weight": 35, "text": "The fourth code is 1-1-4-4, the ship's registry number, and the keypad wakes with a soft chime. The door slides back in its track. The payroll is there, in rolls, and a great deal of old dust.", "effects": {"items": {"credits": 60, "silicon": 2}}},
+          {"weight": 65, "text": "The keypad accepts none of them, and logs each attempt with a small, disapproving beep. At the twelfth the lights come on in the hall and a recording says, calmly, 'The authorities have been informed.' There are none to inform. You leave regardless.", "effects": {"items": {"scrap": 5}}}
+        ]},
+        {"text": "Cut through the door with a torch.", "outcomes": [
+          {"weight": 60, "text": "It takes three hours, four torch tips and a good deal of bad language, and the door is cut. Inside, the payroll chests are intact. The sweat, however, is yours.", "effects": {"items": {"credits": 55, "scrap": 20}, "crew_hp": -5}},
+          {"weight": 40, "text": "The door was armoured against torches. You go through every tip you have, and gain only a small neat groove. You leave with a sore back and a Concord warning plate for the wall.", "effects": {"items": {"scrap": -10}, "crew_hp": -5}}
+        ]},
+        {"text": "[Sable] Cut it the family way.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable looks at the door as an old friend does at a bad joke. Both torches light, one on each forearm, and the cut goes round in a clean square in under four minutes, with a commentary about the door's ancestry. It falls inward with a boom. The payroll, the strongbox, and a rack of vault-grade plates are all there.", "effects": {"items": {"credits": 70, "titanium": 4, "silicon": 2}}}
+        ]},
+        {"text": "Leave the vault shut.", "outcomes": [
+          {"weight": 100, "text": "You leave the Prudent to her secrets. The bent hammer, on the way out, looks up at you with a kind of dignity.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "sable_hired_boarders", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 3},
+      "text": "The raiders have hired a Sable boarding crew: eight lean figures in dark coats stand in a boarding tube with a cutter torch on each forearm, their faces calm. 'Yours truly,' says the raider captain over the comm, 'has hired the best.' The Sable at the head of the line looks at your hull, your name painted on it, and the weapons on your side. She frowns, very slightly, like a customer counting change. Torches are lit down the line, a row of small hard stars.",
+      "choices": [
+        {"text": "Hold the airlock against them.", "outcomes": [
+          {"weight": 100, "text": "You seal the lock and pull every crew member in front of it with whatever they can hold. The lead boarder shrugs, as at weather, and the torches come up.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Outbid the captain (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 60, "text": "The lead boarder's eyebrows go up. 'We do not sign on twice,' she says, 'but we do read the small print.' She turns her torches off, one at a time. The captain screams over the comm. The Sable file back into their own cutter and, as a courtesy, drop a coil of cable and a few tips in your lock.", "effects": {"items": {"credits": -60, "scrap": 40, "titanium": 3}}},
+          {"weight": 40, "text": "She takes the money with a straight face, nods, and says: 'And we will still board.' The tube comes on, laughing.", "effects": {"items": {"credits": -60}, "fight": "tier"}}
+        ]},
+        {"text": "[Sable] Hail them by family name.", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable steps to the comm and says the greeting of the cutter families, three words and a slow rising note. The line of torches stops. There is a long pause. 'Cousin,' says the lead boarder, quietly, and every flame goes out at once. The crew cuts itself loose from the contract on the spot, to the captain's scream, and sends over a family toll as an apology: the captain's own advance.", "effects": {"items": {"credits": 60, "scrap": 30}}}
+        ]},
+        {"text": "Burn for the nearest lane.", "outcomes": [
+          {"weight": 100, "text": "You put the drive to the wall and run for a lane. The tube snaps away at the last possible moment, taking a section of your rail with it.", "effects": {"hull": -10, "crew_hp": -5}}
+        ]}
+      ],
+      "after_win": {"text": "The Sable withdraw in order, helping their wounded, and the raider captain's ship goes the other way. Behind them, in the tube, a hook is left hanging, with a little tag on it: NO HARD FEELINGS. A purse follows.", "effects": {"items": {"scrap": 40, "credits": 35}}}
+    }
+  ]}

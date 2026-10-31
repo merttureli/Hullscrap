@@ -23,7 +23,7 @@ enum Tab { STRUCTURE, SHAPES, SYSTEMS, WEAPONS, ENGINES, UTILITY, CARGO }
 const TAB_NAMES: Array[String] = ["Structure", "Shapes", "Systems", "Weapons", "Engines", "Utility", "Cargo"]
 const TAB_ICONS: Array[String] = ["structure", "shapes", "systems", "weapons", "engines", "utility", "cargo"]
 ## The families on the Utility tab. Weapons and engines have their own tabs; every other family is a System.
-const UTILITY_FAMILIES: Array[String] = ["intake", "radar", "tractor", "shield", "oxygen", "bed", "workshop", "fabricator", "utility", "ammo_rack", "belt_drive"]
+const UTILITY_FAMILIES: Array[String] = ["intake", "radar", "tractor", "shield", "oxygen", "bed", "workshop", "fabricator", "smelter", "utility", "ammo_rack", "belt_drive"]
 ## The cargo the top bar shows (scripts/ui/hud_top_bar.gd), in its order; the Cargo tab lists everything else held.
 const BAR_IDS: Array[String] = ["scrap", "copper", "polymer", "titanium", "silicon", "crystal", "credits", "fuel"]
 const LINE_ORDER: Array[String] = ["standard", "scrap", "neon"]
@@ -292,6 +292,8 @@ static func _part_info(out: Dictionary, e: Dictionary, ship, rot: int) -> void:
 			rows.append(["Feeds", "1 unit every %s s" % num(float(st.get("belt_interval", 1.0)))])
 		"ammo_rack":
 			rows.append(["Holds", "%d units of one ammo" % int(st.get("capacity", 20))])
+		"smelter":
+			rows.append(["Smelts", "level %d%s, speed x%s" % [int(st.get("smelt_level", 1)), ", plasma tool" if float(st.get("plasma", 0.0)) > 0.0 else "", num(float(st.get("smelt_speed", 1.0)))]])
 		_:
 			for k in st:
 				rows.append([_label(k), num(float(st[k]))])

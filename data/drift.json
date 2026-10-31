@@ -48,17 +48,17 @@
 		"rusthold": {
 			"faction": "clans", "services": ["fuel", "sell", "stock", "debt", "repair", "recruit"],
 			"stock": {"engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "engine_scrap_mk3": 360, "reactor_scrap_mk1": 140, "oxygen_scrap_mk1": 80, "shield_scrap_mk1": 110, "rattle_burst_scrap": 130, "bolt_thrower_scrap": 150, "shrapnel_cannon_scrap": 160, "radiator": 40, "bed": 30, "missile": 12, "ammo_rack": 60, "belt_drive_scrap": 220},
-			"recruit": {"human": 5, "basalt": 3, "fenn": 1, "kett": 2, "gauntling": 1, "drakkin": 2}
+			"recruit": {"human": 5, "basalt": 3, "fenn": 1, "kett": 2, "gauntling": 1, "drakkin": 2, "rattler": 2, "quillback": 1}
 		},
 		"meridian": {
 			"faction": "concord", "services": ["fuel", "sell", "stock", "repair", "recruit"],
-			"stock": {"engine_mk1": 120, "engine_mk2": 270, "engine_mk3": 480, "strafe_jets_mk1": 60, "strafe_jets_mk2": 140, "longburn_mk1": 120, "reactor_mk1": 150, "reactor_mk2": 320, "shield_mk1": 160, "shield_mk2": 330, "laser_mk1": 140, "laser_mk2": 280, "pulse_mk1": 130, "oxygen_gen": 90, "medbay": 180, "helm": 70, "intake_mk1": 120, "intake_mk2": 270, "intake_mk3": 480, "radar_mk1": 130, "radar_mk2": 290, "radar_mk3": 520, "tractor_mk1": 160, "tractor_mk2": 360, "artemis_mk1": 220, "missile": 14, "ammo_rack": 70, "belt_drive_std": 340},
+			"stock": {"engine_mk1": 120, "engine_mk2": 270, "engine_mk3": 480, "strafe_jets_mk1": 60, "strafe_jets_mk2": 140, "longburn_mk1": 120, "reactor_mk1": 150, "reactor_mk2": 320, "shield_mk1": 160, "shield_mk2": 330, "laser_mk1": 140, "laser_mk2": 280, "pulse_mk1": 130, "oxygen_gen": 90, "medbay": 180, "helm": 70, "intake_mk1": 120, "intake_mk2": 270, "intake_mk3": 480, "radar_mk1": 130, "radar_mk2": 290, "radar_mk3": 520, "tractor_mk1": 160, "tractor_mk2": 360, "artemis_mk1": 220, "missile": 14, "ammo_rack": 70, "belt_drive_std": 340, "smelter_mk2": 280, "smelter_mk3": 500},
 			"recruit": {"human": 6, "fenn": 2, "mire": 2, "grundl": 1, "oorth": 1, "lantern": 2}
 		},
 		"prism": {
 			"faction": "lumen", "services": ["fuel", "sell", "stock", "repair", "recruit"],
-			"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "engine_neon_mk2": 680, "longburn_mk2": 270, "shield_neon_mk1": 340, "heat_lance_neon": 420, "siren_ion_neon": 400, "radiator": 50, "belt_drive_neon": 520},
-			"recruit": {"emberkin": 6, "fenn": 1, "human": 1, "sporeling": 2, "prismatic": 1, "vellum": 2}
+			"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "engine_neon_mk2": 680, "longburn_mk2": 270, "shield_neon_mk1": 340, "heat_lance_neon": 420, "siren_ion_neon": 400, "radiator": 50, "belt_drive_neon": 520, "smelter_neon_mk1": 380},
+			"recruit": {"emberkin": 6, "fenn": 1, "human": 1, "sporeling": 2, "prismatic": 1, "vellum": 2, "choir": 2}
 		},
 		"clan_trader": {
 			"faction": "clans", "services": ["fuel", "sell", "debt"], "stock": {}, "recruit": {}

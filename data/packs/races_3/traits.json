@@ -1,0 +1,19 @@
+{
+	"_doc": "Traits of race wave 3. Each is a bag of keys of the trait library (data/traits.json `_doc`). Work speeds are factors on speed (2 = twice as fast). The keys revive_once, line_affinity, split_on_death, counter_melee, no_suit and vacuum_speed come from the race3-hooks track (docs/CONTENT_PLAN.md section 2).",
+	"traits": {
+		"returned": {"name": "Returned", "blurb": "Came back from the Hollow and does not breathe. The first time they go down, they get up again.", "o2_use": 0, "revive_once": {"after": 10, "hp": 50}},
+		"stitched": {"name": "Stitched", "blurb": "A bed does nothing for what is stitched together, and a medbay only half as much.", "heal_mult": {"bed": 0.0, "medbay": 0.5}},
+		"choral_voice": {"name": "Choral voice", "blurb": "They sing at their work, and everyone else in the room works 15% faster.", "aura": {"work_mult": 1.15}},
+		"hollow_body": {"name": "Hollow body", "blurb": "A crystal instrument, not a fist: hits a third as hard in a brawl.", "melee_mult": 0.3},
+		"gremlin": {"name": "Gremlin", "blurb": "Small enough to walk a 1-wide crawlspace.", "body": 1},
+		"scrap_sense": {"name": "Scrap sense", "blurb": "Born in Scrap-line walls: repairs and mans Scrap-line parts twice as fast.", "line_affinity": {"scrap": 2.0}},
+		"many_bodies": {"name": "Many bodies", "blurb": "A swarm that holds a person's shape, and does not breathe. When brought down it splits in two small bodies that reform if both live.", "o2_use": 0, "split_on_death": {"reform_s": 30}},
+		"circuit_kin": {"name": "Circuit kin", "blurb": "Made of the thing ion breaks: takes double ion damage.", "damage_taken": {"ion": 2.0}},
+		"cutter_torches": {"name": "Cutter torches", "blurb": "Torches on both forearms: cuts through doors and walls twice as fast.", "work_mult": {"breach": 2.0}},
+		"boarders_eye": {"name": "Boarder's eye", "blurb": "Raised to shoot down a corridor: hits a quarter harder at range.", "ranged_mult": 1.25},
+		"quill_coat": {"name": "Quill coat", "blurb": "Anyone who hits them in a brawl is hit back for 10.", "counter_melee": 10},
+		"proud_back": {"name": "Proud back", "blurb": "A coat of quills does not fit in a suit or armour: they wear none.", "no_suit": true},
+		"drift_born": {"name": "Drift-born", "blurb": "Raised in thin air: takes half the damage in a room with no air.", "suffocate_mult": 0.5},
+		"tail_grip": {"name": "Tail grip", "blurb": "Quick in thin air: moves half as fast again in a room under 30% air.", "vacuum_speed": 1.5}
+	}
+}

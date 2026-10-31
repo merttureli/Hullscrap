@@ -1,0 +1,193 @@
+{
+ "species": "tessellate_half",
+ "frame": [
+  25,
+  25
+ ],
+ "pivot": [
+  12,
+  12
+ ],
+ "notes": "Tessellate, split in two: the 1x1 body a Tessellate becomes at `split_on_death` (THE SMALL RIG: kind \"small\", 25x25, pivot (12,12)). The same 2x2 bots with 1 px gaps as the full swarm, in a 4x4 lattice (about half of the bots: a two-bot head, a four-bot shoulder row, a sash row). Legs, torso and head stay inside the central 15x15 (pivot +-7); only the short bot trails of the arms reach the shared mounts (item top-left = mount - item.grip as everywhere; hand anchors are art only). Same head variants and outfit mask as `tessellate`. The outline is round the outside of the swarm only. Same rig as human: every layer faces UP at rotation 0 on one 25x25 frame, rotate about the pivot; outfit pixels are neutral grey in the base PNG and white in *_color.png (multiply by the outfit colour there); no baked shadow.",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "item",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "item": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     9
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "frames 0 and 3 are the contacts; the swing boot (frames 1-2 right, 4-5 left) is lifted"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     12,
+     8
+    ],
+    "back": [
+     12,
+     16
+    ],
+    "shoulder_l": [
+     7,
+     11
+    ],
+    "shoulder_r": [
+     17,
+     11
+    ]
+   },
+   "glow": {
+    "image": "torso_glow.png",
+    "frame": [
+     25,
+     25
+    ],
+    "offset": [
+     0,
+     0
+    ],
+    "frames": 2,
+    "blend": "add (preferred) or alpha-over",
+    "anims": {
+     "on": [
+      0,
+      2,
+      3
+     ]
+    }
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "pistol": 1,
+    "rifle": 2,
+    "tool": 3,
+    "heavy": 4,
+    "melee": 5
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      6,
+      15
+     ],
+     "hand_r": [
+      18,
+      15
+     ],
+     "mount": null
+    },
+    "pistol": {
+     "hand_l": [
+      10,
+      1
+     ],
+     "hand_r": [
+      14,
+      1
+     ],
+     "mount": [
+      12,
+      1
+     ]
+    },
+    "rifle": {
+     "hand_l": [
+      13,
+      1
+     ],
+     "hand_r": [
+      17,
+      5
+     ],
+     "mount": [
+      16,
+      4
+     ]
+    },
+    "tool": {
+     "hand_l": [
+      9,
+      5
+     ],
+     "hand_r": [
+      17,
+      1
+     ],
+     "mount": [
+      17,
+      0
+     ]
+    },
+    "heavy": {
+     "hand_l": [
+      10,
+      1
+     ],
+     "hand_r": [
+      17,
+      8
+     ],
+     "mount": [
+      15,
+      7
+     ]
+    },
+    "melee": {
+     "hand_l": [
+      8,
+      3
+     ],
+     "hand_r": [
+      19,
+      4
+     ],
+     "mount": [
+      19,
+      4
+     ]
+    }
+   },
+   "notes": "item placement: item top-left = mount - item.grip (both unrotated), then rotate the upper group about the pivot. Mounts are identical on every species (and the human), so any item fits any body. Pose = the item's class: pistol, rifle, tool, heavy, melee. RIG KIND small: this frame is 25x25 with the pivot at (12,12), so every mount here is the shared one moved by (-4,-4): mount - pivot is identical to the human rig. The hand anchors are art only (kept inside the frame)."
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "swarm": 0,
+    "visor": 1,
+    "helmet": 2
+   }
+  }
+ },
+ "kind": "small"
+}
