@@ -254,7 +254,7 @@ func _show_hud(on: bool) -> void:
 		_bar.visible = on
 		_hint.visible = on
 		_banner.visible = false
-		_jump_bar.bind(session.morale if on else null)
+		_jump_bar.bind(session if on else null)
 
 
 # --- input ----------------------------------------------------------------------------------------

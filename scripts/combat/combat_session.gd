@@ -26,7 +26,7 @@ const STEER_MIN_DISTANCE := 48.0  ## px: a cursor closer to the ship than this d
 const WON_TEXT := "Pirate wrecked. Esc to return"
 const LOST_TEXT := "Your ship is wrecked. R to restart"
 const CAPTURED_TEXT := "Nobody is left standing aboard. She's yours. Esc to return"
-const SPARED_TEXT := "Deal struck. Pirate limps away. Esc to return"
+const SPARED_TEXT := "Deal struck. Pirate stands down. Esc to return"
 const ESCAPED_TEXT := "They got away. Esc to return"
 const ESCAPE_LOOK_S := 1.5  ## seconds the camera keeps the place the enemy jumped from in view
 
