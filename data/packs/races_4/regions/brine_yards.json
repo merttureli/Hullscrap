@@ -4,7 +4,7 @@
 	"home_species": "brine",
 	"faction": "concord",
 	"stages": [2, 6],
-	"weight": 3,
+	"weight": 4,
 	"rarity": "common",
 	"danger": 1.05,
 	"palette": {"tint": "#5d8fb0", "nebula": "concord"},

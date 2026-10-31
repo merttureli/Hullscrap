@@ -4,7 +4,7 @@
 	"home_species": "echo",
 	"faction": "",
 	"stages": [5, 8],
-	"weight": 2,
+	"weight": 8,
 	"rarity": "rare",
 	"danger": 1.25,
 	"palette": {"tint": "#b8c4d6", "nebula": "gate"},
