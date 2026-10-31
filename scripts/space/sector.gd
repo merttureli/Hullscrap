@@ -16,6 +16,9 @@ extends RefCounted
 ##   regenerated.
 ## - Ambient rolls and fight spawn points use the sector's own rng (saved), so real-time play never moves the
 ##   campaign's rng, which events and loot use.
+## - The Hollow tide (docs/MECHANICS_REVIEW.md P1): the campaign tells the sector it is `hollow` (set_hollow, the one
+##   setter; the sector never reads the tide). Then its debris thins, ghosts come for the ship (ambient `hollow` in
+##   data/sectors.json) and every POI but a station or store runs a `hollow` event. Not saved: the campaign sets it again on a load.
 
 const Content = preload("res://scripts/data/content.gd")
 const Radar = preload("res://scripts/space/radar.gd")
@@ -56,7 +59,9 @@ var damping := 0.25  ## per second
 var clock := 0.0  ## seconds spent in the sector (tick)
 var rng := RandomNumberGenerator.new()  ## ambient rolls and spawn points
 var ambient_weights := {}  ## kind (trader, patrol, pirate) -> weight of the passing ships: the region's `ambient`
+var hollow := false  ## the Hollow tide has taken this place (set_hollow): ghosts come for the ship and the debris thins
 var _amb_t := 0.0  # seconds since the last ambient roll
+var _ghost_due := false  # the place fell to the tide with the ship in it: the next tick brings a ghost at once
 var _next_amb := 1
 var _next_wreck := 1
 var _engaged := {}  # POI id -> true while its event is open (or, for a station, until the ship has left); not saved
@@ -268,6 +273,7 @@ func enter() -> void:
 	_engaged.clear()
 	_greeted.clear()
 	_amb_t = 0.0
+	_ghost_due = false
 
 
 ## Is point `p` inside the sector (grown by `slack` px)?
@@ -321,7 +327,12 @@ func trigger(c, ship) -> Dictionary:
 func _event_for(c, ship, poi: Dictionary) -> Dictionary:
 	if poi["main"] and c.current == node_id:
 		return c.arrive(ship)
-	var ev: Dictionary = c.HOSTILE_PATROL if poi["event_type"] == "patrol" and c.refuses("concord") else c.events.pick(c, {"id": node_id, "type": poi["event_type"], "place": ""}, ship)
+	var kind := str(poi["event_type"])
+	if hollow and not bool(cfg["poi_types"].get(poi["type"], {}).get("repeat", false)):
+		kind = "hollow"  # the tide has taken the place: every POI but a station or store sends ghosts and dead beacons, no rewards
+	var ev: Dictionary = c.HOSTILE_PATROL if kind == "patrol" and c.refuses("concord") else c.events.pick(c, {"id": node_id, "type": kind, "place": ""}, ship)
+	if ev.is_empty() and kind == "hollow":  # a ghost always meets the ship (the tide pack has the real events)
+		ev = c.HOSTILE_HOLLOW
 	c.events_seen += int(not ev.is_empty())
 	return {"node": c.node(node_id), "refused": "", "event": ev}
 
@@ -351,7 +362,7 @@ func fight_design(c, id: String, value := "tier") -> String:
 	var poi := find(id)
 	if poi.is_empty():
 		return ""
-	return c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" else c.fight_path(value, str(poi["event_type"]))
+	return c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" and not hollow else c.fight_path(value, str(poi["event_type"]))
 
 
 ## A `fight` effect at POI `id` (`value`: "tier" or a design id, as in events.gd): {design (a res:// path), pos (where
@@ -387,7 +398,7 @@ func _wreck(id: String, pos: Vector2, label: String) -> Dictionary:
 func hostile_ships() -> Array:
 	var out := hostiles.duplicate()
 	for a in ambient:
-		if a["event_type"] == "pirate" and a["state"] == NEW:
+		if a["event_type"] in ["pirate", "hollow"] and a["state"] == NEW:
 			out.append(a["pos"])
 	return out
 
@@ -456,9 +467,10 @@ func debris_cfg(base: Dictionary) -> Dictionary:
 	out["current"]["angle"] = current_angle
 	out["current"]["speed"] = current_speed
 	var s: Dictionary = out["spawn"]
-	s["every"] = float(s["every"]) / density
-	s["max_alive"] = maxi(8, roundi(float(s["max_alive"]) * density))
-	s["start_alive"] = roundi(float(s["start_alive"]) * density)
+	var d := density * (float(cfg["ambient"].get("hollow", {}).get("debris", 1.0)) if hollow else 1.0)  # the Hollow eats the current
+	s["every"] = float(s["every"]) / d
+	s["max_alive"] = maxi(8, roundi(float(s["max_alive"]) * d))
+	s["start_alive"] = roundi(float(s["start_alive"]) * d)
 	for t in out["types"]:
 		t["weight"] = float(t["weight"]) * float(debris_mult.get(t["id"], 1.0))
 	return out
@@ -484,8 +496,11 @@ func tick(dt: float, ship) -> Array:
 			ambient.remove_at(i)
 		else:
 			i += 1
-	var amb: Dictionary = cfg["ambient"]
+	var amb := _ambient_rule()
 	var made := []
+	if _ghost_due:
+		_ghost_due = false
+		made.append(_roll_ambient(ship, true))
 	_amb_t += dt
 	while _amb_t >= float(amb["every"]):
 		_amb_t -= float(amb["every"])
@@ -495,15 +510,34 @@ func tick(dt: float, ship) -> Array:
 	return made
 
 
+## The ambient numbers in force: data/sectors.json `ambient`, with its `hollow` block laid over them in a Hollow place.
+func _ambient_rule() -> Dictionary:
+	var amb: Dictionary = cfg["ambient"]
+	return amb.merged(amb["hollow"], true) if hollow and amb.get("hollow") is Dictionary else amb
+
+
+## The Hollow tide's call for this sector (campaign.gd is the only caller: on arrival, on a load, and when a jump, a wait or
+## lingering takes the place). `mid_stay`: the ship is in the place as it falls, so one ghost appears at the next tick
+## (and the roll's clock starts again). A place that is Hollow already, or a quiet call (arrival, load), brings none.
+func set_hollow(h: bool, mid_stay := false) -> void:
+	if h and mid_stay and not hollow:
+		_ghost_due = true
+		_amb_t = 0.0
+	hollow = h
+
+
 ## One ambient roll: with chance `ambient.chance` (and fewer than `max` about) an `unknown` contact appears at
 ## `edge` x the radar's reach from the ship, in a random direction that stays inside the sector. Its kind (trader,
-## patrol or pirate: the event type it will run) is picked by the region's weights (ambient_weights).
-func _roll_ambient(ship) -> Dictionary:
+## patrol or pirate: the event type it will run) is picked by the region's weights (ambient_weights). In a Hollow place
+## the kind is always `hollow` (a ghost) and the `hollow` rolls apply; `force` (the ghost of a place that has just
+## fallen) skips the chance and the `max`.
+func _roll_ambient(ship, force := false) -> Dictionary:
 	var amb: Dictionary = cfg["ambient"]
-	var lucky := rng.randf() < float(amb["chance"])
-	if not lucky or ambient.size() >= int(amb["max"]):
+	var rule := _ambient_rule()
+	var lucky := rng.randf() < float(rule["chance"])
+	if not force and (not lucky or ambient.size() >= int(amb["max"])):
 		return {}
-	var kind := _pick(rng, ambient_weights)
+	var kind := "hollow" if hollow else _pick(rng, ambient_weights)
 	var dist := Radar.reach(ship) * float(amb["edge"])
 	var at := ship_pos
 	var found := false
@@ -516,7 +550,7 @@ func _roll_ambient(ship) -> Dictionary:
 		at = ship_pos + (Vector2(size, size) / 2.0 - ship_pos).normalized() * dist
 	var speed := rng.randf_range(float(amb["speed"][0]), float(amb["speed"][1]))
 	var to := ship_pos
-	if rng.randf() >= float(amb["approach"]):  # it passes by, to one side of the ship
+	if rng.randf() >= float(rule["approach"]):  # it passes by, to one side of the ship
 		var side := (ship_pos - at).normalized().orthogonal() * (1.0 if rng.randf() < 0.5 else -1.0)
 		to = ship_pos + side * rng.randf_range(1500.0, 3000.0)
 	var contact := {"id": "a%d" % _next_amb, "type": "unknown", "name": str(cfg["poi_types"]["unknown"]["label"]), "pos": at, "visibility": "signal",

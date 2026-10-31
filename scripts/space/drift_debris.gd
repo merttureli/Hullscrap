@@ -72,6 +72,12 @@ static func for_sector(sector, seed_value := 1):
 	return new(seed_value, sector.debris_cfg(Content.read(PATH)))
 
 
+## `sector` changed its density (the Hollow tide took it, sector.gd hollow): take its spawn numbers again. The pieces already
+## adrift stay, and no more come until fewer than the new cap are about.
+func rescale(sector) -> void:
+	cfg["spawn"] = sector.debris_cfg(Content.read(PATH))["spawn"]
+
+
 # --- the current ---------------------------------------------------------------------------------------
 
 ## The unit direction debris drifts in now (degrees: 0 east, 90 south on the screen), the base angle plus the wobble.

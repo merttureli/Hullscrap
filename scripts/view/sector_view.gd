@@ -12,6 +12,7 @@ extends Node2D
 ##   block, the real flight numbers), and when it ends the ship takes the fight's place. A win or a capture leaves the
 ##   wreck as a POI, already salvaged: the salvage pick comes from the map (map_view.gd, Salvage.event_for).
 ## - Red alert: BuildMode's hostiles_source is red_alert_hostiles() (the fight's enemy and the passing pirates).
+## - When the Hollow tide takes the place the ship is in (sector.hollow), the HUD says FALL_TEXT; debris_view.gd thins the field.
 ## - in_play() and the `played` signal say when the sector runs (play mode, nothing open over it, no fight), for clocks
 ##   that count play time (the Hollow tide's linger).
 ## - Under the ship: the POIs the radar sees (flat placeholder shapes), the passing ships, the course line and the
@@ -33,6 +34,7 @@ const THREAT_S := 2.0  ## seconds a contact's skulls are kept before they are ra
 const SKULL_STEP := 13.0  ## screen px between two skulls under a marker
 const FLASH_S := 0.45  ## seconds the jump flash plays on arrival
 const SAY_S := 4.0  ## seconds a message stays
+const FALL_TEXT := "The tide is here. Something is coming."  ## the HUD line when the Hollow tide takes the place the ship is in
 const ICON := 32.0  ## screen px of a marker icon (the 16 px art at 2x)
 const EDGE := 46.0  ## screen px the edge markers keep from the border
 const TOP := 66.0  ## screen px down to the sector's lines (under the HUD's top bar)
@@ -67,6 +69,7 @@ var _clock := 0.0
 var _said := -100.0
 var _posed := false  # BuildMode and the crew are moved to the ship's place
 var _flash := 0.0
+var _hollow_seen := false  # whether the sector was Hollow at the last look: the HUD tells when it falls
 var _markers: Array = []  # [{rect (screen), id}] of the last HUD frame, for clicks
 var _threats := {}  # POI id -> {n (skulls), t (the clock it was rated at)} for this sector
 var _layer: CanvasLayer
@@ -240,6 +243,10 @@ func frame(dt: float) -> void:
 				_say("Arrived at %s." % helm.arrived)
 		if not s.tick(dt, ship).is_empty():
 			_say("A ship shows on the radar.")
+		if s.hollow != _hollow_seen:
+			_hollow_seen = s.hollow
+			if s.hollow:
+				_say(FALL_TEXT)
 		_spool(dt, c, ship)
 		if not fighting and _sector == s and map != null and not map.visible:
 			var res: Dictionary = s.trigger(c, ship)
@@ -267,6 +274,7 @@ func _sync(c, ship) -> void:
 	_campaign = c
 	_sector = s
 	_threats.clear()
+	_hollow_seen = s.hollow
 	helm.refresh(ship)
 	helm.place(s.ship_pos, s.ship_vel, s.ship_angle)
 	helm.clear_course()
