@@ -400,6 +400,7 @@ func _advance(n: int) -> Array:
 			else:
 				notes.append("A payment fell due, and you are paid up.")
 	notes.append_array(_tide_notes(tide.advance(n)))
+	_mark_hollow(true)
 	return notes
 
 
@@ -413,12 +414,23 @@ func is_hollow(id: String) -> bool:
 	return tide.is_hollow(id)
 
 
+## Tell the current sector whether the tide has taken it (Sector.set_hollow): the one place that flag is set. `mid_stay`: the
+## ship is in the place as it falls (a jump's step, a wait, lingering), so a ghost comes for it at once; an arrival and a load
+## are quiet. Called on arrival (_enter), on a load, and wherever the tide steps (_advance, linger); a sector made later is
+## marked by sector_at. It never makes a sector (so a save stays the same save).
+func _mark_hollow(mid_stay := false) -> void:
+	var s = sectors.get(current)
+	if s != null:
+		s.set_hollow(is_hollow(current), mid_stay)
+
+
 ## A stretch of `dt` seconds is lived in the same place (play mode, no fight, no map): the tide creeps on. Returns lines for
 ## the HUD and the chronicle. It never moves the jump counter or the debt.
 func linger(dt: float) -> Array:
 	var fell := tide.hollow_count()
 	var lines := tide.linger(dt)
 	lines.append_array(_tide_notes(tide.hollow_count() - fell))
+	_mark_hollow(true)
 	return lines
 
 
@@ -593,6 +605,7 @@ func sector_at(id: String):
 		if not drift.has(id):
 			return null
 		sectors[id] = Sector.generate(region_seed, drift.node(id), region_id, {}, region_data)
+		sectors[id].set_hollow(is_hollow(id))
 	return sectors[id]
 
 
@@ -617,6 +630,7 @@ func _enter(id: String, ship) -> void:
 	if s == null:
 		return
 	s.enter()
+	_mark_hollow()
 	if ship != null:
 		s.set_flight(ship)
 
@@ -1264,6 +1278,7 @@ func load_dict(d: Dictionary) -> String:
 				foes[str(k)] = d["foes"][k]
 	last_jump = {}
 	_hull_key = -1
+	_mark_hollow()  # the flag is not saved: the tide says it
 	return ""
 
 

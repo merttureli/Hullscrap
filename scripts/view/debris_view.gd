@@ -32,6 +32,7 @@ var view_centre := Vector2.ZERO  ## the world point at the middle of the screen
 var pops: Array = []  ## {pos, text, age}
 var _ship: RefCounted
 var _sector_of = null  # the sector (sector.gd) the debris was made for, null on the build screen's own
+var _hollow := false  # whether that sector was Hollow when the spawner took its numbers
 var _clock := 0.0
 var _sheets := {}  # art id -> SpriteSheet, or null when there is no art yet
 var _top: Node2D  # over the ship: the pulling mouths and the pops
@@ -90,9 +91,13 @@ func frame(dt: float) -> void:
 		_ship = ship
 		_sector_of = here
 		debris = DriftDebris.for_sector(here, ship.rng_seed) if here != null else DriftDebris.new(ship.rng_seed)
+		_hollow = here != null and here.hollow
 		pops.clear()
 		_place(ship)
 		debris.prewarm(ship)
+	elif here != null and here.hollow != _hollow:  # the tide took this place with the ship in it: the current thins, the pieces adrift stay
+		_hollow = here.hollow
+		debris.rescale(here)
 	_clock += dt
 	_place(ship)
 	debris.step(ship, dt)
