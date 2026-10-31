@@ -281,7 +281,8 @@ func _unhandled_input(e: InputEvent) -> void:
 					_say("Cannot disengage: wreck the enemy, get %d px away, or press J to spool the jump drive" % Session.LEAVE_DISTANCE)
 			KEY_J:
 				var why_jump: String = session.start_jump()
-				_say(why_jump if why_jump != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL))
+				var held: String = session.jump_hold()
+				_say(why_jump if why_jump != "" else (held if held != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL)))
 			KEY_R:
 				restart()
 			KEY_Y:
@@ -399,6 +400,8 @@ func _update_hud() -> void:
 	var text: String = session.end_text()
 	if text == "" and _clock < _note_until:
 		text = _note
+	if text == "" and session.jump_charge >= 0.0:
+		text = session.jump_hold()
 	if text == "":
 		text = session.morale.banner()
 	_banner.text = text
