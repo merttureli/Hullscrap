@@ -34,26 +34,26 @@ So the rule from now on is: **mechanics are a fixed vocabulary, and content is d
   - `jump_range` (nodes per jump);
   - `fuel_mult`;
   - `reveal_enemy` (show enemy interior and crew on the schematic).
-- **Crew traits**: a **trait library in `data/traits.json`**, resolved in one place (`scripts/crew/traits.gd`, `TraitSet.of(member)`; its `_doc` and the `##` lines say what each key does). Built: `hp_mult`, `speed_mult`, `o2_use`, `suffocate_mult`, `damage_taken`, `work_mult` (as speed factors), `heal_mult`, `mechanical`, `aura` {o2_per_s, heal_per_s, work_mult}, `station` {power_bonus, manned_mult}, `melee_mult` and `ranged_mult` (kept for on-foot fights), `swarm`, `dries_out`, `ion_stun`. Still to come: `body`, `line_affinity`, the other `aura` and `station` keys, `counter_melee` and the Special list. Every trait is a bag of generic keys:
-  - **Body**: `hp_mult`, `speed_mult`, `body` (2 = the normal 2×2; 1 = a small body that fits 1-cell crawlspaces).
+- **Crew traits**: a **trait library in `data/traits.json`**, resolved in one place (`scripts/crew/traits.gd`, `TraitSet.of(member)`; its `_doc` and the `##` lines say what each key does). Built: `hp_mult`, `speed_mult`, `o2_use`, `suffocate_mult`, `damage_taken`, `work_mult` (as speed factors), `heal_mult`, `mechanical`, `aura` {o2_per_s, heal_per_s, work_mult}, `station` {power_bonus, manned_mult}, `melee_mult` and `ranged_mult` (kept for on-foot fights), `swarm`, `dries_out`, `ion_stun`, and for race wave 2 `body`, `reveal_enemy`, `heat_speed`, `vacuum_walk`, `no_tools`, `hull_mend` and `station.evasion_add` (the true/false ones are `mechanical`, `vacuum_walk`, `no_tools` and `reveal_enemy`: `TraitSet.FLAGS`). Still to come: `line_affinity`, the other `aura` and `station` keys, `counter_melee` and the rest of the Special list. Every trait is a bag of generic keys:
+  - **Body**: `hp_mult`, `speed_mult`, `body` (2 = the normal 2×2; 1 = a small body that fits 1-cell crawlspaces: the pathfinder, `CrewMember.body_size`, the job spots and the collision radius all follow it), `heat_speed` {cold, hot, below, above} (walk speed ×cold when the room's hottest part is below `below`, ×hot above `above`).
   - **Air**: `o2_use` (0 = doesn't breathe), `suffocate_mult`.
   - **Damage taken**: `damage_taken` {fire, no_air, melee, ranged, ion}, plus `ion_stun` (seconds stunned by ion).
   - **Work**: `work_mult` {repair, extinguish, breach, man, restock, craft, heal_others}, and `line_affinity` {line: work_mult} (e.g. faster on scrap parts).
   - **Healing**: `heal_mult` {bed, medbay}, `mechanical` (healed by the repair job, not beds).
   - **Room auras**: `aura` {o2_per_s, heal_per_s, work_mult, heat_per_s, fire_suppress}.
-  - **Stations**: `station` {manned_mult, power_bonus, evasion_add}.
+  - **Stations**: `station` {manned_mult, power_bonus, evasion_add (flat evasion at the helm)}.
   - **Fighting**: `melee_mult`, `ranged_mult`, `counter_melee`.
   - **Special**:
-    - `vacuum_walk` (no breach or vacuum penalties);
+    - `vacuum_walk` (no breach or vacuum penalties: built as no suffocation damage; combine it with `o2_use` 0);
     - `revive_once`;
     - `split_on_death` (into 2 small bodies that reform);
-    - `no_tools` (can't repair or extinguish);
+    - `no_tools` (can't repair or extinguish: `Jobs.TOOL_JOBS`);
     - `no_suit`;
     - `regen_in_power` (heals in powered rooms);
-    - `hull_mend` (slowly repairs adjacent walls and breaches when idle);
-    - `heat_speed` (speed scales with room heat);
+    - `hull_mend` {rate, seal} (idle: repairs adjacent wall hp at `rate`/s and seals a breach beside them in `seal` s);
     - `haggler` (prices −10%);
-    - `reveal_enemy`.
+    - `reveal_enemy` (while aboard and up, the enemy's schematic shows its crew).
+- **Crew rigs** (`art/README.md`, `crew.json` `kind`): `normal` 33×33, `large` 49×49, `small` 25×25 (the 1×1 body) and `floating` 49×49 (no legs: a trailing tail and a bob); `PersonDrawer.RIGS`.
 - **Event effects** (`docs/CONTENT.md` section 8). Add: `start_quest`, `advance_quest`, `give_unique`, `damage_system`, and `board` (boarding comes with on-foot play).
 
 ## 3. Balance bands (content agents fill tables; they don't invent numbers)

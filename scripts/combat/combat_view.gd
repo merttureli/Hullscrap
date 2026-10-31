@@ -28,6 +28,7 @@ const JumpBar = preload("res://scripts/ui/jump_bar.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
 
 const PLAYER_SHOT := {"energy": Color("#7dffe8"), "kinetic": Color("#ffe07a"), "explosive": Color("#ffb04a"), "ion": Color("#b99bff")}
@@ -434,6 +435,7 @@ func _update_hud() -> void:
 	_schem[0].position = Vector2(10.0, 10.0)
 	_schem[1].position = Vector2(vp.x - Schematic.PANEL.x - 10.0, 10.0)
 	_schem[0].intent = Intent.of(session.arena, session.ai, Session.PLAYER)
+	_schem[1].reveal = TraitSet.reveals_enemy(session.arena.ships[Session.PLAYER].ship)  # a crew member with reveal_enemy: the enemy's crew show
 	_banner.position = Vector2((vp.x - _banner.size.x) / 2.0, vp.y * 0.28)
 	_hint.position = Vector2((vp.x - _hint.size.x) / 2.0, 10.0)
 	_jump_bar.position = _schem[1].position + Vector2(0.0, Schematic.PANEL.y + 6.0)

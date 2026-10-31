@@ -340,10 +340,10 @@ static func _phase(ship, m, p: Dictionary) -> Dictionary:
 	var blocked := false
 	for k in range(1, int(p.get("range", 6)) + 1):
 		var to := from + dir * k
-		if not Pathfinder.body_ok(ship.grid, to):
+		if not Pathfinder.body_ok(ship.grid, to, Callable(), m.body_size):
 			blocked = true
 		elif blocked and not _crowded(ship, m, to):
-			m.pos = Pathfinder.centre_of(to)
+			m.pos = Pathfinder.centre_of(to, m.body_size)
 			m.path.clear()
 			m.job = {}
 			return _ok("%s steps through the wall" % m.name)
@@ -577,8 +577,11 @@ static func _key_problems(at: String, e: Dictionary) -> Array[String]:
 		var subs: Array = TraitSet.KEYS[k]
 		var v = e[k]
 		if subs.is_empty():
-			if not (v is bool if k == "mechanical" else _is_num(v)):
-				out.append("%s: '%s' must be %s" % [at, k, "true or false" if k == "mechanical" else "a number"])
+			var flag: bool = TraitSet.FLAGS.has(k)
+			if not (v is bool if flag else _is_num(v)):
+				out.append("%s: '%s' must be %s" % [at, k, "true or false" if flag else "a number"])
+			elif k == "body" and not TraitSet.BODIES.has(int(v)):
+				out.append("%s: 'body' must be %s" % [at, " or ".join(TraitSet.BODIES.map(func(b): return str(b)))])
 		elif not v is Dictionary:
 			out.append("%s: '%s' must be an object of %s" % [at, k, ", ".join(subs)])
 		else:
