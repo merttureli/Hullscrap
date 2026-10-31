@@ -1,0 +1,51 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "pointer": [
+   0,
+   1,
+   0
+  ],
+  "place": [
+   1,
+   1,
+   0
+  ],
+  "remove": [
+   2,
+   1,
+   0
+  ],
+  "invalid": [
+   3,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pointer": [
+   0,
+   0
+  ],
+  "place": [
+   8,
+   8
+  ],
+  "remove": [
+   8,
+   8
+  ],
+  "invalid": [
+   8,
+   8
+  ]
+ },
+ "notes": "Mouse cursors, 16x16: pointer, place (amber reticle), remove (red X), invalid (no-entry sign). `anchors` holds each cursor's hotspot in px from the frame top-left (pointer: its tip; the others: the middle). Cut a frame out and pass it to Input.set_custom_mouse_cursor(texture, shape, hotspot). This is the 1x set; `cursors_x2` is the same pre-scaled to 32x32, which is the size to use on a 1600x900 window."
+}
