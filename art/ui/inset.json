@@ -1,0 +1,33 @@
+{
+ "frame": [
+  12,
+  12
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "normal": [
+   0,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 3,
+   "top": 3,
+   "right": 3,
+   "bottom": 3
+  },
+  "content_margins": {
+   "left": 3,
+   "top": 3,
+   "right": 3,
+   "bottom": 3
+  },
+  "center": "stretch"
+ },
+ "notes": "A sunken field (lists, slots, bar backgrounds): near-black fill, dark top/left lip, light bottom/right lip."
+}
