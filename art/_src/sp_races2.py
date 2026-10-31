@@ -84,20 +84,20 @@ def planes(n, shape, tones, base='f'):
                 if t.g[y][x] != '.' and s.g[y][x] != '.': s.g[y][x] = t.g[y][x]
     return s
 
-V_BOOT = {
+V_BOOT = {                                  # ink-dark paper slippers (they must show against the cream body at the sides)
  'plant': art("""
-.H.
-ffM
-.MS
+jN
+NN
+.N
 """),
  'lift': art("""
-.H.
-ffM
-ffM
-.MS
+jN
+NN
+NN
+.N
 """),
 }
-V_LX = (3, 12)        # left column of each 2-wide leg strip: out at the sides, so the stride shows under the kite
+V_LX = (2, 13)        # left column of each 2-wide leg strip: right out at the sides (pivot +-5/6), so the stride shows beside the kite
 def v_leg_frame(dl, dr, lift_l=False, lift_r=False):
     s = Spr(VN, VN)
     for lx, d, lift, side in ((V_LX[0], dl, lift_l, -1), (V_LX[1], dr, lift_r, 1)):
@@ -108,11 +108,10 @@ def v_leg_frame(dl, dr, lift_l=False, lift_r=False):
         if len(ys) > 3:
             wy = ys[len(ys) * 2 // 3]; s.put(lx, wy, 'B'); s.put(lx + 1, wy, 'C')              # an ankle band (outfit)
         b = V_BOOT['lift' if lift else 'plant']
-        s.stamp(lx - 1 if side < 0 else lx, fy - len(b) // 2 - (1 if fy < 8 else 0), b)
+        s.stamp(lx, fy - len(b) // 2 - (1 if fy < 8 else 0), b)
     return s
-V_WALK = walk_cycle(3, 2)                                   # short steps: legs stay inside the central 15x15
-
-V_SHAPE = [(8, 4), (14, 8), (12, 11), (8, 14), (4, 11), (2, 8)]
+V_WALK = [(4, -4, False, False), (2, -2, False, True), (-2, 2, False, True), (-4, 4, False, False), (-2, 2, True, False), (2, -2, True, False)]   # a reach of 4 either way: the most the pivot +-7 box allows
+V_SHAPE = [(8, 4), (14, 8), (11, 11), (8, 14), (5, 11), (2, 8)]
 def v_torso():
     """a kite of folded planes: sharp shoulder corners, a vertical crease, diagonal folds, a hanging tab."""
     s = planes(VN, V_SHAPE, [([(0, 0), (8, 0), (8, 17), (0, 17)], 'H'), ([(8, 9), (17, 9), (17, 17), (8, 17)], 'M'),
