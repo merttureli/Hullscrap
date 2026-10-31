@@ -21,6 +21,8 @@ const COLUMNS: Array = [
 			["E (hold)", "Work with your hands: stand by a fire, a breach, a broken system or a downed crewmate"],
 			["E on a door", "Open / close the door"],
 			["Middle click", "Send Ada there"],
+			["Left click", "Play mode: select a crew member (or click their card, bottom right)"],
+			["G", "Use the selected crew member's special ability (in a fight too)"],
 			["B", "Build mode / play mode"],
 			["O / P", "Oxygen / power overlay"],
 			["Wheel", "Zoom"],

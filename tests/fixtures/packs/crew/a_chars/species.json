@@ -1,0 +1,5 @@
+{
+  "species": {
+    "fx_oracle": {"name": "Oracle", "hp": 90, "speed": 1.0, "traits": [], "rig": "human", "sidearm": "service_pistol", "ability": {"id": "scan", "params": {"duration": 12}}}
+  }
+}

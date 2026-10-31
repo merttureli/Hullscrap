@@ -6,7 +6,8 @@ extends Node
 ## (jobs.gd: walk, repair, fight fires, man stations, heal), then let the atmosphere flow. A ship that is not the player's gets its own crew on its
 ## first tick (Jobs.spawn_enemy_crew).
 ## Abilities (abilities.gd) tick here while one ship is in the sim; in a fight (more than one) the
-## arena ticks them itself, at its own rate. The fabricator's queue (ship.crafting) ticks for every
+## arena ticks them itself, at its own rate. The crew's active abilities (crew_abilities.gd: cooldowns and
+## their timed effects) tick here for every ship, always. The fabricator's queue (ship.crafting) ticks for every
 ## ship, at the level and tools of the ship's best powered fabricator (Workshop.best); finished
 ## items go to the cargo and the chronicle says so, and says when the fabricator stops the queue.
 ## The random rolls (malfunctions, fires) use one RandomNumberGenerator per ship, seeded with the
@@ -23,6 +24,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
 const MAX_FRAME := 0.25  ## longest time step a slow frame may take, seconds
 
@@ -132,6 +134,7 @@ func _step_ship(ship: Ship, dt: float) -> void:
 	ship.refresh()
 	ship.clock += dt
 	var rng := rng_of(ship)
+	CrewAbilities.tick(ship, dt)  # crew ability cooldowns and effects, in a fight too (they stand still when the world does)
 	if ships.size() == 1:  # in a fight the arena ticks the abilities
 		Abilities.tick(ship, dt, rng)
 	Heat.tick(ship, dt, rng)

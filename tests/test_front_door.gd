@@ -93,7 +93,7 @@ func test_menu_buttons_can_be_clicked() -> void:
 ## held, middle click; combat_view.gd and weapon_bar.gd: W S A D, the mouse, T, 1-9, Shift Space Q, the arrows
 ## and End, Esc, R; map_view.gd, event_panel.gd, station_panel.gd, shield_panel.gd, crafting_panel.gd as below.
 const HANDLER_KEYS: Array[String] = [
-	"W A S D", "E (hold)", "E on a door", "Middle click", "Mouse", "B", "O / P", "Wheel", "Ctrl+S / Ctrl+L", "N", "Esc", "F1",
+	"W A S D", "E (hold)", "E on a door", "Middle click", "Left click", "G", "Mouse", "B", "O / P", "Wheel", "Ctrl+S / Ctrl+L", "N", "Esc", "F1",
 	"Tab", "1 2 3", "1 - 9", "Left mouse", "Shift+Left drag", "Ctrl+Left drag", "Right mouse", "T", "R", "Shift+R", "F", "Ctrl+Z / Ctrl+Y",
 	"M", "Click a lit neighbour", "Shift+click", "Enter", "1 - 9 or click", "Enter / Space",
 	"K", "W / S", "A / D", "Left / Right mouse", "Shift / Space / Q", "Arrows / End",

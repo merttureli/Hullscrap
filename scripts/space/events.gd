@@ -23,6 +23,7 @@ extends RefCounted
 
 const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const Characters = preload("res://scripts/crew/characters.gd")
 
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
@@ -35,7 +36,7 @@ const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "r
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
 const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log"]
-const RECRUIT_KEYS: Array = ["name", "species"]
+const RECRUIT_KEYS: Array = ["name", "species", "character"]
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
 const SHIPS_DIR := "res://data/ships/"
 const DEFAULT_WEIGHT := 10.0
@@ -431,9 +432,10 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 	for r in _list(effects.get("recruit")):
 		var rd := _dict(r)
 		var species := str(rd.get("species", "human"))
-		var who: String = c.add_crew(ship, str(rd.get("name", "")), species)
+		var chr := Characters.entry(str(rd.get("character", "")))  # a unique character comes as themselves
+		var who: String = c.add_crew(ship, str(rd.get("name", "")), species, str(rd.get("character", "")))
 		if who != "":
-			lines.append("%s (%s) joins the crew" % [who, species.capitalize()])
+			lines.append("%s (%s) joins the crew" % [who, Characters.label(chr) if not chr.is_empty() else species.capitalize()])
 	if effects.has("lose_crew"):
 		var count = effects["lose_crew"]
 		var n: int = (1 if count else 0) if count is bool else int(count)
@@ -497,7 +499,10 @@ static func _known() -> Dictionary:
 	var traits := {}
 	for id in TraitSet.library():
 		traits[id] = true
-	return {"items": items, "components": _ids_of("res://data/components.json", "components"), "recipes": _ids_of("res://data/recipes.json", "recipes"),
+	var characters := {}
+	for id in Content.ids("characters"):
+		characters[id] = true
+	return {"characters": characters, "items": items, "components": _ids_of("res://data/components.json", "components"), "recipes": _ids_of("res://data/recipes.json", "recipes"),
 		"places": places, "factions": factions, "species": species, "traits": traits}
 
 
@@ -656,10 +661,13 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 				bad.call("%s: %s must be a flag name or a list of them" % [where, k])
 	for r in _list(eff.get("recruit")):
 		if not r is Dictionary:
-			bad.call(where + ": recruit must be {name?, species}")
+			bad.call(where + ": recruit must be {name?, species} or {character}")
 			continue
 		_check_keys(r, RECRUIT_KEYS, where + " recruit: ", bad)
-		if not known["species"].has(r.get("species")):
+		if r.has("character"):  # a unique character (data/characters.json) needs neither species nor name
+			if not known["characters"].has(r["character"]):
+				bad.call("%s: recruit has unknown character '%s' (known: %s)" % [where, r["character"], ", ".join(known["characters"].keys())])
+		elif not known["species"].has(r.get("species")):
 			bad.call("%s: recruit has unknown species '%s' (known: %s)" % [where, r.get("species"), ", ".join(known["species"].keys())])
 	if eff.has("lose_crew") and not (eff["lose_crew"] is bool or _is_int(eff["lose_crew"])):
 		bad.call(where + ": lose_crew must be true or a count")

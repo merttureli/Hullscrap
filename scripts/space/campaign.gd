@@ -15,6 +15,7 @@ const Events = preload("res://scripts/space/events.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Characters = preload("res://scripts/crew/characters.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Sector = preload("res://scripts/space/sector.gd")
@@ -714,9 +715,16 @@ func crew_name(species: String, ship) -> String:
 
 
 ## Put a new crew member of `species` aboard, at the next bed (or near the middle). `who` "" picks a name.
-## Returns the name, "" if there was no room for a body.
-func add_crew(ship, who: String, species: String) -> String:
-	if who == "":
+## `character`: the id of a unique character (data/characters.json): they come as themselves (name, species, look and
+## ability), and only once. Returns the name, "" if there was no room for a body (or the character is aboard already).
+func add_crew(ship, who: String, species: String, character := "") -> String:
+	var chr := Characters.entry(character)
+	if character != "" and (chr.is_empty() or ship.crew.any(func(m): return m.character == character or m.name == chr["name"])):
+		return ""
+	if not chr.is_empty():
+		who = str(chr["name"])
+		species = Characters.species_id(chr)
+	elif who == "":
 		who = crew_name(species, ship)
 	var near := Vector2(ship.grid.size) / 2.0
 	var beds: Array = Jobs._beds(ship)
@@ -727,6 +735,8 @@ func add_crew(ship, who: String, species: String) -> String:
 		return ""
 	var looks: Array = CrewMember.config()["looks"]
 	var m = Jobs._person(who, looks[ship.crew.size() % looks.size()], Pathfinder.centre_of(spot), species)
+	if not chr.is_empty():
+		Characters.apply(m, character)
 	ship.crew.append(m)
 	return who
 
