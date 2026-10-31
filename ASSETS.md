@@ -786,6 +786,15 @@ Source and licence of every art and audio file in the repo.
 | `art/crew/basalt/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/basalt/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/basalt/torso_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/head.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/head_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/legs.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/brine/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/choir/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/choir/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/choir/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |

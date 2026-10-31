@@ -634,4 +634,135 @@ class Corvin(Species):
                 out.append(g)
         return out
 
-SPECIES = [WardenFrame, Murrow, Siltborn, Corvin]
+# ================================================================== BRINE: crab-shelled Concord dockworkers. THE LARGE RIG (49x49, pivot (24,24))
+# A broad brick-red carapace (e, lit r/u, deep n) wider than the 2x2 body with a row of orange spines along its front edge, salt-crust specks (f), jointed crab legs
+# jutting out to the sides (legs layer: three a side, they step in alternation), two eyes on stalks, and ONE BIG WORK CLAW on the right arm (a red pincer with a serrated
+# bite that closes round whatever it holds) against a small claw on the left. Dock-union gear (outfit): crossed cargo straps over the shell, the claw's wrist band, the
+# goggles and the hard hat; a stencilled union plate on the rear of the shell.
+def bR(dx, dy): return (DC + dx, DC + dy)
+BR_ROOTS = ((-2, 12), (3, 13), (8, 12))                                                    # the three leg roots on each side: (dy, dx)
+def br_leg_frame(dl, dr, lift_l=False, lift_r=False):
+    s = Spr(DN, DN)
+    for sd, d in ((-1, dl), (1, dr)):
+        for i, (ry, rx) in enumerate(BR_ROOTS):
+            m = int(round(d * 0.32 * (1 if i % 2 == 0 else -1)))
+            root = (DC + sd * rx, DC + ry); knee = (DC + sd * (rx + 8), DC + ry - 3 + m); tip = (DC + sd * (rx + 10), DC + ry + 5 + m)
+            t = Spr(DN, DN); seg(t, root[0], root[1], knee[0], knee[1], 3, 'e'); seg(t, knee[0], knee[1], tip[0], tip[1], 2, 'e')
+            merge(s, shade_gen(t, 'e', 'r', 'n'))
+            s.put(knee[0], knee[1], 'o'); s.put(tip[0], tip[1], 'f'); s.put(tip[0], tip[1] + 1, 'f')                # a bright knee joint and a pale pointed dactyl
+    return s
+BR_WALK = [(11, -11, False, False), (6, -6, False, True), (-6, 6, False, True), (-11, 11, False, False), (-6, 6, True, False), (6, -6, True, False)]
+
+def br_torso():
+    s = Spr(DN, DN)
+    sh = Spr(DN, DN); ell(sh, DC, DC + 2, 16.0, 11.5, 'e')
+    for k in range(-5, 6):                                                                  # the front-lateral spines, round the front half of the rim
+        th = math.radians(-90 + k * 15.5)
+        px_ = DC + 16.0 * math.cos(th); py_ = DC + 2 + 11.5 * math.sin(th)
+        nx, ny = math.cos(th) * 11.5, math.sin(th) * 16.0; nl = math.hypot(nx, ny); nx, ny = nx / nl, ny / nl
+        tx, ty = px_ + nx * 4.6, py_ + ny * 4.6; ox, oy = -ny * 1.9, nx * 1.9
+        poly(sh, [(px_ - nx * 1.5 + ox, py_ - ny * 1.5 + oy), (px_ - nx * 1.5 - ox, py_ - ny * 1.5 - oy), (tx, ty)], 'e')
+    f = shade_gen(sh, 'e', 'r', 'n')
+    merge(s, f)
+    for y in range(DN):                                                                      # a lit top-left shoulder to the carapace: two tones with a dither seam
+        for x in range(DN):
+            if s.g[y][x] == 'e':
+                v = (x - DC) + (y - DC)
+                if v < -11 or (v < -8 and (x + y) % 2 == 0): s.g[y][x] = 'u'
+    for (dx, dy) in ((-2, -10), (-1, -11), (1, -11), (2, -10)): s.put(DC + dx, DC + dy, 'o')   # the frontal teeth
+    for dx in range(-12, 13):                                                                # a bowed ridge across the shell, and the two grooves of the gastric region
+        y = DC - 3 + int(round(4.0 * (dx / 12.0) ** 2))
+        if s.get(DC + dx, y) in ('e', 'u'): s.put(DC + dx, y, 'r' if dx % 3 else 'o')
+    for sd in (-1, 1):
+        for dy in range(0, 9): s.put(DC + sd * 5, DC + dy, 'n')
+        for dy in range(2, 10): s.put(DC + sd * 9, DC + dy + (dy > 7), 'n') if dy % 3 else None
+    for y in range(DC - 12, DC + 14):                                                        # salt crust and barnacle specks
+        for x in range(DC - 17, DC + 18):
+            if s.get(x, y) in ('e', 'u', 'r') and (x * 7 + y * 5) % 29 == 0: s.put(x, y, 'f' if (x + y) % 3 else 'H')
+    for (dx, dy) in ((-9, 6), (7, 9), (11, 1)): s.put(DC + dx, DC + dy, 'f'); s.put(DC + dx + 1, DC + dy, 'f'); s.put(DC + dx, DC + dy + 1, 'M')    # barnacle patches
+    # the dock-union harness (outfit): two straps crossing over the shell, and a belt of cargo hooks round the rear
+    for i in range(22):
+        for (x0, sg) in ((DC - 12, 1), (DC + 12, -1)):
+            x = x0 + sg * (i * 24 // 22); y = DC - 7 + (i * 18) // 22
+            s.put(x, y - 1, 'A'); s.put(x, y, 'B'); s.put(x, y + 1, 'C')
+    s.put(DC, DC + 2, 'a'); s.rect(DC - 1, DC + 1, 3, 3, 'a'); s.put(DC - 1, DC + 1, 'y'); s.put(DC + 1, DC + 3, 'u')                                   # the cross-over buckle
+    s.rect(DC - 5, DC + 8, 10, 4, 'a'); s.rect(DC - 5, DC + 8, 10, 1, 'y'); s.hline(DC - 5, DC + 11, 10, 'u')                                           # the union plate, stencilled
+    for dx in (-4, -2, 0, 2, 3): s.put(DC + dx, DC + 9, 'N'); s.put(DC + dx, DC + 10, 'n') if dx % 2 == 0 else None
+    return s
+
+BR_HEADS = ['stalks', 'goggles', 'helmet']
+def br_head(kind):
+    s = Spr(DN, DN)
+    for sd in (-1, 1):                                                                       # the eyestalks, then the eyes (drawn first: the helmet covers their roots)
+        t = Spr(DN, DN); seg(t, DC + sd * 3, DC - 9, DC + sd * 5, DC - 13, 2, 'e'); merge(s, shade_gen(t, 'e', 'r', 'n'))
+        ex, ey = DC + sd * 6, DC - 15
+        ell(s, ex, ey, 2.3, 2.3, 'f'); s.put(ex, ey, 'N'); s.put(ex, ey - 1, 'N'); s.put(ex - 1, ey - 1, 'H'); s.put(ex + 1, ey + 1, 'M')
+    fr = Spr(DN, DN); ell(fr, DC, DC - 8, 6.8, 3.2, 'e'); merge(s, shade_gen(fr, 'e', 'r', 'n'))      # the frontal plate between the stalks
+    for dx in (-3, -1, 1, 3): s.put(DC + dx, DC - 7, 'n')                                    # mouthparts
+    s.put(DC, DC - 6, 'p')
+    if kind == 'goggles':                                                                    # union goggles: a tinted frame round each eye on a strap
+        for sd in (-1, 1):
+            ex, ey = DC + sd * 6, DC - 15
+            for (dx, dy) in ((-3, 0), (3, 0), (0, -3), (0, 3), (-2, -2), (2, -2), (-2, 2), (2, 2)): s.put(ex + dx, ey + dy, 'B' if dx <= 0 else 'C')
+            s.put(ex - 2, ey - 2, 'A'); s.put(ex, ey - 3, 'A')
+        s.hline(DC - 3, DC - 11, 7, 'B'); s.hline(DC - 3, DC - 10, 7, 'C')
+    if kind == 'helmet':                                                                     # a dock hard hat on the frontal plate, the stalks out through the sides
+        h = Spr(DN, DN); ell(h, DC, DC - 6, 5.6, 4.0, 'B'); merge(s, cv2.shade_edges(h))
+        s.hline(DC - 6, DC - 4, 13, 'C'); s.hline(DC - 5, DC - 5, 11, 'B'); s.hline(DC - 4, DC - 9, 9, 'A')
+        for dy in range(-9, -5): s.put(DC, DC + dy, 'A')
+        s.put(DC - 2, DC - 8, 'C'); s.put(DC + 3, DC - 7, 'C')
+    return s
+
+def br_claw(s, x, y, big=True):
+    """a crab claw pointing up, centred on x, its wrist at y: the palm, two fingers that close at the tips (the gap narrows), teeth along the bite."""
+    if big: palm, fl, fr_, ln, sc = (5.6, 5.0), [(-5, -2), (-1, -2), (-2, -12), (-5, -10), (-6, -6)], [(1, -2), (5, -2), (6, -6), (5, -10), (2, -12)], 12, 1.0
+    else: palm, fl, fr_, ln, sc = (3.4, 3.2), [(-3, -1), (-1, -1), (-1, -7), (-3, -6), (-4, -3)], [(1, -1), (3, -1), (4, -3), (3, -6), (1, -7)], 7, 0.7
+    t = Spr(DN, DN); ell(t, x, y, palm[0], palm[1], 'r')
+    poly(t, [(x + a, y + b) for a, b in fl], 'r'); poly(t, [(x + a, y + b) for a, b in fr_], 'r')
+    merge(s, shade_gen(t, 'r', 'o', 'e'))
+    for j in range(3, ln - 1, 2):                                                            # teeth on the inner edges of the bite
+        s.put(x - 1, y - j, 'f'); s.put(x + 1, y - j + 1, 'f')
+    s.put(x - 2, y - ln + 1, 'o'); s.put(x + 2, y - ln + 1, 'o')
+    s.hline(x - int(palm[0]) + 1, y + int(palm[1]) - 1, int(2 * palm[0]) - 1, 'n')            # the wrist shadow
+def br_arm(s, a, b, w=5):
+    t = Spr(DN, DN); seg(t, a[0], a[1], b[0], b[1], w, 'e'); merge(s, shade_gen(t, 'e', 'r', 'n'))
+    ex = a[0] + round((b[0] - a[0]) * 0.5); ey = a[1] + round((b[1] - a[1]) * 0.5); s.put(ex, ey, 'o')           # the elbow
+def br_band(s, a, b):
+    cx = a[0] + round((b[0] - a[0]) * 0.8); cy = a[1] + round((b[1] - a[1]) * 0.8)
+    s.rect(cx - 3, cy - 1, 7, 3, 'B'); s.hline(cx - 3, cy - 1, 7, 'A'); s.hline(cx - 3, cy + 1, 7, 'C')
+BR_UNARMED = (bR(-15, 5), bR(15, 5))
+def br_arms(pose):
+    s = Spr(DN, DN); A = pose_anchors(*BR_UNARMED, shift=DSH)[pose]
+    if pose == 'unarmed':
+        bl, brr = (BR_UNARMED[0][0], BR_UNARMED[0][1]), (BR_UNARMED[1][0] + 2, BR_UNARMED[1][1] - 6)
+        br_arm(s, bR(-14, -4), (bl[0], bl[1] - 1), 4); br_arm(s, bR(14, -4), (brr[0], brr[1] + 3), 5)
+        br_claw(s, *bl, big=False); br_claw(s, *brr)
+        br_band(s, bR(14, -4), (brr[0], brr[1] + 3))
+        return s
+    hl = A['hand_l']; hr = (A['mount'][0], A['hand_r'][1])                                    # the pincer straddles the item, whose grip is at the mount
+    br_arm(s, bR(-14, -4), (hl[0], hl[1] + 1), 4); br_arm(s, bR(14, -4), (hr[0], hr[1] + 2), 5)
+    br_claw(s, hl[0], hl[1] + 1, big=False); br_claw(s, hr[0], hr[1] + 2)
+    br_band(s, bR(14, -4), (hr[0], hr[1] + 2))
+    return s
+
+class Brine(Species):
+    id = 'brine'
+    N = DN; C = DC
+    walk_fps = 6
+    glow_fps = 1
+    kind = 'large'
+    head_names = BR_HEADS
+    notes = ('Brine: crab-shelled Concord dock-union workers, on THE LARGE RIG: the frame is 49x49 with the pivot at (24,24) (the normal 2x2 body, 32 px, sits at the centre, its '
+             'shadow and pathing stay there; the art overhangs it). Mounts and hands are the shared targets moved by (+8,+8), identical relative to the pivot, so every item fits '
+             '(item top-left = mount - item.grip). A broad brick-red carapace with a row of orange spines along its front edge and salt-crust specks, three jointed crab legs a side in the '
+             'legs layer (they step in alternation at 6 fps), two eyes on stalks, ONE BIG WORK CLAW on the right arm (a red pincer with a toothed bite that straddles the held item) and a '
+             'small claw on the left. Head variants: stalks, goggles (union goggles, tinted frames), helmet (a dock hard hat, tinted). Outfit mask = the crossed cargo straps, the claw\'s wrist '
+             'band, the goggle frames, the hard hat.')
+    def legs(self): return [outlined(br_leg_frame(*w)) for w in BR_WALK] + [outlined(br_leg_frame(1, -1))]
+    def torso(self): return outlined(br_torso())
+    def arms(self, pose): return outlined(br_arms(pose))
+    def head(self, name): return outlined(br_head(name))
+    def torso_anchors(self): return {'head': [DC, DC - 8], 'back': [DC, DC + 12], 'shoulder_l': [DC - 14, DC - 4], 'shoulder_r': [DC + 14, DC - 4]}
+    def arm_anchors(self): return pose_anchors(*BR_UNARMED, shift=DSH)
+
+SPECIES = [WardenFrame, Murrow, Siltborn, Corvin, Brine]
