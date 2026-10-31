@@ -16,6 +16,8 @@ const Art = preload("res://scripts/view/art.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
+const BeltArt = preload("res://scripts/view/belt_art.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 
 const CELL := 32.0
 const HOLE := Color("#06080c")
@@ -110,6 +112,7 @@ func _draw() -> void:
 		_draw_hole(c)
 	for c in grid.hp:
 		_draw_damage(grid, c)
+	BeltArt.draw(self, ship, px(Vector2.ZERO), CELL, _clock)  # the conveyor belts and the ammo riding them
 	Visuals.draw_wrecks(self, ship.components.wrecks, px(Vector2.ZERO), CELL)
 	var powered: Dictionary = ship.power_state.get("powered", {})
 	var uids: Array = ship.components.instances.keys()
@@ -119,6 +122,7 @@ func _draw() -> void:
 		var inst: Dictionary = ship.components.instances[uid]
 		var opts := _weapon_opts(uid)
 		opts.merge({"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads, "thrusting": _thrusting(inst)})
+		opts.merge(Ammo.draw_opts(ship, uid))
 		all_opts[uid] = opts
 		Visuals.draw_component(self, _rect_of(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
 	for uid in uids:  # the outside halves and barrels of the hull mounts, over the wall's edge

@@ -1,8 +1,8 @@
 {
-  "_doc": "Items that are neither ship components (components.json) nor raw materials (materials.json): ammo, crew gear and special finds. Content is data: add an entry here and recipes and cargo can name it. kind: ammo (spent by weapons that name it in their `ammo` field), gear (crew equipment, craftable) or special (found, bought or earned only: it never has a recipe). Fuel is special: one jump of the Drift campaign burns one.",
+  "_doc": "Items that are neither ship components (components.json) nor raw materials (materials.json): ammo, crew gear and special finds. Content is data: add an entry here and recipes and cargo can name it. kind: ammo (spent by weapons that name it in their `ammo` field; `explosive: true` makes a wrecked ammo rack holding it blow up, data/ammo.json), gear (crew equipment, craftable) or special (found, bought or earned only: it never has a recipe). Fuel is special: one jump of the Drift campaign burns one.",
   "items": [
     {"id": "fuel", "name": "Fuel", "kind": "special", "blurb": "One jump's worth. Every Rusthold sells it by the can, and every can costs more than the last."},
-    {"id": "missile", "name": "Missile", "kind": "ammo", "blurb": "Slow, guided and loud about it. Artemis launchers eat these."},
+    {"id": "missile", "name": "Missile", "kind": "ammo", "explosive": true, "blurb": "Slow, guided and loud about it. Artemis launchers eat these."},
     {"id": "pistol", "name": "Pistol", "kind": "gear", "blurb": "Loud enough, reliable enough. The crew's first argument-settler."},
     {"id": "rifle", "name": "Rifle", "kind": "gear", "blurb": "Longer reach, steadier hands. Boarding parties love it."},
     {"id": "basic_armor", "name": "Basic Armour", "kind": "gear", "blurb": "Polymer plates stitched over a flight suit. Stops a bruise, not a bullet."},

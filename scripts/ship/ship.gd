@@ -9,6 +9,8 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const Cables = preload("res://scripts/ship/cables.gd")
+const Belts = preload("res://scripts/sim/belts.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
 const Atmosphere = preload("res://scripts/sim/atmosphere.gd")
 const Power = preload("res://scripts/sim/power.gd")
@@ -24,9 +26,11 @@ const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 ## grid and cargo of 2; versions 1 and 2 still load (no components, no cables). The optional
 ## "crafting" list (blueprints and queue) was added within 3: a save without it starts with the
 ## blueprints known at the start. 4 adds the optional "shield_balance" (the chosen sector weights and the
-## two custom presets of the Shields tab); older saves load with it fresh (even weights, empty slots). The optional "skin"
-## (the hull skin id the player chose in the hangar, run_start.gd) was added within 4: a save without it has the plain hull.
-const VERSION := 4
+## two custom presets of the Shields tab); older saves load with it fresh (even weights, empty slots). 5 adds the
+## optional "belts" (the conveyor-belt layer) and, inside "components" (version 4 there), the contents of ammo racks
+## and the loaded units of guns; older saves load with no belts and empty racks. The optional "skin" (the hull skin id the
+## player chose in the hangar, run_start.gd) was added within 5: a save without it has the plain hull.
+const VERSION := 5
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
 const START_PATH := "res://data/start.json"
@@ -40,6 +44,7 @@ var name := "Ship"
 var grid: ShipGrid
 var components: Components
 var cables: Cables
+var belts: Belts  ## the conveyor-belt layer (docs/CONTENT.md 4f; scripts/sim/belts.gd): cells, cuts and the units riding them
 var atmosphere: Atmosphere
 var inventory: Inventory  ## the cargo: materials and items (crafted systems)
 var crafting: Crafting  ## the known blueprints and the fabricator's queue (saved); ShipSim ticks it
@@ -69,6 +74,7 @@ func _init(p_name := "Ship", p_grid: ShipGrid = null, components_path := COMPONE
 	components = Components.new()
 	components.load_defs(components_path)
 	cables = Cables.new()
+	belts = Belts.new()
 	atmosphere = Atmosphere.new()
 	inventory = Inventory.new()
 	crafting = Crafting.new()
@@ -222,7 +228,10 @@ func to_dict() -> Dictionary:
 	d["rot"] = rot_quarters
 	d["cargo"] = inventory.to_dict()
 	d["components"] = components.to_dict()
+	Ammo.stow_units(self, d["components"])  # what rides a belt is saved in its rack
 	d["cables"] = cables.to_dict()
+	if not belts.is_blank():  # optional: only written when there are belts
+		d["belts"] = belts.to_dict()
 	d["crafting"] = crafting.to_dict()
 	d["oxygen"] = atmosphere.pressure.duplicate()
 	if not ShieldBalance.is_fresh(shield_balance):  # optional: only written when the player set something
@@ -260,6 +269,12 @@ func load_dict(d: Dictionary) -> String:
 	var burning = _read_fires(d)
 	if burning == null:
 		return "bad ship data"
+	if d.has("belts"):
+		if not (d["belts"] is Dictionary):
+			return "bad ship data"
+		var why: String = Belts.check_dict(d["belts"])
+		if why != "":
+			return why
 	if d.has("crafting"):
 		if not (d["crafting"] is Dictionary):
 			return "bad ship data"
@@ -279,6 +294,7 @@ func load_dict(d: Dictionary) -> String:
 		inventory.add(r["id"], 1)
 		log_event(r["text"])
 	cables.load_dict(d["cables"] if version >= 3 else empty_cables)
+	belts.load_dict(d["belts"] if d.get("belts") is Dictionary else {"version": Belts.VERSION})
 	if version >= 3:
 		name = str(d.get("name", name))
 		var p = d.get("world_pos")
