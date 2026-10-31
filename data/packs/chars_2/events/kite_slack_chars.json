@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_bowline_rope_walker", "type": "empty", "weight": 22, "once": true, "requires": {"region": "kite_slack", "stage_min": 2},
+      "text": "A line a kilometre long runs between two Snap hulls wedged either side of the lane, hung with washing: shirts, flags, a very long scarf. In the middle of the line, in the thin cold air that leaks from the nearest plating, a Kite with no suit and one tail wrapped round the rope is holding a hull patch against a leak with both hands and one foot. He has been there for some time. 'Sorry,' he calls across the gap, long-limbed and wide-eyed and entirely cheerful. 'I would wave, but I am busy. There is a hole in this ship and a family on the other side of it. I only need something to hold the line while I find the second patch. I am Bowline. I am quite all right, honestly. Is gravity always so heavy on your side?'",
+      "choices": [
+        {"text": "Hold station while he works (1 fuel).", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You hold the ship steady against the drift for an hour, burning the fuel in small careful pulses, while he works. When the patch is finally on he comes hand over hand along the line to your lock and swings in upside down, grinning. 'Thank you. I should like to see how you live with a floor,' he says. 'Is it hard? The standing?'", "effects": {"recruit": {"character": "bowline"}}}
+        ]},
+        {"text": "[Kite] Take the other end of the line.", "requires": {"species": "kite"}, "outcomes": [
+          {"weight": 100, "text": "Your Kite and Bowline pass the line between them without a word, in a sort of weightless dance, and have the second patch on before anyone on your ship has finished breathing. 'Kin,' says Bowline, tail curling in delight. 'I owe you a drink. I owe you thirty. I will come and pay them back.'", "effects": {"recruit": {"character": "bowline"}}}
+        ]},
+        {"text": "[Tractor] Pin the plate with your beam.", "requires": {"component": "tractor_mk1"}, "outcomes": [
+          {"weight": 100, "text": "A tractor beam is a great tool for a man with only two hands. You pin the plate in place from a hundred metres, and Bowline, finally free, tightens the patch with the expression of a man eating his first hot meal in a week. 'That is cheating,' he says. 'It is lovely.' He climbs the line to your lock and does not say goodbye to the hull he was patching, which is a very Kite thing to do.", "effects": {"recruit": {"character": "bowline"}}}
+        ]},
+        {"text": "Wave back and fly on.", "outcomes": [
+          {"weight": 100, "text": "'Mind the washing,' he calls, as you slide under the line. You mind it. A single sock comes loose and follows you for an hour.", "effects": {}}
+        ]}
+      ]
+    }
+]}

@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_tamsin_the_contract", "type": "pirate", "weight": 14, "once": true, "requires": {"region": "sable_moorings", "stage_min": 4},
+      "text": "A cutter with its family name cut into the hull closes on you at a courteous angle and hails on the open band. 'Sable cutter Gannet. We hold a contract to board you. Nothing personal, the terms are fixed, and nobody need be hurt if you strike your colours. Tamsin, our door, will be along in a moment.' A figure in a dark coat with a cutter torch on each forearm is already standing on the Gannet's bow, one hand raised, politely, in greeting. 'I should say,' she calls over the comm, 'that I cut doors for a living. It is not a threat. It is a description.'",
+      "choices": [
+        {"text": "Refuse, and meet the Gannet's guns.", "outcomes": [
+          {"weight": 100, "text": "'Understood,' says the Gannet. 'Noted for the record.' Her guns come round with a courtesy you can almost hear.", "effects": {"fight": "tier"}, "after_win": {"text": "The Gannet goes quiet, a hatch opens, and Tamsin is on the hull with her coat singed and a torch still lit. 'The contract ends when the client does,' she says, cheerfully. 'And a client who loses to their own target is, strictly, no client. Which makes me a free agent. Are you hiring? I have never worked for the same side twice. I might make an exception.'", "effects": {"recruit": {"character": "tamsin"}}}}
+        ]},
+        {"text": "Out-bid the contract (260 credits).", "requires": {"credits": 260, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "'A better offer,' says Tamsin, delighted. 'Clause four: the highest standing bid prevails. They never read clause four.' She steps off the cutter's bow into your lock without looking back, torches still lit, and the Gannet's captain says something unrepeatable on the open band. 'Family,' says Tamsin. 'They will understand. Eventually.'", "effects": {"recruit": {"character": "tamsin"}}}
+        ]},
+        {"text": "[Sable] Call the Long Table: 'Nobody is armed here.'", "requires": {"species": "sable"}, "outcomes": [
+          {"weight": 100, "text": "Your Sable stands in the lock and speaks the words, flat and formal, as every Sable child is taught. Out on the hull Tamsin lowers her torches, one by one, and the Gannet's guns go cold. 'The table is called,' she says. 'Contract suspended. We eat first, we talk after.' The three of you eat a very silent dinner. By the end of it she is on your roster, and no one can say how.", "effects": {"recruit": {"character": "tamsin"}}}
+        ]},
+        {"text": "Break off and run for open space.", "outcomes": [
+          {"weight": 100, "text": "The Gannet lets you go. A contract has a clock, and yours runs out of sector. 'Another time,' calls Tamsin, cheerfully, and cuts a small, neat door in the air to wave you off through.", "effects": {}}
+        ]}
+      ]
+    }
+]}

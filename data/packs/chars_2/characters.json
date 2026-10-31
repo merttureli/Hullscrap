@@ -47,6 +47,62 @@
       "ability": {"id": "overclock", "cooldown": 40, "params": {"mult": 1.7, "duration": 11, "rest": 4}},
       "obtained": "Lamplit Lanes (stage 3+), expensive: her glider is mortgaged to Concord Dispatch. Clear the bond (320 credits), vouch for her with good Concord standing, or show her a radar that can find her dead addresses.",
       "lore": "The Night Mail. Rushlight flew the Concord dispatch lanes with no running lights, on the theory that a courier nobody can see cannot be shot, and was right for thirty-one years. She still delivers letters to ships that no longer exist, and has a sack of nine hundred to prove it. Put her at a helm and the whole ship feels late for something."
+    },
+    {
+      "id": "ostrander", "name": "Ostrander", "species": "revenant",
+      "rig": {"tint": "#8d9aa8", "head": "hood"},
+      "traits": {"damage_taken": {"fire": 0.7}},
+      "ability": {"id": "extinguish", "cooldown": 20},
+      "obtained": "The Cairns (stage 5+): a stack of empty suits is burning from a split oxygen line and he is carrying them out by hand. Foam it down (3 polymer), put it out properly with a trained firefighter, or fly through the plume to vent it (costs hull).",
+      "lore": "The Smoke-Eater. Ostrander does not breathe, so a burning hold is only a warm one, and he walks into them with the unhurried air of a man on his way to a meeting. He has been dead once and found it unremarkable, mostly for the paperwork. The name on his patch is not his; he says he has grown into it."
+    },
+    {
+      "id": "compline", "name": "Compline", "species": "choir",
+      "rig": {"tint": "#b6c8ff", "head": "mitre"},
+      "traits": {"work_mult": {"man": 1.1}},
+      "ability": {"id": "rally", "cooldown": 40, "params": {"mult": 1.65, "duration": 18}},
+      "obtained": "The Chantry (stage 3+): singing the last hour to a dead tender, alone and a part short. Sing the third part yourselves (badly), hold it in crystal with a Prismatic of your own, or light the dead their candles (2 crystal).",
+      "lore": "The Last Hour. Compline sings the evening office to wrecks, because somebody should and the chantry would not send anyone. She sings to a room until it remembers it has a job, and everyone in it picks up whatever they were holding a little more firmly. It is not clear whether this is faith or acoustics. She says the distinction has never helped a hymn."
+    },
+    {
+      "id": "hobnail", "name": "Hobnail", "species": "rattler",
+      "rig": {"tint": "#a97c4a", "head": "goggles"},
+      "traits": {"line_affinity": {"scrap": 1.4}},
+      "ability": {"id": "repair_burst", "cooldown": 20, "params": {"amount": 5}},
+      "obtained": "The Wallworks (stage 2+): item 31 on the Understairs' lost-property shelf. Sign the claim and pay the storage (40 credits), claim him as kin in wall-code with a Rattler of your own, or fix the counter's till with a tinkerer.",
+      "lore": "Ma Gantry's Mechanic. Hobnail, known to everyone as Old Hob, has kept the Rusthold's oldest decks flying from inside the walls for forty years, and has been listed as lost property for six, because nobody will sign the form that says Rattlers exist. A Scrap part mends for him the way a dog comes to its name. He calls every machine 'love' and every rivet 'you'."
+    },
+    {
+      "id": "parquet", "name": "Parquet", "species": "tessellate",
+      "rig": {"tint": "#9fb1c9", "head": "visor"},
+      "traits": {"work_mult": {"breach": 1.3}},
+      "ability": {"id": "seal_breach", "cooldown": 32, "params": {"count": 2, "range": 10}},
+      "obtained": "The Mended Mile (stage 3+): waiting in a wreck for a breach of the right size. Let it seal the dent in your hull, or countersign its Work Order with a mechanical crew member.",
+      "lore": "Work Order 4471. Parquet is a small flock of Repair Bay Nine's swarm that wandered off forty years ago holding a single clause: seal the nearest breach. It has been looking for a hole of the right size ever since, and is easily the most enthusiastic person in the Mile about yours."
+    },
+    {
+      "id": "tamsin", "name": "Tamsin", "species": "sable",
+      "rig": {"tint": "#2e3547", "head": "hood"},
+      "traits": {"speed_mult": 1.08},
+      "ability": {"id": "phase", "cooldown": 16, "params": {"range": 5}},
+      "obtained": "Sable Moorings (stage 4+), hard to get, a fight: she is the door on a cutter that has a contract to board you. Beat the cutter, out-bid the contract (260 credits), or call the Long Table with a Sable of your own.",
+      "lore": "The Second Signature. Tamsin has one rule above every contract: it ends when the client does. She cuts doors for a living, then out of tidiness the next wall too, and the one after, and by the time the dust settles she is generally in the room she meant to be in. Nobody is armed at the Long Table. Nobody has ever needed to be, with her sitting at it."
+    },
+    {
+      "id": "pyracantha", "name": "Pyracantha", "species": "quillback",
+      "rig": {"tint": "#7a2f2a", "head": "crest"},
+      "traits": {"work_mult": {"man": 1.15}},
+      "ability": {"id": "overclock", "cooldown": 44, "params": {"mult": 1.6, "duration": 10, "rest": 5}},
+      "obtained": "The Lists (stage 3+), hard to get, a duel: a challenge in writing arrives by launch. Meet her guns, offer a draw and a dinner (50 credits, and she may refuse), or name a Quillback of your own as your Second.",
+      "lore": "The Marshal of the Lists. Pyracantha has fought three hundred duels, drawn two hundred and ninety, and eaten the dinner after every one. Put her at a gun and it fires with the clean, unhurried regularity of a woman who has already decided how this ends. Calling her Pyra is a challenge. She will send you a letter."
+    },
+    {
+      "id": "bowline", "name": "Bowline", "species": "kite",
+      "rig": {"tint": "#7fb0b8", "head": "goggles"},
+      "traits": {"work_mult": {"repair": 1.2}},
+      "ability": {"id": "repair_burst", "cooldown": 24, "params": {"amount": 5}},
+      "obtained": "The Long Slack (stage 2+): holding a patch on a leaking hull at the middle of a kilometre of washing line. Hold station for him (1 fuel), take the other end of the line with a Kite of your own, or pin the plate with a tractor beam.",
+      "lore": "The Rope Walker. Bowline mends hulls on the outside, where the air is thin and the cold is thinner, at the end of a kilometre of line tied to his own tail. He has never worn a suit and finds the idea claustrophobic. He sends his regards to your gravity, and asks if it is always this heavy."
     }
   ]
 }
