@@ -1,0 +1,7 @@
+{
+	"id": "regions_1",
+	"name": "Region event packs, wave 1",
+	"version": "1.0",
+	"requires": ["races_1"],
+	"notes": "12 events and 6 derelict logs for each of the 10 race homelands (human_core, basalt_quarries, emberkin_forges, fenn_bazaar, kett_hives, mire_fens, sporeling_groves, gauntling_scrapyards, prismatic_choir, grundl_barges): events/<region>_events.json, and one logs.json. Every rolled event asks for the flag in_<region id> (the region graph sets it on arrival; the event schema has no requires.region yet). Each region has one tech event (type quest) that sets the flag tech_<part id>, to be swapped for the part itself once the racial tech packs exist; one recruit event for its own race; and at least one dangerous event. Follow-up pages have weight 0. The logs are not handed out by events yet: events.gd reads only data/logs. File names avoid the suffix core.json, which tests/test_events.gd matches."
+}

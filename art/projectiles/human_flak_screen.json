@@ -1,0 +1,81 @@
+{
+ "frame": [
+  4,
+  10
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   2,
+   14
+  ]
+ },
+ "anchors": {
+  "head": [
+   2,
+   1
+  ],
+  "tail": [
+   2,
+   9
+  ]
+ },
+ "glow": {
+  "image": "human_flak_screen_glow.png",
+  "frame": [
+   10,
+   16
+  ],
+  "offset": [
+   -3,
+   -3
+  ],
+  "anims": {
+   "fly": [
+    0,
+    2,
+    14
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "impact": {
+  "image": "human_flak_screen_impact.png",
+  "frame": [
+   16,
+   16
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    14
+   ]
+  },
+  "anchor": [
+   8,
+   8
+  ],
+  "glow": {
+   "image": "human_flak_screen_impact_glow.png",
+   "frame": [
+    24,
+    24
+   ],
+   "offset": [
+    -4,
+    -4
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     14
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A flak tracer, 4x10: a bright amber shell with a short ember tail (2 frames). Fired at incoming missiles within 300 px."
+}

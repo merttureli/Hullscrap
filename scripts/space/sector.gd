@@ -30,13 +30,13 @@ var cfg: Dictionary
 var seed_value := 0  ## this sector's own seed (seed_for)
 var node_id := ""
 var node_type := ""  ## the Drift node's type: the sector's theme
-var region := ""  ## clans, concord, lumen or boneyard
+var region := ""  ## the id of the region the node is in (data/regions)
 var size := 24000.0  ## px, the sector is a square
 var arrival := Vector2.ZERO  ## where the ship arrives, near one edge
 var current_angle := 0.0  ## the debris current's direction in degrees (0 east, 90 south on the screen, as in data/debris.json)
 var current_speed := 40.0  ## px/s
 var density := 1.0  ## the debris density: x the base spawn rate and cap of data/debris.json
-var debris_mult := {}  ## debris type id -> weight multiplier: the theme of the node type
+var debris_mult := {}  ## debris type id -> weight multiplier: the theme of the node type times the region's `debris`
 var pois: Array = []  ## the generated POIs, main first
 var ambient: Array = []  ## the passing ships now about (transient; not generated)
 var hostiles: Array = []  ## positions (Vector2, px) of the hostile ships about; the fight in place keeps this list for the jump block
@@ -47,6 +47,7 @@ var max_speed := 600.0
 var damping := 0.25  ## per second
 var clock := 0.0  ## seconds spent in the sector (tick)
 var rng := RandomNumberGenerator.new()  ## ambient rolls and spawn points
+var ambient_weights := {}  ## kind (trader, patrol, pirate) -> weight of the passing ships: the region's `ambient`
 var _amb_t := 0.0  # seconds since the last ambient roll
 var _next_amb := 1
 var _engaged := {}  # POI id -> true while its event is open (or, for a station, until the ship has left); not saved
@@ -71,17 +72,21 @@ static func seed_for(campaign_seed: int, id: String) -> int:
 
 
 ## A new sector for `node` (a Drift node dictionary) in region `region_id`. `p_cfg` is data/sectors.json by default.
+## `region_data` (the region's file, regions.gd) lays its `debris` and `pois` multipliers over the node type's theme and
+## mix and gives the passing ships' `ambient` weights; without it they come from data/sectors.json `regions` by id.
 ## The ship starts at the arrival point.
-static func generate(campaign_seed: int, node: Dictionary, region_id: String, p_cfg: Dictionary = {}):
+static func generate(campaign_seed: int, node: Dictionary, region_id: String, p_cfg: Dictionary = {}, region_data: Dictionary = {}):
 	var s = new()
 	s.cfg = p_cfg if not p_cfg.is_empty() else config()
 	s.node_id = str(node["id"])
 	s.node_type = str(node["type"])
 	s.region = region_id
+	var table: Dictionary = s.cfg["regions"]
+	s.ambient_weights = region_data["ambient"] if region_data.get("ambient") is Dictionary else table.get(region_id, table["boneyard"])["ambient"]
 	s.seed_value = seed_for(campaign_seed, s.node_id)
 	var r := RandomNumberGenerator.new()
 	r.seed = s.seed_value
-	s._build(r, node)
+	s._build(r, node, region_data)
 	s.rng.seed = s.seed_value + 7919
 	s.enter()
 	return s
@@ -89,7 +94,7 @@ static func generate(campaign_seed: int, node: Dictionary, region_id: String, p_
 
 # --- generation ------------------------------------------------------------------------------------------
 
-func _build(r: RandomNumberGenerator, node: Dictionary) -> void:
+func _build(r: RandomNumberGenerator, node: Dictionary, region_data: Dictionary) -> void:
 	size = float(cfg["size"])
 	var a: Dictionary = cfg["arrival"]
 	var along := size * (0.5 + r.randf_range(-1.0, 1.0) * float(a["spread"]))
@@ -110,7 +115,10 @@ func _build(r: RandomNumberGenerator, node: Dictionary) -> void:
 	var n: Dictionary = nodes[node_type] if nodes.has(node_type) else nodes["empty"]
 	density = float(n["density"]) * r.randf_range(0.85, 1.15)
 	debris_mult = n.get("debris", {}).duplicate()
-	var types := _mix(r, n)
+	var over: Dictionary = region_data.get("debris", {})
+	for k in over:
+		debris_mult[k] = float(debris_mult.get(k, 1.0)) * float(over[k])
+	var types := _mix(r, n, region_data.get("pois", {}))
 	var pc: Dictionary = cfg["poi"]
 	var types_cfg: Dictionary = cfg["poi_types"]
 	for i in types.size():
@@ -127,9 +135,9 @@ func _build(r: RandomNumberGenerator, node: Dictionary) -> void:
 
 
 ## The POI types of the sector in order: the node's main one, the ones it always has (`also`), then others rolled by the
-## node's weights, within each type's `max`, until the count (rolled in the node's range, kept within the sector's)
-## is reached.
-func _mix(r: RandomNumberGenerator, n: Dictionary) -> Array:
+## node's weights (times the region's `pois` multipliers), within each type's `max`, until the count (rolled in the node's
+## range, kept within the sector's) is reached.
+func _mix(r: RandomNumberGenerator, n: Dictionary, mults: Dictionary = {}) -> Array:
 	var pc: Dictionary = cfg["poi"]
 	var count := clampi(r.randi_range(int(n["count"][0]), int(n["count"][1])), int(pc["count"][0]), int(pc["count"][1]))
 	var types: Array = [str(n["main"])]
@@ -142,8 +150,9 @@ func _mix(r: RandomNumberGenerator, n: Dictionary) -> Array:
 	while types.size() < count:
 		var open := {}
 		for t in weights:
-			if float(weights[t]) > 0.0 and int(made.get(t, 0)) < int(cfg["poi_types"][t].get("max", 3)):
-				open[t] = float(weights[t])
+			var w := float(weights[t]) * float(mults.get(t, 1.0))
+			if w > 0.0 and int(made.get(t, 0)) < int(cfg["poi_types"][t].get("max", 3)):
+				open[t] = w
 		if open.is_empty():
 			break
 		var pick := _pick(r, open)
@@ -418,14 +427,13 @@ func tick(dt: float, ship) -> Array:
 
 ## One ambient roll: with chance `ambient.chance` (and fewer than `max` about) an `unknown` contact appears at
 ## `edge` x the radar's reach from the ship, in a random direction that stays inside the sector. Its kind (trader,
-## patrol or pirate: the event type it will run) is picked by the region's weights.
+## patrol or pirate: the event type it will run) is picked by the region's weights (ambient_weights).
 func _roll_ambient(ship) -> Dictionary:
 	var amb: Dictionary = cfg["ambient"]
 	var lucky := rng.randf() < float(amb["chance"])
 	if not lucky or ambient.size() >= int(amb["max"]):
 		return {}
-	var regions: Dictionary = cfg["regions"]
-	var kind := _pick(rng, regions[region]["ambient"] if regions.has(region) else regions["boneyard"]["ambient"])
+	var kind := _pick(rng, ambient_weights)
 	var dist := Radar.reach(ship) * float(amb["edge"])
 	var at := ship_pos
 	var found := false

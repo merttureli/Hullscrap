@@ -1,0 +1,76 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   8,
+   8
+  ],
+  "off": [
+   8,
+   1,
+   0
+  ],
+  "hit": [
+   9,
+   3,
+   12
+  ],
+  "recharge": [
+   12,
+   4,
+   10
+  ],
+  "damaged": [
+   16,
+   2,
+   6
+  ],
+  "disabled": [
+   18,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "emberkin_hearth_shield_glow.png",
+  "frame": [
+   88,
+   88
+  ],
+  "offset": [
+   -12,
+   -12
+  ],
+  "anims": {
+   "on": [
+    0,
+    8,
+    8
+   ],
+   "hit": [
+    8,
+    3,
+    12
+   ],
+   "recharge": [
+    11,
+    4,
+    10
+   ],
+   "damaged": [
+    15,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Emberkin \"Hearth Shield\" (+1 layer while the room is hot): a gunmetal frame with a brass ring and four brass pylons topped with flame lamps, and in the middle a brass hearth bowl with a live flame under the dome. On loop (8): blue emitter segments turn round the hearth, arcs crawl between the pylons, the pylon flames take turns, the hearth flame flickers. hit (3): flare and ripple. recharge (4): the rings spin up. Damaged: the brass ring cracked, the west pylon dead, a flap hangs off the lower-right corner. Disabled: the bowl cold and split, the west pylon smashed, casing split."
+}

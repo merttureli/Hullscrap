@@ -1,0 +1,51 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "kett_brood_hold_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ]
+  }
+ },
+ "notes": "Kett \"Brood Hold\" (Kett heal and work x1.2 here, others x0.8): a chitin nursery cabinet of nine hive cells, each holding a pale larva; on loop (2) the larvae glow in alternating cells as they squirm. A row of three small drone bays along the bottom. Damaged: a cell burst open and dark, the larva gone, a plate hanging, sparks. Disabled: the cells grey and empty, the cabinet cracked, a bay dark."
+}

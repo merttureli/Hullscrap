@@ -1,0 +1,27 @@
+{
+	"id": "gate_approaches",
+	"name": "The Gate Approaches",
+	"home_species": "",
+	"faction": "hollow",
+	"stages": [6, 8],
+	"weight": 10,
+	"rarity": "uncommon",
+	"danger": 1.4,
+	"palette": {"tint": "#59667a", "nebula": "gate"},
+	"map": {},
+	"node_weights": {"anomaly": 18, "wreck_field": 18, "empty": 18, "distress": 12, "asteroid_field": 12, "pirate": 10, "patrol": 8, "trader": 4},
+	"places": [
+		{"id": "gate_1", "name": "The Concord Gate", "type": "gate", "pos": [620, 45]},
+		{"id": "gate_2", "name": "The Scrapper Gate", "type": "gate", "pos": [620, 955]},
+		{"id": "gate_3", "name": "The Lumen Gate", "type": "gate", "pos": [1250, 60]}
+	],
+	"debris": {"ice_chunk_s": 1.2, "scrap_chunk_s": 0.7},
+	"pois": {"anomaly": 1.5, "abandoned_station": 1.5, "unknown": 1.3},
+	"ambient": {"patrol": 2, "pirate": 2, "trader": 1},
+	"stock": {},
+	"recruit": {},
+	"enemies": "hollow",
+	"hazards": ["radiation", "ion_storm"],
+	"events": "gate_approaches",
+	"blurb": "The three dead gates hang at the edge of everything, cold and enormous. Crystal and gate alloy drift off their shells. So do ships with no crew aboard and their systems still running."
+}

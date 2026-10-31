@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   6,
+   7
+  ],
+  "off": [
+   6,
+   1,
+   0
+  ],
+  "damaged": [
+   7,
+   2,
+   6
+  ],
+  "disabled": [
+   9,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "prismatic_song_reactor_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    6,
+    7
+   ],
+   "damaged": [
+    6,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Prismatic Song Reactor, 4x4: a gem-cut violet frame round a tall crystal that sings: concentric rings of cyan and magenta light spread outward from its white-gold core on the 6-frame loop, with four small tuning crystals in the corners that light in turn. Off: a dull dark crystal, no rings. Damaged: the crystal is cracked and a corner crystal dark, the rings stutter. Disabled: the crystal split and grey, the frame cracked."
+}

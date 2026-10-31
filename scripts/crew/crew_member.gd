@@ -10,6 +10,7 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const Characters = preload("res://scripts/crew/characters.gd")
 const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide)
 const MAX_SUBSTEP := 0.2  ## longest single move in cells, so a long frame cannot skip over a wall
 const CONFIG_PATH := "res://data/crew.json"
@@ -33,6 +34,10 @@ var look := {}  ## PersonDrawer palette ("suit", "hair", "tool"); empty = the vi
 var job := {}  ## what they are doing now (a Jobs board entry plus its "spot"); empty = idle
 var hold := 0.0  ## seconds left of a manual order, during which the job board leaves them alone
 var stun := 0.0  ## seconds left stunned (an ion hit on their room, trait ion_stun): no walking, no work
+var ability: Dictionary = {}  ## the active ability they carry, {id, cooldown?, params?} (crew_abilities.gd): their species' own, or their character's
+var ability_cd := 0.0  ## seconds until the ability may be used again (ticked by CrewAbilities.tick, so build mode pauses it)
+var character := ""  ## the unique character (data/characters.json) they are, "" for an ordinary crew member
+var head := ""  ## a head frame of their rig's art to draw instead of the usual one ("" = the usual); a character's rig.head
 
 
 func _init(p_name := "", p_pos := Vector2.ZERO, p_species := "human") -> void:
@@ -59,18 +64,21 @@ static func species_table() -> Dictionary:
 	return _species
 
 
-## The entry of species `id` in data/species.json; {} for an id it does not list.
+## The entry of species `id` in data/species.json; {} for an id it does not list (a character's one-of-a-kind
+## species, "unique:<id>", is found in data/characters.json).
 static func species_def(id: String) -> Dictionary:
 	var d = species_table().get("species", {}).get(id)
-	return d if d is Dictionary else {}
+	return d if d is Dictionary else Characters.unique_species(id)
 
 
 ## Become species `id`: max hp and walk speed come from its entry (the crew.json hp, and speed 1.0,
 ## for an id data/species.json does not list) times the hp_mult and speed_mult of their traits (TraitSet,
-## the species' and personal ones; gear worn later does not change the body), and hp is full.
+## the species' and personal ones; gear worn later does not change the body), and hp is full. The species'
+## `ability` (if it has one) becomes theirs.
 func set_species(id: String) -> void:
 	species = id
 	var def := species_def(id)
+	ability = def["ability"].duplicate(true) if def.get("ability") is Dictionary else {}
 	var t := TraitSet.of(self)
 	max_hp = float(def.get("hp", config().get("hp", 100))) * float(t["hp_mult"])
 	hp = max_hp
@@ -78,14 +86,21 @@ func set_species(id: String) -> void:
 
 
 ## Every trait this person has, without repeats: their species' (data/species.json), their own
-## (data/crew.json `traits`, by name) and the ones worn gear gives (`gear_traits`).
+## (data/crew.json `traits`, by name), their character's (when its `traits` is a list of ids) and the ones worn
+## gear gives (`gear_traits`).
 func traits() -> Array:
 	var out := []
-	for list in [species_def(species).get("traits", []), config().get("traits", {}).get(name, []), gear_traits]:
+	for list in [species_def(species).get("traits", []), config().get("traits", {}).get(name, []), Characters.trait_ids(character), gear_traits]:
 		for t in list:
 			if not out.has(t):
 				out.append(t)
 	return out
+
+
+## A new crew member that is the unique character `id` (Characters.apply), standing at `p_pos`. Null for an unknown id.
+static func from_character(id: String, p_pos := Vector2.ZERO):
+	var m = new("", p_pos)
+	return m if Characters.apply(m, id) else null
 
 
 ## The art folder this person is drawn with (art/crew/<rig>/): their species' `rig`, else the species id.

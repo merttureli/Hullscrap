@@ -1,0 +1,40 @@
+{
+ "frame": [
+  20,
+  20
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   16
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   10,
+   10
+  ]
+ },
+ "glow": {
+  "image": "human_concord_railgun_impact_glow.png",
+  "frame": [
+   30,
+   30
+  ],
+  "offset": [
+   -5,
+   -5
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    16
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "A Concord rail flash: a white core with a cross of cyan rays and a blue shock ring that grows and thins (4 frames, 20x20). Play it on every pierce."
+}

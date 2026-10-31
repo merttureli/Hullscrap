@@ -1,0 +1,85 @@
+{
+ "frame": [
+  8,
+  16
+ ],
+ "orientation": "up: travels towards the top of the image at rotation 0",
+ "anims": {
+  "fly": [
+   0,
+   3,
+   12
+  ]
+ },
+ "anchors": {
+  "head": [
+   4,
+   0
+  ],
+  "tail": [
+   4,
+   15
+  ]
+ },
+ "glow": {
+  "image": "emberkin_pyre_lance_glow.png",
+  "frame": [
+   18,
+   16
+  ],
+  "offset": [
+   -5,
+   0
+  ],
+  "anims": {
+   "fly": [
+    0,
+    3,
+    12
+   ]
+  },
+  "blend": "add (preferred) or alpha-over",
+  "tile": "y"
+ },
+ "impact": {
+  "image": "emberkin_pyre_lance_impact.png",
+  "frame": [
+   20,
+   20
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    12
+   ]
+  },
+  "anchor": [
+   10,
+   10
+  ],
+  "glow": {
+   "image": "emberkin_pyre_lance_impact_glow.png",
+   "frame": [
+    30,
+    30
+   ],
+   "offset": [
+    -5,
+    -5
+   ],
+   "anims": {
+    "play": [
+     0,
+     4,
+     12
+    ]
+   },
+   "blend": "add (preferred) or alpha-over"
+  }
+ },
+ "notes": "A stream of flame, 8 wide x 16 tall, tiling along y (joins seamlessly, glow too): red edge, orange body, yellow band, white core, ragged edges that crawl over 3 flicker frames. Draw it from the lance to the hit.",
+ "tile": "y",
+ "length": 16,
+ "width": 8
+}

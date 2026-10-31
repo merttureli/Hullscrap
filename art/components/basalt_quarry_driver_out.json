@@ -1,0 +1,133 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "basalt_quarry_driver_out_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   32,
+   12
+  ]
+ },
+ "notes": "OUTSIDE half of the Basalt Quarry Driver: a massive basalt block strapped with iron bands, flame vents on both shoulders (the room vents on fire) and a magma-lit pressure gauge. damaged: a band sprung, a stone corner cracked and weeping magma; disabled: scorched, a slab knocked off, dented, sparking.",
+ "barrel": {
+  "image": "basalt_quarry_driver_barrel.png",
+  "frame": [
+   25,
+   72
+  ],
+  "pivot_on_base": [
+   32,
+   12
+  ],
+  "pivot_on_barrel": [
+   12,
+   65
+  ],
+  "muzzle": [
+   12,
+   15
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "gimbal_deg": 6,
+  "glow": {
+   "image": "basalt_quarry_driver_barrel_glow.png",
+   "frame": [
+    45,
+    92
+   ],
+   "offset": [
+    -10,
+    -10
+   ],
+   "anims": {
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "fire": [
+     1,
+     3,
+     14
+    ],
+    "damaged": [
+     4,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}

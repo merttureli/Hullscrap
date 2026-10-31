@@ -1,0 +1,40 @@
+{
+ "frame": [
+  16,
+  16
+ ],
+ "anims": {
+  "play": [
+   0,
+   4,
+   14
+  ]
+ },
+ "mode": "once",
+ "anchors": {
+  "center": [
+   8,
+   8
+  ]
+ },
+ "glow": {
+  "image": "human_flak_screen_impact_glow.png",
+  "frame": [
+   24,
+   24
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "play": [
+    0,
+    4,
+    14
+   ]
+  },
+  "blend": "add (preferred) or alpha-over"
+ },
+ "notes": "A flak burst: a white-yellow puff with a grey smoke ring and flung sparks, thinning to a faint ring (4 frames, 16x16)."
+}
