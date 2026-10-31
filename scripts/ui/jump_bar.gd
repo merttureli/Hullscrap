@@ -1,6 +1,6 @@
 extends Control
 ## The red JUMP bar under the enemy's schematic while it flees (morale.gd): "JUMP 9.2 s" as its jump drive
-## charges, and in small print why the charge is held (no engine can push, the helm is not manned). Hidden
+## charges, and in small print why the charge is held ("JUMP held: engines out", "helm down" or "no crew"). Hidden
 ## otherwise. bind() it to the fight's session (null: none); it reads session.morale each frame. Drawing only.
 
 const PANEL := Vector2(280.0, 38.0)
@@ -36,7 +36,7 @@ func _draw() -> void:
 		return
 	var morale = session.morale
 	var total := float(morale.cfg["spool_s"])
-	var held: String = morale.spool_block()
+	var held: String = morale.hold()
 	var bar := Rect2(4.0, 4.0, PANEL.x - 8.0, 20.0)
 	draw_rect(Rect2(Vector2.ZERO, PANEL), BG)
 	draw_rect(Rect2(Vector2.ZERO, PANEL), EDGE, false, 2.0)
@@ -45,4 +45,4 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	draw_string(font, bar.position + Vector2(8.0, 15.0), "JUMP %.1f s" % maxf(total - morale.spool, 0.0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, TEXT)
 	if held != "":
-		draw_string(font, Vector2(8.0, 35.0), "charge held: " + held, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("#ffb4a8"))
+		draw_string(font, Vector2(8.0, 35.0), "JUMP held: " + held, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("#ffb4a8"))
