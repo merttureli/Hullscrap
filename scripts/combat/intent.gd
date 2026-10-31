@@ -14,6 +14,7 @@ extends RefCounted
 ## Numbers: data/combat_ui.json, "intent".
 
 const Effects = preload("res://scripts/combat/effects.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 
 const CONFIG_PATH := "res://data/combat_ui.json"
 const META := "intent_shown"  ## meta on the pilot: {uid, tick} of the target now shown and when it was first shown
@@ -97,7 +98,7 @@ static func _can_shoot(arena, idx: int, uid: int, m: Dictionary, w: Dictionary) 
 	if arena.weapons.status_of(arena, idx, uid) != "ok" or not (m["powered"] if m["virtual"] else co.powered.get(uid, false)):
 		return false
 	var ammo := str(w["ammo"])
-	return ammo == "" or co.ship.inventory.count(ammo) >= maxi(Effects.ammo_cost(m, w), 1)
+	return ammo == "" or Ammo.can_supply(co.ship, uid, ammo, maxi(Effects.ammo_cost(m, w), 1))
 
 
 ## "Artemis Mk1" -> "Artemis".

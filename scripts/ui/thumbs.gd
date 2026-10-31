@@ -10,6 +10,8 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
+const BeltArt = preload("res://scripts/view/belt_art.gd")
+const Ammo = preload("res://scripts/sim/ammo.gd")
 const WALL := Color("#3b3f45")
 const WALL_TOP := Color("#5a6068")
 const CABLE := Color("#d98a4e")
@@ -28,6 +30,8 @@ static func draw(cv: CanvasItem, e: Dictionary, ship, r: Rect2, t := 0.0) -> voi
 			UiKit.icon(cv, e["id"], Rect2(r.get_center() - Vector2(s, s) / 2.0, Vector2(s, s)))
 		"cable":
 			_cable(cv, r)
+		"belt":
+			_belt(cv, r, t)
 		_:
 			_tiles(cv, e, ship, r)
 
@@ -120,3 +124,12 @@ static func _cable(cv: CanvasItem, r: Rect2) -> void:
 		if not TileArt.cable(cv, q, has, Vector2i(x, 0), true):
 			cv.draw_line(q.get_center() - Vector2(k / 2.0, 0), q.get_center() + Vector2(k / 2.0, 0), CABLE, 2.0)
 			cv.draw_circle(q.get_center(), 3.0, CABLE)
+
+
+## Three cells of conveyor belt in a row, the treads running.
+static func _belt(cv: CanvasItem, r: Rect2, t: float) -> void:
+	var k := _cell(r, Vector2(3, 1))
+	var at := r.get_center() - Vector2(3, 1) * k / 2.0
+	for x in 3:
+		BeltArt.tile(cv, Rect2(at + Vector2(x * k, 0), Vector2(k, k)), [2, 10, 8][x], t)
+	BeltArt.unit(cv, at + Vector2((fposmod(t * 1.2, 1.0) * 2.0 + 0.5) * k, k / 2.0), k, "missile")
