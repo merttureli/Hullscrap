@@ -76,6 +76,12 @@ func test_data_is_complete() -> void:
 		"afterburner": [-3, 4, 2], "inertial_dampener": [-2, 3, 2], "battering_bow": [0, 0, 2], "reactor_scrap_kettle": [8, 0, 1],
 		# the Raft loop (docs/CONTENT.md section 11)
 		"net_mouth_scrap": [0, 0, 1], "intake_mk1": [-1, 6, 1],
+		# racial tech, group b (data/packs/tech_mire, _sporeling, _gauntling, _prismatic, _grundl): id -> [power, priority, tier]
+		"mire_steam_lance": [-3, 5, 2], "mire_bog_mortar": [-3, 5, 2], "mire_mist_projector": [-3, 5, 1],
+		"sporeling_spore_cannon": [-3, 5, 2], "sporeling_rot_pod": [-2, 5, 2], "sporeling_pollen_turret": [-2, 5, 1],
+		"gauntling_arc_hammer": [-3, 5, 2], "gauntling_scrap_shotgun": [-2, 5, 1], "gauntling_tesla_picket": [-3, 5, 2],
+		"prismatic_prism_lens": [-4, 5, 2], "prismatic_refractor": [-3, 5, 2], "prismatic_glimmer_turret": [-3, 5, 2],
+		"grundl_slug_mortar": [-4, 5, 3], "grundl_grapple_harpoon": [-3, 5, 2], "grundl_barge_flak": [-3, 5, 2],
 		# engine wave 1 (data/packs/engines_1)
 		"engine_mk3": [-4, 4, 3], "engine_mk4": [-5, 4, 4], "engine_mk5": [-6, 4, 5], "engine_scrap_mk2": [-3, 4, 2], "engine_scrap_mk3": [-4, 4, 3],
 		"engine_scrap_mk4": [-5, 4, 4], "engine_neon_mk2": [-3, 4, 2], "engine_neon_mk3": [-4, 4, 3], "engine_neon_mk4": [-5, 4, 4],

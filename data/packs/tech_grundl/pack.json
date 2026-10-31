@@ -1,0 +1,10 @@
+{
+	"id": "tech_grundl",
+	"name": "Racial tech: Grundl",
+	"version": "1.0",
+	"requires": [
+		"engines_1",
+		"races_1"
+	],
+	"notes": "Grundl arsenal (docs/waves/racial_tech_1.md): 3 ship weapons, 3 components and 2 hand weapons, each with a strong pro and a con the race's own traits cancel. Sold in Meridian."
+}

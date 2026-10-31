@@ -1,0 +1,6 @@
+{
+"weapons": [
+	{"id": "lens_pistol", "name": "Lens Pistol", "culture": "prismatic", "class": "pistol", "damage": 10, "rate": 1.5, "range": 360, "art": "lens_pistol", "notes": "range +20%: a lens focuses the beam, so it carries farther"},
+	{"id": "shard_lance", "name": "Shard Lance", "culture": "prismatic", "class": "heavy", "damage": 36, "rate": 0.6, "range": 280, "art": "shard_lance", "notes": "damage +20%, range -20%: a lance of crystal splinters; its shots split on hit (later)"}
+]
+}

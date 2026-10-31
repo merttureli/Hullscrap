@@ -1,0 +1,7 @@
+{
+"recipes": [
+	{"id": "gauntling_arc_hammer", "output": {"item": "gauntling_arc_hammer", "count": 1}, "materials": {"scrap": 24, "copper": 14, "titanium": 6, "silicon": 4}, "fab_level": 2, "tools": [], "time": 34, "category": "system"},
+	{"id": "gauntling_scrap_shotgun", "output": {"item": "gauntling_scrap_shotgun", "count": 1}, "materials": {"scrap": 22, "copper": 3}, "fab_level": 2, "tools": [], "time": 20, "category": "system"},
+	{"id": "gauntling_tesla_picket", "output": {"item": "gauntling_tesla_picket", "count": 1}, "materials": {"scrap": 18, "copper": 18, "titanium": 4, "silicon": 5}, "fab_level": 2, "tools": [], "time": 34, "category": "system"}
+]
+}

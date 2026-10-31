@@ -1,0 +1,7 @@
+{
+"recipes": [
+	{"id": "sporeling_spore_cannon", "output": {"item": "sporeling_spore_cannon", "count": 1}, "materials": {"scrap": 18, "copper": 8, "polymer": 8, "silicon": 3}, "fab_level": 2, "tools": [], "time": 30, "category": "system"},
+	{"id": "sporeling_rot_pod", "output": {"item": "sporeling_rot_pod", "count": 1}, "materials": {"scrap": 16, "copper": 8, "polymer": 10, "titanium": 3}, "fab_level": 2, "tools": [], "time": 28, "category": "system"},
+	{"id": "sporeling_pollen_turret", "output": {"item": "sporeling_pollen_turret", "count": 1}, "materials": {"scrap": 12, "copper": 8, "polymer": 8}, "fab_level": 2, "tools": [], "time": 22, "category": "system"}
+]
+}
