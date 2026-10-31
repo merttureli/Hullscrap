@@ -1,0 +1,117 @@
+{"events": [
+    {
+      "id": "chantry_sounding_nave", "type": "station", "weight": 10, "once": false, "requires": {"region": "choir_chantry"},
+      "text": "The Sounding Nave is a long hall of crystal ribs, and every rib is humming. Hollow glass figures stand in rows along the aisle with their sound-holes open and their rings of tuning prongs just trembling, and each of them is holding a single note, and the notes make a chord that settles on your shoulders like a coat. A chorister in a tabard glides up. 'Evensong is in a quarter of an hour,' she says. 'You are very welcome to the pews. Your hull is a little flat, if you don't mind my saying.'",
+      "choices": [
+        {"text": "Stay for evensong.", "outcomes": [
+          {"weight": 100, "text": "You sit in the back pew with your crew while forty Choir sing a piece that has no words and no end. At some point you stop noticing the time. When you get up, your shoulders are lower than they have been in a year, and somebody in your crew is quietly humming.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Have your hull tuned (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "A tuner with a silver fork walks the length of your ship, tapping every plate, and tells you which ones are lying. By the end the hull rings clean, the drive hums sweetly, and a loose plate on the starboard side that has been rattling for months has stopped.", "effects": {"items": {"credits": -30}, "hull": 10}}
+        ]},
+        {"text": "[Choir] Join the descant.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir walks up the aisle without being asked, takes a place in the third row, and when the chord reaches its turn, lifts the line a whole octave above everyone. The nave goes dead quiet, then answers. The precentor, an enormously old Choir with a cracked left rib, weeps a little crystal. Afterwards the Nave presses a purse on your Choir and some neon polish on your hull.", "effects": {"items": {"credits": 50}, "hull": 5, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "Hire a young chorister (80 credits).", "requires": {"credits": 80, "not_flag": "chantry_hired"}, "outcomes": [
+          {"weight": 100, "text": "Motet is new, shining and nervous, and has been told that out in the Drift there are rooms where nobody sings at all. 'I should like to see one,' they say, in a voice like a tuning fork. They bow to the precentor, who bows back, and cross the dock with a small case of tuning prongs and a very large smile.", "effects": {"items": {"credits": -80}, "recruit": {"species": "choir", "name": "Motet"}, "flag": "chantry_hired"}}
+        ]},
+        {"text": "Slip out before the singing starts.", "outcomes": [
+          {"weight": 100, "text": "You are three corridors away when it begins. You can hear it through the bulkheads. You stand in the corridor for the whole length of it.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "chantry_tuning_day", "type": "trader", "weight": 8, "once": false, "requires": {"region": "choir_chantry"},
+      "text": "A tuning stall has set up between two chantry barges, run by a Lumen artisan with a wall of forks. 'Reactors,' she calls, 'engines, shield emitters, anything with a note. A flat ship is an unhappy ship, and an unhappy ship costs you fuel.' She holds a fork to your hull and listens. 'Your reactor is a semitone down,' she says, with sympathy. 'It's been that way a long while.'",
+      "choices": [
+        {"text": "Have the reactor tuned (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 70, "text": "She goes at your reactor with a silver fork and a patient ear. The hum climbs out of its rut and finds the right note. In the evening, your fuel gauge reads a little higher than it has any right to.", "effects": {"items": {"credits": -40, "fuel": 2}}},
+          {"weight": 30, "text": "She tunes it a quarter-tone sharp. Everything works and everything is faintly uneasy. The crew get a week of headaches before it settles.", "effects": {"items": {"credits": -40}, "crew_hp": -5}}
+        ]},
+        {"text": "Buy a pocket fork (10 credits).", "requires": {"credits": 10}, "outcomes": [
+          {"weight": 100, "text": "It does nothing a fork does not do. But when someone in the crew is in a mood, a quiet note from it, and a look, takes the edge off the room.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+        ]},
+        {"text": "[Choir] Tune her own bells.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir picks up one of the stall's forks, flicks it, listens with their whole body, and puts it back a hair to the left. Then another. In a minute the artisan has dropped everything, and the two of them are tuning her wall of forks together in a long happy argument. At the end she will not take a credit from you, and sends you off with a handful of cut crystal.", "effects": {"items": {"crystal": 2, "credits": 30}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Admire the forks and move on.", "outcomes": [
+          {"weight": 100, "text": "She lets you strike one. It sings for nine seconds. You buy nothing, and she watches you go with a smile that says your reactor is still flat.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "chantry_off_key", "type": "anomaly", "weight": 9, "once": false, "requires": {"region": "choir_chantry"},
+      "text": "A stretch of space has gone sour. Every instrument on your bridge reads a shade flat. The sensors drift, the engine hum drops a quarter-tone, and a ring of chantry ships nearby sits hung in a kind of wince. A choirmaster hails you, her voice pinched. 'Is it you? Something is flattening us, a hair at a time. Whatever it is has been pulling the whole ring down for a week.'",
+      "choices": [
+        {"text": "Trace the source with the sensors.", "outcomes": [
+          {"weight": 60, "text": "You find it after an hour: a dead beacon relay whose clock is drifting, pulling the whole neighbourhood out of true. You cut its power, and the ring sighs in relief. The choirmaster sends a purse.", "effects": {"items": {"credits": 35}, "rep": {"lumen": 1}}},
+          {"weight": 40, "text": "The trace picks up your own engines as the loudest source. You spend an unhappy hour finding that out.", "effects": {"hull": -5, "items": {"credits": 10}}}
+        ]},
+        {"text": "Cut your engines and drift.", "outcomes": [
+          {"weight": 100, "text": "With your drive off the sour note thins, and the ring's choirs start to recover, one by one. It is not a fix. But it is a courtesy, and the choirmaster notes it.", "effects": {"rep": {"lumen": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Choir] Sing the true note.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir stands in the airlock with every prong out and finds the note, the real one, under the sourness, and holds it. The sour field wobbles, hesitates, and then snaps in on the pitch like a string tightened. The whole ring of chantry ships rings out at once in relief. The choirmaster sends over what the Chantry had set aside for the fix: a handful of tuned crystal.", "effects": {"items": {"crystal": 2, "plasma_cell": 1}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "Leave the field behind.", "outcomes": [
+          {"weight": 100, "text": "You turn your nose to the dark and go. By the time the sourness is behind you, you are quite sure you can still hear the ring, all of it, wincing.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "chantry_cracked_bell", "type": "wreck_field", "weight": 8, "once": false, "requires": {"region": "choir_chantry"},
+      "text": "The Great Bell of the chantry ship Descant lies wrecked among the debris, forty metres of bell-metal cracked along its length. It is the biggest piece of non-hull salvage you have ever seen. It also rings at every touch: a sour, flat, mournful note. A pair of Rustfang salvagers is trying to roll it into their hold, and every time the bell goes bong they both flinch.",
+      "choices": [
+        {"text": "Take the bell-metal with cutters.", "outcomes": [
+          {"weight": 60, "text": "You cut four sections away in an afternoon of howling. The bell protests every time, and the Rustfangs applaud. The metal is good titanium alloy.", "effects": {"items": {"titanium": 5, "scrap": 20}, "crew_hp": -5}},
+          {"weight": 40, "text": "A section lets go in the wrong direction. The bell rings once for the whole Chantry, a long cracked groan, and the nearest ships turn to see who did it.", "effects": {"items": {"titanium": 3}, "rep": {"lumen": -1}, "hull": -5}}
+        ]},
+        {"text": "Pay the salvagers off to leave it (30 credits).", "requires": {"credits": 30}, "outcomes": [
+          {"weight": 100, "text": "They take the money and go, with their ears ringing. The Chantry finds out, and a basket of cut crystals is waiting on your airlock mat in the morning.", "effects": {"items": {"credits": -30, "crystal": 1}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "[Choir] Sing the crack closed.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir stands in front of the bell and sings into the crack. The bell hums back. The sour note drifts, rises, and resolves into a deep, clean A that rolls out across the field. A shard of bell-metal that was hanging by a thread lets go and floats into your Choir's hands, humming. The Rustfangs take their hats off. The Chantry sends a lot of thanks.", "effects": {"items": {"crystal": 2, "titanium": 4}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "Leave the bell be.", "outcomes": [
+          {"weight": 100, "text": "You pass it by. Behind you, the Rustfangs strike it once with a wrench to see what happens, and the whole wreck-field winces.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "chantry_sour_raiders", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "choir_chantry", "jumps_min": 2},
+      "text": "The raiders are playing a chord at you. They have wired a stolen set of chantry pipes to their hull, a screamer array, and it is tuned to make every bone in a body ache. Your crew's fillings throb. Over the comm, a Rustfang captain shouts happily above the din: 'It's a toll! Pay up, or we turn it up to a seven!'",
+      "choices": [
+        {"text": "Break the array with your guns.", "outcomes": [
+          {"weight": 100, "text": "You open up at the pipes. The captain's cheerful voice cracks, and the screamer fires up to full as the guns come in.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Pay the toll (45 credits).", "requires": {"credits": 45}, "outcomes": [
+          {"weight": 100, "text": "They stop. The silence is wonderful and shameful. The captain cheerfully thanks you and plays a single gentle note of apology as you go.", "effects": {"items": {"credits": -45}}}
+        ]},
+        {"text": "[Choir] Sing counterpoint.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir opens the channel and sings the exact inverse of the chord. The two sounds meet in the gap between the ships and cancel out, and for a moment there is a perfect, ringing silence. Then the screamer array, which had nowhere to put its note, resonates in its own pipes and shakes itself to pieces. The raiders drift in a cloud of tin. The captain applauds feebly.", "effects": {"items": {"scrap": 30, "credits": 30}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Turn tail and fly clear.", "outcomes": [
+          {"weight": 100, "text": "You put your drive to the wall and run. The array follows you for a while in a fading chord, getting flatter. You come out of it with a headache you will remember.", "effects": {"crew_hp": -10}}
+        ]}
+      ],
+      "after_win": {"text": "The pipes fall silent at last. In the wreck you find them still warm, a dozen chantry pipes, and a pile of the raiders' loot. The Chantry will pay for the pipes.", "effects": {"items": {"scrap": 35, "credits": 35, "crystal": 1}, "rep": {"lumen": 1}}}
+    },
+    {
+      "id": "chantry_vow_of_silence", "type": "distress", "weight": 7, "once": false, "requires": {"region": "choir_chantry"},
+      "text": "A lifepod is drifting with its lamps on, and in its window sits a Choir with a cloth bound over their ring of prongs. They have taken the vow of silence, and so they cannot call for help, and they are waving a hand in a slow, careful signal that you cannot read. A tiny card is taped to the glass: A WRONG NOTE BROUGHT DOWN A SHIP. I AM SORRY. NO ONE NEED STOP.",
+      "choices": [
+        {"text": "Take them aboard.", "outcomes": [
+          {"weight": 100, "text": "They come aboard silent as a candle, and for a week they tap rhythms on the mess table that make the helmsman smile and the engineer move faster. On the seventh day they unwrap one prong and give it a little flick, as a trial. Nobody falls down. Cantor stays.", "effects": {"recruit": {"species": "choir", "name": "Cantor"}}}
+        ]},
+        {"text": "Leave them a ration pack and a can of fuel (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You leave a pack on the pod's hull and fuel for a week's drift. The figure inside lifts a hand, once, in thanks, and lowers it. Behind you, in the dark, a single clear prong rings softly, and rings again.", "effects": {"items": {"fuel": -1}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "[Choir] Break the vow, gently.", "requires": {"species": "choir"}, "outcomes": [
+          {"weight": 100, "text": "Your Choir presses a hand to the glass and hums a single soft rest, a moment of nothing, held. The figure inside starts to shake. A prong unwraps. 'It was a long time,' Cantor says, in a voice rusty with disuse. 'Nobody told me the note was only a note.' They come aboard weeping crystal tears, which your Choir sweeps up and hands to them to keep. The Chantry rewards the rescue.", "effects": {"recruit": {"species": "choir", "name": "Cantor"}, "items": {"credits": 40}, "rep": {"lumen": 2}}}
+        ]},
+        {"text": "Pass by without stopping.", "outcomes": [
+          {"weight": 100, "text": "You steer round the pod, and the figure in the window raises a hand, once, as if you had done them a courtesy. It is the worst thing you have seen all week.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    }
+  ]}

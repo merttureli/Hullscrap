@@ -1,0 +1,65 @@
+{"events": [
+    {
+      "id": "tessellate_work_order", "type": "wreck_field", "weight": 8, "once": true, "requires": {"jumps_min": 3},
+      "text": "The wreck of a Concord supply tug has been repaired so many times that it is mostly patches. Every patch is a different metal, and the whole hull has the look of a quilt. On the hull a crowd of tiny bots is at work in the shape of a tall thin person: a swarm that holds a human outline the way a flock holds a shape, with pixel gaps at the elbows where bots are away on errands. A speaker on the hull recites, in a tinny chorus of a hundred voices: 'Work Order 4471. Repair hull. Status: in progress. Duration: forty years.'",
+      "choices": [
+        {"text": "Ask if they would repair your hull (15 scrap).", "requires": {"items": {"scrap": 15}}, "outcomes": [
+          {"weight": 70, "text": "The outline tilts its head. 'Accepted,' it says, in chorus, and a hundred bots peel off and run along your plating like ants down a bannister. By the end of the hour you have never seen your hull so clean. They ask for scrap in return, courteously, in the correct amount.", "effects": {"hull": 10, "items": {"scrap": -15}}},
+          {"weight": 30, "text": "They repair the hull. They also repair the airlock handle, the galley kettle, your pen, and one of your crew's teeth. Everything works perfectly and some of it is a little bit different. They ask for payment, and are surprised that you are surprised.", "effects": {"hull": 5, "items": {"scrap": -10}, "crew_hp": 5}}
+        ]},
+        {"text": "Tell them the work order is complete.", "outcomes": [
+          {"weight": 100, "text": "Silence. The outline collapses into sand and runs across the hull, and for a terrible minute you think you have broken them. Then the sand rises again. 'Work Order 4471 closed,' says the chorus, faintly. 'Please issue a new order.' You think about it. 'Work Order 4472: keep my ship in repair.' The outline straightens. 'Accepted,' it says. Tessel boards in the shape of a person, with a faint rustle, and sits for a long time in the engine room, enchanted by your pipes.", "effects": {"recruit": {"species": "tessellate", "name": "Tessel"}}}
+        ]},
+        {"text": "[Tessellate] Issue the new order yourself.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate steps forward and the two swarms touch at the edges. A ripple of bots crosses between them like a handshake in static. 'Work Order 4471 closed,' they say together. 'Work Order 4472 opened: assist captain.' A small knot of bots detaches from the wreck's swarm and settles into your Tessellate's shoulder, like a pinned medal. Tessel steps across to your airlock, and the wreck gives up its best patches: it was never going to need them.", "effects": {"recruit": {"species": "tessellate", "name": "Tessel"}, "items": {"scrap": 30, "nanite_paste": 1}}}
+        ]},
+        {"text": "Strip some of the patches.", "outcomes": [
+          {"weight": 100, "text": "The swarm watches you with a hundred patient dots. You cut out a plate and it is mended before you have put your torch down. You cut out another, and they mend the torch. By the time you have your arms full, they have repaired your glove, your wrench and the hole in your boot. They do not charge. You feel faintly watched, and fixed.", "effects": {"items": {"titanium": 3, "scrap": 25}}}
+        ]},
+        {"text": "Leave them to their order.", "outcomes": [
+          {"weight": 100, "text": "You back away. As you go, you notice the swarm has repaired a small ding in your hull that you had never noticed. There is a polite message on the comm: 'No charge.'", "effects": {"hull": 3}}
+        ]}
+      ]
+    },
+    {
+      "id": "tessellate_overhelpful_cloud", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "A grey cloud of loose repair bots has found the freighter Ample Return and is fixing her. Nothing was broken. They have repaired the airlocks shut, set the engines to the correct position (off), and improved the crew's quarters, with the crew in them. The captain is yelling over the comm from inside the pantry, which has also been repaired closed. 'It is HELPING,' she shouts. 'MAKE IT STOP HELPING.'",
+      "choices": [
+        {"text": "Blast the cloud with an extinguisher.", "outcomes": [
+          {"weight": 50, "text": "The foam scatters the bots, which regroup at once in the shape of an extinguisher, and thank you for your contribution. The airlocks open. The captain emerges from the pantry like a pardoned convict and presses a purse on you.", "effects": {"items": {"credits": 30}}},
+          {"weight": 50, "text": "The bots repair your extinguisher. It is now a very nice extinguisher and does nothing at all. The cloud moves on to your airlock handle.", "effects": {"hull": -5}}
+        ]},
+        {"text": "Give them a bigger job (10 scrap).", "requires": {"items": {"scrap": 10}}, "outcomes": [
+          {"weight": 100, "text": "You toss a drum of scrap and a bent bracket into the cloud and say, 'That needs repairing.' It does. The cloud boils off the Ample Return and swarms the bracket, and in ten minutes the bracket is a very small ship. The airlocks open. The captain, quite hoarse, gives you the freighter's emergency float.", "effects": {"items": {"scrap": -10, "credits": 35}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Tessellate] Issue a work order: stop.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate steps out onto the hull and says, in the tone of one who has had to say it before, 'Work Order revoked. Return to the pool.' The cloud hesitates. Then it pours itself back into the shape of a very small, very sorry person and shuffles off. The airlocks, doors and pantry open one by one. The captain is delighted, and pays with tears and a good deal of credit.", "effects": {"items": {"credits": 60, "scrap": 20}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Gauntling] Tell them what actually needs fixing.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling leans out of the airlock and says, in the flat tone of a practised mechanic, 'Your problem is a loose coupling on deck three.' The cloud agrees with great enthusiasm and sweeps off to fix it, leaving the rest alone. 'Thank you,' says the captain, 'for your sensible interference.' She pays well.", "effects": {"items": {"credits": 40, "copper": 15}}}
+        ]},
+        {"text": "Leave the freighter to its fate.", "outcomes": [
+          {"weight": 100, "text": "You steer wide. In the mirror the Ample Return slowly develops a small spire. Her captain's voice follows you for a long time: 'it is HELPING.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "tessellate_narrow_seam", "type": "asteroid_field", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "A mining outpost has cracked along a seam only a finger wide, right through the pressure core. The seam is not getting any bigger, only venting, a thin white thread of air out into the dark, but nobody on the rock is small enough to get inside the wall and weld it from the back. The boss, a lean woman in a stained jumper, stands with her arms folded and her hands very still. 'The repair crew is thirty hours away,' she says. 'We have about twenty-nine of air.'",
+      "choices": [
+        {"text": "Weld the seam from outside.", "outcomes": [
+          {"weight": 60, "text": "It takes a very careful torch and two hours. The seam closes with a hiss and a smell of burnt paint. The boss exhales for the first time in a day and writes you a cheque.", "effects": {"items": {"credits": 40, "titanium": 2}}},
+          {"weight": 40, "text": "The weld takes at the front and fails at the back. You do it twice, and the second time you are lucky. The boss pays what she can, which is less than she meant to.", "effects": {"items": {"credits": 20}, "crew_hp": -5}}
+        ]},
+        {"text": "Pack the seam with polymer (15 polymer).", "requires": {"items": {"polymer": 15}}, "outcomes": [
+          {"weight": 100, "text": "You squeeze polymer into the crack with a syringe and a prayer. It sets in a minute into a plug that will outlast the rock. The boss runs a thumb along it, looks at you, and says, 'You are my favourite person.' She pays in ore, and means it.", "effects": {"items": {"polymer": -15, "credits": 35, "titanium": 3}}}
+        ]},
+        {"text": "[Tessellate] Flow through the seam.", "requires": {"species": "tessellate"}, "outcomes": [
+          {"weight": 100, "text": "Your Tessellate walks to the crack and pours into it as a shimmer, and for an hour the seam glows from the inside with a thousand tiny working lights. When they re-form on the far side the seam is gone and the metal is smoother than the original. 'Done,' they say, a little smugly, and shed a stray bot onto the boss's sleeve. She thanks them with credits, ore, and a small, awkward hug.", "effects": {"items": {"credits": 50, "titanium": 4, "silicon": 2}}}
+        ]},
+        {"text": "Wish them luck.", "outcomes": [
+          {"weight": 100, "text": "'Twenty-nine hours,' the boss says to herself, as you leave. 'It's fine. It's fine.' It does not sound fine.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    }
+  ]}

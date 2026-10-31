@@ -1,0 +1,65 @@
+{"events": [
+    {
+      "id": "revenant_returned_things", "type": "wreck_field", "weight": 8, "once": true, "requires": {"jumps_min": 3},
+      "text": "Somebody has opened every locker on a dead freighter and laid the contents out on her hull in neat rows: boots, a mug, a child's drawing, a wedding band in a sandwich bag. Between the rows moves a figure in a salvaged pressure-suit with every lamp dead, pale where the visor shows, stitched at the jaw with what looks like fishing line. Its eyes are two cold dots. It is writing on a label with a grease pencil. 'There are four hundred and six,' it says over the open channel, without looking up. 'Somebody will want them.'",
+      "choices": [
+        {"text": "Help sort the lockers.", "outcomes": [
+          {"weight": 70, "text": "You spend an afternoon among other people's boots. The figure thanks you without looking up, and gives you the freighter's last fuel, which no family could use.", "effects": {"items": {"fuel": 1, "scrap": 20}}},
+          {"weight": 30, "text": "The sixth locker holds a ledger of debts, somebody's idea of a joke. Both of you wish you had not found it. The figure files it under WHERE IT WENT, and does not say anything for an hour.", "effects": {"items": {"credits": 15}, "crew_hp": -5}}
+        ]},
+        {"text": "Offer them a berth. 'You could return them from our ship.'", "outcomes": [
+          {"weight": 100, "text": "The grease pencil stops. The two dots look at you for a long time, and then at the rows. 'I would have to finish,' they say. It takes the rest of the day, and your crew do not leave them alone with it. At the end Okafor folds the last label into a pocket, picks up a lamp that will never light, and steps across to your airlock without being asked twice. 'I don't need air,' they say, a little anxiously, as if it were a flaw. 'I don't need much.'", "effects": {"recruit": {"species": "revenant", "name": "Okafor"}}}
+        ]},
+        {"text": "[Revenant] Read the labels aloud with them.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant kneels by the rows and reads the labels in the flat gentle voice of someone who has done it before. The figure stops writing. The two of them go down every row together, name by name. At the end Okafor has no more labels, and no more reason to stay with the dead freighter. 'You have a ship,' they say. 'It is warm?' 'It is warm enough.' They bring the good titanium from the freighter's spares, as a dowry, and pass it over very formally.", "effects": {"recruit": {"species": "revenant", "name": "Okafor"}, "items": {"titanium": 4}, "crew_hp": 5}}
+        ]},
+        {"text": "Take the valuables from the rows.", "outcomes": [
+          {"weight": 100, "text": "The figure does not stop you. It writes a label for each thing you take: WHERE IT WENT. By the time you have your arms full the label stack is the thickest thing on the hull, and you carry it back to the ship under a weight no scale would show.", "effects": {"items": {"credits": 60}, "crew_hp": -10}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You steer round the hull. On the way past you see the figure hold up the child's drawing to the light, tilt it, and lay it down again at an exact angle.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "revenant_clean_air_hulk", "type": "distress", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The Gentle Evening is a Concord ferry with a spore bloom in her ventilation, a thick grey-green fur on every vent that makes the air in the passenger deck as good as a wet blanket. Eleven people are shut behind a pressure door at the far end, tapping on the glass in a hopeful rhythm that is slightly out of time. Nobody wants to cross the bloom without a rebreather, and the ferry's rebreathers are in a locker on the wrong side of it.",
+      "choices": [
+        {"text": "Suit up and go through with filters.", "outcomes": [
+          {"weight": 60, "text": "You lose the filters twice, find them once, and get all eleven out before the third lungful. The captain pays you in the ferry's emergency float and a very wet handshake.", "effects": {"items": {"credits": 40}, "rep": {"concord": 1}}},
+          {"weight": 40, "text": "The bloom gets into the seals. Everyone is out and everyone coughs for a day, and the captain pays what she can, which is less than she meant to.", "effects": {"items": {"credits": 25}, "crew_hp": -15}}
+        ]},
+        {"text": "Flush the vents from outside (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "A purge burn along the vent line blows the bloom out into the dark in a long grey ribbon. The passengers pour out coughing and delighted, and the captain presses a ticket book into your hand: eleven free fares, to anywhere the Concord flies.", "effects": {"items": {"fuel": -1, "credits": 30}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Revenant] Walk in. No lungs, no problem.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant walks into the fog with a dead lamp swinging, through spores that would drop a mule, and carries the passengers out two at a time, calmly. At the door a small child tugs at a pale hand and asks if they are a ghost. 'No,' your Revenant says, after a while. 'Just late.' The captain's thanks are awkward, heartfelt and slightly too loud.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "[Basalt] Walk in. Rock does not need air.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt goes through the bloom as through a hedge, shoulders the pressure door off its track, and brings the eleven out in one trip, like a basket of washing. The captain pays well and asks, quietly, if all your crew are made of things this convenient.", "effects": {"items": {"credits": 45}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Wish them luck and go.", "outcomes": [
+          {"weight": 100, "text": "You pass the Gentle Evening with your hands off the controls. Over the comm, a thin voice says, 'It's all right. We'll wait,' and that is worse.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "revenant_health_order", "type": "patrol", "weight": 8, "once": false, "requires": {"jumps_min": 3},
+      "text": "'Concord Health Order Nine,' says the patrol officer, in the voice of someone who has read it out too often. 'No persons of Returned status aboard an unlicensed vessel. It is for their safety.' She is reading it off a slate. Behind her a junior officer is trying not to look at a window on your ship, where somebody pale looks back. 'We have a report of one on this lane, alone, in a lifeboat, three jumps back. Have you passed it?'",
+      "choices": [
+        {"text": "Tell her where the lifeboat was.", "outcomes": [
+          {"weight": 100, "text": "She writes it down, thanks you for your cooperation, and has a credit transferred. It is a small credit. You find that you do not want to look at the window.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}, "crew_hp": -5}}
+        ]},
+        {"text": "Say you have seen nothing.", "outcomes": [
+          {"weight": 70, "text": "She looks at your face for some time, nods once, and lets you go. 'Safe lanes,' she says, in a tone with a great deal in it.", "effects": {"items": {"credits": 10}}},
+          {"weight": 30, "text": "The junior officer says he did see something. They go through your holds for an hour, find nothing they can use, and fine you for the delay.", "effects": {"items": {"credits": -20}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "[Revenant] Hold up the certificate.", "requires": {"species": "revenant"}, "outcomes": [
+          {"weight": 100, "text": "Your Revenant holds a card to the glass: CERTIFICATE OF DEATH, issued by the Concord Registry, valid until revoked. The officer reads it twice. 'This is a perfectly good certificate,' she says. 'It says you're dead.' 'Yes,' says your Revenant. 'It's very consistent.' She strikes Order Nine from her slate, sits down on the nearest crate, and produces a tin of biscuits for both ships. A long, unofficial lunch follows. On the way out she presses her stipend on you.", "effects": {"items": {"credits": 30}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "Fly on without answering.", "outcomes": [
+          {"weight": 100, "text": "You hold your course and a patrol cutter holds hers, and neither of you says a thing. It is the closest thing to a conversation the Concord and the Returned have had in forty years.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

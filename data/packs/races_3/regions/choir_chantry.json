@@ -1,0 +1,25 @@
+{
+	"id": "choir_chantry",
+	"name": "The Chantry",
+	"home_species": "choir",
+	"faction": "lumen",
+	"stages": [3, 8],
+	"weight": 3,
+	"rarity": "uncommon",
+	"danger": 1.2,
+	"palette": {"tint": "#a9c6ff", "nebula": "lumen"},
+	"map": {},
+	"node_weights": {"anomaly": 18, "empty": 16, "trader": 12, "wreck_field": 12, "distress": 12, "pirate": 10, "patrol": 8, "asteroid_field": 6},
+	"places": [
+		{"id": "sounding_nave", "name": "The Sounding Nave", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"ice_chunk_s": 1.3, "copper_coil": 1.1},
+	"pois": {"anomaly": 1.5, "trader": 1.2},
+	"ambient": {"trader": 2, "patrol": 1, "pirate": 1},
+	"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "shield_neon_mk1": 340, "siren_ion_neon": 400, "heat_lance_neon": 420, "longburn_mk2": 270, "radiator": 50, "helm": 70, "oxygen_gen": 90},
+	"recruit": {"choir": 8, "emberkin": 1, "prismatic": 1},
+	"enemies": "wardens",
+	"hazards": ["ion_storm"],
+	"events": "choir_chantry",
+	"blurb": "The Lumen's chantry ships hang in a ring, joined by crystal spars that ring whenever anything touches them. The Choir were glass frames once, and somebody hung a ring of tuning prongs on one, and it sang back. The Sounding Nave sells neon gear tuned to the note of the room, and you will leave humming that note whether you meant to or not."
+}
