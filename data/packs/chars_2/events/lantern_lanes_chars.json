@@ -1,0 +1,20 @@
+{"events": [
+    {
+      "id": "char_rushlight_night_mail", "type": "patrol", "weight": 14, "once": true, "requires": {"region": "lantern_lanes", "stage_min": 3},
+      "text": "A Concord Dispatch tender has a glider in its clamp with REPOSSESSED stencilled across the wing in letters a metre high. On the wing, in a flight jacket two sizes too large, sits a Lantern with a mail sack across her knees, not arguing. 'Night Mail,' she explains, when you hail. 'I flew the dispatch lanes without running lights for thirty-one years, on the principle that a courier nobody can see cannot be shot. It was a sound principle. The glider is mortgaged, though. The bond is three hundred and twenty.' She holds up the sack. 'I still have nine hundred letters to deliver. The addressees are mostly wrecks, but they have a right to their post.' The inspector in the tender's hatch coughs politely. He is in no hurry. He has been in no hurry for forty years.",
+      "choices": [
+        {"text": "Clear her bond (320 credits).", "requires": {"credits": 320, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The inspector processes it in nine forms, with a flourish at the end of each, and the clamp opens like a hand. Rushlight does not say thank you, which for a Lantern is the highest compliment. She flutters off her wing into your cargo lock, sack first. 'I will work it off,' she says. 'On your helm. Please do not keep the lamps on.'", "effects": {"recruit": {"character": "rushlight"}}}
+        ]},
+        {"text": "[Concord standing] Vouch for her.", "blue": true, "requires": {"rep_min": {"concord": 3}}, "outcomes": [
+          {"weight": 100, "text": "You give the inspector your name and a short account of yourself, and he consults a ledger that is mostly rubber stamps. 'Standing of three with the Concord,' he says, and something in him softens by one candela. 'Bond waived to a sponsor. She is yours to supervise, sir. I would keep her away from the lamps.'", "effects": {"recruit": {"character": "rushlight"}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Radar] Offer to find her dead addresses.", "requires": {"component": "radar_mk1"}, "outcomes": [
+          {"weight": 100, "text": "Rushlight stares at your radar's sweep like a child at a lit window. 'A lot of the addressees are in the wreck fields,' she says slowly. 'You can find them.' You can. By evening the sack is a good deal lighter, and the inspector, in a rare act of initiative, has stopped counting the interest. 'The bond stays with the glider,' says Rushlight, climbing across. 'I am the Night Mail. Not the glider.' She takes your helm as if it had been hers all along.", "effects": {"recruit": {"character": "rushlight"}}}
+        ]},
+        {"text": "Wish her luck and fly on.", "outcomes": [
+          {"weight": 100, "text": "'There is a letter in the sack for you, I think,' she calls, rummaging. 'No. Sorry. For a Mr Pettifer.' The clamp shuts. The inspector waves, slowly, at nothing.", "effects": {}}
+        ]}
+      ]
+    }
+]}

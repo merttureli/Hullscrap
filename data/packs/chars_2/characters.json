@@ -1,0 +1,52 @@
+{
+  "characters": [
+    {
+      "id": "graticule", "name": "Graticule", "species": "vellum",
+      "rig": {"tint": "#e2d3a6", "head": "cap"},
+      "traits": {"work_mult": {"man": 1.15}},
+      "ability": {"id": "scan", "cooldown": 36, "params": {"duration": 30}},
+      "obtained": "Vellum Stacks (stage 3+): on an archive cart marked WITHDRAWN FROM CIRCULATION, due at the furnace. Pay the handling (30 credits), re-file it as current with a Vellum of your own, or show the archivist a working radar.",
+      "lore": "The Lane Reader. Graticule was folded from the master chart of a lane the Snap filled in, and has never forgiven the geography. Hold a hull's heading up to its creases and it will tell you where that ship was going in the year thirty-nine, and where it would have got to. It is always right, and mortified every time."
+    },
+    {
+      "id": "tholu", "name": "Tholu", "species": "oorth",
+      "rig": {"tint": "#6f759f", "head": "hood"},
+      "traits": {"station": {"evasion_add": 0.04}},
+      "ability": {"id": "shield_layer", "cooldown": 38, "params": {"layers": 1, "duration": 16}},
+      "obtained": "Oorth Quietude (stage 4+): the last chair at the back of a Concord briefing room, under a sign that says ASK ME SOMETHING. Ask him the question nobody has, or sit beside him and say nothing with an Oorth of your own.",
+      "lore": "The Back-Row Advisor. Tholu sat behind the Concord's briefing table for forty years and was never once asked a question, which he took, correctly, as a comment. He can feel a shot leave the other ship's gun a heartbeat before it does, and braces the shield for it the way you brace for a sneeze. He answers questions people have not asked yet, and is very sorry about that."
+    },
+    {
+      "id": "kharra", "name": "Kharra", "species": "drakkin",
+      "rig": {"tint": "#b5523a", "head": "scarred"},
+      "traits": {"work_mult": {"heal_others": 1.4}},
+      "ability": {"id": "heal_burst", "cooldown": 26, "params": {"amount": 38}},
+      "obtained": "Drakkin Pits (stage 3+), hard to get: the Heat Sink's house tug is dragging her off for a debt of stitches. Beat the tug, pay her debt (340 credits), or have a Drakkin of your own settle it in the pit.",
+      "lore": "The Cutman. Kharra has patched forty years of pit-fighters between rounds, on credit, in a hot room, with one eye on the clock and one on the bookmaker. She can put a loser back on his feet in the time it takes to say 'last bets', and her apron reads NOT THE FACE. It is the face about half the time."
+    },
+    {
+      "id": "arci", "name": "Arci", "species": "wisp",
+      "rig": {"tint": "#b9f0ff", "head": "forked"},
+      "traits": {"speed_mult": 1.1},
+      "ability": {"id": "power_system", "cooldown": 40, "params": {"power": 5, "duration": 14}},
+      "obtained": "The Stormfield (stage 4+): playing catch with herself between two dead reactors. Let her earth on your hull and brace, sink a copper earth for her (6 copper), or show her a neon core.",
+      "lore": "The Spare Lightning. Arci is exactly as old as the storm, and has not yet learned to sit still in a wire. Park her by a system and she pours into it until the numbers go up and the lights go a little blue. She says it tickles. Your engineer says it does not."
+    },
+    {
+      "id": "keelson", "name": "Keelson", "species": "hullkin",
+      "rig": {"tint": "#6f8f86", "head": "twin"},
+      "traits": {"hp_mult": 1.15},
+      "ability": {"id": "seal_breach", "cooldown": 34, "params": {"count": 2, "range": 16}},
+      "obtained": "Hullkin Reefs: eleven years into the same patch on the same hulk. Take a turn with the sealant (4 polymer), or press your shell to the seam beside him with a Hullkin of your own. Do not tell him to hurry.",
+      "lore": "The Old Patch. Keelson has been closing the same hole in the same hulk for eleven years, because scavengers keep opening it, and he regards this as a long and friendly argument. He does not hurry. A seam he has closed does not open again, which is why the scavengers have started to avoid him."
+    },
+    {
+      "id": "rushlight", "name": "Rushlight", "species": "lantern",
+      "rig": {"tint": "#3d4660", "head": "goggles"},
+      "traits": {"station": {"evasion_add": 0.03}},
+      "ability": {"id": "overclock", "cooldown": 40, "params": {"mult": 1.7, "duration": 11, "rest": 4}},
+      "obtained": "Lamplit Lanes (stage 3+), expensive: her glider is mortgaged to Concord Dispatch. Clear the bond (320 credits), vouch for her with good Concord standing, or show her a radar that can find her dead addresses.",
+      "lore": "The Night Mail. Rushlight flew the Concord dispatch lanes with no running lights, on the theory that a courier nobody can see cannot be shot, and was right for thirty-one years. She still delivers letters to ships that no longer exist, and has a sack of nine hundred to prove it. Put her at a helm and the whole ship feels late for something."
+    }
+  ]
+}
