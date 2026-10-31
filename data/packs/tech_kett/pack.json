@@ -5,5 +5,5 @@
   "requires": [
     "races_1"
   ],
-  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons. stock_hint: kett_hives."
+  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons. Sold at kett_hives (data/regions/kett_hives.json, stock)."
 }

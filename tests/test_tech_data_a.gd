@@ -15,6 +15,7 @@ const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 
 const RACES: Array[String] = ["human", "basalt", "emberkin", "fenn", "kett"]
 const KEY_MATERIALS: Array[String] = ["military_circuit", "gate_alloy", "void_crystal", "nanite_paste"]
+const HOMELAND := {"human": "human_core", "basalt": "basalt_quarries", "emberkin": "emberkin_forges", "fenn": "fenn_bazaar", "kett": "kett_hives"}
 ## weapon id -> [tier, turret, kind, damage_type, power]
 const WEAPONS := {
 	"human_volley_rack": [2, false, "missile", "explosive", -3], "human_concord_railgun": [3, false, "bolt", "kinetic", -5],
@@ -61,8 +62,16 @@ func test_the_five_packs_load_with_no_problems_and_say_where_they_are_sold() -> 
 		var id := "tech_" + r
 		check(have.has(id), id + " is a pack")
 		if have.has(id):
-			check(str(have[id]["notes"]).contains("stock_hint:"), id + ": the notes name the homeland store for the lead")
+			check(str(have[id]["notes"]).contains(HOMELAND[r]), id + ": the notes say which region sells it")
 	eq(Content.errors(), [], "the content loads with no errors")
+
+
+func test_the_homeland_stores_sell_the_weapons() -> void:
+	for id in WEAPONS:
+		var race: String = id.split("_")[0]
+		var region = JSON.parse_string(FileAccess.get_file_as_string("res://data/regions/%s.json" % HOMELAND[race]))
+		eq(region["home_species"], race, HOMELAND[race] + " is the home of the " + race)
+		check(region["stock"].has(id) and float(region["stock"][id]) > 0.0, "%s is in the stock of %s" % [id, HOMELAND[race]])
 
 
 func test_each_race_has_its_three_ship_weapons() -> void:
