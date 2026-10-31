@@ -10,9 +10,9 @@
   "cable_mass_per_cell": 0.1,
   "linear_damping": 0.25,
   "angular_damping": 1.5,
-  "thrust_to_accel": 2000.0,
-  "turn_factor": 48.0,
-  "max_speed": 600.0,
+  "thrust_to_accel": 3000.0,
+  "turn_factor": 72.0,
+  "max_speed": 900.0,
   "controls": {
     "steer": "mouse"
   }
