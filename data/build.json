@@ -1,4 +1,5 @@
 {
-  "_doc": "Build rules. cable_cost: materials paid for each cable cell (refunded 100% when the cable is removed).",
-  "cable_cost": {"copper": 1}
+  "_doc": "Build rules. cable_cost: materials paid for each cable cell (refunded 100% when the cable is removed). red_alert_px: build mode can't be entered while a hostile ship is this close (scripts/sim/red_alert.gd).",
+  "cable_cost": {"copper": 1},
+  "red_alert_px": 2500
 }

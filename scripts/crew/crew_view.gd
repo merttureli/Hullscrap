@@ -2,7 +2,7 @@ extends Node2D
 ## Crew on the ship: the player's soldier (WASD; hold E next to a fire, breach, broken part or
 ## downed crewmate to work on it), Ada (middle-click to send her) and the other NPCs, who find their
 ## own jobs (jobs.gd, run by ShipSim, also during a fight). This node reads input, draws the people
-## (PersonDrawer, about 3 cells across), the fires and health bars, and the HUD crew line.
+## (PersonDrawer, about 3 cells across), the fires and health bars (the HUD's log, hud_log.gd, says what they do).
 ## A body is 2x2 cells: people stand on whole-cell body anchors (see Pathfinder).
 ## The ship comes from the sibling ShipSim (player_ship(), read every frame); cell size and cell
 ## positions from the sibling BuildMode. Crew are kept in ship.crew, which the simulation reads
@@ -27,28 +27,11 @@ var sim: Node
 var aim_override: Variant = null
 var _anim := {}  # CrewMember -> PersonDrawer.new_state(): {last, phase, angle, aim, moving}, for drawing only
 var _clock := 0.0  # for the flicker of the fires
-var _layer: CanvasLayer  # the HUD crew line
-var _line: Label
 
 
 func _ready() -> void:
 	build = get_node_or_null("../BuildMode")
 	sim = get_node_or_null("../ShipSim")
-	_layer = CanvasLayer.new()
-	_layer.layer = 2
-	_line = Label.new()
-	_line.anchor_top = 1.0
-	_line.anchor_bottom = 1.0
-	_line.offset_left = 14.0
-	_line.offset_top = -36.0
-	_line.offset_right = 1500.0
-	_line.offset_bottom = -10.0
-	_line.add_theme_color_override("font_color", Color(0.85, 0.9, 1))
-	_line.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	_line.add_theme_constant_override("outline_size", 6)
-	_layer.add_child(_line)
-	add_child(_layer)
-	visibility_changed.connect(func(): _layer.visible = is_visible_in_tree())  # put away during a fight
 
 
 ## The ship the player is on (null until the scene is wired).
@@ -70,8 +53,6 @@ func _process(dt: float) -> void:
 			sim.jobs_of(ship).hand_work(ship, player, dt)  # E held: work on what is in reach
 	for m: CrewMember in ship.crew:
 		_animate(m, dt)
-	if _line != null:
-		_line.text = Jobs.crew_line(ship)
 	queue_redraw()
 
 

@@ -72,7 +72,6 @@ var _hint: Label
 var _note := ""
 var _note_until := 0.0
 var _starfield: Node
-var _hud_label: Node
 
 
 func _ready() -> void:
@@ -81,7 +80,6 @@ func _ready() -> void:
 	crew = get_node_or_null("../Crew")
 	cam = get_node_or_null("../Camera2D")
 	_starfield = get_node_or_null("../Space/Starfield")
-	_hud_label = get_node_or_null("../HUD/Label")
 	_rng.seed = 4242
 	_make_stars()
 	_make_hud()
@@ -235,8 +233,6 @@ func _put_away(away: bool) -> void:
 		_starfield.visible = not away
 	if _stars_node != null:
 		_stars_node.visible = away
-	if _hud_label != null:
-		_hud_label.visible = not away
 
 
 func _show_hud(on: bool) -> void:
