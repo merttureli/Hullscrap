@@ -1,0 +1,359 @@
+{
+  "start_known": [
+    "smelter_scrap_mk1",
+    "smelter_mk1",
+    "steel",
+    "alloy",
+    "conductor",
+    "glass_lattice"
+  ],
+  "recipes": [
+    {
+      "id": "steel",
+      "output": {
+        "item": "steel",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 4
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 6,
+      "category": "material",
+      "station": "smelter"
+    },
+    {
+      "id": "alloy",
+      "output": {
+        "item": "alloy",
+        "count": 1
+      },
+      "materials": {
+        "steel": 2,
+        "titanium": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 10,
+      "category": "material",
+      "station": "smelter"
+    },
+    {
+      "id": "conductor",
+      "output": {
+        "item": "conductor",
+        "count": 1
+      },
+      "materials": {
+        "copper": 3,
+        "silicon": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 8,
+      "category": "material",
+      "station": "smelter"
+    },
+    {
+      "id": "glass_lattice",
+      "output": {
+        "item": "glass_lattice",
+        "count": 1
+      },
+      "materials": {
+        "silicon": 2,
+        "crystal": 1
+      },
+      "fab_level": 2,
+      "tools": [
+        "plasma"
+      ],
+      "time": 12,
+      "category": "material",
+      "station": "smelter"
+    },
+    {
+      "id": "smelter_scrap_mk1",
+      "output": {
+        "item": "smelter_scrap_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 4
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 25,
+      "category": "system"
+    },
+    {
+      "id": "smelter_mk1",
+      "output": {
+        "item": "smelter_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "copper": 18
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "smelter_mk2",
+      "output": {
+        "item": "smelter_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 50,
+        "copper": 24,
+        "titanium": 8,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 45,
+      "category": "system"
+    },
+    {
+      "id": "smelter_mk3",
+      "output": {
+        "item": "smelter_mk3",
+        "count": 1
+      },
+      "materials": {
+        "steel": 14,
+        "alloy": 4,
+        "conductor": 4,
+        "copper": 20,
+        "silicon": 6
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 60,
+      "category": "system"
+    },
+    {
+      "id": "smelter_neon_mk1",
+      "output": {
+        "item": "smelter_neon_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 16,
+        "silicon": 12,
+        "crystal": 4,
+        "plasma_cell": 1
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 50,
+      "category": "system"
+    },
+    {
+      "id": "engine_mk3",
+      "output": {
+        "item": "engine_mk3",
+        "count": 1
+      },
+      "materials": {
+        "copper": 24,
+        "titanium": 12,
+        "silicon": 4,
+        "steel": 10
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel (the same raw materials, smelted first)"
+    },
+    {
+      "id": "engine_mk4",
+      "output": {
+        "item": "engine_mk4",
+        "count": 1
+      },
+      "materials": {
+        "copper": 32,
+        "titanium": 13,
+        "silicon": 8,
+        "military_circuit": 1,
+        "alloy": 7
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 55,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel, steel + titanium -> alloy (the same raw materials, smelted first)"
+    },
+    {
+      "id": "engine_mk5",
+      "output": {
+        "item": "engine_mk5",
+        "count": 1
+      },
+      "materials": {
+        "copper": 40,
+        "titanium": 21,
+        "silicon": 12,
+        "crystal": 2,
+        "military_circuit": 2,
+        "gate_alloy": 1,
+        "steel": 1,
+        "alloy": 9
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 75,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel, steel + titanium -> alloy (the same raw materials, smelted first)"
+    },
+    {
+      "id": "engine_scrap_mk3",
+      "output": {
+        "item": "engine_scrap_mk3",
+        "count": 1
+      },
+      "materials": {
+        "copper": 12,
+        "titanium": 4,
+        "steel": 9
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 35,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel (the same raw materials, smelted first)"
+    },
+    {
+      "id": "engine_scrap_mk4",
+      "output": {
+        "item": "engine_scrap_mk4",
+        "count": 1
+      },
+      "materials": {
+        "copper": 18,
+        "titanium": 4,
+        "military_circuit": 1,
+        "steel": 1,
+        "alloy": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 50,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel, steel + titanium -> alloy (the same raw materials, smelted first)"
+    },
+    {
+      "id": "engine_neon_mk2",
+      "output": {
+        "item": "engine_neon_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 16,
+        "titanium": 6,
+        "glass_lattice": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 45,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: silicon + crystal -> glass lattice (the same raw materials, smelted first)"
+    },
+    {
+      "id": "engine_neon_mk3",
+      "output": {
+        "item": "engine_neon_mk3",
+        "count": 1
+      },
+      "materials": {
+        "copper": 24,
+        "titanium": 12,
+        "silicon": 4,
+        "steel": 10,
+        "glass_lattice": 6
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 60,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel, silicon + crystal -> glass lattice (the same raw materials, smelted first)"
+    },
+    {
+      "id": "engine_neon_mk4",
+      "output": {
+        "item": "engine_neon_mk4",
+        "count": 1
+      },
+      "materials": {
+        "copper": 32,
+        "titanium": 13,
+        "silicon": 8,
+        "military_circuit": 1,
+        "void_crystal": 1,
+        "alloy": 7,
+        "glass_lattice": 8
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 85,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel, steel + titanium -> alloy, silicon + crystal -> glass lattice (the same raw materials, smelted first)"
+    },
+    {
+      "id": "strafe_jets_mk3",
+      "output": {
+        "item": "strafe_jets_mk3",
+        "count": 1
+      },
+      "materials": {
+        "copper": 12,
+        "titanium": 6,
+        "silicon": 2,
+        "steel": 5
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 20,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel (the same raw materials, smelted first)"
+    },
+    {
+      "id": "longburn_mk3",
+      "output": {
+        "item": "longburn_mk3",
+        "count": 1
+      },
+      "materials": {
+        "copper": 36,
+        "titanium": 12,
+        "silicon": 4,
+        "steel": 10
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system",
+      "override": true,
+      "reason": "CONTENT 12: scrap -> steel (the same raw materials, smelted first)"
+    }
+  ]
+}

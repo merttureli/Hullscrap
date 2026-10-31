@@ -110,6 +110,8 @@ func test_data_is_complete() -> void:
 		"longburn_mk1": [-2, 4, 1], "longburn_mk2": [-3, 4, 2], "longburn_mk3": [-4, 4, 3],
 		# ammo racks and conveyor belts (docs/CONTENT.md 4f)
 		"ammo_rack": [0, 0, 1], "belt_drive_scrap": [-1, 2, 1], "belt_drive_std": [-1, 2, 2], "belt_drive_neon": [-1, 2, 3],
+		# the smelters (docs/CONTENT.md section 12, data/packs/processing_1)
+		"smelter_scrap_mk1": [-3, 7, 1], "smelter_mk1": [-3, 7, 1], "smelter_mk2": [-4, 7, 2], "smelter_mk3": [-5, 7, 3], "smelter_neon_mk1": [-4, 7, 1],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:

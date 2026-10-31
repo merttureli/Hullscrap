@@ -5,7 +5,9 @@ extends RefCounted
 ##   Content.list("components")      the merged entries (copies: change them freely)
 ##   Content.events() / ships() / regions() / names()
 ##   Content.read("res://data/components.json")   a drop-in for JSON.parse_string(FileAccess.get_file_as_string(path)):
-##                                   the core file's own shape with the pack entries merged in (other paths are read as they are)
+##                                   the core file's own shape with the pack entries merged in (other paths are read as they are);
+##                                   a list the core file has next to its entries (recipes.json `start_known`) also gets the
+##                                   items of the same list in the packs' files
 ## A pack is a folder with a pack.json ({id, name, version, requires, notes}) and any of <kind>.json,
 ## names.json, events/*.json, ships/*.json and regions/*.json. An entry may be a list element with an `id` or a key of an
 ## object (weapons.json is keyed by id); packs may use either. A duplicate id is an error unless the later
@@ -31,7 +33,7 @@ static var root := DATA_ROOT
 static var packs_root := ""
 static var _key := ""  # root|packs_root the cache was built for
 static var _packs: Array = []  # [{id, name, version, requires, notes, dir}] in load order
-static var _kinds := {}  # kind -> {ids, map (id -> entry), origin (id -> "core" or pack id), file (id -> path), core (the core file's parsed object), body_key, dict (entries are an object keyed by id)}
+static var _kinds := {}  # kind -> {ids, map (id -> entry), origin (id -> "core" or pack id), file (id -> path), core (the core file's parsed object), body_key, dict (entries are an object keyed by id), extra (list key -> the packs' items of it)}
 static var _names := {}
 static var _names_loaded := false
 static var _errors: Array[String] = []
@@ -163,6 +165,10 @@ static func read(path: String):
 	var core: Dictionary = k["core"] if k["core"] != null else {}
 	for key in core:
 		doc[key] = body if key == k["body_key"] else (core[key].duplicate(true) if (core[key] is Array or core[key] is Dictionary) else core[key])
+		if core[key] is Array and key != k["body_key"] and k["extra"].has(key):  # recipes.json start_known: the packs add to it
+			for item in k["extra"][key]:
+				if not doc[key].has(item):
+					doc[key].append(item)
 	doc[k["body_key"]] = body
 	return doc
 
@@ -267,7 +273,7 @@ static func _load_kind(kind: String) -> Dictionary:
 	_ensure()
 	if _kinds.has(kind):
 		return _kinds[kind]
-	var k := {"ids": [], "map": {}, "origin": {}, "file": {}, "core": null, "body_key": FILE_KEYS.get(kind, kind), "dict": false}
+	var k := {"ids": [], "map": {}, "origin": {}, "file": {}, "core": null, "body_key": FILE_KEYS.get(kind, kind), "dict": false, "extra": {}}
 	_kinds[kind] = k
 	if FOLDER_KINDS.has(kind):
 		_add_folder(k, kind, kind)
@@ -296,6 +302,12 @@ static func _add_file(k: Dictionary, kind: String, path: String, pack: String) -
 		k["dict"] = data[key] is Dictionary
 	elif k["core"] == null and k["ids"].is_empty():
 		k["dict"] = data[key] is Dictionary
+	if pack != "core" and data is Dictionary:
+		for ek in data:
+			if ek != key and not str(ek).begins_with("_") and data[ek] is Array:
+				if not k["extra"].has(ek):
+					k["extra"][ek] = []
+				k["extra"][ek].append_array(data[ek])
 	for pair in _pairs(data[key], path):
 		_add(k, kind, pair[0], pair[1], pack, path, pair[1])
 
