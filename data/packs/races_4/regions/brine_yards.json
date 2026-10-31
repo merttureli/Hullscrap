@@ -1,0 +1,25 @@
+{
+	"id": "brine_yards",
+	"name": "The Brine Yards",
+	"home_species": "brine",
+	"faction": "concord",
+	"stages": [2, 6],
+	"weight": 4,
+	"rarity": "common",
+	"danger": 1.05,
+	"palette": {"tint": "#5d8fb0", "nebula": "concord"},
+	"map": {},
+	"node_weights": {"trader": 22, "patrol": 16, "distress": 12, "pirate": 10, "wreck_field": 10, "empty": 10, "asteroid_field": 8, "anomaly": 2},
+	"places": [
+		{"id": "slip_nine", "name": "Slip Nine", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"sealed_crate": 1.6, "polymer_barrel": 1.3},
+	"pois": {"trader": 1.4, "concord_checkpoint": 1.4, "abandoned_station": 1.2},
+	"ambient": {"trader": 4, "patrol": 2, "pirate": 1},
+	"stock": {"engine_mk1": 120, "engine_mk2": 270, "reactor_mk1": 150, "shield_mk1": 160, "shield_mk2": 330, "intake_mk1": 120, "intake_mk2": 270, "tractor_mk1": 160, "medbay": 180, "ammo_rack": 70, "belt_drive_std": 340, "bed": 30, "missile": 14},
+	"recruit": {"brine": 8, "human": 1, "grundl": 1},
+	"enemies": "concord",
+	"hazards": [],
+	"events": "brine_yards",
+	"blurb": "The Concord dock unions' own yards: a mile of berths, cranes and gantries under a banner that says NOTHING MOVES UNTIL WE MOVE IT. The Brine run Slip Nine in shifts, with hard hats on their shells and a great work claw for a hand, and everyone who visits is handed a pamphlet on how to be a visitor. The tea is free. The picket lines are not."
+}

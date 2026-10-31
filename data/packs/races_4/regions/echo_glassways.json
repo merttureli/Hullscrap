@@ -1,0 +1,25 @@
+{
+	"id": "echo_glassways",
+	"name": "The Echo Glassways",
+	"home_species": "echo",
+	"faction": "",
+	"stages": [5, 8],
+	"weight": 8,
+	"rarity": "rare",
+	"danger": 1.25,
+	"palette": {"tint": "#b8c4d6", "nebula": "gate"},
+	"map": {},
+	"node_weights": {"anomaly": 30, "empty": 16, "distress": 10, "trader": 10, "wreck_field": 10, "pirate": 10, "asteroid_field": 8, "patrol": 6},
+	"places": [
+		{"id": "receiving_room", "name": "The Receiving Room", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+	],
+	"debris": {"ice_chunk_s": 1.2, "copper_coil": 1.2},
+	"pois": {"anomaly": 2.0, "unknown": 1.5},
+	"ambient": {"trader": 2, "pirate": 1, "patrol": 1},
+	"stock": {"radar_mk1": 130, "radar_mk2": 290, "mirror_veil": 300, "shield_mk1": 160, "shield_mk2": 330, "helm": 70, "reactor_mk1": 150, "laser_mk1": 140, "pulse_mk1": 130, "oxygen_gen": 90},
+	"recruit": {"echo": 8, "oorth": 1, "human": 1},
+	"enemies": "wardens",
+	"hazards": ["ion_storm"],
+	"events": "echo_glassways",
+	"blurb": "A long shimmering lane where every signal comes back a day late, a little altered and a little kinder. The Echo live there, smooth mimic-folk with faint likenesses on their faces, polite beyond belief. Everything is said back to you in the Receiving Room, with small improvements. Be careful what you decide to be."
+}

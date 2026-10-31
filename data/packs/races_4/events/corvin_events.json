@@ -1,0 +1,62 @@
+{"events": [
+    {
+      "id": "corvin_shiny_stall", "type": "trader", "weight": 8, "once": true, "requires": {"jumps_min": 1},
+      "text": "The stall is a gutted lifeboat, hung with so many things that it twinkles. Every surface has a shelf; every shelf has a row; every row is made of small bright objects catching the light. Spoons. Lenses. Medals. A Lumen crystal the size of a thumbnail. A watch with no hands. A tiny gold ship. A feathered shape in a tailored coat perches on the airlock sill, small black eyes counting you, and then your ship, and then every glittering thing you own. 'Everything for sale,' says the Corvin. 'Nothing for trade. Except for what I want.'",
+      "choices": [
+        {"text": "Buy something shiny (25 credits).", "requires": {"credits": 25}, "outcomes": [
+          {"weight": 60, "text": "She picks it out for you with a flourish: a brass sextant, no use to anyone, polished to a mirror. It fits in your hand. Inside the case, folded very small, is a Concord ration chit worth much more than you paid. 'Oh,' says the Corvin, watching your face. 'That is a mistake. Mine.' She makes no move to take it back.", "effects": {"items": {"credits": 5}}},
+          {"weight": 40, "text": "She picks out a medal for you with a flourish. It is a good medal, for bravery at sea, a dead sea, in an old war. You hang it in the mess. The crew sneer at it all week and fight over who gets to polish it.", "effects": {"items": {"credits": -25}, "crew_hp": 5}}
+        ]},
+        {"text": "Hire her assistant, who keeps looking at your ship (80 credits).", "requires": {"credits": 80}, "outcomes": [
+          {"weight": 100, "text": "A younger Corvin has been stacking spoons in the corner and watching your hull, and is pushed forward by the shopkeeper, with a stern look. 'Pica,' she says. 'Good eyes. Bad hands. Not for sale to just anyone.' Pica ducks her head, then ruffles her cloak, then pulls from a pocket a polished bolt, a thimble and a tiny bright key. 'Welcome gifts,' she says, to the room in general.", "effects": {"items": {"credits": -80}, "recruit": {"species": "corvin", "name": "Pica"}}}
+        ]},
+        {"text": "[Corvin] Trade shiny for shiny.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin steps onto the sill, ruffles their cloak, and lays a dull little brass button on the counter. The shopkeeper leans in. Her feathers go flat, then fluff. A single, long, happy croak. 'That is the one,' she says. 'The one from the old cutter.' She gives your Corvin the lifeboat's best shelf, and for the rest of the day the two of them trade, in quick clicking sentences, until everyone aboard is the owner of a new thing and nobody can say what they paid for it.", "effects": {"items": {"credits": 40, "silicon": 3, "copper": 15}, "crew_hp": 5, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Admire the shelves and leave.", "outcomes": [
+          {"weight": 100, "text": "You walk the whole stall, row by row, with your hands behind your back, as one does in a museum. The Corvin watches every step. At the exit she says, 'The little brass one by your hand. You were thinking of it. I saw.' You were. You buy it.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "corvin_second_look", "type": "wreck_field", "weight": 8, "once": false, "requires": {"jumps_min": 2},
+      "text": "The wreck has been picked. You can see it from the lane: the airlock stripped, the engine pods gone, every panel taken, a ship down to its ribs and its rivets, and no more on it than the hull itself. Three scavenger crews have already come and gone. A fourth is just leaving, loaded to the gills with nothing in particular, sighing in the way of people who have been over it twice. 'It is empty,' says their captain, over the comm. 'Save yourself the fuel.'",
+      "choices": [
+        {"text": "Search it anyway.", "outcomes": [
+          {"weight": 35, "text": "You find a locker behind a locker behind a panel that was already open. Inside, a half bag of polymer and the dried remains of someone's lunch. It is something, at least.", "effects": {"items": {"polymer": 10, "scrap": 10}}},
+          {"weight": 65, "text": "They were right. It is empty. You spend an hour proving it to yourselves, and leave with nothing but the lessons.", "effects": {}}
+        ]},
+        {"text": "Strip the hull plating.", "outcomes": [
+          {"weight": 100, "text": "It is dull, honest work. The plating is old and good, and it is all there is. You come away with a modest heap of scrap and some bruises.", "effects": {"items": {"scrap": 30}, "crew_hp": -5}}
+        ]},
+        {"text": "[Corvin] Look again. Look where the shiny would hide.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin stands in the empty hold, tilts their head, and goes very still. Then they walk, quite slowly, to the third bulkhead, run a talon along a seam and click. A panel falls open. Behind it, in a space as long as an arm, lies a small crate of bright things: a handful of Lumen crystal, a tray of silicon, and a purse of old Concord credits. 'People always look low,' says your Corvin, without any smugness at all. 'A thing that shines wants to be seen. It puts itself up high.'", "effects": {"items": {"crystal": 3, "silicon": 4, "credits": 50, "copper": 15}, "crew_hp": 5}}
+        ]},
+        {"text": "[Gauntling] Sweep it with your lamp-eye.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling sweeps the hold with the work lamp in their eye, slowly, from floor to ceiling, and stops on a faint line of paint that does not belong. A sealed case behind a false bulkhead. Inside, nothing glamorous: a set of good tools and a bundle of copper cable, which is, to a Gauntling, nearly everything.", "effects": {"items": {"copper": 25, "scrap": 20}, "crew_hp": 5}}
+        ]},
+        {"text": "Take the captain's advice and fly on.", "outcomes": [
+          {"weight": 100, "text": "You fly on. In your mirror the stripped hull sits in the dark, a skeleton of a ship, as quiet as a hat on a peg.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "corvin_tithe", "type": "pirate", "weight": 6, "once": false, "requires": {"jumps_min": 3},
+      "text": "The Rustfang cutter drops out of the wreckage and lays across your bow. 'Tithe,' says the captain, bored and polite. 'A hundred in credits, or an equal weight in anything shiny. It is the Roost's rule. We keep the peace, you pay for the peace.' Behind her, on the bridge, a bird-shaped figure in a tailored coat stands on the back of a chair, ruffling its feathers with quiet distaste. 'Do not pay her,' it says over the comm, in a whisper. 'Everything she has is stolen. From me.'",
+      "choices": [
+        {"text": "Pay the tithe (100 credits).", "requires": {"credits": 100}, "outcomes": [
+          {"weight": 100, "text": "The captain counts it with a grunt and sends a receipt, a scrap of foil with a smiley face. The Corvin on the chair drops its feathers and turns away. 'You will regret that,' it says, quietly, to the room. 'I would.'", "effects": {"items": {"credits": -100}, "crew_hp": -5}}
+        ]},
+        {"text": "Refuse, and shoot.", "outcomes": [
+          {"weight": 100, "text": "The captain sighs. 'There is always one,' she says, and the guns come around.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Corvin] Name the stolen goods one by one.", "requires": {"species": "corvin"}, "outcomes": [
+          {"weight": 100, "text": "Your Corvin takes the comm and in a clear sharp voice recites, from memory, every piece of loot on the cutter: the medal from the Brannock wreck, the sextant, the green glass bead. The Rustfang captain goes quiet. The Corvin on her bridge adds a few items. By the time it is done, the cutter has returned most of what it took, and half of the crew are laughing. 'Twelve years,' says the captain, 'and nobody has ever read it out loud.' She lets you go for free, and sends a gift of fuel.", "effects": {"items": {"fuel": 2, "credits": 30}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Warden-frame] Show the Lumen insignia.", "requires": {"species": "warden_frame"}, "outcomes": [
+          {"weight": 100, "text": "Your Warden-frame steps onto the bridge and turns its single lens on the cutter's feed. A long, still moment. The cutter's captain draws a slow breath. 'That is a gatekeeper,' she says. 'I'd heard they were still around.' She lowers the guns. 'No tithe from Lumen friends, ma'am. Apologies for the trouble.' The bird on her bridge dips a wing. 'You are a very useful sort of person,' it tells your Warden-frame.", "effects": {"rep": {"lumen": 1}, "items": {"credits": 30}}}
+        ]}
+      ],
+      "after_win": {"text": "The cutter drifts, venting. Her hold is a jackdaw's nest: stolen medals, odd buttons, a tin of sardines, and a good deal of ordinary loot. A bird in a tailored coat steps out of the wreck, ruffles itself, and politely asks for the medals.", "effects": {"items": {"scrap": 40, "credits": 45}, "rep": {"clans": -1}}}
+    }
+  ]}

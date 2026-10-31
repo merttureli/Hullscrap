@@ -1,0 +1,7 @@
+{
+	"id": "races_4",
+	"name": "Races, wave 4",
+	"version": "1.0",
+	"requires": ["races_3"],
+	"notes": "Seven crew species completing the roster at 30: Warden-frame, Murrow, Siltborn, Corvin, Brine, Echo and Ferro (docs/waves/races_2_4.md). Their traits are bags of keys of the trait library (data/traits.json); mining_mult, low_pressure_heal, haggler, loot_bonus, mimic and station.pull_bonus come from the race4-hooks track. Art is art/crew/<id>/ (claude/art-race4; until it lands the art loader falls back to the human rig). Sidearms are the existing hand weapons (the Siltborn have none). Six of them have a homeland region (regions/) with six events each (events/<region>_events.json, every one asks for requires.region): Murrow Diggings, Siltborn Rings, Corvin Roost, Brine Yards, Echo Glassways and Ferro Lodes. The Warden-frame have no homeland: they join only through the three-event quest chain in events/warden_frame_events.json (a late-stage wreck, a cold start, the reboot). Recruited at Meridian (Brine: data/drift.json); the rest join through events at their node types (Murrow at asteroid fields, Siltborn and Echo at anomalies, Corvin at traders, Ferro at wreck fields). Three events per race (events/<race>_events.json: one where the race is the story, two with a blue option for it)."
+}

@@ -1,0 +1,66 @@
+{"events": [
+    {
+      "id": "ferro_magnetic_wreck", "type": "wreck_field", "weight": 8, "once": true, "requires": {"jumps_min": 2},
+      "text": "The wreck is so magnetic that the dust stands up on its plating in spikes. Loose tools swim against the wall of the hold. Your compass spins and settles pointing at the middle of the ship, where a pool of something silvery-black sits in a hollow of the deck, quivering, in the rough shape of a seated person. It ripples as you come near. It rises into a ridge of small sharp spikes, as a cat rises its back, and sinks again, shy. It has been trying, evidently, to get up. It has made a good job of a knee.",
+      "choices": [
+        {"text": "Approach slowly with your hands open.", "outcomes": [
+          {"weight": 100, "text": "The pool pulls itself together, one spike at a time, until there is a thin silver figure kneeling in the hold with its face a smooth mirror. It tips its head. A line of little magnetic sparks runs up its arm like a wave. 'Gauss,' says a voice, as if it had been practised for a long time. It holds out a hand that is not quite a hand. It would like, evidently, to come with you. It will make a mess of the cutlery.", "effects": {"recruit": {"species": "ferro", "name": "Gauss"}}}
+        ]},
+        {"text": "Salvage the wreck's scrap and leave the pool.", "outcomes": [
+          {"weight": 100, "text": "The scrap is sticky with iron filings and it takes a crowbar to peel every plate from the wall. You come away with a good haul. The pool watches, trembling, and sinks into the floor.", "effects": {"items": {"scrap": 35, "copper": 20}, "crew_hp": -5}}
+        ]},
+        {"text": "[Ferro] Pour out of the airlock and flow into the pool.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro runs out across the deck in a bright silver tide, and the pool in the hollow stands up to meet it. They merge at the edges and pull apart. For ten minutes there are two spiky figures dancing over the deck in a storm of magnetic sparks. When it is over, there is one more of them than there were. 'Oersted,' says the new one, solemnly. In thanks they shake loose an armload of the wreck's best copper.", "effects": {"recruit": {"species": "ferro", "name": "Oersted"}, "items": {"copper": 30, "scrap": 20}, "crew_hp": 10}}
+        ]},
+        {"text": "[Warden-frame] Hail it on the Lumen band.", "requires": {"species": "warden_frame"}, "outcomes": [
+          {"weight": 100, "text": "Your Warden-frame faces the pool and sends a short pulse of white light. The pool shivers, forms a lens-shaped bulge, and sends one back. A brief exchange of lights follows, like two sailors signalling across a bay. 'It says it is called Henry,' your Warden-frame reports, 'and that it is lonely. It would like to belong to a crew.' It tilts its lens. 'Request granted.'", "effects": {"recruit": {"species": "ferro", "name": "Henry"}, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "Leave the wreck alone.", "outcomes": [
+          {"weight": 100, "text": "You leave it. On the screen the spikes subside on the pool as your ship moves away, and a small shape in the hollow of the deck rocks, once, like a child waving.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "ferro_lodestone", "type": "asteroid_field", "weight": 7, "once": false, "requires": {"jumps_min": 2},
+      "text": "The asteroid is a lodestone. It sits in the middle of the field like the head of a pin, and every loose piece of iron in the system has come to it: a dozen hulls stuck to its sides at all angles, a tangle of cable like a bird's nest, a drift of tools hanging off it in strings. Your own hull groans. A wrench slides slowly across the cockpit floor. Down at the rock, three scavengers are trying to pull a cargo pod off the surface, and not getting anywhere. One of them is sitting on the pod and weeping.",
+      "choices": [
+        {"text": "Cut the pod free with a laser.", "outcomes": [
+          {"weight": 55, "text": "The laser slices the cable, and the pod pops free into the dark. The scavengers pay in the usual way, which is badly and in kind. You take the haul and fly out of the field before the rock realises.", "effects": {"items": {"scrap": 15, "copper": 25, "credits": 30}}},
+          {"weight": 45, "text": "The rock fights the laser. The beam twists, scores your own hull, and burns out a coil. The pod is free. The scavengers cheer. You do not.", "effects": {"items": {"credits": 20}, "hull": -10}}
+        ]},
+        {"text": "Wait for the field to calm, and take what shakes loose.", "outcomes": [
+          {"weight": 100, "text": "It takes an hour. At the end the field lets go of a few loose items, which drift out into the dark where you can scoop them up: bolts, cable, and an old crate of tools. It's slow, patient work, and it feels like cheating.", "effects": {"items": {"scrap": 25, "copper": 15}}}
+        ]},
+        {"text": "[Ferro] Ask the rock to let go.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro glides to the rock and presses both hands against it, spikes lying flat, and goes quiet. The field stops groaning. The tools, the cables, the pod, all of it drifts a little way from the surface and hangs, gently, as if held by a hand. The scavengers watch in awe. Your Ferro gathers the whole lot like a stack of washing and brings it to your lock. 'It was lonely,' it says. 'It only wanted something to hold.'", "effects": {"items": {"scrap": 40, "copper": 30, "credits": 25}, "crew_hp": 10}}
+        ]},
+        {"text": "[Gauntling] Reverse-polarise your own plates.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling slaps a hand on the wall of the cockpit, flicks three switches, and your hull hums as the polarity reverses. The pod, the tools and the cable spring clear of the rock and tumble into the dark, where they can be gathered. 'Easier than it looks,' says your Gauntling, rubbing a smoking forearm.", "effects": {"items": {"scrap": 30, "copper": 20}, "crew_hp": -5}}
+        ]},
+        {"text": "Steer round the rock.", "outcomes": [
+          {"weight": 100, "text": "You keep the engines low and the hull well clear. Somewhere behind you, a wrench finds the wall and clangs, once, like a bell.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "ferro_pulled_scrap", "type": "trader", "weight": 7, "once": false, "requires": {"jumps_min": 1},
+      "text": "The stall is a hull plate laid flat on a trestle, with a dozen magnets the size of dinner plates hung over it on chains, and a tall silver figure standing behind them, slightly rippling, in a tidy apron. Piles of sorted metal sit in careful rows: iron, copper, nickel, a gleaming pile of unalloyed something. A hand-lettered sign: PULLED, NOT PICKED. SORTED BY HAND. THE HAND IS ALSO THE MAGNET. The Ferro merchant bows a little, and a ripple runs up from its feet to its face. 'What would you like pulled?'",
+      "choices": [
+        {"text": "Buy a sorted lot of copper (25 credits).", "requires": {"credits": 25}, "outcomes": [
+          {"weight": 100, "text": "The merchant steps over the pile and runs one hand over it. A single clean ripple of silver, and a small bright cube of pure copper lifts out of the heap and into your hand. 'Eighty grams,' it says. 'Perfectly sorted. No dust.' You get a good deal, and a flawless piece of metal.", "effects": {"items": {"credits": -25, "copper": 30}}}
+        ]},
+        {"text": "Trade scrap for something sorted (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
+          {"weight": 100, "text": "The Ferro runs a magnet across your scrap, flicks the iron off into a bin, and hands you back a bag of clean, bright copper and silicon. 'Magnetic,' it says. 'Everything is magnetic, if you ask properly.'", "effects": {"items": {"scrap": -20, "copper": 15, "silicon": 3}}}
+        ]},
+        {"text": "[Ferro] Share a bit of lode.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro steps up beside the merchant, and a ripple passes between them like a greeting. They trade a handful of silver between their palms in a ritual, the way people trade rings. The merchant pushes your whole bill aside, loads a crate of its best metal into your hold, and says, in a pleased spiky whisper, 'Cousin. You must come back.'", "effects": {"items": {"copper": 35, "silicon": 4, "titanium": 3}, "crew_hp": 5}}
+        ]},
+        {"text": "[Gauntling] Compare scrap-plates.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling rolls up a sleeve and slaps a mismatched forearm on the counter. The merchant bends low, runs a magnet along it, and makes a long, delighted rattling noise. 'Seven alloys,' it says. 'Seven! And the weld at the elbow is a work of art.' It sells you its best lot at cost, and asks, very politely, to see the other arm.", "effects": {"items": {"copper": 30, "silicon": 3}, "crew_hp": 5}}
+        ]},
+        {"text": "Just look.", "outcomes": [
+          {"weight": 100, "text": "You look at the piles for a while. One ripples when you pass. It is not clear whether it was the wind.", "effects": {}}
+        ]}
+      ]
+    }
+  ]}

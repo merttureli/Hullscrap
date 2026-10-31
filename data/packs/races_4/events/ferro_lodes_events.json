@@ -1,0 +1,119 @@
+{"events": [
+    {
+      "id": "lodes_coil_row_dock", "type": "station", "weight": 10, "once": false, "requires": {"region": "ferro_lodes"},
+      "text": "Coil Row is wound with copper. Miles of it: coil on coil on coil, wrapped round every strut and rail of the station, humming faintly in the dark, so that the whole place sings a low continuous chord and your hair stands on end. A sign at the lock says LEAVE YOUR WATCH OUTSIDE. Ferro move through the passages like quicksilver, spiked and rippling, their faces smooth mirrors. The dock-master, a tall one in a canvas apron, takes your hand in both of its own and examines it for loose metal. 'Fillings,' it says. 'You have fillings. We will manage.'",
+      "choices": [
+        {"text": "Buy a box of pulled copper (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "The box is heavy, and when you open it the copper inside is so clean it rings. The stall-keeper waves a hand over it, and the surface stands up, rippling, in tiny spikes, and sinks back down. 'Good stock,' it says. 'It likes you.'", "effects": {"items": {"credits": -20, "copper": 25}}}
+        ]},
+        {"text": "Hire a young Ferro from the coil-hall (90 credits).", "requires": {"credits": 90, "not_flag": "lodes_hired"}, "outcomes": [
+          {"weight": 100, "text": "The coil-hall is full of young Ferro, running in loops round the great copper rings, chasing each other's sparks. One of them slows, shivers, and flows over to your side: a small silvery figure with very bright eyes. 'Weber,' it says. 'I like to be near big metal. I am told your ship has a great deal.' It touches the hull plate with one finger, and the plate rings.", "effects": {"items": {"credits": -90}, "recruit": {"species": "ferro", "name": "Weber"}, "flag": "lodes_hired"}}
+        ]},
+        {"text": "Ask the dock-master about the field.", "outcomes": [
+          {"weight": 100, "text": "The dock-master's voice is a soft rustle. It describes the field: its tides, its dead spots, its safe lines. At the end it draws a quick sketch on your forearm in cold, wet metal. The sketch hardens as it dries. You keep it for a week, and it guides you true.", "effects": {"reveal": "wreck_field", "crew_hp": 5}}
+        ]},
+        {"text": "[Ferro] Join the great coil.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro goes into the great ring at the heart of the station and flows round it, faster and faster, until they are a streak of silver, trailing sparks. The coil sings. The whole station sings. The young Ferro stop and watch, then join, then all of Coil Row is a blur of spikes and light. When it ends your Ferro sinks gently to the deck, glowing, and is lifted onto the shoulders of the dock. A gift of pure copper is waiting at your lock.", "effects": {"items": {"copper": 40, "silicon": 4, "credits": 35}, "crew_hp": 15}}
+        ]},
+        {"text": "Leave your watch outside and look round.", "outcomes": [
+          {"weight": 100, "text": "You leave your watch in a tray. When you collect it, an hour later, it is running perfectly. It tells a slightly different time, and you decide not to ask.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "lodes_magnet_storm", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "ferro_lodes", "jumps_min": 2},
+      "text": "The field is turning. The whole cluster of wrecks groans and swings, and every loose piece of iron rises: bolts, plates, cables, a lost wrench, a whole crane, flung up into the dark in a slow clockwise wheel. Your compass spins. Your hull begins to hum. Ahead, the storm's heart, a bright blue-white knot of lines, pulses once, twice, and begins to draw the whole mass of the wrecks in towards itself. A Ferro voice on the channel is calm. 'Please,' it says. 'Do not fight it. It is only breathing.'",
+      "choices": [
+        {"text": "Cut the engines and ride it out.", "outcomes": [
+          {"weight": 65, "text": "You cut the engines, drop the plates and hold on. The storm takes your ship in a great slow arc, round the heart and out the other side. Nothing breaks. You emerge a little dizzy, with a faint hum in your teeth, and an extra heap of shed iron on the deck.", "effects": {"items": {"scrap": 20}, "crew_hp": -5}},
+          {"weight": 35, "text": "The storm takes the ship in a great arc and flings it, and a dozen bolts come off the hull like rain. You get out with a bruised crew and a dented bow.", "effects": {"hull": -10, "crew_hp": -10, "items": {"scrap": 10}}}
+        ]},
+        {"text": "Thrust against it (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "The engines shriek. The storm gives, a little, and you make a handful of metres, and a handful more. It takes all the reactor has. At the edge of the field you drop out the side of the wheel, shaking, with a hundred scraps of iron stuck to your hull, which fall off as you coast.", "effects": {"items": {"fuel": -1, "scrap": 15}, "hull": -5}}
+        ]},
+        {"text": "[Ferro] Ride the storm.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro goes out into the storm in a single bound and melts into the wheel, a streak of silver in the blue-white fire. For ten minutes you cannot tell them from the storm. Then the wheel slows, shivers, and sets down all it carried, gently, in a ring round your ship: a heap of clean salvage, a spiral of cable, a whole intact generator. Your Ferro comes in at the end, glowing and a little drunk. 'It likes to be talked to,' they say. 'Mostly about iron.'", "effects": {"items": {"scrap": 40, "copper": 30, "silicon": 3}, "crew_hp": 10}}
+        ]},
+        {"text": "[Gauntling] Ground the ship.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling runs a cable from the hull to a lump of dead wreck and, with a grin, earths the entire ship. The storm hits, and the ship hums, and nothing goes wrong. 'That,' says your Gauntling, rubbing a hand across a smoking cable-mop of hair, 'was a lot of volts.' The storm passes, leaving a heap of loose copper.", "effects": {"items": {"copper": 30, "scrap": 15}, "crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "lodes_wrecker_crew", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "ferro_lodes", "jumps_min": 3},
+      "text": "A wreckers' tug has dropped a pair of huge electromagnets into the field and is hauling passing ships in with them like a fisherman with a net. Your hull creaks. The whole ship slides sideways toward the tug's open hold. 'Salvage rights,' says the captain, over the comm, almost sympathetic. 'The Lodes take what falls in. Pay the toll, and I'll lift the field. Or don't, and I'll lift the rest.' Somewhere on his bridge a Ferro's voice is murmuring, anxious. It is not on the captain's side.",
+      "choices": [
+        {"text": "Pay the toll (80 credits).", "requires": {"credits": 80}, "outcomes": [
+          {"weight": 100, "text": "The captain counts the credits and the magnets lift. Your ship lurches free. 'Pleasure,' he says, with a finger to his hat. In his mirror, as he turns, you see the Ferro flicker.", "effects": {"items": {"credits": -80}, "crew_hp": -5}}
+        ]},
+        {"text": "Fire on the tug.", "outcomes": [
+          {"weight": 100, "text": "The captain sighs. 'It's always the nice ones,' he says, and the tug swings round to face you.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Ferro] Cut the field.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro steps out of the airlock and walks, tiny and silver, along the hull to the nearest magnet-line, laying a hand against it. The field flickers. A long note passes along the line, a ripple of silver, and the magnets drop. The tug's captain stares. On his bridge, the captive Ferro stands up, uncoils from the corner, and walks off the tug and into your lock. 'My cousin,' says your Ferro. The captain, wiser now, lets both of you go.", "effects": {"items": {"scrap": 30, "credits": 40}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "[Warden-frame] Challenge the tug.", "requires": {"species": "warden_frame"}, "outcomes": [
+          {"weight": 100, "text": "Your Warden-frame takes the comm and announces, in level tones, that the field is a gate and the tug is blocking it. The captain, who has never heard anyone say this, asks 'Who is this?'. 'The gatekeeper,' says your Warden-frame. A silence. The magnets lift. The captain offers an apology and a free lift out.", "effects": {"items": {"credits": 35}, "rep": {"lumen": 1}}}
+        ]}
+      ],
+      "after_win": {"text": "The tug drifts, her magnets dead. In her hold, curled round a rusting iron ball, is a Ferro, trembling. It runs out through your lock without being asked and hides under a bench. You take the tug's haul, and don't look for the Ferro until they come out.", "effects": {"items": {"scrap": 45, "copper": 20}, "rep": {"clans": 1}}}
+    },
+    {
+      "id": "lodes_pool_in_the_core", "type": "wreck_field", "weight": 8, "once": true, "requires": {"region": "ferro_lodes", "jumps_min": 2},
+      "text": "The reactor of a dead freighter is still pulling. You can see it from the lane: a ring of tools floating round the core housing like a halo, spinning slowly, and in the middle of the ring, in the hollow where the fuel rods used to be, a glossy pool of metal, silent, rippling. It is far too large to be an accident. It has the quiet dignity of a lake. When your ship comes near, the whole pool shivers, and a long thin finger of silver rises from the middle and points at your hull.",
+      "choices": [
+        {"text": "Salvage the tools around the core.", "outcomes": [
+          {"weight": 100, "text": "The tools come away in a long glittering string, with a faint tug of reluctance. You take a good haul: wrenches, a spare coil, a toolbox of fine bolts. The pool watches you do it, still, until you go.", "effects": {"items": {"scrap": 30, "copper": 20}, "crew_hp": -5}}
+        ]},
+        {"text": "Hold out a hand to the pool.", "outcomes": [
+          {"weight": 100, "text": "The finger of silver curls to meet your hand and wraps, lightly, round the wrist. Then the whole pool rises from the core in a fluid wave, takes the shape of a small, shy figure, and stands up. 'Farad,' it says, softly. It looks round the wreck, and back at you. 'I have been in this reactor for a very long time. I should like to go somewhere with a window.'", "effects": {"recruit": {"species": "ferro", "name": "Farad"}}}
+        ]},
+        {"text": "[Ferro] Pour yourself into the core and meet them.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro flows across the wreck and into the reactor housing, and the pool opens to take them. They merge, ripple, part, and for a moment there are three silver figures standing in the hollow. Then two walk out, hand in hand, and the third is a faint glow in the core. 'Her mother,' says your Ferro, quietly. 'She will stay. She asks us to take her daughter.' The new Ferro takes your Ferro's hand. A gift of the core's best copper is left at the airlock.", "effects": {"recruit": {"species": "ferro", "name": "Biot"}, "items": {"copper": 35, "titanium": 4}, "crew_hp": 10}}
+        ]},
+        {"text": "[Gauntling] Plug a cable into the pool.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling drops a cable into the pool, and the pool sends back a ripple. They talk through the cable in sparks and static for ten minutes. At the end your Gauntling sits back with a stunned look. 'It is the oldest thing I have ever talked to,' they say. 'It says the field has been singing for a hundred years.' The pool lifts a small silver ring from its surface and presses it into your Gauntling's palm: a perfect conductor, humming.", "effects": {"items": {"copper": 30, "silicon": 3, "crystal": 2}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "lodes_stuck_tug", "type": "distress", "weight": 8, "once": false, "requires": {"region": "ferro_lodes"},
+      "text": "A tug has locked itself to the hull of a dead freighter and cannot get off. The two have fused: the tug's grapples, caught in a field of resonance, have clamped down on the freighter's plate and will not let go, and the whole mass is spinning slowly in a patch of storm. The tug's pilot, a hoarse human, is broadcasting. 'It's the field,' she says. 'It's got me. If anybody has anything that can break a magnetic lock, I'd be grateful. I have been here two days.'",
+      "choices": [
+        {"text": "Cut the grapples loose with a laser.", "outcomes": [
+          {"weight": 60, "text": "It takes forty minutes and a steady hand, but the grapples part with a bang. The tug tumbles away from the hull and into a stable orbit. The pilot cries on the comm. She pays with a bag of salvage.", "effects": {"items": {"scrap": 25, "credits": 35}, "rep": {"clans": 1}}},
+          {"weight": 40, "text": "The laser slips and scores the tug's hull, and the pilot swears a long and creative oath. It comes free, in the end. She pays what she can.", "effects": {"items": {"credits": 15}, "hull": -5, "crew_hp": -5}}
+        ]},
+        {"text": "Break the lock with a pulse (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
+          {"weight": 100, "text": "You run a hard pulse through your own plating and into the lock. The grapples shudder and release in a spray of sparks. The tug floats free, humming. The pilot sobs once and thanks you in six languages.", "effects": {"items": {"fuel": -1, "credits": 50}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Ferro] Pour into the lock and release it.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro walks across the gap, touches the lock, and melts into it, flowing through the clamps like water through a sieve. A faint ripple, and the grapples uncurl one by one. The tug floats loose. Your Ferro comes back with a bright thread of the freighter's old cargo, loose and glowing, and a solemn expression. 'It was not an accident,' they say. 'The field was holding the freighter. It was lonely.'", "effects": {"items": {"copper": 25, "credits": 55, "silicon": 3}, "rep": {"clans": 2}, "crew_hp": 10}}
+        ]},
+        {"text": "[Murrow] Dig the clamps out of the plate.", "requires": {"species": "murrow"}, "outcomes": [
+          {"weight": 100, "text": "Your Murrow crosses the gap on a line, hammer in claw, and starts to dig out the clamps, one by one, from the freighter's plate. It takes forty minutes. When the last one comes free, a spray of sparks lights the whole sky. The pilot kisses the nearest Murrow on the head. She pays in cash, and a bag of tools.", "effects": {"items": {"credits": 55, "scrap": 25}, "rep": {"clans": 1}, "crew_hp": 5}}
+        ]},
+        {"text": "Relay the call.", "outcomes": [
+          {"weight": 100, "text": "You relay the call to the nearest dock and go. The pilot's voice is steady. 'Understood,' she says. It does not sound as though she expects much.", "effects": {"crew_hp": -5}}
+        ]}
+      ]
+    },
+    {
+      "id": "lodes_iron_rain", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"region": "ferro_lodes"},
+      "text": "It is raining iron. The asteroid is a fat, rusty rock that throws off a fine red dust, and the dust, in the field, rises and falls in slow sheets, drawn up one side of the rock and down the other, spiralling like smoke. It clatters on the hull like hail. A group of Ferro stand on the rock's pole, with arms outspread, soaking in it, their spikes pointed upward and rippling. They are, quite evidently, having the time of their lives. A child with a tin bucket is gathering the rain, and is in great demand.",
+      "choices": [
+        {"text": "Collect the dust (15 credits for the bucket).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "You buy a bucket, you collect the rain. It takes an hour, and is oddly soothing. At the end you have a heap of fine iron dust, clean and rich, which is worth quite a lot to the right buyer.", "effects": {"items": {"credits": -15, "scrap": 35, "copper": 10}}}
+        ]},
+        {"text": "Sit under the rain with the Ferro.", "outcomes": [
+          {"weight": 100, "text": "You sit. The Ferro sit with you. The rain clatters on your visor and the rust piles on your shoulders. After an hour a small one shares a flask of something that tastes of metal and pears. It is, you realise, a very good afternoon.", "effects": {"crew_hp": 15}}
+        ]},
+        {"text": "[Ferro] Dance in it.", "requires": {"species": "ferro"}, "outcomes": [
+          {"weight": 100, "text": "Your Ferro goes out onto the rock and into the middle of the rain and, to the delight of every Ferro there, begins to dance: a ripple, a spike, a whirl, a long spinning arc of silver. The others join. The whole pole becomes a whirl of bodies and iron. When it is over your Ferro is covered from head to foot in a coat of shining rust, and is gleaming. The children present them with the best of the rain, a whole bucketful.", "effects": {"items": {"scrap": 40, "copper": 25, "credits": 30}, "crew_hp": 15}}
+        ]},
+        {"text": "[Mire] Wash the rust off your hull.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire takes a hose to the hull and washes off a hundred kilos of red rust, which a grateful group of Ferro catch in buckets and press on you as thanks. The ship has not looked this clean in a year.", "effects": {"items": {"scrap": 30, "credits": 20}, "hull": 5, "crew_hp": 5}}
+        ]}
+      ]
+    }
+  ]}
