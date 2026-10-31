@@ -313,6 +313,15 @@ func cleared() -> bool:
 	return pois.all(func(p): return p["state"] == DONE or bool(cfg["poi_types"].get(p["type"], {}).get("repeat", false)))
 
 
+## The design a `fight` effect of `value` at POI `id` sends ("" for an unknown POI): what fight_spawn hands the combat, and
+## what the event panel rates before the fight is chosen (it rolls nothing of the sector's own).
+func fight_design(c, id: String, value := "tier") -> String:
+	var poi := find(id)
+	if poi.is_empty():
+		return ""
+	return c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" else c.fight_path(value, str(poi["event_type"]))
+
+
 ## A `fight` effect at POI `id` (`value`: "tier" or a design id, as in events.gd): {design (a res:// path), pos (where
 ## the enemy appears, 250 to 600 px from the POI), poi (its id)}. The design is the POI's own `enemy` when it has one
 ## and the effect says "tier", else Campaign.fight_path()'s (the tier tables; a rammer for a pirate after two missed
@@ -321,7 +330,7 @@ func fight_spawn(c, id: String, value := "tier") -> Dictionary:
 	var poi := find(id)
 	if poi.is_empty():
 		return {}
-	var design: String = c.fight_path(str(poi["enemy"]), "") if value == "tier" and poi["enemy"] != "" else c.fight_path(value, str(poi["event_type"]))
+	var design := fight_design(c, id, value)
 	var s: Array = cfg["poi"]["spawn"]
 	var pos: Vector2 = poi["pos"] + Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(float(s[0]), float(s[1]))
 	return {"design": design, "pos": pos.clamp(Vector2.ZERO, Vector2(size, size)), "poi": id}

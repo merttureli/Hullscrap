@@ -450,6 +450,13 @@ func _hide_panels() -> void:
 
 # --- fights -------------------------------------------------------------------------------------------------------------------
 
+## The design a fight of `value` ("tier" or a design id) would start now, as _start_fight picks it: the POI's in sector
+## space, else the node's. The event panel rates it for its threat tags.
+func fight_design(value: String) -> String:
+	var design: String = _poi_sector.fight_design(campaign, _poi, value) if sector_flow() and _poi_sector != null and _poi != "" else ""
+	return design if design != "" else campaign.fight_path(value, str(campaign.node(campaign.current)["type"]))
+
+
 ## An event outcome asked for a fight: `value` is "tier" or a design id; `after_win` runs if we win.
 func _start_fight(value: String, after_win: Dictionary) -> void:
 	var spot: Dictionary = _poi_sector.fight_spawn(campaign, _poi, value) if sector_flow() and _poi_sector != null and _poi != "" else {}
@@ -500,7 +507,7 @@ func _on_fight_finished(result: Dictionary) -> void:
 		var page: String = r["goto"]
 		_queue.append(func(): event_panel.open_event(campaign.events.get_event(page)))
 	elif r["state"] in ["won", "captured"]:
-		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship())
+		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship(), null, int(r["threat"]))
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
 

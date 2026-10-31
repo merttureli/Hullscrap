@@ -14,6 +14,7 @@ const Wardens = preload("res://scripts/space/wardens.gd")
 const Threat = preload("res://scripts/space/threat.gd")
 const Art = preload("res://scripts/view/art.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
+const Skulls = preload("res://scripts/ui/skulls.gd")
 
 const PAD := 26.0
 const GAP := 20.0
@@ -30,8 +31,6 @@ const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
 const BAD := Color("#e0413b")
-const AMBER := Color("#e1a136")
-const SKULL_OFF := Color("#3a4350")
 const RARITY_COLORS := {"common": Color("#cfd6df"), "uncommon": Color("#6bd34a"), "rare": Color("#4fa3ff"), "very_rare": Color("#c06bff"), "legendary": Color("#e1a136")}
 
 var map: Control  ## the MapView: its campaign, its ship and cross_to()
@@ -253,7 +252,7 @@ func _draw_card(i: int, r: Dictionary) -> void:
 	_text(Campaign.faction_name(faction) if faction != "" else "No faction", Vector2(x, y), 15, fcol)
 	y += 26.0
 	_text("Danger", Vector2(x, y), 15, DIM_TEXT)
-	_skulls(Vector2(x + 72.0, y - 6.0), Regions.skulls(r))
+	Skulls.draw(self, Vector2(x + 72.0, y - 6.0), Regions.skulls(r))
 	y += 26.0
 	var seen: bool = known[i]
 	var rarity := str(r.get("rarity", "common"))
@@ -289,18 +288,7 @@ func _draw_warden(i: int, box: Rect2) -> void:
 
 ## The colour of a threat of `n` skulls: 1-2 dim, 3 amber, 4-5 red.
 static func threat_color(n: int) -> Color:
-	return DIM_TEXT if n <= 2 else (AMBER if n == 3 else BAD)
-
-
-## `n` of 5 skulls, from `at` (their row's left middle).
-func _skulls(at: Vector2, n: int) -> void:
-	for k in 5:
-		var col := BAD if k < n else SKULL_OFF
-		var o := at + Vector2(18.0 * k + 7.0, 0.0)
-		draw_circle(o, 7.0, col)
-		draw_rect(Rect2(o + Vector2(-4.0, 4.0), Vector2(8.0, 5.0)), col)
-		draw_circle(o + Vector2(-2.5, 0.0), 1.8, CARD_BG)
-		draw_circle(o + Vector2(2.5, 0.0), 1.8, CARD_BG)
+	return Skulls.color(n)
 
 
 ## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
