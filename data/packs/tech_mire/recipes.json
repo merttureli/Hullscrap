@@ -2,6 +2,9 @@
 "recipes": [
 	{"id": "mire_steam_lance", "output": {"item": "mire_steam_lance", "count": 1}, "materials": {"scrap": 20, "copper": 14, "titanium": 6, "silicon": 3}, "fab_level": 2, "tools": [], "time": 32, "category": "system"},
 	{"id": "mire_bog_mortar", "output": {"item": "mire_bog_mortar", "count": 1}, "materials": {"scrap": 22, "copper": 8, "titanium": 6, "polymer": 3}, "fab_level": 2, "tools": [], "time": 32, "category": "system"},
-	{"id": "mire_mist_projector", "output": {"item": "mire_mist_projector", "count": 1}, "materials": {"scrap": 14, "copper": 10, "polymer": 4}, "fab_level": 2, "tools": [], "time": 22, "category": "system"}
+	{"id": "mire_mist_projector", "output": {"item": "mire_mist_projector", "count": 1}, "materials": {"scrap": 14, "copper": 10, "polymer": 4}, "fab_level": 2, "tools": [], "time": 22, "category": "system"},
+	{"id": "mire_rain_shield", "output": {"item": "mire_rain_shield", "count": 1}, "materials": {"scrap": 25, "copper": 12, "titanium": 8, "polymer": 4}, "fab_level": 2, "tools": [], "time": 38, "category": "system"},
+	{"id": "mire_wetwell_reactor", "output": {"item": "mire_wetwell_reactor", "count": 1}, "materials": {"scrap": 30, "copper": 18, "titanium": 4, "polymer": 4}, "fab_level": 2, "tools": [], "time": 28, "category": "system"},
+	{"id": "mire_spray_deck", "output": {"item": "mire_spray_deck", "count": 1}, "materials": {"scrap": 10, "copper": 8, "polymer": 3}, "fab_level": 2, "tools": [], "time": 14, "category": "system"}
 ]
 }

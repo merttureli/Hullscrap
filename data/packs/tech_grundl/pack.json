@@ -6,5 +6,5 @@
 		"engines_1",
 		"races_1"
 	],
-	"notes": "Grundl arsenal (docs/waves/racial_tech_1.md): 3 ship weapons, 3 components and 2 hand weapons, each with a strong pro and a con the race's own traits cancel. Sold in Meridian."
+	"notes": "Grundl arsenal (docs/waves/racial_tech_1.md): 3 ship weapons, 3 components and 2 hand weapons, each with a strong pro and a con the race's own traits cancel. Sold in Meridian (its region's stock in data/regions/grundl_barges.json). The hand weapons have no art yet: their `art` ids (art/items/<id>.png) are the ids of the entries."
 }

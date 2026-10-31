@@ -2,6 +2,9 @@
 "recipes": [
 	{"id": "gauntling_arc_hammer", "output": {"item": "gauntling_arc_hammer", "count": 1}, "materials": {"scrap": 24, "copper": 14, "titanium": 6, "silicon": 4}, "fab_level": 2, "tools": [], "time": 34, "category": "system"},
 	{"id": "gauntling_scrap_shotgun", "output": {"item": "gauntling_scrap_shotgun", "count": 1}, "materials": {"scrap": 22, "copper": 3}, "fab_level": 2, "tools": [], "time": 20, "category": "system"},
-	{"id": "gauntling_tesla_picket", "output": {"item": "gauntling_tesla_picket", "count": 1}, "materials": {"scrap": 18, "copper": 18, "titanium": 4, "silicon": 5}, "fab_level": 2, "tools": [], "time": 34, "category": "system"}
+	{"id": "gauntling_tesla_picket", "output": {"item": "gauntling_tesla_picket", "count": 1}, "materials": {"scrap": 18, "copper": 18, "titanium": 4, "silicon": 5}, "fab_level": 2, "tools": [], "time": 34, "category": "system"},
+	{"id": "gauntling_arc_core", "output": {"item": "gauntling_arc_core", "count": 1}, "materials": {"scrap": 28, "copper": 24, "titanium": 4, "silicon": 4}, "fab_level": 2, "tools": [], "time": 30, "category": "system"},
+	{"id": "gauntling_overclock_engine", "output": {"item": "gauntling_overclock_engine", "count": 1}, "materials": {"scrap": 25, "copper": 14, "titanium": 8, "silicon": 4}, "fab_level": 2, "tools": [], "time": 34, "category": "system"},
+	{"id": "gauntling_graft_bay", "output": {"item": "gauntling_graft_bay", "count": 1}, "materials": {"scrap": 20, "copper": 12, "titanium": 4, "silicon": 3}, "fab_level": 2, "tools": [], "time": 28, "category": "system"}
 ]
 }

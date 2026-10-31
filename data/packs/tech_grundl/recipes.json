@@ -2,6 +2,9 @@
 "recipes": [
 	{"id": "grundl_slug_mortar", "output": {"item": "grundl_slug_mortar", "count": 1}, "materials": {"scrap": 40, "copper": 20, "titanium": 14, "silicon": 5, "military_circuit": 1}, "fab_level": 2, "tools": [], "time": 55, "category": "system"},
 	{"id": "grundl_grapple_harpoon", "output": {"item": "grundl_grapple_harpoon", "count": 1}, "materials": {"scrap": 30, "copper": 12, "titanium": 8}, "fab_level": 2, "tools": [], "time": 30, "category": "system"},
-	{"id": "grundl_barge_flak", "output": {"item": "grundl_barge_flak", "count": 1}, "materials": {"scrap": 28, "copper": 14, "titanium": 6, "silicon": 3}, "fab_level": 2, "tools": [], "time": 34, "category": "system"}
+	{"id": "grundl_barge_flak", "output": {"item": "grundl_barge_flak", "count": 1}, "materials": {"scrap": 28, "copper": 14, "titanium": 6, "silicon": 3}, "fab_level": 2, "tools": [], "time": 34, "category": "system"},
+	{"id": "grundl_hauler_thrusters", "output": {"item": "grundl_hauler_thrusters", "count": 1}, "materials": {"scrap": 40, "copper": 16, "titanium": 10, "silicon": 2}, "fab_level": 2, "tools": [], "time": 38, "category": "system"},
+	{"id": "grundl_freight_shield", "output": {"item": "grundl_freight_shield", "count": 1}, "materials": {"scrap": 35, "copper": 16, "titanium": 10, "silicon": 4}, "fab_level": 2, "tools": [], "time": 42, "category": "system"},
+	{"id": "grundl_cargo_deck", "output": {"item": "grundl_cargo_deck", "count": 1}, "materials": {"scrap": 30, "copper": 10, "polymer": 6, "titanium": 4}, "fab_level": 2, "tools": [], "time": 26, "category": "system"}
 ]
 }
