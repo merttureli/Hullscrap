@@ -22,7 +22,13 @@
 			"heat_speed": "their walk speed is multiplied by cold when the hottest part in their room is below `below`, and by hot when above `above` (a room with no part is at heat 0); cold and hot multiply, the widest thresholds win",
 			"vacuum_walk": "true: no air penalties. They do not take damage in thin air, and the vacuum will not slow them. They still breathe unless o2_use is 0",
 			"no_tools": "true: they take no repair or extinguish jobs (extinguish, repair_breach, repair_component, repair_crew, repair_belt); every other job (a post, reviving, restocking, clearing a wreck) is theirs",
-			"hull_mend": "while idle (no job, not walking) they mend what is next to their body: rate = hit points a second, in all, of the damaged walls beside them; seal = seconds to close a breach beside them (0 = they cannot). Rates add, the quickest seal wins"
+			"hull_mend": "while idle (no job, not walking) they mend what is next to their body: rate = hit points a second, in all, of the damaged walls beside them; seal = seconds to close a breach beside them (0 = they cannot). Rates add, the quickest seal wins",
+			"revive_once": "{after, hp}: the first time they go down (once a run) they do not bleed out: after `after` seconds they stand up again at `hp` hit points (at most their max). The crew's revive job leaves them alone meanwhile; if something picks them up first, the revive is spent all the same. No hp above 0 = no revive. Merging: the highest hp, the quickest after (0 = not set)",
+			"line_affinity": "{line id: factor}: the speed of their work on the parts of that equipment line (data/lines.json: scrap, standard, neon), as a factor: {\"scrap\": 2.0} repairs and mans scrap parts twice as fast. Applies to repairing a part and to manning one (walls and every other job are not parts). Factors multiply",
+			"split_on_death": "{reform_s}: bleeding out, they do not die: they become two small 1x1 bodies (body 1) with half their max hp each, at full. If both are still aboard and up reform_s seconds later they merge back into one, at the sum of their hp (a downed half holds the merge back until it is up or dead). If one dies the other stays small for good, and a half never splits again. 0 or missing = they just die",
+			"counter_melee": "damage they deal straight back to whoever hits them in a melee (CrewAbilities.melee_hit, through the attacker's damage_taken.melee). Amounts add. Nothing fights on foot yet; the hook is ready",
+			"no_suit": "true: they cannot wear a suit or armour: CrewMember.equip refuses the suit gear traits (TraitSet.SUIT_TRAITS) with a reason",
+			"vacuum_speed": "factor on their walk speed in a room whose air is below 30% of full (TraitSet.THIN_AIR); factors multiply, and it stacks with heat_speed. Combine with vacuum_walk to also take no damage there"
 		}
 	},
 	"traits": {

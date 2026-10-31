@@ -145,6 +145,32 @@ static func melee_mult(ship, m) -> float:
 	return float(TraitSet.of(m)["melee_mult"]) * CrewFx.berserk_mult(ship, m)
 
 
+## One melee hit of `attacker` on `victim` (on-foot fights; the hook for them): `base` damage times the attacker's melee_mult and
+## the victim's damage_taken.melee. A victim with counter_melee who was up when hit deals that damage straight back (times the
+## attacker's own damage_taken.melee; a counter is never countered, and it lands even when the hit put them down). Anyone put
+## down drops their job. Returns {dealt, countered}: the hit points each of them lost.
+static func melee_hit(ship, attacker, victim, base: float) -> Dictionary:
+	var t := TraitSet.of(victim)
+	var standing: bool = not victim.is_down()
+	var dealt := base * melee_mult(ship, attacker) * float(t["damage_taken"]["melee"])
+	var countered := 0.0
+	_hurt(ship, victim, dealt)
+	if standing and float(t["counter_melee"]) > 0.0 and attacker != victim:
+		countered = float(t["counter_melee"]) * float(TraitSet.of(attacker)["damage_taken"]["melee"])
+		_hurt(ship, attacker, countered)
+	return {"dealt": dealt, "countered": countered}
+
+
+## `m` loses `amount` hp; one who goes down drops what they were doing (and the chronicle says so).
+static func _hurt(ship, m, amount: float) -> void:
+	var was_down: bool = m.is_down()
+	m.hurt(amount)
+	if m.is_down() and not was_down:
+		m.job = {}
+		m.path.clear()
+		ship.log_event("%s is down" % m.name)
+
+
 static func _ok(text: String) -> Dictionary:
 	return {"ok": true, "text": text}
 
@@ -576,7 +602,9 @@ static func _key_problems(at: String, e: Dictionary) -> Array[String]:
 			continue
 		var subs: Array = TraitSet.KEYS[k]
 		var v = e[k]
-		if subs.is_empty():
+		if TraitSet.OPEN.has(k):
+			out.append_array(TraitSet.extra_problems(at, k, v))
+		elif subs.is_empty():
 			var flag: bool = TraitSet.FLAGS.has(k)
 			if not (v is bool if flag else _is_num(v)):
 				out.append("%s: '%s' must be %s" % [at, k, "true or false" if flag else "a number"])
@@ -590,6 +618,7 @@ static func _key_problems(at: String, e: Dictionary) -> Array[String]:
 					out.append("%s: '%s' has the unknown key '%s' (known: %s)" % [at, k, sub, ", ".join(subs)])
 				elif not _is_num(v[sub]):
 					out.append("%s: '%s.%s' must be a number" % [at, k, sub])
+			out.append_array(TraitSet.extra_problems(at, k, v))
 	return out
 
 
