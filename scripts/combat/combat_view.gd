@@ -439,17 +439,9 @@ func _update_hud() -> void:
 	_banner.position = Vector2((vp.x - _banner.size.x) / 2.0, vp.y * 0.28)
 	_hint.position = Vector2((vp.x - _hint.size.x) / 2.0, 10.0)
 	_jump_bar.position = _schem[1].position + Vector2(0.0, Schematic.PANEL.y + 6.0)
-	var text: String = session.end_text()
-	var rated := false
-	if text == "":
-		text = session.threat_banner()
-		rated = text != ""
-	if text == "" and _clock < _note_until:
-		text = _note
-	if text == "" and session.jump_charge >= 0.0:
-		text = session.jump_hold()
-	if text == "":
-		text = session.morale.banner()
+	var line := banner_line(session, _note if _clock < _note_until else "")
+	var text: String = line["text"]
+	var rated: bool = line["rated"]
 	_banner.text = text
 	_banner.visible = text != ""
 	if rated:
@@ -458,6 +450,26 @@ func _update_hud() -> void:
 		_banner.remove_theme_color_override("font_color")
 	var co = session.arena.ships[Session.PLAYER]
 	_hint.text = "%s\nenemy %d px   speed %d px/s%s" % [HINT, session.distance(), co.flight.vel.length(), SHIELD_HINT if co.sectors > 1 and co.layers_cap > 0 else ""]
+
+
+## The line of the banner: {text, rated (it is the threat rating, drawn in its colour)}. The end of the fight, then the threat
+## rating, then a standing surrender offer or a fleeing enemy (a note must not hide those), the note (`note`, "" for none), the
+## jump drive's hold and the rest of the enemy's morale.
+static func banner_line(s: Session, note: String) -> Dictionary:
+	var text: String = s.end_text()
+	var rated := false
+	if text == "":
+		text = s.threat_banner()
+		rated = text != ""
+	if text == "" and s.morale.state in ["offering", "fleeing"]:
+		text = s.morale.banner()
+	if text == "":
+		text = note
+	if text == "" and s.jump_charge >= 0.0:
+		text = s.jump_hold()
+	if text == "":
+		text = s.morale.banner()
+	return {"text": text, "rated": rated}
 
 
 ## Under each turret's slot of the weapon bar: its hit chance against the enemy now (accuracy less the enemy's

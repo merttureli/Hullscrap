@@ -31,12 +31,6 @@ const COLUMNS: Array = [
 			["Esc", "Pause menu"],
 			["F1", "This screen, anywhere"],
 		]],
-		["STATIONS", [
-			["Click", "Buy or sell one"],
-			["Right click", "Five fuel, or all of an item"],
-			["Wheel", "Scroll a column"],
-			["Esc / Enter / M", "Leave"],
-		]],
 	],
 	[
 		["BUILDING (B for build mode)", [
@@ -57,6 +51,10 @@ const COLUMNS: Array = [
 			["Belts", "Ammo racks feed guns in their room; a belt drive and belts (Belt on Structure) carry ammo to the rest"],
 			["Mode bar", "Click Build, Play, Map, Shields, Crafting or Help"],
 		]],
+		["SHIELDS (H)", [
+			["H", "Shields tab: click a sector's + or -, or pick a preset or a custom slot"],
+			["H / Esc", "Close it"],
+		]],
 	],
 	[
 		["THE MAP AND EVENTS (M in play mode)", [
@@ -73,6 +71,17 @@ const COLUMNS: Array = [
 			["1 - 9 or click", "Pick a choice in an event"],
 			["Enter / Space", "Continue"],
 		]],
+		["RAFT LOOP (flying)", [
+			["Q (hold)", "Not in a fight: tractor beams haul nearby debris to the nearest intake"],
+		]],
+		["STATIONS", [
+			["Click", "Buy or sell one"],
+			["Right click", "Five fuel, or all of an item"],
+			["Wheel", "Scroll a column"],
+			["Esc / Enter / M", "Leave"],
+		]],
+	],
+	[
 		["COMBAT (a fight, or K in play mode)", [
 			["K", "Play mode: meet the test pirate (Shift+K: the Rustfang rammer)"],
 			["Mouse", "Steer; fixed guns aim where the ship points"],
@@ -87,15 +96,6 @@ const COLUMNS: Array = [
 			["Y", "Accept a surrender"],
 			["J", "Open the map to spool the jump drive (held while the enemy is within 2,000 px)"],
 			["R", "After your ship is wrecked"],
-		]],
-	],
-	[
-		["SHIELDS (H)", [
-			["H", "Shields tab: click a sector's + or -, or pick a preset or a custom slot"],
-			["H / Esc", "Close it"],
-		]],
-		["RAFT LOOP (flying)", [
-			["Q (hold)", "Not in a fight: tractor beams haul nearby debris to the nearest intake"],
 		]],
 		["CRAFTING (C)", [
 			["C", "Crafting panel, in build or play mode"],
@@ -114,8 +114,8 @@ const COL_GAP := 20.0
 const PAD := 18.0
 const MARGIN := 24.0
 const TITLE_H := 56.0
-const FONT := 14
-const ROW_GAP := 5.0
+const FONT := 13
+const ROW_GAP := 3.0
 const DIM := Color(0.0, 0.0, 0.0, 0.8)
 const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
@@ -219,6 +219,20 @@ func column_width() -> float:
 	return (panel_rect().size.x - 2.0 * PAD - (COLUMNS.size() - 1) * COL_GAP) / COLUMNS.size()
 
 
+## The y of the bottom of column `c`'s last row, as _draw lays it out (the tests keep it above the footer line).
+func column_end(c: int) -> float:
+	var w := column_width()
+	var y := panel_rect().position.y + TITLE_H + 12.0
+	if c == 0:
+		y += _first_run_h(w) + 18.0
+	for sec in COLUMNS[c]:
+		y += 36.0
+		for row in sec[1]:
+			y += _row_h(row, w) + ROW_GAP
+		y += 14.0
+	return y - 14.0 - ROW_GAP
+
+
 func _process(_dt: float) -> void:
 	if visible:
 		queue_redraw()
@@ -234,7 +248,7 @@ func _draw() -> void:
 	for c in COLUMNS.size():
 		var x := p.position.x + PAD + c * (cw + COL_GAP)
 		var y := p.position.y + TITLE_H + 12.0
-		if c == COLUMNS.size() - 1:
+		if c == 0:
 			y = _first_run_box(Vector2(x, y), cw) + 18.0  # the box first: it is what a new player reads
 		for sec in COLUMNS[c]:
 			y = _section(sec, Vector2(x, y), cw) + 14.0
@@ -252,25 +266,34 @@ func _section(sec: Array, at: Vector2, w: float) -> float:
 	return y
 
 
+## The height of a row `w` wide: the taller of its keys and its text once wrapped.
+static func _row_h(row: Array, w: float) -> float:
+	var font := ThemeDB.fallback_font
+	return maxf(font.get_multiline_string_size(str(row[0]), HORIZONTAL_ALIGNMENT_LEFT, KEY_W - 8.0, FONT).y,
+		font.get_multiline_string_size(str(row[1]), HORIZONTAL_ALIGNMENT_LEFT, w - KEY_W, FONT).y)
+
+
 ## One row: the keys (amber, wrapped in their own column) and what they do (wrapped). Returns its height.
 func _row(row: Array, at: Vector2, w: float) -> float:
-	var keys := str(row[0])
 	var font := ThemeDB.fallback_font
-	var kh := font.get_multiline_string_size(keys, HORIZONTAL_ALIGNMENT_LEFT, KEY_W - 8.0, FONT).y
-	var dh := font.get_multiline_string_size(str(row[1]), HORIZONTAL_ALIGNMENT_LEFT, w - KEY_W, FONT).y
-	draw_multiline_string(font, at + Vector2(0.0, FONT), keys, HORIZONTAL_ALIGNMENT_LEFT, KEY_W - 8.0, FONT, -1, AMBER)
+	draw_multiline_string(font, at + Vector2(0.0, FONT), str(row[0]), HORIZONTAL_ALIGNMENT_LEFT, KEY_W - 8.0, FONT, -1, AMBER)
 	draw_multiline_string(font, at + Vector2(KEY_W, FONT), str(row[1]), HORIZONTAL_ALIGNMENT_LEFT, w - KEY_W, FONT, -1, TEXT)
-	return maxf(kh, dh)
+	return _row_h(row, w)
+
+
+## The height of the First run box `w` wide.
+static func _first_run_h(w: float) -> float:
+	var h := 48.0
+	for s in first_run():
+		h += ThemeDB.fallback_font.get_multiline_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, w - 48.0, 16).y + 9.0
+	return h
 
 
 ## The First run box at `at`, `w` wide. Returns the y under it.
 func _first_run_box(at: Vector2, w: float) -> float:
 	var steps := first_run()
 	var font := ThemeDB.fallback_font
-	var h := 40.0
-	for s in steps:
-		h += font.get_multiline_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, w - 48.0, 16).y + 9.0
-	var box := Rect2(at, Vector2(w, h + 8.0))
+	var box := Rect2(at, Vector2(w, _first_run_h(w)))
 	draw_rect(box, ROW_BG)
 	draw_rect(box, AMBER, false, 2.0)
 	_text("FIRST RUN", box.position + Vector2(12.0, 24.0), 15, AMBER)
