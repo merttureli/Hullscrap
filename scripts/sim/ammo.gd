@@ -229,13 +229,12 @@ static func moving_at(ship, cell: Vector2i) -> bool:
 
 ## Does the ship hold or carry a belt drive (the first one comes with the belt blueprint)?
 static func has_drive(ship) -> bool:
-	for id in ship.components.ids():
-		if str(ship.components.def(id).get("family", "")) == "belt_drive":
-			if ship.inventory.count(id) > 0:
-				return true
-			for uid in ship.components.instances:
-				if ship.components.instances[uid]["id"] == id:
-					return true
+	for id in ship.inventory.counts:
+		if ship.inventory.counts[id] > 0 and str(ship.components.def(id).get("family", "")) == "belt_drive":
+			return true
+	for uid in ship.components.instances:
+		if family_of(ship, uid) == "belt_drive":
+			return true
 	return false
 
 
@@ -254,8 +253,11 @@ static func belts_unlocked(ship) -> bool:
 
 ## Advance the belts of `ship` by `dt` seconds: units ride, drives feed the guns that want ammo.
 static func tick(ship, dt: float) -> void:
-	learn(ship)
 	var b = ship.belts
+	b.learn_wait -= dt
+	if b.learn_wait <= 0.0:  # a drive aboard teaches the belt blueprint; looked for once a second
+		b.learn_wait = 1.0
+		learn(ship)
 	if dt <= 0.0 or (b.cells.is_empty() and b.units.is_empty()):
 		return
 	var n := maxi(1, ceili(dt / STEP - 1e-9))

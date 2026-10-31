@@ -406,7 +406,7 @@ func test_the_first_drive_brings_the_belt_blueprint_with_the_sim() -> void:
 	sim.step(0.1)
 	check(not ship.belts.known, "no drive yet")
 	ship.inventory.add("belt_drive_std", 1)
-	sim.step(0.1)
+	sim.step(1.1)  # the sim looks once a second
 	check(ship.belts.known, "the first drive in the hold teaches it")
 
 
