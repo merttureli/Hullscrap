@@ -379,7 +379,7 @@ func test_the_bow_is_the_side_with_the_most_ram_plating() -> void:
 func test_the_rustfang_rammer_design() -> void:
 	var ship := Session.spawn_rammer()
 	check(ship != null, "the design loads")
-	eq(ship.get_meta("ai"), {"style": "rammer", "aim_skill": 0.4}, "and carries its pilot style and its poor aim")
+	eq(ship.get_meta("ai"), {"style": "rammer", "aim_skill": 0.4, "morale": "ram"}, "and carries its pilot style, its poor aim and its morale")
 	var plates := 0
 	var slopes := 0
 	for c in ship.grid.tiles:
@@ -400,7 +400,7 @@ func test_the_rustfang_rammer_design() -> void:
 	eq(arena.ships[i].flight.can_fly(ship.components, arena.ships[i].powered), "", "it can fly")
 	check(arena.ships[i].thrust * arena.ships[i].flight.thrust_to_accel / arena.ships[i].mass > 30.0, "and is not a brick")
 	var pirate := Session.load_ship(Session.PIRATE_PATH)
-	eq(pirate.get_meta("ai"), {"aim_skill": 0.5}, "the pirate has no pilot style, only a middling aim")
+	eq(pirate.get_meta("ai"), {"aim_skill": 0.5, "morale": "rustfang"}, "the pirate has no pilot style, only a middling aim and a Rustfang morale")
 
 
 func _rammer_fight(target_path := "res://data/ships/starter_courier.json", seed_value := 3) -> Session:
