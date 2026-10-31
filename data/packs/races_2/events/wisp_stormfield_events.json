@@ -74,6 +74,9 @@
         ]},
         {"text": "[Wisp] Buy the barman a round.", "requires": {"species": "wisp"}, "outcomes": [
           {"weight": 100, "text": "Your Wisp tops up the barman's glow from their own, and the two sit and shine at each other for a long, rippling hour. Cordelia refuses payment. 'On the house,' she says. 'They don't get many in.' She fills your tank and sends your Wisp home with a jar.", "effects": {"items": {"fuel": 4, "plasma_cell": 1}, "crew_hp": 10}}
+        ]},
+        {"text": "Nurse a glass of water and watch the glow.", "outcomes": [
+          {"weight": 100, "text": "You nurse a glass of water at the end of the counter while a thousand volts argue over a card game. Cordelia tops it up without comment. It is, you decide, the cheapest good evening in the Drift.", "effects": {"crew_hp": 5}}
         ]}
       ]
     },
