@@ -62,7 +62,7 @@
       "id": "human_flak_screen",
       "name": "Flak Screen",
       "blurb": "Fills the lane with tin and good intentions. The manual is vague about what, exactly, it is a screen against.",
-      "quirk": "A fast, accurate flak turret (accuracy 0.85), but its pellets are weak against hulls.",
+      "quirk": "A fast, accurate flak turret (accuracy 0.85) that shoots down enemy missiles within 300 px before it looks at any ship, but its pellets are weak against hulls.",
       "family": "weapon",
       "line": "standard",
       "tier": 2,

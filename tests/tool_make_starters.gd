@@ -32,7 +32,7 @@ const GRID := Vector2i(63, 63)
 const MARGIN := 2
 const OUT_DIR := "res://data/ships/"
 const SIDES: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
-const STOCK := {"scrap": 5000, "copper": 600, "titanium": 400, "silicon": 400, "crystal": 200, "plasma_cell": 100, "polymer": 100}
+const STOCK := {"scrap": 5000, "copper": 600, "titanium": 400, "silicon": 400, "crystal": 200, "plasma_cell": 100, "polymer": 600}
 ## Cost of crossing a cell when routing a cable: walls, doors and parts are cheap (the wire hides there).
 const WIRE_COST := {"solid": 2, "part": 2, "floor": 5, "none": 14}
 
@@ -42,11 +42,16 @@ var _bad := false
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
 	var skin_only: bool = "skin" in args
-	var makers := {"rustbucket": _rustbucket, "courier": _courier, "prism": _prism, "pirate": _pirate}
+	var makers := _makers()
 	for key in makers:
 		if args.size() - int(skin_only) == 0 or key in args:
 			_make(makers[key].call(), skin_only)
 	quit(1 if _bad else 0)
+
+
+## The designs this tool builds: name -> Callable returning a spec. tests/tool_make_starters2.gd overrides it.
+func _makers() -> Dictionary:
+	return {"rustbucket": _rustbucket, "courier": _courier, "prism": _prism, "pirate": _pirate}
 
 
 # --- the designs ---------------------------------------------------------------------------------------
@@ -174,11 +179,13 @@ func _placed(spec: Dictionary) -> Dictionary:
 	out["outline"] = spec["outline"].map(func(p): return [p[0], p[1] + d.x, p[2] + d.y, p[3], p[4]] if p[0] is String else [p[0] + d.x, p[1] + d.y])
 	out["walls"] = spec["walls"].map(func(w): return [w[0] + d.x, w[1] + d.y, w[2] + d.x, w[3] + d.y])
 	out["doors"] = spec["doors"].map(func(w): return [w[0] + d.x, w[1] + d.y, w[2]])
+	if spec.has("rooms"):
+		out["rooms"] = spec["rooms"].map(func(w): return [w[0] + d.x, w[1] + d.y, w[2] + d.x, w[3] + d.y])
 	out["parts"] = spec["parts"].map(func(p): return [p[0], p[1] + d.x, p[2] + d.y] + p.slice(3))
 	var plated: Callable = spec["plated"]
 	out["plated"] = func(c): return plated.call(c - d)
-	for key in ["thick", "backed"]:
-		if spec.has(key):
+	for key in ["thick", "backed", "plate"]:
+		if spec.has(key) and spec[key] is Callable:
 			var fn: Callable = spec[key]
 			out[key] = func(c): return fn.call(c - d)
 	out.erase("at")
@@ -206,8 +213,8 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 			fhi = fhi.max(c)
 		if flo != Vector2i.ZERO:
 			_fail("%s: the frame starts at %s, not 0,0" % [name, str(flo)])
-	var plate: String = spec["plate"]
-	var skin := HullOutline.layers(ras["cells"], func(c): return plate if spec["plated"].call(c) else "", func(c): return plate if spec.has("thick") and spec["thick"].call(c) else "", spec.get("backed", Callable()))
+	var plate_of: Callable = spec["plate"] if spec["plate"] is Callable else func(_c): return spec["plate"]  # a tile id, or a Callable(cell) -> the tile id of that cell
+	var skin := HullOutline.layers(ras["cells"], func(c): return plate_of.call(c) if spec["plated"].call(c) else "", func(c): return plate_of.call(c) if spec.has("thick") and spec["thick"].call(c) else "", spec.get("backed", Callable()))
 	var lo := Vector2i(1 << 20, 1 << 20)
 	var hi := Vector2i(-(1 << 20), -(1 << 20))
 	for c in skin:
@@ -226,6 +233,18 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 					_fail("%s: the bulkhead %s leaves the hull at %s" % [name, str(w), str(c)])
 				elif skin[c]["tile"] == "floor":
 					skin[c]["tile"] = "wall"
+	if spec.has("rooms"):  # "rooms" [x0, y0, x1, y1] (inclusive cells): the floor of the ship. Every other cell inside the outline is wall.
+		var room_cells := {}
+		for r in spec["rooms"]:
+			for y in range(r[1], r[3] + 1):
+				for x in range(r[0], r[2] + 1):
+					room_cells[Vector2i(x, y)] = true
+		for c in room_cells:
+			if not skin.has(c) or skin[c]["tile"] != "floor":
+				_fail("%s: the room cell %s is not floor (%s)" % [name, str(c), skin[c]["tile"] if skin.has(c) else "outside the hull"])
+		for c in skin:
+			if skin[c]["tile"] == "floor" and not room_cells.has(c):
+				skin[c]["tile"] = "wall"
 	if skin_only:
 		print("==== %s (skin only)" % name)
 		_print_skin(skin, lo, hi, frame)
@@ -295,7 +314,9 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 	saved["crew"] = spec["crew"]  # who starts aboard and their species (Jobs.spawn_crew)
 	if spec.has("ai"):
 		saved["ai"] = spec["ai"]  # the pilot's style and aim skill (pilot_ai.gd)
-	var path: String = OUT_DIR + spec["file"] + ".json"
+	if spec.has("hangar"):
+		saved["hangar"] = spec["hangar"]  # {group, layout, unlock}: the hangar tab, the layout A/B/C and the unlock that opens it (space/hangar.gd)
+	var path: String = spec.get("dir", OUT_DIR) + spec["file"] + ".json"
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(_format(saved))
 	f.close()
@@ -456,7 +477,7 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 		return
 	var g: ShipGrid = ship.grid
 	var glyph := {"reactor": "R", "engine": "E", "oxygen": "O", "shield": "S", "weapon": "W", "helm": "H", "bed": "B", "fabricator": "F", "radiator": "i"}
-	var tile_glyph := {"floor": ".", "wall": "#", "door": "D", "scrap_plate": "s", "titanium_alloy": "T", "reflective_coating": "x", "ram_plating": "r"}
+	var tile_glyph := {"floor": ".", "wall": "#", "door": "D", "scrap_plate": "s", "titanium_alloy": "T", "reflective_coating": "x", "ram_plating": "r", "whipple_spacer": "p", "neon_lattice": "n", "heavy_armor": "h", "ablative_plating": "a"}
 	var lo := Vector2i(GRID)
 	var hi := Vector2i.ZERO
 	var cells: Array = g.tiles.keys()
@@ -523,8 +544,9 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 		var empty := 0
 		for c in g.hull:
 			empty += int(g.get_tile(c) == "" and ship.components.at_out(c) < 0)
-		print("   frame %d cells (%.2fx the old hull of %d), %d tiles, %d components, empty %d = %.0f%%" % [
-			g.hull.size(), float(g.hull.size()) / spec["was_hull"], spec["was_hull"], g.tiles.size(), ship.components.instances.size(), empty, 100.0 * empty / g.hull.size()])
+		print("   frame %d cells%s, %d tiles, %d components, empty %d = %.0f%%" % [
+			g.hull.size(), " (%.2fx the old hull of %d)" % [float(g.hull.size()) / spec["was_hull"], spec["was_hull"]] if spec.has("was_hull") else "", g.tiles.size(), ship.components.instances.size(), empty, 100.0 * empty / g.hull.size()])
+		print("ROW %s|%s|%d|%d|%d|%.0f" % [spec["file"], str(spec.get("hangar", {}).get("group", "")) + " " + str(spec.get("hangar", {}).get("layout", "")), co.hull_max, ship.components.instances.size(), g.hull.size(), 100.0 * empty / g.hull.size()])
 	var pockets := HullOutline.pockets(ship)
 	if not pockets.is_empty():
 		_fail("%s: %d floor cells no crew body reaches from the helm: %s" % [spec["name"], pockets.size(), str(pockets.map(func(c): return c - off))])
