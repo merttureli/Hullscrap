@@ -4,7 +4,7 @@
 	"home_species": "",
 	"faction": "concord",
 	"stages": [2, 6],
-	"weight": 10,
+	"weight": 16,
 	"rarity": "common",
 	"danger": 1.1,
 	"palette": {"tint": "#4fa3ff", "nebula": "concord"},

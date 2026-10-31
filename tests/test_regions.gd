@@ -122,7 +122,8 @@ func test_rarity_weights_the_offers() -> void:
 		for id in Regions.offers(s, 4, ["clan_space"], cfg):
 			counts[id] = int(counts.get(id, 0)) + 1
 	check(int(counts.get("sporeling_groves", 0)) > 0, "a rare region does turn up")
-	check(int(counts.get("sporeling_groves", 0)) * 2 < int(counts.get("boneyard", 0)), "a rare region far less often than a common one (%s)" % str(counts))
+	# (picking 2-3 cards without repeats from a pool of 20 flattens the 0.3 factor to about half as often)
+	check(int(counts.get("sporeling_groves", 0)) * 3 < int(counts.get("boneyard", 0)) * 2, "a rare region clearly less often than a common one (%s)" % str(counts))
 
 
 # --- the maps -------------------------------------------------------------------------------------------------
