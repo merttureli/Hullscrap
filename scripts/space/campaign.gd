@@ -28,6 +28,7 @@ const Tide = preload("res://scripts/space/tide.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Radar = preload("res://scripts/space/radar.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
@@ -189,9 +190,10 @@ func discount(faction: String) -> float:
 	return float(r["discount"]) if faction != "" and int(rep.get(faction, 0)) >= int(r["discount_from"]) else 0.0
 
 
-## `base` credits at a station of `faction`, discount included (never below 1).
-func price(base: int, faction: String) -> int:
-	return maxi(1, ceili(float(base) * (1.0 - discount(faction)) - 0.0001))
+## `base` credits at a station of `faction`, discount included (never below 1). With the buyer's `ship`, the best haggler
+## aboard takes his fraction off as well (TraitSet.haggle: -10% is 0.1, added to the faction's discount).
+func price(base: int, faction: String, ship = null) -> int:
+	return maxi(1, ceili(float(base) * (1.0 - discount(faction) - TraitSet.haggle(ship)) - 0.0001))
 
 
 # --- the map and the fog ---------------------------------------------------------------------------------
@@ -1074,18 +1076,18 @@ func _station_faction(id: String) -> String:
 
 ## Pay for `n` units of fuel at the station `id`. Returns {ok, text}.
 func buy_fuel(ship, id: String, n := 1) -> Dictionary:
-	var each := price(int(cfg["fuel"]["price"]), _station_faction(id))
+	var each := price(int(cfg["fuel"]["price"]), _station_faction(id), ship)
 	return _purchase(ship, "fuel", n, each * n, "Fuel")
 
 
-## The price of `item` in the stock of station `id`, 0 when it is not sold there.
-func stock_price(id: String, item: String) -> int:
+## The price of `item` in the stock of station `id`, 0 when it is not sold there (`ship`: the buyer's, for a haggler aboard).
+func stock_price(id: String, item: String, ship = null) -> int:
 	var stock: Dictionary = station_cfg(id).get("stock", {})
-	return price(int(stock[item]), _station_faction(id)) if stock.has(item) else 0
+	return price(int(stock[item]), _station_faction(id), ship) if stock.has(item) else 0
 
 
 func buy(ship, id: String, item: String, n := 1) -> Dictionary:
-	var each := stock_price(id, item)
+	var each := stock_price(id, item, ship)
 	if each <= 0:
 		return {"ok": false, "text": "They don't sell that."}
 	return _purchase(ship, item, n, each * n, ship.crafting.name_of(item, ship.components))
@@ -1148,7 +1150,7 @@ func repair(ship, id: String, points: int) -> Dictionary:
 	points = mini(points, hull_loss)
 	if points <= 0:
 		return {"ok": false, "text": "The hull is sound."}
-	var total := price(int(cfg["prices"]["repair"]), _station_faction(id)) * points
+	var total := price(int(cfg["prices"]["repair"]), _station_faction(id), ship) * points
 	if ship.inventory.count("credits") < total:
 		return {"ok": false, "text": "%d credits for %d points: you have %d." % [total, points, ship.inventory.count("credits")]}
 	ship.inventory.add("credits", -total)
@@ -1185,7 +1187,7 @@ func recruit(ship, id: String, index: int) -> Dictionary:
 	var list: Array = offers.get(id, [])
 	if index < 0 or index >= list.size():
 		return {"ok": false, "text": "Nobody there."}
-	var cost := price(int(cfg["prices"]["recruit"]), _station_faction(id))
+	var cost := price(int(cfg["prices"]["recruit"]), _station_faction(id), ship)
 	if ship.inventory.count("credits") < cost:
 		return {"ok": false, "text": "%d credits to hire: you have %d." % [cost, ship.inventory.count("credits")]}
 	var who := add_crew(ship, str(list[index].get("name", "")), str(list[index]["species"]))

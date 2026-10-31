@@ -22,7 +22,8 @@ extends RefCounted
 ## (work_rate: repair, extinguish, breach, revive, swarm and aura bonuses), air and fire damage, room heat
 ## (dries_out, heat_speed), healing (heal_mult, auras), ion hits (ion_hit: damage and stun), vacuum_walk (no suffocation),
 ## vacuum_speed (the walk in thin air), line_affinity (repairing a part of a line), no_tools (no repair or extinguish jobs) and
-## hull_mend (idle crew mend the walls and breaches next to them). revive_once, split_on_death: mortality.gd.
+## hull_mend (idle crew mend the walls and breaches next to them), low_pressure_heal (hp a second in a room with under half its
+## air) and mimic (tick starts with TraitSet.update_mimics, so a mimic's set holds the trait it copies). revive_once, split_on_death: mortality.gd.
 ## Repairs take `seconds` x the repair multiplier of the part's line (of the wall's line for a
 ## breach). A crew member at a station marks it in `ship.manned` (uid -> name): a manned helm adds
 ## evasion in a fight and a manned weapon cools down faster (see evasion_bonus, cooldown_mult), and a manned
@@ -63,6 +64,7 @@ var _since := 1.0e9  ## seconds since the board was rebuilt (huge: build it on t
 ## walk and work, then hurt and heal. `in_combat`: a fight is on.
 func tick(ship, dt: float, in_combat := false) -> void:
 	combat = in_combat
+	TraitSet.update_mimics(ship)
 	_since += dt
 	if _since >= float(jcfg().get("period", 1.0)):
 		_since = 0.0
@@ -541,6 +543,8 @@ func _health(ship, dt: float) -> void:
 		if dmg > 0.0:
 			m.hurt(dmg * dt)
 		var heal := _heal_rate(ship, m) + float(auras.get(room, {}).get("heal_per_s", 0.0))
+		if room >= 0:
+			heal += TraitSet.low_pressure_heal_rate(t, ship.atmosphere.pressure_of(room))
 		if heal > 0.0:
 			m.heal(heal * dt)
 		if m.is_down() and not was_down:

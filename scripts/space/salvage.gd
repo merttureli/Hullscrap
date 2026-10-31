@@ -4,8 +4,10 @@ extends RefCounted
 ## dictionary the event panel shows as it is (id `salvage`): one row to cut out each of up to 3 parts (4 when
 ## the ship was captured whole), one row to scan the best part whose blueprint is unknown, and, after a plain
 ## win, a row to strip her for scrap. Parts the fight wrecked are no longer on the ship, so they are not offered.
-## No nodes, no drawing. All the random picks use the campaign's rng; the numbers are in data/drift.json `loot`.
+## A crew member with loot_bonus adds rows to the pick (picks_for). No nodes, no drawing. All the random picks use the campaign's rng; the numbers are in data/drift.json `loot`.
 ## `c` below is the campaign (campaign.gd; not preloaded here, to avoid a cycle) and `ship` the player's Ship.
+
+const TraitSet = preload("res://scripts/crew/traits.gd")
 
 const NOT_OFFERED: Array = ["bed", "helm"]  ## families and ids nobody cuts out of a wreck
 const PICKS := {"won": 3, "captured": 4}  ## parts offered by the state of the fight
@@ -27,10 +29,11 @@ static func parts(enemy) -> Array:
 
 
 ## The parts offered after a fight in `state` against an enemy of `threat` skulls: the state's base, plus the bonus of
-## data/drift.json `loot.threat_picks` ({"4": 1, "5": 2}: a dangerous enemy pays better).
-static func picks_for(state: String, threat: int, c) -> int:
+## data/drift.json `loot.threat_picks` ({"4": 1, "5": 2}: a dangerous enemy pays better), plus the best loot_bonus aboard `ship`
+## (TraitSet.loot_bonus; no ship, no bonus).
+static func picks_for(state: String, threat: int, c, ship = null) -> int:
 	var bonus: Dictionary = c.cfg["loot"].get("threat_picks", {})
-	return int(PICKS.get(state, PICKS["won"])) + int(bonus.get(str(clampi(threat, 0, 5)), 0))
+	return int(PICKS.get(state, PICKS["won"])) + int(bonus.get(str(clampi(threat, 0, 5)), 0)) + TraitSet.loot_bonus(ship)
 
 
 ## The scrap a stripped ship gives: (strip_base + strip_per_part x its parts) x the tier (data/drift.json loot); half
@@ -69,7 +72,7 @@ static func event_for(enemy, state: String, c, ship, hollow = null, threat := 0)
 			pool.append(id)
 	var picked := []
 	var base := int(PICKS.get(state, PICKS["won"]))
-	for i in picks_for(state, threat, c):
+	for i in picks_for(state, threat, c, ship):
 		if pool.is_empty():
 			break
 		picked.append(pool.pop_at(c.rng.randi() % pool.size()))
@@ -86,7 +89,7 @@ static func event_for(enemy, state: String, c, ship, hollow = null, threat := 0)
 		choices.append(_row("Scan the %s (learn its blueprint)" % _name(ship, scan), "The scanner maps every weld and wire of the %s." % _name(ship, scan), {"blueprint": [recipe_for(ship, scan)]}))
 	var foe := str(enemy.name) if enemy != null else "ship"
 	var text := "Nobody is left standing aboard the %s. Your crew strip her hold, then pick one prize to cut loose." % foe
-	var more := DANGEROUS_TEXT if picked.size() > base else ""
+	var more := DANGEROUS_TEXT if picked.size() > base + TraitSet.loot_bonus(ship) else ""  # the bonus of a crew member is not the threat's
 	if state != "captured":
 		var scrap := strip_scrap(enemy, c)
 		choices.append(_row("Strip her for scrap (+%d)" % scrap, "You cut her down to the frame. What is left breaks up behind you.", {"items": {"scrap": scrap}}))

@@ -89,12 +89,12 @@ func rows(col: int) -> Array:
 	var out := []
 	if col == 0:
 		if "fuel" in cfg["services"]:
-			out.append({"kind": "fuel", "id": "fuel", "label": "Fuel", "right": "%d cr" % c.price(int(c.cfg["fuel"]["price"]), _faction()), "cost": c.price(int(c.cfg["fuel"]["price"]), _faction())})
+			out.append({"kind": "fuel", "id": "fuel", "label": "Fuel", "right": "%d cr" % c.price(int(c.cfg["fuel"]["price"]), _faction(), s), "cost": c.price(int(c.cfg["fuel"]["price"]), _faction(), s)})
 		if "stock" in cfg["services"]:
 			var ids: Array = cfg.get("stock", {}).keys()
-			ids.sort_custom(func(a, b): return c.stock_price(station, a) < c.stock_price(station, b) or (c.stock_price(station, a) == c.stock_price(station, b) and a < b))
+			ids.sort_custom(func(a, b): return c.stock_price(station, a, s) < c.stock_price(station, b, s) or (c.stock_price(station, a, s) == c.stock_price(station, b, s) and a < b))
 			for id in ids:
-				out.append({"kind": "buy", "id": id, "label": s.crafting.name_of(id, s.components), "right": "%d cr" % c.stock_price(station, id), "cost": c.stock_price(station, id)})
+				out.append({"kind": "buy", "id": id, "label": s.crafting.name_of(id, s.components), "right": "%d cr" % c.stock_price(station, id, s), "cost": c.stock_price(station, id, s)})
 	elif col == 1:
 		if "sell" in cfg["services"]:
 			var ids: Array = s.inventory.counts.keys()
@@ -114,7 +114,7 @@ func rows(col: int) -> Array:
 			else:
 				out.append({"kind": "note", "label": "Paid off. Ma has nothing more to say to you."})
 		if "repair" in cfg["services"]:
-			var each: int = c.price(int(c.cfg["prices"]["repair"]), _faction())
+			var each: int = c.price(int(c.cfg["prices"]["repair"]), _faction(), s)
 			out.append({"kind": "header", "label": "HULL INTEGRITY: %d/%d" % [c.hull_left(s), c.hull_max(s)], "right": "%d cr a point" % each})
 			if c.hull_loss > 0:
 				out.append({"kind": "repair", "id": "repair", "label": "Repair 10 points", "right": "%d cr" % (mini(10, c.hull_loss) * each), "cost": mini(10, c.hull_loss) * each})
@@ -122,7 +122,7 @@ func rows(col: int) -> Array:
 			else:
 				out.append({"kind": "note", "label": "The hull is sound."})
 		if "recruit" in cfg["services"]:
-			var price: int = c.price(int(c.cfg["prices"]["recruit"]), _faction())
+			var price: int = c.price(int(c.cfg["prices"]["recruit"]), _faction(), s)
 			out.append({"kind": "header", "label": "RECRUITS", "right": "%d cr each" % price})
 			var offers: Array = c.offers.get(station, [])
 			for i in offers.size():
