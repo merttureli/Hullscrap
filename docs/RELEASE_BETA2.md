@@ -35,6 +35,8 @@ Built in one night after the Beta 1 playtest ("combat is amazing"). Play it from
 - AI-vs-AI: jump 5 starters win 56% (78% projected), jump 15 with a few upgrades 56% (72%), jump 35 bare 0% (11%). Enemies break at half hull; wardens are a clear step above the fights around them.
 
 ## Known issues
+- **Continue doesn't restore the crew**: a saved run comes back with its ship, region, tide and warden, but the crew is rebuilt from the default plan (recruits are lost). Finish a session in one go until this is fixed.
+- The first-run hint toast can cover the map's tide clock.
 - Fights are long (90-150 s in AI-vs-AI); your own flying is the real test.
 - Smelters and the new materials use placeholder art.
 - The intent panel shows no reticle when the enemy pilot aims at your hull instead of a part (most pilots now).
