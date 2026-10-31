@@ -51,6 +51,12 @@ func test_the_seven_species_have_the_numbers_of_the_table() -> void:
 	near(f[1]["hull_mend"]["rate"], 0.5, "hull_mend 0.5")
 	var e := _of("echo")
 	eq(e[0].sidearm(), "spark_pistol", "echo sidearm")
+	check(e[1]["mimic"], "an Echo mimics")
+	near(m[1]["mining_mult"], 1.5, "murrow mining x1.5")
+	near(s[1]["low_pressure_heal"], 1.0, "siltborn heal 1 hp/s in thin air")
+	near(c[1]["haggler"], 0.1, "corvin haggles 10%")
+	near(c[1]["loot_bonus"], 1.0, "corvin loot +1")
+	near(f[1]["station"]["pull_bonus"], 1.0, "ferro intake pulls 1 cell further")
 	for id in RACES:
 		var def: Dictionary = Content.entry("species", id)
 		check(not def.is_empty(), id + ": a species")

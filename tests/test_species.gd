@@ -37,8 +37,8 @@ const CLASSES := {
 	"melee": [25.0, 1.2, 40.0], "tool": [6.0, 1.0, 60.0],
 }
 const CULTURES := ["concord", "clans", "lumen", "basalt", "emberkin", "fenn"]
-## Race waves 2 and 4: their art (claude/art-race2, claude/art-race4) may not be on this branch yet. Until art/crew/<id>/ exists the art checks skip them.
-const ART_PENDING := ["vellum", "oorth", "drakkin", "wisp", "hullkin", "lantern", "warden_frame", "murrow", "siltborn", "corvin", "brine", "echo", "ferro"]
+## Race wave 2: their art (claude/art-race2) may not be on this branch yet. Until art/crew/<id>/ exists the art checks skip them.
+const ART_PENDING := ["vellum", "oorth", "drakkin", "wisp", "hullkin", "lantern"]
 
 
 func near(got: float, want: float, msg: String, eps := 1e-6) -> void:
