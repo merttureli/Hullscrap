@@ -225,6 +225,10 @@ func _event_chain(where: String, ev: Dictionary, c: Campaign, sim, pick: RandomN
 			check(false, "%s: event '%s' shows only greyed choices: the panel has no way out" % [where, e.get("id", "?")])
 			continue
 		var v: Dictionary = open[pick.randi() % open.size()]
+		if e.get("id", "") == "salvage":  # a sensible player scans a blueprint they can learn
+			var scans: Array = open.filter(func(w): return str(w["text"]).begins_with("Scan"))
+			if not scans.is_empty():
+				v = scans[0]
 		if ship.inventory.count("fuel") < 1:  # out of fuel: take what pays in fuel, then in credits
 			for gain in ["fuel", "credits"]:
 				var wanted: Array = open.filter(func(w): return _gives(e, int(w["index"]), gain))
