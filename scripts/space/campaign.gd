@@ -28,6 +28,7 @@ const Tide = preload("res://scripts/space/tide.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Radar = preload("res://scripts/space/radar.gd")
+const Hazards = preload("res://scripts/combat/hazards.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 
@@ -105,6 +106,7 @@ var ending := ""  ## the id of the ending this run reached ("" while it goes on)
 var landmarks: Array = []  ## ids of the landmark events (events.gd) met in this run, in order
 var unlocks_earned: Array = []  ## ids of the unlocks this run earned (new to the profile), in order
 var chronicle: Array = []  ## the run log, in order: {jumps, kind (landmark, unlock, ending), id, text}; the ending screen reads it
+var _hazards := {}  # "<region seed>:<region>:<node>" -> that node's hazard ({} or {id, dir}), rolled once (hazard_at)
 var _hull_key := -1
 var _hull_max := 0
 
@@ -590,6 +592,15 @@ func sector_at(id: String):
 			return null
 		sectors[id] = Sector.generate(region_seed, drift.node(id), region_id, {}, region_data)
 	return sectors[id]
+
+
+## The hazard of node `id` ({} or {id, dir}; hazards.gd): rolled once from the region seed, the node and the region's
+## `hazards`, the same every time. {} for a node the map does not have.
+func hazard_at(id: String) -> Dictionary:
+	var key := "%d:%s:%s" % [region_seed, region_id, id]
+	if not _hazards.has(key):
+		_hazards[key] = Hazards.roll(region_seed, drift.node(id), region_data.get("hazards", [])) if drift.has(id) else {}
+	return _hazards[key]
 
 
 ## The sector the ship is in.

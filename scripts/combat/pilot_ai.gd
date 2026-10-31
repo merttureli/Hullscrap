@@ -28,6 +28,7 @@ extends RefCounted
 
 const Shields = preload("res://scripts/combat/shields.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
+const Hazards = preload("res://scripts/combat/hazards.gd")
 
 const RANGE_FRACTION := 0.7
 const HULL_MARGIN := 40.0  ## px kept between the two hulls' bounding circles, at least
@@ -98,7 +99,7 @@ func think(dt: float) -> void:
 		_retarget = RETARGET_S
 		target_uid = pick_target()
 		_bow = bow_of(co)
-		var e := deg_to_rad((1.0 - aim_skill) * AIM_ERROR_DEG)
+		var e := deg_to_rad((1.0 - aim_skill) * AIM_ERROR_DEG * Hazards.aim_error_mult(arena))
 		bias = rng.randf_range(-e, e)
 	if mode == "hold":  # surrendering: no throttle, no fire
 		arena.set_input(me, 0.0, 0.0)

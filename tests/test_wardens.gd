@@ -8,6 +8,7 @@ const Regions = preload("res://scripts/space/regions.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Threat = preload("res://scripts/space/threat.gd")
+const Sector = preload("res://scripts/space/sector.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
@@ -327,6 +328,44 @@ func test_the_region_choice_is_gated_until_the_warden_is_cleared() -> void:
 	check(not c.warden_up(), "cleared")
 	ep.proceed()
 	check(rc.visible and rc.page == "confirm", "and the region choice opens after it")
+	_free(d)
+
+
+func test_in_sector_space_the_beacon_hails_again_after_a_turn_back_and_the_toll_opens_the_choice() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var c: Campaign = map.campaign
+	var ship = map.ship()
+	ship.inventory.add("credits", 200)
+	c.flags["met_ma"] = true
+	_to_exit(c)
+	var sec = c.sector_at(c.current)
+	sec.enter()
+	var beacon: Dictionary = sec.main_poi()
+	sec.ship_pos = beacon["pos"]
+	var res: Dictionary = sec.trigger(c, ship)
+	check(res.get("warden", false) and not res.get("exit", true), "flying to the beacon triggers the warden's hail, not the exit")
+	map.open_poi(res, sec)
+	var ep = map.event_panel
+	check(ep.visible and ep.title == c.warden["name"] and not map.region_choice.visible, "over the sector, the hail")
+	ep.choose(ep.view.size() - 1)  # Turn back
+	ep.proceed()
+	check(not map.region_choice.visible and c.warden_up(), "turned back: the lane is shut")
+	eq(sec.find(beacon["id"])["state"], Sector.NEW, "and the beacon is still live")
+	sec.ship_pos = beacon["pos"] + Vector2(3000.0, 0.0)
+	eq(sec.trigger(c, ship), {}, "(nothing out there)")
+	sec.ship_pos = beacon["pos"]
+	var again: Dictionary = sec.trigger(c, ship)
+	check(again.get("warden", false), "flown back to, it hails again")
+	map.open_poi(again, sec)
+	var pay := -1
+	for i in ep.view.size():
+		if str(ep.view[i]["text"]).begins_with("Pay the toll"):
+			pay = i
+	eq(ep.choose(pay), "", "pay")
+	ep.proceed()
+	check(not c.warden_up() and map.region_choice.visible, "paid: the region choice opens over the sector")
+	eq(sec.find(beacon["id"])["state"], Sector.DONE, "and the beacon is resolved")
 	_free(d)
 
 
