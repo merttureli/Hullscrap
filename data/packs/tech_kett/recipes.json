@@ -49,6 +49,56 @@
       "tools": [],
       "time": 30,
       "category": "system"
+    },
+    {
+      "id": "kett_hive_battery",
+      "output": {
+        "item": "kett_hive_battery",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 28,
+        "copper": 12,
+        "polymer": 8,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system"
+    },
+    {
+      "id": "kett_nest_reactor",
+      "output": {
+        "item": "kett_nest_reactor",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 12,
+        "polymer": 8
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 28,
+      "category": "system"
+    },
+    {
+      "id": "kett_brood_hold",
+      "output": {
+        "item": "kett_brood_hold",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 14,
+        "copper": 4,
+        "polymer": 10
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 18,
+      "category": "system"
     }
   ]
 }

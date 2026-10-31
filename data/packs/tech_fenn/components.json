@@ -102,6 +102,98 @@
       "heat_per_s": 2.0,
       "cooling": 3,
       "stats": {}
+    },
+    {
+      "id": "fenn_haggle_engine",
+      "name": "Haggle Engine",
+      "blurb": "Thrust bought at a discount. The seller said it was practically new, and left quickly.",
+      "quirk": "Thrust 23 (x1.3 over a Mk2), but it malfunctions 20% a minute: the Fenn mend it in no time.",
+      "family": "engine",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#e8d9b0",
+      "power": -3,
+      "priority": 4,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 4,
+      "stats": {
+        "thrust": 23,
+        "fuel_mult": 1.0,
+        "malfunction_per_min": 0.2
+      }
+    },
+    {
+      "id": "fenn_jury_reactor",
+      "name": "Jury Reactor",
+      "blurb": "Held together with a good argument. Two more power than it has any business making, and it stops when it feels slighted.",
+      "quirk": "+2 power over a Reactor Mk1, but it malfunctions 15% a minute: the Fenn mend it in no time.",
+      "family": "reactor",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#d9c68a",
+      "power": 10,
+      "priority": 0,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {
+        "malfunction_per_min": 0.15
+      }
+    },
+    {
+      "id": "fenn_quickfix_bay",
+      "name": "Quickfix Bay",
+      "blurb": "A cart of tools, a rack of spares and a sign that says back in a minute. Repairs go twice as fast in here.",
+      "quirk": "Crew in its room repair, patch and put fires out twice as fast, but the bay draws 2 power.",
+      "family": "utility",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#f0e2a8",
+      "power": -2,
+      "priority": 3,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3.0,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "quickfix",
+          "name": "Quickfix",
+          "type": "passive",
+          "effects": {
+            "room_work_mult": {
+              "mult": 2.0
+            }
+          },
+          "side_effects": []
+        }
+      ]
     }
   ]
 }

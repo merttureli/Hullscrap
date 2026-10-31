@@ -48,6 +48,54 @@
       "tools": [],
       "time": 30,
       "category": "system"
+    },
+    {
+      "id": "basalt_vacuum_forge",
+      "output": {
+        "item": "basalt_vacuum_forge",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 50,
+        "copper": 10,
+        "titanium": 8
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 40,
+      "category": "system"
+    },
+    {
+      "id": "basalt_stonehide_bay",
+      "output": {
+        "item": "basalt_stonehide_bay",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 40,
+        "titanium": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 25,
+      "category": "system"
+    },
+    {
+      "id": "basalt_gravity_anchor",
+      "output": {
+        "item": "basalt_gravity_anchor",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 30,
+        "copper": 8,
+        "titanium": 8,
+        "silicon": 2
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
     }
   ]
 }

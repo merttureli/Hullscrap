@@ -86,6 +86,90 @@
       "heat_per_s": 2.0,
       "cooling": 3,
       "stats": {}
+    },
+    {
+      "id": "human_reactor_plus",
+      "name": "Standard Reactor Plus",
+      "blurb": "Standard Reactor, Plus edition: one more unit of power and twenty percent more invoice. The invoice is itemised; the power is not.",
+      "quirk": "One more power than a Reactor Mk1 (9 against 8), for 20% more to build.",
+      "family": "reactor",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#f2d27a",
+      "power": 9,
+      "priority": 0,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {}
+    },
+    {
+      "id": "human_comms_array",
+      "name": "Concord Comms Array",
+      "blurb": "Long-range listening, certified, with a registry lookup on everything it hears. The registry answers, eventually.",
+      "quirk": "A radar that names every contact within 2400 px (the helm's own radar sees farther but names nothing), at 2 power.",
+      "family": "utility",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#6fa8e8",
+      "power": -2,
+      "priority": 3,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3.0,
+      "stats": {
+        "radar_range": 2400,
+        "identify": 1
+      }
+    },
+    {
+      "id": "human_crew_quarters_deluxe",
+      "name": "Crew Quarters Deluxe",
+      "blurb": "A bunk pod with a door that shuts and a pillow nobody was issued. Rested crews are said to be more productive. The audit is pending.",
+      "quirk": "A powered pod that heals 10 hp a second (twice a bed) and makes the crew in its room work 5% faster, but it draws 1 power.",
+      "family": "medbay",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#c9a27a",
+      "power": -1,
+      "priority": 3,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0.0,
+      "cooling": 3.0,
+      "stats": {
+        "heal": 0.67
+      },
+      "abilities": [
+        {
+          "id": "rested",
+          "name": "Rested crew",
+          "type": "passive",
+          "effects": {
+            "room_work_mult": {
+              "mult": 1.05
+            }
+          },
+          "side_effects": []
+        }
+      ]
     }
   ]
 }

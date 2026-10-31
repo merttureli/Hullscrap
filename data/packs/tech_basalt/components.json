@@ -86,6 +86,119 @@
       "heat_per_s": 2.0,
       "cooling": 3,
       "stats": {}
+    },
+    {
+      "id": "basalt_vacuum_forge",
+      "name": "Vacuum Forge",
+      "blurb": "A reactor that runs best with no air in the way. It lets the room out through a polite little valve. The Basalt do not notice.",
+      "quirk": "+3 power over a Reactor Mk1 (11 against 8), but it vents 5% of its room's air a second: Basalt do not breathe.",
+      "family": "reactor",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#c8662a",
+      "power": 11,
+      "priority": 0,
+      "manned": false,
+      "hp": 9,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "vent",
+          "name": "Vents its room",
+          "type": "passive",
+          "effects": {},
+          "side_effects": [
+            {
+              "type": "drain_o2",
+              "rate": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "basalt_stonehide_bay",
+      "name": "Stonehide Plating Bay",
+      "blurb": "Quarried plate laid thick over every wall of the room. The walls are very sure of themselves. The air is not invited.",
+      "quirk": "The walls of its room get +50% hp in a fight, but the room cannot keep its air (3% a second): Basalt do not breathe.",
+      "family": "utility",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#9a8c7a",
+      "power": -1,
+      "priority": 3,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 0.5,
+      "cooling": 3.0,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "stonehide",
+          "name": "Stonehide",
+          "type": "passive",
+          "effects": {
+            "room_wall_hp_mult": 1.5
+          },
+          "side_effects": [
+            {
+              "type": "drain_o2",
+              "rate": 0.03
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "basalt_gravity_anchor",
+      "name": "Gravity Anchor",
+      "blurb": "A heavy core that makes the whole ship hard to push around. It pulls on everything near it, air included, and says nothing about it.",
+      "quirk": "Ram damage to the ship's plain cells x0.35 and the crew keep their feet in a ram, but it pulls the air out of its room (3% a second): Basalt do not breathe.",
+      "family": "utility",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#5a6a7a",
+      "power": -2,
+      "priority": 3,
+      "manned": false,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 1,
+      "cooling": 3.0,
+      "stats": {
+        "ram_take": 0.35,
+        "no_knock": 1
+      },
+      "abilities": [
+        {
+          "id": "pull",
+          "name": "Pulls the air",
+          "type": "passive",
+          "effects": {},
+          "side_effects": [
+            {
+              "type": "drain_o2",
+              "rate": 0.03
+            }
+          ]
+        }
+      ]
     }
   ]
 }

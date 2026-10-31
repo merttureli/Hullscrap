@@ -3,5 +3,5 @@
   "name": "Racial tech: Fenn",
   "version": "1.0",
   "requires": [],
-  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons. Sold at fenn_bazaar (data/regions/fenn_bazaar.json, stock)."
+  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons, 3 components (Haggle Engine, Jury Reactor, Quickfix Bay). Sold at fenn_bazaar (data/regions/fenn_bazaar.json, stock)."
 }

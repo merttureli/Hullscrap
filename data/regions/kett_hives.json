@@ -16,7 +16,7 @@
 	"debris": {"scrap_chunk_s": 1.3, "polymer_barrel": 1.3},
 	"pois": {"wreck": 1.3},
 	"ambient": {"pirate": 4, "trader": 3, "patrol": 1},
-	"stock": {"engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "oxygen_scrap_mk1": 80, "shield_scrap_mk1": 110, "rattle_burst_scrap": 130, "bed": 30, "missile": 12, "kett_hive_swarm_launcher": 300, "kett_chitin_thrower": 150, "kett_drone_picket": 290},
+	"stock": {"engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "oxygen_scrap_mk1": 80, "shield_scrap_mk1": 110, "rattle_burst_scrap": 130, "bed": 30, "missile": 12, "kett_hive_swarm_launcher": 300, "kett_chitin_thrower": 150, "kett_drone_picket": 290, "kett_hive_battery": 330, "kett_nest_reactor": 150, "kett_brood_hold": 100},
 	"recruit": {"kett": 9, "gauntling": 1, "human": 1},
 	"enemies": "rustfangs",
 	"hazards": ["gas_cloud"],

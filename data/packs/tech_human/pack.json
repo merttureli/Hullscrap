@@ -5,5 +5,5 @@
   "requires": [
     "engines_1"
   ],
-  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons. Sold at human_core (data/regions/human_core.json, stock)."
+  "notes": "Racial tech (docs/waves/racial_tech_1.md): 3 ship weapons, 3 components (Reactor Plus, Comms Array, Crew Quarters Deluxe). Sold at human_core (data/regions/human_core.json, stock)."
 }
