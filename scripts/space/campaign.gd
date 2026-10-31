@@ -28,6 +28,7 @@ const Tide = preload("res://scripts/space/tide.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Radar = preload("res://scripts/space/radar.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -789,8 +790,9 @@ func tier() -> int:
 	return 2 if jumps >= int(d["tier2_from"]) else 1
 
 
-## The design file for a `fight` effect: "tier" rolls from the table of the node's kind (a pirate node
-## with two payments missed sends the rammer while Ma's clock runs), anything else is a design id in data/ships.
+## The design for a `fight` effect: "tier" rolls from the table of the node's kind (a pirate node with two payments
+## missed sends the rammer while Ma's clock runs); an entry is a design file or a generated ship ("gen:...", gen_spec).
+## Anything else is a design id in data/ships.
 func fight_path(value: String, node_type: String) -> String:
 	if value != "tier":
 		return value if value.begins_with("res://") else "res://data/ships/%s.json" % value
@@ -800,7 +802,18 @@ func fight_path(value: String, node_type: String) -> String:
 	elif node_type == "pirate" and misses() >= 2 and debt_running():
 		kind = "rammer"
 	var table: Array = cfg["enemies"][kind][str(tier())]
-	return str(table[rng.randi() % table.size()])
+	var pick := str(table[rng.randi() % table.size()])
+	return gen_spec(pick, kind) if Shipgen.is_spec(pick) else pick
+
+
+## A generated enemy (shipgen.gd) for a table entry "gen:<faction>[:ram]"; a bare "gen:" takes the faction the current
+## region meets in a fight of `kind` (Shipgen.faction_for). The budget is the tier's, the jumps', the region's danger and the difficulty's
+## (docs/CONTENT.md 14), the size class follows from it. Returns the spec string Session.load_ship() reads.
+func gen_spec(entry: String, kind: String) -> String:
+	var p := entry.trim_prefix(Shipgen.PREFIX).split(":")
+	var faction := p[0] if p[0] != "" else Shipgen.faction_for(region_data, kind)
+	var budget := Shipgen.budget_for(tier(), jumps, Shipgen.danger_of(region_data), str(cfg.get("difficulty", "normal")))
+	return Shipgen.spec(faction, Shipgen.pick_size(budget, rng), rng.randi(), budget, p.has("ram"))
 
 
 ## The fight is over. `res` is {state, hull, hull_max, enemy (its Ship)}, plus `offer` ({item: count}) when

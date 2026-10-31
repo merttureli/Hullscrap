@@ -285,14 +285,9 @@ func test_no_hollow_event_falls_back_to_a_fight() -> void:
 
 func test_hollow_places_send_ghost_ships_and_have_no_trade() -> void:
 	var c := Campaign.new(3)
-	var ghosts: Array = []
 	for t in ["1", "2", "3"]:
-		for p in c.cfg["enemies"]["hollow"][t]:
-			ghosts.append(p)
-	check(not ghosts.is_empty() and ghosts.all(func(p): return FileAccess.file_exists(p)), "the hollow table points at designs that exist")
-	check(ghosts.has("res://data/ships/pirate_raider.json") and ghosts.has("res://data/ships/rustfang_rammer.json"), "the raider and the rammer for now")
-	var table: Array = c.cfg["enemies"]["hollow"]["1"]
-	check(table.has(c.fight_path("tier", "hollow")), "fight_path(tier, hollow) rolls the hollow table")
+		eq(c.cfg["enemies"]["hollow"][t], ["gen:hollow"], "the hollow table builds ghost ships (shipgen's hollow faction), tier " + t)
+	check(c.fight_path("tier", "hollow").begins_with("gen:hollow:"), "fight_path(tier, hollow) rolls a generated ghost")
 	var other := ""
 	for n in c.drift.nodes:
 		if n["type"] == "pirate":
@@ -300,9 +295,9 @@ func test_hollow_places_send_ghost_ships_and_have_no_trade() -> void:
 			break
 	c.current = other
 	c.tide.steps = 0
-	check(c.cfg["enemies"]["pirate"]["1"].has(c.fight_path("tier", "pirate")), "a free place sends its own")
+	check(not c.fight_path("tier", "pirate").begins_with("gen:hollow:"), "a free place sends its own")
 	c.tide.steps = 40
-	check(table.has(c.fight_path("tier", "pirate")), "a Hollow place sends ghosts whatever it was")
+	check(c.fight_path("tier", "pirate").begins_with("gen:hollow:"), "a Hollow place sends ghosts whatever it was")
 	var trader := ""
 	for seed_value in 60:
 		var d := Campaign.new(seed_value)

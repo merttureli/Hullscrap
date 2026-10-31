@@ -17,7 +17,7 @@ const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
-const HullOutline = preload("res://tests/hull_outline.gd")
+const HullOutline = preload("res://scripts/ship/hull_outline.gd")
 
 const GRID := Vector2i(63, 63)
 const MARGIN := 2
