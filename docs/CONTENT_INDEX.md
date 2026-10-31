@@ -261,7 +261,7 @@ By family, line and tier:
 | starter_courier | Courier | 9 | 248 | core |
 | starter_prism | Prism | 10 | 252 | core |
 | starter_rustbucket | Rustbucket | 10 | 296 | core |
-| basalt_deepcut | Deepcut | 8 | 322 | starters_2 |
+| basalt_deepcut | Deepcut | 8 | 354 | starters_2 |
 | basalt_long_quiet | Long Quiet | 9 | 306 | starters_2 |
 | concord_frigate | Concord Frigate Resolve | 9 | 482 | starters_2 |
 | door_prize | Door Prize | 9 | 274 | starters_2 |
@@ -281,9 +281,9 @@ By family, line and tier:
 | kett_picket_nest | Picket Nest | 9 | 302 | starters_2 |
 | kettle_tug | Ma's Kettle-class Tug | 10 | 348 | starters_2 |
 | lumen_skiff | Lumen Skiff Afterimage | 10 | 316 | starters_2 |
-| mire_geyser_season | Geyser Season | 9 | 300 | starters_2 |
+| mire_geyser_season | Geyser Season | 9 | 318 | starters_2 |
 | mire_wet_watch | Wet Watch | 9 | 318 | starters_2 |
-| patience_sister | CS-002 Forbearance | 8 | 302 | starters_2 |
+| patience_sister | CS-002 Forbearance | 8 | 308 | starters_2 |
 | prismatic_flat_note | Flat Note | 10 | 356 | starters_2 |
 | prismatic_tuning_bell | Tuning Bell | 10 | 322 | starters_2 |
 | sporeling_first_bloom | First Bloom | 8 | 294 | starters_2 |

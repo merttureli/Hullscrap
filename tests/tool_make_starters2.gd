@@ -241,9 +241,9 @@ func _patience_sister() -> Dictionary:
 		"file": "patience_sister", "name": "CS-002 Forbearance",
 		"hangar": {"group": "Concord", "layout": "C", "unlock": "ship_patience_sister"},
 		"crew": _crew("human", ["Teodor"]),
-		"blurb": "The Patience's little sister, never launched: a flagship's frame and a skeleton built in it. One engine, one pulse gun, a skeleton crew and military circuit boards in the hold. A hard start with room to grow.",
+		"blurb": "The Patience's little sister, never launched: a flagship's bare ribs and a skeleton built in them. One engine, one pulse gun, a skeleton crew and military circuit boards in the hold. A hard start with room to grow.",
 		"frame": _sym(24, [[0, 8], [8, 8], [16, 16], [20, 16], [28, 24], [44, 24], [52, 16], [58, 16]]),
-		"outline": _sym(CX, [[0, 4], [4, 6], [8, 6], [8, 8], [14, 8], [16, 6], [22, 6], [23, 5]]),
+		"outline": _sym(CX, [[0, 4], [4, 6], [7, 6], [7, 9], [9, 9], [9, 6], [13, 6], [13, 9], [15, 9], [15, 6], [19, 6], [19, 9], [21, 9], [21, 6], [22, 6], [23, 5]]),
 		"plate": "titanium_alloy",
 		"cargo": {"scrap": 500, "copper": 100, "titanium": 60, "polymer": 40, "military_circuit": 4, "shield_mk1": 1, "engine_mk1": 1, "credits": 300, "fuel": 6},
 	}))
@@ -297,7 +297,7 @@ func _basalt_deepcut() -> Dictionary:
 	var k := _spine({"gun": _p("basalt_magma_spitter", "pulse_mk2"), "reactor": _p("basalt_vacuum_forge", "reactor_mk2"), "o2": "oxygen_gen", "engines": ["engine_mk2"]})
 	return _race_ship("basalt_deepcut", "Deepcut", "Basalt", "A", _crew("basalt", ["Slate", "Tuff", "Flint"]),
 		"A quarry block with an engine: heavy plating, a Vacuum Forge that runs best with no air in the room and a Magma Spitter that keeps eating. The crew do not mind the vacuum. The Soldier does.",
-		k, _sym(CX, [[0, 4], [4, 8], [19, 8], [20, 7], [21, 6]]),
+		k, _sym(CX, [[0, 4], [4, 8], [8, 8], [8, 10], [16, 10], [16, 8], [19, 8], [21, 6]]),
 		_sym(22, [[0, 6], [16, 22], [36, 22], [52, 6]]), "heavy_armor",
 		_cargo({"titanium": 40, "silicon": 20}, ["shield_mk1", _p("basalt_stonehide_bay", "inertial_dampener")]),
 		{"backed": func(c): return c.y <= 1, "thick": func(c): return c.y <= 3})
@@ -386,12 +386,12 @@ func _mire_wet_watch() -> Dictionary:
 		_cargo({"polymer": 60}, [_p("mire_rain_shield", "shield_mk1"), _p("mire_wetwell_reactor", "reactor_mk1"), _p("mire_spray_deck", "inertial_dampener")]))
 
 
-## Mire B. A wet siege: twin steam stacks on the flanks, a Bog Mortar that eats walls and a Mist Projector in the hold.
+## Mire B. A wet siege: twin boilers on the shoulders, a Bog Mortar that eats walls and a Mist Projector in the hold.
 func _mire_geyser_season() -> Dictionary:
 	var k := _spine({"gun": _p("mire_bog_mortar", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2", "engine_mk2"]})
 	return _race_ship("mire_geyser_season", "Geyser Season", "Mire", "B", _crew("mire", ["Mool", "Plom"]),
-		"A siege ship with a steam stack on each flank: a Bog Mortar whose slurry eats the wall it lands on and a Mist Projector in the hold to slow what is left. Wet, loud and quite safe from fire.",
-		k, _sym(CX, [[0, 4], [4, 6], [8, 6], [8, 8], [10, 8], [10, 9], [16, 9], [16, 8], [18, 8], [18, 6], [20, 6], [21, 5]]),
+		"A siege ship with a boiler on each shoulder: a Bog Mortar whose slurry eats the wall it lands on and a Mist Projector in the hold to slow what is left. Wet, loud and quite safe from fire.",
+		k, _sym(CX, [["arc", 4, 2, 270, 360], [4, 6], ["arc", 7, 6, 270, 360], ["arc", 7, 13, 0, 90], [15, 6], [20, 6], [21, 5]]),
 		_sym(20, [[0, 6], [10, 16], [14, 16], [18, 20], [30, 20], [34, 16], [38, 16], [48, 6]]), "titanium_alloy",
 		_cargo({"polymer": 50}, [_p("mire_rain_shield", "shield_mk1"), _p("mire_mist_projector", "laser_turret_mk1")]))
 
