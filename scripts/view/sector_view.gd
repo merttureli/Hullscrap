@@ -28,6 +28,8 @@ const FLASH_S := 0.45  ## seconds the jump flash plays on arrival
 const SAY_S := 4.0  ## seconds a message stays
 const ICON := 32.0  ## screen px of a marker icon (the 16 px art at 2x)
 const EDGE := 46.0  ## screen px the edge markers keep from the border
+const TOP := 128.0  ## screen px down to the sector's lines (under the HUD text at the top left)
+const BOTTOM := 96.0  ## screen px the edge markers keep from the bottom (the salvage and crew lines)
 const CYAN := Color("#43e6ff")
 const AMBER := Color("#e1a136")
 const RED := Color("#e0413b")
@@ -436,7 +438,11 @@ func _draw() -> void:
 		return
 	var px := _px()
 	for ct in Radar.contacts(_sector, _ship()):
-		_draw_poi(ct["poi"], px)
+		if ct["known_type"] == Radar.CONTACT:  # not identified: a blip, not its shape
+			draw_circle(ct["poi"]["pos"], 6.0 * px, Color(CYAN, 0.6))
+			draw_arc(ct["poi"]["pos"], (14.0 + 6.0 * sin(_clock * 3.0)) * px, 0.0, TAU, 24, Color(CYAN, 0.4), 1.5 * px)
+		else:
+			_draw_poi(ct["poi"], px)
 	var to = helm.target(_sector)
 	if to != null:
 		var from: Vector2 = helm.flight.pos
@@ -568,7 +574,7 @@ func _draw_hud() -> void:
 	if not _fighting():
 		var xf := get_viewport().get_canvas_transform()
 		var centre: Vector2 = xf * helm.flight.pos
-		var ring := minf(vp.x, vp.y) * 0.42
+		var ring := maxf(minf(vp.x, vp.y) * 0.42, helm.radius * get_viewport().get_canvas_transform().get_scale().x + 30.0)
 		_draw_ring(centre, ring)
 		var contacts := Radar.contacts(_sector, _ship())
 		for ct in contacts:
@@ -579,7 +585,7 @@ func _draw_hud() -> void:
 		lines.append([sl, RED if campaign().jump_status()["blocked"] else AMBER, 16])
 	if message != "" and _clock - _said < SAY_S:
 		lines.append([message, TEXT, 14])
-	var y := 62.0 if _fighting() else 70.0
+	var y := 62.0 if _fighting() else TOP
 	var w := 0.0
 	for l in lines:
 		w = maxf(w, font.get_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, l[2]).x)
@@ -630,7 +636,7 @@ func _draw_marker(ct: Dictionary, xf: Transform2D, centre: Vector2, vp: Vector2)
 	var font := ThemeDB.fallback_font
 	var poi: Dictionary = ct["poi"]
 	var at: Vector2 = xf * poi["pos"]
-	var inner := Rect2(Vector2(EDGE, EDGE + 40.0), vp - Vector2(EDGE * 2.0, EDGE * 2.0 + 80.0))
+	var inner := Rect2(Vector2(EDGE, EDGE + 40.0), vp - Vector2(EDGE * 2.0, EDGE + 40.0 + BOTTOM))
 	if not inner.has_point(at):
 		at = _to_edge(centre, at, inner)
 	var done: bool = poi["state"] == Sector.DONE and not bool(Sector.config()["poi_types"].get(poi["type"], {}).get("repeat", false))
