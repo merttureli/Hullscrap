@@ -22,7 +22,7 @@ def flame(im, gl, x, y, L, f, col=('H', 'y', 'o'), r=2):
     """an exhaust trailing LEFT from (x, y): L px long, flickering with the frame."""
     ln = L + (f % 2) * 2 - (1 if f == 3 else 0)
     for k in range(ln):
-        w = max(0, r - k * r // max(1, ln - 1)) if False else int(round(r * (1 - k / float(ln))))
+        w = int(round(r * (1 - k / float(ln))))
         for dy in range(-w, w + 1):
             c = col[0] if (abs(dy) == 0 and k < ln * 0.4) else col[1] if abs(dy) <= max(0, w - 1) or k < ln * 0.5 else col[2]
             im.put(x - k, y + dy, c)
@@ -133,13 +133,13 @@ def lumen(im, gl, x, y, L, f, seed=1):
     cells = poly_cells(P)
     top = poly_cells([P[0], P[1], P[2], (x0 + L * 0.34, y)])
     bot = poly_cells([P[0], (x0 + L * 0.34, y), P[2], P[3]])
-    im.fill(top, 'J'); im.fill(bot, 'I')
+    im.fill(top, 'C'); im.fill(bot, 'B')
     mid = poly_cells([P[0], P[1], (x0 + L * 0.34, y)])
-    im.fill(mid, 'j')
+    im.fill(mid, 'i')
     im.outline(cells, 'N')
-    for (a, b) in zip(P, P[1:] + P[:1]): im.line(a[0], a[1], b[0], b[1], 'c')
-    im.line(P[0][0], P[0][1], P[2][0], P[2][1], 'C')
-    im.line(P[1][0], P[1][1], x0 + L * 0.34, y, 'c')
+    for (a, b) in zip(P, P[1:] + P[:1]): im.line(a[0], a[1], b[0], b[1], 'z' if a[1] <= y and b[1] <= y else 'c')
+    im.line(P[0][0], P[0][1], P[2][0], P[2][1], 'J')
+    im.line(P[1][0], P[1][1], x0 + L * 0.34, y, 'z')
     im.put(int(x0 + L * 0.34), y, 'H'); im.put(int(x0 + L * 0.34) - 1, y, 'z')
     gl.blob(x0 + L * 0.34, y, L * 0.7, 'c', 70 if f % 2 == 0 else 55, 1.7, squash=0.8)
     for k in range(3):                                                # a trail of shed crystal dust

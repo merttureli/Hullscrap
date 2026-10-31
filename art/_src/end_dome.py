@@ -202,7 +202,6 @@ def cottage(im, gl, x, y, w, h, wall='s', roof='T', seed=1, lit=True, f=0, wrong
         c = 'Y' if t < 0.25 else wall if t < 0.7 else 'Q'
         if j >= y - 2: c = 'v' if t < 0.7 else 'q'
         im.put(i, j, c)
-    im.vline(x, y - h, h, 'K') if False else None
     # roof: a shingled dome that overhangs
     rh = max(4, int(w * 0.45))
     rc = ellipse_cells(x + w / 2.0, y - h, w / 2.0 + 2, rh) - rect_cells(x - 4, y - h + 1, w + 10, rh + 4)
@@ -220,7 +219,6 @@ def cottage(im, gl, x, y, w, h, wall='s', roof='T', seed=1, lit=True, f=0, wrong
             if lit: gl.blob(wx + 1, y - h + 5, 7, 'i' if wrong else 'y', 95, 2.0)
     elif lit:
         im.rect(x + 2, y - h + 3, 2, 2, 'z' if wrong else 'y'); gl.blob(x + 3, y - h + 4, 6, 'i' if wrong else 'y', 85, 2.0)
-    im.outline(body, 'K', empty_only=False) if False else None
     # chimney with a thread of smoke
     cx = x + w - 4
     im.rect(cx, y - h - rh - 1, 2, 3, 'W'); im.put(cx, y - h - rh - 1, 'M')
@@ -309,7 +307,7 @@ def ship(im, gl, x, y, f, wrong=False):
     for (i, j) in hull:
         t = (j - (y - 29)) / 22.0
         u = (i - x) / 65.0
-        v = 0.0 + t * 0.82 + (u * 0.12 if False else 0)
+        v = t * 0.82
         im.put(i, j, pick(1 - v * 1.05 + (0.08 if u < 0.3 else 0), ['E', 'W', 'S', 'M', 'L'], i, j, 2.6))
     im.outline(hull, 'K')
     # panel seams
@@ -424,20 +422,6 @@ def flowers(im, f, seed, region, n=30):
         if r.below(2): im.put(x - 1 + sw, y, lighten(c)); im.put(x + 1 + sw, y, c)
         if r.below(3) == 0: im.put(x + sw, y - 1, c)
 
-def fern(im, x, y, size, side, seed, f=0):
-    """an arching frond (foreground), leaflets down both sides; side -1 curls left, 1 right."""
-    r = Lcg(seed)
-    pts = []
-    for t in range(size):
-        pts.append((x + side * (t * 0.9), y - t * 0.8 + (t * t) / (size * 1.2)))
-    for k, (px_, py_) in enumerate(pts):
-        im.put(int(px_), int(py_), 'O')
-        w = max(1, int((size - k) * 0.28)) if k > 3 else 0
-        for d in range(1, w + 1):
-            im.put(int(px_ + side * d * 0.3), int(py_ - d * 0.9), 'R' if d < w else 'U')
-            im.put(int(px_ - side * d * 0.2), int(py_ + d * 0.9), 'O' if d < w else 'R')
-        if k > 3 and k % 2 == 0: im.put(int(px_) + side, int(py_) - 1, 'g')
-
 def ivy(im, gl, f, wrong=False):
     """strands of ivy climbing the base ring and planter vines hanging from the first ring."""
     r = Lcg(404)
@@ -463,14 +447,6 @@ def ivy(im, gl, f, wrong=False):
             im.put(px_ + (1 if j % 4 == 2 else 0), py_ + j, 'O' if j % 3 else 'R')
             if j % 2 == 1: im.put(px_ - 1, py_ + j, 'R'); im.put(px_ + 1, py_ + j, 'U')
         if (x // 17) % 2 == 0: im.put(px_, py_ + ln, ['m', 'y', 'z'][(x // 17) % 3])
-
-def glints(im, f):
-    r = Lcg(808)
-    for k in range(26):
-        x, y = r.below(300), r.below(70)
-        n = r.rng(3, 6)
-        for t in range(n):
-            if im.get(x + t, y + t) in ('N', 'I', 'J', 'Z'): im.put(x + t, y + t, 'j' if t < n - 1 else 'x')
 
 def leaf(im, cx, cy, ln, wd, ang, ramp, f=0):
     """a broad leaf lying along `ang` degrees from (cx, cy) (its base): rhombus outline, shaded, with a lighter midrib."""

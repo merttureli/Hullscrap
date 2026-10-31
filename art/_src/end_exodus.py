@@ -20,6 +20,9 @@ def halcyon(im, gl, f):
     # the hull: a long slab with a tapered bow, rim-lit on top, warm window rows
     hull = poly_cells([(176, 122), (190, 100), (204, 90), (330, 90), (330, 156), (300, 160), (220, 158), (200, 150), (186, 138)])
     body(im, hull, ['E', 'W', 'S', 'M', 'L'], 90, 158, sharp=2.4, tl=0.25, x0=176, x1=330)
+    for (x, y) in hull:
+        if y > 140 and (x + y) % 2 == 0: im.put(x, y, darken(im.get(x, y)))
+        if y > 148: im.put(x, y, darken(im.get(x, y)))
     # seams: big panels, a lower belt, bolt rows
     for sx in range(196, 330, 17): im.vline(sx, 92, 64, 'E')
     for sy in (102, 126, 146): im.hline(180, sy, 150, 'E')
@@ -34,8 +37,6 @@ def halcyon(im, gl, f):
     # structural frames (heavier ribs every third panel), a pipe bundle low on the hull, rust streaks under the patches
     for sx in (213, 281):
         im.vline(sx - 1, 92, 64, 'M'); im.vline(sx, 92, 64, 'S'); im.vline(sx + 1, 92, 64, 'E'); im.vline(sx + 2, 92, 64, 'K')
-    for k in range(4):
-        im.hline(184, 153 + k % 2 - (1 if k == 3 else 0), 146, ['W', 'S', 'M', 'E'][k]) if False else None
     for i, c in enumerate(['E', 'S', 'M']): im.hline(190, 152 + i, 140, c)
     for (x, y) in ((206, 121), (292, 145), (241, 145), (309, 118)):
         for j in range(5 + x % 4): 
@@ -144,6 +145,18 @@ def bounce(im, cx, cy, r, letters='SMLH'):
             d = math.hypot((x - cx) / 1.6, y - cy) / r
             if d < 1 and (1 - d) * 0.75 > bay(x, y): im.put(x, y, 'Y' if c in 'LH' else 'Q' if c == 'M' else 'q')
 
+def warm_rim(im, x_max=215):
+    """the warm light of the dome falls on every surface of the convoy that faces Halcyon (their right-hand edges)."""
+    sky_ = ('N', 'I', 'J', 'Z', 'V', 'd', 'P', 'w', 'm', '.')
+    marks = []
+    for y in range(30, 180):
+        for x in range(0, x_max):
+            c = im.get(x, y)
+            if c in ('S', 'M', 'L', 'H', 'W', 'u', 'T', 'Q', 'i', 'C', 'z') and im.get(x + 1, y) in sky_ and im.get(x + 1, y) is not None:
+                marks.append((x, y, c))
+    for (x, y, c) in marks:
+        if (x * 7 + y * 3) % 3 != 0 or x > 150 + 40: im.put(x, y, 'Y' if c in ('M', 'L', 'H', 'S', 'i', 'z') else 'T')
+
 def convoy(im, gl, f):
     for (x, y, L, c) in ((22, 60, 12, ('S', 'M', 'L')), (52, 40, 10, ('S', 'M', 'L')), (140, 56, 11, ('S', 'M', 'L')), (196, 42, 10, ('M', 'L', 'H')), (30, 84, 9, ('S', 'M', 'L'))):
         dart(im, gl, x, y + (1 if f % 2 and x % 4 == 0 else 0), L, f, x)
@@ -162,5 +175,6 @@ def render(f=0):
     bounce(im, DCX, 92, 16)
     arm(im, gl, f)
     convoy(im, gl, f)
+    warm_rim(im)
     motes(im, gl, f, 91, 26, (0, 20, 319, 170), ('z', 'L', 'M'), 1, 0)
     return im, gl

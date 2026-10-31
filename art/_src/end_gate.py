@@ -144,7 +144,6 @@ def girder(im, x0, y0, x1, y1, c1='M', c2='L', c3='W'):
     for (x, y) in line_cells(x0, y0, x1, y1):
         im.put(x, y, c2)
         im.put(int(round(x + vx * 3)), int(round(y + vy * 3)), c3)
-        im.put(int(round(x + vx * 1.5 + 1)), int(round(y + vy * 1.5 + 1)), 'D') if False else None
     for k in range(0, n, 4):
         a = (x0 + ux * k, y0 + uy * k)
         b = (x0 + ux * (k + 2) + vx * 3, y0 + uy * (k + 2) + vy * 3)

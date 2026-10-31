@@ -12,19 +12,6 @@ def fl(xw, z): return VX + xw * K / z, VY + CAMH * K / z          # floor point 
 def room(im, gl, f):
     # ceiling, walls, floor as flat planes in perspective
     im.rect(0, 0, 320, 180, 'N')
-    # ceiling (dark, with ribs that converge on the window)
-    for x in range(0, 321, 16):
-        im.line(x, 0, VX + (x - VX) * 0.45, 22, 'I')
-    for k in range(1, 8):
-        yy = int(22 * (1 - 0.62 ** k) / (1 - 0.62) * 0.4)
-    # side walls: panels
-    for sg in (-1, 1):
-        for k in range(0, 9):
-            t0, t1 = 0.62 ** k, 0.62 ** (k + 1)
-            xa, xb = VX + sg * 160 * (0.3 + 0.7 * t0), VX + sg * 160 * (0.3 + 0.7 * t1)
-            ta, tb = 4 + (88 - 4) * (1 - t0) * 0.0, 0
-    # window frame wall (the far wall): a dark slab with a wide curved window
-    wall = poly_cells([(0, 0), (320, 0), (320, 180), (0, 180)])
     # floor
     horizon = VY + 10
     for y in range(horizon, 180):
@@ -67,7 +54,6 @@ def window(im, gl, f):
     # a wide curved window; through it, the tunnel of the gate and the pale light at its end
     x0, x1, y0, y1 = 30, 290, 20, 98
     win = ellipse_cells(160, 98, 130, 80) & rect_cells(x0, y0, x1 - x0, y1 - y0)
-    win = {(x, y) for (x, y) in win}
     im.fill(win, 'N')
     cx, cy = 160, 60
     # the rings of the gate receding to the end of the tunnel (each ring is a dark steel hoop with a rim light on its upper-left)
@@ -113,15 +99,11 @@ def window(im, gl, f):
     edge = grow(win, 2) - win
     for (x, y) in edge: im.put(x, y, 'K')
     for (x, y) in grow(win, 1) - win: im.put(x, y, 'W' if (x < 160 and y < 60) else 'E')
-    for ang in (-62, -34, -12, 12, 34, 62):
-        for t in range(10, 140):
-            x = cx + t * math.cos(math.radians(90 + ang)) * 1.0; y = cy - t * math.sin(math.radians(90 + ang)) * 0.0
-        # vertical mullions at fixed x, slightly converging
+    # vertical mullions
     for mx in (70, 115, 205, 250):
         for y in range(y0 + 2, y1):
-            xx = int(mx + (160 - mx) * ((y1 - y) / float(y1 - y0)) * 0.0)
-            if (xx, y) in win:
-                im.put(xx, y, 'D'); im.put(xx + 1, y, 'E'); im.put(xx - 1, y, 'K')
+            if (mx, y) in win:
+                im.put(mx, y, 'D'); im.put(mx + 1, y, 'E'); im.put(mx - 1, y, 'K')
     # the sill
     im.hline(x0 + 6, y1 - 1, x1 - x0 - 12, 'M'); im.hline(x0 + 8, y1, x1 - x0 - 16, 'S'); im.hline(x0 + 10, y1 + 1, x1 - x0 - 20, 'E')
 
@@ -212,9 +194,6 @@ def render(f=0):
         x, y = int(round(x)), int(round(y))
         if 0 <= x < 320 and 0 <= y < 180 and y > VY + 12 and im.get(x, y) in ('D', 'E', 'W', 'N', 'S'):
             im.put(x, y, 'B' if (a // 6) % 2 == 0 else 'J')
-    for i in range(11):
-        ph = math.radians(-165 + i * 15)
-        x, y = fl(6.6 * math.cos(ph + math.pi), 5.0 - 2.9 * math.sin(ph + math.pi) * -1 + 0.4)
     # the horseshoe: eleven chairs, far to near, each turned a little
     chairs = []
     for i in range(11):

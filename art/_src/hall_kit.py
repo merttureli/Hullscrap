@@ -262,7 +262,7 @@ def ornaments():
     # pips: a lit diamond and an empty one (8 x 8) for ratings and counters; a lit star (10 x 10)
     def pip(s, on):
         dia = poly_cells([(4, 0), (8, 4), (4, 8), (0, 4)])
-        s.fill(dia, i1 if on else D); s.outline(dia, K) if False else None
+        s.fill(dia, i1 if on else D)
         for (x, y) in dia:
             if on and x + y < 7: s.put(x, y, i2)
             if not on and (x + y) < 6: s.put(x, y, E)
@@ -292,7 +292,7 @@ def ornaments():
             rr = 14 if k % 2 == 0 else 11
             pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a)))
         star = poly_cells(pts)
-        s.shade(star, [K, u_, i0, i1, i2], cx - 3, cy - 3, 15, 15, sharp=1.5) if False else s.fill(star, i1)
+        s.fill(star, i1)
         for (x, y) in star:
             if (x - cx) + (y - cy) < -4: s.put(x, y, i2)
             elif (x - cx) + (y - cy) > 6: s.put(x, y, i0)
@@ -306,8 +306,6 @@ def ornaments():
     put('seal', 0, 20, seal, 32, 40)
     # banner pieces behind the ending title: left cap, a tiling middle (8 x 20), right cap; steel with an amber edge
     def b_mid(s):
-        for y in range(20):
-            s.put(0, y, K) if False else None
         for x in range(8):
             s.put(x, 3, K); s.put(x, 4, i2); s.put(x, 5, i1)
             for y in range(6, 14): s.put(x, y, S if y < 8 else W if y < 12 else E)
@@ -325,8 +323,6 @@ def ornaments():
         p(3, 10, i2); p(4, 10, 'H'); p(6, 10, i1)
     put('banner_l', 40, 20, b_cap, 16, 20); put('banner_mid', 60, 20, b_mid, 8, 20); put('banner_r', 72, 20, lambda s: b_cap(s, True), 16, 20)
     return A, regs
-
-u_ = 'u'
 
 def export(art_dir):
     ui = art_dir + '/ui'

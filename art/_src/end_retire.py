@@ -272,9 +272,7 @@ def foreground(im, gl, f):
     gl.blob(mx - 2, my - 6, 20, 'y', 40, 1.5, squash=0.7)
     # the helmet on its hook: a dome, a dark visor with the last of the sun in it, a strap
     hx, hy = 100, y - 44
-    im.vline(hx, y - 4, -(hy - 4 - y + 4), 'W') if False else None
     im.rect(hx - 2, hy - 10, 4, 12, 'E'); im.vline(hx - 2, hy - 10, 12, 'S'); im.rect(hx - 1, hy - 14, 3, 5, 'W')
-    im.hline(hx - 6, hy - 11, 18, 'S') if False else None
     im.line(hx + 1, hy + 2, hx + 9, hy + 2, 'W'); im.line(hx + 9, hy + 2, hx + 9, hy + 6, 'W')                  # the hook arm
     hx2, hy2 = hx + 9, hy + 6
     dome = ellipse_cells(hx2, hy2 + 10, 11, 11)
