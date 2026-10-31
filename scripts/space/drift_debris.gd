@@ -6,7 +6,10 @@ extends RefCounted
 ## one that touches the mouth lands in ship.inventory (refused when the hold cannot take it: it bounces). A
 ## piece that touches any other solid cell (a tile, an outside half) bounces off and keeps drifting.
 ## A sector (sector.gd) can set the current and the density (for_sector); with none, the numbers of debris.json run.
-## Positions are world px, the same space the build view draws the ship in (ship.world_pos is the grid centre).
+## Positions are world px. On the build screen that is the space the build view draws the ship in (ship.world_pos is
+## the grid centre); in a sector the pieces live in sector px and `frame` says where the ship's cells are (its place and
+## heading, helm.gd frame()) and `frame_vel` how fast it moves: pieces then spawn upstream of the flow past the ship,
+## and the mouths and the hull are tested in the ship's own frame.
 ## Randomness comes from one RandomNumberGenerator seeded by the caller (the ship's rng_seed): same seed, same run.
 
 const Content = preload("res://scripts/data/content.gd")
@@ -31,6 +34,8 @@ var time := 0.0  ## seconds of drifting; the current's wobble follows it
 var rng := RandomNumberGenerator.new()
 var view_centre := Vector2.ZERO  ## world point at the middle of the screen (the view sets it)
 var view_half := Vector2(1600.0, 900.0)  ## half the visible world size (the view sets it from the viewport and zoom)
+var frame := Transform2D.IDENTITY  ## the build view's px (the ship's cells) in the pieces' space: the identity on the build screen
+var frame_vel := Vector2.ZERO  ## the ship's velocity in the pieces' space, px/s
 var _by_id := {}
 var _total_weight := 0.0
 var _spawn_in := 0.0
@@ -78,6 +83,15 @@ func current_vel() -> Vector2:
 
 
 ## Where the current comes from and goes to, in words ("south-east"): the way it drifts, without the wobble.
+## The way the pieces cross the view: the current less the ship's own velocity (the current's own direction while the
+## ship is still, or nearly as fast as the current).
+func flow_dir() -> Vector2:
+	if frame_vel == Vector2.ZERO:
+		return current_dir()
+	var f := current_vel() - frame_vel
+	return f.normalized() if f.length() > 1.0 else current_dir()
+
+
 func compass() -> String:
 	return COMPASS[posmod(roundi(float(cfg["current"]["angle"]) / 45.0), 8)]
 
@@ -141,9 +155,9 @@ func _sub(ship, mouths: Array, h: float) -> void:
 		pulling[uid] -= h
 		if pulling[uid] <= 0.0:
 			pulling.erase(uid)
-	var dir := current_dir()
+	var dir := flow_dir()
 	var lane := _lane(ship)
-	var limit := {"vel": dir * current_speed(), "along": _reach(lane), "across": _cross_reach(lane), "dir": dir}
+	var limit := {"vel": current_dir() * current_speed(), "along": _reach(lane), "across": _cross_reach(lane), "dir": dir, "inv": frame.affine_inverse()}
 	var i := 0
 	while i < pieces.size():
 		if _move(ship, pieces[i], mouths, limit, h):
@@ -155,24 +169,26 @@ func _sub(ship, mouths: Array, h: float) -> void:
 ## Move one piece by `h`; `now`: the current's vel and dir and the despawn distances (along, across). False when it is gone.
 func _move(ship, p: Dictionary, mouths: Array, now: Dictionary, h: float) -> bool:
 	var r: float = p["r"]
+	var inv: Transform2D = now["inv"]
 	p["age"] += h
 	p["vel"] += (now["vel"] - p["vel"]) * minf(1.0, float(cfg["relax"]) * h)
 	if not p["no_pull"]:
+		var lp: Vector2 = inv * p["pos"]
 		var best := {}
 		var best_d := INF
 		for m in mouths:
-			var d := _dist_to_rect(p["pos"], m["rect"])
+			var d := _dist_to_rect(lp, m["rect"])
 			if d - r <= float(m["pull"]) and d < best_d:
 				best = m
 				best_d = d
 		if not best.is_empty():
-			var to: Vector2 = best["rect"].get_center() - p["pos"]
-			p["vel"] = p["vel"].lerp(to.normalized() * float(cfg["pull"]["speed"]), 1.0 - exp(-float(cfg["pull"]["ease"]) * h))
+			var to: Vector2 = frame.basis_xform(best["rect"].get_center() - lp)
+			p["vel"] = p["vel"].lerp(frame_vel + to.normalized() * float(cfg["pull"]["speed"]), 1.0 - exp(-float(cfg["pull"]["ease"]) * h))
 			pulling[best["uid"]] = PULL_GLOW
 	p["pos"] += p["vel"] * h
 	p["angle"] += p["spin"] * h
 	for m in mouths:  # touching the mouth: into the hold
-		if _dist_to_rect(p["pos"], m["rect"]) > r * 0.6:
+		if _dist_to_rect(inv * p["pos"], m["rect"]) > r * 0.6:
 			continue
 		var t := type_of(p)
 		var gains := _gains(t)
@@ -181,8 +197,8 @@ func _move(ship, p: Dictionary, mouths: Array, now: Dictionary, h: float) -> boo
 			_note(m, t, gains)
 			return false
 		p["no_pull"] = true  # the hold is full: it bounces off the mouth like hull and is not drawn again
-		_hit_rect(p, m["rect"])
-	_hull(ship, p, mouths)
+		_hit_local(p, m["rect"], inv)
+	_hull(ship, p, mouths, inv)
 	var rel: Vector2 = p["pos"] - view_centre
 	var dir: Vector2 = now["dir"]
 	return p["age"] < float(cfg["spawn"]["max_age"]) and rel.dot(dir) <= now["along"] and absf(rel.dot(Vector2(-dir.y, dir.x))) <= now["across"]
@@ -196,7 +212,7 @@ func _spawn(ship, along := NAN) -> Dictionary:
 	if pieces.size() >= int(s["max_alive"]):
 		return {}
 	var lane := _lane(ship)
-	var dir := current_dir()
+	var dir := flow_dir()
 	var perp := Vector2(-dir.y, dir.x)
 	var t := _pick()
 	var half := minf(_cross_half(lane, perp) + float(s["lane_margin"]), float(s["lane_max"]))
@@ -223,7 +239,7 @@ func _pick() -> Dictionary:
 
 ## How far along the current (px from the view centre) pieces appear upstream and vanish downstream.
 func _reach(lane: Dictionary) -> float:
-	var dir := current_dir()
+	var dir := flow_dir()
 	var view := absf(dir.x) * view_half.x + absf(dir.y) * view_half.y
 	var ship: float = absf(dir.x) * lane["rect"].size.x * 0.5 + absf(dir.y) * lane["rect"].size.y * 0.5 + absf(dir.dot(lane["centre"] - view_centre)) + 200.0
 	return maxf(view, ship) + float(cfg["spawn"]["margin"])
@@ -231,7 +247,7 @@ func _reach(lane: Dictionary) -> float:
 
 ## How far sideways of the current a piece may stray from the view centre before it despawns.
 func _cross_reach(lane: Dictionary) -> float:
-	var dir := current_dir()
+	var dir := flow_dir()
 	var perp := Vector2(-dir.y, dir.x)
 	return maxf(absf(perp.x) * view_half.x + absf(perp.y) * view_half.y, _cross_half(lane, perp) + absf(perp.dot(lane["centre"] - view_centre))) + 2.0 * float(cfg["spawn"]["margin"])
 
@@ -240,7 +256,8 @@ func _cross_half(lane: Dictionary, perp: Vector2) -> float:
 	return (absf(perp.x) * lane["rect"].size.x + absf(perp.y) * lane["rect"].size.y) * 0.5
 
 
-## The ship's outline in world px: {rect, centre}. Looked at again every LANE_REFRESH seconds.
+## The ship's outline in world px (through `frame`, the box round it): {rect, centre}. Its cells are looked at again every
+## LANE_REFRESH seconds.
 func _lane(ship) -> Dictionary:
 	if time - _bounds_age >= LANE_REFRESH or _bounds_age > time:
 		_bounds_age = time
@@ -254,7 +271,8 @@ func _lane(ship) -> Dictionary:
 			_bounds = Rect2(ship.world_pos - Vector2(CELL, CELL), Vector2(CELL, CELL) * 2.0)
 		else:
 			_bounds = Rect2(o + Vector2(lo) * CELL, Vector2(hi - lo + Vector2i.ONE) * CELL)
-	return {"rect": _bounds, "centre": _bounds.get_center()}
+	var box: Rect2 = _bounds if frame == Transform2D.IDENTITY else frame * _bounds
+	return {"rect": box, "centre": box.get_center()}
 
 
 # --- intakes, collecting and bouncing ------------------------------------------------------------------
@@ -334,23 +352,25 @@ func _note(mouth: Dictionary, t: Dictionary, gains: Dictionary) -> void:
 	var text := "+%d%% O2" % roundi(float(t["effect"]["o2"]) * 100.0) if t.has("effect") else ""
 	for id in gains:
 		text = "+%d %s" % [gains[id], id]
-	events.append({"kind": "collect", "pos": mouth["rect"].get_center(), "text": text, "uid": mouth["uid"], "type": t["id"]})
+	events.append({"kind": "collect", "pos": frame * mouth["rect"].get_center(), "text": text, "uid": mouth["uid"], "type": t["id"]})
 	if events.size() > MAX_EVENTS:
 		events.pop_front()
 
 
 ## Bounce piece `p` off every solid cell it touches: a tile (wall, floor, door) or any outside half. The mouth of a
-## working intake is not solid (a piece that touches it is collected), unless the hold refused this piece.
-func _hull(ship, p: Dictionary, mouths: Array) -> void:
+## working intake is not solid (a piece that touches it is collected), unless the hold refused this piece. `inv` takes
+## the piece into the ship's frame.
+func _hull(ship, p: Dictionary, mouths: Array, inv: Transform2D) -> void:
 	var o := _origin(ship)
 	var r: float = p["r"]
-	var lo: Vector2 = ((p["pos"] - Vector2(r, r) - o) / CELL).floor()
-	var hi: Vector2 = ((p["pos"] + Vector2(r, r) - o) / CELL).floor()
+	var lp: Vector2 = inv * p["pos"]
+	var lo: Vector2 = ((lp - Vector2(r, r) - o) / CELL).floor()
+	var hi: Vector2 = ((lp + Vector2(r, r) - o) / CELL).floor()
 	for y in range(int(lo.y), int(hi.y) + 1):
 		for x in range(int(lo.x), int(hi.x) + 1):
 			var c := Vector2i(x, y)
 			if _solid(ship, c) and (p["no_pull"] or not _open_mouth(ship, c, mouths)):
-				_hit_rect(p, Rect2(o + Vector2(c) * CELL, Vector2(CELL, CELL)))
+				_hit_local(p, Rect2(o + Vector2(c) * CELL, Vector2(CELL, CELL)), inv)
 
 
 func _open_mouth(ship, c: Vector2i, mouths: Array) -> bool:
@@ -367,6 +387,7 @@ func _solid(ship, c: Vector2i) -> bool:
 
 ## Is a disc of radius `r` at world point `pos` touching a solid cell?
 func _blocked_at(ship, pos: Vector2, r: float) -> bool:
+	pos = frame.affine_inverse() * pos
 	var o := _origin(ship)
 	var lo := ((pos - Vector2(r, r) - o) / CELL).floor()
 	var hi := ((pos + Vector2(r, r) - o) / CELL).floor()
@@ -375,6 +396,21 @@ func _blocked_at(ship, pos: Vector2, r: float) -> bool:
 			if _solid(ship, Vector2i(x, y)):
 				return true
 	return false
+
+
+## _hit_rect() for `rect` in the ship's frame (`inv` takes a point there): the piece is moved into that frame, with its
+## speed relative to the ship, bounced, and put back.
+func _hit_local(p: Dictionary, rect: Rect2, inv: Transform2D) -> void:
+	var pos: Vector2 = p["pos"]
+	var vel: Vector2 = p["vel"]
+	p["pos"] = inv * pos
+	p["vel"] = inv.basis_xform(vel - frame_vel)
+	if _hit_rect(p, rect):
+		p["pos"] = frame * p["pos"]
+		p["vel"] = frame.basis_xform(p["vel"]) + frame_vel
+	else:
+		p["pos"] = pos
+		p["vel"] = vel
 
 
 ## Push piece `p` out of `rect` if it overlaps, and turn its speed if it was going in: part of it is kept

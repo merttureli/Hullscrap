@@ -59,11 +59,16 @@ static func spawn_rammer() -> Ship:
 
 
 ## Put `player` at the origin and `enemy` SPAWN_DISTANCE ahead of it (up), facing it. `seed_value`
-## seeds every roll of the fight and the pilot.
-func start(player: Ship, enemy: Ship, seed_value := 1) -> void:
+## seeds every roll of the fight and the pilot. `place` puts the fight somewhere else (a fight in a sector, in its px):
+## {player_pos, player_angle, player_vel, player_ang_vel, enemy_pos}; the enemy always starts facing the player.
+func start(player: Ship, enemy: Ship, seed_value := 1, place := {}) -> void:
 	arena = Arena.new(seed_value)
-	arena.add_ship(player, Vector2.ZERO, 0.0)
-	arena.add_ship(enemy, Vector2(0.0, -SPAWN_DISTANCE), PI)
+	var at: Vector2 = place.get("player_pos", Vector2.ZERO)
+	arena.add_ship(player, at, float(place.get("player_angle", 0.0)))
+	arena.ships[PLAYER].flight.vel = place.get("player_vel", Vector2.ZERO)
+	arena.ships[PLAYER].flight.ang_vel = float(place.get("player_ang_vel", 0.0))
+	var foe: Vector2 = place.get("enemy_pos", at + Vector2(0.0, -SPAWN_DISTANCE))
+	arena.add_ship(enemy, foe, (at - foe).angle() + PI / 2.0)
 	ai = PilotAI.new(arena, ENEMY, PLAYER, enemy.get_meta("ai", {}))
 	input = {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
 	cursor = null

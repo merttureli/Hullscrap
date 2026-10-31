@@ -8,6 +8,10 @@ extends Node2D
 ## The rules live in combat_session.gd; this node reads input, runs the session, and draws the aim
 ## wedges, shots, impacts and the HUD (schematics, weapon bar). Shots, beams and effects are drawn from
 ## art/projectiles and art/fx (scripts/view/art.gd) when that art exists, else as code-drawn placeholders.
+## In sector space (the Sector node, sector_view.gd, gives the place: fight_place) the fight runs right there, in the
+## sector's px: the sector's sky stays, the fight ends by itself once the enemy has been a wreck for WRECK_LINGER seconds
+## or is more than LEAVE_DISTANCE px away, it holds while the map or an event panel is open, and J opens the map to
+## spool the jump drive (the campaign's, blocked while the enemy is within 2,000 px).
 
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ImpactFx = preload("res://scripts/combat/impact_fx.gd")
@@ -33,15 +37,19 @@ const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and pro
 const HINT := "mouse steers   W/S throttle   A/D strafe   T turrets auto   LMB group 1   RMB group 2   1-9 single weapon   Shift engine   Space shield   Q utility   Esc leave"
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
+const WRECK_LINGER := 3.0  ## seconds a sector fight goes on showing the wreck before it ends by itself
 
-## Emitted when the fight is left: {state ("won", "lost" or "fled"), enemy (its Ship), hull, hull_max (the player's)}.
+## Emitted when the fight is left: {state ("won", "lost" or "fled"), enemy (its Ship), hull, hull_max (the player's),
+## in_sector, pose ({pos, vel, angle, ang_vel}: where the player's ship is now), enemy_pos}.
 signal finished(result: Dictionary)
 
 var sim: Node  ## ShipSim
 var build: Node  ## BuildMode (put away during the fight)
 var crew: Node  ## crew view (put away too)
 var cam: Camera2D
+var sector: Node  ## the Sector node (sector_view.gd), if the scene has one
 var active := false
+var in_sector := false  ## this fight runs in the sector (see the top)
 var session: Session
 ## Scripts and tests drive these instead of the keyboard and mouse.
 var aim_override: Variant = null  ## a world point, or null for the mouse
@@ -73,6 +81,7 @@ var _note := ""
 var _note_until := 0.0
 var _starfield: Node
 var _hud_label: Node
+var _over_t := 0.0  # seconds the enemy has been a wreck, in a sector fight
 
 
 func _ready() -> void:
@@ -82,6 +91,7 @@ func _ready() -> void:
 	cam = get_node_or_null("../Camera2D")
 	_starfield = get_node_or_null("../Space/Starfield")
 	_hud_label = get_node_or_null("../HUD/Label")
+	sector = get_node_or_null("../Sector")
 	_rng.seed = 4242
 	_make_stars()
 	_make_hud()
@@ -137,8 +147,9 @@ func _make_hud() -> void:
 
 # --- entering and leaving ------------------------------------------------------------------------
 
-## Start a fight with the ship in `path` (the test pirate by default). "" when it began, else why not.
-func enter(path := Session.PIRATE_PATH) -> String:
+## Start a fight with the ship in `path` (the test pirate by default). "" when it began, else why not. `opts`:
+## {enemy_pos}: where the enemy appears in a sector fight (else ahead of the ship).
+func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 	if active:
 		return "already fighting"
 	var player = sim.player_ship() if sim != null else null
@@ -148,8 +159,11 @@ func enter(path := Session.PIRATE_PATH) -> String:
 	if enemy == null:
 		return "cannot load " + path
 	sim.ships.append(enemy)
+	var place: Dictionary = sector.fight_place(opts.get("enemy_pos")) if sector != null and sector.has_method("fight_place") else {}
+	in_sector = not place.is_empty()
+	_over_t = 0.0
 	session = Session.new()
-	session.start(player, enemy, enemy.rng_seed)
+	session.start(player, enemy, enemy.rng_seed, place)
 	active = true
 	_cursor = 0
 	_fx.clear()
@@ -184,7 +198,8 @@ func leave() -> void:
 		return
 	var foe = session.arena.ships[Session.ENEMY]
 	var mine = session.arena.ships[Session.PLAYER]
-	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max}
+	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max,
+		"in_sector": in_sector, "pose": {"pos": mine.flight.pos, "vel": mine.flight.vel, "angle": mine.flight.angle, "ang_vel": mine.flight.ang_vel}, "enemy_pos": foe.flight.pos}
 	sim.ships.erase(session.arena.ships[Session.ENEMY].ship)
 	for v in _views:
 		v.queue_free()
@@ -232,9 +247,9 @@ func _put_away(away: bool) -> void:
 		crew.visible = not away
 		crew.set_process(not away)
 	if _starfield != null:
-		_starfield.visible = not away
+		_starfield.visible = not away or in_sector  # a sector fight keeps the sector's sky
 	if _stars_node != null:
-		_stars_node.visible = away
+		_stars_node.visible = away and not in_sector
 	if _hud_label != null:
 		_hud_label.visible = not away
 
@@ -269,6 +284,9 @@ func _unhandled_input(e: InputEvent) -> void:
 					leave()
 				else:
 					_say("Cannot disengage: wreck the enemy, get %d px away, or press J to spool the jump drive" % Session.LEAVE_DISTANCE)
+			KEY_J when in_sector:
+				if build != null and build.get("drift") != null:
+					build.drift.open()  # pick where to: the jump drive spools there (map_view.gd click_node)
 			KEY_J:
 				var why_jump: String = session.start_jump()
 				_say(why_jump if why_jump != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL))
@@ -334,6 +352,8 @@ func _process(dt: float) -> void:
 
 ## One frame of the fight: read the helm, run the session, turn its events into effects, move the camera.
 func frame(dt: float) -> void:
+	if in_sector and _panel_open():
+		return  # the map or an event is up: the fight holds
 	_clock += dt
 	_frame += 1
 	var st: String = session.state()
@@ -347,6 +367,11 @@ func frame(dt: float) -> void:
 	if session.jump_ready():
 		leave()  # the jump drive has spooled: away
 		return
+	if in_sector:
+		_over_t = _over_t + dt if session.state() == "won" else 0.0
+		if _over_t >= WRECK_LINGER or (session.state() == "fighting" and session.distance() > Session.LEAVE_DISTANCE):
+			leave()  # the wreck has been seen, or the enemy is out of range
+			return
 	_consume_events()
 	_age_fx(dt)
 	var player = session.arena.ships[Session.PLAYER]
@@ -359,6 +384,12 @@ func frame(dt: float) -> void:
 		_bar_extras.queue_redraw()
 	if _stars_node != null:
 		_stars_node.queue_redraw()
+
+
+## Is the map of the Drift, or one of its panels, open over the fight?
+func _panel_open() -> bool:
+	var map = build.get("drift") if build != null else null
+	return map != null and map.visible
 
 
 func _move_camera(dt: float) -> void:

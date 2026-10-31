@@ -26,7 +26,7 @@
 		{"id": "gate_2", "name": "The Scrapper Gate", "type": "gate", "pos": [790, 955]},
 		{"id": "gate_3", "name": "The Lumen Gate", "type": "gate", "pos": [1555, 520]}
 	],
-	"instant_jump": true,
+	"instant_jump": false,
 	"jump": {"spool": 8.0, "hostile_range": 2000.0},
 	"fuel": {"start": 6, "price": 8, "trader_multiplier": 3, "drift_hull": 15},
 	"debt": {"total": 1000, "payment": 100, "every": 8, "creditor": "Ma Gantry", "kettle": "reactor_scrap_kettle"},

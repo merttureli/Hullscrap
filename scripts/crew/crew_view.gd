@@ -86,13 +86,16 @@ func _unhandled_input(e: InputEvent) -> void:
 
 
 ## WASD by keycode (any layout). Ctrl/Cmd held means a shortcut like Ctrl+S, not walking, and so
-## does the crafting panel (C) being open, whose keys must not walk the soldier about.
+## does the crafting panel (C) being open, whose keys must not walk the soldier about, or the soldier having the helm.
 func _wasd() -> Vector2:
 	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_META):
 		return Vector2.ZERO
 	var craft := get_node_or_null("../CraftLayer/CraftingPanel")
 	if craft != null and craft.visible:
 		return Vector2.ZERO
+	var sector := get_node_or_null("../Sector")
+	if sector != null and sector.piloting():
+		return Vector2.ZERO  # the soldier has the helm: WASD fly the ship
 	return Vector2(
 		float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A)),
 		float(Input.is_key_pressed(KEY_S)) - float(Input.is_key_pressed(KEY_W)))
