@@ -106,6 +106,8 @@ func test_data_is_complete() -> void:
 		"engine_scrap_mk4": [-5, 4, 4], "engine_neon_mk2": [-3, 4, 2], "engine_neon_mk3": [-4, 4, 3], "engine_neon_mk4": [-5, 4, 4],
 		"strafe_jets_mk1": [-1, 4, 1], "strafe_jets_mk2": [-2, 4, 2], "strafe_jets_mk3": [-2, 4, 3],
 		"longburn_mk1": [-2, 4, 1], "longburn_mk2": [-3, 4, 2], "longburn_mk3": [-4, 4, 3],
+		# ammo racks and conveyor belts (docs/CONTENT.md 4f)
+		"ammo_rack": [0, 0, 1], "belt_drive_scrap": [-1, 2, 1], "belt_drive_std": [-1, 2, 2], "belt_drive_neon": [-1, 2, 3],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:
