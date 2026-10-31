@@ -7,7 +7,15 @@ extends RefCounted
 ## - effects: stat_mult {thrust, power} (a factor on that part's own figure), shield_layer (extra
 ##   layers), charge_mult (a factor on every weapon's cooldown), evasion_add.
 ## - side_effects, per second while it runs: drain_o2 (fraction of the part's room air lost), heat,
-##   power_spike (extra power draw, taken in the power solve), fire_risk (chance), self_damage (hp).
+##   power_spike (extra power draw, taken in the power solve), fire_risk (chance), self_damage (hp),
+##   shock_organic (hp a second to the crew in the room who are not mechanical), wet (crew in the room work
+##   slower, parts in it cool).
+## - the racial keys of effects, which depend on who stands in the part's room (part_effects.gd has the rules):
+##   crew_bonus {who, stat, per, max}, crew_needed {count, stat, else_mult, who?}, room_wall_hp_mult,
+##   heat_above {heat, shield_layer}, room_work_mult {mult, who?, else_mult?}. They are read by the power solve
+##   (Ship.refresh), the arena's thrust and the shield layers and recharge (Shields), the crew's work speed
+##   (Jobs) and the wall hp at the start of a fight (Arena.add_ship). tick() bumps rev when one of the figures
+##   changes because crew moved or a room heated, so those readers refresh.
 ## - operator_needs: traits the crew member manning the part (ship.manned) must have; "a|b" means
 ##   either. Traits come from the crew member's species, data/crew.json and gear (CrewMember.traits()).
 ## State lives on the ship, in `ship.ability_state` (not saved): `slots` "uid:id" -> {uid, id, active,
@@ -18,15 +26,16 @@ extends RefCounted
 
 const Fire = preload("res://scripts/sim/fire.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const PartEffects = preload("res://scripts/sim/part_effects.gd")
 
 const KEYS: Array[String] = ["engine", "shield", "utility"]  ## the combat keys: Shift, Space and Q
-const EFFECTS: Array[String] = ["stat_mult", "shield_layer", "charge_mult", "evasion_add"]  ## the keys of an ability's `effects` that something reads
-const SIDE_EFFECTS: Array[String] = ["drain_o2", "heat", "power_spike", "fire_risk", "self_damage"]  ## the `type`s of its `side_effects`
+const EFFECTS: Array[String] = PartEffects.EFFECTS  ## the keys of an ability's `effects` that something reads
+const SIDE_EFFECTS: Array[String] = PartEffects.SIDE_EFFECTS  ## the `type`s of its `side_effects`
 const EPS := 1e-9
 
 
 static func fresh_state() -> Dictionary:
-	return {"rev": 0, "slots": {}}
+	return {"rev": 0, "slots": {}, "pulse": {}, "crew_sig": []}
 
 
 ## How many starts and ends this ship's abilities have had.
@@ -174,6 +183,10 @@ static func tick(ship, dt: float, rng: RandomNumberGenerator = null) -> void:
 		for a in ship.components.def(inst["id"]).get("abilities", []):
 			if a.get("type", "active") == "passive":
 				_side_effects(ship, uid, a, dt, rng)
+	var sig := crew_sig(ship)  # someone walked in or out, or a room heated past a threshold: the readers of those figures refresh
+	if sig != ship.ability_state["crew_sig"]:
+		ship.ability_state["crew_sig"] = sig
+		ship.ability_state["rev"] += 1
 
 
 # --- what the running abilities change ------------------------------------------------------------
@@ -202,29 +215,118 @@ static func running(ship, need_power := true) -> Array:
 	return out
 
 
-## part uid -> the factor `stat_mult` gives its stat `stat` ("thrust", "power"); parts without one are absent.
+## part uid -> the factor on its stat `stat` ("thrust", "power"): its `stat_mult` times the `crew_needed` factors
+## of that stat (the crew it lacks); parts without one are absent.
 static func stat_mults(ship, stat: String, need_power := true) -> Dictionary:
 	var out := {}
 	for r in running(ship, need_power):
-		var m = r["ability"].get("effects", {}).get("stat_mult", {})
+		var fx: Dictionary = r["ability"].get("effects", {})
+		var m = fx.get("stat_mult", {})
 		if m is Dictionary and m.has(stat):
 			out[r["uid"]] = float(out.get(r["uid"], 1.0)) * float(m[stat])
+		for cn in PartEffects.entries(fx.get("crew_needed")):
+			if cn.get("stat") == stat:
+				out[r["uid"]] = float(out.get(r["uid"], 1.0)) * PartEffects.needed_mult(ship, r["uid"], cn)
 	return out
 
 
-## part uid -> thrust factor, for Flight.thrust_of's `boost`.
+## part uid -> thrust factor, for Flight.thrust_of's `boost`: stat_mult and crew_needed thrust, and a crew_bonus
+## thrust as the factor that adds it to the engine's own thrust.
 static func thrust_boost(ship) -> Dictionary:
-	return stat_mults(ship, "thrust")
+	var out := stat_mults(ship, "thrust")
+	for r in running(ship):
+		for cb in PartEffects.entries(r["ability"].get("effects", {}).get("crew_bonus")):
+			if cb.get("stat") != "thrust":
+				continue
+			var base := float(ship.effective(ship.components.instances[r["uid"]]["id"])["stats"].get("thrust", 0.0))
+			if base > 0.0:
+				out[r["uid"]] = float(out.get(r["uid"], 1.0)) * (base + PartEffects.bonus_of(ship, r["uid"], cb)) / base
+	return out
 
 
-## What the power solve needs: {mult: part uid -> factor on its power figure, extra: part uid -> power_spike draw}.
+## What the power solve needs: {mult: part uid -> factor on its power figure, extra: part uid -> power_spike draw,
+## bonus: part uid -> power the crew adds (crew_bonus power), after the factor}.
 static func power_mods(ship) -> Dictionary:
 	var extra := {}
+	var bonus := {}
 	for r in running(ship, false):
 		for s in r["ability"].get("side_effects", []):
 			if s.get("type", "") == "power_spike":
 				extra[r["uid"]] = float(extra.get(r["uid"], 0.0)) + float(s.get("rate", 0.0))
-	return {"mult": stat_mults(ship, "power", false), "extra": extra}
+		for cb in PartEffects.entries(r["ability"].get("effects", {}).get("crew_bonus")):
+			if cb.get("stat") == "power":
+				bonus[r["uid"]] = float(bonus.get(r["uid"], 0.0)) + PartEffects.bonus_of(ship, r["uid"], cb)
+	return {"mult": stat_mults(ship, "power", false), "extra": extra, "bonus": bonus}
+
+
+## The layers shield part `uid` gives (called by Shields.layers_of_ship for a powered part): `base`, its stats.layers,
+## with its crew_needed shield_layer factors and its crew_bonus and heat_above layers (part_effects.gd).
+static func part_layers(ship, uid: int, base: int) -> int:
+	var n := base
+	for a in _live(ship, uid):
+		var fx: Dictionary = a.get("effects", {})
+		if fx.has("crew_needed") or fx.has("crew_bonus") or fx.has("heat_above"):
+			n += PartEffects.layers_of(ship, uid, base, fx) - base
+	return n
+
+
+## How fast the used layers of the shield come back, 1 being normal: the layers-weighted mean over the powered
+## shield parts of their crew_needed recharge factors (a part with the crew it needs, or with none, counts 1).
+static func recharge_rate(ship, powered: Dictionary) -> float:
+	var weight := 0.0
+	var sum := 0.0
+	for uid in _uids(ship):
+		var def: Dictionary = ship.components.def(ship.components.instances[uid]["id"])
+		if def.get("family", "") != "shield" or not powered.get(uid, false):
+			continue
+		var layers := float(def.get("stats", {}).get("layers", 0))
+		var f := 1.0
+		for a in _live(ship, uid):
+			for cn in PartEffects.entries(a.get("effects", {}).get("crew_needed")):
+				if cn.get("stat") == "recharge":
+					f *= PartEffects.needed_mult(ship, uid, cn)
+		weight += layers
+		sum += layers * f
+	return sum / weight if weight > 0.0 else 1.0
+
+
+## The factor on the work speed (repair, extinguish, restock, crafting) of crew member `m` from the parts working in
+## the room they stand in: room_work_mult, and wet (Jobs._work_rate multiplies it in).
+static func work_mult(ship, m) -> float:
+	var room: int = ship.atmosphere.room_at(m.cell())
+	var f := 1.0
+	if room < 0:
+		return f
+	for r in running(ship):
+		if PartEffects.room_of_part(ship, r["uid"]) == room:
+			f *= PartEffects.work_of(m, r["ability"])
+	return f
+
+
+## wall cell -> factor on its hp from the working parts with room_wall_hp_mult (the strongest on a cell counts; they
+## do not stack). Arena.add_ship stores it in the grid when a fight starts.
+static func wall_hp_mults(ship) -> Dictionary:
+	ship.refresh()
+	var out := {}
+	for r in running(ship):
+		var f = r["ability"].get("effects", {}).get("room_wall_hp_mult")
+		var room := PartEffects.room_of_part(ship, r["uid"])
+		if f == null or room < 0:
+			continue
+		for c in PartEffects.walls_round(ship, room):
+			out[c] = maxf(float(out.get(c, 1.0)), float(f))
+	return out
+
+
+## The crew-dependent figures of the working parts as plain data (part_effects.gd fingerprint): equal while nothing
+## that matters changed. Ship.refresh and tick() compare it.
+static func crew_sig(ship) -> Array:
+	var out := []
+	for r in running(ship, false):
+		var fx: Dictionary = r["ability"].get("effects", {})
+		if PartEffects.has_crew_effects(fx):
+			out.append([r["uid"], PartEffects.fingerprint(ship, r["uid"], fx)])
+	return out
 
 
 ## Extra shield layers the running abilities give.
@@ -314,6 +416,15 @@ static func _uids(ship) -> Array:
 	return uids
 
 
+## The abilities of part `uid` in effect: its passive ones, and the active ones that are running.
+static func _live(ship, uid: int) -> Array:
+	var out := []
+	for a in ship.components.def(ship.components.instances[uid]["id"]).get("abilities", []):
+		if a.get("type", "active") == "passive" or active_left(ship, uid, str(a["id"])) > 0.0:
+			out.append(a)
+	return out
+
+
 ## The state of a slot, read only ({} when it never ran).
 static func _state(ship, uid: int, ability_id: String) -> Dictionary:
 	return ship.ability_state["slots"].get(slot_key(uid, ability_id), {})
@@ -356,3 +467,7 @@ static func _side_effects(ship, uid: int, a: Dictionary, dt: float, rng: RandomN
 				if inst["hp"] <= 0.0 and inst["status"] != "disabled":
 					inst["status"] = "disabled"
 					ship.log_event("%s is disabled" % name)
+			"shock_organic":
+				PartEffects.shock(ship, uid, rate, dt)
+			"wet":
+				PartEffects.wet(ship, uid, slot_key(uid, str(a.get("id", ""))), dt)
