@@ -79,7 +79,8 @@ static func projectile_of(id: String, kind: String, suffix := "") -> RefCounted:
 
 ## A crew species (art/crew/<species>/): the torso sheet, with `layers` {"legs", "arms", "head"}
 ## and `poses` (see _poses). Null unless the torso and the legs both exist. crew.json holds the
-## shared "frame" and "pivot" and a "layers" table (image, color_mask, anims, frames, anchors each).
+## shared "frame" and "pivot", the rig "kind" (normal, large, small or floating: PersonDrawer.RIGS) and a "layers" table
+## (image, color_mask, anims, frames, anchors each).
 static func crew(species: String) -> RefCounted:
 	var key := "%s/crew/%s" % [root, species]
 	if _cache.has(key):
@@ -87,7 +88,7 @@ static func crew(species: String) -> RefCounted:
 	var dir := "%s/crew/%s" % [root, species]
 	var d := read_json(dir + "/crew.json")
 	var table: Dictionary = d.get("layers", d)
-	var common := {"frame": d.get("frame"), "pivot": d.get("pivot"), "anchors_origin": d.get("anchors_origin", "topleft")}
+	var common := {"frame": d.get("frame"), "pivot": d.get("pivot"), "anchors_origin": d.get("anchors_origin", "topleft"), "kind": d.get("kind", "normal")}
 	var parts := {}
 	var raw_arms := {}
 	for layer in CREW_LAYERS:

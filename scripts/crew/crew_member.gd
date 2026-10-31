@@ -4,6 +4,7 @@ extends RefCounted
 ## sits on the four cells round `pos`, and collides as a circle of RADIUS (a little under a cell,
 ## so a 2-wide opening lets it through). NPCs follow a `path` of body anchors (go_to + step), whose
 ## body centre is the anchor plus (1, 1); the player's soldier moves directly (move_input).
+## A small body (the trait `body` 1, `body_size`) is one cell, with half the radius: it also fits 1-wide crawlspaces.
 ## Health and the current job live here too (rules in jobs.gd); the defaults are in data/crew.json.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -11,7 +12,7 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Characters = preload("res://scripts/crew/characters.gd")
-const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide)
+const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide; a small one has half of it, see body_radius)
 const MAX_SUBSTEP := 0.2  ## longest single move in cells, so a long frame cannot skip over a wall
 const CONFIG_PATH := "res://data/crew.json"
 const SPECIES_PATH := "res://data/species.json"
@@ -25,6 +26,9 @@ var species := "human"  ## the species id (data/species.json): hp, speed, traits
 var gear_traits: Array = []  ## traits worn gear gives (an EVA suit gives "suit"); nothing equips gear yet
 var pos := Vector2.ZERO
 var speed := BASE_SPEED  ## cells per second
+var speed_mod := 1.0  ## factor on `speed` right now (the heat of their room, trait heat_speed): Jobs sets it every tick
+var body_size := Pathfinder.BODY  ## cells across the body: 2, or 1 for a small body (trait `body`, read when the species is set)
+var mend_t := 0.0  ## seconds a hull_mend crew member has spent sealing the breach next to them (Jobs)
 var facing := Vector2.DOWN
 var path: Array[Vector2i] = []
 var hp := 100.0
@@ -84,6 +88,7 @@ func set_species(id: String) -> void:
 	max_hp = float(def.get("hp", config().get("hp", 100))) * float(t["hp_mult"])
 	hp = max_hp
 	speed = BASE_SPEED * float(def.get("speed", 1.0)) * float(t["speed_mult"])
+	body_size = int(t["body"])
 
 
 ## Every trait this person has, without repeats: their species' (data/species.json), their own
@@ -139,21 +144,26 @@ func cell() -> Vector2i:
 	return Vector2i(floori(pos.x), floori(pos.y))
 
 
-## The top-left cell of the 2x2 cells the body covers.
+## The top-left cell of the cells the body covers (2x2, or the one cell of a small body).
 func anchor() -> Vector2i:
-	return Pathfinder.anchor_of(pos)
+	return Pathfinder.anchor_of(pos, body_size)
 
 
-## The 2x2 cells the body covers.
+## The cells the body covers.
 func body_cells() -> Array[Vector2i]:
-	return Pathfinder.body_cells(anchor())
+	return Pathfinder.body_cells(anchor(), body_size)
+
+
+## The collision radius of the body in cells: RADIUS for a 2x2 body, in proportion for a smaller one.
+func body_radius() -> float:
+	return RADIUS * body_size / float(Pathfinder.BODY)
 
 
 ## Walk until the body sits on anchor `target` (see Pathfinder), along the shortest path from the
 ## nearest usable anchor. Returns false (and keeps the current path) when there is no route.
 func go_to(grid: ShipGrid, target: Vector2i, door_passable: Callable = Callable()) -> bool:
-	var from := Pathfinder.nearest_walkable(grid, pos, door_passable)
-	var p := Pathfinder.find_path(grid, from, target, door_passable)
+	var from := Pathfinder.nearest_walkable(grid, pos, door_passable, Pathfinder.NO_CELL, body_size)
+	var p := Pathfinder.find_path(grid, from, target, door_passable, body_size)
 	if p.is_empty():
 		return false
 	path = p
@@ -167,9 +177,9 @@ func step(dt: float) -> void:
 		return
 	if is_stunned():
 		return
-	var left := speed * dt
+	var left := speed * speed_mod * dt
 	while left > 0.0 and not path.is_empty():
-		var to := Pathfinder.centre_of(path[0])
+		var to := Pathfinder.centre_of(path[0], body_size)
 		var d := to - pos
 		var dist := d.length()
 		if dist > 0.0:
@@ -191,7 +201,7 @@ func move_input(grid: ShipGrid, dir: Vector2, dt: float, door_passable: Callable
 	if is_down() or is_stunned() or dir.length_squared() < 0.0001 or dt <= 0.0:
 		return
 	facing = dir.normalized()
-	var dist := speed * dt
+	var dist := speed * speed_mod * dt
 	var n := maxi(1, ceili(dist / MAX_SUBSTEP))
 	var d := facing * (dist / n)
 	for i in n:
@@ -206,11 +216,12 @@ func move_input(grid: ShipGrid, dir: Vector2, dt: float, door_passable: Callable
 
 
 ## Blocked head-on while moving by `step` (along one axis): nudge sideways, at most `step` long,
-## toward the nearest whole-number line from which the step would fit.
+## toward the nearest line (a whole number for a 2x2 body, a cell middle for a 1x1 one) from which the step would fit.
 func _slide_to_lane(grid: ShipGrid, step: Vector2, door_passable: Callable) -> void:
 	var a := 0 if step.x != 0.0 else 1  # the axis we move along; 1 - a is the sideways one
 	var side := 1 - a
-	var lanes := [floorf(pos[side]), ceilf(pos[side])]
+	var h := body_size * 0.5  # the body's centre sits on lines at this offset from a whole number
+	var lanes := [floorf(pos[side] - h) + h, ceilf(pos[side] - h) + h]
 	if lanes[0] == lanes[1]:
 		return  # already on a line: a real wall
 	if pos[side] - lanes[0] > lanes[1] - pos[side]:
@@ -227,8 +238,10 @@ func _slide_to_lane(grid: ShipGrid, step: Vector2, door_passable: Callable) -> v
 		return
 
 
-## Would a body of `radius` centred on `p` stay clear of every non-walkable cell?
-func fits(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), radius := RADIUS) -> bool:
+## Would a body of `radius` (default: their own, body_radius) centred on `p` stay clear of every non-walkable cell?
+func fits(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), radius := -1.0) -> bool:
+	if radius < 0.0:
+		radius = body_radius()
 	for cy in range(floori(p.y - radius), floori(p.y + radius) + 1):
 		for cx in range(floori(p.x - radius), floori(p.x + radius) + 1):
 			if Pathfinder.walkable(grid, Vector2i(cx, cy), door_passable):
@@ -243,13 +256,13 @@ func fits(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), radi
 ## overlaps a non-walkable cell, move it onto the nearest usable anchor, then re-plan or drop a
 ## path that now crosses an anchor the body can't stand on.
 func resolve(grid: ShipGrid, door_passable: Callable = Callable()) -> void:
-	if not fits(grid, pos, door_passable, RADIUS - 0.01):
-		var n := Pathfinder.nearest_walkable(grid, pos, door_passable)
+	if not fits(grid, pos, door_passable, body_radius() - 0.01):
+		var n := Pathfinder.nearest_walkable(grid, pos, door_passable, Pathfinder.NO_CELL, body_size)
 		if n == Pathfinder.NO_CELL:
 			return
-		pos = Pathfinder.centre_of(n)
+		pos = Pathfinder.centre_of(n, body_size)
 	for c in path:
-		if not Pathfinder.body_ok(grid, c, door_passable):
+		if not Pathfinder.body_ok(grid, c, door_passable, body_size):
 			if not go_to(grid, path.back(), door_passable):
 				path.clear()
 			break

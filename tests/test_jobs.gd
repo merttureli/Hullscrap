@@ -844,3 +844,32 @@ func test_crew_with_the_right_traits_take_the_station_that_needs_them() -> void:
 	_run(jobs, ship, 1.5)
 	eq(rook.job.get("key"), "post:%d" % burner, "the suited crew member mans the afterburner")
 	eq(ada.job.get("key"), "post:%d" % helm, "and the other takes the helm")
+
+
+func test_a_breach_in_a_mount_wall_is_worked_from_beside_the_mount() -> void:
+	for path in STARTERS:
+		var ship := Ship.from_design(path)
+		var link: Array = []
+		var uids: Array = ship.components.instances.keys()
+		uids.sort()
+		for uid in uids:
+			if not ship.components.instances[uid]["link"].is_empty():
+				link = ship.components.instances[uid]["link"]
+				break
+		check(not link.is_empty(), path + ": a hull mount with a wall between its halves")
+		if link.is_empty():
+			continue
+		var cell: Vector2i = link[0]
+		ship.grid.breach(cell)
+		ship.mark_dirty()
+		ship.refresh()
+		var view := CrewView.new()
+		view._spawn(ship)
+		view.free()
+		var jobs := Jobs.new()
+		jobs.build_board(ship)
+		var job: Dictionary = jobs.board["breach:%d,%d" % [cell.x, cell.y]]
+		check(job.has("reach"), path + ": the breach job knows the mount it runs through")
+		check(not jobs.stand_spots(ship, job).is_empty(), path + ": somewhere to stand to work it")
+		_run(jobs, ship, 40.0)
+		check(not ship.grid.breached.has(cell), path + ": the crew seal it")

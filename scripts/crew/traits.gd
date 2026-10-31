@@ -5,7 +5,8 @@ extends RefCounted
 ## member's species (its entry may carry keys inline, merged first), personal and gear traits into one
 ## Dictionary of numbers, and every rule a key changes asks for it here, so a new race is data only.
 ## Merging: factors multiply, amounts add, `mechanical` is true if any trait says so, ion_stun and the
-## dries_out threshold take the strongest. data/traits.json `_doc` describes the keys too.
+## dries_out threshold take the strongest, the true/false keys (FLAGS) are true if any trait says so, `body` takes the smallest.
+## data/traits.json `_doc` describes the keys too.
 ## The keys (see KEYS for the sub-keys of the groups):
 ## - `hp_mult`: factor on the species' max hp (CrewMember.set_species).
 ## - `speed_mult`: factor on the species' walk speed (CrewMember.set_species).
@@ -16,12 +17,18 @@ extends RefCounted
 ## - `heal_mult`: factors on what a bed and a medbay heal them (Jobs).
 ## - `mechanical`: beds do not heal them; a hurt one gets a repair_crew job that any other crew member does (Jobs).
 ## - `aura`: o2_per_s and heal_per_s for the room they stand in (ShipSim, Jobs), work_mult for the others there (work_rate).
-## - `station`: power_bonus, power the part they man gets (Power.solve through station_bonus), and manned_mult (manned_factor).
+## - `station`: power_bonus, power the part they man gets (Power.solve through station_bonus), manned_mult (manned_factor), and evasion_add (evasion the helm gets while they man it, Jobs.evasion_bonus through helm_evasion_add).
 ## - `melee_mult`: factor on their melee damage in on-foot fights (kept: nothing reads it yet).
 ## - `ranged_mult`: factor on their ranged damage in on-foot fights (kept: nothing reads it yet).
 ## - `swarm`: work speed +per_other for each other crew member of their species in the room, at most +max (work_rate).
 ## - `dries_out`: hp_per_s lost in a room whose hottest part is above heat_above (Jobs, Heat.room_heat).
 ## - `ion_stun`: seconds stunned when an ion hit lands on their room (Jobs.ion_hit).
+## - `body`: the body's size in cells: 2 (the default, 2x2) or 1 (a small body, 1x1, that also walks 1-wide crawlspaces); read when the species is set (CrewMember.body_size, Pathfinder).
+## - `reveal_enemy`: while they are aboard and up, your enemy schematic shows the enemy's crew (reveals_enemy, Schematic).
+## - `heat_speed`: walk speed x`cold` in a room whose hottest part is below `below`, x`hot` above `above` (heat_factor, set by Jobs as CrewMember.speed_mod).
+## - `vacuum_walk`: no air penalties: they do not suffocate and the vacuum does not slow them (Jobs); give it with `o2_use` 0 to also not use air.
+## - `no_tools`: they take no repair or extinguish jobs (Jobs.TOOL_JOBS).
+## - `hull_mend`: idle, they repair `rate` hp a second in all of the damaged walls next to them and seal a breach next to them in `seal` seconds (Jobs).
 ## The result is shared and cached: read it, do not change it.
 
 const Content = preload("res://scripts/data/content.gd")
@@ -32,17 +39,22 @@ const LEGACY_PATH := "res://data/species.json"  ## its `traits` table is the old
 const DAMAGE: Array[String] = ["fire", "no_air", "melee", "ranged", "ion"]
 const WORK: Array[String] = ["repair", "extinguish", "breach", "man", "restock", "craft", "heal_others"]
 const HEAL: Array[String] = ["bed", "medbay"]
+const FLAGS: Array[String] = ["mechanical", "vacuum_walk", "no_tools", "reveal_enemy"]  ## the keys that are true or false
+const BODIES: Array[int] = [1, 2]  ## the sizes `body` may have
 ## Every key a trait may use -> its sub-keys ([] for a plain number or flag).
 const KEYS := {
 	"hp_mult": [], "speed_mult": [], "o2_use": [], "suffocate_mult": [],
 	"damage_taken": DAMAGE, "work_mult": WORK, "heal_mult": HEAL, "mechanical": [],
-	"aura": ["o2_per_s", "heal_per_s", "work_mult"], "station": ["power_bonus", "manned_mult"],
+	"aura": ["o2_per_s", "heal_per_s", "work_mult"], "station": ["power_bonus", "manned_mult", "evasion_add"],
 	"melee_mult": [], "ranged_mult": [], "swarm": ["per_other", "max"],
 	"dries_out": ["heat_above", "hp_per_s"], "ion_stun": [],
+	"body": [], "reveal_enemy": [], "heat_speed": ["cold", "hot", "below", "above"], "vacuum_walk": [], "no_tools": [],
+	"hull_mend": ["rate", "seal"],
 }
 const META: Array[String] = ["id", "name", "blurb", "notes", "override", "reason"]  ## the fields of a trait entry that are not keys
 const FACTORS: Array[String] = ["hp_mult", "speed_mult", "o2_use", "suffocate_mult", "melee_mult", "ranged_mult"]
 const FACTOR_GROUPS: Array[String] = ["damage_taken", "work_mult", "heal_mult"]
+const GROUPS: Array[String] = ["aura", "station", "swarm", "dries_out", "heat_speed", "hull_mend"]  ## the groups with their own merge rule per sub-key
 ## The old `mult` stats of a trait, as keys (repair_time is a time factor: work_mult repair and breach are 1 / it).
 const LEGACY := {"no_air_damage": ["damage_taken", "no_air"], "fire_damage": ["damage_taken", "fire"], "heal_others": ["work_mult", "heal_others"]}
 
@@ -84,7 +96,8 @@ static func _ensure() -> void:
 ## hp_mult, speed_mult, o2_use, suffocate_mult, melee_mult, ranged_mult 1.0; ion_stun 0.0; mechanical false;
 ## damage_taken {fire, no_air, melee, ranged, ion}, work_mult {repair, extinguish, breach, man, restock, craft,
 ## heal_others} and heal_mult {bed, medbay} all 1.0; aura {o2_per_s 0, heal_per_s 0, work_mult 1};
-## station {power_bonus 0, manned_mult 1}; swarm {per_other 0, max 0}; dries_out {heat_above INF, hp_per_s 0}.
+## station {power_bonus 0, manned_mult 1, evasion_add 0}; swarm {per_other 0, max 0}; dries_out {heat_above INF, hp_per_s 0};
+## body 2; vacuum_walk, no_tools, reveal_enemy false; heat_speed {cold 1, hot 1, below -INF, above INF}; hull_mend {rate 0, seal 0}.
 static func of(member) -> Dictionary:
 	_ensure()
 	var ids: Array = member.traits()
@@ -131,12 +144,16 @@ static func _scale(bag: Dictionary, group: String, sub: String, v: float) -> voi
 static func _fresh() -> Dictionary:
 	var out := {
 		"hp_mult": 1.0, "speed_mult": 1.0, "o2_use": 1.0, "suffocate_mult": 1.0, "melee_mult": 1.0, "ranged_mult": 1.0,
-		"ion_stun": 0.0, "mechanical": false,
+		"ion_stun": 0.0, "body": 2,
 		"aura": {"o2_per_s": 0.0, "heal_per_s": 0.0, "work_mult": 1.0},
-		"station": {"power_bonus": 0.0, "manned_mult": 1.0},
+		"station": {"power_bonus": 0.0, "manned_mult": 1.0, "evasion_add": 0.0},
 		"swarm": {"per_other": 0.0, "max": 0.0},
 		"dries_out": {"heat_above": INF, "hp_per_s": 0.0},
+		"heat_speed": {"cold": 1.0, "hot": 1.0, "below": -INF, "above": INF},
+		"hull_mend": {"rate": 0.0, "seal": 0.0},
 	}
+	for flag in FLAGS:
+		out[flag] = false
 	for group in FACTOR_GROUPS:
 		out[group] = {}
 		for sub in KEYS[group]:
@@ -152,23 +169,29 @@ static func _merge(out: Dictionary, bag: Dictionary) -> void:
 			out[k] = float(out[k]) * float(v)
 		elif k == "ion_stun":
 			out[k] = maxf(float(out[k]), float(v))
-		elif k == "mechanical":
+		elif k in FLAGS:
 			out[k] = bool(out[k]) or bool(v)
+		elif k == "body":
+			out[k] = mini(int(out[k]), clampi(int(v), BODIES[0], BODIES[-1]))
 		elif not v is Dictionary:
 			continue
 		elif k in FACTOR_GROUPS:
 			for sub in v:
 				if out[k].has(sub):
 					out[k][sub] = float(out[k][sub]) * float(v[sub])
-		elif k == "aura" or k == "station" or k == "swarm" or k == "dries_out":
+		elif k in GROUPS:
 			for sub in v:
 				if not out[k].has(sub):
 					continue
 				var f := float(v[sub])
-				if sub in ["work_mult", "manned_mult"]:
+				if sub in ["work_mult", "manned_mult", "cold", "hot"]:
 					out[k][sub] = float(out[k][sub]) * f
-				elif sub == "heat_above":
+				elif sub in ["heat_above", "above"]:
 					out[k][sub] = minf(float(out[k][sub]), f)
+				elif sub == "below":
+					out[k][sub] = maxf(float(out[k][sub]), f)
+				elif sub == "seal":  # the quickest seal wins; 0 = cannot seal
+					out[k][sub] = f if float(out[k][sub]) <= 0.0 else (minf(float(out[k][sub]), f) if f > 0.0 else float(out[k][sub]))
 				else:
 					out[k][sub] = float(out[k][sub]) + f
 
@@ -244,3 +267,29 @@ static func manned_factor(ship, uid: int) -> float:
 	if who == null:
 		return 1.0
 	return work_rate(ship, who, "man") * float(of(who)["station"]["manned_mult"])
+
+
+## The factor on a walk speed that the heat of the room (`heat`) puts on a crew member whose resolved set is `t`:
+## heat_speed.cold below `below`, heat_speed.hot above `above`, 1.0 between (and for crew with no heat_speed).
+static func heat_factor(t: Dictionary, heat: float) -> float:
+	var h: Dictionary = t["heat_speed"]
+	var f := 1.0
+	if heat < float(h["below"]):
+		f *= float(h["cold"])
+	if heat > float(h["above"]):
+		f *= float(h["hot"])
+	return f
+
+
+## Does a crew member of `ship` who is up have `reveal_enemy`? Then the enemy's schematic shows its crew.
+static func reveals_enemy(ship) -> bool:
+	for m in ship.crew:
+		if not m.is_down() and of(m)["reveal_enemy"]:
+			return true
+	return false
+
+
+## The evasion that whoever mans part `uid` adds on top of the post's own (station.evasion_add); 0 with nobody there.
+static func helm_evasion_add(ship, uid: int) -> float:
+	var who = operator_of(ship, uid)
+	return 0.0 if who == null else float(of(who)["station"]["evasion_add"])
