@@ -1,0 +1,38 @@
+{
+ "frame": [
+  16,
+  14
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "on": [
+   0,
+   1,
+   0
+  ],
+  "off": [
+   1,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 5,
+   "top": 5,
+   "right": 5,
+   "bottom": 3
+  },
+  "content_margins": {
+   "left": 4,
+   "top": 5,
+   "right": 4,
+   "bottom": 2
+  },
+  "center": "stretch"
+ },
+ "notes": "Tab: `on` is lit steel with an amber cap, `off` is sunk dark slate. Put it on top of its page; the bottom rim is plain so it can overlap the page by 1 px. Icon (16x16) + label go inside the content margins."
+}

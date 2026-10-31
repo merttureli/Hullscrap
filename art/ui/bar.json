@@ -1,0 +1,33 @@
+{
+ "frame": [
+  18,
+  18
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "normal": [
+   0,
+   1,
+   0
+  ]
+ },
+ "nine_slice": {
+  "margins": {
+   "left": 6,
+   "top": 6,
+   "right": 6,
+   "bottom": 6
+  },
+  "content_margins": {
+   "left": 4,
+   "top": 4,
+   "right": 4,
+   "bottom": 4
+  },
+  "center": "stretch"
+ },
+ "notes": "The thin HUD frame for the top resource bar, the bottom mode bar and small floating panels: a 3 px steel rim, a bolt in each corner, dark-slate fill."
+}

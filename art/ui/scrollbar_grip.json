@@ -1,0 +1,18 @@
+{
+ "frame": [
+  4,
+  6
+ ],
+ "cells": [
+  1,
+  1
+ ],
+ "anims": {
+  "grip": [
+   0,
+   1,
+   0
+  ]
+ },
+ "notes": "The 4x6 grip ridges for a scrollbar thumb (it fits the thumb face): centre it on the thumb when the thumb is 14 px or longer. Not a 9-slice."
+}

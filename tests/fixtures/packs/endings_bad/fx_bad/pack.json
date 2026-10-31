@@ -1,0 +1,7 @@
+{
+	"id": "fx_bad",
+	"name": "Fixture bad endings",
+	"version": "1.0",
+	"requires": [],
+	"notes": "Test fixture: see tests/test_endings.gd. Every entry here is wrong on purpose."
+}

@@ -87,6 +87,11 @@ var region_data := {}  ## that region's data (Regions.get_region), not saved
 var route: Array = []  ## the regions of the run in order, this one last
 var region_seed := 0  ## the seed of this region's map and sectors
 var debt_stop := -1  ## the jump count at which Ma's debt clock stopped (from stage run.debt_stages + 1), -1 while it runs
+var profile = null  ## the player's Profile (profile.gd), set by the map: unlocks and landmarks are written to it at once. null in tests
+var ending := ""  ## the id of the ending this run reached ("" while it goes on): the run is won (docs/CONTENT.md section 13)
+var landmarks: Array = []  ## ids of the landmark events (events.gd) met in this run, in order
+var unlocks_earned: Array = []  ## ids of the unlocks this run earned (new to the profile), in order
+var chronicle: Array = []  ## the run log, in order: {jumps, kind (landmark, unlock, ending), id, text}; the ending screen reads it
 var _hull_key := -1
 var _hull_max := 0
 
@@ -636,6 +641,36 @@ func cross(id: String, ship) -> Dictionary:
 	return {"ok": true, "why": "", "notes": notes}
 
 
+# --- unlocks, landmarks and the end ---------------------------------------------------------------------------
+
+## Earn unlock `id` (data/unlocks.json): kept in the profile at once, and in this run's list when it is new. Returns
+## true when the player did not have it yet (the event then says "Unlocked: ...").
+func unlock(id: String) -> bool:
+	var fresh: bool = profile.unlock(id) if profile != null else not unlocks_earned.has(id)
+	if fresh and not unlocks_earned.has(id):
+		unlocks_earned.append(id)
+		chronicle.append({"jumps": jumps, "kind": "unlock", "id": id, "text": ""})
+	return fresh
+
+
+## A landmark event `id` was met, with its `title`: once in the run log, and once ever in the profile. Returns true when it
+## is new to this run.
+func note_landmark(id: String, title: String) -> bool:
+	if landmarks.has(id):
+		return false
+	landmarks.append(id)
+	chronicle.append({"jumps": jumps, "kind": "landmark", "id": id, "text": title})
+	if profile != null:
+		profile.record_landmark(id, title)
+	return true
+
+
+## The run is won with ending `id`: the event panel then opens the ending screen.
+func finish(id: String) -> void:
+	ending = id
+	chronicle.append({"jumps": jumps, "kind": "ending", "id": id, "text": ""})
+
+
 # --- the debt -----------------------------------------------------------------------------------------------
 
 ## Does Ma Gantry's debt clock run? Only in the first run.debt_stages stages (2): later regions are too far for the repo
@@ -730,10 +765,10 @@ func fight_path(value: String, node_type: String) -> String:
 ## The fight is over. `res` is {state: "won" | "lost" | "fled", hull, hull_max, enemy (its Ship)} from the
 ## combat view. A win gives loot and runs `after_win` ({text, effects}); the hull integrity left in the
 ## fight is kept. A loss ends the run (the caller starts a new campaign). Returns {state, text, lines,
-## goto, fight}: `goto` and `fight` are what the after_win effects asked for next.
+## goto, fight, ending}: `goto`, `fight` and `ending` are what the after_win effects asked for next.
 func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary:
 	var state := str(res.get("state", "fled"))
-	var out := {"state": state, "text": "", "lines": [], "goto": "", "fight": ""}
+	var out := {"state": state, "text": "", "lines": [], "goto": "", "fight": "", "ending": ""}
 	if state == "lost":
 		out["text"] = "Your ship is wrecked. The Drift keeps what is left of it."
 		return out
@@ -752,6 +787,7 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 		out["lines"].append_array(r["lines"])
 		out["goto"] = r["goto"]
 		out["fight"] = r["fight"]
+		out["ending"] = r["ending"]
 	return out
 
 
@@ -994,8 +1030,9 @@ func to_dict() -> Dictionary:
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
 		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
 		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
-		"sectors": _sectors_dict(), "spool": spool.duplicate(), "stage": stage, "region": region_id, "route": route.duplicate(),
-		"region_seed": str(region_seed), "debt_stop": debt_stop}
+		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
+		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
+		"debt_stop": debt_stop}
 
 
 func _sectors_dict() -> Dictionary:
@@ -1057,6 +1094,10 @@ func load_dict(d: Dictionary) -> String:
 	fuel_part = clampi(int(d.get("fuel_part", 0)), 0, FUEL_PARTS - 1)  # a version 1 save has none
 	events_seen = int(d.get("events_seen", 0))  # saves from before the game over screen have none
 	fights_won = int(d.get("fights_won", 0))
+	landmarks = _texts(d.get("landmarks"))  # saves from before the endings have none of these three
+	unlocks_earned = _texts(d.get("unlocks_earned"))
+	chronicle = _chronicle(d.get("chronicle"))
+	ending = ""
 	offers = d["offers"].duplicate(true)
 	sectors = made
 	spool = charge
@@ -1116,6 +1157,21 @@ static func _read_spool(d: Dictionary, map):
 	if not (raw.get("to") is String and map.has(raw["to"]) and (raw.get("t") is float or raw.get("t") is int)):
 		return null
 	return {"to": raw["to"], "t": maxf(float(raw["t"]), 0.0), "drift": bool(raw.get("drift", false)), "blocked": false}
+
+
+static func _texts(v) -> Array:
+	var out := []
+	for x in v if v is Array else []:
+		out.append(str(x))
+	return out
+
+
+static func _chronicle(v) -> Array:
+	var out := []
+	for x in v if v is Array else []:
+		if x is Dictionary:
+			out.append({"jumps": int(x.get("jumps", 0)), "kind": str(x.get("kind", "")), "id": str(x.get("id", "")), "text": str(x.get("text", ""))})
+	return out
 
 
 static func _to_set(list: Array) -> Dictionary:
