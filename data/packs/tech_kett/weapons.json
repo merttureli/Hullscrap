@@ -1,0 +1,7 @@
+{
+  "weapons": {
+    "kett_hive_swarm_launcher": {"kind": "missile", "damage_type": "explosive", "damage": 0.7, "cooldown": 4.7, "range": 900, "shots": 6, "pierce": 0, "fire_chance": 0.0, "splash": 0, "speed": 380, "turn": 2.2, "spread": 36, "pass_shields": true, "ammo": "missile", "turret": false, "gimbal": 5, "effects": {"needs_crew_in_room": {"count": 3, "else_mult": 0.4, "stat": "rate"}}},
+    "kett_chitin_thrower": {"kind": "flak", "damage_type": "kinetic", "damage": 0.9, "cooldown": 2.2, "range": 460, "shots": 5, "pierce": 0, "fire_chance": 0.0, "speed": 640, "spread": 24, "turret": false, "gimbal": 3, "effects": {"shard": {"splinters": 1, "dmg": 0.5}, "needs_crew_in_room": {"count": 2, "else_mult": 0.5, "stat": "rate"}}},
+    "kett_drone_picket": {"kind": "bolt", "damage_type": "kinetic", "damage": 1.5, "cooldown": 1.0, "range": 650, "shots": 2, "pierce": 0, "fire_chance": 0.0, "speed": 520, "spread": 6, "turret": true, "gimbal": 0, "arc": 300, "track": 150, "accuracy": 0.8, "effects": {"needs_crew_in_room": {"count": 2, "else_mult": 0.5, "stat": "rate"}}}
+  }
+}

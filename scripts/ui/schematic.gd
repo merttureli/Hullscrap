@@ -3,10 +3,13 @@ extends Control
 ## its rooms, walls, doors and systems coloured by state, breaches in red, a hull integrity bar and
 ## shield pips with a ring that shows which sector of the bubble is open. Bow is up. Placeholder shapes.
 ## bind() it to an arena ship; it redraws every frame. Drawing only.
+## The player's panel can show the enemy's intent (`intent`, intent.gd): a pulsing red reticle on the part the pilot
+## aims at, and under the panel "Targeting: Weapons" and a row per heavy enemy weapon about to fire.
 
 const Visuals = preload("res://scripts/view/visuals.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
+const Intent = preload("res://scripts/combat/intent.gd")
 
 const PANEL := Vector2(280.0, 200.0)
 const MAP := Rect2(8.0, 26.0, 264.0, 132.0)
@@ -23,10 +26,13 @@ const STATE_COLORS := {
 const PIP := Color("#5fd4ff")
 const GOLD := Color("#ffd24a")
 const ION := Color("#a07bff")
+const THREAT := Color("#ff3a3a")  ## the intent reticle and its rows
+const ROW_H := 16.0  ## px per line of the intent strip under the panel
 
 var arena
 var index := 0
 var title := ""
+var intent: Dictionary = {}  ## Intent.of(...), set each frame on the player's panel; {} draws nothing
 
 
 func _init() -> void:
@@ -134,7 +140,7 @@ func _draw() -> void:
 	_text(title.to_upper(), Vector2(10, 17), 13, TEXT)
 	if grid.hull.is_empty():
 		return
-	draw_map(self, co.ship, co.powered, MAP)
+	var map := draw_map(self, co.ship, co.powered, MAP)
 	# Hull integrity bar and the shield pips.
 	var frac := clampf(co.hull / maxf(co.hull_max, 0.01), 0.0, 1.0)
 	_text("HULL", Vector2(10, 172), 11, TEXT)
@@ -144,9 +150,71 @@ func _draw() -> void:
 	draw_rect(bar, EDGE, false, 1.0)
 	_text("%d/%d" % [ceili(co.hull), ceili(co.hull_max)], Vector2(200, 172), 11, TEXT)
 	_draw_shield(co, Vector2(10, 180))
+	_draw_intent(co, map)
 	if co.wrecked:
 		draw_rect(Rect2(Vector2.ZERO, PANEL), Color(0.25, 0.0, 0.0, 0.45))
 		_text("WRECKED", Vector2(70, 100), 26, Color("#ff5a4a"))
+
+
+## Where the intent marks go on `ship`'s map (`map`: what draw_map returned): {ring: the reticle's centre (px), radius,
+## line: "Targeting: Weapons" ("" with no target), rows: [{text, hot}] (the heavy weapons: "Artemis in 1.2 s", hot under
+## red_under_s; at most max_rows, then "+N more")}. `ring` is absent with no target. Empty for an empty `intent`.
+static func intent_layout(ship, p_intent: Dictionary, map: Dictionary) -> Dictionary:
+	var out := {"line": "", "rows": []}
+	var cfg := Intent.config()
+	var uid := int(p_intent.get("target_uid", -1))
+	var inst = ship.components.instances.get(uid)
+	if uid >= 0 and inst != null and not map.is_empty():
+		var lo: Vector2i = inst["cells"][0]
+		var hi := lo
+		for c in inst["cells"]:
+			lo = lo.min(c)
+			hi = hi.max(c)
+		var r := Rect2(map["origin"] + Vector2(lo) * map["s"], Vector2(hi - lo + Vector2i.ONE) * map["s"])
+		out["ring"] = r.get_center()
+		out["radius"] = maxf(r.size.x, r.size.y) * 0.5 + 3.0
+		out["line"] = "Targeting: " + Intent.family_label(str(p_intent.get("target_family", "")))
+	var heavy: Array = p_intent.get("heavy", [])
+	var cap := int(cfg.get("max_rows", 4))
+	for i in mini(heavy.size(), cap):
+		var h: Dictionary = heavy[i]
+		var eta := float(h["eta"])
+		var weapon := Intent.short_name(str(h["name"]))
+		out["rows"].append({"text": "%s ready" % weapon if eta < 0.05 else "%s in %.1f s" % [weapon, eta], "hot": eta < float(cfg.get("red_under_s", 0.5))})
+	if heavy.size() > cap:
+		out["rows"].append({"text": "+%d more" % (heavy.size() - cap), "hot": false})
+	return out
+
+
+## The reticle (a ring and four ticks, pulsing) on the targeted part, and under the panel the strip with the
+## "Targeting" line and a row for each heavy weapon about to fire.
+func _draw_intent(co, map: Dictionary) -> void:
+	if intent.is_empty():
+		return
+	var lay := intent_layout(co.ship, intent, map)
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.012)
+	if lay.has("ring"):
+		var at: Vector2 = lay["ring"]
+		var rad: float = lay["radius"] + 1.5 * pulse
+		draw_arc(at, rad, 0.0, TAU, 24, Color(THREAT, 0.6 + 0.4 * pulse), 2.0, true)
+		for d in [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]:
+			draw_line(at + d * (rad - 3.0), at + d * (rad + 4.0), Color(THREAT, 0.6 + 0.4 * pulse), 2.0)
+	var lines: Array = ([lay["line"]] if lay["line"] != "" else []) + lay["rows"]
+	if lines.is_empty():
+		return
+	var box := Rect2(0.0, PANEL.y + 4.0, PANEL.x, 8.0 + ROW_H * lines.size())
+	draw_rect(box, BG)
+	draw_rect(box, Color(THREAT, 0.55), false, 2.0)
+	var y := box.position.y + 6.0 + 11.0
+	if lay["line"] != "":
+		_text(lay["line"], Vector2(10.0, y), 13, THREAT.lerp(TEXT, 0.35))
+		y += ROW_H
+	for row in lay["rows"]:
+		var hot: bool = row["hot"]
+		var col := Color(THREAT, 0.7 + 0.3 * pulse) if hot else TEXT
+		draw_rect(Rect2(10.0, y - 8.0, 7.0, 7.0), col, hot)  # a flat marker, solid when hot
+		_text(row["text"], Vector2(24.0, y), 13, col)
+		y += ROW_H
 
 
 ## Shield pips (a filled one per layer up, the overcharge layer in gold; with several sectors the layers up

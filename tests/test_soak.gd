@@ -30,7 +30,7 @@ const MAX_WAITS := 20  ## waits for a passing trader before a run with no fuel c
 
 var _cap_s := FIGHT_CAP_S
 var _real_left := 0  # fights of this run still to go through the arena
-var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "runs": 0, "known": 0, "dead": 0}
+var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "tows": 0, "runs": 0, "known": 0, "dead": 0}
 
 
 func test_soak_every_starter_every_seed() -> void:
@@ -144,8 +144,12 @@ func _choose_lane(where: String, c: Campaign, sim, pick: RandomNumberGenerator) 
 		_event_chain(where + " (waiting)", w["event"], c, sim, pick)
 		if ship.inventory.count("fuel") > 0:
 			return _choose_lane(where, c, sim, pick)
-	check(false, "%s: stuck with no fuel, no drift jump and no trader (fuel %d, credits %d, hull left %d)" % [where, ship.inventory.count("fuel"), ship.inventory.count("credits"), c.hull_left(ship)])
-	return ""
+	# Still nothing (a broke run in the Hollow tide's far reaches can't afford the trader's fuel): Ma's tow home, which
+	# the map always offers with an empty tank so that a run never soft-locks (Y).
+	var tow := c.tow(ship)
+	stats["tows"] += 1
+	check(tow["ok"], "%s: stuck with no fuel, no drift jump, no trader and no tow (fuel %d, credits %d, hull left %d): %s" % [where, ship.inventory.count("fuel"), ship.inventory.count("credits"), c.hull_left(ship), tow["why"]])
+	return _choose_lane(where, c, sim, pick) if tow["ok"] else ""
 
 
 ## The first node on the shortest lane path from the ship to a station it can dock at ("" when it is at
@@ -269,8 +273,9 @@ func _gives(e: Dictionary, index: int, item: String) -> bool:
 
 
 ## A fight through the real arena, both ships flown by the pilot AI. Returns the result dictionary the
-## combat view gives the map: {state, enemy, hull, hull_max}. Over FIGHT_CAP_S it is a draw ("fled"). A captured
-## or spared enemy counts as a win and one that escaped as a draw (the campaign's own handling of those comes with salvage).
+## combat view gives the map: {state, enemy, hull, hull_max} (plus offer when spared): state is won, captured, spared,
+## escaped or lost, and over FIGHT_CAP_S a draw ("fled"). A captured or spared enemy counts as a win in the stats and one
+## that escaped as a draw; the campaign handles each state itself. The player takes any surrender that is offered.
 func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGenerator) -> Dictionary:
 	stats["fights"] += 1
 	var path := c.fight_path(value, str(c.node(c.current)["type"]))
@@ -305,14 +310,13 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 			_audit_fight(where, s)
 	_audit_fight(where, s)
 	var state := s.state()
-	state = {"captured": "won", "spared": "won", "escaped": "fighting"}.get(state, state)  # morale: a captured or spared enemy is a win, one that jumped away a draw
+	stats[{"won": "won", "captured": "won", "spared": "won", "lost": "lost"}.get(state, "draw")] += 1
 	if state == "fighting":
 		state = "fled"
-		stats["draw"] += 1
-	else:
-		stats[state] += 1
 	var foe = s.arena.ships[Session.ENEMY]
 	var res := {"state": state, "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max}
+	if state == "spared":
+		res["offer"] = s.morale.offer.duplicate()
 	stats["fight_ticks"] += n
 	sim.ships.erase(enemy)
 	return res

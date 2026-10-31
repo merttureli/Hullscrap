@@ -464,6 +464,11 @@ func test_spool_hold_reasons_for_both_sides() -> void:
 		eq(Morale.spool_hold(s.arena, idx), "", tag + ": one on their feet: free")
 		crew[2].hp = 0.0
 		eq(Morale.spool_hold(s.arena, idx), "no crew", tag + ": every crew member down")
+		# crew that bled out leave the list: none left, some dead
+		co.ship.crew = []
+		co.ship.dead_crew = ["Rook"]
+		eq(Morale.spool_hold(s.arena, idx), "no crew", tag + ": everybody dead")
+		co.ship.dead_crew = []
 		# engines are named first when several things are wrong
 		_set_status(s, engines, "disabled", idx)
 		eq(Morale.spool_hold(s.arena, idx), "engines out", tag + ": engines come first")

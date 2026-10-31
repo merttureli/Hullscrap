@@ -159,9 +159,9 @@ func hold() -> String:
 
 ## Why the jump drive of ship `idx` cannot charge, for a fleeing enemy and the player's J alike: "engines out"
 ## (every engine disabled, offline or unpowered, or none), "helm down" (no helm, or none working and powered) or
-## "no crew" (crew aboard and every one down); "" when it charges. Things the player can cause and see; whether
-## somebody happens to stand at the helm does not count. A ship with an empty crew list (the arena alone spawns
-## none) is not "no crew".
+## "no crew" (crew aboard and every one down, or all of them dead); "" when it charges. Things the player can
+## cause and see; whether somebody happens to stand at the helm does not count. A ship with an empty crew list and
+## nobody dead (the arena alone spawns no crew) is not "no crew".
 static func spool_hold(arena, idx: int) -> String:
 	var co = arena.ships[idx]
 	var comps = co.ship.components
@@ -181,7 +181,7 @@ static func spool_hold(arena, idx: int) -> String:
 	if not helm:
 		return "helm down"
 	var crew: Array = co.ship.crew
-	if not crew.is_empty() and crew.all(func(m): return m.is_down()):
+	if (not crew.is_empty() or not co.ship.dead_crew.is_empty()) and crew.all(func(m): return m.is_down()):
 		return "no crew"
 	return ""
 

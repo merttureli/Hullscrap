@@ -1,0 +1,219 @@
+{
+  "components": [
+    {
+      "id": "kett_hive_swarm_launcher",
+      "name": "Hive Swarm Launcher",
+      "blurb": "A rack of hungry drones. Many hands make it fast; one hand makes it sad.",
+      "quirk": "Six tiny homing drones a salvo (+50% damage a second over the Artemis) but it fires at 0.4 the rate unless 3 crew stand in its room: Kett work in threes.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#c98a2a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "kett_chitin_thrower",
+      "name": "Chitin Thrower",
+      "blurb": "Throws shed plate in a cone. It takes two to feed it, and no Kett has ever wished to be fewer.",
+      "quirk": "A wide cone of chitin needles that splinter into the next cell, but it fires at half rate unless 2 crew stand in its room.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#b87a2a",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "kett_drone_picket",
+      "name": "Drone Picket",
+      "blurb": "Two crewmates, one watchful drone. The hive keeps its pickets in pairs.",
+      "quirk": "A twin-drone turret that hits 30% harder than a Mk2 pulse turret, but it fires at half rate unless 2 crew stand in its room.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 4
+      },
+      "color": "#d9a24a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "kett_hive_battery",
+      "name": "Hive Battery",
+      "blurb": "A shield grown in cells, one cell to a crewmate. Three in the room and it blooms; fewer and it sulks.",
+      "quirk": "Three layers while 3 crew stand in its room, one otherwise: Kett swarm it.",
+      "family": "shield",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#c98a2a",
+      "power": -5,
+      "priority": 3,
+      "manned": false,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2,
+      "cooling": 3,
+      "stats": {
+        "layers": 3,
+        "sectors": 2
+      },
+      "abilities": [
+        {
+          "id": "overcharge",
+          "name": "Overcharge",
+          "type": "active",
+          "key": "shield",
+          "duration": 6,
+          "cooldown": 15,
+          "event": "overcharge",
+          "effects": {
+            "shield_layer": 1
+          },
+          "side_effects": []
+        },
+        {
+          "id": "hive",
+          "name": "Hive-fed",
+          "type": "passive",
+          "effects": {
+            "crew_needed": {
+              "count": 3,
+              "stat": "shield_layer",
+              "else_mult": 0.5
+            }
+          },
+          "side_effects": []
+        }
+      ]
+    },
+    {
+      "id": "kett_nest_reactor",
+      "name": "Nest Reactor",
+      "blurb": "A reactor that likes company. It warms to the hum of the hive and sulks at an empty room.",
+      "quirk": "+1 power for each Kett in its room, up to +3, on a base of 7: with nobody home it is weaker than a Reactor Mk1.",
+      "family": "reactor",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        4,
+        4
+      ],
+      "color": "#b87a2a",
+      "power": 7,
+      "priority": 0,
+      "manned": false,
+      "hp": 8,
+      "heat_limit": 100,
+      "heat_per_s": 4,
+      "cooling": 5,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "nest",
+          "name": "Nest-warmed",
+          "type": "passive",
+          "effects": {
+            "crew_bonus": {
+              "who": "kett",
+              "stat": "power",
+              "per": 1,
+              "max": 3
+            }
+          },
+          "side_effects": []
+        }
+      ]
+    },
+    {
+      "id": "kett_brood_hold",
+      "name": "Brood Hold",
+      "blurb": "A warm, crowded cell where the hive tends its own. Everyone else feels like an intruder, and works like one.",
+      "quirk": "Kett in its room repair, patch and put fires out 20% faster, everyone else 20% slower.",
+      "family": "utility",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "color": "#d9a24a",
+      "power": -1,
+      "priority": 3,
+      "manned": false,
+      "hp": 4,
+      "heat_limit": 100,
+      "heat_per_s": 0.5,
+      "cooling": 3.0,
+      "stats": {},
+      "abilities": [
+        {
+          "id": "brood",
+          "name": "Brood",
+          "type": "passive",
+          "effects": {
+            "room_work_mult": {
+              "mult": 1.2,
+              "who": "kett",
+              "else_mult": 0.8
+            }
+          },
+          "side_effects": []
+        }
+      ]
+    }
+  ]
+}

@@ -25,10 +25,12 @@ static func parts(enemy) -> Array:
 	return out
 
 
-## The scrap a stripped ship gives: (strip_base + strip_per_part x its parts) x the tier (data/drift.json loot).
-static func strip_scrap(enemy, c) -> int:
+## The scrap a stripped ship gives: (strip_base + strip_per_part x its parts) x the tier (data/drift.json loot); half
+## of that from a ghost ship, one the Hollow tide sent (`hollow`, docs/MECHANICS_REVIEW.md P1).
+static func strip_scrap(enemy, c, hollow := false) -> int:
 	var l: Dictionary = c.cfg["loot"]
-	return (int(l["strip_base"]) + int(l["strip_per_part"]) * parts(enemy).size()) * c.tier()
+	var scrap: int = (int(l["strip_base"]) + int(l["strip_per_part"]) * parts(enemy).size()) * c.tier()
+	return maxi(scrap / 2, 1) if hollow else scrap
 
 
 ## The recipe that makes item `item` ("" when none does): the recipe of that id, else the first one that outputs it.
@@ -45,7 +47,13 @@ static func recipe_for(ship, item: String) -> String:
 ## Returns {} when there is nothing to offer. Rows, in order: "Cut out the X" (the part, to the cargo), at
 ## most one "Scan the X" (its blueprint: the highest-tier offered part whose recipe the ship does not know),
 ## and for a win "Strip her for scrap". A captured ship's scrap was paid already (Campaign.fight_done).
-static func event_for(enemy, state: String, c, ship) -> Dictionary:
+## A ghost ship (`hollow`: it came from a place the Hollow tide has taken, which is what the campaign says when the
+## flag is left out) offers only the strip row, at half the scrap, whatever the state: nothing aboard is worth cutting
+## out or scanning, and its scrap was not paid at the fight.
+static func event_for(enemy, state: String, c, ship, hollow = null) -> Dictionary:
+	var ghost: bool = c.is_hollow(c.current) if hollow == null else bool(hollow)
+	if ghost:
+		return _ghost_event(enemy, c)
 	var pool := []
 	for id in parts(enemy):
 		if not pool.has(id):
@@ -75,6 +83,15 @@ static func event_for(enemy, state: String, c, ship) -> Dictionary:
 	if choices.is_empty():
 		return {}
 	return {"id": "salvage", "type": "salvage", "once": false, "title": "Salvage: %s" % foe, "text": text, "choices": choices}
+
+
+## The salvage of a ghost ship: one row, the plating at half the scrap.
+static func _ghost_event(enemy, c) -> Dictionary:
+	var foe := str(enemy.name) if enemy != null else "ship"
+	var scrap := strip_scrap(enemy, c, true)
+	var row := _row("Strip her for scrap (+%d)" % scrap, "Nothing aboard is right. Your cutters take the plating and leave the rest.", {"items": {"scrap": scrap}})
+	return {"id": "salvage", "type": "salvage", "once": false, "title": "Salvage: %s" % foe,
+		"text": "The %s drifts with no light in her and no crew to show for it. She will not last long. Your cutters have time for the plating." % foe, "choices": [row]}
 
 
 static func _row(text: String, outcome_text: String, effects: Dictionary) -> Dictionary:

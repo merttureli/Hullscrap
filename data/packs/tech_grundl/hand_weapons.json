@@ -1,0 +1,6 @@
+{
+"weapons": [
+	{"id": "freight_hammer", "name": "Freight Hammer", "culture": "grundl", "class": "melee", "damage": 30, "rate": 1.2, "range": 48, "art": "freight_hammer", "notes": "damage +20%, range +20%: a long-hafted dock hammer; it knocks a target back (later)"},
+	{"id": "chain_gun", "name": "Chain Gun", "culture": "grundl", "class": "heavy", "damage": 24, "rate": 0.72, "range": 350, "art": "chain_gun", "notes": "damage -20%, rate +20%: a belt-fed chain gun spits more, lighter slugs"}
+]
+}
