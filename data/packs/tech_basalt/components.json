@@ -17,7 +17,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#d9602a",
       "power": -3,
@@ -46,7 +46,7 @@
           4,
           2
         ],
-        "outside_hp": 5
+        "outside_hp": 12
       },
       "color": "#8a7f74",
       "power": -4,
@@ -75,7 +75,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#a89a8a",
       "power": -4,

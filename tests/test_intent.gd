@@ -19,6 +19,7 @@ func near(got: float, want: float, msg: String, eps := 1e-4) -> void:
 func _session() -> Session:
 	var s := Session.new()
 	s.start(Session.load_ship(PIRATE), Session.load_ship(PIRATE), 3)
+	s.ai.aim_skill = 0.9  # a pilot that aims at parts (pilot_ai.gd SNIPE_SKILL); the raider's own 0.5 aims at the hull
 	return s
 
 

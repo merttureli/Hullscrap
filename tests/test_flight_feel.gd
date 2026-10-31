@@ -89,16 +89,19 @@ func test_an_ai_fight_still_resolves() -> void:
 
 
 func test_the_pilot_closes_faster_than_it_used_to() -> void:
-	# From the 1200 px spawn gap the pirate closed to 1000 px in 4.2 s against the slow Rustbucket in Beta 1 (3.5 s now).
+	# From the 1200 px spawn gap the pirate closed to 1000 px in 4.2 s against the slow Rustbucket in Beta 1 (3.5 s after the
+	# x1.5). It now holds a gap between the hulls, not the centres, so it starts 400 px beyond the distance it holds.
 	var s := Session.new()
 	s.start(Ship.from_design(RUSTBUCKET), Session.load_ship(PIRATE), 1)
+	var start: float = s.ai.hold_distance(Vector2.DOWN, s.ai._intact()) + 400.0
+	s.arena.ships[Session.ENEMY].flight.pos = Vector2(0.0, -start)
 	var t := -1.0
 	for i in 60 * 30:
 		s.arena.set_input(Session.PLAYER, 0.0, 0.0, 0.0)
 		s.ai.think(Session.STEP)
 		s.arena.step(Session.STEP)
-		if s.distance() < 1000.0:
+		if s.distance() < start - 200.0:
 			t = i / 60.0
 			break
-	check(t > 0.0 and t < 4.0, "the pirate closed from 1200 to 1000 px in %.1f s" % t)
+	check(t > 0.0 and t < 4.0, "the pirate closed 200 px in %.1f s" % t)
 	check(PilotAI.CLOSE_MAX >= 1.5 * 260.0 - 1.0 and PilotAI.LATERAL_MAX >= 1.5 * 150.0 - 1.0, "its speed caps are Beta 1's x1.5")
