@@ -1,0 +1,29 @@
+{"events": [
+    {
+      "id": "station_retire_ma_berth", "type": "station", "weight": 100, "once": false, "requires": {"flag": ["at_rusthold", "debt_free"]},
+      "text": "Ma Gantry is waiting at the end of your dock with her clipboard under one arm, and for the first time ever she has put the pen behind her ear instead of chaining it to her wrist. 'Debt's clear,' she says. 'You know what that makes you? Unemployed, if you're sensible. There's a berth on the Rusthold's inner ring, third spiral, the one with the window. Five thousand. It comes with a hook for your helmet and a chair that doesn't fold. Nobody has ever retired out here. I'd like to see how it's done.'",
+      "choices": [
+        {"text": "Buy the berth. (5,000 credits)", "requires": {"credits": 5000, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "Ma counts it in front of you, twice, out loud, then slides the key across the table and, quite quietly, turns the clipboard over. On the back, in her own hand, it says PAID. 'First one,' she says. 'Don't make it weird.'", "effects": {"unlock": "ship_kettle_tug", "ending": "retire"}}
+        ]},
+        {"text": "Ask to see the berth first.", "outcomes": [
+          {"weight": 100, "text": "She walks you up through three decks of the Rusthold and one deck of somebody's laundry, and opens a round door onto a round room with a round window.", "effects": {"goto": "retire_berth_page"}}
+        ]},
+        {"text": "Not yet. There are still wrecks.", "outcomes": [
+          {"weight": 100, "text": "'Wrecks aren't going anywhere,' says Ma. 'That's the whole problem with them.'", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "retire_berth_page", "type": "page", "weight": 0, "requires": {},
+      "text": "The berth is a round room the size of a good argument, with a window onto the whole slow turning of the Rusthold: the cargo bay, the welders, the long dim spiral of every wreck that anyone ever bolted to anyone else. There is a hook by the door at helmet height. There is a chair that doesn't fold. On the shelf sit a kettle, a spare mug, and a note in Ma's chalk: DON'T GET USED TO IT. Out of the window a dock hand sees you looking, and waves, with her welding mask pushed up.",
+      "choices": [
+        {"text": "Take it. (5,000 credits)", "requires": {"credits": 5000, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You hang your helmet on the hook. It fits. Behind you Ma says nothing, loudly, for a long time, and then 'Tea?'", "effects": {"unlock": "ship_kettle_tug", "ending": "retire"}}
+        ]},
+        {"text": "Think about it.", "outcomes": [
+          {"weight": 100, "text": "'Take your time,' says Ma. 'It's not going anywhere. Nor am I. Nor is the number five thousand.'", "effects": {}}
+        ]}
+      ]
+    }
+]}
