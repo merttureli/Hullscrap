@@ -1,0 +1,244 @@
+{"events": [
+    {
+      "id": "fen_wet_watch_dock", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "The Fens dock is a raft of lily-pad platforms joined by plank walkways, each painted with a fire-risk rating, each rated higher than the last. A Mire in a dripping slicker greets you with a bucket in each hand. 'Welcome,' they say. 'Please do not strike a match. Please do not think about striking a match. We are monitoring your thoughts.'",
+      "choices": [
+        {"text": "Hand over your lighter and any matches.", "outcomes": [
+          {"weight": 80, "text": "The Mire sorts your things with solemn care and gives you a damp ticket for each. 'Good,' they say. 'You are now officially a safe person.' You are, for the first time in your life, calm.", "effects": {"crew_hp": 10}},
+          {"weight": 20, "text": "The Mire finds a second lighter in your boot. There is a silence. You are issued a bucket.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+        ]},
+        {"text": "Say you are a fire safety inspector.", "outcomes": [
+          {"weight": 50, "text": "The Mire's eyes go wide. They offer you a tour, three meals and a hat. You are an excellent inspector. You find nothing, because there is nothing; it is a Fen.", "effects": {"items": {"credits": 15}, "crew_hp": 10}},
+          {"weight": 50, "text": "The Mire asks which fire. You say 'Any'. They ask which standard. You say 'Any'. They lead you gently to a free course in fire safety.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+        ]},
+        {"text": "[Mire] Compare tank sizes.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire and the dockhand stand back to back to compare backpacks. The dockhand's tank is a litre bigger; yours has a nicer finish. They shake hands solemnly and swap one tank-badge each. The dock tops up your fuel for the honour.", "effects": {"items": {"fuel": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Emberkin] Ask them to be gentle with you.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "The dockhand blinks at your Emberkin, who is steaming gently on the planks. A hush. The dockhand puts a bucket over their own head in solidarity and then, shaken, over yours. You are issued a lanyard that says FIRE RISK: ACCEPTED.", "effects": {"items": {"credits": 20}}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_burning_barge", "type": "distress", "weight": 10, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "A trade barge, the Dampener, is on fire. Not badly: gently, thoroughly, in the way of a fire that has all the time in the world. Her crew stand in a row at the rail passing buckets hand to hand, and apologise to each other every time one slops over. The fire is not impressed.",
+      "choices": [
+        {"text": "Join the bucket line.", "outcomes": [
+          {"weight": 65, "text": "You pass buckets for an hour. The fire sulks, shrinks and goes out. The crew drop their buckets and cry 'Oh, thank you, oh, we are so sorry!' all at once, and press a crate of polymer into your hands. A damp inventory comes with it.", "effects": {"items": {"polymer": 20}, "rep": {"concord": 1}, "crew_hp": -5, "log": "log_fen_bucket_inventory"}},
+          {"weight": 25, "text": "The fire flares as you arrive, burns a bucket-man's apron, and goes out in a hiss of pure embarrassment. You are singed. They are mortified, and apologise with a list of buckets.", "effects": {"items": {"polymer": 15}, "crew_hp": -10, "log": "log_fen_bucket_inventory"}},
+          {"weight": 10, "text": "A tank on the barge goes. You get out; so do they.", "effects": {"items": {"polymer": 10, "credits": 30}, "hull": -10}}
+        ]},
+        {"text": "[Mire] Take the lead of the bucket line.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire walks the length of the barge, takes one look at the fire, and rearranges the whole line in a minute. The fire goes out in six. The crew look at your Mire the way people look at a saint with a tank, and give you everything, plus their bucket book.", "effects": {"items": {"polymer": 25, "credits": 50}, "rep": {"concord": 2, "clans": 1}, "log": "log_fen_bucket_inventory"}}
+        ]},
+        {"text": "[Quick hands] Cut the burning cargo loose.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 100, "text": "Your engineer cuts the burning pallets free with four clean strokes and kicks them overboard. The barge breathes out. The crew hug each other, then your engineer, then the nearest bucket.", "effects": {"items": {"polymer": 15, "credits": 30}}}
+        ]},
+        {"text": "Sell them 20 polymer of extinguisher foam.", "requires": {"items": {"polymer": 20}}, "outcomes": [
+          {"weight": 100, "text": "You hand over the foam. The fire gives up. They pay in credits, with sincere gratitude and no discount.", "effects": {"items": {"polymer": -20, "credits": 70}, "rep": {"concord": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_ice_harvest", "type": "asteroid_field", "weight": 10, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "A comet-ice field, white and squeaking with cold, cut up by the Fen harvesters into neat blocks and stacked in long rows to be melted for the docks. Mire crews in thin slickers pull blocks along on tow-lines, humming, ankle-deep in meltwater. 'Bring a bucket,' says the lead. 'Or three.'",
+      "choices": [
+        {"text": "Harvest ice for your tanks.", "outcomes": [
+          {"weight": 85, "text": "The ice squeaks, cracks, and comes away in perfect blocks. You fill your tanks and your hold with clean cold water, with enough left to wash your face.", "effects": {"items": {"fuel": 2, "polymer": 10}, "crew_hp": 10}},
+          {"weight": 15, "text": "A block slips off the line and finds a foot. Several of you.", "effects": {"items": {"fuel": 1}, "crew_hp": -5}}
+        ]},
+        {"text": "Buy a harvest permit and a block of the best (20 credits).", "requires": {"credits": 20}, "outcomes": [
+          {"weight": 100, "text": "The permit clerk stamps a wet receipt. You take a block of the finest ice and a recipe for tea. You sell most of the ice at the next stop for more than the permit.", "effects": {"items": {"credits": -20, "fuel": 3, "polymer": 15}}}
+        ]},
+        {"text": "[Mire] Join the harvest in the water.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire slides into the meltwater like a dream and pulls ice with the Fen crews until the sun comes up. They come back wrinkled, happy and soaked, with a share of the harvest and a rap on the shoulder from the lead.", "effects": {"items": {"fuel": 4, "polymer": 20}, "crew_hp": 10}}
+        ]},
+        {"text": "[Basalt] Split the big blocks by hand.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt walks across the ice with no suit, splits a thirty-tonne block with a flat hand, and walks on. The harvesters follow in silence. Nobody has ever cut so cleanly. They pay in ice and an invitation to dinner.", "effects": {"items": {"fuel": 4, "polymer": 20}}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_fog_bank", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "A bank of white fog lies across the lane like a held breath. Your sensors say it is warm, wet, and forty percent gas. Your crew say it smells of grandmothers. Faint in the dark, someone is calling your name in a voice you almost recognise, and the Mire on the next ship are chanting 'Do not follow it. Do not follow it.'",
+      "choices": [
+        {"text": "Fly through slowly.", "outcomes": [
+          {"weight": 60, "text": "The fog parts, closes, parts. Voices come and go. At the far end you realise your crew have all heard different names, and none of them will say which. The air tastes of rain.", "effects": {"crew_hp": 5}},
+          {"weight": 30, "text": "The fog gets in. For an hour the crew see things that are not there and say things that are not true. Everyone sleeps badly.", "effects": {"crew_hp": -10}},
+          {"weight": 10, "text": "Somewhere in the fog something takes a bite out of your hull. It leaves a tooth.", "effects": {"items": {"scrap": 20}, "hull": -10}}
+        ]},
+        {"text": "Follow the voice.", "outcomes": [
+          {"weight": 40, "text": "The voice leads you to a drifting lamp, a floating pot of tea and a note: THIS WAY IS FINE. You drink the tea. It is very good. The note is signed 'Moll'.", "effects": {"items": {"fuel": 2}, "crew_hp": 10}},
+          {"weight": 40, "text": "The voice leads you into the thick of it. By the time you get out a day has gone, and your crew are wearing each other's hats.", "effects": {"crew_hp": -5}},
+          {"weight": 20, "text": "The voice leads you to the bank's heart: an old Concord cutter, her crew at their posts, fog pouring from her vents. The log is the last thing aboard.", "effects": {"items": {"scrap": 30}, "log": "log_fen_fog_log"}}
+        ]},
+        {"text": "[Mire] Sing the Wet Watch call.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire sings the old brigade call: three notes up, one down. The fog thins at once and parts like a curtain. Moored in the lane beyond are forty tiny lamps and a hundred Mire in slickers, all waving. 'We heard,' says the leader. 'We came.' They toast with tea and give you fuel, and a log from the cutter they found.", "effects": {"items": {"fuel": 4, "credits": 30}, "rep": {"concord": 1}, "log": "log_fen_fog_log"}}
+        ]},
+        {"text": "[Prismatic] Burn the fog off with a beam.", "requires": {"species": "prismatic"}, "outcomes": [
+          {"weight": 100, "text": "Your Prismatic opens its core and the fog glows pink, gold, white, then lifts like breath off a mirror. Behind it a long string of Fen lamps. The Mire cheer and ask your Prismatic to do it every Tuesday.", "effects": {"items": {"crystal": 2, "credits": 20}}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_drowned_wreck", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "A freighter, the Slow Leak, sits in a bubble of Fen water, sunk to her topmost deck. Fish, or something fish-like, swim through her bridge windows. Her cargo bay is a rippling green pond. A sign nailed to the lock: SALVAGE ONLY IF DRY. IT IS NOT DRY.",
+      "choices": [
+        {"text": "Pump the hold and strip it.", "outcomes": [
+          {"weight": 55, "text": "You rig a pump, drain the hold, and find the cargo has sat under water forty years. The crates are swollen, the labels are runny and the contents are mostly fine. A soggy manifest comes up with them.", "effects": {"items": {"scrap": 35, "polymer": 20, "copper": 15}, "log": "log_fen_slow_leak"}},
+          {"weight": 30, "text": "The pump hits a pocket of old gas and burps a huge bubble. The crew come up soaked and stunned.", "effects": {"items": {"scrap": 25}, "crew_hp": -10, "log": "log_fen_slow_leak"}},
+          {"weight": 15, "text": "Under the hold, a locker of dry clothes in a plastic bag. Inside: a Concord spare part and a smell of lavender.", "effects": {"items": {"titanium": 5, "credits": 40}, "log": "log_fen_slow_leak"}}
+        ]},
+        {"text": "[Mire] Dive in and bring it up by hand.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire dives into the green pond and comes up an hour later with a net of crates, a manifest and a very small fish in the hair. It is the best afternoon they have had.", "effects": {"items": {"scrap": 40, "polymer": 25, "titanium": 6}, "crew_hp": 5, "log": "log_fen_slow_leak"}}
+        ]},
+        {"text": "[Quick hands] Weld the leak and refloat her.", "requires": {"trait": "fast_repair"}, "outcomes": [
+          {"weight": 80, "text": "Your engineer patches the Slow Leak from inside and the sunken freighter, with a sigh, lifts out of her pond. The salvage rights revert to you for the refloat. The cargo is intact.", "effects": {"items": {"scrap": 50, "copper": 20, "credits": 40}}},
+          {"weight": 20, "text": "The weld takes. The leak moves. The freighter settles back with the dignity of a ship who knew.", "effects": {"items": {"scrap": 20}}}
+        ]},
+        {"text": "[Sporeling] Walk in. Moss loves water.", "requires": {"species": "sporeling"}, "outcomes": [
+          {"weight": 100, "text": "Your Sporeling wades into the hold and spreads across the walls like a green sunrise. In an hour the hold is carpeted in moss, the walls are bound, and the water is clear and still. The cargo comes up clean as a pin.", "effects": {"items": {"scrap": 40, "polymer": 30}, "crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_fire_drill", "type": "empty", "weight": 9, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "A Fen patrol cutter pulls alongside, flashing a polite lamp. 'Surprise drill,' says the voice. 'You will have three minutes.' Before you can ask, an alarm sounds on your ship that is not yours. A Mire in a slicker steps through your airlock holding a stopwatch. 'Fire in the galley,' they say. 'Go.'",
+      "choices": [
+        {"text": "Play along.", "outcomes": [
+          {"weight": 55, "text": "Your crew run the drill: foam, buckets, a lot of shouting. The stopwatch says 2:41. The Mire nods, writes 'adequate', and awards each of you a sticker. Your crew are quietly delighted. The Mire's log pad is left behind.", "effects": {"items": {"credits": 10}, "rep": {"concord": 1}, "crew_hp": 5, "log": "log_fen_three_am"}},
+          {"weight": 45, "text": "Your crew run the drill. Someone takes the wrong exit; someone else takes the right one in the wrong order. The Mire writes 'educational' and sticks a poster on your wall, along with a log pad.", "effects": {"crew_hp": 5, "log": "log_fen_three_am"}}
+        ]},
+        {"text": "Refuse the drill.", "outcomes": [
+          {"weight": 100, "text": "The Mire looks at you for a long time, with the compassion of a nurse. 'Fire does not refuse,' they say, and leave a poster on your wall. FIRE DOES NOT REFUSE.", "effects": {}}
+        ]},
+        {"text": "[Mire] Run the drill yourself.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire takes the stopwatch and runs the drill as if their life depended on it. The patrol Mire watch, whisper, and finally salute. '2:04,' says the leader. 'A record on a human ship.' The crew get a medal, a bucket and a hundred credits.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "crew_hp": 5}}
+        ]},
+        {"text": "[Medbay] Show off your medical bay. Drill-ready.", "requires": {"component": "medbay"}, "outcomes": [
+          {"weight": 100, "text": "The Mire inspect your medbay with the reverent silence of tourists in a cathedral. 'Every bed has a bucket,' one whispers. 'Every bucket has a label.' They hold a small ceremony, and issue you a certificate and a tin of nanite paste.", "effects": {"items": {"credits": 40, "nanite_paste": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_unpaid_wages", "type": "patrol", "weight": 10, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "A Concord clerk in a leaking cutter, CS-044 Remittance, is signalling the Fens: 'Pay. Pay. Pay.' It takes a moment to realise he is begging them to accept his money. 'Forty years of wages,' he says. 'Owed to the Wet Watch since the Snap. The Concord has just remembered. I have a hold of credits and I cannot make them take it.' The Mire stand in a row, arms folded.",
+      "choices": [
+        {"text": "Offer to carry the money across to them.", "outcomes": [
+          {"weight": 60, "text": "You carry the credits across and set them at the Watch's feet. The Mire look at it for a long time. Then the chief says, 'A donation, then,' and everyone nods. The clerk bursts into tears. You get a finder's fee and the clerk's ledger.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "log": "log_fen_wages"}},
+          {"weight": 40, "text": "The Mire send you back with the credits and a note: THANK YOU BUT NO. You return the hold to the clerk, who weeps harder. He tips you for the effort.", "effects": {"items": {"credits": 30}, "rep": {"concord": 1}, "log": "log_fen_wages"}}
+        ]},
+        {"text": "[Mire] Explain it as a gift, not a wage.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire speaks to the chief in the old brigade way, and the chief's folded arms unfold. 'A gift from the clerk's heart,' she says. 'A different thing.' The money is accepted in a ceremony involving one bucket. The clerk is carried off on shoulders, and you get a cut of the euphoria.", "effects": {"items": {"credits": 80, "fuel": 2}, "rep": {"concord": 3}, "log": "log_fen_wages"}}
+        ]},
+        {"text": "[Fenn] Restructure the debt as a donation.", "requires": {"species": "fenn"}, "outcomes": [
+          {"weight": 100, "text": "Your Fenn drafts a deed in four minutes: the wages become a Brigade Fund, to be spent on buckets and tea. The Mire sign with relief. The clerk signs with joy. Your Fenn takes a fee from the fund, which both sides agree is fair.", "effects": {"items": {"credits": 70}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Keep out of it.", "outcomes": [
+          {"weight": 100, "text": "You wave and fly on. Behind you the Mire and the clerk stand, forty years apart, still not touching the money.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_steam_lance_trial", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_mire_fens"},
+      "text": "Mother Moll, chief of the Wet Watch, keeps a steam lance in a rack by her bunk: a heavy, hissing beam that cooks what it touches and, every tenth shot, makes the room a little too warm. 'Mire put fires out,' she says. 'The lance puts them in. We built it by accident.' She nods at a training room with a wall of sandbags. 'Fire it. Put out what you start. Then it is yours.'",
+      "choices": [
+        {"text": "Fire the lance and put out the fire yourself.", "outcomes": [
+          {"weight": 55, "text": "You fire. The sandbags steam, the room fills with a fog that smells of hot laundry, and a small fire starts in the corner. You put it out with a bucket and a lot of shouting. Moll signs a chit. 'Adequate,' she says. 'Keep it clean.'", "effects": {"crew_hp": -5, "flag": "tech_steam_lance"}},
+          {"weight": 45, "text": "You fire. The room goes hot, the fire gets up, and you put it out about three seconds after the crew would have liked. Moll hands over the schematics with a long, level look.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_steam_lance"}}
+        ]},
+        {"text": "[Mire] Fire it and put out what you start.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire fires the lance, lets the fire catch, and puts it out with a single sweep of the tank. The training room is a cloud of steam, and your Mire emerges wet and beaming. Moll hands over the schematics, a plaque and a spare nozzle. 'It likes you.'", "effects": {"items": {"polymer": 15, "fuel": 2}, "rep": {"concord": 1}, "flag": "tech_steam_lance"}}
+        ]},
+        {"text": "[Radiator] Cool the room while you fire.", "requires": {"component": "radiator"}, "outcomes": [
+          {"weight": 100, "text": "Your radiators drink the lance's heat as fast as it makes it, and the room never gets above sauna. Moll nods slowly. 'Cheating,' she says. 'But you set nothing on fire.' She signs the chit.", "effects": {"flag": "tech_steam_lance"}}
+        ]},
+        {"text": "Say you will come back with a bucket.", "outcomes": [
+          {"weight": 100, "text": "'Bring two,' says Moll.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_dry_run", "type": "pirate", "weight": 10, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "A Rustfang boat, the Dry Run, has been raiding Fen platforms for their water tanks. Her crew stand at the rail with a long-barrelled hose and a very loud megaphone: 'GIVE US YOUR WATER OR WE WILL TAKE IT.' The Mire, in slickers, line up and offer the pirates their buckets. The pirates are visibly confused. 'No,' says the leader. 'You are supposed to be afraid.'",
+      "choices": [
+        {"text": "Fight the pirates.", "outcomes": [
+          {"weight": 100, "text": "You open fire. The Mire, relieved to have someone else do the shouting, hand out tea.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Let the Mire win by politeness.", "outcomes": [
+          {"weight": 60, "text": "The Mire hand each pirate a bucket and a cup of tea and offer to show them how to put out a fire. By the end the pirates have signed up for a safety course, handed in their hoses and gone home in tears. The Wet Watch pays you a finder's fee.", "effects": {"items": {"credits": 40}, "rep": {"concord": 2}}},
+          {"weight": 40, "text": "The pirates drink the tea, take the buckets and the tank, and leave without saying thank you. The Mire say it for them.", "effects": {"items": {"polymer": 10}}}
+        ]},
+        {"text": "[Mire] Offer the pirates a pint each, no tanks.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire walks across the airlock, tank on their back, and opens the tap into a pirate's cup. 'Pure,' they say. 'Free. Keep your hose.' The pirates, floored by the generosity, flee. You find a crate of loot and the megaphone on your way back.", "effects": {"items": {"scrap": 40, "credits": 30}}}
+        ]},
+        {"text": "[Gauntling] Give them a mechanical fright.", "requires": {"species": "gauntling"}, "outcomes": [
+          {"weight": 100, "text": "Your Gauntling steps out and unscrews its own arm to hold it like a club. The pirates scream, drop everything and flee. You pick up the loot, the megaphone and the leader's hat.", "effects": {"items": {"scrap": 50, "credits": 25}}}
+        ]}
+      ],
+      "after_win": {"text": "The Dry Run's tanks are full of Fen water and her hold is full of buckets. The Mire send a delegation to thank you. They have brought you a bucket.", "effects": {"items": {"polymer": 25, "credits": 45, "scrap": 30}, "rep": {"concord": 1}}}
+    },
+    {
+      "id": "fen_geyser_season", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"flag": "in_mire_fens", "jumps_min": 3},
+      "text": "The comet ice is in geyser season. Every few seconds a jet of superheated steam shoots from a fissure in the rock, fifty metres high, and falls as boiling rain. The Mire harvest it anyway, in mackintoshes. 'Mind the geysers,' says one. 'They are quite hot.' She is bright pink from the neck up.",
+      "choices": [
+        {"text": "Harvest between the jets.", "outcomes": [
+          {"weight": 40, "text": "You time the jets like a tide, dart in, cut, dart out. The haul is huge and the crew come back parboiled but proud.", "effects": {"items": {"fuel": 5, "polymer": 25}, "crew_hp": -10}},
+          {"weight": 30, "text": "A jet catches the ship mid-dart. The hull screams. The crew scald. You get out with half a haul and most of your skin.", "effects": {"items": {"fuel": 3, "polymer": 10}, "crew_hp": -20, "hull": -10}},
+          {"weight": 20, "text": "A jet takes the cutter arm clean off. The haul floats in the steam and you get a little of it.", "effects": {"items": {"fuel": 2, "polymer": 10}, "hull": -15}},
+          {"weight": 10, "text": "A jet catches the airlock mid-cycle. One of your crew is scalded badly in the steam and does not make it back.", "effects": {"crew_hp": -15, "hull": -10, "lose_crew": 1}}
+        ]},
+        {"text": "[Mire] Harvest with the Wet Watch.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 85, "text": "Your Mire joins the harvesters in a mackintosh and walks into the steam as if it were mist. They return damp, pink and triumphant, carrying nine blocks of ice and a lot of fuel.", "effects": {"items": {"fuel": 6, "polymer": 25, "credits": 30}, "rep": {"concord": 1}}},
+          {"weight": 15, "text": "A geyser takes your Mire by surprise. They get out bright pink and cross.", "effects": {"items": {"fuel": 4, "polymer": 15}, "crew_hp": -15}}
+        ]},
+        {"text": "[Radiator] Run your radiators flat out and cut.", "requires": {"component": "radiator"}, "outcomes": [
+          {"weight": 70, "text": "Your radiators sing, the hull steams, and the cutters go through the rock like soap. The steam rolls off you. You take your haul and go.", "effects": {"items": {"fuel": 4, "polymer": 20}, "hull": -5}},
+          {"weight": 30, "text": "The radiators overload under the sudden heat and shut down. The hull cooks for ten minutes.", "effects": {"items": {"fuel": 3}, "crew_hp": -10, "hull": -10}}
+        ]},
+        {"text": "Watch the Mire work and wave.", "outcomes": [
+          {"weight": 100, "text": "You watch the harvest from a safe distance. A Mire waves from the steam, bright pink, and shouts 'Come in! It is quite nice!' It is not nice.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_old_chief", "type": "distress", "weight": 6, "once": true, "requires": {"flag": "in_mire_fens"},
+      "text": "At the end of a plank walkway a Mire in an old brigade slicker sits on a bucket and looks at nothing. The slicker has a chief's badge. The badge has a date: forty years of service. 'I am Glub,' he says to no one. 'I am done with fire. I am tired of the wet. I would like to see somewhere dry. Do you know anywhere dry?'",
+      "choices": [
+        {"text": "Tell him you know a dry ship.", "outcomes": [
+          {"weight": 100, "text": "Glub considers this for a long time, as a man might consider an unlikely loan. Then he stands, picks up his bucket, and walks aboard. He will dry out in a week. He is willing to try. His old mate's notes on dry weeks are in the bucket.", "effects": {"recruit": {"species": "mire", "name": "Glub"}, "log": "log_fen_dry_week"}}
+        ]},
+        {"text": "[Mire] Offer to trade a dry place for a good chief.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire and Glub talk quietly for a very long time. In the end Glub hangs his slicker on the walkway, badge on top, and comes aboard in a plain tunic. Your Mire carries the slicker back to the dock and returns damp, solemn and a little proud.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}, "recruit": {"species": "mire", "name": "Glub"}, "log": "log_fen_dry_week"}}
+        ]},
+        {"text": "[Emberkin] Sit beside him and radiate, gently.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin sits beside him and glows. Glub sniffs. 'Dry,' he says, with horror. He edges away, then closer, then shifts to the warm side. After an hour he is cheerful enough to sign on, steam rising off his shoulders. 'You are the most terrifying person I have ever met,' he says. 'Thank you.'", "effects": {"recruit": {"species": "mire", "name": "Glub"}, "log": "log_fen_dry_week"}}
+        ]},
+        {"text": "Offer him a bucket.", "outcomes": [
+          {"weight": 100, "text": "He looks at it in his hands for a long time. 'No,' he says, gently. 'Not today.' But he smiles, and for the first time since you came, he looks up.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "fen_steam_baths", "type": "trader", "weight": 10, "once": false, "requires": {"flag": "in_mire_fens"},
+      "text": "The Fens sell steam baths: floating pods with wooden benches, a little brass boiler and a notice reading WARNING, THIS IS A DRY ROOM. NOT FOR MIRE. FOR EVERYONE ELSE, IT IS LOVELY. The Mire stand outside with buckets and tea, with the faces of nurses at a hospital for fools.",
+      "choices": [
+        {"text": "Take a steam bath (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 85, "text": "An hour in the pod: eucalyptus, brass, and a Mire pouring water on the stones with a face of professional concern. You come out boiled and blissful. The crew carry you to your bunks.", "effects": {"items": {"credits": -15}, "crew_hp": 15}},
+          {"weight": 15, "text": "The boiler overdoes it. You come out the colour of a lobster, with the temper of one.", "effects": {"items": {"credits": -15}, "crew_hp": -5}}
+        ]},
+        {"text": "Sell the Fens 20 scrap for the boilers.", "requires": {"items": {"scrap": 20}}, "outcomes": [
+          {"weight": 100, "text": "The boiler-keeper weighs the scrap on a brass scale, hums, pays in credits, and refuses a receipt. 'It is a deductible,' she says.", "effects": {"items": {"scrap": -20, "credits": 45}}}
+        ]},
+        {"text": "[Mire] Keep the guests company from outside the door.", "requires": {"species": "mire"}, "outcomes": [
+          {"weight": 100, "text": "Your Mire stands in the corridor, tank to the wall, passing buckets to the steam-room's guests and cooling them on their way out. It is the proudest hour of their career. The pod-keeper pays them in cash and a hug.", "effects": {"items": {"credits": 40}, "crew_hp": 5}}
+        ]},
+        {"text": "[Emberkin] Test the pod's highest setting.", "requires": {"species": "emberkin"}, "outcomes": [
+          {"weight": 100, "text": "Your Emberkin goes in and turns the boiler up. The pod goes to 90, to 100, to a temperature the manual does not list. The steam turns to light. Your Emberkin comes out glowing and says 'Barely a tickle.' The pod-keeper offers to buy them.", "effects": {"items": {"credits": 50}, "crew_hp": 10}}
+        ]},
+        {"text": "Sit outside with a cup of tea.", "outcomes": [
+          {"weight": 100, "text": "A Mire hands you a cup of tea and a bucket, in case. You sit on the plank and watch the pods steam, and nothing happens, in the nicest way.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    }
+]}
