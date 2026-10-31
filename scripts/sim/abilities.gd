@@ -14,8 +14,9 @@ extends RefCounted
 ##   crew_bonus {who, stat, per, max}, crew_needed {count, stat, else_mult, who?}, room_wall_hp_mult,
 ##   heat_above {heat, shield_layer}, room_work_mult {mult, who?, else_mult?}. They are read by the power solve
 ##   (Ship.refresh), the arena's thrust and the shield layers and recharge (Shields), the crew's work speed
-##   (Jobs) and the wall hp at the start of a fight (Arena.add_ship). tick() bumps rev when one of the figures
-##   changes because crew moved or a room heated, so those readers refresh.
+##   (Jobs) and the wall hp at the start of a fight (Arena.add_ship). Ship.refresh puts crew_sig, the figures
+##   that depend on the crew and the heat, in its signature, so the power solve is redone (and the arena, which
+##   watches the solve, recomputes thrust and layers) when someone walks in or out or a room heats past a threshold.
 ## - operator_needs: traits the crew member manning the part (ship.manned) must have; "a|b" means
 ##   either. Traits come from the crew member's species, data/crew.json and gear (CrewMember.traits()).
 ## State lives on the ship, in `ship.ability_state` (not saved): `slots` "uid:id" -> {uid, id, active,
@@ -35,7 +36,7 @@ const EPS := 1e-9
 
 
 static func fresh_state() -> Dictionary:
-	return {"rev": 0, "slots": {}, "pulse": {}, "crew_sig": []}
+	return {"rev": 0, "slots": {}, "pulse": {}}
 
 
 ## How many starts and ends this ship's abilities have had.
@@ -183,10 +184,6 @@ static func tick(ship, dt: float, rng: RandomNumberGenerator = null) -> void:
 		for a in ship.components.def(inst["id"]).get("abilities", []):
 			if a.get("type", "active") == "passive":
 				_side_effects(ship, uid, a, dt, rng)
-	var sig := crew_sig(ship)  # someone walked in or out, or a room heated past a threshold: the readers of those figures refresh
-	if sig != ship.ability_state["crew_sig"]:
-		ship.ability_state["crew_sig"] = sig
-		ship.ability_state["rev"] += 1
 
 
 # --- what the running abilities change ------------------------------------------------------------
@@ -225,8 +222,9 @@ static func stat_mults(ship, stat: String, need_power := true) -> Dictionary:
 		if m is Dictionary and m.has(stat):
 			out[r["uid"]] = float(out.get(r["uid"], 1.0)) * float(m[stat])
 		for cn in PartEffects.entries(fx.get("crew_needed")):
-			if cn.get("stat") == stat:
-				out[r["uid"]] = float(out.get(r["uid"], 1.0)) * PartEffects.needed_mult(ship, r["uid"], cn)
+			var f := PartEffects.needed_mult(ship, r["uid"], cn) if cn.get("stat") == stat else 1.0
+			if f != 1.0:
+				out[r["uid"]] = float(out.get(r["uid"], 1.0)) * f
 	return out
 
 
@@ -239,8 +237,9 @@ static func thrust_boost(ship) -> Dictionary:
 			if cb.get("stat") != "thrust":
 				continue
 			var base := float(ship.effective(ship.components.instances[r["uid"]]["id"])["stats"].get("thrust", 0.0))
-			if base > 0.0:
-				out[r["uid"]] = float(out.get(r["uid"], 1.0)) * (base + PartEffects.bonus_of(ship, r["uid"], cb)) / base
+			var add := PartEffects.bonus_of(ship, r["uid"], cb)
+			if base > 0.0 and add > 0.0:
+				out[r["uid"]] = float(out.get(r["uid"], 1.0)) * (base + add) / base
 	return out
 
 
@@ -254,8 +253,9 @@ static func power_mods(ship) -> Dictionary:
 			if s.get("type", "") == "power_spike":
 				extra[r["uid"]] = float(extra.get(r["uid"], 0.0)) + float(s.get("rate", 0.0))
 		for cb in PartEffects.entries(r["ability"].get("effects", {}).get("crew_bonus")):
-			if cb.get("stat") == "power":
-				bonus[r["uid"]] = float(bonus.get(r["uid"], 0.0)) + PartEffects.bonus_of(ship, r["uid"], cb)
+			var add := PartEffects.bonus_of(ship, r["uid"], cb) if cb.get("stat") == "power" else 0.0
+			if add > 0.0:
+				bonus[r["uid"]] = float(bonus.get(r["uid"], 0.0)) + add
 	return {"mult": stat_mults(ship, "power", false), "extra": extra, "bonus": bonus}
 
 
@@ -319,7 +319,7 @@ static func wall_hp_mults(ship) -> Dictionary:
 
 
 ## The crew-dependent figures of the working parts as plain data (part_effects.gd fingerprint): equal while nothing
-## that matters changed. Ship.refresh and tick() compare it.
+## that matters changed. Ship.refresh compares it.
 static func crew_sig(ship) -> Array:
 	var out := []
 	for r in running(ship, false):
