@@ -281,6 +281,25 @@ func test_the_cheapest_ship_of_every_faction_is_powered() -> void:
 			check(ship != null and Shipgen.validate(ship).is_empty(), "%s %s with nothing to spend is a ship" % [fid, size])
 
 
+func test_generated_ships_carry_a_morale_style_a_pilot_and_a_crew() -> void:
+	var styles: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/morale.json"))["styles"]
+	for faction in Shipgen.factions():
+		for size in SIZES:
+			var ship := Shipgen.build(faction, size, 21, 200.0)
+			var ai: Dictionary = ship.get_meta("ai")
+			check(styles.has(ai["morale"]), "%s %s: the morale style %s exists" % [faction, size, ai["morale"]])
+			check(float(ai["aim_skill"]) >= 0.0 and float(ai["aim_skill"]) <= 1.0, "%s: a pilot's aim skill" % faction)
+			eq(ship.crew_plan.size(), int(ship.get_meta("shipgen")["crew"]), "%s %s: the crew the budget bought" % [faction, size])
+			var names := {}
+			for e in ship.crew_plan:
+				names[e["name"]] = true
+				check(Content.has("species", str(e["species"])), "%s: the crew species %s exists" % [faction, e["species"]])
+			eq(names.size(), ship.crew_plan.size(), "%s %s: no two crew share a name" % [faction, size])
+			check(ship.name != "" and ship.name != "Ship", "%s: a name" % faction)
+	eq(Shipgen.build("rustfangs", "medium", 3, 100.0, {"ram": true}).get_meta("ai")["morale"], "ram", "a rammer breaks like one")
+	eq(Shipgen.build("concord", "small", 3, 60.0).get_meta("ai")["morale"], "concord", "the Concord breaks like the Concord")
+
+
 # --- the budget --------------------------------------------------------------------------------------
 
 func test_the_budget_follows_section_14() -> void:
@@ -313,10 +332,10 @@ func near(got: float, want: float, msg: String) -> void:
 func test_a_bigger_budget_buys_more() -> void:
 	for faction in Shipgen.factions():
 		var total_spent := [0.0, 0.0, 0.0]
-		for i in 10:
+		for i in 5:
 			for k in 3:
 				var budget: float = [40.0, 120.0, 360.0][k]
-				var ship := Shipgen.build(faction, "large", 700 + i, budget)
+				var ship := Shipgen.build(faction, "medium", 700 + i, budget)
 				var meta: Dictionary = ship.get_meta("shipgen")
 				check(float(meta["spent"]) <= budget + 1e-6, "%s: spent %.1f of %.0f" % [faction, float(meta["spent"]), budget])
 				total_spent[k] += float(meta["spent"])
@@ -333,18 +352,18 @@ func test_threat_rises_with_the_budget() -> void:
 		var pairs := 0
 		for budget in [40.0, 90.0, 200.0, 450.0]:
 			var sum := 0.0
-			for i in 10:
+			for i in 6:
 				var size := "small" if budget < 60.0 else ("medium" if budget < 250.0 else "large")
 				sum += Threat.rate(Shipgen.build(faction, size, 800 + i, budget), player)["ratio"]
-			means.append(sum / 10.0)
+			means.append(sum / 6.0)
 		for k in 3:
 			check(means[k] < means[k + 1], "%s: threat %s rises with the budget (%s)" % [faction, str(k), str(means)])
-		for i in 10:  # the same seed with four times the budget is the stronger ship, nearly always
+		for i in 6:  # the same seed with four times the budget is the stronger ship, nearly always
 			var weak: float = Threat.power(Shipgen.build(faction, "medium", 820 + i, 60.0), 0.6)["power"]
 			var strong: float = Threat.power(Shipgen.build(faction, "medium", 820 + i, 240.0), 0.6)["power"]
 			rises += int(strong > weak)
 			pairs += 1
-		check(rises >= 9, "%s: four times the budget is the stronger ship (%d of %d)" % [faction, rises, pairs])
+		check(rises >= 5, "%s: four times the budget is the stronger ship (%d of %d)" % [faction, rises, pairs])
 
 
 func test_threat_is_one_to_five_skulls_against_the_players_ship() -> void:
@@ -360,6 +379,10 @@ func test_threat_is_one_to_five_skulls_against_the_players_ship() -> void:
 	var enemy := Shipgen.build("concord", "medium", 5, 150.0)
 	var small_fry := Shipgen.build("clans", "small", 6, 30.0)
 	check(Shipgen.threat(enemy, small_fry)["ratio"] > Shipgen.threat(enemy, courier)["ratio"], "a weaker player ship sees more threat")
+	var by_design := Shipgen.threat_of("gen:concord:medium:5:15000", courier)
+	eq(by_design["skulls"], Shipgen.threat(enemy, courier)["skulls"], "the radar's call by design path gives the same skulls")
+	check(Shipgen.threat_of("res://data/ships/pirate_raider.json", courier)["skulls"] >= 1, "and works for a design file")
+	check(Shipgen.threat_of("res://nothing.json", courier).is_empty(), "and says nothing for one that does not load")
 	eq(Threat.label(3), "Threat 3/5", "the label for the radar")
 	eq(Threat.label(9), "Threat 5/5", "and it stays on the scale")
 

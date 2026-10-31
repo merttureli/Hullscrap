@@ -214,6 +214,13 @@ static func threat(enemy: Ship, player: Ship) -> Dictionary:
 	return Threat.rate(enemy, player)
 
 
+## The threat rating of a design (a generated spec or a design file) against the player's ship, Threat.rate()'s dictionary;
+## {} when the design does not load. For the radar and the HUD: a contact's design path in, its skulls out.
+static func threat_of(design: String, player: Ship) -> Dictionary:
+	var enemy: Ship = from_spec(design) if is_spec(design) else Ship.from_design(design)
+	return {} if enemy == null else Threat.rate(enemy, player)
+
+
 static func _mix(seed_value: int, faction: String, size: String, attempt: int) -> int:
 	var h := posmod(seed_value, 2147483647) * 31 + attempt * 40503 + 7
 	for ch in (faction + "/" + size).to_utf8_buffer():
@@ -268,15 +275,23 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 	var why := validate(ship)
 	if not why.is_empty():
 		return {"ship": null, "why": str(why[0])}
+	var parts := {"weapon": [], "engine": [], "shield": [], "reactor": []}  # what stands in the hull, not what was bought
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		var id := str(ship.components.instances[uid]["id"])
+		var family := str(ship.components.def(id).get("family", ""))
+		if parts.has(family):
+			parts[family].append(id)
 	ship.set_meta("shipgen", {"faction": faction, "size": size, "budget": budget, "spent": lo["spent"], "ram": ram, "level": level,
-		"weapons": lo["weapons"].duplicate(), "engines": lo["engines"].duplicate(), "shields": lo["shields"].duplicate(),
-		"reactors": lo["reactors"].duplicate(), "armour": lo["armour"], "crew": lo["crew"], "skill": lo["skill"]})
+		"weapons": parts["weapon"], "engines": parts["engine"], "shields": parts["shield"], "reactors": parts["reactor"],
+		"armour": lo["armour"], "crew": lo["crew"], "skill": lo["skill"]})
 	return {"ship": ship, "why": ""}
 
 
 # --- the loadout ---------------------------------------------------------------------------------
 
-## What the budget buys: {weapons, engines, shields, reactors, systems, armour, crew, skill, beds, radiators, spent}.
+## What the budget buys: {weapons, engines, shields, reactors, systems, armour, crew, skill, beds, spent}.
 ## The base ship (helm, life support, the faction's cheapest reactor, two engines, one gun) is free; every purchase
 ## after it is drawn from the faction's weights and has to fit the hull's limits and the power its reactors give.
 static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGenerator, ram: bool) -> Dictionary:
@@ -290,7 +305,7 @@ static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGe
 	var ai: Dictionary = f["ai"]
 	var engines: Array = _menu(parts["engines"], budget)
 	var lo := {"weapons": [str(base["weapon"])], "engines": [], "shields": [], "systems": [], "reactors": [], "armour": 0,
-		"crew": 2, "skill": float(ai["aim_skill"][0]), "beds": 0, "radiators": 0, "spent": 0.0, "helm": str(base["helm"]), "o2": str(base["o2"])}
+		"crew": 2, "skill": float(ai["aim_skill"][0]), "beds": 0, "spent": 0.0, "helm": str(base["helm"]), "o2": str(base["o2"])}
 	for _i in 2:
 		lo["engines"].append(str(engines[0]["id"]))
 	var cfg: Dictionary = T["budget"]
@@ -313,12 +328,11 @@ static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGe
 			if roll < 0.0:
 				pick = o
 				break
-		_apply(lo, pick, f)
+		_apply(lo, pick)
 		spent += float(pick["cost"])
 	lo["reactors"] = _reactors(f, lo, mx, budget)["ids"]
 	lo["spent"] = spent
 	lo["beds"] = mini(int(mx["beds"]), (int(lo["crew"]) + 1) / 2)
-	lo["radiators"] = _radiators(f, lo)
 	return lo
 
 
@@ -334,18 +348,6 @@ static func _item(f: Dictionary, cat: String, id: String) -> Dictionary:
 		if m["id"] == id:
 			return m
 	return {}
-
-
-## The radiators the loadout carries: those the parts come with plus the ones bought.
-static func _radiators(f: Dictionary, lo: Dictionary) -> int:
-	var n := 0
-	for id in lo["weapons"]:
-		n += int(_item(f, "weapons", id).get("needs", {}).get("radiator", 0))
-	for id in lo["reactors"]:
-		n += int(_item(f, "reactors", id).get("needs", {}).get("radiator", 0))
-	for id in lo["systems"]:
-		n += int(id == "radiator")
-	return n
 
 
 ## The power the loadout draws (a positive number), reactors left out; radiators included.
@@ -538,7 +540,7 @@ static func _slots_ok(ids: Array, mx: Dictionary) -> bool:
 	return fixed <= int(mx["bow"]) and turrets <= int(mx["bow"]) - fixed + int(mx["flank"])
 
 
-static func _apply(lo: Dictionary, o: Dictionary, f: Dictionary) -> void:
+static func _apply(lo: Dictionary, o: Dictionary) -> void:
 	match str(o["cat"]):
 		"weapons":
 			lo["weapons"].append(o["id"])
@@ -761,26 +763,17 @@ static func _construct(f: Dictionary, faction: String, lo: Dictionary, bands: Ar
 		elif d == layers:
 			tile = "wall"
 		if ram and d <= layers and c.y < ram_rows:
-			tile = str(f["armour"]["ram"])
+			tile = str(f["armour"].get("ram", "ram_plating"))
 		if tile == "floor" and cells[c].is_empty():
 			fset[c] = true
 			tile = "wall"
 		g.force_tile(c, tile, cells[c])
-	if OS.get_environment("SHIPGEN_DEBUG") != "":
-		for y in grid_size.y:
-			var row := ""
-			for x in grid_size.x:
-				var c := Vector2i(x, y)
-				row += " " if not g.tiles.has(c) else (HullOutline.shape_glyph(g.shapes[c]) if g.shapes.has(c) else ("." if fset.has(c) else "#"))
-			print(row)
 	# rooms
 	var decks: Array = []
 	for b in bands:
 		var rect := _rect_of(fset, b)
 		if rect.size.x < 2:
 			return {"ship": null, "why": "a deck has no floor"}
-		if OS.get_environment("SHIPGEN_DEBUG") != "":
-			print("deck ", b["kind"], " nominal ", b["x0"], "..", b["x1"], " rows ", b["y0"], "..", b["y1"], " rect ", rect)
 		var rooms := _lay_rooms(b["rooms"], rect)
 		if rooms.is_empty():
 			return {"ship": null, "why": "a deck is too narrow for its essential rooms"}
@@ -818,7 +811,7 @@ static func _construct(f: Dictionary, faction: String, lo: Dictionary, bands: Ar
 	# the cables, then the finishing touches
 	if not _wire(ship):
 		return {"ship": null, "why": "no route to a part"}
-	_trim(ship, f)
+	_trim(ship)
 	_finish(ship, f, faction, lo, rng, ram)
 	return {"ship": ship, "why": ""}
 
@@ -1070,8 +1063,6 @@ static func _wire(ship: Ship) -> bool:
 	for uid in rest:
 		var path := _route(ship, ship.components.instances[uid]["cells"], net)
 		if path.is_empty() and not _touches(ship.components.instances[uid]["cells"], net):
-			if OS.get_environment("SHIPGEN_DEBUG") != "":
-				print("no route for ", ship.components.instances[uid]["id"], " at ", ship.components.instances[uid]["anchor"])
 			return false
 		for c in path:
 			net[c] = true
@@ -1140,7 +1131,7 @@ static func _wire_cost(ship: Ship, c: Vector2i) -> int:
 # --- the finish ----------------------------------------------------------------------------------
 
 ## Take parts off that the power cannot carry (the last gun first) until supply covers the demand.
-static func _trim(ship: Ship, f: Dictionary) -> void:
+static func _trim(ship: Ship) -> void:
 	for _i in 12:
 		ship.refresh()
 		var short := false
@@ -1188,10 +1179,13 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 	var names: Array = crew["names"]
 	var first := rng.randi() % names.size()
 	for i in int(lo["crew"]):
-		ship.crew_plan.append({"name": str(names[(first + i) % names.size()]), "species": str(crew["species"][rng.randi() % crew["species"].size()])})
-	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01)}
+		var base_name := str(names[(first + i) % names.size()])
+		var lap := i / names.size()  # more crew than names: the second lap is "Vex II"
+		ship.crew_plan.append({"name": base_name if lap == 0 else "%s %s" % [base_name, "I".repeat(lap + 1)], "species": str(crew["species"][rng.randi() % crew["species"].size()])})
+	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01), "morale": str(f["ai"].get("morale", "default"))}  # morale: a style of data/morale.json
 	if ram:
 		ai["style"] = "rammer"
+		ai["morale"] = "ram"
 	ship.set_meta("ai", ai)
 	for uid in ship.components.instances:
 		var w := str(ship.components.instances[uid]["id"])

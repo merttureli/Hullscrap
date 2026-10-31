@@ -97,11 +97,7 @@ static func make(style: Dictionary, bands: Array, t: int, rows: int, rng: Random
 			{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": "max"},
 		]
 	var arcs := {}
-	if OS.get_environment("SHIPGEN_DEBUG") != "":
-		print("poly0 ", poly)
 	for op in ops:
-		if OS.get_environment("SHIPGEN_DEBUG") != "":
-			print("op ", op["op"], " ", op.get("at", ""), " -> ", poly)
 		match str(op["op"]):
 			"wedge", "chamfer":
 				if str(op["op"]) == "wedge" and boost >= 2 and not bool(opts.get("ram", false)):
