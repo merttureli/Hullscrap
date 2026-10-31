@@ -2,14 +2,15 @@ extends RefCounted
 ## The tractor beam (docs/CONTENT.md section 11, the Raft loop): hold Q in play mode and every working tractor beam draws
 ## the debris within its range toward the nearest working intake. Pure logic, no nodes: drift_debris.gd asks beams() once a
 ## step and pull() for each piece, debris_view.gd reads the key and draws the beams.
-## - A beam is a part of the `tractor` family (a turret hull mount) with stats.tractor_range (px) and stats.tractor_pull
-##   (px/s, how fast it hauls a piece). It works when it is not disabled (a shot-off outside half or a cut link included) and,
+## - A beam is a part of the `tractor` family (a turret hull mount) with stats.tractor_range (px, plus the station.pull_bonus cells
+##   of whoever mans it) and stats.tractor_pull (px/s, how fast it hauls a piece). It works when it is not disabled (a shot-off outside half or a cut link included) and,
 ##   as it draws power, is powered. Its emitter is the turning point of its head, on the outside half.
 ## - Range is measured from the emitter to the edge of the piece. The piece is hauled toward the middle of the intake mouth
 ##   nearest to it; it still has to get through the hull's outline to land (a mouth on the far side is a long way round).
 ## - Q is the combat utility key, so the beam is a play-mode tool: debris_view.gd does not run it in a fight.
 
 const Mounts = preload("res://scripts/ship/mounts.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 
 const FAMILY := "tractor"
 const CELL := 32.0  ## ship-frame px per grid cell (build_mode.gd CELL)
@@ -31,7 +32,7 @@ static func beams(ship, origin: Vector2) -> Array:
 			continue
 		var stats: Dictionary = def.get("stats", {})
 		out.append({"uid": uid, "id": inst["id"], "at": origin + Vector2(Mounts.barrel(def, inst["out_anchor"], inst["rot"])["pivot"]) * CELL,
-			"range": float(stats.get("tractor_range", 0.0)), "pull": float(stats.get("tractor_pull", 0.0))})
+			"range": float(stats.get("tractor_range", 0.0)) + TraitSet.pull_bonus(ship, uid) * CELL, "pull": float(stats.get("tractor_pull", 0.0))})
 	return out
 
 

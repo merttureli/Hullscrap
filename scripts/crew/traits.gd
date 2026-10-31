@@ -6,6 +6,7 @@ extends RefCounted
 ## Dictionary of numbers, and every rule a key changes asks for it here, so a new race is data only.
 ## Merging: factors multiply, amounts add, `mechanical` is true if any trait says so, ion_stun and the
 ## dries_out threshold take the strongest, the true/false keys (FLAGS) are true if any trait says so, `body` takes the smallest.
+## `counter_melee`, `low_pressure_heal`, `haggler` and `loot_bonus` are amounts that add (AMOUNTS); `mining_mult` is a factor.
 ## Inside a group amounts add, except: the heat thresholds take the widest; a time that starts something (hull_mend.seal, revive_once.after, split_on_death.reform_s) takes the quickest one that is set (0 = not set); revive_once.hp takes the highest.
 ## data/traits.json `_doc` describes the keys too.
 ## The keys (see KEYS for the sub-keys of the groups):
@@ -18,7 +19,7 @@ extends RefCounted
 ## - `heal_mult`: factors on what a bed and a medbay heal them (Jobs).
 ## - `mechanical`: beds do not heal them; a hurt one gets a repair_crew job that any other crew member does (Jobs).
 ## - `aura`: o2_per_s and heal_per_s for the room they stand in (ShipSim, Jobs), work_mult for the others there (work_rate).
-## - `station`: power_bonus, power the part they man gets (Power.solve through station_bonus), manned_mult (manned_factor), and evasion_add (evasion the helm gets while they man it, Jobs.evasion_bonus through helm_evasion_add).
+## - `station`: power_bonus, power the part they man gets (Power.solve through station_bonus), manned_mult (manned_factor), evasion_add (evasion the helm gets while they man it, Jobs.evasion_bonus through helm_evasion_add) and pull_bonus (cells the intake or tractor they man reaches further: pull_bonus, read by DriftDebris.intakes and Tractor.beams).
 ## - `melee_mult`: factor on their melee damage in on-foot fights (kept: nothing reads it yet).
 ## - `ranged_mult`: factor on their ranged damage in on-foot fights (kept: nothing reads it yet).
 ## - `swarm`: work speed +per_other for each other crew member of their species in the room, at most +max (work_rate).
@@ -36,6 +37,11 @@ extends RefCounted
 ## - `counter_melee`: damage dealt straight back to whoever hits them in a melee (CrewAbilities.melee_hit). Amounts add.
 ## - `no_suit`: they cannot wear a suit or armour (CrewMember.can_wear / equip refuse it, with a reason).
 ## - `vacuum_speed`: factor on their walk speed in a room with less than THIN_AIR of its air (set by Jobs as CrewMember.speed_mod, with heat_speed).
+## - `mining_mult`: factor on the damage to rocks and asteroids of a mining tool or cutter they man (mining_factor), or of their own hands cutting (read `of(m)["mining_mult"]`). No code breaks rocks yet: the hook is ready.
+## - `low_pressure_heal`: hp a second they heal in a room with less than LOW_AIR of its air (low_pressure_heal_rate, Jobs). Amounts add.
+## - `haggler`: the fraction the prices of a station fall by while they are aboard and up; the best haggler aboard counts (haggle, Campaign.price). Amounts add.
+## - `loot_bonus`: extra rows in a salvage pick (Salvage.picks_for) and extra rolls of a loot table (a crate, DriftDebris) while they are aboard and up; the best one aboard counts (loot_bonus). Amounts add.
+## - `mimic`: while in a room with another crew member who is up, they copy the best trait of that room's others (mimic_pick: the trait whose best key is first in MIMIC_ORDER; a trait of the body (BODY_KEYS) or of another mimic is never copied, nor one they have already); Jobs.tick sets CrewMember.mimicking (update_mimics) and of() merges it.
 ## The result is shared and cached: read it, do not change it.
 
 const Content = preload("res://scripts/data/content.gd")
@@ -47,24 +53,32 @@ const LEGACY_PATH := "res://data/species.json"  ## its `traits` table is the old
 const DAMAGE: Array[String] = ["fire", "no_air", "melee", "ranged", "ion"]
 const WORK: Array[String] = ["repair", "extinguish", "breach", "man", "restock", "craft", "heal_others"]
 const HEAL: Array[String] = ["bed", "medbay"]
-const FLAGS: Array[String] = ["mechanical", "vacuum_walk", "no_tools", "reveal_enemy", "no_suit"]  ## the keys that are true or false
+const FLAGS: Array[String] = ["mechanical", "vacuum_walk", "no_tools", "reveal_enemy", "no_suit", "mimic"]  ## the keys that are true or false
 const OPEN: Array[String] = ["line_affinity"]  ## the groups whose sub-keys are not a fixed list: line ids (data/lines.json) -> a number
+const AMOUNTS: Array[String] = ["counter_melee", "low_pressure_heal", "haggler", "loot_bonus"]  ## the plain numbers that add up
 const THIN_AIR := 0.3  ## a room with less than this share of its air is "thin" for vacuum_speed
+const LOW_AIR := 0.5  ## a room with less than this share of its air is "low pressure" for low_pressure_heal
+const BODY_KEYS: Array[String] = ["body", "hp_mult", "speed_mult"]  ## the keys that are fixed when the species is set: a trait with one is a body trait, which a mimic cannot copy
+## The keys a mimic copies, the best first (mimic_pick): a trait is ranked by the first of these it has, and the best-ranked trait in the room is copied.
+const MIMIC_ORDER: Array[String] = ["revive_once", "hull_mend", "split_on_death", "vacuum_walk", "aura", "reveal_enemy", "counter_melee", "damage_taken", "station",
+	"line_affinity", "work_mult", "swarm", "heat_speed", "vacuum_speed", "heal_mult", "low_pressure_heal", "mining_mult", "haggler", "loot_bonus", "melee_mult", "ranged_mult", "o2_use", "suffocate_mult"]
 const SUIT_TRAITS: Array[String] = ["suit"]  ## the gear traits that are a suit or armour: no_suit refuses them (add the armour ones here)
 const BODIES: Array[int] = [1, 2]  ## the sizes `body` may have
+const LIMITS := {"mining_mult": "above 0", "haggler": "from 0 to 1", "loot_bonus": "a whole number from 0", "low_pressure_heal": "from 0"}  ## the plain numbers with a range: what it is said to be in a problem
 ## Every key a trait may use -> its sub-keys ([] for a plain number or flag).
 const KEYS := {
 	"hp_mult": [], "speed_mult": [], "o2_use": [], "suffocate_mult": [],
 	"damage_taken": DAMAGE, "work_mult": WORK, "heal_mult": HEAL, "mechanical": [],
-	"aura": ["o2_per_s", "heal_per_s", "work_mult"], "station": ["power_bonus", "manned_mult", "evasion_add"],
+	"aura": ["o2_per_s", "heal_per_s", "work_mult"], "station": ["power_bonus", "manned_mult", "evasion_add", "pull_bonus"],
 	"melee_mult": [], "ranged_mult": [], "swarm": ["per_other", "max"],
 	"dries_out": ["heat_above", "hp_per_s"], "ion_stun": [],
 	"body": [], "reveal_enemy": [], "heat_speed": ["cold", "hot", "below", "above"], "vacuum_walk": [], "no_tools": [],
 	"hull_mend": ["rate", "seal"],
 	"revive_once": ["after", "hp"], "line_affinity": [], "split_on_death": ["reform_s"], "counter_melee": [], "no_suit": [], "vacuum_speed": [],
+	"mining_mult": [], "low_pressure_heal": [], "haggler": [], "loot_bonus": [], "mimic": [],
 }
 const META: Array[String] = ["id", "name", "blurb", "notes", "override", "reason"]  ## the fields of a trait entry that are not keys
-const FACTORS: Array[String] = ["hp_mult", "speed_mult", "o2_use", "suffocate_mult", "melee_mult", "ranged_mult", "vacuum_speed"]
+const FACTORS: Array[String] = ["hp_mult", "speed_mult", "o2_use", "suffocate_mult", "melee_mult", "ranged_mult", "vacuum_speed", "mining_mult"]
 const FACTOR_GROUPS: Array[String] = ["damage_taken", "work_mult", "heal_mult"]
 const GROUPS: Array[String] = ["aura", "station", "swarm", "dries_out", "heat_speed", "hull_mend", "revive_once", "split_on_death"]  ## the groups with their own merge rule per sub-key
 ## The old `mult` stats of a trait, as keys (repair_time is a time factor: work_mult repair and breach are 1 / it).
@@ -106,7 +120,8 @@ static func _ensure() -> void:
 
 ## Problems in the value `v` of key `k` of a trait or species entry (`at` says where it is) that the validators' shape checks do not
 ## see: an OPEN group must be an object of equipment lines (data/lines.json) -> number; revive_once needs an hp above 0 and
-## split_on_death a reform_s above 0, or the trait would do nothing.
+## split_on_death a reform_s above 0, or the trait would do nothing; the numbers with limits (LIMITS: mining_mult above 0,
+## haggler a fraction up to 1, loot_bonus a whole number from 0, low_pressure_heal from 0). Only for a value of the right type.
 static func extra_problems(at: String, k: String, v) -> Array[String]:
 	var out: Array[String] = []
 	if k in OPEN:
@@ -118,6 +133,15 @@ static func extra_problems(at: String, k: String, v) -> Array[String]:
 				out.append("%s: '%s' names '%s', which is not a line (%s)" % [at, k, sub, ", ".join(lines.keys())])
 			elif not (v[sub] is float or v[sub] is int):
 				out.append("%s: '%s.%s' must be a number" % [at, k, sub])
+	elif LIMITS.has(k) and (v is float or v is int):
+		var ok := true
+		match k:
+			"mining_mult": ok = v > 0
+			"haggler": ok = v >= 0 and v <= 1
+			"loot_bonus": ok = v >= 0 and v == floorf(float(v))
+			_: ok = v >= 0
+		if not ok:
+			out.append("%s: '%s' must be %s" % [at, k, LIMITS[k]])
 	elif v is Dictionary and k in ["revive_once", "split_on_death"]:
 		var sub := "hp" if k == "revive_once" else "reform_s"
 		var n = v.get(sub, 0)
@@ -132,11 +156,13 @@ static func extra_problems(at: String, k: String, v) -> Array[String]:
 ## heal_others} and heal_mult {bed, medbay} all 1.0; aura {o2_per_s 0, heal_per_s 0, work_mult 1};
 ## station {power_bonus 0, manned_mult 1, evasion_add 0}; swarm {per_other 0, max 0}; dries_out {heat_above INF, hp_per_s 0};
 ## body 2; vacuum_walk, no_tools, reveal_enemy, no_suit false; heat_speed {cold 1, hot 1, below -INF, above INF}; hull_mend {rate 0, seal 0};
-## revive_once {after 0, hp 0}; split_on_death {reform_s 0}; line_affinity {} (a line it does not list is 1); counter_melee 0; vacuum_speed 1.
+## revive_once {after 0, hp 0}; split_on_death {reform_s 0}; line_affinity {} (a line it does not list is 1); counter_melee 0; vacuum_speed 1;
+## mining_mult 1; low_pressure_heal, haggler, loot_bonus 0; mimic false; station.pull_bonus 0.
+## A mimic's set also holds the keys of the trait it copies now (member.mimicking).
 static func of(member) -> Dictionary:
 	_ensure()
 	var ids: Array = member.traits()
-	var key := "%s|%s|%s" % [member.species, ",".join(PackedStringArray(ids)), member.character]
+	var key := "%s|%s|%s|%s" % [member.species, ",".join(PackedStringArray(ids)), member.character, ",".join(PackedStringArray(member.mimicking))]
 	if _cache.has(key):
 		return _cache[key]
 	var out := _fresh()
@@ -144,6 +170,8 @@ static func of(member) -> Dictionary:
 	_merge(out, bag_of(sp if not sp.is_empty() else Characters.unique_species(str(member.species))))
 	_merge(out, bag_of(Characters.bag(member.character)))  # a unique character's own keys
 	for id in ids:
+		_merge(out, bag_of(_library.get(id, {})))
+	for id in member.mimicking:  # what a mimic copies right now (update_mimics)
 		_merge(out, bag_of(_library.get(id, {})))
 	if out["mechanical"]:
 		out["heal_mult"]["bed"] = 0.0  # a bed does nothing for a machine: the repair_crew job does
@@ -181,13 +209,13 @@ static func _fresh() -> Dictionary:
 		"hp_mult": 1.0, "speed_mult": 1.0, "o2_use": 1.0, "suffocate_mult": 1.0, "melee_mult": 1.0, "ranged_mult": 1.0,
 		"ion_stun": 0.0, "body": 2,
 		"aura": {"o2_per_s": 0.0, "heal_per_s": 0.0, "work_mult": 1.0},
-		"station": {"power_bonus": 0.0, "manned_mult": 1.0, "evasion_add": 0.0},
+		"station": {"power_bonus": 0.0, "manned_mult": 1.0, "evasion_add": 0.0, "pull_bonus": 0.0},
 		"swarm": {"per_other": 0.0, "max": 0.0},
 		"dries_out": {"heat_above": INF, "hp_per_s": 0.0},
 		"heat_speed": {"cold": 1.0, "hot": 1.0, "below": -INF, "above": INF},
 		"hull_mend": {"rate": 0.0, "seal": 0.0},
 		"revive_once": {"after": 0.0, "hp": 0.0}, "split_on_death": {"reform_s": 0.0}, "line_affinity": {},
-		"counter_melee": 0.0, "vacuum_speed": 1.0,
+		"counter_melee": 0.0, "vacuum_speed": 1.0, "mining_mult": 1.0, "low_pressure_heal": 0.0, "haggler": 0.0, "loot_bonus": 0.0,
 	}
 	for flag in FLAGS:
 		out[flag] = false
@@ -210,7 +238,7 @@ static func _merge(out: Dictionary, bag: Dictionary) -> void:
 			out[k] = bool(out[k]) or bool(v)
 		elif k == "body":
 			out[k] = mini(int(out[k]), clampi(int(v), BODIES[0], BODIES[-1]))
-		elif k == "counter_melee":
+		elif k in AMOUNTS:
 			out[k] = float(out[k]) + float(v)
 		elif not v is Dictionary:
 			continue
@@ -351,3 +379,84 @@ static func reveals_enemy(ship) -> bool:
 static func helm_evasion_add(ship, uid: int) -> float:
 	var who = operator_of(ship, uid)
 	return 0.0 if who == null else float(of(who)["station"]["evasion_add"])
+
+
+## The factor on the damage to rocks and asteroids of the tool at part `uid` (a mining laser, a drill, a gun turned on a rock):
+## the operator's mining_mult, 1.0 with nobody there. Whoever cuts a rock by hand reads `of(m)["mining_mult"]`.
+static func mining_factor(ship, uid: int) -> float:
+	var who = operator_of(ship, uid)
+	return 1.0 if who == null else float(of(who)["mining_mult"])
+
+
+## The hp a second that low_pressure_heal heals a crew member whose resolved set is `t` in a room whose air is `pressure`
+## (a fraction): the figure below LOW_AIR, 0 above it (and for crew with none).
+static func low_pressure_heal_rate(t: Dictionary, pressure: float) -> float:
+	return float(t["low_pressure_heal"]) if pressure < LOW_AIR else 0.0
+
+
+## The most of a number key (`haggler`, `loot_bonus`) any crew member of `ship` who is up has: the best one counts. 0 with no ship.
+static func _best_aboard(ship, key: String) -> float:
+	var best := 0.0
+	if ship == null:
+		return best
+	for m in ship.crew:
+		if not m.is_down():
+			best = maxf(best, float(of(m)[key]))
+	return best
+
+
+## The fraction the prices of a station fall by for `ship`: the best haggler aboard (up) counts; 0 with none.
+static func haggle(ship) -> float:
+	return _best_aboard(ship, "haggler")
+
+
+## The extra salvage rows and loot-table rolls `ship` gets: the best loot_bonus aboard (up) counts, rounded; 0 with none.
+static func loot_bonus(ship) -> int:
+	return maxi(roundi(_best_aboard(ship, "loot_bonus")), 0)
+
+
+## The cells that whoever mans part `uid` adds to the reach of an intake or a tractor beam (station.pull_bonus); 0 with nobody there.
+static func pull_bonus(ship, uid: int) -> float:
+	var who = operator_of(ship, uid)
+	return 0.0 if who == null else maxf(float(of(who)["station"]["pull_bonus"]), 0.0)
+
+
+## The id of the trait the mimic `m` copies in `ship` ("" for none): of the traits of the other crew in their room who are up, the
+## one ranked best by MIMIC_ORDER (the first listed key it has; a trait with none, a body trait (BODY_KEYS) or a mimic's own is
+## never copied, nor is one `m` has already). Equal ranks: the first crew member in the ship's crew list, then their first trait.
+static func mimic_pick(ship, m) -> String:
+	var room: int = ship.atmosphere.room_at(m.cell())
+	var own: Array = m.traits()
+	var lib := library()
+	var best := ""
+	var best_rank := MIMIC_ORDER.size()
+	if room < 0:
+		return best
+	for o in ship.crew:
+		if o == m or o.is_down() or ship.atmosphere.room_at(o.cell()) != room:
+			continue
+		for id in o.traits():
+			if own.has(id):
+				continue
+			var bag := bag_of(lib.get(id, {}))
+			if bag.has("mimic") or BODY_KEYS.any(func(k): return bag.has(k)):
+				continue
+			for rank in best_rank:
+				if bag.has(MIMIC_ORDER[rank]):
+					best = str(id)
+					best_rank = rank
+					break
+	return best
+
+
+## Set what every `mimic` of `ship` copies now (CrewMember.mimicking): the trait mimic_pick finds while they are up, none else, so it
+## ends when they leave the room (or the one they copy from does). Jobs.tick calls it first thing.
+static func update_mimics(ship) -> void:
+	for m in ship.crew:
+		var want := []
+		if not m.is_down() and of(m)["mimic"]:
+			var id := mimic_pick(ship, m)
+			if id != "":
+				want.append(id)
+		if m.mimicking != want:
+			m.mimicking = want

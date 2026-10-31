@@ -16,6 +16,7 @@ extends RefCounted
 
 const Content = preload("res://scripts/data/content.gd")
 const Tractor = preload("res://scripts/space/tractor.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 const PATH := "res://data/debris.json"
 const CELL := 32.0  ## world px per grid cell (build_mode.gd CELL)
 const SUBSTEP := 0.05  ## longest time step the pieces move by
@@ -226,7 +227,7 @@ func _move(ship, p: Dictionary, mouths: Array, now: Dictionary, h: float) -> boo
 		if _dist_to_rect(inv * p["pos"], m["rect"]) > r * 0.6:
 			continue
 		var t := type_of(p)
-		var gains := _gains(t)
+		var gains := _gains(t, ship)
 		if _store(ship, t, gains):
 			picked += 1
 			_note(m, t, gains)
@@ -335,7 +336,7 @@ func _lane(ship) -> Dictionary:
 # --- intakes, collecting and bouncing ------------------------------------------------------------------
 
 ## The intakes that work now (an outside half that is alive, link intact, status ok, powered when it draws power):
-## [{uid, id, rect (the mouth in world px), pull (px)}].
+## [{uid, id, rect (the mouth in world px), pull (px: the part's pull_radius, plus the station.pull_bonus of whoever mans it)}].
 func intakes(ship) -> Array:
 	var out := []
 	var origin := _origin(ship)
@@ -356,24 +357,29 @@ func intakes(ship) -> Array:
 			lo = lo.min(c)
 			hi = hi.max(c)
 		out.append({"uid": uid, "id": inst["id"], "rect": Rect2(origin + Vector2(lo) * CELL, Vector2(hi - lo + Vector2i.ONE) * CELL),
-			"pull": float(def.get("stats", {}).get("pull_radius", 0)) * CELL})
+			"pull": (float(def.get("stats", {}).get("pull_radius", 0)) + TraitSet.pull_bonus(ship, uid)) * CELL})
 	return out
 
 
-## What collecting a piece of type `t` gives: cargo id -> units (a crate rolls here). {} for ice.
-func _gains(t: Dictionary) -> Dictionary:
+## What collecting a piece of type `t` gives: cargo id -> units (a crate rolls here: once, and once more for each point of
+## loot_bonus of the best crew member aboard `ship`, the finds adding up). {} for ice.
+func _gains(t: Dictionary, ship = null) -> Dictionary:
 	if t.has("roll"):
 		var total := 0.0
 		for o in t["roll"]:
 			total += float(o["weight"])
-		var x := rng.randf() * total
-		var pick: Dictionary = t["roll"][-1]
-		for o in t["roll"]:
-			x -= float(o["weight"])
-			if x < 0.0:
-				pick = o
-				break
-		return {str(pick["item"]): rng.randi_range(int(pick["count"][0]), int(pick["count"][1]))}
+		var got := {}
+		for n in 1 + TraitSet.loot_bonus(ship):
+			var x := rng.randf() * total
+			var pick: Dictionary = t["roll"][-1]
+			for o in t["roll"]:
+				x -= float(o["weight"])
+				if x < 0.0:
+					pick = o
+					break
+			var id := str(pick["item"])
+			got[id] = int(got.get(id, 0)) + rng.randi_range(int(pick["count"][0]), int(pick["count"][1]))
+		return got
 	var out := {}
 	for id in t.get("yield", {}):
 		out[str(id)] = int(t["yield"][id])
