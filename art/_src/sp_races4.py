@@ -170,4 +170,170 @@ class WardenFrame(Species):
                 out.append(g)
         return out
 
-SPECIES = [WardenFrame]
+# ================================================================== MURROW: asteroid-colony diggers, mole-folk. THE LARGE RIG (49x49, pivot (24,24)), like the Grundl and the Drakkin
+# Dark velvet fur (E, lit W, shade D) caked with tan dust (Q/q), a stocky hunched barrel of a body, a small head with a long snout ending in a pink star-nose (p/s)
+# and TINY eyes, and HUGE digging claws: pink palms with three long cream spade claws (f/L/H) on each arm. A miner's harness (outfit: crossed straps, the belt, the
+# wrist wraps, the headband and the hard hat), an ore sack on the back, a lamp battery on the hip. The tail is a short pink stub in the legs layer.
+def mR(dx, dy): return (DC + dx, DC + dy)
+def mu_fur(s): return shade_gen(s, 'E', 'W', 'D')
+def mu_dust(s, y0, y1, k):
+    """dust caked into the fur: tan specks (a fixed lattice, no randomness) over the dark fur between rows y0 and y1."""
+    for y in range(max(0, y0), min(s.h, y1)):
+        for x in range(s.w):
+            if s.g[y][x] in ('E', 'D', 'W') and ((x * 5 + y * 3) % k == 0 or (x * 3 - y * 7) % (k + 4) == 0): s.g[y][x] = 'q' if (x + y) % 3 else 'Q'
+
+MU_FOOT = {
+ 'plant': art("""
+f.f.f.f
+vsssssv
+ssssssv
+.vvvvv.
+"""),
+ 'lift': art("""
+f.f.f.f
+vsssssv
+ssssssv
+vsssssv
+.vvvvv.
+"""),
+}
+def mu_leg_frame(dl, dr, lift_l=False, lift_r=False, tail=0):
+    s = Spr(DN, DN)
+    for i, y in enumerate(range(DC + 12, DC + 20)):                                           # the short bare tail, swinging a px
+        x = DC + int(round(tail * (i / 7.0))); w = 3 if i < 5 else 2
+        for k in range(w): s.put(x - w // 2 + k, y, 'p' if k < w - 1 else 'v')
+    for cx, d, lift in ((DC - 8, dl, lift_l), (DC + 8, dr, lift_r)):
+        fy = DC - d
+        t = Spr(DN, DN); t.rect(cx - 5, DC - 3, 10, 6, 'E')
+        step = -1 if fy < DC else 1
+        for y in range(DC, fy + step, step): t.hline(cx - 4, y, 8, 'E')
+        merge(s, mu_fur(t))
+        b = MU_FOOT['lift' if lift else 'plant']
+        s.stamp(cx - 3, fy - len(b) // 2 - (2 if fy < DC else 0), b)
+    return s
+MU_WALK = [(11, -11, False, False, 2), (6, -6, False, True, 1), (-6, 6, False, True, -1), (-11, 11, False, False, -2), (-6, 6, True, False, -1), (6, -6, True, False, 1)]
+
+def mu_torso():
+    s = Spr(DN, DN)
+    # the ore sack and its rope, on the back (under the belt)
+    sk = Spr(DN, DN); ell(sk, DC, DC + 12, 7.5, 5.2, 'q'); merge(s, shade_gen(sk, 'q', 'Q', 'n'))
+    for (dx, dy) in ((-3, 9), (0, 8), (3, 9)): s.put(DC + dx, DC + dy, 'u')                       # the rope ties
+    for (dx, dy) in ((-4, 11), (-1, 12), (2, 10), (4, 12), (0, 14)): s.put(DC + dx, DC + dy, 'y' if (dx + dy) % 2 else 'a')   # nuggets showing in the neck
+    # the body: a barrel with two heavy shoulders
+    b = Spr(DN, DN); ell(b, DC, DC + 3, 13.5, 11.5, 'E')
+    for sd in (-1, 1): ell(b, DC + sd * 13, DC - 3, 7.0, 6.5, 'E')
+    f = mu_fur(b)
+    for y in range(DN):
+        for x in range(DN):
+            if f.g[y][x] != '.' and not (s.g[y][x] != '.' and DC + 6 < y): s.g[y][x] = f.g[y][x]
+    for dy in range(1, 11, 3): s.put(DC, DC + dy, 'W')                                          # a ridge of lighter fur down the spine
+    mu_dust(s, DC - 12, DC + 2, 9)                                                              # heavy dust over the shoulders
+    mu_dust(s, DC + 2, DC + 16, 14)
+    # the miner's harness (outfit): crossed straps from the shoulders to the belt, the belt and its buckle
+    for i in range(18):
+        for (x0, sg) in ((DC - 11, 1), (DC + 11, -1)):
+            x = x0 + sg * i * 10 // 18; y = DC - 8 + i
+            s.put(x - 1, y, 'A'); s.put(x, y, 'B'); s.put(x + 1, y, 'C')
+    s.hline(DC - 12, DC + 8, 25, 'B'); s.hline(DC - 12, DC + 7, 25, 'A'); s.hline(DC - 12, DC + 9, 25, 'C')
+    s.rect(DC - 2, DC + 7, 5, 4, 'a'); s.hline(DC - 2, DC + 7, 5, 'y'); s.put(DC + 2, DC + 10, 'u'); s.rect(DC - 1, DC + 8, 3, 2, 'n')    # a brass buckle
+    # a lamp battery on the left hip with its cable running up to the neck, and a pick stowed on the right
+    s.rect(DC - 12, DC + 3, 4, 4, 'S'); s.hline(DC - 12, DC + 3, 4, 'M'); s.put(DC - 10, DC + 5, 'y'); s.put(DC - 9, DC + 6, 'W')
+    for i in range(10): s.put(DC - 11 + i // 4, DC + 2 - i, 'n')
+    s.vline(DC + 11, DC + 6, 10, 'q'); s.vline(DC + 12, DC + 6, 10, 'n'); s.hline(DC + 8, DC + 15, 7, 'S'); s.put(DC + 8, DC + 15, 'M'); s.put(DC + 14, DC + 16, 'W')
+    return s
+
+MU_HEADS = ['snout', 'lamp', 'helmet']
+def mu_head(kind):
+    s = Spr(DN, DN)
+    for sd in (-1, 1): ell(s, DC + sd * 7, DC - 6, 2.2, 2.2, 'W')                              # small fur flaps where ears would be
+    sk = Spr(DN, DN); ell(sk, DC, DC - 8, 6.6, 6.4, 'W')
+    poly(sk, [(DC - 4, DC - 12), (DC + 4, DC - 12), (DC + 2, DC - 18), (DC - 2, DC - 18)], 'W')
+    merge(s, shade_gen(sk, 'W', 'S', 'E'))
+    for (dx, dy) in ((-3, -13), (3, -13), (-2, -16), (2, -16)): s.put(DC + dx, DC + dy, 'D')       # whisker roots
+    for (dx, dy) in ((-6, -15), (-5, -16), (6, -15), (5, -16), (-7, -13), (7, -13)): s.put(DC + dx, DC + dy, 'M')
+    nx, ny = DC, DC - 19                                                                        # the star-nose: a pink centre with short rays
+    s.hline(nx - 1, ny, 3, 'p'); s.put(nx, ny - 1, 'p'); s.put(nx, ny + 1, 'p')
+    for (dx, dy) in ((-2, 0), (2, 0), (0, -2), (0, 2)): s.put(nx + dx, ny + dy, 's')
+    for (dx, dy) in ((-1, -1), (1, -1), (-1, 1), (1, 1)): s.put(nx + dx, ny + dy, 'v')
+    for sd in (-1, 1): s.put(DC + sd * 4, DC - 9, 'N'); s.put(DC + sd * 4, DC - 10, 'M')       # tiny eyes with a glint
+    if kind == 'lamp':                                                                      # a headband and a lamp (the light is the glow layer)
+        s.hline(DC - 6, DC - 10, 13, 'B'); s.hline(DC - 6, DC - 11, 13, 'A'); s.hline(DC - 5, DC - 9, 11, 'C')
+        s.rect(DC - 2, DC - 13, 5, 4, 'S'); s.hline(DC - 2, DC - 13, 5, 'M'); s.hline(DC - 1, DC - 12, 3, 'y'); s.put(DC, DC - 12, 'H'); s.put(DC + 2, DC - 10, 'W')
+    if kind == 'helmet':                                                                    # a dented hard hat with a brim over the snout's root and a lamp
+        h = Spr(DN, DN); ell(h, DC, DC - 7, 7.8, 6.2, 'B'); merge(s, cv2.shade_edges(h))
+        s.hline(DC - 8, DC - 11, 17, 'C'); s.hline(DC - 7, DC - 12, 15, 'B'); s.hline(DC - 6, DC - 13, 13, 'C')                # the brim
+        for dy in range(-12, -3): s.put(DC, DC + dy, 'A')                                    # the ridge
+        for (dx, dy) in ((-4, -9), (-3, -8), (4, -7), (3, -6)): s.put(DC + dx, DC + dy, 'C')   # dents
+        s.rect(DC - 2, DC - 12, 5, 3, 'S'); s.hline(DC - 2, DC - 12, 5, 'M'); s.hline(DC - 1, DC - 11, 3, 'y'); s.put(DC, DC - 11, 'H')
+    return s
+
+def mu_hand(s, x, y, big=True):
+    """a pink palm with three long cream spade claws pointing forward (up); the grip version is smaller, so two of them fit round an item."""
+    rx, ry, sp, ln = (5.5, 3.0, 4, 9) if big else (4.0, 2.4, 3, 6)
+    p = Spr(DN, DN); ell(p, x, y, rx, ry, 's'); merge(s, shade_gen(p, 's', 'f', 'v'))
+    for cx in (x - sp, x, x + sp):
+        toward = (1 if cx < x else -1 if cx > x else 0)
+        for j in range(ln):
+            yy = y - 2 - j
+            if j < ln - 5: s.put(cx - 1, yy, 'f'); s.put(cx, yy, 'f'); s.put(cx + 1, yy, 'M')
+            elif j < ln - 2: s.put(cx, yy, 'f'); s.put(cx + 1, yy, 'M')
+            else: s.put(cx + (toward if j == ln - 1 else 0), yy, 'L' if j < ln - 1 else 'H')
+    s.hline(int(x - rx) + 1, y + 1, int(2 * rx) - 1, 'v')                                       # a crease across the palm
+def mu_arm(s, a, b):
+    t = Spr(DN, DN); m = ((a[0] * 2 + b[0]) // 3, (a[1] * 2 + b[1]) // 3)
+    seg(t, a[0], a[1], m[0], m[1], 7, 'E'); seg(t, m[0], m[1], b[0], b[1], 5, 'E'); merge(s, mu_fur(t))     # a heavy upper arm tapering to the wrist
+    n = max(abs(b[0] - a[0]), abs(b[1] - a[1]), 1)
+    for k in (0.25, 0.5):
+        x = a[0] + round((b[0] - a[0]) * k); y = a[1] + round((b[1] - a[1]) * k)
+        for (dx, dy) in ((-2, 0), (1, 1), (0, -2)): s.put(x + dx, y + dy, 'q')                  # dust
+    x = a[0] + round((b[0] - a[0]) * 0.82); y = a[1] + round((b[1] - a[1]) * 0.82)
+    s.rect(x - 3, y - 1, 7, 3, 'B'); s.hline(x - 3, y - 1, 7, 'A'); s.hline(x - 3, y + 1, 7, 'C')   # the wrist wrap (outfit)
+MU_UNARMED = (mR(-18, 8), mR(18, 8))
+def mu_arms(pose):
+    s = Spr(DN, DN); A = pose_anchors(*MU_UNARMED, shift=DSH)[pose]
+    if pose == 'unarmed':
+        mu_arm(s, mR(-14, -3), (MU_UNARMED[0][0], MU_UNARMED[0][1] - 1)); mu_arm(s, mR(14, -3), (MU_UNARMED[1][0], MU_UNARMED[1][1] - 1))
+        mu_hand(s, *MU_UNARMED[0]); mu_hand(s, *MU_UNARMED[1])
+        return s
+    for sh, k, sd in ((mR(-14, -3), 'hand_l', -1), (mR(14, -3), 'hand_r', 1)):          # the claws grip a little wider than the anchors, so they show beside the snout
+        h = (A[k][0] + sd * 4, A[k][1] + 1)
+        mu_arm(s, sh, (h[0], h[1] + 2)); mu_hand(s, *h, big=False)
+    return s
+
+class Murrow(Species):
+    id = 'murrow'
+    N = DN; C = DC
+    walk_fps = 6
+    glow_fps = 3
+    kind = 'large'
+    head_names = MU_HEADS
+    notes = ('Murrow: asteroid-colony diggers, mole-folk, on THE LARGE RIG: the frame is 49x49 with the pivot at (24,24) (the normal 2x2 body, 32 px, sits at the centre, its '
+             'shadow and pathing stay there; the art overhangs it). Mounts and hands are the shared targets moved by (+8,+8), identical relative to the pivot, so every item '
+             'fits (item top-left = mount - item.grip). Dark velvet fur caked with tan dust on a stocky hunched barrel of a body, a small head with a long snout ending in a pink '
+             'star-nose and tiny eyes, and HUGE digging claws: pink palms with three long cream spade claws (spread wide when unarmed, a smaller grip round an item). A miner\'s '
+             'harness (crossed straps, belt with a brass buckle), an ore sack on the back, a lamp battery on the hip, a pick stowed on the right, a short bare tail in the legs layer '
+             '(it swings with the walk). head_glow (2 frames per head, ~3 fps) is the headlamp of the lamp and helmet heads; torso_glow the battery lamp. Head variants: snout, lamp '
+             '(a tinted headband with a lamp), helmet (a dented hard hat, tinted, with a lamp). Outfit mask = the harness straps, belt, wrist wraps, headband and hard hat.')
+    def legs(self): return [outlined(mu_leg_frame(*w[:4], tail=w[4])) for w in MU_WALK] + [outlined(mu_leg_frame(1, -1, tail=0))]
+    def torso(self): return outlined(mu_torso())
+    def arms(self, pose): return outlined(mu_arms(pose))
+    def head(self, name): return outlined(mu_head(name))
+    def torso_anchors(self): return {'head': [DC, DC - 2], 'back': [DC, DC + 12], 'shoulder_l': [DC - 13, DC - 3], 'shoulder_r': [DC + 13, DC - 3]}
+    def arm_anchors(self): return pose_anchors(*MU_UNARMED, shift=DSH)
+    def torso_glow(self):
+        out = []
+        for f in (0, 1):
+            g = ng(DN); glow_px_max(g, [(DC - 10, DC + 5)], (255, 210, 58), (0.7, 0.4)[f], (3.0, 2.4)[f], 1.4)
+            out.append(g)
+        return out
+    def head_glow(self):
+        out = []
+        for f in (0, 1):
+            for nm in self.head_names:
+                g = ng(DN)
+                if nm == 'lamp': glow_px_max(g, [(DC, DC - 12), (DC - 1, DC - 12), (DC + 1, DC - 12)], (255, 210, 58), (0.75, 0.5)[f], (5.0, 4.0)[f], 1.4)
+                if nm == 'helmet': glow_px_max(g, [(DC, DC - 11), (DC - 1, DC - 11), (DC + 1, DC - 11)], (255, 210, 58), (0.75, 0.5)[f], (5.0, 4.0)[f], 1.4)
+                out.append(g)
+        return out
+
+SPECIES = [WardenFrame, Murrow]

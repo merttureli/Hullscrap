@@ -903,6 +903,17 @@ Source and licence of every art and audio file in the repo.
 | `art/crew/mire/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/mire/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/mire/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/head.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/head_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/head_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/legs.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/torso.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/torso_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/crew/murrow/torso_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/oorth/arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/oorth/arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/crew/oorth/crew.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
