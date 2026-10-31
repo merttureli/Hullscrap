@@ -35,6 +35,7 @@ enum Mode { PAINT, LINE, RECT }
 
 var ship: Ship
 var cable_cost := {}  ## material id -> count per cable cell
+var last_preview_cost := {}  ## what the last preview() would take from the cargo: id -> count (negative = given back)
 var undo_stack: Array = []
 var redo_stack: Array = []
 var grid: ShipGrid:
@@ -81,11 +82,17 @@ func apply(changes: Array) -> Dictionary:
 	return {"applied": step.size(), "skipped": skipped, "reason": reason}
 
 
-## What apply() would do, without keeping it: each change plus "reason" ("" = it would apply).
+## What apply() would do, without keeping it: each change plus "reason" ("" = it would apply). Also sets last_preview_cost.
 func preview(changes: Array) -> Array:
 	var has_parts := changes.any(func(ch): return ch.get("layer", "") == "component")
 	var parts_before: Dictionary = ship.components.to_dict() if has_parts else {}  # placing hands out a uid
+	var cargo_before: Dictionary = inventory.counts.duplicate()
 	var run := _run(changes)
+	last_preview_cost = {}
+	for id in cargo_before.keys() + inventory.counts.keys():
+		var d := int(cargo_before.get(id, 0)) - inventory.count(id)
+		if d != 0:
+			last_preview_cost[id] = d
 	_revert(run["step"])
 	if has_parts:
 		ship.components.load_dict(parts_before)  # give the uid back

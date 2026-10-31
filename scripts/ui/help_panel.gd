@@ -40,9 +40,8 @@ const COLUMNS: Array = [
 	],
 	[
 		["BUILDING (B for build mode)", [
-			["Tab", "Next palette: Tiles, Systems, Cables"],
-			["1 2 3", "Tiles: floor, wall, door"],
-			["1 - 9", "Systems: pick one you hold in cargo"],
+			["Tab / Shift+Tab", "Palette tab: Structure, Shapes, Systems, Weapons, Engines, Utility, Cargo"],
+			["1 - 9", "Pick a card of the tab (or click it); grey = can't pay or none held"],
 			["Left mouse", "Place; drag to paint (a system goes down on release)"],
 			["Shift+Left drag", "Straight line"],
 			["Ctrl+Left drag", "Rectangle (a wall makes a room)"],
@@ -54,7 +53,8 @@ const COLUMNS: Array = [
 			["Ctrl+Z / Ctrl+Y", "Undo / redo (Ctrl+Shift+Z also redoes)"],
 			["Esc", "Cancel a drag"],
 			["Mounts", "A weapon or engine goes outside the hull, against a wall; its inside half goes on the floor behind it"],
-			["Cables", "Every system needs a cable to a reactor"],
+			["Cables", "Every system needs a cable to a reactor (Cable is on Structure)"],
+			["Mode bar", "Click Build, Play, Map, Shields, Crafting or Help"],
 		]],
 	],
 	[
