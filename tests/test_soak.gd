@@ -292,6 +292,7 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 	s.start(player, enemy, enemy.rng_seed)
 	var mine = s.arena.ships[Session.PLAYER]
 	mine.hull = c.fight_hull(mine.hull_max)  # what the campaign says is left of the hull
+	s.arena.hazard = c.hazard_at(c.current)  # the node's sector hazard, as the map sets it
 	var pilot := PilotAI.new(s.arena, Session.PLAYER, Session.ENEMY, {})
 	var ticks := int(_cap_s * 60.0)
 	var n := 0

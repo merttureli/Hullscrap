@@ -564,7 +564,7 @@ func _draw_node(id: String) -> void:
 	var glyph := str(Campaign.type_info(str(n["type"]))["glyph"]) if known else "?"
 	_text(glyph, at + Vector2(-5.0, 6.0), 16, Color("#10151c") if known and n["type"] != "gate" else TEXT)
 	if known:  # a place with a sector hazard wears its badge (hazards.gd)
-		HazardBar.badge(self, at + Vector2(NODE_R * 0.8, -NODE_R * 0.8), campaign.hazard_at(id))
+		HazardBar.badge(self, at + Vector2(-NODE_R * 0.8, -NODE_R * 0.8), campaign.hazard_at(id))
 	if hollow:  # a broken ring: three arcs with gaps
 		for i in 3:
 			draw_arc(at, NODE_R + 4.0, TAU * i / 3.0 + 0.3, TAU * (i + 1) / 3.0 - 0.3, 10, HOLLOW.lightened(0.25), 2.0, true)
