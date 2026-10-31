@@ -34,6 +34,7 @@ var look := {}  ## PersonDrawer palette ("suit", "hair", "tool"); empty = the vi
 var job := {}  ## what they are doing now (a Jobs board entry plus its "spot"); empty = idle
 var hold := 0.0  ## seconds left of a manual order, during which the job board leaves them alone
 var stun := 0.0  ## seconds left stunned (an ion hit on their room, trait ion_stun): no walking, no work
+var down_t := 0.0  ## seconds spent at 0 hp (mortality.gd: they die at crew.json bleed_out_s unless someone is saving them)
 var ability: Dictionary = {}  ## the active ability they carry, {id, cooldown?, params?} (crew_abilities.gd): their species' own, or their character's
 var ability_cd := 0.0  ## seconds until the ability may be used again (ticked by CrewAbilities.tick, so build mode pauses it)
 var character := ""  ## the unique character (data/characters.json) they are, "" for an ordinary crew member

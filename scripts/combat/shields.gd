@@ -38,7 +38,7 @@ static func layers_of_ship(ship, powered: Dictionary) -> int:
 		if powered.get(uid, false):
 			var d: Dictionary = comps.def(comps.instances[uid]["id"])
 			if d.get("family", "") == "shield":
-				total += int(d.get("stats", {}).get("layers", 0))
+				total += Abilities.part_layers(ship, uid, int(d.get("stats", {}).get("layers", 0)))  # crew and heat can change a part's layers
 	return total
 
 
@@ -336,14 +336,17 @@ static func tick(co, dt: float) -> void:
 		co.ion_lock = maxf(co.ion_lock - dt, 0.0)
 		return
 	dt *= CrewFx.family_mult(co.ship, "shield")
+	var rate := -1.0
 	for s in co.sectors:
 		var timers: Array = co.sector_timers[s]
 		if timers.is_empty():
 			continue
+		if rate < 0.0:
+			rate = Abilities.recharge_rate(co.ship, co.powered)  # crew_needed recharge: the crew a shield lacks slows it
 		var left := []
 		for t in timers:
-			if t.x - dt <= 1e-9:
+			if t.x - dt * rate <= 1e-9:
 				co.sector_layers[s] = minf(float(co.sector_layers[s]) + t.y, cap_of(co, s))
 			else:
-				left.append(Vector2(t.x - dt, t.y))
+				left.append(Vector2(t.x - dt * rate, t.y))
 		co.sector_timers[s] = left
