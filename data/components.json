@@ -1,5 +1,5 @@
 {
-  "_doc": "Placeable ship components. Content is data: add an entry here and it can be placed. size is [w, h] in cells at rotation 0 (a crew body is 2x2 cells, so a 1-cell corridor is too narrow). power: positive produces, negative consumes. priority: lower is powered first when power is short (0 for producers and zero-power parts). tier: 1 to 3 (Mk1 to Mk3). family groups related parts. manned: works better with crew. stats: numbers read by the systems that use the part. line: scrap, standard or neon (data/lines.json). hp: system health, at 0 it is disabled until repaired. heat_limit: overheats at this heat. heat_per_s: heat gained per second while running. cooling: heat lost per second. stats.cooling_bonus: extra cooling every part in the same room gets (radiator). Shield stats: stats.layers (bubble layers), stats.sectors (1, 2, 4 or 8: how many sectors the bubble is split into, bow first and clockwise: Mk1 and scrap 1, Mk2 2, Mk3 and Neon 4, and 8 for the Mk5 and the late uniques; the best powered generator sets it, and each sector holds layers x its balance weight, docs/CONTENT.md section 4) and stats.recharge (seconds until a used layer is back, default 2.0; lower is faster: Abilities.recharge_rate scales the shield's recharge by 2.0 / stats.recharge, 1.4 is 1.43 times as fast). unique: true marks a found-or-traded item that has no recipe. effects: tags the combat code reads for a unique or special part (for weapons they live in weapons.json). A weapon part needs an entry in weapons.json under the same id. abilities: optional list of {id, name, type (active or passive), key (engine, shield or utility: the combat key that triggers an active one), duration and cooldown in seconds (the cooldown starts when the effect ends), effects, side_effects, operator_needs, event} (see docs/CONTENT.md section 5 and scripts/sim/abilities.gd). effects: stat_mult {thrust or power: factor} on this part, shield_layer (extra layers), charge_mult (weapon cooldown factor), evasion_add. side_effects: a list of {type, rate} applied per second while it runs: drain_o2 (fraction of the room's air lost per second), heat, power_spike (extra draw), fire_risk (chance per second), self_damage (hp per second). Racial keys (docs/CONTENT.md section 17, scripts/sim/part_effects.gd; \"room\" is the room of the part's anchor, \"up\" crew are neither downed nor stunned, `who` is a species id, a trait id or \"mechanical\", \"a|b\" either): effects.crew_bonus {who, stat (power, thrust or shield_layer), per, max} adds per up crew member in the room matching who, up to max in all (power to the part's output, thrust to the engine's thrust, layers to a shield, rounded down); effects.crew_needed {count, stat (power, thrust, shield_layer, recharge or evasion), else_mult, who?} multiplies the stat by else_mult unless count up crew (matching who) stand in the room (layers round down; recharge is the speed shield layers come back at, 0.5 = twice as long; evasion is the ability's own evasion_add); both may be a list of entries; effects.room_wall_hp_mult: factor on the hp of the wall cells round the room, set when a fight starts (the strongest on a cell counts); effects.heat_above {heat, shield_layer}: that many extra layers while the room's hottest part is above heat; effects.room_work_mult {mult, who?, else_mult?}: factor on the work speed (repair, extinguish, breach, revive) of crew in the room, mult for those matching who, else_mult (default 1) for the rest; side_effects shock_organic (rate = hp per second to every crew member in the room who is not mechanical), scorch (rate = hp per second to every crew member in the room without the heat_resistant trait: the mirror of shock_organic, so an Emberkin crew runs a hot part free; the part's own heat is the separate heat side effect) and wet (rate = work factor, e.g. 0.8, for crew in the room unless their work_mult.extinguish is above 1; every part in the room also loses 30 heat at the start of each second). shield_layer and recharge effects only work on a shield part. The validator is PartEffects.problems / component_problems (tests/test_components.gd). stats.malfunction_per_min (a chance per minute, 0 to 1) overrides the line's malfunction rate for that part. operator_needs: traits a crew member manning the part must have; a|b means either. blurb: one line of flavour. Ram parts (docs/CONTENT.md 4e) read stats.ram_deal (damage dealt to the other ship in a collision, as a multiple), stats.tether_s (seconds it latches on after a hit), stats.ram_take (multiple of ram damage taken by the ship's plain cells while the part is powered) and stats.no_knock (1: crew take no knock from a ram while it is powered). mount (weapons and engines): {outside: [w, h], outside_hp} makes the part two linked halves through a hull wall of any thickness (docs/CONTENT.md 4f). size is the INSIDE half (on the floor, crewed and wired); the outside half sits in space at the outer wall face, outward is UP at rotation 0, takes the visible hits with its own outside_hp and is only ever disabled; a direct hit on a disabled inside half wrecks the part. Engine stats: thrust, and fuel_mult (a jump of the Drift costs 1 x the thrust-weighted mean fuel_mult of the powered engines; an engine without one counts as 1.0; docs/waves/engines_1.md). quirk: a line of text saying why a part is off its balance band (data/balance.json), which exempts it.",
+  "_doc": "Placeable ship components. Content is data: add an entry here and it can be placed. size is [w, h] in cells at rotation 0 (a crew body is 2x2 cells, so a 1-cell corridor is too narrow). power: positive produces, negative consumes. priority: lower is powered first when power is short (0 for producers and zero-power parts). tier: 1 to 3 (Mk1 to Mk3). family groups related parts. manned: works better with crew. stats: numbers read by the systems that use the part. line: scrap, standard or neon (data/lines.json). hp: system health, at 0 it is disabled until repaired. heat_limit: overheats at this heat. heat_per_s: heat gained per second while running. cooling: heat lost per second. stats.cooling_bonus: extra cooling every part in the same room gets (radiator). Shield stats: stats.layers (bubble layers), stats.sectors (1, 2, 4 or 8: how many sectors the bubble is split into, bow first and clockwise: Mk1 and scrap 1, Mk2 2, Mk3 and Neon 4, and 8 for the Mk5 and the late uniques; the best powered generator sets it, and each sector holds layers x its balance weight, docs/CONTENT.md section 4) and stats.recharge (seconds until a used layer is back, default 2.0; lower is faster: Abilities.recharge_rate scales the shield's recharge by 2.0 / stats.recharge, 1.4 is 1.43 times as fast). unique: true marks a found-or-traded item that has no recipe. effects: tags the combat code reads for a unique or special part (for weapons they live in weapons.json). A weapon part needs an entry in weapons.json under the same id. abilities: optional list of {id, name, type (active or passive), key (engine, shield or utility: the combat key that triggers an active one), duration and cooldown in seconds (the cooldown starts when the effect ends), effects, side_effects, operator_needs, event} (see docs/CONTENT.md section 5 and scripts/sim/abilities.gd). effects: stat_mult {thrust or power: factor} on this part, shield_layer (extra layers), charge_mult (weapon cooldown factor), evasion_add. side_effects: a list of {type, rate} applied per second while it runs: drain_o2 (fraction of the room's air lost per second), heat, power_spike (extra draw), fire_risk (chance per second), self_damage (hp per second). Racial keys (docs/CONTENT.md section 17, scripts/sim/part_effects.gd; \"room\" is the room of the part's anchor, \"up\" crew are neither downed nor stunned, `who` is a species id, a trait id or \"mechanical\", \"a|b\" either): effects.crew_bonus {who, stat (power, thrust or shield_layer), per, max} adds per up crew member in the room matching who, up to max in all (power to the part's output, thrust to the engine's thrust, layers to a shield, rounded down); effects.crew_needed {count, stat (power, thrust, shield_layer, recharge or evasion), else_mult, who?} multiplies the stat by else_mult unless count up crew (matching who) stand in the room (layers round down; recharge is the speed shield layers come back at, 0.5 = twice as long; evasion is the ability's own evasion_add); both may be a list of entries; effects.room_wall_hp_mult: factor on the hp of the wall cells round the room, set when a fight starts (the strongest on a cell counts); effects.heat_above {heat, shield_layer}: that many extra layers while the room's hottest part is above heat; effects.room_work_mult {mult, who?, else_mult?}: factor on the work speed (repair, extinguish, breach, revive) of crew in the room, mult for those matching who, else_mult (default 1) for the rest; side_effects shock_organic (rate = hp per second to every crew member in the room who is not mechanical), scorch (rate = hp per second to every crew member in the room without the heat_resistant trait: the mirror of shock_organic, so an Emberkin crew runs a hot part free; the part's own heat is the separate heat side effect) and wet (rate = work factor, e.g. 0.8, for crew in the room unless their work_mult.extinguish is above 1; every part in the room also loses 30 heat at the start of each second). shield_layer and recharge effects only work on a shield part. The validator is PartEffects.problems / component_problems (tests/test_components.gd). stats.malfunction_per_min (a chance per minute, 0 to 1) overrides the line's malfunction rate for that part. operator_needs: traits a crew member manning the part must have; a|b means either. blurb: one line of flavour. Ram parts (docs/CONTENT.md 4e) read stats.ram_deal (damage dealt to the other ship in a collision, as a multiple), stats.tether_s (seconds it latches on after a hit), stats.ram_take (multiple of ram damage taken by the ship's plain cells while the part is powered) and stats.no_knock (1: crew take no knock from a ram while it is powered). mount (weapons and engines): {outside: [w, h], outside_hp} makes the part two linked halves through a hull wall of any thickness (docs/CONTENT.md 4f). size is the INSIDE half (on the floor, crewed and wired); the outside half sits in space at the outer wall face, outward is UP at rotation 0, takes the visible hits with its own outside_hp and is only ever disabled (a weapon's outside_hp is twice its hp, an armoured barrel housing that the crew can patch between volleys; an engine's or an intake's is 75% of its hp, rounded); a direct hit on a disabled inside half wrecks the part. Engine stats: thrust, and fuel_mult (a jump of the Drift costs 1 x the thrust-weighted mean fuel_mult of the powered engines; an engine without one counts as 1.0; docs/waves/engines_1.md). quirk: a line of text saying why a part is off its balance band (data/balance.json), which exempts it.",
   "components": [
     {
       "id": "reactor_mk1",
@@ -242,7 +242,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#e8624a",
       "power": -2,
@@ -273,7 +273,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#ff3b8a",
       "power": -3,
@@ -303,7 +303,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#e8624a",
       "power": -3,
@@ -700,7 +700,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#e9c46a",
       "power": -2,
@@ -728,7 +728,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#f4a261",
       "power": -3,
@@ -756,7 +756,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#a68a64",
       "power": -2,
@@ -784,7 +784,7 @@
           4,
           3
         ],
-        "outside_hp": 5
+        "outside_hp": 12
       },
       "color": "#9c8f6a",
       "power": -2,
@@ -812,7 +812,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#8d6e53",
       "power": -1,
@@ -840,7 +840,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#e76f51",
       "power": -2,
@@ -868,7 +868,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#4cc9f0",
       "power": -3,
@@ -896,7 +896,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#5ef2e0",
       "power": -3,
@@ -924,7 +924,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#ff6b35",
       "power": -4,
@@ -952,7 +952,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#9bf06a",
       "power": -3,
@@ -981,7 +981,7 @@
           4,
           2
         ],
-        "outside_hp": 4
+        "outside_hp": 10
       },
       "color": "#c9ced6",
       "power": -2,

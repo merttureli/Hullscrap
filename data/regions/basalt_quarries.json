@@ -4,7 +4,7 @@
 	"home_species": "basalt",
 	"faction": "clans",
 	"stages": [2, 7],
-	"weight": 10,
+	"weight": 14,
 	"rarity": "common",
 	"danger": 1.1,
 	"palette": {"tint": "#8a7f74", "nebula": "boneyard"},
