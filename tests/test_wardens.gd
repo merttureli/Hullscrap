@@ -78,7 +78,7 @@ func test_for_region_is_deterministic_per_seed_stage_and_region_and_leaves_the_r
 	eq(c.rng.state, state, "the campaign's rng was not touched")
 	eq([a["region"], a["stage"], a["flag"]], ["concord_space", 3, "warden_concord_space_3"], "it knows its place and its flag")
 	var p: PackedStringArray = str(a["spec"]).split(":")
-	var want := Shipgen.budget_for(Wardens.tier_at(20), 20, 1.1, "normal") * 1.2
+	var want := Shipgen.budget_for(Wardens.tier_at(20), 20, 1.1, "normal") * float(Wardens.config()["stage_budget_mult"][2])
 	eq([p[0], p[1], p[2], int(p[4])], ["gen", "concord", "large", roundi(want * 100.0)], "a concord large ship at the budget of jumps + 8, times the stage factor")
 	check(Shipgen.from_spec(a["spec"]) != null, "and the spec builds")
 	var easy := Wardens.for_region(11, 3, concord, 12, "easy")
