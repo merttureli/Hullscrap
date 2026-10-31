@@ -556,6 +556,15 @@ func test_the_sim_ticks_the_cooldowns_of_every_ship() -> void:
 	near(b.ability_cd, 29.0, "and the enemy's")
 	sim.step(0.0)
 	near(a.ability_cd, 29.0, "no time passes when the world does not step")
+	CrewAbilities.use(mine, _crew(mine, "Brute", 14, 12, "berserk"))
+	sim.set_paused(true, "build mode")
+	sim.step(5.0)
+	near(a.ability_cd, 29.0, "the world is paused (build mode): the cooldown stands still")
+	near(CrewFx.list(mine)[0]["left"], 10.0, "and so does a running effect")
+	sim.set_paused(false)
+	sim.step(1.0)
+	near(a.ability_cd, 28.0, "and it goes on afterwards")
+	near(CrewFx.list(mine)[0]["left"], 9.0, "(the effect too)")
 	sim.free()
 
 

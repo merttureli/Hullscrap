@@ -138,9 +138,14 @@ func test_f_sends_the_nearest_crew_member_to_repair_the_part_under_the_mouse() -
 	eq(b.message, "Near will repair Fabricator", "the nearest one goes")
 	eq(near.job.get("type"), "repair_component", "and has the job")
 	check(far.job.is_empty(), "the other stays")
+	for i in 100:  # build mode pauses the world: the order waits
+		b.sim.step(0.1)
+	eq([inst["status"], inst["hp"]], ["malfunction", 3], "nothing is repaired while the world is paused")
+	b.build_on = false
 	for i in 100:  # 5 s of work after the walk
 		b.sim.step(0.1)
-	eq([inst["status"], inst["hp"]], ["ok", 4], "repaired")
+	eq([inst["status"], inst["hp"]], ["ok", 4], "repaired in play mode")
+	b.build_on = true
 	b._on_key(e)
 	eq(b.message, "Fabricator needs no repair", "nothing to do the second time")
 	b.hover = Vector2i(20, 14)

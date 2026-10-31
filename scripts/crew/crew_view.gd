@@ -78,9 +78,11 @@ func _process(dt: float) -> void:
 	_spawn(ship)
 	if selected != null and not ship.crew.has(selected):
 		selected = null  # they left, or the ship was replaced
-	for m: CrewMember in ship.crew:
-		m.resolve(ship.grid, door_passable)  # the ship changed under them (a wall built on a body)
-	if player != null:
+	var frozen: bool = sim != null and bool(sim.get("paused"))  # build mode: nobody walks (ShipSim.relocate_crew sorts them out on leaving it)
+	if not frozen:
+		for m: CrewMember in ship.crew:
+			m.resolve(ship.grid, door_passable)  # the ship changed under them (a wall built on a body)
+	if player != null and not frozen:
 		player.move_input(ship.grid, _wasd(), dt, door_passable)
 		if Input.is_key_pressed(KEY_E) and not Input.is_key_pressed(KEY_CTRL) and sim.has_method("jobs_of"):
 			sim.jobs_of(ship).hand_work(ship, player, dt)  # E held: work on what is in reach
@@ -132,7 +134,7 @@ func select(m: CrewMember) -> void:
 func use_ability(m: CrewMember) -> Dictionary:
 	var ship = _ship()
 	var r := {"ok": false, "text": ""}
-	if ship != null and build.build_on:
+	if ship != null and (build.build_on or bool(sim.get("paused"))):
 		r["text"] = "Paused in build mode: B for play mode"
 	elif ship != null:
 		r = CrewAbilities.use(ship, m, sim.ships[1] if sim.ships.size() > 1 else null)
