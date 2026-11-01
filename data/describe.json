@@ -62,7 +62,7 @@
 		"ion_weak": {"label": "ION-WEAK", "color": "#64c46d", "hover": "Ion hits do x{n} damage to it."},
 		"ablative": {"label": "ABLATIVE", "color": "#60fb68", "hover": "Each energy hit takes 1 from its max hp."},
 		"lattice_power": {"label": "LATTICE", "color": "#cfeea0", "hover": "Turns some absorbed energy into ship power."},
-		"ram": {"label": "RAM x{deal}", "color": "#e5fa2e", "hover": "Ram damage dealt x{deal}, taken x{take}."}
+		"ram": {"label": "RAM ×{deal}", "color": "#e5fa2e", "hover": "Ram damage dealt x{deal}, taken x{take}."}
 	},
 	"items": {
 		"ammo": "Ammo for guns that use it.",
