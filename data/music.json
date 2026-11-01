@@ -11,7 +11,9 @@
   "combat": [
    "combat.ogg"
   ],
-  "hollow": [],
+  "hollow": [
+   "hollow.ogg"
+  ],
   "build": []
  },
  "stings": {},
@@ -19,6 +21,7 @@
   "menu.ogg": 0.0,
   "explore_a.ogg": 0.0,
   "explore_b.ogg": 0.0,
-  "combat.ogg": 0.0
+  "combat.ogg": 0.0,
+  "hollow.ogg": 0.0
  }
 }

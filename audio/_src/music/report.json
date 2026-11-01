@@ -74,6 +74,31 @@
   "title": "Salvage Lanes",
   "true_peak_db": -1.81
  },
+ "hollow": {
+  "bands_pct": [
+   8.9,
+   38.9,
+   47.2,
+   4.5,
+   0.5
+  ],
+  "bpm": 60.0,
+  "bytes": 2280740,
+  "peak_db": -3.28,
+  "rms_db": -18.0,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.18998,
+   "rms_first_db": -19.3,
+   "rms_last_db": -18.0,
+   "seam_step": 0.01196,
+   "typ_step_p999": 0.092
+  },
+  "seconds": 120.0,
+  "target_rms_db": -18.0,
+  "title": "Manners",
+  "true_peak_db": -3.28
+ },
  "menu": {
   "bands_pct": [
    20.8,
