@@ -166,6 +166,8 @@ func test_a_homeland_has_its_race_station_as_a_beacon_selling_and_recruiting_its
 		for sp in menu["recruit"]:
 			check(int(menu["recruit"][sp]) <= int(menu["recruit"][home]), "%s: %s weighs no more than the home race" % [id, sp])
 		c.current = st
+		c.cfg = c.cfg.duplicate(true)
+		c.cfg["prices"]["recruit_chance"] = 1.0  # (the chance a station has anyone is tested in test_alone.gd)
 		c.roll_offers(st, ship)
 		eq(c.offers[st].size(), 2, id + ": two recruits on offer")
 		var price := c.stock_price(st, str(r["stock"].keys()[0]))

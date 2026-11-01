@@ -391,6 +391,10 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 	if spec.has("hangar"):
 		saved["hangar"] = spec["hangar"]  # {group, layout, unlock}: the hangar tab, the layout A/B/C and the unlock that opens it (space/hangar.gd)
 	var path: String = spec.get("dir", OUT_DIR) + spec["file"] + ".json"
+	if FileAccess.file_exists(path):  # the blueprints a design knows stay as they were: a regenerated one must not need a pack the old one did not
+		var was = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if was is Dictionary and was.has("crafting"):
+			saved["crafting"] = was["crafting"]
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(_format(saved))
 	f.close()

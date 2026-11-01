@@ -333,7 +333,7 @@ func _station(where: String, c: Campaign, ship, pick: RandomNumberGenerator) -> 
 		check(r["ok"] or ship.inventory.count("credits") < c.stock_price(c.current, item), where + ": buying %s: %s" % [item, r["text"]])
 	if services.has("recruit") and pick.randf() < 0.3 and not c.offers.get(c.current, []).is_empty():
 		var r := c.recruit(ship, c.current, 0)
-		check(r["ok"] or ship.inventory.count("credits") < 150 or "room" in str(r["text"]), where + ": recruiting: " + str(r["text"]))
+		check(r["ok"] or ship.inventory.count("credits") < int(c.cfg["prices"]["recruit"]) or "room" in str(r["text"]), where + ": recruiting: " + str(r["text"]))
 	_audit(where + " after docking", c, ship)
 
 

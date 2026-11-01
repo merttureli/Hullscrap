@@ -251,10 +251,19 @@ func test_a_basalt_revives_at_half_speed() -> void:
 
 # --- crews -----------------------------------------------------------------------------------------
 
-func test_the_starting_crews_match_the_design_notes() -> void:
+func test_the_starters_start_with_the_soldier_alone() -> void:  # playtest 2, A1
+	for path in CREWS:
+		var ship := Ship.from_design(path)
+		eq(ship.crew_plan, [{"name": "Soldier", "species": "human"}], path + ": the crew list")
+		Jobs.spawn_crew(ship)
+		eq(ship.crew.size(), 1, path + ": one spawned")
+
+
+func test_a_listed_crew_spawns_with_their_species_and_hp() -> void:
 	for path in CREWS:
 		var ship := Ship.from_design(path)
 		var want: Dictionary = CREWS[path]
+		ship.crew_plan = want.keys().map(func(n): return {"name": n, "species": want[n]})  # (the old starting crews)
 		eq(ship.crew_plan.map(func(e): return e["name"]), want.keys(), path + ": the crew list")
 		Jobs.spawn_crew(ship)
 		eq(ship.crew.size(), want.size(), path + ": all spawned")
@@ -280,6 +289,8 @@ func test_every_ship_with_an_afterburner_has_a_qualified_operator() -> void:
 		if not has:
 			continue
 		carrying += 1
+		if ship.crew_plan.size() <= 1:  # the soldier alone: the operator (a Basalt or a suited hand) is a crewmate found on the way
+			continue
 		var crew: Array = ship.crew_plan.map(func(e): return CrewMember.new(e["name"], Vector2.ZERO, e["species"]))
 		check(crew.any(func(m): return Abilities.meets(m, needs)), path + ": somebody aboard can work an afterburner")
 	check(carrying >= 2, "the Courier and the Prism carry one (found %d)" % carrying)
@@ -287,6 +298,7 @@ func test_every_ship_with_an_afterburner_has_a_qualified_operator() -> void:
 
 func test_the_crew_spawn_with_their_species_and_unlisted_names_are_human() -> void:
 	var ship := Ship.from_design(STARTERS[0])
+	ship.crew_plan = CREWS[STARTERS[0]].keys().map(func(n): return {"name": n, "species": CREWS[STARTERS[0]][n]})
 	Jobs.spawn_crew(ship)
 	var rook: CrewMember = ship.crew.filter(func(m): return m.name == "Rook")[0]
 	eq(rook.species, "basalt", "Rook is a Basalt")
@@ -299,8 +311,8 @@ func test_the_crew_spawn_with_their_species_and_unlisted_names_are_human() -> vo
 
 
 func test_a_crew_list_is_read_loosely() -> void:
-	var ship := Ship.from_design(STARTERS[1])
-	eq(ship.crew_plan, [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Bram", "species": "basalt"}], "name and species")
+	var ship := Ship.from_design(PIRATE)
+	eq(ship.crew_plan, [{"name": "Grub", "species": "human"}, {"name": "Skab", "species": "human"}, {"name": "Vex", "species": "basalt"}], "name and species")
 	var empty := Ship.new_starter()
 	eq(empty.crew_plan, [], "a ship with no design has no list")
 

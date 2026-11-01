@@ -23,15 +23,20 @@ const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const STARTERS := ["res://data/ships/starter_rustbucket.json", "res://data/ships/starter_courier.json", "res://data/ships/starter_prism.json"]
 
 
+## The Rustbucket with a crew of four for these tests (the real one starts with the soldier alone).
 func _ship() -> Ship:
 	var s: Ship = Ship.from_design(RUSTBUCKET)
+	s.crew_plan = [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Rook", "species": "basalt"}, {"name": "Juno", "species": "fenn"}]
 	Jobs.spawn_crew(s)
 	return s
 
 
 ## A campaign that has the real events but nothing special.
 func _camp(seed_value := 1) -> Campaign:
-	return Campaign.new(seed_value)
+	var c := Campaign.new(seed_value)
+	c.cfg = c.cfg.duplicate(true)  # (the config is shared)
+	c.cfg["prices"]["recruit_chance"] = 1.0  # every station has someone to hire here (the chance is tested in test_alone.gd)
+	return c
 
 
 ## A map of region `region` (Clan space by default) from `seed_value`.
@@ -457,7 +462,7 @@ func test_repair_hull_integrity_at_two_credits_a_point() -> void:
 	check(not c.repair(ship, "rusthold", 5)["ok"], "no credits, no repair")
 
 
-func test_recruit_for_150_credits() -> void:
+func test_recruit_for_the_hiring_price() -> void:
 	var c := _camp()
 	var ship := _ship()
 	c.roll_offers("rusthold", ship)
@@ -467,12 +472,14 @@ func test_recruit_for_150_credits() -> void:
 		check(o["name"] != "", "each has a name")
 	var first: Dictionary = c.offers["rusthold"][0]
 	var crew := ship.crew.size()
+	ship.inventory.add("credits", 1000)
 	var credits := ship.inventory.count("credits")
+	var price := int(c.cfg["prices"]["recruit"])
 	var r := c.recruit(ship, "rusthold", 0)
 	check(r["ok"], r["text"])
 	eq(ship.crew.size(), crew + 1, "one more aboard")
 	eq([ship.crew[-1].name, ship.crew[-1].species], [first["name"], first["species"]], "the one on offer")
-	eq(ship.inventory.count("credits"), credits - 150, "for 150 credits")
+	eq(ship.inventory.count("credits"), credits - price, "for the hiring price (450 credits: playtest 2, A2)")
 	eq(c.offers["rusthold"].size(), 1, "and they are no longer on offer")
 	ship.inventory.counts.erase("credits")
 	check(not c.recruit(ship, "rusthold", 0)["ok"], "no credits, no hire")
@@ -890,6 +897,8 @@ func test_station_menu_trades_pays_repairs_and_recruits() -> void:
 	var st: StationPanel = map.station_panel
 	map.event_panel.close()
 	c.hull_loss = 40
+	c.cfg = c.cfg.duplicate(true)
+	c.cfg["prices"]["recruit_chance"] = 1.0
 	c.roll_offers("rusthold", ship)  # docking rolls them
 	st.open("rusthold")
 	ship.inventory.add("credits", 2000)
