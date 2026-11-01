@@ -1,0 +1,63 @@
+{"events": [
+    {
+      "id": "wreck_field_drone_still_mending", "type": "wreck_field", "weight": 8, "once": true, "requires": {},
+      "text": "A hulk, and a small robot working on her. It has been mending her breaches for forty years: new plate on old, neat seams, one whole flank gleaming. She has nobody aboard and nowhere to go. It has not been told. It looks up at you with its one lens, then back at the seam.",
+      "choices": [
+        {"text": "Let it work, and strip the far side.", "outcomes": [
+          {"weight": 100, "text": "You strip the far side while the robot mends the near one. It does not mind. It does not look up again. When you leave, she is a little more ship than she was.", "effects": {"items": {"scrap": 35, "copper": 8}}}
+        ]},
+        {"text": "[Drone] Send your drone over to say hello.", "requires": {"species": "drone"}, "outcomes": [
+          {"weight": 70, "text": "The two robots face each other over the seam for a long minute. Then yours hands the other a patch, and it takes it. You leave them to it, with a spare cell and a courtesy from one to the other.", "effects": {"items": {"scrap": 20, "fuel": 1}}},
+          {"weight": 30, "text": "They compare work. Yours is faster. The other is not pleased, and takes it out on your paint.", "effects": {"hull": -6}}
+        ]},
+        {"text": "Take the little robot aboard.", "outcomes": [
+          {"weight": 55, "text": "It comes aboard with its seam tool still in its arm, looking back at the hulk. It will be a good worker. It will, for a week, keep trying to go back.", "effects": {"items": {"repair_drone": 1}}},
+          {"weight": 45, "text": "It will not leave. It holds the hulk's rail with its one arm, and you do not have the heart. You leave it there, mending.", "effects": {}}
+        ]},
+        {"text": "Leave it to its work.", "outcomes": [
+          {"weight": 100, "text": "You leave it at the seam. In the mirror, the plate catches the light, and for a second the whole hulk is lit.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_unfinished_seam", "type": "anomaly", "weight": 7, "once": false, "requires": {},
+      "text": "A long straight scar in the dark, like a seam someone left unfinished: a line of nothing across the lane, stitched along one edge with fine bright thread, stopping a hand's breadth short of the end. The loose end is gently moving, as if in a draught.",
+      "choices": [
+        {"text": "Pull the loose thread.", "outcomes": [
+          {"weight": 60, "text": "The thread comes away in your hands, long and bright, and the line of nothing gapes open, just a little, and shuts. It leaves you with a cord of crystal.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 1}}},
+          {"weight": 40, "text": "The seam remembers it was a seam.", "effects": {"hull": -8}}
+        ]},
+        {"text": "[Drone] Let your drone finish the stitch.", "requires": {"species": "drone"}, "outcomes": [
+          {"weight": 80, "text": "Yours goes out on its tether, one arm extended, and finishes the stitch with a precision that makes the dark hold its breath. The seam closes. Something on the far side is, you feel, grateful.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 2}}},
+          {"weight": 20, "text": "The stitch holds. The drone, on the way back, will not look at you, and does not say why.", "effects": {"rep": {"lumen": 1}}}
+        ]},
+        {"text": "[Radar] Read what the seam is holding shut.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 60, "text": "The radar reads the line as a door, stitched shut from this side, with a great deal of care. You note the place on your chart and say nothing to anyone.", "effects": {"reveal": "anomaly", "rep": {"lumen": 1}}},
+          {"weight": 40, "text": "The radar reads the seam. The seam reads the radar, and tightens.", "effects": {"hull": -6}}
+        ]},
+        {"text": "Leave it open.", "outcomes": [
+          {"weight": 100, "text": "You leave it open. The loose end waves after you, a little, like a hand that has not made up its mind.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "trader_drone_tray", "type": "trader", "weight": 8, "once": false, "requires": {},
+      "text": "A trader with a tray of small robots, all switched off, tagged by price in a careful hand. 'Refurbished,' she says. 'Trade-ins welcome. Not that one. Not that one. Oh, that one is nice. That one has kept its manners.'",
+      "choices": [
+        {"text": "Buy a refurbished drone (150 credits).", "requires": {"credits": 150, "pay": true}, "outcomes": [
+          {"weight": 75, "text": "It wakes on the counter, looks at you, and goes to find something to mend. Within a minute it has found three.", "effects": {"items": {"repair_drone": 1}}},
+          {"weight": 25, "text": "The cheapest on the tray is a lemon. It wakes, mends the counter, and falls over. She refunds nothing, with a kind of dignity.", "effects": {}}
+        ]},
+        {"text": "[Drone] Let your drone choose from the tray (150 credits).", "requires": {"species": "drone", "credits": 150, "pay": true}, "outcomes": [
+          {"weight": 90, "text": "Yours walks the tray, pokes each one, rejects four, and sits down beside the fifth. It is, the trader admits, the only one that works.", "effects": {"items": {"repair_drone": 1}}},
+          {"weight": 10, "text": "Yours walks the tray, pokes each one, and sits down next to a broken one. It does not want to leave without it. She lets you have it at cost, and it does not work.", "effects": {}}
+        ]},
+        {"text": "Ask what happened to the last owners.", "outcomes": [
+          {"weight": 100, "text": "'Retired,' she says. 'The ships did the working. They did the retiring.' She does not say more, and a robot on the tray lifts one arm and puts it down again.", "effects": {}}
+        ]},
+        {"text": "Leave.", "outcomes": [
+          {"weight": 100, "text": "'Come back when you're ready,' she says. 'They will be here. They are very patient.'", "effects": {}}
+        ]}
+      ]
+    }
+]}

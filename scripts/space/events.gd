@@ -21,7 +21,7 @@ extends RefCounted
 ## - `after_win` ({text, effects}) on an event, or on an outcome, runs after a won fight.
 ## - `requires.region` (a region id or a region's `events` tag, or a list of them: any one) and `stage_min` / `stage_max`
 ##   tie an event or a choice to the regions of the run (docs/CONTENT.md section 15, regions.gd).
-## - `requires.crew_min` / `crew_max` (on an event or a choice) count the crew aboard besides the soldier (crew_count(); drones will
+## - `requires.crew_min` / `crew_max` (on an event or a choice) count the crew aboard besides the soldier (crew_count(); a repair drone does
 ##   not count), so a text can ask for a crew to send or for the ship to be alone. A choice's `species` and `component` take an id or
 ##   a list (any one of them); `species_any` and `component_any` mean the same and can sit beside the plain key (both must hold).
 ## - At most `crew.offers_per_region` (data/drift.json) events that add crew fire in a region: once that many have (Campaign.crew_offers),
@@ -37,6 +37,7 @@ const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Characters = preload("res://scripts/crew/characters.gd")
+const Jobs = preload("res://scripts/crew/jobs.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
@@ -244,9 +245,9 @@ static func offers_used(c) -> int:
 	return int(c.crew_offers)
 
 
-## The crew aboard besides the soldier (a ship of null has none): what `requires.crew_min` / `crew_max` count. Drones are not crew.
+## The crew aboard besides the soldier (a ship of null has none): what `requires.crew_min` / `crew_max` count. A repair drone is not crew.
 static func crew_count(ship) -> int:
-	return 0 if ship == null else ship.crew.filter(func(m): return not m.is_player).size()
+	return 0 if ship == null else ship.crew.filter(func(m): return not m.is_player and not m.is_drone()).size()
 
 
 # --- picking ------------------------------------------------------------------------------------------
@@ -531,6 +532,8 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 		var got: int = ship.inventory.count(str(id)) - before
 		if got != 0:
 			lines.append("%+d %s" % [got, _name(ship, str(id))])
+	if int(items.get(str(_dict(CrewMember.config().get("drone")).get("item", "")), 0)) > 0:
+		Jobs.launch_drones(ship)  # a repair drone an event hands over goes aboard at once, like one bought
 	var rep := _dict(effects.get("rep"))
 	var factions: Array = rep.keys()
 	factions.sort()
@@ -540,12 +543,13 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 			lines.append("%s reputation %+d" % [c.faction_name(str(f)), d])
 	if effects.has("crew_hp"):
 		var hp := int(effects["crew_hp"])
-		for m in ship.crew:
+		var people: Array = ship.crew.filter(func(m): return not m.is_drone())  # (a drone is no crew: the hull takes what hits it)
+		for m in people:
 			if hp < 0:
 				m.hurt(float(-hp))
 			else:
 				m.heal(float(hp))
-		if hp != 0 and not ship.crew.is_empty():
+		if hp != 0 and not people.is_empty():
 			lines.append("Crew %+d hp" % hp)
 	if effects.has("hull"):
 		var d: int = c.change_hull(ship, int(effects["hull"]))

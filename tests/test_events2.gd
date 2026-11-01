@@ -54,6 +54,25 @@ func _shown(c: Campaign, ev: Dictionary, ship: Ship) -> Array:
 
 # --- crew_min / crew_max -----------------------------------------------------------------------------------------------
 
+func test_a_repair_drone_is_no_crew_for_crew_min_and_crew_max_or_for_crew_hp() -> void:
+	var ship := _ship()
+	ship.inventory.add("repair_drone", 1)
+	Jobs.launch_drones(ship)
+	check(ship.crew.any(func(m): return m.is_drone()), "the lone ship carries a repair drone")
+	eq(Events.crew_count(ship), 0, "the drone is not counted")
+	var out := [{"weight": 1, "text": "ok", "effects": {}}]
+	var ev := {"id": "d", "type": "pirate", "text": "x", "requires": {"crew_min": 1}, "choices": [{"text": "Alone", "requires": {"crew_max": 0}, "outcomes": out}]}
+	var c := _camp([ev])
+	check(not c.events.eligible(ev, c, _node("pirate"), ship), "crew_min 1 is not met by a drone")
+	check(_shown(c, {"id": "d2", "type": "pirate", "text": "x", "choices": ev["choices"]}, ship) == [0], "and crew_max 0 holds with one aboard")
+	var drone = ship.crew.filter(func(m): return m.is_drone())[0]
+	var soldier = ship.crew.filter(func(m): return m.is_player)[0]
+	var drone_hp: float = drone.hp
+	var soldier_hp: float = soldier.hp
+	c.events.apply({"crew_hp": -20}, c, ship, _node("pirate"))
+	eq(drone.hp, drone_hp, "crew_hp does not hurt the drone")
+	eq(soldier.hp, soldier_hp - 20.0, "but hurts the soldier")
+
 func test_crew_count_is_the_crew_besides_the_soldier() -> void:
 	eq(Events.crew_count(_ship()), 0, "a soldier alone")
 	eq(Events.crew_count(_crewed()), 3, "three crew besides the soldier")
@@ -232,7 +251,7 @@ func _text_of(e: Dictionary) -> String:
 func test_the_events_2_pack_has_the_planned_events() -> void:
 	var ev: Events = Events.shared()
 	var ids := _pack_ids()
-	eq(ids.size(), 54, "54 events in the pack")
+	eq(ids.size(), 57, "54 planned events and 3 for the repair drone")
 	var by := {}
 	var regional := {"concord_space": 0, "lumen_space": 0, "boneyard": 0}
 	for id in ids:
@@ -241,8 +260,8 @@ func test_the_events_2_pack_has_the_planned_events() -> void:
 		var reg := str(Events._dict(e.get("requires")).get("region", ""))
 		if regional.has(reg):
 			regional[reg] += 1
-	# the 8 regional ones count in their types: wreck_field 8 + 2, asteroid_field 6, anomaly 6 + 3, hollow 6, trader 5 + 1, empty 5 + 1, distress 4, pirate 4, patrol 2 + 1
-	eq([by.get("wreck_field"), by.get("asteroid_field"), by.get("anomaly"), by.get("hollow"), by.get("trader"), by.get("empty"), by.get("distress"), by.get("pirate"), by.get("patrol")], [10, 6, 9, 6, 6, 6, 4, 4, 3], "events by type")
+	# the 8 regional ones count in their types: wreck_field 8 + 2, asteroid_field 6, anomaly 6 + 3, hollow 6, trader 5 + 1, empty 5 + 1, distress 4, pirate 4, patrol 2 + 1; and the 3 drone events (wreck_field, anomaly, trader)
+	eq([by.get("wreck_field"), by.get("asteroid_field"), by.get("anomaly"), by.get("hollow"), by.get("trader"), by.get("empty"), by.get("distress"), by.get("pirate"), by.get("patrol")], [11, 6, 10, 6, 7, 6, 4, 4, 3], "events by type")
 	eq([regional["concord_space"], regional["lumen_space"], regional["boneyard"]], [3, 3, 2], "Concord, Lumen and Boneyard events")
 	for msg in ev.validate().filter(func(m): return m.contains("/packs/events_2/")):
 		check(false, msg)
@@ -252,7 +271,7 @@ func test_the_events_2_pack_is_repeatable_normal_weight_and_recruits_nobody() ->
 	var ev: Events = Events.shared()
 	for id in _pack_ids():
 		var e: Dictionary = ev.events[id]
-		check(not bool(e.get("once", false)), id + ": repeatable")
+		check(not bool(e.get("once", false)) or id == "wreck_field_drone_still_mending", id + ": repeatable (but for the one that hands over a free drone)")
 		var w := float(e.get("weight", 10))
 		check(w >= 6.0 and w <= 12.0, id + ": a normal weight (%s)" % str(w))
 		check(not ev._recruiters.has(id), id + ": recruits nobody")
@@ -296,7 +315,7 @@ func test_events_2_part_options_use_any_of_lists_and_most_carry_a_risk() -> void
 				costly = costly or int(fx.get("hull", 0)) < 0 or int(fx.get("crew_hp", 0)) < 0 or fx.has("fight") or Events._dict(fx.get("items")).values().any(func(v): return int(v) < 0)
 			risky += int(costly and ch["outcomes"].size() >= 2)
 		with_part += int(has)
-	check(with_part >= 50, "%d of 54 events have a part-keyed option" % with_part)
+	check(with_part >= 50, "%d of 57 events have a part-keyed option" % with_part)
 	check(parts >= 55, "%d part options in all" % parts)
 	check(risky * 10 >= parts * 8, "and %d of %d carry a risk" % [risky, parts])
 
@@ -354,3 +373,13 @@ func test_pirate_ambush_has_a_free_way_out() -> void:
 	for ch in e["choices"]:
 		out = out or (not ch.has("requires") and ch["outcomes"].any(func(o): return not Events._dict(o.get("effects")).has("fight")))
 	check(out, "a choice with no requirement that can end without a fight")
+
+
+func test_a_drone_an_event_hands_over_goes_aboard_at_once() -> void:
+	var c := _camp([])
+	var ship := _ship()
+	var before := ship.crew.filter(func(m): return m.is_drone()).size()
+	c.events.apply({"items": {"repair_drone": 1}}, c, ship, _node("wreck_field"))
+	eq(ship.crew.filter(func(m): return m.is_drone()).size(), before + 1, "a drone is aboard")
+	eq(ship.inventory.count("repair_drone"), 0, "and the item is used up")
+	eq(Events.crew_count(ship), 0, "and still nobody counts as crew")
