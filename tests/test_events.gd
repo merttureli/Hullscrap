@@ -151,7 +151,7 @@ func test_the_two_asteroid_events_offer_surface_mining_the_deep_vein_and_moving_
 		if ev["type"] != "asteroid_field" or not e.files[id].ends_with("core.json"):
 			continue
 		found += 1
-		eq(ev["choices"].map(func(c): return c["text"]), ["Surface mining.", "Crack the deep vein.", "Move on."], id + " choices")
+		eq(ev["choices"].filter(func(c): return not c.has("requires")).map(func(c): return c["text"]), ["Surface mining.", "Crack the deep vein.", "Move on."], id + " choices (besides the part options)")
 		var surface: Array = ev["choices"][0]["outcomes"]
 		for o in surface:
 			var n: int = o["effects"]["items"]["scrap"]

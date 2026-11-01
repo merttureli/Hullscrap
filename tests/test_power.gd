@@ -37,6 +37,11 @@ func _wire(x0: int, y0: int, x1: int, y1: int) -> void:
 			check(cables.place(grid, Vector2i(x, y)), "cable at %d,%d" % [x, y])
 
 
+## What component `id` makes in the data (call after _setup).
+func _makes(id: String) -> int:
+	return int(comps.def(id)["power"])
+
+
 func _net(r: Dictionary, uid: int) -> Dictionary:
 	return r["networks"][r["network_of"][uid]]
 
@@ -55,7 +60,7 @@ func test_reactor_and_engine_on_a_cable() -> void:
 	eq(n["id"], 0, "ids start at 0")
 	eq(n["members"], [r, e], "members by uid")
 	eq(n["cells"].size(), 4, "four cable cells")
-	eq([n["supply"], n["demand"], n["used"]], [8, 2, 2], "supply, demand, used")
+	eq([n["supply"], n["demand"], n["used"]], [_makes("reactor_mk1"), 2, 2], "supply, demand, used")
 
 
 func test_no_cable_means_no_power() -> void:
@@ -120,26 +125,27 @@ func test_shortfall_powers_by_priority() -> void:
 	for i in 3:
 		check(res["powered"][lasers[i]], "laser %d powered" % i)
 	check(not res["powered"][lasers[3]], "the last laser is the one left dark")
-	eq([res["networks"][0]["supply"], res["networks"][0]["demand"], res["networks"][0]["used"]], [8, 10, 8], "supply, demand, used")
+	eq([res["networks"][0]["supply"], res["networks"][0]["demand"], res["networks"][0]["used"]], [_makes("reactor_mk1"), 10, 8], "supply (9: the 4th laser's 2 do not fit in the 1 left), demand, used")
 
 
 func test_equal_priority_goes_by_uid() -> void:
 	_setup()
-	_put("reactor_mk1", 14, 2)
+	_put("reactor_mk1", 14, 2)  # makes 9: three lasers (3 each) fit, a fourth does not
 	var a := _put("laser_mk2", 15, 6)
 	var b := _put("laser_mk2", 15, 8)
 	var c := _put("laser_mk2", 15, 10)
-	_wire(15, 2, 15, 11)
+	var d := _put("laser_mk2", 15, 12)
+	_wire(15, 2, 15, 13)
 	var res := Power.solve(comps, cables)
-	check(res["powered"][a] and res["powered"][b], "the two oldest fit")
-	check(not res["powered"][c], "the newest does not")
+	check(res["powered"][a] and res["powered"][b] and res["powered"][c], "the three oldest fit")
+	check(not res["powered"][d], "the newest does not")
 
 
 func test_a_later_small_consumer_still_fits() -> void:
 	_setup()
-	_put("reactor_mk1", 14, 2)
-	var e1 := _put("engine_mk2", 15, 6)
-	var e2 := _put("engine_mk2", 15, 8)
+	_put("reactor_mk1", 14, 2)  # makes 9
+	var e1 := _put("engine_mk2", 15, 6)  # 3
+	var e2 := _put("engine_mk3", 15, 8)  # 4, x 15..18
 	var laser := _put("laser_mk2", 15, 10)
 	var fab := _put("fabricator", 15, 12)
 	_wire(15, 2, 15, 13)
@@ -147,7 +153,7 @@ func test_a_later_small_consumer_still_fits() -> void:
 	check(res["powered"][e1] and res["powered"][e2], "engines first (priority 4)")
 	check(not res["powered"][laser], "the laser (3) no longer fits in the 2 left")
 	check(res["powered"][fab], "the fabricator (2) still fits after it")
-	eq([res["networks"][0]["demand"], res["networks"][0]["used"]], [11, 8], "demand and used")
+	eq([res["networks"][0]["demand"], res["networks"][0]["used"]], [12, 9], "demand and used")
 
 
 func test_two_reactors_add_up() -> void:
@@ -159,7 +165,7 @@ func test_two_reactors_add_up() -> void:
 		ids.append(_put(pair[0], 15, pair[1]))
 	_wire(15, 2, 15, 21)
 	var res := Power.solve(comps, cables)
-	eq(res["networks"][0]["supply"], 22, "8 + 14")
+	eq(res["networks"][0]["supply"], _makes("reactor_mk1") + _makes("reactor_mk2"), "mk1 + mk2")
 	eq(res["networks"][0]["demand"], 15, "demand")
 	for uid in ids:
 		check(res["powered"][uid], "uid %d powered" % uid)
@@ -169,7 +175,7 @@ func test_two_reactors_add_up() -> void:
 	d["instances"].remove_at(1)
 	one.load_dict(d)
 	var res1 := Power.solve(one, cables)
-	eq(res1["networks"][0]["supply"], 8, "one reactor alone is 8")
+	eq(res1["networks"][0]["supply"], _makes("reactor_mk1"), "one reactor alone is the mk1's")
 	check(not res1["powered"][ids[4]], "and cannot run everything")
 
 
@@ -180,7 +186,7 @@ func test_a_disabled_reactor_makes_no_power() -> void:
 	var e := _put("engine_mk1", 15, 10)
 	_wire(15, 2, 15, 11)
 	var res := Power.solve(comps, cables, {r2: true})
-	eq(res["networks"][0]["supply"], 8, "only the mk1 supplies")
+	eq(res["networks"][0]["supply"], _makes("reactor_mk1"), "only the mk1 supplies")
 	check(not res["powered"][r2], "a disabled reactor is not powered")
 	check(res["powered"][r1] and res["powered"][e], "the rest still run")
 	res = Power.solve(comps, cables, {r1: true, r2: true})
@@ -220,7 +226,7 @@ func test_a_bridging_component_merges_networks() -> void:
 	eq(res["network_of"][s["reactor"]], res["network_of"][s["engine"]], "same network id")
 	eq(_net(res, shield)["members"], [s["reactor"], s["engine"], shield], "all three are members")
 	eq(_net(res, shield)["cells"].size(), 19, "both cable runs are one network")
-	eq([_net(res, shield)["supply"], _net(res, shield)["demand"], _net(res, shield)["used"]], [8, 5, 5], "supply, demand, used")
+	eq([_net(res, shield)["supply"], _net(res, shield)["demand"], _net(res, shield)["used"]], [_makes("reactor_mk1"), 5, 5], "supply, demand, used")
 	comps.remove_at(Vector2i(10, 13))
 	res = Power.solve(comps, cables)
 	eq(res["networks"].size(), 2, "removing it splits them again")

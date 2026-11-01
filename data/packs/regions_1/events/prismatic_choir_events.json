@@ -4,8 +4,8 @@
       "text": "The Choir's dock is a ring of crystal pylons, each ringing a different note as your ship passes between them. A Prismatic greeter hums a warm rising chord that your translator renders as 'Welcome, welcome, welcome' and also 'You are slightly flat'. The pylons chime in agreement.",
       "choices": [
         {"text": "Hum along (badly).", "outcomes": [
-          {"weight": 60, "text": "Your crew hum. It is awful. The pylons wince in a cascade of tiny chimes. But the greeter's core glows a warm, forgiving gold. 'Brave,' it hums. 'Flat, but brave.'", "effects": {"crew_hp": 5, "unlock": "ship_prismatic_tuning_bell"}},
-          {"weight": 40, "text": "Your crew hum. The greeter's core flickers, flat as a coin. A pylon cracks gently from the effort. You are asked, with great politeness, to stop.", "effects": {"rep": {"lumen": -1}, "unlock": "ship_prismatic_tuning_bell"}}
+          {"weight": 60, "text": "You hum. It is awful. The pylons wince in a cascade of tiny chimes. But the greeter's core glows a warm, forgiving gold. 'Brave,' it hums. 'Flat, but brave.'", "effects": {"crew_hp": 5, "unlock": "ship_prismatic_tuning_bell"}},
+          {"weight": 40, "text": "You hum. The greeter's core flickers, flat as a coin. A pylon cracks gently from the effort. You are asked, with great politeness, to stop.", "effects": {"rep": {"lumen": -1}, "unlock": "ship_prismatic_tuning_bell"}}
         ]},
         {"text": "Stay silent and bow.", "outcomes": [
           {"weight": 100, "text": "The greeter's glow warms to gold. In the Choir, silence is a kindness and bowing is a language. You are given a small bell and a place to dock.", "effects": {"items": {"crystal": 2}, "crew_hp": 5, "unlock": "ship_prismatic_tuning_bell"}}
@@ -160,11 +160,17 @@
       "id": "choir_ion_front", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_prismatic_choir", "jumps_min": 3},
       "text": "An ion front is coming in over the Choir: a wall of violet static a hundred kilometres wide, rolling toward the spires. The Prismatics are lashing down, humming a low frightened line. They take double damage from ion, and each of them knows what that means. A voice from the Cantor's balcony: 'Everyone who can fly, please come and help.'",
       "choices": [
-        {"text": "Fly into the front to blunt it.", "outcomes": [
+        {"text": "Fly into the front to blunt it.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "You angle the shield into the front and take the worst of the static on your hull. It sings like a bell. Behind you the Choir lies untouched. When it passes the Prismatics file out and hum a thank-you so loud your plates ring.", "effects": {"items": {"crystal": 5}, "rep": {"lumen": 3}, "crew_hp": -10, "hull": -10}},
-          {"weight": 30, "text": "The front hits harder than forecast. Every system flickers. The crew are stunned for seconds and the hull is scored, but the Choir holds.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}, "crew_hp": -15, "hull": -15}},
+          {"weight": 30, "text": "The front hits harder than forecast. Every system flickers. You are stunned for seconds and the hull is scored, but the Choir holds.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}, "crew_hp": -15, "hull": -15}},
           {"weight": 20, "text": "The static goes through you like a wire. The Choir is saved. You are not at your best for a day.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 3}, "crew_hp": -20, "hull": -15}},
           {"weight": 10, "text": "The front takes one of your crew. The Choir hums a long low line for the rest of the day, and it is for them.", "effects": {"rep": {"lumen": 3}, "crew_hp": -20, "hull": -15, "lose_crew": 1}}
+        ]},
+        {"text": "Fly into the front to blunt it.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You angle the shield into the front and take the worst of the static on your hull. It sings like a bell. Behind you the Choir lies untouched. When it passes the Prismatics file out and hum a thank-you so loud your plates ring.", "effects": {"items": {"crystal": 5}, "rep": {"lumen": 3}, "crew_hp": -10, "hull": -10}},
+          {"weight": 30, "text": "The front hits harder than forecast. Every system flickers. You are stunned for seconds and the hull is scored, but the Choir holds.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}, "crew_hp": -15, "hull": -15}},
+          {"weight": 20, "text": "The static goes through you like a wire. The Choir is saved. You are not at your best for a day.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 3}, "crew_hp": -20, "hull": -15}},
+          {"weight": 10, "text": "The front takes the shield, the lamps and a good half of the wiring. The Choir is saved; the ship is not at her best. The Choir hums a long low line for the rest of the day, and it is for your hull.", "effects": {"rep": {"lumen": 3}, "crew_hp": -20, "hull": -25}}
         ]},
         {"text": "Help rig reflectors round the spires.", "outcomes": [
           {"weight": 70, "text": "You and the Prismatics rig reflectors round the spires, a net of mirrors and wire. The front breaks round them like surf round a rock. It takes all night. The Cantor presents you with a crystal the size of your fist.", "effects": {"items": {"crystal": 6, "credits": 30}, "rep": {"lumen": 3}, "crew_hp": -5}},

@@ -98,17 +98,17 @@ func order_target() -> CrewMember:
 	var ship = _ship()
 	if ship == null:
 		return null
-	if selected != null and ship.crew.has(selected) and not selected.is_player:
+	if selected != null and ship.crew.has(selected) and not selected.is_player and not selected.is_drone():
 		return selected
 	if ada != null and ship.crew.has(ada):
 		return ada
 	for m: CrewMember in ship.crew:
-		if not m.is_player:
+		if not m.is_player and not m.is_drone():  # (nobody orders a repair drone about)
 			return m
 	return null
 
 
-## The crew member whose body centre is nearest to `p` (cell units) within PICK_RADIUS, or null.
+## The crew member whose body centre is nearest to `p` (cell units) within PICK_RADIUS, or null. A repair drone is never picked.
 func pick_at(p: Vector2) -> CrewMember:
 	var ship = _ship()
 	var best: CrewMember = null
@@ -117,7 +117,7 @@ func pick_at(p: Vector2) -> CrewMember:
 		return null
 	for m: CrewMember in ship.crew:
 		var d := m.pos.distance_to(p)
-		if d <= best_d:
+		if d <= best_d and not m.is_drone():
 			best = m
 			best_d = d
 	return best
@@ -272,5 +272,7 @@ func _draw_person(m: CrewMember) -> void:
 	var fight: bool = sim != null and sim.has_method("jobs_of") and sim.jobs_of(_ship()).combat
 	var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
 		"item": PersonDrawer.item_for(m, clock, fight), "down": m.is_down(), "work": PersonDrawer.is_working(m, clock), "t": _clock, "head": m.head}
+	pose.merge(PersonDrawer.drone_extras(m, _ship()))
 	PersonDrawer.draw(self, _world(m.pos), pose, look_of(m), build.CELL)
+	PersonDrawer.draw_status(self, _world(m.pos), Jobs.drone_status(_ship(), m), build.CELL)
 	ShipView.draw_health(self, _world(m.pos), m.hp / m.max_hp, m.is_down(), build.CELL, Mortality.bleed_frac(m))

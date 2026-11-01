@@ -44,14 +44,20 @@
       "choices": [
         {"text": "Shelter on the Row.", "outcomes": [
           {"weight": 60, "text": "You tuck in behind the yard's old reactor shield as the storm roars over. Inside the shelter the Gauntlings play cards in the dark, laughing, waiting for their pins to clear. When it passes, the whole Row cheers, and deals you in.", "effects": {"crew_hp": 5, "log": "log_scrapyard_ion_day"}},
-          {"weight": 25, "text": "The storm finds a gap in the shield. Every system on your ship flickers and every Gauntling in the room freezes for three seconds, mid-sentence. The crew wait politely.", "effects": {"crew_hp": -5, "hull": -5}},
+          {"weight": 25, "text": "The storm finds a gap in the shield. Every system on your ship flickers and every Gauntling in the room freezes for three seconds, mid-sentence. You wait politely.", "effects": {"crew_hp": -5, "hull": -5}},
           {"weight": 15, "text": "A discharge arcs through the hull. The lights die, the helm freezes, and you drift for ten minutes while everything reboots.", "effects": {"crew_hp": -10, "hull": -10}}
         ]},
-        {"text": "Fly into the storm to harvest ion-charged scrap.", "outcomes": [
+        {"text": "Fly into the storm to harvest ion-charged scrap.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "The storm fills your hold with scrap magnetised in the shape of a lightning bolt. You come out crackling, wired and rich.", "effects": {"items": {"scrap": 70, "copper": 30}, "crew_hp": -10, "hull": -10}},
-          {"weight": 30, "text": "The storm fries half your systems and stuns your crew for a few seconds each. You get out with the haul and a ringing in every ear.", "effects": {"items": {"scrap": 60, "copper": 25}, "crew_hp": -15, "hull": -15}},
-          {"weight": 20, "text": "A discharge goes through the crew room and finds someone who was not wearing foil. They live. They will not forget.", "effects": {"items": {"scrap": 50, "copper": 20}, "crew_hp": -20}},
+          {"weight": 30, "text": "The storm fries half your systems and stuns you for a few seconds. You get out with the haul and a ringing in every ear.", "effects": {"items": {"scrap": 60, "copper": 25}, "crew_hp": -15, "hull": -15}},
+          {"weight": 20, "text": "A discharge goes through the bunk room and finds you without foil. You live. You will not forget.", "effects": {"items": {"scrap": 50, "copper": 20}, "crew_hp": -20}},
           {"weight": 10, "text": "A discharge finds a crew member in the corridor. You find the haul, and not them.", "effects": {"items": {"scrap": 50, "copper": 20}, "crew_hp": -15, "hull": -10, "lose_crew": 1}}
+        ]},
+        {"text": "Fly into the storm to harvest ion-charged scrap.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "The storm fills your hold with scrap magnetised in the shape of a lightning bolt. You come out crackling, wired and rich.", "effects": {"items": {"scrap": 70, "copper": 30}, "crew_hp": -10, "hull": -10}},
+          {"weight": 30, "text": "The storm fries half your systems and stuns you for a few seconds. You get out with the haul and a ringing in every ear.", "effects": {"items": {"scrap": 60, "copper": 25}, "crew_hp": -15, "hull": -15}},
+          {"weight": 20, "text": "A discharge goes through the bunk room and finds you without foil. You live. You will not forget.", "effects": {"items": {"scrap": 50, "copper": 20}, "crew_hp": -20}},
+          {"weight": 10, "text": "A discharge finds you in the corridor. You come to on the deck with the haul and a ringing in every tooth, and half the ship's lights out.", "effects": {"items": {"scrap": 50, "copper": 20}, "crew_hp": -15, "hull": -20}}
         ]},
         {"text": "[Mechanical] Lead the Row's hatch-lashing crew.", "requires": {"trait": "mechanical"}, "outcomes": [
           {"weight": 90, "text": "Your Gauntling, ion-prone, wraps themselves in foil and stands in the middle of the Row, shouting orders in a voice like a cannon. The Row lashes down in record time. When the storm hits it frizzes their hair and stuns them for three seconds. They do not mind. They are a hero, and a card player's log lands in their lap.", "effects": {"items": {"scrap": 40, "credits": 40}, "rep": {"clans": 1}, "log": "log_scrapyard_ion_day"}},
@@ -207,11 +213,17 @@
       "id": "scrapyard_live_hulk", "type": "wreck_field", "weight": 8, "once": false, "requires": {"flag": "in_gauntling_scrapyards", "jumps_min": 3},
       "text": "A dead gunship, the Final Notice, drifts at the edge of the Row, and every plate on her hull crackles with blue-white light. Her reactor is still live, still arcing, still sending bolts through the walls. A scavenger who flew into her docking bay is frozen in a ball of static, waving politely. 'Do not touch the hull,' says the Row's warning buoy. 'Do not touch anything.'",
       "choices": [
-        {"text": "Go aboard and salvage.", "outcomes": [
+        {"text": "Go aboard and salvage.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "You edge through the arcing corridors with rubber gloves and a prayer. The reactor room is a cathedral of lightning. You pry loose a coil, a plate and a core, and walk out with your hair on end. The bank's last notice is pinned to the bridge door.", "effects": {"items": {"copper": 35, "titanium": 10, "scrap": 40}, "crew_hp": -15, "log": "log_scrapyard_final_notice"}},
-          {"weight": 30, "text": "A bolt catches your shoulder. The crew drag you out, twitching. Everything you grabbed is still in your hand.", "effects": {"items": {"copper": 30, "scrap": 30}, "crew_hp": -25, "log": "log_scrapyard_final_notice"}},
-          {"weight": 20, "text": "The reactor room surges while you are in it. Your gloves melt. Your crew are lucky to be alive, and your hold is full.", "effects": {"items": {"copper": 40, "titanium": 12, "scrap": 40}, "crew_hp": -20, "hull": -10, "log": "log_scrapyard_final_notice"}},
+          {"weight": 30, "text": "A bolt catches your shoulder. You drag yourself out, twitching. Everything you grabbed is still in your hand.", "effects": {"items": {"copper": 30, "scrap": 30}, "crew_hp": -25, "log": "log_scrapyard_final_notice"}},
+          {"weight": 20, "text": "The reactor room surges while you are in it. Your gloves melt. You are lucky to be alive, and your hold is full.", "effects": {"items": {"copper": 40, "titanium": 12, "scrap": 40}, "crew_hp": -20, "hull": -10, "log": "log_scrapyard_final_notice"}},
           {"weight": 10, "text": "A surge finds one of your crew in the corridor. They do not come out.", "effects": {"items": {"copper": 25, "scrap": 30}, "crew_hp": -15, "lose_crew": 1, "log": "log_scrapyard_final_notice"}}
+        ]},
+        {"text": "Go aboard and salvage.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You edge through the arcing corridors with rubber gloves and a prayer. The reactor room is a cathedral of lightning. You pry loose a coil, a plate and a core, and walk out with your hair on end. The bank's last notice is pinned to the bridge door.", "effects": {"items": {"copper": 35, "titanium": 10, "scrap": 40}, "crew_hp": -15, "log": "log_scrapyard_final_notice"}},
+          {"weight": 30, "text": "A bolt catches your shoulder. You drag yourself out, twitching. Everything you grabbed is still in your hand.", "effects": {"items": {"copper": 30, "scrap": 30}, "crew_hp": -25, "log": "log_scrapyard_final_notice"}},
+          {"weight": 20, "text": "The reactor room surges while you are in it. Your gloves melt. You are lucky to be alive, and your hold is full.", "effects": {"items": {"copper": 40, "titanium": 12, "scrap": 40}, "crew_hp": -20, "hull": -10, "log": "log_scrapyard_final_notice"}},
+          {"weight": 10, "text": "A surge finds you in the corridor. You come out on your hands and knees, minus the gloves and most of the coil you went in for.", "effects": {"items": {"copper": 10, "scrap": 15}, "crew_hp": -25, "hull": -10, "log": "log_scrapyard_final_notice"}}
         ]},
         {"text": "[Mechanical] Send a Gauntling in.", "requires": {"trait": "mechanical"}, "outcomes": [
           {"weight": 85, "text": "Your Gauntling walks into the arcing corridors, lit up like a Christmas tree, takes the whole reactor room apart in an hour and walks out whistling. 'Tickles,' they say. The haul is superb, with the bank's notice on top.", "effects": {"items": {"copper": 45, "titanium": 14, "scrap": 50}, "log": "log_scrapyard_final_notice"}},

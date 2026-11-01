@@ -178,7 +178,7 @@ static func first_sentence(s: String) -> String:
 static func _of_item(id: String, out: Dictionary) -> Dictionary:
 	var item: Dictionary = Content.entry("items", id)
 	var kind := str(item.get("kind", "")) if not item.is_empty() else ("material" if Content.has("materials", id) else "")
-	out["what"] = str(data()["items"].get(kind, ""))
+	out["what"] = str(item.get("does", data()["items"].get(kind, "")))
 	out["lore"] = first_sentence(str(item.get("blurb", Content.entry("materials", id).get("blurb", ""))))
 	return out
 

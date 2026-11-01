@@ -8,6 +8,7 @@ extends RefCounted
 ## `c` below is the campaign (campaign.gd; not preloaded here, to avoid a cycle) and `ship` the player's Ship.
 
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 const NOT_OFFERED: Array = ["bed", "helm"]  ## families and ids nobody cuts out of a wreck
 const PICKS := {"won": 3, "captured": 4}  ## parts offered by the state of the fight
@@ -54,6 +55,18 @@ static func recipe_for(ship, item: String) -> String:
 	return ""
 
 
+## The recipe of the Repair Drone (R1) when this salvage may also offer to scan its blueprint, else "": it is unknown, and a roll of
+## data/drift.json `loot.drone_scan` (a fifth of the wrecks, about as rare as a tier-2 part) comes up. The roll is made from the run's seed and
+## the fights won, so a given wreck always offers the same and the campaign's rng stream is left alone.
+static func drone_scan(ship, c) -> String:
+	var rid := recipe_for(ship, str(CrewMember.config().get("drone", {}).get("item", "")))
+	if rid == "" or ship.crafting.is_known(rid):
+		return ""
+	var roll := RandomNumberGenerator.new()
+	roll.seed = hash([c.seed_value, c.fights_won, c.stage])
+	return rid if roll.randf() < float(c.cfg["loot"].get("drone_scan", 0.0)) else ""
+
+
 ## The salvage event for `enemy` (its Ship, as the fight left it) after a fight in `state` ("won" or "captured").
 ## Returns {} when there is nothing to offer. Rows, in order: "Cut out the X" (the part, to the cargo), at
 ## most one "Scan the X" (its blueprint: the highest-tier offered part whose recipe the ship does not know),
@@ -97,6 +110,9 @@ static func event_for(enemy, state: String, c, ship, hollow = null, threat := 0)
 	text += more
 	if choices.is_empty():
 		return {}
+	var drone := drone_scan(ship, c)  # (an extra row on a salvage that exists anyway, before the strip row)
+	if drone != "":
+		choices.insert(choices.size() - (1 if state != "captured" else 0), _row("Scan the service drone bay (learn the Repair Drone blueprint)", "A wrecked service drone still has its plans in its memory. The scanner copies them.", {"blueprint": [drone]}))
 	return {"id": "salvage", "type": "salvage", "once": false, "title": "Salvage: %s" % foe, "text": text, "choices": choices}
 
 

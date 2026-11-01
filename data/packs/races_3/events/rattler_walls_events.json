@@ -107,8 +107,8 @@
       "id": "walls_great_knock", "type": "empty", "weight": 8, "once": false, "requires": {"region": "rattler_walls"},
       "text": "At exactly noon by Rusthold time, every wall in the Wallworks knocks once. It is a low, soft, enormous thump, a thousand spanners in a thousand ducts at the same instant, and it travels through your hull like a heartbeat. Then silence. Then, tentatively, a second knock: three short and one long. A small voice comes on the comm. 'It's the Great Knock,' it says. 'You may join in, if you like. Everyone's invited. You do have walls?'",
       "choices": [
-        {"text": "Knock along with the crew.", "outcomes": [
-          {"weight": 100, "text": "You line your crew up in the mess and every one of them takes a spanner and raps the wall: three short, one long. It is ridiculous, and moving, and the whole ship hums with it afterwards. The Rattlers send a little cheer over the comm, and a bag of scrap, for the thought.", "effects": {"crew_hp": 10, "items": {"scrap": 15}}}
+        {"text": "Knock along.", "outcomes": [
+          {"weight": 100, "text": "You take a spanner to the mess wall and rap it: three short, one long. It is ridiculous, and moving, and the whole ship hums with it afterwards. The Rattlers send a little cheer over the comm, and a bag of scrap, for the thought.", "effects": {"crew_hp": 10, "items": {"scrap": 15}}}
         ]},
         {"text": "Ask what it is for.", "outcomes": [
           {"weight": 100, "text": "'It's for saying we are still here,' says the voice. 'The first Rattlers got into the walls on this day, when Rusthold was only four hulls welded together. We knocked, to see if anyone would knock back. They did. It was a Basalt. He's still in the south wall, I think.' You are given a small map as a thank-you.", "effects": {"reveal": "trader", "items": {"scrap": 10}}}

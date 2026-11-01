@@ -76,7 +76,7 @@ static func blueprints(profile) -> Array[String]:
 # --- applying -------------------------------------------------------------------------------------------------
 
 ## Put the starting unlocks on the player's `ship` (just loaded from its design): the soldier's species, the blueprints known
-## at the start, the hull skin. Returns a line for each thing done.
+## at the start, the hull skin, and the repair drone every run starts with (add_drone). Returns a line for each thing done.
 static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 	var lines: Array[String] = []
 	var pick := clean(choice, profile)
@@ -88,9 +88,36 @@ static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 		if ship.crafting.unlock(id):
 			lines.append("Known from the start: " + ship.crafting.name_of(str(ship.crafting.def(id)["output"]["item"]), ship.components))
 	ship.skin = str(Unlocks.payload_of(str(pick["skin"])).get("skin", "")) if pick["skin"] != "" else ""
+	if add_drone(ship):
+		lines.append("A repair drone is aboard: it mends, fights fires and reloads by itself, on 1 power")
 	for l in lines:
 		ship.log_event(l)
 	return lines
+
+
+## Every run starts with one repair drone (playtest 2, R1; data/crew.json `drone`, species `drone`): its entry joins the design's crew list, which is
+## what Jobs.spawn_crew puts aboard. A list with no entries (the default crew) gets the soldier first, so the run is the soldier and the drone.
+## It is added here, not in the starter files. False when the list has a drone already.
+static func add_drone(ship) -> bool:
+	if ship.crew_plan.any(func(e): return CrewMember.is_drone_species(str(e.get("species", "")))):
+		return false
+	var cfg: Dictionary = CrewMember.config()
+	if ship.crew_plan.is_empty():
+		ship.crew_plan.append({"name": cfg["player"]["name"], "species": "human", "player": true})
+	ship.crew_plan.append(drone_entry())
+	return true
+
+
+## The crew-list entry of the starting drone: {name, species}.
+static func drone_entry() -> Dictionary:
+	var cfg: Dictionary = CrewMember.config()["drone"]
+	return {"name": str(cfg["name"]), "species": str(cfg["species"])}
+
+
+## How the hangar names the starting drone beside the crew: "Drone (Repair Drone)".
+static func drone_label() -> String:
+	var e := drone_entry()
+	return "%s (%s)" % [e["name"], CrewMember.species_def(str(e["species"])).get("name", "Drone")]
 
 
 ## Make the ship's soldier (the player's crew member of its crew list) a `species`, named `name` when given. False when the ship

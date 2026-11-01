@@ -1,0 +1,9 @@
+{
+	"id": "events_2",
+	"name": "Events refresh",
+	"version": "1.0",
+	"requires": [
+		"engines_1"
+	],
+	"notes": "Beta 3 events refresh: new repeatable events that work for a ship flying alone (wreck fields, asteroid fields, anomalies, the Hollow, traders, empty lanes, distress, pirates, patrols, and Concord, Lumen and Boneyard space). Many have risky blue options keyed on a part (component_any: any shield, radar, intake, tractor or strafe-jet line counts); crew-only lines are gated with crew_min. None recruits. The strafe jets come from engines_1."
+}

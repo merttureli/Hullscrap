@@ -201,7 +201,7 @@ func test_the_numbers_come_from_the_data() -> void:
 		check(shield.contains(want), "shield_mk1 says " + want + ": " + shield)
 	eq(Abilities.shield_base(), 7.0, "the base the shield text follows")
 	var rector := Describe.text("reactor_mk1", ship)
-	check(rector.contains("Power: +8") and rector.contains("HP: 8"), "reactor_mk1: " + rector)
+	check(rector.contains("Power: +%d" % int(ship.components.def("reactor_mk1")["power"])) and rector.contains("HP: 8"), "reactor_mk1: " + rector)
 	check(Describe.text("medbay", ship).contains("Heals: 15 hp/s"), "the medbay heals at crew.json's rate")
 	check(Describe.text("radar_mk1", ship).contains("6,000 px"), "radar range with a thousands comma")
 	var beam := {}
@@ -235,6 +235,8 @@ func test_tags_no_code_reads_are_left_off_the_card() -> void:
 
 func test_an_item_gets_its_line_and_its_lore() -> void:
 	var ship := Ship.new_starter()
+	for it in Content.list("items"):
+		check(_words(Describe.of(str(it["id"]), ship)["what"]) <= 8, "%s: what it does is 8 words at most: %s" % [it["id"], Describe.of(str(it["id"]), ship)["what"]])
 	var d := Describe.of("pistol", ship)
 	check(d["what"].contains("gear") and d["lore"] == Describe.first_sentence(Content.entry("items", "pistol")["blurb"]), "a pistol: " + str(d))
 	check(Describe.of("polymer", ship)["what"].contains("Raw material"), "a material")

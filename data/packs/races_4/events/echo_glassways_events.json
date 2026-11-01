@@ -6,7 +6,7 @@
         {"text": "Ask what they sell.", "requires": {"credits": 20}, "outcomes": [
           {"weight": 100, "text": "They list their stock in your voice, with small improvements. Everything is a bargain; nothing has a price; each item is offered with a tiny, courteous apology. By the end you have bought more than you meant to, and are not at all sure you were cheated. You were not.", "effects": {"items": {"credits": -20, "crystal": 2, "silicon": 3}, "crew_hp": 5}}
         ]},
-        {"text": "Hire an Echo who keeps looking at your crew (90 credits).", "requires": {"credits": 90, "not_flag": "glassways_hired"}, "outcomes": [
+        {"text": "Hire an Echo who keeps looking at you (90 credits).", "requires": {"credits": 90, "not_flag": "glassways_hired"}, "outcomes": [
           {"weight": 100, "text": "The Echo is standing by the door, nodding gently at each person who passes. They have an unfinished look, as though they are still deciding who to be. 'Encore,' they say, in a voice that is a little like the chief engineer's. 'I do not know yet what I am like. I should like to find out.' They shake your hand, and for a moment they have your grip exactly.", "effects": {"items": {"credits": -90}, "recruit": {"species": "echo", "name": "Encore"}, "flag": "glassways_hired"}}
         ]},
         {"text": "Ask them what they think of you.", "outcomes": [
@@ -62,7 +62,7 @@
       "text": "A single traveller, in a one-person skiff, drifting. The skiff is intact. The traveller is sitting upright in the cockpit with a hand on the helm, looking at the stars with an expression of dreamy confusion. When you pull alongside they wave, politely. When you ask their name they say it back to you, 'Your name,' and then, uncertainly, 'is... mine.' They are not hurt. They are only lost: a long way lost, in a way that has nothing to do with a map.",
       "choices": [
         {"text": "Take them aboard and look after them.", "requires": {"items": {"fuel": 1}}, "outcomes": [
-          {"weight": 100, "text": "They are very quiet, and very kind, and keep copying the way your crew stand. After three days they begin to say things that are their own. At the end of the week they hand you a small bright stone, 'because you were nice,' and ask for a lift to the nearest harbour.", "effects": {"items": {"fuel": -1, "crystal": 2}, "crew_hp": 10, "rep": {"concord": 1}}}
+          {"weight": 100, "text": "They are very quiet, and very kind, and keep copying the way you stand. After three days they begin to say things that are their own. At the end of the week they hand you a small bright stone, 'because you were nice,' and ask for a lift to the nearest harbour.", "effects": {"items": {"fuel": -1, "crystal": 2}, "crew_hp": 10, "rep": {"concord": 1}}}
         ]},
         {"text": "Give them directions and let them go.", "outcomes": [
           {"weight": 100, "text": "You point the skiff at the nearest port. They thank you in your own voice and set off. They are still waving when they go out of sight, one hand on the helm and the other raised, in a graceful and precise copy of your own wave.", "effects": {"crew_hp": 5}}
@@ -80,7 +80,7 @@
       "text": "A touring theatre ship, dead in the lane, its hold full of costumes. Racks and racks of them, in every colour, hanging in the still air: kings' robes and beggars' rags, masks of gold and cloth, wigs and wings and a suit of silver armour, all gently turning. The stage is set for a play. A single chair is drawn up to the front row. Echo stand about the wreck in a quiet ring, watching you, and every one is wearing a mask, and every mask has your face.",
       "choices": [
         {"text": "Take the costumes (and the silver).", "outcomes": [
-          {"weight": 70, "text": "You load the racks into your hold with no thought for the play. The ring of masks watches you do it, saying nothing. A good haul of silk, brass and silver. Some of your crew refuse to look at the masks.", "effects": {"items": {"credits": 55, "silicon": 3, "polymer": 10}, "crew_hp": -5}},
+          {"weight": 70, "text": "You load the racks into your hold with no thought for the play. The ring of masks watches you do it, saying nothing. A good haul of silk, brass and silver. Some of you refuse to look at the masks.", "effects": {"items": {"credits": 55, "silicon": 3, "polymer": 10}, "crew_hp": -5}},
           {"weight": 30, "text": "The racks come away easily, and the masks come away with them. For the rest of the day your crew find themselves unable to remember each other's faces. It wears off, slowly.", "effects": {"items": {"credits": 50, "silicon": 3}, "crew_hp": -15}}
         ]},
         {"text": "Sit in the front row and watch.", "outcomes": [

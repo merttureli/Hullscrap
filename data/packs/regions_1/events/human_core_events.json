@@ -241,11 +241,17 @@
       "id": "core_ring_breach", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_human_core", "jumps_min": 2},
       "text": "Ring Five has split along a seam, and the rooms are venting one at a time, in order, like news travelling down a corridor. Residents crowd the hull-side corridor with sealant guns and the expressions of people who were warned about this for years.",
       "choices": [
-        {"text": "Go in with your crew and patch the seam.", "outcomes": [
-          {"weight": 40, "text": "You and your crew work the seam from both ends, sealant in one hand, residents in the other. The last door shuts with a fist-sized hole in it, and sixty people breathe in at the same time. They pay what they can, which is a lot.", "effects": {"items": {"credits": 60}, "rep": {"concord": 1}, "crew_hp": -10, "log": "log_core_warm_sink"}},
-          {"weight": 30, "text": "The seam gives while you are on it. You are blown out of the breach, tethered, the whole crew with you. You all come back, bruised, to a ring that thanks you with its last credits.", "effects": {"items": {"credits": 40}, "crew_hp": -25, "hull": -10, "log": "log_core_warm_sink"}},
-          {"weight": 20, "text": "A corridor goes while you cross it. Someone's family is lost, and one of your crew is hurt badly enough that they will limp for a week.", "effects": {"items": {"credits": 20}, "crew_hp": -20}},
+        {"text": "Go in and patch the seam.", "requires": {"crew_min": 1}, "outcomes": [
+          {"weight": 40, "text": "You work the seam from both ends, sealant in one hand, residents in the other. The last door shuts with a fist-sized hole in it, and sixty people breathe in at the same time. They pay what they can, which is a lot.", "effects": {"items": {"credits": 60}, "rep": {"concord": 1}, "crew_hp": -10, "log": "log_core_warm_sink"}},
+          {"weight": 30, "text": "The seam gives while you are on it. You are blown out of the breach, tethered. You come back, bruised, to a ring that thanks you with its last credits.", "effects": {"items": {"credits": 40}, "crew_hp": -25, "hull": -10, "log": "log_core_warm_sink"}},
+          {"weight": 20, "text": "A corridor goes while you cross it. Someone's family is lost, and you are hurt badly enough to limp for a week.", "effects": {"items": {"credits": 20}, "crew_hp": -20}},
           {"weight": 10, "text": "The seam goes all at once. You get the survivors out; the ring does not survive. One of yours does not come back from the dark.", "effects": {"rep": {"concord": 1}, "crew_hp": -20, "lose_crew": 1}}
+        ]},
+        {"text": "Go in and patch the seam.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You work the seam from both ends, sealant in one hand, residents in the other. The last door shuts with a fist-sized hole in it, and sixty people breathe in at the same time. They pay what they can, which is a lot.", "effects": {"items": {"credits": 60}, "rep": {"concord": 1}, "crew_hp": -10, "log": "log_core_warm_sink"}},
+          {"weight": 30, "text": "The seam gives while you are on it. You are blown out of the breach, tethered. You come back, bruised, to a ring that thanks you with its last credits.", "effects": {"items": {"credits": 40}, "crew_hp": -25, "hull": -10, "log": "log_core_warm_sink"}},
+          {"weight": 20, "text": "A corridor goes while you cross it. Someone's family is lost, and you are hurt badly enough to limp for a week.", "effects": {"items": {"credits": 20}, "crew_hp": -20}},
+          {"weight": 10, "text": "The seam goes all at once. You get the survivors out; the ring does not survive. The dark takes your tether, your sealant guns and a plate off your own hull.", "effects": {"rep": {"concord": 1}, "crew_hp": -20, "hull": -25, "items": {"scrap": -30}}}
         ]},
         {"text": "[Basalt] Send your Basalt into the venting section. No air, no problem.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 90, "text": "Your Basalt walks into the hole where the air used to be and holds the seam shut with both hands for forty minutes. Nobody is hurt. The residents bring tea they cannot drink and hang a sign: OUR HERO.", "effects": {"items": {"credits": 70}, "rep": {"concord": 2, "clans": 1}}},

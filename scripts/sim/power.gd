@@ -108,6 +108,29 @@ static func solve(components, cables, disabled := {}, mods := {}) -> Dictionary:
 	return {"powered": powered, "networks": nets, "network_of": network_of}
 
 
+## The repair drones (R1) draw power with no cable: each of the working drones `names` (sorted) takes `draw` from the ship's
+## surplus after the parts on the cables have had theirs (supply left over in the networks, pooled), in that order. A drone the
+## surplus does not cover is off. Adds `drones` to the solve result `state`: {fed: name -> bool, demand: the draw of every
+## working drone, used: the draw of the fed ones, draw}. The networks are left as they are: HUD figures add `drones.demand`.
+static func feed_drones(state: Dictionary, names: Array, draw: float) -> void:
+	var left := 0.0
+	for n in state.get("networks", []):
+		left += maxf(float(n["supply"]) - float(n["used"]), 0.0)
+	var fed := {}
+	var used := 0.0
+	for name in names:
+		fed[name] = left + EPS >= draw
+		if fed[name]:
+			left -= draw
+			used += draw
+	state["drones"] = {"fed": fed, "demand": draw * names.size(), "used": used, "draw": draw}
+
+
+## Is the drone called `name` running on the solve result `state` (it is working and the surplus covered it)?
+static func drone_fed(state: Dictionary, name: String) -> bool:
+	return bool(state.get("drones", {}).get("fed", {}).get(name, false))
+
+
 static func _before(a: Vector2i, b: Vector2i) -> bool:
 	return a.y < b.y or (a.y == b.y and a.x < b.x)
 

@@ -114,7 +114,7 @@
           {"weight": 100, "text": "Your Wisp flickers the cabin lamps back, faster. The ghost answers, slower, then in a rush. They talk for ten minutes in dots and dashes, and then something small and bright pours out of the junction box and into your Wisp's arms like a child. 'A sister,' your Wisp says. 'Half a sister.' She comes aboard, and the tug's crew, relieved, press credits on you and ask nothing about the toaster.", "effects": {"recruit": {"species": "wisp", "name": "Wisi"}, "items": {"credits": 30}}}
         ]},
         {"text": "Leave it. It is rude.", "outcomes": [
-          {"weight": 100, "text": "You turn away. As you go every lamp on the tug flickers, once, in a way that says 'sorry'. Your crew look at you.", "effects": {"crew_hp": -5}}
+          {"weight": 100, "text": "You turn away. As you go every lamp on the tug flickers, once, in a way that says 'sorry'. You do not look back.", "effects": {"crew_hp": -5}}
         ]}
       ]
     }

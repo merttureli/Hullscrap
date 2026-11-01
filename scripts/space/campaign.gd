@@ -45,7 +45,8 @@ const Unlocks = preload("res://scripts/space/unlocks.gd")
 ## 6 adds `warden` (the warden of the exit beacon, wardens.gd); older saves roll it on load. Its flag is in `flags`.
 ## 7 adds `foes` (the enemies rolled for the fights of the places, foe_for); older saves start with none rolled.
 ## 8 adds `far` to each saved sector (the far POIs that are done, sector.gd); older saves have none done.
-const VERSION := 8
+## 9 adds `crew_offers` (the events that add crew fired in this region, events.gd); older saves start with none.
+const VERSION := 9
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100
@@ -104,6 +105,7 @@ var region_id := ""  ## the region the ship is in (data/regions/<id>.json)
 var region_data := {}  ## that region's data (Regions.get_region), not saved
 var route: Array = []  ## the regions of the run in order, this one last
 var region_seed := 0  ## the seed of this region's map and sectors
+var crew_offers := 0  ## events that add crew fired in this region (events.gd counts them in pick): data/drift.json `crew.offers_per_region` is the limit; saved
 var debt_stop := -1  ## the jump count at which Ma's debt clock stopped (from stage run.debt_stages + 1), -1 while it runs
 var warden := {}  ## the warden of this region's exit beacon (Wardens.for_region), rolled on entering; {} in the ending region
 var profile = null  ## the player's Profile (profile.gd), set by the map: unlocks and landmarks are written to it at once. null in tests
@@ -718,6 +720,7 @@ func enter_region(id: String, ship = null) -> void:
 	region_data = Regions.get_region(id)
 	route.append(id)
 	region_seed = Regions.seed_for(seed_value, stage, id)
+	crew_offers = 0  # a new region may make a new offer
 	drift = Regions.make_map(region_data, cfg, region_seed, is_final())
 	current = drift.start_id()
 	tide = Tide.make(drift, current, Tide.config(), drift.exit_id(), stage)  # a Hollow tide of the region's own, from its entry
@@ -1057,13 +1060,14 @@ func add_crew(ship, who: String, species: String, character := "") -> String:
 	var m = Jobs._person(who, look, Pathfinder.centre_of(spot), species)
 	if not chr.is_empty():
 		Characters.apply(m, character)
+	m.backstory()  # their story is fixed the day they join, and saved
 	ship.crew.append(m)
 	return who
 
 
 ## A random crew member who is not the player leaves for good. Returns their name, "" if there is none.
 func lose_crew(ship) -> String:
-	var others: Array = ship.crew.filter(func(m): return not m.is_player)
+	var others: Array = ship.crew.filter(func(m): return not m.is_player and not m.is_drone())  # (a drone is no crew)
 	if others.is_empty():
 		return ""
 	var gone = others[rng.randi() % others.size()]
@@ -1117,7 +1121,10 @@ func buy(ship, id: String, item: String, n := 1) -> Dictionary:
 	var each := stock_price(id, item, ship)
 	if each <= 0:
 		return {"ok": false, "text": "They don't sell that."}
-	return _purchase(ship, item, n, each * n, ship.crafting.name_of(item, ship.components))
+	var r := _purchase(ship, item, n, each * n, ship.crafting.name_of(item, ship.components))
+	if r["ok"]:
+		Jobs.launch_drones(ship)  # a repair drone bought goes aboard at once
+	return r
 
 
 func _purchase(ship, item: String, n: int, total: int, name: String) -> Dictionary:
@@ -1241,7 +1248,7 @@ func to_dict() -> Dictionary:
 		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
 		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
 		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
-		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate()}
+		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers}
 
 
 func _sectors_dict() -> Dictionary:
@@ -1326,6 +1333,7 @@ func load_dict(d: Dictionary) -> String:
 	region_data = Regions.get_region(region_id)
 	route = where["route"]
 	region_seed = where["seed"]
+	crew_offers = maxi(0, int(d["crew_offers"])) if d.get("crew_offers") is float or d.get("crew_offers") is int else 0  # a version 8 save has none
 	debt_stop = int(d.get("debt_stop", -1)) if d.get("debt_stop") is float or d.get("debt_stop") is int else -1
 	foes = {}  # a version 5 save has none rolled: the places roll theirs when asked
 	if d.get("foes") is Dictionary:

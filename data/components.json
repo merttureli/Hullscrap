@@ -13,7 +13,7 @@
         4
       ],
       "color": "#f2c14e",
-      "power": 8,
+      "power": 9,
       "priority": 0,
       "manned": false,
       "hp": 8,
@@ -34,7 +34,7 @@
         4
       ],
       "color": "#ff8c3a",
-      "power": 14,
+      "power": 15,
       "priority": 0,
       "manned": false,
       "hp": 8,
@@ -501,7 +501,7 @@
         4
       ],
       "color": "#b8863b",
-      "power": 6,
+      "power": 7,
       "priority": 0,
       "manned": false,
       "hp": 8,
@@ -601,7 +601,7 @@
         4
       ],
       "color": "#ffd84a",
-      "power": 16,
+      "power": 17,
       "priority": 0,
       "manned": false,
       "hp": 8,
@@ -1220,7 +1220,7 @@
         4
       ],
       "color": "#c9923f",
-      "power": 8,
+      "power": 9,
       "priority": 0,
       "manned": false,
       "hp": 8,

@@ -117,7 +117,8 @@ func test_cards_follow_the_cargo_and_what_it_can_pay() -> void:
 	check(not not_held["ok"] and str(not_held["why"]) == "Blueprint not known", "a part not held is greyed: " + str(not_held["why"]))
 	ship.crafting.unlock("laser_mk2")
 	eq(Palette.part_entry(ship, "laser_mk2")["why"], "Craft at Fabricator (C)", "a known blueprint says where to craft it")
-	eq(Palette.part_entry(ship, "reactor_scrap_mk1")["power"], 5.4, "power is line-adjusted (scrap 6 x 0.9)")
+	var scrap_pw: float = float(ship.components.def("reactor_scrap_mk1")["power"]) * 0.9
+	check(is_equal_approx(float(Palette.part_entry(ship, "reactor_scrap_mk1")["power"]), scrap_pw), "power is line-adjusted (the scrap line's x0.9 of its %s)" % str(scrap_pw))
 	eq(Palette.part_entry(ship, "leech_laser")["line"], "unique", "a unique part has the gold border")
 	eq(Palette.piece_entry(ship, "slope2", "wall")["cost"], {"scrap": 3}, "a piece costs by area, rounded up per cell")
 	ship.inventory.add("scrap", 1)

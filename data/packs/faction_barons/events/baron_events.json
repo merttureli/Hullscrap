@@ -219,7 +219,7 @@
 					"outcomes": [
 						{
 							"weight": 60,
-							"text": "The food is real, and it is wonderful, and your crew eat as if it is the last meal on the Drift. The Baron tells a story about his grandfather's yacht that takes an hour and has no ending. When you rise he presses a purse into your hand. 'For listening.'",
+							"text": "The food is real, and it is wonderful, and you eat as if it is the last meal on the Drift. The Baron tells a story about his grandfather's yacht that takes an hour and has no ending. When you rise he presses a purse into your hand. 'For listening.'",
 							"effects": {"crew_hp": 25, "items": {"credits": 70}, "flag": "baron_guest"}
 						},
 						{
@@ -264,7 +264,7 @@
 			"once": true,
 			"requires": {"region": ["clan_space", "boneyard"], "jumps_min": 3},
 			"title": "A Baron's Bounty",
-			"text": "A Baron's agent in a velvet coat has pinned a poster to the trade-point board: WANTED, THE YACHT GILDED MEAN, BY ORDER OF HER OWN COUSIN. 'A family matter,' he says, not looking up from his ledger. 'Four hundred credits and the signet ring from her captain's finger. The Gilded Mean is a Baron's yacht, as you will see. She will hit back. Cousins do.'",
+			"text": "A Baron's agent in a velvet coat has pinned a poster to the trade-point board: WANTED, A BARON'S YACHT, BY ORDER OF HER OWN COUSIN. 'A family matter,' he says, not looking up from his ledger. 'Four hundred credits and the signet ring from her captain's finger. She is a Baron's yacht, as you will see. She will hit back. Cousins do.'",
 			"choices": [
 				{
 					"text": "Take the contract.",
@@ -274,7 +274,7 @@
 							"text": "'Excellent. She is in the next lane over. Do try to leave the ring finger intact.' The agent pencils your name into a column headed EXPENDABLE, and then, after thought, rubs it out and writes it under the other heading.",
 							"effects": {"fight": "gen:barons", "flag": "baron_bounty_taken"},
 							"after_win": {
-								"text": "The Gilded Mean breaks up in a haze of confetti, which turns out to be shredded banknotes. The signet ring comes out of the wreck on its own, on a cut finger, with the finger. You are not sure the agent will want the finger.",
+								"text": "The yacht breaks up in a haze of confetti, which turns out to be shredded banknotes. The signet ring comes out of the wreck on its own, on a cut finger, with the finger. You are not sure the agent will want the finger.",
 								"effects": {"items": {"credits": 400}, "flag": "baron_bounty_done"}
 							}
 						}

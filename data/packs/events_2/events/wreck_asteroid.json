@@ -1,0 +1,289 @@
+{"events": [
+    {
+      "id": "wreck_field_tug_still_towing", "type": "wreck_field", "weight": 10, "once": false, "requires": {},
+      "text": "A salvage tug is still towing. The cable runs off her stern into the dark, taut and humming, and at the end of it there is nothing at all. Her pilot light is on. Her pilot, if she had one, is somewhere else.",
+      "choices": [
+        {"text": "Cut the cable and strip the tug.", "outcomes": [
+          {"weight": 70, "text": "The cable parts with a twang you feel in your fillings. The tug, relieved of duty, lets you take her winch, her plates and most of her dignity.", "effects": {"items": {"scrap": 40, "copper": 10}}},
+          {"weight": 30, "text": "The cable whips back along the tug and takes the winch with it, and some of your flank. You get what the whip left.", "effects": {"hull": -6, "items": {"scrap": 25}}}
+        ]},
+        {"text": "Follow the cable to the other end.", "outcomes": [
+          {"weight": 55, "text": "Forty minutes out, the cable ends in a barge nobody told about the tug. Her hold is full of ingots, and she is, for the first time in forty years, not being pulled.", "effects": {"items": {"scrap": 55, "titanium": 6}}},
+          {"weight": 45, "text": "Forty minutes out, the cable ends in a knot. The knot is attached to nothing. You have burnt a day's fuel to admire it.", "effects": {"items": {"fuel": -1}}}
+        ]},
+        {"text": "[Tractor] Reel the cable in with the beam.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 65, "text": "You take the cable in on the beam and the dark pays it out: three hundred metres, five hundred, a kilometre, and then the barge, coming home like a dog on a lead.", "effects": {"items": {"scrap": 70, "polymer": 15}}},
+          {"weight": 35, "text": "The cable comes in fast and the barge behind it faster. It stops against your hull the way a barge does.", "effects": {"hull": -10, "items": {"scrap": 40}}}
+        ]},
+        {"text": "Leave her towing.", "outcomes": [
+          {"weight": 100, "text": "She tows on. The cable hums a little as you go, like someone who has heard that one before.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_two_halves", "type": "wreck_field", "weight": 9, "once": false, "requires": {},
+      "text": "A freighter cut clean in two. The bow is here, the break as smooth as a cheese wire's. The stern is somewhere else. Her manifest, on the bow's one working screen, lists the good cargo as 'aft'.",
+      "choices": [
+        {"text": "Strip the bow.", "outcomes": [
+          {"weight": 75, "text": "The bow gives up its plates, its wiring and a locker of spanners meant for a different, larger ship.", "effects": {"items": {"scrap": 40, "copper": 8}}},
+          {"weight": 25, "text": "A loose bulkhead takes a swing at you, in the ship's last nerve.", "effects": {"hull": -5, "items": {"scrap": 25}}}
+        ]},
+        {"text": "[Radar] Find the stern.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 65, "text": "The radar leans out along the cut and finds the other half forty klicks off, still on her heading. You catch her up. She is entirely full.", "effects": {"items": {"titanium": 15, "scrap": 30, "credits": 20}}},
+          {"weight": 35, "text": "The radar finds the stern, and the stern's reactor, which is running. The detour costs fuel and the reactor costs paint.", "effects": {"hull": -8, "items": {"fuel": -1, "scrap": 15}}}
+        ]},
+        {"text": "Take the manifest and go.", "outcomes": [
+          {"weight": 100, "text": "The manifest lists 'aft' in four different hands. A clerk at the next dock gives you ten credits for it, out of pity.", "effects": {"items": {"credits": 10}}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_cargo_curtain", "type": "wreck_field", "weight": 9, "once": false, "requires": {},
+      "text": "A cargo ship died shedding crates, and the crates never stopped: a hanging curtain of containers and plate, hundreds of metres wide, turning slowly across the lane. There is a gap. It is exactly as wide as the ship, if the ship were thinner.",
+      "choices": [
+        {"text": "Push through the curtain, slowly.", "outcomes": [
+          {"weight": 55, "text": "You shoulder the curtain apart one crate at a time. It takes an hour, and your hull takes the rest.", "effects": {"hull": -5, "items": {"scrap": 30}}},
+          {"weight": 45, "text": "A crate takes exception. The rest take sides.", "effects": {"hull": -10, "items": {"scrap": 25}}}
+        ]},
+        {"text": "[Strafe Jets] Slide through the gap sideways.", "requires": {"component_any": ["strafe_jets_mk1", "strafe_jets_mk2", "strafe_jets_mk3", "afterburner"]}, "outcomes": [
+          {"weight": 70, "text": "You hang the ship on her side and slide through the gap like a letter through a door. Behind you the curtain closes, and every crate you passed on the way is yours to pick.", "effects": {"items": {"scrap": 55, "copper": 15}}},
+          {"weight": 30, "text": "The gap was a little thinner than the survey said. The jets argue the difference, and so does the hull.", "effects": {"hull": -5, "items": {"scrap": 40}}}
+        ]},
+        {"text": "[Intake] Let the intake eat the curtain from the front.", "requires": {"component_any": ["intake_mk1", "intake_mk2", "intake_mk3", "net_mouth_scrap"]}, "outcomes": [
+          {"weight": 75, "text": "You feed the intake the curtain a crate at a time and it digests them with a noise like a cheerful gearbox.", "effects": {"items": {"scrap": 45, "polymer": 12}}},
+          {"weight": 25, "text": "A crate the intake cannot swallow jams in the mouth. Clearing it costs you the afternoon and a panel.", "effects": {"hull": -6, "items": {"scrap": 25}}}
+        ]},
+        {"text": "Go around.", "outcomes": [
+          {"weight": 100, "text": "It takes four hours and you see nothing but dark. You are, you note, a very patient person.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_vending_freighter", "type": "wreck_field", "weight": 8, "once": false, "requires": {},
+      "text": "A freighter full of vending machines. Every one of them is lit, humming, offering something. The slot on the nearest says EXACT CHANGE ONLY. The slot on the next says THANK YOU.",
+      "choices": [
+        {"text": "Feed the nearest one (10 credits).", "requires": {"credits": 10, "pay": true}, "outcomes": [
+          {"weight": 50, "text": "It drops a can of fuel pellets with a small, satisfied clunk.", "effects": {"items": {"fuel": 1}}},
+          {"weight": 30, "text": "It drops a bag of polymer pellets, in a bag, in another bag.", "effects": {"items": {"polymer": 12}}},
+          {"weight": 20, "text": "It drops a sandwich eleven years old, which is still, against all odds, a sandwich. You feel better.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Kick it until it gives.", "outcomes": [
+          {"weight": 60, "text": "It gives. A rain of tins, bolts and copper foil. The machine looks at you as it goes dark.", "effects": {"items": {"scrap": 25, "copper": 10}}},
+          {"weight": 40, "text": "It gives you a shock of the mains. The mains are still on.", "effects": {"hull": -5}}
+        ]},
+        {"text": "[Cutter] Take the backs off the whole row.", "requires": {"component_any": ["laser_cutter", "robot_arm"]}, "outcomes": [
+          {"weight": 80, "text": "You take the backs off eleven machines in a row and the freighter pays out like a bank.", "effects": {"items": {"copper": 25, "polymer": 20, "scrap": 20}}},
+          {"weight": 20, "text": "The fourth machine was a fuse box. The cutter finds it.", "effects": {"hull": -8, "items": {"copper": 10}}}
+        ]},
+        {"text": "Leave them lit.", "outcomes": [
+          {"weight": 100, "text": "They offer to the end of the lane: THANK YOU. THANK YOU. THANK YOU.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_three_flags", "type": "wreck_field", "weight": 8, "once": false, "requires": {},
+      "text": "A wreck flying three flags: a Concord ensign, a Clan pennant and a Lumen glass vane, all on the same mast. She was whatever was safest, whenever it mattered. Whose she was is a matter for lawyers who no longer exist.",
+      "choices": [
+        {"text": "Strip her and say she was Concord's.", "outcomes": [
+          {"weight": 100, "text": "You file the claim under the ensign. Meridian will approve it, by and by, and take its cut. The Clans will hear of it sooner.", "effects": {"items": {"credits": 35}, "rep": {"concord": 1, "clans": -1}}}
+        ]},
+        {"text": "Strip her and say she was the Clans'.", "outcomes": [
+          {"weight": 100, "text": "You strip her under the pennant and nobody argues, because nobody on the Row has ever lost a claim by being loud first.", "effects": {"items": {"scrap": 45}, "rep": {"clans": 1, "concord": -1}}}
+        ]},
+        {"text": "[Radar] Read her transponder history and find out who she really was.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 60, "text": "The history goes back eleven codes. At the bottom she was a fishing boat. Nobody has a claim on a fishing boat, which is the best kind of claim.", "effects": {"items": {"scrap": 45, "credits": 20}}},
+          {"weight": 40, "text": "The history goes back four codes and ends in a lawyer's seal. You have just read something you were not meant to. Meridian notes it.", "effects": {"items": {"scrap": 25}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "Strip her under no flag at all.", "outcomes": [
+          {"weight": 100, "text": "You take the plates and nobody's name. It is quicker, and a little lonely.", "effects": {"items": {"scrap": 30}}}
+        ]},
+        {"text": "Leave the flags to argue.", "outcomes": [
+          {"weight": 100, "text": "Behind you the three flags go on flapping at each other in the nothing, which is where most of the arguments out here end.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_pressure_door", "type": "wreck_field", "weight": 8, "once": false, "requires": {},
+      "text": "A freighter's cargo hold, sealed and still holding air. A pressure door with a wheel. Behind it something is cooling and ticking, the way a kitchen does after a big meal.",
+      "choices": [
+        {"text": "Turn the wheel, slowly.", "outcomes": [
+          {"weight": 50, "text": "The door opens on forty years of preserved biscuits, perfectly stacked, perfectly awful. You eat one. You feel, briefly, loved.", "effects": {"items": {"credits": 30}, "crew_hp": 10}},
+          {"weight": 30, "text": "The air comes out like a sigh and takes the door with it. You are showered in biscuit.", "effects": {"hull": -8, "items": {"credits": 15}}},
+          {"weight": 20, "text": "The hold opens on nothing but a smell.", "effects": {}}
+        ]},
+        {"text": "[Cutter] Cut a vent first, then the door.", "requires": {"component_any": ["laser_cutter", "robot_arm"]}, "outcomes": [
+          {"weight": 85, "text": "A neat vent, a long exhale, and then the door opens at its leisure. The tins are good. The biscuits are not.", "effects": {"items": {"credits": 40, "scrap": 20}}},
+          {"weight": 15, "text": "The vent was the wrong shape. The door finds the right one.", "effects": {"hull": -8, "items": {"credits": 20}}}
+        ]},
+        {"text": "[Intake] Draw the air off through the intake first.", "requires": {"component_any": ["intake_mk1", "intake_mk2", "intake_mk3", "net_mouth_scrap"]}, "outcomes": [
+          {"weight": 90, "text": "The intake drinks the hold down to nothing. The tins roll out in a slow, orderly line, as if they had been waiting to be asked.", "effects": {"items": {"credits": 45, "polymer": 10}}},
+          {"weight": 10, "text": "The intake chokes on a biscuit. It takes a day to forgive you.", "effects": {"hull": -4, "items": {"credits": 25}}}
+        ]},
+        {"text": "Leave it sealed.", "outcomes": [
+          {"weight": 100, "text": "Behind you, the ticking goes on. It sounds like a very polite clock.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_salvage_ledger", "type": "wreck_field", "weight": 8, "once": false, "requires": {},
+      "text": "On the bridge of a stripped hulk, in a locker, a salvager's ledger: every wreck she ever found, the date, and what was left in it. The last page lists a ship with your hull's name and a column headed WORTH IT. The column is blank.",
+      "choices": [
+        {"text": "Take the ledger and read it on the way out.", "outcomes": [
+          {"weight": 100, "text": "Forty wrecks, none worth the fuel, and one that is. You circle it in pencil. The pencil, you notice, is still warm.", "effects": {"items": {"scrap": 10}, "reveal": "wreck_field"}}
+        ]},
+        {"text": "[Radar] Match the ledger's dates to the wrecks nearby.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 60, "text": "The radar finds three of the ledger's wrecks inside a day's flight. Two are stripped. The third has a dent in the shape of its owner's temper.", "effects": {"items": {"credits": 15}, "reveal": "wreck_field"}},
+          {"weight": 40, "text": "The radar matches the dates to the wrong wrecks, and the detour burns a day of fuel for a handful of scrap.", "effects": {"items": {"fuel": -1, "scrap": 20}}}
+        ]},
+        {"text": "Strip the hulk while you're here.", "outcomes": [
+          {"weight": 100, "text": "She has nothing left to strip but the shelves. You take the shelves.", "effects": {"items": {"scrap": 35}}}
+        ]},
+        {"text": "Put the ledger back where it was.", "outcomes": [
+          {"weight": 100, "text": "You put it back, spine out, the way she would have wanted.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "wreck_field_burning_slowly", "type": "wreck_field", "weight": 8, "once": false, "requires": {},
+      "text": "A hull with a fire in her sealed hold, burning since long before the Snap on the last of its own oxygen. The windows glow reactor-orange. Her bulkheads are warm to your scanner and the scanner is a little worried.",
+      "choices": [
+        {"text": "Open the hold and let it out.", "outcomes": [
+          {"weight": 60, "text": "The fire sighs out into vacuum and dies, as relieved as a fire can be. The hold behind it is cooked, clean and full of ingots.", "effects": {"items": {"scrap": 40, "copper": 15}}},
+          {"weight": 40, "text": "The fire has other plans for the airlock.", "effects": {"hull": -8, "items": {"scrap": 20}}}
+        ]},
+        {"text": "[Shield] Stand in the doorway with the shield up and take what's inside.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 75, "text": "The shield stands in the open hold like a bouncer. You pull ingots out past it, and a plasma cell as bright as a coal.", "effects": {"items": {"scrap": 55, "plasma_cell": 1}}},
+          {"weight": 25, "text": "The shield holds, and holds, and then does not. You leave with what you can carry.", "effects": {"hull": -10, "items": {"scrap": 30}}}
+        ]},
+        {"text": "Cut round the fire and leave it alone.", "outcomes": [
+          {"weight": 100, "text": "You strip the cold end and leave the warm end to its long evening.", "effects": {"items": {"copper": 20, "scrap": 10}}}
+        ]},
+        {"text": "Leave.", "outcomes": [
+          {"weight": 100, "text": "It burns on, as it has for forty years, with the patience of something no one has asked to stop.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "asteroid_claim_marker_dispute", "type": "asteroid_field", "weight": 10, "once": false, "requires": {},
+      "text": "Two claim markers on one rock. The north one says MINE. The south one says NO, MINE. Between them someone has started a dotted line with a paint gun and given up in the middle of a word.",
+      "choices": [
+        {"text": "Mine the strip between them.", "outcomes": [
+          {"weight": 70, "text": "Between the markers is no one's. You take it in the quiet of an argument that is not yours.", "effects": {"items": {"scrap": 40, "copper": 8}}},
+          {"weight": 30, "text": "Both markers have a gun. Both guns have a sense of humour. Neither joke lands.", "effects": {"hull": -8, "items": {"scrap": 30}}}
+        ]},
+        {"text": "Move the south marker ten metres and see who notices.", "outcomes": [
+          {"weight": 55, "text": "Nobody notices. The south marker is now, in law, more reasonable. You mine the difference.", "effects": {"items": {"scrap": 45, "copper": 12}, "rep": {"clans": -1}}},
+          {"weight": 45, "text": "Both markers notice.", "effects": {"hull": -10, "rep": {"clans": -1}}}
+        ]},
+        {"text": "[Tractor] Tow the rock out of the argument and mine it unclaimed.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 70, "text": "You take the whole rock out of the lane on the beam. By the time the markers notice, it is a kilometre from either, and it is yours, for the afternoon.", "effects": {"items": {"scrap": 75, "copper": 20}}},
+          {"weight": 30, "text": "The rock does not tow nicely. It swings, and the markers fire at the swinging.", "effects": {"hull": -10, "items": {"scrap": 35}}}
+        ]},
+        {"text": "Leave a note: 'SHARE'.", "outcomes": [
+          {"weight": 100, "text": "You paint it on the dotted line. By the time you look back it has two signatures and a rude word, which is the most the Row has ever agreed on.", "effects": {"rep": {"clans": 1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "asteroid_slow_carousel", "type": "asteroid_field", "weight": 9, "once": false, "requires": {},
+      "text": "A rock the size of a barn, spinning exactly slowly enough that you could land on it if you were patient. Every few seconds the face with the vein comes round to you and goes away again.",
+      "choices": [
+        {"text": "Land and mine the vein as it comes round.", "outcomes": [
+          {"weight": 65, "text": "You mine in bites. A bite, a wait, a bite. At the end you have a good seam and the faint sense of having been on a ride.", "effects": {"items": {"scrap": 35, "copper": 12}}},
+          {"weight": 35, "text": "On the last bite, the rock decides to speed up.", "effects": {"hull": -8, "items": {"scrap": 25}}}
+        ]},
+        {"text": "[Strafe Jets] Match the spin and keep the vein in front of you.", "requires": {"component_any": ["strafe_jets_mk1", "strafe_jets_mk2", "strafe_jets_mk3", "afterburner"]}, "outcomes": [
+          {"weight": 80, "text": "You hang off the face, turning with it, and the vein stays in front of the cutters for the whole shift. It is the most elegant work you have done.", "effects": {"items": {"copper": 28, "titanium": 10}}},
+          {"weight": 20, "text": "The jets and the rock disagree by a few degrees. The rock wins.", "effects": {"hull": -8, "items": {"copper": 15}}}
+        ]},
+        {"text": "[Radar] Time the vein and cut it from a distance.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 90, "text": "The radar says when. You fire the cutters at the exact second and a ribbon of ore leaves the rock for the hold.", "effects": {"items": {"scrap": 40, "copper": 15}}},
+          {"weight": 10, "text": "The radar said when. The rock said sooner.", "effects": {"hull": -5, "items": {"scrap": 20}}}
+        ]},
+        {"text": "Watch it turn for a while.", "outcomes": [
+          {"weight": 100, "text": "You watch the vein come round, and go, and come round. It is relaxing in a way you resent.", "effects": {"crew_hp": 5}}
+        ]}
+      ]
+    },
+    {
+      "id": "asteroid_ice_wall", "type": "asteroid_field", "weight": 9, "once": false, "requires": {},
+      "text": "A wall of ice a kilometre long, clear as glass and cold as a promise. Inside it, a ship: lights on, doors shut, coffee still in the cups. There is no door into the ice.",
+      "choices": [
+        {"text": "Cut her out with the cutters.", "outcomes": [
+          {"weight": 60, "text": "It takes a day. The ice comes away in blocks and the ship comes after it, still sealed. You open her like a tin: ingots and a paperback.", "effects": {"items": {"scrap": 45, "titanium": 8}}},
+          {"weight": 40, "text": "The ice lets her go with a groan and a bang. The bang comes back along your hull.", "effects": {"hull": -8, "items": {"scrap": 30}}}
+        ]},
+        {"text": "[Guns] Cut her out with the guns.", "requires": {"component_any": ["laser_mk1", "laser_mk2", "laser_turret_mk1", "heat_lance_neon"]}, "outcomes": [
+          {"weight": 70, "text": "You lay the beam along the ice and the wall opens like a zip. She slides out whole into the lane, as though she had been waiting a long time to be asked.", "effects": {"items": {"titanium": 12, "scrap": 40, "credits": 20}}},
+          {"weight": 30, "text": "The beam turns the ice to steam on the inside. The steam goes where steam goes.", "effects": {"hull": -10, "items": {"scrap": 25}}}
+        ]},
+        {"text": "Take a block of ice and leave her.", "outcomes": [
+          {"weight": 100, "text": "You carve a block of the clear stuff and put it in the hold. It makes a very good fuel tank for about a day.", "effects": {"items": {"fuel": 1, "polymer": 6}}}
+        ]},
+        {"text": "Look at her for a while, then go.", "outcomes": [
+          {"weight": 100, "text": "You look at the coffee, and the cups, and the lights that never went out. You go, quietly, in case.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "asteroid_rig_still_running", "type": "asteroid_field", "weight": 9, "once": false, "requires": {},
+      "text": "A mining rig, still at work. The drill goes down, the drill comes up, a crate drops from the chute into a bin that filled forty years ago. The crates are piling up behind it like a queue at a counter.",
+      "choices": [
+        {"text": "Wait at the chute and take the crates as they come.", "outcomes": [
+          {"weight": 100, "text": "You wait. The crates come every four minutes, regular as grief. Twelve crates later you have an honest haul and the patience of a saint.", "effects": {"items": {"scrap": 35, "copper": 12}}}
+        ]},
+        {"text": "Rob the hopper.", "outcomes": [
+          {"weight": 60, "text": "The hopper opens with a bang. Under years of crates there is a seam of titanium.", "effects": {"items": {"titanium": 10, "scrap": 20}}},
+          {"weight": 40, "text": "The rig has one defence, a very dull alarm that dumps a whole load on your bow.", "effects": {"hull": -6, "items": {"scrap": 15}}}
+        ]},
+        {"text": "[Tractor] Lift the whole rig off the rock.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 60, "text": "The rig comes away still drilling, the drill spinning in air, and sits in your hold wondering where the rock went. It makes crates all the way to the next system.", "effects": {"items": {"titanium": 14, "scrap": 40, "copper": 15}}},
+          {"weight": 40, "text": "The rig objects. It is bigger than it looks and angrier than a rig should be.", "effects": {"hull": -10, "items": {"scrap": 25}}}
+        ]},
+        {"text": "Leave it to its work.", "outcomes": [
+          {"weight": 100, "text": "The drill goes down. The drill comes up. You are, you decide, in no position to ask it to stop.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "asteroid_fresh_craters", "type": "asteroid_field", "weight": 8, "once": false, "requires": {},
+      "text": "A belt of fresh blast craters, each the width of a small house and still smoking. Someone has been testing something out here, or something has been testing someone. The craters are in a line, and the line points at you.",
+      "choices": [
+        {"text": "Search the craters.", "outcomes": [
+          {"weight": 70, "text": "The blasts have turned the rock over like a field. You pick copper out of the fresh spoil.", "effects": {"items": {"copper": 20, "scrap": 15}}},
+          {"weight": 30, "text": "Another one goes off a long way off, and the shock finds your hull.", "effects": {"hull": -10, "items": {"copper": 10}}}
+        ]},
+        {"text": "[Shield] Work the rim under the shield.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 80, "text": "You work the lip of the biggest crater with the shield humming over you like a lid. Nothing goes off. The spoil is good.", "effects": {"items": {"scrap": 40, "copper": 20, "titanium": 6}}},
+          {"weight": 20, "text": "Something goes off. The shield has opinions.", "effects": {"hull": -8, "items": {"scrap": 25}}}
+        ]},
+        {"text": "[Radar] Read the next blast's timing and work between.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 70, "text": "The radar says forty seconds. You take thirty-eight, and the crater behind you opens like a mouth.", "effects": {"items": {"copper": 25, "titanium": 10}}},
+          {"weight": 30, "text": "The radar is off by two seconds. Two seconds is enough.", "effects": {"hull": -10, "items": {"copper": 10}}}
+        ]},
+        {"text": "Back away from the line.", "outcomes": [
+          {"weight": 100, "text": "You follow the line out the other way. Nothing goes off. You are, for the first time in a while, proud of your instincts.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "asteroid_bored_tunnel", "type": "asteroid_field", "weight": 8, "once": false, "requires": {},
+      "text": "Someone has bored a tunnel straight through a rock, entry to exit, as wide as a ship. The walls are glazed. At the far end, a pinprick of star. Whatever went in came out: there are no wrecks, only the tunnel.",
+      "choices": [
+        {"text": "Fly the tunnel.", "outcomes": [
+          {"weight": 60, "text": "It is narrower than the survey said and wider than your fear. You come out the far end with glaze on the hull and ore in the vents.", "effects": {"items": {"scrap": 35, "fuel": 1}}},
+          {"weight": 40, "text": "The tunnel is exactly as wide as the ship, minus the ship's pride.", "effects": {"hull": -10, "items": {"scrap": 20}}}
+        ]},
+        {"text": "[Strafe Jets] Fly it on your side, keeping off the walls.", "requires": {"component_any": ["strafe_jets_mk1", "strafe_jets_mk2", "strafe_jets_mk3", "afterburner"]}, "outcomes": [
+          {"weight": 85, "text": "You run the tunnel at a tilt and the jets hold you off the glaze like a hand on a banister. The vein in the roof goes by at arm's length.", "effects": {"items": {"scrap": 50, "titanium": 10}}},
+          {"weight": 15, "text": "A bend you did not see. The jets do their best.", "effects": {"hull": -5, "items": {"scrap": 30}}}
+        ]},
+        {"text": "Mine the entrance and don't go in.", "outcomes": [
+          {"weight": 100, "text": "The mouth of the tunnel is chewed and easy. You take what the borer left on the lip.", "effects": {"items": {"scrap": 25, "copper": 8}}}
+        ]},
+        {"text": "Go around.", "outcomes": [
+          {"weight": 100, "text": "Around is longer. Around is also, you tell yourself, where all the survivors go.", "effects": {}}
+        ]}
+      ]
+    }
+]}

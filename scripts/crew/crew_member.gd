@@ -12,6 +12,7 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Characters = preload("res://scripts/crew/characters.gd")
+const Backstory = preload("res://scripts/crew/backstory.gd")
 const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide; a small one has half of it, see body_radius)
 const MAX_SUBSTEP := 0.2  ## longest single move in cells, so a long frame cannot skip over a wall
 const CONFIG_PATH := "res://data/crew.json"
@@ -48,7 +49,9 @@ var down_t := 0.0  ## seconds spent at 0 hp (mortality.gd: they die at crew.json
 var ability: Dictionary = {}  ## the active ability they carry, {id, cooldown?, params?} (crew_abilities.gd): their species' own, or their character's
 var ability_cd := 0.0  ## seconds until the ability may be used again (ticked by CrewAbilities.tick, so build mode pauses it)
 var character := ""  ## the unique character (data/characters.json) they are, "" for an ordinary crew member
+var story := ""  ## their backstory (backstory.gd), made the first time backstory() is asked and kept in saves, so new tables never rewrite a crew member
 var head := ""  ## a head frame of their rig's art to draw instead of the usual one ("" = the usual); a character's rig.head
+var _drone := false  # the species is a repair drone (set_species)
 
 
 func _init(p_name := "", p_pos := Vector2.ZERO, p_species := "human") -> void:
@@ -95,6 +98,19 @@ func set_species(id: String) -> void:
 	hp = max_hp
 	speed = BASE_SPEED * float(def.get("speed", 1.0)) * float(t["speed_mult"])
 	body_size = int(t["body"])
+	_drone = bool(def.get("drone", false))
+
+
+## A repair drone (playtest 2, R1; species `drone: true`)? It is a body that works like crew but is not crew: leave it out of
+## crew counts, beds and morale, never steer or give it orders, and when it is at 0 hp it is broken, not dying (is_down;
+## Mortality, Jobs). What it may do: data/crew.json `drone_jobs`.
+func is_drone() -> bool:
+	return _drone
+
+
+## Is species `id` a repair drone?
+static func is_drone_species(id: String) -> bool:
+	return bool(species_def(id).get("drone", false))
 
 
 ## Every trait this person has, without repeats: their species' (data/species.json), their own
@@ -131,6 +147,13 @@ static func from_character(id: String, p_pos := Vector2.ZERO):
 	return m if Characters.apply(m, id) else null
 
 
+## Who they are in words: the lore of their character, else a short story made from their name and species. Kept once made.
+func backstory() -> String:
+	if story == "":
+		story = Backstory.of(name, species, character, is_player)
+	return story
+
+
 ## Everything a save keeps of this person, as JSON-friendly data (Ship.to_dict "crew_state"; from_dict is the way back):
 ## who they are (name, species, soldier, character, look, head, worn gear), how they are (hp, down and bleeding, the
 ## ability's cooldown, a revive spent, a split) and where they stand. What they are doing (job, path, orders) is not
@@ -148,6 +171,8 @@ func to_dict() -> Dictionary:
 		d["look"] = colours
 	if head != "":
 		d["head"] = head
+	if story != "":
+		d["story"] = story
 	if not gear_traits.is_empty():
 		d["gear"] = gear_traits.duplicate()
 	if ability_cd > 0.0:
@@ -183,6 +208,7 @@ static func from_dict(d: Dictionary):
 	if d.get("look") is Dictionary:
 		m.look = d["look"].duplicate()
 	m.head = str(d.get("head", m.head))
+	m.story = str(d.get("story", ""))
 	if d.get("gear") is Array:
 		for g in d["gear"]:
 			if not m.gear_traits.has(str(g)):

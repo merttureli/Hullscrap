@@ -295,6 +295,7 @@ func _craft(ship: Ship, dt: float) -> void:
 	ship.crafting.lead.clear()
 	_run_station(ship, dt, Processing.SMELTER)
 	_run_station(ship, dt, Crafting.FABRICATOR)
+	Jobs.launch_drones(ship)  # a repair drone the fabricator finished goes aboard
 
 
 ## Run the queue of `station` for `dt` seconds at the level, tools and speed of its best powered parts.

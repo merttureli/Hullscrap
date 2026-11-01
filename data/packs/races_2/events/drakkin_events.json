@@ -26,9 +26,13 @@
       "id": "drakkin_duel_challenge", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 3},
       "text": "The raiders hail you with a chime instead of a threat. 'Pit rules,' says a voice. 'Our champion against yours. If yours wins, we leave. If ours wins, we take your cargo bay and nobody needs to be hurt who isn't already.' A boarding tube snakes across the gap. At the far end, in the airlock, stands a fighter two heads taller than the door, hands taped, with the face of someone who has been in more than one cargo bay.",
       "choices": [
-        {"text": "Send your biggest crew member.", "outcomes": [
+        {"text": "Send your biggest crew member.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "Your champion wins on points and one unfair bite. The raiders pay up with ill grace, a groan and a bag of scrap, and the tube retracts like a sulk.", "effects": {"items": {"scrap": 40}}},
           {"weight": 60, "text": "Your champion is lifted off the deck, spoken to firmly, and put down in the corridor. The raiders take a share of your hold, as promised. Nobody is hurt who wasn't already.", "effects": {"items": {"scrap": -30}, "crew_hp": -10}}
+        ]},
+        {"text": "Take the airlock yourself.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 25, "text": "You win on points and one unfair bite, and nobody is more surprised than the champion. The raiders pay up with ill grace, a groan and a bag of scrap, and the tube retracts like a sulk.", "effects": {"items": {"scrap": 40}}},
+          {"weight": 75, "text": "You are lifted off the deck, spoken to firmly, and put down in the corridor. The raiders take a share of your hold, as promised. Nobody is hurt who wasn't already, and you were.", "effects": {"items": {"scrap": -30}, "crew_hp": -15}}
         ]},
         {"text": "Refuse the pit and fight the ship.", "outcomes": [
           {"weight": 100, "text": "'No one likes a coward in the Pit,' says the voice. 'But we also don't mind a fight.' The tube snaps shut.", "effects": {"fight": "tier"}}
@@ -38,7 +42,7 @@
           {"weight": 15, "text": "A draw, which the Pit calls a cancellation. Both slump against the airlock and agree it was the best fight in years. The raiders pay half the purse and wish you a safe lane.", "effects": {"items": {"credits": 25}, "crew_hp": -10}}
         ]},
         {"text": "Pay them off (40 credits).", "requires": {"credits": 40}, "outcomes": [
-          {"weight": 100, "text": "They take the forty with a shrug that says they would rather have had the fight. The tube retracts. Your crew, to their credit, do not look relieved until it is gone.", "effects": {"items": {"credits": -40}}}
+          {"weight": 100, "text": "They take the forty with a shrug that says they would rather have had the fight. The tube retracts. You, to your credit, do not look relieved until it is gone.", "effects": {"items": {"credits": -40}}}
         ]}
       ],
       "after_win": {"text": "The raiders drift apart and the champion's locker floats out: tape, a trophy shaped like a boot, and a tin of beans with a name scratched on it. You take the parts.", "effects": {"items": {"scrap": 45, "credits": 30}}}

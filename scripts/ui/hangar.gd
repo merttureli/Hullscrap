@@ -447,6 +447,7 @@ func _draw_info(lay: Dictionary, cur: Dictionary) -> void:
 	var names: Array[String] = []
 	for m in RunStart.crew_shown(cur["crew"], start, profile):
 		names.append("%s (%s)" % [m["name"], str(m["species"]).capitalize()])
+	names.append(RunStart.drone_label())  # every run starts with a repair drone besides (RunStart.add_drone)
 	draw_multiline_string(ThemeDB.fallback_font, Vector2(x + 70.0, y), ", ".join(names) if not names.is_empty() else "none", HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 70.0, 14, 3, TEXT)
 	if message != "":
 		_text(message, Vector2(x, lay["button"].position.y - 12.0), 14, BAD)
