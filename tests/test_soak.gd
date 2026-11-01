@@ -11,6 +11,7 @@ extends "res://tests/base_test.gd"
 
 const Arena = preload("res://scripts/combat/arena.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
+const Content = preload("res://scripts/data/content.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Helm = preload("res://scripts/space/helm.gd")
 const Sector = preload("res://scripts/space/sector.gd")
@@ -510,7 +511,7 @@ func _audit(where: String, c: Campaign, ship) -> void:
 
 
 func _known_item(ship, id: String) -> bool:
-	return id in ["credits", "fuel"] or ship.components.has(id) or ship.crafting.materials.has(id) or Campaign._item_kinds().has(id)
+	return id in ["credits", "fuel"] or ship.components.has(id) or ship.crafting.materials.has(id) or Campaign._item_kinds().has(id) or Content.has("items", id)  # a pack's items too (Ada's recorder, the gate core)
 
 
 # --- regressions found by the soak ------------------------------------------------------------------------

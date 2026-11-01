@@ -657,7 +657,7 @@ func test_the_map_view_adds_the_line_to_its_own_canvas_layer() -> void:
 
 func test_the_pack_has_six_hollow_events_with_fights_and_a_free_way_out() -> void:
 	var ev: Events = Events.shared()
-	var hollow: Array = ev.order.filter(func(id): return str(ev.events[id].get("type", "")) == "hollow")
+	var hollow: Array = ev.order.filter(func(id): return str(ev.events[id].get("type", "")) == "hollow" and Content.origin("events", id) == "mech_tide")  # the story_1 pack adds its own clue-bearing tide events
 	check(hollow.size() >= 6, "six hollow events (%d)" % hollow.size())
 	var fights := 0
 	for id in hollow:
