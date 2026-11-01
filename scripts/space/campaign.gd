@@ -44,7 +44,8 @@ const Unlocks = preload("res://scripts/space/unlocks.gd")
 ## 5 adds `tide` (the Hollow tide of the region, tide.gd); older saves load with a fresh tide (at their jump count in stage 1).
 ## 6 adds `warden` (the warden of the exit beacon, wardens.gd); older saves roll it on load. Its flag is in `flags`.
 ## 7 adds `foes` (the enemies rolled for the fights of the places, foe_for); older saves start with none rolled.
-const VERSION := 7
+## 8 adds `far` to each saved sector (the far POIs that are done, sector.gd); older saves have none done.
+const VERSION := 8
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100
@@ -424,7 +425,14 @@ func is_hollow(id: String) -> bool:
 	return tide.is_hollow(id) and drift.node(id).get("type", "") != "gate"
 
 
-## Tell the current sector whether the tide has taken it (Sector.set_hollow): the one place that flag is set. `mid_stay`: the
+## How hard the Hollow tide presses on node `id`, 0 to 1 (tide.gd pressure; 1 once it is Hollow, 0 for a Dead Gate, which the tide never takes).
+func tide_pressure(id: String) -> float:
+	if is_hollow(id):
+		return 1.0
+	return 0.0 if drift.node(id).get("type", "") == "gate" else tide.pressure(id)
+
+
+## Tell the current sector whether the tide has taken it (Sector.set_hollow) and how hard it presses (Sector.set_pressure): the one place those are set. `mid_stay`: the
 ## ship is in the place as it falls (a jump's step, a wait, lingering), so a ghost comes for it at once; an arrival and a load
 ## are quiet. Called on arrival (_enter), on a load, and wherever the tide steps (_advance, linger); a sector made later is
 ## marked by sector_at. It never makes a sector (so a save stays the same save).
@@ -432,6 +440,7 @@ func _mark_hollow(mid_stay := false) -> void:
 	var s = sectors.get(current)
 	if s != null:
 		s.set_hollow(is_hollow(current), mid_stay)
+		s.set_pressure(tide_pressure(current))
 
 
 ## A stretch of `dt` seconds is lived in the same place (play mode, no fight, no map): the tide creeps on. Returns lines for
@@ -439,6 +448,8 @@ func _mark_hollow(mid_stay := false) -> void:
 func linger(dt: float) -> Array:
 	var fell := tide.hollow_count()
 	var lines := tide.linger(dt)
+	if not tide.warns.is_empty() and lines.has("The tide rises in %d s" % int(tide.warns[0])) and tide.jumps_until(current) == 1 and tide_pressure(current) > 0.0:
+		lines.append(Tide.NEAR_TEXT)  # the first warning, and it is this place that falls next
 	lines.append_array(_tide_notes(tide.hollow_count() - fell))
 	_mark_hollow(true)
 	return lines
@@ -616,6 +627,7 @@ func sector_at(id: String):
 			return null
 		sectors[id] = Sector.generate(region_seed, drift.node(id), region_id, {}, region_data)
 		sectors[id].set_hollow(is_hollow(id))
+		sectors[id].set_pressure(tide_pressure(id))
 	return sectors[id]
 
 

@@ -14,6 +14,7 @@ const Arena = preload("res://scripts/combat/arena.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Content = preload("res://scripts/data/content.gd")
+const Helm = preload("res://scripts/space/helm.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "exit"]
@@ -121,7 +122,7 @@ func test_size_arrival_current_and_poi_distances_are_in_range() -> void:
 			check(s.contains(s.arrival), tag + ": and inside")
 			check(s.current_speed >= 20.0 and s.current_speed <= 60.0, tag + ": the current runs 20 to 60 px/s (%s)" % str(s.current_speed))
 			check(s.current_angle >= 0.0 and s.current_angle < 360.0, tag + ": in degrees")
-			check(s.pois.size() >= 2 and s.pois.size() <= 6, tag + ": 2 to 6 POIs (%d)" % s.pois.size())
+			check(s.pois.size() >= 3 and s.pois.size() <= 8, tag + ": 3 to 8 POIs (%d)" % s.pois.size())
 			var seen := {}
 			for p in s.pois:
 				var d: float = p["pos"].distance_to(s.arrival)
@@ -135,6 +136,21 @@ func test_size_arrival_current_and_poi_distances_are_in_range() -> void:
 			eq(s.pois[0]["main"], true, tag + ": the first is the main POI")
 			eq(s.ship_pos, s.arrival, tag + ": the ship starts at the arrival point")
 	check(n == want and n >= 6 * 16, "all sectors were checked (%d)" % n)
+
+
+func test_the_busier_sectors_still_place_every_poi_apart() -> void:
+	var cfg: Dictionary = Sector.config()
+	var relaxed := float(cfg["poi"]["gap"]) * 0.343 - 1.0  # the gap shrinks by 0.7 three times at the most
+	var most := 0
+	for type in TYPES:
+		for i in 60:
+			var s = Sector.generate(i, _node(type, i), "boneyard")
+			var tag := "%s #%d" % [type, i]
+			most = maxi(most, s.pois.size())
+			for a in s.pois.size():
+				for b in range(a + 1, s.pois.size()):
+					check(s.pois[a]["pos"].distance_to(s.pois[b]["pos"]) >= relaxed, "%s: %s and %s are not stacked (the gap relaxed, never gone)" % [tag, s.pois[a]["id"], s.pois[b]["id"]])
+	eq(most, 6, "the busiest node (a wreck field or an asteroid field) places 6 POIs")
 
 
 func test_the_poi_mix_follows_sectors_json() -> void:
@@ -320,13 +336,12 @@ func test_fly_is_a_point_mass() -> void:
 	for i in 100:
 		s.fly(0.1, Vector2.RIGHT)
 	near(s.ship_vel.length(), 600.0, "the speed is capped at max_speed")
-	var wall = Campaign.new(1).sector_at("n01")
-	wall.accel = 500.0
-	wall.ship_pos = Vector2(wall.size - 100.0, 500.0)
+	var edge = Campaign.new(1).sector_at("n01")
+	edge.accel = 500.0
+	edge.ship_pos = Vector2(edge.size - 100.0, 500.0)
 	for i in 100:
-		wall.fly(0.1, Vector2.RIGHT)
-	eq(wall.ship_pos.x, wall.size, "the sector's wall stops the ship")
-	eq(wall.ship_vel.x, 0.0, "and its speed into the wall")
+		edge.fly(0.1, Vector2.RIGHT)
+	check(edge.ship_pos.x > edge.size + 100.0 and edge.ship_vel.x > 0.0, "the square's edge stops nothing: space has no walls")
 	var still = Campaign.new(1).sector_at("n01")
 	still.fly(5.0, Vector2.RIGHT)
 	eq(still.ship_pos, still.arrival, "a ship with no acceleration (no engine) goes nowhere; the current only moves the debris")
@@ -662,7 +677,6 @@ func test_ambient_contacts_come_every_90_seconds_by_a_seeded_roll() -> void:
 	eq(c["visibility"], "signal", "that needs a radar")
 	check(["trader", "patrol", "pirate"].has(c["event_type"]), "a trader, a patrol or a pirate (%s)" % c["event_type"])
 	near(c["pos"].distance_to(a.ship_pos), 1500.0 * 0.9, "at the radar's edge: with no radar the visual range x 0.9", 0.5)
-	check(a.contains(c["pos"]), "inside the sector")
 	check(a.all_pois().has(c), "it is one of the sector's contacts")
 	b.tick(90.0, null)
 	eq(b.ambient.size(), 1, "the twin sector")
@@ -744,6 +758,269 @@ func test_an_ambient_contact_moves_leaves_and_fires_its_event() -> void:
 	a["ttl"] = 5.0
 	s.tick(6.0, ship)
 	check(not s.ambient.any(func(x): return x["id"] == a["id"]), "it leaves when its time is up")
+
+
+# --- the far POIs: space without walls ------------------------------------------------------------------------
+
+const FAR_TYPES: Array = ["wreck", "unknown", "mining_field", "distress", "trader", "abandoned_station", "pirate_nest"]
+## The placed layouts of the generator before the far POIs (and before the counts went up by one): [seed, node type, arrival, POIs]
+## as id:type@x,y,visibility,event. The far POIs must not move them.
+const OLD_COUNTS := {"wreck_field": [3, 5], "pirate": [3, 4], "station": [3, 4], "empty": [2, 3], "asteroid_field": [3, 5], "gate": [2, 2]}
+const OLD_LAYOUTS: Array = [
+	[1, "wreck_field", "10458,22800", "p0:wreck@15772,21557,signal,wreck_field;p1:abandoned_station@18696,19195,signal,wreck_field;p2:wreck@18746,15529,signal,wreck_field;p3:wreck@13915,14771,signal,wreck_field"],
+	[2, "pirate", "17572,22800", "p0:pirate_nest@22618,18245,hidden,pirate;p1:wreck@16990,19652,signal,wreck_field;p2:wreck@20229,12759,signal,wreck_field;p3:wreck@7734,18210,signal,wreck_field"],
+	[3, "station", "1200,5984", "p0:station@7154,13574,beacon,station;p1:wreck@4845,15459,signal,wreck_field;p2:unknown@12690,6039,hidden,trader"],
+	[4, "empty", "1200,16651", "p0:unknown@4865,15399,hidden,empty;p1:quest@10634,9601,beacon,quest;p2:unknown@12004,14012,signal,wreck_field"],
+	[5, "asteroid_field", "22800,10087", "p0:mining_field@22831,3881,signal,asteroid_field;p1:mining_field@14167,10683,signal,asteroid_field;p2:quest@13764,13379,beacon,quest"],
+	[6, "gate", "16095,22800", "p0:unknown@13766,12929,signal,gate;p1:wreck@16536,17534,signal,wreck_field"]]
+
+
+func _flyer(seed_value := 3, type := "station") -> Sector:
+	var s = Sector.generate(seed_value, _node(type, seed_value), "boneyard")
+	s.accel = 6000.0
+	s.max_speed = 4000.0
+	s.damping = 0.0
+	return s
+
+
+func _far_of(s: Sector) -> Array:
+	return s.all_pois().filter(func(p): return p.get("far", false))
+
+
+## The chunk distance (the larger of the two axes) between two chunks.
+func _chunks_apart(a: Vector2i, b: Vector2i) -> int:
+	return maxi(absi(a.x - b.x), absi(a.y - b.y))
+
+
+func test_the_ship_flies_200000_px_in_a_line_with_no_wall_and_far_pois_keep_turning_up() -> void:
+	var live := int(Sector.config()["far"]["live"])
+	for dir in [Vector2.RIGHT, Vector2(-1.0, -1.0), Vector2(0.0, 1.0)]:
+		var s := _flyer()
+		var start: Vector2 = s.ship_pos
+		var seen := {}
+		var steps := 0
+		while s.ship_pos.distance_to(start) < 200000.0 and steps < 4000:
+			s.fly(0.1, dir)
+			steps += 1
+			for p in _far_of(s):
+				seen[p["id"]] = true
+				check(_chunks_apart(s.chunk_of(p["pos"]), s.chunk_of(s.ship_pos)) <= live, "%s is within %d chunks of the ship" % [p["id"], live])
+		var tag := "heading %s" % str(dir)
+		check(s.ship_pos.distance_to(start) >= 200000.0, tag + ": 200,000 px flown (%d steps)" % steps)
+		check(s.ship_vel.length() > 3999.0, tag + ": the speed was never cut by a wall")
+		check(not s.contains(s.ship_pos), tag + ": and the ship is far outside the layout's square")
+		check(seen.size() > 25, tag + ": new far POIs appeared along the way (%d)" % seen.size())
+		var first: String = seen.keys()[0]
+		check(s.find(first).is_empty(), tag + ": the first one is far behind and no longer live")
+		var live_now := _far_of(s)
+		var ids := {}
+		for p in live_now:
+			check(not ids.has(p["id"]), "ids are unique")
+			ids[p["id"]] = true
+			check(p["state"] == "new" and p["main"] == false and FAR_TYPES.has(p["type"]), "%s: a new %s, never a station, store, quest, checkpoint or exit beacon" % [p["id"], p["type"]])
+
+
+func test_a_chunk_always_rolls_the_same_far_pois_from_the_sector_seed() -> void:
+	var node := _node("wreck_field", 4)
+	var a = Sector.generate(8, node, "boneyard")
+	var b = Sector.generate(8, node, "boneyard")
+	var other = Sector.generate(9, node, "boneyard")
+	var f: Dictionary = Sector.config()["far"]
+	var margin := float(Sector.config()["poi"]["margin"])
+	var chunk := float(f["chunk"])
+	var total := 0
+	var kinds := {}
+	var differs := false
+	var empties := 0
+	for cy in range(-8, 9):
+		for cx in range(-8, 9):
+			var ck := Vector2i(cx, cy)
+			var got: Array = a.far_pois(ck)
+			eq(got, b.far_pois(ck), "chunk %s: the same sector rolls the same POIs" % str(ck))
+			eq(got, a.far_pois(ck), "and the same chunk twice")
+			differs = differs or got.map(func(p): return p["pos"]) != other.far_pois(ck).map(func(p): return p["pos"])
+			if cx >= 0 and cx < 4 and cy >= 0 and cy < 4:
+				eq(got, [], "chunk %s overlaps the layout's square: it rolls nothing" % str(ck))
+				continue
+			check(got.size() >= int(f["count"][0]) and got.size() <= int(f["count"][1]), "chunk %s: %d POIs within the count" % [str(ck), got.size()])
+			empties += int(got.is_empty())
+			for i in got.size():
+				var p: Dictionary = got[i]
+				total += 1
+				kinds[p["type"]] = int(kinds.get(p["type"], 0)) + 1
+				eq(p["id"], "f%d_%d_%d" % [cx, cy, i], "the id names the chunk and the index")
+				check(FAR_TYPES.has(p["type"]), "%s: %s is a far type" % [p["id"], p["type"]])
+				check(p["pos"].x >= cx * chunk + margin - 0.01 and p["pos"].x <= (cx + 1) * chunk - margin + 0.01 and p["pos"].y >= cy * chunk + margin - 0.01 and p["pos"].y <= (cy + 1) * chunk - margin + 0.01, "%s: inside its chunk, in from the edge" % p["id"])
+				for j in i:
+					check(got[j]["pos"].distance_to(p["pos"]) >= 800.0, "%s: kept its distance from %s" % [p["id"], got[j]["id"]])
+				for q in a.pois:
+					check(q["pos"].distance_to(p["pos"]) >= 800.0, "%s: kept its distance from the placed %s" % [p["id"], q["id"]])
+				eq(a.chunk_of(p["pos"]), ck, "%s: chunk_of finds its chunk" % p["id"])
+	check(differs, "another sector seed rolls other chunks")
+	check(total > 100 and empties > 10, "chunks give 0 to 2 POIs (%d POIs, %d empty chunks)" % [total, empties])
+	check(int(kinds.get("pirate_nest", 0)) * 3 < int(kinds.get("distress", 0)) + int(kinds.get("mining_field", 0)), "pirate nests are rare: a quarter of the weight (%s)" % str(kinds))
+	check(kinds.size() >= 5, "and a mix turns up (%s)" % str(kinds))
+	var gate = Sector.generate(2, _node("gate", 2), "boneyard")
+	for cx in range(4, 9):
+		for p in gate.far_pois(Vector2i(cx, 4)):
+			eq(p["type"], "wreck", "a node's own weights decide: a gate only has wrecks")
+
+
+func test_a_done_far_poi_stays_done_when_you_leave_and_come_back() -> void:
+	var c := _camp(1)
+	var ship := _ship()
+	_go(c, "n01", ship)
+	var s = c.current_sector()
+	s.ship_pos = Vector2(30000.0, 6000.0)
+	var near_far := _far_of(s)
+	check(near_far.size() >= 2, "there are far POIs about out here (%d)" % near_far.size())
+	near_far.sort_custom(func(x, y): return x["pos"].distance_to(s.ship_pos) < y["pos"].distance_to(s.ship_pos))
+	var p: Dictionary = near_far[0]
+	var id: String = p["id"]
+	s.ship_pos = p["pos"] + Vector2(300.0, 0.0)
+	var fired: Dictionary = s.trigger(c, ship)
+	check(not fired.is_empty() and fired["poi"]["id"] == id, "it fires within 800 px")
+	s.resolve(id)
+	eq(s.find(id)["state"], "done", "and is done")
+	var other: String = near_far[1]["id"]
+	s.ship_pos = Vector2(-60000.0, 80000.0)
+	check(s.find(id).is_empty() and s.find(other).is_empty(), "far away its chunk is no longer live: it is not in the list")
+	check(_far_of(s).all(func(q): return q["id"] != id), "all_pois() has other far POIs only")
+	s.ship_pos = p["pos"] + Vector2(300.0, 0.0)
+	eq(s.find(id)["state"], "done", "back again it is still done")
+	check(s.trigger(c, ship).is_empty(), "and does not fire again")
+	eq(s.find(other)["state"], "new", "while an untouched one is new")
+	check(s.find(id) == s.find(id) and not s.find(id).is_empty(), "the same POI both times")
+
+
+func test_the_done_far_pois_are_saved_and_restored() -> void:
+	var c := _camp(1)
+	var ship := _ship()
+	_go(c, _next(c), ship)
+	var s = c.current_sector()
+	s.ship_pos = Vector2(-20000.0, 5000.0)
+	var list := _far_of(s)
+	list.sort_custom(func(x, y): return x["pos"].distance_to(s.ship_pos) < y["pos"].distance_to(s.ship_pos))
+	check(list.size() >= 3, "far POIs about (%d)" % list.size())
+	var a: String = list[0]["id"]
+	var b: String = list[1]["id"]
+	var fresh: String = list[2]["id"]
+	s.resolve(a)
+	s.ship_pos = Vector2(-90000.0, 5000.0)  # a's chunk drops out: its state is remembered
+	s.resolve(_far_of(s)[0]["id"])
+	s.ship_pos = Vector2(-20000.0, 5000.0)
+	s.find(b)["state"] = "done"  # set directly: a live POI with a state is saved too
+	var d = JSON.parse_string(JSON.stringify(c.to_dict()))
+	eq(d["version"], Campaign.VERSION, "saved at the current version")
+	check(Campaign.VERSION >= 8, "the far POIs came with version 8")
+	var saved: Dictionary = d["sectors"][c.current]["far"]
+	check(saved.has(a) and saved.has(b), "the done far POIs are saved")
+	check(not saved.has(fresh), "a new one is not")
+	check(saved.values().all(func(v): return v == "done"), "only states that are not new")
+	var c2 := _camp(77)
+	eq(c2.load_dict(d), "", "loads")
+	var t = c2.current_sector()
+	eq(t.ship_pos, s.ship_pos, "the ship is where it was, far outside the square")
+	eq([t.find(a)["state"], t.find(b)["state"], t.find(fresh)["state"]], ["done", "done", "new"], "the states are restored")
+	t.ship_pos = Vector2(-90000.0, 5000.0)
+	check(t.find(a).is_empty(), "left behind...")
+	t.ship_pos = Vector2(-20000.0, 5000.0)
+	eq(t.find(a)["state"], "done", "and still done after leaving and coming back")
+	var e = JSON.parse_string(JSON.stringify(d))
+	e["sectors"][c.current].erase("far")
+	var c3 := _camp(1)
+	eq(c3.load_dict(e), "", "a version 7 save (no far) loads")
+	eq(c3.current_sector().find(a)["state"], "new", "with none of them done")
+	var bad = JSON.parse_string(JSON.stringify(d))
+	bad["sectors"][c.current]["far"] = [1]
+	eq(_camp(1).load_dict(bad), "bad campaign sectors", "far that is a list is refused")
+	bad["sectors"][c.current]["far"] = {a: "maybe"}
+	eq(_camp(1).load_dict(bad), "bad campaign sectors", "and a state that is neither new nor done")
+
+
+func test_the_placed_pois_are_what_the_generator_always_made() -> void:
+	for row in OLD_LAYOUTS:
+		var cfg: Dictionary = Sector.config().duplicate(true)
+		cfg["poi"]["count"] = [2, 6]
+		for t in OLD_COUNTS:
+			cfg["nodes"][t]["count"] = OLD_COUNTS[t]
+		var s = Sector.generate(row[0], _node(row[1], row[0]).merged({"id": "g%d" % row[0]}, true), "boneyard", cfg)
+		var parts := []
+		for p in s.pois:
+			parts.append("%s:%s@%d,%d,%s,%s" % [p["id"], p["type"], roundi(p["pos"].x), roundi(p["pos"].y), p["visibility"], p["event_type"]])
+		eq("%d,%d" % [roundi(s.arrival.x), roundi(s.arrival.y)], row[2], "%s #%d: the arrival point" % [row[1], row[0]])
+		eq(";".join(parts), row[3], "%s #%d: the placed POIs are unchanged" % [row[1], row[0]])
+
+
+func test_a_passing_ship_leaves_when_it_is_3_radar_reaches_away() -> void:
+	var c := _camp(1)
+	var ship := _ship()
+	var s = Sector.generate(1, c.node("n01"), "clans", _busy())
+	_go(c, "n01", ship)
+	c.sectors["n01"] = s
+	s.set_flight(ship)
+	s.ship_pos = Vector2(-40000.0, 90000.0)
+	s.tick(90.0, ship)
+	var a: Dictionary = s.ambient[0]
+	check(a["pos"].distance_to(s.ship_pos) < 3000.0, "a contact comes to a ship far outside the square, no wall in the way")
+	var reach := 3000.0
+	a["vel"] = Vector2.ZERO
+	a["pos"] = s.ship_pos + Vector2(3.0 * reach - 100.0, 0.0)
+	s.tick(0.1, ship)
+	check(s.ambient.has(a), "just inside 3 x the radar's reach it stays")
+	a["pos"] = s.ship_pos + Vector2(0.0, 3.0 * reach + 100.0)
+	s.tick(0.1, ship)
+	check(not s.ambient.has(a), "beyond it, it leaves")
+
+
+func test_fights_and_wrecks_do_not_rely_on_walls() -> void:
+	var c := _camp(1)
+	var ship := _ship()
+	_go(c, "n01", ship)
+	var s = c.current_sector()
+	s.ship_pos = Vector2(-30000.0, 40000.0)
+	var p: Dictionary = _far_of(s)[0]
+	var f: Dictionary = s.fight_spawn(c, p["id"], "tier")
+	check(not f.is_empty(), "a far POI sends a fight")
+	var d: float = f["pos"].distance_to(p["pos"])
+	check(d >= 250.0 - 0.01 and d <= 600.0 + 0.01, "its enemy appears 250 to 600 px from it, not pulled back into the square (%d)" % d)
+	var w: Dictionary = s.add_wreck(Vector2(-31000.0, 41000.0))
+	eq(w["pos"], Vector2(-31000.0, 41000.0), "a wreck stays where the fight was")
+	var h := Helm.new()
+	h.place(Vector2(-50000.0, 90000.0), Vector2.ZERO, 0.0)
+	eq(h.fight_place(Vector2(-50500.0, 90300.0), 400.0)["enemy_pos"], Vector2(-50500.0, 90300.0), "a fight place far outside the square is not clamped")
+	eq(h.fight_place(null, 400.0)["enemy_pos"], Vector2(-50000.0, 89600.0), "nor is the enemy 400 px ahead")
+
+
+# --- the debris streams ---------------------------------------------------------------------------------------
+
+func test_a_sector_rolls_one_to_three_debris_streams_from_its_seed() -> void:
+	var sc: Dictionary = Sector.config()["streams"]
+	var speed: Array = Sector.config()["current"]["speed"]
+	var sides := {}
+	var any_differs := false
+	for i in 120:
+		var node := _node(TYPES[i % TYPES.size()], i)
+		var a = Sector.generate(i, node, "boneyard")
+		var b = Sector.generate(i, node, "boneyard")
+		var tag := "%s #%d" % [node["type"], i]
+		eq(a.streams, b.streams, tag + ": the same seed rolls the same streams")
+		any_differs = any_differs or a.streams != Sector.generate(i + 500, node, "boneyard").streams
+		sides[a.streams.size()] = int(sides.get(a.streams.size(), 0)) + 1
+		check(a.streams.size() + 1 >= int(sc["count"][0]) and a.streams.size() + 1 <= int(sc["count"][1]), tag + ": 1 to 3 streams with the main current")
+		var rest := 1.0
+		for st in a.streams:
+			var off := absf(fposmod(float(st["angle"]) - a.current_angle + 180.0, 360.0) - 180.0)
+			check(off >= float(sc["angle_off"][0]) - 1e-4 and off <= float(sc["angle_off"][1]) + 1e-4, "%s: %.0f degrees off the main current" % [tag, off])
+			check(float(st["speed"]) >= float(speed[0]) and float(st["speed"]) <= float(speed[1]), tag + ": in the current's speed range")
+			check(float(st["share"]) >= float(sc["share"][0]) and float(st["share"]) <= float(sc["share"][1]), tag + ": a share of 0.2 to 0.35")
+			rest -= float(st["share"])
+		check(rest >= 0.3 - 1e-6, tag + ": the main current keeps at least 0.3")
+		var cfg: Dictionary = a.debris_cfg(Content.read(DriftDebris.PATH))
+		eq(cfg["streams"], a.streams, tag + ": the spawner's numbers carry them")
+		eq(DriftDebris.for_sector(a).stream_count(), a.streams.size() + 1, tag + ": and it runs them")
+	check(sides.has(0) and sides.has(1) and sides.has(2) and sides.size() == 3, "0, 1 and 2 side streams all turn up (%s)" % str(sides))
+	check(any_differs, "another seed rolls other streams")
 
 
 # --- saving and loading --------------------------------------------------------------------------------------
@@ -881,7 +1158,7 @@ func test_sectors_json_is_sound() -> void:
 		check(types.has(n["main"]), "%s: main %s is a POI type" % [t, n["main"]])
 		for w in n["weights"]:
 			check(types.has(w), "%s: weight for %s, a POI type" % [t, w])
-		check(int(n["count"][0]) >= 2 and int(n["count"][1]) <= 6 and int(n["count"][0]) <= int(n["count"][1]), "%s: a count within 2 to 6" % t)
+		check(int(n["count"][0]) >= 3 and int(n["count"][1]) <= 8 and int(n["count"][0]) <= int(n["count"][1]), "%s: a count within 3 to 8" % t)
 		check(float(n["density"]) > 0.0, "%s: a density" % t)
 		var debris: Array = Content.read(DriftDebris.PATH)["types"].map(func(x): return x["id"])
 		for k in n["debris"]:

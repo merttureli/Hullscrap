@@ -21,6 +21,7 @@ const POP_LIFE := 1.0  ## seconds a "+N material" pop floats and fades
 const POP_RISE := 48.0  ## world px it rises in that time
 const STAR_PARALLAX := 0.6  ## the nearest stars drift this fraction of the debris' screen speed
 const OUTLINE := Color(0.05, 0.06, 0.09)
+const PRESSURE_STEP := 0.02  ## how far the tide's pressure must move before the spawner takes its numbers again
 const MIN_PX := 6.0  ## screen px a piece is drawn at the least, so debris still shows zoomed far out
 
 var sim: Node  ## the ShipSim, for the player's ship
@@ -37,6 +38,7 @@ var q_held := false  ## Q is down; _process reads the key, a test sets it
 var _ship: RefCounted
 var _sector_of = null  # the sector (sector.gd) the debris was made for, null on the build screen's own
 var _hollow := false  # whether that sector was Hollow when the spawner took its numbers
+var _pressure := 0.0  # and the tide's pressure on it then
 var _clock := 0.0
 var _sheets := {}  # art id -> SpriteSheet, or null when there is no art yet
 var _top: Node2D  # over the ship: the pulling mouths and the pops
@@ -106,11 +108,13 @@ func frame(dt: float) -> void:
 		_sector_of = here
 		debris = DriftDebris.for_sector(here, ship.rng_seed) if here != null else DriftDebris.new(ship.rng_seed)
 		_hollow = here != null and here.hollow
+		_pressure = here.pressure if here != null else 0.0
 		pops.clear()
 		_place(ship)
 		debris.prewarm(ship)
-	elif here != null and here.hollow != _hollow:  # the tide took this place with the ship in it: the current thins, the pieces adrift stay
+	elif here != null and (here.hollow != _hollow or absf(here.pressure - _pressure) >= PRESSURE_STEP):  # the tide took this place with the ship in it, or came nearer: the current thins, the pieces adrift stay
 		_hollow = here.hollow
+		_pressure = here.pressure
 		debris.rescale(here)
 	_clock += dt
 	_place(ship)

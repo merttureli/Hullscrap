@@ -1,6 +1,6 @@
 extends RefCounted
 ## What the ship sees of a sector (docs/CONTENT.md section 11, "Radar and beacons"). Pure logic, no nodes.
-## - A `beacon` POI is always on the radar, with its type, from anywhere in the sector.
+## - A `beacon` POI is always on the radar, with its type, from anywhere in the sector (a far one only while its chunk is live, sector.gd).
 ## - A `signal` POI shows within the best radar's range (never less than the visual range).
 ## - A `hidden` POI shows only within the visual range (data/sectors.json radar.visual, 1,500 px), or within the range
 ##   of a radar with stats.see_hidden (the Mk3).

@@ -8,6 +8,10 @@ extends RefCounted
 ## While `tractor_on` (Q held, debris_view.gd) the working tractor beams (tractor.gd) haul every piece within their range
 ## toward the nearest working intake, faster than an intake's own pull.
 ## A sector (sector.gd) can set the current and the density (for_sector); with none, the numbers of debris.json run.
+## Streams: besides the main current a sector adds up to two side streams (cfg `streams`: angle, speed and the share of the
+## pieces each carries). Every piece belongs to one stream and drifts with it. A piece appears upstream of its stream's flow
+## past the ship (the stream's velocity less the ship's), and the spawn rate is scaled by how much faster that flow is than
+## the stream (1 to 6 x), so a fast ship meets more pieces and the screen stays full whatever the speed.
 ## Positions are world px. On the build screen that is the space the build view draws the ship in (ship.world_pos is
 ## the grid centre); in a sector the pieces live in sector px and `frame` says where the ship's cells are (its place and
 ## heading, helm.gd frame()) and `frame_vel` how fast it moves: pieces then spawn upstream of the flow past the ship,
@@ -83,31 +87,73 @@ func rescale(sector) -> void:
 
 ## The unit direction debris drifts in now (degrees: 0 east, 90 south on the screen), the base angle plus the wobble.
 func current_dir() -> Vector2:
-	var c: Dictionary = cfg["current"]
-	var period := float(c["wobble_period"])
-	var swing := 0.6 * sin(time * TAU / period + _phase[0]) + 0.4 * sin(time * TAU / (period * 0.37) + _phase[1])
-	return Vector2.from_angle(deg_to_rad(float(c["angle"]) + float(c["wobble_deg"]) * swing))
+	return _dir_of(float(cfg["current"]["angle"]))
 
 
 func current_speed() -> float:
-	var c: Dictionary = cfg["current"]
-	return float(c["speed"]) * (1.0 + float(c["speed_wobble"]) * sin(time * TAU / (float(c["wobble_period"]) * 0.8) + _phase[2]))
+	return _speed_of(float(cfg["current"]["speed"]))
 
 
 func current_vel() -> Vector2:
 	return current_dir() * current_speed()
 
 
-## Where the current comes from and goes to, in words ("south-east"): the way it drifts, without the wobble.
-## The way the pieces cross the view: the current less the ship's own velocity (the current's own direction while the
-## ship is still, or nearly as fast as the current).
-func flow_dir() -> Vector2:
+## `angle` (degrees) with the current's wobble added: every stream swings together.
+func _dir_of(angle: float) -> Vector2:
+	var c: Dictionary = cfg["current"]
+	var period := float(c["wobble_period"])
+	var swing := 0.6 * sin(time * TAU / period + _phase[0]) + 0.4 * sin(time * TAU / (period * 0.37) + _phase[1])
+	return Vector2.from_angle(deg_to_rad(angle + float(c["wobble_deg"]) * swing))
+
+
+func _speed_of(speed: float) -> float:
+	var c: Dictionary = cfg["current"]
+	return speed * (1.0 + float(c["speed_wobble"]) * sin(time * TAU / (float(c["wobble_period"]) * 0.8) + _phase[2]))
+
+
+## How many streams there are: the main current (0) and the side streams (1 and up).
+func stream_count() -> int:
+	return cfg["streams"].size() + 1
+
+
+## Stream `i`'s velocity in world px/s: 0 is the main current, the others are cfg `streams` ({angle, speed, share}).
+func stream_vel(i: int) -> Vector2:
+	if i == 0:
+		return current_vel()
+	var st: Dictionary = cfg["streams"][i - 1]
+	return _dir_of(float(st["angle"])) * _speed_of(float(st["speed"]))
+
+
+## The way stream `i`'s pieces cross the view: its velocity less the ship's own (the stream's own direction while the ship is
+## still, or nearly as fast as the stream).
+func stream_flow(i := 0) -> Vector2:
+	var own := current_dir() if i == 0 else _dir_of(float(cfg["streams"][i - 1]["angle"]))
 	if frame_vel == Vector2.ZERO:
-		return current_dir()
-	var f := current_vel() - frame_vel
-	return f.normalized() if f.length() > 1.0 else current_dir()
+		return own
+	var f := stream_vel(i) - frame_vel
+	return f.normalized() if f.length() > 1.0 else own
 
 
+## The way the main current's pieces cross the view.
+func flow_dir() -> Vector2:
+	return stream_flow(0)
+
+
+## What the next piece is picked from: each stream's share of the pieces times how much faster its flow past the ship is than
+## the stream itself, clamped to 1 to 6 (the main current has the share the side streams leave). Their sum scales the spawn rate.
+func _stream_weights() -> Array:
+	var sides: Array = cfg["streams"]
+	var rest := 1.0
+	for st in sides:
+		rest -= float(st["share"])
+	var out := []
+	for i in sides.size() + 1:
+		var v := stream_vel(i)
+		out.append((maxf(rest, 0.0) if i == 0 else float(sides[i - 1]["share"])) * clampf((v - frame_vel).length() / maxf(v.length(), 1.0), 1.0, 6.0))
+	return out
+
+
+## Where the main current comes from and goes to, in words ("south-east"): the way it drifts, without the wobble.
 func compass() -> String:
 	return COMPASS[posmod(roundi(float(cfg["current"]["angle"]) / 45.0), 8)]
 
@@ -138,10 +184,8 @@ func step(ship, dt: float) -> void:
 ## Put the starting pieces along the stream (cfg spawn.start_alive), so there is something to see and catch
 ## the moment play begins. Call once, before the first step().
 func prewarm(ship) -> void:
-	var lane := _lane(ship)
-	var reach := _reach(lane)
 	for k in int(cfg["spawn"]["start_alive"]):
-		var p := _spawn(ship, rng.randf_range(-reach, reach * 0.6))
+		var p := _spawn(ship, true)
 		if p.is_empty():
 			continue
 		if _blocked_at(ship, p["pos"], p["r"] + 8.0):
@@ -151,7 +195,7 @@ func prewarm(ship) -> void:
 ## Add a piece of type `type_id` at `pos` moving at `vel` (a test or a later feature, such as a crate shot open, puts one where it likes).
 func add_piece(type_id: String, pos: Vector2, vel: Vector2) -> Dictionary:
 	var p := {"uid": _next_uid, "type": type_id, "pos": pos, "vel": vel, "angle": 0.0, "spin": 0.0, "phase": 0.0, "age": 0.0,
-		"r": float(_by_id[type_id]["size"]) * 0.5, "no_pull": false}
+		"r": float(_by_id[type_id]["size"]) * 0.5, "no_pull": false, "stream": 0}
 	_next_uid += 1
 	pieces.append(p)
 	return p
@@ -168,20 +212,26 @@ func _sub(ship, mouths: Array, h: float) -> void:
 	_spawn_in -= h
 	if _spawn_in <= 0.0:
 		var s: Dictionary = cfg["spawn"]
-		_spawn_in += float(s["every"]) * (1.0 + float(s["jitter"]) * rng.randf_range(-1.0, 1.0))
+		var rate := 0.0
+		for w in _stream_weights():
+			rate += w
+		_spawn_in += float(s["every"]) * (1.0 + float(s["jitter"]) * rng.randf_range(-1.0, 1.0)) / maxf(rate, 0.01)
 		if pieces.size() < int(s["max_alive"]):
 			_spawn(ship)
 	for uid in pulling.keys():
 		pulling[uid] -= h
 		if pulling[uid] <= 0.0:
 			pulling.erase(uid)
-	var dir := flow_dir()
 	var lane := _lane(ship)
-	var limit := {"vel": current_dir() * current_speed(), "along": _reach(lane), "across": _cross_reach(lane), "dir": dir, "inv": frame.affine_inverse()}
+	var inv := frame.affine_inverse()
+	var limits := []  # per stream: its velocity and how far along and across its flow a piece may go
+	for k in stream_count():
+		var dir := stream_flow(k)
+		limits.append({"vel": stream_vel(k), "along": _reach(lane, dir), "across": _cross_reach(lane, dir), "dir": dir, "inv": inv})
 	_hauls.clear()
 	var i := 0
 	while i < pieces.size():
-		if _move(ship, pieces[i], mouths, limit, h):
+		if _move(ship, pieces[i], mouths, limits[mini(int(pieces[i]["stream"]), limits.size() - 1)], h):
 			i += 1
 		else:
 			pieces.remove_at(i)
@@ -189,7 +239,7 @@ func _sub(ship, mouths: Array, h: float) -> void:
 		_note_hauls()
 
 
-## Move one piece by `h`; `now`: the current's vel and dir and the despawn distances (along, across). False when it is gone.
+## Move one piece by `h`; `now`: its stream's vel and flow dir and the despawn distances (along, across). False when it is gone.
 func _move(ship, p: Dictionary, mouths: Array, now: Dictionary, h: float) -> bool:
 	var r: float = p["r"]
 	var inv: Transform2D = now["inv"]
@@ -264,26 +314,43 @@ func beam_aims() -> Dictionary:
 
 # --- spawning ------------------------------------------------------------------------------------------
 
-## A new piece upstream (or `along` px along the current from the view centre, for the prewarm). Returns it, {} at the cap.
-func _spawn(ship, along := NAN) -> Dictionary:
+## A new piece upstream of the flow of a stream picked by _stream_weights() (or, for the prewarm, anywhere from there to a bit
+## past the view centre along it). Returns it, {} at the cap.
+func _spawn(ship, scattered := false) -> Dictionary:
 	var s: Dictionary = cfg["spawn"]
 	if pieces.size() >= int(s["max_alive"]):
 		return {}
 	var lane := _lane(ship)
-	var dir := flow_dir()
+	var stream := _pick_stream()
+	var dir := stream_flow(stream)
 	var perp := Vector2(-dir.y, dir.x)
 	var t := _pick()
 	var half := minf(_cross_half(lane, perp) + float(s["lane_margin"]), float(s["lane_max"]))
 	if rng.randf() < float(s["scatter"]):  # a share of the debris is spread over the whole view, so it is not one stream
-		half = maxf(half, _cross_reach(lane) - 2.0 * float(s["margin"]))
+		half = maxf(half, _cross_reach(lane, dir) - 2.0 * float(s["margin"]))
 	var lat := perp.dot(lane["centre"] - view_centre) + rng.randf_range(-1.0, 1.0) * half
-	var a := -_reach(lane) if is_nan(along) else along
+	var reach := _reach(lane, dir)
+	var a := rng.randf_range(-reach, reach * 0.6) if scattered else -reach
 	var p := {"uid": _next_uid, "type": str(t["id"]), "pos": view_centre + dir * a + perp * lat,
-		"vel": current_vel() * rng.randf_range(0.9, 1.1), "angle": rng.randf() * TAU, "spin": rng.randf_range(-0.8, 0.8),
-		"phase": rng.randf() * 10.0, "age": 0.0, "r": float(t["size"]) * 0.5, "no_pull": false}
+		"vel": stream_vel(stream) * rng.randf_range(0.9, 1.1), "angle": rng.randf() * TAU, "spin": rng.randf_range(-0.8, 0.8),
+		"phase": rng.randf() * 10.0, "age": 0.0, "r": float(t["size"]) * 0.5, "no_pull": false, "stream": stream}
 	_next_uid += 1
 	pieces.append(p)
 	return p
+
+
+## A stream by _stream_weights().
+func _pick_stream() -> int:
+	var w := _stream_weights()
+	var total := 0.0
+	for x in w:
+		total += x
+	var x := rng.randf() * total
+	for i in w.size():
+		x -= w[i]
+		if x < 0.0:
+			return i
+	return w.size() - 1
 
 
 func _pick() -> Dictionary:
@@ -295,17 +362,15 @@ func _pick() -> Dictionary:
 	return types[-1]
 
 
-## How far along the current (px from the view centre) pieces appear upstream and vanish downstream.
-func _reach(lane: Dictionary) -> float:
-	var dir := flow_dir()
+## How far along a flow `dir` (px from the view centre) pieces appear upstream and vanish downstream.
+func _reach(lane: Dictionary, dir: Vector2) -> float:
 	var view := absf(dir.x) * view_half.x + absf(dir.y) * view_half.y
 	var ship: float = absf(dir.x) * lane["rect"].size.x * 0.5 + absf(dir.y) * lane["rect"].size.y * 0.5 + absf(dir.dot(lane["centre"] - view_centre)) + 200.0
 	return maxf(view, ship) + float(cfg["spawn"]["margin"])
 
 
-## How far sideways of the current a piece may stray from the view centre before it despawns.
-func _cross_reach(lane: Dictionary) -> float:
-	var dir := flow_dir()
+## How far sideways of a flow `dir` a piece may stray from the view centre before it despawns.
+func _cross_reach(lane: Dictionary, dir: Vector2) -> float:
 	var perp := Vector2(-dir.y, dir.x)
 	return maxf(absf(perp.x) * view_half.x + absf(perp.y) * view_half.y, _cross_half(lane, perp) + absf(perp.dot(lane["centre"] - view_centre))) + 2.0 * float(cfg["spawn"]["margin"])
 

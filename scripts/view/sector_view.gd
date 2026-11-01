@@ -13,6 +13,7 @@ extends Node2D
 ##   wreck as a POI, already salvaged: the salvage pick comes from the map (map_view.gd, Salvage.event_for).
 ## - Red alert: BuildMode's hostiles_source is red_alert_hostiles() (the fight's enemy and the passing pirates).
 ## - When the Hollow tide takes the place the ship is in (sector.hollow), the HUD says FALL_TEXT; debris_view.gd thins the field.
+##   As it comes near (sector.pressure) the field thins too and a dark fog creeps in from the left (hollow_fog.gd, under the HUD).
 ## - in_play() and the `played` signal say when the sector runs (play mode, nothing open over it, no fight), for clocks
 ##   that count play time (the Hollow tide's linger).
 ## - Under the ship: the POIs the radar sees (flat placeholder shapes), the passing ships, the course line and the
@@ -28,6 +29,7 @@ const Radar = preload("res://scripts/space/radar.gd")
 const Sector = preload("res://scripts/space/sector.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Art = preload("res://scripts/view/art.gd")
+const HollowFog = preload("res://scripts/view/hollow_fog.gd")
 
 const DEBRIS_DOTS := 2000.0  ## px: debris this near shows on the compass ring
 const THREAT_S := 2.0  ## seconds a contact's skulls are kept before they are rated again
@@ -74,6 +76,7 @@ var _markers: Array = []  # [{rect (screen), id}] of the last HUD frame, for cli
 var _threats := {}  # POI id -> {n (skulls), t (the clock it was rated at)} for this sector
 var _layer: CanvasLayer
 var _hud: Control
+var _fog: Control  # the Hollow tide's fog, under the HUD
 var _icons = null
 var _icons_read := false
 
@@ -85,6 +88,8 @@ func _init() -> void:
 	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_hud.draw.connect(_draw_hud)
+	_fog = HollowFog.new()
+	_layer.add_child(_fog)
 	_layer.add_child(_hud)
 	add_child(_layer)
 
@@ -200,7 +205,7 @@ func fight_place(enemy_pos = null) -> Dictionary:
 	if not flying():
 		return {}
 	_sync(campaign(), _ship())
-	return helm.fight_place(enemy_pos, Session.SPAWN_DISTANCE, _sector.size)
+	return helm.fight_place(enemy_pos, Session.SPAWN_DISTANCE)
 
 
 # --- the tick --------------------------------------------------------------------------------------------------
@@ -258,6 +263,7 @@ func frame(dt: float) -> void:
 		_unpose()
 	visible = playing
 	_layer.visible = playing
+	_fog.pressure = s.pressure
 	if in_play():
 		played.emit(dt)
 	if starfield != null:

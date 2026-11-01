@@ -13,6 +13,7 @@ extends RefCounted
 const CONFIG_PATH := "res://data/tide.json"
 const EPS := 0.001  ## px: tolerance for the float maths of the front
 const RISES_TEXT := "The Hollow tide rises."
+const NEAR_TEXT := "The Hollow is near. Jump soon."  ## told with the first linger warning when the ship's own place falls at the next step
 
 static var _cfg := {}
 
@@ -21,6 +22,7 @@ var grace := 3  ## steps before the front starts to move
 var jumps_to_cross := 16  ## steps the front takes to cross the whole axis
 var linger_s := 240.0  ## seconds of play in one place that make one step
 var warns: Array = [60, 15]  ## seconds left at which a warning is told, once each (largest first)
+var pressure_from := 0.3  ## the pressure on a place one step from falling, as its linger step begins (pressure())
 var axis_len := 0.0  ## px: the farthest node's projection on the axis
 var entry_id := ""
 var far_id := ""  ## the node farthest along the axis (the map view fits the front between the entry and this one)
@@ -58,6 +60,7 @@ static func make(drift, entry_id: String, cfg := {}, exit_id := "", stage := 1):
 	w.sort()
 	w.reverse()
 	t.warns = w
+	t.pressure_from = clampf(float(c.get("pressure_from", 0.3)), 0.0, 1.0)
 	t.entry_id = entry_id
 	t.exit_id = exit_id
 	if not drift.has(entry_id):
@@ -122,6 +125,18 @@ func jumps_until(id: String) -> int:
 		if _hollow_at(id, steps + n):
 			return n
 	return -1
+
+
+## How hard the tide presses on node `id`, 0 to 1 (the campaign hands it to the node's sector, sector.gd set_pressure): 0 while the node is 2 or
+## more steps from falling (and for one that never falls), rising from `pressure_from` to 1 over the last step as the linger clock runs out, 1 once
+## it is Hollow.
+func pressure(id: String) -> float:
+	var n := jumps_until(id)
+	if n == 0:
+		return 1.0
+	if n != 1:
+		return 0.0
+	return lerpf(pressure_from, 1.0, clampf(1.0 - linger_left() / linger_s, 0.0, 1.0))
 
 
 ## How many nodes are Hollow now.
