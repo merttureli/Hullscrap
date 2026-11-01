@@ -270,7 +270,7 @@ func order_repair(ship, uid: int) -> String:
 	for m in ship.crew:
 		if m.is_player or m.is_drone() or m.is_down() or TraitSet.of(m)["no_tools"]:  # (nobody orders a drone about)
 			continue
-		var d := absi(m.anchor().x - inst["anchor"].x) + absi(m.anchor().y - inst["anchor"].y)
+		var d := absi(m.anchor().x - inst["anchor"].x) + absi(m.anchor().y - inst["anchor"].y) + (1000 if m.post >= 0 else 0)  # (a crew member at a post is the last to be sent)
 		if d < best_d:
 			best = m
 			best_d = d
@@ -363,8 +363,8 @@ func _still_valid(ship, m) -> bool:
 	m.job["spot"] = spot
 	if m.job["type"] == "man_station" and not str(m.job.get("held", "")) in ["", m.name]:
 		return false  # somebody was posted there
-	if m.post >= 0 and not Posts.allows(ship, m, m.job):
-		return false  # posted since: only what the post allows
+	if m.post >= 0 and not orders.has(m.job["key"]) and not Posts.allows(ship, m, m.job):
+		return false  # posted since: only what the post allows (and an order of the player's)
 	return not (m.winded and _job_airless(ship, m.job))
 
 

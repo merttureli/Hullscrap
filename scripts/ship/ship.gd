@@ -37,6 +37,8 @@ const MigrateParts = preload("res://scripts/ship/migrate_parts.gd")
 ## 6 adds the crew: the optional "crew_state" (every person aboard, CrewMember.to_dict), "dead_crew" (the names of those who bled out)
 ## and "crew_plan" (the design's crew list), written when anyone is aboard or has died; older saves have none and load
 ## leaving the crew the ship has now (the view then spawns the design's list).
+## The optional "abandoned" list (the key cells of the rooms the player gave up, evacuate.gd) was added within 7, and a crew member's
+## optional "post" (the part they man, posts.gd) inside "crew_state": older saves have none.
 ## 7: the tier 1-2 weapons, engines, reactors, shields and the medbay take less room inside (data/components.json); an older save
 ## is re-anchored on load by MigrateParts (mounts centred behind their barrels, the rest by their top-left; cables and belts re-joined).
 const VERSION := 7

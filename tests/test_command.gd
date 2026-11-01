@@ -652,3 +652,64 @@ func test_a_posted_crew_member_walks_out_of_bad_air_then_returns_to_the_post() -
 	ship.atmosphere.pressure[_east(ship)] = 1.0
 	_run(jobs, ship, 8.0)
 	eq(ada.job.get("uid"), laser, "and went back to it when the air was back")
+
+
+func test_a_middle_click_order_cannot_send_crew_behind_a_locked_door() -> void:
+	var ship := _two_rooms()
+	var ada := _npc("Ada", 18, 13)
+	ship.crew.append(ada)
+	check(Jobs.order_move(ship, ada, Vector2i(11, 12)), "an order into the west room works while it is open")
+	ada.path.clear()
+	Evacuate.abandon(ship, _west(ship))
+	check(not Jobs.order_move(ship, ada, Vector2i(11, 12)), "and is refused once its door is locked")
+
+
+func test_a_repair_order_goes_to_an_unposted_crew_member_first_and_a_posted_one_obeys_it() -> void:
+	var ship := Fixture.room_ship()
+	var laser := Fixture.put(ship, "laser_mk1", 15, 10)
+	var radiator := Fixture.put(ship, "radiator", 10, 10)
+	var near := _npc("Near", 11, 12)  # posted, and the nearer
+	var far := _npc("Far", 20, 14)
+	ship.crew.append_array([near, far])
+	Posts.post(ship, near, laser)
+	var jobs := Jobs.new()
+	ship.components.instances[radiator]["status"] = "malfunction"
+	eq(jobs.order_repair(ship, radiator), "Far will repair %s" % Posts.name_of(ship, radiator), "the one without a post is sent")
+	ship.crew.erase(far)
+	near.hold = 0.0
+	eq(jobs.order_repair(ship, radiator), "Near will repair %s" % Posts.name_of(ship, radiator), "a posted one when there is no other")
+	_run(jobs, ship, 3.0)
+	eq(near.job.get("type"), "repair_component", "and she does not drop the order for her post")
+
+
+func test_the_station_bar_stays_clear_of_the_other_panels() -> void:
+	var defs := TileDefs.new()
+	defs.load_file("res://data/tiles.json")
+	var ship := Fixture.room_ship()
+	Fixture.put(ship, "helm", 19, 10)
+	for x in [9, 11, 13, 15, 17]:
+		Fixture.put(ship, "laser_mk1", x, 10)
+	for x in [9, 11, 13]:
+		Fixture.put(ship, "pulse_mk1", x, 13)
+	var sim := ShipSim.new()
+	sim.ships = [ship]
+	var b := BuildMode.new()
+	b.sim = sim
+	b.hud = Hud.new()
+	b.hud.setup(b)
+	for view in [Vector2(1600, 900), Vector2(1280, 720)]:
+		for folded in [false, true]:
+			b.build_on = false
+			b.hud.log_panel.collapsed = folded
+			b.hud.sync(view)
+			var rects: Dictionary = b.hud.panel_rects()
+			var tag := "%s%s" % [str(view), " folded" if folded else ""]
+			check(rects.has("station_bar"), tag + ": the bar is on show")
+			var names: Array = rects.keys()
+			for i in names.size():
+				var r: Rect2 = rects[names[i]]
+				check(Rect2(Vector2.ZERO, view).encloses(r), "%s: %s is on screen" % [tag, names[i]])
+				for j in range(i + 1, names.size()):
+					check(not r.intersects(rects[names[j]]), "%s: %s and %s do not overlap" % [tag, names[i], names[j]])
+	for n in [b.hud, sim, b]:
+		n.free()
