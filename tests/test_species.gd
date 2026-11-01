@@ -197,8 +197,9 @@ func test_fast_repair_finishes_in_six_tenths_of_the_time() -> void:
 			jobs.tick(ship, STEP)
 			t += STEP
 		times[species] = t
-	near(times["human"], 5.0, "a human repair takes 5 s", 0.15)
-	near(times["fenn"], 3.0, "a Fenn's takes 3 s", 0.15)
+	var part := float(Jobs.jcfg()["repair_component"]["seconds"])  # data/crew.json: 12 s
+	near(times["human"], part, "a human repair takes the job's time", 0.15)
+	near(times["fenn"], part * 0.6, "a Fenn's takes 0.6 of it", 0.15)
 	near(times["fenn"] / times["human"], 0.6, "0.6 of the time", 0.03)
 
 
@@ -215,8 +216,9 @@ func test_fast_repair_patches_breaches_in_six_tenths_of_the_time_too() -> void:
 			jobs.tick(ship, STEP)
 			t += STEP
 		times[species] = t
-	near(times["human"], 6.0, "a human seals a breach in 6 s", 0.15)
-	near(times["fenn"], 3.6, "a Fenn in 3.6 s", 0.15)
+	var breach := float(Jobs.jcfg()["repair_breach"]["seconds"])  # 14 s
+	near(times["human"], breach, "a human seals a breach in the job's time", 0.15)
+	near(times["fenn"], breach * 0.6, "a Fenn in 0.6 of it", 0.15)
 
 
 func test_the_player_with_fast_repair_works_faster_by_hand_too() -> void:

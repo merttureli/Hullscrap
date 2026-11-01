@@ -177,8 +177,9 @@ func test_damage_beside_a_belt_cuts_it_and_a_crew_member_mends_it() -> void:
 	eq(jobs.board[key]["priority"], 70, "priority 70")
 	var m := CrewMember.new("Hand", Pathfinder.centre_of(Vector2i(14, 19)))
 	check(jobs.in_reach(m, jobs.board[key]), "next to it")
-	jobs.work(ship, m, jobs.board[key], 1.9)
-	check(ship.belts.cut.has(Vector2i(14, 18)), "2 s of work not done yet")
+	var work := float(Jobs.jcfg()["repair_belt"]["seconds"])  # data/crew.json: 4 s
+	jobs.work(ship, m, jobs.board[key], work - 0.1)
+	check(ship.belts.cut.has(Vector2i(14, 18)), "%.0f s of work not done yet" % work)
 	jobs.work(ship, m, jobs.board[key], 0.2)
 	check(not ship.belts.cut.has(Vector2i(14, 18)), "mended")
 

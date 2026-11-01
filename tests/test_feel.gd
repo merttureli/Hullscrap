@@ -4,6 +4,7 @@ extends "res://tests/base_test.gd"
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const CrewView = preload("res://scripts/crew/crew_view.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
+const Jobs = preload("res://scripts/crew/jobs.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
@@ -106,3 +107,14 @@ func test_the_wheel_is_told_from_other_mouse_events() -> void:
 	check(not UiKit.is_wheel(click), "a click is not")
 	check(not UiKit.is_wheel(InputEventMouseMotion.new()), "nor is a motion")
 	check(not UiKit.is_wheel(InputEventKey.new()), "nor a key")
+
+
+# --- repairs take longer -----------------------------------------------------------------------------
+
+func test_repairs_take_about_twice_as_long_as_in_beta_2() -> void:
+	var j: Dictionary = Jobs.jcfg()
+	eq(float(j["repair_breach"]["seconds"]), 14.0, "a breach: 14 s (was 6)")
+	eq(float(j["repair_component"]["seconds"]), 12.0, "a part: 12 s (was 5)")
+	eq(float(j["repair_crew"]["rate"]), 4.0, "mending a machine crew member: 4 hp a second (was 8)")
+	eq(float(j["repair_belt"]["seconds"]), 4.0, "a belt cell: 4 s (was 2)")
+	eq(float(j["extinguish"]["rate"]), 0.5, "fires are put out as fast as before")
