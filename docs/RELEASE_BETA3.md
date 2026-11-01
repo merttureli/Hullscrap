@@ -47,5 +47,10 @@ Everything from the second playtest, plus the owner's later notes. Download it f
 Continue keeps your crew (posts, injuries, the dead), the drone, angled mounts and the places you've finished. Older saves still load.
 
 ## Known issues
+- If an event window is open when a breach happens, R/V go to the event and the breach prompt falls back to Repair.
+- A crewmate lying on a bed in a room with no air heals as fast as they suffocate, so they never leave.
+- Sloped wall cells draw as plain dark triangles.
+- Events at far places are titled with the region node's name.
+- QA once saw the ship slow down for about 15 s while flying far out (cause not found yet).
 - Placeholder art on some newer parts and on the drone.
 - Balance is a first pass for the solo start; tell us where it hurts.
