@@ -181,7 +181,7 @@ func _input(e: InputEvent) -> void:
 		return
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
-	if e.pressed and not e.echo and e.keycode in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_M]:
+	if e.pressed and not e.echo and not e.ctrl_pressed and e.keycode in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_M]:  # (Ctrl+M is the mute, audio.gd)
 		close()
 
 

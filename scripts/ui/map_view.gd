@@ -569,7 +569,7 @@ func _input(e: InputEvent) -> void:
 		return  # they take the keys
 	if get_viewport() != null:
 		get_viewport().set_input_as_handled()
-	if not e.pressed or e.echo:
+	if not e.pressed or e.echo or e.ctrl_pressed:  # (Ctrl+M is the mute, audio.gd)
 		return
 	match e.keycode:
 		KEY_M, KEY_ESCAPE:

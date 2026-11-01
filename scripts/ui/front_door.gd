@@ -19,6 +19,7 @@ const HintToast = preload("res://scripts/ui/hint_toast.gd")
 const ShipPicker = preload("res://scripts/ui/ship_picker.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const Starfield = preload("res://scripts/space/starfield.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 ## The first-run hints (profile.gd HINTS), by id.
 const HINT_TEXT := {
@@ -66,6 +67,10 @@ func _make_ui() -> void:
 	menu.set_stars(Starfield.new())
 	menu.version = Profile.version_label()
 	menu.chosen.connect(_on_menu)
+	menu.sound = profile.sound.duplicate()
+	menu.sound_changed.connect(_on_sound)
+	if Audio.of(self) != null:
+		Audio.of(self).apply_settings(profile.sound)  # the volumes the profile kept
 	over = _layer(root, "OverLayer", 9, GameOver.new())
 	over.chosen.connect(_on_over)
 	ending = _layer(root, "EndingLayer", 9, EndingScreen.new())
@@ -155,6 +160,15 @@ func _on_menu(id: String) -> void:
 		"save_menu":
 			build._save()
 			show_main("Run saved. Continue picks it up.")
+
+
+## A volume slider of the menu moved: the sound follows at once, the profile keeps it when the mouse is let go.
+func _on_sound(kind: String, value: float, final: bool) -> void:
+	profile.sound[kind] = value
+	if Audio.of(self) != null:
+		Audio.of(self).set_volume(kind, value)
+	if final:
+		profile.save()
 
 
 func _on_over(id: String) -> void:
