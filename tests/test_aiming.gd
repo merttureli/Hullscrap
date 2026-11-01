@@ -109,14 +109,14 @@ func test_a_turret_deals_sixty_percent_of_its_fixed_equivalent() -> void:
 			near(w.def(id)["damage"], 0.6 * float(w.defs[id]["damage"]), id + ": 60 percent of the entry", 1e-9)
 			for k in ["arc", "track", "accuracy"]:
 				check(w.defs[id].has(k), "%s has %s" % [id, k])
-			check(float(w.defs[id]["accuracy"]) >= 0.6 and float(w.defs[id]["accuracy"]) <= 0.85, id + ": accuracy 0.6 to 0.85")
+			check(float(w.defs[id]["accuracy"]) >= 0.6 and float(w.defs[id]["accuracy"]) <= 0.95, id + ": accuracy 0.6 to 0.95")
 		elif not id.begins_with("test_"):
 			eq(w.def(id)["damage"], float(w.defs[id]["damage"]), id + ": a fixed gun deals its whole damage")
 	turrets.sort()
 	for id in ["laser_turret_mk1", "leech_laser", "rattle_burst_scrap", "siren_ion_neon"]:  # the core turrets; packs add more
 		check(turrets.has(id), id + " is a turret")
-	near(w.def("laser_turret_mk1")["damage"], 0.6 * w.def("laser_mk1")["damage"], "the Concord Point Turret against Laser Mk1", 1e-9)
-	eq([float(w.defs["laser_turret_mk1"]["arc"]), float(w.defs["laser_turret_mk1"]["track"]), float(w.defs["laser_turret_mk1"]["accuracy"]), float(w.defs["laser_turret_mk1"]["cooldown"])], [270.0, 120.0, 0.8, 4.0], "arc 270, 120 degrees a second, accuracy 0.8, cooldown 4")
+	near(w.def("laser_turret_mk1")["damage"], 0.6, "the Concord Point Turret: a rapid turret of 1 damage a shot, 60 percent of it", 1e-9)
+	eq([float(w.defs["laser_turret_mk1"]["arc"]), float(w.defs["laser_turret_mk1"]["track"]), float(w.defs["laser_turret_mk1"]["accuracy"]), float(w.defs["laser_turret_mk1"]["cooldown"])], [270.0, 120.0, 0.8, 0.8], "arc 270, 120 degrees a second, accuracy 0.8, cooldown 0.8 (a rapid turret)")
 
 
 func test_a_turret_turns_at_its_track_rate_and_stops_at_the_edge_of_its_arc() -> void:

@@ -49,6 +49,7 @@ func _duel(shields: int, wired := true, seed_value := 1, reactor := "reactor_mk1
 			target.cables.place(target.grid, Vector2i(x, 20))
 	arena.add_ship(target, Vector2(800.0, 0.0))
 	gun = arena.add_mount(0, "laser_mk1", Vector2(20.5, 15.5))
+	arena.weapons.defs["laser_mk1"]["damage"] = 2  # pinned at 2: these tests are about the damage rules, not the balance numbers
 
 
 func _def(id: String, d: Dictionary) -> int:

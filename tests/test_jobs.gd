@@ -623,8 +623,8 @@ func test_a_manned_weapon_cools_down_ten_percent_faster() -> void:
 		var i := a.add_ship(d["ship"])
 		check(a.fire(i, d["laser"], Vector2(0.0, -1000.0)), "it fires")
 		cooldowns.append(a.cooldown_left(i, d["laser"]))
-	near(cooldowns[0], 1.2, "alone: the data's 1.2 s", 0.02)
-	near(cooldowns[1], 1.08, "manned: 10 percent less", 0.03)
+	near(cooldowns[0], 2.1, "alone: the data's 2.1 s", 0.02)
+	near(cooldowns[1], 1.89, "manned: 10 percent less", 0.03)
 	check(cooldowns[1] < cooldowns[0], "shorter")
 
 
@@ -634,10 +634,10 @@ func test_a_manned_weapon_fires_again_sooner() -> void:
 	var i := a.add_ship(d["ship"])
 	var aim := Vector2(0.0, -1000.0)
 	check(a.fire(i, d["laser"], aim), "first shot")
-	a.step(1.05)
-	check(not a.fire(i, d["laser"], aim), "still cooling at 1.05 s")
+	a.step(1.85)
+	check(not a.fire(i, d["laser"], aim), "still cooling at 1.85 s")
 	a.step(0.06)
-	check(a.fire(i, d["laser"], aim), "ready at 1.11 s, before the unmanned 1.2 s")
+	check(a.fire(i, d["laser"], aim), "ready at 1.91 s, before the unmanned 2.1 s")
 
 
 # --- crews ---------------------------------------------------------------------------------------

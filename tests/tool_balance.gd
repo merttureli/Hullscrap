@@ -18,7 +18,7 @@ extends SceneTree
 ## The upgrade kit ("a few upgrades", apply_kit()): an annex room built onto the core in the starter's empty frame, holding the
 ## shield generator the starter carries in its hold, a Mk1 reactor to power it and a Mk1 laser turret through the annex's
 ## outer wall, wired to the ship's network, all through the build rules (BuildSession). A kitted ship is "<name> + kit".
-## A fight's budget is Shipgen.budget_for(tier of the jump, jump, the danger of the faction's first region, normal); the enemy
+## A fight's budget is Shipgen.budget_for(tier of the jump, jump, the danger of the faction's first region, normal, the stage of the jump); the enemy
 ## is Shipgen.build(faction, pick_size(budget), seed, budget), the same ship for every starter.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -181,12 +181,17 @@ func tier_at(j: int) -> int:
 	return 3 if j >= tier3 else (2 if j >= tier2 else 1)
 
 
+## The run stage (1 to 8) of jump `j`, at about 10 jumps a stage (the early stages' enemies are lighter: Shipgen stage_mult, shield_cap).
+func stage_at(j: int) -> int:
+	return clampi(j / 10 + 1, 1, 8)
+
+
 ## The enemy of (faction, jump, seed) as a spec string, as the campaign rolls it.
 func _spec(faction: String, j: int, seed_value: int) -> String:
-	var budget := Shipgen.budget_for(tier_at(j), j, danger_for(faction))
+	var budget := Shipgen.budget_for(tier_at(j), j, danger_for(faction), "normal", stage_at(j))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
-	return Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget)
+	return Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage_at(j))
 
 
 ## One fight of ship `sh` against the enemy `spec`. Returns its row.
@@ -580,7 +585,7 @@ func report(secs: float) -> String:
 	L.append("")
 	L.append("## Win rate by ship and jump")
 	L.append("")
-	L.append("| ship | " + " | ".join(jumps.map(func(j): return "jump %d (budget ~%d)" % [j, roundi(Shipgen.budget_for(tier_at(j), j, 1.0))])) + " |")
+	L.append("| ship | " + " | ".join(jumps.map(func(j): return "jump %d (budget ~%d)" % [j, roundi(Shipgen.budget_for(tier_at(j), j, 1.0, "normal", stage_at(j)))])) + " |")
 	L.append("|---|" + "---|".repeat(jumps.size()))
 	for sh in ships:
 		L.append("| %s | " % sh["name"] + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["ship"] == sh["id"] and r["jump"] == j))))) + " |")

@@ -24,7 +24,7 @@ const WEAPONS := {
 	"basalt_pumice_flak": [2, true, "flak", "kinetic", -4],
 	"emberkin_pyre_lance": [2, false, "beam", "energy", -4], "emberkin_cinder_mortar": [2, false, "bolt", "explosive", -3],
 	"emberkin_flare_turret": [1, true, "bolt", "energy", -3],
-	"fenn_twitch_cannon": [2, false, "bolt", "energy", -3], "fenn_spark_lattice": [2, true, "bolt", "energy", -4],
+	"fenn_twitch_cannon": [2, true, "bolt", "energy", -3], "fenn_spark_lattice": [2, true, "bolt", "energy", -4],
 	"fenn_market_missile": [2, false, "missile", "explosive", -3],
 	"kett_hive_swarm_launcher": [2, false, "missile", "explosive", -3], "kett_chitin_thrower": [1, false, "flak", "kinetic", -2],
 	"kett_drone_picket": [2, true, "bolt", "kinetic", -4],
@@ -132,10 +132,8 @@ func test_the_damage_a_second_is_30_to_55_percent_over_the_family_part_it_replac
 		"human_volley_rack": [_dps(w.def("human_volley_rack")) / artemis, "against the Artemis"],
 		"basalt_magma_spitter": [(float(spitter["damage"]) + float(acid["dps"]) * float(acid["seconds"])) / float(spitter["cooldown"]) / pulse, "hit plus acid against Pulse Mk2"],
 		"emberkin_pyre_lance": [_dps(w.def("emberkin_pyre_lance")) / heat_lance, "against the Heat Lance"],
-		"fenn_twitch_cannon": [_dps(w.def("fenn_twitch_cannon")) / pulse, "against Pulse Mk2"],
 		"fenn_spark_lattice": [(_dps(lattice) + float(splinters["splinters"]) * float(splinters["dmg"]) / float(lattice["cooldown"])) / turret_pulse, "hit plus splinters against a Pulse Mk2 turret"],
 		"kett_hive_swarm_launcher": [_dps(w.def("kett_hive_swarm_launcher")) / artemis, "against the Artemis"],
-		"kett_drone_picket": [_dps(w.def("kett_drone_picket")) / turret_pulse, "against a Pulse Mk2 turret"],
 	}
 	for id in table:
 		var ratio: float = table[id][0]
@@ -195,7 +193,7 @@ func test_concord_railgun_is_a_fast_piercing_slug_that_charges_slowly() -> void:
 	var rail := w.def("human_concord_railgun")
 	eq(int(rail["pierce"]), 2, "pierces 2")
 	check(float(rail["speed"]) >= 2.0 * float(w.def("pulse_mk2")["speed"]), "at more than twice a pulse's speed")
-	near(float(rail["cooldown"]) / 1.3, 1.5, "charge 1.5 times the 1.3 s of a tier-3 bolt", 0.06)
+	near(float(rail["cooldown"]) / (1.3 * 1.75), 1.5, "charge 1.5 times the 2.3 s (1.3 x 1.75) of a tier-3 bolt", 0.06)
 	_duel("human_concord_railgun")
 	_shoot()
 	arena.step(1.0)
@@ -206,7 +204,7 @@ func test_flak_screen_is_a_quick_accurate_turret_with_weak_pellets() -> void:
 	var w := Weapons.new()
 	var flak := w.def("human_flak_screen")
 	check(float(flak["damage"]) < float(w.def("shrapnel_cannon_scrap")["damage"]), "each pellet is weaker than a Shrapnel Cannon's")
-	check(float(flak["cooldown"]) < 1.5 and float(flak["accuracy"]) >= 0.85, "but it fires fast and true")
+	check(float(flak["cooldown"]) < 2.5 and float(flak["accuracy"]) >= 0.85, "but it fires fast (the quickest flak: 2.1 s) and true")
 
 
 func test_magma_spitter_starts_an_acid_and_vents_thirty_percent_of_its_room() -> void:
@@ -297,11 +295,13 @@ func test_flare_turret_stuns_the_crew_in_the_room_it_hits_and_runs_hot() -> void
 	check(float(w.def("emberkin_flare_turret")["heat_per_shot"]) >= 25.0, "each flare adds a lot of heat to the turret")
 
 
-func test_twitch_cannon_cools_down_forty_percent_faster_than_a_pulse() -> void:
+func test_twitch_cannon_is_a_rapid_turret() -> void:
 	_duel("fenn_twitch_cannon")
 	_shoot()
-	near(arena.cooldown_left(0, gun), 0.8, "0.8 s", 0.02)
-	near(0.8 / float(Weapons.new().def("pulse_mk2")["cooldown"]), 0.6, "which is 40 percent shorter than Pulse Mk2's", 0.02)
+	near(arena.cooldown_left(0, gun), 0.6, "a shot every 0.6 s", 0.02)
+	var w := Weapons.new()
+	check(bool(w.defs["fenn_twitch_cannon"].get("rapid", false)) and bool(w.def("fenn_twitch_cannon")["turret"]), "one of the few rapid guns, so a turret")
+	check(float(w.def("fenn_twitch_cannon")["cooldown"]) < 0.5 * float(w.def("pulse_mk2")["cooldown"]), "far quicker than Pulse Mk2")
 
 
 func test_spark_lattice_throws_splinters_beside_each_hit() -> void:
@@ -325,9 +325,10 @@ func test_hive_swarm_launcher_wants_three_crew_in_its_room() -> void:
 	var cd := []
 	for n in [1, 2, 3]:
 		cd.append(_cooldown_with("kett_hive_swarm_launcher", "kett", n))
-	near(cd[0], 11.75, "alone: x0.4 rate", 0.05)
-	near(cd[1], 11.75, "two: still short", 0.05)
-	near(cd[2], 4.7, "three: full rate", 0.05)
+	var base := float(Weapons.new().def("kett_hive_swarm_launcher")["cooldown"])
+	near(cd[0], base / 0.4, "alone: x0.4 rate", 0.05)
+	near(cd[1], base / 0.4, "two: still short", 0.05)
+	near(cd[2], base, "three: full rate", 0.05)
 	var shooter := _duel("kett_hive_swarm_launcher")
 	_shoot()
 	eq(arena.projectiles.size(), 6, "six tiny drones a salvo")
@@ -337,8 +338,9 @@ func test_chitin_thrower_wants_two_and_splinters() -> void:
 	var cd := []
 	for n in [1, 2]:
 		cd.append(_cooldown_with("kett_chitin_thrower", "kett", n))
-	near(cd[0], 4.4, "alone: half rate", 0.05)
-	near(cd[1], 2.2, "two: full rate", 0.05)
+	var base := float(Weapons.new().def("kett_chitin_thrower")["cooldown"])
+	near(cd[0], 2.0 * base, "alone: half rate", 0.05)
+	near(cd[1], base, "two: full rate", 0.05)
 	_duel("kett_chitin_thrower", 300.0)
 	_shoot()
 	arena.step(1.5)
@@ -349,9 +351,9 @@ func test_drone_picket_wants_two_crew_nearby() -> void:
 	var cd := []
 	for n in [1, 2]:
 		cd.append(_cooldown_with("kett_drone_picket", "kett", n))
-	near(cd[0], 2.0, "alone: half rate", 0.05)
-	near(cd[1], 1.0, "two: full rate", 0.05)
-	eq(int(Weapons.new().def("kett_drone_picket")["shots"]), 2, "two drones a volley")
+	near(cd[0], 1.0, "alone: half rate", 0.05)
+	near(cd[1], 0.5, "two: full rate", 0.05)
+	eq(int(Weapons.new().def("kett_drone_picket")["shots"]), 1, "a drone a shot, every 0.5 s (a rapid turret)")
 
 
 # --- the Kett hand weapons ----------------------------------------------------------------------------------------

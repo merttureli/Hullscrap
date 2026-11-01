@@ -222,12 +222,12 @@ func test_overclock_on_a_weapon_cools_it_down_faster() -> void:
 	var a := Arena.new()
 	var i := a.add_ship(ship)
 	check(a.fire(i, d["part"], Vector2(0.0, -1000.0)), "a manned laser fires")
-	near(a.cooldown_left(i, d["part"]), 1.08, "manned: 10 percent less than 1.2 s", 0.03)
+	near(a.cooldown_left(i, d["part"]), 1.89, "manned: 10 percent less than 2.1 s", 0.03)
 	check(CrewAbilities.use(ship, m)["ok"], "overclock the laser")
 	var b := Arena.new()
 	var j := b.add_ship(ship)
 	check(b.fire(j, d["part"], Vector2(0.0, -1000.0)), "fires again")
-	near(b.cooldown_left(j, d["part"]), 1.08 / 1.5, "and cools down 1.5 times as fast", 0.03)
+	near(b.cooldown_left(j, d["part"]), 1.89 / 1.5, "and cools down 1.5 times as fast", 0.03)
 
 
 func test_overclock_on_a_shield_recharges_its_layers_faster() -> void:

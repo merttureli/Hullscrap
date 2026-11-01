@@ -311,6 +311,63 @@ func test_the_budget_follows_section_14() -> void:
 	near(Shipgen.budget_for(3, 25, 1.6, "hard"), float(base["3"]) * 2.0 * 1.6 * 1.2, "the Hollow on hard")
 	near(Shipgen.budget_for(1, 0, 1.0, "easy"), t1 * 0.8, "easy")
 	check(t1 < float(base["2"]) and float(base["2"]) < float(base["3"]), "each tier's base is above the one before")
+
+
+func test_the_first_three_stages_fight_with_70_percent_of_the_budget() -> void:
+	var full := Shipgen.budget_for(2, 15, 1.1)
+	for stage in [1, 2, 3]:
+		near(Shipgen.budget_for(2, 15, 1.1, "normal", stage), full * 0.7, "stage %d: 70%%" % stage)
+	near(Shipgen.budget_for(2, 15, 1.1, "normal", 4), full, "stage 4 and later: all of it")
+	near(Shipgen.budget_for(2, 15, 1.1, "normal", 0), full, "an unknown stage: all of it")
+	near(Shipgen.budget_for(3, 35, 1.0, "hard", 8), Shipgen.budget_for(3, 35, 1.0, "hard"), "the late game is unchanged")
+
+
+## The share of 6 factions x `n` seeds whose enemy of run stage `stage` carries a shield.
+func _shield_share(stage: int, n: int) -> float:
+	var jumps: int = [5, 15, 25, 35][stage - 1]
+	var tier: int = [1, 2, 3, 3][stage - 1]
+	var with_shield := 0
+	var total := 0
+	for faction in ["rustfangs", "concord", "lumen", "wardens", "clans", "hollow"]:
+		for i in n:
+			var budget := Shipgen.budget_for(tier, jumps, 1.0, "normal", stage)
+			var rng := RandomNumberGenerator.new()
+			rng.seed = 1000 + i
+			var ship := Shipgen.build(faction, Shipgen.pick_size(budget, rng), 5000 + i * 13, budget, {"stage": stage})
+			total += 1
+			if ship != null and not ship.get_meta("shipgen")["shields"].is_empty():
+				with_shield += 1
+	return float(with_shield) / float(total)
+
+
+func test_an_early_enemy_carries_a_shield_at_most_25_40_and_55_percent_of_the_time() -> void:
+	var caps := [0.25, 0.40, 0.55]
+	for k in 3:
+		near(Shipgen.shield_cap(k + 1), caps[k], "stage %d cap" % (k + 1))
+		var share := _shield_share(k + 1, 30)
+		check(share <= caps[k] + 1e-9, "stage %d: %.0f%% of the enemies have a shield, the cap is %.0f%%" % [k + 1, share * 100.0, caps[k] * 100.0])
+	near(Shipgen.shield_cap(4), 1.0, "later stages are not capped")
+	check(_shield_share(4, 10) > 0.9, "and by then nearly every enemy has one")
+
+
+func test_the_stage_rides_in_the_spec_and_the_ship_is_the_same_every_time() -> void:
+	var stage_spec := Shipgen.spec("concord", "medium", 77, 60.0, false, 2)
+	check(stage_spec.ends_with(":s2"), "a stage with a cap is in the spec: " + stage_spec)
+	check(Shipgen.spec("concord", "medium", 77, 60.0, false, 5) == Shipgen.spec("concord", "medium", 77, 60.0), "a later stage is not")
+	check(Shipgen.spec("rustfangs", "medium", 77, 60.0, true, 1).ends_with(":s1:ram"), ":ram stays last")
+	var a := Shipgen.from_spec(stage_spec)
+	var b := Shipgen.from_spec(stage_spec)
+	check(a != null and b != null, "the spec builds")
+	eq(a.get_meta("shipgen")["shields"], b.get_meta("shipgen")["shields"], "the same spec, the same shields")
+	var ram := Shipgen.from_spec(Shipgen.spec("rustfangs", "medium", 77, 90.0, true, 1))
+	check(ram != null and bool(ram.get_meta("shipgen")["ram"]), "a stage and a ram together")
+	var shieldless := 0
+	for i in 40:  # the roll is the seed's: some seeds of a stage-1 concord ship have no shield at all, whatever the budget
+		var s := Shipgen.build("concord", "medium", 900 + i, 120.0, {"stage": 1})
+		shieldless += 1 if s.get_meta("shipgen")["shields"].is_empty() else 0
+	check(shieldless >= 25, "at stage 1 most ships have none even with a big budget (%d of 40)" % shieldless)
+	var rare := Shipgen.build("barons", "medium", 5, 300.0, {"stage": 1})
+	check(rare != null and not rare.get_meta("shipgen")["shields"].is_empty(), "a rare faction ignores the cap")
 	near(Shipgen.danger_of(Regions.get_region("gate_approaches")), 1.4, "the Gate approaches' danger comes from the region")
 	near(Shipgen.danger_of({}), 1.0, "a region with none is plain")
 	eq(Shipgen.faction_for(Regions.get_region("clan_space"), "pirate"), "rustfangs", "Clan space is raided by Rustfangs")
