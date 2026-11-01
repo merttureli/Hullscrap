@@ -135,6 +135,8 @@ static func design_of(ship) -> Dictionary:
 		if m.hp > 0.0:
 			crew.append({"name": str(m.name), "species": str(m.species)})
 	d["crew"] = crew
+	for k in ["crew_state", "dead_crew", "crew_plan"]:  # a design is a start, not a saved run: the crew come from its list
+		d.erase(k)
 	return d
 
 

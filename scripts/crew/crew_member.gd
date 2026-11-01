@@ -131,6 +131,79 @@ static func from_character(id: String, p_pos := Vector2.ZERO):
 	return m if Characters.apply(m, id) else null
 
 
+## Everything a save keeps of this person, as JSON-friendly data (Ship.to_dict "crew_state"; from_dict is the way back):
+## who they are (name, species, soldier, character, look, head, worn gear), how they are (hp, down and bleeding, the
+## ability's cooldown, a revive spent, a split) and where they stand. What they are doing (job, path, orders) is not
+## kept: the job board hands out work again.
+func to_dict() -> Dictionary:
+	var d := {"name": name, "species": species, "pos": [pos.x, pos.y], "hp": hp, "max_hp": max_hp}
+	if is_player:
+		d["is_player"] = true
+	if character != "":
+		d["character"] = character
+	if not look.is_empty():
+		var colours := {}
+		for k in look:
+			colours[str(k)] = look[k].to_html() if look[k] is Color else look[k]
+		d["look"] = colours
+	if head != "":
+		d["head"] = head
+	if not gear_traits.is_empty():
+		d["gear"] = gear_traits.duplicate()
+	if ability_cd > 0.0:
+		d["ability_cd"] = ability_cd
+	if down_t > 0.0:
+		d["down_t"] = down_t
+	if revived:
+		d["revived"] = true
+	if revive_t >= 0.0:
+		d["revive_t"] = revive_t
+	if mend_t > 0.0:
+		d["mend_t"] = mend_t
+	if is_half:
+		d["is_half"] = true
+	if split_pair != "":
+		d["split_pair"] = split_pair
+	if split_t >= 0.0:
+		d["split_t"] = split_t
+	return d
+
+
+## A person from to_dict() data: made the way Jobs.spawn_crew and Campaign.add_crew make them (a new CrewMember of the
+## species, the character applied), then given what was saved. Null when `d` is not a person (no name or place).
+static func from_dict(d: Dictionary):
+	var p = d.get("pos")
+	if not (d.get("name") is String and str(d["name"]) != "" and p is Array and p.size() == 2 and _is_num(p[0]) and _is_num(p[1])):
+		return null
+	var m = new(str(d["name"]), Vector2(float(p[0]), float(p[1])), str(d.get("species", "human")))
+	if str(d.get("character", "")) != "":
+		Characters.apply(m, str(d["character"]))  # (an id the data no longer has stays an ordinary person)
+		m.name = str(d["name"])
+	m.is_player = bool(d.get("is_player", false))
+	if d.get("look") is Dictionary:
+		m.look = d["look"].duplicate()
+	m.head = str(d.get("head", m.head))
+	if d.get("gear") is Array:
+		for g in d["gear"]:
+			if not m.gear_traits.has(str(g)):
+				m.gear_traits.append(str(g))
+	m.max_hp = maxf(1.0, float(d["max_hp"])) if _is_num(d.get("max_hp")) else m.max_hp
+	m.hp = clampf(float(d["hp"]), 0.0, m.max_hp) if _is_num(d.get("hp")) else m.max_hp
+	m.ability_cd = maxf(0.0, float(d.get("ability_cd", 0.0))) if _is_num(d.get("ability_cd", 0.0)) else 0.0
+	m.down_t = maxf(0.0, float(d.get("down_t", 0.0))) if _is_num(d.get("down_t", 0.0)) else 0.0
+	m.revived = bool(d.get("revived", false))
+	m.revive_t = float(d.get("revive_t", -1.0)) if _is_num(d.get("revive_t", -1.0)) else -1.0
+	m.mend_t = maxf(0.0, float(d.get("mend_t", 0.0))) if _is_num(d.get("mend_t", 0.0)) else 0.0
+	m.is_half = bool(d.get("is_half", false))
+	m.split_pair = str(d.get("split_pair", ""))
+	m.split_t = float(d.get("split_t", -1.0)) if _is_num(d.get("split_t", -1.0)) else -1.0
+	return m
+
+
+static func _is_num(v) -> bool:
+	return typeof(v) == TYPE_FLOAT or typeof(v) == TYPE_INT
+
+
 ## The art folder this person is drawn with (art/crew/<rig>/): their species' `rig`, else the species id.
 func rig() -> String:
 	return str(species_def(species).get("rig", species))

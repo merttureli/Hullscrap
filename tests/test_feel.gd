@@ -5,6 +5,11 @@ const BuildMode = preload("res://scripts/build/build_mode.gd")
 const CrewView = preload("res://scripts/crew/crew_view.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
+const Characters = preload("res://scripts/crew/characters.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Endings = preload("res://scripts/space/endings.gd")
+const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Ship = preload("res://scripts/ship/ship.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
@@ -118,3 +123,131 @@ func test_repairs_take_about_twice_as_long_as_in_beta_2() -> void:
 	eq(float(j["repair_crew"]["rate"]), 4.0, "mending a machine crew member: 4 hp a second (was 8)")
 	eq(float(j["repair_belt"]["seconds"]), 4.0, "a belt cell: 4 s (was 2)")
 	eq(float(j["extinguish"]["rate"]), 0.5, "fires are put out as fast as before")
+
+
+# --- Continue keeps the crew -------------------------------------------------------------------------
+
+func _person(who: String, species: String, x: int, y: int) -> CrewMember:
+	return CrewMember.new(who, Pathfinder.centre_of(Vector2i(x, y)), species)
+
+
+## A ship with three crew: the soldier, Ada (hurt, with her ability cooling down) and a recruit who is a character
+## and wears gear. One crew member has bled out (in dead_crew) and the design had a crew list.
+func _crewed() -> Ship:
+	var ship := Fixture.room_ship()
+	var soldier := _person("Soldier", "human", 12, 12)
+	soldier.is_player = true
+	soldier.look = {"suit": "#2a5d8f", "hair": "#c9a46a", "tool": "#ffd24a"}
+	var ada := _person("Ada", "human", 16, 13)
+	ada.hp = 37.5
+	ada.ability_cd = 12.25
+	ada.look = {"suit": "#d9822b", "hair": "#4a2f1d", "tool": "#ffd24a"}
+	var chars := Characters.ids()
+	check(not chars.is_empty(), "(setup: the data has characters)")
+	var recruit: CrewMember = CrewMember.from_character(chars[0], Pathfinder.centre_of(Vector2i(18, 11)))
+	recruit.equip("suit")
+	recruit.hp = recruit.max_hp * 0.5
+	recruit.revived = true
+	ship.crew.append_array([soldier, ada, recruit])
+	ship.dead_crew.append("Fallen")
+	ship.crew_plan = [{"name": "Soldier", "species": "human", "player": true}, {"name": "Ada", "species": "human"}]
+	return ship
+
+
+func _same_person(a: CrewMember, b: CrewMember) -> void:
+	var tag: String = a.name
+	eq(b.name, a.name, "%s: name" % tag)
+	eq(b.species, a.species, "%s: species" % tag)
+	eq(b.is_player, a.is_player, "%s: the soldier" % tag)
+	eq(b.character, a.character, "%s: character" % tag)
+	eq(b.look, a.look, "%s: look" % tag)
+	eq(b.head, a.head, "%s: head" % tag)
+	eq(b.gear_traits, a.gear_traits, "%s: gear" % tag)
+	eq(b.hp, a.hp, "%s: hp" % tag)
+	eq(b.max_hp, a.max_hp, "%s: max hp" % tag)
+	eq(b.cell(), a.cell(), "%s: cell" % tag)
+	eq(b.pos, a.pos, "%s: place" % tag)
+	eq(b.ability, a.ability, "%s: ability" % tag)
+	eq(b.ability_cd, a.ability_cd, "%s: ability cooldown" % tag)
+	eq(b.revived, a.revived, "%s: revive spent" % tag)
+	eq(b.speed, a.speed, "%s: speed" % tag)
+
+
+func test_a_saved_ship_brings_its_crew_back_as_they_were() -> void:
+	var ship := _crewed()
+	var d: Dictionary = JSON.parse_string(JSON.stringify(ship.to_dict()))  # through the file, as Ctrl+S / Continue do
+	eq(d["version"], 6, "saved as version 6")
+	eq(d["crew_state"].size(), 3, "three people in the save")
+	var back := Ship.new_starter()
+	var stale := _person("Stale", "human", 5, 5)  # a crew member of the ship that was loaded into
+	back.crew.append(stale)
+	back.dead_crew.append("Ghost")
+	eq(back.load_dict(d), "", "loads")
+	eq(back.crew.size(), 3, "the same three, not the ones that were aboard before")
+	check(not back.crew.has(stale), "(the old crew are gone)")
+	for i in 3:
+		_same_person(ship.crew[i], back.crew[i])
+	eq(back.crew[2].character, ship.crew[2].character, "the recruit is still the character")
+	check(back.crew[2].is_player == false and back.crew[0].is_player, "and the soldier is the soldier")
+	eq(back.crew[1].hp, 37.5, "the hurt one is still hurt")
+	eq(back.dead_crew, ["Fallen"], "the dead stay dead (and Ghost is not carried over)")
+	eq(back.crew_plan, ship.crew_plan, "the design's crew list too")
+	eq(back.to_dict()["crew_state"], d["crew_state"], "and saving again gives the same save")
+
+
+func test_a_downed_crew_member_and_a_bleed_out_survive_a_save() -> void:
+	var ship := Fixture.room_ship()
+	var m := _person("Rook", "human", 12, 12)
+	m.hp = 0.0
+	m.down_t = 7.5
+	ship.crew.append(m)
+	var back := Ship.new_starter()
+	eq(back.load_dict(JSON.parse_string(JSON.stringify(ship.to_dict()))), "", "loads")
+	check(back.crew[0].is_down(), "still down")
+	eq(back.crew[0].down_t, 7.5, "and still bleeding for as long")
+
+
+func test_an_older_save_loads_and_leaves_the_crew_alone() -> void:
+	var ship := _crewed()
+	var d: Dictionary = JSON.parse_string(JSON.stringify(ship.to_dict()))
+	for k in ["crew_state", "dead_crew", "crew_plan"]:
+		d.erase(k)
+	d["version"] = 5  # a Beta 2 save
+	var back := Ship.new_starter()
+	var mate := _person("Mate", "human", 14, 14)
+	back.crew.append(mate)
+	eq(back.load_dict(d), "", "a version 5 save loads")
+	eq(back.crew, [mate], "with the old behaviour: the crew the ship has stay (the view spawns the design's list)")
+	var nobody := Ship.new_starter()
+	eq(nobody.to_dict().has("crew_state"), false, "a ship with no crew writes none")
+	var empty := _crewed()
+	empty.crew.clear()
+	empty.dead_crew.clear()
+	eq(empty.to_dict().has("crew_state"), false, "nor one that has nobody and no dead")
+
+
+func test_a_malformed_crew_in_a_save_is_refused_and_changes_nothing() -> void:
+	var d: Dictionary = JSON.parse_string(JSON.stringify(_crewed().to_dict()))
+	var back := Ship.new_starter()
+	var mate := _person("Mate", "human", 14, 14)
+	back.crew.append(mate)
+	var before: Vector2i = back.grid.size
+	var bad := d.duplicate(true)
+	bad["crew_state"][1] = {"name": "NoPlace"}
+	check(back.load_dict(bad) != "", "a person with no place is refused")
+	bad = d.duplicate(true)
+	bad["crew_state"] = "three"
+	check(back.load_dict(bad) != "", "a crew that is not a list is refused")
+	bad = d.duplicate(true)
+	bad["crew_plan"] = [5]
+	check(back.load_dict(bad) != "", "a crew list that is not entries is refused")
+	eq(back.crew, [mate], "the crew did not change")
+	eq(back.grid.size, before, "nor did the ship")
+
+
+func test_a_hall_of_ships_design_is_not_a_saved_run() -> void:
+	var ship := _crewed()
+	var design := Endings.design_of(ship)
+	for k in ["crew_state", "dead_crew", "crew_plan"]:
+		check(not design.has(k), "the design has no %s" % k)
+	eq(design["crew"].size(), 3, "just its crew list [{name, species}]")
