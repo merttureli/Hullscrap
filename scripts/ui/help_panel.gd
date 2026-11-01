@@ -18,7 +18,7 @@ const COLUMNS: Array = [
 		["MOVING AND CREW", [
 			["W A S D", "Walk your soldier (the legs turn the way you walk)"],
 			["Mouse", "Play mode: the soldier aims at the cursor"],
-			["E (hold)", "Work with your hands: stand by a fire, a breach, a broken system or a downed crewmate"],
+			["E (hold)", "Hold to repair, patch, extinguish or revive nearby."],
 			["E on a door", "Open / close the door"],
 			["Middle click", "Send a crewmate there"],
 			["Left click", "Select a crew member or their card"],
@@ -37,7 +37,7 @@ const COLUMNS: Array = [
 	[
 		["BUILDING (B for build mode)", [
 			["Tab / Shift+Tab", "Palette tab: Structure, Shapes, Systems, Weapons, Engines, Utility, Cargo"],
-			["1 - 9", "Pick a card of the tab (or click it). It lists the parts you hold or can craft; grey = none held or can't pay"],
+			["1 - 9", "Pick a card. Grey: none held or can't pay."],
 			["Left mouse", "Place; drag to paint (a system goes down on release)"],
 			["Shift+Left drag", "Straight line"],
 			["Ctrl+Left drag", "Rectangle (a wall makes a room)"],
@@ -48,7 +48,7 @@ const COLUMNS: Array = [
 			["F", "Send the nearest crew to repair the system under the mouse"],
 			["Ctrl+Z / Ctrl+Y", "Undo / redo (Ctrl+Shift+Z also redoes)"],
 			["Esc", "Cancel a drag"],
-			["Mounts", "A weapon or engine goes outside the hull, against a wall; its inside half goes on the floor behind it"],
+			["Mounts", "Weapons and engines go on an outer wall or a slope; the inside half sits on the floor behind."],
 			["Cables", "Every system needs a cable to a reactor (Cable is on Structure)"],
 			["Belts", "Ammo racks feed guns in their room; a belt drive and belts (Belt on Structure) carry ammo to the rest"],
 			["Mode bar", "Click Build, Play, Map, Shields, Crafting or Help"],
@@ -67,9 +67,9 @@ const COLUMNS: Array = [
 			["Click a lit neighbour", "Spool the jump drive there (8 s, fuel when it fires; the same node again cancels)"],
 			["Shift+click", "Drift jump with no fuel (costs hull)"],
 			["T", "Wait for a passing trader (no fuel)"],
-			["Y", "Out of fuel: Ma tows you to the region's start (no fuel, debt +150)"],
+			["Y", "No fuel: Ma tows you to the region start (debt +150)."],
 			["Enter", "Close to a station's beacon its menu opens; at the exit beacon, choose the next region (1 - 3) once its warden is dealt with"],
-			["Exit warden", "A strong ship holds each region's exit: pay its toll, show good standing, or break through (its threat is on the region cards)"],
+			["Exit warden", "A warden holds each exit: pay, show standing, or break through."],
 			["Esc", "Close the map"],
 			["1 - 9 or click", "Pick a choice in an event"],
 			["Enter / Space", "Continue"],
@@ -86,7 +86,7 @@ const COLUMNS: Array = [
 	],
 	[
 		["COMBAT (a fight, or K in play mode)", [
-			["K", "Play mode: meet the test pirate (Shift+K: the Rustfang rammer)"],
+			["K", "Play mode: meet the test pirate"],
 			["Mouse", "Steer; fixed guns aim where the ship points"],
 			["W / S", "Throttle forward / back"],
 			["A / D", "Strafe"],
@@ -104,7 +104,7 @@ const COLUMNS: Array = [
 			["C", "Crafting panel, in build or play mode"],
 			["Tab", "Fabricator / smelter (steel, alloy, conductor, glass)"],
 			["?", "How crafting works"],
-			["Click, or Up / Down + Enter", "Queue a recipe; the part lands in the hold, then place it from the build palette (B)"],
+			["Click, or Up / Down + Enter", "Queue a recipe, then place the part from the palette (B)."],
 			["Dimmed recipe", "Needs a blueprint: salvage scans, events, stores"],
 			["PgUp / PgDn", "Scroll fast"],
 			["Click a queued job", "Cancel it"],

@@ -351,7 +351,7 @@ func _draw_row(lay: Dictionary) -> void:
 		return
 	if not RunStart.has_choices(profile) and _bp_names.is_empty():
 		var r: Rect2 = lay["opts"][0]
-		_text("New-run options: starting species, map variants, hull skins and blueprints unlock with endings and landmarks.", r.position + Vector2(0.0, 34.0), 14, DIM_TEXT)
+		_text("New-run options: starting species, map variants, hull skins and blueprints.", r.position + Vector2(0.0, 34.0), 14, DIM_TEXT)
 		return
 	for i in 3:
 		var r: Rect2 = lay["opts"][i]
