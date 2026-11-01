@@ -49,6 +49,7 @@ var size := 24000.0  ## px, the sector is a square
 var arrival := Vector2.ZERO  ## where the ship arrives, near one edge
 var current_angle := 0.0  ## the debris current's direction in degrees (0 east, 90 south on the screen, as in data/debris.json)
 var current_speed := 40.0  ## px/s
+var streams: Array = []  ## the debris' side streams: [{angle (degrees, as current_angle), speed (px/s), share (of the pieces)}]; the main current carries the rest
 var density := 1.0  ## the debris density: x the base spawn rate and cap of data/debris.json
 var debris_mult := {}  ## debris type id -> weight multiplier: the theme of the node type times the region's `debris`
 var pois: Array = []  ## the generated POIs, main first
@@ -156,6 +157,11 @@ func _build(r: RandomNumberGenerator, node: Dictionary, region_data: Dictionary)
 		var label := str(t["label"])
 		pois.append({"id": "p%d" % i, "type": type, "name": str(node.get("name", "")) if i == 0 and str(node.get("name", "")) != "" else label,
 			"pos": pos, "visibility": vis, "event_type": ev, "state": NEW, "enemy": str(t.get("enemy", "")), "main": i == 0})
+	var sc: Dictionary = cfg["streams"]  # rolled last, so the layout above is what it always was
+	for k in r.randi_range(int(sc["count"][0]), int(sc["count"][1])) - 1:
+		var off := r.randf_range(float(sc["angle_off"][0]), float(sc["angle_off"][1])) * (1.0 if r.randf() < 0.5 else -1.0)
+		streams.append({"angle": fposmod(current_angle + off, 360.0), "speed": r.randf_range(float(c["speed"][0]), float(c["speed"][1])),
+			"share": r.randf_range(float(sc["share"][0]), float(sc["share"][1]))})
 
 
 ## The POI types of the sector in order: the node's main one, the ones it always has (`also`), then others rolled by the
@@ -576,13 +582,14 @@ func current_vel() -> Vector2:
 	return current_dir() * current_speed
 
 
-## `base` (data/debris.json) with this sector's current, density and theme: the current's direction and speed, the
-## spawn rate, cap and starting pieces times the density, the type weights times the node type's multipliers.
+## `base` (data/debris.json) with this sector's current, streams, density and theme: the current's direction and speed, its
+## side streams, the spawn rate, cap and starting pieces times the density, the type weights times the node type's multipliers.
 ## drift_debris.gd builds its spawner from it (DriftDebris.for_sector).
 func debris_cfg(base: Dictionary) -> Dictionary:
 	var out := base.duplicate(true)
 	out["current"]["angle"] = current_angle
 	out["current"]["speed"] = current_speed
+	out["streams"] = streams.duplicate(true)
 	var s: Dictionary = out["spawn"]
 	var d := density * (float(cfg["ambient"].get("hollow", {}).get("debris", 1.0)) if hollow else 1.0)  # the Hollow eats the current
 	s["every"] = float(s["every"]) / d

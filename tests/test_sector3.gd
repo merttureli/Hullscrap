@@ -488,14 +488,14 @@ func _income(rig: Dictionary, chase: bool, tractor: bool, seeds: int, minutes: f
 	return got
 
 
-func test_one_mk1_intake_drifting_idle_brings_fifteen_to_twenty_five_scrap_a_minute_and_mk3_chasing_about_double() -> void:
+func test_one_mk1_intake_drifting_idle_brings_twenty_to_thirty_five_scrap_a_minute_and_mk3_chasing_about_triple() -> void:
 	var idle := _income(_rig([["intake_mk1", -2]]), false, false, 8, 1.5)
 	var chase := _income(_rig([["intake_mk3", -2]]), true, false, 8, 1.5)
 	var both := _income(_rig([["intake_mk3", -6], ["tractor_mk2", 0]]), true, true, 8, 1.5)
 	print("sector3: scrap a minute: Mk1 idle %.1f (copper %.1f, polymer %.1f), Mk3 chasing %.1f, Mk3 chasing with the Mk2 tractor %.1f" % [idle["scrap"], idle["copper"], idle["polymer"], chase["scrap"], both["scrap"]])
-	check(idle["scrap"] >= 14.0 and idle["scrap"] <= 28.0, "an idle Mk1 earns about 15-25 scrap a minute: %.1f" % idle["scrap"])
+	check(idle["scrap"] >= 18.0 and idle["scrap"] <= 38.0, "an idle Mk1 earns about 20-35 scrap a minute (the steady flow of Beta 3: spawn every 1.1 s, 70 pieces): %.1f" % idle["scrap"])
 	check(idle["copper"] + idle["polymer"] >= 2.0, "and a bit of copper and polymer: %.1f and %.1f" % [idle["copper"], idle["polymer"]])
-	check(chase["scrap"] >= 1.5 * idle["scrap"] and chase["scrap"] <= 3.0 * idle["scrap"], "Mk3 chasing is about double: %.1f against %.1f" % [chase["scrap"], idle["scrap"]])
+	check(chase["scrap"] >= 1.5 * idle["scrap"] and chase["scrap"] <= 3.5 * idle["scrap"], "Mk3 chasing is about triple (a fast ship meets more pieces): %.1f against %.1f" % [chase["scrap"], idle["scrap"]])
 	check(both["scrap"] >= 1.1 * chase["scrap"], "and the tractor adds to it: %.1f against %.1f" % [both["scrap"], chase["scrap"]])
 
 

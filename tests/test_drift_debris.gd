@@ -111,6 +111,141 @@ func test_pieces_appear_upstream_just_outside_the_view() -> void:
 		check(p["pos"].y < -450.0, "north of the view, upstream of a current that runs south: %s" % [p["pos"]])
 
 
+# --- a steady flow at any speed, and the streams -------------------------------------------------------------
+
+## The pieces within the view round `d.view_centre`.
+func _in_view(d: DriftDebris) -> int:
+	return d.pieces.filter(func(p): return absf(p["pos"].x - d.view_centre.x) <= d.view_half.x and absf(p["pos"].y - d.view_centre.y) <= d.view_half.y).size()
+
+
+## `d` flies `ship` at `vel` px/s for `seconds` the way the sector view does (the frame and the view centre follow the ship):
+## the mean number of pieces within the view over the last `sample` seconds.
+func _flown_count(d: DriftDebris, ship, vel: Vector2, seconds: float, sample := 30.0) -> float:
+	var off := Vector2(20000.0, 20000.0)
+	d.frame_vel = vel
+	d.frame = Transform2D(0.0, off)
+	d.view_centre = d.frame * ship.world_pos
+	d.prewarm(ship)
+	var sum := 0.0
+	var n := 0
+	var steps := roundi(seconds / 0.05)
+	for i in steps:
+		off += vel * 0.05
+		d.frame = Transform2D(0.0, off)
+		d.view_centre = d.frame * ship.world_pos
+		d.step(ship, 0.05)
+		if i >= steps - roundi(sample / 0.05) and i % 20 == 0:
+			sum += _in_view(d)
+			n += 1
+	return sum / float(n)
+
+
+func test_a_ship_five_times_as_fast_as_the_current_flying_upstream_still_sees_a_full_screen() -> void:
+	var ship := Wall.wall_ship(1, 0)
+	var rest := _flown_count(_dd(), ship, Vector2.ZERO, 150.0)
+	var fast := _flown_count(_dd(), ship, Vector2(0.0, -200.0), 150.0)  # the current runs south at 40: upstream is north, 5 x its speed
+	var slow := _flown_count(_dd(), ship, Vector2(0.0, -80.0), 150.0)
+	print("drift_debris: pieces in view at rest %.1f, at 2 x the current upstream %.1f, at 5 x %.1f" % [rest, slow, fast])
+	check(rest > 20.0, "at rest the view has a good many pieces (%.1f)" % rest)
+	check(fast >= 0.6 * rest, "at 5 x the current's speed upstream at least 60%% of that stay (%.1f of %.1f)" % [fast, rest])
+	check(slow >= 0.6 * rest, "and at 2 x (%.1f of %.1f)" % [slow, rest])
+
+
+func test_the_spawn_rate_follows_how_fast_the_flow_passes_the_ship_from_1_to_6_times() -> void:
+	var d := _dd()
+	near(d.stream_vel(0).length(), 40.0, "the test current is 40 px/s")
+	for row in [[Vector2.ZERO, 1.0], [Vector2(0.0, 40.0), 1.0], [Vector2(0.0, 20.0), 1.0], [Vector2(0.0, -40.0), 2.0], [Vector2(0.0, -80.0), 3.0],
+			[Vector2(0.0, -200.0), 6.0], [Vector2(0.0, -2000.0), 6.0], [Vector2(300.0, 40.0), 300.0 / 40.0 if false else 6.0]]:
+		d.frame_vel = row[0]
+		var total := 0.0
+		for w in d._stream_weights():
+			total += w
+		near(total, row[1], "the ship at %s: the spawn rate is x%.0f" % [str(row[0]), row[1]])
+
+
+func test_flying_downstream_at_the_currents_speed_pieces_still_spawn() -> void:
+	var ship := Wall.wall_ship(1, 0)
+	var d := _dd()
+	var off := Vector2(20000.0, 20000.0)
+	var vel := Vector2(0.0, 40.0)  # with the current: the flow past the ship is nil
+	d.frame_vel = vel
+	var seen := 0
+	for i in 1200:  # 60 s
+		off += vel * 0.05
+		d.frame = Transform2D(0.0, off)
+		d.view_centre = d.frame * ship.world_pos
+		var before := d.pieces.size()
+		d.step(ship, 0.05)
+		seen += maxi(d.pieces.size() - before, 0)
+	check(seen >= 20, "pieces keep spawning (%d in a minute)" % seen)
+	check(d.pieces.size() >= 10, "and are about (%d)" % d.pieces.size())
+	for p in d.pieces:
+		check(p["pos"].y < d.view_centre.y + 1.0, "upstream of the ship, to the north")
+		break
+
+
+func test_every_cargo_type_flows() -> void:
+	var ship := Wall.wall_ship(1, 0)
+	var d := _dd(3)
+	var seen := {}
+	for i in 800:
+		d.pieces.clear()
+		var p := d._spawn(ship)
+		seen[p["type"]] = true
+	var want: Array = ["scrap_chunk_s", "scrap_chunk_m", "copper_coil", "polymer_barrel", "ice_chunk_s", "fuel_canister", "sealed_crate"]
+	for t in want:
+		check(seen.has(t), "%s turns up in the flow" % t)
+	eq(d.cfg["spawn"]["every"], 1.1, "a piece about every 1.1 s")
+	eq(d.cfg["spawn"]["max_alive"], 70, "up to 70 about")
+
+
+## `_dd()` with two side streams: one at 90 degrees off the main current, 0.3 of the pieces, one at 70 degrees the other way, 0.25.
+func _streamed(seed_value := 1) -> DriftDebris:
+	var cfg: Dictionary = Content.read(DriftDebris.PATH).duplicate(true)
+	cfg["current"]["angle"] = 90  # south
+	cfg["current"]["wobble_deg"] = 0
+	cfg["current"]["speed_wobble"] = 0
+	cfg["streams"] = [{"angle": 180.0, "speed": 30.0, "share": 0.3}, {"angle": 20.0, "speed": 55.0, "share": 0.25}]
+	return DriftDebris.new(seed_value, cfg)
+
+
+func test_pieces_are_picked_into_the_streams_by_share_and_drift_with_their_own() -> void:
+	var ship := Wall.wall_ship(1, 0)
+	var d := _streamed()
+	eq(d.stream_count(), 3, "the main current and two side streams")
+	near(d.stream_vel(1).x, -30.0, "side stream 1 runs west at 30 px/s", 1e-3)
+	near(d.stream_vel(2).length(), 55.0, "side stream 2 at 55 px/s", 1e-3)
+	var counts := [0, 0, 0]
+	for i in 3000:
+		counts[d._pick_stream()] += 1
+	near(counts[1] / 3000.0, 0.3, "30%% of the pieces in the first side stream", 0.03)
+	near(counts[2] / 3000.0, 0.25, "25%% in the second", 0.03)
+	near(counts[0] / 3000.0, 0.45, "the main current carries the rest", 0.03)
+	var made := [0, 0, 0]
+	for i in 300:
+		d.pieces.clear()
+		var p := d._spawn(ship)
+		made[p["stream"]] += 1
+		var v: Vector2 = d.stream_vel(p["stream"])
+		check(p["vel"].length() >= 0.89 * v.length() and p["vel"].length() <= 1.11 * v.length() and p["vel"].normalized().dot(v.normalized()) > 0.999, "a piece starts moving with its stream")
+		var up: Vector2 = -d.stream_flow(p["stream"])
+		check((p["pos"] - d.view_centre).dot(up) > 0.0, "and upstream of that stream's flow")
+	check(made[0] > 0 and made[1] > 0 and made[2] > 0, "pieces come from every stream (%s)" % str(made))
+	d.prewarm(ship)
+	_run(d, ship, 20.0)
+	var by := [0, 0, 0]
+	for p in d.pieces:
+		by[p["stream"]] += 1
+		if d.time - p["age"] < 0.0:
+			continue
+	check(by[0] > 0 and by[1] > 0 and by[2] > 0, "all three are drifting (%s)" % str(by))
+	for p in d.pieces:
+		if p["stream"] == 1 and p["age"] > 15.0 and not p["no_pull"]:
+			check(p["vel"].x < -15.0, "a piece of the west stream goes west: %s" % str(p["vel"]))
+			break
+	check(d.hud_line().ends_with("current: south"), "the HUD names the main current: %s" % d.hud_line())
+
+
 # --- moving ------------------------------------------------------------------------------------------------
 
 func test_pieces_move_with_the_current() -> void:

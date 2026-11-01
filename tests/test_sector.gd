@@ -992,6 +992,37 @@ func test_fights_and_wrecks_do_not_rely_on_walls() -> void:
 	eq(h.fight_place(null, 400.0)["enemy_pos"], Vector2(-50000.0, 89600.0), "nor is the enemy 400 px ahead")
 
 
+# --- the debris streams ---------------------------------------------------------------------------------------
+
+func test_a_sector_rolls_one_to_three_debris_streams_from_its_seed() -> void:
+	var sc: Dictionary = Sector.config()["streams"]
+	var speed: Array = Sector.config()["current"]["speed"]
+	var sides := {}
+	var any_differs := false
+	for i in 120:
+		var node := _node(TYPES[i % TYPES.size()], i)
+		var a = Sector.generate(i, node, "boneyard")
+		var b = Sector.generate(i, node, "boneyard")
+		var tag := "%s #%d" % [node["type"], i]
+		eq(a.streams, b.streams, tag + ": the same seed rolls the same streams")
+		any_differs = any_differs or a.streams != Sector.generate(i + 500, node, "boneyard").streams
+		sides[a.streams.size()] = int(sides.get(a.streams.size(), 0)) + 1
+		check(a.streams.size() + 1 >= int(sc["count"][0]) and a.streams.size() + 1 <= int(sc["count"][1]), tag + ": 1 to 3 streams with the main current")
+		var rest := 1.0
+		for st in a.streams:
+			var off := absf(fposmod(float(st["angle"]) - a.current_angle + 180.0, 360.0) - 180.0)
+			check(off >= float(sc["angle_off"][0]) - 1e-4 and off <= float(sc["angle_off"][1]) + 1e-4, "%s: %.0f degrees off the main current" % [tag, off])
+			check(float(st["speed"]) >= float(speed[0]) and float(st["speed"]) <= float(speed[1]), tag + ": in the current's speed range")
+			check(float(st["share"]) >= float(sc["share"][0]) and float(st["share"]) <= float(sc["share"][1]), tag + ": a share of 0.2 to 0.35")
+			rest -= float(st["share"])
+		check(rest >= 0.3 - 1e-6, tag + ": the main current keeps at least 0.3")
+		var cfg: Dictionary = a.debris_cfg(Content.read(DriftDebris.PATH))
+		eq(cfg["streams"], a.streams, tag + ": the spawner's numbers carry them")
+		eq(DriftDebris.for_sector(a).stream_count(), a.streams.size() + 1, tag + ": and it runs them")
+	check(sides.has(0) and sides.has(1) and sides.has(2) and sides.size() == 3, "0, 1 and 2 side streams all turn up (%s)" % str(sides))
+	check(any_differs, "another seed rolls other streams")
+
+
 # --- saving and loading --------------------------------------------------------------------------------------
 
 func test_saves_are_versioned_and_old_ones_arrive_at_the_arrival_point() -> void:
