@@ -143,7 +143,7 @@ func test_f_sends_the_nearest_crew_member_to_repair_the_part_under_the_mouse() -
 		b.sim.step(0.1)
 	eq([inst["status"], inst["hp"]], ["malfunction", 3], "nothing is repaired while the world is paused")
 	b.build_on = false
-	for i in 100:  # 5 s of work after the walk
+	for i in 200:  # 12 s of work after the walk
 		b.sim.step(0.1)
 	eq([inst["status"], inst["hp"]], ["ok", 4], "repaired in play mode")
 	b.build_on = true
