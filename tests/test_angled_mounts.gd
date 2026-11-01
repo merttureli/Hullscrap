@@ -11,7 +11,7 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
-const Weapons = preload("res://scripts/combat/weapons.gd")
+const Arena = preload("res://scripts/combat/arena.gd")
 
 ## The face angle of slope45 turned r quarter turns, and of slope2 by (rot, mirror), with the piece-to-piece step along the face.
 const SLOPE2 := {[0, false]: [333.434949, Vector2i(2, -1)], [0, true]: [26.565051, Vector2i(2, 1)], [1, false]: [63.434949, Vector2i(1, 2)],
@@ -186,6 +186,51 @@ func test_a_straight_mounts_direction_is_exact() -> void:
 	eq(Mounts.dir_of({"rot": 2}), Vector2(0, 1), "a rear mount faces down, exactly")
 	eq(Mounts.dir_of({"rot": 1, "angle": 90.0}), Vector2(1, 0), "an angle on a quarter turn is the straight rule")
 	check(Mounts.dir_of({"rot": 0, "angle": 45.0}).is_equal_approx(Vector2(1, -1).normalized()), "45 degrees is up and right")
+
+
+# --- guns -----------------------------------------------------------------------------------------------------------
+
+func _armed(id: String, rot: int, mirror := false) -> Dictionary:
+	var s := _slope_ship("slope45", rot, mirror, 5)
+	var uid: int = s["ship"].components.place_planned(id, _plan(s, id))
+	check(uid >= 0, id + " is placed on the slope")
+	var a := Arena.new(7)
+	a.add_ship(s["ship"], Vector2.ZERO)
+	return {"arena": a, "uid": uid, "slope": s}
+
+
+func test_a_gun_on_a_slope_aims_along_the_true_outward_direction() -> void:
+	for rot in 4:
+		var g := _armed("laser_mk1", rot)
+		var a: Arena = g["arena"]
+		var m: Dictionary = a.ships[0].mounts[g["uid"]]
+		var want := Vector2.UP.rotated(deg_to_rad(45.0 + 90.0 * rot))
+		check(Vector2(m["dir"]).is_equal_approx(want), "slope turned %d: dir is %s, got %s" % [rot, str(want), str(m["dir"])])
+		eq(m["aim"], m["dir"], "and the barrel rests along it")
+		var s: Dictionary = g["slope"]
+		var inst: Dictionary = s["ship"].components.instances[g["uid"]]
+		check((Vector2(m["pos"]) - Vector2(inst["out_at"])).dot(want) > 0.0, "slope turned %d: the barrel pivots in space, in front of the face" % rot)
+
+
+func test_a_fixed_guns_gimbal_is_centred_on_the_slope() -> void:
+	var g := _armed("laser_mk1", 0)  # faces 45 degrees: up and to the right; gimbal 5 degrees
+	var a: Arena = g["arena"]
+	var m: Dictionary = a.ships[0].mounts[g["uid"]]
+	var from: Vector2 = a.local_to_world(0, m["pos"])
+	check(a.weapons.in_arc(a, 0, m, from + Vector2.UP.rotated(deg_to_rad(45.0 + 4.0)) * 500.0), "4 degrees off the slope's way is inside the gimbal")
+	check(not a.weapons.in_arc(a, 0, m, from + Vector2.UP.rotated(deg_to_rad(45.0 + 7.0)) * 500.0), "7 degrees off is outside")
+	check(not a.weapons.in_arc(a, 0, m, from + Vector2.UP * 500.0), "straight up (45 degrees off) is far outside")
+
+
+func test_a_45_degree_turrets_arc_is_centred_on_45_degrees() -> void:
+	var g := _armed("laser_turret_mk1", 0)  # arc 270
+	var a: Arena = g["arena"]
+	var m: Dictionary = a.ships[0].mounts[g["uid"]]
+	var from: Vector2 = a.local_to_world(0, m["pos"])
+	eq(snappedf(rad_to_deg(Vector2.UP.angle_to(m["dir"])), 0.01), 45.0, "the arc's centre is 45 degrees")
+	check(a.weapons.in_arc(a, 0, m, from + Vector2.UP.rotated(deg_to_rad(45.0 + 130.0)) * 500.0), "130 degrees round from the centre is inside")
+	check(not a.weapons.in_arc(a, 0, m, from + Vector2.UP.rotated(deg_to_rad(45.0 + 140.0)) * 500.0), "140 degrees round is outside the 270 degree arc")
+	check(a.weapons.in_arc(a, 0, m, from + Vector2.UP.rotated(deg_to_rad(45.0 - 130.0)) * 500.0), "and 130 degrees the other way is inside")
 
 
 # --- saves ----------------------------------------------------------------------------------------------------------

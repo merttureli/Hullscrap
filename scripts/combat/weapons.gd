@@ -95,11 +95,11 @@ func mounts_of(ship) -> Dictionary:
 		var inst: Dictionary = ship.components.instances[uid]
 		if not has(inst["id"]):
 			continue
-		var dir := Vector2(Mounts.outward(inst["rot"]))
+		var dir := Mounts.dir_of(inst)  # the true outward direction: a mount on a slope faces along it
 		var pos := Vector2.ZERO
 		var reach := 0.0
 		if ship.components.has_outside(uid):
-			var b := Mounts.barrel(ship.components.def(inst["id"]), inst["out_anchor"], inst["rot"])
+			var b := Mounts.barrel_of(ship.components.def(inst["id"]), inst)
 			pos = b["pivot"]
 			reach = b["reach"]
 		else:
