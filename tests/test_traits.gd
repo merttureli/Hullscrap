@@ -103,7 +103,14 @@ func test_the_three_old_traits_are_bags_of_keys() -> void:
 	var fenn := TraitSet.of(CrewMember.new("X", Vector2.ZERO, "fenn"))
 	near(fenn["work_mult"]["repair"], 1.0 / 0.6, "fast_repair: repair work 1 / 0.6 as fast", 1e-6)
 	near(fenn["work_mult"]["breach"], 1.0 / 0.6, "and breach patching too", 1e-6)
-	check(TraitSet.library()["suit"].get("o2_use") == null, "suit is only a label")
+	check(TraitSet.library()["suit"].get("o2_use") == null, "a suit does not change how much air they use")
+	_done()
+
+
+func test_a_suit_keeps_the_vacuum_off_its_wearer() -> void:
+	var rook := CrewMember.new("Rook", Vector2.ZERO)  # crew.json gives Rook a suit
+	check(TraitSet.of(rook)["vacuum_walk"], "a suited crew member takes no damage from thin air")
+	check(not TraitSet.of(CrewMember.new("Juno", Vector2.ZERO))["vacuum_walk"], "an ordinary one still does")
 	_done()
 
 

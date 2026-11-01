@@ -37,7 +37,7 @@
 		}
 	},
 	"traits": {
-		"suit": {"name": "Suited", "blurb": "Wears an EVA suit: the label abilities ask for."},
+		"suit": {"name": "Suited", "blurb": "Wears an EVA suit: the label abilities ask for, and no damage from thin air.", "vacuum_walk": true},
 		"no_breath": {"name": "Does not breathe", "o2_use": 0},
 		"heat_resistant": {"name": "Heat resistant", "damage_taken": {"fire": 0.25}},
 		"fast_repair": {"name": "Quick hands", "notes": "repair and breach time x0.6, which is a work speed of 1/0.6", "work_mult": {"repair": 1.6666667, "breach": 1.6666667}},
