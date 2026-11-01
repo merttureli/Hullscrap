@@ -29,13 +29,12 @@ const PATHS := {
 }
 const PIRATE := "res://data/ships/pirate_raider.json"
 const MAX_COVER := 3  ## tiles between a gun and open space: a wall, a plate, one more at most
-const OLD_HULL := {"Rustbucket": 1122, "Courier": 864, "Prism": 624}  ## cells of the hull of the starters before the big frames (the bounding box plus 2)
-const MIN_GROWTH := 1.8  ## the frame is about 1.8 to 2.3 times as big as that (1.6 to 2 before the frames grew by 15%: playtest 2, P4)
-const MAX_GROWTH := 2.3
+const FRAME_R := 29  ## playtest 2, B1: every starter's frame is a disc of this radius in cells round the middle of the grid
+const FRAME_MID := Vector2i(31, 31)  ## the centre cell of the 63x63 grid
 const MAX_FILL := 0.85  ## the frame's cells over the cells of its box: a silhouette, not a rectangle (test_ship_silhouettes.gd)
 const MIN_SHAPED := 4  ## slopes or curves on the built hull
-const MIN_FRAME := 1000  ## cells of the hull frame: a lot of room (the first three have 1250 to 2150)
-const MAX_FRAME := 2500
+const MIN_FRAME := 2600  ## cells of the hull frame: a disc of radius 29 is 2629 cells
+const MAX_FRAME := 2700
 const MAX_PARTS := 10  ## placed components: the essentials only
 const MIN_EMPTY := 0.5  ## at least this share of the frame is empty hull (no tile, no outside half of a mount)
 const MIN_HULL_INTEGRITY := 150.0  ## every starter has real armour on its outer hull (arena.gd: 20 + 2 per plated cell)
@@ -142,21 +141,42 @@ func test_the_hull_is_a_big_frame_in_the_middle_that_holds_everything_built() ->
 		for c in ship.grid.hull:
 			lo = lo.min(c)
 			hi = hi.max(c)
-		if OLD_HULL.has(key):  # the first three have a frame that holds the whole box of the core; the packs' ships only need every built cell on it (below)
-			check(ship.grid.hull.has(b[0]) and ship.grid.hull.has(b[1]), key + ": the frame holds the built ship, outside halves of the mounts included")
-		var built: Array = ship.grid.tiles.keys() + ship.cables.cells.keys()
-		for uid in ship.components.instances:
-			built.append_array(ship.components.instances[uid]["cells"])
-			built.append_array(ship.components.instances[uid]["out_cells"])
-		check(built.all(func(c): return ship.grid.hull.has(c)), key + ": every tile, cable and part is on the frame")
+		check(ship.grid.hull.has(b[0]) and ship.grid.hull.has(b[1]), key + ": the frame holds the built ship, outside halves of the mounts included")
+		check(_built(ship).all(func(c): return ship.grid.hull.has(c)), key + ": every tile, cable and part is on the frame")
 		var centre := Vector2(lo + hi + Vector2i.ONE) / 2.0
 		check((centre - Vector2(31.5, 31.5)).length() <= 1.0, "%s: the frame is centred in the grid (%s)" % [key, str(centre)])
 		var box := (hi - lo + Vector2i.ONE)
 		check(ship.grid.hull.size() < 0.9 * box.x * box.y, "%s: the frame is a silhouette, not a rectangle (%d of %d cells)" % [key, ship.grid.hull.size(), box.x * box.y])
-		if OLD_HULL.has(key):
-			var growth := float(ship.grid.hull.size()) / float(OLD_HULL[key])
-			check(growth >= MIN_GROWTH and growth <= MAX_GROWTH, "%s: the frame is %.2fx today's old hull (%d cells), 1.8 to 2.3 wanted" % [key, growth, ship.grid.hull.size()])
 		check(ship.grid.hull.size() >= MIN_FRAME and ship.grid.hull.size() <= MAX_FRAME, "%s: a frame of %d cells (%d to %d wanted)" % [key, ship.grid.hull.size(), MIN_FRAME, MAX_FRAME])
+
+
+## Every cell a ship has built: tiles, cables, parts and the outside halves of the mounts.
+func _built(ship: Ship) -> Array:
+	var built: Array = ship.grid.tiles.keys() + ship.cables.cells.keys()
+	for uid in ship.components.instances:
+		built.append_array(ship.components.instances[uid]["cells"])
+		built.append_array(ship.components.instances[uid]["out_cells"])
+	return built
+
+
+func test_every_starter_frame_is_a_disc_of_radius_29_that_holds_every_built_cell() -> void:  # playtest 2, B1: the build area is round, so any shape is possible
+	for key in _all():
+		var ship := _ship(key)
+		var g = ship.grid
+		var built := {}
+		for c in _built(ship):
+			built[c] = true
+		var missing := 0
+		for y in g.size.y:
+			for x in g.size.x:
+				var c := Vector2i(x, y)
+				if (c - FRAME_MID).length_squared() <= FRAME_R * FRAME_R and not g.hull.has(c):
+					missing += 1
+		eq(missing, 0, "%s: every cell of the disc is on the frame" % key)
+		var strays: Array = g.hull.keys().filter(func(c): return (c - FRAME_MID).length_squared() > FRAME_R * FRAME_R and not built.has(c))
+		eq(strays.size(), 0, "%s: no cell off the disc unless something is built on it (%s)" % [key, str(strays.slice(0, 4))])
+		check(built.keys().all(func(c): return g.hull.has(c)), "%s: the frame holds every built cell" % key)
+		check(g.hull.has(FRAME_MID + Vector2i(FRAME_R, 0)) and g.hull.has(FRAME_MID - Vector2i(FRAME_R, 0)) and g.hull.has(FRAME_MID + Vector2i(0, FRAME_R)) and g.hull.has(FRAME_MID - Vector2i(0, FRAME_R)), "%s: the disc reaches its radius on all four sides" % key)
 
 
 func test_each_starter_has_at_most_ten_parts_and_at_least_half_of_its_frame_empty() -> void:
@@ -561,24 +581,19 @@ func test_the_pack_starters_are_no_rectangles_and_mount_on_flat_walls() -> void:
 		eq(lost.size(), 0, "%s: every floor cell is reachable from the helm by a 2x2 body (%s)" % [id, str(lost.slice(0, 6))])
 
 
-## A signature of a ship's look: the cells of its frame and of its walls, from the top left of the frame.
-func _look(ship: Ship) -> Array:
+## A signature of a ship's look: the cells of its walls, from the top left of the frame (the same disc for every starter).
+func _look(ship: Ship) -> int:
 	var lo := Vector2i(1 << 20, 1 << 20)
 	for c in ship.grid.hull:
 		lo = lo.min(c)
-	var frame := ship.grid.hull.keys().map(func(c): return [c.x - lo.x, c.y - lo.y])
 	var walls := ship.grid.tiles.keys().filter(func(c): return ship.grid.tile_flag(ship.grid.tiles[c], "solid")).map(func(c): return [c.x - lo.x, c.y - lo.y])
-	frame.sort()
 	walls.sort()
-	return [hash(str(frame)), hash(str(walls))]
+	return hash(str(walls))
 
 
-func test_every_starter_has_a_silhouette_of_its_own() -> void:
-	var frames := {}
+func test_every_starter_has_a_silhouette_of_its_own() -> void:  # the frame is the same big disc for all of them (B1), so each has its own built hull
 	var cores := {}
 	for key in _all():
 		var look := _look(_ship(key))
-		check(not frames.has(look[0]), "%s: its frame is not the frame of %s" % [key, frames.get(look[0], "")])
-		check(not cores.has(look[1]), "%s: its hull is not the hull of %s" % [key, cores.get(look[1], "")])
-		frames[look[0]] = key
-		cores[look[1]] = key
+		check(not cores.has(look), "%s: its hull is not the hull of %s" % [key, cores.get(look, "")])
+		cores[look] = key
