@@ -33,6 +33,8 @@ var escape_pos := Vector2.ZERO  ## where the enemy was when it jumped away (esca
 var escape_time := -1.0  ## the arena time it jumped
 var refused_at := -1.0  ## arena time the offer was refused (fighting_on after an offer), else -1
 var rolls := 0  ## style rolls made: one per fight at most
+var faction := ""  ## the faction of a generated enemy (its ai `faction`), whose lines in cfg["lines"] it says; "" for an authored design
+var captain := ""  ## the name of its captain (the `captain` of its ai, else the first of its crew plan) when it has a faction
 
 var _unarmed := 0.0  # seconds with no weapon able to fire
 var _down := 0.0  # seconds every crew member has been down
@@ -59,6 +61,11 @@ func _init(p_arena, p_enemy: int, p_player: int, p_style := "default", p_cfg := 
 	style = p_style
 	cfg = p_cfg if not p_cfg.is_empty() else config()
 	_cursor = arena.events.size()
+	var ship = arena.ships[enemy].ship
+	var ai: Dictionary = ship.get_meta("ai", {})
+	faction = str(ai.get("faction", ""))
+	if faction != "":
+		captain = str(ai.get("captain", ship.crew_plan[0]["name"] if not ship.crew_plan.is_empty() else ""))
 
 
 ## The style's weights: {surrender, flee, fight}.
@@ -120,18 +127,54 @@ func accept() -> String:
 	return ""
 
 
-## The line for the HUD banner ("" for none): the hail with its offer, the spool, the refusal.
+## The line for the HUD banner ("" for none): the hail, the offer with its hail, the spool, the refusal. A generated
+## enemy speaks in its faction's words (data/morale.json lines) as "Captain Vex of the Dental Plan"; an authored design
+## keeps the plain lines.
 func banner() -> String:
-	var name := str(arena.ships[enemy].ship.name)
+	var who := speaker()
 	match state:
+		"steady":
+			var window: Array = cfg.get("hail_s", [])
+			var hail := say("hail")
+			if hail != "" and window.size() == 2 and arena.time() >= float(window[0]) and arena.time() < float(window[1]):
+				return "%s hails: '%s'" % [who, hail]
 		"offering":
-			return "The %s hails: 'Enough! Take it and let us go.' Offer: %s. Y accept / keep firing to refuse (%d s)" % [name, offer_text(), ceili(offer_left)]
+			return "%s hails: '%s' Offer: %s. Y accept / keep firing to refuse (%d s)" % [who, say("surrender", "Enough! Take it and let us go."), offer_text(), ceili(offer_left)]
 		"fleeing":
-			return "The %s is spooling its jump drive! Knock out its engines or helm" % name
+			var cry := say("flee")
+			if cry != "":
+				return "%s: '%s' Spooling its jump drive! Knock out its engines or helm" % [who, cry]
+			return "%s is spooling its jump drive! Knock out its engines or helm" % who
 		"fighting_on":
 			if refused_at >= 0.0 and arena.time() - refused_at < float(cfg["refused_banner_s"]):
-				return "They take that as a no"
+				var no := say("refuse")
+				return "%s: '%s'" % [who, no] if no != "" else "They take that as a no"
 	return ""
+
+
+## Who speaks for the enemy: "Captain Vex of the Dental Plan" for a ship with a faction that names a captain, else "The <ship>".
+func speaker() -> String:
+	var ship_name := str(arena.ships[enemy].ship.name)
+	var title := str(_lines().get("title", ""))
+	if title != "" and captain != "":
+		return "%s %s of the %s" % [title, captain, ship_name.trim_prefix("The ")]
+	return ship_name if ship_name.begins_with("The ") else "The " + ship_name
+
+
+## One `kind` line (hail, surrender, flee or refuse) of the enemy's faction, picked by the hash of its ship's name so it always
+## says the same one; `fallback` when the faction has none (an authored design).
+func say(kind: String, fallback := "") -> String:
+	var pool = _lines().get(kind, [])
+	if not (pool is Array) or pool.is_empty():
+		return fallback
+	var ship_name := str(arena.ships[enemy].ship.name)
+	return str(pool[(ship_name + kind).hash() % pool.size()]).format({"captain": captain, "ship": ship_name})
+
+
+func _lines() -> Dictionary:
+	var all = cfg.get("lines", {})
+	var mine = all.get(faction, {}) if all is Dictionary and faction != "" else {}
+	return mine if mine is Dictionary else {}
 
 
 ## The offer in words: "45 credits, 2 missiles".

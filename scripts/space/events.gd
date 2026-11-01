@@ -32,6 +32,7 @@ const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Characters = preload("res://scripts/crew/characters.gd")
+const Backstory = preload("res://scripts/crew/backstory.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
@@ -439,7 +440,11 @@ func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dicti
 	var res := apply(_dict(outcome.get("effects")), c, ship, node)
 	lines.append_array(res["lines"])
 	var after: Dictionary = _dict(outcome.get("after_win")) if outcome.has("after_win") else _dict(ev.get("after_win"))
-	return {"ok": true, "why": "", "text": str(outcome.get("text", "")), "lines": lines, "goto": res["goto"], "fight": res["fight"], "ending": res["ending"], "logs": res["logs"], "after_win": after}
+	var text := str(outcome.get("text", ""))
+	for t in res["told"]:
+		if str(t) != "":
+			text += "\n\n" + str(t)  # what a new crew member says about themselves, under the outcome's text
+	return {"ok": true, "why": "", "text": text, "lines": lines, "goto": res["goto"], "fight": res["fight"], "ending": res["ending"], "logs": res["logs"], "after_win": after}
 
 
 ## The title of landmark event `ev` ("" when it is not one): its `landmark` text, else its id as words.
@@ -469,12 +474,13 @@ static func roll(outcomes, rng: RandomNumberGenerator) -> Dictionary:
 
 # --- effects ------------------------------------------------------------------------------------------
 
-## Apply `effects` to campaign `c` and `ship`. Returns {lines, goto, fight, ending, logs}: the changes in words,
-## the follow-up page, the fight to start and the ending reached (each "" when there is none) and the derelict logs
+## Apply `effects` to campaign `c` and `ship`. Returns {lines, told, goto, fight, ending, logs}: the changes in words,
+## what the new crew say about themselves (`told`), the follow-up page, the fight to start and the ending reached (each "" when there is none) and the derelict logs
 ## found. The fight is not started here, and the ending screen is not opened (the event panel does).
 func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 	var lines: Array = []
 	var found: Array = []
+	var told: Array = []  # what the people who joined say about themselves (Backstory.intro): a paragraph under the outcome text
 	var items := _dict(effects.get("items"))
 	var ids: Array = items.keys()
 	ids.sort()
@@ -524,6 +530,7 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 		var who: String = c.add_crew(ship, str(rd.get("name", "")), species, str(rd.get("character", "")))
 		if who != "":
 			lines.append("%s (%s) joins the crew" % [who, Characters.label(chr) if not chr.is_empty() else species.capitalize()])
+			told.append(Backstory.intro(who, Characters.species_id(chr) if not chr.is_empty() else species, str(rd.get("character", ""))))
 	if effects.has("lose_crew"):
 		var count = effects["lose_crew"]
 		var n: int = (1 if count else 0) if count is bool else int(count)
@@ -543,7 +550,7 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 	var ending := str(effects.get("ending", ""))
 	if ending != "":
 		c.finish(ending)
-	return {"lines": lines, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "ending": ending, "logs": found}
+	return {"lines": lines, "told": told, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "ending": ending, "logs": found}
 
 
 # --- validation ---------------------------------------------------------------------------------------

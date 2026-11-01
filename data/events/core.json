@@ -145,7 +145,7 @@
 		},
 		{
 			"id": "patrol_inspection", "type": "patrol", "weight": 10,
-			"text": "A Concord cutter, CS-114 Diligence, matches your speed and hails you. \"Officer Hallett. This is a routine inspection. Please do not make it exciting.\"",
+			"text": "A Concord cutter matches your speed and hails you. \"Officer Hallett. This is a routine inspection. Please do not make it exciting.\"",
 			"choices": [
 				{"text": "Submit to the inspection.", "outcomes": [
 					{"weight": 80, "text": "Stamps, forms, a long look at your reactor. \"Have a lawful day,\" says Hallett, and sounds like he means it.", "effects": {"rep": {"concord": 1}}},

@@ -251,7 +251,7 @@
     },
     {
       "id": "pirate_rammer_wrong_ship", "type": "pirate", "weight": 10, "once": false, "requires": {"jumps_min": 5},
-      "text": "A Rustfang rammer, the Collections, with a bow like a front door and REPO CREW painted along the flank. 'Debtor vessel Wet Paint,' says a flat voice, reading off a card. 'Surrender the hull. We have a form.' You are not the Wet Paint. Nobody aboard the Collections has checked.",
+      "text": "A Rustfang rammer with a bow like a front door and REPO CREW painted along the flank. 'Debtor vessel Wet Paint,' says a flat voice, reading off a card. 'Surrender the hull. We have a form.' You are not the Wet Paint. Nobody aboard has checked.",
       "choices": [
         {"text": "Show them your registry. You are not the Wet Paint.", "outcomes": [
           {"weight": 60, "text": "A pause. Paper rustles. 'Ah,' says the voice. 'Our spreadsheet is, uh, forty years old.' They peel away, offering a coupon for ten percent off your next repossession and fifteen credits for the trouble.", "effects": {"items": {"credits": 15}}},
@@ -259,7 +259,7 @@
         ]},
         {"text": "[Fenn] Read their spreadsheet back to them, upside down.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 85, "text": "Your Fenn finds the error in six seconds: the Wet Paint is blue, and you are not. The voice apologises, then pays a 'procedural error fee' out of habit.", "effects": {"items": {"credits": 40}}},
-          {"weight": 15, "text": "Your Fenn is right, which makes the Collections angrier, not happier.", "effects": {"fight": "rustfang_rammer"}}
+          {"weight": 15, "text": "Your Fenn is right, which makes the repo crew angrier, not happier.", "effects": {"fight": "rustfang_rammer"}}
         ]},
         {"text": "Pay them to go away (40 credits).", "requires": {"credits": 40}, "outcomes": [
           {"weight": 100, "text": "They hand you a receipt for a repossession that never happened. It might be useful to somebody someday.", "effects": {"items": {"credits": -40}}}
@@ -268,11 +268,11 @@
           {"weight": 100, "text": "'Right,' says the voice. 'Form 2, then.'", "effects": {"fight": "rustfang_rammer"}}
         ]}
       ],
-      "after_win": {"text": "The Collections comes apart in a slow drift of forms, all addressed to the Wet Paint. Wherever she is, the Wet Paint has had a very lucky day.", "effects": {"rep": {"concord": 1}, "items": {"credits": 30}}}
+      "after_win": {"text": "The rammer comes apart in a slow drift of forms, all addressed to the Wet Paint. Wherever she is, the Wet Paint has had a very lucky day.", "effects": {"rep": {"concord": 1}, "items": {"credits": 30}}}
     },
     {
       "id": "pirate_rammer_stolen_reactor", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 4},
-      "text": "A clan rammer, the Cousin's Reactor, comes up your tail with a wedge of welded girders for a bow. A woman who has not slept in two days is on the comm. 'Which one of you,' she says, 'has my cousin's reactor?' She is looking at you.",
+      "text": "A clan rammer comes up your tail with a wedge of welded girders for a bow. A woman who has not slept in two days is on the comm. 'Which one of you,' she says, 'has my cousin's reactor?' She is looking at you.",
       "choices": [
         {"text": "Point confidently at a part of space.", "outcomes": [
           {"weight": 55, "text": "You tell her you saw a reactor, a big one, going that way. She believes you. She goes. Somewhere, a stranger is about to have a surprise.", "effects": {}},
@@ -304,10 +304,10 @@
         ]},
         {"text": "[Fenn] Audit the draw.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 80, "text": "Your Fenn has the drum open and the odds written on your hull in two minutes. The draw was rigged, badly, in Vex's own favour. He pays out in scrap and shame.", "effects": {"items": {"scrap": 30, "fuel": 1}}},
-          {"weight": 20, "text": "Your Fenn is right, and Vex does not like it.", "effects": {"fight": "pirate_raider"}}
+          {"weight": 20, "text": "Your Fenn is right, and Vex does not like it.", "effects": {"fight": "dental_plan"}}
         ]},
         {"text": "Tear the ticket book in half.", "outcomes": [
-          {"weight": 100, "text": "Vex looks at the ticket book. Then at you. 'That,' he says, quietly, 'was the good book.'", "effects": {"fight": "pirate_raider"}}
+          {"weight": 100, "text": "Vex looks at the ticket book. Then at you. 'That,' he says, quietly, 'was the good book.'", "effects": {"fight": "dental_plan"}}
         ]},
         {"text": "Decline. Fly past slowly.", "outcomes": [
           {"weight": 100, "text": "'Third prize it is,' says Vex, and lets you go. Behind you, a toaster alarm goes off.", "effects": {}}
@@ -604,14 +604,14 @@
     },
     {
       "id": "pirate_skarn_deckhand", "type": "pirate", "weight": 30, "once": true, "requires": {"flag": "bounty_1"},
-      "text": "A Rustfang skiff, the Sore Loser, drifts with her drive out and one man on the hull, waving a wrench. 'I was Skarn's,' he says, 'till he stopped paying me. Nine months. He still owes me a hat.' He knows where the Eviction Notice is going. He would like very much to be paid for knowing.",
+      "text": "A Rustfang skiff drifts with her drive out and one man on the hull, waving a wrench. 'I was Skarn's,' he says, 'till he stopped paying me. Nine months. He still owes me a hat.' He knows where the Eviction Notice is going. He would like very much to be paid for knowing.",
       "choices": [
         {"text": "Pay for the tip (40 credits).", "requires": {"credits": 40}, "outcomes": [
           {"weight": 100, "text": "The deckhand pockets the money, kisses it, and draws a route on your console in grease pencil. 'He's heading for the lane by a Concord marker,' he says. 'Bring him back, if you can. Bring the hat.'", "effects": {"items": {"credits": -40}, "flag": "bounty_2", "reveal": "patrol"}}
         ]},
         {"text": "Lean on him.", "outcomes": [
           {"weight": 60, "text": "You lean. He folds like a deckchair and spills everything, including some things about Skarn's mother. It is useful, in places.", "effects": {"flag": "bounty_2", "reveal": "patrol"}},
-          {"weight": 40, "text": "He leans back. The Sore Loser's friends come out of the debris with their guns warm.", "effects": {"flag": "bounty_2", "fight": "pirate_raider"}}
+          {"weight": 40, "text": "He leans back. The skiff's friends come out of the debris with their guns warm.", "effects": {"flag": "bounty_2", "fight": "pirate_raider"}}
         ]},
         {"text": "[Basalt] Let your Basalt stand behind you and say nothing.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 100, "text": "Your Basalt stands behind you and says nothing, vast and patient as a cliff. The deckhand tells you everything in under a minute, then asks if he can please go and sit down.", "effects": {"flag": "bounty_2", "rep": {"concord": 1}, "reveal": "patrol"}}
@@ -620,7 +620,7 @@
           {"weight": 100, "text": "'Fine,' he says. 'Fine! Nine months!' His voice follows you for a good while, fainter each time, the way a debt does.", "effects": {}}
         ]}
       ],
-      "after_win": {"text": "Among the Sore Loser's wreckage, a crew ledger: nine months of wages owed by Skarn, every line signed off with a small, apologetic S. You send a copy to Hallett, out of sympathy.", "effects": {"rep": {"concord": 1}, "items": {"credits": 15}}}
+      "after_win": {"text": "Among the skiff's wreckage, a crew ledger: nine months of wages owed by Skarn, every line signed off with a small, apologetic S. You send a copy to Hallett, out of sympathy.", "effects": {"rep": {"concord": 1}, "items": {"credits": 15}}}
     },
     {
       "id": "patrol_hallett_dented", "type": "patrol", "weight": 30, "once": true, "requires": {"flag": "bounty_2"},
@@ -642,7 +642,7 @@
     },
     {
       "id": "pirate_skarn_escort", "type": "pirate", "weight": 30, "once": true, "requires": {"flag": "bounty_3"},
-      "text": "Two Rustfang gunboats, the Overbite and the Spare Teeth, sit on a Concord lane marker like crows on a fence. 'Hallett's dog,' says one. 'Skarn said you'd come. He said to say he's looking forward to it.' Somewhere beyond them, the Eviction Notice is warming up. You can hear it in the way the dark leans.",
+      "text": "Two Rustfang gunboats sit on a Concord lane marker like crows on a fence. 'Hallett's dog,' says one. 'Skarn said you'd come. He said to say he's looking forward to it.' Somewhere beyond them, the Eviction Notice is warming up. You can hear it in the way the dark leans.",
       "choices": [
         {"text": "Fight.", "outcomes": [
           {"weight": 100, "text": "There is a time for talking, and it ended around the word 'dog'.", "effects": {"flag": "bounty_4", "fight": "pirate_raider"}}
@@ -666,17 +666,17 @@
       "text": "The Eviction Notice comes out of the dark at ramming speed, with a bow like a front door and a voice on the comm like a man cheerfully reading his own will. 'Hallett sent you?' says Skarn. 'Tell him he owes me a buffet.' The bow swings. The lights along his flank are strobing in a pattern that might be a laugh.",
       "choices": [
         {"text": "Meet him head on.", "outcomes": [
-          {"weight": 50, "text": "Skarn clips you on the first pass, with feeling. The rest is a negotiation, conducted in hulls.", "effects": {"hull": -10, "fight": "rustfang_rammer"}},
-          {"weight": 50, "text": "You angle away at the last second, and the Eviction Notice screams past a metre from your skin. The fight is on.", "effects": {"fight": "rustfang_rammer"}}
+          {"weight": 50, "text": "Skarn clips you on the first pass, with feeling. The rest is a negotiation, conducted in hulls.", "effects": {"hull": -10, "fight": "eviction_notice"}},
+          {"weight": 50, "text": "You angle away at the last second, and the Eviction Notice screams past a metre from your skin. The fight is on.", "effects": {"fight": "eviction_notice"}}
         ]},
         {"text": "[Inertial Dampener] Brace the crew and take the ram on your terms.", "requires": {"component": "inertial_dampener"}, "outcomes": [
-          {"weight": 100, "text": "The Dampener drinks the first hit in a long, deep hum. Skarn looks surprised, and a little hurt, as the Eviction Notice bounces and your crew keep their feet.", "effects": {"fight": "rustfang_rammer"}}
+          {"weight": 100, "text": "The Dampener drinks the first hit in a long, deep hum. Skarn looks surprised, and a little hurt, as the Eviction Notice bounces and your crew keep their feet.", "effects": {"fight": "eviction_notice"}}
         ]},
         {"text": "[Battering Bow] Point your own wedge at his and see who blinks.", "requires": {"component": "battering_bow"}, "outcomes": [
-          {"weight": 100, "text": "Two wedges, one lane, no brakes. Skarn laughs on the comm, delighted to be met properly for the first time in years, and the guns open up.", "effects": {"fight": "rustfang_rammer"}}
+          {"weight": 100, "text": "Two wedges, one lane, no brakes. Skarn laughs on the comm, delighted to be met properly for the first time in years, and the guns open up.", "effects": {"fight": "eviction_notice"}}
         ]},
         {"text": "Hail him: 'About that buffet.'", "outcomes": [
-          {"weight": 100, "text": "Skarn howls with laughter, then stops, then rams. The two things do not seem to be connected.", "effects": {"fight": "rustfang_rammer"}}
+          {"weight": 100, "text": "Skarn howls with laughter, then stops, then rams. The two things do not seem to be connected.", "effects": {"fight": "eviction_notice"}}
         ]}
       ],
       "after_win": {"text": "The Eviction Notice comes apart slowly, for such a violent ship, and in the middle of the wreck, intact and slightly singed, is a hat, with a deckhand's name sewn inside the band. You keep it, in case you pass him on a hull. CS-114 Diligence arrives eleven minutes later, which for Concord is a record. Hallett reads the wreck, then the receipt, then signs both. 'It is the first form I have closed in forty years,' he says, and holds the stamp a moment before he uses it. He pays the two hundred, and after a pause, a small salute that is not on any form.", "effects": {"items": {"credits": 200}, "rep": {"concord": 3}, "flag": "hallett_bounty_done"}}
