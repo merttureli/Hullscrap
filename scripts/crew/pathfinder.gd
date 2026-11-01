@@ -17,13 +17,16 @@ const FAR := 1 << 30
 
 
 ## Can a crew member stand on `c`? `door_passable` is a Callable(cell) -> bool for door cells;
-## an invalid (default) Callable means every door is passable.
+## an invalid (default) Callable means every door is passable but a locked one (grid.door_locked: the doors of an
+## abandoned room), which only a valid Callable that says yes lets through (the player's soldier walks in).
 static func walkable(grid: ShipGrid, c: Vector2i, door_passable: Callable = Callable()) -> bool:
 	var id := grid.get_tile(c)
 	if id == "":
 		return false
 	var def: Dictionary = grid.defs.get_def(id) if grid.defs != null else {}
 	if def.get("door", false):
+		if grid.door_locked.has(c):
+			return door_passable.is_valid() and bool(door_passable.call(c))
 		return not door_passable.is_valid() or bool(door_passable.call(c))
 	return not def.get("solid", false)
 

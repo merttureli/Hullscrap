@@ -15,6 +15,7 @@ var defs  # tile_defs.gd instance, or null for a rule-less grid
 var hull := {}   # Vector2i -> true: cells where building is allowed
 var tiles := {}  # Vector2i -> tile id
 var door_open := {}  # Vector2i -> true for doors that are open; closed doors are absent
+var door_locked := {}  # Vector2i -> true for the doors of an abandoned room (Evacuate.sync sets them, K2): crew's paths avoid them unless the caller passes its own door_passable; not saved
 var hp := {}  # Vector2i -> float: current hp of damaged cells (a cell not listed has full hp)
 var hp_max := {}  # Vector2i -> float: max hp of cells burnt below their tile's hp (ablative); others are absent
 var hp_mult := {}  # Vector2i -> float: factor on a wall's max hp from a part in the room it bounds (Stonehide bay), set when a fight starts; not saved
@@ -147,6 +148,7 @@ func force_tile(c: Vector2i, id: String, shape := {}) -> void:
 	else:
 		tiles[c] = id
 	door_open.erase(c)
+	door_locked.erase(c)
 	hp.erase(c)
 	hp_max.erase(c)
 	breached.erase(c)

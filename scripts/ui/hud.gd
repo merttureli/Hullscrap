@@ -10,6 +10,7 @@ const PalettePanel = preload("res://scripts/ui/hud_palette.gd")
 const InfoCard = preload("res://scripts/ui/hud_card.gd")
 const ModeBar = preload("res://scripts/ui/hud_mode_bar.gd")
 const LogPanel = preload("res://scripts/ui/hud_log.gd")
+const StationBar = preload("res://scripts/ui/station_bar.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const MARGIN := 8.0
@@ -28,6 +29,7 @@ var palette: Control
 var card: Control
 var mode_bar: Control
 var log_panel: Control
+var station_bar: Control  ## one button per crewable part, left edge above the log, in play mode (K1)
 var hint_rect := Rect2()  ## where the message and the key hints are drawn
 var view := Vector2(1600, 900)  ## the screen size of the last layout
 var cursor_state := ""  ## the kit cursor on show: "" (the system's), place, remove or invalid
@@ -44,6 +46,7 @@ func setup(p_build: Node) -> void:
 	build = p_build
 	top_bar = _add(TopBar.new())
 	log_panel = _add(LogPanel.new())
+	station_bar = _add(StationBar.new())
 	palette = _add(PalettePanel.new())
 	card = _add(InfoCard.new())
 	mode_bar = _add(ModeBar.new())
@@ -76,12 +79,13 @@ func sync(p_view: Vector2) -> void:
 	visible = not build.combat and build.ship != null and (picker == null or not picker.visible)
 	palette.visible = build.build_on
 	card.visible = build.build_on
+	station_bar.visible = not build.build_on and station_bar.count() > 0
 	layout(p_view)
 
 
 ## Place every panel for a screen of `p_view` px: the top bar across, the palette over the log on the left, the
 ## card on the right, the mode bar at the bottom centre (icons only when it would not fit between the sides) and
-## the hints over it, between the side columns.
+## the hints over it, between the side columns. In play mode the station bar stands over the log, on the left edge.
 func layout(p_view: Vector2) -> void:
 	view = p_view
 	var side := SIDE_W + 2.0 * MARGIN
@@ -89,6 +93,8 @@ func layout(p_view: Vector2) -> void:
 	var log_h: float = log_panel.wanted_height()
 	_place(log_panel, Rect2(MARGIN, view.y - MARGIN - log_h, SIDE_W, log_h))
 	_place(palette, Rect2(MARGIN, TOP_H + MARGIN, SIDE_W, view.y - log_h - TOP_H - 3.0 * MARGIN))
+	var strip: Vector2 = StationBar.size_for(station_bar.count(), view.y - log_h - TOP_H - 3.0 * MARGIN)  # (the palette's place, which play mode does not use)
+	_place(station_bar, Rect2(MARGIN, log_panel.position.y - MARGIN - strip.y, strip.x, strip.y))
 	mode_bar.compact = ModeBar.width_for(false) > view.x - 2.0 * side
 	var mw: float = mode_bar.full_width()
 	_place(mode_bar, Rect2(floorf((view.x - mw) / 2.0), view.y - MARGIN - MODE_H, mw, MODE_H))
@@ -106,7 +112,7 @@ func _place(c: Control, r: Rect2) -> void:
 ## The rect of every panel on show (name -> Rect2, screen px), the hints included when there are any.
 func panel_rects() -> Dictionary:
 	var out := {}
-	for n in ["top_bar", "palette", "card", "mode_bar", "log_panel"]:
+	for n in ["top_bar", "palette", "card", "mode_bar", "log_panel", "station_bar"]:
 		var c: Control = get(n)
 		if c.visible:
 			out[n] = Rect2(c.position, c.size)

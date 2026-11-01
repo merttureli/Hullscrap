@@ -28,6 +28,11 @@ extends RefCounted
 ## breach). A crew member at a station marks it in `ship.manned` (uid -> name): a manned helm adds
 ## evasion in a fight and a manned weapon cools down faster (see evasion_bonus, cooldown_mult), and a manned
 ## smelter works faster (processing.gd; its post is on the board only while it has a queue).
+## A crew member posted to a station (CrewMember.post, posts.gd, K1) mans it for good: the board gives them only their post and what
+## Posts.allows (a fire or breach in its room, repairing it, restocking its gun's rack), and unposted crew leave a held post alone.
+## An abandoned room (evacuate.gd, K2) has no jobs on the board: they wait in `closed`, where only the player's hand (hand_work) reaches them.
+## A crew member who breathes and is hurt (hp under crew.json air.hurt_below) walks out of an airless room and takes no job in one until
+## their hp is over air.back_above again (K3; drones, vacuum_walk, o2_use 0 and suits are exempt).
 ## A repair drone (CrewMember.is_drone, R1) is handed only the jobs of crew.json `drone_jobs`, and only while Power.feed_drones powers it
 ## (without power it stands still); at 0 hp it is broken, not dead: a crewmate's repair_crew job (or the player's hand) mends it.
 
@@ -41,6 +46,8 @@ const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Processing = preload("res://scripts/craft/processing.gd")
 const Power = preload("res://scripts/sim/power.gd")
+const Posts = preload("res://scripts/crew/posts.gd")
+const Evacuate = preload("res://scripts/crew/evacuate.gd")
 const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
 const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
@@ -54,6 +61,7 @@ const WORK_KIND := {"extinguish": "extinguish", "repair_breach": "breach", "repa
 
 var board := {}  ## job key -> job: {key, type, priority, cells, slots, work, label, ...}
 var progress := {}  ## job key -> seconds of work done so far (kept while the job stays on the board)
+var closed := {}  ## job key -> job: the jobs of abandoned rooms, off the board (nobody is sent), but the player's hand_work still does them
 var orders := {}  ## job key -> job: repairs the player ordered (F), kept until done
 var patients := {}  ## medbay uid -> the name of the one crew member it is healing (a medbay is one bed)
 var restocking := {}  ## rack uid -> true: racks a crew member has started filling (they fill them to the top, not just to half)
@@ -97,12 +105,11 @@ func hand_work(ship, m, dt: float) -> String:
 	if m.is_down() or m.is_stunned():
 		return ""
 	var tools: bool = not TraitSet.of(m)["no_tools"]
-	for key in by_priority(board.values()).map(func(j): return j["key"]):
-		var job: Dictionary = board[key]
+	for job in by_priority(board.values() + closed.values()):  # (an abandoned room's jobs too: the soldier may still go in)
 		if job["type"] != "man_station" and in_reach(m, job) and not _is_own(job, m) and (tools or not job["type"] in TOOL_JOBS):
 			work(ship, m, job, dt)
-			m.job = {"key": key, "type": job["type"], "label": job["label"], "hand": true, "t": ship.clock}
-			return key
+			m.job = {"key": job["key"], "type": job["type"], "label": job["label"], "hand": true, "t": ship.clock}
+			return job["key"]
 	return ""
 
 
@@ -117,13 +124,13 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 				ship.fires[foot] = float(ship.fires[foot]) - rate
 				if ship.fires[foot] <= 0.0:
 					Fire.extinguish(ship, foot)
-					board.erase("fire:%d,%d" % [foot.x, foot.y])
+					_erase("fire:%d,%d" % [foot.x, foot.y])
 				return
 			if ship.fires.has(c):
 				ship.fires[c] = float(ship.fires[c]) - rate
 			if not ship.fires.has(c) or ship.fires[c] <= 0.0:
 				Fire.extinguish(ship, c)
-				board.erase(job["key"])  # done: everyone on it moves on at the next hand-out
+				_erase(job["key"])  # done: everyone on it moves on at the next hand-out
 				_since = 1.0e9
 		"man_station":
 			ship.manned[job["uid"]] = m.name
@@ -138,7 +145,7 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 			if Ammo.restock_done(ship, rack):
 				restocking.erase(rack)
 				progress.erase(job["key"])
-				board.erase(job["key"])
+				_erase(job["key"])
 				_since = 1.0e9
 		"repair_breach", "repair_component", "revive", "clear_wreck", "repair_belt":
 			var key: String = job["key"]
@@ -152,7 +159,7 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 			if open and who.hp < who.max_hp:
 				who.heal(float(jcfg()["repair_crew"]["rate"]) * _work_rate(ship, m, "repair_crew") * dt)
 			if not open or who.hp >= who.max_hp:
-				board.erase(job["key"])
+				_erase(job["key"])
 				_since = 1.0e9
 
 
@@ -169,6 +176,12 @@ static func _is_own(job: Dictionary, m) -> bool:
 	return job["type"] == "repair_crew" and job["who"] == m.name
 
 
+## Take job `key` off the board (and off the closed jobs of abandoned rooms).
+func _erase(key: String) -> void:
+	board.erase(key)
+	closed.erase(key)
+
+
 # --- the board ----------------------------------------------------------------------------------
 
 ## Rebuild the board from the state of `ship`.
@@ -176,6 +189,9 @@ func build_board(ship) -> void:
 	var b := {}
 	var j := jcfg()
 	var grid = ship.grid
+	Posts.prune(ship)
+	Evacuate.sync(ship)
+	var holders := Posts.holders(ship)
 	for c in Fire.sorted_cells(ship.fires.keys()):
 		_add(b, _job("extinguish", "fire:%d,%d" % [c.x, c.y], [c], {"cell": c}))
 	for m in ship.crew:
@@ -200,8 +216,8 @@ func build_board(ship) -> void:
 		var family := str(def.get("family", ""))
 		if inst["status"] in FAULTY or ship.outside_hurt(uid):
 			_add(b, _fix_job(ship, uid))
-		if family == "helm" or (bool(def.get("manned", false)) and family in j["man_station"]["families"] and Processing.post_wanted(ship, uid)):
-			var post := _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def)})
+		if family == "helm" or holders.has(uid) or (bool(def.get("manned", false)) and family in j["man_station"]["families"] and Processing.post_wanted(ship, uid)):
+			var post := _job("man_station", "post:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]), "family": family, "needs": _needs_of(def), "held": holders.get(uid, "")})
 			if family != "helm" and (combat if family == "smelter" else not combat):
 				# nothing to shoot at: the helm first, the autopilot needs it; a smelter's post only exists while it has work, so it
 				# keeps its priority then and gives way to the guns in a fight
@@ -223,9 +239,17 @@ func build_board(ship) -> void:
 			orders.erase(key)
 		else:
 			_add(b, orders[key])
+	closed = {}
+	var given_up := Evacuate.cells(ship)
+	if not given_up.is_empty():  # nobody is sent into an abandoned room: its jobs wait for the player's hand or for the room to reopen
+		for key in b.keys():
+			var rooms := _job_rooms(ship, b[key])
+			if not rooms.is_empty() and rooms.all(func(r): return Evacuate.is_abandoned(ship, r)):
+				closed[key] = b[key]
+				b.erase(key)
 	board = b
 	for key in progress.keys():
-		if not board.has(key):
+		if not board.has(key) and not closed.has(key):
 			progress.erase(key)
 
 
@@ -246,7 +270,7 @@ func order_repair(ship, uid: int) -> String:
 	for m in ship.crew:
 		if m.is_player or m.is_drone() or m.is_down() or TraitSet.of(m)["no_tools"]:  # (nobody orders a drone about)
 			continue
-		var d := absi(m.anchor().x - inst["anchor"].x) + absi(m.anchor().y - inst["anchor"].y)
+		var d := absi(m.anchor().x - inst["anchor"].x) + absi(m.anchor().y - inst["anchor"].y) + (1000 if m.post >= 0 else 0)  # (a crew member at a post is the last to be sent)
 		if d < best_d:
 			best = m
 			best_d = d
@@ -279,6 +303,7 @@ func assign(ship) -> void:
 			continue
 		if m.hold > 0.0:
 			continue  # on a manual order
+		_breath_check(ship, m)
 		free.append(m)
 		if m.job.is_empty():
 			continue
@@ -290,7 +315,7 @@ func assign(ship) -> void:
 			m.path.clear()
 	var margin := int(jcfg().get("switch_margin", 30))
 	for m in free:
-		var floor_p := 0 if m.job.is_empty() else int(m.job["priority"]) + margin
+		var floor_p := 0 if m.job.is_empty() or _on_post(m) else int(m.job["priority"]) + margin  # (anything their post allows beats the post)
 		var pick := _pick(ship, m, claims, floor_p)
 		if pick.is_empty():
 			continue
@@ -314,6 +339,10 @@ static func _needs_of(def: Dictionary) -> Array:
 
 ## `job` as `m` sees it: a station that needs traits is worth more to crew who have them, less to the rest.
 static func _for_member(job: Dictionary, m) -> Dictionary:
+	if job["type"] == "man_station" and m.post >= 0 and int(job["uid"]) == m.post:  # their own post: the last thing they do
+		var posted := job.duplicate()
+		posted["priority"] = 1
+		return posted
 	var needs: Array = job.get("needs", [])
 	if job["type"] != "man_station" or needs.is_empty():
 		return job
@@ -332,7 +361,11 @@ func _still_valid(ship, m) -> bool:
 	var spot = job.get("spot")
 	m.job = board[job["key"]].duplicate()
 	m.job["spot"] = spot
-	return true
+	if m.job["type"] == "man_station" and not str(m.job.get("held", "")) in ["", m.name]:
+		return false  # somebody was posted there
+	if m.post >= 0 and not orders.has(m.job["key"]) and not Posts.allows(ship, m, m.job):
+		return false  # posted since: only what the post allows (and an order of the player's)
+	return not (m.winded and _job_airless(ship, m.job))
 
 
 ## The best job for `m` with a priority of at least `floor_p`: {job, spot}, or {} when none.
@@ -346,6 +379,10 @@ func _pick(ship, m, claims: Dictionary, floor_p: int) -> Dictionary:
 			continue
 		if m.is_drone() and not job["type"] in drone_jobs:
 			continue  # a drone takes only the jobs of crew.json drone_jobs: no station, no revive, no mending a crewmate
+		if job["type"] == "man_station" and not str(job.get("held", "")) in ["", m.name]:
+			continue  # a post somebody holds
+		if (m.post >= 0 and not Posts.allows(ship, m, job)) or (m.winded and _job_airless(ship, job)):
+			continue  # posted crew do only what the post allows; hurt crew keep out of airless rooms
 		if int(claims.get(key, 0)) < int(job["slots"]):
 			open.append(job)
 	if open.is_empty():
@@ -433,7 +470,7 @@ func _rest(ship, m) -> void:
 		var cands: Array = []
 		for uid in uids:
 			var inst: Dictionary = ship.components.instances[uid]
-			if ship.components.def(inst["id"]).get("family", "") == family and _rest_ok(ship, uid) and (family != "medbay" or _medbay_open(ship, uid, m)):
+			if ship.components.def(inst["id"]).get("family", "") == family and _rest_ok(ship, uid) and (family != "medbay" or _medbay_open(ship, uid, m)) and (air_exempt(m) or not _cells_airless(ship, inst["cells"])):
 				cands.append(_job("rest", "rest:%d" % uid, inst["cells"], {"uid": uid}))
 		var got := _nearest(ship, m, cands, taken)
 		if not got.is_empty():
@@ -483,6 +520,75 @@ func _rest_ok(ship, uid: int) -> bool:
 	return true
 
 
+## Is `m` standing at the post they were given (that is their job right now)?
+static func _on_post(m) -> bool:
+	return m.post >= 0 and not m.job.is_empty() and m.job["type"] == "man_station" and int(m.job.get("uid", -1)) == m.post
+
+
+# --- bad air (K3) and abandoned rooms (K2) -------------------------------------------------------
+
+## Does `m` need no air, or have a suit? Drones (no breath), vacuum_walk, o2_use 0 and the `suit` trait: they stay in an airless room.
+static func air_exempt(m) -> bool:
+	if m.is_drone():
+		return true
+	var t := TraitSet.of(m)
+	return bool(t["vacuum_walk"]) or float(t["o2_use"]) <= 0.0 or m.traits().has("suit")
+
+
+static func _room_airless(ship, room_id: int) -> bool:
+	return room_id >= 0 and ship.atmosphere.pressure_of(room_id) < float(CrewMember.config()["no_air_below"])
+
+
+## The ids of the rooms round `cells`: a cell's own room, else (a wall cell shot open, a doorway) the rooms beside it.
+static func _rooms_of_cells(ship, cells: Array) -> Array:
+	var out := []
+	for c in cells:
+		var r: int = ship.atmosphere.room_at(c)
+		if r >= 0:
+			if not out.has(r):
+				out.append(r)
+			continue
+		for d in SIDES:
+			var n: int = ship.atmosphere.room_at(c + d)
+			if n >= 0 and not out.has(n):
+				out.append(n)
+	return out
+
+
+static func _job_rooms(ship, job: Dictionary) -> Array:
+	return _rooms_of_cells(ship, job["cells"])
+
+
+static func _cells_airless(ship, cells: Array) -> bool:
+	return _rooms_of_cells(ship, cells).any(func(r): return _room_airless(ship, r))
+
+
+## Is any room of `job` airless?
+static func _job_airless(ship, job: Dictionary) -> bool:
+	return _cells_airless(ship, job["cells"])
+
+
+## K3, once a hand-out: a crew member who breathes becomes `winded` when their hp falls under air.hurt_below (a fraction of the
+## maximum) and stops being so over air.back_above. While winded they take no job in an airless room (_pick), and one standing
+## in such a room drops their job and walks to the nearest room with air (Evacuate.path_out).
+func _breath_check(ship, m) -> void:
+	if air_exempt(m):
+		m.winded = false
+		return
+	var a: Dictionary = CrewMember.config().get("air", {})
+	var frac: float = m.hp / maxf(m.max_hp, 1.0)
+	if m.winded:
+		m.winded = frac <= float(a.get("back_above", 0.7))
+	elif frac < float(a.get("hurt_below", 0.4)):
+		m.winded = true
+	if m.winded and _room_airless(ship, ship.atmosphere.room_at(m.cell())) and (not m.job.is_empty() or m.path.is_empty()):  # (one already walking out keeps going)
+		m.job = {}
+		m.path.clear()
+		var out := Evacuate.path_out(ship, m)
+		if not out.is_empty():
+			m.path.assign(out)
+
+
 # --- walking and working ------------------------------------------------------------------------
 
 ## One tick of a crew member with a job: drop it when it is gone, walk to the spot, work in reach.
@@ -513,7 +619,7 @@ func _finish(ship, job: Dictionary) -> void:
 	var key: String = job["key"]
 	progress.erase(key)
 	orders.erase(key)
-	board.erase(key)
+	_erase(key)
 	_since = 1.0e9
 	match job["type"]:
 		"clear_wreck":

@@ -19,12 +19,20 @@ const ShipView = preload("res://scripts/view/ship_view.gd")
 const Art = preload("res://scripts/view/art.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const CrewBar = preload("res://scripts/ui/crew_bar.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
+const Posts = preload("res://scripts/crew/posts.gd")
+const Fire = preload("res://scripts/sim/fire.gd")
+const Evacuate = preload("res://scripts/crew/evacuate.gd")
 const AIM_DEAD_ZONE := 0.3  ## cells: with the mouse this close to the player, the aim stays where it was
 const PICK_RADIUS := 1.7  ## cells: a left click this close to a body (its centre) selects that crew member
 const SELECT_COLOR := Color("#ffd24a")
+const ABANDONED := Color("#e0453a")  ## the hatching and the tag of an abandoned room
+const TAG_SIZE := 12
+const TAG_TEXT := "Abandoned: click to reopen"
 
-## Callable(cell) -> bool for doors. Auto doors: crew walk through every door and it closes behind
-## them (the simulation counts a door piece as open while a body overlaps it), so there are no locks yet.
+## Callable(cell) -> bool for doors, for the soldier's moves (and the nudges out of a wall). Auto doors: crew walk through every door and
+## it closes behind them (the simulation counts a door piece as open while a body overlaps it); only the doors of an abandoned room
+## are locked (grid.door_locked), and this callable lets the soldier through them. The others' paths use no callable.
 var door_passable: Callable = func(_cell: Vector2i) -> bool: return true
 var player: CrewMember
 var ada: CrewMember
@@ -36,6 +44,7 @@ var aim_override: Variant = null
 var _anim := {}  # CrewMember -> PersonDrawer.new_state(): {last, phase, angle, aim, moving}, for drawing only
 var _clock := 0.0  # for the flicker of the fires
 var _bar: CrewBar  # the crew cards, bottom right; in a layer of its own so a fight (which puts this node away) keeps it
+var prompt: BreachPrompt  # the breach prompt (K2), in the same layer
 
 
 func _ready() -> void:
@@ -46,6 +55,9 @@ func _ready() -> void:
 	_bar = CrewBar.new()
 	_bar.view = self
 	bar_layer.add_child(_bar)
+	prompt = BreachPrompt.new()
+	prompt.view = self
+	bar_layer.add_child(prompt)
 	add_child(bar_layer)
 
 
@@ -79,6 +91,10 @@ func _unhandled_input(e: InputEvent) -> void:
 	if _ship() == null:
 		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and not build.build_on and not build.combat:
+		var tag := tag_at(e.position)
+		if tag >= 0:
+			say(reopen(tag))  # the tag of an abandoned room
+			return
 		selected = pick_at((make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL)  # empty floor clears the selection
 	elif e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_G and not e.ctrl_pressed and not e.meta_pressed and not build.combat:
 		press_ability()  # (in a fight combat_view.gd takes the key)
@@ -87,9 +103,9 @@ func _unhandled_input(e: InputEvent) -> void:
 		if who == null:
 			return
 		var p: Vector2 = (make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL
-		var a := Pathfinder.nearest_walkable(_ship().grid, p, door_passable, Pathfinder.NO_CELL, who.body_size)  # where their body can stand nearest the click
+		var a := Pathfinder.nearest_walkable(_ship().grid, p, Callable(), Pathfinder.NO_CELL, who.body_size)  # where their body can stand nearest the click (never behind a locked door)
 		if a != Pathfinder.NO_CELL and (Pathfinder.centre_of(a, who.body_size) - p).length() <= 1.5:
-			Jobs.order_move(_ship(), who, a, door_passable)  # they leave the job board alone for a while
+			Jobs.order_move(_ship(), who, a)  # they leave the job board alone for a while
 
 
 ## Whom a middle-click sends: the selected crewmate (not the soldier), else Ada when she is aboard, else the first
@@ -126,6 +142,70 @@ func pick_at(p: Vector2) -> CrewMember:
 ## Select crew member `m` (null clears the selection).
 func select(m: CrewMember) -> void:
 	selected = m
+
+
+## Say `text` above the crew cards for a few seconds (the crew bar's line).
+func say(text: String) -> void:
+	if _bar != null and text != "":
+		_bar.flash(text)
+
+
+## A click on the station button of part `uid` (station_bar.gd): the selected crew member is posted there; with nobody
+## selected, the crew member posted there is selected. Returns what to tell the player.
+func press_station(uid: int) -> String:
+	var ship = _ship()
+	if ship == null:
+		return ""
+	if selected != null and ship.crew.has(selected):
+		return Posts.post(ship, selected, uid)
+	var who = Posts.holder(ship, uid)
+	if who == null:
+		return "Select a crew member first, then click a station"
+	selected = who
+	return ""
+
+
+## A right click on the station button of part `uid`: whoever is posted there is taken off the post.
+func release_station(uid: int) -> String:
+	var ship = _ship()
+	return Posts.unpost(ship, uid) if ship != null else ""
+
+
+## The abandoned rooms with the rectangle of their tag, in screen pixels (the tag stays upright whichever way the ship is turned): [{id, rect}].
+func abandoned_tags() -> Array:
+	var out := []
+	var ship = _ship()
+	if ship == null or build == null:
+		return out
+	var font := ThemeDB.fallback_font
+	var to_screen := get_global_transform_with_canvas()
+	for id in Evacuate.rooms(ship):
+		var sum := Vector2.ZERO
+		var cells: Array = ship.atmosphere.rooms[id]["cells"]
+		for c in cells:
+			sum += Vector2(c) + Vector2(0.5, 0.5)
+		var w := font.get_string_size(TAG_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, TAG_SIZE).x + 14.0
+		var at: Vector2 = to_screen * _world(sum / float(cells.size()))
+		out.append({"id": id, "rect": Rect2(at - Vector2(w / 2.0, 11.0), Vector2(w, 22.0))})
+	return out
+
+
+## The room whose tag is at screen point `p`, -1 for none.
+func tag_at(p: Vector2) -> int:
+	for t in abandoned_tags():
+		if t["rect"].has_point(p):
+			return t["id"]
+	return -1
+
+
+## Take abandoned room `room_id` back. Returns what to tell the player.
+func reopen(room_id: int) -> String:
+	var ship = _ship()
+	if ship == null or not Evacuate.reopen(ship, room_id):
+		return ""
+	var line := "Reopened: " + Fire.room_name(ship, room_id)
+	ship.log_event(line)
+	return line
 
 
 ## Use the ability of `m` (the crew bar's icon and G both come here): {ok, text}. The enemy of a fight is the second
@@ -240,6 +320,7 @@ func _draw() -> void:
 	if ship == null:
 		return
 	ShipView.draw_fire(self, ship.fires, _world(Vector2.ZERO), build.CELL, _clock)
+	_draw_abandoned(ship)
 	var sent := order_target()
 	if sent != null:
 		for c in sent.path:
@@ -254,6 +335,27 @@ func _draw() -> void:
 		var r: float = build.CELL * (1.45 + 0.06 * sin(_clock * 5.0))
 		draw_circle(at, r, Color(SELECT_COLOR, 0.10))
 		draw_arc(at, r, 0.0, TAU, 40, SELECT_COLOR, 2.5, true)
+
+
+## The abandoned rooms: a red wash with diagonal hatching, and the tag that reopens one.
+func _draw_abandoned(ship) -> void:
+	var ids := Evacuate.rooms(ship)
+	if ids.is_empty():
+		return
+	var k: float = build.CELL
+	for id in ids:
+		for c in ship.atmosphere.rooms[id]["cells"]:
+			var o := _world(Vector2(c))
+			draw_rect(Rect2(o, Vector2(k, k)), Color(ABANDONED, 0.16))
+			draw_line(o + Vector2(0.0, k), o + Vector2(k, 0.0), Color(ABANDONED, 0.55), maxf(1.0, k / 12.0))
+	var font := ThemeDB.fallback_font
+	draw_set_transform_matrix(get_global_transform_with_canvas().affine_inverse())  # the tags are in screen pixels
+	for t in abandoned_tags():
+		var r: Rect2 = t["rect"]
+		draw_rect(r, Color(0.07, 0.03, 0.03, 0.9))
+		draw_rect(r, ABANDONED, false, 1.5)
+		draw_string(font, r.position + Vector2(7.0, 15.0), TAG_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, TAG_SIZE, Color("#ffd9d4"))
+	draw_set_transform_matrix(Transform2D.IDENTITY)
 
 
 ## The palette of `m`: their own, else one picked by name; darker while down.

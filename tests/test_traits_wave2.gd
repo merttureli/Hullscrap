@@ -167,7 +167,9 @@ func test_a_small_crew_member_repairs_what_only_a_crawlspace_reaches() -> void:
 		ship.grid.breach(Vector2i(8, 2))  # the wall beside the corridor: only the corridor touches it
 		ship.mark_dirty()
 		ship.refresh()
-		ship.crew.append(_small("Tiny", 3, 3) if kind == "small" else _person("Big", 3, 3))
+		var who: CrewMember = _small("Tiny", 3, 3) if kind == "small" else _person("Big", 3, 3)
+		who.equip("suit")  # (the corridor is airless: an unsuited one would leave it at 40 percent hp, before the 14 s of sealing are done: K3)
+		ship.crew.append(who)
 		var jobs := Jobs.new()
 		jobs.build_board(ship)
 		var job: Dictionary = jobs.board["breach:8,2"]
