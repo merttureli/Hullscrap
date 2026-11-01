@@ -459,11 +459,12 @@ func _fade_out() -> void:
 	music_file = ""
 
 
-## The file of a track named in data/music.json: a res:// path as it is, else a file name in assets/audio/music (the .ogg is optional).
+## The file of a track named in data/music.json: a res:// path as it is, else a file name in its `dir` (assets/audio/music by default;
+## the .ogg is optional).
 func _music_path(track: String) -> String:
 	if track.begins_with("res://"):
 		return track
-	return MUSIC_DIR + (track if track.get_extension() != "" else track + ".ogg")
+	return str(music_data.get("dir", MUSIC_DIR)) + (track if track.get_extension() != "" else track + ".ogg")
 
 
 ## The trim in dB data/music.json gives a track (`volumes`, keyed by the name it is listed under or by its file name).
