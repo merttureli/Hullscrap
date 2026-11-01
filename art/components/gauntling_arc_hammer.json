@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "gauntling_arc_hammer_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -72,7 +72,7 @@
    ]
   }
  },
- "notes": "INSIDE half of the Gauntling Arc Hammer: three steel capacitor cans with copper bands, exposed contacts between them that spit an arc on the loop, a patched hatch, power coupling and five copper coils that light cyan while charging (frame 5 = ready, green). fire: the coils flash white then go out. damaged: a can dented and arcing to the casing, two coils dead; disabled: a can split, the contacts burnt, wires hanging. Barrel layer gauntling_arc_hammer_barrel: a ram tube with copper windings ending in a battered hammer head with two ball electrodes and an arc between them; fire: the head slams forward and a blue-white flash.",
+ "notes": "INSIDE half of the Gauntling Arc Hammer: three steel capacitor cans with copper bands, exposed contacts between them that spit an arc on the loop, a patched hatch, power coupling and five copper coils that light cyan while charging (frame 5 = ready, green). fire: the coils flash white then go out. damaged: a can dented and arcing to the casing, two coils dead; disabled: a can split, the contacts burnt, wires hanging. Barrel layer gauntling_arc_hammer_barrel: a ram tube with copper windings ending in a battered hammer head with two ball electrodes and an arc between them; fire: the head slams forward and a blue-white flash. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

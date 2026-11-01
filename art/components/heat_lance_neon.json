@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "heat_lance_neon_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -72,7 +72,7 @@
    ]
   }
  },
- "notes": "INSIDE half of the Heat Lance (neon): twelve heat fins in two banks that glow orange fin by fin as it charges (frame 5 = all twelve white-hot at the tips, strip yellow), a heat-core window, power coupling, hatch. fire: every fin flashes white. damaged: fins bent and dead, sparks; disabled: fins dark, a bank split. Barrel layer heat_lance_neon_barrel: the long beam-focus lens head with heat fins; fire: the lens flares white-orange and a beam starts.",
+ "notes": "INSIDE half of the Heat Lance (neon): twelve heat fins in two banks that glow orange fin by fin as it charges (frame 5 = all twelve white-hot at the tips, strip yellow), a heat-core window, power coupling, hatch. fire: every fin flashes white. damaged: fins bent and dead, sparks; disabled: fins dark, a bank split. Barrel layer heat_lance_neon_barrel: the long beam-focus lens head with heat fins; fire: the lens flares white-orange and a beam starts. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

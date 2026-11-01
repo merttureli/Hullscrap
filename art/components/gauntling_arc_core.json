@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   64
  ],
  "cells": [
-  4,
+  2,
   4
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "gauntling_arc_core_glow.png",
   "frame": [
-   84,
+   52,
    84
   ],
   "offset": [
@@ -52,5 +52,5 @@
    ]
   }
  },
- "notes": "Gauntling Arc Core, 4x4: four mismatched plates (pale steel, rust, dark steel, patched) welded round a copper-wound ring with a steel ball in the middle; four electrode posts in the corners and cyan arcs that jump from the ball to a different post each frame (the 4-frame loop). Off: dark ball, windings dull. Damaged: a post sheared off and arcing to the casing, a plate lifting, the ball stuttering. Disabled: the ball cracked and dead, windings burnt, plates split."
+ "notes": "Gauntling Arc Core, 4x4: four mismatched plates (pale steel, rust, dark steel, patched) welded round a copper-wound ring with a steel ball in the middle; four electrode posts in the corners and cyan arcs that jump from the ball to a different post each frame (the 4-frame loop). Off: dark ball, windings dull. Damaged: a post sheared off and arcing to the casing, a plate lifting, the ball stuttering. Disabled: the ball cracked and dead, windings burnt, plates split. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

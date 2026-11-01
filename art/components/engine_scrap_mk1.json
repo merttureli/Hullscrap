@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "engine_scrap_mk1_glow.png",
   "frame": [
-   84,
+   52,
    50
   ],
   "offset": [
@@ -54,11 +54,11 @@
  },
  "anchors": {
   "power_coupling": [
-   37,
+   21,
    29
   ],
   "repair_hatch": [
-   21,
+   5,
    29
   ]
  },
@@ -71,5 +71,5 @@
   "part": "inside",
   "faces": "rotation 0: outward is up"
  },
- "notes": "Scrapper Clans \"Kickjet\", a hull mount (outward is up): ONE oversized dented bell outside with a rust patch, a rusty fuel tank strapped on beside it, a patched mismatched wall collar with hazard tape, and inside a squat motor block with a taped control box, warm lamps, a patched repair hatch and a taped power coupling. The jet flickers unevenly. Damaged: the lower strap snapped and the tank sags and weeps fuel, the bell patch lost a bolt and the dent is on fire, the core sparks. Disabled: the bell broken off its neck and lying beside it, the tank slid off and split, the collar cracked, the core dead. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+ "notes": "Scrapper Clans \"Kickjet\", a hull mount (outward is up): ONE oversized dented bell outside with a rust patch, a rusty fuel tank strapped on beside it, a patched mismatched wall collar with hazard tape, and inside a squat motor block with a taped control box, warm lamps, a patched repair hatch and a taped power coupling. The jet flickers unevenly. Damaged: the lower strap snapped and the tank sags and weeps fuel, the bell patch lost a bolt and the dent is on fire, the core sparks. Disabled: the bell broken off its neck and lying beside it, the tank slid off and split, the collar cracked, the core dead. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange). COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

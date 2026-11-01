@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   64
  ],
  "cells": [
-  4,
+  2,
   4
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "emberkin_furnace_core_glow.png",
   "frame": [
-   84,
+   52,
    84
   ],
   "offset": [
@@ -52,5 +52,5 @@
    ]
   }
  },
- "notes": "Emberkin \"Furnace Core\" reactor: a gunmetal body in a riveted brass frame round a big arched furnace door full of live flame (4-frame flicker), four brass corner stacks with pilot lights chasing round, navy enamel plates north and south, pressure gauges east and west, and feed pipes. Damaged: the door ring dented with fire spilling out of the crack, the NE stack leaning and burning crooked, a gauge cracked. Disabled: cold ash in the door, the door buckled, a stack fallen, soot streaks."
+ "notes": "Emberkin \"Furnace Core\" reactor: a gunmetal body in a riveted brass frame round a big arched furnace door full of live flame (4-frame flicker), four brass corner stacks with pilot lights chasing round, navy enamel plates north and south, pressure gauges east and west, and feed pipes. Damaged: the door ring dented with fire spilling out of the crack, the NE stack leaning and burning crooked, a gauge cracked. Disabled: cold ash in the door, the door buckled, a stack fallen, soot streaks. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

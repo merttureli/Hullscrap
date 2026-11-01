@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "human_volley_rack_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -60,19 +60,14 @@
     6,
     0
    ],
-   "fire": [
-    8,
-    2,
-    12
-   ],
    "damaged": [
-    10,
+    8,
     2,
     4
    ]
   }
  },
- "notes": "INSIDE half of the Human Volley Rack: a three-slot missile cradle with a feed chute on the right; a small missile slides into each slot as it charges (frames 0..5 seat 0,1,1,2,2,3; frame 5 = three seated, strip green), power coupling, repair hatch. fire: all three slots empty and the strip discharges. damaged: chute cracked, a missile jammed crooked, lamps dead; disabled: a missile jammed half way in the chute. Barrel layer human_volley_rack_barrel: a three-tube launcher head, a small missile in each tube; fire: the three leave one after another, smoke.",
+ "notes": "INSIDE half of the Human Volley Rack: a three-slot missile cradle with a feed chute on the right; a small missile slides into each slot as it charges (frames 0..5 seat 0,1,1,2,2,3; frame 5 = three seated, strip green), power coupling, repair hatch. fire: all three slots empty and the strip discharges. damaged: chute cracked, a missile jammed crooked, lamps dead; disabled: a missile jammed half way in the chute. Barrel layer human_volley_rack_barrel: a three-tube launcher head, a small missile in each tube; fire: the three leave one after another, smoke. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

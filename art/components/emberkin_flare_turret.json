@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "emberkin_flare_turret_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -60,19 +60,14 @@
     6,
     0
    ],
-   "fire": [
-    8,
-    2,
-    12
-   ],
    "damaged": [
-    10,
+    8,
     2,
     4
    ]
   }
  },
- "notes": "INSIDE half of the Emberkin Flare Turret: a magazine rack where flare cartridges (brass casings, coloured caps) slide into the chamber one by one as it charges (frame 5 = five loaded, strip yellow), power coupling, brass hatch. fire: the chamber flashes and the rack is empty. damaged: a cartridge jammed crooked, the rack cracked, lamps dead; disabled: cartridges spilled, rack bent. Barrel layer emberkin_flare_turret_barrel: a brass dome head with a short flare gun, a flared muzzle and a small heat-sink fin stack.",
+ "notes": "INSIDE half of the Emberkin Flare Turret: a magazine rack where flare cartridges (brass casings, coloured caps) slide into the chamber one by one as it charges (frame 5 = five loaded, strip yellow), power coupling, brass hatch. fire: the chamber flashes and the rack is empty. damaged: a cartridge jammed crooked, the rack cracked, lamps dead; disabled: cartridges spilled, rack bent. Barrel layer emberkin_flare_turret_barrel: a brass dome head with a short flare gun, a flared muzzle and a small heat-sink fin stack. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

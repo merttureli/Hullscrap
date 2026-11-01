@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "emberkin_cinder_mortar_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -72,7 +72,7 @@
    ]
   }
  },
- "notes": "INSIDE half of the Emberkin Cinder Mortar: a coal hopper that fills with glowing cinders as it charges (frame 5 = heaped and white-hot, strip yellow) above a firing pan, power coupling, brass hatch. fire: the pan flashes and the hopper empties (a flashback puff at the hatch). damaged: the hopper cracked, embers falling out, lamps dead; disabled: cold ash, the hopper split. Barrel layer emberkin_cinder_mortar_barrel: a short fat brass mortar with a wide funnel mouth full of embers.",
+ "notes": "INSIDE half of the Emberkin Cinder Mortar: a coal hopper that fills with glowing cinders as it charges (frame 5 = heaped and white-hot, strip yellow) above a firing pan, power coupling, brass hatch. fire: the pan flashes and the hopper empties (a flashback puff at the hatch). damaged: the hopper cracked, embers falling out, lamps dead; disabled: cold ash, the hopper split. Barrel layer emberkin_cinder_mortar_barrel: a short fat brass mortar with a wide funnel mouth full of embers. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

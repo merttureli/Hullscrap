@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   64
  ],
  "cells": [
-  4,
+  2,
   4
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "sporeling_bloom_reactor_glow.png",
   "frame": [
-   84,
+   52,
    84
   ],
   "offset": [
@@ -52,5 +52,5 @@
    ]
   }
  },
- "notes": "Sporeling Bloom Reactor, 4x4: a brown, root-veined basin round a flower that blooms around a glowing amber core: eight cream-and-pink petals that open and close on the 4-frame loop, spore specks drifting up. Off: the bloom is a closed bud over a dark core. Damaged: two petals torn and drooping, the basin cracked and weeping, the core stuttering. Disabled: withered brown petals, a dead dry core, the basin split."
+ "notes": "Sporeling Bloom Reactor, 4x4: a brown, root-veined basin round a flower that blooms around a glowing amber core: eight cream-and-pink petals that open and close on the 4-frame loop, spore specks drifting up. Off: the bloom is a closed bud over a dark core. Damaged: two petals torn and drooping, the basin cracked and weeping, the core stuttering. Disabled: withered brown petals, a dead dry core, the basin split. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

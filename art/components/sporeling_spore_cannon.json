@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "sporeling_spore_cannon_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -72,7 +72,7 @@
    ]
   }
  },
- "notes": "INSIDE half of the Sporeling Spore Cannon: a big violet spore chamber with green spores drifting in it, fibrous feed roots, a steel repair hatch, power coupling and five spore sacs that swell violet while charging and glow green when ready. fire: the sacs flash white then deflate. damaged: the chamber has a split and leaks, two sacs withered; disabled: the chamber collapsed and dry, withered. Barrel layer sporeling_spore_cannon_barrel: a fleshy ringed tube with a flared spotted bell mouth that puffs spores; fire: a green-yellow spore burst.",
+ "notes": "INSIDE half of the Sporeling Spore Cannon: a big violet spore chamber with green spores drifting in it, fibrous feed roots, a steel repair hatch, power coupling and five spore sacs that swell violet while charging and glow green when ready. fire: the sacs flash white then deflate. damaged: the chamber has a split and leaks, two sacs withered; disabled: the chamber collapsed and dry, withered. Barrel layer sporeling_spore_cannon_barrel: a fleshy ringed tube with a flared spotted bell mouth that puffs spores; fire: a green-yellow spore burst. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

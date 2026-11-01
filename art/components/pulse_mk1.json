@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "pulse_mk1_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -72,7 +72,7 @@
    ]
   }
  },
- "notes": "INSIDE half of the Pulse Mk1: the revolving six-chamber drum IS the charge indicator: charge frame i loads (0,2,3,4,5,6) chambers and indexes the drum half a step on odd frames; frame 5 = ready (all lit, centre pixel white). Plus power coupling, repair hatch and an amber strip. fire: the drum is spent (empty chambers). damaged: drum rim cracked, a bent casing jams a chamber; disabled: drum split, casings spilled. Barrel layer pulse_mk1_barrel: stubby plasma barrel.",
+ "notes": "INSIDE half of the Pulse Mk1: the revolving six-chamber drum IS the charge indicator: charge frame i loads (0,2,3,4,5,6) chambers and indexes the drum half a step on odd frames; frame 5 = ready (all lit, centre pixel white). Plus power coupling, repair hatch and an amber strip. fire: the drum is spent (empty chambers). damaged: drum rim cracked, a bent casing jams a chamber; disabled: drum split, casings spilled. Barrel layer pulse_mk1_barrel: stubby plasma barrel. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

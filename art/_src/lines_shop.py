@@ -331,64 +331,59 @@ def draw_bed(s, x, y, w, h):
     for yy in (by + 12, by + 18): s.hline(x + 3, yy, w - 6, 'Q')
 
 class Medbay(LComp):
-    id = 'medbay'; cells = (4, 4)
+    """ONE bed (playtest 2, P1): a 2x4 bay, 32x64 px: the bed on its rails, a monitor rail on top and the scanner arm sweeping down over the patient."""
+    id = 'medbay'; cells = (2, 4)
     glow_pad = (8, 8, 8, 8)
     anims = [('on', 'on', 4, 4), ('off', 'off', 1, 0), ('damaged', 'damaged', 2, 5), ('disabled', 'disabled', 1, 0)]
-    notes = ('Workshop/medical: two beds side by side and a scanner arch on rails that sweeps down the beds with a green scan line, a pulse monitor between them, violet trim on the equipment rail. The arch runs up and back down over the 4 frames. '
-             'Damaged: the arch is jammed skewed on its rails, the scan line flickers and one monitor is dead, a bed is torn. Disabled: the arch has dropped across one bed, scanner dead, monitors dark.')
+    notes = ('Workshop/medical, one bed: a single bed on its rails and a scanner arm on the rails that sweeps down the patient with a green scan line, a pulse monitor and green status lamps on the equipment rail, violet trim. The arm runs up and back down over the 4 frames. '
+             'Damaged: the arm is jammed skewed on its rails, the scan line flickers, a monitor is dead and the blanket is torn. Disabled: the arm has dropped across the bed, scanner dead, monitors dark.')
     DMG = (1, 3)
     AY = [12, 28, 44, 28]
     def interior(self, state, i):
         on = state == 'on'
-        s = Spr(64, 64)
-        chamfer_fill(s, 0, 0, 64, 64, 'S', 4); rim(s, 'S', 'M', 'W')
-        chamfer_fill(s, 2, 2, 60, 60, 'E', 3)
-        for x in (2, 60): s.rect(x, 8, 2, 52, 'D'); s.vline(x, 8, 52, 'W')                       # rails
-        draw_bed(s, 5, 14, 24, 46); draw_bed(s, 35, 14, 24, 46)
-        # equipment rail and the pulse monitor between the beds
-        bev(s, 5, 3, 54, 8, 'W', 'E', 'D')
-        for k, x in enumerate((8, 14, 20)): s.rect(x, 5, 4, 4, 'D'); s.hline(x, 7 + (k + i) % 2 if on else 7, 4, 'g' if on else 'W')
-        bev(s, 28, 4, 8, 6, 'M', 'S', 'W'); s.put(31, 6, 'g' if on else 'W'); s.put(32, 7, 'g' if on else 'W'); s.hline(30, 7, 1, 'g' if on else 'W')
-        for k in range(3): violet_lamp(s, 40 + 5 * k, 5, on and (k + i) % 3 != 2)
-        s.rect(30, 12, 4, 48, 'W'); s.vline(30, 12, 48, 'S'); s.vline(33, 12, 48, 'D')
-        for y in range(15, 58, 10): s.put(31, y, 'g' if on else 'W'); s.put(32, y + 1, 'g' if on else 'W')
-        # scanner arch
+        s = Spr(32, 64)
+        chamfer_fill(s, 0, 0, 32, 64, 'S', 4); rim(s, 'S', 'M', 'W')
+        chamfer_fill(s, 2, 2, 28, 60, 'E', 3)
+        for x in (2, 28): s.rect(x, 8, 2, 52, 'D'); s.vline(x, 8, 52, 'W')                       # rails
+        draw_bed(s, 4, 14, 24, 46)
+        # equipment rail: two status lamps, the pulse monitor, a violet lamp
+        bev(s, 4, 3, 24, 8, 'W', 'E', 'D')
+        for k, x in enumerate((6, 11)): s.rect(x, 5, 4, 4, 'D'); s.hline(x, 7 + (k + i) % 2 if on else 7, 4, 'g' if on else 'W')
+        bev(s, 16, 4, 6, 6, 'M', 'S', 'W'); s.put(18, 6, 'g' if on else 'W'); s.put(19, 7, 'g' if on else 'W'); s.put(17, 7, 'g' if on else 'W')
+        violet_lamp(s, 24, 5, on and i % 3 != 2)
+        # scanner arm
         ay = self.AY[i % 4] if on else 4 if state == 'off' else self.AY[0]
         if state == 'off': ay = 12
-        s.rect(2, ay, 60, 7, 'S'); s.hline(2, ay, 60, 'L'); s.hline(2, ay + 6, 60, 'W'); s.rect(2, ay + 1, 3, 5, 'E'); s.rect(59, ay + 1, 3, 5, 'E')
-        s.rect(6, ay + 2, 52, 3, 'D'); s.hline(6, ay + 2, 52, 'E')
-        for x in range(8, 56, 8): s.put(x, ay + 1, 'M')
-        s.put(4, ay + 3, 'V' if on else 'W'); s.put(59, ay + 3, 'V' if on else 'W')
+        s.rect(2, ay, 28, 7, 'S'); s.hline(2, ay, 28, 'L'); s.hline(2, ay + 6, 28, 'W'); s.rect(2, ay + 1, 3, 5, 'E'); s.rect(27, ay + 1, 3, 5, 'E')
+        s.rect(6, ay + 2, 20, 3, 'D'); s.hline(6, ay + 2, 20, 'E')
+        for x in range(10, 24, 8): s.put(x, ay + 1, 'M')
+        s.put(3, ay + 3, 'V' if on else 'W'); s.put(28, ay + 3, 'V' if on else 'W')
         if on:
-            s.hline(6, ay + 3, 52, 'g')
-            s.hline(6, ay + 7, 52, 'g')
-            for x in range(6 + (i * 9) % 13, 58, 13): s.rect(x, ay + 3, 3, 1, 'H'); s.put(x + 1, ay + 7, 'H')
+            s.hline(6, ay + 3, 20, 'g')
+            s.hline(6, ay + 7, 20, 'g')
+            for x in range(6 + (i * 9) % 13, 26, 13): s.rect(x, ay + 3, 3, 1, 'H'); s.put(x + 1, ay + 7, 'H')
         else:
-            s.hline(6, ay + 3, 52, 'W')
+            s.hline(6, ay + 3, 20, 'W')
         return s
     def hurt(self, s, i):
         ay = self.AY[self.DMG[i] % 4]
-        shift_rect(s, 40, 62, ay - 1, ay + 9, 0, 3)
-        s.rect(40, ay + 3, 22, 1, 'K'); s.stamp(34, ay + 3, art("KKK\nKDK"))
-        for k in range(3): s.hline(8 + 6 * k, 7, 4, 'D') if k == 1 else None
-        s.rect(14, 5, 4, 4, 'D'); s.put(15, 6, 'r' if i else 'D')
-        crack(s, [(38, 22), (44, 27), (41, 33)], 'M'); s.stamp(8, 40, art("KKKK\nKQqK\n.KKK")); s.put(20, ay + 8 + i, 'y')
-        stamp_on(s, 46, 44, SCORCH_S)
+        shift_rect(s, 16, 30, ay - 1, ay + 9, 0, 3)
+        s.rect(16, ay + 3, 14, 1, 'K'); s.stamp(12, ay + 3, art("KKK\nKDK"))
+        s.rect(6, 5, 4, 4, 'D'); s.put(7, 6, 'r' if i else 'D')
+        crack(s, [(14, 22), (19, 27), (16, 33)], 'M'); s.stamp(6, 40, art("KKKK\nKQqK\n.KKK")); s.put(10, ay + 8 + i, 'y')
+        stamp_on(s, 18, 44, SCORCH_S)
     def wreck(self, s):
-        s.stamp(2, 30, art("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK\nKLSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSK\nKSEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDK\n.KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK.")) if False else None
-        for y in range(8, 40):
-            for x in range(2, 62):
-                if s.get(x, y) in ('S', 'L', 'W', 'E', 'D', 'g', 'H') and y >= self.AY[0] and y < self.AY[0] + 9: pass
-        s.stamp(34, 36, art("KKKKKKKKKKKKKKKKKKKKKKKK\nKLSSSSSSSSSSSSSSSSSSSSSK\nKSEDDDDDDDDDDDDDDDDDDDEK\n.KKKKKKKKKKKKKKKKKKKKKK.")); s.stamp(55, 34, art("K.K\nKSK"))
-        crack(s, [(38, 22), (44, 27), (41, 33)], 'M'); s.stamp(10, 20, art("KKKK.\nKQqK.\nKnQKK\n.KKK.")); stamp_on(s, 46, 44, SCORCH_L); stamp_on(s, 14, 50, SCORCH_S)
-        for k in range(3): s.rect(8 + 6 * k, 5, 4, 4, 'D')
+        s.stamp(5, 34, art("KKKKKKKKKKKKKKKKKKKKKK\nKLSSSSSSSSSSSSSSSSSSSK\nKSEDDDDDDDDDDDDDDDDDEK\n.KKKKKKKKKKKKKKKKKKKK."))
+        s.stamp(24, 32, art("K.K\nKSK"))
+        crack(s, [(14, 22), (19, 27), (16, 33)], 'M'); s.stamp(8, 20, art("KKKK.\nKQqK.\nKnQKK\n.KKK.")); stamp_on(s, 18, 46, SCORCH_L); stamp_on(s, 8, 52, SCORCH_S)
+        s.rect(6, 5, 4, 4, 'D'); s.rect(11, 5, 4, 4, 'D')
         s.put(4, 4, 'K')
     def glow(self, state, i, g, ox, oy, flick=None):
         k = 1.0 if flick is None else (0.7 if flick else 0.3)
         ay = self.AY[i % 4]
-        glow(g, ox + 32, oy + ay + 5, 34, GREEN, 0.18 * k, 2.0, sx=1.0)
-        glow(g, ox + 32, oy + ay + 7.5, 20, GREEN, 0.4 * k, 2.2, sx=2.2)
-        for k2 in range(3): glow(g, ox + 41 + 5 * k2 + 1, oy + 6.5, 3.4, VIOLET, 0.45 * k, 2.0)
-        glow(g, ox + 32, oy + 8, 6, GREEN, 0.4 * k, 2.0)
+        glow(g, ox + 16, oy + ay + 5, 20, GREEN, 0.18 * k, 2.0, sx=1.0)
+        glow(g, ox + 16, oy + ay + 7.5, 12, GREEN, 0.4 * k, 2.2, sx=1.6)
+        glow(g, ox + 25, oy + 6.5, 3.4, VIOLET, 0.45 * k, 2.0)
+        glow(g, ox + 19, oy + 7, 5, GREEN, 0.4 * k, 2.0)
 
 ALL = [Fabricator, RobotArm, LaserCutter, AssemblyRig, Nanoforge, Medbay]

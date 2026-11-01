@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "sporeling_rot_pod_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -72,7 +72,7 @@
    ]
   }
  },
- "notes": "INSIDE half of the Sporeling Rot Pod: the pod cradle with a feed root to the right (the ammo rack sits beside it), power coupling, repair hatch and five spore sacs. charge: a rot pod rolls in from the root into the cradle (frame 5 = seated and ready); fire: the cradle is empty. damaged: root cracked, sacs withered; disabled: a pod stuck half-way in the root. Barrel layer sporeling_rot_pod_barrel: a cradle of two curved fingers holding a violet rot pod; fire: the pod leaves, a spore puff follows.",
+ "notes": "INSIDE half of the Sporeling Rot Pod: the pod cradle with a feed root to the right (the ammo rack sits beside it), power coupling, repair hatch and five spore sacs. charge: a rot pod rolls in from the root into the cradle (frame 5 = seated and ready); fire: the cradle is empty. damaged: root cracked, sacs withered; disabled: a pod stuck half-way in the root. Barrel layer sporeling_rot_pod_barrel: a cradle of two curved fingers holding a violet rot pod; fire: the pod leaves, a spore puff follows. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

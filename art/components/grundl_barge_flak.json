@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "grundl_barge_flak_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -60,19 +60,14 @@
     6,
     0
    ],
-   "fire": [
-    8,
-    2,
-    12
-   ],
    "damaged": [
-    10,
+    8,
     2,
     4
    ]
   }
  },
- "notes": "INSIDE half of the Grundl Barge Flak: a huge ammo drum with a ribbed feed chute to the right (the ammo rack sits beside it), a heavy gear, hatch, power coupling and five amber lamps. damaged: the drum dented and the belt slipping; disabled: the drum jammed with a round stuck. The rotating head grundl_barge_flak_barrel swivels in the ring: four fat banded barrels in a riveted cradle with a drum feeding a chain belt, and a sensor lamp; fire: the barrels flash in turn.",
+ "notes": "INSIDE half of the Grundl Barge Flak: a huge ammo drum with a ribbed feed chute to the right (the ammo rack sits beside it), a heavy gear, hatch, power coupling and five amber lamps. damaged: the drum dented and the belt slipping; disabled: the drum jammed with a round stuck. The rotating head grundl_barge_flak_barrel swivels in the ring: four fat banded barrels in a riveted cradle with a drum feeding a chain belt, and a sensor lamp; fire: the barrels flash in turn. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4
