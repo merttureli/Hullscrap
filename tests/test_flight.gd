@@ -335,3 +335,78 @@ func test_can_fly_reasons() -> void:
 	eq(f.can_fly(bare, {}), "no powered helm", "an empty ship")
 	var cut := Cables.new()
 	eq(f.can_fly(comps, Power.solve(comps, cut)["powered"]), "no powered helm", "no cables, no power")
+
+
+## Components with just what thrusts_of reads: engines of `thrusts` (thrust units), the i-th turned `rots[i]` quarter turns,
+## all powered. Rotation 2 is a rear engine (pushes forward), 1 an engine on the right wall (pushes left), 3 on the left wall.
+class FakeComps:
+	var instances := {}
+
+	func _init(thrusts: Array, rots: Array) -> void:
+		for i in thrusts.size():
+			instances[i + 1] = {"id": "e%d" % i, "rot": rots[i], "thrust": thrusts[i]}
+
+	func def(id: String) -> Dictionary:
+		for inst in instances.values():
+			if inst["id"] == id:
+				return {"family": "engine", "stats": {"thrust": inst["thrust"]}}
+		return {}
+
+	func powered_all() -> Dictionary:
+		var out := {}
+		for uid in instances:
+			out[uid] = true
+		return out
+
+
+func test_two_rear_engines_also_strafe_with_a_share_of_their_thrust() -> void:
+	var f := Flight.new()
+	eq(f.side_share, 0.3, "the data file says 30%")
+	var rear := FakeComps.new([10.0, 18.0], [2, 2])
+	var t := f.thrusts_of(rear, rear.powered_all())
+	near(t["fwd"], 28.0, "forward is the whole thrust")
+	near(t["left"], 0.3 * 28.0, "left is the share of the total")
+	near(t["right"], 0.3 * 28.0, "and so is right")
+	near(t["left"], t["right"], "the same both ways")
+	var cut := f.thrusts_of(rear, {1: true, 2: false})
+	near(cut["left"], 3.0, "an unpowered engine adds no share")
+	var boosted := f.thrusts_of(rear, rear.powered_all(), {1: 2.0})
+	near(boosted["fwd"], 38.0, "a boost counts")
+	near(boosted["left"], 0.3 * 38.0, "in the share too")
+
+
+func test_a_side_engine_gives_its_full_thrust_to_its_side_plus_the_share() -> void:
+	var f := Flight.new()
+	var right_wall := FakeComps.new([10.0], [1])  # its nozzle points right, so it pushes the ship left
+	var t := f.thrusts_of(right_wall, right_wall.powered_all())
+	near(t["fwd"], 0.0, "no forward thrust")
+	near(t["left"], 10.0 + 3.0, "all of it to its side, and the share")
+	near(t["right"], 3.0, "only the share the other way")
+	var left_wall := FakeComps.new([10.0], [3])
+	var u := f.thrusts_of(left_wall, left_wall.powered_all())
+	near(u["right"], 13.0, "the left wall's engine pushes right")
+	near(u["left"], 3.0, "and has the share left")
+	var mixed := FakeComps.new([10.0, 10.0], [2, 1])  # one rear, one on the right wall
+	var m := f.thrusts_of(mixed, mixed.powered_all())
+	near(m["fwd"], 10.0, "forward from the rear one only")
+	near(m["left"], 10.0 + 6.0, "left: the wall engine's thrust and both shares")
+	near(m["right"], 6.0, "right: both shares")
+	var none := Flight.new("")
+	none.side_share = 0.0
+	var z := none.thrusts_of(right_wall, right_wall.powered_all())
+	near(z["right"], 0.0, "with no share the old model is back")
+
+
+func test_a_ship_with_only_rear_engines_strafes() -> void:
+	var f := Flight.new()
+	var rear := FakeComps.new([20.0], [2])
+	var t := f.thrusts_of(rear, rear.powered_all())
+	for sign in [1.0, -1.0]:
+		var g := Flight.new()
+		g.step(1.0, {"strafe": sign}, 1000.0, 20.0, t)
+		check(g.vel.x * sign > 1.0 and absf(g.vel.y) < 1e-6, "A/D slides the ship sideways (strafe %s): %s" % [str(sign), str(g.vel)])
+	var g := Flight.new()
+	g.step(1.0, {"strafe": 1.0}, 1000.0, 20.0, t)
+	var side := Flight.new()
+	side.step(1.0, {"throttle": 1.0}, 1000.0, 20.0, t)
+	near(g.vel.x / -side.vel.y, 0.3, "the strafe is 30% of the forward push", 1e-6)

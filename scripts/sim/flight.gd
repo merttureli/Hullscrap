@@ -24,6 +24,7 @@ var angular_damping := 1.5  ## per second
 var thrust_to_accel := 40.0  ## px/s^2 per thrust unit per mass unit
 var turn_factor := 0.6  ## rad/s^2 per thrust unit per mass unit
 var max_speed := 600.0  ## px/s
+var side_share := 0.3  ## the share of an engine's thrust it also gives sideways (to the left and to the right), whatever way it points
 var turn_mult := 1.0  ## a factor on the turn rate (Abilities.turn_mult: a Gravity Anchor); the arena sets it
 var steer := "mouse"  ## data/flight.json controls.steer: "mouse" (the ship turns toward the cursor, A/D strafe) or "keys" (A/D turn)
 
@@ -73,7 +74,7 @@ func load_config(path: String) -> bool:
 		component_mass = masses
 	if data.get("controls") is Dictionary and str(data["controls"].get("steer", "")) in ["mouse", "keys"]:
 		steer = str(data["controls"]["steer"])
-	for k in ["component_mass_per_cell", "cable_mass_per_cell", "linear_damping", "angular_damping", "thrust_to_accel", "turn_factor", "max_speed"]:
+	for k in ["component_mass_per_cell", "cable_mass_per_cell", "linear_damping", "angular_damping", "thrust_to_accel", "turn_factor", "max_speed", "side_share"]:
 		if _is_num(data.get(k)):
 			set(k, maxf(0.0, float(data[k])))
 	return true
@@ -173,7 +174,9 @@ func thrust_of(components, powered: Dictionary, boost := {}) -> float:
 ## nozzle (the mount's outward direction), so {fwd: the sum of thrust x cos(angle between its push and
 ## the ship's forward) (at least 0), left and right: thrust x the sideways part of its push, summed
 ## over the engines that push that way}. Rear engines (rotation 2) give full forward thrust and no
-## sideways, engines on a side wall give none forward and all sideways. `boost` as in thrust_of.
+## sideways, engines on a side wall give none forward and all sideways. On top of that every engine gives
+## `side_share` of its thrust to both sides (a rear pair strafes at that share of its forward thrust; forward thrust
+## and reverse are unchanged). `boost` as in thrust_of.
 func thrusts_of(components, powered: Dictionary, boost := {}) -> Dictionary:
 	var fwd := 0.0
 	var left := 0.0
@@ -191,6 +194,8 @@ func thrusts_of(components, powered: Dictionary, boost := {}) -> Dictionary:
 			right += part.x
 		elif part.x < 0.0:
 			left -= part.x
+		left += t * side_share
+		right += t * side_share
 	return {"fwd": maxf(fwd, 0.0), "left": left, "right": right}
 
 
