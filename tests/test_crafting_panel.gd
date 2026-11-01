@@ -225,10 +225,10 @@ func test_the_selected_recipe_is_described_and_the_help_box_toggles() -> void:
 	panel.open()
 	panel.selected = KICKJET
 	var desc := panel.described()
-	check(desc["does"].begins_with("Pushes the ship") and desc["lore"] != "", "what the part does, and its lore: " + str(desc["does"]))
-	check(desc["rows"].any(func(r): return r[0] == "Thrust"), "its stats")
+	check(desc["what"].begins_with("Pushes and steers") and desc["lore"] != "", "what the part does, and its lore: " + str(desc["what"]))
+	check(desc["stats"].any(func(r): return r[0] == "Thrust"), "its stats")
 	panel.selected = "pistol"
-	check(panel.described()["does"].contains("Gear"), "gear gets its line too")
+	check(panel.described()["what"].contains("gear"), "gear gets its line too")
 	check(not panel.help_open, "the help box starts shut")
 	panel._input(_key(KEY_SLASH))
 	check(panel.help_open, "? opens it")

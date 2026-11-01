@@ -230,9 +230,9 @@ func test_first_run_hints_are_shown_once_and_only_in_the_first_run() -> void:
 	for id in Profile.HINTS:
 		check(not q.hint_due(id), id + " is off once a run has ended")
 	eq(FrontDoor.HINT_TEXT.keys(), Profile.HINTS, "every hint has its text, in order")
-	eq(FrontDoor.HINT_TEXT["picked"], "B: play mode, click a marker to set a course, M: map", "the first hint")
-	eq(FrontDoor.HINT_TEXT["map"], "Click a lit neighbour to spool the jump there", "the second hint")
-	eq(FrontDoor.HINT_TEXT["fight"], "Mouse steers, LMB fires, J opens the map to jump away", "the third hint")
+	eq(FrontDoor.HINT_TEXT["picked"], "B: play mode. Click a marker to set a course. M: map", "the first hint")
+	eq(FrontDoor.HINT_TEXT["map"], "Click a lit node to jump there", "the second hint")
+	eq(FrontDoor.HINT_TEXT["fight"], "Mouse steers, LMB fires, J: map to jump away", "the third hint")
 	_clean()
 
 

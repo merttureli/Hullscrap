@@ -11,6 +11,6 @@
     {"id": "salamander_suit", "name": "Salamander Suit", "kind": "special", "blurb": "Immune to fire, but slow. Strolls through the flames, unhurried."},
     {"id": "heat_suit", "name": "Heat Suit", "kind": "special", "blurb": "Insulated for hot rooms: work beside a Prism Core without cooking."},
     {"id": "plasma_rifle", "name": "Plasma Rifle", "kind": "special", "blurb": "A hand-held star. Turns up in locked crates and is never sold twice."},
-    {"id": "repair_drone", "name": "Repair Drone", "kind": "gear", "does": "A small robot that flies by itself: it mends breaches, parts and belts, puts out fires and refills ammo racks, on 1 power and no cable. It goes aboard the moment it is made or bought.", "blurb": "One lens, one tool arm, no opinions. It works slower than a crew member, never mans a station, and when it breaks someone with a spanner can wake it again."}
+    {"id": "repair_drone", "name": "Repair Drone", "kind": "gear", "does": "Flies by itself: repairs, fights fires, reloads ammo.", "blurb": "One lens, one tool arm, no opinions. It works slower than a crew member, never mans a station, and when it breaks someone with a spanner can wake it again."}
   ]
 }

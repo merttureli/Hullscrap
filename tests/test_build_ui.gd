@@ -7,6 +7,7 @@ const BuildMode = preload("res://scripts/build/build_mode.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Palette = preload("res://scripts/build/palette.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
+const Describe = preload("res://scripts/ui/describe.gd")
 const RedAlert = preload("res://scripts/sim/red_alert.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -113,9 +114,9 @@ func test_cards_follow_the_cargo_and_what_it_can_pay() -> void:
 	eq(laser["out_size"], Vector2i(4, 2), "with its outside half")
 	eq(laser["power"], -2, "and its power draw")
 	var not_held := Palette.part_entry(ship, "laser_mk2")
-	check(not not_held["ok"] and str(not_held["why"]).begins_with("none held"), "a part not held is greyed: " + str(not_held["why"]))
+	check(not not_held["ok"] and str(not_held["why"]) == "Blueprint not known", "a part not held is greyed: " + str(not_held["why"]))
 	ship.crafting.unlock("laser_mk2")
-	eq(Palette.part_entry(ship, "laser_mk2")["why"], "0 held, craft at the fabricator (C)", "a known blueprint says where to craft it")
+	eq(Palette.part_entry(ship, "laser_mk2")["why"], "Craft at Fabricator (C)", "a known blueprint says where to craft it")
 	var scrap_pw: float = float(ship.components.def("reactor_scrap_mk1")["power"]) * 0.9
 	check(is_equal_approx(float(Palette.part_entry(ship, "reactor_scrap_mk1")["power"]), scrap_pw), "power is line-adjusted (the scrap line's x0.9 of its %s)" % str(scrap_pw))
 	eq(Palette.part_entry(ship, "leech_laser")["line"], "unique", "a unique part has the gold border")
@@ -171,7 +172,70 @@ func test_a_click_on_a_tab_or_a_card_picks_it() -> void:
 	pal.hover_key = "part:laser_mk1"
 	eq(b.hud.card.entry()["id"], "laser_mk1", "the card under the mouse is what the selection card shows")
 	pal.hover_key = ""
+	eq(b.hud.card.entry()["id"], "laser_mk1", "and stays a moment after the mouse left, so it can reach a chip")
+	b.hud.card._clock += 1.0
 	eq(b.hud.card.entry()["key"], b.tool_key(), "else the tool in hand")
+	_done(b)
+
+
+## Every card of every tab, laid out for 1600x900: the tallest card and what it says.
+func _card_heights(b: BuildMode) -> Dictionary:
+	var view := Vector2(1600, 900)
+	var tall := {"h": 0.0, "key": ""}
+	b.hud.sync(view)
+	for tab in Palette.TAB_NAMES.size():
+		b.tab = tab
+		for e in b.hud.palette.entries():
+			b.hud.palette.hover_key = e["key"]
+			b.hud.sync(view)
+			b.hud.sync(view)
+			var h: float = b.hud.card.wanted_height()
+			if h > tall["h"]:
+				tall = {"h": h, "key": e["key"]}
+	b.hud.palette.hover_key = ""
+	return tall
+
+
+func test_the_card_is_short_for_every_part() -> void:
+	var cargo := {"scrap": 500, "copper": 500, "polymer": 50}
+	var b := _build(cargo)
+	for id in b.ship.components.ids():
+		b.ship.inventory.add(id, 1)  # every part held: each has a card
+		b.ship.crafting.unlock(id)
+	b.build_on = true
+	var tall := _card_heights(b)
+	print("tallest card at 1600x900: %d px (%s), %d%% of the screen" % [tall["h"], tall["key"], roundi(tall["h"] / 9.0)])
+	check(tall["h"] < 0.6 * 900.0, "the tallest card (%s, %d px) is under 60%% of the screen" % [tall["key"], tall["h"]])
+	_done(b)
+
+
+func test_the_card_shows_keyword_chips_and_explains_one_under_the_mouse() -> void:
+	var b := _build({"scrap": 200, "laser_turret_mk1": 1})
+	b.build_on = true
+	b.pick(Palette.part_entry(b.ship, "laser_turret_mk1"))
+	b.hud.sync(Vector2(1600, 900))
+	b.hud.sync(Vector2(1600, 900))
+	var card: Control = b.hud.card
+	var chips: Array = card.chips()
+	check(chips.size() >= 3, "the keyword chips: %d" % chips.size())
+	var labels: Array = chips.map(func(c): return c[1]["label"])
+	check(labels.has("LASER") and labels.has("AUTO") and labels.has("RAPID"), "LASER, AUTO and RAPID: " + str(labels))
+	var auto: Array = chips.filter(func(c): return c[1]["label"] == "AUTO")[0]
+	card.point_at(auto[0].get_center())
+	eq(card.hover_kw.get("hover"), "Aims and fires by itself. T toggles.", "the mouse on a chip says what it does")
+	card.point_at(Vector2(2.0, 2.0))
+	check(card.hover_kw.is_empty(), "and off it, nothing")
+	var rects: Dictionary = b.hud.panel_rects()
+	check(rects["card"].size.y < 0.6 * 900.0, "the card is short: %d px" % rects["card"].size.y)
+	_done(b)
+
+
+func test_a_weapon_cards_kind_shows_under_its_name_in_the_palette() -> void:
+	var b := _build({"scrap": 200, "laser_turret_mk1": 1, "artemis_mk1": 1})
+	var tags: Array = Describe.weapon_tags("laser_turret_mk1")
+	eq(tags.map(func(k): return k["label"]), ["LASER", "AUTO"], "a turret card: its kind, then AUTO")
+	eq(Describe.weapon_tags("artemis_mk1").map(func(k): return k["label"]), ["MISSILE"], "a missile card: its kind")
+	check(tags[0]["color"] != Describe.weapon_tags("artemis_mk1")[0]["color"], "each kind has its own colour")
 	_done(b)
 
 
@@ -182,33 +246,33 @@ func test_the_selection_card_shows_the_stats_of_the_selected_def() -> void:
 	eq(inf["title"], "Concord Thruster Mk1", "the name")
 	eq([inf["line"], inf["tier"]], ["Standard", 1], "the line and tier")
 	var rows := {}
-	for r in inf["rows"]:
+	for r in inf["stats"]:
 		rows[r[0]] = r[1]
-	eq(rows.get("Size"), "2x2 + 4x2 outside", "the size of both halves")
-	eq(rows.get("Power"), "draws 2", "the power")
-	eq(rows.get("HP"), "6 (outside 5)", "hp of both halves")
+	eq(rows.get("Size"), "2\u00d72 (out 4\u00d72)", "the size of both halves")
+	eq(rows.get("Power"), "\u22122", "the power")
+	eq(rows.get("HP"), "6 (out 5)", "hp of both halves")
 	eq(rows.get("Thrust"), "10", "and the key stat")
-	check(inf["blurb"] != "", "the blurb")
-	check(inf["recipe"].contains("20 scrap + 10 copper"), "the recipe: " + inf["recipe"])
-	check(inf["place"].begins_with("Hull mount: outside half 4x2, pointing up"), "where it goes: " + inf["place"])
-	b.rot = 1
-	check(b.hud.card.info()["place"].contains("2x4, pointing right"), "turned, it says so")
+	eq(rows.get("Push"), "brakes: turn it (R)", "and where it pushes: held pointing up, it only brakes")
+	check(inf["lore"] != "" and inf["what"] != "", "what it does, and one line of lore")
+	check(inf["cost"] == {"scrap": 20, "copper": 10}, "the cost: " + str(inf["cost"]))
+	b.rot = 2
+	eq(b.hud.card.info()["stats"].filter(func(r): return r[0] == "Push")[0][1], "10 fwd, 3 side", "turned to point back, it pushes forward")
 	b.pick(Palette.part_entry(b.ship, "laser_mk1"))
 	rows = {}
-	for r in b.hud.card.info()["rows"]:
+	for r in b.hud.card.info()["stats"]:
 		rows[r[0]] = r[1]
-	eq([rows.get("Damage"), rows.get("Fires"), rows.get("Range")], ["3 energy a shot", "every 2.1 s", "900 px"], "a weapon's damage, fire rate and range")
-	check(str(rows.get("Aim")).begins_with("Fixed gun") and str(rows.get("Aim")).contains("5 deg"), "and its aim: " + str(rows.get("Aim")))
-	check(b.hud.card.info()["does"] != "" and b.hud.card.info()["kinds"].size() >= 2, "a part says what it does and what its type means")
+	eq([rows.get("Damage"), rows.get("Every"), rows.get("Range")], ["3", "2.1 s", "900"], "a weapon's damage, fire rate and range")
+	check(rows.get("Gimbal") == "5\u00b0", "and its aim: " + str(rows.get("Gimbal")))
+	var labels: Array = b.hud.card.info()["keywords"].map(func(k): return k["label"])
+	check(labels.has("LASER") and labels.has("ENERGY"), "a part's kind and damage type are chips: " + str(labels))
 	b.pick(Palette.part_entry(b.ship, "shield_mk1"))
 	inf = b.hud.card.info()
-	check(inf["rows"].has(["Layers", "1"]), "a shield's layers")
-	check(inf["abilities"][0].begins_with("Overcharge: shield key"), "and its ability: " + str(inf["abilities"]))
-	check(inf["place"].begins_with("On floor"), "an inside part goes on floor")
+	check(inf["stats"].has(["Layers", "1"]), "a shield's layers")
+	check(inf["keywords"].any(func(k): return k["label"] == "OVERCHARGE" and k["hover"].begins_with("Space:")), "and its ability: " + str(inf["keywords"]))
 	b.pick(Palette.tile_entry(b.ship, "ablative_plating"))
 	inf = b.hud.card.info()
-	check(inf["quirk"].begins_with("Ablative"), "a wall's quirk: " + inf["quirk"])
-	check(inf["rows"].has(["Resists", "energy x0.5"]), "and its resistances")
+	check(inf["keywords"].any(func(k): return k["label"] == "ABLATIVE"), "a wall's quirk is a chip")
+	check(inf["stats"].has(["Resists", "energy x0.5"]), "and its resistances")
 	_done(b)
 
 
