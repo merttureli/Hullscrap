@@ -460,7 +460,7 @@ func title() -> String:
 
 ## What the helm is doing, in words.
 func helm_line() -> String:
-	var speed := "%d px/s, %s" % [roundi(helm.flight.vel.length()), "cruise x%d" % roundi(helm.cruise) if helm.cruise > 1.0 else "combat speed"]
+	var speed := "%d px/s, %s" % [roundi(helm.flight.vel.length()), "cruise x%s" % String.num(helm.cruise, 1) if helm.cruise > 1.0 else "combat speed"]
 	match helm.state:
 		"grounded":
 			return "HELM: the ship cannot fly (%s)" % helm.why_not
