@@ -600,6 +600,26 @@ func test_a_hurt_crew_member_repairing_in_vacuum_leaves_at_forty_percent_and_ret
 	eq(ship.atmosphere.room_at(ada.cell()), _east(ship), "in the east room")
 
 
+func test_a_hurt_crew_member_keeps_out_of_the_outer_layer_of_a_deep_hole() -> void:
+	var ship := _two_rooms()
+	ship.grid.force_tile(Vector2i(23, 12), "wall")  # a second layer of armour outside the east wall
+	ship.grid.breach(Vector2i(22, 12))
+	ship.grid.breach(Vector2i(23, 12))  # a hole two cells deep: the outer cell touches no room
+	ship.mark_dirty()
+	ship.refresh()
+	ship.atmosphere.pressure[_east(ship)] = 0.0
+	var ada := _npc("Ada", 18, 13)
+	ship.crew.append(ada)
+	ada.hp = 30.0
+	var jobs := Jobs.new()
+	_run(jobs, ship, 1.5)
+	check(jobs.board.has("breach:23,12"), "the outer layer is on the job board")
+	check(Jobs._job_airless(ship, jobs.board["breach:23,12"]), "it counts as a job in the airless east room")
+	_run(jobs, ship, 6.0)
+	eq(ship.atmosphere.room_at(ada.cell()), _west(ship), "hurt, she walked out and stays out of the vacuum")
+	check(_types(ada) != "repair_breach", "and is not sent to seal the hole")
+
+
 func test_air_recovering_sends_them_back_without_waiting_for_their_health() -> void:
 	var d := _airless_east()
 	var ship: Ship = d["ship"]
