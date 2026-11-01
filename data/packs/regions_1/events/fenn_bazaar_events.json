@@ -209,11 +209,17 @@
       "id": "bazaar_premium_blend", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_fenn_bazaar", "jumps_min": 3},
       "text": "A fuel barge, Premium Blend, is venting white vapour from every seam. Her captain is on the comm, calm and cheerful: 'Nothing to worry about, friends, the fuel is entirely safe, we have never had a single incident, we are going to explode.' He says it in the same tone as 'good morning'.",
       "choices": [
-        {"text": "Tow the barge clear of the market.", "outcomes": [
+        {"text": "Tow the barge clear of the market.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "You tow the barge a few kilometres out as she comes apart in a long, quiet fizz of vapour. She does not blow. The captain pays you in the only currency he has left: fuel, a lot of it.", "effects": {"items": {"fuel": 6, "credits": 30}, "hull": -5}},
           {"weight": 30, "text": "The barge blows while you are towing. You are thrown, shaken and showered with fuel pellets.", "effects": {"items": {"fuel": 4}, "crew_hp": -15, "hull": -15}},
           {"weight": 20, "text": "The barge blows and the shockwave takes your engine pod. The captain's wave, as he goes past, is cheerful.", "effects": {"items": {"fuel": 3}, "crew_hp": -20, "hull": -15}},
           {"weight": 10, "text": "The barge blows. One of your crew is thrown off the hull and does not come back. The captain's last words are 'Could be worse.'", "effects": {"crew_hp": -20, "hull": -15, "lose_crew": 1}}
+        ]},
+        {"text": "Tow the barge clear of the market.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You tow the barge a few kilometres out as she comes apart in a long, quiet fizz of vapour. She does not blow. The captain pays you in the only currency he has left: fuel, a lot of it.", "effects": {"items": {"fuel": 6, "credits": 30}, "hull": -5}},
+          {"weight": 30, "text": "The barge blows while you are towing. You are thrown, shaken and showered with fuel pellets.", "effects": {"items": {"fuel": 4}, "crew_hp": -15, "hull": -15}},
+          {"weight": 20, "text": "The barge blows and the shockwave takes your engine pod. The captain's wave, as he goes past, is cheerful.", "effects": {"items": {"fuel": 3}, "crew_hp": -20, "hull": -15}},
+          {"weight": 10, "text": "The barge blows. You are thrown off the hull and spend a bad quarter hour on the tether. The captain's last words are 'Could be worse.'", "effects": {"crew_hp": -20, "hull": -25}}
         ]},
         {"text": "[Fenn] Talk the captain through the vent sequence.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 80, "text": "Your Fenn walks the captain through the seven valves in the right order in four minutes, while the barge fizzes. The last valve shuts with a clunk. 'See?' says the captain. 'Entirely safe.' He sells you fuel at cost.", "effects": {"items": {"fuel": 5, "credits": 20}}},

@@ -105,7 +105,7 @@
       "text": "The Grove's roots run for kilometres through the dark, thin and pale and glowing, joining one hulk to the next. Tonight they carry a signal: a hum that rises, falls, and rises again, as if the whole network were thinking one thought. A Sporeling at the rail says, in the voice of someone repeating a lesson, 'There is a voice in the roots. We do not know whose.'",
       "choices": [
         {"text": "Listen to the roots.", "outcomes": [
-          {"weight": 100, "text": "You put an ear to the hull and hear, dimly, in the hum, a voice saying the same words again and again: 'If you can hear this, we are alive. Come to the Lantern Reach.' The Sporelings have been listening for years. Your crew are very quiet.", "effects": {"items": {"crystal": 1}, "crew_hp": 5, "flag": "groves_heard_lantern"}}
+          {"weight": 100, "text": "You put an ear to the hull and hear, dimly, in the hum, a voice saying the same words again and again: 'If you can hear this, we are alive. Come to the Lantern Reach.' The Sporelings have been listening for years. You are very quiet.", "effects": {"items": {"crystal": 1}, "crew_hp": 5, "flag": "groves_heard_lantern"}}
         ]},
         {"text": "Ask the Grove what it means.", "outcomes": [
           {"weight": 100, "text": "The elder, Morel, takes a long time to answer. 'It came in the roots,' she says, 'before the roots were ours. Some of us follow it in our dreams. None of us has come back to say.' She gives you a small cap, sealed in wax. 'Keep it dry.'", "effects": {"items": {"polymer": 10}, "flag": "groves_heard_lantern"}}
@@ -201,17 +201,29 @@
       "id": "grove_spore_storm", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_sporeling_groves", "jumps_min": 3},
       "text": "A spore storm sweeps in: a rolling wall of pale gold dust a kilometre high, glowing from within. The Sporelings run for shelter, lashing down their hatches. 'Do not breathe it,' says the Grove's warning bell. 'Do not look into it. Do not listen to what it says.' The storm is already saying things.",
       "choices": [
-        {"text": "Run for shelter in the Grove.", "outcomes": [
+        {"text": "Run for shelter in the Grove.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 55, "text": "You thread the lane into a Sporeling dock, hatches slamming behind you. The storm roars over the hulls like a tide. Inside, the Sporelings pass round tea and wait. Nothing gets in.", "effects": {"crew_hp": 5}},
-          {"weight": 25, "text": "A thin trickle of spores gets in through a vent. For an hour the crew see their own ghosts. Everyone is shaken, and a little sad.", "effects": {"crew_hp": -10}},
-          {"weight": 15, "text": "The storm catches your tail. The hull sings for a day, and the crew's dreams are very, very vivid.", "effects": {"crew_hp": -15, "hull": -10}},
+          {"weight": 25, "text": "A thin trickle of spores gets in through a vent. For an hour you see your own ghosts. You are shaken, and a little sad.", "effects": {"crew_hp": -10}},
+          {"weight": 15, "text": "The storm catches your tail. The hull sings for a day, and your dreams are very, very vivid.", "effects": {"crew_hp": -15, "hull": -10}},
           {"weight": 5, "text": "The storm takes one of your crew, who walks out of the airlock after a voice nobody else heard. They are gone before you notice.", "effects": {"hull": -10, "lose_crew": 1}}
         ]},
-        {"text": "Fly through the storm for the gold dust.", "outcomes": [
+        {"text": "Run for shelter in the Grove.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 55, "text": "You thread the lane into a Sporeling dock, hatches slamming behind you. The storm roars over the hulls like a tide. Inside, the Sporelings pass round tea and wait. Nothing gets in.", "effects": {"crew_hp": 5}},
+          {"weight": 25, "text": "A thin trickle of spores gets in through a vent. For an hour you see your own ghosts. You are shaken, and a little sad.", "effects": {"crew_hp": -10}},
+          {"weight": 15, "text": "The storm catches your tail. The hull sings for a day, and your dreams are very, very vivid.", "effects": {"crew_hp": -15, "hull": -10}},
+          {"weight": 5, "text": "The storm sings you out of the airlock. You come to a long way out, on the tether, with a voice nobody else heard still in your ear and the hatch seal gone.", "effects": {"hull": -20}}
+        ]},
+        {"text": "Fly through the storm for the gold dust.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "The dust is fine, glowing and strange. You scoop it up in the intakes and come out the other side with a hold of spores and a headache that lasts a week.", "effects": {"items": {"nanite_paste": 2, "crystal": 3, "polymer": 20}, "crew_hp": -15, "log": "log_grove_spore_storm"}},
           {"weight": 30, "text": "The storm shows each of you your worst day. You live through it. The dust you collect is worth a fortune.", "effects": {"items": {"nanite_paste": 3, "crystal": 4}, "crew_hp": -20, "log": "log_grove_spore_storm"}},
-          {"weight": 20, "text": "The storm shows each of you your best day. Nobody wants to leave. It takes the whole crew pulling on the helm to get out.", "effects": {"items": {"crystal": 3, "polymer": 20}, "crew_hp": -10, "hull": -10, "log": "log_grove_spore_storm"}},
+          {"weight": 20, "text": "The storm shows each of you your best day. Nobody wants to leave. It takes both hands pulling on the helm to get out.", "effects": {"items": {"crystal": 3, "polymer": 20}, "crew_hp": -10, "hull": -10, "log": "log_grove_spore_storm"}},
           {"weight": 10, "text": "The storm takes one of your crew. They walk into it, smiling.", "effects": {"items": {"nanite_paste": 3, "crystal": 4}, "crew_hp": -15, "lose_crew": 1, "log": "log_grove_spore_storm"}}
+        ]},
+        {"text": "Fly through the storm for the gold dust.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "The dust is fine, glowing and strange. You scoop it up in the intakes and come out the other side with a hold of spores and a headache that lasts a week.", "effects": {"items": {"nanite_paste": 2, "crystal": 3, "polymer": 20}, "crew_hp": -15, "log": "log_grove_spore_storm"}},
+          {"weight": 30, "text": "The storm shows each of you your worst day. You live through it. The dust you collect is worth a fortune.", "effects": {"items": {"nanite_paste": 3, "crystal": 4}, "crew_hp": -20, "log": "log_grove_spore_storm"}},
+          {"weight": 20, "text": "The storm shows each of you your best day. Nobody wants to leave. It takes both hands pulling on the helm to get out.", "effects": {"items": {"crystal": 3, "polymer": 20}, "crew_hp": -10, "hull": -10, "log": "log_grove_spore_storm"}},
+          {"weight": 10, "text": "The storm sings to you, and you walk toward it, smiling. You come back to the helm a day later, with the dust, a hold two crates lighter and a smile you cannot account for.", "effects": {"items": {"nanite_paste": 3, "crystal": 4, "scrap": -25}, "crew_hp": -15, "log": "log_grove_spore_storm"}}
         ]},
         {"text": "[Sporeling] Call the storm down.", "requires": {"species": "sporeling"}, "outcomes": [
           {"weight": 85, "text": "Your Sporeling stands in the airlock, spreads their arms, and hums to the storm. The wall of dust wavers, leans in, and settles round the ship like a blanket. For an hour you sail through a warm gold hush, and the storm passes through you without taking anything. You collect a little of it, as a gift.", "effects": {"items": {"nanite_paste": 2, "crystal": 3, "polymer": 15}, "crew_hp": 10, "log": "log_grove_spore_storm"}},

@@ -16,7 +16,7 @@
     },
     {
       "id": "char_nimmik_crate_thief", "type": "wreck_field", "weight": 20, "once": true, "requires": {"region": "fenn_bazaar"},
-      "text": "The wreck has one intact crate, and it is lighter than it should be. When your crew pry it open there is a Fenn inside, small as a toolbox, in a coat so full of pockets it clinks. 'I can explain,' she says. 'You would have to want to hear it.' She is, you notice, now standing behind you. The crate's lid has not moved. Nobody saw her get out.",
+      "text": "The wreck has one intact crate, and it is lighter than it should be. When you pry it open there is a Fenn inside, small as a toolbox, in a coat so full of pockets it clinks. 'I can explain,' she says. 'You would have to want to hear it.' She is, you notice, now standing behind you. The crate's lid has not moved. Nobody saw her get out.",
       "choices": [
         {"text": "Offer her a job.", "outcomes": [
           {"weight": 100, "text": "'A job,' she says, tasting the word. 'With walls?' You say there are a great many walls. 'Perfect.' Nimmik puts a heap of copper lumps on the crate lid without being asked, a little sheepishly. 'Deposit.'", "effects": {"recruit": {"character": "nimmik"}, "items": {"copper": 10}}}

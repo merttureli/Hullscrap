@@ -79,7 +79,7 @@
     },
     {
       "id": "chantry_sour_raiders", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "choir_chantry", "jumps_min": 2},
-      "text": "The raiders are playing a chord at you. They have wired a stolen set of chantry pipes to their hull, a screamer array, and it is tuned to make every bone in a body ache. Your crew's fillings throb. Over the comm, a Rustfang captain shouts happily above the din: 'It's a toll! Pay up, or we turn it up to a seven!'",
+      "text": "The raiders are playing a chord at you. They have wired a stolen set of chantry pipes to their hull, a screamer array, and it is tuned to make every bone in a body ache. Your fillings throb. Over the comm, a Rustfang captain shouts happily above the din: 'It's a toll! Pay up, or we turn it up to a seven!'",
       "choices": [
         {"text": "Break the array with your guns.", "outcomes": [
           {"weight": 100, "text": "You open up at the pipes. The captain's cheerful voice cracks, and the screamer fires up to full as the guns come in.", "effects": {"fight": "tier"}}

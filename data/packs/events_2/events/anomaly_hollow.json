@@ -1,0 +1,244 @@
+{"events": [
+    {
+      "id": "anomaly_lane_marker_countdown", "type": "anomaly", "weight": 8, "once": false, "requires": {},
+      "text": "A Concord lane marker, counting down from a number with eleven digits. The display reads 00:00:41 and falling. The plate underneath says what happens at zero. The plate has been scratched out, by someone with a key and a lot of time.",
+      "choices": [
+        {"text": "Wait for zero.", "outcomes": [
+          {"weight": 60, "text": "The number reaches zero. A single soft chime. The marker resets to a larger number. Somewhere, you feel, something has been informed.", "effects": {"items": {"crystal": 1}, "rep": {"lumen": 1}}},
+          {"weight": 40, "text": "The number reaches zero and the marker fires one pulse at the nearest object, which is you. It is a friendly sort of pulse. Your instruments disagree for an hour.", "effects": {"hull": -4}}
+        ]},
+        {"text": "[Radar] Read what it is counting toward.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 65, "text": "The radar traces the pulse to a place on your chart with nothing in it. You mark the place. The marker, relieved, resets.", "effects": {"reveal": "anomaly"}},
+          {"weight": 35, "text": "The radar reads the pulse; the pulse reads the radar. The count jumps by a million and the dish rings.", "effects": {"hull": -6}}
+        ]},
+        {"text": "Smash the marker so it stops.", "outcomes": [
+          {"weight": 70, "text": "It stops. You feel strangely terrible about it. The housing has good copper in it.", "effects": {"items": {"copper": 15}, "rep": {"concord": -1}}},
+          {"weight": 30, "text": "It does not stop. It counts the smashing, too.", "effects": {"hull": -5, "items": {"copper": 8}}}
+        ]},
+        {"text": "Fly on. Some counts are not yours.", "outcomes": [
+          {"weight": 100, "text": "The marker finishes its count behind you, quietly, as if nobody had interrupted.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_sector_limit", "type": "anomaly", "weight": 6, "once": false, "requires": {},
+      "text": "A buoy bolted to nothing, flashing a Concord warning in six languages and one that is only light. SECTOR LIMIT. YOU ARE PAST IT. PLEASE RETURN TO SECTOR. Behind it the stars go on exactly as before, with no sign of having been told.",
+      "choices": [
+        {"text": "Return to the sector, as asked.", "outcomes": [
+          {"weight": 100, "text": "You turn around, politely. The buoy relaxes in the way a buoy can: its warning dims and a green light comes on. Somebody, somewhere, files you as compliant.", "effects": {"rep": {"concord": 1}}}
+        ]},
+        {"text": "Keep going, past the limit.", "outcomes": [
+          {"weight": 70, "text": "You go on. Nothing happens, which is more worrying than if something had. On the far side someone has left a crate, as if to say: well, you're here.", "effects": {"items": {"scrap": 20, "polymer": 8}}},
+          {"weight": 30, "text": "The buoy takes this personally and fines you, in a currency it makes up. The hold is a little lighter.", "effects": {"items": {"credits": -15}}}
+        ]},
+        {"text": "[Radar] Ask the radar where the sector ends.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 60, "text": "The radar draws a line, thinks better of it, and draws another. 'Approximately here,' it says, in effect, 'for administrative purposes.' You mark both.", "effects": {"reveal": "wreck_field", "items": {"credits": 10}}},
+          {"weight": 40, "text": "The radar draws a line through your own ship and apologises.", "effects": {"hull": -4}}
+        ]},
+        {"text": "Salute the buoy and turn nowhere in particular.", "outcomes": [
+          {"weight": 100, "text": "The buoy flashes once, which you choose to take as a salute.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_mirror_lane", "type": "anomaly", "weight": 8, "once": false, "requires": {},
+      "text": "A lane of dark glass hangs in the dark like a window. In it, your ship, slightly early. It dips its nose before you do; it puts up its shield a second ahead of you, each time, politely.",
+      "choices": [
+        {"text": "Wave.", "outcomes": [
+          {"weight": 100, "text": "The reflection waves a second before you do. You both stand there with your hands up.", "effects": {"rep": {"lumen": 1}}}
+        ]},
+        {"text": "[Shield] Raise the shield and watch the reflection raise first.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 60, "text": "The reflection's shield flares a second early. You watch how it flares and copy it, and yours holds the way its does. A few crystals shake off the glass for your trouble.", "effects": {"items": {"crystal": 3}}},
+          {"weight": 40, "text": "The reflection's shield breaks. Yours, a second later, remembers to.", "effects": {"hull": -8, "items": {"crystal": 1}}}
+        ]},
+        {"text": "Break the glass.", "outcomes": [
+          {"weight": 60, "text": "It breaks the way glass does, into your ship, in pieces, slightly early. You sweep crystal for an hour.", "effects": {"hull": -5, "items": {"crystal": 4}}},
+          {"weight": 40, "text": "It breaks. So does something of yours, a second ahead of schedule.", "effects": {"hull": -10, "items": {"crystal": 2}}}
+        ]},
+        {"text": "Look away and go.", "outcomes": [
+          {"weight": 100, "text": "In the corner of the screen your reflection watches you leave, a moment before you do.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_borrowed_gravity", "type": "anomaly", "weight": 8, "once": false, "requires": {},
+      "text": "Gravity here belongs to somewhere else. Everything not bolted down is falling, slowly and cheerfully, toward a point a long way off, and so, by degrees, are you. The pull is as steady as a tide and exactly as polite.",
+      "choices": [
+        {"text": "Fall with it.", "outcomes": [
+          {"weight": 55, "text": "You let the ship fall. It costs nothing and goes a long way. You land, if that is the word, well on, with the tank untouched.", "effects": {"items": {"fuel": 2}}},
+          {"weight": 45, "text": "You fall further than you meant to. The way back costs a day of fuel.", "effects": {"items": {"fuel": -1}}}
+        ]},
+        {"text": "[Tractor] Hook a falling rock and let it tow you.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 70, "text": "You hook a falling rock on the beam and let it drag you, like a child on a sledge. It takes you exactly where you didn't know you wanted to go.", "effects": {"items": {"fuel": 2}, "reveal": "wreck_field"}},
+          {"weight": 30, "text": "The rock is falling faster than the beam can bear. The beam objects.", "effects": {"hull": -8}}
+        ]},
+        {"text": "[Strafe Jets] Steer the fall.", "requires": {"component_any": ["strafe_jets_mk1", "strafe_jets_mk2", "strafe_jets_mk3", "afterburner"]}, "outcomes": [
+          {"weight": 80, "text": "You thread the fall with the jets whispering and come out the far side with a fuller tank than you left with. The gravity, you feel, was almost impressed.", "effects": {"items": {"fuel": 3}}},
+          {"weight": 20, "text": "A gust of someone else's gravity takes the tail. You mend it by hand.", "effects": {"hull": -6, "items": {"fuel": 1}}}
+        ]},
+        {"text": "Burn hard against it and leave.", "outcomes": [
+          {"weight": 100, "text": "The pull lets go slowly, like a hand on a sleeve. It costs you fuel and you are not sorry.", "effects": {"items": {"fuel": -1}}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_still_water", "type": "anomaly", "weight": 7, "once": false, "requires": {},
+      "text": "A bubble of stillness in the lane. Inside it the engines go quiet, the hull stops ticking, the dust hangs where it is. It is the quietest place you have ever been, and exactly your size.",
+      "choices": [
+        {"text": "Sit in it for a while.", "outcomes": [
+          {"weight": 80, "text": "You sit. You do not do anything. When you come out you have forgotten what you were worried about, which will come back, but not at once.", "effects": {"crew_hp": 15}},
+          {"weight": 20, "text": "You sit a little too long. You come out two days later, by the clock, rested and a fuel lighter.", "effects": {"crew_hp": 15, "items": {"fuel": -1}}}
+        ]},
+        {"text": "[Dampener] Match its stillness and take a sample.", "requires": {"component": "inertial_dampener"}, "outcomes": [
+          {"weight": 70, "text": "The dampener finds the bubble's rhythm and holds it. You carry a little of the stillness out in a jar, and it is worth, to the right buyer, a good deal.", "effects": {"items": {"crystal": 3, "credits": 30}}},
+          {"weight": 30, "text": "The dampener finds the rhythm, holds it, and then the bubble pops.", "effects": {"hull": -6, "items": {"crystal": 1}}}
+        ]},
+        {"text": "Shout into it.", "outcomes": [
+          {"weight": 100, "text": "Your shout goes in and does not come out. The silence swallows it whole and seems to feel better for it.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "Move on before you like it too much.", "outcomes": [
+          {"weight": 100, "text": "You go. The quiet takes a long time to leave the cabin.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "anomaly_prism_forecast", "type": "anomaly", "weight": 7, "once": false, "requires": {},
+      "text": "A Lumen weather station, no storm in sight, broadcasting tomorrow's forecast on a loop: 'Light, with periods of light. Scattered crystal in the afternoon. Visibility, for you, poor.' It says you, and means you.",
+      "choices": [
+        {"text": "Believe it.", "outcomes": [
+          {"weight": 60, "text": "A cold front of crystal dust comes through at exactly the hour it said. You are in the right place with the hold open.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 1}}},
+          {"weight": 40, "text": "The visibility, for you, is poor. A light you did not expect arrives from a direction you were not watching.", "effects": {"hull": -5}}
+        ]},
+        {"text": "[Radar] Check it against your own instruments.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 65, "text": "The radar agrees with every word, down to the minute. It is the first time the radar has agreed with anything. The Lumen send a thank-you note shaped like a prism.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 2}}},
+          {"weight": 35, "text": "The radar disagrees with every word and is, by the evening, wrong.", "effects": {"hull": -6}}
+        ]},
+        {"text": "Ask the station what it knows about the Snap.", "outcomes": [
+          {"weight": 100, "text": "'Partly cloudy,' says the station. 'With a chance of everything having been different.' It does not say another word.", "effects": {"rep": {"lumen": 1}}}
+        ]},
+        {"text": "Wave it off.", "outcomes": [
+          {"weight": 100, "text": "The forecast follows you for a while, then changes its mind.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_shore_of_fog", "type": "hollow", "weight": 9, "once": false, "requires": {},
+      "text": "A shore of fog at the edge of the lane, white as a held breath. As you near it a voice comes out of it: your voice, repeating the last thing you transmitted. It says it a little slower each time, like someone learning how.",
+      "choices": [
+        {"text": "Say something new.", "outcomes": [
+          {"weight": 55, "text": "You say something new. The fog considers this for a long time, and then repeats it, very quietly, in a voice that is not yours. It leaves a cell on the shore.", "effects": {"items": {"fuel": 1, "scrap": 15}}},
+          {"weight": 45, "text": "You say something new. The fog says it back with someone else's cough on the end. You close the channel.", "effects": {"crew_hp": -6}}
+        ]},
+        {"text": "[Radar Mk3] Map the shore.", "requires": {"component": "radar_mk3"}, "outcomes": [
+          {"weight": 65, "text": "The radar draws the shore as a coastline with a harbour in it, and in the harbour a hulk with her lamps lit. You ease in. She has been polishing her cargo for you.", "effects": {"items": {"scrap": 45, "titanium": 10}}},
+          {"weight": 35, "text": "The coastline moves while the radar draws it. The harbour turns out to be the same thing as the shore.", "effects": {"hull": -10}}
+        ]},
+        {"text": "Cut the channel and go.", "outcomes": [
+          {"weight": 100, "text": "The voice says the last word again as you go, into dead air, and then has to work out what to say next.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_fog_walker", "type": "hollow", "weight": 9, "once": false, "requires": {},
+      "text": "A figure stands on a plate of wreckage in the fog, in a suit with no lamp, one hand up like someone hailing a bus. The radio says: 'Directions. One fuel. Directions are good. Directions are the only thing I have left that is good.'",
+      "choices": [
+        {"text": "Pay one fuel for directions.", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
+          {"weight": 60, "text": "The figure points. You go the way they point. It is, for once, the right way: a cache, untouched, where a signpost used to be.", "effects": {"items": {"scrap": 35, "copper": 12}, "reveal": "trader"}},
+          {"weight": 40, "text": "The figure points. The way they point has a wreck in it with lights on, and no hull behind the lights.", "effects": {"hull": -10}}
+        ]},
+        {"text": "[Radar] Ask for directions to somewhere the radar already knows.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 70, "text": "The figure points exactly where the radar does. 'Good,' they say, 'you're listening.' They hand you back your fuel, and a second one, with an air of great satisfaction.", "effects": {"items": {"fuel": 2}}},
+          {"weight": 30, "text": "The figure points the other way. The radar and the figure disagree, and the fog takes the figure's side.", "effects": {"hull": -6}}
+        ]},
+        {"text": "Ask them who they were.", "outcomes": [
+          {"weight": 100, "text": "The figure thinks about it for a long time. 'Tuesday,' they say at last, and put their hand down.", "effects": {}}
+        ]},
+        {"text": "Wave and fly on.", "outcomes": [
+          {"weight": 100, "text": "The hand stays up in the mirror for a long while, still hailing.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_toll_ghost", "type": "hollow", "weight": 8, "once": false, "requires": {},
+      "text": "A toll booth in a lane with no toll, floating in the dark, barrier down, light green. In the booth a figure in a Concord cap is waiting with a hand out, with the patient face of someone who has been owed a long time. The sign reads EXACT CHANGE. NO EXCEPTIONS. NO FOG.",
+      "choices": [
+        {"text": "Pay the toll (20 credits).", "requires": {"credits": 20, "pay": true}, "outcomes": [
+          {"weight": 80, "text": "The barrier lifts. The figure counts the coins, nods, and salutes. 'Safe lane,' says the speaker, and means it. Behind you the booth goes dark with an air of satisfaction.", "effects": {"items": {"fuel": 1, "scrap": 15}}},
+          {"weight": 20, "text": "The barrier lifts. The figure counts the coins, and keeps counting.", "effects": {"hull": -6}}
+        ]},
+        {"text": "[Shield] Ram the barrier under the shield.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 60, "text": "The shield takes the barrier like a wave. The figure holds its hand out a moment longer, then lowers it, the way one lowers a hand for the last time.", "effects": {"items": {"scrap": 25}}},
+          {"weight": 40, "text": "The barrier does not break. It bends, rings, and sends you on your way with the shield in pieces.", "effects": {"hull": -10}}
+        ]},
+        {"text": "Wait until the figure looks away, and slip under.", "outcomes": [
+          {"weight": 60, "text": "It never looks away. It never blinks. You wait an hour. Then you go, and it lets you, and you do not know why.", "effects": {"items": {"fuel": -1}}},
+          {"weight": 40, "text": "It looked away. It was waiting for you to try.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Turn around.", "outcomes": [
+          {"weight": 100, "text": "You go back the way you came. The barrier comes up behind you, just to be neat.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_password_sentry", "type": "hollow", "weight": 8, "once": false, "requires": {},
+      "text": "A gate ship with her lights low hails in the voice of a very young sentry: 'Halt. Password.' There is no password. There never was one; you can tell from how it asks, like a child who was told to ask and not what for.",
+      "choices": [
+        {"text": "Give a password, any password.", "outcomes": [
+          {"weight": 50, "text": "'Correct,' says the sentry, in a voice of pure relief. It opens its bay: a spare cell, a tin, a medal for nothing.", "effects": {"items": {"fuel": 1, "scrap": 20, "credits": 10}}},
+          {"weight": 50, "text": "'Incorrect.' The guns come round with the weary patience of a thing that has been wrong before.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "Say: 'Your watch is over.'", "outcomes": [
+          {"weight": 65, "text": "A long silence. 'Relieved,' says the sentry. 'Thank God.' The lights go out one by one. It leaves a cell, warm, and a plate with a name on it that you take.", "effects": {"items": {"scrap": 35, "fuel": 1}}},
+          {"weight": 35, "text": "'No,' says the sentry, kindly. 'That is not the password either.'", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Radar Mk3] Listen for what the sentry is listening for.", "requires": {"component": "radar_mk3"}, "outcomes": [
+          {"weight": 80, "text": "The radar finds the sentry's real listening channel. You say the word it has been waiting forty years to hear, which is your own name. The bay opens.", "effects": {"items": {"scrap": 40, "fuel": 2}}},
+          {"weight": 20, "text": "The radar finds the channel, and the channel finds you.", "effects": {"hull": -8}}
+        ]},
+        {"text": "Back away without turning around.", "outcomes": [
+          {"weight": 100, "text": "You back away. The sentry says 'Halt' twice more, with less and less conviction, then 'Password?' to nobody at all.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_stay_lights", "type": "hollow", "weight": 8, "once": false, "requires": {},
+      "text": "A dead liner with lamps lit in a column, reading as you approach: STAY. As you move past, they shift: STAY. As you turn: STAY. It is not an order. It sounds more like a tired request.",
+      "choices": [
+        {"text": "Stay a moment.", "outcomes": [
+          {"weight": 60, "text": "You stay a moment. Nothing happens. It is the loneliest moment of your life, and then it is over, and the lights go out one by one, thanking you.", "effects": {"items": {"fuel": 1}, "crew_hp": 5}},
+          {"weight": 40, "text": "You stay a moment, and then another, and the moment does not end by itself. You cut yourself loose from the docking arm.", "effects": {"hull": -8}}
+        ]},
+        {"text": "[Strafe Jets] Circle her at speed and read the lamps from each side.", "requires": {"component_any": ["strafe_jets_mk1", "strafe_jets_mk2", "strafe_jets_mk3", "afterburner"]}, "outcomes": [
+          {"weight": 70, "text": "From the left it says STAY. From the right, if you are quick, it says STAY WITH ME. From below it says nothing at all, and the hold below is open, and warm, and full.", "effects": {"items": {"scrap": 45, "copper": 15}}},
+          {"weight": 30, "text": "From above it says RUN. You do. The jets argue over which way.", "effects": {"hull": -8}}
+        ]},
+        {"text": "Answer: 'I can't.'", "outcomes": [
+          {"weight": 100, "text": "The lamps go out one by one. The last says THANK YOU, in letters so small you almost miss them.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "Fly on.", "outcomes": [
+          {"weight": 100, "text": "The column follows you out to the edge of its power, saying it one more time.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_lane_priority", "type": "hollow", "weight": 8, "once": false, "requires": {},
+      "text": "A pilot hails you in perfect Concord register from a shape in the fog: 'Vessel, you are in my lane. Please give way.' The shape is large and has no running lights. It is in your lane. You are, you suppose, in its.",
+      "choices": [
+        {"text": "Give way.", "outcomes": [
+          {"weight": 70, "text": "You give way. The shape passes slowly, over a long time, and in its wake the fog thins and is full of things it dropped.", "effects": {"items": {"scrap": 40, "polymer": 10}}},
+          {"weight": 30, "text": "You give way. The shape passes much too close and takes a tithe from the hull.", "effects": {"hull": -8}}
+        ]},
+        {"text": "[Shield] Hold your lane under the shield.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 55, "text": "You hold. The shape swerves at the last moment, apologising in a very old register. Behind it, as you pass, there is a cache.", "effects": {"items": {"scrap": 50, "titanium": 8}}},
+          {"weight": 45, "text": "You hold. It does not swerve.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Radar] Find the shape's real course.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 80, "text": "The radar finds a course in the fog that nobody was on until now. You take it and meet the shape at the far end on good terms. It tells you the way out.", "effects": {"items": {"fuel": 2}, "reveal": "trader"}},
+          {"weight": 20, "text": "The radar finds a course, and the course finds you.", "effects": {"hull": -6}}
+        ]},
+        {"text": "Turn off your lights and let it pass.", "outcomes": [
+          {"weight": 100, "text": "You turn off your lights. It does not see you. It goes by with the sound of a thousand engines in a very small room.", "effects": {}}
+        ]}
+      ]
+    }
+]}

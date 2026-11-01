@@ -55,7 +55,7 @@ static func room_of_part(ship, uid: int) -> int:
 
 
 static func _up(m) -> bool:
-	return not m.is_down() and not m.is_stunned()
+	return not m.is_down() and not m.is_stunned() and not m.is_drone()  # (a repair drone is no crew: it counts for no crew bonus)
 
 
 ## Is `m` what `who` names: a species id, a trait id, or a true flag of the resolved traits ("mechanical")? "" is anyone.

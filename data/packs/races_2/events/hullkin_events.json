@@ -4,7 +4,7 @@
       "text": "The Concord cruiser Constancy has been dead for forty years, and she is not empty. Her whole outer hull is a town. Shell-backed figures with small grasping hands and eyes on stalks creep along the plating in slow rows, scraping, patching, laying new shell over old, the way you tend a garden. A sign on her flank, in barnacle-script, reads PLEASE DON'T CUT. THIS IS OUR HOUSE. Her hold, you can see from here, is full of good steel.",
       "choices": [
         {"text": "Cut her up anyway.", "outcomes": [
-          {"weight": 70, "text": "The Hullkin do not stop you. They put their small hands flat against the plating wherever you cut, and stand in a long slow line watching you work, and none of them says anything at all. You get the steel. Your crew do not sleep well.", "effects": {"items": {"titanium": 10, "scrap": 40}, "crew_hp": -5}},
+          {"weight": 70, "text": "The Hullkin do not stop you. They put their small hands flat against the plating wherever you cut, and stand in a long slow line watching you work, and none of them says anything at all. You get the steel. You do not sleep well.", "effects": {"items": {"titanium": 10, "scrap": 40}, "crew_hp": -5}},
           {"weight": 30, "text": "The Hullkin have been welding the inner doors shut, quietly, one a month, for a decade. You come away with a quarter of what you planned and a good deal of sympathy for a door.", "effects": {"items": {"scrap": 15}, "crew_hp": -5}}
         ]},
         {"text": "Knock, and ask permission.", "outcomes": [
@@ -22,9 +22,13 @@
       "id": "hullkin_leaking_freighter", "type": "distress", "weight": 7, "once": false, "requires": {},
       "text": "The tanker Last Orders has a crack in her belly that runs from stem to stern like a bad idea. She is losing coolant in a long white thread, and her crew are running between buckets and holes. The captain has radioed for a patch crew, and another patch crew, and a third. 'They said four hours,' she says. 'That was an hour ago. I'd settle for anyone with a thumb.'",
       "choices": [
-        {"text": "Lend your repair crew.", "outcomes": [
+        {"text": "Lend your repair crew.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 60, "text": "Two hours of sealing, swearing and passing tools down a corridor. The crack closes along its whole length. The captain pays what she can, and a good deal of coffee.", "effects": {"items": {"credits": 30}}},
           {"weight": 40, "text": "The crack gets worse before it gets better, and so does the swearing. At the end of it the coolant is in the tank and your crew are in the hold, asleep on a pile of tarps.", "effects": {"items": {"credits": 15}, "crew_hp": -5}}
+        ]},
+        {"text": "Lend a thumb. Yours.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 60, "text": "Two hours of sealing, swearing and carrying tools down a corridor you walk up and down yourself. The crack closes along its whole length. The captain pays what she can, and a good deal of coffee.", "effects": {"items": {"credits": 30}}},
+          {"weight": 40, "text": "The crack gets worse before it gets better, and so does the swearing. At the end of it the coolant is in the tank and you are in the hold, asleep on a pile of tarps.", "effects": {"items": {"credits": 15}, "crew_hp": -5}}
         ]},
         {"text": "Sell her a patch kit (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
           {"weight": 100, "text": "You hand over twenty scrap of the right kind, in the right-sized bags, with instructions the captain does not read. It works anyway. She is so grateful she overpays, which she will find out about later.", "effects": {"items": {"scrap": -20, "credits": 50}}}

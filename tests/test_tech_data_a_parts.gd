@@ -23,15 +23,15 @@ const KEY_MATERIALS: Array[String] = ["military_circuit", "gate_alloy", "void_cr
 const HOMELAND := {"human": "human_core", "basalt": "basalt_quarries", "emberkin": "emberkin_forges", "fenn": "fenn_bazaar", "kett": "kett_hives"}
 ## id -> [family, tier, [w, h], power, priority]
 const PARTS := {
-	"human_reactor_plus": ["reactor", 1, [2, 4], 9, 0], "human_comms_array": ["utility", 1, [2, 2], -2, 3],
+	"human_reactor_plus": ["reactor", 1, [2, 4], 10, 0], "human_comms_array": ["utility", 1, [2, 2], -2, 3],
 	"human_crew_quarters_deluxe": ["medbay", 1, [2, 2], -1, 3],
-	"basalt_vacuum_forge": ["reactor", 1, [2, 4], 11, 0], "basalt_stonehide_bay": ["utility", 2, [2, 2], -1, 3],
+	"basalt_vacuum_forge": ["reactor", 1, [2, 4], 12, 0], "basalt_stonehide_bay": ["utility", 2, [2, 2], -1, 3],
 	"basalt_gravity_anchor": ["utility", 2, [2, 2], -2, 3],
-	"emberkin_pyre_drive": ["engine", 2, [2, 2], -3, 4], "emberkin_furnace_core": ["reactor", 1, [2, 4], 10, 0],
+	"emberkin_pyre_drive": ["engine", 2, [2, 2], -3, 4], "emberkin_furnace_core": ["reactor", 1, [2, 4], 11, 0],
 	"emberkin_hearth_shield": ["shield", 2, [2, 4], -4, 3],
-	"fenn_haggle_engine": ["engine", 2, [2, 2], -3, 4], "fenn_jury_reactor": ["reactor", 1, [2, 4], 10, 0],
+	"fenn_haggle_engine": ["engine", 2, [2, 2], -3, 4], "fenn_jury_reactor": ["reactor", 1, [2, 4], 11, 0],
 	"fenn_quickfix_bay": ["utility", 1, [2, 2], -2, 3],
-	"kett_hive_battery": ["shield", 2, [2, 4], -5, 3], "kett_nest_reactor": ["reactor", 1, [2, 4], 7, 0],
+	"kett_hive_battery": ["shield", 2, [2, 4], -5, 3], "kett_nest_reactor": ["reactor", 1, [2, 4], 8, 0],
 	"kett_brood_hold": ["utility", 1, [2, 2], -1, 3],
 }
 
@@ -135,29 +135,33 @@ func test_the_reactors_make_what_the_spec_says_over_a_reactor_mk1() -> void:
 	var want := {"human_reactor_plus": 1.0, "basalt_vacuum_forge": 3.0, "emberkin_furnace_core": 2.0, "fenn_jury_reactor": 2.0}
 	for id in want:
 		var d := _rig(id)
-		near(_supply(d["ship"]) - 8.0, 8.0 + want[id], id + ": its own output", 1e-6)
-		near(float(d["ship"].components.def(id)["power"]) - 8.0, want[id], id + ": over the Reactor Mk1's 8", 1e-6)
+		var mk1 := float(d["ship"].components.def("reactor_mk1")["power"])
+		near(_supply(d["ship"]) - mk1, mk1 + want[id], id + ": its own output", 1e-6)
+		near(float(d["ship"].components.def(id)["power"]) - mk1, want[id], id + ": over the Reactor Mk1's output", 1e-6)
 
 
 func test_the_nest_reactor_is_worth_one_power_for_each_kett_in_its_room_up_to_three() -> void:
 	var d := _rig("kett_nest_reactor")
 	var ship: Ship = d["ship"]
-	near(_supply(ship) - 8.0, 7.0, "nobody home: 7, less than a Reactor Mk1")
+	var mk1 := float(ship.components.def("reactor_mk1")["power"])
+	var own := float(ship.components.def("kett_nest_reactor")["power"])
+	check(own < mk1 and own + 3.0 > mk1, "the nest reactor starts below a Reactor Mk1 and ends above it")
+	near(_supply(ship) - mk1, own, "nobody home: its own figure, less than a Reactor Mk1")
 	_crew(ship, "Ada", "human", 12, 14)
-	near(_supply(ship) - 8.0, 7.0, "a human is not a Kett")
+	near(_supply(ship) - mk1, own, "a human is not a Kett")
 	_crew(ship, "K1", "kett", 12, 12)
-	near(_supply(ship) - 8.0, 8.0, "one Kett: 8")
+	near(_supply(ship) - mk1, own + 1.0, "one Kett: +1")
 	_crew(ship, "K2", "kett", 14, 14)
 	var k3 := _crew(ship, "K3", "kett", 16, 14)
-	near(_supply(ship) - 8.0, 10.0, "three Kett: 10, more than a Mk1")
+	near(_supply(ship) - mk1, own + 3.0, "three Kett: +3, more than a Mk1")
 	_crew(ship, "K4", "kett", 18, 14)
-	near(_supply(ship) - 8.0, 10.0, "a fourth adds nothing")
+	near(_supply(ship) - mk1, own + 3.0, "a fourth adds nothing")
 	k3.pos = Pathfinder.centre_of(Vector2i(12, 22))
-	near(_supply(ship) - 8.0, 10.0, "one in the other room leaves three in the room")
+	near(_supply(ship) - mk1, own + 3.0, "one in the other room leaves three in the room")
 	_crew(ship, "K5", "kett", 12, 22).pos = Pathfinder.centre_of(Vector2i(14, 22))
-	near(_supply(ship) - 8.0, 10.0, "and those in the other room never count")
+	near(_supply(ship) - mk1, own + 3.0, "and those in the other room never count")
 	ship.crew[2].pos = Pathfinder.centre_of(Vector2i(12, 22))  # K1 walks off too
-	near(_supply(ship) - 8.0, 9.0, "two left in the room (K2, K4) and a human: 9")
+	near(_supply(ship) - mk1, own + 2.0, "two left in the room (K2, K4) and a human: +2")
 
 
 func test_the_forge_vents_the_room_and_only_a_human_suffers() -> void:

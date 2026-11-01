@@ -10,6 +10,7 @@ extends Control
 signal closed
 
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Backstory = preload("res://scripts/crew/backstory.gd")
 
 const MARGIN := 40.0
 const PAD := 18.0
@@ -17,6 +18,7 @@ const HEAD_H := 96.0
 const FOOT_H := 38.0
 const ROW_H := 30.0
 const HEADER_H := 32.0
+const STORY_SIZE := 13  ## font size of the story under a recruit
 const COL_GAP := 14.0
 const COL_SPLIT: Array[float] = [0.36, 0.30, 0.34]
 const DIM := Color(0.0, 0.0, 0.0, 0.62)
@@ -130,6 +132,7 @@ func rows(col: int) -> Array:
 				var traits: Array = def.get("traits", [])
 				out.append({"kind": "recruit", "id": "recruit", "index": i, "label": "%s  %s  hp %d" % [offers[i]["name"], str(offers[i]["species"]).capitalize(), int(def.get("hp", 100))],
 					"right": "%s" % (", ".join(traits) if not traits.is_empty() else ""), "cost": price})
+				out.append({"kind": "note", "story": true, "label": Backstory.of(str(offers[i]["name"]), str(offers[i]["species"]))})  # who they are, so the hire is made by story
 			if offers.is_empty():
 				out.append({"kind": "note", "label": "Nobody is looking for a berth."})
 	return out
@@ -219,8 +222,18 @@ func row_rect(col: int, i: int) -> Rect2:
 	var all := rows(col)
 	if i < top[col] or i >= all.size():
 		return Rect2()
-	var r := Rect2(col_r.position + Vector2(0.0, (i - top[col]) * (ROW_H + 4.0)), Vector2(col_r.size.x, ROW_H))
+	var y := 0.0
+	for k in range(top[col], i):
+		y += _row_h(col, all[k]) + 4.0
+	var r := Rect2(col_r.position + Vector2(0.0, y), Vector2(col_r.size.x, _row_h(col, all[i])))
 	return r if r.end.y <= col_r.end.y else Rect2()
+
+
+## The height of `row` of column `col`: ROW_H, or what its wrapped story needs.
+func _row_h(col: int, row: Dictionary) -> float:
+	if not row.has("story"):
+		return ROW_H
+	return ThemeDB.fallback_font.get_multiline_string_size(str(row["label"]), HORIZONTAL_ALIGNMENT_LEFT, column_rect(col).size.x - 16.0, STORY_SIZE).y + 8.0
 
 
 ## [column, row] at `p`, or [-1, -1].
@@ -280,6 +293,10 @@ func _draw_column(col: int, credits: int) -> void:
 			_right(str(row.get("right", "")), r, 12, BAD if str(row.get("right", "")).begins_with("behind") else DIM_TEXT, 20.0)
 			continue
 		if row["kind"] == "note":
+			if row.has("story"):
+				var font := ThemeDB.fallback_font
+				draw_multiline_string(font, r.position + Vector2(8.0, 4.0 + font.get_ascent(STORY_SIZE)), str(row["label"]), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 16.0, STORY_SIZE, -1, DIM_TEXT)
+				continue
 			_text(str(row["label"]), r.position + Vector2(8.0, 20.0), 14, DIM_TEXT)
 			continue
 		var hot: bool = hover[0] == col and hover[1] == i

@@ -1230,7 +1230,7 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 		var base_name := str(names[(first + i) % names.size()])
 		var lap := i / names.size()  # more crew than names: the second lap is "Vex II"
 		ship.crew_plan.append({"name": base_name if lap == 0 else "%s %s" % [base_name, "I".repeat(lap + 1)], "species": str(crew["species"][rng.randi() % crew["species"].size()])})
-	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01), "morale": str(f["ai"].get("morale", "default"))}  # morale: a style of data/morale.json
+	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01), "morale": str(f["ai"].get("morale", "default")), "faction": faction}  # morale: a style of data/morale.json; faction: whose lines (morale.json) it says
 	if ram:
 		ai["style"] = "rammer"
 		ai["morale"] = "ram"

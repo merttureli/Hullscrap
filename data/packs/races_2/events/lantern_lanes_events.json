@@ -6,8 +6,8 @@
         {"text": "Watch the cadets fly.", "outcomes": [
           {"weight": 100, "text": "You watch an hour of drills. A cadet pulls out of a spin so close to your window you can see the dust on her wing. Cresset sends over a hot cup of something amber and a flight manual with half the pages missing. In the margin of the chapter on lamps someone has written: DON'T.", "effects": {"crew_hp": 5, "items": {"fuel": 1}}}
         ]},
-        {"text": "Put one of your crew through a flight lesson (40 credits).", "requires": {"credits": 40}, "outcomes": [
-          {"weight": 100, "text": "Cresset puts your chosen crew member in a trainer for an hour and returns them with a silvered grin and a better sense of angles. 'They have wings in the heart,' she says, which she says to everyone. The Concord board adds a good mark to your log.", "effects": {"items": {"credits": -40}, "crew_hp": 10, "rep": {"concord": 1}}}
+        {"text": "Take a flight lesson (40 credits).", "requires": {"credits": 40}, "outcomes": [
+          {"weight": 100, "text": "Cresset puts you in a trainer for an hour and returns you with a silvered grin and a better sense of angles. 'They have wings in the heart,' she says, which she says to everyone. The Concord board adds a good mark to your log.", "effects": {"items": {"credits": -40}, "crew_hp": 10, "rep": {"concord": 1}}}
         ]},
         {"text": "[Lantern] Take the second glider.", "requires": {"species": "lantern"}, "outcomes": [
           {"weight": 100, "text": "Cresset spots your Lantern across the field and puts down the megaphone. 'You're one of the old squadron,' she says. 'Show them how it's done.' Your Lantern takes a glider, climbs, rolls, and drops through the middle of the field in a falling spiral that makes forty cadets stop flying to watch. 'That,' says Cresset to the cadets, 'was a Lantern.' She pays your Lantern a squadron's wage, and nobody bumps into anything for the rest of the afternoon.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "crew_hp": 10}}
@@ -60,11 +60,11 @@
     },
     {
       "id": "lanes_moth_trap", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "lantern_lanes", "jumps_min": 3},
-      "text": "A lamp where no lamp should be. A single lane-lamp hangs in the middle of a black sector, brilliant white, humming a soft soothing note, and round it at a respectful distance drift three Rustfang skiffs with their lights out and a net strung between them. A lamp like that is a fine thing to see, if you are a moth. It is a trap, if you are a moth. Your crew are looking at it. Your crew are looking at it a lot.",
+      "text": "A lamp where no lamp should be. A single lane-lamp hangs in the middle of a black sector, brilliant white, humming a soft soothing note, and round it at a respectful distance drift three Rustfang skiffs with their lights out and a net strung between them. A lamp like that is a fine thing to see, if you are a moth. It is a trap, if you are a moth. You are looking at it. You are looking at it a lot.",
       "choices": [
         {"text": "Look away, and fly on past.", "outcomes": [
           {"weight": 50, "text": "You turn your head, the hard way, and fly past with your hands over half the windows. In the dark the skiffs hiss, and let you go.", "effects": {}},
-          {"weight": 50, "text": "Half your crew keep looking. You have to shout. The skiffs close in.", "effects": {"fight": "tier"}}
+          {"weight": 50, "text": "Part of you keeps looking. You have to say your own name out loud. The skiffs close in.", "effects": {"fight": "tier"}}
         ]},
         {"text": "Shoot out the lamp.", "outcomes": [
           {"weight": 100, "text": "You put a shot into the lamp. It goes out with a wail, and in the dark three skiffs turn and open fire, furious.", "effects": {"fight": "tier"}}

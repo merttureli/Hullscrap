@@ -1,0 +1,164 @@
+{"events": [
+    {
+      "id": "concord_floating_desk", "type": "trader", "weight": 8, "once": false, "requires": {"region": "concord_space"},
+      "text": "A Concord clerk at a floating desk in an otherwise empty lane, with a queue of zero. 'Welcome. Please take a number.' A ticket prints: it says 1. 'You are being served.' She has a stamp, an inkpad and the look of a woman who has not been interrupted since the Snap.",
+      "choices": [
+        {"text": "File a docking form (10 credits).", "requires": {"credits": 10, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "She stamps it, three times, with rising satisfaction. The stamps are a pass for the lane and a ration of fuel from the desk's own tin.", "effects": {"items": {"fuel": 1}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Radar] Request a lane permit and a chart of the area.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 70, "text": "She stamps the chart. It is a good chart, which surprises you both. 'Don't tell Meridian,' she says. 'They only think I do forms.'", "effects": {"reveal": ["wreck_field", "trader"], "rep": {"concord": 1}}},
+          {"weight": 30, "text": "She stamps the chart. It is a chart of the desk.", "effects": {"items": {"credits": 5}}}
+        ]},
+        {"text": "Ask what she is for.", "outcomes": [
+          {"weight": 100, "text": "'Administration,' she says, with total confidence. You nod. She looks relieved to be believed.", "effects": {"rep": {"concord": 1}}}
+        ]},
+        {"text": "Take the ticket and go.", "outcomes": [
+          {"weight": 100, "text": "The ticket says 1. For the rest of the day, somewhere, you are still being served.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "concord_survey_buoy", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "concord_space"},
+      "text": "A Concord survey buoy logging 'Unknown Objects'. The list is long and updates as you watch. A line has just appeared at the bottom: ITEM 4,112: VESSEL, UNIDENTIFIED (PROVISIONAL). It is you.",
+      "choices": [
+        {"text": "Correct the entry.", "outcomes": [
+          {"weight": 65, "text": "You type your hull's name. The buoy thanks you, strikes out PROVISIONAL, and adds a small footnote that you cannot read. Meridian will like it.", "effects": {"rep": {"concord": 2}}},
+          {"weight": 35, "text": "The buoy corrects your correction. It is now ITEM 4,112: VESSEL, UNIDENTIFIED (CONFIRMED).", "effects": {"rep": {"concord": 1}}}
+        ]},
+        {"text": "[Shield] Run a shield scan so it has something to log.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 70, "text": "The buoy logs the shield, the hum and the colour of the glow, in a long careful line. A small credit is paid out of a fund nobody knew about.", "effects": {"items": {"credits": 35}, "rep": {"concord": 1}}},
+          {"weight": 30, "text": "The scan overloads the buoy's one working sensor, which then reports you as a star.", "effects": {"hull": -4, "items": {"credits": 10}}}
+        ]},
+        {"text": "Add an unknown object of your own.", "outcomes": [
+          {"weight": 100, "text": "You drop a bolt out of the airlock and log it as 'Item 4,113: bolt'. The buoy accepts this with real feeling.", "effects": {"items": {"credits": 5}}}
+        ]},
+        {"text": "Fly on, provisional.", "outcomes": [
+          {"weight": 100, "text": "The buoy leaves your entry blinking on the list. By the time you are out of range someone else is being added under you.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "concord_condemned_wreck", "type": "wreck_field", "weight": 9, "once": false, "requires": {"region": "concord_space"},
+      "text": "A hull stamped CONDEMNED in red on every plate, in a neat grid, as if someone had gone over her with a small, determined stamp. A notice: SALVAGE PERMITTED UNDER FORM 9-B. FORM 9-B NOT AVAILABLE. A stamp, still wet, hangs on a string.",
+      "choices": [
+        {"text": "Strip her anyway.", "outcomes": [
+          {"weight": 70, "text": "You strip her anyway. She does not mind. The stamp swings on its string in the breeze of your cutter and stamps your hull's name in the margin of a form you do not own.", "effects": {"items": {"scrap": 45, "copper": 10}, "rep": {"concord": -1}}},
+          {"weight": 30, "text": "A plate you cut stamps itself. It gets you across the face, which is a first.", "effects": {"hull": -5, "items": {"scrap": 30}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "Strip her and file Form 9-B afterwards (10 credits).", "requires": {"credits": 10, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You strip her, then fill in the form, in your own hand, on the stamp's own paper. The stamp comes down on it, by itself, with a soft authoritative thump.", "effects": {"items": {"scrap": 45, "copper": 10}, "rep": {"concord": 1}}}
+        ]},
+        {"text": "[Cutter] Cut along the stamp grid and take the squares.", "requires": {"component_any": ["laser_cutter", "robot_arm"]}, "outcomes": [
+          {"weight": 80, "text": "You cut the hull into the squares the stamp left, neat as a chocolate bar. Each plate is perfectly flat. Each brings a better price.", "effects": {"items": {"scrap": 60, "titanium": 8}, "rep": {"concord": 1}}},
+          {"weight": 20, "text": "The grid was a decoration. The plates were not.", "effects": {"hull": -8, "items": {"scrap": 30}}}
+        ]},
+        {"text": "Leave her condemned.", "outcomes": [
+          {"weight": 100, "text": "You leave her condemned. The stamp swings on its string, content.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lumen_listening_array", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "lumen_space"},
+      "text": "A lattice of glass dishes, listening to something on the other side of nothing. Each dish is tuned to a different note; in the middle the notes make a chord. The chord has no root. It is not unpleasant. It is the opposite of that, and you cannot say what.",
+      "choices": [
+        {"text": "Sit in the middle and listen.", "outcomes": [
+          {"weight": 70, "text": "You sit in the middle of the chord. It does not resolve. For a long while you wait for it to, and then you stop waiting, and then it is a little like being forgiven.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}}},
+          {"weight": 30, "text": "You sit in the middle of the chord and it sits in you. You come out humming a note you cannot find again.", "effects": {"crew_hp": -5, "rep": {"lumen": 1}}}
+        ]},
+        {"text": "[Radar] Point the radar the way the dishes point.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 65, "text": "The radar swings round and finds what the dishes find, a long way off, and draws it. It is a door. The radar looks at the door the way a dog looks at a gate.", "effects": {"reveal": "anomaly", "items": {"crystal": 2}, "rep": {"lumen": 2}}},
+          {"weight": 35, "text": "The radar finds what the dishes find. What the dishes find finds the radar.", "effects": {"hull": -8}}
+        ]},
+        {"text": "Take a dish for the glass.", "outcomes": [
+          {"weight": 60, "text": "You unclip a dish. It rings once, sadly, as it comes loose, and the chord has a hole in it. The glass is flawless.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": -1}}},
+          {"weight": 40, "text": "You unclip a dish. The rest of the array turns to look.", "effects": {"hull": -6, "items": {"crystal": 3}, "rep": {"lumen": -1}}}
+        ]},
+        {"text": "Leave the array to its chord.", "outcomes": [
+          {"weight": 100, "text": "You leave the chord where it hangs. Behind you the array keeps listening, with the patience of something that has never been given an answer.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lumen_glass_orchard", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "lumen_space"},
+      "text": "An orchard of glass trees growing in vacuum, in rows, with fruit like pale lamps. Each fruit hums slightly flat. A Lumen sign on the first tree says, in a tidy, apologetic hand: PLEASE DO NOT PICK. PLEASE PICK ONLY THE RIPE ONES.",
+      "choices": [
+        {"text": "Pick a ripe one.", "outcomes": [
+          {"weight": 70, "text": "You pick the one that hums true. The branch lets go with a tiny sound, like a sigh, and the fruit lies in your hand and glows at you.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 1}}},
+          {"weight": 30, "text": "You pick the wrong one. It sings, once, and the nearest row sings with it, all flat.", "effects": {"hull": -5, "items": {"crystal": 1}}}
+        ]},
+        {"text": "[Intake] Harvest the row.", "requires": {"component_any": ["intake_mk1", "intake_mk2", "intake_mk3", "net_mouth_scrap"]}, "outcomes": [
+          {"weight": 60, "text": "The intake takes the row like a combine and spits out crystal in a long bright stream. A sign, behind you, falls over.", "effects": {"items": {"crystal": 7}, "rep": {"lumen": -2}}},
+          {"weight": 40, "text": "The intake takes the row and some of the root, and the tree beside it takes offence.", "effects": {"hull": -8, "items": {"crystal": 4}, "rep": {"lumen": -2}}}
+        ]},
+        {"text": "[Shield] Walk the rows under the shield and let the fruit come to you.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 75, "text": "The shield ticks against the orchard as you pass, and the ripe fruit falls into the hold of its own accord. The orchard seems, if anything, relieved.", "effects": {"items": {"crystal": 4}, "rep": {"lumen": 1}}},
+          {"weight": 25, "text": "The shield rings against a branch, and the whole row rings back.", "effects": {"hull": -6, "items": {"crystal": 2}}}
+        ]},
+        {"text": "Read the sign twice and go.", "outcomes": [
+          {"weight": 100, "text": "You read the sign twice. It does not change. You go, with the careful feeling of having been asked a kindness.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "lumen_polite_assessor", "type": "patrol", "weight": 8, "once": false, "requires": {"region": "lumen_space"},
+      "text": "A Lumen assessor skiff sidles alongside, all glass and soft light, and a voice that is several people being careful says: 'Forgive the intrusion. Would you describe yourself as interesting? There is a form, but it is mostly the one question.'",
+      "choices": [
+        {"text": "Say yes.", "outcomes": [
+          {"weight": 65, "text": "'Thank you,' says the voice. 'We thought so.' A pulse goes over your hull, warm, thorough and not at all unfriendly. A few crystals are left on your hull for your trouble.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}}},
+          {"weight": 35, "text": "'Hm,' says the voice, doubtfully. 'Perhaps.' The pulse goes over twice, to make sure.", "effects": {"hull": -3}}
+        ]},
+        {"text": "Say no.", "outcomes": [
+          {"weight": 100, "text": "'Oh,' says the voice, with real disappointment. 'We are sorry to have troubled you.' The skiff withdraws, politely, as if from a funeral.", "effects": {"rep": {"lumen": -1}}}
+        ]},
+        {"text": "[Radar] Return the scan. Politely.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 65, "text": "The radar returns the pulse, note for note. The assessor is silent for a long time. 'That,' it says, 'is very interesting,' and sends a gift.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}}},
+          {"weight": 35, "text": "The radar returns the pulse a half-tone sharp. The assessor winces on the comm.", "effects": {"rep": {"lumen": -1}}}
+        ]},
+        {"text": "Decline to be assessed.", "outcomes": [
+          {"weight": 100, "text": "'Of course,' says the voice. 'Of course. We would ask only that you think about it.' The skiff does not follow, quite.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "boneyard_stacked_hulls", "type": "wreck_field", "weight": 9, "once": false, "requires": {"region": "boneyard"},
+      "text": "Hulls stacked on each other like plates in a sink, six deep, bow to stern, welded by a long time and a little dust. Somewhere in the stack the oldest hull is holding the weight of all the others, and has been for forty years, without being asked.",
+      "choices": [
+        {"text": "Take from the top.", "outcomes": [
+          {"weight": 100, "text": "You take the top hull's plates and nothing else. It is easy work, and honest, and the hull below hardly notices.", "effects": {"items": {"scrap": 40}}}
+        ]},
+        {"text": "Pull from the middle.", "outcomes": [
+          {"weight": 60, "text": "You pull a plate out from the middle of the stack. The stack hums, settles, and does not fall. The plate, and the one behind it, are very good.", "effects": {"items": {"scrap": 90, "titanium": 15}}},
+          {"weight": 40, "text": "The stack shifts. Six hulls make a noise like a cathedral being sat on.", "effects": {"hull": -12, "items": {"scrap": 40}}}
+        ]},
+        {"text": "[Tractor] Draw a hull from the bottom with the beam.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 55, "text": "You draw the bottom hull out like a tablecloth from under the plates. The stack above it settles a hand's breadth and stays. The oldest hull comes out whole, and full.", "effects": {"items": {"scrap": 100, "titanium": 18, "copper": 20}}},
+          {"weight": 45, "text": "The stack remembers it was holding something.", "effects": {"hull": -14, "items": {"scrap": 45}}}
+        ]},
+        {"text": "Leave the stack to its weight.", "outcomes": [
+          {"weight": 100, "text": "You leave the stack to its weight. It holds, quietly, the way a very old person holds a door.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "boneyard_scrap_queue", "type": "empty", "weight": 9, "once": false, "requires": {"region": "boneyard"},
+      "text": "A queue of ships waiting at a dead wreck, engines idling, nobody out of their ships. A hand-lettered sign: THIS IS THE LINE. THE LINE IS FOR THE WRECK. Beyond them the wreck sits, cold and patient, with the look of a thing being waited on too long.",
+      "choices": [
+        {"text": "Join the queue.", "outcomes": [
+          {"weight": 70, "text": "You wait. The line moves a hull's length an hour. At the end of a long day the wreck gives you your share of its ribs, with great ceremony.", "effects": {"items": {"scrap": 50, "copper": 10}, "rep": {"clans": 1}}},
+          {"weight": 30, "text": "You wait. At the front the wreck is stripped, and the man in front of you sells you the last rivet.", "effects": {"items": {"scrap": 10}}}
+        ]},
+        {"text": "Cut the queue.", "outcomes": [
+          {"weight": 60, "text": "You roll up the side of the line to the wreck. Nobody stops you. Nobody will forget it, either.", "effects": {"items": {"scrap": 70, "titanium": 10}, "rep": {"clans": -2}}},
+          {"weight": 40, "text": "You roll up the side of the line. The line has guns.", "effects": {"fight": "tier", "rep": {"clans": -2}}}
+        ]},
+        {"text": "[Radar] Find a different wreck with a shorter line.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 75, "text": "The radar finds a second wreck a short way off with no queue at all. It is a worse wreck, but it is yours.", "effects": {"reveal": "wreck_field", "items": {"scrap": 30}}},
+          {"weight": 25, "text": "The radar finds a second wreck with a queue of its own, and a longer one.", "effects": {"items": {"fuel": -1}}}
+        ]},
+        {"text": "Take your place at the back, and then leave.", "outcomes": [
+          {"weight": 100, "text": "You take your place at the back of the line, and the person in front of you nods. You leave. They hold your place for a day.", "effects": {}}
+        ]}
+      ]
+    }
+]}

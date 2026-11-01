@@ -4,7 +4,7 @@
       "text": "The wreck is a Concord relief tender, gutted to the frame by something that burned very hot, very recently, and then went out by itself. In the middle of the burnt deck, standing at attention in a coat of soot, is a firefighting drone, barrel-bodied, red where the paint survives. It rotates to face you with a gentle mechanical whirr. 'Is there a fire?' it asks. Its voice has a little hopeful lift in it. 'I have been looking for forty years. I have not been given a fire. Are you a fire?'",
       "choices": [
         {"text": "Give it a fire. A small one, in a safe place (1 fuel).", "requires": {"items": {"fuel": 1}, "pay": true}, "outcomes": [
-          {"weight": 100, "text": "Your crew set a cautious little blaze in a drum on the deck. The drone watches it with something like love. Then it extinguishes it in one neat blast, and swivels. 'Thank you,' says Hydrant. 'That was the best day of my life. I will be extremely good at your fires.' It gets on the lift before anyone has asked.", "effects": {"recruit": {"character": "hydrant"}}}
+          {"weight": 100, "text": "You set a cautious little blaze in a drum on the deck. The drone watches it with something like love. Then it extinguishes it in one neat blast, and swivels. 'Thank you,' says Hydrant. 'That was the best day of my life. I will be extremely good at your fires.' It gets on the lift before anyone has asked.", "effects": {"recruit": {"character": "hydrant"}}}
         ]},
         {"text": "[Mechanical] Run its old protocol: 'Station relieved.'", "requires": {"trait": "mechanical"}, "outcomes": [
           {"weight": 100, "text": "Your crewmate plugs in a cable, taps a dead-letter code, and Hydrant straightens. 'Station relieved,' it says. 'Reassignment: vessel.' It rolls aboard, wheels clicking, and stops at your fire panel, which it regards with silent joy.", "effects": {"recruit": {"character": "hydrant"}}}
@@ -31,7 +31,7 @@
     },
     {
       "id": "char_halfway_in_your_cargo", "type": "empty", "weight": 50, "once": true, "requires": {"stage_min": 4, "flag": "char_halfway_met"},
-      "text": "Your crew call you to the cargo hold. Halfway is sitting on a crate there, perfectly at ease, in the flight suit, drinking a cup of tea you did not know you had. 'Hello,' she says, with, for once, no delay at all. 'I hope you do not mind. I have been here about a week. I am told it has not been a week yet, but I assure you it has.' She sips. 'I think I have caught up. Partly. I would like to stay with you until the rest of me arrives. I don't take up much room. Some of the time, I take up none.'",
+      "text": "Something in the cargo hold is making the sound of a kettle. Halfway is sitting on a crate there, perfectly at ease, in the flight suit, drinking a cup of tea you did not know you had. 'Hello,' she says, with, for once, no delay at all. 'I hope you do not mind. I have been here about a week. I am told it has not been a week yet, but I assure you it has.' She sips. 'I think I have caught up. Partly. I would like to stay with you until the rest of me arrives. I don't take up much room. Some of the time, I take up none.'",
       "choices": [
         {"text": "Welcome her aboard.", "outcomes": [
           {"weight": 100, "text": "'Thank you,' says Halfway, and then, half a second later, 'Thank you,' again, warmer. Then she steps through the crate she was sitting on and into the next room. 'Sorry,' she says. 'Habit.'", "effects": {"recruit": {"character": "halfway"}}}

@@ -27,6 +27,11 @@ func near(got: float, want: float, msg: String, eps := 1e-4) -> void:
 	check(absf(got - want) <= eps, "%s: expected %s, got %s" % [msg, str(want), str(got)])
 
 
+## What the Reactor Mk1 makes in the data (the reactor of every rig here).
+func _reactor_power() -> float:
+	return float(Ship.new("t").components.def("reactor_mk1")["power"])
+
+
 ## A passive ability list with `effects` and `side_effects`.
 func _passive(effects := {}, side := []) -> Array:
 	return [{"id": "t", "name": "T", "type": "passive", "effects": effects, "side_effects": side}]
@@ -181,36 +186,38 @@ func test_crew_bonus_power_counts_matching_up_crew_in_the_room_up_to_max() -> vo
 	var d := _rig("oxygen_gen", {"reactor_mk1": {"abilities": _passive(fx)}})
 	var ship: Ship = d["ship"]
 	_two_rooms(ship)
-	near(_supply(ship), 8.0, "a reactor 8 with nobody there")
+	var r := _reactor_power()
+	near(_supply(ship), r, "a bare reactor with nobody there")
 	_crew(ship, "Human", "human", 12, 14)
-	near(_supply(ship), 8.0, "a human is not a Kett")
+	near(_supply(ship), r, "a human is not a Kett")
 	var k1 := _crew(ship, "K1", "kett", 12, 14)
-	near(_supply(ship), 9.0, "one Kett: +1 (the refresh sees the crew, no tick needed)")
+	near(_supply(ship), r + 1.0, "one Kett: +1 (the refresh sees the crew, no tick needed)")
 	var k2 := _crew(ship, "K2", "kett", 14, 14)
 	var k3 := _crew(ship, "K3", "kett", 16, 14)
-	near(_supply(ship), 11.0, "three Kett: +3")
+	near(_supply(ship), r + 3.0, "three Kett: +3")
 	_crew(ship, "K4", "kett", 18, 14)
-	near(_supply(ship), 11.0, "a fourth adds nothing: max 3")
+	near(_supply(ship), r + 3.0, "a fourth adds nothing: max 3")
 	k3.hp = 0.0
-	near(_supply(ship), 11.0, "a downed one leaves three standing")
+	near(_supply(ship), r + 3.0, "a downed one leaves three standing")
 	k2.stun = 2.0
-	near(_supply(ship), 10.0, "a stunned one does not count either")
+	near(_supply(ship), r + 2.0, "a stunned one does not count either")
 	_put(k1, 12, 22)
-	near(_supply(ship), 9.0, "one in the other room is not in the part's room")
+	near(_supply(ship), r + 1.0, "one in the other room is not in the part's room")
 	_put(k1, 12, 14)
-	near(_supply(ship), 10.0, "and counts again when it walks back")
+	near(_supply(ship), r + 2.0, "and counts again when it walks back")
 
 
 func test_crew_bonus_power_runs_a_consumer_that_the_base_could_not_in_a_fight_too() -> void:
 	var fx := {"crew_bonus": {"who": "kett", "stat": "power", "per": 1, "max": 3}}
-	var d := _rig("oxygen_gen", {"reactor_mk1": {"abilities": _passive(fx)}, "oxygen_gen": {"power": -9}})
+	var r := _reactor_power()
+	var d := _rig("oxygen_gen", {"reactor_mk1": {"abilities": _passive(fx)}, "oxygen_gen": {"power": -(r + 1.0)}})
 	var ship: Ship = d["ship"]
 	var a := Arena.new(1)
 	a.add_ship(ship)
-	check(not a.ships[0].powered.get(d["part"], false), "9 wanted of 8: unpowered")
+	check(not a.ships[0].powered.get(d["part"], false), "one more than the reactor makes is wanted: unpowered")
 	var k := _crew(ship, "K1", "kett", 12, 14)
 	a.step(0.05)
-	check(a.ships[0].powered.get(d["part"], false), "a Kett walks in: 9 of 9, the arena sees it")
+	check(a.ships[0].powered.get(d["part"], false), "a Kett walks in: the supply meets the demand, the arena sees it")
 	_put(k, 12, 4)  # off the floor, in no room
 	a.step(0.05)
 	check(not a.ships[0].powered.get(d["part"], false), "and out again")
@@ -255,26 +262,28 @@ func test_crew_needed_power_cuts_a_reactor_that_lacks_its_crew() -> void:
 	var fx := {"crew_needed": {"count": 2, "stat": "power", "else_mult": 0.5}}
 	var d := _rig("oxygen_gen", {"reactor_mk1": {"abilities": _passive(fx)}})
 	var ship: Ship = d["ship"]
-	near(_supply(ship), 4.0, "an empty room: 8 x 0.5")
+	var r := _reactor_power()
+	near(_supply(ship), r * 0.5, "an empty room: the reactor x 0.5")
 	var a := _crew(ship, "A", "human", 12, 14)
-	near(_supply(ship), 4.0, "one of two")
+	near(_supply(ship), r * 0.5, "one of two")
 	var b := _crew(ship, "B", "human", 14, 14)
-	near(_supply(ship), 8.0, "two of two: full power")
+	near(_supply(ship), r, "two of two: full power")
 	b.stun = 1.0
-	near(_supply(ship), 4.0, "a stunned one does not count")
+	near(_supply(ship), r * 0.5, "a stunned one does not count")
 	b.stun = 0.0
 	a.hp = 0.0
-	near(_supply(ship), 4.0, "nor a downed one")
+	near(_supply(ship), r * 0.5, "nor a downed one")
 
 
 func test_crew_needed_with_who_counts_only_those_it_names() -> void:
 	var fx := {"crew_needed": {"count": 1, "stat": "power", "else_mult": 0.25, "who": "mechanical"}}
 	var d := _rig("oxygen_gen", {"reactor_mk1": {"abilities": _passive(fx)}})
 	var ship: Ship = d["ship"]
+	var r := _reactor_power()
 	_crew(ship, "H", "human", 12, 14)
-	near(_supply(ship), 2.0, "a human is not mechanical: 8 x 0.25")
+	near(_supply(ship), r * 0.25, "a human is not mechanical: the reactor x 0.25")
 	_crew(ship, "G", "gauntling", 14, 14)
-	near(_supply(ship), 8.0, "a Gauntling is (the flag of its traits, and its trait id)")
+	near(_supply(ship), r, "a Gauntling is (the flag of its traits, and its trait id)")
 
 
 func test_crew_needed_thrust_is_the_overclock_engine() -> void:
@@ -820,7 +829,7 @@ func test_a_gauntling_is_not_shocked_by_its_own_reactor_and_a_mixed_crew_is() ->
 	Abilities.tick(ship, 5.0)
 	near(g1.hp + g2.hp, 200.0, "an all-Gauntling crew pays nothing")
 	near(h.hp, 95.0, "a human aboard pays 1 hp a second")
-	near(_supply(ship), 10.0, "and the Gauntlings are worth +2 power")
+	near(_supply(ship), _reactor_power() + 2.0, "and the Gauntlings are worth +2 power")
 
 
 # --- determinism -----------------------------------------------------------------------------------

@@ -12,6 +12,7 @@ const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
+const Jobs = preload("res://scripts/crew/jobs.gd")
 const Art = preload("res://scripts/view/art.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
@@ -140,7 +141,9 @@ func _draw() -> void:
 		var look: Dictionary = m.look if not m.look.is_empty() else LOOKS.get(m.name, OTHER_LOOK)
 		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
 			"item": PersonDrawer.item_for(m, ship.clock, arena != null), "down": m.is_down(), "work": PersonDrawer.is_working(m, ship.clock), "t": _clock}
+		pose.merge(PersonDrawer.drone_extras(m, ship))
 		PersonDrawer.draw(self, px(m.pos), pose, look, CELL)
+		PersonDrawer.draw_status(self, px(m.pos), Jobs.drone_status(ship, m), CELL)
 		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL, Mortality.bleed_frac(m))
 	if _glow != null:
 		_glow.show_quads(_glow_quads)

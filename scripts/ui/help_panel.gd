@@ -61,6 +61,7 @@ const COLUMNS: Array = [
 			["Click a marker", "Set a course to that point of interest; crew at the helm fly there (click again: cancel)"],
 			["E at the helm", "Fly the ship yourself (mouse, W/S, A/D); E again hands it back"],
 			["M", "Open / close the map"],
+			["J", "Journal: the logs found this run"],
 			["Click a lit neighbour", "Spool the jump drive there (8 s, fuel when it fires; the same node again cancels)"],
 			["Shift+click", "Drift jump with no fuel (costs hull)"],
 			["T", "Wait for a passing trader (no fuel)"],
