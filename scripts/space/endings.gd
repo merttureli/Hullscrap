@@ -58,7 +58,7 @@ static func crew_alive(ship) -> Array:
 	var out := []
 	if ship != null:
 		for m in ship.crew:
-			if m.hp > 0.0:
+			if m.hp > 0.0 and not m.is_drone():  # (a repair drone is no crew)
 				out.append(str(m.name))
 	return out
 
@@ -132,7 +132,7 @@ static func design_of(ship) -> Dictionary:
 	var d: Dictionary = ship.to_dict()
 	var crew := []
 	for m in ship.crew:
-		if m.hp > 0.0:
+		if m.hp > 0.0 and not m.is_drone():  # (a new run brings its own drone: RunStart.add_drone)
 			crew.append({"name": str(m.name), "species": str(m.species)})
 	d["crew"] = crew
 	for k in ["crew_state", "dead_crew", "crew_plan"]:  # a design is a start, not a saved run: the crew come from its list

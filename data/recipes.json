@@ -918,6 +918,22 @@
       "tools": [],
       "time": 34,
       "category": "system"
+    },
+    {
+      "id": "repair_drone",
+      "output": {
+        "item": "repair_drone",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 60,
+        "copper": 20,
+        "polymer": 10
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 30,
+      "category": "gear"
     }
   ]
 }
