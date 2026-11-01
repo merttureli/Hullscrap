@@ -9,7 +9,7 @@
 					{"weight": 70, "text": "The chain comes away in one piece, grease and all. It has a sign on it that says KICK TO START. You decide to believe it.", "effects": {"items": {"belt_drive_scrap": 1}}},
 					{"weight": 30, "text": "The chain snaps on the first cut and takes a glove with it. The housing is salvageable, which is something.", "effects": {"items": {"scrap": 35}}}
 				]},
-				{"text": "Leave her to clank.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "Leave her to clank.", "outcomes": [{"weight": 100, "text": "Behind you the chain goes on clanking, steady as a metronome, until the signal gives out.", "effects": {}}]}
 			]
 		},
 		{
@@ -21,7 +21,7 @@
 					{"weight": 70, "text": "The spoked wheel comes out of its window with a polite click. Form 14-B is attached. You file it under 'found'.", "effects": {"items": {"belt_drive_std": 1}}},
 					{"weight": 30, "text": "The bolts are registered, and they do not want to leave. You take the copper wiring instead and the tender keeps her dignity.", "effects": {"items": {"copper": 20}}}
 				]},
-				{"text": "Leave her to her paperwork.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "Leave her to her paperwork.", "outcomes": [{"weight": 100, "text": "You leave the paperwork signed in triplicate. Somebody will want it, eventually.", "effects": {}}]}
 			]
 		},
 		{
@@ -33,7 +33,7 @@
 					{"weight": 70, "text": "The bead of light stops, politely, when you cut the lead. The rail comes away humming. It is faintly warm and slightly offended.", "effects": {"items": {"belt_drive_neon": 1}}},
 					{"weight": 30, "text": "The glass cracks along its length and the light goes out of it all at once. A little silicon is the only thing left to take.", "effects": {"items": {"silicon": 6}}}
 				]},
-				{"text": "Leave the light to its walk.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "Leave the light to its walk.", "outcomes": [{"weight": 100, "text": "The bead of light finishes its walk, turns, and starts the next one. You let it.", "effects": {}}]}
 			]
 		}
 	]

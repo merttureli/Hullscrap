@@ -44,7 +44,7 @@
       "text": "A Basalt hauler sits dead in the lane, running lights out, hatches shut. The beacon says LONG QUIET: DO NOT HAIL. Beside it two more Basalt ships are parked in a polite circle, also not hailing, also not moving. It appears to be a vigil, or an argument, or lunch.",
       "choices": [
         {"text": "Wait with them.", "outcomes": [
-          {"weight": 70, "text": "You wait. Nothing happens for five hours. At the end the hauler's hatch opens, a Basalt waves one hand, and all three ships leave in order. They leave you a pad on a buoy. Your crew are rested, a little embarrassed, and strangely proud.", "effects": {"crew_hp": 15, "log": "log_quarry_hello"}},
+          {"weight": 70, "text": "You wait. Nothing happens for five hours. At the end the hauler's hatch opens, a Basalt waves one hand, and all three ships leave in order. They leave you a pad on a buoy. You are rested, a little embarrassed, and strangely proud.", "effects": {"crew_hp": 15, "log": "log_quarry_hello"}},
           {"weight": 30, "text": "You wait. You wait some more. The Long Quiet ends when it ends, which is after you have jumped. The crew say it was the most restful stop of the run anyway.", "effects": {"crew_hp": 10}}
         ]},
         {"text": "Hail them anyway.", "outcomes": [
@@ -200,17 +200,29 @@
       "id": "quarry_blast_day", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"flag": "in_basalt_quarries", "jumps_min": 2},
       "text": "Today is Blast Day: the Quarry's controlled demolition of the east face. The notice went up forty years ago, in the slow tongue, and says the blast is 'imminent'. This is the day. You are in the middle of the notice's 'imminent'. A voice, calm as granite, says: 'Please leave the area. Please leave it soon. Thank you.'",
       "choices": [
-        {"text": "Get out immediately.", "outcomes": [
+        {"text": "Get out immediately.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 55, "text": "You burn hard out of the blast zone. The east face lets go behind you, a silent, orange bloom of stone. The Basalt applaud, slowly. You came out with a hold of debris scooped from the edge.", "effects": {"items": {"silicon": 8, "scrap": 30}}},
-          {"weight": 25, "text": "You are nearly clear when the first shockwave catches your tail. The ship tumbles. The crew bounce.", "effects": {"items": {"scrap": 20}, "crew_hp": -15, "hull": -10}},
+          {"weight": 25, "text": "You are nearly clear when the first shockwave catches your tail. The ship tumbles. You bounce.", "effects": {"items": {"scrap": 20}, "crew_hp": -15, "hull": -10}},
           {"weight": 12, "text": "The blast comes early. 'Imminent', it turns out, has a wide margin. You get out trailing smoke, short a handrail and a few teeth.", "effects": {"crew_hp": -20, "hull": -15}},
           {"weight": 8, "text": "The blast comes early and from the wrong side. You get the ship out. One of the crew did not get back to the hatch in time.", "effects": {"crew_hp": -20, "hull": -15, "lose_crew": 1}}
         ]},
-        {"text": "Ride the blast and mine the loosened rock.", "outcomes": [
+        {"text": "Get out immediately.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 55, "text": "You burn hard out of the blast zone. The east face lets go behind you, a silent, orange bloom of stone. The Basalt applaud, slowly. You came out with a hold of debris scooped from the edge.", "effects": {"items": {"silicon": 8, "scrap": 30}}},
+          {"weight": 25, "text": "You are nearly clear when the first shockwave catches your tail. The ship tumbles. You bounce.", "effects": {"items": {"scrap": 20}, "crew_hp": -15, "hull": -10}},
+          {"weight": 12, "text": "The blast comes early. 'Imminent', it turns out, has a wide margin. You get out trailing smoke, short a handrail and a few teeth.", "effects": {"crew_hp": -20, "hull": -15}},
+          {"weight": 8, "text": "The blast comes early and from the wrong side. You get the ship out, but not all of her: a plate, a hatch and half your cargo stay behind in the dust.", "effects": {"crew_hp": -20, "hull": -25, "items": {"scrap": -30}}}
+        ]},
+        {"text": "Ride the blast and mine the loosened rock.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "You sit at the edge and take the blast on the shield side. The east face comes apart in a cloud of fresh-cut stone and the cutters fill like pockets. It is a lot of rock. It is a lot of rock coming at you.", "effects": {"items": {"silicon": 16, "titanium": 10, "scrap": 40}, "crew_hp": -10, "hull": -5, "log": "log_quarry_imminent"}},
           {"weight": 30, "text": "The blast rolls over you like a wall. You come out the other side with a full hold and half a hull.", "effects": {"items": {"silicon": 16, "titanium": 8}, "crew_hp": -20, "hull": -15, "log": "log_quarry_imminent"}},
           {"weight": 20, "text": "The shockwave takes the cutter arm off and puts it in the next system. You get the haul. You do not get the arm.", "effects": {"items": {"silicon": 14, "titanium": 10}, "hull": -10, "log": "log_quarry_imminent"}},
           {"weight": 10, "text": "The blast catches the hull in the worst place. You get the haul out. You do not get everyone back.", "effects": {"items": {"silicon": 14, "titanium": 8}, "crew_hp": -20, "hull": -15, "lose_crew": 1, "log": "log_quarry_imminent"}}
+        ]},
+        {"text": "Ride the blast and mine the loosened rock.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You sit at the edge and take the blast on the shield side. The east face comes apart in a cloud of fresh-cut stone and the cutters fill like pockets. It is a lot of rock. It is a lot of rock coming at you.", "effects": {"items": {"silicon": 16, "titanium": 10, "scrap": 40}, "crew_hp": -10, "hull": -5, "log": "log_quarry_imminent"}},
+          {"weight": 30, "text": "The blast rolls over you like a wall. You come out the other side with a full hold and half a hull.", "effects": {"items": {"silicon": 16, "titanium": 8}, "crew_hp": -20, "hull": -15, "log": "log_quarry_imminent"}},
+          {"weight": 20, "text": "The shockwave takes the cutter arm off and puts it in the next system. You get the haul. You do not get the arm.", "effects": {"items": {"silicon": 14, "titanium": 10}, "hull": -10, "log": "log_quarry_imminent"}},
+          {"weight": 10, "text": "The blast catches the hull in the worst place. You get the haul out, and the hull does not get itself out at all.", "effects": {"items": {"silicon": 14, "titanium": 8}, "crew_hp": -20, "hull": -25, "log": "log_quarry_imminent"}}
         ]},
         {"text": "[Basalt] Call the demolition foreman and ask for a delay.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 100, "text": "Your Basalt tells the foreman, in the slow tongue, that a ship is in the zone. The foreman is silent for six minutes. Then, with infinite courtesy, he postpones the blast by one settling. You use it to cut the east face yourself, at leisure.", "effects": {"items": {"silicon": 14, "titanium": 8}, "rep": {"clans": 1}, "log": "log_quarry_imminent"}}

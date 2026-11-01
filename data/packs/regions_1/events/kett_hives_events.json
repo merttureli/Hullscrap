@@ -4,7 +4,7 @@
       "text": "Knot Eleven runs the Hive-lane dock: four Kett on four consoles, working in the same rhythm, so that the whole dock sounds like one very organised insect. They greet you in sequence. 'Welcome.' 'Welcome.' 'Welcome.' 'Welcome.' Each one is a quarter of the word, and the full welcome is in the spaces.",
       "choices": [
         {"text": "Welcome them back, in sequence.", "outcomes": [
-          {"weight": 100, "text": "Your crew try it. It goes badly, and then well. By the fifth go the four Kett are nodding in the same rhythm as your crew, and the dock is two seconds faster than usual. They tip you in fuel.", "effects": {"items": {"fuel": 1}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
+          {"weight": 100, "text": "You try it. It goes badly, and then well. By the fifth go the four Kett are nodding in the same rhythm as your crew, and the dock is two seconds faster than usual. They tip you in fuel.", "effects": {"items": {"fuel": 1}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
         ]},
         {"text": "Ask for dock services.", "outcomes": [
           {"weight": 100, "text": "The quartet processes your request in a rolling chorus, each pass a little more correct than the last. The fee is split four ways. You pay four quarters.", "effects": {"items": {"credits": -10, "fuel": 2}, "unlock": "ship_kett_ninefold_cell"}}
@@ -195,9 +195,13 @@
       "id": "hive_battery_trial", "type": "quest", "weight": 10, "once": true, "requires": {"flag": "in_kett_hives"},
       "text": "Matron Tcha runs the knot-yard that builds the Hive Battery, a shield that charges fully only when three hands work it at once. 'It is not hard,' she says, 'if you do not mind being close.' Her test console is in a very small room, with an expectation that you will stand in it with two friends. The room is built for four Kett. There is no handle on the inside of the door.",
       "choices": [
-        {"text": "Squeeze in three crew and work the console.", "outcomes": [
+        {"text": "Squeeze in three crew and work the console.", "requires": {"crew_min": 3}, "outcomes": [
           {"weight": 55, "text": "Three of your crew squeeze into a room built for insects and run the Battery together. It hums, it flares, it takes the Matron's test shots without a flicker. They come out rumpled, closer, and slightly in love. Tcha hands over the schematics.", "effects": {"crew_hp": 5, "flag": "tech_hive_battery", "unlock": "ship_kett_picket_nest"}},
           {"weight": 45, "text": "Three crew in a room that small: nobody is graceful. But the shield holds on the third try, and the Matron concedes. 'Good enough for a non-Kett,' she says.", "effects": {"flag": "tech_hive_battery", "unlock": "ship_kett_picket_nest"}}
+        ]},
+        {"text": "[Robot Arm] Rig the arm to work the second and third hands.", "requires": {"component": "robot_arm"}, "outcomes": [
+          {"weight": 55, "text": "The robot arm takes the second console and a cable takes the third. The Battery hums, it flares, it takes the Matron's test shots without a flicker. Tcha stares at the arm for a long time. 'That is cheating,' she says. 'It is also three hands.' She hands over the schematics.", "effects": {"flag": "tech_hive_battery", "unlock": "ship_kett_picket_nest", "crew_hp": 5}},
+          {"weight": 45, "text": "The arm is a beat behind, and the Battery sulks. The third try is the same as the first. Tcha opens the door from the outside. 'Come back with a better arm,' she says, 'or friends.'", "effects": {}}
         ]},
         {"text": "[Kett] Work it with your Kett.", "requires": {"species": "kett"}, "outcomes": [
           {"weight": 100, "text": "Your Kett steps in, finds the beat, and the Battery sings. The Matron weeps. She gives them the schematics, a quarter-share of her pension, and the key to the knot-yard.", "effects": {"items": {"credits": 40, "polymer": 15}, "rep": {"clans": 1}, "flag": "tech_hive_battery", "unlock": "ship_kett_picket_nest"}}
@@ -214,11 +218,17 @@
       "id": "hive_hatching", "type": "wreck_field", "weight": 7, "once": false, "requires": {"flag": "in_kett_hives", "jumps_min": 3},
       "text": "A hive-hulk with every cell closed and a low roar coming from inside. The beacon says BROOD HATCHING. DO NOT ENTER. KEEP THE DOORS CLOSED. The roar is the sound of ten thousand very new Kett, all learning at once what they are and who is theirs. The doors are bulging.",
       "choices": [
-        {"text": "Go in and shepherd the brood.", "outcomes": [
+        {"text": "Go in and shepherd the brood.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "You step into a river of tiny, furious, hungry Kett who take you for their mother. By the time you get out, the brood has a name for you and a very strong opinion about your hat.", "effects": {"items": {"polymer": 20, "credits": 40}, "crew_hp": -15, "log": "log_hive_brood_room"}},
-          {"weight": 30, "text": "The doors give. The brood pours out like water, over the crew, over the hull, into every vent. Everything is sticky for a week.", "effects": {"items": {"polymer": 25}, "crew_hp": -20, "hull": -10, "log": "log_hive_brood_room"}},
-          {"weight": 20, "text": "You get lost in the cells. The crew find you after three hours, covered in resin and cuddled by two hundred newborns.", "effects": {"items": {"polymer": 30, "credits": 30}, "crew_hp": -10, "log": "log_hive_brood_room"}},
+          {"weight": 30, "text": "The doors give. The brood pours out like water, over you, over the hull, into every vent. Everything is sticky for a week.", "effects": {"items": {"polymer": 25}, "crew_hp": -20, "hull": -10, "log": "log_hive_brood_room"}},
+          {"weight": 20, "text": "You get lost in the cells. The Kett find you after three hours, covered in resin and cuddled by two hundred newborns.", "effects": {"items": {"polymer": 30, "credits": 30}, "crew_hp": -10, "log": "log_hive_brood_room"}},
           {"weight": 10, "text": "The brood takes one of your crew. They are not hurt; they are adopted. They stay.", "effects": {"items": {"credits": 50}, "lose_crew": 1, "log": "log_hive_brood_room"}}
+        ]},
+        {"text": "Go in and shepherd the brood.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You step into a river of tiny, furious, hungry Kett who take you for their mother. By the time you get out, the brood has a name for you and a very strong opinion about your hat.", "effects": {"items": {"polymer": 20, "credits": 40}, "crew_hp": -15, "log": "log_hive_brood_room"}},
+          {"weight": 30, "text": "The doors give. The brood pours out like water, over you, over the hull, into every vent. Everything is sticky for a week.", "effects": {"items": {"polymer": 25}, "crew_hp": -20, "hull": -10, "log": "log_hive_brood_room"}},
+          {"weight": 20, "text": "You get lost in the cells. The Kett find you after three hours, covered in resin and cuddled by two hundred newborns.", "effects": {"items": {"polymer": 30, "credits": 30}, "crew_hp": -10, "log": "log_hive_brood_room"}},
+          {"weight": 10, "text": "The brood takes your hat, your boots and a crate of your cargo. You are not hurt; you are adopted for an afternoon, and it is a sticky, noisy afternoon.", "effects": {"items": {"credits": 50, "scrap": -25}, "hull": -8, "log": "log_hive_brood_room"}}
         ]},
         {"text": "[Kett] Tick them the first song.", "requires": {"species": "kett"}, "outcomes": [
           {"weight": 100, "text": "Your Kett ticks the oldest song they know into the closed door. The roar drops, and drops again. A thousand tiny voices answer, a thousand ticks at once. The doors open, and a stream of brood files out to follow your Kett down the corridor. By evening the hulk is quiet, and the nearest knot gives you the first harvest.", "effects": {"items": {"polymer": 40, "credits": 60}, "rep": {"clans": 2}}}

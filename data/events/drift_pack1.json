@@ -16,6 +16,10 @@
           {"weight": 85, "text": "Your Basalt walks into vacuum without a suit, which still upsets people who watch, and cuts the pod away in one slow swing. The fire starves. The skipper cries a little.", "effects": {"items": {"scrap": 50, "credits": 20}, "rep": {"clans": 2}}},
           {"weight": 15, "text": "The pod tumbles into your hull on its way past. Your Basalt apologises to the hull.", "effects": {"hull": -5, "items": {"scrap": 50}, "rep": {"clans": 2}}}
         ]},
+        {"text": "[Shield] Dock under your shield and take the pods as they pop.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1"]}, "outcomes": [
+          {"weight": 55, "text": "You nose in under the shield and the pods go off one by one against it, like popcorn on a lid. By the end the hold is a black room and the crew are all out, shaking hands with your hull.", "effects": {"items": {"scrap": 45, "credits": 25}, "rep": {"clans": 2}}},
+          {"weight": 45, "text": "The shield takes eleven pods and the twelfth takes the shield. The hull gets the rest. You get everybody out, and the Not Again's crew insist you take the scrap.", "effects": {"hull": -10, "items": {"scrap": 30}, "rep": {"clans": 1}}}
+        ]},
         {"text": "Leave them to it.", "outcomes": [
           {"weight": 100, "text": "You jump. Their prayers follow you on every channel for a good while, and most of the prayers are rude.", "effects": {}}
         ]}
@@ -82,7 +86,7 @@
       "text": "A Fenn fuel tanker is sneezing glittering clouds into the dark. Her captain, Sixpence's cousin Fourpence, is shouting rates at you: so much per patch, so much per minute, extra if you ask nicely. The meter is already running.",
       "choices": [
         {"text": "Patch the leak at their rates.", "outcomes": [
-          {"weight": 75, "text": "It takes an hour and your crew's whole supply of patience. The captain pays to the credit, the only way a Fenn pays.", "effects": {"items": {"credits": 25}}},
+          {"weight": 75, "text": "It takes an hour and your whole supply of patience. The captain pays to the credit, the only way a Fenn pays.", "effects": {"items": {"credits": 25}}},
           {"weight": 25, "text": "The patch holds, but the captain finds extras: sealant, standby fees, a surcharge for your face. You go home with less than you hoped.", "effects": {"items": {"credits": 10}}}
         ]},
         {"text": "[Fenn] Your Fenn takes over the pump and the negotiation.", "requires": {"species": "fenn"}, "outcomes": [
@@ -92,6 +96,10 @@
         {"text": "Siphon the spill into your own tanks.", "outcomes": [
           {"weight": 70, "text": "You tap the cloud and call it a rescue. The captain notices, but he is too busy plugging holes to argue.", "effects": {"items": {"fuel": 2}}},
           {"weight": 30, "text": "The tap sprays your hull and the captain notices that too. He has a lot to say about it, all of it priced.", "effects": {"hull": -5, "items": {"fuel": 1}}}
+        ]},
+        {"text": "[Intake] Skim the glittering cloud with the salvage intake.", "requires": {"component_any": ["intake_mk1", "intake_mk2", "intake_mk3", "net_mouth_scrap"]}, "outcomes": [
+          {"weight": 65, "text": "The intake drinks the cloud like it was owed it. Fourpence notices a third of the way through and starts an invoice for the part you already took. You are out of range before he finishes the first line.", "effects": {"items": {"fuel": 3}}},
+          {"weight": 35, "text": "The cloud comes in hot. The intake chokes, the hull shivers, and Fourpence adds a surcharge for whatever that was.", "effects": {"hull": -5, "items": {"fuel": 1}}}
         ]},
         {"text": "Wave and keep flying.", "outcomes": [
           {"weight": 100, "text": "The captain's voice follows you for three jumps' worth of range, quoting rates.", "effects": {}}
@@ -172,6 +180,10 @@
         ]},
         {"text": "Refuse and charge the guns.", "outcomes": [
           {"weight": 100, "text": "'Wrong answer,' says Vex, warmly.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Shield] Take the toll gun on the shield and ask for change.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1"]}, "outcomes": [
+          {"weight": 55, "text": "Vex fires a warning shot at your shield. The shield rings. You do not blink. 'Ha,' says Vex. 'Wrong customer. Safe lane, friend, and tell them the Dental Plan sent you.'", "effects": {"rep": {"clans": 1}}},
+          {"weight": 45, "text": "The shield takes the first shot and flickers. Vex hears the flicker. 'Oh,' he says, warmly, 'pirate again.'", "effects": {"fight": "pirate_raider"}}
         ]}
       ],
       "after_win": {"text": "The Dental Plan comes apart, and Vex's escape pod spits a rude flare as it tumbles away. Concord pays a little for the paperwork.", "effects": {"rep": {"concord": 1}, "items": {"credits": 20}}}
@@ -277,10 +289,16 @@
       "id": "wreck_field_dead_cruiser", "type": "wreck_field", "weight": 10, "once": false, "requires": {"jumps_min": 4},
       "text": "A Concord cruiser, CS-221 Sobriety. Status: cold, lights none, distress call none. On the bridge window, from the inside, there is a handprint, and it still shines like a fresh one.",
       "choices": [
-        {"text": "Board and salvage it.", "outcomes": [
+        {"text": "Board and salvage it.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 45, "text": "The corridors are cold and the cabinets full. The handprint was a smear of old grease. Mostly.", "effects": {"items": {"scrap": 50, "credits": 25}}},
           {"weight": 35, "text": "The lights come up the moment your airlock seals, and the guns come up with them. It wasn't dead. It was patient.", "effects": {"fight": "tier"}},
           {"weight": 10, "text": "You split up to search. One of the party takes a wrong turn and the ship, politely, does not give them back.", "effects": {"lose_crew": 1, "items": {"scrap": 40}}},
+          {"weight": 10, "text": "In the engine bay, wrapped in a tarp and a Concord seal reading NOT FOR ISSUE, a nozzle with a long burn history.", "effects": {"items": {"afterburner": 1}}}
+        ]},
+        {"text": "Board and salvage it.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 45, "text": "The corridors are cold and the cabinets full. The handprint was a smear of old grease. Mostly.", "effects": {"items": {"scrap": 50, "credits": 25}}},
+          {"weight": 35, "text": "The lights come up the moment your airlock seals, and the guns come up with them. It wasn't dead. It was patient.", "effects": {"fight": "tier"}},
+          {"weight": 10, "text": "You search alone. You take a wrong turn, and the ship, politely, keeps you for an hour. When it lets you go, the airlock takes a bite out of your hull on the way out, and you carry out what you grabbed.", "effects": {"items": {"scrap": 40}, "hull": -12}},
           {"weight": 10, "text": "In the engine bay, wrapped in a tarp and a Concord seal reading NOT FOR ISSUE, a nozzle with a long burn history.", "effects": {"items": {"afterburner": 1}}}
         ]},
         {"text": "[Artemis Mk1] Put a missile into the bridge first. Knock before you enter.", "requires": {"component": "artemis_mk1", "items": {"missile": 1}}, "outcomes": [
@@ -302,7 +320,7 @@
       "choices": [
         {"text": "Pry it open.", "outcomes": [
           {"weight": 40, "text": "Inside, neat rows of titanium plate and a manifest reading 'For Meridian'. Meridian can wait another forty years.", "effects": {"items": {"titanium": 8, "silicon": 6}}},
-          {"weight": 25, "text": "The container vents an air sample best described as historic. Your crew cough for an hour.", "effects": {"crew_hp": -10, "items": {"polymer": 20}}},
+          {"weight": 25, "text": "The container vents an air sample best described as historic. You cough for an hour.", "effects": {"crew_hp": -10, "items": {"polymer": 20}}},
           {"weight": 25, "text": "Seventy crates of regulation wiring, each stamped and signed. Concord would pay for these, in better days.", "effects": {"items": {"copper": 25, "scrap": 20}}},
           {"weight": 10, "text": "Under the paperwork, wrapped in foam: a hook with a bite like a bad temper, and a note saying REQUEST DENIED.", "effects": {"items": {"breach_harpoon": 1}}}
         ]},
@@ -416,6 +434,11 @@
         {"text": "[Fenn] Let your Fenn pick the crate.", "requires": {"species": "fenn", "credits": 30}, "outcomes": [
           {"weight": 100, "text": "Your Fenn walks the aisles, taps one crate, and says 'that one'. It's the only crate with a lock. Ma Pickle's eyes open for the first time all day.", "effects": {"items": {"credits": -30, "titanium": 8, "silicon": 6, "plasma_cell": 1}}}
         ]},
+        {"text": "[Workshop] Open a mystery crate on the bench before you pay for it (30 credits).", "requires": {"component_any": ["fabricator", "assembly_rig", "robot_arm"], "credits": 30, "pay": true}, "outcomes": [
+          {"weight": 55, "text": "You pop the crate on the bench and sift. Copper, a little titanium, and a gasket that was never meant for this ship. Ma Pickle watches from the hammock with one eye, impressed against her will.", "effects": {"items": {"copper": 25, "titanium": 5}}},
+          {"weight": 30, "text": "Mostly scrap, but you got to see it first, and the scrap was sorted. You come away feeling clever.", "effects": {"items": {"scrap": 55}}},
+          {"weight": 15, "text": "The crate has a spring in it, and the spring has opinions. You keep the scrap, and the bruise.", "effects": {"hull": -5, "items": {"scrap": 20}}}
+        ]},
         {"text": "Touch nothing. Everything works until you do.", "outcomes": [
           {"weight": 100, "text": "Ma Pickle goes back to sleep. The tags go on lying.", "effects": {}}
         ]}
@@ -442,7 +465,7 @@
     },
     {
       "id": "anomaly_singing_buoy", "type": "anomaly", "weight": 4, "once": false, "requires": {"not_flag": "prism_revealed"},
-      "text": "A buoy of fused glass turns slowly in the dark, singing three notes. The third note is yours. It wasn't, a moment ago. Your instruments find no power source, and your crew find a mild, polite homesickness.",
+      "text": "A buoy of fused glass turns slowly in the dark, singing three notes. The third note is yours. It wasn't, a moment ago. Your instruments find no power source, and you find a mild, polite homesickness.",
       "choices": [
         {"text": "Listen to the third note.", "outcomes": [
           {"weight": 100, "text": "You listen. It listens back, which is somehow worse.", "effects": {"goto": "anomaly_buoy_answer"}}
@@ -450,8 +473,12 @@
         {"text": "[Emberkin] Let your Emberkin hum it back.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 100, "text": "Your Emberkin hums the third note without being asked, and the buoy brightens like something that has been waiting a long time.", "effects": {"rep": {"lumen": 1}, "goto": "anomaly_buoy_answer"}}
         ]},
+        {"text": "[Radar] Triangulate where the third note comes from.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 60, "text": "The radar draws the third note as a line across the dark, and the line ends at the buoy's own lamp. The buoy brightens, as though somebody had finally looked at it properly.", "effects": {"rep": {"lumen": 1}, "goto": "anomaly_buoy_answer"}},
+          {"weight": 40, "text": "The third note comes back down the beam and rings the dish like a bell. The dish is never quite true again. The buoy is, if anything, pleased.", "effects": {"hull": -5, "rep": {"lumen": 1}, "goto": "anomaly_buoy_answer"}}
+        ]},
         {"text": "Fly off. The notes aren't for you.", "outcomes": [
-          {"weight": 100, "text": "The song fades behind you. Your crew keep humming it for the rest of the shift.", "effects": {}}
+          {"weight": 100, "text": "The song fades behind you. You keep humming it for the rest of the shift.", "effects": {}}
         ]}
       ]
     },
@@ -581,10 +608,10 @@
     },
     {
       "id": "empty_long_quiet", "type": "empty", "weight": 10, "once": false, "requires": {},
-      "text": "The drive hums its one note, and the ship is quiet in the way that feels like company. Somewhere aft, someone is humming off-key. Nobody has been shot at in hours.",
+      "text": "The drive hums its one note, and the ship is quiet in the way that feels like company. Somewhere aft, a pipe is humming off-key. Nobody has been shot at in hours.",
       "choices": [
-        {"text": "Let the crew rest.", "outcomes": [
-          {"weight": 100, "text": "Somebody finds a blanket. Somebody else finds a second blanket. By the time you notice, the whole ship is asleep except the autopilot, which never needed to be.", "effects": {"crew_hp": 10}}
+        {"text": "Rest.", "outcomes": [
+          {"weight": 100, "text": "You find a blanket. You find a second blanket. By the time you notice, the whole ship is asleep except the autopilot, which never needed to be.", "effects": {"crew_hp": 10}}
         ]},
         {"text": "[Emberkin] Sit on the warm reactor casing with your Emberkin.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 100, "text": "It's warm, and quiet, and your Emberkin tells you about a place with two suns and no winter, and you believe every word. You come away feeling something close to well.", "effects": {"crew_hp": 15}}
@@ -602,7 +629,7 @@
       "text": "Radio Rusthold fades in through the static, a pirate station run out of someone's laundry room. The presenter reads requests, dedications and the day's debts, in that order. A song goes out to 'the ship that owes Ma Gantry'. You think it might be you.",
       "choices": [
         {"text": "Call in a request.", "outcomes": [
-          {"weight": 70, "text": "You ask for something slow and sad, and the presenter plays something fast and rude. Your crew sing along anyway.", "effects": {"crew_hp": 10, "rep": {"clans": 1}}},
+          {"weight": 70, "text": "You ask for something slow and sad, and the presenter plays something fast and rude. You sing along anyway.", "effects": {"crew_hp": 10, "rep": {"clans": 1}}},
           {"weight": 30, "text": "The presenter reads your name and balance on air to a round of applause from three hundred strangers. Ma Gantry rings in to say hello, which is worse.", "effects": {"rep": {"clans": 1}, "debt": 20}}
         ]},
         {"text": "[Suit] Take a walk on the hull while it plays.", "requires": {"trait": "suit"}, "outcomes": [

@@ -23,7 +23,7 @@
       "choices": [
         {"text": "Run a pressure tube from your airlock (15 scrap).", "requires": {"items": {"scrap": 15}}, "outcomes": [
           {"weight": 60, "text": "You run a tube along the hull, patch it at three points, and press it into the aft hatch with a crew of grim faces. It holds. The aft section is reached, the repair is made, and the captain is quietly overwhelmed.", "effects": {"items": {"scrap": -15, "credits": 45}, "rep": {"concord": 1}}},
-          {"weight": 40, "text": "The tube holds long enough to get them across, and then splits like a sausage. Everybody gets out. The tube does not, and several of your crew have to be stitched.", "effects": {"items": {"scrap": -15, "credits": 25}, "crew_hp": -10}}
+          {"weight": 40, "text": "The tube holds long enough to get them across, and then splits like a sausage. Everybody gets out. The tube does not, and several of you have to be stitched.", "effects": {"items": {"scrap": -15, "credits": 25}, "crew_hp": -10}}
         ]},
         {"text": "Suit up and cross the passage.", "outcomes": [
           {"weight": 50, "text": "Your crew go across on a line in two shifts, wearing everything the ship has. They reach the aft section, repair the break, and return. The captain pays with the manifest's emergency float and a very wet hug.", "effects": {"items": {"credits": 40}, "crew_hp": -5}},
@@ -45,7 +45,7 @@
       "text": "A pack of small Kite are playing tag round an asteroid in free fall, long limbs flung out, shrieking with joy. The rules, you gather from the shouting, are that the one who is 'it' has to touch a ship, any ship, and tag it with a splash of chalk. They have clearly chosen yours. One is already on your hull, three are on the other side of the cockpit window, and a fourth is hanging off your antenna by its tail, waving.",
       "choices": [
         {"text": "Play along: fly smooth and let them tag you.", "outcomes": [
-          {"weight": 60, "text": "You fly a long gentle arc round the asteroid, and the children swarm over the hull in a happy chalk-flinging cloud. When they have all tagged you, they shout the score in unison and shoot off to tell their parents. Your hull has stripes, your crew have grins, and a dad on the rock sends a bag of fuel.", "effects": {"crew_hp": 10, "items": {"fuel": 1}}},
+          {"weight": 60, "text": "You fly a long gentle arc round the asteroid, and the children swarm over the hull in a happy chalk-flinging cloud. When they have all tagged you, they shout the score in unison and shoot off to tell their parents. Your hull has stripes, you have grins, and a dad on the rock sends a bag of fuel.", "effects": {"crew_hp": 10, "items": {"fuel": 1}}},
           {"weight": 40, "text": "One of them tags the intake with a fistful of chalk. It sneezes. You spend twenty minutes cleaning it and the children, who have not yet gone, supervise.", "effects": {"hull": -5, "crew_hp": 5}}
         ]},
         {"text": "Bet on the smallest one (20 credits).", "requires": {"credits": 20}, "outcomes": [

@@ -5,7 +5,7 @@
       "choices": [
         {"text": "Thank them for the courtesy.", "outcomes": [
           {"weight": 80, "text": "The dockhands beam. They bring you a mug of tea that is still boiling and a damp cloth for your forehead. The crew drink the tea, sweating, and are surprisingly moved.", "effects": {"crew_hp": 5, "unlock": "ship_emberkin_ember_kite"}},
-          {"weight": 20, "text": "The tea is hot enough to take the first layer off the mug. Your crew are very moved and quite blistered.", "effects": {"items": {"credits": 10}, "crew_hp": -5, "unlock": "ship_emberkin_ember_kite"}}
+          {"weight": 20, "text": "The tea is hot enough to take the first layer off the mug. You are very moved and quite blistered.", "effects": {"items": {"credits": 10}, "crew_hp": -5, "unlock": "ship_emberkin_ember_kite"}}
         ]},
         {"text": "Ask them to turn it down further.", "outcomes": [
           {"weight": 100, "text": "A shocked silence. Then three dockhands throw open the vents and pull on coats, with the solemn faces of people undertaking a great sacrifice. It gets down to thirty-five. You are very comfortable and slightly ashamed.", "effects": {"crew_hp": 10, "unlock": "ship_emberkin_ember_kite"}}
@@ -204,11 +204,17 @@
       "id": "forge_meltdown", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_emberkin_forges", "jumps_min": 3},
       "text": "A reactor ship, Afterglow, is going critical in the lane: her core glowing white through the hull, her crew hanging off the outside in a ring. Emberkin engineers in thin shirts are trying to hold the core steady with their bare hands. 'Not hot yet!' someone calls. 'Not hot yet!' It is very, very hot.",
       "choices": [
-        {"text": "Go in and help vent the core.", "outcomes": [
+        {"text": "Go in and help vent the core.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "You vent the core into space in a white plume. The ship stops glowing and the Emberkin cheer. They give you everything in the cargo, which is reactor fuel.", "effects": {"items": {"plasma_cell": 4, "credits": 50}, "rep": {"lumen": 1}, "crew_hp": -10}},
           {"weight": 30, "text": "The core coughs a flame the length of your ship. You get out with half your paint.", "effects": {"items": {"plasma_cell": 3}, "crew_hp": -15, "hull": -15}},
-          {"weight": 20, "text": "The core goes while you are alongside. Your shield screams, the crew get singed, and the Afterglow's crew are saved, which is the thing.", "effects": {"items": {"plasma_cell": 2}, "rep": {"lumen": 1}, "crew_hp": -20, "hull": -10}},
+          {"weight": 20, "text": "The core goes while you are alongside. Your shield screams, you get singed, and the Afterglow's crew are saved, which is the thing.", "effects": {"items": {"plasma_cell": 2}, "rep": {"lumen": 1}, "crew_hp": -20, "hull": -10}},
           {"weight": 10, "text": "The core goes all at once. You get the Afterglow's crew off. You lose one of your own to the glare.", "effects": {"rep": {"lumen": 2}, "crew_hp": -20, "hull": -15, "lose_crew": 1}}
+        ]},
+        {"text": "Go in and help vent the core.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You vent the core into space in a white plume. The ship stops glowing and the Emberkin cheer. They give you everything in the cargo, which is reactor fuel.", "effects": {"items": {"plasma_cell": 4, "credits": 50}, "rep": {"lumen": 1}, "crew_hp": -10}},
+          {"weight": 30, "text": "The core coughs a flame the length of your ship. You get out with half your paint.", "effects": {"items": {"plasma_cell": 3}, "crew_hp": -15, "hull": -15}},
+          {"weight": 20, "text": "The core goes while you are alongside. Your shield screams, you get singed, and the Afterglow's crew are saved, which is the thing.", "effects": {"items": {"plasma_cell": 2}, "rep": {"lumen": 1}, "crew_hp": -20, "hull": -10}},
+          {"weight": 10, "text": "The core goes all at once. You get the Afterglow's crew off, and the glare strips the paint from one whole side of your ship and the shine from your eyes for a day.", "effects": {"rep": {"lumen": 2}, "crew_hp": -20, "hull": -25}}
         ]},
         {"text": "[Emberkin] Go in and hold the core with them.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 90, "text": "Your Emberkin links hands with the others round the core. They sing, in off-key unison, a very old song for cooling. The core dims, reluctantly, like a child told to go to bed. They return singed, laughing and proud, with the ship's cells.", "effects": {"items": {"plasma_cell": 4, "credits": 60}, "rep": {"lumen": 2}}},

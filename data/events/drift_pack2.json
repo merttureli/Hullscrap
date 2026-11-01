@@ -16,6 +16,10 @@
           {"weight": 85, "text": "Your Basalt walks the surface with no suit, taps twice, and points. 'There,' they say, in the voice of someone who has been there before. The seam is exactly there.", "effects": {"items": {"scrap": 80, "copper": 20, "titanium": 6}}},
           {"weight": 15, "text": "Your Basalt points at the wrong spot out of sheer politeness, because you were standing near it. The rock gives up a little less than hoped.", "effects": {"items": {"scrap": 45, "copper": 10}}}
         ]},
+        {"text": "[Tractor Beam] Haul the seam loose with the beam instead of cutting it.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 65, "text": "You clamp the beam on the fat end of the seam and pull. The Anvil lets go of it with a groan, and a bright slab of iron and copper floats into the hold like it was always going there.", "effects": {"items": {"scrap": 90, "copper": 25, "titanium": 6}}},
+          {"weight": 35, "text": "The seam comes loose, and so does everything it was holding up. A slab swings round on the end of the beam and finds your bow. You keep the seam.", "effects": {"hull": -12, "items": {"scrap": 45, "copper": 10}}}
+        ]},
         {"text": "Mark the claim for someone else and jump.", "outcomes": [
           {"weight": 100, "text": "You chalk a cross on the rock for the next ship, and a rude word beside it for the ship after that. It is the most Scrapper thing you have ever done.", "effects": {}}
         ]}
@@ -37,6 +41,10 @@
         {"text": "[Emberkin] Let your Emberkin lean into the pockets and cut them by hand.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 90, "text": "Your Emberkin takes the little explosions the way other people take light rain. 'Sorry,' they say to a pocket, as it goes off. The hold fills with rock and the cook with admiration.", "effects": {"items": {"scrap": 70, "copper": 22}}},
           {"weight": 10, "text": "One pocket is bigger than it looked. Your Emberkin comes out singed to the elbows, perfectly cheerful and a little deaf.", "effects": {"crew_hp": -10, "items": {"scrap": 70, "copper": 22}}}
+        ]},
+        {"text": "[Shield] Cut the pockets with the shield up and let them go off against it.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1"]}, "outcomes": [
+          {"weight": 60, "text": "You cut with the shield up, and the little explosions pat against it like rain. It is the loudest, safest afternoon of your career, and the haul is as fat as a pocket can make it.", "effects": {"items": {"scrap": 60, "copper": 18}}},
+          {"weight": 40, "text": "A pocket goes off under the shield's rim and finds the hull anyway. You get most of the haul and a new smell.", "effects": {"hull": -10, "items": {"scrap": 40, "copper": 12, "fuel": 1}}}
         ]},
         {"text": "Leave the pockets to someone with insurance.", "outcomes": [
           {"weight": 100, "text": "You leave the sponge to its grudge. Behind you, something small and unlucky goes bang.", "effects": {}}
@@ -66,15 +74,15 @@
     },
     {
       "id": "asteroid_ice_field", "type": "asteroid_field", "weight": 8, "once": false, "requires": {},
-      "text": "An ice field, white as a tooth and older than the Snap. The clans call it the Thirst, because it is the only thing out here that ever put one out. Your crew are already at the windows, breathing on the glass.",
+      "text": "An ice field, white as a tooth and older than the Snap. The clans call it the Thirst, because it is the only thing out here that ever put one out. You are already at the window, breathing on the glass.",
       "choices": [
         {"text": "Fill the tanks and take a breather.", "outcomes": [
-          {"weight": 75, "text": "Cold water, clean air, and an hour of nobody shouting. The crew come back from the airlock looking ten years younger and a little damp.", "effects": {"crew_hp": 10}},
+          {"weight": 75, "text": "Cold water, clean air, and an hour of nobody shouting. You come back from the airlock looking ten years younger and a little damp.", "effects": {"crew_hp": 10}},
           {"weight": 25, "text": "Cold water, clean air, and a frozen sack of sealant caught in the cut. Somebody finds the sealant. Somebody is thrilled.", "effects": {"crew_hp": 10, "items": {"polymer": 15}}}
         ]},
         {"text": "Cut deeper. Ice that old is hiding something.", "outcomes": [
           {"weight": 40, "text": "A freighter, frozen whole in clear ice, her cargo stacked in tidy rows and a sign on the hatch that says HANDLE WITH CARE. You do.", "effects": {"items": {"titanium": 8, "scrap": 40}}},
-          {"weight": 35, "text": "Just ice. Very old, very good ice. The crew drink it in shifts and the ship smells of snow.", "effects": {"crew_hp": 10}},
+          {"weight": 35, "text": "Just ice. Very old, very good ice. You drink it in shifts and the ship smells of snow.", "effects": {"crew_hp": 10}},
           {"weight": 25, "text": "A fault line you did not see lets go in a slab, and the slab goes in the direction of your hull.", "effects": {"hull": -10, "items": {"scrap": 30}}}
         ]},
         {"text": "[Emberkin] Your Emberkin hates the cold. Let them melt a tunnel anyway.", "requires": {"species": "emberkin"}, "outcomes": [
@@ -110,14 +118,14 @@
     },
     {
       "id": "asteroid_silicate_geode", "type": "asteroid_field", "weight": 8, "once": false, "requires": {},
-      "text": "A geode the size of a cargo bay, split along one flank, its inside lined with grey, glittering glass. The scanner says SILICATE. The cook says it looks like a lot of salt. The crew say nothing, because they are already making plans.",
+      "text": "A geode the size of a cargo bay, split along one flank, its inside lined with grey, glittering glass. The scanner says SILICATE. It looks like a lot of salt. You say nothing, because you are already making plans.",
       "choices": [
         {"text": "Chip the glass off the outside.", "outcomes": [
           {"weight": 100, "text": "You flake off a hold of grey glass, one careful bite at a time. It is boring, and it is exactly as much money as you thought.", "effects": {"items": {"silicon": 6, "scrap": 20}}}
         ]},
         {"text": "Crack it open.", "outcomes": [
           {"weight": 55, "text": "The geode splits like an egg and spills its glass into the dark. You catch most of it.", "effects": {"items": {"silicon": 8, "scrap": 25}}},
-          {"weight": 30, "text": "It shatters inward. A cloud of grey glass fills the lane, and the crew come out with grit in their teeth and a hold full of it.", "effects": {"hull": -5, "items": {"silicon": 8}}},
+          {"weight": 30, "text": "It shatters inward. A cloud of grey glass fills the lane, and you come out with grit in your teeth and a hold full of it.", "effects": {"hull": -5, "items": {"silicon": 8}}},
           {"weight": 15, "text": "At the heart of the geode, a seed of real crystal, blue as a pilot light and warm to the touch.", "effects": {"items": {"silicon": 8, "crystal": 2}}}
         ]},
         {"text": "[Fast repair] Open it along the seam with patient, quick hands.", "requires": {"trait": "fast_repair"}, "outcomes": [
@@ -321,7 +329,7 @@
       "choices": [
         {"text": "Play along and offer the manifest.", "outcomes": [
           {"weight": 50, "text": "They inspect your hold for twenty very serious minutes and take 30 scrap in 'fees'. They leave congratulating each other.", "effects": {"items": {"scrap": -30}}},
-          {"weight": 50, "text": "They inspect your hold, find your crew staring at them, and panic.", "effects": {"fight": "pirate_raider"}}
+          {"weight": 50, "text": "They inspect your hold, find you staring at them, and panic.", "effects": {"fight": "pirate_raider"}}
         ]},
         {"text": "Ask for the form number. Only real Concord know it.", "requires": {"rep_min": {"concord": 3}}, "outcomes": [
           {"weight": 100, "text": "'Form... twelve-C?' says the voice, after a long pause. 'Wrong,' you say. The channel clicks off. The patrol boat leaves at remarkable speed, its font still wrong.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}}}
@@ -332,6 +340,10 @@
         ]},
         {"text": "Shoot first. Authority is a state of mind.", "outcomes": [
           {"weight": 100, "text": "Their hull is very much real. So are their guns.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Radar] Check the transponder against the Concord register.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 65, "text": "The register says CS-439 Honesty was scrapped for parts thirty years ago, with a note: 'Honesty, retired'. You say so on an open channel, clearly. The 'patrol' remembers an urgent appointment elsewhere and leaves a bag of credits by way of apology.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}}},
+          {"weight": 35, "text": "The radar reads the transponder; the transponder reads the radar and decides to stop pretending. Their hull is very much real.", "effects": {"fight": "pirate_raider"}}
         ]}
       ],
       "after_win": {"text": "In their locker: a Concord uniform in the wrong size, a book called HOW TO TALK LIKE AUTHORITY, and a set of forms filled out in crayon.", "effects": {"items": {"credits": 25}, "rep": {"concord": 1}}}
@@ -350,6 +362,10 @@
         ]},
         {"text": "Take the pad and go. The rest is theirs.", "outcomes": [
           {"weight": 100, "text": "You take the pad, close the airlock, and leave the lights on. It feels like the right thing to do for a boat with that much manners.", "effects": {"log": "log_clans_eleven_chairs", "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Radar] Read the survey's trail back before you touch the ship.", "requires": {"component_any": ["radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 60, "text": "The radar follows the survey's last six stops back through the Boneyard like a thread through a coat. The last one is circled in someone's biggest handwriting. You take the pad, and the circle, and leave the ship exactly as you found it.", "effects": {"log": "log_clans_eleven_chairs", "items": {"scrap": 15}, "reveal": "wreck_field"}},
+          {"weight": 40, "text": "The Mostly Legal's own scanner sees the radar looking, and looks back, loudly. The dish rings like a bell. You get the pad and a headache.", "effects": {"log": "log_clans_eleven_chairs", "hull": -8}}
         ]},
         {"text": "Do not read it. Close the airlock.", "outcomes": [
           {"weight": 100, "text": "You take the advice on the screen. Sometimes the best salvage is an unread page.", "effects": {}}
@@ -439,8 +455,8 @@
       "id": "trader_tin_mother_soup", "type": "trader", "weight": 10, "once": false, "requires": {},
       "text": "A clan galley-barge, the Tin Mother, trailing steam and a smell of garlic you can taste through the hull. 'Soup!' roars a woman at the airlock, wearing three aprons. 'Hot, filling, and whatever was in the pot!'",
       "choices": [
-        {"text": "Buy a round for the crew (15 credits).", "requires": {"credits": 15}, "outcomes": [
-          {"weight": 100, "text": "Nobody asks what is in it. Everybody has seconds. The galley goes quiet in the way only a full galley does.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+        {"text": "Buy a round (15 credits).", "requires": {"credits": 15}, "outcomes": [
+          {"weight": 100, "text": "You don't ask what is in it. You have seconds. The galley goes quiet in the way only a full galley does.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
         ]},
         {"text": "[Emberkin] Have your Emberkin reheat the cold end of the pot.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 100, "text": "Your Emberkin holds the pot in both hands until it boils, and does not blink. The cook gives them a ladle for free and a stare of deep, professional respect.", "effects": {"crew_hp": 10, "rep": {"clans": 1}}}
@@ -493,7 +509,7 @@
     },
     {
       "id": "anomaly_song_first_note", "type": "anomaly", "weight": 10, "once": true, "requires": {"jumps_min": 2, "not_flag": "prism_revealed"},
-      "text": "A buoy no bigger than a barrel hangs in the lane, glass, spinning slowly, singing one note. The same note, over and over, patient as a dripping tap. Your instruments log it as interference. Your cook logs it as dinner.",
+      "text": "A buoy no bigger than a barrel hangs in the lane, glass, spinning slowly, singing one note. The same note, over and over, patient as a dripping tap. Your instruments log it as interference. The galley timer logs it as dinner.",
       "choices": [
         {"text": "Record the note.", "outcomes": [
           {"weight": 100, "text": "The recorder plays it back a half-tone lower. When you play it again, it has changed back. The bearing the buoy leaves on your chart points to a place with nothing in it.", "effects": {"flag": "buoy_1", "reveal": "empty"}}
@@ -511,11 +527,11 @@
     },
     {
       "id": "empty_song_second_note", "type": "empty", "weight": 30, "once": true, "requires": {"flag": "buoy_1"},
-      "text": "Nothing in this lane. No wreck, no beacon, no dust; the chart shows a blank. Then you notice the drive has begun to hum one note, and it is the note from the buoy. Your engineer swears she has done nothing. The quiet here has a shape, like the inside of a bell.",
+      "text": "Nothing in this lane. No wreck, no beacon, no dust; the chart shows a blank. Then you notice the drive has begun to hum one note, and it is the note from the buoy. You swear you have done nothing. The quiet here has a shape, like the inside of a bell.",
       "choices": [
         {"text": "Cut the engines and listen.", "outcomes": [
-          {"weight": 70, "text": "The drive stops. The note goes on without it, a half-step up from the first, and your crew sit very still until it is done. Someone is crying and does not know why.", "effects": {"flag": "buoy_2", "rep": {"lumen": 1}, "reveal": "anomaly"}},
-          {"weight": 30, "text": "The note builds in your teeth. Everyone gets a headache that tastes of coins, and the second note lands anyway, clear as a bell in a well.", "effects": {"flag": "buoy_2", "crew_hp": -10, "reveal": "anomaly"}}
+          {"weight": 70, "text": "The drive stops. The note goes on without it, a half-step up from the first, and you sit very still until it is done. Someone is crying and does not know why.", "effects": {"flag": "buoy_2", "rep": {"lumen": 1}, "reveal": "anomaly"}},
+          {"weight": 30, "text": "The note builds in your teeth. You get a headache that tastes of coins, and the second note lands anyway, clear as a bell in a well.", "effects": {"flag": "buoy_2", "crew_hp": -10, "reveal": "anomaly"}}
         ]},
         {"text": "[Prism Core] Let the reactor carry the second note.", "requires": {"component": "reactor_neon_mk1"}, "outcomes": [
           {"weight": 100, "text": "The Prism Core finds the note and holds it. The light in the reactor room turns the colour of a held breath, and a few crystals gather on the floor.", "effects": {"flag": "buoy_2", "items": {"crystal": 3}, "rep": {"lumen": 1}, "reveal": "anomaly"}}
@@ -669,8 +685,8 @@
           {"weight": 50, "text": "Skarn clips you on the first pass, with feeling. The rest is a negotiation, conducted in hulls.", "effects": {"hull": -10, "fight": "rustfang_rammer"}},
           {"weight": 50, "text": "You angle away at the last second, and the Eviction Notice screams past a metre from your skin. The fight is on.", "effects": {"fight": "rustfang_rammer"}}
         ]},
-        {"text": "[Inertial Dampener] Brace the crew and take the ram on your terms.", "requires": {"component": "inertial_dampener"}, "outcomes": [
-          {"weight": 100, "text": "The Dampener drinks the first hit in a long, deep hum. Skarn looks surprised, and a little hurt, as the Eviction Notice bounces and your crew keep their feet.", "effects": {"fight": "rustfang_rammer"}}
+        {"text": "[Inertial Dampener] Brace and take the ram on your terms.", "requires": {"component": "inertial_dampener"}, "outcomes": [
+          {"weight": 100, "text": "The Dampener drinks the first hit in a long, deep hum. Skarn looks surprised, and a little hurt, as the Eviction Notice bounces and you keep your feet.", "effects": {"fight": "rustfang_rammer"}}
         ]},
         {"text": "[Battering Bow] Point your own wedge at his and see who blinks.", "requires": {"component": "battering_bow"}, "outcomes": [
           {"weight": 100, "text": "Two wedges, one lane, no brakes. Skarn laughs on the comm, delighted to be met properly for the first time in years, and the guns open up.", "effects": {"fight": "rustfang_rammer"}}
@@ -724,17 +740,17 @@
     },
     {
       "id": "empty_the_vote", "type": "empty", "weight": 8, "once": false, "requires": {},
-      "text": "Day seven of a quiet lane, and the crew has called a vote on whether the ship needs a better name. Nobody ever voted on the old one. The mess is divided into three factions and a cook.",
+      "text": "Day seven of a quiet lane, and you have called a vote on whether the ship needs a better name. Nobody ever voted on the old one. So far it is one vote to none, and the none is sulking.",
       "choices": [
-        {"text": "Let them vote.", "outcomes": [
-          {"weight": 60, "text": "Second Wind wins by one vote, and loses by two when the cook gets involved. Everyone feels heard.", "effects": {"crew_hp": 5}},
-          {"weight": 40, "text": "The vote ends in a draw, a shouting match and a pot lid thrown with feeling.", "effects": {"crew_hp": -5}}
+        {"text": "Hold the vote.", "outcomes": [
+          {"weight": 60, "text": "Second Wind wins by one vote, and loses by one when you vote again to be sure. You feel heard.", "effects": {"crew_hp": 5}},
+          {"weight": 40, "text": "The vote ends in a draw, a shouting match with yourself and a pot lid thrown with feeling.", "effects": {"crew_hp": -5}}
         ]},
-        {"text": "[Human] Call for a recount.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 100, "text": "Humans love a recount. By the end of it everyone has voted nine times, the name is 'Recount', and the ship is, for a day, the happiest hull in the Drift.", "effects": {"crew_hp": 5}}
+        {"text": "Put it to the crew, and call a recount.", "requires": {"crew_min": 1}, "outcomes": [
+          {"weight": 100, "text": "The crew love a recount. By the end of it everyone has voted nine times, the name is 'Recount', and the ship is, for a day, the happiest hull in the Drift.", "effects": {"crew_hp": 5}}
         ]},
         {"text": "Rename her Rent Due II.", "outcomes": [
-          {"weight": 100, "text": "The crew groan, laugh, then fall silent. It is too close to true. Someone starts to hum, and the rest join in.", "effects": {"rep": {"clans": 1}}}
+          {"weight": 100, "text": "You groan, laugh, then fall silent. It is too close to true. Somewhere aft the pipes take up the tune.", "effects": {"rep": {"clans": 1}}}
         ]},
         {"text": "Veto the vote.", "outcomes": [
           {"weight": 100, "text": "You declare the ship's name final. There is a silence, then the quiet scrape of a chair, then a long evening in which nobody speaks to you.", "effects": {}}
@@ -761,11 +777,11 @@
     },
     {
       "id": "anomaly_warm_dark", "type": "anomaly", "weight": 8, "once": false, "requires": {"jumps_min": 2},
-      "text": "It is warm here. The dark itself is warm, a pleasant 21 degrees by every sensor on the ship, in a vacuum. The crew take their jackets off one by one. If you have an Emberkin aboard, they have stopped complaining.",
+      "text": "It is warm here. The dark itself is warm, a pleasant 21 degrees by every sensor on the ship, in a vacuum. You take your jacket off, then the one under it. If you have an Emberkin aboard, they have stopped complaining.",
       "choices": [
         {"text": "Stay for an hour and rest.", "outcomes": [
           {"weight": 70, "text": "An hour, then another. Nobody is hurt, nobody is hungry. Someone sleeps standing up.", "effects": {"crew_hp": 10}},
-          {"weight": 30, "text": "The warm turns out to have an edge. A circuit panel is slow-cooked before anyone notices, and the crew come away sweating.", "effects": {"hull": -5}}
+          {"weight": 30, "text": "The warm turns out to have an edge. A circuit panel is slow-cooked before anyone notices, and you come away sweating.", "effects": {"hull": -5}}
         ]},
         {"text": "[Emberkin] Let your Emberkin soak it in.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 100, "text": "Your Emberkin lies on the hull with their arms out and is entirely, completely happy. Later they will say it was the best day of their life, and will not say why.", "effects": {"crew_hp": 10, "rep": {"lumen": 1}}}
@@ -781,10 +797,10 @@
     },
     {
       "id": "anomaly_extra_star", "type": "anomaly", "weight": 6, "once": true, "requires": {"jumps_min": 3},
-      "text": "Your navigator checks the star count three times. The chart says 3,011 points of light in this quadrant. The sky says 3,012. One of them is new, and none of them will say which. The crew start to name them, just in case.",
+      "text": "You check the star count three times. The chart says 3,011 points of light in this quadrant. The sky says 3,012. One of them is new, and none of them will say which. You start to name them, just in case.",
       "choices": [
         {"text": "Find the new star.", "outcomes": [
-          {"weight": 40, "text": "Everyone points at a different one. After an hour you are all pointing at the same one, and it is closer than it should be. A thin, cold dust of crystal falls from it.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}}},
+          {"weight": 40, "text": "You point at a different one each time. After an hour you are pointing at the same one, and it is closer than it should be. A thin, cold dust of crystal falls from it.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}}},
           {"weight": 60, "text": "You never find it. But you spend an hour looking, and the sky feels bigger when you stop.", "effects": {"rep": {"lumen": 1}}}
         ]},
         {"text": "[Basalt] Ask your Basalt to point at it.", "requires": {"species": "basalt"}, "outcomes": [

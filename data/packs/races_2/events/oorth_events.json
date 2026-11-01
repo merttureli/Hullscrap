@@ -19,7 +19,7 @@
     },
     {
       "id": "oorth_read_the_hull", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 4},
-      "text": "A Rustfang boarding sled slides alongside with its lamps off, which is a thing people only do when they mean it. Out in the dark a second sled waits with its engines cold. Your crew count the angles. Nobody has hailed. Somewhere out there the raiders' captain is being quiet very hard.",
+      "text": "A Rustfang boarding sled slides alongside with its lamps off, which is a thing people only do when they mean it. Out in the dark a second sled waits with its engines cold. You count the angles. Nobody has hailed. Somewhere out there the raiders' captain is being quiet very hard.",
       "choices": [
         {"text": "Open fire on the nearest sled.", "outcomes": [
           {"weight": 100, "text": "You light up the first sled. The second one wakes at once.", "effects": {"fight": "tier"}}
