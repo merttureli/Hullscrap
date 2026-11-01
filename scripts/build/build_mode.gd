@@ -42,6 +42,7 @@ const Hud = preload("res://scripts/ui/hud.gd")
 const RedAlert = preload("res://scripts/sim/red_alert.gd")
 const BeltArt = preload("res://scripts/view/belt_art.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 const CELL := 32
 const SAVE_PATH := "user://ship.json"
 const OK_TINT := Color(0.35, 1, 0.45)
@@ -105,6 +106,7 @@ var _clock := 0.0  # seconds, for the loops of the art
 var _glow: Node2D  # additive layer for the glow art
 var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
 var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state
+var _door_open := {}  # a door piece's first cell -> whether it was open when last drawn (a flip is heard: the door sound)
 var _frame_key := -1  # hull.hash() the cached frame art below was made for
 var _frame_rects: Array[Rect2] = []  # the frame as long row runs (px from the grid's corner)
 var _frame_lines := PackedVector2Array()  # its grid lines, as long segments in pairs of points
@@ -309,6 +311,7 @@ func _build_key(code: Key, shift := false) -> void:
 	elif code == KEY_T:
 		_cycle_piece()
 	elif code == KEY_R:
+		Audio.fx(self, "rotate")
 		if group != Group.TILES:
 			rot = (rot + 1) % 4
 		elif grid.tile_flag(selected, "solid"):
@@ -323,6 +326,7 @@ func _build_key(code: Key, shift := false) -> void:
 		var cards := Palette.entries(tab, ship, session.cable_cost)
 		if i >= 0 and i < mini(9, cards.size()):
 			pick(cards[i])
+			Audio.fx(self, "click")
 
 
 ## T: the next shape for the wall tool (the pieces of data/shapes.json in order, full first). With a wall in hand the
@@ -428,7 +432,10 @@ func set_build(on: bool) -> void:
 		var why := can_build()
 		if why != "":
 			message = why
+			Audio.fx(self, "invalid")
 			return
+	if on != build_on:
+		Audio.fx(self, "open" if on else "close")
 	build_on = on
 	message = ""
 	dragging = false
@@ -536,13 +543,30 @@ func _end_drag() -> void:
 	dragging = false
 	if pl["error"] != "":
 		message = pl["error"]
+		Audio.fx(self, "invalid")
 		return
 	var r := session.apply(pl["changes"])
 	message = ""
 	if r["applied"] == 0:
 		message = r["reason"]
-	elif r["skipped"] > 0 and not r["reason"] in QUIET_REASONS:
+		if not r["reason"] in QUIET_REASONS:
+			Audio.fx(self, "invalid")
+	else:
+		Audio.fx(self, _edit_sound(pl["changes"]))
+	if r["applied"] > 0 and r["skipped"] > 0 and not r["reason"] in QUIET_REASONS:
 		message = "%d done, %d skipped: %s" % [r["applied"], r["skipped"], r["reason"]]
+
+
+## The sound of an edit that went through: a part placed, something removed, else a tile placed.
+func _edit_sound(changes: Array) -> String:
+	var out := "place_tile"
+	for ch in changes:
+		var layer := str(ch.get("layer", "tile"))
+		if layer == "component" and ch.has("id"):
+			return "place_part"
+		if bool(ch.get("remove", false)) or (layer == "tile" and str(ch.get("to", "x")) == "") or (layer == "component" and not ch.has("id")):
+			out = "remove"
+	return out
 
 
 ## The pending edit: the drag in progress, or just the cell under the mouse.
@@ -592,6 +616,7 @@ func _refresh_ghost() -> void:
 func _toggle_door() -> void:
 	if not grid.tile_flag(grid.get_tile(hover), "door"):
 		message = "no door under the mouse"
+		Audio.fx(self, "invalid")
 		return
 	var open := not grid.is_door_open(hover)
 	grid.set_door_open(hover, open)
@@ -602,12 +627,14 @@ func _repair_under_mouse() -> void:
 	var uid := ship.components.any_at(hover)  # either half of a hull mount
 	if uid < 0:
 		message = "no system under the mouse"
+		Audio.fx(self, "invalid")
 		return
 	message = sim.jobs_of(ship).order_repair(ship, uid)  # the nearest crew member goes and fixes it
 
 
 ## The player's ship was replaced (the picker loaded a design): forget the old ship's edit state.
 func ship_replaced(text: String) -> void:
+	_door_open.clear()
 	dragging = false
 	drag_path = []
 	_fix_component()
@@ -618,11 +645,15 @@ func ship_replaced(text: String) -> void:
 
 
 func _undo() -> void:
-	message = "undone" if session.undo() else "nothing to undo"
+	var ok := session.undo()
+	message = "undone" if ok else "nothing to undo"
+	Audio.fx(self, "click" if ok else "invalid")
 
 
 func _redo() -> void:
-	message = "redone" if session.redo() else "nothing to redo"
+	var ok := session.redo()
+	message = "redone" if ok else "nothing to redo"
+	Audio.fx(self, "click" if ok else "invalid")
 
 
 ## A wheel step on the world zooms the camera. Over a panel it never does (the panel scrolls, or nothing happens);
@@ -817,6 +848,9 @@ func _draw_tile(c: Vector2i, id: String, open_doors: Dictionary) -> void:
 ## A door piece: floor under it, then two leaves that meet in the middle when closed and slide back
 ## into the walls at both ends when open. The leaves run along the piece (the wall's direction).
 func _draw_door(piece: Array[Vector2i], col: Color, open: bool) -> void:
+	if _door_open.has(piece[0]) and _door_open[piece[0]] != open:
+		Audio.fx(self, "door")
+	_door_open[piece[0]] = open
 	var floor_col: Color = grid.defs.color("floor") if grid.defs.has("floor") else col.darkened(0.5)
 	var rects := []
 	for p in piece:

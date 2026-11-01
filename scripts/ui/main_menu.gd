@@ -5,11 +5,17 @@ extends Control
 ## quit to menu, Quit. Each entry has a letter key; Up/Down and Enter, a click and the number keys work too.
 ## The menu only says which entry was chosen (`chosen`); front_door.gd does what it means. entries() is the
 ## state machine (Continue is left out without a save). In the UI colours of station_panel.gd.
+## Both menus carry a small Sound row: three sliders (Master, Music, SFX) that a click or a drag sets and the wheel nudges; `sound`
+## holds them (front_door.gd sets it from the profile), `sound_changed` says which moved (final = the mouse was let go: save it).
 
 ## Emitted with the id of the entry chosen: continue, new, help, quit, resume, save_menu.
 signal chosen(id: String)
 
+## A volume slider moved: its kind (master, music or sfx), the new value (0 to 1) and whether this is the last of the drag.
+signal sound_changed(kind: String, value: float, final: bool)
+
 const Profile = preload("res://scripts/ui/profile.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 enum Mode { MAIN, PAUSE }
 
@@ -25,6 +31,11 @@ const PAUSE_ENTRIES: Array = [
 	{"id": "save_menu", "label": "Save and quit to menu", "key": KEY_S},
 	{"id": "quit", "label": "Quit", "key": KEY_Q},
 ]
+const SOUND_KINDS: Array = [["master", "Master"], ["music", "Music"], ["sfx", "SFX"]]
+const SLIDER_W := 116.0
+const SLIDER_H := 12.0
+const SOUND_STEP := 0.05  ## a wheel notch
+const SOUND_H := 70.0  ## the room the sound row takes under the buttons
 const TAGLINE := "Everything flies on salvage."
 const BTN := Vector2(380.0, 48.0)
 const GAP := 12.0
@@ -46,6 +57,8 @@ var selected := 0  ## the entry Enter presses
 var recent: Array = []  ## profile.last_runs(): the records listed on the main menu
 var version := ""  ## the label in the corner
 var note := ""  ## a line under the buttons (a refused Continue, "Run saved")
+var sound := Profile.SOUND_DEFAULTS.duplicate()  ## the volume sliders, 0 to 1
+var _drag := -1  # the slider being dragged
 var _stars: Node2D
 
 
@@ -103,12 +116,14 @@ func set_stars(node: Node2D) -> void:
 func move(d: int) -> void:
 	var n := list().size()
 	selected = (selected + d + n) % n
+	Audio.fx(self, "hover")
 
 
 ## Choose entry `i`: hides nothing (the owner decides), just says which.
 func press(i: int) -> void:
 	var l := list()
 	if i >= 0 and i < l.size():
+		Audio.fx(self, "click")
 		chosen.emit(l[i]["id"])
 
 
@@ -150,15 +165,70 @@ func _input(e: InputEvent) -> void:
 
 func _gui_input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion:
-		var i := button_at(e.position)
-		if i >= 0:
-			selected = i
-	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
-		var i := button_at(e.position)
-		if i >= 0:
-			selected = i
-			press(i)
+		if _drag >= 0:
+			set_slider(_drag, e.position.x, false)
+		else:
+			var i := button_at(e.position)
+			if i >= 0 and i != selected:
+				selected = i
+				Audio.fx(self, "hover")
+	elif e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
+		if e.pressed:
+			var s := slider_at(e.position)
+			if s >= 0:
+				_drag = s
+				set_slider(s, e.position.x, false)
+			else:
+				var i := button_at(e.position)
+				if i >= 0:
+					selected = i
+					press(i)
+		elif _drag >= 0:
+			set_slider(_drag, e.position.x, true)
+			_drag = -1
+	elif e is InputEventMouseButton and e.pressed and e.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		var s := slider_at(e.position)
+		if s >= 0:
+			nudge(s, 1.0 if e.button_index == MOUSE_BUTTON_WHEEL_UP else -1.0)
 	accept_event()
+
+
+# --- the sound row -----------------------------------------------------------------------------------------------
+
+## Where the Sound row starts (its heading's baseline): under the buttons and their note.
+func _sound_top() -> float:
+	return button_rect(list().size() - 1).end.y + (64.0 if note != "" else 44.0)
+
+
+func slider_rect(i: int) -> Rect2:
+	return Rect2(Vector2((size.x - BTN.x) / 2.0 + i * (SLIDER_W + (BTN.x - 3.0 * SLIDER_W) / 2.0), _sound_top() + 28.0), Vector2(SLIDER_W, SLIDER_H))
+
+
+## The slider under `p` (its bar, a little taller to hit), or -1.
+func slider_at(p: Vector2) -> int:
+	for i in SOUND_KINDS.size():
+		if slider_rect(i).grow_individual(4.0, 10.0, 4.0, 10.0).has_point(p):
+			return i
+	return -1
+
+
+## Put slider `i` at the screen x `x` and say so. `final`: the drag is over.
+func set_slider(i: int, x: float, final: bool) -> void:
+	var r := slider_rect(i)
+	set_sound(SOUND_KINDS[i][0], roundf(clampf((x - r.position.x) / r.size.x, 0.0, 1.0) * 100.0) / 100.0, final)
+
+
+## Move slider `i` one wheel notch (`dir` +1 or -1).
+func nudge(i: int, dir: float) -> void:
+	var kind: String = SOUND_KINDS[i][0]
+	set_sound(kind, roundf(clampf(float(sound[kind]) + dir * SOUND_STEP, 0.0, 1.0) * 100.0) / 100.0, true)
+
+
+func set_sound(kind: String, v: float, final: bool) -> void:
+	if sound.get(kind) == v and not final:
+		return
+	sound[kind] = v
+	sound_changed.emit(kind, v, final)
 
 
 # --- layout and drawing ----------------------------------------------------------------------------------
@@ -197,6 +267,24 @@ func _draw() -> void:
 		_text(k, Vector2(b.end.x - w - 18.0, b.position.y + 30.0), 15, AMBER if hot else DIM_TEXT)
 	if note != "":
 		_centered(note, button_rect(l.size() - 1).end.y + 32.0, 16, GOOD)
+	_draw_sound()
+
+
+func _draw_sound() -> void:
+	var a = Audio.of(self)
+	var off: bool = a != null and a.muted
+	var x0 := (size.x - BTN.x) / 2.0
+	var top := _sound_top()
+	_text("SOUND", Vector2(x0, top + 8.0), 13, AMBER)
+	var hint := "MUTED  (Ctrl+M)" if off else "Ctrl+M mutes"
+	_text(hint, Vector2(x0 + BTN.x - ThemeDB.fallback_font.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x, top + 8.0), 13, BAD if off else DIM_TEXT)
+	for i in SOUND_KINDS.size():
+		var r := slider_rect(i)
+		var v: float = float(sound[SOUND_KINDS[i][0]])
+		_text("%s %d%%" % [SOUND_KINDS[i][1], roundi(v * 100.0)], r.position + Vector2(0.0, -5.0), 13, DIM_TEXT if off else TEXT)
+		draw_rect(r, ROW_BG)
+		draw_rect(Rect2(r.position, Vector2(r.size.x * v, r.size.y)), DIM_TEXT if off else AMBER)
+		draw_rect(r, AMBER if i == _drag else EDGE_DIM, false, 1.0)
 
 
 func _draw_main() -> void:
@@ -216,7 +304,7 @@ func _draw_main() -> void:
 func _draw_pause() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var top := _top()
-	var p := Rect2(Vector2((size.x - BTN.x) / 2.0 - 28.0, top - 78.0), Vector2(BTN.x + 56.0, 78.0 + list().size() * (BTN.y + GAP) + 28.0 + (28.0 if note != "" else 0.0)))
+	var p := Rect2(Vector2((size.x - BTN.x) / 2.0 - 28.0, top - 78.0), Vector2(BTN.x + 56.0, 78.0 + list().size() * (BTN.y + GAP) + 28.0 + (28.0 if note != "" else 0.0) + SOUND_H))
 	_panel(p)
 	_centered("PAUSED", top - 32.0, 26, TEXT)
 

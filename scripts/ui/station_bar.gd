@@ -10,6 +10,7 @@ extends Control
 const Posts = preload("res://scripts/crew/posts.gd")
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const BTN := 42.0  ## one button, px
 const GAP := 4.0
@@ -117,6 +118,7 @@ func click(i: int, right := false) -> String:
 	if view == null or uid < 0:
 		return ""
 	var text: String = view.release_station(uid) if right else view.press_station(uid)
+	Audio.fx(self, "click")
 	view.say(text)
 	return text
 

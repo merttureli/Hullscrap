@@ -9,6 +9,7 @@ extends Control
 
 const BreachAlert = preload("res://scripts/crew/breach_alert.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const CARD := Vector2(380.0, 58.0)
 const BTN := Vector2(112.0, 22.0)
@@ -52,7 +53,11 @@ func tick(real_dt: float) -> void:
 	var paused: bool = view != null and view.sim != null and bool(view.sim.get("paused"))
 	alert.update(ship, real_dt, paused)
 	Engine.time_scale = alert.time_scale()
+	var was := visible
 	visible = not alert.current().is_empty()
+	if visible and not was:
+		Audio.fx(self, "breach_alert")  # the room has started losing air: the prompt's sting, and the hiss under it
+		Audio.fx(self, "breach", null, -6.0, 0.2)
 	if visible:
 		queue_redraw()
 

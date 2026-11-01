@@ -10,6 +10,7 @@ const Palette = preload("res://scripts/build/palette.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
 const Describe = preload("res://scripts/ui/describe.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const PAD := 14.0
 const TAB_H := 38.0
@@ -160,10 +161,12 @@ func click(p: Vector2) -> void:
 	for i in Palette.TAB_NAMES.size():
 		if tab_rect(i).has_point(p):
 			b.set_tab(i)
+			Audio.fx(self, "click")
 			return
 	var en := entry_at(p)
 	if not en.is_empty():
 		b.pick(en)
+		Audio.fx(self, "click")
 
 
 func _draw() -> void:

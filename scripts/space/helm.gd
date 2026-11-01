@@ -34,6 +34,7 @@ var manual := false  ## the player has the helm (E): hand() flies it
 var cruise := 1.0  ## the multiplier on acceleration and top speed in use now
 var state := "no course"  ## what the last step did, for the HUD: autopilot, manual, unmanned, no course, grounded
 var arrived := ""  ## the name of the course reached on the last step ("" when none)
+var drive := 0.0  ## how hard the engines were driven on the last step, 0 to 1: the throttle, or half the strafe (the engine sound follows it)
 var _base := Vector2.ZERO  # data/flight.json's thrust_to_accel and max_speed
 var _powered = null  # the power solve refresh() last read
 var _rev := -1
@@ -168,6 +169,7 @@ func step(dt: float, sector, manned: bool, hand := {}, hostile := false, rocks: 
 			state = "no course"
 		else:
 			input = autopilot(to, rocks)
+	drive = clampf(maxf(absf(float(input.get("throttle", 0.0))), 0.5 * absf(float(input.get("strafe", 0.0)))), 0.0, 1.0)
 	flight.step(dt, input, mass, thrust, thrusts)
 	sync_to(sector)
 
