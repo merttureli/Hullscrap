@@ -35,7 +35,7 @@
         ]},
         {"text": "Tap a pocket for the gas.", "outcomes": [
           {"weight": 55, "text": "You drill a neat hole, hold a tank to it, and let it hiss. Pure fuel gas, faintly sweet. The tank takes it without complaint.", "effects": {"items": {"fuel": 2}}},
-          {"weight": 30, "text": "The pocket takes exception to the drill. The bang knocks every loose thing on the ship into a new place, including the cook.", "effects": {"crew_hp": -10, "items": {"fuel": 1}}},
+          {"weight": 30, "text": "The pocket takes exception to the drill. The bang knocks every loose thing on the ship into a new place, including you.", "effects": {"crew_hp": -10, "items": {"fuel": 1}}},
           {"weight": 15, "text": "Three pockets go in a row, like a drum roll. Your paint is shorter and your tank is longer.", "effects": {"hull": -10, "items": {"fuel": 2}}}
         ]},
         {"text": "[Emberkin] Let your Emberkin lean into the pockets and cut them by hand.", "requires": {"species": "emberkin"}, "outcomes": [
@@ -105,7 +105,7 @@
         {"text": "Ride the shift in. The big veins are opening up.", "outcomes": [
           {"weight": 50, "text": "The field splits like a book and the veins lie open on the pages. You cut as the walls move, and the hold fills in a rush.", "effects": {"items": {"titanium": 9, "silicon": 6, "scrap": 40}}},
           {"weight": 35, "text": "A slab tumbles into your path, and you take it on the shoulder of the hull. The haul is good. The paint is not.", "effects": {"hull": -10, "items": {"titanium": 6, "scrap": 30}}},
-          {"weight": 15, "text": "The shift catches the cutter arm and the crew with it. Everyone gets out, in various directions.", "effects": {"hull": -10, "crew_hp": -10, "items": {"titanium": 8, "silicon": 6}}}
+          {"weight": 15, "text": "The shift catches the cutter arm and you with it. You get out, in a direction you did not pick.", "effects": {"hull": -10, "crew_hp": -10, "items": {"titanium": 8, "silicon": 6}}}
         ]},
         {"text": "[Basalt] Send your Basalt to hold the split rock apart while you cut.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 90, "text": "Your Basalt plants both hands on the moving rock and simply stays where they are. The rock, being rock, gives up first. The cutters work in the gap for as long as it takes.", "effects": {"items": {"titanium": 10, "silicon": 8, "scrap": 40}}},
@@ -378,7 +378,7 @@
       "choices": [
         {"text": "Search the drawers for anything valuable.", "outcomes": [
           {"weight": 55, "text": "The drawers are mostly forms for forms, but one holds a clerk's notes, a coil of copper wire, and a surprising amount of polymer stationery.", "effects": {"log": "log_concord_pencil", "items": {"copper": 20, "polymer": 15}}},
-          {"weight": 30, "text": "A whole rack of drawers comes down in a slow-motion avalanche of paper. Nobody is badly hurt. One of you is reading a form aloud, with feeling.", "effects": {"log": "log_concord_pencil", "crew_hp": -10, "items": {"polymer": 15}}},
+          {"weight": 30, "text": "A whole rack of drawers comes down in a slow-motion avalanche of paper. Nobody is badly hurt. You find yourself reading a form aloud, with feeling.", "effects": {"log": "log_concord_pencil", "crew_hp": -10, "items": {"polymer": 15}}},
           {"weight": 15, "text": "A hidden drawer holds the barge's petty cash, ledger-neat and uncounted since the Snap.", "effects": {"log": "log_concord_pencil", "items": {"credits": 60}}}
         ]},
         {"text": "[Fabricator] Pulp the stock and print it as polymer.", "requires": {"component": "fabricator"}, "outcomes": [
@@ -550,7 +550,7 @@
       "choices": [
         {"text": "Sing the third note.", "outcomes": [
           {"weight": 50, "text": "You sing it, badly. The buoy flinches, then brightens, and sings it back correctly, with what sounds like forgiveness.", "effects": {"flag": "buoy_3", "items": {"crystal": 3}, "rep": {"lumen": 1}}},
-          {"weight": 50, "text": "You sing it, very badly. The buoy winces. The note lands anyway, and your crew hold their ears.", "effects": {"flag": "buoy_3", "crew_hp": -10, "items": {"crystal": 2}}}
+          {"weight": 50, "text": "You sing it, very badly. The buoy winces. The note lands anyway, and you hold your ears.", "effects": {"flag": "buoy_3", "crew_hp": -10, "items": {"crystal": 2}}}
         ]},
         {"text": "[Fenn] Tune the buoy by ear.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 100, "text": "Your Fenn tilts their long ears, winces, and corrects the buoy by a hair. The third note drops into place with the sound of a key finding its lock. The buoy thanks them the only way it can, and spits out a crystal.", "effects": {"flag": "buoy_3", "items": {"crystal": 3}, "rep": {"lumen": 2}}}
@@ -565,10 +565,10 @@
     },
     {
       "id": "empty_song_the_rest", "type": "empty", "weight": 30, "once": true, "requires": {"flag": "buoy_3"},
-      "text": "Four beats of silence, then four more. The lane is the quietest place you have ever been, and the quiet has weight, like a hand laid flat on the hull. In the middle of it, your whole crew stops talking at once, and nobody has to say why.",
+      "text": "Four beats of silence, then four more. The lane is the quietest place you have ever been, and the quiet has weight, like a hand laid flat on the hull. In the middle of it, you stop talking to yourself at once, and nobody has to say why.",
       "choices": [
         {"text": "Hold the silence for four beats.", "outcomes": [
-          {"weight": 100, "text": "You hold it. Everyone does. When it breaks, the ship feels lighter, and a plasma cell has formed on the console where the silence was thickest.", "effects": {"flag": "buoy_4", "items": {"plasma_cell": 1}, "rep": {"lumen": 1}, "reveal": "anomaly"}}
+          {"weight": 100, "text": "You hold it. So does the ship. When it breaks, the ship feels lighter, and a plasma cell has formed on the console where the silence was thickest.", "effects": {"flag": "buoy_4", "items": {"plasma_cell": 1}, "rep": {"lumen": 1}, "reveal": "anomaly"}}
         ]},
         {"text": "[Basalt] Let your Basalt count the beats. They count slowly.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 100, "text": "Your Basalt counts to four, then four again, without moving. Then they say, very quietly, 'I know this part.' They will not say more. Their hand on the console is shaking, very slightly.", "effects": {"flag": "buoy_4", "rep": {"lumen": 2}, "reveal": "anomaly"}}
@@ -726,7 +726,7 @@
           {"weight": 20, "text": "The lane drops you somewhere you are not supposed to be. The walls sing, and crystals fall out of them like milk teeth.", "effects": {"hull": -10, "items": {"fuel": 1, "crystal": 3}}}
         ]},
         {"text": "[Prism Core] Let the reactor carry you down the lane.", "requires": {"component": "reactor_neon_mk1"}, "outcomes": [
-          {"weight": 90, "text": "The Prism Core sings the lane's note, and the lane sings back. You arrive refuelled, humming, and slightly pleased with yourselves.", "effects": {"items": {"fuel": 3}, "rep": {"lumen": 1}}},
+          {"weight": 90, "text": "The Prism Core sings the lane's note, and the lane sings back. You arrive refuelled, humming, and slightly pleased with yourself.", "effects": {"items": {"fuel": 3}, "rep": {"lumen": 1}}},
           {"weight": 10, "text": "The Core sings too loudly for the lane. A little heat gets into the plating.", "effects": {"hull": -5, "items": {"fuel": 3}}}
         ]},
         {"text": "Burn a crystal in the injectors. Crystal burns clean.", "requires": {"items": {"crystal": 1}}, "outcomes": [

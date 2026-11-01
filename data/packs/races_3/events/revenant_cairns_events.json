@@ -26,7 +26,7 @@
       "choices": [
         {"text": "Tow her in on the line.", "outcomes": [
           {"weight": 60, "text": "You take the strain slowly and the wreck lets go with a groan. She comes in hand over hand, apologising, and then goes straight back out to put the last suit on the cairn. When she returns she hands you a spare lamp from her belt, a good one.", "effects": {"items": {"scrap": 20, "plasma_cell": 1}}},
-          {"weight": 40, "text": "The line parts halfway. It takes two of your crew an hour to catch her, and she is polite about it throughout. The cairn does not fall, but it thinks about it.", "effects": {"items": {"scrap": 10}, "crew_hp": -5}}
+          {"weight": 40, "text": "The line parts halfway. It takes you an hour to catch her, and she is polite about it throughout. The cairn does not fall, but it thinks about it.", "effects": {"items": {"scrap": 10}, "crew_hp": -5}}
         ]},
         {"text": "Cut the wreck loose from the line.", "outcomes": [
           {"weight": 100, "text": "A cutting torch and a steady hand do it in a minute. The wreck sails off with a snarl of cable and its clean chrome showing in the light. She drops back to the cairn on a slack line and sets the last suit on top, lamp outward, and the whole pile steadies. 'Thank you,' she says. 'I would have been all right, but it is nice to be finished.'", "effects": {"items": {"copper": 20, "credits": 20}}}
@@ -63,7 +63,7 @@
       "text": "Dessa's Dead Lamps has set up its stall on the shoulder of a cairn. She sells every make of suit lamp the Drift ever turned out, laid in rows on black velvet, and every one of them is dark. 'Lamp that doesn't light,' she tells you, polishing a visor. 'Lamp that never will. Restful. For the person who is tired of being looked at.' At the back of the stall, under a cloth, something is glowing.",
       "choices": [
         {"text": "Buy a dead lamp for the mess (20 credits).", "requires": {"credits": 20}, "outcomes": [
-          {"weight": 100, "text": "You hang it by the table. For a week the crew find, to their surprise, that they like having it there. Nobody talks about why. Arguments end a little sooner. Somebody puts a hat on it.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
+          {"weight": 100, "text": "You hang it by the table. For a week you find, to your surprise, that you like having it there. Nobody talks about why. Arguments end a little sooner. Somebody puts a hat on it.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
         ]},
         {"text": "Ask about the one under the cloth (60 credits).", "requires": {"credits": 60}, "outcomes": [
           {"weight": 100, "text": "Dessa lifts the cloth. It is a lamp that lights, a warm white one, with a plasma cell in it that has been burning since the Snap. 'Do not sell it,' she says. 'It is only a loan.' You take it. The cell is good for something.", "effects": {"items": {"credits": -60, "plasma_cell": 2}}}
@@ -81,7 +81,7 @@
       "text": "Something is passing through the Cairns, slow and square and dark, with no crew aboard and every system running. The Revenants stop what they are doing and turn, all together, and stand in rows on the cairns with their dead lamps toward it like sunflowers. The thing does not seem to notice them. As it drifts by, a few of the empty suits on the nearest cairn stir on their lashings, as if remembering.",
       "choices": [
         {"text": "Keep your distance and take readings.", "outcomes": [
-          {"weight": 70, "text": "The readings are blank where a hull should be, and the blank has edges, which is worth something to a Lumen archivist. Nothing else happens. Several of the crew would like to talk about it.", "effects": {"items": {"credits": 30}, "rep": {"lumen": 1}}},
+          {"weight": 70, "text": "The readings are blank where a hull should be, and the blank has edges, which is worth something to a Lumen archivist. Nothing else happens. You would like to talk about it. The drone listens, in its way.", "effects": {"items": {"credits": 30}, "rep": {"lumen": 1}}},
           {"weight": 30, "text": "For a minute every screen on your ship shows the same grey square. When it passes, nobody says anything, and the hull plating on the sunward side is a little colder than it was.", "effects": {"hull": -5, "crew_hp": -5}}
         ]},
         {"text": "Open fire on it.", "outcomes": [
@@ -91,7 +91,7 @@
           {"weight": 100, "text": "Your Revenant climbs onto the cairn and takes a place in the rows. For half a minute the square pauses, and one running light on it, that was off, shows a single dim amber. Then it drifts on. When your Revenant climbs back down they are shaking a little, and not surprised. 'It knew me,' they say. 'It couldn't place me.' In the hold, afterwards, a small cold cell has appeared that nobody put there.", "effects": {"items": {"plasma_cell": 2, "crystal": 1}, "crew_hp": -10}}
         ]},
         {"text": "Look away and keep flying.", "outcomes": [
-          {"weight": 100, "text": "You keep your eyes on the instruments until the Cairns are behind you. Nobody on the bridge has said a word for some time. The helmsman is quietly counting something under her breath.", "effects": {}}
+          {"weight": 100, "text": "You keep your eyes on the instruments until the Cairns are behind you. Nobody on the bridge has said a word for some time. You are quietly counting something under your breath.", "effects": {}}
         ]}
       ],
       "after_win": {"text": "It does not burn, quite. It comes apart along its seams, square by square, and the pieces drift among the cairns. The Revenants gather them up and lay them in a line, and the keeper of Tallyhouse sends you a plate of something she says is food, and a quantity of salvage.", "effects": {"items": {"scrap": 40, "crystal": 2, "credits": 40}}}

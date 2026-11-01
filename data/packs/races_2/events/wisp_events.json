@@ -5,7 +5,7 @@
       "choices": [
         {"text": "Keep your distance and take readings.", "outcomes": [
           {"weight": 70, "text": "The readings are beautiful and mean nothing. A Lumen archivist would pay for the graph alone, and say it was an honour.", "effects": {"items": {"credits": 30}, "rep": {"lumen": 1}}},
-          {"weight": 30, "text": "The storm sneezes. An arc crosses your hull and every screen on the ship goes white for an hour. Nobody is hurt. Everyone is a little more polite for the rest of the day.", "effects": {"hull": -5}}
+          {"weight": 30, "text": "The storm sneezes. An arc crosses your hull and every screen on the ship goes white for an hour. Nobody is hurt. You are a little more polite for the rest of the day.", "effects": {"hull": -5}}
         ]},
         {"text": "Run a line out and offer it a charge (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
           {"weight": 100, "text": "You run a line out and let the storm drink. The brightness comes nearer, politely, with the hunger of a thing that has been polite for forty years. 'Thank you,' says a voice that is mostly a smell of ozone. 'I am Zeli. I was a flash.' It shakes out its ribbons and drifts into your wiring like a cat into a laundry basket.", "effects": {"items": {"fuel": -1}, "recruit": {"species": "wisp", "name": "Zeli"}}}
@@ -23,7 +23,7 @@
       "text": "The freighter Slow Cooker has lost her aft hold to a rock and her captain to an understandable panic. The hold is a hundred cubic metres of hard vacuum. Clipped to the far bulkhead is the only thing the crew will cry about: the ship's cat, in an emergency carrier with a seal, a gauge, and eight minutes of air. The cat can be seen through the window, being furious. It is alive. Nobody wants to go in.",
       "choices": [
         {"text": "Suit up and go in.", "outcomes": [
-          {"weight": 60, "text": "Two of you go across on a line and return with the carrier and a deeply insulted cat. The captain cries into the carrier, and the cat, offended, bites her. The pay is generous.", "effects": {"items": {"credits": 30, "fuel": 1}}},
+          {"weight": 60, "text": "You go across on a line and return with the carrier and a deeply insulted cat. The captain cries into the carrier, and the cat, offended, bites her. The pay is generous.", "effects": {"items": {"credits": 30, "fuel": 1}}},
           {"weight": 40, "text": "A suit seal sticks halfway, and you bring the carrier out through a bad minute. The cat is fine. They are bruised, and will not be told about it.", "effects": {"items": {"credits": 15}, "crew_hp": -10}}
         ]},
         {"text": "Patch the hold and repressurise.", "outcomes": [

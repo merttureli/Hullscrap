@@ -57,7 +57,7 @@
           {"weight": 100, "text": "Your Rattler is out of the airlock and into the vent faster than you can say it. Thirty seconds later the hose bucks, bulges, and spits a long yellow plume back down the line into the cart. The Rustfangs retreat in a cloud, coughing, and your Rattler emerges from the wall with a spanner over one shoulder and an air of tremendous modesty.", "effects": {"items": {"scrap": 30, "credits": 30}, "rep": {"clans": 2}}}
         ]},
         {"text": "Mind your own business.", "outcomes": [
-          {"weight": 100, "text": "You sail past. The coughing recedes into the ventilation. Someone in your crew has gone very quiet.", "effects": {"crew_hp": -5}}
+          {"weight": 100, "text": "You sail past. The coughing recedes into the ventilation. You go very quiet.", "effects": {"crew_hp": -5}}
         ]}
       ],
       "after_win": {"text": "The cart goes over on its side and the hose whips about like a snake. The vents sprout ears and goggles, and a small cheer goes up from every wall. Someone slides a tray of boiled sweets out of the nearest grille, and the Council's contract, which turns out to be forged, is added to your trophies.", "effects": {"items": {"scrap": 35, "credits": 30}, "rep": {"clans": 2}}}

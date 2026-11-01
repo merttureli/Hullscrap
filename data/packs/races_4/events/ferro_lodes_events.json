@@ -26,7 +26,7 @@
       "choices": [
         {"text": "Cut the engines and ride it out.", "outcomes": [
           {"weight": 65, "text": "You cut the engines, drop the plates and hold on. The storm takes your ship in a great slow arc, round the heart and out the other side. Nothing breaks. You emerge a little dizzy, with a faint hum in your teeth, and an extra heap of shed iron on the deck.", "effects": {"items": {"scrap": 20}, "crew_hp": -5}},
-          {"weight": 35, "text": "The storm takes the ship in a great arc and flings it, and a dozen bolts come off the hull like rain. You get out with a bruised crew and a dented bow.", "effects": {"hull": -10, "crew_hp": -10, "items": {"scrap": 10}}}
+          {"weight": 35, "text": "The storm takes the ship in a great arc and flings it, and a dozen bolts come off the hull like rain. You get out bruised, with a dented bow.", "effects": {"hull": -10, "crew_hp": -10, "items": {"scrap": 10}}}
         ]},
         {"text": "Thrust against it (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
           {"weight": 100, "text": "The engines shriek. The storm gives, a little, and you make a handful of metres, and a handful more. It takes all the reactor has. At the edge of the field you drop out the side of the wheel, shaking, with a hundred scraps of iron stuck to your hull, which fall off as you coast.", "effects": {"items": {"fuel": -1, "scrap": 15}, "hull": -5}}

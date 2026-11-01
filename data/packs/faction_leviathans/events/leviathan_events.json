@@ -153,7 +153,7 @@
 					"outcomes": [
 						{
 							"weight": 85,
-							"text": "It takes all of you, and a great many careful cuts, and the calf does not struggle once. When it comes loose it noses your hull, once, like a very large dog, and is gone. Your cups are still humming.",
+							"text": "It takes everything you have, and a great many careful cuts, and the calf does not struggle once. When it comes loose it noses your hull, once, like a very large dog, and is gone. Your cups are still humming.",
 							"effects": {"flag": "leviathan_calf_freed", "crew_hp": 10}
 						},
 						{
@@ -244,7 +244,7 @@
 					"outcomes": [
 						{
 							"weight": 60,
-							"text": "Hours of cutting in the lee of the spine. The bone comes away in pale sheets and your crew, who had no idea they were so strong, stack it in the hold like cord-wood.",
+							"text": "Hours of cutting in the lee of the spine. The bone comes away in pale sheets and you, who had no idea you were so strong, stack it in the hold like cord-wood.",
 							"effects": {"items": {"leviathan_bone": 6, "scrap": 20}, "crew_hp": -5}
 						},
 						{

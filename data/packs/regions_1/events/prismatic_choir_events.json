@@ -24,7 +24,7 @@
       "choices": [
         {"text": "Buy the A bell (25 credits).", "requires": {"credits": 25}, "outcomes": [
           {"weight": 80, "text": "You take the bell home. It hums in your cabin whenever you are about to lose your temper. It saves two arguments before breakfast.", "effects": {"items": {"credits": -25, "crystal": 2}, "crew_hp": 10}},
-          {"weight": 20, "text": "The bell is slightly sharp. The crew find themselves humming at the wrong pitch for a week.", "effects": {"items": {"credits": -25, "crystal": 2}}}
+          {"weight": 20, "text": "The bell is slightly sharp. You find yourself humming at the wrong pitch for a week.", "effects": {"items": {"credits": -25, "crystal": 2}}}
         ]},
         {"text": "Sell 3 crystal shards to the Choir.", "requires": {"items": {"crystal": 3}}, "outcomes": [
           {"weight": 100, "text": "Gleam rolls each shard on her palm, listens, and hums approval. 'Good grain,' she says. She pays in credits, and a small bell as a gift.", "effects": {"items": {"crystal": -3, "credits": 75}}}
@@ -56,7 +56,7 @@
           {"weight": 100, "text": "Your Gauntling finds the cracked spire and gives it one precise clunk. It stops ringing. The Choir stares. 'Rude,' hums an elder; then, 'effective'; then, 'thank you'.", "effects": {"items": {"crystal": 2, "scrap": 20}, "rep": {"lumen": 1}}}
         ]},
         {"text": "Ignore it.", "outcomes": [
-          {"weight": 100, "text": "You fly through. The flat note follows you out of the ring and a long way into the lane. The crew all hum the same wrong note for a day, and nobody can stop.", "effects": {"crew_hp": -5}}
+          {"weight": 100, "text": "You fly through. The flat note follows you out of the ring and a long way into the lane. You hum the same wrong note for a day, and cannot stop.", "effects": {"crew_hp": -5}}
         ]}
       ]
     },
@@ -104,7 +104,7 @@
       "text": "A young Prismatic, Opal, sits alone on a crystal shard at the edge of the Choir, core dim, humming a thin tuneless line. 'I was grown to sing in the spire,' she hums, when you hail. 'I cannot find my part. I would like to find a different one. Somewhere. Anywhere else.' The Choir's ring is a long way back. Nobody has noticed she is gone.",
       "choices": [
         {"text": "Offer Opal a berth.", "outcomes": [
-          {"weight": 100, "text": "Opal's core brightens by degrees as she crosses your airlock. She hums for the first time in a clear note: 'Thank you.' By the end of the first hour your engine room hums with her. It is, the crew agree, the best the engine has ever sounded.", "effects": {"recruit": {"species": "prismatic", "name": "Opal"}}}
+          {"weight": 100, "text": "Opal's core brightens by degrees as she crosses your airlock. She hums for the first time in a clear note: 'Thank you.' By the end of the first hour your engine room hums with her. It is, you decide, the best the engine has ever sounded.", "effects": {"recruit": {"species": "prismatic", "name": "Opal"}}}
         ]},
         {"text": "[Prismatic] Hum the missing part.", "requires": {"species": "prismatic"}, "outcomes": [
           {"weight": 100, "text": "Your Prismatic hums a line, a counter-line, and a third line that fits between them. Opal listens, then adds her own, the missing part, thin and clear. They finish together. Opal's core is bright as noon. 'That was it,' she hums. 'That was mine.' She signs on, singing.", "effects": {"items": {"crystal": 3}, "recruit": {"species": "prismatic", "name": "Opal"}}}
@@ -231,7 +231,7 @@
       "text": "The Choir is silent. All four hundred of them stand in rows on the crystal terraces, cores lit, saying nothing. It is not mourning and it is not a protest. A banner in light reads WE ARE RESTING OUR VOICES. DO NOT SPEAK. DO NOT HUM. DO NOT, PLEASE, WHISTLE. On the next ship over, a trader's parrot is whistling. It is a crisis.",
       "choices": [
         {"text": "Keep quiet.", "outcomes": [
-          {"weight": 100, "text": "You keep quiet. The crew, who cannot remember when they last did, sit in the silence. After an hour a Prismatic comes over and presses a small bell into your hand. It has no clapper. 'For hush,' she hums, softly, and drifts away, leaving her notebook.", "effects": {"items": {"crystal": 2}, "crew_hp": 15, "log": "log_choir_resting_voices"}}
+          {"weight": 100, "text": "You keep quiet. You, who cannot remember when you last did, sit in the silence. After an hour a Prismatic comes over and presses a small bell into your hand. It has no clapper. 'For hush,' she hums, softly, and drifts away, leaving her notebook.", "effects": {"items": {"crystal": 2}, "crew_hp": 15, "log": "log_choir_resting_voices"}}
         ]},
         {"text": "Hum something gentle anyway.", "outcomes": [
           {"weight": 55, "text": "You hum a lullaby. It is very flat. For a moment the Choir's cores flinch. Then, one by one, they begin to hum back, a tone at a time. The silence ends, kindly, in the middle of your song. A Prismatic gives you a shard in thanks.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 1}, "crew_hp": 5}},

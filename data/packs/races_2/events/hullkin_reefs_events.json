@@ -42,7 +42,7 @@
       "text": "A wedding is taking place on a hull-plate in the middle of nowhere. It has been taking place, judging by the garlands, for about three weeks. The bride and groom, two Hullkin, are approaching each other along the plate at a speed that makes sense to them, and the guests have set out deckchairs along the way, with blankets and flasks. A cousin hails you. 'You're just in time for the vows,' she says. 'They'll be in eight days.'",
       "choices": [
         {"text": "Stay for the vows (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
-          {"weight": 100, "text": "You stay eight days. The vows take four minutes, and they are the most moving four minutes you have ever heard. The couple, shy and slow, present your ship with a plate of their shell for luck, and the whole crew goes home with a lump in the throat and a hull stronger than before.", "effects": {"items": {"fuel": -1}, "hull": 10, "crew_hp": 10}}
+          {"weight": 100, "text": "You stay eight days. The vows take four minutes, and they are the most moving four minutes you have ever heard. The couple, shy and slow, present your ship with a plate of their shell for luck, and you go home with a lump in the throat and a hull stronger than before.", "effects": {"items": {"fuel": -1}, "hull": 10, "crew_hp": 10}}
         ]},
         {"text": "Leave a gift and go.", "outcomes": [
           {"weight": 100, "text": "You leave a tin of something sweet on the plate and slip away. A grateful cousin sends a message after you: 'The groom thinks it is a very good tin.'", "effects": {"crew_hp": 5}}
@@ -97,7 +97,7 @@
       "text": "A beacon from a single hull-plate, adrift. It is the plate of a reef-home peeled off in a collision, and on it a Hullkin is clinging with every limb. The beacon says, in careful shell-script transcribed into your language, I AM VERY SORRY ABOUT THIS. She has been adrift three days. She is mortified. She has taken the trouble to polish the part of the plate she is sitting on.",
       "choices": [
         {"text": "Take her aboard.", "outcomes": [
-          {"weight": 100, "text": "You take the plate in tow and the Hullkin aboard. She apologises for each deck she crosses and mends each crack she passes. 'Gunwale,' she says. 'It's a good word for a hull.' She is the most apologetic crew member you have ever had, and the best at sealing a wall.", "effects": {"recruit": {"species": "hullkin", "name": "Gunwale"}}}
+          {"weight": 100, "text": "You take the plate in tow and the Hullkin aboard. She apologises for each deck she crosses and mends each crack she passes. 'Gunwale,' she says. 'It's a good word for a hull.' She is the most apologetic guest you have ever had, and the best at sealing a wall.", "effects": {"recruit": {"species": "hullkin", "name": "Gunwale"}}}
         ]},
         {"text": "Tow her plate home (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
           {"weight": 100, "text": "It takes a lot of fuel and more patience. At the far end the reef greets you with a ceremony so slow you leave in the middle of it. They mend your hull, in thanks, while you are gone.", "effects": {"items": {"fuel": -1}, "hull": 15}}

@@ -7,7 +7,7 @@
           {"weight": 100, "text": "The Fenn stamps your hand and gives you a receipt for a receipt. 'Preferred leaver,' he says. 'Discount on your next exit.' He means it. It is a very good discount, and a pellet of fuel for your trouble.", "effects": {"items": {"credits": -20, "fuel": 1}, "unlock": "ship_fenn_sold_twice"}}
         ]},
         {"text": "Argue that you are not leaving.", "outcomes": [
-          {"weight": 55, "text": "'Then you are staying,' says the Fenn, delighted, and charges a residency fee, but a lower one. The crew spend a pleasant day. You are, technically, a local.", "effects": {"items": {"credits": -10}, "crew_hp": 10, "unlock": "ship_fenn_sold_twice"}},
+          {"weight": 55, "text": "'Then you are staying,' says the Fenn, delighted, and charges a residency fee, but a lower one. You spend a pleasant day. You are, technically, a local.", "effects": {"items": {"credits": -10}, "crew_hp": 10, "unlock": "ship_fenn_sold_twice"}},
           {"weight": 45, "text": "'Then you are a trespasser,' says the Fenn, equally delighted, and hands you a larger bill.", "effects": {"items": {"credits": -30}, "unlock": "ship_fenn_sold_twice"}}
         ]},
         {"text": "[Fenn] Find a loophole in the fee schedule.", "requires": {"species": "fenn"}, "outcomes": [
@@ -121,7 +121,7 @@
           {"weight": 100, "text": "Your Grundl leans out of the airlock and catches the circling cart by its awning pole. The cart whips round, slows, stops. The Fenn lets go. 'Sorry,' says your Grundl, 'for stopping you.' The Fenn weeps with relief.", "effects": {"items": {"credits": 50}, "crew_hp": 5}}
         ]},
         {"text": "Sell tickets to watch.", "outcomes": [
-          {"weight": 100, "text": "You park at a safe distance and sell your crew front-row seats for a modest fee. The Fenn on the cart is furious, then, on reflection, impressed. He would have done the same.", "effects": {"items": {"credits": 25}}}
+          {"weight": 100, "text": "You park at a safe distance and sell front-row seats to the bazaar for a modest fee. The Fenn on the cart is furious, then, on reflection, impressed. He would have done the same.", "effects": {"items": {"credits": 25}}}
         ]}
       ]
     },
@@ -136,7 +136,7 @@
           {"weight": 100, "text": "Your Fenn and Tuppence haggle for six minutes over terms of employment, ending in a perfectly fair contract and a drink. She boards, glowing, with a box of useful dirt on three Guild brokers.", "effects": {"items": {"credits": 40}, "recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
         ]},
         {"text": "[Human] Tell her honesty is still a virtue somewhere.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 100, "text": "Tuppence looks at your Human as if she had been handed a real coin. 'Somewhere,' she says. 'Where?' 'Here, maybe,' says your Human. She signs on, a little tearful, and pays her own berth in advance.", "effects": {"items": {"credits": 30}, "recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
+          {"weight": 100, "text": "Tuppence looks at you as if she had been handed a real coin. 'Somewhere,' she says. 'Where?' 'Here, maybe,' you say. She signs on, a little tearful, and pays her own berth in advance.", "effects": {"items": {"credits": 30}, "recruit": {"species": "fenn", "name": "Tuppence"}, "log": "log_bazaar_candour"}}
         ]},
         {"text": "Wish her luck.", "outcomes": [
           {"weight": 100, "text": "'Thanks,' she says, not looking up. 'I will invoice you for the encouragement.'", "effects": {}}
@@ -239,7 +239,7 @@
       "text": "For one hour a day the Bazaar goes quiet. The stalls shut, the skiffs moor, and the Fenn line the rails with nothing to say. It is the Hour of Fixed Prices, a pause in which no one haggles, to remember what a price is. A very small Fenn looks at you with enormous eyes. 'Please,' she whispers. 'Do not ask me for a discount.'",
       "choices": [
         {"text": "Respect the hour.", "outcomes": [
-          {"weight": 100, "text": "You stand with the crew at the rail, in silence, for an hour. It is the nicest stop of the trip. When the bells ring a Fenn presses a small bag into your hand: 'For not asking.' A pad lies beneath.", "effects": {"items": {"credits": 20}, "crew_hp": 10, "log": "log_bazaar_dead_quiet"}}
+          {"weight": 100, "text": "You stand at the rail, in silence, for an hour. It is the nicest stop of the trip. When the bells ring a Fenn presses a small bag into your hand: 'For not asking.' A pad lies beneath.", "effects": {"items": {"credits": 20}, "crew_hp": 10, "log": "log_bazaar_dead_quiet"}}
         ]},
         {"text": "Ask for a discount.", "outcomes": [
           {"weight": 70, "text": "A gasp runs the length of the market. Forty Fenn turn to look. Then a small voice laughs, and the whole Bazaar follows. You are fined for the hour and tipped for the joke.", "effects": {"items": {"credits": 5}}},

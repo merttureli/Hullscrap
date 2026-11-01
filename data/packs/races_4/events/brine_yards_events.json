@@ -105,7 +105,7 @@
           {"weight": 100, "text": "It is about a young Brine named Dunne who dropped a container into the sea of Meridian and lifted it out again, on his back, with nobody watching. It is a long story and a good one. By the end, the line has gone, and you have a second cup, and a feeling of being a person who has been told something.", "effects": {"crew_hp": 10, "rep": {"concord": 1}}}
         ]},
         {"text": "Buy the wagon's last biscuits (15 credits).", "requires": {"credits": 15}, "outcomes": [
-          {"weight": 100, "text": "The brewer hands over a tin with great ceremony. They are hard biscuits, the kind that last a month in a locker and taste of a long evening. Your crew goes through them in a day.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+          {"weight": 100, "text": "The brewer hands over a tin with great ceremony. They are hard biscuits, the kind that last a month in a locker and taste of a long evening. You go through them in a day.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
         ]},
         {"text": "[Brine] Take a turn on the kettle.", "requires": {"species": "brine"}, "outcomes": [
           {"weight": 100, "text": "Your Brine takes the ladle in the small hand, lifts the kettle in the great claw and, with a practised twist, pours six cups in a single pass. The queue applauds. The brewer, delighted, hands over the apron. The tea is free for you from now on, they say, and they press a bag of the wagon's best, along with a travelling ration, into your Brine's arms.", "effects": {"items": {"credits": 35, "fuel": 2}, "rep": {"concord": 1}, "crew_hp": 10}}

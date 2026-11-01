@@ -4,7 +4,7 @@
       "text": "Graft Row dock: a long gantry of welded plate, lit by a thousand work lamps, staffed by Gauntlings in every stage of repair. A sign over the airlock reads ASK ME ABOUT MY ARM. The dock foreman, Gasket, is already telling you about hers. It involves a reactor, a sunrise and a man called Dennis.",
       "choices": [
         {"text": "Listen to the whole story.", "outcomes": [
-          {"weight": 80, "text": "Forty minutes later you know more about Dennis than you ever wanted, and the crew are in tears of laughter. Gasket tips you a spare coil for being a good audience.", "effects": {"items": {"copper": 10}, "crew_hp": 10, "unlock": "ship_gauntling_graft_row"}},
+          {"weight": 80, "text": "Forty minutes later you know more about Dennis than you ever wanted, and you are in tears of laughter. Gasket tips you a spare coil for being a good audience.", "effects": {"items": {"copper": 10}, "crew_hp": 10, "unlock": "ship_gauntling_graft_row"}},
           {"weight": 20, "text": "The story has a second half. And a third. And a sequel about Dennis's cousin. You leave, richer in anecdote, poorer in time.", "effects": {"crew_hp": 5, "unlock": "ship_gauntling_graft_row"}}
         ]},
         {"text": "Tell your own story, bigger.", "outcomes": [
@@ -155,8 +155,8 @@
       "choices": [
         {"text": "Run it yourself. You are organic.", "outcomes": [
           {"weight": 40, "text": "You run it, wearing rubber gloves and a very large hat. You feel it in your fillings. At the hour mark Weld opens the door, looks at you, and nods. 'You are daft,' she says, with real warmth. She gives you the schematics.", "effects": {"crew_hp": -15, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}},
-          {"weight": 35, "text": "You run it with the crew taking turns, ten minutes each. It is the funniest hour of the trip. Everyone has hair like a dandelion. Weld hands over the schematics.", "effects": {"crew_hp": -10, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}},
-          {"weight": 25, "text": "A bolt finds the fillings of one of the crew. They will be fine in the morning. Weld, deeply impressed, signs.", "effects": {"crew_hp": -20, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}}
+          {"weight": 35, "text": "You run it yourself, ten minutes at a time. It is the funniest hour of the trip. Your hair stands up like a dandelion. Weld hands over the schematics.", "effects": {"crew_hp": -10, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}},
+          {"weight": 25, "text": "A bolt finds your fillings. You will be fine in the morning. Weld, deeply impressed, signs.", "effects": {"crew_hp": -20, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}}
         ]},
         {"text": "[Gauntling] Run it with a Gauntling.", "requires": {"species": "gauntling"}, "outcomes": [
           {"weight": 100, "text": "Your Gauntling sits in the cage with the Arc Core for an hour, perfectly calm, lit up by bolts. 'Tickles,' they report. Old Weld whoops. She hands over the schematics, a coil of her best cable and a crate of washers.", "effects": {"items": {"copper": 25, "scrap": 30}, "rep": {"clans": 1}, "flag": "tech_arc_core", "unlock": "ship_gauntling_lamp_post"}}

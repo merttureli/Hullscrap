@@ -4,7 +4,7 @@
       "text": "The Gossamer is a hull wrapped in glowing netting, strung with soft lights, with a dozen bells drifting round the docking ring like jellyfish round a pier. Docking is a matter of being sorted by tendrils: a gentle, thorough pat-down by a Siltborn in a harbour-master's sash, who sorts you into LIGHT, HEAVY and FLAMMABLE with a long glowing finger. There is a small, courteous sign by the lock. PLEASE DO NOT LIGHT A FLAME. WE ARE VERY FLAMMABLE. THANK YOU.",
       "choices": [
         {"text": "Buy a jar of lantern jelly (20 credits).", "requires": {"credits": 20}, "outcomes": [
-          {"weight": 100, "text": "It is a soft glowing paste in a screw-top jar, and when spread on a wound it hums. The whole crew uses it for a week and swears by it. The Siltborn stall-keeper glows pink and tells you not to put it on toast.", "effects": {"items": {"credits": -20}, "crew_hp": 15}}
+          {"weight": 100, "text": "It is a soft glowing paste in a screw-top jar, and when spread on a wound it hums. You use it for a week and swear by it. The Siltborn stall-keeper glows pink and tells you not to put it on toast.", "effects": {"items": {"credits": -20}, "crew_hp": 15}}
         ]},
         {"text": "Hire a young Siltborn from the harbour school (80 credits).", "requires": {"credits": 80, "not_flag": "rings_hired"}, "outcomes": [
           {"weight": 100, "text": "A small bell, barely half the size of the others, drifts up to your elbow. Selumi is thin and shy and glows a soft lavender, and has a satchel of lessons tied to a tendril. 'I am not good at floors,' they say. 'But I am very good at the air.' The teacher waves from the dock, wiping an eye.", "effects": {"items": {"credits": -80}, "recruit": {"species": "siltborn", "name": "Selumi"}, "flag": "rings_hired"}}
@@ -25,7 +25,7 @@
       "text": "The ring-ice is out. A flock of Siltborn is working the glittering edge of a great shining belt with fine nets spun from their own tendrils, hauling in the loose ice by the shimmering sackful. They drift in long, slow lines, humming. Each net holds a hundred small ice-chunks, blue and clear as glass. It is a quiet, wonderful scene; a foreman bell glows an urgent orange and drifts up to your window. 'Visitors,' it says. 'Do you want to help, or are you only looking?'",
       "choices": [
         {"text": "Help haul a net.", "outcomes": [
-          {"weight": 70, "text": "The nets are as light as breath and as heavy as water. You haul one in with four crew, slowly, a chunk at a time, and are given a sackful of the ice for your pains. Melted, it makes good fuel. The Siltborn glow with approval.", "effects": {"items": {"fuel": 2}, "crew_hp": -5}},
+          {"weight": 70, "text": "The nets are as light as breath and as heavy as water. You haul one in with the drone, slowly, a chunk at a time, and are given a sackful of the ice for your pains. Melted, it makes good fuel. The Siltborn glow with approval.", "effects": {"items": {"fuel": 2}, "crew_hp": -5}},
           {"weight": 30, "text": "A net tangles in your engine. It takes an hour to pick the tendril-silk out of the intake. The Siltborn are very polite about it.", "effects": {"hull": -5, "items": {"fuel": 1}}}
         ]},
         {"text": "Trade scrap for ice-fuel (20 scrap).", "requires": {"items": {"scrap": 20}}, "outcomes": [
@@ -51,7 +51,7 @@
           {"weight": 30, "text": "The flare front is wider than anyone said. It scorches your outer hull on the way through, and sets off a fire in the aft locker. By the time it is out, the front is gone, and the Rings are relighting in the dark. The voice does not reproach you.", "effects": {"hull": -10, "crew_hp": -5}}
         ]},
         {"text": "Run for the shadow of the planet (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
-          {"weight": 100, "text": "You haul the ship round in a long, steep curve and into the planet's shadow, where the flare cannot find you. You come out the other side with an hour's lead and a small, shaken crew. The Siltborn bless you in a long glowing sentence that you do not understand.", "effects": {"items": {"fuel": -1, "credits": 25}, "crew_hp": 5}}
+          {"weight": 100, "text": "You haul the ship round in a long, steep curve and into the planet's shadow, where the flare cannot find you. You come out the other side with an hour's lead and a small, shaken ship. The Siltborn bless you in a long glowing sentence that you do not understand.", "effects": {"items": {"fuel": -1, "credits": 25}, "crew_hp": 5}}
         ]},
         {"text": "[Siltborn] Gather the small ones in your bell.", "requires": {"species": "siltborn"}, "outcomes": [
           {"weight": 100, "text": "Your Siltborn flows out of the lock and opens wide, bell-skirts spread, and the children of the Ring come to them in a rush, a hundred little bells, tucking into the shelter of the big one like chicks. Your Siltborn goes dark, glowing nothing, and holds them. The flare passes over, white and vast. When it is gone, the bells relight one by one in a ripple of colour, and every parent in the Ring comes to say thank you.", "effects": {"items": {"credits": 50, "fuel": 3, "crystal": 2}, "crew_hp": 15, "rep": {"lumen": 1}}}
@@ -104,7 +104,7 @@
       "text": "Without any signal, the lights go slowly down across the Ring, one bell after another, to a single faint blue. The chimes stop. Every Siltborn in the lane hangs motionless in the dark, tendrils drifting, and the only sound is the hush of your own engines. It is the Quiet Hour, a hundred years old, held every cycle for no reason anyone can quite explain. A bell drifts up to your window, glowing very low. 'Please,' it says. 'It is only an hour. Stay.'",
       "choices": [
         {"text": "Cut the engines and wait.", "outcomes": [
-          {"weight": 100, "text": "You cut the engines. The lane goes silent. In the dark a thousand bells hang round you, faintly blue. Nobody speaks. By the end of the hour the whole crew is lying on the floor of the cockpit, staring at the ceiling, wishing it would never end. When the lights come back, in a rush, each bell flashes your ship a thank-you.", "effects": {"crew_hp": 15, "items": {"fuel": 1}}}
+          {"weight": 100, "text": "You cut the engines. The lane goes silent. In the dark a thousand bells hang round you, faintly blue. Nobody speaks. By the end of the hour you are lying on the floor of the cockpit, staring at the ceiling, wishing it would never end. When the lights come back, in a rush, each bell flashes your ship a thank-you.", "effects": {"crew_hp": 15, "items": {"fuel": 1}}}
         ]},
         {"text": "Carry on regardless.", "outcomes": [
           {"weight": 100, "text": "The lane is very quiet. Several bells flicker, uncertainly, as you pass. Nobody scolds you. It is just very clear that you have done something, and you cannot quite say what.", "effects": {"rep": {"lumen": -1}, "crew_hp": -5}}
