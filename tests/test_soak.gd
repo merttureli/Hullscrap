@@ -44,7 +44,7 @@ var _real_left := 0  # fights of this run still to go through the arena
 var _helm: Helm  # the ship's helm in the sector of the run now
 var _goals: Array = []  # POI ids still to fly to in this sector
 var stats := {"jumps": 0, "events": 0, "fights": 0, "won": 0, "lost": 0, "draw": 0, "docks": 0, "fight_ticks": 0, "waits": 0, "drifts": 0, "tows": 0, "runs": 0, "known": 0, "dead": 0,
-	"pois": 0, "flown_s": 0, "salvage": 0, "contacts": 0, "grounded": 0, "wardens": 0, "cleared": 0}
+	"pois": 0, "revisits": 0, "flown_s": 0, "salvage": 0, "contacts": 0, "grounded": 0, "wardens": 0, "cleared": 0}
 
 
 func test_soak_every_starter_every_seed() -> void:
@@ -55,7 +55,7 @@ func test_soak_every_starter_every_seed() -> void:
 	print("soak: %s in %d ms" % [str(stats), Time.get_ticks_msec() - t0])
 	check(stats["jumps"] >= STARTERS.size() * SEEDS.size() * JUMPS, "every run made its jumps (%d)" % stats["jumps"])
 	check(stats["fights"] > 0, "the soak met at least one fight")
-	check(stats["pois"] + stats["grounded"] >= stats["jumps"], "a POI or more a sector, unless a fight left the ship unable to fly (%d POIs, %d grounded)" % [stats["pois"], stats["grounded"]])
+	check(stats["pois"] + stats["grounded"] + stats["revisits"] >= stats["jumps"], "a POI or more a sector, unless a fight left the ship unable to fly or the node was one it had been to (%d POIs, %d grounded, %d revisits)" % [stats["pois"], stats["grounded"], stats["revisits"]])
 	check(stats["salvage"] > 0, "a won fight led to the salvage of the enemy's parts")
 	check(stats["wardens"] > 0 and stats["cleared"] > 0, "the exit warden was met and cleared (%d meetings, %d runs got through)" % [stats["wardens"], stats["cleared"]])
 
@@ -168,6 +168,7 @@ func _visit(where: String, c: Campaign, sim, pick: RandomNumberGenerator) -> boo
 		var id: String = _goals.pop_front()
 		var poi: Dictionary = s.find(id)
 		if poi.is_empty() or (poi["state"] == Sector.DONE and not bool(s.cfg["poi_types"].get(poi["type"], {}).get("repeat", false))):
+			stats["revisits"] += 0 if poi.is_empty() else 1  # a node the run has been to: its POI is done, nothing new to fly to
 			continue
 		var r := _fly(where, c, sim, pick, s, id)
 		if r == "wrecked":

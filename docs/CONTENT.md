@@ -99,7 +99,7 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
     - A sector holds **`total layers × w`** layers.
     - So with 2 layers on bow and stern: even is 2/2, "double the bow" is 4 bow and 0 stern, and 3/1 is in between.
     - Protection is moved, never created.
-  - **Layers are per sector**: a hit spends a layer of the sector it hits, and each sector recharges its own.
+  - **Layers are per sector**: a hit spends a layer of the sector it hits, and each sector recharges its own, one layer at a time (7 s a layer for a Mk1, `shields.recharge` in data/weapons.json; the next layer's timer starts when the one before it is back), and a sector whose last whole layer was used waits 3 s more (`shields.break_delay`).
   - **Shifting takes time**: the losing sector drops at once, and the gaining sector fills at the recharge rate, so you can't swap for free as a volley lands.
   - Firing opens **only the sector the shot leaves through**, for `drops_shield_s`.
   - **In combat**: the arrow keys shift balance one step: ↑ bow, ↓ stern, ← port, → starboard (port and starboard need 4+ sectors). The step is taken from the opposite sector first, then evenly from the others. **End** returns to even.
@@ -714,7 +714,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - an **under-prepared** ship against an enemy that counters it (full shields with no ion or missiles; heavy armour with only lasers) wins **30–50%**;
   - a skilled player finishes **40–60%** of runs, and a new player under 10%.
 - **Enemy scaling, the FTL way**: an enemy is a **hull** (a premade design per faction and size class: small, medium, large) plus a **loadout bought from a budget**.
-  - **Budget** = tier base × (1 + 0.04 × jumps) × the region's danger (Clan 1.0, Concord 1.1, the Boneyard 1.15, Lumen 1.2, the Gate approaches 1.4, the Hollow 1.6) × the difficulty (Easy 0.8, Normal 1.0, Hard 1.2).
+  - **Budget** = tier base × (1 + 0.04 × jumps) × the region's danger (Clan 1.0, Concord 1.1, the Boneyard 1.15, Lumen 1.2, the Gate approaches 1.4, the Hollow 1.6) × the difficulty (Easy 0.8, Normal 1.0, Hard 1.2). **Early stages (Beta 3)**: a run's stages 1 to 3 fight with 70% of it (`budget.stage_mult` in `data/enemy_tables.json`), and an enemy of those stages carries a shield at most 25%, 40% and 55% of the time (`budget.shield_cap`, rolled from the ship's seed; the rare factions ignore it). The stage rides in the spec as `:s<stage>` (`gen:rustfangs:medium:123:2400:s1[:ram]`); stage 4 and later, and a spec without it, are unchanged.
   - The budget buys from the faction's table (`data/enemy_tables.json`): weapon tiers, shield layers and sectors, armour layers on the outer walls, crew count and skill, the AI's `aim_skill`, and systems.
     - Rustfangs buy armour, rams and flak.
     - The Concord buys shields and missiles.
@@ -740,7 +740,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - `Shipgen.build(faction, size, seed, budget)` gives a valid ship (power, sealed rooms, crew paths, mounts through the real rules, flies, no rectangle); the same arguments always give the same ship. A spec string `gen:<faction>:<size>:<seed>:<budget x 100>[:ram]` names one, and `Session.load_ship` loads it like a design file.
   - **Loadout**: the free base ship (helm, life support, the faction's cheapest reactor, two engines, one gun) plus purchases drawn from the faction's weights, each priced in `enemy_tables.json` and each needing the hull's room and the power its reactors give. Armour layers are real wall layers (2 hull integrity a cell, `arena.gd`).
   - **Hull**: `scripts/space/hullgen.gd` draws the faction's silhouette round the decks (gun deck, decks between, engine room) from the faction's `hull` grammar: wedge, chamfer, spikes, round2 arcs. A hull that comes out a box is narrowed at both ends, then gives up bow guns and engines, until it is under 85% of its bounding box.
-  - **Campaign**: `fight: "tier"` rolls the `gen:` entry of `data/drift.json` `enemies`; the faction is the region's `enemies`, the budget is tier base x (1 + 0.04 x jumps) x the region's `danger` x the difficulty.
+  - **Campaign**: `fight: "tier"` rolls the `gen:` entry of `data/drift.json` `enemies`; the faction is the region's `enemies`, the budget is tier base x (1 + 0.04 x jumps) x the region's `danger` x the difficulty x the stage's `stage_mult` (stages 1 to 3: 0.7).
   - **Threat**: `Shipgen.threat(enemy, player)` / `Shipgen.threat_of(design, player)` give 1-5 skulls from sqrt(damage per second x effective hp) x a speed factor, enemy over player (`scripts/space/threat.gd`, cuts in the table); `Threat.label(n)` is the text for the radar and HUD.
 
 ## 15. Regions: every race has a home you can jump to (owner, 2026-10-30)
