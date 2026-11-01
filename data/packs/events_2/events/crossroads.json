@@ -83,8 +83,7 @@
       "text": "A Rustfang skiff, the Receipt Book, slides across your nose and opens a channel. 'Toll,' says a woman's voice, and a printer clatters. 'Forty credits. You will be given a receipt. Receipts are not optional. Rustfang policy.'",
       "choices": [
         {"text": "Pay the toll (40 credits).", "requires": {"credits": 40, "pay": true}, "outcomes": [
-          {"weight": 85, "text": "The receipt prints, signed in a hand that clearly practised. 'Safe lane,' she says. 'Keep it. It's worth something to somebody.'", "effects": {"items": {"scrap": 10}}},
-          {"weight": 15, "text": "The receipt prints. Then the skiff's guns come up. 'That was for the lane,' she says. 'Your cargo is a separate matter.'", "effects": {"fight": "pirate_raider"}}
+          {"weight": 100, "text": "The receipt prints, signed in a hand that clearly practised. 'Safe lane,' she says. 'Keep it. It's worth something to somebody.' You do. A week later a stranger buys it off you for ten.", "effects": {"items": {"scrap": 10}}}
         ]},
         {"text": "Tell her honestly how little she'd get.", "outcomes": [
           {"weight": 55, "text": "You list the shield (thin), the guns (slow), the hold (empty) and the paint (peeling). A long pause. 'Frankly,' she says, 'I'm moved. Go on.'", "effects": {"rep": {"clans": 1}}},
@@ -105,8 +104,7 @@
       "text": "A raider closes at an easy, unhurried speed: the speed of a ship that has never been shot back at. Her gunnery officer, over the comm, sounds bored. 'Just so we're clear,' he says, 'I can see your guns. They don't look like much.'",
       "choices": [
         {"text": "Agree, and offer scrap to go away (30 scrap).", "requires": {"items": {"scrap": 30}, "pay": true}, "outcomes": [
-          {"weight": 80, "text": "'Thank you,' he says. 'Honestly, that's the right answer.' He sounds relieved.", "effects": {"rep": {"clans": 1}}},
-          {"weight": 20, "text": "'Thanks,' he says. 'And the rest.'", "effects": {"fight": "pirate_raider"}}
+          {"weight": 100, "text": "'Thank you,' he says. 'Honestly, that's the right answer.' He sounds relieved, and a little ashamed, and takes the scrap.", "effects": {"rep": {"clans": 1}}}
         ]},
         {"text": "Tell him: slow guns, sure, but every shot counts.", "outcomes": [
           {"weight": 50, "text": "A pause. 'Hm,' he says. 'That is a different way to think about it.' They peel off, thoughtful.", "effects": {"rep": {"clans": 1}}},

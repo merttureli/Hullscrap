@@ -216,3 +216,141 @@ func test_the_offer_counter_is_saved_and_an_old_save_has_none() -> void:
 	old.crew_offers = 1
 	eq(old.load_dict(d), "", "a version 8 save still loads")
 	eq(old.crew_offers, 0, "with no offer made")
+
+
+# --- the pack data/packs/events_2 -------------------------------------------------------------------------------------
+
+func _pack_ids() -> Array:
+	var ev: Events = Events.shared()
+	return ev.order.filter(func(id): return str(ev.files[id]).contains("/packs/events_2/"))
+
+
+func _text_of(e: Dictionary) -> String:
+	return JSON.stringify(e)
+
+
+func test_the_events_2_pack_has_the_planned_events() -> void:
+	var ev: Events = Events.shared()
+	var ids := _pack_ids()
+	eq(ids.size(), 54, "54 events in the pack")
+	var by := {}
+	var regional := {"concord_space": 0, "lumen_space": 0, "boneyard": 0}
+	for id in ids:
+		var e: Dictionary = ev.events[id]
+		by[e["type"]] = int(by.get(e["type"], 0)) + 1
+		var reg := str(Events._dict(e.get("requires")).get("region", ""))
+		if regional.has(reg):
+			regional[reg] += 1
+	# the 8 regional ones count in their types: wreck_field 8 + 2, asteroid_field 6, anomaly 6 + 3, hollow 6, trader 5 + 1, empty 5 + 1, distress 4, pirate 4, patrol 2 + 1
+	eq([by.get("wreck_field"), by.get("asteroid_field"), by.get("anomaly"), by.get("hollow"), by.get("trader"), by.get("empty"), by.get("distress"), by.get("pirate"), by.get("patrol")], [10, 6, 9, 6, 6, 6, 4, 4, 3], "events by type")
+	eq([regional["concord_space"], regional["lumen_space"], regional["boneyard"]], [3, 3, 2], "Concord, Lumen and Boneyard events")
+	for msg in ev.validate().filter(func(m): return m.contains("/packs/events_2/")):
+		check(false, msg)
+
+
+func test_the_events_2_pack_is_repeatable_normal_weight_and_recruits_nobody() -> void:
+	var ev: Events = Events.shared()
+	for id in _pack_ids():
+		var e: Dictionary = ev.events[id]
+		check(not bool(e.get("once", false)), id + ": repeatable")
+		var w := float(e.get("weight", 10))
+		check(w >= 6.0 and w <= 12.0, id + ": a normal weight (%s)" % str(w))
+		check(not ev._recruiters.has(id), id + ": recruits nobody")
+		check(not _text_of(e).contains("lose_crew"), id + ": loses nobody")
+		check(not ev.is_page(id), id + ": is rolled at a node, not a page")
+		for word in ["your crew", "the crew", "your cook", "your engineer", "your medic"]:
+			check(not _text_of(e).to_lower().contains(word), id + ": says '" + word + "'")
+
+
+func test_every_events_2_event_can_be_played_alone() -> void:
+	var ev: Events = Events.shared()
+	var c := Campaign.new(4)
+	var ship := _ship()  # the soldier alone
+	for id in _pack_ids():
+		var e: Dictionary = ev.events[id]
+		var view := ev.choice_view(e, c, ship, _node(str(e["type"])))
+		check(view.any(func(v): return not v["blue"] and not v["grey"]), id + ": a plain choice shows to a ship alone")
+		var safe := false
+		for v in view:
+			var outs: Array = e["choices"][v["index"]]["outcomes"]
+			safe = safe or (not v["blue"] and not v["grey"] and not outs.any(func(o): return Events._dict(o.get("effects")).has("fight")))
+		check(safe, id + ": a way out with no fight in it")
+
+
+func test_events_2_part_options_use_any_of_lists_and_most_carry_a_risk() -> void:
+	var ev: Events = Events.shared()
+	var parts := 0
+	var risky := 0
+	var with_part := 0
+	for id in _pack_ids():
+		var has := false
+		for ch in ev.events[id]["choices"]:
+			var req: Dictionary = Events._dict(ch.get("requires"))
+			if not (req.has("component") or req.has("component_any")):
+				continue
+			has = true
+			parts += 1
+			var costly := false
+			for o in ch["outcomes"]:
+				var fx: Dictionary = Events._dict(o.get("effects"))
+				costly = costly or int(fx.get("hull", 0)) < 0 or int(fx.get("crew_hp", 0)) < 0 or fx.has("fight") or Events._dict(fx.get("items")).values().any(func(v): return int(v) < 0)
+			risky += int(costly and ch["outcomes"].size() >= 2)
+		with_part += int(has)
+	check(with_part >= 50, "%d of 54 events have a part-keyed option" % with_part)
+	check(parts >= 55, "%d part options in all" % parts)
+	check(risky * 10 >= parts * 8, "and %d of %d carry a risk" % [risky, parts])
+
+
+func test_the_fixed_events_say_you_not_your_crew() -> void:
+	var ev: Events = Events.shared()
+	for id in ["empty_the_vote", "asteroid_ice_field", "asteroid_silicate_geode", "anomaly_song_first_note", "empty_song_second_note", "hollow_counting_beacon", "hollow_dead_callsign", "quiet_sound_of_nobody", "wisp_dead_relay", "fen_fog_bank"]:
+		var t: String = str(ev.events[id]["text"]).to_lower()
+		for word in ["your crew", "your cook", "your engineer", "the crew"]:
+			check(not t.contains(word), id + ": the text says '" + word + "'")
+
+
+func test_the_lose_crew_events_cost_a_ship_alone_something() -> void:
+	var ev: Events = Events.shared()
+	var c := Campaign.new(6)
+	var alone := _ship()
+	var crewed := _crewed()
+	var fixed := ["wreck_field_dead_cruiser", "quarry_blast_day", "forge_meltdown", "bazaar_premium_blend", "scrapyard_ion_storm", "scrapyard_live_hulk", "barge_runaway_grace", "core_ring_breach", "hive_hatching", "fen_geyser_season", "choir_ion_front", "grove_spore_storm"]
+	for id in fixed:
+		var e: Dictionary = ev.events[id]
+		var lost_alone := 0
+		var lost_crewed := 0
+		for i in e["choices"].size():
+			var ch: Dictionary = e["choices"][i]
+			var has_loss: bool = ch["outcomes"].any(func(o): return Events._dict(o.get("effects")).has("lose_crew"))
+			var req: Dictionary = Events._dict(ch.get("requires"))
+			if has_loss:
+				check(req.has("crew_min"), id + ": a choice that can lose a crewmate needs one aboard")
+				lost_crewed += 1
+			if req.has("crew_max"):
+				lost_alone += 1
+				check(not has_loss, id + ": the alone twin loses nobody")
+				check(ch["outcomes"].any(func(o): return int(Events._dict(o.get("effects")).get("hull", 0)) <= -8), id + ": and costs hull instead")
+		check(lost_crewed > 0 and lost_crewed == lost_alone, id + ": every choice that can lose a crewmate has an alone twin")
+		var shown_alone := ev.choice_view(e, c, alone, _node(str(e["type"]))).filter(func(v): return not v["blue"]).size()
+		var shown_crewed := ev.choice_view(e, c, crewed, _node(str(e["type"]))).filter(func(v): return not v["blue"]).size()
+		eq(shown_alone, shown_crewed, id + ": the same number of choices show alone or crewed")
+
+
+func test_nothing_is_left_with_a_blank_outcome_text() -> void:
+	var ev: Events = Events.shared()
+	for id in ev.order:
+		var e: Dictionary = ev.events[id]
+		if ev.files[id].contains("/packs/story_1/") or ev.files[id].contains("/packs/endings_1/"):
+			continue  # the story pack is another writer's
+		for ch in Events._list(e.get("choices")):
+			for o in Events._list(Events._dict(ch).get("outcomes")):
+				check(str(Events._dict(o).get("text", "")).strip_edges() != "", id + ": an outcome has no text (choice '" + str(ch.get("text", "")).left(30) + "')")
+
+
+func test_pirate_ambush_has_a_free_way_out() -> void:
+	var ev: Events = Events.shared()
+	var e: Dictionary = ev.events["pirate_ambush"]
+	var out := false
+	for ch in e["choices"]:
+		out = out or (not ch.has("requires") and ch["outcomes"].any(func(o): return not Events._dict(o.get("effects")).has("fight")))
+	check(out, "a choice with no requirement that can end without a fight")

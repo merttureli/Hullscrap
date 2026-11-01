@@ -192,6 +192,10 @@
         {"text": "Leave 10 scrap and borrow a spanner.", "requires": {"items": {"scrap": 10}, "pay": true}, "outcomes": [
           {"weight": 100, "text": "You leave ten scrap and borrow a spanner. The list gains a line in your hand. It is an honest transaction, and rare.", "effects": {"items": {"fuel": 2}, "rep": {"clans": 1}}}
         ]},
+        {"text": "[Tractor] Haul the whole buoy aboard, sign and all.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 60, "text": "The buoy comes aboard with its cache and its list. The list, you notice, has a new name at the bottom in a wet hand: yours.", "effects": {"items": {"fuel": 3, "scrap": 30}, "rep": {"clans": -1}}},
+          {"weight": 40, "text": "The buoy was welded to something that did not agree.", "effects": {"hull": -8, "items": {"fuel": 1}}}
+        ]},
         {"text": "Add your name and fly on.", "outcomes": [
           {"weight": 100, "text": "You write your name at the bottom, under 'a little time'. It feels like a promise to somebody.", "effects": {}}
         ]}

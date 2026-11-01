@@ -105,16 +105,17 @@
 			"choices": [
 				{"text": "Cut her open for scrap.", "outcomes": [
 					{"weight": 70, "text": "The cutting torch sings and the plates peel away like orange rind. A decent haul.", "effects": {"items": {"scrap": 50}}},
-					{"weight": 30, "text": "A bulkhead lets go mid-cut and takes a crewman with it for a moment. Everyone lives. The scrap is smaller than you hoped.", "effects": {"crew_hp": -15, "items": {"scrap": 20}}}]},
+					{"weight": 30, "text": "A bulkhead lets go mid-cut and takes you with it for a moment. You live. The scrap is smaller than you hoped.", "effects": {"crew_hp": -15, "items": {"scrap": 20}}}]},
 				{"text": "Search the cargo bay for anything worth selling.", "outcomes": [
 					{"weight": 50, "text": "A crate of Concord ration chits, none of them expired yet. You sell them to yourself, for the credits.", "effects": {"items": {"credits": 35}}},
 					{"weight": 50, "text": "Copper wire, miles of it, wound round a dead man's reel.", "effects": {"items": {"copper": 20}}}]},
 				{"text": "[Basalt] Send your Basalt out onto the hull, no suit needed.", "requires": {"species": "basalt"}, "outcomes": [
 					{"weight": 100, "text": "He walks the outer plates like a man on a Sunday pier, and comes back with a sack of the good stuff and a calm expression.", "effects": {"items": {"scrap": 60, "titanium": 10}}}]},
 				{"text": "[Afterburner] Match her tumble and cut from the spinning side.", "requires": {"component": "afterburner"}, "outcomes": [
-					{"weight": 60, "text": "You leave her turning in the dark, hold doors open, still surprised.", "effects": {"items": {"scrap": 70, "credits": 25}}},
+					{"weight": 60, "text": "You slide in alongside her, turning with her, and the torch holds one still line down her flank while the plates peel away like the skin of an orange. The cargo bay opens its mouth and you take what is in it.", "effects": {"items": {"scrap": 70, "credits": 25}}},
 					{"weight": 40, "text": "The tumble wins by a few degrees. The torch has been there a moment before the freighter's corner arrives, and the corner does not stop at your hull.", "effects": {"hull": -12, "items": {"scrap": 25}}}]},
-				{"text": "Leave her to the dark.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "Leave her to the dark.", "outcomes": [
+					{"weight": 100, "text": "You leave her turning in the dark, hold doors open, still surprised.", "effects": {}}]}
 			]
 		},
 		{
@@ -198,10 +199,10 @@
 					{"weight": 10, "text": "A fat knuckle of titanium. Someone at Meridian is going to hug you.", "effects": {"items": {"titanium": 20}}},
 					{"weight": 40, "text": "The rock fractures the wrong way and a slab the size of a door comes back at the hull. You get some scrap out of it, and a dent.", "effects": {"hull": -10, "items": {"scrap": 10}}}]},
 				{"text": "[Intake] Skim the loose rubble with the intake while the rock turns.", "requires": {"component_any": ["intake_mk1", "intake_mk2", "intake_mk3", "net_mouth_scrap"]}, "outcomes": [
-					{"weight": 60, "text": "You leave the rock to turn. It looks, you think, relieved.", "effects": {"items": {"scrap": 45}}},
+					{"weight": 60, "text": "You hold station off the flank and let the rock throw its dust at the intake. The hold fills a little at a time, without a single cut. It is the laziest money you have ever made.", "effects": {"items": {"scrap": 45}}},
 					{"weight": 25, "text": "The turn brings a vein round into the beam, and the intake gets a mouthful of copper along with the grit.", "effects": {"items": {"scrap": 30, "copper": 12}}},
 					{"weight": 15, "text": "A boulder the size of a door comes round with the rest. The intake takes it in the mouth and does not enjoy it.", "effects": {"hull": -8, "items": {"scrap": 15}}}]},
-				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "You leave the rock to turn. It looks, you think, relieved.", "effects": {}}]}
 			]
 		},
 		{
@@ -219,9 +220,9 @@
 					{"weight": 10, "text": "The blind spot was a titanium nodule the size of a crate.", "effects": {"items": {"titanium": 20}}},
 					{"weight": 40, "text": "The blind spot was a gas pocket. The bang rattles every tooth you have, and scatters a little scrap back at you.", "effects": {"hull": -10, "items": {"scrap": 10}}}]},
 				{"text": "[Radar] Pick the blind spot out before anyone cuts it.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
-					{"weight": 65, "text": "The belt drifts on without you. The blind spot stays blind.", "effects": {"items": {"titanium": 14, "scrap": 15}}},
+					{"weight": 65, "text": "The radar leans on the blind spot until it resolves into a titanium nodule the size of a crate, wrapped in a skin of ice. You cut round it, not through it, and it comes away whole.", "effects": {"items": {"titanium": 14, "scrap": 15}}},
 					{"weight": 35, "text": "The radar resolves the blind spot into a gas pocket, half a second after you started to cut. The bang goes the way it was always going to.", "effects": {"hull": -8, "items": {"scrap": 10}}}]},
-				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "The belt drifts on without you. The blind spot stays blind.", "effects": {}}]}
 			]
 		}
 	]
