@@ -16,7 +16,7 @@ const Rooms = preload("res://scripts/sim/rooms.gd")
 
 var queue: Array = []  ## prompts waiting, the first is on show: {key: room key cell, name, left (real seconds), slow (bool)}
 var since_slow := 1.0e9  ## real seconds since the last slow-down began
-var slowed_total := 0  ## how many slow-downs there have been (for tests and the HUD)
+var slowed_total := 0  ## how many slow-downs there have been (for tests)
 var _armed := {}  # room key cell -> true while its pressure is over the limit
 var _shown := false  # the first prompt has had its slow-down decided
 

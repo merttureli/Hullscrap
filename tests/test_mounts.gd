@@ -556,6 +556,7 @@ func test_the_crew_repair_a_hurt_barrel_from_the_inside_and_patch_a_cut_link_fir
 	# a crew member does it
 	var m := CrewMember.new("Ada", Pathfinder.centre_of(Wall.corner(0, 4, 5, 5, 6)))
 	ship.crew.append(m)
+	ship.atmosphere.pressure.fill(1.0)  # (the rig is open to space and Jobs alone does not tick the air: with none, Ada would leave at 40 percent hp, K3)
 	for i in 160:
 		jobs.tick(ship, 0.1)
 	eq(inst["out_hp"], 10, "the barrel is whole after a while")
