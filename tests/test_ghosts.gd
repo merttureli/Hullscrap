@@ -112,12 +112,15 @@ func test_in_a_hollow_sector_a_ghost_comes_every_60_seconds_and_closes_in() -> v
 
 
 func test_ghosts_count_toward_the_cap_and_the_ship_that_lingers_meets_them() -> void:
-	var s = Sector.generate(5, _node("empty", 1), "clans")
+	var cfg: Dictionary = Sector.config().duplicate(true)
+	cfg["ambient"]["hollow"]["every"] = 15  # a ghost that has passed the ship leaves (3 radar reaches), so they must come faster to fill the sky
+	var ship := _ship()
+	var s = Sector.generate(5, _node("empty", 1), "clans", cfg)
 	s.set_hollow(true)
 	var cap := int(s.cfg["ambient"]["max"])
 	var most := 0
 	for i in 600:
-		s.tick(1.0, null)
+		s.tick(1.0, ship)
 		most = maxi(most, s.ambient.size())
 		check(s.ambient.size() <= cap, "at most %d about at once" % cap)
 	eq(most, cap, "and the cap is reached: the ghosts keep coming")
@@ -155,19 +158,20 @@ func test_outside_a_hollow_sector_the_old_rolls_are_unchanged() -> void:
 # --- the place falls with the ship in it ------------------------------------------------------------------
 
 func test_the_current_place_falling_hollow_spawns_one_ghost_at_once_and_only_once() -> void:
+	var ship := _ship()  # a ghost that has passed the ship leaves 3 radar reaches (9,000 px) away: this ship's radar sees 3,000
 	var s = Sector.generate(5, _node("empty", 1), "clans")
-	s.tick(50.0, null)  # most of the way to an ordinary roll
+	s.tick(50.0, ship)  # most of the way to an ordinary roll
 	s.set_hollow(true, true)
-	var made: Array = s.tick(0.1, null)
+	var made: Array = s.tick(0.1, ship)
 	eq(made.size(), 1, "one contact at the next tick")
 	eq(made[0]["event_type"], "hollow", "a ghost")
 	check(_closing_on(made[0], s.ship_pos), "closing in")
 	s.set_hollow(true, true)
 	s.set_hollow(true)
-	eq(s.tick(0.1, null), [], "told again, it brings no second one")
+	eq(s.tick(0.1, ship), [], "told again, it brings no second one")
 	eq(_ghosts(s).size(), 1, "only the one")
-	eq(s.tick(58.0, null), [], "the roll's clock started again at the fall: nothing for the next minute")
-	eq(s.tick(2.0, null).size(), 1, "then the 60 s ghosts follow")
+	eq(s.tick(58.0, ship), [], "the roll's clock started again at the fall: nothing for the next minute")
+	eq(s.tick(2.0, ship).size(), 1, "then the 60 s ghosts follow")
 	eq(_ghosts(s).size(), 2, "two now")
 
 
@@ -185,16 +189,17 @@ func test_a_place_that_is_hollow_on_arrival_brings_no_ghost_at_once() -> void:
 
 
 func test_the_first_ghost_comes_even_when_the_sky_is_full() -> void:
+	var ship := _ship()
 	var s = Sector.generate(5, _node("empty", 1), "clans")
 	for k in 3:
 		s.ambient.append({"id": "x%d" % k, "type": "unknown", "name": "Unknown ship", "pos": s.ship_pos + Vector2(5000.0, 0.0), "visibility": "signal",
 			"event_type": "trader", "state": Sector.NEW, "enemy": "", "main": false, "ambient": true, "vel": Vector2.ZERO, "ttl": 1000.0})
 	eq(s.ambient.size(), 3, "three ordinary contacts about")
 	s.set_hollow(true, true)
-	var made: Array = s.tick(0.1, null)
+	var made: Array = s.tick(0.1, ship)
 	eq(made.size(), 1, "the tide is here: its ghost comes anyway")
 	eq(s.ambient.size(), 4, "over the cap")
-	eq(s.tick(60.0, null), [], "but the minute rolls still obey the cap")
+	eq(s.tick(60.0, ship), [], "but the minute rolls still obey the cap")
 
 
 # --- the campaign sets the flag ---------------------------------------------------------------------------

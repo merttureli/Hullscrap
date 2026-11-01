@@ -122,7 +122,7 @@ func test_size_arrival_current_and_poi_distances_are_in_range() -> void:
 			check(s.contains(s.arrival), tag + ": and inside")
 			check(s.current_speed >= 20.0 and s.current_speed <= 60.0, tag + ": the current runs 20 to 60 px/s (%s)" % str(s.current_speed))
 			check(s.current_angle >= 0.0 and s.current_angle < 360.0, tag + ": in degrees")
-			check(s.pois.size() >= 2 and s.pois.size() <= 6, tag + ": 2 to 6 POIs (%d)" % s.pois.size())
+			check(s.pois.size() >= 3 and s.pois.size() <= 8, tag + ": 3 to 8 POIs (%d)" % s.pois.size())
 			var seen := {}
 			for p in s.pois:
 				var d: float = p["pos"].distance_to(s.arrival)
@@ -136,6 +136,21 @@ func test_size_arrival_current_and_poi_distances_are_in_range() -> void:
 			eq(s.pois[0]["main"], true, tag + ": the first is the main POI")
 			eq(s.ship_pos, s.arrival, tag + ": the ship starts at the arrival point")
 	check(n == want and n >= 6 * 16, "all sectors were checked (%d)" % n)
+
+
+func test_the_busier_sectors_still_place_every_poi_apart() -> void:
+	var cfg: Dictionary = Sector.config()
+	var relaxed := float(cfg["poi"]["gap"]) * 0.343 - 1.0  # the gap shrinks by 0.7 three times at the most
+	var most := 0
+	for type in TYPES:
+		for i in 60:
+			var s = Sector.generate(i, _node(type, i), "boneyard")
+			var tag := "%s #%d" % [type, i]
+			most = maxi(most, s.pois.size())
+			for a in s.pois.size():
+				for b in range(a + 1, s.pois.size()):
+					check(s.pois[a]["pos"].distance_to(s.pois[b]["pos"]) >= relaxed, "%s: %s and %s are not stacked (the gap relaxed, never gone)" % [tag, s.pois[a]["id"], s.pois[b]["id"]])
+	eq(most, 6, "the busiest node (a wreck field or an asteroid field) places 6 POIs")
 
 
 func test_the_poi_mix_follows_sectors_json() -> void:
@@ -1112,7 +1127,7 @@ func test_sectors_json_is_sound() -> void:
 		check(types.has(n["main"]), "%s: main %s is a POI type" % [t, n["main"]])
 		for w in n["weights"]:
 			check(types.has(w), "%s: weight for %s, a POI type" % [t, w])
-		check(int(n["count"][0]) >= 2 and int(n["count"][1]) <= 6 and int(n["count"][0]) <= int(n["count"][1]), "%s: a count within 2 to 6" % t)
+		check(int(n["count"][0]) >= 3 and int(n["count"][1]) <= 8 and int(n["count"][0]) <= int(n["count"][1]), "%s: a count within 3 to 8" % t)
 		check(float(n["density"]) > 0.0, "%s: a density" % t)
 		var debris: Array = Content.read(DriftDebris.PATH)["types"].map(func(x): return x["id"])
 		for k in n["debris"]:

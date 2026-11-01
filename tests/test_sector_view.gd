@@ -307,6 +307,8 @@ func test_flying_to_rusthold_brings_ma_gantry_then_the_station_menu() -> void:
 	var view = d["view"]
 	var map: MapView = d["map"]
 	var s = map.campaign.current_sector()
+	for p in s.pois.slice(1):
+		p["state"] = "done"  # the way to the station is clear: no other site fires first
 	view.manned_override = true
 	view.choose(str(s.main_poi()["id"]))
 	var t := 0.0

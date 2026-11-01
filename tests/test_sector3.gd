@@ -540,7 +540,7 @@ func test_quest_sites_are_made_only_where_there_is_a_quest_and_often_enough_ther
 		print("sector3: %s: a quest site in %d of %d sectors" % [id, with, total])
 		check(rate >= 0.25, "%s: a quest site in at least a quarter of its sectors (%d of %d)" % [id, with, total])
 		most = maxf(most, rate)
-	check(most < 0.7, "but not in all of them (one quest, once, a region): %.2f" % most)
+	check(most < 0.85, "but not in all of them (one quest, once, a region; sectors hold one POI more since Beta 3): %.2f" % most)
 	var c := Campaign.new(7)  # Clan space
 	for n in c.drift.nodes:
 		for p in c.sector_at(n["id"]).pois:
