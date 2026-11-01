@@ -659,10 +659,11 @@ func test_the_pack_has_six_hollow_events_with_fights_and_a_free_way_out() -> voi
 	var ev: Events = Events.shared()
 	var hollow: Array = ev.order.filter(func(id): return str(ev.events[id].get("type", "")) == "hollow")
 	check(hollow.size() >= 6, "six hollow events (%d)" % hollow.size())
+	eq(hollow.filter(func(id): return Content.origin("events", id) == "mech_tide").size(), 6, "six of them from the tide pack (events_2 adds six more)")
 	var fights := 0
 	for id in hollow:
 		var e: Dictionary = ev.events[id]
-		eq(Content.origin("events", id), "mech_tide", id + ": from the pack")
+		check(["mech_tide", "events_2"].has(Content.origin("events", id)), id + ": from the tide pack or the events refresh")
 		var free := false
 		var fight := false
 		for ch in e["choices"]:
