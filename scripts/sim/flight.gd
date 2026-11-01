@@ -174,7 +174,7 @@ func thrust_of(components, powered: Dictionary, boost := {}) -> float:
 ## nozzle (the mount's outward direction), so {fwd: the sum of thrust x cos(angle between its push and
 ## the ship's forward) (at least 0), left and right: thrust x the sideways part of its push, summed
 ## over the engines that push that way}. Rear engines (rotation 2) give full forward thrust and no
-## sideways, engines on a side wall give none forward and all sideways. On top of that every engine gives
+## sideways, engines on a side wall give none forward and all sideways, one on a 45 degree slope about 71% of each. On top of that every engine gives
 ## `side_share` of its thrust to both sides (a rear pair strafes at that share of its forward thrust; forward thrust
 ## and reverse are unchanged). `boost` as in thrust_of.
 func thrusts_of(components, powered: Dictionary, boost := {}) -> Dictionary:
@@ -188,7 +188,7 @@ func thrusts_of(components, powered: Dictionary, boost := {}) -> Dictionary:
 		if d.get("family", "") != "engine":
 			continue
 		var t := float(d.get("stats", {}).get("thrust", 0.0)) * maxf(0.0, float(boost.get(uid, 1.0)))
-		var part := split(t, -Vector2(Mounts.outward(int(components.instances[uid]["rot"]))))
+		var part := split(t, -Mounts.dir_of(components.instances[uid]))  # an engine on a slope pushes along its true direction
 		fwd += part.y
 		if part.x > 0.0:
 			right += part.x

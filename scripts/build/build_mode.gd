@@ -91,6 +91,7 @@ var shape_mirror := false  ## and whether it is mirrored (Shift+R)
 var show_o2 := false
 var show_power := false
 var hover := Vector2i(-1, -1)
+var hover_pt := Vector2.INF  ## the pointer in grid coordinates (a hull mount snaps to a sloped face near it); only used while it is inside `hover`
 var message := ""
 var dragging := false
 var drag_button := 0
@@ -209,14 +210,25 @@ func _cell_of(e: InputEventMouse) -> Vector2i:
 	return cell_at((make_input_local(e) as InputEventMouse).position)
 
 
+func _point_of(e: InputEventMouse) -> Vector2:
+	return ((make_input_local(e) as InputEventMouse).position - _origin()) / CELL
+
+
+## The pointer in grid coordinates: the exact point while it is inside the hovered cell, else that cell's middle.
+func pointer() -> Vector2:
+	return hover_pt if hover_pt != Vector2.INF and Vector2i(hover_pt.floor()) == hover else Vector2(hover) + Vector2(0.5, 0.5)
+
+
 func _unhandled_input(e: InputEvent) -> void:
 	if ship == null or combat or (picker != null and picker.visible):
 		return
 	if e is InputEventMouseMotion:
 		hover = _cell_of(e)
+		hover_pt = _point_of(e)
 		_extend_path()
 	elif e is InputEventMouseButton:
 		hover = _cell_of(e)
+		hover_pt = _point_of(e)
 		if e.pressed:
 			match e.button_index:
 				MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT:
@@ -541,7 +553,7 @@ func _plan() -> Dictionary:
 				return session.plan_component_removal(hover)
 			if sel_component == "":
 				return {"changes": [], "error": "no systems in cargo"}
-			return session.plan_component(sel_component, hover, rot)
+			return session.plan_component(sel_component, hover, rot, pointer())
 		Group.CABLES:
 			return session.plan_cables(mode, remove, start, hover, path)
 		Group.BELTS:

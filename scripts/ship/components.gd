@@ -9,15 +9,17 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 ## Save format. 2 adds each instance's hp, heat and status; 3 adds the outside half of a hull mount
 ## (`out`, `out_hp`) and the wrecks; versions 1 and 2 still load (full hp, cold, ok; a weapon or engine
 ## with no `out` is mounted through the wall on its outward side if it can be, else back to the cargo). 4 adds the
-## optional contents of an ammo rack (`ammo`, `n`) and the units a gun has loaded from a belt (`loaded`).
-const VERSION := 4
+## optional contents of an ammo rack (`ammo`, `n`) and the units a gun has loaded from a belt (`loaded`). 5 adds the
+## mounts on a slope: `angle` (degrees clockwise from up; absent when it is the quarter turn `rot` x 90), `at` (the base
+## middle of the outside half on the face) and the cells it holds, `ocells` (empty space under the barrel) and `link`.
+const VERSION := 5
 const MIN_VERSION := 1
 ## An instance's status: ok, or one of the ways it can be out of action.
 const STATUSES: Array[String] = ["ok", "overheated", "malfunction", "disabled"]
 
 var by_id := {}
 var order: Array[String] = []
-var instances := {}  # uid -> {uid, id, anchor, rot, cells, hp, heat, status, out_anchor, out_cells, link, out_hp}
+var instances := {}  # uid -> {uid, id, anchor, rot, angle, cells, hp, heat, status, out_anchor, out_at, out_cells, link, out_hp}; out_at only means something on a slope (Mounts.is_angled)
 var wrecks: Array = []  # [{id, cells}]: parts shot to pieces, their debris on the floor until a crew member clears it
 var returned: Array[Dictionary] = []  # what the last load_dict() could not mount: [{id, text}] (the caller returns them to the cargo)
 var _cell_uid := {}  # Vector2i -> uid of the component covering it (inside halves)
@@ -121,6 +123,32 @@ func can_place_mount(grid, id: String, out: Vector2i, rot: int) -> String:
 	if not by_id.has(id):
 		return "unknown component"
 	return plan_mount(grid, id, out, rot)["why"]
+
+
+## Where mount `id` can go when the pointer is at `point` (grid coordinates) and R has it turned `rot`: plan_mount() with its
+## outside half's top-left on `out`, unless that fails and a sloped hull face is near `point`; then Mounts.plan_slope() against
+## that face (the plan has `angle`, `at`). Always has why, rot and out.
+func plan_mount_at(grid, id: String, out: Vector2i, rot: int, point := Vector2.INF) -> Dictionary:
+	var plan := plan_mount(grid, id, out, rot)
+	if plan["why"] == "" or not is_mount(id):
+		plan.merge({"rot": posmod(rot, 4), "out": out}, true)
+		return plan
+	var slope := Mounts.plan_slope(grid, self, by_id[id], Vector2(out) + Vector2(0.5, 0.5) if point == Vector2.INF else point)
+	if not slope["angled"]:
+		plan.merge({"rot": posmod(rot, 4), "out": out}, true)
+		return plan
+	return slope
+
+
+## Place mount `id` as `plan` (plan_mount_at(); a straight plan needs the `rot` and `out` it was made with). Returns its new
+## uid, or -1 when the plan is refused.
+func place_planned(id: String, plan: Dictionary) -> int:
+	if plan.get("why", "x") != "":
+		return -1
+	var uid := _next_uid
+	_next_uid += 1
+	_add(uid, id, plan["anchor"], int(plan["rot"]), plan["out"], plan)
+	return uid
 
 
 ## Place mount `id`, outside half's top-left on `out`. Returns its new uid, or -1 when it cannot go there.
@@ -264,6 +292,7 @@ func to_dict() -> Dictionary:
 		if not i["out_cells"].is_empty():
 			rec["out"] = [i["out_anchor"].x, i["out_anchor"].y]
 			rec["out_hp"] = i["out_hp"]
+			rec.merge(slope_record(i).get("slope", {}))
 		if int(i.get("n", 0)) > 0 or str(i.get("ammo", "")) != "":  # an ammo rack's contents
 			rec["ammo"] = str(i.get("ammo", ""))
 			rec["n"] = int(i.get("n", 0))
@@ -304,7 +333,9 @@ func load_dict(d: Dictionary, grid = null) -> String:
 		if is_mount(id):
 			if i.get("out") is Array and i["out"].size() == 2:
 				out = Vector2i(int(i["out"][0]), int(i["out"][1]))
-				plan = Mounts.cells_of(by_id[id], anchor, rot, out)
+				plan = _slope_plan(i, anchor, rot)
+				if plan.is_empty():
+					plan = Mounts.cells_of(by_id[id], anchor, rot, out)
 				if plan.is_empty():  # the halves do not line up: as if it had no outside half
 					out = Mounts.NONE
 			if plan.is_empty() and grid != null:
@@ -326,6 +357,34 @@ func load_dict(d: Dictionary, grid = null) -> String:
 	return ""
 
 
+## {"slope": the save keys (angle, at, ocells, link) of a mount on a slope}; {} for any other part.
+func slope_record(inst: Dictionary) -> Dictionary:
+	if not Mounts.is_angled(inst) or inst["out_cells"].is_empty():
+		return {}
+	return {"slope": {"angle": inst["angle"], "at": [inst["out_at"].x, inst["out_at"].y],
+		"ocells": inst["out_cells"].map(func(c): return [c.x, c.y]), "link": inst["link"].map(func(c): return [c.x, c.y])}}
+
+
+## The plan of a mount saved on a slope (`angle`, `at`, `ocells`, `link` of record `i`), or {} for any other record.
+func _slope_plan(i: Dictionary, anchor: Vector2i, rot: int) -> Dictionary:
+	var at = i.get("at")
+	var ocells = i.get("ocells")
+	var link = i.get("link")
+	if not ((i.get("angle") is float or i.get("angle") is int) and at is Array and at.size() == 2 and ocells is Array and not ocells.is_empty() and link is Array):
+		return {}
+	var out_cells: Array[Vector2i] = []
+	var wall: Array[Vector2i] = []
+	for pair in [[ocells, out_cells], [link, wall]]:
+		for p in pair[0]:
+			if not (p is Array and p.size() == 2):
+				return {}
+			pair[1].append(Vector2i(int(p[0]), int(p[1])))
+	var plan := {"anchor": anchor, "angle": float(i["angle"]), "at": Vector2(float(at[0]), float(at[1])), "out_cells": out_cells, "link": wall}
+	if not Mounts.is_angled({"angle": plan["angle"], "rot": rot}):
+		return {}
+	return plan
+
+
 ## An old inside-only mount at `anchor`, rotation `rot`: where it can be mounted (Mounts.from_inside),
 ## trying the rotation it was saved with and then the opposite one (the same inside rectangle, the
 ## other wall). The plan() entries plus rot and out, or {}.
@@ -341,14 +400,19 @@ func _mount_old(grid, id: String, anchor: Vector2i, rot: int) -> Dictionary:
 ## Add instance `uid`. `plan` (Mounts.plan / cells_of) gives a mount its outside half and link.
 func _add(uid: int, id: String, anchor: Vector2i, rot: int, out := Mounts.NONE, plan := {}) -> void:
 	var cells := footprint(id, anchor, rot)
-	var inst := {"uid": uid, "id": id, "anchor": anchor, "rot": posmod(rot, 4), "cells": cells,
+	var inst := {"uid": uid, "id": id, "anchor": anchor, "rot": posmod(rot, 4), "angle": posmod(rot, 4) * 90.0, "cells": cells,
 		"hp": Stats.max_hp(by_id[id]), "heat": 0.0, "status": "ok",
-		"out_anchor": Mounts.NONE, "out_cells": [], "link": [], "out_hp": 0}
+		"out_anchor": Mounts.NONE, "out_at": Vector2.ZERO, "out_cells": [], "link": [], "out_hp": 0}
 	if not plan.is_empty():
 		inst["out_anchor"] = out
 		inst["out_cells"] = plan["out_cells"]
 		inst["link"] = plan["link"]
 		inst["out_hp"] = outside_hp_max(id)
+		if plan.has("angle"):  # on a slope: the outside half is turned to the face
+			inst["angle"] = float(plan["angle"])
+			inst["out_at"] = plan["at"]
+			if not Mounts.is_angled(inst):
+				inst["angle"] = posmod(rot, 4) * 90.0
 	instances[uid] = inst
 	for c in cells:
 		_cell_uid[c] = uid
