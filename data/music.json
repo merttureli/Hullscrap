@@ -8,7 +8,9 @@
    "explore_a.ogg",
    "explore_b.ogg"
   ],
-  "combat": [],
+  "combat": [
+   "combat.ogg"
+  ],
   "hollow": [],
   "build": []
  },
@@ -16,6 +18,7 @@
  "volumes": {
   "menu.ogg": 0.0,
   "explore_a.ogg": 0.0,
-  "explore_b.ogg": 0.0
+  "explore_b.ogg": 0.0,
+  "combat.ogg": 0.0
  }
 }

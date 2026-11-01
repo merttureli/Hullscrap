@@ -1,4 +1,29 @@
 {
+ "combat": {
+  "bands_pct": [
+   28.8,
+   32.7,
+   29.7,
+   5.4,
+   3.5
+  ],
+  "bpm": 126.0,
+  "bytes": 2391050,
+  "peak_db": -1.48,
+  "rms_db": -15.02,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.84447,
+   "rms_first_db": -16.6,
+   "rms_last_db": -15.1,
+   "seam_step": 0.03606,
+   "typ_step_p999": 0.331
+  },
+  "seconds": 121.9,
+  "target_rms_db": -15.0,
+  "title": "Broadside",
+  "true_peak_db": -1.31
+ },
  "explore_a": {
   "bands_pct": [
    26.6,

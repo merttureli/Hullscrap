@@ -234,16 +234,20 @@ def rms_db(x):
     return 10 * np.log10(float(np.mean(x.astype(np.float64) ** 2)) + 1e-20)
 
 
-def master(x, target_rms_db, ceil_db=-1.55):
+def master(x, target_rms_db, ceil_db=-1.8):
     """High-pass the DC, bus-compress, set the loudness, then soft-limit under the ceiling."""
     x = filt(x, hp=24, order=2)
     x = compress(x)
-    ceil = db(ceil_db)
-    g = db(target_rms_db) / np.sqrt(np.mean(x.astype(np.float64) ** 2))
-    y = x
-    for _ in range(5):
-        y = softclip(x * np.float32(g), ceil)
-        g *= db(target_rms_db - rms_db(y))
+    g0 = db(target_rms_db) / np.sqrt(np.mean(x.astype(np.float64) ** 2))
+    for _ in range(3):   # soft-limit under the ceiling, lower the ceiling if inter-sample peaks still go over -1.35 dBTP
+        ceil, g = db(ceil_db), g0
+        for _ in range(5):
+            y = softclip(x * np.float32(g), ceil)
+            g *= db(target_rms_db - rms_db(y))
+        over = 20 * np.log10(true_peak(y)) + 1.35
+        if over <= 0:
+            break
+        ceil_db -= over + 0.1
     return y.astype(np.float32)
 
 
