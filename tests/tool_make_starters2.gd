@@ -208,7 +208,7 @@ func _lumen_skiff() -> Dictionary:
 		"file": "lumen_skiff", "name": "Lumen Skiff Afterimage",
 		"hangar": {"group": "Lumen", "layout": "B", "unlock": "ship_lumen_skiff"},
 		"crew": SOLDIER,
-		"blurb": "A faceted skiff that is always a moment behind its own light. An ion Siren that locks doors shut, a Prism Core that runs hot, and a Neon Lattice shield.",
+		"blurb": "Built to study a gate and left behind when the gate stopped answering. A faceted skiff always a moment behind its own light: an ion Siren that locks doors shut, a Prism Core that runs hot, a Neon Lattice shield.",
 		"frame": _sym(18, [[0, 6], [6, 12], [10, 12], [16, 18], [28, 18], [34, 12], [40, 6]]),
 		"outline": _sym(CX, [[0, 3], [3, 6], [8, 6], [12, 10], [14, 10], [16, 8], [20, 8], [21, 6]]),
 		"plate": "neon_lattice",
@@ -275,7 +275,7 @@ func _race_ship(file: String, name: String, group: String, layout: String, how_c
 func _human_ring_runner() -> Dictionary:
 	var k := _spine({"gun": "laser_mk1", "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2", "engine_mk2"], "kit": _p("human_crew_quarters_deluxe", "medbay"), "kit_at": [CX - 5, 8, 0]})
 	return _race_ship("human_ring_runner", "Ring Runner", "Human", "A", SOLDIER,
-		"The balanced ship of the Haldane Ring: swept wings, a titanium skin, a laser, two good engines and nothing to apologise for. Deluxe quarters (a medbay with a view) and a spare Reactor Plus in the hold.",
+		"Raced by a Haldane Ring captain who swore there was nothing to apologise for, and never did. Swept wings, titanium skin, a laser, two good engines, deluxe quarters (a medbay with a view), a spare Reactor Plus in the hold.",
 		k, _sym(CX, [[0, 4], [4, 6], [8, 6], [11, 9], [14, 9], [17, 6], [20, 6], [21, 5]]),
 		_sym(21, [[0, 5], [16, 21], [30, 21], [30, 10], [46, 10]]), "titanium_alloy",
 		_cargo({"titanium": 40}, [_p("human_reactor_plus", "reactor_mk1")]))
@@ -285,7 +285,7 @@ func _human_ring_runner() -> Dictionary:
 func _human_formal_complaint() -> Dictionary:
 	var k := _spine({"gun": _p("human_volley_rack", "artemis_mk1"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2"], "kit": "shield_mk1"})
 	return _race_ship("human_formal_complaint", "Formal Complaint", "Human", "B", SOLDIER,
-		"Filed in triplicate and fired in salvos: a Volley Rack on a pylon-shouldered hull, ten missiles in the rack and a Flak Screen in the hold for the replies.",
+		"Filed in triplicate and fired in salvos by a Haldane Ring clerk tired of waiting for a reply. A Volley Rack on a pylon-shouldered hull, ten missiles in the rack and a Flak Screen in the hold for the replies.",
 		k, _sym(CX, [[0, 3], [2, 5], [5, 5], [5, 9], [9, 9], [12, 6], [20, 6], [21, 5]]),
 		_sym(18, [[0, 18], [12, 18], [36, 6], [46, 6]]), "titanium_alloy",
 		_cargo({"missile": 10}, [_p("human_flak_screen", "laser_turret_mk1")]))
@@ -295,7 +295,7 @@ func _human_formal_complaint() -> Dictionary:
 func _basalt_deepcut() -> Dictionary:
 	var k := _spine({"gun": _p("basalt_magma_spitter", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2"], "kit": "shield_mk1"})
 	return _race_ship("basalt_deepcut", "Deepcut", "Basalt", "A", SOLDIER,
-		"A quarry block with an engine: heavy plating, a Vacuum Forge in the hold that runs best with no air in the room and a Magma Spitter that keeps eating. The crew do not mind the vacuum. The Soldier does.",
+		"A quarry block a Basalt crew cut loose and bolted an engine to. Heavy plating, a Vacuum Forge that runs best with no air, a Magma Spitter that keeps eating. The crew do not mind the vacuum. The Soldier does.",
 		k, _sym(CX, [[0, 4], [4, 8], [8, 8], [8, 10], [16, 10], [16, 8], [19, 8], [21, 6]]),
 		_sym(22, [[0, 6], [16, 22], [36, 22], [52, 6]]), "heavy_armor",
 		_cargo({"titanium": 40, "silicon": 20}, [_p("basalt_vacuum_forge", "reactor_mk1"), _p("basalt_stonehide_bay", "inertial_dampener")]),
@@ -306,7 +306,7 @@ func _basalt_deepcut() -> Dictionary:
 func _basalt_long_quiet() -> Dictionary:
 	var k := _spine({"gun": _p("basalt_quarry_driver", "laser_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2"], "kit": "medbay"})
 	return _race_ship("basalt_long_quiet", "Long Quiet", "Basalt", "B", SOLDIER,
-		"Nobody has ever hurried it. A stepped monolith of heavy armour, a Quarry Driver that fires one slug that pierces three walls, a small engine, a medbay and a long silence.",
+		"The last ship of a gate-builders' crew, parked forty years because nobody wanted to be first to talk. Stepped heavy armour, a Quarry Driver that pierces three walls, a small engine, a medbay and a long silence.",
 		k, _sym(CX, [[0, 3], [2, 5], [4, 5], [4, 7], [8, 7], [8, 9], [14, 9], [16, 7], [20, 7], [21, 6]]),
 		_sym(20, [[0, 8], [6, 8], [6, 14], [14, 14], [14, 20], [38, 20], [38, 14], [44, 14], [44, 8], [50, 8]]), "heavy_armor",
 		_cargo({"titanium": 60}, [_p("basalt_stonehide_bay", "inertial_dampener")]),
@@ -318,7 +318,7 @@ func _emberkin_ember_kite() -> Dictionary:
 	var k := _spine({"gun": _p("emberkin_pyre_lance", "heat_lance_neon"), "reactor": "reactor_neon_mk1", "o2": "oxygen_gen", "engines": [_p("emberkin_pyre_drive", "afterburner")],
 		"extra": [["radiator", CX - 5, 15], ["radiator", CX + 3, 15]], "kit": _p("emberkin_hearth_shield", "shield_neon_mk1"), "kit_at": [CX - 5, 17, 1]})  # (the Hearth Shield warms itself: it goes in the engine room, with the radiators)
 	return _race_ship("emberkin_ember_kite", "Ember Kite", "Emberkin", "A", SOLDIER,
-		"A kite with a furnace for a heart: a Prism Core, a Pyre Lance that sets fires where it sweeps, an engine that burns its own room and two radiators. The crew call it cosy.",
+		"An Emberkin pilot's pride, flown hot until the pilot retired somewhere cold and sulky. A Prism Core, a Pyre Lance that sets fires where it sweeps, an engine that burns its own room, two radiators. The crew call it cosy.",
 		k, _sym(CX, [[0, 3], [2, 5], [3, 6], [7, 6], [11, 10], [15, 10], [19, 6], [20, 6], [21, 5]]),
 		_sym(22, [[0, 4], [10, 14], [16, 14], [24, 22], [32, 22], [42, 12]]), "ablative_plating",
 		_cargo({"silicon": 30, "crystal": 8}, ["afterburner"]))
@@ -328,7 +328,7 @@ func _emberkin_ember_kite() -> Dictionary:
 func _emberkin_flashpan() -> Dictionary:
 	var k := _spine({"gun": _p("emberkin_cinder_mortar", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk1", "engine_mk1"], "kit": "medbay"})
 	return _race_ship("emberkin_flashpan", "Flashpan", "Emberkin", "B", SOLDIER,
-		"Round-shouldered and quick to catch: a Cinder Mortar that lobs fire, two engines and a hull that does not mind it. The Emberkin crew stand in the flames and call for more.",
+		"Won in a foundry race by an Emberkin who spent the prize on fuel, and the fuel on a fire. A Cinder Mortar that lobs fire, two engines, a hull that does not mind it. The crew stand in the flames and call for more.",
 		k, _sym(CX, [["arc", 4, 2, 270, 360], ["arc", 6, 6, 270, 360], ["arc", 6, 17, 0, 90], ["arc", 4, 19, 0, 90]]),
 		_sym(18, [[0, 12], [6, 18], [28, 18], [34, 12], [34, 4], [52, 4]]), "ablative_plating",
 		_cargo({"polymer": 50, "heat_suit": 2}, ["radiator"]), {"at": [10, 8]})
@@ -338,7 +338,7 @@ func _emberkin_flashpan() -> Dictionary:
 func _fenn_sold_twice() -> Dictionary:
 	var k := _spine({"gun": _p("fenn_twitch_cannon", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": [_p("fenn_haggle_engine", "engine_mk2")], "kit": "medbay"})
 	return _race_ship("fenn_sold_twice", "Sold Twice", "Fenn", "A", SOLDIER,
-		"Quick, light and sold twice before it left the dock: a Twitch Cannon that fires fast and sulks, a Haggle Engine, a Jury Reactor in the hold. The Fenn crew mend it faster than it breaks.",
+		"Sold twice before it left the dock, to two Fenn who are still arguing about it. Quick and light: a Twitch Cannon that fires fast and sulks, a Haggle Engine, a Jury Reactor in the hold. The crew mend it faster than it breaks.",
 		k, _sym(CX, [[0, 2], [0, 4], [-5, 4], [-6, 5], [-5, 6], [4, 6], [20, 6], [21, 5]]),
 		_sym(18, [[0, 4], [8, 12], [14, 12], [20, 18], [30, 18], [40, 8], [46, 8]]), "whipple_spacer",
 		_cargo({"silicon": 20}, [_p("fenn_jury_reactor", "reactor_mk1"), _p("fenn_quickfix_bay", "inertial_dampener")]),
@@ -349,7 +349,7 @@ func _fenn_sold_twice() -> Dictionary:
 func _fenn_closing_sale() -> Dictionary:
 	var k := _spine({"gun": _p("fenn_market_missile", "artemis_mk1"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk1", "engine_mk1"], "kit": "medbay"})
 	return _race_ship("fenn_closing_sale", "Closing Sale", "Fenn", "B", SOLDIER,
-		"Everything must go, preferably at someone else. A wide canopy for a bow, a Market Missile that runs on scrap (a quarter of them duds), and a salvage intake in the hold to restock from the wrecks.",
+		"A Fenn trader's last ship: the stock ran out, the lease ran out, the canopy stayed. A Market Missile that runs on scrap (a quarter are duds), a salvage intake in the hold. Everything must go, preferably at someone else.",
 		k, _sym(CX, [[0, 8], [3, 8], [5, 6], [20, 6], [21, 5]]),
 		_sym(22, [[0, 14], [6, 14], [10, 18], [20, 18], [24, 22], [34, 22], [42, 14], [46, 14]]), "titanium_alloy",
 		_cargo({}, ["intake_mk1", _p("fenn_jury_reactor", "reactor_mk1")]))
@@ -359,7 +359,7 @@ func _fenn_closing_sale() -> Dictionary:
 func _kett_ninefold_cell() -> Dictionary:
 	var k := _spine({"gun": _p("kett_chitin_thrower", "pulse_mk1"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2"], "extra": [[_p("kett_brood_hold", "radiator"), CX - 5, 15]], "kit": "shield_mk1"})
 	return _race_ship("kett_ninefold_cell", "Ninefold Cell", "Kett", "A", SOLDIER,
-		"One cell of the hive: ringed like a body, a Chitin Thrower that wants two Kett on it and a Brood Hold in the engine room where they work together. Alone, a Kett sulks.",
+		"One cell of a hive cut off in the Snap that kept building the same ship. Ringed like a body, a Chitin Thrower that wants two Kett on it, a Brood Hold in the engine room where they work together. Alone, a Kett sulks.",
 		k, _sym(CX, [[0, 4], [4, 6], [6, 6], [6, 7], [8, 7], [8, 6], [10, 6], [10, 7], [12, 7], [12, 6], [14, 6], [14, 7], [16, 7], [16, 6], [20, 6], [21, 5]]),
 		_sym(20, [[0, 6], [6, 12], [10, 12], [14, 16], [18, 16], [22, 20], [30, 20], [34, 16], [38, 16], [42, 12], [46, 12]]), "scrap_plate",
 		_cargo({"polymer": 50}, ["engine_mk1"]))
@@ -369,7 +369,7 @@ func _kett_ninefold_cell() -> Dictionary:
 func _kett_picket_nest() -> Dictionary:
 	var k := _spine({"gun": _p("kett_hive_swarm_launcher", "artemis_mk1"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2"], "kit": "medbay"})
 	return _race_ship("kett_picket_nest", "Picket Nest", "Kett", "B", SOLDIER,
-		"A nest that goes visiting: a Hive Swarm Launcher, a medbay, a Breach Harpoon in the hold to latch on, and room for the five hands on the rivet guns it will need.",
+		"A Kett nest that went visiting and never quite went home. A Hive Swarm Launcher, a medbay, a Breach Harpoon in the hold to latch on, and room for the five hands on the rivet guns it will need.",
 		k, _sym(CX, [[0, 4], [4, 6], [11, 6], ["arc", 7, 13, 270, 360], ["arc", 7, 18, 0, 90], [20, 6], [21, 5]]),
 		_sym(20, [[0, 8], [4, 12], [8, 12], [12, 16], [16, 16], [20, 20], [32, 20], [38, 14], [44, 14]]), "scrap_plate",
 		_cargo({"missile": 8}, ["breach_harpoon"]))
@@ -389,7 +389,7 @@ func _mire_wet_watch() -> Dictionary:
 func _mire_geyser_season() -> Dictionary:
 	var k := _spine({"gun": _p("mire_bog_mortar", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk1", "engine_mk1"], "kit": "medbay"})
 	return _race_ship("mire_geyser_season", "Geyser Season", "Mire", "B", SOLDIER,
-		"A siege ship with a boiler on each shoulder: a Bog Mortar whose slurry eats the wall it lands on and a Mist Projector in the hold to slow what is left. Wet, loud and quite safe from fire.",
+		"Raised by Mire dockhands tired of other people's fires, who built a siege ship round the boilers. A Bog Mortar whose slurry eats the wall it lands on, a Mist Projector in the hold. Wet, loud and quite safe from fire.",
 		k, _sym(CX, [["arc", 4, 2, 270, 360], [4, 6], ["arc", 7, 6, 270, 360], ["arc", 7, 13, 0, 90], [15, 6], [20, 6], [21, 5]]),
 		_sym(20, [[0, 6], [10, 16], [14, 16], [18, 20], [30, 20], [34, 16], [38, 16], [48, 6]]), "titanium_alloy",
 		_cargo({"polymer": 50}, [_p("mire_mist_projector", "laser_turret_mk1")]))
@@ -401,7 +401,7 @@ func _sporeling_first_bloom() -> Dictionary:
 	var k := _spine({"gun": _p("sporeling_spore_cannon", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "sporeling_garden_bay" if garden else "oxygen_gen", "o2_rot": 0 if garden else 1,
 		"engines": ["engine_mk2"], "bh": 6, "kit": "medbay"})
 	return _race_ship("sporeling_first_bloom", "First Bloom", "Sporeling", "A", SOLDIER,
-		"A mushroom with an engine: a round cap for a bridge on a narrow stalk, a Garden Bay, a Spore Cannon that thins the enemy's air and a Bloom Reactor in the hold that eats its room's (the crew make more).",
+		"Grown from a seed in a derelict's hold, given an engine out of politeness. A cap on a stalk, a Garden Bay, a Spore Cannon that thins the enemy's air, a Bloom Reactor in the hold that eats its room's (the crew make more).",
 		k, _sym(CX, [["arc", 7, 2, 270, 360], ["arc", 7, 5, 0, 90], [7, 6], [20, 6], [21, 5]]),
 		_sym(22, [[0, 10], [12, 22], [16, 22], [22, 16], [32, 16], [38, 22], [44, 22], [50, 16]]), "whipple_spacer",
 		_cargo({"polymer": 80}, [_p("sporeling_bloom_reactor", "reactor_mk1"), _p("sporeling_pollen_turret", "laser_turret_mk1")]))
@@ -412,7 +412,7 @@ func _sporeling_mycelium_wall() -> Dictionary:
 	var garden := Content.has("components", "sporeling_garden_bay")
 	var k := _spine({"gun": _p("sporeling_rot_pod", "artemis_mk1"), "reactor": "reactor_mk2", "o2": "sporeling_garden_bay" if garden else "oxygen_gen", "o2_rot": 0 if garden else 1, "engines": ["engine_mk2"], "kit": _p("sporeling_mycelium_shield", "shield_mk2")})
 	return _race_ship("sporeling_mycelium_wall", "Mycelium Wall", "Sporeling", "B", SOLDIER,
-		"A slab that grows back: a rounded wall of a hull, a Rot Pod that spreads along the wall it hits and a Mycelium Shield that regrows its layers. Patient, damp and hard to shift.",
+		"A wall that took root across a Sporeling hull, and the hull gave in. A rounded slab, a Rot Pod that spreads along the wall it hits, a Mycelium Shield that regrows its layers. Patient, damp and hard to shift.",
 		k, _sym(CX, [["arc", 7, 2, 270, 360], ["arc", 7, 19, 0, 90]]),
 		_sym(26, [[0, 10], [16, 26], [26, 26], [40, 12]]), "whipple_spacer",
 		_cargo({"polymer": 80, "missile": 6}, [_p("sporeling_garden_bay", "oxygen_gen")]),
@@ -435,7 +435,7 @@ func _gauntling_graft_row() -> Dictionary:
 func _gauntling_lamp_post() -> Dictionary:
 	var k := _spine({"gun": _p("gauntling_scrap_shotgun", "pulse_mk1"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2"], "extra": [[_p("gauntling_tesla_picket", "laser_turret_mk1"), "flank"]]})
 	return _race_ship("gauntling_lamp_post", "Lamp Post", "Gauntling", "B", SOLDIER,
-		"A scavenger with a mast and a work lamp: a Scrap Shotgun that jams one volley in seven, a Tesla Picket for when someone is rude about the lamp, and a salvage intake and a Net Mouth in the hold.",
+		"A scavenger's boat with a mast and a work lamp, kept lit through forty years of other people's wrecks. A Scrap Shotgun that jams one volley in seven, a Tesla Picket for the rude, a salvage intake and a Net Mouth in the hold.",
 		k, _sym(CX, [[0, 2], [0, 6], [-8, 6], [-8, 8], [4, 8], [4, 6], [20, 6], [21, 5]], [[0, 4], [4, 6], [20, 6], [21, 5]]),
 		_sym(20, [[0, 8], [8, 16], [14, 16], [18, 20], [30, 20], [38, 12], [44, 12]]), "scrap_plate",
 		_cargo({}, ["intake_mk1", "net_mouth_scrap"]), {"top": 10})
@@ -446,7 +446,7 @@ func _prismatic_tuning_bell() -> Dictionary:
 	var k := _spine({"gun": _p("prismatic_prism_lens", "heat_lance_neon"), "reactor": "reactor_neon_mk1", "o2": "oxygen_gen", "helm": _p("prismatic_resonance_helm", "helm"), "engines": ["engine_neon_mk2"],
 		"extra": [["radiator", CX - 5, 15], ["radiator", CX + 3, 15]], "kit": _p("prismatic_lattice_shield", "shield_neon_mk1")})
 	return _race_ship("prismatic_tuning_bell", "Tuning Bell", "Prismatic", "A", SOLDIER,
-		"A bell struck once: a faceted hull flaring to the stern, a Prism Lens at full power only with a crystal-born hand on it, a Resonance Helm that evades for a Prismatic and a Song Reactor in the hold.",
+		"A bell struck once, forty years ago, and still ringing. Faceted, flaring to the stern: a Prism Lens at full power only with a crystal-born hand on it, a Resonance Helm that evades for a Prismatic, a Song Reactor in the hold.",
 		k, _sym(CX, [[0, 3], [3, 6], [10, 6], [14, 10], [20, 10], [21, 9]]),
 		_sym(20, [[0, 6], [6, 12], [14, 12], [22, 20], [30, 20], [38, 12], [46, 12]]), "neon_lattice",
 		_cargo({"silicon": 30, "crystal": 10}, [_p("prismatic_song_reactor", "reactor_mk1")]))
@@ -456,7 +456,7 @@ func _prismatic_tuning_bell() -> Dictionary:
 func _prismatic_flat_note() -> Dictionary:
 	var k := _spine({"gun": _p("prismatic_refractor", "heat_lance_neon"), "reactor": "reactor_neon_mk1", "o2": "oxygen_gen", "engines": ["engine_neon_mk2"], "extra": [["radiator", CX - 5, 15], ["radiator", CX + 3, 15]], "kit": "medbay"})
 	return _race_ship("prismatic_flat_note", "Flat Note", "Prismatic", "B", SOLDIER,
-		"A note a little off true: a lozenge of reflective plating, a Refractor that splits its shots on a shield and a medbay for the rest. Brilliant, thin-skinned and fatally afraid of ion.",
+		"A Prismatic ship tuned a half-step flat, and nobody has dared tell the hull. A lozenge of reflective plating, a Refractor that splits its shots on a shield, a medbay for the rest. Brilliant, thin-skinned, afraid of ion.",
 		k, _sym(CX, [[0, 4], [4, 8], [8, 10], [12, 10], [16, 8], [20, 6], [21, 5]]),
 		_sym(20, [[0, 4], [16, 20], [26, 20], [42, 4]]), "reflective_coating",
 		_cargo({"silicon": 40, "crystal": 12, "plasma_cell": 3}, ["radiator"]))
@@ -466,7 +466,7 @@ func _prismatic_flat_note() -> Dictionary:
 func _grundl_second_helping() -> Dictionary:
 	var k := _spine({"gun": _p("grundl_slug_mortar", "pulse_mk2"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk2"], "bh": 5, "lw": 1, "rw": 3, "el": 2, "er": 3, "kit": "medbay"})
 	return _race_ship("grundl_second_helping", "Second Helping", "Grundl", "A", SOLDIER,
-		"A barge with the bow of a warship: a Slug Mortar that throws half the cargo, a medbay, a hold you could live in and Hauler Thrusters crated for the way home.",
+		"A Grundl freight barge refitted for a war nobody declared. The bow of a warship, a Slug Mortar that throws half the cargo, a medbay, a hold you could live in and Hauler Thrusters crated for the way home.",
 		k, _sym(CX, [[0, 5], [2, 7], [4, 7], [4, 9], [19, 9], [21, 7]]),
 		_sym(24, [[0, 10], [10, 20], [14, 20], [18, 24], [34, 24], [38, 20], [42, 20], [52, 10]]), "heavy_armor",
 		_cargo({"titanium": 40}, [_p("grundl_hauler_thrusters", "engine_mk2"), _p("grundl_cargo_deck", "inertial_dampener")]),
@@ -477,7 +477,7 @@ func _grundl_second_helping() -> Dictionary:
 func _grundl_tow_rope() -> Dictionary:
 	var k := _spine({"gun": _p("grundl_grapple_harpoon", "breach_harpoon"), "reactor": "reactor_mk2", "o2": "oxygen_gen", "engines": ["engine_mk1", "engine_mk1"], "kit": "medbay"})
 	return _race_ship("grundl_tow_rope", "Tow Rope", "Grundl", "B", SOLDIER,
-		"A tug with two long tongs for a bow: a Grapple Harpoon that drags the enemy in close and a crew who hit twice as hard in a corridor. It brings the fight to you, slowly.",
+		"A Grundl tug that spent years towing dead ships home and decided the live ones were next. Two long tongs for a bow, a Grapple Harpoon that drags the enemy close, a crew who hit twice as hard in a corridor. Slowly.",
 		k, _sym(CX, [[0, 2], [0, 6], [-6, 6], [-8, 8], [-8, 9], [4, 9], [4, 7], [20, 7], [21, 6]]),
 		_sym(22, [[0, 10], [6, 16], [10, 16], [16, 22], [34, 22], [40, 16], [46, 10]]), "heavy_armor",
 		_cargo({}, [_p("grundl_cargo_deck", "inertial_dampener")]),

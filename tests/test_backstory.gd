@@ -143,3 +143,18 @@ class StubView:
 
 	func bar_visible() -> bool:
 		return true
+
+
+func test_every_starter_blurb_fits_the_hangar_card_and_the_core_three_have_a_history() -> void:
+	var n := 0
+	for d in Content.ships():
+		if not (d["design"] is Dictionary and d["design"].has("hangar")):
+			continue
+		n += 1
+		var blurb := str(d["design"].get("blurb", ""))
+		check(blurb.length() > 60 and blurb.length() <= 230, "%s: a blurb of %d chars (the hangar draws 4 lines)" % [d["id"], blurb.length()])
+	check(n >= 27, "all the pack starters: %d" % n)
+	for id in ["starter_rustbucket", "starter_courier", "starter_prism"]:
+		var blurb := str(Content.entry("ships", id).get("design", {}).get("blurb", ""))
+		check(blurb.length() <= 230, id + ": fits the card")
+		check(blurb.contains("Ma Gantry") or blurb.contains("Concord") or blurb.contains("Lumen"), id + ": says whose it was: " + blurb)
