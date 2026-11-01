@@ -271,7 +271,7 @@ func _draw() -> void:
 		_text(message, p.position + Vector2(PAD, 88.0), 16, BAD if message_bad else GOOD)
 	for col in 3:
 		_draw_column(col, credits)
-	_text("Click: buy or sell one    Right-click: five fuel, or all of an item    Wheel: scroll    Esc / Enter: leave", Vector2(p.position.x + PAD, p.end.y - 14.0), 13, DIM_TEXT)
+	_text("Click: buy or sell one   Right-click: five fuel or all   Wheel: scroll   Esc: leave", Vector2(p.position.x + PAD, p.end.y - 14.0), 13, DIM_TEXT)
 
 
 func _draw_column(col: int, credits: int) -> void:

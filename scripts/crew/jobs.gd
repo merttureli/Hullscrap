@@ -539,7 +539,8 @@ static func _room_airless(ship, room_id: int) -> bool:
 	return room_id >= 0 and ship.atmosphere.pressure_of(room_id) < float(CrewMember.config()["no_air_below"])
 
 
-## The ids of the rooms round `cells`: a cell's own room, else (a wall cell shot open, a doorway) the rooms beside it.
+## The ids of the rooms round `cells`: a cell's own room, else (a wall cell shot open, a doorway) the rooms beside it, and
+## beside the other shot-open cells it joins (the outer layer of a hole through thick armour touches no room itself).
 static func _rooms_of_cells(ship, cells: Array) -> Array:
 	var out := []
 	for c in cells:
@@ -548,10 +549,19 @@ static func _rooms_of_cells(ship, cells: Array) -> Array:
 			if not out.has(r):
 				out.append(r)
 			continue
-		for d in SIDES:
-			var n: int = ship.atmosphere.room_at(c + d)
-			if n >= 0 and not out.has(n):
-				out.append(n)
+		var seen := {c: true}
+		var todo: Array = [c]
+		while not todo.is_empty():
+			var h: Vector2i = todo.pop_back()
+			for d in SIDES:
+				var n: Vector2i = h + d
+				var nr: int = ship.atmosphere.room_at(n)
+				if nr >= 0:
+					if not out.has(nr):
+						out.append(nr)
+				elif ship.grid.breached.has(n) and not seen.has(n):
+					seen[n] = true
+					todo.append(n)
 	return out
 
 

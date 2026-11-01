@@ -80,7 +80,7 @@ func entry() -> Dictionary:
 ## What it says about entry(): palette.gd info(), or {} for nothing.
 func info() -> Dictionary:
 	var e := entry()
-	return Palette.info(e, hud.build.ship, hud.build.rot) if not e.is_empty() else {}
+	return Palette.info(e, hud.build.ship, hud.build.rot, hud.build.held_angle()) if not e.is_empty() else {}
 
 
 ## The blocks top to bottom, wrapped to the card's width: [kind, height, data].
@@ -88,7 +88,7 @@ func blocks() -> Array:
 	var e := entry()
 	if e.is_empty():
 		return [["text", LINE * 2.0, {"lines": ["Pick a part."], "color": UiKit.DIM_TEXT}]]
-	var inf := Palette.info(e, hud.build.ship, hud.build.rot)
+	var inf := Palette.info(e, hud.build.ship, hud.build.rot, hud.build.held_angle())
 	var w := size.x - 2.0 * PAD
 	var out := []
 	var title := UiKit.wrap(inf["title"], w, TITLE, UiKit.bold())

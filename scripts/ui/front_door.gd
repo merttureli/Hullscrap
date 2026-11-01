@@ -113,10 +113,16 @@ func _process(_dt: float) -> void:
 		_craft_seen = craft.visible
 	if combat != null:
 		var fighting: bool = combat.active
-		toast.top = 62.0 if fighting else 48.0  # out of play: under the HUD's top bar
+		toast.top = toast_top(fighting, _map_seen)
 		if fighting and not _fight_seen:
 			_hint("fight")
 		_fight_seen = fighting
+
+
+## Where the hint toast sits (its top, px): under the fight's key hints, under the map's header (a toast at the top bar covered
+## its Hull figure), else under the HUD's top bar.
+static func toast_top(fighting: bool, map_open: bool) -> float:
+	return 62.0 if fighting else (106.0 if map_open else 48.0)
 
 
 # --- screens ----------------------------------------------------------------------------------------------

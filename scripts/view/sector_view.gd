@@ -73,6 +73,7 @@ var _posed := false  # BuildMode and the crew are moved to the ship's place
 var _flash := 0.0
 var _hollow_seen := false  # whether the sector was Hollow at the last look: the HUD tells when it falls
 var _markers: Array = []  # [{rect (screen), id}] of the last HUD frame, for clicks
+var _labels: Array = []  # the label boxes drawn so far this frame (place_label keeps two markers' texts apart)
 var _threats := {}  # POI id -> {n (skulls), t (the clock it was rated at)} for this sector
 var _layer: CanvasLayer
 var _hud: Control
@@ -631,6 +632,7 @@ func _icon(kind: String, at: Vector2, size: float, mod := Color.WHITE, canvas: C
 
 func _draw_hud() -> void:
 	_markers = []
+	_labels = []
 	if _sector == null or not _layer.visible or not is_inside_tree():
 		return
 	var vp := _hud.size
@@ -714,7 +716,8 @@ func _draw_marker(ct: Dictionary, xf: Transform2D, centre: Vector2, vp: Vector2)
 	_icon(kind, at, ICON, Color(1, 1, 1, alpha), _hud)
 	var label := "%s  %s" % [contact_name(ct), dist_text(float(ct["distance"]))]
 	var tw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-	var tp := Vector2(clampf(at.x - tw / 2.0, 4.0, vp.x - tw - 4.0), at.y + ICON * 0.5 + 14.0)
+	var tp := place_label(at, tw, vp, _labels)
+	_labels.append(Rect2(tp + Vector2(0.0, -12.0), Vector2(tw, 16.0)))
 	_hud.draw_string_outline(font, tp, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color(0, 0, 0, 0.9 * alpha))
 	_hud.draw_string(font, tp, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(CYAN if course else TEXT, alpha))
 	var rect := Rect2(at - Vector2(ICON, ICON) * 0.6, Vector2(ICON, ICON) * 1.2).merge(Rect2(tp + Vector2(0.0, -12.0), Vector2(tw, 16.0)))
@@ -724,6 +727,19 @@ func _draw_marker(ct: Dictionary, xf: Transform2D, centre: Vector2, vp: Vector2)
 		_draw_skulls(row, skulls, alpha)
 		rect = rect.merge(Rect2(row + Vector2(0.0, -8.0), Vector2(SKULL_STEP * 5.0 + 24.0, 16.0)))
 	_markers.append({"rect": rect, "id": poi["id"]})
+
+
+## Where the text of a marker at `at` goes (the left end of its baseline): under its icon, else above it, else a line lower or higher, so
+## that markers close together on a screen edge do not print their labels over each other. `taken`: the label boxes drawn so far.
+static func place_label(at: Vector2, tw: float, vp: Vector2, taken: Array) -> Vector2:
+	var x := clampf(at.x - tw / 2.0, 4.0, vp.x - tw - 4.0)
+	var base := at.y + ICON * 0.5 + 14.0
+	for dy in [0.0, -(ICON + 18.0), 15.0, -(ICON + 33.0)]:
+		var tp := Vector2(x, base + dy)
+		var box := Rect2(tp + Vector2(0.0, -12.0), Vector2(tw, 16.0))
+		if tp.y <= vp.y - 4.0 and box.position.y >= 0.0 and not taken.any(func(r): return r.intersects(box)):
+			return tp
+	return Vector2(x, base)
 
 
 ## `n` of 5 small skulls in a row from `at` (the row's left middle) and "n/5" after them: lit ones in the band's colour

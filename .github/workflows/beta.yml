@@ -25,7 +25,7 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates/4.6.3.stable
           unzip -q tpl.tpz -d tpl && mv tpl/templates/* ~/.local/share/godot/export_templates/4.6.3.stable/ && rm -rf tpl tpl.tpz
       - name: Version label
-        run: echo "Beta 2 $(git rev-parse --short HEAD)" > version.txt
+        run: echo "Beta 3 $(git rev-parse --short HEAD)" > version.txt
       - name: Import
         run: ./godot --headless --path . --import
       - name: Export Windows, Linux and macOS

@@ -366,6 +366,14 @@ func tool_key() -> String:
 	return "piece:%s:%s" % [wall_piece, selected] if _shaped_wall() else "tile:" + selected
 
 
+## The degrees of the sloped hull face the mount in hand would snap to under the pointer, -1 when it is not over one (or has no mount).
+func held_angle() -> float:
+	if not build_on or group != Group.SYSTEMS or sel_component == "" or not ship.components.is_mount(sel_component):
+		return -1.0
+	var plan: Dictionary = ship.components.plan_mount_at(grid, sel_component, hover, rot, pointer())
+	return float(plan["angle"]) if plan.has("angle") else -1.0
+
+
 ## The palette card of the tool in hand ({} with no system to place).
 func selected_entry() -> Dictionary:
 	match group:

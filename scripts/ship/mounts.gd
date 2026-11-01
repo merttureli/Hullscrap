@@ -121,7 +121,7 @@ static func plan(grid, comps, def: Dictionary, out: Vector2i, rot: int) -> Dicti
 	while depth < MAX_DEPTH and layer(outside, rot, depth).all(func(c): return flat_wall(grid, c)):
 		depth += 1
 	if depth == 0:
-		res["why"] = "needs a flat wall to mount through"
+		res["why"] = "needs an outer wall or a slope to mount through"
 		return res
 	var lay := layout(def, out, rot, depth)
 	var inside := rect_cells(lay["inside"])
@@ -155,7 +155,7 @@ static func from_inside(grid, comps, def: Dictionary, anchor: Vector2i, rot: int
 		_:
 			out = Vector2i(anchor.x - depth - osz.x, base.y)
 	if depth == 0:
-		return {"why": "needs a flat wall to mount through", "out": out}
+		return {"why": "needs an outer wall or a slope to mount through", "out": out}
 	var own := {}
 	for c in rect_cells(Rect2i(anchor, isz)):
 		own[c] = true
