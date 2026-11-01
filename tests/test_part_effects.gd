@@ -806,8 +806,9 @@ func test_a_fenn_repairs_a_self_damaging_or_unreliable_part_faster() -> void:
 			jobs.work(ship, m, job, 0.1)
 			t += 0.1
 		seconds[species] = t
-	near(seconds["human"], 5.0, "a human mends it in the job's 5 s", 0.15)
-	near(seconds["fenn"], 3.0, "a Fenn in 3 s (x1/0.6)", 0.15)
+	var part := float(Jobs.jcfg()["repair_component"]["seconds"])  # data/crew.json: 12 s
+	near(seconds["human"], part, "a human mends it in the job's time", 0.15)
+	near(seconds["fenn"], part * 0.6, "a Fenn in 0.6 of it (x1/0.6)", 0.15)
 
 
 func test_a_gauntling_is_not_shocked_by_its_own_reactor_and_a_mixed_crew_is() -> void:

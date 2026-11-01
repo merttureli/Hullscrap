@@ -267,9 +267,10 @@ func test_work_mult_scales_repair_breach_and_extinguish() -> void:
 		ship.crew.append(_person("A", species, 13, 10))
 		var jobs := Jobs.new()
 		times[species] = _seconds_until(ship, jobs, func(): return inst["status"] == "ok")
-	near(times["human"], 5.0, "a human repair takes 5 s", 0.15)
-	near(times["gauntling"], 4.0, "a Gauntling (tinkerer, time x0.8): 4 s", 0.15)
-	near(times["grundl"], 6.5, "a Grundl (clumsy, time x1.3): 6.5 s", 0.15)
+	var part := float(Jobs.jcfg()["repair_component"]["seconds"])  # data/crew.json: 12 s
+	near(times["human"], part, "a human repair takes the job's time", 0.15)
+	near(times["gauntling"], part * 0.8, "a Gauntling (tinkerer, time x0.8)", 0.15)
+	near(times["grundl"], part * 1.3, "a Grundl (clumsy, time x1.3)", 0.15)
 	var seal := {}
 	for species in ["human", "gauntling", "grundl"]:
 		var ship := Fixture.room_ship()
@@ -277,9 +278,10 @@ func test_work_mult_scales_repair_breach_and_extinguish() -> void:
 		ship.mark_dirty()
 		ship.crew.append(_person("A", species, 14, 9))
 		seal[species] = _seconds_until(ship, Jobs.new(), func(): return ship.grid.breached.is_empty())
-	near(seal["human"], 6.0, "a breach takes a human 6 s", 0.15)
-	near(seal["gauntling"], 4.8, "a Gauntling 4.8 s", 0.15)
-	near(seal["grundl"], 7.8, "a Grundl 7.8 s", 0.15)
+	var breach := float(Jobs.jcfg()["repair_breach"]["seconds"])  # 14 s
+	near(seal["human"], breach, "a breach takes a human the job's time", 0.15)
+	near(seal["gauntling"], breach * 0.8, "a Gauntling x0.8", 0.15)
+	near(seal["grundl"], breach * 1.3, "a Grundl x1.3", 0.15)
 	var left := {}
 	for species in ["human", "mire"]:
 		var ship := Fixture.room_ship()
@@ -381,12 +383,13 @@ func test_a_hurt_mechanical_crew_member_gets_a_repair_job_that_any_other_crew_me
 	ship.crew.append(player)
 	jobs.build_board(ship)
 	near(float(jobs.hand_work(ship, player, 1.0) == "mend:Rivet"), 1.0, "the player mends by hand (E)")
-	near(gaunt.hp, 48.0, "8 hp a second")
+	var rate := float(Jobs.jcfg()["repair_crew"]["rate"])  # data/crew.json: 4 hp a second
+	near(gaunt.hp, 40.0 + rate, "the job's hp a second")
 	ship.crew.erase(player)
 	var ada := _person("Ada", "human", 11, 13)
 	ship.crew.append(ada)
 	var t := _seconds_until(ship, jobs, func(): return gaunt.hp >= gaunt.max_hp)
-	check(t < 20.0, "a crewmate walks over and mends them (took %s s)" % t)
+	check(t < 30.0, "a crewmate walks over and mends them (took %s s)" % t)
 	near(gaunt.hp, gaunt.max_hp, "back to full")
 	check(not jobs.board.has("mend:Rivet") or gaunt.hp >= gaunt.max_hp, "and the job is done")
 	_done()
@@ -561,8 +564,9 @@ func test_a_kett_trio_repairs_faster_than_one_kett() -> void:
 			var k := _person("Kett%d" % i, "kett", 13, 10 + 2 * i, i > 0)  # the others are only company: they hold no job
 			ship.crew.append(k)
 		times[n] = _seconds_until(ship, Jobs.new(), func(): return inst["status"] == "ok")
-	near(times[1], 5.0, "a lone Kett: the normal 5 s", 0.15)
-	near(times[3], 5.0 / 1.5, "with two more in the room: 3.33 s", 0.15)
+	var part := float(Jobs.jcfg()["repair_component"]["seconds"])
+	near(times[1], part, "a lone Kett: the normal time", 0.15)
+	near(times[3], part / 1.5, "with two more in the room: a third faster", 0.15)
 	_done()
 
 

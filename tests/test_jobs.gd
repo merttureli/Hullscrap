@@ -62,6 +62,11 @@ func _time_until(jobs: Jobs, ship: Ship, done: Callable) -> float:
 	return -1.0
 
 
+## The work time of job `type` in seconds (data/crew.json jobs: repair_breach 14, repair_component 12, repair_belt 4).
+func _secs(type: String) -> float:
+	return float(Jobs.jcfg()[type]["seconds"])
+
+
 # --- the board and its order ---------------------------------------------------------------------
 
 ## A room with a helm, an engine that malfunctions, a fire, and a breach. Returns the uids too.
@@ -302,8 +307,9 @@ func test_breach_repair_restores_the_wall_and_reseals_the_room() -> void:
 	check(not ship.atmosphere.rooms[ship.atmosphere.room_at(Vector2i(15, 9))]["sealed"], "the breach opens the room to space")
 	ship.crew.append(_npc("A", 14, 9))
 	var jobs := Jobs.new()
-	_run(jobs, ship, 5.5)
-	check(ship.grid.breached.has(Vector2i(15, 8)), "not done at 5.5 s (6 s of work)")
+	var work := _secs("repair_breach")
+	_run(jobs, ship, work - 0.5)
+	check(ship.grid.breached.has(Vector2i(15, 8)), "not done at %.1f s (%.0f s of work)" % [work - 0.5, work])
 	_run(jobs, ship, 1.0)
 	eq(ship.grid.get_tile(Vector2i(15, 8)), "wall", "the wall is back")
 	check(ship.grid.breached.is_empty(), "no breach left")
@@ -320,12 +326,12 @@ func test_a_breach_in_scrap_plate_is_patched_in_half_the_time() -> void:
 	ship.mark_dirty()
 	ship.crew.append(_npc("A", 14, 9))
 	var t := _time_until(Jobs.new(), ship, func(): return ship.grid.breached.is_empty())
-	near(t, 3.0, "6 s x the scrap line's 0.5", 0.15)
+	near(t, _secs("repair_breach") * 0.5, "the breach time x the scrap line's 0.5", 0.15)
 	eq(ship.grid.get_tile(Vector2i(15, 8)), "scrap_plate", "the same material comes back")
 
 
 func test_part_repair_respects_the_lines_repair_multiplier() -> void:
-	for pair in [["engine_scrap_mk1", 2.5], ["engine_mk1", 5.0], ["engine_neon_mk1", 7.5]]:
+	for pair in [["engine_scrap_mk1", 0.5 * _secs("repair_component")], ["engine_mk1", _secs("repair_component")], ["engine_neon_mk1", 1.5 * _secs("repair_component")]]:
 		var ship := Fixture.room_ship()
 		var uid := Fixture.put(ship, pair[0], 15, 10)
 		var inst: Dictionary = ship.components.instances[uid]
@@ -333,7 +339,7 @@ func test_part_repair_respects_the_lines_repair_multiplier() -> void:
 		inst["hp"] = 1
 		ship.crew.append(_npc("A", 13, 10))
 		var t := _time_until(Jobs.new(), ship, func(): return inst["status"] == "ok")
-		near(t, pair[1], "%s takes 5 s x the repair multiplier" % pair[0], 0.15)
+		near(t, pair[1], "%s takes the part repair time x the repair multiplier" % pair[0], 0.15)
 		eq(inst["hp"], ship.effective(pair[0])["hp"], "and comes back at full hp")
 	var named := Fixture.room_ship()
 	var kick := Fixture.put(named, "engine_scrap_mk1", 15, 10)
@@ -392,12 +398,13 @@ func test_the_player_works_a_job_by_hand_at_the_same_speed() -> void:
 	check(ship.fires.is_empty(), "out")
 	p.pos = Pathfinder.centre_of(Vector2i(13, 14))
 	jobs.build_board(ship)
-	for i in 49:
+	var work := _secs("repair_component")
+	for i in roundi(work / STEP) - 1:
 		jobs.hand_work(ship, p, STEP)
-	eq(ship.components.instances[uid]["status"], "malfunction", "4.9 s is not enough for a standard engine")
+	eq(ship.components.instances[uid]["status"], "malfunction", "%.1f s is not enough for a standard engine" % (work - STEP))
 	for i in 3:
 		jobs.hand_work(ship, p, STEP)
-	eq(ship.components.instances[uid]["status"], "ok", "5 s is")
+	eq(ship.components.instances[uid]["status"], "ok", "%.0f s is" % work)
 	eq(jobs.hand_work(ship, p, 1.0), "", "nothing left in reach")
 
 
@@ -578,7 +585,7 @@ func test_an_order_repairs_a_damaged_part_that_still_works() -> void:
 	eq(jobs.order_repair(ship, uid), "no crew to send", "nobody to send")
 	ship.crew.append(_npc("Ada", 13, 10))
 	eq(jobs.order_repair(ship, uid), "Ada will repair Concord Thruster Mk1", "an order does")
-	_run(jobs, ship, 7.0)
+	_run(jobs, ship, _secs("repair_component") + 3.0)  # the walk there, then the work
 	eq(inst["hp"], 6, "mended")
 	eq(jobs.order_repair(ship, uid), "Concord Thruster Mk1 needs no repair", "nothing more to do")
 	inst["status"] = "overheated"

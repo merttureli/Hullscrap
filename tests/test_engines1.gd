@@ -275,13 +275,15 @@ func test_every_engine_thrusts_by_its_numbers_times_its_line() -> void:
 			var t: Dictionary = a.ships[0].thrusts
 			var tag := "%s on rotation %d" % [id, rot]
 			near(a.ships[0].thrust, want, tag + ": total thrust", 1e-5)
+			var share: float = want * a.ships[0].flight.side_share  # every engine gives this to both sides as well
 			if strafe:
 				near(t["fwd"], 0.0, tag + ": nothing forward", 1e-6)
-				near(t["left"] if rot == 1 else t["right"], want, tag + ": all of it sideways", 1e-5)
-				near(t["right"] if rot == 1 else t["left"], 0.0, tag + ": and not the other way", 1e-6)
+				near(t["left"] if rot == 1 else t["right"], want + share, tag + ": all of it sideways, and the share", 1e-5)
+				near(t["right"] if rot == 1 else t["left"], share, tag + ": and only the share the other way", 1e-5)
 			else:
 				near(t["fwd"], want, tag + ": all of it forward", 1e-5)
-				near(t["left"] + t["right"], 0.0, tag + ": and nothing sideways", 1e-6)
+				near(t["left"], share, tag + ": and the share to the left", 1e-5)
+				near(t["right"], share, tag + ": and to the right", 1e-5)
 
 
 func test_a_disabled_outside_half_stops_the_thrust() -> void:

@@ -1,6 +1,6 @@
 extends "res://tests/base_test.gd"
 ## Sector space step 2 (docs/CONTENT.md section 11, the view): the helm (helm.gd: the autopilot to a course, round big
-## rocks, the player's hand, cruise x3, who mans it, the frame that puts the ship's cells in the sector), the sector
+## rocks, the player's hand, cruise x1.8, who mans it, the frame that puts the ship's cells in the sector), the sector
 ## view (sector_view.gd: play mode flies in the sector and the build screen holds, markers set a course, POIs trigger into
 ## the panels, the map spools the jump and the ship arrives, E at the helm, fights in place and the wrecks they leave,
 ## saves resume where the ship was), the debris round a flying ship (drift_debris.gd frame) and the sector's new save
@@ -120,15 +120,16 @@ func test_the_autopilot_steers_round_a_big_rock_in_its_path() -> void:
 	check(blind[0] < float(rock["r"]) + 40.0, "with no rock to see it flies straight through that spot (%d px)" % blind[0])
 
 
-func test_cruise_is_x3_out_of_combat_and_real_near_a_hostile() -> void:
+func test_cruise_is_x1_8_out_of_combat_and_real_near_a_hostile() -> void:
 	var ship := _ship()
 	var s = _sector()
 	var h := _helm(ship, s, Vector2(5000.0, 5000.0))
 	var base := Vector2(h.flight.thrust_to_accel, h.flight.max_speed)
 	h.step(0.1, s, true)
-	near(h.cruise, 3.0, "cruise x3 with nothing hostile near")
-	near(h.flight.thrust_to_accel, base.x * 3.0, "acceleration x3")
-	near(h.flight.max_speed, base.y * 3.0, "top speed x3")
+	eq(float(h.cfg["cruise"]), 1.8, "data/sectors.json: cruise 1.8 (it was 3: the owner found open space too fast)")
+	near(h.cruise, 1.8, "cruise x1.8 with nothing hostile near")
+	near(h.flight.thrust_to_accel, base.x * 1.8, "acceleration x1.8")
+	near(h.flight.max_speed, base.y * 1.8, "top speed x1.8")
 	h.step(0.1, s, true, {}, true)
 	near(h.cruise, 1.0, "a hostile within 2,500 px: real numbers")
 	near(h.flight.max_speed, base.y, "real top speed")

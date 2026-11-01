@@ -31,6 +31,13 @@ The pace is slower than the Beta 2 night: **two builders at a time**, in four wa
 - **Breaches.** When a room starts losing air, time slows and a prompt asks: Repair or Evacuate. Evacuate abandons the room: no jobs inside, the crew leave and its doors seal. (K2)
 - **Crew repair until they die.** Crew low on health in a room with no air leave it on their own, and come back when healed or the air returns. (K3)
 
+### Angled mounts (owner's follow-up note)
+- **Engines and guns can sit on a sloped hull face**, not only on straight walls. This covers the 45° pieces and the 1:2 slopes (about 27° and 63°).
+- **The outside half faces along that slope's outward normal.** The inside half stays flush with the grid, in whichever of the 4 rotations is nearest.
+- **Engines push along their real direction.** An engine at 45° gives about 71% of its thrust forward and 71% sideways (flight.gd `split` already takes any push vector). So fewer engines give more mobility, at the cost of straight-line speed.
+- **Guns aim along their real direction.** A fixed gun's line and a turret's arc centre follow the slope. Angled turrets can cover more angles between them, with less overlap.
+- The placement preview shows the angled outside half. Saves keep the angle. (G1)
+
 ### Combat pacing
 - **Repairs are too fast.** Repair times roughly double. (F5)
 - **Shields come back at once.** Each generator has its own recharge time (Mk1 about 7 s per layer, up from 2 s). Layers come back one at a time, and an emptied sector waits 3 s more. (C1)
@@ -48,10 +55,11 @@ The pace is slower than the Beta 2 night: **two builders at a time**, in four wa
 ## Waves (two builders each)
 | wave | builder A | builder B |
 |---|---|---|
-| 1 | `feel`: F1–F6 | `pace`: C1–C3 |
-| 2 | `space`: S1–S4 | `parts`: P1–P4 |
-| 3 | `alone`: A1, A2, K3 | `info`: I1–I3 |
-| 4 | `command`: K1, K2 | then a QA playthrough, Beta 3 build |
+| 1 | `feel`: F1–F6 | `pace`: C1–C4 |
+| 2 | `space`: S1–S4 | `parts`: P1, P2 (tier 1–2 parts smaller inside; mounts get a narrower breech) |
+| 3 | `alone`: A1, A2, P3, P4 (start alone, rare crew, starter loadouts, bigger starters) | `info`: I1–I3 |
+| 4 | `command`: K1–K3 | `angles`: G1 (after `parts`, which changes mount sizes) |
+| 5 | QA playthrough, Beta 3 build | |
 
 ## Budget
 - The round stops at **40% weekly usage** (it was 26% at the start), or when wave 4 is merged.

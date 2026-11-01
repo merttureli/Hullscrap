@@ -19,6 +19,7 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewFx = preload("res://scripts/crew/crew_fx.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 
@@ -31,7 +32,10 @@ const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 ## and the loaded units of guns; older saves load with no belts and empty racks. The optional "skin" (the hull skin id the
 ## player chose in the hangar, run_start.gd) was added within 5: a save without it has the plain hull. The optional "queues"
 ## inside "crafting" (the jobs of the stations but the fabricator: the smelter's) was added within 5 as well: older saves have none.
-const VERSION := 5
+## 6 adds the crew: the optional "crew_state" (every person aboard, CrewMember.to_dict), "dead_crew" (the names of those who bled out)
+## and "crew_plan" (the design's crew list), written when anyone is aboard or has died; older saves have none and load
+## leaving the crew the ship has now (the view then spawns the design's list).
+const VERSION := 6
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
 const START_PATH := "res://data/start.json"
@@ -54,8 +58,8 @@ var power_state := {}  ## the last Power.solve result; empty until the first ref
 var events: Array = []  ## the chronicle, newest last: {t, text}; at most MAX_EVENTS; not saved
 var clock := 0.0  ## seconds this ship has been simulated; the `t` of new events
 var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
-var crew: Array = []  ## CrewMember objects aboard; not saved yet
-var dead_crew: Array = []  ## names of crew who bled out (mortality.gd): Jobs.spawn_crew does not bring them back
+var crew: Array = []  ## CrewMember objects aboard; saved as "crew_state" (version 6)
+var dead_crew: Array = []  ## names of crew who bled out (mortality.gd): Jobs.spawn_crew does not bring them back; saved
 var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
 var skin := ""  ## the hull skin of the exterior plating (a skin unlock's payload `skin`, unlocks.gd skin_paint); "" = the plain hull; saved when set
 var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
@@ -239,6 +243,11 @@ func to_dict() -> Dictionary:
 		d["shield_balance"] = shield_balance.duplicate(true)
 	if skin != "":
 		d["skin"] = skin
+	if not crew.is_empty() or not dead_crew.is_empty():  # optional: the people aboard, so Continue brings back the same crew
+		d["crew_state"] = crew.map(func(m): return m.to_dict())
+		d["dead_crew"] = dead_crew.duplicate()
+		if not crew_plan.is_empty():
+			d["crew_plan"] = crew_plan.duplicate(true)
 	if not fires.is_empty():  # optional, like the grid's damage lists: only written when something burns
 		var list := []
 		for c in Fire.sorted_cells(fires.keys()):
@@ -270,6 +279,9 @@ func load_dict(d: Dictionary) -> String:
 	var burning = _read_fires(d)
 	if burning == null:
 		return "bad ship data"
+	var people = _read_crew(d)  # null (an older save, or nobody aboard), a Dictionary, or a String: why it is malformed
+	if people is String:
+		return people
 	if d.has("belts"):
 		if not (d["belts"] is Dictionary):
 			return "bad ship data"
@@ -302,6 +314,12 @@ func load_dict(d: Dictionary) -> String:
 		world_pos = Vector2(float(p[0]), float(p[1])) if p is Array and p.size() == 2 else Vector2.ZERO
 		rot_quarters = posmod(int(d.get("rot", 0)), 4)
 	fires = burning
+	if people != null:  # the same arrays, filled again (others may hold them)
+		crew.clear()
+		crew.append_array(people["crew"])
+		dead_crew.clear()
+		dead_crew.append_array(people["dead"])
+		crew_plan = people["plan"]
 	shield_balance = ShieldBalance.sanitize(d.get("shield_balance"))
 	skin = str(d.get("skin", ""))
 	manned = {}
@@ -321,6 +339,31 @@ func load_dict(d: Dictionary) -> String:
 		for i in air.size():
 			atmosphere.pressure[i] = clampf(float(air[i]), 0.0, 1.0)
 	return ""
+
+
+## The optional crew of a save: {crew: [CrewMember], dead: [names], plan: [{name, species, ...}]}; null when the save has no
+## "crew_state" (older ones, or nobody aboard), else the reason it is malformed (a String). Nothing is changed.
+func _read_crew(d: Dictionary):
+	if not d.has("crew_state"):
+		return null
+	var list = d["crew_state"]
+	var dead = d.get("dead_crew", [])
+	var plan = d.get("crew_plan", [])
+	if not (list is Array and dead is Array and plan is Array):
+		return "bad ship data"
+	var out := {"crew": [], "dead": [], "plan": []}
+	for e in list:
+		var m = CrewMember.from_dict(e) if e is Dictionary else null
+		if m == null:
+			return "bad ship data"
+		out["crew"].append(m)
+	for n in dead:
+		out["dead"].append(str(n))
+	for e in plan:
+		if not (e is Dictionary and e.get("name") is String):
+			return "bad ship data"
+		out["plan"].append(e.duplicate(true))
+	return out
 
 
 ## The optional "fires" list of a save ([[x, y, intensity], ...]) as cell -> intensity; {} when

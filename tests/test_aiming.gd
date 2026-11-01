@@ -246,19 +246,20 @@ func _engine_ship_ship(rots: Array) -> Ship:
 	return ship
 
 
-func test_thrust_follows_the_nozzle_rear_engines_all_forward_side_engines_only_sideways() -> void:
+func test_thrust_follows_the_nozzle_rear_engines_forward_side_engines_sideways_and_every_engine_a_share_sideways() -> void:
 	var one := 10.0  # engine_mk1
+	var share := one * Flight.new().side_share  # data/flight.json side_share: every engine also gives this to both sides
 	var rear := _engine_ship([2])
 	near(rear.ships[0].thrusts["fwd"], one, "rear: all forward", 1e-6)
-	eq([rear.ships[0].thrusts["left"], rear.ships[0].thrusts["right"]], [0.0, 0.0], "and nothing sideways")
+	eq([rear.ships[0].thrusts["left"], rear.ships[0].thrusts["right"]], [share, share], "and only the share sideways")
 	var right_wall := _engine_ship([1])  # nozzle to the right: pushes the ship left
 	near(right_wall.ships[0].thrusts["fwd"], 0.0, "an engine on a side wall gives no forward thrust", 1e-6)
-	near(right_wall.ships[0].thrusts["left"], one, "a nozzle pointing right pushes the ship left", 1e-6)
-	near(right_wall.ships[0].thrusts["right"], 0.0, "and not right", 1e-6)
+	near(right_wall.ships[0].thrusts["left"], one + share, "a nozzle pointing right pushes the ship left, with the share", 1e-6)
+	near(right_wall.ships[0].thrusts["right"], share, "and only the share right", 1e-6)
 	var left_wall := _engine_ship([3])
-	near(left_wall.ships[0].thrusts["right"], one, "a nozzle pointing left pushes the ship right", 1e-6)
+	near(left_wall.ships[0].thrusts["right"], one + share, "a nozzle pointing left pushes the ship right", 1e-6)
 	var pair := _engine_ship([1, 3])
-	eq([pair.ships[0].thrusts["fwd"], pair.ships[0].thrusts["left"], pair.ships[0].thrusts["right"]], [0.0, one, one], "a side pair: strafe both ways, no forward")
+	eq([pair.ships[0].thrusts["fwd"], pair.ships[0].thrusts["left"], pair.ships[0].thrusts["right"]], [0.0, one + 2.0 * share, one + 2.0 * share], "a side pair: strafe both ways, no forward")
 	near(pair.ships[0].thrust, 2.0 * one, "though all of it turns the ship", 1e-6)
 	var front := _engine_ship([2, 0])
 	near(front.ships[0].thrusts["fwd"], 0.0, "a front-facing engine cancels a rear one", 1e-6)
@@ -290,7 +291,12 @@ func test_the_ship_moves_the_way_the_engines_push() -> void:
 	a = _engine_ship([2])
 	a.set_input(0, 0.0, 0.0, 1.0)
 	a.step(1.0)
-	eq(a.ships[0].flight.vel, Vector2.ZERO, "no side engines, no strafe")
+	var weak: float = a.ships[0].flight.vel.x
+	check(weak > 1.0 and absf(a.ships[0].flight.vel.y) < 1e-6, "rear engines only: A/D strafe too, but weakly: %s" % weak)
+	a = _engine_ship([2])
+	a.set_input(0, 1.0, 0.0)
+	a.step(1.0)
+	near(weak, -a.ships[0].flight.vel.y * a.ships[0].flight.side_share, "at the share of the forward push", 1e-4)
 	a = _engine_ship([2, 1, 3])
 	a.ships[0].flight.angle = PI / 2.0
 	a.set_input(0, 0.0, 0.0, 1.0)
@@ -317,7 +323,7 @@ func test_the_ship_turns_toward_the_mouse_and_the_keys_mode_still_turns_with_a_a
 	var x: float = co.flight.pos.x
 	for i in 30:
 		s.tick(DT)
-	check(absf(co.flight.angle - angle) < 0.02, "with the mouse steering A/D do not turn")
+	check(absf(co.flight.angle - angle) < 0.05, "with the mouse steering A/D do not turn (the strafe moves the ship, so the bearing of the cursor shifts a little)")
 	check(co.flight.pos.x != x or co.flight.vel.length() > 1.0, "they strafe")
 	co.flight.steer = "keys"
 	s.input = {"throttle": 0.0, "turn": 1.0, "strafe": 1.0}

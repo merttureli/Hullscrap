@@ -6,7 +6,7 @@ extends RefCounted
 ## - `flight.pos` is the hull's pivot (the centre of its bounding box, as in arena.gd), `flight.angle` its heading (0 up,
 ##   clockwise positive). frame() maps the build view's px (ship.world_pos at the grid centre) into the sector, so the
 ##   interior, the crew and the intakes can be drawn and hit where the ship flies.
-## - Out of combat the flight numbers run at `cruise` (x3 on acceleration and top speed); with a hostile within
+## - Out of combat the flight numbers run at `cruise` (x1.8 on acceleration and top speed, data/sectors.json); with a hostile within
 ##   `real_within` px (2,500) they are the real ones.
 ## - The autopilot turns toward the way it has to go, thrusts, and brakes with reverse thrust so it stops within
 ##   `arrive` px (300) of the course; then the course is done. Big drifting rocks near its path push it aside.
