@@ -72,21 +72,37 @@ static func component_state(def: Dictionary, inst: Dictionary, powered: bool) ->
 	return "ok"
 
 
+## The cells a ship's map is fitted to by default: what is built (tiles, parts, the outside halves of mounts) with two cells
+## round it, as the hull of a generated ship is. Not the whole hull: a starter's round frame (59 cells across) would shrink
+## the ship to a speck. The hull's own box when nothing is built.
+static func fit_box(ship) -> Rect2:
+	var grid = ship.grid
+	var cells: Array = grid.tiles.keys()
+	for uid in ship.components.instances:
+		cells.append_array(ship.components.instances[uid]["cells"])
+		cells.append_array(ship.components.instances[uid].get("out_cells", []))
+	var pad := Vector2(2.0, 2.0)
+	if cells.is_empty():
+		cells = grid.hull.keys()
+		pad = Vector2.ZERO
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for cell in cells:
+		lo = Vector2(minf(lo.x, cell.x), minf(lo.y, cell.y))
+		hi = Vector2(maxf(hi.x, cell.x + 1.0), maxf(hi.y, cell.y + 1.0))
+	return Rect2(lo - pad, hi - lo + pad * 2.0)
+
+
 ## Draw `ship`'s map on the canvas `cv`: rooms, walls, doors, breaches and systems coloured by state
 ## (`powered`: uid -> bool), bow up, fitted into `map` (px). The cells of `bounds` (cell coordinates; the
-## hull's bounding box when empty) are scaled to fit. Returns {origin: the px of cell (0, 0), s: px per cell}.
+## built cells' box, fit_box, when empty) are scaled to fit. Returns {origin: the px of cell (0, 0), s: px per cell}.
 static func draw_map(cv: CanvasItem, ship, powered: Dictionary, map: Rect2, bounds := Rect2()) -> Dictionary:
 	var grid = ship.grid
 	if grid.hull.is_empty():
 		return {}
-	var lo := Vector2(INF, INF)
-	var hi := Vector2(-INF, -INF)
-	for cell in grid.hull:
-		lo = Vector2(minf(lo.x, cell.x), minf(lo.y, cell.y))
-		hi = Vector2(maxf(hi.x, cell.x + 1.0), maxf(hi.y, cell.y + 1.0))
-	if bounds.size != Vector2.ZERO:
-		lo = bounds.position
-		hi = bounds.end
+	var box := fit_box(ship) if bounds.size == Vector2.ZERO else bounds
+	var lo := box.position
+	var hi := box.end
 	var s := minf(map.size.x / (hi.x - lo.x), map.size.y / (hi.y - lo.y))
 	var origin := map.position + (map.size - (hi - lo) * s) / 2.0 - lo * s
 	var atmo = ship.atmosphere

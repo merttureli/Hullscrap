@@ -14,12 +14,13 @@ extends SceneTree
 ## top-left cell of its OUTSIDE half (in space, against a flat stretch of the outer wall face; outward
 ## is up at rot 0, so rear engines use rot 2); the inside half goes on the floor behind the wall by the
 ## placement rule, so the part has to be placed where the real mount rules (mounts.gd) allow it.
-## A STARTER (docs/CONTENT.md 4c, "Start with very little") has a "frame" outline too: the hull frame, a big
-## silhouette of cells you may build on, in the same local coordinates as everything else (its bounding box
-## starts at 0,0, the ship sits in the middle of the grid). The "outline" of such a ship is only its built
-## core, somewhere inside the frame: the essentials and the walls of their rooms. The rest of the frame is
-## empty hull for the player to build in. Everything built has to stay inside the frame (the tool fails
-## if not). The pirate has no frame: its hull stays the bounding box plus MARGIN.
+## A STARTER (docs/CONTENT.md 4c, "Start with very little") has a "frame" outline too: a big silhouette in the
+## same local coordinates as everything else (its bounding box starts at 0,0, the ship sits in the middle of the
+## grid). The "outline" of such a ship is only its built core, somewhere inside the frame: the essentials and the
+## walls of their rooms. Everything built has to stay inside that silhouette (the tool fails if not), which also
+## places the core in the grid. The hull a starter is saved with is the big round build area (playtest 2, B1): a
+## disc of DISC_R cells round the middle of the grid, joined with every cell the ship uses, the rest empty hull
+## for the player to build in. The pirate has no frame: its hull stays the bounding box plus MARGIN.
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -32,6 +33,7 @@ const GRID := Vector2i(63, 63)
 const MARGIN := 2
 const MAX_FILL := 0.84  ## a grown frame stays a silhouette: its cells over its box (tests/test_starter_ships.gd wants under 85%)
 const FRAME_GROWTH := 0.15  ## P4: a starter's frame is grown by about this share of its area (the built core stays as it is)
+const DISC_R := 29.0  ## B1: the build area of a starter is a disc of this radius in cells, centred on the grid (the edge keeps room for the outside half of a mount)
 const OUT_DIR := "res://data/ships/"
 const SIDES: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
 ## Who starts aboard: the soldier alone (playtest 2, A1). Ada is found in a distress pod (data/packs/start_alone), the rest are hired or met.
@@ -375,11 +377,12 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 			for x in range(blo.x, bhi.x + 1):
 				g.hull[Vector2i(x, y)] = true
 	else:
-		for c in frame:
-			g.hull[c + off] = true
-		var outside := all.filter(func(c): return not g.hull.has(c))
+		var outside := all.filter(func(c): return not frame.has(c - off))
 		if not outside.is_empty():
 			_fail("%s: %d built cells leave the frame, first %s" % [name, outside.size(), str(outside.slice(0, 6).map(func(c): return c - off))])
+		g.fill_circle_hull(DISC_R)  # B1: the build area is a big disc (whole cells, so the rim is a stair), joined with everything built
+		for c in all:
+			g.hull[c] = true
 	ship.inventory.load_dict(spec["cargo"])
 	ship.refresh()
 
