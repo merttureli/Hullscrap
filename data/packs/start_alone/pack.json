@@ -2,6 +2,6 @@
 	"id": "start_alone",
 	"name": "Start alone",
 	"version": "1.0",
-	"requires": [],
-	"notes": "Playtest 2 (A1): every run starts with the soldier alone, and Ada is the likely first crewmate. events/ada_pod.json is a distress event of stages 1-2, once per run (flag ada_met), weighted so that about 70% of runs meet her by the end of stage 2 (tests/tool_crew_rate.gd measures it); she is free and does not need a bed. Her name and colours come from data/crew.json `ada`."
+	"requires": ["story_1"],
+	"notes": "Playtest 2 (A1): every run starts with the soldier alone, and Ada is the likely first crewmate. events/ada_pod.json is a distress event of stages 1-2, once per run (flag ada_met), weighted so that about 70% of runs meet her by the end of stage 2 (tests/tool_crew_rate.gd measures it); she is free and does not need a bed (she brings the item ada_recorder from story_1 and the flag ada_aboard, which her story beats ask for). Her name and colours come from data/crew.json `ada`."
 }

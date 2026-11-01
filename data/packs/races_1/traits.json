@@ -9,7 +9,6 @@
 		"mechanical": {"name": "Mechanical", "blurb": "Half the body is machine: beds do nothing, but a crewmate with a spanner mends them.", "mechanical": true},
 		"half_lungs": {"name": "Half-lunged", "blurb": "Breathes half as much air.", "o2_use": 0.5},
 		"ion_prone": {"name": "Ion-prone", "blurb": "An ion hit on their room stuns them for 3 seconds.", "ion_stun": 3.0},
-		"tinkerer": {"name": "Tinkerer", "blurb": "Proud of every part: repairs and breach patches take x0.8 the time.", "work_mult": {"repair": 1.25, "breach": 1.25}},
 		"crystal_conduit": {"name": "Crystal conduit", "blurb": "The system they man gets +1 power while they man it.", "station": {"power_bonus": 1}},
 		"crystal_body": {"name": "Crystal body", "blurb": "Takes double ion damage, and hits half as hard in a brawl.", "damage_taken": {"ion": 2.0}, "melee_mult": 0.5},
 		"hauler": {"name": "Hauler", "blurb": "Moves cargo twice as fast and hits twice as hard in a brawl.", "work_mult": {"restock": 2.0}, "melee_mult": 2.0},
