@@ -1,0 +1,264 @@
+{
+ "ada_found": {
+  "bands_pct": [
+   8.4,
+   41.6,
+   45.8,
+   3.3,
+   0.8
+  ],
+  "bytes": 108060,
+  "peak_db": -3.63,
+  "rms_db": -18.16,
+  "samples_off_vs_render": 0,
+  "seconds": 6.0,
+  "title": "ada_found",
+  "true_peak_db": -3.59
+ },
+ "build": {
+  "bands_pct": [
+   39.3,
+   41.5,
+   12.6,
+   3.0,
+   3.7
+  ],
+  "bpm": 76.19,
+  "bytes": 1523019,
+  "peak_db": -4.12,
+  "rms_db": -18.01,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.52004,
+   "rms_first_db": -22.2,
+   "rms_last_db": -22.3,
+   "seam_step": 0.06935,
+   "typ_step_p999": 0.18255
+  },
+  "seconds": 100.8,
+  "target_rms_db": -18.0,
+  "title": "Workbench",
+  "true_peak_db": -3.6
+ },
+ "combat": {
+  "bands_pct": [
+   28.6,
+   32.6,
+   30.0,
+   5.4,
+   3.4
+  ],
+  "bpm": 126.0,
+  "bytes": 2393457,
+  "peak_db": -1.36,
+  "rms_db": -15.02,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.84468,
+   "rms_first_db": -16.6,
+   "rms_last_db": -15.2,
+   "seam_step": 0.04621,
+   "typ_step_p999": 0.32864
+  },
+  "seconds": 121.9,
+  "target_rms_db": -15.0,
+  "title": "Broadside",
+  "true_peak_db": -1.31
+ },
+ "defeat": {
+  "bands_pct": [
+   12.2,
+   55.3,
+   31.5,
+   1.0,
+   0.0
+  ],
+  "bytes": 97389,
+  "peak_db": -3.06,
+  "rms_db": -18.92,
+  "samples_off_vs_render": 0,
+  "seconds": 6.0,
+  "title": "defeat",
+  "true_peak_db": -3.05
+ },
+ "ending": {
+  "bands_pct": [
+   11.2,
+   43.3,
+   33.9,
+   9.4,
+   2.2
+  ],
+  "bytes": 217798,
+  "peak_db": -2.37,
+  "rms_db": -16.84,
+  "samples_off_vs_render": 0,
+  "seconds": 10.0,
+  "title": "ending",
+  "true_peak_db": -2.37
+ },
+ "explore_a": {
+  "bands_pct": [
+   27.2,
+   29.8,
+   32.1,
+   7.6,
+   3.3
+  ],
+  "bpm": 80.0,
+  "bytes": 2391436,
+  "peak_db": -2.89,
+  "rms_db": -18.01,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.45065,
+   "rms_first_db": -21.3,
+   "rms_last_db": -19.1,
+   "seam_step": 0.03566,
+   "typ_step_p999": 0.20998
+  },
+  "seconds": 144.0,
+  "target_rms_db": -18.0,
+  "title": "Drift",
+  "true_peak_db": -2.84
+ },
+ "explore_b": {
+  "bands_pct": [
+   20.7,
+   45.5,
+   24.7,
+   5.3,
+   3.9
+  ],
+  "bpm": 88.16,
+  "bytes": 2519028,
+  "peak_db": -2.36,
+  "rms_db": -18.02,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.49454,
+   "rms_first_db": -20.6,
+   "rms_last_db": -18.8,
+   "seam_step": 0.01974,
+   "typ_step_p999": 0.19259
+  },
+  "seconds": 152.44,
+  "target_rms_db": -18.0,
+  "title": "Salvage Lanes",
+  "true_peak_db": -2.18
+ },
+ "hollow": {
+  "bands_pct": [
+   8.9,
+   38.9,
+   47.2,
+   4.5,
+   0.5
+  ],
+  "bpm": 60.0,
+  "bytes": 2280724,
+  "peak_db": -3.28,
+  "rms_db": -18.0,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.18998,
+   "rms_first_db": -19.3,
+   "rms_last_db": -18.0,
+   "seam_step": 0.01196,
+   "typ_step_p999": 0.092
+  },
+  "seconds": 120.0,
+  "target_rms_db": -18.0,
+  "title": "Manners",
+  "true_peak_db": -3.28
+ },
+ "jump": {
+  "bands_pct": [
+   25.2,
+   11.4,
+   45.0,
+   15.5,
+   2.9
+  ],
+  "bytes": 71873,
+  "peak_db": -1.89,
+  "rms_db": -21.59,
+  "samples_off_vs_render": 0,
+  "seconds": 4.5,
+  "title": "jump",
+  "true_peak_db": -1.85
+ },
+ "menu": {
+  "bands_pct": [
+   20.8,
+   35.8,
+   37.8,
+   4.4,
+   1.2
+  ],
+  "bpm": 72.0,
+  "bytes": 1997541,
+  "peak_db": -3.08,
+  "rms_db": -18.0,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.21132,
+   "rms_first_db": -22.3,
+   "rms_last_db": -19.9,
+   "seam_step": 0.01334,
+   "typ_step_p999": 0.10944
+  },
+  "seconds": 120.0,
+  "target_rms_db": -18.0,
+  "title": "Ma's Ledger",
+  "true_peak_db": -3.08
+ },
+ "region_cross": {
+  "bands_pct": [
+   14.6,
+   41.5,
+   27.7,
+   14.2,
+   2.0
+  ],
+  "bytes": 114429,
+  "peak_db": -3.62,
+  "rms_db": -18.48,
+  "samples_off_vs_render": 0,
+  "seconds": 5.5,
+  "title": "region_cross",
+  "true_peak_db": -3.41
+ },
+ "unlock": {
+  "bands_pct": [
+   0.0,
+   9.0,
+   66.1,
+   20.1,
+   4.8
+  ],
+  "bytes": 66967,
+  "peak_db": -2.05,
+  "rms_db": -19.52,
+  "samples_off_vs_render": 0,
+  "seconds": 3.2,
+  "title": "unlock",
+  "true_peak_db": -1.88
+ },
+ "victory": {
+  "bands_pct": [
+   21.6,
+   30.0,
+   32.9,
+   12.8,
+   2.8
+  ],
+  "bytes": 105600,
+  "peak_db": -3.46,
+  "rms_db": -19.82,
+  "samples_off_vs_render": 0,
+  "seconds": 5.0,
+  "title": "victory",
+  "true_peak_db": -3.24
+ }
+}

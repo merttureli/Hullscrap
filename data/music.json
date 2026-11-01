@@ -1,0 +1,45 @@
+{
+ "dir": "res://assets/audio/music/",
+ "states": {
+  "menu": [
+   "menu.ogg"
+  ],
+  "explore": [
+   "explore_a.ogg",
+   "explore_b.ogg"
+  ],
+  "combat": [
+   "combat.ogg"
+  ],
+  "hollow": [
+   "hollow.ogg"
+  ],
+  "build": [
+   "build.ogg"
+  ]
+ },
+ "stings": {
+  "victory": "victory.ogg",
+  "defeat": "defeat.ogg",
+  "jump": "jump.ogg",
+  "region_cross": "region_cross.ogg",
+  "ada_found": "ada_found.ogg",
+  "unlock": "unlock.ogg",
+  "ending": "ending.ogg"
+ },
+ "volumes": {
+  "menu.ogg": 0.0,
+  "explore_a.ogg": 0.0,
+  "explore_b.ogg": 0.0,
+  "combat.ogg": 0.0,
+  "hollow.ogg": 0.0,
+  "build.ogg": 0.0,
+  "victory.ogg": -3.0,
+  "defeat.ogg": -3.0,
+  "jump.ogg": -3.0,
+  "region_cross.ogg": -3.0,
+  "ada_found.ogg": -3.0,
+  "unlock.ogg": -3.0,
+  "ending.ogg": -3.0
+ }
+}
