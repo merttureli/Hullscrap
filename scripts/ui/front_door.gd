@@ -26,6 +26,7 @@ const HINT_TEXT := {
 	"map": "Click a lit neighbour to spool the jump there",
 	"fight": "Mouse steers, LMB fires, J opens the map to jump away",
 	"net": "Ma's Net Mouth is in your cargo: B, the Cargo tab, put it on an outer wall to catch drifting scrap",
+	"craft": "Pick a recipe and it queues; the part lands in the hold, then place it from the build palette (B). ? explains",
 }
 
 var sim: Node
@@ -42,6 +43,8 @@ var ending: Control
 var toast: Control
 var _map_seen := false  # the map was open last frame
 var _fight_seen := false  # so was a fight
+var craft: Control  ## the crafting panel (C)
+var _craft_seen := false  # it was open last frame
 
 
 func _ready() -> void:
@@ -50,6 +53,7 @@ func _ready() -> void:
 	build = get_node_or_null("../BuildMode")
 	picker = get_node_or_null("../PickerLayer/ShipPicker")
 	combat = get_node_or_null("../Combat")
+	craft = get_node_or_null("../CraftLayer/CraftingPanel")
 	cam = get_node_or_null("../Camera2D")
 	profile = Profile.new()
 	_make_ui.call_deferred()  # after build_mode.gd added its layers: ours must be the last children to get the keys first
@@ -103,6 +107,10 @@ func _process(_dt: float) -> void:
 		if not map.visible and sim != null and sim.has_method("player_ship") and sim.player_ship() != null \
 				and sim.player_ship().inventory.count("net_mouth_scrap") > 0:
 			_hint("net")  # Ma's gift is in the hold: show where it goes
+	if craft != null:
+		if craft.visible and not _craft_seen:
+			_hint("craft")  # the first time the panel opens
+		_craft_seen = craft.visible
 	if combat != null:
 		var fighting: bool = combat.active
 		toast.top = 62.0 if fighting else 48.0  # out of play: under the HUD's top bar

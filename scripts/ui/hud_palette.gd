@@ -2,7 +2,7 @@ extends Control
 ## The build palette, on the left in build mode: a row of category tabs (Tab and Shift+Tab cycle them) over a
 ## scrolling grid of icon cards (scripts/build/palette.gd says what each tab holds). A card shows the real sprite,
 ## the name, the size, the power and the cost or how many are in the cargo, framed in its line's colour, greyed
-## when it can't be paid for or isn't held; the first nine carry their number key. A click on a tab opens it, a
+## when it can't be paid for or isn't held (a part card is listed when it is held or its blueprint is known); the first nine carry their number key. A click on a tab opens it, a
 ## click on a card picks it (build_mode.gd pick()), the wheel scrolls, and the card under the mouse is what the
 ## selection card (hud_card.gd) shows.
 
@@ -19,6 +19,7 @@ const GAP := 8.0
 const COLS := 2
 const SCROLL_STEP := 54.0
 const GREY := Color(0.07, 0.09, 0.12, 0.62)
+const EMPTY_TEXT := "Nothing here yet: craft or salvage parts. The crafting menu (C) lists everything you could still make."
 
 var hud: Control
 var list: Control  ## the clipped grid of cards
@@ -185,6 +186,10 @@ func _draw() -> void:
 	var lr := list_rect()
 	UiKit.inset(self, lr.grow(4))
 	var total := content_height(list_e.size())
+	if list_e.is_empty():
+		var lines := UiKit.wrap(EMPTY_TEXT, lr.size.x - 16.0, 13)
+		for i in lines.size():
+			UiKit.text(self, lines[i], lr.position + Vector2(10.0, 26.0 + i * 18.0), 13, UiKit.DIM_TEXT)
 	if total > lr.size.y:
 		UiKit.scrollbar(self, Rect2(lr.end.x - 8.0, lr.position.y, 8.0, lr.size.y), lr.size.y / total, scroll / maxf(1.0, total - lr.size.y))
 
@@ -229,7 +234,7 @@ func draw_card(cv: CanvasItem, e: Dictionary, r: Rect2, selected: bool, hot: boo
 ## Right-aligned at `right` (its baseline): how many are held for a part, else each material of the cost with its icon.
 func _draw_price(cv: CanvasItem, e: Dictionary, right: Vector2) -> void:
 	if e["kind"] in ["part", "item"]:
-		var t := "x%d in cargo" % e["count"] if e["count"] > 0 else "none in cargo"
+		var t := "x%d in cargo" % e["count"] if e["count"] > 0 else "0 held"
 		UiKit.text(cv, t, right - Vector2(UiKit.text_width(t, 11), 0), 11, UiKit.TEXT if e["count"] > 0 else UiKit.BAD.lightened(0.2))
 		return
 	var short: Dictionary = hud.build.ship.inventory.missing(e["cost"])

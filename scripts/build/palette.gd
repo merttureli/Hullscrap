@@ -14,7 +14,8 @@ extends RefCounted
 
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
-const Weapons = preload("res://scripts/combat/weapons.gd")
+const Describe = preload("res://scripts/ui/describe.gd")
+const Crafting = preload("res://scripts/craft/crafting.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Belts = preload("res://scripts/sim/belts.gd")
@@ -35,8 +36,6 @@ const TILE_QUIRKS := {
 }
 const DIRS: Array[String] = ["up", "right", "down", "left"]
 
-static var _weapons: Weapons  # the full weapon stats (defaults merged), read once
-
 
 ## The tab a component def belongs on.
 static func component_tab(def: Dictionary) -> int:
@@ -50,7 +49,7 @@ static func component_tab(def: Dictionary) -> int:
 
 ## The cards of tab `tab` for `ship` (`cable_cost`: BuildSession.cable_cost). Structure: every tile and the cable;
 ## Shapes: every non-full piece of every wall material; Cargo: the parts held, then the other cargo off the top bar;
-## the others: every part of their families.
+## the others: the parts of their families that are held or whose blueprint is known (could be crafted), see shown().
 static func entries(tab: int, ship, cable_cost: Dictionary) -> Array:
 	var out := []
 	var g = ship.grid
@@ -59,7 +58,8 @@ static func entries(tab: int, ship, cable_cost: Dictionary) -> Array:
 			for id in g.defs.ids():
 				out.append(tile_entry(ship, id))
 			out.append(cable_entry(ship, cable_cost))
-			out.append(belt_entry(ship))
+			if Ammo.belts_unlocked(ship):  # the belt needs its blueprint: no card before it
+				out.append(belt_entry(ship))
 		Tab.SHAPES:
 			for id in g.defs.ids():
 				if g.tile_flag(id, "solid") and not g.tile_flag(id, "door"):
@@ -76,9 +76,15 @@ static func entries(tab: int, ship, cable_cost: Dictionary) -> Array:
 				out.append(item_entry(ship, id))
 		_:
 			for id in _sorted_parts(ship):
-				if component_tab(ship.components.def(id)) == tab:
+				if component_tab(ship.components.def(id)) == tab and shown(ship, id):
 					out.append(part_entry(ship, id))
 	return out
+
+
+## Does the build palette list part `id`: one is held, or its blueprint is known (so it could be crafted)? Anything
+## else lives in the crafting panel only.
+static func shown(ship, id: String) -> bool:
+	return ship.inventory.count(id) > 0 or ship.crafting.is_known(id)
 
 
 ## Every component id, grouped by family (in the order the families first appear), then by line, then as listed.
@@ -138,7 +144,15 @@ static func part_entry(ship, id: String) -> Dictionary:
 	return {"key": "part:" + id, "kind": "part", "id": id, "piece": "", "name": str(def.get("name", id)), "line": line_of(def),
 		"tier": int(def.get("tier", 0)), "size": Vector2i(int(def["size"][0]), int(def["size"][1])),
 		"out_size": Vector2i(int(def["mount"]["outside"][0]), int(def["mount"]["outside"][1])) if mount else Vector2i.ZERO,
-		"power": ship.effective(id)["power"], "cost": {}, "count": n, "ok": n > 0, "why": "" if n > 0 else "none in cargo"}
+		"power": ship.effective(id)["power"], "cost": {}, "count": n, "ok": n > 0, "why": "" if n > 0 else _not_held(ship, id)}
+
+
+## Why a part that is not held cannot be placed: where to craft it, or that it has no blueprint here.
+static func _not_held(ship, id: String) -> String:
+	if ship.crafting.is_known(id):
+		return "0 held, craft at the %s (C)" % str(Crafting.STATIONS.get(ship.crafting.station_of(id), "fabricator")).to_lower()
+	return "none held, and the blueprint is not known"
+
 
 
 ## Held cargo that is not a part (a rare material, ammo, gear): shown, never placed.
@@ -200,11 +214,11 @@ static func size_text(s: Vector2i) -> String:
 	return "%dx%d" % [s.x, s.y]
 
 
-## What the selection card says about card `e` on `ship`: {title, line (its name), tier, rows ([label, value]),
-## quirk, abilities (lines), blurb, recipe, place}. `rot`: the quarter turns the tool has now (a mount's facing).
+## What the selection card says about card `e` on `ship`: {title, line (its name), tier, does (a part's sentence), rows ([label, value]),
+## kinds (what its type means, lines), quirk, abilities (lines), blurb, recipe, place}. `rot`: the quarter turns the tool has now (a mount's facing).
 static func info(e: Dictionary, ship, rot := 0) -> Dictionary:
 	var out := {"title": e["name"], "line": LINE_NAMES.get(e["line"], str(e["line"]).capitalize()), "tier": e["tier"], "rows": [],
-		"quirk": "", "abilities": [], "blurb": "", "recipe": "", "place": ""}
+		"does": "", "kinds": [], "quirk": "", "abilities": [], "blurb": "", "recipe": "", "place": ""}
 	match e["kind"]:
 		"part":
 			_part_info(out, e, ship, rot)
@@ -214,6 +228,7 @@ static func info(e: Dictionary, ship, rot := 0) -> Dictionary:
 				d = Content.entry("materials", e["id"])
 			out["line"] = str(d.get("kind", d.get("rarity", "cargo"))).replace("_", " ").capitalize()
 			out["rows"] = [["In cargo", str(e["count"])]]
+			out["does"] = Describe.of(e["id"], ship)["does"]
 			out["blurb"] = str(d.get("blurb", ""))
 			out["recipe"] = cost_text(ship.crafting.def(e["id"]).get("materials", {})) if ship.crafting.has(e["id"]) else ""
 			out["place"] = "Not placed on the ship: it is spent by weapons, crafting or the crew, or sold at a station."
@@ -269,108 +284,30 @@ static func _tile_info(out: Dictionary, e: Dictionary, ship) -> void:
 
 static func _part_info(out: Dictionary, e: Dictionary, ship, rot: int) -> void:
 	var def: Dictionary = ship.components.def(e["id"])
-	var eff: Dictionary = ship.effective(e["id"])
-	var st: Dictionary = eff["stats"]
-	var mount := Mounts.is_mount(def)
-	var rows := []
-	rows.append(["Size", size_text(e["size"]) + (" + %s outside" % size_text(e["out_size"]) if mount else "")])
-	rows.append(["Power", power_text(float(eff["power"]))])
-	rows.append(["HP", "%d%s" % [eff["hp"], " (outside %d)" % int(def["mount"]["outside_hp"]) if mount else ""]])
-	match str(def.get("family", "")):
-		"engine":
-			rows.append(["Thrust", num(float(st.get("thrust", 0.0)))])
-			if st.has("fuel_mult"):
-				rows.append(["Fuel use", "x" + num(float(st["fuel_mult"]))])
-		"shield":
-			rows.append(["Layers", num(float(st.get("layers", 0)))])
-			rows.append(["Sectors", num(float(st.get("sectors", 1)))])
-			rows.append(["Recharge", num(float(st.get("recharge", 2.0))) + " s a layer"])
-		"weapon":
-			rows.append_array(_weapon_rows(e["id"]))
-		"belt_drive":
-			rows.append(["Belt speed", "%s cells a second" % num(float(st.get("belt_speed", 0.0)))])
-			rows.append(["Feeds", "1 unit every %s s" % num(float(st.get("belt_interval", 1.0)))])
-		"ammo_rack":
-			rows.append(["Holds", "%d units of one ammo" % int(st.get("capacity", 20))])
-		"smelter":
-			rows.append(["Smelts", "level %d%s, speed x%s" % [int(st.get("smelt_level", 1)), ", plasma tool" if float(st.get("plasma", 0.0)) > 0.0 else "", num(float(st.get("smelt_speed", 1.0)))]])
-		_:
-			for k in st:
-				rows.append([_label(k), num(float(st[k]))])
-	rows.append(["Heat", "%s/s, cools %s/s, limit %s" % [num(eff["heat_per_s"]), num(eff["cooling"]), num(eff["heat_limit"])]])
-	if def.get("manned", false):
-		rows.append(["Crew", "works better manned"])
-	out["rows"] = rows
-	var quirks := []
-	if e["line"] == "scrap" or def.get("line", "") == "scrap":
-		quirks.append("Scrap line: malfunctions more often (%s a minute)" % num(eff["malfunction_per_min"]))
-	elif def.get("line", "") == "neon":
-		quirks.append("Neon line: ion hits do x%s" % num(eff["ion_vulnerability"]))
-	var tags: Array = def.get("effects", []) if def.get("effects") is Array else []
-	if str(def.get("family", "")) == "weapon":
-		var w := _weapon(e["id"])
-		if w.get("effects") is Array:
-			tags = tags + w["effects"]
-	if not tags.is_empty():
-		quirks.append("Effects: " + ", ".join(tags.map(func(t): return str(t).replace("_", " "))))
-	if str(def.get("family", "")) in ["ammo_rack", "belt_drive"]:
-		quirks.append(str(def.get("quirk", "")))
-	out["quirk"] = ". ".join(quirks)
+	var d := Describe.of(e["id"], ship, rot)  # what it does, the stats, what its type means, the lore
+	out["does"] = d["does"]
+	out["rows"] = d["rows"]
+	out["kinds"] = d["kinds"]
+	out["quirk"] = " ".join(d["notes"])
+	out["blurb"] = d["lore"]
 	for a in def.get("abilities", []):
 		if str(a.get("type", "")) == "passive":
 			out["abilities"].append("%s (passive)" % a.get("name", a.get("id", "")))
 		else:
 			out["abilities"].append("%s: %s key, %s s, rests %s s" % [a.get("name", a.get("id", "")), a.get("key", "?"), num(float(a.get("duration", 0))), num(float(a.get("cooldown", 0)))])
-	out["blurb"] = str(def.get("blurb", ""))
 	out["recipe"] = _recipe_text(ship, e["id"], def)
-	if mount:
+	if Mounts.is_mount(def):
 		var o := Mounts.turned(def["mount"]["outside"], rot)
 		out["place"] = "Hull mount: outside half %dx%d, pointing %s: put it in space against a flat outer wall. The inside half goes on the floor behind it. R turns it." % [o.x, o.y, DIRS[posmod(rot, 4)]]
 	else:
 		out["place"] = "On floor inside the hull, clear of other systems. R turns it. Wire it to a reactor with cable."
 
 
-static func _weapon(id: String) -> Dictionary:
-	if _weapons == null:
-		_weapons = Weapons.new()
-	return _weapons.def(id) if _weapons.has(id) else {}
-
-
-static func _weapon_rows(id: String) -> Array:
-	var w := _weapon(id)
-	if w.is_empty():
-		return []
-	var shots := int(w.get("shots", 1))
-	var rows := [["Damage", "%s%s %s" % [num(float(w["damage"])), " x%d" % shots if shots > 1 else "", w["damage_type"]] + (" a second" if w.get("kind") == "beam" else "")],
-		["Cooldown", num(float(w["cooldown"])) + " s"], ["Range", num(float(w["range"])) + " px"],
-		["Aim", "turret, %s deg arc" % num(float(w["arc"])) if w["turret"] else "fixed, %s deg gimbal" % num(float(w["gimbal"]))]]
-	var extra := []
-	if int(w.get("pierce", 0)) > 0:
-		extra.append("pierces %d" % int(w["pierce"]))
-	if float(w.get("splash", 0.0)) > 0.0:
-		extra.append("splash %s" % num(float(w["splash"])))
-	if float(w.get("fire_chance", 0.0)) > 0.0:
-		extra.append("fire %d%%" % roundi(float(w["fire_chance"]) * 100.0))
-	if float(w.get("breach_chance", 0.0)) > 0.0:
-		extra.append("breach %d%%" % roundi(float(w["breach_chance"]) * 100.0))
-	if w.get("pass_shields", false):
-		extra.append("passes shields")
-	if str(w.get("ammo", "")) != "":
-		extra.append("ammo: " + str(w["ammo"]))
-	if not extra.is_empty():
-		rows.append(["Special", ", ".join(extra)])
-	return rows
-
-
 static func _recipe_text(ship, id: String, def: Dictionary) -> String:
 	var r: Dictionary = ship.crafting.def(id)
 	if r.is_empty():
 		return "No recipe: found, bought or earned" if def.get("unique", false) else "No recipe"
-	var t := "%s, fabricator level %d" % [cost_text(r.get("materials", {})), int(r.get("fab_level", 1))]
+	var t := "%s, %s level %d" % [cost_text(r.get("materials", {})), str(Crafting.STATIONS.get(ship.crafting.station_of(id), "fabricator")).to_lower(), int(r.get("fab_level", 1))]
 	if not r.get("tools", []).is_empty():
 		t += ", tools: " + ", ".join(r["tools"])
 	return t + ("" if ship.crafting.is_known(id) else " (blueprint not known)")
-
-
-static func _label(key: String) -> String:
-	return key.replace("_", " ").capitalize()
