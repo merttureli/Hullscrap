@@ -13,6 +13,14 @@ def _t(n):
     return np.arange(n, dtype=np.float32) / SR
 
 
+def _tail(y, ms=30):
+    """Cosine fade over the last ms so a hit that is cut at its buffer end never clicks."""
+    k = min(len(y) // 2, int(ms * SR / 1000))
+    y = y.copy()
+    y[-k:] *= (0.5 + 0.5 * np.cos(np.pi * np.arange(k) / k)).astype(np.float32)
+    return y
+
+
 def _norm(y, peak=1.0):
     return (y * (peak / max(1e-9, float(np.abs(y).max())))).astype(np.float32)
 
@@ -100,7 +108,7 @@ def keys(midi, dur, vel=3, idx=2.0, rel=0.5, tau=1.1):
     amp = np.exp(-t / (tau * (1.6 - 0.008 * (midi - 40)))) * np.minimum(1.0, t / 0.002)
     rl = np.ones(n, np.float32)
     rl[n_on:] = np.exp(-(t[n_on:] - t[n_on]) / (rel / 4.5))
-    return (y * amp * rl * 0.5 * (0.35 + 0.65 * v)).astype(np.float32)
+    return _tail((y * amp * rl * 0.5 * (0.35 + 0.65 * v)).astype(np.float32), 40)
 
 
 # ---------- bells: FM bell and music box ----------
@@ -156,7 +164,7 @@ def kick(seed=0, f0=150.0, f1=46.0, tau_f=0.032, decay=0.17, click=0.25, dur=0.5
     fi = f1 + (f0 - f1) * np.exp(-t / tau_f)
     y = np.sin(2 * np.pi * np.cumsum(fi) / SR) * np.exp(-t / decay)
     y += click * S.filt(_noise(n, seed), hp=1500) * np.exp(-t / 0.004)
-    return S.crush(_norm(np.tanh(1.6 * y), 0.95))
+    return S.crush(_tail(_norm(np.tanh(1.6 * y), 0.95)))
 
 
 @cache
@@ -165,7 +173,7 @@ def snare(seed=0, tone=185.0, decay=0.1, noise_hp=1800, dur=0.35, body=0.6):
     t = _t(n)
     nz = S.filt(_noise(n, seed), hp=noise_hp, lp=9000) * np.exp(-t / decay)
     tn = np.sin(2 * np.pi * (tone + 60 * np.exp(-t / 0.02)) * t) * np.exp(-t / 0.07) * body
-    return S.crush(_norm(nz + tn, 0.9))
+    return S.crush(_tail(_norm(nz + tn, 0.9)))
 
 
 @cache
@@ -173,7 +181,7 @@ def hat(seed=0, open_=False, hp=7000):
     n = int((0.38 if open_ else 0.09) * SR)
     t = _t(n)
     y = S.filt(_noise(n, seed), hp=hp, order=2) * np.exp(-t / (0.12 if open_ else 0.018))
-    return S.crush(_norm(y, 0.8))
+    return S.crush(_tail(_norm(y, 0.8)))
 
 
 @cache
@@ -182,7 +190,7 @@ def rim(seed=0):
     t = _t(n)
     y = (np.sin(2 * np.pi * 1750 * t) * 0.6 + np.sin(2 * np.pi * 455 * t)) * np.exp(-t / 0.012)
     y += 0.5 * S.filt(_noise(n, seed), hp=2500) * np.exp(-t / 0.003)
-    return S.crush(_norm(y, 0.85))
+    return S.crush(_tail(_norm(y, 0.85)))
 
 
 @cache
@@ -191,7 +199,7 @@ def brush(seed=0, dur=0.32, lo=1200, hi=7000, swell=0.07):
     n = int(dur * SR)
     t = _t(n)
     e = np.minimum(1.0, t / swell) * np.exp(-np.maximum(t - swell, 0) / (dur * 0.35))
-    return S.crush(_norm(S.band(_noise(n, seed), lo, hi) * e, 0.8))
+    return S.crush(_tail(_norm(S.band(_noise(n, seed), lo, hi) * e, 0.8)))
 
 
 @cache
@@ -205,7 +213,7 @@ def clank(seed=0, base=480.0, decay=0.6, dur=1.4):
         r2 = r * rng.uniform(0.97, 1.04)
         y += a * np.sin(2 * np.pi * base * r2 * t + rng.uniform(0, 6.28)) * np.exp(-t / (decay * d))
     y += 1.2 * S.band(_noise(n, seed + 1), 1500, 8000) * np.exp(-t / 0.012)
-    return S.crush(_norm(y * np.minimum(1.0, t / 0.001), 0.85))
+    return S.crush(_tail(_norm(y * np.minimum(1.0, t / 0.001), 0.85)))
 
 
 @cache
@@ -214,7 +222,7 @@ def crash(seed=0, dur=2.0):
     t = _t(n)
     y = S.filt(_noise(n, seed), hp=2800) * np.exp(-t / 0.7)
     y += 0.5 * clank(seed, 330.0, 0.9, 2.0)[:n] if n <= 2 * SR else 0
-    return S.crush(_norm(y, 0.8))
+    return S.crush(_tail(_norm(y, 0.8)))
 
 
 def riser(n, seed=0, lo=250.0, hi=9000.0):
@@ -222,7 +230,7 @@ def riser(n, seed=0, lo=250.0, hi=9000.0):
     t = np.arange(n) / n
     fc = lo * (hi / lo) ** t
     y = S.lp_sweep(_noise(n, seed)[None, :], fc.astype(np.float32), lo, hi, nb=6)[0]
-    return (S.filt(y, hp=200) * t ** 2.2).astype(np.float32)
+    return _tail((S.filt(y, hp=200) * t ** 2.2).astype(np.float32), 20)
 
 
 # ---------- textures (full-loop length) ----------

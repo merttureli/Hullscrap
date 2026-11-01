@@ -24,21 +24,21 @@
    3.7
   ],
   "bpm": 76.19,
-  "bytes": 1523124,
+  "bytes": 1523019,
   "peak_db": -4.12,
   "rms_db": -18.01,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.52005,
+   "max_step": 0.52004,
    "rms_first_db": -22.2,
    "rms_last_db": -22.3,
-   "seam_step": 0.06917,
-   "typ_step_p999": 0.18267
+   "seam_step": 0.06935,
+   "typ_step_p999": 0.18255
   },
   "seconds": 100.8,
   "target_rms_db": -18.0,
   "title": "Workbench",
-  "true_peak_db": -3.63
+  "true_peak_db": -3.6
  },
  "combat": {
   "bands_pct": [
@@ -46,24 +46,24 @@
    32.6,
    30.0,
    5.4,
-   3.5
+   3.4
   ],
   "bpm": 126.0,
-  "bytes": 2391888,
-  "peak_db": -1.59,
+  "bytes": 2393457,
+  "peak_db": -1.36,
   "rms_db": -15.02,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.85129,
+   "max_step": 0.84468,
    "rms_first_db": -16.6,
-   "rms_last_db": -15.1,
-   "seam_step": 0.03609,
-   "typ_step_p999": 0.32938
+   "rms_last_db": -15.2,
+   "seam_step": 0.04621,
+   "typ_step_p999": 0.32864
   },
   "seconds": 121.9,
   "target_rms_db": -15.0,
   "title": "Broadside",
-  "true_peak_db": -1.34
+  "true_peak_db": -1.31
  },
  "defeat": {
   "bands_pct": [
@@ -73,7 +73,7 @@
    1.0,
    0.0
   ],
-  "bytes": 97376,
+  "bytes": 97389,
   "peak_db": -3.06,
   "rms_db": -18.92,
   "samples_off_vs_render": 0,
@@ -106,7 +106,7 @@
    3.3
   ],
   "bpm": 80.0,
-  "bytes": 2391401,
+  "bytes": 2391436,
   "peak_db": -2.89,
   "rms_db": -18.01,
   "samples_off_vs_render": 0,
@@ -115,7 +115,7 @@
    "rms_first_db": -21.3,
    "rms_last_db": -19.1,
    "seam_step": 0.03566,
-   "typ_step_p999": 0.20995
+   "typ_step_p999": 0.20998
   },
   "seconds": 144.0,
   "target_rms_db": -18.0,
@@ -131,8 +131,8 @@
    3.9
   ],
   "bpm": 88.16,
-  "bytes": 2518068,
-  "peak_db": -2.39,
+  "bytes": 2519028,
+  "peak_db": -2.36,
   "rms_db": -18.02,
   "samples_off_vs_render": 0,
   "seam": {
@@ -140,12 +140,12 @@
    "rms_first_db": -20.6,
    "rms_last_db": -18.8,
    "seam_step": 0.01974,
-   "typ_step_p999": 0.19247
+   "typ_step_p999": 0.19259
   },
   "seconds": 152.44,
   "target_rms_db": -18.0,
   "title": "Salvage Lanes",
-  "true_peak_db": -2.21
+  "true_peak_db": -2.18
  },
  "hollow": {
   "bands_pct": [
@@ -174,19 +174,19 @@
  },
  "jump": {
   "bands_pct": [
-   25.4,
+   25.2,
    11.4,
-   45.3,
-   15.3,
-   2.7
+   45.0,
+   15.5,
+   2.9
   ],
-  "bytes": 71961,
-  "peak_db": -2.04,
+  "bytes": 71873,
+  "peak_db": -1.89,
   "rms_db": -21.59,
   "samples_off_vs_render": 0,
   "seconds": 4.5,
   "title": "jump",
-  "true_peak_db": -1.95
+  "true_peak_db": -1.85
  },
  "menu": {
   "bands_pct": [
