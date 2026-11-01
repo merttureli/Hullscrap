@@ -23,6 +23,8 @@ class Song:
         return beats * self.spb / SR
 
     def at(self, beat, ms=0.0):
+        if 0 < ms < 20:   # humanise: +-5 ms at most (a looser ms >= 20 is a deliberate sloppiness, used by the Hollow)
+            ms = min(ms, 5.0)
         j = float(np.clip(self.rng.normal(0, ms / 2), -ms, ms)) if ms else 0.0
         return int(round(beat * self.spb + j * SR / 1000.0))
 

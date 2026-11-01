@@ -39,7 +39,6 @@ def render():
     s = Song(76, BARS, seed=606)
     bar = lambda b: b * 4.0
     cyc = lambda b: b // 8
-    off = lambda j: j // 1 + (SW if j % 1 else 0)    # unused helper kept simple below
 
     for b in range(BARS):
         c, bi = cyc(b), b % 8

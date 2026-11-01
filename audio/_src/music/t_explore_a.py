@@ -1,7 +1,7 @@
 """explore_a.ogg  "Drift"  A aeolian, 80 BPM, 48 bars (2:24).
 Am(add9) - Fmaj7 - C - Gsus4, two bars each, six cycles. Cycles 1-2: pad and a sparse 16th pluck arp with the
-dotted-eighth echo, no drums. Cycles 3-4: a soft kick and rim; the theme's opening phrase on the lead in cycle 4.
-Cycle 5: breakdown with a riser. Cycle 6: drums with light hats, the phrase again on the music box, then thin out."""
+dotted-eighth echo, no drums. Cycles 3-4: a soft kick and rim; the theme's opening phrase (the one fragment) on the lead in cycle 4.
+Cycle 5: breakdown with a riser. Cycle 6: drums with light hats, then thin out."""
 import numpy as np
 import synth as S
 import voices as V
@@ -81,11 +81,9 @@ def render():
     # a riser through the end of the breakdown into the last cycle
     s.put("riser", V.riser(int(s.sec(bar(7)) * S.SR), 5), bar(33), 0.0 + 0.5, 0.0)
 
-    # --- the theme's opening phrase, A aeolian: lead in cycle 4, music box in cycle 6
+    # --- the theme's opening phrase (one fragment), A aeolian, on the lead in cycle 4
     for b, m, d in T.notes(57, "aeolian", start=bar(26), bars=2, shift=12):
         s.put("lead", V.lead(m, s.sec(d) * 0.95), b, s.v(0.9, 0.06), pan=0.1, ms=6)
-    for b, m, d in T.notes(57, "aeolian", start=bar(42), bars=2, shift=24):
-        s.put("box", V.musicbox(m, 3.4, 0.0, 0.0, 1.6), b, s.v(0.55, 0.08), pan=-0.1, ms=5)
 
     # --- texture
     s.part("tex").put(V.hiss(s.L, 5) * (0.6 + 0.4 * S.lfo(s.L, 0.05)), 0, 1.0, 0.0)
@@ -106,7 +104,6 @@ def render():
         "pluck": dict(g=-4, hp=260, lp=8000, send=0.35, fx=echo),
         "bell": dict(g=0, hp=350, send=0.7),
         "lead": dict(g=-2, hp=250, send=0.5),
-        "box": dict(g=-2, hp=350, send=0.6),
         "kick": dict(g=-3, hp=30, lp=2500, send=0.05),
         "rim": dict(g=-6, hp=300, send=0.25),
         "hat": dict(g=-8, hp=5000, send=0.15),

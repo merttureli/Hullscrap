@@ -1,103 +1,151 @@
 {
+ "ada_found": {
+  "bands_pct": [
+   8.4,
+   41.6,
+   45.8,
+   3.3,
+   0.8
+  ],
+  "bytes": 108060,
+  "peak_db": -3.63,
+  "rms_db": -18.16,
+  "samples_off_vs_render": 0,
+  "seconds": 6.0,
+  "title": "ada_found",
+  "true_peak_db": -3.59
+ },
  "build": {
   "bands_pct": [
-   39.7,
-   41.1,
-   12.5,
+   39.3,
+   41.5,
+   12.6,
    3.0,
    3.7
   ],
   "bpm": 76.19,
-  "bytes": 1522486,
-  "peak_db": -4.13,
+  "bytes": 1523124,
+  "peak_db": -4.12,
   "rms_db": -18.01,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.4996,
-   "rms_first_db": -22.0,
+   "max_step": 0.52005,
+   "rms_first_db": -22.2,
    "rms_last_db": -22.3,
-   "seam_step": 0.07115,
-   "typ_step_p999": 0.1819
+   "seam_step": 0.06917,
+   "typ_step_p999": 0.18267
   },
   "seconds": 100.8,
   "target_rms_db": -18.0,
   "title": "Workbench",
-  "true_peak_db": -3.79
+  "true_peak_db": -3.63
  },
  "combat": {
   "bands_pct": [
-   28.8,
-   32.7,
-   29.7,
+   28.6,
+   32.6,
+   30.0,
    5.4,
    3.5
   ],
   "bpm": 126.0,
-  "bytes": 2391050,
-  "peak_db": -1.48,
+  "bytes": 2391888,
+  "peak_db": -1.59,
   "rms_db": -15.02,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.84447,
+   "max_step": 0.85129,
    "rms_first_db": -16.6,
    "rms_last_db": -15.1,
-   "seam_step": 0.03606,
-   "typ_step_p999": 0.331
+   "seam_step": 0.03609,
+   "typ_step_p999": 0.32938
   },
   "seconds": 121.9,
   "target_rms_db": -15.0,
   "title": "Broadside",
-  "true_peak_db": -1.31
+  "true_peak_db": -1.34
+ },
+ "defeat": {
+  "bands_pct": [
+   12.2,
+   55.3,
+   31.5,
+   1.0,
+   0.0
+  ],
+  "bytes": 97376,
+  "peak_db": -3.06,
+  "rms_db": -18.92,
+  "samples_off_vs_render": 0,
+  "seconds": 6.0,
+  "title": "defeat",
+  "true_peak_db": -3.05
+ },
+ "ending": {
+  "bands_pct": [
+   11.2,
+   43.3,
+   33.9,
+   9.4,
+   2.2
+  ],
+  "bytes": 217798,
+  "peak_db": -2.37,
+  "rms_db": -16.84,
+  "samples_off_vs_render": 0,
+  "seconds": 10.0,
+  "title": "ending",
+  "true_peak_db": -2.37
  },
  "explore_a": {
   "bands_pct": [
-   26.6,
-   29.7,
-   32.8,
+   27.2,
+   29.8,
+   32.1,
    7.6,
    3.3
   ],
   "bpm": 80.0,
-  "bytes": 2394068,
-  "peak_db": -2.51,
+  "bytes": 2391401,
+  "peak_db": -2.89,
   "rms_db": -18.01,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.46148,
-   "rms_first_db": -21.2,
-   "rms_last_db": -19.3,
-   "seam_step": 0.03219,
-   "typ_step_p999": 0.21009
+   "max_step": 0.45065,
+   "rms_first_db": -21.3,
+   "rms_last_db": -19.1,
+   "seam_step": 0.03566,
+   "typ_step_p999": 0.20995
   },
   "seconds": 144.0,
   "target_rms_db": -18.0,
   "title": "Drift",
-  "true_peak_db": -2.51
+  "true_peak_db": -2.84
  },
  "explore_b": {
   "bands_pct": [
    20.7,
-   45.4,
-   24.8,
+   45.5,
+   24.7,
    5.3,
    3.9
   ],
   "bpm": 88.16,
-  "bytes": 2519102,
-  "peak_db": -2.07,
-  "rms_db": -18.01,
+  "bytes": 2518068,
+  "peak_db": -2.39,
+  "rms_db": -18.02,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.48654,
-   "rms_first_db": -20.5,
-   "rms_last_db": -18.9,
-   "seam_step": 0.01198,
-   "typ_step_p999": 0.19282
+   "max_step": 0.49454,
+   "rms_first_db": -20.6,
+   "rms_last_db": -18.8,
+   "seam_step": 0.01974,
+   "typ_step_p999": 0.19247
   },
   "seconds": 152.44,
   "target_rms_db": -18.0,
   "title": "Salvage Lanes",
-  "true_peak_db": -1.81
+  "true_peak_db": -2.21
  },
  "hollow": {
   "bands_pct": [
@@ -108,7 +156,7 @@
    0.5
   ],
   "bpm": 60.0,
-  "bytes": 2280740,
+  "bytes": 2280724,
   "peak_db": -3.28,
   "rms_db": -18.0,
   "samples_off_vs_render": 0,
@@ -124,29 +172,93 @@
   "title": "Manners",
   "true_peak_db": -3.28
  },
+ "jump": {
+  "bands_pct": [
+   25.4,
+   11.4,
+   45.3,
+   15.3,
+   2.7
+  ],
+  "bytes": 71961,
+  "peak_db": -2.04,
+  "rms_db": -21.59,
+  "samples_off_vs_render": 0,
+  "seconds": 4.5,
+  "title": "jump",
+  "true_peak_db": -1.95
+ },
  "menu": {
   "bands_pct": [
    20.8,
-   36.0,
-   37.6,
+   35.8,
+   37.8,
    4.4,
    1.2
   ],
   "bpm": 72.0,
-  "bytes": 1998470,
-  "peak_db": -4.53,
+  "bytes": 1997541,
+  "peak_db": -3.08,
   "rms_db": -18.0,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.23371,
-   "rms_first_db": -22.0,
-   "rms_last_db": -20.1,
-   "seam_step": 0.01584,
-   "typ_step_p999": 0.10882
+   "max_step": 0.21132,
+   "rms_first_db": -22.3,
+   "rms_last_db": -19.9,
+   "seam_step": 0.01334,
+   "typ_step_p999": 0.10944
   },
   "seconds": 120.0,
   "target_rms_db": -18.0,
   "title": "Ma's Ledger",
-  "true_peak_db": -4.53
+  "true_peak_db": -3.08
+ },
+ "region_cross": {
+  "bands_pct": [
+   14.6,
+   41.5,
+   27.7,
+   14.2,
+   2.0
+  ],
+  "bytes": 114429,
+  "peak_db": -3.62,
+  "rms_db": -18.48,
+  "samples_off_vs_render": 0,
+  "seconds": 5.5,
+  "title": "region_cross",
+  "true_peak_db": -3.41
+ },
+ "unlock": {
+  "bands_pct": [
+   0.0,
+   9.0,
+   66.1,
+   20.1,
+   4.8
+  ],
+  "bytes": 66967,
+  "peak_db": -2.05,
+  "rms_db": -19.52,
+  "samples_off_vs_render": 0,
+  "seconds": 3.2,
+  "title": "unlock",
+  "true_peak_db": -1.88
+ },
+ "victory": {
+  "bands_pct": [
+   21.6,
+   30.0,
+   32.9,
+   12.8,
+   2.8
+  ],
+  "bytes": 105600,
+  "peak_db": -3.46,
+  "rms_db": -19.82,
+  "samples_off_vs_render": 0,
+  "seconds": 5.0,
+  "title": "victory",
+  "true_peak_db": -3.24
  }
 }

@@ -1,6 +1,6 @@
 """combat.ogg  "Broadside"  C minor, 126 BPM, 64 bars (2:02).
 One chord a bar. A: Cm - Ab - Eb - Bb. B: Fm - Ab - Gsus4 - G. Each 8-bar unit is A then B; the theme, mapped into C minor,
-fits one unit exactly (one theme bar per chord) and is the lead in units 2, 5 (octave up), 7 (doubled).
+fits one unit exactly (one theme bar per chord) and is the lead in units 2, 5 (octave up, right after the breakdown) and 7 (doubled).
 Intro 4 bars; units 1-3; a 4-bar breakdown; units 4-7. Eighth-note bass, full drums with scrap-metal accents,
 a 16th arp and stabs; a snare roll and riser into every B and into the loop."""
 import numpy as np
@@ -23,7 +23,6 @@ ARP = [0, 2, 3, 2, 4, 3, 2, 1, 0, 2, 3, 5, 4, 3, 2, 3]
 def render():
     s = Song(126, BARS, seed=404)
     bar = lambda b: b * 4.0
-    unit = lambda b: (b - 4) // 8 if b >= 4 else -1       # 0..2 before the break (b<28), after it 4..7 as 4..
     def chord(b):
         i = b % 8 if b < 4 else (b - 4) % 8 if b < 28 else (b - 32) % 8 if b >= 32 else (b - 28) % 4
         return (A_CH + B_CH)[i] if b >= 4 else A_CH[b % 4]
@@ -62,7 +61,7 @@ def render():
                   pan=(-0.6, 0.6)[(st // 2) % 2], ms=2)
 
     # --- the theme as lead (C minor, one theme bar per chord, unit starts at bars 12, 36 and 52)
-    for start, shifts in ((12, (0,)), (36, (12,)), (52, (0, 12))):
+    for start, shifts in ((12, (0,)), (32, (12,)), (48, (0, 12))):
         for sh in shifts:
             for b, m, d in T.notes(60, "minor", start=bar(start), shift=sh):
                 s.put("lead", V.lead(m, s.sec(d) * 0.97, 14.0, 5.5, 0.25, 0.015, 0.2, 0.15, 0.5), b, (0.95 if sh == 0 else 0.7) * s.v(1.0, 0.04), pan=0.0, ms=3)
@@ -94,7 +93,6 @@ def render():
         # hats: 8ths, 16ths in B sections
         step = 0.25 if bb else 0.5
         for i in range(int(4 / step)):
-            on = (i % (1 / step * 0.5 / 1 if step == 0.25 else 1) == 0)
             v = (0.5 if (i * step) % 1 == 0.5 else 0.3 if (i * step) % 1 == 0 else 0.22)
             s.put("hat", V.hat(i % 3, False), bar(b) + i * step, v * s.v(1, 0.15), pan=0.35, ms=2)
         if b % 2 == 1:

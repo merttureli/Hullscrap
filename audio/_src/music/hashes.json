@@ -1,8 +1,15 @@
 {
- "build": "78170325b056a845",
- "combat": "708c88cf55b71145",
- "explore_a": "dfaedfac5e06d55d",
- "explore_b": "7c173c83f15a7a75",
- "hollow": "eba5a9e01a245c37",
- "menu": "2ee8c9859f4dc4bd"
+ "ada_found": "b3fe68692756d248",
+ "build": "a26c62378791e5ed",
+ "combat": "0e8e833a33ee43fb",
+ "defeat": "b3fe68692756d248",
+ "ending": "b3fe68692756d248",
+ "explore_a": "cf9319928fc07bef",
+ "explore_b": "c5e77eee6b7f6291",
+ "hollow": "c2eb03ee97f1f52a",
+ "jump": "b3fe68692756d248",
+ "menu": "305e294a77434ac3",
+ "region_cross": "b3fe68692756d248",
+ "unlock": "b3fe68692756d248",
+ "victory": "b3fe68692756d248"
 }

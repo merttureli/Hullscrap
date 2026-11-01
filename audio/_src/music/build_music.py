@@ -1,5 +1,5 @@
 """Builds the soundtrack: python audio/_src/music/build_music.py [names...] [--force]
-Renders each track (deterministic, numpy only), encodes Ogg Vorbis (ffmpeg libvorbis, q5, 44.1 kHz stereo) into
+Renders each track (deterministic, numpy only), encodes Ogg Vorbis (ffmpeg libvorbis, q5, 44.1 kHz stereo, bitexact so a re-run gives the same bytes) into
 assets/audio/music/, measures the decoded file, and writes data/music.json, the ASSETS.md rows and report.json.
 A track whose source hash (engine + its own file) is unchanged is skipped. Godot's .import files for the loops
 are patched to loop=true (run `godot --headless --import` once first so they exist)."""
@@ -38,7 +38,7 @@ def src_hash(*files):
 
 def encode(y, path):
     p = subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "f32le", "-ar", "44100", "-ac", "2", "-i", "-",
-                        "-c:a", "libvorbis", "-q:a", "5", "-ar", "44100", path], input=np.ascontiguousarray(y.T, "<f4").tobytes(), capture_output=True)
+                        "-fflags", "+bitexact", "-flags:a", "+bitexact", "-c:a", "libvorbis", "-q:a", "5", "-ar", "44100", path], input=np.ascontiguousarray(y.T, "<f4").tobytes(), capture_output=True)
     if p.returncode:
         raise RuntimeError(p.stderr.decode())
 
