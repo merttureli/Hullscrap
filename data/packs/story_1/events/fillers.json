@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "quest_old_beacon", "type": "quest", "weight": 2, "once": false, "requires": {}, "title": "Back in five",
+      "id": "quest_old_beacon", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Back in five",
       "text": "An old claim beacon on a rock the size of a bed, ticking over on a cell somebody forgot to take. The rock has been worked out to the last vein: a tidy hole, a lamp left burning, a tin cup in a bracket. There is a file in the beacon's memory, and nobody left to say whose it is.",
       "choices": [
         {"text": "Read what it has left.", "outcomes": [
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "id": "quest_dead_relay", "type": "quest", "weight": 2, "once": false, "requires": {}, "title": "Relay, unattended",
+      "id": "quest_dead_relay", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Relay, unattended",
       "text": "A Concord relay buoy, powered and polished, forwarding nothing to nobody. Its status board is green. It has been green for forty years, and it still sends a heartbeat every nine seconds to a station that is not there. In its outbox, one file is waiting to send.",
       "choices": [
         {"text": "Read what it has left.", "outcomes": [
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "id": "quest_prism_buoy", "type": "quest", "weight": 2, "once": false, "requires": {}, "title": "A buoy that sings because someone must",
+      "id": "quest_prism_buoy", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "A buoy that sings because someone must",
       "text": "A Lumen buoy turns in the dark, singing one long note and then stopping to wait, politely, for an answer. It sounds like a question. The pause is the right length for a reply. Nobody is on the other end to give it one, and the buoy has, you suspect, stopped expecting anybody to.",
       "choices": [
         {"text": "Read what it has left.", "outcomes": [
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "id": "quest_message_cache", "type": "quest", "weight": 2, "once": false, "requires": {}, "title": "To whoever",
+      "id": "quest_message_cache", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "To whoever",
       "text": "A sealed cargo tube, welded to a rock with a lot of caution and not much skill, marked TO WHOEVER. Inside, a data slug, a tin of the blue ration, and a handwritten label: PLEASE READ. IT'S NOT THE BAD KIND.",
       "choices": [
         {"text": "Read what it has left.", "outcomes": [

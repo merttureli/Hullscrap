@@ -395,3 +395,27 @@ func test_the_warden_hail_carries_the_line_of_the_stage() -> void:
 	for l in story:
 		lines[l] = true
 	eq(lines.size(), story.size(), "no two stages repeat a line")
+
+
+# --- the `fallback` events (the filler quests) ----------------------------------------------------------------
+
+func test_a_fallback_event_is_rolled_only_when_nothing_else_is_eligible() -> void:
+	var quest := {"id": "real_quest", "type": "quest", "weight": 1, "once": true, "requires": {}, "text": "Real",
+		"choices": [{"text": "Go", "outcomes": [{"weight": 100, "text": "Done", "effects": {"flag": "done"}}]}]}
+	var filler := {"id": "filler_quest", "type": "quest", "weight": 1000, "once": false, "fallback": true, "requires": {}, "text": "Filler",
+		"choices": [{"text": "Go", "outcomes": [{"weight": 100, "text": "Done", "effects": {}}]}]}
+	var ev := Events.new("res://tests")  # no *.json there
+	ev.add(quest, "test.json")
+	ev.add(filler, "test.json")
+	eq(ev.validate().filter(func(m): return m.contains("filler_quest") or m.contains("real_quest")), [], "both pass the validator")
+	var c := Campaign.new(3, {}, ev)
+	for i in 30:
+		eq(str(ev.pick(c, _pool_node("quest")).get("id", "")), "real_quest", "pick %d: the real quest, however heavy the filler" % i)
+	c.used["real_quest"] = true
+	for i in 5:
+		eq(str(ev.pick(c, _pool_node("quest")).get("id", "")), "filler_quest", "pick %d: nothing else is left, so the filler" % i)
+	var bad := filler.duplicate(true)
+	bad["id"] = "bad_filler"
+	bad["fallback"] = "yes"
+	ev.add(bad, "test.json")
+	check(ev.validate().any(func(m): return m.contains("bad_filler") and m.contains("fallback must be true or false")), "fallback must be a bool")
