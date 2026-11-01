@@ -25,14 +25,14 @@ const Reliability = preload("res://scripts/sim/reliability.gd")
 const WALLS: Array[int] = [1, 3, 5]
 
 
-## A wall `thick` deep facing `rot` with a laser through it (outside half on u -2..1), a reactor behind it on
-## u 2..5, and a cable between them. Returns {ship, uid, reactor, rot, thick, id}.
+## A wall `thick` deep facing `rot` with a laser through it (outside half on u -2..1, the breech centred on u -1..0), a reactor behind it on
+## u 2..3, and a cable between them. Returns {ship, uid, reactor, rot, thick, id}.
 func _rig(thick := 1, rot := 0, id := "laser_mk1") -> Dictionary:
 	var ship := Wall.wall_ship(thick, rot)
 	var depth: int = ship.components.by_id[id]["mount"]["outside"][1]
 	var uid := ship.components.place_mount(ship.grid, id, Wall.out_anchor(rot, depth), rot)
-	var reactor := ship.components.place(ship.grid, "reactor_mk1", Wall.corner(rot, 2, 5, thick, thick + 3), 0)
-	for c in [Wall.at(rot, 1, thick), Wall.at(rot, 2, thick)]:
+	var reactor := ship.components.place(ship.grid, "reactor_mk1", Wall.corner(rot, 2, 3, thick, thick + 3), rot % 2)
+	for c in [Wall.at(rot, 0, thick), Wall.at(rot, 1, thick), Wall.at(rot, 2, thick)]:  # from the breech (u -1..0) to the reactor (u 2..3)
 		ship.cables.place(ship.grid, c)
 	ship.refresh()
 	return {"ship": ship, "uid": uid, "reactor": reactor, "rot": rot, "thick": thick, "id": id}
@@ -60,11 +60,11 @@ func test_a_mount_goes_through_a_wall_of_any_thickness_in_all_four_directions() 
 			eq(plan["why"], "", tag + ": it fits")
 			eq(plan["depth"], thick, tag + ": the link is the whole wall")
 			eq(plan["link"].size(), 4 * thick, tag + ": across the full width")
-			eq(plan["anchor"], Wall.corner(rot, -2, 1, thick, thick + 1), tag + ": the inside half sits on the first floor rows behind the wall")
+			eq(plan["anchor"], Wall.corner(rot, -1, 0, thick, thick + 1), tag + ": the 2x2 breech sits centred behind the barrel, on the first floor rows behind the wall")
 			var uid: int = ship.components.place_mount(ship.grid, "laser_mk1", out, rot)
 			check(uid >= 0, tag + ": placed")
 			var inst: Dictionary = ship.components.instances[uid]
-			eq(inst["cells"].size(), 8, tag + ": the inside half is 4x2")
+			eq(inst["cells"].size(), 4, tag + ": the inside half is 2x2 (a tier 1 laser)")
 			eq(inst["out_cells"].size(), 8, tag + ": and so is the outside half")
 			eq(inst["out_hp"], 10, tag + ": the outside half has its own hp (twice the part's 5)")
 			eq(ship.components.at(inst["cells"][0]), uid, tag + ": the inside half answers at()")
@@ -83,9 +83,9 @@ func test_the_heavy_shrapnel_cannon_has_a_three_row_outside_half() -> void:
 	var uid: int = ship.components.place_mount(ship.grid, "shrapnel_cannon_scrap", out, 0)
 	check(uid >= 0, "placed")
 	var inst: Dictionary = ship.components.instances[uid]
-	eq([inst["cells"].size(), inst["out_cells"].size()], [8, 12], "a 4x2 inside half and a 4x3 outside half")
+	eq([inst["cells"].size(), inst["out_cells"].size()], [4, 12], "a 2x2 inside half and a 4x3 outside half")
 	eq(inst["out_hp"], 12, "twice the part's 6")
-	eq(inst["anchor"], Wall.corner(0, -2, 1, 2, 3), "the inside half is two rows behind a two-thick wall")
+	eq(inst["anchor"], Wall.corner(0, -1, 0, 2, 3), "the breech is centred, two rows behind a two-thick wall")
 
 
 func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp() -> void:
@@ -97,10 +97,13 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 		if d["family"] in ["weapon", "engine", "intake", "radar", "tractor"]:
 			n += 1
 			check(Mounts.is_mount(d), id + " is a hull mount")
-			var narrow: bool = d["size"][0] == 2  # Strafe Jets: 2x2 and 2x2 (docs/waves/engines_1.md)
+			var narrow: bool = d["size"][0] == 2  # a tier 1-2 gun or engine (2x2 behind a 4 wide barrel, playtest 2 P2), Strafe Jets (2x2 and 2x2, docs/waves/engines_1.md)
 			eq(d["size"], [2, 2] if narrow else [4, 2], id + ": the inside half is 4x2 (a Strafe Jets one 2x2)")
 			var console: bool = d["family"] == "radar" and not narrow  # a Radar Mk2 or Mk3 console is 4x2 behind a 2x2 dish (art/README.md)
-			eq(d["mount"]["outside"][0], 2 if console else d["size"][0], id + ": and the outside half is as wide (a radar's dish is 2 wide)")
+			var small_barrel: bool = id.begins_with("strafe") or id == "net_mouth_scrap" or id == "radar_mk1" or console  # these have a 2 wide outside half
+			eq(d["mount"]["outside"][0], 2 if small_barrel else 4, id + ": the barrel is 4 wide (a Strafe Jets, a net mouth or a radar's dish is 2 wide)")
+			if not console:
+				check(d["mount"]["outside"][0] >= d["size"][0], id + ": the barrel is at least as wide as the breech")
 			if d["family"] == "weapon":  # an armoured barrel housing (the balance pass: at 75% a bow gun went at the first volley)
 				eq(d["mount"]["outside_hp"], 2 * int(d["hp"]), id + ": a weapon's outside_hp is twice its hp")
 			else:
@@ -123,7 +126,7 @@ func _refusals(thick: int, rot: int) -> void:
 	var ok := Wall.out_anchor(rot)
 	var tag := "rot %d, %d thick" % [rot, thick]
 	var toward := Vector2i(Mounts.outward(rot))  # one step out into space
-	var breech := "the breech needs %s free floor behind the wall" % ("4x2" if rot % 2 == 0 else "2x4")  # the footprint turns with the mount
+	var breech := "the breech needs 2x2 free floor behind the wall"  # a tier 1 laser's breech: square, so it reads the same turned
 	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "", tag + ": the plain case works")
 	# the barrel must stick out into space
 	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok - toward, rot), "the barrel must stick out into space", tag + ": an outside half that overlaps the wall")
@@ -146,9 +149,9 @@ func _refusals(thick: int, rot: int) -> void:
 	ship.grid.force_tile(layer0, "wall")
 	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "", tag + ": mended")
 	# the breech needs 4x2 free floor behind the wall
-	ship.grid.force_tile(Wall.at(rot, 1, thick), "")
+	ship.grid.force_tile(Wall.at(rot, 0, thick), "")
 	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), breech, tag + ": a hole in the floor behind")
-	ship.grid.force_tile(Wall.at(rot, 1, thick), "floor")
+	ship.grid.force_tile(Wall.at(rot, 0, thick), "floor")
 	var gen: int = parts.place(ship.grid, "oxygen_gen", Wall.corner(rot, 0, 1, thick, thick + 3), rot % 2)
 	check(gen >= 0, tag + ": (setup: a generator behind the wall)")
 	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), breech, tag + ": another part in the way")
@@ -279,9 +282,9 @@ func test_the_barrel_pivot_is_read_from_the_outside_half_only() -> void:
 
 func test_wreckage_blocks_the_floor_behind_the_wall() -> void:
 	var ship := Wall.wall_ship(1)
-	var inside := Wall.corner(0, -2, 1, 1, 2)
+	var inside := Wall.corner(0, -1, 0, 1, 2)
 	ship.components.wrecks.append({"id": "reactor_mk1", "cells": [inside + Vector2i(1, 0)]})
-	eq(ship.components.can_place_mount(ship.grid, "laser_mk1", Wall.out_anchor(0), 0), "the breech needs 4x2 free floor behind the wall", "debris on the floor")
+	eq(ship.components.can_place_mount(ship.grid, "laser_mk1", Wall.out_anchor(0), 0), "the breech needs 2x2 free floor behind the wall", "debris on the floor")
 	eq(ship.components.can_place(ship.grid, "bed", inside, 0), "wreckage in the way", "and for any other part")
 	eq(ship.components.place(ship.grid, "bed", inside, 0), -1, "place() agrees")
 
@@ -295,7 +298,7 @@ func test_the_build_session_places_mounts_by_their_outside_half_and_undoes_them(
 	eq(ship.inventory.count("laser_mk1"), 1, "one laser used")
 	var uid: int = ship.components.any_at(out)
 	check(uid >= 0, "the outside half is where it was pointed")
-	eq(ship.components.instances[uid]["anchor"], Wall.corner(0, -2, 1, 2, 3), "the inside half was found")
+	eq(ship.components.instances[uid]["anchor"], Wall.corner(0, -1, 0, 2, 3), "the inside half was found")
 	var before := JSON.stringify(ship.to_dict())
 	eq(s.apply([{"layer": "component", "id": "laser_mk1", "anchor": out + Vector2i(0, -5), "rot": 0}])["reason"], "needs a flat wall to mount through", "a second one in mid air is refused")
 	eq(s.preview([{"layer": "component", "id": "laser_mk1", "anchor": out + Vector2i(4, 0), "rot": 0}])[0]["reason"], "", "the ghost of a free spot would apply")
@@ -583,7 +586,7 @@ func test_a_breached_link_cell_takes_the_mount_offline_until_it_is_patched() -> 
 
 
 func test_the_outside_half_is_part_of_the_hitbox_and_the_mass() -> void:
-	var d := _rig(1)
+	var d := _rig(1, 0, "leech_laser")  # a 4x2 + 4x2 mount that weighs by its cells (the tier 1-2 guns are listed in flight.json at their old mass)
 	var with: Ship = d["ship"]
 	var a := Arena.new(1)
 	a.add_ship(with)
@@ -597,10 +600,10 @@ func test_the_outside_half_is_part_of_the_hitbox_and_the_mass() -> void:
 	var f = a.ships[0].flight
 	var m_with: float = f.mass_of(with.grid, with.components, with.cables)
 	var bare := Wall.wall_ship(1)  # the same ship with the laser's inside half only
-	bare.components.place(bare.grid, "laser_mk1", with.components.instances[d["uid"]]["anchor"], 0)
+	bare.components.place(bare.grid, "leech_laser", with.components.instances[d["uid"]]["anchor"], 0)
 	bare.components.place(bare.grid, "reactor_mk1", with.components.instances[d["reactor"]]["anchor"], 0)
-	bare.cables.place(bare.grid, Wall.at(0, 1, 1))
-	bare.cables.place(bare.grid, Wall.at(0, 2, 1))
+	for u in 3:
+		bare.cables.place(bare.grid, Wall.at(0, u, 1))
 	near(m_with - f.mass_of(bare.grid, bare.components, bare.cables), 8.0 * f.component_mass_per_cell, "the outside half weighs 8 cells more", 1e-6)
 
 

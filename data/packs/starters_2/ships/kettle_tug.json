@@ -1,8 +1,8 @@
 {
 "blurb": "Ma Gantry's own tug: a round, scrap-plated pot with her Kettle in the engine room. Two more power than it has any right to, a room that smells of tea and smoke, and a scrap-fed bolt gun.",
-"cables": {"cells":[[32,23],[33,23],[33,24],[31,25],[32,25],[33,25],[31,26],[27,27],[31,27],[27,28],[28,28],[29,28],[30,28],[31,28],[32,28],[27,29],[27,30],[27,31],[27,32],[27,33],[27,34],[27,35],[27,36],[32,36],[27,37],[32,37],[27,38],[28,38],[29,38],[30,38],[31,38],[32,38]],"version":1},
+"cables": {"cells":[[31,23],[32,23],[33,23],[33,24],[31,25],[32,25],[33,25],[31,26],[27,27],[31,27],[27,28],[28,28],[29,28],[30,28],[31,28],[32,28],[27,29],[27,30],[27,31],[27,32],[27,33],[27,34],[27,35],[27,36],[32,36],[27,37],[32,37],[27,38],[28,38],[29,38],[30,38],[31,38],[32,38]],"version":1},
 "cargo": {"copper":80,"credits":300,"fuel":8,"net_mouth_scrap":1,"polymer":30,"scrap":700,"shield_scrap_mk1":1},
-"components": {"instances":[{"anchor":[29,22],"heat":0.0,"hp":5,"id":"bolt_thrower_scrap","out":[29,18],"out_hp":10,"rot":0,"status":"ok","uid":1},{"anchor":[33,23],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":2},{"anchor":[26,26],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":3},{"anchor":[26,28],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":4},{"anchor":[26,30],"heat":0.0,"hp":5,"id":"oxygen_scrap_mk1","rot":1,"status":"ok","uid":5},{"anchor":[32,28],"heat":0.0,"hp":4,"id":"fabricator","rot":0,"status":"ok","uid":6},{"anchor":[26,33],"heat":0.0,"hp":8,"id":"reactor_mk2","rot":0,"status":"ok","uid":7},{"anchor":[27,38],"heat":0.0,"hp":6,"id":"engine_scrap_mk1","out":[27,41],"out_hp":5,"rot":2,"status":"ok","uid":8},{"anchor":[31,38],"heat":0.0,"hp":6,"id":"engine_scrap_mk1","out":[31,41],"out_hp":5,"rot":2,"status":"ok","uid":9},{"anchor":[32,33],"heat":0.0,"hp":8,"id":"reactor_scrap_kettle","rot":0,"status":"ok","uid":10}],"next_uid":11,"version":3},
+"components": {"instances":[{"anchor":[30,22],"heat":0.0,"hp":5,"id":"bolt_thrower_scrap","out":[29,18],"out_hp":10,"rot":0,"status":"ok","uid":1},{"anchor":[33,23],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":2},{"anchor":[26,26],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":3},{"anchor":[26,28],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":4},{"anchor":[26,30],"heat":0.0,"hp":5,"id":"oxygen_scrap_mk1","rot":1,"status":"ok","uid":5},{"anchor":[32,28],"heat":0.0,"hp":4,"id":"fabricator","rot":0,"status":"ok","uid":6},{"anchor":[26,33],"heat":0.0,"hp":8,"id":"reactor_mk2","rot":0,"status":"ok","uid":7},{"anchor":[28,38],"heat":0.0,"hp":6,"id":"engine_scrap_mk1","out":[27,41],"out_hp":5,"rot":2,"status":"ok","uid":8},{"anchor":[32,38],"heat":0.0,"hp":6,"id":"engine_scrap_mk1","out":[31,41],"out_hp":5,"rot":2,"status":"ok","uid":9},{"anchor":[32,33],"heat":0.0,"hp":8,"id":"reactor_scrap_kettle","rot":0,"status":"ok","uid":10}],"next_uid":11,"version":4},
 "crafting": {"known":["basic_armor","bed","bolt_thrower_scrap","engine_mk1","engine_scrap_mk1","fabricator","helm","laser_mk1","medbay","net_mouth_scrap","oxygen_gen","oxygen_scrap_mk1","pistol","polymer","radiator","rattle_burst_scrap","reactor_mk1","reactor_scrap_mk1","robot_arm","shield_mk1","shield_scrap_mk1","shrapnel_cannon_scrap"],"queue":[],"version":1},
 "crew": [{"name":"Soldier","species":"human"},{"name":"Hob","species":"human"},{"name":"Nan","species":"human"},{"name":"Rook","species":"basalt"}],
 "doors_open": [],
@@ -363,6 +363,6 @@
 	[38,40,"scrap_plate"],
 	[39,40,"scrap_plate"]
 ],
-"version": 4,
+"version": 7,
 "world_pos": [0.0,0.0]
 }

@@ -1,8 +1,8 @@
 {
 "blurb": "Nobody has ever hurried it. A stepped monolith of heavy armour, a Quarry Driver that fires one slug that pierces three walls, small engines, a Mk2 shield in the hold and a long silence.",
-"cables": {"cells":[[29,22],[30,22],[31,22],[32,22],[33,22],[29,23],[29,24],[29,25],[29,26],[29,27],[30,27],[31,27],[32,27],[29,28],[29,29],[29,30],[29,31],[30,31],[30,32],[30,33],[30,34],[30,35],[30,36],[30,37],[31,37]],"version":1},
+"cables": {"cells":[[29,22],[30,22],[31,22],[32,22],[33,22],[29,23],[29,24],[29,25],[29,26],[29,27],[30,27],[31,27],[32,27],[29,28],[29,29],[29,30],[29,31],[30,31],[30,32],[30,33],[30,34],[30,35],[30,36],[29,37],[30,37],[31,37],[32,37]],"version":1},
 "cargo": {"basalt_stonehide_bay":1,"copper":80,"credits":350,"fuel":6,"polymer":30,"scrap":400,"shield_mk2":1,"titanium":60},
-"components": {"instances":[{"anchor":[29,21],"heat":0.0,"hp":6,"id":"basalt_quarry_driver","out":[29,17],"out_hp":12,"rot":0,"status":"ok","uid":1},{"anchor":[33,22],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":2},{"anchor":[26,25],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":3},{"anchor":[26,27],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":4},{"anchor":[26,29],"heat":0.0,"hp":5,"id":"oxygen_gen","rot":1,"status":"ok","uid":5},{"anchor":[32,27],"heat":0.0,"hp":4,"id":"fabricator","rot":0,"status":"ok","uid":6},{"anchor":[29,32],"heat":0.0,"hp":8,"id":"reactor_mk2","rot":0,"status":"ok","uid":7},{"anchor":[27,37],"heat":0.0,"hp":6,"id":"engine_mk1","out":[27,40],"out_hp":5,"rot":2,"status":"ok","uid":8},{"anchor":[31,37],"heat":0.0,"hp":6,"id":"engine_mk1","out":[31,40],"out_hp":5,"rot":2,"status":"ok","uid":9}],"next_uid":10,"version":3},
+"components": {"instances":[{"anchor":[29,21],"heat":0.0,"hp":6,"id":"basalt_quarry_driver","out":[29,17],"out_hp":12,"rot":0,"status":"ok","uid":1},{"anchor":[33,22],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":2},{"anchor":[26,25],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":3},{"anchor":[26,27],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":4},{"anchor":[26,29],"heat":0.0,"hp":5,"id":"oxygen_gen","rot":1,"status":"ok","uid":5},{"anchor":[32,27],"heat":0.0,"hp":4,"id":"fabricator","rot":0,"status":"ok","uid":6},{"anchor":[29,32],"heat":0.0,"hp":8,"id":"reactor_mk2","rot":0,"status":"ok","uid":7},{"anchor":[28,37],"heat":0.0,"hp":6,"id":"engine_mk1","out":[27,40],"out_hp":5,"rot":2,"status":"ok","uid":8},{"anchor":[32,37],"heat":0.0,"hp":6,"id":"engine_mk1","out":[31,40],"out_hp":5,"rot":2,"status":"ok","uid":9}],"next_uid":10,"version":4},
 "crafting": {"known":["basic_armor","bed","bolt_thrower_scrap","engine_mk1","engine_scrap_mk1","fabricator","helm","laser_mk1","medbay","net_mouth_scrap","oxygen_gen","oxygen_scrap_mk1","pistol","polymer","radiator","rattle_burst_scrap","reactor_mk1","reactor_scrap_mk1","robot_arm","shield_mk1","shield_scrap_mk1","shrapnel_cannon_scrap"],"queue":[],"version":1},
 "crew": [{"name":"Soldier","species":"human"},{"name":"Shale","species":"basalt"},{"name":"Gabbro","species":"basalt"}],
 "doors_open": [],
@@ -321,6 +321,6 @@
 	[36,39,"heavy_armor"],
 	[37,39,"heavy_armor"]
 ],
-"version": 4,
+"version": 7,
 "world_pos": [0.0,0.0]
 }

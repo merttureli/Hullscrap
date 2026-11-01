@@ -179,7 +179,7 @@ func test_a_placed_laser_needs_power() -> void:
 	var a := Arena.new()
 	var i := a.add_ship(s)
 	eq(a.ships[i].mounts.keys(), [laser], "the laser is a mount, the reactor is not")
-	near((a.ships[i].mounts[laser]["pos"] as Vector2).distance_to(Vector2(22.0, 15.0)), 0.0, "mount at the centre of its footprint")
+	near((a.ships[i].mounts[laser]["pos"] as Vector2).distance_to(Vector2(21.0, 15.0)), 0.0, "mount at the centre of its (2x2) footprint")
 	eq(a.weapons.can_fire(a, i, laser, Vector2(1000.0, 0.0)), "unpowered", "no cable yet")
 	s.cables.place(s.grid, Vector2i(20, 15))
 	s.cables.place(s.grid, Vector2i(20, 16))

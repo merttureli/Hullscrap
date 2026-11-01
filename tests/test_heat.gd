@@ -5,7 +5,7 @@ const Fixture = preload("res://tests/fixture_ship.gd")
 const Heat = preload("res://scripts/sim/heat.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const REACTOR_CABLE: Array[Vector2i] = [Vector2i(11, 11)]
-const RADIATOR_CABLES: Array[Vector2i] = [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(15, 12)]
+const RADIATOR_CABLES: Array[Vector2i] = [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(15, 12)]
 
 
 ## A room with a Prism Core (x 10..13, y 10..13) and `radiators` radiators (2x2 at x 15..16), all on one cable.
@@ -91,7 +91,7 @@ func test_standard_parts_do_not_overheat_at_normal_load() -> void:
 	var r := Fixture.put(ship, "reactor_mk1", 10, 10)
 	var e := Fixture.put(ship, "engine_mk1", 15, 10)  # x 15..18, y 10..11
 	check(r > 0 and e > 0, "placed")
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	for i in 300:
 		Heat.tick(ship, 1.0)
@@ -105,7 +105,7 @@ func test_a_scrap_engine_creeps_up() -> void:
 	var ship := Fixture.room_ship()
 	Fixture.put(ship, "reactor_mk1", 10, 10)
 	var e := Fixture.put(ship, "engine_scrap_mk1", 15, 10)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	for i in 60:
 		Heat.tick(ship, 1.0)
@@ -130,7 +130,7 @@ func test_a_radiator_only_cools_its_own_room() -> void:
 	var e := Fixture.put(ship, "engine_neon_mk1", 10, 21)  # in the second room, no power
 	Fixture.put(ship, "reactor_mk1", 10, 10)
 	Fixture.put(ship, "radiator", 15, 10)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	var room: int = ship.atmosphere.room_at(Vector2i(15, 10))
 	check(room >= 0 and room != ship.atmosphere.room_at(Vector2i(10, 21)), "two rooms")

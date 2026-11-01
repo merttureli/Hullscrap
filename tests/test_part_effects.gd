@@ -46,7 +46,7 @@ func _rig(part_id: String, defs: Dictionary) -> Dictionary:
 	var d := {"ship": ship}
 	d["reactor"] = Fixture.put(ship, "reactor_mk1", 10, 10)
 	d["part"] = Fixture.put(ship, part_id, 15, 10, 2)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	return d
 

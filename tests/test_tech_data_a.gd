@@ -93,7 +93,7 @@ func test_every_weapon_is_the_shape_the_spec_gives() -> void:
 		var want: Array = WEAPONS[id]
 		var c := Content.entry("components", id)
 		eq([int(c["tier"]), c["family"], c["line"], int(c["power"]), int(c["priority"]), c["manned"]], [want[0], "weapon", "standard", want[4], 5, true], id + ": tier, family, line, power, priority, manned")
-		eq([int(c["size"][0]), int(c["size"][1]), int(c["mount"]["outside"][0]), int(c["mount"]["outside"][1])], [4, 2, 4, 2], id + ": 4x2 inside, a hull mount with a 4x2 outside half")
+		eq([int(c["size"][0]), int(c["size"][1]), int(c["mount"]["outside"][0]), int(c["mount"]["outside"][1])], [2 if int(want[0]) <= 2 else 4, 2, 4, 2], id + ": a hull mount with a 4x2 outside half and a 4x2 inside half (2x2 for tier 1-2, playtest 2 P2)")
 		check(float(c["mount"]["outside_hp"]) >= 4.0, id + ": the outside half has hp")
 		check(str(c.get("blurb", "")).length() > 20 and str(c.get("quirk", "")).length() > 20, id + ": a blurb and a quirk line")
 		check(not c.get("unique", false), id + " is not unique")

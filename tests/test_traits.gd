@@ -352,9 +352,9 @@ func test_heal_mult_and_mechanical_crew_are_not_healed_by_beds() -> void:
 	check(medbay >= 0, "the medbay fits")
 	ship.power_state["powered"][medbay] = true
 	_trait("t_cold", {"heal_mult": {"medbay": 0.0}})
-	var cold := _person("Cold", "human", 10, 14, true)
+	var cold := _person("Cold", "human", 10, 13, true)  # both lie in the 2x4 medbay (x 10..11, y 13..16)
 	cold.gear_traits = ["t_cold"]
-	var warm := _person("Warm", "human", 12, 14, true)
+	var warm := _person("Warm", "human", 10, 15, true)
 	ship.crew.append_array([cold, warm])
 	cold.hp = 50.0
 	warm.hp = 50.0
@@ -461,8 +461,8 @@ func test_a_prismatic_at_a_station_gives_it_a_point_of_power() -> void:
 	var reactor := Fixture.put(ship, "reactor_mk1", 10, 9)  # +8
 	var shield := Fixture.put(ship, "shield_mk1", 15, 9)  # -3
 	var lasers := [Fixture.put(ship, "laser_mk1", 10, 13), Fixture.put(ship, "laser_mk1", 15, 13), Fixture.put(ship, "laser_mk1", 10, 15)]  # -2 each
-	Fixture.wire(ship, [Vector2i(13, 9), Vector2i(13, 10), Vector2i(13, 11), Vector2i(13, 12), Vector2i(13, 13), Vector2i(13, 14), Vector2i(13, 15), Vector2i(13, 16),
-		Vector2i(14, 10), Vector2i(15, 10), Vector2i(15, 11), Vector2i(15, 12), Vector2i(15, 13)])
+	Fixture.wire(ship, [Vector2i(11, 9), Vector2i(11, 10), Vector2i(11, 11), Vector2i(11, 12), Vector2i(11, 13), Vector2i(11, 14), Vector2i(11, 15), Vector2i(11, 16),
+		Vector2i(12, 10), Vector2i(13, 10), Vector2i(14, 10), Vector2i(15, 10), Vector2i(15, 11), Vector2i(15, 12), Vector2i(15, 13)])
 	ship.refresh()
 	var off := func() -> int:
 		var n := 0
@@ -498,7 +498,7 @@ func test_power_solve_adds_the_bonus_to_a_part_figure() -> void:
 	var ship := Fixture.room_ship()
 	var reactor := Fixture.put(ship, "reactor_mk1", 10, 10)
 	var shield := Fixture.put(ship, "shield_mk1", 15, 10)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	var Power = load("res://scripts/sim/power.gd")
 	var plain: Dictionary = Power.solve(ship.components, ship.cables)
 	near(float(plain["networks"][0]["demand"]), 3.0, "the shield asks for 3")

@@ -22,6 +22,7 @@ const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
+const MigrateParts = preload("res://scripts/ship/migrate_parts.gd")
 
 ## Save format. 3 adds name, world transform, components, cables and oxygen on top of the
 ## grid and cargo of 2; versions 1 and 2 still load (no components, no cables). The optional
@@ -35,7 +36,9 @@ const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 ## 6 adds the crew: the optional "crew_state" (every person aboard, CrewMember.to_dict), "dead_crew" (the names of those who bled out)
 ## and "crew_plan" (the design's crew list), written when anyone is aboard or has died; older saves have none and load
 ## leaving the crew the ship has now (the view then spawns the design's list).
-const VERSION := 6
+## 7: the tier 1-2 weapons, engines, reactors, shields and the medbay take less room inside (data/components.json); an older save
+## is re-anchored on load by MigrateParts (mounts centred behind their barrels, the rest by their top-left; cables and belts re-joined).
+const VERSION := 7
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"
 const START_PATH := "res://data/start.json"
@@ -263,6 +266,8 @@ func load_dict(d: Dictionary) -> String:
 	var version := int(d.get("version", 0))
 	if version < 1 or version > VERSION:
 		return "unsupported ship version"
+	if version < 7:  # parts that took more room inside before version 7
+		d = MigrateParts.migrate(d, components.by_id)
 	var cargo := Inventory.new()
 	if version == 1:
 		cargo.load_dict(start_cargo())

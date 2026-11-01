@@ -310,7 +310,8 @@ func test_mas_kettle_is_a_unique_scrap_reactor_with_a_quirk() -> void:
 	var k := comps.def("reactor_scrap_kettle")
 	var base := comps.def("reactor_scrap_mk1")
 	check(k.get("unique", false) == true, "unique")
-	eq([k["family"], k["line"], k["tier"], k["size"]], [base["family"], base["line"], base["tier"], base["size"]], "a Scrap reactor like the Mk1")
+	eq([k["family"], k["line"], k["tier"]], [base["family"], base["line"], base["tier"]], "a Scrap reactor like the Mk1")
+	eq(k["size"], [4, 4], "and, being unique, it keeps the old 4x4 the Mk1 had before playtest 2")
 	eq(k["power"], base["power"] + 2, "two more power")
 	for f in ["priority", "hp", "heat_limit", "heat_per_s", "cooling", "manned"]:
 		eq(k[f], base[f], f + " as the Mk1")

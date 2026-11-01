@@ -258,8 +258,8 @@ func _dampener_set(s: Ship, wired := true) -> int:
 	s.components.place(s.grid, "reactor_mk1", Vector2i(16, 18), 0)
 	var uid: int = s.components.place(s.grid, "inertial_dampener", Vector2i(20, 18), 0)
 	if wired:
-		s.cables.place(s.grid, Vector2i(19, 18))
-		s.cables.place(s.grid, Vector2i(20, 18))
+		for x in range(17, 21):  # from the reactor's right-hand column (x 16..17) to the dampener
+			s.cables.place(s.grid, Vector2i(x, 18))
 	return uid
 
 

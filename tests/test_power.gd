@@ -43,8 +43,8 @@ func _net(r: Dictionary, uid: int) -> Dictionary:
 
 func test_reactor_and_engine_on_a_cable() -> void:
 	_setup()
-	var r := _put("reactor_mk1", 6, 12)  # x 6..9
-	var e := _put("engine_mk1", 11, 12)  # x 11..14
+	var r := _put("reactor_mk1", 8, 12)  # x 8..9
+	var e := _put("engine_mk1", 11, 12)  # x 11..12
 	_wire(9, 12, 12, 12)
 	var res := Power.solve(comps, cables)
 	check(res["powered"][r], "reactor powered")
@@ -60,7 +60,7 @@ func test_reactor_and_engine_on_a_cable() -> void:
 
 func test_no_cable_means_no_power() -> void:
 	_setup()
-	var r := _put("reactor_mk1", 6, 12)
+	var r := _put("reactor_mk1", 8, 12)
 	var e := _put("engine_mk1", 11, 12)
 	var res := Power.solve(comps, cables)
 	check(not res["powered"][r], "reactor off a network is unpowered")
@@ -86,7 +86,7 @@ func test_zero_power_parts_need_a_network_too() -> void:
 
 func test_cutting_a_cable_unpowers_the_far_side() -> void:
 	_setup()
-	var r := _put("reactor_mk1", 4, 12)  # x 4..7
+	var r := _put("reactor_mk1", 6, 12)  # x 6..7
 	var near := _put("engine_mk1", 10, 13)
 	var far := _put("engine_mk1", 20, 13)
 	_wire(7, 13, 20, 13)
@@ -194,7 +194,7 @@ func test_a_disabled_reactor_makes_no_power() -> void:
 	check(res["powered"][r1], "false means not disabled")
 
 
-## Reactor on cable A (row 13), engine on cable B (row 16); a 4x4 shield sits over the gap and
+## Reactor on cable A (row 13), engine on cable B (row 16); a 2x4 shield (x 10..11) sits over the gap and
 ## touches both runs.
 func _bridge_scene() -> Dictionary:
 	_setup()
@@ -202,7 +202,7 @@ func _bridge_scene() -> Dictionary:
 	s["reactor"] = _put("reactor_mk1", 2, 12)
 	s["engine"] = _put("engine_mk1", 16, 15)
 	_wire(2, 13, 11, 13)
-	_wire(12, 16, 19, 16)
+	_wire(11, 16, 19, 16)
 	return s
 
 
@@ -219,7 +219,7 @@ func test_a_bridging_component_merges_networks() -> void:
 	check(res["powered"][shield], "shield powered")
 	eq(res["network_of"][s["reactor"]], res["network_of"][s["engine"]], "same network id")
 	eq(_net(res, shield)["members"], [s["reactor"], s["engine"], shield], "all three are members")
-	eq(_net(res, shield)["cells"].size(), 18, "both cable runs are one network")
+	eq(_net(res, shield)["cells"].size(), 19, "both cable runs are one network")
 	eq([_net(res, shield)["supply"], _net(res, shield)["demand"], _net(res, shield)["used"]], [8, 5, 5], "supply, demand, used")
 	comps.remove_at(Vector2i(10, 13))
 	res = Power.solve(comps, cables)

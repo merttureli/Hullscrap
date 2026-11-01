@@ -74,7 +74,7 @@ func _rig(part_id: String, rot := 0) -> Dictionary:
 	var d := {"ship": ship}
 	d["reactor"] = Fixture.put(ship, "reactor_mk1", 10, 10)
 	d["part"] = Fixture.put(ship, part_id, 15, 10, rot)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	return d
 
@@ -336,8 +336,8 @@ func test_rally_needs_company() -> void:
 func test_repair_burst_mends_the_hurt_system_beside_them() -> void:
 	var ship := Fixture.room_ship()
 	var reactor := Fixture.put(ship, "reactor_mk1", 10, 10)
-	var gen := Fixture.put(ship, "oxygen_gen", 15, 10)
-	var fixer := _crew(ship, "Old Hob", 14, 12, "repair_burst")  # touches the reactor (x 13) and the generator (x 15)
+	var gen := Fixture.put(ship, "oxygen_gen", 14, 10)
+	var fixer := _crew(ship, "Old Hob", 12, 12, "repair_burst")  # touches the reactor (x 11) and the generator (x 14)
 	ship.components.instances[reactor]["hp"] = 5
 	ship.components.instances[gen]["hp"] = 0
 	ship.components.instances[gen]["status"] = "disabled"

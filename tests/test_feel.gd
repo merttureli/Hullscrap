@@ -176,7 +176,7 @@ func _same_person(a: CrewMember, b: CrewMember) -> void:
 func test_a_saved_ship_brings_its_crew_back_as_they_were() -> void:
 	var ship := _crewed()
 	var d: Dictionary = JSON.parse_string(JSON.stringify(ship.to_dict()))  # through the file, as Ctrl+S / Continue do
-	eq(d["version"], 6, "saved as version 6")
+	eq(d["version"], 7, "saved as version 7")
 	eq(d["crew_state"].size(), 3, "three people in the save")
 	var back := Ship.new_starter()
 	var stale := _person("Stale", "human", 5, 5)  # a crew member of the ship that was loaded into

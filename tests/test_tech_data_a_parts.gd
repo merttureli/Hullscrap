@@ -23,15 +23,15 @@ const KEY_MATERIALS: Array[String] = ["military_circuit", "gate_alloy", "void_cr
 const HOMELAND := {"human": "human_core", "basalt": "basalt_quarries", "emberkin": "emberkin_forges", "fenn": "fenn_bazaar", "kett": "kett_hives"}
 ## id -> [family, tier, [w, h], power, priority]
 const PARTS := {
-	"human_reactor_plus": ["reactor", 1, [4, 4], 9, 0], "human_comms_array": ["utility", 1, [2, 2], -2, 3],
+	"human_reactor_plus": ["reactor", 1, [2, 4], 9, 0], "human_comms_array": ["utility", 1, [2, 2], -2, 3],
 	"human_crew_quarters_deluxe": ["medbay", 1, [2, 2], -1, 3],
-	"basalt_vacuum_forge": ["reactor", 1, [4, 4], 11, 0], "basalt_stonehide_bay": ["utility", 2, [2, 2], -1, 3],
+	"basalt_vacuum_forge": ["reactor", 1, [2, 4], 11, 0], "basalt_stonehide_bay": ["utility", 2, [2, 2], -1, 3],
 	"basalt_gravity_anchor": ["utility", 2, [2, 2], -2, 3],
-	"emberkin_pyre_drive": ["engine", 2, [4, 2], -3, 4], "emberkin_furnace_core": ["reactor", 1, [4, 4], 10, 0],
-	"emberkin_hearth_shield": ["shield", 2, [4, 4], -4, 3],
-	"fenn_haggle_engine": ["engine", 2, [4, 2], -3, 4], "fenn_jury_reactor": ["reactor", 1, [4, 4], 10, 0],
+	"emberkin_pyre_drive": ["engine", 2, [2, 2], -3, 4], "emberkin_furnace_core": ["reactor", 1, [2, 4], 10, 0],
+	"emberkin_hearth_shield": ["shield", 2, [2, 4], -4, 3],
+	"fenn_haggle_engine": ["engine", 2, [2, 2], -3, 4], "fenn_jury_reactor": ["reactor", 1, [2, 4], 10, 0],
 	"fenn_quickfix_bay": ["utility", 1, [2, 2], -2, 3],
-	"kett_hive_battery": ["shield", 2, [4, 4], -5, 3], "kett_nest_reactor": ["reactor", 1, [4, 4], 7, 0],
+	"kett_hive_battery": ["shield", 2, [2, 4], -5, 3], "kett_nest_reactor": ["reactor", 1, [2, 4], 7, 0],
 	"kett_brood_hold": ["utility", 1, [2, 2], -1, 3],
 }
 
@@ -47,7 +47,7 @@ func _rig(part_id: String, rot := 2) -> Dictionary:
 	var d := {"ship": ship}
 	d["reactor"] = Fixture.put(ship, "reactor_mk1", 10, 10)
 	d["part"] = Fixture.put(ship, part_id, 15, 10, rot)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	BuildSession.new(ship).apply(BuildSession.room_changes(Vector2i(8, 18), Vector2i(22, 26), "wall", "floor"))
 	ship.refresh()
 	for i in ship.atmosphere.pressure.size():
@@ -185,7 +185,7 @@ func test_the_furnace_core_runs_hot_and_trips_without_a_radiator_for_any_crew() 
 	eq(tripped, {"human": true, "emberkin": true}, "it overheats whoever is aboard: heat is cancelled by nobody")
 	var d := _rig("emberkin_furnace_core")
 	Fixture.put(d["ship"], "radiator", 19, 10)
-	Fixture.wire(d["ship"], [Vector2i(17, 11), Vector2i(18, 11), Vector2i(19, 11)])
+	Fixture.wire(d["ship"], [Vector2i(16, 11), Vector2i(17, 11), Vector2i(18, 11), Vector2i(19, 11)])  # from the 2 wide core (x 15..16) to the radiator
 	d["ship"].refresh()
 	check(not _run(d["ship"], 300.0, true), "a radiator in the room keeps it from ever tripping")
 

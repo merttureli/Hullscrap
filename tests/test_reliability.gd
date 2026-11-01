@@ -54,7 +54,7 @@ func test_the_same_seed_gives_the_same_story() -> void:
 	# the engine needs power: a reactor beside it
 	for d in [a, b]:
 		Fixture.put(d["ship"], "reactor_mk1", 15, 10)
-		Fixture.wire(d["ship"], [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+		Fixture.wire(d["ship"], [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 		d["ship"].refresh()
 	var ra := RandomNumberGenerator.new()
 	var rb := RandomNumberGenerator.new()
@@ -74,7 +74,7 @@ func test_the_same_seed_gives_the_same_story() -> void:
 	rc.seed = 8
 	var c := _one("engine_scrap_mk1")
 	Fixture.put(c["ship"], "reactor_mk1", 15, 10)
-	Fixture.wire(c["ship"], [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(c["ship"], [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	c["ship"].refresh()
 	for s in 3000:
 		Reliability.tick(c["ship"], 1.0, rc)

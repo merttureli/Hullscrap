@@ -17,7 +17,7 @@ func _ship() -> Dictionary:
 	d["reactor"] = Fixture.put(ship, "reactor_mk1", 10, 10)
 	d["part"] = Fixture.put(ship, "fabricator", 15, 10)
 	d["gen"] = Fixture.put(ship, "oxygen_gen", 15, 12)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(15, 12)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(15, 12)])
 	ship.refresh()
 	return d
 

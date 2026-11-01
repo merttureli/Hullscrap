@@ -32,13 +32,13 @@ func _run(ship: Ship, seconds: int) -> Array:
 	return lines
 
 
-## A room ship with a medbay at x 10..13, y 10..13; powered by a reactor next to it when `power`.
+## A room ship with a medbay at x 10..11, y 10..13; powered by a reactor next to it when `power`.
 func _medbay_ship(power: bool) -> Ship:
 	var ship := Fixture.room_ship()
 	Fixture.put(ship, "medbay", 10, 10)
 	if power:
 		Fixture.put(ship, "reactor_mk1", 15, 10)
-		Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+		Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	return ship
 

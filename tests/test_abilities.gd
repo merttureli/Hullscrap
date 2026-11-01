@@ -18,13 +18,13 @@ func near(got: float, want: float, msg: String, eps := 1e-4) -> void:
 	check(absf(got - want) <= eps, "%s: expected %s, got %s" % [msg, str(want), str(got)])
 
 
-## A reactor (x 10..13, y 10..13) and `part_id` (x 15..) joined by one cable in the test room. Returns {ship, reactor, part}.
+## A reactor (x 10..11, y 10..13) and `part_id` (x 15..) joined by one cable in the test room. Returns {ship, reactor, part}.
 func _rig(part_id: String, reactor_id := "reactor_mk1") -> Dictionary:
 	var ship := Fixture.room_ship()
 	var d := {"ship": ship}
 	d["reactor"] = Fixture.put(ship, reactor_id, 10, 10)
 	d["part"] = Fixture.put(ship, part_id, 15, 10, 2)  # turned round: a bare engine pushes opposite its nozzle, and the nozzle of rotation 0 points up
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	return d
 
