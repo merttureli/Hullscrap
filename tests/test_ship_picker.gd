@@ -52,14 +52,13 @@ func test_three_cards_with_a_name_a_character_and_the_numbers() -> void:
 		check(c["blurb"].length() > 30, c["name"] + " has a one-line character")
 		var st: Dictionary = c["stats"]
 		check(st["supply"] >= st["demand"] and st["demand"] > 0.0, c["name"] + ": power supply covers demand")
-		check(st["mass"] > 100.0 and st["hull"] >= 150.0 and st["layers"] >= 0, c["name"] + ": mass, armour and shield layers (the shield waits in the hold)")
+		check(st["mass"] > 100.0 and st["hull"] >= 150.0 and st["layers"] >= 0, c["name"] + ": mass, armour and shield layers")
 		check(st["weapons"].size() >= 1, c["name"] + " lists its weapon")
 		check(c["schematic"].arena != null, c["name"] + " has a schematic bound to an arena")
-	eq(p.cards[0]["stats"]["weapons"], ["Rattle Burst"], "Rustbucket weapons by name")
+	eq(p.cards[0]["stats"]["weapons"], ["Bolt Thrower", "Rattle Burst"], "Rustbucket weapons by name")
 	eq(p.cards[1]["stats"]["weapons"], ["Pulse Mk1"], "Courier weapons by name")
 	eq(p.cards[2]["stats"]["weapons"], ["Heat Lance"], "Prism weapons by name")
-	for i in 3:
-		eq(p.cards[i]["stats"]["layers"], 0, "%s: no shield built yet" % p.cards[i]["name"])
+	eq([p.cards[0]["stats"]["layers"], p.cards[1]["stats"]["layers"], p.cards[2]["stats"]["layers"] > 0], [0, 1, true], "the Rustbucket has no shield, the Courier one layer and the Prism its lattice")
 	check(p.cards[0]["stats"]["mass"] > p.cards[1]["stats"]["mass"] and p.cards[1]["stats"]["mass"] > p.cards[2]["stats"]["mass"], "masses: Rustbucket > Courier > Prism")
 	check(p.cards[0]["stats"]["hull"] > p.cards[1]["stats"]["hull"] and p.cards[1]["stats"]["hull"] > p.cards[2]["stats"]["hull"], "hulls: Rustbucket > Courier > Prism")
 	_done(d)

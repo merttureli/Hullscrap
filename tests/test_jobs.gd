@@ -14,6 +14,8 @@ const CrewView = preload("res://scripts/crew/crew_view.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 
 const STARTERS := ["res://data/ships/starter_rustbucket.json", "res://data/ships/starter_courier.json", "res://data/ships/starter_prism.json"]
+## A crew of four for the tests that need a crew list to spawn: the real starters start with the soldier alone (playtest 2, A1).
+const TEAM := [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Rook", "species": "basalt"}, {"name": "Juno", "species": "fenn"}]
 const PIRATE := "res://data/ships/pirate_raider.json"
 const STEP := 0.1
 
@@ -688,9 +690,20 @@ func test_a_manned_weapon_fires_again_sooner() -> void:
 
 # --- crews ---------------------------------------------------------------------------------------
 
-func test_the_starters_come_with_their_crews() -> void:
+func test_the_starters_start_with_the_soldier_alone() -> void:
 	for path in STARTERS:
 		var ship := Ship.from_design(path)
+		eq(ship.crew_plan, [{"name": "Soldier", "species": "human"}], path + ": the design lists the soldier alone")
+		var made := Jobs.spawn_crew(ship)
+		eq(made.size(), 1, path + ": one person made")
+		check(ship.crew[0].is_player and ship.crew.size() == 1, path + ": the soldier is the only one aboard")
+		check(Pathfinder.body_ok(ship.grid, ship.crew[0].anchor()), path + ": and stands where a body fits")
+
+
+func test_a_design_with_a_crew_list_spawns_it_round_the_beds() -> void:
+	for path in STARTERS:
+		var ship := Ship.from_design(path)
+		ship.crew_plan = TEAM.duplicate(true)
 		var want: Array = ship.crew_plan.map(func(e): return e["name"])
 		var made := Jobs.spawn_crew(ship)
 		check(want.size() >= 3, path + ": the design lists a crew")
@@ -713,8 +726,8 @@ func test_the_starters_come_with_their_crews() -> void:
 		for uid in ship.components.instances:
 			if ship.components.def(ship.components.instances[uid]["id"])["family"] == "bed":
 				beds.append(ship.components.instances[uid]["cells"])
-		for m in ship.crew.filter(func(m): return not m.is_player and m.name != "Ada"):
-			check(beds.any(func(cells): return cells.has(m.cell())), "%s: %s starts on a bed" % [path, m.name])
+		var first: Array = ship.crew.filter(func(m): return not m.is_player and m.name != "Ada")
+		check(beds.any(func(cells): return cells.has(first[0].cell())), "%s: %s starts on a bed (the others beside it: the ship has one)" % [path, first[0].name])
 		eq(Jobs.spawn_crew(ship).size(), 0, path + ": asking again adds nobody")
 		eq(ship.crew.size(), want.size(), path + ": still the same crew")
 
@@ -813,6 +826,7 @@ func test_holding_e_next_to_a_fire_puts_it_out() -> void:
 func test_the_crew_view_spawns_the_crew_and_finds_the_player_and_ada() -> void:
 	var view := CrewView.new()
 	var ship := Ship.from_design(STARTERS[0])
+	ship.crew_plan = TEAM.duplicate(true)
 	view._spawn(ship)
 	eq(ship.crew.size(), 4, "four aboard")
 	check(view.player != null and view.player.is_player, "the player's soldier")
@@ -821,16 +835,56 @@ func test_the_crew_view_spawns_the_crew_and_finds_the_player_and_ada() -> void:
 	view._spawn(ship)
 	eq(ship.crew.size(), count, "nothing is added twice")
 	var other := Ship.from_design(STARTERS[1])
+	other.crew_plan = TEAM.slice(0, 3).duplicate(true)
 	view._spawn(other)
 	eq(other.crew.size(), 3, "a new ship gets its own crew")
 	check(view.player in other.crew and not view.player in ship.crew, "the view follows the new ship's soldier")
-	var prism := Ship.from_design(STARTERS[2])  # no Ada on the Prism
+	var prism := Ship.from_design(STARTERS[2])  # no Ada on this crew list
+	prism.crew_plan = [TEAM[0], {"name": "Tess", "species": "emberkin"}, {"name": "Quill", "species": "fenn"}]
 	view._spawn(prism)
-	eq(prism.crew.size(), 4, "the Prism's four")
+	eq(prism.crew.size(), 3, "the three of the list")
 	check(view.player in prism.crew and view.ada == null, "a soldier and no Ada")
 	view._spawn(prism)
-	eq(prism.crew.size(), 4, "and nothing is added twice without her either")
+	eq(prism.crew.size(), 3, "and nothing is added twice without her either")
+	var alone := Ship.from_design(STARTERS[2])  # the real start: the soldier alone
+	view._spawn(alone)
+	eq(alone.crew.size(), 1, "the soldier alone")
+	check(view.player in alone.crew and view.ada == null, "and no Ada")
+	eq(view.order_target(), null, "a middle-click has nobody to send")
 	view.free()
+
+
+func test_a_middle_click_sends_the_selected_crewmate_else_ada_else_the_first_one() -> void:
+	var view := CrewView.new()
+	var sim := ShipSim.new()
+	var ship := Fixture.room_ship()
+	sim.ships = [ship]
+	view.sim = sim
+	view.build = BuildMode.new()
+	view.build.sim = sim
+	var p := _player(13, 12)
+	ship.crew.append(p)
+	view.player = p
+	eq(view.order_target(), null, "the soldier alone: nobody")
+	var rook := _npc("Rook", 20, 14)
+	var juno := _npc("Juno", 22, 14)
+	ship.crew.append(rook)
+	ship.crew.append(juno)
+	eq(view.order_target(), rook, "no Ada, nothing selected: the first crewmate who is not the soldier")
+	view.selected = juno
+	eq(view.order_target(), juno, "the selected crewmate")
+	view.selected = p
+	eq(view.order_target(), rook, "the soldier is not sent")
+	view.selected = null
+	var ada := _npc("Ada", 24, 14)
+	ship.crew.append(ada)
+	view.ada = ada
+	eq(view.order_target(), ada, "Ada when she is aboard and nobody is selected")
+	view.selected = juno
+	eq(view.order_target(), juno, "a selected crewmate before Ada")
+	view.build.free()
+	view.free()
+	sim.free()
 
 
 # --- the story ---------------------------------------------------------------------------------
@@ -895,6 +949,7 @@ func test_crew_with_the_right_traits_take_the_station_that_needs_them() -> void:
 func test_a_breach_in_a_mount_wall_is_worked_from_beside_the_mount() -> void:
 	for path in STARTERS:
 		var ship := Ship.from_design(path)
+		ship.crew_plan = TEAM.duplicate(true)
 		var link: Array = []
 		var uids: Array = ship.components.instances.keys()
 		uids.sort()
@@ -925,6 +980,7 @@ func test_a_breach_beside_a_mount_wall_is_worked_from_beside_the_mount_too() -> 
 	var tried := 0
 	for path in STARTERS:
 		var ship := Ship.from_design(path)
+		ship.crew_plan = TEAM.duplicate(true)
 		var uids: Array = ship.components.instances.keys()
 		uids.sort()
 		var cell := Vector2i(-1, -1)

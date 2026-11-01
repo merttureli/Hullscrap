@@ -32,6 +32,8 @@ const GRID := Vector2i(63, 63)
 const MARGIN := 2
 const OUT_DIR := "res://data/ships/"
 const SIDES: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
+## Who starts aboard: the soldier alone (playtest 2, A1). Ada is found in a distress pod (data/packs/start_alone), the rest are hired or met.
+const SOLDIER := [{"name": "Soldier", "species": "human"}]
 const STOCK := {"scrap": 5000, "copper": 600, "titanium": 400, "silicon": 400, "crystal": 200, "plasma_cell": 100, "polymer": 600}
 ## Cost of crossing a cell when routing a cable: walls, doors and parts are cheap (the wire hides there).
 const WIRE_COST := {"solid": 2, "part": 2, "floor": 5, "none": 14}
@@ -69,12 +71,12 @@ func _makers() -> Dictionary:
 ## starboard), a fat cargo sponson on the port side, a patch sticking out of the starboard side and a
 ## rounded stern. Only the core is built: a plated bow with the Rattle Burst and the bridge, a workshop under
 ## the bridge's port half (the starboard half hangs over a notch), the engine room with a wide stern block
-## and round2 corners, and the quarters in the port sponson. The Bubble Rig and a Net Mouth wait in the hold.
+## and round2 corners, and the quarters in the port sponson. A Net Mouth waits in the hold.
 func _rustbucket() -> Dictionary:
 	return {
 		"file": "starter_rustbucket", "name": "Rustbucket", "was_hull": 1122, "at": [6, 5],
-		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Rook", "species": "basalt"}, {"name": "Juno", "species": "fenn"}],
-		"blurb": "Welded together from scrap: cheap, thick-skinned, a lumpy hull with a lot of empty frame to weld more onto. Parts rattle and quit, but it hits back.",
+		"crew": SOLDIER, "kit": "neither",
+		"blurb": "Welded together from scrap: cheap, thick-skinned, a lumpy hull with a lot of empty frame to weld more onto. Parts rattle and quit, but it hits back with two guns.",
 		"frame": [[12, 0], [38, 0], [46, 8], [46, 14], [52, 20], [52, 28], [46, 34], ["arc", 44, 42, 0, 90], [12, 44], ["arc", 12, 42, 90, 180], [10, 36], [0, 26], [0, 18], [6, 12], [6, 8], [12, 2]],
 		"outline": [[20, 6], [26, 6], [30, 10], [30, 13], [24, 13], [24, 17], [30, 17], [30, 25], ["arc", 28, 25, 0, 90], [19, 27], ["arc", 19, 25, 90, 180], [17, 22], [11, 22], [10, 21], [10, 15], [11, 14], [17, 14], [17, 9]],
 		"plate": "scrap_plate", "plated": func(c): return true, "backed": func(c): return c.y <= 9 or c.x >= 29 or c.y >= 25, "thick": func(c): return true,
@@ -83,11 +85,12 @@ func _rustbucket() -> Dictionary:
 		],
 		"doors": [[19, 12, "h"], [19, 16, "h"], [17, 18, "v"]],
 		"parts": [
-			["rattle_burst_scrap", 21, 4], ["helm", 26, 10], ["fabricator", 18, 13],
-			["bed", 11, 15], ["bed", 13, 15], ["oxygen_scrap_mk1", 15, 15],
-			["reactor_mk2", 21, 18], ["radiator", 26, 18], ["engine_scrap_mk1", 19, 27, 2], ["engine_scrap_mk1", 24, 27, 2],
+			["bolt_thrower_scrap", 21, 4], ["helm", 26, 10], ["fabricator", 18, 13],
+			["bed", 11, 15], ["oxygen_scrap_mk1", 15, 15],
+			["reactor_mk2", 21, 18], ["engine_scrap_mk1", 19, 27, 2], ["engine_scrap_mk1", 24, 27, 2],
+			["rattle_burst_scrap", "flank"],  # a turret aims from any wall (last: it takes the first flat flank the other parts left free)
 		],
-		"cargo": {"scrap": 500, "copper": 80, "polymer": 30, "shield_scrap_mk1": 1, "net_mouth_scrap": 1, "credits": 300, "fuel": 6},
+		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "net_mouth_scrap": 1, "credits": 300, "fuel": 6},
 	}
 
 
@@ -95,12 +98,12 @@ func _rustbucket() -> Dictionary:
 ## The frame is an arrowhead (a long slope2 taper to a flat tip, swept-back wings with 45 degree edges, a tail
 ## block), symmetric about x = 24. Only the fuselage is built: a titanium nose with the pulse gun on its tip,
 ## the bridge, the quarters, the workshop and the engine room with the two Mk2 engines. The wings and the
-## rest of the frame are empty hull; the strafe pair and a light shield wait in the hold.
+## rest of the frame are empty hull; the strafe pair waits in the hold.
 func _courier() -> Dictionary:
 	return {
 		"file": "starter_courier", "name": "Courier", "was_hull": 864,
-		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Bram", "species": "basalt"}],
-		"blurb": "Small, quick and reliable: a titanium nose, a pulse gun and a roomy empty frame. The strafe jets and a light shield wait in the hold.",
+		"crew": SOLDIER, "kit": "shield",
+		"blurb": "Small, quick and reliable: a titanium nose, a pulse gun, a light shield and a roomy empty frame. The strafe jets wait in the hold.",
 		"frame": [[20, 0], [28, 0], [34, 12], [36, 12], [48, 24], [48, 34], [42, 40], [34, 40], [34, 44], [14, 44], [14, 40], [6, 40], [0, 34], [0, 24], [12, 12], [14, 12]],
 		"outline": [[20, 9], [28, 9], [30, 13], [30, 29], [29, 30], [19, 30], [18, 29], [18, 13]],
 		"plate": "titanium_alloy", "plated": func(c): return true, "backed": func(c): return c.y <= 13, "thick": func(c): return c.y <= 13,
@@ -110,10 +113,10 @@ func _courier() -> Dictionary:
 		"doors": [[21, 14, "h"], [26, 14, "h"], [21, 21, "h"], [26, 21, "h"]],
 		"parts": [
 			["pulse_mk1", 22, 7], ["helm", 26, 12],
-			["bed", 19, 15, 1], ["bed", 19, 17, 1], ["oxygen_gen", 19, 19, 1], ["fabricator", 25, 17],
-			["reactor_mk2", 22, 22], ["engine_mk2", 20, 30, 2], ["engine_mk2", 24, 30, 2],
+			["bed", 19, 15, 1], ["shield_mk1", 19, 17, 1], ["oxygen_gen", 19, 19, 1], ["fabricator", 25, 17],
+			["reactor_mk2", 22, 22], ["engine_mk1", 20, 30, 2], ["engine_mk1", 24, 30, 2],
 		],
-		"cargo": {"scrap": 400, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "shield_mk1": 1, "credits": 500, "fuel": 6},
+		"cargo": {"scrap": 250, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "credits": 500, "fuel": 6},
 	}
 
 
@@ -121,12 +124,12 @@ func _courier() -> Dictionary:
 ## The frame is a faceted crystal: only 45 degree facets (a long hexagon with a pointed bow and stern),
 ## symmetric about x = 19. Only the spine is built: a coated spire with the Heat Lance on its tip, the
 ## bridge, the quarters and the workshop side by side, and the engine room with the Ion Drive at the pointed
-## stern. The four-sector Neon Lattice Shield and the Siren Ion wait in the hold.
+## stern, and the Neon Lattice Shield in the quarters.
 func _prism() -> Dictionary:
 	return {
 		"file": "starter_prism", "name": "Prism", "was_hull": 624, "at": [7, 9],
-		"crew": [{"name": "Soldier", "species": "human"}, {"name": "Tess", "species": "emberkin"}, {"name": "Quill", "species": "fenn"}, {"name": "Wren", "species": "basalt"}],
-		"blurb": "A neon glass cannon: huge power, thin skin, a big empty crystal frame to grow in, and everything runs hot. The shield waits in the hold.",
+		"crew": SOLDIER, "kit": "shield",
+		"blurb": "A neon glass cannon: huge power, thin skin, a lattice shield, a big empty crystal frame to grow in, and everything runs hot.",
 		"frame": [[15, 0], [23, 0], [38, 15], [38, 25], [23, 40], [15, 40], [0, 25], [0, 15]],
 		"outline": [[9, 0], [15, 0], [18, 3], [18, 19], [15, 22], [9, 22], [6, 19], [6, 3]],
 		"plate": "reflective_coating", "plated": func(c): return true, "backed": func(c): return c.y <= 2, "thick": func(c): return c.y <= 2,
@@ -136,10 +139,10 @@ func _prism() -> Dictionary:
 		"doors": [[9, 6, "h"], [14, 6, "h"], [9, 13, "h"], [14, 13, "h"]],
 		"parts": [
 			["heat_lance_neon", 10, -2], ["helm", 11, 4],
-			["bed", 7, 7, 1], ["bed", 7, 9, 1], ["oxygen_gen", 7, 11, 1], ["fabricator", 13, 8],
+			["bed", 7, 7, 1], ["shield_neon_mk1", 7, 9, 1], ["oxygen_gen", 7, 11, 1], ["fabricator", 13, 8],
 			["reactor_neon_mk1", 10, 14], ["radiator", 7, 15], ["radiator", 14, 15], ["engine_neon_mk1", 10, 22, 2],
 		],
-		"cargo": {"scrap": 400, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "shield_neon_mk1": 1, "credits": 400, "fuel": 6},
+		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "credits": 400, "fuel": 6},
 	}
 
 
@@ -181,7 +184,7 @@ func _placed(spec: Dictionary) -> Dictionary:
 	out["doors"] = spec["doors"].map(func(w): return [w[0] + d.x, w[1] + d.y, w[2]])
 	if spec.has("rooms"):
 		out["rooms"] = spec["rooms"].map(func(w): return [w[0] + d.x, w[1] + d.y, w[2] + d.x, w[3] + d.y])
-	out["parts"] = spec["parts"].map(func(p): return [p[0], p[1] + d.x, p[2] + d.y] + p.slice(3))
+	out["parts"] = spec["parts"].map(func(p): return p if p[1] is String else [p[0], p[1] + d.x, p[2] + d.y] + p.slice(3))
 	var plated: Callable = spec["plated"]
 	out["plated"] = func(c): return plated.call(c - d)
 	for key in ["thick", "backed", "plate"]:
@@ -260,7 +263,7 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 	ship.inventory.load_dict(STOCK)
 	for p in spec["parts"]:
 		ship.inventory.add(p[0], 1)
-	var off: Vector2i = (GRID - (hi - lo + Vector2i.ONE)) / 2
+	var off: Vector2i = (GRID - (hi - lo + Vector2i.ONE)) / 2 - lo
 	var session := BuildSession.new(ship)
 
 	var cells: Array = skin.keys()
@@ -278,6 +281,9 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 	_apply(session, changes, name + " doors")
 
 	for p in spec["parts"]:  # one at a time, so a refusal names its part
+		if p[1] is String:  # [id, "flank"]: a second gun on the first flat stretch of a flank the mount rules accept
+			_flank(session, p[0], skin, off, name)
+			continue
 		_apply(session, [{"layer": "component", "id": p[0], "anchor": Vector2i(p[1], p[2]) + off, "rot": p[3] if p.size() > 3 else 0}], "%s: %s at %d,%d" % [name, p[0], p[1], p[2]])
 
 	_wire(ship, session, spec)
@@ -321,6 +327,24 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 	f.store_string(_format(saved))
 	f.close()
 	_report(spec, path, off)
+
+
+## Mount part `id` on a flank: the first anchor, scanning down the hull, the left-hand wall (rot 3, the quarters) before the right (rot 1,
+## the workshop stays the fabricator's alone), that the real mount rules accept.
+func _flank(session: BuildSession, id: String, skin: Dictionary, off: Vector2i, what: String) -> void:
+	var lo := Vector2i(1 << 20, 1 << 20)
+	var hi := Vector2i(-(1 << 20), -(1 << 20))
+	for c in skin:
+		lo = lo.min(c)
+		hi = hi.max(c)
+	for rot in [3, 1]:
+		for y in range(lo.y, hi.y + 1):
+			for x in range(lo.x - 4, hi.x + 4):
+				var r := session.apply([{"layer": "component", "id": id, "anchor": Vector2i(x, y) + off, "rot": rot}])
+				if r["skipped"] == 0:
+					print("%s: %s on the flank at %d,%d rot %d" % [what, id, x, y, rot])
+					return
+	_fail("%s: no flank spot for %s" % [what, id])
 
 
 func _apply(session: BuildSession, changes: Array, what: String) -> void:
@@ -547,6 +571,39 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 		print("   frame %d cells%s, %d tiles, %d components, empty %d = %.0f%%" % [
 			g.hull.size(), " (%.2fx the old hull of %d)" % [float(g.hull.size()) / spec["was_hull"], spec["was_hull"]] if spec.has("was_hull") else "", g.tiles.size(), ship.components.instances.size(), empty, 100.0 * empty / g.hull.size()])
 		print("ROW %s|%s|%d|%d|%d|%.0f" % [spec["file"], str(spec.get("hangar", {}).get("group", "")) + " " + str(spec.get("hangar", {}).get("layout", "")), co.hull_max, ship.components.instances.size(), g.hull.size(), 100.0 * empty / g.hull.size()])
+	if spec.has("frame"):
+		_check_loadout(spec, ship)
 	var pockets := HullOutline.pockets(ship)
 	if not pockets.is_empty():
 		_fail("%s: %d floor cells no crew body reaches from the helm: %s" % [spec["name"], pockets.size(), str(pockets.map(func(c): return c - off))])
+
+
+## The loadout rules of a starter (playtest 2, P3): a helm, one reactor, one bed, air and the fabricator; 1-2 engines; 1-2 guns; then
+## exactly one of a shield (one gun) and a medbay (1-2 guns), or neither (two guns); no spare shield or medbay in the hold; 250 scrap.
+func _check_loadout(spec: Dictionary, ship: Ship) -> void:
+	var fam := {}
+	for uid in ship.components.instances:
+		var f := str(ship.components.def(ship.components.instances[uid]["id"]).get("family", ""))
+		fam[f] = int(fam.get(f, 0)) + 1
+	var who: String = spec["name"]
+	for f in ["helm", "reactor", "oxygen", "bed", "fabricator"]:
+		if int(fam.get(f, 0)) != 1:
+			_fail("%s: %d parts of family %s, wants exactly 1" % [who, int(fam.get(f, 0)), f])
+	var guns := int(fam.get("weapon", 0))
+	var shields := int(fam.get("shield", 0))
+	var medbays := int(fam.get("medbay", 0))
+	if not int(fam.get("engine", 0)) in [1, 2]:
+		_fail("%s: %d engines, wants 1 or 2" % [who, int(fam.get("engine", 0))])
+	if not guns in [1, 2]:
+		_fail("%s: %d guns, wants 1 or 2" % [who, guns])
+	if shields + medbays > 1:
+		_fail("%s: a shield and a medbay both built" % who)
+	if shields + medbays == 0 and guns != 2:
+		_fail("%s: neither a shield nor a medbay, so it wants two guns (has %d)" % [who, guns])
+	if shields == 1 and guns != 1:
+		_fail("%s: a shield ship wants one gun (has %d)" % [who, guns])
+	for id in ship.inventory.to_dict():
+		if str(ship.components.def(str(id)).get("family", "")) in ["shield", "medbay"]:
+			_fail("%s: a spare %s in the hold" % [who, id])
+	if ship.inventory.count("scrap") != 250:
+		_fail("%s: %d scrap in the hold, wants 250" % [who, ship.inventory.count("scrap")])

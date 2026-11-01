@@ -244,19 +244,28 @@ func test_the_crew_can_walk_to_every_room() -> void:
 		eq(reached.size(), ship.atmosphere.rooms.size(), key + ": every room is reachable on foot")
 
 
-func test_each_has_a_gun_the_essentials_and_a_shield_in_the_hold() -> void:
+func test_every_starter_has_the_lean_loadout() -> void:  # playtest 2, P3: no starter comes with everything
+	var kinds := {"shield": 0, "medbay": 0, "neither": 0}
 	for key in _all():
 		var ship := _ship(key)
-		check(_family(ship, "weapon").size() >= 1, key + " has a gun")
-		for family in ["reactor", "engine", "oxygen", "helm", "fabricator", "bed"]:
-			check(not _family(ship, family).is_empty(), "%s has a %s" % [key, family])
-		check(_family(ship, "bed").size() >= 2, key + " has crew beds")
-		check(_family(ship, "shield").is_empty(), key + ": the shield is not built yet")
-		var shields := 0
+		for family in ["reactor", "oxygen", "helm", "fabricator", "bed"]:
+			eq(_family(ship, family).size(), 1, "%s has exactly one %s" % [key, family])
+		var engines := _family(ship, "engine").size()
+		var guns := _family(ship, "weapon").size()
+		check(engines >= 1 and engines <= 2, "%s: %d engines, 1 or 2 wanted" % [key, engines])
+		check(guns >= 1 and guns <= 2, "%s: %d guns, 1 or 2 wanted" % [key, guns])
+		var shields := _family(ship, "shield").size()
+		var medbays := _family(ship, "medbay").size()
+		check(shields + medbays <= 1, key + ": a shield or a medbay, not both")
+		kinds["shield" if shields > 0 else ("medbay" if medbays > 0 else "neither")] += 1
+		if shields > 0:
+			eq(guns, 1, key + ": a shield ship has one gun")
+		if shields + medbays == 0:
+			eq(guns, 2, key + ": a ship with neither has two guns")
 		for id in ship.inventory.counts:
-			if ship.components.has(id) and ship.components.def(id).get("family", "") == "shield":
-				shields += ship.inventory.count(id)
-		eq(shields, 1, key + ": one shield waits in the hold")
+			if ship.components.has(id):
+				check(not ship.components.def(id).get("family", "") in ["shield", "medbay"], "%s: a spare %s in the hold" % [key, id])
+		eq(ship.inventory.count("scrap"), 250, key + ": 250 scrap in the hold")
 		var fab: int = _family(ship, "fabricator")[0]
 		var room: int = ship.atmosphere.room_at(ship.components.instances[fab]["anchor"])
 		var mates := 0
@@ -265,6 +274,15 @@ func test_each_has_a_gun_the_essentials_and_a_shield_in_the_hold() -> void:
 				mates += 1
 		check(room >= 0 and ship.atmosphere.rooms[room]["sealed"], key + ": the fabricator is in a sealed room")
 		eq(mates, 0, key + ": the workshop holds the fabricator alone")
+	check(kinds["neither"] >= 1 and kinds["neither"] <= 4, "at most four starters have neither a shield nor a medbay (%s)" % str(kinds))
+	check(kinds["shield"] >= 10 and kinds["medbay"] >= 10, "about half the starters have a shield and half a medbay (%s)" % str(kinds))
+
+
+func test_every_starter_starts_with_the_soldier_alone() -> void:  # playtest 2, A1: Ada is found in a pod, the rest are met or hired
+	for e in Hangar.starters():
+		eq(e["crew"], [{"name": "Soldier", "species": "human"}], e["id"] + ": the Soldier alone")
+	for key in _all():
+		eq(_ship(key).crew_plan, [{"name": "Soldier", "species": "human"}], key + ": the design lists the Soldier alone")
 
 
 func test_every_gun_and_engine_is_mounted_through_the_wall() -> void:
@@ -295,18 +313,18 @@ func test_nose_guns_point_forward_and_rear_engines_push_forward() -> void:
 		var co = arena.ships[0]
 		check(co.thrusts["fwd"] > 0.0, "%s: the engines push forward (%s)" % [key, str(co.thrusts)])
 		for uid in co.mounts:
-			eq(co.mounts[uid]["dir"], Vector2.UP, "%s: %s is on the bow" % [key, co.mounts[uid]["id"]])
+			if not bool(Content.entry("weapons", co.mounts[uid]["id"]).get("turret", false)):  # a turret may sit on a flank
+				eq(co.mounts[uid]["dir"], Vector2.UP, "%s: %s is on the bow" % [key, co.mounts[uid]["id"]])
 
 
 func test_rustbucket_is_the_scrap_ship() -> void:
 	var ship := _ship("Rustbucket")
 	var b := _bounds(ship)
 	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(20, 21), "20x21 cells built")
-	eq([_count(ship, "reactor_mk2"), _count(ship, "radiator")], [1, 1], "one standard Reactor Mk2 (scrap parts draw 20% more) and a radiator (the Kickjets run hot)")
-	eq([_count(ship, "engine_scrap_mk1"), _count(ship, "oxygen_scrap_mk1"), _count(ship, "rattle_burst_scrap")], [2, 1, 1], "2 Kickjets, Wheezer O2, Rattle Burst")
-	eq([ship.inventory.count("shield_scrap_mk1"), ship.inventory.count("net_mouth_scrap")], [1, 1], "the Bubble Rig and a Net Mouth in the hold")
+	eq(_count(ship, "reactor_mk2"), 1, "one standard Reactor Mk2 (scrap parts draw 20% more)")
+	eq([_count(ship, "engine_scrap_mk1"), _count(ship, "oxygen_scrap_mk1"), _count(ship, "rattle_burst_scrap"), _count(ship, "bolt_thrower_scrap")], [2, 1, 1, 1], "2 Kickjets, Wheezer O2, the Rattle Burst turret and a Bolt Thrower")
+	eq([ship.inventory.count("shield_scrap_mk1"), ship.inventory.count("net_mouth_scrap")], [0, 1], "no spare shield, a Net Mouth in the hold")
 	check(_tiles(ship, "scrap_plate") > 100, "a scrap-plate outer layer all round")
-	check(ship.inventory.count("scrap") >= 400, "a lot of scrap in the hold")
 	eq(ship.inventory.count("credits"), 300, "300 credits")
 
 
@@ -314,8 +332,8 @@ func test_courier_is_the_standard_ship() -> void:
 	var ship := _ship("Courier")
 	var b := _bounds(ship)
 	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(12, 21), "12x21 cells built: the fuselage of the arrowhead")
-	eq([_count(ship, "engine_mk2"), _count(ship, "pulse_mk1"), _count(ship, "reactor_mk2")], [2, 1, 1], "2 Engine Mk2 (the fast ship), Pulse Mk1, one Reactor Mk2")
-	eq([ship.inventory.count("shield_mk1"), ship.inventory.count("afterburner")], [1, 1], "a Shield Mk1 and an Afterburner in the hold")
+	eq([_count(ship, "engine_mk1"), _count(ship, "pulse_mk1"), _count(ship, "reactor_mk2"), _count(ship, "shield_mk1")], [2, 1, 1, 1], "2 Engine Mk1 (one reactor feeds a shield too), Pulse Mk1, one Reactor Mk2, a Shield Mk1")
+	eq(ship.inventory.count("afterburner"), 1, "an Afterburner in the hold")
 	check(_tiles(ship, "titanium_alloy") >= 60, "a titanium skin all round")
 	var nose := 0
 	for c in ship.grid.tiles:
@@ -348,7 +366,7 @@ func test_prism_is_the_neon_ship() -> void:
 	var b := _bounds(ship)
 	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(12, 22), "12x22 cells built: the spine of the crystal")
 	eq([_count(ship, "reactor_neon_mk1"), _count(ship, "engine_neon_mk1"), _count(ship, "heat_lance_neon")], [1, 1, 1], "Prism Core, Ion Drive, Heat Lance")
-	eq([ship.inventory.count("shield_neon_mk1"), ship.inventory.count("afterburner")], [1, 1], "the Neon Lattice Shield and an Afterburner in the hold")
+	eq([_count(ship, "shield_neon_mk1"), ship.inventory.count("afterburner")], [1, 1], "the Neon Lattice Shield built and an Afterburner in the hold")
 	var core: int = _family(ship, "reactor")[0]
 	var hot: int = ship.atmosphere.room_at(ship.components.instances[core]["anchor"])
 	var radiators := 0
@@ -376,7 +394,7 @@ func test_cargo_is_known_ids_and_credits() -> void:
 		for id in ship.inventory.counts:
 			if ship.components.has(id):
 				spares += ship.inventory.count(id)
-		check(spares >= 2, key + " carries a few spare parts")
+		check(spares <= 4, "%s carries %d spare parts, a lean start has at most four" % [key, spares])
 
 
 func test_starters_are_ordered_by_hull_and_speed() -> void:
@@ -471,7 +489,7 @@ func test_each_pack_starter_has_its_unlock_and_sits_where_the_unlock_says() -> v
 		eq(str(entry["payload"].get("layout", "")), e["layout"], id + ": its layout is the unlock's")
 		eq(str(entry["payload"].get("group", "")).to_lower(), e["group"].to_lower(), id + ": its group is the unlock's")
 		check(str(entry.get("how", "")).length() > 12, id + ": the unlock says how to earn it")
-		check(e["crew"].size() >= 2, id + ": it has a crew")
+		eq(e["crew"].size(), 1, id + ": the Soldier alone")
 
 
 func test_every_pack_starter_can_be_earned_in_an_event() -> void:
@@ -493,19 +511,14 @@ func test_every_pack_starter_can_be_earned_in_an_event() -> void:
 				check(not hits.is_empty() and hits.all(func(x): return x[0] == hits[0][0]), e["id"] + ": and in one event only")
 
 
-func test_each_race_starter_is_crewed_by_its_race_and_fits_its_tech() -> void:
+func test_each_race_starter_fits_its_tech() -> void:
 	for race in RACES:
 		var group: String = race.capitalize()
 		var racial := Content.ids("components").filter(func(id): return id.begins_with(race + "_"))
 		for e in Hangar.starters():
 			if e["group"] != group:
 				continue
-			var crew: Array = e["crew"]
-			eq(crew[0], {"name": "Soldier", "species": "human"}, e["id"] + ": the Soldier first")
-			var kin := crew.filter(func(m): return m["species"] == race)
-			check(kin.size() >= 2 or (race == "human" and crew.size() >= 3), "%s: at least two of the race aboard (%s)" % [e["id"], str(crew)])
-			if race != "human":
-				check(crew.slice(1).all(func(m): return m["species"] == race), e["id"] + ": a crew of that race (and the Soldier)")
+			eq(e["crew"], [{"name": "Soldier", "species": "human"}], e["id"] + ": the Soldier alone (the race is met on the way)")
 			var ship := Ship.from_design(e["path"])
 			var mine := 0
 			var parts := {}
