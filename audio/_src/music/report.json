@@ -1,4 +1,29 @@
 {
+ "explore_a": {
+  "bands_pct": [
+   26.6,
+   29.7,
+   32.8,
+   7.6,
+   3.3
+  ],
+  "bpm": 80.0,
+  "bytes": 2394068,
+  "peak_db": -2.51,
+  "rms_db": -18.01,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.46148,
+   "rms_first_db": -21.2,
+   "rms_last_db": -19.3,
+   "seam_step": 0.03219,
+   "typ_step_p999": 0.21009
+  },
+  "seconds": 144.0,
+  "target_rms_db": -18.0,
+  "title": "Drift",
+  "true_peak_db": -2.51
+ },
  "menu": {
   "bands_pct": [
    20.8,

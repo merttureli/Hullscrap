@@ -4,13 +4,16 @@
   "menu": [
    "menu.ogg"
   ],
-  "explore": [],
+  "explore": [
+   "explore_a.ogg"
+  ],
   "combat": [],
   "hollow": [],
   "build": []
  },
  "stings": {},
  "volumes": {
-  "menu.ogg": 0.0
+  "menu.ogg": 0.0,
+  "explore_a.ogg": 0.0
  }
 }

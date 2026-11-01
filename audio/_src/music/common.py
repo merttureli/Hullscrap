@@ -65,10 +65,10 @@ class Song:
         return S._conv_smooth(step, tau, False).astype(np.float32)
 
     def levels(self, spec):
-        """Dev aid: each part's RMS (dB) after its filter and gain."""
+        """Dev aid: each part's (RMS dB, peak dB) after its filter and gain."""
         out = {}
         for name, cv in self.parts.items():
             p = spec[name]
             x = S.filt(cv.buf, p.get("hp"), p.get("lp"), p.get("order", 2)) * db(p.get("g", 0.0))
-            out[name] = round(S.rms_db(x), 1)
+            out[name] = (round(S.rms_db(x), 1), round(float(20 * np.log10(np.abs(x).max() + 1e-9)), 1))
         return out
