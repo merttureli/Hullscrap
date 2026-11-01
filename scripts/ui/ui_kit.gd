@@ -37,6 +37,7 @@ static var _icons := {}  # id -> [texture, region] or null
 static var _sheets := {}  # kit sheet name -> SpriteSheet or null
 static var _cursors := {}  # cursor name -> [ImageTexture, hotspot] or null
 static var _bold: Font
+static var _italic: Font
 
 
 ## Is `e` a mouse wheel step (either axis)? A panel under the pointer marks these handled (accept_event), so the world behind it never zooms.
@@ -58,6 +59,16 @@ static func bold() -> Font:
 		f.variation_embolden = 0.7
 		_bold = f
 	return _bold
+
+
+## The fallback font, slanted, for lore lines.
+static func italic() -> Font:
+	if _italic == null:
+		var f := FontVariation.new()
+		f.base_font = ThemeDB.fallback_font
+		f.variation_transform = Transform2D(Vector2(1.0, 0.0), Vector2(0.22, 1.0), Vector2.ZERO)
+		_italic = f
+	return _italic
 
 
 static func text_width(s: String, size: int, f: Font = null) -> float:
@@ -253,6 +264,42 @@ static func chip(cv: CanvasItem, s: String, at: Vector2, col: Color, size := 11)
 	cv.draw_rect(r, col, false, 1.0)
 	cv.draw_string(bold(), at + Vector2(5, size + 2), s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col.lightened(0.25))
 	return w
+
+
+## Keyword chips (describe.gd keyword()) in rows of at most `width` px, from `at`: [[Rect2, keyword], ...].
+static func chip_layout(kws: Array, at: Vector2, width: float, size := 11) -> Array:
+	var out := []
+	var x := 0.0
+	var y := 0.0
+	for k in kws:
+		var w := text_width(k["label"], size, bold()) + 10.0
+		if x > 0.0 and x + w > width:
+			x = 0.0
+			y += size + 11.0
+		out.append([Rect2(at + Vector2(x, y), Vector2(w, size + 7)), k])
+		x += w + 5.0
+	return out
+
+
+## One keyword chip in rect `r`, in the keyword's colour; `lit` (the mouse is on it) fills it more.
+static func keyword_chip(cv: CanvasItem, r: Rect2, k: Dictionary, size := 11, lit := false) -> void:
+	var col: Color = k["color"]
+	cv.draw_rect(r, Color(col, 0.34 if lit else 0.18))
+	cv.draw_rect(r, Color(col, 0.9 if lit else 0.6), false, 1.0)
+	cv.draw_string(bold(), r.position + Vector2(5, size + 2), k["label"], HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
+
+
+## A note of `lines` (UiKit.wrap them to the width wanted), its top left at `at` (the caller keeps it on screen); returns its rect.
+static func note(cv: CanvasItem, lines: PackedStringArray, at: Vector2, edge: Color, size := 12) -> Rect2:
+	var w := 16.0
+	for l in lines:
+		w = maxf(w, text_width(l, size) + 16.0)
+	var h: float = lines.size() * (size + 4.0) + 12.0
+	var r := Rect2(at, Vector2(w, h))
+	tooltip(cv, r, edge)
+	for i in lines.size():
+		text(cv, lines[i], at + Vector2(8, 8 + size + i * (size + 4.0)), size, TEXT)
+	return r
 
 
 ## The kit's mouse cursor `name` (pointer, place, remove, invalid; the 32 px set) as [texture, hotspot], or null.

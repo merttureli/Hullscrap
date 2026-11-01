@@ -305,7 +305,7 @@ func test_the_leviathans_have_a_rare_region_a_warden_and_a_roamer() -> void:
 		var s := _share(pair[0], pair[1], 20, "empty", "leviathan_surfaces")
 		check(s >= 0.005 and s <= 0.02, "%s: the roamer is %.2f%% of the empty-space events" % [pair[0], 100.0 * s])
 	near(_share("concord_space", 3, 20, "empty", "leviathan_surfaces"), 0.0, "not before stage 4", 0.0001)
-	check(_share("leviathan_deep", 5, 20, "anomaly", "leviathan_deep_") > 0.1, "in the deep its own events are common")
+	check(_share("leviathan_deep", 6, 20, "anomaly", "leviathan_deep_") > 0.1, "in the deep its own events are common (from stage 6: the Haven's first fragment, 200 a pick, is open to stage 5)")
 	eq(_events_of(["faction_leviathans"]).size(), 7, "six events and the roamer")
 
 

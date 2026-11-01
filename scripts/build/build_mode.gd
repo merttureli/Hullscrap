@@ -286,7 +286,7 @@ func _on_key(e: InputEventKey) -> void:
 					picker.ask()
 			KEY_M:
 				if build_on:
-					message = "M: switch to play mode (B) to open the map"
+					message = "Press B for play mode, then M for the map"
 				elif drift != null:
 					drift.open()
 			KEY_H:
@@ -643,7 +643,7 @@ func _save() -> void:
 
 func _load() -> void:
 	if not FileAccess.file_exists(SAVE_PATH):
-		message = "no saved ship yet (Ctrl+S saves)"
+		message = "No saved ship (Ctrl+S saves)"
 		return
 	var d = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
 	message = session.load_dict(d) if d is Dictionary else "save file is not valid JSON"
@@ -651,7 +651,7 @@ func _load() -> void:
 		message = "ship loaded"
 		_fix_component()
 		if drift != null and drift.load_campaign() != "":
-			message = "ship loaded (no saved campaign: a new one begins)"
+			message = "Ship loaded. No saved run: a new one begins"
 
 
 # --- HUD (scripts/ui/hud.gd draws it; these are the words and numbers it reads) ---
@@ -683,20 +683,20 @@ func _breached(room_id: int) -> bool:
 ## The key hints of the mode (the HUD shows them over the mode bar).
 func _controls_text() -> String:
 	if not build_on:
-		var tractor := "   Q hold: tractor" if ship != null and ship.components.instances.values().any(func(i): return str(ship.components.def(i["id"]).get("family", "")) == "tractor") else ""
-		return "WASD walk   click a marker: course   E at the helm: fly%s   middle-click: send crew   E door   O oxygen   P power   K fight (Shift+K rammer)   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom" % tractor
-	var how := "LMB paint   Shift+LMB line   Ctrl+LMB rectangle   RMB remove"
+		var tractor := "   Hold Q: tractor" if ship != null and ship.components.instances.values().any(func(i): return str(ship.components.def(i["id"]).get("family", "")) == "tractor") else ""
+		return "WASD walk   E at the helm: fly   Click a marker: course%s   MMB send crew   E door   O oxygen   P power   M map   B build   K fight   N new ship   Ctrl+S/L save/load   Wheel zoom" % tractor
+	var how := "LMB paint   Shift line   Ctrl rectangle   RMB remove"
 	if group == Group.TILES:
-		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove" + ("   T shape" if grid.tile_flag(selected, "solid") else "")
+		how = "LMB paint   Shift line   Ctrl rectangle (wall: a room)   RMB remove" + ("   T shape" if grid.tile_flag(selected, "solid") else "")
 		if _shaped_wall():
-			how = "LMB place %s (top-left cell on the mouse)   RMB remove   T shape   R rotate   Shift+R mirror" % wall_piece
+			how = "LMB place %s   RMB remove   T shape   R rotate   Shift+R mirror" % wall_piece
 		elif grid.tile_flag(selected, "door"):
-			how = "LMB place a 2-cell door in a wall   RMB remove   R flip"
+			how = "LMB place door   RMB remove   R flip"
 	elif group == Group.SYSTEMS:
-		how = "LMB place (a weapon or engine: its outside half on the mouse)   RMB remove   R rotate   F repair"
+		how = "LMB place   RMB remove   R rotate   F repair"
 	elif group == Group.BELTS:
-		how = "LMB lay belt   Shift+LMB line   Ctrl+LMB rectangle   RMB remove (belts touch racks, guns and drives by an edge)"
-	return "%s   E door   O oxygen   P power\nTab / Shift+Tab palette tab   1-9 pick   Ctrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   wheel zoom" % how
+		how = "LMB lay belt   Shift line   Ctrl rectangle   RMB remove"
+	return "%s   E door   O oxygen   P power\nTab palette   1-9 pick   Ctrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   Wheel zoom" % how
 
 
 ## Why the pending edit would do nothing, when every cell of it is refused ("" otherwise).

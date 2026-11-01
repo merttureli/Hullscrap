@@ -292,7 +292,7 @@ func test_a_marker_sets_the_course_and_again_cancels_it() -> void:
 	var id := str(s.main_poi()["id"])
 	check(view.choose(id), "a known POI")
 	eq(view.helm.course, {"poi": id}, "the course follows it")
-	check(view.helm_line().begins_with("AUTOPILOT") or view.helm_line().begins_with("HELM UNMANNED") or view.helm_line().begins_with("No course"), "the helm line says what it does")
+	check(view.helm_line().begins_with("AUTOPILOT") or view.helm_line().begins_with("Helm empty") or view.helm_line().begins_with("No course"), "the helm line says what it does")
 	view._markers = [{"rect": Rect2(100.0, 100.0, 40.0, 40.0), "id": id}]
 	view.visible = true
 	check(view.click(Vector2(120.0, 120.0)), "a click on its marker")

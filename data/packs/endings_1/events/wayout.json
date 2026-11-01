@@ -50,7 +50,7 @@
       ]
     },
     {
-      "id": "station_wayout_clans_moot", "type": "station", "weight": 100, "once": true, "requires": {"rep_min": {"clans": 5}, "not_flag": "wayout_clans_backed", "region": ["basalt_quarries", "gauntling_scrapyards", "kett_hives"], "stage_min": 3, "stage_max": 7},
+      "id": "station_wayout_clans_moot", "type": "station", "weight": 200, "once": true, "requires": {"rep_min": {"clans": 5}, "not_flag": "wayout_clans_backed", "region": ["basalt_quarries", "gauntling_scrapyards", "kett_hives"], "stage_min": 3, "stage_max": 7},
       "text": "The Clan Moot meets in the big cargo bay, which is the only room large enough, and which is why most of the furniture is already on fire. Twelve clans, one table and one rule: whoever wants the floor must hold the Good Wrench. The Good Wrench is, in fact, not that good. Today it is in the hands of Ma Gantry, who is standing on a chair. 'The Concord wants the gates back,' she says. 'The Lumen want to listen to them. Who wants them open?' The bay answers with a noise like a hangar full of dropped pans. It is not yet a vote. A vote needs the Wrench.",
       "choices": [
         {"text": "Take the Wrench. Promise to open the Scrapper Gate for everybody, for free.", "outcomes": [
@@ -114,6 +114,9 @@
         ]},
         {"text": "[Prism Core] Let the reactor sing it.", "requires": {"component": "reactor_neon_mk1"}, "outcomes": [
           {"weight": 100, "text": "Your Prism Core finds the note on its first attempt, as if it had been holding it for forty years. The chamber answers with a chord. The Hierophant bows to your reactor and then, politely, to you.", "effects": {"flag": "wayout_lumen_backed", "rep": {"lumen": 3}, "reveal": "gate_3", "items": {"crystal": 3}}}
+        ]},
+        {"text": "[Ada's recorder] Play the school bell.", "blue": true, "requires": {"items": {"ada_recorder": 1}, "flag": "ada_halcyon"}, "outcomes": [
+          {"weight": 100, "text": "The recorder plays its four notes into the spiral. The model, which has hummed three for forty years, stops humming altogether, as if to listen. The Hierophant's eyes are open and she does not blink. 'Four,' she says. 'We have taught the Prism three.' She does not ask where you got it. She asks, very properly, whether you would be willing to open the door.", "effects": {"flag": "wayout_lumen_backed", "rep": {"lumen": 3}, "reveal": "gate_3", "items": {"crystal": 3}}}
         ]},
         {"text": "Ask what is on the other side.", "outcomes": [
           {"weight": 100, "text": "'We do not know,' says the Hierophant. 'It is the entire point.'", "effects": {}}

@@ -837,7 +837,7 @@ func _draw_foot(p: Rect2) -> void:
 	if message != "":
 		_text(message, Vector2(p.position.x + PAD, y), 16, BAD if message_bad else GOOD)
 	var how := "spool the jump drive there, 8 s" if sector_flow() else "jump"
-	_text("Click a lane-linked node to %s (%s)    Enter: dock    T: wait for a trader (no fuel)    Y: Ma tows you home (no fuel, debt +150)    Shift+click: drift jump (no fuel, hull -%d)    J: journal    M / Esc: close" % [how, jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
+	_text("Click a node: %s (%s)   Enter: dock   T: wait for a trader   Y: tow home (debt +150)   Shift+click: drift jump (hull -%d)   J: journal   M/Esc: close" % [how, jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
 		Vector2(p.position.x + PAD, p.end.y - 22.0), 13, DIM_TEXT)
 	var s = ship()
 	if s != null and campaign.fuel_short(s):

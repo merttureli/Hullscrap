@@ -40,6 +40,7 @@
 		"suit": {"name": "Suited", "blurb": "Wears an EVA suit: the label abilities ask for."},
 		"no_breath": {"name": "Does not breathe", "o2_use": 0},
 		"heat_resistant": {"name": "Heat resistant", "damage_taken": {"fire": 0.25}},
-		"fast_repair": {"name": "Quick hands", "notes": "repair and breach time x0.6, which is a work speed of 1/0.6", "work_mult": {"repair": 1.6666667, "breach": 1.6666667}}
+		"fast_repair": {"name": "Quick hands", "notes": "repair and breach time x0.6, which is a work speed of 1/0.6", "work_mult": {"repair": 1.6666667, "breach": 1.6666667}},
+		"tinkerer": {"name": "Tinkerer", "blurb": "Proud of every part: repairs and breach patches take x0.8 the time. Ada has it (data/crew.json), and so do the Gauntlings (races_1).", "work_mult": {"repair": 1.25, "breach": 1.25}}
 	}
 }

@@ -247,7 +247,7 @@ func frame(dt: float) -> void:
 			if helm.arrived != "":
 				_say("Arrived at %s." % helm.arrived)
 		if not s.tick(dt, ship).is_empty():
-			_say("A ship shows on the radar.")
+			_say("Ship on radar.")
 		if s.hollow != _hollow_seen:
 			_hollow_seen = s.hollow
 			if s.hollow:
@@ -391,11 +391,11 @@ func toggle_helm() -> bool:
 		return false
 	if helm.manual:
 		helm.manual = false
-		_say("You hand the helm back to the autopilot.")
+		_say("Autopilot has the helm.")
 		return true
 	if helm.why_not == "" and Helm.helm_near(_ship(), crew.get("player") if crew != null else null) >= 0:
 		helm.manual = true
-		_say("You have the helm: mouse steers, W/S thrust, A/D strafe. E hands it back.")
+		_say("Flying: mouse steers, W/S thrust, A/D strafe, E lets go.")
 		return true
 	return false
 
@@ -469,15 +469,15 @@ func helm_line() -> String:
 	var speed := "%d px/s, %s" % [roundi(helm.flight.vel.length()), "cruise x%s" % String.num(helm.cruise, 1) if helm.cruise > 1.0 else "combat speed"]
 	match helm.state:
 		"grounded":
-			return "HELM: the ship cannot fly (%s)" % helm.why_not
+			return "Can't fly: %s" % helm.why_not
 		"manual":
-			return "YOU HAVE THE HELM: mouse steers, W/S thrust, A/D strafe, E hands back   (%s)" % speed
+			return "Flying: mouse steers, W/S thrust, A/D strafe, E lets go   (%s)" % speed
 		"unmanned":
-			return "HELM UNMANNED: the ship coasts. Crew go to the helm, or take it yourself (E)   (%s)" % speed
+			return "Helm empty: press E at the helm to fly   (%s)" % speed
 		"autopilot":
 			var to = helm.target(_sector)
 			return "AUTOPILOT to %s, %s   (%s)" % [helm.course_name(_sector), dist_text(helm.flight.pos.distance_to(to)) if to != null else "?", speed]
-	return "No course: click a marker to set one   (%s)" % speed
+	return "No course: click a marker   (%s)" % speed
 
 
 ## The jump drive's line ("" when it is idle).

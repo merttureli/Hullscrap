@@ -522,10 +522,10 @@ func test_the_smelters_are_on_the_utility_tab_and_say_what_they_smelt() -> void:
 	var ship := Ship.new_starter()
 	for id in PARTS:
 		eq(Palette.component_tab(ship.components.def(id)), Palette.Tab.UTILITY, id + " is a Utility part")
-	var rows: Array = Palette.info(Palette.part_entry(ship, "smelter_neon_mk1"), ship)["rows"]
+	var rows: Array = Palette.info(Palette.part_entry(ship, "smelter_neon_mk1"), ship)["stats"]
 	var smelts: Array = rows.filter(func(r): return r[0] == "Smelts")
 	eq(smelts.size(), 1, "a Smelts row")
-	check(str(smelts[0][1]).contains("level 2"), "the level: " + str(smelts[0]))
+	check(str(smelts[0][1]).contains("L2"), "the level: " + str(smelts[0]))
 	check(rows.has(["Tool", "plasma"]), "and the plasma tool")
 
 

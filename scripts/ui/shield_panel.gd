@@ -399,7 +399,7 @@ func _draw() -> void:
 	Schematic.draw_map(self, s, pw, map_rect(), map_bounds())
 	_draw_bubble(n, layers())
 	_draw_side(n)
-	_text("H / Esc close    click + or - on a sector (the weights stay summed)    presets and slots on the right    saved with the ship: every fight starts with it",
+	_text("H/Esc close   Click + or - on a sector   Presets and slots on the right   Saved with the ship",
 		p.position + Vector2(PAD, p.size.y - 16.0), 13, DIM_TEXT)
 
 
@@ -444,7 +444,7 @@ func _draw_side(n: int) -> void:
 	var gens := generators()
 	if gens.is_empty():
 		_text("No powered shield generator", box.position + Vector2(10.0, 54.0), 20, BAD)
-		_text("Put a shield generator on the ship and wire it to a reactor.", box.position + Vector2(10.0, 78.0), 13, DIM_TEXT)
+		_text("No shield generator. Build one and wire it to a reactor.", box.position + Vector2(10.0, 78.0), 13, DIM_TEXT)
 		return
 	_text("%d layers, %d sector%s" % [layers(), n, "" if n == 1 else "s"], box.position + Vector2(10.0, 54.0), 20, TEXT)
 	_text(", ".join(PackedStringArray(gens)), box.position + Vector2(10.0, 78.0), 13, DIM_TEXT)
