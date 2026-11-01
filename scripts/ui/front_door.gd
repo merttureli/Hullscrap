@@ -22,11 +22,11 @@ const Starfield = preload("res://scripts/space/starfield.gd")
 
 ## The first-run hints (profile.gd HINTS), by id.
 const HINT_TEXT := {
-	"picked": "B: play mode, click a marker to set a course, M: map",
-	"map": "Click a lit neighbour to spool the jump there",
-	"fight": "Mouse steers, LMB fires, J opens the map to jump away",
-	"net": "Ma's Net Mouth is in your cargo: B, the Cargo tab, put it on an outer wall to catch drifting scrap",
-	"craft": "Pick a recipe and it queues; the part lands in the hold, then place it from the build palette (B). ? explains",
+	"picked": "B: play mode. Click a marker to set a course. M: map",
+	"map": "Click a lit node to jump there",
+	"fight": "Mouse steers, LMB fires, J: map to jump away",
+	"net": "Net Mouth in your cargo: put it on an outer wall to catch scrap",
+	"craft": "Click a recipe to queue it. Place the finished part from the build palette (B).",
 }
 
 var sim: Node
