@@ -161,6 +161,122 @@ func _refusals(thick: int, rot: int) -> void:
 	eq(parts.can_place_mount(ship.grid, "warp_core", ok, rot), "unknown component", tag + ": unknown ids")
 
 
+# --- a breech narrower than the barrel (tier 1-2 guns and engines: 2 wide behind a 4 wide outside half) ----
+
+## laser_mk1 with a 2x2 breech: the data-independent shape of the rule.
+func _narrow(id := "laser_mk1") -> Dictionary:
+	var c := Components.new()
+	c.load_defs("res://data/components.json")
+	var d: Dictionary = c.def(id).duplicate(true)
+	d["size"] = [2, 2]
+	return d
+
+
+## The breech's cells' extent along the wall, as (first, last) grid coordinates of the wall's axis.
+func _span(cells: Array, rot: int) -> Vector2i:
+	var lo := 1 << 20
+	var hi := -(1 << 20)
+	for c in cells:
+		var v: int = c.x if rot % 2 == 0 else c.y
+		lo = mini(lo, v)
+		hi = maxi(hi, v)
+	return Vector2i(lo, hi)
+
+
+func test_a_narrow_breech_sits_centred_behind_the_barrel_at_every_rotation_and_wall() -> void:
+	var def := _narrow()
+	for rot in 4:
+		for thick in WALLS:
+			var ship := Wall.wall_ship(thick, rot)
+			var out := Wall.out_anchor(rot)
+			var plan: Dictionary = Mounts.plan(ship.grid, ship.components, def, out, rot)
+			var tag := "rot %d, %d thick" % [rot, thick]
+			eq(plan["why"], "", tag + ": it fits")
+			eq(plan["depth"], thick, tag + ": the link is the whole wall")
+			eq(plan["link"].size(), 4 * thick, tag + ": and as wide as the barrel (4), not the breech")
+			eq(plan["out_cells"].size(), 8, tag + ": the barrel is 4x2")
+			eq(plan["cells"].size(), 4, tag + ": the breech is 2x2")
+			eq(plan["anchor"], Wall.corner(rot, -1, 0, thick, thick + 1), tag + ": centred behind the barrel (u -1..0 of -2..1), on the first floor rows")
+			var b := _span(plan["out_cells"], rot)
+			var i := _span(plan["cells"], rot)
+			eq([i.x - b.x, b.y - i.y], [1, 1], tag + ": one cell of barrel to either side of the breech")
+
+
+func test_a_narrow_breech_refuses_when_its_two_columns_are_not_free_floor() -> void:
+	var def := _narrow()
+	for rot in 4:
+		var ship := Wall.wall_ship(1, rot)
+		var out := Wall.out_anchor(rot)
+		var tag := "rot %d" % rot
+		eq(Mounts.plan(ship.grid, ship.components, def, out, rot)["why"], "", tag + ": plain")
+		ship.grid.force_tile(Wall.at(rot, -1, 1), "")  # a hole in the breech's floor
+		eq(Mounts.plan(ship.grid, ship.components, def, out, rot)["why"], "the breech needs 2x2 free floor behind the wall", tag + ": a hole under the breech")
+		ship.grid.force_tile(Wall.at(rot, -1, 1), "floor")
+		ship.grid.force_tile(Wall.at(rot, -2, 1), "")  # floor missing beside the breech, behind the barrel's end: fine
+		eq(Mounts.plan(ship.grid, ship.components, def, out, rot)["why"], "", tag + ": the barrel's end need not have floor behind it")
+		ship.grid.force_tile(Wall.at(rot, 1, 0), "floor")  # a wall that is not flat across the barrel's width, beside the breech
+		eq(Mounts.plan(ship.grid, ship.components, def, out, rot)["why"], "needs a flat wall to mount through", tag + ": the wall run is as wide as the barrel")
+
+
+func test_a_narrow_breech_only_needs_its_own_cells_clear() -> void:
+	var def := _narrow()
+	var ship := Wall.wall_ship(2)
+	var out := Wall.out_anchor(0)
+	var gen: int = ship.components.place(ship.grid, "oxygen_gen", Wall.corner(0, 0, 1, 2, 5), 0)
+	check(gen >= 0, "(setup: a generator on u 0..1 behind the wall, half of it on the breech)")
+	eq(Mounts.plan(ship.grid, ship.components, def, out, 0)["why"], "the breech needs 2x2 free floor behind the wall", "a part on the breech's cells")
+	ship.components.remove_uid(gen)
+	var beside: int = ship.components.place(ship.grid, "helm", Wall.corner(0, -3, -2, 2, 3), 0)
+	check(beside >= 0, "(setup: a 2x2 helm on u -3..-2, under the barrel's left end but beside the breech)")
+	eq(Mounts.plan(ship.grid, ship.components, def, out, 0)["why"], "", "a part under the barrel's width but not the breech's does not matter")
+
+
+func test_plan_from_inside_and_cells_of_agree_for_a_narrow_breech_at_every_rotation() -> void:
+	var def := _narrow()
+	for rot in 4:
+		for thick in WALLS:
+			var ship := Wall.wall_ship(thick, rot)
+			var out := Wall.out_anchor(rot)
+			var plan: Dictionary = Mounts.plan(ship.grid, ship.components, def, out, rot)
+			var tag := "rot %d, %d thick" % [rot, thick]
+			var back: Dictionary = Mounts.from_inside(ship.grid, ship.components, def, plan["anchor"], rot)
+			eq(back["why"], "", tag + ": from_inside finds it")
+			eq(back["out"], out, tag + ": the outside half's top-left comes back")
+			eq(back["anchor"], plan["anchor"], tag + ": the same breech")
+			eq(back["depth"], thick, tag + ": the same wall depth")
+			eq(back["link"], plan["link"], tag + ": the same link")
+			var saved: Dictionary = Mounts.cells_of(def, plan["anchor"], rot, out)
+			eq(saved["depth"], thick, tag + ": cells_of reads the depth back")
+			eq(saved["out_cells"], plan["out_cells"], tag + ": the same barrel cells")
+			eq(saved["cells"], plan["cells"], tag + ": the same breech cells")
+			eq(saved["link"], plan["link"], tag + ": the same link cells")
+			eq(Mounts.cells_of(def, plan["anchor"] + Vector2i(1, 1), rot, out), {}, tag + ": a breech that is not behind the barrel is no mount")
+
+
+func test_from_inside_looks_through_the_whole_barrel_width_like_plan_does() -> void:
+	var def := _narrow()
+	for rot in 4:
+		var ship := Wall.wall_ship(3, rot)
+		var inside := Wall.corner(rot, -1, 0, 3, 4)  # an old save's breech, on the first floor rows behind the wall
+		var tag := "rot %d" % rot
+		var back: Dictionary = Mounts.from_inside(ship.grid, ship.components, def, inside, rot)
+		eq([back["why"], back["depth"], back["out"]], ["", 3, Wall.out_anchor(rot)], tag + ": the three layers and the barrel in space")
+		ship.grid.force_tile(Wall.at(rot, -2, 2), "floor")  # the barrel's end column is not wall in the last layer; the breech's own columns are
+		eq(Mounts.from_inside(ship.grid, ship.components, def, inside, rot)["why"], "needs a flat wall to mount through", tag + ": the walk covers the barrel's width, so this is no wall to mount through")
+
+
+func test_the_barrel_pivot_is_read_from_the_outside_half_only() -> void:
+	var c := Components.new()
+	c.load_defs("res://data/components.json")
+	var wide: Dictionary = c.def("laser_mk1")
+	var narrow := _narrow()
+	for rot in 4:
+		var a: Dictionary = Mounts.barrel(narrow, Vector2i(5, 5), rot)
+		var b: Dictionary = Mounts.barrel(wide, Vector2i(5, 5), rot)
+		eq(a["pivot"], b["pivot"], "rot %d: the same pivot with a narrow breech" % rot)
+		eq(a["reach"], b["reach"], "rot %d: and the same reach" % rot)
+
+
 func test_wreckage_blocks_the_floor_behind_the_wall() -> void:
 	var ship := Wall.wall_ship(1)
 	var inside := Wall.corner(0, -2, 1, 1, 2)
