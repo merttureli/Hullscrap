@@ -10,6 +10,7 @@ extends "res://scripts/ui/game_over.gd"
 const Art = preload("res://scripts/view/art.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const GOOD := Color("#6bd34a")
 const BACKDROP := Color(0.02, 0.03, 0.05, 0.96)  ## nearly opaque: the HUD of the ship behind it must not show through
@@ -59,6 +60,7 @@ func open_ending(p_report: Dictionary, p_ship) -> void:
 	rng.seed = hash(str(report.get("ending", {}).get("id", "")))  # visual only: the same stars for the same ending
 	for i in 70:
 		_stars.append([Vector2(rng.randf(), rng.randf()), rng.randf_range(0.25, 1.0)])
+	Audio.cue(self, "ending")
 	open({})
 
 

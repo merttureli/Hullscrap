@@ -30,6 +30,7 @@ const Skulls = preload("res://scripts/ui/skulls.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const PLAYER_SHOT := {"energy": Color("#7dffe8"), "kinetic": Color("#ffe07a"), "explosive": Color("#ffb04a"), "ion": Color("#b99bff")}
 const ENEMY_SHOT := {"energy": Color("#ff6a4a"), "kinetic": Color("#ff9a6a"), "explosive": Color("#ff5a3a"), "ion": Color("#b99bff")}
@@ -44,6 +45,7 @@ const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and pro
 const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB weapon groups   1-9 one weapon   T turrets   Shift engine   Space shield   Q utility   Esc leave"
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
+const ENEMY_JUMP_DB := -8.0  ## the enemy's jump drive firing, against the player's own jump
 const WRECK_LINGER := 3.0  ## seconds a decided sector fight goes on showing its end before it ends by itself
 
 ## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship), hull, hull_max (the player's),
@@ -90,6 +92,8 @@ var _note := ""
 var _note_until := 0.0
 var _starfield: Node
 var _over_t := 0.0  # seconds the fight has been over (the enemy wrecked, captured, spared or gone), in a sector fight
+var _snd_state := "fighting"  # the session's state at the last frame, for the victory and defeat stings
+var _layers := [-1, -1]  # whole shield layers up per ship at the last frame (-1 = not read yet), for the shield sounds
 
 
 func _ready() -> void:
@@ -176,6 +180,8 @@ func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 	_over_t = 0.0
 	session = Session.new()
 	session.start(player, enemy, enemy.rng_seed, place)
+	_snd_state = "fighting"
+	_layers = [-1, -1]
 	active = true
 	_cursor = 0
 	_fx.clear()
@@ -397,6 +403,7 @@ func frame(dt: float) -> void:
 			leave()  # the end has been seen (a wreck, a capture, a deal, a jump), or the enemy is out of range
 			return
 	_consume_events()
+	_sound_frame()
 	_age_fx(dt)
 	var player = session.arena.ships[Session.PLAYER]
 	_star_drift -= player.flight.vel * dt * 0.4
@@ -511,6 +518,36 @@ func _age_fx(_dt: float) -> void:
 				_add_fx({"k": "puff", "pos": p["pos"] - p["vel"].normalized() * 8.0, "vel": -p["vel"].normalized() * 20.0, "life": 0.5, "r": 3.0, "grow": 14.0, "color": Color("#c9a37a", 0.55)})
 
 
+## The sounds that come from the fight's state rather than one event: the engine under the player's throttle, the victory and defeat
+## stings when the fight is decided, a shield bubble going down or a layer coming back.
+func _sound_frame() -> void:
+	var st: String = session.state()
+	if st != _snd_state:
+		_snd_state = st
+		if st in ["won", "captured", "spared"]:
+			Audio.cue(self, "victory")
+		elif st == "lost":
+			Audio.cue(self, "defeat")
+	var mine = session.arena.ships[Session.PLAYER]
+	if st != "lost" and not mine.wrecked:
+		var drive := clampf(maxf(absf(float(session.input.get("throttle", 0.0))), 0.5 * absf(float(session.input.get("strafe", 0.0)))), 0.0, 1.0)
+		Audio.fx_loop(self, "engine", "engine_loop", true, 0.2 + 0.8 * drive, 0.85 + 0.45 * drive)
+	for i in 2:
+		var co = session.arena.ships[i]
+		var up: int = Shields.layers_up(co)
+		if _layers[i] >= 0 and not co.wrecked:
+			if _layers[i] > 0 and up == 0:
+				_snd("shield_down", i, co.flight.pos)
+			elif up > _layers[i]:
+				_snd("shield_up", i, co.flight.pos)
+		_layers[i] = up
+
+
+## A sound at the world point `pos` of ship `idx`'s doing: the enemy's is quieter than yours (`enemy_db`), and only what is near the camera is heard.
+func _snd(id: String, idx: int, pos: Vector2, gain := 0.0, enemy_db := Audio.ENEMY_DB) -> void:
+	Audio.fx(self, id, pos, gain + (0.0 if idx == Session.PLAYER else enemy_db))
+
+
 func _consume_events() -> void:
 	var arena = session.arena
 	while _cursor < arena.events.size():
@@ -537,11 +574,16 @@ func _on_event(e: Dictionary) -> void:
 	var dir: Vector2 = e.get("dir", Vector2.ZERO)
 	match e["type"]:
 		"shot":
+			var fire_sound := Audio.weapon_sound(arena.weapons.def(str(e.get("weapon", ""))))
+			if fire_sound != "beam_loop":  # (a beam sounds from its beam events)
+				_snd(fire_sound, idx, e["origin"])
 			if Art.fx("muzzle") != null:
 				_add_fx({"k": "art", "name": "muzzle", "anchor": "muzzle", "pos": e["origin"], "angle": dir.angle() + PI / 2.0, "life": 0.14})
 			else:
 				_add_fx({"k": "flash", "pos": e["origin"], "life": 0.09, "r": 10.0, "color": _shot_color(idx, "energy" if e["kind"] in ["laser", "beam"] else "kinetic")})
 		"beam":
+			if str(arena.weapons.def(str(e.get("weapon", "")))["kind"]) == "beam":
+				Audio.fx_loop(self, "beam%d" % idx, "beam_loop", true, 1.0 if idx == Session.PLAYER else 0.5, 1.0, null if idx == Session.PLAYER else e["from"])
 			_add_fx({"k": "beam", "a": e["from"], "b": e["to"], "life": BEAM_LIFE, "color": _shot_color(idx, e["dtype"]),
 				"kind": str(arena.weapons.def(str(e.get("weapon", "")))["kind"]), "weapon": str(e.get("weapon", ""))})
 		"effect":  # a weapon effect (acid, spores, frost ...): effect_fx.gd says what it looks like
@@ -554,6 +596,10 @@ func _on_event(e: Dictionary) -> void:
 				return
 			var weapon_art := str(e.get("weapon", ""))
 			var big: bool = e["kind"] == "component"
+			if e["dtype"] == "explosive":
+				_snd("explosion_s", idx, pos, -2.0, -3.0)
+			else:
+				_snd("hit_hull", idx, pos, 0.0 if big else -3.0, -3.0)
 			var col := Color("#ffb347") if big else Color("#ffe9a8")
 			if e["dtype"] == "ion":
 				col = Color("#b99bff")
@@ -567,6 +613,7 @@ func _on_event(e: Dictionary) -> void:
 				_on_ship(idx, pos, {"k": "flash", "life": 0.22, "r": 18.0 if big else 11.0, "color": col})
 			_sparks(pos, n, 7 if big else 4, col)
 		"shield":
+			_snd("hit_shield", idx, pos, 0.0, -3.0)
 			var shot_dir := dir
 			if Art.fx("shield_ripple") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "shield_ripple", "anchor": "impact", "life": 0.45, "scale": 1.0, "angle": (-shot_dir).angle() + PI / 2.0})
@@ -582,6 +629,7 @@ func _on_event(e: Dictionary) -> void:
 			for f in ImpactFx.bounce(e):  # a small spark at the bounce point
 				_add_impact_fx(f)
 		"ram":  # two ships met hard: sparks and debris at the contact points, a shake, a line in the chronicle
+			Audio.fx(self, "collision", pos)
 			var r := ImpactFx.ram(arena, _cursor, Session.PLAYER, session.enemy_label.to_lower())
 			for f in r["fx"]:
 				_add_impact_fx(f)
@@ -589,6 +637,7 @@ func _on_event(e: Dictionary) -> void:
 			if r["line"] != "":
 				_say(r["line"])
 		"breach":
+			_snd("breach", idx, pos, 0.0, -3.0)
 			if Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.6, "scale": 1.0})
 			else:
@@ -606,6 +655,7 @@ func _on_event(e: Dictionary) -> void:
 			for i in 3:
 				_add_fx({"k": "puff", "pos": pos, "vel": Vector2.from_angle(_rng.randf() * TAU) * 30.0, "life": 0.7, "r": 6.0, "grow": 16.0, "color": Color("#ff7a2a", 0.6)})
 		"wreck_part":
+			_snd("part_destroyed", idx, pos, 0.0, -3.0)
 			if Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.7, "scale": 1.6})
 			else:
@@ -616,12 +666,14 @@ func _on_event(e: Dictionary) -> void:
 		"overcharge":
 			_on_ship(idx, pos, {"k": "ring", "life": 0.8, "r": 260.0, "color": Color("#ffd24a")})
 		"escape":  # the enemy's jump drive fired: a flash where it was
+			Audio.fx(self, "jump", pos, ENEMY_JUMP_DB)
 			if Art.fx("jump_flash") != null:
 				_add_fx({"k": "art", "name": "jump_flash", "pos": pos, "angle": e["angle"], "life": 0.5, "scale": 3.0})
 			else:
 				_add_fx({"k": "flash", "pos": pos, "life": 0.5, "r": 120.0, "color": Color("#bfe4ff")})
 			_add_fx({"k": "ring", "pos": pos, "life": 0.8, "r": 420.0, "color": Color("#7fe4ff")})
 		"wreck":
+			Audio.fx(self, "explosion_l", pos)
 			_on_ship(idx, pos, {"k": "ring", "life": 1.1, "r": 420.0, "color": Color("#ffb347")})
 			if Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 1.2, "scale": 4.0})

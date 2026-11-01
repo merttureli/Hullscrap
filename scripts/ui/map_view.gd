@@ -28,6 +28,7 @@ const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const RunStart = preload("res://scripts/space/run_start.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -166,6 +167,8 @@ func _tide_say(lines: Array) -> void:
 	var s = ship()
 	var door = get_node_or_null("../../FrontDoor")
 	var toast = door.get("toast") if door != null else null
+	if not lines.is_empty():
+		Audio.fx(self, "tide_warning")
 	for l in lines:
 		if s != null:
 			s.log_event(str(l))
@@ -180,6 +183,8 @@ func open() -> void:
 	_ensure_panels()
 	if campaign == null:
 		new_game()
+	if not visible:
+		Audio.fx(self, "open")
 	visible = true
 	panel_only = false
 	message = ""
@@ -193,6 +198,8 @@ func open() -> void:
 func close() -> void:
 	if event_panel.visible or station_panel.visible or region_choice.visible or journal_panel.visible:
 		return
+	if visible:
+		Audio.fx(self, "close")
 	visible = false
 
 
@@ -238,6 +245,7 @@ func click_node(id: String, drift_jump := false) -> String:
 	if id == campaign.current:
 		return dock()
 	var s = ship()
+	Audio.fx(self, "click")
 	if sector_flow():
 		return _spool(id, drift_jump)
 	var r := campaign.jump(id, s, drift_jump)
@@ -341,6 +349,7 @@ func cross_to(id: String) -> String:
 	if not r["ok"]:
 		return r["why"]
 	_say(" ".join(r["notes"]))
+	Audio.cue(self, "region_cross")
 	refresh()
 	if sector_flow():
 		_hide_panels()  # the sector view takes the ship in at the new region's arrival point
@@ -569,7 +578,7 @@ func _input(e: InputEvent) -> void:
 		return  # they take the keys
 	if get_viewport() != null:
 		get_viewport().set_input_as_handled()
-	if not e.pressed or e.echo:
+	if not e.pressed or e.echo or e.ctrl_pressed:  # (Ctrl+M is the mute, audio.gd)
 		return
 	match e.keycode:
 		KEY_M, KEY_ESCAPE:

@@ -78,7 +78,7 @@ func _input(e: InputEvent) -> void:
 		return
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
-	if not e.pressed or e.echo:
+	if not e.pressed or e.echo or e.ctrl_pressed:  # (Ctrl+M is the mute, audio.gd)
 		return
 	match e.keycode:
 		KEY_UP, KEY_LEFT:

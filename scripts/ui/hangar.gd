@@ -132,8 +132,10 @@ func choose(i: int) -> String:
 		return "no such ship"
 	if is_locked(i):
 		message = "Locked: " + Hangar.hint(cards[i])
+		Audio.fx(self, "invalid")
 		queue_redraw()
 		return message
+	Audio.fx(self, "click")
 	message = ""
 	if profile != null:
 		profile.start = RunStart.clean(start, profile)  # kept for the next run, and read by the new campaign (map_view.gd)

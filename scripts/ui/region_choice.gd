@@ -15,6 +15,7 @@ const Threat = preload("res://scripts/space/threat.gd")
 const Art = preload("res://scripts/view/art.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const PAD := 26.0
 const GAP := 20.0
@@ -63,6 +64,7 @@ func open() -> void:
 	hover = -1
 	message = ""
 	visible = true
+	Audio.fx(self, "open")
 
 
 ## Read the charts: the cards of the regions on offer.
@@ -94,6 +96,7 @@ func warden_line(i: int) -> String:
 func choose(i: int) -> String:
 	if page != "choose" or i < 0 or i >= options.size():
 		return "no such region"
+	Audio.fx(self, "click")
 	var why: String = map.cross_to(str(options[i]["id"]))
 	if why != "":
 		message = why

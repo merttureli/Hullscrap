@@ -15,6 +15,7 @@ const ShipView = preload("res://scripts/view/ship_view.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Shape = preload("res://scripts/combat/shield_shape.gd")
 const Balance = preload("res://scripts/combat/shield_balance.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const MARGIN := 40.0
 const PAD := 18.0
@@ -135,10 +136,13 @@ func open() -> void:
 	message = ""
 	hover_id = ""
 	visible = true
+	Audio.fx(self, "open")
 	queue_redraw()
 
 
 func close() -> void:
+	if visible:
+		Audio.fx(self, "close")
 	visible = false
 
 

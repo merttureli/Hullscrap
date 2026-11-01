@@ -30,11 +30,13 @@ const Sector = preload("res://scripts/space/sector.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Art = preload("res://scripts/view/art.gd")
 const HollowFog = preload("res://scripts/view/hollow_fog.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const DEBRIS_DOTS := 2000.0  ## px: debris this near shows on the compass ring
 const THREAT_S := 2.0  ## seconds a contact's skulls are kept before they are rated again
 const SKULL_STEP := 13.0  ## screen px between two skulls under a marker
 const FLASH_S := 0.45  ## seconds the jump flash plays on arrival
+const SPOOL_SOUND_S := 3.0  ## the jump drive's whine (jump_spool, 3 s) starts this long before the drive fires
 const SAY_S := 4.0  ## seconds a message stays
 const FALL_TEXT := "The tide is here. Something is coming."  ## the HUD line when the Hollow tide takes the place the ship is in
 const ICON := 32.0  ## screen px of a marker icon (the 16 px art at 2x)
@@ -72,6 +74,7 @@ var _said := -100.0
 var _posed := false  # BuildMode and the crew are moved to the ship's place
 var _flash := 0.0
 var _hollow_seen := false  # whether the sector was Hollow at the last look: the HUD tells when it falls
+var _spool_heard := false  # the whine of this spool has played
 var _markers: Array = []  # [{rect (screen), id}] of the last HUD frame, for clicks
 var _labels: Array = []  # the label boxes drawn so far this frame (place_label keeps two markers' texts apart)
 var _threats := {}  # POI id -> {n (skulls), t (the clock it was rated at)} for this sector
@@ -245,6 +248,7 @@ func frame(dt: float) -> void:
 			if helm.manual and (crew == null or crew.get("player") == null or crew.player.is_down()):
 				helm.manual = false
 			helm.step(dt, s, _manned(ship), _hand(), s.hostile_near(float(helm.cfg["real_within"])), _rocks())
+			Audio.fx_loop(self, "engine", "engine_loop", helm.why_not == "", 0.2 + 0.8 * helm.drive, 0.85 + 0.45 * helm.drive)  # the throttle, heard
 			if helm.arrived != "":
 				_say("Arrived at %s." % helm.arrived)
 		if not s.tick(dt, ship).is_empty():
@@ -253,6 +257,7 @@ func frame(dt: float) -> void:
 			_hollow_seen = s.hollow
 			if s.hollow:
 				_say(FALL_TEXT)
+				Audio.fx(self, "tide_warning")
 		_spool(dt, c, ship)
 		if not fighting and _sector == s and map != null and not map.visible:
 			var res: Dictionary = s.trigger(c, ship)
@@ -290,14 +295,26 @@ func _sync(c, ship) -> void:
 
 ## The jump drive charges; when it fires a fight in the sector is left behind and the ship arrives in the new sector.
 func _spool(dt: float, c, ship) -> void:
-	match c.tick_jump(dt, _sector.hostile_near(c.hostile_range()), ship):
+	var res: String = c.tick_jump(dt, _sector.hostile_near(c.hostile_range()), ship)
+	if res == "spooling":
+		var st: Dictionary = c.jump_status()
+		if not _spool_heard and float(st["t"]) >= float(st["total"]) - SPOOL_SOUND_S:
+			_spool_heard = true
+			Audio.fx(self, "jump_spool")
+	elif res != "blocked":
+		_spool_heard = false
+	match res:
 		"jumped":
 			if combat != null and combat.get("active"):
 				combat.leave()
 			_flash = FLASH_S
+			Audio.fx(self, "jump")
+			Audio.cue(self, "jump")
+			Audio.fx(self, "arrive", null, 0.0, 0.6)
 			_say(" ".join(["Arrived at %s." % c.label(c.current)] + c.last_jump.get("notes", [])))
 			_sync(c, ship)
 		"failed":
+			Audio.fx(self, "invalid")
 			_say("The jump failed: %s" % c.last_jump.get("why", ""))
 
 

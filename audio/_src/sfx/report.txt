@@ -1,0 +1,66 @@
+file                  chan   secs  peak dB    rms dB loop seam (last-to-first step / typical step; level of the 0.1 s window at the seam vs the mean)
+laser_1.wav           mono   0.30    -3.99    -17.00 
+laser_2.wav           mono   0.30    -2.91    -17.01 
+laser_3.wav           mono   0.30    -3.89    -17.00 
+bolt_1.wav            mono   0.34    -4.53    -17.00 
+bolt_2.wav            mono   0.34    -4.33    -17.00 
+bolt_3.wav            mono   0.34    -3.47    -17.00 
+flak_1.wav            mono   0.60    -2.29    -17.04 
+flak_2.wav            mono   0.60    -3.41    -17.00 
+missile_launch_1.wav  mono   1.20    -3.41    -17.00 
+missile_launch_2.wav  mono   1.20    -3.77    -17.00 
+beam_loop.wav           st   2.00   -11.36    -23.07 step 0.53, dip 0.42 dB (worst window inside 3.00 dB)
+ion_1.wav             mono   0.50    -2.18    -17.06 
+ion_2.wav             mono   0.50    -2.17    -17.05 
+rapid_tick_1.wav      mono   0.08   -10.40    -24.00 
+rapid_tick_2.wav      mono   0.08   -11.11    -24.00 
+rapid_tick_3.wav      mono   0.08   -10.51    -24.00 
+hit_hull_1.wav        mono   0.70    -1.14    -15.62 
+hit_hull_2.wav        mono   0.70    -1.06    -15.88 
+hit_hull_3.wav        mono   0.70    -1.15    -15.61 
+hit_shield_1.wav      mono   0.68    -1.28    -15.34 
+hit_shield_2.wav      mono   0.66    -1.19    -15.40 
+hit_shield_3.wav      mono   0.67    -1.45    -15.21 
+shield_down.wav       mono   1.10    -2.22    -15.02 
+shield_up.wav         mono   1.19    -2.41    -15.01 
+explosion_s_1.wav     mono   0.85    -1.04    -13.82 
+explosion_s_2.wav     mono   0.85    -1.09    -13.60 
+explosion_l.wav       mono   2.52    -1.06    -13.47 
+part_destroyed.wav    mono   1.20    -1.03    -13.68 
+breach.wav            mono   1.70    -1.30    -15.25 
+collision.wav         mono   0.90    -1.07    -13.73 
+engine_loop.wav         st   3.00   -11.55    -23.04 step 0.76, dip 0.49 dB (worst window inside 3.44 dB)
+jump_spool.wav        mono   3.00    -2.72    -17.01 
+jump.wav              mono   1.85    -4.64    -17.00 
+arrive.wav            mono   1.60    -2.39    -17.02 
+collect_1.wav         mono   0.25    -7.85    -21.00 
+collect_2.wav         mono   0.25    -7.46    -21.00 
+collect_3.wav         mono   0.25    -8.15    -21.00 
+tractor_loop.wav        st   2.00   -11.68    -23.05 step 0.43, dip 0.73 dB (worst window inside 2.52 dB)
+intake_pull.wav       mono   0.60    -5.35    -21.00 
+place_tile_1.wav      mono   0.16    -7.98    -20.00 
+place_tile_2.wav      mono   0.16    -8.62    -20.00 
+place_part.wav        mono   0.37    -7.59    -20.00 
+remove.wav            mono   0.32    -6.01    -20.00 
+invalid.wav           mono   0.29   -14.71    -20.00 
+rotate.wav            mono   0.16    -8.13    -20.00 
+door.wav              mono   0.60    -4.48    -20.00 
+repair_loop.wav         st   2.00    -8.60    -23.10 step 0.16, dip 0.44 dB (worst window inside 1.85 dB)
+extinguish.wav        mono   0.95    -7.13    -22.00 
+fire_loop.wav           st   2.00    -9.92    -23.06 step 0.30, dip 1.51 dB (worst window inside 4.18 dB)
+drone_beep_1.wav      mono   0.22   -15.52    -22.00 
+drone_beep_2.wav      mono   0.22   -15.32    -22.00 
+crew_hurt.wav         mono   0.28   -10.91    -22.00 
+click.wav             mono   0.06   -11.14    -23.00 
+hover.wav             mono   0.04   -13.25    -23.00 
+open.wav              mono   0.24   -15.20    -23.00 
+close.wav             mono   0.22   -14.65    -23.00 
+event_open.wav        mono   0.75   -14.98    -23.00 
+toast.wav             mono   0.62   -13.15    -23.00 
+buy.wav               mono   0.50   -10.43    -23.00 
+unlock.wav            mono   1.51    -9.88    -23.00 
+red_alert.wav         mono   0.86    -8.59    -15.00 
+breach_alert.wav      mono   1.26    -2.93    -15.01 
+tide_warning.wav      mono   4.65    -3.18    -15.00 
+
+63 files, 5.77 MB

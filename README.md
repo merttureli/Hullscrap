@@ -50,6 +50,7 @@ Build mode only:
 | Shift + left mouse drag | Straight line, locked to the horizontal or vertical axis |
 | Ctrl + left mouse drag | Rectangle. Floor and cables fill it, a wall makes a room (walls round the edge, floor inside); doors and systems one at a time |
 | Right mouse (+ Shift / Ctrl) | Tiles and cables: the same three modes, but removing (100% refund). Systems: removes the one under the mouse (either half of a weapon or engine) and returns it to the cargo |
+| Ctrl+M | Mute / unmute all sound, everywhere (the Master, Music and SFX sliders are on the main menu and the pause menu, and are kept in the profile) |
 | Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z) | Undo / redo (tiles, systems, cables, belts and cargo) |
 | Belt card (Structure tab) | Lay conveyor belts like cables (paint, Shift line, Ctrl rectangle, right mouse removes): 1 scrap a cell, on floor and door cells only. Locked until a belt drive is aboard (see Ammo racks and belts) |
 | Esc | Cancel a drag |
@@ -179,6 +180,13 @@ The game draws pixel art from `art/` and falls back to flat code-drawn placehold
 - **Shaped walls and the hull skin** (`art/tiles/*_shapes`, `hull_skin*`): slopes and curves are drawn from the shaped sheets (a frame per orientation and neighbour mask; a neighbour joins a wall when it covers 60% of the shared edge), ram plating from `walls_ram*` with no tint, and the open part of a shaped wall shows floor when it looks into the ship, space otherwise. A ship in a fight also gets the exterior skin over every wall that faces space (panel variants and a few vents, antennas, hatches and lamps by position, tinted by the line most of those walls belong to; neon adds an edge glow; ram plating keeps its hazard tape). The interior and build views never show it.
 
 The format and how to add art are in [`art/README.md`](art/README.md); every file's source is in [`ASSETS.md`](ASSETS.md). The default texture filter is nearest.
+
+## Sound
+Every sound is made in this repo, like the art: `python3 audio/_src/sfx/build_sfx.py` (numpy only, fixed seeds, byte-identical on a re-run, about 5 s) writes `assets/audio/sfx/*.wav` and a report (peak, RMS, loop-seam check of each file) in `audio/_src/sfx/report.txt`; the recipes are in `sounds.py`. After a re-run on a fresh clone, import the project once and run the script again with `--import-params` (it sets the loops to loop and the samples to PCM in the `.import` files). `data/audio.json` maps a sound id to its files, volume trim, pitch variation, voice cap, cooldown, bus and whether it is positional or a loop.
+- **`scripts/audio/audio.gd`** is a plain node of the main scene (not an autoload), so headless tests and tools never need it. Views and UI call the static helpers, which do nothing when the node is absent: `Audio.fx(self, "hit_hull", world_pos, gain_db)`, `Audio.fx_loop(self, "engine", "engine_loop", on, volume, pitch)` (call it each frame it should sound), `Audio.mood(self, state)`, `Audio.cue(self, "victory")`. Logic scripts (RefCounted) never call it; they only make the event lists the views read. World sounds are positional and heard only near the camera; the enemy ship's are 6 dB quieter than yours.
+- **Buses** (`default_bus_layout.tres`): Master (with a limiter), Music, SFX, UI. The Master, Music and SFX sliders are on the main and pause menus and live in `user://profile.json` (`sound`); **Ctrl+M** mutes.
+- **Music** comes from `data/music.json` ({states: {menu, explore, combat, hollow, build: [tracks]}, stings: {id: file}, volumes: {file: dB}}). `scripts/audio/mood.gd` picks the state from what the game is doing (menu, a fight or a hostile in range kept 4 s after it ends, build mode, tide pressure from 0.6 or a Hollow place, else explore); tracks alternate on each visit and cross-fade over 2 s; a sting dips the music 6 dB. A missing file or track is silence, never an error.
+- `tests/test_audio.gd` checks the data against the files, the voice rules, the music states, the mood and the settings.
 
 ## Tests
 ```

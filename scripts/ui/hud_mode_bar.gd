@@ -5,6 +5,7 @@ extends Control
 ## between the side panels it shows only the icons and keys. Draws only.
 
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const MODES: Array = [
 	{"id": "build", "label": "Build", "key": "B"},
@@ -68,6 +69,7 @@ func _gui_input(e: InputEvent) -> void:
 	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		var i := button_at(e.position)
 		if i >= 0:
+			Audio.fx(self, "click")
 			hud.switch_mode(MODES[i]["id"])
 
 
