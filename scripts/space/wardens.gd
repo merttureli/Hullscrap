@@ -18,7 +18,7 @@ const Threat = preload("res://scripts/space/threat.gd")
 const PATH := "res://data/wardens.json"
 const DRIFT_PATH := "res://data/drift.json"
 const ENTRY_KEYS: Array[String] = ["name", "hail", "hint", "toll", "pass_rep", "rep_on_fight"]
-const KEYS: Array[String] = ["_doc", "stage_size", "stage_budget_mult", "jumps_ahead", "fight_credits", "wardens"]
+const KEYS: Array[String] = ["_doc", "stage_size", "stage_budget_mult", "jumps_ahead", "fight_credits", "story", "wardens"]
 const FALLBACK := "rustfangs"  ## the guard of a region whose faction and enemies have no entry
 
 static var _cfg := {}
@@ -163,8 +163,8 @@ static func toll_of(w: Dictionary) -> int:
 	return int(w.get("toll", 0)) * int(w.get("stage", 1))
 
 
-## The event panel's page for warden `w` at the beacon ({} for no warden): its name for a title, the lane held, the toll and
-## the threat for the text, and the choices pay the toll, good standing (only with the reputation, blue), break through (a fight
+## The event panel's page for warden `w` at the beacon ({} for no warden): its name for a title, the lane held (its hail, then
+## the stage's `story` line from data/wardens.json), the toll and the threat for the text, and the choices pay the toll, good standing (only with the reputation, blue), break through (a fight
 ## against the warden's ship, whose `after_win` clears the lane, pays credits and changes the reputation) and turn back
 ## (nothing changes; come again). `ship` rates the threat.
 static func event(w: Dictionary, c, ship) -> Dictionary:
@@ -179,6 +179,9 @@ static func event(w: Dictionary, c, ship) -> Dictionary:
 	var toll := toll_of(w)
 	var rating := threat_label(w, ship)
 	var text := str(entry.get("hail", "The %s holds the exit lane." % name))
+	var story: Array = cfg.get("story", [])  # one line a stage, whoever holds the lane: the beacon's old log echoes that stage's beat of the story
+	if stage >= 1 and stage <= story.size():
+		text += " " + str(story[stage - 1])
 	text += " It wants %d credits for the lane." % toll if toll > 0 else " It asks for nothing. It only holds the lane."
 	if rating != "":
 		text += " Your scanners rate it %s." % rating
@@ -222,6 +225,9 @@ static func problems() -> Array[String]:
 				out.append("wardens.json: stage_budget_mult must be numbers above 0")
 	if not (cfg.get("jumps_ahead") is float or cfg.get("jumps_ahead") is int) or int(cfg.get("jumps_ahead", -1)) < 0:
 		out.append("wardens.json: jumps_ahead must be a whole number of jumps, 0 or more")
+	var story = cfg.get("story", [])
+	if not (story is Array and (not sizes is Array or story.size() == sizes.size()) and story.all(func(l): return l is String and l != "")):
+		out.append("wardens.json: story must be a list of non-empty texts, one per stage")
 	for id in cfg["wardens"]:
 		var e = cfg["wardens"][id]
 		if not Shipgen.tables()["factions"].has(id):

@@ -1,0 +1,155 @@
+{"events": [
+    {
+      "id": "ma_snap_call", "type": "debt", "weight": 400, "once": true, "requires": {"flag": "met_ma", "not_flag": "debt_missed", "jumps_min": 6, "stage_max": 2}, "title": "Snap night",
+      "text": "Ma Gantry's face fills the comm, which is how you know it is not about the weather. 'Payment's due in a day or two,' she says. 'A hundred. I'm calling early because it's Snap night, and the Rusthold puts every light out at 02:14 for one minute, and I never know who to be rude to in the dark.' Behind her the decks are going out one by one. 'Forty years tonight. Every gate in the Drift went quiet with a ship in it, and every ship came out wherever it happened to be. The Concord says solar event. My mother said somebody pulled the plug. The Prism says nothing, which is also a way of saying. Nobody ever says the useful part.' She leans in. 'The gates are not dead. They're stopped. You can feel a core from the Rusthold roof, if you stand still and you're sad enough. Whoever starts one owns the way out.' A pause. 'I'm not saying it's you. I'm saying it's a long way out, and I'd want a cut.'",
+      "choices": [
+        {"text": "Pay the hundred now, and ask about the night.", "requires": {"credits": 100}, "outcomes": [
+          {"weight": 100, "text": "Ma takes the hundred without counting it twice, which you will tell people about. 'I was nine,' she says. 'Deck Six canteen, mid-soup. The lights went, and old Tuck at the hotplate said, oh, it let go, like a man dropping a plate. That's all this rock ever saw of it. Everyone else got to see more.' She forwards two pages from her mother's drawer, Concord paper, stamped and sorry. 'Read them. Then fly somewhere with a window.'", "effects": {"items": {"credits": -100}, "debt": -100, "rep": {"clans": 1}, "log": ["log_concord_incident_minor", "log_concord_meridian_day3"]}}
+        ]},
+        {"text": "Ask about the night. Say you'll pay when you can.", "outcomes": [
+          {"weight": 100, "text": "'When you can is a sentence with a number in it,' says Ma, but she tells it anyway, because the lights are out and nobody is listening. 'Deck Six canteen, mid-soup. Old Tuck at the hotplate said, oh, it let go, like a man dropping a plate. That was the Snap, on this rock: a cook and a plate.' She sends two pages from her mother's drawer, Concord paper, stamped and sorry. 'The number doesn't move for stories. Read them anyway.'", "effects": {"log": ["log_concord_incident_minor", "log_concord_meridian_day3"]}}
+        ]},
+        {"text": "Say the number back to her and nothing else.", "outcomes": [
+          {"weight": 100, "text": "'Good,' says Ma. 'Keep it that way.' She holds the line a moment longer than the call needs, the dark behind her, and then the lights come back on, deck by deck, the way they have for forty years.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_welcome_aboard", "type": "hollow", "weight": 200, "once": true, "requires": {"stage_min": 2, "stage_max": 4}, "title": "Visitors: noted",
+      "text": "The ghost comes in without a wake: a clean green hull with no seam in it, lit the colour of a kitchen at night. It matches your speed and stops, and the radio, which has been quiet all day, clears its throat. 'Visitors: noted,' it says, in a pleasant, tired voice, the voice of a thing that has said it to nobody for a very long time. 'Welcome aboard.' A line crawls across your console from its recorder, timed 06:00: ALL WELL. CREW: ALL PRESENT. You have not boarded anything. It has noted you anyway.",
+      "choices": [
+        {"text": "Answer. Give it the ship's name.", "outcomes": [
+          {"weight": 100, "text": "The line goes quiet the way a room does when somebody remembers the right name. 'Noted,' says the voice. 'Thank you for coming.' The green hull turns away, satisfied, and the tide goes with it for a mile. It leaves one thing on your console: its daily entry, fourteen thousand six hundred and ten of them, none different. The air in the cabin eases a little, as if you had been forgiven something small.", "effects": {"log": "log_concord_daily_entry", "crew_hp": 5}}
+        ]},
+        {"text": "Say nothing. Turn away.", "outcomes": [
+          {"weight": 100, "text": "You turn away. The green hull does not follow. It stays exactly where it is, with the porch light on, and goes on noting.", "effects": {}}
+        ]},
+        {"text": "Open fire. Test the line.", "outcomes": [
+          {"weight": 100, "text": "Your first shot goes into the clean green hull and does nothing at all except make it very sad. 'We were only being polite,' says the voice, and the hull, gently, turns its guns on you.", "effects": {"fight": "tier"}, "after_win": {"text": "The hull comes apart without a sound. 'Oh,' says the radio, once. The last line on your console reads: VISITORS: DECLINED.", "effects": {}}}
+        ]}
+      ]
+    },
+    {
+      "id": "ada_hears_loop", "type": "quest", "weight": 250, "once": true, "requires": {"flag": "ada_aboard", "stage_min": 2, "stage_max": 4}, "title": "The mast that repeats itself",
+      "text": "A relay mast on a bare rock, its dish turned to a patch of sky where nothing is. Someone has hand-lettered LANTERN on the base in yellow paint and touched it up every few years. When you come in range the radio fills with forty seconds of a small, tired voice: 'If you can hear this, we're alive. Come to the Lantern Reach.' A chair scrapes. Someone coughs. Someone asks if it is still on. On your console the pod recorder, which has done nothing for days but keep four notes warm, clicks over by itself and starts to play them under the loop. The two fit like a key in a lock.",
+      "choices": [
+        {"text": "Let the recorder run against the loop.", "outcomes": [
+          {"weight": 100, "text": "The loop comes round again, and the recorder plays you what the pod's radio caught in week six: a woman talking to a wall. 'That's Pell,' says Ada. 'That's Pell's cough. He coughs before he says it every Thursday, because he hates saying it. They make the littlest one press the button, and she's always late.' A long breath on the tape. 'I'm not supposed to know that.' Then hiss, and then it stops, as if embarrassed. The loop is not a trick. At the other end is a man who coughs on Thursdays, and somebody in a pod knew his name.", "effects": {"flag": "haven_1", "log": "log_haven_first_fragment", "unlock": "skin_lantern_lights"}}
+        ]},
+        {"text": "[Tinkerer] Bridge the recorder into the mast and run both clean.", "requires": {"trait": "tinkerer"}, "outcomes": [
+          {"weight": 100, "text": "A bridged cable, two clips and some language later, the loop and the recording run on one clean channel, and you hear the room behind the room: a school bell, a dog being told off, a child counting to four. The recorder plays its four notes into the middle of it and they are the bell. Then week six, a woman talking to a wall: 'That's Pell's cough. I'm not supposed to know that.' The mast gives up a good cell as you unclip, as if grateful to have been heard right.", "effects": {"flag": "haven_1", "log": "log_haven_first_fragment", "unlock": "skin_lantern_lights", "items": {"fuel": 2}}}
+        ]},
+        {"text": "Switch the recorder off. You have your own problems.", "outcomes": [
+          {"weight": 100, "text": "The mast goes on saying it to the dark. The recorder, switched off, plays its four notes once more anyway, quietly, and gives up.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_laid_for_twelve", "type": "hollow", "weight": 200, "once": true, "requires": {"stage_min": 5, "stage_max": 8}, "title": "Laid for twelve",
+      "text": "A green hull holds an airlock open to the dark, lit like a shop window. Inside, on a fold-out table bolted to the deck, a meal is laid for twelve. Eleven places have been used and cleared; the twelfth bowl steams in front of a chair pulled out an inch, with a blank place card and a pencil. Every surface in the little room has been scrubbed past anything you would call clean. There is a smell of onions that you have not smelled since you were small.",
+      "choices": [
+        {"text": "Sit. Eat a mouthful.", "outcomes": [
+          {"weight": 100, "text": "The chair is warm, the way a chair is warm when someone has only just stood up. The soup is the best soup you have ever had, which is the hull trying very hard. When you stand, the place card is still blank, and the pencil is warm. The airlock lets you go with a sound like a held breath let out. Nobody says anything about it, then or after.", "effects": {"log": "log_clans_tidy_engines", "crew_hp": 10}}
+        ]},
+        {"text": "Close the airlock on it and go.", "outcomes": [
+          {"weight": 100, "text": "You close the airlock on the table. It is the first door you have ever closed gently.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "ada_halcyon", "type": "quest", "weight": 250, "once": true, "requires": {"flag": "ada_aboard", "stage_min": 5, "stage_max": 7}, "title": "The quiet buoy",
+      "text": "A marker buoy with its lamp out, parked in a pocket where the radio gives up and the hiss goes away. It is the quietest place you have been in weeks. On the console the recorder wakes by itself and plays its last track, which is not four notes. It is Ada, close to the microphone, the way people talk when they have already decided. 'Week eleven. If you're hearing this, we're somewhere quiet, which is where I said I'd say it.'",
+      "choices": [
+        {"text": "Listen to all of it.", "outcomes": [
+          {"weight": 100, "text": "You turn the lamp off and let the tape run.", "effects": {"goto": "ada_halcyon_page"}}
+        ]},
+        {"text": "Switch it off. It isn't yours to hear.", "outcomes": [
+          {"weight": 100, "text": "You switch it off. The quiet comes back, and it is, you notice, a little less kind.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "ada_halcyon_page", "type": "page", "weight": 0, "requires": {},
+      "text": "'I'm from Halcyon,' says the tape. 'You've been calling it a broadcast. I called it a school with a roof that leaks over the third desk. Nobody pushed me into the pod. I scraped the name off it myself, so don't go looking.' A pause you could park a ship in. 'They did something, or they were about to. I won't say what. It might have been kind. That's the part I couldn't be in the room for.' The hiss shifts. 'The four notes are the school bell. Somebody told me once it's the old gate song with the last note put back. I thought that was a thing grown-ups said. The loop has a fifth, and it's the one you wait for, because it's late. When a fifth comes on time, don't go.' Then, closer: 'I can't give you the Reach. I can give you the fifth, and I'd like something back. Promise me nobody hears where it is from you.'",
+      "choices": [
+        {"text": "Give her your word.", "outcomes": [
+          {"weight": 100, "text": "You say it aloud to an empty room, which feels foolish, and the recorder clicks like a lock. 'Right,' says the tape, very quietly. 'Right. Thank you.' It plays the fifth note then, once, late: a tone with a small catch in it, like a breath taken before a sentence. You will know it again. Out in the quiet the buoy's dead lamp blinks on, once, as if somebody had been holding it.", "effects": {"flag": ["ada_halcyon", "haven_5"], "clear_flag": "haven_lured"}}
+        ]},
+        {"text": "Tell her you can't promise that.", "outcomes": [
+          {"weight": 100, "text": "The tape waits, politely, for as long as it takes to be sure. 'Fair,' it says. 'It's your ship.' It plays the fifth note once, late, and then nothing, hiss or a cut. The buoy's lamp stays dark.", "effects": {"flag": "haven_5"}}
+        ]}
+      ]
+    },
+    {
+      "id": "doors_briefing", "type": "quest", "weight": 250, "once": true, "requires": {"stage_min": 6, "stage_max": 8}, "title": "Three doors",
+      "text": "CS-114 Diligence holds station at the beacon with her hatch open, and Lieutenant Hallett sits in it with his boots over the side and a mug in his lap. WORLD'S OKAYEST OFFICER, it says. He raises it an inch as you come alongside. 'I was going to file this,' he says, and holds up a patrol form turned over and drawn on. 'There is no box for it. So. Three doors.' The back of the form is a rough map: the three dead gates, drawn like rooms in a house.",
+      "choices": [
+        {"text": "Hear him out.", "outcomes": [
+          {"weight": 100, "text": "'One is ours, Two the Scrappers', Three the Lumen's. They are not dead, they are holding. To start one you need three things. A core, the heart of the gate, which each keeps for whoever it has decided to like. Gate alloy to seat it, which the Basalt can find. And someone's backing: the charter at Meridian, the Moot on the clan rocks, the Prism's consent. Five standing at the right desk, and a reason.' He turns the mug. 'There is also a fourth door, and I would take it. The Scrapper Gate has tenants. They are very polite. They have been laying a table for forty years. Bring a kettle. Do not bring a gun.' He writes something on the form, crosses it out, and hands it over anyway.", "effects": {"flag": "doors_known", "rep": {"concord": 1}, "log": ["log_concord_hallett_mug", "log_lumen_test_pulse"]}}
+        ]},
+        {"text": "[Basalt] Let your Basalt correct the map.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt takes the pencil, rubs out one of Hallett's rooms and draws it again from memory, and a hall appears that was on no chart: the gate-yard floor, where the night shift ate. 'We swept this for forty years,' he says. He adds two lumps of alloy from his pocket without being asked, and the rest of the lesson, in the order stones tell things: a core, an alloy, a backer, and a fourth door for anyone who will sit. Hallett looks at the map for a long time and writes THANK YOU in the margin, with great care. Then he looks away, because a Concord officer cannot be seen to have been moved.", "effects": {"flag": "doors_known", "rep": {"concord": 1}, "items": {"gate_alloy": 2}, "log": ["log_concord_hallett_mug", "log_lumen_test_pulse"]}}
+        ]},
+        {"text": "Tell him you'll read it later.", "outcomes": [
+          {"weight": 100, "text": "'Later is the usual time,' says Hallett, and goes on holding the form out, mug in his other hand, for as long as you are in range.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "hollow_porch_light", "type": "hollow", "weight": 200, "once": true, "requires": {"stage_min": 7, "stage_max": 8}, "title": "The porch light",
+      "text": "A lane of green hulls hangs in the dark with every light on, bow to stern, like a street where someone has been born and someone has died. One airlock stands open. Over the comm, in many voices that are all the same voice, quietly, the way you would speak to somebody asleep: 'We kept it on for you.' It is not a threat. It is the most patient thing you have ever been told.",
+      "choices": [
+        {"text": "Fly the lane at a walking pace. Wave.", "outcomes": [
+          {"weight": 100, "text": "You fly the lane at a walking pace with your hand out of the window, and the Hollow, one ship at a time, dim their lights as you pass: the way a street does for a funeral or a wedding. Nobody can tell which. At the end of the lane something, somewhere, writes a number down, and you are not sure it is a small one.", "effects": {"log": "log_lumen_star_count", "crew_hp": 5}}
+        ]},
+        {"text": "Turn around.", "outcomes": [
+          {"weight": 100, "text": "You turn around. Behind you the lane watches you go, warmly, with the porch light on. It will still be on when you come back. That is the whole problem with it.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "ledger_last_call", "type": "quest", "weight": 300, "once": true, "requires": {"stage_min": 8, "stage_max": 8}, "title": "Last orders",
+      "text": "The last licensed bar before the Gate Approaches is a hull called Last Orders, lit like a birthday, run by a Fenn named Quill who keeps the ledger of the Drift in a drawer. Not debts. Odds. 'Everyone out here is betting on a door,' he says, polishing a glass with a rag that has seen things. 'Eight stages of ships come through, and every one has put something on a gate. The house takes no side.' He taps the ledger. 'Ask. Ask about yours.'",
+      "choices": [
+        {"text": "Ask what's missing.", "requires": {"not_flag": "doors_known"}, "outcomes": [
+          {"weight": 100, "text": "Quill turns a page. 'Any door wants three things: a backer, a core and alloy to seat it. A faction's backing is a desk and five standing. The core is the gate's to give. The alloy is in the walls.' He closes the ledger. 'And if you hold nothing at all? Annex Nine says finders keepers, and a gate is a dead hull. I'd put a coin on a salvager with a pencil, at the Scrapper Gate. For the house.' He winks, badly.", "effects": {"log": "log_concord_salvage_annex"}}
+        ]},
+        {"text": "Show him Hallett's form, and ask what's missing.", "requires": {"flag": "doors_known"}, "outcomes": [
+          {"weight": 100, "text": "'Hallett's,' says Quill, reading it upside down. 'He gives them to anyone who stops. Good work.' He pours you one on the house, which is how you know it is. 'Backer, core, alloy: you've the sums. And if the sums come out at nothing, Annex Nine says finders keepers, and a gate is a dead hull. A salvager with a pencil, at the Scrapper Gate. I'd put a coin on it.'", "effects": {"log": "log_concord_salvage_annex", "crew_hp": 5}}
+        ]},
+        {"text": "Show him the Meridian charter.", "requires": {"flag": "wayout_concord_backed"}, "outcomes": [
+          {"weight": 100, "text": "'Door One,' says Quill, and the glass goes down. 'Backer: yes, and a signature in triplicate, a thing of beauty. Core: in the Concord Gate, in a cage, with chairs; you will be asked to wait. Alloy: four, from the ribs. Fly to Gate One. Bring a pen.'", "effects": {"log": "log_concord_form_9b"}}
+        ]},
+        {"text": "Tell him about the Moot and the Wrench.", "requires": {"flag": "wayout_clans_backed"}, "outcomes": [
+          {"weight": 100, "text": "'Door Two,' says Quill. 'Backer: the Moot, which will deny it by lunch. Core: over a bar at the Last Stop, under a sign. Alloy: four. Fly to Gate Two and be friendly to anyone holding a ledger.' He tops up your glass. 'The Wrench is not that good. Don't tell them I said.'", "effects": {"log": "log_clans_fight_rota"}}
+        ]},
+        {"text": "Show him the Prism's letter.", "requires": {"flag": "wayout_lumen_backed"}, "outcomes": [
+          {"weight": 100, "text": "'Door Three,' says Quill, holding the letter at arm's length. 'Backer: the Prism, in a letter that is mostly weather. Core: a drone called Unit 7 keeps it and will ask you a question. Answer honestly. Alloy: four. Fly to Gate Three, and hum on the way in.'", "effects": {"log": "log_lumen_warden_asks"}}
+        ]},
+        {"text": "Mention the green ships.", "requires": {"flag": "hollow_6"}, "outcomes": [
+          {"weight": 100, "text": "Quill's rag stops. 'Door Two has tenants,' he says. 'A fourth way in. A kettle, if you have one. A Basalt, if you have one. Manners, if you have neither. Say your ship's name loud enough to be heard at a door.' He turns the glass the other way round. 'Nobody takes bets on that one. Nobody has come back to collect.' He pours you one anyway.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "Mention the lanterns.", "requires": {"flag": "haven_reach"}, "outcomes": [
+          {"weight": 100, "text": "Quill puts the glass down very gently. 'Not a gate,' he says. 'A door, all the same. The odds on that one are the best in the book and nobody takes them, because the ones who go don't come to collect either, and they aren't sad about it.' He slides a coin across the bar. 'For the lamp.'", "effects": {"items": {"credits": 40}}}
+        ]},
+        {"text": "Finish your drink and go.", "outcomes": [
+          {"weight": 100, "text": "You finish your drink. Quill writes something small in the ledger, and does not say whose name it is under.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "gate_scrapper_rights", "type": "gate", "weight": 8, "once": false, "requires": {"node": "gate_2", "region": "gate_approaches", "stage_min": 9}, "title": "Unclaimed, pending review",
+      "text": "The Scrapper Gate hangs in the dark like a cathedral nobody finished, and you do what a hullscrapper does first, which is check who it belongs to. Nobody. There is no owner of record and no operator. There is a Concord notice, forty years old, taped to a rib: UNCLAIMED, PENDING REVIEW. Under it someone has written in grease pencil: ANNEX 9. FINDERS KEEPERS. It is the biggest derelict in the Drift. When you think about it, you are in the business.",
+      "choices": [
+        {"text": "File a salvage claim. Cut it up. Sell what works.", "outcomes": [
+          {"weight": 100, "text": "You write the claim in grease pencil on a plate of hull and nail it to a rib. Nobody objects. There is nobody left to.", "effects": {"ending": "scrapper_rights"}}
+        ]},
+        {"text": "[Basalt] Ask your Basalt what the gate-yard would say.", "requires": {"species": "basalt"}, "outcomes": [
+          {"weight": 100, "text": "Your Basalt walks the ribs for a long while. 'It would say cut slowly,' he says. 'It would say thank you for asking first.' He takes the pencil, which is the first time you have seen him take anything, and signs under your name.", "effects": {"ending": "scrapper_rights"}}
+        ]},
+        {"text": "Not today.", "outcomes": [
+          {"weight": 100, "text": "You back out of the shell. The notice stays where it is, UNCLAIMED, PENDING REVIEW, patient as paper.", "effects": {}}
+        ]}
+      ]
+    }
+]}

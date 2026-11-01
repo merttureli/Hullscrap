@@ -1,0 +1,6 @@
+{
+  "_doc": "The fallback ending of the story_1 pack: at the Scrapper Gate (stage 9) with no thread to follow, a hullscrapper does what a hullscrapper does. Low score, no flags needed (event gate_scrapper_rights).",
+  "endings": [
+    {"id": "scrapper_rights", "title": "Rights of Salvage", "base_score": 500, "epilogue": "You file the claim in grease pencil on a plate of hull and nail it to a rib, and nobody objects, because nobody is left to. The Concord, when it hears, sends a form. The Clans send cousins. By the end of the season the Scrapper Gate is a very tidy pile of alloy the colour of old brass, still warm, and half the Drift is queueing at the yard with a cutter and a receipt book. It opens nothing. It keeps a thousand ships flying for a generation, which is a different kind of door. Ma Gantry is paid in alloy, at her own rate, and frames the receipt next to the one for the hull. In the evenings you sit on your own deck and listen to the Drift hammer, and it sounds, you decide, like a place that has made up its mind to stay."}
+  ]
+}

@@ -637,9 +637,9 @@ func test_every_key_is_described_in_the_data_and_in_the_resolver() -> void:
 
 
 func test_the_library_has_the_old_traits_and_the_packs_traits() -> void:
-	for id in ["no_breath", "heat_resistant", "fast_repair", "suit"]:
+	for id in ["no_breath", "heat_resistant", "fast_repair", "suit", "tinkerer"]:  # tinkerer: Ada's personal trait (data/crew.json), so core
 		eq(Content.origin("traits", id), "core", id + " is core")
-	for id in ["swarm", "firefighter", "dries_out", "aura_spores", "flammable", "mechanical", "half_lungs", "ion_prone", "tinkerer", "crystal_conduit", "crystal_body", "hauler", "clumsy"]:
+	for id in ["swarm", "firefighter", "dries_out", "aura_spores", "flammable", "mechanical", "half_lungs", "ion_prone", "crystal_conduit", "crystal_body", "hauler", "clumsy"]:
 		eq(Content.origin("traits", id), "races_1", id + " is the races_1 pack's")
 	_done()
 
