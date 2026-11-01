@@ -27,7 +27,7 @@
         ]},
         {"text": "Cut the core free while the Warden is reading.", "outcomes": [
           {"weight": 60, "text": "The cutter bites the cage while Unit 3 is on page twelve. The core comes loose with a noise like a tray being set down in an empty canteen. Unit 3 notices at the very end, says 'Oh,' and lets you go.", "effects": {"items": {"gate_core": 1, "gate_alloy": 2}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}},
-          {"weight": 40, "text": "The cage fights back, with a flash and a great many Lattice Authority tags. Everyone aboard has a very bad evening and a very good core.", "effects": {"crew_hp": -20, "items": {"gate_core": 1, "gate_alloy": 2}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}}
+          {"weight": 40, "text": "The cage fights back, with a flash and a great many Lattice Authority tags. You have a very bad evening and a very good core.", "effects": {"crew_hp": -20, "items": {"gate_core": 1, "gate_alloy": 2}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}}
         ]},
         {"text": "[Basalt] Ask your Basalt to carry it out. They know the door.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 100, "text": "Your Basalt walks the control ring without a suit, touches each chair as he passes, and lifts the core out of its cage like a man lifting a sleeping child. Unit 3 says 'Credentials,' once. He says, 'I was on the floor,' and Unit 3, for a long moment, says nothing. It stamps something. Nobody asks what.", "effects": {"items": {"gate_core": 1, "gate_alloy": 4}, "flag": "wayout_concord_core", "log": "log_wayout_concord_chairs"}}

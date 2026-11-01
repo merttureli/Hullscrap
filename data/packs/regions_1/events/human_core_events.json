@@ -4,7 +4,7 @@
       "text": "Ring Three Dock has a queue of four hundred for ration tickets and a second queue, shorter and angrier, for people who want to complain about the first. A sign over both says THE QUEUE IS FAIR. Someone has crossed out FAIR and written LONG, and someone else has crossed out LONG and written MINE.",
       "choices": [
         {"text": "Take a ticket and wait your turn.", "outcomes": [
-          {"weight": 70, "text": "Four hours later you are served by a clerk who apologises for the wait, the queue and the weather. The crew nap in line, shoulder to shoulder, in the best rest they have had all month.", "effects": {"crew_hp": 10, "unlock": "ship_human_ring_runner"}},
+          {"weight": 70, "text": "Four hours later you are served by a clerk who apologises for the wait, the queue and the weather. You nap in line, shoulder to shoulder with strangers, in the best rest you have had all month.", "effects": {"crew_hp": 10, "unlock": "ship_human_ring_runner"}},
           {"weight": 30, "text": "Four hours in, the clerk goes to lunch. The line takes it like weather. You come away with rations and a ten-credit queue levy, which nobody can explain.", "effects": {"items": {"credits": -10}, "crew_hp": 5, "unlock": "ship_human_ring_runner"}}
         ]},
         {"text": "Skip the queue (30 credits).", "requires": {"credits": 30}, "outcomes": [
@@ -29,7 +29,7 @@
       "text": "Ring Two's swap meet fills a whole docking spoke: tables of salvage, hot noodles, a man selling genuine Concord forms, stamped, and a woman selling the stamps. Everything is second-hand. Some of it is first-hand, which is worse.",
       "choices": [
         {"text": "Buy hot noodles (15 credits).", "requires": {"credits": 15}, "outcomes": [
-          {"weight": 100, "text": "The noodles are hot, salty and made by someone's aunt. The crew eat standing up and look, briefly, like people with a future.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+          {"weight": 100, "text": "The noodles are hot, salty and made by someone's aunt. You eat standing up and look, briefly, like a person with a future.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
         ]},
         {"text": "Buy a bag of missiles from the back of a cart (45 credits).", "requires": {"credits": 45}, "outcomes": [
           {"weight": 70, "text": "The missiles are real and only slightly dented. The seller counts your change twice, to show he can.", "effects": {"items": {"credits": -45, "missile": 3}}},
@@ -78,8 +78,8 @@
         {"text": "[Medbay] Open the ward's old clinic and take the stock.", "requires": {"component": "medbay"}, "outcomes": [
           {"weight": 100, "text": "The clinic's cabinets are labelled, alphabetised and fully stocked. You leave the labels.", "effects": {"items": {"nanite_paste": 2, "credits": 30}}}
         ]},
-        {"text": "[Human] Read the ward's last minutes aloud to the crew.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 100, "text": "The minutes are a masterpiece of grievance. Your Human reads them in full, with timing, to a crew that has not laughed so hard since the Snap. A line near the end promises the airlock code to whoever finishes. It is 4-4-4-4.", "effects": {"items": {"scrap": 25}, "crew_hp": 10, "log": "log_core_committee"}}
+        {"text": "[Human] Read the ward's last minutes aloud.", "requires": {"species": "human"}, "outcomes": [
+          {"weight": 100, "text": "The minutes are a masterpiece of grievance. You read them in full, with timing, to a ward that has not laughed so hard since the Snap. A line near the end promises the airlock code to whoever finishes. It is 4-4-4-4.", "effects": {"items": {"scrap": 25}, "crew_hp": 10, "log": "log_core_committee"}}
         ]},
         {"text": "Leave the ward its banner.", "outcomes": [
           {"weight": 100, "text": "You leave the banner up. If they ever do come back, they will want to know someone noticed.", "effects": {}}
@@ -121,7 +121,7 @@
           {"weight": 40, "text": "She asks for your name and badge number. You have neither. She stays on hold. You stay quiet, having discovered a new kind of shame.", "effects": {"rep": {"concord": -1}}}
         ]},
         {"text": "Listen to the tune for a while.", "outcomes": [
-          {"weight": 100, "text": "It is a surprisingly good tune. The crew hum along, then argue about the second verse, then agree on it. Somewhere out there the buoy goes on playing it for no one.", "effects": {"crew_hp": 5}}
+          {"weight": 100, "text": "It is a surprisingly good tune. You hum along, then argue with yourself about the second verse, then agree on it. Somewhere out there the buoy goes on playing it for no one.", "effects": {"crew_hp": 5}}
         ]}
       ]
     },
@@ -146,7 +146,7 @@
       "text": "A shell of hollowed rocks, each with a hatch, a lamp and a hand-painted number. Allotments: gardens, goats, a pocket of real earth in every one. The residents defend them with mining lasers, politely. One has put up a sign: PLEASE DO NOT SHOOT THE TOMATOES.",
       "choices": [
         {"text": "Trade for the surplus (20 credits).", "requires": {"credits": 20}, "outcomes": [
-          {"weight": 85, "text": "Four tomatoes, a sack of onions and a goat's blessing. The crew eat like kings for a week.", "effects": {"items": {"credits": -20}, "crew_hp": 15}},
+          {"weight": 85, "text": "Four tomatoes, a sack of onions and a goat's blessing. You eat like a king for a week.", "effects": {"items": {"credits": -20}, "crew_hp": 15}},
           {"weight": 15, "text": "The goat gets into the ship. It is a long afternoon.", "effects": {"items": {"credits": -20}, "crew_hp": 5}}
         ]},
         {"text": "Work the unclaimed rock at the edge.", "outcomes": [
@@ -174,7 +174,7 @@
           {"weight": 45, "text": "The clause is on page seven, and it says the landlord may evict by force.", "effects": {"log": "log_core_landlord", "fight": "pirate_raider"}}
         ]},
         {"text": "[Human] Serve them a Notice of Disrepair, in writing.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 85, "text": "Your Human drafts a formal notice about the pirate gunboat's cracked windscreen. The captain, mortally offended, withdraws to fix it, citing a tenant's right to quiet enjoyment.", "effects": {"items": {"credits": 25, "scrap": 20}}},
+          {"weight": 85, "text": "You draft a formal notice about the pirate gunboat's cracked windscreen. The captain, mortally offended, withdraws to fix it, citing a tenant's right to quiet enjoyment.", "effects": {"items": {"credits": 25, "scrap": 20}}},
           {"weight": 15, "text": "The captain reads the notice, agrees with every word, and shoots you for the effort.", "effects": {"hull": -10}}
         ]},
         {"text": "Fight them.", "outcomes": [
@@ -188,7 +188,7 @@
       "text": "Every ring in the Core goes dark at the same hour once a year. Not a fault. The hour is the Snap's, ship time, and the Core keeps it. Out here the dark is total, and in every window of every ring someone has put a single candle.",
       "choices": [
         {"text": "Cut your lights and join them.", "outcomes": [
-          {"weight": 100, "text": "You switch off the lamps and sit in the dark with your crew, and across the gap sixty thousand candles burn in the windows. Nobody speaks for eleven minutes. When the lights come back you are a little different, and so is everyone else. A ring-keeper sends you a count of the candles, for the record.", "effects": {"rep": {"concord": 1, "clans": 1}, "crew_hp": 15, "log": "log_core_vigil"}}
+          {"weight": 100, "text": "You switch off the lamps and sit in the dark with the drone, and across the gap sixty thousand candles burn in the windows. Nobody speaks for eleven minutes. When the lights come back you are a little different, and so is everyone else. A ring-keeper sends you a count of the candles, for the record.", "effects": {"rep": {"concord": 1, "clans": 1}, "crew_hp": 15, "log": "log_core_vigil"}}
         ]},
         {"text": "Fly through the dark with your lights on.", "outcomes": [
           {"weight": 70, "text": "A ring-keeper flashes the vigil code at you, twice. You switch off, ashamed, and a little late.", "effects": {"rep": {"concord": -1}}},
@@ -230,7 +230,7 @@
           {"weight": 100, "text": "Teodor Pike climbs through your airlock with the box of minutes, which he will not let anyone else carry, and the face of a man who has been allowed to leave a meeting. 'Thank you,' he says. 'I will take notes.'", "effects": {"recruit": {"species": "human", "name": "Pike"}}}
         ]},
         {"text": "[Human] Offer him a seat at your table, with a vote.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 100, "text": "Your Human tells him the crew has a vote, and that he may record it. Pike nearly cries. He signs on for the pleasure of being asked, and his box of minutes comes with useful dirt on three clan reps.", "effects": {"items": {"credits": 30}, "rep": {"clans": 1}, "recruit": {"species": "human", "name": "Pike"}}}
+          {"weight": 100, "text": "You tell him the ship has a vote, and that he may record it. Pike nearly cries. He signs on for the pleasure of being asked, and his box of minutes comes with useful dirt on three clan reps.", "effects": {"items": {"credits": 30}, "rep": {"clans": 1}, "recruit": {"species": "human", "name": "Pike"}}}
         ]},
         {"text": "Wave and keep flying.", "outcomes": [
           {"weight": 100, "text": "You wave. He logs it.", "effects": {}}

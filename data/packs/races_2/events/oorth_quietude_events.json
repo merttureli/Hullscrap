@@ -4,7 +4,7 @@
       "text": "The Listening Gallery is a long curved hall lined with grey-hooded Oorth, one on each bench, each looking at nothing in particular with the ridge on their forehead glowing a dim, steady blue. A sign hangs over the door, in four languages and a drawing: PLEASE ASK US SOMETHING. Under it, smaller: ANYTHING. WE HAVE BEEN ASKED NOTHING SINCE THE SNAP. A young Oorth at the door touches your sleeve. 'Would you like to be read?' they ask. 'It is free. It is very quiet.'",
       "choices": [
         {"text": "Be read.", "outcomes": [
-          {"weight": 100, "text": "The young Oorth closes their eyes, the ridge flares, and for nine seconds you feel gently, thoroughly noticed, like a coat being found. 'You are tired,' they say. 'You are worried about the debt. Your engineer likes the cook. The left engine will go before the right.' You thank them. You check the left engine.", "effects": {"crew_hp": 10}}
+          {"weight": 100, "text": "The young Oorth closes their eyes, the ridge flares, and for nine seconds you feel gently, thoroughly noticed, like a coat being found. 'You are tired,' they say. 'You are worried about the debt. The drone is fond of you. The left engine will go before the right.' You thank them. You check the left engine.", "effects": {"crew_hp": 10}}
         ]},
         {"text": "Ask them something.", "outcomes": [
           {"weight": 100, "text": "'What is through the exit?' you ask. The gallery goes quiet in a way you feel in your fillings. Forty hoods turn. One says, 'Something large. It is more afraid of you than you are of it. It is pretending it is not.' A bench sighs with relief; nobody has asked in months. They press a handwritten summary of the next lane into your hand, and a few credits for having asked.", "effects": {"reveal": "trader", "items": {"credits": 20}, "rep": {"concord": 1}}}
@@ -98,7 +98,7 @@
       "text": "A salesman in a coat the colour of fog is working the lane with a cart. SILENCE, says the cart. BOTTLED. ONE MINUTE PER CANISTER. SAVE IT FOR WHEN YOU NEED IT. He shakes a canister at you and it makes no sound whatever, which he is plainly proud of. 'Twenty credits,' he whispers. 'Imagine the dinner.'",
       "choices": [
         {"text": "Buy a canister (20 credits).", "requires": {"credits": 20}, "outcomes": [
-          {"weight": 100, "text": "You open it at dinner. For one minute the mess is silent and everybody stares at their soup. Nobody has ever eaten so well. The cook cries. You decide it was worth it, and then, a little later, that it was not, and then that it was.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
+          {"weight": 100, "text": "You open it at dinner. For one minute the mess is silent and you stare at your soup. Nobody has ever eaten so well. You cry a little. You decide it was worth it, and then, a little later, that it was not, and then that it was.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
         ]},
         {"text": "Ask what is in it.", "outcomes": [
           {"weight": 100, "text": "'Nothing,' says the salesman, with deep satisfaction. 'The finest nothing in the Quietude. I distil it myself.' He seems to be telling the truth, and that is the trouble.", "effects": {}}

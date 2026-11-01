@@ -5,7 +5,7 @@
       "choices": [
         {"text": "Buy something shiny (25 credits).", "requires": {"credits": 25}, "outcomes": [
           {"weight": 60, "text": "She picks it out for you with a flourish: a brass sextant, no use to anyone, polished to a mirror. It fits in your hand. Inside the case, folded very small, is a Concord ration chit worth much more than you paid. 'Oh,' says the Corvin, watching your face. 'That is a mistake. Mine.' She makes no move to take it back.", "effects": {"items": {"credits": 5}}},
-          {"weight": 40, "text": "She picks out a medal for you with a flourish. It is a good medal, for bravery at sea, a dead sea, in an old war. You hang it in the mess. The crew sneer at it all week and fight over who gets to polish it.", "effects": {"items": {"credits": -25}, "crew_hp": 5}}
+          {"weight": 40, "text": "She picks out a medal for you with a flourish. It is a good medal, for bravery at sea, a dead sea, in an old war. You hang it in the mess. You sneer at it all week and polish it every night.", "effects": {"items": {"credits": -25}, "crew_hp": 5}}
         ]},
         {"text": "Hire her assistant, who keeps looking at your ship (80 credits).", "requires": {"credits": 80}, "outcomes": [
           {"weight": 100, "text": "A younger Corvin has been stacking spoons in the corner and watching your hull, and is pushed forward by the shopkeeper, with a stern look. 'Pica,' she says. 'Good eyes. Bad hands. Not for sale to just anyone.' Pica ducks her head, then ruffles her cloak, then pulls from a pocket a polished bolt, a thimble and a tiny bright key. 'Welcome gifts,' she says, to the room in general.", "effects": {"items": {"credits": -80}, "recruit": {"species": "corvin", "name": "Pica"}}}
@@ -24,7 +24,7 @@
       "choices": [
         {"text": "Search it anyway.", "outcomes": [
           {"weight": 35, "text": "You find a locker behind a locker behind a panel that was already open. Inside, a half bag of polymer and the dried remains of someone's lunch. It is something, at least.", "effects": {"items": {"polymer": 10, "scrap": 10}}},
-          {"weight": 65, "text": "They were right. It is empty. You spend an hour proving it to yourselves, and leave with nothing but the lessons.", "effects": {}}
+          {"weight": 65, "text": "They were right. It is empty. You spend an hour proving it to yourself, and leave with nothing but the lessons.", "effects": {}}
         ]},
         {"text": "Strip the hull plating.", "outcomes": [
           {"weight": 100, "text": "It is dull, honest work. The plating is old and good, and it is all there is. You come away with a modest heap of scrap and some bruises.", "effects": {"items": {"scrap": 30}, "crew_hp": -5}}

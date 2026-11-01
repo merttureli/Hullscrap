@@ -63,10 +63,10 @@
       "text": "The Remendery is a market where everything for sale has been repaired at least eleven times. A sign over the stalls reads MENDED TOOLS. MENDED BOOTS. MENDED PLATES. MENDED HEARTS (SEE RECEPTION). A swarm in the shape of a smiling stall-keeper holds up a spanner, whose handle is a patchwork of four metals, and polishes it with a rag that is also, on closer inspection, a swarm.",
       "choices": [
         {"text": "Buy a mended spanner (30 credits).", "requires": {"credits": 30}, "outcomes": [
-          {"weight": 100, "text": "It is the best spanner you have ever held. It is also, you notice, faintly warm, and the nut it was made to fit seems to have moved to the right place. Your engineer refuses to give it back.", "effects": {"items": {"credits": -30, "scrap": 30, "copper": 15}}}
+          {"weight": 100, "text": "It is the best spanner you have ever held. It is also, you notice, faintly warm, and the nut it was made to fit seems to have moved to the right place. You refuse to give it back.", "effects": {"items": {"credits": -30, "scrap": 30, "copper": 15}}}
         ]},
         {"text": "Ask what a mended heart is.", "outcomes": [
-          {"weight": 100, "text": "The stall-keeper takes your hand and, with great delicacy, a hundred bots run over your wrist and up your sleeve. They find something you did not know was loose, and fix it. It is small, and a little embarrassing. Your whole crew queue for the same.", "effects": {"crew_hp": 15}}
+          {"weight": 100, "text": "The stall-keeper takes your hand and, with great delicacy, a hundred bots run over your wrist and up your sleeve. They find something you did not know was loose, and fix it. It is small, and a little embarrassing. You queue for the other wrist.", "effects": {"crew_hp": 15}}
         ]},
         {"text": "[Tessellate] Bargain as one.", "requires": {"species": "tessellate"}, "outcomes": [
           {"weight": 100, "text": "Your Tessellate and the stall-keeper stand at opposite ends of the counter and talk for a quarter of an hour in static. At the end the stall-keeper puts a stack of crates in your arms and refuses all payment. 'Mended to order,' it says. 'For one of the family.'", "effects": {"items": {"copper": 30, "polymer": 20, "titanium": 3}}}

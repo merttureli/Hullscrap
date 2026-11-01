@@ -84,7 +84,7 @@
       "text": "Old Tallow's Lamp Oil is a barge with a hand-painted sign: HONEST LAMP OIL (FOR LAMPS). The oil is in glass jugs, and each jug has a candle floating in it. Tallow is a Lantern with a hundred tiny scorch-holes in his wings and the serenity of a man who has been close to the sun and decided against it. 'For lamps,' he repeats. 'I mean it. Not for engines. Do not put it in the engines. People put it in the engines.'",
       "choices": [
         {"text": "Buy a jug for the ship's lamps (20 credits).", "requires": {"credits": 20}, "outcomes": [
-          {"weight": 100, "text": "You put the oil in the lamps. They burn warm and amber. Your crew sit in the glow at dinner and, for the first time in weeks, tell each other the truth.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
+          {"weight": 100, "text": "You put the oil in the lamps. They burn warm and amber. You sit in the glow at dinner and, for the first time in weeks, tell yourself the truth.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
         ]},
         {"text": "Put it in the engines (20 credits).", "requires": {"credits": 20}, "outcomes": [
           {"weight": 50, "text": "It runs, hot and loud, and gets you three jumps for the price of one. Tallow shakes his head as you go. 'People always do,' he says.", "effects": {"items": {"credits": -20, "fuel": 3}}},

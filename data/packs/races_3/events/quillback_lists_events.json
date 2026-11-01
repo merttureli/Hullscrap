@@ -63,7 +63,7 @@
       "text": "Burr and Balm is an apothecary in a dented cargo pod, run by a very old Quillback whose own back has gone entirely bald. Her shelves are rows of oils, salves and tonics, each in a labelled tin: QUILL OIL. BURR SALVE. TONIC FOR HONOUR (NOT ACCEPTED BY ALL AUTHORITIES). 'They all come in at the end of a long day,' she says, 'with something that hurts, and a story about why it does not matter.'",
       "choices": [
         {"text": "Buy a tin of tonic (25 credits).", "requires": {"credits": 25}, "outcomes": [
-          {"weight": 100, "text": "It tastes of smoke and ginger. Within the hour, every bruise on the ship has dulled to a quiet ache and the crew are in better spirits than they have been in a week. You will not ask what is in it.", "effects": {"items": {"credits": -25}, "crew_hp": 15}}
+          {"weight": 100, "text": "It tastes of smoke and ginger. Within the hour, every bruise on the ship has dulled to a quiet ache and you are in better spirits than you have been in a week. You will not ask what is in it.", "effects": {"items": {"credits": -25}, "crew_hp": 15}}
         ]},
         {"text": "Buy a pot of burr salve (10 credits).", "requires": {"credits": 10}, "outcomes": [
           {"weight": 100, "text": "A small pot of green paste. It works on every scrape on the ship and several things that were not scrapes. It is also very good on hinges.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}

@@ -4,7 +4,7 @@
       "text": "Knot Eleven runs the Hive-lane dock: four Kett on four consoles, working in the same rhythm, so that the whole dock sounds like one very organised insect. They greet you in sequence. 'Welcome.' 'Welcome.' 'Welcome.' 'Welcome.' Each one is a quarter of the word, and the full welcome is in the spaces.",
       "choices": [
         {"text": "Welcome them back, in sequence.", "outcomes": [
-          {"weight": 100, "text": "You try it. It goes badly, and then well. By the fifth go the four Kett are nodding in the same rhythm as your crew, and the dock is two seconds faster than usual. They tip you in fuel.", "effects": {"items": {"fuel": 1}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
+          {"weight": 100, "text": "You try it. It goes badly, and then well. By the fifth go the four Kett are nodding in the same rhythm as you, and the dock is two seconds faster than usual. They tip you in fuel.", "effects": {"items": {"fuel": 1}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
         ]},
         {"text": "Ask for dock services.", "outcomes": [
           {"weight": 100, "text": "The quartet processes your request in a rolling chorus, each pass a little more correct than the last. The fee is split four ways. You pay four quarters.", "effects": {"items": {"credits": -10, "fuel": 2}, "unlock": "ship_kett_ninefold_cell"}}
@@ -13,7 +13,7 @@
           {"weight": 100, "text": "Your Kett steps to the fifth console without a word and falls into the beat. For a whole shift the dock is five-handed and nobody has been so happy in years. The foreman, dazed, pays a full quarter share.", "effects": {"items": {"credits": 40, "scrap": 20}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
         ]},
         {"text": "[Human] Try to learn the beat. Humans are bad at this.", "requires": {"species": "human"}, "outcomes": [
-          {"weight": 100, "text": "Your Human claps along half a beat behind, then a full beat, then in exactly the right place for one glorious second. The Kett erupt in applause, four times over.", "effects": {"items": {"credits": 15}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
+          {"weight": 100, "text": "You clap along half a beat behind, then a full beat, then in exactly the right place for one glorious second. The Kett erupt in applause, four times over.", "effects": {"items": {"credits": 15}, "crew_hp": 5, "unlock": "ship_kett_ninefold_cell"}}
         ]}
       ]
     },
@@ -22,7 +22,7 @@
       "text": "A single pod, drifting. Inside, a Kett, alone, all four hands wrapped round themselves, rocking. The beacon is a thin little tick, tick, tick, the sound a Kett makes when it has lost the others. The pod's log reads, in tidy script: 'This one is alone. This one would like not to be.'",
       "choices": [
         {"text": "Take the pod aboard.", "outcomes": [
-          {"weight": 100, "text": "The Kett unfolds, one hand at a time. Your crew shift to make room and, without thinking, begin to stand a little closer together. 'Thank you,' says the Kett, in a very small clicking voice. 'Ktik. This one will work. This one will work very hard.'", "effects": {"recruit": {"species": "kett", "name": "Ktik"}, "log": "log_hive_seven_days"}}
+          {"weight": 100, "text": "The Kett unfolds, one hand at a time. You shift to make room and, without thinking, begin to stand a little closer. 'Thank you,' says the Kett, in a very small clicking voice. 'Ktik. This one will work. This one will work very hard.'", "effects": {"recruit": {"species": "kett", "name": "Ktik"}, "log": "log_hive_seven_days"}}
         ]},
         {"text": "[Kett] Answer the beacon in the hive-tick.", "requires": {"species": "kett"}, "outcomes": [
           {"weight": 100, "text": "Your Kett ticks back and the lone Kett's beacon speeds up, and answers, and answers again. By the time you have docked the two are holding hands, all eight of them, and the pod's Kett is crying in quarter-notes. They sign on together.", "effects": {"items": {"credits": 20}, "recruit": {"species": "kett", "name": "Ktik"}, "log": "log_hive_seven_days"}}
@@ -83,7 +83,7 @@
       "choices": [
         {"text": "Search the outer cells.", "outcomes": [
           {"weight": 60, "text": "The outer cells hold tools, resin and the odd forgotten lunch. The names on the lids all end in the same sound. You take what is useful and feel like a burglar.", "effects": {"items": {"polymer": 20, "scrap": 25}}},
-          {"weight": 25, "text": "You open a cell that was not empty. A wave of brood-mites, small, harmless and extremely loud, pours out. They are all over the crew for an hour.", "effects": {"items": {"polymer": 15}, "crew_hp": -5}},
+          {"weight": 25, "text": "You open a cell that was not empty. A wave of brood-mites, small, harmless and extremely loud, pours out. They are all over you for an hour.", "effects": {"items": {"polymer": 15}, "crew_hp": -5}},
           {"weight": 15, "text": "In one cell: a perfect brood-egg, cold and shining. Whatever was inside is long gone. The shell is worth a surprising amount.", "effects": {"items": {"credits": 60, "polymer": 10}}}
         ]},
         {"text": "Follow the clicking.", "outcomes": [

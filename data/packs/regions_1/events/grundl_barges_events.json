@@ -4,7 +4,7 @@
       "text": "The Long Convoy: forty barges lashed in a slow ring, each a kilometre long, each with a mess hall. You dock at the nearest and are met by a Grundl who has to duck under a doorframe the width of a barn. 'Welcome,' he says, tucking in his elbows. 'Sorry about the door. Sorry about the ceiling. Sorry about the chairs. Have you eaten?'",
       "choices": [
         {"text": "Accept the dinner invitation.", "outcomes": [
-          {"weight": 85, "text": "A table the length of a ship. A soup in a pot the size of a bath. The Grundl watch you eat with enormous, tender interest, and add more. Four hours later the crew are carried back to the airlock in a happy stupor.", "effects": {"crew_hp": 20, "unlock": "ship_grundl_second_helping"}},
+          {"weight": 85, "text": "A table the length of a ship. A soup in a pot the size of a bath. The Grundl watch you eat with enormous, tender interest, and add more. Four hours later you are carried back to the airlock in a happy stupor.", "effects": {"crew_hp": 20, "unlock": "ship_grundl_second_helping"}},
           {"weight": 15, "text": "The dinner is superb. The dessert is not for the faint of heart. Someone is carried back to the airlock, groaning, a hero.", "effects": {"items": {"credits": -10}, "crew_hp": 10, "unlock": "ship_grundl_second_helping"}}
         ]},
         {"text": "Decline politely. You have eaten.", "outcomes": [
@@ -47,7 +47,7 @@
       "text": "A cargo pallet drifts in the lane, wrapped in a net, beeping. Inside, a Grundl child, Dunnage, nine years old and the size of a refrigerator, is wedged between two crates, eating something. 'Hello,' says Dunnage through a mouthful. 'I am lost. I am fine. I am also stuck. Do you have a snack?'",
       "choices": [
         {"text": "Cut Dunnage free.", "outcomes": [
-          {"weight": 70, "text": "You cut the net, slide the pallet apart, and Dunnage rolls out into the airlock like a friendly boulder. They eat your crew's rations in a single happy sitting and ask for more. The Convoy pays handsomely for the return, and the net's tag says whose barge it was.", "effects": {"items": {"credits": 60, "fuel": 3}, "rep": {"concord": 1}, "crew_hp": -5, "log": "log_barge_sorry"}},
+          {"weight": 70, "text": "You cut the net, slide the pallet apart, and Dunnage rolls out into the airlock like a friendly boulder. They eat your rations in a single happy sitting and ask for more. The Convoy pays handsomely for the return, and the net's tag says whose barge it was.", "effects": {"items": {"credits": 60, "fuel": 3}, "rep": {"concord": 1}, "crew_hp": -5, "log": "log_barge_sorry"}},
           {"weight": 30, "text": "You cut the net and the pallet shifts. A crate catches your arm. Dunnage hugs you in gratitude and cracks two ribs.", "effects": {"items": {"credits": 50, "fuel": 2}, "rep": {"concord": 1}, "crew_hp": -10, "log": "log_barge_sorry"}}
         ]},
         {"text": "Give Dunnage a snack first.", "outcomes": [
@@ -57,7 +57,7 @@
           {"weight": 100, "text": "Your Grundl picks up the pallet with one hand, tears the net with the other, and sets Dunnage on their feet. 'Cousin,' says Dunnage, solemn. 'You are very good at that.' The Convoy pays in cargo, hugs and a thousand sorries.", "effects": {"items": {"credits": 60, "fuel": 4, "missile": 2}, "rep": {"concord": 2}, "crew_hp": 5}}
         ]},
         {"text": "[Medbay] Check Dunnage over.", "requires": {"component": "medbay"}, "outcomes": [
-          {"weight": 100, "text": "Dunnage lies on the table, which creaks, and is checked over by your medic, who finds they are perfectly healthy and merely very hungry. The Convoy pays for the check-up with three barrels of soup and a tin of nanite paste.", "effects": {"items": {"credits": 50, "nanite_paste": 1}, "rep": {"concord": 1}, "crew_hp": 5}}
+          {"weight": 100, "text": "Dunnage lies on the table, which creaks, and is checked over by the drone, which finds they are perfectly healthy and merely very hungry. The Convoy pays for the check-up with three barrels of soup and a tin of nanite paste.", "effects": {"items": {"credits": 50, "nanite_paste": 1}, "rep": {"concord": 1}, "crew_hp": 5}}
         ]}
       ]
     },
@@ -66,7 +66,7 @@
       "text": "A wrecked barge, the Provision, sits broken-backed in the lane with her hold doors hanging open. Her manifest says CARGO: UNSPECIFIED. Her hold is a vast cavern, empty save for a single enormous crate in the middle with a note on it: DO NOT OPEN UNTIL ARRIVAL. The barge never arrived.",
       "choices": [
         {"text": "Open the crate.", "outcomes": [
-          {"weight": 50, "text": "The crate is full of tiny, tidy tins, each labelled EMERGENCY BISCUITS. They are forty years old and perfectly edible. The crew eat for a week. In the bottom: a lot of fuel cells.", "effects": {"items": {"fuel": 4, "polymer": 10}, "crew_hp": 15}},
+          {"weight": 50, "text": "The crate is full of tiny, tidy tins, each labelled EMERGENCY BISCUITS. They are forty years old and perfectly edible. You eat for a week. In the bottom: a lot of fuel cells.", "effects": {"items": {"fuel": 4, "polymer": 10}, "crew_hp": 15}},
           {"weight": 30, "text": "The crate is full of another crate, which is full of another crate. At the bottom, a note: WELL DONE. You get a small amount of scrap and a feeling of having been had.", "effects": {"items": {"scrap": 30}}},
           {"weight": 20, "text": "The crate is full of live shells, a Grundl's idea of a joke. Several go off.", "effects": {"items": {"scrap": 40, "missile": 2}, "crew_hp": -10, "hull": -10}}
         ]},
@@ -124,8 +124,8 @@
       "text": "Matriarch Gronn, convoy master, keeps a Slug Mortar on the nose of her barge: it throws a hundred-kilo slug a very long way and empties its racks in about ten shots. 'A hungry gun,' she says. 'It needs a crew that can fill it as fast as it eats. We are very quick at that.' She nods at a stack of slugs the size of ovens. 'Load twelve before the clock runs out, and the plans are yours.'",
       "choices": [
         {"text": "Load the slugs yourself.", "outcomes": [
-          {"weight": 40, "text": "You lift a slug. You drop it. You lift another. By the time the clock runs out you have got seven in, and a crew standing on the others. Gronn is a kind woman. 'Nobody gets twelve,' she says. 'Seven is very good for a person your size.' She hands you the plans.", "effects": {"crew_hp": -10, "flag": "tech_slug_mortar", "unlock": "ship_grundl_tow_rope"}},
-          {"weight": 60, "text": "Your whole crew form a chain, passing slugs hand to hand along the barge in a long cheerful line. Eleven in when the clock runs out. Gronn, laughing, hands you the plans anyway, 'for the chain'.", "effects": {"crew_hp": -5, "flag": "tech_slug_mortar", "unlock": "ship_grundl_tow_rope"}}
+          {"weight": 40, "text": "You lift a slug. You drop it. You lift another. By the time the clock runs out you have got seven in, and the drone standing on the others. Gronn is a kind woman. 'Nobody gets twelve,' she says. 'Seven is very good for a person your size.' She hands you the plans.", "effects": {"crew_hp": -10, "flag": "tech_slug_mortar", "unlock": "ship_grundl_tow_rope"}},
+          {"weight": 60, "text": "You and the drone form a chain, passing slugs hand to claw along the barge in a long cheerful line. Eleven in when the clock runs out. Gronn, laughing, hands you the plans anyway, 'for the chain'.", "effects": {"crew_hp": -5, "flag": "tech_slug_mortar", "unlock": "ship_grundl_tow_rope"}}
         ]},
         {"text": "[Grundl] Load the slugs.", "requires": {"species": "grundl"}, "outcomes": [
           {"weight": 100, "text": "Your Grundl lifts the first slug with one hand, the second with the other, and sets about it as if tidying a shelf. Twelve in eight minutes. Gronn applauds with enormous hands. She hands over the plans, the first slug and a signed picture of herself.", "effects": {"items": {"credits": 40, "missile": 3}, "rep": {"concord": 1}, "flag": "tech_slug_mortar", "unlock": "ship_grundl_tow_rope"}}
