@@ -235,6 +235,7 @@ func test_a_death_leaves_the_crew_the_stations_and_the_jobs_and_stays_dead() -> 
 
 func test_a_dead_ada_is_not_respawned_either() -> void:
 	var ship: Ship = Ship.from_design("res://data/ships/starter_courier.json")
+	ship.crew_plan = [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}]  # (Ada found in her pod)
 	Jobs.spawn_crew(ship)
 	var ada: CrewMember = ship.crew.filter(func(m): return m.name == "Ada")[0]
 	_down(ada).down_t = 44.5
