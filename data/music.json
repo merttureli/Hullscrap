@@ -1,0 +1,16 @@
+{
+ "dir": "res://assets/audio/music/",
+ "states": {
+  "menu": [
+   "menu.ogg"
+  ],
+  "explore": [],
+  "combat": [],
+  "hollow": [],
+  "build": []
+ },
+ "stings": {},
+ "volumes": {
+  "menu.ogg": 0.0
+ }
+}

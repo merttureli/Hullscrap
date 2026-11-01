@@ -1638,3 +1638,16 @@ Source and licence of every art and audio file in the repo.
 | `art/ui/tooltip.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/ui/tooltip.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `tests/fixtures/art/**` (tiny test images and JSON, every kind) | original, made for Hullscrap (hand-generated, 2-5 px) | project-owned |
+| `assets/audio/music/ada_found.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/build.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/combat.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/defeat.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/ending.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/explore_a.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/explore_b.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/hollow.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/jump.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/menu.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/region_cross.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/unlock.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/victory.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |

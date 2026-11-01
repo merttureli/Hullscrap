@@ -1,0 +1,27 @@
+{
+ "menu": {
+  "bands_pct": [
+   20.8,
+   36.0,
+   37.6,
+   4.4,
+   1.2
+  ],
+  "bpm": 72.0,
+  "bytes": 1998470,
+  "peak_db": -4.53,
+  "rms_db": -18.0,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.23371,
+   "rms_first_db": -22.0,
+   "rms_last_db": -20.1,
+   "seam_step": 0.01584,
+   "typ_step_p999": 0.10882
+  },
+  "seconds": 120.0,
+  "target_rms_db": -18.0,
+  "title": "Ma's Ledger",
+  "true_peak_db": -4.53
+ }
+}
