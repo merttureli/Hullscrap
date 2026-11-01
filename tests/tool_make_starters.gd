@@ -7,7 +7,7 @@ extends SceneTree
 ## arcs: never stair-steps), the bulkheads that cut the inside into rooms, doors, parts and plating
 ## (local coordinates, the top-left corner of the outline's bounding box is 0,0). It is built through
 ## BuildSession.apply, wired by a cheap router, then exported with Ship.to_dict(). The hull is the
-## bounding box plus MARGIN cells, and the ship sits in the middle of the 63x63 grid. Prints a map
+## bounding box plus MARGIN cells, and the ship sits in the middle of its grid (63x63, a starter's 83x83). Prints a map
 ## (shaped cells as triangles, arcs as o) and the stats of every ship, and fails when a floor cell
 ## cannot be reached by a crew body from the helm.
 ## A weapon or engine is a hull mount (docs/CONTENT.md 4f): its entry is [id, x, y, rot] with x, y the
@@ -29,11 +29,12 @@ const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const HullOutline = preload("res://scripts/ship/hull_outline.gd")
 
-const GRID := Vector2i(63, 63)
+const GRID := Vector2i(63, 63)  ## the grid of the pirate, and the limit a starter's authored frame outline is grown within
+const START_GRID := Vector2i(83, 83)  ## the grid of a starter: its round build area (DISC_R) plus 3 cells at the edge for the outside half of a mount
 const MARGIN := 2
 const MAX_FILL := 0.84  ## a grown frame stays a silhouette: its cells over its box (tests/test_starter_ships.gd wants under 85%)
 const FRAME_GROWTH := 0.15  ## P4: a starter's frame is grown by about this share of its area (the built core stays as it is)
-const DISC_R := 29.0  ## B1: the build area of a starter is a disc of this radius in cells, centred on the grid (the edge keeps room for the outside half of a mount)
+const DISC_R := 38.0  ## B1: the build area of a starter is a disc of this radius in cells, centred on its grid (START_GRID)
 const OUT_DIR := "res://data/ships/"
 const SIDES: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
 ## Who starts aboard: the soldier alone (playtest 2, A1). Ada is found in a distress pod (data/packs/start_alone), the rest are hired or met.
@@ -325,15 +326,16 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 
 	var defs := TileDefs.new()
 	defs.load_file(Ship.TILES_PATH)
-	var ship := Ship.new(name, ShipGrid.new(GRID, defs))
+	var grid_size := START_GRID if spec.has("frame") else GRID
+	var ship := Ship.new(name, ShipGrid.new(grid_size, defs))
 	var g: ShipGrid = ship.grid
-	for y in GRID.y:
-		for x in GRID.x:
+	for y in grid_size.y:
+		for x in grid_size.x:
 			g.hull[Vector2i(x, y)] = true  # the real hull is set at the end
 	ship.inventory.load_dict(STOCK)
 	for p in spec["parts"]:
 		ship.inventory.add(p[0], 1)
-	var off: Vector2i = (GRID - (hi - lo + Vector2i.ONE)) / 2 - lo
+	var off: Vector2i = (grid_size - (hi - lo + Vector2i.ONE)) / 2 - lo
 	var session := BuildSession.new(ship)
 
 	var cells: Array = skin.keys()
@@ -358,7 +360,7 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 
 	_wire(ship, session, spec)
 
-	var blo := Vector2i(GRID)
+	var blo := Vector2i(grid_size)
 	var bhi := Vector2i.ZERO
 	var all: Array = g.tiles.keys() + ship.cables.cells.keys()
 	for uid in ship.components.instances:
@@ -371,7 +373,7 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 	if frame.is_empty():
 		blo -= Vector2i(MARGIN, MARGIN)
 		bhi += Vector2i(MARGIN, MARGIN)
-		if blo.x < 0 or blo.y < 0 or bhi.x >= GRID.x or bhi.y >= GRID.y:
+		if blo.x < 0 or blo.y < 0 or bhi.x >= grid_size.x or bhi.y >= grid_size.y:
 			_fail(name + ": the hull does not fit the grid")
 		for y in range(blo.y, bhi.y + 1):
 			for x in range(blo.x, bhi.x + 1):
@@ -577,7 +579,7 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 	var g: ShipGrid = ship.grid
 	var glyph := {"reactor": "R", "engine": "E", "oxygen": "O", "shield": "S", "weapon": "W", "helm": "H", "bed": "B", "fabricator": "F", "radiator": "i"}
 	var tile_glyph := {"floor": ".", "wall": "#", "door": "D", "scrap_plate": "s", "titanium_alloy": "T", "reflective_coating": "x", "ram_plating": "r", "whipple_spacer": "p", "neon_lattice": "n", "heavy_armor": "h", "ablative_plating": "a"}
-	var lo := Vector2i(GRID)
+	var lo := Vector2i(g.size)
 	var hi := Vector2i.ZERO
 	var cells: Array = g.tiles.keys()
 	for uid in ship.components.instances:
@@ -625,7 +627,7 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 	arena.add_ship(ship)
 	var co = arena.ships[0]
 	var sealed: bool = ship.atmosphere.rooms.all(func(r): return r["sealed"])
-	var tlo := Vector2i(GRID)
+	var tlo := Vector2i(g.size)
 	var thi := Vector2i.ZERO
 	var area := 0.0
 	for c in g.tiles:

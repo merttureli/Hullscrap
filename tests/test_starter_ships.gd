@@ -1,7 +1,7 @@
 extends "res://tests/base_test.gd"
 ## Every starter ship of the hangar (docs/CONTENT.md 19): the three first ones (data/ships/starter_*.json) and the
 ## ships of the packs (the seven event starters and the two ships of each race of data/packs/starters_2/). Each
-## loads, sits in the middle of the 63x63 grid on a big hull frame (docs/CONTENT.md 4c, "Start with very little")
+## loads, sits in the middle of the 83x83 grid on a big hull frame (docs/CONTENT.md 4c, "Start with very little")
 ## with only the essentials built (at most 10 parts) and most of the frame empty to build in, is wired, sealed,
 ## connected, can fly, has its gun and engines mounted through its walls, a shield in the hold and the rest of a
 ## working ship, and runs for minutes without overheating. The pack's ships also have their unlock, a crew of
@@ -29,12 +29,12 @@ const PATHS := {
 }
 const PIRATE := "res://data/ships/pirate_raider.json"
 const MAX_COVER := 3  ## tiles between a gun and open space: a wall, a plate, one more at most
-const FRAME_R := 29  ## playtest 2, B1: every starter's frame is a disc of this radius in cells round the middle of the grid
-const FRAME_MID := Vector2i(31, 31)  ## the centre cell of the 63x63 grid
+const FRAME_R := 38  ## playtest 2, B1: every starter's frame is a disc of this radius in cells round the middle of the grid
+const FRAME_MID := Vector2i(41, 41)  ## the centre cell of the 83x83 grid (radius 38 and 3 cells at the edge for the outside half of a mount)
 const MAX_FILL := 0.85  ## the frame's cells over the cells of its box: a silhouette, not a rectangle (test_ship_silhouettes.gd)
 const MIN_SHAPED := 4  ## slopes or curves on the built hull
-const MIN_FRAME := 2600  ## cells of the hull frame: a disc of radius 29 is 2629 cells
-const MAX_FRAME := 2700
+const MIN_FRAME := 4500  ## cells of the hull frame: a disc of radius 38 is 4513 cells
+const MAX_FRAME := 4600
 const MAX_PARTS := 10  ## placed components: the essentials only
 const MIN_EMPTY := 0.5  ## at least this share of the frame is empty hull (no tile, no outside half of a mount)
 const MIN_HULL_INTEGRITY := 150.0  ## every starter has real armour on its outer hull (arena.gd: 20 + 2 per plated cell)
@@ -124,7 +124,7 @@ func test_each_starter_loads() -> void:
 		if ship == null:
 			continue
 		eq(ship.name, key, key + " keeps its name")
-		eq(ship.grid.size, Vector2i(63, 63), key + " sits in a 63x63 grid")
+		eq(ship.grid.size, Vector2i(83, 83), key + " sits in an 83x83 grid")
 		check(ship.grid.tiles.size() > 200 and ship.components.instances.size() >= 8, key + " is a built ship")
 		var d = JSON.parse_string(FileAccess.get_file_as_string(_all()[key]))
 		check(str(d.get("blurb", "")).length() > 30, key + " has a one-line character")
@@ -144,7 +144,7 @@ func test_the_hull_is_a_big_frame_in_the_middle_that_holds_everything_built() ->
 		check(ship.grid.hull.has(b[0]) and ship.grid.hull.has(b[1]), key + ": the frame holds the built ship, outside halves of the mounts included")
 		check(_built(ship).all(func(c): return ship.grid.hull.has(c)), key + ": every tile, cable and part is on the frame")
 		var centre := Vector2(lo + hi + Vector2i.ONE) / 2.0
-		check((centre - Vector2(31.5, 31.5)).length() <= 1.0, "%s: the frame is centred in the grid (%s)" % [key, str(centre)])
+		check((centre - Vector2(41.5, 41.5)).length() <= 1.0, "%s: the frame is centred in the grid (%s)" % [key, str(centre)])
 		var box := (hi - lo + Vector2i.ONE)
 		check(ship.grid.hull.size() < 0.9 * box.x * box.y, "%s: the frame is a silhouette, not a rectangle (%d of %d cells)" % [key, ship.grid.hull.size(), box.x * box.y])
 		check(ship.grid.hull.size() >= MIN_FRAME and ship.grid.hull.size() <= MAX_FRAME, "%s: a frame of %d cells (%d to %d wanted)" % [key, ship.grid.hull.size(), MIN_FRAME, MAX_FRAME])
@@ -159,7 +159,7 @@ func _built(ship: Ship) -> Array:
 	return built
 
 
-func test_every_starter_frame_is_a_disc_of_radius_29_that_holds_every_built_cell() -> void:  # playtest 2, B1: the build area is round, so any shape is possible
+func test_every_starter_frame_is_a_disc_of_radius_38_that_holds_every_built_cell() -> void:  # playtest 2, B1: the build area is round, so any shape is possible
 	for key in _all():
 		var ship := _ship(key)
 		var g = ship.grid
