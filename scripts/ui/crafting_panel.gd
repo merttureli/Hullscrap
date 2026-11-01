@@ -17,11 +17,12 @@ const Workshop = preload("res://scripts/craft/workshop.gd")
 const Processing = preload("res://scripts/craft/processing.gd")
 const Describe = preload("res://scripts/ui/describe.gd")
 const Content = preload("res://scripts/data/content.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const STATION_IDS: Array[String] = ["fabricator", "smelter"]  ## the tabs, in order
 const CATEGORIES: Array[String] = ["system", "gear", "material", "module"]
 const CATEGORY_NAMES := {"system": "Systems", "gear": "Gear", "material": "Materials", "module": "Modules"}
-const BLUEPRINT_HELP := "Blueprint needed: scan a salvaged part, or find it in events and stores"
+const BLUEPRINT_HELP := "Needs a blueprint"
 const MARGIN := 40.0
 const TITLE_H := 56.0
 const CARGO_H := 96.0
@@ -53,6 +54,9 @@ var message_bad := false
 var hover_row := -1  ## index into rows()
 var hover_job := -1
 var help_open := false  ## the middle column shows how crafting works, not the selected recipe
+var hover_kw := {}  ## the keyword chip under the mouse in the description ({} for none), and its rect
+var hover_rect := Rect2()
+var chips_at := []  # the description's chips as drawn: [[Rect2, keyword]]
 var _ids_cache: Array[String] = []  # recipe_ids() for _ids_key: it is asked for many times a frame
 var _ids_key := ""
 
@@ -287,6 +291,11 @@ func _gui_input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion:
 		hover_row = row_at(e.position)
 		hover_job = job_at(e.position)
+		hover_kw = {}
+		for c in chips_at:
+			if c[0].has_point(e.position):
+				hover_kw = c[1]
+				hover_rect = c[0]
 	elif e is InputEventMouseButton and e.pressed:
 		match e.button_index:
 			MOUSE_BUTTON_LEFT:
@@ -481,7 +490,7 @@ func _draw_tabs() -> void:
 		_text(str(Crafting.STATIONS[STATION_IDS[i]]), r.position + Vector2(0.0, 22.0), 16, TEXT if on else DIM_TEXT, r.size.x, HORIZONTAL_ALIGNMENT_CENTER)
 
 
-## The recipe under the cursor, described: what its output does, its stats, what its type means, the lore.
+## The recipe under the cursor, described (describe.gd): what its output does, its keywords, its stats, one line of lore.
 func described() -> Dictionary:
 	var s = ship()
 	if s == null or selected == "":
@@ -492,14 +501,16 @@ func described() -> Dictionary:
 ## How crafting works, a paragraph each (the "?" box).
 func help_lines() -> Array[String]:
 	return [
-		"Pick a recipe (click it, or Up / Down and Enter). Its materials leave the cargo and the job joins the queue of its station.",
-		"The fabricator builds parts, gear and modules. It needs power, and workshop modules in its room raise its level. The smelter turns scrap and ore into refined materials; a crew member at it works %d%% faster. Tab switches between them." % roundi(Processing.manned_speed() * 100.0),
-		"When a job ends, the part lands in the hold. Place it from the build palette (B). Click a queued job to cancel it and get the materials back.",
-		"Dimmed recipes need a blueprint: scan a salvaged part, or find it in events and stores. The build palette lists only parts you hold or have a blueprint for.",
+		"Click a recipe (or Up/Down, Enter) to queue it. Its materials leave the cargo.",
+		"Fabricator: parts, gear, modules. Needs power. Workshop modules in its room raise its level.",
+		"Smelter (Tab): scrap and ore into refined materials. A crew member at it adds %d%% speed." % roundi(Processing.manned_speed() * 100.0),
+		"Finished parts land in the hold: place them from the build palette (B). Click a queued job to cancel it.",
+		"Dimmed recipes need a blueprint: scan salvage, or find one in events and stores.",
 	]
 
 
 func _draw_details() -> void:
+	chips_at = []
 	var r := details_rect()
 	_panel(r, ROW_BG)
 	var x := r.position.x + 12.0
@@ -517,24 +528,27 @@ func _draw_details() -> void:
 	_text(_name(selected).to_upper(), r.position + Vector2(12.0, 24.0), 15, AMBER)
 	var y := r.position.y + 38.0
 	var limit := r.end.y - 10.0
-	if d["does"] != "":
-		y += _para(d["does"], Vector2(x, y), w, 14, TEXT) + 8.0
-	for row in d["rows"]:
+	if d["what"] != "":
+		y += _para(d["what"], Vector2(x, y), w, 14, TEXT) + 8.0
+	if not d["keywords"].is_empty():
+		var lay := UiKit.chip_layout(d["keywords"], Vector2(x, y), w, 11)
+		for c in lay:
+			UiKit.keyword_chip(self, c[0], c[1], 11, c[1] == hover_kw)
+		chips_at = lay
+		y += lay[lay.size() - 1][0].end.y - y + 10.0
+	for row in d["stats"]:
 		if y > limit:
 			return
 		_text(str(row[0]), Vector2(x, y + 13.0), 13, DIM_TEXT)
 		y += _para(str(row[1]), Vector2(x + 84.0, y), w - 84.0, 13, TEXT) + 1.0
-	y += 6.0
-	for line in d["kinds"]:
-		if y > limit:
-			return
-		y += _para(line, Vector2(x, y), w, 13, TEXT) + 4.0
-	for line in d["notes"]:
-		if y > limit:
-			return
-		y += _para(line, Vector2(x, y), w, 13, AMBER) + 4.0
 	if y <= limit and d["lore"] != "":
-		_para(d["lore"], Vector2(x, y + 4.0), w, 13, DIM_TEXT)
+		_para(d["lore"], Vector2(x, y + 8.0), w, 13, DIM_TEXT)
+	if not hover_kw.is_empty():
+		var lines := UiKit.wrap(hover_kw["hover"], w - 16.0, 12)
+		var tw := 16.0
+		for l in lines:
+			tw = maxf(tw, UiKit.text_width(l, 12) + 16.0)
+		UiKit.note(self, lines, Vector2(minf(hover_rect.position.x, r.end.x - 8.0 - tw), hover_rect.end.y + 4.0), hover_kw["color"])
 
 
 ## Draw `text` wrapped to `width` with its top at `at`; returns its height.
@@ -643,7 +657,7 @@ func _draw_smelter(s, st: Dictionary) -> void:
 	_text(status, box.position + Vector2(10.0, 54.0), 22, col)
 	var tools: Array = st["tools"]
 	if int(st["level"]) > 0:
-		var speed := "Speed x%s, %s" % [str(snappedf(float(st["speed"]), 0.01)), "manned" if st["manned"] else "unmanned: a crew member at the smelter adds %d%%" % roundi(Processing.manned_speed() * 100.0)]
+		var speed := "Speed x%s, %s" % [str(snappedf(float(st["speed"]), 0.01)), "manned" if st["manned"] else "unmanned (+%d%% with crew)" % roundi(Processing.manned_speed() * 100.0)]
 		_text(speed, box.position + Vector2(10.0, 78.0), 14, TEXT)
 		var heat := ""
 		var lead := int(st["uid"])
@@ -652,7 +666,7 @@ func _draw_smelter(s, st: Dictionary) -> void:
 			heat = "   Heat %d%%" % roundi(float(inst["heat"]) / maxf(1.0, float(s.effective(inst["id"])["heat_limit"])) * 100.0)
 		_text("Tools: %s   Smelters: %d%s" % [", ".join(tools) if not tools.is_empty() else "none", st["count"], heat], box.position + Vector2(10.0, 100.0), 14, TEXT)
 	else:
-		draw_multiline_string(ThemeDB.fallback_font, box.position + Vector2(10.0, 78.0), "Build and wire a Slag Pot or a Smelter (Utility tab), and put a radiator beside it: it runs hot.", HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 20.0, 14, 3, DIM_TEXT)
+		draw_multiline_string(ThemeDB.fallback_font, box.position + Vector2(10.0, 78.0), "No smelter. Build one (Utility tab) with a radiator beside it.", HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 20.0, 14, 3, DIM_TEXT)
 
 
 func _draw_queue(s) -> void:
@@ -686,7 +700,7 @@ func _draw_cargo(s) -> void:
 	var r := cargo_rect()
 	_panel(r, ROW_BG)
 	_text("CARGO", r.position + Vector2(10.0, 24.0), 15, AMBER)
-	_text("C / Esc close    ?: how it works    Tab: fabricator / smelter    Up Down select    Enter or click a recipe: craft    click a job: cancel    U: debug unlock a blueprint    wheel: scroll",
+	_text("C/Esc close   ?: help   Tab: station   Up/Down, Enter: craft   Click a job: cancel   Wheel: scroll",
 		r.position + Vector2(10.0, r.size.y - 10.0), 13, DIM_TEXT)
 	var x := r.position.x + 90.0
 	var y := r.position.y + 24.0

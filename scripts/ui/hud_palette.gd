@@ -9,17 +9,18 @@ extends Control
 const Palette = preload("res://scripts/build/palette.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
+const Describe = preload("res://scripts/ui/describe.gd")
 
 const PAD := 14.0
 const TAB_H := 38.0
 const TAB_GAP := 4.0
 const HEAD_H := 30.0
-const CARD_H := 104.0
+const CARD_H := 112.0
 const GAP := 8.0
 const COLS := 2
 const SCROLL_STEP := 54.0
 const GREY := Color(0.07, 0.09, 0.12, 0.62)
-const EMPTY_TEXT := "Nothing here yet: craft or salvage parts. The crafting menu (C) lists everything you could still make."
+const EMPTY_TEXT := "Nothing here. Craft parts at the Fabricator (C)."
 
 var hud: Control
 var list: Control  ## the clipped grid of cards
@@ -229,6 +230,11 @@ func draw_card(cv: CanvasItem, e: Dictionary, r: Rect2, selected: bool, hot: boo
 	_draw_price(cv, e, Vector2(r.end.x - 10.0, r.end.y - 12.0))
 	if not e["ok"]:
 		cv.draw_rect(r.grow(-3), GREY)
+	if e["kind"] == "part":  # a weapon's kind in its colour (and AUTO for a turret) under the name, bright even when greyed
+		var tx := x
+		for k in Describe.weapon_tags(e["id"]):
+			UiKit.text(cv, k["label"], Vector2(tx, r.position.y + 87.0), 11, k["color"], HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
+			tx += UiKit.text_width(k["label"], 11, UiKit.bold()) + 8.0
 
 
 ## Right-aligned at `right` (its baseline): how many are held for a part, else each material of the cost with its icon.

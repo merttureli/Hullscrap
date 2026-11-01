@@ -29,12 +29,6 @@ const UTILITY_FAMILIES: Array[String] = ["intake", "radar", "tractor", "shield",
 const BAR_IDS: Array[String] = ["scrap", "copper", "polymer", "titanium", "silicon", "crystal", "credits", "fuel"]
 const LINE_ORDER: Array[String] = ["standard", "scrap", "neon"]
 const LINE_NAMES := {"scrap": "Scrap", "standard": "Standard", "neon": "Neon", "unique": "Unique"}
-const TILE_QUIRKS := {
-	"ablative": "Ablative: every energy hit takes 1 from its max hp",
-	"lattice_power": "Lattice: part of the energy it absorbs becomes ship power",
-	"ram": "Ram plating: deals x%s ram damage in a collision and takes x%s",
-}
-const DIRS: Array[String] = ["up", "right", "down", "left"]
 
 
 ## The tab a component def belongs on.
@@ -133,7 +127,7 @@ static func belt_entry(ship) -> Dictionary:
 		"size": Vector2i.ONE, "out_size": Vector2i.ZERO, "power": 0, "cost": Belts.cost(), "count": 0}, ship)
 	if not Ammo.belts_unlocked(ship):
 		e["ok"] = false
-		e["why"] = "needs a belt drive"
+		e["why"] = "Needs a belt drive first"
 	return e
 
 
@@ -150,8 +144,8 @@ static func part_entry(ship, id: String) -> Dictionary:
 ## Why a part that is not held cannot be placed: where to craft it, or that it has no blueprint here.
 static func _not_held(ship, id: String) -> String:
 	if ship.crafting.is_known(id):
-		return "0 held, craft at the %s (C)" % str(Crafting.STATIONS.get(ship.crafting.station_of(id), "fabricator")).to_lower()
-	return "none held, and the blueprint is not known"
+		return "Craft at %s (C)" % str(Crafting.STATIONS.get(ship.crafting.station_of(id), "Fabricator"))
+	return "Blueprint not known"
 
 
 
@@ -214,38 +208,40 @@ static func size_text(s: Vector2i) -> String:
 	return "%dx%d" % [s.x, s.y]
 
 
-## What the selection card says about card `e` on `ship`: {title, line (its name), tier, does (a part's sentence), rows ([label, value]),
-## kinds (what its type means, lines), quirk, abilities (lines), blurb, recipe, place}. `rot`: the quarter turns the tool has now (a mount's facing).
+## What the selection card says about card `e` on `ship`: {title, line (its name), tier, what (one short line), stats ([label,
+## value]), keywords (describe.gd keyword(): label, colour, hover), lore (one sentence), cost ({id: n}), per ("a cell" for
+## cable and belt), level (the fabricator level it needs), note (red: why it can't be placed, else "")}. `rot`: the quarter turns
+## the tool has now (an engine's push).
 static func info(e: Dictionary, ship, rot := 0) -> Dictionary:
-	var out := {"title": e["name"], "line": LINE_NAMES.get(e["line"], str(e["line"]).capitalize()), "tier": e["tier"], "rows": [],
-		"does": "", "kinds": [], "quirk": "", "abilities": [], "blurb": "", "recipe": "", "place": ""}
+	var out := {"title": e["name"], "line": LINE_NAMES.get(e["line"], str(e["line"]).capitalize()), "tier": e["tier"], "what": "",
+		"stats": [], "keywords": [], "lore": "", "cost": {}, "per": "", "level": 0, "note": ""}
+	var words: Dictionary = Describe.data()["tiles"]
 	match e["kind"]:
 		"part":
-			_part_info(out, e, ship, rot)
+			var d := Describe.of(e["id"], ship, rot)
+			for k in ["what", "stats", "keywords", "lore", "cost", "level"]:
+				out[k] = d[k]
+			out["note"] = "" if e["ok"] else str(e["why"])
 		"item":
-			var d: Dictionary = Content.entry("items", e["id"])
-			if d.is_empty():
-				d = Content.entry("materials", e["id"])
-			out["line"] = str(d.get("kind", d.get("rarity", "cargo"))).replace("_", " ").capitalize()
-			out["rows"] = [["In cargo", str(e["count"])]]
-			out["does"] = Describe.of(e["id"], ship)["does"]
-			out["blurb"] = str(d.get("blurb", ""))
-			out["recipe"] = cost_text(ship.crafting.def(e["id"]).get("materials", {})) if ship.crafting.has(e["id"]) else ""
-			out["place"] = "Not placed on the ship: it is spent by weapons, crafting or the crew, or sold at a station."
-		"cable":
-			out["rows"] = [["Size", "1x1 per cell"], ["Cost", cost_text(e["cost"]) + " a cell"]]
-			out["blurb"] = "Carries power from the reactors to the systems. Each joined run of cable is one network."
-			out["place"] = "Anywhere in the hull, under floors and systems. Drag to lay a run; every system needs a cable to a reactor."
-		"belt":
-			out["rows"] = [["Size", "1x1 per cell"], ["Cost", cost_text(e["cost"]) + " a cell"]]
-			out["blurb"] = "A conveyor floor. Joined cells are a network; a powered belt drive moves ammo along it from racks to the guns it touches."
-			out["place"] = "On floor and doors, never under a system. A rack, gun or drive must have a belt cell against its edge. Drag to lay a run." if Ammo.belts_unlocked(ship) else "Locked: it comes with your first belt drive, a part found or traded for (Rusthold, Meridian and Prism sell them)."
+			var d := Describe.of(e["id"], ship)
+			for k in ["what", "lore", "cost", "level"]:
+				out[k] = d[k]
+			var it: Dictionary = Content.entry("items", e["id"])
+			if it.is_empty():
+				it = Content.entry("materials", e["id"])
+			out["line"] = str(it.get("kind", it.get("rarity", "cargo"))).replace("_", " ").capitalize()
+		"cable", "belt":
+			out["what"] = words[e["kind"]]
+			out["stats"] = [["Size", "1\u00d71"]]
+			out["cost"] = e["cost"]
+			out["per"] = "a cell"
+			out["note"] = "" if e["kind"] == "cable" or Ammo.belts_unlocked(ship) else str(e["why"])
 		_:
-			_tile_info(out, e, ship)
+			_tile_info(out, e, ship, words)
 	return out
 
 
-static func _tile_info(out: Dictionary, e: Dictionary, ship) -> void:
+static func _tile_info(out: Dictionary, e: Dictionary, ship, words: Dictionary) -> void:
 	var g = ship.grid
 	var def: Dictionary = g.defs.get_def(e["id"])
 	var area := 1.0
@@ -253,9 +249,9 @@ static func _tile_info(out: Dictionary, e: Dictionary, ship) -> void:
 		area = 0.0
 		for pc in Shapes.piece_cells(e["piece"], Vector2i.ZERO):
 			area += Shapes.area_of(pc)
-	var rows := [["Size", size_text(e["size"])], ["Cost", cost_text(e["cost"])]]
+	var rows := [["Size", "%d\u00d7%d" % [e["size"].x, e["size"].y]]]
 	if def.has("hp"):
-		rows.append(["HP", num(float(def["hp"]) * area) + (" over %d cells" % Shapes.piece_cells(e["piece"], Vector2i.ZERO).size() if e["kind"] == "piece" else "")])
+		rows.append(["HP", num(float(def["hp"]) * area)])
 	if def.has("mass"):
 		rows.append(["Mass", num(float(def["mass"]) * area)])
 	for k in ["resist", "deflect"]:
@@ -265,49 +261,9 @@ static func _tile_info(out: Dictionary, e: Dictionary, ship) -> void:
 			for t in d:
 				parts.append("%s x%s" % [t, num(float(d[t]))] if k == "resist" else "%s %d%%" % [t, roundi(float(d[t]) * 100.0)])
 			rows.append(["Resists" if k == "resist" else "Deflects", ", ".join(parts)])
-	out["rows"] = rows
+	out["stats"] = rows
+	out["cost"] = e["cost"]
 	var q := str(def.get("quirk", ""))
-	if TILE_QUIRKS.has(q):
-		out["quirk"] = TILE_QUIRKS[q] % [num(float(def.get("ram_deal", 1.0))), num(float(def.get("ram_take", 1.0)))] if q == "ram" else TILE_QUIRKS[q]
-	if e["kind"] == "piece":
-		out["blurb"] = "A shaped piece of %s: hp, mass and cost scale with its solid area." % def.get("name", e["id"])
-		out["place"] = "Top-left cell on the mouse. R turns it, Shift+R mirrors it, T picks the next shape."
-	elif def.get("door", false):
-		out["blurb"] = "Two cells wide, so a crew member fits through. Opens for the crew and closes behind them."
-		out["place"] = "In a straight wall, with wall at both ends. R flips it across. E opens and closes it."
-	elif def.get("solid", false):
-		out["place"] = "Inside the hull. Ctrl+drag a rectangle to build a room: walls round it, floor inside. T shapes it."
-	else:
-		out["blurb"] = "Crew walk on it and systems stand on it. Rooms fill with air."
-		out["place"] = "Inside the hull. Drag to paint, Shift+drag a line, Ctrl+drag a rectangle."
-
-
-static func _part_info(out: Dictionary, e: Dictionary, ship, rot: int) -> void:
-	var def: Dictionary = ship.components.def(e["id"])
-	var d := Describe.of(e["id"], ship, rot)  # what it does, the stats, what its type means, the lore
-	out["does"] = d["does"]
-	out["rows"] = d["rows"]
-	out["kinds"] = d["kinds"]
-	out["quirk"] = " ".join(d["notes"])
-	out["blurb"] = d["lore"]
-	for a in def.get("abilities", []):
-		if str(a.get("type", "")) == "passive":
-			out["abilities"].append("%s (passive)" % a.get("name", a.get("id", "")))
-		else:
-			out["abilities"].append("%s: %s key, %s s, rests %s s" % [a.get("name", a.get("id", "")), a.get("key", "?"), num(float(a.get("duration", 0))), num(float(a.get("cooldown", 0)))])
-	out["recipe"] = _recipe_text(ship, e["id"], def)
-	if Mounts.is_mount(def):
-		var o := Mounts.turned(def["mount"]["outside"], rot)
-		out["place"] = "Hull mount: outside half %dx%d, pointing %s: put it in space against a flat outer wall. The inside half goes on the floor behind it. R turns it." % [o.x, o.y, DIRS[posmod(rot, 4)]]
-	else:
-		out["place"] = "On floor inside the hull, clear of other systems. R turns it. Wire it to a reactor with cable."
-
-
-static func _recipe_text(ship, id: String, def: Dictionary) -> String:
-	var r: Dictionary = ship.crafting.def(id)
-	if r.is_empty():
-		return "No recipe: found, bought or earned" if def.get("unique", false) else "No recipe"
-	var t := "%s, %s level %d" % [cost_text(r.get("materials", {})), str(Crafting.STATIONS.get(ship.crafting.station_of(id), "fabricator")).to_lower(), int(r.get("fab_level", 1))]
-	if not r.get("tools", []).is_empty():
-		t += ", tools: " + ", ".join(r["tools"])
-	return t + ("" if ship.crafting.is_known(id) else " (blueprint not known)")
+	if Describe.data()["keywords"].has(q):
+		out["keywords"].append(Describe.keyword(q, {"deal": float(def.get("ram_deal", 1.0)), "take": float(def.get("ram_take", 1.0))}))
+	out["what"] = words["piece"] if e["kind"] == "piece" else (words["door"] if def.get("door", false) else (words["wall"] if def.get("solid", false) else words["floor"]))

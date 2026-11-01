@@ -41,7 +41,7 @@ const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
-const HINT := "mouse steers   W/S throttle   A/D strafe   T turrets auto   LMB group 1   RMB group 2   1-9 single weapon   Shift engine   Space shield   Q utility   Esc leave"
+const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB weapon groups   1-9 one weapon   T turrets   Shift engine   Space shield   Q utility   Esc leave"
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
 const WRECK_LINGER := 3.0  ## seconds a decided sector fight goes on showing its end before it ends by itself
@@ -285,7 +285,7 @@ func _unhandled_input(e: InputEvent) -> void:
 		if not active:
 			if e.keycode == KEY_K and not e.ctrl_pressed and build != null:
 				if build.build_on:
-					build.message = "K: switch to play mode (B) to fight"
+					build.message = "Press B for play mode, then K to fight"
 				else:
 					var why := enter(Session.RAMMER_PATH if e.shift_pressed else Session.PIRATE_PATH)  # Shift+K: the Rustfang rammer
 					if why != "":
@@ -298,14 +298,14 @@ func _unhandled_input(e: InputEvent) -> void:
 				if session.can_leave():
 					leave()
 				else:
-					_say("Cannot disengage: wreck the enemy, get %d px away, or press J to spool the jump drive" % Session.LEAVE_DISTANCE)
+					_say("Can't leave: wreck them, get %d px away, or press J to jump" % Session.LEAVE_DISTANCE)
 			KEY_J when in_sector:
 				if build != null and build.get("drift") != null:
 					build.drift.open()  # pick where to: the jump drive spools there (map_view.gd click_node)
 			KEY_J:
 				var why_jump: String = session.start_jump()
 				var held: String = session.jump_hold()
-				_say(why_jump if why_jump != "" else (held if held != "" else "Jump drive spooling: %d s. Stay alive" % int(Session.JUMP_SPOOL)))
+				_say(why_jump if why_jump != "" else (held if held != "" else "Jumping in %d s. Stay alive" % int(Session.JUMP_SPOOL)))
 			KEY_R:
 				restart()
 			KEY_Y:

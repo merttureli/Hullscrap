@@ -429,7 +429,7 @@ func test_the_palette_has_a_belt_card_only_once_a_drive_has_taught_the_blueprint
 	eq(belt["cost"], {"scrap": 1}, "1 scrap")
 	check(belt["ok"], "unlocked with a drive aboard")
 	var info := Palette.info(belt, ship)
-	check(String(info["blurb"]).length() > 0 and info["rows"].size() >= 2, "the selection card says something")
+	check(String(info["what"]).length() > 0 and info["stats"].size() >= 1 and info["cost"] == {"scrap": 1}, "the selection card says something")
 
 
 func test_the_belt_tool_in_build_mode() -> void:
