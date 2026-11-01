@@ -428,6 +428,7 @@ func test_a_chain_has_room_in_its_stage_windows() -> void:
 	var chains := {
 		"haven": ["anomaly_haven_ghost_first", "distress_haven_lantern_blind", "wreck_field_haven_relay_log", "station_haven_signals_desk", "distress_haven_fig_skiff", "anomaly_haven_bearings_cross", "empty_haven_lantern_reach"],
 		"haven lure": ["anomaly_haven_ghost_first", "distress_haven_lantern_blind", "wreck_field_haven_clean_shrine", "station_haven_signals_desk", "distress_haven_voice_beacon", "anomaly_haven_bearings_cross", "empty_haven_lantern_reach_wrong"],
+		"haven (Ada)": ["ada_hears_loop", "ada_halcyon", "anomaly_haven_bearings_cross", "empty_haven_lantern_reach"],  # data/packs/story_1: the pod's recorder carries the first and the fifth fragment
 		"hollow": ["wreck_field_hollow_green_lit", "patrol_hollow_roll_call", "anomaly_hollow_listening_post", "distress_hollow_knucklehead", "asteroid_hollow_basalt_camp", "gate_hollow_approach", "gate_hollow_the_table"],
 	}
 	for name in chains:

@@ -524,7 +524,7 @@ func test_quest_sites_are_made_only_where_there_is_a_quest_and_often_enough_ther
 				r = reg
 		check(not r.is_empty() and str(r.get("home_species", "")) != "", id + " is a homeland region")
 		check(Sector.has_quest(id, str(r.get("events", ""))), id + " has a quest, so it gets quest sites")
-	check(not Sector.has_quest("clan_space", "clan_space") and not Sector.has_quest("concord_space"), "the main-line regions have none")
+	check(Sector.has_quest("clan_space", "clan_space") and Sector.has_quest("concord_space"), "the main-line regions have quest sites too: the story's quests (data/packs/story_1) ask for no region")
 	var most := 0.0
 	for id in quests:
 		var with := 0
@@ -542,9 +542,11 @@ func test_quest_sites_are_made_only_where_there_is_a_quest_and_often_enough_ther
 		most = maxf(most, rate)
 	check(most < 0.85, "but not in all of them (one quest, once, a region; sectors hold one POI more since Beta 3): %.2f" % most)
 	var c := Campaign.new(7)  # Clan space
+	var sites := 0
 	for n in c.drift.nodes:
 		for p in c.sector_at(n["id"]).pois:
-			check(p["type"] != "quest", "Clan space has no quest site")
+			sites += int(p["type"] == "quest")
+	check(sites > 0, "Clan space has quest sites now (%d)" % sites)
 
 
 func test_each_homelands_tech_quest_can_come_up_at_its_quest_site() -> void:

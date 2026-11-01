@@ -14,7 +14,7 @@
 	"ada": {"name": "Ada", "look": {"suit": "#e8913a", "hair": "#c2331f", "tool": "#f1d36b"}},
 	"extra_crew": 2,
 	"names": ["Rook", "Juno", "Pike", "Marlo", "Tess", "Quill", "Bram", "Wren"],
-	"traits": {"Rook": ["suit"]},
+	"traits": {"Rook": ["suit"], "Ada": ["tinkerer"]},
 	"looks": [
 		{"suit": "#4fae6b", "hair": "#3a2a1c", "tool": "#e6e2c8"},
 		{"suit": "#a56be0", "hair": "#e9d9a3", "tool": "#d7dce4"},

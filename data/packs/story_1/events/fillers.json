@@ -1,0 +1,64 @@
+{"events": [
+    {
+      "id": "quest_old_beacon", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Back in five",
+      "text": "An old claim beacon on a rock the size of a bed, ticking over on a cell somebody forgot to take. The rock has been worked out to the last vein: a tidy hole, a lamp left burning, a tin cup in a bracket. There is a file in the beacon's memory, and nobody left to say whose it is.",
+      "choices": [
+        {"text": "Read what it has left.", "outcomes": [
+          {"weight": 100, "text": "The beacon holds one file, left by the last person to work the rock. You read it by the lamp they left on.", "effects": {"log": "log_clans_claim_note", "items": {"scrap": 8}}},
+          {"weight": 100, "text": "The beacon's last file is a page of somebody's diary, filed under RULES. The tin cup is still in its bracket.", "effects": {"log": "log_clans_rusthold_rule", "items": {"scrap": 8}}},
+          {"weight": 100, "text": "Somebody left a galley sheet in the beacon's memory, for reasons that are probably soup. The cup, you notice, has been used.", "effects": {"log": "log_clans_soup_rules", "items": {"scrap": 8}}},
+          {"weight": 100, "text": "The last file is a collection receipt in a cramped hand, filed under MA. Everybody out here has one of those.", "effects": {"log": "log_clans_ma_birthday", "items": {"scrap": 8}}}
+        ]},
+        {"text": "Leave it ticking.", "outcomes": [
+          {"weight": 100, "text": "You leave the beacon ticking in its hole. The lamp is still lit when you lose it on the scope. Somebody may come back for it. Somebody may.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quest_dead_relay", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Relay, unattended",
+      "text": "A Concord relay buoy, powered and polished, forwarding nothing to nobody. Its status board is green. It has been green for forty years, and it still sends a heartbeat every nine seconds to a station that is not there. In its outbox, one file is waiting to send.",
+      "choices": [
+        {"text": "Read what it has left.", "outcomes": [
+          {"weight": 100, "text": "The outbox opens without a password, as if it had been waiting for someone to ask. You read the file.", "effects": {"log": "log_concord_floor_note", "items": {"copper": 5}}},
+          {"weight": 100, "text": "The relay's outbox holds a patrol log marked NO ACTION. It was never sent, which is the most Concord thing about it.", "effects": {"log": "log_concord_probably_fine", "items": {"copper": 5}}},
+          {"weight": 100, "text": "A requisition form, filled in, never sent. The relay has been trying for forty years. You read it so it can stop.", "effects": {"log": "log_concord_form_9b", "items": {"copper": 5}}},
+          {"weight": 100, "text": "A diplomatic annex in the outbox: eleven hours of argument reduced to four lines. You read it for the four lines.", "effects": {"log": "log_concord_salvage_annex", "items": {"copper": 5}}}
+        ]},
+        {"text": "Leave it ticking.", "outcomes": [
+          {"weight": 100, "text": "You leave the relay to its heartbeat. Nine seconds later it sends another, and the quiet where the answer should be is very well kept.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quest_prism_buoy", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "A buoy that sings because someone must",
+      "text": "A Lumen buoy turns in the dark, singing one long note and then stopping to wait, politely, for an answer. It sounds like a question. The pause is the right length for a reply. Nobody is on the other end to give it one, and the buoy has, you suspect, stopped expecting anybody to.",
+      "choices": [
+        {"text": "Read what it has left.", "outcomes": [
+          {"weight": 100, "text": "You hum something back, badly. The buoy considers it, and releases a short text it has been keeping for whoever answered.", "effects": {"log": "log_lumen_first_note", "items": {"crystal": 1}}},
+          {"weight": 100, "text": "The pause lengthens. A panel in the casing slides open and a small slate falls out, written in a neat hand.", "effects": {"log": "log_lumen_second_note", "items": {"crystal": 1}}},
+          {"weight": 100, "text": "The buoy sings the same note again, slower, and a file you did not ask for opens on the console.", "effects": {"log": "log_lumen_apprentice_rule", "items": {"crystal": 1}}},
+          {"weight": 100, "text": "The buoy hums a flat, offended note when you switch the engines on, and then, grudgingly, a file.", "effects": {"log": "log_lumen_ion_complaint", "items": {"crystal": 1}}},
+          {"weight": 100, "text": "The note falls. A line of text appears on the console in the buoy's careful hand, with the air of a complaint finally forwarded.", "effects": {"log": "log_lumen_emberkin_rota", "items": {"crystal": 1}}}
+        ]},
+        {"text": "Leave it ticking.", "outcomes": [
+          {"weight": 100, "text": "You let the pause run out. The buoy sings its note again, a little lower, to nobody, and carries on waiting.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quest_message_cache", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "To whoever",
+      "text": "A sealed cargo tube, welded to a rock with a lot of caution and not much skill, marked TO WHOEVER. Inside, a data slug, a tin of the blue ration, and a handwritten label: PLEASE READ. IT'S NOT THE BAD KIND.",
+      "choices": [
+        {"text": "Read what it has left.", "outcomes": [
+          {"weight": 100, "text": "You break the weld, which is more than the weld wanted, and read the slug. Whoever wrote it did not think anyone would.", "effects": {"log": "log_clans_the_bill", "crew_hp": 5}},
+          {"weight": 100, "text": "The slug is a page of somebody's life, filed under DUES. You eat the ration, to be fair.", "effects": {"log": "log_clans_exile", "crew_hp": 5}},
+          {"weight": 100, "text": "The slug is a letter to somebody who will never get it. You eat the ration, because the label asked you to.", "effects": {"log": "log_clans_green_hat", "crew_hp": 5}},
+          {"weight": 100, "text": "The slug is a warning, and also, you realise, a joke. You eat the ration anyway.", "effects": {"log": "log_clans_brother_in_law", "crew_hp": 5}},
+          {"weight": 100, "text": "The slug is a day's log kept by somebody who had decided to find it funny. You eat the ration, and take the tone.", "effects": {"log": "log_clans_midjump", "crew_hp": 5}}
+        ]},
+        {"text": "Leave it ticking.", "outcomes": [
+          {"weight": 100, "text": "You leave the tube on its rock, welded, for the next one. It said PLEASE READ. Somebody will.", "effects": {}}
+        ]}
+      ]
+    }
+]}

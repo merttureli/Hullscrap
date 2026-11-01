@@ -31,6 +31,8 @@ extends RefCounted
 ##   does not end the run. The effect `unlock` (an id of data/unlocks.json, or a list) earns something for the next runs and
 ##   shows "Unlocked: <name>"; the effect `ending` (an id of data/endings.json) ends the run as a win: choose() and
 ##   apply() hand it back and the event panel opens the ending screen.
+## - `fallback` (true) on an event keeps it out of every pick that has another eligible event: it is only rolled when nothing else
+##   is (the repeatable filler quests of data/packs/story_1, so a quest beacon with no quest left still has something to give).
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
 
 const Content = preload("res://scripts/data/content.gd")
@@ -47,7 +49,7 @@ const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
 const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest", "hollow"]
-const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark"]
+const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark", "fallback"]
 const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue"]
 const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "species", "species_any", "trait", "items", "pay", "component", "component_any", "credits"]
@@ -259,7 +261,7 @@ static func crew_count(ship) -> int:
 ## `filter` (optional Callable(ev) -> bool) can narrow the pool further. {} when there is none.
 func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 	var pool: Array = []
-	var total := 0.0
+	var spare: Array = []  # `fallback` events: in the pool only when nothing else is eligible
 	for id in order:
 		var ev: Dictionary = events[id]
 		if str(ev.get("type", "")) != str(node.get("type", "")) or is_page(id):
@@ -272,10 +274,14 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 		var gate := crew_factor(id, c)
 		if gate < 1.0 and c.rng.randf() >= gate:  # crew are rare: most of the time the event is not in the pool
 			continue
-		pool.append([ev, w])
-		total += w
+		(spare if bool(ev.get("fallback", false)) else pool).append([ev, w])
+	if pool.is_empty():
+		pool = spare
 	if pool.is_empty():
 		return {}
+	var total := 0.0
+	for p in pool:
+		total += p[1]
 	var r: float = c.rng.randf() * total
 	var chosen: Dictionary = pool[-1][0]
 	for p in pool:
@@ -680,6 +686,8 @@ func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[S
 		bad.call("weight must be a number, 0 or more")
 	if ev.has("once") and not ev["once"] is bool:
 		bad.call("once must be true or false")
+	if ev.has("fallback") and not ev["fallback"] is bool:
+		bad.call("fallback must be true or false")
 	if ev.has("landmark") and not (ev["landmark"] is bool or (ev["landmark"] is String and ev["landmark"] != "")):
 		bad.call("landmark must be true, false or a title")
 	if ev.has("requires"):
