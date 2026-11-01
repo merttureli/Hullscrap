@@ -2,7 +2,7 @@ extends Node2D
 ## Sector space on screen (docs/CONTENT.md section 11, the view): in play mode the ship flies through the sector of the
 ## campaign's current node. This node runs it and draws what is round the ship.
 ## - The helm (helm.gd): with a course set and someone at the helm the autopilot flies there; E at the helm gives the
-##   player the combat flight controls and E again hands back. Cruise x3 out of combat.
+##   player the combat flight controls and E again hands back. Cruise (x1.8, data/sectors.json) out of combat.
 ## - The sector (sector.gd): the passing ships, a POI within 800 px runs its event in the event panel (map_view.gd
 ##   open_poi), and the jump drive's spool (Campaign.tick_jump, started from the map) shows on the HUD; when it fires the
 ##   ship arrives in the new sector.
@@ -460,7 +460,7 @@ func title() -> String:
 
 ## What the helm is doing, in words.
 func helm_line() -> String:
-	var speed := "%d px/s, %s" % [roundi(helm.flight.vel.length()), "cruise x%d" % roundi(helm.cruise) if helm.cruise > 1.0 else "combat speed"]
+	var speed := "%d px/s, %s" % [roundi(helm.flight.vel.length()), "cruise x%s" % String.num(helm.cruise, 1) if helm.cruise > 1.0 else "combat speed"]
 	match helm.state:
 		"grounded":
 			return "HELM: the ship cannot fly (%s)" % helm.why_not

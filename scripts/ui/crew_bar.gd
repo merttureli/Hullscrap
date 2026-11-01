@@ -7,10 +7,11 @@ extends Control
 ## the bottom, and a second column starts to the left when the screen is full. A line above the cards says what
 ## the last use did, or why it was refused. Placeholder shapes and letters until the icons have art.
 ## Reads the crew view (crew_view.gd: ship_now(), selected, select(), use_ability()), and takes only left clicks
-## on the cards (everything else falls through to the world).
+## on the cards (everything else falls through to the world; a wheel step over a card is swallowed, so it never zooms).
 
 const Art = preload("res://scripts/view/art.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const CARD := Vector2(238.0, 58.0)
 const GAP := 4.0
@@ -104,6 +105,8 @@ func _has_point(p: Vector2) -> bool:
 
 
 func _gui_input(e: InputEvent) -> void:
+	if UiKit.is_wheel(e):
+		accept_event()  # the wheel over a card never zooms the world
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		if click(e.position) != "":
 			accept_event()

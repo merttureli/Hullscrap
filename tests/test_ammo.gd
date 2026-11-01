@@ -306,7 +306,7 @@ func test_rack_contents_and_loaded_units_survive_a_save() -> void:
 	Fx.stock(ship, d["rack"], "missile", 13)
 	ship.components.instances[d["gun"]]["loaded"] = 2
 	var saved: Dictionary = JSON.parse_string(JSON.stringify(ship.to_dict()))
-	eq(saved["version"], 5, "ship version 5")
+	eq(saved["version"], Ship.VERSION, "the current ship save version")
 	eq(saved["components"]["version"], 4, "components version 4")
 	var back := Ship.new_starter()
 	eq(back.load_dict(saved), "", "loads")

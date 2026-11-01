@@ -782,7 +782,7 @@ static func _job(type: String, key: String, cells: Array, extra := {}) -> Dictio
 	return job
 
 
-## repair_component for part `uid`: 5 s x the line's repair multiplier; weapons, engines and shields
+## repair_component for part `uid`: its seconds in data/crew.json x the line's repair multiplier; weapons, engines and shields
 ## come first in a fight.
 func _fix_job(ship, uid: int) -> Dictionary:
 	var inst: Dictionary = ship.components.instances[uid]

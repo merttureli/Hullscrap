@@ -134,6 +134,8 @@ func _follow() -> void:
 func _gui_input(e: InputEvent) -> void:
 	if hud.pass_release(e):
 		return
+	if UiKit.is_wheel(e):
+		accept_event()  # the wheel scrolls the palette below, and never zooms the world
 	if e is InputEventMouseMotion:
 		hover_tab = -1
 		for i in Palette.TAB_NAMES.size():

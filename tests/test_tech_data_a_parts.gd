@@ -198,7 +198,7 @@ func test_the_jury_reactor_and_the_haggle_engine_malfunction_at_their_rates() ->
 	near(ship.effective("engine_mk2")["malfunction_per_min"], 0.01, "against a Mk2's 1 percent")
 
 
-func test_a_fenn_mends_the_unreliable_parts_in_three_seconds_and_a_human_in_five() -> void:
+func test_a_fenn_mends_the_unreliable_parts_in_six_tenths_of_the_time_a_human_takes() -> void:
 	var seconds := {}
 	for species in ["human", "fenn"]:
 		var d := _rig("fenn_jury_reactor")
@@ -212,8 +212,9 @@ func test_a_fenn_mends_the_unreliable_parts_in_three_seconds_and_a_human_in_five
 			jobs.work(ship, m, job, 0.1)
 			t += 0.1
 		seconds[species] = t
-	near(seconds["human"], 5.0, "a human mends it in 5 s", 0.15)
-	near(seconds["fenn"], 3.0, "a Fenn in 3 s", 0.15)
+	var part := float(Jobs.jcfg()["repair_component"]["seconds"])  # data/crew.json: 12 s
+	near(seconds["human"], part, "a human mends it in the job's time", 0.15)
+	near(seconds["fenn"], part * 0.6, "a Fenn in 0.6 of it", 0.15)
 
 
 func test_the_hot_parts_scorch_a_mixed_crew_and_an_emberkin_crew_runs_them_free() -> void:

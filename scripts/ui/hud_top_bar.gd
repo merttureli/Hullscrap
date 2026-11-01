@@ -87,6 +87,8 @@ func status() -> Array[String]:
 func _gui_input(e: InputEvent) -> void:
 	if hud.pass_release(e):
 		return
+	if UiKit.is_wheel(e):
+		accept_event()  # the world behind must not zoom
 	if e is InputEventMouseMotion:
 		hover = -1
 		var rs := item_rects(items())

@@ -37,7 +37,7 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 
 - **Flying** (the player is at the helm):
   - **The ship turns toward the mouse cursor** at its turn rate, so you aim nose guns by flying (owner, 2026-10-30). Heavy ships turn slowly, so they aim slowly.
-  - **W/S** thrust and reverse. **A/D strafe** sideways, using engines mounted on the side walls (thrust × the sideways component of their push). No side engines means no strafe.
+  - **W/S** thrust and reverse. **A/D strafe** sideways, using engines mounted on the side walls (thrust × the sideways component of their push) plus `side_share` (data/flight.json, 30%) of every engine's thrust, so rear engines alone strafe weakly and side engines stay much better.
   - A setting `controls.steer` switches to keys (A/D turn as before, with the mouse only aiming gimbals).
   - Speed, acceleration and turn rate come from `flight.gd`: powered engines' thrust against the mass of everything you built.
   - The crew stay aboard and repair, fight fires and man stations on their own.

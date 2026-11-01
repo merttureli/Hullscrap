@@ -329,7 +329,8 @@ func test_courier_has_room_for_a_strafe_pair_on_its_flanks() -> void:
 	var arena := Arena.new(1)
 	arena.add_ship(ship)
 	var t: Dictionary = arena.ships[0].thrusts
-	check(t["fwd"] > 0.0 and t["left"] == 0.0 and t["right"] == 0.0, "it starts with rear engines only: %s" % str(t))
+	var share: float = arena.ships[0].thrust * arena.ships[0].flight.side_share  # every engine strafes a little
+	check(t["fwd"] > 0.0 and absf(t["left"] - share) < 1e-6 and absf(t["right"] - share) < 1e-6, "it starts with rear engines only (just the share sideways): %s" % str(t))
 	var found := {}
 	for rot in [1, 3]:  # nozzle to the right (on the right wall), nozzle to the left (on the left wall)
 		for y in ship.grid.size.y:

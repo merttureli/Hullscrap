@@ -311,7 +311,7 @@ func test_a_saved_balance_comes_back_and_starts_every_fight() -> void:
 	ship.refresh()
 	var plain := ship.to_dict()
 	check(not plain.has("shield_balance"), "nothing chosen: nothing saved")
-	eq(plain["version"], 5, "ship save version 5")
+	eq(plain["version"], Ship.VERSION, "the current ship save version")
 	ship.shield_balance["weights"] = [2.0, 0.0]
 	ship.shield_balance["presets"][1] = [1.5, 0.5]
 	var d := ship.to_dict()

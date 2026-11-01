@@ -65,6 +65,8 @@ func wanted_height() -> float:
 func _gui_input(e: InputEvent) -> void:
 	if hud.pass_release(e):
 		return
+	if UiKit.is_wheel(e):
+		accept_event()  # the world behind must not zoom
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and e.position.y < HEAD_H:
 		collapsed = not collapsed
 

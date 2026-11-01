@@ -148,7 +148,7 @@ func bar_visible() -> bool:
 	return build != null and not build.build_on and _ship() != null
 
 
-## WASD by keycode (any layout). Ctrl/Cmd held means a shortcut like Ctrl+S, not walking, and so
+## WASD by keycode (any layout), screen-relative (W is up on the screen, see screen_to_grid). Ctrl/Cmd held means a shortcut like Ctrl+S, not walking, and so
 ## does the crafting panel (C) being open, whose keys must not walk the soldier about, or the soldier having the helm.
 func _wasd() -> Vector2:
 	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_META):
@@ -159,9 +159,16 @@ func _wasd() -> Vector2:
 	var sector := get_node_or_null("../Sector")
 	if sector != null and sector.piloting():
 		return Vector2.ZERO  # the soldier has the helm: WASD fly the ship
-	return Vector2(
+	var screen := Vector2(
 		float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A)),
 		float(Input.is_key_pressed(KEY_S)) - float(Input.is_key_pressed(KEY_W)))
+	return screen_to_grid(screen, global_rotation if is_inside_tree() else rotation)
+
+
+## A direction on the screen (W = up) as a direction in the ship's grid frame, for a ship drawn turned by `angle`
+## (sector_view.gd turns this node with the ship): WASD stays screen-relative whichever way the bow points.
+static func screen_to_grid(screen: Vector2, angle: float) -> Vector2:
+	return screen.rotated(-angle)
 
 
 ## Put the starting crew on the ship once there is floor for it (Jobs.spawn_crew: the design's crew

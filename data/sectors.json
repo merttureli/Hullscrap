@@ -5,7 +5,7 @@
 	"current": {"speed": [20, 60]},
 	"poi": {"count": [2, 6], "dist": [3000, 12000], "gap": 2500, "margin": 1000, "trigger": 800, "rearm": 1.5, "spawn": [250, 600]},
 	"radar": {"visual": 1500, "helm": 3000},
-	"helm": {"cruise": 3.0, "real_within": 2500, "arrive": 300, "arrive_speed": 60, "brake": 0.8, "avoid": {"size": 40, "look": 900, "react": 10.0, "clear": 120}},
+	"helm": {"cruise": 1.8, "real_within": 2500, "arrive": 300, "arrive_speed": 60, "brake": 0.8, "avoid": {"size": 40, "look": 900, "react": 10.0, "clear": 120}},
 	"ambient": {"every": 90, "chance": 0.5, "edge": 0.9, "speed": [60, 140], "approach": 0.6, "ttl": 300, "max": 3,
 		"hollow": {"_doc": "In a Hollow place (the tide has taken it, sector.gd hollow) these replace the rolls above: a ghost (a `hollow` contact) every `every` seconds with `chance`, always closing in (`approach`), and the debris spawns at `debris` x its density. Ghosts count toward `max`.", "every": 60, "chance": 1.0, "approach": 1.0, "debris": 0.3}},
 	"poi_types": {
