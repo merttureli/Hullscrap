@@ -1,0 +1,208 @@
+{"events": [
+    {
+      "id": "distress_hull_breach_hauler", "type": "distress", "weight": 10, "once": false, "requires": {},
+      "text": "A hauler with a hole in her side the size of a door and her air going out in a long white scarf. Her crew are in the aft section with the door shut, calm, drinking something. 'We're fine,' says the captain. 'We would be better with a lid.'",
+      "choices": [
+        {"text": "Throw patch plates at the hole (20 scrap).", "requires": {"items": {"scrap": 20}, "pay": true}, "outcomes": [
+          {"weight": 65, "text": "The plates go over the hole in a clumsy patchwork. It holds. The captain sends credits and a very long grateful silence.", "effects": {"items": {"credits": 45}, "rep": {"clans": 1}}},
+          {"weight": 35, "text": "The patch fits like a hat on a horse. It holds just long enough for them to leave.", "effects": {"items": {"credits": 20}}}
+        ]},
+        {"text": "[Shield] Fly close and cover the breach with your shield.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 70, "text": "You tuck the shield over the hole like a hand over a mouth. The air stops going out. The captain, in the aft section, raises a mug.", "effects": {"items": {"credits": 60}, "rep": {"clans": 2}}},
+          {"weight": 30, "text": "The breach pulls at the shield. The shield holds it, grudgingly; the hull argues the point.", "effects": {"hull": -8, "items": {"credits": 30}}}
+        ]},
+        {"text": "Tell them to hold on and hail the nearest dock.", "outcomes": [
+          {"weight": 100, "text": "You pass the message on. 'Understood,' says the captain, and does not stop drinking.", "effects": {"items": {"credits": 5}}}
+        ]},
+        {"text": "Leave them to it.", "outcomes": [
+          {"weight": 100, "text": "You leave them with their mug and their hole.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_fuel_dry_hauler", "type": "distress", "weight": 10, "once": false, "requires": {},
+      "text": "A long-haul tug, out of fuel, drifting dead in the lane with all her lights on out of habit. Her pilot is on the comm: 'I'm not asking for charity. I'm asking for fuel. I'll pay. I'll pay double. I'll pay double in installments.'",
+      "choices": [
+        {"text": "Sell her two fuel at a good price.", "requires": {"items": {"fuel": 2}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "She pays in a fistful of mismatched credits and a very sincere handshake over the comm.", "effects": {"items": {"credits": 70}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Give her the fuel and ask for nothing.", "requires": {"items": {"fuel": 2}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "She says nothing, very loudly, for a long time. Then: 'I'll remember this.' She will. A crate of whatever was nearest comes across on a line.", "effects": {"items": {"scrap": 20}, "rep": {"clans": 2}}}
+        ]},
+        {"text": "[Tractor] Tow her to the nearest dock.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 75, "text": "You tow her in at a stately pace. She pays at the dock, and again for the tow, and a third time for the manners.", "effects": {"items": {"credits": 55}, "rep": {"clans": 2}}},
+          {"weight": 25, "text": "The tow cable parts twice, which is twice more than a tow cable should.", "effects": {"hull": -6, "items": {"credits": 30}}}
+        ]},
+        {"text": "Wish her luck.", "outcomes": [
+          {"weight": 100, "text": "'Luck's not fuel,' she says, not unkindly, and goes back to watching the lights.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_two_beacons", "type": "distress", "weight": 9, "once": false, "requires": {},
+      "text": "Two distress beacons, forty klicks apart, both transmitting the same message in the same voice: 'Hurry. This one's real.' Neither has said which.",
+      "choices": [
+        {"text": "Go north.", "outcomes": [
+          {"weight": 60, "text": "North is a wreck picked clean by someone who left the beacon on. The beacon thanks you for your concern, and there is a locker she missed.", "effects": {"items": {"scrap": 40}}},
+          {"weight": 40, "text": "North is bait: a wreck with a beacon and a rig under it. The rig has a sense of humour and a spring.", "effects": {"hull": -8, "items": {"scrap": 20}}}
+        ]},
+        {"text": "Go south.", "outcomes": [
+          {"weight": 60, "text": "South is a lifeboat with a bored pilot, who has been waiting for someone to ask. She tips.", "effects": {"items": {"credits": 40}, "rep": {"clans": 1}}},
+          {"weight": 40, "text": "South is bait: a lifeboat with no one in it and a bomb in the seat. It is not a good bomb. It is enough.", "effects": {"hull": -8}}
+        ]},
+        {"text": "[Radar] Find out which one is lying.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 80, "text": "The radar draws a line to one beacon and a question mark to the other. You go to the line. The pilot is real, and so is the tip.", "effects": {"items": {"credits": 55, "scrap": 20}, "rep": {"clans": 1}}},
+          {"weight": 20, "text": "The radar picks right. The other beacon, annoyed, takes a shot at you as you go.", "effects": {"hull": -6, "items": {"credits": 30}}}
+        ]},
+        {"text": "Leave them both. They'll sort it out.", "outcomes": [
+          {"weight": 100, "text": "Behind you the message goes on, twice, in the same voice. The silence between the two is, you feel, the most honest thing in it.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "distress_air_thin_barge", "type": "distress", "weight": 9, "once": false, "requires": {},
+      "text": "A barge, rock steady and silent, her people lined up in the windows with their palms flat on the glass and their faces a little blue. The comm says: 'Air. If you have a spare. Please.'",
+      "choices": [
+        {"text": "Send them a tank of air (15 scrap).", "requires": {"items": {"scrap": 15}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You pass over a tank by line. The faces go from blue to pink in a long rolling blush.", "effects": {"items": {"credits": 40}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Oxygen] Run a hose across and share your air.", "requires": {"component_any": ["oxygen_gen", "oxygen_scrap_mk1"]}, "outcomes": [
+          {"weight": 75, "text": "You run the hose and let the generator do the work. The barge's windows fog up from the inside, which is the nicest thing you have seen all week.", "effects": {"items": {"credits": 60, "fuel": 1}, "rep": {"clans": 2}}},
+          {"weight": 25, "text": "The generator coughs at the extra load. It manages, and sulks.", "effects": {"hull": -4, "items": {"credits": 40}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Hail the nearest dock and wait with them.", "outcomes": [
+          {"weight": 100, "text": "You wait. When the dock tug comes in the barge folk give you a rope of dried fruit and a hand each.", "effects": {"items": {"fuel": 1}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Fly on.", "outcomes": [
+          {"weight": 100, "text": "The palms stay on the glass until you are out of sight. They do not, you notice, wave.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "pirate_toll_by_receipt", "type": "pirate", "weight": 10, "once": false, "requires": {},
+      "text": "A Rustfang skiff, the Receipt Book, slides across your nose and opens a channel. 'Toll,' says a woman's voice, and a printer clatters. 'Forty credits. You will be given a receipt. Receipts are not optional. Rustfang policy.'",
+      "choices": [
+        {"text": "Pay the toll (40 credits).", "requires": {"credits": 40, "pay": true}, "outcomes": [
+          {"weight": 85, "text": "The receipt prints, signed in a hand that clearly practised. 'Safe lane,' she says. 'Keep it. It's worth something to somebody.'", "effects": {"items": {"scrap": 10}}},
+          {"weight": 15, "text": "The receipt prints. Then the skiff's guns come up. 'That was for the lane,' she says. 'Your cargo is a separate matter.'", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Tell her honestly how little she'd get.", "outcomes": [
+          {"weight": 55, "text": "You list the shield (thin), the guns (slow), the hold (empty) and the paint (peeling). A long pause. 'Frankly,' she says, 'I'm moved. Go on.'", "effects": {"rep": {"clans": 1}}},
+          {"weight": 45, "text": "You list it all. 'That,' she says, 'is the most useful thing anyone has ever told me,' and lines up the shot.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Shield] Show the shield and ask for the toll in writing.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
+          {"weight": 65, "text": "The shield is bigger than it looks and so is the hull behind it. She finds a clause waiving the toll for shielded vessels in transit. It is a clause she has just written.", "effects": {"rep": {"clans": 1}}},
+          {"weight": 35, "text": "She finds a clause that doubles the toll for shielded vessels. You pay, and keep the receipt.", "effects": {"items": {"credits": -60}}}
+        ]},
+        {"text": "Burn away from the toll booth.", "outcomes": [
+          {"weight": 60, "text": "They do not chase. They have a printer to mind.", "effects": {"items": {"fuel": -1}}},
+          {"weight": 40, "text": "They chase. A receipt is a receipt.", "effects": {"fight": "pirate_raider"}}
+        ]}
+      ]
+    },
+    {
+      "id": "pirate_slow_gun_bluff", "type": "pirate", "weight": 9, "once": false, "requires": {},
+      "text": "A raider closes at an easy, unhurried speed: the speed of a ship that has never been shot back at. Her gunnery officer, over the comm, sounds bored. 'Just so we're clear,' he says, 'I can see your guns. They don't look like much.'",
+      "choices": [
+        {"text": "Agree, and offer scrap to go away (30 scrap).", "requires": {"items": {"scrap": 30}, "pay": true}, "outcomes": [
+          {"weight": 80, "text": "'Thank you,' he says. 'Honestly, that's the right answer.' He sounds relieved.", "effects": {"rep": {"clans": 1}}},
+          {"weight": 20, "text": "'Thanks,' he says. 'And the rest.'", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Tell him: slow guns, sure, but every shot counts.", "outcomes": [
+          {"weight": 50, "text": "A pause. 'Hm,' he says. 'That is a different way to think about it.' They peel off, thoughtful.", "effects": {"rep": {"clans": 1}}},
+          {"weight": 50, "text": "'It really isn't,' he says.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "[Artemis] Let the launcher say it for you (a missile).", "requires": {"component": "artemis_mk1", "items": {"missile": 1}, "pay": true}, "outcomes": [
+          {"weight": 75, "text": "Your launcher swings round. The raider's closing speed becomes, abruptly, a leisurely reversing speed. 'No need,' says the officer. 'No need at all.'", "effects": {}},
+          {"weight": 25, "text": "The launcher swings round. 'Oh, I know what that is,' he says. 'It's a missile. Take your time.'", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Open fire first.", "outcomes": [
+          {"weight": 100, "text": "'Ah,' says the officer, with real interest. 'There they are.'", "effects": {"fight": "pirate_raider"}}
+        ]}
+      ]
+    },
+    {
+      "id": "pirate_ram_gone_wrong", "type": "pirate", "weight": 9, "once": false, "requires": {},
+      "text": "A Rustfang ramming skiff has rammed her own tow, and the tow is a barge, and the barge is on fire. The skiff is tangled in the barge's hull and the pilot's voice on the comm has gone up half an octave: 'This is not a raid. This is a request for help. It is also a raid. Please.'",
+      "choices": [
+        {"text": "Help them cut free.", "outcomes": [
+          {"weight": 65, "text": "You cut the skiff loose. The pilot, shaking, gives you a purse and a salute that is mostly shaking.", "effects": {"items": {"credits": 40}, "rep": {"clans": 1}}},
+          {"weight": 35, "text": "A cable whips as it parts, and finds your flank on the way to the pilot's thanks.", "effects": {"hull": -8, "items": {"credits": 20}}}
+        ]},
+        {"text": "[Tractor] Pull the skiff clear of the barge.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 75, "text": "You pull the skiff out of the burning barge like a thumb out of a bun. The pilot weeps a little over the comm.", "effects": {"items": {"credits": 60}, "rep": {"clans": 2}}},
+          {"weight": 25, "text": "The skiff comes free all at once, and all of her comes at you.", "effects": {"hull": -10, "items": {"credits": 25}}}
+        ]},
+        {"text": "Take the barge's cargo while they're busy.", "outcomes": [
+          {"weight": 60, "text": "The barge burns, the skiff flaps, and you take the cargo that wasn't on fire.", "effects": {"items": {"scrap": 50, "copper": 15}, "rep": {"clans": -2}}},
+          {"weight": 40, "text": "The skiff finishes being tangled and remembers it is a raider.", "effects": {"fight": "pirate_raider"}}
+        ]},
+        {"text": "Leave them in it.", "outcomes": [
+          {"weight": 100, "text": "You leave them in it. Over the comm, behind you, the pilot starts, quite quietly, to pray.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "pirate_picket_go_slow", "type": "pirate", "weight": 8, "once": false, "requires": {},
+      "text": "A line of Rustfang skiffs across the lane, engines low, hulls hung with banners: UNFAIR SCRAP RATES. WE WILL NOT BE MOVED. A woman with a megaphone: 'We are on a go-slow! You may pass, if you go slowly!' They are not shooting. They have, however, all got guns.",
+      "choices": [
+        {"text": "Go slowly.", "outcomes": [
+          {"weight": 70, "text": "You go through at the speed of a hearse. The skiffs nod as you pass; one of them hands you a leaflet. It is quite persuasive.", "effects": {"rep": {"clans": 1}}},
+          {"weight": 30, "text": "A skiff mistakes your speed for contempt.", "effects": {"hull": -6}}
+        ]},
+        {"text": "Pay the picket dues (15 credits).", "requires": {"credits": 15, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The picket takes your dues, stamps a card, and waves you through at full speed. You carry the card, and a little of the solidarity.", "effects": {"rep": {"clans": 2}}}
+        ]},
+        {"text": "[Strafe Jets] Slip along the line between the banners.", "requires": {"component_any": ["strafe_jets_mk1", "strafe_jets_mk2", "strafe_jets_mk3", "afterburner"]}, "outcomes": [
+          {"weight": 60, "text": "You pick your way through the gap between two banners, perfectly slow, perfectly sideways. 'That's technically cheating,' says the megaphone. She lets it go.", "effects": {"items": {"scrap": 15}, "rep": {"clans": 1}}},
+          {"weight": 40, "text": "The gap closes. The banner's pole has opinions.", "effects": {"hull": -8}}
+        ]},
+        {"text": "Run the line.", "outcomes": [
+          {"weight": 100, "text": "You do not slow down. They stop being on strike.", "effects": {"fight": "pirate_raider"}}
+        ]}
+      ]
+    },
+    {
+      "id": "patrol_depth_survey", "type": "patrol", "weight": 10, "once": false, "requires": {},
+      "text": "A Concord survey cutter, the Tape Measure, drifts in your lane and asks you to hold still for a depth reading. 'It takes a minute,' says the officer. 'Possibly four. It's the paperwork that's long.'",
+      "choices": [
+        {"text": "Hold still.", "outcomes": [
+          {"weight": 85, "text": "You hold still for four minutes. The cutter takes your depth, your width and your 'general attitude', and thanks you.", "effects": {"rep": {"concord": 1}, "items": {"credits": 10}}},
+          {"weight": 15, "text": "You hold still for four minutes. Then the cutter takes your depth again, to check, and charges for the second reading.", "effects": {"items": {"credits": -10}}}
+        ]},
+        {"text": "[Radar] Offer your own readings instead.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 70, "text": "The officer compares your readings with hers and finds, with some alarm, that they agree. She stamps both. 'Twelve years,' she says, 'and no one has ever helped.'", "effects": {"rep": {"concord": 2}, "items": {"credits": 25}}},
+          {"weight": 30, "text": "Your readings are off by two metres and a feeling. She writes up the difference.", "effects": {"items": {"credits": -15}}}
+        ]},
+        {"text": "Ask whether the measurements get you anything.", "outcomes": [
+          {"weight": 100, "text": "'A number,' she says. 'Eventually.' She reads it out when she is done. It is a rather good number.", "effects": {"items": {"credits": 5}}}
+        ]},
+        {"text": "Floor it.", "outcomes": [
+          {"weight": 60, "text": "You leave a streak of exhaust across the Tape Measure's survey. It will have to start again.", "effects": {"rep": {"concord": -2}}},
+          {"weight": 40, "text": "The Tape Measure's guns are not on the survey, it turns out.", "effects": {"rep": {"concord": -2}, "fight": "tier"}}
+        ]}
+      ]
+    },
+    {
+      "id": "patrol_weighing_post", "type": "patrol", "weight": 9, "once": false, "requires": {},
+      "text": "A Concord weighing post on a stretch of old Lattice rail: a long steel scale, a clerk in a booth, a sign. ALL HOLDS TO BE WEIGHED. OVERWEIGHT SUBJECT TO LEVY. The clerk has an actual abacus.",
+      "choices": [
+        {"text": "Be weighed.", "outcomes": [
+          {"weight": 65, "text": "Your hold weighs what it weighs. The clerk moves three beads, writes a number and waves you through.", "effects": {"rep": {"concord": 1}}},
+          {"weight": 35, "text": "Your hold is overweight by a number that sounds invented. The levy is twenty-five credits.", "effects": {"items": {"credits": -25}}}
+        ]},
+        {"text": "Bribe the clerk (25 credits).", "requires": {"credits": 25, "pay": true}, "outcomes": [
+          {"weight": 60, "text": "The beads move in your favour. 'Underweight,' he says. 'Admirably.' He gives you a certificate.", "effects": {"rep": {"concord": -1}}},
+          {"weight": 40, "text": "'Attempted bribery of a clerk,' he says, with real regret, and adds a levy.", "effects": {"rep": {"concord": -3}, "items": {"credits": -25}}}
+        ]},
+        {"text": "[Workshop] Show him your own calibrated bench scale.", "requires": {"component_any": ["fabricator", "assembly_rig", "robot_arm", "laser_cutter", "nanoforge"]}, "outcomes": [
+          {"weight": 75, "text": "Your scale and his agree to the gram. The clerk is so moved he waives the levy for the year.", "effects": {"rep": {"concord": 2}, "items": {"credits": 15}}},
+          {"weight": 25, "text": "Your scale and his disagree by a ton, and the clerk will not hear that it was his.", "effects": {"items": {"credits": -15}}}
+        ]},
+        {"text": "Go around the post.", "outcomes": [
+          {"weight": 60, "text": "There is a way around. It adds an hour, no levy, and a small uncomfortable feeling.", "effects": {"items": {"fuel": -1}}},
+          {"weight": 40, "text": "The post notices.", "effects": {"rep": {"concord": -1}}}
+        ]}
+      ]
+    }
+]}
