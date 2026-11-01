@@ -20,6 +20,8 @@ func _fight(player_path: String, spec: String, seed_value: int, cap_s: float) ->
 	var enemy: Ship = Session.load_ship(spec)
 	var sim := ShipSim.new()
 	sim.ships = [player, enemy]
+	if player.crew_plan.size() == 1:  # a starter has the soldier alone (playtest 2, A1): these fights are the pilot's, with a crew at the guns as in the harness's day
+		player.crew_plan = [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Bram", "species": "basalt"}]
 	Jobs.spawn_crew(player)
 	var s := Session.new()
 	s.start(player, enemy, seed_value)

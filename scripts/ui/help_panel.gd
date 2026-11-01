@@ -20,7 +20,7 @@ const COLUMNS: Array = [
 			["Mouse", "Play mode: the soldier aims at the cursor"],
 			["E (hold)", "Work with your hands: stand by a fire, a breach, a broken system or a downed crewmate"],
 			["E on a door", "Open / close the door"],
-			["Middle click", "Send Ada there"],
+			["Middle click", "Send a crewmate there"],
 			["Left click", "Play mode: select a crew member (or click their card, bottom right)"],
 			["G", "Use the selected crew member's special ability (in a fight too)"],
 			["B", "Build mode / play mode"],

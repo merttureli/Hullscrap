@@ -11,6 +11,8 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
+## The crew the tests that need people aboard give the Rustbucket (the real one starts with the soldier alone).
+const TEAM := [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Rook", "species": "basalt"}, {"name": "Juno", "species": "fenn"}]
 const RAIDER := "res://data/ships/pirate_raider.json"
 
 
@@ -183,6 +185,7 @@ func test_the_ring_fraction_grows_with_the_time_down() -> void:
 func test_an_enemy_crew_dies_the_same_way_through_the_ship_sim() -> void:
 	var sim := ShipSim.new()
 	sim.choose_ship(RUSTBUCKET)
+	sim.player_ship().crew_plan = TEAM.duplicate(true)
 	Jobs.spawn_crew(sim.player_ship())
 	var enemy: Ship = Ship.from_design(RAIDER)
 	sim.ships.append(enemy)
@@ -203,6 +206,7 @@ func test_a_death_leaves_the_crew_the_stations_and_the_jobs_and_stays_dead() -> 
 	var sim := ShipSim.new()
 	sim.choose_ship(RUSTBUCKET)
 	var ship: Ship = sim.player_ship()
+	ship.crew_plan = TEAM.duplicate(true)
 	Jobs.spawn_crew(ship)
 	var names: Array = ship.crew.map(func(m): return m.name)
 	check(names.has("Rook") and names.has("Ada"), "the Rustbucket carries Rook and Ada")
@@ -231,6 +235,7 @@ func test_a_death_leaves_the_crew_the_stations_and_the_jobs_and_stays_dead() -> 
 
 func test_a_dead_ada_is_not_respawned_either() -> void:
 	var ship: Ship = Ship.from_design("res://data/ships/starter_courier.json")
+	ship.crew_plan = [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}]  # (Ada found in her pod)
 	Jobs.spawn_crew(ship)
 	var ada: CrewMember = ship.crew.filter(func(m): return m.name == "Ada")[0]
 	_down(ada).down_t = 44.5

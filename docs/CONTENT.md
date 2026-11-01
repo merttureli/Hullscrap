@@ -162,7 +162,9 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Size balances itself**: more space means more walls to enclose it, more material cost, more mass (slower, turns worse), more armour, more oxygen to fill and more crew to run it. No artificial size cap beyond the grid limit (128×128).
 - **Credits** are the trading currency (buying frames, gear and crew; selling salvage). Materials stay physical cargo. Each starter ship starts with some credits.
 - The ship grid is a fixed 128×128 workspace. The hull marks which cells you own.
-- **Start with very little (owner, 2026-10-30, Beta 1 feedback)**: starters are **big frames with only the essentials built** (reactor, helm, 1–2 engines, 1 weapon, O2, 2 beds, fabricator). Half or more of the frame is empty, to build in. The starting cargo carries materials and a few parts. Creativity is the point: the player builds the ship they want.
+- **Start with very little (owner, 2026-10-30, Beta 1 feedback)**: starters are **big frames with only the essentials built** (reactor, helm, 1–2 engines, 1–2 guns, O2, one bed, fabricator). Half or more of the frame is empty, to build in. The starting cargo carries materials and a few parts. Creativity is the point: the player builds the ship they want.
+  - **Lean loadout (playtest 2, P3)**: then exactly one of a **shield** (about half the starters, which have one gun), a **medbay** (about half, one or two guns) or **neither** (at most four, which have two guns, the second a turret on a flank). No spare shield or medbay in the hold, 250 scrap. Where a racial reactor could not power that, the standard Reactor Mk2 is built and the racial one waits in the hold.
+  - **Bigger frames (P4)**: each starter's frame was grown by about 15% of its area; the built core is the same, so the extra is empty hull. `tests/tool_make_starters.gd` (`FRAME_GROWTH`) does it and checks power, reach and the loadout; `tests/tool_make_starters2.gd` builds the pack's ships from the same rules.
 - **Ship silhouettes (owner, 2026-10-30: "spaceships being rectangles is pretty goofy")**: no premade ship is a rectangle.
   - Every designed ship (starters, enemies, NPCs, stations) uses **slopes and curves** (4d) for a bow, stern and flanks with character.
   - It has a **non-rectangular footprint**: sponsons, wings, an engine block, a tapered nose, a raised bridge pod.
@@ -448,11 +450,9 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
 - Traits from species merge with personal traits (`crew.json` `traits`) and with gear (`suit` from an EVA suit). The existing `abilities.meets()` sees all of them.
 - **Hand weapons** live in `data/hand_weapons.json`: id, name, culture (concord, clans, lumen, basalt, emberkin, fenn), class (pistol, rifle, heavy, melee, tool), damage, rate, range, and the art id.
   - They're used for on-foot fights later. For now crew carry their culture's sidearm: drawn when idle in combat, holstered at work.
-- **Starting crews** (in each starter design's `crew` list):
-  - Rustbucket: the Soldier, Ada (human), **Rook (basalt, the afterburner operator)**, and Juno (fenn).
-  - Courier: the Soldier, Ada, and **Bram (basalt, the afterburner operator)**.
-  - Prism: the Soldier, **Tess (emberkin)**, Quill (fenn), and **Wren (basalt, the afterburner operator)**.
-  - Every ship carrying an Afterburner has a `no_breath` or suited operator.
+- **Starting crews** (in each starter design's `crew` list): **the Soldier alone** (playtest 2, A1), on every starter, the packs' too; the soldier's species comes from the hangar choice.
+  - **Ada** is the likely first crewmate: the `ada_pod` distress event (`data/packs/start_alone`) in stages 1-2, once per run, free, no bed needed. Her name and colours are `data/crew.json` `ada`. About 70% of runs meet her by the end of stage 2 (`tests/tool_crew_rate.gd` measures it).
+  - **Crew are rare (A2)**: `data/drift.json` `crew` gates the events that add crew (`species_event`, `station_event`, `unique_event`: the chance an eligible one is in the pool at all), hiring costs 450 credits (`prices.recruit`) and a station has anyone to hire only `prices.recruit_chance` of its visits. The aim: about one more crewmate per 2-3 regions, 2-4 besides Ada by stage 8.
   - The pirate raider's crew: 2 humans and 1 basalt.
 
 ## 10. Mining and cutting: a reliable way to earn materials (owner, 2026-10-30)

@@ -27,6 +27,7 @@ var _info := {}  # region id -> {stations, gates, places}: the place ids of its 
 func _begin(seed_value := 3) -> void:
 	c = Campaign.new(seed_value)
 	ship = Ship.from_design(RUSTBUCKET)
+	ship.crew_plan = [{"name": "Soldier", "species": "human"}, {"name": "Rook", "species": "basalt"}]  # (a Basalt aboard for the way-out choices that ask for one)
 	Jobs.spawn_crew(ship)
 	ship.inventory.add("credits", 6000)
 	ship.inventory.add("fuel", 20)

@@ -10,6 +10,7 @@ extends "res://tests/base_test.gd"
 const Ship = preload("res://scripts/ship/ship.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
+const Content = preload("res://scripts/data/content.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -23,19 +24,19 @@ const TOLERANCE := 0.15  ## how far mass and hull integrity may drift from the n
 ## very little"); the pirate and the rammer are the ships they were.
 const SHIPS := {
 	"Rustbucket": {
-		"path": "res://data/ships/starter_rustbucket.json", "mass": 733.0, "hull": 246.0, "frame": true,
-		"parts": {"bed": 2, "engine_scrap_mk1": 2, "fabricator": 1, "helm": 1, "oxygen_scrap_mk1": 1, "radiator": 1, "rattle_burst_scrap": 1, "reactor_mk2": 1},
-		"cargo": {"scrap": 500, "copper": 80, "polymer": 30, "shield_scrap_mk1": 1, "net_mouth_scrap": 1, "credits": 300, "fuel": 6},
+		"path": "res://data/ships/starter_rustbucket.json", "mass": 755.0, "hull": 246.0, "frame": true,
+		"parts": {"bed": 1, "bolt_thrower_scrap": 1, "engine_scrap_mk1": 2, "fabricator": 1, "helm": 1, "oxygen_scrap_mk1": 1, "rattle_burst_scrap": 1, "reactor_mk2": 1},
+		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "net_mouth_scrap": 1, "credits": 300, "fuel": 6},
 	},
 	"Courier": {
-		"path": "res://data/ships/starter_courier.json", "mass": 574.0, "hull": 168.0, "frame": true,
-		"parts": {"bed": 2, "engine_mk2": 2, "fabricator": 1, "helm": 1, "oxygen_gen": 1, "pulse_mk1": 1, "reactor_mk2": 1},
-		"cargo": {"scrap": 400, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "shield_mk1": 1, "credits": 500, "fuel": 6},
+		"path": "res://data/ships/starter_courier.json", "mass": 598.0, "hull": 168.0, "frame": true,
+		"parts": {"bed": 1, "engine_mk1": 2, "fabricator": 1, "helm": 1, "oxygen_gen": 1, "pulse_mk1": 1, "reactor_mk2": 1, "shield_mk1": 1},
+		"cargo": {"scrap": 250, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "credits": 500, "fuel": 6},
 	},
 	"Prism": {
-		"path": "res://data/ships/starter_prism.json", "mass": 451.0, "hull": 152.0, "frame": true,
-		"parts": {"bed": 2, "engine_neon_mk1": 1, "fabricator": 1, "heat_lance_neon": 1, "helm": 1, "oxygen_gen": 1, "radiator": 2, "reactor_neon_mk1": 1},
-		"cargo": {"scrap": 400, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "shield_neon_mk1": 1, "credits": 400, "fuel": 6},
+		"path": "res://data/ships/starter_prism.json", "mass": 461.0, "hull": 152.0, "frame": true,
+		"parts": {"bed": 1, "engine_neon_mk1": 1, "fabricator": 1, "heat_lance_neon": 1, "helm": 1, "oxygen_gen": 1, "radiator": 2, "reactor_neon_mk1": 1, "shield_neon_mk1": 1},
+		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "credits": 400, "fuel": 6},
 	},
 	"Pirate Raider": {
 		"path": "res://data/ships/pirate_raider.json", "mass": 732.0, "hull": 64.0,
@@ -148,7 +149,8 @@ func test_every_mount_sits_on_a_flat_wall_with_its_outside_half_in_space() -> vo
 			eq(plan["why"], "", name + ": the placement rules accept it")
 			eq([plan["anchor"], plan["link"]], [inst["anchor"], inst["link"]], name + ": and give the same inside half and link")
 			if def["family"] == "weapon":
-				eq(out, Vector2i.UP, name + ": guns face forward")
+				if not bool(Content.entry("weapons", inst["id"]).get("turret", false)):
+					eq(out, Vector2i.UP, name + ": fixed guns face forward (a turret may sit on a flank)")
 			else:
 				check(out != Vector2i.UP, name + ": an engine never pushes backwards")
 				rear += int(out == Vector2i.DOWN)

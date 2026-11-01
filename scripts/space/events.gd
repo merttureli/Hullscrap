@@ -33,6 +33,7 @@ const TraitSet = preload("res://scripts/crew/traits.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Characters = preload("res://scripts/crew/characters.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 
 const DIR := "res://data/events"
@@ -60,6 +61,7 @@ var files := {}  ## id -> the file it came from
 var order: Array[String] = []  ## ids, in file name order then file order
 var errors: Array[String] = []  ## problems met while loading (bad JSON, a missing id, a duplicate id)
 var _pages := {}  # id -> true for every event some outcome names in a goto
+var _recruiters := {}  # id -> "species" | "unique" | "ada" for every event some outcome of which adds crew (unique: a character)
 
 
 ## The events of data/events and the packs, loaded once (again if the content loader was pointed elsewhere).
@@ -94,6 +96,7 @@ func load_dir(dir: String) -> void:
 			_load_file(dir + "/" + f)
 	_load_logs()
 	_index_pages()
+	_index_recruiters()
 
 
 ## Remember which events are follow-up pages: every event some outcome names in a goto.
@@ -180,10 +183,48 @@ func is_page(id: String) -> bool:
 	return _pages.has(id) or str(events.get(id, {}).get("type", "")) == "page"
 
 
+## Remember which events add crew: "ada" when a recruit is Ada herself, "unique" when it is a unique character, else "species".
+func _index_recruiters() -> void:
+	_recruiters.clear()
+	var ada := str(_dict(CrewMember.config().get("ada")).get("name", ""))
+	for id in order:
+		var ev: Dictionary = events[id]
+		var effects: Array = [_dict(_dict(ev.get("after_win")).get("effects"))]
+		for ch in _list(ev.get("choices")):
+			for o in _list(_dict(ch).get("outcomes")):
+				effects.append(_dict(_dict(o).get("effects")))
+				effects.append(_dict(_dict(_dict(o).get("after_win")).get("effects")))
+		var kind := ""
+		for eff in effects:
+			for r in _list(eff.get("recruit")):
+				var rd := _dict(r)
+				if str(rd.get("name", "")) == ada:
+					kind = "ada"
+				elif rd.has("character"):
+					kind = "unique" if kind != "ada" else kind
+				elif kind == "":
+					kind = "species"
+		if kind != "":
+			_recruiters[id] = kind
+
+
+## The chance (data/drift.json `crew`) that event `id`, eligible at a pick, may be rolled at all: 1 for an event that adds no
+## crew and for Ada's; `unique_event` for one that brings a unique character; `station_event` for a station greeting that brings
+## an ordinary recruit and `species_event` for any other such event. A gate on the chance, not a weight, so an event that is
+## alone in its pool (a region's station greeting) is rarer too.
+func crew_factor(id: String, c) -> float:
+	var kind: String = _recruiters.get(id, "")
+	if kind == "" or kind == "ada":
+		return 1.0
+	var key := "unique_event" if kind == "unique" else ("station_event" if str(events[id].get("type", "")) == "station" else "species_event")
+	return float(_dict(c.cfg.get("crew")).get(key, 1.0))
+
+
 # --- picking ------------------------------------------------------------------------------------------
 
 ## The event that happens at `node` ({id, type, place}): a weighted roll with the campaign's rng among
-## the events of the node's type whose requirements hold and that have not been used up (`once`).
+## the events of the node's type whose requirements hold and that have not been used up (`once`). An event that adds crew
+## is in the pool only with the chance crew_factor() gives.
 ## `filter` (optional Callable(ev) -> bool) can narrow the pool further. {} when there is none.
 func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 	var pool: Array = []
@@ -194,6 +235,9 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 			continue
 		var w := _weight(ev.get("weight", DEFAULT_WEIGHT))
 		if w <= 0.0 or not eligible(ev, c, node, ship) or (filter.is_valid() and not filter.call(ev)):
+			continue
+		var gate := crew_factor(id, c)
+		if gate < 1.0 and c.rng.randf() >= gate:  # crew are rare: most of the time the event is not in the pool
 			continue
 		pool.append([ev, w])
 		total += w

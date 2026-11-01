@@ -667,7 +667,7 @@ func _breached(room_id: int) -> bool:
 func _controls_text() -> String:
 	if not build_on:
 		var tractor := "   Q hold: tractor" if ship != null and ship.components.instances.values().any(func(i): return str(ship.components.def(i["id"]).get("family", "")) == "tractor") else ""
-		return "WASD walk   click a marker: course   E at the helm: fly%s   middle-click send Ada   E door   O oxygen   P power   K fight (Shift+K rammer)   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom" % tractor
+		return "WASD walk   click a marker: course   E at the helm: fly%s   middle-click: send crew   E door   O oxygen   P power   K fight (Shift+K rammer)   M map   N new ship   B build   Ctrl+S/L save/load   wheel zoom" % tractor
 	var how := "LMB paint   Shift+LMB line   Ctrl+LMB rectangle   RMB remove"
 	if group == Group.TILES:
 		how = "LMB paint   Shift+LMB line   Ctrl+LMB rectangle (wall = room)   RMB remove" + ("   T shape" if grid.tile_flag(selected, "solid") else "")

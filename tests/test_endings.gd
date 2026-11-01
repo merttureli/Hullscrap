@@ -502,7 +502,7 @@ func test_the_hangar_lists_the_starters_and_their_locks() -> void:
 		by[e["id"]] = e
 	eq([by["starter_rustbucket"]["group"], by["starter_courier"]["group"], by["starter_prism"]["group"]], ["Clans", "Concord", "Lumen"], "the three starters sit under their factions (data/hangar.json)")
 	eq([by["starter_rustbucket"]["layout"], by["starter_rustbucket"]["unlock"]], ["A", ""], "layout A, open from the start")
-	check(by["starter_rustbucket"]["crew"].size() >= 3, "with its crew")
+	eq(by["starter_rustbucket"]["crew"].size(), 1, "with its crew: the soldier alone (playtest 2, A1)")
 	check(by["starter_rustbucket"]["blurb"].length() > 30, "and its pitch")
 	eq(Hangar.groups(list), ["Clans", "Concord", "Fixture", "Lumen", "Wisp"], "the tabs, in order")
 	eq(by["fx_tender"]["unlock"], "fx_tender", "a design's own hangar.unlock")

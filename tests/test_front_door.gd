@@ -36,6 +36,7 @@ func _clean() -> void:
 
 func _starter() -> Ship:
 	var s := Ship.from_design("res://data/ships/starter_courier.json")
+	s.crew_plan = [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Bram", "species": "basalt"}]  # (the real start is the soldier alone)
 	Jobs.spawn_crew(s)
 	return s
 

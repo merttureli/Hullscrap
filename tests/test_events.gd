@@ -12,9 +12,10 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 
 
-## The Rustbucket with its starting crew (the Soldier, Ada, Rook the Basalt and Juno the Fenn).
+## The Rustbucket with a crew of four for these tests (the Soldier, Ada, Rook the Basalt and Juno the Fenn: the real one starts alone).
 func _ship() -> Ship:
 	var s: Ship = Ship.from_design(RUSTBUCKET)
+	s.crew_plan = [{"name": "Soldier", "species": "human"}, {"name": "Ada", "species": "human"}, {"name": "Rook", "species": "basalt"}, {"name": "Juno", "species": "fenn"}]
 	Jobs.spawn_crew(s)
 	return s
 

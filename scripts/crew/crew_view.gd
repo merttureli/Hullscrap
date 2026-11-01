@@ -1,6 +1,6 @@
 extends Node2D
 ## Crew on the ship: the player's soldier (WASD; hold E next to a fire, breach, broken part or
-## downed crewmate to work on it), Ada (middle-click to send her) and the other NPCs, who find their
+## downed crewmate to work on it), the crewmate a middle-click sends (Ada, the selected one) and the other NPCs, who find their
 ## own jobs (jobs.gd, run by ShipSim, also during a fight). Left click (play mode) selects a crew member, who
 ## gets a ring, and G uses their special ability if they have one (crew_abilities.gd); the crew bar
 ## (crew_bar.gd) shows a card per crew member and takes clicks too. This node reads input, draws the people
@@ -82,13 +82,30 @@ func _unhandled_input(e: InputEvent) -> void:
 		selected = pick_at((make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL)  # empty floor clears the selection
 	elif e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_G and not e.ctrl_pressed and not e.meta_pressed and not build.combat:
 		press_ability()  # (in a fight combat_view.gd takes the key)
-	if ada == null:
-		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_MIDDLE:
+		var who := order_target()
+		if who == null:
+			return
 		var p: Vector2 = (make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL
-		var a := Pathfinder.nearest_walkable(_ship().grid, p, door_passable, Pathfinder.NO_CELL, ada.body_size)  # where her body can stand nearest the click
-		if a != Pathfinder.NO_CELL and (Pathfinder.centre_of(a, ada.body_size) - p).length() <= 1.5:
-			Jobs.order_move(_ship(), ada, a, door_passable)  # she leaves the job board alone for a while
+		var a := Pathfinder.nearest_walkable(_ship().grid, p, door_passable, Pathfinder.NO_CELL, who.body_size)  # where their body can stand nearest the click
+		if a != Pathfinder.NO_CELL and (Pathfinder.centre_of(a, who.body_size) - p).length() <= 1.5:
+			Jobs.order_move(_ship(), who, a, door_passable)  # they leave the job board alone for a while
+
+
+## Whom a middle-click sends: the selected crewmate (not the soldier), else Ada when she is aboard, else the first
+## crewmate who is not the soldier. Null when the soldier is alone.
+func order_target() -> CrewMember:
+	var ship = _ship()
+	if ship == null:
+		return null
+	if selected != null and ship.crew.has(selected) and not selected.is_player:
+		return selected
+	if ada != null and ship.crew.has(ada):
+		return ada
+	for m: CrewMember in ship.crew:
+		if not m.is_player:
+			return m
+	return null
 
 
 ## The crew member whose body centre is nearest to `p` (cell units) within PICK_RADIUS, or null.
@@ -223,8 +240,9 @@ func _draw() -> void:
 	if ship == null:
 		return
 	ShipView.draw_fire(self, ship.fires, _world(Vector2.ZERO), build.CELL, _clock)
-	if ada != null:
-		for c in ada.path:
+	var sent := order_target()
+	if sent != null:
+		for c in sent.path:
 			draw_circle(_world(Pathfinder.centre_of(c)), 3.0, Color(1, 0.65, 0.2, 0.35))
 	for m: CrewMember in ship.crew:
 		if not m.is_player:
