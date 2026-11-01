@@ -31,7 +31,7 @@ static func beams(ship, origin: Vector2) -> Array:
 		if int(def.get("power", 0)) < 0 and not powered.get(uid, false):
 			continue
 		var stats: Dictionary = def.get("stats", {})
-		out.append({"uid": uid, "id": inst["id"], "at": origin + Vector2(Mounts.barrel(def, inst["out_anchor"], inst["rot"])["pivot"]) * CELL,
+		out.append({"uid": uid, "id": inst["id"], "at": origin + Vector2(Mounts.barrel_of(def, inst)["pivot"]) * CELL,
 			"range": float(stats.get("tractor_range", 0.0)) + TraitSet.pull_bonus(ship, uid) * CELL, "pull": float(stats.get("tractor_pull", 0.0))})
 	return out
 

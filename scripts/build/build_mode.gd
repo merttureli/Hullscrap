@@ -91,6 +91,7 @@ var shape_mirror := false  ## and whether it is mirrored (Shift+R)
 var show_o2 := false
 var show_power := false
 var hover := Vector2i(-1, -1)
+var hover_pt := Vector2.INF  ## the pointer in grid coordinates (a hull mount snaps to a sloped face near it); only used while it is inside `hover`
 var message := ""
 var dragging := false
 var drag_button := 0
@@ -209,14 +210,25 @@ func _cell_of(e: InputEventMouse) -> Vector2i:
 	return cell_at((make_input_local(e) as InputEventMouse).position)
 
 
+func _point_of(e: InputEventMouse) -> Vector2:
+	return ((make_input_local(e) as InputEventMouse).position - _origin()) / CELL
+
+
+## The pointer in grid coordinates: the exact point while it is inside the hovered cell, else that cell's middle.
+func pointer() -> Vector2:
+	return hover_pt if hover_pt != Vector2.INF and Vector2i(hover_pt.floor()) == hover else Vector2(hover) + Vector2(0.5, 0.5)
+
+
 func _unhandled_input(e: InputEvent) -> void:
 	if ship == null or combat or (picker != null and picker.visible):
 		return
 	if e is InputEventMouseMotion:
 		hover = _cell_of(e)
+		hover_pt = _point_of(e)
 		_extend_path()
 	elif e is InputEventMouseButton:
 		hover = _cell_of(e)
+		hover_pt = _point_of(e)
 		if e.pressed:
 			match e.button_index:
 				MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT:
@@ -541,7 +553,7 @@ func _plan() -> Dictionary:
 				return session.plan_component_removal(hover)
 			if sel_component == "":
 				return {"changes": [], "error": "no systems in cargo"}
-			return session.plan_component(sel_component, hover, rot)
+			return session.plan_component(sel_component, hover, rot, pointer())
 		Group.CABLES:
 			return session.plan_cables(mode, remove, start, hover, path)
 		Group.BELTS:
@@ -854,7 +866,8 @@ func _draw_components() -> void:
 			var opts := {"powered": powered.get(uid, false), "time": _clock, "glow_out": _glow_quads}
 			if mount_fx.has(uid):
 				opts["fired_ago"] = fmod(_clock, 0.3)
-			Visuals.draw_mount_out(self, def, inst, _cells_rect(inst["out_cells"]), _pivot_px(def, inst["out_anchor"], inst["rot"]), CELL,
+			var out_rect := Visuals.slope_rect(def, inst, _origin(), CELL) if Mounts.is_angled(inst) else _cells_rect(inst["out_cells"])
+			Visuals.draw_mount_out(self, def, inst, out_rect, _origin() + Vector2(Mounts.barrel_of(def, inst)["pivot"]) * CELL, CELL,
 				mount_fx.get(uid, {}).get("aim", Vector2.ZERO), opts)
 
 
@@ -1006,6 +1019,10 @@ func _draw_ghost_system(g: Dictionary, tint: Color) -> void:
 func _draw_ghost_mount(g: Dictionary, tint: Color) -> void:
 	var id: String = g["id"]
 	var def: Dictionary = ship.components.def(id)
+	var slope: Dictionary = ship.components.plan_mount_at(grid, id, g["anchor"], g["rot"], g.get("point", Vector2.INF))
+	if slope.has("angle"):  # snapped to a sloped hull face
+		_draw_ghost_slope(def, slope, tint)
+		return
 	var out_cells := Mounts.rect_cells(Rect2i(g["anchor"], Mounts.turned(def["mount"]["outside"], g["rot"])))
 	var out_rect := _cells_rect(out_cells)
 	draw_rect(out_rect.grow(-1), Color(tint, 0.14))
@@ -1028,9 +1045,37 @@ func _draw_ghost_mount(g: Dictionary, tint: Color) -> void:
 	draw_rect(in_rect.grow(-1), tint, false, 2.0)
 
 
+## A hull mount about to be placed against a sloped face (`plan`: Components.plan_mount_at): the outside half turned to the
+## face, the wall cells it is mounted through lit, and, when the breech fits behind it, the inside half on the grid.
+func _draw_ghost_slope(def: Dictionary, plan: Dictionary, tint: Color) -> void:
+	var ok: bool = plan["why"] == ""
+	var ghost_inst := {"rot": plan["rot"], "angle": plan["angle"], "out_at": plan["at"]}
+	var corners := Mounts.out_polygon(plan["at"], float(plan["angle"]), float(def["mount"]["outside"][0]), float(def["mount"]["outside"][1]))
+	var px_poly := PackedVector2Array()
+	for v in corners:
+		px_poly.append(_origin() + v * CELL)
+	draw_colored_polygon(px_poly, Color(tint, 0.14))
+	Visuals.draw_mount_out(self, def, ghost_inst, Visuals.slope_rect(def, ghost_inst, _origin(), CELL), _origin() + Vector2(Mounts.barrel_of(def, ghost_inst)["pivot"]) * CELL, CELL, Vector2.ZERO, {"alpha": 0.6})
+	px_poly.append(px_poly[0])
+	draw_polyline(px_poly, tint, 2.0)
+	_draw_arrow(_origin() + (corners[0] + corners[1] + corners[2] + corners[3]) / 4.0 * CELL, Mounts.dir_of(ghost_inst), tint)
+	if not ok:
+		return
+	for c in plan["link"]:
+		draw_rect(cell_rect(c).grow(-5), Color(tint, 0.35))
+	var in_rect := _cells_rect(plan["cells"])
+	draw_rect(in_rect.grow(-1), Color(tint, 0.14))
+	Visuals.draw_component(self, in_rect, def, {"rot": plan["rot"]}, CELL, {"alpha": 0.6})
+	draw_rect(in_rect.grow(-1), tint, false, 2.0)
+
+
 ## The arrow on a system's ghost: the way it faces (a mount's outward side), turned with R.
 func _draw_facing(at: Vector2, rot: int, tint: Color) -> void:
-	var d := Vector2(Mounts.outward(rot))
+	_draw_arrow(at, Vector2(Mounts.outward(rot)), tint)
+
+
+## The same arrow along any unit vector `d` (a mount on a slope faces its true direction).
+func _draw_arrow(at: Vector2, d: Vector2, tint: Color) -> void:
 	var side := Vector2(-d.y, d.x)
 	var tip := at + d * CELL * 0.75
 	var pts := PackedVector2Array([tip, tip - d * CELL * 0.45 + side * CELL * 0.32, tip - d * CELL * 0.45 - side * CELL * 0.32])

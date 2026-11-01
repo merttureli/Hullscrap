@@ -75,8 +75,8 @@ func test_version_1_parts_load_as_new() -> void:
 	eq(c.load_dict(old), "", "a version 1 save loads")
 	var inst: Dictionary = c.instances[2]
 	eq([inst["hp"], inst["heat"], inst["status"]], [8, 0.0, "ok"], "full hp, cold, ok")
-	eq(c.to_dict()["version"], 4, "and saves as version 4")
-	eq(c.load_dict({"version": 5, "next_uid": 1, "instances": []}), "unsupported components version", "newer is refused")
+	eq(c.to_dict()["version"], Components.VERSION, "and saves as the current version")
+	eq(c.load_dict({"version": Components.VERSION + 1, "next_uid": 1, "instances": []}), "unsupported components version", "newer is refused")
 	var odd := {"version": 2, "next_uid": 3, "instances": [{"uid": 2, "id": "engine_mk1", "anchor": [4, 4], "rot": 0, "hp": 99, "heat": -5, "status": "exploded"}]}
 	eq(c.load_dict(odd), "", "odd state loads")
 	inst = c.instances[2]

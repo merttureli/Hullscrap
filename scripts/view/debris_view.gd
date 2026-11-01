@@ -16,6 +16,7 @@ const DriftDebris = preload("res://scripts/space/drift_debris.gd")
 const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
+const Mounts = preload("res://scripts/ship/mounts.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const POP_LIFE := 1.0  ## seconds a "+N material" pop floats and fades
 const POP_RISE := 48.0  ## world px it rises in that time
@@ -226,7 +227,8 @@ func _draw_top() -> void:
 		var opts := {"pulling": true, "time": _clock, "glow_out": quads}
 		var out_sheet = Art.component(str(inst["id"]) + "_out")
 		if out_sheet != null and out_sheet.has_anim("pulling"):
-			Visuals.draw_mount_out(_top, def, inst, _cells_rect(inst["out_cells"]), Vector2.ZERO, DriftDebris.CELL, Vector2.ZERO, opts)
+			var out_rect := Visuals.slope_rect(def, inst, Vector2.ZERO, DriftDebris.CELL) if Mounts.is_angled(inst) else _cells_rect(inst["out_cells"])
+			Visuals.draw_mount_out(_top, def, inst, out_rect, Vector2.ZERO, DriftDebris.CELL, Vector2.ZERO, opts)
 		var in_sheet = Art.component(str(inst["id"]))
 		if in_sheet != null and in_sheet.has_anim("pulling"):
 			Visuals.draw_component(_top, _cells_rect(inst["cells"]), def, inst, DriftDebris.CELL, opts)

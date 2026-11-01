@@ -22,12 +22,14 @@ extends RefCounted
 ## piece costs twice. A step is the list of what was really done: tiles {layer, cell, from, to}
 ## (+ "from_open" for a removed open door, "from_shape" / "to_shape" for a shaped cell; a door piece
 ## and a shaped piece are one entry per cell),
-## components {layer, uid, id, anchor (the inside half), rot, added, + out (the outside half's top-left) for a mount},
+## components {layer, uid, id, anchor (the inside half), rot, added, + out (the outside half's top-left) for a mount, + slope
+## (angle, at, ocells, link) for one on a slope},
 ## cables {layer, cell, added}, belts {layer, cell, added}; a component removal also has "stock" (the ammo it held, now in the cargo).
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
+const Mounts = preload("res://scripts/ship/mounts.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Belts = preload("res://scripts/sim/belts.gd")
@@ -189,11 +191,15 @@ func plan_piece(piece: String, tile: String, anchor: Vector2i, rot := 0, mirror 
 
 
 ## Place component `id` with its top-left cell on `anchor`, turned `rot` quarter turns. For a hull
-## mount `anchor` is the top-left cell of its outside half.
-func plan_component(id: String, anchor: Vector2i, rot: int) -> Dictionary:
+## mount `anchor` is the top-left cell of its outside half; `point` (the pointer in grid coordinates) lets a mount
+## that cannot go straight there snap to a sloped hull face near it (Components.plan_mount_at).
+func plan_component(id: String, anchor: Vector2i, rot: int, point := Vector2.INF) -> Dictionary:
 	if not grid.in_bounds(anchor):
 		return {"changes": [], "error": "outside the hull"}
-	return {"changes": [{"layer": "component", "id": id, "anchor": anchor, "rot": posmod(rot, 4)}], "error": ""}
+	var ch := {"layer": "component", "id": id, "anchor": anchor, "rot": posmod(rot, 4)}
+	if point != Vector2.INF:
+		ch["point"] = point
+	return {"changes": [ch], "error": ""}
 
 
 ## Remove the component covering `cell`.
@@ -402,7 +408,7 @@ func _stands_on(c: Vector2i, to: String, shape := {}) -> String:
 	if out_uid >= 0 and to != "":
 		return "a %s sticks out here" % parts.def(parts.instances[out_uid]["id"]).get("name", "system")
 	var link_uid: int = parts.link_at(c)
-	if link_uid >= 0 and (to == "" or not grid.tile_flag(to, "solid") or grid.tile_flag(to, "door") or not shape.is_empty()):
+	if link_uid >= 0 and (to == "" or not grid.tile_flag(to, "solid") or grid.tile_flag(to, "door") or not shape.is_empty() or (Mounts.is_angled(parts.instances[link_uid]) and not grid.shape_of(c).is_empty())):
 		return "a %s is mounted through this wall" % parts.def(parts.instances[link_uid]["id"]).get("name", "system")
 	if ship.belts.has(c) and (to == "" or grid.tile_flag(to, "solid")):
 		return "a belt runs here"
@@ -419,19 +425,21 @@ func _try_component(ch: Dictionary, step: Array) -> String:
 		var anchor: Vector2i = ch["anchor"]
 		var rot := int(ch.get("rot", 0))
 		var mount: bool = parts.is_mount(id)
-		var why: String = parts.can_place_mount(grid, id, anchor, rot) if mount else parts.can_place(grid, id, anchor, rot)
+		var plan: Dictionary = parts.plan_mount_at(grid, id, anchor, rot, ch.get("point", Vector2.INF)) if mount else {}
+		var why: String = plan["why"] if mount else parts.can_place(grid, id, anchor, rot)
 		if why != "":
 			return why
-		for c in (parts.plan_mount(grid, id, anchor, rot)["cells"] if mount else parts.footprint(id, anchor, rot)):
+		for c in (plan["cells"] if mount else parts.footprint(id, anchor, rot)):
 			if ship.belts.has(c):
 				return "a belt runs here"
 		if inventory.count(id) < 1:
 			return "no %s in cargo" % parts.def(id).get("name", id)
-		var new_uid: int = parts.place_mount(grid, id, anchor, rot) if mount else parts.place(grid, id, anchor, rot)
+		var new_uid: int = parts.place_planned(id, plan) if mount else parts.place(grid, id, anchor, rot)
 		inventory.add(id, -1)
-		var e := {"layer": "component", "uid": new_uid, "id": id, "anchor": parts.instances[new_uid]["anchor"], "rot": posmod(rot, 4), "added": true}
+		var e := {"layer": "component", "uid": new_uid, "id": id, "anchor": parts.instances[new_uid]["anchor"], "rot": parts.instances[new_uid]["rot"], "added": true}
 		if mount:
-			e["out"] = anchor
+			e["out"] = plan["out"]
+			e.merge(parts.slope_record(parts.instances[new_uid]))
 		step.append(e)
 		return ""
 	var uid: int = parts.any_at(ch["cell"])
@@ -441,6 +449,7 @@ func _try_component(ch: Dictionary, step: Array) -> String:
 	var e := {"layer": "component", "uid": uid, "id": inst["id"], "anchor": inst["anchor"], "rot": inst["rot"], "added": false}
 	if parts.has_outside(uid):
 		e["out"] = inst["out_anchor"]
+		e.merge(parts.slope_record(inst))
 	var held := Ammo.unload(ship, uid)  # a rack's ammo (and a gun's loaded units) go back to the cargo
 	if not held.is_empty():
 		e["stock"] = held
@@ -526,6 +535,7 @@ func _set_component(e: Dictionary, present: bool) -> void:
 		var rec := {"uid": e["uid"], "id": e["id"], "anchor": [e["anchor"].x, e["anchor"].y], "rot": e["rot"]}
 		if e.has("out"):
 			rec["out"] = [e["out"].x, e["out"].y]
+			rec.merge(e.get("slope", {}))
 		if e.has("stock"):  # it takes back what it held
 			var st: Dictionary = e["stock"]
 			Ammo.stock_into(rec, st)

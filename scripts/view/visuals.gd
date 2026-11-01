@@ -89,6 +89,9 @@ static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect
 	d2["size"] = mount["outside"]
 	d2["hp"] = mount["outside_hp"]
 	var i2 := {"rot": rot, "hp": out_hp, "heat": 0.0, "status": "disabled" if out_hp <= 0 else "ok", "uid": int(inst.get("uid", 0))}
+	var angled := Mounts.is_angled(inst)
+	if angled:  # on a slope: `rect` is the box about the outside half's middle and the art turns to the face
+		i2["face"] = inst["angle"]
 	var o2 := opts.duplicate()
 	var family := str(def.get("family", ""))
 	if family == "engine":
@@ -99,15 +102,28 @@ static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect
 		_draw_sheet(canvas, sheet, rect, d2, i2, cell_px, o2)
 	else:
 		var m := marks(d2, i2)
-		_draw_placeholder(canvas, rect.grow(-2), d2, cell_px, m, bool(o2.get("powered", true)), alpha)
-		canvas.draw_rect(rect.grow(-2), Color(0, 0, 0, 0.25 * alpha))
+		var flat := rect
+		if angled:  # the flat block, turned about its middle
+			flat = Rect2(-rect.size / 2.0, rect.size)
+			canvas.draw_set_transform_matrix(Transform2D(deg_to_rad(float(inst["angle"]) - rot * 90.0), rect.get_center()))
+		_draw_placeholder(canvas, flat.grow(-2), d2, cell_px, m, bool(o2.get("powered", true)), alpha)
+		canvas.draw_rect(flat.grow(-2), Color(0, 0, 0, 0.25 * alpha))
+		if angled:
+			canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 	if not family in BARRELS:
 		return
-	var dir := Vector2(Mounts.outward(rot))
+	var dir := Mounts.dir_of(inst)
 	if family == "radar" and aim == Vector2.ZERO and bool(opts.get("powered", true)):  # the dish turns by itself while it works
 		aim = Vector2.UP.rotated(float(opts.get("time", 0.0)) * DISH_SPIN)
 	var live := aim if aim != Vector2.ZERO and out_hp > 0 else dir  # a disabled barrel hangs along the mount
 	_draw_barrel(canvas, def, i2, pivot, cell_px, live, opts, Mounts.barrel(def, Mounts.NONE, rot)["reach"])
+
+
+## The screen rectangle of the outside half of a placed mount on a slope: the box of its quarter-turn size about its middle
+## (the art is turned about that middle). `origin`: where grid cell (0, 0) starts in the canvas' pixels.
+static func slope_rect(def: Dictionary, inst: Dictionary, origin: Vector2, cell_px: float) -> Rect2:
+	var r := Mounts.out_rect(def, inst)
+	return Rect2(origin + r.position * cell_px, r.size * cell_px)
 
 
 ## The barrel of weapon `def` about `pivot`, turned to point along `aim` (see draw_mount_out): its frame by the outside
@@ -254,7 +270,10 @@ static func _draw_sheet(canvas, sheet, rect: Rect2, def: Dictionary, inst: Dicti
 	var foot := Vector2(float(def["size"][0]), float(def["size"][1])) * cell_px
 	var k: Vector2 = Vector2.ONE * cell_px / SpriteSheet.SRC_CELL if sheet.cells != Vector2i.ZERO else foot / Vector2(sheet.frame)
 	var tint := Color(DIM, alpha) if st["dim"] else Color(1, 1, 1, alpha)
-	var xf := Transform2D(sheet.rot_total(int(inst.get("rot", 0))) * PI / 2.0, rect.get_center())
+	var turn: float = sheet.rot_total(int(inst.get("rot", 0))) * PI / 2.0
+	if inst.has("face"):  # the outside half of a mount on a slope: the quarter turn, then the rest of the way to the face
+		turn += deg_to_rad(float(inst["face"]) - posmod(int(inst.get("rot", 0)), 4) * 90.0)
+	var xf := Transform2D(turn, rect.get_center())
 	var at: Vector2 = -foot / 2.0 + sheet.offset * k  # the frame's top-left, in the turned frame
 	var dest := Rect2(at, Vector2(sheet.frame) * k)
 	var src: Rect2 = sheet.region(st["frame"])
