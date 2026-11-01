@@ -330,6 +330,8 @@ func test_every_species_has_its_rig_and_sidearm_art() -> void:
 		var def: Dictionary = table[id]
 		var m := CrewMember.new("X", Vector2.ZERO, id)
 		eq(m.rig(), def["rig"], id + ": the rig")
+		if bool(def.get("drone", false)):
+			continue  # a repair drone is drawn in code (PersonDrawer.draw_drone): it has no rig art
 		if ART_PENDING.has(id) and Art.crew(m.rig()) == null:
 			continue
 		check(Art.crew(m.rig()) != null, "%s: art/crew/%s/ is there" % [id, m.rig()])

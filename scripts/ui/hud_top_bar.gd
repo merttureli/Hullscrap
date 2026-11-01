@@ -39,6 +39,7 @@ func items() -> Array:
 	for n in ship.power_state.get("networks", []):
 		supply += float(n["supply"])
 		demand += float(n["demand"])
+	demand += float(ship.power_state.get("drones", {}).get("demand", 0.0))  # the repair drones draw from the surplus, with no cable
 	out.append({"id": "power", "text": "%s / %s" % [Palette.num(supply), Palette.num(demand)], "color": UiKit.GOOD if supply >= demand else UiKit.BAD,
 		"tip": "Power: supply / demand"})
 	var o2: Dictionary = b.player_o2()

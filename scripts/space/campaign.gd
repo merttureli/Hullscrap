@@ -1066,7 +1066,7 @@ func add_crew(ship, who: String, species: String, character := "") -> String:
 
 ## A random crew member who is not the player leaves for good. Returns their name, "" if there is none.
 func lose_crew(ship) -> String:
-	var others: Array = ship.crew.filter(func(m): return not m.is_player)
+	var others: Array = ship.crew.filter(func(m): return not m.is_player and not m.is_drone())  # (a drone is no crew)
 	if others.is_empty():
 		return ""
 	var gone = others[rng.randi() % others.size()]
@@ -1120,7 +1120,10 @@ func buy(ship, id: String, item: String, n := 1) -> Dictionary:
 	var each := stock_price(id, item, ship)
 	if each <= 0:
 		return {"ok": false, "text": "They don't sell that."}
-	return _purchase(ship, item, n, each * n, ship.crafting.name_of(item, ship.components))
+	var r := _purchase(ship, item, n, each * n, ship.crafting.name_of(item, ship.components))
+	if r["ok"]:
+		Jobs.launch_drones(ship)  # a repair drone bought goes aboard at once
+	return r
 
 
 func _purchase(ship, item: String, n: int, total: int, name: String) -> Dictionary:

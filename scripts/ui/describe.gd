@@ -130,7 +130,7 @@ static func _of_item(id: String) -> Dictionary:
 	var item: Dictionary = Content.entry("items", id)
 	var kind := str(item.get("kind", "")) if not item.is_empty() else ("material" if Content.has("materials", id) else "")
 	var blurb := str(item.get("blurb", Content.entry("materials", id).get("blurb", "")))
-	return {"does": str(data()["items"].get(kind, "")), "rows": [], "kinds": [], "notes": [], "lore": blurb}
+	return {"does": str(item.get("does", data()["items"].get(kind, ""))), "rows": [], "kinds": [], "notes": [], "lore": blurb}
 
 
 # --- stats -------------------------------------------------------------------------------------------------

@@ -12,6 +12,7 @@ extends RefCounted
 
 const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
+const Power = preload("res://scripts/sim/power.gd")
 const SEGMENTS := 20  ## points on a drawn ellipse
 const SCALE := 1.15  ## the figure below is drawn in units of this many cells: arms and legs reach about 3 cells across
 const STRIDE := PI  ## walk phase (radians) per cell walked: one full leg cycle every 2 cells
@@ -113,8 +114,12 @@ static func is_working(m, clock: float) -> bool:
 
 ## Draw a person centred on `centre_px`. `pose`: {species ("human"), move (angle they walk, radians,
 ## 0 = right), aim (angle the torso points), phase (walk phase, radians), moving, item (id or ""),
-## down, work (the tool jabs), helmet, head (the name of a head frame to wear), t (seconds)}. `palette`: "suit" colour tints the outfit.
+## down, work (the tool jabs), helmet, head (the name of a head frame to wear), t (seconds), drone (a repair
+## drone: draw_drone, with `off` for no power)}. `palette`: "suit" colour tints the outfit.
 static func draw(canvas, centre_px: Vector2, pose: Dictionary, palette: Dictionary, cell_px: float) -> void:
+	if pose.get("drone", false):
+		draw_drone(canvas, centre_px, pose, cell_px)
+		return
 	var sheet = art_of(pose)
 	if sheet == null:
 		var facing := float(pose.get("aim", pose.get("move", 0.0)))
@@ -198,6 +203,77 @@ static func _blit(canvas, l: Dictionary, tex: Texture2D, at: Vector2, k: float, 
 	var sh = l["sheet"]
 	canvas.draw_set_transform(at, l["angle"], Vector2(k, k))
 	canvas.draw_texture_rect_region(tex, Rect2(l["pos"], Vector2(sh.frame)), sh.region(l["frame"]), mod)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## What a crew view adds to the pose of `m` when it is a repair drone (merge it into the pose; {} for anyone else): `drone`, `off`
+## (no power) and `work` (it has a job and stands at it). `ship`: the one it is aboard.
+static func drone_extras(m, ship) -> Dictionary:
+	if not m.is_drone():
+		return {}
+	var busy: bool = not m.job.is_empty() and m.path.is_empty() and str(m.job.get("type", "")) != "rest"
+	return {"drone": true, "off": not m.is_down() and not Power.drone_fed(ship.power_state, m.name), "work": busy and not m.is_down()}
+
+
+## A repair drone, drawn in code (there is no art/crew/drone): a small hovering robot about one cell across, a round body with one lens
+## and a tool arm in front, turned to `pose.aim`. `pose`: aim (radians, 0 = right), t (seconds, for the hover), work (the arm jabs
+## and sparks), off (no power: a dark lens, no hover), down (broken: dark, low, no light). `cell_px` pixels a cell.
+static func draw_drone(canvas: CanvasItem, centre_px: Vector2, pose: Dictionary, cell_px: float) -> void:
+	var u := cell_px
+	var t := float(pose.get("t", 0.0))
+	var down: bool = pose.get("down", false)
+	var live: bool = not down and not pose.get("off", false)
+	var working: bool = live and pose.get("work", false)
+	var hover := (0.12 + sin(t * 3.0) * 0.04) * u if live else 0.0  # it rides above its shadow
+	var hull := Color("#a3b0c2") if live else Color("#6c7686")
+	var trim := hull.darkened(0.5)
+	var aim := float(pose.get("aim", pose.get("move", 0.0)))
+	_ellipse(canvas, Transform2D(0.0, centre_px + Vector2(0.05, 0.12) * u), Vector2.ZERO, Vector2(0.46 + hover / u * 0.3, 0.38) * u, SHADOW)
+	var at := centre_px - Vector2(0.0, hover)
+	var xf := Transform2D(aim, at)
+	for s in [-1.0, 1.0]:  # two thruster pods at the sides
+		_capsule(canvas, xf, Vector2(0.0, s * 0.42) * u, Vector2(-0.26, s * 0.42) * u, 0.085 * u, trim, true)
+		if live:
+			canvas.draw_circle(xf * (Vector2(-0.32, s * 0.42) * u), (0.05 + 0.02 * sin(t * 15.0 + s)) * u, Color("#7fd6ff", 0.85), true, -1.0, true)
+	var reach := 0.62 + (absf(sin(t * 9.0)) * 0.10 if working else 0.0)  # the arm: two joints and a claw, it jabs while it works
+	var elbow := Vector2(0.36, 0.20) * u
+	var tip := Vector2(reach, 0.06) * u
+	_capsule(canvas, xf, Vector2(0.22, 0.12) * u, elbow, 0.055 * u, trim, true)
+	_capsule(canvas, xf, elbow, tip, 0.05 * u, hull.darkened(0.2), true)
+	canvas.draw_arc(xf * tip, 0.075 * u, aim + 0.9, aim + TAU - 0.9, 8, hull.lightened(0.2), 0.04 * u, true)
+	canvas.draw_circle(at, 0.44 * u, Color(0, 0, 0, 0.4), true, -1.0, true)  # the round body: an edge, a rim, the plate and a glint
+	canvas.draw_circle(at, 0.40 * u, trim, true, -1.0, true)
+	canvas.draw_circle(at, 0.34 * u, hull, true, -1.0, true)
+	canvas.draw_circle(at + Vector2(-0.08, -0.09) * u, 0.15 * u, hull.lightened(0.18), true, -1.0, true)
+	canvas.draw_line(xf * (Vector2(-0.30, -0.10) * u), xf * (Vector2(-0.30, 0.10) * u), trim, 0.05 * u, true)  # a vent at the back
+	var lens := xf * (Vector2(0.14, 0.0) * u)  # the one lens, where it looks
+	canvas.draw_circle(lens, 0.15 * u, Color(0, 0, 0, 0.65), true, -1.0, true)
+	canvas.draw_circle(lens, 0.115 * u, Color("#46e4ff") if live else (Color("#3a2828") if down else Color("#26303c")), true, -1.0, true)
+	if live:
+		canvas.draw_circle(lens + Vector2(-0.03, -0.03) * u, 0.035 * u, Color(1, 1, 1, 0.85), true, -1.0, true)
+	if working:  # sparks at the claw
+		for i in 3:
+			var a := t * 21.0 + i * 2.1
+			if fposmod(a, 2.0) < 1.2:
+				canvas.draw_line(xf * tip, xf * (tip + Vector2(cos(a * 3.0), sin(a * 3.0)) * 0.16 * u), Color("#ffd24a"), maxf(1.0, 0.04 * u), true)
+	if down:  # a thread of smoke
+		for i in 3:
+			var rise := fposmod(t * 0.7 + i * 0.33, 1.0)
+			canvas.draw_circle(at + Vector2(sin(t + i) * 0.06, -0.15 - rise * 0.5) * u, (0.05 + rise * 0.06) * u, Color(0.7, 0.7, 0.72, 0.4 * (1.0 - rise)), true, -1.0, true)
+
+
+## A short label (a drone's "no power" or "broken") just above a body at `centre_px`, white on a dark plate so it reads on any floor.
+## It stays upright on the screen when the canvas is turned with the ship.
+static func draw_status(canvas: CanvasItem, centre_px: Vector2, text: String, cell_px: float) -> void:
+	if text == "":
+		return
+	var font := ThemeDB.fallback_font
+	var size := maxi(10, roundi(cell_px * 0.42))
+	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var at := Vector2(-w / 2.0, -cell_px * 0.78)
+	canvas.draw_set_transform(centre_px, -canvas.global_rotation if canvas is Node2D else 0.0, Vector2.ONE)
+	canvas.draw_rect(Rect2(at + Vector2(-3.0, -size), Vector2(w + 6.0, size + 4.0)), Color(0.04, 0.07, 0.11, 0.8))
+	canvas.draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color("#ffb347"))
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
