@@ -24,6 +24,7 @@ const GOLD := Color("#ffd24a")
 const KEY_OF := {KEY_SHIFT: "engine", KEY_SPACE: "shield", KEY_Q: "utility"}  ## keycode -> ability key
 const KEY_LABEL := {"engine": "SHIFT", "shield": "SPACE", "utility": "Q"}
 const FLASH_MS := 2200  ## how long a refusal stays in its slot
+const NAME_W := 104.0  ## px a slot's weapon name has (it starts 58 px in and stops short of the power dot)
 const DIAG := Vector2(132.0, 138.0)  ## the shield diagram's box
 const DIAG_RING := 33.0  ## its ring's radius
 const PIP := Color("#5fd4ff")
@@ -118,7 +119,8 @@ func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2) -> void:
 		draw_arc(c, 19.0, -PI / 2.0, -PI / 2.0 + TAU * done, 28, Color(col, 0.95), 4.0, true)
 	_text(str(number), c + Vector2(-4.0, 6.0), 17, TEXT)
 	var tags := Describe.weapon_tags(str(w["id"]))  # its kind (and AUTO) in their colours: the name takes the kind's
-	_text(str(w["name"]), at + Vector2(58.0, 20.0), 14, tags[0]["color"] if not tags.is_empty() else TEXT, SLOT.x - 64.0)
+	var shown := fit_name(str(w["name"]))
+	_text(shown["text"], at + Vector2(58.0, 20.0), shown["size"], tags[0]["color"] if not tags.is_empty() else TEXT, NAME_W)
 	var tx := 58.0
 	for k in tags:
 		_text(k["label"], at + Vector2(tx, 53.0), 10, k["color"])
@@ -131,7 +133,22 @@ func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2) -> void:
 		label += " %.1f" % st["cooldown_left"]
 	_text(label, at + Vector2(90.0, 39.0), 11, col)
 	var powered: bool = status not in ["unpowered", "disabled", "overheated", "malfunction", "wrecked"]
-	draw_circle(at + Vector2(SLOT.x - 12.0, 12.0), 4.0, READY if powered else BAD)
+	draw_circle(at + Vector2(SLOT.x - 7.0, 7.0), 3.5, READY if powered else BAD)
+
+
+## A weapon's name as the slot shows it: {size, text} - the font size (14 down to 10) that fits `max_w` px, else the name cut
+## short with an ellipsis at 10.
+static func fit_name(text: String, max_w := NAME_W) -> Dictionary:
+	var font := ThemeDB.fallback_font
+	var size := 14
+	while size > 10 and font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > max_w:
+		size -= 1
+	if font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > max_w:
+		var n := text.length()
+		while n > 1 and font.get_string_size(text.left(n).strip_edges() + "\u2026", HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > max_w:
+			n -= 1
+		text = text.left(n).strip_edges() + "\u2026"
+	return {"size": size, "text": text}
 
 
 ## One ability slot: key, name, a ring (time left while it runs, cooldown while it rests), its state and,
