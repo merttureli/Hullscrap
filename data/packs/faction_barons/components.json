@@ -4,7 +4,7 @@
 			"id": "gilded_lance",
 			"name": "Gilded Lance",
 			"blurb": "A laser in a gold-leaf housing, because a Baron's guns are looked at before they are fired. The leaf is real. So is the beam.",
-			"quirk": "Hits a tier above a Laser Mk2 (5 damage, and it punches through one more plate), but the gilt runs hot: every shot adds 9 heat, so it wants a radiator.",
+			"quirk": "Hits a tier above a Laser Mk2 (7.5 damage, and it punches through one more plate), but the gilt runs hot: every shot adds 9 heat, so it wants a radiator.",
 			"family": "weapon",
 			"line": "standard",
 			"tier": 3,

@@ -48,6 +48,8 @@ const OK_TINT := Color(0.35, 1, 0.45)
 const BAD_TINT := Color(1, 0.35, 0.35)
 const CABLE_COLOR := Color("#d98a4e")
 const BELT_COLOR := Color("#c9b878")
+const FRAME_FILL := Color("#141922")  ## the empty hull frame you can build in (build mode)
+const FRAME_LINE := Color(1, 1, 1, 0.08)
 const O2_EMPTY := Color("#ff3b3b")
 const O2_FULL := Color("#3b7bff")
 const BREACH_COLOR := Color("#ffb020")
@@ -102,6 +104,9 @@ var _clock := 0.0  # seconds, for the loops of the art
 var _glow: Node2D  # additive layer for the glow art
 var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
 var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state
+var _frame_key := -1  # hull.hash() the cached frame art below was made for
+var _frame_rects: Array[Rect2] = []  # the frame as long row runs (px from the grid's corner)
+var _frame_lines := PackedVector2Array()  # its grid lines, as long segments in pairs of points
 
 var ship: Ship:
 	get:
@@ -700,9 +705,7 @@ func _draw() -> void:
 		return
 	_glow_quads = []
 	if build_on:  # the empty frame you can build in shows only in build mode, not while flying
-		for c in grid.hull:
-			draw_rect(cell_rect(c), Color("#141922"))
-			draw_rect(cell_rect(c), Color(1, 1, 1, 0.05), false, 1.0)
+		_draw_frame()
 	var open_doors := ShipSim.open_door_cells(ship)  # doors someone opened, and doors a body is in
 	for c in grid.tiles:
 		_draw_tile(c, grid.tiles[c], open_doors)
@@ -720,6 +723,59 @@ func _draw() -> void:
 			_draw_ghost(g)
 	if _glow != null:
 		_glow.show_quads(_glow_quads)
+
+
+## The empty frame: a few long row runs and grid lines made once per hull (a round frame has 2600 cells), moved to the grid.
+func _draw_frame() -> void:
+	var key := grid.hull.hash()
+	if key != _frame_key:
+		_frame_key = key
+		_make_frame_art()
+	draw_set_transform(_origin())
+	for r in _frame_rects:
+		draw_rect(r, FRAME_FILL)
+	if not _frame_lines.is_empty():
+		draw_multiline(_frame_lines, FRAME_LINE, 1.0)
+	draw_set_transform(Vector2.ZERO)
+
+
+## Runs [from, to) of consecutive ints in `xs`.
+static func _runs(xs: Array) -> Array:
+	xs.sort()
+	var out := []
+	var i := 0
+	while i < xs.size():
+		var j := i
+		while j + 1 < xs.size() and xs[j + 1] == xs[j] + 1:
+			j += 1
+		out.append([xs[i], xs[j] + 1])
+		i = j + 1
+	return out
+
+
+## Fills _frame_rects and _frame_lines from the hull: each row's runs of cells, and every cell edge once, joined into long lines.
+func _make_frame_art() -> void:
+	var rows := {}  # y -> {x: true}: the cells
+	var across := {}  # y -> {x: true}: the unit edges along the line y (cell x to x + 1)
+	var down := {}  # x -> {y: true}: the unit edges along the line x
+	for c in grid.hull:
+		for m in [[rows, c.y, c.x], [across, c.y, c.x], [across, c.y + 1, c.x], [down, c.x, c.y], [down, c.x + 1, c.y]]:
+			if not m[0].has(m[1]):
+				m[0][m[1]] = {}
+			m[0][m[1]][m[2]] = true
+	_frame_rects = []
+	_frame_lines = PackedVector2Array()
+	for y in rows:
+		for r in _runs(rows[y].keys()):
+			_frame_rects.append(Rect2(Vector2(r[0], y) * CELL, Vector2(r[1] - r[0], 1) * CELL))
+	for y in across:
+		for r in _runs(across[y].keys()):
+			_frame_lines.append(Vector2(r[0], y) * CELL)
+			_frame_lines.append(Vector2(r[1], y) * CELL)
+	for x in down:
+		for r in _runs(down[x].keys()):
+			_frame_lines.append(Vector2(x, r[0]) * CELL)
+			_frame_lines.append(Vector2(x, r[1]) * CELL)
 
 
 ## Placeholder look: flat shapes until real art lands (see docs/PLAN.md, milestone 8).
