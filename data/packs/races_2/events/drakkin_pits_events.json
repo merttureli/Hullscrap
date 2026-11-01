@@ -8,7 +8,7 @@
           {"weight": 45, "text": "Your pick goes down in round one and stays there, peacefully, with a small smile. The Fenn takes your thirty with enormous sympathy.", "effects": {"items": {"credits": -30}}}
         ]},
         {"text": "Lie down in the sleeping pile for an hour.", "outcomes": [
-          {"weight": 100, "text": "You lie down on the grille among eleven snoring Drakkin. It is the warmest you have been since the Snap. A scale tickles your ear. You wake with a tail across your chest and an unaccountable sense of belonging, and your crew, who followed you, wake the same way.", "effects": {"crew_hp": 10}}
+          {"weight": 100, "text": "You lie down on the grille among eleven snoring Drakkin. It is the warmest you have been since the Snap. A scale tickles your ear. You wake with a tail across your chest and an unaccountable sense of belonging, and, according to its log, so does the drone.", "effects": {"crew_hp": 10}}
         ]},
         {"text": "[Drakkin] Take the bell.", "requires": {"species": "drakkin"}, "outcomes": [
           {"weight": 100, "text": "Your Drakkin lifts the great brass bell and rings it, and the whole station, which has only just settled, wakes and stares. 'The Pit remembers you,' says the dockmaster, delighted. 'A berth, a round of drinks, and a refit.' She slides a roll of bay credit across the table, and her people patch your hull while you drink.", "effects": {"items": {"credits": 50}, "hull": 10, "rep": {"clans": 2}}}
@@ -64,7 +64,7 @@
       "text": "Hotplate Dag's Warm Goods has set up on the sunward side of an old cooling tower. The stall is a field of heated bricks laid out like loaves, each with a tag: WARM. WARMER. VERY WARM. DO NOT SIT ON. A line of cold Drakkin shuffles along it with their tails dragging, paying in whatever they have. 'Fuel,' says Dag. 'I take fuel. Or credit. Or you tell me a story that makes me cry, and I give you a brick.'",
       "choices": [
         {"text": "Buy a warm brick (15 credits).", "requires": {"credits": 15}, "outcomes": [
-          {"weight": 100, "text": "The brick goes under the mess table. For a week your crew's feet are warm, dinner is a pleasure, and nobody remembers why they were so short with each other.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+          {"weight": 100, "text": "The brick goes under the mess table. For a week your feet are warm, dinner is a pleasure, and you cannot remember why you were so short with everyone.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
         ]},
         {"text": "Tell him a story that makes him cry.", "outcomes": [
           {"weight": 40, "text": "It is the one about your first ship, and the first wall you fell through. Dag cries into his apron and gives you a brick and a hug that goes on a while.", "effects": {"items": {"fuel": 1}, "crew_hp": 5}},
@@ -92,7 +92,7 @@
           {"weight": 100, "text": "Your Drakkin looks at the pile, looks at you, and lies down on the end of the heap. Within a minute they are snoring. Hissa, the eldest, wakes and squints at the stranger on her rock. 'You're one of us,' she says, slow and slurred. 'I'll come with you. Wake me for breakfast.' The pile takes a while to forgive the lost warmth, but the tug's parts are yours.", "effects": {"recruit": {"species": "drakkin", "name": "Hissa"}, "items": {"scrap": 30, "copper": 15}}}
         ]},
         {"text": "Leave them to sleep.", "outcomes": [
-          {"weight": 100, "text": "You back away from a tug full of sleeping children, which is, you feel, the right call. Your crew are kinder to each other for an hour.", "effects": {"crew_hp": 5}}
+          {"weight": 100, "text": "You back away from a tug full of sleeping children, which is, you feel, the right call. You are kinder to yourself for an hour.", "effects": {"crew_hp": 5}}
         ]}
       ]
     },

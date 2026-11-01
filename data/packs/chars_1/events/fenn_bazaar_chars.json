@@ -1,7 +1,7 @@
 {"events": [
     {
       "id": "char_haggit_free_valuation", "type": "trader", "weight": 24, "once": true, "requires": {"region": "fenn_bazaar"},
-      "text": "A stall the size of a coffin sells nothing at all. Its owner, a Fenn in a waistcoat with eleven pockets, offers you a free valuation of your ship. 'Free,' he says, 'meaning I look, I tell you, and you wonder how I knew.' He looks. 'Hull is good but your reactor is lying about its age. Your third crew member is wondering about quitting. You paid too much for those radiators, and your last trading partner had a thumb on the scale.' All of this is true. He smiles like a drawer opening.",
+      "text": "A stall the size of a coffin sells nothing at all. Its owner, a Fenn in a waistcoat with eleven pockets, offers you a free valuation of your ship. 'Free,' he says, 'meaning I look, I tell you, and you wonder how I knew.' He looks. 'Hull is good but your reactor is lying about its age. Your drone is wondering about quitting. You paid too much for those radiators, and your last trading partner had a thumb on the scale.' All of this is true. He smiles like a drawer opening.",
       "choices": [
         {"text": "Hire him on the spot (140 credits).", "requires": {"credits": 140, "pay": true}, "outcomes": [
           {"weight": 100, "text": "He bites the coin, a ritual no coin has ever failed, and writes your name in a ledger with a very small pen. 'Haggit,' he says. 'Appraiser. I will tell you what everything is worth, including the people who owe you. Especially them.'", "effects": {"recruit": {"character": "haggit"}}}

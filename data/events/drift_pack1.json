@@ -66,7 +66,7 @@
         {"text": "Haul the pod aboard.", "outcomes": [
           {"weight": 45, "text": "They thank you in riddles and leave a handful of crystal on the floor, as if it were nothing. To them it probably is.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}}},
           {"weight": 25, "text": "The researcher steps out of the pod, looks around your ship, and says 'Yes. This one.' They intend to stay.", "effects": {"recruit": {"species": "emberkin"}, "rep": {"lumen": 1}}},
-          {"weight": 30, "text": "The counting spreads. For an hour your whole crew counts under their breath, and no one will say what. Everyone gets a headache that tastes of copper.", "effects": {"crew_hp": -10, "items": {"crystal": 2}, "rep": {"lumen": 2}}}
+          {"weight": 30, "text": "The counting spreads. For an hour you count under your breath, and you will not say what. You get a headache that tastes of copper.", "effects": {"crew_hp": -10, "items": {"crystal": 2}, "rep": {"lumen": 2}}}
         ]},
         {"text": "[Prism Core] Let your reactor answer the hum.", "requires": {"component": "reactor_neon_mk1"}, "outcomes": [
           {"weight": 70, "text": "The Prism Core rings back, and the pod brightens like a face in recognition. A blueprint appears on your console, uninvited and neat.", "effects": {"blueprint": "shield_neon_mk1", "rep": {"lumen": 3}}},
@@ -274,7 +274,7 @@
           {"weight": 8, "text": "Under the yacht's racing livery, a nozzle the size of a barrel and the name AFTERBURNER stencilled on it in cheerful paint.", "effects": {"items": {"afterburner": 1}}}
         ]},
         {"text": "[Breach Harpoon] Reel the whole friendship home and strip it at your leisure.", "requires": {"component": "breach_harpoon"}, "outcomes": [
-          {"weight": 100, "text": "The harpoon bites, the rope tightens, and the whole bad idea comes home with you. You spend a week strip-mining it, and the crew sing the entire time.", "effects": {"items": {"scrap": 100, "copper": 20, "titanium": 6}}}
+          {"weight": 100, "text": "The harpoon bites, the rope tightens, and the whole bad idea comes home with you. You spend a week strip-mining it, and sing the entire time.", "effects": {"items": {"scrap": 100, "copper": 20, "titanium": 6}}}
         ]},
         {"text": "[Suit] Cut the yacht captain's safe out of the hull, outside.", "requires": {"trait": "suit"}, "outcomes": [
           {"weight": 60, "text": "The safe is rated for fire, flood and divorce. You cut it free at the weld and carry it in like a baby.", "effects": {"items": {"credits": 90}}},
@@ -390,7 +390,7 @@
           {"weight": 100, "text": "She listens to the end without interrupting, then says, very quietly, 'So we're not going home.' She signs on anyway, and does not ask to see the other pods again.", "effects": {"recruit": {"species": "human", "name": "Maud"}, "rep": {"clans": 1}}}
         ]},
         {"text": "Tell her it's only been a few days.", "outcomes": [
-          {"weight": 60, "text": "She nods, believes you, and spends a happy afternoon fixing your coolant lines. The lie sits in the room like a third crew member.", "effects": {"recruit": {"species": "human", "name": "Maud"}}},
+          {"weight": 60, "text": "She nods, believes you, and spends a happy afternoon fixing your coolant lines. The lie sits in the room like a third person.", "effects": {"recruit": {"species": "human", "name": "Maud"}}},
           {"weight": 40, "text": "She checks your clock, your hair and your age, and decides you are lying. She takes the job on principle, and the wrench along with it.", "effects": {"recruit": {"species": "human", "name": "Maud"}, "crew_hp": -10}}
         ]},
         {"text": "Ask her what she remembers before the pods.", "outcomes": [
@@ -502,7 +502,7 @@
       "text": "A ship sits in the lane, outline only, as if drawn on the dark in light. The scanner insists it is four hundred metres away and also inside you. The name glows and fades along its flank: Afterimage.",
       "choices": [
         {"text": "Fly through it.", "outcomes": [
-          {"weight": 55, "text": "You pass through a ship made of nothing, and the nothing passes through you. Every crew member sees something different and none will say what.", "effects": {"crew_hp": -10, "items": {"crystal": 3}}},
+          {"weight": 55, "text": "You pass through a ship made of nothing, and the nothing passes through you. You see something of your own in it, and do not say what.", "effects": {"crew_hp": -10, "items": {"crystal": 3}}},
           {"weight": 35, "text": "The outline closes round you like a held breath, then lets you go, dimmer, and you a little richer.", "effects": {"items": {"plasma_cell": 2, "crystal": 2}}},
           {"weight": 10, "text": "Where the bow would be, a veil of glass hangs, folded small. It comes with you like it was always yours.", "effects": {"items": {"mirror_veil": 1}}}
         ]},
@@ -592,17 +592,17 @@
     },
     {
       "id": "empty_card_game", "type": "empty", "weight": 10, "once": false, "requires": {},
-      "text": "Nothing out here but you, the stars and eleven hours of quiet. Somebody drags a crate into the mess and deals from a deck that's been missing three cards since the Snap.",
+      "text": "Nothing out here but you, the stars and eleven hours of quiet. You drag a crate into the mess and deal from a deck that's been missing three cards since the Snap.",
       "choices": [
         {"text": "Sit in, for stakes (15 credits).", "requires": {"credits": 15}, "outcomes": [
-          {"weight": 45, "text": "You win, narrowly, on a hand that shouldn't have worked. Someone accuses the dealer of cheating. Someone is right.", "effects": {"items": {"credits": 25}}},
-          {"weight": 55, "text": "You lose, gracefully and with swearing. The whole crew have never been happier.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+          {"weight": 45, "text": "You win, narrowly, on a hand that shouldn't have worked. You accuse the dealer of cheating. The dealer is you.", "effects": {"items": {"credits": 25}}},
+          {"weight": 55, "text": "You lose, gracefully and with swearing. You have never been happier.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
         ]},
         {"text": "[Basalt] Let your Basalt deal. Nobody can read them.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 100, "text": "Your Basalt plays a perfectly even game, with a face like a rock, which it is. The crew lose their stakes into the ship's fund and thank them for it.", "effects": {"items": {"credits": 30}, "crew_hp": 10}}
         ]},
         {"text": "Watch from the doorway.", "outcomes": [
-          {"weight": 100, "text": "You watch them play for an hour without saying much. It's one of the better hours of the trip.", "effects": {"crew_hp": 10}}
+          {"weight": 100, "text": "You watch the dealt hands for an hour without saying much. It's one of the better hours of the trip.", "effects": {"crew_hp": 10}}
         ]}
       ]
     },

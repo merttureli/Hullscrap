@@ -109,7 +109,7 @@
           {"weight": 100, "text": "You sit with the elders and listen. The note is steady, huge and kind. It does not change, and does not ask. When you leave, the foreman gives you a sack of ore and a squeeze of the arm, and you carry the note with you for the rest of the day.", "effects": {"items": {"titanium": 3}, "crew_hp": 10}}
         ]},
         {"text": "Open the doors and take a core sample.", "outcomes": [
-          {"weight": 50, "text": "The doors give. The note grows, sweet and huge, until it fills the whole gallery and every one of your crew has to sit down. A shining shard comes out of the wall and drops into your hand, warm as an egg. The elders are not pleased.", "effects": {"items": {"plasma_cell": 1, "crystal": 2}, "rep": {"clans": -2}, "crew_hp": -5}},
+          {"weight": 50, "text": "The doors give. The note grows, sweet and huge, until it fills the whole gallery and you have to sit down. A shining shard comes out of the wall and drops into your hand, warm as an egg. The elders are not pleased.", "effects": {"items": {"plasma_cell": 1, "crystal": 2}, "rep": {"clans": -2}, "crew_hp": -5}},
           {"weight": 50, "text": "The note stops. The wall is quiet, and a little dull. The elders turn from you, slowly, and you understand that something has been taken that cannot be put back.", "effects": {"rep": {"clans": -2}, "crew_hp": -10}}
         ]},
         {"text": "[Murrow] Put your claws on the wall and hum back.", "requires": {"species": "murrow"}, "outcomes": [

@@ -60,7 +60,7 @@
       "text": "A Fenn in a long coat has opened a stall on a spar between two shelves: PRE-SNAP CHARTS. AUTHENTIC. SLIGHTLY USED. NO REFUNDS. The charts hang on strings, one for each lane of the old Lattice, in a long handsome pennant. They all have the same coffee ring.",
       "choices": [
         {"text": "Buy a chart (30 credits).", "requires": {"credits": 30}, "outcomes": [
-          {"weight": 55, "text": "The chart is a fine thing and a fake. The crew hang it in the mess anyway, where it makes everyone feel better about the distance.", "effects": {"items": {"credits": -30}, "crew_hp": 5}},
+          {"weight": 55, "text": "The chart is a fine thing and a fake. You hang it in the mess anyway, where it makes you feel better about the distance.", "effects": {"items": {"credits": -30}, "crew_hp": 5}},
           {"weight": 45, "text": "The chart is real, to everyone's surprise, including the Fenn's. He looks briefly ill about it. The lane at the end of it has a trader on it.", "effects": {"items": {"credits": -30}, "reveal": "trader"}}
         ]},
         {"text": "Haggle on the coffee ring.", "outcomes": [

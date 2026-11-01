@@ -7,7 +7,7 @@
           {"weight": 100, "text": "A canvas roll of cutting tips, two hooks, a coil of line and a small wedge for doors. The aunt weighs your money and throws in a lock, 'for luck'. The teenager watches the roll as if it were a prison sentence, packed neatly.", "effects": {"items": {"credits": -40, "scrap": 35, "polymer": 10}}}
         ]},
         {"text": "Ask her about the cooking.", "outcomes": [
-          {"weight": 100, "text": "She lights up like a stove. She tells you about a stew made on a torch, with three kinds of pepper and a smoky glaze, and you find that you are being fed on the crate, on a plate made of an old shield. It is the best meal you have had since the Snap. Your crew come out of the barge with their eyes shining.", "effects": {"crew_hp": 15}}
+          {"weight": 100, "text": "She lights up like a stove. She tells you about a stew made on a torch, with three kinds of pepper and a smoky glaze, and you find that you are being fed on the crate, on a plate made of an old shield. It is the best meal you have had since the Snap. You come out of the barge with your eyes shining.", "effects": {"crew_hp": 15}}
         ]},
         {"text": "Offer her a place in your galley (60 credits to the aunt).", "requires": {"credits": 60}, "outcomes": [
           {"weight": 100, "text": "The aunt names a price, because a family does not give anyone away for free, and you pay it. She looks at her niece's face for a long moment, and sighs from somewhere near her boots. 'Fine,' she says. 'She can cut vegetables.' Sabine hugs the aunt hard, climbs onto your ship with both torches in a bag, and begins, at once, to inspect the stove.", "effects": {"items": {"credits": -60}, "recruit": {"species": "sable", "name": "Sabine"}}}
@@ -45,7 +45,7 @@
       "text": "The raiders have hired a Sable boarding crew: eight lean figures in dark coats stand in a boarding tube with a cutter torch on each forearm, their faces calm. 'Yours truly,' says the raider captain over the comm, 'has hired the best.' The Sable at the head of the line looks at your hull, your name painted on it, and the weapons on your side. She frowns, very slightly, like a customer counting change. Torches are lit down the line, a row of small hard stars.",
       "choices": [
         {"text": "Hold the airlock against them.", "outcomes": [
-          {"weight": 100, "text": "You seal the lock and pull every crew member in front of it with whatever they can hold. The lead boarder shrugs, as at weather, and the torches come up.", "effects": {"fight": "tier"}}
+          {"weight": 100, "text": "You seal the lock and stand in front of it with whatever you can hold. The lead boarder shrugs, as at weather, and the torches come up.", "effects": {"fight": "tier"}}
         ]},
         {"text": "Outbid the captain (60 credits).", "requires": {"credits": 60}, "outcomes": [
           {"weight": 60, "text": "The lead boarder's eyebrows go up. 'We do not sign on twice,' she says, 'but we do read the small print.' She turns her torches off, one at a time. The captain screams over the comm. The Sable file back into their own cutter and, as a courtesy, drop a coil of cable and a few tips in your lock.", "effects": {"items": {"credits": -60, "scrap": 40, "titanium": 3}}},

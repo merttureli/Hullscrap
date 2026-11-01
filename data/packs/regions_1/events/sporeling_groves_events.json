@@ -4,8 +4,8 @@
       "text": "The Grove dock is a hollowed hulk grown over with moss and pale ferns, lit by glowing caps. The dockhand is a Sporeling called Lull, who greets you with a gentle puff of spores and an apology. 'Sorry about the smell,' they say. 'It is the good smell. It is the smell of something becoming something else.'",
       "choices": [
         {"text": "Breathe deep.", "outcomes": [
-          {"weight": 80, "text": "The spores are warm and damp and faintly sweet, and the crew have not slept this well in a month. The air tastes of rain and bread.", "effects": {"crew_hp": 10, "unlock": "ship_sporeling_first_bloom"}},
-          {"weight": 20, "text": "The spores tickle. Everyone sneezes, in sequence, for an hour. The dockhand apologises for each sneeze in turn.", "effects": {"crew_hp": 5, "unlock": "ship_sporeling_first_bloom"}}
+          {"weight": 80, "text": "The spores are warm and damp and faintly sweet, and you have not slept this well in a month. The air tastes of rain and bread.", "effects": {"crew_hp": 10, "unlock": "ship_sporeling_first_bloom"}},
+          {"weight": 20, "text": "The spores tickle. You sneeze, in sequence, for an hour. The dockhand apologises for each sneeze in turn.", "effects": {"crew_hp": 5, "unlock": "ship_sporeling_first_bloom"}}
         ]},
         {"text": "Hold your breath and hurry.", "outcomes": [
           {"weight": 100, "text": "Lull takes this in stride. 'Many do,' they say, kindly, and hold the lamp for you. You come out a little blue, and unharmed.", "effects": {"unlock": "ship_sporeling_first_bloom"}}
@@ -47,8 +47,8 @@
           {"weight": 15, "text": "Hidden in the roots: a medbay, intact, with a locker of nanite paste.", "effects": {"items": {"nanite_paste": 2, "polymer": 15}, "log": "log_grove_long_weekend"}}
         ]},
         {"text": "Harvest the fruiting bodies.", "outcomes": [
-          {"weight": 70, "text": "The mushroom trees drop their fruit at the first touch. They are edible, filling, and faintly luminous. The crew eat well, glow slightly, and complain of nothing.", "effects": {"items": {"polymer": 10}, "crew_hp": 15}},
-          {"weight": 30, "text": "One of the mushrooms is not edible. The crew learn which, collectively.", "effects": {"items": {"polymer": 10}, "crew_hp": -10}}
+          {"weight": 70, "text": "The mushroom trees drop their fruit at the first touch. They are edible, filling, and faintly luminous. You eat well, glow slightly, and complain of nothing.", "effects": {"items": {"polymer": 10}, "crew_hp": 15}},
+          {"weight": 30, "text": "One of the mushrooms is not edible. You learn which, the hard way.", "effects": {"items": {"polymer": 10}, "crew_hp": -10}}
         ]},
         {"text": "[Sporeling] Ask the forest to let you in.", "requires": {"species": "sporeling"}, "outcomes": [
           {"weight": 100, "text": "Your Sporeling stands at the airlock and hums to the moss. The roots part like a curtain. Deep in the forest they find the freighter's reactor, perfectly preserved, wrapped in ferns. 'It was kept,' says your Sporeling. 'It was looked after.'", "effects": {"items": {"copper": 25, "polymer": 25, "scrap": 30}, "crew_hp": 5, "log": "log_grove_long_weekend"}}
@@ -63,8 +63,8 @@
       "text": "A Sporeling market run from a floating hollow tree: stalls of dried caps, jars of pickled spores, tea made from something that was alive this morning. The stallholder, Nettle, offers you a tasting spoon and a warning. 'Everything here is edible,' she says. 'Some of it is also a story.'",
       "choices": [
         {"text": "Buy a basket of dried caps (20 credits).", "requires": {"credits": 20}, "outcomes": [
-          {"weight": 85, "text": "Good eating, light as paper, with a taste like bread and old books. The crew eat them for a week and sleep like stones.", "effects": {"items": {"credits": -20, "polymer": 10}, "crew_hp": 15}},
-          {"weight": 15, "text": "One of the caps whispers. Nobody mentions it. Everybody hears.", "effects": {"items": {"credits": -20, "polymer": 10}, "crew_hp": 5}}
+          {"weight": 85, "text": "Good eating, light as paper, with a taste like bread and old books. You eat them for a week and sleep like a stone.", "effects": {"items": {"credits": -20, "polymer": 10}, "crew_hp": 15}},
+          {"weight": 15, "text": "One of the caps whispers. You do not mention it. You heard.", "effects": {"items": {"credits": -20, "polymer": 10}, "crew_hp": 5}}
         ]},
         {"text": "Trade 15 polymer for spore tea.", "requires": {"items": {"polymer": 15}}, "outcomes": [
           {"weight": 100, "text": "Nettle weighs the polymer, nods, and fills a flask with something amber, warm, and faintly lit from within. 'Drink it slow,' she says. It tastes of rain and rust and your grandmother.", "effects": {"items": {"polymer": -15}, "crew_hp": 20}}
@@ -145,7 +145,7 @@
       "choices": [
         {"text": "Tend the reactor for a shift.", "outcomes": [
           {"weight": 55, "text": "You water, prune and fan the bloom for six hours, and it purrs. The room gets a little stuffy, then very stuffy; the seedlings help. Morel inspects you at the end and says, with wonder, 'You have the hands.' She gives you the schematics.", "effects": {"crew_hp": -5, "flag": "tech_bloom_reactor", "unlock": "ship_sporeling_mycelium_wall"}},
-          {"weight": 45, "text": "The reactor drinks the room dry in the third hour. The crew come out gasping and the seedlings are very smug. Morel is not displeased. 'Everybody does that once,' she says, and hands over the schematics.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_bloom_reactor", "unlock": "ship_sporeling_mycelium_wall"}}
+          {"weight": 45, "text": "The reactor drinks the room dry in the third hour. You come out gasping and the seedlings are very smug. Morel is not displeased. 'Everybody does that once,' she says, and hands over the schematics.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_bloom_reactor", "unlock": "ship_sporeling_mycelium_wall"}}
         ]},
         {"text": "[Sporeling] Tend it with the Grove.", "requires": {"species": "sporeling"}, "outcomes": [
           {"weight": 100, "text": "Your Sporeling kneels by the bloom and hums, and the reactor hums back. The room never gets stuffy. The fern walls breathe out, the bloom breathes in, and for six hours the Grove is a single quiet organism. Morel gives your Sporeling the schematics, a seedling and a blessing.", "effects": {"items": {"polymer": 20, "crystal": 2}, "rep": {"lumen": 1}, "crew_hp": 10, "flag": "tech_bloom_reactor", "unlock": "ship_sporeling_mycelium_wall"}}
@@ -184,7 +184,7 @@
       "choices": [
         {"text": "Cut a seam of the rich ore.", "outcomes": [
           {"weight": 70, "text": "The ore is dark, dense, and smells of earth and rain. It yields quietly under the cutters, and the moss grows back over the scar almost at once.", "effects": {"items": {"copper": 15, "silicon": 6, "scrap": 20}}},
-          {"weight": 30, "text": "A hidden vein of old spore-gas pops and fogs the lane. The crew come up giggling for an hour.", "effects": {"items": {"silicon": 4, "scrap": 10}, "crew_hp": 5}}
+          {"weight": 30, "text": "A hidden vein of old spore-gas pops and fogs the lane. You come up giggling for an hour.", "effects": {"items": {"silicon": 4, "scrap": 10}, "crew_hp": 5}}
         ]},
         {"text": "Help the gardener turn the soil.", "outcomes": [
           {"weight": 100, "text": "Three hours with a spade, in the dirt, with the gardener telling stories about the rock's last ten thousand years. At the end you are muddy, content, and carrying a little pot of black soil. The gardener says it is worth more than gold. It is mud, but you believe her.", "effects": {"items": {"nanite_paste": 1, "polymer": 10}, "crew_hp": 10}}
@@ -221,8 +221,8 @@
         ]},
         {"text": "Fly through the storm for the gold dust.", "requires": {"crew_max": 0}, "outcomes": [
           {"weight": 40, "text": "The dust is fine, glowing and strange. You scoop it up in the intakes and come out the other side with a hold of spores and a headache that lasts a week.", "effects": {"items": {"nanite_paste": 2, "crystal": 3, "polymer": 20}, "crew_hp": -15, "log": "log_grove_spore_storm"}},
-          {"weight": 30, "text": "The storm shows each of you your worst day. You live through it. The dust you collect is worth a fortune.", "effects": {"items": {"nanite_paste": 3, "crystal": 4}, "crew_hp": -20, "log": "log_grove_spore_storm"}},
-          {"weight": 20, "text": "The storm shows each of you your best day. Nobody wants to leave. It takes both hands pulling on the helm to get out.", "effects": {"items": {"crystal": 3, "polymer": 20}, "crew_hp": -10, "hull": -10, "log": "log_grove_spore_storm"}},
+          {"weight": 30, "text": "The storm shows you your worst day. You live through it. The dust you collect is worth a fortune.", "effects": {"items": {"nanite_paste": 3, "crystal": 4}, "crew_hp": -20, "log": "log_grove_spore_storm"}},
+          {"weight": 20, "text": "The storm shows you your best day. You do not want to leave. It takes both hands pulling on the helm to get out.", "effects": {"items": {"crystal": 3, "polymer": 20}, "crew_hp": -10, "hull": -10, "log": "log_grove_spore_storm"}},
           {"weight": 10, "text": "The storm sings to you, and you walk toward it, smiling. You come back to the helm a day later, with the dust, a hold two crates lighter and a smile you cannot account for.", "effects": {"items": {"nanite_paste": 3, "crystal": 4, "scrap": -25}, "crew_hp": -15, "log": "log_grove_spore_storm"}}
         ]},
         {"text": "[Sporeling] Call the storm down.", "requires": {"species": "sporeling"}, "outcomes": [

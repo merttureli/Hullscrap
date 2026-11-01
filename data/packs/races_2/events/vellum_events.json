@@ -15,7 +15,7 @@
           {"weight": 100, "text": "Your Vellum does not so much fold it as remind it. Two quick creases, a tuck the shape of an apology, and the stranger sits up on the table with ink-dot eyes. 'Oh,' says Folio. 'Someone who does it properly.' They share a long and tender look at each other's edges. Then Folio notices the spare charts on the wall, and the two of them spend an hour tutting at the margins. They come out with the best of the lot.", "effects": {"recruit": {"species": "vellum", "name": "Folio"}, "items": {"credits": 30}}}
         ]},
         {"text": "Leave the room as you found it.", "outcomes": [
-          {"weight": 100, "text": "You close the door the way you opened it. You cannot say why this feels like the right thing to do. Your crew feel it too, and are quiet and kind to each other for the rest of the day.", "effects": {"crew_hp": 5}}
+          {"weight": 100, "text": "You close the door the way you opened it. You cannot say why this feels like the right thing to do. You are quiet, and kind to yourself, for the rest of the day.", "effects": {"crew_hp": 5}}
         ]}
       ]
     },

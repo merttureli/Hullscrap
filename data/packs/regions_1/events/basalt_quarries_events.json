@@ -4,7 +4,7 @@
       "text": "The Quarry dock is staffed by one Basalt called Marl, who has been saying 'welcome' since you were on approach. He is about to finish. The word is nine syllables long and every one is meant. A sign beside him reads: PLEASE ALLOW TIME FOR HELLO.",
       "choices": [
         {"text": "Wait for the whole greeting.", "outcomes": [
-          {"weight": 80, "text": "Marl finishes, three minutes later, and the effect is odd: you feel welcomed in a way you have not felt anywhere in the Drift. The crew stand a little straighter. He offers a bowl of warm grit, which is a joke, mostly.", "effects": {"crew_hp": 10, "unlock": "ship_basalt_deepcut"}},
+          {"weight": 80, "text": "Marl finishes, three minutes later, and the effect is odd: you feel welcomed in a way you have not felt anywhere in the Drift. You stand a little straighter. He offers a bowl of warm grit, which is a joke, mostly.", "effects": {"crew_hp": 10, "unlock": "ship_basalt_deepcut"}},
           {"weight": 20, "text": "Marl finishes, and begins the second greeting. There are four. By the end you are all friends, and half an hour older.", "effects": {"items": {"credits": 10}, "crew_hp": 5, "unlock": "ship_basalt_deepcut"}}
         ]},
         {"text": "Hurry him along.", "outcomes": [
@@ -45,7 +45,7 @@
       "choices": [
         {"text": "Wait with them.", "outcomes": [
           {"weight": 70, "text": "You wait. Nothing happens for five hours. At the end the hauler's hatch opens, a Basalt waves one hand, and all three ships leave in order. They leave you a pad on a buoy. You are rested, a little embarrassed, and strangely proud.", "effects": {"crew_hp": 15, "log": "log_quarry_hello"}},
-          {"weight": 30, "text": "You wait. You wait some more. The Long Quiet ends when it ends, which is after you have jumped. The crew say it was the most restful stop of the run anyway.", "effects": {"crew_hp": 10}}
+          {"weight": 30, "text": "You wait. You wait some more. The Long Quiet ends when it ends, which is after you have jumped. You tell yourself it was the most restful stop of the run anyway.", "effects": {"crew_hp": 10}}
         ]},
         {"text": "Hail them anyway.", "outcomes": [
           {"weight": 50, "text": "The comm squeals back with a single word in the slow tongue that your translator renders as 'Please.' You cut the channel. Nobody is angry. Everybody has noticed.", "effects": {"rep": {"clans": -1}}},
@@ -141,7 +141,7 @@
       "choices": [
         {"text": "Sit with him for a settling.", "outcomes": [
           {"weight": 50, "text": "You sit. Nothing happens for six hours, in the best way. When Schist finally stirs he says one word, 'Yes,' and hands you the Spitter's schematics on a slab of slate.", "effects": {"items": {"silicon": 8}, "crew_hp": 10, "flag": "tech_magma_spitter", "unlock": "ship_basalt_long_quiet"}},
-          {"weight": 30, "text": "Three hours in, the crew's fidgeting sounds like a band of mice. Schist does not move. At hour six he says 'Almost.' He gives you the slate anyway, with a look.", "effects": {"items": {"silicon": 5}, "flag": "tech_magma_spitter", "unlock": "ship_basalt_long_quiet"}},
+          {"weight": 30, "text": "Three hours in, your fidgeting sounds like a band of mice. Schist does not move. At hour six he says 'Almost.' He gives you the slate anyway, with a look.", "effects": {"items": {"silicon": 5}, "flag": "tech_magma_spitter", "unlock": "ship_basalt_long_quiet"}},
           {"weight": 20, "text": "You break at hour two. Schist opens one eye and says 'Come again.' The bay stays locked.", "effects": {}}
         ]},
         {"text": "[Basalt] Sit with him, properly.", "requires": {"species": "basalt"}, "outcomes": [

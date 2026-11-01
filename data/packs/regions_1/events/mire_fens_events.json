@@ -45,7 +45,7 @@
       "choices": [
         {"text": "Harvest ice for your tanks.", "outcomes": [
           {"weight": 85, "text": "The ice squeaks, cracks, and comes away in perfect blocks. You fill your tanks and your hold with clean cold water, with enough left to wash your face.", "effects": {"items": {"fuel": 2, "polymer": 10}, "crew_hp": 10}},
-          {"weight": 15, "text": "A block slips off the line and finds a foot. Several of you.", "effects": {"items": {"fuel": 1}, "crew_hp": -5}}
+          {"weight": 15, "text": "A block slips off the line and finds a foot. Yours.", "effects": {"items": {"fuel": 1}, "crew_hp": -5}}
         ]},
         {"text": "Buy a harvest permit and a block of the best (20 credits).", "requires": {"credits": 20}, "outcomes": [
           {"weight": 100, "text": "The permit clerk stamps a wet receipt. You take a block of the finest ice and a recipe for tea. You sell most of the ice at the next stop for more than the permit.", "effects": {"items": {"credits": -20, "fuel": 3, "polymer": 15}}}
@@ -86,7 +86,7 @@
       "choices": [
         {"text": "Pump the hold and strip it.", "outcomes": [
           {"weight": 55, "text": "You rig a pump, drain the hold, and find the cargo has sat under water forty years. The crates are swollen, the labels are runny and the contents are mostly fine. A soggy manifest comes up with them.", "effects": {"items": {"scrap": 35, "polymer": 20, "copper": 15}, "log": "log_fen_slow_leak"}},
-          {"weight": 30, "text": "The pump hits a pocket of old gas and burps a huge bubble. The crew come up soaked and stunned.", "effects": {"items": {"scrap": 25}, "crew_hp": -10, "log": "log_fen_slow_leak"}},
+          {"weight": 30, "text": "The pump hits a pocket of old gas and burps a huge bubble. You come up soaked and stunned.", "effects": {"items": {"scrap": 25}, "crew_hp": -10, "log": "log_fen_slow_leak"}},
           {"weight": 15, "text": "Under the hold, a locker of dry clothes in a plastic bag. Inside: a Concord spare part and a smell of lavender.", "effects": {"items": {"titanium": 5, "credits": 40}, "log": "log_fen_slow_leak"}}
         ]},
         {"text": "[Mire] Dive in and bring it up by hand.", "requires": {"species": "mire"}, "outcomes": [
@@ -106,7 +106,7 @@
       "text": "A Fen patrol cutter pulls alongside, flashing a polite lamp. 'Surprise drill,' says the voice. 'You will have three minutes.' Before you can ask, an alarm sounds on your ship that is not yours. A Mire in a slicker steps through your airlock holding a stopwatch. 'Fire in the galley,' they say. 'Go.'",
       "choices": [
         {"text": "Play along.", "outcomes": [
-          {"weight": 55, "text": "You run the drill: foam, buckets, a lot of shouting. The stopwatch says 2:41. The Mire nods, writes 'adequate', and awards each of you a sticker. You are quietly delighted. The Mire's log pad is left behind.", "effects": {"items": {"credits": 10}, "rep": {"concord": 1}, "crew_hp": 5, "log": "log_fen_three_am"}},
+          {"weight": 55, "text": "You run the drill: foam, buckets, a lot of shouting. The stopwatch says 2:41. The Mire nods, writes 'adequate', and awards you a sticker. You are quietly delighted. The Mire's log pad is left behind.", "effects": {"items": {"credits": 10}, "rep": {"concord": 1}, "crew_hp": 5, "log": "log_fen_three_am"}},
           {"weight": 45, "text": "You run the drill. Someone takes the wrong exit; someone else takes the right one in the wrong order. The Mire writes 'educational' and sticks a poster on your wall, along with a log pad.", "effects": {"crew_hp": 5, "log": "log_fen_three_am"}}
         ]},
         {"text": "Refuse the drill.", "outcomes": [
@@ -145,7 +145,7 @@
       "choices": [
         {"text": "Fire the lance and put out the fire yourself.", "outcomes": [
           {"weight": 55, "text": "You fire. The sandbags steam, the room fills with a fog that smells of hot laundry, and a small fire starts in the corner. You put it out with a bucket and a lot of shouting. Moll signs a chit. 'Adequate,' she says. 'Keep it clean.'", "effects": {"crew_hp": -5, "flag": "tech_steam_lance", "unlock": "ship_mire_geyser_season"}},
-          {"weight": 45, "text": "You fire. The room goes hot, the fire gets up, and you put it out about three seconds after the crew would have liked. Moll hands over the schematics with a long, level look.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_steam_lance", "unlock": "ship_mire_geyser_season"}}
+          {"weight": 45, "text": "You fire. The room goes hot, the fire gets up, and you put it out about three seconds after you would have liked. Moll hands over the schematics with a long, level look.", "effects": {"items": {"polymer": 10}, "crew_hp": -10, "flag": "tech_steam_lance", "unlock": "ship_mire_geyser_season"}}
         ]},
         {"text": "[Mire] Fire it and put out what you start.", "requires": {"species": "mire"}, "outcomes": [
           {"weight": 100, "text": "Your Mire fires the lance, lets the fire catch, and puts it out with a single sweep of the tank. The training room is a cloud of steam, and your Mire emerges wet and beaming. Moll hands over the schematics, a plaque and a spare nozzle. 'It likes you.'", "effects": {"items": {"polymer": 15, "fuel": 2}, "rep": {"concord": 1}, "flag": "tech_steam_lance", "unlock": "ship_mire_geyser_season"}}
@@ -230,7 +230,7 @@
       "text": "The Fens sell steam baths: floating pods with wooden benches, a little brass boiler and a notice reading WARNING, THIS IS A DRY ROOM. NOT FOR MIRE. FOR EVERYONE ELSE, IT IS LOVELY. The Mire stand outside with buckets and tea, with the faces of nurses at a hospital for fools.",
       "choices": [
         {"text": "Take a steam bath (15 credits).", "requires": {"credits": 15}, "outcomes": [
-          {"weight": 85, "text": "An hour in the pod: eucalyptus, brass, and a Mire pouring water on the stones with a face of professional concern. You come out boiled and blissful. The crew carry you to your bunks.", "effects": {"items": {"credits": -15}, "crew_hp": 15}},
+          {"weight": 85, "text": "An hour in the pod: eucalyptus, brass, and a Mire pouring water on the stones with a face of professional concern. You come out boiled and blissful. The drone steers you to your bunk.", "effects": {"items": {"credits": -15}, "crew_hp": 15}},
           {"weight": 15, "text": "The boiler overdoes it. You come out the colour of a lobster, with the temper of one.", "effects": {"items": {"credits": -15}, "crew_hp": -5}}
         ]},
         {"text": "Sell the Fens 20 scrap for the boilers.", "requires": {"items": {"scrap": 20}}, "outcomes": [

@@ -4,7 +4,7 @@
       "text": "The Earthing Post has no dock. It has a lightning rod, forty metres of copper spike, and a platform at the foot of it where the weather comes down. The stationmaster, a Wisp the colour of a held breath, hovers a hand above the grating with her ribbons trailing. 'Mind the arcs,' she says. 'We try to warn people. We are not good at the warning. We are mostly weather.' Lightning walks the rod. Everything on the platform smells of ozone and hot coins.",
       "choices": [
         {"text": "Stand at the foot of the rod in the charge.", "outcomes": [
-          {"weight": 100, "text": "The rod takes a stroke while you stand under it. Every hair rises. Your fillings sing. You feel clean and very slightly famous, and your crew, who followed you out, come back giggling.", "effects": {"crew_hp": 10}}
+          {"weight": 100, "text": "The rod takes a stroke while you stand under it. Every hair rises. Your fillings sing. You feel clean and very slightly famous, and walk back giggling.", "effects": {"crew_hp": 10}}
         ]},
         {"text": "Buy a jar of lightning (25 credits).", "requires": {"credits": 25}, "outcomes": [
           {"weight": 100, "text": "The stationmaster fills a jar from the rod's collar. It is warm, buzzing, and faintly offended to be in a jar. Poured into your tanks it is three jumps of fuel, and your gauge sulks for a minute and then reads full.", "effects": {"items": {"credits": -25, "fuel": 3}}}
@@ -66,7 +66,7 @@
           {"weight": 100, "text": "Cordelia hands over a jar with a lid that glows. Poured into the tank it is three jumps of fuel, and the jar's last spark jumps back out and up your sleeve with a squeak.", "effects": {"items": {"credits": -25, "fuel": 3}}}
         ]},
         {"text": "Order a static shot (10 credits).", "requires": {"credits": 10}, "outcomes": [
-          {"weight": 100, "text": "Your hair stands straight up for an hour. Nobody can look at you. You feel wonderful, and the whole crew wants the same.", "effects": {"items": {"credits": -10}, "crew_hp": 10}}
+          {"weight": 100, "text": "Your hair stands straight up for an hour. Nobody can look at you. You feel wonderful, and you want the same tomorrow.", "effects": {"items": {"credits": -10}, "crew_hp": 10}}
         ]},
         {"text": "Order the Full Storm (60 credits).", "requires": {"credits": 60}, "outcomes": [
           {"weight": 50, "text": "It is, quite literally, the Full Storm. The bar lights up, the glass fogs, the barman screams with joy, and you float, briefly, an inch above your stool. Everyone gets a refill.", "effects": {"items": {"credits": -60, "fuel": 5}, "crew_hp": 10}},

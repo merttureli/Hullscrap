@@ -4,7 +4,7 @@
       "text": "Tether Knot is a bundle of ropes, nets, hammocks and market stalls strung between four hulls in the dark. There is no floor anywhere. You hold on, or you drift. The Kite have one rule for visitors: always have a hand on a line. A Kite woman clipped to a cable calls the prices from upside down, and everyone from solid ships is handed a rope and a little bell, so they can be found. Overhead, in the gaps, there are lights, and washing, and an entire school of children going by like fish.",
       "choices": [
         {"text": "Buy a hammock for the mess (15 credits).", "requires": {"credits": 15}, "outcomes": [
-          {"weight": 100, "text": "A real Kite hammock, strung from the ceiling, that holds you at no angle at all. For a week your crew sleep in it in shifts and wake up with their backs a good deal better.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
+          {"weight": 100, "text": "A real Kite hammock, strung from the ceiling, that holds you at no angle at all. For a week you sleep in it and wake up with your back a good deal better.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
         ]},
         {"text": "Ask for a guide through the Slack.", "outcomes": [
           {"weight": 100, "text": "A girl of about eleven attaches herself to your belt with a carabiner and, giving you a running commentary, takes you through six hull-gaps and a laundry. At the end she tells you where the good salvage is and asks for a tip, which is a button.", "effects": {"reveal": "wreck_field", "items": {"scrap": 10}}}
@@ -26,7 +26,7 @@
       "choices": [
         {"text": "Try to read it.", "outcomes": [
           {"weight": 50, "text": "You make out three flags and a sock. They seem to say that the lane ahead is clear and there is a trader a jump along. It is the best you can do, and it turns out to be right.", "effects": {"reveal": "trader", "items": {"credits": 10}}},
-          {"weight": 50, "text": "You read it with great confidence and are wrong. The red sock apparently says something about your mother. A nearby Kite has to be calmed down, and your helmsman is not allowed to go near the line.", "effects": {"crew_hp": -5}}
+          {"weight": 50, "text": "You read it with great confidence and are wrong. The red sock apparently says something about your mother. A nearby Kite has to be calmed down, and you are not allowed to go near the line.", "effects": {"crew_hp": -5}}
         ]},
         {"text": "Peg a message of your own (5 scrap).", "requires": {"items": {"scrap": 5}}, "outcomes": [
           {"weight": 100, "text": "You peg a rag and a bolt to the line, with a note that nobody can read. A family comes along on a rope the next day, reads it, understands it entirely, and leaves a gift in your lock: a full canister of fuel.", "effects": {"items": {"scrap": -5, "fuel": 1}}}

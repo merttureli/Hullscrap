@@ -22,11 +22,11 @@
       "text": "The tanker Sweet Reason has split a tank. Her crew are in the forward section, which has air, and the aft section, where the engines are, has none: between the two is thirty metres of passage that is now hard vacuum. The captain is on the comm, strangely calm. 'Our spare suits are aft,' she says. 'So is the thing that makes the repair. Nobody can get there. We have forty minutes of air in the front.'",
       "choices": [
         {"text": "Run a pressure tube from your airlock (15 scrap).", "requires": {"items": {"scrap": 15}}, "outcomes": [
-          {"weight": 60, "text": "You run a tube along the hull, patch it at three points, and press it into the aft hatch with a crew of grim faces. It holds. The aft section is reached, the repair is made, and the captain is quietly overwhelmed.", "effects": {"items": {"scrap": -15, "credits": 45}, "rep": {"concord": 1}}},
-          {"weight": 40, "text": "The tube holds long enough to get them across, and then splits like a sausage. Everybody gets out. The tube does not, and several of you have to be stitched.", "effects": {"items": {"scrap": -15, "credits": 25}, "crew_hp": -10}}
+          {"weight": 60, "text": "You run a tube along the hull, patch it at three points, and press it into the aft hatch with the drone holding the lamp and you holding your breath. It holds. The aft section is reached, the repair is made, and the captain is quietly overwhelmed.", "effects": {"items": {"scrap": -15, "credits": 45}, "rep": {"concord": 1}}},
+          {"weight": 40, "text": "The tube holds long enough to get them across, and then splits like a sausage. Everybody gets out. The tube does not, and you have to be stitched.", "effects": {"items": {"scrap": -15, "credits": 25}, "crew_hp": -10}}
         ]},
         {"text": "Suit up and cross the passage.", "outcomes": [
-          {"weight": 50, "text": "Your crew go across on a line in two shifts, wearing everything the ship has. They reach the aft section, repair the break, and return. The captain pays with the manifest's emergency float and a very wet hug.", "effects": {"items": {"credits": 40}, "crew_hp": -5}},
+          {"weight": 50, "text": "You go across on a line in two shifts, wearing everything the ship has. They reach the aft section, repair the break, and return. The captain pays with the manifest's emergency float and a very wet hug.", "effects": {"items": {"credits": 40}, "crew_hp": -5}},
           {"weight": 50, "text": "A suit seal fails halfway. It is a near thing, and everybody is rescued, and nobody is happy. The captain pays what she can.", "effects": {"items": {"credits": 20}, "crew_hp": -15}}
         ]},
         {"text": "[Kite] Cross the vacuum on the line.", "requires": {"species": "kite"}, "outcomes": [

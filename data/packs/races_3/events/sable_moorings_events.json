@@ -4,7 +4,7 @@
       "text": "The Long Table is a single enormous cargo bay with one table the length of it and benches down both sides and a black flag at the head. Forty cutter families eat here between jobs: the loud ones, the quiet ones, the cooks, the children under the benches. Nobody in the room is armed. It is the one rule, and the torches hang from pegs by the door like coats. A broad woman at the head of the table, the Matriarch, beckons you with a ladle. 'You will sit,' she says. 'You will eat. Then we will talk about what you want cut.'",
       "choices": [
         {"text": "Sit and eat.", "outcomes": [
-          {"weight": 100, "text": "You sit between a child and a grandmother and are given a bowl of something enormous. For an hour the Long Table is just a table, with all its noise. When you leave your crew are full, and talking, and a little afraid of how much they liked it.", "effects": {"crew_hp": 15}}
+          {"weight": 100, "text": "You sit between a child and a grandmother and are given a bowl of something enormous. For an hour the Long Table is just a table, with all its noise. When you leave you are full, and talking, and a little afraid of how much you liked it.", "effects": {"crew_hp": 15}}
         ]},
         {"text": "Ask the Matriarch for work.", "outcomes": [
           {"weight": 100, "text": "She looks you over with a long steady stare. 'There is a Rustfang hulk three jumps back with its paymaster's door shut. We have not got to it. You might.' She slides a chit down the table. 'Tell them it was our idea.' You come away with the bearings and a purse.", "effects": {"items": {"credits": 25}, "reveal": "wreck_field"}}
@@ -45,7 +45,7 @@
       "text": "Torch Swap is a stall of second-hand cutter torches, hung in rows on a rail, each with a family's mark burned into the handle. 'Keep it clean and it will cut your name in a bulkhead,' says the stall-holder, an old man with scarred forearms and no eyebrows. 'Keep it dirty and it will cut your name in you.' On a nail by his chair hangs a very old torch with no mark on it at all.",
       "choices": [
         {"text": "Buy a used torch (45 credits).", "requires": {"credits": 45}, "outcomes": [
-          {"weight": 100, "text": "A good torch, clean and warm, with some other family's mark on it. Your engineer takes it away. By dinner the galley hatch has been cut in half, cleanly, and twice as useful.", "effects": {"items": {"credits": -45, "scrap": 30, "titanium": 2}}}
+          {"weight": 100, "text": "A good torch, clean and warm, with some other family's mark on it. The drone takes it away. By dinner the galley hatch has been cut in half, cleanly, and twice as useful.", "effects": {"items": {"credits": -45, "scrap": 30, "titanium": 2}}}
         ]},
         {"text": "Ask about the one with no mark.", "outcomes": [
           {"weight": 100, "text": "He takes it down and turns it over in his hands. 'A family that was cut out,' he says. 'There was a quarrel. This was the last torch they made. I keep it. Somebody should.' He puts it back on the nail, very gently.", "effects": {"crew_hp": 5}}
@@ -64,10 +64,10 @@
       "choices": [
         {"text": "Strip the hulk for plate.", "outcomes": [
           {"weight": 40, "text": "You have four sheets in the hold before a single cutter notices. Then eleven notice. You are not harmed, but the families stand along the rail and say nothing at all while you leave.", "effects": {"items": {"titanium": 5, "scrap": 30}, "rep": {"clans": -1}}},
-          {"weight": 60, "text": "A cutter comes alongside and does not say a word. It does not need to. You put the plate back, and you do the repair yourselves, in silence, with them watching. It takes six hours.", "effects": {"crew_hp": -10}}
+          {"weight": 60, "text": "A cutter comes alongside and does not say a word. It does not need to. You put the plate back, and you do the repair yourself, in silence, with them watching. It takes six hours.", "effects": {"crew_hp": -10}}
         ]},
         {"text": "Cut a name in the hull (1 fuel for the torch).", "requires": {"items": {"fuel": 1}}, "outcomes": [
-          {"weight": 100, "text": "You cut a name, a small one, near the gap, with your engineer's hand over yours. The family cutter that was watching you from the shadows moves up, slowly, and one of them leans out and nods. It is a very small thing. It is not nothing.", "effects": {"items": {"fuel": -1}, "crew_hp": 10, "rep": {"clans": 1}}}
+          {"weight": 100, "text": "You cut a name, a small one, near the gap, with the drone's small arm over yours. The family cutter that was watching you from the shadows moves up, slowly, and one of them leans out and nods. It is a very small thing. It is not nothing.", "effects": {"items": {"fuel": -1}, "crew_hp": 10, "rep": {"clans": 1}}}
         ]},
         {"text": "[Sable] Finish the name in the gap.", "requires": {"species": "sable"}, "outcomes": [
           {"weight": 100, "text": "Your Sable floats to the gap in the plating and stays there a while, and then lights a torch and finishes the name, in four steady strokes. It is a girl's name. From the shadow, an entire family cutter turns on its running lights, one by one, and holds them there. A woman's voice says on the comm: 'She was my sister's.' A parcel of salvage is waiting at your lock.", "effects": {"items": {"titanium": 3, "credits": 40, "scrap": 25}, "crew_hp": 10}}
@@ -104,7 +104,7 @@
           {"weight": 100, "text": "They go through your holds and find nothing. The officer thanks you for the trouble and files a note. The Moorings, which are watching the traffic, will remember who cooperated, and for what.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1, "clans": -1}}}
         ]},
         {"text": "Stonewall: demand to see the suspect's description.", "outcomes": [
-          {"weight": 50, "text": "'Dark coat,' reads the officer. 'Lean. Torches.' He looks up at your crew, who are all in dark coats. A silence. He sighs, and lets you go. 'It is not a very good description,' he admits.", "effects": {"items": {"credits": 10}}},
+          {"weight": 50, "text": "'Dark coat,' reads the officer. 'Lean. Torches.' He looks up at you, in your dark coat. A silence. He sighs, and lets you go. 'It is not a very good description,' he admits.", "effects": {"items": {"credits": 10}}},
           {"weight": 50, "text": "The officer takes this as a challenge and goes over your ship personally, in detail. It takes two hours, and a stack of forms, and you are fined for the form.", "effects": {"items": {"credits": -25}, "rep": {"concord": -1}}}
         ]},
         {"text": "[Sable] Give the harbour sign.", "requires": {"species": "sable"}, "outcomes": [

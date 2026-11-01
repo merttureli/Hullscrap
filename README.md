@@ -3,7 +3,7 @@
 A top-down 2D spaceship game. Start with a ready-made ship (or an empty hull), build walls, rooms and systems on a grid, run power to them, crew the ship, fly it, dock and fight. The plan is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Play the beta (no install)
-**Beta 2** is out: what changed is in [docs/RELEASE_BETA2.md](docs/RELEASE_BETA2.md).
+**Beta 3** is out: what changed is in [docs/RELEASE_BETA3.md](docs/RELEASE_BETA3.md) (Beta 2: [docs/RELEASE_BETA2.md](docs/RELEASE_BETA2.md)).
 
 Every push to `main` builds the game for **Windows, Linux and macOS** on GitHub Actions (the **beta builds** workflow).
 1. On GitHub, open **Actions → beta builds**, then the latest green run.

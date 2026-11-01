@@ -4,7 +4,7 @@
       "text": "The Sounding Nave is a long hall of crystal ribs, and every rib is humming. Hollow glass figures stand in rows along the aisle with their sound-holes open and their rings of tuning prongs just trembling, and each of them is holding a single note, and the notes make a chord that settles on your shoulders like a coat. A chorister in a tabard glides up. 'Evensong is in a quarter of an hour,' she says. 'You are very welcome to the pews. Your hull is a little flat, if you don't mind my saying.'",
       "choices": [
         {"text": "Stay for evensong.", "outcomes": [
-          {"weight": 100, "text": "You sit in the back pew with your crew while forty Choir sing a piece that has no words and no end. At some point you stop noticing the time. When you get up, your shoulders are lower than they have been in a year, and somebody in your crew is quietly humming.", "effects": {"crew_hp": 10}}
+          {"weight": 100, "text": "You sit in the back pew while forty Choir sing a piece that has no words and no end. At some point you stop noticing the time. When you get up, your shoulders are lower than they have been in a year, and you are quietly humming.", "effects": {"crew_hp": 10}}
         ]},
         {"text": "Have your hull tuned (30 credits).", "requires": {"credits": 30}, "outcomes": [
           {"weight": 100, "text": "A tuner with a silver fork walks the length of your ship, tapping every plate, and tells you which ones are lying. By the end the hull rings clean, the drive hums sweetly, and a loose plate on the starboard side that has been rattling for months has stopped.", "effects": {"items": {"credits": -30}, "hull": 10}}
@@ -26,10 +26,10 @@
       "choices": [
         {"text": "Have the reactor tuned (40 credits).", "requires": {"credits": 40}, "outcomes": [
           {"weight": 70, "text": "She goes at your reactor with a silver fork and a patient ear. The hum climbs out of its rut and finds the right note. In the evening, your fuel gauge reads a little higher than it has any right to.", "effects": {"items": {"credits": -40, "fuel": 2}}},
-          {"weight": 30, "text": "She tunes it a quarter-tone sharp. Everything works and everything is faintly uneasy. The crew get a week of headaches before it settles.", "effects": {"items": {"credits": -40}, "crew_hp": -5}}
+          {"weight": 30, "text": "She tunes it a quarter-tone sharp. Everything works and everything is faintly uneasy. You get a week of headaches before it settles.", "effects": {"items": {"credits": -40}, "crew_hp": -5}}
         ]},
         {"text": "Buy a pocket fork (10 credits).", "requires": {"credits": 10}, "outcomes": [
-          {"weight": 100, "text": "It does nothing a fork does not do. But when someone in the crew is in a mood, a quiet note from it, and a look, takes the edge off the room.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
+          {"weight": 100, "text": "It does nothing a fork does not do. But when you are in a mood, a quiet note from it, and a look, takes the edge off the room.", "effects": {"items": {"credits": -10}, "crew_hp": 5}}
         ]},
         {"text": "[Choir] Tune her own bells.", "requires": {"species": "choir"}, "outcomes": [
           {"weight": 100, "text": "Your Choir picks up one of the stall's forks, flicks it, listens with their whole body, and puts it back a hair to the left. Then another. In a minute the artisan has dropped everything, and the two of them are tuning her wall of forks together in a long happy argument. At the end she will not take a credit from you, and sends you off with a handful of cut crystal.", "effects": {"items": {"crystal": 2, "credits": 30}, "rep": {"lumen": 1}}}
@@ -101,7 +101,7 @@
       "text": "A lifepod is drifting with its lamps on, and in its window sits a Choir with a cloth bound over their ring of prongs. They have taken the vow of silence, and so they cannot call for help, and they are waving a hand in a slow, careful signal that you cannot read. A tiny card is taped to the glass: A WRONG NOTE BROUGHT DOWN A SHIP. I AM SORRY. NO ONE NEED STOP.",
       "choices": [
         {"text": "Take them aboard.", "outcomes": [
-          {"weight": 100, "text": "They come aboard silent as a candle, and for a week they tap rhythms on the mess table that make the helmsman smile and the engineer move faster. On the seventh day they unwrap one prong and give it a little flick, as a trial. Nobody falls down. Cantor stays.", "effects": {"recruit": {"species": "choir", "name": "Cantor"}}}
+          {"weight": 100, "text": "They come aboard silent as a candle, and for a week they tap rhythms on the mess table that make you smile and the drone move faster. On the seventh day they unwrap one prong and give it a little flick, as a trial. Nobody falls down. Cantor stays.", "effects": {"recruit": {"species": "choir", "name": "Cantor"}}}
         ]},
         {"text": "Leave them a ration pack and a can of fuel (1 fuel).", "requires": {"items": {"fuel": 1}}, "outcomes": [
           {"weight": 100, "text": "You leave a pack on the pod's hull and fuel for a week's drift. The figure inside lifts a hand, once, in thanks, and lowers it. Behind you, in the dark, a single clear prong rings softly, and rings again.", "effects": {"items": {"fuel": -1}, "rep": {"lumen": 1}}}

@@ -4,7 +4,7 @@
       "text": "The Forge dock is forty degrees hotter than it needs to be and the dockhands are fanning themselves, which for Emberkin means they are comfortable. A hand-lettered sign reads: WE HAVE TURNED IT DOWN FOR YOU. The thermometer behind it says fifty-eight.",
       "choices": [
         {"text": "Thank them for the courtesy.", "outcomes": [
-          {"weight": 80, "text": "The dockhands beam. They bring you a mug of tea that is still boiling and a damp cloth for your forehead. The crew drink the tea, sweating, and are surprisingly moved.", "effects": {"crew_hp": 5, "unlock": "ship_emberkin_ember_kite"}},
+          {"weight": 80, "text": "The dockhands beam. They bring you a mug of tea that is still boiling and a damp cloth for your forehead. You drink the tea, sweating, and are surprisingly moved.", "effects": {"crew_hp": 5, "unlock": "ship_emberkin_ember_kite"}},
           {"weight": 20, "text": "The tea is hot enough to take the first layer off the mug. You are very moved and quite blistered.", "effects": {"items": {"credits": 10}, "crew_hp": -5, "unlock": "ship_emberkin_ember_kite"}}
         ]},
         {"text": "Ask them to turn it down further.", "outcomes": [
@@ -103,7 +103,7 @@
       "text": "The Coal, the red ember of a star the Forges orbit, is flaring: a slow tide of light rolling across the dark. The Emberkin on the Forge rings are out on their hulls in their shirtsleeves, faces upturned. 'Free heat!' someone shouts. 'FREE HEAT!' They are, to a person, thrilled. Your radiators are screaming.",
       "choices": [
         {"text": "Soak up the flare. Open the radiators.", "outcomes": [
-          {"weight": 55, "text": "The flare washes over your hull for an hour, charging the radiators and warming every cold corner of the ship. The crew complain of nothing. It is the nicest hour of the run.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": 10}},
+          {"weight": 55, "text": "The flare washes over your hull for an hour, charging the radiators and warming every cold corner of the ship. You complain of nothing. It is the nicest hour of the run.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": 10}},
           {"weight": 30, "text": "The flare is bigger than forecast. The radiators cry out, the hull ticks, and one cabin gets very, very warm.", "effects": {"items": {"plasma_cell": 2}, "crew_hp": -10, "hull": -5}},
           {"weight": 15, "text": "A prominence kisses your hull and leaves a scorch that will be there for the rest of your life.", "effects": {"items": {"plasma_cell": 3}, "hull": -10}}
         ]},
@@ -146,7 +146,7 @@
       "choices": [
         {"text": "Man the Lance during a test burn.", "outcomes": [
           {"weight": 55, "text": "You sit in the chair and fire. The room goes to a hundred and twenty degrees in ten seconds. You hold on for a whole sweep. When you come out steaming, Cinder hands you the schematics and a damp towel. 'Brave,' she says. 'Stupid. But brave.'", "effects": {"crew_hp": -15, "flag": "tech_pyre_lance", "unlock": "ship_emberkin_flashpan"}},
-          {"weight": 45, "text": "You sit and fire. The beam is superb. The room is a furnace. You last four sweeps and get carried out by the crew. Cinder is not offended. 'It is a start,' she says, and hands over the schematics.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": -20, "flag": "tech_pyre_lance", "unlock": "ship_emberkin_flashpan"}}
+          {"weight": 45, "text": "You sit and fire. The beam is superb. The room is a furnace. You last four sweeps and are towed out by the drone. Cinder is not offended. 'It is a start,' she says, and hands over the schematics.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": -20, "flag": "tech_pyre_lance", "unlock": "ship_emberkin_flashpan"}}
         ]},
         {"text": "[Emberkin] Man the Lance. It is a lovely warm room.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 100, "text": "Your Emberkin settles into the chair at a hundred and thirty degrees and starts to hum. The sweep is perfect, and the beam sets a target drone alight from forty paces. Cinder weeps a little, from the heat. 'Keep it,' she says, and hands over the schematics, spare coils and a box of fire-starters.", "effects": {"items": {"plasma_cell": 3, "copper": 12}, "flag": "tech_pyre_lance", "unlock": "ship_emberkin_flashpan"}}
