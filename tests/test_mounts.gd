@@ -332,8 +332,8 @@ func test_build_mode_points_at_the_outside_half_and_shows_both_halves_and_the_re
 	b._refresh_ghost()
 	eq(b.ghost.size(), 1, "one ghost for the one item")
 	eq(b.ghost[0]["reason"], "", "the barrel in space against a 3-thick wall would apply")
-	var place: String = Palette.info(b.selected_entry(), ship, b.rot)["place"]
-	check(place.contains("outside half 4x2, pointing up"), "the selection card names the outside half and the direction: " + place)
+	var size: Array = Palette.info(b.selected_entry(), ship, b.rot)["stats"].filter(func(r): return r[0] == "Size")[0]
+	eq(size[1], "2\u00d72 (out 4\u00d72)", "the selection card names both halves: " + str(size))
 	b.hover = Wall.out_anchor(0) + Vector2i(0, 2)  # the barrel on the wall itself
 	b._refresh_ghost()
 	eq(b.ghost[0]["reason"], "the barrel must stick out into space", "refused with its reason")

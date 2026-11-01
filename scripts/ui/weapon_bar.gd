@@ -9,6 +9,8 @@ extends Control
 ## dashed at 0 (arrow keys shift the balance, End makes it even; combat_view.gd takes those keys).
 ## Reads a CombatSession; the only input it takes is the three ability keys.
 
+const Describe = preload("res://scripts/ui/describe.gd")
+
 const SLOT := Vector2(176.0, 58.0)
 const ASLOT := Vector2(196.0, 66.0)  ## an ability slot: taller, for the reason
 const GAP := 8.0
@@ -115,7 +117,12 @@ func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2) -> void:
 	if done > 0.0:
 		draw_arc(c, 19.0, -PI / 2.0, -PI / 2.0 + TAU * done, 28, Color(col, 0.95), 4.0, true)
 	_text(str(number), c + Vector2(-4.0, 6.0), 17, TEXT)
-	_text(str(w["name"]), at + Vector2(58.0, 20.0), 14, TEXT)
+	var tags := Describe.weapon_tags(str(w["id"]))  # its kind (and AUTO) in their colours: the name takes the kind's
+	_text(str(w["name"]), at + Vector2(58.0, 20.0), 14, tags[0]["color"] if not tags.is_empty() else TEXT, SLOT.x - 64.0)
+	var tx := 58.0
+	for k in tags:
+		_text(k["label"], at + Vector2(tx, 53.0), 10, k["color"])
+		tx += ThemeDB.fallback_font.get_string_size(k["label"], HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 8.0
 	var group_col: Color = GROUP_COLORS.get(w["group"], GREY)
 	draw_rect(Rect2(at + Vector2(58.0, 28.0), Vector2(26.0, 14.0)), Color(group_col, 0.25))
 	_text("G%d" % w["group"], at + Vector2(62.0, 39.0), 11, group_col)
