@@ -14,6 +14,7 @@ const NODES := 7  ## nodes visited per stage before heading for the exit
 const CHECKPOINTS: Array[int] = [2, 4, 8]
 const MAX_PAGES := 12
 
+var roam := false  ## true: every other POI of a node's sector is played, not one of them half the time (endless space: far POIs too)
 var _pick := RandomNumberGenerator.new()
 var seen := {}  ## event id -> times it was shown, over all runs
 var from := {}  ## where a recruit came from: "event:<id>", "station" -> times
@@ -101,7 +102,10 @@ func _arrive(c: Campaign, ship, out: Dictionary) -> void:
 	_hire(c, ship)
 	var s = c.current_sector()
 	var others: Array = s.pois.filter(func(p): return not p["main"] and p["state"] == Sector.NEW and str(p["event_type"]) != "")
-	if not others.is_empty() and _pick.randf() < 0.5:
+	if roam:
+		for poi in others:
+			_chain(c.events.pick(c, {"id": c.current, "type": str(poi["event_type"]), "place": ""}, ship), c, ship, out)
+	elif not others.is_empty() and _pick.randf() < 0.5:
 		var poi: Dictionary = others[_pick.randi() % others.size()]
 		var ev: Dictionary = c.events.pick(c, {"id": c.current, "type": str(poi["event_type"]), "place": ""}, ship)
 		_chain(ev, c, ship, out)

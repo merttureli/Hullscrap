@@ -219,7 +219,7 @@
 					"outcomes": [
 						{
 							"weight": 60,
-							"text": "The food is real, and it is wonderful, and your crew eat as if it is the last meal on the Drift. The Baron tells a story about his grandfather's yacht that takes an hour and has no ending. When you rise he presses a purse into your hand. 'For listening.'",
+							"text": "The food is real, and it is wonderful, and you eat as if it is the last meal on the Drift. The Baron tells a story about his grandfather's yacht that takes an hour and has no ending. When you rise he presses a purse into your hand. 'For listening.'",
 							"effects": {"crew_hp": 25, "items": {"credits": 70}, "flag": "baron_guest"}
 						},
 						{

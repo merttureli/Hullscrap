@@ -6,9 +6,13 @@
         {"text": "Apologise handsomely.", "outcomes": [
           {"weight": 100, "text": "You apologise in the most elaborate terms you can think of, bowing at three different angles. The Quillback's quills rise by a degree, and fall. 'Accepted,' she says, with a faint regret, 'and honour is satisfied.' The Second lets out a breath. Someone in the crowd demands their money back.", "effects": {"rep": {"clans": 1}, "crew_hp": 5}}
         ]},
-        {"text": "Accept the duel: send your best fighter.", "outcomes": [
+        {"text": "Accept the duel: send your best fighter.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 50, "text": "Your fighter wins on points, to a thunder of clan applause, and the Quillback bows lower than anyone you have ever seen bow. 'You are the better,' she says. 'I would be honoured to carry your knives.' Gorse picks up her case, nods to the Second, and walks up your gangway with her quills combed back for the trip.", "effects": {"recruit": {"species": "quillback", "name": "Gorse"}, "items": {"credits": 30}, "rep": {"clans": 1}}},
           {"weight": 50, "text": "Your fighter is a little too slow, and the lesson is well delivered. The Quillback is gracious in victory, and gives the purse to the Second's mother. You get a bruise, an apology, and the clan's good opinion of your sportsmanship.", "effects": {"crew_hp": -15, "items": {"credits": -20}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "Accept the duel: fight it yourself.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 35, "text": "You win on points, to a thunder of clan applause, and the Quillback bows lower than anyone you have ever seen bow. 'You are the better,' she says. 'I would be honoured to carry your knives.' Gorse picks up her case, nods to the Second, and walks up your gangway with her quills combed back for the trip.", "effects": {"recruit": {"species": "quillback", "name": "Gorse"}, "items": {"credits": 30}, "rep": {"clans": 1}}},
+          {"weight": 65, "text": "You are a little too slow, and the lesson is well delivered. The Quillback is gracious in victory, and gives the purse to the Second's mother. You get a bruise, an apology, and the clan's good opinion of your sportsmanship.", "effects": {"crew_hp": -15, "items": {"credits": -20}, "rep": {"clans": 1}}}
         ]},
         {"text": "[Quillback] Name your Second and choose the weapons.", "requires": {"species": "quillback"}, "outcomes": [
           {"weight": 100, "text": "Your Quillback bows at precisely the same angle, to the millimetre. The challenger's quills come up, fully, in a gleaming fan. 'A formal party,' she breathes. 'At last.' They hold a duel with ember knives that lasts nine seconds and ends in a draw and a seven-course dinner. By dessert she has asked for a place on your crew, and a very large share of the table has joined in the toast.", "effects": {"recruit": {"species": "quillback", "name": "Gorse"}, "items": {"credits": 40}, "rep": {"clans": 2}}}
@@ -22,9 +26,13 @@
       "id": "quillback_letter_of_challenge", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 3},
       "text": "A boarding tube comes across the gap, empty, and with a letter in it. The paper is cream-laid, the hand is exquisite. 'The Honourable Captain of this vessel requests the pleasure of a duel between champions, to settle the matter of tolls. Weapons: knives. Seconds: yes. Refreshments: to follow.' Through the window of the raider you can see a crew of Quillbacks lined up along the rail, all in matching waistcoats, bristling gently.",
       "choices": [
-        {"text": "Accept: send your best fighter.", "outcomes": [
+        {"text": "Accept: send your best fighter.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "Your champion wins, on points and a lucky parry. The Captain bows, pays the stake, and invites your crew to dinner, which you decline out of nerves. They send a hamper.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"clans": 1}}},
           {"weight": 60, "text": "Your champion is out-fought, in a very polite way, and is returned to you in the tube with a handshake. The Captain takes the toll, as agreed, and sends back a small tin of liniment.", "effects": {"items": {"credits": -30}, "crew_hp": -10}}
+        ]},
+        {"text": "Accept: cross the tube yourself.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 30, "text": "You win, on points and a lucky parry. The Captain bows, pays the stake, and invites you to dinner, which you decline out of nerves. They send a hamper.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"clans": 1}}},
+          {"weight": 70, "text": "You are out-fought, in a very polite way, and returned through the tube with a handshake. The Captain takes the toll, as agreed, and sends back a small tin of liniment.", "effects": {"items": {"credits": -30}, "crew_hp": -10}}
         ]},
         {"text": "Decline politely, in writing (20 credits for the paper).", "requires": {"credits": 20}, "outcomes": [
           {"weight": 100, "text": "It takes ten minutes and your best pen. The Captain reads your regrets, replies with a note of her own, and extracts a modest fee for the paper. You are free to go. She adds, in her own hand: 'Another time.'", "effects": {"items": {"credits": -20}}}

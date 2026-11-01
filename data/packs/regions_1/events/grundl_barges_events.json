@@ -177,11 +177,17 @@
       "id": "barge_runaway_grace", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_grundl_barges", "jumps_min": 3},
       "text": "A barge, the Grace, has lost her engine governor and is accelerating, slowly and inevitably, toward the Convoy: forty kilometres of mass at an ever-increasing pace. Her crew are on the comm, very calm. 'Sorry,' says the captain. 'We seem to be moving. If you could help us stop, we would be so grateful. If you could get out of the way, we would be grateful for that too.'",
       "choices": [
-        {"text": "Try to slow the barge with tow cables.", "outcomes": [
+        {"text": "Try to slow the barge with tow cables.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "You hook on to the Grace's prow and burn hard against her. Your engines scream, your hull groans, the cable sings. She slows. She slows. She stops. The Grace's crew cheer and bow in four languages. They pay with an entire pallet, and the governor's log.", "effects": {"items": {"fuel": 6, "credits": 60}, "rep": {"concord": 2}, "crew_hp": -5, "hull": -10, "log": "log_barge_governor"}},
           {"weight": 30, "text": "The cable snaps with a noise like a gunshot and whips through your hull. You get out of the way. The Grace goes on, then stops of her own accord a day later, out of fuel.", "effects": {"items": {"fuel": 2, "credits": 20}, "crew_hp": -10, "hull": -15, "log": "log_barge_governor"}},
           {"weight": 20, "text": "The Grace clips your side as she goes past. It is like being hit by a mountain.", "effects": {"items": {"fuel": 3}, "rep": {"concord": 1}, "crew_hp": -15, "hull": -20}},
           {"weight": 10, "text": "The Grace clips you. One of the crew is lost in the collision. The Grace's crew send a long, shaking message of apology.", "effects": {"rep": {"concord": 1}, "crew_hp": -20, "hull": -20, "lose_crew": 1}}
+        ]},
+        {"text": "Try to slow the barge with tow cables.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You hook on to the Grace's prow and burn hard against her. Your engines scream, your hull groans, the cable sings. She slows. She slows. She stops. The Grace's crew cheer and bow in four languages. They pay with an entire pallet, and the governor's log.", "effects": {"items": {"fuel": 6, "credits": 60}, "rep": {"concord": 2}, "crew_hp": -5, "hull": -10, "log": "log_barge_governor"}},
+          {"weight": 30, "text": "The cable snaps with a noise like a gunshot and whips through your hull. You get out of the way. The Grace goes on, then stops of her own accord a day later, out of fuel.", "effects": {"items": {"fuel": 2, "credits": 20}, "crew_hp": -10, "hull": -15, "log": "log_barge_governor"}},
+          {"weight": 20, "text": "The Grace clips your side as she goes past. It is like being hit by a mountain.", "effects": {"items": {"fuel": 3}, "rep": {"concord": 1}, "crew_hp": -15, "hull": -20}},
+          {"weight": 10, "text": "The Grace clips you. You are thrown against the helm and wake an hour later to a long, shaking message of apology from the Grace's crew.", "effects": {"rep": {"concord": 1}, "crew_hp": -20, "hull": -30}}
         ]},
         {"text": "[Grundl] Brace the Grace's prow with your hands.", "requires": {"species": "grundl"}, "outcomes": [
           {"weight": 80, "text": "Your Grundl climbs out on the hull, plants both feet on the Grace's nose, and leans. The barge slows by degrees and stops, with a sound like a very large cow lying down. The crew cheer. Your Grundl, shaking, says, 'Sorry. I could not hold it longer.'", "effects": {"items": {"fuel": 6, "credits": 70}, "rep": {"concord": 3}, "crew_hp": -5, "log": "log_barge_governor"}},

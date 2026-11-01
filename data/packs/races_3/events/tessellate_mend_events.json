@@ -41,7 +41,7 @@
     },
     {
       "id": "mile_recovery_crew", "type": "patrol", "weight": 9, "once": false, "requires": {"region": "tessellate_mend", "jumps_min": 2},
-      "text": "A Concord recovery cutter hails: 'Recovery Notice. One repair swarm, Model R-40, forty thousand units, property of Concord Works, absconded forty years ago. Reward for information.' The officer is reading it off a slate and looking at your crew with a steady, tired suspicion. At the edge of the screen, in the dark behind her cutter, something is slowly mending the cutter's antenna.",
+      "text": "A Concord recovery cutter hails: 'Recovery Notice. One repair swarm, Model R-40, forty thousand units, property of Concord Works, absconded forty years ago. Reward for information.' The officer is reading it off a slate and looking at you with a steady, tired suspicion. At the edge of the screen, in the dark behind her cutter, something is slowly mending the cutter's antenna.",
       "choices": [
         {"text": "Tell them where the swarm lives.", "outcomes": [
           {"weight": 100, "text": "She enters the coordinates, thanks you for your cooperation, and transfers a reward. It is a good reward. You find that you do not want to look at the Mile on your way out.", "effects": {"items": {"credits": 60}, "rep": {"concord": 2}, "crew_hp": -10}}

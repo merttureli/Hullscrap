@@ -60,16 +60,16 @@
     },
     {
       "id": "fen_fog_bank", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_mire_fens"},
-      "text": "A bank of white fog lies across the lane like a held breath. Your sensors say it is warm, wet, and forty percent gas. Your crew say it smells of grandmothers. Faint in the dark, someone is calling your name in a voice you almost recognise, and the Mire on the next ship are chanting 'Do not follow it. Do not follow it.'",
+      "text": "A bank of white fog lies across the lane like a held breath. Your sensors say it is warm, wet, and forty percent gas. It smells of grandmothers. Faint in the dark, someone is calling your name in a voice you almost recognise, and the Mire on the next ship are chanting 'Do not follow it. Do not follow it.'",
       "choices": [
         {"text": "Fly through slowly.", "outcomes": [
-          {"weight": 60, "text": "The fog parts, closes, parts. Voices come and go. At the far end you realise your crew have all heard different names, and none of them will say which. The air tastes of rain.", "effects": {"crew_hp": 5}},
-          {"weight": 30, "text": "The fog gets in. For an hour the crew see things that are not there and say things that are not true. Everyone sleeps badly.", "effects": {"crew_hp": -10}},
+          {"weight": 60, "text": "The fog parts, closes, parts. Voices come and go. At the far end you realise you have heard several different names, and you will not say which. The air tastes of rain.", "effects": {"crew_hp": 5}},
+          {"weight": 30, "text": "The fog gets in. For an hour you see things that are not there and say things that are not true. You sleep badly.", "effects": {"crew_hp": -10}},
           {"weight": 10, "text": "Somewhere in the fog something takes a bite out of your hull. It leaves a tooth.", "effects": {"items": {"scrap": 20}, "hull": -10}}
         ]},
         {"text": "Follow the voice.", "outcomes": [
           {"weight": 40, "text": "The voice leads you to a drifting lamp, a floating pot of tea and a note: THIS WAY IS FINE. You drink the tea. It is very good. The note is signed 'Moll'.", "effects": {"items": {"fuel": 2}, "crew_hp": 10}},
-          {"weight": 40, "text": "The voice leads you into the thick of it. By the time you get out a day has gone, and your crew are wearing each other's hats.", "effects": {"crew_hp": -5}},
+          {"weight": 40, "text": "The voice leads you into the thick of it. By the time you get out a day has gone, and you are wearing somebody else's hat.", "effects": {"crew_hp": -5}},
           {"weight": 20, "text": "The voice leads you to the bank's heart: an old Concord cutter, her crew at their posts, fog pouring from her vents. The log is the last thing aboard.", "effects": {"items": {"scrap": 30}, "log": "log_fen_fog_log"}}
         ]},
         {"text": "[Mire] Sing the Wet Watch call.", "requires": {"species": "mire"}, "outcomes": [
@@ -106,8 +106,8 @@
       "text": "A Fen patrol cutter pulls alongside, flashing a polite lamp. 'Surprise drill,' says the voice. 'You will have three minutes.' Before you can ask, an alarm sounds on your ship that is not yours. A Mire in a slicker steps through your airlock holding a stopwatch. 'Fire in the galley,' they say. 'Go.'",
       "choices": [
         {"text": "Play along.", "outcomes": [
-          {"weight": 55, "text": "Your crew run the drill: foam, buckets, a lot of shouting. The stopwatch says 2:41. The Mire nods, writes 'adequate', and awards each of you a sticker. Your crew are quietly delighted. The Mire's log pad is left behind.", "effects": {"items": {"credits": 10}, "rep": {"concord": 1}, "crew_hp": 5, "log": "log_fen_three_am"}},
-          {"weight": 45, "text": "Your crew run the drill. Someone takes the wrong exit; someone else takes the right one in the wrong order. The Mire writes 'educational' and sticks a poster on your wall, along with a log pad.", "effects": {"crew_hp": 5, "log": "log_fen_three_am"}}
+          {"weight": 55, "text": "You run the drill: foam, buckets, a lot of shouting. The stopwatch says 2:41. The Mire nods, writes 'adequate', and awards each of you a sticker. You are quietly delighted. The Mire's log pad is left behind.", "effects": {"items": {"credits": 10}, "rep": {"concord": 1}, "crew_hp": 5, "log": "log_fen_three_am"}},
+          {"weight": 45, "text": "You run the drill. Someone takes the wrong exit; someone else takes the right one in the wrong order. The Mire writes 'educational' and sticks a poster on your wall, along with a log pad.", "effects": {"crew_hp": 5, "log": "log_fen_three_am"}}
         ]},
         {"text": "Refuse the drill.", "outcomes": [
           {"weight": 100, "text": "The Mire looks at you for a long time, with the compassion of a nurse. 'Fire does not refuse,' they say, and leave a poster on your wall. FIRE DOES NOT REFUSE.", "effects": {}}
@@ -182,11 +182,17 @@
       "id": "fen_geyser_season", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"flag": "in_mire_fens", "jumps_min": 3},
       "text": "The comet ice is in geyser season. Every few seconds a jet of superheated steam shoots from a fissure in the rock, fifty metres high, and falls as boiling rain. The Mire harvest it anyway, in mackintoshes. 'Mind the geysers,' says one. 'They are quite hot.' She is bright pink from the neck up.",
       "choices": [
-        {"text": "Harvest between the jets.", "outcomes": [
-          {"weight": 40, "text": "You time the jets like a tide, dart in, cut, dart out. The haul is huge and the crew come back parboiled but proud.", "effects": {"items": {"fuel": 5, "polymer": 25}, "crew_hp": -10}},
-          {"weight": 30, "text": "A jet catches the ship mid-dart. The hull screams. The crew scald. You get out with half a haul and most of your skin.", "effects": {"items": {"fuel": 3, "polymer": 10}, "crew_hp": -20, "hull": -10}},
+        {"text": "Harvest between the jets.", "requires": {"crew_min": 1}, "outcomes": [
+          {"weight": 40, "text": "You time the jets like a tide, dart in, cut, dart out. The haul is huge and you come back parboiled but proud.", "effects": {"items": {"fuel": 5, "polymer": 25}, "crew_hp": -10}},
+          {"weight": 30, "text": "A jet catches the ship mid-dart. The hull screams. You scald. You get out with half a haul and most of your skin.", "effects": {"items": {"fuel": 3, "polymer": 10}, "crew_hp": -20, "hull": -10}},
           {"weight": 20, "text": "A jet takes the cutter arm clean off. The haul floats in the steam and you get a little of it.", "effects": {"items": {"fuel": 2, "polymer": 10}, "hull": -15}},
           {"weight": 10, "text": "A jet catches the airlock mid-cycle. One of your crew is scalded badly in the steam and does not make it back.", "effects": {"crew_hp": -15, "hull": -10, "lose_crew": 1}}
+        ]},
+        {"text": "Harvest between the jets.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 40, "text": "You time the jets like a tide, dart in, cut, dart out. The haul is huge and you come back parboiled but proud.", "effects": {"items": {"fuel": 5, "polymer": 25}, "crew_hp": -10}},
+          {"weight": 30, "text": "A jet catches the ship mid-dart. The hull screams. You scald. You get out with half a haul and most of your skin.", "effects": {"items": {"fuel": 3, "polymer": 10}, "crew_hp": -20, "hull": -10}},
+          {"weight": 20, "text": "A jet takes the cutter arm clean off. The haul floats in the steam and you get a little of it.", "effects": {"items": {"fuel": 2, "polymer": 10}, "hull": -15}},
+          {"weight": 10, "text": "A jet catches the airlock mid-cycle. You are scalded in the steam, and the cycle takes a good deal of the hull with it before you get it shut.", "effects": {"crew_hp": -15, "hull": -20}}
         ]},
         {"text": "[Mire] Harvest with the Wet Watch.", "requires": {"species": "mire"}, "outcomes": [
           {"weight": 85, "text": "Your Mire joins the harvesters in a mackintosh and walks into the steam as if it were mist. They return damp, pink and triumphant, carrying nine blocks of ice and a lot of fuel.", "effects": {"items": {"fuel": 6, "polymer": 25, "credits": 30}, "rep": {"concord": 1}}},

@@ -1,0 +1,204 @@
+{"events": [
+    {
+      "id": "trader_fuel_on_tick", "type": "trader", "weight": 10, "once": false, "requires": {},
+      "text": "A Fenn tanker, the Threepence, rides alongside with her lights blinking. FUEL, says the stencil. Half price, if you don't ask where from. The hose is already out. It is not the kind of hose you want to look at closely.",
+      "choices": [
+        {"text": "Buy three cans at half price (30 credits).", "requires": {"credits": 30, "pay": true}, "outcomes": [
+          {"weight": 60, "text": "Three cans, each of them fuel, as advertised. You don't ask where from.", "effects": {"items": {"fuel": 3}}},
+          {"weight": 40, "text": "Two cans of fuel and one can of something that eats paint.", "effects": {"hull": -4, "items": {"fuel": 2}}}
+        ]},
+        {"text": "[Radar] Scan the cans before you buy (30 credits).", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"], "credits": 30, "pay": true}, "outcomes": [
+          {"weight": 85, "text": "The radar reads the cans as fuel, mostly, and one of them as mostly fuel. You buy the four honest ones and give Threepence a look.", "effects": {"items": {"fuel": 4}}},
+          {"weight": 15, "text": "The radar reads every can as fuel. It is, for once, the whole truth. Threepence is visibly offended.", "effects": {"items": {"fuel": 3}}}
+        ]},
+        {"text": "Ask where it's from.", "outcomes": [
+          {"weight": 100, "text": "Threepence goes quiet, and then names a price you can afford: full. You take one can and the lesson.", "effects": {"items": {"credits": -24, "fuel": 1}}}
+        ]},
+        {"text": "Wave him off.", "outcomes": [
+          {"weight": 100, "text": "'Next time,' says Threepence, hopefully. He says that to everyone.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "trader_honest_scale", "type": "trader", "weight": 9, "once": false, "requires": {},
+      "text": "A scrap broker with a very large scale on the end of a pole and a sign: WE WEIGH ANYTHING. WE PAY BY THE KILO. A second sign, smaller: THE SCALE IS RIGHT. THE SCALE IS ALWAYS RIGHT.",
+      "choices": [
+        {"text": "Sell 60 scrap by the kilo.", "requires": {"items": {"scrap": 60}, "pay": true}, "outcomes": [
+          {"weight": 65, "text": "Sixty kilos, sixty credits. The scale is right. It is always right.", "effects": {"items": {"credits": 60}}},
+          {"weight": 35, "text": "The scale reads forty-five. You count it twice. It still reads forty-five. It is, a sign points out, always right.", "effects": {"items": {"credits": 45}}}
+        ]},
+        {"text": "[Workshop] Check his scale against the bench scale (sell 60 scrap).", "requires": {"component_any": ["fabricator", "assembly_rig", "robot_arm", "laser_cutter", "nanoforge"], "items": {"scrap": 60}, "pay": true}, "outcomes": [
+          {"weight": 85, "text": "Your bench says his scale is a tenth light, and says so in numbers. The broker pays the difference with the face of a man caught by an honest person.", "effects": {"items": {"credits": 70}}},
+          {"weight": 15, "text": "The scales agree. He is, for once, honest. It costs him a great deal to say so.", "effects": {"items": {"credits": 60}}}
+        ]},
+        {"text": "Ask what he does with it all.", "outcomes": [
+          {"weight": 100, "text": "'Weigh it,' says the broker. 'Then weigh it again.' He does not elaborate.", "effects": {}}
+        ]},
+        {"text": "Move along.", "outcomes": [
+          {"weight": 100, "text": "The scale swings on its pole behind you, right, as always.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "trader_paint_stall", "type": "trader", "weight": 9, "once": false, "requires": {},
+      "text": "A paint barge: 'Stops rust! Stops looking at you! Stops asking about the Snap!' The barge is painted four colours, none of which will admit to being first.",
+      "choices": [
+        {"text": "Buy a coat (25 credits).", "requires": {"credits": 25, "pay": true}, "outcomes": [
+          {"weight": 70, "text": "A coat of something grey and cheerful goes over the dents. The dents are still there, but they have been told to be quiet.", "effects": {"hull": 8}},
+          {"weight": 30, "text": "The paint takes. It also takes some of the old paint and a panel. Net: slightly ahead.", "effects": {"hull": 4}}
+        ]},
+        {"text": "[Workshop] Mix your own from the barge's pigments (15 credits).", "requires": {"component_any": ["fabricator", "assembly_rig", "robot_arm", "laser_cutter", "nanoforge"], "credits": 15, "pay": true}, "outcomes": [
+          {"weight": 80, "text": "You mix a batch at the bench, matched to the hull to a hair. The painter watches, and takes notes, and does not charge you for the notes.", "effects": {"hull": 12}},
+          {"weight": 20, "text": "The batch cures a colour the hull was not expecting.", "effects": {"hull": 3}}
+        ]},
+        {"text": "Ask what the paint is made of.", "outcomes": [
+          {"weight": 100, "text": "'Everything,' says the painter, with great pride. 'Everything that was lying around.'", "effects": {}}
+        ]},
+        {"text": "Wave and fly on.", "outcomes": [
+          {"weight": 100, "text": "The barge shrinks behind you, still shouting about the Snap.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "trader_missile_cart", "type": "trader", "weight": 8, "once": false, "requires": {},
+      "text": "A cart-ship hung with missiles by the dozen, tagged FOR THE OCCASION. The vendor says every missile goes off in the end, and that is more than most can say for their warranties.",
+      "choices": [
+        {"text": "Buy one missile (35 credits).", "requires": {"credits": 35, "pay": true}, "outcomes": [
+          {"weight": 75, "text": "One missile, in a box labelled FOR THE OCCASION. You hope the occasion is a good one.", "effects": {"items": {"missile": 1}}},
+          {"weight": 25, "text": "The missile, on inspection, is a very convincing paperweight. The vendor is genuinely shocked.", "effects": {}}
+        ]},
+        {"text": "[Artemis] Haggle as a fellow launcher owner (25 credits for two).", "requires": {"component": "artemis_mk1", "credits": 25, "pay": true}, "outcomes": [
+          {"weight": 80, "text": "He sees the tube on your hull and drops the price like a professional. 'Two for the one who knows,' he says.", "effects": {"items": {"missile": 2}}},
+          {"weight": 20, "text": "He sees the tube and the price and decides you look rich. You get one.", "effects": {"items": {"missile": 1}}}
+        ]},
+        {"text": "Ask whether any of them have gone off in the cart.", "outcomes": [
+          {"weight": 100, "text": "'Once,' says the vendor. 'Never again.' The cart is not what it was.", "effects": {}}
+        ]},
+        {"text": "Leave.", "outcomes": [
+          {"weight": 100, "text": "You leave, and the vendor goes on telling the lane about the occasion.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "trader_map_seller", "type": "trader", "weight": 8, "once": false, "requires": {},
+      "text": "A man in a hat sells maps of places he has never been. They are very good maps. 'I know,' he says. 'I draw them from what I imagine is there. People say I'm usually right.'",
+      "choices": [
+        {"text": "Buy a map (20 credits).", "requires": {"credits": 20, "pay": true}, "outcomes": [
+          {"weight": 65, "text": "The map is of a wreck field. It is, to your surprise, a wreck field.", "effects": {"reveal": "wreck_field"}},
+          {"weight": 35, "text": "The map is of his kitchen, in great and loving detail.", "effects": {}}
+        ]},
+        {"text": "[Radar] Check the map against the radar before you pay (20 credits).", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"], "credits": 20, "pay": true}, "outcomes": [
+          {"weight": 75, "text": "The radar and the map agree on two places and disagree on one, and the one they disagree on has a dent in it. You buy it anyway, for the dent.", "effects": {"reveal": ["wreck_field", "trader"]}},
+          {"weight": 25, "text": "The radar agrees with the map on one place. The man takes the credit.", "effects": {"reveal": "wreck_field"}}
+        ]},
+        {"text": "Ask him to draw you.", "outcomes": [
+          {"weight": 100, "text": "He draws you. You look, on paper, surprisingly well.", "effects": {}}
+        ]},
+        {"text": "Wave.", "outcomes": [
+          {"weight": 100, "text": "He waves back and starts drawing the place you're going.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_arrival_board", "type": "empty", "weight": 10, "once": false, "requires": {},
+      "text": "An arrival board hangs in the lane, lit, with a sign: WELCOME. YOU ARE HERE. PLEASE REMAIN CALM. EXITS: 1 (PROBABLY). Under it, in someone's handwriting: IT'S NOT AS BAD AS IT LOOKS. Below that, smaller, in the same hand: IT IS.",
+      "choices": [
+        {"text": "Read the notices.", "outcomes": [
+          {"weight": 60, "text": "Mostly warnings. One of them is a hand-drawn map of the nearest honest dealer, and you take it.", "effects": {"reveal": "trader"}},
+          {"weight": 40, "text": "Mostly warnings. Collected, they are a fairly good survey of everything that has gone wrong here.", "effects": {"items": {"credits": 5}}}
+        ]},
+        {"text": "[Radar] Check the board's map against your own.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 70, "text": "The board is right about the exits, wrong about the distances and honest about the danger. You correct it with a marker and are thanked by a passing drone.", "effects": {"reveal": "wreck_field", "items": {"credits": 10}}},
+          {"weight": 30, "text": "The radar corrects the board, and the board, offended, corrects the radar.", "effects": {"hull": -4}}
+        ]},
+        {"text": "Tick the VISITOR box.", "outcomes": [
+          {"weight": 100, "text": "A small light comes on in a box you can't see. Somebody, somewhere, has been informed that you are here, and you feel oddly welcome.", "effects": {"rep": {"concord": 1}}}
+        ]},
+        {"text": "Add your own line.", "outcomes": [
+          {"weight": 100, "text": "You write: SAME. The board seems to approve.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_lane_lamp_dead", "type": "empty", "weight": 9, "once": false, "requires": {},
+      "text": "A lane-lamp, dark. It is the only lamp for a hundred klicks, and it has been out long enough that the dust on it has settled into a pattern. Ships go by it a little quicker than they need to.",
+      "choices": [
+        {"text": "Light it with a plasma cell.", "requires": {"items": {"plasma_cell": 1}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "The lamp coughs, glows and settles to a steady white. A passing hauler flashes its lights twice. It is more thanks than you usually get.", "effects": {"items": {"credits": 15}, "rep": {"concord": 2}}}
+        ]},
+        {"text": "[Reactor] Run a line from your reactor to the lamp.", "requires": {"component_any": ["reactor_mk1", "reactor_mk2", "reactor_scrap_mk1", "reactor_neon_mk1", "reactor_scrap_kettle"]}, "outcomes": [
+          {"weight": 65, "text": "The lamp draws power in a long hungry gulp and comes on, glad. You leave a little of your own light in it.", "effects": {"items": {"credits": 15}, "rep": {"concord": 2}}},
+          {"weight": 35, "text": "The lamp draws more than the line can carry.", "effects": {"hull": -6, "rep": {"concord": 1}}}
+        ]},
+        {"text": "Strip the lamp for parts.", "outcomes": [
+          {"weight": 100, "text": "A good lamp, a good lens, a lot of copper. The dust slides off the lens as you take it, as though it had been waiting.", "effects": {"items": {"copper": 20, "scrap": 15}, "rep": {"concord": -1}}}
+        ]},
+        {"text": "Fly past quickly, like everyone else.", "outcomes": [
+          {"weight": 100, "text": "You go a little quicker than you need to. The lamp does not remark on it.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_the_long_view", "type": "empty", "weight": 8, "once": false, "requires": {},
+      "text": "From here you can see the whole region laid out in one clear sweep, every wreck, every lamp, every dim glow, as if the dark had been wiped. It will not last. It looks like it knows.",
+      "choices": [
+        {"text": "Take a long look.", "outcomes": [
+          {"weight": 70, "text": "You look, and put what you see on the chart as fast as you can. By the time you have finished, the dark has closed back over like a hand.", "effects": {"reveal": "wreck_field"}},
+          {"weight": 30, "text": "You look, and what you see is a market, lit up like a fair, a long way off.", "effects": {"reveal": "trader"}}
+        ]},
+        {"text": "[Radar Mk2] Sweep with the radar while the view holds.", "requires": {"component_any": ["radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 70, "text": "The radar swallows the view whole, and files it. By the time the dark returns, the chart is full.", "effects": {"reveal": ["wreck_field", "trader"]}},
+          {"weight": 30, "text": "The sweep catches you in the view, and the view catches you back.", "effects": {"hull": -5, "reveal": "wreck_field"}}
+        ]},
+        {"text": "Close your eyes. It's too much.", "outcomes": [
+          {"weight": 100, "text": "You close your eyes and let the view go by. It is the nicest minute you have had in a week.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "Fly on.", "outcomes": [
+          {"weight": 100, "text": "You fly on. Behind you the dark comes back over everything with a soft, thankful sound.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_distant_party", "type": "empty", "weight": 8, "once": false, "requires": {},
+      "text": "The radio picks up a party. Music, shouting, somebody's birthday, a fire-eater who has not had anything to eat in a while. It is coming from a sector nobody has mentioned, and it sounds, against all reason, wonderful.",
+      "choices": [
+        {"text": "Listen.", "outcomes": [
+          {"weight": 100, "text": "You listen for an hour. At the end somebody says your hull's name over the channel and wishes you a very happy birthday. You do not know how they know.", "effects": {"crew_hp": 10}}
+        ]},
+        {"text": "Ask to be let in.", "outcomes": [
+          {"weight": 50, "text": "'The more the merrier!' says a voice. A port opens in the dark. The party sends you off with a sack of favours, a good deal of ill-advised advice and a bag of fuel.", "effects": {"items": {"fuel": 2, "credits": 10}, "reveal": "trader"}},
+          {"weight": 50, "text": "'Oh, we're closed,' says the voice, cheerfully. 'Come back next year.'", "effects": {}}
+        ]},
+        {"text": "[Radar] Find where the party is.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+          {"weight": 60, "text": "The radar finds the party: a long lit liner on an old Lattice lane, ten klicks off. You are not invited, but you now know where the lane goes.", "effects": {"reveal": "trader"}},
+          {"weight": 40, "text": "The radar finds the party. The party finds the radar and holds a rather long toast to it.", "effects": {"crew_hp": 5}}
+        ]},
+        {"text": "Turn the radio off.", "outcomes": [
+          {"weight": 100, "text": "The party goes on without you, as parties do.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "empty_borrow_dont_take", "type": "empty", "weight": 9, "once": false, "requires": {},
+      "text": "A supply cache bolted to a dead buoy, with a sign: BORROW, DON'T TAKE. Under it a list of names and what each borrowed: fuel, a spanner, a pair of gloves, 'a little time'. The ink on the last name is still wet.",
+      "choices": [
+        {"text": "Borrow a can of fuel.", "outcomes": [
+          {"weight": 100, "text": "You borrow a can of fuel and sign the list with your hull's name. The ink, when you look back, is already dry.", "effects": {"items": {"fuel": 1}}}
+        ]},
+        {"text": "Take the lot.", "outcomes": [
+          {"weight": 70, "text": "You take the lot. It is quite a lot. The buoy blinks twice, in a pattern that might be disappointment.", "effects": {"items": {"fuel": 3, "scrap": 20}, "rep": {"clans": -2}}},
+          {"weight": 30, "text": "The cache is rigged, as caches are for people who do not read signs.", "effects": {"hull": -8, "items": {"fuel": 2}, "rep": {"clans": -2}}}
+        ]},
+        {"text": "Leave 10 scrap and borrow a spanner.", "requires": {"items": {"scrap": 10}, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You leave ten scrap and borrow a spanner. The list gains a line in your hand. It is an honest transaction, and rare.", "effects": {"items": {"fuel": 2}, "rep": {"clans": 1}}}
+        ]},
+        {"text": "[Tractor] Haul the whole buoy aboard, sign and all.", "requires": {"component_any": ["tractor_mk1", "tractor_mk2"]}, "outcomes": [
+          {"weight": 60, "text": "The buoy comes aboard with its cache and its list. The list, you notice, has a new name at the bottom in a wet hand: yours.", "effects": {"items": {"fuel": 3, "scrap": 30}, "rep": {"clans": -1}}},
+          {"weight": 40, "text": "The buoy was welded to something that did not agree.", "effects": {"hull": -8, "items": {"fuel": 1}}}
+        ]},
+        {"text": "Add your name and fly on.", "outcomes": [
+          {"weight": 100, "text": "You write your name at the bottom, under 'a little time'. It feels like a promise to somebody.", "effects": {}}
+        ]}
+      ]
+    }
+]}

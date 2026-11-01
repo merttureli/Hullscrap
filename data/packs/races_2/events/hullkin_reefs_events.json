@@ -32,7 +32,7 @@
           {"weight": 100, "text": "Your Hullkin presses a hand to the plating and knocks out a slow, heavy rhythm. All along the reef every Hullkin stops creeping and turns. Then the whole reef closes: plating folding on plating, shell sliding over shell, until the scrapers' barge is hemmed in by a wall of ridged steel with no door in it. The woman with the visor puts down her sandwich. 'Fine,' she says. 'We'll go.' The Hullkin let them, after about an hour.", "effects": {"items": {"scrap": 30, "titanium": 6}, "hull": 10}}
         ]},
         {"text": "Look the other way.", "outcomes": [
-          {"weight": 100, "text": "You look the other way, with some effort. On the plating a Hullkin stops creeping to watch you go. Your crew are very quiet.", "effects": {"crew_hp": -5}}
+          {"weight": 100, "text": "You look the other way, with some effort. On the plating a Hullkin stops creeping to watch you go. You are very quiet.", "effects": {"crew_hp": -5}}
         ]}
       ],
       "after_win": {"text": "The barge limps off trailing flame-gas. Along the reef a ripple runs, plate by plate, down to the last Hullkin, who knocks once on your hull in what you suppose is thanks. They have mended your guns while you were not looking.", "effects": {"items": {"scrap": 40, "titanium": 3}, "hull": 5}}

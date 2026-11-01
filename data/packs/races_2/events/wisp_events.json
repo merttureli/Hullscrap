@@ -23,8 +23,8 @@
       "text": "The freighter Slow Cooker has lost her aft hold to a rock and her captain to an understandable panic. The hold is a hundred cubic metres of hard vacuum. Clipped to the far bulkhead is the only thing the crew will cry about: the ship's cat, in an emergency carrier with a seal, a gauge, and eight minutes of air. The cat can be seen through the window, being furious. It is alive. Nobody wants to go in.",
       "choices": [
         {"text": "Suit up and go in.", "outcomes": [
-          {"weight": 60, "text": "Two of your crew go across on a line and return with the carrier and a deeply insulted cat. The captain cries into the carrier, and the cat, offended, bites her. The pay is generous.", "effects": {"items": {"credits": 30, "fuel": 1}}},
-          {"weight": 40, "text": "A suit seal sticks halfway, and your crew bring the carrier out through a bad minute. The cat is fine. They are bruised, and will not be told about it.", "effects": {"items": {"credits": 15}, "crew_hp": -10}}
+          {"weight": 60, "text": "Two of you go across on a line and return with the carrier and a deeply insulted cat. The captain cries into the carrier, and the cat, offended, bites her. The pay is generous.", "effects": {"items": {"credits": 30, "fuel": 1}}},
+          {"weight": 40, "text": "A suit seal sticks halfway, and you bring the carrier out through a bad minute. The cat is fine. They are bruised, and will not be told about it.", "effects": {"items": {"credits": 15}, "crew_hp": -10}}
         ]},
         {"text": "Patch the hold and repressurise.", "outcomes": [
           {"weight": 50, "text": "It takes a long hour and most of your good sealant, and the cat comes out in the middle of it, dignity first. The captain pays you in cargo she can spare.", "effects": {"items": {"scrap": 30, "credits": 20}}},
@@ -40,7 +40,7 @@
     },
     {
       "id": "wisp_dead_relay", "type": "wreck_field", "weight": 7, "once": false, "requires": {"jumps_min": 3},
-      "text": "A comms relay, dead for forty years, is holding a full charge in a capacitor bank the size of a bus. The relay's own interlock says nobody is to touch it. It is an old design, and entirely correct. Every cable off the bank has a sign on it: DO NOT. Your engineer has taken one look at the thing and gone to find a longer stick.",
+      "text": "A comms relay, dead for forty years, is holding a full charge in a capacitor bank the size of a bus. The relay's own interlock says nobody is to touch it. It is an old design, and entirely correct. Every cable off the bank has a sign on it: DO NOT. You have taken one look at the thing and gone to find a longer stick.",
       "choices": [
         {"text": "Discharge the bank through the hull, carefully.", "outcomes": [
           {"weight": 50, "text": "It goes right, more or less. The lights dim, the fuel gauge gets prettier, and every hair on the ship stands up and then, slowly, sits down again.", "effects": {"items": {"fuel": 2, "plasma_cell": 1}}},
@@ -53,7 +53,7 @@
           {"weight": 100, "text": "Your Wisp slips through the panel and drinks the bank dry in a long bright shudder, comes out the far side the size of a lamp, and spends a minute glowing at everyone. The relay is safe. Your reactor, which they top up on the way back, runs hot and happy for a week.", "effects": {"items": {"fuel": 3, "plasma_cell": 3}, "crew_hp": 5}}
         ]},
         {"text": "Leave it. DO NOT means DO NOT.", "outcomes": [
-          {"weight": 100, "text": "You obey the signs. Your engineer comes back with the longer stick and a look of mild disappointment, and puts it back where she found it.", "effects": {}}
+          {"weight": 100, "text": "You obey the signs. You come back with the longer stick and a look of mild disappointment, and put it back where you found it.", "effects": {}}
         ]}
       ]
     }

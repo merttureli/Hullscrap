@@ -1,15 +1,19 @@
 {"events": [
     {
       "id": "hollow_counting_beacon", "type": "hollow", "weight": 10, "once": false, "requires": {},
-      "text": "A navigation beacon hangs in the dark with its casing cold and its lamp out. It is counting. Not hailing, not pinging: counting, in a flat voice, one number a second. Four thousand one hundred and six. Four thousand one hundred and seven. Your engineer says it is a firmware fault. Your engineer is whispering.",
+      "text": "A navigation beacon hangs in the dark with its casing cold and its lamp out. It is counting. Not hailing, not pinging: counting, in a flat voice, one number a second. Four thousand one hundred and six. Four thousand one hundred and seven. You tell yourself it is a firmware fault. You are whispering.",
       "choices": [
         {"text": "Cut its power and take the cell.", "outcomes": [
-          {"weight": 60, "text": "The count stops mid-number. The cell comes away warm, which it should not be, and your engineer decides not to mention it.", "effects": {"items": {"fuel": 1, "scrap": 15}}},
+          {"weight": 60, "text": "The count stops mid-number. The cell comes away warm, which it should not be, and you decide not to mention it.", "effects": {"items": {"fuel": 1, "scrap": 15}}},
           {"weight": 40, "text": "The count stops. A second later, somewhere behind you, it starts again from the same number, and a great many lights come on.", "effects": {"fight": "tier"}}
         ]},
         {"text": "Listen. Somebody ought to know what it is counting.", "outcomes": [
           {"weight": 65, "text": "At four thousand two hundred the voice stops counting and reads out a set of coordinates, twice, in the tone of a clerk closing a ledger. You write them down. They are a trader's lane, and it is not one you knew.", "effects": {"reveal": ["trader"]}},
           {"weight": 35, "text": "You listen until the numbers start to mean something, and then until they stop meaning anything. Nobody sleeps well for a day. Nobody can say why.", "effects": {"crew_hp": -8}}
+        ]},
+        {"text": "[Radar Mk3] Let the radar read what it is counting.", "requires": {"component": "radar_mk3"}, "outcomes": [
+          {"weight": 55, "text": "The radar takes the count and finds the pattern under it: a lane, a cache, a clerk closing a ledger. You write down the coordinates and take the cell on the way out.", "effects": {"reveal": ["trader"], "items": {"fuel": 2}}},
+          {"weight": 45, "text": "The radar finds the number the beacon is counting toward, and the beacon notices. The dish takes the rest of the count in one go, and rings.", "effects": {"hull": -10}}
         ]},
         {"text": "Leave it to its sums.", "outcomes": [
           {"weight": 100, "text": "You turn away. The count follows you for a while, politely, and loses your place.", "effects": {}}
@@ -28,13 +32,13 @@
           {"weight": 100, "text": "The line closes up without her and does not look round. The tail does. Her guns come about, slow and certain, like a tired person turning to see who is knocking.", "effects": {"fight": "tier"}}
         ]},
         {"text": "Wait for them to pass.", "outcomes": [
-          {"weight": 100, "text": "It takes a long time. Nobody on the crew says anything until the last running light is gone, and then they all say something at once.", "effects": {}}
+          {"weight": 100, "text": "It takes a long time. You say nothing until the last running light is gone, and then you say something rude.", "effects": {}}
         ]}
       ]
     },
     {
       "id": "hollow_dead_callsign", "type": "hollow", "weight": 10, "once": false, "requires": {},
-      "text": "The radio clears its throat. A voice says a callsign that was retired three years ago, and says it the way its owner did, down to the cough: come back to me, I'm on your six, I'm cold, somebody has left the gate open. Your cook has gone very quiet. \"That's Dunnock,\" she says. \"That's Dunnock's callsign. That's the right cough.\"",
+      "text": "The radio clears its throat. A voice says a callsign that was retired three years ago, and says it the way its owner did, down to the cough: come back to me, I'm on your six, I'm cold, somebody has left the gate open. You have gone very quiet. That's Dunnock's callsign. That's the right cough.",
       "choices": [
         {"text": "Answer: \"Dunnock? Where are you?\"", "outcomes": [
           {"weight": 70, "text": "\"Right behind you,\" says the voice, in the cook's own voice. Then in everyone's. The dark behind you fills in with hulls.", "effects": {"fight": "tier"}},
@@ -53,6 +57,10 @@
           {"weight": 45, "text": "The bay is warm and stocked, as if somebody expected you and has gone to fetch the kettle. You fill your arms and do not stay for tea.", "effects": {"items": {"scrap": 25, "copper": 10, "fuel": 1}}},
           {"weight": 30, "text": "The doors close behind you on the way out, slowly, the way a hand closes. You cut free with a bad noise and a worse smell.", "effects": {"hull": -12}},
           {"weight": 25, "text": "The welcome loop changes to something shorter. The bay was not empty after all.", "effects": {"fight": "tier"}}
+        ]},
+        {"text": "[Radar Mk3] Look behind the lights before you dock.", "requires": {"component": "radar_mk3"}, "outcomes": [
+          {"weight": 60, "text": "The radar finds nothing behind the lights that breathes or hums, and the lights go out one by one as you fill your arms. You do not stay for tea.", "effects": {"items": {"scrap": 25, "copper": 10, "fuel": 2}}},
+          {"weight": 40, "text": "The radar sees what is behind the lights, and the lights see it seeing. The welcome loop gets shorter.", "effects": {"fight": "tier"}}
         ]},
         {"text": "Keep your heading and your manners.", "outcomes": [
           {"weight": 100, "text": "The lights follow you all the way out of range. When you straighten out they dim, a little, like someone who had a speech ready.", "effects": {}}
@@ -84,8 +92,8 @@
           {"weight": 65, "text": "She gives up the same cargo she gave the last time you looked. You are too busy hauling to count it twice.", "effects": {"items": {"scrap": 40, "copper": 10}}},
           {"weight": 35, "text": "The fire in the window turns out to be a lamp. It swings round and looks at you, and the plating you were cutting lets go all at once.", "effects": {"hull": -10, "items": {"scrap": 20}}}
         ]},
-        {"text": "Give her a wide berth, and don't look back, whatever the cook says.", "outcomes": [
-          {"weight": 100, "text": "You give her a very wide berth. The cook looks back anyway, and says only that the window was empty, and then that it wasn't.", "effects": {}}
+        {"text": "Give her a wide berth, and don't look back, whatever the back of your neck says.", "outcomes": [
+          {"weight": 100, "text": "You give her a very wide berth. You look back anyway, and see only that the window was empty, and then that it wasn't.", "effects": {}}
         ]}
       ]
     }

@@ -50,9 +50,13 @@
           {"weight": 65, "text": "You lock the beam on the container and lift. The latch snaps, the container swings, you catch it in the nick of time, and swing it out over the dark. Fourteen dockers cheer in a cloud of grit.", "effects": {"items": {"fuel": -1, "credits": 45}, "rep": {"concord": 1}}},
           {"weight": 35, "text": "The container swings wild. You get it clear, but the swing takes a gantry arm with it, and the dockers have to run. Nobody is hurt. The foreman is gracious, in a tight sort of way.", "effects": {"items": {"fuel": -1, "credits": 20}, "hull": -5}}
         ]},
-        {"text": "Send a crew to shore up the deck.", "outcomes": [
+        {"text": "Send your crew to shore up the deck.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 55, "text": "You throw all the spare plate and every pair of hands into the deck-shoring, and the dockers hold, and the latch holds, long enough for the rescue crane to arrive. A close, sweaty business.", "effects": {"items": {"credits": 30, "scrap": -10}, "crew_hp": -10, "rep": {"concord": 1}}},
           {"weight": 45, "text": "The latch goes before the shoring is done. The container comes down on the far end of the deck, on nobody, but the shock throws two of yours into a wall.", "effects": {"crew_hp": -20, "items": {"credits": 20}}}
+        ]},
+        {"text": "Go over and shore up the deck yourself.", "requires": {"crew_max": 0}, "outcomes": [
+          {"weight": 45, "text": "You throw all the spare plate you have and both your hands into the deck-shoring, and the dockers hold, and the latch holds, long enough for the rescue crane to arrive. A close, sweaty business.", "effects": {"items": {"credits": 30, "scrap": -10}, "crew_hp": -10, "rep": {"concord": 1}}},
+          {"weight": 55, "text": "The latch goes before the shoring is done. The container comes down on the far end of the deck, on nobody, but the shock throws you into a wall.", "effects": {"crew_hp": -20, "items": {"credits": 20}}}
         ]},
         {"text": "[Brine] Take the weight.", "requires": {"species": "brine"}, "outcomes": [
           {"weight": 100, "text": "Your Brine walks out under the hanging container, plants both feet, braces the great claw against the latch, and takes the weight. Sparks spray from the plating. The dockers' foreman stops speaking. Your Brine holds. Holds. A minute passes, and then another, and then, with a groan, the crane arrives and takes the load. Your Brine sets down the claw and examines it with interest, as if surprised it still worked. The dockers lift them on their shoulders and carry them round the deck. The foreman kisses them on the shell.", "effects": {"items": {"credits": 65, "titanium": 3}, "rep": {"concord": 2}, "crew_hp": 5}}

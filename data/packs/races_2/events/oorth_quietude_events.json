@@ -31,7 +31,7 @@
           {"weight": 100, "text": "Your Oorth stands at the window and the figure turns, and the two ridges glow the same blue. For some time neither says anything. 'Would you like to come with us?' says your Oorth. The figure weeps without making a sound. 'Nobody has asked me that,' they say, 'in thirty-one years.' Ulla leaves a note on the dash, GONE WITH FRIENDS, and squares it with the edge of the panel.", "effects": {"recruit": {"species": "oorth", "name": "Ulla"}, "items": {"credits": 25}, "rep": {"concord": 1}}}
         ]},
         {"text": "Leave them. It is not your shuttle.", "outcomes": [
-          {"weight": 100, "text": "You turn away. In the mirror the shuttle's lights seem to be on for you alone, which is probably a trick of the dark. Your crew are quiet for a while.", "effects": {"crew_hp": -5}}
+          {"weight": 100, "text": "You turn away. In the mirror the shuttle's lights seem to be on for you alone, which is probably a trick of the dark. You are quiet for a while.", "effects": {"crew_hp": -5}}
         ]}
       ]
     },
@@ -76,7 +76,7 @@
     },
     {
       "id": "quiet_sound_of_nobody", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "oorth_quietude", "jumps_min": 3},
-      "text": "A Concord survey drone hangs in the dark on a single working beacon. It has no crew, no autopilot, and no power. It has, your instruments agree, nothing aboard it at all. And yet it is the quietest object you have ever seen, and the quiet is pointed at you. Your cook says it feels like being looked at by a coat.",
+      "text": "A Concord survey drone hangs in the dark on a single working beacon. It has no crew, no autopilot, and no power. It has, your instruments agree, nothing aboard it at all. And yet it is the quietest object you have ever seen, and the quiet is pointed at you. It feels, you decide, like being looked at by a coat.",
       "choices": [
         {"text": "Stay clear and take a reading.", "outcomes": [
           {"weight": 100, "text": "The reading is a straight line. It shakes you more than a spike would. The Lumen will pay for it, if they can be persuaded it is real.", "effects": {"items": {"credits": 20}, "crew_hp": -5}}

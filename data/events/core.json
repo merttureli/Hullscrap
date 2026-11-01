@@ -20,7 +20,8 @@
 			"requires": {"node": "rusthold", "flag": "met_ma"},
 			"text": "Gantry Rusthold turns slowly on its borrowed bearings. The dock lights flicker in a pattern that might be a welcome or might be a fault. Either way, a hand in a welding mask waves you toward bay six.",
 			"choices": [
-				{"text": "Dock.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]},
+				{"text": "Dock.", "outcomes": [
+					{"weight": 100, "text": "Bay six takes you in with a clang that could be a welcome. The dock hand points a welding torch at where to park.", "effects": {}}]},
 				{"text": "Ask the dock hands about work.", "outcomes": [
 					{"weight": 50, "text": "\"Concord's paying double for Rustfang scalps,\" says one. \"Don't tell them we told you. Don't tell Ma either.\"", "effects": {}},
 					{"weight": 50, "text": "\"Wrecks are thick near the dead gates,\" says another. \"Thick as flies. Same smell, too.\"", "effects": {}}]}
@@ -31,7 +32,8 @@
 			"requires": {"node": "meridian"},
 			"text": "\"Concord Station Meridian. You are number one in the docking queue. Thank you for waiting.\" The voice is calm, tired and exactly on time. Behind it you can hear someone stamping something.",
 			"choices": [
-				{"text": "Dock.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]},
+				{"text": "Dock.", "outcomes": [
+					{"weight": 100, "text": "You are number one. A stamp comes down somewhere behind the voice, firmly, and the clamps take hold.", "effects": {}}]},
 				{"text": "File the full docking forms (10 credits).", "requires": {"credits": 10, "pay": true}, "outcomes": [
 					{"weight": 100, "text": "The clerk checks every box twice and looks, for a moment, almost moved. \"A pleasure to see someone use the process.\"", "effects": {"rep": {"concord": 1}}}]}
 			]
@@ -41,7 +43,8 @@
 			"requires": {"node": "prism"},
 			"text": "The Prism hums a note you feel in your fillings. A voice, pleasant and several people at once, says: \"You are interesting. Come in. Mind the light.\"",
 			"choices": [
-				{"text": "Dock.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]},
+				{"text": "Dock.", "outcomes": [
+					{"weight": 100, "text": "The light is pleasant, and several people at once. It lets you in and does not say why.", "effects": {}}]},
 				{"text": "[Emberkin] Hum the note back.", "requires": {"species": "emberkin"}, "outcomes": [
 					{"weight": 100, "text": "Your Emberkin hums the fifth above it, warm as a stove. The Prism goes quiet, and then, you would swear, pleased.", "effects": {"rep": {"lumen": 1}}}]}
 			]
@@ -63,10 +66,14 @@
 			"id": "pirate_ambush", "type": "pirate", "weight": 8,
 			"text": "No hail, no toll. The first you hear of them is the hull ringing like a dropped pan.",
 			"choices": [
-				{"text": "Man the guns.", "outcomes": [{"weight": 100, "text": "", "effects": {"fight": "tier"}}]},
+				{"text": "Man the guns.", "outcomes": [
+					{"weight": 100, "text": "The guns come up. So do theirs, a little late and very loud.", "effects": {"fight": "tier"}}]},
 				{"text": "[Afterburner] Light the afterburner and run.", "requires": {"component": "afterburner"}, "outcomes": [
 					{"weight": 60, "text": "The afterburner roars and the Rustfangs shrink to a rumour. Something was clipped on the way out, but you are not complaining.", "effects": {"hull": -5}},
-					{"weight": 40, "text": "They were expecting that. They've got a faster engine and nothing but time.", "effects": {"fight": "tier"}}]}
+					{"weight": 40, "text": "They were expecting that. They've got a faster engine and nothing but time.", "effects": {"fight": "tier"}}]},
+				{"text": "Cut the lights and drift like a wreck.", "outcomes": [
+					{"weight": 50, "text": "They circle once and kick your hull to see if it rings. It rings the way a dead hull rings, and they move on to somebody with a pulse.", "effects": {}},
+					{"weight": 50, "text": "The Rustfangs have seen this one before. A boarding sled bumps your hull, gently, and then not gently.", "effects": {"fight": "tier"}}]}
 			]
 		},
 		{
@@ -87,7 +94,8 @@
 			"id": "repo_fight", "type": "page", "weight": 0,
 			"text": "The collector's ship swings broadside. It has a ram on the bow that someone has lovingly painted with the word MA. Their crew stops pretending to be pirates.",
 			"choices": [
-				{"text": "Man the guns.", "outcomes": [{"weight": 100, "text": "", "effects": {"fight": "tier"}}]}
+				{"text": "Man the guns.", "outcomes": [
+					{"weight": 100, "text": "You man the guns. The collectors finish pretending.", "effects": {"fight": "tier"}}]}
 			],
 			"after_win": {"text": "Their ledger tumbles out of the wreck, still open. The last line reads: Gantry, one hull, 4 jumps overdue. You tear that page out and pocket the petty cash.", "effects": {"items": {"credits": 40}, "rep": {"clans": -1}}}
 		},
@@ -97,13 +105,17 @@
 			"choices": [
 				{"text": "Cut her open for scrap.", "outcomes": [
 					{"weight": 70, "text": "The cutting torch sings and the plates peel away like orange rind. A decent haul.", "effects": {"items": {"scrap": 50}}},
-					{"weight": 30, "text": "A bulkhead lets go mid-cut and takes a crewman with it for a moment. Everyone lives. The scrap is smaller than you hoped.", "effects": {"crew_hp": -15, "items": {"scrap": 20}}}]},
+					{"weight": 30, "text": "A bulkhead lets go mid-cut and takes you with it for a moment. You live. The scrap is smaller than you hoped.", "effects": {"crew_hp": -15, "items": {"scrap": 20}}}]},
 				{"text": "Search the cargo bay for anything worth selling.", "outcomes": [
 					{"weight": 50, "text": "A crate of Concord ration chits, none of them expired yet. You sell them to yourself, for the credits.", "effects": {"items": {"credits": 35}}},
 					{"weight": 50, "text": "Copper wire, miles of it, wound round a dead man's reel.", "effects": {"items": {"copper": 20}}}]},
 				{"text": "[Basalt] Send your Basalt out onto the hull, no suit needed.", "requires": {"species": "basalt"}, "outcomes": [
 					{"weight": 100, "text": "He walks the outer plates like a man on a Sunday pier, and comes back with a sack of the good stuff and a calm expression.", "effects": {"items": {"scrap": 60, "titanium": 10}}}]},
-				{"text": "Leave her to the dark.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "[Afterburner] Match her tumble and cut from the spinning side.", "requires": {"component": "afterburner"}, "outcomes": [
+					{"weight": 60, "text": "You slide in alongside her, turning with her, and the torch holds one still line down her flank while the plates peel away like the skin of an orange. The cargo bay opens its mouth and you take what is in it.", "effects": {"items": {"scrap": 70, "credits": 25}}},
+					{"weight": 40, "text": "The tumble wins by a few degrees. The torch has been there a moment before the freighter's corner arrives, and the corner does not stop at your hull.", "effects": {"hull": -12, "items": {"scrap": 25}}}]},
+				{"text": "Leave her to the dark.", "outcomes": [
+					{"weight": 100, "text": "You leave her turning in the dark, hold doors open, still surprised.", "effects": {}}]}
 			]
 		},
 		{
@@ -128,7 +140,8 @@
 					{"weight": 100, "text": "\"Bulk,\" says Sixpence, as if it were a favour.", "effects": {"items": {"fuel": 3}}}]},
 				{"text": "[Fenn] Haggle in his own language (48 credits for three).", "requires": {"species": "fenn", "credits": 48, "pay": true}, "outcomes": [
 					{"weight": 100, "text": "Your Fenn trills something at the tanker, fast and rude. Sixpence trills back, slower and ruder, and then laughs. Three cans, a discount, and a promise never to trade with you again.", "effects": {"items": {"fuel": 3}}}]},
-				{"text": "Wave him off.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "Wave him off.", "outcomes": [
+					{"weight": 100, "text": "Sixpence blinks something that is definitely laughter and lets you go. You hear him overcharge somebody else before you are out of range.", "effects": {}}]}
 			]
 		},
 		{
@@ -139,7 +152,7 @@
 					{"weight": 100, "text": "The hum thickens, then resolves into a chord, and a lane you were sure was not on the chart folds open. Somewhere ahead, a crystal station is clearing its throat.", "effects": {"flag": "prism_revealed", "reveal": "prism", "rep": {"lumen": 1}}}]},
 				{"text": "Take a reading from a safe distance.", "outcomes": [
 					{"weight": 70, "text": "Your scanner prints a graph that looks like a signature. Someone at Meridian will pay for that.", "effects": {"items": {"credits": 30}}},
-					{"weight": 30, "text": "The scanner feeds back through every console on the bridge. Your crew say a few words that don't go in the log.", "effects": {"crew_hp": -10}}]},
+					{"weight": 30, "text": "The scanner feeds back through every console on the bridge. You say a few words that don't go in the log.", "effects": {"crew_hp": -10}}]},
 				{"text": "Back away slowly.", "outcomes": [{"weight": 100, "text": "The light dims, politely, as if it understood.", "effects": {}}]}
 			]
 		},
@@ -154,18 +167,21 @@
 					{"weight": 70, "text": "He pockets it with the dignity of a man who is very tired of being a man. \"Move along.\"", "effects": {"rep": {"concord": -1}}},
 					{"weight": 30, "text": "He writes down the serial number of the note. \"Thank you,\" he says. \"That will be exhibit A.\"", "effects": {"rep": {"concord": -3}}}]},
 				{"text": "Floor it.", "outcomes": [
-					{"weight": 100, "text": "\"Oh, come on,\" says Hallett, and the Diligence lights its guns with the air of someone who really wanted a quiet shift.", "effects": {"rep": {"concord": -2}, "fight": "tier"}}]}
+					{"weight": 100, "text": "\"Oh, come on,\" says Hallett, and the Diligence lights its guns with the air of someone who really wanted a quiet shift.", "effects": {"rep": {"concord": -2}, "fight": "tier"}}]},
+				{"text": "[Radar] Read his inspection list before he reads yours.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+					{"weight": 55, "text": "The radar reads the Diligence's list a full minute before Hallett reaches the bottom of it. Everything on it is in order, and so is your hold. 'Remarkably well prepared,' says Hallett, stamping. He sounds almost sad about it.", "effects": {"rep": {"concord": 1}}},
+					{"weight": 45, "text": "The radar shows his list, and the list shows your expired registration, and Hallett shows you the form. 'Thank you for the honesty,' he says. 'Twenty credits.'", "effects": {"items": {"credits": -20}}}]}
 			]
 		},
 		{
 			"id": "empty_quiet", "type": "empty", "weight": 10,
 			"text": "Nothing out here but the hum of the ship and the tick of cooling metal. For once, nothing is on fire.",
 			"choices": [
-				{"text": "Use the quiet to patch everyone up.", "outcomes": [{"weight": 100, "text": "Plasters, a hot drink, someone's stolen blanket. Everybody comes out the better for it.", "effects": {"crew_hp": 15}}]},
+				{"text": "Use the quiet to patch up.", "outcomes": [{"weight": 100, "text": "Plasters, a hot drink, someone's stolen blanket. You come out the better for it.", "effects": {"crew_hp": 15}}]},
 				{"text": "Listen to the radio.", "outcomes": [
 					{"weight": 50, "text": "A Scrapper race broadcast, three hulls and a lot of swearing. You bet a stranger two credits and win ten.", "effects": {"items": {"credits": 10}}},
 					{"weight": 50, "text": "Static and a very old song. Nobody says anything for a while, and it's nice.", "effects": {}}]},
-				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "You leave the quiet where you found it. It does not seem to mind.", "effects": {}}]}
 			]
 		},
 		{
@@ -182,7 +198,11 @@
 					{"weight": 10, "text": "A pale grey seam: titanium. A small one, but real.", "effects": {"items": {"titanium": 10}}},
 					{"weight": 10, "text": "A fat knuckle of titanium. Someone at Meridian is going to hug you.", "effects": {"items": {"titanium": 20}}},
 					{"weight": 40, "text": "The rock fractures the wrong way and a slab the size of a door comes back at the hull. You get some scrap out of it, and a dent.", "effects": {"hull": -10, "items": {"scrap": 10}}}]},
-				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "[Intake] Skim the loose rubble with the intake while the rock turns.", "requires": {"component_any": ["intake_mk1", "intake_mk2", "intake_mk3", "net_mouth_scrap"]}, "outcomes": [
+					{"weight": 60, "text": "You hold station off the flank and let the rock throw its dust at the intake. The hold fills a little at a time, without a single cut. It is the laziest money you have ever made.", "effects": {"items": {"scrap": 45}}},
+					{"weight": 25, "text": "The turn brings a vein round into the beam, and the intake gets a mouthful of copper along with the grit.", "effects": {"items": {"scrap": 30, "copper": 12}}},
+					{"weight": 15, "text": "A boulder the size of a door comes round with the rest. The intake takes it in the mouth and does not enjoy it.", "effects": {"hull": -8, "items": {"scrap": 15}}}]},
+				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "You leave the rock to turn. It looks, you think, relieved.", "effects": {}}]}
 			]
 		},
 		{
@@ -199,7 +219,10 @@
 					{"weight": 10, "text": "Titanium, a little, in a pocket of ice.", "effects": {"items": {"titanium": 10}}},
 					{"weight": 10, "text": "The blind spot was a titanium nodule the size of a crate.", "effects": {"items": {"titanium": 20}}},
 					{"weight": 40, "text": "The blind spot was a gas pocket. The bang rattles every tooth you have, and scatters a little scrap back at you.", "effects": {"hull": -10, "items": {"scrap": 10}}}]},
-				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "", "effects": {}}]}
+				{"text": "[Radar] Pick the blind spot out before anyone cuts it.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
+					{"weight": 65, "text": "The radar leans on the blind spot until it resolves into a titanium nodule the size of a crate, wrapped in a skin of ice. You cut round it, not through it, and it comes away whole.", "effects": {"items": {"titanium": 14, "scrap": 15}}},
+					{"weight": 35, "text": "The radar resolves the blind spot into a gas pocket, half a second after you started to cut. The bang goes the way it was always going to.", "effects": {"hull": -8, "items": {"scrap": 10}}}]},
+				{"text": "Move on.", "outcomes": [{"weight": 100, "text": "The belt drifts on without you. The blind spot stays blind.", "effects": {}}]}
 			]
 		}
 	]

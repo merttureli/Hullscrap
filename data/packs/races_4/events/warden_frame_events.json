@@ -45,7 +45,7 @@
     },
     {
       "id": "warden_first_light", "type": "page", "weight": 0, "once": true, "requires": {}, "landmark": "A Warden Wakes",
-      "text": "The lens focuses. For a long moment the Warden looks at the ceiling, at the cables, at your crew in a half-circle at the edge of the lamp, and at its own hands, as if counting. Its voice, when it comes, is level and soft and has been unused for a long while. 'Watch relieved,' it says. 'Duty log closed at nine thousand and four hours. I have no post. I have no gate.' It is very still. 'Is there something I should be holding?'",
+      "text": "The lens focuses. For a long moment the Warden looks at the ceiling, at the cables, at you at the edge of the lamp, and at its own hands, as if counting. Its voice, when it comes, is level and soft and has been unused for a long while. 'Watch relieved,' it says. 'Duty log closed at nine thousand and four hours. I have no post. I have no gate.' It is very still. 'Is there something I should be holding?'",
       "choices": [
         {"text": "Give it a name, and a place on the roster.", "outcomes": [
           {"weight": 100, "text": "'A name,' says the Warden, and it is quiet for a second. 'I was given a number. It was longer.' It looks around the hold and settles on a doorframe by the hatch, and speaks, a little wonderingly. 'Lintel. The beam over the door that holds the weight and is never looked at. May I be that?' You tell it that it may. It stands up very straight, the neon in its panels the colour of morning, and takes the post by the hatch as if it had always been there.", "effects": {"recruit": {"species": "warden_frame", "name": "Lintel"}, "rep": {"lumen": 1}, "flag": "warden_rebooted"}}
