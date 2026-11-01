@@ -38,7 +38,7 @@
 	},
 	"loot": {"credits": [20, 60], "strip_base": 20, "strip_per_part": 6, "threat_picks": {"4": 1, "5": 2}},
 	"prices": {"repair": 2, "sell_fraction": 0.5, "recruit": 450, "offers": 2, "recruit_chance": 0.4},
-	"crew": {"species_event": 0.07, "station_event": 0.2, "unique_event": 0.3},
+	"crew": {"species_event": 0.07, "station_event": 0.2, "unique_event": 0.3, "offers_per_region": 1, "offers_exempt_packs": ["story_1", "endings_1", "start_alone"]},
 	"values": {
 		"rarity": {"common": 2, "uncommon": 6, "rare": 18, "very_rare": 45},
 		"tier": {"1": 40, "2": 90, "3": 160},

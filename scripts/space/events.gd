@@ -21,6 +21,11 @@ extends RefCounted
 ## - `after_win` ({text, effects}) on an event, or on an outcome, runs after a won fight.
 ## - `requires.region` (a region id or a region's `events` tag, or a list of them: any one) and `stage_min` / `stage_max`
 ##   tie an event or a choice to the regions of the run (docs/CONTENT.md section 15, regions.gd).
+## - `requires.crew_min` / `crew_max` (on an event or a choice) count the crew aboard besides the soldier (crew_count(); drones will
+##   not count), so a text can ask for a crew to send or for the ship to be alone. A choice's `species` and `component` take an id or
+##   a list (any one of them); `species_any` and `component_any` mean the same and can sit beside the plain key (both must hold).
+## - At most `crew.offers_per_region` (data/drift.json) events that add crew fire in a region: once that many have (Campaign.crew_offers),
+##   the others are out of the pool until the next region. Ada's pod and the events of the packs in `crew.offers_exempt_packs` are free.
 ## - `landmark` (true, or a title) on an event makes it a landmark (docs/CONTENT.md section 13): when a choice with
 ##   effects is taken (the rule of `once`) it is recorded in the profile (the first time ever) and in the run log. A landmark
 ##   does not end the run. The effect `unlock` (an id of data/unlocks.json, or a list) earns something for the next runs and
@@ -41,9 +46,9 @@ const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
 const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest", "hollow"]
 const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark"]
-const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max"]
+const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue"]
-const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "species", "trait", "items", "pay", "component", "credits"]
+const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "species", "species_any", "trait", "items", "pay", "component", "component_any", "credits"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
 const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending"]
@@ -220,6 +225,30 @@ func crew_factor(id: String, c) -> float:
 	return float(_dict(c.cfg.get("crew")).get(key, 1.0))
 
 
+## Does event `id` count against the one free crew offer a region makes? An event that adds crew does, but not Ada's pod and
+## not the events of the packs data/drift.json `crew.offers_exempt_packs` names (the story's).
+func offers_crew(id: String, c) -> bool:
+	var kind: String = _recruiters.get(id, "")
+	if kind == "" or kind == "ada":
+		return false
+	var path := str(files.get(id, ""))
+	return not _list(_dict(c.cfg.get("crew")).get("offers_exempt_packs")).any(func(p): return path.contains("/packs/%s/" % p))
+
+
+## How many crew-adding events may fire in a region (`crew.offers_per_region`); no limit when the key is missing.
+static func offers_cap(c) -> int:
+	return int(_dict(c.cfg.get("crew")).get("offers_per_region", 1000000))
+
+
+static func offers_used(c) -> int:
+	return int(c.crew_offers)
+
+
+## The crew aboard besides the soldier (a ship of null has none): what `requires.crew_min` / `crew_max` count. Drones are not crew.
+static func crew_count(ship) -> int:
+	return 0 if ship == null else ship.crew.filter(func(m): return not m.is_player).size()
+
+
 # --- picking ------------------------------------------------------------------------------------------
 
 ## The event that happens at `node` ({id, type, place}): a weighted roll with the campaign's rng among
@@ -236,6 +265,8 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 		var w := _weight(ev.get("weight", DEFAULT_WEIGHT))
 		if w <= 0.0 or not eligible(ev, c, node, ship) or (filter.is_valid() and not filter.call(ev)):
 			continue
+		if offers_crew(id, c) and offers_used(c) >= offers_cap(c):  # this region has made its offer
+			continue
 		var gate := crew_factor(id, c)
 		if gate < 1.0 and c.rng.randf() >= gate:  # crew are rare: most of the time the event is not in the pool
 			continue
@@ -250,6 +281,8 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 		if r < 0.0:
 			chosen = p[0]
 			break
+	if offers_crew(str(chosen.get("id", "")), c):
+		c.crew_offers += 1
 	return chosen
 
 
@@ -283,8 +316,8 @@ static func _list(v) -> Array:
 	return [] if v == null else [v]
 
 
-## The parts of `requires` that depend on the campaign (and the fuel in the hold): jumps, flags,
-## reputation, node, fuel_max, region and stage.
+## The parts of `requires` that depend on the campaign (and the fuel in the hold and the crew aboard): jumps, flags,
+## reputation, node, fuel_max, crew_min / crew_max, region and stage.
 func _world_ok(req: Dictionary, c, node: Dictionary, ship = null) -> bool:
 	if req.has("stage_min") and c.stage < int(req["stage_min"]):
 		return false
@@ -295,6 +328,10 @@ func _world_ok(req: Dictionary, c, node: Dictionary, ship = null) -> bool:
 		if not _list(req["region"]).any(func(r): return str(r) == c.region_id or (tag != "" and str(r) == tag)):
 			return false
 	if req.has("fuel_max") and (ship.inventory.count("fuel") if ship != null else 0) > int(req["fuel_max"]):
+		return false
+	if req.has("crew_min") and crew_count(ship) < int(req["crew_min"]):
+		return false
+	if req.has("crew_max") and crew_count(ship) > int(req["crew_max"]):
 		return false
 	if req.has("jumps_min") and c.jumps < int(req["jumps_min"]):
 		return false
@@ -321,18 +358,25 @@ func _world_ok(req: Dictionary, c, node: Dictionary, ship = null) -> bool:
 	return true
 
 
-## The parts of `requires` that depend on the crew and the ship: species, trait, component.
+## The parts of `requires` that depend on the crew and the ship: species, trait, component. `species` and `component` take an
+## id or a list (any one of them); `species_any` and `component_any` say the same, and a key beside its plain twin must hold too.
 func _crew_ok(req: Dictionary, ship) -> bool:
-	for s in _list(req.get("species")):
-		if not ship.crew.any(func(m): return not m.is_down() and str(m.species) == str(s)):
+	for key in ["species", "species_any"]:
+		var want := _list(req.get(key))
+		if not want.is_empty() and not want.any(func(s): return ship.crew.any(func(m): return not m.is_down() and str(m.species) == str(s))):
 			return false
 	for t in _list(req.get("trait")):
 		if not ship.crew.any(func(m): return not m.is_down() and traits_of(m).has(str(t))):
 			return false
-	for id in _list(req.get("component")):
-		if not ship.components.instances.values().any(func(i): return i["id"] == str(id)):
+	for key in ["component", "component_any"]:
+		var want := _list(req.get(key))
+		if not want.is_empty() and not want.any(func(id): return _fitted(ship, str(id))):
 			return false
 	return true
+
+
+static func _fitted(ship, id: String) -> bool:
+	return ship.components.instances.values().any(func(i): return i["id"] == id)
 
 
 ## The traits of crew member `m` (species, personal and gear traits: CrewMember.traits()).
@@ -345,7 +389,7 @@ static func traits_of(m) -> Array:
 ## Is the choice blue (it asks for a species, a trait or an installed component, or says `blue`: good standing at the exit)?
 static func is_blue(ch: Dictionary) -> bool:
 	var req := _dict(ch.get("requires"))
-	return req.has("species") or req.has("trait") or req.has("component") or bool(ch.get("blue", false))
+	return req.has("species") or req.has("species_any") or req.has("trait") or req.has("component") or req.has("component_any") or bool(ch.get("blue", false))
 
 
 ## The choices of `ev` that show, in order: {index (into ev.choices), text, blue, grey, need}. A
@@ -395,11 +439,14 @@ func _need_text(need: Dictionary, ship) -> String:
 
 
 func _reason(req: Dictionary, ship) -> String:
-	if req.has("species"):
-		return " / ".join(_list(req["species"]).map(func(s): return str(s).capitalize()))
+	var kin := _list(req.get("species")) + _list(req.get("species_any"))
+	if not kin.is_empty():
+		return " / ".join(kin.map(func(s): return str(s).capitalize()))
 	if req.has("trait"):
 		return " / ".join(_list(req["trait"]).map(func(t): return TRAIT_LABELS.get(t, TraitSet.library().get(str(t), {}).get("name", str(t).capitalize()))))
-	return " / ".join(_list(req.get("component")).map(func(id): return ship.components.def(str(id)).get("name", str(id)) if ship.components.has(str(id)) else str(id)))
+	var parts := _list(req.get("component")) + _list(req.get("component_any"))
+	var fitted := parts.filter(func(id): return _fitted(ship, str(id)))  # of several, the ones aboard
+	return " / ".join((fitted if not fitted.is_empty() else parts).map(func(id): return ship.components.def(str(id)).get("name", str(id)) if ship.components.has(str(id)) else str(id)))
 
 
 static func _name(ship, id: String) -> String:
@@ -572,9 +619,12 @@ static func _ids_of(path: String, key: String) -> Dictionary:
 
 static func _known() -> Dictionary:
 	var items := {}  # core and pack items, components and materials
+	var components := {}  # core and pack components (a choice may ask for a part of a pack: strafe jets)
 	for kind in ["items", "components", "materials"]:
 		for id in Content.ids(kind):
 			items[id] = true
+			if kind == "components":
+				components[id] = true
 	items["credits"] = true
 	items["fuel"] = true
 	var places := Regions.place_ids()  # the fixed places of every region
@@ -603,7 +653,7 @@ static func _known() -> Dictionary:
 	var characters := {}
 	for id in Content.ids("characters"):
 		characters[id] = true
-	return {"characters": characters, "items": items, "components": _ids_of("res://data/components.json", "components"), "recipes": _ids_of("res://data/recipes.json", "recipes"),
+	return {"characters": characters, "items": items, "components": components, "recipes": _ids_of("res://data/recipes.json", "recipes"),
 		"places": places, "factions": factions, "species": species, "traits": traits, "unlocks": unlocks, "endings": endings, "regions": regions}
 
 
@@ -685,7 +735,7 @@ func _check_req(req, allowed: Array, where: String, known: Dictionary, bad: Call
 		bad.call(where + " must be an object")
 		return
 	_check_keys(req, allowed, where + ": ", bad)
-	for k in ["jumps_min", "jumps_max", "credits", "fuel_max", "stage_min", "stage_max"]:
+	for k in ["jumps_min", "jumps_max", "credits", "fuel_max", "stage_min", "stage_max", "crew_min", "crew_max"]:
 		if req.has(k) and not _is_num(req[k]):
 			bad.call("%s: %s must be a number" % [where, k])
 	for r in _list(req.get("region")):
@@ -707,13 +757,13 @@ func _check_req(req, allowed: Array, where: String, known: Dictionary, bad: Call
 					bad.call("%s: %s for %s must be a number" % [where, k, f])
 	if req.has("node") and not (NODE_TYPES.has(req["node"]) or known["places"].has(req["node"])):
 		bad.call("%s: node '%s' is neither a node type nor a place id" % [where, req["node"]])
-	for s in _list(req.get("species")):
+	for s in _list(req.get("species")) + _list(req.get("species_any")):
 		if not known["species"].has(s):
 			bad.call("%s: unknown species '%s' (known: %s)" % [where, s, ", ".join(known["species"].keys())])
 	for t in _list(req.get("trait")):
 		if not known["traits"].has(t):
 			bad.call("%s: unknown trait '%s' (known: %s)" % [where, t, ", ".join(known["traits"].keys())])
-	for id in _list(req.get("component")):
+	for id in _list(req.get("component")) + _list(req.get("component_any")):
 		if not known["components"].has(id):
 			bad.call("%s: unknown component '%s'" % [where, id])
 	if req.has("items"):
