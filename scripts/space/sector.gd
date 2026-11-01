@@ -23,6 +23,8 @@ extends RefCounted
 ## - The Hollow tide (docs/MECHANICS_REVIEW.md P1): the campaign tells the sector it is `hollow` (set_hollow, the one
 ##   setter; the sector never reads the tide). Then its debris thins, ghosts come for the ship (ambient `hollow` in
 ##   data/sectors.json) and every POI but a station or store runs a `hollow` event. Not saved: the campaign sets it again on a load.
+## - The tide's pressure (tide.gd pressure, set_pressure, the one setter, also from the campaign, not saved): 0 to 1, how near the tide is to this place.
+##   The debris thins by lerp(1, 0.4, pressure) before the Hollow multiplier, and the sector view creeps a fog in (hollow_fog.gd).
 
 const Content = preload("res://scripts/data/content.gd")
 const Radar = preload("res://scripts/space/radar.gd")
@@ -66,6 +68,7 @@ var clock := 0.0  ## seconds spent in the sector (tick)
 var rng := RandomNumberGenerator.new()  ## ambient rolls and spawn points
 var ambient_weights := {}  ## kind (trader, patrol, pirate) -> weight of the passing ships: the region's `ambient`
 var far_seen := {}  ## far POI id -> state, for the far POIs that are not new: remembered when their chunk is not live, and saved
+var pressure := 0.0  ## how hard the Hollow tide presses on this place, 0 to 1 (set_pressure)
 var hollow := false  ## the Hollow tide has taken this place (set_hollow): ghosts come for the ship and the debris thins
 var _poi_mults := {}  # the region's POI weight multipliers (_build): the far POIs use them too
 var _far := {}  # live chunk (Vector2i) -> its far POIs
@@ -591,7 +594,7 @@ func debris_cfg(base: Dictionary) -> Dictionary:
 	out["current"]["speed"] = current_speed
 	out["streams"] = streams.duplicate(true)
 	var s: Dictionary = out["spawn"]
-	var d := density * (float(cfg["ambient"].get("hollow", {}).get("debris", 1.0)) if hollow else 1.0)  # the Hollow eats the current
+	var d := density * lerpf(1.0, float(cfg["pressure"]["debris"]), pressure) * (float(cfg["ambient"].get("hollow", {}).get("debris", 1.0)) if hollow else 1.0)  # the tide near thins the current, the Hollow eats it
 	s["every"] = float(s["every"]) / d
 	s["max_alive"] = maxi(8, roundi(float(s["max_alive"]) * d))
 	s["start_alive"] = roundi(float(s["start_alive"]) * d)
@@ -649,6 +652,11 @@ func set_hollow(h: bool, mid_stay := false) -> void:
 		_ghost_due = true
 		_amb_t = 0.0
 	hollow = h
+
+
+## The tide's pressure on this place (campaign.gd, with set_hollow: on arrival, on a load and as the tide or the linger clock moves), kept in 0 to 1.
+func set_pressure(p: float) -> void:
+	pressure = clampf(p, 0.0, 1.0)
 
 
 ## One ambient roll: with chance `ambient.chance` (and fewer than `max` about) an `unknown` contact appears at

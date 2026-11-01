@@ -509,7 +509,7 @@ func test_the_debris_field_thins_once_when_the_place_falls() -> void:
 	view.frame(0.05)
 	dv.frame(0.1)
 	check(dv.debris == field, "the same field: it is rescaled, not rebuilt")
-	near(float(dv.debris.cfg["spawn"]["every"]) * 0.3, every, "spawning at 0.3 x the rate", 1e-6)
+	near(float(dv.debris.cfg["spawn"]["every"]) * 0.4 * 0.3, every * lerpf(1.0, 0.4, 0.3), "spawning at 0.3 x the rate, on top of the 0.4 x of pressure 1 (it was 0.3 before)", 1e-6)
 	check(dv.debris.pieces.size() >= pieces - 2, "the pieces already about stay (%d of %d)" % [dv.debris.pieces.size(), pieces])
 	var rescaled: Dictionary = dv.debris.cfg["spawn"].duplicate()
 	dv.frame(0.1)
