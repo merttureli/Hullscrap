@@ -1,5 +1,5 @@
 extends "res://tests/base_test.gd"
-## What the big round build area (playtest 2, B1: every starter's frame is a disc of radius 29) touches besides the
+## What the big round build area (playtest 2, B1: every starter's frame is a disc of radius 38) touches besides the
 ## ships' files (tests/test_starter_ships.gd checks those): the build-mode art of the empty frame, which is drawn every
 ## frame of build mode, and the map of a ship, which must fit the built ship and not the whole frame.
 
@@ -53,7 +53,7 @@ func test_the_map_fits_what_is_built_not_the_empty_frame() -> void:
 	for path in [COURIER, "res://data/ships/starter_rustbucket.json", "res://data/ships/starter_prism.json"]:
 		var ship := Ship.from_design(path)
 		var box := Schematic.fit_box(ship)
-		check(box.size.x < 40.0 and box.size.y < 40.0, "%s: the map box is %s, well under the 59 cells of the frame" % [path, str(box.size)])
+		check(box.size.x < 40.0 and box.size.y < 40.0, "%s: the map box is %s, well under the 77 cells of the frame" % [path, str(box.size)])
 		var cells: Array = ship.grid.tiles.keys()
 		for uid in ship.components.instances:
 			cells.append_array(ship.components.instances[uid]["out_cells"])
@@ -65,3 +65,19 @@ func test_the_map_fits_what_is_built_not_the_empty_frame() -> void:
 		lo = lo.min(Vector2(c))
 		hi = hi.max(Vector2(c) + Vector2.ONE)
 	eq(Schematic.fit_box(pirate), Rect2(lo, hi - lo), "a ship with a snug hull is fitted as it was")
+
+
+func test_a_ship_saved_on_the_old_63_grid_still_loads_as_it_was() -> void:  # the starters moved to 83x83; a save keeps its own size
+	var old := Ship.new_starter()  # the empty starter hull is still 63x63
+	eq(old.grid.size, Vector2i(63, 63), "the empty starter is a 63x63 grid")
+	var saved: Dictionary = old.to_dict()
+	var back := Ship.new_starter()
+	eq(back.load_dict(saved), "", "an old save loads")
+	eq(back.grid.size, Vector2i(63, 63), "and keeps its 63x63 grid")
+	eq(back.grid.hull.size(), old.grid.hull.size(), "and its hull")
+	var big := Ship.from_design(COURIER)
+	eq(big.grid.size, Vector2i(83, 83), "a starter is 83x83")
+	var again := Ship.new_starter()
+	eq(again.load_dict(big.to_dict()), "", "a starter's own save loads")
+	eq(again.grid.size, Vector2i(83, 83), "at its own size")
+	eq(again.grid.hull.size(), big.grid.hull.size(), "with its whole round hull")
