@@ -20,6 +20,7 @@ const Abilities = preload("res://scripts/sim/abilities.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Evacuate = preload("res://scripts/crew/evacuate.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 const MigrateParts = preload("res://scripts/ship/migrate_parts.gd")
@@ -67,6 +68,7 @@ var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_des
 var skin := ""  ## the hull skin of the exterior plating (a skin unlock's payload `skin`, unlocks.gd skin_paint); "" = the plain hull; saved when set
 var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
+var abandoned: Array[Vector2i] = []  ## the key cells (Rooms.key_of) of the rooms the player gave up (Evacuate, K2); saved as the optional "abandoned" list
 var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
 var ability_state := Abilities.fresh_state()  ## abilities running or resting (abilities.gd); not saved
 var world_pos := Vector2.ZERO  ## pixels; for drawing, 0 for now
@@ -226,6 +228,7 @@ func refresh() -> bool:
 		return false
 	if _structure_dirty:
 		atmosphere.rebuild(grid)
+		Evacuate.sync(self)  # the abandoned rooms follow the new rooms, their doors stay locked
 	var mods := Abilities.power_mods(self)
 	for uid in mods["bonus"]:  # the power a crew adds to a part (Nest Reactor) comes on top of its operator's
 		bonus[uid] = float(bonus.get(uid, 0.0)) + float(mods["bonus"][uid])
@@ -263,6 +266,8 @@ func to_dict() -> Dictionary:
 		d["dead_crew"] = dead_crew.duplicate()
 		if not crew_plan.is_empty():
 			d["crew_plan"] = crew_plan.duplicate(true)
+	if not abandoned.is_empty():  # optional: the rooms the player gave up
+		d["abandoned"] = abandoned.map(func(c): return [c.x, c.y])
 	if not fires.is_empty():  # optional, like the grid's damage lists: only written when something burns
 		var list := []
 		for c in Fire.sorted_cells(fires.keys()):
@@ -331,6 +336,12 @@ func load_dict(d: Dictionary) -> String:
 		world_pos = Vector2(float(p[0]), float(p[1])) if p is Array and p.size() == 2 else Vector2.ZERO
 		rot_quarters = posmod(int(d.get("rot", 0)), 4)
 	fires = burning
+	abandoned.clear()
+	var given_up = d.get("abandoned")
+	if given_up is Array:  # (a malformed entry is skipped: the player just gets the room back)
+		for p in given_up:
+			if p is Array and p.size() == 2 and (p[0] is float or p[0] is int) and (p[1] is float or p[1] is int):
+				abandoned.append(Vector2i(int(p[0]), int(p[1])))
 	if people != null:  # the same arrays, filled again (others may hold them)
 		crew.clear()
 		crew.append_array(people["crew"])

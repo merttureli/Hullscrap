@@ -7,9 +7,9 @@ const SPACE := -1  ## a door end that opens to space (no tile there)
 const SOLID := -2  ## a door end that is a wall, another door, or otherwise closed
 
 
-## Returns {"room_of": {cell: id}, "rooms": [{id, cells, size, sealed}], "doors": [{cell, a, b}]}.
+## Returns {"room_of": {cell: id}, "rooms": [{id, cells, size, sealed, abandoned}], "doors": [{cell, a, b}]}.
 ## Air cells are tiles that are neither solid nor door. Rooms are 4-connected groups of them,
-## numbered 0..n-1 by their smallest cell (y, then x). A room is sealed unless one of its cells
+## numbered 0..n-1 by their smallest cell (y, then x). `abandoned` starts false (Evacuate.sync sets it, K2). A room is sealed unless one of its cells
 ## touches a cell with no tile (empty hull or outside the grid). Doors are boundaries: `a` is the
 ## left/up end and `b` the right/down end, each a room id, SPACE or SOLID; sorted by cell.
 static func compute(grid) -> Dictionary:
@@ -49,7 +49,7 @@ static func compute(grid) -> Dictionary:
 				elif grid.get_tile(n) == "":
 					sealed = false
 		_sort(cells)
-		rooms.append({"id": id, "cells": cells, "size": cells.size(), "sealed": sealed})
+		rooms.append({"id": id, "cells": cells, "size": cells.size(), "sealed": sealed, "abandoned": false})
 
 	var doors: Array = []
 	for c in door_cells:
@@ -73,6 +73,11 @@ static func _open_ends(ends: Array) -> int:
 
 static func _flag(grid, id: String, key: String) -> bool:
 	return grid.defs != null and bool(grid.defs.get_def(id).get(key, false))
+
+
+## The cell that names room `r` across rebuilds (room ids shift when the ship changes): its smallest.
+static func key_of(r: Dictionary) -> Vector2i:
+	return r["cells"][0]
 
 
 static func _sort(cells: Array[Vector2i]) -> void:

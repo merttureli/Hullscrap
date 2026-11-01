@@ -44,6 +44,8 @@ var is_player := false  ## the player's soldier: moved by hand, never given a jo
 var look := {}  ## PersonDrawer palette ("suit", "hair", "tool"); empty = the viewer picks one by name
 var job := {}  ## what they are doing now (a Jobs board entry plus its "spot"); empty = idle
 var hold := 0.0  ## seconds left of a manual order, during which the job board leaves them alone
+var post := -1  ## uid of the part they are posted to (K1, Posts): they man it for good and leave it only for a fire or a breach in its room, repairing it or restocking its ammo; -1 = none. Saved
+var winded := false  ## hurt (under crew.json air.hurt_below) and not yet over air.back_above again: they take no job in an airless room (Jobs, K3). Not saved
 var stun := 0.0  ## seconds left stunned (an ion hit on their room, trait ion_stun): no walking, no work
 var down_t := 0.0  ## seconds spent at 0 hp (mortality.gd: they die at crew.json bleed_out_s unless someone is saving them)
 var ability: Dictionary = {}  ## the active ability they carry, {id, cooldown?, params?} (crew_abilities.gd): their species' own, or their character's
@@ -162,6 +164,8 @@ func to_dict() -> Dictionary:
 	var d := {"name": name, "species": species, "pos": [pos.x, pos.y], "hp": hp, "max_hp": max_hp}
 	if is_player:
 		d["is_player"] = true
+	if post >= 0:
+		d["post"] = post
 	if character != "":
 		d["character"] = character
 	if not look.is_empty():
@@ -205,6 +209,7 @@ static func from_dict(d: Dictionary):
 		Characters.apply(m, str(d["character"]))  # (an id the data no longer has stays an ordinary person)
 		m.name = str(d["name"])
 	m.is_player = bool(d.get("is_player", false))
+	m.post = int(d["post"]) if _is_num(d.get("post")) else -1
 	if d.get("look") is Dictionary:
 		m.look = d["look"].duplicate()
 	m.head = str(d.get("head", m.head))
