@@ -85,7 +85,7 @@ static func _side_share() -> float:
 ## The description of id `id` on `ship`: {what, stats, keywords, lore, cost, level}. A part gets all of it; a material, an item
 ## or gear gets its line, its lore and its recipe. `rot`: the quarter turns an engine is held at (-1: not known; says how
 ## each wall uses it).
-static func of(id: String, ship, rot := -1) -> Dictionary:
+static func of(id: String, ship, rot := -1, angle := -1.0) -> Dictionary:
 	var out := {"what": "", "stats": [], "keywords": [], "lore": "", "cost": {}, "level": 0}
 	if ship.crafting.has(id):
 		var r: Dictionary = ship.crafting.def(id)
@@ -105,7 +105,7 @@ static func of(id: String, ship, rot := -1) -> Dictionary:
 	if fam == "weapon":
 		_weapon(id, rows, kws, tail)
 	else:
-		_stats(def, eff, fam, rot, rows)
+		_stats(def, eff, fam, rot, rows, angle)
 	var pw := float(eff["power"])
 	if pw != 0.0:
 		rows.append(["Power", ("+" if pw > 0.0 else MINUS) + num(absf(pw))])
@@ -131,8 +131,8 @@ static func of(id: String, ship, rot := -1) -> Dictionary:
 
 
 ## The description as plain text, a line each (what tests and plain readers get).
-static func text(id: String, ship, rot := -1) -> String:
-	var d := of(id, ship, rot)
+static func text(id: String, ship, rot := -1, angle := -1.0) -> String:
+	var d := of(id, ship, rot, angle)
 	var lines: Array[String] = [d["what"]]
 	for r in d["stats"]:
 		lines.append("%s: %s" % [r[0], r[1]])
@@ -186,7 +186,7 @@ static func _of_item(id: String, out: Dictionary) -> Dictionary:
 # --- stats -------------------------------------------------------------------------------------------------
 
 ## The rows of the stats a non-weapon part has, from data/describe.json `stats`.
-static func _stats(def: Dictionary, eff: Dictionary, fam: String, rot: int, rows: Array) -> void:
+static func _stats(def: Dictionary, eff: Dictionary, fam: String, rot: int, rows: Array, angle := -1.0) -> void:
 	var st: Dictionary = eff["stats"]
 	var table: Dictionary = data()["stats"]
 	for k in st:
@@ -196,7 +196,7 @@ static func _stats(def: Dictionary, eff: Dictionary, fam: String, rot: int, rows
 			continue
 		rows.append([t[0], str(t[1]).replace("{v}", big(v) if k == "radar_range" else num(v))])
 		if k == "thrust":
-			rows.append(["Push", _pushes(v, rot)])
+			rows.append(["Push", _pushes(v, rot, angle)])
 	match fam:
 		"shield":
 			if not st.has("recharge"):
@@ -207,12 +207,15 @@ static func _stats(def: Dictionary, eff: Dictionary, fam: String, rot: int, rows
 			rows.append(["Heals", "%s hp/s" % num(float(CrewMember.config()["heal_per_s"]["bed"]))])
 
 
-## Where an engine's thrust `t` goes at `rot` (the nozzle's turn): forward and sideways, as Flight.thrusts_of splits it.
-static func _pushes(t: float, rot: int) -> String:
+## Where an engine's thrust `t` goes at `rot` (the nozzle's turn), or along `angle` (degrees, an engine on a sloped face: R does not
+## turn it): forward and sideways, as Flight.thrusts_of splits it.
+static func _pushes(t: float, rot: int, angle := -1.0) -> String:
 	var share := num(t * _side_share())
-	if rot < 0:
+	if rot < 0 and angle < 0.0:
 		return "forward, +%s side" % share
-	var part := Flight.split(t, -Vector2(Mounts.outward(rot)))
+	var part := Flight.split(t, -(Mounts.normal_of(angle) if angle >= 0.0 else Vector2(Mounts.outward(rot))))
+	if angle >= 0.0:
+		return "%s %s, %s side" % [num(absf(part.y)), "fwd" if part.y > 0.0 else "back", num(absf(part.x))]
 	if absf(part.x) > absf(part.y):
 		return "%s side, %s back" % [num(absf(part.x)), share]
 	if part.y > 0.0:

@@ -211,14 +211,14 @@ static func size_text(s: Vector2i) -> String:
 ## What the selection card says about card `e` on `ship`: {title, line (its name), tier, what (one short line), stats ([label,
 ## value]), keywords (describe.gd keyword(): label, colour, hover), lore (one sentence), cost ({id: n}), per ("a cell" for
 ## cable and belt), level (the fabricator level it needs), note (red: why it can't be placed, else "")}. `rot`: the quarter turns
-## the tool has now (an engine's push).
-static func info(e: Dictionary, ship, rot := 0) -> Dictionary:
+## the tool has now (an engine's push); `angle`: the degrees of the sloped face it is over, -1 for none.
+static func info(e: Dictionary, ship, rot := 0, angle := -1.0) -> Dictionary:
 	var out := {"title": e["name"], "line": LINE_NAMES.get(e["line"], str(e["line"]).capitalize()), "tier": e["tier"], "what": "",
 		"stats": [], "keywords": [], "lore": "", "cost": {}, "per": "", "level": 0, "note": ""}
 	var words: Dictionary = Describe.data()["tiles"]
 	match e["kind"]:
 		"part":
-			var d := Describe.of(e["id"], ship, rot)
+			var d := Describe.of(e["id"], ship, rot, angle)
 			for k in ["what", "stats", "keywords", "lore", "cost", "level"]:
 				out[k] = d[k]
 			out["note"] = "" if e["ok"] else str(e["why"])

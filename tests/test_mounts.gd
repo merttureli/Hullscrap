@@ -135,16 +135,16 @@ func _refusals(thick: int, rot: int) -> void:
 	var along := Wall.at(rot, 2, 0) - Wall.at(rot, 0, 0)
 	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok + along, rot), "the barrel must stick out into space", tag + ": an outside half on another gun's")
 	parts.remove_uid(first)
-	# needs a flat wall to mount through
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok + toward, rot), "needs a flat wall to mount through", tag + ": a gap between the barrel and the wall")
+	# needs an outer wall or a slope to mount through
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok + toward, rot), "needs an outer wall or a slope to mount through", tag + ": a gap between the barrel and the wall")
 	var layer0 := Wall.at(rot, 0, 0)
 	ship.grid.force_tile(layer0, "floor")
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs a flat wall to mount through", tag + ": a floor cell in the first wall layer")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs an outer wall or a slope to mount through", tag + ": a floor cell in the first wall layer")
 	ship.grid.force_tile(layer0, "door")
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs a flat wall to mount through", tag + ": a door in it")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs an outer wall or a slope to mount through", tag + ": a door in it")
 	ship.grid.force_tile(layer0, "wall")
 	ship.grid.set_shape(layer0, "tri", 0, false)
-	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs a flat wall to mount through", tag + ": a sloped cell in it")
+	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "needs an outer wall or a slope to mount through", tag + ": a sloped cell in it")
 	ship.grid.set_shape(layer0, "full")
 	ship.grid.force_tile(layer0, "wall")
 	eq(parts.can_place_mount(ship.grid, "laser_mk1", ok, rot), "", tag + ": mended")
@@ -218,7 +218,7 @@ func test_a_narrow_breech_refuses_when_its_two_columns_are_not_free_floor() -> v
 		ship.grid.force_tile(Wall.at(rot, -2, 1), "")  # floor missing beside the breech, behind the barrel's end: fine
 		eq(Mounts.plan(ship.grid, ship.components, def, out, rot)["why"], "", tag + ": the barrel's end need not have floor behind it")
 		ship.grid.force_tile(Wall.at(rot, 1, 0), "floor")  # a wall that is not flat across the barrel's width, beside the breech
-		eq(Mounts.plan(ship.grid, ship.components, def, out, rot)["why"], "needs a flat wall to mount through", tag + ": the wall run is as wide as the barrel")
+		eq(Mounts.plan(ship.grid, ship.components, def, out, rot)["why"], "needs an outer wall or a slope to mount through", tag + ": the wall run is as wide as the barrel")
 
 
 func test_a_narrow_breech_only_needs_its_own_cells_clear() -> void:
@@ -265,7 +265,7 @@ func test_from_inside_looks_through_the_whole_barrel_width_like_plan_does() -> v
 		var back: Dictionary = Mounts.from_inside(ship.grid, ship.components, def, inside, rot)
 		eq([back["why"], back["depth"], back["out"]], ["", 3, Wall.out_anchor(rot)], tag + ": the three layers and the barrel in space")
 		ship.grid.force_tile(Wall.at(rot, -2, 2), "floor")  # the barrel's end column is not wall in the last layer; the breech's own columns are
-		eq(Mounts.from_inside(ship.grid, ship.components, def, inside, rot)["why"], "needs a flat wall to mount through", tag + ": the walk covers the barrel's width, so this is no wall to mount through")
+		eq(Mounts.from_inside(ship.grid, ship.components, def, inside, rot)["why"], "needs an outer wall or a slope to mount through", tag + ": the walk covers the barrel's width, so this is no wall to mount through")
 
 
 func test_the_barrel_pivot_is_read_from_the_outside_half_only() -> void:
@@ -300,7 +300,7 @@ func test_the_build_session_places_mounts_by_their_outside_half_and_undoes_them(
 	check(uid >= 0, "the outside half is where it was pointed")
 	eq(ship.components.instances[uid]["anchor"], Wall.corner(0, -1, 0, 2, 3), "the inside half was found")
 	var before := JSON.stringify(ship.to_dict())
-	eq(s.apply([{"layer": "component", "id": "laser_mk1", "anchor": out + Vector2i(0, -5), "rot": 0}])["reason"], "needs a flat wall to mount through", "a second one in mid air is refused")
+	eq(s.apply([{"layer": "component", "id": "laser_mk1", "anchor": out + Vector2i(0, -5), "rot": 0}])["reason"], "needs an outer wall or a slope to mount through", "a second one in mid air is refused")
 	eq(s.preview([{"layer": "component", "id": "laser_mk1", "anchor": out + Vector2i(4, 0), "rot": 0}])[0]["reason"], "", "the ghost of a free spot would apply")
 	eq(JSON.stringify(ship.to_dict()), before, "a preview changes nothing")
 	check(s.undo(), "undo")

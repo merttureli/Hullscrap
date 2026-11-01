@@ -238,7 +238,7 @@ Weapons and engines are **two linked halves**, not FTL's all-outside nor a box i
   - The game walks inward through the wall along the mount axis, and puts the **inside half on the first floor rows behind it**.
   - **The link** is the straight run of cells between the two halves, across the mount's full width. It must be **at least 1 cell deep**, and every cell must be a full wall cell (any material; no doors, floor or shaped pieces).
   - The outside cells must be exterior (no tile, open to space), and the inside cells free floor.
-  - Refusal reasons: "the barrel must stick out into space", "needs a flat wall to mount through", "the breech needs 4×2 free floor behind the wall".
+  - Refusal reasons: "the barrel must stick out into space", "needs an outer wall or a slope to mount through", "the breech needs 4×2 free floor behind the wall".
   - Thicker walls protect the inside half better and weigh more. That's the trade-off; there's no depth limit.
   - **Saves** store one record per mount: `pos` (inside half), `rot` and `out` (the outside half's top-left). Bump the save version.
 - **Damage: outside is built to take it, inside is not**:

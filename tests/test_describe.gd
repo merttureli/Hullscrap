@@ -196,6 +196,10 @@ func test_the_numbers_come_from_the_data() -> void:
 	check(Describe.text("engine_mk1", ship, 2).contains("Thrust: 10"), "engine_mk1 thrust")
 	var side: String = Describe.of("strafe_jets_mk1", ship, 1)["stats"].filter(func(r): return r[0] == "Push")[0][1]
 	check(side.begins_with("6 side"), "a side-mounted engine is sideways only: " + side)
+	var rear_slope: String = Describe.of("engine_mk1", ship, 0, 135.0)["stats"].filter(func(r): return r[0] == "Push")[0][1]
+	eq(rear_slope, "7.07 fwd, 7.07 side", "an engine over a rear-facing 45 degree slope pushes along the slope, not sideways only")
+	var front_slope: String = Describe.of("engine_mk1", ship, 0, 45.0)["stats"].filter(func(r): return r[0] == "Push")[0][1]
+	eq(front_slope, "7.07 back, 7.07 side", "over a front-facing slope it brakes, and R does not help: " + front_slope)
 	var shield := Describe.text("shield_mk1", ship)
 	for want in ["Layers: 1", "Sectors: 1", "Recharge: 7 s"]:
 		check(shield.contains(want), "shield_mk1 says " + want + ": " + shield)
