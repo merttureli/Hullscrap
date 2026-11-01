@@ -14,7 +14,9 @@
   "hollow": [
    "hollow.ogg"
   ],
-  "build": []
+  "build": [
+   "build.ogg"
+  ]
  },
  "stings": {},
  "volumes": {
@@ -22,6 +24,7 @@
   "explore_a.ogg": 0.0,
   "explore_b.ogg": 0.0,
   "combat.ogg": 0.0,
-  "hollow.ogg": 0.0
+  "hollow.ogg": 0.0,
+  "build.ogg": 0.0
  }
 }

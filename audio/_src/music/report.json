@@ -1,4 +1,29 @@
 {
+ "build": {
+  "bands_pct": [
+   39.7,
+   41.1,
+   12.5,
+   3.0,
+   3.7
+  ],
+  "bpm": 76.19,
+  "bytes": 1522486,
+  "peak_db": -4.13,
+  "rms_db": -18.01,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.4996,
+   "rms_first_db": -22.0,
+   "rms_last_db": -22.3,
+   "seam_step": 0.07115,
+   "typ_step_p999": 0.1819
+  },
+  "seconds": 100.8,
+  "target_rms_db": -18.0,
+  "title": "Workbench",
+  "true_peak_db": -3.79
+ },
  "combat": {
   "bands_pct": [
    28.8,
