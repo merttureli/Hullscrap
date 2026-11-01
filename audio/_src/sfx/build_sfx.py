@@ -111,13 +111,15 @@ def file_names_of(name, d):
 
 
 def write_assets_rows():
-    """Replace the SFX rows of ASSETS.md (they go after the other rows, so they never collide with the art or music blocks)."""
+    """Replace the SFX rows of ASSETS.md. They go just before the `tests/` row (the sorted place), where the art rows end and the music
+    rows (appended at the end) begin, so the three blocks do not collide when branches merge."""
     p = os.path.join(ROOT, "ASSETS.md")
     keep = [l for l in open(p).read().splitlines() if "assets/audio/sfx/" not in l]
     while keep and keep[-1] == "":
         keep.pop()
     rows = ["| `assets/audio/sfx/%s.wav` | %s | %s |" % (n, SRC_NOTE, LICENCE) for n in sorted(file_names())]
-    open(p, "w").write("\n".join(keep + rows) + "\n")
+    at = next((i for i, l in enumerate(keep) if l.startswith("| `tests/")), len(keep))
+    open(p, "w").write("\n".join(keep[:at] + rows + keep[at:]) + "\n")
 
 
 if __name__ == "__main__":
