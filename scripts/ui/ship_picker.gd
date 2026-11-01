@@ -11,6 +11,7 @@ extends Control
 const Ship = preload("res://scripts/ship/ship.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const DESIGNS: Array[String] = [
 	"res://data/ships/starter_rustbucket.json",
@@ -153,6 +154,7 @@ func _show_cards(on: bool) -> void:
 func choose(i: int) -> String:
 	if sim == null or i < 0 or i >= cards.size():
 		return "no such ship"
+	Audio.fx(self, "click")
 	var why: String = sim.choose_ship(cards[i]["path"])
 	if why != "":
 		if build != null:

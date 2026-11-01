@@ -22,6 +22,7 @@ signal ending_reached(id: String)
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const WIDTH := 940.0
 const PAD := 26.0
@@ -96,6 +97,7 @@ func open_event(ev: Dictionary) -> void:
 	message = ""
 	hover = -1
 	visible = true
+	Audio.fx(self, "event_open")
 
 
 ## Show a page with only a text and Continue.
@@ -107,6 +109,7 @@ func open_notice(p_title: String, text: String, lines: Array) -> void:
 	page = "result"
 	message = ""
 	visible = true
+	Audio.fx(self, "open")
 
 
 func close() -> void:
@@ -123,7 +126,9 @@ func choose(i: int) -> String:
 	var v: Dictionary = view[i]
 	if v["grey"]:
 		message = "You need " + v["need"]
+		Audio.fx(self, "invalid")
 		return message
+	Audio.fx(self, "click")
 	if v["index"] < 0:
 		close()
 		finished.emit()

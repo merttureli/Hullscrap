@@ -2,6 +2,8 @@ extends Control
 ## A hint toast: one line in a small panel at the top of the screen that fades away after a few seconds. The first-run
 ## hints (front_door.gd) use it; several wait their turn. Draws only, takes no input.
 
+const Audio = preload("res://scripts/audio/audio.gd")
+
 const SHOW_FOR := 7.0  ## seconds a toast stays
 const FADE := 0.8  ## and fades over the last of them
 const PANEL_BG := Color("#1f2630")
@@ -22,6 +24,7 @@ func _ready() -> void:
 
 ## Show `text` for SHOW_FOR seconds, after the one on show.
 func push(text: String) -> void:
+	Audio.fx(self, "toast")
 	if current == "":
 		current = text
 		left = SHOW_FOR

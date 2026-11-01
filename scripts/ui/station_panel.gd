@@ -11,6 +11,7 @@ signal closed
 
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Backstory = preload("res://scripts/crew/backstory.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const MARGIN := 40.0
 const PAD := 18.0
@@ -66,12 +67,14 @@ func open(id: String) -> void:
 	hover = [-1, -1]
 	top = [0, 0, 0]
 	visible = true
+	Audio.fx(self, "open")
 
 
 func close() -> void:
 	if not visible:
 		return
 	visible = false
+	Audio.fx(self, "close")
 	closed.emit()
 
 
@@ -170,6 +173,7 @@ func act(col: int, i: int, button := MOUSE_BUTTON_LEFT) -> String:
 			return ""
 	message = r["text"]
 	message_bad = not r["ok"]
+	Audio.fx(self, "buy" if r["ok"] else "invalid")
 	map.refresh()
 	return message
 

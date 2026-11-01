@@ -18,6 +18,7 @@ const Processing = preload("res://scripts/craft/processing.gd")
 const Describe = preload("res://scripts/ui/describe.gd")
 const Content = preload("res://scripts/data/content.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 const STATION_IDS: Array[String] = ["fabricator", "smelter"]  ## the tabs, in order
 const CATEGORIES: Array[String] = ["system", "gear", "material", "module"]
@@ -142,6 +143,8 @@ func reason(id: String) -> String:
 # --- actions (the keys and clicks call these) -----------------------------------------------------
 
 func open() -> void:
+	if not visible:
+		Audio.fx(self, "open")
 	visible = true
 	if not recipe_ids().has(selected):
 		selected = recipe_ids()[0] if not recipe_ids().is_empty() else ""
@@ -151,6 +154,8 @@ func open() -> void:
 
 
 func close() -> void:
+	if visible:
+		Audio.fx(self, "close")
 	visible = false
 
 

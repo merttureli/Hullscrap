@@ -18,6 +18,7 @@ const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 const POP_LIFE := 1.0  ## seconds a "+N material" pop floats and fades
 const POP_RISE := 48.0  ## world px it rises in that time
 const STAR_PARALLAX := 0.6  ## the nearest stars drift this fraction of the debris' screen speed
@@ -46,6 +47,7 @@ var _top: Node2D  # over the ship: the pulling mouths and the pops
 var _glow: Node2D  # additive glow of the pieces that have it (a fuel canister), under the ship
 var _top_glow: Node2D  # additive glow of the pulling mouths, over the ship
 var _star_drift := Vector2.ZERO  # the starfield's own drift, put back when play mode ends
+var _pulling := {}  # the intakes that were pulling at the last tick (a new one is heard)
 
 
 func _ready() -> void:
@@ -124,6 +126,12 @@ func frame(dt: float) -> void:
 	_set_fx(debris.beam_aims() if debris.tractor_on else {}, debris.beams_on)
 	for e in debris.take_events():
 		pops.append({"pos": e["pos"], "text": e["text"], "age": 0.0})
+		Audio.fx(self, "collect", e["pos"])  # (the catch is at the mouth on the player's ship)
+	for uid in debris.pulling:
+		if not _pulling.has(uid):
+			Audio.fx(self, "intake_pull")  # a mouth starts drawing a piece in
+	_pulling = debris.pulling.duplicate()
+	Audio.fx_loop(self, "tractor", "tractor_loop", debris.tractor_on and not debris.beams_on.is_empty(), 1.0)
 	for p in pops:
 		p["age"] += dt
 	pops = pops.filter(func(p): return p["age"] < POP_LIFE)

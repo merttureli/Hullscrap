@@ -1,7 +1,8 @@
 extends RefCounted
 ## What the player's ship says to the ear, read off its state once per look (audio.gd calls update about ten times a second): somebody
 ## repairing, a fire burning, a fire put out, a crew member hurt, a drone starting a job, a crew member who came aboard. Pure logic, no
-## nodes, so the rules are tested headless. The first look at a ship (and the first after the ship is replaced) only takes the baseline.
+## nodes, so the rules are tested headless. The first look at a ship only takes the baseline, and so does the first after the ship is
+## replaced or loaded (a loaded save brings a new soldier with it, so the crew it holds are not "new aboard").
 
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const REPAIR_JOBS: Array[String] = ["repair_component", "repair_breach", "repair_belt", "repair_crew"]
@@ -9,6 +10,7 @@ const HURT := 1.0  ## hit points lost between two looks that count as hurt
 const HAND_FRESH := 0.4  ## seconds a hand-work job (E held) counts as being worked after the last bit of work
 
 var _ship = null
+var _player = null  # the soldier at the last look: another one means a load
 var _hp := {}  # crew member -> hp at the last look
 var _busy := {}  # drone -> it had a job at the last look
 var _fires := 0
@@ -27,9 +29,15 @@ func update(ship) -> Dictionary:
 	if ship == null:
 		_ship = null
 		return out
-	var first: bool = ship != _ship
+	var soldier = null
+	for m in ship.crew:
+		if m.is_player:
+			soldier = m
+			break
+	var first: bool = ship != _ship or soldier != _player
 	if first:
 		_ship = ship
+		_player = soldier
 		_hp = {}
 		_busy = {}
 		_names = {}

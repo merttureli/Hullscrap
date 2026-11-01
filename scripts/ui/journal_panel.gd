@@ -4,6 +4,8 @@ extends Control
 ## While open it takes every key and click. In the style of the help panel (help_panel.gd).
 
 ## Emitted when the panel is closed.
+const Audio = preload("res://scripts/audio/audio.gd")
+
 signal closed
 
 const WIDTH := 980.0
@@ -52,6 +54,7 @@ func open() -> void:
 		return
 	top = 0
 	visible = true
+	Audio.fx(self, "open")
 	queue_redraw()
 
 
@@ -59,6 +62,7 @@ func close() -> void:
 	if not visible:
 		return
 	visible = false
+	Audio.fx(self, "close")
 	closed.emit()
 
 

@@ -298,6 +298,17 @@ func test_ship_audio_reads_the_crew_and_fires() -> void:
 	s.crew.append(ada)
 	check(ears.update(s)["joined"].has(ShipAudio.ada_name()), "Ada coming aboard is seen")
 	check(ears.update(null)["joined"].is_empty(), "no ship, no sounds")
+	var s2 := FakeShip.new()  # a loaded save: a new soldier and the crew with them, Ada among them: no sting
+	var me := CrewMember.new("Me", Vector2.ZERO)
+	me.is_player = true
+	s2.crew = [me]
+	ears.update(s2)
+	var me2 := CrewMember.new("Me", Vector2.ZERO)
+	me2.is_player = true
+	s2.crew = [me2, CrewMember.new(ShipAudio.ada_name(), Vector2.ZERO)]
+	check(ears.update(s2)["joined"].is_empty(), "a new soldier means a load: the crew is the baseline")
+	s2.crew.append(CrewMember.new("Newcomer", Vector2.ZERO))
+	eq(ears.update(s2)["joined"], ["Newcomer"], "and one who comes aboard after that is seen")
 
 
 # --- settings -------------------------------------------------------------------------------------------------------

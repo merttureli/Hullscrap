@@ -8,6 +8,7 @@ extends Control
 ## In the UI colours of station_panel.gd.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 
 ## Emitted when the panel is closed.
 signal closed
@@ -29,6 +30,7 @@ const COLUMNS: Array = [
 			["O / P", "Oxygen / power overlay"],
 			["Wheel", "Zoom"],
 			["Ctrl+S / Ctrl+L", "Save / load the ship and the run"],
+			["Ctrl+M", "Mute / unmute all sound"],
 			["N", "Play mode: pick another ship"],
 			["Esc", "Pause menu"],
 			["F1", "This screen, anywhere"],
@@ -178,6 +180,7 @@ func open() -> void:
 	if visible:
 		return
 	visible = true
+	Audio.fx(self, "open")
 	queue_redraw()
 
 
@@ -185,6 +188,7 @@ func close() -> void:
 	if not visible:
 		return
 	visible = false
+	Audio.fx(self, "close")
 	closed.emit()
 
 
