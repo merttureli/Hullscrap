@@ -4,13 +4,15 @@ extends Control
 ## (crew_abilities.gd), its icon with a ring: green when ready, filling while it cools down (the seconds left in the
 ## middle), gold and emptying while its effect runs. Clicking a card selects that crew member (a gold frame; the
 ## world shows a ring round them); clicking the ability icon selects them and uses it, like G. Cards stack up from
-## the bottom, and a second column starts to the left when the screen is full. A line above the cards says what
+## the bottom, and a second column starts to the left when the screen is full. The selected member's backstory
+## (backstory.gd) shows in a box to the left of their card, and in the tooltip of any card. A line above the cards says what
 ## the last use did, or why it was refused. Placeholder shapes and letters until the icons have art.
 ## Reads the crew view (crew_view.gd: ship_now(), selected, select(), use_ability()), and takes only left clicks
 ## on the cards (everything else falls through to the world; a wheel step over a card is swallowed, so it never zooms).
 
 const Art = preload("res://scripts/view/art.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const CARD := Vector2(238.0, 58.0)
@@ -28,6 +30,8 @@ const READY := Color("#4fd08a")
 const BAD := Color("#e0453a")
 const HP_BG := Color(0.12, 0.15, 0.2)
 const FLASH_FOR := 3.0  ## seconds the line above the cards stays
+const STORY_W := 330.0  ## width of the backstory box of the selected member, px
+const STORY_SIZE := 13
 
 var view  ## the crew view (crew_view.gd)
 var flash_text := ""
@@ -99,6 +103,15 @@ func card_at(p: Vector2) -> int:
 	return -1
 
 
+## The tooltip of the card under the mouse: who they are and their backstory.
+func _get_tooltip(at_position: Vector2) -> String:
+	var i := card_at(at_position)
+	if i < 0:
+		return ""
+	var m = _crew()[i]
+	return "%s\n%s" % [m.name, m.backstory()]
+
+
 ## Only the cards take the mouse: a click anywhere else goes on to the world.
 func _has_point(p: Vector2) -> bool:
 	return visible and card_at(p) >= 0
@@ -137,6 +150,8 @@ func _draw() -> void:
 	var rects := card_rects(ship.crew.size(), _screen())
 	for i in rects.size():
 		_card(rects[i], ship, ship.crew[i], ship.crew[i] == view.selected)
+		if ship.crew[i] == view.selected:
+			_story(rects[i], ship.crew[i])
 	if flash_left > 0.0 and flash_text != "" and not rects.is_empty():
 		var font := ThemeDB.fallback_font
 		var top := rects[0].position.y
@@ -147,6 +162,21 @@ func _draw() -> void:
 		var at := Vector2(_screen().x - MARGIN - w, top - 8.0)  # right-aligned to the cards
 		draw_string(font, at + Vector2(1, 1), flash_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0, 0, 0, 0.9 * a))
 		draw_string(font, at, flash_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(GOLD, a))
+
+
+## The backstory of `m` in a box left of their card `r`: their name and species, then the story wrapped.
+func _story(r: Rect2, m) -> void:
+	var text: String = m.backstory()
+	if text == "":
+		return
+	var font := ThemeDB.fallback_font
+	var h := font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, STORY_W - 20.0, STORY_SIZE).y + 38.0
+	var box := Rect2(Vector2(r.position.x - GAP - STORY_W, maxf(r.end.y - h, MARGIN)), Vector2(STORY_W, h))
+	draw_rect(box, BG)
+	draw_rect(box, GOLD, false, 1.0)
+	var kind := str(CrewMember.species_def(m.species).get("name", m.species))
+	draw_string(font, box.position + Vector2(10.0, 19.0), "%s, %s" % [m.name, kind], HORIZONTAL_ALIGNMENT_LEFT, STORY_W - 20.0, 14, GOLD)
+	draw_multiline_string(font, box.position + Vector2(10.0, 22.0 + font.get_ascent(STORY_SIZE) + 4.0), text, HORIZONTAL_ALIGNMENT_LEFT, STORY_W - 20.0, STORY_SIZE, -1, TEXT)
 
 
 func _card(r: Rect2, ship, m, selected: bool) -> void:

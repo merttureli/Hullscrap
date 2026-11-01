@@ -1057,6 +1057,7 @@ func add_crew(ship, who: String, species: String, character := "") -> String:
 	var m = Jobs._person(who, look, Pathfinder.centre_of(spot), species)
 	if not chr.is_empty():
 		Characters.apply(m, character)
+	m.backstory()  # their story is fixed the day they join, and saved
 	ship.crew.append(m)
 	return who
 
