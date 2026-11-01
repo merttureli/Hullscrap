@@ -109,7 +109,8 @@
       "cooling": 3,
       "stats": {
         "layers": 3,
-        "sectors": 2
+        "sectors": 2,
+        "recharge": 5.5
       },
       "abilities": [
         {

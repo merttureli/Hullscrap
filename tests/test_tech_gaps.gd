@@ -106,7 +106,7 @@ func test_ion_strips_layers_and_locks_the_bubble_times_the_shields_line_vulnerab
 	var co = arena.ships[1]
 	var full := float(co.layers_cap)
 	_shoot()
-	arena.step(6.0 + 1.4 + 0.1)  # the lock, then the neon recharge (1.4 s a layer, all at once)
+	arena.step(6.0 + (2.0 * 7.0 + 3.0) / 1.75 + 0.1)  # the lock, then the neon recharge: two layers one after the other (7 + 7 s of base time, 3 more for the emptied sector) at x1.75
 	var sum := 0.0
 	for x in co.sector_layers:
 		sum += float(x)

@@ -67,7 +67,7 @@
 			"id": "sovereign_aegis",
 			"name": "Sovereign Aegis",
 			"blurb": "A Baron's personal shield: three layers, a gold rim, and a power bill that has ended more than one barony.",
-			"quirk": "Relic. Three layers that come back in 1.6 s instead of 2 (a Shield Mk2 has two), but it draws 7 power (a Mk2 draws 4) and runs warm: it wants a radiator.",
+			"quirk": "Relic. Three layers that come back in 4.5 s (a Shield Mk2 has two and takes 5.5), but it draws 7 power (a Mk2 draws 4) and runs warm: it wants a radiator.",
 			"family": "shield",
 			"line": "standard",
 			"tier": 3,
@@ -80,7 +80,7 @@
 			"heat_limit": 100,
 			"heat_per_s": 4,
 			"cooling": 3,
-			"stats": {"layers": 3, "sectors": 2, "recharge": 1.6},
+			"stats": {"layers": 3, "sectors": 2, "recharge": 4.5},
 			"abilities": [
 				{
 					"id": "overcharge",

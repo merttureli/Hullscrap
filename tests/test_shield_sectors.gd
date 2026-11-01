@@ -106,7 +106,7 @@ func test_a_sector_holds_the_layers_times_its_weight() -> void:
 	Shields.set_weights(co, [0.5, 1.5])
 	eq([Shields.cap_of(co, 0), Shields.cap_of(co, 1)], [1.5, 4.5], "three layers at half a weight: a layer and a half")
 	eq(co.sector_layers, [1.5, 3.0], "the sector that lost drops at once, to what it can hold")
-	arena.step(2.1)
+	arena.step(10.6)  # a layer (7 s), then the half layer (3.5 s): one at a time
 	eq(co.sector_layers, [1.5, 4.5], "the one that gained fills in")
 	eq(co.layers, 5, "a half layer is not a layer a shot can use: 1 + 4 whole layers")
 	_shot(Vector2(0.0, -800.0))  # from the bow
@@ -136,10 +136,14 @@ func test_a_hit_spends_a_layer_of_the_sector_it_enters_and_only_that_one_recharg
 	arena.step(1.0)
 	_shot(froms[2])
 	eq(co.sector_layers, [0.0, 2.0, 1.0, 2.0], "two layers off the bow and one off the stern")
-	arena.step(1.05)  # 2.05 s after the first two
-	eq(co.sector_layers, [2.0, 2.0, 1.0, 2.0], "the bow's layers are back after 2 s; the stern's one is not yet")
-	arena.step(1.0)
-	eq(co.sector_layers, [2.0, 2.0, 2.0, 2.0], "and the stern's a second later")
+	arena.step(6.9)  # 7.9 s after the first two
+	eq(co.sector_layers, [0.0, 2.0, 1.0, 2.0], "nothing is back yet")
+	arena.step(0.2)  # 8.1 s: the stern's layer was used at 1 s
+	eq(co.sector_layers, [0.0, 2.0, 2.0, 2.0], "the stern's one is back 7 s after its hit; the bow, emptied, waits 3 s more")
+	arena.step(2.0)  # 10.1 s
+	eq(co.sector_layers, [1.0, 2.0, 2.0, 2.0], "the bow's first layer is back at 7 s + 3 s")
+	arena.step(7.0)  # 17.1 s
+	eq(co.sector_layers, [2.0, 2.0, 2.0, 2.0], "and its second 7 s after that")
 	arena.step(5.0)
 	eq(co.sector_layers, [2.0, 2.0, 2.0, 2.0], "never above the capacity")
 
@@ -149,7 +153,7 @@ func test_a_sector_with_no_layer_lets_the_shot_through_to_the_hull() -> void:
 	var co = arena.ships[1]
 	Shields.set_weights(co, [2.0, 0.0])
 	eq(co.sector_layers, [2.0, 0.0], "the stern's layers are gone at once")
-	arena.step(2.1)
+	arena.step(14.1)  # two layers, one after the other
 	eq(co.sector_layers, [4.0, 0.0], "and the bow's arrive: all the layers are in the bow")
 	_shot(Vector2(0.0, 800.0))  # at the stern
 	eq(_count("shield"), 0, "the stern has nothing to stop it")
@@ -165,21 +169,23 @@ func test_shifting_drops_the_loser_at_once_and_fills_the_gainer_at_the_recharge_
 	eq(Shields.shift(co, "up"), "", "a step toward the bow")
 	eq(co.weights, [1.5, 0.5], "half a weight moved")
 	eq(co.sector_layers, [2.0, 1.0], "the stern lost a layer on the spot; the bow has not got it yet")
-	arena.step(1.9)
-	eq(co.sector_layers, [2.0, 1.0], "1.9 s on: still not")
+	arena.step(6.9)
+	eq(co.sector_layers, [2.0, 1.0], "6.9 s on: still not")
 	arena.step(0.2)
-	eq(co.sector_layers, [3.0, 1.0], "2 s on: the layer is there")
+	eq(co.sector_layers, [3.0, 1.0], "7 s on: the layer is there")
 	eq(Shields.shift(co, "up"), "", "another step")
 	eq([co.weights, co.sector_layers], [[2.0, 0.0], [3.0, 0.0]], "the stern is bare at once; the bow's layer is on its way")
 	eq(Shields.shift(co, "up"), "Bow is at the most (2)", "a step past 2 is refused, and says why")
 	eq(co.weights, [2.0, 0.0], "with nothing changed")
-	arena.step(2.1)
+	arena.step(7.1)
 	eq(co.sector_layers, [4.0, 0.0], "all four layers in the bow")
 	Shields.reset_even(co)
 	eq([co.weights, co.sector_layers], [[1.0, 1.0], [2.0, 0.0]], "End: the bow drops to its new capacity at once, the stern starts filling")
-	arena.step(1.9)
+	arena.step(6.9)
 	eq(co.sector_layers[1], 0.0, "slowly")
 	arena.step(0.2)
+	eq(co.sector_layers[1], 1.0, "a layer at a time")
+	arena.step(7.0)
 	eq(co.sector_layers, [2.0, 2.0], "even again, full")
 	eq(Shields.shift(co, "left"), "port and starboard need 4 sectors", "two sectors have no port")
 	_duel(1)
@@ -194,7 +200,7 @@ func test_a_shot_that_lands_while_a_layer_is_still_on_its_way_finds_it_missing()
 	_shot(Vector2(0.0, 800.0))
 	eq(_count("shield"), 0, "a volley at the stern lands on an empty sector")
 	eq(_count("hit"), 1, "and hits the hull")
-	arena.step(2.1)
+	arena.step(14.1)
 	_shot(Vector2(0.0, 800.0))
 	eq(_count("shield"), 0, "and the stern stays empty: nothing was moved back")
 	eq(co.sector_layers[0], 4.0, "while the bow has them all")
@@ -245,7 +251,7 @@ func test_overcharge_adds_layers_spread_by_the_weights() -> void:
 	_duel(2)
 	var co = arena.ships[1]
 	Shields.set_weights(co, [1.5, 0.5])
-	arena.step(2.1)
+	arena.step(7.1)
 	eq(co.sector_layers, [3.0, 1.0], "settled at 3 and 1")
 	eq(arena.overcharge(1), "", "overcharged")
 	eq(co.layers_cap, 3, "one more layer in all")
@@ -274,7 +280,7 @@ func test_a_changed_sector_count_starts_again_from_even() -> void:
 	eq([co.sectors, co.layers_cap], [4, 2], "the better generator sets the count (the layers add: the big one says 1 too, so 2)")
 	target.components.by_id["shield_big"]["stats"]["layers"] = 1
 	Shields.set_weights(co, [2.0, 1.0, 0.0, 1.0])
-	arena.step(2.1)
+	arena.step(7.1)
 	target.components.instances[big]["status"] = "disabled"
 	co.dirty = true
 	arena.sync(i)
@@ -298,7 +304,7 @@ func test_the_sectors_keep_their_fill_when_the_count_changes() -> void:
 	co.dirty = true
 	arena.sync(1)
 	eq([co.sectors, co.layers], [4, 4], "four sectors, each with half its layers: no free refill")
-	arena.step(2.1)
+	arena.step(7.1)
 	eq(co.sector_layers, [2.0, 2.0, 2.0, 2.0], "the rest recharges")
 
 

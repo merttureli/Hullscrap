@@ -4,8 +4,10 @@ extends RefCounted
 ## centred on the bow. N and the layers come from the powered shield components: N is the best powered
 ## generator's `stats.sectors` (1, 2, 4 or 8), the layers add up.
 ## - Balance (shield_balance.gd): each sector has a weight, 0..2 in steps of 0.5, adding up to N, and holds
-##   `layers x weight` layers. A hit uses a layer of the sector it hits; each used layer comes back
-##   RECHARGE seconds later. shift() moves a step of weight toward a side: the sector that loses it drops
+##   `layers x weight` layers. A hit uses a layer of the sector it hits; the used layers of a sector come back
+##   ONE AT A TIME, each Abilities.shield_base() seconds (7) after the one before it (the next timer starts
+##   when a layer is back). A sector whose last whole layer was used waits shield_break_delay() (3 s) more
+##   for its first. shift() moves a step of weight toward a side: the sector that loses it drops
 ##   at once, the one that gains it fills at the recharge rate. A changed N starts again from even weights.
 ## - A shot is stopped by the sector it enters through when that holds a whole layer. Missiles pass. An
 ##   ion hit also locks the whole bubble for ION_LOCK seconds: it stops nothing and does not recharge. Ion strips
@@ -21,7 +23,6 @@ const Shape = preload("res://scripts/combat/shield_shape.gd")
 const Balance = preload("res://scripts/combat/shield_balance.gd")
 const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 
-const RECHARGE := 2.0  ## seconds until a used layer is back
 const ION_LOCK := 3.0  ## seconds an ion hit keeps the shields offline
 const WHOLE := 1.0 - 1e-6  ## a sector stops a shot while it holds at least this much
 ## Seconds a shot opens its sector, by weapon kind (and for ion damage). A beam opens it for its whole
@@ -124,7 +125,9 @@ static func _reform(co, n: int, cap: int) -> void:
 	for s in n:
 		var up := cap * share
 		co.sector_layers.append(up)
-		co.sector_timers.append([Vector2(RECHARGE, cap - up)] if cap - up > 1e-9 else [])
+		var timers := []
+		_queue(timers, cap - up)
+		co.sector_timers.append(timers)
 		co.sector_hit.append(-1000000)
 
 
@@ -149,6 +152,16 @@ static func _fit(co, s: int) -> void:
 			pending = room
 
 
+## Put `amount` layers on the back of a recharge queue (`timers`: Vector2(seconds left, layers) in order, only the first
+## one runs): a whole layer at a time, each taking the base time (a part under 1 layer takes its share of it).
+static func _queue(timers: Array, amount: float) -> void:
+	var left := amount
+	while left > 1e-9:
+		var n := minf(left, 1.0)
+		timers.append(Vector2(Abilities.shield_base() * n, n))
+		left -= n
+
+
 ## A fight starts: the ship's saved weights (even when they do not suit the sector count) and every
 ## sector full.
 static func start(co) -> void:
@@ -161,14 +174,14 @@ static func start(co) -> void:
 # --- balance ---------------------------------------------------------------------------------------
 
 ## Use weights `w` (they must suit the sector count): a sector that loses cap drops to it at once, one that
-## gains cap gets the difference back RECHARGE seconds later.
+## gains cap gets the difference back, a layer at a time, at the recharge rate.
 static func set_weights(co, w: Array) -> bool:
 	if not Balance.valid(w, co.sectors):
 		return false
 	for s in co.sectors:
 		var gained: float = co.layers_cap * (float(w[s]) - float(co.weights[s]))
 		if gained > 1e-9:
-			co.sector_timers[s].append(Vector2(RECHARGE, gained))
+			_queue(co.sector_timers[s], gained)
 	co.weights = w.duplicate()
 	for s in co.sectors:
 		_fit(co, s)
@@ -325,7 +338,10 @@ static func absorb(arena, idx: int, w: Dictionary, point := Vector2.ZERO, dir :=
 		lock = ION_LOCK * strip
 	var before := float(co.sector_layers[s])
 	co.sector_layers[s] = maxf(before - strip, 0.0)
-	co.sector_timers[s].append(Vector2(RECHARGE, minf(strip, maxf(before, 1.0))))  # what was really lost comes back
+	_queue(co.sector_timers[s], minf(strip, maxf(before, 1.0)))  # what was really lost comes back, a layer at a time
+	if before >= WHOLE and float(co.sector_layers[s]) < WHOLE:  # the last whole layer is gone: the first one back waits longer
+		var head: Vector2 = co.sector_timers[s][0]
+		co.sector_timers[s][0] = Vector2(head.x + Abilities.shield_break_delay(), head.y)
 	co.sector_hit[s] = arena.tick
 	if ion:
 		co.ion_lock = maxf(co.ion_lock, lock)
@@ -352,10 +368,13 @@ static func tick(co, dt: float, rate_mult := 1.0) -> void:
 			continue
 		if rate < 0.0:
 			rate = Abilities.recharge_rate(co.ship, co.powered)  # crew_needed recharge: the crew a shield lacks slows it
-		var left := []
-		for t in timers:
-			if t.x - dt * rate <= 1e-9:
+		var step := dt * rate  # only the first timer runs; what it leaves over of this step goes to the next
+		while step > 0.0 and not timers.is_empty():
+			var t: Vector2 = timers[0]
+			if t.x - step <= 1e-9:
+				step -= t.x
 				co.sector_layers[s] = minf(float(co.sector_layers[s]) + t.y, cap_of(co, s))
+				timers.pop_front()
 			else:
-				left.append(Vector2(t.x - dt * rate, t.y))
-		co.sector_timers[s] = left
+				timers[0] = Vector2(t.x - step, t.y)
+				step = 0.0

@@ -208,7 +208,8 @@
       "cooling": 3,
       "stats": {
         "layers": 1,
-        "sectors": 1
+        "sectors": 1,
+        "recharge": 7
       },
       "abilities": [
         {
@@ -1015,7 +1016,8 @@
       "cooling": 3,
       "stats": {
         "layers": 1,
-        "sectors": 1
+        "sectors": 1,
+        "recharge": 8
       },
       "abilities": [
         {
@@ -1054,7 +1056,8 @@
       "cooling": 3,
       "stats": {
         "layers": 2,
-        "sectors": 2
+        "sectors": 2,
+        "recharge": 5.5
       },
       "abilities": [
         {
@@ -1094,7 +1097,7 @@
       "stats": {
         "layers": 2,
         "sectors": 4,
-        "recharge": 1.4
+        "recharge": 4
       },
       "abilities": [
         {
@@ -1133,7 +1136,8 @@
       "cooling": 3,
       "stats": {
         "layers": 1,
-        "sectors": 1
+        "sectors": 1,
+        "recharge": 6
       },
       "abilities": [
         {

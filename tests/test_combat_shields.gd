@@ -36,12 +36,12 @@ func _edged(s: Ship) -> Ship:
 
 ## Ship 0 shoots (laser_mk1 on its east side); ship 1 has a wall at (3, 15), in the line of fire,
 ## a reactor and `shields` Mk1 shield generators wired up (`wired` false leaves out the cable).
-func _duel(shields: int, wired := true, seed_value := 1) -> void:
+func _duel(shields: int, wired := true, seed_value := 1, reactor := "reactor_mk1") -> void:
 	arena = Arena.new(seed_value)
 	arena.add_ship(_ship())
 	target = _edged(_ship())
 	target.grid.force_tile(Vector2i(3, 15), "wall")
-	check(target.components.place(target.grid, "reactor_mk1", Vector2i(9, 19), 0) > 0, "reactor placed")
+	check(target.components.place(target.grid, reactor, Vector2i(9, 19), 0) > 0, "reactor placed")
 	for i in shields:
 		check(target.components.place(target.grid, "shield_mk1", Vector2i(13 + 4 * i, 19), 0) > 0, "shield placed")
 	if wired:
@@ -104,12 +104,69 @@ func test_a_layer_stops_a_shot_and_recharges() -> void:
 	_shoot(gun)
 	eq(_count("hit"), 1, "with no layers left the third shot reaches the wall")
 	eq(target.grid.hp_of(Vector2i(3, 15)), 2.0, "and damages it")
-	arena.step(1.05)  # 2.05 s after the first shot
-	eq(arena.ships[1].layers, 1, "the first layer is back after 2 s")
-	arena.step(1.0)
-	eq(arena.ships[1].layers, 2, "and the second a second later")
+	arena.step(8.0)  # 9 s after the first shot: the bubble was emptied at 1 s, so the first layer waits 3 s more (7 s from the hit, 10 s in all)
+	eq(arena.ships[1].layers, 0, "the first layer is not back yet")
+	arena.step(1.05)  # 10.05 s
+	eq(arena.ships[1].layers, 1, "the first layer is back after 7 s + 3 s")
+	arena.step(6.5)  # 16.55 s
+	eq(arena.ships[1].layers, 1, "the second comes 7 s after the first, not with it")
+	arena.step(0.6)  # 17.15 s
+	eq(arena.ships[1].layers, 2, "and is back at 17 s")
 	arena.step(5.0)
 	eq(arena.ships[1].layers, 2, "never above the cap")
+
+
+func test_a_mk1_bubble_hit_once_is_down_for_7_s_and_3_s() -> void:
+	_duel(1)
+	check(_shoot(gun), "fired")
+	eq(arena.ships[1].layers, 0, "the one layer is used: the sector is empty")
+	arena.step(9.9)
+	eq(arena.ships[1].layers, 0, "still down at 9.9 s")
+	arena.step(0.2)
+	eq(arena.ships[1].layers, 1, "back after 7 s + the 3 s of a broken sector")
+
+
+func test_two_layers_used_come_back_one_at_a_time_at_t_and_2t() -> void:
+	_duel(3, true, 1, "reactor_mk2")  # a Mk1 reactor powers only two generators
+	_shoot(gun)
+	_shoot(gun)
+	eq(arena.ships[1].layers, 1, "two of three layers used (the sector is not emptied: no extra wait)")
+	arena.step(6.9)
+	eq(arena.ships[1].layers, 1, "nothing back at 6.9 s")
+	arena.step(0.2)
+	eq(arena.ships[1].layers, 2, "one back at 7 s")
+	arena.step(6.5)  # 13.6 s
+	eq(arena.ships[1].layers, 2, "the next one starts its timer only now: not back at 13.6 s")
+	arena.step(0.5)  # 14.1 s
+	eq(arena.ships[1].layers, 3, "and the second is back at 14 s")
+
+
+## Seconds until the one used layer of a bubble of `count` generators of `part` is back (60 at most).
+func _seconds_back(part: String, count: int) -> float:
+	var a := Arena.new(1)
+	a.add_ship(_ship())
+	var t := _edged(_ship())
+	check(t.components.place(t.grid, "reactor_mk1", Vector2i(9, 19), 0) > 0, "reactor placed")
+	for i in count:
+		check(t.components.place(t.grid, part, Vector2i(13 + 4 * i, 19), 0) > 0, "shield placed")
+	for x in range(9, 13 + 4 * count):
+		t.cables.place(t.grid, Vector2i(x, 20))
+	a.add_ship(t, Vector2(800.0, 0.0))
+	var before: int = a.ships[1].layers
+	Shields.absorb(a, 1, {"damage_type": "energy"}, Vector2.ZERO, Vector2.ZERO, 0)
+	var secs := 0.0
+	while a.ships[1].layers < before and secs < 60.0:
+		a.step(0.05)
+		secs += 0.05
+	return secs
+
+
+func test_the_neon_shield_comes_back_faster_than_the_mk1() -> void:
+	var mk1 := _seconds_back("shield_mk1", 2)
+	var neon := _seconds_back("shield_neon_mk1", 1)
+	near(mk1, 7.0, "a Mk1 layer: 7 s", 0.1)
+	near(neon, 4.0, "a Neon Lattice layer: 4 s", 0.1)
+	check(neon < mk1, "the neon shield is the faster")
 
 
 func test_a_layer_takes_one_shot_whatever_its_damage() -> void:
@@ -155,10 +212,12 @@ func test_ion_strips_a_layer_and_locks_the_shields() -> void:
 	eq(target.grid.hp_of(Vector2i(3, 15)), 2.0, "so the laser burns the wall")
 	arena.step(2.4)
 	eq(arena.ships[1].layers, 1, "no recharge while locked")
-	arena.step(2.4)  # 4.8 s: the lock ended at 3.0 s and the recharge needs 2 s more
+	arena.step(2.4)  # 4.8 s: the lock ended at 3.0 s and the recharge needs 7 s more
 	eq(arena.ships[1].layers, 1, "still recharging after the lock")
-	arena.step(0.4)
-	eq(arena.ships[1].layers, 2, "back 2 s after the lock ended")
+	arena.step(5.0)  # 9.8 s
+	eq(arena.ships[1].layers, 1, "and 6.8 s after the lock")
+	arena.step(0.4)  # 10.2 s
+	eq(arena.ships[1].layers, 2, "back 7 s after the lock ended")
 	eq(arena.ships[1].ion_lock, 0.0, "unlocked")
 
 

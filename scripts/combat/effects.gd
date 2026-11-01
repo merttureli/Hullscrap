@@ -532,8 +532,8 @@ static func _tick_frost(arena, co, e: Dictionary, step: float) -> bool:
 	if str(co.ship.components.def(inst["id"]).get("family", "")) == "shield" and co.ion_lock <= 0.0:
 		for s in co.sectors:
 			var timers: Array = co.sector_timers[s]
-			for i in timers.size():
-				timers[i] = Vector2(timers[i].x + e["slow"] * step, timers[i].y)
+			if not timers.is_empty():  # only the first layer in the queue is counting down
+				timers[0] = Vector2(timers[0].x + e["slow"] * step, timers[0].y)
 	for k in co.ship.ability_state["slots"]:
 		var st: Dictionary = co.ship.ability_state["slots"][k]
 		if st["uid"] == uid and st["active"] <= 0.0 and st["cd"] > 0.0:

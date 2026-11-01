@@ -146,7 +146,7 @@ func test_the_pros_are_thirty_to_fifty_percent_over_the_part_they_replace() -> v
 	eq(int(c.def("mire_rain_shield")["stats"]["layers"]), int(c.def("shield_mk2")["stats"]["layers"]) + 1, "Rain Shield: one layer over a Shield Mk2")
 	eq(int(c.def("prismatic_lattice_shield")["stats"]["layers"]), int(c.def("shield_mk2")["stats"]["layers"]) + 2, "Lattice Shield: two layers over it")
 	eq(int(c.def("grundl_freight_shield")["stats"]["layers"]), int(c.def("shield_mk2")["stats"]["layers"]) + 2, "Freight Shield: two layers over it")
-	near(float(c.def("sporeling_mycelium_shield")["stats"]["recharge"]), 2.0 / 1.5, "Mycelium Shield: layers come back 1.5 times as fast", 0.01)
+	near(float(c.def("sporeling_mycelium_shield")["stats"]["recharge"]), 5.5 / 1.5, "Mycelium Shield: layers come back 1.5 times as fast as a tier-2 shield's (5.5 s)", 0.05)
 	var mk1: int = c.def("reactor_mk1")["power"]
 	eq(c.def("mire_wetwell_reactor")["power"], mk1 + 2, "Wetwell Reactor: +2 power over a Reactor Mk1")
 	eq(c.def("sporeling_bloom_reactor")["power"], mk1 + 3, "Bloom Reactor: +3")
@@ -332,7 +332,7 @@ func test_the_freight_shield_recharges_only_while_a_grundl_restocks_its_cells() 
 	_crew(ship, "Human", "human")
 	near(Abilities.recharge_rate(ship, powered), 0.0, "a human does not restock", 0.001)
 	_crew(ship, "Bram", "grundl")
-	near(Abilities.recharge_rate(ship, powered), 1.0, "a Grundl does", 0.001)
+	near(Abilities.recharge_rate(ship, powered), 7.0 / 5.5, "a Grundl does (at the speed of its 5.5 s layers)", 0.001)
 
 
 func test_the_arc_core_graft_bay_and_overclock_engine_shock_organic_crew_but_not_mechanical_ones() -> void:
