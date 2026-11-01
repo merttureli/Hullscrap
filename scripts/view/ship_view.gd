@@ -134,7 +134,8 @@ func _draw() -> void:
 		var aim := Vector2.ZERO
 		if arena != null and arena.ships[index].mounts.has(uid):
 			aim = arena.ships[index].mounts[uid]["aim"]
-		Visuals.draw_mount_out(self, def, inst, _rect_of(inst["out_cells"]), px(Mounts.barrel(def, inst["out_anchor"], inst["rot"])["pivot"]), CELL, aim, all_opts[uid])
+		var out_rect := Visuals.slope_rect(def, inst, px(Vector2.ZERO), CELL) if Mounts.is_angled(inst) else _rect_of(inst["out_cells"])
+		Visuals.draw_mount_out(self, def, inst, out_rect, px(Mounts.barrel_of(def, inst)["pivot"]), CELL, aim, all_opts[uid])
 	draw_fire(self, ship.fires, px(Vector2.ZERO), CELL, _clock, _glow_quads)
 	for m in ship.crew:
 		var a: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
@@ -167,7 +168,7 @@ func _thrusting(inst: Dictionary) -> bool:
 	if arena == null or ship.components.def(inst["id"]).get("family", "") != "engine":
 		return false
 	var input: Dictionary = arena.ships[index].input
-	var push := -Vector2(Mounts.outward(int(inst["rot"])))
+	var push := -Mounts.dir_of(inst)
 	var throttle := float(input.get("throttle", 0.0))
 	var strafe := float(input.get("strafe", 0.0))
 	return (throttle != 0.0 and push.y < -0.5) or (strafe > 0.0 and push.x > 0.5) or (strafe < 0.0 and push.x < -0.5)

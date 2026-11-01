@@ -397,8 +397,17 @@ static func _behind_disabled(co, cell: Vector2i) -> Vector2i:
 	var uid: int = parts.at_out(cell)
 	if uid < 0 or parts.outside_alive(uid):
 		return cell
-	var step := -Mounts.outward(int(parts.instances[uid]["rot"]))
+	var inst: Dictionary = parts.instances[uid]
 	var c := cell
+	if Mounts.is_angled(inst):  # on a slope: back along its true direction, half a cell at a time
+		var p := Vector2(cell) + Vector2(0.5, 0.5)
+		for _i in 64:
+			p -= Mounts.dir_of(inst) * 0.5
+			c = Vector2i(p.floor())
+			if parts.at_out(c) != uid:
+				break
+		return c
+	var step := -Mounts.outward(int(inst["rot"]))
 	while parts.at_out(c) == uid:
 		c += step
 	return c

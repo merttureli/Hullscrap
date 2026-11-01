@@ -12,6 +12,8 @@ const Components = preload("res://scripts/ship/components.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
+const Damage = preload("res://scripts/combat/damage.gd")
+const Collisions = preload("res://scripts/combat/collisions.gd")
 
 ## The face angle of slope45 turned r quarter turns, and of slope2 by (rot, mirror), with the piece-to-piece step along the face.
 const SLOPE2 := {[0, false]: [333.434949, Vector2i(2, -1)], [0, true]: [26.565051, Vector2i(2, 1)], [1, false]: [63.434949, Vector2i(1, 2)],
@@ -231,6 +233,36 @@ func test_a_45_degree_turrets_arc_is_centred_on_45_degrees() -> void:
 	check(a.weapons.in_arc(a, 0, m, from + Vector2.UP.rotated(deg_to_rad(45.0 + 130.0)) * 500.0), "130 degrees round from the centre is inside")
 	check(not a.weapons.in_arc(a, 0, m, from + Vector2.UP.rotated(deg_to_rad(45.0 + 140.0)) * 500.0), "140 degrees round is outside the 270 degree arc")
 	check(a.weapons.in_arc(a, 0, m, from + Vector2.UP.rotated(deg_to_rad(45.0 - 130.0)) * 500.0), "and 130 degrees the other way is inside")
+
+
+# --- damage ---------------------------------------------------------------------------------------------------------
+
+func test_the_outside_half_on_a_slope_is_hit_by_the_cells_under_it_and_only_those() -> void:
+	var g := _armed("laser_mk1", 0)
+	var a: Arena = g["arena"]
+	var co = a.ships[0]
+	var inst: Dictionary = co.ship.components.instances[g["uid"]]
+	check(inst["out_cells"].size() >= 5, "the turned barrel holds several cells (%d)" % inst["out_cells"].size())
+	for c in inst["out_cells"]:
+		var obj := Damage.solid_at(co, c)
+		check(obj.get("uid", -1) == g["uid"] and obj.get("half", "") == "out", "the cell %s under the barrel is the barrel" % str(c))
+	for c in [Vector2i(0, 0), inst["cells"][0], inst["link"][0] + Vector2i(1, 1) * 3]:
+		check(Damage.solid_at(co, c).get("half", "") != "out", "the cell %s is not the barrel" % str(c))
+	var cell: Vector2i = inst["out_cells"][0]
+	Damage.apply(a, 0, cell, Damage.solid_at(co, cell), 999.0, "kinetic", {})
+	check(not co.ship.components.outside_alive(g["uid"]), "enough damage disables the outside half")
+	eq(co.ship.components.offline_reason(co.ship.grid, g["uid"]), "outside half disabled", "and the mount is offline")
+	var behind := Collisions._behind_disabled(co, cell)
+	check(co.ship.components.at_out(behind) != g["uid"], "a blow on the disabled barrel goes on to what is behind it")
+
+
+func test_cutting_a_sloped_link_cell_cuts_the_mount_off() -> void:
+	var g := _armed("laser_mk1", 0)
+	var co = g["arena"].ships[0]
+	var inst: Dictionary = co.ship.components.instances[g["uid"]]
+	eq(co.ship.components.offline_reason(co.ship.grid, g["uid"]), "", "a whole link works")
+	co.ship.grid.breach(inst["link"][0])
+	eq(co.ship.components.offline_reason(co.ship.grid, g["uid"]), "link cut", "a breached sloped wall cell cuts it off")
 
 
 # --- saves ----------------------------------------------------------------------------------------------------------
