@@ -44,7 +44,8 @@ const Unlocks = preload("res://scripts/space/unlocks.gd")
 ## 5 adds `tide` (the Hollow tide of the region, tide.gd); older saves load with a fresh tide (at their jump count in stage 1).
 ## 6 adds `warden` (the warden of the exit beacon, wardens.gd); older saves roll it on load. Its flag is in `flags`.
 ## 7 adds `foes` (the enemies rolled for the fights of the places, foe_for); older saves start with none rolled.
-const VERSION := 7
+## 8 adds `far` to each saved sector (the far POIs that are done, sector.gd); older saves have none done.
+const VERSION := 8
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100

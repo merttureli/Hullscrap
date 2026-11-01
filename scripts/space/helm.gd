@@ -169,13 +169,6 @@ func step(dt: float, sector, manned: bool, hand := {}, hostile := false, rocks: 
 		else:
 			input = autopilot(to, rocks)
 	flight.step(dt, input, mass, thrust, thrusts)
-	var size: float = sector.size
-	if flight.pos.x < 0.0 or flight.pos.x > size:
-		flight.pos.x = clampf(flight.pos.x, 0.0, size)
-		flight.vel.x = 0.0
-	if flight.pos.y < 0.0 or flight.pos.y > size:
-		flight.pos.y = clampf(flight.pos.y, 0.0, size)
-		flight.vel.y = 0.0
 	sync_to(sector)
 
 
@@ -257,14 +250,14 @@ func hand_input(hand: Dictionary) -> Dictionary:
 
 
 ## Where a fight starts (combat_session.gd start()'s `place`): the ship as it flies now, and the enemy at `enemy_pos`
-## (else `gap` px ahead), never nearer than `gap` px, inside a sector `size` px across.
-func fight_place(enemy_pos, gap: float, size: float) -> Dictionary:
+## (else `gap` px ahead), never nearer than `gap` px. Space has no walls.
+func fight_place(enemy_pos, gap: float) -> Dictionary:
 	var e: Vector2 = enemy_pos if enemy_pos is Vector2 else flight.pos + Vector2.UP.rotated(flight.angle) * gap
 	if e.distance_to(flight.pos) < gap:
 		var away: Vector2 = e - flight.pos
 		e = flight.pos + (away.normalized() if away.length() > 1.0 else Vector2.UP.rotated(flight.angle)) * gap
 	return {"player_pos": flight.pos, "player_angle": flight.angle, "player_vel": flight.vel, "player_ang_vel": flight.ang_vel,
-		"enemy_pos": e.clamp(Vector2.ZERO, Vector2(size, size))}
+		"enemy_pos": e}
 
 
 # --- who is at the helm ------------------------------------------------------------------------------------

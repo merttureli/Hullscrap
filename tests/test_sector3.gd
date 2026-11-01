@@ -101,6 +101,8 @@ func _sector(pois: Array):
 	var s = Campaign.new(1).sector_at("n01")
 	s.pois = pois
 	s.ambient = []
+	s.cfg = s.cfg.duplicate()
+	s.cfg.erase("far")  # exactly these POIs: no far ones
 	s.ship_pos = HERE
 	return s
 

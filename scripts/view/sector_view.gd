@@ -200,7 +200,7 @@ func fight_place(enemy_pos = null) -> Dictionary:
 	if not flying():
 		return {}
 	_sync(campaign(), _ship())
-	return helm.fight_place(enemy_pos, Session.SPAWN_DISTANCE, _sector.size)
+	return helm.fight_place(enemy_pos, Session.SPAWN_DISTANCE)
 
 
 # --- the tick --------------------------------------------------------------------------------------------------

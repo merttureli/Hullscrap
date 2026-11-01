@@ -418,7 +418,7 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 	var spot: Dictionary = s.fight_spawn(c, poi, value) if poi != "" else {}
 	if spot.is_empty():
 		spot = {"design": c.fight_path(value, str(c.node(c.current)["type"])), "pos": null}
-	var place: Dictionary = _helm.fight_place(spot["pos"], Session.SPAWN_DISTANCE, s.size)
+	var place: Dictionary = _helm.fight_place(spot["pos"], Session.SPAWN_DISTANCE)
 	var enemy = Session.load_ship(spot["design"])
 	check(enemy != null, "%s: the enemy design loads: %s" % [where, spot["design"]])
 	if enemy == null:
