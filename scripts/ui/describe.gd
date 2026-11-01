@@ -1,12 +1,13 @@
 extends RefCounted
-## What a part says about itself (data/describe.json holds the words). One description, in four parts, shown by the
+## What a part says about itself (data/describe.json holds the words). One description, short, in five parts, shown by the
 ## selection card (hud_card.gd, through palette.gd) and by the crafting panel's selected recipe:
-##   does   what its family does, one sentence
-##   rows   its stats, [label, value] for the ones the part has (read from the part's stats, weapons.json, flight.json,
-##          crew.json and the shield timing: the numbers the game itself uses, not copies)
-##   kinds  what its type means: the weapon kind, the damage type, each trait and effect it carries (lines)
-##   notes  the part's own quirk text and the line's (Scrap, Neon) notes
-##   lore   its blurb
+##   what      what its family does, 8 words at most
+##   stats     [label, value] pairs for the stats the part has (read from the part's stats, weapons.json, flight.json,
+##             crew.json and the shield timing: the numbers the game itself uses, not copies)
+##   keywords  one per mechanic it has (keyword(): label, colour, hover line): its weapon kind, its damage type, AUTO, RAPID ...
+##   lore      the first sentence of its blurb
+##   cost      its recipe's materials ({id: n}, {} when it has none), and level: the fabricator level it needs
+## The same keyword is shown in the same colour on the card, the palette's weapon cards and the combat weapon bar.
 ## Pure logic, no nodes: tests/test_describe.gd checks it.
 
 const Weapons = preload("res://scripts/combat/weapons.gd")
@@ -19,6 +20,8 @@ const Content = preload("res://scripts/data/content.gd")
 
 const PATH := "res://data/describe.json"
 const STAT_NAMES := {"rate": "fire rate", "damage": "damage"}
+const KEY_NAMES := {"engine": "Shift", "shield": "Space", "utility": "Q"}  ## the ability keys (weapon_bar.gd KEY_LABEL)
+const MINUS := "\u2212"
 
 static var _data := {}
 static var _weapons: Weapons
@@ -79,58 +82,105 @@ static func _side_share() -> float:
 	return _flight.side_share
 
 
-## The description of id `id` on `ship`: {does, rows, kinds, notes, lore}. A part gets all of it; a material, an item or
-## gear gets its line and its lore. `rot`: the quarter turns an engine is held at (-1: not known; says how each wall
-## uses it).
+## The description of id `id` on `ship`: {what, stats, keywords, lore, cost, level}. A part gets all of it; a material, an item
+## or gear gets its line, its lore and its recipe. `rot`: the quarter turns an engine is held at (-1: not known; says how
+## each wall uses it).
 static func of(id: String, ship, rot := -1) -> Dictionary:
+	var out := {"what": "", "stats": [], "keywords": [], "lore": "", "cost": {}, "level": 0}
+	if ship.crafting.has(id):
+		var r: Dictionary = ship.crafting.def(id)
+		out["cost"] = r.get("materials", {})
+		out["level"] = int(r.get("fab_level", 1))
 	if not ship.components.has(id):
-		return _of_item(id)
+		return _of_item(id, out)
 	var def: Dictionary = ship.components.def(id)
 	var eff: Dictionary = ship.effective(id)
 	var fam := str(def.get("family", ""))
-	var out := {"does": fill(str(data()["families"].get(fam, "")), {"break_delay": Abilities.shield_break_delay()}),
-		"rows": [], "kinds": [], "notes": [], "lore": str(def.get("blurb", ""))}
-	var rows: Array = out["rows"]
-	var size: Array = def["size"]
-	rows.append(["Size", "%dx%d" % [size[0], size[1]] + (" + %dx%d outside" % [def["mount"]["outside"][0], def["mount"]["outside"][1]] if Mounts.is_mount(def) else "")])
-	var pw := float(eff["power"])
-	if pw != 0.0:
-		rows.append(["Power", ("makes " if pw > 0.0 else "draws ") + num(absf(pw))])
-	rows.append(["HP", "%d%s" % [eff["hp"], " (outside %d)" % int(def["mount"]["outside_hp"]) if Mounts.is_mount(def) else ""]])
+	out["what"] = fill(str(data()["families"].get(fam, "")), {"break_delay": Abilities.shield_break_delay()})
+	out["lore"] = first_sentence(str(def.get("blurb", "")))
+	var rows: Array = out["stats"]
+	var kws: Array = out["keywords"]
+	var mount := Mounts.is_mount(def)
+	var tail := []  # a turret's or a fixed gun's aim, after the size
 	if fam == "weapon":
-		_weapon(id, rows, out["kinds"])
+		_weapon(id, rows, kws, tail)
 	else:
 		_stats(def, eff, fam, rot, rows)
-	rows.append(["Heat", "%s/s, cools %s/s, limit %s" % [num(eff["heat_per_s"]), num(eff["cooling"]), num(eff["heat_limit"])]])
+	var pw := float(eff["power"])
+	if pw != 0.0:
+		rows.append(["Power", ("+" if pw > 0.0 else MINUS) + num(absf(pw))])
+	rows.append(["HP", "%d%s" % [eff["hp"], " (out %d)" % int(def["mount"]["outside_hp"]) if mount else ""]])
+	var size: Array = def["size"]
+	rows.append(["Size", "%d\u00d7%d" % [size[0], size[1]] + (" (out %d\u00d7%d)" % [def["mount"]["outside"][0], def["mount"]["outside"][1]] if mount else "")])
+	rows.append_array(tail)
 	if def.get("manned", false):
-		rows.append(["Crew", "works better manned"])
-	var notes: Array = out["notes"]
-	if str(def.get("quirk", "")) != "":
-		notes.append(str(def["quirk"]))
+		kws.append(keyword("manned"))
+	if float(eff["heat_per_s"]) > float(eff["cooling"]):
+		kws.append(keyword("hot"))
 	if def.get("line", "") == "scrap":
-		notes.append("Scrap line: malfunctions more often (%s a minute)." % num(eff["malfunction_per_min"]))
+		kws.append(keyword("faulty", {"n": float(eff["malfunction_per_min"])}))
 	elif def.get("line", "") == "neon":
-		notes.append("Neon line: ion hits do x%s." % num(eff["ion_vulnerability"]))
+		kws.append(keyword("ion_weak", {"n": float(eff["ion_vulnerability"])}))
+	for a in def.get("abilities", []):
+		if str(a.get("type", "")) != "passive":
+			kws.append(keyword("ability", {"name": str(a.get("name", a.get("id", ""))), "key": str(KEY_NAMES.get(a.get("key", ""), str(a.get("key", "?")).capitalize())),
+				"duration": float(a.get("duration", 0)), "cooldown": float(a.get("cooldown", 0))}))
+	if str(def.get("quirk", "")) != "":
+		kws.append(keyword("quirk", {"quirk": str(def["quirk"])}))
 	return out
 
 
 ## The description as plain text, a line each (what tests and plain readers get).
 static func text(id: String, ship, rot := -1) -> String:
 	var d := of(id, ship, rot)
-	var lines: Array[String] = [d["does"]]
-	for r in d["rows"]:
+	var lines: Array[String] = [d["what"]]
+	for r in d["stats"]:
 		lines.append("%s: %s" % [r[0], r[1]])
-	lines.append_array(d["kinds"])
-	lines.append_array(d["notes"])
+	for k in d["keywords"]:
+		lines.append("%s: %s" % [k["label"], k["hover"]])
 	lines.append(d["lore"])
 	return "\n".join(lines.filter(func(l): return l != ""))
 
 
-static func _of_item(id: String) -> Dictionary:
+## Keyword `id` ready to show: {id, label (upper case), color, hover}, its {holes} filled from `vals` ({} for an unknown id).
+static func keyword(id: String, vals := {}) -> Dictionary:
+	var k: Dictionary = data()["keywords"].get(id, {})
+	if k.is_empty():
+		return {}
+	return {"id": id, "label": fill(str(k["label"]), vals).to_upper(), "color": Color(str(k["color"])), "hover": fill(str(k["hover"]), vals)}
+
+
+## The weapon kind ("laser", "bolt", "flak", "missile", "beam") of weapon id `id`, or "" when it is not a weapon.
+static func weapon_kind(id: String) -> String:
+	return str(weapons().def(id)["kind"]) if weapons().has(id) else ""
+
+
+## The kind of weapon `id` as a keyword, and AUTO after it for a turret: what the palette's cards and the weapon bar show.
+static func weapon_tags(id: String) -> Array:
+	if not weapons().has(id):
+		return []
+	var out := [keyword(weapon_kind(id))]
+	if weapons().def(id)["turret"]:
+		out.append(keyword("auto"))
+	return out
+
+
+## `s` up to its first sentence.
+static func first_sentence(s: String) -> String:
+	var at := -1
+	for sep in [". ", "! ", "? "]:
+		var i := s.find(sep)
+		if i >= 0 and (at < 0 or i < at):
+			at = i
+	return s.substr(0, at + 1) if at >= 0 else s
+
+
+static func _of_item(id: String, out: Dictionary) -> Dictionary:
 	var item: Dictionary = Content.entry("items", id)
 	var kind := str(item.get("kind", "")) if not item.is_empty() else ("material" if Content.has("materials", id) else "")
-	var blurb := str(item.get("blurb", Content.entry("materials", id).get("blurb", "")))
-	return {"does": str(data()["items"].get(kind, "")), "rows": [], "kinds": [], "notes": [], "lore": blurb}
+	out["what"] = str(data()["items"].get(kind, ""))
+	out["lore"] = first_sentence(str(item.get("blurb", Content.entry("materials", id).get("blurb", ""))))
+	return out
 
 
 # --- stats -------------------------------------------------------------------------------------------------
@@ -146,97 +196,95 @@ static func _stats(def: Dictionary, eff: Dictionary, fam: String, rot: int, rows
 			continue
 		rows.append([t[0], str(t[1]).replace("{v}", big(v) if k == "radar_range" else num(v))])
 		if k == "thrust":
-			rows.append(["Pushes", _pushes(v, rot)])
+			rows.append(["Push", _pushes(v, rot)])
 	match fam:
 		"shield":
 			if not st.has("recharge"):
 				rows.append(["Recharge", str(table["recharge"][1]).replace("{v}", num(Abilities.shield_base()))])
 		"medbay":
-			rows.append(["Heals", "%s hp a second" % num(float(CrewMember.config()["heal_per_s"]["medbay"]) * float(st.get("heal", 1.0)))])
+			rows.append(["Heals", "%s hp/s" % num(float(CrewMember.config()["heal_per_s"]["medbay"]) * float(st.get("heal", 1.0)))])
 		"bed":
-			rows.append(["Heals", "%s hp a second" % num(float(CrewMember.config()["heal_per_s"]["bed"]))])
+			rows.append(["Heals", "%s hp/s" % num(float(CrewMember.config()["heal_per_s"]["bed"]))])
 
 
 ## Where an engine's thrust `t` goes at `rot` (the nozzle's turn): forward and sideways, as Flight.thrusts_of splits it.
 static func _pushes(t: float, rot: int) -> String:
 	var share := num(t * _side_share())
 	if rot < 0:
-		return "rear wall: forward; side wall: sideways only. Every engine adds %s sideways either way" % share
+		return "forward, +%s side" % share
 	var part := Flight.split(t, -Vector2(Mounts.outward(rot)))
 	if absf(part.x) > absf(part.y):
-		return "sideways only: %s one way, %s the other" % [num(absf(part.x)), share]
+		return "%s side, %s back" % [num(absf(part.x)), share]
 	if part.y > 0.0:
-		return "%s forward, %s sideways either way" % [num(part.y), share]
-	return "like this it only brakes: turn it (R) so the nozzle points back. %s sideways either way" % share
+		return "%s fwd, %s side" % [num(part.y), share]
+	return "brakes: turn it (R)"
 
 
 # --- weapons -----------------------------------------------------------------------------------------------
 
-## The rows and the type lines of weapon `id` (weapons.json, defaults merged: weapons.gd def).
-static func _weapon(id: String, rows: Array, kinds: Array) -> void:
+## The rows and the keywords of weapon `id` (weapons.json, defaults merged: weapons.gd def); `tail`: its aim rows, which
+## come after the size.
+static func _weapon(id: String, rows: Array, kws: Array, tail: Array) -> void:
 	if not weapons().has(id):
 		return
 	var w: Dictionary = weapons().def(id)
-	var d: Dictionary = data()
 	var shots := int(w["shots"])
-	var beam: bool = w["kind"] == "beam"
-	var per := " a second for %s s" % num(float(w["duration"])) if beam else (" a volley" if shots > 1 else " a shot")
-	rows.append(["Damage", "%s%s %s%s" % [num(float(w["damage"])), " x %d" % shots if shots > 1 else "", w["damage_type"], per]])
-	rows.append(["Fires", "every %s s" % num(float(w["cooldown"]))])
-	rows.append(["Range", "%s px" % num(float(w["range"]))])
+	var dmg := num(float(w["damage"]))
+	if w["kind"] == "beam":
+		dmg += "/s \u00d7%s s" % num(float(w["duration"]))
+	elif shots > 1:
+		dmg += " \u00d7%d" % shots
+	rows.append(["Damage", dmg])
+	rows.append(["Every", "%s s" % num(float(w["cooldown"]))])
+	rows.append(["Range", num(float(w["range"]))])
 	if w["turret"]:
-		rows.append(["Aim", fill(d["effects"]["turret"], {"arc": w["arc"], "track": w["track"], "accuracy": w["accuracy"]})])
+		tail.append(["Arc", "%s\u00b0" % num(float(w["arc"]))])
+		tail.append(["Track", "%s\u00b0/s" % num(float(w["track"]))])
+		tail.append(["Hit", "%s%%" % num(float(w["accuracy"]) * 100.0)])
 	else:
-		rows.append(["Aim", fill(d["effects"]["fixed"], {"gimbal": w["gimbal"]})])
-		rows.append(["Fire with", "%s (group %d), or its number key" % ["left mouse" if weapons().group_of(id) == 1 else "right mouse", weapons().group_of(id)]])
-	kinds.append(str(d["kinds"].get(w["kind"], "")))
-	kinds.append(str(d["damage"].get(w["damage_type"], "")))
-	var fx: Dictionary = d["effects"]
+		tail.append(["Gimbal", "%s\u00b0" % num(float(w["gimbal"]))])
+		tail.append(["Fire", "LMB" if weapons().group_of(id) == 1 else "RMB"])
+	kws.append(keyword(str(w["kind"])))
+	kws.append(keyword(str(w["damage_type"])))
+	if w["turret"]:
+		kws.append(keyword("auto"))
 	if w.get("rapid", false):
-		kinds.append(fx["rapid"])
+		kws.append(keyword("rapid"))
+	if w["pass_shields"]:
+		kws.append(keyword("pass_shields"))
 	if int(w["pierce"]) > 0:
-		kinds.append(fill(fx["pierce"], {"n": w["pierce"]}))
-	if float(w["fire_chance"]) > 0.0:
-		kinds.append(fill(fx["fire"], {"p": float(w["fire_chance"]) * 100.0}))
+		kws.append(keyword("pierce", {"n": w["pierce"]}))
 	if float(w["splash"]) > 0.0:
-		kinds.append(fill(fx["splash"], {"n": w["splash"]}))
-	if w["pass_shields"] and w["kind"] != "missile":
-		kinds.append(fx["pass_shields"])
+		kws.append(keyword("splash", {"n": w["splash"]}))
+	if float(w["fire_chance"]) > 0.0:
+		kws.append(keyword("fire", {"p": float(w["fire_chance"]) * 100.0}))
 	if str(w["ammo"]) != "":
-		kinds.append(fill(fx["ammo"], {"ammo": str(w["ammo"])}))
+		kws.append(keyword("ammo", {"ammo": str(w["ammo"])}))
 	if float(w["jam_chance"]) > 0.0:
-		kinds.append(fill(fx["jam"], {"p": float(w["jam_chance"]) * 100.0}))
+		kws.append(keyword("jam", {"p": float(w["jam_chance"]) * 100.0}))
 	if float(w["heat_per_shot"]) > 0.0:
-		kinds.append(fill(fx["heat"], {"n": w["heat_per_shot"]}))
+		kws.append(keyword("heat", {"n": w["heat_per_shot"]}))
 	if float(w.get("breach_chance", 0.0)) > 0.0:
-		kinds.append(fill(fx["breach"], {"p": float(w["breach_chance"]) * 100.0}))
+		kws.append(keyword("breach", {"p": float(w["breach_chance"]) * 100.0}))
 	var e := Effects.of(w)
 	for k in e:
-		if not (k in d["idle"]):
-			kinds.append(_effect_line(str(k), e[k]))
+		if not (k in data()["idle"]):
+			kws.append(keyword(str(k), _effect_vals(str(k), e[k])))
 
 
-## The line of effect `key` with the numbers `v` (an effect's object, or a number for ammo_mult).
-static func _effect_line(key: String, v) -> String:
-	var tpl := str(data()["effects"].get(key, ""))
+## The numbers an effect's keyword fills its holes with: the effect's own object (or a number for ammo_mult), and what
+## the label and the hover line need besides.
+static func _effect_vals(key: String, v) -> Dictionary:
 	if not v is Dictionary:
-		return fill(tpl, {key: v})
+		return {key: v}
 	var vals: Dictionary = v.duplicate()
 	match key:
-		"acid":
-			vals["spread"] = float(v.get("spread", 0.0))
 		"corrode":
 			vals["inv"] = 1.0 / maxf(float(v.get("resist_mult", 1.0)), 0.01)
 		"needs_operator":
 			var who = v.get("species", "")
 			vals["who"] = " or ".join((who if who is Array else [who]).map(func(s): return str(s).capitalize())) if who != "" else "crew member"
-		"self_room":
-			var parts := []
-			for pk in data()["self_room_parts"]:
-				if float(v.get(pk, 0.0)) > 0.0:
-					parts.append(fill(data()["self_room_parts"][pk], {"v": float(v[pk])}))
-			vals["parts"] = ", ".join(parts)
 	if key in ["needs_operator", "needs_crew_in_room"]:
 		vals["stat"] = STAT_NAMES.get(str(v.get("stat", "damage" if key == "needs_operator" else "rate")), "damage")
 		vals["count"] = float(v.get("count", 1))
-	return fill(tpl, vals)
+	return vals
