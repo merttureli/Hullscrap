@@ -161,14 +161,16 @@ func test_the_first_reminder_of_ma_is_the_snap_call() -> void:
 
 
 func test_the_hollow_tide_carries_its_clues_in_the_stage_bands() -> void:
-	var c := _camp(2)
-	var ship := _ship()
-	eq(str(Events.shared().pick(c, _pool_node("hollow"), ship).get("id", "")), "hollow_welcome_aboard", "stage 2: the first tide event is the Hollow's welcome")
-	c = _camp(5)
-	eq(str(Events.shared().pick(c, _pool_node("hollow"), ship).get("id", "")), "hollow_laid_for_twelve", "stage 5: a table laid for twelve")
-	c = _camp(8)
-	c.used["hollow_laid_for_twelve"] = true
-	eq(str(Events.shared().pick(c, _pool_node("hollow"), ship).get("id", "")), "hollow_porch_light", "stage 8: the porch light")
+	var want := {2: ["hollow_welcome_aboard", []], 5: ["hollow_laid_for_twelve", []], 8: ["hollow_porch_light", ["hollow_laid_for_twelve"]]}
+	for stage in want:
+		var wins := 0
+		var trials := 60
+		for seed_value in range(1, trials + 1):
+			var c := _camp(stage, [], seed_value)
+			for spent in want[stage][1]:
+				c.used[spent] = true
+			wins += int(str(Events.shared().pick(c, _pool_node("hollow"), _ship()).get("id", "")) == want[stage][0])
+		check(wins >= int(trials * 0.5), "stage %d: %s is the tide event in %d of %d runs (weight 200 against ~110 of the rest)" % [stage, want[stage][0], wins, trials])
 
 
 # --- the quest beacons never come up empty --------------------------------------------------------------------
