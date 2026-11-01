@@ -5,7 +5,8 @@
    "menu.ogg"
   ],
   "explore": [
-   "explore_a.ogg"
+   "explore_a.ogg",
+   "explore_b.ogg"
   ],
   "combat": [],
   "hollow": [],
@@ -14,6 +15,7 @@
  "stings": {},
  "volumes": {
   "menu.ogg": 0.0,
-  "explore_a.ogg": 0.0
+  "explore_a.ogg": 0.0,
+  "explore_b.ogg": 0.0
  }
 }

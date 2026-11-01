@@ -24,6 +24,31 @@
   "title": "Drift",
   "true_peak_db": -2.51
  },
+ "explore_b": {
+  "bands_pct": [
+   20.7,
+   45.4,
+   24.8,
+   5.3,
+   3.9
+  ],
+  "bpm": 88.16,
+  "bytes": 2519102,
+  "peak_db": -2.07,
+  "rms_db": -18.01,
+  "samples_off_vs_render": 0,
+  "seam": {
+   "max_step": 0.48654,
+   "rms_first_db": -20.5,
+   "rms_last_db": -18.9,
+   "seam_step": 0.01198,
+   "typ_step_p999": 0.19282
+  },
+  "seconds": 152.44,
+  "target_rms_db": -18.0,
+  "title": "Salvage Lanes",
+  "true_peak_db": -1.81
+ },
  "menu": {
   "bands_pct": [
    20.8,
