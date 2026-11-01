@@ -8,7 +8,7 @@
 			"budget_mult": [1.5, 2.0],
 			"crew": {
 				"species": ["human", "human", "fenn", "basalt"],
-				"names": ["Guilder", "Plush", "Sterling", "Pomp", "Gilt", "Mink", "Crest", "Lavish"]
+				"names": ["Guilder", "Plush", "Sterling", "Pomp", "Gilt", "Mink", "Crest", "Lavish", "Mercer", "Ormolu"]
 			},
 			"ai": {"morale": "default", "aim_skill": [0.7, 0.95], "rammer": 0.0},
 			"weights": {"weapons": 4, "armour": 4, "shield": 3, "engine": 1, "crew": 3, "skill": 2, "systems": 2},

@@ -50,7 +50,7 @@ func _human(ship: Ship, p_name: String, x: int, y: int, player := false) -> Crew
 	return m
 
 
-## The room ship with a reactor on a cable: 8 power and nothing using it.
+## The room ship with a reactor on a cable: its power (9) and nothing using it.
 func _powered() -> Ship:
 	var ship := Fixture.room_ship()
 	Fixture.put(ship, "reactor_mk1", 10, 10)
@@ -205,16 +205,17 @@ func test_a_drone_draws_one_power_with_no_cable_and_the_surplus_decides_who_runs
 	var a := _drone(ship, 14, 12)
 	ship.refresh()
 	var st: Dictionary = ship.power_state
-	near(float(st["networks"][0]["supply"]), 8.0, "the reactor makes 8")
+	near(float(st["networks"][0]["supply"]), float(ship.components.def("reactor_mk1")["power"]), "the reactor makes what the data says")
 	near(float(st["drones"]["demand"]), 1.0, "the drone asks for 1")
 	near(float(st["drones"]["used"]), 1.0, "and gets it")
 	eq(ship.cables.cells.size(), cables_before, "with no cable laid for it")
 	check(not ship.cables.cells.has(a.cell()), "(it is on none)")
-	# two shields use 6 of the 8: two drones fit in the 2 left, a third does not
+	# two shields (6) and a radiator (1) use 7 of the 9: two drones fit in the 2 left, a third does not
 	var s1 := Fixture.put(ship, "shield_mk1", 14, 10)
 	var s2 := Fixture.put(ship, "shield_mk1", 17, 10)
-	check(s1 > 0 and s2 > 0, "two shields placed")
-	Fixture.wire(ship, [Vector2i(11, 10), Vector2i(12, 10), Vector2i(13, 10), Vector2i(14, 10), Vector2i(15, 10), Vector2i(16, 10), Vector2i(17, 10)])
+	var rad := Fixture.put(ship, "radiator", 19, 10)
+	check(s1 > 0 and s2 > 0 and rad > 0, "two shields and a radiator placed")
+	Fixture.wire(ship, [Vector2i(11, 10), Vector2i(12, 10), Vector2i(13, 10), Vector2i(14, 10), Vector2i(15, 10), Vector2i(16, 10), Vector2i(17, 10), Vector2i(18, 10), Vector2i(19, 10)])
 	_drone(ship, 14, 14, "Drone 2")
 	_drone(ship, 16, 14, "Drone 3")
 	ship.refresh()
@@ -223,7 +224,7 @@ func test_a_drone_draws_one_power_with_no_cable_and_the_surplus_decides_who_runs
 	check(Power.drone_fed(st, "Drone") and Power.drone_fed(st, "Drone 2") and not Power.drone_fed(st, "Drone 3"), "the first two run, in name order")
 	near(float(st["drones"]["demand"]), 3.0, "all three are asked for (the top bar shows it)")
 	near(float(st["drones"]["used"]), 2.0, "two are paid")
-	check(st["powered"][s1] and st["powered"][s2], "the shields come first and are on")
+	check(st["powered"][s1] and st["powered"][s2] and st["powered"][rad], "the parts come first and are on")
 
 
 func test_the_pure_feed_takes_the_surplus_of_every_network_and_ignores_the_broken() -> void:

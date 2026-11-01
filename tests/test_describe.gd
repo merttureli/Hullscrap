@@ -95,7 +95,7 @@ func test_the_numbers_come_from_the_data() -> void:
 		check(shield.contains(want), "shield_mk1 says " + want + ": " + shield)
 	eq(Abilities.shield_base(), 7.0, "the base the shield text follows")
 	var rector := Describe.text("reactor_mk1", ship)
-	check(rector.contains("makes 8") and rector.contains("HP: 8"), "reactor_mk1: " + rector)
+	check(rector.contains("makes %d" % int(ship.components.def("reactor_mk1")["power"])) and rector.contains("HP: 8"), "reactor_mk1: " + rector)
 	check(Describe.text("medbay", ship).contains("Heals: 15 hp a second"), "the medbay heals at crew.json's rate")
 	check(Describe.text("radar_mk1", ship).contains("6,000 px"), "radar range with a thousands comma")
 	check(Describe.text("artemis_mk1", ship).contains("Passes through shields"), "a missile passes shields")

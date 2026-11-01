@@ -159,19 +159,19 @@
       "choices": [
         {"text": "Pay the toll (50 credits).", "requires": {"credits": 50}, "outcomes": [
           {"weight": 85, "text": "'Pleasure doing business,' says Vex, and means it. The Dental Plan peels away, whistling.", "effects": {"items": {"credits": -50}}},
-          {"weight": 15, "text": "Vex takes the money and then remembers he's a pirate. The Dental Plan swings round, guns warm.", "effects": {"items": {"credits": -50}, "fight": "pirate_raider"}}
+          {"weight": 15, "text": "Vex takes the money and then remembers he's a pirate. The Dental Plan swings round, guns warm.", "effects": {"items": {"credits": -50}, "fight": "dental_plan"}}
         ]},
         {"text": "Haggle him down.", "requires": {"credits": 30}, "outcomes": [
           {"weight": 40, "text": "'Thirty,' says Vex, wounded. 'And you buy a raffle ticket.' You buy a raffle ticket.", "effects": {"items": {"credits": -30}}},
           {"weight": 35, "text": "Vex goes quiet, and you can hear him think. 'Tell you what,' he says.", "effects": {"goto": "pirate_vex_offer"}},
-          {"weight": 25, "text": "'Haggle? HAGGLE?' Vex puts the gunboat's nose in your face and the guns in your hull.", "effects": {"fight": "pirate_raider"}}
+          {"weight": 25, "text": "'Haggle? HAGGLE?' Vex puts the gunboat's nose in your face and the guns in your hull.", "effects": {"fight": "dental_plan"}}
         ]},
         {"text": "[Afterburner] Floor it and leave the toll booth in your exhaust.", "requires": {"component": "afterburner"}, "outcomes": [
           {"weight": 80, "text": "The Dental Plan shrinks to a dot, the dot to a thought, the thought to a rude word on the comm.", "effects": {}},
           {"weight": 20, "text": "They clip you on the way past, with feeling.", "effects": {"hull": -10}}
         ]},
         {"text": "Refuse and charge the guns.", "outcomes": [
-          {"weight": 100, "text": "'Wrong answer,' says Vex, warmly.", "effects": {"fight": "pirate_raider"}}
+          {"weight": 100, "text": "'Wrong answer,' says Vex, warmly.", "effects": {"fight": "dental_plan"}}
         ]}
       ],
       "after_win": {"text": "The Dental Plan comes apart, and Vex's escape pod spits a rude flare as it tumbles away. Concord pays a little for the paperwork.", "effects": {"rep": {"concord": 1}, "items": {"credits": 20}}}
@@ -275,7 +275,7 @@
     },
     {
       "id": "wreck_field_dead_cruiser", "type": "wreck_field", "weight": 10, "once": false, "requires": {"jumps_min": 4},
-      "text": "A Concord cruiser, CS-221 Sobriety. Status: cold, lights none, distress call none. On the bridge window, from the inside, there is a handprint, and it still shines like a fresh one.",
+      "text": "A Concord cruiser. Status: cold, lights none, distress call none. On the bridge window, from the inside, there is a handprint, and it still shines like a fresh one.",
       "choices": [
         {"text": "Board and salvage it.", "outcomes": [
           {"weight": 45, "text": "The corridors are cold and the cabinets full. The handprint was a smear of old grease. Mostly.", "effects": {"items": {"scrap": 50, "credits": 25}}},
@@ -510,7 +510,7 @@
     },
     {
       "id": "patrol_hallett_inspection", "type": "patrol", "weight": 12, "once": false, "requires": {"rep_min": {"concord": -4}},
-      "text": "CS-114 Diligence, patrol cutter, class: tired. Officer Hallett requests that you hold position for a Routine Cargo Inspection (Form 12-C). His tone is that of a man who has asked this four thousand times and been thanked for none of them.",
+      "text": "A patrol cutter, class: tired. Officer Hallett requests that you hold position for a Routine Cargo Inspection (Form 12-C). His tone is that of a man who has asked this four thousand times and been thanked for none of them.",
       "choices": [
         {"text": "Submit to the inspection.", "outcomes": [
           {"weight": 65, "text": "Hallett checks the manifest, the hold and his watch, and signs. 'Safe travels,' he says, in the voice of a man who would rather you stayed.", "effects": {"rep": {"concord": 1}}},
@@ -532,7 +532,7 @@
       "text": "Hallett's cutter hails you on the other frequency, the one with the stationery. 'A bounty, if you want it: the Dental Plan, captain one Vex, wanted for toll-taking, noise, and being a person.' He pauses. 'Three separate counts.'",
       "choices": [
         {"text": "Accept the bounty.", "outcomes": [
-          {"weight": 100, "text": "Hallett stamps the contract with a stamp that has seen better decades. 'Do try to bring back the paperwork,' he says. Vex, by awful luck, is right behind you.", "effects": {"fight": "pirate_raider"}}
+          {"weight": 100, "text": "Hallett stamps the contract with a stamp that has seen better decades. 'Do try to bring back the paperwork,' he says. Vex, by awful luck, is right behind you.", "effects": {"fight": "dental_plan"}}
         ]},
         {"text": "Decline politely.", "outcomes": [
           {"weight": 100, "text": "'Understood,' says Hallett. He writes 'declined' on something, and the something sighs.", "effects": {}}

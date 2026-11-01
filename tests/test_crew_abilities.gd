@@ -208,10 +208,11 @@ func test_overclock_on_a_reactor_makes_more_power() -> void:
 	var d := _rig("laser_mk1")
 	var ship: Ship = d["ship"]
 	var m := _crew(ship, "Rook", 12, 14, "overclock")
-	near(_supply(ship), 8.0, "the reactor makes 8")
+	var base := float(ship.components.def("reactor_mk1")["power"])
+	near(_supply(ship), base, "the reactor makes its own power")
 	ship.manned[d["reactor"]] = "Rook"
 	check(CrewAbilities.use(ship, m)["ok"], "overclock the reactor")
-	near(_supply(ship), 12.0, "x1.5: 12")
+	near(_supply(ship), base * 1.5, "x1.5")
 
 
 func test_overclock_on_a_weapon_cools_it_down_faster() -> void:

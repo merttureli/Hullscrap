@@ -67,17 +67,17 @@ func _block(a: Vector2i, w: int, h: int) -> Array[Vector2i]:
 func test_data_is_complete() -> void:
 	var c := _comps()
 	var want := {
-		"reactor_mk1": [8, 0, 1], "reactor_mk2": [14, 0, 2], "engine_mk1": [-2, 4, 1], "engine_mk2": [-3, 4, 2],
+		"reactor_mk1": [9, 0, 1], "reactor_mk2": [15, 0, 2], "engine_mk1": [-2, 4, 1], "engine_mk2": [-3, 4, 2],
 		"oxygen_gen": [-2, 1, 1], "shield_mk1": [-3, 3, 1], "laser_mk1": [-2, 5, 1], "laser_mk2": [-3, 5, 2], "laser_turret_mk1": [-3, 5, 1],
 		"helm": [-1, 2, 1], "medbay": [-2, 3, 1], "bed": [0, 0, 1], "fabricator": [-2, 6, 1],
 		"robot_arm": [-1, 6, 1], "laser_cutter": [-2, 6, 1], "assembly_rig": [-2, 6, 1], "nanoforge": [-4, 6, 1],
-		"reactor_scrap_mk1": [6, 0, 1], "engine_scrap_mk1": [-2, 4, 1], "oxygen_scrap_mk1": [-2, 1, 1],
-		"reactor_neon_mk1": [16, 0, 1], "engine_neon_mk1": [-2, 4, 1], "radiator": [-1, 2, 1],
+		"reactor_scrap_mk1": [7, 0, 1], "engine_scrap_mk1": [-2, 4, 1], "oxygen_scrap_mk1": [-2, 1, 1],
+		"reactor_neon_mk1": [17, 0, 1], "engine_neon_mk1": [-2, 4, 1], "radiator": [-1, 2, 1],
 		"pulse_mk1": [-2, 5, 1], "pulse_mk2": [-3, 5, 2], "rattle_burst_scrap": [-2, 5, 1], "shrapnel_cannon_scrap": [-2, 5, 1],
 		"bolt_thrower_scrap": [-1, 5, 1], "artemis_mk1": [-2, 5, 1], "ion_blast_mk1": [-3, 5, 1], "siren_ion_neon": [-3, 5, 1],
 		"heat_lance_neon": [-4, 5, 1], "leech_laser": [-3, 5, 2], "breach_harpoon": [-2, 5, 2],
 		"shield_scrap_mk1": [-3, 3, 1], "shield_mk2": [-4, 3, 2], "shield_neon_mk1": [-4, 3, 1], "mirror_veil": [-3, 3, 2],
-		"afterburner": [-3, 4, 2], "inertial_dampener": [-2, 3, 2], "battering_bow": [0, 0, 2], "reactor_scrap_kettle": [8, 0, 1],
+		"afterburner": [-3, 4, 2], "inertial_dampener": [-2, 3, 2], "battering_bow": [0, 0, 2], "reactor_scrap_kettle": [9, 0, 1],
 		# racial tech, human / basalt / emberkin / fenn / kett (data/packs/tech_*): weapons
 		"human_volley_rack": [-3, 5, 2], "human_concord_railgun": [-5, 5, 3], "human_flak_screen": [-4, 5, 2],
 		"basalt_magma_spitter": [-3, 5, 2], "basalt_quarry_driver": [-4, 5, 3], "basalt_pumice_flak": [-4, 5, 2],
@@ -85,11 +85,11 @@ func test_data_is_complete() -> void:
 		"fenn_twitch_cannon": [-3, 5, 2], "fenn_spark_lattice": [-4, 5, 2], "fenn_market_missile": [-3, 5, 2],
 		"kett_hive_swarm_launcher": [-3, 5, 2], "kett_chitin_thrower": [-2, 5, 1], "kett_drone_picket": [-4, 5, 2],
 		# racial tech, group a: components
-		"emberkin_pyre_drive": [-3, 4, 2], "emberkin_furnace_core": [10, 0, 1], "emberkin_hearth_shield": [-4, 3, 2],
-		"human_reactor_plus": [9, 0, 1], "human_comms_array": [-2, 3, 1], "human_crew_quarters_deluxe": [-1, 3, 1],
-		"basalt_vacuum_forge": [11, 0, 1], "basalt_stonehide_bay": [-1, 3, 2], "basalt_gravity_anchor": [-2, 3, 2],
-		"fenn_haggle_engine": [-3, 4, 2], "fenn_jury_reactor": [10, 0, 1], "fenn_quickfix_bay": [-2, 3, 1],
-		"kett_hive_battery": [-5, 3, 2], "kett_nest_reactor": [7, 0, 1], "kett_brood_hold": [-1, 3, 1],
+		"emberkin_pyre_drive": [-3, 4, 2], "emberkin_furnace_core": [11, 0, 1], "emberkin_hearth_shield": [-4, 3, 2],
+		"human_reactor_plus": [10, 0, 1], "human_comms_array": [-2, 3, 1], "human_crew_quarters_deluxe": [-1, 3, 1],
+		"basalt_vacuum_forge": [12, 0, 1], "basalt_stonehide_bay": [-1, 3, 2], "basalt_gravity_anchor": [-2, 3, 2],
+		"fenn_haggle_engine": [-3, 4, 2], "fenn_jury_reactor": [11, 0, 1], "fenn_quickfix_bay": [-2, 3, 1],
+		"kett_hive_battery": [-5, 3, 2], "kett_nest_reactor": [8, 0, 1], "kett_brood_hold": [-1, 3, 1],
 		# the Raft loop (docs/CONTENT.md section 11)
 		"net_mouth_scrap": [0, 0, 1], "intake_mk1": [-1, 6, 1],
 		"intake_mk2": [-1, 6, 2], "intake_mk3": [-2, 6, 3], "radar_mk1": [-1, 6, 1], "radar_mk2": [-2, 6, 2], "radar_mk3": [-3, 6, 3],
@@ -100,10 +100,10 @@ func test_data_is_complete() -> void:
 		"gauntling_arc_hammer": [-3, 5, 2], "gauntling_scrap_shotgun": [-2, 5, 1], "gauntling_tesla_picket": [-3, 5, 2],
 		"prismatic_prism_lens": [-4, 5, 2], "prismatic_refractor": [-3, 5, 2], "prismatic_glimmer_turret": [-3, 5, 2],
 		"grundl_slug_mortar": [-4, 5, 3], "grundl_grapple_harpoon": [-3, 5, 2], "grundl_barge_flak": [-3, 5, 2],
-		"mire_rain_shield": [-4, 3, 2], "mire_wetwell_reactor": [10, 0, 1], "mire_spray_deck": [-1, 3, 1],
-		"sporeling_bloom_reactor": [11, 0, 1], "sporeling_mycelium_shield": [-4, 3, 2], "sporeling_garden_bay": [-2, 1, 1],
-		"gauntling_arc_core": [11, 0, 1], "gauntling_overclock_engine": [-3, 4, 2], "gauntling_graft_bay": [-2, 3, 1],
-		"prismatic_lattice_shield": [-5, 3, 2], "prismatic_song_reactor": [8, 0, 1], "prismatic_resonance_helm": [-2, 2, 1],
+		"mire_rain_shield": [-4, 3, 2], "mire_wetwell_reactor": [11, 0, 1], "mire_spray_deck": [-1, 3, 1],
+		"sporeling_bloom_reactor": [12, 0, 1], "sporeling_mycelium_shield": [-4, 3, 2], "sporeling_garden_bay": [-2, 1, 1],
+		"gauntling_arc_core": [12, 0, 1], "gauntling_overclock_engine": [-3, 4, 2], "gauntling_graft_bay": [-2, 3, 1],
+		"prismatic_lattice_shield": [-5, 3, 2], "prismatic_song_reactor": [9, 0, 1], "prismatic_resonance_helm": [-2, 2, 1],
 		"grundl_hauler_thrusters": [-4, 4, 2], "grundl_freight_shield": [-5, 3, 2], "grundl_cargo_deck": [-1, 3, 1],
 		# engine wave 1 (data/packs/engines_1)
 		"engine_mk3": [-4, 4, 3], "engine_mk4": [-5, 4, 4], "engine_mk5": [-6, 4, 5], "engine_scrap_mk2": [-3, 4, 2], "engine_scrap_mk3": [-4, 4, 3],

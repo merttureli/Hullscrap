@@ -4,7 +4,8 @@ extends Control
 ## (crew_abilities.gd), its icon with a ring: green when ready, filling while it cools down (the seconds left in the
 ## middle), gold and emptying while its effect runs. Clicking a card selects that crew member (a gold frame; the
 ## world shows a ring round them); clicking the ability icon selects them and uses it, like G. Cards stack up from
-## the bottom, and a second column starts to the left when the screen is full. A repair drone (R1) has a card too, with a small robot for
+## the bottom, and a second column starts to the left when the screen is full. The selected member's backstory
+## (backstory.gd) shows in a box above the cards, and in the tooltip of any card. A repair drone (R1) has a card too, with a small robot for
 ## a portrait, a DRONE tag, "no power" or "broken" for what it is doing when it is idle for that, and no ability icon; clicking it selects nothing. A line above the cards says what
 ## the last use did, or why it was refused. Placeholder shapes and letters until the icons have art.
 ## Reads the crew view (crew_view.gd: ship_now(), selected, select(), use_ability()), and takes only left clicks
@@ -12,6 +13,7 @@ extends Control
 
 const Art = preload("res://scripts/view/art.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
@@ -33,6 +35,8 @@ const WARN := Color("#ffb347")
 const TAG := Color("#46e4ff")  ## the DRONE tag
 const HP_BG := Color(0.12, 0.15, 0.2)
 const FLASH_FOR := 3.0  ## seconds the line above the cards stays
+const STORY_W := 360.0  ## width of the backstory box of the selected member, px
+const STORY_SIZE := 13
 
 var view  ## the crew view (crew_view.gd)
 var flash_text := ""
@@ -104,6 +108,15 @@ func card_at(p: Vector2) -> int:
 	return -1
 
 
+## The tooltip of the card under the mouse: who they are and their backstory.
+func _get_tooltip(at_position: Vector2) -> String:
+	var i := card_at(at_position)
+	if i < 0:
+		return ""
+	var m = _crew()[i]
+	return "%s\n%s" % [m.name, m.backstory()]
+
+
 ## Only the cards take the mouse: a click anywhere else goes on to the world.
 func _has_point(p: Vector2) -> bool:
 	return visible and card_at(p) >= 0
@@ -144,6 +157,8 @@ func _draw() -> void:
 	var rects := card_rects(ship.crew.size(), _screen())
 	for i in rects.size():
 		_card(rects[i], ship, ship.crew[i], ship.crew[i] == view.selected)
+	if ship.crew.has(view.selected):
+		_story(rects, view.selected)
 	if flash_left > 0.0 and flash_text != "" and not rects.is_empty():
 		var font := ThemeDB.fallback_font
 		var top := rects[0].position.y
@@ -154,6 +169,25 @@ func _draw() -> void:
 		var at := Vector2(_screen().x - MARGIN - w, top - 8.0)  # right-aligned to the cards
 		draw_string(font, at + Vector2(1, 1), flash_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0, 0, 0, 0.9 * a))
 		draw_string(font, at, flash_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(GOLD, a))
+
+
+## The backstory of `m` in a box above the cards (clear of the flash line), right-aligned with them: their name and
+## species, then the story wrapped.
+func _story(rects: Array[Rect2], m) -> void:
+	var text: String = m.backstory()
+	if text == "" or rects.is_empty():
+		return
+	var font := ThemeDB.fallback_font
+	var top := rects[0].position.y
+	for r in rects:
+		top = minf(top, r.position.y)
+	var h := font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, STORY_W - 20.0, STORY_SIZE).y + 38.0
+	var box := Rect2(Vector2(_screen().x - MARGIN - STORY_W, maxf(top - 30.0 - h, MARGIN)), Vector2(STORY_W, h))
+	draw_rect(box, BG)
+	draw_rect(box, GOLD, false, 1.0)
+	var kind := str(CrewMember.species_def(m.species).get("name", m.species))
+	draw_string(font, box.position + Vector2(10.0, 19.0), "%s, %s" % [m.name, kind], HORIZONTAL_ALIGNMENT_LEFT, STORY_W - 20.0, 14, GOLD)
+	draw_multiline_string(font, box.position + Vector2(10.0, 22.0 + font.get_ascent(STORY_SIZE) + 4.0), text, HORIZONTAL_ALIGNMENT_LEFT, STORY_W - 20.0, STORY_SIZE, -1, TEXT)
 
 
 func _card(r: Rect2, ship, m, selected: bool) -> void:

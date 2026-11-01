@@ -291,14 +291,16 @@ func _supply(ship: Ship) -> float:
 func test_the_song_reactor_adds_one_power_per_prismatic_in_its_room_up_to_three() -> void:
 	var rig := _rig("prismatic_song_reactor", "reactor_mk1")
 	var ship: Ship = rig["ship"]
-	var lone := _supply(ship) - 8.0  # the Reactor Mk1 gives 8
-	near(lone, 8.0 * 1.3, "with nobody it makes the neon line's 10.4", 0.01)
+	var mk1 := float(ship.components.def("reactor_mk1")["power"])  # the Reactor Mk1's share of the supply
+	var song := float(ship.components.def("prismatic_song_reactor")["power"]) * 1.3  # the song reactor's own, on the neon line
+	var lone := _supply(ship) - mk1
+	near(lone, song, "with nobody it makes the neon line's figure", 0.01)
 	for i in 4:
 		_crew(ship, "P%d" % i, "prismatic", 11 + i, 14)
-		near(_supply(ship) - 8.0, 8.0 * 1.3 + minf(float(i + 1), 3.0), "%d Prismatic in the room" % (i + 1), 0.01)
+		near(_supply(ship) - mk1, song + minf(float(i + 1), 3.0), "%d Prismatic in the room" % (i + 1), 0.01)
 	var human := _rig("prismatic_song_reactor")
 	_crew(human["ship"], "H", "human", 12, 14)
-	near(_supply(human["ship"]) - 8.0, 8.0 * 1.3, "a human adds nothing", 0.01)
+	near(_supply(human["ship"]) - mk1, song, "a human adds nothing", 0.01)
 
 
 func test_the_overclock_engine_runs_at_full_thrust_only_with_a_mechanical_crew_member_in_its_room() -> void:

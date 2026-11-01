@@ -458,8 +458,9 @@ func test_an_aura_work_mult_speeds_up_the_others_only() -> void:
 
 func test_a_prismatic_at_a_station_gives_it_a_point_of_power() -> void:
 	var ship := Fixture.room_ship()
-	var reactor := Fixture.put(ship, "reactor_mk1", 10, 9)  # +8
+	var reactor := Fixture.put(ship, "reactor_mk1", 10, 9)  # +9
 	var shield := Fixture.put(ship, "shield_mk1", 15, 9)  # -3
+	var radiator := Fixture.put(ship, "radiator", 13, 9)  # -1, so the demand is one over the supply
 	var lasers := [Fixture.put(ship, "laser_mk1", 10, 13), Fixture.put(ship, "laser_mk1", 15, 13), Fixture.put(ship, "laser_mk1", 10, 15)]  # -2 each
 	Fixture.wire(ship, [Vector2i(11, 9), Vector2i(11, 10), Vector2i(11, 11), Vector2i(11, 12), Vector2i(11, 13), Vector2i(11, 14), Vector2i(11, 15), Vector2i(11, 16),
 		Vector2i(12, 10), Vector2i(13, 10), Vector2i(14, 10), Vector2i(15, 10), Vector2i(15, 11), Vector2i(15, 12), Vector2i(15, 13)])
@@ -469,10 +470,10 @@ func test_a_prismatic_at_a_station_gives_it_a_point_of_power() -> void:
 		for uid in ship.power_state["powered"]:
 			n += 0 if ship.power_state["powered"][uid] else 1
 		return n
-	check(reactor >= 0 and shield >= 0 and not lasers.has(-1), "everything is placed")
+	check(reactor >= 0 and shield >= 0 and radiator >= 0 and not lasers.has(-1), "everything is placed")
 	eq(ship.power_state["networks"].size(), 1, "one network")
-	near(float(ship.power_state["networks"][0]["supply"]), 8.0, "8 in")
-	near(float(ship.power_state["networks"][0]["demand"]), 9.0, "9 asked for")
+	near(float(ship.power_state["networks"][0]["supply"]), float(ship.components.def("reactor_mk1")["power"]), "the reactor's power in")
+	near(float(ship.power_state["networks"][0]["demand"]), 10.0, "10 asked for")
 	eq(off.call(), 1, "so one part is dark")
 	var human := _person("Pike", "human", 15, 14)
 	var prism := _person("Glint", "prismatic", 17, 14)
@@ -482,7 +483,7 @@ func test_a_prismatic_at_a_station_gives_it_a_point_of_power() -> void:
 	eq(off.call(), 1, "a human at the shield changes nothing")
 	ship.manned[shield] = "Glint"
 	check(ship.refresh(), "a Prismatic at the shield makes the ship solve its power again")
-	near(float(ship.power_state["networks"][0]["demand"]), 8.0, "the shield asks for 2 instead of 3")
+	near(float(ship.power_state["networks"][0]["demand"]), 9.0, "the shield asks for 2 instead of 3")
 	eq(off.call(), 0, "and everything is powered")
 	ship.manned.clear()
 	ship.refresh()
@@ -505,7 +506,7 @@ func test_power_solve_adds_the_bonus_to_a_part_figure() -> void:
 	var boosted: Dictionary = Power.solve(ship.components, ship.cables, {}, {"bonus": {shield: 1.0}})
 	near(float(boosted["networks"][0]["demand"]), 2.0, "with a bonus of 1, for 2")
 	var more: Dictionary = Power.solve(ship.components, ship.cables, {}, {"bonus": {reactor: 2.0}})
-	near(float(more["networks"][0]["supply"]), 10.0, "a producer's figure goes up too")
+	near(float(more["networks"][0]["supply"]), float(ship.components.def("reactor_mk1")["power"]) + 2.0, "a producer's figure goes up too")
 	_done()
 
 

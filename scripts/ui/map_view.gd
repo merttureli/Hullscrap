@@ -19,6 +19,7 @@ extends Control
 const Campaign = preload("res://scripts/space/campaign.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
+const JournalPanel = preload("res://scripts/ui/journal_panel.gd")
 const TideHud = preload("res://scripts/ui/tide_hud.gd")
 const Tide = preload("res://scripts/space/tide.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
@@ -64,6 +65,7 @@ var event_panel: Control
 var station_panel: Control
 var tide_hud: Control  ## the play-mode line of the Hollow tide (tide_hud.gd), a sibling in this canvas layer
 var region_choice: Control
+var journal_panel: Control  ## the logs found this run (J)
 var hover := ""  ## the node id under the mouse
 var message := ""
 var message_bad := false
@@ -130,6 +132,9 @@ func _ensure_panels() -> void:
 	region_choice = RegionChoice.new()
 	region_choice.map = self
 	add_child(region_choice)
+	journal_panel = JournalPanel.new()
+	journal_panel.map = self
+	add_child(journal_panel)
 
 
 ## The Hollow tide's clock line, in the canvas layer this map lives in (no scene edit).
@@ -186,7 +191,7 @@ func open() -> void:
 
 
 func close() -> void:
-	if event_panel.visible or station_panel.visible or region_choice.visible:
+	if event_panel.visible or station_panel.visible or region_choice.visible or journal_panel.visible:
 		return
 	visible = false
 
@@ -207,6 +212,7 @@ func new_game(seed_value := 0) -> void:
 	event_panel.visible = false
 	station_panel.visible = false
 	region_choice.visible = false
+	journal_panel.visible = false
 	_fighting = false
 	message = ""
 	refresh()
@@ -546,6 +552,7 @@ func load_campaign() -> String:
 		event_panel.visible = false
 		station_panel.visible = false
 		region_choice.visible = false
+		journal_panel.visible = false
 		_fighting = false
 		refresh()
 		return ""
@@ -558,7 +565,7 @@ func load_campaign() -> String:
 func _input(e: InputEvent) -> void:
 	if not visible or panel_only or not (e is InputEventKey):
 		return
-	if event_panel.visible or station_panel.visible or region_choice.visible:
+	if event_panel.visible or station_panel.visible or region_choice.visible or journal_panel.visible:
 		return  # they take the keys
 	if get_viewport() != null:
 		get_viewport().set_input_as_handled()
@@ -573,6 +580,8 @@ func _input(e: InputEvent) -> void:
 			wait()
 		KEY_Y:
 			tow()
+		KEY_J:
+			journal_panel.open()
 
 
 func _gui_input(e: InputEvent) -> void:
@@ -828,7 +837,7 @@ func _draw_foot(p: Rect2) -> void:
 	if message != "":
 		_text(message, Vector2(p.position.x + PAD, y), 16, BAD if message_bad else GOOD)
 	var how := "spool the jump drive there, 8 s" if sector_flow() else "jump"
-	_text("Click a lane-linked node to %s (%s)    Enter: dock    T: wait for a trader (no fuel)    Y: Ma tows you home (no fuel, debt +150)    Shift+click: drift jump (no fuel, hull -%d)    M / Esc: close" % [how, jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
+	_text("Click a lane-linked node to %s (%s)    Enter: dock    T: wait for a trader (no fuel)    Y: Ma tows you home (no fuel, debt +150)    Shift+click: drift jump (no fuel, hull -%d)    J: journal    M / Esc: close" % [how, jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
 		Vector2(p.position.x + PAD, p.end.y - 22.0), 13, DIM_TEXT)
 	var s = ship()
 	if s != null and campaign.fuel_short(s):
