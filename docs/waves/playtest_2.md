@@ -38,6 +38,10 @@ The pace is slower than the Beta 2 night: **two builders at a time**, in four wa
 - **Guns aim along their real direction.** A fixed gun's line and a turret's arc centre follow the slope. Angled turrets can cover more angles between them, with less overlap.
 - The placement preview shows the angled outside half. Saves keep the angle. (G1)
 
+### The owner's later notes
+- **A repair drone.** Every run starts with one fully automatic drone. It repairs, fights fires and reloads ammo racks while you fly. It draws 1 power with no cable, works slower than crew, never mans a station, and breaks instead of dying (a crewmate or you can fix it). More drones come from a blueprint. (R1)
+- **A big round build area.** Every starter's buildable frame is a disc of radius 29 cells around its core, so any shape is possible. (B1)
+
 ### Combat pacing
 - **Repairs are too fast.** Repair times roughly double. (F5)
 - **Shields come back at once.** Each generator has its own recharge time (Mk1 about 7 s per layer, up from 2 s). Layers come back one at a time, and an emptied sector waits 3 s more. (C1)
@@ -58,6 +62,7 @@ The pace is slower than the Beta 2 night: **two builders at a time**, in four wa
 | 1 | `feel`: F1–F6 | `pace`: C1–C4 |
 | 2 | `space`: S1–S4 | `parts`: P1, P2 (tier 1–2 parts smaller inside; mounts get a narrower breech) |
 | 3 | `alone`: A1, A2, P3, P4 (start alone, rare crew, starter loadouts, bigger starters) | `info`: I1–I3 |
+| 3b | `frame`: B1 | `robot`: R1 (one after the other) |
 | 4 | `command`: K1–K3 | `angles`: G1 (after `parts`, which changes mount sizes) |
 | 5 | QA playthrough, Beta 3 build | |
 
