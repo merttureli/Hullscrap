@@ -20,10 +20,10 @@
     },
     {
       "id": "quillback_letter_of_challenge", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 3},
-      "text": "A boarding tube comes across the gap, empty, and with a letter in it. The paper is cream-laid, the hand is exquisite. 'The Honourable Captain Thrale, of the Point of Honour, requests the pleasure of a duel between champions, to settle the matter of tolls. Weapons: knives. Seconds: yes. Refreshments: to follow.' Through the window of the raider you can see a crew of Quillbacks lined up along the rail, all in matching waistcoats, bristling gently.",
+      "text": "A boarding tube comes across the gap, empty, and with a letter in it. The paper is cream-laid, the hand is exquisite. 'The Honourable Captain of this vessel requests the pleasure of a duel between champions, to settle the matter of tolls. Weapons: knives. Seconds: yes. Refreshments: to follow.' Through the window of the raider you can see a crew of Quillbacks lined up along the rail, all in matching waistcoats, bristling gently.",
       "choices": [
         {"text": "Accept: send your best fighter.", "outcomes": [
-          {"weight": 40, "text": "Your champion wins, on points and a lucky parry. Captain Thrale bows, pays the stake, and invites your crew to dinner, which you decline out of nerves. They send a hamper.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"clans": 1}}},
+          {"weight": 40, "text": "Your champion wins, on points and a lucky parry. The Captain bows, pays the stake, and invites your crew to dinner, which you decline out of nerves. They send a hamper.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"clans": 1}}},
           {"weight": 60, "text": "Your champion is out-fought, in a very polite way, and is returned to you in the tube with a handshake. The Captain takes the toll, as agreed, and sends back a small tin of liniment.", "effects": {"items": {"credits": -30}, "crew_hp": -10}}
         ]},
         {"text": "Decline politely, in writing (20 credits for the paper).", "requires": {"credits": 20}, "outcomes": [
@@ -33,10 +33,10 @@
           {"weight": 100, "text": "A long silence. Then, on the comm, quite grieved: 'It is not usual.' The guns, however, come up in good order.", "effects": {"fight": "tier"}}
         ]},
         {"text": "[Quillback] Accept in person.", "requires": {"species": "quillback"}, "outcomes": [
-          {"weight": 100, "text": "Your Quillback walks into the tube with ember knife drawn and quills flared, and meets Captain Thrale in the middle. She lunges once, exactly as the book says, and comes away with a palm full of spines and a look of delighted surprise. A draw is declared in less than a minute. The Captain pays the stake out of her own pocket, invites you to dinner, and undertakes to pass the word along the Lanes.", "effects": {"items": {"credits": 60, "scrap": 20}, "rep": {"clans": 2}}}
+          {"weight": 100, "text": "Your Quillback walks into the tube with ember knife drawn and quills flared, and meets the Captain in the middle. She lunges once, exactly as the book says, and comes away with a palm full of spines and a look of delighted surprise. A draw is declared in less than a minute. The Captain pays the stake out of her own pocket, invites you to dinner, and undertakes to pass the word along the Lanes.", "effects": {"items": {"credits": 60, "scrap": 20}, "rep": {"clans": 2}}}
         ]}
       ],
-      "after_win": {"text": "The Point of Honour hauls down her colours with a flourish and sends a launch across with the stake and a note: 'We were beaten, and very well. Please accept our compliments.' It is, for pirates, remarkable manners.", "effects": {"items": {"credits": 35, "scrap": 30}, "rep": {"clans": 1}}}
+      "after_win": {"text": "The ship hauls down her colours with a flourish and sends a launch across with the stake and a note: 'We were beaten, and very well. Please accept our compliments.' It is, for pirates, remarkable manners.", "effects": {"items": {"credits": 35, "scrap": 30}, "rep": {"clans": 1}}}
     },
     {
       "id": "quillback_unyielding", "type": "wreck_field", "weight": 7, "once": false, "requires": {"jumps_min": 2},

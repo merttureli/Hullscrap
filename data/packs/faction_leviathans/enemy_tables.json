@@ -20,7 +20,7 @@
 			],
 			"crew": {
 				"species": ["sporeling", "mire"],
-				"names": ["Barnacle", "Remora", "Krill", "Plankton", "Limpet", "Cilia", "Polyp", "Sargasso"]
+				"names": ["Barnacle", "Remora", "Krill", "Plankton", "Limpet", "Cilia", "Polyp", "Sargasso", "Anemone", "Kelp"]
 			},
 			"ai": {"morale": "hollow", "aim_skill": [0.8, 1.0], "rammer": 0.0},
 			"weights": {"weapons": 3, "armour": 5, "shield": 2, "engine": 2, "crew": 1, "skill": 3, "systems": 1},
