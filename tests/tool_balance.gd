@@ -271,8 +271,9 @@ func apply_kit(ship: Ship, key: String) -> String:
 	for id in ship.inventory.counts:
 		if ship.components.has(str(id)) and str(ship.components.def(str(id)).get("family", "")) == "shield":
 			shield = str(id)
-	if shield == "":
-		return "no shield generator in the hold"
+	if shield == "":  # the starters no longer carry a spare one (playtest 2, P3): the kit brings a Mk1
+		shield = "shield_mk1"
+		ship.inventory.add(shield, 1)
 	for id in KIT_STOCK:
 		ship.inventory.add(id, KIT_STOCK[id])
 	for id in KIT_PARTS:

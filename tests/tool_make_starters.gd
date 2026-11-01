@@ -30,6 +30,8 @@ const HullOutline = preload("res://scripts/ship/hull_outline.gd")
 
 const GRID := Vector2i(63, 63)
 const MARGIN := 2
+const MAX_FILL := 0.84  ## a grown frame stays a silhouette: its cells over its box (tests/test_starter_ships.gd wants under 85%)
+const FRAME_GROWTH := 0.15  ## P4: a starter's frame is grown by about this share of its area (the built core stays as it is)
 const OUT_DIR := "res://data/ships/"
 const SIDES: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
 ## Who starts aboard: the soldier alone (playtest 2, A1). Ada is found in a distress pod (data/packs/start_alone), the rest are hired or met.
@@ -172,6 +174,65 @@ func _pirate() -> Dictionary:
 
 # --- building ------------------------------------------------------------------------------------------
 
+## The frame `cells` (Vector2i -> true) grown by about FRAME_GROWTH of its area, without changing its look: up to three dilations, each
+## one cell wide, sideways (x), lengthways (y), all four ways (r4) or all eight (r8), the mix whose area is nearest the goal and
+## that still fits the grid. The grown frame may start at negative coordinates: the core keeps its own.
+func _grow_frame(cells: Dictionary, who: String) -> Dictionary:
+	var goal := float(cells.size()) * (1.0 + FRAME_GROWTH)
+	var best: Dictionary = cells
+	var best_err := INF
+	var best_ops := []
+	var ops: Array[String] = ["x", "y", "r4", "r8"]
+	var plans := [[]]
+	for a in ops:
+		plans.append([a])
+		for b in ops:
+			if ops.find(b) >= ops.find(a):
+				plans.append([a, b])
+				for d in ops:
+					if ops.find(d) >= ops.find(b):
+						plans.append([a, b, d])
+	for plan in plans:
+		if plan.is_empty():
+			continue
+		var grown := cells
+		for op in plan:
+			grown = _dilate(grown, op)
+			if grown.size() > goal * 1.25:
+				break
+		var lo := Vector2i(1 << 20, 1 << 20)
+		var hi := Vector2i(-(1 << 20), -(1 << 20))
+		for c in grown:
+			lo = lo.min(c)
+			hi = hi.max(c)
+		var err: float = absf(float(grown.size()) - goal) + 0.5 * plan.size()
+		var fill := float(grown.size()) / float((hi.x - lo.x + 1) * (hi.y - lo.y + 1))
+		if hi.x - lo.x + 1 <= GRID.x and hi.y - lo.y + 1 <= GRID.y and fill <= MAX_FILL and err < best_err:
+			best = grown
+			best_err = err
+			best_ops = plan
+	if best == cells:
+		_fail(who + ": the frame cannot grow and still fit the grid")
+	print("%s: frame %d -> %d cells (+%.0f%%) by %s" % [who, cells.size(), best.size(), 100.0 * (float(best.size()) / cells.size() - 1.0), str(best_ops)])
+	return best
+
+
+## `cells` with every cell's neighbours added: "x" left and right, "y" up and down, "r4" both, "r8" the eight round it.
+func _dilate(cells: Dictionary, op: String) -> Dictionary:
+	var steps: Array[Vector2i] = []
+	for dy in [-1, 0, 1]:
+		for dx in [-1, 0, 1]:
+			var diag: bool = dx != 0 and dy != 0
+			if (dx == 0 and dy == 0) or (op == "x" and dy != 0) or (op == "y" and dx != 0) or (op == "r4" and diag):
+				continue
+			steps.append(Vector2i(dx, dy))
+	var out := cells.duplicate()
+	for c in cells:
+		for st in steps:
+			out[c + st] = true
+	return out
+
+
 ## A starter is authored in the local coordinates of its built core and carries "at": [x, y], where the core
 ## sits in the frame. Returns the spec with the outline, bulkheads, doors and parts moved there.
 func _placed(spec: Dictionary) -> Dictionary:
@@ -216,6 +277,13 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 			fhi = fhi.max(c)
 		if flo != Vector2i.ZERO:
 			_fail("%s: the frame starts at %s, not 0,0" % [name, str(flo)])
+		spec["frame_was"] = frame.size()
+		frame = _grow_frame(frame, name)  # P4: a little more empty hull to build in
+		flo = Vector2i(1 << 20, 1 << 20)
+		fhi = Vector2i(-(1 << 20), -(1 << 20))
+		for c in frame:
+			flo = flo.min(c)
+			fhi = fhi.max(c)
 	var plate_of: Callable = spec["plate"] if spec["plate"] is Callable else func(_c): return spec["plate"]  # a tile id, or a Callable(cell) -> the tile id of that cell
 	var skin := HullOutline.layers(ras["cells"], func(c): return plate_of.call(c) if spec["plated"].call(c) else "", func(c): return plate_of.call(c) if spec.has("thick") and spec["thick"].call(c) else "", spec.get("backed", Callable()))
 	var lo := Vector2i(1 << 20, 1 << 20)
@@ -570,7 +638,7 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 			empty += int(g.get_tile(c) == "" and ship.components.at_out(c) < 0)
 		print("   frame %d cells%s, %d tiles, %d components, empty %d = %.0f%%" % [
 			g.hull.size(), " (%.2fx the old hull of %d)" % [float(g.hull.size()) / spec["was_hull"], spec["was_hull"]] if spec.has("was_hull") else "", g.tiles.size(), ship.components.instances.size(), empty, 100.0 * empty / g.hull.size()])
-		print("ROW %s|%s|%d|%d|%d|%.0f" % [spec["file"], str(spec.get("hangar", {}).get("group", "")) + " " + str(spec.get("hangar", {}).get("layout", "")), co.hull_max, ship.components.instances.size(), g.hull.size(), 100.0 * empty / g.hull.size()])
+		print("ROW %s|%s|%d|%d|%d|%.0f|%d" % [spec["file"], str(spec.get("hangar", {}).get("group", "")) + " " + str(spec.get("hangar", {}).get("layout", "")), co.hull_max, ship.components.instances.size(), g.hull.size(), 100.0 * empty / g.hull.size(), int(spec.get("frame_was", 0))])
 	if spec.has("frame"):
 		_check_loadout(spec, ship)
 	var pockets := HullOutline.pockets(ship)

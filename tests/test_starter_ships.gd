@@ -30,12 +30,12 @@ const PATHS := {
 const PIRATE := "res://data/ships/pirate_raider.json"
 const MAX_COVER := 3  ## tiles between a gun and open space: a wall, a plate, one more at most
 const OLD_HULL := {"Rustbucket": 1122, "Courier": 864, "Prism": 624}  ## cells of the hull of the starters before the big frames (the bounding box plus 2)
-const MIN_GROWTH := 1.6  ## the frame is about 1.6 to 2 times as big as that
-const MAX_GROWTH := 2.0
+const MIN_GROWTH := 1.8  ## the frame is about 1.8 to 2.3 times as big as that (1.6 to 2 before the frames grew by 15%: playtest 2, P4)
+const MAX_GROWTH := 2.3
 const MAX_FILL := 0.85  ## the frame's cells over the cells of its box: a silhouette, not a rectangle (test_ship_silhouettes.gd)
 const MIN_SHAPED := 4  ## slopes or curves on the built hull
-const MIN_FRAME := 1000  ## cells of the hull frame: a lot of room (the first three have 1100 to 1850)
-const MAX_FRAME := 2300
+const MIN_FRAME := 1000  ## cells of the hull frame: a lot of room (the first three have 1250 to 2150)
+const MAX_FRAME := 2500
 const MAX_PARTS := 10  ## placed components: the essentials only
 const MIN_EMPTY := 0.5  ## at least this share of the frame is empty hull (no tile, no outside half of a mount)
 const MIN_HULL_INTEGRITY := 150.0  ## every starter has real armour on its outer hull (arena.gd: 20 + 2 per plated cell)
@@ -155,7 +155,7 @@ func test_the_hull_is_a_big_frame_in_the_middle_that_holds_everything_built() ->
 		check(ship.grid.hull.size() < 0.9 * box.x * box.y, "%s: the frame is a silhouette, not a rectangle (%d of %d cells)" % [key, ship.grid.hull.size(), box.x * box.y])
 		if OLD_HULL.has(key):
 			var growth := float(ship.grid.hull.size()) / float(OLD_HULL[key])
-			check(growth >= MIN_GROWTH and growth <= MAX_GROWTH, "%s: the frame is %.2fx today's old hull (%d cells), 1.6 to 2 wanted" % [key, growth, ship.grid.hull.size()])
+			check(growth >= MIN_GROWTH and growth <= MAX_GROWTH, "%s: the frame is %.2fx today's old hull (%d cells), 1.8 to 2.3 wanted" % [key, growth, ship.grid.hull.size()])
 		check(ship.grid.hull.size() >= MIN_FRAME and ship.grid.hull.size() <= MAX_FRAME, "%s: a frame of %d cells (%d to %d wanted)" % [key, ship.grid.hull.size(), MIN_FRAME, MAX_FRAME])
 
 
