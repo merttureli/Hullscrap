@@ -4,13 +4,16 @@ extends Control
 ## (crew_abilities.gd), its icon with a ring: green when ready, filling while it cools down (the seconds left in the
 ## middle), gold and emptying while its effect runs. Clicking a card selects that crew member (a gold frame; the
 ## world shows a ring round them); clicking the ability icon selects them and uses it, like G. Cards stack up from
-## the bottom, and a second column starts to the left when the screen is full. A line above the cards says what
+## the bottom, and a second column starts to the left when the screen is full. A repair drone (R1) has a card too, with a small robot for
+## a portrait, a DRONE tag, "no power" or "broken" for what it is doing when it is idle for that, and no ability icon; clicking it selects nothing. A line above the cards says what
 ## the last use did, or why it was refused. Placeholder shapes and letters until the icons have art.
 ## Reads the crew view (crew_view.gd: ship_now(), selected, select(), use_ability()), and takes only left clicks
 ## on the cards (everything else falls through to the world; a wheel step over a card is swallowed, so it never zooms).
 
 const Art = preload("res://scripts/view/art.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
+const Jobs = preload("res://scripts/crew/jobs.gd")
+const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const CARD := Vector2(238.0, 58.0)
@@ -26,6 +29,8 @@ const TEXT := Color("#cfe6ff")
 const DIM := Color("#6b7686")
 const READY := Color("#4fd08a")
 const BAD := Color("#e0453a")
+const WARN := Color("#ffb347")
+const TAG := Color("#46e4ff")  ## the DRONE tag
 const HP_BG := Color(0.12, 0.15, 0.2)
 const FLASH_FOR := 3.0  ## seconds the line above the cards stays
 
@@ -113,12 +118,14 @@ func _gui_input(e: InputEvent) -> void:
 
 
 ## A left click at `p`: on an ability icon it selects the member and uses the ability ("use"), elsewhere on a card
-## it selects them ("select"); "" when it is not on a card.
+## it selects them ("select"); "drone" on a drone's card (nobody steers a drone: nothing is selected); "" when it is not on a card.
 func click(p: Vector2) -> String:
 	var i := card_at(p)
 	if i < 0 or view == null:
 		return ""
 	var m = _crew()[i]
+	if m.is_drone():
+		return "drone"
 	view.select(m)
 	if not CrewAbilities.of(m).is_empty() and icon_rect(card_rects(_crew().size(), _screen())[i]).has_point(p):
 		view.use_ability(m)  # the view says what happened (flash)
@@ -155,7 +162,7 @@ func _card(r: Rect2, ship, m, selected: bool) -> void:
 	draw_rect(r, GOLD if selected else (BAD if m.is_down() else EDGE), false, 2.0 if selected else 1.0)
 	var box := Rect2(r.position + Vector2(7.0, (CARD.y - PORTRAIT) / 2.0), Vector2(PORTRAIT, PORTRAIT))
 	_portrait(box, m)
-	var has_icon: bool = not CrewAbilities.of(m).is_empty()
+	var has_icon: bool = not m.is_drone() and not CrewAbilities.of(m).is_empty()
 	var text_w := CARD.x - PORTRAIT - 22.0 - (ICON + 28.0 if has_icon else 0.0)
 	var x := r.position.x + PORTRAIT + 15.0
 	draw_string(font, Vector2(x, r.position.y + 18.0), m.name + (" (you)" if m.is_player else ""), HORIZONTAL_ALIGNMENT_LEFT, text_w, 14, GOLD if selected else TEXT)
@@ -163,13 +170,22 @@ func _card(r: Rect2, ship, m, selected: bool) -> void:
 	var frac := clampf(m.hp / maxf(m.max_hp, 1.0), 0.0, 1.0)
 	draw_rect(bar, HP_BG)
 	draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, bar.size.y)), READY.lerp(BAD, 1.0 - frac))
-	draw_string(font, Vector2(x, r.position.y + 47.0), _doing(m), HORIZONTAL_ALIGNMENT_LEFT, text_w + (20.0 if has_icon else 0.0), 12, DIM if m.job.is_empty() else TEXT)  # under the G, up to the icon
+	var doing := _doing(ship, m)
+	draw_string(font, Vector2(x, r.position.y + 47.0), doing, HORIZONTAL_ALIGNMENT_LEFT, text_w + (20.0 if has_icon else 0.0), 12, WARN if Jobs.drone_status(ship, m) != "" else (DIM if m.job.is_empty() else TEXT))  # under the G, up to the icon
+	if m.is_drone():  # the DRONE tag, top right
+		var tag := Rect2(r.end.x - 50.0, r.position.y + 5.0, 44.0, 14.0)
+		draw_rect(tag, Color(TAG, 0.18))
+		draw_rect(tag, TAG, false, 1.0)
+		draw_string(font, tag.position + Vector2(0.0, 11.0), "DRONE", HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 10, TAG)
 	if has_icon:
 		_ability(icon_rect(r), CrewAbilities.card(ship, m), selected)
 
 
-## What the card says they are doing: down, stunned, their job's words, or idle.
-func _doing(m) -> String:
+## What the card says they are doing: down, stunned, their job's words, or idle. A drone says "broken" or "no power" first.
+func _doing(ship, m) -> String:
+	var drone := Jobs.drone_status(ship, m)
+	if drone != "":
+		return drone
 	if m.is_down():
 		return "down"
 	if m.is_stunned():
@@ -181,6 +197,11 @@ func _doing(m) -> String:
 ## cropped to what is drawn and fitted into `box`; a coloured disc with the initial when there is no art.
 func _portrait(box: Rect2, m) -> void:
 	draw_rect(box, Color(0.09, 0.12, 0.17))
+	if m.is_drone():  # a small robot instead of a face
+		var ship = view.ship_now() if view != null else null
+		var pose := {"aim": -0.35, "t": Time.get_ticks_msec() / 1000.0, "down": m.is_down(), "off": ship != null and not m.is_down() and Jobs.drone_status(ship, m) != ""}
+		PersonDrawer.draw_drone(self, box.get_center() + Vector2(-3.0, 3.0), pose, PORTRAIT * 0.9)
+		return
 	var sheet = Art.crew(Art.crew_rig(m.rig()))
 	var head = sheet.layers.get("head") if sheet != null else null
 	var look: Dictionary = view.look_of(m) if view != null else m.look

@@ -603,7 +603,7 @@ static func crew_in_room(co, uid: int, m: Dictionary) -> int:
 	var room: int = co.ship.atmosphere.room_at(weapon_cell(co, uid, m))
 	var n := 0
 	for c in co.ship.crew:
-		if room >= 0 and co.ship.atmosphere.room_at(c.cell()) == room and not c.is_down() and not c.is_stunned():
+		if room >= 0 and co.ship.atmosphere.room_at(c.cell()) == room and not c.is_down() and not c.is_stunned() and not c.is_drone():
 			n += 1
 	return n
 

@@ -193,6 +193,16 @@ func wreck_refund(id: String) -> Dictionary:
 	return out
 
 
+## The names of the repair drones aboard that work (not broken), sorted: they draw power with no cable (Power.feed_drones).
+func drone_names() -> Array:
+	var out := []
+	for m in crew:
+		if m.is_drone() and not m.is_down():
+			out.append(m.name)
+	out.sort()
+	return out
+
+
 ## The structure changed (tiles, doors): the next refresh() rebuilds the rooms and re-solves power.
 func mark_dirty() -> void:
 	_structure_dirty = true
@@ -210,7 +220,8 @@ func refresh() -> bool:
 	var off := disabled_uids()
 	var bonus := TraitSet.station_bonus(self)
 	var hand := CrewFx.power_bonus(self)
-	var sig := hash([uids, cables.cells.size(), off.keys(), Abilities.rev(self), bonus, hand, Abilities.crew_sig(self)])
+	var drones := drone_names()
+	var sig := hash([uids, cables.cells.size(), off.keys(), Abilities.rev(self), bonus, hand, Abilities.crew_sig(self), drones])
 	if not _structure_dirty and sig == _signature:
 		return false
 	if _structure_dirty:
@@ -221,6 +232,7 @@ func refresh() -> bool:
 	mods["bonus"] = bonus
 	mods["hand"] = hand
 	power_state = Power.solve(Stats.view(components, lines), cables, off, mods)
+	Power.feed_drones(power_state, drones, float(CrewMember.config().get("drone", {}).get("power", 1.0)))  # the drones take what the parts leave
 	_structure_dirty = false
 	_signature = sig
 	return true

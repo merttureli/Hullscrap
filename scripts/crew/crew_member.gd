@@ -49,6 +49,7 @@ var ability: Dictionary = {}  ## the active ability they carry, {id, cooldown?, 
 var ability_cd := 0.0  ## seconds until the ability may be used again (ticked by CrewAbilities.tick, so build mode pauses it)
 var character := ""  ## the unique character (data/characters.json) they are, "" for an ordinary crew member
 var head := ""  ## a head frame of their rig's art to draw instead of the usual one ("" = the usual); a character's rig.head
+var _drone := false  # the species is a repair drone (set_species)
 
 
 func _init(p_name := "", p_pos := Vector2.ZERO, p_species := "human") -> void:
@@ -95,6 +96,19 @@ func set_species(id: String) -> void:
 	hp = max_hp
 	speed = BASE_SPEED * float(def.get("speed", 1.0)) * float(t["speed_mult"])
 	body_size = int(t["body"])
+	_drone = bool(def.get("drone", false))
+
+
+## A repair drone (playtest 2, R1; species `drone: true`)? It is a body that works like crew but is not crew: leave it out of
+## crew counts, beds and morale, never steer or give it orders, and when it is at 0 hp it is broken, not dying (is_down;
+## Mortality, Jobs). What it may do: data/crew.json `drone_jobs`.
+func is_drone() -> bool:
+	return _drone
+
+
+## Is species `id` a repair drone?
+static func is_drone_species(id: String) -> bool:
+	return bool(species_def(id).get("drone", false))
 
 
 ## Every trait this person has, without repeats: their species' (data/species.json), their own

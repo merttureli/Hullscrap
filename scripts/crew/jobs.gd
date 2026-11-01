@@ -28,6 +28,8 @@ extends RefCounted
 ## breach). A crew member at a station marks it in `ship.manned` (uid -> name): a manned helm adds
 ## evasion in a fight and a manned weapon cools down faster (see evasion_bonus, cooldown_mult), and a manned
 ## smelter works faster (processing.gd; its post is on the board only while it has a queue).
+## A repair drone (CrewMember.is_drone, R1) is handed only the jobs of crew.json `drone_jobs`, and only while Power.feed_drones powers it
+## (without power it stands still); at 0 hp it is broken, not dead: a crewmate's repair_crew job (or the player's hand) mends it.
 
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
@@ -38,6 +40,7 @@ const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Processing = preload("res://scripts/craft/processing.gd")
+const Power = preload("res://scripts/sim/power.gd")
 const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
 const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
@@ -78,6 +81,8 @@ func tick(ship, dt: float, in_combat := false) -> void:
 		m.stun = maxf(m.stun - dt, 0.0)
 		if m.is_down() or m.is_player or stunned:
 			continue
+		if m.is_drone() and not Power.drone_fed(ship.power_state, m.name):
+			continue  # no power: the drone stands still
 		m.step(dt)
 		if not m.job.is_empty():
 			_do(ship, m, dt)
@@ -143,9 +148,10 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 				_finish(ship, job)
 		"repair_crew":  # mends the hurt crewmate (hp a second) until they are whole
 			var who = _find(ship, func(x): return x.name == job["who"])
-			if who != null and not who.is_down() and who.hp < who.max_hp:
+			var open: bool = who != null and (not who.is_down() or who.is_drone())  # a broken drone is mended too: above 0 hp it works again
+			if open and who.hp < who.max_hp:
 				who.heal(float(jcfg()["repair_crew"]["rate"]) * _work_rate(ship, m, "repair_crew") * dt)
-			if who == null or who.is_down() or who.hp >= who.max_hp:
+			if not open or who.hp >= who.max_hp:
 				board.erase(job["key"])
 				_since = 1.0e9
 
@@ -173,10 +179,10 @@ func build_board(ship) -> void:
 	for c in Fire.sorted_cells(ship.fires.keys()):
 		_add(b, _job("extinguish", "fire:%d,%d" % [c.x, c.y], [c], {"cell": c}))
 	for m in ship.crew:
-		if m.is_down():
+		if m.is_down() and not m.is_drone():
 			if m.revive_t < 0.0:  # one who is about to get up by themselves (revive_once) is left alone
 				_add(b, _job("revive", "revive:" + m.name, m.body_cells(), {"who": m.name}))
-		elif m.hp < m.max_hp and TraitSet.of(m)["mechanical"]:
+		elif m.hp < m.max_hp and TraitSet.of(m)["mechanical"]:  # (a broken drone is mended, not revived)
 			_add(b, _job("repair_crew", "mend:" + m.name, m.body_cells(), {"who": m.name}))
 	for c in Fire.sorted_cells(grid.breached.keys()):
 		var tile: Dictionary = grid.defs.get_def(grid.breached[c]) if grid.defs != null else {}
@@ -238,7 +244,7 @@ func order_repair(ship, uid: int) -> String:
 	var best = null
 	var best_d := 1 << 30
 	for m in ship.crew:
-		if m.is_player or m.is_down() or TraitSet.of(m)["no_tools"]:
+		if m.is_player or m.is_drone() or m.is_down() or TraitSet.of(m)["no_tools"]:  # (nobody orders a drone about)
 			continue
 		var d := absi(m.anchor().x - inst["anchor"].x) + absi(m.anchor().y - inst["anchor"].y)
 		if d < best_d:
@@ -267,7 +273,7 @@ func assign(ship) -> void:
 	for m in ship.crew:
 		if m.is_player:
 			continue
-		if m.is_down():
+		if m.is_down() or (m.is_drone() and not Power.drone_fed(ship.power_state, m.name)):  # (a drone with no power drops its work)
 			m.job = {}
 			m.path.clear()
 			continue
@@ -333,10 +339,13 @@ func _still_valid(ship, m) -> bool:
 func _pick(ship, m, claims: Dictionary, floor_p: int) -> Dictionary:
 	var open: Array = []
 	var tools: bool = not TraitSet.of(m)["no_tools"]
+	var drone_jobs: Array = CrewMember.config().get("drone_jobs", []) if m.is_drone() else []
 	for key in board:
 		var job: Dictionary = board[key]
 		if job["priority"] < floor_p or (not m.job.is_empty() and m.job["key"] == key) or _is_own(job, m) or (not tools and job["type"] in TOOL_JOBS):
 			continue
+		if m.is_drone() and not job["type"] in drone_jobs:
+			continue  # a drone takes only the jobs of crew.json drone_jobs: no station, no revive, no mending a crewmate
 		if int(claims.get(key, 0)) < int(job["slots"]):
 			open.append(job)
 	if open.is_empty():
@@ -585,9 +594,9 @@ func _health(ship, dt: float) -> void:
 		if m.is_down() and not was_down:
 			m.job = {}
 			m.path.clear()
-			ship.log_event("%s is down" % m.name)
+			ship.log_event(("%s is broken" if m.is_drone() else "%s is down") % m.name)
 		elif was_down and not m.is_down():
-			ship.log_event("%s is back on their feet" % m.name)
+			ship.log_event(("%s is working again" if m.is_drone() else "%s is back on their feet") % m.name)
 
 
 ## An idle crew member with the trait hull_mend mends what is next to their body: `rate` hp a second go to the
@@ -968,21 +977,24 @@ static func _spawn_planned(ship) -> Array:
 		var who: String = e["name"]
 		var is_player: bool = who == cfg["player"]["name"] or bool(e.get("player", false))  # a renamed soldier is marked `player` (run_start.gd)
 		var is_ada: bool = who == cfg["ada"]["name"]
+		var drone: bool = CrewMember.is_drone_species(str(e["species"]))  # a drone is no crew: it has no bed and no colours of its own
 		var nth := npc
-		if not is_player and not is_ada:
+		if not is_player and not is_ada and not drone:
 			npc += 1
 		if _find(ship, func(m): return m.name == who) != null or ship.dead_crew.has(who):
 			continue
 		var near := mid
 		var look: Dictionary = cfg["player"]["look"] if is_player else cfg["ada"]["look"]
-		if not is_player and not is_ada:
+		if drone:
+			look = {}
+		elif not is_player and not is_ada:
 			look = cfg["looks"][nth % cfg["looks"].size()]
 			if not beds.is_empty():
 				near = Pathfinder.centre_of(beds[nth % beds.size()])
 		var spot := _free_spot(grid, near, _anchors(ship))
 		if spot == Pathfinder.NO_CELL:
 			break
-		var m = _person(who, look, Pathfinder.centre_of(spot), str(e["species"]))
+		var m = _person(who, look, Pathfinder.centre_of(spot, 1) if drone else Pathfinder.centre_of(spot), str(e["species"]))
 		m.is_player = is_player
 		ship.crew.append(m)
 		out.append(m)
@@ -1023,10 +1035,58 @@ static func spawn_enemy_crew(ship) -> Array:
 	return out
 
 
+## Repair drones in the cargo (data/crew.json drone.item: a fabricator made one, a station sold one) go aboard, one small body each,
+## beside the fabricator (the middle of the ship without one). Returns the new members. One that finds no room stays in the cargo.
+static func launch_drones(ship) -> Array:
+	var cfg: Dictionary = CrewMember.config().get("drone", {})
+	var item := str(cfg.get("item", ""))
+	var out := []
+	while item != "" and ship.inventory.count(item) > 0:
+		var spot := _free_spot(ship.grid, _drone_home(ship), _anchors(ship))
+		if spot == Pathfinder.NO_CELL:
+			break
+		ship.inventory.add(item, -1)
+		var m = _person(drone_name(ship), {}, Pathfinder.centre_of(spot, 1), str(cfg.get("species", "drone")))
+		ship.crew.append(m)
+		out.append(m)
+		ship.log_event("%s is aboard" % m.name)
+	return out
+
+
+## Where a new drone appears: the first cell of the fabricator, else the middle of the grid.
+static func _drone_home(ship) -> Vector2:
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		if _family(ship, uid) == "fabricator":
+			return Pathfinder.centre_of(ship.components.instances[uid]["cells"][0])
+	return Vector2(ship.grid.size) / 2.0
+
+
+## The name of the next drone of `ship`: data/crew.json drone.name, then "<name> 2", "<name> 3" ...
+static func drone_name(ship) -> String:
+	var base := str(CrewMember.config().get("drone", {}).get("name", "Drone"))
+	for n in range(1, 100):
+		var who := base if n == 1 else "%s %d" % [base, n]
+		if _find(ship, func(m): return m.name == who) == null:
+			return who
+	return base
+
+
+## Why drone `m` is idle: "broken" (0 hp), "no power" (Power.feed_drones left it none), else "". Always "" for anyone but a drone.
+static func drone_status(ship, m) -> String:
+	if not m.is_drone():
+		return ""
+	var labels: Dictionary = CrewMember.config().get("labels", {})
+	if m.is_down():
+		return str(labels.get("drone_broken", "broken"))
+	return "" if Power.drone_fed(ship.power_state, m.name) else str(labels.get("drone_off", "no power"))
+
+
 ## A manual order (middle click): walk to `anchor` and leave the job board alone for a while.
 ## False when there is no way there.
 static func order_move(ship, m, anchor: Vector2i, door_passable: Callable = Callable()) -> bool:
-	if not m.go_to(ship.grid, anchor, door_passable):
+	if m.is_drone() or not m.go_to(ship.grid, anchor, door_passable):  # (a drone takes no orders)
 		return false
 	m.job = {}
 	m.hold = float(jcfg().get("order_hold", 8.0))

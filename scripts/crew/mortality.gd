@@ -2,7 +2,7 @@ extends RefCounted
 ## Bleeding out (docs/MECHANICS_REVIEW.md P4): a crew member at 0 hp dies after crew.json `bleed_out_s`
 ## seconds, unless a crewmate is working a revive on them right now or they lie in a room with a powered,
 ## working medbay (the timer stops, it does not reset). Back above 0 hp, the timer starts over. The player's
-## soldier never dies: they stay down. The same rule for every ship, enemies included. A dead member leaves
+## soldier never dies: they stay down, and so does a repair drone (broken, not dying: jobs.gd). The same rule for every ship, enemies included. A dead member leaves
 ## ship.crew, any station they manned and the job of anyone who was coming to save them, and their name goes
 ## on ship.dead_crew so Jobs.spawn_crew does not bring them back. Two traits change it (traits.gd):
 ## - revive_once {after, hp}: the first time they go down they do not bleed; `after` seconds later they stand up
@@ -27,7 +27,7 @@ static func bleed_out_s() -> float:
 
 ## How far gone `m` is, 0..1, for the red ring: 0 for anyone standing and for the player's soldier (who never dies).
 static func bleed_frac(m) -> float:
-	if not m.is_down() or m.is_player:
+	if not m.is_down() or m.is_player or m.is_drone():
 		return 0.0
 	return clampf(m.down_t / maxf(bleed_out_s(), 0.001), 0.0, 1.0)
 
@@ -39,7 +39,7 @@ static func tick(ship, dt: float) -> Array:
 	var limit := bleed_out_s()
 	var dying := []
 	for m in ship.crew:
-		if not m.is_down():
+		if not m.is_down() or m.is_drone():  # a drone at 0 hp is broken: it lies there and does not bleed out (a crewmate mends it)
 			m.down_t = 0.0
 			m.revive_t = -1.0
 		elif _rising(m, dt, lines):

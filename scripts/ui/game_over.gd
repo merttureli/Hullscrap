@@ -44,7 +44,7 @@ static func stats_of(campaign, ship) -> Dictionary:
 	var alive := 0
 	if ship != null:
 		for m in ship.crew:
-			if m.hp > 0.0:
+			if m.hp > 0.0 and not m.is_drone():  # (a repair drone is no crew)
 				alive += 1
 	return {"ship": ship.name if ship != null else "?", "jumps": campaign.jumps,
 		"credits": ship.inventory.count("credits") if ship != null else 0, "debt": campaign.debt,
