@@ -69,7 +69,7 @@
       ]
     },
     {
-      "id": "ada_halcyon_page", "type": "page", "weight": 0, "requires": {},
+      "id": "ada_halcyon_page", "type": "page", "weight": 0, "requires": {}, "title": "The quiet buoy",
       "text": "'I'm from Halcyon,' says the tape. 'You've been calling it a broadcast. I called it a school with a roof that leaks over the third desk. Nobody pushed me into the pod. I scraped the name off it myself, so don't go looking.' A pause you could park a ship in. 'They did something, or they were about to. I won't say what. It might have been kind. That's the part I couldn't be in the room for.' The hiss shifts. 'The four notes are the school bell. Somebody told me once it's the old gate song with the last note put back. I thought that was a thing grown-ups said. The loop has a fifth, and it's the one you wait for, because it's late. When a fifth comes on time, don't go.' Then, closer: 'I can't give you the Reach. I can give you the fifth, and I'd like something back. Promise me nobody hears where it is from you.'",
       "choices": [
         {"text": "Give her your word.", "outcomes": [
