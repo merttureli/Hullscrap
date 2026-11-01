@@ -272,7 +272,7 @@ static func component_problems(c: Dictionary, who_ids: Array = [], trait_ids: Ar
 		out.append("stats.malfunction_per_min must be a chance from 0 to 1 per minute, not '%s'" % str(m))
 	var rc = c.get("stats", {}).get("recharge") if c.get("stats") is Dictionary else null
 	if rc != null and not (_num(rc) and float(rc) > 0.0):
-		out.append("stats.recharge must be the seconds a used layer takes to come back (2.0 is normal), above 0, not '%s'" % str(rc))
+		out.append("stats.recharge must be the seconds a used layer takes to come back (7.0 is normal), above 0, not '%s'" % str(rc))
 	var list = c.get("abilities", [])
 	if not list is Array:
 		return out

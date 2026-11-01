@@ -248,6 +248,7 @@ func test_a_laser_bounces_once_and_can_hit_its_own_ship() -> void:
 	_mirrors()
 	var uid := arena.add_mount(0, "laser_mk1", Vector2(20.5, 15.5))
 	arena.weapons.defs["laser_mk1"]["range"] = 4000
+	arena.weapons.defs["laser_mk1"]["damage"] = 2  # pinned at 2: these tests are about the damage rules, not the balance numbers
 	check(arena.fire(0, uid, Vector2(3000.0, 0.0)), "fires")
 	eq(_events("deflect", 1).size(), 1, "reflected off the target's face")
 	eq(_events("deflect", 0).size(), 1, "and met the shooter's own plate: its roll is made")
@@ -270,6 +271,7 @@ func test_a_laser_that_bounces_into_its_own_wall_hurts_it_for_half() -> void:
 	arena.add_ship(target, Vector2(1500.0, 0.0))
 	var uid := arena.add_mount(0, "laser_mk1", Vector2(20.5, 15.5))
 	arena.weapons.defs["laser_mk1"]["range"] = 4000
+	arena.weapons.defs["laser_mk1"]["damage"] = 2  # pinned at 2: these tests are about the damage rules, not the balance numbers
 	check(arena.fire(0, uid, Vector2(3000.0, 0.0)), "fires")
 	var hits := _events("hit", 0)
 	eq(hits.size(), 1, "the bounced beam hits the shooter")

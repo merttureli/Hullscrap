@@ -32,6 +32,7 @@ func _duel(seed_value := 1) -> void:
 	arena.add_ship(_ship())
 	target = _ship()
 	gun = arena.add_mount(0, "laser_mk1", Vector2(20.5, 15.5))
+	arena.weapons.defs["laser_mk1"]["damage"] = 2  # pinned at 2: these tests are about the damage rules, not the balance numbers
 
 
 func _join() -> void:

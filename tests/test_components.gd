@@ -8,6 +8,7 @@ const Weapons = preload("res://scripts/combat/weapons.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
+const Abilities = preload("res://scripts/sim/abilities.gd")
 const PartEffects = preload("res://scripts/sim/part_effects.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 
@@ -32,6 +33,7 @@ const WEAPON_PACK := {
 	"breach_harpoon": ["standard", 2, [4, 2], "bolt", "kinetic"],
 }
 const SHIELD_SECTORS: Array[int] = [1, 2, 4, 8]
+const SHIELD_RECHARGE := {"shield_mk1": 7.0, "shield_scrap_mk1": 8.0, "shield_mk2": 5.5, "shield_neon_mk1": 4.0, "mirror_veil": 6.0, "sovereign_aegis": 4.5, "sporeling_mycelium_shield": 3.7}  ## stats.recharge (s a layer) of the parts that are not just their tier's number
 const UNIQUES: Array[String] = ["leech_laser", "breach_harpoon", "mirror_veil", "afterburner"]
 
 
@@ -389,10 +391,10 @@ func test_the_weapon_pack() -> void:
 		check(str(d.get("blurb", "")) != "", id + " has a blurb")
 		eq([w.defs[id]["kind"], w.defs[id]["damage_type"]], [want[3], want[4]], id + " kind and damage type")
 	eq(c.def("rattle_burst_scrap")["name"], "Rattle Burst", "name")
-	eq(w.def("rattle_burst_scrap")["shots"], 3, "Rattle Burst fires three shots")
+	eq([int(w.def("rattle_burst_scrap")["shots"]), w.defs["rattle_burst_scrap"]["rapid"]], [1, true], "Rattle Burst is the rapid tier-1 turret: a shot at a time")
 	check(float(w.def("rattle_burst_scrap")["jam_chance"]) > 0.0, "Rattle Burst jams")
 	eq(w.def("shrapnel_cannon_scrap")["shots"], 5, "Shrapnel Cannon fires five projectiles")
-	eq(w.def("shrapnel_cannon_scrap")["damage"], 1, "of 1 damage each")
+	eq(w.def("shrapnel_cannon_scrap")["damage"], 1.5, "of 1.5 damage each")
 	eq(w.def("pulse_mk1")["speed"], 700, "pulses are projectiles with a speed")
 	check(w.def("pulse_mk2")["damage"] > w.def("pulse_mk1")["damage"] and w.def("pulse_mk2")["cooldown"] < w.def("pulse_mk1")["cooldown"], "Pulse Mk2 hits harder and faster")
 	check(w.def("artemis_mk1")["pass_shields"] and w.def("artemis_mk1")["splash"] > 0, "the Artemis passes shields and splashes")
@@ -414,7 +416,11 @@ func test_shields_have_layers_and_recharge() -> void:
 			continue
 		n += 1
 		check(int(d["stats"].get("layers", 0)) >= 1, id + " has at least one layer")
-		check(float(d["stats"].get("recharge", 2.0)) > 0.0, id + " recharge is positive")
+		check(float(d["stats"].get("recharge", 0.0)) > 0.0, id + " has a positive recharge time")
+		if not SHIELD_RECHARGE.has(id):  # the rest follow the tier table of data/weapons.json (x its neon factor on the neon line)
+			var cfg: Dictionary = Abilities.shield_config()
+			var want := float(cfg["tier_recharge"][str(int(d["tier"]))]) * (float(cfg["neon_mult"]) if d["line"] == "neon" else 1.0)
+			check(absf(float(d["stats"].get("recharge", 0.0)) - want) < 0.05, "%s recharges in %s s (tier %d%s)" % [id, str(want), int(d["tier"]), ", neon" if d["line"] == "neon" else ""])
 		var sectors = d["stats"].get("sectors")
 		check(sectors != null and sectors == int(sectors) and int(sectors) in SHIELD_SECTORS, "%s sectors %s is an integer in 1, 2, 4 or 8" % [id, str(sectors)])
 	check(n >= 5, "at least five shields")
@@ -423,8 +429,10 @@ func test_shields_have_layers_and_recharge() -> void:
 	eq([c.def("shield_scrap_mk1")["name"], c.def("shield_scrap_mk1")["line"], int(c.def("shield_scrap_mk1")["stats"]["layers"])], ["Bubble Rig", "scrap", 1], "Bubble Rig")
 	eq([c.def("shield_mk2")["line"], c.def("shield_mk2")["tier"], int(c.def("shield_mk2")["stats"]["layers"])], ["standard", 2, 2], "Shield Mk2")
 	var neon := c.def("shield_neon_mk1")
-	eq([neon["name"], neon["line"], int(neon["stats"]["layers"]), neon["stats"]["recharge"]], ["Neon Lattice Shield", "neon", 2, 1.4], "Neon Lattice Shield")
-	check(neon["stats"]["recharge"] < 2.0, "the neon shield recharges faster than the default")
+	eq([neon["name"], neon["line"], int(neon["stats"]["layers"]), neon["stats"]["recharge"]], ["Neon Lattice Shield", "neon", 2, 4.0], "Neon Lattice Shield")
+	check(neon["stats"]["recharge"] < c.def("shield_mk1")["stats"]["recharge"], "the neon shield recharges faster than the Mk1")
+	for id in SHIELD_RECHARGE:
+		eq(float(c.def(id)["stats"]["recharge"]), float(SHIELD_RECHARGE[id]), id + " recharge")
 	check(Stats.load_lines()["neon"]["ion_vulnerability"] > 1.0, "and is ion-weak through its line")
 	var veil := c.def("mirror_veil")
 	eq([int(veil["stats"]["layers"]), veil["effects"]], [1, ["reflect_bolts_15"]], "Mirror Veil")

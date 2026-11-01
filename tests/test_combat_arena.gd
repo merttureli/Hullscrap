@@ -146,17 +146,17 @@ func test_a_mount_added_with_a_direction_points_that_way() -> void:
 func test_cooldown_is_respected() -> void:
 	var a := Arena.new()
 	var i := a.add_ship(_ship())
-	var uid := a.add_mount(i, "laser_mk1", Vector2(20.5, 15.5))  # cooldown 1.2 s
+	var uid := a.add_mount(i, "laser_mk1", Vector2(20.5, 15.5))  # cooldown 2.1 s
 	var aim := Vector2(1000.0, 0.0)
 	check(a.fire(i, uid, aim), "first shot")
 	eq(a.weapons.can_fire(a, i, uid, aim), "cooling down", "right away")
-	near(a.cooldown_left(i, uid), 1.2, "full cooldown", 1e-3)
-	a.step(1.0)
-	check(not a.fire(i, uid, aim), "still cooling after 1.0 s")
+	near(a.cooldown_left(i, uid), 2.1, "full cooldown", 1e-3)
+	a.step(1.9)
+	check(not a.fire(i, uid, aim), "still cooling after 1.9 s")
 	a.step(0.1)
-	check(not a.fire(i, uid, aim), "still cooling after 1.1 s")
+	check(not a.fire(i, uid, aim), "still cooling after 2.0 s")
 	a.step(0.11)
-	check(a.fire(i, uid, aim), "ready after 1.2 s")
+	check(a.fire(i, uid, aim), "ready after 2.1 s")
 	eq(_count(a, "shot"), 2, "two shots logged")
 
 
@@ -254,7 +254,7 @@ func test_hull_integrity_counts_armour_and_wrecks_the_ship() -> void:
 	var small := b.add_mount(shooter, "laser_mk1", Vector2(20.5, 15.5))
 	eq(b.ships[target].hull_max, 20.0, "plain steel adds nothing")
 	check(b.fire(shooter, small, Vector2(2000.0, 0.0)), "a small laser first")
-	eq(b.ships[target].hull, 18.0, "2 damage dealt to a wall")
+	eq(b.ships[target].hull, 17.0, "3 damage dealt to a wall")
 	check(not b.ships[target].wrecked, "still flying")
 	b.ships[shooter].cooldowns.clear()
 	check(b.fire(shooter, lance, Vector2(2000.0, 0.0)), "then the lance")

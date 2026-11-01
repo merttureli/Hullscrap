@@ -192,7 +192,7 @@ func test_the_selection_card_shows_the_stats_of_the_selected_def() -> void:
 	rows = {}
 	for r in b.hud.card.info()["rows"]:
 		rows[r[0]] = r[1]
-	eq([rows.get("Damage"), rows.get("Cooldown"), rows.get("Aim")], ["2 energy", "1.2 s", "fixed, 5 deg gimbal"], "a weapon's damage, cooldown and aim")
+	eq([rows.get("Damage"), rows.get("Cooldown"), rows.get("Aim")], ["3 energy", "2.1 s", "fixed, 5 deg gimbal"], "a weapon's damage, cooldown and aim")
 	b.pick(Palette.part_entry(b.ship, "shield_mk1"))
 	inf = b.hud.card.info()
 	check(inf["rows"].has(["Layers", "1"]), "a shield's layers")

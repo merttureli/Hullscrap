@@ -926,9 +926,9 @@ func gen_spec(entry: String, kind: String, roller: RandomNumberGenerator = null)
 	var p := entry.trim_prefix(Shipgen.PREFIX).split(":")
 	var faction := p[0] if p[0] != "" else Shipgen.faction_for(region_data, kind)
 	var difficulty := str(cfg.get("difficulty", "normal"))
-	var budget := maxf(Shipgen.budget_for(tier(), jumps, Shipgen.danger_of(region_data), difficulty), Shipgen.budget_floor(faction, difficulty))
+	var budget := maxf(Shipgen.budget_for(tier(), jumps, Shipgen.danger_of(region_data), difficulty, stage), Shipgen.budget_floor(faction, difficulty))
 	budget *= Shipgen.budget_mult(faction, r)  # a rare faction (CONTENT 18) fights far above the stage, from the first jump on; the others roll nothing here
-	return Shipgen.spec(faction, Shipgen.at_least(faction, Shipgen.pick_size(budget, r)), r.randi(), budget, p.has("ram"))
+	return Shipgen.spec(faction, Shipgen.at_least(faction, Shipgen.pick_size(budget, r)), r.randi(), budget, p.has("ram"), stage)
 
 
 ## The fight is over. `res` is {state, hull, hull_max, enemy (its Ship)}, plus `offer` ({item: count}) when

@@ -120,6 +120,7 @@ func test_open_doors_let_shots_pass_and_closed_ones_block() -> void:
 	s.grid.force_tile(Vector2i(8, 15), "wall")
 	var t := a.add_ship(s, Vector2(800.0, 0.0))
 	var gun := a.add_mount(gun_ship, "laser_mk1", Vector2(20.5, 15.5))
+	a.weapons.defs["laser_mk1"]["damage"] = 2  # pinned at 2: these tests are about the damage rules, not the balance numbers
 	var aim := Vector2(2000.0, 0.0)
 	a.ships[gun_ship].cooldowns.clear()
 	check(a.fire(gun_ship, gun, aim), "fired")

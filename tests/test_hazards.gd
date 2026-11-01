@@ -2,6 +2,7 @@ extends "res://tests/base_test.gd"
 ## Sector hazards (scripts/combat/hazards.gd): the roll, the five effects in an arena, the map and HUD texts, and that a
 ## fight with no hazard is unchanged.
 
+const Abilities = preload("res://scripts/sim/abilities.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
@@ -174,7 +175,7 @@ func _recharge_seconds(hazard: Dictionary) -> float:
 	Shields.absorb(a, 0, {"damage_type": "energy"}, Vector2.ZERO, Vector2.UP, 0)
 	check(co.layers < full, "the hit used a layer")
 	var t := 0.0
-	while co.layers < full and t < 12.0:
+	while co.layers < full and t < 40.0:
 		a.step(0.05)
 		t += 0.05
 	return t
@@ -183,7 +184,8 @@ func _recharge_seconds(hazard: Dictionary) -> float:
 func test_ion_storm_halves_the_shield_recharge() -> void:
 	var normal := _recharge_seconds({})
 	var storm := _recharge_seconds({"id": "ion_storm", "dir": 0.0})
-	check(absf(normal - Shields.RECHARGE) < 0.15, "a layer takes about %s s to come back (%s)" % [Shields.RECHARGE, normal])
+	var base: float = Abilities.shield_base() + Abilities.shield_break_delay()  # the one layer is the sector's last: 3 s more
+	check(absf(normal - base) < 0.15, "a layer takes about %s s to come back (%s)" % [base, normal])
 	check(absf(storm - 2.0 * normal) < 0.2, "in an ion storm twice as long (%s vs %s)" % [storm, normal])
 	var a := _arena({"id": "ion_storm", "dir": 0.0})
 	eq(Hazards.recharge_mult(a), 0.5, "the factor")

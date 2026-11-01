@@ -113,7 +113,7 @@ func test_a_rare_faction_is_built_far_above_the_stage() -> void:
 				var spec := c.gen_spec("gen:" + faction, "pirate")
 				var p := spec.trim_prefix("gen:").split(":")
 				var budget := float(p[3]) / 100.0
-				var stage_budget := maxf(Shipgen.budget_for(c.tier(), jumps, Shipgen.danger_of(c.region_data)), float(f["budget_floor"]))
+				var stage_budget := maxf(Shipgen.budget_for(c.tier(), jumps, Shipgen.danger_of(c.region_data), "normal", c.stage), float(f["budget_floor"]))
 				var where := "%s at jump %d (seed %d)" % [faction, jumps, seed_value]
 				check(budget >= stage_budget * float(f["budget_mult"][0]) - 0.01 and budget <= stage_budget * float(f["budget_mult"][1]) + 0.01,
 					"%s: budget %.1f is %s-%s times the stage's %.1f" % [where, budget, str(f["budget_mult"][0]), str(f["budget_mult"][1]), stage_budget])
@@ -130,7 +130,7 @@ func test_a_rare_faction_is_built_far_above_the_stage() -> void:
 	near(Shipgen.budget_mult("rustfangs", rng), 1.0, "a plain faction has no budget factor", 0.0001)
 	eq(rng.state, state, "and asking for it rolls nothing")
 	var c := _camp("clan_space", 1, 6)
-	near(float(c.gen_spec("gen:rustfangs", "pirate").trim_prefix("gen:").split(":")[3]) / 100.0, Shipgen.budget_for(c.tier(), 6, 1.0), "a Rustfang fight is the stage's budget")
+	near(float(c.gen_spec("gen:rustfangs", "pirate").trim_prefix("gen:").split(":")[3]) / 100.0, Shipgen.budget_for(c.tier(), 6, 1.0, "normal", c.stage), "a Rustfang fight is the stage's budget")
 	eq(Shipgen.at_least("rustfangs", "small"), "small", "no minimum hull for the others")
 	eq(Shipgen.at_least("barons", "small"), "medium", "Barons are medium at least")
 	eq(Shipgen.at_least("leviathans", "medium"), "large", "Leviathans are large")

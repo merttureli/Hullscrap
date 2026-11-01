@@ -35,7 +35,7 @@ const KEYS: Array[String] = ["engine", "shield", "utility"]  ## the combat keys:
 const EFFECTS: Array[String] = PartEffects.EFFECTS  ## the keys of an ability's `effects` that something reads
 const SIDE_EFFECTS: Array[String] = PartEffects.SIDE_EFFECTS  ## the `type`s of its `side_effects`
 const EPS := 1e-9
-const DEFAULT_RECHARGE := 2.0  ## seconds a used shield layer takes to come back: Shields.RECHARGE, which a part's stats.recharge scales
+const WEAPONS_PATH := "res://data/weapons.json"  ## its `shields` block: recharge (s a used layer takes), break_delay (s more once a sector is emptied), tier_recharge and neon_mult (the numbers a pack's shield follows)
 const MIN_RECHARGE := 0.05  ## the quickest a stats.recharge can count
 const ION_LOCK_S := 3.0  ## seconds an ion hit shuts a part down, times its line's ion_vulnerability (Shields.ION_LOCK is the same for the bubble)
 
@@ -357,6 +357,28 @@ static func turn_mult(ship) -> float:
 	return f
 
 
+static var _shield_cfg := {}  # the `shields` block of data/weapons.json, read on first use
+
+
+## The `shields` block of data/weapons.json (read once).
+static func shield_config() -> Dictionary:
+	if _shield_cfg.is_empty():
+		var data = JSON.parse_string(FileAccess.get_file_as_string(WEAPONS_PATH))
+		if data is Dictionary and data.get("shields") is Dictionary:
+			_shield_cfg = data["shields"]
+	return _shield_cfg
+
+
+## Seconds a used shield layer takes to come back at normal speed (a part's stats.recharge scales it).
+static func shield_base() -> float:
+	return float(shield_config().get("recharge", 7.0))
+
+
+## Seconds more the first layer of a sector waits when the sector's last whole layer was used.
+static func shield_break_delay() -> float:
+	return float(shield_config().get("break_delay", 3.0))
+
+
 ## The layers shield part `uid` gives (called by Shields.layers_of_ship for a powered part): `base`, its stats.layers,
 ## with its crew_needed shield_layer factors and its crew_bonus and heat_above layers (part_effects.gd).
 static func part_layers(ship, uid: int, base: int) -> int:
@@ -369,8 +391,8 @@ static func part_layers(ship, uid: int, base: int) -> int:
 
 
 ## How fast the used layers of the shield come back, 1 being normal: the layers-weighted mean over the powered
-## shield parts of their own speed, DEFAULT_RECHARGE / stats.recharge (2.0 s is normal, the Neon shield's 1.4 is
-## 1.43 times as fast), times their crew_needed recharge factors (a part with the crew it needs, or with none, counts 1).
+## shield parts of their own speed, shield_base() / stats.recharge (7.0 s is normal, the Neon shield's 4 is
+## 1.75 times as fast), times their crew_needed recharge factors (a part with the crew it needs, or with none, counts 1).
 static func recharge_rate(ship, powered: Dictionary) -> float:
 	var weight := 0.0
 	var sum := 0.0
@@ -380,7 +402,7 @@ static func recharge_rate(ship, powered: Dictionary) -> float:
 			continue
 		var stats: Dictionary = def.get("stats", {})
 		var layers := float(stats.get("layers", 0))
-		var f := DEFAULT_RECHARGE / maxf(float(stats.get("recharge", DEFAULT_RECHARGE)), MIN_RECHARGE)
+		var f := shield_base() / maxf(float(stats.get("recharge", shield_base())), MIN_RECHARGE)
 		for a in _live(ship, uid):
 			for cn in PartEffects.entries(a.get("effects", {}).get("crew_needed")):
 				if cn.get("stat") == "recharge":

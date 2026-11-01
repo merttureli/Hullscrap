@@ -69,4 +69,5 @@ func test_the_threat_cuts_are_the_measured_ones() -> void:
 		check(int(weak["skulls"]) <= 2, "%s at jump 5 (budget %d): %d skulls, ratio %.2f" % [f, early, weak["skulls"], weak["ratio"]])
 	for f in ["clans", "rustfangs", "concord"]:  # (a Lumen ship spends its budget on shields and its reactor: a softer late threat)
 		var strong := Threat.rate(Shipgen.build(f, "large", 256, late), courier)
-		check(int(strong["skulls"]) >= 4, "%s at jump 35 (budget %d): %d skulls, ratio %.2f" % [f, late, strong["skulls"], strong["ratio"]])
+		var least := 3 if f == "clans" else 4  # (a Clans ship carries rapid turrets now, whose shots are light: three skulls, a hard fight still)
+		check(int(strong["skulls"]) >= least, "%s at jump 35 (budget %d): %d skulls, ratio %.2f" % [f, late, strong["skulls"], strong["ratio"]])

@@ -41,7 +41,7 @@ func _ready_in(s: Session, uid: int, seconds: float) -> void:
 func test_the_numbers_are_in_the_data_file() -> void:
 	var cfg := Intent.config()
 	near(float(cfg["warn_s"]), 1.5, "warns 1.5 s ahead")
-	near(float(cfg["heavy_damage"]), 3.0, "heavy from damage 3")
+	near(float(cfg["heavy_damage"]), 4.5, "heavy from damage 4.5 (3 before the guns hit 1.5 times as hard)")
 	near(float(cfg["hold_s"]), 0.5, "a target is held 0.5 s")
 	near(float(cfg["min_cooldown"]), 3.0, "a warned gun takes at least 3 s to reload")
 	eq(cfg["heavy_kinds"], ["missile", "beam"], "missiles and beams are heavy")

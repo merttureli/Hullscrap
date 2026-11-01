@@ -85,7 +85,7 @@ func test_the_weapon_bar_states() -> void:
 	s.fire_slot(1, ahead)
 	st = s.slot_state(uid, ahead)
 	eq(st["status"], "cooling down", "just fired")
-	check(st["cooldown_left"] > 1.0 and st["cooldown"] == 1.2, "with the cooldown counting: %s" % str(st))
+	check(st["cooldown_left"] > 1.0 and st["cooldown"] == 2.1, "with the cooldown counting: %s" % str(st))
 	eq(s.slot_state(uid, Vector2(0.0, 1500.0))["in_arc"], false, "the cone is still out of reach while it cools")
 	arena.ships[Session.PLAYER].ship.components.instances[uid]["status"] = "malfunction"
 	eq(s.slot_state(uid, ahead)["status"], "malfunction", "a jammed gun")

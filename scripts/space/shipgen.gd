@@ -100,10 +100,16 @@ static func factions() -> Array:
 
 # --- budget, size, faction, spec -----------------------------------------------------------------
 
-## The budget of a fight (docs/CONTENT.md 14): tier base x (1 + 0.04 x jumps) x the region's danger x the difficulty.
-static func budget_for(tier: int, jumps: int, danger: float, difficulty := "normal") -> float:
+## The budget of a fight (docs/CONTENT.md 14): tier base x (1 + 0.04 x jumps) x the region's danger x the difficulty x the run
+## stage's `stage_mult` (stages 1 to 3 fight with 70% of it; `stage` 0 or a later one: 1).
+static func budget_for(tier: int, jumps: int, danger: float, difficulty := "normal", stage := 0) -> float:
 	var b: Dictionary = tables()["budget"]
-	return float(b["tier_base"][str(clampi(tier, 1, 3))]) * (1.0 + float(b["per_jump"]) * jumps) * danger * float(b["difficulty"].get(difficulty, 1.0))
+	return float(b["tier_base"][str(clampi(tier, 1, 3))]) * (1.0 + float(b["per_jump"]) * jumps) * danger * float(b["difficulty"].get(difficulty, 1.0)) * float(b.get("stage_mult", {}).get(str(stage), 1.0))
+
+
+## The most likely an enemy of run stage `stage` (1 to 8; 0 = unknown) is to carry a shield: `shield_cap` of the budget table, 1 for the later stages.
+static func shield_cap(stage: int) -> float:
+	return float(tables()["budget"].get("shield_cap", {}).get(str(stage), 1.0))
 
 
 ## The danger of a region (`region` is its data, data/regions/*.json: the `danger` field; 1.0 for {}).
@@ -149,8 +155,8 @@ static func at_least(faction: String, size: String) -> String:
 	return size if order.find(size) >= order.find(want) else want
 
 
-static func spec(faction: String, size: String, seed_value: int, budget: float, ram := false) -> String:
-	return "%s%s:%s:%d:%d%s" % [PREFIX, faction, size, seed_value, roundi(budget * 100.0), ":ram" if ram else ""]
+static func spec(faction: String, size: String, seed_value: int, budget: float, ram := false, stage := 0) -> String:
+	return "%s%s:%s:%d:%d%s%s" % [PREFIX, faction, size, seed_value, roundi(budget * 100.0), ":s%d" % stage if shield_cap(stage) < 1.0 else "", ":ram" if ram else ""]
 
 
 static func is_spec(path: String) -> bool:
@@ -162,13 +168,18 @@ static func from_spec(text: String) -> Ship:
 	var p := text.trim_prefix(PREFIX).split(":")
 	if p.size() < 4 or not tables()["factions"].has(p[0]) or not tables()["sizes"].has(p[1]):
 		return null
-	return build(p[0], p[1], int(p[2]), float(p[3]) / 100.0, {"ram": p.size() > 4 and p[4] == "ram"})
+	var stage := 0  # an early stage's enemies carry a shield less often (shield_cap): ":s<stage>"
+	for x in p.slice(4):
+		if x.length() > 1 and x.begins_with("s") and x.substr(1).is_valid_int():
+			stage = int(x.substr(1))
+	return build(p[0], p[1], int(p[2]), float(p[3]) / 100.0, {"ram": p.slice(4).has("ram"), "stage": stage})
 
 
 # --- building ------------------------------------------------------------------------------------
 
 ## The enemy ship for (faction, size class, seed, budget). `opts`: ram (true: a Rustfang rammer, a ram plated V bow and the
-## rammer style; false: never; left out: a faction whose pilots ram does so by the seed). Always a valid ship (see
+## rammer style; false: never; left out: a faction whose pilots ram does so by the seed), stage (the run stage: in an early one
+## the ship has a shield only with the chance of shield_cap(stage), rolled from the seed; the rare factions ignore it). Always a valid ship (see
 ## validate()); meta "shipgen".attempts says how many tries it took.
 static func build(faction: String, size: String, seed_value: int, budget: float, opts := {}) -> Ship:
 	var f: Dictionary = tables()["factions"][faction]
@@ -177,11 +188,17 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 		var roll := RandomNumberGenerator.new()
 		roll.seed = _mix(seed_value, faction, size, 99)
 		ram = roll.randf() < float(f["ai"]["rammer"]) and size != "small"
+	var shields := true
+	var cap := shield_cap(int(opts.get("stage", 0)))
+	if cap < 1.0 and not f.has("budget_mult"):
+		var sroll := RandomNumberGenerator.new()
+		sroll.seed = _mix(seed_value, faction, size, 98)
+		shields = sroll.randf() < cap
 	var failed: Array = []
 	for attempt in MAX_ATTEMPTS:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = _mix(seed_value, faction, size, attempt)
-		var r := _attempt(faction, size, rng, budget, ram, attempt)
+		var r := _attempt(faction, size, rng, budget, ram, attempt, shields)
 		if r["ship"] != null:
 			var ship: Ship = r["ship"]
 			ship.get_meta("shipgen")["attempts"] = attempt + 1
@@ -258,11 +275,11 @@ static func _mix(seed_value: int, faction: String, size: String, attempt: int) -
 
 
 ## One try at a ship: {ship (null when it failed), why}.
-static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, budget: float, ram: bool, attempt: int) -> Dictionary:
+static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, budget: float, ram: bool, attempt: int, shields := true) -> Dictionary:
 	var f: Dictionary = tables()["factions"][faction]
 	var sz: Dictionary = tables()["sizes"][size]
 	var level := 2 if attempt < 4 else (1 if attempt < 7 else 0)
-	var lo := _buy(f, size, budget, rng, ram)
+	var lo := _buy(f, size, budget, rng, ram, shields)
 	var t: int = int(lo["armour"]) + 1
 	var prow := rng.randi_range(int(f["hull"]["prow"][0]), int(f["hull"]["prow"][1]))
 	var tail := rng.randi_range(int(f["hull"]["tail"][0]), int(f["hull"]["tail"][1]))
@@ -323,12 +340,14 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 ## What the budget buys: {weapons, engines, shields, reactors, systems, armour, crew, skill, beds, spent}.
 ## The base ship (helm, life support, the faction's cheapest reactor, two engines, one gun) is free; every purchase
 ## after it is drawn from the faction's weights and has to fit the hull's limits and the power its reactors give.
-static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGenerator, ram: bool) -> Dictionary:
+static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGenerator, ram: bool, shields := true) -> Dictionary:
 	var T := tables()
 	_comps()
 	var mx: Dictionary = T["sizes"][size]["max"].duplicate()
 	if ram:
 		mx["bow"] = 1
+	if not shields:  # the stage's roll said no shield: none of the shield room is for sale
+		mx["shield"] = 0
 	var parts: Dictionary = f["parts"]
 	var base: Dictionary = parts["base"]
 	var ai: Dictionary = f["ai"]

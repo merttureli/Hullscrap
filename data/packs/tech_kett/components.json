@@ -62,7 +62,7 @@
       "id": "kett_drone_picket",
       "name": "Drone Picket",
       "blurb": "Two crewmates, one watchful drone. The hive keeps its pickets in pairs.",
-      "quirk": "A twin-drone turret that hits 30% harder than a Mk2 pulse turret and shoots down enemy missiles within 300 px before it looks at any ship, but it fires at half rate unless 2 crew stand in its room.",
+      "quirk": "A drone turret that fires every 0.5 s and shoots down enemy missiles within 300 px before it looks at any ship, but it fires at half rate unless 2 crew stand in its room.",
       "family": "weapon",
       "line": "standard",
       "tier": 2,
@@ -109,7 +109,8 @@
       "cooling": 3,
       "stats": {
         "layers": 3,
-        "sectors": 2
+        "sectors": 2,
+        "recharge": 5.5
       },
       "abilities": [
         {
