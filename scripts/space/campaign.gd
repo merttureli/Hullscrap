@@ -1052,7 +1052,9 @@ func add_crew(ship, who: String, species: String, character := "") -> String:
 	if spot == Pathfinder.NO_CELL:
 		return ""
 	var looks: Array = CrewMember.config()["looks"]
-	var m = Jobs._person(who, looks[ship.crew.size() % looks.size()], Pathfinder.centre_of(spot), species)
+	var ada: Dictionary = CrewMember.config()["ada"]
+	var look: Dictionary = ada["look"] if who == str(ada["name"]) else looks[ship.crew.size() % looks.size()]  # Ada comes in her own colours
+	var m = Jobs._person(who, look, Pathfinder.centre_of(spot), species)
 	if not chr.is_empty():
 		Characters.apply(m, character)
 	ship.crew.append(m)
@@ -1190,7 +1192,7 @@ func roll_offers(id: String, ship) -> Array:
 	var list := []
 	var keys: Array = weights.keys()
 	keys.sort()
-	if not keys.is_empty():
+	if not keys.is_empty() and rng.randf() < float(cfg["prices"].get("recruit_chance", 1.0)):  # most stations have nobody to hire
 		for i in int(cfg["prices"]["offers"]):
 			var total := 0.0
 			for k in keys:

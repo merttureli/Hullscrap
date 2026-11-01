@@ -1,0 +1,16 @@
+{
+	"events": [
+		{
+			"id": "ada_pod", "type": "distress", "weight": 190, "once": true,
+			"requires": {"stage_min": 1, "stage_max": 2, "not_flag": "ada_met"},
+			"title": "A pod, and somebody waving",
+			"text": "One escape pod, turning end over end on the last of its cells. The beacon has pinged so long it has worn the same four notes into a tune. Through the cracked canopy a woman in an orange mechanic's suit, red hair tied up in a rag, has both arms over her head and is waving them the way you wave at a ship you have been waiting for a very long time.",
+			"choices": [
+				{"text": "Open the pod and bring her aboard.", "outcomes": [
+					{"weight": 100, "text": "She tumbles out of the hatch still talking. \"Ada. Mechanic. Eleven weeks in there, I counted the rivets twice. I can fix anything you have and I will, I promise, just let me hold a wrench.\" She looks round the ship as if it were a cathedral. If there is a spare bunk she takes it; if not, she will sleep on the floor and call it luxury. Free of charge: she is only glad to see anyone.", "effects": {"recruit": {"name": "Ada", "species": "human"}, "flag": "ada_met"}}]},
+				{"text": "Wish her luck and leave her to her tune.", "outcomes": [
+					{"weight": 100, "text": "You lift a hand. She goes on waving a little longer than she should, then stops, and the four notes of the beacon follow you out of range.", "effects": {"flag": "ada_met"}}]}
+			]
+		}
+	]
+}
