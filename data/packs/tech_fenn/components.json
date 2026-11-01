@@ -9,7 +9,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -40,7 +40,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -83,7 +83,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -112,7 +112,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -145,7 +145,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#d9c68a",

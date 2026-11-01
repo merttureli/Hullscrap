@@ -68,6 +68,8 @@ func _starter_with_a_net() -> Ship:
 			for x in ship.grid.size.x:
 				if ship.components.can_place_mount(ship.grid, "net_mouth_scrap", Vector2i(x, y), rot) != "":
 					continue
+				if rot == 0 and _roofed(ship, Vector2i(x, y)):  # a notch under the bow: the hull is upstream of it, no current reaches it
+					continue
 				var score := float(y) * 100.0 + absf(float(x) - float(ship.grid.size.x) / 2.0) + (0.0 if rot == 0 else 2000.0)
 				if score < best_score:
 					best_score = score
@@ -78,6 +80,16 @@ func _starter_with_a_net() -> Ship:
 		check(ship.components.place_mount(ship.grid, "net_mouth_scrap", best, best_rot) >= 0, "and it goes in")
 	ship.refresh()
 	return ship
+
+
+## Is there hull or a part in the two columns above `at` (a 2 wide mouth facing up): is it in the lee of the ship?
+func _roofed(ship: Ship, at: Vector2i) -> bool:
+	for y in at.y:
+		for x in [at.x, at.x + 1]:
+			var c := Vector2i(x, y)
+			if ship.grid.get_tile(c) != "" or ship.components.any_at(c) >= 0:
+				return true
+	return false
 
 
 # --- the spawner -------------------------------------------------------------------------------------------

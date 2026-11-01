@@ -21,7 +21,11 @@ def recess(s, x, y, w, h, fill='D', edge='K'):
     s.hline(x, y, w, edge); s.vline(x, y, h, edge)
     s.hline(x, y + h - 1, w, 'M'); s.vline(x + w - 1, y, h, 'M')
 
+CROP = None     # compact.py sets this to a Spr -> Spr cut for the frame of a compacted part: the columns go right before the outline
+
 def outline_all(s, keep=''):
+    if CROP:
+        c = CROP(s); s.w, s.g = c.w, c.g
     mask = {(x, y) for y in range(s.h) for x in range(s.w) if s.g[y][x] != '.'}
     for (x, y) in mask:
         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):

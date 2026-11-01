@@ -393,9 +393,9 @@ func test_centre_of_mass_and_moment_of_inertia() -> void:
 	var g4 := _grid()  # a part's mass is spread over its cells
 	var ship := Ship.new("t", g4)
 	for y in range(4, 8):
-		for x in range(4, 8):
+		for x in range(4, 6):
 			g4.force_tile(Vector2i(x, y), "floor")
-	ship.components.place(g4, "reactor_mk1", Vector2i(4, 4), 0)
+	ship.components.place(g4, "reactor_mk1", Vector2i(4, 4), 0)  # 2x4
 	var p4 := f.mass_props(g4, ship.components, ship.cables)
-	near(p4["mass"], 16.0 + 14.0, "16 floors and the reactor's 14")
-	near(p4["com"].x, 6.0, "centred on the reactor and the floor under it")
+	near(p4["mass"], 8.0 + 14.0, "8 floors and the reactor's 14")
+	near(p4["com"].x, 5.0, "centred on the reactor and the floor under it")

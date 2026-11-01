@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   64
  ],
  "cells": [
-  4,
+  2,
   4
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "shield_mk2_glow.png",
   "frame": [
-   88,
+   56,
    88
   ],
   "offset": [
@@ -72,5 +72,5 @@
    ]
   }
  },
- "notes": "Concord Mk2 (two layers): Mk1 plus a second ring counter-rotating inside the first, a thin outer ring round the dome with blue nodes, two layer pips, corner lamps and registry stencil. On loop (8): two emitter rings and the dome petals turning against each other, arcs crawling between the pylons, pylons lighting N, E, S, W, the core breathing. hit (3): flare and ripple. recharge (4): rings spinning up. Damaged: dome cracked with a dark chip, west pylon dead, a casing flap hangs off the lower-right corner, the outer ring has a gap. Disabled: dome shattered, west pylon smashed, casing split corner to corner."
+ "notes": "Concord Mk2 (two layers): Mk1 plus a second ring counter-rotating inside the first, a thin outer ring round the dome with blue nodes, two layer pips, corner lamps and registry stencil. On loop (8): two emitter rings and the dome petals turning against each other, arcs crawling between the pylons, pylons lighting N, E, S, W, the core breathing. hit (3): flare and ripple. recharge (4): rings spinning up. Damaged: dome cracked with a dark chip, west pylon dead, a casing flap hangs off the lower-right corner, the outer ring has a gap. Disabled: dome shattered, west pylon smashed, casing split corner to corner. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

@@ -1,8 +1,8 @@
 {
 "blurb": "Round-shouldered and quick to catch: a Cinder Mortar that lobs fire, two engines and a hull that does not mind it. The Emberkin crew stand in the flames and call for more.",
-"cables": {"cells":[[29,16],[30,16],[31,16],[32,16],[33,16],[29,17],[29,18],[29,19],[29,20],[29,21],[30,21],[31,21],[32,21],[29,22],[29,23],[29,24],[29,25],[30,25],[30,26],[30,27],[30,28],[30,29],[30,30],[30,31],[31,31]],"version":1},
+"cables": {"cells":[[29,16],[30,16],[31,16],[32,16],[33,16],[29,17],[29,18],[29,19],[29,20],[29,21],[30,21],[31,21],[32,21],[29,22],[29,23],[29,24],[29,25],[30,25],[30,26],[30,27],[30,28],[30,29],[30,30],[29,31],[30,31],[31,31],[32,31]],"version":1},
 "cargo": {"copper":80,"credits":350,"emberkin_hearth_shield":1,"fuel":6,"heat_suit":2,"polymer":50,"radiator":1,"scrap":400},
-"components": {"instances":[{"anchor":[29,15],"heat":0.0,"hp":5,"id":"emberkin_cinder_mortar","out":[29,11],"out_hp":10,"rot":0,"status":"ok","uid":1},{"anchor":[33,16],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":2},{"anchor":[26,19],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":3},{"anchor":[26,21],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":4},{"anchor":[26,23],"heat":0.0,"hp":5,"id":"oxygen_gen","rot":1,"status":"ok","uid":5},{"anchor":[32,21],"heat":0.0,"hp":4,"id":"fabricator","rot":0,"status":"ok","uid":6},{"anchor":[29,26],"heat":0.0,"hp":8,"id":"reactor_mk2","rot":0,"status":"ok","uid":7},{"anchor":[27,31],"heat":0.0,"hp":8,"id":"engine_mk2","out":[27,34],"out_hp":6,"rot":2,"status":"ok","uid":8},{"anchor":[31,31],"heat":0.0,"hp":8,"id":"engine_mk2","out":[31,34],"out_hp":6,"rot":2,"status":"ok","uid":9}],"next_uid":10,"version":3},
+"components": {"instances":[{"anchor":[30,15],"heat":0.0,"hp":5,"id":"emberkin_cinder_mortar","out":[29,11],"out_hp":10,"rot":0,"status":"ok","uid":1},{"anchor":[33,16],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":2},{"anchor":[26,19],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":3},{"anchor":[26,21],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":4},{"anchor":[26,23],"heat":0.0,"hp":5,"id":"oxygen_gen","rot":1,"status":"ok","uid":5},{"anchor":[32,21],"heat":0.0,"hp":4,"id":"fabricator","rot":0,"status":"ok","uid":6},{"anchor":[29,26],"heat":0.0,"hp":8,"id":"reactor_mk2","rot":0,"status":"ok","uid":7},{"anchor":[28,31],"heat":0.0,"hp":8,"id":"engine_mk2","out":[27,34],"out_hp":6,"rot":2,"status":"ok","uid":8},{"anchor":[32,31],"heat":0.0,"hp":8,"id":"engine_mk2","out":[31,34],"out_hp":6,"rot":2,"status":"ok","uid":9}],"next_uid":10,"version":4},
 "crafting": {"known":["basic_armor","bed","bolt_thrower_scrap","engine_mk1","engine_scrap_mk1","fabricator","helm","laser_mk1","medbay","net_mouth_scrap","oxygen_gen","oxygen_scrap_mk1","pistol","polymer","radiator","rattle_burst_scrap","reactor_mk1","reactor_scrap_mk1","robot_arm","shield_mk1","shield_scrap_mk1","shrapnel_cannon_scrap"],"queue":[],"version":1},
 "crew": [{"name":"Soldier","species":"human"},{"name":"Ziv","species":"emberkin"},{"name":"Wick","species":"emberkin"}],
 "doors_open": [],
@@ -327,6 +327,6 @@
 	[35,33,"ablative_plating"],
 	[36,33,"ablative_plating"]
 ],
-"version": 4,
+"version": 7,
 "world_pos": [0.0,0.0]
 }

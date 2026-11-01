@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   64
  ],
  "cells": [
-  4,
+  2,
   4
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "sporeling_mycelium_shield_glow.png",
   "frame": [
-   84,
+   52,
    84
   ],
   "offset": [
@@ -52,5 +52,5 @@
    ]
   }
  },
- "notes": "Sporeling Mycelium Shield, 4x4: a brown basin holding a web of pale mycelium threads that run from a spotted mushroom cap in the middle out to eight blue-glowing nodes; light pulses outward along the threads on the 4-frame loop. Off: the web is dull and the nodes dark. Damaged: threads snapped, a node burst and oozing, the pulse stutters. Disabled: the web is withered and brown, the cap collapsed."
+ "notes": "Sporeling Mycelium Shield, 4x4: a brown basin holding a web of pale mycelium threads that run from a spotted mushroom cap in the middle out to eight blue-glowing nodes; light pulses outward along the threads on the 4-frame loop. Off: the web is dull and the nodes dark. Damaged: threads snapped, a node burst and oozing, the pulse stutters. Disabled: the web is withered and brown, the cap collapsed. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

@@ -9,7 +9,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#f2c14e",
@@ -30,7 +30,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#ff8c3a",
@@ -51,7 +51,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -82,7 +82,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -195,7 +195,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#8e7dff",
@@ -235,7 +235,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -266,7 +266,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -296,7 +296,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -349,7 +349,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#4ad1b8",
@@ -497,7 +497,7 @@
       "line": "scrap",
       "tier": 1,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#b8863b",
@@ -518,7 +518,7 @@
       "line": "scrap",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -597,7 +597,7 @@
       "line": "neon",
       "tier": 1,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#ffd84a",
@@ -639,7 +639,7 @@
       "line": "neon",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -693,7 +693,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -721,7 +721,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -749,7 +749,7 @@
       "line": "scrap",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -777,7 +777,7 @@
       "line": "scrap",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -805,7 +805,7 @@
       "line": "scrap",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -833,7 +833,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -861,7 +861,7 @@
       "line": "standard",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -889,7 +889,7 @@
       "line": "neon",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -917,7 +917,7 @@
       "line": "neon",
       "tier": 1,
       "size": [
-        4,
+        2,
         2
       ],
       "mount": {
@@ -1003,7 +1003,7 @@
       "line": "scrap",
       "tier": 1,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#6f7fa0",
@@ -1043,7 +1043,7 @@
       "line": "standard",
       "tier": 2,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#6a5cf0",
@@ -1083,7 +1083,7 @@
       "line": "neon",
       "tier": 1,
       "size": [
-        4,
+        2,
         4
       ],
       "color": "#6df0d4",

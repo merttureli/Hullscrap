@@ -8,7 +8,9 @@ extends RefCounted
 ##
 ## The player points at the outside half's top-left cell; plan() walks inward from there through the
 ## wall and puts the inside half on the first floor rows behind it. from_inside() runs the same rule
-## the other way for a part saved before mounts existed (it only knows the inside half).
+## the other way for a part saved before mounts existed (it only knows the inside half). A breech narrower
+## than the outside half (a tier 1-2 gun or engine: 2 wide behind a 4 wide barrel) sits centred behind it
+## (breech_shift); the link stays as wide as the outside half.
 
 const Art = preload("res://scripts/view/art.gd")
 
@@ -43,6 +45,14 @@ static func rect_cells(r: Rect2i) -> Array[Vector2i]:
 	return out
 
 
+## How far a breech `isz` wide sits along the wall from the outside half's edge `osz`: centred behind it
+## when narrower, else flush (a wider console starts at the barrel's edge). Sizes are already turned.
+static func breech_shift(osz: Vector2i, isz: Vector2i, rot: int) -> Vector2i:
+	if posmod(rot, 2) == 0:
+		return Vector2i(maxi(0, int((osz.x - isz.x) / 2.0)), 0)
+	return Vector2i(0, maxi(0, int((osz.y - isz.y) / 2.0)))
+
+
 ## The cells of wall layer `k` (0 is against the outside half) of a mount whose outside half is `outside`.
 static func layer(outside: Rect2i, rot: int, k: int) -> Array[Vector2i]:
 	match outward(rot):
@@ -57,7 +67,7 @@ static func layer(outside: Rect2i, rot: int, k: int) -> Array[Vector2i]:
 
 ## Where the two halves of a mount of `def` turned `rot` are, with the outside half's top-left on
 ## `out` and a wall `depth` layers thick between them: {inside: Rect2i, outside: Rect2i, link: cells}.
-## The halves share their extent along the wall.
+## The halves start together along the wall, a narrower breech centred behind the barrel (breech_shift).
 static func layout(def: Dictionary, out: Vector2i, rot: int, depth: int) -> Dictionary:
 	var osz := turned(def["mount"]["outside"], rot)
 	var isz := turned(def["size"], rot)
@@ -75,7 +85,7 @@ static func layout(def: Dictionary, out: Vector2i, rot: int, depth: int) -> Dict
 			at = Vector2i(out.x - depth - isz.x, out.y)
 		_:
 			at = Vector2i(out.x + osz.x + depth, out.y)
-	return {"inside": Rect2i(at, isz), "outside": outside, "link": link}
+	return {"inside": Rect2i(at + breech_shift(osz, isz, rot), isz), "outside": outside, "link": link}
 
 
 ## The wall depth between a saved outside top-left `out` and inside top-left `anchor`, or 0 when the
@@ -118,24 +128,26 @@ static func plan(grid, comps, def: Dictionary, out: Vector2i, rot: int) -> Dicti
 static func from_inside(grid, comps, def: Dictionary, anchor: Vector2i, rot: int) -> Dictionary:
 	var isz := turned(def["size"], rot)
 	var osz := turned(def["mount"]["outside"], rot)
-	var inside := Rect2i(anchor, isz)
+	var base := anchor - breech_shift(osz, isz, rot)  # where the halves start together along the wall
+	var wide := Vector2i(maxi(osz.x, isz.x), isz.y) if posmod(rot, 2) == 0 else Vector2i(isz.x, maxi(osz.y, isz.y))
+	var look := Rect2i(base, wide)  # the cells the wall walk looks through: the barrel's full width behind it
 	var depth := 0
-	while depth < MAX_DEPTH and _beyond(inside, rot, depth).all(func(c): return flat_wall(grid, c)):
+	while depth < MAX_DEPTH and _beyond(look, rot, depth).all(func(c): return flat_wall(grid, c)):
 		depth += 1
-	var out := anchor
+	var out := base
 	match outward(rot):
 		Vector2i.UP:
-			out = Vector2i(anchor.x, anchor.y - depth - osz.y)
+			out = Vector2i(base.x, anchor.y - depth - osz.y)
 		Vector2i.DOWN:
-			out = Vector2i(anchor.x, anchor.y + isz.y + depth)
+			out = Vector2i(base.x, anchor.y + isz.y + depth)
 		Vector2i.RIGHT:
-			out = Vector2i(anchor.x + isz.x + depth, anchor.y)
+			out = Vector2i(anchor.x + isz.x + depth, base.y)
 		_:
-			out = Vector2i(anchor.x - depth - osz.x, anchor.y)
+			out = Vector2i(anchor.x - depth - osz.x, base.y)
 	if depth == 0:
 		return {"why": "needs a flat wall to mount through", "out": out}
 	var own := {}
-	for c in rect_cells(inside):
+	for c in rect_cells(Rect2i(anchor, isz)):
 		own[c] = true
 	var p := plan(grid, _Placed.new(comps, own), def, out, rot)
 	p["out"] = out

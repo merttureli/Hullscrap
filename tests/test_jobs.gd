@@ -489,10 +489,10 @@ func test_a_crewmate_revives_a_downed_crew_member() -> void:
 func _medbay_ship(power: bool) -> Dictionary:
 	var ship := Fixture.room_ship()
 	var d := {"ship": ship}
-	d["medbay"] = Fixture.put(ship, "medbay", 10, 10)  # x 10..13, y 10..13
+	d["medbay"] = Fixture.put(ship, "medbay", 10, 10)  # x 10..11, y 10..13: one bed
 	if power:
-		Fixture.put(ship, "reactor_mk1", 15, 10)
-		Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+		Fixture.put(ship, "reactor_mk1", 15, 10)  # x 15..16, y 10..13
+		Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	return d
 
@@ -500,7 +500,7 @@ func _medbay_ship(power: bool) -> Dictionary:
 func test_a_powered_medbay_heals_15_a_second_and_brings_the_downed_back() -> void:
 	var d := _medbay_ship(true)
 	var ship: Ship = d["ship"]
-	var p := _player(11, 11)  # the body centre is in the medbay
+	var p := _player(10, 10)  # the body centre is in the medbay
 	p.hurt(1000.0)
 	ship.crew.append(p)
 	var jobs := Jobs.new()
@@ -515,7 +515,7 @@ func test_a_powered_medbay_heals_15_a_second_and_brings_the_downed_back() -> voi
 func test_an_unpowered_medbay_does_nothing() -> void:
 	var d := _medbay_ship(false)
 	var ship: Ship = d["ship"]
-	var p := _player(11, 11)
+	var p := _player(10, 10)
 	p.hurt(50.0)
 	ship.crew.append(p)
 	Jobs.new().tick(ship, 1.0)
@@ -558,6 +558,45 @@ func test_a_powered_medbay_is_preferred_over_a_bed() -> void:
 	var jobs := Jobs.new()
 	jobs.tick(ship, STEP)
 	eq(m.job.get("key"), "rest:%d" % d["medbay"], "the medbay")
+
+
+func test_a_medbay_is_one_bed_it_heals_one_crew_member_at_a_time() -> void:
+	var d := _medbay_ship(true)
+	var ship: Ship = d["ship"]
+	eq(ship.components.def("medbay")["size"], [2, 4], "a 2x4 bay")
+	var a := _npc("Ada", 10, 10)  # both bodies lie on the medbay (a 2x2 body fits twice in 2x4)
+	var b := _npc("Bram", 10, 12)
+	a.hurt(50.0)
+	b.hurt(50.0)
+	ship.crew.append(a)
+	ship.crew.append(b)
+	check(ship.components.instances[d["medbay"]]["cells"].has(a.cell()) and ship.components.instances[d["medbay"]]["cells"].has(b.cell()), "(setup: both lie in it)")
+	var jobs := Jobs.new()
+	jobs.tick(ship, 1.0)
+	near(a.hp, 65.0, "the first one heals 15 a second")
+	near(b.hp, 50.0, "the second heals nothing there")
+	jobs.tick(ship, 1.0)
+	near(b.hp, 50.0, "and keeps waiting while the first is on it")
+	jobs.tick(ship, 10.0)
+	near(a.hp, 100.0, "the first is whole")
+	jobs.tick(ship, 1.0)
+	near(b.hp, 65.0, "then the medbay takes the second")
+
+
+func test_a_second_hurt_crew_member_goes_to_a_bed_when_the_medbay_is_taken() -> void:
+	var d := _medbay_ship(true)
+	var ship: Ship = d["ship"]
+	var bed := Fixture.put(ship, "bed", 19, 10)
+	var a := _npc("Ada", 17, 14)
+	var b := _npc("Bram", 17, 12)
+	a.hurt(40.0)
+	b.hurt(40.0)
+	ship.crew.append(a)
+	ship.crew.append(b)
+	var jobs := Jobs.new()
+	jobs.tick(ship, STEP)
+	eq(a.job.get("key"), "rest:%d" % d["medbay"], "the first takes the medbay")
+	eq(b.job.get("key"), "rest:%d" % bed, "the second, with the medbay claimed, takes the bed")
 
 
 func test_a_manual_order_keeps_the_job_board_away_for_a_while() -> void:
@@ -612,7 +651,7 @@ func _gun_ship(manned: bool) -> Dictionary:
 	var ship := Fixture.room_ship()
 	var reactor := Fixture.put(ship, "reactor_mk1", 10, 10)
 	var laser := Fixture.put(ship, "laser_mk1", 15, 10)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.components.by_id["laser_mk1"]["manned"] = true
 	ship.refresh()
 	if manned:

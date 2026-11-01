@@ -30,7 +30,7 @@ func _world() -> Dictionary:
 	d["reactor"] = Fixture.put(ship, "reactor_mk1", 10, 10)
 	d["fab"] = Fixture.put(ship, "fabricator", 15, 10)
 	d["gen"] = Fixture.put(ship, "oxygen_gen", 15, 12)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(15, 12)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(15, 12)])
 	ship.refresh()
 	for i in ship.atmosphere.pressure.size():
 		ship.atmosphere.pressure[i] = 0.5
@@ -101,7 +101,7 @@ func test_abilities_wait_in_build_mode() -> void:
 	var ship := Fixture.room_ship()
 	var reactor := Fixture.put(ship, "reactor_mk1", 10, 10)
 	var engine := Fixture.put(ship, KICKJET, 15, 10, 2)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	check(reactor > 0 and engine > 0, "the rig")
 	eq(Abilities.trigger(ship, engine), "", "the engine ability is on")

@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "fenn_twitch_cannon_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -60,19 +60,14 @@
     6,
     0
    ],
-   "fire": [
-    8,
-    2,
-    12
-   ],
    "damaged": [
-    10,
+    8,
     2,
     4
    ]
   }
  },
- "notes": "INSIDE half of the Fenn Twitch Cannon: a small escapement gear that ticks half a step on every charge frame, a spring, and a row of ten tiny lamps that fill two per step (frame 5 = all green); power coupling, small hatch. fire: the lamps flash white and the spring is slack. damaged: the gear cracked and out of true, lamps dead, sparks; disabled: the gear off its axle, the spring sprung. Barrel layer fenn_twitch_cannon_barrel: a slim steel barrel with a coiled recoil spring and a slotted muzzle brake; it twitches (fire recoil 2/1/0).",
+ "notes": "INSIDE half of the Fenn Twitch Cannon: a small escapement gear that ticks half a step on every charge frame, a spring, and a row of ten tiny lamps that fill two per step (frame 5 = all green); power coupling, small hatch. fire: the lamps flash white and the spring is slack. damaged: the gear cracked and out of true, lamps dead, sparks; disabled: the gear off its axle, the spring sprung. Barrel layer fenn_twitch_cannon_barrel: a slim steel barrel with a coiled recoil spring and a slotted muzzle brake; it twitches (fire recoil 2/1/0). COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

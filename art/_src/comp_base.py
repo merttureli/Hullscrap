@@ -2,6 +2,7 @@
 import json, os
 from px import *
 from mach import bev, hollow, recess, outline_all, drop_shadow, glow
+import compact
 
 # ---------------- hand-drawn damage decals
 SCORCH_L = art("""
@@ -99,27 +100,30 @@ def export(c, outdir=None):
     outdir = outdir or ART + '/components'
     os.makedirs(outdir, exist_ok=True)
     frames, gframes, anims, ganims = [], [], {}, {}
+    cp = compact.plan_for(c.id)         # a tier 1-2 part that takes less room inside now: its frames are cut to the new width (compact.py)
     for (name, state, n, fps) in c.anims:
         anims[name] = [len(frames), n, fps]
-        for i in range(n): frames.append(c.frame(state, i))
+        for i in range(n): frames.append(cp.frame(c, state, i) if cp else c.frame(state, i))
         if state not in ('off', 'disabled'):
             gl = [c.glow_frame(state, i) for i in range(n)]
+            if cp: gl = [cp.glow(g, c.glow_pad[0]) for g in gl]
             if any(p[3] for g in gl for row in g.p for p in row):
                 ganims[name] = [len(gframes), n, fps]; gframes += gl
-    save(sheet(frames, len(frames), c.w, c.h), '%s/%s.png' % (outdir, c.id))
-    J = {'frame': [c.w, c.h], 'cells': list(c.cells), 'anims': anims}
+    fw = frames[0].w if cp else c.w
+    save(sheet(frames, len(frames), fw, c.h), '%s/%s.png' % (outdir, c.id))
+    J = {'frame': [fw, c.h], 'cells': list(cp.cells if cp else c.cells), 'anims': anims}
     if gframes:
         l, t, r, b = c.glow_pad
-        gw, gh = c.w + l + r, c.h + t + b
+        gw, gh = (gframes[0].w, gframes[0].h) if cp else (c.w + l + r, c.h + t + b)
         strip = Rgba(gw * len(gframes), gh)
         for k, g in enumerate(gframes): strip.blit_rgba(g, k * gw, 0)
         strip.save('%s/%s_glow.png' % (outdir, c.id))
         J['glow'] = {'image': c.id + '_glow.png', 'frame': [gw, gh], 'offset': [-l, -t], 'anims': ganims}
-    if c.anchors: J['anchors'] = {k: list(v) for k, v in c.anchors.items()}
+    if c.anchors: J['anchors'] = {k: (cp.anchor(v) if cp else list(v)) for k, v in c.anchors.items()}
     if getattr(c, 'orientation', None): J['orientation'] = c.orientation
     if getattr(c, 'offset', None): J['offset'] = list(c.offset)
     if getattr(c, 'extra', None): J.update(c.extra)
-    J['notes'] = c.notes
+    J['notes'] = c.notes + (' COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).' if cp else '')
     if hasattr(c, 'finish_json'): c.finish_json(J, outdir)     # two-layer weapons add their barrel
     with open('%s/%s.json' % (outdir, c.id), 'w') as f: json.dump(J, f, indent=1); f.write('\n')
     return frames, gframes, J

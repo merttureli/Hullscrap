@@ -82,7 +82,7 @@
       "family": "engine",
       "line": "scrap",
       "tier": 2,
-      "size": [4, 2],
+      "size": [2, 2],
       "mount": {
         "outside": [4, 2],
         "outside_hp": 6
@@ -232,7 +232,7 @@
       "family": "engine",
       "line": "neon",
       "tier": 2,
-      "size": [4, 2],
+      "size": [2, 2],
       "mount": {
         "outside": [4, 2],
         "outside_hp": 6
@@ -427,7 +427,7 @@
       "family": "engine",
       "line": "standard",
       "tier": 1,
-      "size": [4, 2],
+      "size": [2, 2],
       "mount": {
         "outside": [4, 2],
         "outside_hp": 5
@@ -453,7 +453,7 @@
       "family": "engine",
       "line": "standard",
       "tier": 2,
-      "size": [4, 2],
+      "size": [2, 2],
       "mount": {
         "outside": [4, 2],
         "outside_hp": 6

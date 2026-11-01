@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   64
  ],
  "cells": [
-  4,
+  2,
   4
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "mire_rain_shield_glow.png",
   "frame": [
-   84,
+   52,
    84
   ],
   "offset": [
@@ -52,5 +52,5 @@
    ]
   }
  },
- "notes": "Mire Rain Shield, 4x4: a teal housing with a brass hand-wheel valve in every corner and a round water-lens well in the middle, where a ripple spreads from a falling drop and rain streaks fall over it (the 4-frame loop). Off: still dull water, wheels at rest. Damaged: the upper-left valve has sprung a steam jet, the rim is cracked and the ripple stutters. Disabled: the well is drained and dark, a valve snapped off, the housing split."
+ "notes": "Mire Rain Shield, 4x4: a teal housing with a brass hand-wheel valve in every corner and a round water-lens well in the middle, where a ripple spreads from a falling drop and rain streaks fall over it (the 4-frame loop). Off: still dull water, wheels at rest. Damaged: the upper-left valve has sprung a steam jet, the rim is cracked and the ripple stutters. Disabled: the well is drained and dark, a valve snapped off, the housing split. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

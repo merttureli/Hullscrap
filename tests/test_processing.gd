@@ -31,7 +31,7 @@ func _rig(id := "smelter_mk1") -> Dictionary:
 	var d := {"ship": ship}
 	d["reactor"] = Fixture.put(ship, "reactor_mk1", 10, 10)
 	d["smelter"] = Fixture.put(ship, id, 15, 10)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.inventory.refund({"scrap": 1000, "copper": 100, "titanium": 20, "silicon": 20, "crystal": 10})
 	ship.refresh()
 	return d
@@ -214,7 +214,7 @@ func test_a_smelter_recipe_is_refused_at_the_fabricator_and_the_reverse() -> voi
 	var d := _rig()
 	var ship: Ship = d["ship"]
 	Fixture.put(ship, "fabricator", 15, 13)
-	Fixture.wire(ship, [Vector2i(13, 13), Vector2i(14, 13), Vector2i(15, 13)])
+	Fixture.wire(ship, [Vector2i(11, 13), Vector2i(12, 13), Vector2i(13, 13), Vector2i(14, 13), Vector2i(15, 13)])
 	ship.refresh()
 	var fab := Workshop.best(ship)
 	check(fab["level"] >= 1, "there is a working fabricator")
@@ -332,7 +332,7 @@ func test_several_smelters_share_a_queue_and_pool_their_levels_and_tools() -> vo
 	var d := _rig("smelter_mk1")
 	var ship: Ship = d["ship"]
 	var forge := Fixture.put(ship, "smelter_neon_mk1", 15, 13)
-	Fixture.wire(ship, [Vector2i(13, 13), Vector2i(14, 13), Vector2i(15, 13)])
+	Fixture.wire(ship, [Vector2i(11, 13), Vector2i(12, 13), Vector2i(13, 13), Vector2i(14, 13), Vector2i(15, 13)])
 	ship.refresh()
 	var st := Processing.best(ship)
 	eq([st["level"], st["tools"], st["count"], st["uid"]], [2, ["plasma"], 2, forge], "the Forge leads (fastest) and the level and tools pool")
@@ -403,7 +403,7 @@ func test_the_post_goes_away_when_the_queue_is_empty_or_the_smelter_is_not_the_l
 	var ship: Ship = d["ship"]
 	var uid: int = d["smelter"]
 	var other := Fixture.put(ship, "smelter_scrap_mk1", 15, 13)
-	Fixture.wire(ship, [Vector2i(13, 13), Vector2i(14, 13), Vector2i(15, 13)])
+	Fixture.wire(ship, [Vector2i(11, 13), Vector2i(12, 13), Vector2i(13, 13), Vector2i(14, 13), Vector2i(15, 13)])
 	ship.refresh()
 	var sim := _sim(ship)
 	ship.crafting.enqueue("steel", ship.inventory, Processing.best(ship))

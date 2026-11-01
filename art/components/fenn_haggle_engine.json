@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "fenn_haggle_engine_glow.png",
   "frame": [
-   84,
+   52,
    50
   ],
   "offset": [
@@ -54,11 +54,11 @@
  },
  "anchors": {
   "power_coupling": [
-   33,
+   17,
    29
   ],
   "repair_hatch": [
-   13,
+   3,
    29
   ]
  },
@@ -71,5 +71,5 @@
   "part": "inside",
   "faces": "rotation 0: outward is up"
  },
- "notes": "Fenn \"Haggle Engine\" (thrust x1.3, fragile), a hull mount (outward is up): outside, four slim nozzles of different heights standing on a thin cream pad, joined by steel struts, with a blinking antenna between them and a small quick flame on each (3 frames); a collar through the wall; inside, a cream core of gear trains (they turn on the loop), small dials, a row of lamps, a hatch and a coupling. Damaged: the second nozzle has cracked off its neck and hangs, a gear is loose, sparks. Disabled: nozzles bent and dark, the antenna snapped, gears stopped. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+ "notes": "Fenn \"Haggle Engine\" (thrust x1.3, fragile), a hull mount (outward is up): outside, four slim nozzles of different heights standing on a thin cream pad, joined by steel struts, with a blinking antenna between them and a small quick flame on each (3 frames); a collar through the wall; inside, a cream core of gear trains (they turn on the loop), small dials, a row of lamps, a hatch and a coupling. Damaged: the second nozzle has cracked off its neck and hangs, a gear is loose, sparks. Disabled: nozzles bent and dark, the antenna snapped, gears stopped. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange). COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

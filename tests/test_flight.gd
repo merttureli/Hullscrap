@@ -85,12 +85,12 @@ func test_mass_counts_components() -> void:
 	near(f.mass_of(grid, comps, cables), 96.0 + 14.0, "a listed component uses its own mass")
 	_put("reactor_mk2", 8, 12)
 	near(f.mass_of(grid, comps, cables), 96.0 + 14.0 + 16.0, "the second listed component")
-	_put("engine_mk1", 12, 12)  # 4x2 = 8 cells
-	near(f.mass_of(grid, comps, cables), 96.0 + 14.0 + 16.0 + 24.0, "an unlisted 4x2 weighs 3 per cell")
+	_put("engine_mk1", 12, 12)  # 2x2 inside and 4x2 outside, listed at the 48 it weighed at 4x2 + 4x2 (playtest 2, P2)
+	near(f.mass_of(grid, comps, cables), 96.0 + 14.0 + 16.0 + 48.0, "a shrunk engine keeps its old mass")
 	_put("helm", 16, 12)  # 2x2 = 4 cells
-	near(f.mass_of(grid, comps, cables), 96.0 + 14.0 + 16.0 + 24.0 + 12.0, "an unlisted 2x2")
+	near(f.mass_of(grid, comps, cables), 96.0 + 14.0 + 16.0 + 48.0 + 12.0, "an unlisted 2x2 weighs 3 per cell")
 	comps.remove_at(Vector2i(4, 12))
-	near(f.mass_of(grid, comps, cables), 96.0 + 16.0 + 24.0 + 12.0, "removing a component lightens the ship")
+	near(f.mass_of(grid, comps, cables), 96.0 + 16.0 + 48.0 + 12.0, "removing a component lightens the ship")
 
 
 func test_mass_counts_cables() -> void:

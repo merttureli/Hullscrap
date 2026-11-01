@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "engine_scrap_mk2_glow.png",
   "frame": [
-   84,
+   52,
    50
   ],
   "offset": [
@@ -54,11 +54,11 @@
  },
  "anchors": {
   "power_coupling": [
-   37,
+   21,
    29
   ],
   "repair_hatch": [
-   21,
+   5,
    29
   ]
  },
@@ -71,5 +71,5 @@
   "part": "inside",
   "faces": "rotation 0: outward is up"
  },
- "notes": "Scrapper Clans \"Kickjet Deluxe\", a hull mount (outward is up): the Kickjet bell and strapped tank plus a rusty stovepipe nozzle with its own small flame where the bracket was, a racing stripe of hazard tape round the bell and more patches; inside the Kickjet core plus a taped spare plate, a second lamp row and a rusty feed pipe. Damaged: the lower tank strap snapped and the tank sags and weeps fuel, the dent is on fire, the stovepipe is bent over and sputtering, sparks in the core. Disabled: the bell broken off its neck, the stovepipe snapped, the tank slid off and split, the core dead. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+ "notes": "Scrapper Clans \"Kickjet Deluxe\", a hull mount (outward is up): the Kickjet bell and strapped tank plus a rusty stovepipe nozzle with its own small flame where the bracket was, a racing stripe of hazard tape round the bell and more patches; inside the Kickjet core plus a taped spare plate, a second lamp row and a rusty feed pipe. Damaged: the lower tank strap snapped and the tank sags and weeps fuel, the dent is on fire, the stovepipe is bent over and sputtering, sparks in the core. Disabled: the bell broken off its neck, the stovepipe snapped, the tank slid off and split, the core dead. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange). COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

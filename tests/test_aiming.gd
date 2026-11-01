@@ -26,8 +26,8 @@ func near(got: float, want: float, msg: String, eps := 1e-4) -> void:
 func _gun(id: String, rot := 0, thick := 1) -> Dictionary:
 	var ship := Wall.wall_ship(thick, rot)
 	var uid := ship.components.place_mount(ship.grid, id, Wall.out_anchor(rot), rot)
-	var reactor := ship.components.place(ship.grid, "reactor_mk1", Wall.corner(rot, 2, 5, thick, thick + 3), 0)
-	for c in [Wall.at(rot, 1, thick), Wall.at(rot, 2, thick)]:
+	var reactor := ship.components.place(ship.grid, "reactor_mk1", Wall.corner(rot, 2, 3, thick, thick + 3), rot % 2)  # 2 wide, 4 deep
+	for c in [Wall.at(rot, 0, thick), Wall.at(rot, 1, thick), Wall.at(rot, 2, thick)]:  # from the breech (u -1..0 for a tier 1-2 gun) to the reactor
 		ship.cables.place(ship.grid, c)
 	ship.refresh()
 	var a := Arena.new(7)

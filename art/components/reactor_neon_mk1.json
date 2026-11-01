@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   64
  ],
  "cells": [
-  4,
+  2,
   4
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "reactor_neon_mk1_glow.png",
   "frame": [
-   84,
+   52,
    84
   ],
   "offset": [
@@ -52,5 +52,5 @@
    ]
   }
  },
- "notes": "Lumen: a faceted crystal core in a dark navy frame with 1px cyan edge lines. The on loop rotates the light round the 8 facets (two facets per frame). Damaged: a crack runs through the crystal, one facet is chipped dark, the upper-right accumulator has lost its crystal, edge lines flicker. Disabled: the crystal is dull and fractured with a missing facet, shards on the frame, every edge line dead."
+ "notes": "Lumen: a faceted crystal core in a dark navy frame with 1px cyan edge lines. The on loop rotates the light round the 8 facets (two facets per frame). Damaged: a crack runs through the crystal, one facet is chipped dark, the upper-right accumulator has lost its crystal, edge lines flicker. Disabled: the crystal is dull and fractured with a missing facet, shards on the frame, every edge line dead. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

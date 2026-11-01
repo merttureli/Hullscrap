@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "engine_neon_mk1_glow.png",
   "frame": [
-   84,
+   52,
    50
   ],
   "offset": [
@@ -54,11 +54,11 @@
  },
  "anchors": {
   "power_coupling": [
-   32,
+   16,
    30
   ],
   "repair_hatch": [
-   12,
+   3,
    29
   ]
  },
@@ -71,5 +71,5 @@
   "part": "inside",
   "faces": "rotation 0: outward is up"
  },
- "notes": "Lumen \"Ion Drive\", a hull mount (outward is up): a stack of three ion rings outside, widest at the nozzle on top, the light running up them (cyan lit core, magenta pins) and a cyan glow with a magenta halo streaming out above; a navy collar with cyan edge lines; inside a slim navy core with a lens crystal accumulator, a display, a repair hatch and a cyan-ringed power coupling. Damaged: the middle ring has slipped out of line and cracked, arcs jump the gap, the lens crystal is cracked and flickers. Disabled: the top ring snapped half off and hanging, the collar cracked, the lens shattered, every line dead. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+ "notes": "Lumen \"Ion Drive\", a hull mount (outward is up): a stack of three ion rings outside, widest at the nozzle on top, the light running up them (cyan lit core, magenta pins) and a cyan glow with a magenta halo streaming out above; a navy collar with cyan edge lines; inside a slim navy core with a lens crystal accumulator, a display, a repair hatch and a cyan-ringed power coupling. Damaged: the middle ring has slipped out of line and cracked, arcs jump the gap, the lens crystal is cracked and flickers. Disabled: the top ring snapped half off and hanging, the collar cracked, the lens shattered, every line dead. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange). COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py)."
 }

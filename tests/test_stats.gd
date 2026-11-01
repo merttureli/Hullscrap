@@ -111,11 +111,11 @@ func test_mass_mults_only_list_lines_that_change_mass() -> void:
 
 func test_power_uses_the_line_numbers() -> void:
 	var ship := Fixture.room_ship()
-	var r := Fixture.put(ship, "reactor_scrap_mk1", 10, 10)  # x 10..13, y 10..13
+	var r := Fixture.put(ship, "reactor_scrap_mk1", 10, 10)  # 2x4, x 10..11, y 10..13
 	var o := Fixture.put(ship, "oxygen_scrap_mk1", 15, 10)  # 2x4, x 15..16
-	var e := Fixture.put(ship, "engine_scrap_mk1", 10, 14)  # 4x2, x 10..13, y 14..15
-	var l := Fixture.put(ship, "laser_mk1", 15, 14)  # 4x2, x 15..18, y 14..15
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(13, 13), Vector2i(13, 14), Vector2i(14, 14), Vector2i(15, 14)])
+	var e := Fixture.put(ship, "engine_scrap_mk1", 10, 14)  # 2x2, x 10..11, y 14..15
+	var l := Fixture.put(ship, "laser_mk1", 15, 14)  # 2x2, x 15..16, y 14..15
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(11, 12), Vector2i(11, 13), Vector2i(11, 14), Vector2i(15, 12), Vector2i(15, 13), Vector2i(15, 14)])
 	ship.refresh()
 	var n: Dictionary = ship.power_state["networks"][0]
 	_near(n["supply"], 5.4, "a scrap reactor supplies 6 x 0.9")
@@ -137,5 +137,5 @@ func test_flight_uses_the_line_numbers() -> void:
 	_near(f.thrust_of(ship.components, powered), 10.0 + 10.0, "the raw components keep the base numbers")
 	var plain := f.mass_of(ship.grid, ship.components, ship.cables)
 	var adjusted := f.mass_of(ship.grid, ship.components, ship.cables, Stats.mass_mults(ship.components, ship.lines))
-	# two 8-cell engines at 3 per cell: neon x 0.7 and scrap x 1.2
-	_near(adjusted - plain, 24.0 * (0.7 - 1.0) + 24.0 * (1.2 - 1.0), "mass follows the line")
+	# two bare 2x2 engines at 3 per cell (a Flight with no data lists nothing): neon x 0.7 and scrap x 1.2
+	_near(adjusted - plain, 12.0 * (0.7 - 1.0) + 12.0 * (1.2 - 1.0), "mass follows the line")

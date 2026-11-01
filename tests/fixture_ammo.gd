@@ -9,13 +9,13 @@ const Arena = preload("res://scripts/combat/arena.gd")
 const AIM := Vector2(0.0, -1000.0)  ## the world point fixed guns are aimed at (straight up, along the guns)
 
 
-## One room: the gun `gun_id` (inside half x 13..16, y 16..17), a reactor at (19, 16) and the cables joining them.
-## Returns {ship, gun, reactor}.
+## One room: the gun `gun_id` (a tier 1-2 gun's breech is 2x2: inside half x 13..14, y 16..17, its barrel on x 12..15), a reactor at (19, 16)
+## and the cables joining them. Returns {ship, gun, reactor}.
 static func room(gun_id := "artemis_mk1") -> Dictionary:
 	var ship := Wall.wall_ship(1, 0)
-	var gun: int = ship.components.place_mount(ship.grid, gun_id, Wall.out_anchor(0), 0)
+	var gun: int = ship.components.place_mount(ship.grid, gun_id, Wall.out_anchor(0) - Vector2i(1, 0), 0)
 	var reactor: int = ship.components.place(ship.grid, "reactor_mk1", Vector2i(19, 16), 0)
-	for c in [Vector2i(16, 17), Vector2i(17, 17), Vector2i(18, 17), Vector2i(19, 17)]:
+	for c in [Vector2i(14, 17), Vector2i(15, 17), Vector2i(16, 17), Vector2i(17, 17), Vector2i(18, 17), Vector2i(19, 17)]:
 		ship.cables.place(ship.grid, c)
 	ship.refresh()
 	return {"ship": ship, "gun": gun, "reactor": reactor}

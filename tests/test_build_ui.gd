@@ -179,7 +179,7 @@ func test_the_selection_card_shows_the_stats_of_the_selected_def() -> void:
 	var rows := {}
 	for r in inf["rows"]:
 		rows[r[0]] = r[1]
-	eq(rows.get("Size"), "4x2 + 4x2 outside", "the size of both halves")
+	eq(rows.get("Size"), "2x2 + 4x2 outside", "the size of both halves")
 	eq(rows.get("Power"), "-2", "the power")
 	eq(rows.get("HP"), "6 (outside 5)", "hp of both halves")
 	eq(rows.get("Thrust"), "10", "and the key stat")

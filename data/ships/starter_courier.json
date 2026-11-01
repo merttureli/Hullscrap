@@ -1,8 +1,8 @@
 {
 "blurb": "Small, quick and reliable: a titanium nose, a pulse gun and a roomy empty frame. The strafe jets and a light shield wait in the hold.",
-"cables": {"cells":[[29,21],[30,21],[31,21],[32,21],[33,21],[29,22],[29,23],[29,24],[29,25],[29,26],[30,26],[31,26],[32,26],[29,27],[29,28],[29,29],[29,30],[30,30],[30,31],[30,32],[30,33],[30,34],[30,35],[30,36],[31,36]],"version":1},
+"cables": {"cells":[[29,21],[30,21],[31,21],[32,21],[33,21],[29,22],[29,23],[29,24],[29,25],[29,26],[30,26],[31,26],[32,26],[29,27],[29,28],[29,29],[29,30],[30,30],[30,31],[30,32],[30,33],[30,34],[30,35],[29,36],[30,36],[31,36],[32,36]],"version":1},
 "cargo": {"afterburner":1,"copper":80,"credits":500,"fuel":6,"polymer":30,"scrap":400,"shield_mk1":1,"titanium":40},
-"components": {"instances":[{"anchor":[29,20],"heat":0.0,"hp":5,"id":"pulse_mk1","out":[29,16],"out_hp":10,"rot":0,"status":"ok","uid":1},{"anchor":[33,21],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":2},{"anchor":[26,24],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":3},{"anchor":[26,26],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":4},{"anchor":[26,28],"heat":0.0,"hp":5,"id":"oxygen_gen","rot":1,"status":"ok","uid":5},{"anchor":[32,26],"heat":0.0,"hp":4,"id":"fabricator","rot":0,"status":"ok","uid":6},{"anchor":[29,31],"heat":0.0,"hp":8,"id":"reactor_mk2","rot":0,"status":"ok","uid":7},{"anchor":[27,36],"heat":0.0,"hp":8,"id":"engine_mk2","out":[27,39],"out_hp":6,"rot":2,"status":"ok","uid":8},{"anchor":[31,36],"heat":0.0,"hp":8,"id":"engine_mk2","out":[31,39],"out_hp":6,"rot":2,"status":"ok","uid":9}],"next_uid":10,"version":3},
+"components": {"instances":[{"anchor":[30,20],"heat":0.0,"hp":5,"id":"pulse_mk1","out":[29,16],"out_hp":10,"rot":0,"status":"ok","uid":1},{"anchor":[33,21],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":2},{"anchor":[26,24],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":3},{"anchor":[26,26],"heat":0.0,"hp":4,"id":"bed","rot":1,"status":"ok","uid":4},{"anchor":[26,28],"heat":0.0,"hp":5,"id":"oxygen_gen","rot":1,"status":"ok","uid":5},{"anchor":[32,26],"heat":0.0,"hp":4,"id":"fabricator","rot":0,"status":"ok","uid":6},{"anchor":[29,31],"heat":0.0,"hp":8,"id":"reactor_mk2","rot":0,"status":"ok","uid":7},{"anchor":[28,36],"heat":0.0,"hp":8,"id":"engine_mk2","out":[27,39],"out_hp":6,"rot":2,"status":"ok","uid":8},{"anchor":[32,36],"heat":0.0,"hp":8,"id":"engine_mk2","out":[31,39],"out_hp":6,"rot":2,"status":"ok","uid":9}],"next_uid":10,"version":4},
 "crafting": {"known":["basic_armor","bed","bolt_thrower_scrap","engine_mk1","engine_scrap_mk1","fabricator","helm","laser_mk1","medbay","net_mouth_scrap","oxygen_gen","oxygen_scrap_mk1","pistol","polymer","radiator","rattle_burst_scrap","reactor_mk1","reactor_scrap_mk1","robot_arm","shield_mk1","shield_scrap_mk1","shrapnel_cannon_scrap"],"queue":[],"version":1},
 "crew": [{"name":"Soldier","species":"human"},{"name":"Ada","species":"human"},{"name":"Bram","species":"basalt"}],
 "doors_open": [],
@@ -262,6 +262,6 @@
 	[35,38,"titanium_alloy"],
 	[36,38,"titanium_alloy"]
 ],
-"version": 4,
+"version": 7,
 "world_pos": [0.0,0.0]
 }

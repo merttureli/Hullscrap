@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -42,7 +42,7 @@
  "glow": {
   "image": "mire_bog_mortar_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -72,7 +72,7 @@
    ]
   }
  },
- "notes": "INSIDE half of the Mire Bog Mortar: a glass slurry tank of green bog water with rising bubbles, a feed pipe, repair hatch, power coupling and the five water-gauge tubes (frame 5 = ready). fire: the tubes flash and the slurry sloshes. damaged: the tank leaks green drips, tubes dead; disabled: the tank is cracked and empty, slurry spilled. Barrel layer mire_bog_mortar_barrel: a short wide mortar tube with brass bands and a flared brass mouth rimmed with green slime that drips; fire: a green lob of slime.",
+ "notes": "INSIDE half of the Mire Bog Mortar: a glass slurry tank of green bog water with rising bubbles, a feed pipe, repair hatch, power coupling and the five water-gauge tubes (frame 5 = ready). fire: the tubes flash and the slurry sloshes. damaged: the tank leaks green drips, tubes dead; disabled: the tank is cracked and empty, slurry spilled. Barrel layer mire_bog_mortar_barrel: a short wide mortar tube with brass bands and a flared brass mouth rimmed with green slime that drips; fire: a green lob of slime. COMPACT (tier 1-2 parts take less room inside): this inside half is the centre of the original art between its own edge columns, re-outlined (art/_src/compact.py).",
  "offset": [
   0,
   -4

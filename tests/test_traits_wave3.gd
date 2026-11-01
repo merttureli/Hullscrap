@@ -168,7 +168,7 @@ func test_line_affinity_speeds_up_repairs_and_posts_of_that_line_only() -> void:
 		var s := Fixture.room_ship()
 		var uid := Fixture.put(s, "engine_scrap_mk1", 10, 10)
 		s.components.instances[uid]["status"] = "disabled"
-		var person := _person("Worker", 14, 10, ["t_rat"] if who == rat else [])
+		var person := _person("Worker", 12, 10, ["t_rat"] if who == rat else [])
 		s.crew.append(person)
 		var jobs := Jobs.new()
 		var n := 0

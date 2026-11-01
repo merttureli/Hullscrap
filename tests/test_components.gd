@@ -124,8 +124,10 @@ func test_data_is_complete() -> void:
 		eq([d["power"], d["priority"], d["tier"]], want[id], id + " power, priority, tier")
 		for k in ["name", "size", "color", "family", "manned", "stats", "line", "hp", "heat_limit", "heat_per_s", "cooling"]:
 			check(d.has(k), "%s has %s" % [id, k])
-	eq(c.def("reactor_mk1")["size"], [4, 4], "reactor is 4x4 (a crew body is 2x2)")
-	eq(c.def("engine_mk1")["size"], [4, 2], "engine is 4x2")
+	eq(c.def("reactor_mk1")["size"], [2, 4], "a tier 1-2 reactor is 2x4 (a crew body is 2x2; playtest 2, P2)")
+	eq(c.def("engine_mk1")["size"], [2, 2], "a tier 1-2 engine is 2x2 inside (its barrel is 4x2 outside)")
+	eq(c.def("engine_mk3")["size"], [4, 2], "a tier 3 engine is still 4x2")
+	eq(c.def("afterburner")["size"], [4, 2], "and a unique one keeps its size")
 	eq(c.def("oxygen_gen")["size"], [2, 4], "oxygen generator is 2x4")
 	eq(c.def("robot_arm")["size"], [2, 2], "robot arm is 2x2")
 	eq(c.def("helm")["size"], [2, 2], "even the helm is 2x2")
@@ -137,13 +139,16 @@ func test_data_is_complete() -> void:
 func test_footprint_rotation_swaps_size() -> void:
 	var c := _comps()
 	var a := Vector2i(3, 4)
-	eq(c.footprint("engine_mk1", a, 0), _block(a, 4, 2), "4x2 at rot 0")
-	eq(c.footprint("engine_mk1", a, 1), _block(a, 2, 4), "rot 1 makes it 2x4")
-	eq(c.footprint("engine_mk1", a, 2), c.footprint("engine_mk1", a, 0), "rot 2 keeps the size")
-	eq(c.footprint("engine_mk1", a, 3), c.footprint("engine_mk1", a, 1), "rot 3 swaps again")
-	eq(c.footprint("engine_mk1", a, 4), c.footprint("engine_mk1", a, 0), "rot wraps at 4")
-	eq(c.footprint("engine_mk1", a, -1), c.footprint("engine_mk1", a, 3), "negative rot wraps")
-	eq(c.footprint("reactor_mk1", a, 1).size(), 16, "a 4x4 stays 16 cells")
+	eq(c.footprint("engine_mk3", a, 0), _block(a, 4, 2), "4x2 at rot 0")
+	eq(c.footprint("engine_mk3", a, 1), _block(a, 2, 4), "rot 1 makes it 2x4")
+	eq(c.footprint("engine_mk3", a, 2), c.footprint("engine_mk3", a, 0), "rot 2 keeps the size")
+	eq(c.footprint("engine_mk3", a, 3), c.footprint("engine_mk3", a, 1), "rot 3 swaps again")
+	eq(c.footprint("engine_mk3", a, 4), c.footprint("engine_mk3", a, 0), "rot wraps at 4")
+	eq(c.footprint("engine_mk3", a, -1), c.footprint("engine_mk3", a, 3), "negative rot wraps")
+	eq(c.footprint("engine_mk1", a, 0), _block(a, 2, 2), "a tier 1 engine's inside half is 2x2")
+	eq(c.footprint("reactor_mk1", a, 0), _block(a, 2, 4), "a tier 1 reactor is 2x4")
+	eq(c.footprint("reactor_mk1", a, 1), _block(a, 4, 2), "and lies down at rot 1")
+	eq(c.footprint("reactor_mk1", a, 1).size(), 8, "a 2x4 stays 8 cells")
 	eq(c.footprint("oxygen_gen", a, 0), _block(a, 2, 4), "2x4 at rot 0")
 	eq(c.footprint("oxygen_gen", a, 1), _block(a, 4, 2), "2x4 at rot 1 lies down")
 	eq(c.footprint("nothing", a, 0).size(), 0, "unknown id has no cells")
@@ -153,12 +158,12 @@ func test_placement_needs_floor() -> void:
 	var g := _grid(false)
 	var c := _comps()
 	eq(c.can_place(g, "reactor_mk1", Vector2i(4, 4), 0), "needs floor underneath", "bare hull")
-	for p in _block(Vector2i(4, 4), 4, 4):
-		if p != Vector2i(7, 7):
+	for p in _block(Vector2i(4, 4), 2, 4):
+		if p != Vector2i(5, 7):
 			g.place("floor", p)
 	eq(c.can_place(g, "reactor_mk1", Vector2i(4, 4), 0), "needs floor underneath", "one cell still bare")
-	g.place("floor", Vector2i(7, 7))
-	eq(c.can_place(g, "reactor_mk1", Vector2i(4, 4), 0), "", "all sixteen cells floored")
+	g.place("floor", Vector2i(5, 7))
+	eq(c.can_place(g, "reactor_mk1", Vector2i(4, 4), 0), "", "all eight cells floored")
 	check(c.place(g, "reactor_mk1", Vector2i(4, 4), 0) > 0, "placed")
 	eq(c.can_place(g, "nothing", Vector2i(4, 4), 0), "unknown component", "unknown id refused")
 	eq(c.place(g, "nothing", Vector2i(4, 4), 0), -1, "unknown id not placed")
@@ -168,8 +173,8 @@ func test_placement_outside_the_hull() -> void:
 	var g := _grid()
 	var c := _comps()
 	eq(c.can_place(g, "helm", Vector2i(0, 0), 0), "outside the hull", "corner is outside")
-	eq(c.can_place(g, "engine_mk1", Vector2i(18, 10), 0), "outside the hull", "half off the grid")
-	eq(c.can_place(g, "engine_mk1", Vector2i(-1, 10), 0), "outside the hull", "negative cells")
+	eq(c.can_place(g, "engine_mk3", Vector2i(18, 10), 0), "outside the hull", "half off the grid")
+	eq(c.can_place(g, "engine_mk3", Vector2i(-1, 10), 0), "outside the hull", "negative cells")
 	eq(c.place(g, "helm", Vector2i(0, 0), 0), -1, "not placed")
 	eq(c.instances.size(), 0, "nothing was added")
 
@@ -189,34 +194,34 @@ func test_walls_and_doors_are_not_floor() -> void:
 func test_overlap_names_the_other_component() -> void:
 	var g := _grid()
 	var c := _comps()
-	var r := c.place(g, "reactor_mk1", Vector2i(3, 3), 0)  # x 3..6, y 3..6
+	var r := c.place(g, "reactor_mk1", Vector2i(3, 3), 0)  # x 3..4, y 3..6
 	check(r > 0, "reactor placed")
 	var want := "overlaps " + str(c.def("reactor_mk1")["name"])
-	eq(c.can_place(g, "engine_mk1", Vector2i(5, 5), 0), want, "engine clips the reactor corner")
+	eq(c.can_place(g, "engine_mk3", Vector2i(4, 5), 0), want, "engine clips the reactor corner")
 	eq(c.can_place(g, "reactor_mk2", Vector2i(3, 3), 0), want, "same cells")
-	eq(c.place(g, "engine_mk1", Vector2i(5, 5), 0), -1, "overlap not placed")
-	eq(c.can_place(g, "engine_mk1", Vector2i(7, 3), 0), "", "next to it is fine")
-	eq(c.can_place(g, "engine_mk1", Vector2i(3, 7), 0), "", "below it is fine")
-	var e := c.place(g, "engine_mk1", Vector2i(3, 7), 1)  # turned: x 3..4, y 7..10
+	eq(c.place(g, "engine_mk3", Vector2i(4, 5), 0), -1, "overlap not placed")
+	eq(c.can_place(g, "engine_mk3", Vector2i(5, 3), 0), "", "next to it is fine")
+	eq(c.can_place(g, "engine_mk3", Vector2i(3, 7), 0), "", "below it is fine")
+	var e := c.place(g, "engine_mk3", Vector2i(3, 7), 1)  # turned: x 3..4, y 7..10
 	check(e > 0, "rotated engine placed")
-	eq(c.can_place(g, "helm", Vector2i(3, 9), 0), "overlaps " + str(c.def("engine_mk1")["name"]), "rotated cells count")
+	eq(c.can_place(g, "helm", Vector2i(3, 9), 0), "overlaps " + str(c.def("engine_mk3")["name"]), "rotated cells count")
 
 
 func test_remove_frees_cells_and_uids_are_not_reused() -> void:
 	var g := _grid()
 	var c := _comps()
-	var a := c.place(g, "engine_mk1", Vector2i(3, 3), 0)  # x 3..6, y 3..4
+	var a := c.place(g, "engine_mk3", Vector2i(3, 3), 0)  # x 3..6, y 3..4
 	var b := c.place(g, "helm", Vector2i(3, 5), 0)
 	eq(a, 1, "uids start at 1")
 	eq(b, 2, "and count up")
 	eq(c.at(Vector2i(6, 4)), a, "at() finds the far cell")
 	eq(c.at(Vector2i(7, 3)), -1, "at() is -1 on a free cell")
-	eq(c.remove_at(Vector2i(4, 3)), "engine_mk1", "remove by any covered cell")
+	eq(c.remove_at(Vector2i(4, 3)), "engine_mk3", "remove by any covered cell")
 	eq(c.remove_at(Vector2i(4, 3)), "", "nothing left to remove")
 	eq(c.at(Vector2i(3, 3)), -1, "first cell freed")
 	eq(c.at(Vector2i(6, 4)), -1, "last cell freed")
 	check(not c.instances.has(a), "instance gone")
-	eq(c.can_place(g, "engine_mk1", Vector2i(3, 3), 0), "", "the cells can be used again")
+	eq(c.can_place(g, "engine_mk3", Vector2i(3, 3), 0), "", "the cells can be used again")
 	var again := c.place(g, "engine_mk1", Vector2i(3, 3), 0)
 	eq(again, 3, "a new uid, not the freed one")
 	c.remove_at(Vector2i(3, 5))
@@ -386,7 +391,8 @@ func test_the_weapon_pack() -> void:
 		if not c.has(id):
 			continue
 		var d := c.def(id)
-		eq([d["line"], d["tier"], d["size"]], [want[0], want[1], want[2]], id + " line, tier, size")
+		var size: Array = [2, 2] if int(want[1]) <= 2 and not d.get("unique", false) else want[2]  # a tier 1-2 gun's inside half is 2x2 (playtest 2, P2)
+		eq([d["line"], d["tier"], d["size"]], [want[0], want[1], size], id + " line, tier, size")
 		eq([d["family"], d["priority"], d["power"] < 0, d["manned"]], ["weapon", 5, true, true], id + " is a manned weapon station at priority 5")
 		check(str(d.get("blurb", "")) != "", id + " has a blurb")
 		eq([w.defs[id]["kind"], w.defs[id]["damage_type"]], [want[3], want[4]], id + " kind and damage type")

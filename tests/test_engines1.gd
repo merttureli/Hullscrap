@@ -90,7 +90,7 @@ func test_every_engine_has_the_numbers_of_the_table() -> void:
 		eq(d["hp"], row[5], id + " hp")
 		eq(float(d["heat_per_s"]), float(row[6]), id + " heat_per_s")
 		eq([float(d["heat_limit"]), float(d["cooling"]), int(d["priority"]), d["manned"]], [100.0, maxf(3.0, float(d["heat_per_s"])), 4, false], id + " heat limit, cooling (at least its heat, so it runs cool alone), priority, not manned")
-		eq(d["size"], row[7].duplicate() if id.begins_with("strafe") else [4, 2], id + " inside half")
+		eq(d["size"], [2, 2] if id.begins_with("strafe") or int(row[2]) <= 2 else [4, 2], id + " inside half (tier 1-2 engines and every Strafe Jets are 2x2)")
 		eq(d["mount"]["outside"], row[7], id + " outside half")
 		eq(d["mount"]["outside_hp"], int(floor(row[5] * 0.75 + 0.5)), id + " outside_hp is 75 percent of hp, rounded")
 		near(float(d["stats"]["fuel_mult"]), row[8], id + " fuel_mult")
@@ -217,12 +217,12 @@ func test_the_key_materials_exist() -> void:
 func _rig(id: String, rot: int, thick := 1) -> Dictionary:
 	var ship := Wall.wall_ship(thick, rot)
 	var def := ship.components.def(id)
-	var width: int = def["size"][0]
+	var width: int = def["mount"]["outside"][0]  # the barrel's width; a tier 1-2 breech is narrower and centred behind it
 	var depth: int = def["mount"]["outside"][1]
 	var u0 := -width / 2
 	var uid := ship.components.place_mount(ship.grid, id, Wall.corner(rot, u0, u0 + width - 1, -depth, -1), rot)
-	ship.components.place(ship.grid, "reactor_mk2", Wall.corner(rot, 3, 6, thick, thick + 3), 0)
-	for u in range(u0 + width - 1, 4):
+	ship.components.place(ship.grid, "reactor_mk2", Wall.corner(rot, 3, 4, thick, thick + 3), rot % 2)  # 2 wide, 4 deep behind the wall
+	for u in range(u0 + int((width - int(def["size"][0])) / 2.0) + int(def["size"][0]) - 1, 4):  # from the breech's last column to the reactor
 		ship.cables.place(ship.grid, Wall.at(rot, u, thick))
 	ship.refresh()
 	return {"ship": ship, "uid": uid, "id": id, "rot": rot}
@@ -240,10 +240,10 @@ func test_every_engine_places_as_a_hull_mount_through_walls_of_different_thickne
 				if d["uid"] < 0:
 					continue
 				var inst: Dictionary = ship.components.instances[d["uid"]]
-				var w: int = 2 if id.begins_with("strafe") else 4
+				var w: int = int(ship.components.def(id)["size"][0])
 				eq(inst["cells"].size(), w * 2, tag + ": the inside half is %dx2" % w)
 				eq(inst["out_cells"].size(), row[7][0] * row[7][1], tag + ": the outside half is %dx%d" % [row[7][0], row[7][1]])
-				eq(inst["link"].size(), w * thick, tag + ": the link is the wall, as wide as the engine")
+				eq(inst["link"].size(), row[7][0] * thick, tag + ": the link is the wall, as wide as the barrel")
 				eq(inst["out_hp"], ship.components.outside_hp_max(id), tag + ": the outside half is whole")
 				check(ship.components.has_outside(d["uid"]) and ship.components.link_intact(ship.grid, d["uid"]), tag + ": linked")
 				check(ship.power_state["powered"][d["uid"]], tag + ": powered")
@@ -305,7 +305,7 @@ func _bare(part_id: String) -> Dictionary:
 	var d := {"ship": ship}
 	d["reactor"] = Fixture.put(ship, "reactor_mk2", 10, 10)
 	d["part"] = Fixture.put(ship, part_id, 15, 10, 2)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	return d
 
@@ -364,7 +364,7 @@ func _fuel_ship(ids: Array) -> Ship:
 		check(Fixture.put(ship, id, 15, y, 2) >= 0, "(setup: %s placed)" % id)
 		Fixture.wire(ship, [Vector2i(14, y + 1), Vector2i(15, y + 1)])
 		y += 2
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(14, 10), Vector2i(14, 12), Vector2i(14, 13), Vector2i(14, 14)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(14, 10), Vector2i(14, 12), Vector2i(14, 13), Vector2i(14, 14)])
 	ship.inventory.counts.erase("fuel")
 	ship.inventory.add("fuel", 6)
 	ship.refresh()

@@ -17,7 +17,7 @@ extends RefCounted
 ## search, see `search` in the data). A crew member keeps their job until it is done or a job at
 ## least `switch_margin` priority points higher shows up. The player's soldier is never given a
 ## job; the player works a job by standing next to it and holding E (hand_work). Hurt crew with
-## nothing to do rest on a bed (5 hp/s) or in a powered medbay (15 hp/s).
+## nothing to do rest on a bed (5 hp/s) or in a powered medbay (15 hp/s; a medbay is one bed: it heals one crew member at a time).
 ## What the crew's traits change (traits.gd, the library in data/traits.json) is asked there: work speed
 ## (work_rate: repair, extinguish, breach, revive, swarm and aura bonuses), air and fire damage, room heat
 ## (dries_out, heat_speed), healing (heal_mult, auras), ion hits (ion_hit: damage and stun), vacuum_walk (no suffocation),
@@ -52,6 +52,7 @@ const WORK_KIND := {"extinguish": "extinguish", "repair_breach": "breach", "repa
 var board := {}  ## job key -> job: {key, type, priority, cells, slots, work, label, ...}
 var progress := {}  ## job key -> seconds of work done so far (kept while the job stays on the board)
 var orders := {}  ## job key -> job: repairs the player ordered (F), kept until done
+var patients := {}  ## medbay uid -> the name of the one crew member it is healing (a medbay is one bed)
 var restocking := {}  ## rack uid -> true: racks a crew member has started filling (they fill them to the top, not just to half)
 var combat := false  ## a fight is on: weapons, engines and shields get repaired first
 var paths_used := 0  ## path searches the last hand-out made
@@ -319,7 +320,7 @@ static func _for_member(job: Dictionary, m) -> Dictionary:
 func _still_valid(ship, m) -> bool:
 	var job: Dictionary = m.job
 	if job["type"] == "rest":
-		return m.hp < m.max_hp and _rest_ok(ship, int(job["uid"]))
+		return m.hp < m.max_hp and _rest_ok(ship, int(job["uid"])) and patients.get(int(job["uid"]), m.name) == m.name
 	if not board.has(job["key"]):
 		return false
 	var spot = job.get("spot")
@@ -411,7 +412,7 @@ func _take(ship, m, job: Dictionary, spot: Vector2i, claims: Dictionary) -> void
 		claims[job["key"]] = int(claims.get(job["key"], 0)) + 1
 
 
-## A hurt crew member with nothing to do goes to a powered medbay, else a bed (not where heal_mult is 0).
+## A hurt crew member with nothing to do goes to a powered medbay nobody is in or heading for, else a bed (not where heal_mult is 0).
 func _rest(ship, m) -> void:
 	var taken := _taken(ship, m)
 	var uids: Array = ship.components.instances.keys()
@@ -423,12 +424,45 @@ func _rest(ship, m) -> void:
 		var cands: Array = []
 		for uid in uids:
 			var inst: Dictionary = ship.components.instances[uid]
-			if ship.components.def(inst["id"]).get("family", "") == family and _rest_ok(ship, uid):
+			if ship.components.def(inst["id"]).get("family", "") == family and _rest_ok(ship, uid) and (family != "medbay" or _medbay_open(ship, uid, m)):
 				cands.append(_job("rest", "rest:%d" % uid, inst["cells"], {"uid": uid}))
 		var got := _nearest(ship, m, cands, taken)
 		if not got.is_empty():
 			_take(ship, m, got["job"], got["spot"], {})
 			return
+
+
+## Is medbay `uid` free for `m`: nobody else lies in it hurt, and no other hurt crew member has set off for it? A medbay is one
+## bed (playtest 2, P1): a second hurt crew member waits for it or uses a bed.
+func _medbay_open(ship, uid: int, m) -> bool:
+	if patients.get(uid, m.name) != m.name:
+		return false
+	for o in ship.crew:
+		if o != m and o.hp < o.max_hp and not o.job.is_empty() and o.job["type"] == "rest" and int(o.job.get("uid", -1)) == uid:
+			return false
+	return true
+
+
+## A medbay works on one crew member at a time, the one lying on it (hurt or down, and one it can heal). Whoever was there first stays its patient until
+## they are healed or leave; then the first of the crew, in list order, lying on it takes over.
+func _choose_patients(ship) -> void:
+	var next := {}
+	for uid in ship.components.instances:
+		var inst: Dictionary = ship.components.instances[uid]
+		if ship.components.def(inst["id"]).get("family", "") != "medbay":
+			continue
+		var keep: String = patients.get(uid, "")
+		var pick := ""
+		for m in ship.crew:
+			if m.hp < m.max_hp and inst["cells"].has(m.cell()) and float(TraitSet.of(m)["heal_mult"]["medbay"]) > 0.0:  # one a medbay cannot heal does not hold it
+				if m.name == keep:
+					pick = keep
+					break
+				if pick == "":
+					pick = m.name
+		if pick != "":
+			next[uid] = pick
+	patients = next
 
 
 func _rest_ok(ship, uid: int) -> bool:
@@ -515,6 +549,7 @@ func _health(ship, dt: float) -> void:
 	var auras := TraitSet.room_auras(ship)
 	var heats := {}  # room id -> heat of its hottest part, read once and only if somebody dries out
 	var heats_read := false
+	_choose_patients(ship)
 	for m in ship.crew:
 		var t := TraitSet.of(m)
 		var was_down: bool = m.is_down()
@@ -607,7 +642,7 @@ func _heal_rate(ship, m) -> float:
 		"bed":
 			return float(rates["bed"]) * float(heal["bed"])
 		"medbay":
-			if _rest_ok(ship, uid):
+			if _rest_ok(ship, uid) and patients.get(uid, m.name) == m.name:  # one bed: only its patient heals (_health picks it first)
 				return float(rates["medbay"]) * float(def.get("stats", {}).get("heal", 1.0)) * float(heal["medbay"])
 	return 0.0
 

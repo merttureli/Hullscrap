@@ -123,7 +123,7 @@ func test_a_basalt_can_work_the_afterburner_and_an_unsuited_human_cannot() -> vo
 	var ship := Fixture.room_ship()
 	Fixture.put(ship, "reactor_mk1", 10, 10)
 	var burner := Fixture.put(ship, "afterburner", 15, 10)
-	Fixture.wire(ship, [Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
+	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)])
 	ship.refresh()
 	var human := CrewMember.new("Pike", Vector2(12.0, 12.0))
 	var basalt := CrewMember.new("Bram", Vector2(12.0, 12.0), "basalt")
