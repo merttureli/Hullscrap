@@ -253,16 +253,17 @@ func test_drain_o2_lowers_the_room_air_and_heat_rises() -> void:
 func test_overdrive_raises_the_power_supply_for_10_s() -> void:
 	var d := _rig("oxygen_gen", "reactor_neon_mk1")
 	var ship: Ship = d["ship"]
-	near(_supply(ship), 20.8, "a Prism Core: 16 x 1.3")
+	var base: float = float(ship.components.def("reactor_neon_mk1")["power"]) * 1.3  # the neon line's x1.3
+	near(_supply(ship), base, "a Prism Core: its power x 1.3")
 	eq(Abilities.trigger(ship, d["reactor"]), "", "Overdrive needs no operator")
-	near(_supply(ship), 31.2, "x1.5 while it runs")
+	near(_supply(ship), base * 1.5, "x1.5 while it runs")
 	check(ship.power_state["powered"][d["part"]], "the consumer is still powered")
 	_run(ship, 3.0)
 	near(ship.components.instances[d["reactor"]]["heat"], 45.0, "15 heat a second goes into the reactor", 0.01)
 	_run(ship, 6.9)
-	near(_supply(ship), 31.2, "still on after 9.9 s")
+	near(_supply(ship), base * 1.5, "still on after 9.9 s")
 	_run(ship, 0.2)
-	near(_supply(ship), 20.8, "back after 10 s")
+	near(_supply(ship), base, "back after 10 s")
 	near(ship.components.instances[d["reactor"]]["heat"], 100.0, "the heat stops at the limit")
 
 

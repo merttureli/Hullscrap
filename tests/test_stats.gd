@@ -58,8 +58,8 @@ func test_scrap_and_neon_multiply_the_output() -> void:
 	var c := _comps()
 	var lines := Stats.load_lines()
 	var scrap := Stats.effective(c.def("reactor_scrap_mk1"), lines)
-	_near(scrap["power"], 6 * 0.9, "scrap reactor gives 6 x 0.9")
-	_near(Stats.effective(c.def("reactor_neon_mk1"), lines)["power"], 16 * 1.3, "neon reactor 16 x 1.3")
+	_near(scrap["power"], float(c.def("reactor_scrap_mk1")["power"]) * 0.9, "scrap reactor gives its power x 0.9")
+	_near(Stats.effective(c.def("reactor_neon_mk1"), lines)["power"], float(c.def("reactor_neon_mk1")["power"]) * 1.3, "neon reactor gives its power x 1.3")
 	_near(Stats.effective(c.def("engine_neon_mk1"), lines)["stats"]["thrust"], 10 * 1.3, "neon engine thrust x 1.3")
 	_near(Stats.effective(c.def("engine_scrap_mk1"), lines)["stats"]["thrust"], 10 * 0.9, "scrap engine thrust x 0.9")
 	_near(Stats.effective(c.def("oxygen_scrap_mk1"), lines)["stats"]["o2_rate"], 0.6 * 0.9, "scrap O2 rate x 0.9")
@@ -118,11 +118,11 @@ func test_power_uses_the_line_numbers() -> void:
 	Fixture.wire(ship, [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11), Vector2i(11, 12), Vector2i(11, 13), Vector2i(11, 14), Vector2i(15, 12), Vector2i(15, 13), Vector2i(15, 14)])
 	ship.refresh()
 	var n: Dictionary = ship.power_state["networks"][0]
-	_near(n["supply"], 5.4, "a scrap reactor supplies 6 x 0.9")
+	_near(n["supply"], float(ship.components.def("reactor_scrap_mk1")["power"]) * 0.9, "a scrap reactor supplies its power x 0.9")
 	_near(n["demand"], 2.4 + 2.4 + 2.0, "scrap parts draw x 1.2")
 	var p: Dictionary = ship.power_state["powered"]
-	check(p[r] and p[o] and p[e], "the oxygen generator (priority 1) and the engine (4) fit in 5.4")
-	check(not p[l], "the laser (5) does not: 5.4 - 4.8 = 0.6 left")
+	check(p[r] and p[o] and p[e], "the oxygen generator (priority 1) and the engine (4) fit in 6.3")
+	check(not p[l], "the laser (5) does not: 6.3 - 4.8 = 1.5 left, it needs 2")
 	_near(n["used"], 4.8, "used")
 
 

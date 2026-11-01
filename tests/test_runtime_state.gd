@@ -189,6 +189,7 @@ func test_the_hud_shows_fractional_power() -> void:
 	var hud := Hud.new()
 	hud.setup(b)
 	var power: Dictionary = hud.top_bar.items().filter(func(it): return it["id"] == "power")[0]
-	eq(power["text"], "5.4 / 4", "the top bar shows 5.4 supply against 4 demand")
+	var supply := snappedf(float(d["ship"].components.def("reactor_scrap_mk1")["power"]) * 0.9, 0.1)  # the scrap line's x0.9
+	eq(power["text"], "%s / 4" % str(supply), "the top bar shows the fractional supply against 4 demand")
 	hud.free()
 	_done(b)
