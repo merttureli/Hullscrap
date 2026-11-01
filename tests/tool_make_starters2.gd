@@ -12,6 +12,7 @@ extends "res://tests/tool_make_starters.gd"
 ## standard part of the race's line stands in, so this tool works before and after the tech packs land (run it again
 ## when they do). The cargo takes the same rule.
 ## The core of each ship is drawn in its own local coordinates with the centre line at x = CX; `at` puts it in the frame.
+## Like the first three, each is saved with the round build area of tool_make_starters.gd (DISC_R), not with its frame outline.
 
 const Content = preload("res://scripts/data/content.gd")
 

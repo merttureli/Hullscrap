@@ -182,7 +182,7 @@ func _free(d: Dictionary) -> void:
 	d["sim"].free()
 
 
-func test_the_panel_lists_the_known_recipes_by_category() -> void:
+func test_the_panel_lists_every_recipe_by_category_known_ones_first() -> void:
 	var d := _panel(_rig()["ship"])
 	var panel: CraftingPanel = d["panel"]
 	var rows := panel.rows()
@@ -191,7 +191,8 @@ func test_the_panel_lists_the_known_recipes_by_category() -> void:
 	eq(headers, ["Systems", "Gear", "Materials", "Modules"], "the four categories in order")
 	var ids := panel.recipe_ids()
 	check(ids.has(KICKJET) and ids.has("pistol") and ids.has("polymer") and ids.has("robot_arm"), "known recipes of each kind")
-	check(not ids.has("reactor_mk2") and not ids.has("laser_mk2"), "unknown blueprints are not listed")
+	check(ids.has("reactor_mk2") and ids.has("laser_mk2"), "unknown blueprints are listed too")
+	check(ids.find(KICKJET) < ids.find("reactor_mk2"), "after the known ones of their category")
 	eq(panel.reason(KICKJET), "", "Kickjet can be made")
 	panel.sim.player_ship().crafting.unlock("reactor_mk2")
 	eq(panel.reason("reactor_mk2"), "needs fabricator level 3", "level 3 is out of reach")
@@ -199,6 +200,41 @@ func test_the_panel_lists_the_known_recipes_by_category() -> void:
 	eq(panel.reason("laser_mk2"), "needs fabricator level 2", "and laser_mk2 needs level 2 first")
 	panel.sim.player_ship().inventory.counts.clear()
 	check(panel.reason("reactor_scrap_mk1").begins_with("missing: 30 scrap"), "missing materials are named: " + panel.reason("reactor_scrap_mk1"))
+	_free(d)
+
+
+func test_unknown_recipes_are_dimmed_but_racial_tech_waits_for_its_blueprint() -> void:
+	var d := _panel(_rig()["ship"])
+	var panel: CraftingPanel = d["panel"]
+	var ship: Ship = panel.sim.player_ship()
+	var ids := panel.recipe_ids()
+	check(ids.has("reactor_mk2") and not ship.crafting.is_known("reactor_mk2"), "an unknown recipe of the game's own tech is listed")
+	check(not ids.has("basalt_vacuum_forge"), "racial tech of a people not met is not")
+	panel.selected = "reactor_mk2"
+	panel.craft_selected()
+	eq(panel.message, "Reactor Mk2: " + CraftingPanel.BLUEPRINT_HELP, "asking for it explains where blueprints come from")
+	eq(ship.crafting.queue.size(), 0, "and queues nothing")
+	ship.crafting.unlock("basalt_vacuum_forge")
+	check(panel.recipe_ids().has("basalt_vacuum_forge"), "learning the blueprint lists it")
+	_free(d)
+
+
+func test_the_selected_recipe_is_described_and_the_help_box_toggles() -> void:
+	var d := _panel(_rig()["ship"])
+	var panel: CraftingPanel = d["panel"]
+	panel.open()
+	panel.selected = KICKJET
+	var desc := panel.described()
+	check(desc["does"].begins_with("Pushes the ship") and desc["lore"] != "", "what the part does, and its lore: " + str(desc["does"]))
+	check(desc["rows"].any(func(r): return r[0] == "Thrust"), "its stats")
+	panel.selected = "pistol"
+	check(panel.described()["does"].contains("Gear"), "gear gets its line too")
+	check(not panel.help_open, "the help box starts shut")
+	panel._input(_key(KEY_SLASH))
+	check(panel.help_open, "? opens it")
+	check(panel.help_lines().size() >= 4 and panel.help_lines()[0].contains("recipe"), "it explains the recipe, the stations, the hold and blueprints")
+	panel._gui_input(_click(panel.help_rect().get_center()))
+	check(not panel.help_open, "a click on the ? button shuts it")
 	_free(d)
 
 

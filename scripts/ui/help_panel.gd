@@ -35,7 +35,7 @@ const COLUMNS: Array = [
 	[
 		["BUILDING (B for build mode)", [
 			["Tab / Shift+Tab", "Palette tab: Structure, Shapes, Systems, Weapons, Engines, Utility, Cargo"],
-			["1 - 9", "Pick a card of the tab (or click it); grey = can't pay or none held"],
+			["1 - 9", "Pick a card of the tab (or click it). It lists the parts you hold or can craft; grey = none held or can't pay"],
 			["Left mouse", "Place; drag to paint (a system goes down on release)"],
 			["Shift+Left drag", "Straight line"],
 			["Ctrl+Left drag", "Rectangle (a wall makes a room)"],
@@ -99,8 +99,10 @@ const COLUMNS: Array = [
 		]],
 		["CRAFTING (C)", [
 			["C", "Crafting panel, in build or play mode"],
-			["Tab", "Switch between the fabricator and the smelter (steel, alloy, conductor, glass lattice)"],
-			["Click, or Up / Down + Enter", "Queue a recipe"],
+			["Tab", "Fabricator / smelter (steel, alloy, conductor, glass)"],
+			["?", "How crafting works"],
+			["Click, or Up / Down + Enter", "Queue a recipe; the part lands in the hold, then place it from the build palette (B)"],
+			["Dimmed recipe", "Needs a blueprint: salvage scans, events, stores"],
 			["PgUp / PgDn", "Scroll fast"],
 			["Click a queued job", "Cancel it"],
 			["U", "Debug: unlock a random blueprint"],

@@ -78,7 +78,7 @@
       "id": "fenn_market_missile",
       "name": "Market Missile",
       "blurb": "Cheap enough to fire on credit. One in four is a dud, and it comes with a receipt.",
-      "quirk": "Fires scrap for ammunition and flies fast and agile, but a quarter of the missiles are duds: its damage already counts them (4 x 0.75).",
+      "quirk": "Fires scrap for ammunition and flies fast and agile, but a quarter of the missiles are duds: its damage already counts them (5 x 0.75).",
       "family": "weapon",
       "line": "standard",
       "tier": 2,

@@ -124,7 +124,7 @@ func test_choosing_resets_the_crew_the_camera_and_the_build_palette() -> void:
 func test_the_camera_fit_shows_the_whole_hull_between_the_hud_panels() -> void:
 	for path in ShipPicker.DESIGNS:
 		var ship = preload("res://scripts/ship/ship.gd").from_design(path)
-		for view in [Vector2(1600.0, 900.0), Vector2(1280.0, 720.0)]:
+		for view in [Vector2(1600.0, 900.0), Vector2(1280.0, 720.0), Vector2(1152.0, 648.0)]:  # the round frame is 77 cells across: it still fits a small window
 			var f := ShipPicker.fit(ship.grid, view)
 			var z: float = f["zoom"]
 			var lo := Vector2(INF, INF)

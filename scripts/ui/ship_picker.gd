@@ -115,7 +115,7 @@ static func fit(grid, view: Vector2) -> Dictionary:
 	if grid.hull.is_empty():
 		return {"zoom": 0.5, "pos": Vector2.ZERO}
 	var px := (hi - lo) * CELL_PX
-	var z := clampf(minf((view.x - 2.0 * HUD_SIDE) / px.x, (view.y - HUD_TOP - HUD_BOTTOM) / px.y) * 0.95, 0.2, 1.2)
+	var z := clampf(minf((view.x - 2.0 * HUD_SIDE) / px.x, (view.y - HUD_TOP - HUD_BOTTOM) / px.y) * 0.95, 0.1, 1.2)
 	var centre := ((lo + hi) / 2.0 - Vector2(grid.size) / 2.0) * CELL_PX
 	return {"zoom": z, "pos": centre - Vector2(0.0, (HUD_TOP - HUD_BOTTOM) / 2.0 / z)}
 

@@ -1,8 +1,10 @@
 extends Control
-## The crafting panel (C, in build or play mode): a fabricator screen over the game. Left: the recipes
-## the player knows, grouped by category, with what each needs (missing materials in red) and why it
-## cannot be made yet. Right: the fabricator (level, tools, workshop modules counted) and the queue
-## with progress bars; a click on a queued job cancels it (the materials come back). Bottom: the
+## The crafting panel (C, in build or play mode): a fabricator screen over the game. Left: every recipe,
+## grouped by category, the known ones first with what each needs (missing materials in red) and why it
+## cannot be made yet, then the ones whose blueprint is missing, dimmed (not those of a unique or relic part, or of a
+## people not met yet: racial tech stays hidden until learned). Middle: what the selected recipe makes, described
+## (describe.gd), or how crafting works (? toggles it). Right: the fabricator (level, tools, workshop modules counted)
+## and the queue with progress bars; a click on a queued job cancels it (the materials come back). Bottom: the
 ## cargo's materials. Tab (or a click on the tabs at the top) switches to the smelter (docs/CONTENT.md
 ## section 12): its recipes, its level, speed and tools, its own queue. Click a recipe, or select it with Up/Down and press Enter, to queue it. U
 ## unlocks a random locked blueprint (debug, until salvage gives real ones).
@@ -13,10 +15,13 @@ extends Control
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
 const Processing = preload("res://scripts/craft/processing.gd")
+const Describe = preload("res://scripts/ui/describe.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 const STATION_IDS: Array[String] = ["fabricator", "smelter"]  ## the tabs, in order
 const CATEGORIES: Array[String] = ["system", "gear", "material", "module"]
 const CATEGORY_NAMES := {"system": "Systems", "gear": "Gear", "material": "Materials", "module": "Modules"}
+const BLUEPRINT_HELP := "Blueprint needed: scan a salvaged part, or find it in events and stores"
 const MARGIN := 40.0
 const TITLE_H := 56.0
 const CARGO_H := 96.0
@@ -47,6 +52,9 @@ var message := ""
 var message_bad := false
 var hover_row := -1  ## index into rows()
 var hover_job := -1
+var help_open := false  ## the middle column shows how crafting works, not the selected recipe
+var _ids_cache: Array[String] = []  # recipe_ids() for _ids_key: it is asked for many times a frame
+var _ids_key := ""
 
 
 func _ready() -> void:
@@ -68,17 +76,31 @@ func ship():
 	return sim.player_ship() if sim != null else null
 
 
-## The ids of the known recipes of the shown station in screen order: by category, then as listed in data/recipes.json.
+## The ids of the recipes of the shown station in screen order: by category, the known ones first, then the ones
+## whose blueprint is missing (as listed in data/recipes.json), minus the ones kept hidden (_hidden).
 func recipe_ids() -> Array[String]:
-	var out: Array[String] = []
 	var s = ship()
 	if s == null:
-		return out
+		return []
+	var key := "%s|%d|%d|%d" % [station, s.crafting.known.size(), s.crafting.order.size(), s.get_instance_id()]
+	if key == _ids_key:
+		return _ids_cache
+	var out: Array[String] = []
 	for cat in CATEGORIES:
-		for id in s.crafting.ids():
-			if s.crafting.is_known(id) and s.crafting.def(id)["category"] == cat and s.crafting.station_of(id) == station:
-				out.append(id)
+		for known in [true, false]:
+			for id in s.crafting.ids():
+				if s.crafting.def(id)["category"] == cat and s.crafting.station_of(id) == station and s.crafting.is_known(id) == known and (known or not _hidden(s, id)):
+					out.append(id)
+	_ids_key = key
+	_ids_cache = out
 	return out
+
+
+## Is the unknown recipe `id` kept off the list: the part it makes is unique or a relic (found, never built), or it is
+## racial tech of a people you have not met (a tech_* pack)? Learning the blueprint shows it.
+func _hidden(s, id: String) -> bool:
+	var d: Dictionary = s.components.def(s.crafting.def(id)["output"]["item"])
+	return d.get("unique", false) or d.get("relic", false) or Content.origin("recipes", id).begins_with("tech_")
 
 
 ## The rows of the left column: {"header": text} for a category, {"id": recipe id} for a recipe.
@@ -169,6 +191,8 @@ func craft(id: String) -> String:
 	var why: String = s.crafting.enqueue(id, s.inventory, station_info(s))
 	if why == "":
 		_say("Queued " + _name(id), false)
+	elif not s.crafting.is_known(id):
+		_say("%s: %s" % [_name(id), BLUEPRINT_HELP], true)
 	else:
 		_say("%s: %s" % [_name(id), why], true)
 	return why
@@ -255,6 +279,8 @@ func _input(e: InputEvent) -> void:
 					craft_selected()
 				KEY_U:
 					debug_unlock()
+				KEY_SLASH, KEY_QUESTION:
+					help_open = not help_open
 
 
 func _gui_input(e: InputEvent) -> void:
@@ -267,7 +293,9 @@ func _gui_input(e: InputEvent) -> void:
 				var job := job_at(e.position)
 				var row := row_at(e.position)
 				var tab := tab_at(e.position)
-				if tab >= 0:
+				if help_rect().has_point(e.position):
+					help_open = not help_open
+				elif tab >= 0:
 					set_station(STATION_IDS[tab])
 				elif job >= 0:
 					cancel_job(job)
@@ -303,13 +331,21 @@ func panel_rect() -> Rect2:
 
 func list_rect() -> Rect2:
 	var p := panel_rect()
-	return Rect2(p.position + Vector2(PAD, TITLE_H), Vector2(p.size.x * 0.58 - PAD, p.size.y - TITLE_H - CARGO_H - PAD))
+	return Rect2(p.position + Vector2(PAD, TITLE_H), Vector2(p.size.x * 0.42 - PAD, p.size.y - TITLE_H - CARGO_H - PAD))
 
 
-func side_rect() -> Rect2:
+## The middle column: the selected recipe described, or how crafting works.
+func details_rect() -> Rect2:
 	var p := panel_rect()
 	var l := list_rect()
-	return Rect2(Vector2(l.end.x + GAP, l.position.y), Vector2(p.end.x - PAD - l.end.x - GAP, l.size.y))
+	return Rect2(Vector2(l.end.x + GAP, l.position.y), Vector2(p.size.x * 0.3, l.size.y))
+
+
+## The right column: the station and its queue.
+func side_rect() -> Rect2:
+	var p := panel_rect()
+	var d := details_rect()
+	return Rect2(Vector2(d.end.x + GAP, d.position.y), Vector2(p.end.x - PAD - d.end.x - GAP, d.size.y))
 
 
 func cargo_rect() -> Rect2:
@@ -326,6 +362,12 @@ func queue_rect() -> Rect2:
 func tab_rect(i: int) -> Rect2:
 	var p := panel_rect()
 	return Rect2(p.position.x + 250.0 + i * 124.0, p.position.y + 12.0, 120.0, 32.0)
+
+
+## The "?" button after the tabs: how crafting works.
+func help_rect() -> Rect2:
+	var t := tab_rect(STATION_IDS.size() - 1)
+	return Rect2(t.end.x + 8.0, t.position.y, 32.0, t.size.y)
 
 
 ## The tab at `p`, or -1.
@@ -413,10 +455,11 @@ func _draw() -> void:
 	var p := panel_rect()
 	_panel(p)
 	_text(str(Crafting.STATIONS[station]).to_upper(), p.position + Vector2(PAD, 36.0), 26, TEXT)
-	_text(message, p.position + Vector2(520.0, 34.0), 16, BAD if message_bad else GOOD)
+	_text(message, p.position + Vector2(560.0, 34.0), 16, BAD if message_bad else GOOD)
 	_draw_tabs()
 	var fab := station_info(s)
 	_draw_list(s, fab)
+	_draw_details()
 	if station == Crafting.FABRICATOR:
 		_draw_fabricator(s, fab)
 	else:
@@ -426,6 +469,10 @@ func _draw() -> void:
 
 
 func _draw_tabs() -> void:
+	var h := help_rect()
+	draw_rect(h, ROW_BG if help_open else PANEL_BG)
+	draw_rect(h, EDGE if help_open else EDGE_DIM, false, 2.0 if help_open else 1.0)
+	_text("?", h.position + Vector2(0.0, 22.0), 18, TEXT if help_open else DIM_TEXT, h.size.x, HORIZONTAL_ALIGNMENT_CENTER)
 	for i in STATION_IDS.size():
 		var r := tab_rect(i)
 		var on := STATION_IDS[i] == station
@@ -434,11 +481,74 @@ func _draw_tabs() -> void:
 		_text(str(Crafting.STATIONS[STATION_IDS[i]]), r.position + Vector2(0.0, 22.0), 16, TEXT if on else DIM_TEXT, r.size.x, HORIZONTAL_ALIGNMENT_CENTER)
 
 
+## The recipe under the cursor, described: what its output does, its stats, what its type means, the lore.
+func described() -> Dictionary:
+	var s = ship()
+	if s == null or selected == "":
+		return {}
+	return Describe.of(s.crafting.def(selected)["output"]["item"], s)
+
+
+## How crafting works, a paragraph each (the "?" box).
+func help_lines() -> Array[String]:
+	return [
+		"Pick a recipe (click it, or Up / Down and Enter). Its materials leave the cargo and the job joins the queue of its station.",
+		"The fabricator builds parts, gear and modules. It needs power, and workshop modules in its room raise its level. The smelter turns scrap and ore into refined materials; a crew member at it works %d%% faster. Tab switches between them." % roundi(Processing.manned_speed() * 100.0),
+		"When a job ends, the part lands in the hold. Place it from the build palette (B). Click a queued job to cancel it and get the materials back.",
+		"Dimmed recipes need a blueprint: scan a salvaged part, or find it in events and stores. The build palette lists only parts you hold or have a blueprint for.",
+	]
+
+
+func _draw_details() -> void:
+	var r := details_rect()
+	_panel(r, ROW_BG)
+	var x := r.position.x + 12.0
+	var w := r.size.x - 24.0
+	if help_open:
+		_text("HOW CRAFTING WORKS", r.position + Vector2(12.0, 24.0), 15, AMBER)
+		var yy := r.position.y + 38.0
+		for line in help_lines():
+			yy += _para(line, Vector2(x, yy), w, 14, TEXT) + 10.0
+		return
+	var d := described()
+	if d.is_empty():
+		_text("Nothing selected", r.position + Vector2(12.0, 24.0), 15, DIM_TEXT)
+		return
+	_text(_name(selected).to_upper(), r.position + Vector2(12.0, 24.0), 15, AMBER)
+	var y := r.position.y + 38.0
+	var limit := r.end.y - 10.0
+	if d["does"] != "":
+		y += _para(d["does"], Vector2(x, y), w, 14, TEXT) + 8.0
+	for row in d["rows"]:
+		if y > limit:
+			return
+		_text(str(row[0]), Vector2(x, y + 13.0), 13, DIM_TEXT)
+		y += _para(str(row[1]), Vector2(x + 84.0, y), w - 84.0, 13, TEXT) + 1.0
+	y += 6.0
+	for line in d["kinds"]:
+		if y > limit:
+			return
+		y += _para(line, Vector2(x, y), w, 13, TEXT) + 4.0
+	for line in d["notes"]:
+		if y > limit:
+			return
+		y += _para(line, Vector2(x, y), w, 13, AMBER) + 4.0
+	if y <= limit and d["lore"] != "":
+		_para(d["lore"], Vector2(x, y + 4.0), w, 13, DIM_TEXT)
+
+
+## Draw `text` wrapped to `width` with its top at `at`; returns its height.
+func _para(text: String, at: Vector2, width: float, font_size: int, col: Color) -> float:
+	var font := ThemeDB.fallback_font
+	draw_multiline_string(font, at + Vector2(0.0, font_size), text, HORIZONTAL_ALIGNMENT_LEFT, width, font_size, -1, col)
+	return font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, width, font_size).y
+
+
 func _draw_list(s, fab: Dictionary) -> void:
 	var l := list_rect()
 	var all := rows()
 	if all.is_empty():
-		_text("No blueprints known", l.position + Vector2(8.0, 24.0), 16, DIM_TEXT)
+		_text("No recipes here", l.position + Vector2(8.0, 24.0), 16, DIM_TEXT)
 		return
 	var last := top - 1
 	for i in range(top, all.size()):
@@ -461,8 +571,13 @@ func _draw_list(s, fab: Dictionary) -> void:
 func _draw_recipe(s, fab: Dictionary, id: String, r: Rect2, hot: bool) -> void:
 	var rec: Dictionary = s.crafting.def(id)
 	var why := reason(id)
+	var known: bool = s.crafting.is_known(id)
+	if not known:
+		why = BLUEPRINT_HELP
 	var picked := id == selected
-	draw_rect(r.grow(-2.0), ROW_BG)
+	draw_rect(r.grow(-2.0), ROW_BG if known else PANEL_BG)
+	if not known:
+		draw_rect(r.grow(-2.0), Color(0.0, 0.0, 0.0, 0.2))  # dimmed: its blueprint is missing
 	draw_rect(r.grow(-2.0), EDGE if picked else (AMBER if hot else EDGE_DIM), false, 3.0 if picked else 1.0)
 	var out: Dictionary = rec["output"]
 	var title := _name(id) + (" x%d" % out["count"] if out["count"] > 1 else "")
@@ -471,15 +586,15 @@ func _draw_recipe(s, fab: Dictionary, id: String, r: Rect2, hot: bool) -> void:
 	if not rec["tools"].is_empty():
 		meta += "   " + ", ".join(rec["tools"])
 	var level_ok: bool = int(fab["level"]) >= rec["fab_level"]
-	_text(meta, Vector2(r.position.x, r.position.y + 21.0), 13, DIM_TEXT if level_ok else BAD, r.size.x - 12.0, HORIZONTAL_ALIGNMENT_RIGHT)
+	_text(meta, Vector2(r.position.x, r.position.y + 21.0), 13, DIM_TEXT if level_ok or not known else BAD, r.size.x - 12.0, HORIZONTAL_ALIGNMENT_RIGHT)
 	var x := r.position.x + 12.0
 	var short: Dictionary = s.inventory.missing(rec["materials"])
 	for m in rec["materials"]:
 		var have: int = s.inventory.count(m)
 		var seg := "%s %d" % [s.crafting.name_of(m), rec["materials"][m]] if not short.has(m) else "%s %d/%d" % [s.crafting.name_of(m), have, rec["materials"][m]]
-		_text(seg, Vector2(x, r.position.y + 39.0), 13, BAD if short.has(m) else DIM_TEXT)
+		_text(seg, Vector2(x, r.position.y + 39.0), 13, BAD if short.has(m) and known else DIM_TEXT)
 		x += ThemeDB.fallback_font.get_string_size(seg, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0
-	_text("Enter / click to craft" if why == "" else why, r.position + Vector2(12.0, 56.0), 12, GOOD if why == "" else AMBER)
+	_text("Enter / click to craft" if why == "" else why, r.position + Vector2(12.0, 56.0), 12, GOOD if why == "" else (DIM_TEXT if not known else AMBER))
 
 
 func _draw_fabricator(s, fab: Dictionary) -> void:
@@ -571,7 +686,7 @@ func _draw_cargo(s) -> void:
 	var r := cargo_rect()
 	_panel(r, ROW_BG)
 	_text("CARGO", r.position + Vector2(10.0, 24.0), 15, AMBER)
-	_text("C / Esc close    Tab: fabricator / smelter    Up Down select    Enter or click a recipe: craft    click a job: cancel    U: debug unlock a blueprint    wheel: scroll",
+	_text("C / Esc close    ?: how it works    Tab: fabricator / smelter    Up Down select    Enter or click a recipe: craft    click a job: cancel    U: debug unlock a blueprint    wheel: scroll",
 		r.position + Vector2(10.0, r.size.y - 10.0), 13, DIM_TEXT)
 	var x := r.position.x + 90.0
 	var y := r.position.y + 24.0
