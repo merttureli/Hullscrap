@@ -222,11 +222,6 @@ func draw_card(cv: CanvasItem, e: Dictionary, r: Rect2, selected: bool, hot: boo
 	var x := r.position.x + 10.0
 	var w := r.size.x - 20.0
 	UiKit.text(cv, e["name"], Vector2(x, r.position.y + 74.0), 12, UiKit.TEXT, HORIZONTAL_ALIGNMENT_LEFT, w, UiKit.bold())
-	if e["kind"] == "part":  # a weapon's kind in its colour (and AUTO for a turret) under the name
-		var tx := x
-		for k in Describe.weapon_tags(e["id"]):
-			UiKit.text(cv, k["label"], Vector2(tx, r.position.y + 87.0), 11, k["color"], HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
-			tx += UiKit.text_width(k["label"], 11, UiKit.bold()) + 8.0
 	var line := Palette.size_text(e["size"])  # a mount's outside half shows in the picture
 	UiKit.text(cv, line, Vector2(x, r.end.y - 12.0), 11, UiKit.DIM_TEXT)
 	var pw := float(e["power"])
@@ -235,6 +230,11 @@ func draw_card(cv: CanvasItem, e: Dictionary, r: Rect2, selected: bool, hot: boo
 	_draw_price(cv, e, Vector2(r.end.x - 10.0, r.end.y - 12.0))
 	if not e["ok"]:
 		cv.draw_rect(r.grow(-3), GREY)
+	if e["kind"] == "part":  # a weapon's kind in its colour (and AUTO for a turret) under the name, bright even when greyed
+		var tx := x
+		for k in Describe.weapon_tags(e["id"]):
+			UiKit.text(cv, k["label"], Vector2(tx, r.position.y + 87.0), 11, k["color"], HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
+			tx += UiKit.text_width(k["label"], 11, UiKit.bold()) + 8.0
 
 
 ## Right-aligned at `right` (its baseline): how many are held for a part, else each material of the cost with its icon.
