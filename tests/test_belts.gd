@@ -412,22 +412,21 @@ func test_the_first_drive_brings_the_belt_blueprint_with_the_sim() -> void:
 	check(ship.belts.known, "the first drive in the hold teaches it")
 
 
-func test_the_palette_has_a_belt_card_that_is_locked_until_a_drive_is_aboard() -> void:
+func test_the_palette_has_a_belt_card_only_once_a_drive_has_taught_the_blueprint() -> void:
 	var ship := Wall.wall_ship(1, 0)
 	var cards := Palette.entries(Palette.Tab.STRUCTURE, ship, {"copper": 1})
-	var belt: Dictionary = {}
-	for e in cards:
-		if e["key"] == "belt":
-			belt = e
-	check(not belt.is_empty(), "a Belt card on the Structure tab")
-	eq(belt["name"], "Belt", "named Belt")
-	eq(belt["cost"], {"scrap": 1}, "1 scrap")
-	check(not belt["ok"], "locked: no drive")
-	check(String(belt["why"]).contains("drive"), "it says it needs a drive")
+	check(not cards.any(func(e): return e["key"] == "belt"), "no Belt card before the blueprint")
+	var locked := Palette.belt_entry(ship)  # the tool in hand still has a card to show
+	check(not locked["ok"], "locked: no drive")
+	check(String(locked["why"]).contains("drive"), "it says it needs a drive")
 	ship.inventory.add("belt_drive_scrap", 1)
+	var belt: Dictionary = {}
 	for e in Palette.entries(Palette.Tab.STRUCTURE, ship, {"copper": 1}):
 		if e["key"] == "belt":
 			belt = e
+	check(not belt.is_empty(), "a Belt card on the Structure tab with a drive aboard")
+	eq(belt["name"], "Belt", "named Belt")
+	eq(belt["cost"], {"scrap": 1}, "1 scrap")
 	check(belt["ok"], "unlocked with a drive aboard")
 	var info := Palette.info(belt, ship)
 	check(String(info["blurb"]).length() > 0 and info["rows"].size() >= 2, "the selection card says something")

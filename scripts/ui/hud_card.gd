@@ -1,7 +1,7 @@
 extends Control
 ## The selection card, on the right in build mode: everything about the card under the mouse in the palette, else
-## about the tool in hand (palette.gd info()): name, line, tier, a big picture, size, power, hp and the key stats,
-## the quirk and abilities, the blurb, the recipe and where it can go, and in red why it can't be placed now.
+## about the tool in hand (palette.gd info()): name, line, tier, a big picture, what it does, its stats, what its type
+## means, the quirk and abilities, the lore, the recipe and where it can go, and in red why it can't be placed now.
 ## Its height follows what it says; build_mode.gd keeps the rules. Draws only.
 
 const Palette = preload("res://scripts/build/palette.gd")
@@ -13,6 +13,7 @@ const TITLE := 18
 const BODY := 12
 const LINE := 17.0
 const PIC_H := 112.0
+const PIC_MIN := 40.0  ## the picture shrinks to this when the words need the room
 const LABEL_W := 96.0
 
 var hud: Control
@@ -60,7 +61,9 @@ func blocks() -> Array:
 	var title := UiKit.wrap(inf["title"], w, TITLE, UiKit.bold())
 	out.append(["title", title.size() * 22.0 + 4.0, {"lines": title}])
 	out.append(["chips", 26.0, {}])
-	out.append(["pic", PIC_H + 10.0, {}])
+	out.append(["pic", PIC_H + 10.0, {"h": PIC_H}])
+	if inf["does"] != "":
+		_text(out, inf["does"], w, UiKit.TEXT)
 	var rows := []
 	for row in inf["rows"]:
 		var vl := UiKit.wrap(str(row[1]), w - LABEL_W, BODY)
@@ -70,8 +73,12 @@ func blocks() -> Array:
 		rh += row[1].size() * LINE
 	out.append(["rows", rh + 6.0, {"rows": rows}])
 	if not e["ok"]:
-		var why := "None in cargo: craft it at the fabricator (C) or buy it" if e["kind"] == "part" else str(e["why"]).capitalize()
-		_text(out, why, w, UiKit.BAD.lightened(0.15))
+		var why := str(e["why"])
+		_text(out, why.substr(0, 1).to_upper() + why.substr(1), w, UiKit.BAD.lightened(0.15))
+	if not inf["kinds"].is_empty():
+		_head(out, "WHAT IT MEANS")
+		for k in inf["kinds"]:
+			_text(out, k, w, UiKit.TEXT)
 	if inf["quirk"] != "":
 		_text(out, inf["quirk"], w, UiKit.AMBER)
 	if not inf["abilities"].is_empty():
@@ -86,7 +93,23 @@ func blocks() -> Array:
 	if inf["place"] != "":
 		_head(out, "PLACEMENT")
 		_text(out, inf["place"], w, UiKit.TEXT)
+	var over := _sum(out) - available_height()
+	if over > 0.0:  # a long description: the picture gives up room so the recipe and placement still show
+		var h := maxf(PIC_MIN, PIC_H - over)
+		out[2] = ["pic", h + 10.0, {"h": h}]
 	return out
+
+
+## The tallest the card may be: the screen under the top bar, with the margins (hud.gd places it so).
+func available_height() -> float:
+	return (get_viewport_rect().size.y if is_inside_tree() else 900.0) - 56.0
+
+
+func _sum(bl: Array) -> float:
+	var h := 2.0 * PAD
+	for b in bl:
+		h += b[1]
+	return h
 
 
 func _text(out: Array, s: String, w: float, col: Color) -> void:
@@ -100,10 +123,7 @@ func _head(out: Array, s: String) -> void:
 
 ## The height the card wants for what it says now.
 func wanted_height() -> float:
-	var h := 2.0 * PAD
-	for bl in blocks():
-		h += bl[1]
-	return h
+	return _sum(blocks())
 
 
 func _draw() -> void:
@@ -125,7 +145,7 @@ func _draw() -> void:
 			"chips":
 				_draw_chips(e, Vector2(x, y + 2.0))
 			"pic":
-				var r := Rect2(x, y, w, PIC_H)
+				var r := Rect2(x, y, w, d["h"])
 				UiKit.inset(self, r)
 				Thumbs.draw(self, e, hud.build.ship, r.grow(-8), _clock)
 				if not e["ok"]:

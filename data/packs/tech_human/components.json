@@ -33,7 +33,7 @@
       "id": "human_concord_railgun",
       "name": "Concord Railgun",
       "blurb": "Rated for 'decisive engagement'. Charges slowly, the way a decision does, then settles the matter in one go.",
-      "quirk": "A rail slug that pierces 2 at 1500 px/s and hits for 6, but it charges 1.5 times as long as a Mk2 pulse.",
+      "quirk": "A rail slug that pierces 2 at 1500 px/s and hits for 9, but it charges 1.5 times as long as a Mk2 pulse.",
       "family": "weapon",
       "line": "standard",
       "tier": 3,

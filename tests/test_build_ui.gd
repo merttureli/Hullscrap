@@ -66,6 +66,8 @@ func _keys(cards: Array) -> Array:
 func test_the_palette_lists_every_placeable_id_by_category() -> void:
 	var b := _build()
 	var ship: Ship = b.ship
+	for id in ship.crafting.ids():  # a part is listed once it is held or its blueprint is known: know them all
+		ship.crafting.unlock(id)
 	var structure := _keys(Palette.entries(Palette.Tab.STRUCTURE, ship, b.session.cable_cost))
 	for id in ship.grid.defs.ids():
 		check(structure.has("tile:" + id), "Structure has the tile " + id)
@@ -81,7 +83,7 @@ func test_the_palette_lists_every_placeable_id_by_category() -> void:
 			check(not seen.has(e["id"]), e["id"] + " is on one tab only")
 			seen[e["id"]] = tab
 	for id in ship.components.ids():
-		check(seen.has(id), "every part is on a tab: " + id)
+		eq(seen.has(id), ship.crafting.has(id), "a part is on a tab when it has a known recipe (found parts with no recipe only when held): " + id)
 	for id in seen:
 		var fam := str(ship.components.def(id).get("family", ""))
 		eq(seen[id] == Palette.Tab.WEAPONS, fam == "weapon", id + ": Weapons holds the weapons")
@@ -111,7 +113,9 @@ func test_cards_follow_the_cargo_and_what_it_can_pay() -> void:
 	eq(laser["out_size"], Vector2i(4, 2), "with its outside half")
 	eq(laser["power"], -2, "and its power draw")
 	var not_held := Palette.part_entry(ship, "laser_mk2")
-	check(not not_held["ok"] and not_held["why"] == "none in cargo", "a part not held is greyed")
+	check(not not_held["ok"] and str(not_held["why"]).begins_with("none held"), "a part not held is greyed: " + str(not_held["why"]))
+	ship.crafting.unlock("laser_mk2")
+	eq(Palette.part_entry(ship, "laser_mk2")["why"], "0 held, craft at the fabricator (C)", "a known blueprint says where to craft it")
 	eq(Palette.part_entry(ship, "reactor_scrap_mk1")["power"], 5.4, "power is line-adjusted (scrap 6 x 0.9)")
 	eq(Palette.part_entry(ship, "leech_laser")["line"], "unique", "a unique part has the gold border")
 	eq(Palette.piece_entry(ship, "slope2", "wall")["cost"], {"scrap": 3}, "a piece costs by area, rounded up per cell")
@@ -180,7 +184,7 @@ func test_the_selection_card_shows_the_stats_of_the_selected_def() -> void:
 	for r in inf["rows"]:
 		rows[r[0]] = r[1]
 	eq(rows.get("Size"), "2x2 + 4x2 outside", "the size of both halves")
-	eq(rows.get("Power"), "-2", "the power")
+	eq(rows.get("Power"), "draws 2", "the power")
 	eq(rows.get("HP"), "6 (outside 5)", "hp of both halves")
 	eq(rows.get("Thrust"), "10", "and the key stat")
 	check(inf["blurb"] != "", "the blurb")
@@ -192,7 +196,9 @@ func test_the_selection_card_shows_the_stats_of_the_selected_def() -> void:
 	rows = {}
 	for r in b.hud.card.info()["rows"]:
 		rows[r[0]] = r[1]
-	eq([rows.get("Damage"), rows.get("Cooldown"), rows.get("Aim")], ["3 energy", "2.1 s", "fixed, 5 deg gimbal"], "a weapon's damage, cooldown and aim")
+	eq([rows.get("Damage"), rows.get("Fires"), rows.get("Range")], ["3 energy a shot", "every 2.1 s", "900 px"], "a weapon's damage, fire rate and range")
+	check(str(rows.get("Aim")).begins_with("Fixed gun") and str(rows.get("Aim")).contains("5 deg"), "and its aim: " + str(rows.get("Aim")))
+	check(b.hud.card.info()["does"] != "" and b.hud.card.info()["kinds"].size() >= 2, "a part says what it does and what its type means")
 	b.pick(Palette.part_entry(b.ship, "shield_mk1"))
 	inf = b.hud.card.info()
 	check(inf["rows"].has(["Layers", "1"]), "a shield's layers")
