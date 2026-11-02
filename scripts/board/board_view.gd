@@ -90,6 +90,10 @@ var _muzzle_at := Vector2.ZERO
 var _down_t := 0.0
 var _leave_t := 0.0  # seconds a "leave them behind?" question stands
 var _skitter := 0.0
+var _fight_t := 0.0  # seconds the combat music runs on after the last foe on the hunt
+var _mood := "explore"
+var _fight_t := 0.0  # seconds the combat music runs on after the last foe on the hunt
+var _mood := "explore"
 var _flicker := 0.0  # seconds of flickering lights left (the Hollow arrives)
 var _self_light: PointLight2D
 var _red: Array = []  # [[light, base energy, phase]]
@@ -147,6 +151,8 @@ func enter(p_session) -> String:
 	_down_t = 0.0
 	_flicker = 0.0
 	_leave_t = 0.0
+	_fight_t = 0.0
+	_mood = "explore"
 	_anim = {}
 	_walked = 0.0
 	_put_away(true)
@@ -175,6 +181,7 @@ func leave() -> void:
 		return
 	var result: Dictionary = session.leave()
 	Audio.fx_loop(self, "hack", "repair_loop", false)
+	Audio.mood(self, "explore")
 	Audio.muffle_music(self, false)
 	RenderingServer.set_default_clear_color(_saved_clear)
 	_free_nodes()
@@ -423,6 +430,12 @@ func _fire_down() -> bool:
 func _combat(dt: float) -> void:
 	var s = session
 	_leave_t = maxf(_leave_t - dt, 0.0)
+	var fighting: bool = s.foes.live().any(func(f): return str(f["mode"]) in ["hunt", "attack", "cover", "flee", "stalk"] or float(f["track"]) > 0.0)
+	_fight_t = 6.0 if fighting else maxf(_fight_t - dt, 0.0)
+	var want := "combat" if _fight_t > 0.0 else ("hollow" if s.hollow else "explore")
+	if want != _mood:
+		_mood = want
+		Audio.mood(self, want)
 	if s.downed:
 		_down_t += dt
 		if _down_t >= DOWN_S:
