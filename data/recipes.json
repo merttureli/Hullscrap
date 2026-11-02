@@ -12,6 +12,7 @@
     "fabricator",
     "robot_arm",
     "pistol",
+    "hand_ammo",
     "basic_armor",
     "polymer",
     "reactor_scrap_mk1",
@@ -306,6 +307,21 @@
       "fab_level": 1,
       "tools": [],
       "time": 8,
+      "category": "gear"
+    },
+    {
+      "id": "hand_ammo",
+      "output": {
+        "item": "hand_ammo",
+        "count": 10
+      },
+      "materials": {
+        "scrap": 4,
+        "copper": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 6,
       "category": "gear"
     },
     {

@@ -1,0 +1,475 @@
+{
+	"events": [
+		{
+			"id": "bsite_terminal_last_message",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "terminal"
+			},
+			"title": "A terminal, still on",
+			"text": "The terminal has been left on. A single line blinks on the black: LAST MESSAGE, UNSENT. The keyboard is clean except for three keys, which are worn to the plastic. Whoever sat here wrote this, deleted it, and wrote it again many times before they went. The cursor beats like a pulse.",
+			"choices": [
+				{
+					"text": "Read it.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It is a handover note, and it is kind. Where the lights are on a timer, which is wrong. How to jiggle the door. Which pipe knocks. At the bottom, small: I'm going to check the pipes now. You copy it to your slate, because it seems wrong for nobody to have it.",
+							"effects": {
+								"log": "log_board_last_message"
+							}
+						}
+					]
+				},
+				{
+					"text": "Pull the board for parts.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The board comes away with a sound like a small sigh. Inside there is a good deal of silicon and a great deal of dust. The cursor blinks once more, out of habit, and goes dark.",
+							"effects": {
+								"items": {
+									"silicon": 3,
+									"copper": 4
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave it on.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It seems kinder.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_terminal_still_logged_in",
+			"type": "boarding_site",
+			"weight": 14,
+			"once": false,
+			"requires": {
+				"mark": "terminal",
+				"theme": "concord"
+			},
+			"title": "Form 22",
+			"text": "A Concord terminal, still logged in under a clerk's name and a half-finished form: FORM 22, REQUEST FOR PERMISSION TO LEAVE. The field headed REASON has been filled in, deleted and filled in again. The last attempt reads simply: BECAUSE. A queue number hangs at the top of the screen. It says you are 1. 'You are being served,' the machine says. Nothing happens.",
+			"choices": [
+				{
+					"text": "File the form for them.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You fill in the form, in the clerk's name, and attach the reason. The terminal thinks about it, and then, with something like relief, a stamp comes down on the screen: APPROVED. A drawer somewhere pops open. It holds a small, orderly sum of petty cash.",
+							"effects": {
+								"items": {
+									"credits": 40
+								},
+								"rep": {
+									"concord": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Look for what the clerk was hiding.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "The terminal gives up its secrets without a fight: a locker code, a note, an inventory. 'ITEM 4,112: VESSEL, UNIDENTIFIED (PROVISIONAL),' it says of you, with some warmth.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						},
+						{
+							"weight": 40,
+							"text": "An alarm the clerk never meant to arm goes off, three decks down. Something that was asleep wakes up in a very bad mood. 'You have been served,' the terminal says.",
+							"effects": {
+								"site_fight": {
+									"kind": "scavenger",
+									"n": 2
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the queue as it is.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The number at the top of the screen goes on saying you are 1.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_relay_terminal",
+			"type": "boarding_site",
+			"weight": 40,
+			"once": true,
+			"requires": {
+				"mark": "terminal",
+				"flag": "haven_2",
+				"not_flag": "haven_3",
+				"stage_min": 4,
+				"stage_max": 7
+			},
+			"title": "RB-9",
+			"text": "A relay terminal, tagged RB-9 in white paint, with a tally scratched into its casing that goes up in fives to a number you do not try to read. A speaker the size of a coaster crackles in the wall above it. The screen is a log: a line, forty seconds long, repeated. SIGNAL RECEIVED. SIGNAL RECEIVED. Under that, in pencil taped to the glass: HOAX (RESOLVED). Someone has crossed out HOAX.",
+			"choices": [
+				{
+					"text": "Play the signal.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "A small tired voice says it. We're alive, it says. Come to the Lantern Reach. A chair scrapes. Somebody coughs. The tally on the casing, you realise, counts times heard, not times believed, and the clerk who kept it stopped counting on the last day and started to listen. You copy the log, and the bearing the relay stamped on its last fix.",
+							"effects": {
+								"flag": "haven_3",
+								"log": "log_haven_relay_rb9"
+							}
+						}
+					]
+				},
+				{
+					"text": "Pull the memory core.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The core comes out clean. It is warm, and heavier than it ought to be. When you turn it over the pencil on the glass has gone, like a breath on a mirror, and the speaker has gone quiet. You will have to take it on trust, what it said.",
+							"effects": {
+								"items": {
+									"silicon": 4
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the relay listening.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The speaker crackles once, politely, as you go.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_body_with_a_note",
+			"type": "boarding_site",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"mark": "body"
+			},
+			"title": "A note in the pocket",
+			"text": "The body is sitting against the wall with one hand on a pocket, as if to keep something in. The suit is a Drift suit, patched, kind to its owner. A scrap of paper is held in the pocket by the corner, between two fingers, deliberately. Nothing else is wrong with the room. That is the part you do not like.",
+			"choices": [
+				{
+					"text": "Take the note.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The fingers let go as though they had been waiting. It is a note, in a neat hand, to someone called Marl: where the card is, which door is not a door, and an apology about the smell. You read it, and then fold it small, and put it somewhere safe.",
+							"effects": {
+								"log": "log_board_note_in_pocket",
+								"npc_reveal": "key"
+							}
+						}
+					]
+				},
+				{
+					"text": "Close the eyes and go through the other pockets.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You do the first without thinking and the second with a little shame. A few loose credits, a lighter, a photo of a dog on a rocket crate. You leave the photo. You take the rest, and put the dog back where the hand was.",
+							"effects": {
+								"items": {
+									"credits": 20,
+									"scrap": 4
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the body be.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You say something, quietly, that you do not remember afterwards.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_body_wait_for_it",
+			"type": "boarding_site",
+			"weight": 8,
+			"once": false,
+			"requires": {
+				"mark": "body"
+			},
+			"title": "Still warm",
+			"text": "The body on the deck is face down, one arm out, as if reaching for the door. It is wearing a good suit. It is also, you notice in the instant before you take another step, the only thing in this corridor with a clean boot-print leading in. The air at your back is colder than it should be. The corridor is very still.",
+			"choices": [
+				{
+					"text": "Step over it and keep going.",
+					"outcomes": [
+						{
+							"weight": 55,
+							"text": "You step over. A hand closes on nothing where your ankle was, and something further back makes a long unhappy sound. By the time you look the corridor is empty and the boot-prints lead away. On the belt of the suit is a pouch, still sealed.",
+							"effects": {
+								"items": {
+									"hand_ammo": 6,
+									"credits": 15
+								}
+							}
+						},
+						{
+							"weight": 45,
+							"text": "Your foot comes down and the body gets up. It is not the body. The body had company, and the company has been waiting for exactly this.",
+							"effects": {
+								"site_fight": {
+									"kind": "scavenger",
+									"n": 2
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Turn the body over and look.",
+					"outcomes": [
+						{
+							"weight": 50,
+							"text": "The face is a stranger's and long past worrying. There is a keycard on a lanyard round the neck, and a tag with a name you do not read.",
+							"effects": {
+								"npc_reveal": "key"
+							}
+						},
+						{
+							"weight": 50,
+							"text": "It is not a stranger's face, quite. It is a face that has been made to look like one. 'Hello,' it says, and the rest of the corridor says it with it.",
+							"effects": {
+								"site_fight": {
+									"kind": "pirate",
+									"n": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Go round, the long way.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Nothing follows you. You are almost sure.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_room_eleven_chairs",
+			"type": "boarding_site",
+			"weight": 40,
+			"once": true,
+			"requires": {
+				"mark": "room",
+				"not_flag": "hollow_1",
+				"stage_min": 3,
+				"stage_max": 6
+			},
+			"title": "Table for eleven",
+			"text": "The mess room is warm. That is the first thing, and it is wrong: warm air in a dead place. A long table has been laid for a dinner party. You count the chairs before you can stop yourself: eleven, pushed back at the same angle, the way people stand when someone important comes in. Eleven bowls. The steam is still coming off every one. Nobody here, and the soup smells good.",
+			"choices": [
+				{
+					"text": "Pull up a chair at the end, and eat.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The chair is there when you reach for it. You eat. The soup is soup. When you put the spoon down every other spoon, up and down the table, goes down with it, once, in time. You say 'Thank you,' not knowing who to. Somewhere, the sound of eleven chairs pushing back to stand. You leave quickly, and a little tucked in.",
+							"effects": {
+								"flag": "hollow_1",
+								"log": "log_clans_eleven_chairs",
+								"crew_hp": 6
+							}
+						}
+					]
+				},
+				{
+					"text": "Count the bowls and take notes.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You write down what you see, and it reads, in your own hand, like a thing a person would write in a calm and ordinary place. Eleven bowls. Eleven chairs. One note on the wall, in a clean hand: WE'RE SO GLAD YOU CAME. You take the paper down and fold it away.",
+							"effects": {
+								"flag": "hollow_1",
+								"log": [
+									"log_clans_eleven_chairs",
+									"log_clans_out_of_the_gate"
+								]
+							}
+						}
+					]
+				},
+				{
+					"text": "Pocket a spoon and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It is very good silver. It is also still warm, and by the time you reach the door it is a little warmer. You leave it on the sill. It follows you with its eyes, in the way spoons do. You keep the one you did not mean to take.",
+							"effects": {
+								"items": {
+									"credits": 25
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the table as it is.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The steam goes on, from eleven bowls, without a draught.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_room_strange_quiet",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "room"
+			},
+			"title": "The quiet room",
+			"text": "Your boots stop making a sound at the door. It is not that the room is silent: it is that the sound stops at the threshold, like a coat handed in. You can see your torch beam, and your breath, and nothing else. In the middle of the floor someone has drawn a circle in chalk and set a single chair in it, facing the wall.",
+			"choices": [
+				{
+					"text": "Step in and sit in the chair.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "You sit. The quiet closes round you like water, and your shoulders come down for the first time in days. Time goes strange. When you stand, the world's noises come back all at once, and your hands are steady. You feel, in some way you cannot name, forgiven.",
+							"effects": {
+								"crew_hp": 8
+							}
+						},
+						{
+							"weight": 40,
+							"text": "You sit. The quiet is not empty. In it, very clearly, someone says your name, in a voice you almost knew. You are on your feet and in the corridor before you decide to move. Your heart goes for ten minutes.",
+							"effects": {
+								"crew_hp": -5
+							}
+						}
+					]
+				},
+				{
+					"text": "Toss a bolt in, and back out.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The bolt goes in without a sound and stays where it lands. Another, a heartbeat later, lands beside it. Neither of you threw it. You step back, carefully, as one steps back from a drop.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_room_hall_wake",
+			"type": "boarding_site",
+			"weight": 14,
+			"once": false,
+			"requires": {
+				"mark": "room",
+				"theme": "clans"
+			},
+			"title": "The wake",
+			"text": "A hall set for a wake, with the benches pushed in two long rows and a keg on a trestle at the head. A banner over it, in the clan's lopsided hand: TUSK, OWED EVERYONE. Somebody has left a mug on the keg lid, half full, and a plate under a cloth. There is a coat over the back of the head chair, and a hat on the coat, and the hat is not quite straight.",
+			"choices": [
+				{
+					"text": "Raise the mug to Tusk.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You drink, and it is dreadful, and you do it properly anyway, for the length of one very slow breath. Something in the room eases. A slip of paper under the mug is the menu, in somebody's blocky hand. You pocket it, and the name.",
+							"effects": {
+								"crew_hp": 5,
+								"rep": {
+									"clans": 1
+								},
+								"log": "log_board_wake_menu"
+							}
+						}
+					]
+				},
+				{
+					"text": "Open the keg.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The keg is mostly sediment, and one very large final bottle in a straw jacket, hidden in the false bottom by a person who knew exactly who would come looking. It is worth a good deal to the right buyer, and a good deal of grief to the wrong one.",
+							"effects": {
+								"items": {
+									"credits": 45
+								},
+								"rep": {
+									"clans": -1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Straighten the hat, and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You straighten it. The hall seems to take a breath. A voice, in the dark, deep and unhurried, says 'Cheers,' and does not need an answer.",
+							"effects": {
+								"rep": {
+									"clans": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the wake in peace.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The mug stays where it was. So does the hat.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}

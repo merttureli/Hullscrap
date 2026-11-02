@@ -5,6 +5,7 @@ extends RefCounted
 ## spent reviving someone), moving}. A crew member who is down when the soldier leaves is lost (boarding.gd leave()).
 
 const Arms = preload("res://scripts/board/arms.gd")
+const Site = preload("res://scripts/board/site.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 
@@ -51,6 +52,21 @@ static func join(s, names: Array) -> Array:
 			g = Arms.make_gun("service_pistol", false)
 		out.append({"m": m, "src": src, "gun": g, "cd": 0.0, "repath": 0.0, "revive": 0.0, "moving": false})
 	return out
+
+
+## A person met aboard (people.gd `npc_follow`) walks with the soldier until he leaves: a follower with no crew member behind it (`src` is null, `temp` true),
+## a sidearm of its own (`people.follow.gun`) and `people.follow.hp` health. Added to the party; returns the entry.
+static func add_temp(s, m: CrewMember) -> Dictionary:
+	var pc: Dictionary = Site.config()["people"]["follow"]
+	var g = Arms.make_gun(str(pc["gun"]), false)
+	m.max_hp = float(pc["hp"])
+	m.hp = minf(m.hp, m.max_hp)
+	m.is_player = false
+	m.job = {}
+	m.path.clear()
+	var p := {"m": m, "src": null, "temp": true, "gun": g, "cd": 0.0, "repath": 0.0, "revive": 0.0, "moving": false}
+	s.party.append(p)
+	return p
 
 
 ## The crew of the party who are down.

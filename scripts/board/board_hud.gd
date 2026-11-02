@@ -29,6 +29,7 @@ var view: Node2D  ## board_view.gd
 var _rows: Array = []  # [Rect2] of the loot list rows, in the order of session.entries()
 var _pick_rows: Array = []  # [Rect2] of the crew picker rows
 var _go := Rect2()  # the picker's "go aboard" button
+var _shop_rows: Array = []  # [Rect2] of the rows of a person's goods
 
 
 func _ready() -> void:
@@ -42,6 +43,14 @@ func pick_at(p: Vector2) -> int:
 		return -2
 	for i in _pick_rows.size():
 		if _pick_rows[i].has_point(p):
+			return i
+	return -1
+
+
+## The row of a person's goods under screen point `p`, -1 for none.
+func shop_row_at(p: Vector2) -> int:
+	for i in _shop_rows.size():
+		if _shop_rows[i].has_point(p):
 			return i
 	return -1
 
@@ -65,8 +74,10 @@ func _draw() -> void:
 	_draw_arms(size)
 	_draw_party(size)
 	_draw_feed(size)
+	_draw_reveals(size)
 	_draw_prompt(size)
 	_draw_panel(size)
+	_draw_shop(size)
 	if view.message_alive():
 		_centred(view.message, Vector2(size.x / 2.0, size.y - 150.0), 18, AMBER)
 	if view.session.hollow:
@@ -168,7 +179,7 @@ func _draw_feed(size: Vector2) -> void:
 ## What E does at the target, and the ring of a hold on the thing being held.
 func _draw_prompt(size: Vector2) -> void:
 	var t: Dictionary = view.target
-	if t.is_empty() or view.panel >= 0:
+	if t.is_empty() or view.panel >= 0 or view.shop >= 0:
 		return
 	var s = view.session
 	var site = s.site
@@ -191,6 +202,12 @@ func _draw_prompt(size: Vector2) -> void:
 			else:
 				need = float(Site.config()["props"][p["prop"]]["hold"])
 				text = "Hold E: open the %s" % name.to_lower()
+		"npc":
+			var person: Dictionary = s.people.find(t["id"])
+			at = view.to_screen(person["m"].pos)
+			text = "E: talk to %s" % person["name"] if not person["shop_open"] else "E: trade with %s" % person["name"]
+			if person["done"] and not person["shop_open"]:
+				text = "%s has said what there is to say" % person["name"]
 		"revive":
 			var who = s.party[t["id"]]["m"]
 			at = view.to_screen(who.pos)
@@ -213,6 +230,64 @@ func _draw_prompt(size: Vector2) -> void:
 		var f := clampf(view.hold / need, 0.0, 1.0)
 		draw_arc(at, 24.0, 0.0, TAU, 40, Color(0, 0, 0, 0.6), 7.0, true)
 		draw_arc(at, 24.0, -PI / 2.0, -PI / 2.0 + TAU * f, 40, AMBER if str(t["type"]) == "door" else CYAN, 5.0, true)
+
+
+## What someone's word marked: a pulsing diamond over the container (or the locked door) with its name, held at the edge of the screen when it is off it.
+func _draw_reveals(size: Vector2) -> void:
+	var s = view.session
+	var pulse := 0.6 + 0.4 * sin(Time.get_ticks_msec() / 240.0)
+	var spots := []
+	for id in s.people.revealed:
+		if not s.opened.has(id):
+			spots.append([s.site.centre_of(s.site.props[id]), str(Site.config()["props"][s.site.props[id]["prop"]]["name"])])
+	for id in s.people.revealed_doors:
+		if not s.unlocked.has(id):
+			spots.append([s.site.door_centre(s.site.doors[id]), "Locked door"])
+	var inner := Rect2(Vector2(40.0, 100.0), size - Vector2(80.0, 360.0))  # (clear of the tracker, the arms and the lines of what was taken)
+	for i in spots.size():
+		var sp: Array = spots[i]
+		var at: Vector2 = view.to_screen(sp[0])
+		if not inner.has_point(at):
+			at = Vector2(clampf(at.x, inner.position.x, inner.end.x), clampf(at.y, inner.position.y, inner.end.y))
+		var col := Color(AMBER, pulse)
+		draw_colored_polygon(PackedVector2Array([at + Vector2(0, -12), at + Vector2(10, 0), at + Vector2(0, 12), at + Vector2(-10, 0)]), Color(col, 0.35))
+		draw_polyline(PackedVector2Array([at + Vector2(0, -12), at + Vector2(10, 0), at + Vector2(0, 12), at + Vector2(-10, 0), at + Vector2(0, -12)]), col, 2.0)
+		var label := str(sp[1])
+		var w := _font().get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		_text(label, Vector2(clampf(at.x - w / 2.0, 8.0, size.x - w - 8.0), at.y - 18.0 - 15.0 * float(i % 3)), 13, col)  # (staggered, so two near each other can be read)
+
+
+## A person's goods: three rows with a price, 1-3 buys.
+func _draw_shop(size: Vector2) -> void:
+	_shop_rows.clear()
+	if view.shop < 0:
+		return
+	var s = view.session
+	var person: Dictionary = s.people.find(view.shop)
+	if person.is_empty():
+		return
+	var rows: Array = person["shop"]
+	var h := 54.0 + ROW_H * rows.size() + 34.0
+	var r := Rect2(Vector2(size.x / 2.0 - PANEL_W / 2.0 - 20.0, size.y - 120.0 - h), Vector2(PANEL_W + 40.0, h))
+	draw_rect(r, Color(PANEL_BG, 0.94))
+	draw_rect(r, EDGE, false, 2.0)
+	_text("%s, selling" % person["name"], r.position + Vector2(16.0, 30.0), 20, TEXT)
+	var credits: int = s.ship.inventory.count("credits") if s.ship != null else 0
+	var cw := _font().get_string_size("%d credits" % credits, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+	_text("%d credits" % credits, r.position + Vector2(r.size.x - cw - 16.0, 30.0), 15, AMBER)
+	for i in rows.size():
+		var row: Dictionary = rows[i]
+		var rr := Rect2(r.position + Vector2(10.0, 44.0 + ROW_H * i), Vector2(r.size.x - 20.0, ROW_H - 4.0))
+		_shop_rows.append(rr)
+		var sold: bool = bool(row["sold"])
+		var afford: bool = credits >= int(row["price"])
+		draw_rect(rr, ROW_BG if not sold else Color(ROW_BG, 0.4))
+		_text("%d" % (i + 1), rr.position + Vector2(8.0, 20.0), 15, DIM_TEXT)
+		_text("%s x%d" % [s._name(str(row["item"])), int(row["n"])], rr.position + Vector2(30.0, 20.0), 17, TEXT if not sold else DIM_TEXT)
+		var price := "sold" if sold else "%d cr" % int(row["price"])
+		var pw := _font().get_string_size(price, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+		_text(price, rr.position + Vector2(rr.size.x - pw - 10.0, 20.0), 16, DIM_TEXT if sold else (GOOD if afford else BAD))
+	_text("1-%d: buy     Esc: close" % rows.size(), r.position + Vector2(16.0, h - 12.0), 14, DIM_TEXT)
 
 
 ## The loot list of an open container.

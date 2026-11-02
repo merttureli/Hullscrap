@@ -16,6 +16,8 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Arms = preload("res://scripts/board/arms.gd")
 const Foes = preload("res://scripts/board/foes.gd")
 const Party = preload("res://scripts/board/party.gd")
+const People = preload("res://scripts/board/people.gd")
+const Themes = preload("res://scripts/board/themes.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
 
 const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
@@ -46,7 +48,9 @@ var spare_rounds := 0  ## the rounds he holds when there is no ship (a test)
 var hollow_place := false  ## the place was the Hollow's when he came (hollow-touched stand in it)
 var hollow := false  ## the Hollow took the place while he was aboard (note_hollow)
 var downed := false  ## the soldier went down: the view fades out and calls leave()
-var party: Array = []  ## the crew who came along (party.gd)
+var party: Array = []  ## the crew who came along (party.gd), and a person who follows for now (`temp`)
+var people  ## people.gd: everyone aboard who is not hostile (survivors, traders, a captive ...)
+var seen_marks := {}  ## mark id -> true: the discoveries (site.marks) that have been shown
 
 
 ## A visit to POI `poi_id` of `sector` with the `board` effect `spec` ({kind, name?, parts?}). The soldier stands at the airlock.
@@ -63,10 +67,14 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 		b.spec["parts"] = mem["parts"]
 		b.spec["name"] = mem["name"]
 	var faction := ""
+	var theme := str(mem.get("theme", ""))  # (a place is dressed the way it was the first time)
+	var hollow_now: bool = p_campaign != null and p_campaign.is_hollow(p_campaign.current)
 	if p_campaign != null:
 		faction = str(p_campaign.region_data.get("faction", ""))
+		if mem.is_empty():
+			theme = Themes.for_region(p_campaign.region_data, hollow_now)
 	var seed_value: int = Site._mix(p_sector.seed_value if p_sector != null else 0, p_poi_id, 0)
-	b.site = Site.make(seed_value, str(b.spec["kind"]), {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", [])})
+	b.site = Site.make(seed_value, str(b.spec["kind"]), {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", []), "theme": theme})
 	b.spec["name"] = b.site.site_name
 	b.spec["parts"] = b.site.parts
 	b.soldier = _soldier_of(p_ship)
@@ -85,9 +93,13 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 	for id in held:
 		b.left[int(id)] = held[id]
 	b.cleared = b.opened.size() >= b.site.containers().size()
-	b.hollow_place = p_campaign != null and p_campaign.is_hollow(p_campaign.current)
+	b.hollow_place = hollow_now
 	b.spec["crew"] = int(mem.get("crew", p_spec.get("crew", 0)))
 	b.foes.spawn_site({"hollow": b.hollow_place, "crew": b.spec["crew"], "mem": mem.get("foes", {})})
+	b.people = People.new(b)
+	b.people.spawn_site({"hollow": b.hollow_place, "mem": mem.get("people", {})})
+	for id in mem.get("marks", []) if mem.get("marks") is Array else []:
+		b.seen_marks[int(id)] = true
 	return b
 
 
@@ -295,11 +307,11 @@ func fire(dir: float) -> String:
 		_swing(dir, w)
 		return "swing"
 	var spread := rng.randf_range(-float(w["spread"]), float(w["spread"]))
-	var r := Arms.trace(site, soldier.pos, dir + spread, float(w["range"]), foes.bodies(), rng)
+	var r := Arms.trace(site, soldier.pos, dir + spread, float(w["range"]), foes.bodies() + people.bodies(), rng)
 	var from := soldier.pos + Vector2.from_angle(dir) * float(c["muzzle"])
 	events.append({"type": "shot", "from": from, "to": r["end"], "who": "soldier", "class": str(w["class"]), "kind": r["kind"]})
 	if r["ref"] != null:
-		foes.hurt(r["ref"], float(w["damage"]), r["end"])
+		_strike(r["ref"], float(w["damage"]), r["end"])
 	foes.noise(soldier.pos, float(c["noise_gun"]))
 	return "shot"
 
@@ -309,10 +321,18 @@ func _swing(dir: float, w: Dictionary) -> void:
 	var reach: float = float(w["range"]) + 0.9
 	var half := deg_to_rad(float(c["swing_arc_deg"])) / 2.0
 	events.append({"type": "swing", "from": soldier.pos, "dir": dir, "reach": reach, "who": "soldier"})
-	for b in foes.bodies():
+	for b in foes.bodies() + people.bodies():
 		if Arms.in_arc(soldier.pos, dir, half, reach, b["pos"]):
-			foes.hurt(b["ref"], float(w["damage"]), b["pos"])
+			_strike(b["ref"], float(w["damage"]), b["pos"])
 	foes.noise(soldier.pos, float(c["noise_swing"]))
+
+
+## A shot or a blow of the soldier's hit `ref`: a foe is hurt, a person (who has a role) turns on him.
+func _strike(ref: Dictionary, amount: float, at: Vector2) -> void:
+	if ref.has("role"):
+		people.shot(ref, amount)
+	else:
+		foes.hurt(ref, amount, at)
 
 
 ## R: reload the weapon in his hands from the rounds in the hold. False when there is nothing to do.
@@ -347,11 +367,13 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	for g in guns:
 		Arms.tick(g, dt, take)
 	foes.tick(dt, aim, light_on)
+	people.tick(dt)
 	Party.tick(self, dt)
 	update_doors(float(Arms.cfg()["door_near"]))
 	if soldier.is_down() and not downed:
 		downed = true
 		events.append({"type": "downed", "pos": soldier.pos})
+	_check_marks()
 	if events.size() > 300:
 		events = events.slice(events.size() - 300)
 
@@ -361,6 +383,7 @@ func update_doors(near: float) -> void:
 	var movers: Array = [soldier.pos]
 	for p in party:
 		movers.append(p["m"].pos)
+	movers.append_array(people.movers())
 	for f in foes.list:
 		if not f["dead"] and not f["hidden"] and f["kind"] != "sentry":
 			movers.append(f["m"].pos)
@@ -387,7 +410,7 @@ func join_party(names: Array) -> int:
 
 ## Names of the crew who are down, in the party.
 func downed_party() -> Array:
-	return Party.downed(self).map(func(p): return str(p["src"].name))
+	return Party.downed(self).filter(func(p): return not bool(p.get("temp", false))).map(func(p): return str(p["src"].name))
 
 
 ## A downed member of the party (a follower's CrewMember) gets up with revive_hp of their health.
@@ -431,7 +454,7 @@ func note_hollow(now: bool) -> bool:
 
 ## What the motion tracker is shown (board_view.gd contacts_source): the foes that are up and out of their vents.
 func contacts() -> Array:
-	return foes.contacts()
+	return foes.contacts() + people.contacts()
 
 
 ## Leave: the soldier's health goes back to the ship's (a soldier who went down wakes at the airlock with down_hp of it, and the site is closed for
@@ -444,7 +467,9 @@ func leave() -> Dictionary:
 		g["mag"] = 0
 	var lost: Array = []
 	for p in party:  # the crew on their feet come home; the ones down are lost
-		if p["m"].is_down():
+		if bool(p.get("temp", false)):  # a person met aboard stays aboard
+			said.append("%s stays behind." % str(p["m"].name))
+		elif p["m"].is_down():
 			lost.append(str(p["src"].name))
 			if ship != null:
 				Mortality.lose(ship, p["src"])
@@ -477,7 +502,57 @@ func memory() -> Dictionary:
 	u.sort()
 	k.sort()
 	return {"kind": site.kind, "name": site.site_name, "parts": site.parts.duplicate(), "opened": o, "unlocked": u, "keys": k, "left": held, "cleared": cleared,
-		"crew": int(spec.get("crew", 0)), "foes": foes.memory()}
+		"crew": int(spec.get("crew", 0)), "foes": foes.memory(), "theme": site.theme, "people": people.memory(), "marks": seen_marks.keys()}
+
+
+# --- people and discoveries -------------------------------------------------------------------------------------
+
+## E at person `id`: what the view has to open (people.gd talk): {id, name, node, event}, {id, shop: true} or {id, say}; {} when no one is there.
+func talk(id: int) -> Dictionary:
+	return people.talk(id)
+
+
+## The talk (a person's, or a discovery's: `id` -1) is over: `ops` are what the outcomes asked for (events.gd result "npc"), `acted` whether any outcome did
+## something. Returns {lines, shop}; the lines are also said.
+func finish_talk(id: int, ops: Array, acted: bool) -> Dictionary:
+	var r: Dictionary = people.finish(id, ops, acted)
+	said.append_array(r["lines"])
+	return r
+
+
+## Buy row `i` of person `id`'s goods. Returns {ok, text}.
+func buy(id: int, i: int) -> Dictionary:
+	var r: Dictionary = people.buy(id, i)
+	if bool(r["ok"]):
+		said.append(str(r["text"]))
+	return r
+
+
+## A marked spot is entered the first time (the "discover" event): {id: -1, node, event} for the panel to open, {} when no event fits.
+func discover(mark_id: int) -> Dictionary:
+	if campaign == null or mark_id < 0 or mark_id >= site.marks.size():
+		return {}
+	var m: Dictionary = site.marks[mark_id]
+	var node := {"type": "boarding_site", "site": site.kind, "theme": site.theme, "mark": m["kind"]}
+	var ev: Dictionary = campaign.events.pick(campaign, node, ship)
+	return {"id": -1, "name": "", "node": node, "event": ev} if not ev.is_empty() else {}
+
+
+## Is some foe on the hunt (it has noticed someone)?
+func hunted() -> bool:
+	return foes.live().any(func(f): return str(f["mode"]) in ["hunt", "attack", "cover", "flee", "stalk"] or float(f["track"]) > 0.0)
+
+
+## The first time the soldier stands in a room with a marked spot, with no foe on the hunt, a "discover" event is told to the view (once for the spot).
+func _check_marks() -> void:
+	if site.marks.is_empty() or soldier.is_down() or finished:
+		return
+	var rid: int = site.room_at(soldier.pos)
+	for m in site.marks:
+		if m["room"] == rid and not seen_marks.has(m["id"]) and not hunted():
+			seen_marks[m["id"]] = true
+			events.append({"type": "discover", "mark": m["id"], "pos": m["pos"]})
+			return
 
 
 # --- the context -------------------------------------------------------------------------------------------------

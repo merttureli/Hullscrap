@@ -104,6 +104,8 @@ func _ready() -> void:
 		combat.finished.connect(_on_fight_finished)
 	if board != null and board.has_signal("finished"):
 		board.finished.connect(_on_board_finished)
+	if board != null and board.has_signal("talk_requested"):
+		board.talk_requested.connect(_on_talk)
 	_make_tide_hud.call_deferred()
 
 
@@ -135,6 +137,7 @@ func _ensure_panels() -> void:
 	event_panel.fight_requested.connect(_start_fight)
 	event_panel.ending_reached.connect(_on_ending)
 	event_panel.board_requested.connect(_start_board)
+	event_panel.talk_done.connect(_on_talk_done)
 	add_child(event_panel)
 	station_panel = StationPanel.new()
 	station_panel.map = self
@@ -566,6 +569,30 @@ func _start_board(spec: Dictionary, ev: Dictionary) -> void:
 	_boarding = true
 	_board_ev = ev
 	visible = false
+
+
+## Aboard, the soldier talked to someone or stepped into a marked room (`ctx`: board_view.gd talk_requested): the event panel opens over the dark with the
+## event picked for them, and the world stands still until it is done. The panel is the one the map keeps, so the POI is not touched.
+func _on_talk(ctx: Dictionary) -> void:
+	if not _boarding:
+		return
+	_ensure_panels()
+	visible = true
+	panel_only = true
+	event_panel.talk = ctx.get("node", {"type": "boarding_npc"})
+	var ev: Dictionary = ctx.get("event", {})
+	var who := str(ctx.get("name", ""))
+	if ev.is_empty():
+		event_panel.open_notice(who if who != "" else "Aboard", "%s has nothing to say." % who if who != "" else "There is nothing here.", [])
+	else:
+		event_panel.open_event(ev)
+
+
+## The talk is over: what its outcomes asked for goes to the boarding view.
+func _on_talk_done(ops: Array, acted: bool) -> void:
+	_hide_panels()
+	if _boarding and board != null and board.has_method("talk_done"):
+		board.talk_done(ops, acted)
 
 
 ## The soldier is back. A cleared vessel is done with (its POI is done and its choice gone); else the page he left opens again.

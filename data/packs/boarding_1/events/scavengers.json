@@ -1,0 +1,291 @@
+{
+	"events": [
+		{
+			"id": "bnpc_scav_first_words",
+			"type": "boarding_npc",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"role": "scavenger_talker",
+				"site": [
+					"station",
+					"derelict"
+				]
+			},
+			"text": "A figure in a patched suit steps out of a doorway with a flare pistol held low and loose, like a handshake that has not made up its mind. 'Slow,' says {name}. 'Slow's good. Everyone round here shoots first, and I'm tired.' The light trembles on {name}'s visor. 'You're picking this place clean too, yeah? Let's not make it a thing.'",
+			"choices": [
+				{
+					"text": "Agree to share the place.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'East's mine, west's yours,' says {name}. 'Cross the line and I'll know.' It is the rudest contract you have ever signed and the fairest. {name} holsters the flare gun and walks off the way a person leaves a table at which they have won something.",
+							"effects": {
+								"npc_reveal": "container",
+								"npc_leave": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Offer rounds for what {name} knows (6 rounds).",
+					"requires": {
+						"items": {
+							"hand_ammo": 6
+						},
+						"pay": true
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} counts them twice into a pouch. 'It's the vault,' {name} says. 'Door at the end of the long deck. You'll want a hand.' {name} walks with you to the end of the corridor, and no further.",
+							"effects": {
+								"npc_reveal": "locked",
+								"npc_follow": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Raise the pistol first.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The flare gun comes up a half-second after yours. 'I knew it,' says {name}, bitterly, and means it.",
+							"effects": {
+								"npc_hostile": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Back off, hands where they can be seen.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Good,' says {name}. 'We've all had a day.'",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_scav_toll",
+			"type": "boarding_npc",
+			"weight": 14,
+			"once": false,
+			"requires": {
+				"role": "scavenger_talker",
+				"theme": "clans",
+				"site": [
+					"station",
+					"derelict"
+				]
+			},
+			"text": "{name} stands across a corridor with one boot up on a crate and a clan sash over a patched suit. 'Toll,' {name} says, almost apologetically. 'It's tradition. This is the hall, our rules, our crates. Twenty credits, and no one need get hurt.' The flare gun is not pointed at you. It is simply visible.",
+			"choices": [
+				{
+					"text": "Pay the toll (20 credits).",
+					"requires": {
+						"credits": 20,
+						"pay": true
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} pockets it and writes a receipt on a gum wrapper. 'Welcome to the hall,' {name} says. 'Mind the third crate, it bites.' The sash goes to something close to a salute.",
+							"effects": {
+								"rep": {
+									"clans": 1
+								},
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Offer a story instead.",
+					"outcomes": [
+						{
+							"weight": 50,
+							"text": "You tell {name} the one about the reactor and the cat. By the end {name} is wiping an eye. 'Go on,' {name} says. 'Take what you can carry. Tell it right in the hall.'",
+							"effects": {
+								"rep": {
+									"clans": 1
+								},
+								"npc_leave": true
+							}
+						},
+						{
+							"weight": 50,
+							"text": "The story is a bad one. {name} lets you get to the end of it anyway, which is worse. 'Twenty credits,' {name} says gently. 'And the story's on me.' The flare gun rises, politely.",
+							"effects": {
+								"npc_hostile": "pirate"
+							}
+						}
+					]
+				},
+				{
+					"text": "Refuse.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Your funeral,' says {name}, and means it kindly. The flare gun rises.",
+							"effects": {
+								"npc_hostile": "pirate"
+							}
+						}
+					]
+				},
+				{
+					"text": "Walk away.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Another time,' says {name}. 'The toll keeps.'",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_scav_boneyard_claim",
+			"type": "boarding_npc",
+			"weight": 14,
+			"once": false,
+			"requires": {
+				"role": "scavenger_talker",
+				"theme": "boneyard",
+				"site": [
+					"station",
+					"derelict"
+				]
+			},
+			"text": "{name} is sitting on a heap of someone else's hull, cutting it up with a torch that is more flame than tool. The heap has a flag on it, in the sense that a hubcap has been nailed to a pole. 'My claim,' {name} says, without taking off the mask. 'Stake's in. Paperwork's in. Third one this year.' A sizeable wrench lies near {name}'s hand, with all the inevitability of a full stop.",
+			"choices": [
+				{
+					"text": "Respect the claim and ask what is left.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'You're all right,' says {name}, who has been robbed before. 'North side's clean, I haven't had the time. Go on. But if you come back with a bigger torch we're going to have words.'",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Offer scrap for a corner of it (20 scrap).",
+					"requires": {
+						"items": {
+							"scrap": 20
+						},
+						"pay": true
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} weighs the bag in one hand, then, slowly, with feeling, hands a bit of it back. 'Honest weight,' {name} says, wondering at it. 'Nobody does honest weight.' A key slides across the heap, and the torch stops.",
+							"effects": {
+								"npc_reveal": "key",
+								"items": {
+									"copper": 8
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Tell {name} the claim is not worth the hubcap.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} stands up. It takes a while. There is a great deal to stand up.",
+							"effects": {
+								"npc_hostile": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the claim alone.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Smart,' says {name}, and the torch goes back to work.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_scav_fallback",
+			"type": "boarding_npc",
+			"weight": 6,
+			"once": false,
+			"fallback": true,
+			"text": "The scavenger sees you before you see them. {name} lowers a battered flare gun, a thing you can read in the dark by the weight of the barrel, and sighs through the mask. 'I was going to shoot first,' {name} says. 'But I'm out of the good flares.' Behind {name} a sack is clearly doing the job of a suitcase.",
+			"choices": [
+				{
+					"text": "Say you are only looking.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Aren't we all,' says {name}, and tells you where to look.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Offer a handful of scrap (10 scrap).",
+					"requires": {
+						"items": {
+							"scrap": 10
+						},
+						"pay": true
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} takes it and nods. 'Right. The door nobody wants is yours.' It is a pretty good door.",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "Fire first.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The flare gun was never loaded. This does not make it any better.",
+							"effects": {
+								"npc_hostile": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Back away.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Sensible,' says {name}.",
+							"effects": {}
+						}
+					]
+				}
+			],
+			"requires": {
+				"role": "scavenger_talker"
+			}
+		}
+	]
+}
