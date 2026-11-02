@@ -382,22 +382,33 @@ func test_at_plus_five_prices_are_twenty_percent_off() -> void:
 	eq(c.price(100, "concord"), 100, "only that faction's stations")
 	var ship := _ship()
 	var credits := ship.inventory.count("credits")
-	check(c.buy_fuel(ship, "rusthold", 5)["ok"], "5 fuel")
-	eq(ship.inventory.count("credits"), credits - 35, "at 7 credits each")
+	var left := c.fuel_left("rusthold")
+	check(left >= 2, "a visit has some fuel on sale")
+	check(c.buy_fuel(ship, "rusthold", left)["ok"], "all of it")
+	eq(ship.inventory.count("credits"), credits - left * c.price(int(c.cfg["fuel"]["price"]), "clans"), "at the discounted price each")
+	eq(c.price(int(c.cfg["fuel"]["price"]), "clans"), 12, "14 credits less 20% (11.2), rounded up")
 
 
 # --- stations ---------------------------------------------------------------------------------------------------------------------
 
-func test_buy_fuel_at_eight_credits_a_can() -> void:
+func test_buy_fuel_at_fourteen_credits_a_can_from_a_small_stock() -> void:
 	var c := _camp()
 	var ship := _ship()
 	var credits := ship.inventory.count("credits")
-	var r := c.buy_fuel(ship, "rusthold", 3)
+	var left := c.fuel_left("rusthold")
+	check(left >= 2 and left <= 4, "2 to 4 units on sale a visit: %d" % left)
+	var r := c.buy_fuel(ship, "rusthold", 2)
 	check(r["ok"], r["text"])
-	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [9, credits - 24], "3 fuel for 24")
+	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [8, credits - 28], "2 fuel for 28")
+	eq(c.fuel_left("rusthold"), left - 2, "and the stock went down")
+	var more := c.buy_fuel(ship, "rusthold", 9)
+	check(more["ok"], "asking for more buys what is left")
+	eq(ship.inventory.count("fuel"), 6 + left, "the rest of the stock and no more")
+	check(not c.buy_fuel(ship, "rusthold", 1)["ok"] and c.fuel_left("rusthold") == 0, "sold out: " + str(c.buy_fuel(ship, "rusthold", 1)["text"]))
 	ship.inventory.counts.erase("credits")
+	c.fuel_stock.erase("rusthold")
 	check(not c.buy_fuel(ship, "rusthold", 1)["ok"], "no credits, no fuel")
-	eq(ship.inventory.count("fuel"), 9, "nothing given")
+	eq(ship.inventory.count("fuel"), 6 + left, "nothing given")
 
 
 func test_sell_an_item_at_half_its_value() -> void:
@@ -816,7 +827,7 @@ func test_event_panel_keys_clicks_and_greyed_rows() -> void:
 	check(not panel.visible, "the Continue button ends it")
 	panel.open_event(map.campaign.events.get_event("trader_fuel_peddler"))
 	_press(panel, KEY_2)
-	eq(ship.inventory.count("fuel"), fuel + 4, "key 2 buys three more")
+	eq(ship.inventory.count("fuel"), fuel + 3, "key 2 buys two more")
 	_free_screen(d)
 
 
@@ -906,10 +917,15 @@ func test_station_menu_trades_pays_repairs_and_recruits() -> void:
 	eq(rows0[0]["id"], "fuel", "BUY starts with fuel")
 	check(rows0.size() > 5, "and Rusthold's stock")
 	var credits := ship.inventory.count("credits")
+	var left: int = map.campaign.fuel_left("rusthold")
+	check(rows0[0]["label"].contains("%d left" % left), "the fuel row says how many are on sale: " + str(rows0[0]["label"]))
 	st.act(0, 0)
-	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [7, credits - 8], "one can of fuel for 8")
+	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [7, credits - 14], "one can of fuel for 14")
 	st.act(0, 0, MOUSE_BUTTON_RIGHT)
-	eq(ship.inventory.count("fuel"), 12, "right-click buys five")
+	eq(ship.inventory.count("fuel"), 7 + left - 1, "right-click buys five, or what the visit has left")
+	check(st.rows(0)[0]["label"].contains("sold out"), "and then it is sold out")
+	st.act(0, 0)
+	check(st.message_bad, "which says so")
 	ship.inventory.add("titanium", 10)
 	var sell := -1
 	for i in st.rows(1).size():

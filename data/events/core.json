@@ -132,14 +132,14 @@
 		},
 		{
 			"id": "trader_fuel_peddler", "type": "trader", "weight": 10,
-			"text": "A one-man Fenn tanker, the Second Opinion, rides alongside with its lights blinking in what you suspect is laughter. Sixpence, says the hull stencil, will sell you fuel. At three times the usual price, because he can.",
+			"text": "A one-man Fenn tanker, the Second Opinion, rides alongside with its lights blinking in what you suspect is laughter. Sixpence, says the hull stencil, will sell you fuel. At nearly twice the usual price, because he can.",
 			"choices": [
 				{"text": "Buy one can (24 credits).", "requires": {"credits": 24, "pay": true}, "outcomes": [
 					{"weight": 100, "text": "A can arrives on a line. It is cold and it smells of money.", "effects": {"items": {"fuel": 1}}}]},
-				{"text": "Buy three cans (72 credits).", "requires": {"credits": 72, "pay": true}, "outcomes": [
-					{"weight": 100, "text": "\"Bulk,\" says Sixpence, as if it were a favour.", "effects": {"items": {"fuel": 3}}}]},
-				{"text": "[Fenn] Haggle in his own language (48 credits for three).", "requires": {"species": "fenn", "credits": 48, "pay": true}, "outcomes": [
-					{"weight": 100, "text": "Your Fenn trills something at the tanker, fast and rude. Sixpence trills back, slower and ruder, and then laughs. Three cans, a discount, and a promise never to trade with you again.", "effects": {"items": {"fuel": 3}}}]},
+				{"text": "Buy two cans (48 credits).", "requires": {"credits": 48, "pay": true}, "outcomes": [
+					{"weight": 100, "text": "\"Bulk,\" says Sixpence, as if it were a favour.", "effects": {"items": {"fuel": 2}}}]},
+				{"text": "[Fenn] Haggle in his own language (30 credits for two).", "requires": {"species": "fenn", "credits": 30, "pay": true}, "outcomes": [
+					{"weight": 100, "text": "Your Fenn trills something at the tanker, fast and rude. Sixpence trills back, slower and ruder, and then laughs. Two cans, a discount, and a promise never to trade with you again.", "effects": {"items": {"fuel": 2}}}]},
 				{"text": "Wave him off.", "outcomes": [
 					{"weight": 100, "text": "Sixpence blinks something that is definitely laughter and lets you go. You hear him overcharge somebody else before you are out of range.", "effects": {}}]}
 			]

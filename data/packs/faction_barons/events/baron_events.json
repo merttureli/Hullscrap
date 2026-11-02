@@ -225,7 +225,7 @@
 						{
 							"weight": 20,
 							"text": "A good meal, and a long toast, and a bill in the shape of a sprained stomach: something in the soup does not agree with you. The Baron is mortified and has his physician send over a basket of fruit.",
-							"effects": {"crew_hp": -10, "items": {"fuel": 1}}
+							"effects": {"crew_hp": -10}
 						},
 						{
 							"weight": 20,

@@ -400,19 +400,19 @@
     },
     {
       "id": "trader_sixpence_fuel", "type": "trader", "weight": 14, "once": false, "requires": {},
-      "text": "A Fenn peddler's barge, Exact Change, swings in beside you with her running lights blinking in a sales pattern. 'Fuel,' says Sixpence over the comm, 'the finest in the Drift, at a price that reflects my feelings about you.' The feelings are mild. The price is triple.",
+      "text": "A Fenn peddler's barge, Exact Change, swings in beside you with her running lights blinking in a sales pattern. 'Missiles,' says Sixpence over the comm, 'the finest in the Drift, at a price that reflects my feelings about you.' The feelings are mild. The price is triple.",
       "choices": [
-        {"text": "Buy 1 fuel (24 credits).", "requires": {"credits": 24}, "outcomes": [
-          {"weight": 100, "text": "Sixpence weighs the coins on a scale you can't see and nods. 'Pleasure,' he says. It was not a pleasure.", "effects": {"items": {"credits": -24, "fuel": 1}}}
+        {"text": "Buy 1 missile (24 credits).", "requires": {"credits": 24}, "outcomes": [
+          {"weight": 100, "text": "Sixpence weighs the coins on a scale you can't see and nods. 'Pleasure,' he says. It was not a pleasure.", "effects": {"items": {"credits": -24, "missile": 1}}}
         ]},
-        {"text": "Buy 3 fuel (72 credits).", "requires": {"credits": 72}, "outcomes": [
-          {"weight": 100, "text": "'A bulk buyer,' says Sixpence, with real warmth, and charges you accordingly.", "effects": {"items": {"credits": -72, "fuel": 3}}}
+        {"text": "Buy 3 missiles (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 100, "text": "'A bulk buyer,' says Sixpence, with real warmth, and charges you accordingly.", "effects": {"items": {"credits": -60, "missile": 3}}}
         ]},
-        {"text": "[Fenn] Haggle in his own dialect (3 fuel).", "requires": {"species": "fenn", "credits": 72}, "outcomes": [
-          {"weight": 70, "text": "Your Fenn and Sixpence argue for three minutes in clicks too fast to follow, ending in a handshake and a lot of laughing. Three fuel, forty-five credits.", "effects": {"items": {"credits": -45, "fuel": 3}}},
-          {"weight": 30, "text": "It goes the other way: your Fenn is outhaggled, and the price is the same with a worse attitude.", "effects": {"items": {"credits": -72, "fuel": 3}}}
+        {"text": "[Fenn] Haggle in his own dialect (3 missiles).", "requires": {"species": "fenn", "credits": 60}, "outcomes": [
+          {"weight": 70, "text": "Your Fenn and Sixpence argue for three minutes in clicks too fast to follow, ending in a handshake and a lot of laughing. Three missiles, forty credits.", "effects": {"items": {"credits": -40, "missile": 3}}},
+          {"weight": 30, "text": "It goes the other way: your Fenn is outhaggled, and the price is the same with a worse attitude.", "effects": {"items": {"credits": -60, "missile": 3}}}
         ]},
-        {"text": "Move on without fuel.", "outcomes": [
+        {"text": "Move on without missiles.", "outcomes": [
           {"weight": 100, "text": "'Your funeral,' says Sixpence. 'Cheap, though.' He is already hailing the next ship.", "effects": {}}
         ]}
       ]

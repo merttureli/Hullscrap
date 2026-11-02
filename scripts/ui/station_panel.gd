@@ -94,7 +94,9 @@ func rows(col: int) -> Array:
 	var out := []
 	if col == 0:
 		if "fuel" in cfg["services"]:
-			out.append({"kind": "fuel", "id": "fuel", "label": "Fuel", "right": "%d cr" % c.price(int(c.cfg["fuel"]["price"]), _faction(), s), "cost": c.price(int(c.cfg["fuel"]["price"]), _faction(), s)})
+			var left: int = c.fuel_left(station)  # a station has only a few units a visit
+			out.append({"kind": "fuel", "id": "fuel", "label": "Fuel  (%s)" % ("%d left" % left if left > 0 else "sold out"), "right": "%d cr" % c.price(int(c.cfg["fuel"]["price"]), _faction(), s),
+				"cost": c.price(int(c.cfg["fuel"]["price"]), _faction(), s) if left > 0 else 1000000})
 		if "stock" in cfg["services"]:
 			var ids: Array = cfg.get("stock", {}).keys()
 			ids.sort_custom(func(a, b): return c.stock_price(station, a, s) < c.stock_price(station, b, s) or (c.stock_price(station, a, s) == c.stock_price(station, b, s) and a < b))

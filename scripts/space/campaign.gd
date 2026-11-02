@@ -95,6 +95,7 @@ var fuel_part := 0  ## parts (hundredths) of a fuel the jumps have used up and n
 var events_seen := 0  ## events met at nodes, waits and wrecks (the game over screen counts them)
 var fights_won := 0  ## fights of the run that were won
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
+var fuel_stock := {}  ## station id -> {visit (the jump count the stock was rolled at), left}: the fuel on sale this visit (fuel_left); saved as the optional "fuel_stock"
 var sectors := {}  ## node id -> Sector (sector.gd) for every node visited (made on first use from the seed, so only their states are saved)
 var foes := {}  ## "region/node/kind" -> the enemy rolled for a fight of that kind there (foe_for): a design path or a gen: spec; saved
 var tide: Tide  ## the Hollow tide over the map (tide.gd): jumps, waits, tows and lingering push it
@@ -458,12 +459,16 @@ func linger(dt: float) -> Array:
 
 
 ## With no fuel: wait for a passing trader. Time passes (one jump on the counter) and a trader event
-## may come along. Returns {ok, why, notes, event}.
+## comes along, one that sells fuel when there is one (fuel is scarce, so most traders do not: a ship that waits with an empty
+## tank is the one that meets the fuel peddler). Returns {ok, why, notes, event}.
 func wait(ship) -> Dictionary:
 	if ship.inventory.count("fuel") > 0:
 		return {"ok": false, "why": "you still have fuel", "notes": [], "event": {}}
 	var notes := _advance(1)
-	var ev := events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)
+	var node := {"id": current, "type": "trader", "place": ""}
+	var ev := events.pick(self, node, ship, func(e): return Events.offers_fuel(e))
+	if ev.is_empty():
+		ev = events.pick(self, node, ship)
 	events_seen += int(not ev.is_empty())
 	return {"ok": true, "why": "", "notes": notes, "event": ev}
 
@@ -730,6 +735,7 @@ func enter_region(id: String, ship = null) -> void:
 	revealed = {}
 	sectors = {}
 	offers = {}
+	fuel_stock = {}
 	spool = {}
 	flags["in_" + id] = true
 	if ship != null:
@@ -1105,10 +1111,33 @@ func _station_faction(id: String) -> String:
 	return str(station_cfg(id).get("faction", ""))
 
 
-## Pay for `n` units of fuel at the station `id`. Returns {ok, text}.
+## The units of fuel station `id` has on sale this visit (0 where nothing sells fuel). A visit is the stay at a node between two jumps:
+## the first time the stock is asked for in one it is rolled, fuel.stock [least, most] units from the run's seed, the station and the
+## jump count, so the same visit always has the same; the next visit has a new one (the stock refills).
+func fuel_left(id: String) -> int:
+	if not station_cfg(id).get("services", []).has("fuel"):
+		return 0
+	var rec = fuel_stock.get(id)
+	if rec == null or int(rec["visit"]) != jumps:
+		var roll := RandomNumberGenerator.new()
+		roll.seed = hash([seed_value, id, jumps])
+		var span: Array = cfg["fuel"]["stock"]
+		rec = {"visit": jumps, "left": roll.randi_range(int(span[0]), int(span[1]))}
+		fuel_stock[id] = rec
+	return int(rec["left"])
+
+
+## Pay for `n` units of fuel at the station `id` (at most what it has left, fuel_left). Returns {ok, text}.
 func buy_fuel(ship, id: String, n := 1) -> Dictionary:
+	var left := fuel_left(id)
+	if left <= 0:
+		return {"ok": false, "text": "No fuel here." if not station_cfg(id).get("services", []).has("fuel") else "Sold out: that was all the fuel they had this visit."}
+	n = mini(n, left)
 	var each := price(int(cfg["fuel"]["price"]), _station_faction(id), ship)
-	return _purchase(ship, "fuel", n, each * n, "Fuel")
+	var r := _purchase(ship, "fuel", n, each * n, "Fuel")
+	if r["ok"]:
+		fuel_stock[id]["left"] = left - n
+	return r
 
 
 ## The price of `item` in the stock of station `id`, 0 when it is not sold there (`ship`: the buyer's, for a haggler aboard).
@@ -1248,7 +1277,8 @@ func to_dict() -> Dictionary:
 		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
 		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
 		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
-		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers}
+		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers,
+		"fuel_stock": fuel_stock.duplicate(true)}
 
 
 func _sectors_dict() -> Dictionary:
@@ -1324,6 +1354,7 @@ func load_dict(d: Dictionary) -> String:
 	chronicle = _chronicle(d.get("chronicle"))
 	ending = ""
 	offers = d["offers"].duplicate(true)
+	fuel_stock = d["fuel_stock"].duplicate(true) if d.get("fuel_stock") is Dictionary else {}  # saves from before the scarce fuel have none
 	sectors = made
 	spool = charge
 	tide = rising

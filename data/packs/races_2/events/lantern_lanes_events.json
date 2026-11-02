@@ -87,11 +87,11 @@
           {"weight": 100, "text": "You put the oil in the lamps. They burn warm and amber. You sit in the glow at dinner and, for the first time in weeks, tell yourself the truth.", "effects": {"items": {"credits": -20}, "crew_hp": 10}}
         ]},
         {"text": "Put it in the engines (20 credits).", "requires": {"credits": 20}, "outcomes": [
-          {"weight": 50, "text": "It runs, hot and loud, and gets you three jumps for the price of one. Tallow shakes his head as you go. 'People always do,' he says.", "effects": {"items": {"credits": -20, "fuel": 3}}},
+          {"weight": 50, "text": "It runs, hot and loud, and gets you two jumps for the price of one. Tallow shakes his head as you go. 'People always do,' he says.", "effects": {"items": {"credits": -20, "fuel": 2}}},
           {"weight": 50, "text": "It runs. For about ten seconds. Tallow watches the smoke from the rail with the weariness of a man proved right.", "effects": {"items": {"credits": -20}, "hull": -5, "crew_hp": -5}}
         ]},
         {"text": "[Lantern] Trade lamp-lore.", "requires": {"species": "lantern"}, "outcomes": [
-          {"weight": 100, "text": "Tallow looks at your Lantern and for a moment says nothing. Then he puts down his jug, folds his wings, and for an hour the two of them trade lamp-lore: how to trim a wick, how to find a dead lamp by the quiet, the names of the old keepers. At the end Tallow presses a jug into your Lantern's hands, and a second, and sends you off with a month's oil and one valuable tip.", "effects": {"items": {"fuel": 3, "credits": 20}, "reveal": "distress"}}
+          {"weight": 100, "text": "Tallow looks at your Lantern and for a moment says nothing. Then he puts down his jug, folds his wings, and for an hour the two of them trade lamp-lore: how to trim a wick, how to find a dead lamp by the quiet, the names of the old keepers. At the end Tallow presses a jug into your Lantern's hands, and a second, and sends you off with a month's oil and one valuable tip.", "effects": {"items": {"fuel": 2, "credits": 20}, "reveal": "distress"}}
         ]},
         {"text": "Move on.", "outcomes": [
           {"weight": 100, "text": "'For lamps,' Tallow calls after you, as you go. Over the comm it sounds more like a prayer.", "effects": {}}

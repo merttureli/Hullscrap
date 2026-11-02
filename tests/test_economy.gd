@@ -6,6 +6,7 @@ const DriftDebris = preload("res://scripts/space/drift_debris.gd")
 const Radar = preload("res://scripts/space/radar.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Wall = preload("res://tests/fixture_wall.gd")
+const Ship = preload("res://scripts/ship/ship.gd")
 
 const RARE: Array[String] = ["crystal_shard", "titanium_plate", "silicon_wafer"]
 
@@ -104,3 +105,110 @@ func test_collecting_a_rare_piece_gives_its_material() -> void:
 	check(d._store(ship, t, d._gains(t, ship)), "the hold takes it")
 	eq(ship.inventory.count("crystal"), before + 2, "crystal 2")
 	check(d.hud_line().contains("+2 crystal"), "the HUD lists it: " + d.hud_line())
+
+
+# --- fuel is scarce ----------------------------------------------------------------------------------------------
+
+const Campaign = preload("res://scripts/space/campaign.gd")
+const Regions = preload("res://scripts/space/regions.gd")
+const Events = preload("res://scripts/space/events.gd")
+const FUEL_TRADERS_BEFORE := 14  ## trader events that offered fuel before the economy round (a python audit of the effects)
+
+
+## Every station place of every region, plus the Scrapper trader: [{id, menu}].
+func _stations(c: Campaign) -> Array:
+	var out := []
+	for r in Regions.all():
+		for p in r.get("places", []):
+			if str(p.get("type", "")) == "station":
+				out.append({"id": str(p["id"]), "menu": Regions.station(str(p["id"]), c.cfg), "region": r})
+	return out
+
+
+func test_about_forty_percent_of_the_stations_sell_fuel() -> void:
+	var c := Campaign.new(3)
+	var list := _stations(c)
+	list.append({"id": "clan_trader", "menu": c.cfg["stations"]["clan_trader"], "region": {}})
+	var sells := list.filter(func(s): return s["menu"]["services"].has("fuel"))
+	var share := float(sells.size()) / list.size()
+	check(share > 0.33 and share < 0.47, "%d of %d stations sell fuel (%.0f%%)" % [sells.size(), list.size(), share * 100.0])
+	check(not c.cfg["stations"]["clan_trader"]["services"].has("fuel"), "the Scrapper trader does not")
+	for id in ["rusthold", "meridian", "prism"]:
+		check(c.station_cfg(id).get("services", []).has("fuel") or Regions.station(id, c.cfg)["services"].has("fuel"), "%s, the main station of its region, sells fuel" % id)
+	for stage in range(1, 9):  # every stage has regions whose station sells it, and a share of them near 40%
+		var here := list.filter(func(s): return not s["region"].is_empty() and s["region"]["stages"][0] <= stage and stage <= s["region"]["stages"][1])
+		var fuel_here := here.filter(func(s): return s["menu"]["services"].has("fuel"))
+		check(fuel_here.size() >= 1 and (here.size() <= 2 or float(fuel_here.size()) / here.size() < 0.55), "stage %d: %d of %d region stations sell fuel" % [stage, fuel_here.size(), here.size()])
+
+
+func test_fuel_costs_fourteen_and_a_visit_has_two_to_four_seeded() -> void:
+	var c := Campaign.new(5)
+	eq(int(c.cfg["fuel"]["price"]), 14, "fuel price 14")
+	eq(c.cfg["fuel"]["stock"].map(func(v): return int(v)), [2, 4], "2 to 4 units a visit")
+	var counts := {}
+	for seed_value in 60:
+		var k := Campaign.new(seed_value)
+		var n := k.fuel_left("rusthold")
+		counts[n] = true
+		check(n >= 2 and n <= 4, "seed %d: %d on sale" % [seed_value, n])
+		eq(Campaign.new(seed_value).fuel_left("rusthold"), n, "the same seed has the same stock")
+	eq(counts.keys().size(), 3, "all of 2, 3 and 4 come up: %s" % [counts.keys()])
+	eq(c.fuel_left("nowhere"), 0, "no station, no fuel")
+	eq(c.fuel_left("clan_trader"), 0, "the Scrapper trader has none")
+
+
+func test_the_stock_refills_on_the_next_visit_and_is_saved() -> void:
+	var c := Campaign.new(8)
+	var ship := Ship.from_design("res://data/ships/starter_courier.json")
+	ship.inventory.add("credits", 500)
+	var first := c.fuel_left("rusthold")
+	c.buy_fuel(ship, "rusthold", 1)
+	eq(c.fuel_left("rusthold"), first - 1, "one bought")
+	var back := Campaign.new(8)
+	check(back.load_dict(c.to_dict()) == "", "it loads")
+	eq(back.fuel_left("rusthold"), first - 1, "the save keeps what is left of the visit")
+	c.buy_fuel(ship, "rusthold", 9)
+	eq(c.fuel_left("rusthold"), 0, "sold out")
+	c.jumps += 1  # the ship jumped away and came back: a new visit
+	var next := c.fuel_left("rusthold")
+	check(next >= 2 and next <= 4, "a new visit has a new stock: %d" % next)
+	eq(Campaign.new(8).load_dict(c.to_dict()), "", "still saves and loads")
+	var old: Dictionary = c.to_dict()
+	old.erase("fuel_stock")
+	check(Campaign.new(8).load_dict(old) == "", "a save from before the scarce fuel loads")
+
+
+func test_few_trader_events_offer_fuel_and_only_a_unit_or_two() -> void:
+	var ev = Events.shared()
+	var offering := []
+	var traders := 0
+	for id in ev.order:
+		var e: Dictionary = ev.events[id]
+		if str(e.get("type", "")) != "trader":
+			continue
+		traders += 1
+		var most := 0
+		for ch in e.get("choices", []):
+			for o in ch.get("outcomes", []):
+				var eff = o.get("effects", {})
+				if eff is Dictionary and eff.get("items") is Dictionary:
+					most = maxi(most, int(eff["items"].get("fuel", 0)))
+		if most > 0:
+			offering.append(id)
+			check(most <= 2, "%s offers %d fuel at most, want 1 or 2" % [id, most])
+	check(offering.size() * 3 <= FUEL_TRADERS_BEFORE, "at most a third of the %d trader events that offered fuel still do: %s" % [FUEL_TRADERS_BEFORE, offering])
+	check(offering.size() * 3 <= traders, "and they are a small part of the %d trader events (%d)" % [traders, offering.size()])
+	check(offering.has("trader_fuel_peddler"), "the generic fuel peddler is one of them")
+
+
+func test_a_run_starts_with_the_fuel_of_the_data() -> void:
+	const RunStart = preload("res://scripts/space/run_start.gd")
+	var start := int(Campaign.config()["fuel"]["start"])
+	check(start > 6, "the tank was raised from 6 when the other fuel was cut (%d)" % start)
+	var ship := Ship.from_design("res://data/ships/starter_courier.json")
+	eq(ship.inventory.count("fuel"), 6, "the design carries 6")
+	RunStart.apply_ship(ship, {}, null)
+	eq(ship.inventory.count("fuel"), start, "and starts the run topped up to fuel.start")
+	ship.inventory.add("fuel", 5)
+	RunStart.fuel_up(ship)
+	eq(ship.inventory.count("fuel"), start + 5, "a ship with more keeps it")

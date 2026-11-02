@@ -1,18 +1,18 @@
 {"events": [
     {
       "id": "trader_fuel_on_tick", "type": "trader", "weight": 10, "once": false, "requires": {},
-      "text": "A Fenn tanker, the Threepence, rides alongside with her lights blinking. FUEL, says the stencil. Half price, if you don't ask where from. The hose is already out. It is not the kind of hose you want to look at closely.",
+      "text": "A Fenn tanker, the Threepence, rides alongside with her lights blinking. POLYMER, says the stencil. Half price, if you don't ask where from. The hose is already out. It is not the kind of hose you want to look at closely.",
       "choices": [
         {"text": "Buy three cans at half price (30 credits).", "requires": {"credits": 30, "pay": true}, "outcomes": [
-          {"weight": 60, "text": "Three cans, each of them fuel, as advertised. You don't ask where from.", "effects": {"items": {"fuel": 3}}},
-          {"weight": 40, "text": "Two cans of fuel and one can of something that eats paint.", "effects": {"hull": -4, "items": {"fuel": 2}}}
+          {"weight": 60, "text": "Three cans, each of them polymer, as advertised. You don't ask where from.", "effects": {"items": {"polymer": 12}}},
+          {"weight": 40, "text": "Two cans of polymer and one can of something that eats paint.", "effects": {"hull": -4, "items": {"polymer": 8}}}
         ]},
         {"text": "[Radar] Scan the cans before you buy (30 credits).", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"], "credits": 30, "pay": true}, "outcomes": [
-          {"weight": 85, "text": "The radar reads the cans as fuel, mostly, and one of them as mostly fuel. You buy the four honest ones and give Threepence a look.", "effects": {"items": {"fuel": 4}}},
-          {"weight": 15, "text": "The radar reads every can as fuel. It is, for once, the whole truth. Threepence is visibly offended.", "effects": {"items": {"fuel": 3}}}
+          {"weight": 85, "text": "The radar reads the cans as polymer, mostly, and one of them as mostly polymer. You buy the four honest ones and give Threepence a look.", "effects": {"items": {"polymer": 16}}},
+          {"weight": 15, "text": "The radar reads every can as polymer. It is, for once, the whole truth. Threepence is visibly offended.", "effects": {"items": {"polymer": 12}}}
         ]},
         {"text": "Ask where it's from.", "outcomes": [
-          {"weight": 100, "text": "Threepence goes quiet, and then names a price you can afford: full. You take one can and the lesson.", "effects": {"items": {"credits": -24, "fuel": 1}}}
+          {"weight": 100, "text": "Threepence goes quiet, and then names a price you can afford: full. You take one can and the lesson.", "effects": {"items": {"credits": -24, "polymer": 4}}}
         ]},
         {"text": "Wave him off.", "outcomes": [
           {"weight": 100, "text": "'Next time,' says Threepence, hopefully. He says that to everyone.", "effects": {}}

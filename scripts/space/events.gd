@@ -301,6 +301,16 @@ func eligible(ev: Dictionary, c, node: Dictionary, ship = null) -> bool:
 	return _world_ok(_dict(ev.get("requires")), c, node, ship)
 
 
+## Does some outcome of some choice of `ev` give fuel (effects.items.fuel above 0)?
+static func offers_fuel(ev: Dictionary) -> bool:
+	for ch in _list(ev.get("choices")):
+		for o in _list(_dict(ch).get("outcomes")):
+			var items = _dict(_dict(o).get("effects")).get("items")
+			if items is Dictionary and float(items.get("fuel", 0)) > 0.0:
+				return true
+	return false
+
+
 ## What a debt event is for, judged by its requires: "miss" (it asks for the flag debt_missed: the
 ## collectors' talk), "first" (it asks for not_flag met_ma: Ma's first call), else "reminder".
 static func debt_kind(ev: Dictionary) -> String:
