@@ -1,12 +1,14 @@
 extends Control
 ## The resource bar across the top of the screen (build and play mode): the materials, credits and fuel of the
 ## cargo (palette.gd BAR_IDS) with their icons, then the power supply against demand, the oxygen where the soldier
-## stands and the hull integrity of the run; on the right the mode, and the pause while the world stands still
+## stands and, only while blocks are damaged, a wrench with their number (no hull figure: the blocks are the health);
+## on the right the mode, and the pause while the world stands still
 ## (ShipSim.pause_line(): "PAUSED: build mode").
 ## The name of a figure shows under the mouse. Reads the ship through the HUD's build node; draws only.
 
 const Palette = preload("res://scripts/build/palette.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 
 const ICON := 20.0
 const SIZE := 15  ## font size of the figures
@@ -47,19 +49,10 @@ func items() -> Array:
 	out.append({"id": "o2", "text": "--" if p < 0.0 else "%d%%%s" % [roundi(p * 100.0), " breach" if o2["breach"] else ""],
 		"color": UiKit.DIM_TEXT if p < 0.0 else (UiKit.BAD if o2["breach"] or p < 0.5 else (UiKit.O2_LOW if p < 0.85 else UiKit.TEXT)),
 		"tip": "Oxygen where you stand"})
-	var hull := _hull()
-	out.append({"id": "hull", "text": "--" if hull.y <= 0 else "%d/%d" % [hull.x, hull.y],
-		"color": UiKit.DIM_TEXT if hull.y <= 0 else UiKit.BAD.lerp(UiKit.GOOD, float(hull.x) / float(hull.y)), "tip": "Hull integrity"})
+	var hurt := Structure.damaged(ship).size()
+	if hurt > 0:  # click: the camera goes to the nearest damaged block (BuildMode.focus_damaged)
+		out.append({"id": "wrench", "text": "%d damaged" % hurt, "color": UiKit.AMBER, "tip": "Damaged blocks. Crew, drone and F repair them."})
 	return out
-
-
-## Hull integrity left and max from the run (campaign.gd), or (0, 0) before a run has begun.
-func _hull() -> Vector2i:
-	var d = hud.build.drift
-	var c = d.get("campaign") if d != null else null
-	if c == null:
-		return Vector2i.ZERO
-	return Vector2i(c.hull_left(hud.build.ship), c.hull_max(hud.build.ship))
 
 
 ## Where each figure sits (local px), in items() order.
@@ -96,6 +89,13 @@ func _gui_input(e: InputEvent) -> void:
 		for i in rs.size():
 			if rs[i].has_point(e.position):
 				hover = i
+	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+		var list := items()
+		var rs := item_rects(list)
+		for i in rs.size():
+			if rs[i].has_point(e.position) and list[i]["id"] == "wrench":
+				hud.build.focus_damaged()
+				accept_event()
 
 
 func _draw() -> void:

@@ -3,6 +3,7 @@ extends "res://tests/base_test.gd"
 ## data/events, requires filtering (events and choices), blue and greyed choices, weighted outcome rolls,
 ## every effect type, goto pages, once, fights calling back, the debt events and the pack conventions.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
@@ -405,18 +406,24 @@ func test_effect_crew_hp_hurts_and_heals_everyone() -> void:
 	check(ship.crew.all(func(m): return m.hp == 0.0 and m.is_down()), "hp stops at 0 and they are down")
 
 
-func test_effect_hull_changes_integrity_and_never_kills_the_ship() -> void:
+func test_effect_hull_hurts_and_mends_blocks_and_never_wrecks_the_ship() -> void:
 	var c := _camp()
 	var ship := _ship()
-	var top := c.hull_max(ship)
-	_fx({"hull": -10}, c, ship)
-	eq(c.hull_left(ship), top - 10, "integrity -10")
+	var top := Structure.totals(ship)
+	var r := _fx({"hull": -10}, c, ship)
+	eq(top.x - Structure.totals(ship).x, 10.0, "hull -10: 10 hp of damage on the blocks")
+	eq(r["lines"], ["Hull blocks damaged 10 hp"], "and the line says so")
+	check(Structure.damaged(ship).size() >= 3, "spread over several blocks: %d" % Structure.damaged(ship).size())
+	for d in Structure.damaged(ship):  # outer blocks: open space beside each
+		check(d["kind"] == "tile" or d["kind"] == "breach", "walls and doors: " + str(d))
 	_fx({"hull": 4}, c, ship)
-	eq(c.hull_left(ship), top - 6, "integrity +4")
+	eq(top.x - Structure.totals(ship).x, 6.0, "hull +4: 4 hp mended")
 	_fx({"hull": 500}, c, ship)
-	eq(c.hull_left(ship), top, "never above the maximum")
+	eq(Structure.totals(ship).x, top.x, "never above the maximum")
+	eq(Structure.damaged(ship).size(), 0, "every block whole")
 	_fx({"hull": -100000}, c, ship)
-	eq(c.hull_left(ship), 1, "events never take the last point")
+	check(Structure.structure_fraction(ship) >= Structure.defeat_below() - 0.001, "events never take the structure under the wreck line")
+	check(not Structure.defeated(ship), "so the ship is not wrecked between fights")
 
 
 func test_effect_flag_and_clear_flag() -> void:
@@ -568,13 +575,12 @@ func test_a_won_fight_calls_back_with_loot_and_the_after_win_text() -> void:
 	eq([r["fight"], r["after_win"]], ["tier", after], "the choice hands back the fight and its after_win")
 	var credits := ship.inventory.count("credits")
 	var fuel := ship.inventory.count("fuel")
-	var done := c.fight_done({"state": "won", "hull": 100.0, "hull_max": 120.0, "enemy": Ship.from_design("res://data/ships/pirate_raider.json")}, ship, r["after_win"])
+	var done := c.fight_done({"state": "won", "enemy": Ship.from_design("res://data/ships/pirate_raider.json")}, ship, r["after_win"])
 	eq(done["state"], "won", "state")
 	eq(done["text"], "Their ledger floats by.", "the after_win text is shown")
 	eq(ship.inventory.count("fuel"), fuel + 2, "its effects ran")
 	eq(c.rep["clans"], -1, "including reputation")
 	check(ship.inventory.count("credits") >= credits + 20 and ship.inventory.count("credits") <= credits + 60, "loot: credits 20-60 at tier 1")
-	eq(c.hull_loss, 20, "the hull integrity left in the fight is kept")
 
 
 func test_loot_is_credits_times_the_tier_and_no_scrap_or_part_roll() -> void:
@@ -598,10 +604,9 @@ func test_a_lost_fight_ends_the_run_and_a_fled_one_gives_nothing() -> void:
 	var ship := _ship()
 	var credits := ship.inventory.count("credits")
 	eq(c.fight_done({"state": "lost"}, ship)["state"], "lost", "lost")
-	var fled := c.fight_done({"state": "fled", "hull": 90.0, "hull_max": 100.0}, ship)
+	var fled := c.fight_done({"state": "fled"}, ship)
 	eq(fled["state"], "fled", "fled")
 	eq(ship.inventory.count("credits"), credits, "no loot for running")
-	eq(c.hull_loss, 10, "but the damage stays")
 
 
 # --- the debt events (type debt) -----------------------------------------------------------------------------------------------

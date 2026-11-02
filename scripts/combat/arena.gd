@@ -1,6 +1,6 @@
 extends RefCounted
 ## The 1v1 combat world, headless: two or more ships, each with a flight body, its grid, shield
-## state, weapon cooldowns and hull integrity, plus the shots in flight. step() advances in fixed
+## state and weapon cooldowns, plus the shots in flight. A ship is wrecked when its structure (structure.gd) falls under the defeat line. step() advances in fixed
 ## substeps of 1/60 s, so the same seed and inputs replay exactly. No nodes, no drawing, no input.
 ##
 ## Coordinates: world is pixels; a ship's pivot (the centre of its hull's bounding box) sits at its
@@ -18,11 +18,11 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
-const HULL_BASE := 20.0  ## hull integrity of a ship with no armour
-const HULL_PER_ARMOR := 2.0  ## per wall cell whose material is not plain steel
+const STRUCTURE_EVERY := 6  ## substeps between two looks at a ship's structure (a hit asks for one at once)
 
 ## One ship in the arena.
 class Combatant extends RefCounted:
@@ -30,9 +30,8 @@ class Combatant extends RefCounted:
 	var flight  ## flight.gd body: pos, vel, angle, ang_vel
 	var pivot := Vector2.ZERO  ## the ship's centre in grid cell coordinates
 	var half := Vector2.ZERO  ## half the hull's bounding box, in cells
-	var hull_max := HULL_BASE
-	var hull := HULL_BASE
-	var wrecked := false  ## hull at 0: no firing, no shields, no thrust; stays in the arena
+	var wrecked := false  ## structure under the defeat line: no firing, no shields, no thrust; stays in the arena
+	var check_structure := true  ## a block was hurt: look at the structure on the next substep
 	var mounts := {}  ## uid -> {id, pos (barrel pivot, cell coordinates), dir (outward, ship-local), reach, aim (live barrel direction), virtual, powered (virtual only)}
 	var cooldowns := {}  ## uid -> arena tick when the mount may fire again
 	var powered := {}  ## uid -> bool, the power solve with disabled parts left out
@@ -94,7 +93,7 @@ func time() -> float:
 
 
 ## Put `ship` into the arena at `pos`, turned by `angle`. Returns its index. Its weapon
-## components become mounts; the hull integrity, shield layers and flight masses are set up here.
+## components become mounts; the shield layers and flight masses are set up here.
 func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 	var co := Combatant.new()
 	co.ship = ship
@@ -112,13 +111,7 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 		hi = lo
 	co.pivot = (lo + hi) / 2.0
 	co.half = (hi - lo) / 2.0
-	var armor := 0
-	for c in grid.tiles:
-		if grid.tiles[c] != "wall" and grid.tile_flag(grid.tiles[c], "solid"):
-			armor += 1
 	grid.hp_mult = Abilities.wall_hp_mults(ship)  # a Stonehide bay: tougher walls round its room, from the start of the fight
-	co.hull_max = HULL_BASE + HULL_PER_ARMOR * armor
-	co.hull = co.hull_max
 	co.mounts = weapons.mounts_of(ship)
 	ships.append(co)
 	_recompute(co)
@@ -179,6 +172,10 @@ func _substep() -> void:
 			Abilities.tick(ships[i].ship, SUBSTEP, rng)  # a fight is on: the arena ticks them, not ShipSim
 		sync(i)
 		var co = ships[i]
+		if not co.wrecked and (co.check_structure or tick % STRUCTURE_EVERY == 0):  # fire and ram hurt blocks too, so look now and then
+			co.check_structure = false
+			if Structure.defeated(co):
+				wreck(i)
 		var fly: bool = not co.wrecked and co.flight.can_fly(co.ship.components, co.powered) == ""
 		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust, co.thrusts)
 		Shields.tick(co, SUBSTEP, Hazards.recharge_mult(self))
@@ -226,11 +223,10 @@ func _recompute(co) -> void:
 	co.dirty = false
 
 
-## Hull integrity reached 0: ship `idx` is wrecked. It stays in the arena as a derelict.
+## The structure fell under the defeat line: ship `idx` is wrecked. It stays in the arena as a derelict.
 func wreck(idx: int) -> void:
 	var co = ships[idx]
 	co.wrecked = true
-	co.hull = 0.0
 	co.dirty = true
 	sync(idx)
 	log_event("wreck", idx)
@@ -322,6 +318,6 @@ func snapshot() -> Dictionary:
 			var inst: Dictionary = co.ship.components.instances[uid]
 			parts[str(uid)] = [inst.get("hp", -1), inst.get("status", ""), inst.get("out_hp", 0)]
 		list.append({"pos": [co.flight.pos.x, co.flight.pos.y], "vel": [co.flight.vel.x, co.flight.vel.y], "angle": co.flight.angle, "ang_vel": co.flight.ang_vel,
-			"hull": co.hull, "wrecked": co.wrecked, "layers": co.layers, "weights": co.weights.duplicate(), "sector_layers": co.sector_layers.duplicate(), "ion_lock": co.ion_lock,
+			"wrecked": co.wrecked, "layers": co.layers, "weights": co.weights.duplicate(), "sector_layers": co.sector_layers.duplicate(), "ion_lock": co.ion_lock,
 			"grid": co.ship.grid.to_dict(), "parts": parts})
 	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "tethers": tethers.size(), "events": events.size(), "power_bonus": power_bonus.duplicate(), "fx": Effects.summary(self)}

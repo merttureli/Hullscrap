@@ -8,8 +8,8 @@ extends RefCounted
 ## cell becomes empty); a component at 0 hp is disabled, and a direct hit on one that is already at
 ## 0 wrecks it: it is gone, with debris on its cells (ion and fire never do; see wreck_part). The
 ## outside half of a hull mount (docs/CONTENT.md 4f) has its own hp, is only ever disabled, and a
-## disabled one lets shots through to the cells behind it. Hull integrity drops by the damage dealt to
-## walls and doors. A deflect or ricochet reflects the shot about the normal at half damage (see
+## disabled one lets shots through to the cells behind it. Any hp dealt lowers the ship's structure (structure.gd);
+## the arena wrecks the ship when that falls under the defeat line. A deflect or ricochet reflects the shot about the normal at half damage (see
 ## projectiles.gd for the bounces that follow). Works on arena combatants (arena.gd); every roll
 ## comes from the arena's seeded rng.
 
@@ -180,6 +180,8 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 	var left := dmg - cur / resist if eff > cur and resist > 0.0 else 0.0
 	var was := cur
 	cur -= dealt
+	if dealt > 0.0:
+		co.check_structure = true  # the arena looks at the structure on its next substep
 	var hit := {"dealt": dealt, "kind": obj["kind"], "dtype": type}
 	hit.merge(info)  # dir and n of the shot, for the effects
 	if outside:
@@ -210,7 +212,6 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 		return {"dealt": dealt, "left": left}
 	if dealt > 0.0:
 		grid.hp[cell] = cur
-		co.hull = maxf(co.hull - dealt, 0.0)
 	if type == "energy":
 		var quirk := str(obj["def"].get("quirk", ""))
 		if quirk == "ablative":  # burns away: every energy hit lowers the max hp
@@ -225,8 +226,6 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 		co.ship.mark_dirty()
 		co.dirty = true
 		arena.log_event("breach", idx, cell, {"tile": tile})
-	if co.hull <= 0.0 and not co.wrecked:
-		arena.wreck(idx)
 	return {"dealt": dealt, "left": left}
 
 

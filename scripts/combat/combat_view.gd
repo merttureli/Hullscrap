@@ -48,7 +48,7 @@ const SHIELD_HINT := "   arrows shift the shield balance   End even"
 const ENEMY_JUMP_DB := -8.0  ## the enemy's jump drive firing, against the player's own jump
 const WRECK_LINGER := 3.0  ## seconds a decided sector fight goes on showing its end before it ends by itself
 
-## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship), hull, hull_max (the player's),
+## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship),
 ## threat (the enemy's skulls, 1-5), offer ({item: count}, only when "spared"), in_sector, pose ({pos, vel, angle, ang_vel}: where the player's ship is now), enemy_pos}.
 signal finished(result: Dictionary)
 
@@ -217,7 +217,7 @@ func leave() -> void:
 		return
 	var foe = session.arena.ships[Session.ENEMY]
 	var mine = session.arena.ships[Session.PLAYER]
-	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max,
+	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship,
 		"in_sector": in_sector, "pose": {"pos": mine.flight.pos, "vel": mine.flight.vel, "angle": mine.flight.angle, "ang_vel": mine.flight.ang_vel}, "enemy_pos": foe.flight.pos, "threat": session.threat}
 	if result["state"] == "spared":
 		result["offer"] = session.morale.offer.duplicate()

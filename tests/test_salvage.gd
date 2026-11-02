@@ -209,7 +209,7 @@ func test_won_pays_credits_only_and_counts_as_a_win() -> void:
 	for id in ship.inventory.counts:
 		if id != "credits":
 			eq(ship.inventory.count(id), int(before.get(id, 0)), "no %s: the player picks from the wreck" % id)
-	eq([c.fights_won, c.hull_loss, r["state"]], [1, 20, "won"], "a win, with the damage kept")
+	eq([c.fights_won, r["state"]], [1, "won"], "a win")
 	eq(r["lines"], ["+%d credits" % dc], "the lines")
 
 
@@ -225,7 +225,7 @@ func test_captured_pays_one_and_a_half_times_the_credits_and_the_strip_scrap() -
 		var dc: int = ship.inventory.count("credits") - int(before.get("credits", 0))
 		check(dc >= roundi(20 * t * 1.5) and dc <= roundi(60 * t * 1.5), "credits x1.5 at tier %d (%d)" % [t, dc])
 		eq(ship.inventory.count("scrap") - int(before.get("scrap", 0)), (20 + 6 * 8) * t, "the strip scrap at tier %d" % t)
-		eq([c.fights_won, c.hull_loss, r["state"]], [1, 10, "captured"], "it counts as a win, with the damage kept")
+		eq([c.fights_won, r["state"]], [1, "captured"], "it counts as a win")
 		check(r["lines"].size() == 2 and r["lines"][1].begins_with("+%d scrap" % ((20 + 6 * 8) * t)), "the lines say what the crew stripped")
 
 
@@ -252,9 +252,9 @@ func test_escaped_pays_nothing_and_fled_and_lost_are_as_before() -> void:
 	var r := c.fight_done({"state": "escaped", "enemy": _enemy(), "hull": 80.0, "hull_max": 100.0}, ship)
 	eq(ship.inventory.counts, before, "the cargo is untouched")
 	eq(r["text"], "They're gone, and whatever they carried went with them.", "the text")
-	eq([r["state"], r["lines"], c.fights_won, c.hull_loss], ["escaped", [], 0, 20], "no lines, no win, but the damage stays")
+	eq([r["state"], r["lines"], c.fights_won], ["escaped", [], 0], "no lines, no win")
 	var fled := c.fight_done({"state": "fled", "hull": 90.0, "hull_max": 100.0}, ship)
-	eq([fled["state"], fled["text"], ship.inventory.counts, c.fights_won, c.hull_loss], ["fled", "You break away. The fight is not finished, but you are.", before, 0, 10], "fled as before")
+	eq([fled["state"], fled["text"], ship.inventory.counts, c.fights_won], ["fled", "You break away. The fight is not finished, but you are.", before, 0], "fled as before")
 	var lost := c.fight_done({"state": "lost"}, ship)
 	eq([lost["state"], lost["text"]], ["lost", "Your ship is wrecked. The Drift keeps what is left of it."], "lost as before")
 

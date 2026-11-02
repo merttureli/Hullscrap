@@ -2,6 +2,8 @@ extends "res://tests/base_test.gd"
 ## The owner's Beta 1 playtest ("ships are a little slow"): the flight numbers are 1.5x what Beta 1 had, the
 ## turn in proportion, the safe docking speed is unchanged, a bump does not one-shot, and an AI fight still resolves.
 
+const Structure = preload("res://scripts/ship/structure.gd")
+const StructureUtil = preload("res://tests/structure_util.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
@@ -64,16 +66,16 @@ func test_the_safe_docking_speed_is_unchanged_and_a_bump_does_not_one_shot() -> 
 	near(c["damage_k"], 0.6 * BETA1["damage_k"], "damage_k is x0.6, so 1.5x the speed (2.25x the energy) hurts 1.35x")
 	var a := Arena.new(1)
 	var i := a.add_ship(Ship.from_design(COURIER))
-	var hull: float = a.ships[i].hull_max
-	# A glancing 150 px/s bump between two Couriers of 76 hull (Beta 1 top speed was 600; this is a quarter of the new one).
+	var hull: float = (1.0 - Structure.defeat_below()) * Structure.totals(a.ships[i].ship).y  # the block hp it takes to wreck a Courier
+	# A glancing 150 px/s bump between two Couriers (Beta 1 top speed was 600; this is a quarter of the new one).
 	var energy: float = 0.5 * (a.ships[i].mass / 2.0) * 150.0 * 150.0
-	check(energy * c["damage_k"] < 0.2 * hull, "a bump at 150 px/s costs under a fifth of the hull (%f of %f)" % [energy * c["damage_k"], hull])
+	check(energy * c["damage_k"] < 0.2 * hull, "a bump at 150 px/s costs under a fifth of what wrecks the ship (%f of %f)" % [energy * c["damage_k"], hull])
 
 
 func test_an_ai_fight_still_resolves() -> void:
 	var s := Session.new()
 	s.start(Session.load_ship(PIRATE), Session.load_ship(PIRATE), 5)  # a pirate against a pirate: the starters have one bare gun each now, and the pirate snipes it in the first seconds
-	s.arena.ships[Session.ENEMY].hull = 14.0  # a pirate already hurt: the fight has to end
+	StructureUtil.set_structure(s.arena.ships[Session.ENEMY], 0.53)  # a pirate already hurt: the fight has to end
 	var pilot := PilotAI.new(s.arena, Session.PLAYER, Session.ENEMY, {})
 	var n := 0
 	var fastest := 0.0

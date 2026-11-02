@@ -1,6 +1,6 @@
 extends Control
 ## An FTL-style ship panel (about 280 x 200 px): a small top-down map of one arena ship's grid with
-## its rooms, walls, doors and systems coloured by state, breaches in red, a hull integrity bar and
+## its rooms, walls, doors and systems coloured by state, breaches in red, and the
 ## shield pips with a ring that shows which sector of the bubble is open. Bow is up. Placeholder shapes.
 ## bind() it to an arena ship; it redraws every frame. Drawing only.
 ## The player's panel can show the enemy's intent (`intent`, intent.gd): a pulsing red reticle on the part the pilot
@@ -169,14 +169,7 @@ func _draw() -> void:
 	var map := draw_map(self, co.ship, co.powered, MAP)
 	if reveal:
 		_draw_crew(co.ship, map)
-	# Hull integrity bar and the shield pips.
-	var frac := clampf(co.hull / maxf(co.hull_max, 0.01), 0.0, 1.0)
-	_text("HULL", Vector2(10, 172), 11, TEXT)
-	var bar := Rect2(44, 163, 150, 10)
-	draw_rect(bar, Color(0, 0, 0, 0.6))
-	draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, bar.size.y)), Color("#e0453a").lerp(Color("#4fd08a"), frac))
-	draw_rect(bar, EDGE, false, 1.0)
-	_text("%d/%d" % [ceili(co.hull), ceili(co.hull_max)], Vector2(200, 172), 11, TEXT)
+	# The shield pips. (No hull bar: the damage is on the blocks of the map.)
 	_draw_shield(co, Vector2(10, 180))
 	_draw_intent(co, map)
 	if co.wrecked:

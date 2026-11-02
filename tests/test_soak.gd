@@ -9,6 +9,7 @@ extends "res://tests/base_test.gd"
 ## credits or hull, no unknown id), that the autopilot gets where it was sent, and that no event is a dead end.
 ## Everything is seeded, so a failure replays.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Content = preload("res://scripts/data/content.gd")
@@ -282,7 +283,7 @@ func _choose_lane(where: String, c: Campaign, sim, pick: RandomNumberGenerator) 
 	# the map always offers with an empty tank so that a run never soft-locks (Y).
 	var tow := c.tow(ship)
 	stats["tows"] += 1
-	check(tow["ok"], "%s: stuck with no fuel, no drift jump, no trader and no tow (fuel %d, credits %d, hull left %d): %s" % [where, ship.inventory.count("fuel"), ship.inventory.count("credits"), c.hull_left(ship), tow["why"]])
+	check(tow["ok"], "%s: stuck with no fuel, no drift jump, no trader and no tow (fuel %d, credits %d, structure %.2f): %s" % [where, ship.inventory.count("fuel"), ship.inventory.count("credits"), Structure.structure_fraction(ship), tow["why"]])
 	return _choose_lane(where, c, sim, pick) if tow["ok"] else ""
 
 
@@ -321,9 +322,10 @@ func _station(where: String, c: Campaign, ship, pick: RandomNumberGenerator) -> 
 			var r := c.buy_fuel(ship, c.current, 1)
 			if not r["ok"]:
 				break
-	if services.has("repair") and c.hull_loss > 0 and ship.inventory.count("credits") > 60:
-		var r := c.repair(ship, c.current, c.hull_loss)
-		check(r["ok"] or ship.inventory.count("credits") < 2 * c.hull_loss, where + ": repair: " + str(r["text"]))
+	if services.has("repair") and Structure.missing_hp(ship) > 0.0 and ship.inventory.count("credits") > 60:
+		var cost := c.repair_cost(ship, c.current)
+		var r := c.repair(ship, c.current)
+		check(r["ok"] or ship.inventory.count("credits") < cost, where + ": repair: " + str(r["text"]))
 	if services.has("sell") and ship.inventory.count("scrap") > 100 and pick.randf() < 0.5:
 		check(c.sell(ship, "scrap", 50)["ok"], where + ": selling scrap")
 	if services.has("stock") and not st["stock"].is_empty() and pick.randf() < 0.3:
@@ -434,7 +436,6 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 	var mine = ses.arena.ships[Session.PLAYER]
 	var foe = ses.arena.ships[Session.ENEMY]
 	check(mine.flight.pos == place["player_pos"] and foe.flight.pos.distance_to(mine.flight.pos) >= Session.SPAWN_DISTANCE - 1.0, where + ": the fight starts in the sector, the enemy at a distance")
-	mine.hull = c.fight_hull(mine.hull_max)  # what the campaign says is left of the hull
 	ses.arena.hazard = c.hazard_at(c.current)  # the node's sector hazard, as the map sets it
 	var pilot := PilotAI.new(ses.arena, Session.PLAYER, Session.ENEMY, {})
 	var ticks := int(_cap_s * 60.0)
@@ -463,7 +464,7 @@ func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGe
 	stats[{"won": "won", "captured": "won", "spared": "won", "lost": "lost"}.get(state, "draw")] += 1  # escaped and fled are draws
 	_helm.place(mine.flight.pos, mine.flight.vel, mine.flight.angle, mine.flight.ang_vel)
 	_helm.sync_to(s)
-	var res := {"state": state, "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max, "enemy_pos": foe.flight.pos, "threat": ses.threat}
+	var res := {"state": state, "enemy": foe.ship, "enemy_pos": foe.flight.pos, "threat": ses.threat}
 	if state == "spared":
 		res["offer"] = ses.morale.offer.duplicate()
 	stats["fight_ticks"] += n
@@ -477,15 +478,15 @@ func _stub_fight(enemy, player, c: Campaign, pick: RandomNumberGenerator, at: Ve
 	var roll := pick.randf()
 	var state := "won" if roll < 0.55 else ("fled" if roll < 0.85 else "lost")
 	stats["won" if state == "won" else ("draw" if state == "fled" else "lost")] += 1
-	var hull_max := float(c.hull_max(player))
-	var hull := 0.0 if state == "lost" else maxf(1.0, hull_max - float(c.hull_loss) - pick.randf() * 60.0)
-	return {"state": state, "enemy": enemy, "hull": hull, "hull_max": hull_max, "enemy_pos": at, "threat": int(Shipgen.threat(enemy, player)["skulls"])}
+	if state != "lost":
+		c.hurt_blocks(player, int(pick.randf() * 60.0))  # some blocks gone
+	return {"state": state, "enemy": enemy, "enemy_pos": at, "threat": int(Shipgen.threat(enemy, player)["skulls"])}
 
 
 func _audit_fight(where: String, s: Session) -> void:
 	for i in 2:
 		var co = s.arena.ships[i]
-		check(co.hull >= 0.0 or co.wrecked, "%s: ship %d hull is %s" % [where, i, str(co.hull)])
+		check(is_finite(Structure.structure_fraction(co)), "%s: ship %d structure is not a number" % [where, i])
 		check(is_finite(co.flight.pos.x) and is_finite(co.flight.pos.y) and is_finite(co.flight.angle), "%s: ship %d position is not a number: %s" % [where, i, str(co.flight.pos)])
 		check(is_finite(co.flight.vel.x) and is_finite(co.flight.vel.y), "%s: ship %d velocity is not a number" % [where, i])
 		check(co.layers >= 0.0 if typeof(co.layers) == TYPE_FLOAT else true, "%s: ship %d has negative shield layers" % [where, i])
@@ -500,7 +501,7 @@ func _audit(where: String, c: Campaign, ship) -> void:
 		check(n > 0, "%s: %d of %s in the cargo" % [where, n, id])
 		check(_known_item(ship, str(id)), "%s: unknown item id '%s' in the cargo" % [where, id])
 	check(ship.inventory.count("fuel") >= 0 and ship.inventory.count("credits") >= 0, where + ": negative fuel or credits")
-	check(c.hull_loss >= 0 and c.hull_left(ship) >= 1, "%s: hull integrity %d of %d" % [where, c.hull_left(ship), c.hull_max(ship)])
+	check(Structure.structure_fraction(ship) >= 0.0 and Structure.missing_hp(ship) >= 0.0, "%s: structure %s" % [where, str(Structure.structure_fraction(ship))])
 	check(c.debt >= 0 and c.paid >= 0 and c.jumps >= 0, "%s: debt %d, paid %d, jumps %d" % [where, c.debt, c.paid, c.jumps])
 	check(c.drift.has(c.current), where + ": the ship is at a node that does not exist: " + c.current)
 	for f in c.rep:
@@ -516,23 +517,9 @@ func _known_item(ship, id: String) -> bool:
 
 # --- regressions found by the soak ------------------------------------------------------------------------
 
-## A fight leaves breaches, and a damaged hull has a lower maximum than the one the loss was counted
-## against: the integrity shown went negative ("Hull -20/170"). It stays at 1 or more.
-func test_regression_hull_left_is_never_below_one() -> void:
-	var sim := ShipSim.new()
-	sim.choose_ship(STARTERS[0])
-	var ship = sim.player_ship()
-	var c := Campaign.new(1)
-	c.hull_loss = c.hull_max(ship) + 20
-	eq(c.hull_left(ship), 1, "a loss bigger than the maximum leaves 1")
-	c.hull_loss = 0
-	eq(c.hull_left(ship), c.hull_max(ship), "no loss leaves the maximum")
-
-
-## The hull lost in a fight (or an event, or a drift jump) was forgotten at the next fight, which began at
-## full hull and then overwrote the loss: repairing at a station did nothing. A fight now begins with the
-## integrity the campaign says is left.
-func test_regression_a_fight_starts_with_the_hull_the_campaign_has_left() -> void:
+## The damage of a fight (or an event, or a drift jump) is on the blocks, and a fight begins with the blocks as they are:
+## nothing else is carried, and repairing at a station mends them.
+func test_regression_a_fight_starts_with_the_blocks_as_they_are() -> void:
 	var sim := ShipSim.new()
 	sim.choose_ship(STARTERS[1])
 	var build := BuildMode.new()
@@ -549,17 +536,13 @@ func test_regression_a_fight_starts_with_the_hull_the_campaign_has_left() -> voi
 	map._start_fight("pirate_raider", {})
 	check(view.active, "the fight starts")
 	var mine = view.session.arena.ships[Session.PLAYER]
-	eq(mine.hull, mine.hull_max, "a fresh campaign begins the fight at full hull")
+	eq(Structure.structure_fraction(mine), 1.0, "a fresh campaign begins the fight whole")
 	view.leave()
-	map.campaign.hull_loss = 40
+	eq(map.campaign.hurt_blocks(sim.player_ship(), 40), 40, "40 hp of damage on the blocks")
 	map._start_fight("pirate_raider", {})
 	check(view.active, "a second fight starts")
 	mine = view.session.arena.ships[Session.PLAYER]
-	eq(mine.hull, mine.hull_max - 40.0, "40 points lost, 40 points fewer")
-	view.leave()
-	map.campaign.hull_loss = 100000
-	map._start_fight("pirate_raider", {})
-	eq(view.session.arena.ships[Session.PLAYER].hull, 1.0, "never below 1")
+	eq(Structure.missing_hp(mine.ship), 40.0, "the 40 hp are still missing: the damage is on the blocks")
 	view.leave()
 	map.free()
 	view.free()

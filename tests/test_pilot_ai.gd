@@ -2,6 +2,7 @@ extends "res://tests/base_test.gd"
 ## The enemy pilot: its lead against a moving target, target priority, range keeping, determinism and
 ## stopping when wrecked.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
@@ -123,7 +124,7 @@ func test_the_ai_closes_to_its_preferred_range_and_shoots() -> void:
 	check(gap > 0.5 * PilotAI.HULL_MARGIN, "so the hulls never clip (a gap of %d px)" % gap)
 	check(_count(a, "shot", 0) >= 8, "it fires: %d shots" % _count(a, "shot", 0))
 	check(_count(a, "hit", 1) + _count(a, "shield", 1) > 0, "and hits")
-	check(a.ships[1].hull < a.ships[1].hull_max, "the foe's hull is hurt")
+	check(Structure.structure_fraction(a.ships[1]) < 1.0, "the foe's hull is hurt")
 	eq(_count(a, "shot", 1), 0, "(the sitting foe fired nothing)")
 	for e in a.events:  # the strafing pirate's wide hull may clip the foe's: that is the only way it can be hurt
 		if e["type"] == "hit" and e["ship"] == 0:
