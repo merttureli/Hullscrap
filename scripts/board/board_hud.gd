@@ -6,6 +6,7 @@ extends Control
 
 const Site = preload("res://scripts/board/site.gd")
 const Tracker = preload("res://scripts/board/tracker.gd")
+const Arms = preload("res://scripts/board/arms.gd")
 
 const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
@@ -17,6 +18,7 @@ const GOOD := Color("#6bd34a")
 const AMBER := Color("#e1a136")
 const CYAN := Color("#43e6ff")
 const AIRLOCK := Color("#58e08a")
+const BAD := Color("#e0584a")
 const TRACKER_R := 62.0
 const TRACKER_PAD := 26.0
 const EDGE_PAD := 56.0
@@ -47,6 +49,8 @@ func _draw() -> void:
 	_draw_title(size)
 	_draw_airlock(size)
 	_draw_tracker(size)
+	_draw_tracers()
+	_draw_arms(size)
 	_draw_feed(size)
 	_draw_prompt(size)
 	_draw_panel(size)
@@ -205,3 +209,43 @@ func _draw_panel(size: Vector2) -> void:
 		_text(text, rr.position + Vector2(30.0, 20.0), 17, col)
 	var pick := "1: take it" if entries.size() == 1 else "1-%d: take one" % entries.size()
 	_text("E: take all     %s     Esc: close" % pick, r.position + Vector2(16.0, h - 12.0), 14, DIM_TEXT)
+
+
+## The lines the shots drew: his in a warm white, a foe's in red.
+func _draw_tracers() -> void:
+	var life := float(Arms.cfg()["tracer_s"])
+	for t in view.tracers:
+		var a := clampf(1.0 - float(t["t"]) / life, 0.0, 1.0)
+		var col := Color(1.0, 0.45, 0.35, a) if t["foe"] else Color(1.0, 0.95, 0.7, a)
+		draw_line(view.to_screen(t["from"]), view.to_screen(t["to"]), col, 2.0)
+
+
+## His health and weapon (bottom right, over what was taken): "HP 80", the weapon, rounds in it / in the hold, and the other weapon he carries.
+func _draw_arms(size: Vector2) -> void:
+	var s = view.session
+	var m = s.soldier
+	var g: Dictionary = s.gun()
+	var x := size.x - 300.0
+	var y := size.y - 24.0 - 28.0 * float(view.feed.size())
+	var hp_f := clampf(m.hp / maxf(m.max_hp, 1.0), 0.0, 1.0)
+	draw_rect(Rect2(x, y - 74.0, 276.0, 70.0), Color(PANEL_BG, 0.85))
+	draw_rect(Rect2(x, y - 74.0, 276.0, 70.0), EDGE_DIM, false, 1.5)
+	draw_rect(Rect2(x + 12.0, y - 64.0, 252.0, 8.0), ROW_BG)
+	draw_rect(Rect2(x + 12.0, y - 64.0, 252.0 * hp_f, 8.0), GOOD if hp_f > 0.5 else (AMBER if hp_f > 0.25 else BAD))
+	_text(str(g["w"]["name"]), Vector2(x + 12.0, y - 36.0), 16, TEXT)
+	var ammo := ""
+	if Arms.has_mag(g):
+		ammo = "%d / %d" % [int(g["mag"]), s.reserve()]
+		if float(g["reload"]) > 0.0:
+			ammo = "reloading"
+	else:
+		ammo = "melee"
+	var col := TEXT if Arms.has_mag(g) and int(g["mag"]) > 0 else (BAD if Arms.has_mag(g) else DIM_TEXT)
+	var w := _font().get_string_size(ammo, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+	_text(ammo, Vector2(x + 264.0 - w, y - 34.0), 20, col)
+	if s.guns.size() > 1:
+		_text("Q: %s" % str(s.guns[1 - s.cur]["w"]["name"]), Vector2(x + 12.0, y - 14.0), 13, DIM_TEXT)
+	_text("R reload   F light", Vector2(x + 150.0, y - 14.0), 13, DIM_TEXT)
+	var at: Vector2 = view.aim_screen()
+	draw_arc(at, 9.0, 0.0, TAU, 20, Color(TEXT, 0.7), 1.5, true)
+	draw_circle(at, 1.5, Color(TEXT, 0.9))

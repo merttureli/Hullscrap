@@ -23,6 +23,7 @@ const ShipView = preload("res://scripts/view/ship_view.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Art = preload("res://scripts/view/art.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Arms = preload("res://scripts/board/arms.gd")
 
 ## Emitted when the soldier is back on the ship: Boarding.leave()'s result {cleared, said, name, kind, poi}.
 signal finished(result: Dictionary)
@@ -61,6 +62,9 @@ var lights_up := false  ## debug: the site lit as if by day (screenshots)
 var aim_override: Variant = null  ## a world point (px)
 var e_override: Variant = null  ## whether E is held
 var wasd_override: Variant = null  ## a Vector2
+var fire_override: Variant = null  ## whether the trigger is held
+var tracers: Array = []  ## [{from, to (cells), t, foe}] the lines the shots drew, for the HUD
+var light_on := true  ## F: the flashlight
 var target := {}  ## what E would act on: {type ("airlock", "container", "door"), id, dist}
 var hold := 0.0  ## seconds E has been held on the target
 var panel := -1  ## the container whose loot list is open
@@ -74,6 +78,9 @@ var _over: Node2D
 var _lights: Node2D
 var _mod: CanvasModulate
 var _flash: PointLight2D
+var _muzzle: PointLight2D
+var _muzzle_t := 0.0
+var _muzzle_at := Vector2.ZERO
 var _self_light: PointLight2D
 var _red: Array = []  # [[light, base energy, phase]]
 var _door_occ := {}  # door id -> LightOccluder2D
@@ -126,6 +133,8 @@ func enter(p_session) -> String:
 	message = ""
 	feed.clear()
 	tracker = Tracker.new()
+	tracers.clear()
+	light_on = true
 	_door_state.clear()
 	_anim = {}
 	_walked = 0.0
@@ -208,6 +217,8 @@ func _build_nodes() -> void:
 			_door_occ[d["id"]] = _occluder(BoardLight.door_rect(d["cells"]))
 	_flash = _light(BoardLight.cone_texture(), FLASH_RANGE, Color(1.0, 0.97, 0.88), 1.1, true, BoardLight.cone_texture().get_width() / 2.0)
 	_self_light = _light(BoardLight.round_texture(), SELF_RANGE, Color(0.85, 0.9, 1.0), 0.55, false, 64.0)
+	_muzzle = _light(BoardLight.round_texture(), 7.0, Color(1.0, 0.82, 0.5), 1.5, true, 64.0)
+	_muzzle.visible = false
 	_red.clear()
 	for l in site.lights:
 		var red: bool = l["color"] == "red"
@@ -259,6 +270,7 @@ func _free_nodes() -> void:
 	_layer = null
 	hud = null
 	_flash = null
+	_muzzle = null
 	_self_light = null
 	_red.clear()
 	_door_occ.clear()
@@ -308,6 +320,9 @@ func step(dt: float) -> void:
 	_aim_at(dt)
 	_update_doors()
 	_interact(dt)
+	if not active:
+		return  # (E at the airlock left)
+	_combat(dt)
 	_update_lights(dt)
 	var contacts: Array = contacts_source.call() if contacts_source.is_valid() else []
 	tracker.tick(dt, m.pos, contacts)
@@ -381,12 +396,66 @@ func _update_lights(dt: float) -> void:
 	_flash.position = at
 	_flash.rotation = _aim
 	_self_light.position = at
-	_flash.visible = not lights_up
+	_flash.visible = not lights_up and light_on
 	_self_light.visible = not lights_up
+	_muzzle_t = maxf(_muzzle_t - dt, 0.0)
+	_muzzle.visible = _muzzle_t > 0.0 and not lights_up
+	_muzzle.position = _muzzle_at * CELL
+	_muzzle.energy = 1.5 * _muzzle_t / float(Arms.cfg()["flash_s"])
 	for e in _red:
 		var flicker: float = 1.0 + 0.12 * sin(_clock * 2.3 + float(e[2])) + (0.0 if not e[3] else 0.06 * sin(_clock * 11.0 + float(e[2]) * 3.0))
 		e[0].energy = float(e[1]) * flicker
 		e[0].visible = not lights_up
+
+
+# --- fighting -------------------------------------------------------------------------------------------------------
+
+func _fire_down() -> bool:
+	if fire_override != null:
+		return bool(fire_override)
+	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and is_inside_tree()
+
+
+## The weapons, the shots and what they sound like: the trigger while no list or picker is up, then everything the session says happened.
+func _combat(dt: float) -> void:
+	var s = session
+	s.tick(dt)
+	if _fire_down() and panel < 0 and not s.soldier.is_down():
+		s.fire(_aim)
+	for t in tracers:
+		t["t"] += dt
+	tracers = tracers.filter(func(t): return float(t["t"]) < float(Arms.cfg()["tracer_s"]))
+	_play(s.take_events())
+
+
+## Draw and sound the events of a tick.
+func _play(evs: Array) -> void:
+	for e in evs:
+		var at: Vector2 = e.get("pos", e.get("from", Vector2.ZERO))
+		var px := at * CELL
+		match str(e["type"]):
+			"shot":
+				tracers.append({"from": e["from"], "to": e["to"], "t": 0.0, "foe": e["who"] != "soldier"})
+				if e["who"] == "soldier":
+					_muzzle_t = float(Arms.cfg()["flash_s"])
+					_muzzle_at = e["from"]
+				Audio.fx(self, "shot_" + str(e["class"]), px, 0.0 if e["who"] == "soldier" else -2.0)
+			"swing":
+				Audio.fx(self, "melee_swing", px)
+			"click":
+				Audio.fx(self, "empty_click", px)
+				say("Empty. R reloads.")
+			"reload":
+				Audio.fx(self, "reload", px)
+			"swap":
+				Audio.fx(self, "reload", px, -8.0)
+
+
+## F: the flashlight on or off.
+func toggle_light() -> void:
+	light_on = not light_on
+	Audio.fx(self, "flashlight_click")
+	_update_lights(0.0)
 
 
 # --- interacting ----------------------------------------------------------------------------------------------------
@@ -579,6 +648,12 @@ func _unhandled_input(e: InputEvent) -> void:
 			elif e.keycode == KEY_L:
 				say("Can't load aboard another vessel.")
 				Audio.fx(self, "error")
+		elif e.keycode == KEY_R:
+			session.reload()
+		elif e.keycode == KEY_Q:
+			session.swap()
+		elif e.keycode == KEY_F:
+			toggle_light()
 		elif e.keycode == KEY_ESCAPE:
 			if panel >= 0:
 				close_panel()
@@ -591,6 +666,13 @@ func _unhandled_input(e: InputEvent) -> void:
 func _zoom(f: float) -> void:
 	if cam != null:
 		cam.zoom = (cam.zoom * f).clamp(Vector2(ZOOM_MIN, ZOOM_MIN), Vector2(ZOOM_MAX, ZOOM_MAX))
+
+
+## Where the aim is on the screen (the cursor, or the point a script aims at).
+func aim_screen() -> Vector2:
+	if aim_override != null:
+		return to_screen(aim_override / CELL)
+	return get_viewport().get_mouse_position() if is_inside_tree() else Vector2.ZERO
 
 
 ## Screen position (the HUD's) of a point in cells.

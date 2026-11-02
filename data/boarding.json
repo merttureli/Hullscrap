@@ -12,6 +12,62 @@
 	"reach": 2.6,
 	"airlock_reach": 3.4,
 	"ring_cells": 1,
+	"combat": {
+		"_doc": "On foot, stage B2 (scripts/board/arms.gd, foes.gd, party.gd). ammo_item: the cargo item a magazine is loaded from. mag, reload_s, spread_deg: by hand weapon class (data/hand_weapons.json); melee and tools have no magazine. hand_items: the cargo items that are hand weapons and the weapon each stands for (found in loot, Q swaps between the two carried). hit_r: the radius of a body a ray hits (cells); prop_stop: the chance a prop a ray enters stops it (cover). noise_gun and noise_swing: cells within which a shot or a swing alerts every foe. flash_range, self_range: how far the flashlight and the small light round the soldier reach (the view draws them). down_hp: the share of his health the soldier wakes with; down_text is what the screen says. revive_s and revive_hp: holding E by a downed crewman (the soldier or a follower) and the share of health they get up with. hack_sentry_s and hack_back_deg: holding E behind a sentry, the angle off its facing that counts as behind. party_max: crew who can come along. follow_near and follow_far: a follower walks to the soldier from further than far and stops within near. sight: how far a foe sees, in cells: dark (always), red (a room with an emergency light), lit (in the beam of the flashlight, or the soldier is lit); notice_s is how long it takes to be sure of what it sees (less when close). hollow: the Hollow falling while the soldier is aboard (count of hollow_touched, the toast, the banner).",
+		"ammo_item": "hand_ammo",
+		"mag": {"pistol": 8, "rifle": 20, "heavy": 4},
+		"reload_s": {"pistol": 1.2, "rifle": 1.7, "heavy": 2.0},
+		"spread_deg": {"pistol": 1.2, "rifle": 2.4, "heavy": 0.8},
+		"hand_items": {"pistol": "service_pistol", "rifle": "carbine", "slugthrower": "slugthrower"},
+		"cell_px": 32.0,
+		"hit_r": 0.75,
+		"prop_stop": 0.5,
+		"muzzle": 0.9,
+		"swap_s": 0.35,
+		"swing_arc_deg": 80,
+		"noise_gun": 12.0,
+		"noise_swing": 5.0,
+		"tracer_s": 0.09,
+		"flash_s": 0.08,
+		"flash_range": 12.0,
+		"self_range": 3.4,
+		"down_hp": 0.15,
+		"down_text": "You come to at the airlock.",
+		"revive_s": 4.0,
+		"revive_hp": 0.25,
+		"revive_reach": 2.6,
+		"hack_sentry_s": 3.0,
+		"hack_back_deg": 110,
+		"party_max": 2,
+		"follow_near": 3.5,
+		"follow_far": 6.0,
+		"leave_confirm_s": 6.0,
+		"sight": {"dark": 4.5, "red": 8.0, "lit": 13.0, "notice_s": 0.6},
+		"hollow": {"count": [2, 3], "toast": "Visitors: noted.", "banner": "The Hollow is here. Get out.", "flicker_s": 3.5}
+	},
+	"enemies": {
+		"_doc": "The foes (scripts/board/foes.gd). hp; weapon: the hand weapon drawn in their hands (art); attack: damage, rate (a second) and range (cells; a melee foe's reach) of one hit; inacc: the half-width in radians of the error of an aimed shot (x1.3 against a target that is moving); speed: x the walk speed of a person (3 cells a second); fov_deg and dark: the sight cone and how far it sees with no light on the target (data combat.sight); hold: the share of its range at which a shooter stops to fire; flee_below: the hp share under which it runs; cover: it takes cover behind props; patrol: stand or wander; alert_r: cells within which a foe that notices calls its mates; look: the palette it is drawn with; lines: what a polite one says on noticing you (a toast). The sentry (turret) turns at turn rad/s and sees a cone of cone_deg; it can be hacked (combat.hack_sentry_s). The crawler lives in the vents: emerge (cells within which it comes out), lunge {range, speed, time, damage, cooldown}, hide_s (seconds in a light before it goes back).",
+		"scavenger": {"name": "Scavenger", "hp": 40, "weapon": "flare_gun", "attack": {"damage": 7.0, "rate": 0.9, "range": 9.0}, "inacc": 0.17, "speed": 0.9, "fov_deg": 130, "hold": 0.7, "flee_below": 0.3, "patrol": "wander", "alert_r": 6.0, "look": {"suit": "#8a7a4a"}},
+		"pirate": {"name": "Pirate", "hp": 60, "weapon": "doorbuster", "attack": {"damage": 11.0, "rate": 1.0, "range": 12.0}, "inacc": 0.13, "speed": 0.85, "fov_deg": 120, "hold": 0.45, "cover": true, "patrol": "stand", "alert_r": 7.0, "look": {"suit": "#a8403a"}},
+		"sentry": {"name": "Sentry", "hp": 50, "attack": {"damage": 3.5, "rate": 3.0, "range": 11.0}, "inacc": 0.1, "speed": 0.0, "turn": 2.4, "sweep": 0.5, "sweep_deg": 65, "cone_deg": 64, "patrol": "sweep", "alert_r": 0.0},
+		"hollow_touched": {"name": "Hollow-touched", "hp": 70, "attack": {"damage": 12.0, "rate": 0.7, "range": 1.7}, "melee": true, "speed": 0.55, "fov_deg": 150, "patrol": "stand", "alert_r": 5.0, "look": {"suit": "#9a96a8", "hair": "#d8d4e0"},
+			"lines": ["Hello. You are not on the list.", "Visitor. Noted.", "Please stay where you are.", "We are so glad you came.", "Do not run. It is rude."]},
+		"crawler": {"name": "Crawler", "hp": 35, "attack": {"damage": 10.0, "rate": 1.2, "range": 1.5}, "melee": true, "speed": 2.4, "emerge": 16.0, "hide_s": 2.0, "lunge": {"range": 4.5, "speed": 11.0, "time": 0.35, "damage": 14.0, "cooldown": 6.0}, "alert_r": 0.0}
+	},
+	"spawn": {
+		"_doc": "Who stands where (foes.gd spawn). Per site kind: count [min, max] of foes, mix = weights of the foe kinds. A foe stands on a free spot of a room picked by room_weights (the airlock's own room never), at least min_from_airlock cells from where the soldier arrives. In a place the Hollow already holds, hollow_share of them are hollow_touched instead. A wreck holds its surviving crew (the `crew` of the board effect, at most crew_max). crawler: the chance a site has one, and how many vents [min, max] it has (floor cells by a wall where it hides).",
+		"min_from_airlock": 9.0,
+		"room_weights": {"command": 2.0, "cargo": 1.5, "quarters": 1.2, "storage": 1.0, "engineering": 1.0, "medbay": 0.6, "corridor": 0.5},
+		"kinds": {
+			"derelict": {"count": [0, 2], "mix": {"scavenger": 1}},
+			"station": {"count": [3, 7], "mix": {"scavenger": 5, "pirate": 1.5, "sentry": 2}},
+			"nest": {"count": [5, 8], "mix": {"pirate": 5, "scavenger": 2.5, "sentry": 2}},
+			"wreck": {"count": [0, 0], "mix": {"pirate": 1, "scavenger": 2}}
+		},
+		"hollow_share": 0.7,
+		"crew_max": 4,
+		"crawler": {"chance": 0.1667, "vents": [3, 5]}
+	},
 	"kinds": {
 		"derelict": {
 			"name": "Derelict", "bands": ["RCR", "RCR", "RC"], "interior": [26, 32], "room_h": [5, 6], "room_w": [5, 10], "hull": "",
@@ -35,7 +91,7 @@
 			"min": {"storage": 1, "cargo": 1}, "max": {"command": 1, "medbay": 1, "engineering": 1},
 			"hack": [0, 2], "card": [0, 1], "loop": 0.4, "emergency": 0.15, "prop_mult": 0.5, "loot_mult": 1.3, "locked_bonus": 1.5,
 			"blueprints": {"0": 0.7, "1": 0.3}, "logs": [0, 1],
-			"bonus": [{"weight": 10, "item": "credits", "count": [8, 24]}, {"weight": 8, "item": "missile", "count": [1, 3]}],
+			"bonus": [{"weight": 10, "item": "credits", "count": [8, 24]}, {"weight": 8, "item": "missile", "count": [1, 3]}, {"weight": 10, "item": "hand_ammo", "count": [6, 14]}, {"weight": 3, "item": "rifle", "count": [1, 1]}],
 			"names": ["Rat Hole", "Scrap Roost", "Bone Yard Annex", "Pirate Nest", "Chop Shop", "Dredge Den"]
 		},
 		"wreck": {
@@ -75,13 +131,15 @@
 	"tables": {
 		"storage": [
 			{"weight": 34, "item": "scrap", "count": [4, 10]}, {"weight": 22, "item": "copper", "count": [2, 5]}, {"weight": 18, "item": "polymer", "count": [2, 4]},
-			{"weight": 6, "item": "titanium", "count": [1, 3]}, {"weight": 4, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "missile", "count": [1, 2]}, {"weight": 1.5, "item": "fuel", "count": [1, 1]}
+			{"weight": 6, "item": "titanium", "count": [1, 3]}, {"weight": 4, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "missile", "count": [1, 2]}, {"weight": 1.5, "item": "fuel", "count": [1, 1]},
+			{"weight": 9, "item": "hand_ammo", "count": [6, 14]}
 		],
 		"cargo": [
 			{"weight": 24, "item": "scrap", "count": [4, 9]}, {"weight": 18, "item": "copper", "count": [3, 6]}, {"weight": 14, "item": "polymer", "count": [2, 5]},
 			{"weight": 8, "item": "titanium", "count": [1, 3]}, {"weight": 5, "item": "silicon", "count": [1, 3]}, {"weight": 7, "item": "missile", "count": [1, 3]},
 			{"weight": 3, "item": "radiator", "count": [1, 1]}, {"weight": 3, "item": "ammo_rack", "count": [1, 1]}, {"weight": 2, "item": "oxygen_gen", "count": [1, 1]},
-			{"weight": 2, "item": "engine_mk1", "count": [1, 1]}, {"weight": 1, "item": "shield_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "fuel", "count": [1, 1]}
+			{"weight": 2, "item": "engine_mk1", "count": [1, 1]}, {"weight": 1, "item": "shield_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "fuel", "count": [1, 1]},
+			{"weight": 9, "item": "hand_ammo", "count": [6, 16]}, {"weight": 2, "item": "rifle", "count": [1, 1]}
 		],
 		"engineering": [
 			{"weight": 26, "item": "copper", "count": [3, 6]}, {"weight": 22, "item": "scrap", "count": [4, 8]}, {"weight": 10, "item": "silicon", "count": [1, 3]},
@@ -95,21 +153,24 @@
 		],
 		"command": [
 			{"weight": 30, "item": "credits", "count": [8, 30]}, {"weight": 14, "item": "silicon", "count": [1, 3]}, {"weight": 6, "item": "crystal", "count": [1, 2]},
-			{"weight": 10, "item": "copper", "count": [2, 5]}, {"weight": 3, "item": "plasma_cell", "count": [1, 1]}, {"weight": 2, "item": "radar_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "pulse_mk1", "count": [1, 1]}
+			{"weight": 10, "item": "copper", "count": [2, 5]}, {"weight": 3, "item": "plasma_cell", "count": [1, 1]}, {"weight": 2, "item": "radar_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "pulse_mk1", "count": [1, 1]},
+			{"weight": 8, "item": "hand_ammo", "count": [5, 12]}, {"weight": 1, "item": "slugthrower", "count": [1, 1]}
 		],
 		"quarters": [
 			{"weight": 30, "item": "credits", "count": [2, 10]}, {"weight": 15, "item": "polymer", "count": [2, 4]}, {"weight": 15, "item": "scrap", "count": [3, 7]},
-			{"weight": 8, "item": "copper", "count": [2, 4]}, {"weight": 3, "item": "pistol", "count": [1, 1]}, {"weight": 3, "item": "basic_armor", "count": [1, 1]}, {"weight": 1, "item": "eva_suit", "count": [1, 1]}
+			{"weight": 8, "item": "copper", "count": [2, 4]}, {"weight": 3, "item": "pistol", "count": [1, 1]}, {"weight": 3, "item": "basic_armor", "count": [1, 1]}, {"weight": 1, "item": "eva_suit", "count": [1, 1]},
+			{"weight": 6, "item": "hand_ammo", "count": [4, 10]}
 		],
 		"airlock": [
-			{"weight": 30, "item": "scrap", "count": [2, 6]}, {"weight": 20, "item": "polymer", "count": [1, 3]}, {"weight": 6, "item": "eva_suit", "count": [1, 1]}, {"weight": 10, "item": "copper", "count": [1, 3]}
+			{"weight": 30, "item": "scrap", "count": [2, 6]}, {"weight": 20, "item": "polymer", "count": [1, 3]}, {"weight": 6, "item": "eva_suit", "count": [1, 1]}, {"weight": 10, "item": "copper", "count": [1, 3]}, {"weight": 6, "item": "hand_ammo", "count": [3, 8]}
 		],
 		"terminal": [
 			{"weight": 60, "item": "credits", "count": [6, 24]}, {"weight": 10, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "copper", "count": [1, 3]}
 		],
 		"body": [
 			{"weight": 30, "item": "credits", "count": [2, 8]}, {"weight": 20, "item": "scrap", "count": [1, 3]}, {"weight": 10, "item": "polymer", "count": [1, 2]},
-			{"weight": 6, "item": "pistol", "count": [1, 1]}, {"weight": 6, "item": "missile", "count": [1, 1]}
+			{"weight": 6, "item": "pistol", "count": [1, 1]}, {"weight": 6, "item": "missile", "count": [1, 1]},
+			{"weight": 14, "item": "hand_ammo", "count": [3, 8]}, {"weight": 3, "item": "rifle", "count": [1, 1]}
 		]
 	}
 }
