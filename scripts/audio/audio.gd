@@ -93,6 +93,7 @@ var muffled := false  ## the Music bus has its low-pass on (muffle)
 var front: Node  ## the siblings this node reads (set up in setup(), null when absent)
 var build: Node
 var combat: Node
+var board: Node  ## the boarding view: while the soldier is aboard, a foe on the hunt makes the music combat (fight_music)
 var sector: Node
 var sim: Node
 var _rng := RandomNumberGenerator.new()  # which variant and how much pitch: heard, never simulated
@@ -288,6 +289,7 @@ func setup() -> void:
 		front = parent.get_node_or_null("FrontDoor")
 		build = parent.get_node_or_null("BuildMode")
 		combat = parent.get_node_or_null("Combat")
+		board = parent.get_node_or_null("Board")
 		sector = parent.get_node_or_null("Sector")
 		sim = parent.get_node_or_null("ShipSim")
 	_apply_buses()
@@ -966,6 +968,8 @@ func mood_inputs() -> Dictionary:
 			or (ending != null and ending.visible) or (picker != null and picker.visible)
 	if combat != null:
 		out["fight"] = bool(combat.get("active"))
+	if board != null and bool(board.get("active")) and board.has_method("fight_music"):
+		out["fight"] = bool(out.get("fight", false)) or bool(board.fight_music())  # (aboard another vessel the muffle stays on, only the layer changes)
 	if build != null:
 		out["build"] = bool(build.get("build_on")) and not bool(build.get("combat"))
 		out["hostile"] = build.has_method("can_build") and build.can_build() != ""

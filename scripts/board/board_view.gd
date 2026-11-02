@@ -544,6 +544,11 @@ func _play(evs: Array) -> void:
 				_start_talk(session.discover(int(e["mark"])))
 
 
+## Does the music turn to its fight layer (a foe has noticed someone and is on the hunt, or did within the last few seconds)? The muffle stays on.
+func fight_music() -> bool:
+	return active and _fight_t > 0.0
+
+
 ## The crew who can be taken along, [{name, species, hp, max_hp}].
 func pick_rows() -> Array:
 	return Party.eligible(session.ship).map(func(m): return {"name": m.name, "species": m.species, "hp": m.hp, "max_hp": m.max_hp})
@@ -948,7 +953,7 @@ func _draw_over() -> void:
 		if r["purpose"] == "gone":
 			continue
 		var rect: Rect2i = r["rect"]
-		_over.draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), Color(Themes.wash(site.theme, Color(str(rdefs[r["purpose"]]["tint"]))), 0.09 if site.theme == "" else 0.13))
+		_over.draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), Color(Themes.wash(site.theme, Color(str(rdefs[r["purpose"]]["tint"]))), 0.09 if site.theme == "" else 0.2))
 	_draw_hatch(site)
 	for d in site.doors:
 		if d["lock"] != "" and d["lock"] != "gone" and not session.unlocked.has(d["id"]):
@@ -1045,11 +1050,11 @@ func _draw_prop(p: Dictionary, def: Dictionary) -> void:
 				_over.draw_line(scr.position + Vector2(3, 4 + 5 * k), scr.position + Vector2(scr.size.x - 3 - 4 * k, 4 + 5 * k), Color(0.02, 0.2, 0.18, 0.7), 1.5)
 		"heap":  # a mound of scrap
 			var hc := o + sz / 2.0
-			for k in 7:
+			for k in 8:
 				var a := float(hash([p["id"], k]) % 628) / 100.0
-				var rr := 5.0 + float(hash([k, p["id"]]) % 5)
-				_over.draw_circle(hc + Vector2.from_angle(a) * (3.0 + float(k % 3) * 3.0), rr, fill.lightened(0.12 * float(k % 3)))
-			_over.draw_arc(hc, 12.0, 0.0, TAU, 14, edge, 2.0, true)
+				var rr := 6.0 + float(hash([k, p["id"]]) % 5)
+				_over.draw_circle(hc + Vector2.from_angle(a) * (4.0 + float(k % 3) * 3.5), rr, fill.lightened(0.12 * float(k % 3)))
+				_over.draw_arc(hc + Vector2.from_angle(a) * (4.0 + float(k % 3) * 3.5), rr, 0.0, TAU, 10, edge, 1.5, true)
 			if open:
 				_over.draw_circle(hc, 8.0, Color(0, 0, 0, 0.5))
 		"files":  # racks of folders
@@ -1063,11 +1068,11 @@ func _draw_prop(p: Dictionary, def: Dictionary) -> void:
 		"crystal":  # a glowing cluster
 			var cc := o + sz / 2.0
 			var gl := 0.6 + 0.3 * sin(_clock * 2.2 + float(p["id"]))
-			_over.draw_circle(cc, 15.0, Color(fill, 0.16 * gl))
+			_over.draw_circle(cc, 18.0, Color(fill, 0.2 * gl))
 			for k in 5:
 				var ang := -PI / 2.0 + (float(k) - 2.0) * 0.5
-				var tip := cc + Vector2.from_angle(ang) * (10.0 + float(k % 2) * 4.0)
-				var side := Vector2.from_angle(ang).orthogonal() * 3.0
+				var tip := cc + Vector2.from_angle(ang) * (13.0 + float(k % 2) * 5.0)
+				var side := Vector2.from_angle(ang).orthogonal() * 4.0
 				_over.draw_colored_polygon(PackedVector2Array([cc + side, tip, cc - side]), Color(fill, 0.55 + 0.4 * gl) if not spent else Color(fill, 0.25))
 				_over.draw_line(cc, tip, edge, 1.0)
 		"cask":  # a rack of barrels

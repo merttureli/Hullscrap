@@ -6,6 +6,7 @@
 			"weight": 12,
 			"once": false,
 			"requires": {
+				"role": "scavenger_talker",
 				"site": [
 					"station",
 					"derelict"
@@ -75,6 +76,7 @@
 			"weight": 14,
 			"once": false,
 			"requires": {
+				"role": "scavenger_talker",
 				"theme": "clans",
 				"site": [
 					"station",
@@ -154,6 +156,7 @@
 			"weight": 14,
 			"once": false,
 			"requires": {
+				"role": "scavenger_talker",
 				"theme": "boneyard",
 				"site": [
 					"station",
@@ -279,7 +282,10 @@
 						}
 					]
 				}
-			]
+			],
+			"requires": {
+				"role": "scavenger_talker"
+			}
 		}
 	]
 }

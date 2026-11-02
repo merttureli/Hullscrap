@@ -6,6 +6,7 @@
 			"weight": 12,
 			"once": false,
 			"requires": {
+				"role": "survivor",
 				"site": [
 					"station",
 					"derelict"
@@ -64,6 +65,7 @@
 			"weight": 8,
 			"once": false,
 			"requires": {
+				"role": "survivor",
 				"site": "derelict"
 			},
 			"text": "A figure in a half-sealed suit, one glove off, is waving a torch slowly back and forth across the deck, the way people wave at a ship that left some time ago. {name} sees your light and stops, then waves harder. The suit seam is split down the left thigh and held with a strip of tape that has given up. 'Tell me,' {name} says, in a voice scraped thin, 'that you have a hull that holds air.'",
@@ -132,6 +134,7 @@
 			"weight": 10,
 			"once": false,
 			"requires": {
+				"role": "survivor",
 				"site": "station",
 				"stage_min": 2
 			},
@@ -186,6 +189,7 @@
 			"weight": 40,
 			"once": true,
 			"requires": {
+				"role": "survivor",
 				"site": [
 					"station",
 					"derelict"
@@ -277,7 +281,10 @@
 						}
 					]
 				}
-			]
+			],
+			"requires": {
+				"role": "survivor"
+			}
 		}
 	]
 }

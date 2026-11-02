@@ -6,6 +6,7 @@
 			"weight": 12,
 			"once": false,
 			"requires": {
+				"role": "trader",
 				"site": "station"
 			},
 			"text": "A folding table in the middle of a corridor, laid with the sort of things you only find on a dead station: three coils of cable, a box of odd batteries, someone's good boots. Behind it sits {name} on an upturned crate, with a cashbox and an expression of mild professional hope. 'Don't touch the boots,' {name} says. 'The boots are not for sale. The boots are for looking at.'",
@@ -70,6 +71,7 @@
 			"weight": 40,
 			"once": true,
 			"requires": {
+				"role": "trader",
 				"site": [
 					"station",
 					"derelict"
@@ -124,6 +126,7 @@
 			"weight": 10,
 			"once": false,
 			"requires": {
+				"role": "trader",
 				"site": "station",
 				"stage_min": 2
 			},
@@ -214,7 +217,10 @@
 						}
 					]
 				}
-			]
+			],
+			"requires": {
+				"role": "trader"
+			}
 		}
 	]
 }

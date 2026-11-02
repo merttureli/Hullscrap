@@ -6,6 +6,7 @@
 			"weight": 40,
 			"once": true,
 			"requires": {
+				"role": "touched_talker",
 				"site": [
 					"station",
 					"derelict"
@@ -64,6 +65,7 @@
 			"weight": 12,
 			"once": false,
 			"requires": {
+				"role": "touched_talker",
 				"site": [
 					"station",
 					"derelict"
@@ -124,6 +126,7 @@
 			"weight": 14,
 			"once": false,
 			"requires": {
+				"role": "touched_talker",
 				"theme": "lumen",
 				"site": [
 					"station",
@@ -225,7 +228,10 @@
 						}
 					]
 				}
-			]
+			],
+			"requires": {
+				"role": "touched_talker"
+			}
 		}
 	]
 }

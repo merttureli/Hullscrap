@@ -20,6 +20,14 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
+const BoardView = preload("res://scripts/board/board_view.gd")
+const BuildMode = preload("res://scripts/build/build_mode.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const MapView = preload("res://scripts/ui/map_view.gd")
+const SectorView = preload("res://scripts/view/sector_view.gd")
+const CombatView = preload("res://scripts/combat/combat_view.gd")
+const Mood = preload("res://scripts/audio/mood.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 
@@ -699,3 +707,131 @@ func test_the_rounds_recipe_makes_ten_for_four_scrap_and_two_copper_and_is_known
 	short.add("scrap", 3)
 	short.add("copper", 5)
 	check(c.can_craft("hand_ammo", short, {"level": 1, "tools": []}).begins_with("missing: 1 scrap"), "three scrap is not enough")
+
+
+# --- the music ------------------------------------------------------------------------------------------------------------
+
+func test_the_fight_layer_comes_up_aboard_when_a_foe_is_on_the_hunt_and_the_muffle_stays() -> void:
+	var a = Audio.new()
+	a.setup()
+	var v = BoardView.new()
+	a.board = v
+	eq(bool(a.mood_inputs().get("fight", false)), false, "not aboard: no fight")
+	v.active = true
+	eq(bool(a.mood_inputs().get("fight", false)), false, "aboard and quiet: explore")
+	v._fight_t = 5.0
+	eq(bool(a.mood_inputs().get("fight", false)), true, "a foe has noticed him: the fight layer")
+	eq(Mood.raw(a.mood_inputs()), "combat", "which is the combat mood")
+	v.active = false
+	eq(bool(a.mood_inputs().get("fight", false)), false, "back aboard the ship, no longer")
+	a.muffle(true)
+	a.music_state("combat")
+	check(a.muffled and a.music_now == "combat", "the muffle is on while the combat mood plays")
+	a.music_state("explore")
+	check(a.muffled, "and it is not the mood's to take off")
+	a.muffle(false)
+	v.free()
+	a.free()
+
+
+# --- the whole way: E, the panel, the world standing still, the outcome ---------------------------------------------------
+
+func _screen(seed_value := 5) -> Dictionary:
+	var sim := ShipSim.new()
+	sim.ships = [_ship()]
+	var build := BuildMode.new()
+	build.sim = sim
+	var map := MapView.new()
+	map.sim = sim
+	map.build = build
+	map.size = Vector2(1600.0, 900.0)
+	build.drift = map
+	var combat := CombatView.new()
+	combat.sim = sim
+	combat.build = build
+	map.combat = combat
+	var view := SectorView.new()
+	view.sim = sim
+	view.build = build
+	view.combat = combat
+	view.cam = Camera2D.new()
+	var board := BoardView.new()
+	board.sim = sim
+	board.build = build
+	board.cam = view.cam
+	board.sector = view
+	board.ask_party = false
+	map.board = board
+	board.finished.connect(map._on_board_finished)
+	board.talk_requested.connect(map._on_talk)  # (map._ready does it in the scene)
+	map.new_game(seed_value)
+	map.visible = false
+	map.save_path = "user://test_boarding_people_campaign.json"
+	build.build_on = false
+	view.frame(0.05)
+	return {"sim": sim, "build": build, "map": map, "view": view, "board": board, "combat": combat}
+
+
+func _free(d: Dictionary) -> void:
+	if d["board"].active:
+		d["board"].leave()
+	d["view"].cam.free()
+	for k in ["board", "view", "combat", "map", "build", "sim"]:
+		d[k].free()
+
+
+func test_e_opens_the_event_panel_over_the_dark_and_the_world_waits_until_it_is_done() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var board: BoardView = d["board"]
+	var s: Sector = map.campaign.current_sector()
+	var poi := {"id": "pt", "type": "abandoned_station", "name": "Hulk", "pos": s.ship_pos, "visibility": "signal", "event_type": "wreck_field", "state": Sector.NEW, "enemy": "", "main": false}
+	s.pois.append(poi)
+	var ev := {"id": "t_wreck", "type": "wreck_field", "title": "Hulk", "text": "A dead hull.", "choices": [{"text": "Pick through it.", "outcomes": [{"weight": 1, "text": "Scrap.", "effects": {"items": {"scrap": 3}}}]}]}
+	map.open_poi({"poi": poi, "refused": "", "event": Boarding.offer(ev, "station"), "dock": false}, s)
+	var go := -1
+	for i in map.event_panel.view.size():
+		if str(map.event_panel.view[i]["text"]).begins_with("Board"):
+			go = i
+	map.event_panel.choose(go)
+	map.event_panel.proceed()
+	check(board.active, "aboard")
+	var ses = board.session
+	var n: Dictionary = ses.people.add("survivor", Vector2.ZERO, ses.site.airlock["room"], "human", "Okafor")
+	var spots: Array = ses.site.free_anchors(ses.site.airlock["room"])
+	spots.sort_custom(func(a, b): return (Vector2(a) + Vector2.ONE).distance_to(ses.soldier.pos) < (Vector2(b) + Vector2.ONE).distance_to(ses.soldier.pos))
+	for a in spots:
+		if (Vector2(a) + Vector2.ONE).distance_to(ses.soldier.pos) >= 2.0:
+			n["m"].pos = Vector2(a) + Vector2.ONE
+			break
+	var camp: Campaign = map.campaign
+	camp.events.add({"id": "t_person", "type": "boarding_npc", "weight": 1000, "once": false, "requires": {"role": "survivor"}, "text": "{name} looks up.",
+		"choices": [{"text": "Ask about the cargo.", "outcomes": [{"weight": 1, "text": "{name} points.", "effects": {"npc_reveal": "container", "flag": "talked_aboard"}}]},
+			{"text": "Leave.", "outcomes": [{"weight": 1, "text": "", "effects": {}}]}]}, "test.json")
+	board.e_override = false
+	board.step(0.05)
+	eq(str(board.target.get("type", "")), "npc", "E would talk to the person")
+	board.e_override = true
+	board.step(0.05)
+	check(board.talking, "the world stands still")
+	check(map.visible and map.panel_only and map.event_panel.visible, "the event panel is up over it")
+	eq(map.event_panel.title, "Okafor, survivor", "titled with the person")
+	eq(map.event_panel.event["text"], "Okafor looks up.", "with their name in the text")
+	var at: Vector2 = ses.soldier.pos
+	board.step(0.5)
+	eq(ses.soldier.pos, at, "he does not move meanwhile")
+	check(s.find("pt")["state"] == Sector.NEW, "and the POI is not resolved by the panel closing")
+	map.event_panel.choose(0)
+	check(map.event_panel.result["text"] == "Okafor points.", "the outcome is in their words")
+	map.event_panel.proceed()
+	check(not board.talking and not map.visible, "he is on his feet again, the map gone")
+	check(camp.flags.has("talked_aboard"), "the flag is set")
+	eq(ses.people.revealed.size(), 1, "and the place they pointed to is marked")
+	check(n["done"], "the person has said their piece")
+	check(s.find("pt")["state"] == Sector.NEW, "the POI is still not done")
+	board.e_override = false
+	board.step(0.05)
+	board.e_override = true
+	board.step(0.05)
+	check(not board.talking and board.message_alive(), "a second E is a word, not the page again (%s)" % board.message)
+	_free(d)

@@ -6,6 +6,7 @@
 			"weight": 10,
 			"once": false,
 			"requires": {
+				"role": "captive",
 				"site": "nest"
 			},
 			"text": "{name} is tied to a pipe with cable, in a corner of a room that has been used for a very long time as a place to leave things. There is a bowl of water within sight of the cable and not within reach of {name}. They look up when the light finds them, and the light does not seem to be the thing they are afraid of. 'Quietly,' {name} whispers. 'They drink in the room next door. They'll hear the saw.'",
@@ -66,6 +67,7 @@
 			"weight": 12,
 			"once": false,
 			"requires": {
+				"role": "captive",
 				"site": "nest"
 			},
 			"text": "{name} is chained to a bunk by one ankle and has been running the numbers on it for some time. 'Here's the deal,' {name} says as soon as the light finds them. 'You cut me loose, I show you where they keep the good stuff. I've watched them for weeks. I know the stash, the rota, and which of them cheats at cards.'",
@@ -159,7 +161,10 @@
 						}
 					]
 				}
-			]
+			],
+			"requires": {
+				"role": "captive"
+			}
 		}
 	]
 }

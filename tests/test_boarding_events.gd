@@ -42,16 +42,9 @@ func _pack() -> Dictionary:
 	return out
 
 
-## The role an event is for: the one it asks for, else the one its id names (bnpc_<role>_...).
+## The role an event is for: the one it asks for ("" for a discovery).
 func _role_of(ev: Dictionary) -> String:
-	var r = ev.get("requires", {}).get("role")
-	if r is String:
-		return r
-	var words := {"survivor": "survivor", "hermit": "hermit", "trader": "trader", "scav": "scavenger_talker", "captive": "captive", "touched": "touched_talker"}
-	for w in words:
-		if str(ev["id"]).begins_with("bnpc_" + w):
-			return words[w]
-	return ""
+	return str(ev.get("requires", {}).get("role", ""))
 
 
 func _texts(v) -> Array:
@@ -129,9 +122,14 @@ func test_every_event_has_a_way_out_a_voice_and_no_stray_braces() -> void:
 func test_each_role_has_a_fallback_and_it_asks_for_nothing() -> void:
 	var fallbacks := _pack().values().filter(func(e): return bool(e.get("fallback", false)))
 	eq(fallbacks.size(), 6, "one for each of the six roles")
+	var roles := {}
 	for e in fallbacks:
-		check(e.get("requires", {}).is_empty(), "%s asks for nothing" % e["id"])
+		eq(e["requires"].keys(), ["role"], "%s asks for its role and nothing else" % e["id"])
+		roles[e["requires"]["role"]] = true
 		check(e["type"] == "boarding_npc", "")
+	eq(roles.keys().size(), 6, "and every role has its own")
+	for e in _pack().values():
+		check(e["type"] != "boarding_npc" or People.has_role(_role_of(e)), "%s is for a role" % e["id"])
 
 
 func test_only_three_events_recruit_and_they_count_as_the_regions_offer() -> void:
@@ -242,3 +240,17 @@ func test_the_new_logs_exist_and_are_in_the_voice() -> void:
 		for eid in _pack():
 			given = given or JSON.stringify(_pack()[eid]).contains(id)
 		check(given, "%s is handed out by an event" % id)
+
+
+func test_a_person_hears_only_the_events_of_their_role() -> void:
+	var c := Campaign.new(9)
+	var ship := _ship()
+	var pack := _pack()
+	for kind in People.cfg()["kinds"]:
+		for role in People.cfg()["kinds"][kind]["roles"]:
+			for theme in [""] + Themes.ids():
+				for i in 12:
+					c.stage = 1 + i % 8
+					c.crew_offers = 0
+					var ev: Dictionary = c.events.pick(c, {"type": "boarding_npc", "site": kind, "theme": theme, "role": role}, ship)
+					check(not pack.has(ev.get("id", "")) or _role_of(ev) == role, "%s in a %s is not told %s's page (%s)" % [role, kind, _role_of(ev), ev.get("id", "")])

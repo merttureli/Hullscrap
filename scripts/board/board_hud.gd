@@ -243,7 +243,7 @@ func _draw_reveals(size: Vector2) -> void:
 	for id in s.people.revealed_doors:
 		if not s.unlocked.has(id):
 			spots.append([s.site.door_centre(s.site.doors[id]), "Locked door"])
-	var inner := Rect2(Vector2(40.0, 90.0), size - Vector2(80.0, 180.0))
+	var inner := Rect2(Vector2(40.0, 100.0), size - Vector2(80.0, 360.0))  # (clear of the tracker, the arms and the lines of what was taken)
 	for sp in spots:
 		var at: Vector2 = view.to_screen(sp[0])
 		var edge := false
