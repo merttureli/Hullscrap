@@ -168,6 +168,7 @@ func set_station(id: String) -> bool:
 	selected = recipe_ids()[0] if not recipe_ids().is_empty() else ""
 	message = ""
 	_show_selection()
+	Audio.fx(self, "tab_switch")
 	return true
 
 

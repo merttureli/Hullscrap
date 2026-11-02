@@ -126,9 +126,9 @@ func choose(i: int) -> String:
 	var v: Dictionary = view[i]
 	if v["grey"]:
 		message = "You need " + v["need"]
-		Audio.fx(self, "invalid")
+		Audio.fx(self, "error")
 		return message
-	Audio.fx(self, "click")
+	Audio.fx(self, "confirm")
 	if v["index"] < 0:
 		close()
 		finished.emit()

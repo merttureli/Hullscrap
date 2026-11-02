@@ -84,7 +84,7 @@
 	"haz_gas_cloud": {"files": ["haz_gas_cloud.wav"], "volume_db": 0, "pitch_var": 0.0, "max_voices": 1, "cooldown": 0.0, "bus": "Ambience", "positional": false, "loop": true},
 	"haz_radiation": {"files": ["haz_radiation.wav"], "volume_db": 0, "pitch_var": 0.0, "max_voices": 1, "cooldown": 0.0, "bus": "Ambience", "positional": false, "loop": true},
 	"haz_debris_surge": {"files": ["haz_debris_surge.wav"], "volume_db": 0, "pitch_var": 0.0, "max_voices": 1, "cooldown": 0.0, "bus": "Ambience", "positional": false, "loop": true},
-	"footstep": {"files": ["footstep_1.wav", "footstep_2.wav", "footstep_3.wav", "footstep_4.wav"], "volume_db": 0, "pitch_var": 0.08, "max_voices": 2, "cooldown": 0.12, "bus": "SFX", "positional": false},
+	"footstep": {"files": ["footstep_1.wav", "footstep_2.wav", "footstep_3.wav", "footstep_4.wav"], "volume_db": 0, "pitch_var": 0.08, "max_voices": 2, "cooldown": 0.1, "bus": "SFX", "positional": false},
 	"door_open": {"files": ["door_open_1.wav", "door_open_2.wav"], "volume_db": -7, "pitch_var": 0.05, "max_voices": 3, "cooldown": 0.12, "bus": "SFX", "positional": false},
 	"door_close": {"files": ["door_close_1.wav", "door_close_2.wav"], "volume_db": -7, "pitch_var": 0.05, "max_voices": 3, "cooldown": 0.12, "bus": "SFX", "positional": false},
 	"comms_chirp": {"files": ["comms_chirp_1.wav", "comms_chirp_2.wav"], "volume_db": -8, "pitch_var": 0.03, "max_voices": 1, "cooldown": 0.5, "bus": "SFX", "positional": false},

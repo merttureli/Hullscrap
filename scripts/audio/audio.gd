@@ -3,8 +3,9 @@ extends Node
 ## static helpers, which do nothing when the node is absent (a bare tree, a test):
 ##   Audio.fx(ctx, id, world_pos = null, gain_db = 0, delay = 0)   a one-shot from data/audio.json; with a world position (px) it is
 ##       positional (an AudioStreamPlayer2D heard relative to the camera, silent when far outside the view), else plain
-##   Audio.fx_loop(ctx, key, id, on, volume = 1, pitch = 1, world_pos = null)   a loop (engine, beam, tractor, fire, repair): call it each frame
-##       it should sound; it fades in, follows volume and pitch, and fades out on its own when the calls stop
+##   Audio.fx_loop(ctx, key, id, on, volume = 1, pitch = 1, world_pos = null, fade_s = 0)   a loop (engine, beam, tractor, fire, repair, a
+##       missile in flight, a hazard): call it each frame it should sound; it fades in, follows volume and pitch, and fades out on its own when
+##       the calls stop (fade_s: seconds a full fade takes, 0 = the quick default)
 ##   Audio.mood(ctx, state)   the music state (menu, explore, combat, hollow, build), cross-faded; Audio.cue(ctx, id)   a music sting
 ## `ctx` is any node in the tree (or the SceneTree). Logic scripts (RefCounted) never call this; views and UI do, usually from the event lists
 ## the logic already makes. Sounds come from assets/audio/sfx (audio/_src/sfx/build_sfx.py), the music from data/music.json
@@ -13,10 +14,13 @@ extends Node
 ## pitch of +-pitch_var, and no sound for a world position farther than NEAR view radii from the camera. The admission rules run on
 ## a clock and a ledger of their own (advance), so they work, and are tested, without the audio device or the scene tree.
 ## This node also directs the music from what the game is doing (mood.gd) and listens to the player's ship (ship_audio.gd): the red
-## alert, the unlock and Ada stings, the crew's sounds. Ctrl+M mutes everywhere.
+## alert, the unlock and Ada stings, the crew's sounds, the footsteps, the machines. It also plays the ambience (ambience.gd): the ship's
+## room tone (the Room bus's low-pass opens with the reactor's load), the space bed of the region's family (cross-faded over BED_FADE seconds)
+## and the drone's hum; the hazard loops come from the fight (combat_view.gd). The Ambience slider sets the Ambience bus. Ctrl+M mutes everywhere.
 
 const Mood = preload("res://scripts/audio/mood.gd")
 const ShipAudio = preload("res://scripts/audio/ship_audio.gd")
+const Ambience = preload("res://scripts/audio/ambience.gd")
 const GROUP := "hs_audio"
 const DATA_PATH := "res://data/audio.json"
 const MUSIC_PATH := "res://data/music.json"
@@ -32,11 +36,18 @@ const LOOP_RATE := 8.0  ## how fast a loop fades in and out, volume per second
 const PITCH_RATE := 1.5  ## how fast a loop's pitch follows, per second
 const NEAR := 1.25  ## a world sound plays only within this many view radii of the camera
 const ENEMY_DB := -6.0  ## the enemy ship's sounds against yours (callers pass it as gain_db)
-const DEFAULTS := {"master": 0.8, "music": 0.6, "sfx": 0.8}  ## the volume sliders (linear, 0 to 1)
+const DEFAULTS := {"master": 0.8, "music": 0.6, "sfx": 0.8, "ambience": 0.8}  ## the volume sliders (linear, 0 to 1)
+const BED_FADE := 3.0  ## seconds of the cross-fade between two space beds
+const ROOM_RATE := 1.2  ## how fast the Room low-pass follows the reactor's load, per second
+const STEP_ZOOM := 0.45  ## the soldier's boots are heard only with the camera at least this close (the main camera starts at 0.5)
 const POLL := 0.1  ## seconds between two looks at what the game is doing
+
+static var _table_cache := {}  # data/audio.json as table() reads it
 
 var defs := {}  ## data/audio.json, id -> definition
 var music_data := {}  ## data/music.json
+var beds := {}  ## data/audio.json `_beds`: which space bed plays where (ambience.gd bed_for)
+var bed_now := ""  ## the space bed asked for last
 var volumes := DEFAULTS.duplicate()
 var muted := false
 var clock := 0.0  ## seconds this node has run (advance)
@@ -73,6 +84,10 @@ var _red := false  # a hostile was in range at the last look
 var _campaign = null
 var _unlocks := 0
 var _mute_key := false
+var _ambience_rules := Ambience.new()
+var _room_hz := Ambience.ROOM_CLOSED  # the Room bus's cutoff now
+var _room_to := Ambience.ROOM_CLOSED  # and where it is going (the reactor's load)
+var _bed_ids: Array = []  # the beds the table can name
 
 
 ## The Audio node of the tree `ctx` is in (a node or the SceneTree), or null: a bare tree, a test, a tool.
@@ -97,10 +112,23 @@ static func fx(ctx, id: String, world_pos = null, gain_db := 0.0, delay := 0.0) 
 
 
 ## Keep loop `key` (a sound of data/audio.json that loops) going this frame, at `volume` (0 to 1) and `pitch`.
-static func fx_loop(ctx, key: String, id: String, on: bool, volume := 1.0, pitch := 1.0, world_pos = null) -> void:
+static func fx_loop(ctx, key: String, id: String, on: bool, volume := 1.0, pitch := 1.0, world_pos = null, fade_s := 0.0) -> void:
 	var a = of(ctx)
 	if a != null:
-		a.loop(key, id, on, volume, pitch, world_pos)
+		a.loop(key, id, on, volume, pitch, world_pos, fade_s)
+
+
+## The data/audio.json table, read once: id -> definition (plus the `_doc` and `_beds` entries).
+static func table() -> Dictionary:
+	if _table_cache.is_empty():
+		_table_cache = _read(DATA_PATH)
+	return _table_cache
+
+
+## Is `id` a looping sound (a beam, a hazard)?
+static func is_loop(id: String) -> bool:
+	var d = table().get(id)
+	return d is Dictionary and bool(d.get("loop", false))
 
 
 ## Ask for music state `state`.
@@ -117,8 +145,21 @@ static func cue(ctx, id: String) -> void:
 		a.sting(id)
 
 
-## The sound of weapon `w` (a weapons.gd definition): its kind, with the fast light turrets on their own soft tick and ion on its own zap.
-static func weapon_sound(w: Dictionary) -> String:
+## The sound of weapon `w` (a weapons.gd definition) whose part is of equipment `line` ("scrap", "neon", "standard" or ""): its own `sound`
+## key when it has one (the races' signature guns), else the kind's sound in the line's version if the table has one (laser_neon, flak_scrap ...),
+## else the kind's sound. `ids` is the sound table (data/audio.json, read once when null).
+static func weapon_sound(w: Dictionary, line := "", ids = null) -> String:
+	var known: Dictionary = ids if ids != null else table()
+	var own := str(w.get("sound", ""))
+	if own != "" and known.has(own):
+		return own
+	var base := _kind_sound(w)
+	var version := base + "_" + line
+	return version if line != "" and line != "standard" and known.has(version) else base
+
+
+## The sound of the kind of `w`: its kind, with the fast light turrets on their own soft tick and ion on its own zap.
+static func _kind_sound(w: Dictionary) -> String:
 	var kind := str(w.get("kind", ""))
 	if kind == "beam":
 		return "beam_loop"
@@ -152,6 +193,15 @@ func setup() -> void:
 	_rng.seed = 7
 	defs = _read(DATA_PATH)
 	defs.erase("_doc")
+	beds = defs.get("_beds", {})
+	defs.erase("_beds")
+	for k in ["by_region", "by_faction"]:
+		for id in beds.get(k, {}).values():
+			if not _bed_ids.has(id):
+				_bed_ids.append(id)
+	for k in ["hollow", "default"]:
+		if beds.has(k) and not _bed_ids.has(beds[k]):
+			_bed_ids.append(beds[k])
 	music_data = _read(MUSIC_PATH)
 	for i in POOL_2D:
 		var p := AudioStreamPlayer2D.new()
@@ -189,7 +239,7 @@ static func _read(path: String) -> Dictionary:
 
 # --- volumes -----------------------------------------------------------------------------------------------------
 
-## The sliders: {master, music, sfx}, each 0 to 1. Anything else in `d` is ignored, a missing key keeps its value.
+## The sliders: {master, music, sfx, ambience}, each 0 to 1. Anything else in `d` is ignored, a missing key keeps its value.
 func apply_settings(d: Dictionary) -> void:
 	for k in DEFAULTS:
 		if d.has(k):
@@ -201,7 +251,7 @@ func settings() -> Dictionary:
 	return volumes.duplicate()
 
 
-## Set one slider (`kind`: master, music or sfx) to `v`, 0 to 1.
+## Set one slider (`kind`: master, music, sfx or ambience) to `v`, 0 to 1.
 func set_volume(kind: String, v: float) -> void:
 	if DEFAULTS.has(kind):
 		volumes[kind] = clampf(v, 0.0, 1.0)
@@ -215,12 +265,13 @@ func toggle_mute() -> bool:
 	return muted
 
 
-## Put the sliders and the mute on the buses: Master, Music; the SFX slider also takes the UI bus.
+## Put the sliders and the mute on the buses: Master, Music, Ambience (the Room bus sends to it); the SFX slider also takes the UI bus.
 func _apply_buses() -> void:
 	_bus("Master", volumes["master"])
 	_bus("Music", volumes["music"])
 	_bus("SFX", volumes["sfx"])
 	_bus("UI", volumes["sfx"])
+	_bus("Ambience", volumes["ambience"])
 	var m := AudioServer.get_bus_index("Master")
 	if m >= 0:
 		AudioServer.set_bus_mute(m, muted)
@@ -333,18 +384,22 @@ func _camera() -> Camera2D:
 # --- loops ------------------------------------------------------------------------------------------------------
 
 ## Keep loop `key` (a loop sound `id`) going: `on` false lets it fade out; `volume` (0 to 1) and `pitch` follow smoothly; a `world_pos`
-## makes it positional (the enemy's beam). Call it every frame it should sound: when the calls stop it fades out by itself.
-func loop(key: String, id: String, on: bool, volume := 1.0, pitch := 1.0, world_pos = null) -> void:
+## makes it positional (the enemy's beam). Call it every frame it should sound: when the calls stop it fades out by itself. `fade_s` is how
+## many seconds a full fade in or out takes (0: LOOP_RATE, the quick default; the space beds ask for BED_FADE).
+func loop(key: String, id: String, on: bool, volume := 1.0, pitch := 1.0, world_pos = null, fade_s := 0.0) -> void:
 	var L = _loops.get(key)
+	var rate := LOOP_RATE if fade_s <= 0.0 else 1.0 / fade_s
 	if not on:
 		if L != null:
 			L["target"] = 0.0
+			L["rate"] = rate
 		return
 	if not bool(defs.get(id, {}).get("loop", false)):
 		return
 	if L == null:
 		L = {"id": id, "vol": 0.0, "pitch_now": pitch, "player": null}
 		_loops[key] = L
+	L["rate"] = rate
 	L["id"] = id
 	L["target"] = clampf(volume, 0.0, 1.0)
 	L["seen"] = clock
@@ -365,7 +420,7 @@ func _step_loops(dt: float) -> void:
 		var pos = L.get("pos")
 		if pos is Vector2 and not near(pos):
 			L["target"] = 0.0
-		L["vol"] = move_toward(float(L["vol"]), float(L["target"]), LOOP_RATE * dt)
+		L["vol"] = move_toward(float(L["vol"]), float(L["target"]), float(L.get("rate", LOOP_RATE)) * dt)
 		L["pitch_now"] = move_toward(float(L["pitch_now"]), float(L["pitch"]), PITCH_RATE * dt)
 		var p = L["player"]
 		if float(L["vol"]) <= 0.001 and float(L["target"]) <= 0.0:
@@ -517,6 +572,7 @@ func advance(dt: float) -> void:
 			play(e["id"], e["pos"], e["gain"])
 	_step_loops(dt)
 	_step_music(dt)
+	_step_room(dt)
 
 
 func _process(dt: float) -> void:
@@ -561,6 +617,8 @@ func mood_inputs() -> Dictionary:
 		if c != null:
 			out["hollow"] = c.is_hollow(c.current)
 			out["pressure"] = c.tide_pressure(c.current)
+			out["region"] = str(c.region_id)
+			out["faction"] = str(c.region_data.get("faction", ""))
 	return out
 
 
@@ -573,17 +631,81 @@ func _direct(dt: float) -> void:
 	_red = red
 	_unlock_watch()
 	var ship = sim.player_ship() if sim != null and sim.has_method("player_ship") else null
-	var ev := _ship_audio.update(ship)
-	loop("repair", "repair_loop", bool(ev["repair"]) and not get_tree().paused)
-	loop("fire", "fire_loop", bool(ev["fire"]) and not get_tree().paused)
+	var ev := _ship_audio.update(ship, sim.jobs_of(ship) if ship != null else null)
+	var live := not get_tree().paused
+	loop("repair", "repair_loop", bool(ev["repair"]) and live)
+	loop("fire", "fire_loop", bool(ev["fire"]) and live)
 	if int(ev["extinguished"]) > 0:
 		play("extinguish")
+	if int(ev["ignited"]) > 0:
+		play("fire_whoomph")
 	if int(ev["hurt"]) > 0:
 		play("crew_hurt")
 	if int(ev["beep"]) > 0:
 		play("drone_beep")
+	if int(ev["restocked"]) > 0:
+		play("ammo_restock")
 	if ev["joined"].has(ShipAudio.ada_name()):
 		sting("ada_found")
+	_footsteps(int(ev["steps"]), ship != null and not bool(inp.get("menu", true)))
+	_ambience(inp, ev, live, dt)
+
+
+## The soldier's boots, when the camera is close enough to hear them (STEP_ZOOM): `n` steps since the last look, the second a beat after the first.
+func _footsteps(n: int, playing: bool) -> void:
+	if n <= 0 or not playing:
+		return
+	var cam := _camera()
+	if cam != null and cam.zoom.x < STEP_ZOOM:
+		return
+	for i in n:
+		play("footstep", null, 0.0, 0.12 * i)
+
+
+## The ambience (ambience.gd), in a game and not in a menu: the room tone, whose low-pass opens with the reactor's load; the space bed of the
+## region's family, cross-faded over BED_FADE seconds when it changes; the drone's hum; the medbay, smelter and fabricator while they work; and
+## the hull's creak once it is under half.
+func _ambience(inp: Dictionary, ev: Dictionary, live: bool, dt: float) -> void:
+	var playing := inp.has("menu") and not bool(inp["menu"])
+	bed_now = ""
+	if playing:
+		var hollow := bool(inp.get("hollow", false)) or float(inp.get("pressure", 0.0)) >= Mood.HOLLOW_PRESSURE
+		bed_now = Ambience.bed_for(beds, str(inp.get("region", "")), str(inp.get("faction", "")), hollow)
+	for id in _bed_ids:
+		loop("bed:" + str(id), str(id), str(id) == bed_now, 1.0, 1.0, null, BED_FADE)
+	loop("room", "room_tone", playing, 1.0, 1.0, null, 1.0)
+	_room_to = Ambience.room_cutoff(float(ev["load"]))
+	loop("drone", "drone_hum", playing and int(ev["drones"]) > 0, 1.0, 1.0, null, 1.0)
+	loop("medbay", "medbay_hum", playing and bool(ev["healing"]) and live, 1.0, 1.0, null, 1.0)
+	loop("smelter", "smelter_loop", playing and bool(ev["smelting"]) and live, 1.0, 1.0, null, 1.0)
+	loop("fabricator", "fabricator_loop", playing and bool(ev["fabricating"]) and live, 1.0, 1.0, null, 1.0)
+	if playing and _ambience_rules.creak(_hull_frac(), dt):
+		play("hull_creak")
+
+
+## The player's hull as a fraction of its integrity: the fight's while one is on, else the run's (campaign.gd); 1 when there is none to read.
+func _hull_frac() -> float:
+	if combat != null and bool(combat.get("active")):
+		var session = combat.get("session")
+		if session != null:
+			var co = session.arena.ships[0]
+			return clampf(float(co.hull) / maxf(float(co.hull_max), 1.0), 0.0, 1.0)
+	var map = build.get("drift") if build != null else null
+	var c = map.get("campaign") if map != null else null
+	var ship = sim.player_ship() if sim != null and sim.has_method("player_ship") else null
+	if c == null or ship == null:
+		return 1.0
+	return clampf(float(c.hull_left(ship)) / maxf(float(c.hull_max(ship)), 1.0), 0.0, 1.0)
+
+
+## Let the Room bus's low-pass follow the reactor's load (in equal musical steps, ROOM_RATE a second).
+func _step_room(dt: float) -> void:
+	_room_hz = exp(lerpf(log(_room_hz), log(_room_to), minf(dt * ROOM_RATE, 1.0)))
+	var i := AudioServer.get_bus_index("Room")
+	if i >= 0 and AudioServer.get_bus_effect_count(i) > 0:
+		var fx = AudioServer.get_bus_effect(i, 0)
+		if fx is AudioEffectLowPassFilter:
+			fx.cutoff_hz = _room_hz
 
 
 ## An unlock earned this run: its sound and sting (the campaign keeps the list).
