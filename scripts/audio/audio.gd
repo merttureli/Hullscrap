@@ -6,10 +6,15 @@ extends Node
 ##   Audio.fx_loop(ctx, key, id, on, volume = 1, pitch = 1, world_pos = null, fade_s = 0)   a loop (engine, beam, tractor, fire, repair, a
 ##       missile in flight, a hazard): call it each frame it should sound; it fades in, follows volume and pitch, and fades out on its own when
 ##       the calls stop (fade_s: seconds a full fade takes, 0 = the quick default)
-##   Audio.mood(ctx, state)   the music state (menu, explore, combat, hollow, build), cross-faded; Audio.cue(ctx, id)   a music sting
+##   Audio.mood(ctx, state)   the music state (menu, explore, combat, hollow, build), cross-faded; Audio.cue(ctx, id)   a music sting;
+##       Audio.muffle_music(ctx, on)   a low-pass (the node's muffle(on)) on the Music bus (boarding), the piece going on under it
 ## `ctx` is any node in the tree (or the SceneTree). Logic scripts (RefCounted) never call this; views and UI do, usually from the event lists
 ## the logic already makes. Sounds come from assets/audio/sfx (audio/_src/sfx/build_sfx.py), the music from data/music.json
 ## ({states: {state: [track files]}, stings: {id: file}, volumes: {file: dB}}; a file or a track that is missing just stays silent).
+## A v2 file adds `pieces` (id -> {explore, battle, bpm}: two files of one length that play together, in sync), `regions` (`region:<id>`,
+## `faction:<faction>`, `default` -> piece id; `faction:hollow` for a Hollow piece) and `accents` (the same keys -> {stem, db}: a stem looped
+## over the piece). Sector space plays its region's piece: the EXPLORE and BATTLE files start together and a fight only cross-fades their
+## volumes (the song never restarts); menu, build and hollow keep their `states` tracks. A file without `pieces` works as it always did.
 ## Voice rules: a pool of players, a cooldown per id and a cap of voices per id (so six rapid turrets do not stack into noise), a random
 ## pitch of +-pitch_var, and no sound for a world position farther than NEAR view radii from the camera. The admission rules run on
 ## a clock and a ledger of their own (advance), so they work, and are tested, without the audio device or the scene tree.
@@ -41,8 +46,32 @@ const BED_FADE := 3.0  ## seconds of the cross-fade between two space beds
 const ROOM_RATE := 1.2  ## how fast the Room low-pass follows the reactor's load, per second
 const STEP_ZOOM := 0.45  ## the soldier's boots are heard only with the camera at least this close (the main camera starts at 0.5)
 const POLL := 0.1  ## seconds between two looks at what the game is doing
+const REGION_FADE := 3.0  ## seconds of the cross-fade to another region's piece
+const BATTLE_IN := 2.0  ## seconds a fight takes to cross-fade a piece from its EXPLORE layer to its BATTLE layer
+const BATTLE_OUT := 4.0  ## and the end of the fight to cross-fade back
+const SYNC_EVERY := 1.0  ## seconds between two looks at whether a piece's layers have drifted apart
+const SYNC_TOL := 0.02  ## seconds of drift the layers may have before they are nudged back with seek
+const MUFFLE_HZ := 900.0  ## the Music bus's low-pass cutoff while muffled
+const OPEN_HZ := 20500.0  ## and while it is not
+const MUFFLE_RATE := 5.0  ## how fast the cutoff follows, per second (in equal musical steps)
 
 static var _table_cache := {}  # data/audio.json as table() reads it
+
+
+## One piece of music: three players that play in sync (EXPLORE, BATTLE, accent), the deck's own fade and the mix between the layers.
+class Deck:
+	var piece := ""  # the piece id ("" = the deck is idle)
+	var accent := ""  # the accent stem's file ("" = none)
+	var players: Array = []  # [explore, battle, accent]
+	var streams: Array = [null, null, null]
+	var db := [0.0, 0.0, 0.0]  # their trims
+	var gain := 0.0  # the deck's fade, 0 to 1, and where it goes
+	var target := 0.0
+	var mix := 0.0  # 0 = all EXPLORE, 1 = all BATTLE, and where it goes
+	var mix_to := 0.0
+	var parked := false  # silent under a state's track, playing on so it comes back in time
+	var linear := false  # fades in step with the same song (not equal power: the two are the same sound)
+
 
 var defs := {}  ## data/audio.json, id -> definition
 var music_data := {}  ## data/music.json
@@ -52,7 +81,11 @@ var volumes := DEFAULTS.duplicate()
 var muted := false
 var clock := 0.0  ## seconds this node has run (advance)
 var music_now := ""  ## the music state asked for last
-var music_file := ""  ## the track playing now ("" = none)
+var music_file := ""  ## the track playing now ("" = none; for a piece, its EXPLORE file)
+var music_piece := ""  ## the piece playing now (a v2 data/music.json), "" = none or a state's track
+var piece_starts := 0  ## how many times a piece was started (a fight must not add one)
+var sync_nudges := 0  ## how many times a layer was seeked back into step
+var muffled := false  ## the Music bus has its low-pass on (muffle)
 var front: Node  ## the siblings this node reads (set up in setup(), null when absent)
 var build: Node
 var combat: Node
@@ -72,6 +105,17 @@ var _mgain := [0.0, 0.0]  # their fade (0 to 1)
 var _mtarget := [0.0, 0.0]
 var _mdb := [0.0, 0.0]  # and their track's trim
 var _cur := -1  # the slot of the track that is in
+var _fade_s := FADE  # seconds the cross-fade going on takes
+var _decks: Array = []  # two Decks (a piece: EXPLORE, BATTLE and accent players), for the cross-fade between pieces
+var _deck_cur := -1  # the deck of the piece that is in, or that waits parked under a state's track
+var _hollow_on := false  # the music is in the Hollow (hollow state seen after the last explore)
+var _region := ""  # the region and its faction, which pick the piece
+var _faction := ""
+var _sync_t := 0.0
+var _sim_pos := {}  # player -> position (s): outside the tree nothing plays, so a test sees (and moves) the positions here
+var _muf_hz := OPEN_HZ
+var _muf_to := OPEN_HZ
+var _muf_fx: AudioEffectLowPassFilter
 var _visits := {}  # music state -> how often it was entered, to alternate its tracks
 var _sting: AudioStreamPlayer
 var _sting_until := 0.0
@@ -143,6 +187,13 @@ static func cue(ctx, id: String) -> void:
 	var a = of(ctx)
 	if a != null:
 		a.sting(id)
+
+
+## Muffle the music (a low-pass on the Music bus; the piece keeps playing under it), or open it again.
+static func muffle_music(ctx, on: bool) -> void:
+	var a = of(ctx)
+	if a != null:
+		a.muffle(on)
 
 
 ## The sound of weapon `w` (a weapons.gd definition) whose part is of equipment `line` ("scrap", "neon", "standard" or ""): its own `sound`
@@ -217,6 +268,14 @@ func setup() -> void:
 		m.bus = "Music"
 		_music.append(m)
 		add_child(m)
+	for i in 2:
+		var d := Deck.new()
+		for k in 3:
+			var q := AudioStreamPlayer.new()
+			q.bus = "Music"
+			d.players.append(q)
+			add_child(q)
+		_decks.append(d)
 	_sting = AudioStreamPlayer.new()
 	_sting.bus = "Music"
 	add_child(_sting)
@@ -470,12 +529,63 @@ func _load_loop(d: Dictionary) -> AudioStream:
 
 # --- music --------------------------------------------------------------------------------------------------------
 
-## Go to music state `state` (menu, explore, combat, hollow, build): the track of data/music.json for it fades in over FADE seconds as
-## the old one fades out. Each visit to a state plays the next of its tracks. A state with no track (or no data/music.json) is silence.
+## Go to music state `state` (menu, explore, combat, hollow, build). Sector space (explore, combat, and hollow once a Hollow piece exists)
+## plays the region's piece: a fight only cross-fades its two layers (BATTLE_IN seconds in, BATTLE_OUT out), the song goes on. The other
+## states play a track of data/music.json `states`, which fades in over FADE seconds as the old one fades out; each visit to a state plays
+## the next of its tracks. A state with no track (or no data/music.json) is silence.
 func music_state(state: String) -> void:
 	if state == music_now:
 		return
 	music_now = state
+	if state == "hollow":
+		_hollow_on = true
+	elif state == "explore":
+		_hollow_on = false
+	var w := _piece_for(state)
+	if w.is_empty():
+		_play_track(state)
+	else:
+		_play_piece(w, state == "combat")
+
+
+## The region the ship is in and its faction, which pick the piece (Mood.piece_for). A piece that is playing cross-fades to the new
+## region's over REGION_FADE seconds and keeps the layer it is in (a fight goes on); under a state's track it waits for the way back.
+func music_region(region_id: String, faction: String) -> void:
+	if region_id == _region and faction == _faction:
+		return
+	_region = region_id
+	_faction = faction
+	var w := _piece_for(music_now)
+	if not w.is_empty():
+		_play_piece(w, music_now == "combat")  # (the piece already playing just stays)
+
+
+## What `state` plays as a piece: {piece, accent (file), accent_db}, or {} when it plays a track (no `pieces` in the file, a state
+## that has none, or no piece named for the place).
+func _piece_for(state: String) -> Dictionary:
+	var pieces = music_data.get("pieces")
+	if not (pieces is Dictionary) or not ["explore", "combat", "hollow"].has(state):
+		return {}
+	var regions: Dictionary = music_data.get("regions", {})
+	var accents: Dictionary = music_data.get("accents", {})
+	var hollow := state == "hollow" or (state == "combat" and _hollow_on)
+	if hollow:
+		var h := Mood.piece_for(regions, _region, _faction, true)
+		if pieces.has(h):
+			return _wanted(h, Mood.accent_for(accents, _region, _faction, true))
+		if state == "hollow":
+			return {}  # no Hollow piece yet: the hollow track
+	var piece := Mood.piece_for(regions, _region, _faction)
+	return _wanted(piece, Mood.accent_for(accents, _region, _faction)) if pieces.has(piece) else {}
+
+
+func _wanted(piece: String, accent: Dictionary) -> Dictionary:
+	var stem := str(accent.get("stem", ""))
+	return {"piece": piece, "accent": stem, "accent_db": float(accent.get("db", 0.0))}
+
+
+## A state's track (the v1 way): the next of its tracks fades in on the free slot, the old one and any piece fade out.
+func _play_track(state: String) -> void:
 	var tracks: Array = music_data.get("states", {}).get(state, [])
 	var n: int = _visits.get(state, 0)
 	_visits[state] = n + 1
@@ -493,6 +603,8 @@ func music_state(state: String) -> void:
 		return
 	if path == music_file and _cur >= 0:
 		return  # two states share the track: it plays on
+	_fade_s = FADE
+	_park_deck()
 	var slot := 1 - _cur if _cur >= 0 else 0
 	for i in 2:
 		_mtarget[i] = 0.0
@@ -508,10 +620,125 @@ func music_state(state: String) -> void:
 		p.play()
 
 
-func _fade_out() -> void:
+## Play piece `w` ({piece, accent, accent_db}), in the BATTLE layer when `battle`. The piece that is already playing only changes layer
+## (or comes back from under a track); another piece starts on the free deck with both layers at the same position, the old one fading
+## out as it fades in (REGION_FADE seconds when a piece was heard, else FADE), and starts in the layer the fight is in.
+func _play_piece(w: Dictionary, battle: bool) -> void:
+	var cur: Deck = _decks[_deck_cur] if _deck_cur >= 0 else null
+	var piece := str(w["piece"])
+	for i in 2:
+		_mtarget[i] = 0.0  # a track under the piece fades out
+	_cur = -1
+	if cur != null and cur.piece == piece and cur.accent == str(w["accent"]):
+		if cur.target <= 0.0:
+			_fade_s = FADE
+			cur.target = 1.0
+		cur.parked = false
+		cur.mix_to = 1.0 if battle else 0.0
+		music_piece = piece
+		music_file = _deck_file(cur)
+		return
+	var def: Dictionary = music_data["pieces"][piece]
+	var files := [str(def.get("explore", "")), str(def.get("battle", "")), str(w["accent"])]
+	var streams: Array = [null, null, null]
+	for i in 3:
+		streams[i] = _load(_music_path(files[i])) if files[i] != "" else null
+	if streams[0] == null and streams[1] == null:
+		_fade_out(false)  # both layers missing: silence
+		return
+	var d := _free_deck()
+	var same := cur != null and cur.piece == piece
+	var at := _pos(cur.players[0]) if same and _alive(cur.players[0]) else 0.0  # the same song: go on from where it is
+	_fade_s = REGION_FADE if cur != null and cur.target > 0.0 else FADE
+	if cur != null:
+		cur.target = 0.0
+		cur.parked = false
+		cur.linear = same
+	_stop_deck(d)
+	d.piece = piece
+	d.accent = str(w["accent"])
+	d.streams = streams
+	d.db = [_trim(files[0], _music_path(files[0])), _trim(files[1], _music_path(files[1])), float(w["accent_db"])]
+	d.gain = 0.0
+	d.target = 1.0
+	d.mix = 1.0 if battle else 0.0
+	d.mix_to = d.mix
+	d.parked = false
+	d.linear = same
+	_deck_cur = _decks.find(d)
+	music_piece = piece
+	music_file = _deck_file(d)
+	_start_deck(d, at)
+
+
+## The deck to start a piece on: an idle one, else the one that is not current and is the quietest.
+func _free_deck() -> Deck:
+	var best: Deck = null
+	for i in _decks.size():
+		var d: Deck = _decks[i]
+		if i == _deck_cur:
+			continue
+		if d.piece == "":
+			return d
+		if best == null or d.gain < best.gain:
+			best = d
+	return best
+
+
+func _deck_file(d: Deck) -> String:
+	var def: Dictionary = music_data.get("pieces", {}).get(d.piece, {})
+	var f := str(def.get("explore", "")) if d.streams[0] != null else str(def.get("battle", ""))
+	return _music_path(f)
+
+
+## Start the layers of `d` together, in the same frame and at the same position `at` (the accent's own length wraps it).
+func _start_deck(d: Deck, at: float) -> void:
+	piece_starts += 1
+	for i in 3:
+		var p: AudioStreamPlayer = d.players[i]
+		p.stream = d.streams[i]
+		p.volume_db = -80.0
+		if p.stream != null:
+			var length: float = p.stream.get_length()
+			_play_at(p, fposmod(at, length) if length > 0.0 else 0.0)
+
+
+func _stop_deck(d: Deck) -> void:
+	for p in d.players:
+		p.stop()
+		p.stream = null
+		_sim_pos.erase(p)
+	d.piece = ""
+	d.accent = ""
+	d.streams = [null, null, null]
+	d.gain = 0.0
+	d.target = 0.0
+	d.parked = false
+	if _deck_cur >= 0 and _decks[_deck_cur] == d:
+		_deck_cur = -1
+
+
+## The piece (if any) goes quiet under a state's track, and plays on silent so it comes back in time.
+func _park_deck() -> void:
+	music_piece = ""
+	if _deck_cur >= 0:
+		var d: Deck = _decks[_deck_cur]
+		d.target = 0.0
+		d.parked = true
+
+
+func _fade_out(park := true) -> void:
+	_fade_s = FADE
 	_mtarget = [0.0, 0.0]
 	_cur = -1
 	music_file = ""
+	music_piece = ""
+	if _deck_cur >= 0:
+		var d: Deck = _decks[_deck_cur]
+		d.target = 0.0
+		d.parked = park
+		if not park:
+			_deck_cur = -1
 
 
 ## The file of a track named in data/music.json: a res:// path as it is, else a file name in its `dir` (assets/audio/music by default;
@@ -549,7 +776,7 @@ func _step_music(dt: float) -> void:
 	_duck = move_toward(_duck, DUCK_DB if clock < _sting_until else 0.0, DUCK_RATE * dt)
 	for i in 2:
 		var p: AudioStreamPlayer = _music[i]
-		_mgain[i] = move_toward(_mgain[i], _mtarget[i], dt / FADE)
+		_mgain[i] = move_toward(_mgain[i], _mtarget[i], dt / _fade_s)
 		if _mgain[i] <= 0.0 and _mtarget[i] <= 0.0:
 			if p.playing:
 				p.stop()
@@ -557,6 +784,132 @@ func _step_music(dt: float) -> void:
 		p.volume_db = linear_to_db(maxf(sin(_mgain[i] * PI / 2.0), 0.0001)) + _mdb[i] + _duck  # equal power: the two fades sum to one
 		if is_inside_tree() and not p.playing and _mtarget[i] > 0.0 and p.stream != null:
 			p.play()  # a track whose file does not loop starts over
+	_step_decks(dt)
+	_step_muffle(dt)
+
+
+## The pieces: their fades, the EXPLORE/BATTLE mix, and every SYNC_EVERY seconds a look at whether the layers still agree.
+func _step_decks(dt: float) -> void:
+	for d in _decks:
+		if d.piece == "":
+			continue
+		d.gain = move_toward(d.gain, d.target, dt / _fade_s)
+		d.mix = move_toward(d.mix, d.mix_to, dt / (BATTLE_IN if d.mix_to > d.mix else BATTLE_OUT))
+		if d.gain <= 0.0 and d.target <= 0.0 and not d.parked:
+			_stop_deck(d)
+			continue
+		var f: float = d.gain if d.linear else sin(d.gain * PI / 2.0)  # equal power between two songs, equal gain between two takes of one
+		d.players[0].volume_db = _db(f * (1.0 - d.mix)) + d.db[0] + _duck
+		d.players[1].volume_db = _db(f * d.mix) + d.db[1] + _duck  # the layers are one song: their gains add to f
+		d.players[2].volume_db = _db(f) + d.db[2] + _duck
+		for p in d.players:
+			if _sim_pos.has(p) and p.stream != null:
+				var length: float = p.stream.get_length()
+				_sim_pos[p] = fposmod(_sim_pos[p] + dt, length) if length > 0.0 else 0.0
+		var lead: AudioStreamPlayer = d.players[0] if d.streams[0] != null else d.players[1]
+		if is_inside_tree() and not lead.playing:
+			_start_deck(d, 0.0)  # a file that does not loop: the layers start over together
+	_sync_t += dt
+	if _sync_t >= SYNC_EVERY:
+		_sync_t = 0.0
+		sync_layers()
+
+
+static func _db(linear: float) -> float:
+	return linear_to_db(maxf(linear, 0.0001))
+
+
+## Start (or, outside the tree, simulate the start of) `p` at `t` seconds.
+func _play_at(p: AudioStreamPlayer, t: float) -> void:
+	if is_inside_tree():
+		p.play(t)
+	else:
+		_sim_pos[p] = t
+
+
+func _seek(p: AudioStreamPlayer, t: float) -> void:
+	if _sim_pos.has(p):
+		_sim_pos[p] = t
+	else:
+		p.seek(t)
+
+
+## Where `p` is in its stream, in seconds, as of the last mix. The device mixes in chunks (about 90 ms), so this moves in steps, but two
+## players read at the same moment can be compared, and a seek to the lead's reading lands within a few ms (measured on the ogg demos;
+## adding AudioServer.get_time_since_last_mix(), as the docs suggest, makes the seek overshoot by up to a chunk).
+func _pos(p: AudioStreamPlayer) -> float:
+	if _sim_pos.has(p):
+		return _sim_pos[p]
+	return p.get_playback_position()
+
+
+func _alive(p: AudioStreamPlayer) -> bool:
+	return p.stream != null and (_sim_pos.has(p) or p.playing)
+
+
+## Put every piece's layers back in step: the BATTLE player and the accent are seeked to where the EXPLORE player is (the accent's
+## own length wraps it) when they have drifted by more than SYNC_TOL seconds. Returns how many were nudged.
+func sync_layers() -> int:
+	var n := 0
+	for d in _decks:
+		if d.piece == "":
+			continue
+		var lead: AudioStreamPlayer = d.players[0] if d.streams[0] != null else d.players[1]
+		if not _alive(lead):
+			continue
+		var t := _pos(lead)
+		for p in d.players:
+			if p == lead or not _alive(p):
+				continue
+			var length: float = p.stream.get_length()
+			if length <= 0.0:
+				continue
+			var want := fposmod(t, length)
+			var off := fposmod(_pos(p) - want + length * 0.5, length) - length * 0.5  # the shortest way round the loop
+			if absf(off) > SYNC_TOL:
+				_seek(p, want)
+				n += 1
+	sync_nudges += n
+	return n
+
+
+# --- muffle --------------------------------------------------------------------------------------------------------
+
+## A low-pass on the Music bus (boarding uses it): the music goes on under a wall. Eases in and out; `muffled` says which.
+func muffle(on: bool) -> void:
+	muffled = on
+	_muf_to = MUFFLE_HZ if on else OPEN_HZ
+	if on and _muf_fx == null:
+		_muf_fx = _muffle_effect()
+
+
+## The low-pass on the Music bus: found by its tag, else added (off) on first use. Null without a Music bus.
+func _muffle_effect() -> AudioEffectLowPassFilter:
+	var i := AudioServer.get_bus_index("Music")
+	if i < 0:
+		return null
+	for k in AudioServer.get_bus_effect_count(i):
+		var e = AudioServer.get_bus_effect(i, k)
+		if e is AudioEffectLowPassFilter and e.has_meta("hs_muffle"):
+			return e
+	var f := AudioEffectLowPassFilter.new()
+	f.cutoff_hz = OPEN_HZ
+	f.set_meta("hs_muffle", true)
+	AudioServer.add_bus_effect(i, f)
+	AudioServer.set_bus_effect_enabled(i, AudioServer.get_bus_effect_count(i) - 1, false)
+	return f
+
+
+func _step_muffle(dt: float) -> void:
+	if _muf_fx == null:
+		return
+	_muf_hz = exp(lerpf(log(_muf_hz), log(_muf_to), minf(dt * MUFFLE_RATE, 1.0)))
+	var i := AudioServer.get_bus_index("Music")
+	for k in AudioServer.get_bus_effect_count(i):
+		if AudioServer.get_bus_effect(i, k) == _muf_fx:
+			_muf_fx.cutoff_hz = _muf_hz
+			AudioServer.set_bus_effect_enabled(i, k, muffled or _muf_hz < OPEN_HZ * 0.95)  # (off, it costs nothing)
+			break
 
 
 # --- the clock ----------------------------------------------------------------------------------------------------
@@ -625,6 +978,7 @@ func mood_inputs() -> Dictionary:
 func _direct(dt: float) -> void:
 	var inp := mood_inputs()
 	music_state(_mood.update(inp, dt))
+	music_region(str(inp.get("region", "")), str(inp.get("faction", "")))  # (after the state, so a new piece starts in the fight's layer)
 	var red := bool(inp.get("hostile", false))
 	if red and not _red:
 		play("red_alert")

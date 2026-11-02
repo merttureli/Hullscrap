@@ -99,7 +99,7 @@ func test_buses_and_export() -> void:
 	check(AudioServer.get_bus_effect(AudioServer.get_bus_index("Room"), 0) is AudioEffectLowPassFilter, "and carries the low-pass the reactor's load opens")
 	var cfg := FileAccess.get_file_as_string("res://export_presets.cfg")
 	eq(cfg.count("audio/_src/*"), cfg.count("exclude_filter="), "every export preset leaves the audio sources out")
-	check(not cfg.contains("assets/audio"), "and none excludes the audio assets")
+	check(not cfg.replace("assets/audio/music/demos/*", "").contains("assets/audio"), "and none excludes the audio assets (the listening-only demos aside)")
 
 
 func test_weapon_sounds() -> void:
