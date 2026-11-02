@@ -1807,6 +1807,8 @@ Source and licence of every art and audio file in the repo.
 | `assets/audio/music/explore_b.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/hollow.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/jump.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/lumen_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/lumen_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/menu.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/region_cross.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/unlock.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
@@ -1826,3 +1828,4 @@ Source and licence of every art and audio file in the repo.
 | `assets/audio/music/demos/r3_black_box_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_black_box.py`) | project-owned |
 | `assets/audio/music/demos/r3_clans_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_clans.py`) | project-owned |
 | `assets/audio/music/demos/r3_concord_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_concord.py`) | project-owned |
+| `assets/audio/music/demos/r3_lumen_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_lumen.py`) | project-owned |

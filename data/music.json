@@ -16,12 +16,18 @@
    "explore": "clans_explore.ogg",
    "battle": "clans_battle.ogg",
    "bpm": 116.1
+  },
+  "lumen": {
+   "explore": "lumen_explore.ogg",
+   "battle": "lumen_battle.ogg",
+   "bpm": 96.0
   }
  },
  "regions": {
   "default": "black_box",
   "faction:concord": "concord",
-  "faction:clans": "clans"
+  "faction:clans": "clans",
+  "faction:lumen": "lumen"
  },
  "states": {
   "menu": [
@@ -53,6 +59,8 @@
   "concord_battle.ogg": 0.0,
   "clans_explore.ogg": 0.0,
   "clans_battle.ogg": 0.0,
+  "lumen_explore.ogg": 0.0,
+  "lumen_battle.ogg": 0.0,
   "victory.ogg": -3.0,
   "defeat.ogg": -3.0,
   "jump.ogg": -3.0,

@@ -785,6 +785,86 @@
     "seconds": 74.8,
     "true_peak_db": -3.15
    }
+  },
+  "lumen": {
+   "battle": {
+    "bands_pct": [
+     21.3,
+     19.7,
+     38.1,
+     18.0,
+     2.9
+    ],
+    "bytes": 3014872,
+    "peak_db": -2.58,
+    "rms_db": -15.03,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.62503,
+     "rms_first_db": -19.1,
+     "rms_last_db": -14.3,
+     "seam_step": 0.05403,
+     "typ_step_p999": 0.27041
+    },
+    "seconds": 140.0,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.52
+   },
+   "bpm": 96.0,
+   "explore": {
+    "bands_pct": [
+     12.2,
+     19.2,
+     46.1,
+     20.8,
+     1.7
+    ],
+    "bytes": 3243220,
+    "peak_db": -3.35,
+    "rms_db": -18.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.31597,
+     "rms_first_db": -19.3,
+     "rms_last_db": -19.5,
+     "seam_step": 0.07535,
+     "typ_step_p999": 0.15365
+    },
+    "seconds": 140.0,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.31
+   },
+   "mode": "F lydian, with whole-tone colour (C augmented)",
+   "sections_s": {
+    "A": 20.0,
+    "A2": 100.0,
+    "B": 60.0,
+    "brk": 80.0,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.477,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 6174000,
+    "samples_explore": 6174000
+   },
+   "title": "Lumen",
+   "transition": {
+    "bands_pct": [
+     13.6,
+     19.1,
+     44.4,
+     21.0,
+     1.8
+    ],
+    "bytes": 1672838,
+    "peak_db": -2.79,
+    "rms_db": -16.03,
+    "samples_off_vs_render": 0,
+    "seconds": 74.94,
+    "true_peak_db": -2.79
+   }
   }
  },
  "region_cross": {
