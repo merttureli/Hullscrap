@@ -82,6 +82,89 @@
   "true_peak_db": -3.05
  },
  "demos": {
+  "black_box": {
+   "battle": {
+    "bands_pct": [
+     29.8,
+     23.1,
+     24.1,
+     13.6,
+     9.4
+    ],
+    "bytes": 1506415,
+    "peak_db": -1.33,
+    "rms_db": -15.06,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.86429,
+     "rms_first_db": -17.7,
+     "rms_last_db": -14.1,
+     "seam_step": 0.01162,
+     "typ_step_p999": 0.45615
+    },
+    "seconds": 73.17,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.11
+   },
+   "bpm": 118.08,
+   "crossfades_start_s": [
+    29.73,
+    63.77
+   ],
+   "explore": {
+    "bands_pct": [
+     37.9,
+     37.2,
+     23.4,
+     1.2,
+     0.2
+    ],
+    "bytes": 1423444,
+    "peak_db": -4.03,
+    "rms_db": -18.01,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.18968,
+     "rms_first_db": -19.6,
+     "rms_last_db": -17.6,
+     "seam_step": 0.0096,
+     "typ_step_p999": 0.07806
+    },
+    "seconds": 73.17,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.95
+   },
+   "sections_s": {
+    "A": 8.13,
+    "B": 24.39,
+    "C": 40.65,
+    "D": 56.91,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.703,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 3226944,
+    "samples_explore": 3226944
+   },
+   "title": "Black Box",
+   "transition": {
+    "bands_pct": [
+     31.5,
+     28.3,
+     24.8,
+     9.4,
+     6.0
+    ],
+    "bytes": 1478778,
+    "peak_db": -1.61,
+    "rms_db": -16.44,
+    "samples_off_vs_render": 0,
+    "seconds": 73.77,
+    "true_peak_db": -1.11
+   }
+  },
   "long_haul": {
    "battle": {
     "bands_pct": [

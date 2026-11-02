@@ -1714,6 +1714,9 @@ Source and licence of every art and audio file in the repo.
 | `assets/audio/music/region_cross.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/unlock.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/victory.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/demos/black_box_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
+| `assets/audio/music/demos/black_box_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
+| `assets/audio/music/demos/black_box_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
 | `assets/audio/music/demos/long_haul_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
 | `assets/audio/music/demos/long_haul_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
 | `assets/audio/music/demos/long_haul_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
