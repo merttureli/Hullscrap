@@ -35,7 +35,7 @@
 			"min": {"storage": 1, "cargo": 1}, "max": {"command": 1, "medbay": 1, "engineering": 1},
 			"hack": [0, 2], "card": [0, 1], "loop": 0.4, "emergency": 0.15, "prop_mult": 0.5, "loot_mult": 1.3, "locked_bonus": 1.5,
 			"blueprints": {"0": 0.7, "1": 0.3}, "logs": [0, 1],
-			"bonus": [{"weight": 10, "item": "credits", "count": [20, 60]}, {"weight": 8, "item": "missile", "count": [1, 3]}],
+			"bonus": [{"weight": 10, "item": "credits", "count": [8, 24]}, {"weight": 8, "item": "missile", "count": [1, 3]}],
 			"names": ["Rat Hole", "Scrap Roost", "Bone Yard Annex", "Pirate Nest", "Chop Shop", "Dredge Den"]
 		},
 		"wreck": {
@@ -71,7 +71,7 @@
 		"skip": ["missile"],
 		"fallback": {"titanium": [2, 4], "silicon": [1, 3]}
 	},
-	"log_fallback": {"credits": [20, 50]},
+	"log_fallback": {"credits": [10, 25]},
 	"tables": {
 		"storage": [
 			{"weight": 34, "item": "scrap", "count": [4, 10]}, {"weight": 22, "item": "copper", "count": [2, 5]}, {"weight": 18, "item": "polymer", "count": [2, 4]},
@@ -90,25 +90,25 @@
 			{"weight": 3, "item": "radiator", "count": [1, 1]}, {"weight": 1, "item": "afterburner", "count": [1, 1]}
 		],
 		"medbay": [
-			{"weight": 30, "item": "polymer", "count": [2, 5]}, {"weight": 15, "item": "credits", "count": [10, 40]}, {"weight": 2, "item": "nanite_paste", "count": [1, 1]},
+			{"weight": 30, "item": "polymer", "count": [2, 5]}, {"weight": 15, "item": "credits", "count": [3, 12]}, {"weight": 2, "item": "nanite_paste", "count": [1, 1]},
 			{"weight": 3, "item": "basic_armor", "count": [1, 1]}, {"weight": 2, "item": "crystal", "count": [1, 1]}, {"weight": 10, "item": "scrap", "count": [2, 5]}, {"weight": 1, "item": "medbay", "count": [1, 1]}
 		],
 		"command": [
-			{"weight": 30, "item": "credits", "count": [30, 90]}, {"weight": 14, "item": "silicon", "count": [1, 3]}, {"weight": 6, "item": "crystal", "count": [1, 2]},
+			{"weight": 30, "item": "credits", "count": [8, 30]}, {"weight": 14, "item": "silicon", "count": [1, 3]}, {"weight": 6, "item": "crystal", "count": [1, 2]},
 			{"weight": 10, "item": "copper", "count": [2, 5]}, {"weight": 3, "item": "plasma_cell", "count": [1, 1]}, {"weight": 2, "item": "radar_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "pulse_mk1", "count": [1, 1]}
 		],
 		"quarters": [
-			{"weight": 30, "item": "credits", "count": [8, 35]}, {"weight": 15, "item": "polymer", "count": [2, 4]}, {"weight": 15, "item": "scrap", "count": [3, 7]},
+			{"weight": 30, "item": "credits", "count": [2, 10]}, {"weight": 15, "item": "polymer", "count": [2, 4]}, {"weight": 15, "item": "scrap", "count": [3, 7]},
 			{"weight": 8, "item": "copper", "count": [2, 4]}, {"weight": 3, "item": "pistol", "count": [1, 1]}, {"weight": 3, "item": "basic_armor", "count": [1, 1]}, {"weight": 1, "item": "eva_suit", "count": [1, 1]}
 		],
 		"airlock": [
 			{"weight": 30, "item": "scrap", "count": [2, 6]}, {"weight": 20, "item": "polymer", "count": [1, 3]}, {"weight": 6, "item": "eva_suit", "count": [1, 1]}, {"weight": 10, "item": "copper", "count": [1, 3]}
 		],
 		"terminal": [
-			{"weight": 60, "item": "credits", "count": [20, 80]}, {"weight": 10, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "copper", "count": [1, 3]}
+			{"weight": 60, "item": "credits", "count": [6, 24]}, {"weight": 10, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "copper", "count": [1, 3]}
 		],
 		"body": [
-			{"weight": 30, "item": "credits", "count": [5, 25]}, {"weight": 20, "item": "scrap", "count": [1, 3]}, {"weight": 10, "item": "polymer", "count": [1, 2]},
+			{"weight": 30, "item": "credits", "count": [2, 8]}, {"weight": 20, "item": "scrap", "count": [1, 3]}, {"weight": 10, "item": "polymer", "count": [1, 2]},
 			{"weight": 6, "item": "pistol", "count": [1, 1]}, {"weight": 6, "item": "missile", "count": [1, 1]}
 		]
 	}

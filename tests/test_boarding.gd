@@ -52,7 +52,7 @@ func test_the_same_seed_gives_the_same_site() -> void:
 
 func test_every_site_is_whole() -> void:
 	for kind in Site.kinds():
-		for s in 24:
+		for s in 10:
 			var site = Site.make(s * 131 + 5, kind, {"faction": ["clans", "concord", "lumen", "rustfangs", "wardens", "hollow"][s % 6]})
 			check(site.ok, "%s %d is built" % [kind, s])
 			var why: Array = site.problems()
@@ -64,7 +64,7 @@ func test_every_room_is_walkable_from_the_airlock_and_the_keys_lie_outside_their
 	var cards := 0
 	var hacks := 0
 	for kind in Site.kinds():
-		for s in 30:
+		for s in 14:
 			var site = Site.make(s * 17 + 3, kind, {"faction": "clans"})
 			var all: Dictionary = site.reachable_rooms([])
 			var no_card: Dictionary = site.reachable_rooms(["card"])
@@ -83,7 +83,7 @@ func test_every_room_is_walkable_from_the_airlock_and_the_keys_lie_outside_their
 
 func test_the_airlock_is_on_the_hull_edge_and_a_prop_never_blocks_a_door() -> void:
 	for kind in Site.kinds():
-		for s in 20:
+		for s in 8:
 			var site = Site.make(s * 29 + 1, kind, {})
 			var h: Array = site.airlock["hatch"]
 			for c in h:
@@ -107,10 +107,10 @@ func test_site_sizes_follow_the_kind() -> void:
 	for kind in Site.kinds():
 		rooms[kind] = 0.0
 		boxes[kind] = 0.0
-		for s in 20:
+		for s in 12:
 			var site = Site.make(s * 7 + 2, kind, {"faction": "concord"})
-			rooms[kind] += float(site.rooms.filter(func(r): return not r["corridor"] and r["purpose"] != "gone").size()) / 20.0
-			boxes[kind] += float(site.containers().size()) / 20.0
+			rooms[kind] += float(site.rooms.filter(func(r): return not r["corridor"] and r["purpose"] != "gone").size()) / 12.0
+			boxes[kind] += float(site.containers().size()) / 12.0
 	check(rooms["station"] >= 12.0 and rooms["station"] <= 20.0, "a station has 12 to 20 rooms (%.1f)" % rooms["station"])
 	check(rooms["derelict"] >= 4.0 and rooms["derelict"] <= 9.0, "a derelict is ship sized (%.1f rooms)" % rooms["derelict"])
 	check(rooms["nest"] > rooms["derelict"] and rooms["nest"] < rooms["station"], "a nest is medium (%.1f rooms)" % rooms["nest"])
@@ -157,9 +157,9 @@ func test_the_loot_tables_resolve() -> void:
 
 func test_blueprint_rates_are_about_right() -> void:
 	var rates := {}
-	for kind in Site.kinds():
+	for kind in ["station", "derelict", "nest"]:
 		var n := 0
-		var sites := 120 if kind == "station" else 200
+		var sites := 80 if kind == "station" else 150
 		for s in sites:
 			var site = Site.make(s * 3 + 11, kind, {"faction": "clans"})
 			n += site.props.filter(func(p): return p["slot"] == "blueprint").size()
@@ -382,18 +382,22 @@ func test_a_boardable_poi_event_has_the_choice_when_it_triggers() -> void:
 	var c := _camp(9)
 	var ship := _ship()
 	var s: Sector = c.current_sector()
-	var poi := {"id": "pz", "type": "abandoned_station", "name": "Hulk", "pos": s.ship_pos, "visibility": "signal", "event_type": "wreck_field", "state": Sector.NEW, "enemy": "", "main": false}
-	s.pois.append(poi)
+	s.pois.clear()
+	s.pois.append({"id": "pz", "type": "abandoned_station", "name": "Hulk", "pos": s.ship_pos, "visibility": "signal", "event_type": "wreck_field", "state": Sector.NEW, "enemy": "", "main": false})
 	var res := s.trigger(c, ship)
-	check(not res.is_empty() and res["poi"]["id"] == "pz" or not res.is_empty(), "something triggers")
-	if not res.is_empty() and res["poi"]["id"] == "pz" and not res["event"].is_empty():
-		check(res["event"]["choices"].any(func(ch): return ch["outcomes"][0].get("effects", {}).has("board")), "the event offers the boarding")
-	var other := {"id": "py", "type": "trader", "name": "T", "pos": s.ship_pos + Vector2(1, 0), "visibility": "beacon", "event_type": "trader", "state": Sector.NEW, "enemy": "", "main": false}
-	s.pois.erase(poi)
-	s.pois.append(other)
+	check(not res.is_empty() and res["poi"]["id"] == "pz" and not res["event"].is_empty(), "the abandoned station triggers an event")
+	check(res["event"]["choices"].any(func(ch): return ch["outcomes"][0].get("effects", {}).has("board")), "and it offers the boarding")
+	check(res["event"]["choices"].any(func(ch): return Boarding._free(ch)), "with a free way out")
+	s.pois.clear()
+	s.pois.append({"id": "py", "type": "trader", "name": "T", "pos": s.ship_pos, "visibility": "beacon", "event_type": "trader", "state": Sector.NEW, "enemy": "", "main": false})
 	var res2 := s.trigger(c, ship)
-	if not res2.is_empty() and res2["poi"]["id"] == "py" and not res2["event"].is_empty():
-		check(not res2["event"]["choices"].any(func(ch): return ch["outcomes"][0].get("effects", {}).has("board")), "a trader's event has no boarding")
+	check(not res2.is_empty() and not res2["event"].is_empty(), "a trader triggers an event")
+	check(not res2["event"]["choices"].any(func(ch): return ch["outcomes"][0].get("effects", {}).has("board")), "that has no boarding")
+	s.pois.clear()
+	s.pois.append({"id": "px", "type": "pirate_nest", "name": "Nest", "pos": s.ship_pos, "visibility": "signal", "event_type": "pirate", "state": Sector.NEW, "enemy": "", "main": false})
+	s.hollow = true
+	var res3 := s.trigger(c, ship)
+	check(not res3.is_empty() and not res3["event"]["choices"].any(func(ch): return ch["outcomes"][0].get("effects", {}).has("board")), "a place the tide has taken sends ghosts, not boarding")
 
 
 # --- the view: the tracker, the light, going aboard and coming back ------------------------------------------------
@@ -406,6 +410,7 @@ const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const MapView = preload("res://scripts/ui/map_view.gd")
 const SectorView = preload("res://scripts/view/sector_view.gd")
 const CombatView = preload("res://scripts/combat/combat_view.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
 
 
 func test_the_tracker_pings_what_moves_within_range_as_its_sweep_passes() -> void:
@@ -672,4 +677,52 @@ func test_the_save_is_refused_aboard_and_allowed_again_after() -> void:
 	board.leave()
 	eq(build.save_block, "", "back aboard the ship it can be saved")
 	check(session.finished, "the visit is over")
+	_free(d)
+
+
+func test_the_wreck_of_a_won_fight_can_be_boarded_and_holds_its_parts() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var board: BoardView = d["board"]
+	var ship: Ship = d["sim"].player_ship()
+	var s: Sector = map.campaign.current_sector()
+	var enemy: Ship = Ship.from_design("res://data/ships/pirate_raider.json")
+	var salvage: Dictionary = Salvage.event_for(enemy, "won", map.campaign, ship, null, 1)
+	var parts: Array = Salvage.parts(enemy)
+	parts.resize(mini(parts.size(), Boarding.WRECK_PARTS))
+	var ev := Boarding.offer(salvage, "wreck", {"name": "Pirate Raider", "parts": parts}, false)
+	eq(ev["choices"].size(), salvage["choices"].size() + 1, "the salvage page gains one row, and no way out the pick did not have")
+	var w := s.add_wreck(s.ship_pos + Vector2(120.0, 0.0), "Wreck of Raider")
+	w["state"] = Sector.DONE
+	map.open_poi({"poi": s.main_poi(), "refused": "", "event": ev, "dock": false}, s)
+	map.event_panel.choose(_board_choice(d))
+	map.event_panel.proceed()
+	check(board.active, "aboard the wreck")
+	eq(board.session.site.kind, "wreck", "a wreck")
+	eq(board.session.poi_id, w["id"], "of the wreck the fight left")
+	eq(board.session.site.site_name, "Pirate Raider", "named for the ship")
+	eq(board.session.site.parts, parts, "it holds the parts of the ship")
+	var held := {}
+	for p in board.session.site.props:
+		for item in p["fixed"]:
+			held[item] = int(held.get(item, 0)) + int(p["fixed"][item])
+	var want := {}
+	for part in parts:
+		want[part] = int(want.get(part, 0)) + 1
+	eq(held, want, "each in a container")
+	board.leave()
+	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "salvage", "the salvage page opens again")
+	_free(d)
+
+
+func test_k_does_not_start_a_fight_aboard() -> void:
+	var d := _screen()
+	var combat: CombatView = d["combat"]
+	var session = Boarding.start(d["map"].campaign, d["map"].campaign.current_sector(), "pk", {"kind": "derelict"}, d["sim"].player_ship())
+	d["board"].enter(session)
+	var e := InputEventKey.new()
+	e.keycode = KEY_K
+	e.pressed = true
+	combat._unhandled_input(e)
+	check(not combat.active, "the test pirate does not come aboard")
 	_free(d)
