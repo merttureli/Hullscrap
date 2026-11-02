@@ -186,6 +186,14 @@ static func strip(ship, m) -> void:
 	m.kit = {}
 
 
+## `m` is gone from the ship for another reason than being left aboard a site (they bled out, they left): what they wore goes back to the hold. Returns the line for the
+## chronicle ("Rook's kit is back in the hold."), "" when they carried nothing but a sidearm. (Lost aboard a site, the kit is lost with them: Mortality.lose.)
+static func give_back(ship, m) -> String:
+	var gear := carried_text(ship, m)
+	strip(ship, m)
+	return "%s's kit is back in the hold." % m.name if gear != "" else ""
+
+
 ## The items `m` carries, in words ("Carbine, Basic Armour, Spotter Cam Mk II"), "" for a sidearm alone: what is lost with them.
 static func carried_text(ship, m) -> String:
 	if not is_set(m):

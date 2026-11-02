@@ -15,6 +15,8 @@ const Characters = preload("res://scripts/crew/characters.gd")
 const Backstory = preload("res://scripts/crew/backstory.gd")
 const RADIUS := 0.9  ## body radius in cells, used for wall collision (a body is 2 cells wide; a small one has half of it, see body_radius)
 const MAX_SUBSTEP := 0.2  ## longest single move in cells, so a long frame cannot skip over a wall
+const JAMB := 0.6  ## a door frame's share of the body radius: the wall cells beside a door are rounded off, so a body a little off the door's line still gets through
+const DOOR_PULL := 0.5  ## share of each step spent pulling a body in a doorway onto the door's middle line
 const CONFIG_PATH := "res://data/crew.json"
 const SPECIES_PATH := "res://data/species.json"
 const BASE_SPEED := 3.0  ## cells per second for a species with speed 1.0
@@ -346,12 +348,13 @@ func move_input(grid: ShipGrid, dir: Vector2, dt: float, door_passable: Callable
 	for i in n:
 		if fits(grid, pos + Vector2(d.x, 0.0), door_passable):
 			pos.x += d.x
-		elif d.y == 0.0:
+		elif absf(d.y) < absf(d.x):  # blocked along the way it mostly goes: look for a lane (a door) beside
 			_slide_to_lane(grid, Vector2(d.x, 0.0), door_passable)
 		if fits(grid, pos + Vector2(0.0, d.y), door_passable):
 			pos.y += d.y
-		elif d.x == 0.0:
+		elif absf(d.x) < absf(d.y):
 			_slide_to_lane(grid, Vector2(0.0, d.y), door_passable)
+		_pull_to_door_line(grid, d.length() * DOOR_PULL, door_passable)
 
 
 ## Blocked head-on while moving by `step` (along one axis): nudge sideways, at most `step` long,
@@ -377,16 +380,56 @@ func _slide_to_lane(grid: ShipGrid, step: Vector2, door_passable: Callable) -> v
 		return
 
 
+## Inside a doorway (a 2x2 body over an open door cell), pull the body up to `most` toward the door's middle line, so a
+## body the rounded frame (JAMB) let through off the line walks out lined up.
+func _pull_to_door_line(grid: ShipGrid, most: float, door_passable: Callable) -> void:
+	if body_size != Pathfinder.BODY or most <= 0.0:
+		return
+	var c := Vector2i(floori(pos.x), floori(pos.y))
+	for cell: Vector2i in [c, c - Vector2i(1, 0), c - Vector2i(0, 1), c - Vector2i(1, 1)]:
+		if not _is_door(grid, cell):
+			continue
+		# a door in a row (frame or door to its left and right) is crossed along y, so its line is across x; else the other way
+		var side := 0 if not _is_floor(grid, cell + Vector2i(1, 0)) and not _is_floor(grid, cell - Vector2i(1, 0)) else 1
+		var to := pos
+		to[side] += clampf(roundf(pos[side]) - pos[side], -most, most)
+		if to != pos and fits(grid, to, door_passable):
+			pos = to
+		return
+
+
+static func _is_door(grid: ShipGrid, c: Vector2i) -> bool:
+	var id := grid.get_tile(c)
+	return id != "" and grid.defs != null and bool(grid.defs.get_def(id).get("door", false))
+
+
+static func _is_floor(grid: ShipGrid, c: Vector2i) -> bool:
+	return Pathfinder.walkable(grid, c) and not _is_door(grid, c)
+
+
+## A door frame: a blocking cell that is no door itself, with a door beside it.
+static func _is_jamb(grid: ShipGrid, c: Vector2i) -> bool:
+	if _is_door(grid, c):
+		return false
+	for o in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		if _is_door(grid, c + o):
+			return true
+	return false
+
+
 ## Would a body of `radius` (default: their own, body_radius) centred on `p` stay clear of every non-walkable cell?
+## A door frame (_is_jamb) only stops it at JAMB of the radius: the frame's corners are rounded off.
 func fits(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), radius := -1.0) -> bool:
 	if radius < 0.0:
 		radius = body_radius()
+	var r2 := radius * radius
 	for cy in range(floori(p.y - radius), floori(p.y + radius) + 1):
 		for cx in range(floori(p.x - radius), floori(p.x + radius) + 1):
 			if Pathfinder.walkable(grid, Vector2i(cx, cy), door_passable):
 				continue
 			var near := Vector2(clampf(p.x, cx, cx + 1), clampf(p.y, cy, cy + 1))
-			if (p - near).length_squared() < radius * radius:
+			var d2 := (p - near).length_squared()
+			if d2 < r2 and (d2 < r2 * JAMB * JAMB or not _is_jamb(grid, Vector2i(cx, cy))):
 				return false
 	return true
 
