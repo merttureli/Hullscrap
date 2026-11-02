@@ -117,7 +117,7 @@ def render():
     s.put("riser", V.riser(int(s.sec(bar(7)) * S.SR), 9), bar(33), 0.5)
 
     # --- texture
-    s.part("tex").put(V.hiss(s.L, 5) * (0.6 + 0.4 * S.lfo(s.L, 0.05)), 0, 1.0, 0.0)
+    s.part("tex").put(V.hiss(s.L, 5) * (0.6 + 0.4 * S.lfo(s.L, 0.05)) * 0.125, 0, 1.0, 0.0)   # hiss 18 dB under round 1
     s.part("tex").put(V.crackle(s.L, 6, 4.0) * 0.5, 0, 1.0, 0.0)
 
     # --- mix
