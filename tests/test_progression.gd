@@ -19,9 +19,10 @@ const Workshop = preload("res://scripts/craft/workshop.gd")
 const STARTER := "res://data/ships/starter_courier.json"
 ## The recipes the fabricator ladder needs (docs/audit/progression.md section 12) and the events that now teach them: event id -> recipe.
 const BLUEPRINT_EVENTS := {
-	"station_meridian_shipyard_queue": "shield_mk2", "station_rusthold_scrap_market": "assembly_rig", "scrapyard_graft_row_dock": "pulse_mk2",
+	"station_rusthold_scrap_market": "assembly_rig", "station_meridian_shipyard_queue": "assembly_rig", "scrapyard_graft_row_dock": "assembly_rig",
 	"trader_pawnbarge": "laser_mk2", "trader_concord_requisitions": "pulse_mk2", "anomaly_frozen_flare": "laser_mk2",
-	"lumen_listening_array": "shield_mk2", "bsite_terminal_still_logged_in": "laser_mk2", "bsite_terminal_last_message": "assembly_rig",
+	"lumen_listening_array": "shield_mk2", "concord_survey_buoy": "shield_mk2", "bsite_terminal_still_logged_in": "laser_mk2",
+	"bsite_terminal_last_message": "assembly_rig",
 }
 
 
@@ -202,29 +203,39 @@ func test_the_ladders_blueprints_have_events_and_none_is_free() -> void:
 				check(pays or ch.get("requires", {}).has("credits"), "%s: a blueprint costs something (%s)" % [id, str(eff)])
 		check(got, "%s teaches %s" % [id, BLUEPRINT_EVENTS[id]])
 	eq(found.keys().size(), wanted.size(), "every recipe the ladder needs has an event: %s" % [found.keys()])
+	var rig := BLUEPRINT_EVENTS.keys().filter(func(id): return BLUEPRINT_EVENTS[id] == "assembly_rig")
+	check(rig.size() >= 3, "the Rig, the key to fabricator level 3, has several: %s" % [rig])
 	check(BLUEPRINT_EVENTS.size() >= 6 and BLUEPRINT_EVENTS.size() <= 10, "6 to 10 events")
 
 
-func test_a_gated_blueprint_choice_closes_once_it_is_taken() -> void:
+func test_a_gated_blueprint_choice_closes_once_it_is_taken_and_the_other_rig_offers_close_with_it() -> void:
 	var c := Campaign.new(2)
 	var ship := Ship.from_design(STARTER)
 	ship.inventory.add("credits", 400)
+	ship.inventory.add("scrap", 200)
+	ship.inventory.add("copper", 30)
 	var e: Dictionary = c.events.get_event("station_meridian_shipyard_queue")
-	var view := c.events.choice_view(e, c, ship, {})
-	var row := -1
-	for v in view:
-		if str(v["text"]).begins_with("Ask about the folder"):
-			row = int(v["index"])
-			check(not v["grey"], "open with 160 credits")
-	check(row >= 0, "the folder choice is on the page")
+	var market: Dictionary = c.events.get_event("station_rusthold_scrap_market")
+	var graft: Dictionary = c.events.get_event("scrapyard_graft_row_dock")
+	var row := _row_of(c, e, ship, "Ask about the folder")
+	check(row >= 0, "the folder choice is on the page, open with 160 credits")
+	check(_row_of(c, market, ship, "Ask the old man under the crane") >= 0 and _row_of(c, graft, ship, "Ask Gasket about the arm") >= 0, "so are the other two Rig offers")
 	var before: int = ship.inventory.count("credits")
 	var r: Dictionary = c.events.choose(e, row, c, ship, {})
 	check(r["ok"], "taken")
-	check(ship.crafting.is_known("shield_mk2"), "the Shield Mk2 blueprint is learned")
+	check(ship.crafting.is_known("assembly_rig"), "the Assembly Rig blueprint is learned")
 	eq(ship.inventory.count("credits"), before - 160, "for 160 credits")
+	eq(_row_of(c, e, ship, "Ask about the folder"), -1, "the choice is gone afterwards (not_flag): no paying twice")
+	eq(_row_of(c, market, ship, "Ask the old man under the crane"), -1, "the Rusthold market offer goes with it: it is the same blueprint")
+	eq(_row_of(c, graft, ship, "Ask Gasket about the arm"), -1, "and so does Graft Row's")
+
+
+## The index of the open choice of `e` that begins with `start`; -1 when the page does not show it (or shows it greyed).
+func _row_of(c: Campaign, e: Dictionary, ship: Ship, start: String) -> int:
 	for v in c.events.choice_view(e, c, ship, {}):
-		if str(v["text"]).begins_with("Ask about the folder"):
-			check(v["grey"], "and the choice is closed afterwards (not_flag): no paying twice")
+		if str(v["text"]).begins_with(start) and not bool(v["grey"]):
+			return int(v["index"])
+	return -1
 
 
 # --- debris and mass ------------------------------------------------------------------------------------------------

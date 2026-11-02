@@ -28,7 +28,8 @@
         ]},
         {"text": "[Shield] Run a shield scan so it has something to log.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
           {"weight": 70, "text": "The buoy logs the shield, the hum and the colour of the glow, in a long careful line. A small credit is paid out of a fund nobody knew about.", "effects": {"items": {"credits": 35}, "rep": {"concord": 1}}},
-          {"weight": 30, "text": "The scan overloads the buoy's one working sensor, which then reports you as a star.", "effects": {"hull": -4, "items": {"credits": 10}}}
+          {"weight": 30, "text": "The scan overloads the buoy's one working sensor, which then reports you as a star.", "effects": {"hull": -4, "items": {"credits": 10}}},
+          {"weight": 15, "text": "The buoy logs the shield, finds a reference unit in its catalogue that is better, is offended on your behalf, and transmits the whole specification of the Mk2 in a burst that rattles the hull. It is the nicest thing anyone in Meridian has done for you, and it costs a bolt or two.", "effects": {"hull": -6, "blueprint": "shield_mk2", "rep": {"concord": 1}}}
         ]},
         {"text": "Add an unknown object of your own.", "outcomes": [
           {"weight": 100, "text": "You drop a bolt out of the airlock and log it as 'Item 4,113: bolt'. The buoy accepts this with real feeling.", "effects": {"items": {"credits": 5}}}

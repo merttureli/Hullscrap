@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "scrapyard_graft_row_dock", "type": "station", "weight": 10, "once": false, "requires": {"flag": "in_gauntling_scrapyards"},
+      "id": "scrapyard_graft_row_dock", "type": "station", "weight": 20, "once": false, "requires": {"flag": "in_gauntling_scrapyards"},
       "text": "Graft Row dock: a long gantry of welded plate, lit by a thousand work lamps, staffed by Gauntlings in every stage of repair. A sign over the airlock reads ASK ME ABOUT MY ARM. The dock foreman, Gasket, is already telling you about hers. It involves a reactor, a sunrise and a man called Dennis.",
       "choices": [
         {"text": "Listen to the whole story.", "outcomes": [
@@ -17,8 +17,8 @@
         {"text": "[Mire] Ask if anyone has been on fire.", "requires": {"species": "mire"}, "outcomes": [
           {"weight": 100, "text": "Gasket's lamp lights. 'Do tell,' she says. Your Mire and the dock foreman swap fire stories for an hour, comparing burns like medals. The dock gives your Mire a welding mask as a trophy.", "effects": {"items": {"scrap": 25}, "crew_hp": 10, "unlock": "ship_gauntling_graft_row"}}
         ]},
-        {"text": "Ask Gasket about the emitter in her palm (120 credits).", "requires": {"credits": 120, "not_flag": "bp_graft_pulse"}, "outcomes": [
-          {"weight": 100, "text": "Gasket holds up her hand and a pulse emitter blinks politely in the palm. 'Mk2,' she says. 'Built it on a Tuesday. Dennis was involved.' The drawings are on the back of a reactor invoice. You pay for the invoice. The drawings, she says, are a gift, which is how Gauntlings charge.", "effects": {"items": {"credits": -120}, "rep": {"clans": 1}, "blueprint": "pulse_mk2", "flag": "bp_graft_pulse"}}
+        {"text": "Ask Gasket about the arm she is wearing (120 credits).", "requires": {"credits": 120, "not_flag": "bp_assembly_rig"}, "outcomes": [
+          {"weight": 100, "text": "Gasket flexes the arm: four joints and a lifting rig built into the shoulder. 'Assembly arm,' she says. 'Built it on a Tuesday. Dennis was involved.' The drawings are on the back of a reactor invoice. You pay for the invoice. The drawings, she says, are a gift, which is how Gauntlings charge.", "effects": {"items": {"credits": -120}, "rep": {"clans": 1}, "blueprint": "assembly_rig", "flag": "bp_assembly_rig"}}
         ]}
       ]
     },
