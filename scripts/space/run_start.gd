@@ -77,7 +77,8 @@ static func blueprints(profile) -> Array[String]:
 # --- applying -------------------------------------------------------------------------------------------------
 
 ## Put the starting unlocks on the player's `ship` (just loaded from its design): the soldier's species, the blueprints known
-## at the start, the hull skin, and the repair drone every run starts with (add_drone). Returns a line for each thing done.
+## at the start (data/recipes.json `start_known` first, which a design's own saved list may lack, then the profile's), the hull skin, and the
+## repair drone every run starts with (add_drone). Returns a line for each thing done.
 ## Every run also starts with at least data/drift.json fuel.start fuel (fuel_up), whatever the design's cargo says.
 static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 	var lines: Array[String] = []
@@ -87,6 +88,8 @@ static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 		var p := Unlocks.payload_of(str(pick["species"]))
 		if soldier(ship, str(p.get("species", "")), str(p.get("name", ""))):
 			lines.append("Your soldier is %s" % Unlocks.name_of(str(pick["species"])))
+	for id in Content.read("res://data/recipes.json").get("start_known", []):  # (a design saves its own list of blueprints: recipes.json is the floor of every run)
+		ship.crafting.unlock(str(id))
 	for id in blueprints(profile):
 		if ship.crafting.unlock(id):
 			lines.append("Known from the start: " + ship.crafting.name_of(str(ship.crafting.def(id)["output"]["item"]), ship.components))

@@ -16,6 +16,9 @@
         ]},
         {"text": "[Mire] Ask if anyone has been on fire.", "requires": {"species": "mire"}, "outcomes": [
           {"weight": 100, "text": "Gasket's lamp lights. 'Do tell,' she says. Your Mire and the dock foreman swap fire stories for an hour, comparing burns like medals. The dock gives your Mire a welding mask as a trophy.", "effects": {"items": {"scrap": 25}, "crew_hp": 10, "unlock": "ship_gauntling_graft_row"}}
+        ]},
+        {"text": "Ask Gasket about the emitter in her palm (120 credits).", "requires": {"credits": 120, "not_flag": "bp_graft_pulse"}, "outcomes": [
+          {"weight": 100, "text": "Gasket holds up her hand and a pulse emitter blinks politely in the palm. 'Mk2,' she says. 'Built it on a Tuesday. Dennis was involved.' The drawings are on the back of a reactor invoice. You pay for the invoice. The drawings, she says, are a gift, which is how Gauntlings charge.", "effects": {"items": {"credits": -120}, "rep": {"clans": 1}, "blueprint": "pulse_mk2", "flag": "bp_graft_pulse"}}
         ]}
       ]
     },

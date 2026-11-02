@@ -165,6 +165,7 @@ func test_a_ship_five_times_as_fast_as_the_current_flying_upstream_still_sees_a_
 
 func test_the_spawn_rate_follows_how_fast_the_flow_passes_the_ship_from_1_to_6_times() -> void:
 	var d := _dd()
+	d.cfg["spawn"]["flow_min"] = 1.0  # (the bare clamp; the floor of the data is tested in test_progression.gd)
 	near(d.stream_vel(0).length(), 40.0, "the test current is 40 px/s")
 	for row in [[Vector2.ZERO, 1.0], [Vector2(0.0, 40.0), 1.0], [Vector2(0.0, 20.0), 1.0], [Vector2(0.0, -40.0), 2.0], [Vector2(0.0, -80.0), 3.0],
 			[Vector2(0.0, -200.0), 6.0], [Vector2(0.0, -2000.0), 6.0], [Vector2(300.0, 40.0), 300.0 / 40.0 if false else 6.0]]:

@@ -426,7 +426,8 @@
           {"weight": 25, "text": "Wiring, mostly. Good wiring.", "effects": {"items": {"credits": -30, "copper": 25, "polymer": 15}}},
           {"weight": 20, "text": "An engine, in the sense that it has the shape of one.", "effects": {"items": {"credits": -30, "engine_mk1": 1}}},
           {"weight": 10, "text": "A shield emitter that is still warm.", "effects": {"items": {"credits": -30, "shield_mk2": 1}}},
-          {"weight": 5, "text": "Under the shoes, a laser with a cord and a bad attitude. Ma Pickle opens one eye, sees what you've found, and says nothing, which is the most expensive thing she has ever said.", "effects": {"items": {"credits": -30, "leech_laser": 1}}}
+          {"weight": 5, "text": "Under the shoes, a laser with a cord and a bad attitude. Ma Pickle opens one eye, sees what you've found, and says nothing, which is the most expensive thing she has ever said.", "effects": {"items": {"credits": -30, "leech_laser": 1}}},
+          {"weight": 8, "text": "Under the shoes, folded small, a grease-stained sheet in a Concord hand: a laser lens, ground to a finer face. Ma Pickle opens one eye, sees what you have found, and says 'Thirty', as though that were the price of the crate and not the price of her silence.", "effects": {"items": {"credits": -30}, "blueprint": "laser_mk2"}}
         ]},
         {"text": "Sell her your spare Radiator.", "requires": {"items": {"radiator": 1}}, "outcomes": [
           {"weight": 100, "text": "Ma Pickle bites it, which is how you test radiators, and pays without opening her eyes.", "effects": {"items": {"radiator": -1, "credits": 35}}}
@@ -453,7 +454,8 @@
         ]},
         {"text": "Bribe the clerk for the sixth form (30 credits).", "requires": {"credits": 30}, "outcomes": [
           {"weight": 70, "text": "The clerk pretends not to see your hand, and the sixth form appears fully stamped. A Shield Mk1 comes out of the hatch, authorised at last, and your record gains a small, tasteful smudge.", "effects": {"items": {"credits": -30, "shield_mk1": 1}, "rep": {"concord": -1}}},
-          {"weight": 30, "text": "The clerk is honest. It is the worst possible luck.", "effects": {"items": {"credits": -30}, "rep": {"concord": -2}}}
+          {"weight": 30, "text": "The clerk is honest. It is the worst possible luck.", "effects": {"items": {"credits": -30}, "rep": {"concord": -2}}},
+          {"weight": 15, "text": "The sixth form is not the form you thought. It releases a technical annex, stamped, initialled and never meant for you: the specification of a Pulse Mk2, in six languages and one font. The clerk pretends not to see it leave.", "effects": {"items": {"credits": -30}, "rep": {"concord": -1}, "blueprint": "pulse_mk2"}}
         ]},
         {"text": "Sell them 30 scrap for the recycling fund.", "requires": {"items": {"scrap": 30}}, "outcomes": [
           {"weight": 100, "text": "A clerk weighs your scrap with a grave, official look and enters it under 'Donations, Unsolicited'. You are thanked in writing.", "effects": {"items": {"scrap": -30, "credits": 25}, "rep": {"concord": 1}}}
@@ -524,7 +526,8 @@
       "choices": [
         {"text": "Fly through the flare.", "outcomes": [
           {"weight": 50, "text": "It is like flying through a held note. You come out the far side with plasma dust all over the hull and a happy sort of ringing.", "effects": {"items": {"plasma_cell": 2, "crystal": 2}}},
-          {"weight": 50, "text": "The flare remembers it's a flare. The heat is brief, immense and entirely personal.", "effects": {"hull": -10, "items": {"plasma_cell": 1}}}
+          {"weight": 50, "text": "The flare remembers it's a flare. The heat is brief, immense and entirely personal.", "effects": {"hull": -10, "items": {"plasma_cell": 1}}},
+          {"weight": 15, "text": "The heat prints itself on the hull in a pattern too neat to be an accident, and the scanner, scorched but still working, copies it: the lens of a laser, ground by a star. You limp out with the drawing and the blisters.", "effects": {"hull": -10, "items": {"plasma_cell": 1}, "blueprint": "laser_mk2"}}
         ]},
         {"text": "[Shield Mk1] Fly through under shield.", "requires": {"component": "shield_mk1"}, "outcomes": [
           {"weight": 85, "text": "The bubble takes the heat in one long, sweet hiss. You emerge with plasma dust on the shield and a grin on the bridge.", "effects": {"items": {"plasma_cell": 3, "crystal": 3}}},

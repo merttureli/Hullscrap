@@ -178,7 +178,7 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 	_no_annex.clear()
 	c = Campaign.new(SEED_BASE + seed_index)
 	ship = Ship.from_design(path)
-	RunStart.add_drone(ship)
+	RunStart.apply_ship(ship, {}, null)  # the start of a real run: fuel.start fuel, recipes.json start_known, the drone (a design's own cargo has 6 fuel)
 	Jobs.spawn_crew(ship)
 	ship.refresh()
 	_armour0 = int(stats_now()["armour"])

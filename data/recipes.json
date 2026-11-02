@@ -24,7 +24,9 @@
     "bolt_thrower_scrap",
     "shield_scrap_mk1",
     "net_mouth_scrap",
-    "ammo_rack"
+    "ammo_rack",
+    "laser_cutter",
+    "titanium"
   ],
   "recipes": [
     {
