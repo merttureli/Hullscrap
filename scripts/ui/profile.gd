@@ -3,7 +3,8 @@ extends RefCounted
 ## one-line record of every finished run (the main menu lists the last five), the unlocks earned
 ## (data/unlocks.json: the hangar reads them), the landmarks met (docs/CONTENT.md section 13) and the hall of
 ## ships (the design of the ship of each run that ended in an ending, the last 20, one file each in the
-## folder next to the profile), the new-run options picked in the hangar (`start`) and the sound volumes (`sound`). No nodes. A missing or broken file is an empty profile. Also the version label of the main menu and the save helpers the
+## folder next to the profile), the new-run options picked in the hangar (`start`), the sound volumes (`sound`) and the Ledger (the guidance
+## program of scripts/sim/advisor.gd: its setting, the tips it has shown, whether the player was asked, the run it follows). No nodes. A missing or broken file is an empty profile. Also the version label of the main menu and the save helpers the
 ## front door uses (is there a run to continue, wipe the saves when the ship is scrap).
 
 const PATH := "user://profile.json"
@@ -11,12 +12,14 @@ const PATH := "user://profile.json"
 ## 3 adds `start` (the new-run options chosen last time, run_start.gd); an older file loads with the plain defaults.
 ## 4 adds `sound` (the Master, Music and SFX sliders, audio.gd); an older file loads with the default volumes.
 ## 5 adds the Ambience slider to `sound` (an older file keeps the default for it).
-const VERSION := 5
+## 6 adds the Ledger: `ledger` (full, warn or off), `ledger_asked`, `tips` and `ledger_run`; an older file loads as Full with no tips seen.
+const VERSION := 6
 const MAX_RUNS := 20  ## records kept
 const SHOWN_RUNS := 5  ## records the main menu lists
 const HALL_MAX := 20  ## ships the hall of ships keeps
 const HINTS: Array[String] = ["picked", "map", "fight", "net", "craft"]  ## the first-run hints, in the order they come
 const SOUND_DEFAULTS := {"master": 0.8, "music": 0.6, "sfx": 0.8, "ambience": 0.8}  ## the volume sliders (0 to 1)
+const LEDGER_MODES: Array[String] = ["full", "warn", "off"]  ## the Ledger's settings: card, tips and warnings; warnings only; nothing
 const BETA := "Beta 3"
 const VERSION_PATH := "res://version.txt"  ## the short git hash, written when the game is exported
 
@@ -29,6 +32,10 @@ var hall: Array = []  ## the hall of ships, oldest first: {file, ship, ending, s
 var hall_seq := 0  ## the number of the next hall file
 var start := {}  ## the new-run options chosen in the hangar: {species, variant, skin} (run_start.gd), each an unlock id or ""; {} = the defaults
 var sound := SOUND_DEFAULTS.duplicate()  ## the volume sliders of the main menu: {master, music, sfx, ambience}, each 0 to 1
+var ledger := "full"  ## the Ledger's setting (LEDGER_MODES)
+var ledger_asked := false  ## the one-time "keep it on?" after the first finished run has been put to the player
+var tips := {}  ## Ledger tip id -> the date it was shown, in the order shown (the journal's Ledger tab lists them)
+var ledger_run := {}  ## what the Ledger keeps of the run it follows (advisor.gd state): {seed, base, warned, announced}
 
 
 func _init(p_path := PATH) -> void:
@@ -46,6 +53,10 @@ func load_file() -> void:
 	hall_seq = 0
 	start = {}
 	sound = SOUND_DEFAULTS.duplicate()
+	ledger = "full"
+	ledger_asked = false
+	tips = {}
+	ledger_run = {}
 	if not FileAccess.file_exists(path):
 		return
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -80,6 +91,14 @@ func load_file() -> void:
 		for k in SOUND_DEFAULTS:
 			if d["sound"].has(k):
 				sound[k] = clampf(float(d["sound"][k]), 0.0, 1.0)
+	if LEDGER_MODES.has(str(d.get("ledger", ""))):
+		ledger = str(d["ledger"])
+	ledger_asked = bool(d.get("ledger_asked", false))
+	if d.get("tips") is Dictionary:
+		for k in d["tips"]:
+			tips[str(k)] = str(d["tips"][k])
+	if d.get("ledger_run") is Dictionary:
+		ledger_run = d["ledger_run"]
 
 
 ## Write the file. Returns "" or why not.
@@ -87,7 +106,8 @@ func save() -> String:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
 		return "could not write " + ProjectSettings.globalize_path(path)
-	f.store_string(JSON.stringify({"version": VERSION, "hints": hints, "runs": runs, "unlocks": unlocks, "landmarks": landmarks, "hall": hall, "hall_seq": hall_seq, "start": start, "sound": sound}, "  "))
+	f.store_string(JSON.stringify({"version": VERSION, "hints": hints, "runs": runs, "unlocks": unlocks, "landmarks": landmarks, "hall": hall, "hall_seq": hall_seq, "start": start, "sound": sound,
+		"ledger": ledger, "ledger_asked": ledger_asked, "tips": tips, "ledger_run": ledger_run}, "  "))
 	return ""
 
 
@@ -102,6 +122,43 @@ func hint_due(id: String) -> bool:
 func mark_hint(id: String) -> void:
 	if HINTS.has(id) and not hints.has(id):
 		hints[id] = true
+		save()
+
+
+# --- the Ledger ------------------------------------------------------------------------------------------
+
+## Has Ledger tip `id` been shown to this profile?
+func has_tip(id: String) -> bool:
+	return tips.has(id)
+
+
+## Remember that Ledger tip `id` was shown (once: the date of the first time stays) and write the file. True when it is new.
+func mark_tip(id: String) -> bool:
+	if tips.has(id):
+		return false
+	tips[id] = Time.get_date_string_from_system()
+	save()
+	return true
+
+
+## Set the Ledger to `mode` (LEDGER_MODES) and write the file. False for an unknown mode.
+func set_ledger(mode: String) -> bool:
+	if not LEDGER_MODES.has(mode):
+		return false
+	ledger = mode
+	save()
+	return true
+
+
+## Is the one-time "The Ledger: keep it on?" due: a run has ended, the player was not asked yet, and the Ledger is not off already?
+func ledger_ask_due() -> bool:
+	return not ledger_asked and not runs.is_empty() and ledger != "off"
+
+
+## The player answered (or the setting was chosen by hand): never ask again.
+func mark_ledger_asked() -> void:
+	if not ledger_asked:
+		ledger_asked = true
 		save()
 
 
