@@ -1,8 +1,7 @@
-[gd_resource type="AudioBusLayout" load_steps=3 format=3]
+[gd_resource type="AudioBusLayout" format=3 uid="uid://bm2rotbppgnrv"]
 
 [sub_resource type="AudioEffectHardLimiter" id="AudioEffectHardLimiter_master"]
 ceiling_db = -1.0
-release = 0.1
 
 [sub_resource type="AudioEffectLowPassFilter" id="AudioEffectLowPassFilter_room"]
 cutoff_hz = 600.0
