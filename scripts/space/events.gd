@@ -35,6 +35,14 @@ extends RefCounted
 ##   choose() and apply() hand it back as `board` and the event panel starts the boarding when its page is left. Boarding is not a landmark
 ##   and does not spend a `once` event; the page it came from opens again when the soldier is back (Boarding.offer puts the choice into
 ##   the events of the POIs that can be boarded).
+## - Boarding (docs/BOARDING.md, stage B3): events of type `boarding_npc` are what a person met aboard says (picked when E talks to them, by `requires.site`
+##   (derelict, station, nest, wreck), `role` (survivor, hermit, trader, scavenger_talker, captive, touched_talker) and `theme` (data/boarding.json), besides
+##   the usual region, stage and flags) and of type `boarding_site` what a marked spot shows on the first step into its room (`requires.mark`: terminal, body,
+##   room). They are never rolled at a node. `{name}` in their texts is the person's name. Their effects add `npc_trade` (3 things for sale, rolled from the
+##   site's tables), `npc_reveal` (mark a container or a locked door on the HUD: container, blueprint, key or locked), `npc_join` (the person becomes crew; the
+##   event counts as one that adds crew, so it is gated by the region's one free offer), `npc_hostile` (they turn on you, as a foe kind or true for their
+##   role's), `npc_follow` (they walk with you until you leave), `npc_leave` (they walk away) and `site_fight` ({kind, n}: foes come out of the dark). choose()
+##   hands them back as `npc` (a list of {op, ...}) for the boarding session to carry out; they may not fight, board or end the run.
 ## - `fallback` (true) on an event keeps it out of every pick that has another eligible event: it is only rolled when nothing else
 ##   is (the repeatable filler quests of data/packs/story_1, so a quest beacon with no quest left still has something to give).
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
@@ -53,14 +61,16 @@ const Site = preload("res://scripts/board/site.gd")
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
-const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest", "hollow"]
+const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest", "hollow", "boarding_npc", "boarding_site"]
 const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark", "fallback"]
-const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max"]
+const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "site", "role", "theme", "mark"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue"]
-const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "species", "species_any", "trait", "items", "pay", "component", "component_any", "credits"]
+const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "species", "species_any", "trait", "items", "pay", "component", "component_any", "credits", "site", "role", "theme", "mark"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
-const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending", "board"]
+const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending", "board", "npc_trade", "npc_reveal", "npc_join", "npc_hostile", "npc_follow", "npc_leave", "site_fight"]
+const NPC_REVEALS: Array = ["container", "blueprint", "key", "locked"]  ## what npc_reveal can mark
+const SITE_MARKS: Array = ["terminal", "body", "room"]  ## what a discovery (requires.mark) is about
 const BOARD_KEYS: Array = ["kind", "name", "parts"]
 const RECRUIT_KEYS: Array = ["name", "species", "character"]
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
@@ -76,6 +86,7 @@ var files := {}  ## id -> the file it came from
 var order: Array[String] = []  ## ids, in file name order then file order
 var errors: Array[String] = []  ## problems met while loading (bad JSON, a missing id, a duplicate id)
 var _pages := {}  # id -> true for every event some outcome names in a goto
+var _cur_type := ""  # the type of the event being validated
 var _recruiters := {}  # id -> "species" | "unique" | "ada" for every event some outcome of which adds crew (unique: a character)
 
 
@@ -219,6 +230,8 @@ func _index_recruiters() -> void:
 					kind = "unique" if kind != "ada" else kind
 				elif kind == "":
 					kind = "species"
+			if eff.get("npc_join") and kind == "":
+				kind = "species"  # a person who joins is a recruit like any other
 		if kind != "":
 			_recruiters[id] = kind
 
@@ -351,6 +364,9 @@ func _world_ok(req: Dictionary, c, node: Dictionary, ship = null) -> bool:
 		var tag := str(c.region_data.get("events", ""))
 		if not _list(req["region"]).any(func(r): return str(r) == c.region_id or (tag != "" and str(r) == tag)):
 			return false
+	for key in ["site", "role", "theme", "mark"]:  # boarding: what the node says of the person or the spot
+		if req.has(key) and not _list(req[key]).any(func(v): return str(v) == str(node.get(key, ""))):
+			return false
 	if req.has("fuel_max") and (ship.inventory.count("fuel") if ship != null else 0) > int(req["fuel_max"]):
 		return false
 	if req.has("crew_min") and crew_count(ship) < int(req["crew_min"]):
@@ -481,7 +497,8 @@ static func _name(ship, id: String) -> String:
 ## {ok, why, text, lines, goto, fight, ending, logs, after_win, board}; `lines` are the changes in words ("-40 credits"),
 ## `goto` an event id to show next, `fight` a design id or "tier" for the controller to start, `ending` the id of the
 ## ending the outcome reached ("" for none), `logs` the derelict logs found (each {id, title, ship, faction, text}) and
-## `after_win` the {text, effects} to run if that fight is won, `board` the boarding to start ({} for none). ok is false (and nothing changes) when
+## `after_win` the {text, effects} to run if that fight is won, `board` the boarding to start ({} for none), `npc` what a person met aboard asked of the session
+## (a list of {op, ...}; see the effects npc_*), `acted` whether the outcome did anything. ok is false (and nothing changes) when
 ## the choice is not on offer or its price cannot be paid.
 func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dictionary:
 	var entry := {}
@@ -514,7 +531,25 @@ func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dicti
 	for t in res["told"]:
 		if str(t) != "":
 			text += "\n\n" + str(t)  # what a new crew member says about themselves, under the outcome's text
-	return {"ok": true, "why": "", "text": text, "lines": lines, "goto": res["goto"], "fight": res["fight"], "ending": res["ending"], "logs": res["logs"], "after_win": after, "board": res["board"]}
+	return {"ok": true, "why": "", "text": text, "lines": lines, "goto": res["goto"], "fight": res["fight"], "ending": res["ending"], "logs": res["logs"], "after_win": after, "board": res["board"], "npc": res["npc"], "acted": not _dict(outcome.get("effects")).is_empty()}
+
+
+## A copy of event `ev` with `{name}` in every text replaced by `who` (a person's name, boarding).
+static func personalize(ev: Dictionary, who: String) -> Dictionary:
+	return _fill(ev, who)
+
+
+static func _fill(v, who: String):
+	if v is String:
+		return v.replace("{name}", who)
+	if v is Array:
+		return v.map(func(x): return _fill(x, who))
+	if v is Dictionary:
+		var out := {}
+		for k in v:
+			out[k] = _fill(v[k], who)
+		return out
+	return v
 
 
 ## The title of landmark event `ev` ("" when it is not one): its `landmark` text, else its id as words.
@@ -544,7 +579,7 @@ static func roll(outcomes, rng: RandomNumberGenerator) -> Dictionary:
 
 # --- effects ------------------------------------------------------------------------------------------
 
-## Apply `effects` to campaign `c` and `ship`. Returns {lines, told, goto, fight, ending, logs, board}: the changes in words,
+## Apply `effects` to campaign `c` and `ship`. Returns {lines, told, goto, fight, ending, logs, board, npc}: the changes in words,
 ## what the new crew say about themselves (`told`), the follow-up page, the fight to start and the ending reached (each "" when there is none) and the derelict logs
 ## found. The fight is not started here, and the ending screen is not opened (the event panel does).
 func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
@@ -604,6 +639,30 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 		if who != "":
 			lines.append("%s (%s) joins the crew" % [who, Characters.label(chr) if not chr.is_empty() else species.capitalize()])
 			told.append(Backstory.intro(who, Characters.species_id(chr) if not chr.is_empty() else species, str(rd.get("character", ""))))
+	var ops: Array = []  # what the boarding session has to carry out (npc_*, site_fight)
+	var npc := _dict(node.get("npc"))
+	if effects.has("npc_trade"):
+		ops.append({"op": "trade"})
+	if effects.has("npc_reveal"):
+		ops.append({"op": "reveal", "what": str(effects["npc_reveal"]) if effects["npc_reveal"] is String else "container"})
+	if effects.has("npc_join"):
+		var kin := str(npc.get("species", "human"))
+		var mate: String = c.add_crew(ship, str(npc.get("name", "")), kin)
+		if mate != "":
+			lines.append("%s (%s) joins the crew" % [mate, kin.capitalize()])
+			told.append(Backstory.intro(mate, kin, ""))
+		else:
+			lines.append("There is no berth free for them.")
+		ops.append({"op": "join", "ok": mate != ""})
+	if effects.has("npc_hostile"):
+		ops.append({"op": "hostile", "kind": str(effects["npc_hostile"]) if effects["npc_hostile"] is String else ""})
+	if effects.has("npc_follow"):
+		ops.append({"op": "follow"})
+	if effects.has("npc_leave"):
+		ops.append({"op": "leave"})
+	if effects.has("site_fight"):
+		var sf = effects["site_fight"]
+		ops.append({"op": "fight", "kind": str(sf) if sf is String else str(_dict(sf).get("kind", "scavenger")), "n": 1 if sf is String else int(_dict(sf).get("n", 1))})
 	if effects.has("lose_crew"):
 		var count = effects["lose_crew"]
 		var n: int = (1 if count else 0) if count is bool else int(count)
@@ -623,7 +682,7 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 	var ending := str(effects.get("ending", ""))
 	if ending != "":
 		c.finish(ending)
-	return {"lines": lines, "told": told, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "ending": ending, "logs": found, "board": _dict(effects.get("board")).duplicate(true)}
+	return {"lines": lines, "told": told, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "ending": ending, "logs": found, "board": _dict(effects.get("board")).duplicate(true), "npc": ops}
 
 
 # --- validation ---------------------------------------------------------------------------------------
@@ -693,6 +752,7 @@ static func _known() -> Dictionary:
 func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[String]) -> void:
 	var id := str(ev["id"])
 	var bad := func(msg: String) -> void: errs.append("%s: event '%s': %s" % [path, id, msg])
+	_cur_type = str(ev.get("type", ""))
 	if not _is_snake(id):
 		bad.call("the id must be snake_case")
 	_check_keys(ev, EVENT_KEYS, "", bad)
@@ -790,6 +850,19 @@ func _check_req(req, allowed: Array, where: String, known: Dictionary, bad: Call
 					bad.call("%s: %s names unknown faction '%s' (known: %s)" % [where, k, f, ", ".join(known["factions"].keys())])
 				elif not _is_num(req[k][f]):
 					bad.call("%s: %s for %s must be a number" % [where, k, f])
+	var site_cfg := Site.config()
+	for v in _list(req.get("site")):
+		if not Site.kinds().has(v):
+			bad.call("%s: site '%s' is not a kind of site (%s)" % [where, v, ", ".join(Site.kinds())])
+	for v in _list(req.get("role")):
+		if not site_cfg["people"]["roles"].has(v):
+			bad.call("%s: role '%s' is not a role of a person (%s)" % [where, v, ", ".join(site_cfg["people"]["roles"].keys())])
+	for v in _list(req.get("theme")):
+		if not site_cfg["themes"].has(v) or str(v).begins_with("_"):
+			bad.call("%s: theme '%s' is not a site theme (data/boarding.json themes)" % [where, v])
+	for v in _list(req.get("mark")):
+		if not SITE_MARKS.has(v):
+			bad.call("%s: mark '%s' is not a kind of discovery (%s)" % [where, v, ", ".join(SITE_MARKS)])
 	if req.has("node") and not (NODE_TYPES.has(req["node"]) or known["places"].has(req["node"])):
 		bad.call("%s: node '%s' is neither a node type nor a place id" % [where, req["node"]])
 	for s in _list(req.get("species")) + _list(req.get("species_any")):
@@ -884,6 +957,32 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 			bad.call("%s: unknown unlock id '%s' (not in data/unlocks.json or a pack's unlocks.json)" % [where, u])
 	if eff.has("ending") and not (eff["ending"] is String and known["endings"].has(eff["ending"])):
 		bad.call("%s: unknown ending id '%s' (not in data/endings.json or a pack's endings.json)" % [where, eff["ending"]])
+	var boarding := _cur_type.begins_with("boarding_")
+	if boarding:
+		for k in ["fight", "board", "ending"]:
+			if eff.has(k):
+				bad.call("%s: %s cannot happen aboard (events of type %s)" % [where, k, _cur_type])
+	for k in ["npc_trade", "npc_join", "npc_follow", "npc_leave"]:
+		if eff.has(k) and not eff[k] is bool:
+			bad.call("%s: %s must be true" % [where, k])
+	for k in ["npc_trade", "npc_join", "npc_hostile", "npc_follow", "npc_leave", "npc_reveal"]:
+		if eff.has(k) and _cur_type != "page" and _cur_type != "boarding_npc" and not (k == "npc_reveal" and _cur_type == "boarding_site"):
+			bad.call("%s: %s is for events of type boarding_npc" % [where, k])
+	if eff.has("npc_reveal") and not (eff["npc_reveal"] is bool or NPC_REVEALS.has(eff["npc_reveal"])):
+		bad.call("%s: npc_reveal must be true or one of %s" % [where, ", ".join(NPC_REVEALS)])
+	if eff.has("npc_hostile"):
+		var hk = eff["npc_hostile"]
+		if not (hk is bool or (hk is String and Site.config()["enemies"].has(hk) and not hk in ["sentry", "crawler"])):
+			bad.call("%s: npc_hostile must be true or the foe a person becomes (scavenger, pirate or hollow_touched)" % where)
+	if eff.has("site_fight"):
+		var sf = eff["site_fight"]
+		var sk = sf if sf is String else (sf.get("kind") if sf is Dictionary else null)
+		if _cur_type != "page" and _cur_type != "boarding_site" and _cur_type != "boarding_npc":
+			bad.call("%s: site_fight is for events of type boarding_site" % where)
+		if not (sk is String and Site.config()["enemies"].has(sk) and not sk in ["sentry", "crawler"]):
+			bad.call("%s: site_fight must be a foe kind or {kind, n}" % where)
+		elif sf is Dictionary and not (_is_int(sf.get("n", 1)) and int(sf.get("n", 1)) >= 1 and int(sf.get("n", 1)) <= 4):
+			bad.call("%s: site_fight n must be 1 to 4" % where)
 	if eff.has("board"):
 		var b = eff["board"]
 		if not (b is Dictionary and b.get("kind") is String and board_kinds().has(b["kind"])):

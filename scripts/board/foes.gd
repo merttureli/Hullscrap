@@ -12,6 +12,7 @@ const Site = preload("res://scripts/board/site.gd")
 const Arms = preload("res://scripts/board/arms.gd")
 const BoardLight = preload("res://scripts/board/board_light.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Themes = preload("res://scripts/board/themes.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 const SEARCH_S := 4.0  ## seconds a hunter looks about at the last place it saw someone
@@ -79,13 +80,14 @@ func spawn_site(ctx := {}) -> void:
 	rng.seed = Site._mix(site.seed_value, "spawn", 0)
 	_make_vents(rng)
 	var kc: Dictionary = sc["kinds"].get(site.kind, {"count": [0, 0], "mix": {"scavenger": 1}})
-	var n := mini(int(ctx.get("crew", 0)), int(sc["crew_max"])) if site.kind == "wreck" else rng.randi_range(int(kc["count"][0]), int(kc["count"][1]))
+	var n := mini(int(ctx.get("crew", 0)), int(sc["crew_max"])) if site.kind == "wreck" else Themes.foe_count(site.theme, rng.randi_range(int(kc["count"][0]), int(kc["count"][1])))
+	var mix: Dictionary = Themes.foe_mix(site.theme, kc["mix"])  # (the theme's tilt of who stands here)
 	var spots := _spots(float(sc["min_from_airlock"]))
 	if spots.is_empty():
 		spots = _spots(4.0)
 	var hollow := bool(ctx.get("hollow", false))
 	for i in n:
-		var kind := _pick(kc["mix"], rng)
+		var kind := _pick(mix, rng)
 		if hollow and rng.randf() < float(sc["hollow_share"]):
 			kind = "hollow_touched"
 		var spot := _spot(spots, rng)
@@ -114,7 +116,7 @@ func memory() -> Dictionary:
 	return {"hollow": s.hollow_place, "dead": dead}
 
 
-## A foe of `kind` standing at `pos` (cells). Returns it.
+## A foe of `kind` standing at `pos` (cells). Returns it. `spawned` is false for one that did not stand here from the start (it is not in the site's memory of the dead).
 func add(kind: String, pos: Vector2, room := -1, spawned := true) -> Dictionary:
 	var d: Dictionary = def(kind)
 	var m := CrewMember.new(str(d["name"]), pos, "human")
@@ -345,6 +347,40 @@ func hollow_arrives() -> void:
 		f["mode"] = "hunt"
 		f["target"] = s.soldier.pos
 		f["spoke"] = true
+
+
+## Foe `f` is after the soldier at once (a person who turned on him, an ambush).
+func provoke(f: Dictionary) -> void:
+	f["mode"] = "hunt"
+	f["target"] = s.soldier.pos
+	f["lost"] = 0.0
+	f["notice"] = float(Site.config()["combat"]["sight"]["notice_s"])
+	f["spoke"] = true
+
+
+## `n` foes of `kind` come at the soldier from out of sight: the free spots 5 to 11 cells from him (people.fight.from), the nearest of them to a point
+## `from` first, hunting. Returns how many came.
+func ambush(kind: String, n: int, from: Vector2) -> int:
+	var span: Array = Site.config()["people"]["fight"]["from"]
+	var spots := []
+	for r in s.site.rooms:
+		if r["purpose"] == "gone":
+			continue
+		for a in _anchors_of(r["id"]):
+			var p := Vector2(a) + Vector2.ONE
+			var d := p.distance_to(s.soldier.pos)
+			if d >= float(span[0]) and d <= float(span[1]) and not list.any(func(f): return f["m"].pos.distance_to(p) < 2.5):
+				spots.append({"room": r["id"], "pos": p, "d": p.distance_to(from)})
+	spots.sort_custom(func(x, y): return x["d"] < y["d"])
+	var came := 0
+	for sp in spots:
+		if came >= n:
+			break
+		if list.any(func(f): return f["m"].pos.distance_to(sp["pos"]) < 3.0):
+			continue
+		provoke(add(kind, sp["pos"], int(sp["room"]), false))
+		came += 1
+	return came
 
 
 # --- the tick --------------------------------------------------------------------------------------------------------

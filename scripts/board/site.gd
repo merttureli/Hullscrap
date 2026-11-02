@@ -18,6 +18,7 @@ const Shapes = preload("res://scripts/ship/shapes.gd")
 const Hullgen = preload("res://scripts/space/hullgen.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Themes = preload("res://scripts/board/themes.gd")
 
 const PATH := "res://data/boarding.json"
 const TILES_PATH := "res://data/tiles.json"
@@ -35,6 +36,7 @@ static var _cfg := {}
 var kind := ""
 var seed_value := 0
 var site_name := ""
+var theme := ""  ## the theme it is dressed in (themes.gd, data/boarding.json `themes`), "" for the plain site
 var faction := ""
 var ok := false  ## the site was built (a rectangle always can be, so it is false only for a kind that does not exist)
 var attempt := 0  ## the try that worked (0 = the first)
@@ -46,6 +48,7 @@ var props: Array = []  ## [{id, prop, cell, size (Vector2i), room, blocks, loot,
 var airlock := {}  ## {room, hatch: [Vector2i, Vector2i] (wall cells, drawn as the hatch), spawn (Vector2: the centre of the soldier's body on arrival), normal (Vector2, out of the hull)}
 var lights: Array = []  ## [{pos (Vector2, cells), color ("red" or "green"), room}]
 var parts: Array = []  ## the part ids a wreck's containers hold besides their tables
+var marks: Array = []  ## discoveries: [{id, kind ("terminal", "body" or "room"), room, prop (id, -1 for a room), pos (Vector2, cells)}], placed after the rest from a stream of their own
 var room_of := {}  ## cell -> room id
 var door_of := {}  ## cell -> door id
 var prop_of := {}  ## cell -> prop id (every cell a prop covers)
@@ -68,7 +71,7 @@ static func kinds() -> Array:
 
 
 ## The site of `kind` ("derelict", "station", "nest" or "wreck") for `seed_value`. `opts`: {faction (whose hull ops shape it, else the
-## kind's own, else clans), name (the POI's own), parts (part ids a wreck holds)}.
+## kind's own, else clans), name (the POI's own), parts (part ids a wreck holds), theme (a theme id: its props, loot, names)}.
 static func make(p_seed: int, p_kind: String, opts := {}):
 	var s = new()
 	s.kind = p_kind
@@ -82,6 +85,9 @@ static func make(p_seed: int, p_kind: String, opts := {}):
 	if not Shipgen.tables()["factions"].has(s.faction):
 		s.faction = "clans"
 	s.parts = opts.get("parts", []).duplicate()
+	s.theme = str(opts.get("theme", ""))
+	if not Themes.ids().has(s.theme):
+		s.theme = ""
 	for i in ATTEMPTS:
 		s._clear()
 		if s._try(i) == "":
@@ -89,7 +95,10 @@ static func make(p_seed: int, p_kind: String, opts := {}):
 			s.attempt = i
 			break
 	var names: Array = cfg["names"]
-	s.site_name = str(opts.get("name", "")) if str(opts.get("name", "")) != "" else str(names[s._rng.randi() % names.size()])
+	var themed := Themes.site_name(s.theme, p_kind, s._rng) if str(opts.get("name", "")) == "" else ""
+	s.site_name = str(opts.get("name", "")) if str(opts.get("name", "")) != "" else (themed if themed != "" else str(names[s._rng.randi() % names.size()]))
+	if s.ok:
+		s._place_marks()
 	return s
 
 
@@ -106,6 +115,7 @@ func _clear() -> void:
 	rooms = []
 	doors = []
 	props = []
+	marks = []
 	airlock = {}
 	lights = []
 	room_of = {}
@@ -695,7 +705,8 @@ func _place_props(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 			continue
 		var mult := float(cfg["prop_mult"]) * (float(cfg["locked_bonus"]) if r["locked"] else 1.0)
 		var mouth := _mouth(r)
-		for entry in rdefs[r["purpose"]]["props"]:
+		var entries: Array = rdefs[r["purpose"]]["props"] + Themes.def(theme).get("rooms", {}).get(r["purpose"], [])
+		for entry in entries:
 			var n := rng.randi_range(int(entry["n"][0]), int(entry["n"][1]))
 			n = int(floor(float(n) * mult + rng.randf()))
 			for i in n:
@@ -810,7 +821,8 @@ func _fill_slots(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 		var id := _pick_weighted(w, rng)
 		if id >= 0:
 			props[id]["slot"] = "blueprint"
-	var log_n := rng.randi_range(int(cfg["logs"][0]), int(cfg["logs"][1]))
+	var more := int(Themes.def(theme).get("loot", {}).get("logs", 0))
+	var log_n := rng.randi_range(int(cfg["logs"][0]) + more, int(cfg["logs"][1]) + more)
 	for i in log_n:
 		var w := {}
 		for p in props:
@@ -885,8 +897,64 @@ func _place_lights(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 		var mid := Vector2(rect.position) + Vector2(rect.size) / 2.0
 		if r["id"] == airlock["room"]:
 			lights.append({"pos": mid, "color": "green", "room": r["id"]})
-		elif rng.randf() < float(cfg["emergency"]):
+		elif rng.randf() < float(cfg["emergency"]) * float(Themes.def(theme).get("emergency", 1.0)):
 			lights.append({"pos": mid, "color": "red", "room": r["id"]})
+
+
+## Discoveries (data/boarding.json `marks`): a few rooms that are not the airlock or a corridor hold a marked terminal, a marked body, or are a strange room
+## themselves. A stream of its own, so the layout and the loot of a site are what they were before there were marks.
+func _place_marks() -> void:
+	marks = []
+	var mc: Dictionary = config()["marks"]
+	var span: Array = mc["count"].get(kind, [0, 0])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _mix(seed_value, "marks", 0)
+	var n := rng.randi_range(int(span[0]), int(span[1]))
+	var open: Array = rooms.filter(func(r): return r["purpose"] != "gone" and r["purpose"] != "airlock" and not r["corridor"])
+	_shuffle(open, rng)
+	var kinds_w: Dictionary = mc["weights"]
+	for r in open:
+		if marks.size() >= n:
+			break
+		var rect: Rect2i = r["rect"]
+		var mid := Vector2(rect.position) + Vector2(rect.size) / 2.0
+		var opts := {"room": 1.0}
+		var prop := -1
+		for p in props:
+			if p["room"] == r["id"] and p["prop"] == "terminal":
+				opts["terminal"] = 1.0
+				prop = p["id"]
+				break
+		var body := -1
+		for p in props:
+			if p["room"] == r["id"] and p["prop"] == "body":
+				opts["body"] = 1.0
+				body = p["id"]
+				break
+		var w := {}
+		for k in opts:
+			w[k] = float(kinds_w.get(k, 1.0))
+		var names: Array = w.keys()
+		names.sort()
+		var total := 0.0
+		for k in names:
+			total += float(w[k])
+		var roll := rng.randf() * total
+		var chosen: String = names[0]
+		for k in names:
+			chosen = k
+			roll -= float(w[k])
+			if roll < 0.0:
+				break
+		var at := mid
+		var pid := -1
+		if chosen == "terminal":
+			pid = prop
+			at = centre_of(props[prop])
+		elif chosen == "body":
+			pid = body
+			at = centre_of(props[body])
+		marks.append({"id": marks.size(), "kind": chosen, "room": r["id"], "prop": pid, "pos": at})
 
 
 # --- hull helpers (as in shipgen.gd) ---------------------------------------------------------------------------------

@@ -8,16 +8,24 @@ extends RefCounted
 ## Contents: {items: {id: n}, blueprint: recipe id or "", log: log id or "", key: key id or ""}.
 
 const Site = preload("res://scripts/board/site.gd")
+const Themes = preload("res://scripts/board/themes.gd")
 
 const TIER_GROWTH := 0.15  ## more in every count for each tier above the first
 
 
-## The weighted outcomes container `id` of `site` rolls on.
+## The weighted outcomes container `id` of `site` rolls on (the site's theme tilts the weights of the items it favours).
 static func table_of(site, id: int) -> Array:
-	var cfg := Site.config()
 	var p: Dictionary = site.props[id]
-	var name: String = p["table"] if p["table"] != "" else str(site.rooms[p["room"]]["purpose"])
-	return cfg["tables"].get(name, []) + cfg["kinds"][site.kind]["bonus"]
+	return table_for(site, p["table"] if p["table"] != "" else str(site.rooms[p["room"]]["purpose"]))
+
+
+## The outcomes of table `name` in `site`: the table, the kind's bonus, the theme's tilt.
+static func table_for(site, name: String) -> Array:
+	var cfg := Site.config()
+	var table: Array = cfg["tables"].get(name, []) + cfg["kinds"][site.kind]["bonus"]
+	if site.theme == "":
+		return table
+	return table.map(func(o): return {"weight": float(o["weight"]) * Themes.tilt(site.theme, str(o["item"])), "item": o["item"], "count": o["count"]})  # (the theme's tilt)
 
 
 ## Roll the contents of container `id`. `ctx`: {tier (1-3), unknown (recipe ids the ship has no blueprint for), levels (recipe id -> fab_level),

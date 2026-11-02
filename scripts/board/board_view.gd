@@ -25,9 +25,13 @@ const Art = preload("res://scripts/view/art.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const Arms = preload("res://scripts/board/arms.gd")
 const Party = preload("res://scripts/board/party.gd")
+const Themes = preload("res://scripts/board/themes.gd")
 
 ## Emitted when the soldier is back on the ship: Boarding.leave()'s result {cleared, said, name, kind, poi}.
 signal finished(result: Dictionary)
+## B3: the soldier talked to someone, or stepped into a marked room: the map opens the event of `ctx` ({id (the person, -1 for a spot), name, node, event}) on its
+## event panel and calls talk_done() when it is over. The world stands still meanwhile.
+signal talk_requested(ctx: Dictionary)
 
 const CELL := 32.0
 const DARK := Color(0.022, 0.026, 0.04)
@@ -41,6 +45,10 @@ const FLASH_RANGE := 12.0  ## cells the flashlight reaches
 const SELF_RANGE := 3.4  ## cells the small light round the soldier reaches
 const SPACE := Color("#04060a")  ## outside the hull
 const RED_RANGE := 7.0
+## [fill, edge] of each prop as drawn when its theme says nothing else (data/boarding.json themes.colors).
+const PROP_COLORS := {"crate": ["#8a6a3e", "#3d2c16"], "locker": ["#4d5f78", "#1c2431"], "cabinet": ["#6b727d", "#23272e"], "pallet": ["#6a5a3a", "#2c2416"],
+	"terminal": ["#2b3340", "#10151c"], "heap": ["#5a5a5e", "#1c1c20"], "files": ["#9aa0a8", "#2a2e36"], "crystal": ["#8fe0ff", "#2a5a7a"], "cask": ["#7a5a30", "#2a1c0c"],
+	"trophy": ["#a08a50", "#3a2e14"]}
 const GREEN_RANGE := 4.5
 const STEP_CELLS := 1.4  ## cells walked between two footsteps
 const PANEL_FAR := 1.6  ## cells beyond reach at which the loot list shuts by itself
@@ -74,6 +82,9 @@ var light_on := true  ## F: the flashlight
 var target := {}  ## what E would act on: {type ("airlock", "container", "door"), id, dist}
 var hold := 0.0  ## seconds E has been held on the target
 var panel := -1  ## the container whose loot list is open
+var talking := false  ## an event panel is up over the dark (a talk or a discovery): the world stands still
+var talk_ctx := {}  ## the talk in progress (talk_requested's ctx)
+var shop := -1  ## the person whose goods are on the list
 var message := ""
 var feed: Array = []  ## [{text, t}] what was taken, newest last
 var ship_view: ShipView
@@ -141,6 +152,9 @@ func enter(p_session) -> String:
 	_clock = 0.0
 	hold = 0.0
 	panel = -1
+	talking = false
+	talk_ctx = {}
+	shop = -1
 	target = {}
 	message = ""
 	feed.clear()
@@ -328,7 +342,7 @@ func step(dt: float) -> void:
 	_clock += dt
 	var s = session
 	var m = s.soldier
-	if picking:  # the crew picker is up: he stands at the airlock, the dark waits
+	if picking or talking:  # the crew picker or a talk is up: he stands still, the dark waits
 		_aim_at(dt)
 		_update_lights(dt)
 		if hud != null:
@@ -445,12 +459,17 @@ func _combat(dt: float) -> void:
 	s.tick(dt, _aim, light_on)
 	if _fire_wait and not _fire_down():
 		_fire_wait = false
-	if _fire_down() and panel < 0 and not s.downed and not _fire_wait and not picking:
+	if _fire_down() and panel < 0 and shop < 0 and not s.downed and not _fire_wait and not picking:
 		s.fire(_aim)
 	for p in s.party:
 		var pa: Dictionary = _anim.get(p["m"], PersonDrawer.new_state(p["m"]))
 		PersonDrawer.animate(pa, p["m"], dt, p["m"].facing.angle())
 		_anim[p["m"]] = pa
+	for n in s.people.list:
+		if n["state"] in ["here", "leaving"]:
+			var na: Dictionary = _anim.get(n["m"], PersonDrawer.new_state(n["m"]))
+			PersonDrawer.animate(na, n["m"], dt, n["m"].facing.angle())
+			_anim[n["m"]] = na
 	for f in s.foes.list:
 		if f["kind"] != "sentry" and f["kind"] != "crawler":
 			var a: Dictionary = _anim.get(f["m"], PersonDrawer.new_state(f["m"]))
@@ -521,6 +540,8 @@ func _play(evs: Array) -> void:
 				Audio.fx(self, "tide_warning")
 			"downed":
 				Audio.fx(self, "crew_hurt", px)
+			"discover":
+				_start_talk(session.discover(int(e["mark"])))
 
 
 ## The crew who can be taken along, [{name, species, hp, max_hp}].
@@ -583,6 +604,10 @@ func find_target() -> Dictionary:
 		if d < best_d:
 			best = {"type": "container", "id": cid, "dist": d}
 			best_d = d
+	var pid: int = s.people.nearest(p, float(Site.config()["people"]["talk_reach"]))
+	if pid >= 0:  # a person comes before a crate, a door or the hatch
+		best = {"type": "npc", "id": pid, "dist": s.people.find(pid)["m"].pos.distance_to(p)}
+		best_d = -1.0
 	var rev := -1
 	var rev_d := INF
 	for i in s.party.size():
@@ -632,6 +657,10 @@ func _interact(dt: float) -> void:
 		var far: float = s.site.centre_of(s.site.props[panel]).distance_to(s.soldier.pos)
 		if far > float(Site.config()["reach"]) + PANEL_FAR:
 			close_panel()
+	if shop >= 0:
+		var seller: Dictionary = s.people.find(shop)
+		if seller.is_empty() or seller["m"].pos.distance_to(s.soldier.pos) > float(Site.config()["people"]["talk_reach"]) + PANEL_FAR:
+			close_shop()
 	var t := find_target()
 	var key := "%s:%s" % [t.get("type", ""), t.get("id", "")]
 	if key != _hold_key:
@@ -640,7 +669,7 @@ func _interact(dt: float) -> void:
 	target = t
 	var need := _hold_need(t)
 	var hacking := false
-	if down and need > 0.0 and panel < 0:
+	if down and need > 0.0 and panel < 0 and shop < 0:
 		_hold_gap = 0.0
 		hold += dt
 		hacking = str(t.get("type", "")) in ["door", "sentry"]
@@ -664,7 +693,11 @@ func press_e() -> void:
 	if panel >= 0:
 		take_from_panel("all")
 		return
+	if shop >= 0:
+		return
 	match str(target.get("type", "")):
+		"npc":
+			_start_talk(s.talk(int(target["id"])))
 		"airlock":
 			var down: Array = s.downed_party()
 			if not down.is_empty() and _leave_t <= 0.0:  # crew left down are lost: ask first
@@ -709,6 +742,68 @@ func _finish_hold(t: Dictionary) -> void:
 		Audio.fx(self, "collect")
 	elif str(t.get("type", "")) == "sentry":
 		s.foes.hack(s.foes.find(t["id"]))
+
+
+## Begin a talk: `ctx` is session.talk() or session.discover(). An event goes to the map's event panel (the world stands still until talk_done()); goods go on
+## the list; a word is just said.
+func _start_talk(ctx: Dictionary) -> void:
+	if ctx.is_empty():
+		return
+	if ctx.has("say"):
+		say(str(ctx["say"]))
+		return
+	if bool(ctx.get("shop", false)):
+		open_shop(int(ctx["id"]))
+		return
+	if talk_requested.get_connections().is_empty():
+		say("%s has nothing to say." % str(ctx.get("name", "Nobody")))
+		return
+	talking = true
+	talk_ctx = ctx
+	hold = 0.0
+	_e_prev = true
+	talk_requested.emit(ctx)
+
+
+## The talk is over: what its outcomes asked for is carried out by the session, and the world goes on.
+func talk_done(ops: Array, acted: bool) -> void:
+	if not active or session == null:
+		return
+	talking = false
+	_fire_wait = true  # (the click that ended the talk is not a shot)
+	_e_prev = true
+	var id := int(talk_ctx.get("id", -1))
+	talk_ctx = {}
+	var r: Dictionary = session.finish_talk(id, ops, acted)
+	for l in r["lines"]:
+		feed.append({"text": str(l), "t": _clock})
+		say(str(l))
+	if int(r["shop"]) >= 0:
+		open_shop(int(r["shop"]))
+
+
+## Show the goods of person `id`.
+func open_shop(id: int) -> void:
+	shop = id
+	panel = -1
+	Audio.fx(self, "open")
+
+
+func close_shop() -> void:
+	shop = -1
+
+
+## Buy row `i` (0 based) of the goods on the list.
+func buy_row(i: int) -> void:
+	if shop < 0:
+		return
+	var r: Dictionary = session.buy(shop, i)
+	if bool(r["ok"]):
+		feed.append({"text": str(r["text"]), "t": _clock})
+		Audio.fx(self, "collect")
+	elif str(r["text"]) != "":
+		say(str(r["text"]))
+		Audio.fx(self, "error")
 
 
 ## Show the loot list of container `id` (an opened one).
@@ -774,8 +869,10 @@ func _unhandled_input(e: InputEvent) -> void:
 			MOUSE_BUTTON_WHEEL_DOWN:
 				_zoom(1.0 / 1.1)
 			MOUSE_BUTTON_LEFT:
-				_fire_wait = picking or panel >= 0
-				if hud != null and picking:
+				_fire_wait = picking or panel >= 0 or shop >= 0
+				if hud != null and shop >= 0:
+					buy_row(hud.shop_row_at(e.position))
+				elif hud != null and picking:
 					var pr: int = hud.pick_at(e.position)
 					if pr == -2:
 						confirm_party()
@@ -813,10 +910,14 @@ func _unhandled_input(e: InputEvent) -> void:
 				say("You stay.")
 			elif panel >= 0:
 				close_panel()
+			elif shop >= 0:
+				close_shop()
 			elif front != null and front.has_method("open_pause"):
 				front.open_pause()
 		elif e.keycode >= KEY_1 and e.keycode <= KEY_9 and panel >= 0:
 			take_row(e.keycode - KEY_1)
+		elif e.keycode >= KEY_1 and e.keycode <= KEY_9 and shop >= 0:
+			buy_row(e.keycode - KEY_1)
 
 
 func _zoom(f: float) -> void:
@@ -847,7 +948,7 @@ func _draw_over() -> void:
 		if r["purpose"] == "gone":
 			continue
 		var rect: Rect2i = r["rect"]
-		_over.draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), Color(Color(str(rdefs[r["purpose"]]["tint"])), 0.09))
+		_over.draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), Color(Themes.wash(site.theme, Color(str(rdefs[r["purpose"]]["tint"]))), 0.09 if site.theme == "" else 0.13))
 	_draw_hatch(site)
 	for d in site.doors:
 		if d["lock"] != "" and d["lock"] != "gone" and not session.unlocked.has(d["id"]):
@@ -858,7 +959,9 @@ func _draw_over() -> void:
 	if str(target.get("type", "")) == "container":
 		var tp: Dictionary = site.props[target["id"]]
 		_over.draw_rect(Rect2(Vector2(tp["cell"]) * CELL, Vector2(tp["size"]) * CELL).grow(2.0), Color(1, 1, 1, 0.55), false, 2.0)
+	_draw_marks(site)
 	_draw_foes()
+	_draw_people()
 	_draw_party()
 	_draw_soldier()
 
@@ -893,50 +996,95 @@ func _draw_prop(p: Dictionary, def: Dictionary) -> void:
 	var sz: Vector2 = Vector2(p["size"]) * CELL
 	var open: bool = session.opened.has(p["id"])
 	var spent: bool = open and not session.left.has(p["id"])
+	var pc: Array = Themes.colors(session.site.theme, str(p["prop"]), PROP_COLORS.get(str(p["prop"]), ["#888888", "#222222"]))  # [fill, edge], the theme's if it has them
+	var fill: Color = pc[0].darkened(0.35) if spent else pc[0]
+	var edge: Color = pc[1]
 	match p["prop"]:
 		"crate":
 			var r := Rect2(o + Vector2(3, 3), sz - Vector2(6, 6))
-			_over.draw_rect(r, Color("#8a6a3e") if not spent else Color("#5a4a30"))
-			_over.draw_rect(r, Color("#3d2c16"), false, 2.0)
-			_over.draw_line(r.position, r.end, Color("#3d2c16"), 2.0)
-			_over.draw_line(Vector2(r.end.x, r.position.y), Vector2(r.position.x, r.end.y), Color("#3d2c16"), 2.0)
+			_over.draw_rect(r, fill)
+			_over.draw_rect(r, edge, false, 2.0)
+			_over.draw_line(r.position, r.end, edge, 2.0)
+			_over.draw_line(Vector2(r.end.x, r.position.y), Vector2(r.position.x, r.end.y), edge, 2.0)
 			if open:
 				_over.draw_rect(r.grow(-6.0), Color(0, 0, 0, 0.55))
 		"locker":
 			var r2 := Rect2(o + Vector2(6, 2), sz - Vector2(12, 4))
-			_over.draw_rect(r2, Color("#4d5f78") if not spent else Color("#34404f"))
-			_over.draw_rect(r2, Color("#1c2431"), false, 2.0)
-			_over.draw_line(r2.position + Vector2(r2.size.x / 2.0, 2), r2.position + Vector2(r2.size.x / 2.0, r2.size.y - 2), Color("#1c2431"), 2.0)
+			_over.draw_rect(r2, fill)
+			_over.draw_rect(r2, edge, false, 2.0)
+			_over.draw_line(r2.position + Vector2(r2.size.x / 2.0, 2), r2.position + Vector2(r2.size.x / 2.0, r2.size.y - 2), edge, 2.0)
 			_over.draw_circle(r2.position + Vector2(r2.size.x / 2.0 + 3.0, r2.size.y / 2.0), 1.6, Color("#c8d2e0"))
 			if open:
 				_over.draw_rect(Rect2(r2.position + Vector2(r2.size.x / 2.0, 2), Vector2(r2.size.x / 2.0 - 2, r2.size.y - 4)), Color(0, 0, 0, 0.6))
 		"cabinet":
 			var r3 := Rect2(o + Vector2(3, 4), sz - Vector2(6, 8))
-			_over.draw_rect(r3, Color("#6b727d") if not spent else Color("#454a52"))
-			_over.draw_rect(r3, Color("#23272e"), false, 2.0)
+			_over.draw_rect(r3, fill)
+			_over.draw_rect(r3, edge, false, 2.0)
 			for k in 2:
 				var yy := r3.position.y + r3.size.y * (0.25 + 0.5 * k)
-				_over.draw_line(Vector2(r3.position.x + 2, yy), Vector2(r3.end.x - 2, yy), Color("#23272e"), 2.0)
+				_over.draw_line(Vector2(r3.position.x + 2, yy), Vector2(r3.end.x - 2, yy), edge, 2.0)
 				_over.draw_line(Vector2(r3.get_center().x - 3, yy + 4), Vector2(r3.get_center().x + 3, yy + 4), Color("#c8d2e0"), 2.0)
 		"pallet":
 			var r4 := Rect2(o + Vector2(2, 2), sz - Vector2(4, 4))
-			_over.draw_rect(r4, Color("#6a5a3a") if not spent else Color("#4a4030"))
-			_over.draw_rect(r4, Color("#2c2416"), false, 2.0)
+			_over.draw_rect(r4, fill)
+			_over.draw_rect(r4, edge, false, 2.0)
 			var along := sz.x >= sz.y
 			for k in 2:
 				var f := (0.25 + 0.5 * k)
 				var bx := Rect2(r4.position + (Vector2(r4.size.x * f - 7.0, r4.size.y / 2.0 - 7.0) if along else Vector2(r4.size.x / 2.0 - 7.0, r4.size.y * f - 7.0)), Vector2(14, 14))
-				_over.draw_rect(bx, Color("#a58552") if not open else Color("#5a4a30"))
-				_over.draw_rect(bx, Color("#2c2416"), false, 1.5)
+				_over.draw_rect(bx, fill.lightened(0.3) if not open else fill.darkened(0.2))
+				_over.draw_rect(bx, edge, false, 1.5)
 		"terminal":
 			var r5 := Rect2(o + Vector2(4, 3), sz - Vector2(8, 6))
-			_over.draw_rect(r5, Color("#2b3340"))
-			_over.draw_rect(r5, Color("#10151c"), false, 2.0)
+			_over.draw_rect(r5, fill)
+			_over.draw_rect(r5, edge, false, 2.0)
 			var scr := Rect2(r5.position + Vector2(3, 3), Vector2(r5.size.x - 6, r5.size.y * 0.55))
 			var glow := 0.55 + 0.25 * sin(_clock * 5.0 + float(p["id"]))
 			_over.draw_rect(scr, Color(0.2, 0.95, 0.8, glow if not spent else 0.15))
 			for k in 3:
 				_over.draw_line(scr.position + Vector2(3, 4 + 5 * k), scr.position + Vector2(scr.size.x - 3 - 4 * k, 4 + 5 * k), Color(0.02, 0.2, 0.18, 0.7), 1.5)
+		"heap":  # a mound of scrap
+			var hc := o + sz / 2.0
+			for k in 7:
+				var a := float(hash([p["id"], k]) % 628) / 100.0
+				var rr := 5.0 + float(hash([k, p["id"]]) % 5)
+				_over.draw_circle(hc + Vector2.from_angle(a) * (3.0 + float(k % 3) * 3.0), rr, fill.lightened(0.12 * float(k % 3)))
+			_over.draw_arc(hc, 12.0, 0.0, TAU, 14, edge, 2.0, true)
+			if open:
+				_over.draw_circle(hc, 8.0, Color(0, 0, 0, 0.5))
+		"files":  # racks of folders
+			var r6 := Rect2(o + Vector2(3, 3), sz - Vector2(6, 6))
+			_over.draw_rect(r6, fill)
+			_over.draw_rect(r6, edge, false, 2.0)
+			for k in 4:
+				var xx := r6.position.x + 3.0 + float(k) * (r6.size.x - 6.0) / 4.0
+				_over.draw_rect(Rect2(xx, r6.position.y + 3.0, (r6.size.x - 6.0) / 4.0 - 2.0, r6.size.y - 6.0), Color("#e8e4d4") if not open else Color("#8a8678"))
+				_over.draw_line(Vector2(xx, r6.position.y + 3.0), Vector2(xx, r6.end.y - 3.0), edge, 1.0)
+		"crystal":  # a glowing cluster
+			var cc := o + sz / 2.0
+			var gl := 0.6 + 0.3 * sin(_clock * 2.2 + float(p["id"]))
+			_over.draw_circle(cc, 15.0, Color(fill, 0.16 * gl))
+			for k in 5:
+				var ang := -PI / 2.0 + (float(k) - 2.0) * 0.5
+				var tip := cc + Vector2.from_angle(ang) * (10.0 + float(k % 2) * 4.0)
+				var side := Vector2.from_angle(ang).orthogonal() * 3.0
+				_over.draw_colored_polygon(PackedVector2Array([cc + side, tip, cc - side]), Color(fill, 0.55 + 0.4 * gl) if not spent else Color(fill, 0.25))
+				_over.draw_line(cc, tip, edge, 1.0)
+		"cask":  # a rack of barrels
+			var along2 := sz.x >= sz.y
+			for k in 2:
+				var kc := o + (Vector2(sz.x * (0.25 + 0.5 * k), sz.y / 2.0) if along2 else Vector2(sz.x / 2.0, sz.y * (0.25 + 0.5 * k)))
+				_over.draw_circle(kc, 12.0, fill)
+				_over.draw_arc(kc, 12.0, 0.0, TAU, 16, edge, 2.0, true)
+				_over.draw_arc(kc, 6.0, 0.0, TAU, 12, edge, 1.5, true)
+		"trophy":  # a case with a skull and horns on it
+			var r7 := Rect2(o + Vector2(3, 5), sz - Vector2(6, 10))
+			_over.draw_rect(r7, fill.darkened(0.2))
+			_over.draw_rect(r7, edge, false, 2.0)
+			var tc2 := r7.get_center()
+			_over.draw_circle(tc2, 5.0, Color("#e8e0cc"))
+			_over.draw_line(tc2 + Vector2(-4, -4), tc2 + Vector2(-11, -9), Color("#e8e0cc"), 2.0)
+			_over.draw_line(tc2 + Vector2(4, -4), tc2 + Vector2(11, -9), Color("#e8e0cc"), 2.0)
 		"body":
 			var c := o + sz / 2.0
 			var ang := float(hash(p["cell"]) % 628) / 100.0
@@ -1035,6 +1183,38 @@ func _draw_crawler(f: Dictionary) -> void:
 	if not f["dead"]:
 		_over.draw_circle(c + dir * 7.5 + dir.orthogonal() * 1.6, 0.9, Color("#c8a0a0"))
 		_over.draw_circle(c + dir * 7.5 - dir.orthogonal() * 1.6, 0.9, Color("#c8a0a0"))
+
+
+## An unread note on a marked terminal or body: a small pale sheet. (A strange room shows nothing until he steps in.)
+func _draw_marks(site) -> void:
+	for m in site.marks:
+		if session.seen_marks.has(m["id"]) or m["kind"] == "room":
+			continue
+		var at: Vector2 = m["pos"] * CELL + Vector2(7.0, -8.0)
+		var pulse := 0.6 + 0.3 * sin(_clock * 3.0 + float(m["id"]))
+		_over.draw_rect(Rect2(at, Vector2(8, 10)), Color(0.92, 0.9, 0.78, pulse))
+		_over.draw_rect(Rect2(at, Vector2(8, 10)), Color(0.3, 0.28, 0.2), false, 1.0)
+		_over.draw_line(at + Vector2(2, 3), at + Vector2(6, 3), Color(0.3, 0.28, 0.2), 1.0)
+		_over.draw_line(at + Vector2(2, 6), at + Vector2(6, 6), Color(0.3, 0.28, 0.2), 1.0)
+
+
+## The people who are not hostile: standing, or walking off. A captive has a rope round them.
+func _draw_people() -> void:
+	for n in session.people.list:
+		if not (n["state"] in ["here", "leaving"]):
+			continue
+		var m = n["m"]
+		var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
+		var look: Dictionary = {"suit": "#888888", "hair": "#2a2018", "tool": "#cfd5dd"}
+		look.merge(m.look, true)
+		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
+			"item": str(n["d"].get("weapon", "")), "down": false, "work": false, "t": _clock, "head": m.head}
+		PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
+		if n["role"] == "captive":
+			var c: Vector2 = m.pos * CELL
+			_over.draw_arc(c, 13.0, 0.3, 2.6, 10, Color("#c8b070"), 2.0, true)
+			_over.draw_arc(c, 13.0, 3.5, 5.8, 10, Color("#c8b070"), 2.0, true)
+			_over.draw_circle(c + Vector2(0, 13.0), 2.0, Color("#c8b070"))
 
 
 func _draw_party() -> void:
