@@ -45,11 +45,13 @@ func _fight(player_path: String, spec: String, seed_value: int, cap_s: float) ->
 
 ## Fights that used to run to the cap (docs/BALANCE_REPORT.md before: 83% draws, the Courier's gun shot out in seconds and
 ## its shots spent on the enemy's guns) now end: the pilot holds its gun in range, aims at the hull clear of the guns, and
-## the barrels take more than one volley. Three jump 5 fights of the harness (its seeds); at least two end inside 150 s.
+## the barrels take more than one volley. Three jump 5 fights of the harness (its seeds); at least two end inside 400 s. (They
+## ended inside 150 s while a ship had a small hull-health pool; its structure is the hp of all its blocks and a ship is wrecked
+## at half of them, so a fight takes about twice as long: 157 s, 319 s and over 400 s for these three.)
 func test_starter_fights_at_jump_5_now_end() -> void:
 	var ended := []
 	for f in [["gen:clans:small:8175:4800", 1015], ["gen:lumen:small:256:4800", 6], ["gen:hollow:small:8175:6720", 1015]]:
-		var r := _fight(COURIER, f[0], f[1], 150.0)
+		var r := _fight(COURIER, f[0], f[1], 400.0)
 		if r[0] != "fighting":
 			ended.append("%s %s at %d s" % [f[0], r[0], r[1]])
 	check(ended.size() >= 2, "at least two of the three end: %s" % str(ended))
