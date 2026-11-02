@@ -113,9 +113,13 @@ func stage_value(at_stage: int, key: String) -> float:
 	return float(row[key]) if row is Dictionary and row.has(key) else NAN
 
 
+## The number behind warning key `key`: progression.json's `warn`, NAN when it is not there. Four skulls is the game's own (the table's third cut,
+## enemy_tables.json), so that one works before the file does.
 func warn_value(key: String) -> float:
 	var w = numbers.get("warn", {})
-	return float(w[key]) if w is Dictionary and w.has(key) else NAN
+	if w is Dictionary and w.has(key):
+		return float(w[key])
+	return float(Threat.config()["cuts"][2]) if key == "skulls_ratio" else NAN
 
 
 ## A check's number: a literal, or "p:<key>" read from the stage's row (NAN when it is missing).

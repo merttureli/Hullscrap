@@ -343,6 +343,8 @@ func test_every_warning_has_its_trigger() -> void:
 	var none := Advisor.new({}, {})
 	check(none.conditions({"stage": 3, "power": 1.0, "accel_ratio": 0.1, "scrap": 9999, "credits": 0, "known": 1, "structure": 0.1, "station_hops": 9, "margin": 1.0}).is_empty(), "no numbers, no numbers-based warnings")
 	check(not none.conditions({"stage": 3, "margin": -1.0}).is_empty(), "but a power shortfall needs none")
+	eq(none.conditions({"stage": 3}, {"foe_ratio": 1.7}).map(func(c): return c["id"]), ["skulls"], "nor does a four skull enemy: four skulls is the table's own cut")
+	eq(none.conditions({"stage": 3}, {"foe_ratio": 1.4}), [], "(1.4 is three skulls)")
 
 
 # --- the setting and the question --------------------------------------------------------------------------------
