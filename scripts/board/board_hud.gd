@@ -27,11 +27,23 @@ const ROW_H := 30.0
 
 var view: Node2D  ## board_view.gd
 var _rows: Array = []  # [Rect2] of the loot list rows, in the order of session.entries()
+var _pick_rows: Array = []  # [Rect2] of the crew picker rows
+var _go := Rect2()  # the picker's "go aboard" button
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+
+## The row of the crew picker under screen point `p`, -2 for the go button, -1 for none.
+func pick_at(p: Vector2) -> int:
+	if _go.has_point(p):
+		return -2
+	for i in _pick_rows.size():
+		if _pick_rows[i].has_point(p):
+			return i
+	return -1
 
 
 ## The row of the loot list under screen point `p`, -1 for none.
@@ -51,11 +63,16 @@ func _draw() -> void:
 	_draw_tracker(size)
 	_draw_tracers()
 	_draw_arms(size)
+	_draw_party(size)
 	_draw_feed(size)
 	_draw_prompt(size)
 	_draw_panel(size)
 	if view.message_alive():
 		_centred(view.message, Vector2(size.x / 2.0, size.y - 150.0), 18, AMBER)
+	if view.session.hollow:
+		_centred(str(Arms.cfg()["hollow"]["banner"]), Vector2(size.x / 2.0, 118.0), 20, Color("#c9b8ff"))
+	_draw_picker(size)
+	_draw_fade(size)
 
 
 func _font() -> Font:
@@ -161,6 +178,9 @@ func _draw_prompt(size: Vector2) -> void:
 	match str(t["type"]):
 		"airlock":
 			text = "E: leave through the airlock"
+			var down: Array = s.downed_party()
+			if view._leave_t > 0.0 and not down.is_empty():
+				text = "E: leave %s behind (lost for good)     Esc: stay" % ", ".join(down)
 			at = view.to_screen(site.hatch_centre())
 		"container":
 			var p: Dictionary = site.props[t["id"]]
@@ -171,6 +191,15 @@ func _draw_prompt(size: Vector2) -> void:
 			else:
 				need = float(Site.config()["props"][p["prop"]]["hold"])
 				text = "Hold E: open the %s" % name.to_lower()
+		"revive":
+			var who = s.party[t["id"]]["m"]
+			at = view.to_screen(who.pos)
+			need = float(Arms.cfg()["revive_s"])
+			text = "Hold E: bring %s round (%d s)" % [who.name, int(need)]
+		"sentry":
+			at = view.to_screen(s.foes.find(t["id"])["m"].pos)
+			need = float(Arms.cfg()["hack_sentry_s"])
+			text = "Hold E: hack the sentry (%d s)" % int(need)
 		"door":
 			var d: Dictionary = site.doors[t["id"]]
 			at = view.to_screen(site.door_centre(d))
@@ -249,3 +278,65 @@ func _draw_arms(size: Vector2) -> void:
 	var at: Vector2 = view.aim_screen()
 	draw_arc(at, 9.0, 0.0, TAU, 20, Color(TEXT, 0.7), 1.5, true)
 	draw_circle(at, 1.5, Color(TEXT, 0.9))
+
+
+## The crew who came along (top left): name and a small health bar; a downed one is marked in red, and in the world by a cross.
+func _draw_party(size: Vector2) -> void:
+	var y := 84.0
+	for p in view.session.party:
+		var m = p["m"]
+		var f := clampf(m.hp / maxf(m.max_hp, 1.0), 0.0, 1.0)
+		draw_rect(Rect2(16.0, y, 168.0, 34.0), Color(PANEL_BG, 0.82))
+		draw_rect(Rect2(16.0, y, 168.0, 34.0), EDGE_DIM if not m.is_down() else BAD, false, 1.5)
+		_text(str(m.name), Vector2(26.0, y + 16.0), 15, TEXT)
+		draw_rect(Rect2(26.0, y + 23.0, 148.0, 5.0), ROW_BG)
+		draw_rect(Rect2(26.0, y + 23.0, 148.0 * f, 5.0), GOOD if f > 0.5 else (AMBER if f > 0.25 else BAD))
+		if m.is_down():
+			_text("DOWN", Vector2(130.0, y + 16.0), 13, BAD)
+			var at: Vector2 = view.to_screen(m.pos)
+			if Rect2(Vector2.ZERO, size).has_point(at):
+				draw_line(at + Vector2(-9.0, -9.0), at + Vector2(9.0, 9.0), BAD, 3.0)
+				draw_line(at + Vector2(9.0, -9.0), at + Vector2(-9.0, 9.0), BAD, 3.0)
+		y += 40.0
+
+
+## Before going aboard: which crew come along.
+func _draw_picker(size: Vector2) -> void:
+	_pick_rows.clear()
+	_go = Rect2()
+	if not view.picking:
+		return
+	var rows: Array = view.pick_rows()
+	var cap := int(Arms.cfg()["party_max"])
+	var w := 460.0
+	var h := 96.0 + ROW_H * rows.size() + 44.0
+	var r := Rect2(Vector2(size.x / 2.0 - w / 2.0, size.y / 2.0 - h / 2.0), Vector2(w, h))
+	draw_rect(r, Color(PANEL_BG, 0.96))
+	draw_rect(r, EDGE, false, 2.0)
+	_text("Take crew along?", r.position + Vector2(18.0, 32.0), 22, TEXT)
+	_text("Up to %d. Crew who are down when you leave are lost." % cap, r.position + Vector2(18.0, 56.0), 14, DIM_TEXT)
+	for i in rows.size():
+		var rr := Rect2(r.position + Vector2(12.0, 70.0 + ROW_H * i), Vector2(w - 24.0, ROW_H - 4.0))
+		_pick_rows.append(rr)
+		var on: bool = view.pick.has(rows[i]["name"])
+		draw_rect(rr, ROW_BG if not on else Color(GOOD, 0.3))
+		if on:
+			draw_rect(rr, GOOD, false, 1.5)
+		_text("%d" % (i + 1), rr.position + Vector2(8.0, 20.0), 15, DIM_TEXT)
+		_text("%s   %s" % [rows[i]["name"], str(rows[i]["species"]).capitalize()], rr.position + Vector2(30.0, 20.0), 17, TEXT)
+		_text("%d/%d" % [roundi(rows[i]["hp"]), roundi(rows[i]["max_hp"])], rr.position + Vector2(w - 90.0, 20.0), 15, DIM_TEXT)
+	_go = Rect2(r.position + Vector2(w - 150.0, h - 42.0), Vector2(132.0, 30.0))
+	draw_rect(_go, Color(AIRLOCK, 0.35))
+	draw_rect(_go, AIRLOCK, false, 1.5)
+	_text("Go aboard", _go.position + Vector2(20.0, 21.0), 17, TEXT)
+	_text("1-9: pick     Enter: go     Esc: alone", r.position + Vector2(18.0, h - 22.0), 13, DIM_TEXT)
+
+
+## After the soldier goes down the screen fades out, with where he wakes.
+func _draw_fade(size: Vector2) -> void:
+	if not view.session.downed:
+		return
+	var f := clampf(view._down_t / (view.DOWN_S * 0.7), 0.0, 1.0)
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.0, 0.0, 0.0, f))
+	if f >= 0.6:
+		_centred(str(Arms.cfg()["down_text"]), size / 2.0, 24, TEXT)

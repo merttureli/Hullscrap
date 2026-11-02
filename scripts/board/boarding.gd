@@ -15,6 +15,8 @@ const Loot = preload("res://scripts/board/loot.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Arms = preload("res://scripts/board/arms.gd")
 const Foes = preload("res://scripts/board/foes.gd")
+const Party = preload("res://scripts/board/party.gd")
+const Mortality = preload("res://scripts/crew/mortality.gd")
 
 const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
 
@@ -345,6 +347,7 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	for g in guns:
 		Arms.tick(g, dt, take)
 	foes.tick(dt, aim, light_on)
+	Party.tick(self, dt)
 	update_doors(float(Arms.cfg()["door_near"]))
 	if soldier.is_down() and not downed:
 		downed = true
@@ -374,6 +377,26 @@ func update_doors(near: float) -> void:
 		if want != site.grid.is_door_open(d["cells"][0]):
 			site.grid.set_door_open(d["cells"][0], want)
 			events.append({"type": "door", "id": d["id"], "open": want, "pos": mid})
+
+
+## Take the crew named in `names` along (at most party_max of the eligible ones; party.gd). Returns how many came.
+func join_party(names: Array) -> int:
+	party = Party.join(self, names)
+	return party.size()
+
+
+## Names of the crew who are down, in the party.
+func downed_party() -> Array:
+	return Party.downed(self).map(func(p): return str(p["src"].name))
+
+
+## A downed member of the party (a follower's CrewMember) gets up with revive_hp of their health.
+func revive_member(m: CrewMember) -> void:
+	if not m.is_down():
+		return
+	m.hp = m.max_hp * float(Arms.cfg()["revive_hp"])
+	m.down_t = 0.0
+	events.append({"type": "revived", "pos": m.pos})
 
 
 ## Who a foe may shoot or strike: [{pos, r, ref, moving}] the soldier and the crew who are up.
@@ -419,6 +442,15 @@ func leave() -> Dictionary:
 	for g in guns:
 		_give(int(g["mag"]))
 		g["mag"] = 0
+	var lost: Array = []
+	for p in party:  # the crew on their feet come home; the ones down are lost
+		if p["m"].is_down():
+			lost.append(str(p["src"].name))
+			if ship != null:
+				Mortality.lose(ship, p["src"])
+			said.append("%s was left behind." % str(p["src"].name))
+		else:
+			p["src"].hp = minf(p["m"].hp, p["src"].max_hp)
 	var text := ""
 	if downed:
 		soldier.hp = soldier.max_hp * float(Arms.cfg()["down_hp"])
@@ -430,7 +462,7 @@ func leave() -> Dictionary:
 				m.hp = minf(soldier.hp, m.max_hp)
 	if sector != null and poi_id != "":
 		sector.boarded[poi_id] = memory()
-	return {"cleared": cleared, "said": said.duplicate(), "name": site.site_name, "kind": site.kind, "poi": poi_id, "downed": downed, "text": text}
+	return {"cleared": cleared, "said": said.duplicate(), "name": site.site_name, "kind": site.kind, "poi": poi_id, "downed": downed, "text": text, "lost": lost}
 
 
 ## What a later visit finds: the kind and the parts (so the same site is made again), what was opened and unlocked, what was left in the open ones.

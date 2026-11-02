@@ -482,6 +482,7 @@ func _screen(seed_value := 5) -> Dictionary:
 	board.build = build
 	board.cam = view.cam
 	board.sector = view
+	board.ask_party = false  # (the crew picker has its own tests, test_boarding_combat.gd)
 	map.board = board
 	board.finished.connect(map._on_board_finished)
 	map.new_game(seed_value)

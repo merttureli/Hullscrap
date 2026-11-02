@@ -6,6 +6,10 @@ const Site = preload("res://scripts/board/site.gd")
 const Boarding = preload("res://scripts/board/boarding.gd")
 const Arms = preload("res://scripts/board/arms.gd")
 const Foes = preload("res://scripts/board/foes.gd")
+const Party = preload("res://scripts/board/party.gd")
+const BoardView = preload("res://scripts/board/board_view.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Campaign = preload("res://scripts/space/campaign.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 
@@ -15,6 +19,8 @@ const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 func _ship(rounds := 40) -> Ship:
 	var s: Ship = Ship.from_design(RUSTBUCKET)
 	Jobs.spawn_crew(s)
+	s.crew.append(CrewMember.new("Rook", Vector2(10, 10), "human"))
+	s.crew.append(CrewMember.new("Tess", Vector2(12, 10), "fenn"))
 	s.inventory.add("hand_ammo", rounds)
 	return s
 
@@ -500,3 +506,311 @@ func test_beaten_foes_stay_beaten_on_the_next_visit() -> void:
 	again.foes.spawn_site({"mem": mem})
 	check(again.foes.find(first["id"])["dead"], "he is still down on the next visit")
 	eq(again.foes.live().size(), s.foes.live().size(), "and the rest are as they were")
+
+
+# --- the crew who come along ------------------------------------------------------------------------------------
+
+func _with_party(count := 2, seed_value := 31):
+	var sh := _ship()
+	var s = _visit("station", seed_value, sh)
+	s.foes.list.clear()
+	var names: Array = Party.eligible(sh).map(func(m): return m.name)
+	s.join_party(names.slice(0, count))
+	return s
+
+
+func test_only_unposted_crew_can_come_and_no_more_than_two() -> void:
+	var sh := _ship()
+	var ok: Array = Party.eligible(sh)
+	check(ok.size() >= 2, "the rustbucket has crew to take (%d)" % ok.size())
+	check(ok.all(func(m): return not m.is_player and m.post < 0 and not m.is_down()), "none of them is the soldier, posted or down")
+	ok[0].post = 3
+	check(not Party.eligible(sh).has(ok[0]), "a posted crew member stays aboard")
+	sh.crew.append(CrewMember.new("Vik", Vector2(14, 10), "human"))
+	sh.crew.append(CrewMember.new("Ona", Vector2(16, 10), "human"))
+	var s = _visit("station", 31, sh)
+	eq(s.join_party(sh.crew.map(func(m): return m.name)), 2, "four names, two come")
+	for p in s.party:
+		check(p["m"] != p["src"], "a copy walks the site")
+		check(p["m"].pos.distance_to(s.site.airlock["spawn"]) < 6.0, "by the airlock")
+
+
+func test_followers_follow_the_soldier_and_stop_near() -> void:
+	var s = _with_party()
+	var spots: Array = s.foes._spots(14.0)
+	s.soldier.pos = spots[0]["pos"]
+	var far: float = s.party[0]["m"].pos.distance_to(s.soldier.pos)
+	check(far > 10.0, "he is a good way off (%.1f)" % far)
+	_run(s, 40.0, 0.0, false)
+	for p in s.party:
+		var d: float = p["m"].pos.distance_to(s.soldier.pos)
+		check(d <= 7.0, "%s caught up (%.1f cells)" % [p["m"].name, d])
+	s.soldier.pos += Vector2(1.0, 0.0)
+	var before: Array = s.party.map(func(p): return p["m"].pos)
+	_run(s, 2.0, 0.0, false)
+	check(s.party[0]["m"].pos.distance_to(before[0]) < 2.5, "and they do not crowd him")
+
+
+func test_followers_shoot_what_is_in_front_of_them() -> void:
+	var d := _arena()
+	var s = d["s"]
+	var sh := _ship()
+	s.ship = sh
+	s.join_party(Party.eligible(sh).map(func(m): return m.name).slice(0, 1))
+	var p: Dictionary = s.party[0]
+	p["m"].pos = d["a"]
+	s.soldier.pos = d["a"] + Vector2(1.0, 0.0)
+	var f: Dictionary = s.foes.add("pirate", d["b"], d["room"])
+	f["base"] = (d["a"] - d["b"]).angle() + 3.0
+	var hp: float = f["m"].hp
+	_run(s, 5.0, 0.0, false)
+	check(f["m"].hp < hp or f["dead"], "the follower hit it (%.0f of %.0f)" % [f["m"].hp, hp])
+	check(f["mode"] != "idle", "and the shots woke it")
+
+
+func test_a_downed_follower_is_revived_by_a_mate_in_four_seconds_or_the_soldier() -> void:
+	var s = _with_party()
+	var a: Dictionary = s.party[0]
+	var b: Dictionary = s.party[1]
+	a["m"].hp = 0.0
+	b["m"].pos = a["m"].pos + Vector2(1.0, 0.0)
+	s.soldier.pos = a["m"].pos + Vector2(2.0, 0.0)
+	_run(s, 3.0, 0.0, false)
+	check(a["m"].is_down(), "three seconds are not enough")
+	_run(s, 2.0, 0.0, false)
+	check(not a["m"].is_down(), "four seconds are")
+	check(a["m"].hp > 0.0 and a["m"].hp < a["m"].max_hp, "and they get up hurt (%.0f of %.0f)" % [a["m"].hp, a["m"].max_hp])
+	b["m"].hp = 0.0
+	s.revive_member(b["m"])
+	check(not b["m"].is_down(), "the soldier's hold ends in revive_member")
+
+
+func test_a_follower_left_down_is_lost_and_the_ones_standing_go_home() -> void:
+	var s = _with_party()
+	var sh = s.ship
+	var down: Dictionary = s.party[0]
+	var up: Dictionary = s.party[1]
+	var down_name: String = down["src"].name
+	down["m"].hp = 0.0
+	up["m"].hp = 30.0
+	eq(s.downed_party(), [down_name], "the party knows who is down")
+	var res: Dictionary = s.leave()
+	eq(res["lost"], [down_name], "the one down is lost")
+	check(not sh.crew.has(down["src"]), "off the ship's crew")
+	check(sh.dead_crew.has(down_name), "and counted dead")
+	check(sh.crew.has(up["src"]) and absf(up["src"].hp - 30.0) < 0.1, "the other is home with the health he had (%.0f)" % up["src"].hp)
+	check(s.said.any(func(l): return str(l).contains(down_name)), "and the visit says so")
+
+
+func test_a_revived_follower_is_not_lost() -> void:
+	var s = _with_party()
+	var a: Dictionary = s.party[0]
+	a["m"].hp = 0.0
+	s.revive_member(a["m"])
+	var res: Dictionary = s.leave()
+	eq(res["lost"], [], "nobody is lost")
+	check(s.ship.crew.has(a["src"]), "he is home")
+
+
+func test_the_soldier_down_wakes_at_the_airlock_hurt_and_the_site_is_closed() -> void:
+	var s = _with_party()
+	var sh = s.ship
+	var down: Dictionary = s.party[0]
+	down["m"].hp = 0.0
+	s.hurt_member(s.soldier, 999.0, Vector2.ZERO)
+	s.tick(0.05, 0.0, true)
+	check(s.downed, "he is noticed to be down")
+	check(s.take_events().any(func(e): return e["type"] == "downed"), "the view is told")
+	var said: int = s.said.size()
+	var res: Dictionary = s.leave()
+	check(res["downed"] and res["cleared"], "the site is closed for good")
+	eq(res["text"], "You come to at the airlock.", "and he says where he is")
+	var me = null
+	for m in sh.crew:
+		if m.is_player:
+			me = m
+	check(me != null and absf(me.hp - me.max_hp * 0.15) < 0.01, "he is back at 15%% (%.1f of %.0f)" % [me.hp, me.max_hp])
+	eq(res["lost"].size(), 1, "the follower who was down is lost")
+	check(sh.crew.has(s.party[1]["src"]), "the one standing came back")
+	check(said >= 0, "(told)")
+
+
+func test_a_downed_visit_is_remembered_as_cleared() -> void:
+	var camp := Campaign.new(5)
+	var sector = camp.current_sector()
+	var sh := _ship()
+	var s = Boarding.start(camp, sector, "pz", {"kind": "station"}, sh)
+	s.hurt_member(s.soldier, 999.0, Vector2.ZERO)
+	s.tick(0.05, 0.0, true)
+	s.leave()
+	check(sector.boarded["pz"]["cleared"], "the sector remembers it closed")
+
+
+# --- the Hollow falls while he is aboard --------------------------------------------------------------------------
+
+func test_the_hollow_arriving_puts_hollow_touched_on_the_airlock_side_once() -> void:
+	var s = _visit("station", 31)
+	s.foes.list.clear()
+	check(not s.note_hollow(false), "nothing while the place holds")
+	check(s.note_hollow(true), "the tide takes it")
+	check(not s.note_hollow(true), "and only once")
+	var made: Array = s.foes.list.filter(func(f): return f["kind"] == "hollow_touched")
+	check(made.size() >= 2 and made.size() <= 3, "two or three come (%d)" % made.size())
+	for f in made:
+		check(f["m"].pos.distance_to(s.soldier.pos) >= 4.5, "not on top of him")
+		eq(f["mode"], "hunt", "already coming")
+	var avg := 0.0
+	for f in made:
+		avg += f["m"].pos.distance_to(s.site.airlock["spawn"]) / made.size()
+	check(avg < 14.0, "on the airlock side (%.1f cells from it)" % avg)
+	check(s.take_events().any(func(e): return e["type"] == "hollow"), "the view is told")
+	var born = _visit("station", 31)
+	born.hollow_place = true
+	check(not born.note_hollow(true), "a place that was the Hollow's already has its own")
+
+
+# --- the view ---------------------------------------------------------------------------------------------------
+
+## A boarding view with no scene round it, aboard `s`.
+func _view(s, ask := false):
+	var b := BoardView.new()
+	b.ask_party = ask
+	b.enter(s)
+	return b
+
+
+func _step(b, seconds: float, dt := 0.05) -> void:
+	for i in int(seconds / dt):
+		if not b.active:
+			return
+		b.step(dt)
+
+
+func test_the_crew_picker_takes_at_most_two_and_the_world_waits_while_it_is_up() -> void:
+	var sh := _ship()
+	sh.crew.append(CrewMember.new("Vik", Vector2(14, 10), "human"))
+	var s = _visit("station", 31, sh)
+	var b = _view(s, true)
+	check(b.picking, "the picker opens when there is crew to take")
+	eq(b.pick_rows().size(), 3, "three can be picked from")
+	var at: Vector2 = s.soldier.pos
+	b.wasd_override = Vector2(1.0, 0.0)
+	_step(b, 1.0)
+	eq(s.soldier.pos, at, "he does not walk while it is up")
+	b.toggle_pick(0)
+	b.toggle_pick(1)
+	b.toggle_pick(2)
+	eq(b.pick.size(), 2, "the third is refused")
+	b.toggle_pick(0)
+	b.toggle_pick(2)
+	b.confirm_party()
+	check(not b.picking, "it closes")
+	eq(s.party.size(), 2, "two came")
+	eq(s.party.map(func(p): return p["src"].name), ["Tess", "Vik"], "the two picked")
+	b.wasd_override = Vector2.ZERO
+	b.leave()
+	var alone = _visit("station", 31, _ship())
+	var b2 = _view(alone, true)
+	b2.confirm_party()
+	eq(alone.party.size(), 0, "going alone is allowed")
+	b2.leave()
+	var nobody = _visit("station", 31, Ship.from_design(RUSTBUCKET))
+	var b3 = _view(nobody, true)
+	check(not b3.picking, "with nobody to take there is no picker")
+	b3.leave()
+
+
+func test_the_trigger_fires_the_weapon_toward_the_aim_and_r_reloads() -> void:
+	var s = _visit("station", 31)
+	s.foes.list.clear()
+	var b = _view(s)
+	b.aim_override = (s.soldier.pos + Vector2(5.0, 0.0)) * 32.0
+	b.fire_override = true
+	_step(b, 1.0)
+	b.fire_override = false
+	check(s.gun()["mag"] < 8, "the trigger fired (%d left)" % s.gun()["mag"])
+	check(b.tracers.size() >= 0, "(tracers are drawn)")
+	s.reload()
+	_step(b, 1.5)
+	eq(s.gun()["mag"], 8, "reloaded")
+	b.leave()
+
+
+func test_holding_e_by_a_downed_follower_revives_him_in_four_seconds() -> void:
+	var s = _with_party(1)
+	var b = _view(s)
+	var p: Dictionary = s.party[0]
+	p["m"].hp = 0.0
+	p["m"].pos = s.soldier.pos + Vector2(1.5, 0.0)
+	b.e_override = true
+	b.step(0.05)
+	eq(str(b.target.get("type", "")), "revive", "E would revive him")
+	_step(b, 3.0)
+	check(p["m"].is_down(), "three seconds are not enough")
+	_step(b, 1.5)
+	check(not p["m"].is_down(), "four are")
+	b.e_override = false
+	b.leave()
+
+
+func test_leaving_with_a_follower_down_asks_first() -> void:
+	var s = _with_party(1)
+	var b = _view(s)
+	s.party[0]["m"].hp = 0.0
+	s.party[0]["m"].pos = s.soldier.pos + Vector2(6.0, 0.0)
+	b.step(0.05)
+	eq(str(b.target.get("type", "")), "airlock", "he is at the airlock")
+	b.e_override = false
+	b.step(0.05)
+	b.e_override = true
+	b.step(0.05)
+	check(b.active, "the first E only asks")
+	check(b.message.contains("down"), "and says why: %s" % b.message)
+	b.e_override = false
+	b.step(0.05)
+	b.e_override = true
+	b.step(0.05)
+	check(not b.active, "the second leaves")
+
+
+func test_a_soldier_who_goes_down_fades_out_and_comes_to_on_the_ship() -> void:
+	var s = _visit("station", 31)
+	var b = _view(s)
+	var got := []
+	b.finished.connect(func(r): got.append(r))
+	s.hurt_member(s.soldier, 999.0, Vector2.ZERO)
+	_step(b, 1.0)
+	check(b.active and s.downed, "the screen is fading")
+	_step(b, 3.0)
+	check(not b.active, "then he is back")
+	eq(got.size(), 1, "told once")
+	check(got[0]["downed"] and got[0]["cleared"], "closed for good")
+
+
+func test_the_hollow_arrival_is_noticed_by_the_view() -> void:
+	var s = _visit("station", 31)
+	s.foes.list.clear()
+	var b = _view(s)
+	b.hollow_source = func() -> bool: return true
+	_step(b, 0.2)
+	check(s.hollow, "the visit knows the Hollow is here")
+	check(s.foes.list.size() >= 2, "and it has people in it")
+	b.leave()
+
+
+func test_the_tracker_shows_what_moves_and_pings_by_distance() -> void:
+	var s = _visit("station", 31)
+	s.foes.list.clear()
+	var spots: Array = s.foes._spots(12.0).filter(func(sp): return sp["pos"].distance_to(s.soldier.pos) < 22.0)
+	check(not spots.is_empty(), "a spot 12 to 22 cells off")
+	var f: Dictionary = s.foes.add("scavenger", spots[0]["pos"], spots[0]["room"])
+	f["mode"] = "hunt"
+	f["target"] = s.soldier.pos
+	var b = _view(s)
+	var far := []
+	for i in 120:
+		b.step(0.05)
+		far.append_array(b.tracker.last_heard)  # (the view takes the pings itself, to sound them)
+	check(far.size() >= 1, "a foe on the move is pinged (%d)" % far.size())
+	check(far.all(func(x): return x >= 0.0 and x <= 1.0), "with how far out it was")
+	b.leave()

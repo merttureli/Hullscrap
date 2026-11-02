@@ -460,7 +460,7 @@ func _watch(f: Dictionary, dt: float) -> void:
 
 # --- walkers --------------------------------------------------------------------------------------------------------
 
-func _path(f: Dictionary, to: Vector2) -> void:
+func path_to(f: Dictionary, to: Vector2) -> void:
 	var m: CrewMember = f["m"]
 	var walk = s.site.walk
 	var pas: Callable = s.door_passable()
@@ -478,7 +478,7 @@ func _path(f: Dictionary, to: Vector2) -> void:
 func _chase(f: Dictionary, dt: float, to: Vector2) -> void:
 	f["repath"] = float(f["repath"]) - dt
 	if float(f["repath"]) <= 0.0:
-		_path(f, to)
+		path_to(f, to)
 		f["repath"] = 0.5 + 0.1 * float(int(f["id"]) % 4)
 	f["m"].step(dt)
 
@@ -613,7 +613,7 @@ func _take_cover(f: Dictionary, vis: Dictionary) -> bool:
 	f["cover_pos"] = best
 	f["mode"] = "cover"
 	f["wait"] = 0.0
-	_path(f, best)
+	path_to(f, best)
 	return true
 
 
@@ -631,7 +631,7 @@ func _refuge(f: Dictionary) -> void:
 		var to := Vector2(a) + Vector2.ONE
 		if to.distance_to(m.pos) > 40.0:
 			continue
-		_path(f, to)
+		path_to(f, to)
 		if m.path.is_empty():
 			continue
 		if m.path.all(func(c): return (Vector2(c) + Vector2.ONE).distance_to(from) >= 3.0):
@@ -661,7 +661,7 @@ func _idle(f: Dictionary, dt: float) -> void:
 			var anchors := _anchors_of(int(f["room"]))
 			if not anchors.is_empty():
 				var a: Vector2i = anchors[s.rng.randi() % anchors.size()]
-				_path(f, Vector2(a) + Vector2.ONE)
+				path_to(f, Vector2(a) + Vector2.ONE)
 	else:  # stands and looks about
 		m.facing = Vector2.from_angle(float(f["base"]) + sin(_clock * 0.5 + float(f["id"])) * 0.7)
 
