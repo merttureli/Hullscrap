@@ -81,6 +81,9 @@ var st := {}  # the record of the stage being played
 var _docked := ""  # the node whose station the ship is docked at ("" when not)
 var _skip := {}  # intents that failed in this build phase
 var _armour0 := 0  # the armour cells the starter had
+var _engines0 := 0  # the engines the starter had: the ladder adds at most 1 + stage / 2 more
+var _accel0 := 0.0  # the acceleration the starter had: the ladder adds engines before the ship falls far behind it
+var _no_annex := {}  # size -> the ship's signature when no annex spot was found (the search is slow: not repeated for the same ship)
 var _shop := Rect2i()  # the inner floor of the workshop annex of this run (empty until one is built)
 
 
@@ -173,12 +176,15 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 	_pick.seed = 777 + seed_index * 31
 	_carry.clear()
 	_shop = Rect2i()
+	_no_annex.clear()
 	c = Campaign.new(SEED_BASE + seed_index)
 	ship = Ship.from_design(path)
 	RunStart.add_drone(ship)
 	Jobs.spawn_crew(ship)
 	ship.refresh()
 	_armour0 = int(stats_now()["armour"])
+	_accel0 = float(Sector.flight_numbers(ship)["accel"])
+	_engines0 = int(stats_now()["engines"])
 	run = {"ship": id, "seed": seed_index, "policy": policy, "end": "won", "end_stage": 0, "cause": "", "minutes": 0.0, "stages": []}
 	var guard := 0
 	while c.stage <= mini(c.stages(), stages_n) and guard < 60:
@@ -198,7 +204,7 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 
 func new_stage() -> Dictionary:
 	var rec := {"stage": c.stage, "region": c.region_id, "nodes": 0, "jumps": 0, "minutes": 0.0, "fights": [], "flow": {}, "pois": 0, "dock": 0, "fuel_bought": 0, "drift_jumps": 0, "tows": 0,
-		"blueprints_gained": 0, "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0}
+		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0}
 	rec["start"] = snapshot()
 	return rec
 
@@ -315,46 +321,73 @@ func nearest_station(hops: int) -> String:
 	return ""
 
 
-## Cross to the next region from the exit beacon: the warden first (toll or fight). False when it cannot.
+## One go at the warden: pay the toll if it is affordable and worth it, else break through (two tries inside the round). False when the ship was wrecked.
+func warden_round() -> bool:
+	st["warden"] = str(c.warden.get("name", ""))
+	var ev: Dictionary = c.warden_event(ship)
+	var pay := -1
+	var brk := -1
+	for v in c.events.choice_view(ev, c, ship, c.node(c.current)):
+		if str(v["text"]).begins_with("Pay the toll") and not v["grey"]:
+			pay = int(v["index"])
+		elif str(v["text"]).begins_with("Break through"):
+			brk = int(v["index"])
+	var foe: Ship = Session.load_ship(str(c.warden["spec"]))
+	var th := Threat.rate(foe, ship)
+	st["warden_skulls"] = th["skulls"]
+	st["warden_ratio"] = th["ratio"]
+	st["toll"] = Wardens.toll_of(c.warden)
+	var spare: int = ship.inventory.count("credits") - 60
+	var pick := pay if (pay >= 0 and (int(th["skulls"]) >= 3 or spare >= 2 * int(st["toll"]))) else brk
+	var tries := 0
+	while c.warden_up() and tries < 2:
+		tries += 1
+		var before := inv_copy()
+		var r: Dictionary = c.events.choose(ev, pick, c, ship, c.node(c.current))
+		flow("events", before)
+		if not r["ok"]:
+			return false
+		if str(r["fight"]) != "":
+			var next := fight_path(str(r["fight"]), r["after_win"], "warden")
+			if next.get("dead", false):
+				return false
+		pick = brk  # (a toll that failed to clear it, or a stand-off: break through again)
+	return true
+
+
+## Back to the nearest station (6 lanes at most) to mend, sell and build, then to the exit again. False when there is none.
+func regroup() -> bool:
+	var exit_id: String = c.current
+	var stn := nearest_station(6)
+	if stn == "":
+		return false
+	for hop in path_to(stn):
+		if not go(hop):
+			return false
+	dock()
+	_docked = ""
+	for hop in path_to(exit_id):
+		if not go(hop):
+			return false
+	st["minutes"] += 1.0
+	return c.current == exit_id
+
+
+## Cross to the next region from the exit beacon: the warden first (toll or fight; up to three rounds, with a trip to a station between them
+## to mend and sell). False when it cannot.
 func cross() -> bool:
 	if c.is_final():
 		return true
 	if c.current != c.drift.exit_id():
 		return false
 	c.visited[c.current] = true
-	if c.warden_up():
-		st["warden"] = str(c.warden.get("name", ""))
-		var ev: Dictionary = c.warden_event(ship)
-		var pay := -1
-		var brk := -1
-		for v in c.events.choice_view(ev, c, ship, c.node(c.current)):
-			if str(v["text"]).begins_with("Pay the toll") and not v["grey"]:
-				pay = int(v["index"])
-			elif str(v["text"]).begins_with("Break through"):
-				brk = int(v["index"])
-		var foe: Ship = Session.load_ship(str(c.warden["spec"]))
-		var th := Threat.rate(foe, ship)
-		st["warden_skulls"] = th["skulls"]
-		st["warden_ratio"] = th["ratio"]
-		st["toll"] = Wardens.toll_of(c.warden)
-		var spare: int = ship.inventory.count("credits") - 60
-		var go_pay := pay >= 0 and (int(th["skulls"]) >= 3 or spare >= 2 * int(st["toll"]))
-		var pick := pay if go_pay else brk
-		var tries := 0
-		while c.warden_up() and tries < 3:
-			tries += 1
-			var before := inv_copy()
-			var r: Dictionary = c.events.choose(ev, pick, c, ship, c.node(c.current))
-			flow("events", before)
-			if not r["ok"]:
-				return false
-			if str(r["fight"]) != "":
-				var next := fight_path(str(r["fight"]), r["after_win"], "warden")
-				if next.get("dead", false):
-					return false
-			st["warden_tries"] = tries
-			pick = brk  # (a toll that failed to clear it, or a stand-off: break through again)
-		if c.warden_up():
+	var rounds := 0
+	while c.warden_up() and rounds < 3:
+		rounds += 1
+		st["warden_rounds"] = rounds
+		if not warden_round():
+			return false
+		if c.warden_up() and (rounds >= 3 or not regroup()):
 			return false
 	var offers: Array = c.region_offers()
 	if offers.is_empty():
@@ -413,7 +446,6 @@ func collect(s, seconds: float) -> bool:
 	var before := inv_copy()
 	ship.refresh()
 	s.set_flight(ship)
-	var base: Dictionary = DriftDebris.new(1).cfg
 	var dd = DriftDebris.for_sector(s, hash([c.seed_value, c.jumps, st["nodes"]]))
 	var terminal: float = float(s.accel) * 1.8 / maxf(float(s.damping), 0.01)
 	var speed := clampf(0.5 * minf(terminal, float(s.max_speed) * 1.8), 60.0, 500.0)
@@ -499,10 +531,17 @@ func chain(ev: Dictionary) -> bool:
 				best = val
 				pick = v
 		var before := inv_copy()
+		var known0: Dictionary = ship.crafting.known.duplicate()
 		var r: Dictionary = c.events.choose(e, int(pick["index"]), c, ship, c.node(c.current))
 		if not r["ok"]:
 			continue
 		flow("events", before)
+		if str(e.get("id", "")) == "salvage":
+			var scan_offered := open.any(func(v): return str(v["text"]).begins_with("Scan"))
+			st["salvage"].append({"rows": open.size(), "scan_offered": scan_offered, "took": str(pick["text"]).substr(0, 24)})
+		for rid in ship.crafting.known:
+			if not known0.has(rid):
+				st["bp_list"].append("%s@%s" % [rid, str(e.get("id", ""))])
 		if str(e.get("type", "")) == "debt" and ship.inventory.count("credits") > 400 and c.debt > 0:
 			c.pay_debt(ship, mini(100, c.debt))
 		if str(r["fight"]) != "":
@@ -541,7 +580,9 @@ func effects_value(eff: Dictionary, ev: Dictionary) -> float:
 	var items: Dictionary = eff.get("items", {}) if eff.get("items") is Dictionary else {}
 	for id in items:
 		v += item_worth(str(id)) * float(items[id])
-	v += 60.0 * (eff["blueprint"].size() if eff.get("blueprint") is Array else 0)
+	if eff.get("blueprint") is Array:
+		for rid in eff["blueprint"]:
+			v += blueprint_worth(str(rid))
 	v += 4.0 * float(eff.get("hull", 0)) + 0.6 * float(eff.get("crew_hp", 0))
 	v += 220.0 * (eff["recruit"].size() if eff.get("recruit") is Array else 0)
 	v -= 260.0 * float(eff.get("lose_crew", 0) if not eff.get("lose_crew") is bool else (1 if eff["lose_crew"] else 0))
@@ -557,6 +598,17 @@ func effects_value(eff: Dictionary, ev: Dictionary) -> float:
 	if str(eff.get("goto", "")) != "":
 		v += 5.0
 	return v
+
+
+## What learning recipe `rid` is worth: nothing if it is known; a blueprint is for good, so more than a part, and most for what the ladder is short of.
+func blueprint_worth(rid: String) -> float:
+	if ship.crafting.is_known(rid):
+		return 0.0
+	var out: String = str(ship.crafting.def(rid).get("output", {}).get("item", ""))
+	var d: Dictionary = ship.components.def(out)
+	if d.is_empty():
+		return 70.0
+	return 150.0 + 60.0 * float(int(d.get("tier", 1)) - 1) + (50.0 if wanted_now(out) else 0.0)
 
 
 func item_worth(id: String) -> float:
@@ -736,7 +788,6 @@ func target(key: String) -> int:
 ## Spend what the ship has by the ladder, until nothing more can be done.
 func build_phase() -> void:
 	_skip.clear()
-	var reserve := {}
 	var guard := 0
 	while guard < 14:
 		guard += 1
@@ -746,19 +797,20 @@ func build_phase() -> void:
 		var done := false
 		var opts: Array = it["ids"]
 		for id in opts:
-			var got := procure(str(id), reserve)
+			var got := procure(str(id), it["kind"] == "titanium")
+			if got == "" and it["kind"] == "titanium":
+				done = true  # a material: nothing to place (the loop comes back for more until the stock is 60)
+				break
 			if got == "":
 				var why := install(str(id), it)
 				if why == "":
 					st["installed"].append([str(id), c.stage])
 					done = true
 					break
-				st["failed"][why] = int(st["failed"].get(why, 0)) + 1
+				var fkey: String = "%s:%s" % [why, it["kind"]]
+				st["failed"][fkey] = int(st["failed"].get(fkey, 0)) + 1
 				_skip[it["kind"]] = true
 				break
-			elif got.begins_with("missing") and not reserve.has("set"):
-				reserve["set"] = true
-				reserve["why"] = got
 		if not done:
 			_skip[it["kind"]] = true
 
@@ -777,6 +829,8 @@ func next_intent() -> Dictionary:
 		return {"kind": "medbay", "ids": ["medbay"]}
 	if not _skip.has("shield2") and snap["layers"] < target("layers"):
 		return {"kind": "shield2", "ids": ranked(["shield_mk2", "shield_mk1", "shield_scrap_mk1", "shield_neon_mk1"], "shield")}
+	if not _skip.has("engine") and policy != "idle" and snap["engines"] < _engines0 + 1 + c.stage / 2 and float(Sector.flight_numbers(ship)["accel"]) < 0.75 * _accel0:
+		return {"kind": "engine", "ids": ranked(["engine_mk3", "engine_mk2", "engine_mk1", "engine_scrap_mk3", "engine_scrap_mk2", "engine_scrap_mk1"], "engine")}
 	if not _skip.has("fab") and snap["fab"] < target("fab"):
 		var fab_ids := ["robot_arm"]
 		if snap["fab"] >= 2:
@@ -784,6 +838,8 @@ func next_intent() -> Dictionary:
 		return {"kind": "fab", "ids": fab_ids}
 	if not _skip.has("cutter") and bool(POLICIES[policy]["cutter"]) and snap["fab"] >= 2 and snap["cutters"] < 1:
 		return {"kind": "cutter", "ids": ["laser_cutter"]}
+	if not _skip.has("titanium") and snap["cutters"] >= 1 and ship.crafting.is_known("titanium") and ship.inventory.count("titanium") < 60 and ship.inventory.count("scrap") > 700 + 100 * c.stage:
+		return {"kind": "titanium", "ids": ["titanium"]}
 	if not _skip.has("armour") and snap["armour"] < target("armour"):
 		return {"kind": "armour", "ids": ["armour"]}
 	return {}
@@ -848,10 +904,10 @@ func wanted_now(id: String) -> bool:
 
 ## Get item `id` into the hold: it is there, or craftable now (queued and finished: the time is counted), or bought here. "" when it is in the hold
 ## afterwards, else why not ("missing ..." when the materials are short).
-func procure(id: String, reserve: Dictionary) -> String:
+func procure(id: String, force := false) -> String:
 	if id == "armour":
 		return ""
-	if ship.inventory.count(id) > 0:
+	if ship.inventory.count(id) > 0 and not force:
 		return ""
 	var rid: String = Salvage.recipe_for(ship, id)
 	var fab: Dictionary = Workshop.best(ship)
@@ -866,7 +922,7 @@ func procure(id: String, reserve: Dictionary) -> String:
 				st["crafted"][id] = int(st["crafted"].get(id, 0)) + 1
 				st["fab_s"] = float(st.get("fab_s", 0.0)) + float(rdef["time"])
 				flow_add("craft_out", rdef["materials"])
-				return "" if ship.inventory.count(id) > 0 else "queue"
+				return "" if ship.inventory.count(id) > 0 or force else "queue"
 			return err
 	if _docked != "":
 		var price: int = c.stock_price(_docked, id, ship)
@@ -927,21 +983,20 @@ func install(id: String, it: Dictionary) -> String:
 	var d: Dictionary = ship.components.def(id)
 	var fam := str(d.get("family", ""))
 	var need := -int(d.get("power", 0))
-	if need > 0:
-		var s := stats_now()
-		if int(s["produce"]) - int(s["consume"]) < need and fam != "reactor":
-			var rid := ""
-			for cand in ["reactor_mk2", "reactor_mk1", "reactor_scrap_mk1"]:
-				if ship.components.has(cand) and (ship.inventory.count(cand) > 0 or can_get(cand)):
-					rid = cand
-					break
-			if rid == "" or procure(rid, {}) != "":
-				return "no power"
-			var why := place(bs, rid, false)
-			if why != "":
-				return "no place for a reactor"
-			if install_check(rid) != "":
-				return "reactor not powered"
+	var added := 0
+	while need > 0 and fam != "reactor" and margin() < need and added < 2:
+		added += 1
+		var rid := ""
+		for cand in ["reactor_mk2", "reactor_mk1", "reactor_scrap_mk1"]:
+			if ship.components.has(cand) and (ship.inventory.count(cand) > 0 or can_get(cand)) and procure(cand) == "":
+				rid = cand
+				break
+		if rid == "":
+			return "no power"
+		if place(bs, rid, false) != "":
+			return "no place for a reactor"
+		if install_check(rid) != "":
+			return "reactor not powered"
 	var is_module := fam == "workshop"
 	var why2 := place(bs, id, is_module)
 	if why2 != "":
@@ -979,10 +1034,74 @@ func place(bs: BuildSession, id: String, module: bool) -> String:
 	if int(bs.apply(ch)["applied"]) == 0:
 		return "refused"
 	if int(ship.components.def(id).get("power", 0)) != 0 or str(ship.components.def(id).get("family", "")) == "fabricator":
-		var cables: Array = Balance._wire(ship, [id])
-		if not cables.is_empty():
-			bs.apply(cables)
+		wire(bs, id)
 	return ""
+
+
+## The power network with the most supply ({} when the ship has none).
+func main_net() -> Dictionary:
+	ship.refresh()
+	var best := {}
+	for n in ship.power_state.get("networks", []):
+		if best.is_empty() or float(n["supply"]) > float(best["supply"]):
+			best = n
+	return best
+
+
+## Supply less demand of the main network.
+func margin() -> float:
+	var n := main_net()
+	return float(n["supply"]) - float(n["demand"]) if not n.is_empty() else 0.0
+
+
+## Lay cables from the main network to every part `id` that is on another: the shortest way over hull cells (tool_balance's _wire, but from the main
+## network only, so a part never ends up on a cable of its own that no reactor feeds).
+func wire(bs: BuildSession, id: String) -> void:
+	var g = ship.grid
+	var main := main_net()
+	if main.is_empty():
+		return
+	var laid := {}
+	for cell in main["cells"]:
+		laid[cell] = true
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		var inst: Dictionary = ship.components.instances[uid]
+		if str(inst["id"]) != id or int(ship.power_state["network_of"].get(uid, -1)) == int(main["id"]):
+			continue
+		var goal := {}
+		for cell in inst["cells"]:
+			goal[cell] = true
+		var came := {}
+		var queue: Array = []
+		for cell in laid:
+			came[cell] = cell
+			queue.append(cell)
+		var end := Vector2i(-1, -1)
+		var head := 0
+		while head < queue.size() and end.x < 0:
+			var cell: Vector2i = queue[head]
+			head += 1
+			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				var n: Vector2i = cell + d
+				if came.has(n) or not g.in_hull(n):
+					continue
+				came[n] = cell
+				if goal.has(n):
+					end = n
+					break
+				queue.append(n)
+		if end.x < 0:
+			continue
+		var changes := []
+		var at := end
+		while not laid.has(at):
+			laid[at] = true
+			changes.append({"layer": "cable", "cell": at})
+			at = came[at]
+		bs.apply(changes)
+		ship.refresh()
 
 
 ## A free spot for `id`: {anchor, rot}, or {}. Mounts: an outside half in space against a wall with room inside; the rest: floor, near the cables.
@@ -1065,10 +1184,18 @@ func blocked_ahead(id: String, a: Vector2i, rot: int) -> int:
 ## Build a new annex room against the hull: 12x12 for a workshop (with a fabricator in it), else 10x10. "" or why not.
 func build_annex(bs: BuildSession, module: bool) -> String:
 	var size := Vector2i(12, 12) if module else Vector2i(10, 10)
-	var room := annex_spot(size)
+	var sig := ship.grid.tiles.size() + 1000 * ship.components.instances.size()
+	var room := Rect2i()
+	if _no_annex.get(size, -1) != sig:
+		room = annex_spot(size)
+		if room.size == Vector2i.ZERO:
+			_no_annex[size] = sig
 	if room.size == Vector2i.ZERO and module:
 		size = Vector2i(10, 10)
-		room = annex_spot(size)
+		if _no_annex.get(size, -1) != sig:
+			room = annex_spot(size)
+			if room.size == Vector2i.ZERO:
+				_no_annex[size] = sig
 	if room.size == Vector2i.ZERO:
 		if args.has("dbg"):
 			var hull_free := 0
@@ -1087,15 +1214,13 @@ func build_annex(bs: BuildSession, module: bool) -> String:
 		return "annex: " + str(r["reason"])
 	st["annexes"] = int(st.get("annexes", 0)) + 1
 	if module:
-		if ship.inventory.count("fabricator") < 1 and procure("fabricator", {}) != "":
+		if ship.inventory.count("fabricator") < 1 and procure("fabricator") != "":
 			return "no second fabricator"
 		var spot := find_free_floor("fabricator", room.grow(-1))
 		if spot.is_empty():
 			return "no floor for the fabricator"
 		bs.apply([{"layer": "component", "id": "fabricator", "anchor": spot["anchor"], "rot": spot["rot"]}])
-		var cables: Array = Balance._wire(ship, ["fabricator"])
-		if not cables.is_empty():
-			bs.apply(cables)
+		wire(bs, "fabricator")
 		_shop = room.grow(-1)  # the modules go in here: its fabricator is the one that counts
 	return ""
 
@@ -1152,39 +1277,54 @@ func annex_spot(size: Vector2i) -> Rect2i:
 	return best
 
 
-## Armour: outer wall cells become the best plate the hold can pay, up to the policy's target. "" when some were laid.
+## Armour: a new layer of plates round the hull, up to the policy's target (40 cells a visit), on the empty cells that touch a solid tile and
+## keep clear of every mount's line of fire. The material is the best the hold affords: heavy armour for titanium, ablative plating for polymer,
+## else scrap plate. "" when some were laid.
 func plate_armour() -> String:
 	var bs := BuildSession.new(ship)
-	var s := stats_now()
-	var want := target("armour") - int(s["armour"])
+	var want := mini(target("armour") - int(stats_now()["armour"]), 40)
 	if want <= 0:
 		return "enough"
 	var g = ship.grid
-	var cells := []
-	for cell in g.tiles:
-		if g.tiles[cell] != "wall":
+	var tile := "scrap_plate"
+	if ship.inventory.count("titanium") >= 40 and ship.inventory.count("scrap") > 200:
+		tile = "heavy_armor"
+	elif ship.inventory.count("polymer") >= 150 and ship.inventory.count("scrap") > 200:
+		tile = "ablative_plating"
+	if ship.inventory.count("scrap") < 150:
+		return "no scrap for plates"
+	var blocked := {}
+	for uid in ship.components.instances:
+		var inst: Dictionary = ship.components.instances[uid]
+		if inst["out_cells"].is_empty():
 			continue
+		var d: Vector2i = Mounts.OUTWARD[posmod(int(inst["rot"]), 4)]
+		for cell in inst["out_cells"] + inst["cells"]:
+			for k in range(-1, 11):
+				blocked[cell + d * k] = true
+	var mid := Vector2(g.size) / 2.0
+	var cands := []
+	var seen := {}
+	for cell in g.tiles:
 		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			if g.get_tile(cell + d) == "":
-				cells.append(cell)
-				break
+			var o: Vector2i = cell + d
+			if seen.has(o) or g.tiles.has(o) or blocked.has(o) or not g.in_hull(o) or ship.components.any_at(o) >= 0 or ship.components.at_out(o) >= 0 or ship.components.link_at(o) >= 0:
+				continue
+			seen[o] = true
+			cands.append(o)
+	cands.sort_custom(func(x, y): return Vector2(x).distance_to(mid) < Vector2(y).distance_to(mid))
 	var laid := 0
-	for tile in ["heavy_armor", "titanium_alloy", "ablative_plating", "scrap_plate"]:
+	for o in cands:
 		if laid >= want:
 			break
-		for cell in cells:
-			if laid >= want:
-				break
-			if g.tiles.get(cell, "") != "wall":
-				continue
-			if int(ship.inventory.count("scrap")) < 80:
-				break
-			var r := bs.apply([{"layer": "tile", "cell": cell, "to": tile}])
-			laid += int(r["applied"])
+		var r := bs.apply([{"layer": "tile", "cell": o, "to": tile}])
+		laid += int(r["applied"])
+		if int(r["applied"]) == 0 and ship.inventory.count("scrap") < 100:
+			break
 	if laid > 0:
-		flow_add("armour", {"cells": laid})
+		flow_add("armour", {tile: laid})
 		return ""
-	return "no scrap for plates"
+	return "no cell for plates"
 
 
 # --- records ---------------------------------------------------------------------------------------
@@ -1228,7 +1368,20 @@ func snapshot() -> Dictionary:
 	for id in inv:
 		if ship.components.has(str(id)):
 			part_count += int(inv[id])
-	return {"power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
+	var fab: Dictionary = Workshop.best(ship)
+	var census := {"ok": 0, "bp_ready": 0, "bp_level": 0, "bp_tool": 0, "bp_materials": 0, "station": 0}  # ok: craftable now; bp_*: the blueprint is not known, and with it the recipe would be ready / short of fab level / short of a tool / short of materials
+	for rid in ship.crafting.ids():
+		if ship.crafting.station_of(rid) != "fabricator":
+			census["station"] += 1
+			continue
+		var known: bool = ship.crafting.is_known(rid)
+		ship.crafting.known[rid] = true
+		var why: String = ship.crafting.can_craft(rid, ship.inventory, fab)
+		if not known:
+			ship.crafting.known.erase(rid)
+		var key := "ready" if why == "" else ("level" if why.contains("level") or why.contains("offline") else ("tool" if why.begins_with("needs tool") else "materials"))
+		census["ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short")] = int(census.get("ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short"), 0)) + 1
+	return {"census": census, "power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
 		"margin": int(s["produce"]) - int(s["consume"]), "fab": s["fab"], "armour": s["armour"], "medbays": s["medbays"], "known": ship.crafting.known.size(), "crew": ship.crew.size(),
 		"hull_left": c.hull_left(ship), "hull_max": c.hull_max(ship), "held": held, "spare_parts": part_count, "jumps": c.jumps, "debt": c.debt, "tier": c.tier()}
 
