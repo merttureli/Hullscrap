@@ -35,6 +35,7 @@ const TraitSet = preload("res://scripts/crew/traits.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const BREATH_RATE := 0.02  ## air one crew member uses, in cell units per second
@@ -313,6 +314,8 @@ func _run_station(ship: Ship, dt: float, station: String) -> void:
 	var was: bool = c.is_paused(station)
 	for id in c.tick(dt, ship.inventory, st):
 		ship.log_event("%s %s" % ["Smelted" if smelting else "Crafted", c.name_of(c.def(id)["output"]["item"], ship.components)])
+		if ship == player_ship():
+			Audio.fx(self, "craft_done")
 	if smelting and int(st["uid"]) >= 0:
 		c.lead[station] = int(st["uid"])
 		if not c.is_paused(station):

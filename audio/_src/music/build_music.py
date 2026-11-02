@@ -1,6 +1,8 @@
 """Builds the soundtrack: python audio/_src/music/build_music.py [names...] [--force]
 Renders each track (deterministic, numpy only), encodes Ogg Vorbis (ffmpeg libvorbis, q5, 44.1 kHz stereo, bitexact so a re-run gives the same bytes) into
 assets/audio/music/, measures the decoded file, and writes data/music.json, the ASSETS.md rows and report.json.
+The round-2 demos (d_*.py) render EXPLORE, BATTLE and a transition file each into assets/audio/music/demos/; they are
+not in data/music.json. Their report adds the sync check: equal sample counts and the onset lag between the two.
 A track whose source hash (engine + its own file) is unchanged is skipped. Godot's .import files for the loops
 are patched to loop=true (run `godot --headless --import` once first so they exist)."""
 import hashlib
@@ -20,6 +22,9 @@ import numpy as np
 import synth as S
 
 ENGINE = ["synth.py", "voices.py", "theme.py", "common.py"]
+DEMO_ENGINE = ["synth2.py", "voices2.py", "demo.py"]
+DEMOS = {"signal": "d_signal", "long_haul": "d_longhaul", "black_box": "d_blackbox", "ledger_ii": "d_ledger2"}
+DEMO_OUT = os.path.join(OUT, "demos")
 LOOPS = {"menu": "t_menu", "explore_a": "t_explore_a", "explore_b": "t_explore_b", "combat": "t_combat",
          "hollow": "t_hollow", "build": "t_build"}
 STINGS = ["victory", "defeat", "jump", "region_cross", "ada_found", "unlock", "ending"]
@@ -59,8 +64,8 @@ def measure(path, loop, n_src):
     return r
 
 
-def patch_import(name, loop):
-    p = os.path.join(OUT, name + ".ogg.import")
+def patch_import(name, loop, out=OUT):
+    p = os.path.join(out, name + ".ogg.import")
     if not os.path.exists(p):
         return False
     t = open(p).read()
@@ -101,9 +106,45 @@ def build(names, force):
         json.dump(report, open(rp, "w"), indent=1, sort_keys=True)
         print("built %-13s %5.1fs  %6.1fs audio  rms %s  peak %s  tp %s  bands %s  %d KB" % (
             name, time.time() - t0, info["seconds"], info["rms_db"], info["peak_db"], info["true_peak_db"], info["bands_pct"], info["bytes"] // 1024))
+    for name, modname in DEMOS.items():
+        if not names or name in names:
+            build_demo(name, modname, force, hashes, report, hp, rp)
     for n in list(LOOPS) + STINGS:
         patch_import(n, n in LOOPS)
+    for n in DEMOS:
+        for v in ("explore", "battle", "transition"):
+            patch_import("%s_%s" % (n, v), v != "transition", DEMO_OUT)
     write_data()
+
+
+def build_demo(name, modname, force, hashes, report, hp, rp):
+    """EXPLORE and BATTLE (loops of identical length) and the transition demo for one direction."""
+    os.makedirs(DEMO_OUT, exist_ok=True)
+    paths = {v: os.path.join(DEMO_OUT, "%s_%s.ogg" % (name, v)) for v in ("explore", "battle", "transition")}
+    h = src_hash(*(DEMO_ENGINE + [modname + ".py"]))
+    if not force and hashes.get(name) == h and all(map(os.path.exists, paths.values())):
+        print("skip", name)
+        return
+    import synth2 as S2
+    t0 = time.time()
+    mod = importlib.import_module(modname)
+    r = mod.render()
+    info = {"title": mod.TITLE, "bpm": round(mod.render.bpm, 2), "sections_s": r["sections"], "crossfades_start_s": list(r["xfade_s"])}
+    for v, p in paths.items():
+        encode(r[v], p)
+        info[v] = measure(p, v != "transition", r[v].shape[1])
+        if v != "transition":
+            info[v]["target_rms_db"] = mod.RMS[v]
+    x, b = decode(paths["explore"]), decode(paths["battle"])
+    lag, corr = S2.onset_lag(x, b)
+    info["sync"] = {"samples_explore": int(x.shape[1]), "samples_battle": int(b.shape[1]), "same_length": x.shape[1] == b.shape[1],
+                    "onset_lag_ms": lag, "onset_corr": corr}
+    report.setdefault("demos", {})[name] = info
+    hashes[name] = h
+    json.dump(hashes, open(hp, "w"), indent=1, sort_keys=True)
+    json.dump(report, open(rp, "w"), indent=1, sort_keys=True)
+    print("built %-10s %5.1fs  %s  sync %s" % (name, time.time() - t0, "  ".join("%s %.1fs rms %s tp %s" % (
+        v, info[v]["seconds"], info[v]["rms_db"], info[v]["true_peak_db"]) for v in paths), info["sync"]))
 
 
 def write_data():
@@ -118,6 +159,8 @@ def write_data():
     lines = [l for l in open(p).read().splitlines() if "assets/audio/music/" not in l]
     rows = ["| `assets/audio/music/%s.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |" % n
             for n in sorted(list(LOOPS) + STINGS)]
+    rows += ["| `assets/audio/music/demos/%s_%s.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/%s.py`) | project-owned |" % (n, v, m)
+             for n, m in sorted(DEMOS.items()) for v in ("explore", "battle", "transition") if os.path.exists(os.path.join(DEMO_OUT, "%s_%s.ogg" % (n, v)))]
     open(p, "w").write("\n".join(lines + rows) + "\n")
 
 

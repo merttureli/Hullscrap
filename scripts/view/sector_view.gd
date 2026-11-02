@@ -314,7 +314,7 @@ func _spool(dt: float, c, ship) -> void:
 			_say(" ".join(["Arrived at %s." % c.label(c.current)] + c.last_jump.get("notes", [])))
 			_sync(c, ship)
 		"failed":
-			Audio.fx(self, "invalid")
+			Audio.fx(self, "error")
 			_say("The jump failed: %s" % c.last_jump.get("why", ""))
 
 

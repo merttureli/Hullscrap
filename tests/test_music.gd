@@ -1,10 +1,14 @@
 extends "res://tests/base_test.gd"
 ## data/music.json (the soundtrack: states -> loops, stings, volumes) against the files in assets/audio/music.
-## The tracks are made by audio/_src/music/build_music.py.
+## The tracks are made by audio/_src/music/build_music.py. Also the round-2 demos in assets/audio/music/demos: each
+## direction has EXPLORE and BATTLE versions that must stay in sync (same length, onsets aligned), plus a transition.
 
 const MUSIC_JSON := "res://data/music.json"
 const STATES := ["menu", "explore", "combat", "hollow", "build"]
 const STINGS := ["victory", "defeat", "jump", "region_cross", "ada_found", "unlock", "ending"]
+const DEMO_DIR := "res://assets/audio/music/demos/"
+const DEMOS := ["signal", "long_haul", "black_box", "ledger_ii"]
+const REPORT := "res://audio/_src/music/report.json"
 
 
 func _music() -> Dictionary:
@@ -62,3 +66,36 @@ func test_stings_do_not_loop() -> void:
 		var imp := FileAccess.open(_path(d, d["stings"][id]) + ".import", FileAccess.READ)
 		if imp != null:
 			check(imp.get_as_text().contains("loop=false"), "sting %s imports with loop off" % id)
+
+
+func test_demos_exist() -> void:
+	for d in DEMOS:
+		for v in ["explore", "battle", "transition"]:
+			check(FileAccess.file_exists(DEMO_DIR + "%s_%s.ogg" % [d, v]), "demo %s_%s.ogg exists" % [d, v])
+
+
+func test_demo_explore_and_battle_lengths_match() -> void:
+	for d in DEMOS:
+		var x := AudioStreamOggVorbis.load_from_file(DEMO_DIR + d + "_explore.ogg")
+		var b := AudioStreamOggVorbis.load_from_file(DEMO_DIR + d + "_battle.ogg")
+		check(x != null and b != null, "demo %s loads" % d)
+		if x != null and b != null:
+			check(x.get_length() > 60.0, "demo %s is about 70 s" % d)
+			eq(b.get_length(), x.get_length(), "demo %s battle length matches explore" % d)
+
+
+func test_demo_onsets_align() -> void:
+	# build_music.py decodes both files and cross-correlates their onset curves; the best lag must be zero
+	var f := FileAccess.open(REPORT, FileAccess.READ)
+	check(f != null, "report.json exists")
+	if f == null:
+		return
+	var demos: Dictionary = (JSON.parse_string(f.get_as_text()) as Dictionary).get("demos", {})
+	for d in DEMOS:
+		var sync: Dictionary = demos.get(d, {}).get("sync", {})
+		check(sync.get("same_length", false), "demo %s: decoded sample counts match" % d)
+		check(absf(float(sync.get("onset_lag_ms", 99.0))) <= 2.0, "demo %s: explore and battle onsets align" % d)
+
+
+func test_demos_are_not_wired_in() -> void:
+	check(not FileAccess.get_file_as_string(MUSIC_JSON).contains("demos"), "music.json does not name the demos")
