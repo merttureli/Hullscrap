@@ -27,7 +27,6 @@
 		"swing_arc_deg": 80,
 		"noise_gun": 12.0,
 		"noise_swing": 5.0,
-		"tracer_s": 0.09,
 		"flash_s": 0.08,
 		"flash_range": 12.0,
 		"self_range": 3.4,
@@ -332,7 +331,7 @@
 			{"weight": 8, "item": "titanium", "count": [1, 3]}, {"weight": 3, "item": "crystal", "count": [1, 1]}, {"weight": 1.5, "item": "plasma_cell", "count": [1, 1]},
 			{"weight": 2, "item": "fuel", "count": [1, 1]}, {"weight": 2, "item": "reactor_mk1", "count": [1, 1]}, {"weight": 2, "item": "engine_mk1", "count": [1, 1]},
 			{"weight": 3, "item": "radiator", "count": [1, 1]}, {"weight": 1, "item": "afterburner", "count": [1, 1]},
-			{"weight": 3.5, "item": "mod", "count": [1, 1]}
+			{"weight": 4.2, "item": "mod", "count": [1, 1]}
 		],
 		"medbay": [
 			{"weight": 30, "item": "polymer", "count": [2, 5]}, {"weight": 15, "item": "credits", "count": [3, 12]}, {"weight": 2, "item": "nanite_paste", "count": [1, 1]},
@@ -342,7 +341,7 @@
 			{"weight": 30, "item": "credits", "count": [8, 30]}, {"weight": 14, "item": "silicon", "count": [1, 3]}, {"weight": 6, "item": "crystal", "count": [1, 2]},
 			{"weight": 10, "item": "copper", "count": [2, 5]}, {"weight": 3, "item": "plasma_cell", "count": [1, 1]}, {"weight": 2, "item": "radar_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "pulse_mk1", "count": [1, 1]},
 			{"weight": 8, "item": "hand_ammo", "count": [5, 12]}, {"weight": 1, "item": "slugthrower", "count": [1, 1]},
-			{"weight": 5, "item": "mod", "count": [1, 1]}
+			{"weight": 5.6, "item": "mod", "count": [1, 1]}
 		],
 		"quarters": [
 			{"weight": 30, "item": "credits", "count": [2, 10]}, {"weight": 15, "item": "polymer", "count": [2, 4]}, {"weight": 15, "item": "scrap", "count": [3, 7]},
