@@ -94,7 +94,7 @@ def render():
         "box": dict(g=-1, hp=300, send=0.9),
         "swell": dict(g=-5, hp=250, send=0.3),
         "beacon": dict(g=-8, hp=500, lp=3800, send=2.2, fx=lambda x: x * 0.3),
-        "static": dict(g=-15, hp=800, lp=7000, send=0.1),
+        "static": dict(g=-21, hp=800, lp=7000, send=0.1),   # 6 dB under round 1
         "whistle": dict(g=-13, hp=600, send=0.4),
         "murmur": dict(g=-2, hp=300, lp=3500, send=0.7),
     }

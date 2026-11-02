@@ -155,7 +155,7 @@ func _show_cards(on: bool) -> void:
 func choose(i: int) -> String:
 	if sim == null or i < 0 or i >= cards.size():
 		return "no such ship"
-	Audio.fx(self, "click")
+	Audio.fx(self, "confirm")
 	var why: String = sim.choose_ship(cards[i]["path"])
 	if why != "":
 		if build != null:
@@ -202,6 +202,7 @@ func _input(e: InputEvent) -> void:
 		KEY_1, KEY_2, KEY_3:
 			choose(e.keycode - KEY_1)
 		KEY_ESCAPE:
+			Audio.fx(self, "cancel")
 			var back := on_escape
 			on_escape = Callable()
 			close()

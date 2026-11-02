@@ -171,7 +171,7 @@ func act(col: int, i: int, button := MOUSE_BUTTON_LEFT) -> String:
 			return ""
 	message = r["text"]
 	message_bad = not r["ok"]
-	Audio.fx(self, "buy" if r["ok"] else "invalid")
+	Audio.fx(self, "buy" if r["ok"] else "error")
 	map.refresh()
 	return message
 

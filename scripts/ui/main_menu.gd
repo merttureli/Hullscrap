@@ -5,13 +5,13 @@ extends Control
 ## quit to menu, Quit. Each entry has a letter key; Up/Down and Enter, a click and the number keys work too.
 ## The menu only says which entry was chosen (`chosen`); front_door.gd does what it means. entries() is the
 ## state machine (Continue is left out without a save). In the UI colours of station_panel.gd.
-## Both menus carry a small Sound row: three sliders (Master, Music, SFX) that a click or a drag sets and the wheel nudges; `sound`
+## Both menus carry a small Sound row: four sliders (Master, Music, SFX, Ambience) that a click or a drag sets and the wheel nudges; `sound`
 ## holds them (front_door.gd sets it from the profile), `sound_changed` says which moved (final = the mouse was let go: save it).
 
 ## Emitted with the id of the entry chosen: continue, new, help, quit, resume, save_menu.
 signal chosen(id: String)
 
-## A volume slider moved: its kind (master, music or sfx), the new value (0 to 1) and whether this is the last of the drag.
+## A volume slider moved: its kind (master, music, sfx or ambience), the new value (0 to 1) and whether this is the last of the drag.
 signal sound_changed(kind: String, value: float, final: bool)
 
 const Profile = preload("res://scripts/ui/profile.gd")
@@ -31,8 +31,8 @@ const PAUSE_ENTRIES: Array = [
 	{"id": "save_menu", "label": "Save and quit to menu", "key": KEY_S},
 	{"id": "quit", "label": "Quit", "key": KEY_Q},
 ]
-const SOUND_KINDS: Array = [["master", "Master"], ["music", "Music"], ["sfx", "SFX"]]
-const SLIDER_W := 116.0
+const SOUND_KINDS: Array = [["master", "Master"], ["music", "Music"], ["sfx", "SFX"], ["ambience", "Ambience"]]
+const SLIDER_W := 88.0
 const SLIDER_H := 12.0
 const SOUND_STEP := 0.05  ## a wheel notch
 const SOUND_H := 70.0  ## the room the sound row takes under the buttons
@@ -123,7 +123,7 @@ func move(d: int) -> void:
 func press(i: int) -> void:
 	var l := list()
 	if i >= 0 and i < l.size():
-		Audio.fx(self, "click")
+		Audio.fx(self, "cancel" if l[i]["id"] in ["resume", "quit"] else "confirm")
 		chosen.emit(l[i]["id"])
 
 
@@ -201,7 +201,8 @@ func _sound_top() -> float:
 
 
 func slider_rect(i: int) -> Rect2:
-	return Rect2(Vector2((size.x - BTN.x) / 2.0 + i * (SLIDER_W + (BTN.x - 3.0 * SLIDER_W) / 2.0), _sound_top() + 28.0), Vector2(SLIDER_W, SLIDER_H))
+	var n := SOUND_KINDS.size()
+	return Rect2(Vector2((size.x - BTN.x) / 2.0 + i * (SLIDER_W + (BTN.x - n * SLIDER_W) / (n - 1.0)), _sound_top() + 28.0), Vector2(SLIDER_W, SLIDER_H))
 
 
 ## The slider under `p` (its bar, a little taller to hit), or -1.
@@ -227,6 +228,8 @@ func nudge(i: int, dir: float) -> void:
 func set_sound(kind: String, v: float, final: bool) -> void:
 	if sound.get(kind) == v and not final:
 		return
+	if roundi(v * 20.0) != roundi(float(sound.get(kind, 0.0)) * 20.0):
+		Audio.fx(self, "slider_tick")  # a tick at every 5%
 	sound[kind] = v
 	sound_changed.emit(kind, v, final)
 

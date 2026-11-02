@@ -901,7 +901,7 @@ func _draw_tile(c: Vector2i, id: String, open_doors: Dictionary) -> void:
 ## into the walls at both ends when open. The leaves run along the piece (the wall's direction).
 func _draw_door(piece: Array[Vector2i], col: Color, open: bool) -> void:
 	if _door_open.has(piece[0]) and _door_open[piece[0]] != open:
-		Audio.fx(self, "door")
+		Audio.fx(self, "door_open" if open else "door_close")
 	_door_open[piece[0]] = open
 	var floor_col: Color = grid.defs.color("floor") if grid.defs.has("floor") else col.darkened(0.5)
 	var rects := []

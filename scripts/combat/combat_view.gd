@@ -31,6 +31,7 @@ const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Ambience = preload("res://scripts/audio/ambience.gd")
 
 const PLAYER_SHOT := {"energy": Color("#7dffe8"), "kinetic": Color("#ffe07a"), "explosive": Color("#ffb04a"), "ion": Color("#b99bff")}
 const ENEMY_SHOT := {"energy": Color("#ff6a4a"), "kinetic": Color("#ff9a6a"), "explosive": Color("#ff5a3a"), "ion": Color("#b99bff")}
@@ -46,6 +47,7 @@ const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB weapon groups 
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
 const ENEMY_JUMP_DB := -8.0  ## the enemy's jump drive firing, against the player's own jump
+const MISSILE_LOOPS := 3  ## missiles in flight that each get their whoosh (the nearest ones are heard anyway)
 const WRECK_LINGER := 3.0  ## seconds a decided sector fight goes on showing its end before it ends by itself
 
 ## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship),
@@ -94,6 +96,8 @@ var _starfield: Node
 var _over_t := 0.0  # seconds the fight has been over (the enemy wrecked, captured, spared or gone), in a sector fight
 var _snd_state := "fighting"  # the session's state at the last frame, for the victory and defeat stings
 var _layers := [-1, -1]  # whole shield layers up per ship at the last frame (-1 = not read yet), for the shield sounds
+var _morale_seen := ""  # the enemy's morale state at the last frame, for the surrender chirp
+var _hailing := false  # the enemy's hail was on the banner at the last look, for the hail chirp
 
 
 func _ready() -> void:
@@ -182,6 +186,8 @@ func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 	session.start(player, enemy, enemy.rng_seed, place)
 	_snd_state = "fighting"
 	_layers = [-1, -1]
+	_morale_seen = ""
+	_hailing = false
 	active = true
 	_cursor = 0
 	_fx.clear()
@@ -322,8 +328,11 @@ func _unhandled_input(e: InputEvent) -> void:
 				var why: String = session.shift_shield({KEY_UP: "up", KEY_DOWN: "down", KEY_LEFT: "left", KEY_RIGHT: "right"}[e.keycode])
 				if why != "":
 					_say("Shield balance: " + why)
+				else:
+					Audio.fx(self, "shield_shift")
 			KEY_END:
 				session.reset_shield()
+				Audio.fx(self, "shield_shift")
 			KEY_T:
 				_say("Turrets: autofire %s" % ("on" if session.toggle_autofire() else "off"))
 			KEY_SPACE:
@@ -394,6 +403,7 @@ func frame(dt: float) -> void:
 				session.fire_group(g, _aim())
 	session.tick(dt)
 	if session.jump_ready():
+		Audio.fx(self, "jump_ready")
 		leave()  # the jump drive has spooled: away
 		return
 	if in_sector:
@@ -519,7 +529,8 @@ func _age_fx(_dt: float) -> void:
 
 
 ## The sounds that come from the fight's state rather than one event: the engine under the player's throttle, the victory and defeat
-## stings when the fight is decided, a shield bubble going down or a layer coming back.
+## stings when the fight is decided, a shield bubble going down or a layer coming back, a whoosh on each missile in flight, the fight's
+## hazard as a loop, and the enemy's radio (its hail, its surrender).
 func _sound_frame() -> void:
 	var st: String = session.state()
 	if st != _snd_state:
@@ -541,6 +552,29 @@ func _sound_frame() -> void:
 			elif up > _layers[i]:
 				_snd("shield_up", i, co.flight.pos)
 		_layers[i] = up
+	var n := 0
+	for p in session.arena.projectiles:
+		if n < MISSILE_LOOPS and str(p["w"]["kind"]) == "missile":
+			Audio.fx_loop(self, "missile%d" % n, "missile_flight", true, 1.0 if p["owner"] == Session.PLAYER else 0.6, 1.0, p["pos"])
+			n += 1
+	var haz := Ambience.hazard_loop(str(session.arena.hazard.get("id", "")))
+	if haz != "" and st == "fighting":
+		Audio.fx_loop(self, "hazard", haz, true, 1.0, 1.0, null, 1.5)
+	var ms: String = session.morale.state
+	if ms != _morale_seen:
+		_morale_seen = ms
+		if ms == "offering":
+			Audio.fx(self, "surrender_chirp")
+	if _frame % 6 == 0:  # (the banner is a string: look at it a few times a second)
+		var hail: bool = ms == "steady" and session.morale.banner() != ""
+		if hail and not _hailing:
+			Audio.fx(self, "hail_chirp")
+		_hailing = hail
+
+
+## The equipment line ("scrap", "standard", "neon") of the part weapon `id` of ship `idx` is: a weapon's sound has a version for each line.
+func _line_of(idx: int, id: String) -> String:
+	return str(session.arena.ships[idx].ship.components.def(id).get("line", ""))
 
 
 ## A sound at the world point `pos` of ship `idx`'s doing: the enemy's is quieter than yours (`enemy_db`), and only what is near the camera is heard.
@@ -574,8 +608,8 @@ func _on_event(e: Dictionary) -> void:
 	var dir: Vector2 = e.get("dir", Vector2.ZERO)
 	match e["type"]:
 		"shot":
-			var fire_sound := Audio.weapon_sound(arena.weapons.def(str(e.get("weapon", ""))))
-			if fire_sound != "beam_loop":  # (a beam sounds from its beam events)
+			var fire_sound := Audio.weapon_sound(arena.weapons.def(str(e.get("weapon", ""))), _line_of(idx, str(e.get("weapon", ""))))
+			if not Audio.is_loop(fire_sound):  # (a beam sounds from its beam events)
 				_snd(fire_sound, idx, e["origin"])
 			if Art.fx("muzzle") != null:
 				_add_fx({"k": "art", "name": "muzzle", "anchor": "muzzle", "pos": e["origin"], "angle": dir.angle() + PI / 2.0, "life": 0.14})
@@ -583,10 +617,15 @@ func _on_event(e: Dictionary) -> void:
 				_add_fx({"k": "flash", "pos": e["origin"], "life": 0.09, "r": 10.0, "color": _shot_color(idx, "energy" if e["kind"] in ["laser", "beam"] else "kinetic")})
 		"beam":
 			if str(arena.weapons.def(str(e.get("weapon", "")))["kind"]) == "beam":
-				Audio.fx_loop(self, "beam%d" % idx, "beam_loop", true, 1.0 if idx == Session.PLAYER else 0.5, 1.0, null if idx == Session.PLAYER else e["from"])
+				var beam_sound := Audio.weapon_sound(arena.weapons.def(str(e.get("weapon", ""))), _line_of(idx, str(e.get("weapon", ""))))
+				if not Audio.is_loop(beam_sound):
+					beam_sound = "beam_loop"
+				Audio.fx_loop(self, "beam%d:%s" % [idx, beam_sound], beam_sound, true, 1.0 if idx == Session.PLAYER else 0.5, 1.0, null if idx == Session.PLAYER else e["from"])
 			_add_fx({"k": "beam", "a": e["from"], "b": e["to"], "life": BEAM_LIFE, "color": _shot_color(idx, e["dtype"]),
 				"kind": str(arena.weapons.def(str(e.get("weapon", "")))["kind"]), "weapon": str(e.get("weapon", ""))})
 		"effect":  # a weapon effect (acid, spores, frost ...): effect_fx.gd says what it looks like
+			if e.get("kind", "") == "intercept" and bool(e.get("hit", false)):
+				_snd("missile_pop", idx, pos, 0.0, -3.0)  # point defence shot a missile down
 			for f in EffectFx.of(arena, e):
 				_add_effect_fx(f)
 		"hit":
@@ -630,6 +669,7 @@ func _on_event(e: Dictionary) -> void:
 				_add_impact_fx(f)
 		"ram":  # two ships met hard: sparks and debris at the contact points, a shake, a line in the chronicle
 			Audio.fx(self, "collision", pos)
+			Audio.fx(self, "ram_impact", pos, -3.0)
 			var r := ImpactFx.ram(arena, _cursor, Session.PLAYER, session.enemy_label.to_lower())
 			for f in r["fx"]:
 				_add_impact_fx(f)
@@ -664,7 +704,12 @@ func _on_event(e: Dictionary) -> void:
 			for i in 4:
 				_add_fx({"k": "puff", "pos": pos, "vel": Vector2.from_angle(_rng.randf() * TAU) * 30.0, "life": 1.0, "r": 12.0, "grow": 30.0, "color": Color("#8a8f99", 0.5)})
 		"overcharge":
+			_snd("ability", idx, pos, 0.0, -3.0)
 			_on_ship(idx, pos, {"k": "ring", "life": 0.8, "r": 260.0, "color": Color("#ffd24a")})
+		"ability":  # a system's ability switched on (an overcharge has its ring above)
+			_snd("ability", idx, pos, 0.0, -3.0)
+		"ion_lock":  # an ion hit locked the shield
+			_snd("ion_lock", idx, pos, 0.0, -3.0)
 		"escape":  # the enemy's jump drive fired: a flash where it was
 			Audio.fx(self, "jump", pos, ENEMY_JUMP_DB)
 			if Art.fx("jump_flash") != null:

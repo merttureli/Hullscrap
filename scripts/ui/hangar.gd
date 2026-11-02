@@ -112,6 +112,7 @@ func step_group(step: int) -> void:
 	var gs := groups()
 	if gs.is_empty():
 		return
+	Audio.fx(self, "tab_switch")
 	select_group(gs[posmod(gs.find(cards[sel]["group"]) + step, gs.size())], cards[sel]["layout"])
 
 
@@ -123,6 +124,7 @@ func step_layout(step: int) -> void:
 	for l in Hangar.LAYOUTS:
 		if Hangar.find(cards, cards[sel]["group"], l) >= 0:
 			have.append(l)
+	Audio.fx(self, "tab_switch")
 	select_layout(have[posmod(have.find(cards[sel]["layout"]) + step, have.size())])
 
 
@@ -132,10 +134,10 @@ func choose(i: int) -> String:
 		return "no such ship"
 	if is_locked(i):
 		message = "Locked: " + Hangar.hint(cards[i])
-		Audio.fx(self, "invalid")
+		Audio.fx(self, "error")
 		queue_redraw()
 		return message
-	Audio.fx(self, "click")
+	Audio.fx(self, "confirm")
 	message = ""
 	if profile != null:
 		profile.start = RunStart.clean(start, profile)  # kept for the next run, and read by the new campaign (map_view.gd)
@@ -229,8 +231,10 @@ func click(p: Vector2, back := false) -> void:
 		"option":
 			cycle_option(RunStart.SLOTS[z["index"]], -1 if back else 1)
 		"group":
+			Audio.fx(self, "tab_switch")
 			select_group(visible_tabs(groups())[z["index"]], cards[sel]["layout"] if not cards.is_empty() else "")
 		"layout":
+			Audio.fx(self, "tab_switch")
 			select_layout(Hangar.LAYOUTS[z["index"]])
 		"button":
 			choose(sel)

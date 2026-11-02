@@ -9,7 +9,9 @@ REG = {}   # name -> {fn, variants, family, loop: (length, tail) or None}
 
 # loudness targets (active RMS, dBFS) per family; the game trims individual ids in data/audio.json
 FAMILY_RMS = {"weapon": -17.0, "rapid": -24.0, "hit": -15.0, "boom": -13.0, "ship": -17.0, "loop": -23.0, "raft": -21.0,
-              "build": -20.0, "crew": -22.0, "ui": -23.0, "alarm": -15.0}
+              "build": -20.0, "crew": -22.0, "ui": -23.0, "alarm": -15.0,
+              # round 2: the ambience sits far under the effects (beds -30, hazards -26, footsteps and hums -32 dBFS RMS)
+              "bed": -30.0, "hazard": -26.0, "foot": -32.0, "hum": -32.0, "machine": -29.0}
 
 
 def sound(name, family, variants=1, loop=None):
@@ -545,3 +547,10 @@ def tide_warning(k):
     haze = lp(coloured(r, n, 1.0), 700) * 0.5
     toll = place((modal(BAR[:4] * 110, [1.4, 0.9, 0.6, 0.4], [0.6, 0.45, 0.3, 0.15], 2.0, r, 0.01), 1.2, 0.5), length=dur)
     return reverb((drone + haze) * amp + toll, 1.5, 0.35, 71, damp=2500)
+
+
+# --- round 2: the rest of the library lives in these modules (each registers its sounds in REG on import) ------------------------
+import sounds_lines   # noqa: E402,F401  weapon lines and the races' signature guns
+import sounds_amb     # noqa: E402,F401  ambience beds, hazard loops, machine loops
+import sounds_ship    # noqa: E402,F401  ship, crew and combat extras
+import sounds_ui      # noqa: E402,F401  interface

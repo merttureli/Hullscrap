@@ -594,7 +594,10 @@ func _input(e: InputEvent) -> void:
 
 func _gui_input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion:
-		hover = node_at(e.position)
+		var over := node_at(e.position)
+		if over != "" and over != hover and campaign != null and not campaign.is_hidden(over):
+			Audio.fx(self, "node_hover")
+		hover = over
 	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		click_node(node_at(e.position), e.shift_pressed)
 	accept_event()
