@@ -6,7 +6,7 @@ extends RefCounted
 ## after the ship is replaced or loaded (a loaded save brings a new soldier with it, so the crew it holds are not "new aboard").
 
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
-const REPAIR_JOBS: Array[String] = ["repair_component", "repair_breach", "repair_belt", "repair_crew"]
+const REPAIR_JOBS: Array[String] = ["repair_component", "repair_breach", "repair_block", "repair_belt", "repair_crew"]
 const HURT := 1.0  ## hit points lost between two looks that count as hurt
 const HAND_FRESH := 0.4  ## seconds a hand-work job (E held) counts as being worked after the last bit of work
 const STRIDE := 1.5  ## cells the soldier walks per step of their boots
