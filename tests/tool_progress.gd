@@ -5,16 +5,20 @@ extends SceneTree
 ##   godot --headless --path . --script res://tests/tool_progress.gd [-- key=value ...]
 ## Keys: seeds (runs per ship, default 10), first (first seed, default 0), ships (starter ids, default the three open ones), policy (ladder,
 ## guns, turtle or idle; default ladder), stages (default 8), stay (seconds of debris collecting per node, default 90), nodes (nodes
-## visited per stage, default 7), jobs (processes, default 3), rows (write this run's rows there: JSON), out (write the report there),
+## visited per stage, default 7), pois (POIs flown to per node besides the main one, default 5), jobs (processes, default 3), rows (write this run's rows there: JSON), out (write the report there),
 ## merge (row files to report on instead of playing), dump (write all rows there, JSON), v=1 (log each run).
 ## What the player does, per stage: it visits `nodes` nodes (a wander over unvisited neighbours, a station within 3 jumps once, then the way
 ## to the exit); at each node it plays every POI's event (a value-maximising choice that shuns fights rated 4+ skulls) and the ambient
 ## contacts, collects debris for `stay` seconds with the real intakes in the real DriftDebris (flying upstream at half the cruise terminal
-## speed), then spends what it has by the policy's ladder (docs in `_next_intent`): intake, guns, shield / medbay, fabricator level, tier-2
-## parts as the blueprints allow, armour last. Parts are crafted when the recipe is known and the fabricator can run it, else bought when docked.
+## speed), then spends what it has by the policy's ladder (`next_intent`): intake, guns, shield / medbay, engines (so the ship does not fall behind its
+## own mass), fabricator level, laser cutter and titanium, tier-2 parts as the blueprints allow, armour last. Parts are crafted when the recipe is known and
+## the fabricator can run it, else bought when docked. At a station it sells the surplus of the common materials (a credit each), mends the hull, buys fuel.
+## A blueprint on a salvage page is worth more than a part.
 ## It builds on the real ship through BuildSession (a part goes on a free spot, else in a new annex room; cables are laid; power is added).
 ## Fights run through the real arena, as tests/tool_balance.gd does, on a copy of the ship: parts are taken as mended between fights, hull
-## integrity is not (the campaign keeps hull_loss until a station repairs it). The exit warden is paid when its toll is affordable, else fought.
+## integrity is not (the campaign keeps hull_loss until a station repairs it). A fight is left (the 10 s jump spool) when the hull is under 30%. The exit
+## warden's toll is paid when it is affordable, else fought (up to three rounds, with a trip to a station between). The output rows are one dictionary
+## per run: its stages carry the ship before and after, the fights (rating, length, hull), the flows of every resource by source and the craft census.
 ## Not modelled: the real flying and aiming of a human, crew commands, boarding, the Hollow tide's pursuit (its debris thinning is, through the sector).
 
 const Ship = preload("res://scripts/ship/ship.gd")
