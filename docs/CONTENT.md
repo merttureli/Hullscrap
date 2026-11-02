@@ -478,7 +478,6 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
     - `ore_titanium` → titanium ×2;
     - `ore_silicate` → silicon ×2;
     - `ore_crystal` (rare, mostly near Dead Gates) → crystal ×1;
-    - `ice` → restores O2 (refills every room 10% when collected).
   - **`gas_pocket`**: **explodes when cut** (splash 4, sets fires if the explosion reaches you). This is the main hazard to read and avoid.
   - Asteroids are generated from a seed: a blob of 60–400 cells, with veins as clusters and gas pockets. Bigger rocks spin slowly.
 - **Cutting**: a destroyed ore cell drops a **chunk** (a small physical body carrying its yield). Destroyed plain rock drops nothing.
@@ -540,7 +539,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 ### Drifting resources, the Raft loop
 - **Debris spawns continuously upstream of the ship**, in a ring 1,500–3,000 px out, drifts along the current, and despawns when far behind.
 - **Types** (`data/debris.json`, content):
-  - scrap chunk (scrap 2–5), copper coil (copper 1–3), polymer barrel (polymer 2), ice chunk (refills O2 10%);
+  - scrap chunk (scrap 2–5), copper coil (copper 1–3), polymer barrel (polymer 2), fuel canister (fuel 1, very rare) and the three rare finds (crystal shard: crystal 2, titanium plate: titanium 3, silicon wafer: silicon 2; they glint and show on the radar). Air is not found: it comes from the oxygen generators;
   - sealed crate (shoot it open: 1–2 random items or materials);
   - an ore rock (shoot it to break it into chunks, the mining rules in section 10);
   - a dead drone (salvage: a chance of a component);
@@ -564,7 +563,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 ### Materials by rarity and region (owner, 2026-10-30)
 > "Basic materials can float around, but key upgrade materials or rare ones are only found through fighting, special mining or questing. Different regions have different core materials floating around, and quest items are found too."
 
-- **Common** (they float everywhere; the Raft loop): scrap, copper, polymer, ice.
+- **Common** (they float everywhere; the Raft loop): scrap, copper, polymer.
 - **Regional** (they float only in their region's sectors, and are bought dearly elsewhere):
   - **titanium**: Concord space around Meridian, and wreck fields;
   - **silicon**: asteroid regions;

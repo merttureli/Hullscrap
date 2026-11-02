@@ -33,6 +33,7 @@ const Hazards = preload("res://scripts/combat/hazards.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
+const Shops = preload("res://scripts/space/shops.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -58,6 +59,7 @@ const SAVE_PATH := "user://campaign.json"
 const REFUSED_TEXT := "The dock master turns you away."
 const DARK_TEXT := "The gate is dark."
 const NO_FUEL := "no fuel"
+const SHOP_PREFIX := "shop:"  ## the id of a small shop is "shop:<node id>:<POI id>" (shop_id)
 const HOSTILES_TEXT := "hostiles too close to jump"
 const SPOOL_TEXT := "spool the jump drive first"
 const NOT_AT_EXIT := "not at the exit beacon"
@@ -95,6 +97,9 @@ var fuel_part := 0  ## parts (hundredths) of a fuel the jumps have used up and n
 var events_seen := 0  ## events met at nodes, waits and wrecks (the game over screen counts them)
 var fights_won := 0  ## fights of the run that were won
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
+var shop_sold := {}  ## shop id -> {item id -> units bought}: what has left the small shops of the Trader and Store POIs (shop_cfg); saved as the optional "shop_sold"
+var _shops := {}  # shop id -> the rolled stock (shops.gd roll), kept: it is a pure function of the seed and the id
+var fuel_stock := {}  ## station id -> {visit (the jump count the stock was rolled at), left}: the fuel on sale this visit (fuel_left); saved as the optional "fuel_stock"
 var sectors := {}  ## node id -> Sector (sector.gd) for every node visited (made on first use from the seed, so only their states are saved)
 var foes := {}  ## "region/node/kind" -> the enemy rolled for a fight of that kind there (foe_for): a design path or a gen: spec; saved
 var tide: Tide  ## the Hollow tide over the map (tide.gd): jumps, waits, tows and lingering push it
@@ -450,12 +455,16 @@ func linger(dt: float) -> Array:
 
 
 ## With no fuel: wait for a passing trader. Time passes (one jump on the counter) and a trader event
-## may come along. Returns {ok, why, notes, event}.
+## comes along, one that sells fuel when there is one (fuel is scarce, so most traders do not: a ship that waits with an empty
+## tank is the one that meets the fuel peddler). Returns {ok, why, notes, event}.
 func wait(ship) -> Dictionary:
 	if ship.inventory.count("fuel") > 0:
 		return {"ok": false, "why": "you still have fuel", "notes": [], "event": {}}
 	var notes := _advance(1)
-	var ev := events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)
+	var node := {"id": current, "type": "trader", "place": ""}
+	var ev := events.pick(self, node, ship, func(e): return Events.offers_fuel(e))
+	if ev.is_empty():
+		ev = events.pick(self, node, ship)
 	events_seen += int(not ev.is_empty())
 	return {"ok": true, "why": "", "notes": notes, "event": ev}
 
@@ -722,6 +731,9 @@ func enter_region(id: String, ship = null) -> void:
 	revealed = {}
 	sectors = {}
 	offers = {}
+	fuel_stock = {}
+	shop_sold = {}
+	_shops = {}
 	spool = {}
 	flags["in_" + id] = true
 	if ship != null:
@@ -1071,6 +1083,8 @@ func lose_crew(ship) -> String:
 ## region's stock and recruits), or the Scrapper trader's. `id` may also be the place id of a station in any region (its
 ## menu is the same wherever it is asked for). {} when there is nothing to dock at.
 func station_cfg(id: String) -> Dictionary:
+	if id.begins_with(SHOP_PREFIX):
+		return shop_cfg(id)
 	if is_hollow(id):  # no trade in a place the tide has taken
 		return {}
 	var n := drift.node(id)
@@ -1081,6 +1095,45 @@ func station_cfg(id: String) -> Dictionary:
 	if n.get("type", "") == "trader" and bool(n.get("clan", false)):
 		return cfg["stations"]["clan_trader"]
 	return {}
+
+
+## The id of the small shop of POI `poi_id` in the sector of node `node_id` (a Trader or Store POI: sector.gd trigger gives it as `shop`).
+static func shop_id(node_id: String, poi_id: String) -> String:
+	return "%s%s:%s" % [SHOP_PREFIX, node_id, poi_id]
+
+
+## The menu of small shop `id` in the shape of a station's ({name, faction, services, stock (id -> price), recruit, qty (id -> units left),
+## unique (ids that are a rare find here), shop: true}), what was bought already left out; {} where the tide has taken the place. The stock is
+## rolled by shops.gd from the run's seed, the shop's id and the region, so it is the same whenever it is asked for. The Scrapper traders
+## (clan nodes) keep their debt service and their faction.
+func shop_cfg(id: String) -> Dictionary:
+	var node_id: String = id.trim_prefix(SHOP_PREFIX).split(":", true, 1)[0]
+	if is_hollow(node_id):
+		return {}
+	if not _shops.has(id):
+		var skip: Array = []
+		for p in region_data.get("places", []):
+			if str(p.get("type", "")) == "station":
+				skip.append_array(Regions.station(str(p["id"]), cfg).get("stock", {}).keys())
+		_shops[id] = Shops.roll(cfg, seed_value, id, region_id, skip)
+	var rolled: Dictionary = _shops[id]
+	var sold: Dictionary = shop_sold.get(id, {})
+	var stock := {}
+	var qty := {}
+	var unique: Array = []
+	for item in rolled["stock"]:
+		var left := int(rolled["qty"][item]) - int(sold.get(item, 0))
+		if left > 0:
+			stock[item] = rolled["stock"][item]
+			qty[item] = left
+			if rolled["unique"].has(item):
+				unique.append(item)
+	var clan := bool(drift.node(node_id).get("clan", false))
+	var services := ["sell", "stock"]
+	if clan:
+		services.append("debt")
+	return {"name": "Scrapper trader" if clan else "Trader's shop", "faction": "clans" if clan else "", "services": services, "stock": stock, "qty": qty,
+		"unique": unique, "recruit": {}, "shop": true}
 
 
 ## Why the ship cannot dock at `id` ("" if it can).
@@ -1095,10 +1148,33 @@ func _station_faction(id: String) -> String:
 	return str(station_cfg(id).get("faction", ""))
 
 
-## Pay for `n` units of fuel at the station `id`. Returns {ok, text}.
+## The units of fuel station `id` has on sale this visit (0 where nothing sells fuel). A visit is the stay at a node between two jumps:
+## the first time the stock is asked for in one it is rolled, fuel.stock [least, most] units from the run's seed, the station and the
+## jump count, so the same visit always has the same; the next visit has a new one (the stock refills).
+func fuel_left(id: String) -> int:
+	if not station_cfg(id).get("services", []).has("fuel"):
+		return 0
+	var rec = fuel_stock.get(id)
+	if rec == null or int(rec["visit"]) != jumps:
+		var roll := RandomNumberGenerator.new()
+		roll.seed = hash([seed_value, id, jumps])
+		var span: Array = cfg["fuel"]["stock"]
+		rec = {"visit": jumps, "left": roll.randi_range(int(span[0]), int(span[1]))}
+		fuel_stock[id] = rec
+	return int(rec["left"])
+
+
+## Pay for `n` units of fuel at the station `id` (at most what it has left, fuel_left). Returns {ok, text}.
 func buy_fuel(ship, id: String, n := 1) -> Dictionary:
+	var left := fuel_left(id)
+	if left <= 0:
+		return {"ok": false, "text": "No fuel here." if not station_cfg(id).get("services", []).has("fuel") else "Sold out: that was all the fuel they had this visit."}
+	n = mini(n, left)
 	var each := price(int(cfg["fuel"]["price"]), _station_faction(id), ship)
-	return _purchase(ship, "fuel", n, each * n, "Fuel")
+	var r := _purchase(ship, "fuel", n, each * n, "Fuel")
+	if r["ok"]:
+		fuel_stock[id]["left"] = left - n
+	return r
 
 
 ## The price of `item` in the stock of station `id`, 0 when it is not sold there (`ship`: the buyer's, for a haggler aboard).
@@ -1111,10 +1187,38 @@ func buy(ship, id: String, item: String, n := 1) -> Dictionary:
 	var each := stock_price(id, item, ship)
 	if each <= 0:
 		return {"ok": false, "text": "They don't sell that."}
+	if id.begins_with(SHOP_PREFIX):
+		n = mini(n, int(station_cfg(id)["qty"].get(item, 0)))  # a small shop has only what is on its shelf
+	if item.begins_with(Shops.BLUEPRINT):
+		return _buy_blueprint(ship, id, item, each)
 	var r := _purchase(ship, item, n, each * n, ship.crafting.name_of(item, ship.components))
 	if r["ok"]:
 		Jobs.launch_drones(ship)  # a repair drone bought goes aboard at once
+		_note_sold(id, item, n)
 	return r
+
+
+## Buy the blueprint `item` ("bp:<recipe id>") of small shop `id`: the recipe is known at once.
+func _buy_blueprint(ship, id: String, item: String, each: int) -> Dictionary:
+	var recipe := item.trim_prefix(Shops.BLUEPRINT)
+	var name: String = ship.crafting.name_of(str(ship.crafting.def(recipe)["output"]["item"]), ship.components)
+	if ship.crafting.known.has(recipe):
+		return {"ok": false, "text": "You already know the %s blueprint." % name}
+	if ship.inventory.count("credits") < each:
+		return {"ok": false, "text": "%d credits: you have %d." % [each, ship.inventory.count("credits")]}
+	ship.inventory.add("credits", -each)
+	ship.crafting.unlock(recipe)
+	_note_sold(id, item, 1)
+	return {"ok": true, "text": "Learned the %s blueprint for %d credits." % [name, each]}
+
+
+## `n` of `item` left small shop `id` (stations do not run out).
+func _note_sold(id: String, item: String, n: int) -> void:
+	if not id.begins_with(SHOP_PREFIX):
+		return
+	var sold: Dictionary = shop_sold.get(id, {})
+	sold[item] = int(sold.get(item, 0)) + n
+	shop_sold[id] = sold
 
 
 func _purchase(ship, item: String, n: int, total: int, name: String) -> Dictionary:
@@ -1244,7 +1348,8 @@ func to_dict() -> Dictionary:
 		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
 		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
 		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
-		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers}
+		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers,
+		"fuel_stock": fuel_stock.duplicate(true), "shop_sold": shop_sold.duplicate(true)}
 
 
 func _sectors_dict() -> Dictionary:
@@ -1319,6 +1424,9 @@ func load_dict(d: Dictionary) -> String:
 	chronicle = _chronicle(d.get("chronicle"))
 	ending = ""
 	offers = d["offers"].duplicate(true)
+	fuel_stock = d["fuel_stock"].duplicate(true) if d.get("fuel_stock") is Dictionary else {}  # saves from before the scarce fuel have none
+	shop_sold = d["shop_sold"].duplicate(true) if d.get("shop_sold") is Dictionary else {}  # nor the small shops
+	_shops = {}
 	sectors = made
 	spool = charge
 	tide = rising

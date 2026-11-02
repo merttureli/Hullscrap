@@ -13,7 +13,7 @@
 	"places": [
 		{"id": "receiving_room", "name": "The Receiving Room", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
 	],
-	"debris": {"ice_chunk_s": 1.2, "copper_coil": 1.2},
+	"debris": {"copper_coil": 1.2},
 	"pois": {"anomaly": 2.0, "unknown": 1.5},
 	"ambient": {"trader": 2, "pirate": 1, "patrol": 1},
 	"stock": {"radar_mk1": 130, "radar_mk2": 290, "mirror_veil": 300, "shield_mk1": 160, "shield_mk2": 330, "helm": 70, "reactor_mk1": 150, "laser_mk1": 140, "pulse_mk1": 130, "oxygen_gen": 90},

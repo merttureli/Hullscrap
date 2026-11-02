@@ -8,6 +8,7 @@ extends RefCounted
 ## (map_view.gd). No nodes, no drawing, no randomness.
 
 const Unlocks = preload("res://scripts/space/unlocks.gd")
+const Content = preload("res://scripts/data/content.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 const SLOTS: Array[String] = ["species", "variant", "skin"]
@@ -77,8 +78,10 @@ static func blueprints(profile) -> Array[String]:
 
 ## Put the starting unlocks on the player's `ship` (just loaded from its design): the soldier's species, the blueprints known
 ## at the start, the hull skin, and the repair drone every run starts with (add_drone). Returns a line for each thing done.
+## Every run also starts with at least data/drift.json fuel.start fuel (fuel_up), whatever the design's cargo says.
 static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 	var lines: Array[String] = []
+	fuel_up(ship)
 	var pick := clean(choice, profile)
 	if pick["species"] != "":
 		var p := Unlocks.payload_of(str(pick["species"]))
@@ -93,6 +96,13 @@ static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 	for l in lines:
 		ship.log_event(l)
 	return lines
+
+
+## Top the cargo's fuel up to fuel.start of data/drift.json (a design with more keeps it). Fuel is scarce (stations sell a few units, most
+## traders none), so the tank a run starts with is a real part of its budget: tests/tool_fuel_rate.gd measures what a run is left with.
+static func fuel_up(ship) -> void:
+	var start := int(Content.read("res://data/drift.json")["fuel"]["start"])
+	ship.inventory.add("fuel", maxi(0, start - ship.inventory.count("fuel")))
 
 
 ## Every run starts with one repair drone (playtest 2, R1; data/crew.json `drone`, species `drone`): its entry joins the design's crew list, which is

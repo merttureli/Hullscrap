@@ -12,6 +12,7 @@ signal closed
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Backstory = preload("res://scripts/crew/backstory.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Shops = preload("res://scripts/space/shops.gd")
 
 const MARGIN := 40.0
 const PAD := 18.0
@@ -94,12 +95,21 @@ func rows(col: int) -> Array:
 	var out := []
 	if col == 0:
 		if "fuel" in cfg["services"]:
-			out.append({"kind": "fuel", "id": "fuel", "label": "Fuel", "right": "%d cr" % c.price(int(c.cfg["fuel"]["price"]), _faction(), s), "cost": c.price(int(c.cfg["fuel"]["price"]), _faction(), s)})
+			var left: int = c.fuel_left(station)  # a station has only a few units a visit
+			out.append({"kind": "fuel", "id": "fuel", "label": "Fuel  (%s)" % ("%d left" % left if left > 0 else "sold out"), "right": "%d cr" % c.price(int(c.cfg["fuel"]["price"]), _faction(), s),
+				"cost": c.price(int(c.cfg["fuel"]["price"]), _faction(), s) if left > 0 else 1000000})
 		if "stock" in cfg["services"]:
 			var ids: Array = cfg.get("stock", {}).keys()
 			ids.sort_custom(func(a, b): return c.stock_price(station, a, s) < c.stock_price(station, b, s) or (c.stock_price(station, a, s) == c.stock_price(station, b, s) and a < b))
 			for id in ids:
-				out.append({"kind": "buy", "id": id, "label": s.crafting.name_of(id, s.components), "right": "%d cr" % c.stock_price(station, id, s), "cost": c.stock_price(station, id, s)})
+				if id.begins_with(Shops.BLUEPRINT) and s.crafting.known.has(id.trim_prefix(Shops.BLUEPRINT)):
+					continue  # a blueprint you know is no find
+				var label: String = s.crafting.name_of(id, s.components)
+				if id.begins_with(Shops.BLUEPRINT):
+					label = "Blueprint: " + s.crafting.name_of(str(s.crafting.def(id.trim_prefix(Shops.BLUEPRINT))["output"]["item"]), s.components)
+				var left := int(cfg.get("qty", {}).get(id, 1))  # a small shop has a few of an item, a station any number
+				out.append({"kind": "buy", "id": id, "label": label + ("  x%d" % left if left > 1 else ""), "right": "%d cr" % c.stock_price(station, id, s), "cost": c.stock_price(station, id, s),
+					"rare": cfg.get("unique", []).has(id)})
 	elif col == 1:
 		if "sell" in cfg["services"]:
 			var ids: Array = s.inventory.counts.keys()
@@ -259,7 +269,8 @@ func _draw() -> void:
 	var p := panel_rect()
 	_panel(p)
 	var n: Dictionary = c.node(station)
-	_text((str(n["name"]) if str(n["name"]) != "" else "Scrapper trader").to_upper(), p.position + Vector2(PAD, 38.0), 26, TEXT)
+	var title := str(_cfg().get("name", "")) if station.begins_with(c.SHOP_PREFIX) else (str(n["name"]) if str(n["name"]) != "" else "Scrapper trader")
+	_text(title.to_upper(), p.position + Vector2(PAD, 38.0), 26, TEXT)
 	var f := _faction()
 	if f != "":
 		var disc: float = c.discount(f)
@@ -305,6 +316,10 @@ func _draw_column(col: int, credits: int) -> void:
 		draw_rect(r, ROW_BG)
 		draw_rect(r, AMBER if hot else EDGE_DIM, false, 2.0 if hot else 1.0)
 		_text(str(row["label"]), r.position + Vector2(10.0, 21.0), 15, TEXT if (afford or row["kind"] == "sell") else DIM_TEXT)
+		if bool(row.get("rare", false)):  # a find the stations of this region do not sell
+			var tag := Rect2(r.position + Vector2(18.0 + ThemeDB.fallback_font.get_string_size(str(row["label"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x, 7.0), Vector2(40.0, 16.0))
+			draw_rect(tag, AMBER)
+			_text("RARE", tag.position + Vector2(5.0, 12.0), 11, Color("#1f2630"))
 		_right(str(row.get("right", "")), r, 14, GOOD if row["kind"] == "sell" else (TEXT if afford else BAD), 21.0)
 
 

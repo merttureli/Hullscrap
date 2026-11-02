@@ -224,7 +224,9 @@ func _poi_chain(where: String, res: Dictionary, c: Campaign, sim, pick: RandomNu
 	if res["refused"] == "" and not res["event"].is_empty():
 		if not _event_chain(at, res["event"], c, sim, pick, str(res["poi"]["id"])):
 			return false
-	if res["dock"]:
+	if str(res.get("shop", "")) != "":
+		_shop(at + " (shop)", c, sim.player_ship(), str(res["shop"]), pick)
+	elif res["dock"]:
 		_station(at + " (docked)", c, sim.player_ship(), pick)
 	s.resolve(str(res["poi"]["id"]))
 	_audit(at + " after it", c, sim.player_ship())
@@ -303,6 +305,23 @@ func _towards_station(c: Campaign) -> String:
 				came[o] = at
 				queue.append(o)
 	return ""
+
+
+## In a small shop (a Trader or Store POI): it has 3 to 5 items, and an item bought leaves the shelf.
+func _shop(where: String, c: Campaign, ship, id: String, pick: RandomNumberGenerator) -> void:
+	var st := c.station_cfg(id)
+	check(not st.is_empty() and st["stock"].size() <= 5 and st["unique"].size() >= 0, where + ": a shop with a small stock")
+	stats["shops"] = int(stats.get("shops", 0)) + 1
+	if st.is_empty() or st["stock"].is_empty() or pick.randf() > 0.5:
+		return
+	var ids: Array = st["stock"].keys()
+	ids.sort()
+	var item: String = ids[pick.randi() % ids.size()]
+	var left := int(st["qty"][item])
+	ship.inventory.add("credits", 600)  # (a purse to spend: the shop is what is tested)
+	var r := c.buy(ship, id, item, 1)
+	check(r["ok"], where + ": buying %s: %s" % [item, str(r["text"])])
+	check(int(c.station_cfg(id)["qty"].get(item, 0)) == left - 1, where + ": the shelf is one lighter")
 
 
 ## Docked at a station: pay a due payment, buy fuel when low, sell a little, repair, and look at the stock.

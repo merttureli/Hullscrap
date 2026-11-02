@@ -67,7 +67,7 @@
           {"weight": 100, "text": "The brick goes under the mess table. For a week your feet are warm, dinner is a pleasure, and you cannot remember why you were so short with everyone.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
         ]},
         {"text": "Tell him a story that makes him cry.", "outcomes": [
-          {"weight": 40, "text": "It is the one about your first ship, and the first wall you fell through. Dag cries into his apron and gives you a brick and a hug that goes on a while.", "effects": {"items": {"fuel": 1}, "crew_hp": 5}},
+          {"weight": 40, "text": "It is the one about your first ship, and the first wall you fell through. Dag cries into his apron and gives you a brick and a hug that goes on a while.", "effects": {"crew_hp": 5}},
           {"weight": 60, "text": "Dag does not cry. Dag eats a sandwich through the whole thing, nods at the end, and says 'nice'. You don't get a brick. You do get a sandwich.", "effects": {}}
         ]},
         {"text": "Sell him fuel (2 fuel).", "requires": {"items": {"fuel": 2}}, "outcomes": [
