@@ -41,6 +41,10 @@ var rng := RandomNumberGenerator.new()  ## every roll of a fight comes from here
 var events: Array = []  ## what happened since the view last looked (take_events): shots, hits, clicks, swaps ... {type, ...}
 var foes  ## foes.gd: everyone hostile aboard
 var spare_rounds := 0  ## the rounds he holds when there is no ship (a test)
+var hollow_place := false  ## the place was the Hollow's when he came (hollow-touched stand in it)
+var hollow := false  ## the Hollow took the place while he was aboard (note_hollow)
+var downed := false  ## the soldier went down: the view fades out and calls leave()
+var party: Array = []  ## the crew who came along (party.gd)
 
 
 ## A visit to POI `poi_id` of `sector` with the `board` effect `spec` ({kind, name?, parts?}). The soldier stands at the airlock.
@@ -79,6 +83,9 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 	for id in held:
 		b.left[int(id)] = held[id]
 	b.cleared = b.opened.size() >= b.site.containers().size()
+	b.hollow_place = p_campaign != null and p_campaign.is_hollow(p_campaign.current)
+	b.spec["crew"] = int(mem.get("crew", p_spec.get("crew", 0)))
+	b.foes.spawn_site({"hollow": b.hollow_place, "crew": b.spec["crew"], "mem": mem.get("foes", {})})
 	return b
 
 
@@ -331,29 +338,99 @@ func take_events() -> Array:
 	return out
 
 
-## One tick of a fight: the weapons cool and reload.
-func tick(dt: float) -> void:
+## One tick of a fight, `dt` seconds with the flashlight pointing `aim` (radians), lit or not: the weapons cool and reload, the foes and the crew
+## act, the doors open for whoever comes near them, a fallen soldier is noticed.
+func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	var take := func(n: int) -> int: return _take(n)
 	for g in guns:
 		Arms.tick(g, dt, take)
+	foes.tick(dt, aim, light_on)
+	update_doors(float(Arms.cfg()["door_near"]))
+	if soldier.is_down() and not downed:
+		downed = true
+		events.append({"type": "downed", "pos": soldier.pos})
 	if events.size() > 300:
 		events = events.slice(events.size() - 300)
 
 
-## Leave: the soldier's health goes back to the ship's, the visit is written to the sector's memory. Returns {cleared, said, name, kind, poi}.
+## Open the doors someone stands near (the soldier, his crew, a foe that is up) and shut the rest; a locked door stays shut. Each change is an event.
+func update_doors(near: float) -> void:
+	var movers: Array = [soldier.pos]
+	for p in party:
+		movers.append(p["m"].pos)
+	for f in foes.list:
+		if not f["dead"] and not f["hidden"] and f["kind"] != "sentry":
+			movers.append(f["m"].pos)
+	for d in site.doors:
+		if d["lock"] == "gone":
+			continue
+		var mid: Vector2 = site.door_centre(d)
+		var want := false
+		if door_open_to_soldier(d["id"]):
+			for q in movers:
+				if q.distance_to(mid) <= near:
+					want = true
+					break
+		if want != site.grid.is_door_open(d["cells"][0]):
+			site.grid.set_door_open(d["cells"][0], want)
+			events.append({"type": "door", "id": d["id"], "open": want, "pos": mid})
+
+
+## Who a foe may shoot or strike: [{pos, r, ref, moving}] the soldier and the crew who are up.
+func party_bodies() -> Array:
+	var out := []
+	var r := float(Arms.cfg()["hit_r"])
+	if not soldier.is_down():
+		out.append({"pos": soldier.pos, "r": r, "ref": soldier, "moving": foes.soldier_moving})
+	for p in party:
+		if not p["m"].is_down():
+			out.append({"pos": p["m"].pos, "r": r, "ref": p["m"], "moving": p["moving"]})
+	return out
+
+
+## `amount` damage to party member `m` (the soldier or a follower's CrewMember).
+func hurt_member(m: CrewMember, amount: float, _from: Vector2) -> void:
+	if m.is_down():
+		return
+	m.hurt(amount)
+	events.append({"type": "hurt", "pos": m.pos, "who": "soldier" if m == soldier else "ally", "down": m.is_down()})
+
+
+## The Hollow may have taken the place: `now` is whether it has. True once, the tick it does while he is aboard (the foes appear then).
+func note_hollow(now: bool) -> bool:
+	if not now or hollow or hollow_place:
+		return false
+	hollow = true
+	foes.hollow_arrives()
+	events.append({"type": "hollow"})
+	return true
+
+
+## What the motion tracker is shown (board_view.gd contacts_source): the foes that are up and out of their vents.
+func contacts() -> Array:
+	return foes.contacts()
+
+
+## Leave: the soldier's health goes back to the ship's (a soldier who went down wakes at the airlock with down_hp of it, and the site is closed for
+## good: its POI is done), the visit is written to the sector's memory. Returns {cleared, said, name, kind, poi, downed, text (what to tell him, "" for
+## the usual words)}.
 func leave() -> Dictionary:
 	finished = true
 	for g in guns:
 		_give(int(g["mag"]))
 		g["mag"] = 0
-	cleared = opened.size() >= total()
+	var text := ""
+	if downed:
+		soldier.hp = soldier.max_hp * float(Arms.cfg()["down_hp"])
+		text = str(Arms.cfg()["down_text"])
+	cleared = downed or opened.size() >= total()
 	if ship != null:
 		for m in ship.crew:
 			if m.is_player:
 				m.hp = minf(soldier.hp, m.max_hp)
 	if sector != null and poi_id != "":
 		sector.boarded[poi_id] = memory()
-	return {"cleared": cleared, "said": said.duplicate(), "name": site.site_name, "kind": site.kind, "poi": poi_id}
+	return {"cleared": cleared, "said": said.duplicate(), "name": site.site_name, "kind": site.kind, "poi": poi_id, "downed": downed, "text": text}
 
 
 ## What a later visit finds: the kind and the parts (so the same site is made again), what was opened and unlocked, what was left in the open ones.
@@ -367,7 +444,8 @@ func memory() -> Dictionary:
 	o.sort()
 	u.sort()
 	k.sort()
-	return {"kind": site.kind, "name": site.site_name, "parts": site.parts.duplicate(), "opened": o, "unlocked": u, "keys": k, "left": held, "cleared": cleared}
+	return {"kind": site.kind, "name": site.site_name, "parts": site.parts.duplicate(), "opened": o, "unlocked": u, "keys": k, "left": held, "cleared": cleared,
+		"crew": int(spec.get("crew", 0)), "foes": foes.memory()}
 
 
 # --- the context -------------------------------------------------------------------------------------------------

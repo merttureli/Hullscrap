@@ -31,6 +31,8 @@ signal finished(result: Dictionary)
 const CELL := 32.0
 const DARK := Color(0.022, 0.026, 0.04)
 const ZOOM := 1.1
+const DOWN_S := 2.8  ## seconds the screen fades after the soldier goes down, before he comes to at the airlock
+const HOLLOW_FLICKER_S := 3.5
 const ZOOM_MIN := 0.12
 const ZOOM_MAX := 2.5
 const AIM_DEAD_ZONE := 0.3  ## cells: with the mouse this close to the soldier, the aim stays where it was
@@ -40,7 +42,6 @@ const SPACE := Color("#04060a")  ## outside the hull
 const RED_RANGE := 7.0
 const GREEN_RANGE := 4.5
 const STEP_CELLS := 1.4  ## cells walked between two footsteps
-const DOOR_NEAR := 2.6  ## cells: a door whose middle is this close to the soldier opens
 const PANEL_FAR := 1.6  ## cells beyond reach at which the loot list shuts by itself
 const FEED_S := 5.0  ## seconds a line of what was taken stays
 const MESSAGE_S := 3.2
@@ -63,6 +64,7 @@ var aim_override: Variant = null  ## a world point (px)
 var e_override: Variant = null  ## whether E is held
 var wasd_override: Variant = null  ## a Vector2
 var fire_override: Variant = null  ## whether the trigger is held
+var hollow_source := Callable()  ## () -> bool: has the Hollow taken this place (map_view.gd sets it; the visit notices when it does)
 var tracers: Array = []  ## [{from, to (cells), t, foe}] the lines the shots drew, for the HUD
 var light_on := true  ## F: the flashlight
 var target := {}  ## what E would act on: {type ("airlock", "container", "door"), id, dist}
@@ -81,6 +83,9 @@ var _flash: PointLight2D
 var _muzzle: PointLight2D
 var _muzzle_t := 0.0
 var _muzzle_at := Vector2.ZERO
+var _down_t := 0.0
+var _skitter := 0.0
+var _flicker := 0.0  # seconds of flickering lights left (the Hollow arrives)
 var _self_light: PointLight2D
 var _red: Array = []  # [[light, base energy, phase]]
 var _door_occ := {}  # door id -> LightOccluder2D
@@ -94,7 +99,6 @@ var _msg_t := -100.0
 var _walked := 0.0
 var _anim := {}
 var _aim := 0.0
-var _door_state := {}  # door id -> open now
 var _saved_clear := Color(0.3, 0.3, 0.3)
 var _follow := true  # the camera follows the soldier (frame_all lets go)
 
@@ -135,7 +139,8 @@ func enter(p_session) -> String:
 	tracker = Tracker.new()
 	tracers.clear()
 	light_on = true
-	_door_state.clear()
+	_down_t = 0.0
+	_flicker = 0.0
 	_anim = {}
 	_walked = 0.0
 	_put_away(true)
@@ -318,16 +323,16 @@ func step(dt: float) -> void:
 		_walked = 0.0
 		Audio.fx(self, "footstep", null, -4.0)
 	_aim_at(dt)
-	_update_doors()
 	_interact(dt)
 	if not active:
 		return  # (E at the airlock left)
 	_combat(dt)
 	_update_lights(dt)
-	var contacts: Array = contacts_source.call() if contacts_source.is_valid() else []
+	var contacts: Array = contacts_source.call() if contacts_source.is_valid() else s.contacts()
 	tracker.tick(dt, m.pos, contacts)
-	for i in tracker.take_pings():
-		Audio.fx(self, "comms_chirp", null, -10.0)
+	tracker.take_pings()
+	for far in tracker.last_heard:  # the nearer it is, the higher and faster the beep
+		Audio.fx(self, "tracker_ping_near" if far < 0.25 else ("tracker_ping_mid" if far < 0.6 else "tracker_ping_far"), null, -4.0)
 	feed = feed.filter(func(f): return _clock - float(f["t"]) < FEED_S)
 	if cam != null and _follow:
 		cam.position = cam.position.lerp(m.pos * CELL, 1.0 - exp(-dt * 9.0))
@@ -368,27 +373,6 @@ func _aim_at(dt: float) -> void:
 	_anim[session.soldier] = a
 
 
-## Doors open for the soldier (not the locked ones) and close behind him.
-func _update_doors() -> void:
-	var site = session.site
-	var p: Vector2 = session.soldier.pos
-	var changed := false
-	for d in site.doors:
-		if d["lock"] == "gone":
-			continue
-		var near: bool = session.door_open_to_soldier(d["id"]) and site.door_centre(d).distance_to(p) <= DOOR_NEAR
-		if near != bool(_door_state.get(d["id"], false)):
-			_door_state[d["id"]] = near
-			site.grid.set_door_open(d["cells"][0], near)
-			if _door_occ.has(d["id"]):
-				_door_occ[d["id"]].visible = not near
-			if site.door_centre(d).distance_to(p) <= 12.0:
-				Audio.fx(self, "door_open" if near else "door_close", null, -6.0)
-			changed = true
-	if changed and ship_view != null:
-		ship_view.queue_redraw()
-
-
 func _update_lights(dt: float) -> void:
 	if _flash == null:
 		return
@@ -396,6 +380,10 @@ func _update_lights(dt: float) -> void:
 	_flash.position = at
 	_flash.rotation = _aim
 	_self_light.position = at
+	_flicker = maxf(_flicker - dt, 0.0)
+	var fk := 1.0 - 0.75 * clampf(_flicker / 0.6, 0.0, 1.0) * (0.5 + 0.5 * sin(_clock * 43.0) * sin(_clock * 19.0)) if _flicker > 0.0 else 1.0
+	_flash.energy = 1.1 * fk
+	_self_light.energy = 0.55 * fk
 	_flash.visible = not lights_up and light_on
 	_self_light.visible = not lights_up
 	_muzzle_t = maxf(_muzzle_t - dt, 0.0)
@@ -404,7 +392,7 @@ func _update_lights(dt: float) -> void:
 	_muzzle.energy = 1.5 * _muzzle_t / float(Arms.cfg()["flash_s"])
 	for e in _red:
 		var flicker: float = 1.0 + 0.12 * sin(_clock * 2.3 + float(e[2])) + (0.0 if not e[3] else 0.06 * sin(_clock * 11.0 + float(e[2]) * 3.0))
-		e[0].energy = float(e[1]) * flicker
+		e[0].energy = float(e[1]) * flicker * fk
 		e[0].visible = not lights_up
 
 
@@ -419,9 +407,27 @@ func _fire_down() -> bool:
 ## The weapons, the shots and what they sound like: the trigger while no list or picker is up, then everything the session says happened.
 func _combat(dt: float) -> void:
 	var s = session
-	s.tick(dt)
-	if _fire_down() and panel < 0 and not s.soldier.is_down():
+	if s.downed:
+		_down_t += dt
+		if _down_t >= DOWN_S:
+			leave()
+			return
+	if not s.downed:
+		s.note_hollow(hollow_source.call() if hollow_source.is_valid() else false)
+	s.tick(dt, _aim, light_on)
+	if _fire_down() and panel < 0 and not s.downed:
 		s.fire(_aim)
+	for f in s.foes.list:
+		if f["kind"] != "sentry" and f["kind"] != "crawler":
+			var a: Dictionary = _anim.get(f["m"], PersonDrawer.new_state(f["m"]))
+			PersonDrawer.animate(a, f["m"], dt, f["m"].facing.angle())
+			_anim[f["m"]] = a
+	_skitter -= dt
+	if _skitter <= 0.0:
+		for f in s.foes.list:
+			if f["kind"] == "crawler" and f["moved"] and not f["hidden"] and not f["dead"]:
+				Audio.fx(self, "crawler_skitter", f["m"].pos * CELL, -6.0)
+				_skitter = 0.45
 	for t in tracers:
 		t["t"] += dt
 	tracers = tracers.filter(func(t): return float(t["t"]) < float(Arms.cfg()["tracer_s"]))
@@ -449,6 +455,38 @@ func _play(evs: Array) -> void:
 				Audio.fx(self, "reload", px)
 			"swap":
 				Audio.fx(self, "reload", px, -8.0)
+			"door":
+				if _door_occ.has(e["id"]):
+					_door_occ[e["id"]].visible = not bool(e["open"])
+				if ship_view != null:
+					ship_view.queue_redraw()
+				if session.soldier.pos.distance_to(at) <= 12.0:
+					Audio.fx(self, "door_open" if e["open"] else "door_close", null, -6.0)
+			"hit":
+				Audio.fx(self, "foe_hit", px)
+			"down":
+				Audio.fx(self, "foe_down", px)
+			"hurt":
+				Audio.fx(self, "crew_hurt", px)
+			"melee":
+				Audio.fx(self, "melee_swing", px)
+			"line":
+				_toast(str(e["text"]))
+			"whir":
+				Audio.fx(self, "sentry_whir", px)
+			"screech":
+				Audio.fx(self, "crawler_screech", px)
+			"emerge", "vanish":
+				Audio.fx(self, "crawler_skitter", px)
+			"hacked":
+				Audio.fx(self, "unlock")
+				say("Sentry hacked. It is yours now.")
+			"hollow":
+				_flicker = HOLLOW_FLICKER_S
+				_toast(str(Arms.cfg()["hollow"]["toast"]))
+				Audio.fx(self, "tide_warning")
+			"downed":
+				Audio.fx(self, "crew_hurt", px)
 
 
 ## F: the flashlight on or off.
@@ -702,6 +740,7 @@ func _draw_over() -> void:
 	if str(target.get("type", "")) == "container":
 		var tp: Dictionary = site.props[target["id"]]
 		_over.draw_rect(Rect2(Vector2(tp["cell"]) * CELL, Vector2(tp["size"]) * CELL).grow(2.0), Color(1, 1, 1, 0.55), false, 2.0)
+	_draw_foes()
 	_draw_soldier()
 
 
@@ -810,5 +849,70 @@ func _draw_soldier() -> void:
 	var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
 	var look: Dictionary = m.look if not m.look.is_empty() else ShipView.LOOKS.get(m.name, ShipView.OTHER_LOOK)
 	var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-		"item": PersonDrawer.item_for(m, 0.0), "down": m.is_down(), "work": false, "t": _clock, "head": m.head}
+		"item": str(session.gun()["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head}
 	PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
+
+
+# --- drawing the foes -----------------------------------------------------------------------------------------------
+
+func _draw_foes() -> void:
+	for v in session.foes.vents:
+		var r := Rect2(v * CELL - Vector2(11, 11), Vector2(22, 22))
+		_over.draw_rect(r, Color("#20252d"))
+		_over.draw_rect(r, Color("#0a0c10"), false, 2.0)
+		for k in 4:
+			_over.draw_line(r.position + Vector2(3, 4 + 5 * k), r.position + Vector2(19, 4 + 5 * k), Color("#0a0c10"), 2.0)
+	for pass_no in 2:  # the fallen first, the standing over them
+		for f in session.foes.list:
+			if f["hidden"] or bool(f["dead"]) != (pass_no == 0):
+				continue
+			match str(f["kind"]):
+				"sentry":
+					_draw_sentry(f)
+				"crawler":
+					_draw_crawler(f)
+				_:
+					_draw_foe(f)
+
+
+func _draw_foe(f: Dictionary) -> void:
+	var m = f["m"]
+	var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
+	var look := {"suit": "#888888", "hair": "#2a2018", "tool": "#cfd5dd"}
+	look.merge(f["d"].get("look", {}), true)
+	var pose := {"species": Art.crew_rig("human"), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
+		"item": str(f["d"].get("weapon", "")), "down": f["dead"], "work": false, "t": _clock, "head": ""}
+	PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
+
+
+func _draw_sentry(f: Dictionary) -> void:
+	var c: Vector2 = f["m"].pos * CELL
+	var hacked: bool = f["team"] == "player"
+	var dir := Vector2.from_angle(float(f["aim"]))
+	_over.draw_circle(c, 11.0, Color("#2a2f38") if not f["dead"] else Color("#1a1d22"))
+	_over.draw_arc(c, 11.0, 0.0, TAU, 20, Color("#0c0e12"), 2.0, true)
+	if f["dead"]:
+		return
+	_over.draw_line(c, c + dir * 18.0, Color("#10131a"), 5.0)
+	_over.draw_line(c, c + dir * 18.0, Color("#59626f"), 2.5)
+	var led := Color("#58e08a") if hacked else (Color("#ff3b2e") if float(f["track"]) > 0.0 else Color("#e8a23a"))
+	_over.draw_circle(c - dir * 3.0, 2.5, led)
+
+
+func _draw_crawler(f: Dictionary) -> void:
+	var m = f["m"]
+	var c: Vector2 = m.pos * CELL
+	var dir: Vector2 = m.facing
+	var col := Color("#0c0c10") if not f["dead"] else Color("#1b1b20")
+	var wob := sin(_clock * 18.0 + float(f["id"])) * (0.0 if f["frozen"] or f["dead"] else 1.0)
+	for k in 3:  # legs
+		for sgn in [-1.0, 1.0]:
+			var o: Vector2 = dir.orthogonal() * sgn
+			var base := c + dir * (float(k) - 1.0) * 4.0
+			_over.draw_line(base, base + o * 9.0 + dir * (float(k) - 1.0) * 4.0 + dir * wob * 2.0, col, 1.5)
+	_over.draw_circle(c, 6.0, col)
+	_over.draw_circle(c + dir * 6.0, 3.8, col)
+	_over.draw_circle(c - dir * 6.0, 4.2, col)
+	if not f["dead"]:
+		_over.draw_circle(c + dir * 7.5 + dir.orthogonal() * 1.6, 0.9, Color("#c8a0a0"))
+		_over.draw_circle(c + dir * 7.5 - dir.orthogonal() * 1.6, 0.9, Color("#c8a0a0"))

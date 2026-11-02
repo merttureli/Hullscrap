@@ -91,7 +91,7 @@ static func trace(site, from: Vector2, dir: float, reach: float, bodies: Array, 
 		t = minf(t + STEP, reach)
 		var p := from + v * t
 		for b in bodies:
-			if b["ref"] != skip and p.distance_squared_to(b["pos"]) <= float(b["r"]) * float(b["r"]):
+			if not is_same(b["ref"], skip) and p.distance_squared_to(b["pos"]) <= float(b["r"]) * float(b["r"]):
 				return {"end": p, "ref": b["ref"], "kind": "body", "cover": cover}
 		var c := Vector2i(floori(p.x), floori(p.y))
 		if site.opaque(c):

@@ -540,7 +540,8 @@ func _on_fight_finished(result: Dictionary) -> void:
 			var foe = result["enemy"]
 			var parts: Array = Salvage.parts(foe)
 			parts.resize(mini(parts.size(), Boarding.WRECK_PARTS))
-			salvage = Boarding.offer(salvage, "wreck", {"name": str(foe.name) if str(foe.name) not in ["", "Ship"] else "", "parts": parts}, false)
+			var alive: int = foe.crew.filter(func(c): return not c.is_down()).size() if r["state"] == "won" else 0  # the survivors fight on foot
+			salvage = Boarding.offer(salvage, "wreck", {"name": str(foe.name) if str(foe.name) not in ["", "Ship"] else "", "parts": parts, "crew": alive}, false)
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
 
@@ -556,6 +557,7 @@ func _start_board(spec: Dictionary, ev: Dictionary) -> void:
 		id = str(sector.wrecks[-1]["id"])
 	var why := "no boarding view" if board == null else ("nothing to board" if sector == null or id == "" else "")
 	if why == "":
+		board.hollow_source = func() -> bool: return campaign != null and campaign.is_hollow(campaign.current)
 		why = board.enter(Boarding.start(campaign, sector, id, spec, ship()))
 	if why != "":
 		_say("Cannot board: " + why, true)
@@ -577,7 +579,8 @@ func _on_board_finished(result: Dictionary) -> void:
 	var ev := _board_ev
 	_board_ev = {}
 	if bool(result["cleared"]) or ev.is_empty():
-		event_panel.open_notice(str(result["name"]), Boarding.cleared_text() if bool(result["cleared"]) else "You are back aboard.", result["said"])
+		var words: String = str(result.get("text", ""))
+		event_panel.open_notice(str(result["name"]), words if words != "" else (Boarding.cleared_text() if bool(result["cleared"]) else "You are back aboard."), result["said"])
 	else:
 		event_panel.open_event(ev)
 
