@@ -2,6 +2,7 @@
   "_doc": "Items that are neither ship components (components.json) nor raw materials (materials.json): ammo, crew gear and special finds. Content is data: add an entry here and recipes and cargo can name it. kind: ammo (spent by weapons that name it in their `ammo` field; `explosive: true` makes a wrecked ammo rack holding it blow up, data/ammo.json), gear (crew equipment, craftable) or special (found, bought or earned only: it never has a recipe). Fuel is special: one jump of the Drift campaign burns one. `does` (optional) replaces the line the kind gives in the part description (data/describe.json items): the repair drone is gear that turns into a crew-like body aboard (Jobs.launch_drones).",
   "items": [
     {"id": "fuel", "name": "Fuel", "kind": "special", "blurb": "One jump's worth. Every Rusthold sells it by the can, and every can costs more than the last."},
+    {"id": "hand_ammo", "name": "Rounds", "kind": "ammo", "blurb": "Loose rounds for the hand weapons. Boarding parties never carry enough."},
     {"id": "missile", "name": "Missile", "kind": "ammo", "explosive": true, "blurb": "Slow, guided and loud about it. Artemis launchers eat these."},
     {"id": "pistol", "name": "Pistol", "kind": "gear", "blurb": "Loud enough, reliable enough. The crew's first argument-settler."},
     {"id": "rifle", "name": "Rifle", "kind": "gear", "blurb": "Longer reach, steadier hands. Boarding parties love it."},
@@ -10,6 +11,7 @@
     {"id": "exosuit", "name": "Exosuit", "kind": "special", "blurb": "A powered frame with servos and attitude. Found, never built."},
     {"id": "salamander_suit", "name": "Salamander Suit", "kind": "special", "blurb": "Immune to fire, but slow. Strolls through the flames, unhurried."},
     {"id": "heat_suit", "name": "Heat Suit", "kind": "special", "blurb": "Insulated for hot rooms: work beside a Prism Core without cooking."},
+    {"id": "slugthrower", "name": "Slugthrower", "kind": "special", "blurb": "A basalt heavy: slow, loud, and it does not ask twice. Found aboard, never built."},
     {"id": "plasma_rifle", "name": "Plasma Rifle", "kind": "special", "blurb": "A hand-held star. Turns up in locked crates and is never sold twice."},
     {"id": "repair_drone", "name": "Repair Drone", "kind": "gear", "does": "Flies by itself: repairs, fights fires, reloads ammo.", "blurb": "One lens, one tool arm, no opinions. It works slower than a crew member, never mans a station, and when it breaks someone with a spanner can wake it again."}
   ]

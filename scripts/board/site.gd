@@ -199,6 +199,38 @@ func free_anchors(id: int) -> Array[Vector2i]:
 	return out
 
 
+## Does a shot or a look stop in cell `c`: outside the hull, a wall, or a door that is shut?
+func opaque(c: Vector2i) -> bool:
+	var id := grid.get_tile(c)
+	if id == "" or grid.tile_flag(id, "solid"):
+		return true
+	return grid.tile_flag(id, "door") and not grid.is_door_open(c)
+
+
+## Is the line from `a` to `b` (cells) clear of walls and shut doors?
+func clear_line(a: Vector2, b: Vector2) -> bool:
+	var d := b - a
+	var n := maxi(1, ceili(d.length() / 0.25))
+	for i in range(1, n + 1):
+		var p := a + d * (float(i) / float(n))
+		if opaque(Vector2i(floori(p.x), floori(p.y))):
+			return false
+	return true
+
+
+## How many different blocking props the line from `a` to `b` (cells) crosses: the cover between two bodies.
+func cover_between(a: Vector2, b: Vector2) -> int:
+	var d := b - a
+	var n := maxi(1, ceili(d.length() / 0.25))
+	var seen := {}
+	for i in range(1, n):
+		var p := a + d * (float(i) / float(n))
+		var pid: int = int(prop_of.get(Vector2i(floori(p.x), floori(p.y)), -1))
+		if pid >= 0 and props[pid]["blocks"]:
+			seen[pid] = true
+	return seen.size()
+
+
 ## The body anchors reachable from `from` on the walk grid; `open` is a Callable(door cell) -> bool for the locked doors.
 func reach(from: Vector2i, open: Callable) -> Dictionary:
 	var seen := {}
