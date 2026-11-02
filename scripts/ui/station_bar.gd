@@ -117,8 +117,10 @@ func click(i: int, right := false) -> String:
 	var uid := uid_at(i)
 	if view == null or uid < 0:
 		return ""
+	var ship = _ship()
+	var before = Posts.holder(ship, uid) if ship != null else null
 	var text: String = view.release_station(uid) if right else view.press_station(uid)
-	Audio.fx(self, "click")
+	Audio.fx(self, "comms_chirp" if not right and ship != null and Posts.holder(ship, uid) != before else "click")  # (a crewmate takes the post: a chirp on the comms)
 	view.say(text)
 	return text
 

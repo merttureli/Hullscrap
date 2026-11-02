@@ -158,6 +158,7 @@ func _store(w: Array, text: String) -> String:
 	var s = ship()
 	s.shield_balance["weights"] = [] if w == Balance.even(w.size()) else w.duplicate()
 	_say(text, false)
+	Audio.fx(self, "shield_shift")
 	return ""
 
 
