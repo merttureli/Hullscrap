@@ -34,7 +34,7 @@ func _campaign(seed_value := 1) -> Campaign:
 
 
 func test_the_defeat_line_is_data() -> void:
-	eq(Structure.defeat_below(), 0.5, "data/structure.json: defeat_below")
+	check(Structure.defeat_below() >= 0.4 and Structure.defeat_below() <= 0.6, "data/structure.json: defeat_below is tuned between 0.4 and 0.6")
 	check(Structure.config().has("_doc"), "and it says what it is")
 
 
@@ -73,15 +73,16 @@ func test_a_fight_is_lost_below_the_defeat_line() -> void:
 	var a := Arena.new()
 	var s := _ship()
 	var i := a.add_ship(s)
-	StructureUtil.set_structure(s, 0.52)
+	var line := Structure.defeat_below()
+	StructureUtil.set_structure(s, line + 0.02)
 	a.step(0.2)
-	check(not a.ships[i].wrecked, "52%: still afloat")
+	check(not a.ships[i].wrecked, "2% over the line: still afloat")
 	var wall := Vector2i(8, 12)
 	s.grid.hp[wall] = 4.0
 	Damage.apply(a, i, wall, {"kind": "wall", "def": s.grid.defs.get_def("wall")}, 4.0, "kinetic")  # a breach, and a few points more
-	StructureUtil.set_structure(s, 0.49)
+	StructureUtil.set_structure(s, line - 0.01)
 	a.step(0.1)
-	check(a.ships[i].wrecked, "49%: wrecked")
+	check(a.ships[i].wrecked, "1% under the line: wrecked")
 	check(a.events.any(func(e): return e["type"] == "wreck" and e["ship"] == i), "and it says so")
 
 
@@ -89,7 +90,7 @@ func test_a_hit_on_a_part_counts_too() -> void:
 	var a := Arena.new()
 	var s := _ship()
 	var i := a.add_ship(s)
-	StructureUtil.set_structure(s, 0.5)  # exactly on the line: not under it
+	StructureUtil.set_structure(s, Structure.defeat_below())  # exactly on the line: not under it
 	a.step(0.2)
 	check(not a.ships[i].wrecked, "on the line is not under it")
 	var uid: int = s.components.instances.keys()[0]
@@ -102,7 +103,7 @@ func test_fire_wrecks_a_ship_without_a_shot() -> void:
 	var a := Arena.new()
 	var s := _ship()
 	var i := a.add_ship(s)
-	StructureUtil.set_structure(s, 0.4)  # the structure fell some other way (fire, a ram): the arena looks now and then
+	StructureUtil.set_structure(s, Structure.defeat_below() - 0.1)  # the structure fell some other way (fire, a ram): the arena looks now and then
 	a.step(0.2)
 	check(a.ships[i].wrecked, "the arena looks at the structure every few ticks")
 
@@ -202,6 +203,21 @@ func test_the_top_bar_has_no_hull_number_and_a_wrench_for_damaged_blocks() -> vo
 	eq(wrench["tip"], "Damaged blocks. Crew, drone and F repair them.", "and its hover line")
 	for it in items:
 		check(not str(it["text"]).contains("/") or it["id"] == "power", "no x/y figure in the bar: " + str(it["text"]))
+	b.cam = Camera2D.new()  # a click on the wrench centres the camera on a damaged block
+	var bar: Control = b.hud.top_bar
+	bar.size = Vector2(1600.0, 36.0)
+	var rect: Rect2 = bar.item_rects(items)[-1]
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = Vector2(rect.position.x + 6.0, 10.0)
+	bar._gui_input(click)
+	check(b._focus_on and b.cam != null, "clicking the wrench starts the camera move")
+	click.position = Vector2(8.0, 10.0)  # the first figure is no button
+	b._focus_on = false
+	bar._gui_input(click)
+	check(not b._focus_on, "another figure does nothing")
+	b.cam.free()
 	b.hud.free()
 	sim.free()
 	b.free()
@@ -242,17 +258,18 @@ func test_the_hull_creak_reads_the_structure_on_the_way_from_whole_to_wrecked() 
 	var audio = Audio.new()
 	audio.sim = sim
 	near(audio._hull_frac(), 1.0, "a whole ship")
-	StructureUtil.set_structure(s, 0.75)
-	near(audio._hull_frac(), 0.5, "structure 0.75 is half the way to the wreck line")
-	StructureUtil.set_structure(s, 0.6)
-	near(audio._hull_frac(), 0.2, "0.6")
+	var line := Structure.defeat_below()
+	StructureUtil.set_structure(s, line + 0.5 * (1.0 - line))
+	near(audio._hull_frac(), 0.5, "half the way from whole to the wreck line")
+	StructureUtil.set_structure(s, line + 0.2 * (1.0 - line))
+	near(audio._hull_frac(), 0.2, "a fifth of the way")
 	near(Structure.wreck_margin(s), 0.2, "Structure.wreck_margin is what it reads")
 	var rules := Ambience.new()  # (set_structure only takes hp off: a fresh ship, then down)
 	s = _ship()
 	sim.ships = [s]
-	StructureUtil.set_structure(s, 0.9)
+	StructureUtil.set_structure(s, line + 0.8 * (1.0 - line))
 	check(not rules.creak(audio._hull_frac(), 1.0), "90% structure: quiet")
-	StructureUtil.set_structure(s, 0.7)
+	StructureUtil.set_structure(s, line + 0.4 * (1.0 - line))
 	check(rules.creak(audio._hull_frac(), 1.0), "under half the way: one creak")
 	check(not rules.creak(audio._hull_frac(), 1.0), "then the cooldown")
 	audio.free()

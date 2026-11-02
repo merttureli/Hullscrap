@@ -511,7 +511,7 @@ func _fight(player: Ship, enemy: Ship, seconds: float, enemy_structure := -1.0) 
 func test_a_generated_enemy_fights_and_can_be_wrecked() -> void:
 	var player := Shipgen.build("concord", "medium", 41, 200.0)
 	var enemy := Shipgen.build("rustfangs", "small", 32, 45.0)
-	var s := _fight(player, enemy, 120.0, 0.52)  # an enemy a hair over the wreck line
+	var s := _fight(player, enemy, 120.0, Structure.defeat_below() + 0.02)  # an enemy a hair over the wreck line
 	eq(s.state(), "won", "the fight resolves: the enemy is wrecked")
 	check(s.arena.ships[Session.ENEMY].wrecked and s.end_text() != "", "and the session says so")
 

@@ -144,7 +144,7 @@ func test_the_styles_weights_come_from_the_data() -> void:
 	eq(s.morale.style, "rustfang", "the pirate raider picks the Rustfang style")
 	eq(_session(3, "res://data/ships/rustfang_rammer.json").morale.style, "ram", "the rammer picks ram")
 	eq(_session(3, COURIER).morale.style, "default", "a design with no morale entry uses the default")
-	check(cfg["break_structure"] == 0.75 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
+	check(absf(cfg["break_structure"] - (Structure.defeat_below() + 0.5 * (1.0 - Structure.defeat_below()))) < 1e-9 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
 
 
 func test_the_roll_follows_the_weights() -> void:

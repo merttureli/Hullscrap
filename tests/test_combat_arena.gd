@@ -269,18 +269,19 @@ func test_structure_is_the_block_hp_and_wrecks_the_ship_under_the_line() -> void
 	eq(b.weapons.can_fire(b, target, gun, Vector2(-1000.0, 0.0)), "wrecked", "a wreck does not fire")
 
 
-func test_a_ship_is_wrecked_when_its_structure_falls_under_half() -> void:
+func test_a_ship_is_wrecked_when_its_structure_falls_under_the_line() -> void:
 	var a := Arena.new()
 	var t := _ship()
-	_block(t, 3, 15, 12, 15, "wall")  # 10 walls of 4 hp: wrecked under 20 hp left
+	_block(t, 3, 15, 12, 15, "wall")  # 10 walls of 4 hp
 	var i := a.add_ship(t)
-	for x in 5:  # 5 walls at 0 hp: exactly half the hp is left
+	var gone := int((1.0 - Structure.defeat_below()) * 10.0 + 1e-6)  # walls at 0 hp that leave exactly the defeat line
+	for x in gone:
 		t.grid.hp[Vector2i(3 + x, 15)] = 0.0
 	a.step(0.2)
-	check(not a.ships[i].wrecked and absf(Structure.structure_fraction(a.ships[i]) - 0.5) < 1e-6, "exactly half left: not yet")
-	Damage.apply(a, i, Vector2i(9, 15), {"kind": "wall", "def": t.grid.defs.get_def("wall")}, 1.0, "kinetic")
+	check(not a.ships[i].wrecked and absf(Structure.structure_fraction(a.ships[i]) - Structure.defeat_below()) < 1e-6, "exactly on the line: not yet")
+	Damage.apply(a, i, Vector2i(12, 15), {"kind": "wall", "def": t.grid.defs.get_def("wall")}, 1.0, "kinetic")
 	a.step(0.1)
-	check(a.ships[i].wrecked, "a little under half left: wrecked")
+	check(a.ships[i].wrecked, "a little under the line: wrecked")
 	eq(_count(a, "wreck", i), 1, "reported once")
 
 

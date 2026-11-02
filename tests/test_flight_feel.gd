@@ -75,7 +75,7 @@ func test_the_safe_docking_speed_is_unchanged_and_a_bump_does_not_one_shot() -> 
 func test_an_ai_fight_still_resolves() -> void:
 	var s := Session.new()
 	s.start(Session.load_ship(PIRATE), Session.load_ship(PIRATE), 5)  # a pirate against a pirate: the starters have one bare gun each now, and the pirate snipes it in the first seconds
-	StructureUtil.set_structure(s.arena.ships[Session.ENEMY], 0.53)  # a pirate already hurt: the fight has to end
+	StructureUtil.set_structure(s.arena.ships[Session.ENEMY], Structure.defeat_below() + 0.03)  # a pirate already hurt: the fight has to end
 	var pilot := PilotAI.new(s.arena, Session.PLAYER, Session.ENEMY, {})
 	var n := 0
 	var fastest := 0.0
