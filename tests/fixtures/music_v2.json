@@ -1,0 +1,24 @@
+{
+ "dir": "res://assets/audio/music/demos/",
+ "pieces": {
+  "black_box": {"explore": "black_box_explore.ogg", "battle": "black_box_battle.ogg", "bpm": 118},
+  "ledger_ii": {"explore": "ledger_ii_explore.ogg", "battle": "ledger_ii_battle.ogg", "bpm": 96},
+  "signal": {"explore": "signal_explore.ogg", "battle": "signal_battle.ogg", "bpm": 104}
+ },
+ "regions": {
+  "default": "black_box",
+  "faction:concord": "ledger_ii",
+  "region:human_core": "signal",
+  "region:kett_hives": "black_box"
+ },
+ "accents": {
+  "region:kett_hives": {"stem": "res://assets/audio/sfx/engine_loop.wav", "db": -9}
+ },
+ "states": {
+  "menu": ["res://assets/audio/sfx/engine_loop.wav"],
+  "build": ["res://assets/audio/sfx/beam_loop.wav"],
+  "hollow": ["res://assets/audio/sfx/engine_loop.wav"]
+ },
+ "stings": {},
+ "volumes": {"black_box_battle.ogg": -2.0}
+}
