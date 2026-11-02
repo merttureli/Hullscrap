@@ -626,6 +626,86 @@
     "true_peak_db": -1.94
    }
   },
+  "clans": {
+   "battle": {
+    "bands_pct": [
+     21.5,
+     16.6,
+     43.2,
+     14.8,
+     4.0
+    ],
+    "bytes": 2562874,
+    "peak_db": -2.45,
+    "rms_db": -15.03,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.87933,
+     "rms_first_db": -19.7,
+     "rms_last_db": -15.0,
+     "seam_step": 0.09668,
+     "typ_step_p999": 0.32343
+    },
+    "seconds": 132.3,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.37
+   },
+   "bpm": 116.1,
+   "explore": {
+    "bands_pct": [
+     32.6,
+     31.9,
+     32.7,
+     2.4,
+     0.4
+    ],
+    "bytes": 2582440,
+    "peak_db": -3.63,
+    "rms_db": -18.0,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.33356,
+     "rms_first_db": -20.1,
+     "rms_last_db": -19.2,
+     "seam_step": 0.02121,
+     "typ_step_p999": 0.10481
+    },
+    "seconds": 132.3,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.63
+   },
+   "mode": "A minor: aeolian harmony with the major V (E7#9), a minor-pentatonic lead",
+   "sections_s": {
+    "A": 16.54,
+    "A2": 99.22,
+    "B": 49.61,
+    "brk": 82.69,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.617,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 5834430,
+    "samples_explore": 5834430
+   },
+   "title": "Clans",
+   "transition": {
+    "bands_pct": [
+     23.0,
+     16.9,
+     45.6,
+     12.4,
+     2.1
+    ],
+    "bytes": 1456542,
+    "peak_db": -2.75,
+    "rms_db": -15.96,
+    "samples_off_vs_render": 0,
+    "seconds": 74.72,
+    "true_peak_db": -2.55
+   }
+  },
   "concord": {
    "battle": {
     "bands_pct": [

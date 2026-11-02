@@ -11,11 +11,17 @@
    "explore": "concord_explore.ogg",
    "battle": "concord_battle.ogg",
    "bpm": 112.0
+  },
+  "clans": {
+   "explore": "clans_explore.ogg",
+   "battle": "clans_battle.ogg",
+   "bpm": 116.1
   }
  },
  "regions": {
   "default": "black_box",
-  "faction:concord": "concord"
+  "faction:concord": "concord",
+  "faction:clans": "clans"
  },
  "states": {
   "menu": [
@@ -45,6 +51,8 @@
   "black_box_battle.ogg": 0.0,
   "concord_explore.ogg": 0.0,
   "concord_battle.ogg": 0.0,
+  "clans_explore.ogg": 0.0,
+  "clans_battle.ogg": 0.0,
   "victory.ogg": -3.0,
   "defeat.ogg": -3.0,
   "jump.ogg": -3.0,

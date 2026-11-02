@@ -5,7 +5,7 @@ extends "res://tests/base_test.gd"
 
 const MUSIC_JSON := "res://data/music.json"
 const STATES := ["menu", "hollow", "build"]
-const PIECES := ["black_box", "concord"]
+const PIECES := ["black_box", "concord", "clans"]
 const STINGS := ["victory", "defeat", "jump", "region_cross", "ada_found", "unlock", "ending"]
 const DEMO_DIR := "res://assets/audio/music/demos/"
 const DEMOS := ["signal", "long_haul", "black_box", "ledger_ii"]
