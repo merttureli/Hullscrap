@@ -17,28 +17,28 @@
  },
  "build": {
   "bands_pct": [
-   40.7,
-   43.6,
-   13.0,
-   1.4,
-   1.3
+   12.1,
+   24.3,
+   49.1,
+   13.3,
+   1.2
   ],
-  "bpm": 76.19,
-  "bytes": 1579466,
-  "peak_db": -4.21,
-  "rms_db": -18.0,
+  "bpm": 96.0,
+  "bytes": 2611299,
+  "peak_db": -3.27,
+  "rms_db": -18.01,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.50767,
-   "rms_first_db": -22.6,
-   "rms_last_db": -22.6,
-   "seam_step": 0.0107,
-   "typ_step_p999": 0.17786
+   "max_step": 0.26364,
+   "rms_first_db": -20.5,
+   "rms_last_db": -19.0,
+   "seam_step": 0.03682,
+   "typ_step_p999": 0.14103
   },
-  "seconds": 100.8,
+  "seconds": 105.0,
   "target_rms_db": -18.0,
-  "title": "Workbench",
-  "true_peak_db": -3.76
+  "title": "Ma's Ledger II (build)",
+  "true_peak_db": -3.27
  },
  "combat": {
   "bands_pct": [
@@ -544,6 +544,328 @@
   "target_rms_db": -18.0,
   "title": "Ma's Ledger",
   "true_peak_db": -2.87
+ },
+ "pieces": {
+  "black_box": {
+   "battle": {
+    "bands_pct": [
+     31.2,
+     23.7,
+     25.3,
+     13.0,
+     6.9
+    ],
+    "bytes": 2686874,
+    "peak_db": -1.75,
+    "rms_db": -15.04,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.76397,
+     "rms_first_db": -18.4,
+     "rms_last_db": -15.4,
+     "seam_step": 0.09005,
+     "typ_step_p999": 0.36607
+    },
+    "seconds": 130.03,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.75
+   },
+   "bpm": 118.125,
+   "explore": {
+    "bands_pct": [
+     39.4,
+     36.0,
+     23.0,
+     1.3,
+     0.3
+    ],
+    "bytes": 2544952,
+    "peak_db": -4.09,
+    "rms_db": -18.01,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.26424,
+     "rms_first_db": -20.8,
+     "rms_last_db": -18.1,
+     "seam_step": 0.04109,
+     "typ_step_p999": 0.09003
+    },
+    "seconds": 130.03,
+    "target_rms_db": -18.0,
+    "true_peak_db": -4.09
+   },
+   "mode": "C minor: aeolian with the harmonic-minor V (G7) and the phrygian bII (Dbmaj7#11)",
+   "sections_s": {
+    "A": 16.25,
+    "A2": 97.52,
+    "B": 48.76,
+    "brk": 81.27,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.693,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 5734400,
+    "samples_explore": 5734400
+   },
+   "title": "Black Box",
+   "transition": {
+    "bands_pct": [
+     29.8,
+     26.2,
+     27.7,
+     11.5,
+     4.9
+    ],
+    "bytes": 1531762,
+    "peak_db": -2.43,
+    "rms_db": -16.13,
+    "samples_off_vs_render": 0,
+    "seconds": 73.68,
+    "true_peak_db": -1.94
+   }
+  },
+  "clans": {
+   "battle": {
+    "bands_pct": [
+     21.5,
+     16.6,
+     43.2,
+     14.8,
+     4.0
+    ],
+    "bytes": 2562874,
+    "peak_db": -2.45,
+    "rms_db": -15.03,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.87933,
+     "rms_first_db": -19.7,
+     "rms_last_db": -15.0,
+     "seam_step": 0.09668,
+     "typ_step_p999": 0.32343
+    },
+    "seconds": 132.3,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.37
+   },
+   "bpm": 116.1,
+   "explore": {
+    "bands_pct": [
+     32.6,
+     31.9,
+     32.7,
+     2.4,
+     0.4
+    ],
+    "bytes": 2582440,
+    "peak_db": -3.63,
+    "rms_db": -18.0,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.33356,
+     "rms_first_db": -20.1,
+     "rms_last_db": -19.2,
+     "seam_step": 0.02121,
+     "typ_step_p999": 0.10481
+    },
+    "seconds": 132.3,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.63
+   },
+   "mode": "A minor: aeolian harmony with the major V (E7#9), a minor-pentatonic lead",
+   "sections_s": {
+    "A": 16.54,
+    "A2": 99.22,
+    "B": 49.61,
+    "brk": 82.69,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.617,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 5834430,
+    "samples_explore": 5834430
+   },
+   "title": "Clans",
+   "transition": {
+    "bands_pct": [
+     23.0,
+     16.9,
+     45.6,
+     12.4,
+     2.1
+    ],
+    "bytes": 1456542,
+    "peak_db": -2.75,
+    "rms_db": -15.96,
+    "samples_off_vs_render": 0,
+    "seconds": 74.72,
+    "true_peak_db": -2.55
+   }
+  },
+  "concord": {
+   "battle": {
+    "bands_pct": [
+     16.6,
+     18.8,
+     49.1,
+     10.1,
+     5.3
+    ],
+    "bytes": 2704751,
+    "peak_db": -2.61,
+    "rms_db": -15.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.82224,
+     "rms_first_db": -16.3,
+     "rms_last_db": -15.3,
+     "seam_step": 0.02652,
+     "typ_step_p999": 0.3504
+    },
+    "seconds": 137.14,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.55
+   },
+   "bpm": 112.0,
+   "explore": {
+    "bands_pct": [
+     16.5,
+     29.0,
+     49.1,
+     4.8,
+     0.6
+    ],
+    "bytes": 2854596,
+    "peak_db": -3.32,
+    "rms_db": -18.0,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.37732,
+     "rms_first_db": -18.2,
+     "rms_last_db": -19.8,
+     "seam_step": 0.0109,
+     "typ_step_p999": 0.12829
+    },
+    "seconds": 137.14,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.16
+   },
+   "mode": "E dorian, with a mixolydian lift (E major) into the drop",
+   "sections_s": {
+    "A": 17.14,
+    "A2": 102.86,
+    "B": 51.43,
+    "brk": 85.71,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.78,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 6048000,
+    "samples_explore": 6048000
+   },
+   "title": "Concord",
+   "transition": {
+    "bands_pct": [
+     12.2,
+     24.5,
+     54.3,
+     6.3,
+     2.7
+    ],
+    "bytes": 1530389,
+    "peak_db": -3.19,
+    "rms_db": -15.76,
+    "samples_off_vs_render": 0,
+    "seconds": 74.8,
+    "true_peak_db": -3.15
+   }
+  },
+  "lumen": {
+   "battle": {
+    "bands_pct": [
+     21.3,
+     19.7,
+     38.1,
+     18.0,
+     2.9
+    ],
+    "bytes": 3014872,
+    "peak_db": -2.58,
+    "rms_db": -15.03,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.62503,
+     "rms_first_db": -19.1,
+     "rms_last_db": -14.3,
+     "seam_step": 0.05403,
+     "typ_step_p999": 0.27041
+    },
+    "seconds": 140.0,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.52
+   },
+   "bpm": 96.0,
+   "explore": {
+    "bands_pct": [
+     12.2,
+     19.2,
+     46.1,
+     20.8,
+     1.7
+    ],
+    "bytes": 3243220,
+    "peak_db": -3.35,
+    "rms_db": -18.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.31597,
+     "rms_first_db": -19.3,
+     "rms_last_db": -19.5,
+     "seam_step": 0.07535,
+     "typ_step_p999": 0.15365
+    },
+    "seconds": 140.0,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.31
+   },
+   "mode": "F lydian, with whole-tone colour (C augmented)",
+   "sections_s": {
+    "A": 20.0,
+    "A2": 100.0,
+    "B": 60.0,
+    "brk": 80.0,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.477,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 6174000,
+    "samples_explore": 6174000
+   },
+   "title": "Lumen",
+   "transition": {
+    "bands_pct": [
+     13.6,
+     19.1,
+     44.4,
+     21.0,
+     1.8
+    ],
+    "bytes": 1672838,
+    "peak_db": -2.79,
+    "rms_db": -16.03,
+    "samples_off_vs_render": 0,
+    "seconds": 74.94,
+    "true_peak_db": -2.79
+   }
+  }
  },
  "region_cross": {
   "bands_pct": [
