@@ -800,3 +800,21 @@ func test_the_view_results_for_the_other_endings() -> void:
 	made[0].free()
 	made[1].free()
 	made[2].free()
+
+
+func test_a_broken_block_flashes_on_the_ship() -> void:
+	var made := _view()
+	var view: CombatView = made[0]
+	var foe = view.session.arena.ships[Session.ENEMY]
+	var cell := Vector2i(15, 15)
+	view._on_event({"type": "breach", "ship": Session.ENEMY, "cell": cell, "pos": view.session.arena.cell_to_world(Session.ENEMY, cell), "tile": "wall"})
+	var flashes: Array = view._fx.filter(func(f): return f["k"] == "block")
+	eq(flashes.size(), 1, "a breach flashes its block")
+	eq(flashes[0]["ship"], Session.ENEMY, "stuck to the ship that lost it")
+	check(foe.flight.pos.distance_to(view.session.arena.local_to_world(Session.ENEMY, flashes[0]["local"])) < 1000.0, "at its place on the hull")
+	view._on_event({"type": "disable", "ship": Session.ENEMY, "cell": cell, "pos": view.session.arena.cell_to_world(Session.ENEMY, cell), "uid": 1})
+	view._on_event({"type": "wreck_part", "ship": Session.ENEMY, "cell": cell, "pos": view.session.arena.cell_to_world(Session.ENEMY, cell), "uid": 1, "id": "x"})
+	eq(view._fx.filter(func(f): return f["k"] == "block").size(), 3, "and so does a part that is disabled or wrecked")
+	made[0].free()
+	made[1].free()
+	made[2].free()

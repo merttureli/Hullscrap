@@ -79,7 +79,7 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
     - A component at 0 is **disabled** until crew repair it. A direct hit on one that's already disabled **wrecks** it (4f). Outside mount halves are only ever disabled.
     - If the weapon has `pierce`, leftover damage carries on into the next cells.
   - **Thick outer walls are armour.** A reactor in the middle is protected, and an exposed one is a target. Players will aim for engines and weapons, and flank to reach the soft side.
-  - Every hull hit also lowers the ship's **hull integrity** pool: hull_hp = 20 + armour plates. At 0 the ship is **wrecked** and becomes a salvageable derelict.
+  - There is no hull-health pool: the blocks are the health. A ship's **structure** is the hp of all its blocks (walls, doors, parts, mount halves) over their maximum (`scripts/ship/structure.gd`), never shown as a number. In a fight a ship whose structure falls under `defeat_below` (0.5, `data/structure.json`) is **wrecked** and becomes a salvageable derelict.
 - **Shields** are a bubble around the hull (its shape is below) with **layers** from powered shield components.
   - A projectile or laser hitting the bubble uses up a layer, and layers recharge over time.
   - Missiles pass through. Ion removes layers and ion-locks systems.
@@ -114,7 +114,7 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
 - **Shield-heavy builds**: layers are the sum of your powered generators, each a big power draw, so lots of energy plus generators is a real alternative to armour.
   - **Space = Shield Overcharge**: +1 temporary layer for 6 s, at +4 power draw while active, with a 20 s cooldown.
 - **Fires and breaches** come from hits (`fire_chance`, and walls reaching 0) and use the existing oxygen and fire rules.
-- **Two schematics at the top of the screen**: faint close-up maps of **your ship and the enemy's**, FTL-style. They show rooms, systems with hp, disabled, fire and breach states, hull integrity and shield layers. You read the damage there while fighting in the arena.
+- **Two schematics at the top of the screen**: faint close-up maps of **your ship and the enemy's**, FTL-style. They show rooms, systems with hp, disabled, fire and breach states, the damaged blocks and shield layers. You read the damage there while fighting in the arena.
 - **Enemy pilot AI** keeps its preferred range, strafes, **leads its shots at your components** (weapons, then engines, then reactor) and uses its abilities on cooldown. It's deterministic from the battle seed.
 - **Determinism**: physics and all rolls step at a fixed rate with the battle's seeded RNG, so a battle with the same inputs replays exactly.
 
@@ -214,7 +214,7 @@ Ships are physical bodies made of their cells. **They collide, and both take dam
   - Impact energy `E = ½ · μ · (v_rel·n)²` with reduced mass `μ = mA·mB/(mA+mB)`.
   - Below a safe speed (`ram.min_speed`, about 40 px/s relative) there's no damage: a gentle bump, which docking needs.
   - Above it, each ship takes `E × ram.damage_k`, spread over the cells in contact (more to the cells hit hardest), as **kinetic** damage. Material resistance and slope angle apply (a glancing slope contact does less, per the sloped-armour rule).
-  - Walls at 0 hp breach, components at 0 are disabled, and the lost hp lowers hull integrity.
+  - Walls at 0 hp breach, components at 0 are disabled, and every hp lost lowers the ship's structure.
   - Crew in rooms touching the impact take a knock (5 hp per 100 px/s of impact).
 - **Ram content**:
   - **Ram Plating** (wall material, standard line, C): hp 12, mass 4, kinetic resist 0.4. Quirk `ram`: it **deals 2× ram damage and takes 0.5×**. A bow of it, plus slopes to glance off return fire, is the classic ram build.
@@ -337,7 +337,7 @@ Tiers and lines follow the tables. Unique items (★) have no recipe.
    - projectiles and hitscan lasers, weapon arcs and cooldowns;
    - cell collision with hp and pierce;
    - **damage types, wall materials (resist, deflect, ricochet, spacing)**;
-   - shields, breaches, disables and hull integrity;
+   - shields, breaches, disables and structure;
    - deterministic tests.
 3. **Combat in the game**: the zoomed-out arena, flight controls, mouse aiming, the weapon bar, both schematics at the top, and a pirate ship with pilot AI.
 4. Abilities, with the Afterburner end to end.
@@ -361,7 +361,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - **Fog**: you see the types of nodes next to ones you've visited. Others show "?". Stations are always visible once you've heard of them (a flag).
 - **Jumping**:
   - Click a node linked to yours. A jump costs **1 `fuel`**, a new item (start with 6, buy at stations for 8 credits).
-  - With no fuel, you can only wait for a passing trader (an event that sells fuel at triple price) or drift: a jump that costs 15 hull integrity.
+  - With no fuel, you can only wait for a passing trader (an event that sells fuel at triple price) or drift: a jump that tears 15 hp off random outer blocks.
   - Each jump advances the **jump counter**, which drives the debt clock and the danger.
   - **Danger**: pirate and patrol fights scale with the jump counter. Enemy designs pick from tables by tier (tier 1 at jumps 0–9, tier 2 from 10, tier 3 from 25).
 - **Arriving**: the node's type runs an **event** picked by weight from `data/events/*.json` (a seeded roll). A pirate node may skip the talk and start a fight.
@@ -387,7 +387,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
     - A choice whose `requires` names a species, trait or component is a **blue option**: shown in cyan, with its reason in brackets.
     - A choice whose requirements aren't met is hidden. One that only lacks items or credits shows greyed out, with what it needs.
   - **Effects**:
-    - `items` (+/−, including `credits`, `fuel`, materials and components), `rep` {clans, concord, lumen}, `crew_hp` (everyone, +/−), `hull` (integrity +/−), `flag` / `clear_flag`;
+    - `items` (+/−, including `credits`, `fuel`, materials and components), `rep` {clans, concord, lumen}, `crew_hp` (everyone, +/−), `hull` (−N: N hp of damage on random outer blocks, seeded; +N: N hp of damaged blocks mended), `flag` / `clear_flag`;
     - `recruit` {name?, species}, `lose_crew` (a random non-player), `blueprint` (an id);
     - `fight` (a ship design id, `"tier"` to roll from the node's table, or `"gen:<faction>"` to meet a faction of the enemy tables, e.g. a rare one: `Campaign.foe_of` rolls it once per node and keeps it), `goto` (another event id: a follow-up page), `reveal` (a node or station id), `debt` (+/−).
   - Outcomes are rolled with the campaign RNG. A `fight` effect starts combat, and after a win the event's `after_win` text and effects (optional) run.
@@ -400,7 +400,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - Miss a payment and a "repo crew" event chain starts: Rustfang collectors (a pirate fight that also demands credits). Two misses in a row and the next pirate fight is a rammer that wants your ship back.
   - Pay it all off and Ma gives you a unique ("Ma's Kettle", a Scrap reactor with a quirk) and the flag `debt_free`. The debt is a cargo-independent number on the campaign.
 - **Stations** (for now a menu; walkable stations come with on-foot play):
-  - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), pay the debt, repair hull integrity (2 credits per point), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).
+  - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), pay the debt, repair all blocks (2 credits per hp of damage missing), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).
   - Gantry Rusthold sells Scrap-line parts, Meridian Standard-line parts, and the Prism Neon-line parts.
 - **After a won fight**: loot is credits 20–60 × tier, scrap 30–80 × tier, and a 25% chance of one of the enemy's components. Then a `wreck_field`-style salvage event runs (boarding the wreck on foot comes later).
 - **Conventions the content uses** (as built):
@@ -410,7 +410,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - **`fallback: true` events** are only rolled when no other event is eligible at the pick (the repeatable filler quests of `story_1`: a quest beacon with no quest left used to resolve with nothing; now it hands out a derelict log).
   - **Effects**: `log` (hands over a derelict log; kept once in `logs_found`), and `reveal` with a node type (reveals the nearest unrevealed node of that type). `lose_crew` is an int.
   - **Requires**: `fuel_max` (true when fuel ≤ N). `pay` on a choice charges what its `requires` named.
-  - **Hull integrity** is a campaign number, repaired at stations. Events and drift jumps never take the last point.
+  - **Damage is on the blocks**, nothing else is carried between fights: crew, the drone and the soldier repair them, or a station does ("Repair all blocks"). The top bar shows a wrench and "N damaged" while any block is damaged; clicking it centres the camera on the nearest one. Events and drift jumps never take the structure under the wreck line.
   - **Losing a fight ends the run** (a new campaign starts).
 - **Controls**: **M** opens the map from play mode. Click a linked node to jump; the event panel opens on arrival. Esc closes the map.
 - **Saves**: the campaign (seed, node positions, lanes and types, the current node, visited nodes, flags, reputation, debt, jump counter, and `once` events used) is saved with the ship. Bump the save version.
@@ -752,7 +752,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 
 - **Procedural enemy ships (built: `scripts/space/shipgen.gd`, tables in `data/enemy_tables.json`)**:
   - `Shipgen.build(faction, size, seed, budget)` gives a valid ship (power, sealed rooms, crew paths, mounts through the real rules, flies, no rectangle); the same arguments always give the same ship. A spec string `gen:<faction>:<size>:<seed>:<budget x 100>[:ram]` names one, and `Session.load_ship` loads it like a design file.
-  - **Loadout**: the free base ship (helm, life support, the faction's cheapest reactor, two engines, one gun) plus purchases drawn from the faction's weights, each priced in `enemy_tables.json` and each needing the hull's room and the power its reactors give. Armour layers are real wall layers (2 hull integrity a cell, `arena.gd`).
+  - **Loadout**: the free base ship (helm, life support, the faction's cheapest reactor, two engines, one gun) plus purchases drawn from the faction's weights, each priced in `enemy_tables.json` and each needing the hull's room and the power its reactors give. Armour layers are real wall layers (plating hp counts in the structure).
   - **Hull**: `scripts/space/hullgen.gd` draws the faction's silhouette round the decks (gun deck, decks between, engine room) from the faction's `hull` grammar: wedge, chamfer, spikes, round2 arcs. A hull that comes out a box is narrowed at both ends, then gives up bow guns and engines, until it is under 85% of its bounding box.
   - **Campaign**: `fight: "tier"` rolls the `gen:` entry of `data/drift.json` `enemies`; the faction is the region's `enemies`, the budget is tier base x (1 + 0.04 x jumps) x the region's `danger` x the difficulty x the stage's `stage_mult` (stages 1 to 3: 0.7).
   - **Threat**: `Shipgen.threat(enemy, player)` / `Shipgen.threat_of(design, player)` give 1-5 skulls from sqrt(damage per second x effective hp) x a speed factor, enemy over player (`scripts/space/threat.gd`, cuts in the table); `Threat.label(n)` is the text for the radar and HUD.
