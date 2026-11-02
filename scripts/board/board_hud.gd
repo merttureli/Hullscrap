@@ -1,12 +1,17 @@
 extends Control
 ## The HUD of a boarding visit (board_view.gd), in a canvas layer of its own so the dark does not touch it: the site's name and kind at the top and
-## "Containers 3/11" under it, the airlock marker (an arrow on the screen edge when the hatch is off screen), the motion tracker (bottom left), what
-## E would do (bottom middle) with the progress ring of a hold, the loot list of an open container, what was just taken, and a line of words.
+## "Containers 3/11" under it, the airlock marker (an arrow on the screen edge when the hatch is off screen), the party cards (bottom left, board_cards.gd) with the
+## motion tracker above them, the weapon bar (bottom right), what E would do (bottom middle) with the progress ring of a hold, the loot list of an open container,
+## what was just taken, a line of words, the loadout screen at the airlock (board_loadout.gd) and, last, the note of whatever icon the mouse is on.
 ## Draws only; the node above it keeps the state. In the UI colours of docs/ART_STYLE.md.
 
 const Site = preload("res://scripts/board/site.gd")
 const Tracker = preload("res://scripts/board/tracker.gd")
 const Arms = preload("res://scripts/board/arms.gd")
+const Cards = preload("res://scripts/board/board_cards.gd")
+const Loadout = preload("res://scripts/board/board_loadout.gd")
+const Mods = preload("res://scripts/board/mods.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
@@ -27,24 +32,34 @@ const ROW_H := 30.0
 
 var view: Node2D  ## board_view.gd
 var _rows: Array = []  # [Rect2] of the loot list rows, in the order of session.entries()
-var _pick_rows: Array = []  # [Rect2] of the crew picker rows
-var _go := Rect2()  # the picker's "go aboard" button
 var _shop_rows: Array = []  # [Rect2] of the rows of a person's goods
+var _hits: Array = []  # [[Rect2, Dictionary]] what a click on the loadout screen means (drawn fresh every frame)
+var _hover: Array = []  # [[Rect2, lines, edge colour]] the icons the mouse can explain (drawn fresh every frame)
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
-## The row of the crew picker under screen point `p`, -2 for the go button, -1 for none.
-func pick_at(p: Vector2) -> int:
-	if _go.has_point(p):
-		return -2
-	for i in _pick_rows.size():
-		if _pick_rows[i].has_point(p):
-			return i
-	return -1
+## The loadout screen registers what a click on `r` means.
+func hit_add(r: Rect2, hit: Dictionary) -> void:
+	_hits.append([r, hit])
+
+
+## The loadout screen and the cards register what the mouse on `r` explains: `lines` (each wrapped), with the edge colour `edge`.
+func hover_add(r: Rect2, lines: Array, edge: Color) -> void:
+	if not lines.is_empty():
+		_hover.append([r, lines, edge])
+
+
+## What a click at screen point `p` on the loadout screen means: {type: "go" | "pick" | "person" | "slot" | "option", ...}, {} for nothing. The last thing drawn wins.
+func loadout_at(p: Vector2) -> Dictionary:
+	for i in range(_hits.size() - 1, -1, -1):
+		if _hits[i][0].has_point(p):
+			return _hits[i][1]
+	return {}
 
 
 ## The row of a person's goods under screen point `p`, -1 for none.
@@ -66,13 +81,16 @@ func row_at(p: Vector2) -> int:
 func _draw() -> void:
 	if view == null or view.session == null:
 		return
+	_hits.clear()
+	_hover.clear()
 	var size := get_viewport_rect().size
 	_draw_title(size)
 	_draw_airlock(size)
+	_draw_feeds()
 	_draw_tracker(size)
-	_draw_tracers()
-	_draw_arms(size)
-	_draw_party(size)
+	_draw_cross()
+	Cards.draw_weapons(self, size)
+	Cards.draw_cards(self, size)
 	_draw_feed(size)
 	_draw_reveals(size)
 	_draw_prompt(size)
@@ -82,8 +100,10 @@ func _draw() -> void:
 		_centred(view.message, Vector2(size.x / 2.0, size.y - 150.0), 18, AMBER)
 	if view.session.hollow:
 		_centred(str(Arms.cfg()["hollow"]["banner"]), Vector2(size.x / 2.0, 118.0), 20, Color("#c9b8ff"))
-	_draw_picker(size)
+	if view.picking:
+		Loadout.draw(self, size)
 	_draw_fade(size)
+	_draw_hover(size)
 
 
 func _font() -> Font:
@@ -145,7 +165,7 @@ func _draw_airlock(size: Vector2) -> void:
 
 ## The motion tracker: rings every 5 cells of the 25 it reaches, the sweep, and the blips fading behind it.
 func _draw_tracker(size: Vector2) -> void:
-	var c := Vector2(TRACKER_PAD + TRACKER_R, size.y - TRACKER_PAD - TRACKER_R)
+	var c := Vector2(TRACKER_PAD + TRACKER_R, Cards.top(size, 1 + view.session.party.size()) - 34.0 - TRACKER_R)  # (above the party cards)
 	var t: Tracker = view.tracker
 	draw_circle(c, TRACKER_R + 6.0, Color(PANEL_BG, 0.85))
 	draw_arc(c, TRACKER_R + 6.0, 0.0, TAU, 48, EDGE_DIM, 2.0, true)
@@ -191,7 +211,7 @@ func _draw_prompt(size: Vector2) -> void:
 			text = "E: leave through the airlock"
 			var down: Array = s.downed_party()
 			if view._leave_t > 0.0 and not down.is_empty():
-				text = "E: leave %s behind (lost for good)     Esc: stay" % ", ".join(down)
+				text = "E: leave %s behind (lost for good%s)     Esc: stay" % [", ".join(down), view.lost_note(down)]
 			at = view.to_screen(site.hatch_centre())
 		"container":
 			var p: Dictionary = site.props[t["id"]]
@@ -311,100 +331,11 @@ func _draw_panel(size: Vector2) -> void:
 		var col := CYAN if text.begins_with("Blueprint") else (AMBER if text.contains("keycard") or text.begins_with("Log") else TEXT)
 		_text("%d" % (i + 1), rr.position + Vector2(8.0, 20.0), 15, DIM_TEXT)
 		_text(text, rr.position + Vector2(30.0, 20.0), 17, col)
+		if entries[i].has("bonus"):  # the Salvage Rig's share, in the mod's colour
+			var tw := _font().get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 17).x
+			_text(str(entries[i]["bonus"]), rr.position + Vector2(30.0 + tw + 10.0, 20.0), 15, entries[i]["color"])
 	var pick := "1: take it" if entries.size() == 1 else "1-%d: take one" % entries.size()
 	_text("E: take all     %s     Esc: close" % pick, r.position + Vector2(16.0, h - 12.0), 14, DIM_TEXT)
-
-
-## The lines the shots drew: his in a warm white, a foe's in red.
-func _draw_tracers() -> void:
-	var life := float(Arms.cfg()["tracer_s"])
-	for t in view.tracers:
-		var a := clampf(1.0 - float(t["t"]) / life, 0.0, 1.0)
-		var col := Color(1.0, 0.45, 0.35, a) if t["foe"] else Color(1.0, 0.95, 0.7, a)
-		draw_line(view.to_screen(t["from"]), view.to_screen(t["to"]), col, 2.0)
-
-
-## His health and weapon (bottom right, over what was taken): "HP 80", the weapon, rounds in it / in the hold, and the other weapon he carries.
-func _draw_arms(size: Vector2) -> void:
-	var s = view.session
-	var m = s.soldier
-	var g: Dictionary = s.gun()
-	var x := size.x - 300.0
-	var y := size.y - 24.0 - 28.0 * float(view.feed.size())
-	var hp_f := clampf(m.hp / maxf(m.max_hp, 1.0), 0.0, 1.0)
-	draw_rect(Rect2(x, y - 74.0, 276.0, 70.0), Color(PANEL_BG, 0.85))
-	draw_rect(Rect2(x, y - 74.0, 276.0, 70.0), EDGE_DIM, false, 1.5)
-	draw_rect(Rect2(x + 12.0, y - 64.0, 252.0, 8.0), ROW_BG)
-	draw_rect(Rect2(x + 12.0, y - 64.0, 252.0 * hp_f, 8.0), GOOD if hp_f > 0.5 else (AMBER if hp_f > 0.25 else BAD))
-	_text(str(g["w"]["name"]), Vector2(x + 12.0, y - 36.0), 16, TEXT)
-	var ammo := ""
-	if Arms.has_mag(g):
-		ammo = "%d / %d" % [int(g["mag"]), s.reserve()]
-		if float(g["reload"]) > 0.0:
-			ammo = "reloading"
-	else:
-		ammo = "melee"
-	var col := TEXT if Arms.has_mag(g) and int(g["mag"]) > 0 else (BAD if Arms.has_mag(g) else DIM_TEXT)
-	var w := _font().get_string_size(ammo, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
-	_text(ammo, Vector2(x + 264.0 - w, y - 34.0), 20, col)
-	if s.guns.size() > 1:
-		_text("Q: %s" % str(s.guns[1 - s.cur]["w"]["name"]), Vector2(x + 12.0, y - 14.0), 13, DIM_TEXT)
-	_text("R reload   F light", Vector2(x + 150.0, y - 14.0), 13, DIM_TEXT)
-	var at: Vector2 = view.aim_screen()
-	draw_arc(at, 9.0, 0.0, TAU, 20, Color(TEXT, 0.7), 1.5, true)
-	draw_circle(at, 1.5, Color(TEXT, 0.9))
-
-
-## The crew who came along (top left): name and a small health bar; a downed one is marked in red, and in the world by a cross.
-func _draw_party(size: Vector2) -> void:
-	var y := 84.0
-	for p in view.session.party:
-		var m = p["m"]
-		var f := clampf(m.hp / maxf(m.max_hp, 1.0), 0.0, 1.0)
-		draw_rect(Rect2(16.0, y, 168.0, 34.0), Color(PANEL_BG, 0.82))
-		draw_rect(Rect2(16.0, y, 168.0, 34.0), EDGE_DIM if not m.is_down() else BAD, false, 1.5)
-		_text(str(m.name), Vector2(26.0, y + 16.0), 15, TEXT)
-		draw_rect(Rect2(26.0, y + 23.0, 148.0, 5.0), ROW_BG)
-		draw_rect(Rect2(26.0, y + 23.0, 148.0 * f, 5.0), GOOD if f > 0.5 else (AMBER if f > 0.25 else BAD))
-		if m.is_down():
-			_text("DOWN", Vector2(130.0, y + 16.0), 13, BAD)
-			var at: Vector2 = view.to_screen(m.pos)
-			if Rect2(Vector2.ZERO, size).has_point(at):
-				draw_line(at + Vector2(-9.0, -9.0), at + Vector2(9.0, 9.0), BAD, 3.0)
-				draw_line(at + Vector2(9.0, -9.0), at + Vector2(-9.0, 9.0), BAD, 3.0)
-		y += 40.0
-
-
-## Before going aboard: which crew come along.
-func _draw_picker(size: Vector2) -> void:
-	_pick_rows.clear()
-	_go = Rect2()
-	if not view.picking:
-		return
-	var rows: Array = view.pick_rows()
-	var cap := int(Arms.cfg()["party_max"])
-	var w := 460.0
-	var h := 96.0 + ROW_H * rows.size() + 44.0
-	var r := Rect2(Vector2(size.x / 2.0 - w / 2.0, size.y / 2.0 - h / 2.0), Vector2(w, h))
-	draw_rect(r, Color(PANEL_BG, 0.96))
-	draw_rect(r, EDGE, false, 2.0)
-	_text("Take crew along?", r.position + Vector2(18.0, 32.0), 22, TEXT)
-	_text("Up to %d. Crew who are down when you leave are lost." % cap, r.position + Vector2(18.0, 56.0), 14, DIM_TEXT)
-	for i in rows.size():
-		var rr := Rect2(r.position + Vector2(12.0, 70.0 + ROW_H * i), Vector2(w - 24.0, ROW_H - 4.0))
-		_pick_rows.append(rr)
-		var on: bool = view.pick.has(rows[i]["name"])
-		draw_rect(rr, ROW_BG if not on else Color(GOOD, 0.3))
-		if on:
-			draw_rect(rr, GOOD, false, 1.5)
-		_text("%d" % (i + 1), rr.position + Vector2(8.0, 20.0), 15, DIM_TEXT)
-		_text("%s   %s" % [rows[i]["name"], str(rows[i]["species"]).capitalize()], rr.position + Vector2(30.0, 20.0), 17, TEXT)
-		_text("%d/%d" % [roundi(rows[i]["hp"]), roundi(rows[i]["max_hp"])], rr.position + Vector2(w - 90.0, 20.0), 15, DIM_TEXT)
-	_go = Rect2(r.position + Vector2(w - 150.0, h - 42.0), Vector2(132.0, 30.0))
-	draw_rect(_go, Color(AIRLOCK, 0.35))
-	draw_rect(_go, AIRLOCK, false, 1.5)
-	_text("Go aboard", _go.position + Vector2(20.0, 21.0), 17, TEXT)
-	_text("1-9: pick     Enter: go     Esc: alone", r.position + Vector2(18.0, h - 22.0), 13, DIM_TEXT)
 
 
 ## After the soldier goes down the screen fades out, with where he wakes.
@@ -415,3 +346,49 @@ func _draw_fade(size: Vector2) -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.0, 0.0, 0.0, f))
 	if f >= 0.6:
 		_centred(str(Arms.cfg()["down_text"]), size / 2.0, 24, TEXT)
+
+
+## The crosshair at the aim.
+func _draw_cross() -> void:
+	var at: Vector2 = view.aim_screen()
+	draw_arc(at, 9.0, 0.0, TAU, 20, Color(TEXT, 0.7), 1.5, true)
+	draw_circle(at, 1.5, Color(TEXT, 0.9))
+
+
+## The Spotter Cam's rooms read as a camera feed: corner brackets and a label, in the mod's colour.
+func _draw_feeds() -> void:
+	var col := Mods.color("spotter_cam")
+	for rid in view._cam_lights:
+		var e := float(view._cam_energy.get(rid, 0.0))
+		if e < 0.05:
+			continue
+		var rect: Rect2i = view.session.site.rooms[rid]["rect"]
+		var a: Vector2 = view.to_screen(Vector2(rect.position) - Vector2(0.4, 0.4))
+		var b: Vector2 = view.to_screen(Vector2(rect.end) + Vector2(0.4, 0.4))
+		var c := Color(col, minf(e * 1.6, 0.8))
+		var k := 14.0
+		for corner in [[a, Vector2(1, 1)], [Vector2(b.x, a.y), Vector2(-1, 1)], [Vector2(a.x, b.y), Vector2(1, -1)], [b, Vector2(-1, -1)]]:
+			draw_line(corner[0], corner[0] + Vector2(k * corner[1].x, 0), c, 2.0)
+			draw_line(corner[0], corner[0] + Vector2(0, k * corner[1].y), c, 2.0)
+		_text("CAM", a + Vector2(6, 16), 11, c)
+
+
+## The note of the icon the mouse is on: its lines, wrapped, on a panel edged in the icon's colour.
+func _draw_hover(size: Vector2) -> void:
+	var mouse := get_local_mouse_position()
+	for i in range(_hover.size() - 1, -1, -1):
+		var h: Array = _hover[i]
+		if not h[0].has_point(mouse):
+			continue
+		var lines := PackedStringArray()
+		for t in h[1]:
+			lines.append_array(UiKit.wrap(str(t), 300.0, 12))
+		var w := 16.0
+		for l in lines:
+			w = maxf(w, UiKit.text_width(l, 12) + 16.0)
+		var ht := float(lines.size()) * 16.0 + 12.0
+		var at := Vector2(clampf(h[0].position.x, 4.0, size.x - w - 4.0), h[0].position.y - ht - 6.0)
+		if at.y < 4.0:
+			at.y = h[0].end.y + 6.0
+		UiKit.note(self, lines, at, h[2])
+		return

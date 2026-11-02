@@ -111,9 +111,11 @@ const COLUMNS: Array = [
 			["PgUp / PgDn", "Scroll fast"],
 			["Click a queued job", "Cancel it"],
 			["U", "Debug: unlock a random blueprint"],
+			["M", "Debug: the nine boarding mods into the hold"],
 			["C / Esc", "Close it"],
 		]],
 		["BOARDING (an event's Board her)", [
+			["Airlock screen", "Pick up to 2 crew; set weapons, body gear, mods"],
 			["Mouse R Q F", "Aboard: fire, reload, swap, light"],
 			["E (hold)", "Open, hack, revive; airlock: leave"],
 		]],

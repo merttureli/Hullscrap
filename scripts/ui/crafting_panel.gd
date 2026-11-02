@@ -19,6 +19,7 @@ const Describe = preload("res://scripts/ui/describe.gd")
 const Content = preload("res://scripts/data/content.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Mods = preload("res://scripts/board/mods.gd")
 
 const STATION_IDS: Array[String] = ["fabricator", "smelter"]  ## the tabs, in order
 const CATEGORIES: Array[String] = ["system", "gear", "material", "module"]
@@ -245,6 +246,18 @@ func debug_unlock() -> String:
 	return ""
 
 
+## Debug: one of every boarding mod, every tier (nine items), into the hold. Returns "" or why nothing happened.
+func debug_mods() -> String:
+	var s = ship()
+	if s == null:
+		return "no ship"
+	for id in Mods.ids():
+		for tier in [1, 2, 3]:
+			s.inventory.add(Mods.item_id(str(id), int(tier)), 1)
+	_say("The nine boarding mods are in the hold (debug)", false)
+	return ""
+
+
 func _say(text: String, bad: bool) -> void:
 	message = text
 	message_bad = bad
@@ -289,6 +302,8 @@ func _input(e: InputEvent) -> void:
 					craft_selected()
 				KEY_U:
 					debug_unlock()
+				KEY_M:
+					debug_mods()
 				KEY_SLASH, KEY_QUESTION:
 					help_open = not help_open
 
