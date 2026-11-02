@@ -30,6 +30,7 @@ const Hazards = preload("res://scripts/combat/hazards.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const RunStart = preload("res://scripts/space/run_start.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Boarding = preload("res://scripts/board/boarding.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -61,6 +62,7 @@ signal run_won(campaign, ending_id)
 var sim: Node  ## the ShipSim whose player ship travels
 var build: Node  ## the BuildMode (told about the new ship)
 var combat: Node  ## the combat view: fights started from events run there
+var board: Node  ## the boarding view (board_view.gd): the soldier goes aboard other vessels from events
 var campaign: Campaign
 var profile = null  ## the player's Profile (front_door.gd sets it): the campaigns write their unlocks and landmarks to it
 var event_panel: Control
@@ -76,6 +78,8 @@ var save_path := Campaign.SAVE_PATH  ## where the campaign is saved with the shi
 var damaged := 0  ## damaged blocks of the ship, refreshed after every action
 var _arrived := false  # the arrival at the start of this campaign has been played
 var _fighting := false  # a fight of ours is on
+var _boarding := false  # the soldier is aboard another vessel
+var _board_ev := {}  # the page he went aboard from: it opens again when he is back
 var _after_win := {}  # the after_win of the event that started it
 var _fight_node := ""  # the type of the node it was started at
 var _queue: Array[Callable] = []  # what comes after the event panel is done
@@ -91,12 +95,15 @@ func _ready() -> void:
 	sim = get_node_or_null("../../ShipSim")
 	build = get_node_or_null("../../BuildMode")
 	combat = get_node_or_null("../../Combat")
+	board = get_node_or_null("../../Board")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	visible = false
 	_ensure_panels()
 	if combat != null and combat.has_signal("finished"):
 		combat.finished.connect(_on_fight_finished)
+	if board != null and board.has_signal("finished"):
+		board.finished.connect(_on_board_finished)
 	_make_tide_hud.call_deferred()
 
 
@@ -127,6 +134,7 @@ func _ensure_panels() -> void:
 	event_panel.finished.connect(_on_events_finished)
 	event_panel.fight_requested.connect(_start_fight)
 	event_panel.ending_reached.connect(_on_ending)
+	event_panel.board_requested.connect(_start_board)
 	add_child(event_panel)
 	station_panel = StationPanel.new()
 	station_panel.map = self
@@ -528,8 +536,50 @@ func _on_fight_finished(result: Dictionary) -> void:
 		_queue.append(func(): event_panel.open_event(campaign.events.get_event(page)))
 	elif r["state"] in ["won", "captured"]:
 		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship(), null, int(r["threat"]))
+		if not salvage.is_empty() and sector_flow() and result.get("enemy") != null:  # the wreck can be boarded before the prize is cut out
+			var foe = result["enemy"]
+			var parts: Array = Salvage.parts(foe)
+			parts.resize(mini(parts.size(), Boarding.WRECK_PARTS))
+			salvage = Boarding.offer(salvage, "wreck", {"name": str(foe.name) if str(foe.name) not in ["", "Ship"] else "", "parts": parts}, false)
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
+
+
+# --- boarding ---------------------------------------------------------------------------------------------------------------
+
+## An event outcome sent the soldier aboard another vessel (the `board` effect `spec`; `ev` is the page it was on). The site is the POI's (the wreck
+## a fight left is the newest of the sector's); the map and its panels give way to the boarding view until he is back.
+func _start_board(spec: Dictionary, ev: Dictionary) -> void:
+	var sector = _poi_sector if sector_flow() else null
+	var id := _poi
+	if str(spec.get("kind", "")) == "wreck" and sector != null and not sector.wrecks.is_empty():
+		id = str(sector.wrecks[-1]["id"])
+	var why := "no boarding view" if board == null else ("nothing to board" if sector == null or id == "" else "")
+	if why == "":
+		why = board.enter(Boarding.start(campaign, sector, id, spec, ship()))
+	if why != "":
+		_say("Cannot board: " + why, true)
+		event_panel.open_event(ev)
+		return
+	_boarding = true
+	_board_ev = ev
+	visible = false
+
+
+## The soldier is back. A cleared vessel is done with (its POI is done and its choice gone); else the page he left opens again.
+func _on_board_finished(result: Dictionary) -> void:
+	if not _boarding:
+		return
+	_boarding = false
+	visible = true
+	panel_only = sector_flow()
+	refresh()
+	var ev := _board_ev
+	_board_ev = {}
+	if bool(result["cleared"]) or ev.is_empty():
+		event_panel.open_notice(str(result["name"]), Boarding.cleared_text() if bool(result["cleared"]) else "You are back aboard.", result["said"])
+	else:
+		event_panel.open_event(ev)
 
 
 ## An outcome ended the run with ending `id`: it is won. The front door shows the ending screen and a new campaign waits behind it.

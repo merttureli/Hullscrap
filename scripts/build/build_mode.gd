@@ -81,6 +81,7 @@ var combat := false:  ## a fight is on (combat_view.gd): this node ignores input
 	set(v):
 		combat = v
 		_sync_pause()
+var save_block := ""  ## why the game cannot be saved now ("" = it can): the soldier is aboard another vessel (board_view.gd)
 var group: int = Group.TILES
 var tab: int = Palette.Tab.STRUCTURE  ## the palette tab on show
 var selected := ""  ## tile id
@@ -720,6 +721,10 @@ func _zoom(f: float) -> void:
 
 
 func _save() -> void:
+	if save_block != "":
+		message = save_block
+		Audio.fx(self, "error")
+		return
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f == null:
 		message = "could not write " + ProjectSettings.globalize_path(SAVE_PATH)

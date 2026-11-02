@@ -48,7 +48,8 @@ const Shops = preload("res://scripts/space/shops.gd")
 ## 8 adds `far` to each saved sector (the far POIs that are done, sector.gd); older saves have none done.
 ## 9 adds `crew_offers` (the events that add crew fired in this region, events.gd); older saves start with none.
 ## 10 drops `hull_loss` (there is no hull pool: the blocks are the health, structure.gd); an older save's is ignored.
-const VERSION := 10
+## 11 adds `boarded` to each saved sector (what the soldier opened and unlocked aboard a POI, boarding.gd); older saves have none.
+const VERSION := 11
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100

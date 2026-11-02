@@ -1,0 +1,115 @@
+{
+	"_doc": "Boarding (docs/BOARDING.md, scripts/board/). The sites the soldier explores on foot: a derelict, an abandoned station, a pirate nest, or the wreck of a ship you beat. All numbers are here. kinds: per site kind (the `board` effect's kind): bands (the layouts, one picked per site: R is a band of rooms, C a corridor between them), interior (the widest band, in cells), room_h and room_w (a room's inside size, [min, max]), hull (the enemy-table faction whose hull ops shape the outline; '' = the region's faction, else clans), weights of the room purposes (airlock is always one room, picked from the rooms at either end of a band), min/max (rooms of a purpose a site has at least/most), hack and card (how many doors are locked, [min, max]: a hack door opens after holding E for `hack_s`; a card door wants the keycard that lies in a container of a room the airlock reaches without it), loop (the chance a pair of side-by-side rooms get a door between them), emergency (the chance a room has a red emergency light), prop_mult (x the props of every room), loot_mult (x the counts of every roll), locked_bonus (x the props of a room behind a locked door), blueprints (the chance of 0, 1, 2 blueprints in the site), logs ([min, max] derelict logs on offer), bonus (outcomes added to every container table of the kind), names (pool for the site's name). props: the site-only layer. size [w, h] (a pallet lies along a wall: it turns), blocks (the soldier cannot walk through), loot (a container: it has contents), rolls ([min, max] rolls of its table), hold (seconds of holding E to open it), table (a table that is not the room's purpose's), bp (weight of holding a blueprint), log (weight of holding a log). rooms: per purpose, the props it gets as [{prop, n: [min, max]}] and the tint it is drawn with; bp is the weight of the room for a blueprint. tables: weighted outcomes as in data/debris.json `roll` ({weight, item, count: [min, max]}); item is a material, an item or a part (cargo), credits or fuel. blueprint: weights of the recipe levels (fab_level 1-3) by the campaign's tier. A blueprint slot becomes a recipe the ship does not know when the container is opened, else `fallback`.",
+	"offer": {
+		"derelict": {"text": "Board her.", "flavor": "You seal your suit, cycle the lock and step across. Her lights are out. Yours are not much better."},
+		"station": {"text": "Board the station.", "flavor": "The old docking collar takes your hull with a groan. The corridor beyond is dark, and a long way from anything."},
+		"nest": {"text": "Board the nest.", "flavor": "You go in quiet. Somebody lives here, or did until very recently."},
+		"wreck": {"text": "Board the wreck.", "flavor": "The cutters have opened her flank already. You climb through the gap, into the dark."}
+	},
+	"leave_text": "Leave her be.",
+	"cleared_text": "Every locker, crate and drawer is open. There is nothing left aboard worth the air.",
+	"hack_s": 4.0,
+	"reach": 2.6,
+	"airlock_reach": 3.4,
+	"ring_cells": 1,
+	"kinds": {
+		"derelict": {
+			"name": "Derelict", "bands": ["RCR", "RCR", "RC"], "interior": [26, 32], "room_h": [5, 6], "room_w": [5, 10], "hull": "",
+			"weights": {"quarters": 3, "storage": 3, "cargo": 2, "engineering": 2, "medbay": 1, "command": 1},
+			"min": {"command": 1, "storage": 1}, "max": {"command": 1, "medbay": 1, "engineering": 2},
+			"hack": [0, 1], "card": [0, 1], "loop": 0.3, "emergency": 0.25, "prop_mult": 0.65, "loot_mult": 1.0, "locked_bonus": 1.5,
+			"blueprints": {"0": 0.7, "1": 0.3}, "logs": [1, 2], "bonus": [],
+			"names": ["Hulk", "Drifter", "Dead Freighter", "Ghost Hauler", "Cold Tug", "Lost Cutter"]
+		},
+		"station": {
+			"name": "Station", "bands": ["RCRCR"], "interior": [52, 60], "room_h": [5, 6], "room_w": [6, 11], "hull": "",
+			"weights": {"quarters": 3, "storage": 2, "cargo": 2, "engineering": 2, "medbay": 2, "command": 2},
+			"min": {"command": 1, "medbay": 1, "engineering": 1, "storage": 1}, "max": {"command": 2, "medbay": 2, "engineering": 3},
+			"hack": [1, 3], "card": [1, 2], "loop": 0.35, "emergency": 0.3, "prop_mult": 0.6, "loot_mult": 1.2, "locked_bonus": 1.6,
+			"blueprints": {"0": 0.12, "1": 0.76, "2": 0.12}, "logs": [2, 4], "bonus": [],
+			"names": ["Waystation", "Relay Platform", "Survey Post", "Ring Habitat", "Depot", "Outpost"]
+		},
+		"nest": {
+			"name": "Pirate nest", "bands": ["RCR"], "interior": [34, 40], "room_h": [5, 6], "room_w": [5, 9], "hull": "rustfangs",
+			"weights": {"quarters": 3, "storage": 3, "cargo": 3, "engineering": 1, "medbay": 1, "command": 1},
+			"min": {"storage": 1, "cargo": 1}, "max": {"command": 1, "medbay": 1, "engineering": 1},
+			"hack": [0, 2], "card": [0, 1], "loop": 0.4, "emergency": 0.15, "prop_mult": 0.5, "loot_mult": 1.3, "locked_bonus": 1.5,
+			"blueprints": {"0": 0.7, "1": 0.3}, "logs": [0, 1],
+			"bonus": [{"weight": 10, "item": "credits", "count": [8, 24]}, {"weight": 8, "item": "missile", "count": [1, 3]}],
+			"names": ["Rat Hole", "Scrap Roost", "Bone Yard Annex", "Pirate Nest", "Chop Shop", "Dredge Den"]
+		},
+		"wreck": {
+			"name": "Wreck", "bands": ["RCR", "RC"], "interior": [24, 28], "room_h": [5, 6], "room_w": [5, 9], "hull": "",
+			"weights": {"quarters": 2, "storage": 2, "cargo": 2, "engineering": 3, "medbay": 1, "command": 1},
+			"min": {"command": 1, "engineering": 1}, "max": {"command": 1, "medbay": 1},
+			"hack": [0, 1], "card": [0, 0], "loop": 0.3, "emergency": 0.5, "prop_mult": 0.7, "loot_mult": 1.0, "locked_bonus": 1.4,
+			"blueprints": {"0": 0.75, "1": 0.25}, "logs": [0, 1], "bonus": [],
+			"names": ["Wreck"]
+		}
+	},
+	"props": {
+		"crate": {"name": "Crate", "size": [1, 1], "blocks": true, "loot": true, "rolls": [1, 2], "hold": 1.0, "bp": 1.0, "log": 0.5},
+		"locker": {"name": "Locker", "size": [1, 1], "blocks": true, "loot": true, "rolls": [1, 2], "hold": 1.5, "bp": 2.0, "log": 1.0},
+		"cabinet": {"name": "Cabinet", "size": [1, 1], "blocks": true, "loot": true, "rolls": [1, 2], "hold": 1.2, "bp": 2.0, "log": 1.5},
+		"pallet": {"name": "Cargo pallet", "size": [2, 1], "blocks": true, "loot": true, "rolls": [2, 3], "hold": 2.0, "bp": 0.5, "log": 0.2},
+		"terminal": {"name": "Terminal", "size": [1, 1], "blocks": true, "loot": true, "rolls": [1, 1], "hold": 1.5, "table": "terminal", "bp": 5.0, "log": 8.0},
+		"body": {"name": "Body", "size": [1, 1], "blocks": false, "loot": true, "rolls": [1, 1], "hold": 1.0, "table": "body", "bp": 0.5, "log": 0.5},
+		"cable": {"name": "Sparking cable", "size": [1, 1], "blocks": false, "loot": false, "rolls": [0, 0], "hold": 0.0}
+	},
+	"rooms": {
+		"quarters": {"tint": "#6a7fa8", "bp": 0.8, "props": [{"prop": "locker", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 1]}, {"prop": "crate", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]},
+		"storage": {"tint": "#a88a5a", "bp": 1.0, "props": [{"prop": "crate", "n": [2, 4]}, {"prop": "pallet", "n": [0, 1]}, {"prop": "cabinet", "n": [0, 1]}, {"prop": "cable", "n": [0, 1]}]},
+		"cargo": {"tint": "#b0a070", "bp": 1.0, "props": [{"prop": "pallet", "n": [1, 2]}, {"prop": "crate", "n": [1, 3]}, {"prop": "body", "n": [0, 1]}]},
+		"medbay": {"tint": "#6fb89a", "bp": 1.2, "props": [{"prop": "cabinet", "n": [1, 2]}, {"prop": "locker", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]},
+		"command": {"tint": "#8a7ac8", "bp": 3.0, "props": [{"prop": "terminal", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 1]}, {"prop": "locker", "n": [0, 1]}]},
+		"engineering": {"tint": "#c8845a", "bp": 2.5, "props": [{"prop": "crate", "n": [1, 2]}, {"prop": "locker", "n": [1, 1]}, {"prop": "terminal", "n": [0, 1]}, {"prop": "cable", "n": [1, 3]}]},
+		"airlock": {"tint": "#58c878", "bp": 0.0, "props": [{"prop": "locker", "n": [0, 1]}]},
+		"corridor": {"tint": "#8a94a6", "bp": 0.0, "props": [{"prop": "cable", "n": [0, 2]}, {"prop": "body", "n": [0, 1]}]}
+	},
+	"blueprint": {
+		"levels": {"1": [6, 3, 1], "2": [3, 5, 2], "3": [1, 4, 5]},
+		"skip": ["missile"],
+		"fallback": {"titanium": [2, 4], "silicon": [1, 3]}
+	},
+	"log_fallback": {"credits": [10, 25]},
+	"tables": {
+		"storage": [
+			{"weight": 34, "item": "scrap", "count": [4, 10]}, {"weight": 22, "item": "copper", "count": [2, 5]}, {"weight": 18, "item": "polymer", "count": [2, 4]},
+			{"weight": 6, "item": "titanium", "count": [1, 3]}, {"weight": 4, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "missile", "count": [1, 2]}, {"weight": 1.5, "item": "fuel", "count": [1, 1]}
+		],
+		"cargo": [
+			{"weight": 24, "item": "scrap", "count": [4, 9]}, {"weight": 18, "item": "copper", "count": [3, 6]}, {"weight": 14, "item": "polymer", "count": [2, 5]},
+			{"weight": 8, "item": "titanium", "count": [1, 3]}, {"weight": 5, "item": "silicon", "count": [1, 3]}, {"weight": 7, "item": "missile", "count": [1, 3]},
+			{"weight": 3, "item": "radiator", "count": [1, 1]}, {"weight": 3, "item": "ammo_rack", "count": [1, 1]}, {"weight": 2, "item": "oxygen_gen", "count": [1, 1]},
+			{"weight": 2, "item": "engine_mk1", "count": [1, 1]}, {"weight": 1, "item": "shield_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "fuel", "count": [1, 1]}
+		],
+		"engineering": [
+			{"weight": 26, "item": "copper", "count": [3, 6]}, {"weight": 22, "item": "scrap", "count": [4, 8]}, {"weight": 10, "item": "silicon", "count": [1, 3]},
+			{"weight": 8, "item": "titanium", "count": [1, 3]}, {"weight": 3, "item": "crystal", "count": [1, 1]}, {"weight": 1.5, "item": "plasma_cell", "count": [1, 1]},
+			{"weight": 2, "item": "fuel", "count": [1, 1]}, {"weight": 2, "item": "reactor_mk1", "count": [1, 1]}, {"weight": 2, "item": "engine_mk1", "count": [1, 1]},
+			{"weight": 3, "item": "radiator", "count": [1, 1]}, {"weight": 1, "item": "afterburner", "count": [1, 1]}
+		],
+		"medbay": [
+			{"weight": 30, "item": "polymer", "count": [2, 5]}, {"weight": 15, "item": "credits", "count": [3, 12]}, {"weight": 2, "item": "nanite_paste", "count": [1, 1]},
+			{"weight": 3, "item": "basic_armor", "count": [1, 1]}, {"weight": 2, "item": "crystal", "count": [1, 1]}, {"weight": 10, "item": "scrap", "count": [2, 5]}, {"weight": 1, "item": "medbay", "count": [1, 1]}
+		],
+		"command": [
+			{"weight": 30, "item": "credits", "count": [8, 30]}, {"weight": 14, "item": "silicon", "count": [1, 3]}, {"weight": 6, "item": "crystal", "count": [1, 2]},
+			{"weight": 10, "item": "copper", "count": [2, 5]}, {"weight": 3, "item": "plasma_cell", "count": [1, 1]}, {"weight": 2, "item": "radar_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "pulse_mk1", "count": [1, 1]}
+		],
+		"quarters": [
+			{"weight": 30, "item": "credits", "count": [2, 10]}, {"weight": 15, "item": "polymer", "count": [2, 4]}, {"weight": 15, "item": "scrap", "count": [3, 7]},
+			{"weight": 8, "item": "copper", "count": [2, 4]}, {"weight": 3, "item": "pistol", "count": [1, 1]}, {"weight": 3, "item": "basic_armor", "count": [1, 1]}, {"weight": 1, "item": "eva_suit", "count": [1, 1]}
+		],
+		"airlock": [
+			{"weight": 30, "item": "scrap", "count": [2, 6]}, {"weight": 20, "item": "polymer", "count": [1, 3]}, {"weight": 6, "item": "eva_suit", "count": [1, 1]}, {"weight": 10, "item": "copper", "count": [1, 3]}
+		],
+		"terminal": [
+			{"weight": 60, "item": "credits", "count": [6, 24]}, {"weight": 10, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "copper", "count": [1, 3]}
+		],
+		"body": [
+			{"weight": 30, "item": "credits", "count": [2, 8]}, {"weight": 20, "item": "scrap", "count": [1, 3]}, {"weight": 10, "item": "polymer", "count": [1, 2]},
+			{"weight": 6, "item": "pistol", "count": [1, 1]}, {"weight": 6, "item": "missile", "count": [1, 1]}
+		]
+	}
+}

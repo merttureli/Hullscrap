@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/build/build_mode.gd" id="1_build"]
 [ext_resource type="Script" path="res://scripts/space/starfield.gd" id="2_stars"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/view/debris_view.gd" id="9_debris"]
 [ext_resource type="Script" path="res://scripts/view/sector_view.gd" id="10_sector"]
 [ext_resource type="Script" path="res://scripts/audio/audio.gd" id="11_audio"]
+[ext_resource type="Script" path="res://scripts/board/board_view.gd" id="12_board"]
 
 [node name="Main" type="Node2D"]
 
@@ -37,6 +38,9 @@ script = ExtResource("4_sim")
 
 [node name="Combat" type="Node2D" parent="."]
 script = ExtResource("5_combat")
+
+[node name="Board" type="Node2D" parent="."]
+script = ExtResource("12_board")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(0.5, 0.5)
