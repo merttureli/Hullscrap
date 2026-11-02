@@ -4,6 +4,8 @@ extends "res://tests/base_test.gd"
 ## danger tiers, the station trades, saving and loading, and the data files that feed it. The region graph itself is
 ## tests/test_regions.gd.
 
+const Structure = preload("res://scripts/ship/structure.gd")
+const StructureUtil = preload("res://tests/structure_util.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Drift = preload("res://scripts/space/drift.gd")
@@ -202,18 +204,18 @@ func test_no_fuel_refuses_the_jump() -> void:
 	eq([c.jumps, c.current], [0, "rusthold"], "nowhere moved")
 
 
-func test_a_drift_jump_costs_hull_integrity_instead_of_fuel() -> void:
+func test_a_drift_jump_damages_the_blocks_instead_of_using_fuel() -> void:
 	var c := _camp(2)
 	var ship := _ship()
 	check(not _jump(c, _next(c), ship, true)["ok"], "not while there is fuel")
 	ship.inventory.counts.erase("fuel")
-	var top := c.hull_max(ship)
+	var top := Structure.totals(ship).x
 	var to := _next(c)
 	var r := _jump(c, to, ship, true)
 	check(r["ok"] and r["drift"], "allowed with an empty tank")
-	eq(c.hull_left(ship), top - 15, "15 hull integrity")
+	eq(roundi(top - Structure.totals(ship).x), 15, "15 hp of damage on the blocks")
 	eq([c.jumps, c.current], [1, to], "and the jump counted")
-	c.hull_loss = top - 10
+	StructureUtil.set_structure(ship, Structure.defeat_below() + 0.01)  # a hair over the wreck line
 	check(not _jump(c, _next(c), ship, true)["ok"], "a hull too weak to survive it refuses")
 
 
@@ -382,22 +384,33 @@ func test_at_plus_five_prices_are_twenty_percent_off() -> void:
 	eq(c.price(100, "concord"), 100, "only that faction's stations")
 	var ship := _ship()
 	var credits := ship.inventory.count("credits")
-	check(c.buy_fuel(ship, "rusthold", 5)["ok"], "5 fuel")
-	eq(ship.inventory.count("credits"), credits - 35, "at 7 credits each")
+	var left := c.fuel_left("rusthold")
+	check(left >= 2, "a visit has some fuel on sale")
+	check(c.buy_fuel(ship, "rusthold", left)["ok"], "all of it")
+	eq(ship.inventory.count("credits"), credits - left * c.price(int(c.cfg["fuel"]["price"]), "clans"), "at the discounted price each")
+	eq(c.price(int(c.cfg["fuel"]["price"]), "clans"), 12, "14 credits less 20% (11.2), rounded up")
 
 
 # --- stations ---------------------------------------------------------------------------------------------------------------------
 
-func test_buy_fuel_at_eight_credits_a_can() -> void:
+func test_buy_fuel_at_fourteen_credits_a_can_from_a_small_stock() -> void:
 	var c := _camp()
 	var ship := _ship()
 	var credits := ship.inventory.count("credits")
-	var r := c.buy_fuel(ship, "rusthold", 3)
+	var left := c.fuel_left("rusthold")
+	check(left >= 2 and left <= 4, "2 to 4 units on sale a visit: %d" % left)
+	var r := c.buy_fuel(ship, "rusthold", 2)
 	check(r["ok"], r["text"])
-	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [9, credits - 24], "3 fuel for 24")
+	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [8, credits - 28], "2 fuel for 28")
+	eq(c.fuel_left("rusthold"), left - 2, "and the stock went down")
+	var more := c.buy_fuel(ship, "rusthold", 9)
+	check(more["ok"], "asking for more buys what is left")
+	eq(ship.inventory.count("fuel"), 6 + left, "the rest of the stock and no more")
+	check(not c.buy_fuel(ship, "rusthold", 1)["ok"] and c.fuel_left("rusthold") == 0, "sold out: " + str(c.buy_fuel(ship, "rusthold", 1)["text"]))
 	ship.inventory.counts.erase("credits")
+	c.fuel_stock.erase("rusthold")
 	check(not c.buy_fuel(ship, "rusthold", 1)["ok"], "no credits, no fuel")
-	eq(ship.inventory.count("fuel"), 9, "nothing given")
+	eq(ship.inventory.count("fuel"), 6 + left, "nothing given")
 
 
 func test_sell_an_item_at_half_its_value() -> void:
@@ -445,21 +458,22 @@ func test_pay_the_debt_at_a_station() -> void:
 	check(not ("debt" in c.station_cfg("meridian")["services"]), "Meridian does not")
 
 
-func test_repair_hull_integrity_at_two_credits_a_point() -> void:
+func test_repair_all_blocks_at_two_credits_an_hp() -> void:
 	var c := _camp()
 	var ship := _ship()
-	check(not c.repair(ship, "rusthold", 5)["ok"], "a sound hull needs nothing")
-	c.hull_loss = 30
+	check(not c.repair(ship, "rusthold")["ok"], "sound blocks need nothing")
+	eq(c.hurt_blocks(ship, 30), 30, "30 hp of damage")
+	eq(Structure.missing_hp(ship), 30.0, "30 hp missing")
 	var credits := ship.inventory.count("credits")
-	var r := c.repair(ship, "rusthold", 10)
+	eq(c.repair_cost(ship, "rusthold"), 60, "2 credits an hp")
+	var r := c.repair(ship, "rusthold")
 	check(r["ok"], r["text"])
-	eq([c.hull_loss, ship.inventory.count("credits")], [20, credits - 20], "10 points for 20 credits")
-	c.repair(ship, "rusthold", 1000)
-	eq(c.hull_loss, 0, "all of it, no more than is missing")
-	eq(ship.inventory.count("credits"), credits - 60, "30 points in all for 60")
-	c.hull_loss = 50
+	eq(ship.inventory.count("credits"), credits - 60, "30 hp in all for 60")
+	eq([Structure.missing_hp(ship), Structure.damaged(ship).size(), Structure.structure_fraction(ship)], [0.0, 0, 1.0], "every block is whole again")
+	c.hurt_blocks(ship, 50)
 	ship.inventory.counts.erase("credits")
-	check(not c.repair(ship, "rusthold", 5)["ok"], "no credits, no repair")
+	check(not c.repair(ship, "rusthold")["ok"], "no credits, no repair")
+	eq(Structure.missing_hp(ship), 50.0, "and nothing mended")
 
 
 func test_recruit_for_the_hiring_price() -> void:
@@ -530,7 +544,6 @@ func test_save_and_load_round_trip_and_the_rng_carries_on() -> void:
 	c.flags["met_ma"] = true
 	c.rep["lumen"] = 3
 	c.used["x"] = true
-	c.hull_loss = 12
 	c.paid = 100
 	c.debt = 900
 	c.revealed["meridian"] = true
@@ -538,7 +551,7 @@ func test_save_and_load_round_trip_and_the_rng_carries_on() -> void:
 	var back := _camp(1)
 	eq(back.load_dict(d), "", "loaded")
 	eq(JSON.stringify(back.to_dict()), JSON.stringify(c.to_dict()), "everything survived")
-	eq([back.current, back.jumps, back.debt, back.hull_loss, back.rep["lumen"]], [c.current, 4, 900, 12, 3], "the numbers")
+	eq([back.current, back.jumps, back.debt, back.rep["lumen"]], [c.current, 4, 900, 3], "the numbers")
 	eq(back.drift.lanes, c.drift.lanes, "the lanes")
 	var roll_a := []
 	var roll_b := []
@@ -816,7 +829,7 @@ func test_event_panel_keys_clicks_and_greyed_rows() -> void:
 	check(not panel.visible, "the Continue button ends it")
 	panel.open_event(map.campaign.events.get_event("trader_fuel_peddler"))
 	_press(panel, KEY_2)
-	eq(ship.inventory.count("fuel"), fuel + 4, "key 2 buys three more")
+	eq(ship.inventory.count("fuel"), fuel + 3, "key 2 buys two more")
 	_free_screen(d)
 
 
@@ -851,11 +864,10 @@ func test_a_fight_from_an_event_starts_combat_and_calls_back_with_the_result() -
 	check(not map.visible, "the map steps aside")
 	var credits := ship.inventory.count("credits")
 	var foe: Ship = Ship.from_design("res://data/ships/pirate_raider.json")
-	fake.finished.emit({"state": "won", "enemy": foe, "hull": 200.0, "hull_max": 228.0})
+	fake.finished.emit({"state": "won", "enemy": foe})
 	check(map.visible and panel.visible, "back on the map with a page up")
 	check(panel.result["text"].contains("ledger") and panel.result["lines"].any(func(l): return l.begins_with("+")), "the after_win text and the loot are shown")
 	check(ship.inventory.count("credits") >= credits + 60, "the loot (and the 40 of the ledger) is in the cargo")
-	eq(map.campaign.hull_loss, 28, "the damage of the fight stays")
 	panel.proceed()
 	check(panel.visible and panel.event.get("id", "") == "salvage", "then the salvage pick of the enemy's surviving parts")
 	_free_screen(d)
@@ -883,8 +895,8 @@ func test_a_fight_the_map_did_not_start_is_ignored() -> void:
 	var fake: FakeCombat = d["fake"]
 	map.event_panel.close()
 	var jumps: int = map.campaign.jumps
-	fake.finished.emit({"state": "won", "enemy": null, "hull": 1.0, "hull_max": 2.0})
-	eq(map.campaign.hull_loss, 0, "the K-key test pirate gives no loot and changes nothing")
+	fake.finished.emit({"state": "won", "enemy": null})
+	eq(map.campaign.fights_won, 0, "the K-key test pirate gives no loot and changes nothing")
 	eq(map.campaign.jumps, jumps, "(nothing moved)")
 	_free_screen(d)
 
@@ -896,7 +908,7 @@ func test_station_menu_trades_pays_repairs_and_recruits() -> void:
 	var c: Campaign = map.campaign
 	var st: StationPanel = map.station_panel
 	map.event_panel.close()
-	c.hull_loss = 40
+	c.hurt_blocks(ship, 40)
 	c.cfg = c.cfg.duplicate(true)
 	c.cfg["prices"]["recruit_chance"] = 1.0
 	c.roll_offers("rusthold", ship)  # docking rolls them
@@ -906,10 +918,15 @@ func test_station_menu_trades_pays_repairs_and_recruits() -> void:
 	eq(rows0[0]["id"], "fuel", "BUY starts with fuel")
 	check(rows0.size() > 5, "and Rusthold's stock")
 	var credits := ship.inventory.count("credits")
+	var left: int = map.campaign.fuel_left("rusthold")
+	check(rows0[0]["label"].contains("%d left" % left), "the fuel row says how many are on sale: " + str(rows0[0]["label"]))
 	st.act(0, 0)
-	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [7, credits - 8], "one can of fuel for 8")
+	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [7, credits - 14], "one can of fuel for 14")
 	st.act(0, 0, MOUSE_BUTTON_RIGHT)
-	eq(ship.inventory.count("fuel"), 12, "right-click buys five")
+	eq(ship.inventory.count("fuel"), 7 + left - 1, "right-click buys five, or what the visit has left")
+	check(st.rows(0)[0]["label"].contains("sold out"), "and then it is sold out")
+	st.act(0, 0)
+	check(st.message_bad, "which says so")
 	ship.inventory.add("titanium", 10)
 	var sell := -1
 	for i in st.rows(1).size():
@@ -934,15 +951,16 @@ func test_station_menu_trades_pays_repairs_and_recruits() -> void:
 		match srv[i]["kind"]:
 			"pay":
 				pay = i
-			"repair":
+			"repair_all":
 				repair = i
 			"recruit":
 				recruit = i
 	credits = ship.inventory.count("credits")
 	st.act(2, pay)
 	eq([c.debt, ship.inventory.count("credits")], [900, credits - 100], "100 paid on the debt")
+	credits = ship.inventory.count("credits")
 	st.act(2, repair)
-	eq(c.hull_loss, 30, "10 points of hull repaired")
+	eq([Structure.missing_hp(ship), ship.inventory.count("credits")], [0.0, credits - 80], "all 40 hp mended for 80 credits")
 	var crew := ship.crew.size()
 	st.act(2, recruit)
 	eq(ship.crew.size(), crew + 1, "a recruit hired")

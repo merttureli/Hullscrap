@@ -64,7 +64,7 @@
           {"weight": 45, "text": "The chart is real, to everyone's surprise, including the Fenn's. He looks briefly ill about it. The lane at the end of it has a trader on it.", "effects": {"items": {"credits": -30}, "reveal": "trader"}}
         ]},
         {"text": "Haggle on the coffee ring.", "outcomes": [
-          {"weight": 100, "text": "You point out that the coffee ring is on every chart. The Fenn puts a hand over his heart and offers, in return for your discretion, a canister of fuel.", "effects": {"items": {"fuel": 1}}}
+          {"weight": 100, "text": "You point out that the coffee ring is on every chart. The Fenn puts a hand over his heart and offers, in return for your discretion, ten credits.", "effects": {"items": {"credits": 10}}}
         ]},
         {"text": "[Vellum] Read the chart's edges.", "requires": {"species": "vellum"}, "outcomes": [
           {"weight": 100, "text": "Your Vellum runs a thumb along the edge of a chart, reads it as easily as a family recipe, and goes quiet. 'They are all the same sheet,' they say. 'Cut seventeen ways. The real one is under the counter.' The Fenn goes the colour of tea. 'It was a very good sheet,' he says. 'It deserved to be seen.' He hands over the original in apology, with a roll of credits for your silence.", "effects": {"items": {"credits": 50}, "reveal": "trader"}}

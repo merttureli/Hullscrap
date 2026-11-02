@@ -2,6 +2,7 @@ extends "res://tests/base_test.gd"
 ## Combat rules added for the playable fight: flight from helm input, open doors, ammo, jams and heat
 ## per shot, firing opening the shooter's shield (sectors), and the overcharge.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
@@ -132,7 +133,7 @@ func test_open_doors_let_shots_pass_and_closed_ones_block() -> void:
 	check(a.fire(gun_ship, gun, aim), "fired again")
 	eq(s.grid.hp_of(Vector2i(3, 15)), 3.0, "the open door took nothing")
 	eq(s.grid.hp_of(Vector2i(8, 15)), 2.0, "the shot flew through to the wall behind")
-	check(a.ships[t].hull < a.ships[t].hull_max, "and the hull took it")
+	check(Structure.structure_fraction(a.ships[t]) < 1.0, "and the hull took it")
 
 
 # --- ammo, jams, heat ------------------------------------------------------------------------------

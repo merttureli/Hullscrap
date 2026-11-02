@@ -1,7 +1,7 @@
 extends Control
 ## The map of the Drift (M in play mode): the screen of the campaign. Click a node joined to yours by a
 ## lane to jump there (1 fuel, less with efficient engines: Campaign.jump_cost; Shift+click with an empty
-## tank is a drift jump that costs 15 hull integrity; T waits for a passing trader). The event of the node
+## tank is a drift jump that damages the hull; T waits for a passing trader). The event of the node
 ## opens in the event panel, a station opens its menu in the station panel (Enter or a click on your own
 ## node docks again). Esc or M closes the map. It owns the Campaign (campaign.gd, saved in
 ## user://campaign.json with the ship) and the three panels, and it carries the flow: jump, arrive, event,
@@ -17,6 +17,7 @@ extends Control
 ## at the POI (Sector.fight_spawn), and a won fight leaves its wreck as a POI to salvage instead of the salvage page.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
 const JournalPanel = preload("res://scripts/ui/journal_panel.gd")
@@ -72,7 +73,7 @@ var message := ""
 var message_bad := false
 var new_seed := 0  ## the seed of the next new campaign; 0 picks one
 var save_path := Campaign.SAVE_PATH  ## where the campaign is saved with the ship (tests point it elsewhere)
-var hull := Vector2i.ZERO  ## (left, max) hull integrity, refreshed after every action
+var damaged := 0  ## damaged blocks of the ship, refreshed after every action
 var _arrived := false  # the arrival at the start of this campaign has been played
 var _fighting := false  # a fight of ours is on
 var _after_win := {}  # the after_win of the event that started it
@@ -82,6 +83,7 @@ var panel_only := false  ## shown only to hold the event or station panel of a s
 var _poi := ""  # the id of the POI whose event is up (open_poi), "" when none
 var _poi_sector = null  # its sector
 var _dock := false  # its station menu opens when the event is done
+var _dock_id := ""  # the small shop it opens instead of the node's station (a Trader or Store POI, campaign.gd shop_id)
 var _exit_due := false  # the ship came to the exit beacon: the region choice opens once its events are done
 
 
@@ -225,11 +227,11 @@ func new_game(seed_value := 0) -> void:
 	refresh()
 
 
-## Refresh what the screen derives from the ship (the hull integrity).
+## Refresh what the screen derives from the ship (its damaged blocks).
 func refresh() -> void:
 	var s = ship()
 	if campaign != null and s != null:
-		hull = Vector2i(campaign.hull_left(s), campaign.hull_max(s))
+		damaged = Structure.damaged(s).size()
 
 
 func _say(text: String, bad := false) -> void:
@@ -237,7 +239,7 @@ func _say(text: String, bad := false) -> void:
 	message_bad = bad
 
 
-## Jump to node `id` (a click). `drift_jump`: the no-fuel jump that costs hull integrity. Clicking your
+## Jump to node `id` (a click). `drift_jump`: the no-fuel jump that damages the hull. Clicking your
 ## own node docks if there is a station. Returns "" or the reason it was refused.
 func click_node(id: String, drift_jump := false) -> String:
 	if campaign == null or id == "":
@@ -395,8 +397,8 @@ func _on_events_finished() -> void:
 			else:
 				_poi_resolve()
 			_open_exit()
-		elif _dock and campaign.dock_block(campaign.current) == "":
-			station_panel.open(campaign.current)
+		elif _dock and (_dock_id != "" or campaign.dock_block(campaign.current) == ""):
+			station_panel.open(_dock_id if _dock_id != "" else campaign.current)
 		else:
 			_poi_done()
 		_dock = false
@@ -423,6 +425,7 @@ func open_poi(res: Dictionary, sector) -> void:
 	_poi = str(res["poi"]["id"])
 	_poi_sector = sector
 	_dock = bool(res.get("dock", false))
+	_dock_id = str(res.get("shop", ""))
 	_exit_due = bool(res.get("exit", false)) or bool(res.get("warden", false))
 	panel_only = true
 	visible = true
@@ -437,7 +440,7 @@ func open_poi(res: Dictionary, sector) -> void:
 		_open_exit()
 	elif _dock:
 		_dock = false
-		station_panel.open(campaign.current)
+		station_panel.open(_dock_id if _dock_id != "" else campaign.current)
 	else:
 		_poi_done()
 
@@ -459,6 +462,7 @@ func _forget_poi() -> void:
 	_poi = ""
 	_poi_sector = null
 	_dock = false
+	_dock_id = ""
 
 
 func _hide_panels() -> void:
@@ -488,9 +492,7 @@ func _start_fight(value: String, after_win: Dictionary) -> void:
 			_poi_done()
 		return
 	var session = combat.get("session") if combat != null else null
-	if session != null:  # the fight starts with the integrity the campaign says is left
-		var mine = session.arena.ships[0]
-		mine.hull = campaign.fight_hull(mine.hull_max)
+	if session != null:  # the fight starts with the blocks as they are: damage is on them
 		session.arena.hazard = campaign.hazard_at(campaign.current)  # the node's sector hazard, if any (hazards.gd)
 	_fighting = true
 	_after_win = after_win
@@ -685,7 +687,8 @@ func _draw_status(p: Rect2) -> void:
 	_text("Fuel %d" % fuel, Vector2(x, y), 18, GOOD if fuel > 0 else BAD)
 	_text("Credits %d" % credits, Vector2(x + 100.0, y), 18, TEXT)
 	_text("Jumps %d" % campaign.jumps, Vector2(x + 230.0, y), 18, TEXT)
-	_text("Hull %d/%d" % [hull.x, hull.y], Vector2(x + 340.0, y), 18, TEXT if hull.x * 2 > hull.y else AMBER)
+	if damaged > 0:
+		_text("%d damaged" % damaged, Vector2(x + 340.0, y), 18, AMBER)
 	var owed := "Debt %d" % campaign.debt
 	var due := ""
 	if campaign.debt > 0 and not campaign.debt_running():

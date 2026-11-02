@@ -24,6 +24,7 @@ const POP_RISE := 48.0  ## world px it rises in that time
 const STAR_PARALLAX := 0.6  ## the nearest stars drift this fraction of the debris' screen speed
 const OUTLINE := Color(0.05, 0.06, 0.09)
 const PRESSURE_STEP := 0.02  ## how far the tide's pressure must move before the spawner takes its numbers again
+const GLINT_RATE := 2.1  ## rad/s of a rare piece's sparkle (a swell about every 3 s)
 const MIN_PX := 6.0  ## screen px a piece is drawn at the least, so debris still shows zoomed far out
 
 var sim: Node  ## the ShipSim, for the player's ship
@@ -125,6 +126,9 @@ func frame(dt: float) -> void:
 	debris.step(ship, dt)
 	_set_fx(debris.beam_aims() if debris.tractor_on else {}, debris.beams_on)
 	for e in debris.take_events():
+		if e["kind"] == "rare":  # a rare piece came into view: a toast, no pop
+			_toast(str(e["text"]))
+			continue
 		pops.append({"pos": e["pos"], "text": e["text"], "age": 0.0})
 		Audio.fx(self, "collect", e["pos"])  # (the catch is at the mouth on the player's ship)
 	for uid in debris.pulling:
@@ -140,6 +144,14 @@ func frame(dt: float) -> void:
 	queue_redraw()
 	if _top != null:
 		_top.queue_redraw()
+
+
+## A hint toast at the top of the screen (the front door's), when the scene has one.
+func _toast(text: String) -> void:
+	var door = get_node_or_null("../FrontDoor")
+	var t = door.get("toast") if door != null else null
+	if t != null:
+		t.push(text)
 
 
 ## Light the emitters of the beams that are on (BuildMode.mount_fx): `aims` is uid -> the way a beam that hauls points.
@@ -178,6 +190,8 @@ func _draw() -> void:
 			_draw_art(sheet, p, quads)
 		else:
 			_draw_placeholder(p, t, px)
+		if bool(t.get("rare", false)):
+			_draw_glint(p, px)
 	if _glow != null:
 		_glow.show_quads(quads)
 
@@ -202,6 +216,19 @@ func _draw_art(sheet, p: Dictionary, quads: Array) -> void:
 	if g != null:
 		quads.append({"tex": g.texture, "rect": Rect2(-size / 2.0 + g.offset * k, Vector2(g.frame) * k), "src": g.region(g.loop_frame(t)),
 			"xf": Transform2D(angle, p["pos"]), "mod": Color(1, 1, 1, 1)})
+
+
+## A rare piece's slow sparkle: a four-point star that swells and fades about every 3 s, a little off the piece's middle.
+func _draw_glint(p: Dictionary, px: float) -> void:
+	var f := pow(maxf(sin((float(p["age"]) + float(p["phase"])) * GLINT_RATE), 0.0), 3.0)
+	if f <= 0.01:
+		return
+	var at: Vector2 = p["pos"] + Vector2(p["r"] * 0.35, -p["r"] * 0.35)
+	var len: float = (float(p["r"]) * 1.1 + 6.0 * px) * f
+	var col := Color(1.0, 1.0, 0.92, f)
+	draw_line(at - Vector2(len, 0.0), at + Vector2(len, 0.0), col, 1.5 * px)
+	draw_line(at - Vector2(0.0, len), at + Vector2(0.0, len), col, 1.5 * px)
+	draw_circle(at, 2.0 * px * f, col)
 
 
 ## No art yet: a lopsided polygon in the material colour (a crate and a canister are squarer), 1 screen px outline.

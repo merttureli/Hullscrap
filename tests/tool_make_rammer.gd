@@ -11,6 +11,7 @@ extends SceneTree
 ## tool_make_starters.gd), wired by a breadth-first router, exported with Ship.to_dict() plus its "ai"
 ## entry. Prints a map; "skin" prints the bare hull and builds nothing.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
@@ -269,7 +270,7 @@ func _report(off: Vector2i) -> void:
 		str(unpowered), ship.atmosphere.rooms.size(), str(ship.atmosphere.rooms.all(func(r): return r["sealed"])), co.flight.can_fly(ship.components, co.powered), str(PilotAI.bow_of(co))])
 	print("   mass %.0f  thrust %.1f  accel %.1f px/s2  turn %.2f rad/s2  inertia %.0f  hull %d  weapons %d  cables %d  tiles %d  shaped %d" % [
 		co.mass, co.thrust, co.thrust * co.flight.thrust_to_accel / co.mass, co.thrust * co.flight.turn_factor / co.mass, co.inertia,
-		co.hull_max, co.mounts.size(), ship.cables.cells.size(), g.tiles.size(), g.shapes.size()])
+		Structure.totals(ship).y, co.mounts.size(), ship.cables.cells.size(), g.tiles.size(), g.shapes.size()])
 	var pockets := HullOutline.pockets(ship)
 	if not pockets.is_empty():
 		_fail("Rustfang: %d floor cells no crew body reaches from the helm: %s" % [pockets.size(), str(pockets.map(func(c): return c - off))])

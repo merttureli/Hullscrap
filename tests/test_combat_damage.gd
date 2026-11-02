@@ -2,6 +2,7 @@ extends "res://tests/base_test.gd"
 ## What shots do to cells: the ray march, pierce, wall materials (resist, deflect, ricochet,
 ## ablative, lattice), splash and spacing, breaches and rooms, parts that get disabled.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -288,7 +289,7 @@ func test_ion_does_no_structural_damage() -> void:
 	_shoot(ion)
 	eq(_hp(3, 15), 4.0, "wall unharmed")
 	eq(target.grid.hp.size(), 0, "no damage recorded")
-	eq(arena.ships[1].hull, arena.ships[1].hull_max, "hull unharmed")
+	eq(Structure.structure_fraction(arena.ships[1]), 1.0, "structure unharmed")
 	eq(_count("hit"), 1, "but it did hit")
 
 
@@ -401,18 +402,18 @@ func test_walls_and_doors_stop_shots_and_breach_at_zero_hp() -> void:
 	_tile(4, 15, "door")
 	_tile(5, 15, "door")
 	_join()
-	var hull: float = arena.ships[1].hull
+	var hull: float = Structure.totals(target).x
 	_shoot(gun)
 	_shoot(gun)
 	eq(target.grid.get_tile(Vector2i(3, 15)), "", "wall breached")
 	eq(target.grid.breached, {Vector2i(3, 15): "wall"}, "remembered for repair")
-	eq(hull - arena.ships[1].hull, 4.0, "hull lost the 4 dealt to the wall")
+	eq(hull - Structure.totals(target).x, 4.0, "structure lost the 4 dealt to the wall")
 	_shoot(gun)
 	eq(_hp(4, 15), 1.0, "a door has 3 hp and stops shots")
 	_shoot(gun)
 	eq(target.grid.get_tile(Vector2i(4, 15)), "", "door cell breached")
 	eq(target.grid.breached[Vector2i(4, 15)], "door", "as a door")
-	eq(hull - arena.ships[1].hull, 7.0, "hull lost 3 more for the door")
+	eq(hull - Structure.totals(target).x, 7.0, "structure lost 3 more for the door")
 	eq(_count("breach"), 2, "two breaches reported")
 
 
@@ -488,7 +489,7 @@ func test_a_part_at_zero_hp_is_disabled_and_loses_power() -> void:
 	target.components.instances[reactor]["hp"] = 3
 	_join()
 	eq(arena.weapons.can_fire(arena, 1, laser, arena.ships[1].flight.pos + Vector2(0.0, 1000.0)), "", "its laser works while the reactor does")
-	var hull: float = arena.ships[1].hull
+	var hull: float = Structure.totals(target).x
 	_shoot(gun)  # the line of fire crosses the reactor first
 	eq(target.components.instances[reactor]["hp"], 1.0, "3 - 2")
 	check(target.components.instances[reactor].get("status", "") != "disabled", "still working")
@@ -498,7 +499,7 @@ func test_a_part_at_zero_hp_is_disabled_and_loses_power() -> void:
 	check(target.components.instances.has(reactor), "still there")
 	_shoot(gun)
 	eq(_count("disable"), 1, "reported once")
-	eq(arena.ships[1].hull, hull, "part damage does not touch the hull")
+	eq(Structure.totals(target).x, hull - 3.0, "part damage counts: the reactor lost its 3 hp, nothing else")
 	eq(arena.weapons.can_fire(arena, 1, laser, arena.ships[1].flight.pos + Vector2(0.0, 1000.0)), "unpowered", "no power, no laser")
 
 

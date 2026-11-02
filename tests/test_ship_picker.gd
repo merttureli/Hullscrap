@@ -2,6 +2,8 @@ extends "res://tests/base_test.gd"
 ## The "Choose your ship" picker without a screen: its cards, 1/2/3 and click, Esc, the Y/N question,
 ## N in play mode (BuildMode) and what choosing does to the ship, the crew, the camera and the build palette.
 
+const Structure = preload("res://scripts/ship/structure.gd")
+const StructureUtil = preload("res://tests/structure_util.gd")
 const ShipPicker = preload("res://scripts/ui/ship_picker.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
@@ -60,7 +62,7 @@ func test_three_cards_with_a_name_a_character_and_the_numbers() -> void:
 	eq(p.cards[2]["stats"]["weapons"], ["Heat Lance"], "Prism weapons by name")
 	eq([p.cards[0]["stats"]["layers"], p.cards[1]["stats"]["layers"], p.cards[2]["stats"]["layers"] > 0], [0, 1, true], "the Rustbucket has no shield, the Courier one layer and the Prism its lattice")
 	check(p.cards[0]["stats"]["mass"] > p.cards[1]["stats"]["mass"] and p.cards[1]["stats"]["mass"] > p.cards[2]["stats"]["mass"], "masses: Rustbucket > Courier > Prism")
-	check(p.cards[0]["stats"]["hull"] > p.cards[1]["stats"]["hull"] and p.cards[1]["stats"]["hull"] > p.cards[2]["stats"]["hull"], "hulls: Rustbucket > Courier > Prism")
+	check(p.cards[1]["stats"]["hull"] > p.cards[0]["stats"]["hull"] and p.cards[0]["stats"]["hull"] > p.cards[2]["stats"]["hull"], "hulls: Courier > Rustbucket > Prism")
 	_done(d)
 
 

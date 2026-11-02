@@ -1,0 +1,4 @@
+{
+  "_doc": "How much of a ship is left standing, read by scripts/ship/structure.gd. A ship has no hull-health number: its STRUCTURE is the current hp of all its blocks (every wall and door tile, every component and the outside half of a hull mount, and the wrecks and breaches that used to be blocks) over their maximum hp. It is never shown as a number. defeat_below: in a fight a ship whose structure falls under this fraction is wrecked (the player has lost, an enemy is a derelict). Nothing is carried from fight to fight except the damaged blocks themselves: crew, drones and the soldier repair them, or a station does (campaign.gd repair, drift.json prices.repair credits for every hp of block damage missing). Events (`hull` effect) and drift jumps hurt random outer blocks and never take the structure under defeat_below. Tuned 0.4-0.6 against tests/tool_balance.gd."
+  ,"defeat_below": 0.5
+}

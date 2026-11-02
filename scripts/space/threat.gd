@@ -4,11 +4,12 @@ extends RefCounted
 ## A ship's combat power is sqrt(damage per second x effective hp) x a speed factor:
 ##   - damage per second: every powered weapon's damage x shots over its cooldown, times what lands (a fixed gun by the pilot's
 ##     aim, a turret by its accuracy), with flak and ion discounted and missiles a little up (data/enemy_tables.json "threat");
-##   - effective hp: the hull integrity the arena gives (arena.gd) plus the shield layers that are powered;
+##   - effective hp: the block hp it takes to wreck the ship (the share of its blocks' hp above the defeat line, structure.gd)
+##     plus the shield layers that are powered;
 ##   - speed: acceleration over a reference, to a small power, kept between 0.7 and 1.4.
 ## The ratio enemy power / player power is cut into 1-5 skulls at the table's `cuts`.
 
-const Arena = preload("res://scripts/combat/arena.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
@@ -48,11 +49,7 @@ static func power(ship, skill: float) -> Dictionary:
 			dmg *= float(cfg["ion_factor"])
 		var hit: float = clampf(float(w["accuracy"]) - float(cfg["turret_miss"]), 0.0, 1.0) if bool(w["turret"]) else float(cfg["fixed_hit"]) * (0.55 + 0.45 * skill)
 		dps += dmg * hit / maxf(float(w["cooldown"]), 0.1)
-	var armour := 0
-	for c in ship.grid.tiles:
-		if ship.grid.tiles[c] != "wall" and ship.grid.tile_flag(ship.grid.tiles[c], "solid"):
-			armour += 1
-	var ehp := Arena.HULL_BASE + Arena.HULL_PER_ARMOR * armour + Shields.layers_of_ship(ship, powered) * float(cfg["shield_layer_hp"])
+	var ehp := (1.0 - Structure.defeat_below()) * Structure.totals(ship).y + Shields.layers_of_ship(ship, powered) * float(cfg["shield_layer_hp"])
 	var f := Flight.new()
 	var mass := f.mass_of(ship.grid, ship.components, ship.cables, Stats.mass_mults(ship.components, ship.lines))
 	var thrust := float(f.thrusts_of(Stats.view(ship.components, ship.lines), powered)["fwd"])

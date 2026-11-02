@@ -50,7 +50,7 @@
           {"weight": 100, "text": "She weighs your scrap on a string scale with her tail, nods, and ties off two cans with a flourish. 'Scrap is lovely,' she says. 'It gives my husband something to do.'", "effects": {"items": {"scrap": -20, "fuel": 2}}}
         ]},
         {"text": "[Kite] Haggle with a tail-grip.", "requires": {"species": "kite", "credits": 15}, "outcomes": [
-          {"weight": 100, "text": "Your Kite swings up beside her, tail looped round the same rope, and the two of them haggle upside down for twenty minutes in a language like birdsong. At the end, she gives you four cans for the price of two, a polymer barrel, and a sock, 'for luck'. The sock is left foot. It is the other half of the boot.", "effects": {"items": {"credits": -15, "fuel": 4, "polymer": 15}}}
+          {"weight": 100, "text": "Your Kite swings up beside her, tail looped round the same rope, and the two of them haggle upside down for twenty minutes in a language like birdsong. At the end, she gives you a pair of cans for the price of one, a polymer barrel, and a sock, 'for luck'. The sock is left foot. It is the other half of the boot.", "effects": {"items": {"credits": -15, "fuel": 2, "polymer": 15}}}
         ]},
         {"text": "Browse the odd socks.", "outcomes": [
           {"weight": 100, "text": "There are a great many odd socks. You find one that matches a sock you have lost, and buy it for a button, and are inordinately pleased.", "effects": {"crew_hp": 5}}

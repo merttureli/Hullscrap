@@ -1,7 +1,11 @@
 extends RefCounted
 ## Oxygen per room. Each room holds a pressure (0..1, fraction of full); the amount of gas is
-## pressure x room size, in cell units. Breached rooms vent, open doors equalise, generators add
+## pressure x room size, in cell units. Breached rooms vent, open doors equalise, generators supply
 ## and crew consume. Pure logic, deterministic: no randomness and no Dictionary-order dependence.
+## Air comes from the generators (supply): a working one fills every room reachable from its own through doors, open or
+## closed (a door is a blast valve: it gives air out even when closed), evenly among those below full pressure. A breached
+## (venting) room is not on the network: its valves shut toward the vacuum, so it takes none and passes none on. A closed
+## door never equalises pressure; an open one does, so an open door into a breached room still drains the neighbour.
 
 const Rooms = preload("res://scripts/sim/rooms.gd")
 const CONFIG_PATH := "res://data/atmosphere.json"
@@ -68,20 +72,14 @@ func rebuild(grid) -> void:
 func tick(dt: float, open_doors: Dictionary) -> void:
 	if dt <= 0.0 or rooms.is_empty():
 		return
-	var venting: Array[bool] = []
-	for r in rooms:
-		venting.append(not r["sealed"])
+	var venting := venting_rooms(open_doors)
 	var flowing: Array = []  # open doors between two different rooms, in cell order
 	for d in doors:
 		if not bool(open_doors.get(d["cell"], false)):
 			continue
 		var a: int = d["a"]
 		var b: int = d["b"]
-		if a >= 0 and b == Rooms.SPACE:
-			venting[a] = true
-		elif b >= 0 and a == Rooms.SPACE:
-			venting[b] = true
-		elif a >= 0 and b >= 0 and a != b:
+		if a >= 0 and b >= 0 and a != b:
 			flowing.append(d)
 
 	var keep := exp(-vent_rate * dt)
@@ -104,7 +102,70 @@ func tick(dt: float, open_doors: Dictionary) -> void:
 		pressure[b] = clampf(pressure[b] + flow / sb, 0.0, 1.0)
 
 
-## Add `amount` cell units of oxygen to a room (a generator). Returns what was actually added.
+## Which rooms are venting now (by room id): the unsealed ones and those with an open door to space.
+func venting_rooms(open_doors: Dictionary) -> Array[bool]:
+	var out: Array[bool] = []
+	for r in rooms:
+		out.append(not r["sealed"])
+	for d in doors:
+		if not bool(open_doors.get(d["cell"], false)):
+			continue
+		var a: int = d["a"]
+		var b: int = d["b"]
+		if a >= 0 and b == Rooms.SPACE:
+			out[a] = true
+		elif b >= 0 and a == Rooms.SPACE:
+			out[b] = true
+	return out
+
+
+## The rooms a generator in room `source` supplies (by id, ascending): every room reachable from it through doors, open or
+## closed, without entering a venting room (`venting`: venting_rooms()). Empty when `source` itself vents.
+func air_network(source: int, venting: Array[bool]) -> Array[int]:
+	var out: Array[int] = []
+	if source < 0 or source >= rooms.size() or venting[source]:
+		return out
+	var seen := {source: true}
+	var queue: Array[int] = [source]
+	while not queue.is_empty():
+		var at: int = queue.pop_front()
+		out.append(at)
+		for d in doors:
+			var a: int = d["a"]
+			var b: int = d["b"]
+			if a < 0 or b < 0 or a == b or (a != at and b != at):
+				continue
+			var to := b if a == at else a
+			if not seen.has(to) and not venting[to]:
+				seen[to] = true
+				queue.append(to)
+	out.sort()
+	return out
+
+
+## A generator in room `source` puts `amount` cell units of oxygen into its air network (air_network), evenly: every room
+## below full pressure gains the same pressure, rooms that fill up leaving the rest to the others. Returns what was added.
+## Nothing happens (0.0) when the generator's own room is breached.
+func supply(source: int, amount: float, open_doors: Dictionary) -> float:
+	if amount <= 0.0:
+		return 0.0
+	var open: Array[int] = air_network(source, venting_rooms(open_doors)).filter(func(r): return pressure[r] < 1.0)
+	var left := amount
+	while left > 1.0e-12 and not open.is_empty():
+		var total := 0.0
+		var least := INF
+		for r in open:
+			total += float(rooms[r]["size"])
+			least = minf(least, 1.0 - pressure[r])
+		var step := minf(left / total, least)
+		for r in open:
+			pressure[r] = 1.0 if 1.0 - pressure[r] - step < 1.0e-9 else pressure[r] + step
+		left -= step * total
+		open = open.filter(func(r): return pressure[r] < 1.0)
+	return amount - maxf(left, 0.0)
+
+
+## Add `amount` cell units of oxygen to a room (a spore aura, a test). Returns what was actually added.
 func add_oxygen(room_id: int, amount: float) -> float:
 	return _change(room_id, amount)
 

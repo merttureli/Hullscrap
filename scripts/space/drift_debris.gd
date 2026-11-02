@@ -28,15 +28,15 @@ const PULL_GLOW := 0.35  ## seconds a mouth keeps `pulling` after it last drew a
 const LANE_REFRESH := 1.0  ## seconds between looks at the ship's outline
 const BEAM_LINES := 4  ## most pieces a tractor beam is drawn to at once
 const MAX_EVENTS := 64
-const HUD_ORDER: Array[String] = ["scrap", "copper", "polymer", "fuel", "missile", "ice"]  ## the order the HUD lists what was taken
+const HUD_ORDER: Array[String] = ["scrap", "copper", "polymer", "fuel", "missile", "crystal", "titanium", "silicon"]  ## the order the HUD lists what was taken
 const COMPASS: Array[String] = ["east", "south-east", "south", "south-west", "west", "north-west", "north", "north-east"]
 
 var cfg: Dictionary
 var types: Array = []  ## data/debris.json "types"
 var pieces: Array = []  ## {uid, type, pos, vel, angle, spin, phase, age, r, no_pull}
-var collected := {}  ## cargo id -> units taken in this session ("ice" counts pieces); for the HUD
+var collected := {}  ## cargo id -> units taken in this session; for the HUD
 var picked := 0  ## pieces collected in this session
-var events: Array = []  ## for the view, until take_events(): {kind: "collect", pos (the mouth), text, uid, type}
+var events: Array = []  ## for the view, until take_events(): {kind: "collect", pos (the mouth), text, uid, type}, or {kind: "rare", pos, text, uid, type} the first time a rare piece is in view
 var pulling := {}  ## intake uid -> seconds it still shows the pulling animation
 var mouth_count := 0  ## working intakes at the last step
 var tractor_on := false  ## Q is held: the working tractor beams haul pieces toward the nearest intake (the view sets it)
@@ -195,7 +195,7 @@ func prewarm(ship) -> void:
 ## Add a piece of type `type_id` at `pos` moving at `vel` (a test or a later feature, such as a crate shot open, puts one where it likes).
 func add_piece(type_id: String, pos: Vector2, vel: Vector2) -> Dictionary:
 	var p := {"uid": _next_uid, "type": type_id, "pos": pos, "vel": vel, "angle": 0.0, "spin": 0.0, "phase": 0.0, "age": 0.0,
-		"r": float(_by_id[type_id]["size"]) * 0.5, "no_pull": false, "stream": 0}
+		"r": float(_by_id[type_id]["size"]) * 0.5, "no_pull": false, "stream": 0, "seen": false}
 	_next_uid += 1
 	pieces.append(p)
 	return p
@@ -237,6 +237,19 @@ func _sub(ship, mouths: Array, h: float) -> void:
 			pieces.remove_at(i)
 	if not _beams.is_empty():
 		_note_hauls()
+	_note_rare()
+
+
+## The first time a rare piece (types with `rare`) is inside the view it announces itself: an event {kind: "rare", text} for the view's toast.
+func _note_rare() -> void:
+	var view := Rect2(view_centre - view_half, view_half * 2.0)
+	for p in pieces:
+		if bool(p.get("seen", false)) or not bool(type_of(p).get("rare", false)) or not view.has_point(p["pos"]):
+			continue
+		p["seen"] = true
+		events.append({"kind": "rare", "pos": p["pos"], "text": "Rare drift: %s" % str(type_of(p)["name"]).to_lower(), "uid": p["uid"], "type": p["type"]})
+		if events.size() > MAX_EVENTS:
+			events.pop_front()
 
 
 ## Move one piece by `h`; `now`: its stream's vel and flow dir and the despawn distances (along, across). False when it is gone.
@@ -333,7 +346,7 @@ func _spawn(ship, scattered := false) -> Dictionary:
 	var a := rng.randf_range(-reach, reach * 0.6) if scattered else -reach
 	var p := {"uid": _next_uid, "type": str(t["id"]), "pos": view_centre + dir * a + perp * lat,
 		"vel": stream_vel(stream) * rng.randf_range(0.9, 1.1), "angle": rng.randf() * TAU, "spin": rng.randf_range(-0.8, 0.8),
-		"phase": rng.randf() * 10.0, "age": 0.0, "r": float(t["size"]) * 0.5, "no_pull": false, "stream": stream}
+		"phase": rng.randf() * 10.0, "age": 0.0, "r": float(t["size"]) * 0.5, "no_pull": false, "stream": stream, "seen": false}
 	_next_uid += 1
 	pieces.append(p)
 	return p
@@ -427,7 +440,7 @@ func intakes(ship) -> Array:
 
 
 ## What collecting a piece of type `t` gives: cargo id -> units (a crate rolls here: once, and once more for each point of
-## loot_bonus of the best crew member aboard `ship`, the finds adding up). {} for ice.
+## loot_bonus of the best crew member aboard `ship`, the finds adding up).
 func _gains(t: Dictionary, ship = null) -> Dictionary:
 	if t.has("roll"):
 		var total := 0.0
@@ -451,7 +464,7 @@ func _gains(t: Dictionary, ship = null) -> Dictionary:
 	return out
 
 
-## Put `gains` in the hold (and an ice chunk's air in every room). False, and nothing changes, when the hold refuses.
+## Put `gains` in the hold. False, and nothing changes, when the hold refuses.
 func _store(ship, t: Dictionary, gains: Dictionary) -> bool:
 	var units := 0
 	for id in gains:
@@ -468,16 +481,11 @@ func _store(ship, t: Dictionary, gains: Dictionary) -> bool:
 	for id in gains:
 		ship.inventory.add(id, int(gains[id]))
 		collected[id] = int(collected.get(id, 0)) + int(gains[id])
-	var o2 := float(t.get("effect", {}).get("o2", 0.0))
-	if o2 > 0.0:
-		for room in ship.atmosphere.rooms:
-			ship.atmosphere.add_oxygen(room["id"], o2 * float(room["size"]))
-		collected["ice"] = int(collected.get("ice", 0)) + 1
 	return true
 
 
 func _note(mouth: Dictionary, t: Dictionary, gains: Dictionary) -> void:
-	var text := "+%d%% O2" % roundi(float(t["effect"]["o2"]) * 100.0) if t.has("effect") else ""
+	var text := ""
 	for id in gains:
 		text = "+%d %s" % [gains[id], id]
 	events.append({"kind": "collect", "pos": frame * mouth["rect"].get_center(), "text": text, "uid": mouth["uid"], "type": t["id"]})

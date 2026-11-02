@@ -301,6 +301,16 @@ func eligible(ev: Dictionary, c, node: Dictionary, ship = null) -> bool:
 	return _world_ok(_dict(ev.get("requires")), c, node, ship)
 
 
+## Does some outcome of some choice of `ev` give fuel (effects.items.fuel above 0)?
+static func offers_fuel(ev: Dictionary) -> bool:
+	for ch in _list(ev.get("choices")):
+		for o in _list(_dict(ch).get("outcomes")):
+			var items = _dict(_dict(o).get("effects")).get("items")
+			if items is Dictionary and float(items.get("fuel", 0)) > 0.0:
+				return true
+	return false
+
+
 ## What a debt event is for, judged by its requires: "miss" (it asks for the flag debt_missed: the
 ## collectors' talk), "first" (it asks for not_flag met_ma: Ma's first call), else "reminder".
 static func debt_kind(ev: Dictionary) -> String:
@@ -564,9 +574,9 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 		if hp != 0 and not people.is_empty():
 			lines.append("Crew %+d hp" % hp)
 	if effects.has("hull"):
-		var d: int = c.change_hull(ship, int(effects["hull"]))
+		var d: int = c.change_blocks(ship, int(effects["hull"]))  # hull -N: N hp of damage on outer blocks; +N: N hp mended
 		if d != 0:
-			lines.append("Hull integrity %+d" % d)
+			lines.append("Hull blocks %s %d hp" % ["damaged" if d < 0 else "repaired", absi(d)])
 	if effects.has("debt"):
 		lines.append_array(c.add_debt(ship, int(effects["debt"])))
 	for f in _list(effects.get("flag")):

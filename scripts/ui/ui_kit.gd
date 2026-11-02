@@ -411,6 +411,10 @@ static func _glyph(cv: CanvasItem, id: String, r: Rect2, mod: Color) -> void:
 		"hull":
 			poly.call([[8, 1], [14, 3], [13, 10], [8, 15], [3, 10], [2, 3]], AMBER)
 			poly.call([[8, 4], [11, 5], [10.5, 9.5], [8, 12], [5.5, 9.5], [5, 5]], AMBER.darkened(0.35))
+		"wrench":  # damaged blocks to fix (the top bar)
+			poly.call([[2.5, 13], [4, 14.5], [10.5, 8], [9, 6.5]], AMBER)
+			cv.draw_circle(o + Vector2(10.5, 5.5) * u, 4.0 * u.x, AMBER)
+			poly.call([[10.5, 5.5], [15.5, 0.5], [15.5, 6.5]], AMBER.darkened(0.75))
 		"heat":
 			poly.call([[8, 1], [12, 7], [12, 11], [8, 15], [4, 11], [4, 7]], Color("#ff8a1e"))
 			poly.call([[8, 7], [10, 11], [8, 14], [6, 11]], Color("#ffd23a"))

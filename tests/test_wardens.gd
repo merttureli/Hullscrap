@@ -226,7 +226,7 @@ func test_a_won_fight_clears_pays_and_changes_the_standing() -> void:
 	check(c.warden_up(), "(until it is won)")
 	var credits: int = ship.inventory.count("credits")
 	var foe := Shipgen.from_spec(c.warden["spec"])
-	var done := c.fight_done({"state": "won", "enemy": foe, "hull": 100.0, "hull_max": 100.0}, ship, win)
+	var done := c.fight_done({"state": "won", "enemy": foe}, ship, win)
 	eq(done["state"], "won", "won")
 	check(not c.warden_up(), "the lane is clear")
 	check(ship.inventory.count("credits") >= credits + 50, "50 credits for the stage, on top of the loot")
@@ -240,7 +240,7 @@ func test_a_warden_that_escapes_is_spared_or_captured_leaves_the_lane() -> void:
 		var c: Campaign = m["c"]
 		var ship = m["ship"]
 		var r := _choose(c, m["ev"], ship, "Break through")
-		var res := {"state": state, "hull": 100.0, "hull_max": 100.0, "enemy": Shipgen.from_spec(c.warden["spec"])}
+		var res := {"state": state, "enemy": Shipgen.from_spec(c.warden["spec"])}
 		if state == "spared":
 			res["offer"] = {"credits": 10}
 		var credits: int = ship.inventory.count("credits")
@@ -254,10 +254,10 @@ func test_a_warden_that_escapes_is_spared_or_captured_leaves_the_lane() -> void:
 		var m := _meeting()
 		var c: Campaign = m["c"]
 		var r := _choose(c, m["ev"], m["ship"], "Break through")
-		c.fight_done({"state": state, "hull": 100.0, "hull_max": 100.0}, m["ship"], r["after_win"])
+		c.fight_done({"state": state}, m["ship"], r["after_win"])
 		check(c.warden_up(), "%s: the warden still holds the lane" % state)
 	var m2 := _meeting()
-	m2["c"].fight_done({"state": "escaped", "hull": 100.0, "hull_max": 100.0}, m2["ship"], {})
+	m2["c"].fight_done({"state": "escaped"}, m2["ship"], {})
 	check(m2["c"].warden_up(), "an escape from some other fight clears nothing")
 
 
@@ -380,7 +380,7 @@ func test_a_fight_against_the_warden_ends_at_the_region_choice() -> void:
 	var r: Dictionary = c.events.choose(ep.event, _index(c, ep.event, map.ship(), "Break through"), c, map.ship(), c.node(c.current))
 	map._fighting = true  # (the combat view is not in this scene: hand over the result it would give)
 	map._after_win = r["after_win"]
-	map._on_fight_finished({"state": "escaped", "hull": 100.0, "hull_max": 100.0})
+	map._on_fight_finished({"state": "escaped"})
 	check(not c.warden_up(), "the warden left the lane")
 	check(ep.visible and ep.title == "The fight is over", "the map says so")
 	ep.proceed()

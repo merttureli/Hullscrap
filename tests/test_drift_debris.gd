@@ -1,6 +1,6 @@
 extends "res://tests/base_test.gd"
 ## Debris drifting past the ship (scripts/space/drift_debris.gd, view and mode gate in scripts/view/debris_view.gd):
-## the seeded spawner and its cap, the current, collecting at an intake's mouth (the yield, a crate's roll, ice's air),
+## the seeded spawner and its cap, the current, collecting at an intake's mouth (the yield, a crate's roll),
 ## the hull bounce, the pull radius, a full hold, play mode only, the income of a Net Mouth over a minute, and the data.
 
 const Wall = preload("res://tests/fixture_wall.gd")
@@ -204,7 +204,7 @@ func test_every_cargo_type_flows() -> void:
 		d.pieces.clear()
 		var p := d._spawn(ship)
 		seen[p["type"]] = true
-	var want: Array = ["scrap_chunk_s", "scrap_chunk_m", "copper_coil", "polymer_barrel", "ice_chunk_s", "fuel_canister", "sealed_crate"]
+	var want: Array = ["scrap_chunk_s", "scrap_chunk_m", "copper_coil", "polymer_barrel", "fuel_canister", "sealed_crate"]
 	for t in want:
 		check(seen.has(t), "%s turns up in the flow" % t)
 	eq(d.cfg["spawn"]["every"], 1.1, "a piece about every 1.1 s")
@@ -333,22 +333,17 @@ func test_a_sealed_crate_rolls_scrap_copper_or_a_missile() -> void:
 	eq(seen.size(), 3, "over 40 crates all three come up: %s" % [seen.keys()])
 
 
-func test_ice_refills_the_air_by_five_percent() -> void:
-	var rig := _rig()
-	var ship: Ship = rig["ship"]
-	check(not ship.atmosphere.rooms.is_empty(), "the fixture has a room")
-	for i in ship.atmosphere.pressure.size():
-		ship.atmosphere.pressure[i] = 0.5
+func test_there_is_no_ice_debris_and_air_is_not_a_debris_effect() -> void:
 	var d := _dd()
-	_drop(rig, d, "ice_chunk_s")
-	for i in ship.atmosphere.pressure.size():
-		near(ship.atmosphere.pressure[i], 0.55, "room %d gained 5%%" % i, 1e-4)
-	eq(d.picked, 1, "the ice was taken")
-	eq(d.take_events().map(func(e): return e["text"]), ["+5% O2"], "and says so")
-	for i in ship.atmosphere.pressure.size():
-		ship.atmosphere.pressure[i] = 0.99
-	_drop(rig, d, "ice_chunk_s")
-	check(ship.atmosphere.pressure.all(func(v): return v <= 1.0), "air never goes past full")
+	for t in d.types:
+		check(not str(t["id"]).begins_with("ice"), "no ice type (%s)" % t["id"])
+		check(not t.has("effect"), "%s has no air effect" % t["id"])
+	check(not DriftDebris.HUD_ORDER.has("ice"), "the HUD does not list ice")
+	var ship := Ship.from_design(RUSTBUCKET)
+	var before: Array[float] = ship.atmosphere.pressure.duplicate()
+	d.add_piece("scrap_chunk_s", Vector2.ZERO, Vector2.ZERO)
+	check(d._store(ship, d.type_of(d.pieces[0]), {"scrap": 2}), "a piece is stored")
+	eq(ship.atmosphere.pressure, before, "and the air is left as it was")
 
 
 func test_a_full_hold_refuses_and_the_piece_bounces() -> void:
@@ -536,8 +531,8 @@ func test_every_debris_type_gives_something_the_hold_knows() -> void:
 			check(ship.components.has(id) or Content.has("items", id) or Content.has("materials", id), "%s yields '%s', which exists" % [t["id"], id])
 		for o in t.get("roll", []):
 			check(Content.has("items", o["item"]) or Content.has("materials", o["item"]), "%s rolls '%s', which exists" % [t["id"], o["item"]])
-	eq(d.types.size(), 7, "seven kinds")
-	near(weight, 100.0, "the weights add up to 100", 1e-6)
+	eq(d.types.size(), 9, "nine kinds: six everyday ones and three rare finds")
+	check(weight > 80.0 and weight < 100.0, "the weights are percents, ice gone and fuel and the rare finds small (%s)" % str(weight))
 	check(d.hud_line().begins_with("Salvage: nothing yet this trip"), "the HUD line before anything: " + d.hud_line())
 	d.collected = {"copper": 4, "scrap": 12}
 	check(d.hud_line().begins_with("Salvage: +12 scrap, +4 copper this trip"), "the HUD line lists scrap first: " + d.hud_line())

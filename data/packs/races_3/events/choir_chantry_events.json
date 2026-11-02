@@ -25,7 +25,7 @@
       "text": "A tuning stall has set up between two chantry barges, run by a Lumen artisan with a wall of forks. 'Reactors,' she calls, 'engines, shield emitters, anything with a note. A flat ship is an unhappy ship, and an unhappy ship costs you fuel.' She holds a fork to your hull and listens. 'Your reactor is a semitone down,' she says, with sympathy. 'It's been that way a long while.'",
       "choices": [
         {"text": "Have the reactor tuned (40 credits).", "requires": {"credits": 40}, "outcomes": [
-          {"weight": 70, "text": "She goes at your reactor with a silver fork and a patient ear. The hum climbs out of its rut and finds the right note. In the evening, your fuel gauge reads a little higher than it has any right to.", "effects": {"items": {"credits": -40, "fuel": 2}}},
+          {"weight": 70, "text": "She goes at your reactor with a silver fork and a patient ear. The hum climbs out of its rut and finds the right note. In the evening, the whole ship hums a little easier than it has any right to.", "effects": {"items": {"credits": -40}, "crew_hp": 10}},
           {"weight": 30, "text": "She tunes it a quarter-tone sharp. Everything works and everything is faintly uneasy. You get a week of headaches before it settles.", "effects": {"items": {"credits": -40}, "crew_hp": -5}}
         ]},
         {"text": "Buy a pocket fork (10 credits).", "requires": {"credits": 10}, "outcomes": [
