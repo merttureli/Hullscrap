@@ -81,6 +81,90 @@
   "title": "defeat",
   "true_peak_db": -3.05
  },
+ "demos": {
+  "signal": {
+   "battle": {
+    "bands_pct": [
+     20.9,
+     33.1,
+     33.7,
+     7.8,
+     4.5
+    ],
+    "bytes": 1522759,
+    "peak_db": -1.65,
+    "rms_db": -15.05,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 1.03797,
+     "rms_first_db": -17.8,
+     "rms_last_db": -16.3,
+     "seam_step": 0.05105,
+     "typ_step_p999": 0.4337
+    },
+    "seconds": 73.14,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.13
+   },
+   "bpm": 91.88,
+   "crossfades_start_s": [
+    30.37,
+    63.67
+   ],
+   "explore": {
+    "bands_pct": [
+     18.9,
+     38.1,
+     35.7,
+     6.7,
+     0.6
+    ],
+    "bytes": 1669649,
+    "peak_db": -3.32,
+    "rms_db": -18.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.54435,
+     "rms_first_db": -22.4,
+     "rms_last_db": -19.2,
+     "seam_step": 0.00384,
+     "typ_step_p999": 0.18221
+    },
+    "seconds": 73.14,
+    "target_rms_db": -18.0,
+    "true_peak_db": -2.74
+   },
+   "sections_s": {
+    "A": 10.45,
+    "B": 31.35,
+    "C": 52.24,
+    "intro": 0
+   },
+   "sync": {
+    "onset_corr": 0.678,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 3225600,
+    "samples_explore": 3225600
+   },
+   "title": "Signal",
+   "transition": {
+    "bands_pct": [
+     19.4,
+     34.6,
+     35.5,
+     7.5,
+     2.9
+    ],
+    "bytes": 1584384,
+    "peak_db": -1.74,
+    "rms_db": -16.34,
+    "samples_off_vs_render": 0,
+    "seconds": 73.67,
+    "true_peak_db": -1.23
+   }
+  }
+ },
  "ending": {
   "bands_pct": [
    11.2,
