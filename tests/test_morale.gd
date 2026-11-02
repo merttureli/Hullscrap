@@ -47,7 +47,11 @@ func _foe(s: Session):
 
 
 func _hurt(s: Session, fraction: float) -> void:
-	StructureUtil.set_structure(_foe(s), Structure.defeat_below() * (1.0 - fraction) + fraction)  # `fraction`: the way from the wreck line (0) to whole (1)
+	# `fraction`: 0 on the wreck line, 0.5 on the morale break (break_structure), 1 whole
+	var line := Structure.defeat_below()
+	var brk := float(Morale.config()["break_structure"])
+	var at := line + (brk - line) * fraction / 0.5 if fraction < 0.5 else brk + (1.0 - brk) * (fraction - 0.5) / 0.5
+	StructureUtil.set_structure(_foe(s), at)
 
 
 func _shots(s: Session, idx: int) -> int:
@@ -135,16 +139,16 @@ func test_the_styles_weights_come_from_the_data() -> void:
 	var s := _session()
 	var cfg := Morale.config()
 	var want := {
-		"default": {"surrender": 0.4, "flee": 0.4, "fight": 0.2}, "rustfang": {"surrender": 0.5, "flee": 0.3, "fight": 0.2},
+		"default": {"surrender": 0.6, "flee": 0.3, "fight": 0.1}, "rustfang": {"surrender": 0.6, "flee": 0.25, "fight": 0.15},
 		"ram": {"surrender": 0.0, "flee": 0.4, "fight": 0.6}, "concord": {"surrender": 0.2, "flee": 0.6, "fight": 0.2},
-		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "no such style": {"surrender": 0.4, "flee": 0.4, "fight": 0.2},
+		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "no such style": {"surrender": 0.6, "flee": 0.3, "fight": 0.1},
 	}
 	for style in want:
 		eq(Morale.new(s.arena, Session.ENEMY, Session.PLAYER, style, cfg).weights(), want[style], "weights of " + style)
 	eq(s.morale.style, "rustfang", "the pirate raider picks the Rustfang style")
 	eq(_session(3, "res://data/ships/rustfang_rammer.json").morale.style, "ram", "the rammer picks ram")
 	eq(_session(3, COURIER).morale.style, "default", "a design with no morale entry uses the default")
-	check(absf(cfg["break_structure"] - (Structure.defeat_below() + 0.5 * (1.0 - Structure.defeat_below()))) < 1e-9 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
+	check(cfg["break_structure"] > Structure.defeat_below() and cfg["break_structure"] < 1.0 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
 
 
 func test_the_roll_follows_the_weights() -> void:
@@ -153,8 +157,8 @@ func test_the_roll_follows_the_weights() -> void:
 	var m := Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "rustfang", Morale.config())
 	for i in 3000:
 		count[m.roll_style()] += 1
-	for k in {"surrender": 0.5, "flee": 0.3, "fight": 0.2}:
-		var want: float = {"surrender": 0.5, "flee": 0.3, "fight": 0.2}[k]
+	for k in {"surrender": 0.6, "flee": 0.25, "fight": 0.15}:
+		var want: float = {"surrender": 0.6, "flee": 0.25, "fight": 0.15}[k]
 		check(absf(count[k] / 3000.0 - want) < 0.04, "rustfang %s: %s of 3000" % [k, count[k]])
 	var ram := Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "ram", Morale.config())
 	var hollow := Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "hollow", Morale.config())
