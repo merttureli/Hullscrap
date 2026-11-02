@@ -113,6 +113,10 @@ const COLUMNS: Array = [
 			["U", "Debug: unlock a random blueprint"],
 			["C / Esc", "Close it"],
 		]],
+		["BOARDING (an event's Board her)", [
+			["E (hold)", "Aboard: open crates, hack locks"],
+			["E at airlock", "Back to the ship. No saving aboard"],
+		]],
 	],
 ]
 
@@ -122,7 +126,7 @@ const PAD := 18.0
 const MARGIN := 24.0
 const TITLE_H := 56.0
 const FONT := 13
-const ROW_GAP := 3.0
+const ROW_GAP := 2.0
 const DIM := Color(0.0, 0.0, 0.0, 0.8)
 const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
@@ -235,7 +239,7 @@ func column_end(c: int) -> float:
 	if c == 0:
 		y += _first_run_h(w) + 18.0
 	for sec in COLUMNS[c]:
-		y += 36.0
+		y += 32.0
 		for row in sec[1]:
 			y += _row_h(row, w) + ROW_GAP
 		y += 14.0
@@ -268,7 +272,7 @@ func _draw() -> void:
 func _section(sec: Array, at: Vector2, w: float) -> float:
 	_text(str(sec[0]), at + Vector2(0.0, 14.0), 14, AMBER)
 	draw_line(at + Vector2(0.0, 20.0), at + Vector2(w, 20.0), EDGE_DIM, 1.0)
-	var y := at.y + 36.0
+	var y := at.y + 32.0
 	for row in sec[1]:
 		var h := _row(row, Vector2(at.x, y), w)
 		y += h + ROW_GAP

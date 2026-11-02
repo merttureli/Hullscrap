@@ -132,7 +132,7 @@ func test_an_old_save_loads_and_its_hull_loss_is_ignored() -> void:
 	eq(back.load_dict(d), "", "a version 9 save with hull_loss loads")
 	check(not back.to_dict().has("hull_loss"), "and the number is gone")
 	eq(back.to_dict()["version"], Campaign.VERSION, "saved as the current version")
-	eq(Campaign.VERSION, 10, "(bumped)")
+	check(Campaign.VERSION >= 10, "(bumped to 10 or later)")
 	var d2: Dictionary = JSON.parse_string(JSON.stringify(c.to_dict()))
 	eq(_campaign(3).load_dict(d2), "", "a new save has no hull_loss and loads")
 

@@ -390,6 +390,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
     - `items` (+/−, including `credits`, `fuel`, materials and components), `rep` {clans, concord, lumen}, `crew_hp` (everyone, +/−), `hull` (−N: N hp of damage on random outer blocks, seeded; +N: N hp of damaged blocks mended), `flag` / `clear_flag`;
     - `recruit` {name?, species}, `lose_crew` (a random non-player), `blueprint` (an id);
     - `fight` (a ship design id, `"tier"` to roll from the node's table, or `"gen:<faction>"` to meet a faction of the enemy tables, e.g. a rare one: `Campaign.foe_of` rolls it once per node and keeps it), `goto` (another event id: a follow-up page), `reveal` (a node or station id), `debt` (+/−).
+    - `board` {kind: `derelict`, `station`, `nest` or `wreck`; name?, parts?}: the soldier goes aboard another vessel (docs/BOARDING.md, `scripts/board/`, sites and loot in `data/boarding.json`). Code adds it as a "Board her" choice (`Boarding.offer`) to the events of the `wreck`, `abandoned_station` and `pirate_nest` POIs and to the salvage page of a won fight; boarding spends no `once` event and is no landmark, and the page it came from opens again when the soldier is back, until every container is open.
   - Outcomes are rolled with the campaign RNG. A `fight` effect starts combat, and after a win the event's `after_win` text and effects (optional) run.
 - **Reputation**: three numbers, `clans`, `concord`, `lumen`, from −10 to +10, starting at 0.
   - Below −5, that faction's stations refuse you and its patrols attack.

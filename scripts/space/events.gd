@@ -31,6 +31,10 @@ extends RefCounted
 ##   does not end the run. The effect `unlock` (an id of data/unlocks.json, or a list) earns something for the next runs and
 ##   shows "Unlocked: <name>"; the effect `ending` (an id of data/endings.json) ends the run as a win: choose() and
 ##   apply() hand it back and the event panel opens the ending screen.
+## - The effect `board` ({kind: derelict, station, nest or wreck; name?, parts?}) sends the soldier aboard another vessel (scripts/board/, docs/BOARDING.md):
+##   choose() and apply() hand it back as `board` and the event panel starts the boarding when its page is left. Boarding is not a landmark
+##   and does not spend a `once` event; the page it came from opens again when the soldier is back (Boarding.offer puts the choice into
+##   the events of the POIs that can be boarded).
 ## - `fallback` (true) on an event keeps it out of every pick that has another eligible event: it is only rolled when nothing else
 ##   is (the repeatable filler quests of data/packs/story_1, so a quest beacon with no quest left still has something to give).
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
@@ -44,6 +48,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
+const Site = preload("res://scripts/board/site.gd")
 
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
@@ -55,7 +60,8 @@ const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue"]
 const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "species", "species_any", "trait", "items", "pay", "component", "component_any", "credits"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
-const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending"]
+const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending", "board"]
+const BOARD_KEYS: Array = ["kind", "name", "parts"]
 const RECRUIT_KEYS: Array = ["name", "species", "character"]
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
 const SHIPS_DIR := "res://data/ships/"
@@ -472,10 +478,10 @@ static func _name(ship, id: String) -> String:
 
 
 ## Take choice `index` of `ev`: pay what it asks to pay, roll an outcome, apply its effects. Returns
-## {ok, why, text, lines, goto, fight, ending, logs, after_win}; `lines` are the changes in words ("-40 credits"),
+## {ok, why, text, lines, goto, fight, ending, logs, after_win, board}; `lines` are the changes in words ("-40 credits"),
 ## `goto` an event id to show next, `fight` a design id or "tier" for the controller to start, `ending` the id of the
 ## ending the outcome reached ("" for none), `logs` the derelict logs found (each {id, title, ship, faction, text}) and
-## `after_win` the {text, effects} to run if that fight is won. ok is false (and nothing changes) when
+## `after_win` the {text, effects} to run if that fight is won, `board` the boarding to start ({} for none). ok is false (and nothing changes) when
 ## the choice is not on offer or its price cannot be paid.
 func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dictionary:
 	var entry := {}
@@ -496,10 +502,10 @@ func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dicti
 		for id in ids:
 			lines.append("-%d %s" % [cost[id], _name(ship, id)])
 	var outcome := roll(ch.get("outcomes", []), c.rng)
-	if bool(ev.get("once", false)) and not _dict(outcome.get("effects")).is_empty():
-		c.used[str(ev["id"])] = true  # spent: an outcome that does something
+	if bool(ev.get("once", false)) and not _dict(outcome.get("effects")).is_empty() and not _boards_only(_dict(outcome.get("effects"))):
+		c.used[str(ev["id"])] = true  # spent: an outcome that does something (going aboard does not spend it)
 	var mark := landmark_title(ev)
-	if mark != "" and not _dict(outcome.get("effects")).is_empty() and c.note_landmark(str(ev["id"]), mark):
+	if mark != "" and not _dict(outcome.get("effects")).is_empty() and not _boards_only(_dict(outcome.get("effects"))) and c.note_landmark(str(ev["id"]), mark):
 		lines.append("Landmark: " + mark)  # first, as it was met before what it gave
 	var res := apply(_dict(outcome.get("effects")), c, ship, node)
 	lines.append_array(res["lines"])
@@ -508,7 +514,7 @@ func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dicti
 	for t in res["told"]:
 		if str(t) != "":
 			text += "\n\n" + str(t)  # what a new crew member says about themselves, under the outcome's text
-	return {"ok": true, "why": "", "text": text, "lines": lines, "goto": res["goto"], "fight": res["fight"], "ending": res["ending"], "logs": res["logs"], "after_win": after}
+	return {"ok": true, "why": "", "text": text, "lines": lines, "goto": res["goto"], "fight": res["fight"], "ending": res["ending"], "logs": res["logs"], "after_win": after, "board": res["board"]}
 
 
 ## The title of landmark event `ev` ("" when it is not one): its `landmark` text, else its id as words.
@@ -538,7 +544,7 @@ static func roll(outcomes, rng: RandomNumberGenerator) -> Dictionary:
 
 # --- effects ------------------------------------------------------------------------------------------
 
-## Apply `effects` to campaign `c` and `ship`. Returns {lines, told, goto, fight, ending, logs}: the changes in words,
+## Apply `effects` to campaign `c` and `ship`. Returns {lines, told, goto, fight, ending, logs, board}: the changes in words,
 ## what the new crew say about themselves (`told`), the follow-up page, the fight to start and the ending reached (each "" when there is none) and the derelict logs
 ## found. The fight is not started here, and the ending screen is not opened (the event panel does).
 func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
@@ -617,7 +623,7 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 	var ending := str(effects.get("ending", ""))
 	if ending != "":
 		c.finish(ending)
-	return {"lines": lines, "told": told, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "ending": ending, "logs": found}
+	return {"lines": lines, "told": told, "goto": str(effects.get("goto", "")), "fight": str(effects.get("fight", "")), "ending": ending, "logs": found, "board": _dict(effects.get("board")).duplicate(true)}
 
 
 # --- validation ---------------------------------------------------------------------------------------
@@ -878,6 +884,22 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 			bad.call("%s: unknown unlock id '%s' (not in data/unlocks.json or a pack's unlocks.json)" % [where, u])
 	if eff.has("ending") and not (eff["ending"] is String and known["endings"].has(eff["ending"])):
 		bad.call("%s: unknown ending id '%s' (not in data/endings.json or a pack's endings.json)" % [where, eff["ending"]])
+	if eff.has("board"):
+		var b = eff["board"]
+		if not (b is Dictionary and b.get("kind") is String and board_kinds().has(b["kind"])):
+			bad.call("%s: board must be {kind: %s}" % [where, ", ".join(board_kinds())])
+		else:
+			_check_keys(b, BOARD_KEYS, where + " board: ", bad)
+
+
+## The `board` effect and nothing else: going aboard another vessel.
+static func _boards_only(effects: Dictionary) -> bool:
+	return effects.size() == 1 and effects.has("board")
+
+
+## The kinds of site the `board` effect can name (data/boarding.json).
+static func board_kinds() -> Array:
+	return Site.kinds()
 
 
 ## "gen:<faction>" or "gen:<faction>:ram": a faction of the enemy tables, whose ship Campaign.foe_of rolls.

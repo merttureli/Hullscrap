@@ -296,7 +296,7 @@ func _show_hud(on: bool) -> void:
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and not e.echo:
 		if not active:
-			if e.keycode == KEY_K and not e.ctrl_pressed and build != null:
+			if e.keycode == KEY_K and not e.ctrl_pressed and build != null and not build.combat:  # (build.combat with no fight: the soldier is aboard another vessel)
 				if build.build_on:
 					build.message = "Press B for play mode, then K to fight"
 				else:

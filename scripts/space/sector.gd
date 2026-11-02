@@ -31,6 +31,7 @@ const Radar = preload("res://scripts/space/radar.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
+const Boarding = preload("res://scripts/board/boarding.gd")
 
 const PATH := "res://data/sectors.json"
 const NEW := "new"
@@ -57,6 +58,7 @@ var debris_mult := {}  ## debris type id -> weight multiplier: the theme of the 
 var pois: Array = []  ## the generated POIs, main first
 var ambient: Array = []  ## the passing ships now about (transient; not generated)
 var wrecks: Array = []  ## the wrecks won fights left here (add_wreck); saved
+var boarded := {}  ## POI id -> what the soldier did aboard it: {kind, name, parts, opened, unlocked, keys, left, cleared} (boarding.gd memory); saved
 var hostiles: Array = []  ## positions (Vector2, px) of the hostile ships about; the fight in place keeps this list for the jump block
 var ship_pos := Vector2.ZERO
 var ship_vel := Vector2.ZERO
@@ -449,6 +451,8 @@ func trigger(c, ship) -> Dictionary:
 		res = {"node": c.node(node_id), "refused": "", "event": {}}
 	else:
 		res = _event_for(c, ship, best)
+		if res["refused"] == "" and not hollow and not res["event"].is_empty() and Boarding.kind_for(best) != "":
+			res["event"] = Boarding.offer(res["event"], Boarding.kind_for(best))  # a vessel the soldier can board
 	_greeted[best["id"]] = true
 	res["poi"] = best
 	res["shop"] = c.shop_id(node_id, str(best["id"])) if bool(t.get("shop", false)) and res["refused"] == "" and not c.station_cfg(c.shop_id(node_id, str(best["id"]))).is_empty() else ""
@@ -705,8 +709,11 @@ func to_save() -> Dictionary:
 	var hulks := []
 	for w in wrecks:
 		hulks.append({"id": w["id"], "name": w["name"], "pos": [w["pos"].x, w["pos"].y], "state": w["state"]})
-	return {"pois": states, "far": far, "ship": [ship_pos.x, ship_pos.y], "vel": [ship_vel.x, ship_vel.y], "angle": ship_angle, "ambient": list, "amb_t": _amb_t,
+	var out := {"pois": states, "far": far, "ship": [ship_pos.x, ship_pos.y], "vel": [ship_vel.x, ship_vel.y], "angle": ship_angle, "ambient": list, "amb_t": _amb_t,
 		"next_amb": _next_amb, "clock": clock, "rng": str(rng.state), "wrecks": hulks, "next_wreck": _next_wreck}
+	if not boarded.is_empty():
+		out["boarded"] = boarded.duplicate(true)
+	return out
 
 
 ## Replace the POI states, the ship's place, the wrecks and the ambient state with a saved one. Returns "" or why not
@@ -739,9 +746,21 @@ func load_save(d: Dictionary) -> String:
 		var w := _wreck(e["id"], _vec(e["pos"]), str(e.get("name", "")))
 		w["state"] = str(e.get("state", NEW)) if [NEW, DONE].has(str(e.get("state", NEW))) else NEW
 		hulks.append(w)
+	var memory := {}
+	if not d.get("boarded", {}) is Dictionary:
+		return "bad sector data"
+	for id in d.get("boarded", {}):
+		var m = d["boarded"][id]
+		if not (m is Dictionary and m.get("kind") is String and Boarding.has_kind(m["kind"]) and m.get("opened", []) is Array and m.get("unlocked", []) is Array and m.get("left", {}) is Dictionary):
+			return "bad sector data"
+		memory[str(id)] = m.duplicate(true)
+		memory[str(id)]["parts"] = m["parts"] if m.get("parts") is Array else []
+		memory[str(id)]["name"] = str(m.get("name", ""))
+		memory[str(id)]["keys"] = m["keys"] if m.get("keys") is Array else []
 	for p in pois:
 		if d["pois"].has(p["id"]):
 			p["state"] = d["pois"][p["id"]]
+	boarded = memory
 	ship_pos = _vec(d["ship"])
 	far_seen = {}
 	for id in d.get("far", {}):
