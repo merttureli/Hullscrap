@@ -384,7 +384,7 @@ func test_the_profile_keeps_unlocks_landmarks_and_loads_an_older_file() -> void:
 	check(not p.record_landmark("m", "Meeting"), "and then not")
 	var q := Profile.new(TMP)
 	check(q.has_unlock("a") and q.has_landmark("m") and q.landmarks["m"]["title"] == "Meeting", "both are in the file")
-	eq(Profile.VERSION, 4, "the file is version 4")
+	eq(Profile.VERSION, 5, "the file is version 5")
 	var f := FileAccess.open(TMP, FileAccess.WRITE)
 	f.store_string('{"version": 1, "hints": {"picked": true}, "runs": [{"ship": "Old"}]}')
 	f.close()
