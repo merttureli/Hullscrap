@@ -14,6 +14,8 @@ const Campaign = preload("res://scripts/space/campaign.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const Audio = preload("res://scripts/audio/audio.gd")
+const Ambience = preload("res://scripts/audio/ambience.gd")
 
 const WALLS := 184.0  ## the room ship: 46 walls of 4 hp round its room
 
@@ -231,3 +233,27 @@ func test_the_wrench_centres_the_camera_on_the_nearest_damaged_block_and_then_th
 	b.cam.free()
 	sim.free()
 	b.free()
+
+
+func test_the_hull_creak_reads_the_structure_on_the_way_from_whole_to_wrecked() -> void:
+	var s := _ship()
+	var sim := ShipSim.new()
+	sim.ships = [s]
+	var audio = Audio.new()
+	audio.sim = sim
+	near(audio._hull_frac(), 1.0, "a whole ship")
+	StructureUtil.set_structure(s, 0.75)
+	near(audio._hull_frac(), 0.5, "structure 0.75 is half the way to the wreck line")
+	StructureUtil.set_structure(s, 0.6)
+	near(audio._hull_frac(), 0.2, "0.6")
+	near(Structure.wreck_margin(s), 0.2, "Structure.wreck_margin is what it reads")
+	var rules := Ambience.new()  # (set_structure only takes hp off: a fresh ship, then down)
+	s = _ship()
+	sim.ships = [s]
+	StructureUtil.set_structure(s, 0.9)
+	check(not rules.creak(audio._hull_frac(), 1.0), "90% structure: quiet")
+	StructureUtil.set_structure(s, 0.7)
+	check(rules.creak(audio._hull_frac(), 1.0), "under half the way: one creak")
+	check(not rules.creak(audio._hull_frac(), 1.0), "then the cooldown")
+	audio.free()
+	sim.free()

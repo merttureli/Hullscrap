@@ -43,6 +43,13 @@ static func structure_fraction(co_or_ship) -> float:
 	return 1.0 if t.y <= 0.0 else clampf(t.x / t.y, 0.0, 1.0)
 
 
+## How far `co_or_ship` is from the wreck line: 1 whole, 0 on the line. This is the scale the old hull pool had (whole to
+## wrecked), so anything written for "the hull at half" (the hull creak, morale's break) reads it: half is structure 0.75.
+static func wreck_margin(co_or_ship) -> float:
+	var d := defeat_below()
+	return clampf((structure_fraction(co_or_ship) - d) / (1.0 - d), 0.0, 1.0)
+
+
 ## Is the structure of `co_or_ship` under the defeat line?
 static func defeated(co_or_ship) -> bool:
 	return structure_fraction(co_or_ship) < defeat_below() - EPS

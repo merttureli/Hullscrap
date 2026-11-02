@@ -335,7 +335,7 @@ func test_a_five_skull_win_on_the_map_offers_five_parts() -> void:
 	map.event_panel.open_event(map.campaign.events.get_event("repo_fight"))
 	map.event_panel.choose(0)
 	map.event_panel.proceed()
-	d["fake"].finished.emit({"state": "won", "enemy": _wreck(), "hull": 100.0, "hull_max": 100.0, "threat": 5})
+	d["fake"].finished.emit({"state": "won", "enemy": _wreck(), "threat": 5})
 	map.event_panel.proceed()
 	eq(map.event_panel.event.get("id", ""), "salvage", "the salvage pick follows")
 	eq(_cut_rows(map.event_panel.event), 5, "five parts to cut out")

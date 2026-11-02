@@ -414,7 +414,7 @@ func _gives(e: Dictionary, index: int, item: String) -> bool:
 ## (Sector.fight_spawn; ahead of the ship for a wait), the player's ship starts where it flies (Helm.fight_place). It
 ## ends decided (won, captured, spared: the player takes a surrender when one is offered, escaped), out of range
 ## (LEAVE_DISTANCE: "fled"), or as a draw over FIGHT_CAP_S. Returns the result the combat view gives the map: {state,
-## enemy, hull, hull_max, enemy_pos, offer (spared)}; the helm takes the ship's place after it.
+## enemy, enemy_pos, offer (spared)}; the helm takes the ship's place after it.
 func _fight(where: String, value: String, c: Campaign, sim, pick: RandomNumberGenerator, poi := "") -> Dictionary:
 	stats["fights"] += 1
 	var s = c.current_sector()

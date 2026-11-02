@@ -32,6 +32,7 @@ class Combatant extends RefCounted:
 	var half := Vector2.ZERO  ## half the hull's bounding box, in cells
 	var wrecked := false  ## structure under the defeat line: no firing, no shields, no thrust; stays in the arena
 	var check_structure := true  ## a block was hurt: look at the structure on the next substep
+	var structure := 1.0  ## its structure at the last look (Structure.structure_fraction), for morale
 	var mounts := {}  ## uid -> {id, pos (barrel pivot, cell coordinates), dir (outward, ship-local), reach, aim (live barrel direction), virtual, powered (virtual only)}
 	var cooldowns := {}  ## uid -> arena tick when the mount may fire again
 	var powered := {}  ## uid -> bool, the power solve with disabled parts left out
@@ -114,6 +115,7 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 	grid.hp_mult = Abilities.wall_hp_mults(ship)  # a Stonehide bay: tougher walls round its room, from the start of the fight
 	co.mounts = weapons.mounts_of(ship)
 	ships.append(co)
+	co.structure = Structure.structure_fraction(co)
 	_recompute(co)
 	Shields.start(co)  # shields start full, with the ship's saved balance
 	return ships.size() - 1
@@ -174,7 +176,8 @@ func _substep() -> void:
 		var co = ships[i]
 		if not co.wrecked and (co.check_structure or tick % STRUCTURE_EVERY == 0):  # fire and ram hurt blocks too, so look now and then
 			co.check_structure = false
-			if Structure.defeated(co):
+			co.structure = Structure.structure_fraction(co)
+			if co.structure < Structure.defeat_below() - Structure.EPS:
 				wreck(i)
 		var fly: bool = not co.wrecked and co.flight.can_fly(co.ship.components, co.powered) == ""
 		co.flight.step(SUBSTEP, co.input if fly else {}, co.mass, co.thrust, co.thrusts)

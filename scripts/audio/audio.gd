@@ -21,6 +21,7 @@ extends Node
 const Mood = preload("res://scripts/audio/mood.gd")
 const ShipAudio = preload("res://scripts/audio/ship_audio.gd")
 const Ambience = preload("res://scripts/audio/ambience.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const GROUP := "hs_audio"
 const DATA_PATH := "res://data/audio.json"
 const MUSIC_PATH := "res://data/music.json"
@@ -38,6 +39,7 @@ const NEAR := 1.25  ## a world sound plays only within this many view radii of t
 const ENEMY_DB := -6.0  ## the enemy ship's sounds against yours (callers pass it as gain_db)
 const DEFAULTS := {"master": 0.8, "music": 0.6, "sfx": 0.8, "ambience": 0.8}  ## the volume sliders (linear, 0 to 1)
 const BED_FADE := 3.0  ## seconds of the cross-fade between two space beds
+const HULL_LOOK := 0.25  ## seconds between two counts of the hull's blocks for the creak
 const ROOM_RATE := 1.2  ## how fast the Room low-pass follows the reactor's load, per second
 const STEP_ZOOM := 0.45  ## the soldier's boots are heard only with the camera at least this close (the main camera starts at 0.5)
 const POLL := 0.1  ## seconds between two looks at what the game is doing
@@ -48,6 +50,8 @@ var defs := {}  ## data/audio.json, id -> definition
 var music_data := {}  ## data/music.json
 var beds := {}  ## data/audio.json `_beds`: which space bed plays where (ambience.gd bed_for)
 var bed_now := ""  ## the space bed asked for last
+var _hull_t := 0.0  # seconds to the next count of the hull's blocks
+var _hull_seen := 1.0  # what that count said (Structure.wreck_margin)
 var volumes := DEFAULTS.duplicate()
 var muted := false
 var clock := 0.0  ## seconds this node has run (advance)
@@ -664,7 +668,7 @@ func _footsteps(n: int, playing: bool) -> void:
 
 ## The ambience (ambience.gd), in a game and not in a menu: the room tone, whose low-pass opens with the reactor's load; the space bed of the
 ## region's family, cross-faded over BED_FADE seconds when it changes; the drone's hum; the medbay, smelter and fabricator while they work; and
-## the hull's creak once it is under half.
+## the hull's creak once it is under half (the way from whole to wrecked, so structure 0.75: under 0.5 the ship is gone).
 func _ambience(inp: Dictionary, ev: Dictionary, live: bool, dt: float) -> void:
 	var playing := inp.has("menu") and not bool(inp["menu"])
 	bed_now = ""
@@ -679,23 +683,23 @@ func _ambience(inp: Dictionary, ev: Dictionary, live: bool, dt: float) -> void:
 	loop("medbay", "medbay_hum", playing and bool(ev["healing"]) and live, 1.0, 1.0, null, 1.0)
 	loop("smelter", "smelter_loop", playing and bool(ev["smelting"]) and live, 1.0, 1.0, null, 1.0)
 	loop("fabricator", "fabricator_loop", playing and bool(ev["fabricating"]) and live, 1.0, 1.0, null, 1.0)
-	if playing and _ambience_rules.creak(_hull_frac(), dt):
+	_hull_t -= dt
+	if _hull_t <= 0.0:  # (the blocks are counted a few times a second, not every frame)
+		_hull_t = HULL_LOOK
+		_hull_seen = _hull_frac() if playing else 1.0
+	if playing and _ambience_rules.creak(_hull_seen, dt):
 		play("hull_creak")
 
 
-## The player's hull as a fraction of its integrity: the fight's while one is on, else the run's (campaign.gd); 1 when there is none to read.
+## The player's hull as the fraction left between whole and wrecked (Structure.wreck_margin, from the structure of its blocks): the fight's
+## while one is on, else the run's ship; 1 when there is none to read.
 func _hull_frac() -> float:
 	if combat != null and bool(combat.get("active")):
 		var session = combat.get("session")
 		if session != null:
-			var co = session.arena.ships[0]
-			return clampf(float(co.hull) / maxf(float(co.hull_max), 1.0), 0.0, 1.0)
-	var map = build.get("drift") if build != null else null
-	var c = map.get("campaign") if map != null else null
+			return Structure.wreck_margin(session.arena.ships[0])
 	var ship = sim.player_ship() if sim != null and sim.has_method("player_ship") else null
-	if c == null or ship == null:
-		return 1.0
-	return clampf(float(c.hull_left(ship)) / maxf(float(c.hull_max(ship)), 1.0), 0.0, 1.0)
+	return 1.0 if ship == null else Structure.wreck_margin(ship)
 
 
 ## Let the Room bus's low-pass follow the reactor's load (in equal musical steps, ROOM_RATE a second).
