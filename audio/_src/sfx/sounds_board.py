@@ -170,3 +170,74 @@ def flashlight_click(k):
     n = n_of(dur)
     a = bp(white(r, n_of(0.03)), 2600, 1.6) * ad(0.03, 0.0002, 0.006) + modal(BAR[:3] * 1400, [0.012, 0.008, 0.005], [0.5, 0.3, 0.12], 0.03, r, 0.01) * 0.4
     return lp(crush(place((a, 0.0, 1.0), (a, 0.055, 0.7), length=dur), 9, 1), 5200)
+
+
+# --- round 4, light bolts (docs/BOARDING.md, B4) ----------------------------------------------------------------------------
+
+@sound("shot_laser_pistol", "weapon", 2)
+def shot_laser_pistol(k):
+    """A laser pistol: a short clean zap, a quick falling chirp with a thin tick at its front and a soft hum under it."""
+    r, dur = R("shot_laser_pistol", k), 0.26
+    n = n_of(dur)
+    f = sweep([2700, 2350][k], [540, 470][k], dur)
+    core = lp(0.7 * saw(f) + 0.3 * sine(f * 2.0), 5200) * ad(dur, 0.001, 0.07)
+    tick = bp(white(r, n), 3400, 1.2) * ad(dur, 0.0003, 0.006) * 0.5
+    hum = sine(sweep([330, 290][k], 120, dur)) * ad(dur, 0.002, 0.06) * 0.35
+    return lp(crush(core + tick + hum, 11, 1), 6200)
+
+
+@sound("shot_laser_rifle", "weapon", 2)
+def shot_laser_rifle(k):
+    """A laser rifle: a longer, lower chirp over a dull thump, with a ring of the emitter fading after it."""
+    r, dur = R("shot_laser_rifle", k), 0.4
+    n = n_of(dur)
+    f = sweep([1900, 1650][k], [260, 230][k], dur)
+    core = lp(0.6 * saw(f) + 0.4 * square(f * 0.5), 4600) * ad(dur, 0.001, 0.1)
+    thump = sine(sweep([190, 165][k], 60, dur)) * ad(dur, 0.001, 0.06) * 0.8
+    ring = modal(BAR[:4] * [900, 780][k], [0.08, 0.06, 0.04, 0.03], [0.3, 0.2, 0.12, 0.08], dur, r, 0.01) * 0.35
+    tick = bp(white(r, n), 2800, 1.0) * ad(dur, 0.0003, 0.008) * 0.45
+    return lp(crush(core + thump + ring + tick, 10, 1), 5800)
+
+
+@sound("bolt_sizzle", "hit", 2)
+def bolt_sizzle(k):
+    """A bolt biting into a wall: a short hiss with a few sparks popping in it."""
+    r, dur = R("bolt_sizzle", k), 0.34
+    n = n_of(dur)
+    hiss = bp(white(r, n), [3200, 2700][k], 0.8) * ad(dur, 0.0005, 0.07)
+    sparks = lp(crackle(r, n, [60, 48][k], 0.0016, 1.4), 5200) * decay(dur, 0.1)
+    body = sine(sweep(420, 140, dur)) * ad(dur, 0.001, 0.03) * 0.4
+    return lp(crush(hiss * 0.8 + sparks * 1.2 + body, 10, 1), 6000)
+
+
+@sound("flare_pop", "weapon", 1)
+def flare_pop(k):
+    """A flare gun: a hollow pop, then the hiss of the flare catching and swelling."""
+    r, dur = R("flare_pop", k), 0.7
+    n = n_of(dur)
+    pop = sine(sweep(240, 70, dur)) * ad(dur, 0.001, 0.05) + bp(white(r, n), 1500, 0.8) * ad(dur, 0.0005, 0.02) * 0.8
+    catch = bp(white(r, n), sweep(1800, 4200, dur), 0.9) * swell(dur, 0.45, 0.4) * 0.5
+    return lp(crush(pop + catch, 10, 1), 5600)
+
+
+@sound("flare_burn", "loop", 1, loop=(2.0, 0.3))
+def flare_burn(k):
+    """A flare burning: a steady magnesium hiss with small spits and crackles."""
+    tot = 2.3
+    n = n_of(tot)
+    r = R("flare_burn", 0)
+    hiss = band_noise(r, n, 2200, 7500, 0.0) * (0.8 + 0.2 * smooth_noise(r, n, 9))
+    rush = band_noise(r, n, 300, 1500, 1.0) * 0.4
+    spits = lp(crackle(r, n, 30, 0.002, 1.5), 4500)
+    return hiss * 0.55 + rush * 0.5 + spits * 0.9
+
+
+@sound("arc_crackle", "weapon", 2)
+def arc_crackle(k):
+    """An arc pistol: a crackling blue snap, a burst of electric noise with a buzz under it that stutters out."""
+    r, dur = R("arc_crackle", k), 0.42
+    n = n_of(dur)
+    zap = hp(white(r, n), 1800) * ad(dur, 0.0004, 0.05) * 0.8
+    stutter = lp(crackle(r, n, [110, 90][k], 0.0012, 1.6), 6500) * decay(dur, 0.12)
+    buzz = fft_filter(saw(sweep([160, 140][k], 90, dur), n), None, 1400) * ad(dur, 0.001, 0.09) * 0.5
+    return lp(crush(zap + stutter * 1.2 + buzz, 10, 1), 6200)
