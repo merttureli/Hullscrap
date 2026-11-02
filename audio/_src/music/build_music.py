@@ -23,7 +23,7 @@ import synth as S
 
 ENGINE = ["synth.py", "voices.py", "theme.py", "common.py"]
 DEMO_ENGINE = ["synth2.py", "voices2.py", "demo.py"]
-DEMOS = {"signal": "d_signal", "long_haul": "d_longhaul", "black_box": "d_blackbox"}
+DEMOS = {"signal": "d_signal", "long_haul": "d_longhaul", "black_box": "d_blackbox", "ledger_ii": "d_ledger2"}
 DEMO_OUT = os.path.join(OUT, "demos")
 LOOPS = {"menu": "t_menu", "explore_a": "t_explore_a", "explore_b": "t_explore_b", "combat": "t_combat",
          "hollow": "t_hollow", "build": "t_build"}

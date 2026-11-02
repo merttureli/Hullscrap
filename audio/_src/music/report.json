@@ -165,6 +165,88 @@
     "true_peak_db": -1.11
    }
   },
+  "ledger_ii": {
+   "battle": {
+    "bands_pct": [
+     15.4,
+     20.5,
+     49.7,
+     9.5,
+     4.9
+    ],
+    "bytes": 1475522,
+    "peak_db": -1.72,
+    "rms_db": -15.03,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.96436,
+     "rms_first_db": -17.3,
+     "rms_last_db": -14.5,
+     "seam_step": 0.09609,
+     "typ_step_p999": 0.41908
+    },
+    "seconds": 70.0,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.18
+   },
+   "bpm": 96.0,
+   "crossfades_start_s": [
+    31.56,
+    65.94
+   ],
+   "explore": {
+    "bands_pct": [
+     10.7,
+     22.1,
+     55.3,
+     11.0,
+     0.9
+    ],
+    "bytes": 1747053,
+    "peak_db": -3.76,
+    "rms_db": -18.01,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.23737,
+     "rms_first_db": -19.8,
+     "rms_last_db": -18.2,
+     "seam_step": 0.02097,
+     "typ_step_p999": 0.1291
+    },
+    "seconds": 70.0,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.75
+   },
+   "sections_s": {
+    "A": 10.0,
+    "B": 30.0,
+    "C": 50.0,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.356,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 3087000,
+    "samples_explore": 3087000
+   },
+   "title": "Ma's Ledger II",
+   "transition": {
+    "bands_pct": [
+     11.9,
+     18.1,
+     55.9,
+     10.6,
+     3.5
+    ],
+    "bytes": 1752655,
+    "peak_db": -1.72,
+    "rms_db": -16.45,
+    "samples_off_vs_render": 0,
+    "seconds": 75.94,
+    "true_peak_db": -1.57
+   }
+  },
   "long_haul": {
    "battle": {
     "bands_pct": [
