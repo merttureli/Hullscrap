@@ -293,7 +293,8 @@ func _localise(item: Dictionary, off: Vector2) -> void:
 
 
 ## `text` laid out in `width` px from `at`: {items (text runs), hot (keyword rects), h}. Marks {id} and {id:words} are keywords: coloured, with a hover line.
-func flow(text: String, at: Vector2, width: float, size: int, col: Color) -> Dictionary:
+## `bold`: all of it in the bold font (keywords always are).
+func flow(text: String, at: Vector2, width: float, size: int, col: Color, bold := false) -> Dictionary:
 	var items := []
 	var hot := []
 	var x := 0.0
@@ -302,7 +303,7 @@ func flow(text: String, at: Vector2, width: float, size: int, col: Color) -> Dic
 	var lh := float(size) + 4.0
 	for seg in Advisor.segments(text):
 		var kw: Dictionary = advisor.keyword(seg["kw"]) if seg["kw"] != "" else {}
-		var f: Font = UiKit.bold() if not kw.is_empty() else UiKit.font()
+		var f: Font = UiKit.bold() if bold or not kw.is_empty() else UiKit.font()
 		var s: String = seg["text"]
 		var i := 0
 		while i < s.length():
@@ -345,9 +346,7 @@ func _build_compact(card: Dictionary, w: float) -> float:
 		_card_dl.append_array(df["items"])
 		return float(df["h"]) + 14.0
 	else:
-		var tf := flow(str(card["goal"]["title"]), Vector2(PAD, y), inner, TITLE - 1, UiKit.TEXT)
-		for it in tf["items"]:
-			it["f"] = UiKit.bold()
+		var tf := flow(str(card["goal"]["title"]), Vector2(PAD, y), inner, TITLE - 1, UiKit.TEXT, true)
 		_card_dl.append_array(tf["items"])
 		_card_dl.append_array(tf["hot"])
 		y += float(tf["h"]) + 2.0
@@ -380,9 +379,7 @@ func _build_card(card: Dictionary, w: float, compact := false) -> float:
 			y += float(f["h"]) + 4.0
 		else:
 			var g: Dictionary = card["goal"]
-			var tf := flow(str(g["title"]), Vector2(PAD, y), inner, TITLE, UiKit.TEXT)
-			for it in tf["items"]:
-				it["f"] = UiKit.bold()
+			var tf := flow(str(g["title"]), Vector2(PAD, y), inner, TITLE, UiKit.TEXT, true)
 			_card_dl.append_array(tf["items"])
 			_card_dl.append_array(tf["hot"])
 			y += float(tf["h"]) + 3.0
