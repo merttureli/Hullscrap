@@ -265,13 +265,14 @@ func _step_ship(ship: Ship, dt: float) -> void:
 	ship.refresh()  # a part that went out of action or came back changes the power
 	_craft(ship, dt)
 	var powered: Dictionary = ship.power_state.get("powered", {})
+	var open_doors := open_door_cells(ship)
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
-	for uid in uids:
+	for uid in uids:  # air comes from the generators: a powered one supplies its whole air network (atmosphere.gd)
 		var inst: Dictionary = ship.components.instances[uid]
 		var rate: float = ship.effective(inst["id"])["stats"].get("o2_rate", 0.0)
 		if rate > 0.0 and powered.get(uid, false):
-			ship.atmosphere.add_oxygen(ship.atmosphere.room_at(inst["anchor"]), rate * dt)
+			ship.atmosphere.supply(ship.atmosphere.room_at(inst["anchor"]), rate * dt, open_doors)
 	if ship != player_ship() and not _crewed.has(ship):
 		if not ship.crew.is_empty() or not Jobs.spawn_enemy_crew(ship).is_empty():
 			_crewed[ship] = true

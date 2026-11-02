@@ -1,5 +1,5 @@
 {
-	"_doc": "Atmosphere tuning. vent_rate: fraction of its pressure a breached room loses per second (exponential). door_rate: gas an open door moves between two rooms, in cell units per second per unit of pressure difference.",
+	"_doc": "Atmosphere tuning. vent_rate: fraction of its pressure a breached room loses per second (exponential). door_rate: gas an open door moves between two rooms, in cell units per second per unit of pressure difference. Air supply (scripts/sim/atmosphere.gd supply): a powered oxygen part adds its o2_rate (cell units per second, data/components.json stats) to its air network, every room reachable from its own through doors, open or closed, evenly among those below full pressure; a breached (venting) room takes none and passes none on. A closed door never equalises pressure, an open one does. Nothing else makes air: no debris, no pickup.",
 	"vent_rate": 1.5,
 	"door_rate": 2.0
 }
