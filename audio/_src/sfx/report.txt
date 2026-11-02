@@ -179,5 +179,15 @@ tracker_ping_far.wav  mono   0.28   -18.99    -23.00
 tracker_ping_mid.wav  mono   0.18   -18.77    -23.00 
 tracker_ping_near.wav  mono   0.23   -17.90    -23.00 
 flashlight_click.wav  mono   0.10    -8.53    -23.00 
+shot_laser_pistol_1.wav  mono   0.26    -3.82    -17.00 
+shot_laser_pistol_2.wav  mono   0.26    -3.84    -17.00 
+shot_laser_rifle_1.wav  mono   0.40    -2.88    -17.01 
+shot_laser_rifle_2.wav  mono   0.40    -2.44    -17.03 
+bolt_sizzle_1.wav     mono   0.34    -1.09    -15.67 
+bolt_sizzle_2.wav     mono   0.34    -1.07    -15.77 
+flare_pop.wav         mono   0.70    -1.42    -17.18 
+flare_burn.wav        mono   2.00   -10.80    -23.50 step 0.55, dip 0.08 dB (worst window inside 0.47 dB)
+arc_crackle_1.wav     mono   0.42    -2.84    -17.01 
+arc_crackle_2.wav     mono   0.42    -2.37    -17.04 
 
-180 files, 22.34 MB
+190 files, 22.83 MB

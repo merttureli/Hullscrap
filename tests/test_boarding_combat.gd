@@ -729,7 +729,6 @@ func test_the_trigger_fires_the_weapon_toward_the_aim_and_r_reloads() -> void:
 	_step(b, 1.0)
 	b.fire_override = false
 	check(s.gun()["mag"] < 8, "the trigger fired (%d left)" % s.gun()["mag"])
-	check(b.tracers.size() >= 0, "(tracers are drawn)")
 	s.reload()
 	_step(b, 1.5)
 	eq(s.gun()["mag"], 8, "reloaded")

@@ -330,6 +330,17 @@ func test_the_debug_unlock_is_random_but_repeatable() -> void:
 	eq(picks[0], picks[1], "the same ship draws the same blueprint")
 
 
+func test_the_debug_mods_key_puts_the_nine_boarding_mods_in_the_hold() -> void:
+	var d := _panel(_rig()["ship"])
+	var panel: CraftingPanel = d["panel"]
+	eq(panel.debug_mods(), "", "done")
+	var ship: Ship = panel.sim.player_ship()
+	for id in ["spotter_cam", "salvage_rig", "overcharge_coil"]:
+		for tier in [1, 2, 3]:
+			eq(ship.inventory.count("%s_mk%d" % [id, tier]), 1, "%s Mk %d" % [id, tier])
+	_free(d)
+
+
 func test_the_panel_stays_shut_in_a_fight() -> void:
 	var main := Node.new()
 	var combat := CombatView.new()
