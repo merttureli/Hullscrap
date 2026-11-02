@@ -814,3 +814,112 @@ func test_the_tracker_shows_what_moves_and_pings_by_distance() -> void:
 	check(far.size() >= 1, "a foe on the move is pinged (%d)" % far.size())
 	check(far.all(func(x): return x >= 0.0 and x <= 1.0), "with how far out it was")
 	b.leave()
+
+
+# --- balance: how many he fights at once ------------------------------------------------------------------------
+
+## Spots for `n` foes in the arena room: the foe spot and the free ones nearest it that have a clear line to the soldier.
+func _spots_near(d: Dictionary, n: int) -> Array:
+	var site = d["s"].site
+	var out: Array = []
+	var anchors: Array = site.free_anchors(d["room"])
+	anchors.sort_custom(func(x, y): return (Vector2(x) + Vector2.ONE).distance_to(d["b"]) < (Vector2(y) + Vector2.ONE).distance_to(d["b"]))
+	for a in anchors:
+		var p := Vector2(a) + Vector2.ONE
+		if p.distance_to(d["a"]) >= 5.0 and site.clear_line(d["a"], p) and out.all(func(q): return q.distance_to(p) >= 1.9):
+			out.append(p)
+			if out.size() == n:
+				break
+	return out
+
+
+## A soldier who stands where he is, shoots the nearest foe he can see (a quarter of a second to take aim) and reloads when he must, for up to
+## `seconds` or until nobody is left up or he is down. Returns the number of foes still up.
+func _stand_and_shoot(s, seconds: float) -> int:
+	var react := 0.0
+	var seen = null
+	var aim := 0.0
+	for i in int(seconds / 0.05):
+		var best = null
+		var bd := INF
+		for b in s.foes.bodies():
+			var dist: float = s.soldier.pos.distance_to(b["pos"])
+			if dist < bd and dist <= 12.0 and s.site.clear_line(s.soldier.pos, b["pos"]):
+				best = b
+				bd = dist
+		var g: Dictionary = s.gun()
+		if best != null:
+			aim = (best["pos"] - s.soldier.pos).angle()
+			if seen != best["ref"]:
+				seen = best["ref"]
+				react = 0.25
+			react -= 0.05
+			if react <= 0.0 and int(g["mag"]) > 0 and float(g["reload"]) <= 0.0:
+				s.fire(aim)
+		else:
+			seen = null
+		if int(g["mag"]) == 0 or (best == null and int(g["mag"]) < int(g["w"]["mag"])):
+			s.reload()
+		s.tick(0.05, aim, true)
+		if s.soldier.is_down() or s.foes.live().is_empty():
+			break
+	return s.foes.live().size()
+
+
+## A station fight in the biggest room: the soldier at `a`, three scavengers and a pirate at the spots near `b`, awake and coming `group` at a time
+## (1: one after another, as a careful soldier takes them through a door; 4: all at once, as in the open). The others wait out of the way until
+## the ones before them are down. Returns {hp, down, left, rounds}, {} when the site has no room for it.
+func _station_fight(seed_value: int, group: int) -> Dictionary:
+	var d := _arena("station", seed_value)
+	var s = d["s"]
+	if d["a"] == Vector2.ZERO:
+		return {}
+	var kinds := ["scavenger", "scavenger", "scavenger", "pirate"]
+	var spots := _spots_near(d, kinds.size())
+	if spots.size() < kinds.size():
+		return {}
+	var rounds: int = s.reserve() + s.gun()["mag"]
+	var foes := []
+	for i in kinds.size():
+		var f: Dictionary = s.foes.add(kinds[i], spots[i], d["room"])
+		f["base"] = (d["a"] - spots[i]).angle()
+		foes.append(f)
+	var next := 0
+	while next < foes.size() and not s.soldier.is_down():
+		for i in foes.size():
+			var f: Dictionary = foes[i]
+			var now: bool = i >= next and i < next + group
+			if f["dead"]:
+				continue
+			f["m"].pos = spots[i] if i < next + group else Vector2(-100.0, -100.0)  # (the rest are not on the scene yet)
+			if now and f["mode"] == "idle":
+				f["mode"] = "hunt"
+				f["target"] = d["a"]
+		_stand_and_shoot(s, 25.0)
+		next += group
+	return {"hp": s.soldier.hp, "down": s.soldier.is_down(), "left": s.foes.live().size(), "rounds": rounds - (s.reserve() + s.gun()["mag"])}
+
+
+func test_a_lone_soldier_with_a_pistol_beats_four_foes_one_at_a_time_and_loses_to_them_all_at_once() -> void:
+	var stats := {}
+	for group in [1, 2, 4]:
+		var downs := 0
+		var n := 0
+		var hp := 0.0
+		var rounds := 0
+		for sd in 12:
+			var r := _station_fight(sd * 3 + 1, group)
+			if r.is_empty():
+				continue
+			n += 1
+			downs += int(r["down"])
+			hp += float(r["hp"])
+			rounds = maxi(rounds, int(r["rounds"]))
+		stats[group] = {"n": n, "downs": downs, "hp": hp / maxf(float(n), 1.0), "rounds": rounds}
+	check(stats[1]["n"] >= 8, "enough sites have the room (%d)" % stats[1]["n"])
+	eq(stats[1]["downs"], 0, "taken one at a time (a door, the beam) he is never down")
+	check(stats[1]["hp"] >= 45.0, "and keeps about half his health (%.0f)" % stats[1]["hp"])
+	check(stats[1]["rounds"] <= 30, "for no more than 30 of his 40 rounds (%d)" % stats[1]["rounds"])
+	check(stats[2]["hp"] < stats[1]["hp"] - 15.0, "two at once cost much more (%.0f)" % stats[2]["hp"])
+	check(float(stats[4]["downs"]) >= 0.7 * float(stats[4]["n"]), "all four at once in the open put him down (%d of %d)" % [stats[4]["downs"], stats[4]["n"]])
+	check(stats[4]["hp"] < 15.0, "with next to nothing left (%.0f)" % stats[4]["hp"])
