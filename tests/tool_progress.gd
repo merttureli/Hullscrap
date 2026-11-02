@@ -248,6 +248,14 @@ func play_stage() -> bool:
 				return end_stage(false)
 		elif not c.station_cfg(c.current).is_empty():
 			docked_here = true
+	if c.warden_up() and ship.inventory.count("credits") < Wardens.toll_of(c.warden) + 40 and ship.inventory.count("scrap") > 900:
+		var stn := nearest_station(6)  # sell the surplus for the toll before going to the beacon
+		if stn != "":
+			for hop in path_to(stn):
+				if not go(hop):
+					return end_stage(false)
+			dock()
+			_docked = ""
 	for hop in path_to(c.drift.exit_id()):
 		if not go(hop):
 			return end_stage(false)
@@ -337,8 +345,7 @@ func warden_round() -> bool:
 	st["warden_skulls"] = th["skulls"]
 	st["warden_ratio"] = th["ratio"]
 	st["toll"] = Wardens.toll_of(c.warden)
-	var spare: int = ship.inventory.count("credits") - 60
-	var pick := pay if (pay >= 0 and (int(th["skulls"]) >= 3 or spare >= 2 * int(st["toll"]))) else brk
+	var pick := pay if pay >= 0 else brk  # a toll that can be paid is paid: the fight pays 50 credits a stage and costs hull
 	var tries := 0
 	while c.warden_up() and tries < 2:
 		tries += 1
