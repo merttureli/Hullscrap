@@ -114,6 +114,21 @@ static func contacts_for(sector, radar_range: float, identify_range: float, reve
 	return out
 
 
+## The rare debris pieces (types with `rare`, data/debris.json) of `debris` (a DriftDebris) within `range_px` of `from`, nearest first:
+## [{uid, type, name, pos, bearing (as contacts(): 0 up, clockwise), distance}]. The sector's compass ring marks each with a small diamond.
+static func rare_pieces(debris, from: Vector2, range_px: float) -> Array:
+	var out := []
+	if debris == null:
+		return out
+	for p in debris.pieces:
+		var t: Dictionary = debris.type_of(p)
+		var d: float = from.distance_to(p["pos"])
+		if bool(t.get("rare", false)) and d <= range_px:
+			out.append({"uid": p["uid"], "type": str(p["type"]), "name": str(t["name"]), "pos": p["pos"], "bearing": wrapf((p["pos"] - from).angle() + PI / 2.0, -PI, PI), "distance": d})
+	out.sort_custom(func(a, b): return a["distance"] < b["distance"] or (a["distance"] == b["distance"] and a["uid"] < b["uid"]))
+	return out
+
+
 # --- what a contact is called, and how dangerous it is -----------------------------------------------------------
 
 ## The enemy table ("pirate" or "patrol") of the ship behind POI `poi` when it may fight, else "": a passing pirate or patrol
