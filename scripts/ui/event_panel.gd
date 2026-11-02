@@ -18,6 +18,9 @@ signal finished
 signal fight_requested(value: String, after_win: Dictionary)
 ## Emitted when an outcome ended the run (the `ending` effect): `id` is the ending. The map turns it into the ending screen.
 signal ending_reached(id: String)
+## Emitted when an outcome sent the soldier aboard another vessel (the `board` effect): `spec` is the effect ({kind, ...}) and `ev` the page the
+## choice was on, which the map opens again when he is back (the vessel stays boardable until it is cleared).
+signal board_requested(spec: Dictionary, ev: Dictionary)
 
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
@@ -159,6 +162,10 @@ func proceed() -> void:
 	elif str(r.get("ending", "")) != "":
 		close()
 		ending_reached.emit(str(r["ending"]))
+	elif not r.get("board", {}).is_empty():
+		var back := event
+		close()
+		board_requested.emit(r["board"], back)
 	elif str(r.get("goto", "")) != "" and c.events.has(str(r["goto"])):
 		open_event(c.events.get_event(str(r["goto"])))
 	else:
@@ -385,9 +392,10 @@ func _draw_result(lay: Dictionary) -> void:
 	var b: Rect2 = lay["button"]
 	var fighting := str(result.get("fight", "")) != ""
 	var ended := str(result.get("ending", "")) != "" and not fighting
+	var boards: bool = not result.get("board", {}).is_empty() and not fighting and not ended
 	draw_rect(b, ROW_BG)
-	draw_rect(b, BAD if fighting else (AMBER if ended else EDGE), false, 2.0)
-	_text("To battle (Enter)" if fighting else ("The end (Enter)" if ended else "Continue (Enter)"), b.position + Vector2(24.0, 28.0), 17, BAD if fighting else (AMBER if ended else TEXT))
+	draw_rect(b, BAD if fighting else (AMBER if ended or boards else EDGE), false, 2.0)
+	_text("To battle (Enter)" if fighting else ("The end (Enter)" if ended else ("Go aboard (Enter)" if boards else "Continue (Enter)")), b.position + Vector2(24.0, 28.0), 17, BAD if fighting else (AMBER if ended or boards else TEXT))
 
 
 ## How a change line reads: 1 good (a gain, a debt paid), -1 bad (a loss, a debt grown), 0 neither.

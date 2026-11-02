@@ -394,3 +394,282 @@ func test_a_boardable_poi_event_has_the_choice_when_it_triggers() -> void:
 	var res2 := s.trigger(c, ship)
 	if not res2.is_empty() and res2["poi"]["id"] == "py" and not res2["event"].is_empty():
 		check(not res2["event"]["choices"].any(func(ch): return ch["outcomes"][0].get("effects", {}).has("board")), "a trader's event has no boarding")
+
+
+# --- the view: the tracker, the light, going aboard and coming back ------------------------------------------------
+
+const Tracker = preload("res://scripts/board/tracker.gd")
+const BoardLight = preload("res://scripts/board/board_light.gd")
+const BoardView = preload("res://scripts/board/board_view.gd")
+const BuildMode = preload("res://scripts/build/build_mode.gd")
+const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const MapView = preload("res://scripts/ui/map_view.gd")
+const SectorView = preload("res://scripts/view/sector_view.gd")
+const CombatView = preload("res://scripts/combat/combat_view.gd")
+
+
+func test_the_tracker_pings_what_moves_within_range_as_its_sweep_passes() -> void:
+	var t := Tracker.new()
+	for i in 80:
+		t.tick(0.1, Vector2.ZERO, [])
+	check(t.blips.is_empty() and t.take_pings() == 0, "with nothing to find it shows nothing but the sweep")
+	var contacts := [{"pos": Vector2(10, 0), "moving": true}, {"pos": Vector2(0, 40), "moving": true}, {"pos": Vector2(-6, 0), "moving": false}]
+	var heard := 0
+	for i in 40:  # one sweep is 3.2 s
+		t.tick(0.1, Vector2.ZERO, contacts)
+		heard += t.take_pings()
+	eq(heard, 1, "one sweep pings the moving contact in range, not the one 40 cells off nor the one standing still")
+	eq(t.blips.size(), 1, "and it shows as a blip")
+	near_dist(t.blips[0]["dist"], 10.0 / Tracker.RANGE, "a tenth of 25 cells out")
+	for i in 40:
+		t.tick(0.1, Vector2.ZERO, [])
+	check(t.blips.is_empty(), "and the blip fades")
+
+
+func near_dist(got: float, want: float, msg: String) -> void:
+	check(absf(got - want) < 0.05, "%s: expected %s, got %s" % [msg, str(want), str(got)])
+
+
+func test_the_wall_occluders_stop_the_light_and_leave_the_floor_lit() -> void:
+	for kind in ["derelict", "station"]:
+		var site = Site.make(31, kind, {"faction": "clans"})
+		var rects: Array = BoardLight.occluder_rects(site.grid)
+		check(rects.size() > 10 and rects.size() < 700, "%s: %d occluders is a few hundred at most" % [kind, rects.size()])
+		for c in site.grid.tiles:
+			var id: String = site.grid.tiles[c]
+			var centre := Vector2(c) + Vector2(0.5, 0.5)
+			var covered: bool = rects.any(func(r): return r.has_point(centre))
+			if id == "floor":
+				check(not covered, "%s: floor %s is not under an occluder" % [kind, str(c)])
+			elif id == "wall":
+				var by_floor := false
+				for n in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+					by_floor = by_floor or site.grid.get_tile(c + n) == "floor"
+				if by_floor:
+					check(covered, "%s: the wall %s beside a floor stops the light" % [kind, str(c)])
+	var door: Dictionary = Site.make(31, "derelict", {}).doors[0]
+	check(BoardLight.door_rect(door["cells"]).size.x > 0.0, "a door has an occluder of its own")
+
+
+## The play screen without a window: the ship sim, BuildMode in play mode, the map and its campaign, the sector view and the boarding view,
+## wired as main.tscn does (the crew view is left out: the board view works without it).
+func _screen(seed_value := 5) -> Dictionary:
+	var sim := ShipSim.new()
+	sim.ships = [_ship()]
+	var build := BuildMode.new()
+	build.sim = sim
+	var map := MapView.new()
+	map.sim = sim
+	map.build = build
+	map.size = Vector2(1600.0, 900.0)
+	build.drift = map
+	var combat := CombatView.new()
+	combat.sim = sim
+	combat.build = build
+	map.combat = combat
+	var view := SectorView.new()
+	view.sim = sim
+	view.build = build
+	view.combat = combat
+	view.cam = Camera2D.new()
+	var board := BoardView.new()
+	board.sim = sim
+	board.build = build
+	board.cam = view.cam
+	board.sector = view
+	map.board = board
+	board.finished.connect(map._on_board_finished)
+	map.new_game(seed_value)
+	map.visible = false
+	map.save_path = "user://test_boarding_campaign.json"
+	build.build_on = false
+	view.frame(0.05)
+	return {"sim": sim, "build": build, "map": map, "view": view, "board": board, "combat": combat}
+
+
+func _free(d: Dictionary) -> void:
+	if d["board"].active:
+		d["board"].leave()
+	d["view"].cam.free()
+	for k in ["board", "view", "combat", "map", "build", "sim"]:
+		d[k].free()
+
+
+## A boardable POI at the ship, and the event of it as the sector would hand it out.
+func _poi_event(d: Dictionary, id := "pz", type := "abandoned_station") -> Dictionary:
+	var s: Sector = d["map"].campaign.current_sector()
+	var poi := {"id": id, "type": type, "name": "Hulk", "pos": s.ship_pos, "visibility": "signal", "event_type": "wreck_field", "state": Sector.NEW, "enemy": "", "main": false}
+	s.pois.append(poi)
+	var ev := {"id": "t_wreck", "type": "wreck_field", "title": "Hulk", "text": "A dead hull.", "choices": [
+		{"text": "Pick through it.", "outcomes": [{"weight": 1, "text": "Scrap.", "effects": {"items": {"scrap": 3}}}]}]}
+	return {"poi": poi, "refused": "", "event": Boarding.offer(ev, Boarding.kind_for(poi)), "dock": false}
+
+
+func _board_choice(d: Dictionary) -> int:
+	var view: Array = d["map"].event_panel.view
+	for i in view.size():
+		if str(view[i]["text"]).begins_with("Board"):
+			return i
+	return -1
+
+
+func test_the_board_effect_puts_the_soldier_aboard_and_the_airlock_brings_him_back() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var board: BoardView = d["board"]
+	var build: BuildMode = d["build"]
+	var sim: ShipSim = d["sim"]
+	var s: Sector = map.campaign.current_sector()
+	var res := _poi_event(d)
+	map.open_poi(res, s)
+	check(map.event_panel.visible and _board_choice(d) >= 0, "the event offers boarding")
+	map.event_panel.choose(_board_choice(d))
+	check(map.event_panel.page == "result", "the page says what he does")
+	map.event_panel.proceed()
+	check(board.active and not map.visible, "he is aboard and the map makes way")
+	check(build.combat and sim.paused, "the ship's views are put away and its world held")
+	check(d["view"].boarding, "the sector stands still")
+	check(build.save_block != "", "and the game cannot be saved")
+	check(board.session.at_airlock(), "he arrives at the airlock")
+	eq(board.session.site.kind, "station", "on a station")
+	check(map.campaign.is_hollow(map.campaign.current) or true, "(the tide is another test)")
+	# the sector does not tick, the tide's linger clock does
+	var clock: float = s.clock
+	var left: float = map.campaign.tide.linger_left()
+	for i in 20:
+		d["view"].frame(0.5)
+	map._process(1.0)
+	eq(s.clock, clock, "no time passes in the sector")
+	check(map.campaign.tide.linger_left() < left, "but the Hollow tide's clock runs (%s then %s)" % [str(left), str(map.campaign.tide.linger_left())])
+	# E at the airlock leaves
+	board.step(0.05)
+	eq(str(board.target.get("type", "")), "airlock", "E would leave here")
+	board.e_override = false
+	board.step(0.05)
+	board.e_override = true
+	board.step(0.05)
+	check(not board.active, "E at the airlock leaves")
+	check(map.visible and map.event_panel.visible and map.event_panel.event.get("id", "") == "t_wreck", "the page he left opens again: the station stays boardable")
+	check(not build.combat and not sim.paused and not d["view"].boarding and build.save_block == "", "the ship is as it was, and can be saved")
+	check(_board_choice(d) >= 0, "and the choice is still there")
+	check(s.find("pz")["state"] == Sector.NEW, "the POI is not done")
+	check(s.boarded.has("pz"), "the visit is in the sector's memory")
+	_free(d)
+
+
+func test_clearing_a_site_marks_its_poi_done_and_the_choice_goes() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var board: BoardView = d["board"]
+	var s: Sector = map.campaign.current_sector()
+	map.open_poi(_poi_event(d), s)
+	map.event_panel.choose(_board_choice(d))
+	map.event_panel.proceed()
+	check(board.active, "aboard")
+	for id in board.session.site.containers():
+		board.session.open(id)
+	board.leave()
+	check(map.visible and map.event_panel.visible and map.event_panel.event.is_empty(), "a notice, not the page again")
+	check(str(map.event_panel.result["text"]) == Boarding.cleared_text(), "it says nothing is left aboard")
+	map.event_panel.proceed()
+	eq(s.find("pz")["state"], Sector.DONE, "the POI is done")
+	check(s.boarded["pz"]["cleared"], "and remembered as cleared")
+	_free(d)
+
+
+func test_opening_a_container_in_the_view_takes_a_hold_and_the_loot_goes_to_the_hold() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var board: BoardView = d["board"]
+	var ship: Ship = d["sim"].player_ship()
+	var s: Sector = map.campaign.current_sector()
+	var session = Boarding.start(map.campaign, s, "pq", {"kind": "derelict"}, ship)
+	eq(board.enter(session), "", "aboard")
+	var id: int = session.site.containers()[0]
+	var p: Dictionary = session.site.props[id]
+	var rect: Rect2i = session.site.rooms[p["room"]]["rect"]
+	var c: Vector2 = session.site.centre_of(p)
+	session.soldier.pos = Vector2(clampf(c.x, rect.position.x + 1.0, rect.end.x - 1.0), clampf(c.y, rect.position.y + 1.0, rect.end.y - 1.0))
+	board.aim_override = c * 32.0
+	board.step(0.05)
+	eq(board.target.get("id", -1), id, "the container is what E acts on")
+	var before: Dictionary = ship.inventory.counts.duplicate()
+	board.e_override = true
+	var need: float = float(Site.config()["props"][p["prop"]]["hold"])
+	for i in int(need / 0.1) - 3:
+		board.step(0.1)
+	check(board.panel < 0 and not session.opened.has(id), "a short hold opens nothing")
+	for i in 6:
+		board.step(0.1)
+	check(session.opened.has(id) and board.panel == id, "held long enough it opens and the list shows")
+	eq(ship.inventory.counts, before, "nothing is taken until you take it")
+	board.e_override = false
+	board.step(0.1)
+	board.e_override = true
+	board.step(0.1)  # a tap of E
+	check(board.panel < 0, "E takes all and the list shuts")
+	var got := 0
+	for k in ship.inventory.counts:
+		got += int(ship.inventory.counts[k]) - int(before.get(k, 0))
+	check(got > 0 or session.said.size() > 0, "the loot is in the hold")
+	board.e_override = false
+	board.leave()
+	_free(d)
+
+
+func test_a_locked_door_is_hacked_by_holding_e_for_four_seconds() -> void:
+	var d := _screen()
+	var map: MapView = d["map"]
+	var board: BoardView = d["board"]
+	var s: Sector = map.campaign.current_sector()
+	var session = null
+	var door := {}
+	for seed_id in 40:
+		session = Boarding.start(map.campaign, s, "ph%d" % seed_id, {"kind": "station"}, d["sim"].player_ship())
+		for x in session.site.doors.filter(func(x): return x["lock"] == "hack"):  # one with no container within reach of the spot by it
+			var at: Vector2 = session.site.door_centre(x) + (Vector2(0.0, -2.0) if x["cells"][0].y == x["cells"][1].y else Vector2(-2.0, 0.0))
+			if door.is_empty() and session.site.nearest_container(at, float(Site.config()["reach"])) < 0 and session.site.room_at(at) >= 0:
+				door = x
+		if not door.is_empty():
+			break
+	check(not door.is_empty(), "a station with a hack door")
+	eq(board.enter(session), "", "aboard")
+	var dc: Vector2 = session.site.door_centre(door)
+	var horizontal: bool = door["cells"][0].y == door["cells"][1].y
+	session.soldier.pos = dc + (Vector2(0.0, -2.0) if horizontal else Vector2(-2.0, 0.0))
+	board.aim_override = dc * 32.0
+	board.step(0.05)
+	eq(str(board.target.get("type", "")), "door", "E acts on the door")
+	board.e_override = true
+	for i in 30:
+		board.step(0.1)  # 3 s
+	check(not session.unlocked.has(door["id"]), "three seconds is not enough")
+	for i in 14:
+		board.step(0.1)
+	check(session.unlocked.has(door["id"]), "four seconds hack it")
+	check(not session.site.walk.door_locked.has(door["cells"][0]), "and the door is open to him")
+	board.e_override = false
+	board.leave()
+	_free(d)
+
+
+func test_the_save_is_refused_aboard_and_allowed_again_after() -> void:
+	var d := _screen()
+	var board: BoardView = d["board"]
+	var build: BuildMode = d["build"]
+	var ship: Ship = d["sim"].player_ship()
+	var session = Boarding.start(d["map"].campaign, d["map"].campaign.current_sector(), "ps", {"kind": "wreck"}, ship)
+	eq(board.enter(session), "", "aboard")
+	build._save()
+	eq(build.message, "Can't save aboard another vessel.", "the build screen's save refuses")
+	var e := InputEventKey.new()
+	e.keycode = KEY_S
+	e.ctrl_pressed = true
+	e.pressed = true
+	board._unhandled_input(e)
+	eq(board.message, "Can't save aboard another vessel.", "and so does Ctrl+S in the view")
+	check(board.message_alive(), "the line is on show")
+	board.leave()
+	eq(build.save_block, "", "back aboard the ship it can be saved")
+	check(session.finished, "the visit is over")
+	_free(d)

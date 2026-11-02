@@ -14,6 +14,8 @@ const Site = preload("res://scripts/board/site.gd")
 const Loot = preload("res://scripts/board/loot.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
+const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
+
 ## The boarding kind of each POI type that can be boarded (sector.gd poi_types); the wreck a won fight leaves is boarded from its salvage page.
 const POI_KINDS := {"wreck": "derelict", "abandoned_station": "station", "pirate_nest": "nest"}
 
@@ -256,6 +258,11 @@ func _log_title(id: String) -> String:
 
 # --- the choice ------------------------------------------------------------------------------------------------
 
+## The words when every container is open.
+static func cleared_text() -> String:
+	return str(Site.config()["cleared_text"])
+
+
 ## Is `kind` a kind of site (data/boarding.json)?
 static func has_kind(kind: String) -> bool:
 	return Site.config()["kinds"].has(kind)
@@ -268,9 +275,10 @@ static func kind_for(poi: Dictionary) -> String:
 	return str(POI_KINDS.get(str(poi.get("type", "")), ""))
 
 
-## A copy of event `ev` with the "Board her" choice added (its effect is `board: spec`), and a free way out when the event has none.
+## A copy of event `ev` with the "Board her" choice added (its effect is `board: spec`, `extra` is added to the spec), and a free way out when the
+## event has none (unless `leave` is false: a salvage page is a pick of one prize).
 ## An empty event stays empty.
-static func offer(ev: Dictionary, kind: String, extra := {}) -> Dictionary:
+static func offer(ev: Dictionary, kind: String, extra := {}, leave := true) -> Dictionary:
 	if ev.is_empty() or kind == "":
 		return ev
 	var text: Dictionary = Site.config()["offer"][kind]
@@ -279,7 +287,7 @@ static func offer(ev: Dictionary, kind: String, extra := {}) -> Dictionary:
 	var spec := {"kind": kind}
 	spec.merge(extra)
 	choices.append({"text": text["text"], "outcomes": [{"weight": 1, "text": text["flavor"], "effects": {"board": spec}}]})
-	if not choices.any(func(ch): return _free(ch)):
+	if leave and not choices.any(func(ch): return _free(ch)):
 		choices.append({"text": Site.config()["leave_text"], "outcomes": [{"weight": 1, "text": "", "effects": {}}]})
 	out["choices"] = choices
 	return out

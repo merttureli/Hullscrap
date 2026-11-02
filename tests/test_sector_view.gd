@@ -447,7 +447,11 @@ func test_an_event_fight_spawns_at_its_poi_and_resolves_it_after() -> void:
 	check(map.visible and map.event_panel.visible, "the loot notice")
 	map.event_panel.proceed()
 	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "salvage", "then the salvage pick of the pirate's parts, as from any fight")
-	map.event_panel.choose(map.event_panel.view.size() - 1)
+	var strip: int = map.event_panel.view.size() - 1  # (the Strip row, not the Board the wreck row after it)
+	for i in map.event_panel.view.size():
+		if str(map.event_panel.view[i]["text"]).begins_with("Strip"):
+			strip = i
+	map.event_panel.choose(strip)
 	map.event_panel.proceed()
 	check(not map.visible, "then the sector")
 	check(s.main_poi()["state"] == Sector.DONE or bool(s.cfg["poi_types"][s.main_poi()["type"]].get("repeat", false)), "the POI is resolved")

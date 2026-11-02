@@ -159,6 +159,9 @@ func _on_menu(id: String) -> void:
 			menu.close()
 		"save_menu":
 			build._save()
+			if build.save_block != "":
+				menu.note = build.save_block  # aboard another vessel: nothing is saved, the pause menu stays
+				return
 			show_main("Run saved. Continue picks it up.")
 
 

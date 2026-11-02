@@ -81,7 +81,7 @@ func _process(dt: float) -> void:
 ## Debris runs while the player is in play mode on their ship: not in build mode, not in a fight (unless the fight is
 ## in the sector).
 func active() -> bool:
-	return build != null and sim != null and sim.player_ship() != null and not build.build_on and (not build.combat or _flying())
+	return build != null and sim != null and sim.player_ship() != null and not build.build_on and (not build.combat or _flying()) and not (sector != null and bool(sector.get("boarding")))
 
 
 func _flying() -> bool:
