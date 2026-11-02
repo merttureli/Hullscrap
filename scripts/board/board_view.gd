@@ -18,7 +18,6 @@ const Site = preload("res://scripts/board/site.gd")
 const BoardLight = preload("res://scripts/board/board_light.gd")
 const BoardHud = preload("res://scripts/board/board_hud.gd")
 const Tracker = preload("res://scripts/board/tracker.gd")
-const Loot = preload("res://scripts/board/loot.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
@@ -116,6 +115,8 @@ func enter(p_session) -> String:
 		return "already aboard"
 	if p_session == null or not p_session.site.ok:
 		return "no such vessel"
+	if p_session.soldier.is_down():
+		return "the soldier is down"
 	session = p_session
 	active = true
 	_clock = 0.0
