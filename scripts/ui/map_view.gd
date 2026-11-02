@@ -82,6 +82,7 @@ var panel_only := false  ## shown only to hold the event or station panel of a s
 var _poi := ""  # the id of the POI whose event is up (open_poi), "" when none
 var _poi_sector = null  # its sector
 var _dock := false  # its station menu opens when the event is done
+var _dock_id := ""  # the small shop it opens instead of the node's station (a Trader or Store POI, campaign.gd shop_id)
 var _exit_due := false  # the ship came to the exit beacon: the region choice opens once its events are done
 
 
@@ -395,8 +396,8 @@ func _on_events_finished() -> void:
 			else:
 				_poi_resolve()
 			_open_exit()
-		elif _dock and campaign.dock_block(campaign.current) == "":
-			station_panel.open(campaign.current)
+		elif _dock and (_dock_id != "" or campaign.dock_block(campaign.current) == ""):
+			station_panel.open(_dock_id if _dock_id != "" else campaign.current)
 		else:
 			_poi_done()
 		_dock = false
@@ -423,6 +424,7 @@ func open_poi(res: Dictionary, sector) -> void:
 	_poi = str(res["poi"]["id"])
 	_poi_sector = sector
 	_dock = bool(res.get("dock", false))
+	_dock_id = str(res.get("shop", ""))
 	_exit_due = bool(res.get("exit", false)) or bool(res.get("warden", false))
 	panel_only = true
 	visible = true
@@ -437,7 +439,7 @@ func open_poi(res: Dictionary, sector) -> void:
 		_open_exit()
 	elif _dock:
 		_dock = false
-		station_panel.open(campaign.current)
+		station_panel.open(_dock_id if _dock_id != "" else campaign.current)
 	else:
 		_poi_done()
 
@@ -459,6 +461,7 @@ func _forget_poi() -> void:
 	_poi = ""
 	_poi_sector = null
 	_dock = false
+	_dock_id = ""
 
 
 func _hide_panels() -> void:

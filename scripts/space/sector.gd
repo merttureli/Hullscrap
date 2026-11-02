@@ -419,7 +419,8 @@ func contains(p: Vector2, slack := 0.0) -> bool:
 ## {poi, node, refused, event, dock}: what Campaign.arrive() returns for the node's old arrival event (the main POI
 ## runs exactly that: a dock master's refusal, a debt call, the greeting or the node's event), `event` for any other
 ## POI one picked from its event type by events.gd ({} when nothing fits), and `dock`: the station menu opens
-## (a station or store with a menu, and no refusal). A POI stays engaged until resolve(): it does not fire again. A
+## (a station or store with a menu, and no refusal), and `shop`: the id of the small shop (campaign.gd shop_id) the menu is when the POI is a
+## Trader or Store (data/sectors.json poi_types `shop`), else "". A POI stays engaged until resolve(): it does not fire again. A
 ## station or store never becomes done: it greets once per visit, later only docks, and docks again after the ship has
 ## left (1.5 x the trigger distance) and come back.
 func trigger(c, ship) -> Dictionary:
@@ -450,7 +451,8 @@ func trigger(c, ship) -> Dictionary:
 		res = _event_for(c, ship, best)
 	_greeted[best["id"]] = true
 	res["poi"] = best
-	res["dock"] = bool(t.get("dock", false)) and res["refused"] == "" and c.dock_block(node_id) == ""
+	res["shop"] = c.shop_id(node_id, str(best["id"])) if bool(t.get("shop", false)) and res["refused"] == "" and not c.station_cfg(c.shop_id(node_id, str(best["id"]))).is_empty() else ""
+	res["dock"] = res["shop"] != "" or (bool(t.get("dock", false)) and res["refused"] == "" and c.dock_block(node_id) == "")
 	if bool(t.get("repeat", false)) and res["event"].is_empty() and not res["dock"] and res["refused"] == "":
 		return {}
 	return res

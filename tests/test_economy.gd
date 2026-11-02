@@ -212,3 +212,200 @@ func test_a_run_starts_with_the_fuel_of_the_data() -> void:
 	ship.inventory.add("fuel", 5)
 	RunStart.fuel_up(ship)
 	eq(ship.inventory.count("fuel"), start + 5, "a ship with more keeps it")
+
+
+# --- small shops -------------------------------------------------------------------------------------------------
+
+const Shops = preload("res://scripts/space/shops.gd")
+const StationPanel = preload("res://scripts/ui/station_panel.gd")
+const Sector = preload("res://scripts/space/sector.gd")
+
+
+## A stand-in for the map view the station panel asks for the campaign and the ship.
+class MapStub extends Control:
+	var campaign
+	var _ship
+	func ship():
+		return _ship
+	func refresh() -> void:
+		pass
+
+
+## Every node id of the campaign's current region map.
+func _node_ids(c: Campaign) -> Array:
+	return c.drift.nodes.map(func(n): return str(n["id"]))
+
+
+func test_a_shop_has_three_to_five_items_and_one_or_two_unique() -> void:
+	var c := Campaign.new(11)
+	var seen_unique := {}
+	for r in Regions.all():
+		c.enter_region(str(r["id"]))
+		for node_id in _node_ids(c).slice(0, 4):
+			for poi in ["p0", "p1", "p2"]:
+				var cfg := c.station_cfg(Campaign.shop_id(node_id, poi))
+				if cfg.is_empty():
+					continue  # (a Hollow place: no trade)
+				var n: int = cfg["stock"].size()
+				check(n >= 3 and n <= 5, "%s %s %s: %d items" % [r["id"], node_id, poi, n])
+				check(cfg["unique"].size() >= 1 and cfg["unique"].size() <= 2, "%s %s %s: %d unique" % [r["id"], node_id, poi, cfg["unique"].size()])
+				for u in cfg["unique"]:
+					check(cfg["stock"].has(u), "a unique item is on the shelf")
+					seen_unique[u] = true
+				for id in cfg["stock"]:
+					check(cfg["unique"].has(id) or Campaign.config()["shops"]["common"].has(id), "%s is common or unique" % id)
+	check(seen_unique.size() > 40, "a wide variety of finds over all the shops (%d)" % seen_unique.size())
+	var kinds := {"racial": false, "tier": false, "material": false, "drone": false, "blueprint": false}
+	for id in seen_unique:
+		if str(id).begins_with("bp:"):
+			kinds["blueprint"] = true
+		elif Campaign.config()["shops"]["materials"].has(id):
+			kinds["material"] = true
+		elif Campaign.config()["shops"]["drone"].has(id):
+			kinds["drone"] = true
+		elif Content.origin("components", str(id)).begins_with("tech_"):
+			kinds["racial"] = true
+		else:
+			kinds["tier"] = true
+	check(kinds.values().all(func(v): return v), "racial parts, tier 2-3 parts, rare materials, the drone and blueprints all turn up: %s" % [kinds])
+
+
+func test_station_stocks_never_hold_a_regions_unique_finds() -> void:
+	var c := Campaign.new(12)
+	var cfg := Campaign.config()
+	var stocked := {}  # every id any station sells
+	for st in cfg["stations"]:
+		for id in cfg["stations"][st]["stock"]:
+			stocked[id] = true
+	for r in Regions.all():
+		for id in r.get("stock", {}):
+			stocked[id] = true
+	for id in cfg["shops"]["materials"]:
+		check(not stocked.has(id), "no station sells the rare material %s" % id)
+	for r in cfg["shops"]["blueprints"]:
+		check(not stocked.has("bp:" + r), "no station sells the blueprint %s" % r)
+	for id in cfg["shops"]["common"]:
+		check(stocked.has(id), "the common %s is on sale at some station" % id)
+	for r in Regions.all():
+		c.enter_region(str(r["id"]))
+		var here := {}
+		for p in r.get("places", []):
+			if str(p.get("type", "")) == "station":
+				for id in Regions.station(str(p["id"]), cfg).get("stock", {}):
+					here[id] = true
+		for node_id in _node_ids(c).slice(0, 6):
+			for poi in ["p0", "p1", "p2", "p3"]:
+				for u in c.station_cfg(Campaign.shop_id(node_id, poi)).get("unique", []):
+					check(not here.has(u), "%s: the station there sells %s, so it is no unique find in %s" % [r["id"], u, node_id])
+	for id in cfg["shops"]["common"]:
+		for kind in Shops.unique_pool(cfg, []):
+			check(not Shops.unique_pool(cfg, [])[kind].has(id), "the common %s is not in the unique pool" % id)
+
+
+func test_the_same_seed_gives_the_same_shop() -> void:
+	var a := Campaign.new(21)
+	var b := Campaign.new(21)
+	var other := Campaign.new(22)
+	var differ := 0
+	for node_id in _node_ids(a).slice(0, 8):
+		var id := Campaign.shop_id(node_id, "p1")
+		eq(a.station_cfg(id), b.station_cfg(id), "seed 21, shop %s" % id)
+		eq(a.station_cfg(id), a.station_cfg(id), "and asked twice")
+		if a.station_cfg(id)["stock"].keys() != other.station_cfg(id)["stock"].keys():
+			differ += 1
+	check(differ >= 5, "another seed stocks other things (%d of 8 differ)" % differ)
+	var pois := {}
+	for poi in ["p0", "p1", "p2", "p3", "p4"]:
+		pois[str(a.station_cfg(Campaign.shop_id(_node_ids(a)[0], poi))["stock"].keys())] = true
+	check(pois.size() >= 3, "and the shops of one sector differ from each other")
+
+
+func test_what_is_bought_leaves_the_shelf_and_a_blueprint_is_learned() -> void:
+	var c := Campaign.new(31)
+	var ship := Ship.from_design("res://data/ships/starter_courier.json")
+	ship.inventory.add("credits", 5000)
+	var id := Campaign.shop_id(_node_ids(c)[0], "p0")
+	var cfg := c.station_cfg(id)
+	var items: Array = cfg["stock"].keys()
+	var item: String = items[0]
+	var price: int = cfg["stock"][item]
+	var credits: int = ship.inventory.count("credits")
+	var r := c.buy(ship, id, item, 1)
+	check(r["ok"], str(r["text"]))
+	eq(credits - ship.inventory.count("credits"), price, "paid the shelf price")
+	var after := c.station_cfg(id)
+	eq(int(after["qty"].get(item, 0)), int(cfg["qty"][item]) - 1, "one unit left the shelf")
+	var back := Campaign.new(31)
+	check(back.load_dict(c.to_dict()) == "", "it loads")
+	eq(back.station_cfg(id)["qty"], after["qty"], "the save keeps what was bought")
+	eq(back.station_cfg(id)["stock"].size(), after["stock"].size(), "and the rest of the shelf")
+	# a blueprint: forced into the shop's roll so the test does not depend on the seed
+	var bp := "bp:pulse_mk2"
+	c._shops[id]["stock"][bp] = 360
+	c._shops[id]["qty"][bp] = 1
+	c._shops[id]["unique"].append(bp)
+	check(not ship.crafting.known.has("pulse_mk2"), "the blueprint is unknown")
+	var b := c.buy(ship, id, bp, 1)
+	check(b["ok"] and ship.crafting.known.has("pulse_mk2"), "bought and learned: " + str(b["text"]))
+	check(not c.station_cfg(id)["stock"].has(bp), "and gone from the shelf")
+	check(not c.buy(ship, id, bp, 1)["ok"], "it cannot be bought twice")
+
+
+func test_the_shop_panel_marks_the_unique_items_rare() -> void:
+	var c := Campaign.new(41)
+	var ship := Ship.from_design("res://data/ships/starter_courier.json")
+	var stub := MapStub.new()
+	stub.campaign = c
+	stub._ship = ship
+	var panel := StationPanel.new()
+	panel.map = stub
+	var id := Campaign.shop_id(_node_ids(c)[0], "p0")
+	panel.open(id)
+	var cfg := c.station_cfg(id)
+	var rows := panel.rows(0)
+	eq(rows.size(), cfg["stock"].size(), "a row for every item (no fuel, no blueprint you know)")
+	var rare := rows.filter(func(r): return bool(r.get("rare", false)))
+	eq(rare.map(func(r): return r["id"]), rows.filter(func(r): return cfg["unique"].has(r["id"])).map(func(r): return r["id"]), "the rare rows are the unique items")
+	check(rare.size() >= 1 and rare.size() <= 2, "one or two of them")
+	check(rows.all(func(r): return r["kind"] == "buy"), "a shop sells no fuel")
+	var first: Dictionary = rows[0]
+	var credits: int = ship.inventory.count("credits")
+	ship.inventory.add("credits", 5000)
+	panel.act(0, 0)
+	check(not panel.message_bad, "a click buys: " + panel.message)
+	check(c.station_cfg(id)["qty"].get(first["id"], 0) < int(cfg["qty"][first["id"]]), "and the shelf is lighter")
+	check(credits >= 0, "fixture")
+	panel.free()
+	stub.free()
+
+
+func test_trader_and_store_pois_open_a_shop() -> void:
+	var cfg := Sector.config()
+	check(bool(cfg["poi_types"]["trader"].get("shop", false)) and bool(cfg["poi_types"]["store"].get("shop", false)), "the Trader and Store POI types are shops")
+	check(not bool(cfg["poi_types"]["station"].get("shop", false)) and not bool(cfg["poi_types"]["wreck"].get("shop", false)), "a station and a wreck are not")
+	var found := 0
+	for seed_value in 30:
+		var c := Campaign.new(seed_value)
+		var ship := Ship.from_design("res://data/ships/starter_courier.json")
+		for n in c.drift.nodes:
+			if str(n["type"]) != "trader":
+				continue
+			c.current = str(n["id"])
+			var s = c.current_sector()
+			for poi in s.pois:
+				if str(poi["type"]) != "store" and str(poi["type"]) != "trader":
+					continue
+				s.ship_pos = poi["pos"]
+				var res: Dictionary = s.trigger(c, ship)
+				if res.is_empty() or res["refused"] != "":
+					continue
+				eq(res["shop"], Campaign.shop_id(str(n["id"]), str(poi["id"])), "the trigger names the shop")
+				check(res["dock"], "and docks into it")
+				check(not c.station_cfg(res["shop"]).is_empty(), "which has a menu")
+				found += 1
+				break
+			if found >= 6:
+				break
+		if found >= 6:
+			break
+	check(found >= 3, "Trader and Store POIs were met in the seeds tried (%d)" % found)
