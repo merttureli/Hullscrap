@@ -554,3 +554,4 @@ import sounds_lines   # noqa: E402,F401  weapon lines and the races' signature g
 import sounds_amb     # noqa: E402,F401  ambience beds, hazard loops, machine loops
 import sounds_ship    # noqa: E402,F401  ship, crew and combat extras
 import sounds_ui      # noqa: E402,F401  interface
+import sounds_board   # noqa: E402,F401  boarding on foot: weapons, foes, the tracker

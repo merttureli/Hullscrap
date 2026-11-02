@@ -114,8 +114,8 @@ const COLUMNS: Array = [
 			["C / Esc", "Close it"],
 		]],
 		["BOARDING (an event's Board her)", [
-			["E (hold)", "Aboard: open crates, hack locks"],
-			["E at airlock", "Back to the ship. No saving aboard"],
+			["Mouse R Q F", "Aboard: fire, reload, swap, light"],
+			["E (hold)", "Open, hack, revive; airlock: leave"],
 		]],
 	],
 ]

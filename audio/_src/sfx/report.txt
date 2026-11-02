@@ -153,5 +153,31 @@ jump_ready.wav        mono   1.32   -10.16    -23.00
 confirm.wav           mono   0.33   -13.32    -23.00 
 cancel.wav            mono   0.30   -13.64    -23.00 
 page_turn.wav         mono   0.40   -10.66    -23.00 
+shot_pistol_1.wav     mono   0.30    -3.91    -17.00 
+shot_pistol_2.wav     mono   0.30    -3.45    -17.00 
+shot_rifle_1.wav      mono   0.42    -4.51    -17.00 
+shot_rifle_2.wav      mono   0.42    -4.22    -17.00 
+shot_heavy_1.wav      mono   0.70    -4.48    -17.00 
+shot_heavy_2.wav      mono   0.70    -4.20    -17.00 
+melee_swing_1.wav     mono   0.32   -10.19    -22.00 
+melee_swing_2.wav     mono   0.32    -8.14    -22.00 
+reload.wav            mono   0.85    -6.42    -22.00 
+empty_click.wav       mono   0.09    -8.42    -22.00 
+foe_hit_1.wav         mono   0.20    -3.71    -15.00 
+foe_hit_2.wav         mono   0.20    -4.42    -15.00 
+foe_hit_3.wav         mono   0.20    -3.56    -15.00 
+foe_down_1.wav        mono   0.60    -2.10    -15.04 
+foe_down_2.wav        mono   0.60    -1.99    -15.06 
+crawler_screech_1.wav  mono   0.80   -10.55    -22.00 
+crawler_screech_2.wav  mono   0.80   -10.92    -22.00 
+crawler_skitter_1.wav  mono   0.39   -17.34    -32.00 
+crawler_skitter_2.wav  mono   0.40   -17.54    -32.00 
+crawler_skitter_3.wav  mono   0.36   -14.94    -32.00 
+sentry_whir_1.wav     mono   0.70   -19.42    -29.00 
+sentry_whir_2.wav     mono   0.70   -20.84    -29.00 
+tracker_ping_far.wav  mono   0.28   -18.99    -23.00 
+tracker_ping_mid.wav  mono   0.18   -18.77    -23.00 
+tracker_ping_near.wav  mono   0.23   -17.90    -23.00 
+flashlight_click.wav  mono   0.10    -8.53    -23.00 
 
-154 files, 21.35 MB
+180 files, 22.34 MB
