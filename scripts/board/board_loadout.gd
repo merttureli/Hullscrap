@@ -28,9 +28,8 @@ static func draw(h, size: Vector2) -> void:
 	h._text("Take up to %d crew along, then set what each carries. Crew who are down when you leave are lost, with their kit." % int(Arms.cfg()["party_max"]), r.position + Vector2(20, 58), 13, h.DIM_TEXT)
 	var people: Array = v.loadout_people()
 	_crew(h, r, v, people)
-	if people.is_empty():
-		return
-	_person(h, Rect2(r.position + Vector2(316, 74), Vector2(PW - 336, PH - 150)), v, people[mini(v.load_who, people.size() - 1)])
+	if not people.is_empty():
+		_person(h, Rect2(r.position + Vector2(316, 74), Vector2(PW - 336, PH - 150)), v, people[mini(v.load_who, people.size() - 1)])
 	var go := Rect2(r.end - Vector2(176, 52), Vector2(156, 34))
 	h.draw_rect(go, Color(h.AIRLOCK, 0.35))
 	h.draw_rect(go, h.AIRLOCK, false, 1.5)

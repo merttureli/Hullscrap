@@ -95,7 +95,7 @@ Code: `scripts/board/people.gd` (placing them, the talk, the six effects, the sh
   - **Salvage Rig** (party): every container you open gives more of each stack of materials, rounds and credits: +25%, +50%, +100% (Mk III also a 1 in 3 chance per container of one extra rare material). Fractions are rolled from a stream of the site's seed and the container, so a container gives the same every time. Blueprints, parts and weapons are never multiplied. The loot list shows the bonus as "+3 scrap" in the mod's colour.
   - **Overcharge Coil** (self): the wearer's shots, and swings, do +15%, +30%, +45%; their bolts are wider and brighter; Mk III goes through the first body to the next.
 - **Where mods come from**: the `mod` outcome of the command and engineering tables and of the nest's stashes (about one mod per 2 early stations; Mk III is stations only, from stage 4, about one run in three finds one if it boards a station at each of stages 4-8); a trader aboard may carry one (the room's table); the small shops' unique pool has a `mod` kind (weight 1, priced by tier in `drift.json` `shops.mods`).
-- **Describe**: `mod` is a coloured keyword (MOD) and an item kind; a mod's hover shows what it does, the numbers of its tier and who they work for. Debug: M in the crafting panel (C) puts the nine mods in the hold.
+- **Describe**: `mod` is a coloured keyword (MOD) and an item kind; a mod's hover shows what it does, the numbers of its tier and who they work for. Debug: M in the crafting panel (C) puts the nine mods in the hold (the help panel has no room for a row of it).
 - **Tests**: `tests/test_boarding_kit.gd`, plus `test_content` (every mod item validates) and the existing boarding tests.
 
 ## Loot
