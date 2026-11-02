@@ -1797,6 +1797,8 @@ Source and licence of every art and audio file in the repo.
 | `assets/audio/music/black_box_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/build.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/combat.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/concord_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/concord_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/defeat.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/ending.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/music/explore_a.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
@@ -1820,3 +1822,4 @@ Source and licence of every art and audio file in the repo.
 | `assets/audio/music/demos/signal_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_signal.py`) | project-owned |
 | `assets/audio/music/demos/signal_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_signal.py`) | project-owned |
 | `assets/audio/music/demos/r3_black_box_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_black_box.py`) | project-owned |
+| `assets/audio/music/demos/r3_concord_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_concord.py`) | project-owned |

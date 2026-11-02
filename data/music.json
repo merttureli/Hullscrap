@@ -6,10 +6,16 @@
    "explore": "black_box_explore.ogg",
    "battle": "black_box_battle.ogg",
    "bpm": 118.125
+  },
+  "concord": {
+   "explore": "concord_explore.ogg",
+   "battle": "concord_battle.ogg",
+   "bpm": 112.0
   }
  },
  "regions": {
-  "default": "black_box"
+  "default": "black_box",
+  "faction:concord": "concord"
  },
  "states": {
   "menu": [
@@ -37,6 +43,8 @@
   "hollow.ogg": 0.0,
   "black_box_explore.ogg": 0.0,
   "black_box_battle.ogg": 0.0,
+  "concord_explore.ogg": 0.0,
+  "concord_battle.ogg": 0.0,
   "victory.ogg": -3.0,
   "defeat.ogg": -3.0,
   "jump.ogg": -3.0,

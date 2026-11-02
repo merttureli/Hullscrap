@@ -14,7 +14,7 @@ import voices as V
 import voices2 as V2
 import voices3 as V3
 import theme as T
-from synth import SR
+from synth import SR, db
 from demo import Demo, once
 
 SCALES = {"dorian": [0, 2, 3, 5, 7, 9, 10], "aeolian": [0, 2, 3, 5, 7, 8, 10], "mixolydian": [0, 2, 4, 5, 7, 9, 10],
@@ -237,12 +237,54 @@ def render(D, extras=None):
     env = s.auto([(bar(starts[k]), v) for k, v in D.get("env", {"intro": 0.85, "A": 1.0}).items()], 1.5)
     # a 16 kHz low-pass before the master: noise hits near Nyquist otherwise make inter-sample peaks that pull the limiter down
     top = lambda m: S.filt(m, lp=16000, order=4)
-    x = s.master(top(s.mix(spec("explore"), ir, D.get("rv_db", (-2, -4))[0], D.get("air", (3.0, 4.0))[0], env)), D["rms"]["explore"])
-    y = s.master(top(s.mix(spec("battle"), ir, D.get("rv_db", (-2, -4))[1], D.get("air", (3.0, 4.0))[1], env, glitch)), D["rms"]["battle"])
+    x = master(top(s.mix(spec("explore"), ir, D.get("rv_db", (-2, -4))[0], D.get("air", (3.0, 4.0))[0], env)), D["rms"]["explore"])
+    y = master(top(s.mix(spec("battle"), ir, D.get("rv_db", (-2, -4))[1], D.get("air", (3.0, 4.0))[1], env, glitch)), D["rms"]["battle"])
     render.song = s
     return {"explore": x, "battle": y, "bpm": s.bpm, "song": s,
             "sections": {k: round(s.sec(bar(v)), 2) for k, v in starts.items()},
             "transition": transition(s, x, y, starts.get("A", 0))}
+
+
+def limit(x, ceil_db, hold_ms=3.0):
+    """Look-ahead peak limiter for a loop: the gain each sample needs to keep the 2x-oversampled peak under the
+    ceiling, held over +-hold_ms (in blocks, so a little more) and smoothed by a triangle no wider than the hold, so
+    every peak is caught and the waveform is turned down, not clipped (clipping feeds the codec's overshoot)."""
+    n = x.shape[1]
+    up = np.fft.irfft(np.fft.rfft(x, axis=-1), 2 * n, axis=-1) * 2
+    p = np.abs(up).max(0).reshape(n, 2).max(1)
+    need = np.minimum(1.0, db(ceil_db) / np.maximum(p, 1e-9))
+    k = max(2, int(hold_ms * SR / 1000))
+    m = -(-n // k) * k
+    blk = np.concatenate([need, need[:m - n]]).reshape(-1, k).min(1)
+    blk = np.minimum(blk, np.minimum(np.roll(blk, 1), np.roll(blk, -1)))
+    g = np.repeat(blk, k)[:n]
+    for _ in range(2):   # two box filters of k - 1: a triangle of half-width under k
+        w = k - 1
+        c = np.cumsum(np.concatenate([g[-w:], g, g[:w]]))
+        g = (c[2 * w:] - np.concatenate([[0.0], c[:-2 * w - 1]])) / (2 * w + 1)
+    return (x * g[None, :].astype(np.float32)).astype(np.float32)
+
+
+def master(mix, rms_db, ceil_db=-2.0):
+    """High-pass, bus-compress, set the loudness, limit (not clip) under the ceiling; then a trial Vorbis encode, and
+    the ceiling comes down until the encoded file stays under -1 dBTP."""
+    import os
+    import tempfile
+    import build_music as B
+    x = S.compress(S.filt(mix, hp=24, order=2))
+    for _ in range(4):
+        g = db(rms_db) / np.sqrt(np.mean(x.astype(np.float64) ** 2))
+        for _ in range(5):
+            y = limit(x * np.float32(g), ceil_db)
+            g *= db(rms_db - S.rms_db(y))
+        path = os.path.join(tempfile.gettempdir(), "hullscrap_tp_%d.ogg" % os.getpid())
+        B.encode(y, path)
+        tp = 20 * np.log10(S.true_peak(B.decode(path)))
+        os.remove(path)
+        if tp <= -1.15:
+            break
+        ceil_db -= tp + 1.3
+    return y
 
 
 def _chain(fns, x):

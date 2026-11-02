@@ -549,26 +549,26 @@
   "black_box": {
    "battle": {
     "bands_pct": [
-     29.9,
-     22.7,
-     24.8,
-     14.5,
-     8.2
+     31.2,
+     23.7,
+     25.3,
+     13.0,
+     6.9
     ],
-    "bytes": 2682522,
-    "peak_db": -1.74,
-    "rms_db": -15.05,
+    "bytes": 2686874,
+    "peak_db": -1.75,
+    "rms_db": -15.04,
     "samples_off_vs_render": 0,
     "seam": {
-     "max_step": 0.79352,
-     "rms_first_db": -18.8,
-     "rms_last_db": -15.9,
-     "seam_step": 0.08252,
-     "typ_step_p999": 0.41658
+     "max_step": 0.76397,
+     "rms_first_db": -18.4,
+     "rms_last_db": -15.4,
+     "seam_step": 0.09005,
+     "typ_step_p999": 0.36607
     },
     "seconds": 130.03,
     "target_rms_db": -15.0,
-    "true_peak_db": -1.38
+    "true_peak_db": -1.75
    },
    "bpm": 118.125,
    "explore": {
@@ -579,7 +579,7 @@
      1.3,
      0.3
     ],
-    "bytes": 2544953,
+    "bytes": 2544952,
     "peak_db": -4.09,
     "rms_db": -18.01,
     "samples_off_vs_render": 0,
@@ -588,7 +588,7 @@
      "rms_first_db": -20.8,
      "rms_last_db": -18.1,
      "seam_step": 0.04109,
-     "typ_step_p999": 0.09002
+     "typ_step_p999": 0.09003
     },
     "seconds": 130.03,
     "target_rms_db": -18.0,
@@ -603,7 +603,7 @@
     "intro": 0.0
    },
    "sync": {
-    "onset_corr": 0.694,
+    "onset_corr": 0.693,
     "onset_lag_ms": 0.0,
     "same_length": true,
     "samples_battle": 5734400,
@@ -612,18 +612,98 @@
    "title": "Black Box",
    "transition": {
     "bands_pct": [
-     29.3,
-     25.6,
-     26.9,
-     12.4,
-     5.8
+     29.8,
+     26.2,
+     27.7,
+     11.5,
+     4.9
     ],
-    "bytes": 1530357,
-    "peak_db": -2.29,
-    "rms_db": -16.07,
+    "bytes": 1531762,
+    "peak_db": -2.43,
+    "rms_db": -16.13,
     "samples_off_vs_render": 0,
     "seconds": 73.68,
-    "true_peak_db": -2.0
+    "true_peak_db": -1.94
+   }
+  },
+  "concord": {
+   "battle": {
+    "bands_pct": [
+     16.6,
+     18.8,
+     49.1,
+     10.1,
+     5.3
+    ],
+    "bytes": 2704751,
+    "peak_db": -2.61,
+    "rms_db": -15.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.82224,
+     "rms_first_db": -16.3,
+     "rms_last_db": -15.3,
+     "seam_step": 0.02652,
+     "typ_step_p999": 0.3504
+    },
+    "seconds": 137.14,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.55
+   },
+   "bpm": 112.0,
+   "explore": {
+    "bands_pct": [
+     16.5,
+     29.0,
+     49.1,
+     4.8,
+     0.6
+    ],
+    "bytes": 2854596,
+    "peak_db": -3.32,
+    "rms_db": -18.0,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.37732,
+     "rms_first_db": -18.2,
+     "rms_last_db": -19.8,
+     "seam_step": 0.0109,
+     "typ_step_p999": 0.12829
+    },
+    "seconds": 137.14,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.16
+   },
+   "mode": "E dorian, with a mixolydian lift (E major) into the drop",
+   "sections_s": {
+    "A": 17.14,
+    "A2": 102.86,
+    "B": 51.43,
+    "brk": 85.71,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.78,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 6048000,
+    "samples_explore": 6048000
+   },
+   "title": "Concord",
+   "transition": {
+    "bands_pct": [
+     12.2,
+     24.5,
+     54.3,
+     6.3,
+     2.7
+    ],
+    "bytes": 1530389,
+    "peak_db": -3.19,
+    "rms_db": -15.76,
+    "samples_off_vs_render": 0,
+    "seconds": 74.8,
+    "true_peak_db": -3.15
    }
   }
  },
