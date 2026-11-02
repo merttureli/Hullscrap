@@ -1,0 +1,165 @@
+{
+	"events": [
+		{
+			"id": "bnpc_captive_cut_free",
+			"type": "boarding_npc",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"site": "nest"
+			},
+			"text": "{name} is tied to a pipe with cable, in a corner of a room that has been used for a very long time as a place to leave things. There is a bowl of water within sight of the cable and not within reach of {name}. They look up when the light finds them, and the light does not seem to be the thing they are afraid of. 'Quietly,' {name} whispers. 'They drink in the room next door. They'll hear the saw.'",
+			"choices": [
+				{
+					"text": "Cut {name} free.",
+					"outcomes": [
+						{
+							"weight": 50,
+							"text": "The cable parts with a sound like a plucked string. {name} rubs both wrists, looks at the door, then at you. 'I'll work,' {name} says. 'I'll cook, I'll shoot, I'll scrub a deck. I'm done being left in rooms.'",
+							"effects": {
+								"npc_join": true
+							}
+						},
+						{
+							"weight": 50,
+							"text": "The cable parts with a sound like a plucked string. It carries. Next door a chair scrapes, and then another. {name} is already standing. 'Told you,' {name} says, with a terrible calm, and takes your hand.",
+							"effects": {
+								"npc_join": true,
+								"site_fight": {
+									"kind": "pirate",
+									"n": 2
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Post someone at the door, then cut.",
+					"requires": {
+						"crew_min": 1
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "A crew member takes the corridor with a drawn pistol and the face of someone who has never been this calm in their life. The cut is quiet. {name} comes up off the floor like a spring. 'Thank you,' {name} says, 'thank you,' and then, practically: 'where's your airlock?'",
+							"effects": {
+								"npc_join": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave {name} tied.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} watches you go. Nothing is said. It is the kind of silence that follows you out.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_captive_bargain",
+			"type": "boarding_npc",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"site": "nest"
+			},
+			"text": "{name} is chained to a bunk by one ankle and has been running the numbers on it for some time. 'Here's the deal,' {name} says as soon as the light finds them. 'You cut me loose, I show you where they keep the good stuff. I've watched them for weeks. I know the stash, the rota, and which of them cheats at cards.'",
+			"choices": [
+				{
+					"text": "Free {name} and take the deal.",
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "The chain has a cheap lock, and you have dealt with cheaper. {name} leads you through the nest, ducking, pointing: that crate, that one, the drawer that sticks. 'Rota's Thursday,' {name} breathes. 'They'll all be drunk by nine.' At the airlock the hand is shaken, and the dark takes {name} without a backward look.",
+							"effects": {
+								"npc_reveal": "container",
+								"npc_follow": true
+							}
+						},
+						{
+							"weight": 30,
+							"text": "The chain falls off in a long clatter. {name} is already smiling, and not at you. 'Thanks, friend,' {name} says. 'It was a long time to hold still.' The nest is quiet for exactly as long as it takes to see that the cards were stacked. You were the last card.",
+							"effects": {
+								"npc_hostile": "pirate"
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask for the stash first.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} grins, then goes serious. 'Fair,' {name} says. 'Second drawer, the one that sticks. And the big locker has a card in it. After that it's your call.' You are given what you asked for. The chain is still on {name}'s ankle.",
+							"effects": {
+								"npc_reveal": "key"
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Think about it,' says {name}, who has plenty of time.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_captive_fallback",
+			"type": "boarding_npc",
+			"weight": 6,
+			"once": false,
+			"fallback": true,
+			"text": "{name} has been left where it was convenient, a bag over the head and a note pinned to the sleeve: WILL COLLECT. The bag turns toward the light. 'If that's you,' says a muffled voice, 'you're early. If it isn't, please say something.'",
+			"choices": [
+				{
+					"text": "Take the bag off.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} blinks at the light for a long time. Face grey, hands numb, patience intact. 'Thanks,' {name} says. 'I'd shake, but.' You cut the cable. {name} limps off in the direction of anywhere else, pressing a handful of scrap on you as a toll.",
+							"effects": {
+								"npc_leave": true,
+								"items": {
+									"scrap": 12
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Cut the cable and walk {name} out.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} leans a long way on you. At the hatch {name} turns to say something, and settles for a squeeze of the arm.",
+							"effects": {
+								"npc_follow": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the bag on.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Fine,' says the muffled voice. 'Fine.' It is the worst fine you have ever heard.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}

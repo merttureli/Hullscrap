@@ -86,7 +86,7 @@
 			"touched_talker": {"name": "Hollow-touched", "hp": 60, "weapon": "", "look": {"suit": "#9a96a8", "hair": "#d8d4e0", "tool": "#cfd5dd"}, "hostile": "hollow_touched", "rooms": {"command": 2, "quarters": 2, "medbay": 1.5, "storage": 1}}
 		},
 		"species": {"human": 10, "basalt": 1, "fenn": 1, "emberkin": 1},
-		"names": ["Okafor", "Pell", "Mags", "Dutch", "Ines", "Wren", "Haskell", "Odalys", "Kit", "Marl", "Sully", "Temperance", "Bosch", "Fenwick", "Calloway", "Tamsin", "Rue", "Ferris", "Nell", "Garrick", "Ibarra", "Moreau", "Linnet", "Orrin", "Dessa", "Quill", "Hobb", "Piper", "Vance", "Yusuf"],
+		"names": ["Okafor", "Teague", "Mags", "Dutch", "Ines", "Wren", "Haskell", "Odalys", "Kit", "Marl", "Sully", "Temperance", "Bosch", "Fenwick", "Calloway", "Tamsin", "Rue", "Ferris", "Nell", "Garrick", "Ibarra", "Moreau", "Linnet", "Orrin", "Dessa", "Alder", "Hobb", "Piper", "Vance", "Yusuf"],
 		"rooms": {"quarters": 2, "medbay": 1.5, "command": 1.2, "storage": 1, "cargo": 1, "engineering": 0.8},
 		"min_from_airlock": 6.0,
 		"apart": 4.0,

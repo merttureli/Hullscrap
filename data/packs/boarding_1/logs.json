@@ -1,0 +1,39 @@
+{
+	"logs": [
+		{
+			"id": "log_board_last_message",
+			"title": "Handover",
+			"ship": "Customs Post 7",
+			"faction": "concord",
+			"text": "To whoever has the desk next: the lights are on a timer, the timer is wrong, don't fix the timer.\nWater is Tuesday. The door sticks, lift and then push.\nIf the knocking starts on the lower deck, it is the pipes. It has always been the pipes.\nI am going to check the pipes now."
+		},
+		{
+			"id": "log_board_note_in_pocket",
+			"title": "For Marl",
+			"ship": "Dredge Den",
+			"faction": "clans",
+			"text": "If you're reading this you've found me before the others have, and that's lucky, or it isn't.\nThe card's in my left boot. The red door is not a door.\nI am sorry about the smell.\nTell Marl it was the pipe and not the drink. She'll know."
+		},
+		{
+			"id": "log_board_wake_menu",
+			"title": "Wake for Tusk",
+			"ship": "Tusk's Hall",
+			"faction": "clans",
+			"text": "Wake for Tusk, who owed everyone and was owed by no one.\nMenu: the good stew, the other stew, a cask nobody has labelled.\nSpeeches limited to one minute, by order of Ma. Hobb spoke for forty. Nobody stopped him.\nThe cask was empty by the end, and so was everything else."
+		},
+		{
+			"id": "log_board_air_budget",
+			"title": "Air budget, day 31",
+			"ship": "Relay Platform",
+			"faction": "clans",
+			"text": "Nine of us, six hours of scrubber. We did the sums twice. Then we did them again in a nicer way, for the children, and the sums came out the same.\nOdd thing is the quiet has made us kinder.\nBrin gave me her last ration bar and said she wasn't hungry. She was lying and so was I."
+		},
+		{
+			"id": "log_board_glass_prayer",
+			"title": "What the glass does",
+			"ship": "Glass Shrine",
+			"faction": "lumen",
+			"text": "The glass doesn't sing when you listen. It sings when you stop.\nWe have started to stop on purpose.\nThere is a prayer in it somewhere, or a fault in the lattice, and the difference, the Prism says, is a matter of what you were hoping for."
+		}
+	]
+}

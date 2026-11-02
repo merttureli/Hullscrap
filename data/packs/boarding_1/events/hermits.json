@@ -1,0 +1,237 @@
+{
+	"events": [
+		{
+			"id": "bnpc_hermit_tomato",
+			"type": "boarding_npc",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"site": [
+					"station",
+					"derelict"
+				]
+			},
+			"text": "A hydroponics tray, a grow lamp wired to a car battery, and behind them a person in a coat made of three other coats. {name} is watering a single tomato with a syringe. It is the only red thing for a hundred metres. 'Careful,' {name} says, not looking up. 'You'll frighten it.' The tomato is the size of a thumb and has, you have a feeling, been named.",
+			"choices": [
+				{
+					"text": "Admire the tomato.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "You admire it for the right length of time. {name} cuts it in half with a thumbnail, gives you the bigger half, and eats the other with such grave attention that you look away. 'The vents run behind the pallets,' {name} says, after. 'Your lot would find the rest by smell.'",
+							"effects": {
+								"crew_hp": 4,
+								"npc_reveal": "container"
+							}
+						},
+						{
+							"weight": 40,
+							"text": "{name} talks about the tomato for twenty minutes. It is a good tomato. You leave knowing a great deal about tomatoes, with a fistful of hose clamps pressed on you, and feeling, for no reason you can name, a little less alone.",
+							"effects": {
+								"items": {
+									"scrap": 8
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "See what {name} has to trade.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'People leave things,' says {name}, gesturing at a corner like a small and orderly landfill. 'Nobody comes back for them. Seems rude not to sell.'",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask the tomato how it is doing.",
+					"requires": {
+						"species": "sporeling"
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Sporeling bends over the tray and makes a small, polite sound. The tomato, you could swear, leans toward it. {name} is delighted, then moved, then slightly jealous. 'Take a cutting,' {name} says thickly. 'Take two.' It turns out a cutting is a coil of grow-line, and a good one.",
+							"effects": {
+								"items": {
+									"polymer": 6,
+									"copper": 4
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave {name} to it.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Mind the step,' says {name}, to the tomato.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_hermit_one_light",
+			"type": "boarding_npc",
+			"weight": 8,
+			"once": false,
+			"requires": {
+				"site": "derelict"
+			},
+			"text": "Every light on this deck has been put out but one. Under it, at a folding table, a person is reading a book with the care of someone defusing it. {name} does not look up. 'You can come in,' {name} says, softly. 'Not with that.' It takes you a moment to understand that {name} means the torch. At the edge of the single pool of light, in the dark beyond it, something shifts and settles, like a coat sliding off a chair.",
+			"choices": [
+				{
+					"text": "Switch the torch off and sit.",
+					"outcomes": [
+						{
+							"weight": 50,
+							"text": "You sit in the dark, in the circle of the one lamp, and {name} reads aloud. It is a repair manual for a model of pump that has not been built in forty years. It is the best thing you have ever heard. When the chapter ends {name} marks the page. 'The key you want is somewhere with a pump,' {name} says.",
+							"effects": {
+								"npc_reveal": "key"
+							}
+						},
+						{
+							"weight": 50,
+							"text": "You sit. The book is a manual. Something is breathing by your left elbow, slowly, in time with the page. {name} turns a leaf without looking. 'Don't mind the other one,' {name} says. 'He doesn't like visitors.' It does not stay polite for the whole chapter.",
+							"effects": {
+								"site_fight": {
+									"kind": "scavenger",
+									"n": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Keep the torch on.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} closes the book on a finger, stands, and walks out of the circle into the dark. It is not an angry exit. It is the exit of a person who has been asked to leave their own front room. The lamp ticks as it cools.",
+							"effects": {
+								"npc_leave": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Back out of the light.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Thank you,' says {name}, to the book. The page turns.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_hermit_ledger",
+			"type": "boarding_npc",
+			"weight": 40,
+			"once": true,
+			"requires": {
+				"theme": "concord",
+				"stage_min": 6,
+				"stage_max": 8,
+				"not_flag": "doors_known"
+			},
+			"text": "A Concord checkpoint with the lights turned low, and at the one desk still lit a person in a customs lanyard, writing in a ledger that has never once balanced. {name} writes without looking up. 'Fourth door,' {name} says. 'Everyone asks about the first three.' The ledger is open to a page headed GATES, with three columns, and a fourth that someone has added in pencil. The pencil is much newer than the ink.",
+			"choices": [
+				{
+					"text": "Ask about the fourth door.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Core, alloy, a backer,' {name} reads, running a finger down the page, 'and the table. Because the Scrapper Gate has tenants. They have been laying a table for forty years. Bring a kettle.' {name} turns the ledger round so you can read the last line: a signature, a date, and a note in a cramped officer's hand. 'He left it for the next person who came by.'",
+							"effects": {
+								"flag": "doors_known",
+								"rep": {
+									"concord": 1
+								},
+								"log": [
+									"log_concord_hallett_mug",
+									"log_lumen_test_pulse"
+								]
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask about the vault behind the desk.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Not a vault,' says {name}. 'A cupboard with ambitions.' But the finger goes out, and taps twice on the wall behind the desk, where there is, now you look, a door with a good lock and a small hand-lettered sign: PLEASE DO NOT STEAL.",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the ledger as you found it.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} writes your departure in the margin. The ink is very black. It will not balance.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_hermit_quiet_deck",
+			"type": "boarding_npc",
+			"weight": 6,
+			"once": false,
+			"fallback": true,
+			"text": "{name} has made a home in the corner of what used to be a mess deck: a bedroll, a stove the size of a hat, a row of bolts on the shelf arranged by size. They look up when your light finds them, and give a small nod, as one tenant to another. 'Quiet tonight,' {name} says. It is the first thing {name} has said in a while, and the voice is rusty with it.",
+			"choices": [
+				{
+					"text": "Agree that it is quiet.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You stand there a while, listening to the quiet agree with you. {name} warms both hands over the little stove and does not ask you to leave, or to stay. 'East side's safe,' {name} says at last. 'West I wouldn't.'",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "See what {name} has to trade.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'It's all small things,' says {name}. 'Small things get you through.'",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Nod and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} nods back, and the stove ticks.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}

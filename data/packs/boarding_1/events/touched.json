@@ -1,0 +1,231 @@
+{
+	"events": [
+		{
+			"id": "bnpc_touched_roll_call",
+			"type": "boarding_npc",
+			"weight": 40,
+			"once": true,
+			"requires": {
+				"site": [
+					"station",
+					"derelict"
+				],
+				"flag": "hollow_1",
+				"not_flag": "hollow_2",
+				"stage_min": 4,
+				"stage_max": 7
+			},
+			"text": "{name} stands at the head of a corridor in a night-shift jacket with the sleeves rolled, holding a clipboard against the chest the way you would hold a baby. The face is pleasant. The face is entirely pleasant. 'Good evening,' {name} says. 'Visitor. Noted.' A pencil moves on the clipboard. 'We're doing the roll. If you'd like to join in, there's a gap on the end.'",
+			"choices": [
+				{
+					"text": "Answer to a name.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You give the first name that comes. {name} writes it down, and rubs it out, and writes it again, and is distressed, kindly, at the pencil. 'We'll sort it out,' {name} says. 'We've got time.' Eleven voices, somewhere down the corridor, say 'Present,' in eleven different tones. The twelfth line, you notice, has a pencil mark where a name was once rubbed out. {name} hands you a copy of the sheet, holding it by the corner.",
+							"effects": {
+								"flag": "hollow_2",
+								"log": [
+									"log_concord_roll_call",
+									"log_hollow_manifest"
+								]
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask who the eleven are.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Night shift,' says {name}. 'Gate Two. We were all on the floor when it went. We stayed.' It is said the way a person says they stayed late at a party, for the washing up. {name} gives you a copy of the sheet, and the pencil, and the look of someone delighted to have been asked.",
+							"effects": {
+								"flag": "hollow_2",
+								"log": "log_hollow_manifest"
+							}
+						}
+					]
+				},
+				{
+					"text": "Back away from the clipboard.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Of course,' {name} says. 'No obligation.' The pencil stops, and waits, and goes on waiting after you have turned the corner.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_touched_polite",
+			"type": "boarding_npc",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"site": [
+					"station",
+					"derelict"
+				]
+			},
+			"text": "{name} is sitting in the middle of the deck with a tea service laid out on a crate: four cups, a pot, a plate of nothing in particular. The pot steams. There is no stove. 'Visitor,' {name} says warmly. 'Noted. Sit. There's always a cup for a visitor, we've kept one back for forty years.' The fourth cup is yours. It is already poured.",
+			"choices": [
+				{
+					"text": "Sit and drink.",
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "The tea is exactly the right temperature and tastes of every kitchen you have ever been warm in. You finish the cup. {name} watches you do it with such open, uncomplicated joy that you almost forget where you are. 'There,' {name} says. 'All well.' Your hands have stopped shaking. You did not know they had started.",
+							"effects": {
+								"crew_hp": 8
+							}
+						},
+						{
+							"weight": 30,
+							"text": "The tea tastes of nothing at all. The minutes go by like slides in a projector, one at a time, with long dark between them. {name} is still smiling when you stand up. It is a good deal later than it was. 'Third crate on the left,' {name} says. 'I'd like you to have something.'",
+							"effects": {
+								"crew_hp": -6,
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask {name} for the roll.",
+					"requires": {
+						"species": "revenant"
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Revenant says a name out of the Cairns, clearly, into the room. {name} stops pouring. 'Oh,' says {name}, softly. 'You're ours.' A hand is laid on your Revenant's sleeve, the way you would touch someone's shoulder at a funeral. {name} gives you the keys to everything, one by one, as if that were what keys were for.",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "Decline politely.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Of course,' says {name}, and sets your cup down at the end of the table, untouched, where it will be for a long time. 'It'll be here.'",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_touched_lumen_glass",
+			"type": "boarding_npc",
+			"weight": 14,
+			"once": false,
+			"requires": {
+				"theme": "lumen",
+				"site": [
+					"station",
+					"derelict"
+				]
+			},
+			"text": "The glass in this room has grown. Long clear fingers of it come up out of the deck and across the ceiling, and in the middle of them stands {name}, one palm flat against a pane, perfectly still. The glass hums on a note you can feel in your teeth. 'Visitor,' says {name}, without turning. 'Noted. Don't speak. It's listening, and it is shy.' The note drops, a quarter-tone, as if to make room.",
+			"choices": [
+				{
+					"text": "Stand still and listen.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You listen. For a long time there is only the note, and then, under it, a second, thinner one, like someone repeating a name very quietly in the next room. You do not catch the name. {name} turns at last, tears on the pleasant face. 'It likes you,' {name} says. A sliver of crystal is pressed into your palm, warm as a hand.",
+							"effects": {
+								"items": {
+									"crystal": 2
+								},
+								"log": "log_board_glass_prayer"
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask what the glass is for.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Waiting,' says {name}. 'We're all waiting. It's just better at it.' {name} lays a finger on a pane and the glass, very softly, answers, a ring of light going out toward the far wall where a locker sits. 'There,' says {name}.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Tap the glass.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The note stops. It stops all at once, like a held breath, and every pane in the room turns very slightly toward you. {name} closes the pleasant eyes. 'Oh,' {name} says. 'You shouldn't have.'",
+							"effects": {
+								"npc_hostile": "hollow_touched"
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave quietly.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The note comes back as you reach the door, a little lower, like a sigh of relief.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_touched_fallback",
+			"type": "boarding_npc",
+			"weight": 6,
+			"once": false,
+			"fallback": true,
+			"text": "{name} stands in the middle of the room as if waiting for a bus. The face is kind. The hands are folded. When your light touches it, {name} smiles with great warmth and says, 'Visitor. Noted.' And then, because that seems rude, 'Please don't mind us. We're so glad you came.' It is difficult to tell whether {name} is greeting you or reading from something.",
+			"choices": [
+				{
+					"text": "Say thank you.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'You're welcome,' {name} says, with obvious relief. 'Nobody ever says. Take what you like, it's all well.' A hand opens, slowly, at the dark.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask {name} to come along.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} considers this with an expression of enormous happiness and then, gently, shakes the head. 'We don't go,' {name} says. 'We stay. But I'll walk you to the door.' And does, a step behind, all the way.",
+							"effects": {
+								"npc_follow": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Say nothing and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Noted,' {name} says, warmly, to your back.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}
