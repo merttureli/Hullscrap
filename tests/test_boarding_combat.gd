@@ -733,6 +733,16 @@ func test_the_trigger_fires_the_weapon_toward_the_aim_and_r_reloads() -> void:
 	s.reload()
 	_step(b, 1.5)
 	eq(s.gun()["mag"], 8, "reloaded")
+	b._fire_wait = true  # a click that took something from a list is not a shot
+	b.fire_override = true
+	_step(b, 1.0)
+	eq(s.gun()["mag"], 8, "the held button does not fire until it is let go")
+	b.fire_override = false
+	_step(b, 0.1)
+	b.fire_override = true
+	_step(b, 0.2)
+	check(s.gun()["mag"] < 8, "and then it does")
+	b.fire_override = false
 	b.leave()
 
 
@@ -923,3 +933,22 @@ func test_a_lone_soldier_with_a_pistol_beats_four_foes_one_at_a_time_and_loses_t
 	check(stats[2]["hp"] < stats[1]["hp"] - 15.0, "two at once cost much more (%.0f)" % stats[2]["hp"])
 	check(float(stats[4]["downs"]) >= 0.7 * float(stats[4]["n"]), "all four at once in the open put him down (%d of %d)" % [stats[4]["downs"], stats[4]["n"]])
 	check(stats[4]["hp"] < 15.0, "with next to nothing left (%.0f)" % stats[4]["hp"])
+
+
+func test_a_melee_sidearm_swings_at_what_is_close_and_needs_no_rounds() -> void:
+	var d := _arena()
+	var s = d["s"]
+	s.soldier.set_species("basalt")
+	s._arm()
+	eq(s.gun()["id"], "quarry_hammer", "a basalt soldier carries the hammer")
+	check(not Arms.has_mag(s.gun()), "it has no magazine")
+	var near: Dictionary = s.foes.add("scavenger", d["a"] + Vector2(1.6, 0.0), d["room"])
+	var far: Dictionary = s.foes.add("scavenger", d["a"] + Vector2(4.0, 0.0), d["room"])
+	var hp: float = near["m"].hp
+	eq(s.fire(0.0), "swing", "he swings")
+	check(near["m"].hp < hp - 20.0, "and the close one is hurt (%.0f of %.0f)" % [near["m"].hp, hp])
+	eq(far["m"].hp, far["m"].max_hp, "the one four cells off is not")
+	check(not s.reload(), "there is nothing to reload")
+	s.tick(1.2)
+	eq(s.fire(PI), "swing", "a swing at nothing is still a swing")
+	check(s.take_events().any(func(e): return e["type"] == "swing"), "and the view is told")

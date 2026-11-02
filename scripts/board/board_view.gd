@@ -91,6 +91,7 @@ var _down_t := 0.0
 var _leave_t := 0.0  # seconds a "leave them behind?" question stands
 var _skitter := 0.0
 var _fight_t := 0.0  # seconds the combat music runs on after the last foe on the hunt
+var _fire_wait := false  # a click that picked or took something is not a shot: the trigger waits until the button is let go
 var _mood := "explore"
 var _flicker := 0.0  # seconds of flickering lights left (the Hollow arrives)
 var _self_light: PointLight2D
@@ -442,7 +443,9 @@ func _combat(dt: float) -> void:
 	if not s.downed:
 		s.note_hollow(hollow_source.call() if hollow_source.is_valid() else false)
 	s.tick(dt, _aim, light_on)
-	if _fire_down() and panel < 0 and not s.downed:
+	if _fire_wait and not _fire_down():
+		_fire_wait = false
+	if _fire_down() and panel < 0 and not s.downed and not _fire_wait and not picking:
 		s.fire(_aim)
 	for p in s.party:
 		var pa: Dictionary = _anim.get(p["m"], PersonDrawer.new_state(p["m"]))
@@ -771,6 +774,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			MOUSE_BUTTON_WHEEL_DOWN:
 				_zoom(1.0 / 1.1)
 			MOUSE_BUTTON_LEFT:
+				_fire_wait = picking or panel >= 0
 				if hud != null and picking:
 					var pr: int = hud.pick_at(e.position)
 					if pr == -2:
