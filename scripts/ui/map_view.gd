@@ -1,7 +1,7 @@
 extends Control
 ## The map of the Drift (M in play mode): the screen of the campaign. Click a node joined to yours by a
 ## lane to jump there (1 fuel, less with efficient engines: Campaign.jump_cost; Shift+click with an empty
-## tank is a drift jump that costs 15 hull integrity; T waits for a passing trader). The event of the node
+## tank is a drift jump that damages the hull; T waits for a passing trader). The event of the node
 ## opens in the event panel, a station opens its menu in the station panel (Enter or a click on your own
 ## node docks again). Esc or M closes the map. It owns the Campaign (campaign.gd, saved in
 ## user://campaign.json with the ship) and the three panels, and it carries the flow: jump, arrive, event,
@@ -17,6 +17,7 @@ extends Control
 ## at the POI (Sector.fight_spawn), and a won fight leaves its wreck as a POI to salvage instead of the salvage page.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
 const JournalPanel = preload("res://scripts/ui/journal_panel.gd")
@@ -29,6 +30,7 @@ const Hazards = preload("res://scripts/combat/hazards.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const RunStart = preload("res://scripts/space/run_start.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Boarding = preload("res://scripts/board/boarding.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -60,6 +62,7 @@ signal run_won(campaign, ending_id)
 var sim: Node  ## the ShipSim whose player ship travels
 var build: Node  ## the BuildMode (told about the new ship)
 var combat: Node  ## the combat view: fights started from events run there
+var board: Node  ## the boarding view (board_view.gd): the soldier goes aboard other vessels from events
 var campaign: Campaign
 var profile = null  ## the player's Profile (front_door.gd sets it): the campaigns write their unlocks and landmarks to it
 var event_panel: Control
@@ -72,9 +75,11 @@ var message := ""
 var message_bad := false
 var new_seed := 0  ## the seed of the next new campaign; 0 picks one
 var save_path := Campaign.SAVE_PATH  ## where the campaign is saved with the ship (tests point it elsewhere)
-var hull := Vector2i.ZERO  ## (left, max) hull integrity, refreshed after every action
+var damaged := 0  ## damaged blocks of the ship, refreshed after every action
 var _arrived := false  # the arrival at the start of this campaign has been played
 var _fighting := false  # a fight of ours is on
+var _boarding := false  # the soldier is aboard another vessel
+var _board_ev := {}  # the page he went aboard from: it opens again when he is back
 var _after_win := {}  # the after_win of the event that started it
 var _fight_node := ""  # the type of the node it was started at
 var _queue: Array[Callable] = []  # what comes after the event panel is done
@@ -82,6 +87,7 @@ var panel_only := false  ## shown only to hold the event or station panel of a s
 var _poi := ""  # the id of the POI whose event is up (open_poi), "" when none
 var _poi_sector = null  # its sector
 var _dock := false  # its station menu opens when the event is done
+var _dock_id := ""  # the small shop it opens instead of the node's station (a Trader or Store POI, campaign.gd shop_id)
 var _exit_due := false  # the ship came to the exit beacon: the region choice opens once its events are done
 
 
@@ -89,12 +95,17 @@ func _ready() -> void:
 	sim = get_node_or_null("../../ShipSim")
 	build = get_node_or_null("../../BuildMode")
 	combat = get_node_or_null("../../Combat")
+	board = get_node_or_null("../../Board")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	visible = false
 	_ensure_panels()
 	if combat != null and combat.has_signal("finished"):
 		combat.finished.connect(_on_fight_finished)
+	if board != null and board.has_signal("finished"):
+		board.finished.connect(_on_board_finished)
+	if board != null and board.has_signal("talk_requested"):
+		board.talk_requested.connect(_on_talk)
 	_make_tide_hud.call_deferred()
 
 
@@ -125,6 +136,8 @@ func _ensure_panels() -> void:
 	event_panel.finished.connect(_on_events_finished)
 	event_panel.fight_requested.connect(_start_fight)
 	event_panel.ending_reached.connect(_on_ending)
+	event_panel.board_requested.connect(_start_board)
+	event_panel.talk_done.connect(_on_talk_done)
 	add_child(event_panel)
 	station_panel = StationPanel.new()
 	station_panel.map = self
@@ -225,11 +238,11 @@ func new_game(seed_value := 0) -> void:
 	refresh()
 
 
-## Refresh what the screen derives from the ship (the hull integrity).
+## Refresh what the screen derives from the ship (its damaged blocks).
 func refresh() -> void:
 	var s = ship()
 	if campaign != null and s != null:
-		hull = Vector2i(campaign.hull_left(s), campaign.hull_max(s))
+		damaged = Structure.damaged(s).size()
 
 
 func _say(text: String, bad := false) -> void:
@@ -237,7 +250,7 @@ func _say(text: String, bad := false) -> void:
 	message_bad = bad
 
 
-## Jump to node `id` (a click). `drift_jump`: the no-fuel jump that costs hull integrity. Clicking your
+## Jump to node `id` (a click). `drift_jump`: the no-fuel jump that damages the hull. Clicking your
 ## own node docks if there is a station. Returns "" or the reason it was refused.
 func click_node(id: String, drift_jump := false) -> String:
 	if campaign == null or id == "":
@@ -395,8 +408,8 @@ func _on_events_finished() -> void:
 			else:
 				_poi_resolve()
 			_open_exit()
-		elif _dock and campaign.dock_block(campaign.current) == "":
-			station_panel.open(campaign.current)
+		elif _dock and (_dock_id != "" or campaign.dock_block(campaign.current) == ""):
+			station_panel.open(_dock_id if _dock_id != "" else campaign.current)
 		else:
 			_poi_done()
 		_dock = false
@@ -423,6 +436,7 @@ func open_poi(res: Dictionary, sector) -> void:
 	_poi = str(res["poi"]["id"])
 	_poi_sector = sector
 	_dock = bool(res.get("dock", false))
+	_dock_id = str(res.get("shop", ""))
 	_exit_due = bool(res.get("exit", false)) or bool(res.get("warden", false))
 	panel_only = true
 	visible = true
@@ -437,7 +451,7 @@ func open_poi(res: Dictionary, sector) -> void:
 		_open_exit()
 	elif _dock:
 		_dock = false
-		station_panel.open(campaign.current)
+		station_panel.open(_dock_id if _dock_id != "" else campaign.current)
 	else:
 		_poi_done()
 
@@ -459,6 +473,7 @@ func _forget_poi() -> void:
 	_poi = ""
 	_poi_sector = null
 	_dock = false
+	_dock_id = ""
 
 
 func _hide_panels() -> void:
@@ -488,9 +503,7 @@ func _start_fight(value: String, after_win: Dictionary) -> void:
 			_poi_done()
 		return
 	var session = combat.get("session") if combat != null else null
-	if session != null:  # the fight starts with the integrity the campaign says is left
-		var mine = session.arena.ships[0]
-		mine.hull = campaign.fight_hull(mine.hull_max)
+	if session != null:  # the fight starts with the blocks as they are: damage is on them
 		session.arena.hazard = campaign.hazard_at(campaign.current)  # the node's sector hazard, if any (hazards.gd)
 	_fighting = true
 	_after_win = after_win
@@ -526,8 +539,77 @@ func _on_fight_finished(result: Dictionary) -> void:
 		_queue.append(func(): event_panel.open_event(campaign.events.get_event(page)))
 	elif r["state"] in ["won", "captured"]:
 		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship(), null, int(r["threat"]))
+		if not salvage.is_empty() and sector_flow() and result.get("enemy") != null:  # the wreck can be boarded before the prize is cut out
+			var foe = result["enemy"]
+			var parts: Array = Salvage.parts(foe)
+			parts.resize(mini(parts.size(), Boarding.WRECK_PARTS))
+			var alive: int = foe.crew.filter(func(c): return not c.is_down()).size() if r["state"] == "won" else 0  # the survivors fight on foot
+			salvage = Boarding.offer(salvage, "wreck", {"name": str(foe.name) if str(foe.name) not in ["", "Ship"] else "", "parts": parts, "crew": alive}, false)
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
+
+
+# --- boarding ---------------------------------------------------------------------------------------------------------------
+
+## An event outcome sent the soldier aboard another vessel (the `board` effect `spec`; `ev` is the page it was on). The site is the POI's (the wreck
+## a fight left is the newest of the sector's); the map and its panels give way to the boarding view until he is back.
+func _start_board(spec: Dictionary, ev: Dictionary) -> void:
+	var sector = _poi_sector if sector_flow() else null
+	var id := _poi
+	if str(spec.get("kind", "")) == "wreck" and sector != null and not sector.wrecks.is_empty():
+		id = str(sector.wrecks[-1]["id"])
+	var why := "no boarding view" if board == null else ("nothing to board" if sector == null or id == "" else "")
+	if why == "":
+		board.hollow_source = func() -> bool: return campaign != null and campaign.is_hollow(campaign.current)
+		why = board.enter(Boarding.start(campaign, sector, id, spec, ship()))
+	if why != "":
+		_say("Cannot board: " + why, true)
+		event_panel.open_event(ev)
+		return
+	_boarding = true
+	_board_ev = ev
+	visible = false
+
+
+## Aboard, the soldier talked to someone or stepped into a marked room (`ctx`: board_view.gd talk_requested): the event panel opens over the dark with the
+## event picked for them, and the world stands still until it is done. The panel is the one the map keeps, so the POI is not touched.
+func _on_talk(ctx: Dictionary) -> void:
+	if not _boarding:
+		return
+	_ensure_panels()
+	visible = true
+	panel_only = true
+	event_panel.talk = ctx.get("node", {"type": "boarding_npc"})
+	var ev: Dictionary = ctx.get("event", {})
+	var who := str(ctx.get("name", ""))
+	if ev.is_empty():
+		event_panel.open_notice(who if who != "" else "Aboard", "%s has nothing to say." % who if who != "" else "There is nothing here.", [])
+	else:
+		event_panel.open_event(ev)
+
+
+## The talk is over: what its outcomes asked for goes to the boarding view.
+func _on_talk_done(ops: Array, acted: bool) -> void:
+	_hide_panels()
+	if _boarding and board != null and board.has_method("talk_done"):
+		board.talk_done(ops, acted)
+
+
+## The soldier is back. A cleared vessel is done with (its POI is done and its choice gone); else the page he left opens again.
+func _on_board_finished(result: Dictionary) -> void:
+	if not _boarding:
+		return
+	_boarding = false
+	visible = true
+	panel_only = sector_flow()
+	refresh()
+	var ev := _board_ev
+	_board_ev = {}
+	if bool(result["cleared"]) or ev.is_empty():
+		var words: String = str(result.get("text", ""))
+		event_panel.open_notice(str(result["name"]), words if words != "" else (Boarding.cleared_text() if bool(result["cleared"]) else "You are back aboard."), result["said"])
+	else:
+		event_panel.open_event(ev)
 
 
 ## An outcome ended the run with ending `id`: it is won. The front door shows the ending screen and a new campaign waits behind it.
@@ -595,7 +677,10 @@ func _input(e: InputEvent) -> void:
 
 func _gui_input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion:
-		hover = node_at(e.position)
+		var over := node_at(e.position)
+		if over != "" and over != hover and campaign != null and not campaign.is_hidden(over):
+			Audio.fx(self, "node_hover")
+		hover = over
 	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		click_node(node_at(e.position), e.shift_pressed)
 	accept_event()
@@ -682,7 +767,8 @@ func _draw_status(p: Rect2) -> void:
 	_text("Fuel %d" % fuel, Vector2(x, y), 18, GOOD if fuel > 0 else BAD)
 	_text("Credits %d" % credits, Vector2(x + 100.0, y), 18, TEXT)
 	_text("Jumps %d" % campaign.jumps, Vector2(x + 230.0, y), 18, TEXT)
-	_text("Hull %d/%d" % [hull.x, hull.y], Vector2(x + 340.0, y), 18, TEXT if hull.x * 2 > hull.y else AMBER)
+	if damaged > 0:
+		_text("%d damaged" % damaged, Vector2(x + 340.0, y), 18, AMBER)
 	var owed := "Debt %d" % campaign.debt
 	var due := ""
 	if campaign.debt > 0 and not campaign.debt_running():

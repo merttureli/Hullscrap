@@ -12,6 +12,8 @@ const Morale = preload("res://scripts/combat/morale.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
+const StructureUtil = preload("res://tests/structure_util.gd")
 const PIRATE := "res://data/ships/pirate_raider.json"
 const COURIER := "res://data/ships/starter_courier.json"
 
@@ -21,8 +23,7 @@ func _session(seed_value := 3, design := PIRATE) -> Session:
 	var s := Session.new()
 	s.start(Session.load_ship(PIRATE), Session.load_ship(design), seed_value)
 	var me = s.arena.ships[Session.PLAYER]
-	me.hull_max = 1.0e5
-	me.hull = 1.0e5
+	StructureUtil.tough(me)
 	s.arena.autofire[Session.PLAYER] = false  # the player's turret would wear the small enemy hull down on its own
 	return s
 
@@ -46,7 +47,11 @@ func _foe(s: Session):
 
 
 func _hurt(s: Session, fraction: float) -> void:
-	_foe(s).hull = fraction * _foe(s).hull_max
+	# `fraction`: 0 on the wreck line, 0.5 on the morale break (break_structure), 1 whole
+	var line := Structure.defeat_below()
+	var brk := float(Morale.config()["break_structure"])
+	var at := line + (brk - line) * fraction / 0.5 if fraction < 0.5 else brk + (1.0 - brk) * (fraction - 0.5) / 0.5
+	StructureUtil.set_structure(_foe(s), at)
 
 
 func _shots(s: Session, idx: int) -> int:
@@ -134,16 +139,16 @@ func test_the_styles_weights_come_from_the_data() -> void:
 	var s := _session()
 	var cfg := Morale.config()
 	var want := {
-		"default": {"surrender": 0.4, "flee": 0.4, "fight": 0.2}, "rustfang": {"surrender": 0.5, "flee": 0.3, "fight": 0.2},
+		"default": {"surrender": 0.6, "flee": 0.3, "fight": 0.1}, "rustfang": {"surrender": 0.6, "flee": 0.25, "fight": 0.15},
 		"ram": {"surrender": 0.0, "flee": 0.4, "fight": 0.6}, "concord": {"surrender": 0.2, "flee": 0.6, "fight": 0.2},
-		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "no such style": {"surrender": 0.4, "flee": 0.4, "fight": 0.2},
+		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "no such style": {"surrender": 0.6, "flee": 0.3, "fight": 0.1},
 	}
 	for style in want:
 		eq(Morale.new(s.arena, Session.ENEMY, Session.PLAYER, style, cfg).weights(), want[style], "weights of " + style)
 	eq(s.morale.style, "rustfang", "the pirate raider picks the Rustfang style")
 	eq(_session(3, "res://data/ships/rustfang_rammer.json").morale.style, "ram", "the rammer picks ram")
 	eq(_session(3, COURIER).morale.style, "default", "a design with no morale entry uses the default")
-	check(cfg["break_hull"] == 0.5 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
+	check(cfg["break_structure"] > Structure.defeat_below() and cfg["break_structure"] < 1.0 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
 
 
 func test_the_roll_follows_the_weights() -> void:
@@ -152,8 +157,8 @@ func test_the_roll_follows_the_weights() -> void:
 	var m := Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "rustfang", Morale.config())
 	for i in 3000:
 		count[m.roll_style()] += 1
-	for k in {"surrender": 0.5, "flee": 0.3, "fight": 0.2}:
-		var want: float = {"surrender": 0.5, "flee": 0.3, "fight": 0.2}[k]
+	for k in {"surrender": 0.6, "flee": 0.25, "fight": 0.15}:
+		var want: float = {"surrender": 0.6, "flee": 0.25, "fight": 0.15}[k]
 		check(absf(count[k] / 3000.0 - want) < 0.04, "rustfang %s: %s of 3000" % [k, count[k]])
 	var ram := Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "ram", Morale.config())
 	var hollow := Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "hollow", Morale.config())
@@ -610,7 +615,7 @@ func test_all_crew_down_for_3_s_captures_the_ship() -> void:
 	eq(s.state(), "captured", "3 s: the ship is yours")
 	check(s.end_text().begins_with("Nobody is left standing aboard. She's yours"), s.end_text())
 	check(s.can_leave(), "Esc works")
-	check(_foe(s).hull > 0.9 * _foe(s).hull_max, "with the hull whole")
+	check(Structure.structure_fraction(_foe(s)) > 0.9, "with the hull whole")
 	eq(s.morale.pilot_mode(), "stop", "guns and helm stop")
 	var shots := _shots(s, Session.ENEMY)
 	_run(s, 3.0)
@@ -731,8 +736,7 @@ func _view() -> Array:
 func _fight(view: CombatView) -> void:
 	view._unhandled_input(_key(KEY_K))
 	var me = view.session.arena.ships[Session.PLAYER]
-	me.hull_max = 1.0e5
-	me.hull = 1.0e5
+	StructureUtil.tough(me)
 
 
 func test_the_view_takes_y_and_hands_the_offer_to_the_map() -> void:
@@ -743,7 +747,7 @@ func test_the_view_takes_y_and_hands_the_offer_to_the_map() -> void:
 	view._unhandled_input(_key(KEY_Y))
 	check(view._note.contains("Nobody is offering"), "Y with nothing offered says so: " + view._note)
 	var foe = view.session.arena.ships[Session.ENEMY]
-	foe.hull = 0.3 * foe.hull_max
+	_hurt(view.session, 0.3)
 	for i in 6:
 		view.frame(1.0 / 60.0)
 	eq(view.session.morale.state, "offering", "it offers")
@@ -757,7 +761,7 @@ func test_the_view_takes_y_and_hands_the_offer_to_the_map() -> void:
 	eq(got.size(), 1, "the map was told")
 	eq(got[0]["state"], "spared", "state spared")
 	eq(got[0]["offer"], offer, "with the offer")
-	check(got[0].has("enemy") and got[0].has("hull") and got[0].has("hull_max"), "and the usual keys")
+	check(got[0].has("enemy") and got[0].has("pose"), "and the usual keys")
 	made[0].free()
 	made[1].free()
 	made[2].free()
@@ -783,7 +787,7 @@ func test_the_view_results_for_the_other_endings() -> void:
 	_fight(view)
 	_style(view.session, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
 	var foe = view.session.arena.ships[Session.ENEMY]
-	foe.hull = 0.3 * foe.hull_max
+	_hurt(view.session, 0.3)
 	for i in 60 * 16:
 		view.frame(1.0 / 60.0)
 		if view.session.state() != "fighting":
@@ -797,6 +801,24 @@ func test_the_view_results_for_the_other_endings() -> void:
 	view.frame(1.0 / 60.0)
 	check(not view.active, "the jump drive took us away")
 	eq(got[2]["state"], "fled", "result: fled")
+	made[0].free()
+	made[1].free()
+	made[2].free()
+
+
+func test_a_broken_block_flashes_on_the_ship() -> void:
+	var made := _view()
+	var view: CombatView = made[0]
+	var foe = view.session.arena.ships[Session.ENEMY]
+	var cell := Vector2i(15, 15)
+	view._on_event({"type": "breach", "ship": Session.ENEMY, "cell": cell, "pos": view.session.arena.cell_to_world(Session.ENEMY, cell), "tile": "wall"})
+	var flashes: Array = view._fx.filter(func(f): return f["k"] == "block")
+	eq(flashes.size(), 1, "a breach flashes its block")
+	eq(flashes[0]["ship"], Session.ENEMY, "stuck to the ship that lost it")
+	check(foe.flight.pos.distance_to(view.session.arena.local_to_world(Session.ENEMY, flashes[0]["local"])) < 1000.0, "at its place on the hull")
+	view._on_event({"type": "disable", "ship": Session.ENEMY, "cell": cell, "pos": view.session.arena.cell_to_world(Session.ENEMY, cell), "uid": 1})
+	view._on_event({"type": "wreck_part", "ship": Session.ENEMY, "cell": cell, "pos": view.session.arena.cell_to_world(Session.ENEMY, cell), "uid": 1, "id": "x"})
+	eq(view._fx.filter(func(f): return f["k"] == "block").size(), 3, "and so does a part that is disabled or wrecked")
 	made[0].free()
 	made[1].free()
 	made[2].free()

@@ -67,6 +67,7 @@ var message := ""
 ## Tests drive these instead of the scene: the hand on the helm ({throttle, side, cursor}) and whether it is manned.
 var hand_override = null
 var manned_override = null
+var boarding := false  ## the soldier is aboard another vessel (board_view.gd): the sector stands still and is not drawn
 var _campaign = null  # the campaign the helm flies in
 var _sector = null  # and its sector
 var _clock := 0.0
@@ -223,7 +224,7 @@ func frame(dt: float) -> void:
 	var ship = _ship()
 	if map != null and map.campaign == null and ship != null and build != null and not build.build_on:
 		map.new_game()  # play mode needs a campaign: the sector
-	if not flying():
+	if not flying() or boarding:
 		_unpose()
 		visible = false
 		_layer.visible = false
@@ -314,7 +315,7 @@ func _spool(dt: float, c, ship) -> void:
 			_say(" ".join(["Arrived at %s." % c.label(c.current)] + c.last_jump.get("notes", [])))
 			_sync(c, ship)
 		"failed":
-			Audio.fx(self, "invalid")
+			Audio.fx(self, "error")
 			_say("The jump failed: %s" % c.last_jump.get("why", ""))
 
 
@@ -405,7 +406,7 @@ func _input(e: InputEvent) -> void:
 ## E pressed: take or hand back the helm. True when it did either (the key is used up).
 func toggle_helm() -> bool:
 	var map = _map()
-	if not flying() or build == null or build.build_on or _fighting() or (map != null and map.visible):
+	if not flying() or boarding or build == null or build.build_on or _fighting() or (map != null and map.visible):
 		return false
 	if helm.manual:
 		helm.manual = false
@@ -429,7 +430,7 @@ func _unhandled_input(e: InputEvent) -> void:
 ## A click at screen point `at`. True when it hit a marker.
 func click(at: Vector2) -> bool:
 	var map = _map()
-	if not visible or _fighting() or (map != null and map.visible):
+	if not visible or boarding or _fighting() or (map != null and map.visible):
 		return false
 	for i in range(_markers.size() - 1, -1, -1):
 		if _markers[i]["rect"].has_point(at):
@@ -709,6 +710,11 @@ func _draw_ring(centre: Vector2, ring: float) -> void:
 		var u := Vector2.UP.rotated(float(ct["bearing"]))
 		var col: Color = TYPE_COLORS.get(str(ct["known_type"]), CYAN)
 		_hud.draw_circle(centre + u * ring, 4.0, Color(col, 0.45 if ct["poi"]["state"] == Sector.DONE else 0.95))
+	if d != null:  # a rare find within radar range: a small diamond in its own colour
+		for r in Radar.rare_pieces(d, helm.flight.pos, Radar.reach(_ship())):
+			var at: Vector2 = centre + Vector2.UP.rotated(float(r["bearing"])) * (ring - 4.0)
+			var rc := Color(str(d.type_of(r)["color"])).lightened(0.35)
+			_hud.draw_colored_polygon(PackedVector2Array([at + Vector2(0, -5), at + Vector2(4, 0), at + Vector2(0, 5), at + Vector2(-4, 0)]), rc)
 	var to = helm.target(_sector)
 	if to != null and to.distance_to(helm.flight.pos) > 1.0:
 		var u: Vector2 = (to - helm.flight.pos).normalized()

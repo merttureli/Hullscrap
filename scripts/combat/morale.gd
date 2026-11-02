@@ -1,6 +1,6 @@
 extends RefCounted
-## Enemy morale: the ways a fight ends besides the hull pool (data/morale.json, README "Combat"). A losing
-## enemy breaks once: hull at or under `break_hull`, or no weapon able to fire for `unarmed_s`. It then rolls
+## Enemy morale: the ways a fight ends besides the wreck (structure under the defeat line) (data/morale.json, README "Combat"). A losing
+## enemy breaks once: structure at or under `break_structure`, or no weapon able to fire for `unarmed_s`. It then rolls
 ## its style (surrender / flee / fight weights) with the arena's seeded rng.
 ## - surrender ("offering"): the pilot holds fire and cuts throttle, and the offer (credits, an extra, now and
 ##   then a part) stands for `offer_s`. accept() ("spared") takes it; damage dealt to the enemy, or the time
@@ -235,7 +235,7 @@ static func spool_hold(arena, idx: int) -> String:
 func _watch_break(dt: float) -> void:
 	var co = arena.ships[enemy]
 	_unarmed = 0.0 if _can_shoot() else _unarmed + dt
-	if co.hull <= float(cfg["break_hull"]) * co.hull_max + 1e-6 or _unarmed >= float(cfg["unarmed_s"]) - 1e-6:
+	if co.structure <= float(cfg["break_structure"]) + 1e-6 or _unarmed >= float(cfg["unarmed_s"]) - 1e-6:
 		match roll_style():
 			"surrender":
 				_begin_offer()

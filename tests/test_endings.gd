@@ -229,7 +229,7 @@ func test_a_won_fight_whose_after_win_ends_the_run_goes_to_the_ending_after_the_
 	map.run_won.connect(func(camp, id): won.append(id))
 	map._fighting = true
 	map._after_win = {"text": "The last gate-keeper falls.", "effects": {"ending": "fx_end"}}
-	map._on_fight_finished({"state": "won", "hull": 50.0, "hull_max": 100.0, "enemy": null})
+	map._on_fight_finished({"state": "won", "enemy": null})
 	check(map.event_panel.visible and map.event_panel.page == "result", "the notice of the won fight is up")
 	eq(won.size(), 0, "the ending waits for it")
 	map.event_panel.proceed()
@@ -384,7 +384,7 @@ func test_the_profile_keeps_unlocks_landmarks_and_loads_an_older_file() -> void:
 	check(not p.record_landmark("m", "Meeting"), "and then not")
 	var q := Profile.new(TMP)
 	check(q.has_unlock("a") and q.has_landmark("m") and q.landmarks["m"]["title"] == "Meeting", "both are in the file")
-	eq(Profile.VERSION, 4, "the file is version 4")
+	eq(Profile.VERSION, 5, "the file is version 5")
 	var f := FileAccess.open(TMP, FileAccess.WRITE)
 	f.store_string('{"version": 1, "hints": {"picked": true}, "runs": [{"ship": "Old"}]}')
 	f.close()

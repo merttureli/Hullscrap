@@ -113,6 +113,11 @@ static func _beside(a, b) -> bool:
 	return false
 
 
+## `m` is lost for good (left down aboard another vessel, boarding.gd): as if they had bled out. Their name goes on ship.dead_crew.
+static func lose(ship, m) -> void:
+	_die(ship, m)
+
+
 ## Take `m` off the ship: out of the crew, off any station, and whoever was on their way to them is freed.
 static func _die(ship, m) -> void:
 	_leave(ship, m)

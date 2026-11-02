@@ -31,6 +31,7 @@ const Radar = preload("res://scripts/space/radar.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
+const Boarding = preload("res://scripts/board/boarding.gd")
 
 const PATH := "res://data/sectors.json"
 const NEW := "new"
@@ -57,6 +58,7 @@ var debris_mult := {}  ## debris type id -> weight multiplier: the theme of the 
 var pois: Array = []  ## the generated POIs, main first
 var ambient: Array = []  ## the passing ships now about (transient; not generated)
 var wrecks: Array = []  ## the wrecks won fights left here (add_wreck); saved
+var boarded := {}  ## POI id -> what the soldier did aboard it: {kind, name, parts, opened, unlocked, keys, left, cleared} (boarding.gd memory); saved
 var hostiles: Array = []  ## positions (Vector2, px) of the hostile ships about; the fight in place keeps this list for the jump block
 var ship_pos := Vector2.ZERO
 var ship_vel := Vector2.ZERO
@@ -419,7 +421,8 @@ func contains(p: Vector2, slack := 0.0) -> bool:
 ## {poi, node, refused, event, dock}: what Campaign.arrive() returns for the node's old arrival event (the main POI
 ## runs exactly that: a dock master's refusal, a debt call, the greeting or the node's event), `event` for any other
 ## POI one picked from its event type by events.gd ({} when nothing fits), and `dock`: the station menu opens
-## (a station or store with a menu, and no refusal). A POI stays engaged until resolve(): it does not fire again. A
+## (a station or store with a menu, and no refusal), and `shop`: the id of the small shop (campaign.gd shop_id) the menu is when the POI is a
+## Trader or Store (data/sectors.json poi_types `shop`), else "". A POI stays engaged until resolve(): it does not fire again. A
 ## station or store never becomes done: it greets once per visit, later only docks, and docks again after the ship has
 ## left (1.5 x the trigger distance) and come back.
 func trigger(c, ship) -> Dictionary:
@@ -448,9 +451,12 @@ func trigger(c, ship) -> Dictionary:
 		res = {"node": c.node(node_id), "refused": "", "event": {}}
 	else:
 		res = _event_for(c, ship, best)
+		if res["refused"] == "" and not hollow and not res["event"].is_empty() and Boarding.kind_for(best) != "":
+			res["event"] = Boarding.offer(res["event"], Boarding.kind_for(best))  # a vessel the soldier can board
 	_greeted[best["id"]] = true
 	res["poi"] = best
-	res["dock"] = bool(t.get("dock", false)) and res["refused"] == "" and c.dock_block(node_id) == ""
+	res["shop"] = c.shop_id(node_id, str(best["id"])) if bool(t.get("shop", false)) and res["refused"] == "" and not c.station_cfg(c.shop_id(node_id, str(best["id"]))).is_empty() else ""
+	res["dock"] = res["shop"] != "" or (bool(t.get("dock", false)) and res["refused"] == "" and c.dock_block(node_id) == "")
 	if bool(t.get("repeat", false)) and res["event"].is_empty() and not res["dock"] and res["refused"] == "":
 		return {}
 	return res
@@ -703,8 +709,11 @@ func to_save() -> Dictionary:
 	var hulks := []
 	for w in wrecks:
 		hulks.append({"id": w["id"], "name": w["name"], "pos": [w["pos"].x, w["pos"].y], "state": w["state"]})
-	return {"pois": states, "far": far, "ship": [ship_pos.x, ship_pos.y], "vel": [ship_vel.x, ship_vel.y], "angle": ship_angle, "ambient": list, "amb_t": _amb_t,
+	var out := {"pois": states, "far": far, "ship": [ship_pos.x, ship_pos.y], "vel": [ship_vel.x, ship_vel.y], "angle": ship_angle, "ambient": list, "amb_t": _amb_t,
 		"next_amb": _next_amb, "clock": clock, "rng": str(rng.state), "wrecks": hulks, "next_wreck": _next_wreck}
+	if not boarded.is_empty():
+		out["boarded"] = boarded.duplicate(true)
+	return out
 
 
 ## Replace the POI states, the ship's place, the wrecks and the ambient state with a saved one. Returns "" or why not
@@ -737,9 +746,21 @@ func load_save(d: Dictionary) -> String:
 		var w := _wreck(e["id"], _vec(e["pos"]), str(e.get("name", "")))
 		w["state"] = str(e.get("state", NEW)) if [NEW, DONE].has(str(e.get("state", NEW))) else NEW
 		hulks.append(w)
+	var memory := {}
+	if not d.get("boarded", {}) is Dictionary:
+		return "bad sector data"
+	for id in d.get("boarded", {}):
+		var m = d["boarded"][id]
+		if not (m is Dictionary and m.get("kind") is String and Boarding.has_kind(m["kind"]) and m.get("opened", []) is Array and m.get("unlocked", []) is Array and m.get("left", {}) is Dictionary):
+			return "bad sector data"
+		memory[str(id)] = m.duplicate(true)
+		memory[str(id)]["parts"] = m["parts"] if m.get("parts") is Array else []
+		memory[str(id)]["name"] = str(m.get("name", ""))
+		memory[str(id)]["keys"] = m["keys"] if m.get("keys") is Array else []
 	for p in pois:
 		if d["pois"].has(p["id"]):
 			p["state"] = d["pois"][p["id"]]
+	boarded = memory
 	ship_pos = _vec(d["ship"])
 	far_seen = {}
 	for id in d.get("far", {}):

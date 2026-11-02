@@ -203,13 +203,13 @@ func test_won_pays_credits_only_and_counts_as_a_win() -> void:
 	var c := Campaign.new(1)
 	var ship := _ship()
 	var before := ship.inventory.counts.duplicate()
-	var r := c.fight_done({"state": "won", "enemy": _enemy(), "hull": 100.0, "hull_max": 120.0}, ship)
+	var r := c.fight_done({"state": "won", "enemy": _enemy()}, ship)
 	var dc: int = ship.inventory.count("credits") - int(before.get("credits", 0))
 	check(dc >= 20 and dc <= 60, "credits 20-60 at tier 1 (%d)" % dc)
 	for id in ship.inventory.counts:
 		if id != "credits":
 			eq(ship.inventory.count(id), int(before.get(id, 0)), "no %s: the player picks from the wreck" % id)
-	eq([c.fights_won, c.hull_loss, r["state"]], [1, 20, "won"], "a win, with the damage kept")
+	eq([c.fights_won, r["state"]], [1, "won"], "a win")
 	eq(r["lines"], ["+%d credits" % dc], "the lines")
 
 
@@ -220,12 +220,12 @@ func test_captured_pays_one_and_a_half_times_the_credits_and_the_strip_scrap() -
 		c.jumps = jumps
 		var ship := _ship()
 		var before := ship.inventory.counts.duplicate()
-		var r := c.fight_done({"state": "captured", "enemy": enemy, "hull": 90.0, "hull_max": 100.0}, ship)
+		var r := c.fight_done({"state": "captured", "enemy": enemy}, ship)
 		var t := c.tier()
 		var dc: int = ship.inventory.count("credits") - int(before.get("credits", 0))
 		check(dc >= roundi(20 * t * 1.5) and dc <= roundi(60 * t * 1.5), "credits x1.5 at tier %d (%d)" % [t, dc])
 		eq(ship.inventory.count("scrap") - int(before.get("scrap", 0)), (20 + 6 * 8) * t, "the strip scrap at tier %d" % t)
-		eq([c.fights_won, c.hull_loss, r["state"]], [1, 10, "captured"], "it counts as a win, with the damage kept")
+		eq([c.fights_won, r["state"]], [1, "captured"], "it counts as a win")
 		check(r["lines"].size() == 2 and r["lines"][1].begins_with("+%d scrap" % ((20 + 6 * 8) * t)), "the lines say what the crew stripped")
 
 
@@ -234,14 +234,14 @@ func test_spared_pays_the_offer_with_the_credits_times_the_tier() -> void:
 	c.jumps = 12  # tier 2
 	var ship := _ship()
 	var before := ship.inventory.counts.duplicate()
-	var r := c.fight_done({"state": "spared", "enemy": _enemy(), "hull": 100.0, "hull_max": 100.0, "offer": {"credits": 30, "fuel": 2, "scrap": 15}}, ship)
+	var r := c.fight_done({"state": "spared", "enemy": _enemy(), "offer": {"credits": 30, "fuel": 2, "scrap": 15}}, ship)
 	eq(ship.inventory.count("credits"), int(before.get("credits", 0)) + 60, "credits x tier 2")
 	eq(ship.inventory.count("fuel"), int(before.get("fuel", 0)) + 2, "fuel as offered")
 	eq(ship.inventory.count("scrap"), int(before.get("scrap", 0)) + 15, "scrap as offered (only credits scale)")
 	eq(r["text"], "They dump the goods out of the airlock and limp away.", "the text")
 	eq(c.fights_won, 1, "it counts as a win")
 	eq(r["state"], "spared", "state")
-	var again := c.fight_done({"state": "spared", "hull": 100.0, "hull_max": 100.0}, ship)
+	var again := c.fight_done({"state": "spared"}, ship)
 	eq(again["lines"], [], "no offer, no goods")
 
 
@@ -249,12 +249,12 @@ func test_escaped_pays_nothing_and_fled_and_lost_are_as_before() -> void:
 	var c := Campaign.new(1)
 	var ship := _ship()
 	var before := ship.inventory.counts.duplicate()
-	var r := c.fight_done({"state": "escaped", "enemy": _enemy(), "hull": 80.0, "hull_max": 100.0}, ship)
+	var r := c.fight_done({"state": "escaped", "enemy": _enemy()}, ship)
 	eq(ship.inventory.counts, before, "the cargo is untouched")
 	eq(r["text"], "They're gone, and whatever they carried went with them.", "the text")
-	eq([r["state"], r["lines"], c.fights_won, c.hull_loss], ["escaped", [], 0, 20], "no lines, no win, but the damage stays")
-	var fled := c.fight_done({"state": "fled", "hull": 90.0, "hull_max": 100.0}, ship)
-	eq([fled["state"], fled["text"], ship.inventory.counts, c.fights_won, c.hull_loss], ["fled", "You break away. The fight is not finished, but you are.", before, 0, 10], "fled as before")
+	eq([r["state"], r["lines"], c.fights_won], ["escaped", [], 0], "no lines, no win")
+	var fled := c.fight_done({"state": "fled"}, ship)
+	eq([fled["state"], fled["text"], ship.inventory.counts, c.fights_won], ["fled", "You break away. The fight is not finished, but you are.", before, 0], "fled as before")
 	var lost := c.fight_done({"state": "lost"}, ship)
 	eq([lost["state"], lost["text"]], ["lost", "Your ship is wrecked. The Drift keeps what is left of it."], "lost as before")
 
@@ -265,7 +265,7 @@ func test_after_win_runs_for_a_capture_and_a_sparing_too() -> void:
 		var c := Campaign.new(1)
 		var ship := _ship()
 		var fuel := ship.inventory.count("fuel")
-		var r := c.fight_done({"state": state, "enemy": _enemy(), "hull": 10.0, "hull_max": 10.0}, ship, after)
+		var r := c.fight_done({"state": state, "enemy": _enemy()}, ship, after)
 		eq(ship.inventory.count("fuel"), fuel + 2, state + ": the after_win effects ran")
 		check(r["text"].ends_with("Their ledger floats by."), state + ": and its text is shown")
 
@@ -311,7 +311,7 @@ func test_the_map_shows_a_salvage_notice_then_the_pick_after_a_win_or_a_capture(
 	for state in ["won", "captured"]:
 		var d := _screen()
 		var map: MapView = d["map"]
-		_fight(d, {"state": state, "enemy": _enemy(), "hull": 100.0, "hull_max": 100.0})
+		_fight(d, {"state": state, "enemy": _enemy()})
 		eq(map.event_panel.title, "Salvage", state + ": the notice is titled Salvage")
 		map.event_panel.proceed()
 		eq(map.event_panel.event.get("id", ""), "salvage", state + ": the pick follows")
@@ -325,7 +325,7 @@ func test_the_map_offers_no_salvage_after_a_sparing_or_an_escape() -> void:
 	for state in ["spared", "escaped"]:
 		var d := _screen()
 		var map: MapView = d["map"]
-		_fight(d, {"state": state, "enemy": _enemy(), "hull": 100.0, "hull_max": 100.0, "offer": {"credits": 10}})
+		_fight(d, {"state": state, "enemy": _enemy(), "offer": {"credits": 10}})
 		eq(map.event_panel.title, "Salvage" if state == "spared" else "The fight is over", state + ": the notice title")
 		map.event_panel.proceed()
 		check(map.event_panel.event.get("id", "") != "salvage", state + ": no salvage pick")

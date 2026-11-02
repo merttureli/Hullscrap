@@ -1,7 +1,7 @@
 extends RefCounted
 ## The Drift campaign (docs/CONTENT.md section 8): the state of a run and the rules that move it. The map
 ## (drift.gd), the current node, what is visited, flags, reputation, Ma Gantry's debt and its clock, the
-## jump counter, the `once` events used, the hull integrity lost, the recruits on offer. Jumping, arriving
+## jump counter, the `once` events used, the recruits on offer. Jumping, arriving
 ## (which event happens), fights (design choice, loot, the result), the station trades, save and load.
 ## Light speed (start_jump, tick_jump: an 8 s spool, no jump with hostiles near) and the sectors the nodes turn into
 ## (sector.gd, docs/CONTENT.md section 11) are here too; cfg `instant_jump` keeps the beta's instant jump for now.
@@ -17,7 +17,7 @@ extends RefCounted
 
 const Drift = preload("res://scripts/space/drift.gd")
 const Events = preload("res://scripts/space/events.gd")
-const Arena = preload("res://scripts/combat/arena.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Characters = preload("res://scripts/crew/characters.gd")
@@ -33,6 +33,7 @@ const Hazards = preload("res://scripts/combat/hazards.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
+const Shops = preload("res://scripts/space/shops.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -46,7 +47,9 @@ const Unlocks = preload("res://scripts/space/unlocks.gd")
 ## 7 adds `foes` (the enemies rolled for the fights of the places, foe_for); older saves start with none rolled.
 ## 8 adds `far` to each saved sector (the far POIs that are done, sector.gd); older saves have none done.
 ## 9 adds `crew_offers` (the events that add crew fired in this region, events.gd); older saves start with none.
-const VERSION := 9
+## 10 drops `hull_loss` (there is no hull pool: the blocks are the health, structure.gd); an older save's is ignored.
+## 11 adds `boarded` to each saved sector (what the soldier opened and unlocked aboard a POI, boarding.gd); older saves have none.
+const VERSION := 11
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100
@@ -57,6 +60,7 @@ const SAVE_PATH := "user://campaign.json"
 const REFUSED_TEXT := "The dock master turns you away."
 const DARK_TEXT := "The gate is dark."
 const NO_FUEL := "no fuel"
+const SHOP_PREFIX := "shop:"  ## the id of a small shop is "shop:<node id>:<POI id>" (shop_id)
 const HOSTILES_TEXT := "hostiles too close to jump"
 const SPOOL_TEXT := "spool the jump drive first"
 const NOT_AT_EXIT := "not at the exit beacon"
@@ -90,11 +94,13 @@ var used := {}  ## once-events already seen: id -> true
 var revealed := {}  ## node ids shown on the map although far from any visited node
 var logs_found := {}  ## derelict log ids found: id -> true
 var reminded := -1  ## the payment cycle (jumps / every) Ma's reminder was shown in
-var hull_loss := 0  ## hull integrity points lost; repaired at stations
 var fuel_part := 0  ## parts (hundredths) of a fuel the jumps have used up and not yet paid; 0..FUEL_PARTS-1, spent as whole fuel when they reach FUEL_PARTS
 var events_seen := 0  ## events met at nodes, waits and wrecks (the game over screen counts them)
 var fights_won := 0  ## fights of the run that were won
 var offers := {}  ## station node id -> [{species, name}] recruits on offer
+var shop_sold := {}  ## shop id -> {item id -> units bought}: what has left the small shops of the Trader and Store POIs (shop_cfg); saved as the optional "shop_sold"
+var _shops := {}  # shop id -> the rolled stock (shops.gd roll), kept: it is a pure function of the seed and the id
+var fuel_stock := {}  ## station id -> {visit (the jump count the stock was rolled at), left}: the fuel on sale this visit (fuel_left); saved as the optional "fuel_stock"
 var sectors := {}  ## node id -> Sector (sector.gd) for every node visited (made on first use from the seed, so only their states are saved)
 var foes := {}  ## "region/node/kind" -> the enemy rolled for a fight of that kind there (foe_for): a design path or a gen: spec; saved
 var tide: Tide  ## the Hollow tide over the map (tide.gd): jumps, waits, tows and lingering push it
@@ -114,8 +120,6 @@ var landmarks: Array = []  ## ids of the landmark events (events.gd) met in this
 var unlocks_earned: Array = []  ## ids of the unlocks this run earned (new to the profile), in order
 var chronicle: Array = []  ## the run log, in order: {jumps, kind (landmark, unlock, ending), id, text}; the ending screen reads it
 var _hazards := {}  # "<region seed>:<region>:<node>" -> that node's hazard ({} or {id, dir}), rolled once (hazard_at)
-var _hull_key := -1
-var _hull_max := 0
 
 
 ## data/drift.json, read once.
@@ -267,37 +271,31 @@ func reveal(id: String) -> String:
 	return label(best)
 
 
-# --- hull integrity ---------------------------------------------------------------------------------------
+# --- damaged blocks ---------------------------------------------------------------------------------------
 
-## The most hull integrity `ship` can have (what a fight would give it).
-func hull_max(ship) -> int:
-	var key: int = hash([ship.get_instance_id(), ship.grid.tiles.hash()])
-	if key != _hull_key:
-		var arena := Arena.new(1)
-		arena.add_ship(ship)
-		_hull_max = roundi(arena.ships[0].hull_max)
-		_hull_key = key
-	return _hull_max
+## Hurt random outer blocks of `ship` for `n` hp (an event's `hull` effect, a drift jump). Seeded from the campaign seed and
+## what has happened so far, so a replay hurts the same blocks. It never takes the structure under the defeat line (a ship
+## is not wrecked between fights). Returns the hp dealt.
+func hurt_blocks(ship, n: int) -> int:
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([seed_value, jumps, events_seen, fights_won, n])
+	return roundi(Structure.hurt(ship, float(n), r, Structure.defeat_below()))
 
 
-## The integrity `ship` has left (at least 1: a damaged hull has a lower maximum than the one the loss was
-## counted against, and the number must never show as zero or less).
-func hull_left(ship) -> int:
-	return maxi(hull_max(ship) - hull_loss, 1)
+## Mend `n` hp of damaged blocks of `ship` (an event's `hull` effect). Returns the hp mended.
+func mend_blocks(ship, n: int) -> int:
+	return roundi(Structure.mend(ship, float(n)))
 
 
-## The hull a fight starts with: the arena's maximum less what the campaign has lost (never below 1), so the
-## damage of one fight, of an event or of a drift jump is still there in the next fight until it is repaired.
-func fight_hull(arena_hull_max: float) -> float:
-	return maxf(1.0, arena_hull_max - float(hull_loss))
+## Change the hp of the ship's blocks by `n` (negative = damage). Returns the change really made.
+func change_blocks(ship, n: int) -> int:
+	return -hurt_blocks(ship, -n) if n < 0 else mend_blocks(ship, n)
 
 
-## Change the hull integrity by `n` (negative = damage). It never drops below 1 or rises above the
-## maximum. Returns the change really made.
-func change_hull(ship, n: int) -> int:
-	var before := hull_loss
-	hull_loss = clampi(hull_loss - n, 0, maxi(hull_max(ship) - 1, 0))
-	return before - hull_loss
+## Would a hit of `n` hp to the blocks leave the structure at or over the defeat line?
+func blocks_can_take(ship, n: int) -> bool:
+	var t := Structure.totals(ship)
+	return t.x - float(n) >= Structure.defeat_below() * t.y - Structure.EPS
 
 
 # --- jumping ----------------------------------------------------------------------------------------------
@@ -312,7 +310,7 @@ func jump_block(to: String, ship, drift_jump := false) -> String:
 	if drift_jump:
 		if not fuel_short(ship):
 			return "you still have fuel"
-		if hull_left(ship) <= int(cfg["fuel"]["drift_hull"]):
+		if not blocks_can_take(ship, int(cfg["fuel"]["drift_hull"])):
 			return "the hull would not survive a drift jump"
 		return ""
 	return NO_FUEL if fuel_short(ship) else ""
@@ -330,7 +328,7 @@ func instant_jump() -> bool:
 	return bool(cfg.get("instant_jump", true))
 
 
-## Jump along a lane to `to` at once (the beta's map): the fuel of jump_cost() (or 15 integrity for a drift jump), +1 on
+## Jump along a lane to `to` at once (the beta's map): the fuel of jump_cost() (or hull damage for a drift jump), +1 on
 ## the jump counter, which may bring a payment due. Returns {ok, why, node, drift, notes}; `notes` are lines to tell the
 ## player. With `instant_jump` off it refuses: the jump spools (start_jump).
 func jump(to: String, ship, drift_jump := false) -> Dictionary:
@@ -346,8 +344,8 @@ func _jump_now(to: String, ship, drift_jump: bool) -> Dictionary:
 	var notes := []
 	if drift_jump:
 		var cost := int(cfg["fuel"]["drift_hull"])
-		change_hull(ship, -cost)
-		notes.append("The drift jump tears at the hull (-%d integrity)." % cost)
+		hurt_blocks(ship, cost)
+		notes.append("The drift jump tears at the hull (%d hp of damage)." % cost)
 	else:
 		var parts := fuel_part + jump_cost(ship)
 		ship.inventory.add("fuel", -(parts / FUEL_PARTS))
@@ -458,12 +456,16 @@ func linger(dt: float) -> Array:
 
 
 ## With no fuel: wait for a passing trader. Time passes (one jump on the counter) and a trader event
-## may come along. Returns {ok, why, notes, event}.
+## comes along, one that sells fuel when there is one (fuel is scarce, so most traders do not: a ship that waits with an empty
+## tank is the one that meets the fuel peddler). Returns {ok, why, notes, event}.
 func wait(ship) -> Dictionary:
 	if ship.inventory.count("fuel") > 0:
 		return {"ok": false, "why": "you still have fuel", "notes": [], "event": {}}
 	var notes := _advance(1)
-	var ev := events.pick(self, {"id": current, "type": "trader", "place": ""}, ship)
+	var node := {"id": current, "type": "trader", "place": ""}
+	var ev := events.pick(self, node, ship, func(e): return Events.offers_fuel(e))
+	if ev.is_empty():
+		ev = events.pick(self, node, ship)
 	events_seen += int(not ev.is_empty())
 	return {"ok": true, "why": "", "notes": notes, "event": ev}
 
@@ -730,6 +732,9 @@ func enter_region(id: String, ship = null) -> void:
 	revealed = {}
 	sectors = {}
 	offers = {}
+	fuel_stock = {}
+	shop_sold = {}
+	_shops = {}
 	spool = {}
 	flags["in_" + id] = true
 	if ship != null:
@@ -946,11 +951,11 @@ func gen_spec(entry: String, kind: String, roller: RandomNumberGenerator = null)
 	return Shipgen.spec(faction, Shipgen.at_least(faction, Shipgen.pick_size(budget, r)), r.randi(), budget, p.has("ram"), stage)
 
 
-## The fight is over. `res` is {state, hull, hull_max, enemy (its Ship)}, plus `offer` ({item: count}) when
+## The fight is over. `res` is {state, enemy (its Ship)}, plus `offer` ({item: count}) when
 ## spared; `state` is "won" | "captured" | "spared" | "escaped" | "fled" | "lost". A win pays credits (the caller
 ## then shows Salvage.event_for); a captured ship pays 1.5x the credits and the strip scrap; a spared one pays its
 ## offer (its credits times the tier) and gives no salvage; an escaped one pays nothing. Won, captured and spared
-## count as wins and run `after_win` ({text, effects}). The hull integrity left in the fight is kept. A loss ends
+## count as wins and run `after_win` ({text, effects}). The damage stays on the blocks, nothing else is carried. A loss ends
 ## the run (the caller starts a new campaign). Returns {state, text, lines, goto, fight, ending, threat}: `goto`,
 ## `fight` and `ending` are what the after_win effects asked for next. `threat` (the skulls of the enemy, 0 when
 ## the result has none) is handed on for Salvage.event_for.
@@ -960,8 +965,6 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 	if state == "lost":
 		out["text"] = "Your ship is wrecked. The Drift keeps what is left of it."
 		return out
-	if res.has("hull") and res.has("hull_max"):
-		hull_loss = clampi(roundi(float(res["hull_max"]) - float(res["hull"])), 0, maxi(roundi(float(res["hull_max"])) - 1, 0))
 	if state == "escaped" and after_win.has("clears"):  # the warden left the lane
 		flags[str(after_win["clears"])] = true
 		out["lines"].append("The lane is clear.")
@@ -1081,6 +1084,8 @@ func lose_crew(ship) -> String:
 ## region's stock and recruits), or the Scrapper trader's. `id` may also be the place id of a station in any region (its
 ## menu is the same wherever it is asked for). {} when there is nothing to dock at.
 func station_cfg(id: String) -> Dictionary:
+	if id.begins_with(SHOP_PREFIX):
+		return shop_cfg(id)
 	if is_hollow(id):  # no trade in a place the tide has taken
 		return {}
 	var n := drift.node(id)
@@ -1091,6 +1096,45 @@ func station_cfg(id: String) -> Dictionary:
 	if n.get("type", "") == "trader" and bool(n.get("clan", false)):
 		return cfg["stations"]["clan_trader"]
 	return {}
+
+
+## The id of the small shop of POI `poi_id` in the sector of node `node_id` (a Trader or Store POI: sector.gd trigger gives it as `shop`).
+static func shop_id(node_id: String, poi_id: String) -> String:
+	return "%s%s:%s" % [SHOP_PREFIX, node_id, poi_id]
+
+
+## The menu of small shop `id` in the shape of a station's ({name, faction, services, stock (id -> price), recruit, qty (id -> units left),
+## unique (ids that are a rare find here), shop: true}), what was bought already left out; {} where the tide has taken the place. The stock is
+## rolled by shops.gd from the run's seed, the shop's id and the region, so it is the same whenever it is asked for. The Scrapper traders
+## (clan nodes) keep their debt service and their faction.
+func shop_cfg(id: String) -> Dictionary:
+	var node_id: String = id.trim_prefix(SHOP_PREFIX).split(":", true, 1)[0]
+	if is_hollow(node_id):
+		return {}
+	if not _shops.has(id):
+		var skip: Array = []
+		for p in region_data.get("places", []):
+			if str(p.get("type", "")) == "station":
+				skip.append_array(Regions.station(str(p["id"]), cfg).get("stock", {}).keys())
+		_shops[id] = Shops.roll(cfg, seed_value, id, region_id, skip)
+	var rolled: Dictionary = _shops[id]
+	var sold: Dictionary = shop_sold.get(id, {})
+	var stock := {}
+	var qty := {}
+	var unique: Array = []
+	for item in rolled["stock"]:
+		var left := int(rolled["qty"][item]) - int(sold.get(item, 0))
+		if left > 0:
+			stock[item] = rolled["stock"][item]
+			qty[item] = left
+			if rolled["unique"].has(item):
+				unique.append(item)
+	var clan := bool(drift.node(node_id).get("clan", false))
+	var services := ["sell", "stock"]
+	if clan:
+		services.append("debt")
+	return {"name": "Scrapper trader" if clan else "Trader's shop", "faction": "clans" if clan else "", "services": services, "stock": stock, "qty": qty,
+		"unique": unique, "recruit": {}, "shop": true}
 
 
 ## Why the ship cannot dock at `id` ("" if it can).
@@ -1105,10 +1149,33 @@ func _station_faction(id: String) -> String:
 	return str(station_cfg(id).get("faction", ""))
 
 
-## Pay for `n` units of fuel at the station `id`. Returns {ok, text}.
+## The units of fuel station `id` has on sale this visit (0 where nothing sells fuel). A visit is the stay at a node between two jumps:
+## the first time the stock is asked for in one it is rolled, fuel.stock [least, most] units from the run's seed, the station and the
+## jump count, so the same visit always has the same; the next visit has a new one (the stock refills).
+func fuel_left(id: String) -> int:
+	if not station_cfg(id).get("services", []).has("fuel"):
+		return 0
+	var rec = fuel_stock.get(id)
+	if rec == null or int(rec["visit"]) != jumps:
+		var roll := RandomNumberGenerator.new()
+		roll.seed = hash([seed_value, id, jumps])
+		var span: Array = cfg["fuel"]["stock"]
+		rec = {"visit": jumps, "left": roll.randi_range(int(span[0]), int(span[1]))}
+		fuel_stock[id] = rec
+	return int(rec["left"])
+
+
+## Pay for `n` units of fuel at the station `id` (at most what it has left, fuel_left). Returns {ok, text}.
 func buy_fuel(ship, id: String, n := 1) -> Dictionary:
+	var left := fuel_left(id)
+	if left <= 0:
+		return {"ok": false, "text": "No fuel here." if not station_cfg(id).get("services", []).has("fuel") else "Sold out: that was all the fuel they had this visit."}
+	n = mini(n, left)
 	var each := price(int(cfg["fuel"]["price"]), _station_faction(id), ship)
-	return _purchase(ship, "fuel", n, each * n, "Fuel")
+	var r := _purchase(ship, "fuel", n, each * n, "Fuel")
+	if r["ok"]:
+		fuel_stock[id]["left"] = left - n
+	return r
 
 
 ## The price of `item` in the stock of station `id`, 0 when it is not sold there (`ship`: the buyer's, for a haggler aboard).
@@ -1121,10 +1188,38 @@ func buy(ship, id: String, item: String, n := 1) -> Dictionary:
 	var each := stock_price(id, item, ship)
 	if each <= 0:
 		return {"ok": false, "text": "They don't sell that."}
+	if id.begins_with(SHOP_PREFIX):
+		n = mini(n, int(station_cfg(id)["qty"].get(item, 0)))  # a small shop has only what is on its shelf
+	if item.begins_with(Shops.BLUEPRINT):
+		return _buy_blueprint(ship, id, item, each)
 	var r := _purchase(ship, item, n, each * n, ship.crafting.name_of(item, ship.components))
 	if r["ok"]:
 		Jobs.launch_drones(ship)  # a repair drone bought goes aboard at once
+		_note_sold(id, item, n)
 	return r
+
+
+## Buy the blueprint `item` ("bp:<recipe id>") of small shop `id`: the recipe is known at once.
+func _buy_blueprint(ship, id: String, item: String, each: int) -> Dictionary:
+	var recipe := item.trim_prefix(Shops.BLUEPRINT)
+	var name: String = ship.crafting.name_of(str(ship.crafting.def(recipe)["output"]["item"]), ship.components)
+	if ship.crafting.known.has(recipe):
+		return {"ok": false, "text": "You already know the %s blueprint." % name}
+	if ship.inventory.count("credits") < each:
+		return {"ok": false, "text": "%d credits: you have %d." % [each, ship.inventory.count("credits")]}
+	ship.inventory.add("credits", -each)
+	ship.crafting.unlock(recipe)
+	_note_sold(id, item, 1)
+	return {"ok": true, "text": "Learned the %s blueprint for %d credits." % [name, each]}
+
+
+## `n` of `item` left small shop `id` (stations do not run out).
+func _note_sold(id: String, item: String, n: int) -> void:
+	if not id.begins_with(SHOP_PREFIX):
+		return
+	var sold: Dictionary = shop_sold.get(id, {})
+	sold[item] = int(sold.get(item, 0)) + n
+	shop_sold[id] = sold
 
 
 func _purchase(ship, item: String, n: int, total: int, name: String) -> Dictionary:
@@ -1179,17 +1274,23 @@ func sell(ship, item: String, n := 1) -> Dictionary:
 	return {"ok": true, "text": "Sold %d %s for %d credits." % [n, ship.crafting.name_of(item, ship.components), each * n]}
 
 
-## Repair `points` of hull integrity (the most that is missing) at the repair price per point.
-func repair(ship, id: String, points: int) -> Dictionary:
-	points = mini(points, hull_loss)
+## Repair every damaged block of `ship` at the station: the repair price for each hp missing (wrecks are cleared by the crew).
+func repair(ship, id: String) -> Dictionary:
+	var points := ceili(Structure.missing_hp(ship) - Structure.EPS)
 	if points <= 0:
-		return {"ok": false, "text": "The hull is sound."}
+		return {"ok": false, "text": "Every block is sound."}
 	var total := price(int(cfg["prices"]["repair"]), _station_faction(id), ship) * points
 	if ship.inventory.count("credits") < total:
-		return {"ok": false, "text": "%d credits for %d points: you have %d." % [total, points, ship.inventory.count("credits")]}
+		return {"ok": false, "text": "%d credits for %d hp of repairs: you have %d." % [total, points, ship.inventory.count("credits")]}
 	ship.inventory.add("credits", -total)
-	hull_loss -= points
-	return {"ok": true, "text": "Repaired %d points for %d credits." % [points, total]}
+	Structure.repair_all(ship)
+	return {"ok": true, "text": "Repaired every block (%d hp) for %d credits." % [points, total]}
+
+
+## What repairing every damaged block of `ship` would cost at station `id` (0 when nothing needs mending).
+func repair_cost(ship, id: String) -> int:
+	var points := ceili(Structure.missing_hp(ship) - Structure.EPS)
+	return 0 if points <= 0 else price(int(cfg["prices"]["repair"]), _station_faction(id), ship) * points
 
 
 ## The recruits on offer at station `id`: roll them (species weighted by the station's list, a name each
@@ -1244,11 +1345,12 @@ static func _keys(d: Dictionary) -> Array:
 func to_dict() -> Dictionary:
 	return {"version": VERSION, "seed": seed_value, "rng_state": str(rng.state), "map": drift.to_dict(), "current": current,
 		"visited": _keys(visited), "flags": _keys(flags), "rep": rep.duplicate(), "debt": debt, "paid": paid, "jumps": jumps,
-		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded, "hull_loss": hull_loss,
+		"used": _keys(used), "revealed": _keys(revealed), "logs_found": _keys(logs_found), "reminded": reminded,
 		"fuel_part": fuel_part, "offers": offers.duplicate(true), "events_seen": events_seen, "fights_won": fights_won,
 		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
 		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
-		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers}
+		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers,
+		"fuel_stock": fuel_stock.duplicate(true), "shop_sold": shop_sold.duplicate(true)}
 
 
 func _sectors_dict() -> Dictionary:
@@ -1282,7 +1384,7 @@ func load_dict(d: Dictionary) -> String:
 	for k in ["visited", "flags", "used", "revealed", "logs_found"]:
 		if not d.get(k) is Array:
 			return "bad campaign data"
-	if not (d.get("rep") is Dictionary and d.get("offers") is Dictionary and d.has("seed") and d.has("rng_state") and d.has("debt") and d.has("paid") and d.has("jumps") and d.has("hull_loss")):
+	if not (d.get("rep") is Dictionary and d.get("offers") is Dictionary and d.has("seed") and d.has("rng_state") and d.has("debt") and d.has("paid") and d.has("jumps")):
 		return "bad campaign data"
 	var made = _read_sectors(d, map, where["seed"], Regions.get_region(where["region"]))
 	if made == null:
@@ -1315,7 +1417,6 @@ func load_dict(d: Dictionary) -> String:
 	debt = int(d["debt"])
 	paid = int(d["paid"])
 	jumps = int(d["jumps"])
-	hull_loss = int(d["hull_loss"])
 	fuel_part = clampi(int(d.get("fuel_part", 0)), 0, FUEL_PARTS - 1)  # a version 1 save has none
 	events_seen = int(d.get("events_seen", 0))  # saves from before the game over screen have none
 	fights_won = int(d.get("fights_won", 0))
@@ -1324,6 +1425,9 @@ func load_dict(d: Dictionary) -> String:
 	chronicle = _chronicle(d.get("chronicle"))
 	ending = ""
 	offers = d["offers"].duplicate(true)
+	fuel_stock = d["fuel_stock"].duplicate(true) if d.get("fuel_stock") is Dictionary else {}  # saves from before the scarce fuel have none
+	shop_sold = d["shop_sold"].duplicate(true) if d.get("shop_sold") is Dictionary else {}  # nor the small shops
+	_shops = {}
 	sectors = made
 	spool = charge
 	tide = rising
@@ -1341,7 +1445,6 @@ func load_dict(d: Dictionary) -> String:
 			if d["foes"][k] is String:
 				foes[str(k)] = d["foes"][k]
 	last_jump = {}
-	_hull_key = -1
 	_mark_hollow()  # the flag is not saved: the tide says it
 	return ""
 

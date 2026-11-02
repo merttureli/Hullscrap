@@ -7,7 +7,8 @@ extends RefCounted
 ## `repair_breach` a shot-open wall (90), `repair_component` a malfunctioning or disabled part (80,
 ## +10 for a weapon, engine or shield in a fight; also a hull mount whose outside half is damaged and
 ## whose link is intact, from its inside half), `repair_crew` a hurt `mechanical` crew member (75,
-## done by any other crew member: beds do not heal them), `man_station` (50, out of a fight 45 but the helm: the helm, and weapons,
+## done by any other crew member: beds do not heal them), `repair_block` a wall or door below its hp and not breached (60; 65 out of a
+## fight; work by the hp missing), `man_station` (50, out of a fight 45 but the helm: the helm, and weapons,
 ## shields and engines flagged manned), `restock` (40: carry ammo from the cargo to an ammo rack below half full,
 ## 1 s per 5 units at normal speed: scripts/sim/ammo.gd), `clear_wreck` (30: the debris of a part that was shot to pieces,
 ## which gives back half its recipe), and `repair_belt` (70: mend one conveyor-belt cell that damage cut). A job has `slots` places (two crew stack on a fire) and a place to
@@ -55,9 +56,9 @@ const FAULTY: Array[String] = ["malfunction", "disabled"]  ## part statuses a cr
 const NO_FIRE := Vector2i(-1, -1)  ## "no burning cell"
 const HAND_SHOWN := 0.6  ## seconds the HUD still says what the player was doing by hand
 ## The jobs that need tools: a crew member with the trait no_tools takes none of them.
-const TOOL_JOBS: Array[String] = ["extinguish", "repair_breach", "repair_component", "repair_crew", "repair_belt"]
+const TOOL_JOBS: Array[String] = ["extinguish", "repair_breach", "repair_component", "repair_crew", "repair_belt", "repair_block"]
 ## The TraitSet work_mult a job type is done at.
-const WORK_KIND := {"extinguish": "extinguish", "repair_breach": "breach", "repair_component": "repair", "repair_crew": "repair", "revive": "heal_others", "restock": "restock", "repair_belt": "repair"}
+const WORK_KIND := {"extinguish": "extinguish", "repair_breach": "breach", "repair_component": "repair", "repair_crew": "repair", "revive": "heal_others", "restock": "restock", "repair_belt": "repair", "repair_block": "repair"}
 
 var board := {}  ## job key -> job: {key, type, priority, cells, slots, work, label, ...}
 var progress := {}  ## job key -> seconds of work done so far (kept while the job stays on the board)
@@ -147,7 +148,7 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 				progress.erase(job["key"])
 				_erase(job["key"])
 				_since = 1.0e9
-		"repair_breach", "repair_component", "revive", "clear_wreck", "repair_belt":
+		"repair_breach", "repair_component", "revive", "clear_wreck", "repair_belt", "repair_block":
 			var key: String = job["key"]
 			var line: String = TraitSet.part_line(ship, job["uid"]) if job["type"] == "repair_component" else ""  # their line_affinity
 			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(ship, m, job["type"], line)
@@ -208,6 +209,9 @@ func build_board(ship) -> void:
 		if not near.is_empty():  # a part (a hull mount's inside half) may fill the only floor beside it, so it is worked from beside the part
 			extra["reach"] = near
 		_add(b, _job("repair_breach", "breach:%d,%d" % [c.x, c.y], [c], extra))
+	for c in Fire.sorted_cells(grid.hp.keys()):  # a wall or door below its hp, not shot open: mended where it stands
+		if grid.tiles.has(c) and not grid.breached.has(c) and grid.defs != null and grid.defs.get_def(grid.tiles[c]).has("hp") and grid.max_hp_of(c) - grid.hp_of(c) > 1e-6:
+			_add(b, _block_job(ship, c))
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
 	for uid in uids:
@@ -646,6 +650,8 @@ func _finish(ship, job: Dictionary) -> void:
 		"repair_belt":
 			if ship.belts.repair(job["cell"]):
 				ship.log_event("Belt repaired")
+		"repair_block":
+			ship.grid.hp.erase(job["cell"])  # a cell that is not listed has full hp
 		"repair_component":
 			if ship.repair(job["uid"]):
 				ship.log_event("%s repaired" % job["name"])
@@ -940,6 +946,20 @@ static func _job(type: String, key: String, cells: Array, extra := {}) -> Dictio
 	job.merge(extra, true)
 	job["label"] = label_of(job)
 	return job
+
+
+## repair_block for the damaged wall or door on `c`: seconds_per_hp for each hp missing times its line's repair multiplier;
+## calm_bonus on the priority while no fight is on (a part still comes first).
+func _block_job(ship, c: Vector2i) -> Dictionary:
+	var grid = ship.grid
+	var cfg: Dictionary = jcfg()["repair_block"]
+	var mult := float(ship.lines.get(str(grid.defs.get_def(grid.tiles[c]).get("line", "standard")), {}).get("repair", 1.0))
+	var extra := {"cell": c, "priority": int(cfg["priority"]) + (0 if combat else int(cfg["calm_bonus"])),
+		"work": float(cfg["seconds_per_hp"]) * (grid.max_hp_of(c) - grid.hp_of(c)) * mult}
+	var near := _parts_by_breach(ship, c)
+	if not near.is_empty():  # a part may fill the only floor beside it: worked from beside the part
+		extra["reach"] = near
+	return _job("repair_block", "block:%d,%d" % [c.x, c.y], [c], extra)
 
 
 ## repair_component for part `uid`: its seconds in data/crew.json x the line's repair multiplier; weapons, engines and shields

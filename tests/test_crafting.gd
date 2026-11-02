@@ -120,8 +120,11 @@ func test_recipe_data_is_valid() -> void:
 	for t in JSON.parse_string(FileAccess.get_file_as_string("res://data/tiles.json"))["tiles"]:
 		for m in t.get("cost", {}):
 			check(c.materials.has(m), "tile %s costs a known material %s" % [t["id"], m])
+	var item_ids := {}  # (items.json: loose finds such as the rounds of the hand weapons are not recipes)
+	for it in JSON.parse_string(FileAccess.get_file_as_string("res://data/items.json"))["items"]:
+		item_ids[str(it["id"])] = true
 	for m in JSON.parse_string(FileAccess.get_file_as_string("res://data/start.json"))["cargo"]:
-		check(c.materials.has(m) or c.has(m), "start cargo %s is a known id" % m)
+		check(c.materials.has(m) or c.has(m) or item_ids.has(m), "start cargo %s is a known id" % m)
 
 
 func test_the_numbers_follow_the_brief() -> void:

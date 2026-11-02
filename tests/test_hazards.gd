@@ -2,6 +2,7 @@ extends "res://tests/base_test.gd"
 ## Sector hazards (scripts/combat/hazards.gd): the roll, the five effects in an arena, the map and HUD texts, and that a
 ## fight with no hazard is unchanged.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
@@ -437,7 +438,8 @@ func test_a_surge_follows_the_normal_damage_rules() -> void:
 	for e in _surge_hits(a, 0):
 		check(absf(float(e["dealt"]) - 0.6) < 1e-6, "heavy armour resists kinetic: %s" % e["dealt"])
 		dealt += float(e["dealt"])
-	check(absf(a.ships[0].hull_max - a.ships[0].hull - dealt) < 1e-6, "the hull integrity drops by what was dealt")
+	var t0 := Structure.totals(a.ships[0].ship)
+	check(absf(t0.y - t0.x - dealt) < 1e-3, "the blocks lose what was dealt")
 	# slope: a face 45 degrees off the current takes cos(45) of the damage
 	var t := _room()
 	var b := Arena.new(7)
@@ -584,7 +586,7 @@ func test_every_hazard_runs_a_whole_fight() -> void:
 				sim.step(0.2)
 		for i in 2:
 			var co = s.arena.ships[i]
-			check(is_finite(co.hull) and co.hull >= 0.0, "%s: ship %d hull %s" % [id, i, str(co.hull)])
+			check(is_finite(Structure.structure_fraction(co)), "%s: ship %d structure" % [id, i])
 			check(is_finite(co.flight.pos.x) and is_finite(co.flight.pos.y), "%s: ship %d position" % [id, i])
 			for m in co.ship.crew:
 				check(m.hp >= 0.0 and m.hp <= m.max_hp + 1e-6, "%s: %s hp %s" % [id, m.name, str(m.hp)])

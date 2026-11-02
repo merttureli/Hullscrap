@@ -62,5 +62,122 @@ unlock.wav            mono   1.51    -9.88    -23.00
 red_alert.wav         mono   0.86    -8.59    -15.00 
 breach_alert.wav      mono   1.26    -2.93    -15.01 
 tide_warning.wav      mono   4.65    -3.18    -15.00 
+laser_scrap_1.wav     mono   0.33    -4.19    -17.00 
+laser_scrap_2.wav     mono   0.33    -2.14    -17.03 
+laser_neon_1.wav      mono   0.42    -3.32    -17.00 
+laser_neon_2.wav      mono   0.41    -2.86    -17.01 
+bolt_scrap_1.wav      mono   0.36    -4.15    -17.00 
+bolt_scrap_2.wav      mono   0.34    -3.17    -17.00 
+bolt_neon_1.wav       mono   0.45    -2.44    -17.03 
+bolt_neon_2.wav       mono   0.47    -3.37    -17.00 
+flak_scrap_1.wav      mono   0.54    -2.30    -17.04 
+flak_scrap_2.wav      mono   0.55    -3.20    -17.00 
+flak_neon_1.wav       mono   0.69    -1.92    -17.12 
+flak_neon_2.wav       mono   0.68    -2.09    -17.07 
+missile_launch_scrap_1.wav  mono   1.32    -2.44    -17.01 
+missile_launch_scrap_2.wav  mono   1.33    -2.24    -17.02 
+missile_launch_neon_1.wav  mono   1.24    -3.94    -17.00 
+missile_launch_neon_2.wav  mono   1.24    -4.00    -17.00 
+rapid_tick_scrap_1.wav  mono   0.09    -3.32    -17.00 
+rapid_tick_scrap_2.wav  mono   0.09    -5.26    -17.00 
+rapid_tick_neon_1.wav  mono   0.12    -4.36    -17.00 
+rapid_tick_neon_2.wav  mono   0.13    -3.68    -17.00 
+ion_scrap.wav         mono   0.56    -2.05    -17.04 
+ion_neon.wav          mono   0.61    -3.10    -17.00 
+beam_loop_neon.wav      st   2.00   -10.44    -23.06 step 0.56, dip 0.12 dB (worst window inside 2.78 dB)
+sig_magma_1.wav       mono   0.70    -3.41    -17.00 
+sig_magma_2.wav       mono   0.70    -2.72    -17.02 
+sig_swarm_1.wav       mono   1.00    -5.40    -17.00 
+sig_swarm_2.wav       mono   1.00    -3.64    -17.00 
+sig_crystal_1.wav     mono   1.03    -4.05    -17.00 
+sig_crystal_2.wav     mono   1.06    -4.63    -17.00 
+sig_spore_1.wav       mono   0.49    -2.05    -17.10 
+sig_spore_2.wav       mono   0.48    -3.48    -17.00 
+sig_pyre.wav            st   2.00    -9.38    -23.07 step 0.31, dip 1.54 dB (worst window inside 3.43 dB)
+sig_pop_1.wav         mono   0.15    -2.80    -17.01 
+sig_pop_2.wav         mono   0.15    -3.20    -17.00 
+sig_pop_3.wav         mono   0.15    -3.71    -17.00 
+sig_thunk_1.wav       mono   0.50    -4.85    -17.00 
+sig_thunk_2.wav       mono   0.50    -5.39    -17.00 
+sig_hiss_1.wav        mono   0.95    -3.37    -17.00 
+sig_hiss_2.wav        mono   0.95    -4.33    -17.00 
+sig_arc_1.wav         mono   0.60    -1.03    -18.34 
+sig_arc_2.wav         mono   0.60    -1.08    -17.91 
+sig_volley_1.wav      mono   1.11    -2.65    -17.01 
+sig_volley_2.wav      mono   1.11    -3.11    -17.00 
+room_tone.wav           st   6.00   -16.93    -32.10 step 0.75, dip 1.44 dB (worst window inside 2.56 dB)
+drone_hum.wav         mono   2.00   -19.80    -32.48 step 0.30, dip 0.02 dB (worst window inside 0.94 dB)
+missile_flight.wav    mono   2.00   -10.07    -23.57 step 0.33, dip 0.25 dB (worst window inside 2.75 dB)
+medbay_hum.wav        mono   2.00   -19.52    -29.24 step 0.31, dip 0.01 dB (worst window inside 3.48 dB)
+smelter_loop.wav      mono   3.00   -17.19    -29.47 step 0.22, dip 0.30 dB (worst window inside 3.78 dB)
+fabricator_loop.wav   mono   2.00   -17.11    -29.27 step 0.03, dip 0.49 dB (worst window inside 0.97 dB)
+bed_boneyard.wav        st   6.00   -17.46    -30.05 step 0.12, dip 3.17 dB (worst window inside 3.86 dB)
+bed_lumen.wav           st   6.00   -19.30    -30.03 step 0.77, dip 2.27 dB (worst window inside 7.23 dB)
+bed_concord.wav         st   6.00   -15.16    -30.09 step 0.30, dip 1.54 dB (worst window inside 3.64 dB)
+bed_clans.wav           st   6.00   -12.54    -30.32 step 0.79, dip 5.77 dB (worst window inside 10.13 dB)
+bed_hollow.wav          st   6.00   -11.21    -30.36 step 0.02, dip 3.12 dB (worst window inside 10.26 dB)
+haz_ion_storm.wav       st   4.00    -9.24    -26.14 step 0.16, dip 1.22 dB (worst window inside 3.35 dB)
+haz_star_heat.wav       st   4.00   -11.04    -26.10 step 0.58, dip 3.37 dB (worst window inside 4.34 dB)
+haz_gas_cloud.wav       st   4.00   -10.64    -26.13 step 1.01, dip 2.95 dB (worst window inside 6.86 dB)
+haz_radiation.wav       st   4.00    -2.94    -26.68 step 0.39, dip 0.73 dB (worst window inside 3.20 dB)
+haz_debris_surge.wav    st   4.00   -11.41    -26.09 step 0.25, dip 3.23 dB (worst window inside 5.39 dB)
+footstep_1.wav        mono   0.20   -20.70    -32.00 
+footstep_2.wav        mono   0.20   -19.89    -32.00 
+footstep_3.wav        mono   0.20   -19.77    -32.00 
+footstep_4.wav        mono   0.20   -19.42    -32.00 
+door_open_1.wav       mono   0.56    -6.10    -20.00 
+door_open_2.wav       mono   0.56    -5.44    -20.00 
+door_close_1.wav      mono   0.60    -6.09    -20.00 
+door_close_2.wav      mono   0.60    -5.77    -20.00 
+comms_chirp_1.wav     mono   0.23   -14.70    -22.00 
+comms_chirp_2.wav     mono   0.23   -14.68    -22.00 
+hail_chirp.wav        mono   0.46   -14.58    -22.00 
+surrender_chirp.wav   mono   0.73   -14.41    -22.00 
+craft_done.wav        mono   0.95   -11.35    -23.00 
+ammo_restock.wav      mono   0.51    -7.15    -20.00 
+hull_creak_1.wav      mono   2.20    -6.41    -17.00 
+hull_creak_2.wav      mono   2.20    -6.74    -17.00 
+missile_pop.wav       mono   0.36    -1.67    -15.16 
+shield_shift.wav      mono   0.82    -6.37    -17.00 
+ability_1.wav         mono   0.75    -4.06    -17.00 
+ability_2.wav         mono   0.75    -5.43    -17.00 
+ability_3.wav         mono   0.75    -4.04    -17.00 
+ion_lock.wav          mono   0.75    -2.37    -17.03 
+ram_impact.wav        mono   1.50    -1.11    -13.56 
+fire_whoomph.wav      mono   0.90    -1.88    -13.05 
+tab_switch.wav        mono   0.10   -15.06    -23.00 
+slider_tick.wav       mono   0.04   -12.13    -23.00 
+error.wav             mono   0.28   -16.97    -23.00 
+node_hover.wav        mono   0.10   -12.29    -23.00 
+jump_ready.wav        mono   1.32   -10.16    -23.00 
+confirm.wav           mono   0.33   -13.32    -23.00 
+cancel.wav            mono   0.30   -13.64    -23.00 
+page_turn.wav         mono   0.40   -10.66    -23.00 
+shot_pistol_1.wav     mono   0.30    -3.91    -17.00 
+shot_pistol_2.wav     mono   0.30    -3.45    -17.00 
+shot_rifle_1.wav      mono   0.42    -4.51    -17.00 
+shot_rifle_2.wav      mono   0.42    -4.22    -17.00 
+shot_heavy_1.wav      mono   0.70    -4.48    -17.00 
+shot_heavy_2.wav      mono   0.70    -4.20    -17.00 
+melee_swing_1.wav     mono   0.32   -10.19    -22.00 
+melee_swing_2.wav     mono   0.32    -8.14    -22.00 
+reload.wav            mono   0.85    -6.42    -22.00 
+empty_click.wav       mono   0.09    -8.42    -22.00 
+foe_hit_1.wav         mono   0.20    -3.71    -15.00 
+foe_hit_2.wav         mono   0.20    -4.42    -15.00 
+foe_hit_3.wav         mono   0.20    -3.56    -15.00 
+foe_down_1.wav        mono   0.60    -2.10    -15.04 
+foe_down_2.wav        mono   0.60    -1.99    -15.06 
+crawler_screech_1.wav  mono   0.80   -10.55    -22.00 
+crawler_screech_2.wav  mono   0.80   -10.92    -22.00 
+crawler_skitter_1.wav  mono   0.39   -17.34    -32.00 
+crawler_skitter_2.wav  mono   0.40   -17.54    -32.00 
+crawler_skitter_3.wav  mono   0.36   -14.94    -32.00 
+sentry_whir_1.wav     mono   0.70   -19.42    -29.00 
+sentry_whir_2.wav     mono   0.70   -20.84    -29.00 
+tracker_ping_far.wav  mono   0.28   -18.99    -23.00 
+tracker_ping_mid.wav  mono   0.18   -18.77    -23.00 
+tracker_ping_near.wav  mono   0.23   -17.90    -23.00 
+flashlight_click.wav  mono   0.10    -8.53    -23.00 
 
-63 files, 5.77 MB
+180 files, 22.34 MB

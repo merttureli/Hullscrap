@@ -1,0 +1,226 @@
+{
+	"events": [
+		{
+			"id": "bnpc_trader_sells_cheap",
+			"type": "boarding_npc",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"role": "trader",
+				"site": "station"
+			},
+			"text": "A folding table in the middle of a corridor, laid with the sort of things you only find on a dead station: three coils of cable, a box of odd batteries, someone's good boots. Behind it sits {name} on an upturned crate, with a cashbox and an expression of mild professional hope. 'Don't touch the boots,' {name} says. 'The boots are not for sale. The boots are for looking at.'",
+			"choices": [
+				{
+					"text": "See what is for sale.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Three things,' says {name}. 'Pick one. Don't pick the boots.' The prices are written in grease pencil on the table, and corrected twice.",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Haggle.",
+					"requires": {
+						"species": "fenn"
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You and {name} haggle for nine minutes with real joy, like two cats dancing. {name} ends up parting with the cable for less than cost, and thanks you for the best afternoon since the Snap.",
+							"effects": {
+								"items": {
+									"copper": 12,
+									"credits": 20
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask who {name} sells to.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Anyone who comes,' says {name}. 'It's been a slow year.' {name} laughs at that, once, and means about half of it. 'There's a box in the back. Tell it I sent you.'",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Admire the boots and move on.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'They're very good boots,' says {name}, to the corridor.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_trader_radio",
+			"type": "boarding_npc",
+			"weight": 40,
+			"once": true,
+			"requires": {
+				"role": "trader",
+				"site": [
+					"station",
+					"derelict"
+				],
+				"flag": "haven_3",
+				"not_flag": "haven_4",
+				"stage_min": 4,
+				"stage_max": 7
+			},
+			"text": "{name} has a battered shortwave set open on the table like a patient, and a kettle that has been boiling for so long the room has gone soft with it. 'Don't talk,' {name} says. 'It's about to come round.' You wait. After a while the speaker clears its throat and a small tired voice says, 'If you can hear this, we're alive,' and {name} mouths along with it, word for word, with the face of a person at a christening.",
+			"choices": [
+				{
+					"text": "Ask how long {name} has been listening.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Since it started,' says {name}. 'Not every day. Some days I've a customer.' A dial is turned a hair, and the voice comes in cleaner. 'It's always late, did you notice? The real one's always late. If it ever comes on the minute I'm leaving a note and going the other way.' The set spits a second voice from far off: a signals desk, filing the same form again. {name} copies it down for you on the back of a receipt.",
+							"effects": {
+								"flag": "haven_4",
+								"log": "log_haven_signals_desk"
+							}
+						}
+					]
+				},
+				{
+					"text": "See what {name} has to trade.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Mostly valves,' says {name}. 'And a little of what valves pay for.'",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Listen a while, then go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The voice comes round again as you reach the door. {name} does not look up. {name} mouths it.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_trader_lost_partner",
+			"type": "boarding_npc",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"role": "trader",
+				"site": "station",
+				"stage_min": 2
+			},
+			"text": "A stall, a lamp, a hand-lettered sign: BACK IN FIVE MINUTES. It is faded so far past five minutes that the ink has gone brown. {name} sits under it with a cashbox on one knee and a second chair set out beside the first, with a coat on it. 'My partner's coming back,' {name} says. 'They said five minutes.' It is said flatly, as a fact about the weather, and the two of you look at the chair.",
+			"choices": [
+				{
+					"text": "Sit in the other chair for five minutes.",
+					"outcomes": [
+						{
+							"weight": 55,
+							"text": "You sit, and wait, and nobody comes. At the end of the five minutes {name} stands up, folds the sign in half, then in quarters, and puts it in a pocket. 'Right,' {name} says. 'Right. That's that, then.' The coat goes into the cashbox. 'I'll need a berth, if you've got one. I can sell anything to anyone. It's the only thing I'm good for.'",
+							"effects": {
+								"npc_join": true
+							}
+						},
+						{
+							"weight": 45,
+							"text": "You sit. Five minutes go by. {name} looks at the coat, then at you, then at the coat, and shakes a head. 'No,' {name} says. 'No, I'll wait a bit more.' It is not an unkind refusal. {name} sells you something quickly, to cover it.",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Buy something and move on.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Thank you,' says {name}, with a customer's brightness, and doesn't look at the second chair at all.",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave {name} to the sign.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You go. Behind you the lamp stays on.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_trader_closing_down",
+			"type": "boarding_npc",
+			"weight": 6,
+			"once": false,
+			"fallback": true,
+			"text": "{name} is taking stock, with a clipboard, of a heap that is mostly dust. 'Closing down,' {name} says. 'Everything must go.' There is no one else on the deck. There has been no one else for a while. {name} has a hat on, and the hat says MANAGER.",
+			"choices": [
+				{
+					"text": "See what must go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Everything's a bargain,' says {name}. 'There's no one to argue.'",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask where the good stock went.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Back room,' says {name}. 'Don't tell head office.' There is no head office. {name} knows it, and says it anyway.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Wish {name} luck.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Sale ends Thursday,' says {name}. You do not ask which one.",
+							"effects": {}
+						}
+					]
+				}
+			],
+			"requires": {
+				"role": "trader"
+			}
+		}
+	]
+}

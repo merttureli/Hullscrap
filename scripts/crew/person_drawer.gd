@@ -29,7 +29,7 @@ const BOB_RATE := 2.4  ## radians a second of that bob
 const HOVER := 1.0  ## source px further than usual that the shadow of a floating body sits
 ## The frame and pivot of each rig kind in source px (art/README.md): every rig is a square frame turned about its middle.
 const RIGS := {"normal": [33, 16], "large": [49, 24], "small": [25, 12], "floating": [49, 24]}
-const JOB_ITEMS := {"extinguish": "extinguisher", "repair_breach": "wrench", "repair_component": "wrench"}
+const JOB_ITEMS := {"extinguish": "extinguisher", "repair_breach": "wrench", "repair_component": "wrench", "repair_block": "wrench"}
 
 
 ## Update the drawing state `a` of crew member `m` by `dt` seconds. `a`: {last, phase, angle (the

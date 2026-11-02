@@ -1,0 +1,290 @@
+{
+	"events": [
+		{
+			"id": "bnpc_survivor_counting_wall",
+			"type": "boarding_npc",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"role": "survivor",
+				"site": [
+					"station",
+					"derelict"
+				]
+			},
+			"text": "{name} sits against the bulkhead with a grease pencil and a flask, looking at the dark just past your light. The wall beside them is tallied in fives, a great many fives, in three different hands, and the newest set is {name}'s. 'Don't shine that in my eyes,' {name} says, mildly. 'I've got used to the idea of not seeing.' The air in here is stale but it is air, and somebody has been keeping the scrubber alive with a coat hanger.",
+			"choices": [
+				{
+					"text": "Sit down beside {name} and say nothing.",
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "You sit. The hull ticks as it cools. After a long while {name} tells you where the last of the good stock is kept: not a secret, just something nobody had asked about. 'Funny,' {name} says. 'You get used to talking to the wall. The wall never wants to know where anything is.'",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						},
+						{
+							"weight": 30,
+							"text": "You sit. {name} is asleep against your shoulder inside a minute, and you stay until your light starts to go. When {name} wakes there is a small hard pouch pressed into your hand and no mention of it.",
+							"effects": {
+								"items": {
+									"credits": 30
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask about the sealed door at the end of the deck.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'I sealed it myself,' says {name}. 'It was making a noise and I didn't like the noise. Behind it was storage, once. Maybe it still is.' {name} taps the wall twice, the way you would pat a dog you would rather not meet again.",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave {name} the tally and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} lifts the pencil in a small salute, and adds one more stroke to the wall.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_survivor_bad_air",
+			"type": "boarding_npc",
+			"weight": 8,
+			"once": false,
+			"requires": {
+				"role": "survivor",
+				"site": "derelict"
+			},
+			"text": "A figure in a half-sealed suit, one glove off, is waving a torch slowly back and forth across the deck, the way people wave at a ship that left some time ago. {name} sees your light and stops, then waves harder. The suit seam is split down the left thigh and held with a strip of tape that has given up. 'Tell me,' {name} says, in a voice scraped thin, 'that you have a hull that holds air.'",
+			"choices": [
+				{
+					"text": "Walk {name} to the airlock.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} leans on you the whole way, breathing like a bellows. 'Can't pay,' {name} manages. 'Can point.' And does, with the bare hand, at a locker, all down the length of the corridor.",
+							"effects": {
+								"npc_follow": true,
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Reseal the suit with polymer film (3 polymer).",
+					"requires": {
+						"items": {
+							"polymer": 3
+						},
+						"pay": true
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You cut the film to size and iron it down with the heel of your hand. The seam holds. {name} breathes in, all the way, for what looks like the first time in days, and sits down on the deck rather suddenly. 'I've got stuff,' {name} says. 'You've earned a look at it.'",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Share your air for a minute.",
+					"requires": {
+						"trait": "suit"
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You cross the hoses and the two of you breathe from the one line, close as dancers, until {name}'s hands stop shaking. 'I'll remember this,' {name} says, and draws a small map on your glove with a fingertip, in what is left of the condensation.",
+							"effects": {
+								"npc_reveal": "key"
+							}
+						}
+					]
+				},
+				{
+					"text": "Say the airlock is that way, and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Right,' says {name}. 'Right. That way.' The torch starts to wave again behind you.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_survivor_pulled_through",
+			"type": "boarding_npc",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"role": "survivor",
+				"site": "station",
+				"stage_min": 2
+			},
+			"text": "{name} is behind a barricade of lockers with a length of pipe and a very clear idea of what you might be. You hold your torch low and still. It takes {name} a long time. 'You're not them,' {name} says at last. 'They don't use torches.' The pipe does not lower. In the dark behind {name} there is a camp bed made up with hospital corners, and a second cup set out, just in case.",
+			"choices": [
+				{
+					"text": "Lower the light and talk.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "{name} puts the pipe down on a locker, carefully, as if it might wake something. It takes most of an hour. By the end you know the names of nine people who are not here any more, and {name} has made up a mind. 'I can pull a trigger and I can pull a cable,' {name} says. 'Is there room?'",
+							"effects": {
+								"npc_join": true
+							}
+						},
+						{
+							"weight": 40,
+							"text": "{name} will not be talked down. 'Go on,' {name} says, and keeps saying it, quietly, 'go on, go on,' until it is the only sound on the deck. You go. It was the right thing to have asked.",
+							"effects": {
+								"npc_leave": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Say you are only here for the cargo.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} lets you pass, with a jerk of the pipe toward the one locker worth having. 'Nobody's touched that,' {name} says. 'Didn't feel right.'",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Back away slowly.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The pipe follows you to the end of the corridor, and then, finally, lets you go.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_survivor_lantern_chalk",
+			"type": "boarding_npc",
+			"weight": 40,
+			"once": true,
+			"requires": {
+				"role": "survivor",
+				"site": [
+					"station",
+					"derelict"
+				],
+				"flag": "haven_1",
+				"not_flag": "haven_2",
+				"stage_min": 3,
+				"stage_max": 6
+			},
+			"text": "{name} has covered a whole bulkhead in chalk: bearings, dates, fuel tallies, columns of numbers in four different hands. 'Don't touch the wall,' {name} says, without turning round. 'It's the only thing in here that's right.' In the corner of the lowest column someone has written LANTERN, crossed it out, and written it again. {name} has a head cold and a chalk-white thumb, and the look of a person who has come back from somewhere.",
+			"choices": [
+				{
+					"text": "Ask about the Lantern.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'I went,' {name} says. 'Twice. Copied this off a wall on a ship called Long Odds, and then I went, and then I went again.' The chalk thumb moves down the column. 'Real ones are late. They start late every time, somebody's thumb is on the button. The clean ones are on time.' {name} says the last line to the wall, not to you. 'Don't go to the on-time ones.'",
+							"effects": {
+								"flag": "haven_2",
+								"log": "log_haven_lantern_blind"
+							}
+						}
+					]
+				},
+				{
+					"text": "Take {name} to the airlock.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} copies one more line onto the sleeve of the suit, to be safe, and comes without a word. The chalk comes too, in a fine white drift, all the way down the corridor.",
+							"effects": {
+								"npc_follow": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the wall alone.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Good,' says {name}. 'It's not finished.'",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_survivor_cold_beans",
+			"type": "boarding_npc",
+			"weight": 6,
+			"once": false,
+			"fallback": true,
+			"text": "{name} is eating cold beans out of a tin with a pocket knife. They see you, and the light, and the dark behind it, and after a pause that seems to cost something they hold out the tin. 'There's more,' {name} says. 'There isn't.' It is the kindest thing anyone has said to you in a corridor this month.",
+			"choices": [
+				{
+					"text": "Take a mouthful.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "They are cold, and they are the best thing you have eaten in a week. {name} watches you do it with the shy pleasure of a person who has been allowed to be generous.",
+							"effects": {
+								"crew_hp": 5
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask what is still worth taking aboard.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Cabinets in the next room,' says {name}. 'Hands too cold to try the third drawer. Maybe you'll do better.' A pencilled sheet slides out of a pocket, an air budget, nine names and a long column of sums. {name} lets you copy it.",
+							"effects": {
+								"npc_reveal": "container",
+								"log": "log_board_air_budget"
+							}
+						}
+					]
+				},
+				{
+					"text": "Say thanks and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Any time,' says {name}, and means every word of it.",
+							"effects": {}
+						}
+					]
+				}
+			],
+			"requires": {
+				"role": "survivor"
+			}
+		}
+	]
+}

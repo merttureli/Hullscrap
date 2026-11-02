@@ -88,7 +88,7 @@ func _process(dt: float) -> void:
 
 
 func _unhandled_input(e: InputEvent) -> void:
-	if _ship() == null:
+	if _ship() == null or _aboard():
 		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and not build.build_on and not build.combat:
 		var tag := tag_at(e.position)
@@ -242,7 +242,13 @@ func ship_now():
 
 ## Is the crew bar shown? In play mode and in a fight; build mode has its own panels.
 func bar_visible() -> bool:
-	return build != null and not build.build_on and _ship() != null
+	return build != null and not build.build_on and _ship() != null and not _aboard()
+
+
+## Is the soldier aboard another vessel (the Board node, board_view.gd)? Then the crew stand still and their bar is away.
+func _aboard() -> bool:
+	var board := get_node_or_null("../Board")
+	return board != null and bool(board.get("active"))
 
 
 ## WASD by keycode (any layout), screen-relative (W is up on the screen, see screen_to_grid). Ctrl/Cmd held means a shortcut like Ctrl+S, not walking, and so

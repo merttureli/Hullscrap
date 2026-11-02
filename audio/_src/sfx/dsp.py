@@ -388,3 +388,76 @@ def write_wav(path, x):
         w.setsampwidth(2)
         w.setframerate(SR)
         w.writeframes(pcm.tobytes())
+
+
+# --- helpers for the sound library of round 2 (ambience beds, line variants) --------------------------------------------
+
+def resample(x, ratio):
+    """Play x back `ratio` times as fast (pitch and speed together; linear interpolation): the cheap pitch shift."""
+    x = np.asarray(x, dtype=float)
+    idx = np.arange(0.0, len(x) - 1.0, ratio)
+    lo = idx.astype(int)
+    fr = idx - lo
+    return x[lo] * (1.0 - fr) + x[lo + 1] * fr
+
+
+def per(n, k, ph=0.0):
+    """A sine with k whole cycles over n samples: a modulator that fits a seamless loop."""
+    return np.sin(TAU * (k * np.arange(n) / n + ph))
+
+
+def snap(f, sec):
+    """The frequency nearest f that fits a whole number of cycles in sec seconds (a tone that loops without a seam)."""
+    return max(round(f * sec), 1) / sec
+
+
+def wrap_add(out, x, start):
+    """Add x into the loop buffer `out` at sample `start`; what runs past the end comes in again at the beginning, so events never leave a seam."""
+    idx = (int(start) + np.arange(len(x))) % len(out)
+    np.add.at(out, idx, x)
+
+
+def fft_filter(x, lo=None, hi=None, order=2):
+    """A circular band-pass in the frequency domain (soft edges): shapes a whole loop with no start-up transient, so it stays seamless.
+    lo: high-pass corner, hi: low-pass corner (Hz, either may be None); order 2 is a gentle slope."""
+    x = np.asarray(x, dtype=float)
+    out = np.empty_like(x)
+    for c in range(1 if x.ndim == 1 else x.shape[1]):
+        col = x if x.ndim == 1 else x[:, c]
+        spec = np.fft.rfft(col)
+        f = np.maximum(np.arange(len(spec)) * SR / len(col), 1e-3)
+        if lo:
+            spec = spec / np.sqrt(1.0 + (lo / f) ** (2 * order))
+        if hi:
+            spec = spec / np.sqrt(1.0 + (f / hi) ** (2 * order))
+        y = np.fft.irfft(spec, len(col))
+        if x.ndim == 1:
+            out = y
+        else:
+            out[:, c] = y
+    return out
+
+
+def smooth_noise(rng, n, rate, floor=0.0):
+    """A slow random curve 0..1 that repeats over n samples (noise limited to ~rate Hz, squared): breathing, syllables, gusts."""
+    spec = np.fft.rfft(rng.standard_normal(n))
+    f = np.arange(len(spec)) * SR / n
+    spec = spec / np.sqrt(1.0 + (f / rate) ** 4)
+    spec[0] = 0.0
+    y = np.fft.irfft(spec, n)
+    y = y / (np.max(np.abs(y)) + 1e-12)
+    return floor + (1.0 - floor) * (0.5 + 0.5 * y) ** 2
+
+
+def wcrackle(rng, n, rate, tau=0.002, amp=1.0, pitch=0.45, power=2.0):
+    """Sparse random clicks like crackle(), but wrapped round the end of the buffer (for loops). Every click is a decaying burst."""
+    out = np.zeros(n)
+    k = max(int(rate * n / SR), 1)
+    pos = rng.integers(0, n, k)
+    mag = rng.random(k) ** power * amp
+    sign = rng.choice([-1.0, 1.0], k)
+    m = max(int(tau * SR * 6), 2)
+    kern = np.exp(-np.arange(m) / (tau * SR)) * np.cos(np.arange(m) * pitch)
+    for p, g, s in zip(pos, mag, sign):
+        wrap_add(out, kern * g * s, p)
+    return out

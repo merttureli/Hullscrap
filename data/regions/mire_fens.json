@@ -13,7 +13,7 @@
 	"places": [
 		{"id": "fenwater", "name": "Fenwater Station", "type": "station", "faction": "concord", "pos": [800, 520], "jitter": 90, "beacon": true}
 	],
-	"debris": {"ice_chunk_s": 2.5},
+	"debris": {},
 	"pois": {"distress": 1.5},
 	"ambient": {"patrol": 3, "trader": 3, "pirate": 1},
 	"stock": {"oxygen_gen": 90, "medbay": 180, "shield_mk1": 160, "shield_mk2": 330, "laser_mk1": 140, "pulse_mk1": 130, "helm": 70, "radiator": 40, "mire_steam_lance": 380, "mire_bog_mortar": 340, "mire_mist_projector": 220, "mire_rain_shield": 430, "mire_wetwell_reactor": 260, "mire_spray_deck": 150},

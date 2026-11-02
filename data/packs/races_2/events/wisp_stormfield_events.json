@@ -63,17 +63,17 @@
       "text": "Cordelia's Charge Bar has a sign made of tubing, a counter made of an old shield generator, and a barman who is a Wisp and does not stand behind anything. The menu is a long glow along one wall. LIGHTNING IN A JAR. STATIC SHOT. THE FULL STORM (NO REFUNDS). The regulars are a hum. Cordelia herself, a Mire in an apron, is wiping a glass that is mostly ozone and hope.",
       "choices": [
         {"text": "Buy a jar of lightning (25 credits).", "requires": {"credits": 25}, "outcomes": [
-          {"weight": 100, "text": "Cordelia hands over a jar with a lid that glows. Poured into the tank it is three jumps of fuel, and the jar's last spark jumps back out and up your sleeve with a squeak.", "effects": {"items": {"credits": -25, "fuel": 3}}}
+          {"weight": 100, "text": "Cordelia hands over a jar with a lid that glows. Poured into the tank it is three jumps of fuel, and the jar's last spark jumps back out and up your sleeve with a squeak.", "effects": {"items": {"credits": -25, "fuel": 2}}}
         ]},
         {"text": "Order a static shot (10 credits).", "requires": {"credits": 10}, "outcomes": [
           {"weight": 100, "text": "Your hair stands straight up for an hour. Nobody can look at you. You feel wonderful, and you want the same tomorrow.", "effects": {"items": {"credits": -10}, "crew_hp": 10}}
         ]},
         {"text": "Order the Full Storm (60 credits).", "requires": {"credits": 60}, "outcomes": [
-          {"weight": 50, "text": "It is, quite literally, the Full Storm. The bar lights up, the glass fogs, the barman screams with joy, and you float, briefly, an inch above your stool. Everyone gets a refill.", "effects": {"items": {"credits": -60, "fuel": 5}, "crew_hp": 10}},
-          {"weight": 50, "text": "It is a small thunderclap. Your ears ring for an hour and the bar cheers. You have seen better storms, but not many.", "effects": {"items": {"credits": -60, "fuel": 3}, "crew_hp": -5}}
+          {"weight": 50, "text": "It is, quite literally, the Full Storm. The bar lights up, the glass fogs, the barman screams with joy, and you float, briefly, an inch above your stool. Everyone gets a refill.", "effects": {"items": {"credits": -60, "fuel": 2}, "crew_hp": 10}},
+          {"weight": 50, "text": "It is a small thunderclap. Your ears ring for an hour and the bar cheers. You have seen better storms, but not many.", "effects": {"items": {"credits": -60, "fuel": 1}, "crew_hp": -5}}
         ]},
         {"text": "[Wisp] Buy the barman a round.", "requires": {"species": "wisp"}, "outcomes": [
-          {"weight": 100, "text": "Your Wisp tops up the barman's glow from their own, and the two sit and shine at each other for a long, rippling hour. Cordelia refuses payment. 'On the house,' she says. 'They don't get many in.' She fills your tank and sends your Wisp home with a jar.", "effects": {"items": {"fuel": 4, "plasma_cell": 1}, "crew_hp": 10}}
+          {"weight": 100, "text": "Your Wisp tops up the barman's glow from their own, and the two sit and shine at each other for a long, rippling hour. Cordelia refuses payment. 'On the house,' she says. 'They don't get many in.' She fills your tank and sends your Wisp home with a jar.", "effects": {"items": {"fuel": 2, "plasma_cell": 1}, "crew_hp": 10}}
         ]},
         {"text": "Nurse a glass of water and watch the glow.", "outcomes": [
           {"weight": 100, "text": "You nurse a glass of water at the end of the counter while a thousand volts argue over a card game. Cordelia tops it up without comment. It is, you decide, the cheapest good evening in the Drift.", "effects": {"crew_hp": 5}}

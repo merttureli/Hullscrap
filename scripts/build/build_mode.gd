@@ -29,6 +29,7 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const Rooms = preload("res://scripts/sim/rooms.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
@@ -80,6 +81,7 @@ var combat := false:  ## a fight is on (combat_view.gd): this node ignores input
 	set(v):
 		combat = v
 		_sync_pause()
+var save_block := ""  ## why the game cannot be saved now ("" = it can): the soldier is aboard another vessel (board_view.gd)
 var group: int = Group.TILES
 var tab: int = Palette.Tab.STRUCTURE  ## the palette tab on show
 var selected := ""  ## tile id
@@ -124,6 +126,11 @@ var session: BuildSession:
 		return _session
 
 @onready var cam: Camera2D = get_node_or_null("../Camera2D")
+const FOCUS_HOLD := 3.0  ## seconds the camera holds on the damaged block the wrench pointed at
+var _focus_cell := Vector2i(-1, -1)  # the damaged block the camera is on
+var _focus_t := 0.0  # seconds it still holds there
+var _focus_on := false  # the camera's offset is this node's to move (it eases back to 0 when the hold is over)
+var _focus_seen := {}  # damaged cells the wrench has already shown, so pressing it again goes on to the next
 
 
 func _ready() -> void:
@@ -191,8 +198,52 @@ func _make_shields() -> void:
 func _process(dt: float) -> void:
 	_clock += dt
 	if combat:
+		_focus_t = 0.0
+		_focus_on = false
 		return
+	_follow_focus(dt)
 	queue_redraw()
+
+
+## The wrench in the top bar was clicked: the camera centres on the damaged block nearest to where it looks, and on the
+## next one each time it is pressed again. False when nothing is damaged (or there is no camera).
+func focus_damaged() -> bool:
+	var list := Structure.damaged(ship)
+	if list.is_empty() or cam == null:
+		return false
+	var eye: Vector2 = transform.affine_inverse() * (cam.position + cam.offset)  # where the camera looks, in this node's own coordinates
+	var best := -1
+	for pass_no in 2:
+		var near := INF
+		for i in list.size():
+			var c: Vector2i = list[i]["cell"]
+			var d := eye.distance_squared_to(cell_rect(c).get_center())
+			if d < near and not _focus_seen.has(c):
+				near = d
+				best = i
+		if best >= 0:
+			break
+		_focus_seen.clear()  # every damaged block has had its turn: start over
+	_focus_cell = list[best]["cell"]
+	_focus_seen[_focus_cell] = true
+	_focus_t = FOCUS_HOLD
+	_focus_on = true
+	return true
+
+
+## Ease the camera onto the block the wrench pointed at, hold it there a moment, then ease back.
+func _follow_focus(dt: float) -> void:
+	if cam == null or not _focus_on:
+		return
+	if _focus_t > 0.0:
+		_focus_t -= dt
+		var want: Vector2 = transform * cell_rect(_focus_cell).get_center() - cam.position
+		cam.offset = cam.offset.lerp(want, minf(dt * 8.0, 1.0))
+	else:
+		cam.offset = cam.offset.lerp(Vector2.ZERO, minf(dt * 5.0, 1.0))
+		if cam.offset.length() < 1.0:
+			cam.offset = Vector2.ZERO
+			_focus_on = false
 
 
 func cell_at(world: Vector2) -> Vector2i:
@@ -670,6 +721,10 @@ func _zoom(f: float) -> void:
 
 
 func _save() -> void:
+	if save_block != "":
+		message = save_block
+		Audio.fx(self, "error")
+		return
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f == null:
 		message = "could not write " + ProjectSettings.globalize_path(SAVE_PATH)
@@ -772,6 +827,8 @@ func _draw() -> void:
 	if hud == null or not hud.over_ui(get_viewport().get_mouse_position()):  # no ghost while the mouse is on a panel
 		for g in ghost:
 			_draw_ghost(g)
+	if _focus_t > 0.0:  # the damaged block the wrench pointed at
+		draw_rect(cell_rect(_focus_cell).grow(2.0 + 3.0 * (0.5 + 0.5 * sin(_clock * 8.0))), Color("#e1a136"), false, 2.0)
 	if _glow != null:
 		_glow.show_quads(_glow_quads)
 
@@ -849,7 +906,7 @@ func _draw_tile(c: Vector2i, id: String, open_doors: Dictionary) -> void:
 ## into the walls at both ends when open. The leaves run along the piece (the wall's direction).
 func _draw_door(piece: Array[Vector2i], col: Color, open: bool) -> void:
 	if _door_open.has(piece[0]) and _door_open[piece[0]] != open:
-		Audio.fx(self, "door")
+		Audio.fx(self, "door_open" if open else "door_close")
 	_door_open[piece[0]] = open
 	var floor_col: Color = grid.defs.color("floor") if grid.defs.has("floor") else col.darkened(0.5)
 	var rects := []

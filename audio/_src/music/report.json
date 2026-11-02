@@ -17,28 +17,28 @@
  },
  "build": {
   "bands_pct": [
-   39.3,
-   41.5,
-   12.6,
-   3.0,
-   3.7
+   12.1,
+   24.3,
+   49.1,
+   13.3,
+   1.2
   ],
-  "bpm": 76.19,
-  "bytes": 1523019,
-  "peak_db": -4.12,
+  "bpm": 96.0,
+  "bytes": 2611299,
+  "peak_db": -3.27,
   "rms_db": -18.01,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.52004,
-   "rms_first_db": -22.2,
-   "rms_last_db": -22.3,
-   "seam_step": 0.06935,
-   "typ_step_p999": 0.18255
+   "max_step": 0.26364,
+   "rms_first_db": -20.5,
+   "rms_last_db": -19.0,
+   "seam_step": 0.03682,
+   "typ_step_p999": 0.14103
   },
-  "seconds": 100.8,
+  "seconds": 105.0,
   "target_rms_db": -18.0,
-  "title": "Workbench",
-  "true_peak_db": -3.6
+  "title": "Ma's Ledger II (build)",
+  "true_peak_db": -3.27
  },
  "combat": {
   "bands_pct": [
@@ -81,6 +81,338 @@
   "title": "defeat",
   "true_peak_db": -3.05
  },
+ "demos": {
+  "black_box": {
+   "battle": {
+    "bands_pct": [
+     29.8,
+     23.1,
+     24.1,
+     13.6,
+     9.4
+    ],
+    "bytes": 1506415,
+    "peak_db": -1.33,
+    "rms_db": -15.06,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.86429,
+     "rms_first_db": -17.7,
+     "rms_last_db": -14.1,
+     "seam_step": 0.01162,
+     "typ_step_p999": 0.45615
+    },
+    "seconds": 73.17,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.11
+   },
+   "bpm": 118.08,
+   "crossfades_start_s": [
+    29.73,
+    63.77
+   ],
+   "explore": {
+    "bands_pct": [
+     37.9,
+     37.2,
+     23.4,
+     1.2,
+     0.2
+    ],
+    "bytes": 1423444,
+    "peak_db": -4.03,
+    "rms_db": -18.01,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.18968,
+     "rms_first_db": -19.6,
+     "rms_last_db": -17.6,
+     "seam_step": 0.0096,
+     "typ_step_p999": 0.07806
+    },
+    "seconds": 73.17,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.95
+   },
+   "sections_s": {
+    "A": 8.13,
+    "B": 24.39,
+    "C": 40.65,
+    "D": 56.91,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.703,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 3226944,
+    "samples_explore": 3226944
+   },
+   "title": "Black Box",
+   "transition": {
+    "bands_pct": [
+     31.5,
+     28.3,
+     24.8,
+     9.4,
+     6.0
+    ],
+    "bytes": 1478778,
+    "peak_db": -1.61,
+    "rms_db": -16.44,
+    "samples_off_vs_render": 0,
+    "seconds": 73.77,
+    "true_peak_db": -1.11
+   }
+  },
+  "ledger_ii": {
+   "battle": {
+    "bands_pct": [
+     15.4,
+     20.5,
+     49.7,
+     9.5,
+     4.9
+    ],
+    "bytes": 1475522,
+    "peak_db": -1.72,
+    "rms_db": -15.03,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.96436,
+     "rms_first_db": -17.3,
+     "rms_last_db": -14.5,
+     "seam_step": 0.09609,
+     "typ_step_p999": 0.41908
+    },
+    "seconds": 70.0,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.18
+   },
+   "bpm": 96.0,
+   "crossfades_start_s": [
+    31.56,
+    65.94
+   ],
+   "explore": {
+    "bands_pct": [
+     10.7,
+     22.1,
+     55.3,
+     11.0,
+     0.9
+    ],
+    "bytes": 1747053,
+    "peak_db": -3.76,
+    "rms_db": -18.01,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.23737,
+     "rms_first_db": -19.8,
+     "rms_last_db": -18.2,
+     "seam_step": 0.02097,
+     "typ_step_p999": 0.1291
+    },
+    "seconds": 70.0,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.75
+   },
+   "sections_s": {
+    "A": 10.0,
+    "B": 30.0,
+    "C": 50.0,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.356,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 3087000,
+    "samples_explore": 3087000
+   },
+   "title": "Ma's Ledger II",
+   "transition": {
+    "bands_pct": [
+     11.9,
+     18.1,
+     55.9,
+     10.6,
+     3.5
+    ],
+    "bytes": 1752655,
+    "peak_db": -1.72,
+    "rms_db": -16.45,
+    "samples_off_vs_render": 0,
+    "seconds": 75.94,
+    "true_peak_db": -1.57
+   }
+  },
+  "long_haul": {
+   "battle": {
+    "bands_pct": [
+     20.8,
+     25.4,
+     35.4,
+     13.2,
+     5.2
+    ],
+    "bytes": 1543938,
+    "peak_db": -1.5,
+    "rms_db": -15.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.97942,
+     "rms_first_db": -16.6,
+     "rms_last_db": -15.4,
+     "seam_step": 0.02592,
+     "typ_step_p999": 0.40011
+    },
+    "seconds": 74.06,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.26
+   },
+   "bpm": 103.7,
+   "crossfades_start_s": [
+    29.22,
+    63.35
+   ],
+   "explore": {
+    "bands_pct": [
+     21.4,
+     24.1,
+     39.3,
+     13.4,
+     1.7
+    ],
+    "bytes": 1671450,
+    "peak_db": -2.92,
+    "rms_db": -18.0,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.35002,
+     "rms_first_db": -19.7,
+     "rms_last_db": -19.7,
+     "seam_step": 0.00669,
+     "typ_step_p999": 0.16739
+    },
+    "seconds": 74.06,
+    "target_rms_db": -18.0,
+    "true_peak_db": -2.9
+   },
+   "sections_s": {
+    "A": 9.26,
+    "A2": 46.29,
+    "B": 27.77,
+    "intro": 0,
+    "outro": 64.8
+   },
+   "sync": {
+    "onset_corr": 0.305,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 3265920,
+    "samples_explore": 3265920
+   },
+   "title": "Long Haul",
+   "transition": {
+    "bands_pct": [
+     18.8,
+     22.8,
+     40.1,
+     14.3,
+     4.0
+    ],
+    "bytes": 1588645,
+    "peak_db": -1.8,
+    "rms_db": -16.32,
+    "samples_off_vs_render": 0,
+    "seconds": 73.35,
+    "true_peak_db": -1.26
+   }
+  },
+  "signal": {
+   "battle": {
+    "bands_pct": [
+     20.9,
+     33.1,
+     33.7,
+     7.8,
+     4.5
+    ],
+    "bytes": 1522759,
+    "peak_db": -1.65,
+    "rms_db": -15.05,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 1.03797,
+     "rms_first_db": -17.8,
+     "rms_last_db": -16.3,
+     "seam_step": 0.05105,
+     "typ_step_p999": 0.4337
+    },
+    "seconds": 73.14,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.13
+   },
+   "bpm": 91.88,
+   "crossfades_start_s": [
+    30.37,
+    63.67
+   ],
+   "explore": {
+    "bands_pct": [
+     18.9,
+     38.1,
+     35.7,
+     6.7,
+     0.6
+    ],
+    "bytes": 1669649,
+    "peak_db": -3.32,
+    "rms_db": -18.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.54435,
+     "rms_first_db": -22.4,
+     "rms_last_db": -19.2,
+     "seam_step": 0.00384,
+     "typ_step_p999": 0.18221
+    },
+    "seconds": 73.14,
+    "target_rms_db": -18.0,
+    "true_peak_db": -2.74
+   },
+   "sections_s": {
+    "A": 10.45,
+    "B": 31.35,
+    "C": 52.24,
+    "intro": 0
+   },
+   "sync": {
+    "onset_corr": 0.678,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 3225600,
+    "samples_explore": 3225600
+   },
+   "title": "Signal",
+   "transition": {
+    "bands_pct": [
+     19.4,
+     34.6,
+     35.5,
+     7.5,
+     2.9
+    ],
+    "bytes": 1584384,
+    "peak_db": -1.74,
+    "rms_db": -16.34,
+    "samples_off_vs_render": 0,
+    "seconds": 73.67,
+    "true_peak_db": -1.23
+   }
+  }
+ },
  "ending": {
   "bands_pct": [
    11.2,
@@ -99,78 +431,78 @@
  },
  "explore_a": {
   "bands_pct": [
-   27.2,
-   29.8,
-   32.1,
-   7.6,
-   3.3
+   28.2,
+   31.2,
+   33.3,
+   6.3,
+   1.0
   ],
   "bpm": 80.0,
-  "bytes": 2391436,
-  "peak_db": -2.89,
-  "rms_db": -18.01,
+  "bytes": 2674306,
+  "peak_db": -2.88,
+  "rms_db": -18.0,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.45065,
-   "rms_first_db": -21.3,
+   "max_step": 0.41393,
+   "rms_first_db": -21.4,
    "rms_last_db": -19.1,
-   "seam_step": 0.03566,
-   "typ_step_p999": 0.20998
+   "seam_step": 0.02782,
+   "typ_step_p999": 0.2093
   },
   "seconds": 144.0,
   "target_rms_db": -18.0,
   "title": "Drift",
-  "true_peak_db": -2.84
+  "true_peak_db": -2.74
  },
  "explore_b": {
   "bands_pct": [
-   20.7,
-   45.5,
-   24.7,
-   5.3,
-   3.9
+   21.8,
+   47.5,
+   25.5,
+   3.8,
+   1.4
   ],
   "bpm": 88.16,
-  "bytes": 2519028,
-  "peak_db": -2.36,
-  "rms_db": -18.02,
+  "bytes": 2728270,
+  "peak_db": -2.34,
+  "rms_db": -18.0,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.49454,
-   "rms_first_db": -20.6,
+   "max_step": 0.53008,
+   "rms_first_db": -20.8,
    "rms_last_db": -18.8,
-   "seam_step": 0.01974,
-   "typ_step_p999": 0.19259
+   "seam_step": 0.01558,
+   "typ_step_p999": 0.18946
   },
   "seconds": 152.44,
   "target_rms_db": -18.0,
   "title": "Salvage Lanes",
-  "true_peak_db": -2.18
+  "true_peak_db": -2.27
  },
  "hollow": {
   "bands_pct": [
-   8.9,
-   38.9,
-   47.2,
-   4.5,
-   0.5
+   9.1,
+   39.5,
+   47.6,
+   3.6,
+   0.3
   ],
   "bpm": 60.0,
-  "bytes": 2280724,
-  "peak_db": -3.28,
+  "bytes": 2260469,
+  "peak_db": -3.17,
   "rms_db": -18.0,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.18998,
+   "max_step": 0.16869,
    "rms_first_db": -19.3,
    "rms_last_db": -18.0,
-   "seam_step": 0.01196,
-   "typ_step_p999": 0.092
+   "seam_step": 0.00949,
+   "typ_step_p999": 0.08619
   },
   "seconds": 120.0,
   "target_rms_db": -18.0,
   "title": "Manners",
-  "true_peak_db": -3.28
+  "true_peak_db": -3.15
  },
  "jump": {
   "bands_pct": [
@@ -190,28 +522,350 @@
  },
  "menu": {
   "bands_pct": [
-   20.8,
-   35.8,
-   37.8,
-   4.4,
-   1.2
+   21.1,
+   36.4,
+   38.2,
+   3.9,
+   0.4
   ],
   "bpm": 72.0,
-  "bytes": 1997541,
-  "peak_db": -3.08,
+  "bytes": 2194321,
+  "peak_db": -2.88,
   "rms_db": -18.0,
   "samples_off_vs_render": 0,
   "seam": {
-   "max_step": 0.21132,
-   "rms_first_db": -22.3,
+   "max_step": 0.20619,
+   "rms_first_db": -22.4,
    "rms_last_db": -19.9,
-   "seam_step": 0.01334,
-   "typ_step_p999": 0.10944
+   "seam_step": 0.0118,
+   "typ_step_p999": 0.10447
   },
   "seconds": 120.0,
   "target_rms_db": -18.0,
   "title": "Ma's Ledger",
-  "true_peak_db": -3.08
+  "true_peak_db": -2.87
+ },
+ "pieces": {
+  "black_box": {
+   "battle": {
+    "bands_pct": [
+     31.2,
+     23.7,
+     25.3,
+     13.0,
+     6.9
+    ],
+    "bytes": 2686874,
+    "peak_db": -1.75,
+    "rms_db": -15.04,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.76397,
+     "rms_first_db": -18.4,
+     "rms_last_db": -15.4,
+     "seam_step": 0.09005,
+     "typ_step_p999": 0.36607
+    },
+    "seconds": 130.03,
+    "target_rms_db": -15.0,
+    "true_peak_db": -1.75
+   },
+   "bpm": 118.125,
+   "explore": {
+    "bands_pct": [
+     39.4,
+     36.0,
+     23.0,
+     1.3,
+     0.3
+    ],
+    "bytes": 2544952,
+    "peak_db": -4.09,
+    "rms_db": -18.01,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.26424,
+     "rms_first_db": -20.8,
+     "rms_last_db": -18.1,
+     "seam_step": 0.04109,
+     "typ_step_p999": 0.09003
+    },
+    "seconds": 130.03,
+    "target_rms_db": -18.0,
+    "true_peak_db": -4.09
+   },
+   "mode": "C minor: aeolian with the harmonic-minor V (G7) and the phrygian bII (Dbmaj7#11)",
+   "sections_s": {
+    "A": 16.25,
+    "A2": 97.52,
+    "B": 48.76,
+    "brk": 81.27,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.693,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 5734400,
+    "samples_explore": 5734400
+   },
+   "title": "Black Box",
+   "transition": {
+    "bands_pct": [
+     29.8,
+     26.2,
+     27.7,
+     11.5,
+     4.9
+    ],
+    "bytes": 1531762,
+    "peak_db": -2.43,
+    "rms_db": -16.13,
+    "samples_off_vs_render": 0,
+    "seconds": 73.68,
+    "true_peak_db": -1.94
+   }
+  },
+  "clans": {
+   "battle": {
+    "bands_pct": [
+     21.5,
+     16.6,
+     43.2,
+     14.8,
+     4.0
+    ],
+    "bytes": 2562874,
+    "peak_db": -2.45,
+    "rms_db": -15.03,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.87933,
+     "rms_first_db": -19.7,
+     "rms_last_db": -15.0,
+     "seam_step": 0.09668,
+     "typ_step_p999": 0.32343
+    },
+    "seconds": 132.3,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.37
+   },
+   "bpm": 116.1,
+   "explore": {
+    "bands_pct": [
+     32.6,
+     31.9,
+     32.7,
+     2.4,
+     0.4
+    ],
+    "bytes": 2582440,
+    "peak_db": -3.63,
+    "rms_db": -18.0,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.33356,
+     "rms_first_db": -20.1,
+     "rms_last_db": -19.2,
+     "seam_step": 0.02121,
+     "typ_step_p999": 0.10481
+    },
+    "seconds": 132.3,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.63
+   },
+   "mode": "A minor: aeolian harmony with the major V (E7#9), a minor-pentatonic lead",
+   "sections_s": {
+    "A": 16.54,
+    "A2": 99.22,
+    "B": 49.61,
+    "brk": 82.69,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.617,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 5834430,
+    "samples_explore": 5834430
+   },
+   "title": "Clans",
+   "transition": {
+    "bands_pct": [
+     23.0,
+     16.9,
+     45.6,
+     12.4,
+     2.1
+    ],
+    "bytes": 1456542,
+    "peak_db": -2.75,
+    "rms_db": -15.96,
+    "samples_off_vs_render": 0,
+    "seconds": 74.72,
+    "true_peak_db": -2.55
+   }
+  },
+  "concord": {
+   "battle": {
+    "bands_pct": [
+     16.6,
+     18.8,
+     49.1,
+     10.1,
+     5.3
+    ],
+    "bytes": 2704751,
+    "peak_db": -2.61,
+    "rms_db": -15.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.82224,
+     "rms_first_db": -16.3,
+     "rms_last_db": -15.3,
+     "seam_step": 0.02652,
+     "typ_step_p999": 0.3504
+    },
+    "seconds": 137.14,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.55
+   },
+   "bpm": 112.0,
+   "explore": {
+    "bands_pct": [
+     16.5,
+     29.0,
+     49.1,
+     4.8,
+     0.6
+    ],
+    "bytes": 2854596,
+    "peak_db": -3.32,
+    "rms_db": -18.0,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.37732,
+     "rms_first_db": -18.2,
+     "rms_last_db": -19.8,
+     "seam_step": 0.0109,
+     "typ_step_p999": 0.12829
+    },
+    "seconds": 137.14,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.16
+   },
+   "mode": "E dorian, with a mixolydian lift (E major) into the drop",
+   "sections_s": {
+    "A": 17.14,
+    "A2": 102.86,
+    "B": 51.43,
+    "brk": 85.71,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.78,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 6048000,
+    "samples_explore": 6048000
+   },
+   "title": "Concord",
+   "transition": {
+    "bands_pct": [
+     12.2,
+     24.5,
+     54.3,
+     6.3,
+     2.7
+    ],
+    "bytes": 1530389,
+    "peak_db": -3.19,
+    "rms_db": -15.76,
+    "samples_off_vs_render": 0,
+    "seconds": 74.8,
+    "true_peak_db": -3.15
+   }
+  },
+  "lumen": {
+   "battle": {
+    "bands_pct": [
+     21.3,
+     19.7,
+     38.1,
+     18.0,
+     2.9
+    ],
+    "bytes": 3014872,
+    "peak_db": -2.58,
+    "rms_db": -15.03,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.62503,
+     "rms_first_db": -19.1,
+     "rms_last_db": -14.3,
+     "seam_step": 0.05403,
+     "typ_step_p999": 0.27041
+    },
+    "seconds": 140.0,
+    "target_rms_db": -15.0,
+    "true_peak_db": -2.52
+   },
+   "bpm": 96.0,
+   "explore": {
+    "bands_pct": [
+     12.2,
+     19.2,
+     46.1,
+     20.8,
+     1.7
+    ],
+    "bytes": 3243220,
+    "peak_db": -3.35,
+    "rms_db": -18.02,
+    "samples_off_vs_render": 0,
+    "seam": {
+     "max_step": 0.31597,
+     "rms_first_db": -19.3,
+     "rms_last_db": -19.5,
+     "seam_step": 0.07535,
+     "typ_step_p999": 0.15365
+    },
+    "seconds": 140.0,
+    "target_rms_db": -18.0,
+    "true_peak_db": -3.31
+   },
+   "mode": "F lydian, with whole-tone colour (C augmented)",
+   "sections_s": {
+    "A": 20.0,
+    "A2": 100.0,
+    "B": 60.0,
+    "brk": 80.0,
+    "intro": 0.0
+   },
+   "sync": {
+    "onset_corr": 0.477,
+    "onset_lag_ms": 0.0,
+    "same_length": true,
+    "samples_battle": 6174000,
+    "samples_explore": 6174000
+   },
+   "title": "Lumen",
+   "transition": {
+    "bands_pct": [
+     13.6,
+     19.1,
+     44.4,
+     21.0,
+     1.8
+    ],
+    "bytes": 1672838,
+    "peak_db": -2.79,
+    "rms_db": -16.03,
+    "samples_off_vs_render": 0,
+    "seconds": 74.94,
+    "true_peak_db": -2.79
+   }
+  }
  },
  "region_cross": {
   "bands_pct": [
@@ -228,6 +882,39 @@
   "seconds": 5.5,
   "title": "region_cross",
   "true_peak_db": -3.41
+ },
+ "static_fix": {
+  "build": {
+   "after_dbfs": -51.2,
+   "before_dbfs": -33.3,
+   "first8s_after_dbfs": -52.3,
+   "first8s_before_dbfs": -34.4
+  },
+  "explore_a": {
+   "after_dbfs": -50.5,
+   "before_dbfs": -32.6,
+   "first8s_after_dbfs": -49.1,
+   "first8s_before_dbfs": -31.2
+  },
+  "explore_b": {
+   "after_dbfs": -50.5,
+   "before_dbfs": -32.6,
+   "first8s_after_dbfs": -49.2,
+   "first8s_before_dbfs": -31.3
+  },
+  "hollow": {
+   "after_dbfs": -42.0,
+   "before_dbfs": -36.1,
+   "first8s_after_dbfs": -43.9,
+   "first8s_before_dbfs": -37.9
+  },
+  "menu": {
+   "after_dbfs": -49.9,
+   "before_dbfs": -37.4,
+   "first8s_after_dbfs": null,
+   "first8s_before_dbfs": -36.4
+  },
+  "note": "Level of the hiss/static texture stem in the mastered track (dBFS RMS), whole loop and first 8 s, round 1 -> round 2. Menu: texture -12 dB and silent for the first 8 s; explore_a/b and build: hiss -18 dB (it was audible above the music in the 2-10 kHz band in quiet passages); hollow: the radio static is part of its design, -6 dB."
  },
  "unlock": {
   "bands_pct": [

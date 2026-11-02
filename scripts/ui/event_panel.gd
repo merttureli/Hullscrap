@@ -18,6 +18,12 @@ signal finished
 signal fight_requested(value: String, after_win: Dictionary)
 ## Emitted when an outcome ended the run (the `ending` effect): `id` is the ending. The map turns it into the ending screen.
 signal ending_reached(id: String)
+## Emitted when an outcome sent the soldier aboard another vessel (the `board` effect): `spec` is the effect ({kind, ...}) and `ev` the page the
+## choice was on, which the map opens again when he is back (the vessel stays boardable until it is cleared).
+signal board_requested(spec: Dictionary, ev: Dictionary)
+## Emitted when a talk aboard another vessel (a person's, or a discovery's: `talk` is set) is over instead of `finished`: `ops` is everything the outcomes asked
+## of the boarding session (events.gd result "npc"), `acted` whether any outcome did something.
+signal talk_done(ops: Array, acted: bool)
 
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
@@ -55,6 +61,9 @@ var result := {}  ## the outcome shown: {text, lines, logs, goto, fight, after_w
 var title := ""
 var message := ""  ## why a choice was refused
 var hover := -1  ## the choice under the mouse
+var talk := {}  ## aboard another vessel: the node of the person or the spot the event is about ({type: boarding_npc ..., npc: {id, name, species, role}}), else {}. Set by the map before open_event
+var talk_ops: Array = []  ## the ops the outcomes taken in this talk asked for
+var talk_acted := false
 
 static var _rated := {}  ## "design path|ship key" -> the skulls of that enemy against that ship, so the panel does not rebuild ships
 
@@ -75,7 +84,8 @@ func _campaign():
 
 
 func _node() -> Dictionary:
-	return map.campaign.node(map.campaign.current)
+	var n: Dictionary = map.campaign.node(map.campaign.current)
+	return n if talk.is_empty() else n.merged(talk, true)
 
 
 # --- actions --------------------------------------------------------------------------------------------------
@@ -83,8 +93,13 @@ func _node() -> Dictionary:
 ## Show event `ev` (a dictionary from events.gd) at the current node.
 func open_event(ev: Dictionary) -> void:
 	var c = _campaign()
+	if not talk.is_empty():
+		ev = c.events.personalize(ev, str(talk.get("npc", {}).get("name", "")))
 	event = ev
 	title = str(ev.get("title", c.label(c.current)))  # an event built in code (salvage) may name its own title
+	if not talk.is_empty() and not ev.has("title"):
+		var who: Dictionary = talk.get("npc", {})
+		title = "%s, %s" % [who["name"], str(who.get("label", who.get("role", ""))).to_lower()] if not who.is_empty() else "Aboard"
 	view = c.events.choice_view(ev, c, map.ship(), _node())
 	var leave := {"index": -1, "text": "Leave.", "blue": false, "grey": false, "need": ""}
 	if view.is_empty():
@@ -126,12 +141,12 @@ func choose(i: int) -> String:
 	var v: Dictionary = view[i]
 	if v["grey"]:
 		message = "You need " + v["need"]
-		Audio.fx(self, "invalid")
+		Audio.fx(self, "error")
 		return message
-	Audio.fx(self, "click")
+	Audio.fx(self, "confirm")
 	if v["index"] < 0:
 		close()
-		finished.emit()
+		_end()
 		return ""
 	var c = _campaign()
 	var r: Dictionary = c.events.choose(event, v["index"], c, map.ship(), _node())
@@ -141,6 +156,9 @@ func choose(i: int) -> String:
 	result = r
 	page = "result"
 	message = ""
+	if not talk.is_empty():
+		talk_ops.append_array(r.get("npc", []))
+		talk_acted = talk_acted or bool(r.get("acted", false))
 	map.refresh()
 	if str(r["text"]) == "" and r["lines"].is_empty() and r["logs"].is_empty():
 		proceed()  # nothing to read: straight on
@@ -159,11 +177,28 @@ func proceed() -> void:
 	elif str(r.get("ending", "")) != "":
 		close()
 		ending_reached.emit(str(r["ending"]))
+	elif not r.get("board", {}).is_empty():
+		var back := event
+		close()
+		board_requested.emit(r["board"], back)
 	elif str(r.get("goto", "")) != "" and c.events.has(str(r["goto"])):
 		open_event(c.events.get_event(str(r["goto"])))
 	else:
 		close()
+		_end()
+
+
+## The chain of pages is over: `finished`, or for a talk aboard another vessel `talk_done` with what it asked for.
+func _end() -> void:
+	if talk.is_empty():
 		finished.emit()
+		return
+	var ops := talk_ops
+	var acted := talk_acted
+	talk = {}
+	talk_ops = []
+	talk_acted = false
+	talk_done.emit(ops, acted)
 
 
 # --- input ------------------------------------------------------------------------------------------------------
@@ -385,9 +420,10 @@ func _draw_result(lay: Dictionary) -> void:
 	var b: Rect2 = lay["button"]
 	var fighting := str(result.get("fight", "")) != ""
 	var ended := str(result.get("ending", "")) != "" and not fighting
+	var boards: bool = not result.get("board", {}).is_empty() and not fighting and not ended
 	draw_rect(b, ROW_BG)
-	draw_rect(b, BAD if fighting else (AMBER if ended else EDGE), false, 2.0)
-	_text("To battle (Enter)" if fighting else ("The end (Enter)" if ended else "Continue (Enter)"), b.position + Vector2(24.0, 28.0), 17, BAD if fighting else (AMBER if ended else TEXT))
+	draw_rect(b, BAD if fighting else (AMBER if ended or boards else EDGE), false, 2.0)
+	_text("To battle (Enter)" if fighting else ("The end (Enter)" if ended else ("Go aboard (Enter)" if boards else "Continue (Enter)")), b.position + Vector2(24.0, 28.0), 17, BAD if fighting else (AMBER if ended or boards else TEXT))
 
 
 ## How a change line reads: 1 good (a gain, a debt paid), -1 bad (a loss, a debt grown), 0 neither.

@@ -22,8 +22,8 @@
       "id": "barge_cargo_exchange", "type": "trader", "weight": 12, "once": false, "requires": {"flag": "in_grundl_barges"},
       "text": "The Convoy's cargo exchange: a long dark hold lit by swinging lamps, with crates stacked to the ceiling and forklifts the size of houses. Everything is wholesale; nothing is retail. 'Minimum order,' says the clerk, a Grundl in a tie, 'is one pallet.' A pallet is the size of your cabin.",
       "choices": [
-        {"text": "Buy a pallet of fuel pellets (60 credits).", "requires": {"credits": 60}, "outcomes": [
-          {"weight": 100, "text": "A forklift carries a pallet across the hold and sets it on your hull with a clunk. You stagger. The clerk apologises. The pallet holds a great deal of fuel.", "effects": {"items": {"credits": -60, "fuel": 6}}}
+        {"text": "Buy a pallet of copper bars (60 credits).", "requires": {"credits": 60}, "outcomes": [
+          {"weight": 100, "text": "A forklift carries a pallet across the hold and sets it on your hull with a clunk. You stagger. The clerk apologises. The pallet holds a great deal of copper.", "effects": {"items": {"credits": -60, "copper": 15}}}
         ]},
         {"text": "Buy a pallet of missiles (70 credits).", "requires": {"credits": 70}, "outcomes": [
           {"weight": 100, "text": "The pallet arrives in a net, swinging. The missiles lie in neat rows, each with a number. The clerk sells you the net separately.", "effects": {"items": {"credits": -70, "missile": 5}}}
@@ -32,7 +32,7 @@
           {"weight": 100, "text": "The clerk weighs your scrap on a scale the size of a barn door and pays a wholesale rate with a heavy apology for the rate.", "effects": {"items": {"scrap": -30, "credits": 55}}}
         ]},
         {"text": "[Grundl] Load the pallets yourself.", "requires": {"species": "grundl"}, "outcomes": [
-          {"weight": 100, "text": "Your Grundl lifts a pallet in each hand, carries them across the hold and sets them in your cargo bay with a delicate tap. The clerk watches with open admiration. 'Do you do this professionally?' he asks. Your Grundl does, as of now. They are paid in a pallet.", "effects": {"items": {"fuel": 4, "missile": 3, "credits": 30}}}
+          {"weight": 100, "text": "Your Grundl lifts a pallet in each hand, carries them across the hold and sets them in your cargo bay with a delicate tap. The clerk watches with open admiration. 'Do you do this professionally?' he asks. Your Grundl does, as of now. They are paid in a pallet.", "effects": {"items": {"missile": 3, "credits": 30}}}
         ]},
         {"text": "[Fenn] Sell smaller than a pallet.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 100, "text": "Your Fenn spots the gap in the market and opens a stall selling single crates from the pallets at three times the price. The clerk is appalled. The crowd of Grundl, who have never been able to buy less than a pallet, queue round the hold.", "effects": {"items": {"credits": 70}}}
@@ -210,10 +210,10 @@
           {"weight": 100, "text": "Hodd takes a long time to board, as he has to bend and fold and apologise to the airlock. Once in he takes up two cabins and a corridor, and is worth it. 'Thank you,' he says. 'I will carry what you ask. I will eat what you spare.'", "effects": {"recruit": {"species": "grundl", "name": "Hodd"}}}
         ]},
         {"text": "[Grundl] Greet him as a cousin.", "requires": {"species": "grundl"}, "outcomes": [
-          {"weight": 100, "text": "Your Grundl and Hodd hold forearms in the traditional greeting and stand like that for a long time. Hodd's face works. 'The Convoy will miss me,' he says, 'but I will write.' He boards with a bag of provisions from his family, and a small hamper for your Grundl.", "effects": {"items": {"fuel": 3, "credits": 20}, "recruit": {"species": "grundl", "name": "Hodd"}}}
+          {"weight": 100, "text": "Your Grundl and Hodd hold forearms in the traditional greeting and stand like that for a long time. Hodd's face works. 'The Convoy will miss me,' he says, 'but I will write.' He boards with a bag of provisions from his family, and a small hamper for your Grundl.", "effects": {"items": {"credits": 20}, "recruit": {"species": "grundl", "name": "Hodd"}}}
         ]},
         {"text": "Buy him a meal first (15 credits).", "requires": {"credits": 15}, "pay": true, "outcomes": [
-          {"weight": 100, "text": "You buy Hodd a tray of dinner. He eats it in four bites, closes his eyes and says softly, 'Thank you.' You have bought a friend for life. He asks to come aboard, and brings a lunchbox.", "effects": {"items": {"fuel": 2}, "recruit": {"species": "grundl", "name": "Hodd"}}}
+          {"weight": 100, "text": "You buy Hodd a tray of dinner. He eats it in four bites, closes his eyes and says softly, 'Thank you.' You have bought a friend for life. He asks to come aboard, and brings a lunchbox.", "effects": {"recruit": {"species": "grundl", "name": "Hodd"}}}
         ]},
         {"text": "Apologise: there is no room.", "outcomes": [
           {"weight": 100, "text": "Hodd takes it well. He nods, tips his hat, and apologises for taking up so much of your time. 'Sorry,' he says. 'I will not be a trouble.' He sets off to the next ship.", "effects": {}}

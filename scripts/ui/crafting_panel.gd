@@ -168,6 +168,7 @@ func set_station(id: String) -> bool:
 	selected = recipe_ids()[0] if not recipe_ids().is_empty() else ""
 	message = ""
 	_show_selection()
+	Audio.fx(self, "tab_switch")
 	return true
 
 
@@ -323,10 +324,13 @@ func _gui_input(e: InputEvent) -> void:
 	accept_event()
 
 
-## May the panel open now? Not in a fight, and not over the ship picker.
+## May the panel open now? Not in a fight, not while the soldier is aboard another vessel, and not over the ship picker.
 func _can_open() -> bool:
 	var combat := get_node_or_null("../../Combat")
 	if combat != null and combat.get("active"):
+		return false
+	var board := get_node_or_null("../../Board")
+	if board != null and board.get("active"):
 		return false
 	var picker := get_node_or_null("../../PickerLayer/ShipPicker")
 	return picker == null or not picker.visible

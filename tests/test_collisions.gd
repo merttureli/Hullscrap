@@ -5,6 +5,7 @@ extends "res://tests/base_test.gd"
 ## Test ships are hollow frames of wall (hp 1000, so nothing breaks unless a test wants it), with no
 ## drag, A at x = -300 flying right and B at x = 300 flying left.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
@@ -190,10 +191,10 @@ func test_two_couriers_head_on_at_150_each_lose_2_to_12_hull() -> void:  # was 8
 	arena.ships[1].flight.vel = Vector2(0.0, 150.0)
 	for co in arena.ships:
 		co.flight.linear_damping = 0.0
-	var h0: float = arena.ships[0].hull
+	var h0: float = Structure.totals(arena.ships[0].ship).x
 	_run(4.0)
-	var lost0: float = h0 - arena.ships[0].hull
-	var lost1: float = h0 - arena.ships[1].hull
+	var lost0: float = h0 - Structure.totals(arena.ships[0].ship).x
+	var lost1: float = h0 - Structure.totals(arena.ships[1].ship).x
 	check(lost0 >= 2.0 and lost0 <= 12.0, "courier A lost %f hull" % lost0)
 	check(lost1 >= 2.0 and lost1 <= 12.0, "courier B lost %f hull" % lost1)
 	var guns_hit := 0
@@ -419,9 +420,9 @@ func test_the_rammer_closes_and_hits_a_stationary_target_within_10_seconds() -> 
 			first = i * DT
 	check(first > 0.0 and first < 10.0, "it rammed within 10 s (at %f)" % first)
 	var tgt = s.arena.ships[Session.PLAYER]
-	var hurt: bool = tgt.hull < tgt.hull_max or s.arena.events.any(func(e): return e["type"] == "hit" and e["ship"] == Session.PLAYER)  # the ram may only get as far as the gun housings on the nose
-	check(hurt, "and hurt the target: %f of %f" % [tgt.hull, tgt.hull_max])
-	check(s.arena.ships[Session.ENEMY].hull > 0.0 and not s.arena.ships[Session.ENEMY].wrecked, "the rammer is fine")
+	var hurt: bool = Structure.structure_fraction(tgt) < 1.0 or s.arena.events.any(func(e): return e["type"] == "hit" and e["ship"] == Session.PLAYER)  # the ram may only get as far as the gun housings on the nose
+	check(hurt, "and hurt the target: %f" % Structure.structure_fraction(tgt))
+	check(not s.arena.ships[Session.ENEMY].wrecked, "the rammer is fine")
 
 
 func test_the_rammer_uses_its_engine_ability_in_range_backs_off_and_comes_round() -> void:

@@ -10,12 +10,13 @@ const PATH := "user://profile.json"
 ## 2 adds `unlocks`, `landmarks`, `hall` and `hall_seq`; a version 1 file loads with none.
 ## 3 adds `start` (the new-run options chosen last time, run_start.gd); an older file loads with the plain defaults.
 ## 4 adds `sound` (the Master, Music and SFX sliders, audio.gd); an older file loads with the default volumes.
-const VERSION := 4
+## 5 adds the Ambience slider to `sound` (an older file keeps the default for it).
+const VERSION := 5
 const MAX_RUNS := 20  ## records kept
 const SHOWN_RUNS := 5  ## records the main menu lists
 const HALL_MAX := 20  ## ships the hall of ships keeps
 const HINTS: Array[String] = ["picked", "map", "fight", "net", "craft"]  ## the first-run hints, in the order they come
-const SOUND_DEFAULTS := {"master": 0.8, "music": 0.6, "sfx": 0.8}  ## the volume sliders (0 to 1)
+const SOUND_DEFAULTS := {"master": 0.8, "music": 0.6, "sfx": 0.8, "ambience": 0.8}  ## the volume sliders (0 to 1)
 const BETA := "Beta 3"
 const VERSION_PATH := "res://version.txt"  ## the short git hash, written when the game is exported
 
@@ -27,7 +28,7 @@ var landmarks := {}  ## landmark (event) id -> {title, date}
 var hall: Array = []  ## the hall of ships, oldest first: {file, ship, ending, score, date}
 var hall_seq := 0  ## the number of the next hall file
 var start := {}  ## the new-run options chosen in the hangar: {species, variant, skin} (run_start.gd), each an unlock id or ""; {} = the defaults
-var sound := SOUND_DEFAULTS.duplicate()  ## the volume sliders of the main menu: {master, music, sfx}, each 0 to 1
+var sound := SOUND_DEFAULTS.duplicate()  ## the volume sliders of the main menu: {master, music, sfx, ambience}, each 0 to 1
 
 
 func _init(p_path := PATH) -> void:

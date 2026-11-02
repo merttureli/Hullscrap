@@ -108,10 +108,10 @@
           {"weight": 100, "text": "The brewer hands over a tin with great ceremony. They are hard biscuits, the kind that last a month in a locker and taste of a long evening. You go through them in a day.", "effects": {"items": {"credits": -15}, "crew_hp": 10}}
         ]},
         {"text": "[Brine] Take a turn on the kettle.", "requires": {"species": "brine"}, "outcomes": [
-          {"weight": 100, "text": "Your Brine takes the ladle in the small hand, lifts the kettle in the great claw and, with a practised twist, pours six cups in a single pass. The queue applauds. The brewer, delighted, hands over the apron. The tea is free for you from now on, they say, and they press a bag of the wagon's best, along with a travelling ration, into your Brine's arms.", "effects": {"items": {"credits": 35, "fuel": 2}, "rep": {"concord": 1}, "crew_hp": 10}}
+          {"weight": 100, "text": "Your Brine takes the ladle in the small hand, lifts the kettle in the great claw and, with a practised twist, pours six cups in a single pass. The queue applauds. The brewer, delighted, hands over the apron. The tea is free for you from now on, they say, and they press a bag of the wagon's best, along with a travelling ration, into your Brine's arms.", "effects": {"items": {"credits": 35}, "rep": {"concord": 1}, "crew_hp": 10}}
         ]},
         {"text": "[Mire] Offer to chill the kettle water.", "requires": {"species": "mire"}, "outcomes": [
-          {"weight": 100, "text": "Your Mire cups a hand over the kettle and, with a damp, rippling flourish, draws the extra heat off the water into the air. The tea cools to the exact temperature of a good evening. The brewer sniffs it, nods slowly, and pours a cup for your Mire, with a very small, private look of respect.", "effects": {"items": {"credits": 20, "fuel": 1}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Mire cups a hand over the kettle and, with a damp, rippling flourish, draws the extra heat off the water into the air. The tea cools to the exact temperature of a good evening. The brewer sniffs it, nods slowly, and pours a cup for your Mire, with a very small, private look of respect.", "effects": {"items": {"credits": 20}, "crew_hp": 5}}
         ]}
       ]
     }

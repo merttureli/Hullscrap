@@ -4,7 +4,7 @@
       "text": "A Concord clerk at a floating desk in an otherwise empty lane, with a queue of zero. 'Welcome. Please take a number.' A ticket prints: it says 1. 'You are being served.' She has a stamp, an inkpad and the look of a woman who has not been interrupted since the Snap.",
       "choices": [
         {"text": "File a docking form (10 credits).", "requires": {"credits": 10, "pay": true}, "outcomes": [
-          {"weight": 100, "text": "She stamps it, three times, with rising satisfaction. The stamps are a pass for the lane and a ration of fuel from the desk's own tin.", "effects": {"items": {"fuel": 1}, "rep": {"concord": 1}}}
+          {"weight": 100, "text": "She stamps it, three times, with rising satisfaction. The stamps are a pass for the lane and a ration of fuel from the desk's own tin.", "effects": {"rep": {"concord": 1}}}
         ]},
         {"text": "[Radar] Request a lane permit and a chart of the area.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
           {"weight": 70, "text": "She stamps the chart. It is a good chart, which surprises you both. 'Don't tell Meridian,' she says. 'They only think I do forms.'", "effects": {"reveal": ["wreck_field", "trader"], "rep": {"concord": 1}}},

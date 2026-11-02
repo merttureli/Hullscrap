@@ -101,7 +101,10 @@ func _gui_input(e: InputEvent) -> void:
 
 ## Move the list `n` logs down (negative: up), within the list.
 func scroll(n: int) -> void:
+	var was := top
 	top = clampi(top + n, 0, maxi(entries().size() - 1, 0))
+	if absi(n) >= 3 and top != was:
+		Audio.fx(self, "page_turn")  # (Page Up and Page Down turn a page; a line at a time does not)
 
 
 # --- layout and drawing ------------------------------------------------------------------------------------

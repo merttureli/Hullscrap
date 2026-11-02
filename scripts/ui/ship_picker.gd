@@ -11,6 +11,7 @@ extends Control
 const Ship = preload("res://scripts/ship/ship.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 
 const DESIGNS: Array[String] = [
@@ -101,7 +102,7 @@ static func stats_of(co) -> Dictionary:
 	for uid in uids:
 		var m: Dictionary = co.mounts[uid]
 		names.append(str(co.ship.components.def(m["id"]).get("name", m["id"])))
-	return {"supply": supply, "demand": demand, "mass": co.mass, "hull": co.hull_max,
+	return {"supply": supply, "demand": demand, "mass": co.mass, "hull": Structure.totals(co.ship).y,
 		"layers": co.layers_cap, "sectors": co.sectors, "weapons": names}
 
 
@@ -154,7 +155,7 @@ func _show_cards(on: bool) -> void:
 func choose(i: int) -> String:
 	if sim == null or i < 0 or i >= cards.size():
 		return "no such ship"
-	Audio.fx(self, "click")
+	Audio.fx(self, "confirm")
 	var why: String = sim.choose_ship(cards[i]["path"])
 	if why != "":
 		if build != null:
@@ -201,6 +202,7 @@ func _input(e: InputEvent) -> void:
 		KEY_1, KEY_2, KEY_3:
 			choose(e.keycode - KEY_1)
 		KEY_ESCAPE:
+			Audio.fx(self, "cancel")
 			var back := on_escape
 			on_escape = Callable()
 			close()

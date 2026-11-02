@@ -96,7 +96,7 @@ func warden_line(i: int) -> String:
 func choose(i: int) -> String:
 	if page != "choose" or i < 0 or i >= options.size():
 		return "no such region"
-	Audio.fx(self, "click")
+	Audio.fx(self, "confirm")
 	var why: String = map.cross_to(str(options[i]["id"]))
 	if why != "":
 		message = why

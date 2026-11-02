@@ -22,6 +22,7 @@ extends SceneTree
 ## disc of DISC_R cells round the middle of the grid, joined with every cell the ship uses, the rest empty hull
 ## for the player to build in. The pirate has no frame: its hull stays the bounding box plus MARGIN.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
@@ -640,7 +641,7 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 		supply, demand, str(unpowered), ship.atmosphere.rooms.size(), str(sealed), co.flight.can_fly(ship.components, co.powered)])
 	print("   mass %.0f  thrust %.1f  accel %.1f px/s2  turn %.2f rad/s2  hull %d  shield %d layers x %d sectors  weapons %d  cables %d  tiles %d  cargo %s" % [
 		co.mass, co.thrust, co.thrust * co.flight.thrust_to_accel / co.mass, co.thrust * co.flight.turn_factor / co.mass,
-		co.hull_max, co.layers_cap, co.sectors, co.mounts.size(), ship.cables.cells.size(), g.tiles.size(), str(ship.inventory.to_dict())])
+		Structure.totals(ship).y, co.layers_cap, co.sectors, co.mounts.size(), ship.cables.cells.size(), g.tiles.size(), str(ship.inventory.to_dict())])
 	if spec.has("frame"):
 		var empty := 0
 		for c in g.hull:

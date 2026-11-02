@@ -7,6 +7,8 @@ extends "res://tests/base_test.gd"
 ## power that balances and rooms that hold air.
 ## tests/tool_make_starters.gd and tests/tool_make_rammer.gd rebuild the files.
 
+const Structure = preload("res://scripts/ship/structure.gd")
+const StructureUtil = preload("res://tests/structure_util.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
@@ -24,27 +26,27 @@ const TOLERANCE := 0.15  ## how far mass and hull integrity may drift from the n
 ## very little"); the pirate and the rammer are the ships they were.
 const SHIPS := {
 	"Rustbucket": {
-		"path": "res://data/ships/starter_rustbucket.json", "mass": 755.0, "hull": 246.0, "frame": true,
+		"path": "res://data/ships/starter_rustbucket.json", "mass": 755.0, "hull": 467.0, "frame": true,
 		"parts": {"bed": 1, "bolt_thrower_scrap": 1, "engine_scrap_mk1": 2, "fabricator": 1, "helm": 1, "oxygen_scrap_mk1": 1, "rattle_burst_scrap": 1, "reactor_mk2": 1},
 		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "net_mouth_scrap": 1, "credits": 300, "fuel": 6},
 	},
 	"Courier": {
-		"path": "res://data/ships/starter_courier.json", "mass": 598.0, "hull": 168.0, "frame": true,
+		"path": "res://data/ships/starter_courier.json", "mass": 598.0, "hull": 578.0, "frame": true,
 		"parts": {"bed": 1, "engine_mk1": 2, "fabricator": 1, "helm": 1, "oxygen_gen": 1, "pulse_mk1": 1, "reactor_mk2": 1, "shield_mk1": 1},
 		"cargo": {"scrap": 250, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "credits": 500, "fuel": 6},
 	},
 	"Prism": {
-		"path": "res://data/ships/starter_prism.json", "mass": 461.0, "hull": 152.0, "frame": true,
+		"path": "res://data/ships/starter_prism.json", "mass": 461.0, "hull": 281.0, "frame": true,
 		"parts": {"bed": 1, "engine_neon_mk1": 1, "fabricator": 1, "heat_lance_neon": 1, "helm": 1, "oxygen_gen": 1, "radiator": 2, "reactor_neon_mk1": 1, "shield_neon_mk1": 1},
 		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "credits": 400, "fuel": 6},
 	},
 	"Pirate Raider": {
-		"path": "res://data/ships/pirate_raider.json", "mass": 732.0, "hull": 64.0,
+		"path": "res://data/ships/pirate_raider.json", "mass": 732.0, "hull": 424.0,
 		"parts": {"engine_mk1": 2, "helm": 1, "laser_mk1": 1, "oxygen_gen": 1, "rattle_burst_scrap": 1, "reactor_mk2": 1, "reactor_scrap_mk1": 1, "shield_mk1": 1},
 		"cargo": {"scrap": 120, "copper": 10},
 	},
 	"Rustfang": {
-		"path": "res://data/ships/rustfang_rammer.json", "mass": 570.0, "hull": 180.0,
+		"path": "res://data/ships/rustfang_rammer.json", "mass": 570.0, "hull": 603.0,
 		"parts": {"bolt_thrower_scrap": 1, "engine_scrap_mk1": 2, "helm": 1, "reactor_scrap_mk1": 2},
 		"cargo": {"scrap": 200, "copper": 30},
 	},
@@ -178,7 +180,8 @@ func test_the_ships_keep_their_parts_cargo_and_numbers() -> void:
 		var mass_was: float = SHIPS[key]["mass"]
 		var hull_was: float = SHIPS[key]["hull"]
 		check(absf(co.mass - mass_was) <= TOLERANCE * mass_was, "%s: mass %.0f is within 15%% of %.0f" % [key, co.mass, mass_was])
-		check(absf(co.hull_max - hull_was) <= TOLERANCE * hull_was, "%s: hull integrity %.0f is within 15%% of %.0f" % [key, co.hull_max, hull_was])
+		var hull_now := Structure.totals(ship).y
+		check(absf(hull_now - hull_was) <= TOLERANCE * hull_was, "%s: block hp %.0f is within 15%% of %.0f" % [key, hull_now, hull_was])
 		eq(co.flight.can_fly(ship.components, co.powered), "", key + " can fly")
 
 

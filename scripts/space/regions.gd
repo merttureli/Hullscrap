@@ -26,7 +26,7 @@ const NEBULA_PATH := "res://art/space/nebula_%s.png"
 const RARITIES: Array[String] = ["common", "uncommon", "rare", "very_rare", "legendary"]
 const HAZARDS: Array[String] = ["ion_storm", "gas_cloud", "debris_surge", "radiation", "star_heat"]
 const AMBIENT_KINDS: Array[String] = ["trader", "patrol", "pirate"]
-const SERVICES: Array[String] = ["fuel", "sell", "stock", "repair", "recruit"]  ## a region station's services when it has no drift.json menu
+const SERVICES: Array[String] = ["sell", "stock", "repair", "recruit"]  ## a region station's services when it has no drift.json menu (fuel is added where data/drift.json fuel.stations lists the place)
 const FIELDS: Array[String] = ["id", "name", "home_species", "faction", "stages", "weight", "rarity", "danger", "palette", "map", "node_weights",
 	"places", "debris", "pois", "ambient", "stock", "recruit", "enemies", "hazards", "events", "blurb", "override", "reason", "_doc"]
 const REQUIRED: Array[String] = ["id", "name", "home_species", "faction", "stages", "weight", "rarity", "danger", "palette", "ambient", "enemies", "events", "blurb"]
@@ -179,7 +179,7 @@ static func station(place: String, cfg: Dictionary) -> Dictionary:
 	var base: Dictionary = cfg.get("stations", {}).get(place, {})
 	var at: Dictionary = _index().get(place, {})
 	if at.is_empty():
-		return base
+		return _with_fuel(base, place, cfg)
 	var p: Dictionary = at["place"]
 	if str(p.get("type", "")) != "station":
 		return {}
@@ -191,6 +191,16 @@ static func station(place: String, cfg: Dictionary) -> Dictionary:
 		out["stock"][id] = stock[id]
 	if r.get("recruit") is Dictionary and not r["recruit"].is_empty():
 		out["recruit"] = r["recruit"].duplicate()
+	return _with_fuel(out, place, cfg)
+
+
+## `menu` with the fuel service when `place` is one of data/drift.json fuel.stations (about 40% of the stations sell fuel; {} stays {}).
+static func _with_fuel(menu: Dictionary, place: String, cfg: Dictionary) -> Dictionary:
+	if menu.is_empty() or not (cfg.get("fuel", {}).get("stations", []) as Array).has(place):
+		return menu
+	var out := menu.duplicate(true)
+	if not out["services"].has("fuel"):
+		out["services"].insert(0, "fuel")
 	return out
 
 
