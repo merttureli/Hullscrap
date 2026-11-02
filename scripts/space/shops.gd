@@ -26,7 +26,7 @@ static func unique_pool(cfg: Dictionary, skip: Array) -> Dictionary:
 			racial.append(id)
 		elif int(c.get("tier", 1)) >= lo and int(c.get("tier", 1)) <= hi:
 			tier.append(id)
-	var pool := {"racial": racial, "tier": tier, "material": sc["materials"].keys(), "drone": sc["drone"].keys(),
+	var pool := {"racial": racial, "tier": tier, "material": sc["materials"].keys(), "drone": sc["drone"].keys(), "mod": sc["mods"].keys(),
 		"blueprint": sc["blueprints"].keys().map(func(r): return BLUEPRINT + str(r))}
 	var out := {}
 	for kind in pool:
@@ -42,7 +42,7 @@ static func unique_price(cfg: Dictionary, id: String) -> int:
 	var sc: Dictionary = cfg["shops"]
 	if id.begins_with(BLUEPRINT):
 		return int(sc["blueprints"][id.trim_prefix(BLUEPRINT)])
-	for kind in ["materials", "drone"]:
+	for kind in ["materials", "drone", "mods"]:
 		if sc[kind].has(id):
 			return int(sc[kind][id])
 	var c := Content.entry("components", id)

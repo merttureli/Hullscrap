@@ -14,6 +14,8 @@ const BoardLight = preload("res://scripts/board/board_light.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Themes = preload("res://scripts/board/themes.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Bolts = preload("res://scripts/board/bolts.gd")
+const Mods = preload("res://scripts/board/mods.gd")
 
 const SEARCH_S := 4.0  ## seconds a hunter looks about at the last place it saw someone
 const LOSE_S := 5.0  ## seconds without a line before a hunter gives up the chase at its target
@@ -432,7 +434,7 @@ func _separate() -> void:
 func _sight(t: Dictionary, from: Vector2) -> float:
 	var sc: Dictionary = Site.config()["combat"]["sight"]
 	var r := float(sc["dark"])
-	if _red.has(s.site.room_at(t["pos"])):
+	if _red.has(s.site.room_at(t["pos"])) or s.flare_lit(t["pos"]):  # (a burning flare is an emergency light too)
 		r = maxf(r, float(sc["red"]))
 	if t["ref"] == s.soldier and _in_beam(from):
 		r = maxf(r, float(sc["lit"]))
@@ -453,7 +455,7 @@ func lit(p: Vector2) -> bool:
 	var sc: Dictionary = Site.config()["combat"]
 	if s.soldier.pos.distance_to(p) <= float(sc["self_range"]) and s.site.clear_line(s.soldier.pos, p):
 		return true
-	return _in_beam(p)
+	return _in_beam(p) or s.flare_lit(p)
 
 
 ## The nearest party member (the soldier, or a follower who is up) within `maxd` cells of foe `f` across a clear line, {} for none.
@@ -719,12 +721,18 @@ func _shoot(f: Dictionary, t: Dictionary) -> void:
 	var dir: float = (t["pos"] - m.pos).angle() + s.rng.randf_range(-err, err)
 	var to_party: bool = f["team"] == "foe"
 	var r := Arms.trace(s.site, m.pos, dir, SHOT_RANGE, s.party_bodies() if to_party else bodies(), s.rng, f)
-	s.events.append({"type": "shot", "from": m.pos + Vector2.from_angle(dir) * 0.9, "to": r["end"], "who": "foe", "class": _snd(f), "kind": r["kind"]})
+	var from: Vector2 = m.pos + Vector2.from_angle(dir) * 0.9
+	var mine: bool = f["team"] == "player"  # (a hacked sentry fires in the colour of the soldier's weapon)
+	var look := Bolts.foe_look(str(f["kind"]), mine, Bolts.look(str(s.gun()["id"]), Mods.bolt_size(s.soldier)) if mine else {})
+	var fly := Bolts.travel(look, from.distance_to(r["end"]))
+	s.events.append({"type": "shot", "from": from, "to": r["end"], "who": "foe", "class": _snd(f), "kind": r["kind"], "look": look, "t": fly, "team": str(f["team"]), "foe": str(f["kind"])})
 	if r["ref"] != null:
+		var i0: int = s.events.size()
 		if to_party:
 			s.hurt_member(r["ref"], float(at["damage"]), m.pos)
 		else:
 			hurt(r["ref"], float(at["damage"]), r["end"])
+		s._delay(i0, fly, look)
 
 
 ## A melee foe strikes the party member `t`.

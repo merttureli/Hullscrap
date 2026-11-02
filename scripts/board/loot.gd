@@ -9,8 +9,10 @@ extends RefCounted
 
 const Site = preload("res://scripts/board/site.gd")
 const Themes = preload("res://scripts/board/themes.gd")
+const Mods = preload("res://scripts/board/mods.gd")
 
 const TIER_GROWTH := 0.15  ## more in every count for each tier above the first
+const MOD := "mod"  ## the outcome of a table that is "one mod" (data/mods.json drops)
 
 
 ## The weighted outcomes container `id` of `site` rolls on (the site's theme tilts the weights of the items it favours).
@@ -28,7 +30,7 @@ static func table_for(site, name: String) -> Array:
 	return table.map(func(o): return {"weight": float(o["weight"]) * Themes.tilt(site.theme, str(o["item"])), "item": o["item"], "count": o["count"]})  # (the theme's tilt)
 
 
-## Roll the contents of container `id`. `ctx`: {tier (1-3), unknown (recipe ids the ship has no blueprint for), levels (recipe id -> fab_level),
+## Roll the contents of container `id`. `ctx`: {tier (1-3), stage (of the run, for mods), unknown (recipe ids the ship has no blueprint for), levels (recipe id -> fab_level),
 ## logs (log ids not found yet), log_factions (log id -> faction), faction (the region's)}.
 static func resolve(site, id: int, ctx := {}) -> Dictionary:
 	var cfg := Site.config()
@@ -43,7 +45,11 @@ static func resolve(site, id: int, ctx := {}) -> Dictionary:
 	var rolls := rng.randi_range(int(p["rolls"][0]), int(p["rolls"][1])) + (1 if site.rooms[p["room"]]["locked"] and p["loot"] else 0)
 	for i in rolls:
 		var o := _pick(table, rng)
-		if not o.is_empty():
+		if not o.is_empty() and str(o["item"]) == MOD:  # a mod: which one and which tier come from the site kind and the stage of the run (mods.gd)
+			var drop := Mods.roll_drop(site.kind, int(ctx.get("stage", 1)), rng)
+			if drop != "":
+				_add(out["items"], drop, 1)
+		elif not o.is_empty():
 			_add(out["items"], str(o["item"]), maxi(1, roundi(float(rng.randi_range(int(o["count"][0]), int(o["count"][1]))) * mult)))
 	for item in p["fixed"]:
 		_add(out["items"], str(item), int(p["fixed"][item]))

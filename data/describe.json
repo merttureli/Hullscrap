@@ -62,13 +62,15 @@
 		"ion_weak": {"label": "ION-WEAK", "color": "#64c46d", "hover": "Ion hits do x{n} damage to it."},
 		"ablative": {"label": "ABLATIVE", "color": "#60fb68", "hover": "Each energy hit takes 1 from its max hp."},
 		"lattice_power": {"label": "LATTICE", "color": "#cfeea0", "hover": "Turns some absorbed energy into ship power."},
-		"ram": {"label": "RAM ×{deal}", "color": "#e5fa2e", "hover": "Ram damage dealt x{deal}, taken x{take}."}
+		"ram": {"label": "RAM ×{deal}", "color": "#e5fa2e", "hover": "Ram damage dealt x{deal}, taken x{take}."},
+		"mod": {"label": "MOD", "color": "#ffbb00", "hover": "A device worn in a kit slot. It changes a boarding."}
 	},
 	"items": {
 		"ammo": "Ammo for guns that use it.",
 		"gear": "Crew gear. Not placed on the ship.",
 		"special": "Held until something asks for it.",
-		"material": "Raw material for recipes and trade."
+		"material": "Raw material for recipes and trade.",
+		"mod": "A small device worn in a kit slot. It changes how a boarding goes."
 	},
 	"tiles": {
 		"floor": "Crew walk on it. Systems stand on it.",

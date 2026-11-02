@@ -159,6 +159,33 @@ func room_at(p: Vector2) -> int:
 	return int(room_of.get(Vector2i(floori(p.x), floori(p.y)), -1))
 
 
+## The rooms within `depth` doors of room `rid`, not `rid` itself, sorted (the Spotter Cam shows them). A door joins the two rooms of its `rooms` (a locked one too: the
+## camera is patched into the site's own); a door that is gone joins nothing.
+func rooms_near(rid: int, depth: int) -> Array:
+	var out := []
+	if rid < 0 or rid >= rooms.size() or depth <= 0:
+		return out
+	var seen := {rid: 0}
+	var queue := [rid]
+	var head := 0
+	while head < queue.size():
+		var a: int = queue[head]
+		head += 1
+		if int(seen[a]) >= depth:
+			continue
+		for did in rooms[a]["doors"]:
+			var d: Dictionary = doors[did]
+			if d["lock"] == "gone":
+				continue
+			for b in d["rooms"]:
+				if not seen.has(b) and rooms[b]["purpose"] != "gone":
+					seen[b] = int(seen[a]) + 1
+					queue.append(b)
+					out.append(b)
+	out.sort()
+	return out
+
+
 ## The nearest container (not in `skip`) whose middle is within `radius` cells of `p`, -1 for none.
 func nearest_container(p: Vector2, radius: float, skip := {}) -> int:
 	var best := -1

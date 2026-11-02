@@ -13,6 +13,7 @@ const Loot = preload("res://scripts/board/loot.gd")
 const Themes = preload("res://scripts/board/themes.gd")
 const Party = preload("res://scripts/board/party.gd")
 const Foes = preload("res://scripts/board/foes.gd")
+const Mods = preload("res://scripts/board/mods.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 var s  ## the session (boarding.gd)
@@ -401,10 +402,17 @@ func roll_shop(n: Dictionary) -> Array:
 		if out.size() >= int(sc["items"]):
 			break
 		var o := Loot._pick(table, rng)
-		if o.is_empty() or out.any(func(x): return x["item"] == str(o["item"])):
+		if o.is_empty():
 			continue
-		var count := maxi(1, roundi(float(rng.randi_range(int(o["count"][0]), int(o["count"][1]))) * mult))
-		out.append({"item": str(o["item"]), "n": count, "price": maxi(1, ceili(float(_value(str(o["item"]))) * float(count) * float(sc["markup"]))), "sold": false})
+		var item := str(o["item"])
+		var count := 1
+		if item == Loot.MOD:  # a trader may carry a mod
+			item = Mods.roll_drop(site.kind, s.campaign.stage if s.campaign != null else 1, rng)
+		if item == "" or out.any(func(x): return x["item"] == item):
+			continue
+		if not Mods.is_item(item):
+			count = maxi(1, roundi(float(rng.randi_range(int(o["count"][0]), int(o["count"][1]))) * mult))
+		out.append({"item": item, "n": count, "price": maxi(1, ceili(float(_value(item)) * float(count) * float(sc["markup"]))), "sold": false})
 	return out
 
 

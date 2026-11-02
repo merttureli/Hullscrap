@@ -25,6 +25,7 @@ static var _species := {}  # data/species.json, read on first use
 var name := ""
 var species := "human"  ## the species id (data/species.json): hp, speed, traits, art rig and sidearm
 var gear_traits: Array = []  ## traits worn gear gives (an EVA suit gives "suit"); nothing equips gear yet
+var kit := {}  ## the loadout they carry aboard another vessel (scripts/board/kit.gd): {weapons: [weapon id x2], body: item id, mods: [item id x2]}; empty = never set. Saved
 var pos := Vector2.ZERO
 var speed := BASE_SPEED  ## cells per second
 var speed_mod := 1.0  ## factor on `speed` right now (the heat of their room, trait heat_speed): Jobs sets it every tick
@@ -179,6 +180,8 @@ func to_dict() -> Dictionary:
 		d["story"] = story
 	if not gear_traits.is_empty():
 		d["gear"] = gear_traits.duplicate()
+	if not kit.is_empty():
+		d["kit"] = kit.duplicate(true)
 	if ability_cd > 0.0:
 		d["ability_cd"] = ability_cd
 	if down_t > 0.0:
@@ -218,6 +221,8 @@ static func from_dict(d: Dictionary):
 		for g in d["gear"]:
 			if not m.gear_traits.has(str(g)):
 				m.gear_traits.append(str(g))
+	if d.get("kit") is Dictionary:  # (older saves have none)
+		m.kit = {"weapons": _strings(d["kit"].get("weapons")), "body": str(d["kit"].get("body", "")), "mods": _strings(d["kit"].get("mods"))}
 	m.max_hp = maxf(1.0, float(d["max_hp"])) if _is_num(d.get("max_hp")) else m.max_hp
 	m.hp = clampf(float(d["hp"]), 0.0, m.max_hp) if _is_num(d.get("hp")) else m.max_hp
 	m.ability_cd = maxf(0.0, float(d.get("ability_cd", 0.0))) if _is_num(d.get("ability_cd", 0.0)) else 0.0
@@ -229,6 +234,14 @@ static func from_dict(d: Dictionary):
 	m.split_pair = str(d.get("split_pair", ""))
 	m.split_t = float(d.get("split_t", -1.0)) if _is_num(d.get("split_t", -1.0)) else -1.0
 	return m
+
+
+static func _strings(v) -> Array:
+	var out := []
+	if v is Array:
+		for x in v:
+			out.append(str(x))
+	return out
 
 
 static func _is_num(v) -> bool:
