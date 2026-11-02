@@ -274,6 +274,10 @@ func test_the_tips_wait_for_their_moment() -> void:
 	check(a.watch(ship, c, {}).has("low_fuel"), "low fuel")
 	ship.inventory.add("spotter_cam_mk1", 1)
 	check(a.watch(ship, c, {}).has("first_mod"), "a mod in the hold")
+	var other := _built()
+	for id in other.crafting.recipes:
+		other.crafting.unlock(id)  # another ship, that knows everything
+	check(not a.watch(other, c, {}).has("first_blueprint"), "a swapped ship's blueprints are not news")
 	# a look that begins a run (or a load) fires nothing that waits for a change
 	var fresh := _advisor()
 	var f := fresh.watch(ship, c, {})
@@ -353,7 +357,7 @@ func test_each_setting_hides_what_it_should() -> void:
 		eq(a.shows("warnings"), mode != "off", "%s: the warnings" % mode)
 		eq(a.next_tip() == "first_fight", mode == "full", "%s: the first fight's tip is queued only in Full" % mode)
 		eq(ev.has("warning"), mode != "off", "%s: the warning is said unless Off" % mode)
-		eq(ev.has("goal"), mode == "full" and ev.has("goal"), "%s: goals tick only in Full" % mode)
+		check(mode == "full" or not ev.has("goal"), "%s: goals tick only in Full" % mode)
 		eq(a.card().has("goal"), mode == "full", "%s: the goal on the card" % mode)
 		eq(a.card().has("warning"), mode != "off", "%s: the warning on the card" % mode)
 		if mode == "off":
@@ -645,20 +649,374 @@ func test_a_look_is_at_most_once_a_second() -> void:
 
 
 func test_a_goal_met_ticks_once() -> void:
-	var ship := _built()
 	var c := _campaign()
 	var a := _advisor()
-	a.update(ship, c, {})
-	var met := a.take_events().filter(func(e): return e["type"] == "goal").map(func(e): return e["id"])
-	check(met.has("s1_intake") and met.has("s1_guns") and met.has("s1_cover"), "the goals the ship already meets tick at the first look: " + str(met))
-	a.update(ship, c, {})
-	eq(a.take_events().filter(func(e): return e["type"] == "goal"), [], "and not again")
-	# a goal lost and met again does not tick twice
-	ship.components.instances.erase(ship.components.instances.keys()[3])  # the net mouth goes
-	ship.refresh()
-	a.update(ship, c, {})
+	var bare := Wall.wall_ship(1, 0)
+	a.update(bare, c, {})
+	eq(_goal_events(a), [], "the first look of a run only takes stock: nothing it finds is news")
+	var built := _built()
+	a.update(built, c, {})
+	var met := _goal_events(a)
+	check(met.has("s1_intake") and met.has("s1_guns") and met.has("s1_cover"), "the goals the ship now meets tick: " + str(met))
+	a.update(built, c, {})
+	eq(_goal_events(a), [], "and not again")
+	a.update(bare, c, {})  # the ship loses everything, then gets it back
 	check(a.values["intakes"] == 0, "the intake is gone")
 	a.take_events()
-	var again := _built()
-	a.update(again, c, {})
-	eq(a.take_events().filter(func(e): return e["type"] == "goal" and e["id"] == "s1_intake"), [], "the tick for the intake was already given")
+	a.update(built, c, {})
+	eq(_goal_events(a), [], "a goal already ticked does not tick twice")
+	check(a.announced.has("1:s1_intake") and a.dirty, "it is remembered, for the profile to keep")
+
+
+func _goal_events(a: Advisor) -> Array:
+	return a.take_events().filter(func(e): return e["type"] == "goal").map(func(e): return e["id"])
+
+
+# --- the screens: the card, the prompt, the menu row, the journal tab ------------------------------------------------------
+
+const LedgerCard = preload("res://scripts/ui/ledger_card.gd")
+const LedgerPrompt = preload("res://scripts/ui/ledger_prompt.gd")
+const MainMenu = preload("res://scripts/ui/main_menu.gd")
+const JournalPanel = preload("res://scripts/ui/journal_panel.gd")
+const DriftTests = preload("res://tests/test_drift.gd")
+const SCREEN := Rect2(0.0, 0.0, 1600.0, 900.0)
+
+
+func _key(code: Key, shift := false) -> InputEventKey:
+	var e := InputEventKey.new()
+	e.keycode = code
+	e.pressed = true
+	e.shift_pressed = shift
+	return e
+
+
+## A card for `where` with the stage 1 numbers of a bare ship, and a warning if `warn`.
+func _card(where: String, warn := false, tip_id := "") -> LedgerCard:
+	var c := LedgerCard.new()
+	c.advisor = _advisor()
+	c.advisor.stage = 1
+	c.advisor.values = {"intakes": 0, "guns": 1, "layers": 0, "medbays": 0, "fuel_margin": 4.0, "credits_over_toll": 80.0}
+	if warn:
+		c.advisor.warning = {"id": "fuel", "text": c.advisor.warning_text("fuel"), "left": 20.0}
+	c.where = where
+	if tip_id != "":
+		var w := c.advisor.tip_words(tip_id)
+		c.tip = {"id": tip_id, "title": w["title"], "text": w["text"], "left": 40.0}
+	c.layout()
+	return c
+
+
+func test_the_card_sits_clear_of_the_screens_it_is_over() -> void:
+	for where in ["play", "map", "fight", "modal", "board"]:
+		for expanded in [false, true]:
+			for warn in [false, true]:
+				var c := _card(where, warn, "first_wreck")
+				c.expanded = expanded
+				c.layout()
+				var what := "%s%s%s" % [where, " unfolded" if expanded else "", " with a warning" if warn else ""]
+				for r in [c.card_rect, c.tip_rect]:
+					if r.size.x > 0.0:
+						check(SCREEN.encloses(r), "%s: %s is on the screen" % [what, str(r)])
+				if where in ["fight", "modal", "board"]:
+					check(c.card_rect.size.x == 0.0, "%s: there is no card, only the note" % what)
+				else:
+					check(c.card_rect.size.x > 0.0, "%s: the card" % what)
+				check(c.tip_rect.size.x > 0.0, "%s: the tip's note" % what)
+				if c.card_rect.size.x > 0.0 and c.tip_rect.size.x > 0.0:
+					check(not c.card_rect.intersects(c.tip_rect), "%s: the note does not cover the card" % what)
+				c.free()
+	var play := _card("play")
+	eq(play.card_rect.position, Vector2(8.0, 48.0), "play mode: under the top bar, top left (nothing else is there)")
+	check(play.card_rect.size.y < 150.0, "the card is a few lines")
+	play.free()
+	var map := _card("map", true)
+	check(map.card_rect.size.y < 70.0 and map.card_rect.end.y <= 860.0 and map.card_rect.position.y > 763.0, "the map's card is two lines in the footer of its panel, with its warning in place of them: %s" % str(map.card_rect))
+	map.free()
+	var fight := _card("fight", false, "first_fight")
+	eq(fight.tip_rect.position, LedgerCard.NOTE_AT, "a fight: the note is under the combat schematic")
+	check(fight.tip_rect.end.x < 340.0, "and clear of the ship")
+	fight.free()
+	var strip := _card("modal", false, "first_station")
+	check(strip.tip_rect.end.y <= 900.0 and strip.tip_rect.size.y <= 34.0 and strip.tip_rect.position.y >= 860.0, "over a screen: a strip in the bottom margin of its panel: %s" % str(strip.tip_rect))
+	strip.free()
+
+
+func test_the_card_says_the_goal_and_marks_the_keywords() -> void:
+	var c := _card("play")
+	var kinds: Array = c._card_dl.map(func(i): return i["s"] if i["k"] == "text" else "")
+	check(kinds.has("intake") and kinds.has("Intakes 0/1"), "the goal's title and its progress: " + str(kinds))
+	check(c._hot.any(func(h): return h["kw"] == "intake"), "the intake is a keyword with a hover line")
+	var hot: Dictionary = c._hot.filter(func(h): return h["kw"] == "intake")[0]
+	check(Rect2(Vector2.ZERO, c.size).encloses(hot["rect"]), "inside the card")
+	c._gui_input(_motion(hot["rect"].get_center()))
+	eq(c.hover.get("kw"), "intake", "the mouse on it picks it")
+	c._gui_input(_motion(Vector2(2.0, 2.0)))
+	eq(c.hover, {}, "and off it, nothing")
+	c.free()
+
+
+func _motion(p: Vector2) -> InputEventMouseMotion:
+	var m := InputEventMouseMotion.new()
+	m.position = p
+	return m
+
+
+func _click(p: Vector2) -> InputEventMouseButton:
+	var b := InputEventMouseButton.new()
+	b.position = p
+	b.pressed = true
+	b.button_index = MOUSE_BUTTON_LEFT
+	return b
+
+
+func test_l_and_a_click_unfold_the_checklist_and_got_it_dismisses_the_tip() -> void:
+	var c := _card("play", false, "first_fight")
+	var folded := c.card_rect.size
+	c._input(_key(KEY_L))
+	c.layout()
+	check(c.expanded and c.card_rect.size.x > folded.x and c.card_rect.size.y > folded.y, "L unfolds it")
+	var rows: Array = c._card_dl.filter(func(i): return i["k"] == "tick")
+	eq(rows.size(), 5, "a row for each goal of the stage")
+	eq(rows.map(func(r): return r["met"]), [false, false, false, true, true], "with the ticks of what is done (the fuel and the toll)")
+	c._input(_key(KEY_L))
+	check(not c.expanded, "L again folds it")
+	c._input(_key(KEY_L, true))
+	check(not c.expanded, "Shift+L is another key")
+	c.where = "fight"
+	c._input(_key(KEY_L))
+	check(not c.expanded, "there is no card in a fight to fold")
+	c.where = "play"
+	c.layout()
+	var inside := c.card_rect.position - c.position + Vector2(40.0, 20.0)
+	c.click(inside)
+	check(c.expanded, "a click on the card unfolds it")
+	c.click(inside)
+	check(not c.expanded, "and folds it")
+	c.layout()
+	check(c._button.size.x > 0.0, "the tip has its button")
+	c.click(c._button.get_center())
+	check(c.tip.is_empty(), "Got it: the tip goes")
+	c.free()
+
+
+func test_a_click_on_the_warning_sends_it_away() -> void:
+	var c := _card("play", true)
+	check(c._warn_rect.size.x > 0.0, "the warning has its band")
+	c.click(c._warn_rect.get_center())
+	check(c.advisor.warning.is_empty() and not c.expanded, "a click on it dismisses it and does not unfold the card")
+	c.free()
+
+
+func test_the_settings_decide_what_the_card_shows() -> void:
+	var c := _card("play", true)
+	c.advisor.mode_now = "warn"
+	c.layout()
+	check(c.card_rect.size.x > 0.0 and c._card_dl.all(func(i): return i["k"] != "tick"), "Warnings only: just the warning on the card")
+	check(c._hot.is_empty(), "no goal, so no keywords")
+	c.advisor.mode_now = "off"
+	c.layout()
+	eq(c.card_rect, Rect2(), "Off: no card")
+	c.advisor.mode_now = "full"
+	c.advisor.warning = {}
+	c.layout()
+	check(c.card_rect.size.x > 0.0, "Full: the card is back")
+	c.free()
+
+
+func test_the_prompt_asks_warnings_only_first_and_answers_once() -> void:
+	var p := LedgerPrompt.new()
+	p.size = Vector2(1600.0, 900.0)
+	eq(LedgerPrompt.CHOICES.map(func(c): return c["mode"]), ["warn", "full", "off"], "Warnings only is the first choice")
+	var got := []
+	var after := [0]
+	p.chosen.connect(func(m): got.append(m))
+	p.open(func(): after[0] += 1)
+	check(p.visible and p.selected == 0, "it opens on Warnings only")
+	for i in 3:
+		check(SCREEN.encloses(p.button_rect(i)) and p.panel_rect().encloses(p.button_rect(i)), "button %d is inside the panel" % i)
+		eq(p.button_at(p.button_rect(i).get_center()), i, "and where it is drawn")
+	p._input(_key(KEY_DOWN))
+	p._input(_key(KEY_ENTER))
+	eq(got, ["full"], "Down then Enter takes the second")
+	check(not p.visible and after[0] == 1, "the panel goes and what comes next runs")
+	p._input(_key(KEY_1))
+	eq(got, ["full"], "a key after it is answered does nothing")
+	p.open()
+	p._gui_input(_click(p.button_rect(2).get_center()))
+	eq(got, ["full", "off"], "a click chooses")
+	p.open()
+	p._input(_key(KEY_ESCAPE))
+	eq(got, ["full", "off", "full"], "Esc keeps Full")
+	p.open()
+	p._input(_key(KEY_1))
+	eq(got.back(), "warn", "1 chooses Warnings only")
+	p.free()
+
+
+func test_the_menus_have_a_ledger_row() -> void:
+	for mode in [MainMenu.Mode.MAIN, MainMenu.Mode.PAUSE]:
+		for save in [false, true]:
+			var m := MainMenu.new()
+			m.size = Vector2(1600.0, 900.0)
+			m.recent = [{}, {}, {}, {}, {}]
+			m.open(mode, save)
+			var got := []
+			m.ledger_changed.connect(func(x): got.append(x))
+			for i in 3:
+				var r := m.ledger_rect(i)
+				check(SCREEN.encloses(r), "mode %d: button %d is on the screen" % [mode, i])
+				for j in m.list().size():
+					check(not r.intersects(m.button_rect(j)), "mode %d: ledger button %d clears menu button %d" % [mode, i, j])
+				for s in 4:
+					check(not r.intersects(m.slider_rect(s).grow(4.0)), "mode %d: ledger button %d clears slider %d" % [mode, i, s])
+				if mode == MainMenu.Mode.MAIN:  # (the last runs are listed bottom left)
+					check(not r.intersects(Rect2(24.0, 900.0 - 24.0 - (28.0 + 22.0 * 5.0), 760.0, 28.0 + 22.0 * 5.0)), "ledger button %d clears the list of the last runs (save %s)" % [i, str(save)])
+			eq(m.ledger, "full", "Full to begin with")
+			eq(m.ledger_at(m.ledger_rect(1).get_center()), 1, "the middle button is where it is drawn")
+			m._gui_input(_click(m.ledger_rect(1).get_center()))
+			eq([got, m.ledger], [["warn"], "warn"], "a click sets Warnings only and says so")
+			m._gui_input(_click(m.ledger_rect(1).get_center()))
+			eq(got, ["warn"], "the same again says nothing")
+			m._gui_input(_click(m.ledger_rect(2).get_center()))
+			eq([got, m.ledger], [["warn", "off"], "off"], "and Off")
+			m.free()
+
+
+func test_the_journal_has_a_ledger_tab_of_the_tips_shown() -> void:
+	_clean()
+	var t := DriftTests.new()
+	var d := t._screen()
+	var map = d["map"]
+	map.event_panel.close()
+	var p := Profile.new(TMP)
+	map.profile = p
+	var j: JournalPanel = map.journal_panel
+	j.size = map.size
+	j.open()
+	eq(j.tab, 0, "it opens on the logs")
+	eq(j.listed(), j.entries(), "the logs tab lists the logs")
+	j._input(_key(KEY_TAB))
+	eq([j.tab, j.listed()], [1, []], "Tab: the Ledger tab, empty before any tip was shown")
+	p.mark_tip("first_fight")
+	p.mark_tip("first_build")
+	var rows := j.listed()
+	eq(rows.map(func(r): return r["id"]), ["first_fight", "first_build"], "the tips shown, in the order shown")
+	var w := _advisor().tip_words("first_fight")
+	eq([rows[0]["title"], rows[0]["text"]], [w["title"], w["text"]], "with their own words, to read again")
+	eq(rows[0]["ship"], p.tips["first_fight"], "and the date")
+	check(j.visible_cards().size() == 2 and j.panel_rect().encloses(j.visible_cards()[1]["rect"]), "both fit in the panel")
+	j.scroll(5)
+	eq(j.top, 1, "the list scrolls by an entry")
+	j.set_tab(0)
+	eq([j.tab, j.top], [0, 0], "back to the logs, at the top")
+	j._gui_input(_click(j.tab_rect(1).get_center()))
+	eq(j.tab, 1, "a click on the tab switches too")
+	j._input(_key(KEY_J))
+	check(not j.visible, "J closes it")
+	j.open()
+	eq(j.tab, 0, "and it opens on the logs again")
+	t._free_screen(d)
+	_clean()
+
+
+# --- the front door's screens ---------------------------------------------------------------------------------------
+
+const BuildMode = preload("res://scripts/build/build_mode.gd")
+const Hud = preload("res://scripts/ui/hud.gd")
+
+
+## What the card reads of the front door: the screens, the profile, the map and the build mode.
+class FakeDoor extends Node:
+	var menu: Control
+	var over: Control
+	var ending: Control
+	var help: Control
+	var prompt: Control
+	var picker = null
+	var craft = null
+	var build
+	var map
+	var combat
+	var sim
+	var profile
+	var ledger
+
+	func prompt_up() -> bool:
+		return prompt.visible
+
+
+func test_the_card_follows_the_screens_it_can_see() -> void:
+	_clean()
+	var t := DriftTests.new()
+	var d := t._screen()
+	var map = d["map"]
+	map.event_panel.close()
+	var b := BuildMode.new()
+	b.sim = d["sim"]
+	b.hud = Hud.new()
+	b.hud.setup(b)
+	var door := FakeDoor.new()
+	for n in ["menu", "over", "ending", "help", "prompt"]:
+		var c := MainMenu.new() if n == "menu" else Control.new()
+		c.visible = false
+		door.set(n, c)
+	door.build = b
+	door.map = map
+	door.combat = d["fake"]
+	door.sim = d["sim"]
+	door.profile = Profile.new(TMP)  # (not the player's own file)
+	var l := LedgerCard.new()
+	l.door = door
+	door.ledger = l
+	b.front = door
+	map.visible = false
+	b.build_on = false
+	eq(l.locate(), "play", "flying")
+	b.build_on = true
+	eq(l.locate(), "build", "building")
+	door.menu.visible = true
+	eq(l.locate(), "hidden", "a menu hides it")
+	door.menu.visible = false
+	map.visible = true
+	map.panel_only = false
+	eq(l.locate(), "map", "the map")
+	map.station_panel.visible = true
+	eq(l.locate(), "modal", "a panel over the map")
+	map.station_panel.visible = false
+	map.panel_only = true
+	eq(l.locate(), "modal", "the panels of a place in the sector")
+	map.visible = false
+	map.panel_only = false
+	d["fake"].active = true
+	eq(l.locate(), "fight", "a fight")
+	l.where = "fight"
+	var ctx: Dictionary = l.context()
+	check(ctx["fighting"] and not ctx["boarding"] and not ctx["build_on"], "the fight is in the tips' view of the screens")
+	d["fake"].active = false
+	door.prompt.visible = true
+	eq(l.locate(), "hidden", "the question hides it")
+	door.prompt.visible = false
+	# a look through the node itself: it ticks the advisor, lays itself out and takes the card's rect for its own
+	b.build_on = false
+	l._process(1.2)
+	check(l.advisor != null and not l.advisor.values.is_empty(), "the card's look measured the ship")
+	check(l.visible and l.size == l.card_rect.size, "and the control is the card")
+	b.build_on = true
+	l._process(0.1)
+	eq(l.where, "build", "building")
+	check(SCREEN.encloses(l.card_rect) and l.card_rect.position.x > 1200.0, "build mode: the card is in the right column, clear of the ship and the palette: %s" % str(l.card_rect))
+	var info: Control = b.hud.card
+	check(not l.card_rect.intersects(Rect2(info.position, info.size)) or not info.visible, "and under the part card")
+	check(not l.card_rect.intersects(b.hud.hint_rect) and not l.card_rect.intersects(Rect2(b.hud.mode_bar.position, b.hud.mode_bar.size)), "clear of the hints and the mode bar")
+	check(b.hud.over_ui(l.card_rect.get_center()), "the HUD counts the card as a panel (the world takes no click under it)")
+	door.profile.set_ledger("off")
+	l._process(0.1)
+	check(not l.visible and l.card_rect.size.x == 0.0, "Off: the card is gone")
+	l.free()
+	for n in ["menu", "over", "ending", "help", "prompt"]:
+		door.get(n).free()
+	door.free()
+	b.hud.free()
+	b.free()
+	t._free_screen(d)
+	_clean()

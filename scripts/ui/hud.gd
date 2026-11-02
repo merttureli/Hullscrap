@@ -109,7 +109,7 @@ func _place(c: Control, r: Rect2) -> void:
 	c.size = r.size
 
 
-## The rect of every panel on show (name -> Rect2, screen px), the hints included when there are any.
+## The rect of every panel on show (name -> Rect2, screen px), the hints included when there are any, and the Ledger's card in build mode.
 func panel_rects() -> Dictionary:
 	var out := {}
 	for n in ["top_bar", "palette", "card", "mode_bar", "log_panel", "station_bar"]:
@@ -118,6 +118,9 @@ func panel_rects() -> Dictionary:
 			out[n] = Rect2(c.position, c.size)
 	if hint_rect.size.y > 0.0:
 		out["hints"] = hint_rect
+	var ledger = build.front.get("ledger") if build != null and build.front != null else null  # the Ledger's card (ledger_card.gd) is over the world too
+	if ledger != null and ledger.visible and build.build_on:
+		out["ledger"] = Rect2(ledger.position, ledger.size)
 	return out
 
 

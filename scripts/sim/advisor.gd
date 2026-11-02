@@ -55,7 +55,9 @@ var events: Array = []  ## what happened since take_events(): {type: "goal", id,
 var dirty := false  ## the run state changed: the caller keeps state() in the profile
 var _run := -1  # the seed of the run being followed
 var _clock := 0.0  # seconds since the last evaluation
-var _prev := {}  # what the last look saw, for the tips that wait for a change
+var _prev := {}  # what the last look saw, for the tips that wait for a change ({} before the first look, and after the ship was swapped)
+var _jumps := 0  # the campaign's jump counter at the last look (state())
+var _met := {}  # "<stage>:<goal id>" -> was it met at the last look: a goal is news when it goes from false to true
 var _hops_key := ""  # the cache key of the jump counts below
 var _hops := {"exit": -1, "station": -1}
 
@@ -436,7 +438,9 @@ func fire(conds: Array, at_stage: int) -> String:
 ## craft, shields, rig_bonus} (the screens' state, from the glue), plus what the ship and the campaign say. The tips that wait for a change
 ## (a blueprint learned, a crewmate hired) need a first look to compare with, so the look that begins a run or a load fires none of them.
 func watch(ship, campaign, ctx: Dictionary) -> Array[String]:
-	var now := {}
+	if int(_prev.get("ship", 0)) != ship.get_instance_id():
+		_prev = {}  # another ship (a new pick): its blueprints and crew are no change of ours
+	var now := {"ship": ship.get_instance_id()}
 	now["known"] = ship.crafting.known.size()
 	now["crew"] = ship.crew.filter(func(m): return not m.is_player).size()
 	var fired: Array[String] = []
@@ -488,7 +492,7 @@ func tip_shown(id: String) -> void:
 	events.append({"type": "tip", "id": id})
 
 
-## The words of tip `id`: {title, text}.
+## The words of tip `id`: {title, text}, {} for one the words do not have.
 func tip_words(id: String) -> Dictionary:
 	for t in words.get("tips", []):
 		if str(t["id"]) == id:
@@ -496,11 +500,22 @@ func tip_words(id: String) -> Dictionary:
 	return {}
 
 
+## The tips a profile has been shown, in the order shown, as the journal lists them: [{id, title, text, date}] (a tip the words no longer have is left out).
+static func tips_seen(prof) -> Array:
+	var out := []
+	var all: Array = load_words().get("tips", [])
+	for id in prof.tips:
+		for t in all:
+			if str(t["id"]) == str(id):
+				out.append({"id": str(id), "title": str(t.get("title", "")), "text": str(t.get("text", "")), "date": str(prof.tips[id])})
+	return out
+
+
 # --- the run, and the clock ------------------------------------------------------------------------------------------
 
 ## What of this run to keep in the profile (profile.ledger_run), so a Continue picks up where the Ledger was.
 func state() -> Dictionary:
-	return {"seed": _run, "jumps": int(_prev.get("jumps", 0)), "base": base, "warned": warned, "announced": announced.keys()}
+	return {"seed": _run, "jumps": _jumps, "base": base, "warned": warned, "announced": announced.keys()}
 
 
 ## Follow campaign `c` with `ship`: a new run starts the Ledger afresh (its start measured now); the run the profile remembers goes on.
@@ -509,6 +524,8 @@ func follow(ship, c) -> void:
 		return
 	_run = int(c.seed_value)
 	_prev = {}
+	_met = {}
+	_jumps = 0
 	warning = {}
 	tip_queue.clear()
 	var kept = profile.ledger_run if profile != null else {}
@@ -535,14 +552,16 @@ func update(ship, campaign, ctx := {}) -> void:
 	if not busy or values.is_empty():
 		values = measure(ship, campaign, base)
 		stage = int(values["stage"])
-		_prev["jumps"] = int(campaign.jumps)
+		_jumps = int(campaign.jumps)
 		for g in goals(stage):
 			var key := "%d:%s" % [stage, g["id"]]
-			if goal_met(g, values) and not announced.has(key):
+			var met := goal_met(g, values)
+			if met and not announced.has(key):
 				announced[key] = true
 				dirty = true
-				if shows("card"):
+				if shows("card") and _met.get(key, true) == false:  # a goal already met at the first look (a new run, a new stage) is not news
 					events.append({"type": "goal", "id": g["id"], "title": g["title"]})
+			_met[key] = met
 	var conds := conditions(values, ctx)
 	fire(conds, stage)
 	if not warning.is_empty() and not conds.any(func(c): return c["id"] == warning["id"]):

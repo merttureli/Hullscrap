@@ -7,12 +7,17 @@ extends Control
 ## state machine (Continue is left out without a save). In the UI colours of station_panel.gd.
 ## Both menus carry a small Sound row: four sliders (Master, Music, SFX, Ambience) that a click or a drag sets and the wheel nudges; `sound`
 ## holds them (front_door.gd sets it from the profile), `sound_changed` says which moved (final = the mouse was let go: save it).
+## Under them a Ledger row (the guidance program of scripts/sim/advisor.gd): three buttons, Full, Warnings only and Off; `ledger` holds the
+## setting (front_door.gd sets it from the profile) and `ledger_changed` says which was clicked.
 
 ## Emitted with the id of the entry chosen: continue, new, help, quit, resume, save_menu.
 signal chosen(id: String)
 
 ## A volume slider moved: its kind (master, music, sfx or ambience), the new value (0 to 1) and whether this is the last of the drag.
 signal sound_changed(kind: String, value: float, final: bool)
+
+## The Ledger's setting was clicked: "full", "warn" or "off".
+signal ledger_changed(mode: String)
 
 const Profile = preload("res://scripts/ui/profile.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
@@ -36,6 +41,8 @@ const SLIDER_W := 88.0
 const SLIDER_H := 12.0
 const SOUND_STEP := 0.05  ## a wheel notch
 const SOUND_H := 70.0  ## the room the sound row takes under the buttons
+const LEDGER_H := 50.0  ## and the Ledger row under it
+const LEDGER_GAP := 8.0  ## between its buttons
 const TAGLINE := "Everything flies on salvage."
 const BTN := Vector2(380.0, 48.0)
 const GAP := 12.0
@@ -58,6 +65,7 @@ var recent: Array = []  ## profile.last_runs(): the records listed on the main m
 var version := ""  ## the label in the corner
 var note := ""  ## a line under the buttons (a refused Continue, "Run saved")
 var sound := Profile.SOUND_DEFAULTS.duplicate()  ## the volume sliders, 0 to 1
+var ledger := "full"  ## the Ledger's setting (Profile.LEDGER_MODES)
 var _drag := -1  # the slider being dragged
 var _stars: Node2D
 
@@ -174,8 +182,11 @@ func _gui_input(e: InputEvent) -> void:
 				Audio.fx(self, "hover")
 	elif e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
 		if e.pressed:
+			var l := ledger_at(e.position)
 			var s := slider_at(e.position)
-			if s >= 0:
+			if l >= 0:
+				set_ledger(Profile.LEDGER_MODES[l])
+			elif s >= 0:
 				_drag = s
 				set_slider(s, e.position.x, false)
 			else:
@@ -234,11 +245,37 @@ func set_sound(kind: String, v: float, final: bool) -> void:
 	sound_changed.emit(kind, v, final)
 
 
+# --- the Ledger row ---------------------------------------------------------------------------------------------
+
+## The button of setting `i` (Profile.LEDGER_MODES order: Full, Warnings only, Off), under the Sound row.
+func ledger_rect(i: int) -> Rect2:
+	var n := Profile.LEDGER_MODES.size()
+	var w := (BTN.x - (n - 1.0) * LEDGER_GAP) / n
+	return Rect2(Vector2((size.x - BTN.x) / 2.0 + i * (w + LEDGER_GAP), _sound_top() + 68.0), Vector2(w, 24.0))
+
+
+## The Ledger button under `p`, or -1.
+func ledger_at(p: Vector2) -> int:
+	for i in Profile.LEDGER_MODES.size():
+		if ledger_rect(i).has_point(p):
+			return i
+	return -1
+
+
+## Choose the Ledger's setting and say so (unless it is the one already on).
+func set_ledger(mode: String) -> void:
+	if not Profile.LEDGER_MODES.has(mode) or mode == ledger:
+		return
+	ledger = mode
+	Audio.fx(self, "click")
+	ledger_changed.emit(mode)
+
+
 # --- layout and drawing ----------------------------------------------------------------------------------
 
 ## Where the buttons start: under the title on the main menu, in a small panel on the pause menu.
 func _top() -> float:
-	return size.y * 0.42 if mode == Mode.MAIN else size.y * 0.5 - (list().size() * (BTN.y + GAP)) / 2.0 + 16.0
+	return size.y * 0.35 if mode == Mode.MAIN else size.y * 0.5 - (list().size() * (BTN.y + GAP)) / 2.0 + 16.0
 
 
 func button_rect(i: int) -> Rect2:
@@ -271,6 +308,7 @@ func _draw() -> void:
 	if note != "":
 		_centered(note, button_rect(l.size() - 1).end.y + 32.0, 16, GOOD)
 	_draw_sound()
+	_draw_ledger()
 
 
 func _draw_sound() -> void:
@@ -290,6 +328,22 @@ func _draw_sound() -> void:
 		draw_rect(r, AMBER if i == _drag else EDGE_DIM, false, 1.0)
 
 
+func _draw_ledger() -> void:
+	var x0 := (size.x - BTN.x) / 2.0
+	var top := _sound_top()
+	_text("THE LEDGER", Vector2(x0, top + 62.0), 13, AMBER)
+	var hint := "Ma Gantry's goals, tips and warnings"
+	_text(hint, Vector2(x0 + BTN.x - ThemeDB.fallback_font.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x, top + 62.0), 13, DIM_TEXT)
+	for i in Profile.LEDGER_MODES.size():
+		var r := ledger_rect(i)
+		var on: bool = Profile.LEDGER_MODES[i] == ledger
+		draw_rect(r, Color("#3a3020") if on else ROW_BG)
+		draw_rect(r, AMBER if on else EDGE_DIM, false, 2.0 if on else 1.0)
+		var label: String = {"full": "Full", "warn": "Warnings only", "off": "Off"}[Profile.LEDGER_MODES[i]]
+		var w := ThemeDB.fallback_font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		_text(label, r.position + Vector2((r.size.x - w) / 2.0, 17.0), 13, TEXT if on else DIM_TEXT)
+
+
 func _draw_main() -> void:
 	_centered("HULLSCRAP", size.y * 0.2, 96, TEXT)
 	_centered(TAGLINE, size.y * 0.2 + 44.0, 22, AMBER)
@@ -307,7 +361,7 @@ func _draw_main() -> void:
 func _draw_pause() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var top := _top()
-	var p := Rect2(Vector2((size.x - BTN.x) / 2.0 - 28.0, top - 78.0), Vector2(BTN.x + 56.0, 78.0 + list().size() * (BTN.y + GAP) + 28.0 + (28.0 if note != "" else 0.0) + SOUND_H))
+	var p := Rect2(Vector2((size.x - BTN.x) / 2.0 - 28.0, top - 78.0), Vector2(BTN.x + 56.0, 78.0 + list().size() * (BTN.y + GAP) + 28.0 + (28.0 if note != "" else 0.0) + SOUND_H + LEDGER_H))
 	_panel(p)
 	_centered("PAUSED", top - 32.0, 26, TEXT)
 
