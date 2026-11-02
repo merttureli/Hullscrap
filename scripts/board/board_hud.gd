@@ -35,6 +35,7 @@ var _rows: Array = []  # [Rect2] of the loot list rows, in the order of session.
 var _shop_rows: Array = []  # [Rect2] of the rows of a person's goods
 var _hits: Array = []  # [[Rect2, Dictionary]] what a click on the loadout screen means (drawn fresh every frame)
 var _hover: Array = []  # [[Rect2, lines, edge colour]] the icons the mouse can explain (drawn fresh every frame)
+var _airlock_box := Rect2()  # where the airlock marker (its label and arrow) was drawn this frame, so the line of words never covers it
 
 
 func _ready() -> void:
@@ -83,6 +84,7 @@ func _draw() -> void:
 		return
 	_hits.clear()
 	_hover.clear()
+	_airlock_box = Rect2()
 	var size := get_viewport_rect().size
 	_draw_title(size)
 	_draw_airlock(size)
@@ -97,13 +99,24 @@ func _draw() -> void:
 	_draw_panel(size)
 	_draw_shop(size)
 	if view.message_alive():
-		_centred(view.message, Vector2(size.x / 2.0, size.y - 150.0), 18, AMBER)
+		_centred(view.message, Vector2(size.x / 2.0, _message_y(view.message, size)), 18, AMBER)
 	if view.session.hollow:
 		_centred(str(Arms.cfg()["hollow"]["banner"]), Vector2(size.x / 2.0, 118.0), 20, Color("#c9b8ff"))
 	if view.picking:
 		Loadout.draw(self, size)
 	_draw_fade(size)
 	_draw_hover(size)
+
+
+## The height the line of words (the toast: "Airlock sealed.") is drawn at: low in the middle of the screen, and out of the way of the airlock marker when that is there
+## (above it when the marker is low on the screen, below it when it is high).
+func _message_y(text: String, size: Vector2) -> float:
+	var y := size.y - 150.0
+	var w := _font().get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+	var box := Rect2(size.x / 2.0 - w / 2.0 - 12.0, y - 22.0, w + 24.0, 32.0)
+	if _airlock_box.size != Vector2.ZERO and box.intersects(_airlock_box.grow(6.0)):
+		y = _airlock_box.position.y - 20.0 if _airlock_box.get_center().y > size.y * 0.5 else _airlock_box.end.y + 34.0
+	return y
 
 
 func _font() -> Font:
@@ -147,6 +160,7 @@ func _draw_airlock(size: Vector2) -> void:
 		var w := _font().get_string_size("AIRLOCK", HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 		_text("AIRLOCK", r.position + Vector2((r.size.x - w) / 2.0, 16.0), 14, AIRLOCK)
 		draw_line(at + Vector2(0.0, -42.0), at + Vector2(0.0, -26.0), Color(AIRLOCK, pulse), 2.0)
+		_airlock_box = r.merge(Rect2(at + Vector2(-2.0, -42.0), Vector2(4.0, 16.0)))
 		return
 	var centre := size / 2.0
 	var dir := (at - centre).normalized()
@@ -161,6 +175,7 @@ func _draw_airlock(size: Vector2) -> void:
 	var tp := (p - dir * 26.0) - Vector2(w2 / 2.0, -5.0)
 	draw_rect(Rect2(tp + Vector2(-6.0, -15.0), Vector2(w2 + 12.0, 22.0)), Color(PANEL_BG, 0.8))
 	_text(label, tp, 14, AIRLOCK)
+	_airlock_box = Rect2(tp + Vector2(-6.0, -15.0), Vector2(w2 + 12.0, 22.0)).merge(Rect2(p - Vector2(16.0, 16.0), Vector2(32.0, 32.0)))
 
 
 ## The motion tracker: rings every 5 cells of the 25 it reaches, the sweep, and the blips fading behind it.

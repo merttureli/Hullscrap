@@ -17,6 +17,7 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const Kit = preload("res://scripts/board/kit.gd")
 const DEFAULT_BLEED_S := 45.0
 
 
@@ -57,6 +58,9 @@ static func tick(ship, dt: float) -> Array:
 		else:
 			_die(ship, m)
 			lines.append("%s has died." % m.name)
+			var back: String = Kit.give_back(ship, m)  # their kit goes back to the hold (only a crew member left aboard a site loses it)
+			if back != "":
+				lines.append(back)
 	return lines
 
 
@@ -113,8 +117,10 @@ static func _beside(a, b) -> bool:
 	return false
 
 
-## `m` is lost for good (left down aboard another vessel, boarding.gd): as if they had bled out. Their name goes on ship.dead_crew.
+## `m` is lost for good (left down aboard another vessel, boarding.gd): as if they had bled out. Their name goes on ship.dead_crew, and their kit is lost with them
+## (it does not go back to the hold: Kit.give_back is for a crew member who dies anywhere else).
 static func lose(ship, m) -> void:
+	m.kit = {}
 	_die(ship, m)
 
 
