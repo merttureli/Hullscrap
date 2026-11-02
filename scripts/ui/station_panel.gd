@@ -1,7 +1,7 @@
 extends Control
 ## The station menu of the Drift: a trading screen over the map, opened when you dock at Rusthold,
 ## Meridian, the Prism or a Scrapper trader. Three columns. BUY: fuel and the station's stock. SELL: your
-## cargo at half its value. SERVICES: pay Ma Gantry's debt (Scrapper docks), repair hull integrity,
+## cargo at half its value. SERVICES: pay Ma Gantry's debt (Scrapper docks), repair every damaged block,
 ## hire one of the recruits on offer. Click a row (left: one, right: five fuel or all of an item); Esc,
 ## Enter or M leaves. While open it takes every key and click. The rules and prices are in campaign.gd
 ## (data/drift.json); this node only reads input and draws, in the UI colours of docs/ART_STYLE.md.
@@ -120,12 +120,12 @@ func rows(col: int) -> Array:
 				out.append({"kind": "note", "label": "Paid off. Ma has nothing more to say to you."})
 		if "repair" in cfg["services"]:
 			var each: int = c.price(int(c.cfg["prices"]["repair"]), _faction(), s)
-			out.append({"kind": "header", "label": "HULL INTEGRITY: %d/%d" % [c.hull_left(s), c.hull_max(s)], "right": "%d cr a point" % each})
-			if c.hull_loss > 0:
-				out.append({"kind": "repair", "id": "repair", "label": "Repair 10 points", "right": "%d cr" % (mini(10, c.hull_loss) * each), "cost": mini(10, c.hull_loss) * each})
-				out.append({"kind": "repair_all", "id": "repair_all", "label": "Repair all (%d points)" % c.hull_loss, "right": "%d cr" % (c.hull_loss * each), "cost": c.hull_loss * each})
+			var cost: int = c.repair_cost(s, station)
+			out.append({"kind": "header", "label": "REPAIRS", "right": "%d cr per hp of damage" % each})
+			if cost > 0:
+				out.append({"kind": "repair_all", "id": "repair_all", "label": "Repair all blocks", "right": "%d cr" % cost, "cost": cost})
 			else:
-				out.append({"kind": "note", "label": "The hull is sound."})
+				out.append({"kind": "note", "label": "Every block is sound."})
 		if "recruit" in cfg["services"]:
 			var price: int = c.price(int(c.cfg["prices"]["recruit"]), _faction(), s)
 			out.append({"kind": "header", "label": "RECRUITS", "right": "%d cr each" % price})
@@ -163,10 +163,8 @@ func act(col: int, i: int, button := MOUSE_BUTTON_LEFT) -> String:
 			r = c.pay_debt(s, int(c.cfg["debt"]["payment"]))
 		"pay_all":
 			r = c.pay_debt(s, c.debt)
-		"repair":
-			r = c.repair(s, station, 10)
 		"repair_all":
-			r = c.repair(s, station, c.hull_loss)
+			r = c.repair(s, station)
 		"recruit":
 			r = c.recruit(s, station, row["index"])
 		_:
@@ -269,7 +267,6 @@ func _draw() -> void:
 	var credits: int = s.inventory.count("credits")
 	_text("Credits %d" % credits, Vector2(p.end.x - 620.0, p.position.y + 38.0), 20, AMBER)
 	_text("Fuel %d" % s.inventory.count("fuel"), Vector2(p.end.x - 470.0, p.position.y + 38.0), 20, GOOD if s.inventory.count("fuel") > 0 else BAD)
-	_text("Hull %d/%d" % [c.hull_left(s), c.hull_max(s)], Vector2(p.end.x - 340.0, p.position.y + 38.0), 20, TEXT)
 	_text("Debt %d" % c.debt, Vector2(p.end.x - 190.0, p.position.y + 38.0), 20, BAD if c.behind() > 0 else TEXT)
 	if message != "":
 		_text(message, p.position + Vector2(PAD, 88.0), 16, BAD if message_bad else GOOD)

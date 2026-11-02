@@ -204,7 +204,6 @@ func test_crossing_keeps_the_campaign_and_starts_the_new_region_afresh() -> void
 	c.debt = 700
 	c.used["some_event"] = true
 	c.logs_found["some_log"] = true
-	c.hull_loss = 9
 	c.arrive(ship)
 	c.sector_at(c.current)
 	var fuel := ship.inventory.count("fuel")
@@ -217,7 +216,7 @@ func test_crossing_keeps_the_campaign_and_starts_the_new_region_afresh() -> void
 	var r := c.cross(next, ship)
 	check(r["ok"], "crossed: " + str(r["why"]))
 	eq([c.stage, c.region_id, c.route], [2, next, ["clan_space", next]], "stage 2 in the chosen region")
-	eq([c.debt, c.rep["concord"], c.jumps, c.hull_loss], [700, 4, jumps, 9], "debt, reputation, jumps and hull carry across (the crossing is no jump)")
+	eq([c.debt, c.rep["concord"], c.jumps], [700, 4, jumps], "debt, reputation and jumps carry across (the crossing is no jump)")
 	check(c.flags.has("met_ma") and c.used.has("some_event") and c.logs_found.has("some_log"), "flags, spent events and logs too")
 	eq([ship.inventory.count("fuel"), ship.crew.size()], [fuel, crew], "the fuel and the crew are the ship's")
 	check(c.flags.has("in_" + next) and not c.flags.has("in_clan_space"), "the region flag follows")

@@ -4,6 +4,7 @@ extends "res://tests/base_test.gd"
 ## (Ferro's ion immunity and hull_mend, the Warden-frame's, Brine's), the merge rules and the validators. Traits the data has no
 ## use for yet are made up in the library for the test (`_trait`) and removed again.
 
+const Structure = preload("res://scripts/ship/structure.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
@@ -166,10 +167,11 @@ func test_haggler_takes_a_fraction_off_the_prices_and_the_best_one_counts() -> v
 	credits = ship.inventory.count("credits")
 	check(c.buy(ship, "rusthold", "engine_scrap_mk1")["ok"], "bought")
 	eq(credits - ship.inventory.count("credits"), 68, "the Scrapper engine at 90 less 25% (67.5, rounded up)")
-	c.hull_loss = 4
+	eq(c.hurt_blocks(ship, 4), 4, "4 hp of damage on the blocks")
+	var points := ceili(Structure.missing_hp(ship))
 	credits = ship.inventory.count("credits")
-	check(c.repair(ship, "rusthold", 4)["ok"], "repaired")
-	eq(credits - ship.inventory.count("credits"), 4 * c.price(int(c.cfg["prices"]["repair"]), "clans", ship), "repairs follow it too")
+	check(c.repair(ship, "rusthold")["ok"], "repaired")
+	eq(credits - ship.inventory.count("credits"), points * c.price(int(c.cfg["prices"]["repair"]), "clans", ship), "repairs follow it too")
 	_done()
 
 

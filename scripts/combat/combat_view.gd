@@ -38,6 +38,7 @@ const ENEMY_SHOT := {"energy": Color("#ff6a4a"), "kinetic": Color("#ff9a6a"), "e
 const GROUP_COLORS := {1: Color("#5fd4ff"), 2: Color("#ff9a3c")}
 const GREY := Color("#7a8494")
 const BEAM_LIFE := 0.15
+const BLOCK_FLASH := 0.45  ## seconds a broken block flashes
 const MAX_FX := 500
 const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
@@ -50,7 +51,7 @@ const ENEMY_JUMP_DB := -8.0  ## the enemy's jump drive firing, against the playe
 const MISSILE_LOOPS := 3  ## missiles in flight that each get their whoosh (the nearest ones are heard anyway)
 const WRECK_LINGER := 3.0  ## seconds a decided sector fight goes on showing its end before it ends by itself
 
-## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship), hull, hull_max (the player's),
+## Emitted when the fight is left: {state ("won", "captured", "spared", "escaped", "fled" or "lost"), enemy (its Ship),
 ## threat (the enemy's skulls, 1-5), offer ({item: count}, only when "spared"), in_sector, pose ({pos, vel, angle, ang_vel}: where the player's ship is now), enemy_pos}.
 signal finished(result: Dictionary)
 
@@ -223,7 +224,7 @@ func leave() -> void:
 		return
 	var foe = session.arena.ships[Session.ENEMY]
 	var mine = session.arena.ships[Session.PLAYER]
-	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship, "hull": mine.hull, "hull_max": mine.hull_max,
+	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship,
 		"in_sector": in_sector, "pose": {"pos": mine.flight.pos, "vel": mine.flight.vel, "angle": mine.flight.angle, "ang_vel": mine.flight.ang_vel}, "enemy_pos": foe.flight.pos, "threat": session.threat}
 	if result["state"] == "spared":
 		result["offer"] = session.morale.offer.duplicate()
@@ -677,6 +678,7 @@ func _on_event(e: Dictionary) -> void:
 			if r["line"] != "":
 				_say(r["line"])
 		"breach":
+			_flash_block(idx, pos)
 			_snd("breach", idx, pos, 0.0, -3.0)
 			if Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.6, "scale": 1.0})
@@ -686,6 +688,7 @@ func _on_event(e: Dictionary) -> void:
 				var d := (n if n != Vector2.ZERO else Vector2.from_angle(_rng.randf() * TAU)).rotated(_rng.randf_range(-0.9, 0.9))
 				_add_fx({"k": "puff", "pos": pos, "vel": d * _rng.randf_range(40.0, 110.0), "life": _rng.randf_range(0.6, 1.0), "r": 8.0, "grow": 26.0, "color": Color("#b9bfc9", 0.6)})
 		"disable":
+			_flash_block(idx, pos)
 			if Art.fx("sparks") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "sparks", "life": 0.35, "scale": 1.5})
 			else:
@@ -695,6 +698,7 @@ func _on_event(e: Dictionary) -> void:
 			for i in 3:
 				_add_fx({"k": "puff", "pos": pos, "vel": Vector2.from_angle(_rng.randf() * TAU) * 30.0, "life": 0.7, "r": 6.0, "grow": 16.0, "color": Color("#ff7a2a", 0.6)})
 		"wreck_part":
+			_flash_block(idx, pos)
 			_snd("part_destroyed", idx, pos, 0.0, -3.0)
 			if Art.fx("explosion") != null:
 				_on_ship(idx, pos, {"k": "art", "name": "explosion", "life": 0.7, "scale": 1.6})
@@ -727,6 +731,11 @@ func _on_event(e: Dictionary) -> void:
 			_sparks(pos, Vector2.ZERO, 36, Color("#ffcf7a"))
 			for i in 10:
 				_add_fx({"k": "puff", "pos": pos + Vector2.from_angle(_rng.randf() * TAU) * _rng.randf_range(0.0, 120.0), "vel": Vector2.from_angle(_rng.randf() * TAU) * 40.0, "life": 1.4, "r": 24.0, "grow": 50.0, "color": Color("#8a8f99", 0.5)})
+
+
+## A block broke (a wall shot open, a part disabled or wrecked): its cell lights up white for a moment, stuck to the ship.
+func _flash_block(idx: int, pos: Vector2) -> void:
+	_on_ship(idx, pos, {"k": "block", "life": BLOCK_FLASH, "color": Color("#ffffff")})
 
 
 ## An effect entry from EffectFx: on the hull it names (`stick`) or free in the world.
@@ -839,6 +848,12 @@ func _draw_one(c: Node2D, f: Dictionary, px: float) -> void:
 			var a: float = f["spin"] * (_clock - f["t0"])
 			var h: float = f["size"] * px
 			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-h, -h).rotated(a), p + Vector2(h, -h * 0.6).rotated(a), p + Vector2(h * 0.7, h).rotated(a), p + Vector2(-h * 0.8, h * 0.7).rotated(a)]), Color(col, fade))
+		"block":  # a broken block's cell, flashing: a square the size of a cell, turned with the ship
+			var p := _fx_pos(f)
+			var h := 16.0
+			var a: float = session.arena.ships[f["ship"]].flight.angle
+			var pulse := fade * (0.55 + 0.45 * sin(age * 22.0))
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-h, -h).rotated(a), p + Vector2(h, -h).rotated(a), p + Vector2(h, h).rotated(a), p + Vector2(-h, h).rotated(a)]), Color(col, 0.55 * pulse))
 		"streak":
 			var from: Vector2 = f["pos"] + f["dir"] * 18.0 * age
 			c.draw_line(from, from + f["dir"] * f["len"] * (0.4 + 0.6 * age), Color(col, 0.9 * fade), 3.0 * px)

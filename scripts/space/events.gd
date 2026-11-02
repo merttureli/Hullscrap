@@ -564,9 +564,9 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 		if hp != 0 and not people.is_empty():
 			lines.append("Crew %+d hp" % hp)
 	if effects.has("hull"):
-		var d: int = c.change_hull(ship, int(effects["hull"]))
+		var d: int = c.change_blocks(ship, int(effects["hull"]))  # hull -N: N hp of damage on outer blocks; +N: N hp mended
 		if d != 0:
-			lines.append("Hull integrity %+d" % d)
+			lines.append("Hull blocks %s %d hp" % ["damaged" if d < 0 else "repaired", absi(d)])
 	if effects.has("debt"):
 		lines.append_array(c.add_debt(ship, int(effects["debt"])))
 	for f in _list(effects.get("flag")):

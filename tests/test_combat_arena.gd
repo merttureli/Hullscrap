@@ -3,6 +3,8 @@ extends "res://tests/base_test.gd"
 ## hull integrity and wrecks, and determinism.
 
 const Arena = preload("res://scripts/combat/arena.gd")
+const Damage = preload("res://scripts/combat/damage.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
@@ -220,29 +222,28 @@ func _chase(aim_at_lead: bool) -> Arena:
 func test_a_bolt_aimed_where_the_ship_is_misses_a_moving_ship() -> void:
 	var a := _chase(false)
 	eq(_count(a, "hit"), 0, "no hit")
-	eq(a.ships[1].hull, a.ships[1].hull_max, "hull untouched")
+	eq(Structure.structure_fraction(a.ships[1]), 1.0, "structure untouched")
 	eq(a.projectiles.size(), 0, "the bolt flew on and expired")
 
 
 func test_a_bolt_aimed_at_the_lead_point_hits() -> void:
 	var a := _chase(true)
 	check(_count(a, "hit", 1) >= 1, "hit the moving ship")
-	check(a.ships[1].hull < a.ships[1].hull_max, "and hurt it")
+	check(Structure.structure_fraction(a.ships[1]) < 1.0, "and hurt it")
 	for e in a.events:
 		if e["type"] == "hit":
 			check(e["cell"].x >= 13 and e["cell"].x <= 17 and e["cell"].y >= 13 and e["cell"].y <= 17, "inside the block: " + str(e["cell"]))
 			break
 
 
-func test_hull_integrity_counts_armour_and_wrecks_the_ship() -> void:
+func test_structure_is_the_block_hp_and_wrecks_the_ship_under_the_line() -> void:
 	var s := _ship()
 	_block(s, 5, 5, 7, 5, "titanium_alloy")
-	_block(s, 5, 6, 9, 6, "wall")
 	_tile(s, 5, 7, "heavy_armor")
 	var a := Arena.new()
 	var i := a.add_ship(s)
-	eq(a.ships[i].hull_max, 28.0, "20 + 2 for each of the 4 non-steel cells")
-	eq(a.ships[i].hull, 28.0, "starts full")
+	eq(Structure.structure_fraction(a.ships[i]), 1.0, "a fresh ship is whole")
+	eq(Structure.totals(s), Vector2(28.0, 28.0), "3 titanium (6 hp) and 1 heavy armour (10 hp): the hp of its blocks, no matter the armour")
 	# A row of walls, and a laser that goes through all of them.
 	var b := Arena.new()
 	var shooter := b.add_ship(_ship())
@@ -252,18 +253,36 @@ func test_hull_integrity_counts_armour_and_wrecks_the_ship() -> void:
 	b.weapons.defs["lance"] = {"kind": "laser", "damage": 100, "pierce": 50, "gimbal": 180, "range": 2000, "cooldown": 0.1}
 	var lance := b.add_mount(shooter, "lance", Vector2(20.5, 15.5))
 	var small := b.add_mount(shooter, "laser_mk1", Vector2(20.5, 15.5))
-	eq(b.ships[target].hull_max, 20.0, "plain steel adds nothing")
+	eq(Structure.totals(t).y, 40.0, "ten walls of 4 hp")
 	check(b.fire(shooter, small, Vector2(2000.0, 0.0)), "a small laser first")
-	eq(b.ships[target].hull, 17.0, "3 damage dealt to a wall")
-	check(not b.ships[target].wrecked, "still flying")
+	b.step(0.1)
+	eq(Structure.totals(t).x, 37.0, "3 damage dealt to a wall")
+	check(Structure.structure_fraction(b.ships[target]) > 0.9 and not b.ships[target].wrecked, "still flying")
 	b.ships[shooter].cooldowns.clear()
 	check(b.fire(shooter, lance, Vector2(2000.0, 0.0)), "then the lance")
-	eq(b.ships[target].hull, 0.0, "hull at 0")
+	b.step(0.1)
+	eq(Structure.structure_fraction(b.ships[target]), 0.0, "every wall is breached")
 	check(b.ships[target].wrecked, "wrecked")
 	eq(_count(b, "wreck", target), 1, "reported once")
 	eq(b.ships.size(), 2, "it stays in the arena")
 	var gun := b.add_mount(target, "laser_mk1", Vector2(20.5, 15.5))
 	eq(b.weapons.can_fire(b, target, gun, Vector2(-1000.0, 0.0)), "wrecked", "a wreck does not fire")
+
+
+func test_a_ship_is_wrecked_when_its_structure_falls_under_the_line() -> void:
+	var a := Arena.new()
+	var t := _ship()
+	_block(t, 3, 15, 12, 15, "wall")  # 10 walls of 4 hp
+	var i := a.add_ship(t)
+	var gone := int((1.0 - Structure.defeat_below()) * 10.0 + 1e-6)  # walls at 0 hp that leave exactly the defeat line
+	for x in gone:
+		t.grid.hp[Vector2i(3 + x, 15)] = 0.0
+	a.step(0.2)
+	check(not a.ships[i].wrecked and absf(Structure.structure_fraction(a.ships[i]) - Structure.defeat_below()) < 1e-6, "exactly on the line: not yet")
+	Damage.apply(a, i, Vector2i(12, 15), {"kind": "wall", "def": t.grid.defs.get_def("wall")}, 1.0, "kinetic")
+	a.step(0.1)
+	check(a.ships[i].wrecked, "a little under the line: wrecked")
+	eq(_count(a, "wreck", i), 1, "reported once")
 
 
 func _scripted_battle(seed_value: int) -> Arena:
@@ -296,7 +315,7 @@ func test_the_same_seed_and_inputs_replay_exactly() -> void:
 	check(_count(a, "hit") > 5, "the scripted battle hits things (%d)" % _count(a, "hit"))
 	eq(a.tick, 300, "five seconds")
 	eq(JSON.stringify(a.snapshot()), JSON.stringify(b.snapshot()), "same state after 5 s")
-	eq(a.ships[1].hull, b.ships[1].hull, "same hull")
+	eq(Structure.structure_fraction(a.ships[1]), Structure.structure_fraction(b.ships[1]), "same structure")
 	eq(a.ships[1].ship.grid.hp, b.ships[1].ship.grid.hp, "same cell hp")
 	var c := _scripted_battle(8)
 	check(JSON.stringify(a.snapshot()) != JSON.stringify(c.snapshot()), "another seed spreads the flak differently")

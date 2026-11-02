@@ -32,6 +32,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Content = preload("res://scripts/data/content.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12  ## substeps between ShipSim steps (0.2 s, as the soak)
@@ -255,8 +256,11 @@ func fight(sh: Dictionary, spec: String, faction: String, j: int, s: int) -> Dic
 	var st := sess.state()
 	var me = a.ships[Session.PLAYER]
 	var foe = a.ships[Session.ENEMY]
-	row.merge({"state": st, "end": END_OF.get(st, "draw"), "t": n * STEP, "hull": me.hull / maxf(me.hull_max, 1.0),
-		"foe_hull": foe.hull / maxf(foe.hull_max, 1.0), "hp": me.hull, "foe_hp": foe.hull, "foe_hp_max": foe.hull_max, "morale": sess.morale.state})
+	var mine_t := Structure.totals(me.ship)  # hp now, hp at most, of the blocks
+	var foe_t := Structure.totals(foe.ship)
+	row.merge({"state": st, "end": END_OF.get(st, "draw"), "t": n * STEP, "hull": Structure.structure_fraction(me),
+		"foe_hull": Structure.structure_fraction(foe), "hp": mine_t.x - Structure.defeat_below() * mine_t.y,  # hp the player can still lose before it is wrecked
+		"foe_hp": foe_t.x - float(Morale.config().get("break_structure", 0.75)) * foe_t.y, "morale": sess.morale.state})  # and the foe before its morale breaks
 	row.merge(d)
 	sim.free()
 	return row
@@ -523,7 +527,7 @@ static func _rate(list: Array) -> Dictionary:
 
 
 ## A fight's result as a number: won 1, lost 0, an escape 0.5; a draw (the cap) by projection at the rates of the fight: 1
-## when the player would have brought the enemy to its morale break (break_hull of its hull) before the enemy wrecked it,
+## when the player would have brought the enemy to its morale break (break_structure) before the enemy wrecked it,
 ## 0 when not, 0.5 when neither was hurting the other.
 static func _lean(r: Dictionary) -> float:
 	if r["state"] in WIN_STATES:
@@ -533,10 +537,10 @@ static func _lean(r: Dictionary) -> float:
 	if r["state"] == "escaped" or not r.has("hp"):
 		return 0.5
 	var t := maxf(float(r["t"]), 1.0)
-	var mine := float(r["p_hull"]) / t  # hull a second the player takes off the enemy
-	var theirs := float(r["e_hull"]) / t
-	var t_win := maxf(float(r["foe_hp"]) - float(Morale.config().get("break_hull", 0.35)) * float(r["foe_hp_max"]), 0.0) / mine if mine > 1e-3 else INF
-	var t_lose := float(r["hp"]) / theirs if theirs > 1e-3 else INF
+	var mine := (float(r["p_hull"]) + float(r["p_part"])) / t  # block hp a second the player takes off the enemy
+	var theirs := (float(r["e_hull"]) + float(r["e_part"])) / t
+	var t_win := maxf(float(r["foe_hp"]), 0.0) / mine if mine > 1e-3 else INF
+	var t_lose := maxf(float(r["hp"]), 0.0) / theirs if theirs > 1e-3 else INF
 	if t_win == INF and t_lose == INF:
 		return 0.5
 	return 1.0 if t_win < t_lose else 0.0
@@ -592,7 +596,7 @@ func report(secs: float) -> String:
 		L.append("| %s | " % sh["name"] + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["ship"] == sh["id"] and r["jump"] == j))))) + " |")
 	L.append("| **all** | " + " | ".join(jumps.map(func(j): return _cell(_rate(_sel(func(r): return r["jump"] == j))))) + " |")
 	L.append("")
-	L.append("Projected win rate: the wins plus the draws the player was winning, by the rates of the fight (it would have brought the enemy to its morale break, 35% of its hull, before the enemy wrecked it). The cap cuts many fights short; this is the curve the budgets are tuned on.")
+	L.append("Projected win rate: the wins plus the draws the player was winning, by the rates of the fight (it would have brought the enemy to its morale break, structure break_structure, before the enemy wrecked it). The cap cuts many fights short; this is the curve the budgets are tuned on.")
 	L.append("")
 	L.append("| ship | " + " | ".join(jumps.map(func(j): return "jump %d" % j)) + " |")
 	L.append("|---|" + "---|".repeat(jumps.size()))

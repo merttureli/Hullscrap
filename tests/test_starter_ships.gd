@@ -8,6 +8,8 @@ extends "res://tests/base_test.gd"
 ## their race and a silhouette of their own.
 ## tests/tool_make_starters.gd and tests/tool_make_starters2.gd rebuild the files.
 
+const Structure = preload("res://scripts/ship/structure.gd")
+const StructureUtil = preload("res://tests/structure_util.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
@@ -37,7 +39,7 @@ const MIN_FRAME := 4500  ## cells of the hull frame: a disc of radius 38 is 4513
 const MAX_FRAME := 4600
 const MAX_PARTS := 10  ## placed components: the essentials only
 const MIN_EMPTY := 0.5  ## at least this share of the frame is empty hull (no tile, no outside half of a mount)
-const MIN_HULL_INTEGRITY := 150.0  ## every starter has real armour on its outer hull (arena.gd: 20 + 2 per plated cell)
+const MIN_ARMOUR_HP := 200.0  ## every starter has real armour: at least this much hp in its walls and doors
 const BOW_ROWS := 6  ## the Courier is an arrowhead: its titanium skin covers the nose, shoulders included (docs/CONTENT.md 4c)
 
 
@@ -192,9 +194,12 @@ func test_each_starter_has_at_most_ten_parts_and_at_least_half_of_its_frame_empt
 
 func test_each_starter_has_real_armour_on_its_outer_hull() -> void:
 	for key in _all():
-		var a := Arena.new(1)
-		a.add_ship(_ship(key))
-		check(a.ships[0].hull_max >= MIN_HULL_INTEGRITY, "%s: hull integrity %.0f, at least %.0f wanted" % [key, a.ships[0].hull_max, MIN_HULL_INTEGRITY])
+		var ship := _ship(key)
+		var armour := 0.0
+		for c in ship.grid.tiles:
+			if ship.grid.defs.get_def(ship.grid.tiles[c]).has("hp"):
+				armour += ship.grid.max_hp_of(c)
+		check(armour >= MIN_ARMOUR_HP, "%s: %.0f hp of walls and doors, at least %.0f wanted" % [key, armour, MIN_ARMOUR_HP])
 
 
 func test_every_component_is_powered_and_supply_covers_demand() -> void:
@@ -424,9 +429,9 @@ func test_starters_are_ordered_by_hull_and_speed() -> void:
 		var a := Arena.new(1)
 		a.add_ship(_ship(key))
 		var co = a.ships[0]
-		hull[key] = co.hull_max
+		hull[key] = Structure.totals(co.ship).y
 		accel[key] = co.thrust * co.flight.thrust_to_accel / co.mass
-	check(hull["Rustbucket"] > hull["Courier"] and hull["Courier"] > hull["Prism"], "armour: Rustbucket > Courier > Prism: " + str(hull))
+	check(hull["Courier"] > hull["Rustbucket"] and hull["Rustbucket"] > hull["Prism"], "block hp: Courier (titanium) > Rustbucket (cheap plating) > Prism: " + str(hull))
 	check(accel["Rustbucket"] < accel["Courier"] and accel["Rustbucket"] < accel["Prism"], "the Rustbucket is the slow one: " + str(accel))
 	var stats: Dictionary = _ship("Prism").components.def("shield_neon_mk1")["stats"]
 	eq([int(stats["layers"]), int(stats["sectors"])], [2, 4], "the Prism's shield, in its hold: 2 layers, 4 sectors")
