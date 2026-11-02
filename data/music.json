@@ -1,21 +1,43 @@
 {
+ "version": 2,
  "dir": "res://assets/audio/music/",
+ "pieces": {
+  "black_box": {
+   "explore": "black_box_explore.ogg",
+   "battle": "black_box_battle.ogg",
+   "bpm": 118.125
+  },
+  "concord": {
+   "explore": "concord_explore.ogg",
+   "battle": "concord_battle.ogg",
+   "bpm": 112.0
+  },
+  "clans": {
+   "explore": "clans_explore.ogg",
+   "battle": "clans_battle.ogg",
+   "bpm": 116.1
+  },
+  "lumen": {
+   "explore": "lumen_explore.ogg",
+   "battle": "lumen_battle.ogg",
+   "bpm": 96.0
+  }
+ },
+ "regions": {
+  "default": "black_box",
+  "faction:concord": "concord",
+  "faction:clans": "clans",
+  "faction:lumen": "lumen"
+ },
  "states": {
   "menu": [
    "menu.ogg"
   ],
-  "explore": [
-   "explore_a.ogg",
-   "explore_b.ogg"
-  ],
-  "combat": [
-   "combat.ogg"
+  "build": [
+   "build.ogg"
   ],
   "hollow": [
    "hollow.ogg"
-  ],
-  "build": [
-   "build.ogg"
   ]
  },
  "stings": {
@@ -29,11 +51,16 @@
  },
  "volumes": {
   "menu.ogg": 0.0,
-  "explore_a.ogg": 0.0,
-  "explore_b.ogg": 0.0,
-  "combat.ogg": 0.0,
-  "hollow.ogg": 0.0,
   "build.ogg": 0.0,
+  "hollow.ogg": 0.0,
+  "black_box_explore.ogg": 0.0,
+  "black_box_battle.ogg": 0.0,
+  "concord_explore.ogg": 0.0,
+  "concord_battle.ogg": 0.0,
+  "clans_explore.ogg": 0.0,
+  "clans_battle.ogg": 0.0,
+  "lumen_explore.ogg": 0.0,
+  "lumen_battle.ogg": 0.0,
   "victory.ogg": -3.0,
   "defeat.ogg": -3.0,
   "jump.ogg": -3.0,
