@@ -33,7 +33,7 @@ PIECES = {"black_box": "p_black_box", "concord": "p_concord", "clans": "p_clans"
 REGIONS = {"default": "black_box", "faction:concord": "concord", "faction:clans": "clans", "faction:lumen": "lumen"}
 # round 1's explore and combat loops are still rendered but no state plays them (the pieces replaced them)
 LOOPS = {"menu": "t_menu", "explore_a": "t_explore_a", "explore_b": "t_explore_b", "combat": "t_combat",
-         "hollow": "t_hollow", "build": "t_build"}
+         "hollow": "t_hollow", "build": "p_build"}
 STINGS = ["victory", "defeat", "jump", "region_cross", "ada_found", "unlock", "ending"]
 STATES = {"menu": ["menu.ogg"], "build": ["build.ogg"], "hollow": ["hollow.ogg"]}
 VOLUMES = {}   # dB per file; everything is mastered to its own loudness, stings sit 3 dB under
