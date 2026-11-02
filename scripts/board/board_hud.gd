@@ -232,7 +232,7 @@ func _draw_prompt(size: Vector2) -> void:
 		draw_arc(at, 24.0, -PI / 2.0, -PI / 2.0 + TAU * f, 40, AMBER if str(t["type"]) == "door" else CYAN, 5.0, true)
 
 
-## What someone's word marked: a pulsing diamond over the container (or the locked door) with its name, an arrow at the screen edge when it is off screen.
+## What someone's word marked: a pulsing diamond over the container (or the locked door) with its name, held at the edge of the screen when it is off it.
 func _draw_reveals(size: Vector2) -> void:
 	var s = view.session
 	var pulse := 0.6 + 0.4 * sin(Time.get_ticks_msec() / 240.0)
@@ -244,17 +244,17 @@ func _draw_reveals(size: Vector2) -> void:
 		if not s.unlocked.has(id):
 			spots.append([s.site.door_centre(s.site.doors[id]), "Locked door"])
 	var inner := Rect2(Vector2(40.0, 100.0), size - Vector2(80.0, 360.0))  # (clear of the tracker, the arms and the lines of what was taken)
-	for sp in spots:
+	for i in spots.size():
+		var sp: Array = spots[i]
 		var at: Vector2 = view.to_screen(sp[0])
-		var edge := false
 		if not inner.has_point(at):
 			at = Vector2(clampf(at.x, inner.position.x, inner.end.x), clampf(at.y, inner.position.y, inner.end.y))
-			edge = true
 		var col := Color(AMBER, pulse)
 		draw_colored_polygon(PackedVector2Array([at + Vector2(0, -12), at + Vector2(10, 0), at + Vector2(0, 12), at + Vector2(-10, 0)]), Color(col, 0.35))
 		draw_polyline(PackedVector2Array([at + Vector2(0, -12), at + Vector2(10, 0), at + Vector2(0, 12), at + Vector2(-10, 0), at + Vector2(0, -12)]), col, 2.0)
-		var label := "%s%s" % [str(sp[1]), " (off screen)" if edge else ""]
-		_text(label, at + Vector2(-_font().get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x / 2.0, -18.0), 13, col)
+		var label := str(sp[1])
+		var w := _font().get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		_text(label, Vector2(clampf(at.x - w / 2.0, 8.0, size.x - w - 8.0), at.y - 18.0 - 15.0 * float(i % 3)), 13, col)  # (staggered, so two near each other can be read)
 
 
 ## A person's goods: three rows with a price, 1-3 buys.
