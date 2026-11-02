@@ -18,7 +18,7 @@ const Regions = preload("res://scripts/space/regions.gd")
 
 const FIXTURES := "res://tests/fixtures/packs/"
 const EVENTS_SCRIPT := "res://scripts/space/events.gd"  ## the Drift's loader and validator, once it is on main
-const ITEM_KINDS: Array[String] = ["ammo", "gear", "special"]
+const ITEM_KINDS: Array[String] = ["ammo", "gear", "special", "mod"]
 const RARITIES: Array[String] = ["common", "uncommon", "rare", "very_rare"]
 const ENGINE := {"id": "x", "family": "engine", "line": "standard", "tier": 1, "power": -2, "hp": 6, "stats": {"thrust": 10}}
 
@@ -355,6 +355,78 @@ func test_every_file_loads_and_every_id_is_unique() -> void:
 
 func test_components_items_and_materials_have_their_basics() -> void:
 	_none(basics_problems(Content.list("components"), Content.list("items"), Content.list("materials"), Stats.load_lines()))
+
+
+## The problems of data/mods.json (boarding mods, B4): three tiers each, every tier a cargo item of kind `mod` and slot `kit`, with no recipe.
+func mod_problems(cfg: Dictionary, items: Array, recipes: Array, taken: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	var by_id := {}
+	for i in items:
+		by_id[str(i["id"])] = i
+	var rec := {}
+	for r in recipes:
+		rec[str(r["id"])] = true
+	var tiers: Array = cfg.get("tier_names", [])
+	if tiers.size() != 3:
+		out.append("data/mods.json: tier_names must name three tiers")
+	for m in cfg.get("mods", []):
+		var id := str(m.get("id", ""))
+		var at := "data/mods.json: mod '%s'" % id
+		if id == "" or str(m.get("name", "")) == "" or str(m.get("blurb", "")).length() < 10:
+			out.append(at + " needs an id, a name and a blurb")
+		if not str(m.get("color", "")).begins_with("#") or str(m.get("color", "")).length() != 7:
+			out.append(at + " needs a colour (#rrggbb)")
+		if not str(m.get("scope", "")) in ["party", "self"] or str(m.get("slot", "")) != "kit":
+			out.append(at + " needs a scope (party or self) and the slot kit")
+		var words := str(m.get("does", "")).split(" ", false).size()
+		if words == 0 or words > 8:
+			out.append(at + " says what it does in 1 to 8 words (%d)" % words)
+		if float(m.get("weight", 0)) <= 0.0:
+			out.append(at + " needs a drop weight")
+		if m.get("tiers") is Array and m["tiers"].size() == 3:
+			for t in m["tiers"]:
+				if str(t.get("text", "")) == "" or not t.get("stat") is Array or t["stat"].size() != 2:
+					out.append(at + " needs a text and a stat row in every tier")
+		else:
+			out.append(at + " needs three tiers")
+		for tier in range(1, 4):
+			var item := "%s_mk%d" % [id, tier]
+			var e: Dictionary = by_id.get(item, {})
+			if e.is_empty():
+				out.append("%s has no item %s in data/items.json" % [at, item])
+				continue
+			if str(e.get("kind", "")) != "mod" or str(e.get("slot", "")) != "kit":
+				out.append("%s: item %s must be of kind mod and slot kit" % [at, item])
+			if tiers.size() == 3 and str(e.get("name", "")) != "%s %s" % [m.get("name", ""), tiers[tier - 1]]:
+				out.append("%s: item %s is named '%s'" % [at, item, e.get("name", "")])
+			if str(e.get("blurb", "")).length() < 10:
+				out.append("%s: item %s needs a blurb" % [at, item])
+			if rec.has(item):
+				out.append("%s: item %s has a recipe (a mod is found, not built)" % [at, item])
+			if taken.has(item):
+				out.append("%s: item %s is also a part or a material" % [at, item])
+	for i in items:
+		if str(i.get("kind", "")) == "mod" and not cfg.get("mods", []).any(func(m): return str(i["id"]).begins_with(str(m["id"]) + "_mk")):
+			out.append("data/items.json: mod item '%s' belongs to no mod of data/mods.json" % i["id"])
+	return out
+
+
+func test_every_mod_item_validates() -> void:
+	var cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/mods.json"))
+	var taken := {}
+	for kind in ["components", "materials"]:
+		for e in Content.list(kind):
+			taken[str(e["id"])] = true
+	_none(mod_problems(cfg, Content.list("items"), Content.list("recipes"), taken))
+	eq(cfg["mods"].size(), 3, "three mods")
+	for m in cfg["mods"]:  # a higher tier is more of the same
+		var t: Array = m["tiers"]
+		for k in ["depth", "glow", "bonus", "damage", "size"]:
+			if t[0].has(k):
+				check(float(t[0][k]) <= float(t[1][k]) and float(t[1][k]) <= float(t[2][k]) and float(t[0][k]) < float(t[2][k]), "%s: %s grows with the tier" % [m["id"], k])
+	# and the checker catches what it should
+	var bad := {"tier_names": ["Mk I", "Mk II", "Mk III"], "mods": [{"id": "x", "name": "X", "blurb": "a blurb that is long", "color": "red", "scope": "all", "slot": "ship", "does": "one two three four five six seven eight nine", "weight": 0, "tiers": []}]}
+	check(mod_problems(bad, [], [], {}).size() >= 6, "a made-up mod with everything wrong is caught")
 
 
 func test_recipes_point_at_real_items_components_and_materials() -> void:

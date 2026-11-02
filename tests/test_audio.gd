@@ -88,7 +88,7 @@ func test_loops_loop_in_their_import_settings() -> void:
 			check(s.get_length() >= 1.9, "%s is a few seconds long" % id)
 			if str(defs[id]["bus"]) in ["Ambience", "Room"]:
 				check(not bool(defs[id].get("positional", false)), "%s is ambience, heard from nowhere" % id)
-	eq(loops, 23, "23 loops: 5 of round 1, the neon beam, the pyre, the room tone, 5 beds, 5 hazards, the drone, the missile, medbay, smelter, fabricator")
+	eq(loops, 24, "24 loops: 5 of round 1, the neon beam, the pyre, the room tone, 5 beds, 5 hazards, the drone, the missile, medbay, smelter, fabricator, the flare")
 
 
 func test_buses_and_export() -> void:

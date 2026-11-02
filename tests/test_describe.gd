@@ -67,7 +67,7 @@ func test_every_family_keyword_effect_and_stat_in_use_has_its_words() -> void:
 				in_use[str(k)] = true
 	for k in ["acid", "spores", "shard", "sonic", "magnetic", "frost", "corrode", "split_on_shield", "intercept", "self_room", "needs_operator", "needs_crew_in_room"]:
 		in_use[k] = true  # every effect of effects.gd
-	for k in ["manned", "hot", "faulty", "ion_weak", "quirk", "ability", "ablative", "lattice_power", "ram"]:
+	for k in ["manned", "hot", "faulty", "ion_weak", "quirk", "ability", "ablative", "lattice_power", "ram", "mod"]:
 		in_use[k] = true  # the part's own
 	for k in _keywords_in_use():
 		in_use[k] = true
@@ -82,7 +82,7 @@ func test_every_family_keyword_effect_and_stat_in_use_has_its_words() -> void:
 		check(_words(str(kw.get("hover", ""))) <= 12, "the hover line of %s is 12 words at most: %s" % [k, kw.get("hover")])
 	for k in _lines("keywords"):
 		check(in_use.has(k), "keyword %s is used by something" % k)
-	for t in ["ammo", "gear", "special", "material"]:
+	for t in ["ammo", "gear", "special", "material", "mod"]:
 		check(_has_line("items", t), "item kind " + t)
 	for t in ["floor", "wall", "door", "piece", "cable", "belt"]:
 		check(_has_line("tiles", t) and _words(_lines("tiles")[t]) <= 8, "tile line " + t)

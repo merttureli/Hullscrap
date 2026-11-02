@@ -8,7 +8,7 @@ const Content = preload("res://scripts/data/content.gd")
 const RECIPES := "res://data/recipes.json"
 const MATERIALS := "res://data/materials.json"
 const ITEMS := "res://data/items.json"
-const ITEM_KINDS := ["ammo", "gear", "special"]
+const ITEM_KINDS := ["ammo", "gear", "special", "mod"]
 ## Mk1 parts of the standard line that are blueprints to find, not known at the start (every other
 ## Mk1 Scrap or Standard system is known; Neon is always unlocked).
 const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1", "laser_turret_mk1", "strafe_jets_mk1", "longburn_mk1", "intake_mk1", "belt_drive_scrap", "radar_mk1", "tractor_mk1"]  # intake_mk1, radar_mk1 and tractor_mk1 (the Raft loop): bought at Meridian or found, not known at the start; belt_drive_scrap: bought at Rusthold or found, its blueprint comes with the first drive (docs/CONTENT.md 4f)
