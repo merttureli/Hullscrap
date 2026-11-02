@@ -301,6 +301,13 @@ func _tractor_rig(id := "tractor_mk2") -> Array:
 	return [rig, rig["order"][0], rig["order"][2], rig["order"][1]]
 
 
+## A spawner with no natural spawning (the flow floor of data/debris.json would put a stray piece in the mouth): only the pieces a test adds.
+func _lone_dd() -> DriftDebris:
+	var d := _dd()
+	d.cfg["spawn"]["max_alive"] = 0
+	return d
+
+
 func test_q_hauls_debris_toward_the_nearest_intake() -> void:
 	var t := _tractor_rig()
 	var ship: Ship = t[0]["ship"]
@@ -310,19 +317,19 @@ func test_q_hauls_debris_toward_the_nearest_intake() -> void:
 	# two pieces 200 px out from the tractor, one nearer the left mouth, one nearer the right, both beyond an intake's own pull;
 	# the current (south) alone would drop them on the wall between the mouths
 	for case in [[-30.0, left, t[1]], [30.0, right, t[2]]]:
-		var d := _dd()
+		var d := _lone_dd()
 		d.tractor_on = true
 		var p := d.add_piece("scrap_chunk_s", emitter + Vector2(case[0], -200.0), Vector2.ZERO)
 		_run(d, ship, 8.0)
 		check(not d.pieces.has(p), "the piece is hauled in")
 		var e := d.take_events()
 		check(e.size() == 1 and e[0]["uid"] == case[2], "into the nearest intake (uid %d): %s" % [case[2], str(e)])
-	var off := _dd()
+	var off := _lone_dd()
 	var q := off.add_piece("scrap_chunk_s", emitter + Vector2(-30.0, -200.0), Vector2.ZERO)
 	_run(off, ship, 8.0)
 	check(off.picked == 0, "with Q up the same piece is not drawn in")
 	check(off.beam_lines.is_empty() and off.beams_on.is_empty(), "no beam shows")
-	var on := _dd()
+	var on := _lone_dd()
 	on.tractor_on = true
 	on.add_piece("scrap_chunk_s", emitter + Vector2(-30.0, -200.0), Vector2.ZERO)
 	on.step(ship, 0.05)
@@ -493,7 +500,7 @@ func test_one_mk1_intake_drifting_idle_brings_twenty_to_thirty_five_scrap_a_minu
 	var chase := _income(_rig([["intake_mk3", -2]]), true, false, 8, 1.5)
 	var both := _income(_rig([["intake_mk3", -6], ["tractor_mk2", 0]]), true, true, 8, 1.5)
 	print("sector3: scrap a minute: Mk1 idle %.1f (copper %.1f, polymer %.1f), Mk3 chasing %.1f, Mk3 chasing with the Mk2 tractor %.1f" % [idle["scrap"], idle["copper"], idle["polymer"], chase["scrap"], both["scrap"]])
-	check(idle["scrap"] >= 18.0 and idle["scrap"] <= 38.0, "an idle Mk1 earns about 20-35 scrap a minute (the steady flow of Beta 3: spawn every 1.1 s, 70 pieces): %.1f" % idle["scrap"])
+	check(idle["scrap"] >= 18.0 and idle["scrap"] <= 50.0, "an idle Mk1 earns about 20-50 scrap a minute (the steady flow of Beta 3: spawn every 1.1 s, 70 pieces; the floor of the flow, data/debris.json spawn.flow_min, lifted the top from 35): %.1f" % idle["scrap"])
 	check(idle["copper"] + idle["polymer"] >= 2.0, "and a bit of copper and polymer: %.1f and %.1f" % [idle["copper"], idle["polymer"]])
 	check(chase["scrap"] >= 1.5 * idle["scrap"] and chase["scrap"] <= 3.5 * idle["scrap"], "Mk3 chasing is about triple (a fast ship meets more pieces): %.1f against %.1f" % [chase["scrap"], idle["scrap"]])
 	check(both["scrap"] >= 1.1 * chase["scrap"], "and the tractor adds to it: %.1f against %.1f" % [both["scrap"], chase["scrap"]])

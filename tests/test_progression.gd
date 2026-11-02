@@ -261,5 +261,44 @@ func test_the_debris_flow_has_a_floor_a_heavy_ship_still_meets() -> void:
 	near(none._stream_weights()[0], 1.0, "(and data with no floor reads as 1)")
 
 
+# --- data/progression.json ----------------------------------------------------------------------------------------------
+
+const STAGE_KEYS := ["power_floor", "power_median", "warden", "enemy", "guns", "layers", "intakes", "fab", "plates", "accel_ratio", "known", "fuel_margin", "credits_over_toll"]
+const WARN_KEYS := ["outgunned_ratio", "skulls_ratio", "cliff_stage", "cliff_power", "hull_left", "scrap_surplus", "accel_min", "known_stall"]
+
+
+func test_progression_json_has_all_eight_stages_and_every_number() -> void:
+	var d = Content.read("res://data/progression.json")
+	check(d is Dictionary, "it parses")
+	if not d is Dictionary:
+		return
+	eq(int(d.get("version", 0)), 1, "version 1")
+	check(str(d.get("_doc", "")).length() > 200, "it documents itself")
+	eq(d["stages"].keys().size(), 8, "eight stages")
+	var last_power := -1.0
+	for s in range(1, 9):
+		check(d["stages"].has(str(s)), "stage %d is there" % s)
+		var row: Dictionary = d["stages"].get(str(s), {})
+		eq(row.keys().size(), STAGE_KEYS.size(), "stage %d has exactly the %d keys" % [s, STAGE_KEYS.size()])
+		for k in STAGE_KEYS:
+			check(row.has(k) and (row[k] is float or row[k] is int), "stage %d: %s is a number" % [s, k])
+		if row.size() < STAGE_KEYS.size():
+			continue
+		check(float(row["power_median"]) >= float(row["power_floor"]) and float(row["power_floor"]) > 0.0, "stage %d: the median is at or above the floor" % s)
+		check(float(row["fab"]) >= 1.0 and float(row["fab"]) <= 4.0, "stage %d: a fabricator level 1 to 4" % s)
+		check(float(row["accel_ratio"]) > 0.0 and float(row["accel_ratio"]) <= 1.5, "stage %d: the acceleration kept is a fraction of the start's" % s)
+		check(float(row["guns"]) >= 1.0 and float(row["intakes"]) >= 1.0 and float(row["known"]) >= 20.0, "stage %d: guns, intakes and known recipes are real" % s)
+		check(float(row["credits_over_toll"]) >= 0.0 and float(row["fuel_margin"]) >= 0.0, "stage %d: the margins are not negative" % s)
+		last_power = float(row["power_median"])
+	check(last_power > 0.0, "the last stage has a power")
+	eq(d["warn"].keys().size(), WARN_KEYS.size(), "the warn block has exactly its %d keys" % WARN_KEYS.size())
+	for k in WARN_KEYS:
+		check(d["warn"].has(k) and (d["warn"][k] is float or d["warn"][k] is int), "warn.%s is a number" % k)
+	near(float(d["warn"]["outgunned_ratio"]), 0.8, "outgunned below 0.8 of the warden")
+	near(float(d["warn"]["skulls_ratio"]), 1.6, "an enemy that outguns you from a ratio of 1.6 (4 skulls)")
+	eq(int(d["warn"]["cliff_stage"]), 3, "the cliff is at stage 3")
+	check(float(d["warn"]["accel_min"]) > 0.0 and float(d["warn"]["accel_min"]) < 1.0 and float(d["warn"]["hull_left"]) > 0.0 and float(d["warn"]["hull_left"]) < 1.0, "the fractions are fractions")
+
+
 func near(got: float, want: float, msg: String, eps := 1e-4) -> void:
 	check(absf(got - want) <= eps, "%s: expected %s, got %s" % [msg, str(want), str(got)])
