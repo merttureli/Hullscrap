@@ -5,7 +5,7 @@ extends Control
 ## Where it sits: top left in play mode (nothing is there), the right column under the part card in build mode (the middle is the ship's), the bottom
 ## right of the map (a compact two-line card in the footer, which has room; the nodes are everywhere else). Tips ("the first time ...") are a small note with a "Got it" button under
 ## the card: never modal, and they never pause a fight. In a fight and aboard another vessel there is no card, only the note, under the combat
-## schematic; over a screen (the station, the fabricator) and on the map it is a strip along the bottom edge. Mechanic keywords are coloured, with their hover line (data/advisor.json `keywords`). The setting
+## schematic (a warning there too, in amber, above it); over a screen (the station, the fabricator) and on the map it is a strip along the bottom edge. Mechanic keywords are coloured, with their hover line (data/advisor.json `keywords`). The setting
 ## (profile.ledger: Full, Warnings only, Off) decides what shows. front_door.gd makes it in a canvas layer of its own and sets `door`.
 ## One Control: its rect is the card with the note under it, so the mouse over it is its own and the wheel never zooms the world behind.
 
@@ -227,6 +227,11 @@ func layout() -> void:
 	var w := card_width()
 	var with_card := where in ["play", "build", "map"] and not card.is_empty()
 	var ch := _build_card(card, w, where == "map" and not expanded) if with_card else 0.0
+	var fight_warning: bool = where == "fight" and card.has("warning")  # in a fight the card is not up, but a warning still is (a four skull enemy)
+	if fight_warning:
+		w = NOTE_W
+		ch = _build_warning(card["warning"], w)
+		with_card = true
 	var th := 0.0
 	var tw := w
 	if not tip.is_empty():
@@ -250,12 +255,14 @@ func layout() -> void:
 		"map":  # the bottom right of the map's panel: the two lines in its footer; unfolded, over the corner of the map (the footer's words stay clear)
 			var bottom := view.y - MapView.MARGIN - 6.0 if not expanded else view.y - MapView.MARGIN - MapView.FOOT_H - 4.0
 			card_rect = Rect2(Vector2(view.x - MapView.MARGIN - MapView.PAD - w, bottom - ch), Vector2(w, ch)) if with_card else Rect2()
+		"fight":
+			card_rect = Rect2(NOTE_AT, Vector2(w, ch)) if fight_warning else Rect2()
 		_:
 			card_rect = Rect2(Vector2(8.0, Hud.TOP_H + 8.0), Vector2(w, ch)) if with_card else Rect2()
 	if th > 0.0:
 		match where:
 			"fight":
-				tip_rect = Rect2(NOTE_AT, Vector2(tw, th))
+				tip_rect = Rect2(NOTE_AT + (Vector2(0.0, ch + GAP) if fight_warning else Vector2.ZERO), Vector2(tw, th))
 			"modal", "board", "map":
 				tip_rect = Rect2(Vector2((view.x - tw) / 2.0, view.y - 6.0 - th), Vector2(tw, th))
 			_:
@@ -395,6 +402,18 @@ func _build_card(card: Dictionary, w: float, compact := false) -> float:
 		_card_dl.append({"k": "warn", "rect": r})
 		y += wh + 6.0
 	return y + 4.0
+
+
+## A warning on its own (a fight has no card): the amber band. Returns the height.
+func _build_warning(warn: Dictionary, w: float) -> float:
+	var wf := flow(str(warn["text"]), Vector2(PAD + 18.0, 9.0), w - 2.0 * PAD - 18.0, BODY, Color("#f3c26b"))
+	var wh := float(wf["h"]) + 14.0
+	var r := Rect2(Vector2(0.0, 0.0), Vector2(w, wh))
+	_card_dl.append({"k": "rect", "rect": r, "c": WARN_BG, "edge": UiKit.AMBER})
+	_card_dl.append({"k": "text", "p": Vector2(PAD - 2.0, 9.0 + float(BODY)), "s": "!", "size": TITLE, "c": UiKit.AMBER, "f": UiKit.bold()})
+	_card_dl.append_array(wf["items"])
+	_card_dl.append({"k": "warn", "rect": r})
+	return wh
 
 
 ## The progress line: "Guns 2/3" and a bar. Returns the y under it.

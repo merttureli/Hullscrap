@@ -118,7 +118,7 @@
    },
    {
     "id": "s1_fuel",
-    "title": "Carry {fuel} to the beacon.",
+    "title": "Hold enough {fuel} for the road to the beacon.",
     "why": "A stranded ship repays nobody. Ma has checked.",
     "check": {
      "fuel_margin": 0
@@ -323,7 +323,7 @@
    {
     "id": "s6_margin",
     "title": "Keep the lights on.",
-    "why": "A reactor gives nine to fifteen power, a gun one to three. Ma does the sums.",
+    "why": "Every gun draws power, and a ship in the red does not shoot. Ma does the sums.",
     "check": {
      "margin": 0
     }
@@ -347,7 +347,7 @@
    {
     "id": "s6_toll",
     "title": "Credits for the {toll}.",
-    "why": "Sell above six hundred scrap and the rest is arithmetic.",
+    "why": "Sell the surplus scrap at a station and the rest is arithmetic.",
     "check": {
      "credits_over_toll": "p:credits_over_toll"
     }
@@ -357,7 +357,7 @@
    {
     "id": "s7_arms",
     "title": "Field {=guns} guns behind {=layers} layers.",
-    "why": "Nobody out here is lost. They are all simply waiting for a bigger ship.",
+    "why": "The enemy has stopped being polite. Ma suggests you stop being small.",
     "check": {
      "guns": "p:guns",
      "layers": "p:layers",
@@ -393,7 +393,7 @@
    {
     "id": "s8_arms",
     "title": "Field {=guns} guns behind {=layers} layers.",
-    "why": "Nearly home, in the sense that the debt is. Do not stop adding.",
+    "why": "The last stage. Ma would like the collateral to finish what it started.",
     "check": {
      "guns": "p:guns",
      "layers": "p:layers",

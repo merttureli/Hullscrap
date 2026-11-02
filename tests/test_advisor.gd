@@ -305,6 +305,10 @@ func test_a_warning_fires_once_a_stage_unless_it_gets_worse() -> void:
 	check(a.warned["power"]["stage"] == 3, "remembered at its stage")
 	var ev := a.take_events()
 	eq(ev.filter(func(e): return e["type"] == "warning").size(), 3, "three warnings were said")
+	var off := _advisor()
+	off.mode_now = "off"
+	eq(off.fire(off.conditions({"stage": 2, "margin": -2.0}), 2), "", "Off: nothing fires")
+	eq(off.warned, {}, "and nothing is used up: it fires when the Ledger is turned on again")
 
 
 func test_every_warning_has_its_trigger() -> void:
@@ -718,7 +722,7 @@ func test_the_card_sits_clear_of_the_screens_it_is_over() -> void:
 					if r.size.x > 0.0:
 						check(SCREEN.encloses(r), "%s: %s is on the screen" % [what, str(r)])
 				if where in ["fight", "modal", "board"]:
-					check(c.card_rect.size.x == 0.0, "%s: there is no card, only the note" % what)
+					check((c.card_rect.size.x > 0.0) == (warn and where == "fight"), "%s: no card, only the note (and in a fight a warning, as a note of its own)" % what)
 				else:
 					check(c.card_rect.size.x > 0.0, "%s: the card" % what)
 				check(c.tip_rect.size.x > 0.0, "%s: the tip's note" % what)
@@ -736,6 +740,12 @@ func test_the_card_sits_clear_of_the_screens_it_is_over() -> void:
 	eq(fight.tip_rect.position, LedgerCard.NOTE_AT, "a fight: the note is under the combat schematic")
 	check(fight.tip_rect.end.x < 340.0, "and clear of the ship")
 	fight.free()
+	var warned := _card("fight", true, "first_fight")
+	eq(warned.card_rect.position, LedgerCard.NOTE_AT, "a fight with a warning: the warning takes the place under the schematic")
+	check(warned.tip_rect.position.y >= warned.card_rect.end.y and warned.tip_rect.position.x == warned.card_rect.position.x, "and the tip goes under it")
+	warned.click(warned._warn_rect.get_center())
+	check(warned.advisor.warning.is_empty(), "a click on it sends it away")
+	warned.free()
 	var strip := _card("modal", false, "first_station")
 	check(strip.tip_rect.end.y <= 900.0 and strip.tip_rect.size.y <= 34.0 and strip.tip_rect.position.y >= 860.0, "over a screen: a strip in the bottom margin of its panel: %s" % str(strip.tip_rect))
 	strip.free()

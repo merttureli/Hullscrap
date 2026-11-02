@@ -418,16 +418,17 @@ func warning_text(id: String) -> String:
 	return str(words.get("warnings", {}).get(id, {}).get("text", ""))
 
 
-## Fire the first of `conds` that may: it goes on the card for rules.warn_s seconds (its words, {} when the setting hides warnings),
-## and is remembered. Returns its id, "" when none fired.
+## Fire the first of `conds` that may: it goes on the card for rules.warn_s seconds and is remembered. Returns its id, "" when none fired
+## (and none does while the setting hides warnings: one not shown is not used up).
 func fire(conds: Array, at_stage: int) -> String:
+	if not shows("warnings"):
+		return ""
 	for c in conds:
 		if may_fire(c["id"], at_stage, float(c["level"])):
 			warned[c["id"]] = {"stage": at_stage, "level": float(c["level"])}
 			dirty = true
-			if shows("warnings"):
-				warning = {"id": c["id"], "text": warning_text(c["id"]), "left": rule("warn_s")}
-				events.append({"type": "warning", "id": c["id"], "text": warning["text"]})
+			warning = {"id": c["id"], "text": warning_text(c["id"]), "left": rule("warn_s")}
+			events.append({"type": "warning", "id": c["id"], "text": warning["text"]})
 			return c["id"]
 	return ""
 
