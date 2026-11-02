@@ -1,6 +1,6 @@
 {
 "weapons": {
-	"gauntling_arc_hammer": {"kind": "bolt", "damage_type": "kinetic", "damage": 6, "cooldown": 2.45, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 800, "effects": {"sonic": {"stun_s": 1.5}, "self_room": {"shock_dps": 2.0}}, "turret": false, "gimbal": 5},
+	"gauntling_arc_hammer": {"kind": "bolt", "sound": "sig_arc", "damage_type": "kinetic", "damage": 6, "cooldown": 2.45, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 800, "effects": {"sonic": {"stun_s": 1.5}, "self_room": {"shock_dps": 2.0}}, "turret": false, "gimbal": 5},
 	"gauntling_scrap_shotgun": {"kind": "flak", "damage_type": "kinetic", "damage": 1.5, "cooldown": 3.85, "range": 450, "shots": 6, "pierce": 0, "fire_chance": 0.0, "speed": 600, "spread": 14, "jam_chance": 0.15, "ammo": "scrap", "effects": {"shard": {"splinters": 1, "dmg": 0.75}}, "turret": false, "gimbal": 3},
 	"gauntling_tesla_picket": {"kind": "beam", "damage_type": "ion", "damage": 3, "cooldown": 6.15, "range": 700, "shots": 1, "pierce": 0, "fire_chance": 0.0, "duration": 1.2, "effects": {"shard": {"splinters": 2, "dmg": 0.75}, "self_room": {"shock_dps": 1.5}}, "turret": true, "gimbal": 0, "arc": 300, "track": 140, "accuracy": 0.85}
 }
