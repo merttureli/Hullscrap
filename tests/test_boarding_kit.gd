@@ -17,6 +17,7 @@ const Shops = preload("res://scripts/space/shops.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Describe = preload("res://scripts/ui/describe.gd")
+const Mortality = preload("res://scripts/crew/mortality.gd")
 const Content = preload("res://scripts/data/content.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
@@ -571,6 +572,49 @@ func test_a_crew_member_lost_aboard_takes_the_kit_with_them_and_the_confirm_says
 	eq(tess.kit["body"], "basic_armor", "a crew member who comes home still wears it")
 	eq(sh2.inventory.count("basic_armor"), 0, "and the hold does not have it")
 	b.leave()
+
+
+func test_a_crew_member_who_dies_anywhere_but_aboard_leaves_their_kit_in_the_hold() -> void:
+	var sh := _ship()
+	for item in ["exosuit", "overcharge_coil_mk1", "rifle"]:
+		sh.inventory.add(item, 1)
+	var rook := _crew(sh, "Rook")
+	Kit.set_body(sh, rook, "exosuit")
+	Kit.set_mod(sh, rook, 0, "overcharge_coil_mk1")
+	Kit.set_weapon(sh, rook, 1, "carbine")
+	eq([sh.inventory.count("exosuit"), sh.inventory.count("overcharge_coil_mk1"), sh.inventory.count("rifle")], [0, 0, 0], "worn: the hold has none of it")
+	# bleeding out on the ship
+	rook.pos = Vector2(0.5, 0.5)
+	rook.hp = 0.0
+	rook.down_t = Mortality.bleed_out_s()
+	var tess := _crew(sh, "Tess")
+	tess.pos = Vector2(1.5, 0.5)
+	tess.hp = 0.0
+	tess.down_t = Mortality.bleed_out_s()
+	var lines := Mortality.tick(sh, 0.1)
+	check(lines.has("Rook has died."), "Rook bled out")
+	check(lines.has("Rook's kit is back in the hold."), "and the chronicle says the kit is back: %s" % str(lines))
+	check(not lines.any(func(l): return str(l).begins_with("Tess's kit")), "Tess carried nothing but a sidearm: no line for her")
+	check(not sh.crew.has(rook) and sh.dead_crew.has("Rook"), "he is gone from the crew")
+	eq([sh.inventory.count("exosuit"), sh.inventory.count("overcharge_coil_mk1"), sh.inventory.count("rifle")], [1, 1, 1], "the exosuit, the coil and the rifle are in the hold again")
+	# an event that takes a crew member
+	var sh2 := _ship()
+	sh2.crew.erase(_crew(sh2, "Tess"))
+	sh2.inventory.add("basic_armor", 1)
+	var vik := _crew(sh2, "Rook")
+	Kit.set_body(sh2, vik, "basic_armor")
+	var c := Campaign.new(5)
+	var said := []
+	eq(c.lose_crew(sh2, said), "Rook", "the event takes Rook")
+	eq(said, ["Rook's kit is back in the hold."], "and says the kit is back")
+	eq(sh2.inventory.count("basic_armor"), 1, "in the hold")
+	# lost aboard a site: the kit goes with them (the leave test above), whatever the kit
+	var sh3 := _ship()
+	sh3.inventory.add("exosuit", 1)
+	var lost := _crew(sh3, "Rook")
+	Kit.set_body(sh3, lost, "exosuit")
+	Mortality.lose(sh3, lost)
+	eq(sh3.inventory.count("exosuit"), 0, "lost aboard a site: the kit is lost with them")
 
 
 func test_the_loadout_screen_sets_kits_before_going_aboard() -> void:

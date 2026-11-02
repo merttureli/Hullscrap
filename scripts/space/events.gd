@@ -667,9 +667,11 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 		var count = effects["lose_crew"]
 		var n: int = (1 if count else 0) if count is bool else int(count)
 		for i in n:
-			var gone: String = c.lose_crew(ship)
+			var kit_lines := []
+			var gone: String = c.lose_crew(ship, kit_lines)
 			if gone != "":
 				lines.append("%s is lost" % gone)
+				lines.append_array(kit_lines)
 	for id in _list(effects.get("log")):
 		if logs.has(str(id)):
 			var again: bool = c.logs_found.has(str(id))  # shown again, but kept once

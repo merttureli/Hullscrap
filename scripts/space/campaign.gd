@@ -34,6 +34,7 @@ const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const Shops = preload("res://scripts/space/shops.gd")
+const Kit = preload("res://scripts/board/kit.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -1068,13 +1069,16 @@ func add_crew(ship, who: String, species: String, character := "") -> String:
 	return who
 
 
-## A random crew member who is not the player leaves for good. Returns their name, "" if there is none.
-func lose_crew(ship) -> String:
+## A random crew member who is not the player leaves for good, and what they wore goes back to the hold (the line for it is added to `said`). Returns their name, "" if there is none.
+func lose_crew(ship, said: Array = []) -> String:
 	var others: Array = ship.crew.filter(func(m): return not m.is_player and not m.is_drone())  # (a drone is no crew)
 	if others.is_empty():
 		return ""
 	var gone = others[rng.randi() % others.size()]
 	ship.crew.erase(gone)
+	var back: String = Kit.give_back(ship, gone)
+	if back != "":
+		said.append(back)
 	return gone.name
 
 
