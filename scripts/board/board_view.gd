@@ -92,8 +92,6 @@ var _leave_t := 0.0  # seconds a "leave them behind?" question stands
 var _skitter := 0.0
 var _fight_t := 0.0  # seconds the combat music runs on after the last foe on the hunt
 var _mood := "explore"
-var _fight_t := 0.0  # seconds the combat music runs on after the last foe on the hunt
-var _mood := "explore"
 var _flicker := 0.0  # seconds of flickering lights left (the Hollow arrives)
 var _self_light: PointLight2D
 var _red: Array = []  # [[light, base energy, phase]]
