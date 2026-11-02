@@ -73,9 +73,12 @@ def render():
     for beat, m in ((6.0, 76), (10.0, 72), (13.5, 69)):
         s.put("bell", V.bell(m, 3.5, 3.5, 1.6, 1.3), beat, 0.25, pan=0.35, ms=3)
 
-    # --- texture
-    s.part("tex").put(V.hiss(s.L, 5) * 0.5 * (0.6 + 0.4 * S.lfo(s.L, 0.04)), 0, 1.0, 0.0)
-    s.part("tex").put(V.crackle(s.L, 6, 5.0) * 0.5, 0, 1.0, 0.0)
+    # --- texture: 12 dB under round 1 and silent for the first 8 s (fades in over 8-12 s, out over the last 3 s)
+    t = np.arange(s.L) / S.SR
+    ramp = np.clip((t - 8.0) / 4.0, 0, 1) * np.clip((s.L / S.SR - t) / 3.0, 0, 1)
+    ramp = (0.5 - 0.5 * np.cos(np.pi * ramp)).astype(np.float32)
+    s.part("tex").put(V.hiss(s.L, 5) * 0.5 * (0.6 + 0.4 * S.lfo(s.L, 0.04)) * ramp, 0, 1.0, 0.0)
+    s.part("tex").put(V.crackle(s.L, 6, 5.0) * 0.5 * ramp, 0, 1.0, 0.0)
 
     # --- mix
     pad_cut = s.auto([(0, 1100), (bar(4), 1350), (bar(12), 1700), (bar(20), 1900), (bar(28), 1450)], 2.5)
@@ -94,7 +97,7 @@ def render():
         "lead2": dict(g=-5, hp=250, send=0.5),
         "bell": dict(g=0, hp=350, send=0.7),
         "box": dict(g=-2, hp=350, send=0.6),
-        "tex": dict(g=-20, hp=1200, send=0.0),
+        "tex": dict(g=-32, hp=1200, send=0.0),
     }
     env = s.auto([(0, 0.8), (bar(4), 1.0), (bar(32), 1.0), (bar(34), 0.8)], 2.0)
     mix = s.mix(spec, S.make_ir(4.2, 24, 1.0, 11), -3, 5.0, env)

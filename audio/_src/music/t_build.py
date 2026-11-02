@@ -100,7 +100,7 @@ def render():
             pos = float(s.rng.choice([0.5, 1.5, 2.25, 3.25, 3.75]))
             s.put("clink", V.clank(int(s.rng.integers(0, 6)), float(s.rng.choice([1500.0, 1900.0, 2300.0])), 0.1, 0.5), bar(b) + pos,
                   float(s.rng.uniform(0.3, 0.7)), pan=float(s.rng.uniform(-0.8, 0.8)))
-    s.part("tex").put(V.hiss(s.L, 5) * 0.6, 0, 1.0, 0.0)
+    s.part("tex").put(V.hiss(s.L, 5) * 0.075, 0, 1.0, 0.0)   # hiss 18 dB under round 1
     s.part("tex").put(V.crackle(s.L, 6, 9.0) * 0.8, 0, 1.0, 0.0)
 
     # --- mix
