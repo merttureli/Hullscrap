@@ -15,15 +15,13 @@ extends SceneTree
 ## the fabricator can run it, else bought when docked. At a station it sells the surplus of the common materials (a credit each), mends the hull, buys fuel.
 ## A blueprint on a salvage page is worth more than a part.
 ## It builds on the real ship through BuildSession (a part goes on a free spot, else in a new annex room; cables are laid; power is added).
-## Fights run through the real arena, as tests/tool_balance.gd does, on a copy of the ship: parts are taken as mended between fights, hull
-## integrity is not (the campaign keeps hull_loss until a station repairs it). A fight is left (the 10 s jump spool) when the hull is under 30%. The exit
+## Fights run through the real arena, as tests/tool_balance.gd does, on the ship itself: its blocks keep their damage (structure.gd), the crew and the drone
+## mend them in ShipSim time between fights (mend()), a station repairs the rest for credits. A fight is left (the 10 s jump spool) when the structure is under 30% of the way to the wreck line. The exit
 ## warden's toll is paid when it is affordable, else fought (up to three rounds, with a trip to a station between). The output rows are one dictionary
 ## per run: its stages carry the ship before and after, the fights (rating, length, hull), the flows of every resource by source and the craft census.
 ## Not modelled: the real flying and aiming of a human, crew commands, boarding, the Hollow tide's pursuit (its debris thinning is, through the sector).
 
 const Ship = preload("res://scripts/ship/ship.gd")
-const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
-const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
@@ -43,6 +41,7 @@ const Weapons = preload("res://scripts/combat/weapons.gd")
 const Sector = preload("res://scripts/space/sector.gd")
 const Balance = preload("res://tests/tool_balance.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 
 const STEP := 1.0 / 60.0
@@ -74,7 +73,6 @@ var stay := 90.0
 var nodes_n := 7
 var verbose := false
 var weapons: Weapons
-var tile_defs: TileDefs
 var _pick := RandomNumberGenerator.new()
 var _carry := {}  # item -> the fraction of a unit the scaled debris yield has not paid yet
 # the state of the run being played
@@ -112,9 +110,6 @@ func _run() -> void:
 		_fan_out(int(args.get("jobs", 3)))
 	else:
 		weapons = Weapons.new()
-		var tdefs := TileDefs.new()
-		tdefs.load_file(Ship.TILES_PATH)
-		tile_defs = tdefs
 		var ids: Array = Array(str(args["ships"]).split(",")) if args.has("ships") else STARTERS
 		var seeds := int(args.get("seeds", 10))
 		var first := int(args.get("first", 0))
@@ -225,11 +220,11 @@ func play_stage() -> bool:
 	var docked_here := false
 	while seen.size() < nodes_n and steps < 14:
 		steps += 1
-		var weak: bool = c.hull_left(ship) < 0.55 * c.hull_max(ship)
+		var weak: bool = Structure.wreck_margin(ship) < 0.55
 		var urgent: bool = ship.inventory.count("fuel") < 3 or weak
 		if (urgent or not docked_here) and c.station_cfg(c.current).is_empty():
 			var stn := nearest_station(6 if urgent else 3)
-			if stn != "" and (urgent or ship.inventory.count("fuel") < 4 or c.hull_loss > 12 or ship.inventory.count("credits") > 200):
+			if stn != "" and (urgent or ship.inventory.count("fuel") < 4 or Structure.missing_hp(ship) > 30.0 or ship.inventory.count("credits") > 200):
 				for hop in path_to(stn):
 					if not go(hop):
 						return end_stage(false)
@@ -284,7 +279,7 @@ func go(to: String) -> bool:
 		fuel_up()
 	var r: Dictionary = c._jump_now(to, ship, false)
 	if not r["ok"] and r["why"] == Campaign.NO_FUEL:
-		if c.hull_left(ship) > 25:
+		if Structure.wreck_margin(ship) > 0.25:
 			r = c._jump_now(to, ship, true)
 			st["drift_jumps"] += 1
 		else:
@@ -498,6 +493,7 @@ func collect(s, seconds: float) -> bool:
 			_carry[id] = extra - whole
 			ship.inventory.add(id, whole)
 	st["minutes"] += seconds / 60.0
+	mend(seconds)
 	flow("debris", before)
 	# the contacts that come by while the ship stays
 	var step := 30.0
@@ -602,7 +598,7 @@ func effects_value(eff: Dictionary, ev: Dictionary) -> float:
 		for f in eff["rep"]:
 			v += 3.0 * float(eff["rep"][f])
 	if eff.has("fight"):
-		var weak: bool = c.hull_left(ship) < 0.4 * c.hull_max(ship)
+		var weak: bool = Structure.wreck_margin(ship) < 0.4
 		v -= SKULL_COST[rate_fight(str(eff["fight"]))] * (4.0 if weak else 1.0) - 40.0 + (300.0 if weak else 0.0)
 	if eff.has("ending"):
 		v += 500.0
@@ -642,17 +638,17 @@ func rate_fight(value: String) -> int:
 
 # --- fights ----------------------------------------------------------------------------------------
 
-## A copy of `src` to fight with (its parts whole, its crew alive): the ship through its save dictionary.
-func clone(src: Ship) -> Ship:
-	var copy := Ship.new("Ship", ShipGrid.new(src.grid.size, tile_defs))
-	var why := copy.load_dict(src.to_dict())
-	if why != "":
-		printerr("progress: clone: " + why)
-	copy.crew_plan = src.crew_plan.duplicate(true)
-	if copy.crew.is_empty():
-		Jobs.spawn_crew(copy)
-	copy.rng_seed = src.rng_seed
-	return copy
+## Let the crew and the drone mend for up to `seconds` of ShipSim time (they stop when every block is whole).
+func mend(seconds: float) -> void:
+	if Structure.missing_hp(ship) <= Structure.EPS:
+		return
+	var sim := ShipSim.new()
+	sim.ships = [ship]
+	var t := 0.0
+	while t < seconds and Structure.missing_hp(ship) > Structure.EPS:
+		sim.step(0.2)
+		t += 0.2
+	sim.free()
 
 
 ## Fight the enemy a `fight` effect names. Returns {dead, goto, salvage...}. Runs the real arena, then the campaign's fight_done and the salvage pick.
@@ -666,7 +662,7 @@ func fight_path(path: String, after_win: Dictionary, why: String, value := "") -
 	var out := {"dead": false, "goto": "", "salvage": {}, "salvage_id": ""}
 	if enemy == null:
 		return out
-	var player := clone(ship)
+	var player := ship  # the ship itself: its blocks keep what the fight does to them
 	var th := Threat.rate(enemy, player)
 	var gen: Dictionary = enemy.get_meta("shipgen", {})
 	var rec := {"why": why, "faction": str(gen.get("faction", "?")), "size": str(gen.get("size", "?")), "budget": float(gen.get("budget", 0.0)), "skulls": th["skulls"], "ratio": th["ratio"],
@@ -677,8 +673,7 @@ func fight_path(path: String, after_win: Dictionary, why: String, value := "") -
 	var sess := Session.new()
 	sess.start(player, enemy, 1 + c.jumps * 31 + int(st["nodes"]) * 7 + run["seed"])
 	var me = sess.arena.ships[Session.PLAYER]
-	me.hull = c.fight_hull(me.hull_max)
-	var hull0: float = me.hull
+	var hull0: float = 100.0 * Structure.wreck_margin(me)
 	var pilot := PilotAI.new(sess.arena, Session.PLAYER, Session.ENEMY, {"aim_skill": float(Threat.config()["player_aim"])})
 	pilot.foe_morale = sess.morale
 	var a = sess.arena
@@ -686,7 +681,7 @@ func fight_path(path: String, after_win: Dictionary, why: String, value := "") -
 	var ticks := int((WARDEN_CAP if why == "warden" else FIGHT_CAP) * 60.0)
 	var flee_at := -1
 	while sess.state() == "fighting" and n < ticks:
-		if flee_at < 0 and me.hull < 0.3 * me.hull_max and sess.arena.ships[Session.ENEMY].hull > 0.3 * sess.arena.ships[Session.ENEMY].hull_max:
+		if flee_at < 0 and Structure.wreck_margin(me) < 0.3 and Structure.wreck_margin(sess.arena.ships[Session.ENEMY]) > 0.3:
 			flee_at = n + int(Session.JUMP_SPOOL * 60.0)  # the player turns for the jump drive: ten seconds to survive
 		if flee_at >= 0 and n >= flee_at:
 			break
@@ -707,16 +702,18 @@ func fight_path(path: String, after_win: Dictionary, why: String, value := "") -
 	rec["state"] = state
 	rec["t"] = n * STEP
 	rec["hull0"] = hull0
-	rec["hull_max"] = me.hull_max
-	rec["hull_after"] = me.hull
-	rec["foe_hull"] = foe.hull / maxf(foe.hull_max, 1.0)
+	rec["hull_max"] = 100.0
+	rec["hull_after"] = 100.0 * Structure.wreck_margin(me)
+	rec["foe_hull"] = Structure.wreck_margin(foe)
 	st["fights"].append(rec)
 	st["minutes"] += n * STEP / 60.0 + 0.5
-	var res := {"state": state, "hull": me.hull, "hull_max": me.hull_max, "enemy": enemy, "threat": th["skulls"]}
+	var res := {"state": state, "enemy": enemy, "threat": th["skulls"]}
 	sim.free()
 	var before := inv_copy()
 	var done: Dictionary = c.fight_done(res, ship, after_win)
 	flow("loot", before)
+	if state != "lost":
+		mend(60.0)
 	if state == "lost":
 		run["cause"] = "%s %s (%d skulls, ratio %.2f) at stage %d, jump %d" % [rec["faction"], rec["size"], th["skulls"], th["ratio"], c.stage, c.jumps]
 		rec["fatal"] = true
@@ -755,11 +752,10 @@ func dock() -> void:
 			var extra: int = ship.inventory.count(item) - int(keep[item])
 			if extra > 0 and ship.inventory.count("credits") < 2500:
 				c.sell(ship, item, mini(extra, 2500 - ship.inventory.count("credits")))
-	if services.has("repair") and c.hull_loss > 0:
-		var cost_each: int = c.price(int(c.cfg["prices"]["repair"]), c._station_faction(id), ship)
-		var pts := mini(c.hull_loss, maxi(0, (ship.inventory.count("credits") - 20) / maxi(cost_each, 1)))
-		if pts > 0:
-			c.repair(ship, id, pts)
+	if services.has("repair"):  # every damaged block, or nothing: the price is for the lot
+		var cost: int = c.repair_cost(ship, id)
+		if cost > 0 and ship.inventory.count("credits") >= cost:
+			c.repair(ship, id)
 	fuel_up()
 	if services.has("recruit") and not c.offers.get(id, []).is_empty():
 		var price: int = c.price(int(c.cfg["prices"]["recruit"]), c._station_faction(id), ship)
@@ -1394,7 +1390,7 @@ func snapshot() -> Dictionary:
 		census["ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short")] = int(census.get("ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short"), 0)) + 1
 	return {"census": census, "power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
 		"margin": int(s["produce"]) - int(s["consume"]), "fab": s["fab"], "armour": s["armour"], "medbays": s["medbays"], "known": ship.crafting.known.size(), "crew": ship.crew.size(),
-		"hull_left": c.hull_left(ship), "hull_max": c.hull_max(ship), "held": held, "spare_parts": part_count, "jumps": c.jumps, "debt": c.debt, "tier": c.tier()}
+		"hull_left": roundi(100.0 * Structure.wreck_margin(ship)), "hull_max": 100, "held": held, "spare_parts": part_count, "jumps": c.jumps, "debt": c.debt, "tier": c.tier()}
 
 
 # --- the report ------------------------------------------------------------------------------------
