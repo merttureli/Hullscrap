@@ -7,7 +7,7 @@ extends SceneTree
 ## surrender) against generated enemies of that stage that carry no shield, enemies that do, Hollow ghosts, and the Lattice wardens (the
 ## faction of morale style `hollow`, which never breaks: the control that a morale change must leave as it was), N seeds each.
 ##   godot --headless --path . --script res://tests/tool_standoff.gd [-- key=value ...]
-## Keys: stages (default 3,4,5; 1 to 5 have a build), seeds (per stage and kind, default 20), cap (s, default 180), kinds (plain,shield,ghost,warden), jobs (processes, default 2),
+## Keys: paim (what-if: the player pilot's aim_skill; 0.8+ snipes guns first), stages (default 3,4,5; 1 to 5 have a build), seeds (per stage and kind, default 20), cap (s, default 180), kinds (plain,shield,ghost,warden), jobs (processes, default 2),
 ## out (a JSON of every fight's row), sum (print the table of an out file instead of fighting: sum=<path,path>). Internal: shard (k/n), rows.
 ## What-ifs, for this run only (data/morale.json held in memory): break=<x> (break_structure), ghost_flee=<share> (the Hollow style: that share of
 ## the rolls flee, the rest fight on), shield_recharge=<x> (every shield part's recharge, seconds a layer), shield_cap (not here: stages 4+ have none).
@@ -127,7 +127,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters"]:
+	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters", "paim"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
@@ -291,7 +291,7 @@ func fight(stage: int, e: Dictionary, starter := "") -> Dictionary:
 	Jobs.spawn_crew(player)
 	var sess := Session.new()
 	sess.start(player, enemy, 1 + int(e["seed"]) % 100000)
-	var pilot := PilotAI.new(sess.arena, Session.PLAYER, Session.ENEMY, {"aim_skill": float(Threat.config()["player_aim"])})
+	var pilot := PilotAI.new(sess.arena, Session.PLAYER, Session.ENEMY, {"aim_skill": float(args.get("paim", Threat.config()["player_aim"]))})
 	pilot.foe_morale = sess.morale
 	var a = sess.arena
 	var d := {"p_shots": 0, "e_shots": 0, "p_hull": 0.0, "e_hull": 0.0, "p_part": 0.0, "e_part": 0.0, "p_shield": 0, "e_shield": 0, "p_hits": 0, "e_hits": 0,
