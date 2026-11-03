@@ -514,6 +514,26 @@ func test_a_powered_medbay_heals_15_a_second_and_brings_the_downed_back() -> voi
 	near(p.hp, 100.0, "healed")
 
 
+func test_a_medbay_in_a_room_with_no_air_heals_nobody_who_breathes() -> void:
+	var d := _medbay_ship(true)
+	var ship: Ship = d["ship"]
+	var p := _player(10, 10)
+	p.hurt(50.0)
+	ship.crew.append(p)
+	var jobs := Jobs.new()
+	near(jobs._heal_rate(ship, p), 15.0, "(setup) with air the medbay heals 15 a second")
+	var room: int = ship.atmosphere.room_at(p.cell())
+	ship.atmosphere.pressure[room] = 0.0
+	near(jobs._heal_rate(ship, p), 0.0, "with its room empty it heals nobody who breathes (the bed's rule, fixes4)")
+	ship.atmosphere.pressure[room] = 0.14
+	near(jobs._heal_rate(ship, p), 0.0, "and just under no_air_below")
+	ship.atmosphere.pressure[room] = 0.16
+	near(jobs._heal_rate(ship, p), 15.0, "it heals again just over it")
+	ship.atmosphere.pressure[room] = 0.0
+	p.equip("suit")
+	near(jobs._heal_rate(ship, p), 15.0, "a suit wearer cannot suffocate and is still healed, as on a bed")
+
+
 func test_an_unpowered_medbay_does_nothing() -> void:
 	var d := _medbay_ship(false)
 	var ship: Ship = d["ship"]
