@@ -72,7 +72,7 @@
           {"weight": 50, "text": "Vane checks the records, the output and you, and finds all three wanting. The Forge pays a fine; you pay a smaller one.", "effects": {"items": {"credits": -30}, "rep": {"lumen": -1}}}
         ]},
         {"text": "[Prismatic] Answer the assessor in the Choir's own register.", "requires": {"species": "prismatic"}, "outcomes": [
-          {"weight": 100, "text": "Your Prismatic and the assessor trade three notes that mean something. Vane glows pink, then a deeper rose, then sets the lease aside and offers a grace period of one season. The Forge workers faint, politely.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}}}
+          {"weight": 100, "text": "Your Prismatic and the assessor trade three notes that mean something. Vane glows pink, then a deeper rose, then sets the lease aside and offers a grace period of one season. The Forge workers faint.", "effects": {"items": {"crystal": 3}, "rep": {"lumen": 2}}}
         ]},
         {"text": "[Emberkin] Say the Forge is working as hard as the sun allows.", "requires": {"species": "emberkin"}, "outcomes": [
           {"weight": 100, "text": "Your Emberkin points out that the Forge is two degrees under the Lumen's own spec. Vane checks, and it is. The lease is amended by hand, in light, and the workers carry your Emberkin off on their shoulders.", "effects": {"items": {"plasma_cell": 3}, "rep": {"lumen": 1}}}
@@ -201,7 +201,7 @@
       ]
     },
     {
-      "id": "forge_meltdown", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_emberkin_forges", "jumps_min": 3},
+      "id": "forge_meltdown", "type": "distress", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_emberkin_forges", "jumps_min": 3},
       "text": "A reactor ship, Afterglow, is going critical in the lane: her core glowing white through the hull, her crew hanging off the outside in a ring. Emberkin engineers in thin shirts are trying to hold the core steady with their bare hands. 'Not hot yet!' someone calls. 'Not hot yet!' It is very, very hot.",
       "choices": [
         {"text": "Go in and help vent the core.", "requires": {"crew_min": 1}, "outcomes": [
@@ -225,7 +225,7 @@
           {"weight": 10, "text": "The steam scalds your Mire and boils the crew's tea. The core cools anyway.", "effects": {"items": {"credits": 30}, "crew_hp": -15}}
         ]},
         {"text": "Keep your distance and offer advice.", "outcomes": [
-          {"weight": 100, "text": "You stay out of range and shout cooling advice over the comm. The Emberkin thank you, politely, and ignore every word. Somehow it works.", "effects": {"items": {"credits": 10}}}
+          {"weight": 100, "text": "You stay out of range and shout cooling advice over the comm. The Emberkin thank you and ignore every word. Somehow it works.", "effects": {"items": {"credits": 10}}}
         ]}
       ]
     },

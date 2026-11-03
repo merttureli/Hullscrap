@@ -27,7 +27,7 @@
       "text": "The yard's Gauntlings are holding a contest: Best Accident. A circle of crates, forty contestants, a panel of three judges with scoring cards. The current leader lost both legs to a reactor, a goat and a pair of dice. A banner reads NO BORING ACCIDENTS. A judge looks at you. 'You. Do you have one?'",
       "choices": [
         {"text": "Tell the story of your worst day.", "outcomes": [
-          {"weight": 55, "text": "You tell it. The judges listen politely and give you 6, 6 and 7, the best score for a non-Gauntling in the history of the contest. They award you a medal made of washers, and a printed copy of the results.", "effects": {"items": {"credits": 30, "scrap": 20}, "crew_hp": 5, "log": "log_scrapyard_best_accident"}},
+          {"weight": 55, "text": "You tell it. The judges listen and give you 6, 6 and 7, the best score for a non-Gauntling in the history of the contest. They award you a medal made of washers, and a printed copy of the results.", "effects": {"items": {"credits": 30, "scrap": 20}, "crew_hp": 5, "log": "log_scrapyard_best_accident"}},
           {"weight": 45, "text": "You tell it. The judges give you 2, 2 and 3. 'Too safe,' says one. 'Try falling off something.' The crowd laughs with you, mostly.", "effects": {"crew_hp": 5, "log": "log_scrapyard_best_accident"}}
         ]},
         {"text": "Say you have never had an accident.", "outcomes": [
@@ -42,12 +42,12 @@
       ]
     },
     {
-      "id": "scrapyard_ion_storm", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_gauntling_scrapyards", "jumps_min": 3},
+      "id": "scrapyard_ion_storm", "type": "anomaly", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_gauntling_scrapyards", "jumps_min": 3},
       "text": "The sky ahead flickers violet: an ion storm, rolling over the yard in a wall of static. Every Gauntling on the Row is lashing down hatches, killing lamps and wrapping their dreadlocks in foil. 'Ion!' someone yells. 'Get your arm in!' A Gauntling sits down on the dock, folds her hands and waits to be stunned, with the air of a woman who has done this before.",
       "choices": [
         {"text": "Shelter on the Row.", "outcomes": [
           {"weight": 60, "text": "You tuck in behind the yard's old reactor shield as the storm roars over. Inside the shelter the Gauntlings play cards in the dark, laughing, waiting for their pins to clear. When it passes, the whole Row cheers, and deals you in.", "effects": {"crew_hp": 5, "log": "log_scrapyard_ion_day"}},
-          {"weight": 25, "text": "The storm finds a gap in the shield. Every system on your ship flickers and every Gauntling in the room freezes for three seconds, mid-sentence. You wait politely.", "effects": {"crew_hp": -5, "hull": -5}},
+          {"weight": 25, "text": "The storm finds a gap in the shield. Every system on your ship flickers and every Gauntling in the room freezes for three seconds, mid-sentence. You wait.", "effects": {"crew_hp": -5, "hull": -5}},
           {"weight": 15, "text": "A discharge arcs through the hull. The lights die, the helm freezes, and you drift for ten minutes while everything reboots.", "effects": {"crew_hp": -10, "hull": -10}}
         ]},
         {"text": "Fly into the storm to harvest ion-charged scrap.", "requires": {"crew_min": 1}, "outcomes": [
@@ -213,8 +213,8 @@
       ]
     },
     {
-      "id": "scrapyard_live_hulk", "type": "wreck_field", "weight": 8, "once": false, "requires": {"flag": "in_gauntling_scrapyards", "jumps_min": 3},
-      "text": "A dead gunship, the Final Notice, drifts at the edge of the Row, and every plate on her hull crackles with blue-white light. Her reactor is still live, still arcing, still sending bolts through the walls. A scavenger who flew into her docking bay is frozen in a ball of static, waving politely. 'Do not touch the hull,' says the Row's warning buoy. 'Do not touch anything.'",
+      "id": "scrapyard_live_hulk", "type": "wreck_field", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_gauntling_scrapyards", "jumps_min": 3},
+      "text": "A dead gunship, the Final Notice, drifts at the edge of the Row, and every plate on her hull crackles with blue-white light. Her reactor is still live, still arcing, still sending bolts through the walls. A scavenger who flew into her docking bay is frozen in a ball of static, waving. 'Do not touch the hull,' says the Row's warning buoy. 'Do not touch anything.'",
       "choices": [
         {"text": "Go aboard and salvage.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 40, "text": "You edge through the arcing corridors with rubber gloves and a prayer. The reactor room is a cathedral of lightning. You pry loose a coil, a plate and a core, and walk out with your hair on end. The bank's last notice is pinned to the bridge door.", "effects": {"items": {"copper": 35, "titanium": 10, "scrap": 40}, "crew_hp": -15, "log": "log_scrapyard_final_notice"}},
@@ -234,7 +234,7 @@
         ]},
         {"text": "[Basalt] Walk the corridors. Rock does not conduct.", "requires": {"species": "basalt"}, "outcomes": [
           {"weight": 90, "text": "Your Basalt walks the arcing corridors in no hurry, lightning crawling harmlessly down their back, and takes what they want. They return with a haul, a faint smell of ozone and a new haircut.", "effects": {"items": {"copper": 40, "titanium": 12, "scrap": 45}, "log": "log_scrapyard_final_notice"}},
-          {"weight": 10, "text": "A bolt finds a seam in the rock, and your Basalt winces, politely. They carry on.", "effects": {"items": {"copper": 30, "titanium": 8}, "crew_hp": -10, "log": "log_scrapyard_final_notice"}}
+          {"weight": 10, "text": "A bolt finds a seam in the rock, and your Basalt winces. They carry on.", "effects": {"items": {"copper": 30, "titanium": 8}, "crew_hp": -10, "log": "log_scrapyard_final_notice"}}
         ]},
         {"text": "Free the scavenger and leave the rest.", "outcomes": [
           {"weight": 100, "text": "You use a long pole to push the scavenger out of the static ball. He hangs in the lane, waving, then drifts off, grateful. His cargo drifts with him. He tosses you thirty credits from a very long way off.", "effects": {"items": {"credits": 30}}}
@@ -243,7 +243,7 @@
     },
     {
       "id": "scrapyard_new_part", "type": "trader", "weight": 8, "once": false, "requires": {"flag": "in_gauntling_scrapyards"},
-      "text": "A Gauntling on a repair skiff pulls alongside, politely, and looks at your ship with a hungry eye. 'That is a nice coil,' she says, pointing at your reactor housing. 'May I have it? I would like to be able to say I had one.' Her whole body is made of parts nobody wanted. Her lamp eye is tilted in hope.",
+      "text": "A Gauntling on a repair skiff pulls alongside and looks at your ship with a hungry eye. 'That is a nice coil,' she says, pointing at your reactor housing. 'May I have it? I would like to be able to say I had one.' Her whole body is made of parts nobody wanted. Her lamp eye is tilted in hope.",
       "choices": [
         {"text": "Give her a coil (10 copper).", "requires": {"items": {"copper": 10}}, "pay": true, "outcomes": [
           {"weight": 100, "text": "She cries real tears of oil. She takes the coil to her chest, installs it on the spot, and does a little lap of the ship. 'It is the best part I have,' she says. She gives you a box of her own spare parts.", "effects": {"items": {"scrap": 40, "credits": 20}, "crew_hp": 10}}
@@ -254,7 +254,7 @@
         {"text": "[Gauntling] Offer a part of your own.", "requires": {"species": "gauntling"}, "outcomes": [
           {"weight": 100, "text": "Your Gauntling unscrews their little finger and offers it. The other Gauntling is so moved she cannot speak. They trade fingers, and both go off with a spring in their step. The skiff's pilot leaves you a hold of cable as a thank-you.", "effects": {"items": {"copper": 30, "scrap": 30}, "crew_hp": 10}}
         ]},
-        {"text": "Decline politely.", "outcomes": [
+        {"text": "Decline.", "outcomes": [
           {"weight": 100, "text": "She nods, tilts her lamp, and says, 'Thank you for hearing me.' She sets off, and the skiff's wake shines like a trail of stars.", "effects": {}}
         ]}
       ]

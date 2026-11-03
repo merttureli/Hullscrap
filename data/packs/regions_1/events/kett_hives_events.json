@@ -51,7 +51,7 @@
           {"weight": 100, "text": "Your Kett takes the sixth place in the knot for one long shift and comes back tired and glowing with a full share and a new nickname: 'Six'. The knot's pad of shares is theirs to keep.", "effects": {"items": {"credits": 55}, "crew_hp": 5, "log": "log_hive_quarter_shares"}}
         ]},
         {"text": "[Mechanical] Offer a spare pair of hands.", "requires": {"trait": "mechanical"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling bolts on to the end of the line as an extra pair, perfectly in time. The knot, thrilled, offers to make them an honorary Kett. They decline, politely. The share is paid in full.", "effects": {"items": {"credits": 50}}}
+          {"weight": 100, "text": "Your Gauntling bolts on to the end of the line as an extra pair, perfectly in time. The knot, thrilled, offers to make them an honorary Kett. They decline. The share is paid in full.", "effects": {"items": {"credits": 50}}}
         ]},
         {"text": "Watch the knot work for a while.", "outcomes": [
           {"weight": 100, "text": "Five Kett patch a wall in perfect rhythm. You watch for ten minutes. At the end the knot bows, in sequence, five times, and you bow back, once, feeling inadequate.", "effects": {}}
@@ -215,7 +215,7 @@
       ]
     },
     {
-      "id": "hive_hatching", "type": "wreck_field", "weight": 7, "once": false, "requires": {"flag": "in_kett_hives", "jumps_min": 3},
+      "id": "hive_hatching", "type": "wreck_field", "weight": 7, "once": false, "requires": {"stage_min": 4, "flag": "in_kett_hives", "jumps_min": 3},
       "text": "A hive-hulk with every cell closed and a low roar coming from inside. The beacon says BROOD HATCHING. DO NOT ENTER. KEEP THE DOORS CLOSED. The roar is the sound of ten thousand very new Kett, all learning at once what they are and who is theirs. The doors are bulging.",
       "choices": [
         {"text": "Go in and shepherd the brood.", "requires": {"crew_min": 1}, "outcomes": [

@@ -34,7 +34,7 @@
           {"weight": 30, "text": "You win, on points and a lucky parry. The Captain bows, pays the stake, and invites you to dinner, which you decline out of nerves. They send a hamper.", "effects": {"items": {"credits": 40, "scrap": 20}, "rep": {"clans": 1}}},
           {"weight": 70, "text": "You are out-fought, in a very polite way, and returned through the tube with a handshake. The Captain takes the toll, as agreed, and sends back a small tin of liniment.", "effects": {"items": {"credits": -30}, "crew_hp": -10}}
         ]},
-        {"text": "Decline politely, in writing (20 credits for the paper).", "requires": {"credits": 20}, "outcomes": [
+        {"text": "Decline, in writing (20 credits for the paper).", "requires": {"credits": 20}, "outcomes": [
           {"weight": 100, "text": "It takes ten minutes and your best pen. The Captain reads your regrets, replies with a note of her own, and extracts a modest fee for the paper. You are free to go. She adds, in her own hand: 'Another time.'", "effects": {"items": {"credits": -20}}}
         ]},
         {"text": "Refuse the pleasantries and fight the ship.", "outcomes": [

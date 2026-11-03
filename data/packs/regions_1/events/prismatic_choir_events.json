@@ -157,7 +157,7 @@
       ]
     },
     {
-      "id": "choir_ion_front", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_prismatic_choir", "jumps_min": 3},
+      "id": "choir_ion_front", "type": "anomaly", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_prismatic_choir", "jumps_min": 3},
       "text": "An ion front is coming in over the Choir: a wall of violet static a hundred kilometres wide, rolling toward the spires. The Prismatics are lashing down, humming a low frightened line. They take double damage from ion, and each of them knows what that means. A voice from the Cantor's balcony: 'Everyone who can fly, please come and help.'",
       "choices": [
         {"text": "Fly into the front to blunt it.", "requires": {"crew_min": 1}, "outcomes": [

@@ -63,7 +63,7 @@
 			]
 		},
 		{
-			"id": "pirate_ambush", "type": "pirate", "weight": 8,
+			"id": "pirate_ambush", "type": "pirate", "weight": 8, "requires": {"stage_min": 4},
 			"text": "No hail, no toll. The first you hear of them is the hull ringing like a dropped pan.",
 			"choices": [
 				{"text": "Man the guns.", "outcomes": [
@@ -100,7 +100,7 @@
 			"after_win": {"text": "Their ledger tumbles out of the wreck, still open. The last line reads: Gantry, one hull, 4 jumps overdue. You tear that page out and pocket the petty cash.", "effects": {"items": {"credits": 40}, "rep": {"clans": -1}}}
 		},
 		{
-			"id": "wreck_dead_freighter", "type": "wreck_field", "weight": 12,
+			"id": "wreck_dead_freighter", "type": "wreck_field", "weight": 12, "requires": {"stage_min": 4},
 			"text": "A dead freighter turns end over end, hold doors open like a surprised mouth. Whatever killed her took the crew and left the cargo, which is the wrong way round for a pirate and the right way round for you.",
 			"choices": [
 				{"text": "Cut her open for scrap.", "outcomes": [
@@ -153,7 +153,7 @@
 				{"text": "Take a reading from a safe distance.", "outcomes": [
 					{"weight": 70, "text": "Your scanner prints a graph that looks like a signature. Someone at Meridian will pay for that.", "effects": {"items": {"credits": 30}}},
 					{"weight": 30, "text": "The scanner feeds back through every console on the bridge. You say a few words that don't go in the log.", "effects": {"crew_hp": -10}}]},
-				{"text": "Back away slowly.", "outcomes": [{"weight": 100, "text": "The light dims, politely, as if it understood.", "effects": {}}]}
+				{"text": "Back away slowly.", "outcomes": [{"weight": 100, "text": "The light dims, as if it understood.", "effects": {}}]}
 			]
 		},
 		{

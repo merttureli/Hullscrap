@@ -1,0 +1,25 @@
+{
+	"logs": [
+		{
+			"id": "log_story_painted_rock",
+			"title": "Third try",
+			"ship": "Deborah's Rock",
+			"faction": "clans",
+			"text": "First try, the paint ran. Second try, the wind took the tin. Third try, I held it still with my knees and both hands and it came out straight.\nI asked her at the airlock. She said yes before I finished the question.\nI am painting this from outside, in a suit, in the cold, and I have never been warmer."
+		},
+		{
+			"id": "log_story_honesty_ledger",
+			"title": "Honesty box, last page",
+			"ship": "Mooring 12",
+			"faction": "clans",
+			"text": "Took one cell. Left two. Do the maths, I'm trying.\nTook the tape. Left a better tape.\nTook nothing. Wanted to say I was here.\nI MEANT TO COME BACK. (Underneath: YOU DID.)"
+		},
+		{
+			"id": "log_story_cairn_plates",
+			"title": "Marginalia",
+			"ship": "Plate Cairn",
+			"faction": "clans",
+			"text": "Hold My Fuel: sorry about the noise.\nSecond Hand: thanks for the weld.\nBlue Tuesday: we were here and we're all right.\nSlow Boat: we'll be a while. Save us a plate."
+		}
+	]
+}

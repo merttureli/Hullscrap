@@ -493,6 +493,671 @@
 					]
 				}
 			]
+		},
+		{
+			"id": "bsite_room_made_bunks",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "room"
+			},
+			"title": "Bunks, made",
+			"text": "Twelve bunks in two rows, every one made with hospital corners, every pillow squared. Dust lies on them in a single even layer, like a second blanket. Only the lowest bunk by the door has been slept in, and recently: the cover is thrown back and a boot has been left under it, laces still tied.",
+			"choices": [
+				{
+					"text": "Check the bag under the slept-in bunk.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "A kit bag, packed to go and never carried. Rounds for a small weapon, a folded credit chit, a tin of boot polish that has outlived its owner.",
+							"effects": {
+								"items": {
+									"hand_ammo": 6,
+									"credits": 20
+								}
+							}
+						},
+						{
+							"weight": 40,
+							"text": "Clothes, a toothbrush, and a room card pinned inside the lining with a safety pin. The card is for a door two rooms down. Whoever packed this meant to leave.",
+							"effects": {
+								"npc_reveal": "key"
+							}
+						}
+					]
+				},
+				{
+					"text": "Make the last bed.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You straighten the cover and square the pillow. It takes ten seconds and feels like signing something. On the wall above the head someone has scratched a tally, and under it a list of where the spare tanks went.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Close the door on the room as you found it.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The latch clicks. Behind it the bunks go on being tidier than your ship has ever been.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_room_whistling_vent",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "room"
+			},
+			"title": "One note",
+			"text": "A pressure line runs along the ceiling and has split at a flange. It lets out a thin, steady whistle from a pinhole that has been taped twice and then given up on. The grating beneath the leak is slick, and the locker you want is on the far side of it.",
+			"choices": [
+				{
+					"text": "Close the valve first.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The valve is stiff and goes on a count of nine. The whistle winds down like a tired kettle. The locker behind it opens without argument and holds a few spare parts.",
+							"effects": {
+								"items": {
+									"silicon": 2,
+									"copper": 3
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Cross the grating at a run.",
+					"outcomes": [
+						{
+							"weight": 65,
+							"text": "Four steps, and the pinhole misses you by a hand. The locker is full of fittings and a sealed pack of rounds.",
+							"effects": {
+								"items": {
+									"copper": 4,
+									"hand_ammo": 4
+								}
+							}
+						},
+						{
+							"weight": 35,
+							"text": "The line coughs as you pass and the jet takes the skin off a forearm. You get the locker open one-handed and take what the other hand can hold.",
+							"effects": {
+								"crew_hp": -8,
+								"items": {
+									"copper": 4
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Follow the pipe to see where it goes.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It runs through two walls and ends at a junction stencilled SPARES, ROOM 3. Somebody has chalked an arrow on the floor to match.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Back out and let it sing.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You pull the door to on the whistle. It carries on, one note, to an empty room.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_room_timer_hatch",
+			"type": "boarding_site",
+			"weight": 9,
+			"once": false,
+			"requires": {
+				"mark": "room"
+			},
+			"title": "Eighty seconds",
+			"text": "A hatch in the far wall with a keypad and a red countdown, frozen at 01:20. A strip of tape beside it reads, in marker, ONCE IT STARTS YOU CANNOT STOP IT. Under that, in a different marker: it's fine, I did it, just be patient. One key on the pad is worn through to the plastic.",
+			"choices": [
+				{
+					"text": "Press the key and wait it out.",
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "The count begins. Eighty seconds is a long time in a room you do not know. Nothing comes. At zero the bolts draw back with a satisfied thump, and behind the hatch is a stack of crates somebody was proud of.",
+							"effects": {
+								"items": {
+									"scrap": 10,
+									"copper": 6
+								}
+							}
+						},
+						{
+							"weight": 30,
+							"text": "The count begins. At about forty seconds something that heard the keypad beep comes to see what it is for. The hatch opens on schedule regardless, which is something.",
+							"effects": {
+								"items": {
+									"scrap": 10,
+									"copper": 6
+								},
+								"site_fight": {
+									"kind": "scavenger",
+									"n": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Force the hatch now.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The bar goes in and you lean. The hatch gives with a crack that goes up your arms, and inside there is only what is easy to grab.",
+							"effects": {
+								"crew_hp": -4,
+								"items": {
+									"scrap": 6
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Mark it for later.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You note the hatch, the tape and the two different markers, and carry on. Some doors want your hands free. Your map keeps the spot.",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "Walk away from the hatch.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The tape's promise follows you down the corridor. It is probably true.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_room_tool_wall",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "room"
+			},
+			"title": "Outlines",
+			"text": "A workshop wall with a painted outline for every tool: a hammer here, a cutter there, a torque wrench the size of a forearm. Almost every outline is empty, stained with the dust the tools left behind. One hook still holds its tool, and a roster is pinned under the board with a column for who signed what out.",
+			"choices": [
+				{
+					"text": "Take the tool on the hook.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "A pry bar, heavy and honest, with a name scratched in the handle. Taking it leaves a gap you find you do not like. The board looks, suddenly, less finished.",
+							"effects": {
+								"items": {
+									"scrap": 8,
+									"copper": 3
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Read the roster.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Down the column, in six different hands, the same names, and then fewer names. The last line is a torque wrench signed out by someone who wrote back by end of shift in the box marked date. You copy the sheet.",
+							"effects": {
+								"log": "log_board_tool_roster"
+							}
+						}
+					]
+				},
+				{
+					"text": "Hang a spare on an empty outline.",
+					"requires": {
+						"items": {
+							"scrap": 5
+						}
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It fits no outline, but the board looks better for it. Behind the board a panel you had not noticed swings out an inch, on a tin of fittings somebody saved for exactly this.",
+							"effects": {
+								"items": {
+									"scrap": -5,
+									"copper": 8,
+									"silicon": 2
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Let the wall be.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The empty outlines watch you go, patient as stencils.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_room_loose_plate",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "room"
+			},
+			"title": "The plate that moves",
+			"text": "One floor plate in this room sits a finger higher than its neighbours, and the scratches round its edge are fresh, bright metal against old grey. Someone has been lifting it, often, with a blade. A stool stands beside it, set where you would sit to watch.",
+			"choices": [
+				{
+					"text": "Lift it.",
+					"outcomes": [
+						{
+							"weight": 50,
+							"text": "Under the plate, in a hollow cut for the purpose, is a roll of cloth with a few rounds and a purse of credits. The scratches stop making sense and then make exactly the right sense.",
+							"effects": {
+								"items": {
+									"hand_ammo": 6,
+									"credits": 35
+								}
+							}
+						},
+						{
+							"weight": 35,
+							"text": "The hollow is empty except for a folded note: IT WAS EMPTY BEFORE YOU. SORRY. A small drawing of a face. You laugh, which helps.",
+							"effects": {}
+						},
+						{
+							"weight": 15,
+							"text": "A wire trips as the plate rises and a spark jumps your knuckles. The hollow holds the wire and two spent rounds.",
+							"effects": {
+								"crew_hp": -5
+							}
+						}
+					]
+				},
+				{
+					"text": "Slide a blade under the edge first.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The blade finds a wire. You cut it, then lift the plate with care. The hollow holds a roll of cloth with a few rounds and a purse.",
+							"effects": {
+								"items": {
+									"hand_ammo": 4,
+									"credits": 25
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Sit on the stool and watch the room.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "From the stool you can see every way in, and after a while the thing the watcher was watching for: a hairline of light under the far door, where somebody left a lamp on. You know where to look next.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Set the stool straight and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You nudge the stool back to where it was. Whoever owns the plate will know someone looked, and you hope they are all right.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_room_ankle_deep",
+			"type": "boarding_site",
+			"weight": 9,
+			"once": false,
+			"requires": {
+				"mark": "room"
+			},
+			"title": "Ankle deep",
+			"text": "A foot of still water covers this room from wall to wall, black and level, with a skin of old lamp oil that breaks into colours when you step in. Lockers line the far wall at waist height. The top one is propped open with a boot, the way you prop a door when you mean to come back.",
+			"choices": [
+				{
+					"text": "Wade over and open the top locker.",
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "The water is colder than it looks and the locker drier than it should be. A keycard on a lanyard, a flask, a sheet of instructions for a door.",
+							"effects": {
+								"npc_reveal": "key",
+								"items": {
+									"credits": 10
+								}
+							}
+						},
+						{
+							"weight": 30,
+							"text": "Halfway there a cable you cannot see takes your ankle, and the water remembers it is a conductor. You reach the locker anyway. You get back less pleased.",
+							"effects": {
+								"crew_hp": -7,
+								"npc_reveal": "key"
+							}
+						}
+					]
+				},
+				{
+					"text": "Find the breaker first.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It is on the wall beside the door, under a hand-lettered label: DON'T. You do. The room ticks as it discharges, and the water is only water. The top locker holds a keycard on a lanyard and a flask.",
+							"effects": {
+								"npc_reveal": "key"
+							}
+						}
+					]
+				},
+				{
+					"text": "Pull the boot out of the doorway and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "A good boot, left foot, size eleven. You shake the water out of it and put it back where it was. You could not say why.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_body_on_shift",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "body"
+			},
+			"title": "On shift",
+			"text": "A man sits in the chair at the main console with his hands in his lap and his head tipped back, as if he stopped to think. A mug stands at his elbow. The console is awake on one window, the cursor in the middle of a sentence, and the card on the lanyard round his neck is the cleanest thing in the room.",
+			"choices": [
+				{
+					"text": "Take the card from his neck.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The lanyard lifts over his head more easily than it should. The card is stamped for a door on this deck. Under his hand, where it hung, is a pencilled scrap: sorry, needed that.",
+							"effects": {
+								"npc_reveal": "key"
+							}
+						}
+					]
+				},
+				{
+					"text": "Read what he was writing.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It is the handover to the next shift, and a good one. Pump three sounds worse than it is. The coffee is in the second drawer. If anything strange happens, do nothing heroic and call the number on the wall. The number on the wall is his own. You save the page.",
+							"effects": {
+								"log": "log_board_shift_handover"
+							}
+						}
+					]
+				},
+				{
+					"text": "Turn his chair to the window.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It rolls without a sound. Outside the glass is only the black and your own reflection, which is not the worst company he could have had. You leave the mug where it was, and feel steadier for it.",
+							"effects": {
+								"crew_hp": 3
+							}
+						}
+					]
+				},
+				{
+					"text": "Let him finish his shift.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You step back from the console. In the lamplight he looks like a man who had it all in hand.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_body_tucked_in",
+			"type": "boarding_site",
+			"weight": 9,
+			"once": false,
+			"requires": {
+				"mark": "body"
+			},
+			"title": "Under the blanket",
+			"text": "A body under a grey blanket, tucked at the edges, lying on a cargo pallet with its feet toward the door. Somebody weighted the corners with four tins. A scrawl on the nearest crate reads SORRY, WE HAD TO GO, and below it, in another hand, WE'LL BE BACK FOR YOU.",
+			"choices": [
+				{
+					"text": "Take the tins.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Lamp fuel, not rations, whatever the labels say in their hurry. You thank the pallet aloud, which feels odd and also correct.",
+							"effects": {
+								"items": {
+									"fuel": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Lift the corner.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "A woman in a good coat, very still. One hand holds a pass key against her chest, carefully, as if she had been asked to mind it. You take it with a nod to her.",
+							"effects": {
+								"npc_reveal": "key"
+							}
+						},
+						{
+							"weight": 40,
+							"text": "No one. A coil of cable, a rolled mat, and the shape of a person made with great care by somebody who wanted a door left alone. Under the mat, a hatch.",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "Straighten the blanket and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You square the edges and set the tins back on their corners. The writing on the crate looks less lonely with something holding it down.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_terminal_vending_cycle",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "terminal"
+			},
+			"title": "Vending, still hopeful",
+			"text": "A vending console in an alcove, its screen cycling through the same three products with the prices struck out and rewritten in grease pencil. A strip of tape covers the coin slot, and a note: JUST PRESS THE BUTTON. THE BUTTON IS FREE. THE MACHINE KNOWS.",
+			"choices": [
+				{
+					"text": "Press the button.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "A tray drops. A sealed pack of rounds, a decade past its use-by date, with a sticker: ENJOY.",
+							"effects": {
+								"items": {
+									"hand_ammo": 8
+								}
+							}
+						},
+						{
+							"weight": 30,
+							"text": "A tray drops. A clatter, a tin of something, a coil of cable. The screen says THANK YOU in four languages.",
+							"effects": {
+								"items": {
+									"scrap": 6,
+									"polymer": 4
+								}
+							}
+						},
+						{
+							"weight": 10,
+							"text": "The machine hiccups, rattles, and shrieks a three-note jingle from every speaker on the deck. It has never been so pleased to see anyone.",
+							"effects": {
+								"items": {
+									"scrap": 6
+								},
+								"site_fight": {
+									"kind": "scavenger",
+									"n": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Pull the plug, then press.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The jingle dies at the first note. The tray drops anyway, on spring pressure alone, with a clunk and a pack of rounds.",
+							"effects": {
+								"items": {
+									"hand_ammo": 6
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Read the service log.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The last technician was thorough. The log lists which crates on this deck were restocked, in order, and the order is a map.",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Promise to come back.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The screen thanks you, in four languages, for a loyalty it has no way to check.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bsite_terminal_door_log",
+			"type": "boarding_site",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"mark": "terminal"
+			},
+			"title": "Who went through",
+			"text": "A door controller with a screen the size of a hand, still logging. It lists the last forty openings of the hatch beside it: time, card number, direction. The entries are regular for a long stretch, in and out, in and out, and then they are all in. The last is a card number and the word IN, with no word after it.",
+			"choices": [
+				{
+					"text": "Match the card numbers to names.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The controller keeps a name for each card, in a small embarrassed font. Twelve names, then nine, then four. The last card belongs to an Odette, who typed her own name in the notes field in capitals, in case anyone should ever need it. You copy the list.",
+							"effects": {
+								"log": "log_board_door_names"
+							}
+						}
+					]
+				},
+				{
+					"text": "Open the hatch with that last card number.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The controller considers it, then agrees. Somewhere on the deck a lock you could not read clicks, and your map marks it.",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "Log your own passing.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The controller takes a note. You type HERE, and after a pause, THANKS. It files both, under IN.",
+							"effects": {}
+						}
+					]
+				}
+			]
 		}
 	]
 }

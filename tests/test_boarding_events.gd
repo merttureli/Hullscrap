@@ -65,9 +65,9 @@ func test_the_pack_has_the_events_it_promises() -> void:
 	var pack := _pack()
 	var npc := pack.values().filter(func(e): return e["type"] == "boarding_npc")
 	var site := pack.values().filter(func(e): return e["type"] == "boarding_site")
-	eq(npc.size(), 24, "24 events of what the people say")
-	eq(site.size(), 8, "8 discoveries")
-	eq(pack.size(), 32, "and nothing else")
+	eq(npc.size(), 28, "28 events of what the people say")
+	eq(site.size(), 18, "18 discoveries")
+	eq(pack.size(), 46, "and nothing else")
 	for role in People.role_ids():
 		var mine := npc.filter(func(e): return _role_of(e) == role)
 		check(mine.size() >= 3, "%s has at least three events (%d)" % [role, mine.size()])

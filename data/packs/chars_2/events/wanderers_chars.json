@@ -62,7 +62,7 @@
       "choices": [
         {"text": "Give the order: 'Dismissed.'", "outcomes": [
           {"weight": 75, "text": "'Sir!' says the drum-major. The sticks stop in mid-air. For a long moment he stands quite still in the empty band, taking in the drifting chairs, the bunting, the quiet. Then he tucks the drum under one arm and salutes the music stands, one at a time. 'Cadence, sir,' he says. 'Late of the Third Fleet Band. I find I have a great deal of time to make up. May I march with you?'", "effects": {"recruit": {"character": "cadence"}}},
-          {"weight": 25, "text": "'You are not the colonel, sir,' says the drum-major, politely, and resumes the beat with a vengeance. You retreat across the gap to the sound of the evening retreat, at tempo.", "effects": {}}
+          {"weight": 25, "text": "'You are not the colonel, sir,' says the drum-major, and resumes the beat with a vengeance. You retreat across the gap to the sound of the evening retreat, at tempo.", "effects": {}}
         ]},
         {"text": "[Concord standing] Give the order as an officer would, with a salute.", "blue": true, "requires": {"rep_min": {"concord": 2}}, "outcomes": [
           {"weight": 100, "text": "You give the order in the old form, heels together, and the drum-major's sticks come to rest as if on a rail. He has not heard it said properly in forty years. His salute is perfect, and slightly wet. 'Cadence, sir,' he says. 'Dismissed, and reporting for duty, if the officer will have me.' The beat resumes, softer, in time with your footsteps.", "effects": {"recruit": {"character": "cadence"}, "rep": {"concord": 1}}}

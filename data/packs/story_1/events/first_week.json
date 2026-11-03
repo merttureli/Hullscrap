@@ -1,0 +1,197 @@
+{
+	"events": [
+		{
+			"id": "wreck_field_swept_skiff",
+			"type": "wreck_field",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"stage_max": 2
+			},
+			"title": "One each",
+			"text": "A skiff gutted for parts long ago and then, oddly, tidied. Someone has swept the deck and stacked the cargo box by the hatch, with a note taped to the lid in careful capitals: ONE EACH. THE NEXT ONE WILL BE GRATEFUL.",
+			"choices": [
+				{
+					"text": "Take one.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "One is a fistful of scrap in a freezer bag, tied neatly. You take it. The box seems fuller than before, which cannot be right.",
+							"effects": {
+								"items": {
+									"scrap": 12
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Take one and leave one of your own.",
+					"requires": {
+						"items": {
+							"scrap": 5
+						}
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You trade five scrap of your own for the bag and tie the new bag shut with the same knot. Something on the Rusthold channel clears its throat, approvingly.",
+							"effects": {
+								"items": {
+									"scrap": -5
+								},
+								"rep": {
+									"clans": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave the box for someone who needs it.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You re-tape the note, which has come a bit unstuck. Somebody will be glad. You are glad, in the end, that it will not be you.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "distress_dim_lights_runabout",
+			"type": "distress",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"stage_max": 2
+			},
+			"title": "Embarrassed",
+			"text": "A one-seat Scrapper runabout drifts ahead with its nav lights blinking the long-short that means no emergency, just embarrassed. The pilot has been out of fuel for two hours and has been rehearsing her apology for most of them.",
+			"choices": [
+				{
+					"text": "Tow her to the nearest light.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It takes forty minutes and a good deal of her gratitude. She pays what she can and apologises again on the way out, which brings the total to nine apologies.",
+							"effects": {
+								"items": {
+									"credits": 20
+								},
+								"rep": {
+									"clans": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Hand her a can of fuel.",
+					"requires": {
+						"items": {
+							"fuel": 1
+						}
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The can goes across on a line. She kisses it, then looks mortified at having kissed it, then gives you everything in her wallet and a rating of five on the Rusthold board.",
+							"effects": {
+								"items": {
+									"fuel": -1,
+									"credits": 35
+								},
+								"rep": {
+									"clans": 2
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Wave and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You wave. She waves back with the dignity of someone who would have done the same, and then goes back to rehearsing.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "trader_apprentice_tray",
+			"type": "trader",
+			"weight": 12,
+			"once": false,
+			"requires": {
+				"stage_max": 2
+			},
+			"title": "First week",
+			"text": "A Rusthold apprentice on a cargo scooter, a tray strapped across the handlebars: bolts, rounds, a jar of something with a hand-drawn label. She has the look of someone in her first week, and the manner of someone who has been told not to show it.",
+			"choices": [
+				{
+					"text": "Buy a box of rounds (8 credits).",
+					"requires": {
+						"credits": 8
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "She counts out six rounds into a bag, carefully, and then adds a seventh when she thinks you are not looking. You decide not to be looking.",
+							"effects": {
+								"items": {
+									"credits": -8,
+									"hand_ammo": 7
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Sell her 10 scrap.",
+					"requires": {
+						"items": {
+							"scrap": 10
+						}
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "She weighs it on a scale that is not quite level, frowns, and corrects for it in your favour. 'Ma says to be fair,' she says. 'Ma says it a lot.'",
+							"effects": {
+								"items": {
+									"scrap": -10,
+									"credits": 15
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask how the first week is going.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'It's all right,' she says. 'Everyone says the first jump is worst, and then you go, and it's just a jump.' She straightens the tray. 'Stay near the lights, that's all I'd say.'",
+							"effects": {}
+						}
+					]
+				},
+				{
+					"text": "Tip two fingers to her cap and go.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "She tips two fingers back, a beat late, and looks surprised at herself.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}

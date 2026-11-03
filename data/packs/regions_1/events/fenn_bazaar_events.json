@@ -159,7 +159,7 @@
           {"weight": 100, "text": "Your tinkerer ignores the contract, takes the Cannon apart on Dib's bench, and puts it back together faster. Dib is outraged and impressed and tears the contract up. 'Take it,' he says. 'You have earned it.'", "effects": {"flag": "tech_twitch_cannon", "unlock": "ship_fenn_closing_sale"}}
         ]},
         {"text": "Ask for a copy of the contract first.", "outcomes": [
-          {"weight": 100, "text": "Dib presents you with a copy. It is also eleven pages. You politely decline.", "effects": {}}
+          {"weight": 100, "text": "Dib presents you with a copy. It is also eleven pages. You decline.", "effects": {}}
         ]}
       ]
     },
@@ -173,7 +173,7 @@
         ]},
         {"text": "Contest the lien.", "outcomes": [
           {"weight": 50, "text": "The lien turns out to be registered to a different ship called Teapot. The Reasonable Terms withdraws in confusion, taking its manners with it.", "effects": {"items": {"scrap": 20}}},
-          {"weight": 50, "text": "The lien is real. The boat is not pleased. It opens fire, politely.", "effects": {"fight": "pirate_raider"}}
+          {"weight": 50, "text": "The lien is real. The boat is not pleased. It opens fire.", "effects": {"fight": "pirate_raider"}}
         ]},
         {"text": "[Fenn] Argue the lien's jurisdiction.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 85, "text": "Your Fenn and the voice argue across the lane for twenty minutes, in a language of subclauses. At the end the Reasonable Terms hands over a receipt for the lien, marked VOID, and leaves with its dignity.", "effects": {"items": {"credits": 30}}},
@@ -206,7 +206,7 @@
       ]
     },
     {
-      "id": "bazaar_premium_blend", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_fenn_bazaar", "jumps_min": 3},
+      "id": "bazaar_premium_blend", "type": "distress", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_fenn_bazaar", "jumps_min": 3},
       "text": "A fuel barge, Premium Blend, is venting white vapour from every seam. Her captain is on the comm, calm and cheerful: 'Nothing to worry about, friends, the fuel is entirely safe, we have never had a single incident, we are going to explode.' He says it in the same tone as 'good morning'.",
       "choices": [
         {"text": "Tow the barge clear of the market.", "requires": {"crew_min": 1}, "outcomes": [

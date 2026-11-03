@@ -13,7 +13,7 @@
         {"text": "[Firefighter] Greet him in the wet code.", "requires": {"trait": "firefighter"}, "outcomes": [
           {"weight": 100, "text": "Your Mire gives the double gurgle, hand over heart. Sluice stops mid-clipboard. 'A proper crew,' he says. 'I have waited nine years for someone on this lake to understand.' He hands in his resignation to the clipboard, which is, naturally, also damp. 'I believe you have a cable,' he adds.", "effects": {"recruit": {"character": "sluice"}, "rep": {"concord": 1}}}
         ]},
-        {"text": "Politely decline the inspection and fly on.", "outcomes": [
+        {"text": "Decline the inspection and fly on.", "outcomes": [
           {"weight": 100, "text": "'Noted,' says Sluice, writing it down on the damp clipboard. 'Noted with disappointment.' The launch peels away, still dripping.", "effects": {}}
         ]}
       ]
@@ -29,7 +29,7 @@
           {"weight": 100, "text": "Your Mire dives in, and for an hour the two of them are down there, tapping, listening, passing the spanner in the dark. The engine catches, lurches, and runs. Gurgo bobs up beaming. 'Smooth as a grandmother!' he cries. 'Smoother!' He leaves the tender running, wrings his collar out on your deck, and follows you without being asked.", "effects": {"recruit": {"character": "gurgo"}, "items": {"copper": 12}}}
         ]},
         {"text": "Leave him to it.", "outcomes": [
-          {"weight": 100, "text": "'Nearly running!' he calls after you, and the engine coughs again, politely, to back him up.", "effects": {}}
+          {"weight": 100, "text": "'Nearly running!' he calls after you, and the engine coughs again, to back him up.", "effects": {}}
         ]}
       ]
     }

@@ -143,7 +143,7 @@
     },
     {
       "id": "core_allotments", "type": "asteroid_field", "weight": 9, "once": false, "requires": {"flag": "in_human_core"},
-      "text": "A shell of hollowed rocks, each with a hatch, a lamp and a hand-painted number. Allotments: gardens, goats, a pocket of real earth in every one. The residents defend them with mining lasers, politely. One has put up a sign: PLEASE DO NOT SHOOT THE TOMATOES.",
+      "text": "A shell of hollowed rocks, each with a hatch, a lamp and a hand-painted number. Allotments: gardens, goats, a pocket of real earth in every one. The residents defend them with mining lasers. One has put up a sign: PLEASE DO NOT SHOOT THE TOMATOES.",
       "choices": [
         {"text": "Trade for the surplus (20 credits).", "requires": {"credits": 20}, "outcomes": [
           {"weight": 85, "text": "Four tomatoes, a sack of onions and a goat's blessing. You eat like a king for a week.", "effects": {"items": {"credits": -20}, "crew_hp": 15}},
@@ -238,7 +238,7 @@
       ]
     },
     {
-      "id": "core_ring_breach", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_human_core", "jumps_min": 2},
+      "id": "core_ring_breach", "type": "distress", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_human_core", "jumps_min": 2},
       "text": "Ring Five has split along a seam, and the rooms are venting one at a time, in order, like news travelling down a corridor. Residents crowd the hull-side corridor with sealant guns and the expressions of people who were warned about this for years.",
       "choices": [
         {"text": "Go in and patch the seam.", "requires": {"crew_min": 1}, "outcomes": [

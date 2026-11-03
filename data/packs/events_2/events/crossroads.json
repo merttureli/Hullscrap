@@ -39,7 +39,7 @@
       ]
     },
     {
-      "id": "distress_two_beacons", "type": "distress", "weight": 9, "once": false, "requires": {},
+      "id": "distress_two_beacons", "type": "distress", "weight": 9, "once": false, "requires": {"stage_min": 4},
       "text": "Two distress beacons, forty klicks apart, both transmitting the same message in the same voice: 'Hurry. This one's real.' Neither has said which.",
       "choices": [
         {"text": "Go north.", "outcomes": [

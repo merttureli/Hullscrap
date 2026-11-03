@@ -34,6 +34,34 @@
 			"ship": "Glass Shrine",
 			"faction": "lumen",
 			"text": "The glass doesn't sing when you listen. It sings when you stop.\nWe have started to stop on purpose.\nThere is a prayer in it somewhere, or a fault in the lattice, and the difference, the Prism says, is a matter of what you were hoping for."
+		},
+		{
+			"id": "log_board_tool_roster",
+			"title": "Tool roster",
+			"ship": "Machine Shop 2",
+			"faction": "clans",
+			"text": "Hammer, Pell, back by lunch.\nCutter, Pell, back by lunch.\nTorque wrench, Aun, back by end of shift.\nTorque wrench, Aun, back by end of shift.\nTorque wrench, Aun, back by end of shift.\nThe hook by the door is for the pry bar. Leave it on the hook. I mean it."
+		},
+		{
+			"id": "log_board_shift_handover",
+			"title": "Handover, night shift",
+			"ship": "Pump Station 6",
+			"faction": "concord",
+			"text": "For whoever has the desk next. Pump three sounds worse than it is. It has always sounded like that.\nCoffee in the second drawer. The mug is mine, the other mug is also mine.\nIf anything strange happens, do nothing heroic. Call the number on the wall.\nI have just noticed the number on the wall is my own."
+		},
+		{
+			"id": "log_board_door_names",
+			"title": "Names, by card",
+			"ship": "Hab Ring 2",
+			"faction": "concord",
+			"text": "Card 0114, Aldous. Card 0115, Meret. Card 0120, Tobias, who always forgets his.\nTwelve cards at the start of the week. Nine on the fourth day. By the end, four.\nCard 0131 is Odette. She typed her own name in the notes field, in capitals, in case anyone should ever need it.\nLet it be recorded that she went in last, and that she held the door."
+		},
+		{
+			"id": "log_board_dead_letters",
+			"title": "Return to sender",
+			"ship": "Mail Room, Pier 9",
+			"faction": "clans",
+			"text": "Dear Lenka, the weather is fine here. The hydroponics did well. Your brother's ship is late but they say it always is.\nDear Mr. Haught, your parcel has been received and kept dry.\nDear whoever: this is a reply to a letter that never came. I think it said that you were fine. I am glad you are fine. The weather is fine here too."
 		}
 	]
 }

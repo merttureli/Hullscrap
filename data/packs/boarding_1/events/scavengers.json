@@ -119,7 +119,7 @@
 						},
 						{
 							"weight": 50,
-							"text": "The story is a bad one. {name} lets you get to the end of it anyway, which is worse. 'Twenty credits,' {name} says gently. 'And the story's on me.' The flare gun rises, politely.",
+							"text": "The story is a bad one. {name} lets you get to the end of it anyway, which is worse. 'Twenty credits,' {name} says gently. 'And the story's on me.' The flare gun rises.",
 							"effects": {
 								"npc_hostile": "pirate"
 							}

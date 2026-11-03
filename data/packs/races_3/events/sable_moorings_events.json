@@ -22,7 +22,7 @@
     },
     {
       "id": "moorings_contract_cutters", "type": "pirate", "weight": 9, "once": false, "requires": {"region": "sable_moorings", "jumps_min": 2},
-      "text": "A Sable family cutter moors alongside, without hurry, and a broad woman with a torch on each forearm leans on her rail. 'Sorry about this,' she says on the comm. 'It is a contract. A trader says you cheated him on a deal at Rusthold. We will be quick, and we will not touch the galley.' Behind her, the boarders take their places by the tube, politely, like people lining up for a bus.",
+      "text": "A Sable family cutter moors alongside, without hurry, and a broad woman with a torch on each forearm leans on her rail. 'Sorry about this,' she says on the comm. 'It is a contract. A trader says you cheated him on a deal at Rusthold. We will be quick, and we will not touch the galley.' Behind her, the boarders take their places by the tube, like people lining up for a bus.",
       "choices": [
         {"text": "Refuse and fight.", "outcomes": [
           {"weight": 100, "text": "'Understood,' says the woman, without ill will. The torches come up.", "effects": {"fight": "tier"}}

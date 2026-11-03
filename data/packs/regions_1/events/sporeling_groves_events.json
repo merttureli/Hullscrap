@@ -198,7 +198,7 @@
       ]
     },
     {
-      "id": "grove_spore_storm", "type": "anomaly", "weight": 8, "once": false, "requires": {"flag": "in_sporeling_groves", "jumps_min": 3},
+      "id": "grove_spore_storm", "type": "anomaly", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_sporeling_groves", "jumps_min": 3},
       "text": "A spore storm sweeps in: a rolling wall of pale gold dust a kilometre high, glowing from within. The Sporelings run for shelter, lashing down their hatches. 'Do not breathe it,' says the Grove's warning bell. 'Do not look into it. Do not listen to what it says.' The storm is already saying things.",
       "choices": [
         {"text": "Run for shelter in the Grove.", "requires": {"crew_min": 1}, "outcomes": [

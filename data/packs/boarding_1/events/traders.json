@@ -221,6 +221,149 @@
 			"requires": {
 				"role": "trader"
 			}
+		},
+		{
+			"id": "bnpc_trader_room_pricer",
+			"type": "boarding_npc",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"role": "trader",
+				"site": "derelict"
+			},
+			"text": "A card table set up in an airlock, a lantern, a ledger, and a person in a good coat who is pricing the derelict by the room. 'Engine bay, eighty,' says {name}, without looking up. 'Galley, forty. Captain's quarters depends who you ask.' The ledger is full, and not one of the entries has been crossed out.",
+			"choices": [
+				{
+					"text": "See the goods.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Three things, picked from what I couldn't price,' says {name}. 'It's cheaper than the rooms.'",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Buy a tip on the rooms (15 credits).",
+					"requires": {
+						"credits": 15
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} takes the money, flips back a page, and marks the ship's plan with a thumbnail. 'There. That one. The people who built it were fond of it.' You can feel the price in the pocket and the tip in the map.",
+							"effects": {
+								"items": {
+									"credits": -15
+								},
+								"npc_reveal": "blueprint"
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask what the engine bay is worth.",
+					"outcomes": [
+						{
+							"weight": 50,
+							"text": "'Less than you'd think and more than you'll get.' {name} nods down the corridor. 'There's a box behind the second pump.'",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						},
+						{
+							"weight": 50,
+							"text": "{name} names a figure, then another, then looks pained. 'The thing about a price is that somebody has to have wanted it.' You are none the wiser, and fond of {name}.",
+							"effects": {}
+						}
+					]
+				},
+				{
+					"text": "Wish {name} a good survey.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'The best kind,' says {name}, 'is the kind no one argues with.' The ledger gets a new line. It has your ship in it.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_trader_waiting_tow",
+			"type": "boarding_npc",
+			"weight": 9,
+			"once": false,
+			"requires": {
+				"role": "trader",
+				"site": "derelict"
+			},
+			"text": "A courier's runabout is docked to this wreck with its running lights on, and in its open hatch sits {name}, drinking tea from a flask. 'Tow is eight hours late,' says {name}. 'I'd say I was making use of the time, but I'm drinking tea. Come in. It's good tea. It's the only thing aboard that's mine.'",
+			"choices": [
+				{
+					"text": "Trade.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'A courier's hold is a wide thing,' {name} says. 'You'd be surprised what's in it.'",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Share the tea.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "It is good tea. The flask goes round twice. {name} talks about the corridors of this ship as if they were relatives, and ends by pointing at a cargo door you had not seen.",
+							"effects": {
+								"crew_hp": 4,
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Help hold the tow line while {name} re-brazes it.",
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "An hour of holding a coupling steady while {name} swears gently at it. At the end there is a clean join, a small can of fuel pressed on you, and a promise not to tell anyone how it was done.",
+							"effects": {
+								"items": {
+									"fuel": 1,
+									"credits": 15
+								}
+							}
+						},
+						{
+							"weight": 30,
+							"text": "The braze spits and a bead of metal lands on your glove and through it. {name} apologises through the whole second hour. The can of fuel arrives anyway.",
+							"effects": {
+								"crew_hp": -4,
+								"items": {
+									"fuel": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Wish {name} a quick tow.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Eight hours,' says {name}, to the tea. 'It was seven when I started.'",
+							"effects": {}
+						}
+					]
+				}
+			]
 		}
 	]
 }

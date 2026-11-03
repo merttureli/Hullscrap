@@ -42,7 +42,7 @@
     },
     {
       "id": "distress_medical_hulk", "type": "distress", "weight": 8, "once": false, "requires": {},
-      "text": "CS-309 Mercy, hospital ship, class 2. Status: 41 patients, 2 doctors, 0 bandages. The distress call is a requisition form, repeated every ninety seconds, politely.",
+      "text": "CS-309 Mercy, hospital ship, class 2. Status: 41 patients, 2 doctors, 0 bandages. The distress call is a requisition form, repeated every ninety seconds.",
       "choices": [
         {"text": "Donate 20 polymer for dressings.", "requires": {"items": {"polymer": 20}}, "outcomes": [
           {"weight": 100, "text": "The doctors cry, then complete the receipt, then cry again. Concord remembers receipts.", "effects": {"items": {"polymer": -20, "credits": 20}, "rep": {"concord": 2}}}
@@ -55,7 +55,7 @@
           {"weight": 100, "text": "You carry six stretchers and one furious clerk across the lane. Concord pays by the form, and in goodwill.", "effects": {"items": {"fuel": -2, "credits": 80}, "rep": {"concord": 3}}}
         ]},
         {"text": "Wish them luck and jump.", "outcomes": [
-          {"weight": 100, "text": "The forms continue, politely, behind you.", "effects": {}}
+          {"weight": 100, "text": "The forms continue behind you.", "effects": {}}
         ]}
       ]
     },
@@ -107,7 +107,7 @@
       ]
     },
     {
-      "id": "distress_rustfang_bait", "type": "distress", "weight": 10, "once": false, "requires": {},
+      "id": "distress_rustfang_bait", "type": "distress", "weight": 10, "once": false, "requires": {"stage_min": 4},
       "text": "MAYDAY, says a hauler, a perfectly ordinary hauler, please come close and don't scan us. The hauler is wearing Rustfang paint under two coats of apology. Its beacon plays a recorded cough on a loop.",
       "choices": [
         {"text": "Come alongside anyway.", "outcomes": [
@@ -118,7 +118,7 @@
           {"weight": 70, "text": "The missile gives them a fright and a reason to leave. They dump their cargo as they run, which is rude of them and good for you.", "effects": {"items": {"missile": -1, "scrap": 55}, "rep": {"concord": 1}}},
           {"weight": 30, "text": "They return fire instead of running. Rustfangs have never learned when to take a hint.", "effects": {"items": {"missile": -1}, "fight": "pirate_raider"}}
         ]},
-        {"text": "Hail them and ask politely for papers.", "outcomes": [
+        {"text": "Hail them and ask for papers.", "outcomes": [
           {"weight": 50, "text": "A long silence. Then the coughing stops, the paint stops apologising, and they leave. A little cash is stuck to your hull, probably by way of thanks.", "effects": {"items": {"credits": 20}}},
           {"weight": 50, "text": "'Papers,' says a voice. 'Here's my paper,' says another, and then the guns.", "effects": {"fight": "pirate_raider"}}
         ]},
@@ -162,7 +162,7 @@
       ]
     },
     {
-      "id": "pirate_vex_toll", "type": "pirate", "weight": 14, "once": false, "requires": {"jumps_max": 30},
+      "id": "pirate_vex_toll", "type": "pirate", "weight": 14, "once": false, "requires": {"stage_min": 4, "jumps_max": 30},
       "text": "A Rustfang gunboat, the Dental Plan, slides across your nose and opens a channel. 'Toll,' says a cheerful voice. 'Fifty credits. Captain Vex is saving for a bigger gun.'",
       "choices": [
         {"text": "Pay the toll (50 credits).", "requires": {"credits": 50}, "outcomes": [
@@ -193,7 +193,7 @@
       "text": "Vex squints at you over the comm. 'Skip the toll. Carry this crate to the next Gantry trader, unopened, for forty.' Behind him, someone says the crate is making a noise.",
       "choices": [
         {"text": "Take the crate and the forty.", "outcomes": [
-          {"weight": 60, "text": "The crate rattles politely all the way. Vex pays in advance, because he's an optimist, and you're now a smuggler in your own mind.", "effects": {"items": {"credits": 40}, "rep": {"clans": -1}}},
+          {"weight": 60, "text": "The crate rattles all the way. Vex pays in advance, because he's an optimist, and you're now a smuggler in your own mind.", "effects": {"items": {"credits": 40}, "rep": {"clans": -1}}},
           {"weight": 40, "text": "The crate wasn't rattling. It was ticking. Your hull learns what a box of cheap fireworks can do.", "effects": {"items": {"credits": 40}, "hull": -10}}
         ]},
         {"text": "Open the crate first.", "outcomes": [
@@ -286,19 +286,19 @@
       ]
     },
     {
-      "id": "wreck_field_dead_cruiser", "type": "wreck_field", "weight": 10, "once": false, "requires": {"jumps_min": 4},
+      "id": "wreck_field_dead_cruiser", "type": "wreck_field", "weight": 10, "once": false, "requires": {"stage_min": 4, "jumps_min": 4},
       "text": "A Concord cruiser. Status: cold, lights none, distress call none. On the bridge window, from the inside, there is a handprint, and it still shines like a fresh one.",
       "choices": [
         {"text": "Board and salvage it.", "requires": {"crew_min": 1}, "outcomes": [
           {"weight": 45, "text": "The corridors are cold and the cabinets full. The handprint was a smear of old grease. Mostly.", "effects": {"items": {"scrap": 50, "credits": 25}}},
           {"weight": 35, "text": "The lights come up the moment your airlock seals, and the guns come up with them. It wasn't dead. It was patient.", "effects": {"fight": "tier"}},
-          {"weight": 10, "text": "You split up to search. One of the party takes a wrong turn and the ship, politely, does not give them back.", "effects": {"lose_crew": 1, "items": {"scrap": 40}}},
+          {"weight": 10, "text": "You split up to search. One of the party takes a wrong turn and the ship does not give them back.", "effects": {"lose_crew": 1, "items": {"scrap": 40}}},
           {"weight": 10, "text": "In the engine bay, wrapped in a tarp and a Concord seal reading NOT FOR ISSUE, a nozzle with a long burn history.", "effects": {"items": {"afterburner": 1}}}
         ]},
         {"text": "Board and salvage it.", "requires": {"crew_max": 0}, "outcomes": [
           {"weight": 45, "text": "The corridors are cold and the cabinets full. The handprint was a smear of old grease. Mostly.", "effects": {"items": {"scrap": 50, "credits": 25}}},
           {"weight": 35, "text": "The lights come up the moment your airlock seals, and the guns come up with them. It wasn't dead. It was patient.", "effects": {"fight": "tier"}},
-          {"weight": 10, "text": "You search alone. You take a wrong turn, and the ship, politely, keeps you for an hour. When it lets you go, the airlock takes a bite out of your hull on the way out, and you carry out what you grabbed.", "effects": {"items": {"scrap": 40}, "hull": -12}},
+          {"weight": 10, "text": "You search alone. You take a wrong turn, and the ship keeps you for an hour. When it lets you go, the airlock takes a bite out of your hull on the way out, and you carry out what you grabbed.", "effects": {"items": {"scrap": 40}, "hull": -12}},
           {"weight": 10, "text": "In the engine bay, wrapped in a tarp and a Concord seal reading NOT FOR ISSUE, a nozzle with a long burn history.", "effects": {"items": {"afterburner": 1}}}
         ]},
         {"text": "[Artemis Mk1] Put a missile into the bridge first. Knock before you enter.", "requires": {"component": "artemis_mk1", "items": {"missile": 1}}, "outcomes": [
@@ -351,7 +351,7 @@
       ]
     },
     {
-      "id": "wreck_field_warden_husk", "type": "wreck_field", "weight": 8, "once": false, "requires": {"jumps_min": 5},
+      "id": "wreck_field_warden_husk", "type": "wreck_field", "weight": 8, "once": false, "requires": {"stage_min": 4, "jumps_min": 5},
       "text": "A Lumen Warden drone is perched on a gate-casing shard like a bird on a wire, lights dim, arms folded. The scanner swears it's off. The scanner has been wrong before, in ways that leave scorch marks.",
       "choices": [
         {"text": "Salvage the drone.", "outcomes": [
@@ -522,7 +522,7 @@
           {"weight": 100, "text": "Your Basalt looks at the outline for a long time. 'I have seen this ship,' they say, 'and it has not happened yet.' They say nothing else until the next jump.", "effects": {"flag": "afterimage_seen", "rep": {"lumen": 1}}}
         ]},
         {"text": "Go around, at a respectful distance.", "outcomes": [
-          {"weight": 100, "text": "You take the long way. The outline turns to watch you go, politely, like a cat at a window.", "effects": {}}
+          {"weight": 100, "text": "You take the long way. The outline turns to watch you go, like a cat at a window.", "effects": {}}
         ]}
       ]
     },
@@ -570,7 +570,7 @@
         {"text": "Accept the bounty.", "outcomes": [
           {"weight": 100, "text": "Hallett stamps the contract with a stamp that has seen better decades. 'Do try to bring back the paperwork,' he says. Vex, by awful luck, is right behind you.", "effects": {"fight": "dental_plan"}}
         ]},
-        {"text": "Decline politely.", "outcomes": [
+        {"text": "Decline.", "outcomes": [
           {"weight": 100, "text": "'Understood,' says Hallett. He writes 'declined' on something, and the something sighs.", "effects": {}}
         ]},
         {"text": "Sell the bounty details to a Clan broker instead.", "outcomes": [
@@ -581,7 +581,7 @@
     },
     {
       "id": "patrol_enforcer_warrant", "type": "patrol", "weight": 10, "once": false, "requires": {"rep_max": {"concord": -3}},
-      "text": "Two Concord cutters box you in, rank lights on, weapons politely unarmed. 'Vessel,' says a clipped voice, 'you are listed. You are asked to stand down and pay a fine.' The word asked is doing a great deal of work in that sentence.",
+      "text": "Two Concord cutters box you in, rank lights on, weapons stowed in a way that makes a point. 'Vessel,' says a clipped voice, 'you are listed. You are asked to stand down and pay a fine.' The word asked is doing a great deal of work in that sentence.",
       "choices": [
         {"text": "Pay the fine (80 credits).", "requires": {"credits": 80}, "outcomes": [
           {"weight": 100, "text": "The cutters stamp you clean. For about a minute you are a model citizen. 'Do not make this a habit,' says the clipped voice, which is exactly what a habit sounds like.", "effects": {"items": {"credits": -80}, "rep": {"concord": 2}}}

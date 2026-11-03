@@ -56,7 +56,7 @@
           {"weight": 100, "text": "Your Ferro steps up beside the merchant, and a ripple passes between them like a greeting. They trade a handful of silver between their palms in a ritual, the way people trade rings. The merchant pushes your whole bill aside, loads a crate of its best metal into your hold, and says, in a pleased spiky whisper, 'Cousin. You must come back.'", "effects": {"items": {"copper": 35, "silicon": 4, "titanium": 3}, "crew_hp": 5}}
         ]},
         {"text": "[Gauntling] Compare scrap-plates.", "requires": {"species": "gauntling"}, "outcomes": [
-          {"weight": 100, "text": "Your Gauntling rolls up a sleeve and slaps a mismatched forearm on the counter. The merchant bends low, runs a magnet along it, and makes a long, delighted rattling noise. 'Seven alloys,' it says. 'Seven! And the weld at the elbow is a work of art.' It sells you its best lot at cost, and asks, very politely, to see the other arm.", "effects": {"items": {"copper": 30, "silicon": 3}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Gauntling rolls up a sleeve and slaps a mismatched forearm on the counter. The merchant bends low, runs a magnet along it, and makes a long, delighted rattling noise. 'Seven alloys,' it says. 'Seven! And the weld at the elbow is a work of art.' It sells you its best lot at cost, and asks to see the other arm.", "effects": {"items": {"copper": 30, "silicon": 3}, "crew_hp": 5}}
         ]},
         {"text": "Just look.", "outcomes": [
           {"weight": 100, "text": "You look at the piles for a while. One ripples when you pass. It is not clear whether it was the wind.", "effects": {}}

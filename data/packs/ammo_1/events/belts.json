@@ -30,7 +30,7 @@
 			"text": "A Lumen survey skiff, dark and cold, but along her spine a rail of lit glass still carries a single bead of light from one end to the other and back, unhurried, as though nobody had told it.",
 			"choices": [
 				{"text": "Take the rail drive off her spine.", "outcomes": [
-					{"weight": 70, "text": "The bead of light stops, politely, when you cut the lead. The rail comes away humming. It is faintly warm and slightly offended.", "effects": {"items": {"belt_drive_neon": 1}}},
+					{"weight": 70, "text": "The bead of light stops when you cut the lead. The rail comes away humming. It is faintly warm and slightly offended.", "effects": {"items": {"belt_drive_neon": 1}}},
 					{"weight": 30, "text": "The glass cracks along its length and the light goes out of it all at once. A little silicon is the only thing left to take.", "effects": {"items": {"silicon": 6}}}
 				]},
 				{"text": "Leave the light to its walk.", "outcomes": [{"weight": 100, "text": "The bead of light finishes its walk, turns, and starts the next one. You let it.", "effects": {}}]}

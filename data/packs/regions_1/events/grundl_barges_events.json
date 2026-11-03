@@ -7,7 +7,7 @@
           {"weight": 85, "text": "A table the length of a ship. A soup in a pot the size of a bath. The Grundl watch you eat with enormous, tender interest, and add more. Four hours later you are carried back to the airlock in a happy stupor.", "effects": {"crew_hp": 20, "unlock": "ship_grundl_second_helping"}},
           {"weight": 15, "text": "The dinner is superb. The dessert is not for the faint of heart. Someone is carried back to the airlock, groaning, a hero.", "effects": {"items": {"credits": -10}, "crew_hp": 10, "unlock": "ship_grundl_second_helping"}}
         ]},
-        {"text": "Decline politely. You have eaten.", "outcomes": [
+        {"text": "Decline. You have eaten.", "outcomes": [
           {"weight": 100, "text": "'Of course,' says the Grundl, deeply wounded, and wraps up a hamper for you in a tablecloth the size of a sail. You are sent off with enough food for a week and a look that follows you to the lane.", "effects": {"items": {"polymer": 10}, "crew_hp": 10, "unlock": "ship_grundl_second_helping"}}
         ]},
         {"text": "[Grundl] Sit at the family table.", "requires": {"species": "grundl"}, "outcomes": [
@@ -89,7 +89,7 @@
         {"text": "Go in and eat.", "outcomes": [
           {"weight": 100, "text": "The Plenty has eleven courses, each a pot the size of a cauldron. The Grundl serve in silence, tears of happiness running down their enormous faces. You eat until you cannot see. When you leave they press on you a hamper, a bag of fuel and the galley log.", "effects": {"items": {"fuel": 2, "credits": 15}, "crew_hp": 20, "log": "log_barge_soup_day_three"}}
         ]},
-        {"text": "Decline politely and ask what happened.", "outcomes": [
+        {"text": "Decline and ask what happened.", "outcomes": [
           {"weight": 100, "text": "The captain explains: Concord sent a route marshal to say there would be no cargo this quarter. The family cooked all the stores out of grief. 'We always cook when we are sad,' she says. 'We have a great deal of grief.' You buy the stores for a fair price, and the galley log with them.", "effects": {"items": {"credits": -20, "fuel": 3, "polymer": 15}, "crew_hp": 10, "log": "log_barge_soup_day_three"}}
         ]},
         {"text": "[Grundl] Eat as much as you can.", "requires": {"species": "grundl"}, "outcomes": [
@@ -174,7 +174,7 @@
       "after_win": {"text": "The Capacity's family come out to thank you. There is a great deal of hugging, a great many apologies for the hugging, and a hold of fuel cells for the road.", "effects": {"items": {"fuel": 5, "credits": 40, "scrap": 30}, "rep": {"concord": 2}}}
     },
     {
-      "id": "barge_runaway_grace", "type": "distress", "weight": 8, "once": false, "requires": {"flag": "in_grundl_barges", "jumps_min": 3},
+      "id": "barge_runaway_grace", "type": "distress", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_grundl_barges", "jumps_min": 3},
       "text": "A barge, the Grace, has lost her engine governor and is accelerating, slowly and inevitably, toward the Convoy: forty kilometres of mass at an ever-increasing pace. Her crew are on the comm, very calm. 'Sorry,' says the captain. 'We seem to be moving. If you could help us stop, we would be so grateful. If you could get out of the way, we would be grateful for that too.'",
       "choices": [
         {"text": "Try to slow the barge with tow cables.", "requires": {"crew_min": 1}, "outcomes": [

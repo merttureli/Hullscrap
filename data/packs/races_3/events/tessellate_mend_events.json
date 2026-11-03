@@ -97,11 +97,11 @@
     },
     {
       "id": "mile_lost_half", "type": "distress", "weight": 7, "once": false, "requires": {"region": "tessellate_mend"},
-      "text": "A single small figure, no bigger than a child, sits on a drifting piece of wing with its legs crossed, calling over every channel. It is made of tiny bots, and there are visible gaps in it, as if it were made of half the number it should be. 'Have you seen my other half?' it asks, politely, as you come alongside. 'We were split in a hit. I am the part that is left. I think the rest went that way.' It points at a dark stretch full of wrecks.",
+      "text": "A single small figure, no bigger than a child, sits on a drifting piece of wing with its legs crossed, calling over every channel. It is made of tiny bots, and there are visible gaps in it, as if it were made of half the number it should be. 'Have you seen my other half?' it asks, as you come alongside. 'We were split in a hit. I am the part that is left. I think the rest went that way.' It points at a dark stretch full of wrecks.",
       "choices": [
         {"text": "Help it look.", "outcomes": [
           {"weight": 60, "text": "You find the other half in the third wreck, jammed in a crawlway and fixing a pipe, and the two halves run together with a sound like pouring sand. The whole of it stands up, and is taller than you expected. It pays you from the wreck's cargo, and thanks you in a single, doubled voice.", "effects": {"items": {"credits": 40, "scrap": 25}}},
-          {"weight": 40, "text": "You search all afternoon. The other half is not in any of the wrecks. The small figure thanks you politely and goes on looking, but it seems to have been comforted by the company. It gives you what it has: a small pouch of salvage.", "effects": {"items": {"scrap": 15}, "crew_hp": 5}}
+          {"weight": 40, "text": "You search all afternoon. The other half is not in any of the wrecks. The small figure thanks you and goes on looking, but it seems to have been comforted by the company. It gives you what it has: a small pouch of salvage.", "effects": {"items": {"scrap": 15}, "crew_hp": 5}}
         ]},
         {"text": "Take the small one aboard.", "outcomes": [
           {"weight": 100, "text": "It climbs into your airlock with its legs still crossed, and stays the shape of a child for the rest of the afternoon. 'Smalt,' it says. 'Half of me is not here, but I can work. I do half as much work, which is the same as the other half at twice the speed.' It goes straight to the engine room and starts to mend a pipe, and does not stop.", "effects": {"recruit": {"species": "tessellate", "name": "Smalt"}}}

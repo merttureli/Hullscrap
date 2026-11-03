@@ -61,7 +61,7 @@
     },
     {
       "id": "quarry_gate_stones", "type": "wreck_field", "weight": 10, "once": false, "requires": {"flag": "in_basalt_quarries"},
-      "text": "A scatter of cut stone: dozens of finished blocks, each marked with a sign you half-recognise and cannot read. Whoever shipped them never delivered. Their transport floats among them with a Basalt crew still strapped in, perfectly still, perfectly fine, waiting politely for a delivery slot.",
+      "text": "A scatter of cut stone: dozens of finished blocks, each marked with a sign you half-recognise and cannot read. Whoever shipped them never delivered. Their transport floats among them with a Basalt crew still strapped in, perfectly still, perfectly fine, waiting for a delivery slot.",
       "choices": [
         {"text": "Strip the stone blocks, not the transport.", "outcomes": [
           {"weight": 70, "text": "The blocks come away clean. The crew, silent, seem to approve of the distinction.", "effects": {"items": {"silicon": 8, "titanium": 6, "scrap": 20}}},
@@ -197,7 +197,7 @@
       ]
     },
     {
-      "id": "quarry_blast_day", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"flag": "in_basalt_quarries", "jumps_min": 2},
+      "id": "quarry_blast_day", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_basalt_quarries", "jumps_min": 2},
       "text": "Today is Blast Day: the Quarry's controlled demolition of the east face. The notice went up forty years ago, in the slow tongue, and says the blast is 'imminent'. This is the day. You are in the middle of the notice's 'imminent'. A voice, calm as granite, says: 'Please leave the area. Please leave it soon. Thank you.'",
       "choices": [
         {"text": "Get out immediately.", "requires": {"crew_min": 1}, "outcomes": [
@@ -245,7 +245,7 @@
           {"weight": 100, "text": "Your Basalt and the foreman converse for most of the afternoon in a sequence of long pauses. Pim writes it all down, increasingly baffled. At the end the foreman says one sentence, and Pim reads it aloud: 'The Quarry is not for sale.' He frames the clipboard.", "effects": {"items": {"credits": 30, "silicon": 6}, "rep": {"concord": 1, "clans": 2}}}
         ]},
         {"text": "Tip off the foreman that Concord wants a tax.", "outcomes": [
-          {"weight": 100, "text": "The foreman considers this for a good while and says, 'Ah.' The word fills the dock. Pim's cutter is politely surrounded by a cairn of stone. Nobody is hurt. Pim is later found, rather pleased with it, as a protected monument.", "effects": {"items": {"silicon": 8}, "rep": {"concord": -3, "clans": 3}}}
+          {"weight": 100, "text": "The foreman considers this for a good while and says, 'Ah.' The word fills the dock. Pim's cutter is surrounded by a cairn of stone. Nobody is hurt. Pim is later found, rather pleased with it, as a protected monument.", "effects": {"items": {"silicon": 8}, "rep": {"concord": -3, "clans": 3}}}
         ]},
         {"text": "Leave them to their paperwork.", "outcomes": [
           {"weight": 100, "text": "Pim writes something on his clipboard. It may be your name. It may be 'assent'.", "effects": {}}
