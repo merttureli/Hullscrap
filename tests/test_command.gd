@@ -658,6 +658,49 @@ func test_a_drone_a_suit_wearer_and_a_breathless_crew_member_stay() -> void:
 	check(not Jobs.air_exempt(_npc("Juno", 12, 14)), "an ordinary crew member is not")
 
 
+## A bed in the east room with Ada lying on it at `hp`, the air still on.
+func _in_bed(hp: float) -> Dictionary:
+	var ship := _two_rooms()
+	var bed := Fixture.put(ship, "bed", 18, 12)
+	var ada := _npc("Ada", 18, 13)
+	ship.crew.append(ada)
+	ada.hp = hp
+	var jobs := Jobs.new()
+	_run(jobs, ship, 1.5)
+	eq(_types(ada), "rest", "(setup) she lies on the bed")
+	return {"ship": ship, "ada": ada, "jobs": jobs, "bed": bed}
+
+
+func test_a_bed_heals_nobody_in_a_room_with_no_air_so_they_leave_at_forty_percent() -> void:
+	var d := _in_bed(60.0)
+	var ship: Ship = d["ship"]
+	var ada: CrewMember = d["ada"]
+	var jobs: Jobs = d["jobs"]
+	check(ada.hp > 60.0, "(setup) with air the bed heals her")
+	ship.atmosphere.pressure[_east(ship)] = 0.0  # the room is breached and empties
+	var hp := ada.hp
+	_run(jobs, ship, 2.0)
+	check(ada.hp < hp - 5.0, "the bed does not outheal the suffocation: she loses hp (%.1f -> %.1f)" % [hp, ada.hp])
+	_run(jobs, ship, 20.0)
+	check(ada.winded, "under 40 percent she is winded")
+	eq(ship.atmosphere.room_at(ada.cell()), _west(ship), "and she walked out to the room with air")
+	eq(Jobs.new()._heal_rate(ship, ada), 0.0, "(no bed under her now)")
+
+
+func test_the_bed_heals_again_over_the_threshold_and_still_heals_a_crew_member_who_needs_no_air() -> void:
+	var d := _in_bed(60.0)
+	var ship: Ship = d["ship"]
+	var ada: CrewMember = d["ada"]
+	var jobs: Jobs = d["jobs"]
+	ship.atmosphere.pressure[_east(ship)] = 0.14  # just under no_air_below, where the suffocation starts
+	eq(jobs._heal_rate(ship, ada), 0.0, "no heal under no_air_below")
+	ship.atmosphere.pressure[_east(ship)] = 0.16
+	eq(jobs._heal_rate(ship, ada), 5.0, "5 a second just over it")
+	ship.atmosphere.pressure[_east(ship)] = 0.0
+	ada.equip("suit")
+	eq(jobs._heal_rate(ship, ada), 5.0, "a suit wearer cannot suffocate and is still healed (Jobs lets them rest in the vacuum on purpose)")
+
+
 func test_a_posted_crew_member_walks_out_of_bad_air_then_returns_to_the_post() -> void:
 	var ship := _two_rooms()
 	var laser := Fixture.put(ship, "laser_mk1", 17, 10)

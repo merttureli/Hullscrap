@@ -759,8 +759,8 @@ func _mend(ship, m, dt: float) -> void:
 		_finish(ship, {"key": "breach:%d,%d" % [breach.x, breach.y], "type": "repair_breach", "cell": breach})
 
 
-## hp per second where `m` lies: a bed, or a medbay that is on (its stats.heal scales the rate), times
-## their heal_mult for it.
+## hp per second where `m` lies: a bed (none in a room with no air, to a crew member who breathes), or a medbay that is on
+## (its stats.heal scales the rate), times their heal_mult for it.
 func _heal_rate(ship, m) -> float:
 	var uid: int = ship.components.at(m.cell())
 	if uid < 0:
@@ -771,6 +771,8 @@ func _heal_rate(ship, m) -> float:
 	var heal: Dictionary = TraitSet.of(m)["heal_mult"]
 	match str(def.get("family", "")):
 		"bed":
+			if _room_airless(ship, ship.atmosphere.room_at(m.cell())) and not air_exempt(m):
+				return 0.0  # a bed that outheals the suffocation (5 and 5) keeps them lying there: with no air it heals nobody who breathes, and they leave at air.hurt_below
 			return float(rates["bed"]) * float(heal["bed"])
 		"medbay":
 			if _rest_ok(ship, uid) and patients.get(uid, m.name) == m.name:  # one bed: only its patient heals (_health picks it first)
