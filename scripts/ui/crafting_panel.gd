@@ -13,6 +13,7 @@ extends Control
 ## input and draws, in the UI colours of docs/ART_STYLE.md.
 
 const Crafting = preload("res://scripts/craft/crafting.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
 const Processing = preload("res://scripts/craft/processing.gd")
 const Describe = preload("res://scripts/ui/describe.gd")
@@ -278,6 +279,8 @@ func _input(e: InputEvent) -> void:
 			open()
 			_handled()
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	_handled()
 	if not e.pressed:
 		return

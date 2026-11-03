@@ -17,6 +17,7 @@ extends Control
 ## at the POI (Sector.fight_spawn), and a won fight leaves its wreck as a POI to salvage instead of the salvage page.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
@@ -656,6 +657,8 @@ func load_campaign() -> String:
 func _input(e: InputEvent) -> void:
 	if not visible or panel_only or not (e is InputEventKey):
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	if event_panel.visible or station_panel.visible or region_choice.visible or journal_panel.visible:
 		return  # they take the keys
 	if get_viewport() != null:

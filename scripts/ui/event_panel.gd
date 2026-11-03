@@ -26,6 +26,7 @@ signal board_requested(spec: Dictionary, ev: Dictionary)
 signal talk_done(ops: Array, acted: bool)
 
 const Session = preload("res://scripts/combat/combat_session.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
@@ -206,6 +207,8 @@ func _end() -> void:
 func _input(e: InputEvent) -> void:
 	if not visible or not (e is InputEventKey):
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
 	if not e.pressed or e.echo:
