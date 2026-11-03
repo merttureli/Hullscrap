@@ -418,7 +418,7 @@
       ]
     },
     {
-      "id": "trader_pawnbarge", "type": "trader", "weight": 24, "once": false, "requires": {},
+      "id": "trader_pawnbarge", "type": "trader", "weight": 48, "once": false, "requires": {},
       "text": "A clan pawnbarge hung with parts like a butcher's shop front. Every item is tagged WORKS, in the same handwriting, with the same optimism. The proprietor, Ma Pickle, is asleep in a hammock and wakes only for money.",
       "choices": [
         {"text": "Buy a mystery crate (30 credits).", "requires": {"credits": 30}, "outcomes": [
