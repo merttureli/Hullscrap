@@ -15,7 +15,7 @@ const Processing = preload("res://scripts/craft/processing.gd")
 
 const OTHER := 3  ## next_recipe: the class of every recipe that is not a module, a weapon or a shield
 const NOT_OFFERED: Array = ["bed", "helm"]  ## families and ids nobody cuts out of a wreck
-const PICKS := {"won": 3, "captured": 4}  ## parts offered by the state of the fight
+const PICKS := {"won": 3, "captured": 4, "spared": 1}  ## parts offered by the state of the fight (a spared ship hands over one, and has no strip row)
 const DANGEROUS_TEXT := " She was dangerous. There's more worth cutting."  ## added to the page when the threat bonus gave more rows
 
 
@@ -37,6 +37,8 @@ static func parts(enemy) -> Array:
 ## data/drift.json `loot.threat_picks` ({"4": 1, "5": 2}: a dangerous enemy pays better), plus the best loot_bonus aboard `ship`
 ## (TraitSet.loot_bonus; no ship, no bonus).
 static func picks_for(state: String, threat: int, c, ship = null) -> int:
+	if state == "spared":  # one pick, whatever the threat or the crew
+		return int(PICKS["spared"])
 	var bonus: Dictionary = c.cfg["loot"].get("threat_picks", {})
 	return int(PICKS.get(state, PICKS["won"])) + int(bonus.get(str(clampi(threat, 0, 5)), 0)) + TraitSet.loot_bonus(ship)
 
@@ -136,10 +138,11 @@ static func drone_scan(ship, c) -> String:
 	return rid if roll.randf() < float(c.cfg["loot"].get("drone_scan", 0.0)) else ""
 
 
-## The salvage event for `enemy` (its Ship, as the fight left it) after a fight in `state` ("won" or "captured").
+## The salvage event for `enemy` (its Ship, as the fight left it) after a fight in `state` ("won", "captured" or "spared").
 ## Returns {} when there is nothing to offer. Rows, in order: "Cut out the X" (the part, to the cargo), at
 ## most one "Scan the X" (its blueprint: the unknown recipe of an offered part that the ship can craft next, see next_recipe),
-## and for a win "Strip her for scrap". A captured ship's scrap was paid already (Campaign.fight_done).
+## and for a win "Strip her for scrap". A captured ship's scrap was paid already (Campaign.fight_done); a spared ship offers one part and the scan row
+## and no strip row (she limps away under her own power).
 ## A ghost ship (`hollow`: it came from a place the Hollow tide has taken, which is what the campaign says when the
 ## flag is left out) offers only the strip row, at half the scrap, whatever the state: nothing aboard is worth cutting
 ## out or scanning, and its scrap was not paid at the fight. `threat` (1-5 skulls, 0 when unknown) adds parts to the
@@ -147,7 +150,7 @@ static func drone_scan(ship, c) -> String:
 static func event_for(enemy, state: String, c, ship, hollow = null, threat := 0) -> Dictionary:
 	var ghost: bool = c.is_hollow(c.current) if hollow == null else bool(hollow)
 	if ghost:
-		return _ghost_event(enemy, c)
+		return {} if state == "spared" else _ghost_event(enemy, c)  # a spared ghost gives nothing (Campaign.fight_done)
 	var pool := []
 	for id in parts(enemy):
 		if not pool.has(id):
@@ -175,7 +178,9 @@ static func event_for(enemy, state: String, c, ship, hollow = null, threat := 0)
 	var foe := str(enemy.name) if enemy != null else "ship"
 	var text := "Nobody is left standing aboard the %s. Your crew strip her hold, then pick one prize to cut loose." % foe
 	var more := DANGEROUS_TEXT if picked.size() > base + TraitSet.loot_bonus(ship) else ""  # the bonus of a crew member is not the threat's
-	if state != "captured":
+	if state == "spared":
+		text = "The %s limps off, but her crew leave one prize on the airlock: your cutters have time for it." % foe
+	elif state != "captured":
 		var scrap := strip_scrap(enemy, c)
 		choices.append(_row("Strip her for scrap (+%d)" % scrap, "You cut her down to the frame. What is left breaks up behind you.", {"items": {"scrap": scrap}}))
 		text = "The %s hangs dead, venting. Your cutters have time for one job before she breaks up." % foe
@@ -184,7 +189,7 @@ static func event_for(enemy, state: String, c, ship, hollow = null, threat := 0)
 		return {}
 	var drone := drone_scan(ship, c)  # (an extra row on a salvage that exists anyway, before the strip row)
 	if drone != "":
-		choices.insert(choices.size() - (1 if state != "captured" else 0), _row("Scan the service drone bay (learn the Repair Drone blueprint)", "A wrecked service drone still has its plans in its memory. The scanner copies them.", {"blueprint": [drone]}))
+		choices.insert(choices.size() - (1 if state == "won" else 0), _row("Scan the service drone bay (learn the Repair Drone blueprint)", "A wrecked service drone still has its plans in its memory. The scanner copies them.", {"blueprint": [drone]}))
 	return {"id": "salvage", "type": "salvage", "once": false, "title": "Salvage: %s" % foe, "text": text, "choices": choices}
 
 

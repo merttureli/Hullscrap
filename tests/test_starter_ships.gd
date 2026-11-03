@@ -345,9 +345,9 @@ func test_nose_guns_point_forward_and_rear_engines_push_forward() -> void:
 func test_rustbucket_is_the_scrap_ship() -> void:
 	var ship := _ship("Rustbucket")
 	var b := _bounds(ship)
-	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(20, 21), "20x21 cells built")
+	eq(b[1] - b[0] + Vector2i.ONE, Vector2i(20, 23), "20x23 cells built (the prow is two horns with the gun in the notch)")
 	eq(_count(ship, "reactor_mk2"), 1, "one standard Reactor Mk2 (scrap parts draw 20% more)")
-	eq([_count(ship, "engine_scrap_mk1"), _count(ship, "oxygen_scrap_mk1"), _count(ship, "rattle_burst_scrap"), _count(ship, "bolt_thrower_scrap")], [2, 1, 1, 1], "2 Kickjets, Wheezer O2, the Rattle Burst turret and a Bolt Thrower")
+	eq([_count(ship, "engine_scrap_mk1"), _count(ship, "oxygen_scrap_mk1"), _count(ship, "rattle_burst_scrap"), _count(ship, "bolt_thrower_scrap"), _count(ship, "shield_scrap_mk1")], [2, 1, 0, 1, 1], "2 Kickjets, Wheezer O2, a Bolt Thrower one cell behind the horns of the prow and a Bubble Rig (fights5: the Rattle Burst turret is gone, the nose gun got shot out in every fight without a shield)")
 	eq([ship.inventory.count("shield_scrap_mk1"), ship.inventory.count("net_mouth_scrap")], [0, 1], "no spare shield, a Net Mouth in the hold")
 	check(_tiles(ship, "scrap_plate") > 100, "a scrap-plate outer layer all round")
 	eq(ship.inventory.count("credits"), 300, "300 credits")

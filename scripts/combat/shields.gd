@@ -23,7 +23,7 @@ const Shape = preload("res://scripts/combat/shield_shape.gd")
 const Balance = preload("res://scripts/combat/shield_balance.gd")
 const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 
-const ION_LOCK := 3.0  ## seconds an ion hit keeps the shields offline
+const ION_LOCK := 5.0  ## seconds an ion hit keeps the shields offline
 const WHOLE := 1.0 - 1e-6  ## a sector stops a shot while it holds at least this much
 ## Seconds a shot opens its sector, by weapon kind (and for ion damage). A beam opens it for its whole
 ## duration; a missile never does. A weapon entry's own `drops_shield_s` wins.

@@ -50,7 +50,9 @@ func test_every_rapid_gun_is_a_light_quick_turret() -> void:
 		if bool(w.get("rapid", false)):
 			var cd := float(w["cooldown"])
 			check(cd >= 0.4 - 1e-9 and cd <= 0.8 + 1e-9, "%s: cooldown %s is 0.4 to 0.8 s" % [w["id"], str(cd)])
-			check(float(entries[w["id"]]["damage"]) == 1.0 and int(w["shots"]) == 1, "%s: one shot of damage 1" % w["id"])
+			# damage 1, except the Rattle Burst: at 1 (0.6 after the turret factor) the plating ate it, 0.056 hp/s on the bench (Beta 4 mechanics audit, fights5)
+			var want_damage := 2.0 if w["id"] == "rattle_burst_scrap" else 1.0
+			check(float(entries[w["id"]]["damage"]) == want_damage and int(w["shots"]) == 1, "%s: one shot of damage %s" % [w["id"], str(want_damage)])
 			best_track = maxf(best_track, float(w["track"]))
 			best_acc = maxf(best_acc, float(w["accuracy"]))
 	var sov := Weapons.new().def("sovereign_turret")
@@ -63,8 +65,8 @@ func test_every_rapid_gun_is_a_light_quick_turret() -> void:
 func test_the_heavy_guns_are_slower_and_hit_harder_than_before() -> void:
 	var weapons := Weapons.new()
 	# [cooldown, damage] as they were in Beta 2 -> now: lasers, bolts and flak x1.75 / x1.5 (damage to 0.5), beams the same,
-	# missiles x1.4 / x1.25
-	for row in [["laser_mk1", 1.2, 2.0], ["laser_mk2", 1.0, 3.0], ["pulse_mk1", 1.5, 2.0], ["shrapnel_cannon_scrap", 2.5, 1.0], ["heat_lance_neon", 6.0, 3.0], ["artemis_mk1", 5.0, 3.0], ["gilded_lance", 1.6, 5.0]]:
+	# missiles x1.4 / x1.25 (the Shrapnel Cannon's row is 1.34, not 1.0: its pellets went 1.5 -> 2 in the fights5 balance pass)
+	for row in [["laser_mk1", 1.2, 2.0], ["laser_mk2", 1.0, 3.0], ["pulse_mk1", 1.5, 2.0], ["shrapnel_cannon_scrap", 2.5, 1.34], ["heat_lance_neon", 6.0, 3.0], ["artemis_mk1", 5.0, 3.0], ["gilded_lance", 1.6, 5.0]]:
 		var w := weapons.def(row[0])
 		var kind := str(w["kind"])
 		var cd_mult := 1.4 if kind == "missile" else 1.75

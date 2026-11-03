@@ -410,7 +410,7 @@ func _event_chain(where: String, ev: Dictionary, c: Campaign, sim, pick: RandomN
 				queue.append({"id": "(after_win fight)", "text": "-", "choices": [{"text": "Fight", "outcomes": [{"weight": 100, "effects": {"fight": done["fight"]}}]}]})
 			elif done["goto"] != "" and c.events.has(done["goto"]):
 				queue.append(c.events.get_event(done["goto"]))
-			elif done["state"] in ["won", "captured"]:
+			elif done["state"] in ["won", "captured"] or (done["state"] == "spared" and not c.is_hollow(c.current)):
 				queue.append(Salvage.event_for(res.get("enemy"), done["state"], c, ship, null, int(done["threat"])))
 				stats["salvage"] += 1
 		elif str(r["goto"]) != "":

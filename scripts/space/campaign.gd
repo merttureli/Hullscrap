@@ -956,7 +956,7 @@ func gen_spec(entry: String, kind: String, roller: RandomNumberGenerator = null)
 ## The fight is over. `res` is {state, enemy (its Ship)}, plus `offer` ({item: count}) when
 ## spared; `state` is "won" | "captured" | "spared" | "escaped" | "fled" | "lost". A win pays credits (the caller
 ## then shows Salvage.event_for); a captured ship pays 1.5x the credits and the strip scrap; a spared one pays its
-## offer (its credits times the tier) and gives no salvage; an escaped one pays nothing, except a ghost that faded (its
+## offer (its credits times the tier and the fuel or missile extra, no part) and opens a reduced salvage page (one part, the scan row, no strip row; a spared ghost gets nothing); an escaped one pays nothing, except a ghost that faded (its
 ## morale style `fades`, data/morale.json): that counts as a win and runs `after_win`, with nothing to loot or salvage. Won,
 ## captured and spared count as wins and run `after_win` ({text, effects}). The damage stays on the blocks, nothing else is carried. A loss ends
 ## the run (the caller starts a new campaign). Returns {state, text, lines, goto, fight, ending, threat}: `goto`,

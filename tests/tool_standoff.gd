@@ -13,7 +13,7 @@ extends SceneTree
 ## the rolls flee, the rest fight on), shield_recharge=<x> (every shield part's recharge, seconds a layer), shield_cap (not here: stages 4+ have none).
 ## starters=1 (instead of the stages and kinds): the three starter ships as built (data/ships/starter_*.json) against generated stage 1 and 2
 ## pirates of threat 2 and 3 (rated against that starter, Threat.rate) and the authored Dental Plan, `seeds` each, through the arena's normal player AI;
-## it prints the starter table: who wins, how long, and when the starter's first gun (and its last) is disabled. Not for a stage's player-like ship.
+## (only=courier,prism keeps just those starters) it prints the starter table: who wins, how long, and when the starter's first gun (and its last) is disabled. Not for a stage's player-like ship.
 ## Each row: the end, the time, the enemy's shield layers, the shots of the player and where they went (shield layer, hull, part), the
 ## structure the enemy lost, the time the guns were in range, and the enemy's own damage and shield use.
 
@@ -87,6 +87,8 @@ func _run() -> void:
 		var k := 0
 		if args.has("starters"):
 			for name in STARTERS:
+				if args.has("only") and not str(args["only"]).split(",").has(name):  # only=rustbucket,prism: just those starters
+					continue
 				for st in [1, 2]:
 					for e in starter_enemies(name, st, n):
 						k += 1
@@ -127,7 +129,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters", "paim"]:
+	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters", "paim", "only"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
