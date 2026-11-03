@@ -127,7 +127,7 @@ func test_the_loot_tables_resolve() -> void:
 	var materials := {}
 	for m in Content.list("materials"):
 		materials[m["id"]] = true
-	var items := {"credits": true, "fuel": true}
+	var items := {"credits": true, "fuel": true, "mod": true}  # ("mod" is the outcome that rolls a mod item, mods.gd)
 	for i in Content.list("items"):
 		items[i["id"]] = true
 	var tables: Dictionary = cfg["tables"]

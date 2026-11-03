@@ -1,0 +1,538 @@
+{
+ "_doc": "The words of the Ledger (scripts/sim/advisor.gd builds the card from them; scripts/ui/ledger_card.gd draws it). The Ledger is the guidance program Ma Gantry Loans installs on every ship it finances (docs/LORE.md): dry, polite, financial, faintly threatening and sometimes accidentally kind, and it says one short line at a time. stages: the checklist of each stage in order (the milestone ladder of docs/audit/progression.md section 7): id, title, why and check. A check is {key: number} (every key must be met; a number is a literal or \"p:<key>\", read from that stage's row of data/progression.json) or a list of such objects (any one will do); a key is one of advisor.gd VOCAB, met at or above its number (damaged_blocks: at or below). A clause whose p: number is missing is left out, a goal with nothing left is dropped (so the stage 1 and 2 goals work before the balance track's file lands). {=key} in a title or why is filled with that check's number. {id} or {id:words} marks a mechanic keyword (keywords below: a colour and a hover line). tips: the first-time notes, one per profile each, listed in the journal (advisor.gd TIPS says what each waits for). warnings: one line each (advisor.gd WARNINGS); each fires at most once a stage unless it gets worse by rules.worse. rules: worse = how much worse (x) a warning must get to fire again in the same stage; toll_jumps, toll_scrap: the toll warning's range and scrap; scrap_credits: the unspent scrap warning's credits; hull_stations: jumps to the next station for the hull warning; warn_s: seconds a warning stays on the card; pace_s: seconds between two looks (at least 1); low_fuel: the fuel of the low fuel tip. labels: how a check is named in the progress (Guns 2/3). keywords: the colours differ from each other and from describe.json's (tests/test_advisor.gd measures it).",
+ "version": 1,
+ "card": {
+  "title": "THE LEDGER",
+  "by": "Ma Gantry Loans",
+  "done": "Everything on the list is done. Ma has nothing to add, which is rare."
+ },
+ "rules": {
+  "worse": 1.5,
+  "toll_jumps": 2,
+  "toll_scrap": 600,
+  "scrap_credits": 200,
+  "hull_stations": 3,
+  "warn_s": 30,
+  "pace_s": 1,
+  "low_fuel": 2
+ },
+ "labels": {
+  "intakes": "Intakes",
+  "guns": "Guns",
+  "layers": "Shield layers",
+  "fab": "Fabricator level",
+  "power": "Power rating",
+  "margin": "Spare power",
+  "accel_ratio": "Speed",
+  "plates": "Plates",
+  "medbays": "Medbays",
+  "known": "Blueprints",
+  "fuel_margin": "Fuel to spare",
+  "credits_over_toll": "Credits over the toll",
+  "damaged_blocks": "Damaged blocks"
+ },
+ "keywords": {
+  "intake": {
+   "color": "#5fdd68",
+   "hover": "Pulls in debris that touches it. Mount it on an outer wall."
+  },
+  "gun": {
+   "color": "#fb7d6a",
+   "hover": "Weapons that need power and a hull mount or a room."
+  },
+  "shield": {
+   "color": "#9aeef4",
+   "hover": "Layers that absorb hits before the hull."
+  },
+  "medbay": {
+   "color": "#f075b7",
+   "hover": "A bed that heals fast."
+  },
+  "fabricator": {
+   "color": "#f0a675",
+   "hover": "Builds parts from blueprints. Modules raise its level."
+  },
+  "blueprint": {
+   "color": "#f16afb",
+   "hover": "A recipe you can craft. Found, scanned or bought."
+  },
+  "fuel": {
+   "color": "#bdfa42",
+   "hover": "One jump burns one. Stations and canisters supply it."
+  },
+  "toll": {
+   "color": "#fc92a0",
+   "hover": "What the warden charges to open the exit lane."
+  },
+  "warden": {
+   "color": "#dbb3db",
+   "hover": "Holds the exit lane of each region."
+  },
+  "armour": {
+   "color": "#b3c6db",
+   "hover": "Solid tiles that soak hits. Cheap, and they need no power."
+  },
+  "engine": {
+   "color": "#1ff9eb",
+   "hover": "Thrust against mass. More guns need more engines."
+  },
+  "ion": {
+   "color": "#af8dff",
+   "hover": "Knocks shields out and stuns crew."
+  },
+  "missile": {
+   "color": "#8fdc4a",
+   "hover": "Slow, but flies through shields."
+  }
+ },
+ "stages": {
+  "1": [
+   {
+    "id": "s1_intake",
+    "title": "Mount your {intake}.",
+    "why": "A third of your scrap drifts past. The net mouth is in the hold, earning nothing, like a cousin.",
+    "check": {
+     "intakes": 1
+    }
+   },
+   {
+    "id": "s1_guns",
+    "title": "Fit three {gun:guns}.",
+    "why": "Your collateral would like a third gun.",
+    "check": {
+     "guns": 3
+    }
+   },
+   {
+    "id": "s1_cover",
+    "title": "Add a {shield} or a {medbay}.",
+    "why": "Ma would like the collateral to survive its first fight. One layer or one bed will do.",
+    "check": [
+     {
+      "layers": 1
+     },
+     {
+      "medbays": 1
+     }
+    ]
+   },
+   {
+    "id": "s1_fuel",
+    "title": "Hold enough {fuel} for the road to the beacon.",
+    "why": "A stranded ship repays nobody. Ma has checked.",
+    "check": {
+     "fuel_margin": 0
+    }
+   },
+   {
+    "id": "s1_toll",
+    "title": "Keep the {warden}'s {toll} in your pocket.",
+    "why": "The exit lane is not free, and the warden does not take scrap. Ma recommends solvency.",
+    "check": {
+     "credits_over_toll": 0
+    }
+   }
+  ],
+  "2": [
+   {
+    "id": "s2_fab",
+    "title": "Upgrade the {fabricator}.",
+    "why": "A Robot Arm in its room makes level two, which builds what the shops are too proud to sell.",
+    "check": {
+     "fab": 2
+    }
+   },
+   {
+    "id": "s2_arms",
+    "title": "Arm to {=guns} guns and {=layers} layers.",
+    "why": "The collateral is growing. Ma finds this encouraging, in writing.",
+    "check": {
+     "guns": 4,
+     "layers": 2,
+     "power": "p:power_floor"
+    }
+   },
+   {
+    "id": "s2_speed",
+    "title": "Add {engine:engines} as you add guns.",
+    "why": "Every gun is mass, and slow ships get repossessed.",
+    "check": {
+     "accel_ratio": 0.75
+    }
+   },
+   {
+    "id": "s2_parts",
+    "title": "Look for better parts: {=known} {blueprint:blueprints}.",
+    "why": "Take every Scan row. Mk2 recipes turn up in shops, wrecks and aboard stations.",
+    "check": {
+     "known": "p:known"
+    }
+   },
+   {
+    "id": "s2_toll",
+    "title": "Fatten the purse before the beacon.",
+    "why": "The {warden} wants its {toll} and a little goodwill. Sell surplus scrap at a station.",
+    "check": {
+     "credits_over_toll": 40
+    }
+   }
+  ],
+  "3": [
+   {
+    "id": "s3_arms",
+    "title": "Brace: {=guns} guns behind {=layers} layers.",
+    "why": "Tier-three enemies start about now. They have not read your file.",
+    "check": {
+     "guns": "p:guns",
+     "layers": "p:layers",
+     "power": "p:power_floor"
+    }
+   },
+   {
+    "id": "s3_intake",
+    "title": "Mount a second {intake}.",
+    "why": "More mouths, more scrap. The drift does not mind being collected.",
+    "check": {
+     "intakes": "p:intakes"
+    }
+   },
+   {
+    "id": "s3_fab",
+    "title": "Raise the {fabricator} to level {=fab}.",
+    "why": "An Assembly Rig and two Robot Arms. The titanium loop starts here.",
+    "check": {
+     "fab": "p:fab"
+    }
+   },
+   {
+    "id": "s3_plates",
+    "title": "Add {=plates} {armour:plates}.",
+    "why": "Armour is cheaper than an apology.",
+    "check": {
+     "plates": "p:plates"
+    }
+   },
+   {
+    "id": "s3_toll",
+    "title": "Credits for the {toll}.",
+    "why": "Sell scrap before the beacon. The warden has seen your balance and has opinions.",
+    "check": {
+     "credits_over_toll": "p:credits_over_toll"
+    }
+   }
+  ],
+  "4": [
+   {
+    "id": "s4_arms",
+    "title": "Field {=guns} guns behind {=layers} layers.",
+    "why": "Every enemy carries a shield now. {ion} and {missile:missiles} go through; the shops know.",
+    "check": {
+     "guns": "p:guns",
+     "layers": "p:layers",
+     "power": "p:power_floor"
+    }
+   },
+   {
+    "id": "s4_speed",
+    "title": "Keep your speed above {=accel_ratio}.",
+    "why": "A barge loses the intake and the aim. Add {engine:engines}.",
+    "check": {
+     "accel_ratio": "p:accel_ratio"
+    }
+   },
+   {
+    "id": "s4_plates",
+    "title": "Plate up to {=plates}.",
+    "why": "Ma notes that hulls are the only collateral that fights back.",
+    "check": {
+     "plates": "p:plates"
+    }
+   },
+   {
+    "id": "s4_parts",
+    "title": "Know {=known} {blueprint:blueprints}.",
+    "why": "Mk2 and Mk3 parts are on the shelves. The Ledger can only suggest; the purse decides.",
+    "check": {
+     "known": "p:known"
+    }
+   },
+   {
+    "id": "s4_toll",
+    "title": "Credits for the {toll}.",
+    "why": "The lane costs more each stage. So does everything Ma sells.",
+    "check": {
+     "credits_over_toll": "p:credits_over_toll"
+    }
+   }
+  ],
+  "5": [
+   {
+    "id": "s5_arms",
+    "title": "Field {=guns} guns behind {=layers} layers.",
+    "why": "The listening posts hear everything, including your shield count.",
+    "check": {
+     "guns": "p:guns",
+     "layers": "p:layers",
+     "power": "p:power_floor"
+    }
+   },
+   {
+    "id": "s5_fab",
+    "title": "Raise the {fabricator} to level {=fab}.",
+    "why": "Higher levels build the parts that make the rest of the ship look cheap.",
+    "check": {
+     "fab": "p:fab"
+    }
+   },
+   {
+    "id": "s5_plates",
+    "title": "Plate up to {=plates}.",
+    "why": "Armour does not need a reactor, which the Ledger finds restful.",
+    "check": {
+     "plates": "p:plates"
+    }
+   },
+   {
+    "id": "s5_parts",
+    "title": "Know {=known} {blueprint:blueprints}.",
+    "why": "Read the stores, take the Scan rows, board what you can.",
+    "check": {
+     "known": "p:known"
+    }
+   },
+   {
+    "id": "s5_toll",
+    "title": "Credits for the {toll}.",
+    "why": "A good ship pays at the beacon and never has to be kind about it.",
+    "check": {
+     "credits_over_toll": "p:credits_over_toll"
+    }
+   }
+  ],
+  "6": [
+   {
+    "id": "s6_arms",
+    "title": "Field {=guns} guns behind {=layers} layers.",
+    "why": "The doors are open, and so are the enemy's. Ma recommends being larger.",
+    "check": {
+     "guns": "p:guns",
+     "layers": "p:layers",
+     "power": "p:power_floor"
+    }
+   },
+   {
+    "id": "s6_margin",
+    "title": "Keep the lights on.",
+    "why": "Every gun draws power, and a ship in the red does not shoot. Ma does the sums.",
+    "check": {
+     "margin": 0
+    }
+   },
+   {
+    "id": "s6_plates",
+    "title": "Plate up to {=plates}.",
+    "why": "Every plate is a sentence the enemy has to finish.",
+    "check": {
+     "plates": "p:plates"
+    }
+   },
+   {
+    "id": "s6_repair",
+    "title": "Mend the damage before the beacon.",
+    "why": "Stations repair every block. The warden does not.",
+    "check": {
+     "damaged_blocks": 0
+    }
+   },
+   {
+    "id": "s6_toll",
+    "title": "Credits for the {toll}.",
+    "why": "Sell the surplus scrap at a station and the rest is arithmetic.",
+    "check": {
+     "credits_over_toll": "p:credits_over_toll"
+    }
+   }
+  ],
+  "7": [
+   {
+    "id": "s7_arms",
+    "title": "Field {=guns} guns behind {=layers} layers.",
+    "why": "The enemy has stopped being polite. Ma suggests you stop being small.",
+    "check": {
+     "guns": "p:guns",
+     "layers": "p:layers",
+     "power": "p:power_floor"
+    }
+   },
+   {
+    "id": "s7_plates",
+    "title": "Plate up to {=plates}.",
+    "why": "The heavier the ship, the longer the debt can be discussed.",
+    "check": {
+     "plates": "p:plates"
+    }
+   },
+   {
+    "id": "s7_repair",
+    "title": "Mend the damage before the beacon.",
+    "why": "A dented ship is only a ship that has not paid yet.",
+    "check": {
+     "damaged_blocks": 0
+    }
+   },
+   {
+    "id": "s7_toll",
+    "title": "Credits for the {toll}.",
+    "why": "Ma has been told the lane is expensive. She finds this relatable.",
+    "check": {
+     "credits_over_toll": "p:credits_over_toll"
+    }
+   }
+  ],
+  "8": [
+   {
+    "id": "s8_arms",
+    "title": "Field {=guns} guns behind {=layers} layers.",
+    "why": "The last stage. Ma would like the collateral to finish what it started.",
+    "check": {
+     "guns": "p:guns",
+     "layers": "p:layers",
+     "power": "p:power_floor"
+    }
+   },
+   {
+    "id": "s8_plates",
+    "title": "Plate up to {=plates}.",
+    "why": "The last stage hits like the first, from further away.",
+    "check": {
+     "plates": "p:plates"
+    }
+   },
+   {
+    "id": "s8_repair",
+    "title": "Mend the damage before the beacon.",
+    "why": "The Ledger would like the collateral intact at the end. It would like many things.",
+    "check": {
+     "damaged_blocks": 0
+    }
+   },
+   {
+    "id": "s8_toll",
+    "title": "Credits for the {toll}.",
+    "why": "One last lane. Ma will want to hear about it.",
+    "check": {
+     "credits_over_toll": "p:credits_over_toll"
+    }
+   }
+  ]
+ },
+ "tips": [
+  {
+   "id": "first_build",
+   "title": "Build mode",
+   "text": "The world holds still while you build. Cable every part to a reactor, then press B to fly."
+  },
+  {
+   "id": "first_fight",
+   "title": "Your first fight",
+   "text": "Shields take the first hits, then the blocks. Lose half the ship and you lose. J jumps away when the odds look rude."
+  },
+  {
+   "id": "first_breach",
+   "title": "A breach",
+   "text": "A room is losing air. Repair seals it, Evacuate abandons it. Ma values the crew above the carpet."
+  },
+  {
+   "id": "first_station",
+   "title": "A station",
+   "text": "Docked. Stations repair every block, sell fuel and parts, and buy scrap. Sell the surplus before the beacon."
+  },
+  {
+   "id": "first_fabricator",
+   "title": "The fabricator",
+   "text": "It builds what you hold a blueprint for. A higher level opens more recipes: add a Robot Arm to its room."
+  },
+  {
+   "id": "first_blueprint",
+   "title": "A blueprint",
+   "text": "Yours for good. Craft the part at the fabricator (C), then place it from the palette (B)."
+  },
+  {
+   "id": "first_shields",
+   "title": "Shields",
+   "text": "Layers can be moved between the sectors of the bubble. Put the thick side toward whoever is shooting."
+  },
+  {
+   "id": "first_warden",
+   "title": "A warden",
+   "text": "It holds the exit lane. Pay the toll, break through or turn back. Ma suggests whichever leaves you solvent."
+  },
+  {
+   "id": "first_drift_jump",
+   "title": "A drift jump",
+   "text": "It burns no fuel and dents the ship instead. Ma will not be reimbursing the dents."
+  },
+  {
+   "id": "low_fuel",
+   "title": "Low fuel",
+   "text": "Stations sell it, and debris sometimes carries canisters. A stranded ship pays nobody."
+  },
+  {
+   "id": "first_boarding",
+   "title": "Boarding",
+   "text": "Choose who goes aboard and what they carry. Mods in the kit slot change how the boarding goes."
+  },
+  {
+   "id": "first_mod",
+   "title": "A mod",
+   "text": "A small device worn in a kit slot. Fit it on the loadout screen before the next boarding."
+  },
+  {
+   "id": "first_rig_bonus",
+   "title": "The Salvage Rig",
+   "text": "It added to what you opened. Higher marks add more. Ma has noted the percentage."
+  },
+  {
+   "id": "first_crew",
+   "title": "A new crewmate",
+   "text": "Select them, then click a button on the crew bar: they are posted to that station for good."
+  },
+  {
+   "id": "first_wreck",
+   "title": "A wrecked part",
+   "text": "It stays wrecked. Repair at a station, and keep spares in the hold."
+  }
+ ],
+ "warnings": {
+  "outgunned": {
+   "text": "The warden outguns you and the lane is out of reach. Ma recommends not dying; it complicates repayment."
+  },
+  "fuel": {
+   "text": "Fuel will not reach the beacon. A stranded ship repays nobody, and Ma has checked."
+  },
+  "skulls": {
+   "text": "That contact outguns you. Ma suggests leaving; she values your continued interest."
+  },
+  "toll": {
+   "text": "The toll is near and the purse is thin. Sell scrap at a station: Ma's cousin buys everything."
+  },
+  "hull": {
+   "text": "The structure is thin and the next station is far. Mend it before the collateral becomes a rumour."
+  },
+  "cliff": {
+   "text": "The next region outguns you. Ma has noted it in your file, in red."
+  },
+  "power": {
+   "text": "Demand exceeds supply, and parts go dark. Add a reactor, or take a gun off the books."
+  },
+  "mass": {
+   "text": "The ship is heavy and slow, and slow ships get caught. Add engines."
+  },
+  "scrap": {
+   "text": "Scrap in the hold, arrears on the account. Sell the surplus at a station; Ma prefers coin."
+  },
+  "blueprints": {
+   "text": "No new blueprints in a long while. Take the Scan rows and read the stores; progress is a recurring cost."
+  }
+ }
+}

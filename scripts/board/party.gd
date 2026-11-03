@@ -8,6 +8,9 @@ const Arms = preload("res://scripts/board/arms.gd")
 const Site = preload("res://scripts/board/site.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Kit = preload("res://scripts/board/kit.gd")
+const Mods = preload("res://scripts/board/mods.gd")
+const Bolts = preload("res://scripts/board/bolts.gd")
 
 const ERR := 0.12  ## radians of error in a follower's shot
 const SEE := 14.0  ## cells a follower looks for something to shoot
@@ -47,7 +50,7 @@ static func join(s, names: Array) -> Array:
 			m.pos = Pathfinder.centre_of(spots[out.size()], m.body_size)
 		else:
 			m.pos = s.soldier.pos
-		var g = Arms.make_gun(m.sidearm(), false)
+		var g = Arms.make_gun(str(Kit.weapons_of(m)[0]), false)  # (a follower fights with the first weapon of their kit)
 		if g == null:
 			g = Arms.make_gun("service_pistol", false)
 		out.append({"m": m, "src": src, "gun": g, "cd": 0.0, "repath": 0.0, "revive": 0.0, "moving": false})
@@ -103,16 +106,13 @@ static func _act(s, p: Dictionary, dt: float) -> void:
 				_go(s, p, foe["pos"], dt)
 			elif float(p["cd"]) <= 0.0:
 				p["cd"] = 1.0 / float(w["rate"])
-				s.events.append({"type": "swing", "from": m.pos, "dir": off.angle(), "reach": reach, "who": "ally"})
-				s.foes.hurt(foe["ref"], float(w["damage"]), foe["pos"])
+				s.events.append({"type": "swing", "from": m.pos, "dir": off.angle(), "reach": reach, "who": "ally", "look": Bolts.look(str(w["id"]), Mods.bolt_size(m))})
+				s.foes.hurt(foe["ref"], float(w["damage"]) * Mods.damage_mult(m), foe["pos"])
 				s.foes.noise(m.pos, float(c["noise_swing"]))
 		else:
 			if float(p["cd"]) <= 0.0:
 				p["cd"] = 1.0 / float(w["rate"])
-				var r := Arms.trace(s.site, m.pos, off.angle() + s.rng.randf_range(-ERR, ERR), float(w["range"]), s.foes.bodies(), s.rng)
-				s.events.append({"type": "shot", "from": m.pos + Vector2.from_angle(off.angle()) * 0.9, "to": r["end"], "who": "ally", "class": str(w["class"]), "kind": r["kind"]})
-				if r["ref"] != null:
-					s.foes.hurt(r["ref"], float(w["damage"]), r["end"])
+				s.shoot(m, "ally", m.pos + Vector2.from_angle(off.angle()) * 0.9, off.angle() + s.rng.randf_range(-ERR, ERR), w, s.foes.bodies())
 				s.foes.noise(m.pos, float(c["noise_gun"]))
 			if m.pos.distance_to(s.soldier.pos) > float(c["follow_far"]) * 1.8:
 				_go(s, p, s.soldier.pos, dt)  # not too far from him to shoot

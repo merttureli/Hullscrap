@@ -10,6 +10,10 @@ extends Node2D
 ## - E: hold it on a container to open it (a progress ring), then the loot list shows: E takes all, 1-9 one row, Esc shuts it. Hold E for 4 s by a
 ##   locked door to hack it, tap E by a card door to use the keycard. E in the airlock leaves. Esc is the pause menu; Ctrl+S is refused aboard.
 ## - The HUD (board_hud.gd): the site and its containers, the airlock marker (an arrow at the screen edge when it is off screen), the tracker.
+## Stage B4: a shot is a bolt of light that flies to its hit point (board_fx.gd: the bolts, their pooled lights, the impacts, the flares; the events of the session
+## carry the look and the flight time, and a hit waits for its bolt in `_later`), the HUD has party cards and a weapon bar (board_cards.gd), the crew picker is
+## the loadout screen (board_loadout.gd; this node keeps its state: load_who, load_slot, loadout_* and the clicks), and a Spotter Cam in the party lights the rooms
+## it sees as a camera feed (_update_feed).
 ## Stage B2 hooks: `contacts_source` (a Callable that returns the moving contacts for the tracker), `tracker.take_pings()` for the ping sound, and
 ## `session.site.free_anchors(room)` for where enemies stand. Scripts and tests drive `aim_override`, `e_override`, `wasd_override`, and call step(dt).
 
@@ -26,6 +30,10 @@ const Audio = preload("res://scripts/audio/audio.gd")
 const Arms = preload("res://scripts/board/arms.gd")
 const Party = preload("res://scripts/board/party.gd")
 const Themes = preload("res://scripts/board/themes.gd")
+const BoardFx = preload("res://scripts/board/board_fx.gd")
+const Bolts = preload("res://scripts/board/bolts.gd")
+const Kit = preload("res://scripts/board/kit.gd")
+const Mods = preload("res://scripts/board/mods.gd")
 
 ## Emitted when the soldier is back on the ship: Boarding.leave()'s result {cleared, said, name, kind, poi}.
 signal finished(result: Dictionary)
@@ -74,10 +82,13 @@ var e_override: Variant = null  ## whether E is held
 var wasd_override: Variant = null  ## a Vector2
 var fire_override: Variant = null  ## whether the trigger is held
 var ask_party := true  ## on entering, offer to take unposted crew along (scripts and tests that want to start walking set it false)
-var picking := false  ## the crew picker is up: the world stands still
+var picking := false  ## the loadout screen (the crew picker, B4) is up: the world stands still
 var pick: Array = []  ## the names picked so far
+var load_who := 0  ## the person whose kit the loadout screen shows: 0 the soldier, then the crew picked, in the order picked
+var load_slot := {}  ## the slot whose choices are listed: {slot ("weapon", "body" or "mod"), idx}; empty = none
+var load_msg := ""  ## why the last choice was refused
 var hollow_source := Callable()  ## () -> bool: has the Hollow taken this place (map_view.gd sets it; the visit notices when it does)
-var tracers: Array = []  ## [{from, to (cells), t, foe}] the lines the shots drew, for the HUD
+var fx: BoardFx  ## B4: the bolts, their lights, the impacts (board_fx.gd)
 var light_on := true  ## F: the flashlight
 var target := {}  ## what E would act on: {type ("airlock", "container", "door"), id, dist}
 var hold := 0.0  ## seconds E has been held on the target
@@ -98,6 +109,11 @@ var _flash: PointLight2D
 var _muzzle: PointLight2D
 var _muzzle_t := 0.0
 var _muzzle_at := Vector2.ZERO
+var _later: Array = []  # [{t, e}] events that happen when the bolt arrives (a hit, a flare lighting)
+var _shake := 0.0  # px of screen shake left (a heavy weapon)
+var _shake_rng := RandomNumberGenerator.new()
+var _cam_lights := {}  # room id -> the PointLight2D of the Spotter Cam's feed
+var _cam_energy := {}  # room id -> the energy it shows now (it fades in and out)
 var _down_t := 0.0
 var _leave_t := 0.0  # seconds a "leave them behind?" question stands
 var _skitter := 0.0
@@ -159,7 +175,12 @@ func enter(p_session) -> String:
 	message = ""
 	feed.clear()
 	tracker = Tracker.new()
-	tracers.clear()
+	_later.clear()
+	_shake = 0.0
+	_shake_rng.seed = 91
+	load_who = 0
+	load_slot = {}
+	load_msg = ""
 	light_on = true
 	_down_t = 0.0
 	_flicker = 0.0
@@ -184,7 +205,9 @@ func enter(p_session) -> String:
 	Audio.fx(self, "arrive", null, -6.0)
 	say("Airlock sealed. %s." % session.site.site_name)
 	pick = []
-	picking = ask_party and not Party.eligible(session.ship).is_empty()
+	picking = ask_party and _loadout_wanted()
+	if picking:
+		_open_loadout()
 	return ""
 
 
@@ -194,6 +217,7 @@ func leave() -> void:
 		return
 	var result: Dictionary = session.leave()
 	Audio.fx_loop(self, "hack", "repair_loop", false)
+	Audio.fx_loop(self, "flare", "flare_burn", false)
 	Audio.mood(self, "explore")
 	Audio.muffle_music(self, false)
 	RenderingServer.set_default_clear_color(_saved_clear)
@@ -260,6 +284,10 @@ func _build_nodes() -> void:
 		_red.append([node, node.energy, float(hash(l["pos"]) % 628) / 100.0, red])
 	_layer = CanvasLayer.new()
 	_layer.layer = 3
+	fx = BoardFx.new()
+	fx.view = self
+	fx.lights_root = _lights
+	_layer.add_child(fx)
 	hud = BoardHud.new()
 	hud.view = self
 	_layer.add_child(hud)
@@ -302,6 +330,9 @@ func _free_nodes() -> void:
 	_mod = null
 	_layer = null
 	hud = null
+	fx = null
+	_cam_lights.clear()
+	_cam_energy.clear()
 	_flash = null
 	_muzzle = null
 	_self_light = null
@@ -363,6 +394,10 @@ func step(dt: float) -> void:
 		return  # (E at the airlock left)
 	_combat(dt)
 	_update_lights(dt)
+	if fx != null:
+		fx.step(dt)
+	_shake_cam(dt)
+	_flare_sound()
 	var contacts: Array = contacts_source.call() if contacts_source.is_valid() else s.contacts()
 	tracker.tick(dt, m.pos, contacts)
 	tracker.take_pings()
@@ -425,10 +460,62 @@ func _update_lights(dt: float) -> void:
 	_muzzle.visible = _muzzle_t > 0.0 and not lights_up
 	_muzzle.position = _muzzle_at * CELL
 	_muzzle.energy = 1.5 * _muzzle_t / float(Arms.cfg()["flash_s"])
+	_update_feed(dt)
 	for e in _red:
 		var flicker: float = 1.0 + 0.12 * sin(_clock * 2.3 + float(e[2])) + (0.0 if not e[3] else 0.06 * sin(_clock * 11.0 + float(e[2]) * 3.0))
 		e[0].energy = float(e[1]) * flicker * fk
 		e[0].visible = not lights_up
+
+
+## The Spotter Cam's feed (mods.gd): a flat light over each room it shows, a cool grey-green, that fades in and out as the soldier moves. A feed is not a lamp:
+## nothing in the logic sees it (foes.gd reads the flashlight, the emergency lights and the flares only).
+func _update_feed(dt: float) -> void:
+	if session == null or _lights == null:
+		return
+	var tier := Mods.party_tier(session, "spotter_cam")
+	var want := {}
+	if tier > 0 and not lights_up:
+		for rid in session.spotted:
+			want[rid] = float(Mods.numbers("spotter_cam", tier)["glow"])
+	for rid in want:
+		if not _cam_lights.has(rid):
+			_cam_lights[rid] = _feed_light(int(rid))
+			_cam_energy[rid] = 0.0
+	for rid in _cam_lights.keys():
+		var target := float(want.get(rid, 0.0))
+		_cam_energy[rid] = move_toward(float(_cam_energy[rid]), target, dt * 1.6)
+		var l: PointLight2D = _cam_lights[rid]
+		l.energy = float(_cam_energy[rid])
+		l.visible = float(_cam_energy[rid]) > 0.001
+		if target == 0.0 and float(_cam_energy[rid]) <= 0.001:
+			l.queue_free() if l.is_inside_tree() else l.free()
+			_cam_lights.erase(rid)
+			_cam_energy.erase(rid)
+
+
+## A light as wide as room `rid` and its walls (a texture with 8 px to a cell, drawn 4 times as big).
+func _feed_light(rid: int) -> PointLight2D:
+	var r: Rect2i = session.site.rooms[rid]["rect"]
+	var w := (r.size.x + 2) * 8
+	var h := (r.size.y + 2) * 8
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	img.fill(Color.WHITE)
+	for x in w:
+		img.set_pixel(x, 0, Color(0.55, 0.55, 0.55))
+		img.set_pixel(x, h - 1, Color(0.55, 0.55, 0.55))
+	for y in h:
+		img.set_pixel(0, y, Color(0.55, 0.55, 0.55))
+		img.set_pixel(w - 1, y, Color(0.55, 0.55, 0.55))
+	var l := PointLight2D.new()
+	l.texture = ImageTexture.create_from_image(img)
+	l.texture_scale = CELL / 8.0
+	l.color = Mods.color("spotter_cam").lerp(Color(0.62, 0.78, 0.74), 0.6)
+	l.energy = 0.0
+	l.visible = false
+	l.shadow_enabled = false
+	l.position = (Vector2(r.position) + Vector2(r.size) / 2.0) * CELL
+	_lights.add_child(l)
+	return l
 
 
 # --- fighting -------------------------------------------------------------------------------------------------------
@@ -481,67 +568,121 @@ func _combat(dt: float) -> void:
 			if f["kind"] == "crawler" and f["moved"] and not f["hidden"] and not f["dead"]:
 				Audio.fx(self, "crawler_skitter", f["m"].pos * CELL, -6.0)
 				_skitter = 0.45
-	for t in tracers:
-		t["t"] += dt
-	tracers = tracers.filter(func(t): return float(t["t"]) < float(Arms.cfg()["tracer_s"]))
+	var due := []  # what happens when a bolt arrives: the hit, the flare lighting
+	for q in _later:
+		q["t"] = float(q["t"]) - dt
+		if float(q["t"]) <= 0.0:
+			due.append(q["e"])
+	_later = _later.filter(func(q): return float(q["t"]) > 0.0)
+	for e in due:
+		_play_one(e)
 	_play(s.take_events())
 
 
-## Draw and sound the events of a tick.
+## Draw and sound the events of a tick. One with a `delay` (a hit, a flare lighting) waits for its bolt to arrive.
 func _play(evs: Array) -> void:
 	for e in evs:
-		var at: Vector2 = e.get("pos", e.get("from", Vector2.ZERO))
-		var px := at * CELL
-		match str(e["type"]):
-			"shot":
-				tracers.append({"from": e["from"], "to": e["to"], "t": 0.0, "foe": e["who"] != "soldier"})
-				if e["who"] == "soldier":
-					_muzzle_t = float(Arms.cfg()["flash_s"])
-					_muzzle_at = e["from"]
-				Audio.fx(self, "shot_" + str(e["class"]), px, 0.0 if e["who"] == "soldier" else -2.0)
-			"swing":
-				Audio.fx(self, "melee_swing", px)
-			"click":
-				Audio.fx(self, "empty_click", px)
-				say("Empty. R reloads.")
-			"reload":
-				Audio.fx(self, "reload", px)
-			"swap":
-				Audio.fx(self, "reload", px, -8.0)
-			"door":
-				if _door_occ.has(e["id"]):
-					_door_occ[e["id"]].visible = not bool(e["open"])
-				if ship_view != null:
-					ship_view.queue_redraw()
-				if session.soldier.pos.distance_to(at) <= 12.0:
-					Audio.fx(self, "door_open" if e["open"] else "door_close", null, -6.0)
-			"hit":
-				Audio.fx(self, "foe_hit", px)
-			"down":
-				Audio.fx(self, "foe_down", px)
-			"hurt":
-				Audio.fx(self, "crew_hurt", px)
-			"melee":
-				Audio.fx(self, "melee_swing", px)
-			"line":
-				_toast(str(e["text"]))
-			"whir":
-				Audio.fx(self, "sentry_whir", px)
-			"screech":
-				Audio.fx(self, "crawler_screech", px)
-			"emerge", "vanish":
-				Audio.fx(self, "crawler_skitter", px)
-			"hacked":
-				Audio.fx(self, "unlock")
-				say("Sentry hacked. It is yours now.")
-			"hollow":
-				_flicker = HOLLOW_FLICKER_S
-				_toast(str(Arms.cfg()["hollow"]["toast"]))
-				Audio.fx(self, "tide_warning")
-			"downed":
-				Audio.fx(self, "crew_hurt", px)
-			"discover":
-				_start_talk(session.discover(int(e["mark"])))
+		if float(e.get("delay", 0.0)) > 0.0:
+			_later.append({"t": float(e["delay"]), "e": e})
+		else:
+			_play_one(e)
+
+
+func _play_one(e: Dictionary) -> void:
+	var at: Vector2 = e.get("pos", e.get("from", Vector2.ZERO))
+	var px := at * CELL
+	match str(e["type"]):
+		"shot":
+			var look: Dictionary = e.get("look", Bolts.look(str(e.get("weapon", ""))))
+			if fx != null:
+				fx.shot(look, e["from"], e["to"], float(e.get("t", 0.0)), str(e["kind"]))
+			if e["who"] == "soldier":
+				_muzzle_t = float(Arms.cfg()["flash_s"])
+				_muzzle_at = e["from"]
+				if _muzzle != null:
+					_muzzle.color = Color(str(look["color"]))
+				_shake = maxf(_shake, float(look.get("shake", 0.0)))
+			var snd := str(look.get("sound", ""))
+			Audio.fx(self, snd if snd != "" else "shot_" + str(e["class"]), px, 0.0 if e["who"] == "soldier" else -2.0)
+			if str(e["kind"]) in ["wall", "prop"] and str(look.get("impact", "spark")) != "none":  # the bolt biting in, when it gets there
+				Audio.fx(self, "bolt_sizzle", e["to"] * CELL, -2.0, float(e.get("t", 0.0)))
+		"swing":
+			if fx != null:
+				fx.swing(e["from"], float(e["dir"]), float(e["reach"]), Color(str(e.get("look", {}).get("color", "#ffffff"))))
+			Audio.fx(self, "melee_swing", px)
+		"flare":
+			if fx != null:
+				fx.flare(int(e["id"]), at)
+		"flare_out":
+			if fx != null:
+				fx.flare_out(int(e["id"]))
+		"click":
+			Audio.fx(self, "empty_click", px)
+			say("Empty. R reloads.")
+		"reload":
+			Audio.fx(self, "reload", px)
+		"swap":
+			Audio.fx(self, "reload", px, -8.0)
+		"door":
+			if _door_occ.has(e["id"]):
+				_door_occ[e["id"]].visible = not bool(e["open"])
+			if ship_view != null:
+				ship_view.queue_redraw()
+			if session.soldier.pos.distance_to(at) <= 12.0:
+				Audio.fx(self, "door_open" if e["open"] else "door_close", null, -6.0)
+		"hit":
+			_hit_flash(e)
+			Audio.fx(self, "foe_hit", px)
+		"down":
+			_hit_flash(e)
+			Audio.fx(self, "foe_down", px)
+		"hurt":
+			_hit_flash(e)
+			Audio.fx(self, "crew_hurt", px)
+		"melee":
+			Audio.fx(self, "melee_swing", px)
+		"line":
+			_toast(str(e["text"]))
+		"whir":
+			Audio.fx(self, "sentry_whir", px)
+		"screech":
+			Audio.fx(self, "crawler_screech", px)
+		"emerge", "vanish":
+			Audio.fx(self, "crawler_skitter", px)
+		"hacked":
+			Audio.fx(self, "unlock")
+			say("Sentry hacked. It is yours now.")
+		"hollow":
+			_flicker = HOLLOW_FLICKER_S
+			_toast(str(Arms.cfg()["hollow"]["toast"]))
+			Audio.fx(self, "tide_warning")
+		"downed":
+			Audio.fx(self, "crew_hurt", px)
+		"discover":
+			_start_talk(session.discover(int(e["mark"])))
+
+
+## A body was hit by a bolt: a flash in the bolt's colour where it landed.
+func _hit_flash(e: Dictionary) -> void:
+	if fx != null and e.has("tint"):
+		fx.hit_flash(e["pos"], Color(str(e["tint"])))
+
+
+## A little shake of the screen while a heavy weapon's kick lasts.
+func _shake_cam(dt: float) -> void:
+	if cam == null:
+		return
+	if _shake > 0.0:
+		cam.offset = Vector2(_shake_rng.randf_range(-1.0, 1.0), _shake_rng.randf_range(-1.0, 1.0)) * _shake
+		_shake = maxf(_shake - dt * 40.0, 0.0)
+	elif cam.offset != Vector2.ZERO:
+		cam.offset = Vector2.ZERO
+
+
+## The flare's burn: a hiss where it lies while one burns.
+func _flare_sound() -> void:
+	var where = fx.a_flare() if fx != null else null
+	Audio.fx_loop(self, "flare", "flare_burn", where != null, 0.9, 1.0, where * CELL if where != null else null)
 
 
 ## Does the music turn to its fight layer (a foe has noticed someone and is on the hunt, or did within the last few seconds)? The muffle stays on.
@@ -566,16 +707,120 @@ func toggle_pick(i: int) -> void:
 		pick.append(name)
 	else:
 		Audio.fx(self, "error")
+	load_who = mini(load_who, loadout_people().size() - 1)
+	load_slot = {}
+	load_msg = ""
 
 
-## Go aboard with the crew picked (none is allowed).
+## Go aboard with the crew picked (none is allowed) and the kits set on the loadout screen.
 func confirm_party() -> void:
 	if not picking:
 		return
 	picking = false
+	var src = _src_soldier()
+	if src != null:
+		session.rearm(src)  # (his kit may have changed)
 	var n: int = session.join_party(pick)
 	_e_prev = true  # (a key still down does not count as a press)
 	say("%d crew with you." % n if n > 0 else "Alone.")
+
+
+# --- the loadout screen (B4) ----------------------------------------------------------------------------------------------
+
+## The ship's own soldier (the crew member whose kit the screen sets; the visit walks a copy of him), null when the ship has none.
+func _src_soldier():
+	if session.ship != null:
+		for m in session.ship.crew:
+			if m.is_player:
+				return m
+	return null
+
+
+## Is there anything to set before going aboard: crew to take, or gear in the hold the soldier could wear or carry?
+func _loadout_wanted() -> bool:
+	if session.ship == null:
+		return false
+	if not Party.eligible(session.ship).is_empty():
+		return true
+	var src = _src_soldier()
+	if src == null:
+		return false
+	for item in session.ship.inventory.counts:
+		var w := Arms.item_weapon(str(item))
+		if Mods.is_item(str(item)) or Kit.cfg()["bodies"].has(str(item)) or (w != "" and w != src.sidearm()):
+			return true
+	return false
+
+
+## The screen opens: whoever has no kit yet is given the one they would have had (the soldier takes a spare hand weapon of the hold).
+func _open_loadout() -> void:
+	var src = _src_soldier()
+	if src != null:
+		Kit.materialize(session.ship, src, true)
+	for m in Party.eligible(session.ship):
+		Kit.materialize(session.ship, m)
+
+
+## The people the screen sets, as the ship's own crew members: the soldier, then the crew picked in the order picked.
+func loadout_people() -> Array:
+	var out := []
+	var src = _src_soldier()
+	if src != null:
+		out.append(src)
+	var elig := Party.eligible(session.ship)
+	for n in pick:
+		for m in elig:
+			if m.name == n:
+				out.append(m)
+	return out
+
+
+## Show person `i` (0 is the soldier).
+func loadout_focus(i: int) -> void:
+	load_who = clampi(i, 0, maxi(loadout_people().size() - 1, 0))
+	load_slot = {}
+	load_msg = ""
+
+
+## Open the choices of a slot ("weapon", "body" or "mod", number `idx`); the same slot again shuts them.
+func loadout_open(slot: String, idx: int) -> void:
+	load_msg = ""
+	if load_slot.get("slot", "") == slot and int(load_slot.get("idx", -1)) == idx:
+		load_slot = {}
+	else:
+		load_slot = {"slot": slot, "idx": idx}
+
+
+## The choices of the open slot (kit.gd options).
+func loadout_options() -> Array:
+	var people := loadout_people()
+	if load_slot.is_empty() or load_who >= people.size():
+		return []
+	return Kit.options(session.ship, people[load_who], str(load_slot["slot"]), int(load_slot["idx"]))
+
+
+## Take choice `i` of the open slot. Returns why not ("" when done); the reason is also kept in load_msg.
+func loadout_choose(i: int) -> String:
+	var opts := loadout_options()
+	if i < 0 or i >= opts.size():
+		return ""
+	var o: Dictionary = opts[i]
+	var m = loadout_people()[load_who]
+	var why := ""
+	match str(load_slot["slot"]):
+		"weapon":
+			why = Kit.set_weapon(session.ship, m, int(load_slot["idx"]), str(o["id"]))
+		"body":
+			why = Kit.set_body(session.ship, m, str(o["id"]))
+		"mod":
+			why = Kit.set_mod(session.ship, m, int(load_slot["idx"]), str(o["id"]))
+	load_msg = why
+	if why != "":
+		Audio.fx(self, "error")
+		return why
+	load_slot = {}
+	Audio.fx(self, "confirm")
+	return ""
 
 
 ## F: the flashlight on or off.
@@ -707,7 +952,7 @@ func press_e() -> void:
 			var down: Array = s.downed_party()
 			if not down.is_empty() and _leave_t <= 0.0:  # crew left down are lost: ask first
 				_leave_t = float(Arms.cfg()["leave_confirm_s"])
-				say("%s is down. Leaving now loses them. E again to go, Esc to stay." % ", ".join(down))
+				say("%s is down. Leaving now loses them%s. E again to go, Esc to stay." % [", ".join(down), lost_note(down)])
 				Audio.fx(self, "error")
 				return
 			leave()
@@ -728,6 +973,16 @@ func press_e() -> void:
 					Audio.fx(self, "unlock")
 			elif d["lock"] == "hack":
 				say("Hold E to hack the lock.")
+
+
+## " and their kit (Carbine; Basic Armour)" when the crew who would be left behind carry anything, else "".
+func lost_note(names: Array) -> String:
+	var parts := []
+	for n in names:
+		var k: String = session.lost_kit(str(n))
+		if k != "":
+			parts.append(k)
+	return " and their kit (%s)" % "; ".join(parts) if not parts.is_empty() else ""
 
 
 func _finish_hold(t: Dictionary) -> void:
@@ -878,11 +1133,7 @@ func _unhandled_input(e: InputEvent) -> void:
 				if hud != null and shop >= 0:
 					buy_row(hud.shop_row_at(e.position))
 				elif hud != null and picking:
-					var pr: int = hud.pick_at(e.position)
-					if pr == -2:
-						confirm_party()
-					elif pr >= 0:
-						toggle_pick(pr)
+					_loadout_click(hud.loadout_at(e.position))
 				elif hud != null and panel >= 0:
 					var row: int = hud.row_at(e.position)
 					if row >= 0:
@@ -896,13 +1147,20 @@ func _unhandled_input(e: InputEvent) -> void:
 				say("Can't load aboard another vessel.")
 				Audio.fx(self, "error")
 		elif picking:
-			if e.keycode >= KEY_1 and e.keycode <= KEY_9:
+			if not load_slot.is_empty() and e.keycode >= KEY_1 and e.keycode <= KEY_9:
+				loadout_choose(e.keycode - KEY_1)
+			elif e.keycode >= KEY_1 and e.keycode <= KEY_9:
 				toggle_pick(e.keycode - KEY_1)
+			elif e.keycode == KEY_TAB:
+				loadout_focus((load_who + 1) % maxi(loadout_people().size(), 1))
 			elif e.keycode == KEY_ENTER or e.keycode == KEY_KP_ENTER or e.keycode == KEY_SPACE:
 				confirm_party()
 			elif e.keycode == KEY_ESCAPE:
-				pick.clear()
-				confirm_party()
+				if not load_slot.is_empty():
+					load_slot = {}
+				else:
+					pick.clear()
+					confirm_party()
 		elif e.keycode == KEY_R:
 			session.reload()
 		elif e.keycode == KEY_Q:
@@ -923,6 +1181,26 @@ func _unhandled_input(e: InputEvent) -> void:
 			take_row(e.keycode - KEY_1)
 		elif e.keycode >= KEY_1 and e.keycode <= KEY_9 and shop >= 0:
 			buy_row(e.keycode - KEY_1)
+
+
+## A click on the loadout screen (hud.loadout_at): a person, a crew row, a slot, a choice or the go button.
+func _loadout_click(hit: Dictionary) -> void:
+	match str(hit.get("type", "")):
+		"go":
+			confirm_party()
+		"pick":
+			toggle_pick(int(hit["i"]))
+			if pick.has(str(pick_rows()[int(hit["i"])]["name"])):  # a crew mate just picked is the one shown
+				load_who = loadout_people().size() - 1
+		"person":
+			loadout_focus(int(hit["i"]))
+		"slot":
+			loadout_open(str(hit["slot"]), int(hit["idx"]))
+		"option":
+			loadout_choose(int(hit["i"]))
+		_:
+			if not load_slot.is_empty():
+				load_slot = {}
 
 
 func _zoom(f: float) -> void:
@@ -965,10 +1243,42 @@ func _draw_over() -> void:
 		var tp: Dictionary = site.props[target["id"]]
 		_over.draw_rect(Rect2(Vector2(tp["cell"]) * CELL, Vector2(tp["size"]) * CELL).grow(2.0), Color(1, 1, 1, 0.55), false, 2.0)
 	_draw_marks(site)
+	_draw_feed_lines()
+	_draw_scorch()
 	_draw_foes()
 	_draw_people()
 	_draw_party()
 	_draw_soldier()
+
+
+## The Spotter Cam's rooms read as a camera feed: faint scan lines over what the feed lights.
+func _draw_feed_lines() -> void:
+	for rid in _cam_lights:
+		if float(_cam_energy.get(rid, 0.0)) < 0.05:
+			continue
+		var r: Rect2i = session.site.rooms[rid]["rect"]
+		var x0 := float(r.position.x) * CELL
+		var x1 := float(r.end.x) * CELL
+		var y := float(r.position.y) * CELL
+		while y < float(r.end.y) * CELL:
+			_over.draw_line(Vector2(x0, y), Vector2(x1, y), Color(0.0, 0.05, 0.03, 0.2), 1.0)
+			y += 4.0
+
+
+## The marks bolts left on the walls: a dark smudge with a hot rim that goes first, gone in about 20 s.
+func _draw_scorch() -> void:
+	if fx == null:
+		return
+	var life := float(Bolts.cfg()["scorch_s"])
+	for sc in fx.scorch:
+		var k := 1.0 - float(sc["age"]) / life
+		var seed_a := float(int(sc["seed"]) % 628) / 100.0
+		for i in 4:
+			var o := Vector2.from_angle(seed_a + float(i) * 1.7) * (1.5 + float(i))
+			_over.draw_circle(sc["pos"] + o, 3.4 - 0.4 * float(i), Color(0.02, 0.015, 0.01, 0.7 * k))
+		var hot := 1.0 - float(sc["age"]) / 1.6
+		if hot > 0.0:
+			_over.draw_circle(sc["pos"], 3.0, Color(1.0, 0.55, 0.2, 0.6 * hot))
 
 
 func _draw_hatch(site) -> void:

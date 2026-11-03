@@ -19,6 +19,9 @@ const Party = preload("res://scripts/board/party.gd")
 const People = preload("res://scripts/board/people.gd")
 const Themes = preload("res://scripts/board/themes.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
+const Kit = preload("res://scripts/board/kit.gd")
+const Mods = preload("res://scripts/board/mods.gd")
+const Bolts = preload("res://scripts/board/bolts.gd")
 
 const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
 
@@ -51,6 +54,10 @@ var downed := false  ## the soldier went down: the view fades out and calls leav
 var party: Array = []  ## the crew who came along (party.gd), and a person who follows for now (`temp`)
 var people  ## people.gd: everyone aboard who is not hostile (survivors, traders, a captive ...)
 var seen_marks := {}  ## mark id -> true: the discoveries (site.marks) that have been shown
+var flares: Array = []  ## B4: the flares of a flare gun that burn on the site: [{id, pos, wait (seconds until it lands), t (seconds left burning)}]
+var cur_room := -1  ## the room the soldier stands in (the last one, in a doorway)
+var spotted: Array = []  ## B4: the rooms a Spotter Cam in the party shows (room ids, none without one)
+var _flare_id := 0
 
 
 ## A visit to POI `poi_id` of `sector` with the `board` effect `spec` ({kind, name?, parts?}). The soldier stands at the airlock.
@@ -132,8 +139,24 @@ func open(id: int) -> Dictionary:
 	if not opened.has(id):
 		opened[id] = true
 		left[id] = Loot.resolve(site, id, _ctx())
+		_rig(id)
 		cleared = opened.size() >= total()
 	return left.get(id, {"items": {}, "blueprint": "", "log": "", "key": ""})
+
+
+## The Salvage Rig of the party (mods.gd) adds to the stacks of container `id` it was just opened: what it adds is kept in `bonus` ({item: n}, already in `items`) for the list to show.
+## Its fractions come from a stream of the site's seed and the container, so the same container gives the same bonus.
+func _rig(id: int) -> void:
+	var tier := Mods.party_tier(self, "salvage_rig")
+	if tier <= 0:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = Site._mix(site.seed_value, "rig", id)
+	var c: Dictionary = left[id]
+	var extra := Mods.salvage(c["items"], tier, rng)
+	for item in extra:
+		c["items"][item] = int(c["items"].get(item, 0)) + int(extra[item])
+	c["bonus"] = extra
 
 
 ## What is left in container `id` as rows for a list: [{key ("item:<id>", "blueprint", "log" or "key"), text}].
@@ -143,7 +166,12 @@ func entries(id: int) -> Array:
 	var ids: Array = c.get("items", {}).keys()
 	ids.sort()
 	for item in ids:
-		out.append({"key": "item:" + str(item), "text": "%s x%d" % [_name(str(item)), int(c["items"][item])]})
+		var row := {"key": "item:" + str(item), "text": "%s x%d" % [_name(str(item)), int(c["items"][item])]}
+		var extra := int(c.get("bonus", {}).get(item, 0))
+		if extra > 0:  # the Salvage Rig's share, shown in the mod's colour
+			row["bonus"] = "+%d %s" % [extra, _name(str(item)).to_lower()]
+			row["color"] = Mods.color("salvage_rig")
+		out.append(row)
 	if str(c.get("blueprint", "")) != "":
 		out.append({"key": "blueprint", "text": "Blueprint: " + _name(_output_of(str(c["blueprint"])))})
 	if str(c.get("log", "")) != "":
@@ -170,6 +198,8 @@ func take(id: int, what := "all") -> Array:
 				if found != "":
 					lines.append(found)
 				c["items"].erase(item)
+				if c.get("bonus") is Dictionary:
+					c["bonus"].erase(item)
 	if (what == "all" or what == "blueprint") and str(c["blueprint"]) != "":
 		var rid: String = c["blueprint"]
 		if ship != null and ship.crafting.unlock(rid):
@@ -226,23 +256,39 @@ func at_airlock() -> bool:
 
 # --- the soldier's weapons ---------------------------------------------------------------------------------------
 
-## Arm him: his species' sidearm, and a second hand weapon from the hold when it holds one (a found rifle). Both are loaded from the rounds in the hold.
+## Arm him: the weapons of his kit (kit.gd), else his species' sidearm and a second hand weapon from the hold when it holds one (a found rifle). Both are loaded
+## from the rounds in the hold.
 func _arm() -> void:
 	guns = []
-	var side := soldier.sidearm()
-	var g = Arms.make_gun(side, false)
-	if g == null:
-		g = Arms.make_gun("service_pistol", false)
-	guns.append(g)
-	if ship != null:
-		var items: Dictionary = Arms.cfg()["hand_items"]
-		for item in items:
-			if ship.inventory.count(item) > 0 and str(items[item]) != str(g["id"]):
-				guns.append(Arms.make_gun(str(items[item]), false))
-				break
+	if Kit.is_set(soldier):
+		for w in Kit.weapons_of(soldier):
+			guns.append(Arms.make_gun(str(w), false))
+	else:
+		var side := soldier.sidearm()
+		var g = Arms.make_gun(side, false)
+		if g == null:
+			g = Arms.make_gun("service_pistol", false)
+		guns.append(g)
+		if ship != null:
+			var items: Dictionary = Arms.cfg()["hand_items"]
+			for item in items:
+				if ship.inventory.count(item) > 0 and str(items[item]) != str(g["id"]):
+					guns.append(Arms.make_gun(str(items[item]), false))
+					break
+	guns = guns.filter(func(g): return g != null)
+	if guns.is_empty():
+		guns.append(Arms.make_gun("service_pistol", false))
 	for gun in guns:
 		gun["mag"] = _take(int(gun["w"]["mag"]))
 	cur = 0
+
+
+## Re-arm him after the loadout screen changed his kit on the ship (`src` is the ship's own soldier): the rounds he held go back first.
+func rearm(src) -> void:
+	for g in guns:
+		_give(int(g["mag"]))
+	soldier.kit = src.kit.duplicate(true)
+	_arm()
 
 
 ## The rounds in the hold.
@@ -307,23 +353,64 @@ func fire(dir: float) -> String:
 		_swing(dir, w)
 		return "swing"
 	var spread := rng.randf_range(-float(w["spread"]), float(w["spread"]))
-	var r := Arms.trace(site, soldier.pos, dir + spread, float(w["range"]), foes.bodies() + people.bodies(), rng)
 	var from := soldier.pos + Vector2.from_angle(dir) * float(c["muzzle"])
-	events.append({"type": "shot", "from": from, "to": r["end"], "who": "soldier", "class": str(w["class"]), "kind": r["kind"]})
-	if r["ref"] != null:
-		_strike(r["ref"], float(w["damage"]), r["end"])
+	shoot(soldier, "soldier", from, dir + spread, w, foes.bodies() + people.bodies())
 	foes.noise(soldier.pos, float(c["noise_gun"]))
 	return "shot"
+
+
+## One shot of party member `m` (the soldier or a follower; `who` "soldier" or "ally") from `from` along `ang` with weapon `w`: a ray that stops at the first body,
+## or goes on through as many as the Overcharge Coil of `m` allows, and the shot event the view flies as a bolt. The bodies it hits take the damage now (the logic does
+## not wait for the bolt); the events of the hits say when the bolt arrives (`delay`), so the view shows them then. A flare gun leaves a flare where it lands.
+func shoot(m, who: String, from: Vector2, ang: float, w: Dictionary, bodies: Array) -> void:
+	var dmg := float(w["damage"]) * Mods.damage_mult(m)
+	var look := Bolts.look(str(w["id"]), Mods.bolt_size(m))
+	var reach := float(w["range"])
+	var start: Vector2 = m.pos
+	var skip = null
+	var r := {}
+	var hits := []
+	for k in Mods.pierce(m) + 1:
+		r = Arms.trace(site, start, ang, reach, bodies, rng, skip)
+		if r["ref"] == null:
+			break
+		hits.append(r)
+		skip = r["ref"]
+		reach -= start.distance_to(r["end"])
+		start = r["end"]
+		if reach <= 0.0:
+			break
+	var end: Vector2 = r["end"]
+	var ev := {"type": "shot", "from": from, "to": end, "who": who, "class": str(w["class"]), "kind": r["kind"], "weapon": str(w["id"]), "look": look,
+		"t": Bolts.travel(look, from.distance_to(end))}
+	events.append(ev)
+	for h in hits:
+		var i0 := events.size()
+		_strike(h["ref"], dmg, h["end"])
+		_delay(i0, Bolts.travel(look, from.distance_to(h["end"])), look)
+	if str(w["id"]) == str(Site.config()["flare"]["weapon"]):
+		_flare(end, float(ev["t"]))
+
+
+## The events since index `i0` that show a body being hit happen when the bolt arrives, `t` seconds from now, and flash in the bolt's colour (`look`).
+func _delay(i0: int, t: float, look := {}) -> void:
+	for i in range(i0, events.size()):
+		if str(events[i]["type"]) in ["hit", "down", "hurt", "downed"]:
+			if t > 0.0:
+				events[i]["delay"] = t
+			if not look.is_empty():
+				events[i]["tint"] = str(look["color"])
 
 
 func _swing(dir: float, w: Dictionary) -> void:
 	var c := Arms.cfg()
 	var reach: float = float(w["range"]) + 0.9
 	var half := deg_to_rad(float(c["swing_arc_deg"])) / 2.0
-	events.append({"type": "swing", "from": soldier.pos, "dir": dir, "reach": reach, "who": "soldier"})
+	var dmg := float(w["damage"]) * Mods.damage_mult(soldier)
+	events.append({"type": "swing", "from": soldier.pos, "dir": dir, "reach": reach, "who": "soldier", "look": Bolts.look(str(w["id"]), Mods.bolt_size(soldier))})
 	for b in foes.bodies() + people.bodies():
 		if Arms.in_arc(soldier.pos, dir, half, reach, b["pos"]):
-			_strike(b["ref"], float(w["damage"]), b["pos"])
+			_strike(b["ref"], dmg, b["pos"])
 	foes.noise(soldier.pos, float(c["noise_swing"]))
 
 
@@ -333,6 +420,42 @@ func _strike(ref: Dictionary, amount: float, at: Vector2) -> void:
 		people.shot(ref, amount)
 	else:
 		foes.hurt(ref, amount, at)
+
+
+# --- flares ---------------------------------------------------------------------------------------------------------------
+
+## A flare lands at `at` in `wait` seconds and burns flare.burn_s seconds. At most flare.max burn at once: the oldest goes out.
+func _flare(at: Vector2, wait: float) -> void:
+	var fc: Dictionary = Site.config()["flare"]
+	_flare_id += 1
+	flares.append({"id": _flare_id, "pos": at, "wait": wait, "t": float(fc["burn_s"])})
+	events.append({"type": "flare", "id": _flare_id, "pos": at, "delay": wait})
+	while flares.size() > int(fc["max"]):
+		events.append({"type": "flare_out", "id": flares[0]["id"]})
+		flares.remove_at(0)
+
+
+## Does a burning flare light point `p` (within flare.radius cells of one, a clear line between)? It counts as an emergency light for what a foe sees.
+func flare_lit(p: Vector2) -> bool:
+	var r := float(Site.config()["flare"]["radius"])
+	for f in flares:
+		if float(f["wait"]) <= 0.0 and f["pos"].distance_to(p) <= r and site.clear_line(f["pos"], p):
+			return true
+	return false
+
+
+func _tick_flares(dt: float) -> void:
+	var keep := []
+	for f in flares:
+		if float(f["wait"]) > 0.0:
+			f["wait"] = float(f["wait"]) - dt
+		else:
+			f["t"] = float(f["t"]) - dt
+		if float(f["t"]) > 0.0:
+			keep.append(f)
+		else:
+			events.append({"type": "flare_out", "id": f["id"]})
+	flares = keep
 
 
 ## R: reload the weapon in his hands from the rounds in the hold. False when there is nothing to do.
@@ -369,6 +492,8 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	foes.tick(dt, aim, light_on)
 	people.tick(dt)
 	Party.tick(self, dt)
+	_tick_flares(dt)
+	_look_around()
 	update_doors(float(Arms.cfg()["door_near"]))
 	if soldier.is_down() and not downed:
 		downed = true
@@ -413,6 +538,14 @@ func downed_party() -> Array:
 	return Party.downed(self).filter(func(p): return not bool(p.get("temp", false))).map(func(p): return str(p["src"].name))
 
 
+## What a crew member who is left behind takes with them, in words ("Carbine, Basic Armour"), "" for a bare sidearm.
+func lost_kit(name: String) -> String:
+	for p in party:
+		if p["src"] != null and str(p["src"].name) == name:
+			return Kit.carried_text(ship, p["src"])
+	return ""
+
+
 ## A downed member of the party (a follower's CrewMember) gets up with revive_hp of their health.
 func revive_member(m: CrewMember) -> void:
 	if not m.is_down():
@@ -434,11 +567,11 @@ func party_bodies() -> Array:
 	return out
 
 
-## `amount` damage to party member `m` (the soldier or a follower's CrewMember).
+## `amount` damage to party member `m` (the soldier or a follower's CrewMember), less what their body gear takes (boarding.json `armor`).
 func hurt_member(m: CrewMember, amount: float, _from: Vector2) -> void:
 	if m.is_down():
 		return
-	m.hurt(amount)
+	m.hurt(amount * Kit.armor_mult(m))
 	events.append({"type": "hurt", "pos": m.pos, "who": "soldier" if m == soldier else "ally", "down": m.is_down()})
 
 
@@ -452,9 +585,25 @@ func note_hollow(now: bool) -> bool:
 	return true
 
 
-## What the motion tracker is shown (board_view.gd contacts_source): the foes that are up and out of their vents.
+## What the motion tracker is shown (board_view.gd contacts_source): the foes that are up and out of their vents. A Spotter Cam of Mk II or III in the party
+## makes the foes in the rooms it shows ping even standing still.
 func contacts() -> Array:
-	return foes.contacts() + people.contacts()
+	var out: Array = foes.contacts()
+	var cam := Mods.party_tier(self, "spotter_cam")
+	if cam > 0 and bool(Mods.numbers("spotter_cam", cam)["tracker"]):
+		for c in out:
+			if spotted.has(site.room_at(c["pos"])):
+				c["moving"] = true
+	return out + people.contacts()
+
+
+## The room he stands in, and the rooms the party's Spotter Cam shows from it (site.rooms_near).
+func _look_around() -> void:
+	var rid: int = site.room_at(soldier.pos)
+	if rid >= 0:
+		cur_room = rid
+	var cam := Mods.party_tier(self, "spotter_cam")
+	spotted = site.rooms_near(cur_room, int(Mods.numbers("spotter_cam", cam)["depth"])) if cam > 0 and cur_room >= 0 else []
 
 
 ## Leave: the soldier's health goes back to the ship's (a soldier who went down wakes at the airlock with down_hp of it, and the site is closed for
@@ -559,9 +708,10 @@ func _check_marks() -> void:
 
 ## What loot.gd needs to know of the run: the tier, the blueprints not held, the logs not found.
 func _ctx() -> Dictionary:
-	var ctx := {"tier": 1, "unknown": [], "levels": {}, "logs": [], "log_factions": {}, "faction": ""}
+	var ctx := {"tier": 1, "stage": 1, "unknown": [], "levels": {}, "logs": [], "log_factions": {}, "faction": ""}
 	if campaign != null:
 		ctx["tier"] = campaign.tier()
+		ctx["stage"] = campaign.stage
 		ctx["faction"] = str(campaign.region_data.get("faction", ""))
 		for id in campaign.events.logs:
 			if not campaign.logs_found.has(id):

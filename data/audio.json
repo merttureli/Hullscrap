@@ -122,5 +122,11 @@
 	"confirm": {"files": ["confirm.wav"], "volume_db": -8, "pitch_var": 0.02, "max_voices": 2, "cooldown": 0.1, "bus": "UI", "positional": false},
 	"cancel": {"files": ["cancel.wav"], "volume_db": -9, "pitch_var": 0.02, "max_voices": 2, "cooldown": 0.1, "bus": "UI", "positional": false},
 	"page_turn": {"files": ["page_turn.wav"], "volume_db": -10, "pitch_var": 0.04, "max_voices": 1, "cooldown": 0.15, "bus": "UI", "positional": false},
+	"shot_laser_pistol": {"files": ["shot_laser_pistol_1.wav", "shot_laser_pistol_2.wav"], "volume_db": -4, "pitch_var": 0.05, "max_voices": 4, "cooldown": 0.05, "bus": "SFX", "positional": true},
+	"shot_laser_rifle": {"files": ["shot_laser_rifle_1.wav", "shot_laser_rifle_2.wav"], "volume_db": -3, "pitch_var": 0.05, "max_voices": 4, "cooldown": 0.05, "bus": "SFX", "positional": true},
+	"bolt_sizzle": {"files": ["bolt_sizzle_1.wav", "bolt_sizzle_2.wav"], "volume_db": -7, "pitch_var": 0.08, "max_voices": 4, "cooldown": 0.05, "bus": "SFX", "positional": true},
+	"flare_pop": {"files": ["flare_pop.wav"], "volume_db": -3, "pitch_var": 0.04, "max_voices": 2, "cooldown": 0.2, "bus": "SFX", "positional": true},
+	"flare_burn": {"files": ["flare_burn.wav"], "volume_db": -6, "pitch_var": 0.0, "max_voices": 2, "cooldown": 0.0, "bus": "SFX", "positional": true, "loop": true},
+	"arc_crackle": {"files": ["arc_crackle_1.wav", "arc_crackle_2.wav"], "volume_db": -4, "pitch_var": 0.05, "max_voices": 3, "cooldown": 0.06, "bus": "SFX", "positional": true},
 	"_beds": {"by_region": {"boneyard": "bed_boneyard"}, "by_faction": {"rustfangs": "bed_boneyard", "lumen": "bed_lumen", "concord": "bed_concord", "clans": "bed_clans", "hollow": "bed_hollow"}, "hollow": "bed_hollow", "default": "bed_concord"}
 }

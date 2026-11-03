@@ -1,0 +1,42 @@
+{
+	"_doc": "Mods (docs/BOARDING.md, B4; scripts/board/mods.gd): small devices worn in a kit slot, like FTL's augments. A mod has three tiers (Mk I to III); every tier is its own cargo item `<id>_mk1..3` of kind `mod` in data/items.json (slot `kit`), so the hold, loot and shops carry them like anything else. A person wears up to boarding.json kit.mod_slots of them. scope `party`: the best one worn by anyone in the boarding party counts, they do not stack; scope `self`: it works for the wearer only. does: the line the hover and the item's card show (8 words at most). color: the mod's colour in the HUD, the loot list and the icon. weight: its share of the mod drops. tiers[i]: the numbers of Mk i+1 (`text` is the line of the hover; the other keys are read by the code of the mod: spotter_cam depth (doors deep), glow (the light of the feed, 0-1) and tracker (foes standing still in those rooms still ping); salvage_rig bonus (x the stack) and rare_chance (per container, one extra rare material from `rare`); overcharge_coil damage (+share), size (x the bolt's width and light) and pierce (bodies the shot goes through after the first); `stat` is the row of the item's card). resources: what the Salvage Rig multiplies besides every material (`extra`: the rounds, credits); never blueprints, parts, weapons or gear. drops: how loot picks a mod (the `mod` outcome of the tables in boarding.json): `stages` is a list of {from, w: [Mk I, Mk II, Mk III]}, the weights of the tiers from that stage of the run on; Mk III is rolled only in the site kinds of `tier3_kinds`. Ship mods (a `ship` slot) are left for later: no ship slots exist yet.",
+	"tier_names": ["Mk I", "Mk II", "Mk III"],
+	"resources": {"extra": ["hand_ammo", "credits"]},
+	"drops": {
+		"stages": [{"from": 1, "w": [7, 2, 0]}, {"from": 3, "w": [5, 4, 0]}, {"from": 4, "w": [5, 4, 1]}, {"from": 6, "w": [4, 4, 2]}],
+		"tier3_kinds": ["station"]
+	},
+	"mods": [
+		{
+			"id": "spotter_cam", "name": "Spotter Cam", "color": "#7fd6b4", "scope": "party", "slot": "kit", "weight": 3, "icon": "cam",
+			"does": "Shows the rooms behind nearby doors, dimly.",
+			"blurb": "A shoulder camera that patches into the site's own. It sees what the dark would keep from you.",
+			"tiers": [
+				{"depth": 1, "glow": 0.3, "tracker": false, "stat": ["Sees", "1 door, dim"], "text": "1 door deep, dim."},
+				{"depth": 1, "glow": 0.5, "tracker": true, "stat": ["Sees", "1 door, tracker"], "text": "1 door deep, brighter. Foes there ping the tracker, even standing still."},
+				{"depth": 2, "glow": 0.5, "tracker": true, "stat": ["Sees", "2 doors, tracker"], "text": "2 doors deep, bright. Foes there ping the tracker."}
+			]
+		},
+		{
+			"id": "salvage_rig", "name": "Salvage Rig", "color": "#f2c94c", "scope": "party", "slot": "kit", "weight": 3, "icon": "rig",
+			"does": "Opened containers give more of every stack.",
+			"blurb": "A harness of clamps and a loader's patience. Whatever you open comes out heavier.",
+			"rare": ["titanium", "silicon", "crystal", "plasma_cell"],
+			"tiers": [
+				{"bonus": 0.25, "rare_chance": 0.0, "stat": ["Bonus", "+25% a stack"], "text": "+25% of each stack."},
+				{"bonus": 0.5, "rare_chance": 0.0, "stat": ["Bonus", "+50% a stack"], "text": "+50% of each stack."},
+				{"bonus": 1.0, "rare_chance": 0.34, "stat": ["Bonus", "+100% a stack, rare"], "text": "+100% of each stack, and 1 in 3 containers add a rare material."}
+			]
+		},
+		{
+			"id": "overcharge_coil", "name": "Overcharge Coil", "color": "#ff6a8a", "scope": "self", "slot": "kit", "weight": 2, "icon": "coil",
+			"does": "The wearer hits harder; bolts burn bigger.",
+			"blurb": "A coil wound round the grip. The gun hates it and hits harder for it.",
+			"tiers": [
+				{"damage": 0.15, "size": 1.2, "pierce": 0, "stat": ["Damage", "+15%"], "text": "+15% damage."},
+				{"damage": 0.3, "size": 1.45, "pierce": 0, "stat": ["Damage", "+30%"], "text": "+30% damage."},
+				{"damage": 0.45, "size": 1.75, "pierce": 1, "stat": ["Damage", "+45%, pierces"], "text": "+45% damage, and the shot goes through the first body."}
+			]
+		}
+	]
+}

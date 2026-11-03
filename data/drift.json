@@ -44,18 +44,19 @@
 		"rarity": {"common": 2, "uncommon": 6, "rare": 18, "very_rare": 45},
 		"tier": {"1": 40, "2": 90, "3": 160},
 		"unique": 250,
-		"kind": {"ammo": 5, "gear": 30, "special": 150}
+		"kind": {"ammo": 5, "gear": 30, "special": 150, "mod": 120}
 	},
 	"shops": {
-		"_doc": "Small shops (playtest 2, economy; scripts/space/shops.gd, campaign.gd shop_cfg): the Trader and Store POIs of a sector (data/sectors.json poi_types with shop: true) open a small shop after their event instead of a station menu: a handful of items, some of which no station of the region sells. Each shop is rolled once from the run's seed, its POI and its region (the same shop whenever it is asked for), and what is bought leaves it (campaign.gd shop_sold, saved). items: how many things a shop carries [least, most]; unique: how many of those are from the unique pool [least, most], the rest come from `common` (id -> price, the staples the stations sell too). The unique pool, by kind: racial (every part of the tech_* packs), tier (any other non-unique part of tier `tier_range`; nothing of tier 4 or 5 is ever sold), material (`materials`: id -> price a unit, `material_qty` units on the shelf), drone (`drone`: id -> price) and blueprint (`blueprints`: recipe id -> price, a blueprint is sold as the item bp:<recipe id> and learned at once); `kinds` is the weight of each kind in the roll. A part in the pool is priced `part_price` x its value (values.tier, or values.unique), rounded to 5: dearer than a station sells the same. A shop never offers as unique anything the station of its own region sells (a Fenn part in the Fenn Bazaar is no find there); rare materials, blueprints and the parts no station stocks are in no station's stock anywhere. The shop panel marks the unique items RARE.",
+		"_doc": "Small shops (playtest 2, economy; scripts/space/shops.gd, campaign.gd shop_cfg): the Trader and Store POIs of a sector (data/sectors.json poi_types with shop: true) open a small shop after their event instead of a station menu: a handful of items, some of which no station of the region sells. Each shop is rolled once from the run's seed, its POI and its region (the same shop whenever it is asked for), and what is bought leaves it (campaign.gd shop_sold, saved). items: how many things a shop carries [least, most]; unique: how many of those are from the unique pool [least, most], the rest come from `common` (id -> price, the staples the stations sell too). The unique pool, by kind: racial (every part of the tech_* packs), tier (any other non-unique part of tier `tier_range`; nothing of tier 4 or 5 is ever sold), material (`materials`: id -> price a unit, `material_qty` units on the shelf), drone (`drone`: id -> price), mod (`mods`: the boarding mods of data/mods.json, id -> price by tier; weight 1 in `kinds`) and blueprint (`blueprints`: recipe id -> price, a blueprint is sold as the item bp:<recipe id> and learned at once); `kinds` is the weight of each kind in the roll. A part in the pool is priced `part_price` x its value (values.tier, or values.unique), rounded to 5: dearer than a station sells the same. A shop never offers as unique anything the station of its own region sells (a Fenn part in the Fenn Bazaar is no find there); rare materials, blueprints and the parts no station stocks are in no station's stock anywhere. The shop panel marks the unique items RARE.",
 		"items": [3, 5],
 		"unique": [1, 2],
-		"kinds": {"racial": 4, "tier": 3, "material": 3, "drone": 1, "blueprint": 1},
+		"kinds": {"racial": 4, "tier": 3, "material": 3, "drone": 1, "blueprint": 1, "mod": 1},
 		"part_price": 4.5,
 		"tier_range": [2, 3],
 		"materials": {"crystal": 70, "silicon": 30, "titanium": 30},
 		"material_qty": [2, 4],
 		"drone": {"repair_drone": 420},
+		"mods": {"spotter_cam_mk1": 240, "spotter_cam_mk2": 420, "spotter_cam_mk3": 720, "salvage_rig_mk1": 240, "salvage_rig_mk2": 420, "salvage_rig_mk3": 760, "overcharge_coil_mk1": 260, "overcharge_coil_mk2": 450, "overcharge_coil_mk3": 780},
 		"blueprints": {"pulse_mk2": 360, "tractor_mk2": 360, "radar_mk2": 360, "intake_mk2": 360, "laser_mk2": 360, "shield_mk2": 360, "assembly_rig": 360, "engine_neon_mk3": 640, "strafe_jets_mk3": 640, "longburn_mk3": 640},
 		"common": {"radiator": 40, "bed": 30, "ammo_rack": 60, "oxygen_gen": 90, "helm": 70, "engine_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130, "intake_mk1": 120, "tractor_mk1": 160, "radar_mk1": 130, "medbay": 180, "strafe_jets_mk1": 60, "longburn_mk1": 120, "robot_arm": 150, "laser_cutter": 140}
 	},

@@ -27,7 +27,6 @@
 		"swing_arc_deg": 80,
 		"noise_gun": 12.0,
 		"noise_swing": 5.0,
-		"tracer_s": 0.09,
 		"flash_s": 0.08,
 		"flash_range": 12.0,
 		"self_range": 3.4,
@@ -45,6 +44,63 @@
 		"leave_confirm_s": 6.0,
 		"sight": {"dark": 4.5, "red": 8.0, "lit": 13.0, "notice_s": 0.6},
 		"hollow": {"count": [2, 3], "toast": "Visitors: noted.", "banner": "The Hollow is here. Get out.", "flicker_s": 3.5}
+	},
+	"kit": {
+		"_doc": "Loadouts (B4, scripts/board/kit.gd). The airlock's loadout screen sets, for the soldier and each follower, weapon_slots weapons (their species' sidearm, or a hand weapon of the hold: combat.hand_items), one body gear of `bodies` and mod_slots mods (data/mods.json). What a person wears has left the hold, and goes back when it is taken off. A follower fights with the first weapon they carry.",
+		"weapon_slots": 2,
+		"mod_slots": 2,
+		"bodies": ["basic_armor", "eva_suit", "exosuit", "salamander_suit", "heat_suit"]
+	},
+	"armor": {
+		"_doc": "The share of the damage a person takes aboard, by the body gear they wear (1.0 = none). The EVA suit and the heat suit are made for the ship's hazards: no use aboard.",
+		"basic_armor": 0.8,
+		"exosuit": 0.65,
+		"salamander_suit": 0.9,
+		"eva_suit": 1.0,
+		"heat_suit": 1.0
+	},
+	"flare": {
+		"_doc": "The flare gun's flare (B4): it sticks where it lands and burns burn_s seconds, and lights `radius` cells round it. A burning flare counts as an emergency light for what a foe sees (foes.gd), so it lights a room for both sides. Only the soldier's and his crew's flare guns leave one; at most `max` burn at once (the oldest goes out).",
+		"weapon": "flare_gun",
+		"burn_s": 6.0,
+		"radius": 4.0,
+		"max": 12
+	},
+	"bolts": {
+		"_doc": "What a shot looks like (B4, scripts/board/bolts.gd, board_view.gd). The logic is hitscan; the view flies a bolt from the muzzle to the hit point at `speed` cells a second and shows the hit when it arrives. A look is built in layers: default, then the weapon's class, then its culture (data/hand_weapons.json), then the weapon's own id; each layer sets only the keys it changes. A foe's shot uses `foe` (by foe kind; a hacked sentry fires in the colour of the soldier's weapon). Keys: color and core (the glow and the hot centre), len (cells), width (px), speed (cells a second), light_r (cells the bolt's light reaches) and energy, kind (bolt, beam: the whole line at once, held for `hold` seconds; arc: a jittering line; flame: a short flickering cone; flare: a slow shell that sticks; swing: a melee arc, no light), impact (spark, slug, arc, flame, flare, none), shake (screen shake in px of a shot), sound (the sound id of the shot; none = shot_<class>), jitter (an arc's wobble, cells). max_lights: bolt and flare lights at once (the oldest drops). shadow_lights: how many of them cast shadows from the walls at once (the burning flares, then the newest bolts; a shadow costs far more than the light). scorch_s: seconds a scorch mark on a wall takes to fade. A bolt of an Overcharge Coil is wider and brighter by the mod's `size` (data/mods.json).",
+		"max_lights": 12,
+		"shadow_lights": 4,
+		"scorch_s": 20.0,
+		"default": {"color": "#fff0b8", "core": "#ffffff", "len": 1.1, "width": 3.0, "speed": 42.0, "light_r": 3.2, "energy": 0.8, "kind": "bolt", "impact": "spark", "shake": 0.0},
+		"class": {
+			"pistol": {"len": 0.9, "width": 2.6, "speed": 40.0},
+			"rifle": {"len": 1.5, "width": 3.0, "speed": 52.0, "energy": 0.9},
+			"heavy": {"len": 1.4, "width": 5.0, "speed": 36.0, "light_r": 3.8, "energy": 1.1, "impact": "slug", "shake": 2.6},
+			"melee": {"kind": "swing", "len": 0.0, "speed": 0.0, "light_r": 0.0, "energy": 0.0, "impact": "none"},
+			"tool": {"kind": "swing", "len": 0.0, "speed": 0.0, "light_r": 0.0, "energy": 0.0, "impact": "none"}
+		},
+		"culture": {
+			"concord": {"color": "#8fc8ff", "core": "#f4fbff", "len": 1.7, "width": 2.4, "speed": 58.0},
+			"clans": {"color": "#ff9a3c", "core": "#ffe9c0"},
+			"lumen": {"color": "#c9a8ff", "core": "#f6eeff"},
+			"basalt": {"color": "#ffb02e", "core": "#fff0c0"},
+			"emberkin": {"color": "#ff7a2a", "core": "#ffd9a0"},
+			"fenn": {"color": "#6fb2ff", "core": "#e4f2ff"}
+		},
+		"weapon": {
+			"flare_gun": {"sound": "flare_pop", "kind": "flare", "color": "#ff6a3a", "core": "#fff0b0", "len": 0.7, "width": 4.5, "speed": 36.0, "light_r": 4.0, "energy": 1.0, "impact": "flare"},
+			"gatekeepers_lance": {"sound": "shot_laser_rifle", "kind": "beam", "color": "#c9a8ff", "core": "#f6eeff", "width": 7.0, "speed": 60.0, "light_r": 4.6, "energy": 1.3, "hold": 0.15, "impact": "slug", "shake": 2.0},
+			"spark_pistol": {"sound": "arc_crackle", "kind": "arc", "color": "#78bdff", "core": "#ffffff", "len": 2.2, "width": 2.2, "speed": 44.0, "light_r": 3.4, "energy": 1.0, "impact": "arc", "jitter": 0.35},
+			"torchgun": {"kind": "flame", "color": "#ff8a2a", "core": "#ffe090", "len": 2.4, "width": 15.0, "speed": 35.0, "light_r": 3.8, "energy": 1.0, "impact": "flame", "shake": 1.6},
+			"slugthrower": {"color": "#ffb02e", "core": "#fff0c0", "len": 1.7, "width": 6.0, "speed": 36.0, "energy": 1.1, "shake": 3.0},
+			"service_pistol": {"sound": "shot_laser_pistol"},
+			"carbine": {"sound": "shot_laser_rifle"}
+		},
+		"foe": {
+			"scavenger": {"color": "#d9772e", "core": "#ffd9a0", "len": 1.0, "width": 2.8, "speed": 38.0, "light_r": 3.0, "energy": 0.8},
+			"pirate": {"color": "#ff3a3a", "core": "#ffd0d0", "len": 1.4, "width": 3.2, "speed": 46.0, "light_r": 3.4, "energy": 0.9},
+			"sentry": {"color": "#4cff7a", "core": "#d8ffe4", "len": 1.2, "width": 2.4, "speed": 56.0, "light_r": 3.0, "energy": 0.8}
+		}
 	},
 	"enemies": {
 		"_doc": "The foes (scripts/board/foes.gd). hp; weapon: the hand weapon drawn in their hands (art); attack: damage, rate (a second) and range (cells; a melee foe's reach) of one hit; inacc: the half-width in radians of the error of an aimed shot (x1.3 against a target that is moving); speed: x the walk speed of a person (3 cells a second); fov_deg and dark: the sight cone and how far it sees with no light on the target (data combat.sight); hold: the share of its range at which a shooter stops to fire; flee_below: the hp share under which it runs; cover: it takes cover behind props; patrol: stand or wander; alert_r: cells within which a foe that notices calls its mates; look: the palette it is drawn with; lines: what a polite one says on noticing you (a toast). The sentry (turret) turns at turn rad/s and sees a cone of cone_deg; it can be hacked (combat.hack_sentry_s). The crawler lives in the vents: emerge (cells within which it comes out), lunge {range, speed, time, damage, cooldown}, hide_s (seconds in a light before it goes back).",
@@ -215,7 +271,7 @@
 			"min": {"storage": 1, "cargo": 1}, "max": {"command": 1, "medbay": 1, "engineering": 1},
 			"hack": [0, 2], "card": [0, 1], "loop": 0.4, "emergency": 0.15, "prop_mult": 0.5, "loot_mult": 1.3, "locked_bonus": 1.5,
 			"blueprints": {"0": 0.7, "1": 0.3}, "logs": [0, 1],
-			"bonus": [{"weight": 10, "item": "credits", "count": [8, 24]}, {"weight": 8, "item": "missile", "count": [1, 3]}, {"weight": 10, "item": "hand_ammo", "count": [6, 14]}, {"weight": 3, "item": "rifle", "count": [1, 1]}],
+			"bonus": [{"weight": 10, "item": "credits", "count": [8, 24]}, {"weight": 8, "item": "missile", "count": [1, 3]}, {"weight": 10, "item": "hand_ammo", "count": [6, 14]}, {"weight": 3, "item": "rifle", "count": [1, 1]}, {"weight": 1, "item": "mod", "count": [1, 1]}],
 			"names": ["Rat Hole", "Scrap Roost", "Bone Yard Annex", "Pirate Nest", "Chop Shop", "Dredge Den"]
 		},
 		"wreck": {
@@ -274,7 +330,8 @@
 			{"weight": 26, "item": "copper", "count": [3, 6]}, {"weight": 22, "item": "scrap", "count": [4, 8]}, {"weight": 10, "item": "silicon", "count": [1, 3]},
 			{"weight": 8, "item": "titanium", "count": [1, 3]}, {"weight": 3, "item": "crystal", "count": [1, 1]}, {"weight": 1.5, "item": "plasma_cell", "count": [1, 1]},
 			{"weight": 2, "item": "fuel", "count": [1, 1]}, {"weight": 2, "item": "reactor_mk1", "count": [1, 1]}, {"weight": 2, "item": "engine_mk1", "count": [1, 1]},
-			{"weight": 3, "item": "radiator", "count": [1, 1]}, {"weight": 1, "item": "afterburner", "count": [1, 1]}
+			{"weight": 3, "item": "radiator", "count": [1, 1]}, {"weight": 1, "item": "afterburner", "count": [1, 1]},
+			{"weight": 4.2, "item": "mod", "count": [1, 1]}
 		],
 		"medbay": [
 			{"weight": 30, "item": "polymer", "count": [2, 5]}, {"weight": 15, "item": "credits", "count": [3, 12]}, {"weight": 2, "item": "nanite_paste", "count": [1, 1]},
@@ -283,7 +340,8 @@
 		"command": [
 			{"weight": 30, "item": "credits", "count": [8, 30]}, {"weight": 14, "item": "silicon", "count": [1, 3]}, {"weight": 6, "item": "crystal", "count": [1, 2]},
 			{"weight": 10, "item": "copper", "count": [2, 5]}, {"weight": 3, "item": "plasma_cell", "count": [1, 1]}, {"weight": 2, "item": "radar_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "pulse_mk1", "count": [1, 1]},
-			{"weight": 8, "item": "hand_ammo", "count": [5, 12]}, {"weight": 1, "item": "slugthrower", "count": [1, 1]}
+			{"weight": 8, "item": "hand_ammo", "count": [5, 12]}, {"weight": 1, "item": "slugthrower", "count": [1, 1]},
+			{"weight": 5.6, "item": "mod", "count": [1, 1]}
 		],
 		"quarters": [
 			{"weight": 30, "item": "credits", "count": [2, 10]}, {"weight": 15, "item": "polymer", "count": [2, 4]}, {"weight": 15, "item": "scrap", "count": [3, 7]},

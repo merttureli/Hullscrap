@@ -229,6 +229,56 @@ func test_walking_at_a_door_a_little_off_line_still_gets_through() -> void:
 	eq(wall.pos.x, 2.0, "without being nudged sideways")
 
 
+func _door_row() -> ShipGrid:
+	# A horizontal wall with a 2-wide door piece in it: cells (4,3) and (5,3) are the door, (3,3) and (6,3) its frame.
+	var g := GridTests.grid_from([
+		"##########",
+		"..........",
+		"..........",
+		"....DD....",
+		"..........",
+		"..........",
+	])
+	for x in 4:
+		g.tiles[Vector2i(x, 3)] = "wall"
+		g.tiles[Vector2i(6 + x, 3)] = "wall"
+	return g
+
+
+func test_a_door_frame_is_rounded_so_a_body_off_the_line_fits() -> void:
+	var g := _door_row()
+	var m := CrewMember.new("T", Vector2(5.0, 2.0))
+	check(m.fits(g, Vector2(5.4, 3.0)), "0.4 off the door's line, in the doorway: the frame's corner lets it by")
+	check(not m.fits(g, Vector2(5.5, 3.0)), "0.5 off: the frame still stops it")
+	check(not m.fits(g, Vector2(2.0, 2.4)), "a plain wall keeps the whole radius")
+	check(not m.fits(g, Vector2(5.0, 3.0), func(_c): return false), "a shut door is not a frame: it stops the body")
+
+
+func test_walking_slantwise_at_a_door_gets_through() -> void:
+	for dir in [Vector2(1, 1), Vector2(1, 2), Vector2(-1, 2), Vector2(0.3, 1)]:
+		var g := _door_row()
+		var m := CrewMember.new("T", Vector2(2.5 if dir.x > 0.0 else 7.5, 2.0))
+		var through := false
+		for i in 360:
+			m.move_input(g, dir, 1.0 / 60.0)
+			through = through or m.pos.y > 4.2
+		check(through, "heading %s: through the door, at %s" % [dir, m.pos])
+	var wall := CrewMember.new("T", Vector2(1.0, 2.0))  # slanting into a plain wall far from the door: no way through
+	var g2 := _door_row()
+	for i in 30:
+		wall.move_input(g2, Vector2(0.3, 1), 1.0 / 60.0)
+	check(wall.pos.y <= 3.0 - CrewMember.RADIUS + 0.0001, "a plain wall stops it, y=%s" % wall.pos.y)
+
+
+func test_a_body_in_a_doorway_walks_out_lined_up() -> void:
+	var g := _door_row()
+	var m := CrewMember.new("T", Vector2(5.35, 2.0))
+	for i in 90:
+		m.move_input(g, Vector2.DOWN, 1.0 / 60.0)
+	check(m.pos.y > 4.0, "through, y=%s" % m.pos.y)
+	check(absf(m.pos.x - 5.0) < 0.05, "pulled onto the door's line on the way, x=%s" % m.pos.x)
+
+
 func test_a_long_frame_cannot_tunnel() -> void:
 	var g := _room()
 	var m := _at(Vector2i(3, 2))

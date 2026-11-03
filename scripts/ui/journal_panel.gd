@@ -1,10 +1,13 @@
 extends Control
 ## The journal: the derelict logs found this run (campaign.logs_found), each with its title, where it came from and its
-## text. J opens it from the map; Esc, J or Enter close it, Up / Down / PgUp / PgDn / the wheel scroll it by a log.
+## text, and a Ledger tab with the tips the Ledger has shown this profile (advisor.gd), to read again. Tab or a click switches.
+## J opens it from the map; Esc, J or Enter close it, Up / Down / PgUp / PgDn / the wheel scroll it by an entry.
 ## While open it takes every key and click. In the style of the help panel (help_panel.gd).
 
 ## Emitted when the panel is closed.
 const Audio = preload("res://scripts/audio/audio.gd")
+const Advisor = preload("res://scripts/sim/advisor.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 signal closed
 
@@ -27,7 +30,8 @@ const DIM_TEXT := Color("#97a3b3")
 const AMBER := Color("#e1a136")
 
 var map: Control  ## the MapView: its campaign (logs_found) and events (the logs)
-var top := 0  ## the first log shown
+var top := 0  ## the first entry shown
+var tab := 0  ## 0 the logs, 1 the Ledger's tips
 
 
 func _ready() -> void:
@@ -49,10 +53,38 @@ func entries() -> Array:
 	return out
 
 
+## The entries of the tab on show, in the shape of a log: {id, title, ship (the line at the right: where a log came from, the date of a tip), text}.
+func listed() -> Array:
+	if tab == 0:
+		return entries()
+	var out := []
+	var prof = map.profile if map != null else null
+	if prof == null:
+		return out
+	for t in Advisor.tips_seen(prof):
+		out.append({"id": t["id"], "title": t["title"], "ship": t["date"], "text": t["text"]})
+	return out
+
+
+## Switch to the logs (0) or the Ledger's tips (1).
+func set_tab(i: int) -> void:
+	if i == tab or i < 0 or i > 1:
+		return
+	tab = i
+	top = 0
+	Audio.fx(self, "tab_switch")
+
+
+func tab_rect(i: int) -> Rect2:
+	var p := panel_rect()
+	return Rect2(p.position + Vector2(PAD + 150.0 + i * 98.0, 30.0), Vector2(92.0, 26.0))
+
+
 func open() -> void:
 	if visible:
 		return
 	top = 0
+	tab = 0
 	visible = true
 	Audio.fx(self, "open")
 	queue_redraw()
@@ -79,6 +111,9 @@ func _input(e: InputEvent) -> void:
 		KEY_ESCAPE, KEY_J, KEY_ENTER, KEY_KP_ENTER:
 			if not e.echo:
 				close()
+		KEY_TAB:
+			if not e.echo:
+				set_tab(1 - tab)
 		KEY_DOWN:
 			scroll(1)
 		KEY_UP:
@@ -90,6 +125,10 @@ func _input(e: InputEvent) -> void:
 
 
 func _gui_input(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+		for i in 2:
+			if tab_rect(i).has_point(e.position):
+				set_tab(i)
 	if e is InputEventMouseButton and e.pressed:
 		match e.button_index:
 			MOUSE_BUTTON_WHEEL_DOWN:
@@ -99,10 +138,10 @@ func _gui_input(e: InputEvent) -> void:
 	accept_event()
 
 
-## Move the list `n` logs down (negative: up), within the list.
+## Move the list `n` entries down (negative: up), within the list.
 func scroll(n: int) -> void:
 	var was := top
-	top = clampi(top + n, 0, maxi(entries().size() - 1, 0))
+	top = clampi(top + n, 0, maxi(listed().size() - 1, 0))
 	if absi(n) >= 3 and top != was:
 		Audio.fx(self, "page_turn")  # (Page Up and Page Down turn a page; a line at a time does not)
 
@@ -126,7 +165,7 @@ func visible_cards() -> Array:
 	var out := []
 	var y := p.position.y + HEAD_H
 	var limit := p.end.y - FOOT_H
-	var all := entries()
+	var all := listed()
 	for i in range(top, all.size()):
 		var h := card_h(all[i], p.size.x)
 		if y + h > limit and not out.is_empty():
@@ -145,11 +184,16 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var p := panel_rect()
 	_panel(p)
-	var all := entries()
+	var all := listed()
 	_text("JOURNAL", p.position + Vector2(PAD, 40.0), 26, TEXT)
-	_text("%d log%s found this run" % [all.size(), "" if all.size() == 1 else "s"], p.position + Vector2(PAD + 160.0, 38.0), 15, DIM_TEXT)
+	for i in 2:
+		var tr := tab_rect(i)
+		UiKit.tab(self, tr, i == tab, tr.has_point(get_local_mouse_position()))
+		UiKit.text(self, ["LOGS", "LEDGER"][i], tr.position + Vector2(0.0, 18.0), 13, TEXT if i == tab else DIM_TEXT, HORIZONTAL_ALIGNMENT_CENTER, tr.size.x, UiKit.bold())
+	var count := ("%d log%s found this run" % [all.size(), "" if all.size() == 1 else "s"]) if tab == 0 else ("%d tip%s shown" % [all.size(), "" if all.size() == 1 else "s"])
+	_text(count, p.position + Vector2(PAD + 150.0 + 2.0 * 98.0 + 10.0, 49.0), 15, DIM_TEXT)
 	if all.is_empty():
-		_text("Nothing yet. Logs turn up in derelicts, wrecks and the odd radio ghost.", p.position + Vector2(PAD, HEAD_H + 30.0), TEXT_SIZE, DIM_TEXT)
+		_text("Nothing yet. Logs turn up in derelicts, wrecks and the odd radio ghost." if tab == 0 else "Nothing yet. The Ledger says each thing once, the first time it matters, and keeps it here.", p.position + Vector2(PAD, HEAD_H + 30.0), TEXT_SIZE, DIM_TEXT)
 	var font := ThemeDB.fallback_font
 	var shown := visible_cards()
 	for c in shown:
@@ -163,7 +207,7 @@ func _draw() -> void:
 		draw_multiline_string(font, r.position + Vector2(10.0, 30.0 + font.get_ascent(TEXT_SIZE)), str(e["text"]), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 20.0, TEXT_SIZE, -1, TEXT)
 	if top + shown.size() < all.size():
 		_text("v more (Down / wheel)", Vector2(p.end.x - PAD - 150.0, p.end.y - 12.0), 13, DIM_TEXT)
-	_text("J / Esc / Enter: close    Up / Down / wheel: scroll", Vector2(p.position.x + PAD, p.end.y - 12.0), 13, DIM_TEXT)
+	_text("Tab: logs / Ledger    J / Esc / Enter: close    Up / Down / wheel: scroll", Vector2(p.position.x + PAD, p.end.y - 12.0), 13, DIM_TEXT)
 
 
 ## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.

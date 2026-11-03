@@ -5,7 +5,9 @@ extends Node
 ## open_pause()). When the map reports a lost fight, the run is over: the record goes to the profile, the
 ## saves are wiped and game_over.gd shows the numbers. When it reports an ending (a won run), the record, the
 ## score and the ship's design (the hall of ships) go to the profile, the saves are wiped and ending_screen.gd
-## shows the page. The first run also gets three hint toasts. The
+## shows the page. The first run also gets three hint toasts. The Ledger (ledger_card.gd: the goal card, the tips and the warnings
+## of scripts/sim/advisor.gd) has its own layer here; after the first finished run the player is asked once whether to keep it
+## (ledger_prompt.gd), and its setting is a row of both menus. The
 ## screens sit in canvas layers made after the others (so they get the keys first) and the tree is paused
 ## while one of them is up. The rules are in profile.gd and campaign.gd; this node only wires.
 
@@ -16,6 +18,8 @@ const GameOver = preload("res://scripts/ui/game_over.gd")
 const EndingScreen = preload("res://scripts/ui/ending_screen.gd")
 const Endings = preload("res://scripts/space/endings.gd")
 const HintToast = preload("res://scripts/ui/hint_toast.gd")
+const LedgerCard = preload("res://scripts/ui/ledger_card.gd")
+const LedgerPrompt = preload("res://scripts/ui/ledger_prompt.gd")
 const ShipPicker = preload("res://scripts/ui/ship_picker.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const Starfield = preload("res://scripts/space/starfield.gd")
@@ -42,6 +46,8 @@ var help: Control
 var over: Control
 var ending: Control
 var toast: Control
+var ledger: Control  ## the Ledger's card (ledger_card.gd)
+var prompt: Control  ## the one-time "keep the Ledger on?" (ledger_prompt.gd)
 var _map_seen := false  # the map was open last frame
 var _fight_seen := false  # so was a fight
 var craft: Control  ## the crafting panel (C)
@@ -62,6 +68,8 @@ func _ready() -> void:
 
 func _make_ui() -> void:
 	var root := get_parent()
+	ledger = _layer(root, "LedgerLayer", 6, LedgerCard.new())
+	ledger.door = self
 	toast = _layer(root, "ToastLayer", 7, HintToast.new())
 	menu = _layer(root, "MenuLayer", 8, MainMenu.new())
 	menu.set_stars(Starfield.new())
@@ -69,12 +77,16 @@ func _make_ui() -> void:
 	menu.chosen.connect(_on_menu)
 	menu.sound = profile.sound.duplicate()
 	menu.sound_changed.connect(_on_sound)
+	menu.ledger = profile.ledger
+	menu.ledger_changed.connect(_on_ledger)
 	if Audio.of(self) != null:
 		Audio.of(self).apply_settings(profile.sound)  # the volumes the profile kept
 	over = _layer(root, "OverLayer", 9, GameOver.new())
 	over.chosen.connect(_on_over)
 	ending = _layer(root, "EndingLayer", 9, EndingScreen.new())
 	ending.chosen.connect(_on_over)
+	prompt = _layer(root, "PromptLayer", 9, LedgerPrompt.new())
+	prompt.chosen.connect(_on_ledger_asked)
 	help = _layer(root, "HelpLayer", 10, HelpPanel.new())
 	map = build.drift if build != null else null
 	if map != null and map.has_signal("run_over"):
@@ -103,7 +115,7 @@ func _layer(root: Node, layer_name: String, index: int, node: Control) -> Contro
 func _process(_dt: float) -> void:
 	if menu == null:
 		return
-	get_tree().paused = menu.visible or over.visible or ending.visible or help.visible
+	get_tree().paused = menu.visible or over.visible or ending.visible or help.visible or prompt.visible
 	if map != null:
 		var open: bool = map.visible and map.event_panel != null and not map.event_panel.visible and not map.station_panel.visible  # after Ma's first call is read
 		if open and not _map_seen:
@@ -135,13 +147,15 @@ static func toast_top(fighting: bool, map_open: bool) -> float:
 ## The main menu, with the last runs and Continue if a run is saved.
 func show_main(note := "") -> void:
 	menu.recent = profile.last_runs()
+	menu.ledger = profile.ledger
 	menu.open(MainMenu.Mode.MAIN, Profile.has_save(BuildMode.SAVE_PATH), note)
 
 
 ## Esc in the game: the pause menu (build_mode.gd asks).
 func open_pause() -> void:
-	if menu == null or menu.visible or over.visible or ending.visible or help.visible or (picker != null and picker.visible) or (combat != null and combat.active):
+	if menu == null or menu.visible or over.visible or ending.visible or help.visible or prompt.visible or (picker != null and picker.visible) or (combat != null and combat.active):
 		return
+	menu.ledger = profile.ledger
 	menu.open(MainMenu.Mode.PAUSE)
 
 
@@ -174,11 +188,37 @@ func _on_sound(kind: String, value: float, final: bool) -> void:
 		profile.save()
 
 
+## The game over or ending screen was left: the one-time question about the Ledger first (after the first finished run), then where the player chose to go.
 func _on_over(id: String) -> void:
-	if id == "new":
-		_new_run()
+	_ask_ledger(func():
+		if id == "new":
+			_new_run()
+		else:
+			show_main())
+
+
+## The Ledger row of a menu was clicked: the setting is kept, and it is the player's answer, so it will not be asked about.
+func _on_ledger(mode: String) -> void:
+	profile.set_ledger(mode)
+	profile.mark_ledger_asked()
+
+
+## The one-time question ("keep it on?", ledger_prompt.gd) when it is due, then `next`; else `next` at once.
+func _ask_ledger(next: Callable) -> void:
+	if prompt != null and profile.ledger_ask_due():
+		prompt.open(next)
 	else:
-		show_main()
+		next.call()
+
+
+func _on_ledger_asked(mode: String) -> void:
+	profile.set_ledger(mode)
+	profile.mark_ledger_asked()
+
+
+## Is the Ledger's question up? (ledger_card.gd stays out of its way.)
+func prompt_up() -> bool:
+	return prompt != null and prompt.visible
 
 
 ## New run: the ship picker; Esc there goes back to the main menu. The campaign starts when a ship is chosen.

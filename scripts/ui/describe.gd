@@ -17,6 +17,7 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Content = preload("res://scripts/data/content.gd")
+const Mods = preload("res://scripts/board/mods.gd")
 
 const PATH := "res://data/describe.json"
 const STAT_NAMES := {"rate": "fire rate", "damage": "damage"}
@@ -180,6 +181,12 @@ static func _of_item(id: String, out: Dictionary) -> Dictionary:
 	var kind := str(item.get("kind", "")) if not item.is_empty() else ("material" if Content.has("materials", id) else "")
 	out["what"] = str(item.get("does", data()["items"].get(kind, "")))
 	out["lore"] = first_sentence(str(item.get("blurb", Content.entry("materials", id).get("blurb", ""))))
+	if kind == "mod" and Mods.is_item(id):  # a boarding mod: what it does, the numbers of its tier and who they work for
+		var h := Mods.hover(id)
+		out["what"] = str(h[0])
+		var p := Mods.parse(id)
+		out["stats"] = [Mods.numbers(p["mod"], int(p["tier"]))["stat"].duplicate(), ["Worn by", "the party" if Mods.def(p["mod"])["scope"] == "party" else "the wearer"]]
+		out["keywords"] = [keyword("mod")]
 	return out
 
 
