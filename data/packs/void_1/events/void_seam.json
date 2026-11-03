@@ -1,0 +1,18 @@
+{"events": [
+    {
+      "id": "hollow_void_seam", "type": "hollow", "weight": 25, "once": true, "requires": {"stage_min": 5},
+      "text": "A rock the size of a hangar turns slowly where the tide has left it, split down one side. In the split, something grows: a seam of dark crystal, violet at the edges, throwing back a light your lamps do not make. The scanner calls it a motherlode and then declines to say anything else.",
+      "choices": [
+        {"text": "Cut a sample from the seam.", "outcomes": [
+          {"weight": 60, "text": "The cutter bites, and the seam lets go of one piece as if it had been waiting. It is heavy and cold and faintly interested in you. You wrap it twice and do not look at it for a while.", "effects": {"items": {"void_crystal": 1}}},
+          {"weight": 40, "text": "The crystal rings when the cutter touches it, one long note, and the dark around the rock answers with lights. You tear the piece free anyway and run, and the hull remembers the first few seconds.", "effects": {"items": {"void_crystal": 1}, "hull": -10}}
+        ]},
+        {"text": "Look into it a while.", "outcomes": [
+          {"weight": 100, "text": "It is like reading an answer to a question nobody asked. You learn nothing you can use. Somebody steadies the helm, and you leave it spinning.", "effects": {"crew_hp": -4}}
+        ]},
+        {"text": "Leave it where the tide put it.", "outcomes": [
+          {"weight": 100, "text": "You turn away. The light in the split follows you for a few thousand kilometres, then gives up.", "effects": {}}
+        ]}
+      ]
+    }
+]}

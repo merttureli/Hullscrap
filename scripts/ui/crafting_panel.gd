@@ -52,6 +52,7 @@ var sim: Node  ## the ShipSim whose player ship is worked on
 var station := "fabricator"  ## the tab shown: the station whose recipes and queue are on screen
 var selected := ""  ## the recipe id under the cursor
 var top := 0  ## the first row of rows() shown
+var debug_keys := OS.is_debug_build()  ## U (free blueprint) and M (all mods) work only in a debug build; a release export has neither
 var message := ""
 var message_bad := false
 var hover_row := -1  ## index into rows()
@@ -304,9 +305,11 @@ func _input(e: InputEvent) -> void:
 				KEY_ENTER, KEY_KP_ENTER:
 					craft_selected()
 				KEY_U:
-					debug_unlock()
+					if debug_keys:
+						debug_unlock()
 				KEY_M:
-					debug_mods()
+					if debug_keys:
+						debug_mods()
 				KEY_SLASH, KEY_QUESTION:
 					help_open = not help_open
 

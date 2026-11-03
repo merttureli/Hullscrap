@@ -162,8 +162,8 @@ static func tier_weights(kind: String, stage: int) -> Array:
 	return w
 
 
-## A mod item for loot: the mod by its weight, the tier by the weights of the stage. "" when no tier can be rolled.
-static func roll_drop(kind: String, stage: int, rng: RandomNumberGenerator) -> String:
+## A mod item for loot: the mod by its weight, the tier by the weights of the stage (not above `max_tier`). "" when no tier can be rolled.
+static func roll_drop(kind: String, stage: int, rng: RandomNumberGenerator, max_tier := 3) -> String:
 	var mods: Array = config()["mods"]
 	var total := 0.0
 	for m in mods:
@@ -176,6 +176,8 @@ static func roll_drop(kind: String, stage: int, rng: RandomNumberGenerator) -> S
 			pick = m
 			break
 	var w := tier_weights(kind, stage)
+	for i in range(max_tier, 3):
+		w[i] = 0.0
 	var tw: float = w[0] + w[1] + w[2]
 	if tw <= 0.0:
 		return ""

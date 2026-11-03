@@ -341,6 +341,26 @@ func test_the_debug_mods_key_puts_the_nine_boarding_mods_in_the_hold() -> void:
 	_free(d)
 
 
+func test_the_debug_keys_are_gated_by_the_build() -> void:
+	var d := _panel(_rig()["ship"])
+	var panel: CraftingPanel = d["panel"]
+	check(panel.debug_keys == OS.is_debug_build(), "the keys follow the build (a release export has none)")
+	panel.visible = true
+	panel.debug_keys = false  # as in a release export
+	var ship: Ship = panel.sim.player_ship()
+	var known: int = ship.crafting.known.size()
+	panel._input(_key(KEY_U))
+	panel._input(_key(KEY_M))
+	eq(ship.crafting.known.size(), known, "U learns nothing in a release build")
+	eq(ship.inventory.count("spotter_cam_mk1"), 0, "M puts no mods in the hold in a release build")
+	panel.debug_keys = true
+	panel._input(_key(KEY_U))
+	panel._input(_key(KEY_M))
+	eq(ship.crafting.known.size(), known + 1, "U learns a blueprint in a debug build")
+	eq(ship.inventory.count("spotter_cam_mk1"), 1, "M gives the mods in a debug build")
+	_free(d)
+
+
 func test_the_panel_stays_shut_in_a_fight() -> void:
 	var main := Node.new()
 	var combat := CombatView.new()

@@ -103,7 +103,7 @@ const COLUMNS: Array = [
 			["Arrows / End", "Shift the shield toward a side / back to even"],
 			["Esc", "Leave when it is over or far off"],
 			["Y", "Accept a surrender"],
-			["J", "Open the map to spool the jump drive (held while the enemy is within 2,000 px)"],
+			["J", "Spool the jump drive (10 s); engines or helm down hold it"],
 			["R", "After your ship is wrecked"],
 		]],
 		["CRAFTING (C)", [
@@ -114,12 +114,12 @@ const COLUMNS: Array = [
 			["Dimmed recipe", "Needs a blueprint: salvage scans, events, stores"],
 			["PgUp / PgDn", "Scroll fast"],
 			["Click a queued job", "Cancel it"],
-			["U", "Debug: unlock a random blueprint"],
+			["U", "Debug: unlock a random blueprint", "debug"],
 			["C / Esc", "Close it"],
 		]],
 		["BOARDING (an event's Board her)", [
-			["Mouse R Q F", "Aboard: fire, reload, swap, light"],
-			["E (hold)", "Open, hack, revive; airlock: leave"],
+			["Mouse R Q F", "Aboard: fire, reload, swap, flashlight"],
+			["E (hold)", "Open, hack, revive; airlock: leave. Tap E to talk"],
 		]],
 	],
 ]
@@ -162,12 +162,17 @@ static func first_run() -> Array[String]:
 	]
 
 
+## The rows of a section: a row marked "debug" (a third item) shows only in a debug build.
+static func rows_of(sec: Array) -> Array:
+	return sec[1].filter(func(r): return r.size() < 3 or OS.is_debug_build())
+
+
 ## The text of the keys column of every row, joined: what tests look the keys up in.
 static func keys_text() -> String:
 	var out: Array[String] = []
 	for col in COLUMNS:
 		for sec in col:
-			for row in sec[1]:
+			for row in rows_of(sec):
 				out.append(str(row[0]))
 	return "\n".join(out)
 
@@ -178,7 +183,7 @@ static func all_text() -> String:
 	for col in COLUMNS:
 		for sec in col:
 			out.append(str(sec[0]))
-			for row in sec[1]:
+			for row in rows_of(sec):
 				out.append("%s %s" % [row[0], row[1]])
 	out.append_array(first_run())
 	return "\n".join(out)
@@ -246,7 +251,7 @@ func column_end(c: int) -> float:
 		y += _first_run_h(w) + 18.0
 	for sec in COLUMNS[c]:
 		y += 32.0
-		for row in sec[1]:
+		for row in rows_of(sec):
 			y += _row_h(row, w) + ROW_GAP
 		y += 14.0
 	return y - 14.0 - ROW_GAP
@@ -279,7 +284,7 @@ func _section(sec: Array, at: Vector2, w: float) -> float:
 	_text(str(sec[0]), at + Vector2(0.0, 14.0), 14, AMBER)
 	draw_line(at + Vector2(0.0, 20.0), at + Vector2(w, 20.0), EDGE_DIM, 1.0)
 	var y := at.y + 32.0
-	for row in sec[1]:
+	for row in rows_of(sec):
 		var h := _row(row, Vector2(at.x, y), w)
 		y += h + ROW_GAP
 	return y

@@ -28,7 +28,7 @@ const STAGE_KEYS: Array[String] = ["power_floor", "power_median", "warden", "ene
 	"known", "fuel_margin", "credits_over_toll"]
 const WARN_KEYS: Array[String] = ["outgunned_ratio", "skulls_ratio", "cliff_stage", "cliff_power", "hull_left", "scrap_surplus", "accel_min", "known_stall"]
 ## The warnings, most urgent first (the card shows one at a time).
-const WARNINGS: Array[String] = ["outgunned", "fuel", "skulls", "toll", "hull", "cliff", "power", "mass", "scrap", "blueprints"]
+const WARNINGS: Array[String] = ["outgunned", "fuel", "skulls", "toll", "hull", "cliff", "power", "reactor", "mass", "scrap", "blueprints"]
 ## The first-time tips: what each waits for (the tick's `ctx` and the ship / campaign, see watch()).
 const TIPS: Array[String] = ["first_build", "first_fight", "first_breach", "first_station", "first_fabricator", "first_blueprint", "first_shields",
 	"first_warden", "first_drift_jump", "low_fuel", "first_boarding", "first_mod", "first_rig_bonus", "first_crew", "first_wreck"]
@@ -326,6 +326,11 @@ static func measure(ship, campaign, base_now := {}) -> Dictionary:
 			v["medbays"] += 1
 		elif fam == "intake" and not inst["out_cells"].is_empty() and not off.has(uid) and (int(comps.def(inst["id"]).get("power", 0)) >= 0 or powered.get(uid, false)):
 			v["intakes"] += 1
+	v["reactors"] = 0
+	for uid in comps.instances:
+		if str(comps.def(comps.instances[uid]["id"]).get("family", "")) == "reactor" and not off.has(uid):
+			v["reactors"] += 1
+	v["spare_reactor"] = ship.inventory.counts.keys().any(func(k): return str(comps.def(str(k)).get("family", "")) == "reactor" and ship.inventory.count(str(k)) > 0)
 	v["layers"] = Shields.layers_of_ship(ship, powered)
 	v["fab"] = int(Workshop.best(ship)["level"])
 	var th := Threat.power(ship, float(Threat.config()["player_aim"]))
@@ -396,6 +401,8 @@ func conditions(vals: Dictionary, ctx := {}) -> Array:
 		out.append({"id": "cliff", "level": warn_value("cliff_power") / maxf(power, 1.0)})
 	if float(vals.get("margin", 0.0)) < 0.0:
 		out.append({"id": "power", "level": -float(vals["margin"])})
+	if int(vals.get("reactors", 0)) == 1 and not bool(vals.get("spare_reactor", true)):  # one reactor and nothing in the hold to replace it
+		out.append({"id": "reactor", "level": 1.0})
 	var accel_min := warn_value("accel_min")
 	if not is_nan(accel_min) and float(vals.get("accel_ratio", 1.0)) < accel_min:
 		out.append({"id": "mass", "level": accel_min / maxf(float(vals["accel_ratio"]), 0.05)})

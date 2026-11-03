@@ -255,7 +255,7 @@ func test_the_baron_crew_and_the_yacht_unlock() -> void:
 	eq(Unlocks.validate(), [], "the unlock catalogue passes")
 	var duel: Dictionary = Events.shared().get_event("baron_duel")
 	var after: Dictionary = duel["choices"][0]["outcomes"][0]["after_win"]["effects"]
-	check(_list(after.get("unlock")).has("ship_barons_yacht"), "winning the duel earns the yacht")
+	check(not after.has("unlock"), "winning the duel promises no yacht until the ship exists (the hangar would show nothing)")
 	eq(after["recruit"], {"character": "sterling"}, "and Sterling")
 	var wreck: Dictionary = Events.shared().get_event("baron_gilded_wreck")
 	var prizes := {}
