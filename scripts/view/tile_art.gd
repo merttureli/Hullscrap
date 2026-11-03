@@ -1,5 +1,5 @@
 extends RefCounted
-## The structure art: floor, walls (mask4 autotile, also the shaped cells: slopes and curves), ram
+## The structure art: floor, walls (mask4 autotile; the shaped cells, slopes and curves, are cut out of it), ram
 ## plating, doors, breaches, cables (mask4), fire, and the exterior hull skin of a ship in a fight,
 ## from art/tiles/<name> and art/fx/fire (art/README.md has the sheet layouts). Each draw function
 ## returns true when it drew with art and false when there is none, and then the caller draws its
@@ -20,6 +20,8 @@ const SIDES: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vect
 const DECAL_ONE_IN := 7  ## of the skin cells on a flat run, about this many take a decal
 const DECALS := ["vent", "antenna", "hatch", "light"]
 const GLOW_LINES := ["neon"]  ## the lines whose skin has an edge glow
+const CUT_LINE := Color("#13161b")  ## the near-black outline of a wall (the sheets' own), drawn along the cut edge of a shaped cell
+const CUT_LINE_PX := 1.5  ## its width in source pixels of the wall sheet (the sheets' diagonal outline is 1.4 across)
 
 
 ## The mask4 frame of the wall at `c`: N*1 + E*2 + S*4 + W*8 over the neighbours that join it (see joins()).
@@ -102,28 +104,25 @@ static func floor_tile(canvas, rect: Rect2, c: Vector2i, alpha := 1.0) -> bool:
 ## A wall cell. `id`: its tile id. The plain "wall" is drawn as the sheet is. Ram plating (tile quirk
 ## "ram") has fixed colours: walls_ram, never tinted. Any other material uses walls_armor (neutral
 ## greys, multiplied by `color`); with no such sheet the plain walls are tinted by `color`, through the
-## colour mask when there is one, else the whole sprite. A shaped cell (a slope or a curve) takes the
-## same sheet with `_shapes` on its name, the frame `row * 16 + mask`; its open part is transparent.
+## colour mask when there is one, else the whole sprite. A shaped cell (a slope or a curve) is the
+## straight cell of the same material cut to its polygon (the frame of the sheet as a textured polygon),
+## with the near-black outline of the walls along the cut edge: a slope looks like its material, panels
+## and all. (The `_shapes` sheets drew a slope with almost no detail, which a dark tint made a flat triangle.)
 static func wall_tile(canvas, rect: Rect2, grid, c: Vector2i, id: String, color: Color) -> bool:
-	var sd: Dictionary = grid.shape_of(c)
-	var row := shape_row(sd) if not sd.is_empty() else -1
-	if not sd.is_empty() and row < 0:
-		return false
-	var tail := "_shapes" if row >= 0 else ""
 	var ram := is_ram(grid, id)
-	var s = Art.tiles("walls_ram" + tail) if ram else null
+	var s = Art.tiles("walls_ram") if ram else null
 	var armour := id != "wall" and s == null
 	var tex: Texture2D
 	var mod := Color.WHITE
 	if s != null:
 		tex = s.texture
 	else:
-		s = Art.tiles("walls_armor" + tail) if armour else null
+		s = Art.tiles("walls_armor") if armour else null
 		if s != null:
 			tex = s.texture
 			mod = color
 		else:
-			s = Art.tiles("walls" + tail)
+			s = Art.tiles("walls")
 			if s == null:
 				return false
 			tex = s.texture
@@ -132,9 +131,93 @@ static func wall_tile(canvas, rect: Rect2, grid, c: Vector2i, id: String, color:
 					tex = s.tinted(color)
 				else:
 					mod = Color.WHITE.lerp(color, ARMOUR_TINT)
-	var frame := autotile_frame(s, wall_mask(grid, c))
-	canvas.draw_texture_rect_region(tex, rect, s.region(maxi(row, 0) * MASK_FRAMES + frame), mod)
+	var src: Rect2 = s.region(autotile_frame(s, wall_mask(grid, c)))
+	if grid.shapes.has(c):
+		_draw_cut(canvas, rect, grid.polygon_at(c), tex, src, mod)
+	else:
+		canvas.draw_texture_rect_region(tex, rect, src, mod)
 	return true
+
+
+## The frame `src` of `tex` over the cell-local polygon `poly` only (the polygon is textured with the frame stretched over the
+## whole cell), then the outline along the cut edge, the edges of `poly` that do not lie along a side of the cell: a band
+## of CUT_LINE_PX source pixels inside the shape, in the outline colour (`mod` multiplied, as the sheet's own outline is).
+static func _draw_cut(canvas, rect: Rect2, poly: PackedVector2Array, tex: Texture2D, src: Rect2, mod: Color) -> void:
+	var tex_size := tex.get_size()
+	var pts := PackedVector2Array()
+	var uvs := PackedVector2Array()
+	for p in poly:
+		pts.append(rect.position + p * rect.size)
+		uvs.append((src.position + p * src.size) / tex_size)
+	canvas.draw_colored_polygon(pts, mod, uvs, tex)
+	var width: float = rect.size.x / src.size.x * CUT_LINE_PX
+	var inside := rect.position + _centroid(poly) * rect.size
+	for run in cut_runs(poly):
+		var edge := PackedVector2Array()
+		for p in run:
+			edge.append(rect.position + p * rect.size)
+		var band := edge.duplicate()
+		var in_line := _pulled_in(edge, inside, width)
+		for i in range(in_line.size() - 1, -1, -1):
+			band.append(in_line[i])
+		for piece in Geometry2D.intersect_polygons(band, pts):  # the ends are trimmed to the shape
+			canvas.draw_colored_polygon(piece, CUT_LINE * mod)
+
+
+## The cut edge of the convex cell-local polygon `poly` as runs of connected points (cell-local): the edges that are not along
+## a side of the unit square. A slope has one run of two points, an arc one of several.
+static func cut_runs(poly: PackedVector2Array) -> Array:
+	var n := poly.size()
+	var cut := []
+	for i in n:
+		cut.append(not _along_a_side(poly[i], poly[(i + 1) % n]))
+	var start := cut.find(false)  # begin just after an edge that is on a side of the cell, so a run is not split
+	if start < 0:
+		start = n - 1
+	var runs := []
+	var run := PackedVector2Array()
+	for k in range(1, n + 1):
+		var i := (start + k) % n
+		if cut[i]:
+			if run.is_empty():
+				run.append(poly[i])
+			run.append(poly[(i + 1) % n])
+		elif not run.is_empty():
+			runs.append(run)
+			run = PackedVector2Array()
+	if not run.is_empty():
+		runs.append(run)
+	return runs
+
+
+## Do `a` and `b` lie on one side of the unit square?
+static func _along_a_side(a: Vector2, b: Vector2) -> bool:
+	for axis in 2:
+		for line in [0.0, 1.0]:
+			if absf(a[axis] - line) <= EDGE_EPS and absf(b[axis] - line) <= EDGE_EPS:
+				return true
+	return false
+
+
+static func _centroid(poly: PackedVector2Array) -> Vector2:
+	var sum := Vector2.ZERO
+	for p in poly:
+		sum += p
+	return sum / float(maxi(poly.size(), 1))
+
+
+## `line` moved `by` px toward `inside`: each point along the average of the inward normals of the segments it joins.
+static func _pulled_in(line: PackedVector2Array, inside: Vector2, by: float) -> PackedVector2Array:
+	var normals := []
+	for i in line.size() - 1:
+		var d := (line[i + 1] - line[i]).normalized()
+		var nrm := Vector2(-d.y, d.x)
+		normals.append(nrm if nrm.dot(inside - line[i]) >= 0.0 else -nrm)
+	var out := PackedVector2Array()
+	for i in line.size():
+		var sum: Vector2 = (normals[i - 1] if i > 0 else Vector2.ZERO) + (normals[i] if i < normals.size() else Vector2.ZERO)
+		out.append(line[i] + sum.normalized() * by)
+	return out
 
 
 ## Is tile `id` ram plating (its quirk says so)?

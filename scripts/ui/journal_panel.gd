@@ -6,6 +6,7 @@ extends Control
 
 ## Emitted when the panel is closed.
 const Audio = preload("res://scripts/audio/audio.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Advisor = preload("res://scripts/sim/advisor.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
@@ -103,6 +104,8 @@ func close() -> void:
 func _input(e: InputEvent) -> void:
 	if not visible or not (e is InputEventKey):
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
 	if not e.pressed:

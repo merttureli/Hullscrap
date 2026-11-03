@@ -10,6 +10,7 @@ extends Control
 signal closed
 
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Backstory = preload("res://scripts/crew/backstory.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const Shops = preload("res://scripts/space/shops.gd")
@@ -191,6 +192,8 @@ func act(col: int, i: int, button := MOUSE_BUTTON_LEFT) -> String:
 func _input(e: InputEvent) -> void:
 	if not visible or not (e is InputEventKey):
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
 	if e.pressed and not e.echo and not e.ctrl_pressed and e.keycode in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_M]:  # (Ctrl+M is the mute, audio.gd)

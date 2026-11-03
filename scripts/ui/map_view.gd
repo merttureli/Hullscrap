@@ -17,6 +17,7 @@ extends Control
 ## at the POI (Sector.fight_spawn), and a won fight leaves its wreck as a POI to salvage instead of the salvage page.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
@@ -456,6 +457,13 @@ func open_poi(res: Dictionary, sector) -> void:
 		_poi_done()
 
 
+## The title of an event window with none of its own, while a POI's chain is up: the POI's name ("Wreck", "Distress beacon"), so
+## a wreck far from the beacon is not titled with the node's name. "" for the node's own POI (it is the node) or with no POI.
+func poi_title() -> String:
+	var poi: Dictionary = _poi_sector.find(_poi) if _poi_sector != null and _poi != "" else {}
+	return "" if poi.is_empty() or bool(poi.get("main", false)) else str(poi.get("name", ""))
+
+
 ## The POI's chain is over: it is resolved, and the panels make way for the sector.
 func _poi_done() -> void:
 	_poi_resolve()
@@ -656,6 +664,8 @@ func load_campaign() -> String:
 func _input(e: InputEvent) -> void:
 	if not visible or panel_only or not (e is InputEventKey):
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	if event_panel.visible or station_panel.visible or region_choice.visible or journal_panel.visible:
 		return  # they take the keys
 	if get_viewport() != null:
