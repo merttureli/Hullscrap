@@ -457,6 +457,13 @@ func open_poi(res: Dictionary, sector) -> void:
 		_poi_done()
 
 
+## The title of an event window with none of its own, while a POI's chain is up: the POI's name ("Wreck", "Distress beacon"), so
+## a wreck far from the beacon is not titled with the node's name. "" for the node's own POI (it is the node) or with no POI.
+func poi_title() -> String:
+	var poi: Dictionary = _poi_sector.find(_poi) if _poi_sector != null and _poi != "" else {}
+	return "" if poi.is_empty() or bool(poi.get("main", false)) else str(poi.get("name", ""))
+
+
 ## The POI's chain is over: it is resolved, and the panels make way for the sector.
 func _poi_done() -> void:
 	_poi_resolve()

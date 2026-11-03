@@ -97,7 +97,8 @@ func open_event(ev: Dictionary) -> void:
 	if not talk.is_empty():
 		ev = c.events.personalize(ev, str(talk.get("npc", {}).get("name", "")))
 	event = ev
-	title = str(ev.get("title", c.label(c.current)))  # an event built in code (salvage) may name its own title
+	var place: String = map.poi_title() if map.has_method("poi_title") else ""  # at a POI: its name, not the node's
+	title = str(ev.get("title", place if place != "" else c.label(c.current)))  # an event built in code (salvage) may name its own title
 	if not talk.is_empty() and not ev.has("title"):
 		var who: Dictionary = talk.get("npc", {})
 		title = "%s, %s" % [who["name"], str(who.get("label", who.get("role", ""))).to_lower()] if not who.is_empty() else "Aboard"
