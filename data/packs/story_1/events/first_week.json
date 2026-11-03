@@ -35,7 +35,7 @@
 					"outcomes": [
 						{
 							"weight": 100,
-							"text": "You trade five scrap of your own for the bag and tie the new bag shut with the same knot. Something on the Rusthold channel clears its throat, approvingly.",
+							"text": "You leave the bag where it is and add five scrap of your own beside it, tied shut with the same knot. Something on the Rusthold channel clears its throat, approvingly.",
 							"effects": {
 								"items": {
 									"scrap": -5
