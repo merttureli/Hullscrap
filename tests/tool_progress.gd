@@ -786,6 +786,10 @@ func dock() -> void:
 	var services: Array = cfg.get("services", [])
 	if services.has("sell"):  # the surplus of the common materials sells at a credit each: credits are what the hull, fuel and tolls are paid in
 		var keep := {"scrap": 600 + 250 * c.stage, "copper": 250 + 80 * c.stage, "polymer": 120}
+		if policy != "idle" and c.warden_up():  # the toll is paid in credits and scrap sells a credit each: sell what it takes, whatever stock a person keeps
+			var short: int = Wardens.toll_of(c.warden) + 40 - ship.inventory.count("credits")
+			if short > 0:
+				keep["scrap"] = mini(int(keep["scrap"]), ship.inventory.count("scrap") - short)
 		for item in keep:
 			var extra: int = ship.inventory.count(item) - int(keep[item])
 			if extra > 0 and ship.inventory.count("credits") < 2500:
