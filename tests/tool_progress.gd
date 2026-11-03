@@ -43,6 +43,7 @@ const Balance = preload("res://tests/tool_balance.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
+const Shops = preload("res://scripts/space/shops.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
@@ -203,7 +204,7 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 
 func new_stage() -> Dictionary:
 	var rec := {"stage": c.stage, "region": c.region_id, "nodes": 0, "jumps": 0, "minutes": 0.0, "fights": [], "flow": {}, "pois": 0, "dock": 0, "fuel_bought": 0, "drift_jumps": 0, "tows": 0,
-		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0}
+		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0, "shops": 0, "seen": [], "dens": 0.0, "press": 0.0, "hollow": 0, "dens_n": 0}
 	rec["start"] = snapshot()
 	return rec
 
@@ -428,6 +429,8 @@ func visit_node() -> bool:
 		var docks := not c.station_cfg(c.current).is_empty() and c.dock_block(c.current) == "" and (str(poi["type"]) in ["station", "store", "trader"] or bool(poi.get("main", false)))
 		if docks:
 			dock()
+		if bool(s.cfg["poi_types"].get(str(poi["type"]), {}).get("shop", false)):
+			shop_visit(c.shop_id(c.current, str(poi["id"])))
 		s.resolve(str(poi["id"]))
 	_docked = ""
 	if not collect(s, stay):
@@ -453,6 +456,10 @@ func collect(s, seconds: float) -> bool:
 	ship.refresh()
 	s.set_flight(ship)
 	var dd = DriftDebris.for_sector(s, hash([c.seed_value, c.jumps, st["nodes"]]))
+	st["dens"] += float(s.density) * lerpf(1.0, float(s.cfg["pressure"]["debris"]), s.pressure) * (float(s.cfg["ambient"].get("hollow", {}).get("debris", 1.0)) if s.hollow else 1.0)
+	st["press"] += float(s.pressure)
+	st["hollow"] += int(s.hollow)
+	st["dens_n"] += 1
 	var terminal: float = float(s.accel) * 1.8 / maxf(float(s.damping), 0.01)
 	var speed := clampf(0.5 * minf(terminal, float(s.max_speed) * 1.8), 60.0, 500.0)
 	var cur: Vector2 = s.current_dir()
@@ -526,6 +533,8 @@ func chain(ev: Dictionary) -> bool:
 		if e.is_empty():
 			continue
 		pages += 1
+		if pages == 1:
+			st["seen"].append(str(e.get("id", "")))
 		var view: Array = c.events.choice_view(e, c, ship, c.node(c.current))
 		var open: Array = view.filter(func(v): return not v["grey"])
 		if open.is_empty():
@@ -587,8 +596,8 @@ func effects_value(eff: Dictionary, ev: Dictionary) -> float:
 	var items: Dictionary = eff.get("items", {}) if eff.get("items") is Dictionary else {}
 	for id in items:
 		v += item_worth(str(id)) * float(items[id])
-	if eff.get("blueprint") is Array:
-		for rid in eff["blueprint"]:
+	if eff.has("blueprint"):  # (an id or a list of ids: events.gd reads both)
+		for rid in (eff["blueprint"] if eff["blueprint"] is Array else [eff["blueprint"]]):
 			v += blueprint_worth(str(rid))
 	v += 4.0 * float(eff.get("hull", 0)) + 0.6 * float(eff.get("crew_hp", 0))
 	v += 220.0 * (eff["recruit"].size() if eff.get("recruit") is Array else 0)
@@ -765,6 +774,28 @@ func dock() -> void:
 	build_phase()
 	if c.debt > 0 and c.debt_running() and ship.inventory.count("credits") > 500:
 		c.pay_debt(ship, mini(100, c.debt))
+
+
+## A Trader's or Store's small shop: the player buys the blueprints it lacks, best first, while the credits stay over the toll and a cushion of 40
+## (the Ledger's own). Nothing else is shopped for here. The idle policy builds nothing and buys nothing.
+func shop_visit(sid: String) -> void:
+	var menu: Dictionary = c.station_cfg(sid)
+	if menu.is_empty() or policy == "idle":
+		return
+	st["shops"] += 1
+	var before := inv_copy()
+	var picks: Array = []
+	for item in menu.get("stock", {}):
+		var rid := str(item).trim_prefix(Shops.BLUEPRINT)
+		if str(item).begins_with(Shops.BLUEPRINT) and ship.crafting.def(rid).size() > 0 and not ship.crafting.is_known(rid):
+			picks.append([blueprint_worth(rid), str(item)])
+	picks.sort_custom(func(x, y): return x[0] > y[0])
+	var keep := (Wardens.toll_of(c.warden) if not c.warden.is_empty() else 0) + 40
+	for pick in picks:
+		var price: int = c.stock_price(sid, pick[1], ship)
+		if price > 0 and ship.inventory.count("credits") - price >= keep and c.buy(ship, sid, pick[1])["ok"]:
+			st["bp_list"].append("%s@shop" % str(pick[1]).trim_prefix(Shops.BLUEPRINT))
+	flow("shop", before)
 
 
 ## Buy fuel at the dock until there is enough for the stage (8) and the credits allow.
