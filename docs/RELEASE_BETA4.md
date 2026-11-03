@@ -63,7 +63,7 @@ Boarding, a rebuilt hull, the Ledger, and a balance pass measured by a playtest 
 - **F1** lists the Ledger's L key.
 
 ## Known issues
-- **Starter ships against three-skull pirates at stage 1**: the Rustbucket rarely wins one, and its first gun tends to go down in the first seconds. The Courier wins about 60%. The skulls read these as even fights; take them as hard.
+- **Starter ships against three-skull pirates at stage 1**: the Rustbucket now has a Bubble Rig and its Bolt Thrower sits in a notch of the prow, and it comes through about 40 to 60% of them (the Courier about 55 to 65%, the Prism about 90%): the rest are stalemates, mostly against Concord and Lumen pirates whose crews mend as fast as one Bolt Thrower hurts. A person who shoots the pirate's one gun does better than the autopilot the numbers come from.
 - **Lattice wardens** never break, so beating one takes several minutes.
 - **Small overlaps**:
   - the Ledger card hides marker labels near the map's left edge;
