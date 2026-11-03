@@ -44,6 +44,7 @@ const Wardens = preload("res://scripts/space/wardens.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const Shops = preload("res://scripts/space/shops.gd")
+const Flight = preload("res://scripts/sim/flight.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
@@ -859,6 +860,11 @@ func build_phase() -> void:
 func next_intent() -> Dictionary:
 	ship.refresh()
 	var snap := stats_now()
+	if policy != "idle":  # upkeep: a part wrecked in a fight stays wrecked, and a person replaces what the ship cannot do without
+		if not _skip.has("helm") and Flight.new().can_fly(ship.components, ship.power_state.get("powered", {})) == "no powered helm":  # (without one it cannot fly: collect() would be at its slowest)
+			return {"kind": "helm", "ids": ranked(["helm"], "helm")}
+		if not _skip.has("power") and margin() < 0.0:  # (a reactor gone leaves the workshop and the guns dark)
+			return {"kind": "power", "ids": ranked(["reactor_mk2", "reactor_mk1", "reactor_scrap_mk1"], "reactor")}
 	if not _skip.has("intake") and snap["intakes"] < target("intakes"):
 		return {"kind": "intake", "ids": ranked(["intake_mk3", "intake_mk2", "intake_mk1", "net_mouth_scrap"], "intake")}
 	if not _skip.has("gun") and snap["guns"] < target("guns"):
@@ -1422,7 +1428,7 @@ func snapshot() -> Dictionary:
 		var key := "ready" if why == "" else ("level" if why.contains("level") or why.contains("offline") else ("tool" if why.begins_with("needs tool") else "materials"))
 		census["ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short")] = int(census.get("ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short"), 0)) + 1
 	return {"census": census, "power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
-		"margin": int(s["produce"]) - int(s["consume"]), "fab": s["fab"], "armour": s["armour"], "medbays": s["medbays"], "known": ship.crafting.known.size(), "crew": ship.crew.size(),
+		"margin": int(s["produce"]) - int(s["consume"]), "fab": s["fab"], "arms": s["arms"], "rigs": s["rigs"], "cutters": s["cutters"], "armour": s["armour"], "medbays": s["medbays"], "known": ship.crafting.known.size(), "crew": ship.crew.size(),
 		"hull_left": roundi(100.0 * Structure.wreck_margin(ship)), "hull_max": 100, "held": held, "spare_parts": part_count, "jumps": c.jumps, "debt": c.debt, "tier": c.tier()}
 
 
