@@ -132,7 +132,8 @@ func _process(_dt: float) -> void:
 		_craft_seen = craft.visible
 	if combat != null:
 		var fighting: bool = combat.active
-		toast.top = toast_top(fighting, _map_seen, sector != null and sector.visible)
+		var panel_up: bool = (craft != null and craft.visible) or (build != null and build.get("shields") != null and build.shields.visible)  # a full panel is over the sector: its header is hidden
+		toast.top = toast_top(fighting, _map_seen, sector != null and sector.visible and not panel_up)
 		if fighting and not _fight_seen:
 			_hint("fight")
 		_fight_seen = fighting
