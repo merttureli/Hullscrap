@@ -78,6 +78,7 @@ var nodes_n := 7
 var verbose := false
 var weapons: Weapons
 var _pick := RandomNumberGenerator.new()
+var _reserve := 0  # credits a dock leaves alone: the warden's toll (and 40), on the trips made to sell for it
 var _carry := {}  # item -> the fraction of a unit the scaled debris yield has not paid yet
 # the state of the run being played
 var c: Campaign
@@ -257,7 +258,9 @@ func play_stage() -> bool:
 			for hop in path_to(stn):
 				if not go(hop):
 					return end_stage(false)
+			_reserve = Wardens.toll_of(c.warden) + 40
 			dock()
+			_reserve = 0
 			_docked = ""
 	for hop in path_to(c.drift.exit_id()):
 		if not go(hop):
@@ -374,7 +377,9 @@ func regroup() -> bool:
 	for hop in path_to(stn):
 		if not go(hop):
 			return false
+	_reserve = Wardens.toll_of(c.warden) + 40 if c.warden_up() else 0
 	dock()
+	_reserve = 0
 	_docked = ""
 	for hop in path_to(exit_id):
 		if not go(hop):
@@ -796,12 +801,12 @@ func dock() -> void:
 				c.sell(ship, item, mini(extra, 2500 - ship.inventory.count("credits")))
 	if services.has("repair"):  # every damaged block, or nothing: the price is for the lot
 		var cost: int = c.repair_cost(ship, id)
-		if cost > 0 and ship.inventory.count("credits") >= cost:
+		if cost > 0 and ship.inventory.count("credits") - _reserve >= cost:
 			c.repair(ship, id)
 	fuel_up()
 	if services.has("recruit") and not c.offers.get(id, []).is_empty():
 		var price: int = c.price(int(c.cfg["prices"]["recruit"]), c._station_faction(id), ship)
-		if ship.inventory.count("credits") >= price + 100:
+		if ship.inventory.count("credits") >= price + 100 + _reserve:
 			c.recruit(ship, id, 0)
 	flow("shop", before)
 	build_phase()
@@ -837,7 +842,7 @@ func fuel_up() -> void:
 	if _docked == "" or not c.station_cfg(_docked).get("services", []).has("fuel"):
 		return
 	var want := TANK - ship.inventory.count("fuel")
-	while want > 0 and ship.inventory.count("credits") > 30:
+	while want > 0 and ship.inventory.count("credits") > 30 + _reserve:
 		var r: Dictionary = c.buy_fuel(ship, _docked, 1)
 		if not r["ok"]:
 			break
@@ -1005,6 +1010,8 @@ func procure(id: String, force := false) -> String:
 	if _docked != "":
 		var price: int = c.stock_price(_docked, id, ship)
 		if price > 0:
+			if ship.inventory.count("credits") - _reserve < price:
+				return "missing credits"
 			var r: Dictionary = c.buy(ship, _docked, id, 1)
 			if r["ok"]:
 				flow_add("shop_out", {"credits": price})
@@ -1459,7 +1466,27 @@ func snapshot() -> Dictionary:
 			ship.crafting.known.erase(rid)
 		var key := "ready" if why == "" else ("level" if why.contains("level") or why.contains("offline") else ("tool" if why.begins_with("needs tool") else "materials"))
 		census["ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short")] = int(census.get("ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short"), 0)) + 1
-	return {"census": census, "power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
+	var fabs: Array = []  # per fabricator: its level and the modules in its room (level 3 wants a Rig and two arms in ONE room)
+	var room_of: Dictionary = ship.atmosphere.room_of
+	var powered: Dictionary = ship.power_state.get("powered", {})
+	for fuid in ship.components.instances:
+		if str(ship.components.instances[fuid]["id"]) != "fabricator":
+			continue
+		var froom: int = room_of.get(ship.components.instances[fuid]["anchor"], -1)
+		var mods := {"robot_arm": 0, "assembly_rig": 0, "robot_arm_off": 0, "assembly_rig_off": 0, "elsewhere": 0}
+		for muid in ship.components.instances:
+			var mid := str(ship.components.instances[muid]["id"])
+			if mid in ["robot_arm", "assembly_rig"]:
+				if room_of.get(ship.components.instances[muid]["anchor"], -1) == froom:
+					mods[mid if powered.get(muid, false) else mid + "_off"] += 1
+				else:
+					mods["elsewhere"] += 1
+		var cells := 0
+		for cell in room_of:
+			if room_of[cell] == froom:
+				cells += 1
+		fabs.append({"level": int(Workshop.level_of(ship.components, {"room_of": room_of}, fuid, powered)["level"]), "room_cells": cells, "mods": mods})
+	return {"fabs": fabs, "census": census, "power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
 		"margin": int(s["produce"]) - int(s["consume"]), "fab": s["fab"], "arms": s["arms"], "rigs": s["rigs"], "cutters": s["cutters"], "armour": s["armour"], "medbays": s["medbays"], "known": ship.crafting.known.size(), "crew": ship.crew.size(),
 		"hull_left": roundi(100.0 * Structure.wreck_margin(ship)), "hull_max": 100, "held": held, "spare_parts": part_count, "jumps": c.jumps, "debt": c.debt, "tier": c.tier()}
 
