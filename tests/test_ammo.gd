@@ -233,6 +233,7 @@ func test_crew_walk_to_the_rack_and_restock_it_on_their_own() -> void:
 	var d := Fx.with_rack()
 	var ship: Ship = d["ship"]
 	ship.inventory.add("missile", 40)
+	ship.atmosphere.pressure.fill(1.0)  # (the rig's room is open to space: air in it, or the crew keep out: the breath budget)
 	var gunner := _person(10, 18)  # the gun is manned: the first to be free takes its post (priority 50)
 	var hand := _person(10, 20)
 	hand.name = "Second"

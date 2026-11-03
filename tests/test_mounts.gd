@@ -734,6 +734,7 @@ func _wrecked(id: String) -> Dictionary:
 	ship.components.wreck(uid)
 	for k in 2:  # one goes to man the laser (priority 50), the other is free for the debris (30)
 		ship.crew.append(CrewMember.new(["Ada", "Bram"][k], Pathfinder.centre_of(Wall.corner(0, 6 - 11 * k, 7 - 11 * k, 5, 6))))
+	ship.atmosphere.pressure.fill(1.0)  # (the room of this rig is open to space: air in it, or the crew keep out of it: the breath budget)
 	return {"ship": ship, "jobs": Jobs.new(), "id": id}
 
 

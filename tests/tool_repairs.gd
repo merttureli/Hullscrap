@@ -6,7 +6,7 @@ extends SceneTree
 ##  1. breath: per kind of crew, seconds from full hp in an airless room until air.hurt_below and until down (crew.json damage_per_s.no_air x the
 ##     trait's damage_taken.no_air x suffocate_mult; "-" = takes no harm), and the work seconds of each job at a plain crew member's rate, side by side.
 ##  2. fights (the starters at stage 1, 3 skulls, `seeds` each; `s3` and `s5` fights of the stage 3 and stage 5 player-like ship, half plain, half shielded
-##     enemies): crew downed from no air, crew-seconds in airless rooms, jobs started in an airless room and how many were finished, repair hp a
+##     enemies at stage 3, shielded only from stage 4): crew downed from no air, crew-seconds in airless rooms, jobs started in an airless room and how many were finished, repair hp a
 ##     second against the damage a second each side takes, rooms lost (Jobs lost_rooms) and the end of the fight.
 ##  3. the Concord case: the Rustbucket against Concord pirates of 3 skulls at stage 1 (`concord` fights), the enemy crew's repair rate against the
 ##     player's damage, and the Rustbucket's result.
@@ -196,7 +196,7 @@ func plan() -> Array:
 		var m := int(args.get("s%d" % st, 12))
 		if m <= 0:
 			continue
-		var list: Array = Standoff.enemies(st, "plain", m / 2) + Standoff.enemies(st, "shield", m - m / 2)
+		var list: Array = Standoff.enemies(st, "plain", m / 2) + Standoff.enemies(st, "shield", m - m / 2) if st < 4 else Standoff.enemies(st, "shield", m)  # (from stage 4 every generated enemy carries a shield)
 		for e in list:
 			out.append({"set": "stage%d" % st, "stage": st, "e": e})
 	var c := int(args.get("concord", 15))
@@ -264,6 +264,12 @@ func fight(item: Dictionary) -> Dictionary:
 	return row
 
 
+## Evacuate.openings, looked up by name: the tool also runs on a tree without it (the "before" numbers).
+static func _openings(ship) -> Array:
+	var ev = load("res://scripts/crew/evacuate.gd")
+	return ev.call("openings", ship) if ship.get("lost_rooms") != null else []
+
+
 static func _side() -> Dictionary:
 	return {"air_cs": 0.0, "down_air": 0, "down_air_job": 0, "air_started": 0, "air_done": 0, "rep": 0.0, "dmg": 0.0, "lost": 0, "lost_fight": 0, "_lost": {}, "peaks": {}, "took_downs": []}
 
@@ -300,7 +306,7 @@ func _watch(ship, jobs, d: Dictionary, tr: Dictionary) -> void:
 		t = {"hp": m.hp, "took": took, "down": down, "airless": airless, "job": key, "job_type": str(m.job.get("type", "")) if key != "" else "", "air_job": air_job,
 			"prog": float(jobs.progress.get(key, 0.0)) if key != "" else 0.0, "work": float(m.job.get("work", 0.0)) if key != "" else 0.0}
 		tr[m.name] = t
-	for o in Evacuate.openings(ship):  # how open each room got, to tune crew.json lost: [open, edge] of the most open moment
+	for o in _openings(ship):  # how open each room got, to tune crew.json lost: [open, edge] of the most open moment
 		var k := "%d,%d" % [o["key"].x, o["key"].y]
 		var prev: Array = d["peaks"].get(k, [0, 1])
 		if o["open"] > prev[0]:

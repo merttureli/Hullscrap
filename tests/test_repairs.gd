@@ -242,7 +242,7 @@ func test_the_share_and_the_minimum_of_open_cells_come_from_the_data() -> void:
 
 # --- repairs under fire ----------------------------------------------------------------------------------
 
-func test_a_part_hit_in_the_last_seconds_is_repaired_at_half_speed_and_so_is_a_wall() -> void:
+func test_a_part_hit_in_the_last_seconds_is_repaired_slower_and_so_is_a_wall() -> void:
 	var ship := _two_rooms()
 	var engine := Fixture.put(ship, "engine_mk1", 17, 10)
 	ship.components.instances[engine]["status"] = "malfunction"
@@ -260,10 +260,13 @@ func test_a_part_hit_in_the_last_seconds_is_repaired_at_half_speed_and_so_is_a_w
 	before = jobs.progress[key]
 	_run(jobs, ship, 1.0)
 	var after: float = jobs.progress[key] - before
-	check(fired < after * 0.6 and fired > after * 0.4, "under fire %.2f s of work a second, after %.2f" % [fired, after])
+	var mult: float = CrewMember.config()["under_fire"]["mult"]
+	check(absf(fired / after - mult) < 0.08, "under fire %.2f s of work a second, after %.2f: x%.2f" % [fired, after, mult])
 	check(Jobs._fire_mult(ship, {"type": "repair_block", "cell": Vector2i(3, 3)}) == 1.0, "a wall never hit is not slowed")
 	ship.hit_at[Vector2i(3, 3)] = ship.clock
-	eq(Jobs._fire_mult(ship, {"type": "repair_block", "cell": Vector2i(3, 3)}), 0.5, "a wall just hit is")
+	eq(Jobs._fire_mult(ship, {"type": "repair_block", "cell": Vector2i(3, 3)}), mult, "a wall just hit is")
+	ship.clock += float(CrewMember.config()["under_fire"]["seconds"]) + 0.1
+	eq(Jobs._fire_mult(ship, {"type": "repair_block", "cell": Vector2i(3, 3)}), 1.0, "and not any more after under_fire.seconds")
 
 
 # --- several crew: selection, group orders, the spread key ------------------------------------------------
