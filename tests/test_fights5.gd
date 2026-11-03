@@ -1,6 +1,7 @@
 extends "res://tests/base_test.gd"
 ## The Beta 4 fights-and-balance fixes (fights5): the weak guns' numbers, the ion lock, a spare reactor in every starter's hold,
-## the salvage a spared ship opens (test_salvage.gd has the page) and the threat rating's reading of a gun that cannot last.
+## the salvage a spared ship opens (test_salvage.gd has the page) and the threat rating's reading of a ship that lost its shield or its gun
+## (the rating's formula is unchanged: the starter fix moved the outcomes, see the fights5 handoff for the proposal).
 
 const Weapons = preload("res://scripts/combat/weapons.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
@@ -26,3 +27,30 @@ func test_every_starter_carries_a_spare_reactor() -> void:
 	for name in STARTERS:
 		var ship: Ship = Ship.from_design("res://data/ships/starter_%s.json" % name)
 		check(ship.inventory.count("reactor_mk1") >= 1, "%s: a Reactor Mk1 in the hold (a wrecked reactor ended runs quietly)" % name)
+
+
+# --- the threat rating --------------------------------------------------------------------------------------
+
+func _ship(path: String) -> Ship:
+	return Ship.from_design(path)
+
+
+func _drop(ship: Ship, family: String) -> void:
+	for uid in ship.components.instances.keys():
+		if str(ship.components.def(ship.components.instances[uid]["id"]).get("family", "")) == family:
+			ship.components.remove_uid(uid)
+
+
+func test_an_unshielded_exposed_gun_or_a_dead_one_rates_more_danger() -> void:
+	var foe := _ship("res://data/ships/pirate_raider.json")
+	var courier := _ship("res://data/ships/starter_courier.json")
+	var base := float(Threat.rate(foe, courier)["ratio"])
+	var bare := _ship("res://data/ships/starter_courier.json")
+	_drop(bare, "shield")
+	check(float(Threat.rate(foe, bare)["ratio"]) > base, "the Courier without its shield reads a more dangerous foe (%.2f against %.2f)" % [float(Threat.rate(foe, bare)["ratio"]), base])
+	var dead := _ship("res://data/ships/starter_courier.json")
+	for uid in dead.components.instances.keys():
+		dead.components.instances[uid]["out_hp"] = 0 if dead.components.has_outside(uid) else dead.components.instances[uid]["out_hp"]
+	check(float(Threat.rate(foe, dead)["ratio"]) > base * 5.0, "with its gun shot out the foe is far more dangerous")
+	var r := Threat.rate(foe, courier)
+	check(int(r["skulls"]) >= 1 and int(r["skulls"]) <= 5, "the output is still 1 to 5 skulls")
