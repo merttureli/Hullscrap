@@ -90,7 +90,7 @@
    {
     "id": "s1_intake",
     "title": "Mount your {intake}.",
-    "why": "A third of your scrap drifts past. An intake in the hold earns nothing, like a cousin.",
+    "why": "A third of your scrap drifts past, unpaid. Craft a net mouth and mount it on the hull.",
     "check": {
      "intakes": 1
     }
