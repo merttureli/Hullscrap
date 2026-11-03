@@ -2,7 +2,8 @@ extends Control
 ## The breach prompt (playtest 2, K2): a small card near the room that is losing air, "Breach: <room>  [R] Repair  [V] Evacuate",
 ## with a bar that runs down the seconds left to answer. The logic is crew/breach_alert.gd; this node feeds it the real frame time
 ## (not the scaled one: the prompt slows the game down), sets Engine.time_scale from it, takes R and V (or a click on the card),
-## and says the result on the crew bar. R and V go to the prompt first while it is up (also in a fight, where R would restart).
+## and says the result on the crew bar. R and V go to the prompt first while it is up (also in a fight, where R would restart, and
+## over any open window: the windows that swallow every key ask `claims()` and let those two through).
 ## The time scale is always put back to 1 when the prompt goes, the ship changes, or this node leaves the tree.
 ## Lives in the crew view's canvas layer, so a fight (which puts the crew view away) keeps it; in a fight, where the ship is drawn
 ## elsewhere, the card sits at the top of the screen.
@@ -17,6 +18,8 @@ const MAX_DT := 0.1  ## longest real step the countdown takes, seconds: a stalle
 const FIGHT_TOP := 76.0  ## y of the card when the ship is not drawn by the crew view
 const EDGE := Color("#e0453a")
 
+static var _live := {}  ## instance id -> true, every prompt alive: how a window asks whether a card wants a key
+
 var view  ## the crew view (crew_view.gd)
 var alert := BreachAlert.new()
 var _ship = null
@@ -26,6 +29,12 @@ var _last_us := 0
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
+	_live[get_instance_id()] = true
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_live.erase(get_instance_id())
 
 
 func _ready() -> void:
@@ -104,15 +113,26 @@ func _gui_input(e: InputEvent) -> void:
 				return
 
 
+## Is `e` a plain R or V press that this card answers (one is up)?
+func wants(e: InputEvent) -> bool:
+	return not alert.current().is_empty() and e is InputEventKey and e.pressed and not e.echo and not (e.ctrl_pressed or e.meta_pressed or e.alt_pressed) \
+		and (e.keycode == KEY_R or e.keycode == KEY_V)
+
+
+## Does a prompt alive want `e`? A window that swallows every key (the event panel, the map ...) returns early on a yes, so that R
+## and V reach the card whatever window is open and the window keeps its other keys.
+static func claims(e: InputEvent) -> bool:
+	for id in _live:
+		var p = instance_from_id(id)
+		if p != null and p.wants(e):
+			return true
+	return false
+
+
 func _input(e: InputEvent) -> void:
-	if alert.current().is_empty() or not (e is InputEventKey) or not e.pressed or e.echo or e.ctrl_pressed or e.meta_pressed or e.alt_pressed:
+	if not wants(e):
 		return
-	if e.keycode == KEY_R:
-		answer("repair")
-	elif e.keycode == KEY_V:
-		answer("evacuate")
-	else:
-		return
+	answer("repair" if e.keycode == KEY_R else "evacuate")
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
 

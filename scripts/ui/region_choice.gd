@@ -8,6 +8,7 @@ extends Control
 ## in campaign.gd and regions.gd; this node only reads input and draws, in the UI colours of docs/ART_STYLE.md.
 
 const Content = preload("res://scripts/data/content.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
@@ -110,6 +111,8 @@ func choose(i: int) -> String:
 func _input(e: InputEvent) -> void:
 	if not visible or not (e is InputEventKey):
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	if get_viewport() != null:
 		get_viewport().set_input_as_handled()
 	if not e.pressed or e.echo:

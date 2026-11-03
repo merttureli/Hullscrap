@@ -11,6 +11,7 @@ extends Control
 ## docs/ART_STYLE.md like the crafting and station screens. build_mode.gd makes it and opens it on H.
 
 const Schematic = preload("res://scripts/ui/schematic.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Shape = preload("res://scripts/combat/shield_shape.gd")
@@ -366,6 +367,8 @@ func _presets_y(n: int) -> float:
 func _input(e: InputEvent) -> void:
 	if not visible or not (e is InputEventKey):
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	_handled()
 	if not e.pressed or e.echo:
 		return

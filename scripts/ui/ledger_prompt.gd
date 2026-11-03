@@ -7,6 +7,7 @@ extends Control
 signal chosen(mode: String)
 
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 
 ## The choices, in order: the one asked for first.
@@ -68,6 +69,8 @@ func button_at(pt: Vector2) -> int:
 func _input(e: InputEvent) -> void:
 	if not visible or not (e is InputEventKey):
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
 	if not e.pressed or e.echo:

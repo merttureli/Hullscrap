@@ -8,6 +8,7 @@ extends Control
 ## In the UI colours of station_panel.gd.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 
 ## Emitted when the panel is closed.
@@ -209,6 +210,8 @@ func _input(e: InputEvent) -> void:
 			open()
 			_handled()
 		return
+	if BreachPrompt.claims(e):
+		return  # R and V answer the breach card, whatever window is open
 	_handled()
 	if e.pressed and not e.echo and e.keycode in [KEY_F1, KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
 		close()
