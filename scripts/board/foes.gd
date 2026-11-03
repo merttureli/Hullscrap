@@ -16,6 +16,7 @@ const Themes = preload("res://scripts/board/themes.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Bolts = preload("res://scripts/board/bolts.gd")
 const Mods = preload("res://scripts/board/mods.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 const SEARCH_S := 4.0  ## seconds a hunter looks about at the last place it saw someone
 const LOSE_S := 5.0  ## seconds without a line before a hunter gives up the chase at its target
@@ -274,6 +275,7 @@ func hurt(f: Dictionary, amount: float, at: Vector2) -> void:
 		f["mode"] = "dead"
 		m.path.clear()
 		s.events.append({"type": "down", "pos": m.pos, "foe": f["id"], "kind": f["kind"]})
+		_drop_weapon(f)
 		return
 	match str(f["kind"]):
 		"crawler":
@@ -286,6 +288,23 @@ func hurt(f: Dictionary, amount: float, at: Vector2) -> void:
 		_:
 			if f["mode"] in ["idle", "search", "regroup"]:
 				_alert(f, s.soldier.pos)
+
+
+## A beaten foe may leave its weapon in the hold, when a cargo item stands for it (combat.hand_items) and the dice of the site and the foe allow
+## (combat.foe_drop). The dice are a stream of their own, so no fight's rng moves.
+func _drop_weapon(f: Dictionary) -> void:
+	if s.ship == null or f["team"] != "foe":
+		return
+	var weapon := str(f["d"].get("weapon", ""))
+	var items: Dictionary = Arms.cfg()["hand_items"]
+	for item in items:
+		if str(items[item]) == weapon and weapon != "":
+			var r := RandomNumberGenerator.new()
+			r.seed = Site._mix(s.site.seed_value, "drop", int(f["id"]))
+			if r.randf() < float(Arms.cfg().get("foe_drop", 0.0)):
+				s.ship.inventory.add(str(item), 1)
+				s.events.append({"type": "line", "text": "+1 %s from the body." % str(Content.entry("items", str(item)).get("name", item))})
+			return
 
 
 ## A noise at `at` (a shot, a swing): every foe within `radius` cells that is not already in the fight heads there.

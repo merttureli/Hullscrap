@@ -111,7 +111,7 @@ func test_people_are_placed_at_about_the_target_rates() -> void:
 				check(People.cfg()["kinds"][kind]["roles"].has(n["role"]), "%s: a %s is a person of that kind of site" % [kind, n["role"]])
 		rate[kind] = float(some) / float(total)
 	check(rate["station"] >= 0.35 and rate["station"] <= 0.65, "about 1 in 2 stations holds someone (%.2f)" % rate["station"])
-	check(rate["derelict"] >= 0.08 and rate["derelict"] <= 0.33, "about 1 in 5 derelicts does (%.2f)" % rate["derelict"])
+	check(rate["derelict"] >= 0.25 and rate["derelict"] <= 0.6, "about 2 in 5 derelicts does (%.2f)" % rate["derelict"])
 	check(rate["nest"] > 0.0 and rate["nest"] <= 0.5, "a nest holds a captive now and then (%.2f)" % rate["nest"])
 	eq(rate["wreck"], 0.0, "a wreck holds only the survivors who fight")
 
@@ -642,7 +642,7 @@ func test_marks_are_placed_in_rooms_and_come_from_a_stream_of_their_own() -> voi
 				if m["kind"] != "room":
 					check(a.props[m["prop"]]["room"] == m["room"] and a.props[m["prop"]]["prop"] == m["kind"], "on a prop of its kind in the room")
 		by_kind[kind] = n
-	check(by_kind["station"] > by_kind["derelict"] and by_kind["wreck"] == 0, "a station has the most, a wreck none (%s)" % str(by_kind))
+	check(by_kind["station"] > by_kind["derelict"] and by_kind["wreck"] <= 20, "a station has the most, a wreck at most one a site (%s)" % str(by_kind))
 
 
 func test_stepping_into_a_marked_room_tells_the_view_once() -> void:

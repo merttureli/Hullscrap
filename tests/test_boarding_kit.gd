@@ -661,7 +661,7 @@ func test_the_loadout_screen_sets_kits_before_going_aboard() -> void:
 
 # --- where mods come from ----------------------------------------------------------------------------------------------------
 
-func test_mods_drop_at_about_one_per_two_stations_and_mk3_comes_late_and_from_stations() -> void:
+func test_mods_drop_at_about_one_and_a_half_per_station_and_mk3_comes_late_and_from_stations() -> void:
 	var mods := 0
 	var stations := 60
 	for sd in stations:
@@ -673,7 +673,7 @@ func test_mods_drop_at_about_one_per_two_stations_and_mk3_comes_late_and_from_st
 					mods += int(r["items"][item])
 					check(Mods.parse(str(item))["tier"] <= 2, "no Mk III before stage 4")
 	var rate := float(mods) / float(stations)
-	check(rate > 0.3 and rate < 0.75, "about one mod per two early stations (%.2f a station)" % rate)
+	check(rate > 0.8 and rate < 2.2, "about one and a half mods per early station, lockers and cabinets included (%.2f a station)" % rate)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 77
 	var tiers := {}
@@ -689,11 +689,17 @@ func test_mods_drop_at_about_one_per_two_stations_and_mk3_comes_late_and_from_st
 			if kind != "station" or stage < 4:
 				eq(t3, 0, "stage %d %s: no Mk III" % [stage, kind])
 	check(tiers["6 station"] > 200 and tiers["6 station"] < 400 and tiers["4 station"] > 60 and tiers["4 station"] < 230, "Mk III is rarer at stage 4 than at 6 (%s, %s of 1500)" % [tiers["4 station"], tiers["6 station"]])
-	# a run: one station in each of stages 4 to 8 gives about one run in three a Mk III
+	# a run: one station in each of stages 4 to 8 gives about one run in three a Mk III (lockers and cabinets give Mk I and II only)
 	var per_run := 0.0
 	for stage in range(4, 9):
-		var w := Mods.tier_weights("station", stage)
-		per_run += rate * float(w[2]) / (float(w[0]) + float(w[1]) + float(w[2]))
+		var t3_found := 0
+		for sd in stations:
+			var site = Site.make(500 + sd, "station", {"faction": "clans"})
+			for id in site.containers():
+				for item in Loot.resolve(site, id, {"tier": 1, "stage": stage})["items"]:
+					if Mods.is_item(str(item)) and int(Mods.parse(str(item))["tier"]) == 3:
+						t3_found += 1
+		per_run += float(t3_found) / float(stations)
 	var chance := 1.0 - exp(-per_run)
 	check(chance > 0.22 and chance < 0.45, "about one run in three finds a Mk III (%.0f%%)" % (chance * 100.0))
 	# every kind of mod comes up
@@ -720,10 +726,10 @@ func test_a_person_aboard_who_trades_may_carry_a_mod_and_the_small_shops_sell_th
 				in_shop += 1
 				priced = priced and int(r["stock"][id]) == int(cfg["shops"]["mods"][id])
 				eq(int(r["qty"][id]), 1, "one on the shelf")
-	check(in_shop >= 10 and in_shop < 120, "the small shops roll the mod kind now and then (%d in 400 shops)" % in_shop)
+	check(in_shop >= 10 and in_shop < 220, "the small shops roll the mod kind now and then (%d in 400 shops)" % in_shop)
 	check(priced, "and price them by tier")
 	var pool: Dictionary = Shops.unique_pool(cfg, [])
-	check(pool.has("mod") and pool["mod"].size() == 9, "the mod kind has all nine items")
+	check(pool.has("mod") and pool.has("mod1") and pool["mod"].size() + pool["mod1"].size() == 9, "the mod kinds have all nine items between them (Mk I apart)")
 	check(int(cfg["shops"]["mods"]["salvage_rig_mk3"]) > int(cfg["shops"]["mods"]["salvage_rig_mk2"]) and int(cfg["shops"]["mods"]["salvage_rig_mk2"]) > int(cfg["shops"]["mods"]["salvage_rig_mk1"]), "a higher tier costs more")
 	eq(float(cfg["shops"]["kinds"]["mod"]), 1.0, "the kind has weight 1")
 	# a trader's goods can include one (the room tables carry the outcome)

@@ -14,12 +14,14 @@ const Mods = preload("res://scripts/board/mods.gd")
 
 const TIER_GROWTH := 0.15  ## more in every count for each tier above the first
 const MOD := "mod"  ## the outcome of a table that is "one mod" (data/mods.json drops)
+const MOD_LOW := "mod_low"  ## the same, Mk I or II only (a locker's or a cabinet's: Mk III stays a find of engineering and command decks)
 
 
 ## The weighted outcomes container `id` of `site` rolls on (the site's theme tilts the weights of the items it favours).
 static func table_of(site, id: int) -> Array:
 	var p: Dictionary = site.props[id]
-	return table_for(site, p["table"] if p["table"] != "" else str(site.rooms[p["room"]]["purpose"]))
+	var table := table_for(site, p["table"] if p["table"] != "" else str(site.rooms[p["room"]]["purpose"]))
+	return table + Site.config()["props"][str(p["prop"])].get("bonus", [])  # (what the prop itself may hold besides)
 
 
 ## The outcomes of table `name` in `site`: the table, the kind's bonus, the theme's tilt.
@@ -46,8 +48,8 @@ static func resolve(site, id: int, ctx := {}) -> Dictionary:
 	var rolls := rng.randi_range(int(p["rolls"][0]), int(p["rolls"][1])) + (1 if site.rooms[p["room"]]["locked"] and p["loot"] else 0)
 	for i in rolls:
 		var o := _pick(table, rng)
-		if not o.is_empty() and str(o["item"]) == MOD:  # a mod: which one and which tier come from the site kind and the stage of the run (mods.gd)
-			var drop := Mods.roll_drop(site.kind, int(ctx.get("stage", 1)), rng)
+		if not o.is_empty() and str(o["item"]) in [MOD, MOD_LOW]:  # a mod: which one and which tier come from the site kind and the stage of the run (mods.gd)
+			var drop := Mods.roll_drop(site.kind, int(ctx.get("stage", 1)), rng, 2 if str(o["item"]) == MOD_LOW else 3)
 			if drop != "":
 				_add(out["items"], drop, 1)
 		elif not o.is_empty():
