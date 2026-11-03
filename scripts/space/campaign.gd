@@ -51,7 +51,8 @@ const Kit = preload("res://scripts/board/kit.gd")
 ## 9 adds `crew_offers` (the events that add crew fired in this region, events.gd); older saves start with none.
 ## 10 drops `hull_loss` (there is no hull pool: the blocks are the health, structure.gd); an older save's is ignored.
 ## 11 adds `boarded` to each saved sector (what the soldier opened and unlocked aboard a POI, boarding.gd); older saves have none.
-const VERSION := 11
+## 12 adds `story_views` (how often each heavy `once` event was shown, events.gd fade_weight); older saves start with none.
+const VERSION := 12
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100
@@ -113,6 +114,7 @@ var region_id := ""  ## the region the ship is in (data/regions/<id>.json)
 var region_data := {}  ## that region's data (Regions.get_region), not saved
 var route: Array = []  ## the regions of the run in order, this one last
 var region_seed := 0  ## the seed of this region's map and sectors
+var story_views := {}  ## heavy once-events: id -> times shown in this run (their weight halves with each); saved
 var crew_offers := 0  ## events that add crew fired in this region (events.gd counts them in pick): data/drift.json `crew.offers_per_region` is the limit; saved
 var debt_stop := -1  ## the jump count at which Ma's debt clock stopped (from stage run.debt_stages + 1), -1 while it runs
 var warden := {}  ## the warden of this region's exit beacon (Wardens.for_region), rolled on entering; {} in the ending region
@@ -1360,7 +1362,7 @@ func to_dict() -> Dictionary:
 		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
 		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
 		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers,
-		"fuel_stock": fuel_stock.duplicate(true), "shop_sold": shop_sold.duplicate(true)}
+		"story_views": story_views.duplicate(), "fuel_stock": fuel_stock.duplicate(true), "shop_sold": shop_sold.duplicate(true)}
 
 
 func _sectors_dict() -> Dictionary:
@@ -1435,6 +1437,10 @@ func load_dict(d: Dictionary) -> String:
 	chronicle = _chronicle(d.get("chronicle"))
 	ending = ""
 	offers = d["offers"].duplicate(true)
+	story_views = {}  # saves before version 12 have none
+	if d.get("story_views") is Dictionary:
+		for k in d["story_views"]:
+			story_views[str(k)] = maxi(0, int(d["story_views"][k]))
 	fuel_stock = d["fuel_stock"].duplicate(true) if d.get("fuel_stock") is Dictionary else {}  # saves from before the scarce fuel have none
 	shop_sold = d["shop_sold"].duplicate(true) if d.get("shop_sold") is Dictionary else {}  # nor the small shops
 	_shops = {}

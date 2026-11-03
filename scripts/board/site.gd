@@ -940,47 +940,42 @@ func _place_marks() -> void:
 	var open: Array = rooms.filter(func(r): return r["purpose"] != "gone" and r["purpose"] != "airlock" and not r["corridor"])
 	_shuffle(open, rng)
 	var kinds_w: Dictionary = mc["weights"]
-	for r in open:
-		if marks.size() >= n:
-			break
-		var rect: Rect2i = r["rect"]
-		var mid := Vector2(rect.position) + Vector2(rect.size) / 2.0
-		var opts := {"room": 1.0}
-		var prop := -1
-		for p in props:
-			if p["room"] == r["id"] and p["prop"] == "terminal":
-				opts["terminal"] = 1.0
-				prop = p["id"]
-				break
-		var body := -1
-		for p in props:
-			if p["room"] == r["id"] and p["prop"] == "body":
-				opts["body"] = 1.0
-				body = p["id"]
-				break
-		var w := {}
-		for k in opts:
-			w[k] = float(kinds_w.get(k, 1.0))
-		var names: Array = w.keys()
-		names.sort()
+	var used := {}
+	while marks.size() < n:
+		# The kind first, by what the site has left (a terminal or a body in an unmarked room; any unmarked room is a strange one), then a room that fits it.
+		var fits := {"room": [], "terminal": [], "body": []}
+		for r in open:
+			if used.has(r["id"]):
+				continue
+			fits["room"].append([r, -1])
+			for k in ["terminal", "body"]:
+				for p in props:
+					if p["room"] == r["id"] and p["prop"] == k:
+						fits[k].append([r, p["id"]])
+						break
+		var names: Array = []
 		var total := 0.0
-		for k in names:
-			total += float(w[k])
+		for k in ["body", "room", "terminal"]:
+			if not fits[k].is_empty():
+				names.append(k)
+				total += float(kinds_w.get(k, 1.0))
+		if names.is_empty():
+			break
 		var roll := rng.randf() * total
 		var chosen: String = names[0]
 		for k in names:
 			chosen = k
-			roll -= float(w[k])
+			roll -= float(kinds_w.get(k, 1.0))
 			if roll < 0.0:
 				break
-		var at := mid
-		var pid := -1
-		if chosen == "terminal":
-			pid = prop
-			at = centre_of(props[prop])
-		elif chosen == "body":
-			pid = body
-			at = centre_of(props[body])
+		var pick: Array = fits[chosen][0]  # (the rooms were shuffled: the first that fits is a random one)
+		var r: Dictionary = pick[0]
+		var rect: Rect2i = r["rect"]
+		var at := Vector2(rect.position) + Vector2(rect.size) / 2.0
+		var pid: int = pick[1]
+		if pid >= 0:
+			at = centre_of(props[pid])
+		used[r["id"]] = true
 		marks.append({"id": marks.size(), "kind": chosen, "room": r["id"], "prop": pid, "pos": at})
 
 

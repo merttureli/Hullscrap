@@ -170,7 +170,7 @@ func test_the_hollow_tide_carries_its_clues_in_the_stage_bands() -> void:
 			for spent in want[stage][1]:
 				c.used[spent] = true
 			wins += int(str(Events.shared().pick(c, _pool_node("hollow"), _ship()).get("id", "")) == want[stage][0])
-		check(wins >= int(trials * 0.5), "stage %d: %s is the tide event in %d of %d runs (weight 200 against ~110 of the rest)" % [stage, want[stage][0], wins, trials])
+		check(wins >= int(trials * 0.35), "stage %d: %s is the tide event in %d of %d runs (weight 200 against ~110 of the rest, and 150 more for the void seam from stage 5)" % [stage, want[stage][0], wins, trials])
 
 
 # --- the quest beacons never come up empty --------------------------------------------------------------------

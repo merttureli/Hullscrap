@@ -26,7 +26,8 @@ static func unique_pool(cfg: Dictionary, skip: Array) -> Dictionary:
 			racial.append(id)
 		elif int(c.get("tier", 1)) >= lo and int(c.get("tier", 1)) <= hi:
 			tier.append(id)
-	var pool := {"racial": racial, "tier": tier, "material": sc["materials"].keys(), "drone": sc["drone"].keys(), "mod": sc["mods"].keys(),
+	var pool := {"racial": racial, "tier": tier, "material": sc["materials"].keys(), "drone": sc["drone"].keys(), "mod": sc["mods"].keys().filter(func(m): return not str(m).ends_with("_mk1")),
+		"mod1": sc["mods"].keys().filter(func(m): return str(m).ends_with("_mk1")),  # Mk I is the common find: a kind of its own
 		"blueprint": sc["blueprints"].keys().map(func(r): return BLUEPRINT + str(r))}
 	var out := {}
 	for kind in pool:

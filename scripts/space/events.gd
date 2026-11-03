@@ -76,6 +76,7 @@ const RECRUIT_KEYS: Array = ["name", "species", "character"]
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
 const SHIPS_DIR := "res://data/ships/"
 const DEFAULT_WEIGHT := 10.0
+const STORY_WEIGHT := 100.0  ## a `once` event this heavy fades when shown and not used up
 
 static var _shared = null
 static var _shared_key := ""
@@ -293,6 +294,9 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 		var gate := crew_factor(id, c)
 		if gate < 1.0 and c.rng.randf() >= gate:  # crew are rare: most of the time the event is not in the pool
 			continue
+		if _dict(ev.get("requires")).has("region"):  # the homeland's own events are louder than the generic pool
+			w *= float(c.cfg.get("region_weight", 1.0))
+		w = fade_weight(ev, w, c)
 		(spare if bool(ev.get("fallback", false)) else pool).append([ev, w])
 	if pool.is_empty():
 		pool = spare
@@ -310,7 +314,23 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 			break
 	if offers_crew(str(chosen.get("id", "")), c):
 		c.crew_offers += 1
+	if is_story(chosen):  # shown and perhaps declined: it comes back less often
+		var sid := str(chosen.get("id", ""))
+		c.story_views[sid] = int(c.story_views.get(sid, 0)) + 1
 	return chosen
+
+
+## A story event: heavy (weight 100 or more) and `once`. Each time it is shown without being used up its weight halves (`fade_weight`).
+static func is_story(ev: Dictionary) -> bool:
+	return bool(ev.get("once", false)) and _weight(ev.get("weight", DEFAULT_WEIGHT)) >= STORY_WEIGHT
+
+
+## `w` halved for each view of a story event in this run (campaign.story_views), never under 1.
+static func fade_weight(ev: Dictionary, w: float, c) -> float:
+	if not is_story(ev):
+		return w
+	var views := int(c.story_views.get(str(ev.get("id", "")), 0))
+	return maxf(1.0, w / pow(2.0, views)) if views > 0 else w
 
 
 ## May `ev` happen at `node` now (not used up, its requires hold)?

@@ -187,7 +187,7 @@ func test_faction_regions_keep_their_stations() -> void:
 	for g in ["gate_1", "gate_2", "gate_3"]:
 		check(c.drift.has(g), g + " is in the Gate approaches")
 	c.enter_region("boneyard")
-	check(c.drift.nodes.all(func(n): return n["type"] != "station"), "the Boneyard has no station")
+	check(c.drift.has("dredgers_rest") and c.drift.nodes.filter(func(n): return n["type"] == "station").size() == 1, "the Boneyard has one station, Dredgers' Rest (the fuel stop it lacked)")
 
 
 # --- crossing ---------------------------------------------------------------------------------------------------

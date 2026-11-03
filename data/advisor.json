@@ -90,7 +90,7 @@
    {
     "id": "s1_intake",
     "title": "Mount your {intake}.",
-    "why": "A third of your scrap drifts past, unpaid. Craft a net mouth and mount it on the hull.",
+    "why": "A third of your scrap drifts past, unpaid. Mount the net mouth Ma gave you on an outer wall. The fabricator makes more.",
     "check": {
      "intakes": 1
     }
@@ -106,7 +106,7 @@
    {
     "id": "s1_cover",
     "title": "Add a {shield} or a {medbay}.",
-    "why": "Ma would like the collateral to survive its first fight. One layer or one bed will do.",
+    "why": "Ma would like the collateral to survive its first fight. One layer or one medbay will do.",
     "check": [
      {
       "layers": 1
@@ -435,7 +435,7 @@
   {
    "id": "first_fight",
    "title": "Your first fight",
-   "text": "Shields take the first hits, then the blocks. Lose half the ship and you lose. J jumps away when the odds look rude."
+   "text": "Pirates often carry one gun: knock it out and they break. J spools the jump drive (10 s); engines or helm down hold it."
   },
   {
    "id": "first_breach",
@@ -524,6 +524,9 @@
   },
   "power": {
    "text": "Demand exceeds supply, and parts go dark. Add a reactor, or take a gun off the books."
+  },
+  "reactor": {
+   "text": "One reactor and no spare. If it's wrecked, you're adrift."
   },
   "mass": {
    "text": "The ship is heavy and slow, and slow ships get caught. Add engines."

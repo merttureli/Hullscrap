@@ -83,8 +83,7 @@
 								"effects": {
 									"items": {"credits": 300},
 									"recruit": {"character": "sterling"},
-									"flag": "baron_duelled",
-									"unlock": ["ship_barons_yacht"]
+									"flag": "baron_duelled"
 								}
 							}
 						}

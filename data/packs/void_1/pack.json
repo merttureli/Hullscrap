@@ -1,0 +1,7 @@
+{
+  "id": "void_1",
+  "name": "Void Crystal",
+  "version": "1.0",
+  "requires": [],
+  "notes": "One very rare source of the void crystal (materials in engines_1), which two recipes (Ion Drive: Zenith, the Quarry Driver) need and nothing else gave: a hollow event from stage 5 on (events/void_seam.json)."
+}
