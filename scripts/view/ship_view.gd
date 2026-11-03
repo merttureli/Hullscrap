@@ -32,6 +32,8 @@ const LOOKS := {
 	"Ada": {"suit": "#e8913a", "hair": "#c2331f", "tool": "#f1d36b"},
 }
 const OTHER_LOOK := {"suit": "#b8382c", "hair": "#1b1b1b", "tool": "#d7dce4"}
+const MARK_COLOR := Color("#ffd24a")  ## the ring of a selected crew member (as crew_view.gd's)
+const ROOM_FLASH_S := 0.7  ## seconds a clicked room is lit
 const HIT_FLASH_S := 0.45  ## seconds a sector flashes after a shot hits it
 
 var arena  ## arena.gd, or null
@@ -41,6 +43,9 @@ var pivot := Vector2.ZERO  ## the ship's centre in cell coordinates: the node's 
 var _clock := 0.0
 var _glow: Node2D  # additive layer for the glow art of the parts
 var _weapons := {}  # uid -> {left, peak, shot}: a weapon's cooldown as last seen, the longest it has been, when it last fired (_clock)
+var marked: Array = []  ## crew members to ring (the selected ones; the combat view sets it on the player's ship)
+var flash_cells: Array = []  ## the cells of the room just clicked (flash_room), lit while flash_left > 0
+var flash_left := 0.0
 var _crew_anim := {}  # CrewMember -> PersonDrawer state, for drawing only
 var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state, for the opening animation
 var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
@@ -84,8 +89,15 @@ func _ready() -> void:
 	add_child(_glow)
 
 
+## Flash the cells `cells` for a moment (the room a middle-click order went to).
+func flash_room(cells: Array) -> void:
+	flash_cells = cells
+	flash_left = ROOM_FLASH_S
+
+
 func _process(dt: float) -> void:
 	_clock += dt
+	flash_left = maxf(flash_left - dt / maxf(Engine.time_scale, 0.01), 0.0)  # real time, so the slow-down does not stretch it
 	_follow()
 	if ship != null:
 		for m in ship.crew:
@@ -146,6 +158,14 @@ func _draw() -> void:
 		PersonDrawer.draw(self, px(m.pos), pose, look, CELL)
 		PersonDrawer.draw_status(self, px(m.pos), Jobs.drone_status(ship, m), CELL)
 		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL, Mortality.bleed_frac(m))
+	if flash_left > 0.0:
+		for c in flash_cells:
+			draw_rect(Rect2(px(Vector2(c)), Vector2(CELL, CELL)), Color(MARK_COLOR, 0.7 * flash_left / ROOM_FLASH_S))
+	for m in marked:  # the selection rings, pulsing a little (the node's rotation turns them with the ship)
+		if ship.crew.has(m):
+			var r: float = CELL * (1.45 + 0.06 * sin(_clock * 5.0))
+			draw_circle(px(m.pos), r, Color(MARK_COLOR, 0.10))
+			draw_arc(px(m.pos), r, 0.0, TAU, 40, MARK_COLOR, 2.5, true)
 	if _glow != null:
 		_glow.show_quads(_glow_quads)
 	if arena != null:
