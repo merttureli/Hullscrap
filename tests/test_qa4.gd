@@ -88,3 +88,20 @@ func test_a_body_gear_line_fits_its_loadout_slot() -> void:
 	check(longest > 60.0, "(measured the real lines)")
 	eq(Loadout.body_sub("exosuit"), "35% less damage.", "the sentence without its first word")
 	eq(Kit.body_line("exosuit"), "Takes 35% less damage.", "the hover keeps the whole one")
+
+
+## A thin purse at the exit with a few hundred scrap to sell gets the toll line (it waited for 600 scrap, so a poorer player heard nothing).
+func test_the_toll_line_comes_with_a_few_hundred_scrap_to_sell() -> void:
+	var a := Advisor.new(Advisor.load_words(), JSON.parse_string(FileAccess.get_file_as_string(FIXTURE)))
+	var v := {"stage": 3, "hops": 1, "warden_up": true, "credits_over_toll": -40, "scrap": 200}
+	check(a.conditions(v).any(func(c): return c["id"] == "toll"), "200 scrap and short of the toll: the toll line")
+	v["scrap"] = 50
+	check(not a.conditions(v).any(func(c): return c["id"] == "toll"), "with next to no scrap there is nothing to sell: no line")
+
+
+## The loadout's choice box shows every option the panel has room for (a tenth mod could not be reached with nine rows).
+func test_the_loadout_choices_use_the_panels_height() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/board/board_loadout.gd")
+	check(not src.contains("minf(float(opts.size()), 9.0)"), "no fixed nine-row cap")
+	var Loadout = load("res://scripts/board/board_loadout.gd")
+	check(floorf((540.0 - 38.0) / Loadout.ROW) >= 10.0, "a panel of 540 px holds ten rows or more")

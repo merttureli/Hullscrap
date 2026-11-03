@@ -149,10 +149,10 @@ static func _slot(h, v, r: Rect2, slot: String, idx: int, item: String, title: S
 	h.hit_add(r, {"type": "slot", "slot": slot, "idx": idx})
 
 
-## The choices of the open slot, numbered 1-9.
+## The choices of the open slot, numbered (keys 1-9 pick the first nine); as many rows as the panel's height holds.
 static func _options(h, v, r: Rect2) -> void:
 	var opts: Array = v.loadout_options()
-	var rows := minf(float(opts.size()), 9.0)
+	var rows := minf(float(opts.size()), floorf((r.size.y - 38.0) / ROW))
 	var box := Rect2(r.position, Vector2(r.size.x, 34.0 + rows * ROW))
 	h.draw_rect(box, Color(h.PANEL_BG, 0.99))
 	h.draw_rect(box, h.AMBER, false, 1.5)
