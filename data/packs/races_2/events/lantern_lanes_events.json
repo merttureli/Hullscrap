@@ -53,7 +53,7 @@
         {"text": "[Lantern] Fly it by the dark between the lamps.", "requires": {"species": "lantern"}, "outcomes": [
           {"weight": 100, "text": "Your Lantern takes the helm, folds back, and flies the course with half-shut eyes, watching the dark between the lamps rather than the lamps, as the old pilots teach. It takes ninety seconds and every lamp in the line seems to bow. The examiner, who has been bored since the Snap, sits up very straight. He seals the log, pays the purse and a bonus, and asks, shyly, for an autograph for his daughter.", "effects": {"items": {"credits": 80}, "rep": {"concord": 2}}}
         ]},
-        {"text": "Decline politely.", "outcomes": [
+        {"text": "Decline.", "outcomes": [
           {"weight": 100, "text": "'Next time,' says the examiner. He says it to every ship. Nobody has ever been sure what happens next time.", "effects": {}}
         ]}
       ]

@@ -28,7 +28,7 @@
           {"weight": 100, "text": "A hatch opens in her flank with a long, relieved sigh. The ship's mind, a recording of Captain Adaeze Okoro, welcomes you aboard in the voice of a woman who has rehearsed a welcome for forty years and means to get it right. 'Visitors,' she says. 'I am so sorry about the dust.' She gives you the freedom of the ship, a tour of the bridge, a box of circuit boards the Fleet never got to use, and a drawing taped to the captain's chair of a smaller ship with a name on its hull: CS-002 Forbearance. 'My little sister,' says Okoro. 'In the yard at Meridian. Never launched. Would you mind?'", "effects": {"items": {"military_circuit": 2}, "rep": {"concord": 3}, "flag": "lm_patience", "log": "log_concord_patience_bridge", "unlock": "ship_patience_sister"}}
         ]},
         {"text": "Breach a service hatch and slip aboard.", "outcomes": [
-          {"weight": 60, "text": "An alarm sounds, politely. 'ALERT. UNREGISTERED VISITOR. Please fill in a visitor form.' The form is on a clipboard by the door. You fill it in. The ship lets you in with the air of a customs officer who would be delighted to be wrong. You leave with the circuit boards, the drawing and a small, fussy reputation.", "effects": {"items": {"military_circuit": 2}, "rep": {"concord": -1}, "flag": "lm_patience", "log": "log_concord_patience_bridge", "unlock": "ship_patience_sister"}},
+          {"weight": 60, "text": "An alarm sounds. 'ALERT. UNREGISTERED VISITOR. Please fill in a visitor form.' The form is on a clipboard by the door. You fill it in. The ship lets you in with the air of a customs officer who would be delighted to be wrong. You leave with the circuit boards, the drawing and a small, fussy reputation.", "effects": {"items": {"military_circuit": 2}, "rep": {"concord": -1}, "flag": "lm_patience", "log": "log_concord_patience_bridge", "unlock": "ship_patience_sister"}},
           {"weight": 40, "text": "A boarding gantry, forty years old and hungry, takes a swing at you in the dark. Everyone lives. Nobody is happy. The ship, mortified, apologises on every speaker until you are out of range, and then, you suspect, for some time after.", "effects": {"crew_hp": -15, "items": {"military_circuit": 2}, "flag": "lm_patience", "log": "log_concord_patience_bridge", "unlock": "ship_patience_sister"}}
         ]},
         {"text": "[Mechanical] Speak machine to the ship's mind.", "requires": {"trait": "mechanical"}, "outcomes": [
@@ -68,7 +68,7 @@
         {"text": "Ask what it answers.", "outcomes": [
           {"weight": 100, "text": "'Everything,' says Mira. 'It answers before we ask. As though it knew who would be asking. As though...' She stops. 'We think the Snap was a question, not a command. We think somebody asked, and the gate said yes. We just don't know to what.'", "effects": {}}
         ]},
-        {"text": "Politely decline. It makes your teeth itch.", "outcomes": [
+        {"text": "Decline. It makes your teeth itch.", "outcomes": [
           {"weight": 100, "text": "'It does that,' says Mira, sympathetic. 'It makes mine itch too. It is how we know it is working.'", "effects": {}}
         ]}
       ]

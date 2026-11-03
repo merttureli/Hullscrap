@@ -52,7 +52,7 @@
       ]
     },
     {
-      "id": "asteroid_claim_jumpers", "type": "asteroid_field", "weight": 10, "once": false, "requires": {"jumps_min": 3},
+      "id": "asteroid_claim_jumpers", "type": "asteroid_field", "weight": 10, "once": false, "requires": {"stage_min": 4, "jumps_min": 3},
       "text": "You have barely sunk a cutter into the rock when a Rustfang gunboat drops out of the glare. 'Claim jumpers!' says the voice on the open channel. 'Not us. You.' Behind it, a row of little flags planted in the rock flutters in no wind.",
       "choices": [
         {"text": "Pay the claim fee (40 credits).", "requires": {"credits": 40}, "outcomes": [
@@ -99,7 +99,7 @@
       "text": "The survey said STABLE. The survey was from before the Snap. The rocks are drifting apart with a slow, deliberate air, like guests leaving a party they were never invited to, and the cutter's alarm is making the noise it makes when it has been right all along.",
       "choices": [
         {"text": "Grab what you can from the edge and get out.", "outcomes": [
-          {"weight": 85, "text": "You take the loose pieces from the rim, quickly, and the field politely waits until you are clear before it comes apart.", "effects": {"items": {"scrap": 35, "copper": 12}}},
+          {"weight": 85, "text": "You take the loose pieces from the rim, quickly, and the field waits until you are clear before it comes apart.", "effects": {"items": {"scrap": 35, "copper": 12}}},
           {"weight": 15, "text": "A fragment catches your tail on the way out. It is a small fragment. It has a large opinion.", "effects": {"hull": -5, "items": {"scrap": 30, "copper": 8}}}
         ]},
         {"text": "Ride the shift in. The big veins are opening up.", "outcomes": [
@@ -279,7 +279,7 @@
       "after_win": {"text": "The rammer comes apart in a slow drift of forms, all addressed to the Wet Paint. Wherever she is, the Wet Paint has had a very lucky day.", "effects": {"rep": {"concord": 1}, "items": {"credits": 30}}}
     },
     {
-      "id": "pirate_rammer_stolen_reactor", "type": "pirate", "weight": 8, "once": false, "requires": {"jumps_min": 4},
+      "id": "pirate_rammer_stolen_reactor", "type": "pirate", "weight": 8, "once": false, "requires": {"stage_min": 4, "jumps_min": 4},
       "text": "A clan rammer comes up your tail with a wedge of welded girders for a bow. A woman who has not slept in two days is on the comm. 'Which one of you,' she says, 'has my cousin's reactor?' She is looking at you.",
       "choices": [
         {"text": "Point confidently at a part of space.", "outcomes": [
@@ -324,7 +324,7 @@
       "after_win": {"text": "Vex's escape pod launches with a toaster in each hand. Concord pays a little for the paperwork.", "effects": {"rep": {"concord": 1}, "items": {"credits": 20}}}
     },
     {
-      "id": "pirate_fake_patrol", "type": "pirate", "weight": 10, "once": false, "requires": {"jumps_min": 2},
+      "id": "pirate_fake_patrol", "type": "pirate", "weight": 10, "once": false, "requires": {"stage_min": 4, "jumps_min": 2},
       "text": "CS-439 Honesty, says the transponder, in a font that is very slightly wrong. 'Concord patrol,' says a voice that has been rehearsing its accent in a mirror. 'Routine inspection. Prepare to be... inspected. Of your... cargo. As per the... form.'",
       "choices": [
         {"text": "Play along and offer the manifest.", "outcomes": [
@@ -433,7 +433,7 @@
       ]
     },
     {
-      "id": "trader_pipp_futures", "type": "trader", "weight": 8, "once": false, "requires": {},
+      "id": "trader_pipp_futures", "type": "trader", "weight": 8, "once": false, "requires": {"stage_min": 4},
       "text": "A Fenn barge with a banner across her flank: PIPP'S GATE FUTURES. 'One share in the Drift's way out,' says Pipp, who is already counting the credits you have not spent. 'Guaranteed return when the gates reopen. Guaranteed. I have a form that says guaranteed.'",
       "choices": [
         {"text": "Buy a share (20 credits).", "requires": {"credits": 20}, "outcomes": [
@@ -521,7 +521,7 @@
           {"weight": 100, "text": "Inside: one lens, no wire, no power, no light. Your engineer closes it again with an apology. A few crystals shake loose, as if the buoy had been holding them for you.", "effects": {"flag": "buoy_1", "items": {"crystal": 2}, "reveal": "empty"}}
         ]},
         {"text": "Fly on. A song that simple can wait.", "outcomes": [
-          {"weight": 100, "text": "The note follows you as far as the next jump, then lets go, politely.", "effects": {}}
+          {"weight": 100, "text": "The note follows you as far as the next jump, then lets go.", "effects": {}}
         ]}
       ]
     },
@@ -613,7 +613,7 @@
         {"text": "Ask what the thing at the Meridian dock was.", "outcomes": [
           {"weight": 100, "text": "'Founding Day,' says Hallett. 'The Eviction Notice rammed a docking clamp during the ceremony, took out the buffet, and left through the speakers' platform.' A long pause. 'It was a very good buffet.' He stamps the form for you without being asked.", "effects": {"flag": "bounty_1", "rep": {"concord": 1}, "reveal": "pirate"}}
         ]},
-        {"text": "Decline politely.", "outcomes": [
+        {"text": "Decline.", "outcomes": [
           {"weight": 100, "text": "'Understood,' says Hallett. He writes 'declined' on something, and the something sighs. 'Forms keep,' he says. 'We have had practice.'", "effects": {}}
         ]}
       ]
@@ -678,7 +678,7 @@
       "after_win": {"text": "Between the two wrecks, a data slate, still warm: a course plotted in a clumsy hand, ending in a circle and the words HE'S COMING. The circle is very close.", "effects": {"items": {"credits": 20}, "rep": {"concord": 1}}}
     },
     {
-      "id": "pirate_skarn_eviction_notice", "type": "pirate", "weight": 40, "once": true, "requires": {"flag": "bounty_4"},
+      "id": "pirate_skarn_eviction_notice", "type": "pirate", "weight": 40, "once": true, "requires": {"stage_min": 4, "flag": "bounty_4"},
       "text": "The Eviction Notice comes out of the dark at ramming speed, with a bow like a front door and a voice on the comm like a man cheerfully reading his own will. 'Hallett sent you?' says Skarn. 'Tell him he owes me a buffet.' The bow swings. The lights along his flank are strobing in a pattern that might be a laugh.",
       "choices": [
         {"text": "Meet him head on.", "outcomes": [
@@ -734,7 +734,7 @@
           {"weight": 15, "text": "The crystal burns too bright and flares the injector. You get your fuel and a singed manifold.", "effects": {"hull": -5, "items": {"crystal": -1, "fuel": 2}}}
         ]},
         {"text": "Refuse the lane and drift.", "outcomes": [
-          {"weight": 100, "text": "The lane folds itself up politely, like a napkin. The stars lean back to where they were.", "effects": {}}
+          {"weight": 100, "text": "The lane folds itself up like a napkin. The stars lean back to where they were.", "effects": {}}
         ]}
       ]
     },

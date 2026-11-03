@@ -17,7 +17,7 @@
           {"weight": 100, "text": "Your Corvin empties their pockets onto the counter one by one: a button, a brass compass, a green bead, a Lumen shard, a bent spoon. The Row falls silent. Then, one by one, the other Corvin gather round and begin to trade, in long delighted trills. By the end of the hour your Corvin has traded up three times, and the Row has been told what a good eye looks like. You are paid in credits, and a long, respectful whistle.", "effects": {"items": {"credits": 60, "silicon": 3, "crystal": 2}, "crew_hp": 10}}
         ]},
         {"text": "Walk the Row and look.", "outcomes": [
-          {"weight": 100, "text": "You walk the whole Row, from end to end. A hundred small bright eyes track you, politely. A child offers you a spoon.", "effects": {"crew_hp": 5}}
+          {"weight": 100, "text": "You walk the whole Row, from end to end. A hundred small bright eyes track you. A child offers you a spoon.", "effects": {"crew_hp": 5}}
         ]}
       ]
     },
@@ -45,7 +45,7 @@
     },
     {
       "id": "roost_missing_medal", "type": "patrol", "weight": 8, "once": false, "requires": {"region": "corvin_roost", "jumps_min": 2},
-      "text": "A Concord patrol has pulled alongside, with a very polite hail. 'Routine inspection,' says the officer. 'A medal of the Third Fleet was lost from a ceremony on Meridian two days ago. We are checking vessels in the area.' She looks at your ship, politely. 'It is not an accusation. It is simply a bright, shiny, very valuable thing, and we are in a region that has a reputation.' In your hold, in a dusty corner, a small cloaked figure is trying very hard to look like a crate.",
+      "text": "A Concord patrol has pulled alongside, with a very polite hail. 'Routine inspection,' says the officer. 'A medal of the Third Fleet was lost from a ceremony on Meridian two days ago. We are checking vessels in the area.' She looks at your ship. 'It is not an accusation. It is simply a bright, shiny, very valuable thing, and we are in a region that has a reputation.' In your hold, in a dusty corner, a small cloaked figure is trying very hard to look like a crate.",
       "choices": [
         {"text": "Let them search the hold.", "outcomes": [
           {"weight": 65, "text": "They search it. They find nothing, apart from the small cloaked figure, who has switched, with great self-possession, to looking like a barrel. The officer sighs, writes a form, and leaves. The figure unfolds, hands you something bright, and says 'It was only a loan'. You return it to a patrol drone by hand.", "effects": {"rep": {"concord": 2}, "crew_hp": -5}},

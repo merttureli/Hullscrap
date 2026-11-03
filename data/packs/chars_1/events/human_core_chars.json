@@ -13,7 +13,7 @@
           {"weight": 100, "text": "Your tinkerer takes one look at the gun and sucks air through their teeth. Eleven minutes later it is sweet as a nut, and Brindle is standing to attention in front of something she has not met since the Snap: a competent colleague. 'Permission to come aboard,' she says. 'I would like to see how you keep those.'", "effects": {"recruit": {"character": "brindle"}, "rep": {"concord": 1}}}
         ]},
         {"text": "Turn around and take the long way.", "outcomes": [
-          {"weight": 100, "text": "Her gun tracks you out of range, so politely you almost miss it. 'Come again,' she calls. 'The toll goes up.'", "effects": {}}
+          {"weight": 100, "text": "Her gun tracks you out of range, and you almost miss it. 'Come again,' she calls. 'The toll goes up.'", "effects": {}}
         ]}
       ]
     },

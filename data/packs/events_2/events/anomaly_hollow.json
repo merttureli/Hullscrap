@@ -21,11 +21,11 @@
       ]
     },
     {
-      "id": "anomaly_sector_limit", "type": "anomaly", "weight": 6, "once": false, "requires": {},
+      "id": "anomaly_sector_limit", "type": "anomaly", "weight": 6, "once": false, "requires": {"stage_min": 4},
       "text": "A buoy bolted to nothing, flashing a Concord warning in six languages and one that is only light. SECTOR LIMIT. YOU ARE PAST IT. PLEASE RETURN TO SECTOR. Behind it the stars go on exactly as before, with no sign of having been told.",
       "choices": [
         {"text": "Return to the sector, as asked.", "outcomes": [
-          {"weight": 100, "text": "You turn around, politely. The buoy relaxes in the way a buoy can: its warning dims and a green light comes on. Somebody, somewhere, files you as compliant.", "effects": {"rep": {"concord": 1}}}
+          {"weight": 100, "text": "You turn around. The buoy relaxes in the way a buoy can: its warning dims and a green light comes on. Somebody, somewhere, files you as compliant.", "effects": {"rep": {"concord": 1}}}
         ]},
         {"text": "Keep going, past the limit.", "outcomes": [
           {"weight": 70, "text": "You go on. Nothing happens, which is more worrying than if something had. On the far side someone has left a crate, as if to say: well, you're here.", "effects": {"items": {"scrap": 20, "polymer": 8}}},
@@ -41,8 +41,8 @@
       ]
     },
     {
-      "id": "anomaly_mirror_lane", "type": "anomaly", "weight": 8, "once": false, "requires": {},
-      "text": "A lane of dark glass hangs in the dark like a window. In it, your ship, slightly early. It dips its nose before you do; it puts up its shield a second ahead of you, each time, politely.",
+      "id": "anomaly_mirror_lane", "type": "anomaly", "weight": 8, "once": false, "requires": {"stage_min": 4},
+      "text": "A lane of dark glass hangs in the dark like a window. In it, your ship, slightly early. It dips its nose before you do; it puts up its shield a second ahead of you, each time.",
       "choices": [
         {"text": "Wave.", "outcomes": [
           {"weight": 100, "text": "The reflection waves a second before you do. You both stand there with your hands up.", "effects": {"rep": {"lumen": 1}}}

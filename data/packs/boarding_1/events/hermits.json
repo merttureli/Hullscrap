@@ -238,6 +238,129 @@
 			"requires": {
 				"role": "hermit"
 			}
+		},
+		{
+			"id": "bnpc_hermit_clock_winder",
+			"type": "boarding_npc",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"role": "hermit",
+				"site": "derelict"
+			},
+			"text": "A big brass ship's clock on a bulkhead, and in front of it a person on a stepladder with a key as long as a forearm. {name} winds it with both hands, counts under their breath, and climbs down. Nine more clocks line the passage, all stopped at different hours. 'Mind the third one,' says {name}. 'It is sulking.'",
+			"choices": [
+				{
+					"text": "Help wind the next one.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You take the key. The spring is stiff and the count goes to forty, with {name} nodding at each turn like a teacher. When it ticks, you both listen to it for a while. 'That was the quartermaster's,' says {name}. 'Take the cell from its back. He'd have wanted that.'",
+							"effects": {
+								"items": {
+									"copper": 4,
+									"silicon": 2
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask which clock is right.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'None,' says {name}, delighted. 'But the ninth is the one that was right when they left.' It stopped at 04:10. Somewhere on this ship a door was locked at 04:10, {name} adds, ten minutes after the alarm.",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "See what {name} has to trade.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Time is not for sale,' says {name}. 'The rest is.'",
+							"effects": {
+								"npc_trade": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave {name} to the count.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} is already counting again, lips moving, before you reach the door.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_hermit_dead_letters",
+			"type": "boarding_npc",
+			"weight": 9,
+			"once": false,
+			"requires": {
+				"role": "hermit",
+				"site": "derelict"
+			},
+			"text": "A desk in a mail room, a lamp, and a dozen grey sacks slumped against the wall. {name} is reading a letter with a pencil in one hand. A stack of replies stands at the elbow, each in a fresh envelope. 'They never got delivered,' {name} says, not looking up. 'That seemed a poor reason not to answer.'",
+			"choices": [
+				{
+					"text": "Ask what {name} writes back.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Whatever they'd have wanted to hear,' says {name}. 'It is mostly weather.' You are given one letter to read. It is mostly weather. It is the kindest thing you have read in a month.",
+							"effects": {
+								"log": "log_board_dead_letters"
+							}
+						}
+					]
+				},
+				{
+					"text": "Offer to carry a reply.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} picks an envelope, addressed in a hand so careful it hurts, and pays the postage from a jar: 'If you pass Cordova Station. If you don't, it keeps.' The jar is surprisingly full.",
+							"effects": {
+								"items": {
+									"credits": 25
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask about the sacks.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Undelivered. They were all going somewhere.' {name} taps a sack tag. 'This lot came off the shelf in the cargo bay. There may be more of it, if you want a look at where it came from.'",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Let {name} get on.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The pencil moves again before you are out of the room.",
+							"effects": {}
+						}
+					]
+				}
+			]
 		}
 	]
 }

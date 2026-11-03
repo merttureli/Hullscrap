@@ -59,7 +59,7 @@
     },
     {
       "id": "glassways_lost_traveller", "type": "distress", "weight": 8, "once": false, "requires": {"region": "echo_glassways"},
-      "text": "A single traveller, in a one-person skiff, drifting. The skiff is intact. The traveller is sitting upright in the cockpit with a hand on the helm, looking at the stars with an expression of dreamy confusion. When you pull alongside they wave, politely. When you ask their name they say it back to you, 'Your name,' and then, uncertainly, 'is... mine.' They are not hurt. They are only lost: a long way lost, in a way that has nothing to do with a map.",
+      "text": "A single traveller, in a one-person skiff, drifting. The skiff is intact. The traveller is sitting upright in the cockpit with a hand on the helm, looking at the stars with an expression of dreamy confusion. When you pull alongside they wave. When you ask their name they say it back to you, 'Your name,' and then, uncertainly, 'is... mine.' They are not hurt. They are only lost: a long way lost, in a way that has nothing to do with a map.",
       "choices": [
         {"text": "Take them aboard and look after them.", "requires": {"items": {"fuel": 1}}, "outcomes": [
           {"weight": 100, "text": "They are very quiet, and very kind, and keep copying the way you stand. After three days they begin to say things that are their own. At the end of the week they hand you a small bright stone, 'because you were nice,' and ask for a lift to the nearest harbour.", "effects": {"items": {"fuel": -1, "crystal": 2}, "crew_hp": 10, "rep": {"concord": 1}}}

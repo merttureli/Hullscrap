@@ -16,7 +16,7 @@
           {"weight": 100, "text": "An elderly Oorth in the third row gets up the instant you ask, with the speed of someone who has been waiting to be hired for forty years. 'I used to advise a minister,' they say. 'I advised him to resign. He did not take it well. Is your ship loud?' 'Sometimes.' 'Good. I am ready.' Orrun picks up a bag the size of a hat.", "effects": {"items": {"credits": -80}, "recruit": {"species": "oorth", "name": "Orrun"}, "flag": "oorth_hired"}}
         ]},
         {"text": "Leave quietly.", "outcomes": [
-          {"weight": 100, "text": "You go out as quietly as you can, which is not very. Forty ridges flicker in your wake, politely.", "effects": {}}
+          {"weight": 100, "text": "You go out as quietly as you can, which is not very. Forty ridges flicker in your wake.", "effects": {}}
         ]}
       ]
     },
@@ -82,7 +82,7 @@
           {"weight": 100, "text": "The reading is a straight line. It shakes you more than a spike would. The Lumen will pay for it, if they can be persuaded it is real.", "effects": {"items": {"credits": 20}, "crew_hp": -5}}
         ]},
         {"text": "Board it.", "outcomes": [
-          {"weight": 50, "text": "The drone is empty, and clean, and politely, completely empty. You take its parts, and feel oddly thanked.", "effects": {"items": {"copper": 20, "scrap": 30}}},
+          {"weight": 50, "text": "The drone is empty, and clean, and completely empty. You take its parts, and feel oddly thanked.", "effects": {"items": {"copper": 20, "scrap": 30}}},
           {"weight": 50, "text": "The drone is empty. The drone is also aware. The lights go out on the way back and come on again as you leave, one by one, as if to see you off.", "effects": {"items": {"scrap": 10}, "crew_hp": -15}}
         ]},
         {"text": "[Oorth] Listen back.", "requires": {"species": "oorth"}, "outcomes": [

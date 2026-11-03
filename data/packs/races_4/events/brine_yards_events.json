@@ -62,7 +62,7 @@
     },
     {
       "id": "yards_safety_inspector", "type": "patrol", "weight": 8, "once": false, "requires": {"region": "brine_yards"},
-      "text": "A Concord safety inspector with a clipboard has stopped the entire lane to inspect a Brine crane. She is a small and exact person, who has found something wrong with the crane's third hinge. 'It's out of true,' she says, to nobody. 'It is nine millimetres out of true. This is a hazard.' A crowd of Brine have gathered, claws folded. 'We have lifted fifty thousand tonnes on that hinge,' says the steward, politely. 'It has never once been in true.' The inspector sniffs. 'I should like a second opinion,' she says. She looks at you.",
+      "text": "A Concord safety inspector with a clipboard has stopped the entire lane to inspect a Brine crane. She is a small and exact person, who has found something wrong with the crane's third hinge. 'It's out of true,' she says, to nobody. 'It is nine millimetres out of true. This is a hazard.' A crowd of Brine have gathered, claws folded. 'We have lifted fifty thousand tonnes on that hinge,' says the steward. 'It has never once been in true.' The inspector sniffs. 'I should like a second opinion,' she says. She looks at you.",
       "choices": [
         {"text": "Back the inspector.", "outcomes": [
           {"weight": 100, "text": "You measure the hinge. It is, indeed, nine millimetres out of true. The inspector writes a long form and the crane is closed for a day. The Brine take it with perfect politeness, and you do not forget the look.", "effects": {"rep": {"concord": 2, "clans": -1}, "items": {"credits": 25}}}

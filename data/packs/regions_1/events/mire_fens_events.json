@@ -179,7 +179,7 @@
       "after_win": {"text": "The Dry Run's tanks are full of Fen water and her hold is full of buckets. The Mire send a delegation to thank you. They have brought you a bucket.", "effects": {"items": {"polymer": 25, "credits": 45, "scrap": 30}, "rep": {"concord": 1}}}
     },
     {
-      "id": "fen_geyser_season", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"flag": "in_mire_fens", "jumps_min": 3},
+      "id": "fen_geyser_season", "type": "asteroid_field", "weight": 8, "once": false, "requires": {"stage_min": 4, "flag": "in_mire_fens", "jumps_min": 3},
       "text": "The comet ice is in geyser season. Every few seconds a jet of superheated steam shoots from a fissure in the rock, fifty metres high, and falls as boiling rain. The Mire harvest it anyway, in mackintoshes. 'Mind the geysers,' says one. 'They are quite hot.' She is bright pink from the neck up.",
       "choices": [
         {"text": "Harvest between the jets.", "requires": {"crew_min": 1}, "outcomes": [

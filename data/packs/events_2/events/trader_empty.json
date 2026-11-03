@@ -60,7 +60,7 @@
       ]
     },
     {
-      "id": "trader_missile_cart", "type": "trader", "weight": 8, "once": false, "requires": {},
+      "id": "trader_missile_cart", "type": "trader", "weight": 8, "once": false, "requires": {"stage_min": 4},
       "text": "A cart-ship hung with missiles by the dozen, tagged FOR THE OCCASION. The vendor says every missile goes off in the end, and that is more than most can say for their warranties.",
       "choices": [
         {"text": "Buy one missile (35 credits).", "requires": {"credits": 35, "pay": true}, "outcomes": [

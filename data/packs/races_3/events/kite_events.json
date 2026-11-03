@@ -3,7 +3,7 @@
       "id": "kite_between_the_plates", "type": "empty", "weight": 8, "once": true, "requires": {"jumps_min": 2},
       "text": "A dead hull drifts in the lane with no lights on, but stuck out of its side on a long thin pole is a white shirt, flapping in no wind. When you look closer there is a gap between the inner and outer plating, forty centimetres wide and the length of the ship, and in the gap, curled round the pipes with their tails wrapped for grip, is a family of Kite. Long thin limbs, enormous eyes, quiet. They have been living there for years. A very small one has pushed its face out of a vent to stare at your ship.",
       "choices": [
-        {"text": "Knock politely on the plating.", "outcomes": [
+        {"text": "Knock on the plating.", "outcomes": [
           {"weight": 100, "text": "A tall Kite unfolds from the vent, tail first, and bows at the waist, upside down. They have been waiting for a ship to the next cluster for three weeks and are very glad to be asked. You carry them as far as you were going, and they pay in the only currency the gaps know: directions, and a bag of fuel they have been hoarding.", "effects": {"items": {"fuel": 2}, "reveal": "trader", "crew_hp": 5}}
         ]},
         {"text": "Say hello to the youngest.", "outcomes": [

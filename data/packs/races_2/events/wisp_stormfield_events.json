@@ -51,7 +51,7 @@
           {"weight": 100, "text": "You stay an hour. The hum rises and falls and goes through you like a long bath. When it is done, a single plasma cell has rolled across the ring to your hull and sits there, glowing, as a tip.", "effects": {"items": {"plasma_cell": 1}, "crew_hp": 10}}
         ]},
         {"text": "[Wisp] Ask them to release one.", "requires": {"species": "wisp"}, "outcomes": [
-          {"weight": 100, "text": "Your Wisp drifts into the ring, small and bright, and hums at the nearest reactor. It hums back. There is a long exchange in a language of crackles. Then, one by one, the dead reactors go dark, and the cells are rolled, politely, to your hull. 'They were holding it for someone,' your Wisp says. 'They had forgotten who.'", "effects": {"items": {"plasma_cell": 4, "copper": 10}, "crew_hp": 5}}
+          {"weight": 100, "text": "Your Wisp drifts into the ring, small and bright, and hums at the nearest reactor. It hums back. There is a long exchange in a language of crackles. Then, one by one, the dead reactors go dark, and the cells are rolled to your hull. 'They were holding it for someone,' your Wisp says. 'They had forgotten who.'", "effects": {"items": {"plasma_cell": 4, "copper": 10}, "crew_hp": 5}}
         ]},
         {"text": "Leave the choir alone.", "outcomes": [
           {"weight": 100, "text": "You steer round the ring. Behind you the hum goes on, in and out, and you find that you are breathing along.", "effects": {}}

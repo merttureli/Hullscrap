@@ -9,7 +9,7 @@
           {"weight": 100, "text": "Somebody left a galley sheet in the beacon's memory, for reasons that are probably soup. The cup, you notice, has been used.", "effects": {"log": "log_clans_soup_rules", "items": {"scrap": 8}}},
           {"weight": 100, "text": "The last file is a collection receipt in a cramped hand, filed under MA. Everybody out here has one of those.", "effects": {"log": "log_clans_ma_birthday", "items": {"scrap": 8}}}
         ]},
-        {"text": "Leave it ticking.", "outcomes": [
+        {"text": "Leave the lamp burning.", "outcomes": [
           {"weight": 100, "text": "You leave the beacon ticking in its hole. The lamp is still lit when you lose it on the scope. Somebody may come back for it. Somebody may.", "effects": {}}
         ]}
       ]
@@ -24,14 +24,14 @@
           {"weight": 100, "text": "A requisition form, filled in, never sent. The relay has been trying for forty years. You read it so it can stop.", "effects": {"log": "log_concord_form_9b", "items": {"copper": 5}}},
           {"weight": 100, "text": "A diplomatic annex in the outbox: eleven hours of argument reduced to four lines. You read it for the four lines.", "effects": {"log": "log_concord_salvage_annex", "items": {"copper": 5}}}
         ]},
-        {"text": "Leave it ticking.", "outcomes": [
+        {"text": "Let it keep its heartbeat.", "outcomes": [
           {"weight": 100, "text": "You leave the relay to its heartbeat. Nine seconds later it sends another, and the quiet where the answer should be is very well kept.", "effects": {}}
         ]}
       ]
     },
     {
       "id": "quest_prism_buoy", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "A buoy that sings because someone must",
-      "text": "A Lumen buoy turns in the dark, singing one long note and then stopping to wait, politely, for an answer. It sounds like a question. The pause is the right length for a reply. Nobody is on the other end to give it one, and the buoy has, you suspect, stopped expecting anybody to.",
+      "text": "A Lumen buoy turns in the dark, singing one long note and then stopping to wait for an answer. It sounds like a question. The pause is the right length for a reply. Nobody is on the other end to give it one, and the buoy has, you suspect, stopped expecting anybody to.",
       "choices": [
         {"text": "Read what it has left.", "outcomes": [
           {"weight": 100, "text": "You hum something back, badly. The buoy considers it, and releases a short text it has been keeping for whoever answered.", "effects": {"log": "log_lumen_first_note", "items": {"crystal": 1}}},
@@ -40,7 +40,7 @@
           {"weight": 100, "text": "The buoy hums a flat, offended note when you switch the engines on, and then, grudgingly, a file.", "effects": {"log": "log_lumen_ion_complaint", "items": {"crystal": 1}}},
           {"weight": 100, "text": "The note falls. A line of text appears on the console in the buoy's careful hand, with the air of a complaint finally forwarded.", "effects": {"log": "log_lumen_emberkin_rota", "items": {"crystal": 1}}}
         ]},
-        {"text": "Leave it ticking.", "outcomes": [
+        {"text": "Let the pause run.", "outcomes": [
           {"weight": 100, "text": "You let the pause run out. The buoy sings its note again, a little lower, to nobody, and carries on waiting.", "effects": {}}
         ]}
       ]
@@ -56,9 +56,101 @@
           {"weight": 100, "text": "The slug is a warning, and also, you realise, a joke. You eat the ration anyway.", "effects": {"log": "log_clans_brother_in_law", "crew_hp": 5}},
           {"weight": 100, "text": "The slug is a day's log kept by somebody who had decided to find it funny. You eat the ration, and take the tone.", "effects": {"log": "log_clans_midjump", "crew_hp": 5}}
         ]},
-        {"text": "Leave it ticking.", "outcomes": [
+        {"text": "Leave the tube sealed for the next one.", "outcomes": [
           {"weight": 100, "text": "You leave the tube on its rock, welded, for the next one. It said PLEASE READ. Somebody will.", "effects": {}}
         ]}
       ]
+    },
+    {
+      "id": "quest_tally_counter", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Counted",
+      "text": "A Concord traffic counter bolted to an iron slab, its display reading 4. It has been counting passing ships for thirty years and resets to zero whenever the cell sags, which is often, so it has reached four several thousand times. A slot in its casing holds a spare cell and a card: PLEASE KEEP COUNTING.",
+      "choices": [
+        {"text": "Be counted.", "outcomes": [
+          {"weight": 100, "text": "The display ticks to 5. The counter gives a small, pleased pulse, and then, as a courtesy to its fifth ever, lets a spare cell drop from its housing.", "effects": {"items": {"fuel": 1}}}
+        ]},
+        {"text": "Reset the cell for it.", "outcomes": [
+          {"weight": 100, "text": "The old cell comes out warm and furred with dust. You seat a better one from your scrap bin and the count holds at 4, steady, for what may be the first time in a decade.", "effects": {"items": {"scrap": 6}}}
+        ]},
+        {"text": "Slip past uncounted.", "outcomes": [
+          {"weight": 100, "text": "You thread between its beam and the rock. It stays at 4, a number it has made its peace with.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quest_painted_rock", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Yes",
+      "text": "An asteroid the size of a cargo bay, with a name painted across it in letters taller than your ship: DEBORAH. Beneath, smaller: SHE SAID YES. The paint is fresh enough to smell on the intake. A bracket on the rock holds a brush, a tin with the lid pressed down, and a lantern.",
+      "choices": [
+        {"text": "Read the inside of the lid.", "outcomes": [
+          {"weight": 100, "text": "The painter left a few lines inside the tin, for whoever wanted to know how it went. It went, you gather, very well, and on the third try.", "effects": {"log": "log_story_painted_rock", "items": {"scrap": 6}}}
+        ]},
+        {"text": "Sign it too.", "outcomes": [
+          {"weight": 100, "text": "You paint a small crooked line under hers: AND THE REST OF US. The paint is tacky when you go. The lantern in the bracket lights, once, for as long as it takes to read.", "effects": {}}
+        ]},
+        {"text": "Note the bearing and go.", "outcomes": [
+          {"weight": 100, "text": "You mark where she said yes. It seems only decent to know.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quest_honesty_box", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Take what you need",
+      "text": "A mooring post on a rock, a locked-looking steel box clamped to it with no lock at all, and a stencilled rule: TAKE WHAT YOU NEED. LEAVE WHAT YOU CAN. A ledger hangs from the lid on a string, its pages soft with handling.",
+      "choices": [
+        {"text": "Take what you need.", "outcomes": [
+          {"weight": 100, "text": "The box holds cells, a roll of tape and a bag of mixed hardware. You take the hardware and write your ship's name in the ledger, under a long column of others.", "effects": {"items": {"scrap": 14}}}
+        ]},
+        {"text": "Leave what you can.", "outcomes": [
+          {"weight": 100, "text": "You drop a few scrap in the box and sign. When you check the ledger the line above yours reads: THANK YOU, and below it somebody has left a small tin of silicon wafers for the next to need them.", "effects": {"items": {"scrap": -4, "silicon": 3}}}
+        ]},
+        {"text": "Read the ledger and go.", "outcomes": [
+          {"weight": 100, "text": "Page after page of ships. A few wrote only their names. One wrote I MEANT TO COME BACK, and underneath, in a different hand, YOU DID.", "effects": {"log": "log_story_honesty_ledger"}}
+        ]}
+      ]
+    },
+    {
+      "id": "quest_fuel_marker", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Mile forty",
+      "text": "A painted lane marker with a stub of pipe coming out of its base and a rusted cap on the pipe. A plate: EMERGENCY RESERVE. DO NOT USE UNLESS EMERGENCY. Someone has added, in white paint, ASK YOURSELF.",
+      "choices": [
+        {"text": "Open the reserve.", "outcomes": [
+          {"weight": 70, "text": "The cap turns. Inside the stub is a single sealed can, cold, with a ticket on it in an old hand: BORROWED ONCE. NOW YOURS.", "effects": {"items": {"fuel": 1}}},
+          {"weight": 30, "text": "The cap turns on an empty pipe and a note: SORRY, WAS ME, FEWER PIPES THAN PLANS. You laugh, which helps with the dust.", "effects": {}}
+        ]},
+        {"text": "Ask yourself.", "outcomes": [
+          {"weight": 100, "text": "You ask. The answer, after some honest thought, is no. The pipe seems to approve. Behind its plate, a small reflective tag has come loose, and you pocket it as scrap.", "effects": {"items": {"scrap": 8}}}
+        ]},
+        {"text": "Replace the cap, carefully.", "outcomes": [
+          {"weight": 100, "text": "You turn the cap back to exactly where it was. The marker keeps its secret and its rule.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quest_cairn_plates", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Names, in plate",
+      "text": "A cairn of welded plates the height of a house, one plate for every ship that has passed, each stamped with a hull name. A stamping tool hangs on a chain beside a blank plate. Some of the older names are spelled the way their ships were, not the way they should have been.",
+      "choices": [
+        {"text": "Stamp your ship's name.", "outcomes": [
+          {"weight": 100, "text": "You strike the plate. It rings once, a clean note, and settles into the stack. In its base a hatch drops a handful of rivets for the trouble, as if the cairn were paying a toll in reverse.", "effects": {"items": {"scrap": 10}}}
+        ]},
+        {"text": "Read the older plates.", "outcomes": [
+          {"weight": 100, "text": "The oldest are faded to a ghost. You can read them with a thumb: names, dates, and a few words in the margins. They are, almost all of them, apologies or thanks.", "effects": {"log": "log_story_cairn_plates"}}
+        ]},
+        {"text": "Add a stone and go.", "outcomes": [
+          {"weight": 100, "text": "A chip of rock for the base, as the custom is. It sits there, small, among all that steel, and looks right.", "effects": {}}
+        ]}
+      ]
+    },
+    {
+      "id": "quest_wrong_number", "type": "quest", "weight": 2, "once": false, "fallback": true, "requires": {}, "title": "Wrong number",
+      "text": "A Fenn comms drop riveted to a rock, a handset on a coiled cord dangling in vacuum, and a lamp that blinks when your hull comes in range. It rings. You can hear it ring through the hull plate, which should not be possible.",
+      "choices": [
+        {"text": "Answer it.", "outcomes": [
+          {"weight": 50, "text": "A voice wants Osric. You are Osric for four minutes, and it turns out Osric owed ten credits, which the voice, relieved, sends over the line.", "effects": {"items": {"credits": 15}}},
+          {"weight": 50, "text": "A voice wants Osric. You are not Osric. You say so gently, and after a long pause the voice says it knew, and asks whether you would mind staying on a minute anyway.", "effects": {}}
+        ]},
+        {"text": "Take the handset off the hook and listen.", "outcomes": [
+          {"weight": 100, "text": "There is breathing, and a distant radio, and somewhere a kettle. After a while somebody says 'sorry, wrong number,' and hangs up very softly, as if it were a personal failing. A crystal bead on the cord comes away in your hand.", "effects": {"items": {"crystal": 1}}}
+        ]},
+        {"text": "Let it ring.", "outcomes": [
+          {"weight": 100, "text": "It rings eleven times and stops. The lamp blinks twice, and goes dark with an air of having done what it could.", "effects": {}}
+        ]}
+      ]
     }
-]}
+  ]}

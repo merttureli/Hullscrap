@@ -57,6 +57,6 @@
           {"weight": 100, "text": "Your Warden-frame steps onto the bridge and turns its single lens on the cutter's feed. A long, still moment. The cutter's captain draws a slow breath. 'That is a gatekeeper,' she says. 'I'd heard they were still around.' She lowers the guns. 'No tithe from Lumen friends, ma'am. Apologies for the trouble.' The bird on her bridge dips a wing. 'You are a very useful sort of person,' it tells your Warden-frame.", "effects": {"rep": {"lumen": 1}, "items": {"credits": 30}}}
         ]}
       ],
-      "after_win": {"text": "The cutter drifts, venting. Her hold is a jackdaw's nest: stolen medals, odd buttons, a tin of sardines, and a good deal of ordinary loot. A bird in a tailored coat steps out of the wreck, ruffles itself, and politely asks for the medals.", "effects": {"items": {"scrap": 40, "credits": 45}, "rep": {"clans": -1}}}
+      "after_win": {"text": "The cutter drifts, venting. Her hold is a jackdaw's nest: stolen medals, odd buttons, a tin of sardines, and a good deal of ordinary loot. A bird in a tailored coat steps out of the wreck, ruffles itself, and asks for the medals.", "effects": {"items": {"scrap": 40, "credits": 45}, "rep": {"clans": -1}}}
     }
   ]}

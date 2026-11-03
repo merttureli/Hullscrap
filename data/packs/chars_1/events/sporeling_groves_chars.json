@@ -9,7 +9,7 @@
         {"text": "Hire her with a retainer (110 credits).", "requires": {"credits": 110, "pay": true}, "outcomes": [
           {"weight": 100, "text": "She counts the coins with a fingertip, then counts the fingertip. 'Seeds,' she says. 'Very expensive, seeds.' She shoulders her crate, her trowel and a small severe fern. 'I shall start with the hull.'", "effects": {"recruit": {"character": "bracken"}}}
         ]},
-        {"text": "Politely decline.", "outcomes": [
+        {"text": "Decline.", "outcomes": [
           {"weight": 100, "text": "'A pity,' she says, writing something in her notebook. You are fairly sure it is your name.", "effects": {}}
         ]}
       ]

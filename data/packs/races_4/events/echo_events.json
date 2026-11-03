@@ -4,9 +4,9 @@
       "text": "On the hull of a dead tender, in the light of a pale star, stands a figure that looks very much like your captain. It is not quite right. The outline is smooth, a little glassy; the face is a kind of soft mirror, showing not a face but a faint likeness of the one looking at it; and when you wave, it waves a moment late. It stands aside on the plating to let you pass. It does not speak. It has the unmistakable air of someone who has been waiting, very patiently, to be introduced.",
       "choices": [
         {"text": "Wave back, and wait.", "outcomes": [
-          {"weight": 100, "text": "It waves. Then it tilts its head, very slightly, and you find yourself tilting yours. A long silence. It points to its own chest, then to your ship, then to its chest again. 'After you,' it says, in your voice, and steps back to let you pass. You step on the plating. It steps beside you. It follows you into the airlock, apologising, and sits in a corner of the mess, nodding at everything you say. By the end of the evening its face has a new look: faintly, politely, the drone's.", "effects": {"recruit": {"species": "echo", "name": "Pardon"}}}
+          {"weight": 100, "text": "It waves. Then it tilts its head, very slightly, and you find yourself tilting yours. A long silence. It points to its own chest, then to your ship, then to its chest again. 'After you,' it says, in your voice, and steps back to let you pass. You step on the plating. It steps beside you. It follows you into the airlock, apologising, and sits in a corner of the mess, nodding at everything you say. By the end of the evening its face has a new look: faintly, the drone's.", "effects": {"recruit": {"species": "echo", "name": "Pardon"}}}
         ]},
-        {"text": "Hail it politely on the comm.", "outcomes": [
+        {"text": "Hail it on the comm.", "outcomes": [
           {"weight": 100, "text": "The voice that answers is yours, but with an unfamiliar, careful warmth. 'Hello,' it says. 'Hello. I am sorry. I am Pardon. I have been a long time on this tender.' It asks about the stars, and the ship, and your name. It repeats your answers with great attention. When you leave, it asks if it might keep your coat. You have another.", "effects": {"items": {"credits": 15, "crystal": 1}, "crew_hp": 5}}
         ]},
         {"text": "[Echo] Meet it at the edge of the hull.", "requires": {"species": "echo"}, "outcomes": [
@@ -15,7 +15,7 @@
         {"text": "[Oorth] Read it.", "requires": {"species": "oorth"}, "outcomes": [
           {"weight": 100, "text": "Your Oorth stands quite still before the figure for a long time, hooded, third eye alight. Then they let out a breath. 'There is nothing in it,' they say, wonderingly. 'Not nothing: nothing yet. It is a mirror with the whole of the room in it, waiting for a face to keep.' They lay a hand on its shoulder. 'It is shy. It has been waiting for someone kind.' The figure bows deeply. It follows your Oorth into the airlock like a quiet shadow.", "effects": {"recruit": {"species": "echo", "name": "Indeed"}, "items": {"crystal": 1}, "crew_hp": 5}}
         ]},
-        {"text": "Nod politely and fly on.", "outcomes": [
+        {"text": "Nod and fly on.", "outcomes": [
           {"weight": 100, "text": "You nod. It nods. You fly on. In the stern window it is still on the tender's hull, small and shining, with one hand raised.", "effects": {}}
         ]}
       ]

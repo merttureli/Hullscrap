@@ -52,7 +52,7 @@
           {"weight": 50, "text": "He finds a sketch on a napkin. 'Chart,' he says, delighted. He writes you a fine for the creases in the napkin.", "effects": {"items": {"credits": -25}, "rep": {"concord": -1}}}
         ]},
         {"text": "[Vellum] Point out that your Vellum is crew, not a chart.", "requires": {"species": "vellum"}, "outcomes": [
-          {"weight": 100, "text": "Quarto looks at the Vellum for a long time. The Vellum looks back, politely, with two ink dots. 'It has creases,' says the Inspector. 'So do you,' says the Vellum, 'and nobody has filed you.' Quarto fills in Form 12-D, crosses it out, fills in Form 12-E (Person, Folded), and waves you on with a face the colour of old paper. Somewhere in the Office a clerk is going to have a very interesting week.", "effects": {"items": {"credits": 20}, "rep": {"concord": 2}}}
+          {"weight": 100, "text": "Quarto looks at the Vellum for a long time. The Vellum looks back with two ink dots. 'It has creases,' says the Inspector. 'So do you,' says the Vellum, 'and nobody has filed you.' Quarto fills in Form 12-D, crosses it out, fills in Form 12-E (Person, Folded), and waves you on with a face the colour of old paper. Somewhere in the Office a clerk is going to have a very interesting week.", "effects": {"items": {"credits": 20}, "rep": {"concord": 2}}}
         ]},
         {"text": "[Fenn] Haggle the fee down.", "requires": {"species": "fenn"}, "outcomes": [
           {"weight": 100, "text": "Your Fenn begins in the second person and ends in the fourth. Quarto agrees to a fee of nothing in exchange for a promise never to be spoken to like that again. He does not mean it. He wants it again at once.", "effects": {"rep": {"concord": 1}, "items": {"credits": 10}}}
