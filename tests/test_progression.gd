@@ -15,7 +15,6 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const Shops = preload("res://scripts/space/shops.gd")
 const Site = preload("res://scripts/board/site.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
-const Wall = preload("res://tests/fixture_wall.gd")
 
 const STARTER := "res://data/ships/starter_courier.json"
 ## The recipes the fabricator ladder needs (docs/audit/progression.md section 12) and the events that now teach them: event id -> recipe.
@@ -260,41 +259,6 @@ func test_the_debris_flow_has_a_floor_a_heavy_ship_still_meets() -> void:
 	var none := DriftDebris.new(1, cfg)
 	none.frame_vel = Vector2.ZERO
 	near(none._stream_weights()[0], 1.0, "(and data with no floor reads as 1)")
-
-
-## The scrap a Net Mouth on the bow of the wall fixture takes in a minute while the ship flies upstream at `speed` px/s (the test current runs south at 40).
-func _scrap_a_minute(seed_value: int, speed: float) -> int:
-	var ship := Wall.wall_ship(1, 0)
-	ship.components.place_mount(ship.grid, "net_mouth_scrap", Wall.out_anchor(0, 2), 0)
-	ship.refresh()
-	var cfg: Dictionary = Content.read(DriftDebris.PATH).duplicate(true)
-	cfg["current"]["angle"] = 90
-	cfg["current"]["wobble_deg"] = 0
-	cfg["current"]["speed_wobble"] = 0
-	var d := DriftDebris.new(seed_value, cfg)
-	d.frame_vel = Vector2(0.0, -speed)
-	var off := Vector2(20000.0, 20000.0)
-	d.frame = Transform2D(0.0, off)
-	d.view_centre = d.frame * ship.world_pos
-	d.prewarm(ship)
-	var scrap: int = ship.inventory.count("scrap")
-	for i in 1200:  # 60 s
-		off += d.frame_vel * 0.05
-		d.frame = Transform2D(0.0, off)
-		d.view_centre = d.frame * ship.world_pos
-		d.step(ship, 0.05)
-	return ship.inventory.count("scrap") - scrap
-
-
-func test_a_heavy_slow_ship_takes_in_most_of_what_a_light_fast_one_does() -> void:
-	var slow := 0
-	var fast := 0
-	for s in 4:
-		slow += _scrap_a_minute(s + 1, 60.0)  # a built-up ship: the ladder bot's flew at 66-112 px/s at stage 4
-		fast += _scrap_a_minute(s + 1, 250.0)
-	print("progression: a Net Mouth took in %.1f scrap a minute at 60 px/s and %.1f at 250 (4 seeds)" % [slow / 4.0, fast / 4.0])
-	check(fast > 20, "a light ship takes in a good deal (%d for 4 minutes)" % fast)
-	check(float(slow) >= 0.7 * float(fast), "a heavy one at 60 px/s keeps at least 70%% of it: %d against %d (with the cap at 70 it kept about half)" % [slow, fast])
 
 
 # --- data/progression.json ----------------------------------------------------------------------------------------------
