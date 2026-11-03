@@ -263,7 +263,7 @@
 			"line": "neon", "name_pool": "",
 			"ship_names": ["Absence", "The Echo", "Gap", "Not Here", "Remainder", "Hollow Thing", "Almost"],
 			"crew": {"species": ["basalt", "fenn"], "names": ["Hollow One", "Hollow Two", "Echo", "Absence", "Gap", "Vacant", "Almost", "Lull", "Draught", "Remnant"]},
-			"ai": {"morale": "hollow", "aim_skill": [0.6, 1.0], "rammer": 0.0},
+			"ai": {"morale": "ghost", "aim_skill": [0.6, 1.0], "rammer": 0.0},
 			"weights": {"weapons": 4, "armour": 2, "shield": 3, "engine": 2, "crew": 1, "skill": 3, "systems": 1},
 			"armour": {"tiles": ["ablative_plating", "neon_lattice", "ablative_plating"], "factor": {"ablative_plating": 1.4, "neon_lattice": 1.5}},
 			"layer_cost": {"small": 13, "medium": 21, "large": 29},

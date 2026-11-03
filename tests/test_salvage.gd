@@ -5,6 +5,7 @@ extends "res://tests/base_test.gd"
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
@@ -259,6 +260,30 @@ func test_escaped_pays_nothing_and_fled_and_lost_are_as_before() -> void:
 	eq([fled["state"], fled["text"], ship.inventory.counts, c.fights_won], ["fled", "You break away. The fight is not finished, but you are.", before, 0], "fled as before")
 	var lost := c.fight_done({"state": "lost"}, ship)
 	eq([lost["state"], lost["text"]], ["lost", "Your ship is wrecked. The Drift keeps what is left of it."], "lost as before")
+
+
+func test_a_ghost_that_fades_counts_as_a_win_with_nothing_to_salvage() -> void:
+	var after := {"text": "The ghost is gone from the lane.", "effects": {"items": {"fuel": 2}}}
+	var c := Campaign.new(1)
+	var ship := _ship()
+	var before := ship.inventory.counts.duplicate()
+	var ghost := Shipgen.from_spec(Shipgen.spec("hollow", "small", 7, 40.0))
+	var r := c.fight_done({"state": "escaped", "enemy": ghost}, ship, after)
+	eq(c.fights_won, 1, "a faded ghost is a won fight")
+	eq(ship.inventory.count("fuel"), int(before.get("fuel", 0)) + 2, "its after_win ran")
+	eq(ship.inventory.count("credits"), int(before.get("credits", 0)), "and it paid no credits: nothing to loot")
+	eq(r["text"], "The ghost is gone from the lane.", "the after_win text replaces the fade text")
+	eq(r["state"], "escaped", "the state stays escaped, so the map offers no salvage")
+	var c2 := Campaign.new(1)
+	var plain := c2.fight_done({"state": "escaped", "enemy": ghost}, ship)
+	eq(plain["text"], "The ghost thins out of the world and leaves nothing behind.", "without an after_win the fade text stands")
+	eq(c2.fights_won, 1, "still a win")
+	var c3 := Campaign.new(1)
+	c3.fight_done({"state": "escaped", "enemy": Shipgen.from_spec(Shipgen.spec("wardens", "small", 7, 40.0))}, ship)
+	eq(c3.fights_won, 0, "a warden that escapes is no win (as before)")
+	var c4 := Campaign.new(1)
+	c4.fight_done({"state": "escaped", "enemy": _enemy()}, ship)
+	eq(c4.fights_won, 0, "nor is a pirate that jumps away")
 
 
 func test_after_win_runs_for_a_capture_and_a_sparing_too() -> void:
