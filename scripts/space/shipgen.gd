@@ -9,7 +9,7 @@ extends RefCounted
 ##      through the real mount rules, cables) and checked; a failed attempt is retried with a new roll, then a plainer hull.
 ## Everything random goes through one RandomNumberGenerator seeded from (seed, faction, size), so the same arguments
 ## always give the same ship. A ship has meta "ai" ({aim_skill, style}, read by the pilot) and "shipgen" (what it was).
-## A spec is the same arguments as a string, "gen:<faction>:<size>:<seed>:<budget x 100>[:ram]", so a design path can name
+## A spec is the same arguments as a string, "gen:<faction>:<size>:<seed>:<budget x 100>[:s<stage>][:ram][:warden]", so a design path can name
 ## a generated ship (combat_session.gd load_ship). threat() rates an enemy against the player's ship (threat.gd).
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -25,6 +25,7 @@ const Content = preload("res://scripts/data/content.gd")
 const Hullgen = preload("res://scripts/space/hullgen.gd")
 const Threat = preload("res://scripts/space/threat.gd")
 const HullOutline = preload("res://scripts/ship/hull_outline.gd")
+const Morale = preload("res://scripts/combat/morale.gd")
 
 const PREFIX := "gen:"
 const TABLES_PATH := "res://data/enemy_tables.json"
@@ -155,8 +156,9 @@ static func at_least(faction: String, size: String) -> String:
 	return size if order.find(size) >= order.find(want) else want
 
 
-static func spec(faction: String, size: String, seed_value: int, budget: float, ram := false, stage := 0) -> String:
-	return "%s%s:%s:%d:%d%s%s" % [PREFIX, faction, size, seed_value, roundi(budget * 100.0), ":s%d" % stage if shield_cap(stage) < 1.0 else "", ":ram" if ram else ""]
+## `warden`: the ship holds a beacon (Wardens.for_region), ":warden": it never fades (see build).
+static func spec(faction: String, size: String, seed_value: int, budget: float, ram := false, stage := 0, warden := false) -> String:
+	return "%s%s:%s:%d:%d%s%s%s" % [PREFIX, faction, size, seed_value, roundi(budget * 100.0), ":s%d" % stage if shield_cap(stage) < 1.0 else "", ":ram" if ram else "", ":warden" if warden else ""]
 
 
 static func is_spec(path: String) -> bool:
@@ -172,14 +174,15 @@ static func from_spec(text: String) -> Ship:
 	for x in p.slice(4):
 		if x.length() > 1 and x.begins_with("s") and x.substr(1).is_valid_int():
 			stage = int(x.substr(1))
-	return build(p[0], p[1], int(p[2]), float(p[3]) / 100.0, {"ram": p.slice(4).has("ram"), "stage": stage})
+	return build(p[0], p[1], int(p[2]), float(p[3]) / 100.0, {"ram": p.slice(4).has("ram"), "stage": stage, "warden": p.slice(4).has("warden")})
 
 
 # --- building ------------------------------------------------------------------------------------
 
 ## The enemy ship for (faction, size class, seed, budget). `opts`: ram (true: a Rustfang rammer, a ram plated V bow and the
 ## rammer style; false: never; left out: a faction whose pilots ram does so by the seed), stage (the run stage: in an early one
-## the ship has a shield only with the chance of shield_cap(stage), rolled from the seed; the rare factions ignore it). Always a valid ship (see
+## the ship has a shield only with the chance of shield_cap(stage), rolled from the seed; the rare factions ignore it), warden (it
+## holds a beacon: a style that fades, the Hollow's ghosts, becomes `hollow`, so the Hollow's warden stays a fight to the end). Always a valid ship (see
 ## validate()); meta "shipgen".attempts says how many tries it took.
 static func build(faction: String, size: String, seed_value: int, budget: float, opts := {}) -> Ship:
 	var f: Dictionary = tables()["factions"][faction]
@@ -204,6 +207,8 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 			ship.get_meta("shipgen")["attempts"] = attempt + 1
 			ship.get_meta("shipgen")["failed"] = failed
 			ship.get_meta("shipgen")["seed"] = seed_value
+			if bool(opts.get("warden", false)) and Morale.fades_style(str(ship.get_meta("ai").get("morale", ""))):
+				ship.get_meta("ai")["morale"] = "hollow"
 			return ship
 		failed.append(r["why"])
 	last_failed = failed

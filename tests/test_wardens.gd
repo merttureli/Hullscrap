@@ -496,3 +496,14 @@ func test_saving_and_loading_keep_the_warden_and_its_flag() -> void:
 		var f := Campaign.new(3)
 		eq(f.load_dict(e), "", "a damaged warden does not stop the load")
 		eq(f.warden, Wardens.for_region(c.seed_value, c.stage, c.region_data, c.jumps), "it is rolled again: " + str(bad))
+
+
+## The Hollow's ordinary ghosts fade at the break line (style ghost), but its warden holds the gate approaches: a fight to the end.
+func test_the_hollow_warden_never_fades() -> void:
+	var w := Wardens.for_region(11, 6, Regions.get_region("gate_approaches"), 60, "normal")
+	eq(str(w["faction"]), "hollow", "the gate approaches are held by the Hollow")
+	check(str(w["spec"]).ends_with(":warden"), "its spec says it is a warden: " + str(w["spec"]))
+	eq(str(Shipgen.from_spec(w["spec"]).get_meta("ai")["morale"]), "hollow", "the warden keeps the style that never breaks")
+	eq(str(Shipgen.from_spec(str(w["spec"]).trim_suffix(":warden")).get_meta("ai")["morale"]), "ghost", "the same ship met as a ghost fades")
+	var clan := Wardens.for_region(11, 3, Regions.get_region("clan_space"), 12, "normal")
+	eq(str(Shipgen.from_spec(clan["spec"]).get_meta("ai")["morale"]), str(Shipgen.from_spec(str(clan["spec"]).trim_suffix(":warden")).get_meta("ai")["morale"]), "a warden whose style does not fade keeps it")
