@@ -54,6 +54,7 @@ const SAMPLE_S := 30.0  ## seconds of debris really simulated per node; the yiel
 const STARTERS: Array[String] = ["starter_rustbucket", "starter_courier", "starter_prism"]
 const WINS: Array[String] = ["won", "captured", "spared"]
 const SEED_BASE := 9000
+const TANK := 14  ## the fuel a dock tops the hold up to (fuel_up)
 ## What things are worth to the player (credits), for the choice of an event row and a salvage pick.
 const WORTH := {"scrap": 0.5, "copper": 1.5, "polymer": 1.5, "titanium": 6.0, "silicon": 8.0, "crystal": 18.0, "plasma_cell": 25.0, "nanite_paste": 60.0, "credits": 1.0, "fuel": 8.0, "missile": 3.0, "steel": 5.0}
 const SKULL_COST := {0: 0.0, 1: 5.0, 2: 25.0, 3: 90.0, 4: 700.0, 5: 3000.0}  ## what meeting a fight of that many skulls is worth, in credits
@@ -798,11 +799,12 @@ func shop_visit(sid: String) -> void:
 	flow("shop", before)
 
 
-## Buy fuel at the dock until there is enough for the stage (8) and the credits allow.
+## Buy fuel at the dock: every unit on sale up to a tank that crosses a stage (TANK: this player makes 11 to 15 jumps a stage, so a tank of 9, the
+## first value of this tool, could not cover one even when full), while the credits allow.
 func fuel_up() -> void:
 	if _docked == "" or not c.station_cfg(_docked).get("services", []).has("fuel"):
 		return
-	var want := 9 - ship.inventory.count("fuel")
+	var want := TANK - ship.inventory.count("fuel")
 	while want > 0 and ship.inventory.count("credits") > 30:
 		var r: Dictionary = c.buy_fuel(ship, _docked, 1)
 		if not r["ok"]:
