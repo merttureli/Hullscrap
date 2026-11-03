@@ -126,18 +126,29 @@ func _unhandled_input(e: InputEvent) -> void:
 		press_ability()  # (in a fight combat_view.gd takes the key)
 	elif e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_X and not e.ctrl_pressed and not e.meta_pressed and not build.build_on:
 		press_spread()
-	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_MIDDLE:
-		var p: Vector2 = (make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL
-		if selection().size() >= 2 and sim != null and sim.has_method("jobs_of"):
-			say("; ".join(sim.jobs_of(_ship()).order_group(_ship(), selection(), p)))  # several selected: the jobs round that spot, one each
-			return
-		var who := order_target()
-		if who == null:
-			return
-		var a := Pathfinder.nearest_walkable(_ship().grid, p, Callable(), Pathfinder.NO_CELL, who.body_size)  # where their body can stand nearest the click (never behind a locked door)
-		if a != Pathfinder.NO_CELL and (Pathfinder.centre_of(a, who.body_size) - p).length() <= 1.5:
-			if Jobs.order_move(_ship(), who, a):  # they leave the job board alone for a while
-				say(Jobs.order_warning(_ship(), who))
+	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_MIDDLE and not build.combat:  # (in a fight combat_view.gd takes the click)
+		order_at((make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL)
+
+
+## A middle click at `p` (cell units of the player's ship): with several selected the jobs round that spot go to them, one each; else
+## one crew member (order_target()) walks there. Says what it did on the crew bar and returns that text ("" when there was none).
+func order_at(p: Vector2) -> String:
+	if _ship() == null:
+		return ""
+	if selection().size() >= 2 and sim != null and sim.has_method("jobs_of"):
+		var text := "; ".join(sim.jobs_of(_ship()).order_group(_ship(), selection(), p))  # several selected: the jobs round that spot, one each
+		say(text)
+		return text
+	var who := order_target()
+	if who == null:
+		return ""
+	var a := Pathfinder.nearest_walkable(_ship().grid, p, Callable(), Pathfinder.NO_CELL, who.body_size)  # where their body can stand nearest the click (never behind a locked door)
+	if a != Pathfinder.NO_CELL and (Pathfinder.centre_of(a, who.body_size) - p).length() <= 1.5:
+		if Jobs.order_move(_ship(), who, a):  # they leave the job board alone for a while
+			var warn := Jobs.order_warning(_ship(), who)
+			say(warn)
+			return warn
+	return ""
 
 
 ## The box (cell units) between two points of a drag, given in this node's coordinates.

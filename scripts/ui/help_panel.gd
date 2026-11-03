@@ -22,7 +22,7 @@ const COLUMNS: Array = [
 			["Mouse", "Play mode: the soldier aims at the cursor"],
 			["E (hold)", "Hold to repair, patch, extinguish or revive nearby."],
 			["E on a door", "Open / close the door"],
-			["Middle click", "Send a crewmate or a group"],
+			["Middle click", "Send a crewmate or a group (in a fight: your ship or schematic)"],
 			["Left click", "Select; Shift or drag adds; X spreads"],
 			["Station bar", "Post the selected crew member"],
 			["R / V", "Breach alert: repair / evacuate"],

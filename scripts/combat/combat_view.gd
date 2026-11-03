@@ -352,6 +352,57 @@ func _unhandled_input(e: InputEvent) -> void:
 			session.fire_group(1, _aim())
 		elif e.button_index == MOUSE_BUTTON_RIGHT:
 			session.fire_group(2, _aim())
+		elif e.button_index == MOUSE_BUTTON_MIDDLE:
+			middle_click(e)
+
+
+## A middle click in a fight: on your schematic it sends the crew to the room under the cursor, on your ship in the world likewise;
+## anywhere else nothing happens. Returns what the crew bar said ("" for none).
+func middle_click(e: InputEventMouseButton) -> String:
+	for i in _schem.size():
+		var p: Vector2 = _schem[i].make_input_local(e).position
+		if _schem[i].visible and Rect2(Vector2.ZERO, Schematic.PANEL).has_point(p):
+			return order_from_map(p) if i == Session.PLAYER else ""
+	return order_at_world(make_input_local(e).position)
+
+
+## Which ship has a built cell under the world point `world`: {ship (arena index), local (fractional grid point), cell (Vector2i)}, {} for open space.
+static func ship_cell(arena, world: Vector2) -> Dictionary:
+	for i in arena.ships.size():
+		var local: Vector2 = arena.world_to_local(i, world)
+		var cell := Vector2i(floori(local.x), floori(local.y))
+		if arena.ships[i].ship.grid.tiles.has(cell):
+			return {"ship": i, "local": local, "cell": cell}
+	return {}
+
+
+## Order the crew to the world point `world` if it is on your ship (the crew view's middle-click order: a group splits the
+## room's jobs, one crew member walks there), and flash the room. Off your ship it does nothing. Returns the crew bar's text.
+func order_at_world(world: Vector2) -> String:
+	var hit := ship_cell(session.arena, world)
+	if hit.is_empty() or int(hit["ship"]) != Session.PLAYER:
+		return ""
+	return _order(hit["local"], false)
+
+
+## Order the crew to the cell of your schematic under `p` (the panel's px), if there is one; flash its room on the map.
+func order_from_map(p: Vector2) -> String:
+	var at = Schematic.cell_under(session.arena.ships[Session.PLAYER].ship, p)
+	return "" if at == null else _order(at, true)
+
+
+func _order(local: Vector2, on_map: bool) -> String:
+	var text := ""
+	if crew != null and crew.has_method("order_at"):
+		text = str(crew.order_at(local))
+	var ship = session.arena.ships[Session.PLAYER].ship
+	var cell := Vector2i(floori(local.x), floori(local.y))
+	var room: int = ship.atmosphere.room_of.get(cell, -1)
+	var cells: Array = ship.atmosphere.rooms[room]["cells"] if room >= 0 and room < ship.atmosphere.rooms.size() else [cell]
+	var target = _schem[Session.PLAYER] if on_map and not _schem.is_empty() else (_views[Session.PLAYER] if not _views.is_empty() else null)
+	if target != null:
+		target.flash_room(cells)
+	return text
 
 
 ## The world point the mouse (or a script) aims at.
@@ -450,6 +501,8 @@ func _update_hud() -> void:
 	if _bar == null:
 		return
 	var vp := _view_size()
+	if not _views.is_empty() and crew != null and crew.has_method("selection"):
+		_views[Session.PLAYER].marked = crew.selection()  # the selected crew get their rings on the ship
 	_schem[0].position = Vector2(10.0, 10.0)
 	_schem[1].position = Vector2(vp.x - Schematic.PANEL.x - 10.0, 10.0)
 	_schem[0].intent = Intent.of(session.arena, session.ai, Session.PLAYER)

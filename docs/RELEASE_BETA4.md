@@ -106,7 +106,6 @@ Boarding, a rebuilt hull, the Ledger, and a balance pass measured by a playtest 
 
 ## Known issues
 - **Starter ships against three-skull pirates at stage 1** come through about 70% of the time in the Rustbucket, 75% in the Courier and 95% in the Prism, measured by a bot; the rest are stalemates.
-- **In a fight** you give crew orders on the crew bar and with X: middle-clicking a room on the ship itself works only outside a fight.
 - **Lattice wardens** never break, so beating one takes several minutes.
 - **Small overlaps**:
   - the Ledger card hides marker labels near the map's left edge;

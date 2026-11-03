@@ -34,12 +34,15 @@ const ROW_H := 16.0  ## px per line of the intent strip under the panel
 const SKULL_K := 0.6  ## the size of the threat skulls in the title bar
 const CREW_DOT := Color("#e9f6ff")  ## a revealed crew member; the down ones are CREW_DOWN
 const CREW_DOWN := Color("#ff5a4a")
+const FLASH_FOR := 0.7  ## seconds a clicked room is lit
 
 var arena
 var index := 0
 var title := ""
 var intent: Dictionary = {}  ## Intent.of(...), set each frame on the player's panel; {} draws nothing
 var threat := 0  ## the enemy's panel: its threat in skulls (1-5), drawn small at the right of the title bar; 0 draws none
+var flash_cells: Array = []  ## the cells of the room just clicked (flash_room), lit while flash_left > 0
+var flash_left := 0.0
 var reveal := false  ## draw the ship's crew on the map (set each frame on the enemy's panel from TraitSet.reveals_enemy)
 
 
@@ -55,7 +58,8 @@ func bind(p_arena, idx: int, p_title: String) -> void:
 	title = p_title
 
 
-func _process(_dt: float) -> void:
+func _process(dt: float) -> void:
+	flash_left = maxf(flash_left - dt / maxf(Engine.time_scale, 0.01), 0.0)  # real time, so the slow-down does not stretch it
 	if visible:
 		queue_redraw()
 
@@ -94,6 +98,30 @@ static func fit_box(ship) -> Rect2:
 	return Rect2(lo - pad, hi - lo + pad * 2.0)
 
 
+## Where draw_map puts `ship`'s cells in `map` (px): {origin: the px of cell (0, 0), s: px per cell}.
+static func map_layout(ship, map: Rect2, bounds := Rect2()) -> Dictionary:
+	var box := fit_box(ship) if bounds.size == Vector2.ZERO else bounds
+	var lo := box.position
+	var hi := box.end
+	var s := minf(map.size.x / (hi.x - lo.x), map.size.y / (hi.y - lo.y))
+	return {"origin": map.position + (map.size - (hi - lo) * s) / 2.0 - lo * s, "s": s}
+
+
+## The point of the ship's grid (cell units) under `p` (this panel's px), or null when `p` is off the map or on no built cell.
+static func cell_under(ship, p: Vector2, map := MAP) -> Variant:
+	if ship.grid.hull.is_empty() or not map.has_point(p):
+		return null
+	var lay := map_layout(ship, map)
+	var at: Vector2 = (p - lay["origin"]) / float(lay["s"])
+	return at if ship.grid.tiles.has(Vector2i(floori(at.x), floori(at.y))) else null
+
+
+## Flash the cells `cells` for a moment (the room a middle-click order went to).
+func flash_room(cells: Array) -> void:
+	flash_cells = cells
+	flash_left = FLASH_FOR
+
+
 ## Draw `ship`'s map on the canvas `cv`: rooms, walls, doors, breaches and systems coloured by state
 ## (`powered`: uid -> bool), bow up, fitted into `map` (px). The cells of `bounds` (cell coordinates; the
 ## built cells' box, fit_box, when empty) are scaled to fit. Returns {origin: the px of cell (0, 0), s: px per cell}.
@@ -101,11 +129,9 @@ static func draw_map(cv: CanvasItem, ship, powered: Dictionary, map: Rect2, boun
 	var grid = ship.grid
 	if grid.hull.is_empty():
 		return {}
-	var box := fit_box(ship) if bounds.size == Vector2.ZERO else bounds
-	var lo := box.position
-	var hi := box.end
-	var s := minf(map.size.x / (hi.x - lo.x), map.size.y / (hi.y - lo.y))
-	var origin := map.position + (map.size - (hi - lo) * s) / 2.0 - lo * s
+	var lay := map_layout(ship, map, bounds)
+	var s: float = lay["s"]
+	var origin: Vector2 = lay["origin"]
 	var atmo = ship.atmosphere
 	for c in grid.tiles:
 		var id: String = grid.tiles[c]
@@ -180,6 +206,9 @@ func _draw() -> void:
 	if grid.hull.is_empty():
 		return
 	var map := draw_map(self, co.ship, co.powered, MAP)
+	if flash_left > 0.0 and not map.is_empty():
+		for c in flash_cells:
+			draw_rect(Rect2(map["origin"] + Vector2(c) * float(map["s"]), Vector2.ONE * float(map["s"])), Color(GOLD, 0.85 * flash_left / FLASH_FOR))
 	if reveal:
 		_draw_crew(co.ship, map)
 	# The shield pips. (No hull bar: the damage is on the blocks of the map.)
