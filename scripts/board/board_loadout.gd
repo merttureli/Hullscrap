@@ -97,7 +97,7 @@ static func _person(h, area: Rect2, v, m) -> void:
 	y += 96.0
 	_label(h, "BODY", Vector2(x, y + 14.0), "Armour takes damage off. Suits are for the ship.")
 	var body := str(kit["body"])
-	_slot(h, v, Rect2(x, y + 22.0, SLOT.x, SLOT.y), "body", 0, body, _name(ship, body) if body != "" else "", Kit.body_line(body) if body != "" else "", "", \
+	_slot(h, v, Rect2(x, y + 22.0, SLOT.x, SLOT.y), "body", 0, body, _name(ship, body) if body != "" else "", body_sub(body) if body != "" else "", "", \
 		["Body gear", Kit.body_line(body)] if body != "" else [], h.TEXT)
 	y += 96.0
 	_label(h, "MODS", Vector2(x, y + 14.0), "")
@@ -113,6 +113,11 @@ static func _person(h, area: Rect2, v, m) -> void:
 	if not v.load_slot.is_empty():
 		var ox := x + 2.0 * (SLOT.x + 12.0) + 16.0
 		_options(h, v, Rect2(ox, area.position.y + 70.0, area.end.x - ox, area.size.y - 70.0))
+
+
+## The line under a body gear's name in its slot: what it does without "Takes" (the whole sentence ran over the slot's edge; the hover has it).
+static func body_sub(item: String) -> String:
+	return Kit.body_line(item).trim_prefix("Takes ")
 
 
 static func _label(h, text: String, at: Vector2, note: String) -> void:
@@ -144,10 +149,10 @@ static func _slot(h, v, r: Rect2, slot: String, idx: int, item: String, title: S
 	h.hit_add(r, {"type": "slot", "slot": slot, "idx": idx})
 
 
-## The choices of the open slot, numbered 1-9.
+## The choices of the open slot, numbered (keys 1-9 pick the first nine); as many rows as the panel's height holds.
 static func _options(h, v, r: Rect2) -> void:
 	var opts: Array = v.loadout_options()
-	var rows := minf(float(opts.size()), 9.0)
+	var rows := minf(float(opts.size()), floorf((r.size.y - 38.0) / ROW))
 	var box := Rect2(r.position, Vector2(r.size.x, 34.0 + rows * ROW))
 	h.draw_rect(box, Color(h.PANEL_BG, 0.99))
 	h.draw_rect(box, h.AMBER, false, 1.5)

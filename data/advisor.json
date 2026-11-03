@@ -9,7 +9,7 @@
  "rules": {
   "worse": 1.5,
   "toll_jumps": 2,
-  "toll_scrap": 600,
+  "toll_scrap": 150,
   "scrap_credits": 200,
   "hull_stations": 3,
   "warn_s": 30,
@@ -90,7 +90,7 @@
    {
     "id": "s1_intake",
     "title": "Mount your {intake}.",
-    "why": "A third of your scrap drifts past. The net mouth is in the hold, earning nothing, like a cousin.",
+    "why": "A third of your scrap drifts past, unpaid. Craft a net mouth and mount it on the hull.",
     "check": {
      "intakes": 1
     }
@@ -98,7 +98,7 @@
    {
     "id": "s1_guns",
     "title": "Fit three {gun:guns}.",
-    "why": "Your collateral would like a third gun.",
+    "why": "Your collateral would like a third gun, cabled and powered. Unpowered, it is decor.",
     "check": {
      "guns": 3
     }
