@@ -216,6 +216,11 @@ func slider_rect(i: int) -> Rect2:
 	return Rect2(Vector2((size.x - BTN.x) / 2.0 + i * (SLIDER_W + (BTN.x - n * SLIDER_W) / (n - 1.0)), _sound_top() + 28.0), Vector2(SLIDER_W, SLIDER_H))
 
 
+## Where the label of a slider starts: over its left end, or further left when it is wider than the bar (the last one, "Ambience 100%", ran out of the menu).
+static func slider_label_x(text_w: float, r: Rect2) -> float:
+	return minf(r.position.x, r.end.x - text_w)
+
+
 ## The slider under `p` (its bar, a little taller to hit), or -1.
 func slider_at(p: Vector2) -> int:
 	for i in SOUND_KINDS.size():
@@ -322,7 +327,8 @@ func _draw_sound() -> void:
 	for i in SOUND_KINDS.size():
 		var r := slider_rect(i)
 		var v: float = float(sound[SOUND_KINDS[i][0]])
-		_text("%s %d%%" % [SOUND_KINDS[i][1], roundi(v * 100.0)], r.position + Vector2(0.0, -5.0), 13, DIM_TEXT if off else TEXT)
+		var label := "%s %d%%" % [SOUND_KINDS[i][1], roundi(v * 100.0)]
+		_text(label, Vector2(slider_label_x(ThemeDB.fallback_font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x, r), r.position.y - 5.0), 13, DIM_TEXT if off else TEXT)
 		draw_rect(r, ROW_BG)
 		draw_rect(Rect2(r.position, Vector2(r.size.x * v, r.size.y)), DIM_TEXT if off else AMBER)
 		draw_rect(r, AMBER if i == _drag else EDGE_DIM, false, 1.0)

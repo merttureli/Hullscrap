@@ -20,7 +20,7 @@ const HALL_MAX := 20  ## ships the hall of ships keeps
 const HINTS: Array[String] = ["picked", "map", "fight", "net", "craft"]  ## the first-run hints, in the order they come
 const SOUND_DEFAULTS := {"master": 0.8, "music": 0.6, "sfx": 0.8, "ambience": 0.8}  ## the volume sliders (0 to 1)
 const LEDGER_MODES: Array[String] = ["full", "warn", "off"]  ## the Ledger's settings: card, tips and warnings; warnings only; nothing
-const BETA := "Beta 3"
+const BETA := "Beta 4"
 const VERSION_PATH := "res://version.txt"  ## the short git hash, written when the game is exported
 
 var path := PATH
@@ -270,8 +270,8 @@ static func clear_saves(paths: Array) -> void:
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
 
 
-## "Beta 3 (a1b2c3d)" with the short git hash from version.txt (the export writes "Beta 3 <hash>"; a bare
-## hash works too), else "Beta 3 (dev)".
+## "Beta 4 (a1b2c3d)" with the short git hash from version.txt (the export writes "Beta 4 <hash>"; a bare
+## hash works too), else "Beta 4 (dev)".
 static func version_label(file := VERSION_PATH) -> String:
 	var short := "dev"
 	if FileAccess.file_exists(file):

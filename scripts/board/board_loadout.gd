@@ -97,7 +97,7 @@ static func _person(h, area: Rect2, v, m) -> void:
 	y += 96.0
 	_label(h, "BODY", Vector2(x, y + 14.0), "Armour takes damage off. Suits are for the ship.")
 	var body := str(kit["body"])
-	_slot(h, v, Rect2(x, y + 22.0, SLOT.x, SLOT.y), "body", 0, body, _name(ship, body) if body != "" else "", Kit.body_line(body) if body != "" else "", "", \
+	_slot(h, v, Rect2(x, y + 22.0, SLOT.x, SLOT.y), "body", 0, body, _name(ship, body) if body != "" else "", body_sub(body) if body != "" else "", "", \
 		["Body gear", Kit.body_line(body)] if body != "" else [], h.TEXT)
 	y += 96.0
 	_label(h, "MODS", Vector2(x, y + 14.0), "")
@@ -113,6 +113,11 @@ static func _person(h, area: Rect2, v, m) -> void:
 	if not v.load_slot.is_empty():
 		var ox := x + 2.0 * (SLOT.x + 12.0) + 16.0
 		_options(h, v, Rect2(ox, area.position.y + 70.0, area.end.x - ox, area.size.y - 70.0))
+
+
+## The line under a body gear's name in its slot: what it does without "Takes" (the whole sentence ran over the slot's edge; the hover has it).
+static func body_sub(item: String) -> String:
+	return Kit.body_line(item).trim_prefix("Takes ")
 
 
 static func _label(h, text: String, at: Vector2, note: String) -> void:
