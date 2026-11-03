@@ -238,19 +238,19 @@ func test_first_run_hints_are_shown_once_and_only_in_the_first_run() -> void:
 
 func test_version_label_from_version_txt() -> void:
 	_clean()
-	eq(Profile.version_label(TMP_VERSION), "Beta 4 (dev)", "no file: dev")
+	eq(Profile.version_label(TMP_VERSION), "Beta 4.1 (dev)", "no file: dev")
 	var f := FileAccess.open(TMP_VERSION, FileAccess.WRITE)
-	f.store_string("Beta 4 a1b2c3d4e5f\n")
+	f.store_string("Beta 4.1 a1b2c3d4e5f\n")
 	f.close()
-	eq(Profile.version_label(TMP_VERSION), "Beta 4 (a1b2c3d)", "the export's line gives the short hash")
+	eq(Profile.version_label(TMP_VERSION), "Beta 4.1 (a1b2c3d)", "the export's line gives the short hash")
 	f = FileAccess.open(TMP_VERSION, FileAccess.WRITE)
 	f.store_string("9f8e7d6\n")
 	f.close()
-	eq(Profile.version_label(TMP_VERSION), "Beta 4 (9f8e7d6)", "a bare hash works")
+	eq(Profile.version_label(TMP_VERSION), "Beta 4.1 (9f8e7d6)", "a bare hash works")
 	f = FileAccess.open(TMP_VERSION, FileAccess.WRITE)
-	f.store_string("Beta 4\n")
+	f.store_string("Beta 4.1\n")
 	f.close()
-	eq(Profile.version_label(TMP_VERSION), "Beta 4 (dev)", "no hash in it: dev")
+	eq(Profile.version_label(TMP_VERSION), "Beta 4.1 (dev)", "no hash in it: dev")
 	_clean()
 
 

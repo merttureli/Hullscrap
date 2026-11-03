@@ -1,6 +1,41 @@
-# Hullscrap Beta 4
+# Hullscrap Beta 4.1
 
-Boarding, a rebuilt hull, the Ledger, and a balance pass measured by a playtest bot. Download it from **GitHub → Actions → beta builds → the latest green run → Artifacts** (Windows, Linux, macOS). The main menu's corner says **Beta 4**.
+Beta 4.1 is a fights, balance and content update on top of Beta 4, from a content audit and a mechanics audit. What it changes comes first; the Beta 4 notes follow. Download it from **GitHub → Actions → beta builds → the latest green run → Artifacts** (Windows, Linux, macOS). The main menu's corner says **Beta 4.1**.
+
+## New in Beta 4.1
+### Fights
+- **The Rustbucket** carries a Bubble Rig shield in place of its Rattle Burst, and its Bolt Thrower sits in a notch one cell behind the prow, so it is no longer the first thing shot off.
+- **Every starter has a spare Reactor Mk1** in its hold.
+- **The scrap guns hit harder**: the Rattle Burst does 2 a shot (was 1); the Shrapnel Cannon fires 6 pellets of 2 out to 600 (was 5 of 1.5 out to 500).
+- **An ion hit keeps shields down for 5 s** (was 3).
+- **A spared ship hands over one part**: taking a surrender opens a short salvage page with one pick and the Scan row, and no strip row. The surrender offer itself no longer includes a part.
+- **Fewer enemies run**: Concord ships now surrender as often as they flee, and other pirates surrender more often.
+- **The skulls** no longer overrate ships armed with light kinetic guns.
+
+### Content
+- **Boarding**: 10 new discoveries, 2 new hermits and 2 new traders aboard derelicts, and 4 new logs. More derelicts have someone aboard, and suits turn up in engineering and command lockers.
+- **Events**:
+  - 3 first-week events and 6 new quest fillers;
+  - 26 events now wait for stage 4 or later, so the late game has more you haven't seen;
+  - regional events come up far more often (about 1 event in 6, was about 1 in 45);
+  - a story event you skip comes up less often each time;
+  - a new Hollow event deep in the run;
+  - fewer people do things "politely".
+- **More mods**: in lockers and cabinets, in shops, and dropped by some boarding foes.
+- **A plasma rifle in your hold** now arms your boarding soldier (as the Gatekeeper's Lance).
+- **A fuel stop in the Boneyard**: Dredgers' Rest.
+
+### Fixed
+- The debug keys no longer work in the download builds, and F1 lists them only in a debug build.
+- The Ledger's first goals and the first-fight tip say where things come from.
+- The reactor warning says what it means: "One reactor and no spare. If it's wrecked, you're adrift."
+- The Baron's duel no longer unlocks a ship that isn't in the game yet.
+
+Beta 4 saves load in Beta 4.1.
+
+# Beta 4
+
+Boarding, a rebuilt hull, the Ledger, and a balance pass measured by a playtest bot.
 
 ## Boarding
 - **Board a derelict, an abandoned station, a pirate nest or the wreck of a ship you just beat.** Their events offer "Board her". The soldier goes aboard on foot, in the dark, with a flashlight (F) and a motion tracker.

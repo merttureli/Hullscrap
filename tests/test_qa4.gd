@@ -22,7 +22,7 @@ func test_how_to_play_names_the_ledger_key() -> void:
 
 
 func test_the_beta_label_is_beta_4() -> void:
-	eq(Profile.BETA, "Beta 4", "the main menu corner says Beta 4")
+	eq(Profile.BETA, "Beta 4.1", "the main menu corner says Beta 4.1")
 
 
 func _advisor() -> Advisor:
