@@ -35,6 +35,18 @@
 									"copper": 4
 								}
 							}
+						},
+						{
+							"weight": 25,
+							"text": "The board comes away with a sound like a small sigh, and with it a maintenance cartridge no bigger than a thumb, still warm: the station's own fabricator library. It bites the hand that frees it. The cartridge holds the diagrams of an Assembly Rig, and the cursor, at last, goes out.",
+							"effects": {
+								"items": {
+									"silicon": 3,
+									"copper": 4
+								},
+								"crew_hp": -5,
+								"blueprint": "assembly_rig"
+							}
 						}
 					]
 				},
@@ -96,6 +108,17 @@
 								"site_fight": {
 									"kind": "scavenger",
 									"n": 2
+								}
+							}
+						},
+						{
+							"weight": 25,
+							"text": "The terminal opens a drawer you did not ask for: a technical annex, misfiled under MISCELLANEOUS, the plans for a laser of a finer cut than the clerk's whole department. It sends them to you with a receipt. The same drawer rings a bell three decks down, a short one, and something small and awake starts up the stairs.",
+							"effects": {
+								"blueprint": "laser_mk2",
+								"site_fight": {
+									"kind": "scavenger",
+									"n": 1
 								}
 							}
 						}

@@ -164,7 +164,7 @@ func test_start_blueprints() -> void:
 				check(not c.is_known(id), "Neon system %s must be unlocked" % id)
 			else:
 				check(c.is_known(id), "Mk1 system %s is known" % id)
-	for id in ["engine_mk2", "laser_mk2", "reactor_mk2", "laser_cutter", "assembly_rig", "nanoforge", "rifle", "eva_suit", "titanium", "pulse_mk2", "shield_mk2", "missile"]:
+	for id in ["engine_mk2", "laser_mk2", "reactor_mk2", "assembly_rig", "nanoforge", "rifle", "eva_suit", "pulse_mk2", "shield_mk2", "missile"]:
 		check(not c.is_known(id), id + " must be unlocked")
 	check(c.queue.is_empty(), "nothing queued")
 	for id in c.ids():

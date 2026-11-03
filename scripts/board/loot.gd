@@ -8,6 +8,7 @@ extends RefCounted
 ## Contents: {items: {id: n}, blueprint: recipe id or "", log: log id or "", key: key id or ""}.
 
 const Site = preload("res://scripts/board/site.gd")
+const Salvage = preload("res://scripts/space/salvage.gd")
 const Themes = preload("res://scripts/board/themes.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 
@@ -94,10 +95,15 @@ static func _pick(table: Array, rng: RandomNumberGenerator) -> Dictionary:
 	return table[-1]
 
 
-## A recipe of `ctx.unknown` by the weights of the tier's levels; "" when there is none.
+## A recipe of `ctx.unknown`: the one the ship (`ctx.ship`) can craft next, the pick of a salvage's Scan row (Salvage.next_recipe); when it can craft none
+## of them, or `ctx` has no ship, one by the weights of the tier's levels; "" when there is none.
 static func _blueprint(ctx: Dictionary, tier: int, rng: RandomNumberGenerator) -> String:
 	var unknown: Array = ctx.get("unknown", []).duplicate()
 	unknown.sort()
+	if ctx.get("ship") != null:
+		var next := Salvage.next_recipe(ctx["ship"], unknown, rng)
+		if next != "":
+			return next
 	var w: Array = Site.config()["blueprint"]["levels"][str(tier)]
 	var weights := []
 	var total := 0.0

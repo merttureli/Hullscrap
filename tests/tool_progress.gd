@@ -13,11 +13,12 @@ extends SceneTree
 ## speed), then spends what it has by the policy's ladder (`next_intent`): intake, guns, shield / medbay, engines (so the ship does not fall behind its
 ## own mass), fabricator level, laser cutter and titanium, tier-2 parts as the blueprints allow, armour last. Parts are crafted when the recipe is known and
 ## the fabricator can run it, else bought when docked. At a station it sells the surplus of the common materials (a credit each), mends the hull, buys fuel.
-## A blueprint on a salvage page is worth more than a part.
+## A blueprint on a salvage page is worth more than a part. A Trader's or Store's small shop is visited too (it buys the blueprints it lacks, keeping the toll and 40 credits),
+## a dock tops the hold up to TANK fuel, and a part a fight wrecked is replaced when the ship cannot do without it (a helm: no flying; a reactor: the power margin under 0).
 ## It builds on the real ship through BuildSession (a part goes on a free spot, else in a new annex room; cables are laid; power is added).
 ## Fights run through the real arena, as tests/tool_balance.gd does, on the ship itself: its blocks keep their damage (structure.gd), the crew and the drone
 ## mend them in ShipSim time between fights (mend()), a station repairs the rest for credits. A fight is left (the 10 s jump spool) when the structure is under 30% of the way to the wreck line. The exit
-## warden's toll is paid when it is affordable, else fought (up to three rounds, with a trip to a station between). The output rows are one dictionary
+## warden's toll is paid when it is affordable (scrap is sold for it on a trip to a station, which keeps the toll's credits), else fought (up to three rounds, with a trip to a station between). The output rows are one dictionary
 ## per run: its stages carry the ship before and after, the fights (rating, length, hull), the flows of every resource by source and the craft census.
 ## Not modelled: the real flying and aiming of a human, crew commands, boarding, the Hollow tide's pursuit (its debris thinning is, through the sector).
 
@@ -43,6 +44,8 @@ const Balance = preload("res://tests/tool_balance.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
+const Shops = preload("res://scripts/space/shops.gd")
+const Flight = preload("res://scripts/sim/flight.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
@@ -53,6 +56,7 @@ const SAMPLE_S := 30.0  ## seconds of debris really simulated per node; the yiel
 const STARTERS: Array[String] = ["starter_rustbucket", "starter_courier", "starter_prism"]
 const WINS: Array[String] = ["won", "captured", "spared"]
 const SEED_BASE := 9000
+const TANK := 14  ## the fuel a dock tops the hold up to (fuel_up)
 ## What things are worth to the player (credits), for the choice of an event row and a salvage pick.
 const WORTH := {"scrap": 0.5, "copper": 1.5, "polymer": 1.5, "titanium": 6.0, "silicon": 8.0, "crystal": 18.0, "plasma_cell": 25.0, "nanite_paste": 60.0, "credits": 1.0, "fuel": 8.0, "missile": 3.0, "steel": 5.0}
 const SKULL_COST := {0: 0.0, 1: 5.0, 2: 25.0, 3: 90.0, 4: 700.0, 5: 3000.0}  ## what meeting a fight of that many skulls is worth, in credits
@@ -74,6 +78,7 @@ var nodes_n := 7
 var verbose := false
 var weapons: Weapons
 var _pick := RandomNumberGenerator.new()
+var _reserve := 0  # credits a dock leaves alone: the warden's toll (and 40), on the trips made to sell for it
 var _carry := {}  # item -> the fraction of a unit the scaled debris yield has not paid yet
 # the state of the run being played
 var c: Campaign
@@ -178,7 +183,7 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 	_no_annex.clear()
 	c = Campaign.new(SEED_BASE + seed_index)
 	ship = Ship.from_design(path)
-	RunStart.add_drone(ship)
+	RunStart.apply_ship(ship, {}, null)  # the start of a real run: fuel.start fuel, recipes.json start_known, the drone (a design's own cargo has 6 fuel)
 	Jobs.spawn_crew(ship)
 	ship.refresh()
 	_armour0 = int(stats_now()["armour"])
@@ -203,7 +208,7 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 
 func new_stage() -> Dictionary:
 	var rec := {"stage": c.stage, "region": c.region_id, "nodes": 0, "jumps": 0, "minutes": 0.0, "fights": [], "flow": {}, "pois": 0, "dock": 0, "fuel_bought": 0, "drift_jumps": 0, "tows": 0,
-		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0}
+		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0, "shops": 0, "seen": [], "dens": 0.0, "press": 0.0, "hollow": 0, "dens_n": 0, "slice_new": 0, "slice_old": 0, "speed_sum": 0.0, "fab_max": 0, "peak": {}}
 	rec["start"] = snapshot()
 	return rec
 
@@ -253,7 +258,9 @@ func play_stage() -> bool:
 			for hop in path_to(stn):
 				if not go(hop):
 					return end_stage(false)
+			_reserve = Wardens.toll_of(c.warden) + 40
 			dock()
+			_reserve = 0
 			_docked = ""
 	for hop in path_to(c.drift.exit_id()):
 		if not go(hop):
@@ -370,7 +377,9 @@ func regroup() -> bool:
 	for hop in path_to(stn):
 		if not go(hop):
 			return false
+	_reserve = Wardens.toll_of(c.warden) + 40 if c.warden_up() else 0
 	dock()
+	_reserve = 0
 	_docked = ""
 	for hop in path_to(exit_id):
 		if not go(hop):
@@ -428,6 +437,8 @@ func visit_node() -> bool:
 		var docks := not c.station_cfg(c.current).is_empty() and c.dock_block(c.current) == "" and (str(poi["type"]) in ["station", "store", "trader"] or bool(poi.get("main", false)))
 		if docks:
 			dock()
+		if bool(s.cfg["poi_types"].get(str(poi["type"]), {}).get("shop", false)):
+			shop_visit(c.shop_id(c.current, str(poi["id"])))
 		s.resolve(str(poi["id"]))
 	_docked = ""
 	if not collect(s, stay):
@@ -446,6 +457,33 @@ func poi_plan(s) -> Array:
 	return mains + others.slice(0, int(args.get("pois", 5)))
 
 
+## The scrap a slice of debris brings in with spawn.max_alive `cap` and spawn.flow_min `floor_v`, the ship flying at `speed`; what it took in is undone.
+func paired_slice(s, pos0: Vector2, ang: float, piv: Vector2, cur: Vector2, speed: float, slice: float, cap: int, floor_v: float) -> int:
+	var base: Dictionary = Content.read(DriftDebris.PATH).duplicate(true)
+	base["spawn"]["max_alive"] = cap
+	base["spawn"]["flow_min"] = floor_v
+	var dd2 = DriftDebris.new(hash([c.seed_value, c.jumps, st["nodes"]]), s.debris_cfg(base))
+	var pos2 := pos0
+	dd2.frame = Helm.frame_of(ship, pos2, ang, piv)
+	dd2.frame_vel = -cur.normalized() * speed
+	dd2.view_centre = dd2.frame * ship.world_pos
+	dd2.prewarm(ship)
+	var keep: Dictionary = ship.inventory.counts.duplicate()
+	var t2 := 0.0
+	while t2 < slice:
+		pos2 += dd2.frame_vel * 0.5
+		dd2.frame = Helm.frame_of(ship, pos2, ang, piv)
+		dd2.view_centre = dd2.frame * ship.world_pos
+		dd2.step(ship, 0.5)
+		t2 += 0.5
+	var got: int = ship.inventory.count("scrap") - int(keep.get("scrap", 0))
+	for id in ship.inventory.counts.keys().duplicate():  # (undo what it took in)
+		var extra: int = int(ship.inventory.counts[id]) - int(keep.get(id, 0))
+		if extra != 0:
+			ship.inventory.add(id, -extra)
+	return got
+
+
 ## Collect debris for `seconds` in sector `s` with the real intakes: a SAMPLE_S slice is simulated and scaled up. The ambient contacts come while
 ## the ship stays. False when a fight wrecked the ship.
 func collect(s, seconds: float) -> bool:
@@ -453,6 +491,10 @@ func collect(s, seconds: float) -> bool:
 	ship.refresh()
 	s.set_flight(ship)
 	var dd = DriftDebris.for_sector(s, hash([c.seed_value, c.jumps, st["nodes"]]))
+	st["dens"] += float(s.density) * lerpf(1.0, float(s.cfg["pressure"]["debris"]), s.pressure) * (float(s.cfg["ambient"].get("hollow", {}).get("debris", 1.0)) if s.hollow else 1.0)
+	st["press"] += float(s.pressure)
+	st["hollow"] += int(s.hollow)
+	st["dens_n"] += 1
 	var terminal: float = float(s.accel) * 1.8 / maxf(float(s.damping), 0.01)
 	var speed := clampf(0.5 * minf(terminal, float(s.max_speed) * 1.8), 60.0, 500.0)
 	var cur: Vector2 = s.current_dir()
@@ -466,6 +508,7 @@ func collect(s, seconds: float) -> bool:
 	var ang := (-cur).angle() - lead.angle()  # the mouth leads into the stream
 	var piv: Vector2 = Helm.pivot_of(ship.grid)
 	var pos := Vector2(s.size * 0.5, s.size * 0.5)
+	var pos0 := pos
 	dd.frame = Helm.frame_of(ship, pos, ang, piv)
 	dd.frame_vel = -cur.normalized() * speed
 	dd.view_centre = dd.frame * ship.world_pos
@@ -479,6 +522,13 @@ func collect(s, seconds: float) -> bool:
 		dd.view_centre = dd.frame * ship.world_pos
 		dd.step(ship, 0.5)
 		t += 0.5
+	st["slice_new"] += ship.inventory.count("scrap") - int(inv_before.get("scrap", 0))
+	st["speed_sum"] += speed
+	if args.has("paired"):  # the same ship and sector with other debris numbers or another speed: what the cap and the floor, and the speed, are worth here
+		st["slice_old"] += paired_slice(s, pos0, ang, piv, cur, speed, slice, 70, 5.0)  # (the numbers from before this track)
+		for sp in [60.0, 250.0]:
+			st["slice_new_%d" % int(sp)] = int(st.get("slice_new_%d" % int(sp), 0)) + paired_slice(s, pos0, ang, piv, cur, sp, slice, 140, 5.5)
+			st["slice_old_%d" % int(sp)] = int(st.get("slice_old_%d" % int(sp), 0)) + paired_slice(s, pos0, ang, piv, cur, sp, slice, 70, 5.0)
 	if args.has("dbg"):
 		print("collect: mouths %d picked %d pieces %d rot %d ang %.2f speed %.0f cur %s dens %.2f" % [dd.mouth_count, dd.picked, dd.pieces.size(), out_rot, ang, speed, str(cur), float(s.density)])
 	st["intake_pieces"] += int(dd.picked * seconds / maxf(slice, 1.0))
@@ -526,6 +576,8 @@ func chain(ev: Dictionary) -> bool:
 		if e.is_empty():
 			continue
 		pages += 1
+		if pages == 1:
+			st["seen"].append(str(e.get("id", "")))
 		var view: Array = c.events.choice_view(e, c, ship, c.node(c.current))
 		var open: Array = view.filter(func(v): return not v["grey"])
 		if open.is_empty():
@@ -587,8 +639,8 @@ func effects_value(eff: Dictionary, ev: Dictionary) -> float:
 	var items: Dictionary = eff.get("items", {}) if eff.get("items") is Dictionary else {}
 	for id in items:
 		v += item_worth(str(id)) * float(items[id])
-	if eff.get("blueprint") is Array:
-		for rid in eff["blueprint"]:
+	if eff.has("blueprint"):  # (an id or a list of ids: events.gd reads both)
+		for rid in (eff["blueprint"] if eff["blueprint"] is Array else [eff["blueprint"]]):
 			v += blueprint_worth(str(rid))
 	v += 4.0 * float(eff.get("hull", 0)) + 0.6 * float(eff.get("crew_hp", 0))
 	v += 220.0 * (eff["recruit"].size() if eff.get("recruit") is Array else 0)
@@ -748,18 +800,22 @@ func dock() -> void:
 	var services: Array = cfg.get("services", [])
 	if services.has("sell"):  # the surplus of the common materials sells at a credit each: credits are what the hull, fuel and tolls are paid in
 		var keep := {"scrap": 600 + 250 * c.stage, "copper": 250 + 80 * c.stage, "polymer": 120}
+		if policy != "idle" and c.warden_up():  # the toll is paid in credits and scrap sells a credit each: sell what it takes, whatever stock a person keeps
+			var short: int = Wardens.toll_of(c.warden) + 40 - ship.inventory.count("credits")
+			if short > 0:
+				keep["scrap"] = mini(int(keep["scrap"]), ship.inventory.count("scrap") - short)
 		for item in keep:
 			var extra: int = ship.inventory.count(item) - int(keep[item])
 			if extra > 0 and ship.inventory.count("credits") < 2500:
 				c.sell(ship, item, mini(extra, 2500 - ship.inventory.count("credits")))
 	if services.has("repair"):  # every damaged block, or nothing: the price is for the lot
 		var cost: int = c.repair_cost(ship, id)
-		if cost > 0 and ship.inventory.count("credits") >= cost:
+		if cost > 0 and ship.inventory.count("credits") - _reserve >= cost:
 			c.repair(ship, id)
 	fuel_up()
 	if services.has("recruit") and not c.offers.get(id, []).is_empty():
 		var price: int = c.price(int(c.cfg["prices"]["recruit"]), c._station_faction(id), ship)
-		if ship.inventory.count("credits") >= price + 100:
+		if ship.inventory.count("credits") >= price + 100 + _reserve:
 			c.recruit(ship, id, 0)
 	flow("shop", before)
 	build_phase()
@@ -767,12 +823,35 @@ func dock() -> void:
 		c.pay_debt(ship, mini(100, c.debt))
 
 
-## Buy fuel at the dock until there is enough for the stage (8) and the credits allow.
+## A Trader's or Store's small shop: the player buys the blueprints it lacks, best first, while the credits stay over the toll and a cushion of 40
+## (the Ledger's own). Nothing else is shopped for here. The idle policy builds nothing and buys nothing.
+func shop_visit(sid: String) -> void:
+	var menu: Dictionary = c.station_cfg(sid)
+	if menu.is_empty() or policy == "idle":
+		return
+	st["shops"] += 1
+	var before := inv_copy()
+	var picks: Array = []
+	for item in menu.get("stock", {}):
+		var rid := str(item).trim_prefix(Shops.BLUEPRINT)
+		if str(item).begins_with(Shops.BLUEPRINT) and ship.crafting.def(rid).size() > 0 and not ship.crafting.is_known(rid):
+			picks.append([blueprint_worth(rid), str(item)])
+	picks.sort_custom(func(x, y): return x[0] > y[0])
+	var keep := (Wardens.toll_of(c.warden) if not c.warden.is_empty() else 0) + 40
+	for pick in picks:
+		var price: int = c.stock_price(sid, pick[1], ship)
+		if price > 0 and ship.inventory.count("credits") - price >= keep and c.buy(ship, sid, pick[1])["ok"]:
+			st["bp_list"].append("%s@shop" % str(pick[1]).trim_prefix(Shops.BLUEPRINT))
+	flow("shop", before)
+
+
+## Buy fuel at the dock: every unit on sale up to a tank that crosses a stage (TANK: this player makes 11 to 15 jumps a stage, so a tank of 9, the
+## first value of this tool, could not cover one even when full), while the credits allow.
 func fuel_up() -> void:
 	if _docked == "" or not c.station_cfg(_docked).get("services", []).has("fuel"):
 		return
-	var want := 9 - ship.inventory.count("fuel")
-	while want > 0 and ship.inventory.count("credits") > 30:
+	var want := TANK - ship.inventory.count("fuel")
+	while want > 0 and ship.inventory.count("credits") > 30 + _reserve:
 		var r: Dictionary = c.buy_fuel(ship, _docked, 1)
 		if not r["ok"]:
 			break
@@ -820,12 +899,24 @@ func build_phase() -> void:
 				break
 		if not done:
 			_skip[it["kind"]] = true
+	var sn := stats_now()  # the stage's end is after its last fights, which wreck parts that stay wrecked: what the ship was at its best in between is the peak
+	var pk: Dictionary = st["peak"]
+	for key in ["guns", "layers", "intakes", "medbays", "armour", "fab"]:
+		pk[key] = maxi(int(pk.get(key, 0)), int(sn[key]))
+	pk["power"] = maxf(float(pk.get("power", 0.0)), float(Threat.power(ship, float(Threat.config()["player_aim"]))["power"]))
+	pk["known"] = maxi(int(pk.get("known", 0)), ship.crafting.known.size())
+	st["fab_max"] = int(pk["fab"])
 
 
 ## The next thing the policy wants, {kind, ids (best first)}, skipping the kinds that failed this phase. {} when it wants nothing.
 func next_intent() -> Dictionary:
 	ship.refresh()
 	var snap := stats_now()
+	if policy != "idle":  # upkeep: a part wrecked in a fight stays wrecked, and a person replaces what the ship cannot do without
+		if not _skip.has("helm") and Flight.new().can_fly(ship.components, ship.power_state.get("powered", {})) == "no powered helm":  # (without one it cannot fly: collect() would be at its slowest)
+			return {"kind": "helm", "ids": ranked(["helm"], "helm")}
+		if not _skip.has("power") and margin() < 0.0:  # (a reactor gone leaves the workshop and the guns dark)
+			return {"kind": "power", "ids": ranked(["reactor_mk2", "reactor_mk1", "reactor_scrap_mk1"], "reactor")}
 	if not _skip.has("intake") and snap["intakes"] < target("intakes"):
 		return {"kind": "intake", "ids": ranked(["intake_mk3", "intake_mk2", "intake_mk1", "net_mouth_scrap"], "intake")}
 	if not _skip.has("gun") and snap["guns"] < target("guns"):
@@ -934,6 +1025,8 @@ func procure(id: String, force := false) -> String:
 	if _docked != "":
 		var price: int = c.stock_price(_docked, id, ship)
 		if price > 0:
+			if ship.inventory.count("credits") - _reserve < price:
+				return "missing credits"
 			var r: Dictionary = c.buy(ship, _docked, id, 1)
 			if r["ok"]:
 				flow_add("shop_out", {"credits": price})
@@ -1388,8 +1481,28 @@ func snapshot() -> Dictionary:
 			ship.crafting.known.erase(rid)
 		var key := "ready" if why == "" else ("level" if why.contains("level") or why.contains("offline") else ("tool" if why.begins_with("needs tool") else "materials"))
 		census["ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short")] = int(census.get("ok" if known and key == "ready" else ("bp_" + key if not known else "ok_short"), 0)) + 1
-	return {"census": census, "power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
-		"margin": int(s["produce"]) - int(s["consume"]), "fab": s["fab"], "armour": s["armour"], "medbays": s["medbays"], "known": ship.crafting.known.size(), "crew": ship.crew.size(),
+	var fabs: Array = []  # per fabricator: its level and the modules in its room (level 3 wants a Rig and two arms in ONE room)
+	var room_of: Dictionary = ship.atmosphere.room_of
+	var powered: Dictionary = ship.power_state.get("powered", {})
+	for fuid in ship.components.instances:
+		if str(ship.components.instances[fuid]["id"]) != "fabricator":
+			continue
+		var froom: int = room_of.get(ship.components.instances[fuid]["anchor"], -1)
+		var mods := {"robot_arm": 0, "assembly_rig": 0, "robot_arm_off": 0, "assembly_rig_off": 0, "elsewhere": 0}
+		for muid in ship.components.instances:
+			var mid := str(ship.components.instances[muid]["id"])
+			if mid in ["robot_arm", "assembly_rig"]:
+				if room_of.get(ship.components.instances[muid]["anchor"], -1) == froom:
+					mods[mid if powered.get(muid, false) else mid + "_off"] += 1
+				else:
+					mods["elsewhere"] += 1
+		var cells := 0
+		for cell in room_of:
+			if room_of[cell] == froom:
+				cells += 1
+		fabs.append({"level": int(Workshop.level_of(ship.components, {"room_of": room_of}, fuid, powered)["level"]), "room_cells": cells, "mods": mods})
+	return {"fabs": fabs, "census": census, "power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
+		"margin": int(s["produce"]) - int(s["consume"]), "fab": s["fab"], "arms": s["arms"], "rigs": s["rigs"], "cutters": s["cutters"], "armour": s["armour"], "medbays": s["medbays"], "known": ship.crafting.known.size(), "crew": ship.crew.size(),
 		"hull_left": roundi(100.0 * Structure.wreck_margin(ship)), "hull_max": 100, "held": held, "spare_parts": part_count, "jumps": c.jumps, "debt": c.debt, "tier": c.tier()}
 
 

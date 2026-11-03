@@ -2,14 +2,18 @@ extends RefCounted
 ## Cutting a beaten ship apart (docs/MECHANICS_REVIEW.md P3): the loot of a fight is the enemy's real,
 ## surviving parts, and the player picks one of a few ("pick 1 of 3"). event_for() builds an event
 ## dictionary the event panel shows as it is (id `salvage`): one row to cut out each of up to 3 parts (4 when
-## the ship was captured whole), one row to scan the best part whose blueprint is unknown, and, after a plain
+## the ship was captured whole), one row to scan the part whose blueprint the ship can use next (next_recipe), and, after a plain
 ## win, a row to strip her for scrap. Parts the fight wrecked are no longer on the ship, so they are not offered.
 ## A crew member with loot_bonus adds rows to the pick (picks_for). No nodes, no drawing. All the random picks use the campaign's rng; the numbers are in data/drift.json `loot`.
 ## `c` below is the campaign (campaign.gd; not preloaded here, to avoid a cycle) and `ship` the player's Ship.
 
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
+const Content = preload("res://scripts/data/content.gd")
+const Workshop = preload("res://scripts/craft/workshop.gd")
+const Processing = preload("res://scripts/craft/processing.gd")
 
+const OTHER := 3  ## next_recipe: the class of every recipe that is not a module, a weapon or a shield
 const NOT_OFFERED: Array = ["bed", "helm"]  ## families and ids nobody cuts out of a wreck
 const PICKS := {"won": 3, "captured": 4}  ## parts offered by the state of the fight
 const DANGEROUS_TEXT := " She was dangerous. There's more worth cutting."  ## added to the page when the threat bonus gave more rows
@@ -55,6 +59,71 @@ static func recipe_for(ship, item: String) -> String:
 	return ""
 
 
+## The recipe among `ids` the ship can craft next, "" when none can be (the Scan row of a salvage and a boarding blueprint share this pick).
+## A candidate is unknown, not a material, and within reach of its station: the level it asks is at most the station's level + 1 (the fabricator,
+## or the smelter for a smelter recipe) and each tool it asks is on the station or its recipe is known (the ship can build it). Of those the
+## fabricator modules come first (they open the next level), then the weapons and shields of the core game, then those of the racial packs, the
+## higher tier first in each; only when there are none, other parts by tier, the top tier on offer left out while a lower one remains (the next
+## step, not the far prize). Equals: the first by id, or one drawn with `rng` when it is given.
+static func next_recipe(ship, ids: Array, rng = null) -> String:
+	var stations := {}  # station -> {level, tools}, looked up once
+	var cands := []
+	for v in ids:
+		var rid := str(v)
+		if not ship.crafting.has(rid) or ship.crafting.is_known(rid) or cands.has(rid):
+			continue
+		var r: Dictionary = ship.crafting.def(rid)
+		if str(r.get("category", "")) == "material":
+			continue
+		var st := str(r["station"])
+		if not stations.has(st):
+			stations[st] = Workshop.best(ship) if st == "fabricator" else Processing.best(ship, st)
+		var have: Dictionary = stations[st]
+		if int(r["fab_level"]) > int(have["level"]) + 1:
+			continue
+		if r["tools"].any(func(t): return not have["tools"].has(t) and not ship.crafting.is_known(str(t))):
+			continue
+		cands.append(rid)
+	var pool: Array = cands.filter(func(x): return _recipe_class(ship, x) < OTHER)
+	if pool.is_empty():
+		pool = cands
+		var top := 0
+		for rid in cands:
+			top = maxi(top, _recipe_tier(ship, rid))
+		var lower: Array = cands.filter(func(x): return _recipe_tier(ship, x) < top)
+		if not lower.is_empty():
+			pool = lower
+	var best_score := 1 << 30
+	var best := []
+	for rid in pool:
+		var score := _recipe_class(ship, rid) * 100 - _recipe_tier(ship, rid)
+		if score < best_score:
+			best_score = score
+			best = []
+		if score == best_score:
+			best.append(rid)
+	if best.is_empty():
+		return ""
+	best.sort()
+	return str(best[0] if rng == null else best[rng.randi() % best.size()])
+
+
+## How much next_recipe wants recipe `rid`: 0 a fabricator module, 1 a weapon or shield of the core game, 2 one of a racial pack (tech_*), OTHER the rest.
+static func _recipe_class(ship, rid: String) -> int:
+	var item := str(ship.crafting.def(rid)["output"]["item"])
+	var family := str(ship.components.def(item).get("family", ""))
+	if family == "workshop":
+		return 0
+	if family == "weapon" or family == "shield":
+		return 2 if Content.origin("components", item).begins_with("tech_") else 1
+	return OTHER
+
+
+## The tier of what recipe `rid` makes (1 for anything that is not a part).
+static func _recipe_tier(ship, rid: String) -> int:
+	return int(ship.components.def(str(ship.crafting.def(rid)["output"]["item"])).get("tier", 1))
+
+
 ## The recipe of the Repair Drone (R1) when this salvage may also offer to scan its blueprint, else "": it is unknown, and a roll of
 ## data/drift.json `loot.drone_scan` (a fifth of the wrecks, about as rare as a tier-2 part) comes up. The roll is made from the run's seed and
 ## the fights won, so a given wreck always offers the same and the campaign's rng stream is left alone.
@@ -69,7 +138,7 @@ static func drone_scan(ship, c) -> String:
 
 ## The salvage event for `enemy` (its Ship, as the fight left it) after a fight in `state` ("won" or "captured").
 ## Returns {} when there is nothing to offer. Rows, in order: "Cut out the X" (the part, to the cargo), at
-## most one "Scan the X" (its blueprint: the highest-tier offered part whose recipe the ship does not know),
+## most one "Scan the X" (its blueprint: the unknown recipe of an offered part that the ship can craft next, see next_recipe),
 ## and for a win "Strip her for scrap". A captured ship's scrap was paid already (Campaign.fight_done).
 ## A ghost ship (`hollow`: it came from a place the Hollow tide has taken, which is what the campaign says when the
 ## flag is left out) offers only the strip row, at half the scrap, whatever the state: nothing aboard is worth cutting
@@ -94,12 +163,15 @@ static func event_for(enemy, state: String, c, ship, hollow = null, threat := 0)
 	for id in picked:
 		var nm := _name(ship, id)
 		choices.append(_row("Cut out the %s" % nm, "The cutters bite through the mounts and the %s comes free." % nm, {"items": {id: 1}}))
-	var scan := ""  # the part to scan: the highest tier, the first of equals
+	var offered := {}  # recipe -> the picked part that shows it
 	for id in picked:
-		if recipe_for(ship, id) != "" and not ship.crafting.is_known(recipe_for(ship, id)) and (scan == "" or _tier(ship, id) > _tier(ship, scan)):
-			scan = id
-	if scan != "":
-		choices.append(_row("Scan the %s (learn its blueprint)" % _name(ship, scan), "The scanner maps every weld and wire of the %s." % _name(ship, scan), {"blueprint": [recipe_for(ship, scan)]}))
+		var rid := recipe_for(ship, id)
+		if rid != "" and not offered.has(rid):
+			offered[rid] = id
+	var scan_rid := next_recipe(ship, offered.keys())  # the recipe the ship can craft next, not the grandest on the page
+	if scan_rid != "":
+		var scan: String = offered[scan_rid]
+		choices.append(_row("Scan the %s (learn its blueprint)" % _name(ship, scan), "The scanner maps every weld and wire of the %s." % _name(ship, scan), {"blueprint": [scan_rid]}))
 	var foe := str(enemy.name) if enemy != null else "ship"
 	var text := "Nobody is left standing aboard the %s. Your crew strip her hold, then pick one prize to cut loose." % foe
 	var more := DANGEROUS_TEXT if picked.size() > base + TraitSet.loot_bonus(ship) else ""  # the bonus of a crew member is not the threat's
@@ -131,7 +203,3 @@ static func _row(text: String, outcome_text: String, effects: Dictionary) -> Dic
 
 static func _name(ship, id: String) -> String:
 	return ship.crafting.name_of(id, ship.components)
-
-
-static func _tier(ship, id: String) -> int:
-	return int(ship.components.def(id).get("tier", 1))

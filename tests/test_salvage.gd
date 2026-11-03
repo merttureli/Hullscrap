@@ -110,24 +110,27 @@ func test_the_event_has_the_texts_and_the_rows_in_order() -> void:
 func test_a_scan_row_only_for_an_unknown_recipe_and_it_unlocks_the_blueprint() -> void:
 	var c := Campaign.new(4)
 	var ship := _ship()
-	check(not ship.crafting.is_known("reactor_mk2"), "the Reactor Mk2 blueprint is not known at the start")
+	check(not ship.crafting.is_known("pulse_mk2"), "the Pulse Mk2 blueprint is not known at the start")
 	var enemy := _enemy(["laser_mk1", "engine_mk1", "reactor_mk2"])
+	for uid in enemy.components.instances.keys():
+		if enemy.components.instances[uid]["id"] == "reactor_mk2":
+			enemy.components.instances[uid]["id"] = "pulse_mk2"  # a level 2 recipe, no tool: within a level 1 fabricator's reach
 	var ev := Salvage.event_for(enemy, "won", c, ship)
 	var scan := _row(ev, "Scan the ")
 	check(scan >= 0, "an unknown recipe gets a scan row")
-	eq(ev["choices"][scan]["text"], "Scan the Reactor Mk2 (learn its blueprint)", "its text")
-	eq(ev["choices"][scan]["outcomes"][0]["effects"], {"blueprint": ["reactor_mk2"]}, "its effect")
+	eq(ev["choices"][scan]["text"], "Scan the Pulse Mk2 (learn its blueprint)", "its text")
+	eq(ev["choices"][scan]["outcomes"][0]["effects"], {"blueprint": ["pulse_mk2"]}, "its effect")
 	eq(ev["choices"].filter(func(ch): return ch["text"].begins_with("Scan")).size(), 1, "only one scan row")
 	var r := c.events.choose(ev, scan, c, ship)
 	check(r["ok"], "the row can be taken")
-	check(ship.crafting.is_known("reactor_mk2"), "taking it unlocks the blueprint")
+	check(ship.crafting.is_known("pulse_mk2"), "taking it unlocks the blueprint")
 	check(r["lines"].any(func(l): return l.begins_with("Blueprint learned")), "and says so")
 	eq(_row(Salvage.event_for(enemy, "won", c, ship), "Scan the "), -1, "known now: no scan row")
 	var known_only := _enemy(["laser_mk1", "engine_mk1"])
 	eq(_row(Salvage.event_for(known_only, "won", c, _ship()), "Scan the "), -1, "parts whose recipes are known have no scan row")
 
 
-func test_the_scan_row_is_the_highest_tier_unknown_recipe() -> void:
+func test_the_scan_row_is_the_next_craftable_recipe_not_the_highest_tier() -> void:
 	var c := Campaign.new(5)
 	var ship := _ship()
 	var enemy := _enemy(["laser_mk1", "engine_mk1", "reactor_mk2"])
@@ -136,10 +139,9 @@ func test_the_scan_row_is_the_highest_tier_unknown_recipe() -> void:
 			enemy.components.instances[uid]["id"] = "pulse_mk1"  # tier 1, recipe unknown
 	check(not ship.crafting.is_known("pulse_mk1") and not ship.crafting.is_known("reactor_mk2"), "both recipes are unknown")
 	var ev := Salvage.event_for(enemy, "won", c, ship)
-	eq(ev["choices"][_row(ev, "Scan the ")]["outcomes"][0]["effects"], {"blueprint": ["reactor_mk2"]}, "tier 2 beats tier 1")
-	ship.crafting.unlock("reactor_mk2")
-	ev = Salvage.event_for(enemy, "won", c, ship)
-	eq(ev["choices"][_row(ev, "Scan the ")]["outcomes"][0]["effects"], {"blueprint": ["pulse_mk1"]}, "with the tier 2 known, the tier 1 is scanned")
+	eq(ev["choices"][_row(ev, "Scan the ")]["outcomes"][0]["effects"], {"blueprint": ["pulse_mk1"]}, "the tier 2 reactor is a level 3 recipe, out of reach of this fabricator: the pulse is scanned")
+	ship.crafting.unlock("pulse_mk1")
+	eq(_row(Salvage.event_for(enemy, "won", c, ship), "Scan the "), -1, "with the pulse known, the reactor is still out of reach: no scan row")
 
 
 func test_the_strip_scrap_follows_the_formula() -> void:

@@ -11,7 +11,8 @@ extends RefCounted
 ## Streams: besides the main current a sector adds up to two side streams (cfg `streams`: angle, speed and the share of the
 ## pieces each carries). Every piece belongs to one stream and drifts with it. A piece appears upstream of its stream's flow
 ## past the ship (the stream's velocity less the ship's), and the spawn rate is scaled by how much faster that flow is than
-## the stream (1 to 6 x), so a fast ship meets more pieces and the screen stays full whatever the speed.
+## the stream (spawn.flow_min to 6 x), so a fast ship meets more pieces and the screen stays full whatever the speed, and a heavy slow one
+## (whose flow past it is slow) still collects at the floor.
 ## Positions are world px. On the build screen that is the space the build view draws the ship in (ship.world_pos is
 ## the grid centre); in a sector the pieces live in sector px and `frame` says where the ship's cells are (its place and
 ## heading, helm.gd frame()) and `frame_vel` how fast it moves: pieces then spawn upstream of the flow past the ship,
@@ -140,16 +141,18 @@ func flow_dir() -> Vector2:
 
 
 ## What the next piece is picked from: each stream's share of the pieces times how much faster its flow past the ship is than
-## the stream itself, clamped to 1 to 6 (the main current has the share the side streams leave). Their sum scales the spawn rate.
+## the stream itself, clamped to spawn.flow_min (1 when the data has none) to 6 (the main current has the share the side streams leave). Their sum
+## scales the spawn rate.
 func _stream_weights() -> Array:
 	var sides: Array = cfg["streams"]
 	var rest := 1.0
 	for st in sides:
 		rest -= float(st["share"])
 	var out := []
+	var least := float(cfg["spawn"].get("flow_min", 1.0))
 	for i in sides.size() + 1:
 		var v := stream_vel(i)
-		out.append((maxf(rest, 0.0) if i == 0 else float(sides[i - 1]["share"])) * clampf((v - frame_vel).length() / maxf(v.length(), 1.0), 1.0, 6.0))
+		out.append((maxf(rest, 0.0) if i == 0 else float(sides[i - 1]["share"])) * clampf((v - frame_vel).length() / maxf(v.length(), 1.0), least, 6.0))
 	return out
 
 

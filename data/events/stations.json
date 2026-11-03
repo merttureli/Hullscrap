@@ -30,7 +30,7 @@
       ]
     },
     {
-      "id": "station_rusthold_scrap_market", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
+      "id": "station_rusthold_scrap_market", "type": "station", "weight": 30, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
       "text": "The scrap market runs three floors and one rumour. A boy tries to sell you your own bolts back. A woman tries to sell you a map of the market. Both, you realise, are correct.",
       "choices": [
         {"text": "Buy the boy's bolts back (5 credits).", "requires": {"credits": 5}, "outcomes": [
@@ -41,6 +41,9 @@
         ]},
         {"text": "Walk the stalls and listen.", "outcomes": [
           {"weight": 100, "text": "Six different people tell you six different prices for the same pipe. You leave with a rough idea of what a pipe is worth, and a headache.", "effects": {}}
+        ]},
+        {"text": "Ask the old man under the crane for his lifting-rig drawings (150 scrap, 20 copper).", "requires": {"items": {"scrap": 150, "copper": 20}, "not_flag": "bp_assembly_rig"}, "outcomes": [
+          {"weight": 100, "text": "He unrolls three floors of a gantry arm, hand-inked, with the rude words left in. 'Built four,' he says. 'Three fell over. The drawings are fine.' He weighs your scrap by eye, gets it right to the pound, and is insulted when you check.", "effects": {"items": {"scrap": -150, "copper": -20}, "blueprint": "assembly_rig", "flag": "bp_assembly_rig"}}
         ]}
       ]
     },
@@ -75,7 +78,7 @@
       ]
     },
     {
-      "id": "station_meridian_shipyard_queue", "type": "station", "weight": 10, "once": false, "requires": {"flag": "at_meridian"},
+      "id": "station_meridian_shipyard_queue", "type": "station", "weight": 20, "once": false, "requires": {"flag": "at_meridian"},
       "text": "Outside the shipyard, a man in a good coat holds a place in a queue that has not moved in nineteen years. 'Hull frame, Mk2,' he says, proudly. 'Ordered the week of the Snap.' He does not turn his head. If he did, the queue would notice.",
       "choices": [
         {"text": "Ask what happens when he reaches the front.", "outcomes": [
@@ -86,6 +89,9 @@
         ]},
         {"text": "Sell him a folding chair (10 scrap).", "requires": {"items": {"scrap": 10}}, "outcomes": [
           {"weight": 100, "text": "A folding chair. He sits for the first time in nineteen years, and for a moment looks like a man with a plan.", "effects": {"items": {"scrap": -10, "credits": 15}}}
+        ]},
+        {"text": "Ask about the folder on his knee (160 credits).", "requires": {"credits": 160, "not_flag": "bp_assembly_rig"}, "outcomes": [
+          {"weight": 100, "text": "'Gantry rig, assembly, the plans,' he says. 'They came with the frame order. The frame never did. The plans were the one thing the yard ever delivered, and I have guarded them like a promise.' He takes the credits the way a man takes a verdict, and lets you copy every page.", "effects": {"items": {"credits": -160}, "rep": {"concord": 1}, "blueprint": "assembly_rig", "flag": "bp_assembly_rig"}}
         ]}
       ]
     },

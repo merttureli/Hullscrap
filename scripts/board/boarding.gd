@@ -718,6 +718,7 @@ func _ctx() -> Dictionary:
 				ctx["logs"].append(id)
 				ctx["log_factions"][id] = str(campaign.events.logs[id].get("faction", ""))
 	if ship != null:
+		ctx["ship"] = ship  # (loot.gd picks the blueprint the ship can craft next)
 		var skip: Array = Site.config()["blueprint"]["skip"]
 		for rid in ship.crafting.order:
 			var d: Dictionary = ship.crafting.def(rid)

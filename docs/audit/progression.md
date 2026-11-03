@@ -171,7 +171,7 @@ How the tracks that were pending have shifted these numbers (they merged during 
 ```
 godot --headless --path . --script res://tests/tool_progress.gd -- seeds=10 first=0 policy=ladder jobs=3 dump=rows.json out=report.md
 ```
-Keys: `seeds`, `first`, `ships` (default the three open starters), `policy` (ladder, guns, turtle, idle), `stages`, `stay` (seconds of debris per node), `nodes`, `pois` (POIs flown per node, default 5), `jobs`, `rows`, `merge`, `dump`, `out`, `v=1`. A 3 x 4 run of 8 stages takes about an hour on three cores.
+Keys: `seeds`, `first`, `ships` (default the three open starters), `policy` (ladder, guns, turtle, idle), `stages`, `stay` (seconds of debris per node), `nodes`, `pois` (POIs flown per node, default 5), `jobs`, `rows`, `merge`, `dump`, `out`, `v=1`, `paired=1` (replay each debris slice with the old cap and floor and at 60 and 250 px/s on the same ship), `dbg=1` (a line for each debris collection). For a long measurement run one process per ship and seed (`ships=<id> seeds=1 first=<seed> jobs=1 rows=<file>`), so that a restart loses one run, not a shard. A 3 x 4 run of 8 stages takes about an hour on three cores.
 It is not a test (the runner only loads `test_*.gd`); the full suite passes with it in the tree.
 
 ## 11. A sample on the new main (economy + hull + hull2 + board3 merged)
@@ -191,3 +191,133 @@ Ladder, 3 starters x 2 seeds, 5 stages; and idle, 3 x 3, 8 stages. The sample is
 - **The hold-and-flee strategy is gone**: a ship that builds nothing loses its guns and reactor to the first few fights (guns 0.4 of 1.3 by stage 1), because a wrecked part stays wrecked. Building, and re-building, is now required; the tutorial has something real to teach (repair at stations: every damaged block or nothing, at 2 credits a hp; keep spare reactors and guns in the hold).
 - **Fuel decides**: 5-12 drift jumps a stage in the ladder from stage 2 on, debris gives 0-2 fuel a stage (it was 5-17), events 5-13. The stage 2-3 wardens then stop the run because the ship arrives wrecked (power 43 against a warden of 45-62), with 500-1500 credits it cannot spend at the beacon. The milestone "fuel >= 6 when leaving the station" in section 7 now needs to be "fuel >= the jumps to the beacon + 2" and the warning "fuel < jumps to the beacon" fires almost always.
 - Everything else (fab level 2 by stage 2 in 5 of 6; no level 3; 23 known recipes; scrap 1200-1800 held and unspent; Reactor Mk2 the usual scan) matches the baseline.
+
+## 12. After the fixes (Beta 3, track `balance`)
+
+Branch `claude/balance`. The first pass of this track changed data (fuel, the fabricator ladder, debris) and had measured almost none of it. This pass measured it with `tests/tool_progress.gd`, found that the tool itself kept the numbers from showing the game, fixed the tool, moved one more knob, left two alone on evidence, and wrote `data/progression.json`. The rows of every run are kept outside the repo in `audit/balance_runs/` (`<tag>_<policy>_<starter>_<seed>.json`, one process per run; `analyze.py --compare <tags>` and `make_tables.py <before> <after>` print the tables below).
+
+### What was run
+
+| tag | what | runs |
+|---|---|---|
+| section 11 | `origin/main` before this track | ladder 6, idle 9 |
+| `m1` | the branch as the first pass left it, merged with main, the tool as it was | ladder 3 starters x 2 seeds, idle 3 x 2, 8 stages |
+| `m8` | the final data and the tool as fixed below | ladder 3 x 4 seeds, idle 3 x 2, 8 stages |
+
+Between them: replays of one seed to find a cause (listed under each defect), paired debris replays (`p1`, `p2`), and six intermediate measurements (`m2`-`m7`) that each exposed a bot defect and were stopped when it was found.
+
+### The tool was handicapping the player
+
+The targets of this track are read off the ladder bot, so a bot that cannot do what a person does hides the game. Six things, each found by replaying a seed, each fixed in `tests/tool_progress.gd`:
+
+1. **It never entered a Trader's or Store's small shop.** The shop id comes from `Sector.trigger`, which the bot does not use, so the shop blueprints of the first pass could not be bought. `shop_visit` buys the blueprints the ship lacks, best first, keeping the toll and 40 credits.
+2. **It valued a blueprint row of an event at nothing.** `effects_value` read `effects.blueprint` only as a list; `events.gd` takes an id or a list and the events of this track use an id. No run took one in `m1`; the Rusthold row is taken in 8 of 12 final runs.
+3. **A dock topped the hold up to 9 fuel.** Its stages are 11 to 15 jumps; a full tank could not cross one. It buys every unit on sale up to 14 now (`TANK`).
+4. **It never replaced a wrecked helm.** A part wrecked in a fight stays wrecked, the helm has 4 hp, and a ship without a powered helm cannot fly: `collect()` flew at its 60 px/s floor from the first fight to the last, whatever the mass. (This is why the first pass's "a built-up ship flies at 66-112 px/s" and the debris fall in `m1` were not what they looked like.) It replaces a helm now, and a reactor when the power margin is under 0.
+5. **It sold no scrap for the toll.** It kept 600 + 250 x stage scrap and sold none above that, so a stage 3 ship with 1,350 scrap and 20 credits met a 120 credit toll it could not fight (3 of 6 runs in each of two measurements ended there). On the trip made to sell for the toll it sells what the toll and 40 take, and leaves that money alone when it repairs, buys fuel, recruits or buys a part (`_reserve`).
+6. **Diagnostics.** The stage record keeps the event ids met, the shops visited, the debris density, tide pressure and Hollow nodes of the nodes collected in, the flight speed, the peak of guns, layers, intakes, armour, fabricator level, power and recipes after a build phase (a stage ends after its last fights, which wreck parts that stay wrecked), each fabricator's room and modules, and with `paired=1` every debris slice replayed with the old cap and floor and at 60 and 250 px/s on the same ship.
+
+The idle policy builds and buys nothing, as before, and takes none of 4 and 5.
+
+### What was moved
+
+| knob | main | first pass | now |
+|---|---|---|---|
+| `drift.json` fuel stations | 13 of 33 | 24 | 24 |
+| `drift.json` fuel stock a visit | [2, 4] | [4, 8] | **[6, 10]** |
+| `debris.json` fuel canister weight | 0.5 | 0.25 | 0.25 |
+| `debris.json` `spawn.flow_min` | (none: 1) | 5 | 5 |
+| `debris.json` `spawn.max_alive` | 70 | 70 | 70 (140 tried, reverted) |
+| `recipes.json` `start_known` | | + `laser_cutter`, `titanium` | same |
+| shop blueprint pool | | + `laser_mk2`, `shield_mk2`, `assembly_rig` | same |
+| events that teach a blueprint | | 10, each at a cost | same (the Pawn Barge's weight 24 to 48 and back) |
+| enemy structure (`stage_mult`, `structure.json`) | | | not moved (below) |
+
+### Targets
+
+| the lead's target | section 11 (main) | `m1` | `m8` (final) | |
+|---|---|---|---|---|
+| ladder drift jumps a stage: 1.5 or fewer | 0.2 / 8.7 / 4.6 / 5.7 / 11.7 (stages 1-5) | 3.4 (stages 2-8) | **2.6** (median stage 1; 48% of stages none) | not met |
+| fuel held at the end of stages 1 to 6 | 2.2 / 1.7 / 0.4 / 0 / 0 (stages 1-5) | 4.2 on average, 9 of 32 ends empty | **6.9**, 12 of 69 ends empty (17%); by stage 12.2 / 7.4 / 4.0 / 5.8 / 8.4 / 3.3 | met on the mean |
+| idle still fails most runs | 7 of 9 failed | 3 of 6 failed | **4 of 6 failed** (3 stranded at stages 5-7, 1 at a 5-skull warden) | met, narrowly |
+| fabricator level 3 by stage 3-4 in half the ladder runs | 0 of 6 | 0 of 6 | **1 of 12** (2 of 12 ever); a Rig and two arms aboard by stage 4 in 5 of 12 | not met: the bot's layout, below |
+| known recipes 30+ by stage 5 | 22-23 all run | 27.6 | **28.8** (30+ in 3 of 11 runs); 30.0 by stage 8 | not met, 1.2 short |
+| debris scrap a stage falls 25% or less, stage 1 to 8 | -55% (607 > 266, section 2) | -85% (905 > 137) | **-79%** (927 > 194) | not met; the cause is not what the brief assumed, below |
+| fight length of stages 3-6, median 60-110 s | | 180 s (all), 37 s (decided, n=22), 58% at the cap | **180 s** (all), 36 s (decided, n=26), 51% at the cap | not tuned: no structure knob can move it, below |
+| warden meetings: paid / fought and won / fled or lost | 72 of 74 paid (section 2) | 31 / 1 / 6 | **69 / 0 / 10** | (report only) |
+| ladder runs finished | 2 of 6 past stage 5 | 1 of 6 | **4 of 12** | |
+| idle runs finished | 2 of 9 | 3 of 6 | **2 of 6** | |
+
+### Per stage (the final ladder, 12 runs)
+
+| stage | runs | drift jumps | fuel held | fuel bought | power at its best (floor / median) | at the end | guns (best / end) | layers (best / end) | intakes | fab (end / highest) | known | accel kept | debris scrap | fights | decided / all median s |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 12 | 0.0 | 12.2 | 0.0 | 20.4 / 36.4 | 29.1 | 3.8 / 3.3 | 1.4 / 1.1 | 1.1 | 0.6 / 1.0 | 27.2 | 0.83 | 927.0 | 4.3 | 38.0 / 71.9 |
+| 2 | 12 | 0.4 | 7.4 | 4.8 | 20.6 / 40.2 | 39.0 | 4.4 / 4.1 | 1.6 / 1.4 | 0.9 | 1.2 / 1.2 | 27.8 | 0.75 | 552.5 | 5.0 | 45.0 / 135.4 |
+| 3 | 12 | 2.8 | 4.0 | 7.7 | 0.0 / 48.4 | 37.0 | 4.7 / 3.4 | 2.2 / 2.0 | 1.3 | 1.0 / 1.2 | 28.1 | 0.44 | 324.2 | 2.8 | 62.6 / 180.0 |
+| 4 | 12 | 2.2 | 5.8 | 10.0 | 26.2 / 51.1 | 48.1 | 5.8 / 4.5 | 2.2 / 2.2 | 1.8 | 1.1 / 1.1 | 28.6 | 0.47 | 513.7 | 3.1 | 32.0 / 109.1 |
+| 5 | 11 | 2.1 | 8.4 | 17.0 | 27.9 / 70.5 | 61.5 | 6.6 / 4.5 | 2.9 / 2.7 | 1.4 | 1.0 / 1.3 | 28.8 | 0.34 | 418.3 | 5.1 | 35.4 / 180.0 |
+| 6 | 10 | 4.2 | 3.3 | 6.3 | 19.5 / 71.9 | 59.8 | 5.5 / 4.2 | 2.8 / 2.6 | 2.2 | 1.1 / 1.1 | 29.0 | 0.25 | 299.2 | 2.9 | 97.0 / 141.3 |
+| 7 | 7 | 5.9 | 5.3 | 10.4 | 25.9 / 71.2 | 66.4 | 5.9 / 5.6 | 3.4 / 3.4 | 2.3 | 1.3 / 1.3 | 29.7 | 0.22 | 245.1 | 2.0 | - / 140.3 |
+| 8 | 6 | 1.3 | 7.0 | 13.5 | 24.9 / 66.9 | 66.9 | 5.3 / 5.2 | 3.7 / 3.7 | 2.5 | 1.2 / 1.2 | 30.0 | 0.20 | 193.5 | 2.0 | 65.0 / 10.0 |
+
+"Best" is the peak after a build phase, "end" the state at the beacon after the stage's last fights. Drift jumps and fuel are means over the runs that reached the stage; from stage 6 on that is 8, 5 and 4 runs.
+
+### Fuel
+
+**Moved: the stock of a visit, [4, 8] to [6, 10].** On the same six runs (3 starters, seeds 0 and 1), at [4, 8] with the 14-unit tank (`m3`, before the toll fix) 6 of 26 stage ends in stages 1-6 were empty and the ladder drifted 3.3 jumps a stage from stage 2; at [6, 10] (`m4`) 1 of 25 and 2.9. The final set has 12 of 69 empty ends and 2.6, with the toll fix in. Idle, with the same tank and stock, finishes 2 of 6.
+
+What is left is a tail, not a level. The median stage makes 1 drift jump and 48% make none; 10 of 70 stages make 6 or more and carry 58% of all the jumps (stage 7 averages 5.9, stage 2 0.4). Those are stages where the ship is out of fuel and the bot, which looks for a fuel stop within six lanes, has none: more stock per visit does not reach them, more fuel stops would. Not moved, because the brief names the stations at about 20 of 33 and the first pass already put 24 there: all 33 stations, or a guaranteed fuel stop in every region's first ring, are the next steps and are a design call. The fuel-rate tool the `drift.json` doc points to (`tests/tool_fuel_rate.gd`) no longer compiles (it calls `repair()` with three arguments after the structure rework) and was not repaired here.
+
+### The fabricator ladder
+
+**Findable: yes.** The Assembly Rig is learned in stage 1 in 10 of 12 runs (8 by the Rusthold row, 2 in a shop), the Pulse Mk2 deal of the Concord requisitions in 10, the Pawn Barge's Laser Mk2 in 3; scan rows gave Reactor Mk2 4 times (a level 3 recipe the ship can try at fabricator level 2). The shop pool adds little (5 of 12 runs bought a blueprint in one): a shop carries a blueprint 12% of the time and the Rig 1%. The Pawn Barge was doubled in weight and put back: the Rig comes at stage 1 without it.
+
+**Reached: no, and not for want of a blueprint.** A Rig and two arms are aboard at a stage end by stage 4 in 5 of 12 runs, but fabricator level 3 needs them powered in the room of one fabricator, and that happened twice (stage 4 and stage 5). The Courier's workshop room holds 24 cells (the other starters' were not measured); a Rig takes 16. The bot builds a second workshop in an annex (100 cells) while its first arm stays in the old room, so the Rig and the second arm end in one room, an arm in the other, and neither makes level 3 (the `fabs` list of the snapshot, replayed on the Courier). Fights wreck modules too (parts stay wrecked); the bot replaces a reactor and a helm now but not a Rig. A person builds the workshop in one room. If a starter's workshop should take a Rig, its room has to be bigger or the Rig smaller: that is the lead's.
+
+### Debris against mass
+
+**Not moved (tried, reverted).** The brief's premise was that the intake follows flight speed and a heavy ship collects less. It does, by half: replayed on the same real ship and sector, a ship at 60 px/s takes in 0.50 of what one at 250 does (Rustbucket 0.51, Prism 0.49; `p2`). But the old runs did not show it: the bot had lost its helm in the first fight and flew at 60 px/s throughout (defect 4), so their fall from stage 1 (-85%) was density, tide and geometry. With the helm kept, flight speed falls from 216 to 84 px/s between stage 1 and stage 8 and the debris from 927 to 194 scrap a stage (-79%); over the same stages the effective density (sector density x tide x Hollow) falls from 0.95 to 0.57 (100 of the 695 nodes collected in were Hollow), the mouths go from 1.0 to 2.5, and the scrap per unit of density falls from 978 to 339. What is left at stage 8 is 0.21 of stage 1: a factor of 0.60 is the sector (density and tide), 0.35 is flight speed and the ship.
+
+The knob tried was the cap with the floor: `spawn.max_alive` 70 to 140 and `flow_min` 5 to 5.5, because the floor alone moved a 60 px/s ship from 41.5 to 44.4 scrap a minute (a slow ship keeps its pieces in view, so it meets the cap first). On a head-on Net Mouth it works (60 px/s keeps 88% of 250, up from 54%). On the real ships it does not: pooled 60/250 ratio 0.52, against 0.49 with the old numbers (Rustbucket 0.41, Prism 0.61 with the new), a run's total scrap +14% and +36%, and the fall from stage 1 as steep as before (per unit of density -71% against -61% on the Rustbucket, -37% against -27% on the Prism). And it doubles what a ship standing still takes in (an idle Mk1: 42.3 to 77.2 scrap a minute), which leaves a Mk3 chasing at 1.5 x an idle Mk1 where `test_sector3` and the design say about 3 x. So `debris.json` is as the first pass left it (cap 70, floor 5).
+
+What would hold the debris up is not in these two numbers: the mouth's pull radius at low speed, or a milder tide (`sectors.json` pressure 0.4, Hollow 0.3). Whether a heavy ship should collect as much as a light one is a design question: the current answer, half, is also what makes flying matter.
+
+### Fight length
+
+**Not tuned.** The stage 3-6 median is the 180 s cap, as in `m1`: 51% of the 156 fights end at the cap, and the 26 that are decided (captured or spared) take 36 s. Those 79 stand-offs are not fights the enemy's structure prolongs. After 180 s the enemy has lost a median 3% of its margin to the wreck line; 63 of the 79 are against shielded ships and 58 against Hollow ghosts; their effective hit points are 881 against 232 for the fights that are decided. With the enemy's structure at 0.5 x (`stage_mult` or `defeat_below`) 1 of the 79 would end inside 180 s, and at 0.35 x still 1. A knob that cannot reach the median would only make the enemies it does touch weaker, so none was moved. What would end the stand-offs is the bot's weapons against shields (its guns are picked by damage per second and nothing asks it for a piercing one, as section 7 notes) and the pilot AI, which draws (section 1); the enemy's shield (`enemy_tables.json` `shield_cap`) is the data knob if the lead wants these fights shorter.
+
+### The toll, and who ends where
+
+Paid 69, fought and won 0, fled or lost 10. Every warden of stages 1 to 3 is paid (36 of 36); from stage 4 the unpaid ones start: 2, 2, 3, 2, 1 of 11, 11, 9, 7, 5 at stages 4-8. In all 10 unpaid meetings the bot reached the beacon with fewer credits than the toll (14 to 208 against 140 to 280) and with under 700 scrap in every case: the sale for the toll only runs from 900 scrap, so it is poor at the beacon rather than unwilling to pay, and 6 of the 10 wardens were rated 4 or 5 skulls anyway. Where the 12 runs end: 4 finish; 5 stop at a warden (Bulwark 5 and 4 skulls, Hulk 3 skulls, Ripper 2 and 3 skulls) they can neither pay nor beat; 3 are stranded with no fuel or structure to move (stages 4, 6, 8). Against the reference curve the ladder is outgunned by the wardens from stage 3: they rate 68 power at stages 3-6 against the ladder's median 48, 55, 71 and 75. That agrees with what the bot meets (section 11), and it is the ground the Ledger's "outgunned" warning stands on.
+
+### The ladder, and `data/progression.json`
+
+`data/progression.json` is built by `gen_progression.py m8` (beside the rows in `audit/balance_runs/`, with the reference curve of `Wardens.for_region` and `Shipgen` filled in) from these 12 ladder runs; the numbers are at the **peak** of the stage, not its end (a stage ends after its last fights, which wreck parts that stay wrecked: the ladder holds 5.8 guns at its best in stage 4 and 4.5 at the beacon). A stage's row uses the runs that went on to the next one (12, 12, 12, 11, 10, 7, 6 and 4 runs for stages 1-8, so stages 7-8 are thin). Power is `Threat.power(ship, 0.75)` on the structure scale of section 11. The floor is the 25th percentile of the runs' peak power, leaving out a ship that lost its power plant (under a quarter of the median); counts are medians and never fall; `warden` and `enemy` are the reference curve (`Wardens.for_region` and a generated enemy over every region of the stage, 12.5 jumps a stage; the warden power the bot's own ratings imply agrees: 69.5 against 67.6 at stage 3).
+
+| stage | power floor / median | warden | enemy | guns | layers | intakes | fab | plates | accel kept | known |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 27 / 36 | 10 | 10 | 4 | 1 | 1 | 1 | 5 | 0.80 | 27 |
+| 2 | 36 / 40 | 31 | 19 | 4 | 1 | 1 | 2 | 25 | 0.75 | 28 |
+| 3 | 44 / 48 | 68 | 44 | 5 | 2 | 2 | 3 | 40 | 0.60 | 28 |
+| 4 | 44 / 55 | 68 | 60 | 6 | 2 | 2 | 3 | 75 | 0.50 | 28 |
+| 5 | 48 / 71 | 68 | 65 | 7 | 3 | 2 | 3 | 100 | 0.35 | 28 |
+| 6 | 51 / 75 | 68 | 66 | 7 | 3 | 3 | 3 | 130 | 0.35 | 29 |
+| 7 | 51 / 75 | 66 | 65 | 7 | 3 | 3 | 3 | 160 | 0.30 | 30 |
+| 8 | 56 / 78 | 63 | 60 | 7 | 4 | 3 | 3 | 200 | 0.30 | 30 |
+
+`fuel_margin` is 0 at stage 1 and 2 after, `credits_over_toll` 0 and then 40 (the bot keeps the toll and 40 by construction, so they are the Ledger's own cushions, not measurements). **`fab` is the design's, not the bot's:** the bot's median is 2 (see above), and the row asks 2 at stage 2 and 3 from stage 3, the Rig and two arms in one room. `warn`: `outgunned_ratio` 0.8 and `skulls_ratio` 1.6 as before, `cliff_stage` 3 and `cliff_power` 44 (that stage's floor), `hull_left` 0.6 (a structure fraction; the wreck line is 0.5 and the ladder ends its stages at 0.66 to 0.81, the 10th to the 50th percentile), `scrap_surplus` 1,700 (the 75th percentile of the scrap held at a stage end), `accel_min` 0.3 (the 25th percentile of the acceleration kept is 0.25; the generator keeps it in 0.3 to 0.6) and `known_stall` 27 (the 26 known at the start, plus one).
+
+**The advisor's stage 1-2 literals (`data/advisor.json`) agree and are not changed.** Stage 1: 3 guns or more at the best of the stage in 12 of 12 runs; an intake in 12 of 12; a shield layer or a medbay in 12 of 12. Stage 2: 4 guns or more in 10 of 12; 2 layers or more in 5 of 12 (the literal asks 2: borderline, not clearly off); the acceleration kept has a median of 0.75 (the literal asks 0.75); the toll cushion of 40 is the bot's own.
+
+**Against section 7.** The counts agree with the old ladder up to stage 4 (guns 4, 4, 5, 6 against 3, 4, 6, 8; layers 1, 1, 2, 2 against 1, 2, 3, 4) and fall behind it from stage 5 (7 guns against 8-11, 3-4 layers against 4-7), and the acceleration kept is far lower (0.3-0.35 against 0.6): the bot's engine rule caps its engines at the starter's plus one plus half the stage number, and the heavy ships it builds pay for it. Read the later rows as what a bot that wrecks parts in 40-second skirmishes can hold, and as a floor for a person who repairs and replaces.
+
+### Open questions for the lead
+
+1. **Drift (2.6 against 1.5).** The tail of stages with no fuel stop is the whole gap. All 33 stations selling fuel, or a fuel stop guaranteed near every region's start, would reach it; the stock of a visit would not. Idle fails 4 of 6 now; either step lifts that.
+2. **Fabricator level 3.** The blueprint is found in stage 1. The starters' workshop room (24 cells) cannot hold a Rig (16) and two arms with the fabricator; a person rebuilds the room, the bot lays out a second one. Is a bigger starting workshop wanted, or is building it the point?
+3. **Debris against speed.** Half at 60 px/s is what the data says; the cap and floor cannot change that without paying idle ships twice as much. Pull radius at low speed, or a milder tide, are the untried knobs.
+4. **Fight length.** Stand-offs with shielded ships and ghosts, not structure: shields or a piercing weapon in the bot's kit.
+5. **Recipes.** 28.8 at stage 5 against 30: the bot meets the Rusthold Rig row, the Concord requisitions and the Pawn Barge, few shop blueprints (5 of 12 runs bought one) and none of the Shield Mk2 rows; one more start-known recipe or a heavier blueprint share in the shops would close it.
+6. **Acceleration.** The ladder's 0.3-0.35 from stage 5 is below section 7's 0.6 and the Ledger's `accel_min`; the advisor will not nag a ship at 0.31. If the lead wants 0.6 as the aim, the row is a design number like `fab`.
+7. **The tool** is fixed, not finished: it lays the workshop out in two rooms, sells scrap for the toll only from 900 scrap (the ten unpaid wardens above arrived with less), and gives up on fuel when no stop lies within six lanes. `tests/tool_fuel_rate.gd` needs its `repair()` call updated.

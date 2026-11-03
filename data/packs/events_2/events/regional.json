@@ -19,7 +19,7 @@
       ]
     },
     {
-      "id": "concord_survey_buoy", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "concord_space"},
+      "id": "concord_survey_buoy", "type": "anomaly", "weight": 12, "once": false, "requires": {"region": "concord_space"},
       "text": "A Concord survey buoy logging 'Unknown Objects'. The list is long and updates as you watch. A line has just appeared at the bottom: ITEM 4,112: VESSEL, UNIDENTIFIED (PROVISIONAL). It is you.",
       "choices": [
         {"text": "Correct the entry.", "outcomes": [
@@ -28,7 +28,8 @@
         ]},
         {"text": "[Shield] Run a shield scan so it has something to log.", "requires": {"component_any": ["shield_mk1", "shield_mk2", "shield_scrap_mk1", "shield_neon_mk1", "mirror_veil"]}, "outcomes": [
           {"weight": 70, "text": "The buoy logs the shield, the hum and the colour of the glow, in a long careful line. A small credit is paid out of a fund nobody knew about.", "effects": {"items": {"credits": 35}, "rep": {"concord": 1}}},
-          {"weight": 30, "text": "The scan overloads the buoy's one working sensor, which then reports you as a star.", "effects": {"hull": -4, "items": {"credits": 10}}}
+          {"weight": 30, "text": "The scan overloads the buoy's one working sensor, which then reports you as a star.", "effects": {"hull": -4, "items": {"credits": 10}}},
+          {"weight": 15, "text": "The buoy logs the shield, finds a reference unit in its catalogue that is better, is offended on your behalf, and transmits the whole specification of the Mk2 in a burst that rattles the hull. It is the nicest thing anyone in Meridian has done for you, and it costs a bolt or two.", "effects": {"hull": -6, "blueprint": "shield_mk2", "rep": {"concord": 1}}}
         ]},
         {"text": "Add an unknown object of your own.", "outcomes": [
           {"weight": 100, "text": "You drop a bolt out of the airlock and log it as 'Item 4,113: bolt'. The buoy accepts this with real feeling.", "effects": {"items": {"credits": 5}}}
@@ -59,12 +60,13 @@
       ]
     },
     {
-      "id": "lumen_listening_array", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "lumen_space"},
+      "id": "lumen_listening_array", "type": "anomaly", "weight": 12, "once": false, "requires": {"region": "lumen_space"},
       "text": "A lattice of glass dishes, listening to something on the other side of nothing. Each dish is tuned to a different note; in the middle the notes make a chord. The chord has no root. It is not unpleasant. It is the opposite of that, and you cannot say what.",
       "choices": [
         {"text": "Sit in the middle and listen.", "outcomes": [
           {"weight": 70, "text": "You sit in the middle of the chord. It does not resolve. For a long while you wait for it to, and then you stop waiting, and then it is a little like being forgiven.", "effects": {"items": {"crystal": 2}, "rep": {"lumen": 1}}},
-          {"weight": 30, "text": "You sit in the middle of the chord and it sits in you. You come out humming a note you cannot find again.", "effects": {"crew_hp": -5, "rep": {"lumen": 1}}}
+          {"weight": 30, "text": "You sit in the middle of the chord and it sits in you. You come out humming a note you cannot find again.", "effects": {"crew_hp": -5, "rep": {"lumen": 1}}},
+          {"weight": 12, "text": "You sit in the middle of the chord and, this once, it resolves. The root arrives like a wave, and in its wake the dishes' tuning table writes itself on the console: the shape of a shield that sings. You are bleeding a little from the ears. It was worth the note.", "effects": {"crew_hp": -8, "items": {"crystal": 2}, "rep": {"lumen": 1}, "blueprint": "shield_mk2"}}
         ]},
         {"text": "[Radar] Point the radar the way the dishes point.", "requires": {"component_any": ["radar_mk1", "radar_mk2", "radar_mk3"]}, "outcomes": [
           {"weight": 65, "text": "The radar swings round and finds what the dishes find, a long way off, and draws it. It is a door. The radar looks at the door the way a dog looks at a gate.", "effects": {"reveal": "anomaly", "items": {"crystal": 2}, "rep": {"lumen": 2}}},
