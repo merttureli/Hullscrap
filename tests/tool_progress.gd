@@ -18,7 +18,7 @@ extends SceneTree
 ## It builds on the real ship through BuildSession (a part goes on a free spot, else in a new annex room; cables are laid; power is added).
 ## Fights run through the real arena, as tests/tool_balance.gd does, on the ship itself: its blocks keep their damage (structure.gd), the crew and the drone
 ## mend them in ShipSim time between fights (mend()), a station repairs the rest for credits. A fight is left (the 10 s jump spool) when the structure is under 30% of the way to the wreck line. The exit
-## warden's toll is paid when it is affordable, else fought (up to three rounds, with a trip to a station between). The output rows are one dictionary
+## warden's toll is paid when it is affordable (scrap is sold for it on a trip to a station, which keeps the toll's credits), else fought (up to three rounds, with a trip to a station between). The output rows are one dictionary
 ## per run: its stages carry the ship before and after, the fights (rating, length, hull), the flows of every resource by source and the craft census.
 ## Not modelled: the real flying and aiming of a human, crew commands, boarding, the Hollow tide's pursuit (its debris thinning is, through the sector).
 
@@ -457,6 +457,33 @@ func poi_plan(s) -> Array:
 	return mains + others.slice(0, int(args.get("pois", 5)))
 
 
+## The scrap a slice of debris brings in with spawn.max_alive `cap` and spawn.flow_min `floor_v`, the ship flying at `speed`; what it took in is undone.
+func paired_slice(s, pos0: Vector2, ang: float, piv: Vector2, cur: Vector2, speed: float, slice: float, cap: int, floor_v: float) -> int:
+	var base: Dictionary = Content.read(DriftDebris.PATH).duplicate(true)
+	base["spawn"]["max_alive"] = cap
+	base["spawn"]["flow_min"] = floor_v
+	var dd2 = DriftDebris.new(hash([c.seed_value, c.jumps, st["nodes"]]), s.debris_cfg(base))
+	var pos2 := pos0
+	dd2.frame = Helm.frame_of(ship, pos2, ang, piv)
+	dd2.frame_vel = -cur.normalized() * speed
+	dd2.view_centre = dd2.frame * ship.world_pos
+	dd2.prewarm(ship)
+	var keep: Dictionary = ship.inventory.counts.duplicate()
+	var t2 := 0.0
+	while t2 < slice:
+		pos2 += dd2.frame_vel * 0.5
+		dd2.frame = Helm.frame_of(ship, pos2, ang, piv)
+		dd2.view_centre = dd2.frame * ship.world_pos
+		dd2.step(ship, 0.5)
+		t2 += 0.5
+	var got: int = ship.inventory.count("scrap") - int(keep.get("scrap", 0))
+	for id in ship.inventory.counts.keys().duplicate():  # (undo what it took in)
+		var extra: int = int(ship.inventory.counts[id]) - int(keep.get(id, 0))
+		if extra != 0:
+			ship.inventory.add(id, -extra)
+	return got
+
+
 ## Collect debris for `seconds` in sector `s` with the real intakes: a SAMPLE_S slice is simulated and scaled up. The ambient contacts come while
 ## the ship stays. False when a fight wrecked the ship.
 func collect(s, seconds: float) -> bool:
@@ -497,29 +524,11 @@ func collect(s, seconds: float) -> bool:
 		t += 0.5
 	st["slice_new"] += ship.inventory.count("scrap") - int(inv_before.get("scrap", 0))
 	st["speed_sum"] += speed
-	if args.has("paired"):  # the same slice, same ship, with the debris numbers from before this track (cap 70, floor 5): what the new cap and floor are worth here
-		var base: Dictionary = Content.read(DriftDebris.PATH).duplicate(true)
-		base["spawn"]["max_alive"] = 70
-		base["spawn"]["flow_min"] = 5.0
-		var old = DriftDebris.new(hash([c.seed_value, c.jumps, st["nodes"]]), s.debris_cfg(base))
-		var pos2 := pos0
-		old.frame = Helm.frame_of(ship, pos2, ang, piv)
-		old.frame_vel = -cur.normalized() * speed
-		old.view_centre = old.frame * ship.world_pos
-		old.prewarm(ship)
-		var keep: Dictionary = ship.inventory.counts.duplicate()
-		var t2 := 0.0
-		while t2 < slice:
-			pos2 += old.frame_vel * 0.5
-			old.frame = Helm.frame_of(ship, pos2, ang, piv)
-			old.view_centre = old.frame * ship.world_pos
-			old.step(ship, 0.5)
-			t2 += 0.5
-		st["slice_old"] += ship.inventory.count("scrap") - int(keep.get("scrap", 0))
-		for id in ship.inventory.counts.keys().duplicate():  # (undo what the old numbers took in)
-			var extra: int = int(ship.inventory.counts[id]) - int(keep.get(id, 0))
-			if extra != 0:
-				ship.inventory.add(id, -extra)
+	if args.has("paired"):  # the same ship and sector with other debris numbers or another speed: what the cap and the floor, and the speed, are worth here
+		st["slice_old"] += paired_slice(s, pos0, ang, piv, cur, speed, slice, 70, 5.0)  # (the numbers from before this track)
+		for sp in [60.0, 250.0]:
+			st["slice_new_%d" % int(sp)] = int(st.get("slice_new_%d" % int(sp), 0)) + paired_slice(s, pos0, ang, piv, cur, sp, slice, 140, 5.5)
+			st["slice_old_%d" % int(sp)] = int(st.get("slice_old_%d" % int(sp), 0)) + paired_slice(s, pos0, ang, piv, cur, sp, slice, 70, 5.0)
 	if args.has("dbg"):
 		print("collect: mouths %d picked %d pieces %d rot %d ang %.2f speed %.0f cur %s dens %.2f" % [dd.mouth_count, dd.picked, dd.pieces.size(), out_rot, ang, speed, str(cur), float(s.density)])
 	st["intake_pieces"] += int(dd.picked * seconds / maxf(slice, 1.0))
