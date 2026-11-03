@@ -8,7 +8,7 @@
 	"posts": {"families": ["shield", "medbay"]},
 	"air": {"hurt_below": 0.4, "back_above": 0.7, "breath_ok": 0.5, "breath_margin": 1.25},
 	"lost": {"min_open": 3, "share": 0.2},
-	"under_fire": {"seconds": 3.0, "mult": 0.5},
+	"under_fire": {"seconds": 5.0, "mult": 0.35},
 	"slow": {"scale": 0.25},
 	"breach": {"slow_down": true, "pressure": 0.6, "time_scale": 0.25, "prompt_s": 3.0, "gap_s": 10.0},
 	"bleed_out_s": 45,

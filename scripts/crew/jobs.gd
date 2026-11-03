@@ -214,12 +214,17 @@ func build_board(ship) -> void:
 		if ship.clock - float(ship.hit_at[k]) > 30.0:
 			ship.hit_at.erase(k)
 	var holders := Posts.holders(ship)
+	var held := {}  # jobs nobody is sent to, but the player's hand may do
 	for c in Fire.sorted_cells(ship.fires.keys()):
 		_add(b, _job("extinguish", "fire:%d,%d" % [c.x, c.y], [c], {"cell": c}))
 	for m in ship.crew:
 		if m.is_down() and not m.is_drone():
 			if m.revive_t < 0.0:  # one who is about to get up by themselves (revive_once) is left alone
-				_add(b, _job("revive", "revive:" + m.name, m.body_cells(), {"who": m.name}))
+				var revive := _job("revive", "revive:" + m.name, m.body_cells(), {"who": m.name})
+				if _revivable(ship, m):
+					_add(b, revive)
+				else:
+					held[revive["key"]] = revive  # (the player's hand may still do it)
 		elif m.hp < m.max_hp and TraitSet.of(m)["mechanical"]:  # (a broken drone is mended, not revived)
 			_add(b, _job("repair_crew", "mend:" + m.name, m.body_cells(), {"who": m.name}))
 	for c in Fire.sorted_cells(grid.breached.keys()):
@@ -264,7 +269,7 @@ func build_board(ship) -> void:
 			orders.erase(key)
 		else:
 			_add(b, orders[key])
-	closed = {}
+	closed = held
 	if not Evacuate.rooms(ship).is_empty() or not ship.lost_rooms.is_empty():  # nobody is sent into an abandoned or lost room: its jobs wait for the player's hand (or for the room to reopen, or the fight to end)
 		for key in b.keys():
 			var rooms := _job_rooms(ship, b[key])
@@ -869,6 +874,23 @@ func _leave_bad_air(ship, m) -> void:
 static func order_warning(ship, m, work := 0.0) -> String:
 	var spot: Vector2i = m.path.back() if not m.path.is_empty() else m.anchor()
 	return "" if _lasts(ship, m, spot, m.path, work, _margin()) else "%s won't last in there" % m.name
+
+
+## Can downed `m` be revived where they lie? In bad air only when they could walk out alive on the hp the revive gives them (crew.json revive_hp, breath_margin
+## times the airless walk): else they would go down again in the same room, and whoever revived them would have spent the breath for nothing.
+static func _revivable(ship, m) -> bool:
+	var rate := suffocation(m)
+	if rate <= 0.0 or _margin() <= 0.0 or not _room_airless(ship, ship.atmosphere.room_at(m.cell())):
+		return true
+	if m.is_player:
+		return false  # the soldier walks only when the player says so: nobody revives them into bad air
+	var out := Evacuate.path_out(ship, m)
+	if out.is_empty():
+		return false
+	var steps := 0
+	for p in out:
+		steps += int(_anchor_airless(ship, p, m.body_size))
+	return float(CrewMember.config().get("revive_hp", 20)) / rate >= _margin() * float(steps) / maxf(m.speed, 0.1)
 
 
 ## A crew member in a lost room walks out to air (the room posts no jobs); the soldier is their own master.

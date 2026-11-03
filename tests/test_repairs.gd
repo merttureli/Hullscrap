@@ -158,6 +158,29 @@ func test_the_budget_is_off_with_a_margin_of_zero() -> void:
 	CrewMember.config()["air"]["breath_margin"] = 1.25
 
 
+func test_a_downed_crew_member_is_revived_in_bad_air_only_when_they_could_walk_out() -> void:
+	var ship := _two_rooms()
+	var ada := _npc("Ada", 18, 13)
+	ada.hp = 0.0
+	ship.crew.append(ada)
+	ship.atmosphere.pressure[_east(ship)] = 0.0
+	var jobs := Jobs.new()
+	_run(jobs, ship, 1.2)
+	check(jobs.board.has("revive:Ada"), "the west room has air and the door is near: she can walk out on 20 hp")
+	ship.atmosphere.pressure[_west(ship)] = 0.0  # no air anywhere
+	_run(jobs, ship, 1.2)
+	check(not jobs.board.has("revive:Ada") and jobs.closed.has("revive:Ada"), "nowhere to walk to: nobody is sent, the player's hand may still do it")
+	ship.atmosphere.pressure[_west(ship)] = 1.0
+	ada.hp = 0.0
+	ship.atmosphere.pressure[_east(ship)] = 0.0
+	ada.pos = Pathfinder.centre_of(Vector2i(16, 12))
+	check(Jobs._revivable(ship, ada), "beside the door she is revivable")
+	var soldier := _npc("Soldier", 16, 12)
+	soldier.is_player = true
+	soldier.hp = 0.0
+	check(not Jobs._revivable(ship, soldier), "nobody revives the soldier into bad air: they walk only when the player says so")
+
+
 # --- lost rooms ------------------------------------------------------------------------------------------
 
 ## Shoot `n` of the east wall's cells open (the room's boundary is 28 cells: a fifth of it is 6).
