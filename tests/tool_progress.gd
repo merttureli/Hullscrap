@@ -13,7 +13,8 @@ extends SceneTree
 ## speed), then spends what it has by the policy's ladder (`next_intent`): intake, guns, shield / medbay, engines (so the ship does not fall behind its
 ## own mass), fabricator level, laser cutter and titanium, tier-2 parts as the blueprints allow, armour last. Parts are crafted when the recipe is known and
 ## the fabricator can run it, else bought when docked. At a station it sells the surplus of the common materials (a credit each), mends the hull, buys fuel.
-## A blueprint on a salvage page is worth more than a part.
+## A blueprint on a salvage page is worth more than a part. A Trader's or Store's small shop is visited too (it buys the blueprints it lacks, keeping the toll and 40 credits),
+## a dock tops the hold up to TANK fuel, and a part a fight wrecked is replaced when the ship cannot do without it (a helm: no flying; a reactor: the power margin under 0).
 ## It builds on the real ship through BuildSession (a part goes on a free spot, else in a new annex room; cables are laid; power is added).
 ## Fights run through the real arena, as tests/tool_balance.gd does, on the ship itself: its blocks keep their damage (structure.gd), the crew and the drone
 ## mend them in ShipSim time between fights (mend()), a station repairs the rest for credits. A fight is left (the 10 s jump spool) when the structure is under 30% of the way to the wreck line. The exit
@@ -206,7 +207,7 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 
 func new_stage() -> Dictionary:
 	var rec := {"stage": c.stage, "region": c.region_id, "nodes": 0, "jumps": 0, "minutes": 0.0, "fights": [], "flow": {}, "pois": 0, "dock": 0, "fuel_bought": 0, "drift_jumps": 0, "tows": 0,
-		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0, "shops": 0, "seen": [], "dens": 0.0, "press": 0.0, "hollow": 0, "dens_n": 0}
+		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0, "shops": 0, "seen": [], "dens": 0.0, "press": 0.0, "hollow": 0, "dens_n": 0, "slice_new": 0, "slice_old": 0, "speed_sum": 0.0}
 	rec["start"] = snapshot()
 	return rec
 
@@ -475,6 +476,7 @@ func collect(s, seconds: float) -> bool:
 	var ang := (-cur).angle() - lead.angle()  # the mouth leads into the stream
 	var piv: Vector2 = Helm.pivot_of(ship.grid)
 	var pos := Vector2(s.size * 0.5, s.size * 0.5)
+	var pos0 := pos
 	dd.frame = Helm.frame_of(ship, pos, ang, piv)
 	dd.frame_vel = -cur.normalized() * speed
 	dd.view_centre = dd.frame * ship.world_pos
@@ -488,6 +490,31 @@ func collect(s, seconds: float) -> bool:
 		dd.view_centre = dd.frame * ship.world_pos
 		dd.step(ship, 0.5)
 		t += 0.5
+	st["slice_new"] += ship.inventory.count("scrap") - int(inv_before.get("scrap", 0))
+	st["speed_sum"] += speed
+	if args.has("paired"):  # the same slice, same ship, with the debris numbers from before this track (cap 70, floor 5): what the new cap and floor are worth here
+		var base: Dictionary = Content.read(DriftDebris.PATH).duplicate(true)
+		base["spawn"]["max_alive"] = 70
+		base["spawn"]["flow_min"] = 5.0
+		var old = DriftDebris.new(hash([c.seed_value, c.jumps, st["nodes"]]), s.debris_cfg(base))
+		var pos2 := pos0
+		old.frame = Helm.frame_of(ship, pos2, ang, piv)
+		old.frame_vel = -cur.normalized() * speed
+		old.view_centre = old.frame * ship.world_pos
+		old.prewarm(ship)
+		var keep: Dictionary = ship.inventory.counts.duplicate()
+		var t2 := 0.0
+		while t2 < slice:
+			pos2 += old.frame_vel * 0.5
+			old.frame = Helm.frame_of(ship, pos2, ang, piv)
+			old.view_centre = old.frame * ship.world_pos
+			old.step(ship, 0.5)
+			t2 += 0.5
+		st["slice_old"] += ship.inventory.count("scrap") - int(keep.get("scrap", 0))
+		for id in ship.inventory.counts.keys().duplicate():  # (undo what the old numbers took in)
+			var extra: int = int(ship.inventory.counts[id]) - int(keep.get(id, 0))
+			if extra != 0:
+				ship.inventory.add(id, -extra)
 	if args.has("dbg"):
 		print("collect: mouths %d picked %d pieces %d rot %d ang %.2f speed %.0f cur %s dens %.2f" % [dd.mouth_count, dd.picked, dd.pieces.size(), out_rot, ang, speed, str(cur), float(s.density)])
 	st["intake_pieces"] += int(dd.picked * seconds / maxf(slice, 1.0))
