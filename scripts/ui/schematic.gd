@@ -20,6 +20,7 @@ const EDGE := Color("#3b5a78")
 const ROOM_TINTS: Array[Color] = [Color("#22404f"), Color("#27384f")]
 const WALL_DAMAGE := Color("#ff9a3c")
 const BREACH := Color("#ff2a2a")
+const LOST := Color("#c0271f")  ## the tint of a lost room (jobs.gd, lost_rooms)
 const TEXT := Color("#cfe6ff")
 const STATE_COLORS := {
 	"ok": Color("#4fd08a"), "damaged": Color("#f1c40f"), "disabled": Color("#e0453a"),
@@ -122,6 +123,8 @@ static func draw_map(cv: CanvasItem, ship, powered: Dictionary, map: Rect2, boun
 			var col := ROOM_TINTS[room % 2] if room >= 0 else ROOM_TINTS[0]
 			if room >= 0:
 				col = col.lerp(Color("#7a2020"), (1.0 - atmo.pressure_of(room)) * 0.7)  # thin air reddens a room
+				if ship.lost_rooms.has(room):
+					col = col.lerp(LOST, 0.45)  # a lost room (a fight, jobs.gd): the crew have given it up
 			cv.draw_rect(r, col)
 	var pulse := 0.65 + 0.35 * sin(Time.get_ticks_msec() * 0.008)
 	for c in grid.breached:
@@ -149,6 +152,16 @@ static func draw_map(cv: CanvasItem, ship, powered: Dictionary, map: Rect2, boun
 			cv.draw_line(r.position + Vector2(2, 2), r.end - Vector2(2, 2), col, 1.5)
 		if r.size.y >= 12.0 and r.size.x >= 18.0:
 			_label(cv, Visuals.label_of(def), r.get_center() + Vector2(-6, 4), 10, Color(1, 1, 1, 0.9))
+	for id in ship.lost_rooms:  # the LOST marker on each room given up
+		if id >= atmo.rooms.size() or atmo.rooms[id]["cells"].is_empty():
+			continue
+		var cells: Array = atmo.rooms[id]["cells"]
+		var sum := Vector2.ZERO
+		for c in cells:
+			sum += Vector2(c) + Vector2(0.5, 0.5)
+		var at: Vector2 = origin + sum / float(cells.size()) * s + Vector2(-13.0, 4.0)
+		cv.draw_rect(Rect2(at + Vector2(-3.0, -11.0), Vector2(32.0, 14.0)), Color(0.1, 0.0, 0.0, 0.8))
+		_label(cv, "LOST", at, 11, Color("#ff7a6a"))
 	return {"origin": origin, "s": s}
 
 

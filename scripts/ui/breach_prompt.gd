@@ -1,16 +1,17 @@
 extends Control
 ## The breach prompt (playtest 2, K2): a small card near the room that is losing air, "Breach: <room>  [R] Repair  [V] Evacuate",
 ## with a bar that runs down the seconds left to answer. The logic is crew/breach_alert.gd; this node feeds it the real frame time
-## (not the scaled one: the prompt slows the game down), sets Engine.time_scale from it, takes R and V (or a click on the card),
+## (not the scaled one: the prompt slows the game down), asks for that speed through TimeScale (time_scale.gd: it is merged with the fight slow-down, the slower wins), takes R and V (or a click on the card),
 ## and says the result on the crew bar. R and V go to the prompt first while it is up (also in a fight, where R would restart, and
 ## over any open window: the windows that swallow every key ask `claims()` and let those two through).
-## The time scale is always put back to 1 when the prompt goes, the ship changes, or this node leaves the tree.
+## Its request is withdrawn when the prompt goes, the ship changes, or this node leaves the tree.
 ## Lives in the crew view's canvas layer, so a fight (which puts the crew view away) keeps it; in a fight, where the ship is drawn
 ## elsewhere, the card sits at the top of the screen.
 
 const BreachAlert = preload("res://scripts/crew/breach_alert.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const TimeScale = preload("res://scripts/crew/time_scale.gd")
 
 const CARD := Vector2(380.0, 58.0)
 const BTN := Vector2(112.0, 22.0)
@@ -35,6 +36,7 @@ func _init() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_live.erase(get_instance_id())
+		TimeScale.clear(get_instance_id())
 
 
 func _ready() -> void:
@@ -43,7 +45,7 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	Engine.time_scale = 1.0
+	TimeScale.clear(get_instance_id())  # (the fight slow-down, if it runs, stays)
 
 
 func _process(_dt: float) -> void:
@@ -61,7 +63,7 @@ func tick(real_dt: float) -> void:
 		alert.reset()
 	var paused: bool = view != null and view.sim != null and bool(view.sim.get("paused"))
 	alert.update(ship, real_dt, paused)
-	Engine.time_scale = alert.time_scale()
+	TimeScale.request(get_instance_id(), alert.time_scale())
 	var was := visible
 	visible = not alert.current().is_empty()
 	if visible and not was:
@@ -143,7 +145,7 @@ func answer(choice: String) -> void:
 	if ship == null:
 		return
 	var line := alert.respond(ship, choice)
-	Engine.time_scale = alert.time_scale()
+	TimeScale.request(get_instance_id(), alert.time_scale())
 	visible = not alert.current().is_empty()
 	if view != null:
 		view.say(line)

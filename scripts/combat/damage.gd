@@ -182,6 +182,7 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 	cur -= dealt
 	if dealt > 0.0:
 		co.check_structure = true  # the arena looks at the structure on its next substep
+		co.ship.hit_at[obj["uid"] if is_part else cell] = co.ship.clock  # crew repair it slower for a moment (Jobs, crew.json under_fire)
 	var hit := {"dealt": dealt, "kind": obj["kind"], "dtype": type}
 	hit.merge(info)  # dir and n of the shot, for the effects
 	if outside:

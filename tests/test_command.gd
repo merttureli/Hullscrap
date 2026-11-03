@@ -577,6 +577,7 @@ func _airless_east() -> Dictionary:
 
 
 func test_a_hurt_crew_member_repairing_in_vacuum_leaves_at_forty_percent_and_returns_over_seventy() -> void:
+	CrewMember.config()["air"]["breath_margin"] = 0.0  # (the breath budget would keep a healthy one out of the room: tests/test_repairs.gd)
 	var d := _airless_east()
 	var ship: Ship = d["ship"]
 	var ada := _npc("Ada", 18, 13)
@@ -598,6 +599,7 @@ func test_a_hurt_crew_member_repairing_in_vacuum_leaves_at_forty_percent_and_ret
 	check(not ada.winded, "over 70 percent she is fit")
 	eq(_types(ada), "repair_component", "and she is back at the engine")
 	eq(ship.atmosphere.room_at(ada.cell()), _east(ship), "in the east room")
+	CrewMember.config()["air"]["breath_margin"] = 1.25
 
 
 func test_a_hurt_crew_member_keeps_out_of_the_outer_layer_of_a_deep_hole() -> void:
