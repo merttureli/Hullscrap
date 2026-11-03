@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "hollow_void_seam", "type": "hollow", "weight": 150, "once": true, "requires": {"stage_min": 5},
+      "id": "hollow_void_seam", "type": "hollow", "weight": 25, "once": true, "requires": {"stage_min": 5},
       "text": "A rock the size of a hangar turns slowly where the tide has left it, split down one side. In the split, something grows: a seam of dark crystal, violet at the edges, throwing back a light your lamps do not make. The scanner calls it a motherlode and then declines to say anything else.",
       "choices": [
         {"text": "Cut a sample from the seam.", "outcomes": [
