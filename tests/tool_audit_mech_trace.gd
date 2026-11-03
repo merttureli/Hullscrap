@@ -31,6 +31,7 @@ func _initialize() -> void:
 	var a = sess.arena
 	var n := 0
 	var next := 0.0
+	var early := int(args.get("early", 0))
 	while sess.state() == "fighting" and n * STEP < cap:
 		if n % 3 == 0:
 			pilot.think(STEP * 3)
@@ -41,6 +42,8 @@ func _initialize() -> void:
 		a.step(STEP)
 		sess.morale.tick(STEP)
 		n += 1
+		if n <= early:
+			print("  tick ", n, " me=", Structure.structure_fraction(a.ships[Session.PLAYER]), " events=", a.events)
 		if n % 12 == 0:
 			sim.step(12 * STEP)
 		if n * STEP >= next:
