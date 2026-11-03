@@ -3,7 +3,7 @@ extends Control
 ## events, combat, stations, shields, crafting) and a "First run" box. F1 opens and closes it anywhere
 ## (the main menu and the pause menu list it too); Esc, Enter or Space close it. While open it takes
 ## every key and click. The keys are the real ones of the input handlers: build_mode.gd, crew_view.gd,
-## combat_view.gd, weapon_bar.gd, map_view.gd, event_panel.gd, station_panel.gd, shield_panel.gd and
+## combat_view.gd, weapon_bar.gd, map_view.gd, event_panel.gd, station_panel.gd, shield_panel.gd, ledger_card.gd and
 ## crafting_panel.gd; tests/test_front_door.gd checks that every one of them is on the screen.
 ## In the UI colours of station_panel.gd.
 
@@ -58,6 +58,9 @@ const COLUMNS: Array = [
 		["SHIELDS (H)", [
 			["H", "Shields tab: click a sector's + or -, or pick a preset or a custom slot"],
 			["H / Esc", "Close it"],
+		]],
+		["THE LEDGER (L)", [
+			["L", "Fold or unfold the Ledger's goal list (a click on its card does too)"],
 		]],
 	],
 	[
