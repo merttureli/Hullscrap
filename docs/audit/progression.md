@@ -225,7 +225,7 @@ The idle policy builds and buys nothing, as before, and takes none of 4 and 5.
 |---|---|---|---|
 | `drift.json` fuel stations | 13 of 33 | 24 | 24 |
 | `drift.json` fuel stock a visit | [2, 4] | [4, 8] | **[6, 10]** |
-| `debris.json` fuel canister weight | 0.5 | 0.25 | 0.25 |
+| `debris.json` fuel canister weight | 0.5 | 0.25 | 0.25, then 1.0 by the lead (the brief asked for canisters twice as common, not half; not re-measured in this table) |
 | `debris.json` `spawn.flow_min` | (none: 1) | 5 | 5 |
 | `debris.json` `spawn.max_alive` | 70 | 70 | 70 (140 tried, reverted) |
 | `recipes.json` `start_known` | | + `laser_cutter`, `titanium` | same |

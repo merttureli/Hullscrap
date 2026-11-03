@@ -16,7 +16,7 @@
 			{"weight": 50, "item": "scrap", "count": [6, 12]},
 			{"weight": 35, "item": "copper", "count": [3, 5]},
 			{"weight": 15, "item": "missile", "count": [1, 1]}]},
-		{"id": "fuel_canister", "name": "Fuel canister", "weight": 0.25, "size": 28, "art": "fuel_canister", "color": "#f2c744", "yield": {"fuel": 1}},
+		{"id": "fuel_canister", "name": "Fuel canister", "weight": 1.0, "size": 28, "art": "fuel_canister", "color": "#f2c744", "yield": {"fuel": 1}},
 		{"id": "crystal_shard", "name": "Crystal shard", "weight": 0.4, "size": 28, "art": "crystal_shard", "color": "#5ff2ff", "rare": true, "yield": {"crystal": 2}},
 		{"id": "titanium_plate", "name": "Titanium plate", "weight": 0.5, "size": 30, "art": "titanium_plate", "color": "#b9c6d6", "rare": true, "yield": {"titanium": 3}},
 		{"id": "silicon_wafer", "name": "Silicon wafer", "weight": 0.5, "size": 28, "art": "silicon_rock", "color": "#8fa2b8", "rare": true, "yield": {"silicon": 2}}

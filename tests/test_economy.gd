@@ -39,7 +39,7 @@ func test_rare_types_are_in_the_data_and_very_rare() -> void:
 		check(bool(d.type_of({"type": id}).get("rare", false)), "%s is flagged rare" % id)
 	eq(RARE.map(func(id): return int(d.type_of({"type": id})["yield"].values()[0])), [2, 3, 2], "what each gives: crystal 2, titanium 3, silicon 2")
 	eq(RARE.map(func(id): return d.type_of({"type": id})["yield"].keys()[0]), ["crystal", "titanium", "silicon"], "and which material")
-	near(float(weights["fuel_canister"]), 0.25, "fuel is a rare find too (down from 3, then 0.5, then halved again)")
+	near(float(weights["fuel_canister"]), 1.0, "fuel is a rare find too (down from 3, then 0.5; twice that since the progression audit)")
 	check(total > 80.0 and total < 100.0, "the flow is still mostly scrap, copper and polymer (total weight %s)" % str(total))
 
 

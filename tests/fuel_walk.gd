@@ -215,8 +215,8 @@ func _dock(ship) -> void:
 	if st.is_empty() or _c.dock_block(_c.current) != "" or not st["services"].has("fuel"):
 		return
 	_row["docks"] = int(_row.get("docks", 0)) + 1
-	if st["services"].has("repair") and _c.hull_loss > 0:
-		_c.repair(ship, _c.current, _c.hull_loss)
+	if st["services"].has("repair"):
+		_c.repair(ship, _c.current)  # (no hull pool since the structure rework: it mends every damaged block, when there is any)
 	while _fuel(ship) < buy_to:
 		var r := _c.buy_fuel(ship, _c.current, 1)
 		if not r["ok"]:
