@@ -19,7 +19,7 @@
       ]
     },
     {
-      "id": "concord_survey_buoy", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "concord_space"},
+      "id": "concord_survey_buoy", "type": "anomaly", "weight": 12, "once": false, "requires": {"region": "concord_space"},
       "text": "A Concord survey buoy logging 'Unknown Objects'. The list is long and updates as you watch. A line has just appeared at the bottom: ITEM 4,112: VESSEL, UNIDENTIFIED (PROVISIONAL). It is you.",
       "choices": [
         {"text": "Correct the entry.", "outcomes": [
@@ -60,7 +60,7 @@
       ]
     },
     {
-      "id": "lumen_listening_array", "type": "anomaly", "weight": 8, "once": false, "requires": {"region": "lumen_space"},
+      "id": "lumen_listening_array", "type": "anomaly", "weight": 12, "once": false, "requires": {"region": "lumen_space"},
       "text": "A lattice of glass dishes, listening to something on the other side of nothing. Each dish is tuned to a different note; in the middle the notes make a chord. The chord has no root. It is not unpleasant. It is the opposite of that, and you cannot say what.",
       "choices": [
         {"text": "Sit in the middle and listen.", "outcomes": [

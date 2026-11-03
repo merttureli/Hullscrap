@@ -125,34 +125,34 @@ func _stations(c: Campaign) -> Array:
 	return out
 
 
-func test_about_sixty_percent_of_the_stations_sell_fuel() -> void:
+func test_about_seventy_percent_of_the_stations_sell_fuel() -> void:
 	var c := Campaign.new(3)
 	var list := _stations(c)
 	list.append({"id": "clan_trader", "menu": c.cfg["stations"]["clan_trader"], "region": {}})
 	var sells := list.filter(func(s): return s["menu"]["services"].has("fuel"))
 	var share := float(sells.size()) / list.size()
-	check(share > 0.55 and share < 0.65, "%d of %d stations sell fuel (%.0f%%)" % [sells.size(), list.size(), share * 100.0])
+	check(share > 0.68 and share < 0.78, "%d of %d stations sell fuel (%.0f%%)" % [sells.size(), list.size(), share * 100.0])
 	check(not c.cfg["stations"]["clan_trader"]["services"].has("fuel"), "the Scrapper trader does not")
 	for id in ["rusthold", "meridian", "prism"]:
 		check(c.station_cfg(id).get("services", []).has("fuel") or Regions.station(id, c.cfg)["services"].has("fuel"), "%s, the main station of its region, sells fuel" % id)
-	for stage in range(1, 9):  # every stage has regions whose station sells it, and a share of them near 60%
+	for stage in range(1, 9):  # every stage has regions whose station sells it, and a share of them near 70%
 		var here := list.filter(func(s): return not s["region"].is_empty() and s["region"]["stages"][0] <= stage and stage <= s["region"]["stages"][1])
 		var fuel_here := here.filter(func(s): return s["menu"]["services"].has("fuel"))
-		check(fuel_here.size() >= 1 and (here.size() <= 2 or float(fuel_here.size()) / here.size() < 0.85), "stage %d: %d of %d region stations sell fuel" % [stage, fuel_here.size(), here.size()])
+		check(fuel_here.size() >= 1 and (here.size() <= 2 or float(fuel_here.size()) / here.size() < 0.9), "stage %d: %d of %d region stations sell fuel" % [stage, fuel_here.size(), here.size()])
 
 
-func test_fuel_costs_fourteen_and_a_visit_has_three_to_five_seeded() -> void:
+func test_fuel_costs_fourteen_and_a_visit_has_four_to_eight_seeded() -> void:
 	var c := Campaign.new(5)
 	eq(int(c.cfg["fuel"]["price"]), 14, "fuel price 14")
-	eq(c.cfg["fuel"]["stock"].map(func(v): return int(v)), [3, 5], "3 to 5 units a visit")
+	eq(c.cfg["fuel"]["stock"].map(func(v): return int(v)), [4, 8], "4 to 8 units a visit")
 	var counts := {}
 	for seed_value in 60:
 		var k := Campaign.new(seed_value)
 		var n := k.fuel_left("rusthold")
 		counts[n] = true
-		check(n >= 3 and n <= 5, "seed %d: %d on sale" % [seed_value, n])
+		check(n >= 4 and n <= 8, "seed %d: %d on sale" % [seed_value, n])
 		eq(Campaign.new(seed_value).fuel_left("rusthold"), n, "the same seed has the same stock")
-	eq(counts.keys().size(), 3, "all of 3, 4 and 5 come up: %s" % [counts.keys()])
+	eq(counts.keys().size(), 5, "all of 4 to 8 come up: %s" % [counts.keys()])
 	eq(c.fuel_left("nowhere"), 0, "no station, no fuel")
 	eq(c.fuel_left("clan_trader"), 0, "the Scrapper trader has none")
 
@@ -171,7 +171,7 @@ func test_the_stock_refills_on_the_next_visit_and_is_saved() -> void:
 	eq(c.fuel_left("rusthold"), 0, "sold out")
 	c.jumps += 1  # the ship jumped away and came back: a new visit
 	var next := c.fuel_left("rusthold")
-	check(next >= 3 and next <= 5, "a new visit has a new stock: %d" % next)
+	check(next >= 4 and next <= 8, "a new visit has a new stock: %d" % next)
 	eq(Campaign.new(8).load_dict(c.to_dict()), "", "still saves and loads")
 	var old: Dictionary = c.to_dict()
 	old.erase("fuel_stock")
