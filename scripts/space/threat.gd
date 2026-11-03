@@ -7,6 +7,9 @@ extends RefCounted
 ##   - effective hp: the block hp it takes to wreck the ship (the share of its blocks' hp above the defeat line, structure.gd)
 ##     plus the shield layers that are powered;
 ##   - speed: acceleration over a reference, to a small power, kept between 0.7 and 1.4.
+## A kinetic gun's hit counts over `kinetic_floor` (data/enemy_tables.json) when it is smaller: the plating eats a light round (the
+## Rattle Burst's 1.2 damage a shot landed 0.09 hp/s on the Beta 4 weapon bench against the 0.7 its listed dps promised), and without
+## this the pirates' Rattle Bursts made a jump-5 raider read 3 skulls against the Courier once the gun was given damage 2.
 ## The ratio enemy power / player power is cut into 1-5 skulls at the table's `cuts`.
 
 const Structure = preload("res://scripts/ship/structure.gd")
@@ -45,6 +48,8 @@ static func power(ship, skill: float) -> Dictionary:
 		if str(w["kind"]) == "beam":
 			dmg *= float(w["duration"])
 		dmg *= float(cfg["kind_factor"].get(str(w["kind"]), 1.0))
+		if str(w["damage_type"]) == "kinetic":
+			dmg *= minf(1.0, float(w["damage"]) / float(cfg["kinetic_floor"]))
 		if str(w["damage_type"]) == "ion":
 			dmg *= float(cfg["ion_factor"])
 		var hit: float = clampf(float(w["accuracy"]) - float(cfg["turret_miss"]), 0.0, 1.0) if bool(w["turret"]) else float(cfg["fixed_hit"]) * (0.55 + 0.45 * skill)

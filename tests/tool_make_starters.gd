@@ -82,7 +82,7 @@ func _rustbucket() -> Dictionary:
 	return {
 		"file": "starter_rustbucket", "name": "Rustbucket", "was_hull": 1122, "at": [6, 5],
 		"crew": SOLDIER, "kit": "shield",
-		"blurb": "Ma Gantry's first loan and her worst: three owners, two fires and a clan wedding went into this scrap hull. Thick-skinned, a bolt thrower, a patched bubble shield, a lot of empty frame to weld onto. Now it's yours, and so is the bill.",
+		"blurb": "Ma Gantry's first loan and her worst: three owners, two fires and a clan wedding went into this scrap hull. Thick-skinned, a bolt thrower, a patched bubble, lots of empty frame. Now it's yours, and so is the bill.",
 		"frame": [[12, 0], [38, 0], [46, 8], [46, 14], [52, 20], [52, 28], [46, 34], ["arc", 44, 42, 0, 90], [12, 44], ["arc", 12, 42, 90, 180], [10, 36], [0, 26], [0, 18], [6, 12], [6, 8], [12, 2]],
 		"outline": [[20, 6], [20, 4], [22, 4], [22, 7], [26, 7], [26, 4], [28, 4], [30, 6], [30, 13], [24, 13], [24, 17], [30, 17], [30, 25], ["arc", 28, 25, 0, 90], [19, 27], ["arc", 19, 25, 90, 180], [17, 22], [11, 22], [10, 21], [10, 15], [11, 14], [17, 14], [17, 9]],
 		"plate": "scrap_plate", "plated": func(c): return true, "backed": func(c): return c.y <= 9 or c.x >= 29 or c.y >= 25, "thick": func(c): return true,

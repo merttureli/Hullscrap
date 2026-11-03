@@ -98,15 +98,15 @@ func test_ion_strips_layers_and_locks_the_bubble_times_the_shields_line_vulnerab
 			after += float(x)
 		rows[id] = [before - after, co.ion_lock]
 	near(rows["shield_mk2"][0], 1.0, "a plain shield loses one layer to an ion hit")
-	near(rows["shield_mk2"][1], 3.0, "and is locked for 3 s")
+	near(rows["shield_mk2"][1], 5.0, "and is locked for 5 s (Shields.ION_LOCK)")
 	near(rows["shield_neon_mk1"][0], 2.0, "a neon shield (ion_vulnerability 2) loses two layers")
-	near(rows["shield_neon_mk1"][1], 6.0, "and is locked for 6 s")
+	near(rows["shield_neon_mk1"][1], 10.0, "and is locked for 10 s")
 	# the lost layers come back, no more
 	_duel({"damage_type": "ion", "damage": 1}, _shielded("shield_neon_mk1"))
 	var co = arena.ships[1]
 	var full := float(co.layers_cap)
 	_shoot()
-	arena.step(6.0 + (2.0 * 7.0 + 3.0) / 1.75 + 0.1)  # the lock, then the neon recharge: two layers one after the other (7 + 7 s of base time, 3 more for the emptied sector) at x1.75
+	arena.step(10.0 + (2.0 * 7.0 + 3.0) / 1.75 + 0.1)  # the lock (10 s), then the neon recharge: two layers one after the other (7 + 7 s of base time, 3 more for the emptied sector) at x1.75
 	var sum := 0.0
 	for x in co.sector_layers:
 		sum += float(x)

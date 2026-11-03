@@ -54,3 +54,17 @@ func test_an_unshielded_exposed_gun_or_a_dead_one_rates_more_danger() -> void:
 	check(float(Threat.rate(foe, dead)["ratio"]) > base * 5.0, "with its gun shot out the foe is far more dangerous")
 	var r := Threat.rate(foe, courier)
 	check(int(r["skulls"]) >= 1 and int(r["skulls"]) <= 5, "the output is still 1 to 5 skulls")
+
+
+func test_a_light_kinetic_round_counts_over_the_plating_floor() -> void:
+	var w := Weapons.new().def("rattle_burst_scrap")
+	var cfg := Threat.config()
+	var share := minf(1.0, float(w["damage"]) / float(cfg["kinetic_floor"]))
+	check(share < 0.5, "the Rattle Burst's hit counts for %s of itself" % str(share))
+	var ship := _ship("res://data/ships/pirate_raider.json")
+	for uid in ship.components.instances.keys():
+		var id := str(ship.components.instances[uid]["id"])
+		if str(ship.components.def(id).get("family", "")) == "weapon" and id != "rattle_burst_scrap":
+			ship.components.remove_uid(uid)
+	var want: float = float(w["damage"]) * float(cfg["kind_factor"]["bolt"]) * share * (float(w["accuracy"]) - float(cfg["turret_miss"])) / float(w["cooldown"])
+	check(absf(float(Threat.power(ship, 0.5)["dps"]) - want) < 1e-6, "and the raider's turret alone is rated %.3f dps" % want)
