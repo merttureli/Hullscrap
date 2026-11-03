@@ -423,11 +423,15 @@ func warning_text(id: String) -> String:
 
 
 ## Fire the first of `conds` that may: it goes on the card for rules.warn_s seconds and is remembered. Returns its id, "" when none fired
-## (and none does while the setting hides warnings: one not shown is not used up).
+## (and none does while the setting hides warnings: one not shown is not used up). While a warning is on the card only a more urgent one (earlier in
+## WARNINGS), or the same one grown worse, replaces it; the rest wait until it has gone.
 func fire(conds: Array, at_stage: int) -> String:
 	if not shows("warnings"):
 		return ""
+	var on_show := WARNINGS.find(str(warning.get("id", ""))) if not warning.is_empty() else -1
 	for c in conds:
+		if on_show >= 0 and WARNINGS.find(str(c["id"])) > on_show:
+			continue  # a less urgent one waits its turn: it does not shove the one on the card off it (and use up its once-a-stage)
 		if may_fire(c["id"], at_stage, float(c["level"])):
 			warned[c["id"]] = {"stage": at_stage, "level": float(c["level"])}
 			dirty = true

@@ -38,6 +38,7 @@ var sim: Node
 var build: Node
 var picker: Node
 var combat: Node
+var sector: Node  ## the sector view: its header (the place, the helm line) is on show while it is visible
 var cam: Camera2D
 var map: Node  ## the map of the Drift (build_mode.gd makes it)
 var profile: Profile
@@ -60,6 +61,7 @@ func _ready() -> void:
 	build = get_node_or_null("../BuildMode")
 	picker = get_node_or_null("../PickerLayer/ShipPicker")
 	combat = get_node_or_null("../Combat")
+	sector = get_node_or_null("../Sector")
 	craft = get_node_or_null("../CraftLayer/CraftingPanel")
 	cam = get_node_or_null("../Camera2D")
 	profile = Profile.new()
@@ -130,16 +132,16 @@ func _process(_dt: float) -> void:
 		_craft_seen = craft.visible
 	if combat != null:
 		var fighting: bool = combat.active
-		toast.top = toast_top(fighting, _map_seen)
+		toast.top = toast_top(fighting, _map_seen, sector != null and sector.visible)
 		if fighting and not _fight_seen:
 			_hint("fight")
 		_fight_seen = fighting
 
 
 ## Where the hint toast sits (its top, px): under the fight's key hints, under the map's header (a toast at the top bar covered
-## its Hull figure), else under the HUD's top bar.
-static func toast_top(fighting: bool, map_open: bool) -> float:
-	return 62.0 if fighting else (106.0 if map_open else 48.0)
+## its Hull figure), under the sector's two header lines (the place and the helm) when the ship is flying, else under the HUD's top bar.
+static func toast_top(fighting: bool, map_open: bool, sector_header := false) -> float:
+	return 62.0 if fighting else (106.0 if map_open else (100.0 if sector_header else 48.0))
 
 
 # --- screens ----------------------------------------------------------------------------------------------

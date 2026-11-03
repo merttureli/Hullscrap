@@ -90,7 +90,7 @@
    {
     "id": "s1_intake",
     "title": "Mount your {intake}.",
-    "why": "A third of your scrap drifts past. The net mouth is in the hold, earning nothing, like a cousin.",
+    "why": "A third of your scrap drifts past. Ma gives you a net mouth; in the hold it earns nothing, like a cousin.",
     "check": {
      "intakes": 1
     }
