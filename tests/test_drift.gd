@@ -398,7 +398,7 @@ func test_buy_fuel_at_fourteen_credits_a_can_from_a_small_stock() -> void:
 	var ship := _ship()
 	var credits := ship.inventory.count("credits")
 	var left := c.fuel_left("rusthold")
-	check(left >= 4 and left <= 8, "4 to 8 units on sale a visit: %d" % left)
+	check(left >= 6 and left <= 10, "6 to 10 units on sale a visit: %d" % left)
 	var r := c.buy_fuel(ship, "rusthold", 2)
 	check(r["ok"], r["text"])
 	eq([ship.inventory.count("fuel"), ship.inventory.count("credits")], [8, credits - 28], "2 fuel for 28")

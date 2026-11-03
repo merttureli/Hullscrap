@@ -141,18 +141,18 @@ func test_about_seventy_percent_of_the_stations_sell_fuel() -> void:
 		check(fuel_here.size() >= 1 and (here.size() <= 2 or float(fuel_here.size()) / here.size() < 0.9), "stage %d: %d of %d region stations sell fuel" % [stage, fuel_here.size(), here.size()])
 
 
-func test_fuel_costs_fourteen_and_a_visit_has_four_to_eight_seeded() -> void:
+func test_fuel_costs_fourteen_and_a_visit_has_six_to_ten_seeded() -> void:
 	var c := Campaign.new(5)
 	eq(int(c.cfg["fuel"]["price"]), 14, "fuel price 14")
-	eq(c.cfg["fuel"]["stock"].map(func(v): return int(v)), [4, 8], "4 to 8 units a visit")
+	eq(c.cfg["fuel"]["stock"].map(func(v): return int(v)), [6, 10], "6 to 10 units a visit")
 	var counts := {}
 	for seed_value in 60:
 		var k := Campaign.new(seed_value)
 		var n := k.fuel_left("rusthold")
 		counts[n] = true
-		check(n >= 4 and n <= 8, "seed %d: %d on sale" % [seed_value, n])
+		check(n >= 6 and n <= 10, "seed %d: %d on sale" % [seed_value, n])
 		eq(Campaign.new(seed_value).fuel_left("rusthold"), n, "the same seed has the same stock")
-	eq(counts.keys().size(), 5, "all of 4 to 8 come up: %s" % [counts.keys()])
+	eq(counts.keys().size(), 5, "all of 6 to 10 come up: %s" % [counts.keys()])
 	eq(c.fuel_left("nowhere"), 0, "no station, no fuel")
 	eq(c.fuel_left("clan_trader"), 0, "the Scrapper trader has none")
 

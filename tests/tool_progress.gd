@@ -207,7 +207,7 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 
 func new_stage() -> Dictionary:
 	var rec := {"stage": c.stage, "region": c.region_id, "nodes": 0, "jumps": 0, "minutes": 0.0, "fights": [], "flow": {}, "pois": 0, "dock": 0, "fuel_bought": 0, "drift_jumps": 0, "tows": 0,
-		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0, "shops": 0, "seen": [], "dens": 0.0, "press": 0.0, "hollow": 0, "dens_n": 0, "slice_new": 0, "slice_old": 0, "speed_sum": 0.0}
+		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0, "shops": 0, "seen": [], "dens": 0.0, "press": 0.0, "hollow": 0, "dens_n": 0, "slice_new": 0, "slice_old": 0, "speed_sum": 0.0, "fab_max": 0}
 	rec["start"] = snapshot()
 	return rec
 
@@ -881,6 +881,7 @@ func build_phase() -> void:
 				break
 		if not done:
 			_skip[it["kind"]] = true
+	st["fab_max"] = maxi(int(st["fab_max"]), int(stats_now()["fab"]))  # (the stage's end is after its last fights, which wreck parts: the level it had in between is this)
 
 
 ## The next thing the policy wants, {kind, ids (best first)}, skipping the kinds that failed this phase. {} when it wants nothing.
