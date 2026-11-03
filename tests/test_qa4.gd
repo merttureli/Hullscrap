@@ -74,3 +74,17 @@ func test_every_sound_label_stays_inside_its_slider() -> void:
 			var pw := font.get_string_size("%s 100%%" % MainMenu.SOUND_KINDS[i - 1][1], HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 			check(MainMenu.slider_label_x(pw, prev) + pw < x, "%s does not run into the label before it" % MainMenu.SOUND_KINDS[i][1])
 	m.free()
+
+
+func test_a_body_gear_line_fits_its_loadout_slot() -> void:
+	var Loadout = load("res://scripts/board/board_loadout.gd")
+	var Kit = load("res://scripts/board/kit.gd")
+	var font := ThemeDB.fallback_font
+	var longest := 0.0
+	for item in Kit.cfg()["bodies"]:
+		var w := font.get_string_size(Loadout.body_sub(str(item)), HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		longest = maxf(longest, w)
+		check(54.0 + w <= Loadout.SLOT.x - 4.0, "%s: '%s' is %.0f px, the slot has %.0f after its icon" % [item, Loadout.body_sub(str(item)), w, Loadout.SLOT.x - 58.0])
+	check(longest > 60.0, "(measured the real lines)")
+	eq(Loadout.body_sub("exosuit"), "35% less damage.", "the sentence without its first word")
+	eq(Kit.body_line("exosuit"), "Takes 35% less damage.", "the hover keeps the whole one")
