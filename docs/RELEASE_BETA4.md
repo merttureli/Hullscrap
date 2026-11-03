@@ -12,6 +12,13 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **Fewer enemies run**: Concord ships now surrender as often as they flee, and other pirates surrender more often.
 - **The skulls** no longer overrate ships armed with light kinetic guns.
 
+### Crew and repairs
+- **Crew keep their breath**: they take a job in an airless room only if they can finish it and walk out with air to spare. Send someone in yourself (middle click) and they go, with a warning.
+- **Lost compartments**: in a fight, a room with 3 or more holes to space (or a fifth of its walls open) is LOST. The crew leave it, and you fix it after the fight or in build mode. Your soldier can still work there.
+- **Repairs under fire**: a wall or part hit in the last 5 s repairs at about a third of the speed, on both ships, so an enemy crew no longer mends as fast as one gun hurts.
+- **Orders for several crew**: Shift+click or drag a box to select several (Shift+click on the crew bar works too). Middle click a room to split its jobs among them, and **X** spreads them over the damaged rooms.
+- **Tab slows a ship fight to a quarter speed** until you press it again: time to give orders. There's no limit on it.
+
 ### Content
 - **Boarding**: 10 new discoveries, 2 new hermits and 2 new traders aboard derelicts, and 4 new logs. More derelicts have someone aboard, and suits turn up in engineering and command lockers.
 - **Events**:
@@ -98,7 +105,8 @@ Boarding, a rebuilt hull, the Ledger, and a balance pass measured by a playtest 
 - **F1** lists the Ledger's L key.
 
 ## Known issues
-- **Starter ships against three-skull pirates at stage 1**: the Rustbucket now has a Bubble Rig and its Bolt Thrower sits in a notch of the prow, and it comes through about 40 to 60% of them (the Courier about 55 to 65%, the Prism about 90%): the rest are stalemates, mostly against Concord and Lumen pirates whose crews mend as fast as one Bolt Thrower hurts. A person who shoots the pirate's one gun does better than the autopilot the numbers come from.
+- **Starter ships against three-skull pirates at stage 1** come through about 70% of the time in the Rustbucket, 75% in the Courier and 95% in the Prism, measured by a bot; the rest are stalemates.
+- **In a fight** you give crew orders on the crew bar and with X: middle-clicking a room on the ship itself works only outside a fight.
 - **Lattice wardens** never break, so beating one takes several minutes.
 - **Small overlaps**:
   - the Ledger card hides marker labels near the map's left edge;
