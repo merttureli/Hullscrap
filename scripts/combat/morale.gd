@@ -7,9 +7,10 @@ extends RefCounted
 ##   running out, makes it "fighting_on": it fights to the end and morale never triggers again. The player's
 ##   turrets hold fire while it stands (a turret hit would refuse it) and go back to how they were after.
 ## - flee ("fleeing"): the pilot burns away stern to the player (pilot_ai.gd) while the jump drive charges for
-##   `spool_s`; the charge holds by spool_hold(): every engine out, the helm down or every crew member down (the
-##   same rule holds the player's own J spool, combat_session.gd). Full: "escaped", the ship is moved
-##   `escape_distance` px away and stopped.
+##   `spool_s` (a style may set its own); the charge holds by spool_hold(): every engine out, the helm down or every crew
+##   member down (the same rule holds the player's own J spool, combat_session.gd). Full: "escaped", the ship is moved
+##   `escape_distance` px away and stopped. A style with `fades` (the Hollow's ghosts) flees every time and quicker: it
+##   thins back into the Hollow, which Campaign.fight_done counts as a won fight with nothing to salvage.
 ## - captured: the enemy had crew aboard and all of it is down (or gone) for `captured_s`: guns and helm stop.
 ## The session ticks it every substep after the arena; the pilot reads pilot_mode(). No nodes, no drawing.
 
@@ -68,11 +69,33 @@ func _init(p_arena, p_enemy: int, p_player: int, p_style := "default", p_cfg := 
 		captain = str(ai.get("captain", ship.crew_plan[0]["name"] if not ship.crew_plan.is_empty() else ""))
 
 
+## The style's entry of cfg["styles"] (an unknown style uses "default").
+func _style_cfg() -> Dictionary:
+	var styles: Dictionary = cfg["styles"]
+	return styles.get(style, styles["default"])
+
+
 ## The style's weights: {surrender, flee, fight}.
 func weights() -> Dictionary:
-	var styles: Dictionary = cfg["styles"]
-	var s: Dictionary = styles.get(style, styles["default"])
+	var s := _style_cfg()
 	return {"surrender": float(s.get("surrender", 0.0)), "flee": float(s.get("flee", 0.0)), "fight": float(s.get("fight", 0.0))}
+
+
+## Seconds this enemy's jump drive spools when it flees: the style's own `spool_s`, else morale.json's.
+func spool_total() -> float:
+	return float(_style_cfg().get("spool_s", cfg["spool_s"]))
+
+
+## Does this enemy fade when it flees (a Hollow ghost thins back into the Hollow)?
+func fades() -> bool:
+	return bool(_style_cfg().get("fades", false))
+
+
+## Does a ship of morale style `style` (the `morale` of its ai) fade when it flees? (data/morale.json)
+static func fades_style(style: String) -> bool:
+	var styles: Dictionary = config().get("styles", {})
+	var s = styles.get(style, {})
+	return s is Dictionary and bool(s.get("fades", false))
 
 
 ## Roll the style: "surrender", "flee" or "fight" (the last when every weight is 0).
@@ -142,9 +165,10 @@ func banner() -> String:
 			return "%s hails: '%s' Offer: %s. Y accept / keep firing to refuse (%d s)" % [who, say("surrender", "Enough! Take it and let us go."), offer_text(), ceili(offer_left)]
 		"fleeing":
 			var cry := say("flee")
+			var what := "Fading back into the Hollow!" if fades() else "Spooling its jump drive!"
 			if cry != "":
-				return "%s: '%s' Spooling its jump drive! Knock out its engines or helm" % [who, cry]
-			return "%s is spooling its jump drive! Knock out its engines or helm" % who
+				return "%s: '%s' %s Knock out its engines or helm" % [who, cry, what]
+			return "%s is %s%s Knock out its engines or helm" % [who, what.substr(0, 1).to_lower(), what.substr(1)]
 		"fighting_on":
 			if refused_at >= 0.0 and arena.time() - refused_at < float(cfg["refused_banner_s"]):
 				var no := say("refuse")
@@ -329,7 +353,7 @@ func _is_attack(e: Dictionary) -> bool:
 func _tick_flee(dt: float) -> void:
 	if hold() == "":
 		spool += dt
-	if spool >= float(cfg["spool_s"]) - 1e-6:
+	if spool >= spool_total() - 1e-6:
 		_escape()
 
 

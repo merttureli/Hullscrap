@@ -31,6 +31,7 @@ const Radar = preload("res://scripts/space/radar.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
+const Morale = preload("res://scripts/combat/morale.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const Shops = preload("res://scripts/space/shops.gd")
@@ -955,8 +956,9 @@ func gen_spec(entry: String, kind: String, roller: RandomNumberGenerator = null)
 ## The fight is over. `res` is {state, enemy (its Ship)}, plus `offer` ({item: count}) when
 ## spared; `state` is "won" | "captured" | "spared" | "escaped" | "fled" | "lost". A win pays credits (the caller
 ## then shows Salvage.event_for); a captured ship pays 1.5x the credits and the strip scrap; a spared one pays its
-## offer (its credits times the tier) and gives no salvage; an escaped one pays nothing. Won, captured and spared
-## count as wins and run `after_win` ({text, effects}). The damage stays on the blocks, nothing else is carried. A loss ends
+## offer (its credits times the tier) and gives no salvage; an escaped one pays nothing, except a ghost that faded (its
+## morale style `fades`, data/morale.json): that counts as a win and runs `after_win`, with nothing to loot or salvage. Won,
+## captured and spared count as wins and run `after_win` ({text, effects}). The damage stays on the blocks, nothing else is carried. A loss ends
 ## the run (the caller starts a new campaign). Returns {state, text, lines, goto, fight, ending, threat}: `goto`,
 ## `fight` and `ending` are what the after_win effects asked for next. `threat` (the skulls of the enemy, 0 when
 ## the result has none) is handed on for Salvage.event_for.
@@ -969,13 +971,17 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 	if state == "escaped" and after_win.has("clears"):  # the warden left the lane
 		flags[str(after_win["clears"])] = true
 		out["lines"].append("The lane is clear.")
-	if not state in ["won", "captured", "spared"]:
+	var foe = res.get("enemy")
+	var faded: bool = state == "escaped" and foe != null and Morale.fades_style(str(foe.get_meta("ai", {}).get("morale", "")))
+	if not state in ["won", "captured", "spared"] and not faded:
 		out["text"] = "They're gone, and whatever they carried went with them." if state == "escaped" else "You break away. The fight is not finished, but you are."
 		return out
 	fights_won += 1
 	out["text"] = "The wreck tumbles away, still venting."
 	var ghost := is_hollow(current)  # ghosts pay almost nothing: loot() gives no credits, the strip row is half (salvage.gd)
-	if state == "spared" and not ghost:
+	if faded:
+		out["text"] = "The ghost thins out of the world and leaves nothing behind."
+	elif state == "spared" and not ghost:
 		out["text"] = "They dump the goods out of the airlock and limp away."
 		var offer: Dictionary = res["offer"].duplicate() if res.get("offer") is Dictionary else {}
 		if offer.has("credits"):
@@ -983,7 +989,7 @@ func fight_done(res: Dictionary, ship, after_win: Dictionary = {}) -> Dictionary
 		out["lines"] = events.apply({"items": offer}, self, ship)["lines"]
 	else:
 		out["lines"] = loot(res.get("enemy"), ship, state == "captured")
-	if ghost:
+	if ghost and not faded:
 		out["text"] = "The ghost ship stops firing and drifts off. Nothing it offers is worth taking." if state == "spared" else "The ghost hull goes dark and hangs there, wrong and empty."
 	if not after_win.is_empty():
 		if str(after_win.get("text", "")) != "":  # replaces the wreck text; a spared ship's goods stay in the story

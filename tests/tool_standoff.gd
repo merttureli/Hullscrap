@@ -4,12 +4,16 @@ extends SceneTree
 ## It builds a player-like ship for a stage from data/progression.json's median row (its guns, shield layers and power), with a human mix of
 ## weapons (lasers and the pulse line, what the shops and blueprints offer by then), and fights it through the real arena (as
 ## tests/tool_balance.gd does: both pilots on the AI, the crews in ShipSim, morale ending fights the way the game does, the player takes any
-## surrender) against generated enemies of that stage that carry no shield, enemies that do, and Hollow ghosts, N seeds each.
+## surrender) against generated enemies of that stage that carry no shield, enemies that do, Hollow ghosts, and the Lattice wardens (the
+## faction of morale style `hollow`, which never breaks: the control that a morale change must leave as it was), N seeds each.
 ##   godot --headless --path . --script res://tests/tool_standoff.gd [-- key=value ...]
-## Keys: stages (default 3,4,5), seeds (per stage and kind, default 20), cap (s, default 180), kinds (plain,shield,ghost), jobs (processes, default 2),
+## Keys: stages (default 3,4,5; 1 to 5 have a build), seeds (per stage and kind, default 20), cap (s, default 180), kinds (plain,shield,ghost,warden), jobs (processes, default 2),
 ## out (a JSON of every fight's row), sum (print the table of an out file instead of fighting: sum=<path,path>). Internal: shard (k/n), rows.
 ## What-ifs, for this run only (data/morale.json held in memory): break=<x> (break_structure), ghost_flee=<share> (the Hollow style: that share of
 ## the rolls flee, the rest fight on), shield_recharge=<x> (every shield part's recharge, seconds a layer), shield_cap (not here: stages 4+ have none).
+## starters=1 (instead of the stages and kinds): the three starter ships as built (data/ships/starter_*.json) against generated stage 1 and 2
+## pirates of threat 2 and 3 (rated against that starter, Threat.rate) and the authored Dental Plan, `seeds` each, through the arena's normal player AI;
+## it prints the starter table: who wins, how long, and when the starter's first gun (and its last) is disabled. Not for a stage's player-like ship.
 ## Each row: the end, the time, the enemy's shield layers, the shots of the player and where they went (shield layer, hull, part), the
 ## structure the enemy lost, the time the guns were in range, and the enemy's own damage and shield use.
 
@@ -31,11 +35,15 @@ const PLAYER_EVERY := 3
 const JUMPS_A_STAGE := 12.5  ## the progression bot's stages (docs/audit/progression.md): about this many jumps each
 const FACTIONS := ["rustfangs", "concord", "lumen", "clans"]  ## the pirates a stage 3-6 region sends (the Hollow's ghosts are their own kind)
 const MAX_TRIES := 600  ## seeds looked at to fill the plain / shield quotas of a stage
+const STARTERS := {"courier": "res://data/ships/starter_courier.json", "rustbucket": "res://data/ships/starter_rustbucket.json", "prism": "res://data/ships/starter_prism.json"}
+const DENTAL := "res://data/ships/dental_plan.json"  ## the authored stage-1 pirate QA met (threat 3, one shield layer)
 
 ## The player-like ship of each stage: size, weapons, shields, armour layers. Guns and shield layers are the median row of
 ## data/progression.json (stage 3: 5 guns, 2 layers; 4: 6 and 2; 5: 7 and 3; 6: 7 and 3), the mix is the one a shop and the blueprints
 ## give: Laser Mk1 and Mk2, Pulse Mk1 and Mk2 on the bow, the Laser Turret on the flanks. No missile, no ion: the bot never asks for one either.
 const BUILDS := {
+	1: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1"], "shields": ["shield_mk1"], "armour": 0},
+	2: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1"], "shields": ["shield_mk1"], "armour": 1},
 	3: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2"], "armour": 1},
 	4: {"size": "large", "weapons": ["laser_mk2", "laser_mk1", "pulse_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2"], "armour": 1},
 	5: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
@@ -64,6 +72,8 @@ func _run() -> void:
 		for path in str(args["sum"]).split(","):
 			rows.append_array(JSON.parse_string(FileAccess.get_file_as_string(path)))
 		print(table(rows))
+		if rows.any(func(r): return r.has("starter")):
+			print(starter_table(rows))
 		quit(0)
 		return
 	var jobs := int(args.get("jobs", 2))
@@ -75,6 +85,17 @@ func _run() -> void:
 		var kinds: Array = Array(str(args.get("kinds", "plain,shield,ghost")).split(","))
 		var n := int(args.get("seeds", 20))
 		var k := 0
+		if args.has("starters"):
+			for name in STARTERS:
+				for st in [1, 2]:
+					for e in starter_enemies(name, st, n):
+						k += 1
+						if (k - 1) % shard[1] != shard[0]:
+							continue
+						var row := fight(st, e, name)
+						rows.append(row)
+						print("%s stage %d %-12s seed %d: %s in %.0f s (first gun out at %.0f s)" % [name, st, e["kind"], e["seed"], row["state"], row["t"], row.get("t_gun1", -1.0)])
+			stages = []
 		for st in stages:
 			var player_info := {}
 			for kind in kinds:
@@ -91,6 +112,8 @@ func _run() -> void:
 		_write(str(args["out"]), JSON.stringify(rows))
 	if not args.has("shard"):
 		print(table(rows))
+		if rows.any(func(r): return r.has("starter")):
+			print(starter_table(rows))
 	quit(0)
 
 
@@ -104,7 +127,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee"]:
+	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
@@ -183,7 +206,8 @@ static func danger_for(faction: String) -> float:
 	return best if best < INF else 1.0
 
 
-## `n` enemies of `kind` ("plain": no shield part, "shield": at least one, "ghost": the Hollow's) for stage `stage`: [{spec, faction, seed, layers}].
+## `n` enemies of `kind` ("plain": no shield part, "shield": at least one, "ghost": the Hollow's, "warden": the Lattice wardens', whose style never
+## breaks) for stage `stage`: [{spec, faction, seed, layers}].
 ## The budget is the campaign's for the jump in the middle of the stage; the faction goes round the pirates of the stage's regions.
 static func enemies(stage: int, kind: String, n: int) -> Array:
 	var out: Array = []
@@ -192,7 +216,7 @@ static func enemies(stage: int, kind: String, n: int) -> Array:
 	var tries := 0
 	while out.size() < n and tries < MAX_TRIES:
 		var seed_value := 101 + tries * 7919 + stage * 31
-		var faction: String = "hollow" if kind == "ghost" else FACTIONS[tries % FACTIONS.size()]
+		var faction: String = "hollow" if kind == "ghost" else ("wardens" if kind == "warden" else FACTIONS[tries % FACTIONS.size()])
 		tries += 1
 		var budget := Shipgen.budget_for(tier, j, danger_for(faction), "normal", stage)
 		var rng := RandomNumberGenerator.new()
@@ -210,12 +234,49 @@ static func enemies(stage: int, kind: String, n: int) -> Array:
 	return out
 
 
+## Enemies for the starter ship `name` at stage `stage`: `n` generated pirates (the factions of FACTIONS in turn, shielded or not) of threat 2 and `n` of threat 3
+## (rated against this starter), then `n` runs of the authored Dental Plan; [{spec, faction, seed, layers, kind, skulls}], kind "<name> t<skulls>" or "<name> dental".
+static func starter_enemies(name: String, stage: int, n: int) -> Array:
+	var mine: Ship = Session.load_ship(STARTERS[name])
+	var out: Array = []
+	var got := {2: 0, 3: 0}
+	var j := roundi(JUMPS_A_STAGE * (float(stage) - 0.5))
+	var tier := 3 if j >= 25 else (2 if j >= 10 else 1)
+	var tries := 0
+	while (got[2] < n or got[3] < n) and tries < MAX_TRIES:
+		var seed_value := 101 + tries * 7919 + stage * 31
+		var faction: String = FACTIONS[tries % FACTIONS.size()]
+		tries += 1
+		var budget := Shipgen.budget_for(tier, j, danger_for(faction), "normal", stage)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_value
+		var spec := Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage)
+		var ship: Ship = Session.load_ship(spec)
+		if ship == null:
+			continue
+		var sk: int = Threat.rate(ship, mine)["skulls"]
+		if not got.has(sk) or got[sk] >= n:
+			continue
+		got[sk] += 1
+		out.append({"spec": spec, "faction": faction, "seed": seed_value, "layers": Shields.layers_of_ship(ship, ship.power_state.get("powered", {})), "kind": "%s t%d" % [name, sk], "skulls": sk})
+	if got[2] < n or got[3] < n:
+		printerr("standoff: %s stage %d: threat 2: %d, threat 3: %d of %d in %d tries" % [name, stage, got[2], got[3], n, MAX_TRIES])
+	if stage == 1:
+		var dental: Ship = Session.load_ship(DENTAL)
+		var dsk: int = Threat.rate(dental, mine)["skulls"]
+		for i in n:
+			out.append({"spec": DENTAL, "faction": "rustfangs", "seed": 5000 + i * 131, "layers": Shields.layers_of_ship(dental, dental.power_state.get("powered", {})), "kind": "%s dental t%d" % [name, dsk], "skulls": dsk})
+	return out
+
+
 # --- one fight -------------------------------------------------------------------------------------
 
-func fight(stage: int, e: Dictionary) -> Dictionary:
-	var player := build_player(stage)
+func fight(stage: int, e: Dictionary, starter := "") -> Dictionary:
+	var player: Ship = Session.load_ship(STARTERS[starter]) if starter != "" else build_player(stage)
 	var enemy: Ship = Session.load_ship(e["spec"])
 	var row := {"stage": stage, "kind": e["kind"], "faction": e["faction"], "seed": e["seed"], "spec": e["spec"], "e_layers": e["layers"]}
+	if starter != "":
+		row["starter"] = starter
 	if player == null or enemy == null:
 		row["state"] = "error"
 		row["t"] = 0.0
@@ -234,14 +295,14 @@ func fight(stage: int, e: Dictionary) -> Dictionary:
 	pilot.foe_morale = sess.morale
 	var a = sess.arena
 	var d := {"p_shots": 0, "e_shots": 0, "p_hull": 0.0, "e_hull": 0.0, "p_part": 0.0, "e_part": 0.0, "p_shield": 0, "e_shield": 0, "p_hits": 0, "e_hits": 0,
-		"in_range": 0, "samples": 0, "gap": 0.0, "t_half": -1.0, "t_break": -1.0}
+		"in_range": 0, "samples": 0, "gap": 0.0, "t_half": -1.0, "t_break": -1.0, "t_gun1": -1.0, "t_guns": -1.0}
 	var cursor := 0
 	var n := 0
 	var ticks := int(cap * 60.0)
 	while sess.state() == "fighting" and n < ticks:
 		if n % PLAYER_EVERY == 0:
 			pilot.think(STEP * PLAYER_EVERY)
-			_sample(sess, pilot, d)
+			_sample(sess, pilot, d, n * STEP)
 		if sess.morale.state == "offering":
 			sess.accept_surrender()
 		sess.ai.think(STEP)
@@ -259,16 +320,26 @@ func fight(stage: int, e: Dictionary) -> Dictionary:
 	cursor = _scan(a, cursor, d)
 	var st := sess.state()
 	var foe = a.ships[Session.ENEMY]
-	row.merge({"state": st, "t": n * STEP, "foe_hull": Structure.structure_fraction(foe), "hull": Structure.structure_fraction(a.ships[Session.PLAYER]), "morale": sess.morale.state})
+	if st == "escaped" and sess.morale.style == "ghost":
+		st = "faded"  # a ghost that thinned back into the Hollow: a won fight with nothing to salvage (Campaign.fight_done)
+	row.merge({"state": st, "t": n * STEP, "foe_hull": Structure.structure_fraction(foe), "hull": Structure.structure_fraction(a.ships[Session.PLAYER]), "morale": sess.morale.state,
+		"style": sess.morale.style})
 	row.merge(d)
 	sim.free()
 	return row
 
 
-func _sample(sess: Session, pilot: PilotAI, d: Dictionary) -> void:
+func _sample(sess: Session, pilot: PilotAI, d: Dictionary, t: float) -> void:
 	var a = sess.arena
 	var co = a.ships[Session.PLAYER]
 	d["samples"] += 1
+	var out := 0
+	for uid in co.mounts:
+		out += int(a.weapons.status_of(a, 0, uid) == "disabled")
+	if out > 0 and d["t_gun1"] < 0.0:
+		d["t_gun1"] = t  # the first gun of the player's ship disabled
+	if out > 0 and out == co.mounts.size() and d["t_guns"] < 0.0:
+		d["t_guns"] = t  # and the last
 	var to_foe: Vector2 = a.ships[Session.ENEMY].flight.pos - co.flight.pos
 	d["gap"] += to_foe.length() - pilot.extent(0, to_foe.normalized()) - pilot.extent(1, -to_foe.normalized())
 	var reach := false
@@ -321,11 +392,11 @@ static func _mean(v: Array) -> float:
 	return t / maxf(float(v.size()), 1.0)
 
 
-## The table: per (stage, kind) the number of fights, the median and mean length, the share over 110 s and at the cap, how they ended,
+## The table: per (stage, kind) the number of fights, the median and mean length, the share over 110 s and at the cap, how they ended (percent),
 ## and for the long ones (over 110 s) what the shots did.
 static func table(list: Array) -> String:
 	var L: Array[String] = []
-	L.append("| stage | kind | n | median s | mean s | over 110 s | at cap | decided (wreck/capt/spared/escaped) | enemy layers | p.power | e.power | p.dps | e.ehp |")
+	L.append("| stage | kind | n | median s | mean s | over 110 s | at cap | ends % (wreck / captured / spared / fled / faded / cap / lost) | enemy layers | p.power | e.power | p.dps | e.ehp |")
 	L.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
 	var keys := {}
 	for r in list:
@@ -344,8 +415,11 @@ static func table(list: Array) -> String:
 		var ends := {}
 		for r in sel:
 			ends[str(r["state"])] = int(ends.get(str(r["state"]), 0)) + 1
+		var shares: Array[String] = []
+		for end in ["won", "captured", "spared", "escaped", "faded", "fighting", "lost"]:
+			shares.append(str(roundi(100.0 * int(ends.get(end, 0)) / sel.size())))
 		L.append("| %d | %s | %d | %.0f | %.0f | %d%% | %d%% | %s | %.1f | %.0f | %.0f | %.1f | %.0f |" % [s, kind, sel.size(), _median(ts), _mean(ts), roundi(100.0 * over110 / sel.size()), roundi(100.0 * capped / sel.size()),
-			str(ends), _mean(sel.map(func(r): return r["e_layers"])), _mean(sel.map(func(r): return r["p_power"])), _mean(sel.map(func(r): return r["e_power"])), _mean(sel.map(func(r): return r["p_dps"])), _mean(sel.map(func(r): return r["e_ehp"]))])
+			" / ".join(shares), _mean(sel.map(func(r): return r["e_layers"])), _mean(sel.map(func(r): return r["p_power"])), _mean(sel.map(func(r): return r["e_power"])), _mean(sel.map(func(r): return r["p_dps"])), _mean(sel.map(func(r): return r["e_ehp"]))])
 	L.append("")
 	L.append("Why the long ones (over 110 s) are long: per (stage, kind), the means of the fights over 110 s.")
 	L.append("")
@@ -365,4 +439,32 @@ static func table(list: Array) -> String:
 			100.0 * maxf(shots - sh - hits, 0.0) / maxf(shots, 1.0), _mean(sel.map(func(r): return float(r["p_hull"]) + float(r["p_part"]))), _mean(sel.map(func(r): return r["foe_hull"])),
 			100.0 * _mean(sel.map(func(r): return float(r["in_range"]) / maxf(float(r["samples"]), 1.0))), _mean(sel.map(func(r): return float(r["gap"]) / maxf(float(r["samples"]), 1.0))), es,
 			100.0 * _mean(sel.map(func(r): return r["e_shield"])) / maxf(es, 1.0)])
+	return "\n".join(L)
+
+
+
+## The starter table: per (starter, stage, kind) the fights, the median length, who wins (the starter wrecks it, takes its surrender or capture, or it flees or fades;
+## the starter is wrecked; neither at the cap), and the first gun disabled: the share of fights it happens in, and its median time (all guns: the same).
+static func starter_table(list: Array) -> String:
+	var L: Array[String] = []
+	L.append("| starter | stage | enemy | n | median s | mean s | starter wins % | starter lost % | stalemate % | first gun out in % | at (median s) | all guns out in % | at (median s) |")
+	L.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+	var keys := {}
+	for r in list:
+		if r.has("starter"):
+			keys["%s|%d|%s" % [r["starter"], int(r["stage"]), str(r["kind"])]] = [str(r["starter"]), int(r["stage"]), str(r["kind"])]
+	var ks := keys.keys()
+	ks.sort()
+	for key in ks:
+		var sel := list.filter(func(r): return r.get("starter", "") == keys[key][0] and int(r["stage"]) == keys[key][1] and str(r["kind"]) == keys[key][2] and str(r["state"]) != "error")
+		if sel.is_empty():
+			continue
+		var n := float(sel.size())
+		var lost := sel.filter(func(r): return str(r["state"]) == "lost").size()
+		var cap := sel.filter(func(r): return str(r["state"]) == "fighting").size()
+		var g1 := sel.filter(func(r): return float(r["t_gun1"]) >= 0.0).map(func(r): return float(r["t_gun1"]))
+		var gall := sel.filter(func(r): return float(r["t_guns"]) >= 0.0).map(func(r): return float(r["t_guns"]))
+		L.append("| %s | %d | %s | %d | %.0f | %.0f | %d | %d | %d | %d | %s | %d | %s |" % [keys[key][0], keys[key][1], keys[key][2], sel.size(), _median(sel.map(func(r): return float(r["t"]))), _mean(sel.map(func(r): return float(r["t"]))),
+			roundi(100.0 * (n - lost - cap) / n), roundi(100.0 * lost / n), roundi(100.0 * cap / n), roundi(100.0 * g1.size() / n), "%.0f" % _median(g1) if not g1.is_empty() else "-",
+			roundi(100.0 * gall.size() / n), "%.0f" % _median(gall) if not gall.is_empty() else "-"])
 	return "\n".join(L)

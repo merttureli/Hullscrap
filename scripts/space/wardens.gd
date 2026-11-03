@@ -84,7 +84,7 @@ static func for_region(run_seed: int, stage: int, region: Dictionary, jumps: int
 	var budget := Shipgen.budget_for(tier_at(ahead), ahead, Shipgen.danger_of(region), difficulty) * float(cfg["stage_budget_mult"][stage - 1])
 	var w := {"faction": faction, "name": str(entry["name"]), "hint": str(entry["hint"]), "toll": int(entry.get("toll", 0)),
 		"rep_on_fight": int(entry.get("rep_on_fight", 0)), "region": id, "stage": stage, "flag": flag_of(id, stage),
-		"spec": Shipgen.spec(faction, str(sizes[stage - 1]), Regions.seed_for(run_seed, stage, id) ^ _fnv("warden"), budget)}
+		"spec": Shipgen.spec(faction, str(sizes[stage - 1]), Regions.seed_for(run_seed, stage, id) ^ _fnv("warden"), budget, false, 0, true)}
 	if entry.has("pass_rep"):
 		w["pass_rep"] = int(entry["pass_rep"])
 	return w

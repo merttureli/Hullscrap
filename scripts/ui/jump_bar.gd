@@ -35,7 +35,7 @@ func _draw() -> void:
 	if session == null:
 		return
 	var morale = session.morale
-	var total := float(morale.cfg["spool_s"])
+	var total: float = morale.spool_total()
 	var held: String = morale.hold()
 	var bar := Rect2(4.0, 4.0, PANEL.x - 8.0, 20.0)
 	draw_rect(Rect2(Vector2.ZERO, PANEL), BG)

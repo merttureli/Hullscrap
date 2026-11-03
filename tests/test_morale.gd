@@ -2,7 +2,7 @@ extends "res://tests/base_test.gd"
 ## Enemy morale (scripts/combat/morale.gd, data/morale.json), driven through the real arena and session: the
 ## break at 35% hull or with no weapon able to fire, the styles' weights, surrender (the enemy holds fire, Y
 ## spares it, a hit refuses), flight (the 15 s jump spool and what holds it), capture (all crew down for 3 s),
-## the hollow that never yields, determinism per seed, and the combat view's Y key and result.
+## the hollow that never yields and the ghosts that fade, determinism per seed, and the combat view's Y key and result.
 
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const CombatView = preload("res://scripts/combat/combat_view.gd")
@@ -11,6 +11,7 @@ const JumpBar = preload("res://scripts/ui/jump_bar.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const StructureUtil = preload("res://tests/structure_util.gd")
@@ -34,6 +35,12 @@ func _style(s: Session, weights: Dictionary, tweak := {}) -> void:
 	cfg["styles"]["test"] = weights
 	cfg.merge(tweak, true)
 	s.morale = Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "test", cfg)
+	s.ai.morale = s.morale
+
+
+## Swap the session's morale for one of the named style of data/morale.json.
+func _with_style(s: Session, style: String) -> void:
+	s.morale = Morale.new(s.arena, Session.ENEMY, Session.PLAYER, style, Morale.config())
 	s.ai.morale = s.morale
 
 
@@ -141,13 +148,15 @@ func test_the_styles_weights_come_from_the_data() -> void:
 	var want := {
 		"default": {"surrender": 0.6, "flee": 0.3, "fight": 0.1}, "rustfang": {"surrender": 0.6, "flee": 0.25, "fight": 0.15},
 		"ram": {"surrender": 0.0, "flee": 0.4, "fight": 0.6}, "concord": {"surrender": 0.2, "flee": 0.6, "fight": 0.2},
-		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "no such style": {"surrender": 0.6, "flee": 0.3, "fight": 0.1},
+		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "ghost": {"surrender": 0.0, "flee": 1.0, "fight": 0.0},
+		"no such style": {"surrender": 0.6, "flee": 0.3, "fight": 0.1},
 	}
 	for style in want:
 		eq(Morale.new(s.arena, Session.ENEMY, Session.PLAYER, style, cfg).weights(), want[style], "weights of " + style)
 	eq(s.morale.style, "rustfang", "the pirate raider picks the Rustfang style")
 	eq(_session(3, "res://data/ships/rustfang_rammer.json").morale.style, "ram", "the rammer picks ram")
 	eq(_session(3, COURIER).morale.style, "default", "a design with no morale entry uses the default")
+	eq(cfg["break_structure"], 0.95, "the break is pinned at 95% of the blocks' hp (fights4: 0.9 left stage 3-5 fights at 100-180 s, tests/tool_standoff.gd)")
 	check(cfg["break_structure"] > Structure.defeat_below() and cfg["break_structure"] < 1.0 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
 
 
@@ -169,6 +178,11 @@ func test_the_roll_follows_the_weights() -> void:
 		hollow_yields += int(hollow.roll_style() != "fight")
 	eq(ram_surrenders, 0, "a rammer never surrenders")
 	eq(hollow_yields, 0, "the hollow never surrenders or flees")
+	var ghost := Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "ghost", Morale.config())
+	var ghost_flees := 0
+	for i in 500:
+		ghost_flees += int(ghost.roll_style() == "flee")
+	eq(ghost_flees, 500, "a ghost always fades: it neither surrenders nor fights on")
 
 
 func test_the_hollow_fights_on_whatever_the_seed() -> void:
@@ -179,6 +193,76 @@ func test_the_hollow_fights_on_whatever_the_seed() -> void:
 		_hurt(s, 0.1)
 		_run(s, 0.2)
 		eq(s.morale.state, "fighting_on", "seed %d: the hollow fights on" % (seed_value + 1))
+
+
+func test_a_ghost_fades_at_the_break_line_and_a_warden_does_not() -> void:
+	for seed_value in 8:
+		var g := _session(seed_value + 1)
+		_with_style(g, "ghost")
+		_hurt(g, 0.51)
+		_run(g, 0.5)
+		eq(g.morale.state, "steady", "seed %d: above the line a ghost is whole" % (seed_value + 1))
+		_hurt(g, 0.3)
+		_run(g, 0.1)
+		eq(g.morale.state, "fleeing", "seed %d: at the line it fades back into the Hollow" % (seed_value + 1))
+		eq(g.morale.rolls, 1, "with the one roll")
+		var w := _session(seed_value + 1)
+		_with_style(w, "hollow")
+		_hurt(w, 0.3)
+		_run(w, 0.1)
+		eq(w.morale.state, "fighting_on", "seed %d: a warden (style hollow) still fights on" % (seed_value + 1))
+	check(Morale.fades_style("ghost") and not Morale.fades_style("hollow") and not Morale.fades_style("default") and not Morale.fades_style(""), "only the ghost style fades")
+
+
+func test_a_fading_ghost_spools_for_6_s_and_is_gone() -> void:
+	var s := _session()
+	_with_style(s, "ghost")
+	_hurt(s, 0.3)
+	_run(s, 0.1)
+	eq(s.morale.state, "fleeing", "it fades")
+	eq(s.morale.pilot_mode(), "flee", "the pilot burns away")
+	eq(s.morale.spool_total(), 6.0, "in its own short spool, not the 15 s of the others")
+	eq(Morale.new(s.arena, Session.ENEMY, Session.PLAYER, "default", Morale.config()).spool_total(), 15.0, "(the others keep morale.json's)")
+	eq(s.morale.banner(), "The Pirate Raider is fading back into the Hollow! Knock out its engines or helm", "the banner")
+	_run(s, 5.5)
+	check(s.morale.spool > 5.3 and s.morale.spool < 5.7, "5.5 s spooled: %s" % str(s.morale.spool))
+	eq(s.state(), "fighting", "not gone yet")
+	_run(s, 0.6)
+	eq(s.state(), "escaped", "6 s: gone")
+	check(s.can_leave(), "Esc works")
+	check(s.end_text().begins_with("The ship thins out of the world"), s.end_text())
+	check(s.distance() > 10000.0, "far away")
+
+
+func test_a_fading_ghost_obeys_the_engine_helm_and_crew_holds() -> void:
+	var s := _session()
+	_with_style(s, "ghost")
+	_hurt(s, 0.3)
+	_run(s, 2.0)
+	var engines := _parts(s, "engine")
+	_set_status(s, engines, "disabled")
+	_run(s, 0.1)
+	var held: float = s.morale.spool
+	_run(s, 8.0)
+	eq(s.morale.spool, held, "disabled engines: the fade holds")
+	eq(s.state(), "fighting", "and the ghost is still there")
+	eq(s.morale.hold(), "engines out", "with the same reason as any fleeing ship")
+	_set_status(s, engines, "ok")
+	_run(s, 4.1)
+	eq(s.state(), "escaped", "repaired: it finishes the fade")
+
+
+func test_the_hollows_ships_fade_and_the_wardens_never_break() -> void:
+	var ghost := Shipgen.from_spec(Shipgen.spec("hollow", "small", 7, 40.0))
+	var warden := Shipgen.from_spec(Shipgen.spec("wardens", "small", 7, 40.0))
+	eq(str(ghost.get_meta("ai", {}).get("morale", "")), "ghost", "a Hollow ship is a ghost")
+	eq(str(warden.get_meta("ai", {}).get("morale", "")), "hollow", "a Lattice warden keeps the style that never breaks")
+	var s := Session.new()
+	s.start(Session.load_ship(PIRATE), Session.load_ship(Shipgen.spec("hollow", "small", 7, 40.0)), 3)
+	eq(s.morale.style, "ghost", "and the fight is told so")
+	var w := Session.new()
+	w.start(Session.load_ship(PIRATE), Session.load_ship(Shipgen.spec("wardens", "small", 7, 40.0)), 3)
+	eq(w.morale.style, "hollow", "the warden's too")
 
 
 # --- surrender --------------------------------------------------------------------------------------------

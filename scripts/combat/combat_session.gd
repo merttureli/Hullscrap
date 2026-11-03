@@ -30,6 +30,7 @@ const LOST_TEXT := "Your ship is wrecked. R to restart"
 const CAPTURED_TEXT := "Nobody is left standing aboard. She's yours. Esc to return"
 const SPARED_TEXT := "Deal struck. Pirate stands down. Esc to return"
 const ESCAPED_TEXT := "They got away. Esc to return"
+const FADED_TEXT := "The ship thins out of the world. Nothing is left. Esc to return"
 const THREAT_BANNER_S := 3.0  ## seconds of the fight the banner names the enemy and its threat
 const ESCAPE_LOOK_S := 1.5  ## seconds the camera keeps the place the enemy jumped from in view
 
@@ -183,7 +184,7 @@ func end_text() -> String:
 		"spared":
 			return SPARED_TEXT.replace("Pirate", enemy_label)
 		"escaped":
-			return ESCAPED_TEXT
+			return FADED_TEXT if morale.fades() else ESCAPED_TEXT
 	return ""
 
 
