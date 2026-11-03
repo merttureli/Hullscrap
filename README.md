@@ -28,7 +28,10 @@ Saves go to Godot's user folder (on Windows: `%APPDATA%\Godot\app_userdata\Hulls
 | W A S D | Walk (your soldier). The legs turn to the way you walk |
 | Mouse (play mode) | Your soldier aims at the cursor: the torso and what they hold (a pistol; a wrench or an extinguisher while working) turn to it |
 | E (hold) | Work with your own hands: stand next to a fire, a breach, a broken system or a downed crewmate and hold E. It goes at the speed of a crew member's work (see Crew, fire and repairs) |
-| Middle mouse | Send Ada there (bodies are 2x2 cells, so she stands where one fits). She leaves the job board alone for 8 s |
+| Middle mouse | Send the selected crew member (else Ada) there (bodies are 2x2 cells, so she stands where one fits). She leaves the job board alone for 8 s. A line under the crew bar says if she won't last in the bad air there; the order stands. With **several crew selected** the jobs of the room under the cursor go to them, one each in board order (breach, part, wall); extras help with the top job or stand by, and each keeps the job until it is done |
+| Left click / Shift+click (play mode) | Select one crew member / add or remove one. **Drag a box** to select everyone inside it (not the soldier). Shift+click on a card of the crew bar adds or removes too. Every selected crew member has a ring |
+| X (play mode, in a fight too) | **Spread**: the selected crew drop their orders and go to the damaged rooms, one each, the highest job first and the nearest first. A crew member at a station post keeps the post |
+| Tab (in a ship fight) | **Slow-down**: the game runs at a quarter speed (a SLOW banner and a blue tint show it) until Tab is pressed again or the fight ends. Not in an on-foot fight |
 | E over a door | Open / close the whole door piece (both cells; free, not an undo step; both modes). Crew also walk through closed doors, which open while any body overlaps them |
 | O | Oxygen overlay: each room cell from red (empty) to blue (full), breached rooms outlined |
 | P | Power overlay: cables shown, each network tinted, with its supply / demand over its first cable |

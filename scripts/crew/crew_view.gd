@@ -2,7 +2,9 @@ extends Node2D
 ## Crew on the ship: the player's soldier (WASD; hold E next to a fire, breach, broken part or
 ## downed crewmate to work on it), the crewmate a middle-click sends (Ada, the selected one) and the other NPCs, who find their
 ## own jobs (jobs.gd, run by ShipSim, also during a fight). Left click (play mode) selects a crew member, who
-## gets a ring, and G uses their special ability if they have one (crew_abilities.gd); the crew bar
+## gets a ring, and G uses their special ability if they have one (crew_abilities.gd); Shift+click adds or removes one, a left drag
+## draws a box that selects everyone in it (not the soldier), and with several selected a middle click gives the jobs round that spot to them,
+## one each (Jobs.order_group), and X spreads them over the damaged rooms (Jobs.spread); the crew bar
 ## (crew_bar.gd) shows a card per crew member and takes clicks too. This node reads input, draws the people
 ## (PersonDrawer, about 3 cells across), the fires and health bars (the HUD's log, hud_log.gd, says what they do).
 ## A body is 2x2 cells: people stand on whole-cell body anchors (see Pathfinder).
@@ -20,12 +22,14 @@ const Art = preload("res://scripts/view/art.gd")
 const CrewAbilities = preload("res://scripts/crew/crew_abilities.gd")
 const CrewBar = preload("res://scripts/ui/crew_bar.gd")
 const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
+const SlowBanner = preload("res://scripts/ui/slow_banner.gd")
 const Posts = preload("res://scripts/crew/posts.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
 const Evacuate = preload("res://scripts/crew/evacuate.gd")
 const AIM_DEAD_ZONE := 0.3  ## cells: with the mouse this close to the player, the aim stays where it was
 const PICK_RADIUS := 1.7  ## cells: a left click this close to a body (its centre) selects that crew member
 const SELECT_COLOR := Color("#ffd24a")
+const DRAG_MIN := 6.0  ## px a left drag must travel to be a box and not a click
 const ABANDONED := Color("#e0453a")  ## the hatching and the tag of an abandoned room
 const TAG_SIZE := 12
 const TAG_TEXT := "Abandoned: click to reopen"
@@ -36,7 +40,9 @@ const TAG_TEXT := "Abandoned: click to reopen"
 var door_passable: Callable = func(_cell: Vector2i) -> bool: return true
 var player: CrewMember
 var ada: CrewMember
-var selected: CrewMember  ## the crew member picked by a left click (play mode) or on the crew bar; G uses their ability
+var selected: CrewMember  ## the crew member picked last (a left click in play mode or a card on the crew bar); G uses their ability
+var group: Array = []  ## everyone selected (Shift+click, a drag box): see selection(); a plain click or card makes it just `selected`
+var _drag_from: Variant = null  # where a left drag began (this node's coordinates) while the button is down
 var build: Node
 var sim: Node
 ## Scripts and tests aim the player here (a world point) instead of with the mouse.
@@ -45,6 +51,7 @@ var _anim := {}  # CrewMember -> PersonDrawer.new_state(): {last, phase, angle, 
 var _clock := 0.0  # for the flicker of the fires
 var _bar: CrewBar  # the crew cards, bottom right; in a layer of its own so a fight (which puts this node away) keeps it
 var prompt: BreachPrompt  # the breach prompt (K2), in the same layer
+var slow_banner: SlowBanner  # the fight slow-down (Tab), in the same layer
 
 
 func _ready() -> void:
@@ -58,6 +65,9 @@ func _ready() -> void:
 	prompt = BreachPrompt.new()
 	prompt.view = self
 	bar_layer.add_child(prompt)
+	slow_banner = SlowBanner.new()
+	slow_banner.view = self
+	bar_layer.add_child(slow_banner)
 	add_child(bar_layer)
 
 
@@ -90,22 +100,51 @@ func _process(dt: float) -> void:
 func _unhandled_input(e: InputEvent) -> void:
 	if _ship() == null or _aboard():
 		return
-	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and not build.build_on and not build.combat:
-		var tag := tag_at(e.position)
-		if tag >= 0:
-			say(reopen(tag))  # the tag of an abandoned room
-			return
-		selected = pick_at((make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL)  # empty floor clears the selection
+	var play: bool = not build.build_on and not build.combat
+	if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT and play:
+		if e.pressed:
+			var tag := tag_at(e.position)
+			if tag >= 0:
+				say(reopen(tag))  # the tag of an abandoned room
+				return
+			var local: Vector2 = make_input_local(e).position
+			var hit := pick_at((local - _world(Vector2.ZERO)) / build.CELL)
+			if e.shift_pressed:  # Shift+click adds or removes one
+				if hit != null:
+					toggle(hit)
+			else:
+				select(hit)  # empty floor clears the selection
+			_drag_from = local
+		elif _drag_from != null:  # the button is up: a drag selects everyone in the box
+			var to: Vector2 = make_input_local(e).position
+			if to.distance_to(_drag_from) > DRAG_MIN:
+				select_box(drag_box(_drag_from, to), e.shift_pressed)
+			_drag_from = null
+	elif e is InputEventMouseMotion and _drag_from != null:
+		queue_redraw()
 	elif e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_G and not e.ctrl_pressed and not e.meta_pressed and not build.combat:
 		press_ability()  # (in a fight combat_view.gd takes the key)
+	elif e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_X and not e.ctrl_pressed and not e.meta_pressed and not build.build_on:
+		press_spread()
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_MIDDLE:
+		var p: Vector2 = (make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL
+		if selection().size() >= 2 and sim != null and sim.has_method("jobs_of"):
+			say("; ".join(sim.jobs_of(_ship()).order_group(_ship(), selection(), p)))  # several selected: the jobs round that spot, one each
+			return
 		var who := order_target()
 		if who == null:
 			return
-		var p: Vector2 = (make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL
 		var a := Pathfinder.nearest_walkable(_ship().grid, p, Callable(), Pathfinder.NO_CELL, who.body_size)  # where their body can stand nearest the click (never behind a locked door)
 		if a != Pathfinder.NO_CELL and (Pathfinder.centre_of(a, who.body_size) - p).length() <= 1.5:
-			Jobs.order_move(_ship(), who, a)  # they leave the job board alone for a while
+			if Jobs.order_move(_ship(), who, a):  # they leave the job board alone for a while
+				say(Jobs.order_warning(_ship(), who))
+
+
+## The box (cell units) between two points of a drag, given in this node's coordinates.
+func drag_box(from: Vector2, to: Vector2) -> Rect2:
+	var a: Vector2 = (from - _world(Vector2.ZERO)) / build.CELL
+	var b: Vector2 = (to - _world(Vector2.ZERO)) / build.CELL
+	return Rect2(a, Vector2.ZERO).expand(b)
 
 
 ## Whom a middle-click sends: the selected crewmate (not the soldier), else Ada when she is aboard, else the first
@@ -142,6 +181,59 @@ func pick_at(p: Vector2) -> CrewMember:
 ## Select crew member `m` (null clears the selection).
 func select(m: CrewMember) -> void:
 	selected = m
+	group = [m] if m != null else []
+
+
+## Add `m` to the selection, or take them off it when they are in already.
+func toggle(m: CrewMember) -> void:
+	var now := selection()
+	if now.has(m):
+		now.erase(m)
+	else:
+		now.append(m)
+	group = now
+	selected = now.back() if not now.is_empty() else null
+
+
+## Is `m` selected?
+func is_selected(m: CrewMember) -> bool:
+	return selection().has(m)
+
+
+## Everyone selected, still aboard: the group, kept in step with `selected` (scripts and tests set that one directly).
+func selection() -> Array:
+	var ship = _ship()
+	if selected == null:
+		group = []
+	elif not group.has(selected):
+		group = [selected]
+	if ship != null:
+		group = group.filter(func(m): return ship.crew.has(m))
+	return group
+
+
+## Select the crew inside `box` (cell units): everyone but the soldier and the drones; `add`: keep the ones already selected too.
+func select_box(box: Rect2, add := false) -> void:
+	var ship = _ship()
+	if ship == null:
+		return
+	var now: Array = selection().duplicate() if add else []
+	for m: CrewMember in ship.crew:
+		if not m.is_player and not m.is_drone() and box.has_point(m.pos) and not now.has(m):
+			now.append(m)
+	group = now
+	selected = now.back() if not now.is_empty() else null
+
+
+## The spread key: the selected crew drop their orders and go to the damaged rooms, one each (Jobs.spread). Returns what to tell the player.
+func press_spread() -> String:
+	var ship = _ship()
+	if ship == null or sim == null or not sim.has_method("jobs_of"):
+		return ""
+	var who := selection()
+	var text := "Select crew first (click, Shift+click or drag a box)" if who.is_empty() else "; ".join(sim.jobs_of(ship).spread(ship, who))
+	say(text)
+	return text
 
 
 ## Say `text` above the crew cards for a few seconds (the crew bar's line).
@@ -245,6 +337,11 @@ func bar_visible() -> bool:
 	return build != null and not build.build_on and _ship() != null and not _aboard()
 
 
+## Is a ship fight on (more than one ship in the sim) and the soldier not aboard another vessel? The slow-down (Tab) is for these only.
+func fight_on() -> bool:
+	return sim != null and sim.get("ships") != null and sim.ships.size() > 1 and not _aboard()
+
+
 ## Is the soldier aboard another vessel (the Board node, board_view.gd)? Then the crew stand still and their bar is away.
 func _aboard() -> bool:
 	var board := get_node_or_null("../Board")
@@ -336,11 +433,15 @@ func _draw() -> void:
 			_draw_person(m)
 	if player != null:
 		_draw_person(player)
-	if selected != null and ship.crew.has(selected):  # the selection ring, pulsing a little
-		var at := _world(selected.pos)
+	for m: CrewMember in selection():  # the selection rings, pulsing a little
+		var at := _world(m.pos)
 		var r: float = build.CELL * (1.45 + 0.06 * sin(_clock * 5.0))
 		draw_circle(at, r, Color(SELECT_COLOR, 0.10))
 		draw_arc(at, r, 0.0, TAU, 40, SELECT_COLOR, 2.5, true)
+	if _drag_from != null and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):  # the box being dragged
+		var box := Rect2(_drag_from, Vector2.ZERO).expand(get_local_mouse_position())
+		draw_rect(box, Color(SELECT_COLOR, 0.08))
+		draw_rect(box, Color(SELECT_COLOR, 0.8), false, 1.5)
 
 
 ## The abandoned rooms: a red wash with diagonal hatching, and the tag that reopens one.

@@ -126,19 +126,22 @@ func _gui_input(e: InputEvent) -> void:
 	if UiKit.is_wheel(e):
 		accept_event()  # the wheel over a card never zooms the world
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
-		if click(e.position) != "":
+		if click(e.position, e.shift_pressed) != "":
 			accept_event()
 
 
 ## A left click at `p`: on an ability icon it selects the member and uses the ability ("use"), elsewhere on a card
-## it selects them ("select"); "drone" on a drone's card (nobody steers a drone: nothing is selected); "" when it is not on a card.
-func click(p: Vector2) -> String:
+## it selects them ("select"); with Shift it adds them to the selection or takes them off ("toggle"); "drone" on a drone's card (nobody steers a drone: nothing is selected); "" when it is not on a card.
+func click(p: Vector2, shift := false) -> String:
 	var i := card_at(p)
 	if i < 0 or view == null:
 		return ""
 	var m = _crew()[i]
 	if m.is_drone():
 		return "drone"
+	if shift:  # Shift+click adds the member to the selection or takes them off it
+		view.toggle(m)
+		return "toggle"
 	view.select(m)
 	if not CrewAbilities.of(m).is_empty() and icon_rect(card_rects(_crew().size(), _screen())[i]).has_point(p):
 		view.use_ability(m)  # the view says what happened (flash)
@@ -156,7 +159,7 @@ func _draw() -> void:
 		return
 	var rects := card_rects(ship.crew.size(), _screen())
 	for i in rects.size():
-		_card(rects[i], ship, ship.crew[i], ship.crew[i] == view.selected)
+		_card(rects[i], ship, ship.crew[i], view.is_selected(ship.crew[i]))
 	if ship.crew.has(view.selected):
 		_story(rects, view.selected)
 	if flash_left > 0.0 and flash_text != "" and not rects.is_empty():

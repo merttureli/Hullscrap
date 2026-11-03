@@ -10,6 +10,7 @@ extends SceneTree
 ##     second against the damage a second each side takes, rooms lost (Jobs lost_rooms) and the end of the fight.
 ##  3. the Concord case: the Rustbucket against Concord pirates of 3 skulls at stage 1 (`concord` fights), the enemy crew's repair rate against the
 ##     player's damage, and the Rustbucket's result.
+## What-ifs for this run (crew.json in memory): under_s, under_mult (under_fire), lost_min, lost_share (lost), margin (air.breath_margin).
 ## Keys: seeds (per starter, default 24), s3 / s5 (default 12 each), concord (default 15; 0 skips), cap (s, default 180), jobs (processes, default 3),
 ## only (starters, e.g. rustbucket,prism), breath=0 (skip the table), out (JSON of every row), sum (print the tables of out files, sum=a.json,b.json).
 ## Internal: shard (k/n), rows. A job "started in an airless room" is one whose room had less air than crew.json no_air_below the first time it was seen
@@ -26,6 +27,7 @@ const Standoff = preload("res://tests/tool_standoff.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Content = preload("res://scripts/data/content.gd")
+const Evacuate = preload("res://scripts/crew/evacuate.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
@@ -40,6 +42,17 @@ func _initialize() -> void:
 	for a in OS.get_cmdline_user_args():
 		var kv := str(a).split("=", true, 1)
 		args[kv[0]] = kv[1] if kv.size() > 1 else ""
+	var cfg := CrewMember.config()
+	if args.has("under_s"):
+		cfg["under_fire"]["seconds"] = float(args["under_s"])
+	if args.has("under_mult"):
+		cfg["under_fire"]["mult"] = float(args["under_mult"])
+	if args.has("lost_min"):
+		cfg["lost"]["min_open"] = int(args["lost_min"])
+	if args.has("lost_share"):
+		cfg["lost"]["share"] = float(args["lost_share"])
+	if args.has("margin"):
+		cfg["air"]["breath_margin"] = float(args["margin"])
 	_run.call_deferred()
 
 
@@ -85,7 +98,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["seeds", "s3", "s5", "concord", "cap", "only"]:
+	for key in ["seeds", "s3", "s5", "concord", "cap", "only", "under_s", "under_mult", "lost_min", "lost_share", "margin"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
@@ -252,7 +265,7 @@ func fight(item: Dictionary) -> Dictionary:
 
 
 static func _side() -> Dictionary:
-	return {"air_cs": 0.0, "down_air": 0, "down_air_job": 0, "air_started": 0, "air_done": 0, "rep": 0.0, "dmg": 0.0, "lost": 0, "lost_fight": 0, "_lost": {}}
+	return {"air_cs": 0.0, "down_air": 0, "down_air_job": 0, "air_started": 0, "air_done": 0, "rep": 0.0, "dmg": 0.0, "lost": 0, "lost_fight": 0, "_lost": {}, "peaks": {}, "took_downs": []}
 
 
 ## One sample of the crew of `ship`: time in airless rooms, downs from no air, airless jobs begun and finished, rooms lost.
@@ -273,6 +286,7 @@ func _watch(ship, jobs, d: Dictionary, tr: Dictionary) -> void:
 			d["down_air"] += 1
 			if bool(t.get("took", false)):  # they took an airless job and have not been in air since
 				d["down_air_job"] += 1
+				d["took_downs"].append("%s hp %.0f job %s work %.1f left, t %.0f" % [m.name, float(t.get("hp", 0.0)), str(t.get("job", "")), float(t.get("work", 0.0)) - float(t.get("prog", 0.0)), ship.clock])
 		var key := str(m.job.get("key", "")) if not m.job.is_empty() else ""
 		var air_job: bool = bool(t.get("air_job", false))
 		if key != str(t.get("job", "")):
@@ -282,10 +296,15 @@ func _watch(ship, jobs, d: Dictionary, tr: Dictionary) -> void:
 			if key != "" and not exempt and float(m.job.get("work", 0.0)) > 0.0 and Jobs._job_airless(ship, m.job):
 				d["air_started"] += 1
 				air_job = true
-		var took: bool = (bool(t.get("took", false)) and airless) or air_job
-		t = {"took": took, "down": down, "airless": airless, "job": key, "job_type": str(m.job.get("type", "")) if key != "" else "", "air_job": air_job,
+		var took: bool = ((bool(t.get("took", false)) and airless) or air_job) and not down  # (one revived in the same room is no longer on a job of their own)
+		t = {"hp": m.hp, "took": took, "down": down, "airless": airless, "job": key, "job_type": str(m.job.get("type", "")) if key != "" else "", "air_job": air_job,
 			"prog": float(jobs.progress.get(key, 0.0)) if key != "" else 0.0, "work": float(m.job.get("work", 0.0)) if key != "" else 0.0}
 		tr[m.name] = t
+	for o in Evacuate.openings(ship):  # how open each room got, to tune crew.json lost: [open, edge] of the most open moment
+		var k := "%d,%d" % [o["key"].x, o["key"].y]
+		var prev: Array = d["peaks"].get(k, [0, 1])
+		if o["open"] > prev[0]:
+			d["peaks"][k] = [o["open"], o["edge"]]
 	var lost = ship.get("lost_rooms")
 	if lost is Array:
 		for id in lost:
@@ -325,12 +344,12 @@ static func block(title: String, list: Array) -> Array[String]:
 	var L: Array[String] = []
 	if list.is_empty():
 		return L
-	var won := list.filter(func(r): return str(r["state"]) != "lost").size()
+	var won := list.filter(func(r): return not str(r["state"]) in ["lost", "fighting"]).size()  # (the audit's "non-loss": spared, captured, enemy fled; not a stalemate at the cap)
 	var states := {}
 	for r in list:
 		states[r["state"]] = int(states.get(r["state"], 0)) + 1
 	var ts: Array = list.map(func(r): return float(r["t"]))
-	L.append("--- %s: %d fights, non-loss %d (%.0f%%), median %.0f s, ends %s" % [title, list.size(), won, 100.0 * won / list.size(), _median(ts), JSON.stringify(states)])
+	L.append("--- %s: %d fights, non-loss %d (%.0f%%; stalemates at the cap are not), median %.0f s, ends %s" % [title, list.size(), won, 100.0 * won / list.size(), _median(ts), JSON.stringify(states)])
 	var T := _sum(list, "p", "air_cs") * 0.0 + _sum(list.map(func(r): return {"x": {"t": r["t"]}}), "x", "t")
 	for s in [["p", "player"], ["e", "enemy "]]:
 		var started := _sum(list, s[0], "air_started")

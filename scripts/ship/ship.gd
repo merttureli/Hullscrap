@@ -71,6 +71,8 @@ var skin := ""  ## the hull skin of the exterior plating (a skin unlock's payloa
 var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
 var abandoned: Array[Vector2i] = []  ## the key cells (Rooms.key_of) of the rooms the player gave up (Evacuate, K2); saved as the optional "abandoned" list
+var lost_rooms: Array = []  ## ids of the rooms that are lost in the fight on now (Evacuate.lost_rooms, set by Jobs.build_board; empty out of a fight). Not saved
+var hit_at := {}  ## a wall cell (Vector2i) or part uid -> ship.clock when it last lost hp (Damage.apply); Jobs repairs it slower for crew.json under_fire.seconds. Not saved
 var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
 var ability_state := Abilities.fresh_state()  ## abilities running or resting (abilities.gd); not saved
 var world_pos := Vector2.ZERO  ## pixels; for drawing, 0 for now

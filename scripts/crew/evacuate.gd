@@ -89,6 +89,47 @@ static func sync(ship) -> void:
 				g.door_open.erase(p)  # shut
 
 
+## Is room `room_id` lost in the fight on now (see lost_rooms; Jobs.build_board keeps `ship.lost_rooms` up to date)?
+static func is_lost(ship, room_id: int) -> bool:
+	return room_id >= 0 and ship.lost_rooms.has(room_id)
+
+
+## The ids of the rooms that are lost: the cells of a room's boundary (the walls and doors round it, shot-open ones included) that are
+## shot open number at least max(crew.json lost.min_open, lost.share of the boundary cells). Only a fight loses rooms (Jobs asks only then).
+static func lost_rooms(ship) -> Array:
+	var cfg: Dictionary = CrewMember.config().get("lost", {})
+	var out := []
+	for o in openings(ship):
+		if o["open"] > 0 and o["open"] >= maxi(int(cfg.get("min_open", 3)), ceili(float(cfg.get("share", 0.2)) * o["edge"] - 1e-6)):
+			out.append(o["id"])
+	return out
+
+
+## For each room with a boundary cell shot open: {id, key (Rooms.key_of), open (boundary cells shot open), edge (boundary cells: the walls and doors round the
+## room, the shot-open ones included)}. A shot-open cell of a thick wall counts only where it touches the room.
+static func openings(ship) -> Array:
+	var grid = ship.grid
+	var out := []
+	if grid.breached.is_empty():
+		return out
+	for r in ship.atmosphere.rooms:
+		var edge := {}
+		var open := 0
+		for c in r["cells"]:
+			for d in SIDES:
+				var n: Vector2i = c + d
+				if edge.has(n) or ship.atmosphere.room_at(n) == int(r["id"]):
+					continue
+				if grid.breached.has(n):
+					edge[n] = true
+					open += 1
+				elif grid.tile_flag(grid.get_tile(n), "solid") or grid.tile_flag(grid.get_tile(n), "door"):
+					edge[n] = true
+		if open > 0:
+			out.append({"id": int(r["id"]), "key": Rooms.key_of(r), "open": open, "edge": edge.size()})
+	return out
+
+
 ## The cells of the abandoned rooms: cell -> true.
 static func cells(ship) -> Dictionary:
 	var out := {}
@@ -107,20 +148,21 @@ static func room_at_anchor(ship, anchor: Vector2i, body: int) -> int:
 ## The shortest walk for `m` to a spot whose room has air (pressure of at least air.breath_ok) and is not abandoned: body
 ## anchors from where they stand, [] when there is none or they are there already. Locked doors stop the walk, so call it
 ## before a room is locked behind a crew member.
-static func path_out(ship, m) -> Array[Vector2i]:
+static func path_out(ship, m, from := Pathfinder.NO_CELL) -> Array[Vector2i]:
 	var ok := float(CrewMember.config().get("air", {}).get("breath_ok", 0.5))
 	var at = ship.atmosphere
 	return path_to(ship, m, func(a: Vector2i) -> bool:
 		var r := room_at_anchor(ship, a, m.body_size)
-		return r >= 0 and at.pressure_of(r) >= ok and not is_abandoned(ship, r))
+		return r >= 0 and at.pressure_of(r) >= ok and not is_abandoned(ship, r) and not is_lost(ship, r), from)
 
 
 ## The shortest walk for `m` to the nearest body anchor `accept` says yes to (a breadth-first search over the anchors a body
 ## fits on): the path including the first anchor, or [] when none is found, they are already at one, or no anchor fits.
-static func path_to(ship, m, accept: Callable) -> Array[Vector2i]:
+## `from`: start at that body anchor instead of where `m` stands.
+static func path_to(ship, m, accept: Callable, from := Pathfinder.NO_CELL) -> Array[Vector2i]:
 	var grid = ship.grid
 	var out: Array[Vector2i] = []
-	var start := Pathfinder.nearest_walkable(grid, m.pos, Callable(), Pathfinder.NO_CELL, m.body_size)
+	var start := from if from != Pathfinder.NO_CELL else Pathfinder.nearest_walkable(grid, m.pos, Callable(), Pathfinder.NO_CELL, m.body_size)
 	if start == Pathfinder.NO_CELL or accept.call(start):
 		return out
 	var came := {start: start}
