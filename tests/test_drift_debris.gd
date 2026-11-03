@@ -209,7 +209,7 @@ func test_every_cargo_type_flows() -> void:
 	for t in want:
 		check(seen.has(t), "%s turns up in the flow" % t)
 	eq(d.cfg["spawn"]["every"], 1.1, "a piece about every 1.1 s")
-	eq(d.cfg["spawn"]["max_alive"], 70, "up to 70 about")
+	eq(d.cfg["spawn"]["max_alive"], 140, "up to 140 about (the cap the debris floor needs: test_progression.gd)")
 
 
 ## `_dd()` with two side streams: one at 90 degrees off the main current, 0.3 of the pieces, one at 70 degrees the other way, 0.25.
