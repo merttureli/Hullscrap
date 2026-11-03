@@ -206,18 +206,18 @@ func test_ion_strips_a_layer_and_locks_the_shields() -> void:
 	var ion := _def("ion", {"damage_type": "ion", "damage": 3})
 	_shoot(ion)
 	eq(arena.ships[1].layers, 1, "ion removes a layer")
-	near(arena.ships[1].ion_lock, 3.0, "and locks the shields for 3 s")
+	near(arena.ships[1].ion_lock, 5.0, "and locks the shields for 5 s (Shields.ION_LOCK; 3 before the Beta 4 audit)")
 	eq(_count("ion_lock"), 1, "reported")
 	_shoot(gun)
 	eq(_count("shield"), 1, "the locked bubble stops nothing more")
 	eq(target.grid.hp_of(Vector2i(3, 15)), 2.0, "so the laser burns the wall")
 	arena.step(2.4)
 	eq(arena.ships[1].layers, 1, "no recharge while locked")
-	arena.step(2.4)  # 4.8 s: the lock ended at 3.0 s and the recharge needs 7 s more
-	eq(arena.ships[1].layers, 1, "still recharging after the lock")
+	arena.step(2.4)  # 4.8 s: still locked, the lock ends at 5.0 s and the recharge needs 7 s more
+	eq(arena.ships[1].layers, 1, "still locked")
 	arena.step(5.0)  # 9.8 s
-	eq(arena.ships[1].layers, 1, "and 6.8 s after the lock")
-	arena.step(0.4)  # 10.2 s
+	eq(arena.ships[1].layers, 1, "still recharging 4.8 s after the lock")
+	arena.step(2.4)  # 12.2 s
 	eq(arena.ships[1].layers, 2, "back 7 s after the lock ended")
 	eq(arena.ships[1].ion_lock, 0.0, "unlocked")
 

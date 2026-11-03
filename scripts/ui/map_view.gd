@@ -545,7 +545,7 @@ func _on_fight_finished(result: Dictionary) -> void:
 	elif r["goto"] != "" and campaign.events.has(r["goto"]):
 		var page: String = r["goto"]
 		_queue.append(func(): event_panel.open_event(campaign.events.get_event(page)))
-	elif r["state"] in ["won", "captured"]:
+	elif r["state"] in ["won", "captured"] or (r["state"] == "spared" and not campaign.is_hollow(campaign.current)):
 		var salvage := Salvage.event_for(result.get("enemy"), r["state"], campaign, ship(), null, int(r["threat"]))
 		if not salvage.is_empty() and sector_flow() and result.get("enemy") != null:  # the wreck can be boarded before the prize is cut out
 			var foe = result["enemy"]

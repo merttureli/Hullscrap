@@ -81,22 +81,22 @@ func _makers() -> Dictionary:
 func _rustbucket() -> Dictionary:
 	return {
 		"file": "starter_rustbucket", "name": "Rustbucket", "was_hull": 1122, "at": [6, 5],
-		"crew": SOLDIER, "kit": "neither",
-		"blurb": "Ma Gantry's first loan and her worst: three owners, two fires and a clan wedding went into this scrap hull. Thick-skinned, two rattling guns, a lot of empty frame to weld onto. Now it's yours, and so is the bill.",
+		"crew": SOLDIER, "kit": "shield",
+		"blurb": "Ma Gantry's first loan and her worst: three owners, two fires and a clan wedding went into this scrap hull. Thick-skinned, a bolt thrower, a patched bubble, lots of empty frame. Now it's yours, and so is the bill.",
 		"frame": [[12, 0], [38, 0], [46, 8], [46, 14], [52, 20], [52, 28], [46, 34], ["arc", 44, 42, 0, 90], [12, 44], ["arc", 12, 42, 90, 180], [10, 36], [0, 26], [0, 18], [6, 12], [6, 8], [12, 2]],
-		"outline": [[20, 6], [26, 6], [30, 10], [30, 13], [24, 13], [24, 17], [30, 17], [30, 25], ["arc", 28, 25, 0, 90], [19, 27], ["arc", 19, 25, 90, 180], [17, 22], [11, 22], [10, 21], [10, 15], [11, 14], [17, 14], [17, 9]],
+		"outline": [[20, 6], [20, 4], [22, 4], [22, 7], [26, 7], [26, 4], [28, 4], [30, 6], [30, 13], [24, 13], [24, 17], [30, 17], [30, 25], ["arc", 28, 25, 0, 90], [19, 27], ["arc", 19, 25, 90, 180], [17, 22], [11, 22], [10, 21], [10, 15], [11, 14], [17, 14], [17, 9]],
 		"plate": "scrap_plate", "plated": func(c): return true, "backed": func(c): return c.y <= 9 or c.x >= 29 or c.y >= 25, "thick": func(c): return true,
 		"walls": [
-			[18, 12, 23, 12], [18, 16, 23, 16], [17, 14, 17, 21],  # the bridge's floor, the workshop's floor, the quarters' wall
+			[18, 12, 23, 12], [18, 16, 23, 16], [17, 14, 17, 21], [20, 7, 20, 7], [27, 7, 27, 7],  # the bridge's floor, the workshop's floor, the quarters' wall, the corners behind the horns
 		],
 		"doors": [[19, 12, "h"], [19, 16, "h"], [17, 18, "v"]],
 		"parts": [
-			["bolt_thrower_scrap", 21, 4], ["helm", 26, 10], ["fabricator", 18, 13],
+			["bolt_thrower_scrap", 22, 5], ["helm", 26, 10], ["fabricator", 18, 13],
 			["bed", 11, 15], ["oxygen_scrap_mk1", 15, 15],
 			["reactor_mk2", 21, 18], ["engine_scrap_mk1", 19, 27, 2], ["engine_scrap_mk1", 24, 27, 2],
-			["rattle_burst_scrap", "flank"],  # a turret aims from any wall (last: it takes the first flat flank the other parts left free)
+			["shield_scrap_mk1", 13, 17, 0],  # in place of the Rattle Burst turret (fights5): the nose gun got shot out in 12 of 12 fights, a Courier's shield absorbs a quarter of the shots
 		],
-		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "net_mouth_scrap": 1, "credits": 300, "fuel": 6},
+		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "net_mouth_scrap": 1, "reactor_mk1": 1, "credits": 300, "fuel": 6},
 	}
 
 
@@ -122,7 +122,7 @@ func _courier() -> Dictionary:
 			["bed", 19, 15, 1], ["shield_mk1", 19, 17, 1], ["oxygen_gen", 19, 19, 1], ["fabricator", 25, 17],
 			["reactor_mk2", 22, 22], ["engine_mk1", 20, 30, 2], ["engine_mk1", 24, 30, 2],
 		],
-		"cargo": {"scrap": 250, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "credits": 500, "fuel": 6},
+		"cargo": {"scrap": 250, "copper": 80, "titanium": 40, "polymer": 30, "afterburner": 1, "reactor_mk1": 1, "credits": 500, "fuel": 6},
 	}
 
 
@@ -148,7 +148,7 @@ func _prism() -> Dictionary:
 			["bed", 7, 7, 1], ["shield_neon_mk1", 7, 9, 1], ["oxygen_gen", 7, 11, 1], ["fabricator", 13, 8],
 			["reactor_neon_mk1", 10, 14], ["radiator", 7, 15], ["radiator", 14, 15], ["engine_neon_mk1", 10, 22, 2],
 		],
-		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "credits": 400, "fuel": 6},
+		"cargo": {"scrap": 250, "copper": 80, "polymer": 30, "silicon": 40, "crystal": 12, "plasma_cell": 3, "afterburner": 1, "reactor_mk1": 1, "credits": 400, "fuel": 6},
 	}
 
 
@@ -648,7 +648,7 @@ func _report(spec: Dictionary, path: String, off: Vector2i) -> void:
 			empty += int(g.get_tile(c) == "" and ship.components.at_out(c) < 0)
 		print("   frame %d cells%s, %d tiles, %d components, empty %d = %.0f%%" % [
 			g.hull.size(), " (%.2fx the old hull of %d)" % [float(g.hull.size()) / spec["was_hull"], spec["was_hull"]] if spec.has("was_hull") else "", g.tiles.size(), ship.components.instances.size(), empty, 100.0 * empty / g.hull.size()])
-		print("ROW %s|%s|%d|%d|%d|%.0f|%d" % [spec["file"], str(spec.get("hangar", {}).get("group", "")) + " " + str(spec.get("hangar", {}).get("layout", "")), co.hull_max, ship.components.instances.size(), g.hull.size(), 100.0 * empty / g.hull.size(), int(spec.get("frame_was", 0))])
+		print("ROW %s|%s|%d|%d|%d|%.0f|%d" % [spec["file"], str(spec.get("hangar", {}).get("group", "")) + " " + str(spec.get("hangar", {}).get("layout", "")), int(Structure.totals(ship).y), ship.components.instances.size(), g.hull.size(), 100.0 * empty / g.hull.size(), int(spec.get("frame_was", 0))])
 	if spec.has("frame"):
 		_check_loadout(spec, ship)
 	var pockets := HullOutline.pockets(ship)

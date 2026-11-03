@@ -146,16 +146,17 @@ func test_the_styles_weights_come_from_the_data() -> void:
 	var s := _session()
 	var cfg := Morale.config()
 	var want := {
-		"default": {"surrender": 0.6, "flee": 0.3, "fight": 0.1}, "rustfang": {"surrender": 0.6, "flee": 0.25, "fight": 0.15},
-		"ram": {"surrender": 0.0, "flee": 0.4, "fight": 0.6}, "concord": {"surrender": 0.2, "flee": 0.6, "fight": 0.2},
+		"default": {"surrender": 0.7, "flee": 0.2, "fight": 0.1}, "rustfang": {"surrender": 0.6, "flee": 0.25, "fight": 0.15},
+		"ram": {"surrender": 0.0, "flee": 0.4, "fight": 0.6}, "concord": {"surrender": 0.4, "flee": 0.4, "fight": 0.2},
 		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "ghost": {"surrender": 0.0, "flee": 1.0, "fight": 0.0},
-		"no such style": {"surrender": 0.6, "flee": 0.3, "fight": 0.1},
+		"no such style": {"surrender": 0.7, "flee": 0.2, "fight": 0.1},
 	}
 	for style in want:
 		eq(Morale.new(s.arena, Session.ENEMY, Session.PLAYER, style, cfg).weights(), want[style], "weights of " + style)
 	eq(s.morale.style, "rustfang", "the pirate raider picks the Rustfang style")
 	eq(_session(3, "res://data/ships/rustfang_rammer.json").morale.style, "ram", "the rammer picks ram")
 	eq(_session(3, COURIER).morale.style, "default", "a design with no morale entry uses the default")
+	eq(cfg["offer"]["part_chance"], 0, "an offer carries no part (a spared ship opens a one-part salvage page instead, fights5)")
 	eq(cfg["break_structure"], 0.95, "the break is pinned at 95% of the blocks' hp (fights4: 0.9 left stage 3-5 fights at 100-180 s, tests/tool_standoff.gd)")
 	check(cfg["break_structure"] > Structure.defeat_below() and cfg["break_structure"] < 1.0 and cfg["unarmed_s"] == 5.0 and cfg["offer_s"] == 12.0 and cfg["spool_s"] == 15.0 and cfg["captured_s"] == 3.0, "the numbers of the design")
 

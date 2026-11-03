@@ -348,14 +348,37 @@ func test_the_map_shows_a_salvage_notice_then_the_pick_after_a_win_or_a_capture(
 		d["fake"].free()
 
 
-func test_the_map_offers_no_salvage_after_a_sparing_or_an_escape() -> void:
+func test_the_map_offers_a_reduced_salvage_after_a_sparing_and_none_after_an_escape() -> void:
 	for state in ["spared", "escaped"]:
 		var d := _screen()
 		var map: MapView = d["map"]
 		_fight(d, {"state": state, "enemy": _enemy(), "offer": {"credits": 10}})
 		eq(map.event_panel.title, "Salvage" if state == "spared" else "The fight is over", state + ": the notice title")
 		map.event_panel.proceed()
-		check(map.event_panel.event.get("id", "") != "salvage", state + ": no salvage pick")
+		if state == "spared":
+			var ev: Dictionary = map.event_panel.event
+			eq(ev.get("id", ""), "salvage", "spared: the pick follows")
+			eq(_cut_ids(ev).size(), 1, "spared: one part to cut out")
+			eq(_row(ev, "Strip"), -1, "spared: no strip row")
+		else:
+			check(map.event_panel.event.get("id", "") != "salvage", state + ": no salvage pick")
 		d["map"].free()
 		d["sim"].free()
 		d["fake"].free()
+
+
+func test_a_spared_ship_offers_one_part_and_the_scan_row_and_no_strip_row() -> void:
+	var c := Campaign.new(1)
+	var ship := _ship()
+	eq(Salvage.PICKS, {"won": 3, "captured": 4, "spared": 1}, "the picks by state")
+	eq(Salvage.picks_for("spared", 5, c, ship), 1, "a spared ship gives one pick whatever its threat")
+	var ev := Salvage.event_for(_enemy(), "spared", c, ship, false, 5)
+	eq(_cut_ids(ev).size(), 1, "one part to cut out")
+	eq(_row(ev, "Strip"), -1, "no strip row")
+	for ch in ev["choices"]:
+		check(ch["text"].begins_with("Cut out") or ch["text"].begins_with("Scan"), "a row is a part or a scan: " + ch["text"])
+	check(not str(ev["text"]).contains("dangerous"), "no threat line")
+	check(Salvage.event_for(_enemy(), "won", c, ship, false)["choices"].size() > ev["choices"].size(), "a win offers more")
+	eq(Salvage.event_for(_enemy(), "spared", c, ship, true), {}, "a spared ghost still gets nothing")
+
+

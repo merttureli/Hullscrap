@@ -1439,10 +1439,14 @@ func flow(src: String, before: Dictionary) -> void:
 	if not f.has(src):
 		f[src] = {}
 	var now: Dictionary = ship.inventory.counts
+	if not f.has(src + "+"):
+		f[src + "+"] = {}  # the gains alone: a toll or a fine inside the same step must not read as income
 	for id in now:
 		var d: int = int(now[id]) - int(before.get(id, 0))
 		if d != 0:
 			f[src][id] = int(f[src].get(id, 0)) + d
+		if d > 0:
+			f[src + "+"][id] = int(f[src + "+"].get(id, 0)) + d
 	for id in before:
 		if not now.has(id):
 			f[src][id] = int(f[src].get(id, 0)) - int(before[id])
@@ -1522,7 +1526,7 @@ func report() -> String:
 		L.append("## %s: %d runs, %d did not finish; runs that began stage 1..%d: %s" % [ship_id, sub.size(), died, stages_n, ", ".join(reach)])
 	L.append("")
 	L.append("## The curve by stage (all runs; end of stage unless said)")
-	L.append("| stage | runs | fights | win % | skulls | p.power (start>end) | e.power | ratio e/p | guns | layers | fab | known | scrap in | credits in | min | deaths |")
+	L.append("| stage | runs | fights | win % | skulls | p.power (start>end) | e.power | ratio e/p (cut at 10) | guns | layers | fab | known | scrap in | credits in | min | deaths |")
 	L.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
 	for s in range(1, stages_n + 1):
 		var recs := []
@@ -1539,9 +1543,9 @@ func report() -> String:
 			fights.append_array(sr["fights"])
 		var wins := fights.filter(func(f): return f["state"] in WINS).size()
 		L.append("| %d | %d | %.1f | %s | %.1f | %.0f>%.0f | %.0f | %.2f | %.1f | %.1f | %.1f | %.0f | %.0f | %.0f | %.0f | %d |" % [s, recs.size(), float(fights.size()) / recs.size(), pct(wins, fights.size()),
-			mean(fights, "skulls"), mean_of(recs, ["start", "power"]), mean_of(recs, ["end", "power"]), mean(fights, "e_power"), mean(fights, "ratio"),
+			mean(fights, "skulls"), mean_of(recs, ["start", "power"]), mean_of(recs, ["end", "power"]), mean(fights, "e_power"), mean_capped(fights, "ratio", 10.0),
 			mean_of(recs, ["end", "guns"]), mean_of(recs, ["end", "layers"]), mean_of(recs, ["end", "fab"]), mean_of(recs, ["end", "known"]),
-			mean_flow(recs, "debris", "scrap") + mean_flow(recs, "events", "scrap") + mean_flow(recs, "loot", "scrap"), mean_flow(recs, "events", "credits") + mean_flow(recs, "loot", "credits"),
+			mean_flow(recs, "debris+", "scrap") + mean_flow(recs, "events+", "scrap") + mean_flow(recs, "loot+", "scrap"), mean_flow(recs, "events+", "credits") + mean_flow(recs, "loot+", "credits"),
 			mean(recs, "minutes"), deaths])
 	L.append("")
 	L.append("## Where runs end")
@@ -1571,6 +1575,14 @@ func mean(list: Array, key: String) -> float:
 	var t := 0.0
 	for x in list:
 		t += float(x.get(key, 0.0))
+	return t / maxf(list.size(), 1.0)
+
+
+## The mean of `key`, each value cut at `top` (a ship with no power at all rates against 0.001 in Threat.rate: the ratio is then huge, not meaningful).
+func mean_capped(list: Array, key: String, top: float) -> float:
+	var t := 0.0
+	for x in list:
+		t += minf(float(x.get(key, 0.0)), top)
 	return t / maxf(list.size(), 1.0)
 
 
