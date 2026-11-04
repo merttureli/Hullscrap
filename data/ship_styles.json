@@ -89,7 +89,7 @@
 			"hull": {"prow": [0, 1], "tail": [3, 5], "band": {"gun": 1.0, "bridge": 0.9, "core": 0.7, "aux": 0.5, "engine": 0.3}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}]},
 			"style": {"label": "Drakkin", "roles": {"small": "fang", "medium": "claw", "large": "wyrm"}, "palette": {"tint": "#a02838", "accent": "#f0c040", "lamp": "#ffb040", "glow": "#ffb040", "floor": "#c04050", "wall": "#601020", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "ribs", "count": [8, 12], "where": "flank", "len": 1.4}], "emblem": {"prims": [{"line": [0.2, 0.08, 0.35, 0.92]}, {"line": [0.5, 0.08, 0.6, 0.92]}, {"line": [0.8, 0.08, 0.85, 0.92]}]}},
 			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "laser_mk1": 2.0}},
-			"cost_mult": 1.435
+			"cost_mult": 1.659
 		},
 		"wisp": {
 			"base": "wardens",
@@ -97,7 +97,7 @@
 			"hull": {"prow": [3, 5], "tail": [2, 4], "band": {"gun": 0.3, "bridge": 0.6, "core": 1.0, "aux": 0.75, "engine": 0.4}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 4]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [3, 5]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}], "spine": "neon_lattice"},
 			"style": {"label": "Wisp", "roles": {"small": "flicker", "medium": "streamer", "large": "stormcloud"}, "palette": {"tint": "#50d8f0", "accent": "#e8ffff", "lamp": "#a0f8ff", "glow": "#a0f8ff", "floor": "#90f0ff", "wall": "#287898", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "fins", "count": [6, 9], "where": "any", "len": 2.4, "sym": true}], "emblem": {"prims": [{"line": [0.5, 0.5, 0.58, 0.45, 0.62, 0.55, 0.5, 0.68, 0.32, 0.6, 0.28, 0.38, 0.45, 0.2, 0.72, 0.25, 0.85, 0.5]}]}},
 			"prefer": {"weapons": {"heat_lance_neon": 2.0}},
-			"cost_mult": 0.741
+			"cost_mult": 0.615
 		},
 		"hullkin": {
 			"base": "clans",
@@ -113,7 +113,7 @@
 			"hull": {"prow": [2, 4], "tail": [0, 1], "band": {"gun": 0.3, "bridge": 0.5, "core": 0.7, "aux": 0.9, "engine": 1.0}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 4]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
 			"style": {"label": "Lantern", "roles": {"small": "moth", "medium": "glowwing", "large": "beacon"}, "palette": {"tint": "#f8b088", "accent": "#fff0d0", "lamp": "#ffd890", "glow": "#ffd890", "floor": "#ffd0a8", "wall": "#c07850", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "lanterns", "count": [3, 5], "where": "front", "len": 1.8, "sym": true}], "emblem": {"prims": [{"poly": [[0.3, 0.2], [0.7, 0.2], [0.75, 0.85], [0.25, 0.85]], "fill": false}, {"line": [0.38, 0.1, 0.62, 0.1]}, {"circle": [0.5, 0.52, 0.1], "fill": true}]}},
 			"prefer": {"weapons": {"pulse_mk1": 2.0, "laser_mk1": 2.0}},
-			"cost_mult": 0.661
+			"cost_mult": 0.629
 		},
 		"revenant": {
 			"base": "hollow",
@@ -128,7 +128,8 @@
 			"crew": {"species": ["choir"]},
 			"hull": {"prow": [3, 5], "tail": [2, 4], "band": {"gun": 0.3, "bridge": 0.6, "core": 1.0, "aux": 0.75, "engine": 0.4}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 4]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [3, 5]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}], "spine": "neon_lattice"},
 			"style": {"label": "Choir", "roles": {"small": "chime", "medium": "anthem", "large": "chantry"}, "palette": {"tint": "#f0a8d8", "accent": "#fff0fa", "lamp": "#ffc0f0", "glow": "#ffc0f0", "floor": "#ffd0ee", "wall": "#b06890", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "shards", "count": [5, 8], "where": "any", "len": 2.0, "sym": true}], "emblem": {"prims": [{"line": [0.3, 0.1, 0.3, 0.6, 0.7, 0.6, 0.7, 0.1]}, {"line": [0.5, 0.6, 0.5, 0.95]}]}},
-			"prefer": {"weapons": {"pulse_mk1": 2.0}}
+			"prefer": {"weapons": {"pulse_mk1": 2.0}},
+			"cost_mult": 0.949
 		},
 		"rattler": {
 			"base": "clans",
@@ -136,7 +137,7 @@
 			"hull": {"prow": [1, 3], "tail": [0, 2], "band": {"gun": 0.45, "bridge": 0.7, "core": 0.95, "aux": 0.8, "engine": 0.7}, "jitter_w": [1, 4], "jitter_c": 0, "asym": true, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}, {"op": "spikes", "count": [3, 5], "depth": 1}]},
 			"style": {"label": "Rattler", "roles": {"small": "scrapling", "medium": "gremlin", "large": "heap"}, "palette": {"tint": "#c8784a", "accent": "#ffe0a0", "lamp": "#ffb868", "glow": "#ffb868", "floor": "#e09868", "wall": "#7a4020", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "ribs", "count": [6, 10], "where": "any", "len": 1.0}], "emblem": {"prims": [{"poly": [[0.55, 0.05], [0.25, 0.55], [0.48, 0.55], [0.4, 0.95], [0.78, 0.4], [0.52, 0.4]], "fill": true}]}},
 			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "bolt_thrower_scrap": 2.0}},
-			"cost_mult": 1.856
+			"cost_mult": 2.075
 		},
 		"tessellate": {
 			"base": "concord",
@@ -159,7 +160,7 @@
 			"hull": {"prow": [2, 3], "tail": [1, 2], "band": {"gun": 0.45, "bridge": 0.6, "core": 1.0, "aux": 0.6, "engine": 0.5}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}]},
 			"style": {"label": "Quillback", "roles": {"small": "pricker", "medium": "duellist", "large": "porcupine"}, "palette": {"tint": "#b0a060", "accent": "#6a5028", "lamp": "#ffd878", "glow": "#ffd878", "floor": "#d0c488", "wall": "#7a6a38", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "spikes", "count": [9, 14], "where": "flank", "len": 1.5}], "emblem": {"prims": [{"line": [0.5, 0.92, 0.1, 0.3]}, {"line": [0.5, 0.92, 0.3, 0.1]}, {"line": [0.5, 0.92, 0.5, 0.05]}, {"line": [0.5, 0.92, 0.7, 0.1]}, {"line": [0.5, 0.92, 0.9, 0.3]}]}},
 			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "bolt_thrower_scrap": 2.0}},
-			"cost_mult": 1.503
+			"cost_mult": 1.721
 		},
 		"kite": {
 			"base": "clans",
@@ -167,7 +168,7 @@
 			"hull": {"prow": [2, 4], "tail": [0, 1], "band": {"gun": 0.3, "bridge": 0.5, "core": 0.7, "aux": 0.9, "engine": 1.0}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 4]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
 			"style": {"label": "Kite", "roles": {"small": "skimmer", "medium": "tumbler", "large": "windrider"}, "palette": {"tint": "#b8a0e8", "accent": "#ffffff", "lamp": "#e0d0ff", "glow": "#e0d0ff", "floor": "#d8c8ff", "wall": "#7864b0", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "fins", "count": [3, 5], "where": "any", "len": 2.8, "sym": true}], "emblem": {"prims": [{"poly": [[0.5, 0.05], [0.8, 0.4], [0.5, 0.75], [0.2, 0.4]], "fill": false}, {"line": [0.5, 0.75, 0.4, 0.88, 0.55, 0.95]}]}},
 			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "shrapnel_cannon_scrap": 2.0}},
-			"cost_mult": 1.353
+			"cost_mult": 1.477
 		},
 		"warden_frame": {
 			"base": "wardens",
@@ -183,7 +184,7 @@
 			"hull": {"prow": [0, 1], "tail": [3, 5], "band": {"gun": 1.0, "bridge": 0.9, "core": 0.7, "aux": 0.5, "engine": 0.3}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}]},
 			"style": {"label": "Murrow", "roles": {"small": "digger", "medium": "borer", "large": "tunneller"}, "palette": {"tint": "#7a5a3a", "accent": "#e0b070", "lamp": "#ffb060", "glow": "#ffb060", "floor": "#9a7a54", "wall": "#4a3220", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "slabs", "count": [4, 7], "where": "bow", "len": 1.1}], "emblem": {"prims": [{"line": [0.12, 0.2, 0.88, 0.8]}, {"line": [0.88, 0.2, 0.12, 0.8]}, {"circle": [0.5, 0.5, 0.1], "fill": true}]}},
 			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "shrapnel_cannon_scrap": 2.0}},
-			"cost_mult": 1.354
+			"cost_mult": 1.524
 		},
 		"siltborn": {
 			"base": "wardens",
@@ -215,7 +216,7 @@
 			"hull": {"prow": [3, 5], "tail": [0, 2], "band": {"gun": 0.3, "bridge": 0.7, "core": 0.9, "aux": 0.85, "engine": 1.0}, "jitter_w": [0, 2], "jitter_c": 0, "asym": true, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}, {"op": "spikes", "count": [2, 3], "depth": 1}]},
 			"style": {"label": "Echo", "roles": {"small": "mimic", "medium": "reflection", "large": "double"}, "palette": {"tint": "#d0d8e8", "accent": "#ffffff", "lamp": "#f0f8ff", "glow": "#f0f8ff", "floor": "#e8eef8", "wall": "#8890a0", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "shards", "count": [4, 6], "where": "any", "len": 1.6}], "emblem": {"prims": [{"circle": [0.36, 0.5, 0.3], "fill": false}, {"circle": [0.64, 0.5, 0.3], "fill": false}]}},
 			"prefer": {"weapons": {"siren_ion_neon": 2.0, "pulse_mk2": 2.0}},
-			"cost_mult": 1.676
+			"cost_mult": 1.841
 		},
 		"ferro": {
 			"base": "clans",
@@ -231,7 +232,7 @@
 			"hull": {"prow": [2, 4], "tail": [0, 1], "band": {"gun": 0.3, "bridge": 0.5, "core": 0.7, "aux": 0.9, "engine": 1.0}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 4]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
 			"style": {"label": "Emberkin", "roles": {"small": "spark", "medium": "kiln", "large": "forge"}, "palette": {"tint": "#e8782a", "accent": "#ffd060", "lamp": "#ff8030", "glow": "#ff8030", "floor": "#ff9a40", "wall": "#a8480e", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "fins", "count": [4, 6], "where": "flank", "len": 3.0, "sym": true}], "emblem": {"prims": [{"poly": [[0.5, 0.05], [0.78, 0.45], [0.7, 0.9], [0.3, 0.9], [0.22, 0.45]], "fill": false}, {"poly": [[0.5, 0.45], [0.6, 0.8], [0.4, 0.8]], "fill": true}]}},
 			"parts": {"weapons": [{"id": "pulse_mk1", "cost": 10, "weight": 2}, {"id": "ion_blast_mk1", "cost": 14, "weight": 2}, {"id": "emberkin_pyre_lance", "cost": 14, "weight": 3, "from": 30}, {"id": "emberkin_cinder_mortar", "cost": 14, "weight": 3, "from": 30}, {"id": "emberkin_flare_turret", "cost": 10, "weight": 3, "from": 30}], "shields": [{"id": "shield_mk1", "cost": 14, "weight": 1}, {"id": "emberkin_hearth_shield", "cost": 14, "weight": 3, "from": 36}], "engines": [{"id": "engine_neon_mk1", "cost": 8}, {"id": "emberkin_pyre_drive", "cost": 12, "from": 40}]},
-			"cost_mult": 2.323
+			"cost_mult": 2.273
 		},
 		"sporeling": {
 			"base": "wardens",
@@ -239,7 +240,7 @@
 			"hull": {"prow": [1, 2], "tail": [1, 2], "band": {"gun": 0.4, "bridge": 0.7, "core": 1.0, "aux": 1.0, "engine": 0.75}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "arc", "at": "tip", "count": [2, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "arc", "at": "stern_end", "count": [2, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
 			"style": {"label": "Sporeling", "roles": {"small": "puffball", "medium": "bloom", "large": "garden"}, "palette": {"tint": "#8ad040", "accent": "#f0ffb0", "lamp": "#c8ff60", "glow": "#c8ff60", "floor": "#b8f070", "wall": "#4a7a20", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "pods", "count": [6, 10], "where": "any", "len": 1.3}], "emblem": {"prims": [{"poly": [[0.08, 0.55], [0.2, 0.25], [0.5, 0.1], [0.8, 0.25], [0.92, 0.55]], "fill": true}, {"poly": [[0.42, 0.55], [0.42, 0.92], [0.58, 0.92], [0.58, 0.55]], "fill": false}]}},
 			"parts": {"weapons": [{"id": "pulse_mk1", "cost": 10, "weight": 2}, {"id": "ion_blast_mk1", "cost": 14, "weight": 2}, {"id": "sporeling_spore_cannon", "cost": 14, "weight": 3, "from": 30}, {"id": "sporeling_rot_pod", "cost": 14, "weight": 3, "from": 30}, {"id": "sporeling_pollen_turret", "cost": 10, "weight": 3, "from": 30}], "shields": [{"id": "shield_mk1", "cost": 14, "weight": 1}, {"id": "sporeling_mycelium_shield", "cost": 14, "weight": 3, "from": 36}]},
-			"cost_mult": 1.486
+			"cost_mult": 1.841
 		}
 	}
 }

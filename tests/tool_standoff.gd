@@ -51,6 +51,8 @@ const BUILDS := {
 }
 
 var args := {}
+static var style_only := ""  ## style=<id>: the enemies of the starters= mode are all of this faction or race (Beta 3 enemy identity)
+static var want_skulls := 0  ## want=3: only the enemies of that threat (default: 2 and 3)
 var cap := 180.0
 var rows: Array = []
 
@@ -60,6 +62,8 @@ func _initialize() -> void:
 		var kv := str(a).split("=", true, 1)
 		args[kv[0]] = kv[1] if kv.size() > 1 else ""
 	cap = float(args.get("cap", cap))
+	style_only = str(args.get("style", ""))
+	want_skulls = int(args.get("want", 0))
 	if args.has("break"):
 		Morale.config()["break_structure"] = float(args["break"])
 	if args.has("ghost_flee"):
@@ -89,7 +93,7 @@ func _run() -> void:
 			for name in STARTERS:
 				if args.has("only") and not str(args["only"]).split(",").has(name):  # only=rustbucket,prism: just those starters
 					continue
-				for st in [1, 2]:
+				for st in Array(str(args.get("starter_stages", "1,2")).split(",")).map(func(x): return int(x)):
 					for e in starter_enemies(name, st, n):
 						k += 1
 						if (k - 1) % shard[1] != shard[0]:
@@ -129,7 +133,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters", "paim", "only"]:
+	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters", "paim", "only", "style", "want", "starter_stages"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
@@ -218,9 +222,9 @@ static func enemies(stage: int, kind: String, n: int) -> Array:
 	var tries := 0
 	while out.size() < n and tries < MAX_TRIES:
 		var seed_value := 101 + tries * 7919 + stage * 31
-		var faction: String = "hollow" if kind == "ghost" else ("wardens" if kind == "warden" else FACTIONS[tries % FACTIONS.size()])
+		var faction: String = "hollow" if kind == "ghost" else ("wardens" if kind == "warden" else (style_only if style_only != "" else FACTIONS[tries % FACTIONS.size()]))
 		tries += 1
-		var budget := Shipgen.budget_for(tier, j, danger_for(faction), "normal", stage)
+		var budget := Shipgen.budget_for(tier, j, danger_for(str(Shipgen.tables()["factions"][faction].get("lines_as", faction))), "normal", stage)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_value
 		var spec := Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage)
@@ -242,14 +246,17 @@ static func starter_enemies(name: String, stage: int, n: int) -> Array:
 	var mine: Ship = Session.load_ship(STARTERS[name])
 	var out: Array = []
 	var got := {2: 0, 3: 0}
+	if want_skulls > 0:
+		for k in got:
+			got[k] = 0 if k == want_skulls else n  # only the wanted threat is looked for
 	var j := roundi(JUMPS_A_STAGE * (float(stage) - 0.5))
 	var tier := 3 if j >= 25 else (2 if j >= 10 else 1)
 	var tries := 0
 	while (got[2] < n or got[3] < n) and tries < MAX_TRIES:
 		var seed_value := 101 + tries * 7919 + stage * 31
-		var faction: String = FACTIONS[tries % FACTIONS.size()]
+		var faction: String = style_only if style_only != "" else FACTIONS[tries % FACTIONS.size()]
 		tries += 1
-		var budget := Shipgen.budget_for(tier, j, danger_for(faction), "normal", stage)
+		var budget := Shipgen.budget_for(tier, j, danger_for(str(Shipgen.tables()["factions"][faction].get("lines_as", faction))), "normal", stage)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_value
 		var spec := Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage)
@@ -263,7 +270,7 @@ static func starter_enemies(name: String, stage: int, n: int) -> Array:
 		out.append({"spec": spec, "faction": faction, "seed": seed_value, "layers": Shields.layers_of_ship(ship, ship.power_state.get("powered", {})), "kind": "%s t%d" % [name, sk], "skulls": sk})
 	if got[2] < n or got[3] < n:
 		printerr("standoff: %s stage %d: threat 2: %d, threat 3: %d of %d in %d tries" % [name, stage, got[2], got[3], n, MAX_TRIES])
-	if stage == 1:
+	if stage == 1 and style_only == "":
 		var dental: Ship = Session.load_ship(DENTAL)
 		var dsk: int = Threat.rate(dental, mine)["skulls"]
 		for i in n:
@@ -449,8 +456,8 @@ static func table(list: Array) -> String:
 ## the starter is wrecked; neither at the cap), and the first gun disabled: the share of fights it happens in, and its median time (all guns: the same).
 static func starter_table(list: Array) -> String:
 	var L: Array[String] = []
-	L.append("| starter | stage | enemy | n | median s | mean s | starter wins % | starter lost % | stalemate % | first gun out in % | at (median s) | all guns out in % | at (median s) |")
-	L.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+	L.append("| starter | stage | enemy | n | median s | mean s | starter wins % | starter lost % | stalemate % | first gun out in % | at (median s) | all guns out in % | at (median s) | enemy dmg landed /s |")
+	L.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
 	var keys := {}
 	for r in list:
 		if r.has("starter"):
@@ -468,5 +475,6 @@ static func starter_table(list: Array) -> String:
 		var gall := sel.filter(func(r): return float(r["t_guns"]) >= 0.0).map(func(r): return float(r["t_guns"]))
 		L.append("| %s | %d | %s | %d | %.0f | %.0f | %d | %d | %d | %d | %s | %d | %s |" % [keys[key][0], keys[key][1], keys[key][2], sel.size(), _median(sel.map(func(r): return float(r["t"]))), _mean(sel.map(func(r): return float(r["t"]))),
 			roundi(100.0 * (n - lost - cap) / n), roundi(100.0 * lost / n), roundi(100.0 * cap / n), roundi(100.0 * g1.size() / n), "%.0f" % _median(g1) if not g1.is_empty() else "-",
-			roundi(100.0 * gall.size() / n), "%.0f" % _median(gall) if not gall.is_empty() else "-"])
+			roundi(100.0 * gall.size() / n), "%.0f" % _median(gall) if not gall.is_empty() else "-",
+			"%.2f" % _mean(sel.map(func(r): return (float(r["p_hull"]) + float(r["p_part"])) / maxf(float(r["t"]), 1.0)))])
 	return "\n".join(L)
