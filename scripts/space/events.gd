@@ -650,7 +650,7 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}) -> Dictionary:
 			lines.append("On the map: " + label)
 	for id in _list(effects.get("blueprint")):
 		if ship.crafting.has(str(id)) and ship.crafting.unlock(str(id)):
-			lines.append("Blueprint learned: " + _name(ship, str(ship.crafting.def(str(id))["output"]["item"])))
+			lines.append(ship.crafting.learned_line(str(id), ship.components))
 	for r in _list(effects.get("recruit")):
 		var rd := _dict(r)
 		var species := str(rd.get("species", "human"))

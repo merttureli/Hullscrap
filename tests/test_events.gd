@@ -477,7 +477,7 @@ func test_effect_blueprint_unlocks_a_recipe() -> void:
 	check(locked != "", "there is a locked blueprint to learn")
 	var r := _fx({"blueprint": locked}, c, ship)
 	check(ship.crafting.is_known(locked), "learned")
-	check(r["lines"].size() == 1 and r["lines"][0].begins_with("Blueprint learned"), "said: " + str(r["lines"]))
+	check(r["lines"].size() == 1 and r["lines"][0].begins_with("Blueprint: "), "said: " + str(r["lines"]))
 	eq(_fx({"blueprint": locked}, c, ship)["lines"].size(), 0, "nothing new the second time")
 
 
