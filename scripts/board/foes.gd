@@ -184,7 +184,10 @@ func add(kind: String, pos: Vector2, room := -1, spawned := true) -> Dictionary:
 		f["wait"] = s.rng.randf_range(2.0, 6.0)
 	var wr := RandomNumberGenerator.new()  # (its own dice: the fight's are not shifted)
 	wr.seed = Site._mix(site.seed_value, "wear", int(f["id"]))
-	dress(f, Wear.for_foe(kind, site.region, wr))
+	var race := ""
+	if room >= 0 and not site.modules.is_empty() and int(site.rooms[room].get("module", -1)) >= 0:
+		race = str(site.modules[int(site.rooms[room]["module"])].get("race", ""))
+	dress(f, Wear.for_foe(kind, site.region, wr, race))
 	list.append(f)
 	return f
 

@@ -366,6 +366,12 @@ static func heat_factor(t: Dictionary, heat: float) -> float:
 	return f
 
 
+## The hp a second a hot room (`heat`) costs a crew member whose resolved set is `t`: dries_out.hp_per_s above its heat_above, else 0. Aboard (Jobs) and on foot (heat_foot.gd).
+static func heat_hurt(t: Dictionary, heat: float) -> float:
+	var dry: Dictionary = t["dries_out"]
+	return float(dry["hp_per_s"]) if heat > float(dry["heat_above"]) and float(dry["hp_per_s"]) > 0.0 else 0.0
+
+
 ## The factor on a walk speed that thin air puts on a crew member whose resolved set is `t`: vacuum_speed in a room whose
 ## air is below THIN_AIR of full (`pressure`, a fraction), 1.0 above it (and for crew with no vacuum_speed).
 static func thin_air_factor(t: Dictionary, pressure: float) -> float:

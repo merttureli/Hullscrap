@@ -15,6 +15,9 @@ extends RefCounted
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Races = preload("res://scripts/board/station_races.gd")
+const Fixtures = preload("res://scripts/board/station_fixtures.gd")
+const Dressing = preload("res://scripts/board/station_dressing.gd")
 
 const PATH := "res://data/station_modules.json"
 const SIDES: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -38,6 +41,13 @@ static func config() -> Dictionary:
 	if _cfg.is_empty():
 		var data = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 		assert(data is Dictionary and data.get("modules") is Dictionary, "bad station data: " + PATH)
+		for mid in data["modules"]:  # a module that is `like` another has its footprint, and what it does not say itself
+			var def: Dictionary = data["modules"][mid]
+			if def.has("like"):
+				var merged: Dictionary = data["modules"][str(def["like"])].duplicate(true)
+				for k in def:
+					merged[k] = def[k]
+				data["modules"][mid] = merged
 		_cfg = data
 	return _cfg
 
@@ -89,6 +99,9 @@ func _roll_kind(opts: Dictionary) -> void:
 	mood = _pick(moods, r) if not moods.is_empty() else ""
 	if moods.has(str(opts.get("mood", ""))):
 		mood = str(opts["mood"])
+	var rr := RandomNumberGenerator.new()
+	rr.seed = s._mix(s.seed_value, "races", 0)
+	s.races = Races.roll(rr, s.region, type)
 	s.state = state
 	s.mood = mood
 	s.station_type = type
@@ -136,7 +149,7 @@ func _count() -> int:
 
 
 func _count_of(mid: String) -> int:
-	return insts.filter(func(i): return i["mod"] == mid).size()
+	return insts.filter(func(i): return i["mod"] == mid or str(modules()[i["mod"]].get("counts_as", "")) == mid).size()
 
 
 ## The modules the type must still have (a secure one counts its checkpoint too): the budget keeps room for them.
@@ -175,6 +188,10 @@ func _weights() -> Dictionary:
 					boost[m] = true
 	for mid in ids:
 		var w := float(modules()[mid].get("weights", {}).get(type, 0.0))
+		var rcs: Array = modules()[mid].get("races", [])
+		if not rcs.is_empty() and not rcs.any(func(x): return s.races.has(x)):  # (a race's own room only in a station its people built)
+			continue
+		w *= float(config().get("race_boost", 1.0)) if not rcs.is_empty() else 1.0
 		if w > 0.0 and _count_of(mid) < _max_of(mid):
 			out[mid] = w * (3.0 if boost.has(mid) else 1.0)
 	return out
@@ -616,6 +633,7 @@ func _realize() -> String:
 		var r: Dictionary = s.rooms[-1]
 		r["purpose"] = _purpose(rdef)
 		r["module"] = i
+		r["mroom"] = int(parts[1])
 		if rdef.has("props"):
 			r["props"] = rdef["props"]
 		rid_of[key] = r["id"]
@@ -663,7 +681,7 @@ func _realize() -> String:
 			a = a.min(c + insts[i]["off"] + off)
 			b = b.max(c + insts[i]["off"] + off)
 		s.modules.append({"id": insts[i]["mod"], "name": str(modules()[insts[i]["mod"]]["name"]), "rect": Rect2i(a, b - a + Vector2i.ONE), "rooms": mrooms,
-			"powered": true, "breached": false})
+			"powered": true, "breached": false, "own": not modules()[insts[i]["mod"]].get("races", []).is_empty()})
 	return _dress()
 
 
@@ -729,13 +747,15 @@ func _purpose(rdef: Dictionary) -> String:
 func _dress() -> String:
 	var scfg: Dictionary = config()["states"][state]
 	var kcfg: Dictionary = s.config()["kinds"]["station"]
+	_assign_races()
 	var breached := 0
 	for i in s.modules.size():
 		var m: Dictionary = s.modules[i]
 		if i == 0:  # (the dock has power unless the whole station is dead)
 			m["powered"] = float(scfg["powered"]) > 0.0
 			continue
-		m["powered"] = rng.randf() < float(scfg["powered"])
+		var pm := Races.power_mult(str(m["race"])) if float(scfg["powered"]) < 1.0 else 1.0  # (a power race keeps more of a half-active station lit)
+		m["powered"] = rng.randf() < minf(float(scfg["powered"]) * pm, 1.0)
 		var bm := float(modules()[m["id"]].get("breach_mult", 1.0))
 		if breached < BREACH_MAX and rng.randf() < float(scfg["breach"]) * bm:
 			m["breached"] = true
@@ -743,6 +763,15 @@ func _dress() -> String:
 			breached += 1
 			for rid in m["rooms"]:
 				s.rooms[rid]["air"] = 0.0
+	for i in range(1, s.modules.size()):  # a module that is a torn-open hull in its data: always breached (not counted against the cap)
+		var m: Dictionary = s.modules[i]
+		if bool(modules()[m["id"]].get("breached", false)) and not m["breached"] and float(scfg["breach"]) > 0.0:  # (an operational station keeps her hull whole)
+			m["breached"] = true
+			m["powered"] = false
+			for rid in m["rooms"]:
+				s.rooms[rid]["air"] = 0.0
+	_airless_races()
+	_power()
 	s.room_light = {}
 	for r in s.rooms:
 		var m: Dictionary = s.modules[int(r["module"])]
@@ -754,6 +783,7 @@ func _dress() -> String:
 			s.lights.append({"pos": mid, "color": "green", "room": r["id"]})
 		elif mode == "red":
 			s.lights.append({"pos": mid, "color": "red", "room": r["id"]})
+	_heat()
 	_lock(scfg)
 	s.crowd = scfg["crowd"].get(mood if mood != "" else "any", scfg["crowd"].get("any", {}))
 	s._place_props(kcfg, rng)
@@ -766,8 +796,109 @@ func _dress() -> String:
 		return "too few containers"
 	_posts(scfg)
 	_beds(scfg)
+	Fixtures.place(s)
+	if not s.power.is_empty() and Fixtures.enabled:
+		var gen_fx: Array = s.fixtures.filter(func(f): return f["fixture"] == "generator")
+		if gen_fx.is_empty():
+			return "no generator"
+		s.power["fixture"] = gen_fx[0]["id"]
+	if s._cut_off():
+		return "fixtures cut a room off"
+	Dressing.place(s)
 	_backdrop()
 	return ""
+
+
+## Each module is a section of one race: the dock the station's first; a race-only module its race's; the rest keep their parent's at `stay` chance, else
+## take another of the station's races. A stream of its own, so the layout and the rest of the dice are what they were.
+func _assign_races() -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = s._mix(s.seed_value, "sections", 0)
+	var stay := float(Races.config()["stay"])
+	for i in s.modules.size():
+		var m: Dictionary = s.modules[i]
+		var own := ""
+		for x in modules()[m["id"]].get("races", []):
+			if own == "" and s.races.has(x):
+				own = str(x)
+		var race: String = s.races[0]
+		if own != "":
+			race = own
+		elif i > 0:
+			var parent: int = maxi(int(insts[i]["parent"]), 0)
+			race = str(s.modules[parent]["race"])
+			var roll := r.randf()
+			var pick := r.randi()
+			if roll >= stay and s.races.size() > 1:
+				var others: Array = s.races.filter(func(x): return x != race)
+				race = str(others[pick % others.size()])
+		m["race"] = race
+		m["climate"] = Races.climate(race)
+		m["airless"] = false
+
+
+## A race that needs no air keeps a powered section of its own airless and working: lit, doors live, and nobody in it needs a suit but the soldier.
+func _airless_races() -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = s._mix(s.seed_value, "airless", 0)
+	var left := int(Races.config()["airless_max"])
+	for i in range(1, s.modules.size()):
+		var m: Dictionary = s.modules[i]
+		var roll := r.randf()
+		if left > 0 and m["powered"] and not m["breached"] and Races.airless_ok(str(m["race"])) and roll < float(Races.config()["airless_chance"]):
+			m["airless"] = true
+			left -= 1
+			for rid in m["rooms"]:
+				s.rooms[rid]["air"] = 0.0
+
+
+## The generator room (tag power; in an operational station it just works and there is nothing to repair): its section is dark until the soldier repairs it. The section is every unpowered module that has
+## not lost its air within `power.reach` modules of it (at least one besides itself, else one is cut off from power).
+func _power() -> void:
+	s.power = {}
+	if float(config()["states"][state]["powered"]) >= 1.0:
+		return
+	var gi := -1
+	for i in s.modules.size():
+		if modules()[s.modules[i]["id"]].get("tags", []).has("power"):
+			gi = i
+	if gi < 0:
+		return
+	s.modules[gi]["powered"] = false
+	var dist := {gi: 0}
+	var queue: Array = [gi]
+	while not queue.is_empty():
+		var i: int = queue.pop_front()
+		for l in insts[i]["links"]:
+			if int(l) >= 0 and not dist.has(int(l)):
+				dist[int(l)] = int(dist[i]) + 1
+				queue.append(int(l))
+	var reach := int(config().get("power", {}).get("reach", 3))
+	var feeds := []
+	for i in range(1, s.modules.size()):
+		var m: Dictionary = s.modules[i]
+		if i != gi and dist.has(i) and int(dist[i]) <= reach and not m["powered"] and not m["breached"] and not m["airless"]:
+			feeds.append(i)
+	if feeds.is_empty():
+		var near := dist.keys().filter(func(i): return i != gi and i > 0 and not s.modules[i]["breached"] and not s.modules[i]["airless"])
+		near.sort_custom(func(a, b): return int(dist[a]) < int(dist[b]) or (int(dist[a]) == int(dist[b]) and a < b))
+		if not near.is_empty():
+			feeds.append(near[0])
+			s.modules[near[0]]["powered"] = false
+	s.power = {"module": gi, "fixture": -1, "feeds": feeds, "restored": false}
+
+
+## The static heat of each room (data `heat`): the ambient, a purpose's own (a reactor), a module's own (a forge), and a hot race's sections.
+func _heat() -> void:
+	var hc: Dictionary = config().get("heat", {})
+	for r in s.rooms:
+		var m: Dictionary = s.modules[int(r["module"])]
+		var h := float(hc.get("ambient", 30.0))
+		h = maxf(h, float(hc.get("purposes", {}).get(str(r["purpose"]), 0.0)))
+		h = maxf(h, float(hc.get("modules", {}).get(str(m["id"]), 0.0)))
+		if str(m["climate"]) == "hot":
+			h = maxf(h, float(hc.get("hot", 70.0)))
+		r["heat"] = h
 
 
 ## Locks: the checkpoint's door to its secure module is a card door; a door that touches a module without power is dead at the state's `hack`
@@ -867,6 +998,9 @@ func _backdrop() -> void:
 		at = (Vector2(pick["cells"][0]) + Vector2(pick["cells"][-1])) / 2.0 + Vector2(0.5, 0.5)
 	s.backdrop = {"kind": kind, "palette": rng.randi() % kc["palettes"].size(), "radius": rng.randf_range(float(kc["radius"][0]), float(kc["radius"][1])),
 		"dir": Vector2(dir), "at": at, "seed": rng.randi(), "ring": rng.randf() < float(kc.get("ring", 0.0)), "tilt": rng.randf_range(-0.5, 0.5)}
+	if kc.has("moons"):  # (from the seed already rolled: no more dice)
+		var mn: Array = kc["moons"]
+		s.backdrop["moons"] = int(mn[0]) + int(s.backdrop["seed"]) % (int(mn[1]) - int(mn[0]) + 1)
 
 
 # --- dice ----------------------------------------------------------------------------------------------------------

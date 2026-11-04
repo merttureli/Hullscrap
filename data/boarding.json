@@ -311,11 +311,12 @@
 			"wreck": {"count": {"0": 1.0}, "roles": {}}
 		},
 		"roles": {
-			"survivor": {"name": "Survivor", "hp": 40, "weapon": "", "look": {"suit": "#7f8c99", "hair": "#4a3a2a", "tool": "#cfd5dd"}, "hostile": "scavenger", "rooms": {"quarters": 2, "medbay": 2, "storage": 1, "command": 1, "cargo": 0.6, "observation": 1.5, "market": 1}},
-			"hermit": {"name": "Hermit", "hp": 40, "weapon": "", "look": {"suit": "#6f7c70", "hair": "#c8c4b8", "tool": "#a8a090"}, "hostile": "scavenger", "rooms": {"engineering": 2, "storage": 1.5, "quarters": 1, "command": 1, "reactor": 2, "observation": 1}},
-			"trader": {"name": "Trader", "hp": 50, "weapon": "", "look": {"suit": "#9a8a5a", "hair": "#2a2018", "tool": "#e8d9a0"}, "hostile": "scavenger", "rooms": {"cargo": 2, "storage": 2, "quarters": 1, "market": 14}},
+			"survivor": {"name": "Survivor", "hp": 40, "weapon": "", "look": {"suit": "#7f8c99", "hair": "#4a3a2a", "tool": "#cfd5dd"}, "hostile": "scavenger", "rooms": {"quarters": 2, "medbay": 2, "storage": 1, "command": 1, "cargo": 0.6, "observation": 1.5, "market": 1, "mess": 2, "hydroponics": 1.5, "chapel": 1, "lab": 0.5, "water": 0.5}},
+			"hermit": {"name": "Hermit", "hp": 40, "weapon": "", "look": {"suit": "#6f7c70", "hair": "#c8c4b8", "tool": "#a8a090"}, "hostile": "scavenger", "rooms": {"engineering": 2, "storage": 1.5, "quarters": 1, "command": 1, "reactor": 2, "observation": 1, "hydroponics": 2, "water": 1.5, "power": 1.5, "maintenance": 1}},
+			"trader": {"name": "Trader", "hp": 50, "weapon": "", "look": {"suit": "#9a8a5a", "hair": "#2a2018", "tool": "#e8d9a0"}, "hostile": "scavenger", "rooms": {"cargo": 2, "storage": 2, "quarters": 1, "market": 14, "mess": 1, "hangar": 1.5}},
 			"scavenger_talker": {"name": "Scavenger", "hp": 40, "weapon": "flare_gun", "look": {"suit": "#8a7a4a", "hair": "#3a2a1c", "tool": "#cfd5dd"}, "hostile": "scavenger", "rooms": {"storage": 2, "cargo": 2, "engineering": 1, "command": 1}},
 			"captive": {"name": "Captive", "hp": 40, "weapon": "", "look": {"suit": "#7a8896", "hair": "#4a3a2a", "tool": "#cfd5dd"}, "hostile": "scavenger", "rooms": {"storage": 2, "quarters": 2, "cargo": 1, "command": 0.5, "security": 2}},
+			"guard": {"name": "Station guard", "hp": 70, "weapon": "pistol", "look": {"suit": "#58708a", "hair": "#2a2a30", "tool": "#d8dce4"}, "hostile": "pirate", "rooms": {"security": 6, "command": 2, "market": 2, "corridor": 1.5, "hangar": 1.5, "cargo": 1, "quarters": 0.5, "mess": 1, "observation": 1}},
 			"touched_talker": {"name": "Hollow-touched", "hp": 60, "weapon": "", "look": {"suit": "#9a96a8", "hair": "#d8d4e0", "tool": "#cfd5dd"}, "hostile": "hollow_touched", "rooms": {"command": 2, "quarters": 2, "medbay": 1.5, "storage": 1}}
 		},
 		"species": {"human": 10, "basalt": 1, "fenn": 1, "emberkin": 1},
@@ -488,7 +489,18 @@
 		"reactor": {"tint": "#d8a050", "bp": 2.5, "table": "engineering", "props": [{"prop": "terminal", "n": [0, 1]}, {"prop": "locker", "n": [1, 2]}, {"prop": "crate", "n": [1, 2]}, {"prop": "cable", "n": [2, 4]}]},
 		"security": {"tint": "#c86a5a", "bp": 1.4, "props": [{"prop": "locker", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 1]}, {"prop": "terminal", "n": [0, 1]}]},
 		"market": {"tint": "#d8b860", "bp": 0.8, "table": "cargo", "props": [{"prop": "crate", "n": [2, 4]}, {"prop": "pallet", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 2]}]},
-		"observation": {"tint": "#7ab8d8", "bp": 0.4, "table": "quarters", "props": [{"prop": "cabinet", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]}
+		"observation": {"tint": "#7ab8d8", "bp": 0.4, "table": "quarters", "props": [{"prop": "cabinet", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]},
+		"hydroponics": {"tint": "#6fa85a", "bp": 0.5, "table": "storage", "props": [{"prop": "crate", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 1]}, {"prop": "cable", "n": [0, 1]}]},
+		"mess": {"tint": "#b0855a", "bp": 0.5, "table": "quarters", "props": [{"prop": "crate", "n": [1, 2]}, {"prop": "locker", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]},
+		"lab": {"tint": "#8ac8c8", "bp": 2.0, "table": "medbay", "props": [{"prop": "cabinet", "n": [0, 1]}, {"prop": "terminal", "n": [0, 1]}, {"prop": "crate", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]},
+		"comms": {"tint": "#8a9ae0", "bp": 2.5, "table": "command", "props": [{"prop": "terminal", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 1]}]},
+		"chapel": {"tint": "#c8b0d8", "bp": 0.4, "table": "quarters", "props": [{"prop": "cabinet", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]},
+		"brig": {"tint": "#a86a6a", "bp": 0.8, "table": "quarters", "props": [{"prop": "locker", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]},
+		"water": {"tint": "#6a9ac8", "bp": 1.0, "table": "storage", "props": [{"prop": "crate", "n": [1, 2]}, {"prop": "cable", "n": [1, 2]}]},
+		"hangar": {"tint": "#8a8aa0", "bp": 1.2, "table": "cargo", "props": [{"prop": "pallet", "n": [1, 2]}, {"prop": "crate", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 1]}]},
+		"maintenance": {"tint": "#8a8478", "bp": 0.3, "table": "storage", "props": [{"prop": "cable", "n": [1, 3]}, {"prop": "body", "n": [0, 1]}]},
+		"power": {"tint": "#d8c060", "bp": 2.0, "table": "engineering", "props": [{"prop": "terminal", "n": [0, 1]}, {"prop": "crate", "n": [1, 2]}, {"prop": "cable", "n": [1, 3]}]},
+		"breach": {"tint": "#707880", "bp": 0.3, "table": "storage", "props": [{"prop": "heap", "n": [1, 2]}, {"prop": "body", "n": [0, 1]}, {"prop": "cable", "n": [1, 2]}]}
 	},
 	"beds": {
 		"_doc": "Beds on foot (scripts/board/beds.gd): a bed blocks like a pallet (size [w, h], turned along a side wall) and is not a container. Hold E by a working bed and the soldier heals heal_hp_s a second (the ship's bed heals 5, its medbay 15); hold E by a hurt follower near a free working bed (as long as a revive) and they lie down on it and heal until full, or until a foe hunts the party. One person to a bed. Nobody heals while a foe is on the hunt: `refuse` is said. A generated site's medbay has count [min, max] beds by kind, each working at `works` (mostly broken); a module station's come from its type and state (data/station_modules.json); a beaten ship's bed parts are beds, working at `works`. reach: cells from a bed's middle within which E uses it.",
@@ -507,7 +519,7 @@
 	"loot_theme": {
 		"_doc": "Loot that fits the room (scripts/board/loot.gd). A container's first roll is today's: its table's weights pick an outcome, and the outcome's tier (common and rare materials, part, gear, weapon, ammo, credits, mod, special) is what the roll gave. Only then, in a room whose purpose has tags here (`rooms`), the item is picked again within that tier, each outcome's weight x `mult` when its tags meet the room's: so every tier keeps its share and the items that fit the room come up more often. tiers: what an item counts as when its kind does not say (tier_of in loot.gd: credits, mod, a part (components.json), a hand weapon (combat.hand_items), ammo (items.json kind ammo), body gear (`gear`), a material by its rarity: common, else rare; the rest special). Tags: `families` (a part's family -> tags), `items` (an item or a material -> tags); a recipe has the tags of what it makes, so a blueprint found in a room favours recipes that fit it the same way, among those equally wanted.",
 		"mult": 3.0,
-		"rooms": {"engineering": ["tool", "repair", "power"], "reactor": ["power"], "medbay": ["medical"], "command": ["sensor", "data"], "security": ["weapon"], "armoury": ["weapon"], "quarters": ["personal"], "storage": ["bulk"], "cargo": ["freight"], "market": ["trade"], "airlock": ["suit"], "observation": ["personal"], "hydroponics": ["organic"]},
+		"rooms": {"engineering": ["tool", "repair", "power"], "reactor": ["power"], "medbay": ["medical"], "command": ["sensor", "data"], "security": ["weapon"], "armoury": ["weapon"], "quarters": ["personal"], "storage": ["bulk"], "cargo": ["freight"], "market": ["trade"], "airlock": ["suit"], "observation": ["personal"], "hydroponics": ["organic"], "mess": ["bulk"], "lab": ["medical", "data"], "comms": ["sensor", "data"], "chapel": ["personal"], "brig": ["weapon"], "water": ["tool"], "hangar": ["freight", "tool"], "maintenance": ["tool", "repair"], "power": ["power"]},
 		"families": {"reactor": ["power"], "radiator": ["power"], "engine": ["freight"], "intake": ["freight"], "tractor": ["freight"], "weapon": ["weapon"], "ammo_rack": ["weapon"], "shield": ["power"], "medbay": ["medical"], "bed": ["medical"], "radar": ["sensor"], "helm": ["sensor"], "oxygen": ["life"], "workshop": ["tool"], "fabricator": ["tool"], "belt_drive": ["tool"], "utility": ["repair"]},
 		"items": {"plasma_cell": ["power"], "nanite_paste": ["medical", "repair"], "polymer": ["medical", "bulk"], "scrap": ["bulk"], "copper": ["tool"], "silicon": ["sensor", "data"], "crystal": ["data"], "titanium": ["freight"], "medic_sash": ["medical"], "rigger_harness": ["tool", "repair"], "firefighter_coat": ["repair"], "exosuit": ["suit", "tool"], "eva_suit": ["suit"], "salamander_suit": ["suit"], "heat_suit": ["suit"], "pistol": ["weapon", "personal"], "rifle": ["weapon"], "slugthrower": ["weapon"], "hand_ammo": ["weapon"], "missile": ["weapon", "freight"], "basic_armor": ["weapon", "personal"], "marine_plate": ["weapon"], "jump_pack": ["personal"], "traders_coat": ["trade"], "spore_mantle": ["organic"], "fuel": ["freight"]},
 		"tiers": {"fuel": "special"}
@@ -551,6 +563,7 @@
 			"hollow_touched": {"chance": 0.0, "items": []}
 		},
 		"npc": {
+			"guard": {"chance": 0.95, "items": [{"weight": 3, "item": "basic_armor"}, {"weight": 2, "item": "marine_plate"}, {"weight": 1, "item": "eva_suit"}]},
 			"survivor": {"chance": 0.8, "items": [{"weight": 3, "item": "basic_armor"}, {"weight": 2, "item": "eva_suit"}, {"weight": 2, "item": "medic_sash"}]},
 			"hermit": {"chance": 0.8, "items": [{"weight": 3, "item": "rigger_harness"}, {"weight": 2, "item": "eva_suit"}, {"weight": 1, "item": "firefighter_coat"}]},
 			"trader": {"chance": 0.9, "items": [{"weight": 3, "item": "traders_coat"}, {"weight": 2, "item": "basic_armor"}, {"weight": 1, "item": "jump_pack"}]},

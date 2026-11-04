@@ -1,0 +1,109 @@
+{
+	"events": [
+		{
+			"id": "bnpc_guard_keep_moving",
+			"type": "boarding_npc",
+			"weight": 10,
+			"once": false,
+			"fallback": true,
+			"requires": {
+				"role": "guard"
+			},
+			"text": "{name} stands beside the door with a sidearm on the hip and the posture of someone who has been told to look bored on purpose. 'Docked and paid?' {name} asks. 'Then you are no trouble to me. Keep your weapon down and your hands to yourself, and I will not have to write anything.'",
+			"choices": [
+				{
+					"text": "Ask what to watch for.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Pickpockets in the market, and a cold section aft where the lights went. Nothing in the cold section is mine to guard.' {name} nods at a locked cabinet. 'Not that one either. Mind it.'",
+							"effects": {
+								"npc_reveal": "container"
+							}
+						}
+					]
+				},
+				{
+					"text": "Say you are only passing through.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Everyone is,' says {name}. 'Pass faster.'",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_guard_shift_end",
+			"type": "boarding_npc",
+			"weight": 8,
+			"once": false,
+			"requires": {
+				"role": "guard",
+				"site": "station"
+			},
+			"text": "{name} is counting the minutes to the end of the shift on the wall clock and does not mind who sees it. 'Eleven minutes,' {name} says. 'Then it is somebody else's quiet corridor. If you are buying anything, buy it now. The stall by the hub gives a guard's price.'",
+			"choices": [
+				{
+					"text": "Thank {name} for the tip.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Do not thank me,' says {name}. 'Tell no one I said it.' A ration bar is pressed into your hand, still warm from a pocket.",
+							"effects": {
+								"crew_hp": 4
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave {name} to the clock.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Ten minutes,' says {name}, softly, to nobody.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "bnpc_guard_cold_section",
+			"type": "boarding_npc",
+			"weight": 8,
+			"once": false,
+			"requires": {
+				"role": "guard",
+				"site": "station"
+			},
+			"text": "{name} leans on the doorframe where the light stops. Past it the corridor is dark and the air smells of cold metal. 'Aft section lost its power,' {name} says, without being asked. 'Generator room is back there. Somebody has to hold a button for a while and nobody on this shift will. Not that I told you.'",
+			"choices": [
+				{
+					"text": "Ask what is back there.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'Dark. Dead doors. Whatever got in before we sealed it.' {name} taps the sidearm, once. 'Go if you like. I am paid to stand here.'",
+							"effects": {
+								"npc_reveal": "locked"
+							}
+						}
+					]
+				},
+				{
+					"text": "Leave {name} at the door.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} nods at the dark as if it owed a favour.",
+							"effects": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}

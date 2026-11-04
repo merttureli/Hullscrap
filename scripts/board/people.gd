@@ -77,14 +77,17 @@ func spawn_site(ctx := {}) -> void:
 			counts[k] = float(counts[k]) * more
 	var n := Site._weighted_count(counts, rng)
 	var hollow := bool(ctx.get("hollow", false))
-	for i in n:
-		var role := _role(kc["roles"], theme, hollow, rng)
+	var guards := 0
+	if kc.has("guards"):  # (a friendly station keeps its guards besides the people who live there)
+		guards = rng.randi_range(int(kc["guards"][0]), int(kc["guards"][1]))
+	for i in n + guards:
+		var role := "guard" if i >= n else _role(kc["roles"], theme, hollow, rng)
 		if role == "":
 			break
 		var spot := _spot(role, rng)
 		if spot.is_empty():
 			break
-		add(role, spot["pos"], int(spot["room"]), _species(theme, rng), _name(theme, rng))
+		add(role, spot["pos"], int(spot["room"]), _species_in(theme, int(spot["room"]), rng), _name(theme, rng))
 	var mem: Dictionary = ctx.get("mem", {})
 	var saved: Dictionary = mem.get("npcs", {}) if mem.get("npcs") is Dictionary else {}
 	for n_ in list:
@@ -130,6 +133,18 @@ func _species(theme: Dictionary, rng: RandomNumberGenerator) -> String:
 		if CrewMember.species_table().get("species", {}).has(sp) and not CrewMember.is_drone_species(str(sp)):
 			ok[sp] = w[sp]
 	return str(Foes._pick_weighted(ok, rng)) if not ok.is_empty() else "human"
+
+
+## The species of a person standing in room `rid`: the people of the section's race on a station built by races (a race that is a crew species), else `_species`.
+func _species_in(theme: Dictionary, rid: int, rng: RandomNumberGenerator) -> String:
+	var any := _species(theme, rng)
+	var site = s.site
+	if site.modules.is_empty() or int(site.rooms[rid].get("module", -1)) < 0:
+		return any
+	var race := str(site.modules[int(site.rooms[rid]["module"])].get("race", ""))
+	if race != "" and CrewMember.species_table().get("species", {}).has(race) and not CrewMember.is_drone_species(race):
+		return race
+	return any
 
 
 func _name(theme: Dictionary, rng: RandomNumberGenerator) -> String:
@@ -311,8 +326,9 @@ func turn(n: Dictionary, kind := "", fresh := true) -> Dictionary:
 func walk_away(n: Dictionary) -> void:
 	var best := Vector2.ZERO
 	var bd := -1.0
+	var open: Dictionary = s.site.reachable_rooms(["card", "hack"], true)  # (a room past an airless section is no way out either)
 	for r in s.site.rooms:
-		if r["purpose"] == "gone" or r["locked"]:
+		if r["purpose"] == "gone" or r["locked"] or not open.has(r["id"]):
 			continue
 		var anchors: Array = s.site.free_anchors(r["id"])
 		if anchors.is_empty():

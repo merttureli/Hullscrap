@@ -36,6 +36,8 @@ const Kit = preload("res://scripts/board/kit.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Air = preload("res://scripts/board/air.gd")
 const StationBackdrop = preload("res://scripts/board/station_backdrop.gd")
+const StationDecor = preload("res://scripts/board/station_decor.gd")
+const Races = preload("res://scripts/board/station_races.gd")
 
 ## Emitted when the soldier is back on the ship: Boarding.leave()'s result {cleared, said, name, kind, poi}.
 signal finished(result: Dictionary)
@@ -130,6 +132,7 @@ var _flicker := 0.0  # seconds of flickering lights left (the Hollow arrives)
 var _self_light: PointLight2D
 var _red: Array = []  # [[light, base energy, phase]]
 var _door_occ := {}  # door id -> LightOccluder2D
+var _decor  # a module station's interior (station_decor.gd)
 var _room_lights: Array = []  # [[light, base energy, mode, phase]]: the lit rooms of a station with power (site.room_light), the light through its windows, its working beds
 var _sky: CanvasLayer  # the backdrop the windows show (station_backdrop.gd), under the site and out of its dark
 var _layer: CanvasLayer
@@ -294,6 +297,10 @@ func _build_nodes() -> void:
 	add_child(ship_view)
 	ship_view.show_ship(_fake)
 	ship_view.pivot = Vector2.ZERO
+	if site.gen == "modules":  # (a module station's interior: skins, fixtures, wall and floor dressing; drawn once, under the people)
+		_decor = StationDecor.new()
+		_decor.setup(site)
+		add_child(_decor)
 	_over = Node2D.new()
 	_over.z_index = 1
 	_over.draw.connect(_draw_over)
@@ -377,6 +384,7 @@ func _free_nodes() -> void:
 	_layer = null
 	_sky = null
 	_room_lights.clear()
+	_decor = null
 	hud = null
 	fx = null
 	_cam_lights.clear()
@@ -588,6 +596,18 @@ func _station_lights(site) -> void:
 			_room_lights.append([l, l.energy, mode, 0.0])
 
 
+## The station's light maps again (the power came back): the old ones go, the new are baked from site.room_light.
+func _rebuild_station_lights() -> void:
+	for e in _room_lights:
+		if e[0].is_inside_tree():
+			e[0].queue_free()
+		else:
+			e[0].free()
+	_station_lights(session.site)
+	if _decor != null:
+		_decor.rebuild()
+
+
 ## The light map of `mode` (lit: with the windows and the beds; flicker; red): 4 px to a cell, each room's floor and walls soft at the rim, a window's
 ## light brightest at the glass and gone 6 cells in. null when nothing is lit that way.
 func _light_map(site, mode: String) -> PointLight2D:
@@ -610,6 +630,17 @@ func _light_map(site, mode: String) -> PointLight2D:
 			for x in w:
 				var k := clampf(minf(minf(x + 0.5, w - x - 0.5), minf(y + 0.5, h - y - 0.5)) / 5.0, 0.0, 1.0)
 				_add_px(img, Vector2i(x0 + x, y0 + y), tone * k)
+	for f in site.fixtures:  # what glows lights its room: a core, a screen, a holo-table, a pool of spores
+		if f["glow"] != "" and not f["dead"] and str(site.room_light.get(f["room"], "")) == mode:
+			any = true
+			var fc := Vector2(f["cell"]) + Vector2(f["size"]) / 2.0
+			var big := maxf(f["size"].x, f["size"].y)
+			_glow_px(img, fc * PX, (big / 2.0 + 2.2) * PX, Color(str(f["glow"])).lerp(tone, 0.25) * 0.8, PX)
+	for d in site.dressing:  # lamps and lit signs on the walls
+		if (str(d["kind"]) == "lamp" or str(d["kind"]) == "sign") and str(site.room_light.get(d["room"], "")) == mode and bool(site.modules[int(site.rooms[d["room"]]["module"])]["powered"]):
+			any = true
+			var lc := Color(str(Races.skin(str(site.modules[int(site.rooms[d["room"]]["module"])].get("race", "human")))["lamp"]))
+			_glow_px(img, (Vector2(d["cell"]) + Vector2(0.5, 0.5) + Vector2(d["dir"]) * 0.6) * PX, (3.0 if str(d["kind"]) == "lamp" else 1.8) * PX, lc * (0.55 if str(d["kind"]) == "lamp" else 0.3), PX)
 	if mode == "lit":
 		for run in site.windows:
 			any = true
@@ -644,6 +675,14 @@ func _light_map(site, mode: String) -> PointLight2D:
 	l.position = Vector2(site.grid.size) * CELL / 2.0
 	_lights.add_child(l)
 	return l
+
+
+## A soft round glow of `col` and `radius` (pixels of the map) at `mid` in the light map.
+static func _glow_px(img: Image, mid: Vector2, radius: float, col: Color, _px: int) -> void:
+	for y in range(int(mid.y - radius), int(mid.y + radius) + 1):
+		for x in range(int(mid.x - radius), int(mid.x + radius) + 1):
+			var k := clampf(1.0 - Vector2(x, y).distance_to(mid) / radius, 0.0, 1.0)
+			_add_px(img, Vector2i(x, y), col * (k * k))
 
 
 ## Add light `c` to pixel `at` of a light map (the brighter of the two, channel by channel).
@@ -1050,6 +1089,10 @@ func find_target() -> Dictionary:
 		if d2 < best_d:
 			best = {"type": "door", "id": did, "dist": d2}
 			best_d = d2
+	var gd: float = s.site.generator_dist(p)
+	if gd >= 0.0 and gd <= reach and gd < best_d:  # the generator that lights a dark section (hold E)
+		best = {"type": "generator", "id": 0, "dist": gd}
+		best_d = gd
 	var bed_reach := float(Site.config()["beds"]["reach"])
 	var bid: int = s.beds.near(p, bed_reach)
 	if bid >= 0:  # a bed (beds.gd): the soldier heals on it; by a hurt follower, E lays them on it
@@ -1079,6 +1122,8 @@ func _hold_need(t: Dictionary) -> float:
 			return session.revive_time()
 		"sentry":
 			return float(Arms.cfg()["hack_sentry_s"])
+		"generator":
+			return session.power_time()
 	return 0.0
 
 
@@ -1106,7 +1151,7 @@ func _interact(dt: float) -> void:
 	if down and need > 0.0 and panel < 0 and shop < 0:
 		_hold_gap = 0.0
 		hold += dt
-		hacking = str(t.get("type", "")) in ["door", "sentry"]
+		hacking = str(t.get("type", "")) in ["door", "sentry", "generator"]
 		if hold >= need:
 			hold = 0.0
 			_finish_hold(t)
@@ -1144,7 +1189,7 @@ func press_e() -> void:
 				Audio.fx(self, "error")
 				return
 			leave()
-		"revive", "sentry", "bedside":
+		"revive", "sentry", "bedside", "generator":
 			say("Hold E.")
 		"container":
 			if s.opened.has(target["id"]) and s.left.has(target["id"]):
@@ -1188,6 +1233,11 @@ func _finish_hold(t: Dictionary) -> void:
 		s.revive_member(who)
 		say("%s is up." % who.name)
 		Audio.fx(self, "collect")
+	elif str(t.get("type", "")) == "generator":
+		var n: int = s.restore_power()
+		_rebuild_station_lights()
+		say("The generator catches. Lights come on%s." % (" and %d locks release" % n if n > 0 else ""))
+		Audio.fx(self, "unlock")
 	elif str(t.get("type", "")) == "sentry":
 		s.foes.hack(s.foes.find(t["id"]))
 	elif str(t.get("type", "")) == "bedside":

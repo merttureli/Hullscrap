@@ -14,6 +14,7 @@ const GearActive = preload("res://scripts/board/gear_active.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Party = preload("res://scripts/board/party.gd")
 const Air = preload("res://scripts/board/air.gd")
+const HeatFoot = preload("res://scripts/board/heat_foot.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 
 const W := 268.0
@@ -71,6 +72,7 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 		var w2: float = h._font().get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 		h._text(n, Vector2(r.end.x - w2 - 10.0, r.position.y + 22.0), 13, h.DIM_TEXT)
 	_air(h, r, m)
+	_heat(h, r, m)
 	# the gear: the weapon, the body, the mods
 	var art: String = str(s.gun()["w"]["art"]) if e["p"] == null else str(e["p"]["gun"]["w"]["art"])
 	var wid: String = str(s.gun()["id"]) if e["p"] == null else str(e["p"]["gun"]["id"])
@@ -139,6 +141,16 @@ static func _air(h, r: Rect2, m) -> void:
 		t += " suit" if bool(a["sealed"]) else (" %ds" % ceili(float(a["secs"])) if float(a["secs"]) >= 0.0 else "")
 	var w: float = h._font().get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
 	h._text(t, Vector2(r.end.x - w - 8.0, r.position.y + 58.0), 12, col)
+
+
+## The HOT line: where the heat of the room hurts or slows this person (heat_foot.gd), beside the AIR line.
+static func _heat(h, r: Rect2, m) -> void:
+	var e := HeatFoot.effect(h.view.session.site, m)
+	if e == "":
+		return
+	var t := "HOT, %s" % e
+	h._text(t, Vector2(r.position.x + 10.0, r.position.y + 58.0), 12, h.BAD if e == "hurts" else h.AMBER)
+	h.hover_add(Rect2(r.position.x + 10.0, r.position.y + 46.0, 110.0, 16.0), ["Hot room", "The heat here %s %s: a hot section, a reactor or a forge. A Forge Apron keeps it off the pace; cooler rooms are next door." % [e, m.name]], h.AMBER)
 
 
 ## How far the revive of this person has got (0 to 1): the soldier's hold of E on them, or a crew mate kneeling by them.

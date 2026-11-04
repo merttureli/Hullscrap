@@ -11,6 +11,8 @@ extends RefCounted
 ## offer() is the other half: it puts the "Board her" choice into the event a boardable POI rolls.
 
 const Site = preload("res://scripts/board/site.gd")
+const StationGen = preload("res://scripts/board/station_gen.gd")
+const HeatFoot = preload("res://scripts/board/heat_foot.gd")
 const Loot = preload("res://scripts/board/loot.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Arms = preload("res://scripts/board/arms.gd")
@@ -120,6 +122,8 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 		b.site.unlock_door(int(id))
 	for id in mem.get("keys", []):
 		b.keys[str(id)] = true
+	if bool(mem.get("power", false)):
+		b.restore_power()
 	var held: Dictionary = mem.get("left", {})
 	for id in held:
 		b.left[int(id)] = held[id]
@@ -534,6 +538,7 @@ func take_events() -> Array:
 ## act, the doors open for whoever comes near them, a fallen soldier is noticed.
 func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	GearActive.tick(self, dt)
+	HeatFoot.tick(self, dt)
 	var take := func(n: int) -> int: return _take(n)
 	for g in guns:
 		Arms.tick(g, dt, take)
@@ -617,6 +622,20 @@ func hack_time() -> float:
 
 func revive_time() -> float:
 	return float(Arms.cfg()["revive_s"]) / maxf(Kit.gear_num(soldier, "revive", 1.0), 0.1)
+
+
+## The soldier repaired the generator: its section is lit and its dead doors open (site.restore_power). Returns how many doors.
+func restore_power() -> int:
+	var opened_doors: Array = site.restore_power()
+	for id in opened_doors:
+		unlocked[int(id)] = true
+		site.unlock_door(int(id))
+	return opened_doors.size()
+
+
+## Seconds E is held at the generator.
+func power_time() -> float:
+	return float(StationGen.config().get("power", {}).get("repair_s", 4.0))
 
 
 ## Take the crew named in `names` along (at most party_max of the eligible ones; party.gd). Returns how many came.
@@ -759,7 +778,8 @@ func memory() -> Dictionary:
 	u.sort()
 	k.sort()
 	return {"kind": site.kind, "name": site.site_name, "parts": site.parts.duplicate(), "opened": o, "unlocked": u, "keys": k, "left": held, "cleared": cleared,
-		"crew": int(spec.get("crew", 0)), "foes": foes.memory(), "theme": site.theme, "people": people.memory(), "marks": seen_marks.keys(), "gen": site.gen, "state": site.state}
+		"crew": int(spec.get("crew", 0)), "foes": foes.memory(), "theme": site.theme, "people": people.memory(), "marks": seen_marks.keys(), "gen": site.gen, "state": site.state,
+		"power": bool(site.power.get("restored", false))}
 
 
 # --- people and discoveries -------------------------------------------------------------------------------------

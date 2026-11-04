@@ -122,7 +122,9 @@ func test_a_follower_laid_on_a_bed_heals_takes_it_and_gets_up() -> void:
 	var bed: Dictionary = site.beds.filter(func(b): return b["works"])[0]
 	p["m"].pos = site.bed_centre(bed) + Vector2(1.5, 0)
 	p["m"].hp = 10.0
-	eq(s.beds.bed_for(0, 3.0), bed["id"], "the free working bed by them")
+	var got: int = s.beds.bed_for(0, 3.0)  # (the nearest free working bed: two can lie side by side)
+	check(got >= 0 and site.beds[got]["works"], "a free working bed by them")
+	bed = site.beds[got]
 	eq(s.beds.lay(0, bed["id"]), "", "they lie down on it")
 	check(Beds.lying(p) and p["m"].pos == site.bed_centre(bed), "on the bed")
 	eq(s.beds.why_not(bed["id"]), str(Site.config()["beds"]["busy"]), "one person to a bed")

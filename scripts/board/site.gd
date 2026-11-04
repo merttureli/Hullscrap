@@ -63,7 +63,12 @@ var gen := ""  ## how a station was built: "modules" (station_gen.gd) or "classi
 var state := ""  ## a module station's state: abandoned, half or operational (data/station_modules.json states)
 var mood := ""  ## an operational station's: friendly or hostile
 var station_type := ""  ## a module station's type (outpost, waystation, habitat)
-var modules: Array = []  ## a module station's modules: [{id, name, rect (cells), rooms: [ids], powered, breached}]
+var modules: Array = []  ## a module station's modules: [{id, name, rect (cells), rooms: [ids], powered, breached, own (a race's own room), race (a species id), climate ("hot", "cold" or ""), airless (working, no air)}]
+var power := {}  ## a half-active or abandoned station's generator: {module, fixture (id of the generator fixture), feeds: [module ids it lights and opens], restored}; {} for none
+var races: Array = []  ## a module station's builder races (species ids, the dock's first; station_races.gd)
+var fixtures: Array = []  ## a module station's fixtures: [{id, fixture, cell, size, room, dir, blocks, variant, dead, wreck}] (station_fixtures.gd); not props, so the container ids never move
+var dressing: Array = []  ## what the walls and floors of a module station carry (station_dressing.gd): [{kind, cell, dir, room, len, seed, word}]; none of it blocks
+var fixture_of := {}  ## cell -> fixture id (every cell a fixture covers)
 var room_light := {}  ## room id -> lit, flicker, red or dark (a module station's; empty for the rest, which are dark)
 var windows: Array = []  ## runs of window cells (not in `grid`: space shows through): [{cells: [Vector2i], normal: Vector2i (out)}]
 var backdrop := {}  ## what the windows look out on (station_gen.gd _backdrop), {} for none
@@ -120,6 +125,7 @@ static func make(p_seed: int, p_kind: String, opts := {}):
 		s.arrival = ""
 		s.mood = ""
 		s.station_type = ""
+		s.races = []
 		s.modules = []
 		for i in ATTEMPTS:
 			s._clear()
@@ -159,6 +165,10 @@ func _clear() -> void:
 	crowd = {}
 	posts = []
 	beds = []
+	fixtures = []
+	fixture_of = {}
+	dressing = []
+	power = {}
 	room_of = {}
 	door_of = {}
 	prop_of = {}
@@ -1039,6 +1049,52 @@ func _place_lights(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 			lights.append({"pos": mid, "color": "green", "room": r["id"]})
 		elif rng.randf() < float(cfg["emergency"]) * float(Themes.def(theme).get("emergency", 1.0)):
 			lights.append({"pos": mid, "color": "red", "room": r["id"]})
+
+
+## Repair the generator (a module station's `power`): its section is powered, lit and its dead doors live again. Returns the ids of the doors it opened.
+func restore_power() -> Array:
+	var out := []
+	if power.is_empty() or bool(power["restored"]):
+		return out
+	power["restored"] = true
+	var fed := {}
+	for mi in power["feeds"] + [power["module"]]:
+		fed[int(mi)] = true
+		modules[int(mi)]["powered"] = true
+		for rid in modules[int(mi)]["rooms"]:
+			room_light[rid] = "lit"
+	for f in fixtures:
+		if fed.has(int(rooms[f["room"]]["module"])) and not f["wreck"]:
+			f["dead"] = false
+	for d in doors:
+		if d["lock"] == "hack" and d["rooms"].any(func(r): return fed.has(int(rooms[r]["module"]))):
+			out.append(d["id"])
+	return out
+
+
+## The heat of room `rid`, a static number like its air (a module station's `heat` in data/station_modules.json): the section's own while it has power, else the
+## ambient. A site with no heat of its own (a classic one) is at the ambient everywhere. Cells are on the same scale as the ship's part heat (traits.gd dries_out, heat_speed).
+func heat_of(rid: int) -> float:
+	var ambient := float(StationGen.config().get("heat", {}).get("ambient", 30.0))
+	if rid < 0 or not rooms[rid].has("heat"):
+		return ambient
+	var mi := int(rooms[rid].get("module", -1))
+	if mi >= 0 and not bool(modules[mi]["powered"]):
+		return ambient
+	return float(rooms[rid]["heat"])
+
+
+func heat_at(p: Vector2) -> float:
+	return heat_of(room_at(p))
+
+
+## The distance from `p` to the generator that still wants repair, -1 when there is none.
+func generator_dist(p: Vector2) -> float:
+	if power.is_empty() or bool(power["restored"]) or int(power["fixture"]) < 0:
+		return -1.0
+	var f: Dictionary = fixtures[int(power["fixture"])]
+	var rect := Rect2(Vector2(f["cell"]), Vector2(f["size"]))
+	return rect.get_center().distance_to(p) - maxf(rect.size.x, rect.size.y) / 2.0
 
 
 ## The cells a bed covers.

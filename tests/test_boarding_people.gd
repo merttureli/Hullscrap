@@ -108,7 +108,7 @@ func test_people_are_placed_at_about_the_target_rates() -> void:
 			if not b.people.list.is_empty():
 				some += 1
 			for n in b.people.list:  # (a module station's state says who is aboard: site.crowd)
-				check(b.site.crowd.get("people", People.cfg()["kinds"][kind])["roles"].has(n["role"]), "%s: a %s is a person of that kind of site" % [kind, n["role"]])
+				check(n["role"] == "guard" or b.site.crowd.get("people", People.cfg()["kinds"][kind])["roles"].has(n["role"]), "%s: a %s is a person of that kind of site" % [kind, n["role"]])
 		rate[kind] = float(some) / float(total)
 	check(rate["station"] >= 0.35 and rate["station"] <= 0.85, "about 1 in 2 stations holds someone, more of the live ones (%.2f)" % rate["station"])
 	check(rate["derelict"] >= 0.25 and rate["derelict"] <= 0.6, "about 2 in 5 derelicts does (%.2f)" % rate["derelict"])

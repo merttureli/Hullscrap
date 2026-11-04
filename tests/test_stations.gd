@@ -218,7 +218,7 @@ func test_each_state_sets_light_air_power_and_who_is_aboard() -> void:
 		if op.gen != "modules":
 			continue
 		check(op.room_light.values().all(func(m): return m == "lit" or m == "flicker"), "operational: every room is lit")
-		check(op.rooms.all(func(r): return op.breathable(r["id"])), "operational: air everywhere")
+		check(op.rooms.all(func(r): return op.breathable(r["id"]) or op.modules[int(r["module"])]["airless"]), "operational: air everywhere (but in a section of a race that needs none, working and airless)")
 		check(not op.doors.any(func(d): return d["lock"] == "hack"), "operational: no dead doors")
 		eq(op.crowd, StationGen.config()["states"]["operational"]["crowd"][op.mood], "operational: its mood says who is aboard")
 		var ab = _station(2000 + i, "abandoned")
@@ -246,7 +246,7 @@ func test_windows_look_out_on_space_and_a_station_with_windows_has_a_backdrop() 
 		if s.gen != "modules":
 			continue
 		check(not s.windows.is_empty(), "a station has windows")
-		check(not s.backdrop.is_empty() and str(s.backdrop["kind"]) in ["planet", "gas_giant"], "and something to see through them")
+		check(not s.backdrop.is_empty() and StationGen.config()["backdrop"]["kinds"].has(str(s.backdrop["kind"])), "and something to see through them")
 		for run in s.windows:
 			for c in run["cells"]:
 				check(not s.grid.tiles.has(c), "a window is not drawn as wall")

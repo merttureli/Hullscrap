@@ -65,9 +65,9 @@ func test_the_pack_has_the_events_it_promises() -> void:
 	var pack := _pack()
 	var npc := pack.values().filter(func(e): return e["type"] == "boarding_npc")
 	var site := pack.values().filter(func(e): return e["type"] == "boarding_site")
-	eq(npc.size(), 28, "28 events of what the people say")
+	eq(npc.size(), 31, "31 events of what the people say (28 and three of the station guard)")
 	eq(site.size(), 18, "18 discoveries")
-	eq(pack.size(), 46, "and nothing else")
+	eq(pack.size(), 49, "and nothing else")
 	for role in People.role_ids():
 		var mine := npc.filter(func(e): return _role_of(e) == role)
 		check(mine.size() >= 3, "%s has at least three events (%d)" % [role, mine.size()])
@@ -121,13 +121,13 @@ func test_every_event_has_a_way_out_a_voice_and_no_stray_braces() -> void:
 
 func test_each_role_has_a_fallback_and_it_asks_for_nothing() -> void:
 	var fallbacks := _pack().values().filter(func(e): return bool(e.get("fallback", false)))
-	eq(fallbacks.size(), 6, "one for each of the six roles")
+	eq(fallbacks.size(), 7, "one for each of the seven roles")
 	var roles := {}
 	for e in fallbacks:
 		eq(e["requires"].keys(), ["role"], "%s asks for its role and nothing else" % e["id"])
 		roles[e["requires"]["role"]] = true
 		check(e["type"] == "boarding_npc", "")
-	eq(roles.keys().size(), 6, "and every role has its own")
+	eq(roles.keys().size(), 7, "and every role has its own")
 	for e in _pack().values():
 		check(e["type"] != "boarding_npc" or People.has_role(_role_of(e)), "%s is for a role" % e["id"])
 

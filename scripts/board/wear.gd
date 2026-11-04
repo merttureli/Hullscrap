@@ -35,15 +35,15 @@ static func _pick(items: Array, x: float) -> String:
 	return str(items[-1]["item"])
 
 
-## The gear a foe of `kind` wears in `region` ("" for none). Three rolls of `rng`, always.
-static func for_foe(kind: String, region: String, rng: RandomNumberGenerator) -> String:
+## The gear a foe of `kind` wears in `region`, or in a section built by `race` ("" for none). Three rolls of `rng`, always.
+static func for_foe(kind: String, region: String, rng: RandomNumberGenerator, race := "") -> String:
 	var w: Dictionary = cfg()["foe"].get(kind, {})
 	var a := rng.randf()
 	var b := rng.randf()
 	var c := rng.randf()
 	if w.is_empty() or a >= float(w["chance"]):
 		return ""
-	var home := home_item(region)
+	var home := str(cfg()["race_item"].get(race, "")) if race != "" else home_item(region)  # (aboard a station a race built: the gear of the section's people)
 	if home != "" and b < float(cfg()["home"]):
 		return home
 	return _pick(w["items"], c)

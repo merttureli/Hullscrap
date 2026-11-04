@@ -1,0 +1,41 @@
+{
+	"_doc": "Who built a station (scripts/board/station_races.gd, scripts/board/station_gen.gd _roll_races). Each station has one or more builder races (species.json ids). In a race's home region (regions/*.json home_species) a station is a single race's work at `single` chance by type (outpost mostly, habitat rarely), else mixed: `mixed` [min, max] races, the home race first, the rest drawn by weight from the region's `neighbours` (and humans, `human_weight`). Outside any home region a station is always mixed, drawn from the region's neighbours (`default_neighbours` when the region has none listed). In a mixed station each module is a section of one race: it keeps its parent's race at `stay` chance, else takes another of the station's races; a race-only module (a module's `race`) is always its race's. A race changes only the SKIN of a section: `skin` (floor and wall tints, lamp colour, signage glyph) and `variants` (the art a fixture is drawn with: fixture id -> variant id; the footprint is the same), never footprints, doors, lanes or container counts. No ship_styles.json exists on main yet: the colours here are this file's own; when it lands, the skins can read its palettes. What the body of a race lets its sections be comes from its traits (species.json, traits.json), read by station_races.gd: `airless_ok` (needs no air: o2_use 0 or vacuum_walk) sections may be operational and airless, fully lit (`airless_chance`); a power trait (`power`: trait key -> x the chance a section has power in a half-active station); a `climate` (`climate`: a trait test -> hot or cold, shown in the dressing, nothing more). items: the gear a race's sections hold more of (loot.gd weights them within the tier, like a room's tags); parts and recipes whose id starts with a race's `prefix` count too.",
+	"single": {"outpost": 0.7, "waystation": 0.5, "habitat": 0.15},
+	"mixed": {"outpost": [2, 2], "waystation": [2, 3], "habitat": [2, 4]},
+	"human_weight": 2.0,
+	"stay": 0.6,
+	"airless_chance": 0.5,
+	"airless_max": 2,
+	"power": {"mechanical": 1.25, "crystal_conduit": 1.35, "circuit_kin": 1.25},
+	"climate": {"hot": {"fire_below": 0.3, "or": "heat_speed.hot above 1"}, "cold": {"dries_out": true}},
+	"default_neighbours": {"human": 3, "fenn": 1, "gauntling": 1, "basalt": 1},
+	"neighbours": {
+		"human_core": {"fenn": 2, "basalt": 1, "gauntling": 1},
+		"clan_space": {"gauntling": 2, "basalt": 1, "kett": 1},
+		"concord_space": {"fenn": 2, "prismatic": 1, "grundl": 1},
+		"fenn_bazaar": {"human": 2, "grundl": 2, "emberkin": 1},
+		"boneyard": {"gauntling": 2, "kett": 1, "mire": 1},
+		"gate_approaches": {"prismatic": 2, "basalt": 1},
+		"lumen_space": {"prismatic": 2, "sporeling": 1, "fenn": 1},
+		"basalt_quarries": {"gauntling": 2, "emberkin": 1, "human": 1},
+		"emberkin_forges": {"basalt": 2, "gauntling": 1, "human": 1},
+		"gauntling_scrapyards": {"kett": 1, "basalt": 1, "grundl": 1},
+		"grundl_barges": {"fenn": 2, "mire": 1, "human": 1},
+		"kett_hives": {"sporeling": 1, "gauntling": 1, "mire": 1},
+		"mire_fens": {"sporeling": 2, "kett": 1, "grundl": 1},
+		"prismatic_choir": {"sporeling": 1, "fenn": 1, "human": 1},
+		"sporeling_groves": {"mire": 2, "kett": 1, "prismatic": 1}
+	},
+	"races": {
+		"human": {"prefix": "", "items": ["marine_plate"], "skin": {"floor": "#9aa3b2", "wall": "#5d6573", "lamp": "#fff0d0", "glyph": "chevron", "style": "plain"}, "variants": {}},
+		"basalt": {"prefix": "basalt", "items": ["stone_plates"], "skin": {"floor": "#8a7f74", "wall": "#4e463f", "lamp": "#ffd8a0", "glyph": "block", "style": "stone"}, "variants": {"console": "stone_slab", "bunk": "stone_ledge", "table": "stone_table"}},
+		"emberkin": {"prefix": "emberkin", "items": ["forge_apron"], "skin": {"floor": "#a06048", "wall": "#4a2a22", "lamp": "#ff9040", "glyph": "flame", "style": "forge"}, "variants": {"console": "forge_gauge", "reactor_core": "forge_heart", "bunk": "ash_cot"}},
+		"fenn": {"prefix": "fenn", "items": ["traders_coat"], "skin": {"floor": "#a88c5a", "wall": "#5a4a30", "lamp": "#ffe090", "glyph": "ring", "style": "tent"}, "variants": {"stall": "bazaar_tent", "console": "ledger_desk"}},
+		"kett": {"prefix": "kett", "items": ["chitin_plate"], "skin": {"floor": "#9a8040", "wall": "#4a3a1a", "lamp": "#ffc060", "glyph": "hex", "style": "hex"}, "variants": {"console": "hive_node", "bunk": "brood_cell", "table": "resin_table"}},
+		"mire": {"prefix": "mire", "items": ["tank_harness"], "skin": {"floor": "#5a8a6a", "wall": "#2f4a3a", "lamp": "#a0ffc0", "glyph": "drop", "style": "reed"}, "variants": {"console": "reed_panel", "bunk": "hammock"}},
+		"sporeling": {"prefix": "sporeling", "items": ["spore_mantle"], "skin": {"floor": "#7aa060", "wall": "#3a5030", "lamp": "#d0ff90", "glyph": "leaf", "style": "organic"}, "variants": {"console": "spore_node", "bunk": "moss_bed", "grow_bed": "spore_bed"}},
+		"gauntling": {"prefix": "gauntling", "items": ["scrap_gauntlets"], "skin": {"floor": "#7a7a8a", "wall": "#3a3a48", "lamp": "#ffb040", "glyph": "gear", "style": "bolt"}, "variants": {"console": "rig_panel", "bunk": "rack_cot"}},
+		"grundl": {"prefix": "grundl", "items": ["ballast_rig"], "skin": {"floor": "#8a7050", "wall": "#403020", "lamp": "#ffd090", "glyph": "bar", "style": "barrel"}, "variants": {"cargo_stack": "ballast_stack", "bunk": "hammock"}},
+		"prismatic": {"prefix": "prismatic", "items": ["prism_cloak"], "skin": {"floor": "#a0a0e0", "wall": "#5a5a9a", "lamp": "#e0c0ff", "glyph": "diamond", "style": "facet"}, "variants": {"console": "crystal_lectern", "kiosk": "resonator", "bunk": "crystal_bed"}}
+	}
+}
