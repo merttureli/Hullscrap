@@ -1431,7 +1431,7 @@ func _draw_soldier() -> void:
 	var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
 	var look: Dictionary = m.look if not m.look.is_empty() else ShipView.LOOKS.get(m.name, ShipView.OTHER_LOOK)
 	var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-		"item": str(session.gun()["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head}
+		"item": str(session.gun()["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head, "body": PersonDrawer.gear_of(m)}
 	PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
 
 
@@ -1538,5 +1538,5 @@ func _draw_party() -> void:
 		var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
 		var look: Dictionary = m.look if not m.look.is_empty() else ShipView.LOOKS.get(m.name, ShipView.OTHER_LOOK)
 		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-			"item": str(p["gun"]["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head}
+			"item": str(p["gun"]["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head, "body": PersonDrawer.gear_of(m)}
 		PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)

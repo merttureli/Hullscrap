@@ -491,7 +491,7 @@ func _draw_person(m: CrewMember) -> void:
 	var clock: float = _ship().clock
 	var fight: bool = sim != null and sim.has_method("jobs_of") and sim.jobs_of(_ship()).combat
 	var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-		"item": PersonDrawer.item_for(m, clock, fight), "down": m.is_down(), "work": PersonDrawer.is_working(m, clock), "t": _clock, "head": m.head}
+		"item": PersonDrawer.item_for(m, clock, fight), "down": m.is_down(), "work": PersonDrawer.is_working(m, clock), "t": _clock, "head": m.head, "body": PersonDrawer.gear_of(m)}
 	pose.merge(PersonDrawer.drone_extras(m, _ship()))
 	PersonDrawer.draw(self, _world(m.pos), pose, look_of(m), build.CELL)
 	PersonDrawer.draw_status(self, _world(m.pos), Jobs.drone_status(_ship(), m), build.CELL)
