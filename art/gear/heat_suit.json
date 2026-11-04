@@ -1,0 +1,45 @@
+{
+ "id": "heat_suit",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "fits": "human rig (same anchors as art/crew/human)",
+ "layers": {
+  "body": {
+   "image": "heat_suit.png",
+   "frame": 0,
+   "color_mask": "heat_suit_color.png",
+   "draw_after": "torso",
+   "glow": {
+    "image": "heat_suit_glow.png",
+    "frame": 0,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  },
+  "head": {
+   "image": "heat_suit.png",
+   "frame": 1,
+   "color_mask": "heat_suit_color.png",
+   "draw_after": "head",
+   "glow": {
+    "image": "heat_suit_glow.png",
+    "frame": 1,
+    "frame_size": [
+     33,
+     33
+    ],
+    "blend": "add (preferred) or alpha-over"
+   }
+  }
+ },
+ "notes": "Heat suit: a reflective silver mantle with tinted shoulder and collar bands, a back cooling pack, a hood with a gold-tinted visor. Fits the human rig. Layers share the crew frame and rotate about the pivot with the aim (legs with the move direction). \"draw_after\": body goes after the torso (before the arms); head goes after the head layer. Outfit pixels: neutral grey in the PNG, white in the _color mask."
+}

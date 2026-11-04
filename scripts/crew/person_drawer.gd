@@ -14,6 +14,7 @@ const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
 const Power = preload("res://scripts/sim/power.gd")
 const Site = preload("res://scripts/board/site.gd")
+static var _glows := {}  # canvas instance id -> its GearGlow
 const SEGMENTS := 20  ## points on a drawn ellipse
 const SCALE := 1.15  ## the figure below is drawn in units of this many cells: arms and legs reach about 3 cells across
 const STRIDE := PI  ## walk phase (radians) per cell walked: one full leg cycle every 2 cells
@@ -133,18 +134,66 @@ static func draw(canvas, centre_px: Vector2, pose: Dictionary, palette: Dictiona
 	var floating := rig_kind(sheet) == "floating"
 	var lift := Vector2(0.0, -bob(pose) * k) if floating else Vector2.ZERO  # a floating body rides over its shadow
 	for l in layers:  # the shadow first: the same silhouettes, one source px down and right (a floating body: one more)
+		if l.has("glow"):
+			continue
 		_blit(canvas, l, l["sheet"].texture, centre_px + Vector2(k, k) * (1.0 + HOVER if floating else 1.0), k, SHADOW)
 	var suit := Color(palette.get("suit", "#33c6d6"))
 	var gear := str(pose.get("body", ""))
 	var aim := float(pose.get("aim", pose.get("move", 0.0)))
+	var flat := gear != "" and gear_art(sheet, gear) == null  # a rig the gear art does not fit: the flat look
 	var worn := false
+	var glow := []
 	for l in layers:
-		if gear != "" and not worn and l["layer"] in ["arms", "head"]:  # worn over the torso, under the arms and the head
+		if l.has("glow"):  # glow is additive: collected, drawn over everything
+			glow.append(l)
+			continue
+		if flat and not worn and l["layer"] in ["arms", "head"]:  # worn over the torso, under the arms and the head
 			draw_gear(canvas, centre_px + lift, aim, k, gear, false, base)
 			worn = true
 		_blit(canvas, l, l["sheet"].tinted(suit) if l["tint"] else l["sheet"].texture, centre_px + lift, k, base)
-	if gear != "":
+	if flat:
 		draw_gear(canvas, centre_px + lift, aim, k, gear, true, base)
+	if not glow.is_empty() and canvas is CanvasItem:
+		_glow_of(canvas).add(glow, centre_px + lift, k)
+
+
+## The body gear art (Art.gear) of `item` on crew art `sheet`: the `art` id of its look (boarding.json `looks`) when the rig fits it, else null.
+static func gear_art(sheet, item: String) -> Variant:
+	var id := str(gear_look(item).get("art", ""))
+	return Art.gear(id) if id != "" and Art.gear_fits(sheet) else null
+
+
+## The additive layer that shows the glow of gear drawn on `canvas`: a child node, made on first use.
+static func _glow_of(canvas: CanvasItem) -> Node2D:
+	var id := canvas.get_instance_id()
+	var g = _glows.get(id)
+	if g == null or not is_instance_valid(g) or g.get_parent() != canvas:
+		g = GearGlow.new()
+		_glows[id] = g
+		canvas.add_child.call_deferred(g)
+	return g
+
+
+## Additive glow quads of the gear drawn on one canvas this frame (GlowLayer, which fades them when nobody asks any more).
+class GearGlow extends "res://scripts/view/glow_layer.gd":
+	var stamp := -1
+
+	## Add the glow layers `ls` (plan() entries) of one person drawn at `at`, `k` px per source px.
+	func add(ls: Array, at: Vector2, k: float) -> void:
+		var now := Engine.get_frames_drawn()
+		if stamp != now:
+			quads = []
+			stamp = now
+		for l in ls:
+			var g = l["glow"]
+			quads.append({"tex": g.texture, "rect": Rect2(l["pos"], Vector2(g.frame)), "src": g.region(l["glow_frame"]), "xf": Transform2D(l["angle"], Vector2(k, k), 0.0, at), "mod": Color.WHITE})
+		queue_redraw()
+
+	## Nobody drew glow here this frame: clear it.
+	func _process(_dt: float) -> void:
+		if not quads.is_empty() and stamp < Engine.get_frames_drawn() - 1:
+			quads = []
+			queue_redraw()
 
 
 ## The look of body gear `item` (boarding.json `looks`), {} for none or for an item with no look.
@@ -217,7 +266,8 @@ static func plan(sheet, pose: Dictionary) -> Array:
 	var move := float(pose.get("move", pose.get("aim", 0.0)))
 	var aim := float(pose.get("aim", move))
 	var out := []
-	var legs = sheet.layers["legs"]
+	var ge = gear_art(sheet, str(pose.get("body", "")))  # the worn gear's art layers, or null
+	var legs = ge["legs"] if ge != null and ge.has("legs") else sheet.layers["legs"]
 	var frame: int = legs.start_of("stand")
 	if rig_kind(sheet) == "floating":
 		if not down and legs.has_anim("float"):
@@ -227,6 +277,8 @@ static func plan(sheet, pose: Dictionary) -> Array:
 		frame = legs.start_of("walk") + int(fposmod(float(pose.get("phase", 0.0)), TAU) / TAU * n) % n
 	out.append({"layer": "legs", "sheet": legs, "frame": frame, "angle": move + PI / 2.0, "pos": legs.origin_of_frame(), "tint": true})
 	out.append({"layer": "torso", "sheet": sheet, "frame": 0, "angle": aim + PI / 2.0, "pos": sheet.origin_of_frame(), "tint": true})
+	if ge != null and ge.has("body"):
+		_add_gear(out, "gear_body", ge["body"], aim, down)  # after the torso, before the arms
 	var arms = sheet.layers.get("arms")
 	if arms != null:
 		var held := held_item(pose)
@@ -236,7 +288,9 @@ static func plan(sheet, pose: Dictionary) -> Array:
 			held = {}
 		var jab := Vector2(0.0, -absf(sin(float(pose.get("t", 0.0)) * 9.0)) * JAB) if pose.get("work", false) and not down else Vector2.ZERO
 		var pose_frame: int = sheet.poses[cls]["frame"] if sheet.poses.has(cls) else 0
-		out.append({"layer": "arms", "sheet": arms, "frame": pose_frame, "angle": aim + PI / 2.0, "pos": arms.origin_of_frame() + jab, "tint": true})
+		var arm_art = ge["arms"] if ge != null and ge.has("arms") else null  # an exosuit's own arms, in the same pose
+		out.append({"layer": "arms", "sheet": arms if arm_art == null else arm_art, "frame": pose_frame if arm_art == null else arm_art.named_frames.get(cls, pose_frame),
+			"angle": aim + PI / 2.0, "pos": arms.origin_of_frame() + jab, "tint": true})
 		if not held.is_empty():
 			var it = held["sheet"]
 			out.append({"layer": "item", "sheet": it, "frame": 0, "angle": aim + PI / 2.0, "tint": false, "id": held["id"],
@@ -246,7 +300,18 @@ static func plan(sheet, pose: Dictionary) -> Array:
 		var hf: int = head.named_frames.get("helmet" if pose.get("helmet", false) else "hair", 0)
 		hf = head.named_frames.get(str(pose.get("head", "")), hf)  # a character's own head frame (CrewMember.head)
 		out.append({"layer": "head", "sheet": head, "frame": hf, "angle": aim + PI / 2.0, "pos": head.origin_of_frame(), "tint": true})
+	if ge != null and ge.has("head"):
+		_add_gear(out, "gear_head", ge["head"], aim, down)  # after the head
 	return out
+
+
+## Append gear art layer `s` (a body or head layer of Art.gear) to the plan `out`, with its glow (lit while the wearer is up).
+static func _add_gear(out: Array, name: String, s, aim: float, down: bool) -> void:
+	var at: Vector2 = s.origin_of_frame()
+	var l := {"layer": name, "sheet": s, "frame": int(s.meta.get("frame", 0)), "angle": aim + PI / 2.0, "pos": at, "tint": true}
+	out.append(l)
+	if s.glow != null and not down:
+		out.append({"layer": name + "_glow", "sheet": s, "frame": l["frame"], "angle": l["angle"], "pos": at, "tint": false, "glow": s.glow, "glow_frame": int(s.meta["glow"].get("frame", 0))})
 
 
 ## {id, sheet} of the item the pose asks for; the wrench stands in for an extinguisher with no art;
