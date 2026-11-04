@@ -336,6 +336,7 @@ func test_the_offer_can_carry_one_of_its_intact_parts() -> void:
 
 func test_a_hit_during_the_offer_refuses_it() -> void:
 	var s := _session()
+	_foe(s).flight.pos = Vector2(0.0, -1200.0)  # near enough for a bolt to land in time
 	_style(s, {"surrender": 1.0, "flee": 0.0, "fight": 0.0})
 	s.arena.autofire[Session.PLAYER] = true
 	_hurt(s, 0.3)
@@ -359,6 +360,7 @@ func test_a_hit_during_the_offer_refuses_it() -> void:
 
 func test_a_shot_already_in_flight_when_it_broke_is_no_refusal() -> void:
 	var s := _session()
+	_foe(s).flight.pos = Vector2(0.0, -1200.0)  # near enough for a bolt to land in time
 	_style(s, {"surrender": 1.0, "flee": 0.0, "fight": 0.0})
 	var uid := s.arena.add_mount(Session.PLAYER, "test_bolt", Vector2(31.0, 28.0))
 	check(s.arena.fire(Session.PLAYER, uid, _foe(s).flight.pos), "a bolt is on its way")
