@@ -37,6 +37,7 @@ const ROOM_FLASH_S := 0.7  ## seconds a clicked room is lit
 const HIT_FLASH_S := 0.45  ## seconds a sector flashes after a shot hits it
 
 var arena  ## arena.gd, or null
+var skin_on := false  ## draw the exterior skin on a loose ship too (the pre-fight card, the enemy gallery)
 var index := 0  ## the ship's index in the arena
 var ship  ## ship.gd
 var pivot := Vector2.ZERO  ## the ship's centre in cell coordinates: the node's origin
@@ -119,7 +120,7 @@ func _draw() -> void:
 	var grid = ship.grid
 	for c in grid.tiles:
 		_draw_tile(grid, c, grid.tiles[c])
-	if arena != null:
+	if arena != null or skin_on:
 		_draw_skin(grid)
 	for c in grid.breached:
 		_draw_hole(c)
