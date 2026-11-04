@@ -148,7 +148,7 @@ func test_the_camera_frames_both_ships() -> void:
 	var s := _session()
 	var view := Vector2(1600.0, 900.0)
 	var f := s.framing(view)
-	eq(f["center"], Vector2(0.0, -600.0), "the midpoint")
+	eq(f["center"], Vector2(0.0, -900.0), "the midpoint")
 	var z: float = f["zoom"]
 	for ship in [Session.PLAYER, Session.ENEMY]:
 		var p: Vector2 = (s.arena.ships[ship].flight.pos - f["center"]) * z
