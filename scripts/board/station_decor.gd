@@ -9,6 +9,7 @@ const Fixtures = preload("res://scripts/board/station_fixtures.gd")
 const Races = preload("res://scripts/board/station_races.gd")
 const Glyph = preload("res://scripts/board/station_glyph.gd")
 const StationGen = preload("res://scripts/board/station_gen.gd")
+const Art = preload("res://scripts/board/station_art.gd")
 
 const CELL := 32.0
 
@@ -258,6 +259,8 @@ func _fixture(f: Dictionary) -> void:
 	var fn := "_art_" + str(f["fixture"])
 	if has_method(fn):
 		call(fn, item)
+	elif Art.has_art(str(f["fixture"])):  # (the race rooms' fixtures: station_art.gd)
+		Callable(Art, "a_" + str(f["fixture"])).call(self, item)
 	else:
 		_block(item, bool(def.get("screen", false)))
 	if str(item["variant"]) != "" and not wreck:
@@ -266,7 +269,7 @@ func _fixture(f: Dictionary) -> void:
 		draw_line(item["r"].position + item["r"].size * 0.2, item["r"].position + item["r"].size * 0.7, Color(0, 0, 0, 0.7), 2.0)
 		draw_circle(item["r"].position + item["r"].size * Vector2(0.75, 0.3), 3.0, Color(0.9, 0.8, 0.2, 0.0))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	if str(f["fixture"]) in ["reactor_core", "forge_furnace", "crystal_spire", "holo_table", "generator", "shuttle"] and not dead and not wreck:
+	if (str(f["fixture"]) in ["reactor_core", "forge_furnace", "crystal_spire", "holo_table", "generator", "shuttle"] or bool(def.get("pulse", false))) and not dead and not wreck:
 		_anim.append({"kind": "pulse", "pos": r.get_center(), "size": r.size, "color": glow, "seed": int(f["id"]), "room": rid})
 
 

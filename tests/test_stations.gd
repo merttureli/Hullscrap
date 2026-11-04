@@ -258,7 +258,7 @@ func test_glass_tubes_are_crossings_some_airless_some_watched() -> void:
 	var tubes := 0
 	var watched := 0
 	var airless := 0
-	for i in 30:
+	for i in 60:  # (a station is now about one race room different from what it was: a few more to find a sentried tube)
 		var s = _station(4000 + i * 11, "abandoned")
 		for m in s.modules:
 			if m["id"] != "glass_tube":

@@ -7,9 +7,12 @@ const Traits = preload("res://scripts/crew/traits.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 
 const PATH := "res://data/station_races.json"
+const STYLES_PATH := "res://data/ship_styles.json"
 
 static var _cfg := {}
 static var _traits := {}
+static var _skins := {}
+static var _palettes := {}
 static var forced: Array = []  ## a test sets it: the races every station has
 
 
@@ -28,8 +31,34 @@ static func ids() -> Array:
 	return out
 
 
+## The skin of a race: its floor, wall and lamp colours are the palette of its ships (data/ship_styles.json `style.palette`, the packs' too), so a race's ships
+## and stations share them; the glyph and the style are this file's.
 static func skin(race: String) -> Dictionary:
-	return config()["races"].get(race, config()["races"]["human"])["skin"]
+	var id := race if config()["races"].has(race) else "human"
+	if not _skins.has(id):
+		var sk: Dictionary = config()["races"][id]["skin"].duplicate()
+		var pal: Dictionary = palette(id)
+		for k in ["floor", "wall", "lamp"]:
+			if pal.has(k):
+				sk[k] = pal[k]
+		_skins[id] = sk
+	return _skins[id]
+
+
+## The ship palette of race `id` ({} for none): data/ship_styles.json and every pack's ship_styles.json (a race already read is kept).
+static func palette(id: String) -> Dictionary:
+	if _palettes.is_empty():
+		var files: Array = [STYLES_PATH]
+		for p in Content.packs():
+			files.append(p["dir"] + "/ship_styles.json")
+		for path in files:
+			var more = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+			if more is Dictionary and more.get("races") is Dictionary:
+				for rid in more["races"]:
+					var pal = more["races"][rid].get("style", {}).get("palette")
+					if pal is Dictionary and not _palettes.has(rid):
+						_palettes[rid] = pal
+	return _palettes.get(id, {})
 
 
 ## The art variant a race draws fixture `fixture` with ("" for the plain one).

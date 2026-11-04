@@ -339,6 +339,7 @@ func _footprint(s) -> Array:
 
 func test_a_skin_never_changes_the_footprint_the_lanes_or_the_containers() -> void:
 	var differed := 0
+	StationGen.race_rooms = false  # (a race's own room is a layout of its own: leave them out to compare the skins)
 	for i in 8:
 		Races.forced = ["human"]
 		var a = _station(2600 + i * 23, "half")
@@ -353,6 +354,7 @@ func test_a_skin_never_changes_the_footprint_the_lanes_or_the_containers() -> vo
 		for k in a.fixtures.size():
 			if a.fixtures[k]["variant"] != b.fixtures[k]["variant"]:
 				differed += 1
+	StationGen.race_rooms = true
 	check(differed > 0, "a fixture's art variant is the race's (%d differ)" % differed)
 	check(Races.variant("kett", "console") == "hive_node" and Races.variant("human", "console") == "", "a Kett section draws a hive node where a human has a console")
 
@@ -524,7 +526,7 @@ func test_dressing_sits_on_walls_and_floors_and_the_state_decides_the_rest() -> 
 				check(s.grid.get_tile(c) == "wall" and not s.room_of.has(c) and s.room_of.get(c + d["dir"], -1) == d["room"], "seed %d: a wall item is on a wall, facing its room" % s.seed_value)
 				check(not s.door_of.has(c), "and not on a door")
 			elif d["kind"] == "hazard":
-				check(s.fixtures[s.fixture_of[c]]["fixture"] in ["reactor_core", "forge_furnace", "generator", "turbine"], "a hazard frame goes round what burns or turns")
+				check(bool(Fixtures.defs()[s.fixtures[s.fixture_of[c]]["fixture"]].get("hazard", false)), "a hazard frame goes round what burns or turns")
 			else:
 				check(s.room_of.get(c, -1) == d["room"] and not s.fixture_of.has(c) and not s.prop_of.has(c), "seed %d: a floor mark is on free floor of its room" % s.seed_value)
 			if d["kind"] == "frost":
