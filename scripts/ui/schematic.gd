@@ -12,6 +12,7 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Intent = preload("res://scripts/combat/intent.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
+const Emblem = preload("res://scripts/view/emblem.gd")
 
 const PANEL := Vector2(280.0, 200.0)
 const MAP := Rect2(8.0, 26.0, 264.0, 132.0)
@@ -40,6 +41,7 @@ var arena
 var index := 0
 var title := ""
 var intent: Dictionary = {}  ## Intent.of(...), set each frame on the player's panel; {} draws nothing
+var look := {}  ## the enemy's livery (Shipgen.style_of: emblem, name line, palette): its emblem is drawn left of the title, its name line leads it
 var threat := 0  ## the enemy's panel: its threat in skulls (1-5), drawn small at the right of the title bar; 0 draws none
 var flash_cells: Array = []  ## the cells of the room just clicked (flash_room), lit while flash_left > 0
 var flash_left := 0.0
@@ -200,7 +202,13 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, PANEL), EDGE, false, 2.0)
 	draw_rect(Rect2(2, 2, PANEL.x - 4, 20), Color(0.12, 0.2, 0.3, 0.7))
 	var skulls_w := Skulls.width(SKULL_K) + 8.0 if threat > 0 else 0.0
-	draw_string(ThemeDB.fallback_font, Vector2(10, 17), title.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, PANEL.x - 20.0 - skulls_w, 13, TEXT)
+	var lead := 0.0
+	var head := title
+	if not look.is_empty():  # in a fight the emblem and the name line say what the ship is (the skull dots stay: feedback after the player has committed)
+		Emblem.draw(self, look["emblem"], Rect2(7.0, 4.0, 16.0, 16.0), look["palette"]["mark"], 1.5)
+		lead = 22.0
+		head = "%s - %s" % [look["line"], title]
+	draw_string(ThemeDB.fallback_font, Vector2(10.0 + lead, 17), head.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, PANEL.x - 20.0 - skulls_w - lead, 13, TEXT)
 	if threat > 0:
 		Skulls.draw(self, Vector2(PANEL.x - 8.0 - Skulls.width(SKULL_K), 12.0), threat, Skulls.color(threat), SKULL_K)
 	if grid.hull.is_empty():

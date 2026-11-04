@@ -11,6 +11,8 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const FixtureShip = preload("res://tests/fixture_ship.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
 
+## Beta 3 enemy identity: every race tech part (data/packs/tech_*, faction_*) enemies now carry is on the bench too (races=0 to leave them out), and the table
+## flags a race gun whose plain hp/s is over 30% above the mean of the base guns of its tier.
 const GUNS := ["laser_mk1", "laser_mk2", "pulse_mk1", "pulse_mk2", "laser_turret_mk1", "rattle_burst_scrap", "shrapnel_cannon_scrap", "bolt_thrower_scrap", "artemis_mk1", "ion_blast_mk1", "heat_lance_neon"]
 var args := {}
 
@@ -24,7 +26,11 @@ func _initialize() -> void:
 	var fac := str(args.get("faction", "lumen"))
 	var stage := int(args.get("stage", 4))
 	var budget := int(args.get("budget", 12000))
-	var guns: Array = str(args["guns"]).split(",") if args.has("guns") else GUNS
+	var guns: Array = str(args["guns"]).split(",") if args.has("guns") else GUNS.duplicate()
+	var races: Array = []
+	if not args.has("guns") and str(args.get("races", "1")) != "0":
+		races = race_guns()
+		guns.append_array(races)
 	var kinds := {"plain": [], "shield2": []}  # the same ships: "plain" has its shield layers stripped before the bench
 	for seed_value in range(1, 600):
 		var spec := "gen:%s:medium:%d:%d:s%d" % [fac, seed_value, budget, stage]
@@ -38,6 +44,7 @@ func _initialize() -> void:
 	print("targets ", kinds)
 	var w := Weapons.new()
 	print("gun | kind | plain hp dealt/s | shield2 hp dealt/s | shield2 layers used/s")
+	var plain := {}
 	for g in guns:
 		var line := "%-22s %-8s" % [g, w.def(g)["kind"]]
 		for k in ["plain", "shield2"]:
@@ -49,9 +56,27 @@ func _initialize() -> void:
 				used += r[1]
 			var m := float(maxi(kinds[k].size(), 1))
 			line += " | %6.3f" % (hp / m / secs)
+			if k == "plain":
+				plain[g] = hp / m / secs
 			if k == "shield2":
 				line += " | %5.3f" % (used / m / secs)
 		print(line)
+	var by_tier := {}
+	for g in GUNS:
+		if plain.has(g):
+			var t := int(Shipgen._comps().def(g).get("tier", 1))
+			by_tier[t] = by_tier.get(t, []) + [plain[g]]
+	for g in races:
+		var t := int(Shipgen._comps().def(g).get("tier", 1))
+		var base: Array = by_tier.get(t, [])
+		if base.is_empty():
+			continue
+		var mean := 0.0
+		for x in base:
+			mean += x
+		mean /= base.size()
+		var ratio: float = plain[g] / maxf(mean, 0.0001)
+		print("%-28s tier %d plain %.3f hp/s, x%.2f of the base guns of its tier (%.3f)%s" % [g, t, plain[g], ratio, mean, "   <-- over 30%" if ratio > 1.3 else ""])
 	quit()
 
 
@@ -89,3 +114,24 @@ func _bench(gun: String, spec: String, secs: float, strip := false) -> Array:
 	if args.has("v"):
 		print("  ", gun, " fired ", fired, " at ", spec, " strip=", strip, " events=", a.events.size())
 	return [tot.y - Structure.totals(target).x, float(hits)]
+
+
+## The weapon ids of the race and faction packs (data/packs/tech_*/weapons.json, faction_*/weapons.json).
+static func race_guns() -> Array:
+	var out: Array = []
+	for dir in DirAccess.get_directories_at("res://data/packs"):
+		if not (dir.begins_with("tech_") or dir.begins_with("faction_")):
+			continue
+		var path := "res://data/packs/%s/weapons.json" % dir
+		if not FileAccess.file_exists(path):
+			continue
+		var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var list = data.get("weapons", data) if data is Dictionary else data
+		if list is Dictionary:
+			for id in list:
+				if not str(id).begins_with("_"):
+					out.append(str(id))
+		elif list is Array:
+			for w in list:
+				out.append(str(w["id"]))
+	return out

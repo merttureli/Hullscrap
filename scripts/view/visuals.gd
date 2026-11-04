@@ -285,7 +285,7 @@ static func _draw_sheet(canvas, sheet, rect: Rect2, def: Dictionary, inst: Dicti
 	if st["glow"] != "":
 		var g = sheet.glow
 		var quad := {"tex": g.texture, "rect": Rect2(at + g.offset * k, Vector2(g.frame) * k), "src": g.region(st["glow_frame"]),
-			"xf": xf, "mod": Color(1, 1, 1, alpha)}
+			"xf": xf, "mod": Color(opts.get("glow_tint", Color.WHITE), alpha)}
 		if opts.has("glow_out"):
 			opts["glow_out"].append(quad)
 		else:

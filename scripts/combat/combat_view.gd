@@ -213,6 +213,7 @@ func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 		_schem[0].bind(session.arena, Session.PLAYER, player.name if player.name != "Ship" else "Your ship")
 		_schem[1].bind(session.arena, Session.ENEMY, enemy.name)
 		_schem[1].threat = session.threat
+		_schem[1].look = enemy.get_meta("style", {})
 		_bar.bind(session, _aim)
 	_show_hud(true)
 	return ""

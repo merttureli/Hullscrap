@@ -15,6 +15,7 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
+const FoeInfo = preload("res://scripts/space/foe_info.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const RAIDER := "res://data/ships/pirate_raider.json"
@@ -166,7 +167,7 @@ func _free(d: Dictionary) -> void:
 	d["fake"].free()
 
 
-func test_the_event_panel_tags_fight_choices_with_the_threat() -> void:
+func test_the_event_panel_tags_fight_choices_with_the_enemy_not_skulls() -> void:
 	var d := _screen()
 	var map: MapView = d["map"]
 	var c: Campaign = map.campaign
@@ -177,14 +178,16 @@ func test_the_event_panel_tags_fight_choices_with_the_threat() -> void:
 	eq(view.size(), 4, "four choices")
 	eq(c.rng.state, rng_before, "rating the fights moved no campaign rng")
 	var foe := c.foe_for(c.current, "pirate" if str(c.node(c.current)["type"]) != "patrol" else "patrol")
-	var tier_skulls := int(Shipgen.threat(Session.load_ship(foe), ship)["skulls"])
-	var raider_skulls := int(Shipgen.threat(Session.load_ship(RAIDER), ship)["skulls"])
-	check(tier_skulls >= 1 and tier_skulls <= 5, "the tier foe has a rating: %d" % tier_skulls)
-	eq(view[0].get("tag", ""), "[Threat %d/5]" % tier_skulls, "a sure fight with the tier foe")
-	eq(view[0].get("threat", 0), tier_skulls, "with its skulls")
+	var tier_line := str(FoeInfo.of(foe)["line"])
+	var raider_line := str(FoeInfo.of(RAIDER)["line"])
+	check(tier_line != "", "the tier foe has a name line: " + tier_line)
+	eq(view[0].get("tag", ""), "[%s]" % tier_line, "a sure fight shows the enemy's name line")
+	check(not view[0].has("threat"), "and no skulls")
 	check(not view[1].has("tag") and not view[1].has("lines"), "a choice with no fight has no tag")
-	eq(view[2].get("tag", ""), "[may fight: Threat %d/5]" % tier_skulls, "a maybe-fight says so")
-	eq(view[3].get("tag", ""), "[Threat %d/5]" % raider_skulls, "a named design is rated too")
+	eq(view[2].get("tag", ""), "[may fight: %s]" % tier_line, "a maybe-fight says so")
+	eq(view[3].get("tag", ""), "[%s]" % raider_line, "a named design is shown too")
+	for v in view:
+		check(not str(v.get("tag", "")).to_lower().contains("threat") and not str(v.get("tag", "")).to_lower().contains("skull") and not str(v.get("tag", "")).contains("/5"), "no skull or number in the tag: " + str(v.get("tag", "")))
 	eq(c.fight_path("tier", str(c.node(c.current)["type"])), foe, "and fight_path hands out that foe")
 	check(c.foes.size() >= 1, "the foe was rolled when the page opened")
 	var lines: Array = view[0]["lines"]
@@ -196,24 +199,19 @@ func test_the_event_panel_tags_fight_choices_with_the_threat() -> void:
 	_free(d)
 
 
-func test_the_panel_keeps_ratings_until_the_ship_changes() -> void:
+func test_the_panel_shows_the_enemy_card_with_her_ship_and_yours() -> void:
 	var d := _screen()
 	var map: MapView = d["map"]
 	map.event_panel.open_event(_event())
-	var kept: int = EventPanel._rated.size()
-	check(kept >= 2, "the tier foe and the raider were rated (%d)" % kept)
-	map.event_panel.open_event(_event())
-	eq(EventPanel._rated.size(), kept, "opening it again rates nothing new")
-	var ship = map.ship()
-	var key := EventPanel.ship_key(ship)
-	eq(EventPanel.ship_key(ship), key, "the ship's key is steady")
-	for uid in ship.components.instances.keys():
-		if ship.components.instances[uid]["id"] == "shield_mk1" or str(ship.components.def(ship.components.instances[uid]["id"]).get("family", "")) == "weapon":
-			ship.components.wreck(uid)
-			break
-	check(EventPanel.ship_key(ship) != key, "losing a part changes it")
-	map.event_panel.open_event(_event())
-	check(EventPanel._rated.size() > kept, "and the foes are rated again")
+	map.event_panel._update_pic()
+	var pic = map.event_panel.foe_pic
+	check(pic != null and pic.visible, "the card is up beside a fight choice")
+	check(pic.foe != null and pic.mine != null, "it holds her ship and yours")
+	check(pic.line != "" and not pic.line.to_lower().contains("skull"), "with her name line: " + pic.line)
+	check(pic._views.size() == 2, "both ships are drawn by the real ship art")
+	map.event_panel.hover = 1
+	map.event_panel._update_pic()
+	check(pic.visible, "a choice with no fight keeps the first fight's card")
 	_free(d)
 
 
@@ -363,7 +361,6 @@ func test_a_poi_rates_the_foe_its_fight_will_send() -> void:
 	eq(map.fight_design("tier"), design, "the map rates the POI's foe while its event is up")
 	eq(map.fight_design("pirate_raider"), RAIDER, "a named design stays a file")
 	map.event_panel.open_event(_event())
-	var skulls := int(Shipgen.threat(Session.load_ship(design), map.ship())["skulls"])
-	eq(map.event_panel.view[0].get("tag", ""), "[Threat %d/5]" % skulls, "so the tag on its choice rates that foe")
+	eq(map.event_panel.view[0].get("tag", ""), "[%s]" % str(FoeInfo.of(design)["line"]), "so the tag on its choice names that foe")
 	map._forget_poi()
 	_free(d)
