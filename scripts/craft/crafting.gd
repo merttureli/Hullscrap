@@ -17,6 +17,7 @@ var recipes := {}    # id -> {id, output {item, count}, materials, fab_level, to
 var order: Array[String] = []
 var materials := {}  # id -> {id, name, color, rarity}
 var known := {}      # recipe id -> true; the blueprints the player has (a set)
+var seen := {}       # recipe id -> true; the known blueprints the player has looked at on the Blueprints tab (the rest are NEW); saved
 var queue: Array = []  # the fabricator's FIFO jobs: {recipe, progress (seconds of work done), paid (materials spent)}
 var paused := false  ## the first job could not run during the last tick (fabricator offline or too weak); not saved
 var others := {}  ## station id -> its FIFO jobs, for every station but the fabricator (the smelter); read through queue_of()
@@ -25,6 +26,7 @@ var working := {}  ## part uid -> true: the smelters that worked during the last
 var lead := {}  ## station id -> uid of the part running that station's queue during the last tick (crew man it: jobs.gd); not saved
 var _start_known: Array[String] = []
 var _item_names := {}  # item id -> name (data/items.json)
+var _item_defs := {}  # item id -> its row of data/items.json
 
 
 ## Load the recipes and materials. Resets the known blueprints to `start_known` and empties the queue.
@@ -41,11 +43,13 @@ func load(recipes_path: String, materials_path: String) -> void:
 	_clear_stations()
 	_start_known.clear()
 	_item_names.clear()
+	_item_defs.clear()
 	if FileAccess.file_exists(ITEMS_PATH):
 		var it = Content.read(ITEMS_PATH)
 		if it is Dictionary and it.get("items") is Array:
 			for d in it["items"]:
 				_item_names[str(d["id"])] = str(d.get("name", d["id"]))
+				_item_defs[str(d["id"])] = d
 	for d in m["materials"]:
 		materials[d["id"]] = d
 	for d in r["recipes"]:
@@ -65,6 +69,7 @@ func load(recipes_path: String, materials_path: String) -> void:
 		assert(recipes.has(id), "start_known has an unknown recipe: " + str(id))
 		known[str(id)] = true
 		_start_known.append(str(id))
+	mark_seen()
 
 
 ## Forget the unlocked blueprints and empty the queue, as after load().
@@ -72,6 +77,7 @@ func reset() -> void:
 	known.clear()
 	for id in _start_known:
 		known[id] = true
+	mark_seen()
 	queue.clear()
 	_clear_stations()
 
@@ -87,6 +93,11 @@ func name_of(id: String, components = null) -> String:
 	if materials.has(id):
 		return str(materials[id].get("name", id))
 	return str(_item_names.get(id, id))
+
+
+## The row of item `id` in data/items.json ({} for a part or a material).
+func item_def(id: String) -> Dictionary:
+	return _item_defs.get(id, {})
 
 
 func has(id: String) -> bool:
@@ -126,6 +137,25 @@ func unlock(id: String) -> bool:
 		return false
 	known[id] = true
 	return true
+
+
+## Everything known so far has been looked at: no blueprint is NEW.
+func mark_seen() -> void:
+	seen = known.duplicate()
+
+
+## The known blueprints not looked at yet (NEW), in recipe order.
+func fresh() -> Array[String]:
+	var out: Array[String] = []
+	for id in order:
+		if known.has(id) and not seen.has(id):
+			out.append(id)
+	return out
+
+
+## The line that says a blueprint was learned and where to make it: "Blueprint: Laser Mk2. Make it at the fabricator (C)."
+func learned_line(id: String, components = null) -> String:
+	return "Blueprint: %s. Make it at the %s (C)." % [name_of(str(def(id)["output"]["item"]), components), str(STATIONS.get(station_of(id), "fabricator")).to_lower()]
 
 
 ## Why `recipe_id` cannot be crafted now, or "" when it can. `fab` is the station's result (workshop.gd level_of or
@@ -219,7 +249,9 @@ func cancel(index: int, inventory, station := FABRICATOR) -> bool:
 func to_dict() -> Dictionary:
 	var ids_known: Array = known.keys()
 	ids_known.sort()
-	var d := {"version": VERSION, "known": ids_known, "queue": _jobs_out(queue)}
+	var ids_seen: Array = seen.keys()
+	ids_seen.sort()
+	var d := {"version": VERSION, "known": ids_known, "queue": _jobs_out(queue), "seen": ids_seen}  # "seen" is optional when reading: a save without it has seen everything
 	var extra := {}  # optional, like a save's belts: only written when another station has work
 	for st in others:
 		if not others[st].is_empty():
@@ -236,6 +268,7 @@ func load_dict(d: Dictionary) -> String:
 	if r.has("error"):
 		return r["error"]
 	known = r["known"]
+	seen = r["seen"]
 	queue = r["queue"]
 	others = r["queues"]
 	paused = false
@@ -259,6 +292,12 @@ func _read(d: Dictionary) -> Dictionary:
 		if not recipes.has(str(id)):
 			return {"error": "unknown recipe " + str(id)}
 		fresh_known[str(id)] = true
+	var fresh_seen := fresh_known.duplicate()
+	if d.has("seen") and d["seen"] is Array:
+		fresh_seen = {}
+		for id in d["seen"]:
+			if fresh_known.has(str(id)):
+				fresh_seen[str(id)] = true
 	var fab := _read_jobs(d.get("queue", []), FABRICATOR)
 	if fab.has("error"):
 		return fab
@@ -273,7 +312,7 @@ func _read(d: Dictionary) -> Dictionary:
 		if r.has("error"):
 			return r
 		fresh_others[str(st)] = r["jobs"]
-	return {"known": fresh_known, "queue": fab["jobs"], "queues": fresh_others}
+	return {"known": fresh_known, "seen": fresh_seen, "queue": fab["jobs"], "queues": fresh_others}
 
 
 ## Parse one saved queue of `station`: {jobs}, or {error}.

@@ -434,7 +434,7 @@ func _draw_result(lay: Dictionary) -> void:
 static func tone_of(line: String) -> int:
 	if line.contains("is lost"):
 		return -1
-	if line.contains("joins") or line.contains("learned") or line.begins_with("Log ") or line.begins_with("On the map") or line.begins_with("Unlocked") or line.begins_with("Landmark"):
+	if line.contains("joins") or line.contains("learned") or line.begins_with("Blueprint:") or line.begins_with("Log ") or line.begins_with("On the map") or line.begins_with("Unlocked") or line.begins_with("Landmark"):
 		return 1
 	var re := RegEx.new()
 	re.compile("[+-][0-9]+")

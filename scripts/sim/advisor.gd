@@ -21,7 +21,7 @@ const WORDS_PATH := "res://data/advisor.json"
 const NUMBERS_PATH := "res://data/progression.json"  ## written by the balance track; missing until it lands (the `p:` clauses are then left out)
 ## The checks a goal may use (docs/audit/progression.md section 7): what measure() computes.
 const VOCAB: Array[String] = ["intakes", "guns", "layers", "fab", "power", "margin", "accel_ratio", "plates", "medbays", "known",
-	"fuel_margin", "credits_over_toll", "damaged_blocks"]
+	"fuel_margin", "credits_over_toll", "damaged_blocks", "smelters"]
 const MAX_KEYS: Array[String] = ["damaged_blocks"]  ## met when the value is AT MOST the number (the rest: at least)
 ## The keys of a stage's row and of `warn` in progression.json (the format the balance track writes).
 const STAGE_KEYS: Array[String] = ["power_floor", "power_median", "warden", "enemy", "guns", "layers", "intakes", "fab", "plates", "accel_ratio",
@@ -57,6 +57,7 @@ var _run := -1  # the seed of the run being followed
 var _clock := 0.0  # seconds since the last evaluation
 var _prev := {}  # what the last look saw, for the tips that wait for a change ({} before the first look, and after the ship was swapped)
 var _jumps := 0  # the campaign's jump counter at the last look (state())
+var armed := {}  ## extra goal id -> true: its `when` came true once, so it stays on the list until met (kept in the profile)
 var _met := {}  # "<stage>:<goal id>" -> was it met at the last look: a goal is news when it goes from false to true
 var _hops_key := ""  # the cache key of the jump counts below
 var _hops := {"exit": -1, "station": -1}
@@ -174,6 +175,11 @@ func alternatives(check, at_stage: int) -> Array:
 ## holes of the words are filled with the first alternative's numbers.
 func goals(at_stage: int) -> Array:
 	var out := []
+	for g in words.get("extra_goals", []):  # side goals, armed by a `when` (advisor.json): listed first while armed
+		if armed.has(str(g["id"])):
+			var xa := alternatives(g["check"], at_stage)
+			if not xa.is_empty():
+				out.append({"id": str(g["id"]), "title": str(g["title"]), "why": str(g.get("why", "")), "alts": xa})
 	for g in words.get("stages", {}).get(str(at_stage), []):
 		var alts := alternatives(g["check"], at_stage)
 		if alts.is_empty():
@@ -348,6 +354,13 @@ static func measure(ship, campaign, base_now := {}) -> Dictionary:
 	v["fuel"] = ship.inventory.count("fuel")
 	v["credits"] = ship.inventory.count("credits")
 	v["scrap"] = ship.inventory.count("scrap")
+	v["smelters"] = 0  # smelters placed or held in the cargo (a crafted Slag Pot counts: the goal says "craft")
+	for uid in comps.instances:
+		if str(comps.def(comps.instances[uid]["id"]).get("family", "")) == "smelter":
+			v["smelters"] += 1
+	for k in ship.inventory.counts:
+		if comps.has(str(k)) and str(comps.def(str(k)).get("family", "")) == "smelter":
+			v["smelters"] += ship.inventory.count(str(k))
 	v["structure"] = Structure.structure_fraction(ship)
 	v["stage"] = int(campaign.stage) if campaign != null else 0
 	v["toll"] = 0
@@ -531,7 +544,7 @@ static func tips_seen(prof) -> Array:
 
 ## What of this run to keep in the profile (profile.ledger_run), so a Continue picks up where the Ledger was.
 func state() -> Dictionary:
-	return {"seed": _run, "jumps": _jumps, "base": base, "warned": warned, "announced": announced.keys()}
+	return {"seed": _run, "jumps": _jumps, "base": base, "warned": warned, "announced": announced.keys(), "armed": armed.keys()}
 
 
 ## Follow campaign `c` with `ship`: a new run starts the Ledger afresh (its start measured now); the run the profile remembers goes on.
@@ -543,6 +556,7 @@ func follow(ship, c) -> void:
 	_met = {}
 	_jumps = 0
 	warning = {}
+	armed = {}
 	tip_queue.clear()
 	var kept = profile.ledger_run if profile != null else {}
 	if kept is Dictionary and int(kept.get("seed", -1)) == _run and int(kept.get("jumps", 0)) <= int(c.jumps) and kept.get("base") is Dictionary:
@@ -551,6 +565,8 @@ func follow(ship, c) -> void:
 		announced = {}
 		for k in kept.get("announced", []):
 			announced[str(k)] = true
+		for k in kept.get("armed", []):
+			armed[str(k)] = true
 	else:
 		base = baseline(ship)
 		warned = {}
@@ -569,6 +585,13 @@ func update(ship, campaign, ctx := {}) -> void:
 		values = measure(ship, campaign, base)
 		stage = int(values["stage"])
 		_jumps = int(campaign.jumps)
+		for g in words.get("extra_goals", []):  # arm a side goal the first time its `when` holds while it is unmet
+			var xid := str(g["id"])
+			if not armed.has(xid) and (g.get("when", {}) as Dictionary).keys().all(func(k): return float(values.get(k, 0.0)) >= float(g["when"][k])):
+				var xalts := alternatives(g["check"], stage)
+				if not xalts.is_empty() and not goal_met({"alts": xalts}, values):
+					armed[xid] = true
+					dirty = true
 		for g in goals(stage):
 			var key := "%d:%s" % [stage, g["id"]]
 			var met := goal_met(g, values)

@@ -29,7 +29,7 @@ const COLUMNS: Array = [
 			["G", "Use the selected crew member's special ability (in a fight too)"],
 			["B", "Build mode / play mode"],
 			["O / P", "Oxygen / power overlay"],
-			["Wheel", "Zoom"],
+			["Wheel", "Zoom (build: MMB drag, arrows pan)"],
 			["Ctrl+S / Ctrl+L", "Save / load the ship and the run"],
 			["Ctrl+M", "Mute / unmute all sound"],
 			["N", "Play mode: pick another ship"],

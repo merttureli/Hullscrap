@@ -93,6 +93,7 @@ static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 	for id in blueprints(profile):
 		if ship.crafting.unlock(id):
 			lines.append("Known from the start: " + ship.crafting.name_of(str(ship.crafting.def(id)["output"]["item"]), ship.components))
+	ship.crafting.mark_seen()  # the starting blueprints are not NEW
 	ship.skin = str(Unlocks.payload_of(str(pick["skin"])).get("skin", "")) if pick["skin"] != "" else ""
 	if add_drone(ship):
 		lines.append("A repair drone is aboard: it mends, fights fires and reloads by itself, on 1 power")

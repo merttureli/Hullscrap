@@ -29,7 +29,7 @@
   "known": "Blueprints",
   "fuel_margin": "Fuel to spare",
   "credits_over_toll": "Credits over the toll",
-  "damaged_blocks": "Damaged blocks"
+  "damaged_blocks": "Damaged blocks", "smelters": "Smelters"
  },
  "keywords": {
   "intake": {
@@ -85,6 +85,9 @@
    "hover": "Slow, but flies through shields."
   }
  },
+ "extra_goals": [
+  {"id": "x_smelter", "title": "Craft a Slag Pot: it turns scrap into steel", "why": "Craft it at the fabricator (C), then place it in build mode (B).", "check": {"smelters": 1}, "when": {"scrap": 101}}
+ ],
  "stages": {
   "1": [
    {

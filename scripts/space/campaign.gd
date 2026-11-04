@@ -1223,7 +1223,7 @@ func _buy_blueprint(ship, id: String, item: String, each: int) -> Dictionary:
 	ship.inventory.add("credits", -each)
 	ship.crafting.unlock(recipe)
 	_note_sold(id, item, 1)
-	return {"ok": true, "text": "Learned the %s blueprint for %d credits." % [name, each]}
+	return {"ok": true, "text": ship.crafting.learned_line(recipe, ship.components)}
 
 
 ## `n` of `item` left small shop `id` (stations do not run out).
