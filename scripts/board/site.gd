@@ -38,6 +38,7 @@ var seed_value := 0
 var site_name := ""
 var theme := ""  ## the theme it is dressed in (themes.gd, data/boarding.json `themes`), "" for the plain site
 var faction := ""
+var region := ""  ## the id of the region the site lies in ("" in a test): its race gear is likelier in its lockers (boarding.json `regional`)
 var ok := false  ## the site was built (a rectangle always can be, so it is false only for a kind that does not exist)
 var attempt := 0  ## the try that worked (0 = the first)
 var grid: ShipGrid  ## drawn: floor, wall, door
@@ -89,6 +90,7 @@ static func make(p_seed: int, p_kind: String, opts := {}):
 		s.faction = "clans"
 	s.parts = opts.get("parts", []).duplicate()
 	s.theme = str(opts.get("theme", ""))
+	s.region = str(opts.get("region", ""))
 	if not Themes.ids().has(s.theme):
 		s.theme = ""
 	for i in ATTEMPTS:

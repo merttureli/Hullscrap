@@ -16,7 +16,7 @@
 	"debris": {"scrap_chunk_m": 1.2, "copper_coil": 1.5},
 	"pois": {"mining_field": 2.0},
 	"ambient": {"trader": 3, "pirate": 3, "patrol": 1},
-	"stock": {"reactor_scrap_mk1": 140, "engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "shield_scrap_mk1": 110, "shrapnel_cannon_scrap": 160, "bolt_thrower_scrap": 150, "radiator": 40, "basalt_magma_spitter": 300, "basalt_quarry_driver": 500, "basalt_pumice_flak": 280, "basalt_vacuum_forge": 200, "basalt_stonehide_bay": 160, "basalt_gravity_anchor": 190},
+	"stock": {"reactor_scrap_mk1": 140, "engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "shield_scrap_mk1": 110, "shrapnel_cannon_scrap": 160, "bolt_thrower_scrap": 150, "radiator": 40, "basalt_magma_spitter": 300, "basalt_quarry_driver": 500, "basalt_pumice_flak": 280, "basalt_vacuum_forge": 200, "basalt_stonehide_bay": 160, "basalt_gravity_anchor": 190, "stone_plates": 240},
 	"recruit": {"basalt": 8, "human": 1, "grundl": 1},
 	"enemies": "rustfangs",
 	"hazards": ["debris_surge"],

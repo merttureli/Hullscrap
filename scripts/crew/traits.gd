@@ -41,6 +41,11 @@ extends RefCounted
 ## - `low_pressure_heal`: hp a second they heal in a room with less than LOW_AIR of its air (low_pressure_heal_rate, Jobs). Amounts add.
 ## - `haggler`: the fraction the prices of a station fall by while they are aboard and up; the best haggler aboard counts (haggle, Campaign.price). Amounts add.
 ## - `loot_bonus`: extra rows in a salvage pick (Salvage.picks_for) and extra rolls of a loot table (a crate, DriftDebris) while they are aboard and up; the best one aboard counts (loot_bonus). Amounts add.
+## - `walk_mult`: factor on their walk speed aboard and on foot (Jobs sets it in CrewMember.speed_mod; Boarding on foot). Worn gear.
+## - `no_knock`: the crew knock of a collision does not hurt them (Collisions._knock).
+## - `heat_proof`: a hot room does not slow them (heat_factor ignores heat_speed.hot).
+## - `sell_bonus`: the fraction more credits the ship's sales fetch while they are aboard and up (sell_bonus, Campaign.sell_price); the best one aboard counts.
+## - `scrap_mult`: factor on the scrap they get clearing a wreck or opening a container on foot.
 ## - `mimic`: while in a room with another crew member who is up, they copy the best trait of that room's others (mimic_pick: the trait whose best key is first in MIMIC_ORDER; a trait of the body (BODY_KEYS) or of another mimic is never copied, nor one they have already); Jobs.tick sets CrewMember.mimicking (update_mimics) and of() merges it.
 ## The result is shared and cached: read it, do not change it.
 
@@ -53,9 +58,9 @@ const LEGACY_PATH := "res://data/species.json"  ## its `traits` table is the old
 const DAMAGE: Array[String] = ["fire", "no_air", "melee", "ranged", "ion"]
 const WORK: Array[String] = ["repair", "extinguish", "breach", "man", "restock", "craft", "heal_others"]
 const HEAL: Array[String] = ["bed", "medbay"]
-const FLAGS: Array[String] = ["mechanical", "vacuum_walk", "no_tools", "reveal_enemy", "no_suit", "mimic"]  ## the keys that are true or false
+const FLAGS: Array[String] = ["mechanical", "vacuum_walk", "no_tools", "reveal_enemy", "no_suit", "mimic", "no_knock", "heat_proof"]  ## the keys that are true or false
 const OPEN: Array[String] = ["line_affinity"]  ## the groups whose sub-keys are not a fixed list: line ids (data/lines.json) -> a number
-const AMOUNTS: Array[String] = ["counter_melee", "low_pressure_heal", "haggler", "loot_bonus"]  ## the plain numbers that add up
+const AMOUNTS: Array[String] = ["counter_melee", "low_pressure_heal", "haggler", "loot_bonus", "sell_bonus"]  ## the plain numbers that add up
 const THIN_AIR := 0.3  ## a room with less than this share of its air is "thin" for vacuum_speed
 const LOW_AIR := 0.5  ## a room with less than this share of its air is "low pressure" for low_pressure_heal
 const BODY_KEYS: Array[String] = ["body", "hp_mult", "speed_mult"]  ## the keys that are fixed when the species is set: a trait with one is a body trait, which a mimic cannot copy
@@ -64,7 +69,7 @@ const MIMIC_ORDER: Array[String] = ["revive_once", "hull_mend", "split_on_death"
 	"line_affinity", "work_mult", "swarm", "heat_speed", "vacuum_speed", "heal_mult", "low_pressure_heal", "mining_mult", "haggler", "loot_bonus", "melee_mult", "ranged_mult", "o2_use", "suffocate_mult"]
 const SUIT_TRAITS: Array[String] = ["suit"]  ## the gear traits that are a suit or armour: no_suit refuses them (add the armour ones here)
 const BODIES: Array[int] = [1, 2]  ## the sizes `body` may have
-const LIMITS := {"mining_mult": "above 0", "haggler": "from 0 to 1", "loot_bonus": "a whole number from 0", "low_pressure_heal": "from 0"}  ## the plain numbers with a range: what it is said to be in a problem
+const LIMITS := {"mining_mult": "above 0", "haggler": "from 0 to 1", "loot_bonus": "a whole number from 0", "low_pressure_heal": "from 0", "sell_bonus": "from 0"}  ## the plain numbers with a range: what it is said to be in a problem
 ## Every key a trait may use -> its sub-keys ([] for a plain number or flag).
 const KEYS := {
 	"hp_mult": [], "speed_mult": [], "o2_use": [], "suffocate_mult": [],
@@ -75,10 +80,10 @@ const KEYS := {
 	"body": [], "reveal_enemy": [], "heat_speed": ["cold", "hot", "below", "above"], "vacuum_walk": [], "no_tools": [],
 	"hull_mend": ["rate", "seal"],
 	"revive_once": ["after", "hp"], "line_affinity": [], "split_on_death": ["reform_s"], "counter_melee": [], "no_suit": [], "vacuum_speed": [],
-	"mining_mult": [], "low_pressure_heal": [], "haggler": [], "loot_bonus": [], "mimic": [],
+	"mining_mult": [], "low_pressure_heal": [], "haggler": [], "loot_bonus": [], "mimic": [], "walk_mult": [], "no_knock": [], "heat_proof": [], "sell_bonus": [], "scrap_mult": [],
 }
 const META: Array[String] = ["id", "name", "blurb", "notes", "override", "reason"]  ## the fields of a trait entry that are not keys
-const FACTORS: Array[String] = ["hp_mult", "speed_mult", "o2_use", "suffocate_mult", "melee_mult", "ranged_mult", "vacuum_speed", "mining_mult"]
+const FACTORS: Array[String] = ["hp_mult", "speed_mult", "o2_use", "suffocate_mult", "melee_mult", "ranged_mult", "vacuum_speed", "mining_mult", "walk_mult", "scrap_mult"]
 const FACTOR_GROUPS: Array[String] = ["damage_taken", "work_mult", "heal_mult"]
 const GROUPS: Array[String] = ["aura", "station", "swarm", "dries_out", "heat_speed", "hull_mend", "revive_once", "split_on_death"]  ## the groups with their own merge rule per sub-key
 ## The old `mult` stats of a trait, as keys (repair_time is a time factor: work_mult repair and breach are 1 / it).
@@ -215,7 +220,7 @@ static func _fresh() -> Dictionary:
 		"heat_speed": {"cold": 1.0, "hot": 1.0, "below": -INF, "above": INF},
 		"hull_mend": {"rate": 0.0, "seal": 0.0},
 		"revive_once": {"after": 0.0, "hp": 0.0}, "split_on_death": {"reform_s": 0.0}, "line_affinity": {},
-		"counter_melee": 0.0, "vacuum_speed": 1.0, "mining_mult": 1.0, "low_pressure_heal": 0.0, "haggler": 0.0, "loot_bonus": 0.0,
+		"counter_melee": 0.0, "vacuum_speed": 1.0, "mining_mult": 1.0, "low_pressure_heal": 0.0, "haggler": 0.0, "loot_bonus": 0.0, "walk_mult": 1.0, "scrap_mult": 1.0, "sell_bonus": 0.0,
 	}
 	for flag in FLAGS:
 		out[flag] = false
@@ -356,7 +361,7 @@ static func heat_factor(t: Dictionary, heat: float) -> float:
 	var f := 1.0
 	if heat < float(h["below"]):
 		f *= float(h["cold"])
-	if heat > float(h["above"]):
+	if heat > float(h["above"]) and not bool(t["heat_proof"]):
 		f *= float(h["hot"])
 	return f
 
@@ -408,6 +413,21 @@ static func _best_aboard(ship, key: String) -> float:
 ## The fraction the prices of a station fall by for `ship`: the best haggler aboard (up) counts; 0 with none.
 static func haggle(ship) -> float:
 	return _best_aboard(ship, "haggler")
+
+
+## The factor on the scrap a wreck gives when it is cleared, for `ship`: the best scrap_mult among the crew who are up; 1.0 with none.
+static func scrap_mult(ship) -> float:
+	var best := 1.0
+	if ship != null:
+		for m in ship.crew:
+			if not m.is_down():
+				best = maxf(best, float(of(m)["scrap_mult"]))
+	return best
+
+
+## The extra credits a sale fetches (a fraction) for `ship`: the best sell_bonus aboard (up); 0 with none.
+static func sell_bonus(ship) -> float:
+	return _best_aboard(ship, "sell_bonus")
 
 
 ## The extra salvage rows and loot-table rolls `ship` gets: the best loot_bonus aboard (up) counts, rounded; 0 with none.

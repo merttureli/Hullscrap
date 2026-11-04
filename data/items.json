@@ -24,6 +24,20 @@
     {"id": "salvage_rig_mk3", "name": "Salvage Rig Mk III", "kind": "mod", "slot": "kit", "blurb": "A harness of clamps and a loader's patience. Whatever you open comes out heavier."},
     {"id": "overcharge_coil_mk1", "name": "Overcharge Coil Mk I", "kind": "mod", "slot": "kit", "blurb": "A coil wound round the grip. The gun hates it and hits harder for it."},
     {"id": "overcharge_coil_mk2", "name": "Overcharge Coil Mk II", "kind": "mod", "slot": "kit", "blurb": "A coil wound round the grip. The gun hates it and hits harder for it."},
-    {"id": "overcharge_coil_mk3", "name": "Overcharge Coil Mk III", "kind": "mod", "slot": "kit", "blurb": "A coil wound round the grip. The gun hates it and hits harder for it."}
+    {"id": "overcharge_coil_mk3", "name": "Overcharge Coil Mk III", "kind": "mod", "slot": "kit", "blurb": "A coil wound round the grip. The gun hates it and hits harder for it."},
+    {"id": "rigger_harness", "name": "Rigger's Harness", "kind": "gear", "blurb": "Webbing, clips and a tool for every hand. Repairs go faster aboard, and door locks give up sooner on foot."},
+    {"id": "firefighter_coat", "name": "Firefighter's Coat", "kind": "gear", "blurb": "Layered foil and a reflective hem. Takes half the fire and puts it out faster; lighter than a Salamander Suit."},
+    {"id": "medic_sash", "name": "Medic's Sash", "kind": "gear", "blurb": "A white sash with a red cross, and a pouch of everything. Heals the room it stands in; G patches up the people beside you."},
+    {"id": "jump_pack", "name": "Jump Pack", "kind": "gear", "blurb": "Twin thrusters on a strap. G throws you four cells the way you aim, and the pack needs a few seconds to get its breath back."},
+    {"id": "chitin_plate", "name": "Chitin Plate", "kind": "special", "blurb": "Kett shell-work, riveted over a work harness. Heavy armour that bites back at whatever hits it. G braces for a few seconds."},
+    {"id": "spore_mantle", "name": "Spore Mantle", "kind": "special", "blurb": "A living cloak of spore caps. Slowly mends the allies near its wearer, on foot and aboard."},
+    {"id": "prism_cloak", "name": "Prism Cloak", "kind": "special", "blurb": "Cut glass on a cloak. Throws back a share of energy bolts on foot, and softens ion hits aboard."},
+    {"id": "ballast_rig", "name": "Ballast Rig", "kind": "special", "blurb": "Grundl freight weights on a frame: very heavy armour, no knocking its wearer over, and no hurry."},
+    {"id": "tank_harness", "name": "Tank Harness", "kind": "special", "blurb": "A Mire breather tank on a light harness: sealed against bad air with no suit to cook in."},
+    {"id": "forge_apron", "name": "Forge Apron", "kind": "special", "blurb": "Emberkin leather and ember rivets. Immune to fire, and a hot room does not slow its wearer."},
+    {"id": "traders_coat", "name": "Trader's Coat", "kind": "special", "blurb": "A Fenn coat with brass buttons and many pockets. Shops pay a little more for what you sell while it is aboard."},
+    {"id": "stone_plates", "name": "Stone Plates", "kind": "special", "blurb": "Basalt slabs strapped on in a row. Big armour, a slow walk."},
+    {"id": "scrap_gauntlets", "name": "Scrap Gauntlets", "kind": "special", "blurb": "Gauntling fists welded from a wreck. Melee hits harder, and a wreck gives up more scrap."},
+    {"id": "marine_plate", "name": "Marine Plate", "kind": "special", "blurb": "Human service plate in olive drab. Balanced armour, and a spare magazine holds more rounds."}
   ]
 }

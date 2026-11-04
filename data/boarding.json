@@ -51,10 +51,10 @@
 		"_doc": "Loadouts (B4, scripts/board/kit.gd). The airlock's loadout screen sets, for the soldier and each follower, weapon_slots weapons (their species' sidearm, or a hand weapon of the hold: combat.hand_items), one body gear of `bodies` and mod_slots mods (data/mods.json). What a person wears has left the hold, and goes back when it is taken off. A follower fights with the first weapon they carry.",
 		"weapon_slots": 2,
 		"mod_slots": 2,
-		"bodies": ["basic_armor", "eva_suit", "exosuit", "salamander_suit", "heat_suit"]
+		"bodies": ["basic_armor", "eva_suit", "exosuit", "salamander_suit", "heat_suit", "rigger_harness", "firefighter_coat", "medic_sash", "jump_pack", "chitin_plate", "spore_mantle", "prism_cloak", "ballast_rig", "tank_harness", "forge_apron", "traders_coat", "stone_plates", "scrap_gauntlets", "marine_plate"]
 	},
 	"looks": {
-		"_doc": "What body gear looks like on a person (scripts/crew/person_drawer.gd). art: the id of its sprites in art/gear/ (made for the human rig; a species whose rig has the human's anchors wears them, any other rig gets the flat shapes below). The flat look, the fallback (draw_gear): shapes over the body and under the head. Source px (16 to a cell) in the body's frame: x is the person's right, y is back (forward is -y), the middle is between the shoulders; the pieces turn with the body. color: the main tone, dark and light: the edge and the highlight (from color when missing). pieces, drawn in order: shape (circle: at, r; rect: at (top-left), size; ring: at, r, an outline), tone (main, dark, light or a #hex; main when missing), alpha, edge (true: an outline in the dark tone), over_head (true: drawn over the head, as a helmet is).",
+		"_doc": "What body gear looks like on a person (scripts/crew/person_drawer.gd). mark: the glyph of its icon (board_cards.gd _body_icon); art: the id of its sprites in art/gear/ (made for the human rig; a species whose rig has the human's anchors wears them, any other rig gets the flat shapes below). The flat look, the fallback (draw_gear): shapes over the body and under the head. Source px (16 to a cell) in the body's frame: x is the person's right, y is back (forward is -y), the middle is between the shoulders; the pieces turn with the body. color: the main tone, dark and light: the edge and the highlight (from color when missing). pieces, drawn in order: shape (circle: at, r; rect: at (top-left), size; ring: at, r, an outline), tone (main, dark, light or a #hex; main when missing), alpha, edge (true: an outline in the dark tone), over_head (true: drawn over the head, as a helmet is).",
 		"basic_armor": {"art": "combat_vest", "color": "#8d96a3", "dark": "#474e59", "light": "#b9c1cc", "pieces": [
 			{"shape": "circle", "at": [-8.5, -1.0], "r": 4.6, "edge": true},
 			{"shape": "circle", "at": [8.5, -1.0], "r": 4.6, "edge": true},
@@ -92,7 +92,77 @@
 			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
 			{"shape": "rect", "at": [-6.0, -4.0], "size": [5.0, 3.0], "tone": "light"},
 			{"shape": "rect", "at": [-6.0, 0.0], "size": [12.0, 1.4], "tone": "light"},
-			{"shape": "rect", "at": [-3.0, -3.5], "size": [6.0, 2.0], "tone": "#3a4654", "over_head": true}]}
+			{"shape": "rect", "at": [-3.0, -3.5], "size": [6.0, 2.0], "tone": "#3a4654", "over_head": true}]},
+		"rigger_harness": {"art": "rigger_harness", "mark": "straps", "color": "#c9772a", "dark": "#5a3410", "light": "#f2a24a", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"firefighter_coat": {"art": "firefighter_coat", "mark": "stripes", "color": "#d9b23a", "dark": "#8a6a14", "light": "#f2d36a", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"medic_sash": {"art": "medic_sash", "mark": "cross", "color": "#f1f4f6", "dark": "#9aa5b0", "light": "#ffffff", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"jump_pack": {"art": "jump_pack", "mark": "pack", "color": "#7c8591", "dark": "#363c45", "light": "#aab3bf", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"chitin_plate": {"art": "chitin_plate", "mark": "spikes", "color": "#8a5a1e", "dark": "#3a210a", "light": "#d89a3c", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"spore_mantle": {"art": "spore_mantle", "mark": "dots", "color": "#5f8a3c", "dark": "#2c4a1a", "light": "#9acb5a", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"prism_cloak": {"art": "prism_cloak", "mark": "gem", "color": "#8f7ae0", "dark": "#3b2f7a", "light": "#e8f0ff", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"ballast_rig": {"art": "ballast_rig", "mark": "blocks", "color": "#5b6068", "dark": "#2a2d33", "light": "#8a9099", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"tank_harness": {"art": "tank_harness", "mark": "pack", "color": "#2f9d8f", "dark": "#145149", "light": "#7fe0d0", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"forge_apron": {"art": "forge_apron", "mark": "dots", "color": "#4a2f22", "dark": "#1c0f08", "light": "#7a5238", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"traders_coat": {"art": "traders_coat", "mark": "buttons", "color": "#2e6f73", "dark": "#143a3e", "light": "#5fb0b4", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"stone_plates": {"art": "stone_plates", "mark": "blocks", "color": "#8b8f94", "dark": "#3e4146", "light": "#c1c5c9", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"scrap_gauntlets": {"art": "scrap_gauntlets", "mark": "spikes", "color": "#a0a6ad", "dark": "#4d5258", "light": "#d4d9de", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]},
+		"marine_plate": {"art": "marine_plate", "mark": "stripes", "color": "#5e6b48", "dark": "#2c3322", "light": "#8f9d70", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-5.5, -4.5], "size": [11.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 2.0], "tone": "light"}]}
 	},
 	"armor": {
 		"_doc": "The share of the damage a person takes aboard, by the body gear they wear (1.0 = none). The EVA suit and the heat suit take no damage off, but they are sealed (`gear`): their line says so (kit.gd body_line).",
@@ -100,7 +170,21 @@
 		"exosuit": 0.65,
 		"salamander_suit": 0.9,
 		"eva_suit": 1.0,
-		"heat_suit": 1.0
+		"heat_suit": 1.0,
+		"rigger_harness": 0.95,
+		"firefighter_coat": 0.88,
+		"medic_sash": 1.0,
+		"jump_pack": 1.0,
+		"chitin_plate": 0.7,
+		"spore_mantle": 0.9,
+		"prism_cloak": 0.95,
+		"ballast_rig": 0.55,
+		"tank_harness": 0.9,
+		"forge_apron": 0.85,
+		"traders_coat": 0.97,
+		"stone_plates": 0.6,
+		"scrap_gauntlets": 0.95,
+		"marine_plate": 0.75
 	},
 	"gear": {
 		"_doc": "Body gear against bad air on foot (scripts/board/air.gd). sealed: a person who wears it breathes in a room whose pressure is under crew.json air.breath_ok (they take no no-air damage there, and a follower in it follows into an airless room). Suits are sealed; plain armour is not. Anyone with the vacuum_walk trait, no breath (o2_use 0) or the `suit` trait is as safe as a sealed suit.",
@@ -108,7 +192,21 @@
 		"eva_suit": {"sealed": true},
 		"exosuit": {"sealed": true},
 		"heat_suit": {"sealed": true},
-		"salamander_suit": {"sealed": true}
+		"salamander_suit": {"sealed": true},
+		"rigger_harness": {"grants": ["gear_rigger"], "hack": 1.4, "sub": "5% less dmg, rigger", "line": "Repairs 30% faster aboard; hacks doors 40% faster on foot.", "sealed": false},
+		"firefighter_coat": {"grants": ["gear_firefighter"], "sub": "12% less, fireproof", "line": "Half fire damage; puts out fires 50% faster. Lighter than the Salamander Suit.", "sealed": false},
+		"medic_sash": {"grants": ["gear_medic"], "revive": 1.6667, "active": "patch", "sub": "Heal aura, G: patch", "line": "A small heal aura in its room aboard; revives 40% faster on foot.", "sealed": false},
+		"jump_pack": {"active": "dash", "sub": "G: dash", "line": "Not sealed.", "sealed": false},
+		"chitin_plate": {"grants": ["gear_chitin"], "active": "brace", "sub": "30% less, thorns", "line": "Melee attackers take 4 damage back; walks 5% slower.", "sealed": false},
+		"spore_mantle": {"grants": ["gear_spore"], "ally_heal": 0.8, "ally_r": 3.5, "sub": "10% less, heal aura", "line": "Slowly heals allies near you on foot and aboard.", "sealed": false},
+		"prism_cloak": {"grants": ["gear_prism"], "deflect": 0.35, "sub": "5% less, deflects", "line": "Deflects 35% of energy bolts on foot; ion hits do 40% less aboard.", "sealed": false},
+		"ballast_rig": {"grants": ["gear_ballast"], "sub": "45% less dmg, heavy", "line": "No knockback aboard; walks 15% slower.", "sealed": false},
+		"tank_harness": {"sealed": true, "grants": ["gear_tank"], "sub": "10% less dmg, sealed", "line": "Its own air tank: sealed, and thin air hurts far less aboard."},
+		"forge_apron": {"grants": ["gear_forge"], "sub": "15% less, fireproof", "line": "Immune to fire; a hot room does not slow you.", "sealed": false},
+		"traders_coat": {"grants": ["gear_trader"], "sub": "3% less, +15% sales", "line": "Shops pay 15% more for what you sell while you are aboard.", "sealed": false},
+		"stone_plates": {"grants": ["gear_stone"], "sub": "40% less dmg, slow", "line": "Walks 15% slower.", "sealed": false},
+		"scrap_gauntlets": {"grants": ["gear_gauntlets"], "sub": "5% less, hits harder", "line": "Melee hits 35% harder; wrecks give 50% more scrap.", "sealed": false},
+		"marine_plate": {"mag": 1.25, "sub": "25% less, big mags", "line": "Spare magazines hold 25% more rounds.", "sealed": false}
 	},
 	"flare": {
 		"_doc": "The flare gun's flare (B4): it sticks where it lands and burns burn_s seconds, and lights `radius` cells round it. A burning flare counts as an emergency light for what a foe sees (foes.gd), so it lights a room for both sides. Only the soldier's and his crew's flare guns leave one; at most `max` burn at once (the oldest goes out).",
@@ -391,13 +489,80 @@
 		"fallback": {"titanium": [2, 4], "silicon": [1, 3]}
 	},
 	"log_fallback": {"credits": [10, 25]},
+	"regional": {
+		"_doc": "Race gear in its region's lockers (scripts/board/loot.gd table_for): region id -> {item: x the weight of that outcome in every table of a site in that region}. The race items sit in the tables at a small weight everywhere; this lifts them at home.",
+		"human_core": {"marine_plate": 14.0},
+		"basalt_quarries": {"stone_plates": 14.0},
+		"emberkin_forges": {"forge_apron": 14.0},
+		"fenn_bazaar": {"traders_coat": 14.0},
+		"gauntling_scrapyards": {"scrap_gauntlets": 14.0},
+		"grundl_barges": {"ballast_rig": 14.0},
+		"kett_hives": {"chitin_plate": 14.0},
+		"mire_fens": {"tank_harness": 14.0},
+		"prismatic_choir": {"prism_cloak": 14.0},
+		"sporeling_groves": {"spore_mantle": 14.0}
+	},
+	"actives": {
+		"_doc": "The active of a piece of body gear (gear.<item>.active), used on foot with the G key (scripts/board/gear_active.gd): name; cooldown (seconds until it can be used again); and its own numbers. dash: the soldier jumps `cells` cells the way he aims over `time` seconds (it stops at a wall). brace: for `time` seconds he takes `share` x the damage. patch: he and every ally within `reach` cells heal `share` of their health. The cooldown shows on the soldier's card.",
+		"key": "G",
+		"dash": {"name": "Dash", "cooldown": 8.0, "cells": 4.0, "time": 0.2},
+		"brace": {"name": "Brace", "cooldown": 25.0, "time": 3.0, "share": 0.5},
+		"patch": {"name": "Patch", "cooldown": 40.0, "share": 0.25, "reach": 4.0}
+	},
+	"wear": {
+		"_doc": "Who wears what (scripts/board/wear.gd). foe: per foe kind, `chance` of wearing body gear and the weighted `items` it picks from; a foe in a region with race gear (`regional`) wears that item instead with `home` chance. energy_foes: the foe kinds whose shots a Prism Cloak may deflect (gear.<item>.deflect). npc: per role, as foe; a person of a species with an item in `race_item` wears it with `race` chance (before the role's items). Worn gear is drawn, gives the foe its armour, and may be on its body: `drop` is the chance a beaten foe's body holds the gear it wore (loot.gd; the old `extra` roll stays). crew: the gear a beaten ship's crew wear on the wreck, by species (`race_item`) with `chance`.",
+		"drop": 0.25,
+		"energy_foes": ["sentry", "scavenger"],
+		"home": 0.5,
+		"race": 0.6,
+		"race_item": {"human": "marine_plate", "basalt": "stone_plates", "emberkin": "forge_apron", "fenn": "traders_coat", "gauntling": "scrap_gauntlets", "grundl": "ballast_rig", "kett": "chitin_plate", "mire": "tank_harness", "prismatic": "prism_cloak", "sporeling": "spore_mantle"},
+		"foe": {
+			"scavenger": {"chance": 0.55, "items": [{"weight": 3, "item": "rigger_harness"}, {"weight": 3, "item": "basic_armor"}, {"weight": 1, "item": "firefighter_coat"}, {"weight": 1, "item": "eva_suit"}]},
+			"pirate": {"chance": 0.7, "items": [{"weight": 3, "item": "basic_armor"}, {"weight": 2, "item": "marine_plate"}, {"weight": 1, "item": "jump_pack"}, {"weight": 0.3, "item": "exosuit"}]},
+			"hollow_touched": {"chance": 0.0, "items": []}
+		},
+		"npc": {
+			"survivor": {"chance": 0.8, "items": [{"weight": 3, "item": "basic_armor"}, {"weight": 2, "item": "eva_suit"}, {"weight": 2, "item": "medic_sash"}]},
+			"hermit": {"chance": 0.8, "items": [{"weight": 3, "item": "rigger_harness"}, {"weight": 2, "item": "eva_suit"}, {"weight": 1, "item": "firefighter_coat"}]},
+			"trader": {"chance": 0.9, "items": [{"weight": 3, "item": "traders_coat"}, {"weight": 2, "item": "basic_armor"}, {"weight": 1, "item": "jump_pack"}]},
+			"scavenger_talker": {"chance": 0.8, "items": [{"weight": 3, "item": "rigger_harness"}, {"weight": 2, "item": "firefighter_coat"}, {"weight": 1, "item": "basic_armor"}]},
+			"captive": {"chance": 0.0, "items": []},
+			"touched_talker": {"chance": 0.0, "items": []}
+		},
+		"crew": {"chance": 0.7}
+	},
 	"tables": {
 		"storage": [
+			{"weight": 0.5, "item": "rigger_harness", "count": [1, 1]},
+			{"weight": 0.3, "item": "firefighter_coat", "count": [1, 1]},
+			{"weight": 0.2, "item": "jump_pack", "count": [1, 1]},
+			{"weight": 0.06, "item": "marine_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "stone_plates", "count": [1, 1]},
+			{"weight": 0.06, "item": "forge_apron", "count": [1, 1]},
+			{"weight": 0.06, "item": "traders_coat", "count": [1, 1]},
+			{"weight": 0.06, "item": "scrap_gauntlets", "count": [1, 1]},
+			{"weight": 0.06, "item": "ballast_rig", "count": [1, 1]},
+			{"weight": 0.06, "item": "chitin_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "tank_harness", "count": [1, 1]},
+			{"weight": 0.06, "item": "prism_cloak", "count": [1, 1]},
+			{"weight": 0.06, "item": "spore_mantle", "count": [1, 1]},
 			{"weight": 34, "item": "scrap", "count": [4, 10]}, {"weight": 22, "item": "copper", "count": [2, 5]}, {"weight": 18, "item": "polymer", "count": [2, 4]},
 			{"weight": 6, "item": "titanium", "count": [1, 3]}, {"weight": 4, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "missile", "count": [1, 2]}, {"weight": 1.5, "item": "fuel", "count": [1, 1]},
 			{"weight": 9, "item": "hand_ammo", "count": [6, 14]}
 		],
 		"cargo": [
+			{"weight": 0.4, "item": "rigger_harness", "count": [1, 1]},
+			{"weight": 0.25, "item": "jump_pack", "count": [1, 1]},
+			{"weight": 0.06, "item": "marine_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "stone_plates", "count": [1, 1]},
+			{"weight": 0.06, "item": "forge_apron", "count": [1, 1]},
+			{"weight": 0.06, "item": "traders_coat", "count": [1, 1]},
+			{"weight": 0.06, "item": "scrap_gauntlets", "count": [1, 1]},
+			{"weight": 0.06, "item": "ballast_rig", "count": [1, 1]},
+			{"weight": 0.06, "item": "chitin_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "tank_harness", "count": [1, 1]},
+			{"weight": 0.06, "item": "prism_cloak", "count": [1, 1]},
+			{"weight": 0.06, "item": "spore_mantle", "count": [1, 1]},
 			{"weight": 24, "item": "scrap", "count": [4, 9]}, {"weight": 18, "item": "copper", "count": [3, 6]}, {"weight": 14, "item": "polymer", "count": [2, 5]},
 			{"weight": 8, "item": "titanium", "count": [1, 3]}, {"weight": 5, "item": "silicon", "count": [1, 3]}, {"weight": 7, "item": "missile", "count": [1, 3]},
 			{"weight": 3, "item": "radiator", "count": [1, 1]}, {"weight": 3, "item": "ammo_rack", "count": [1, 1]}, {"weight": 2, "item": "oxygen_gen", "count": [1, 1]},
@@ -405,6 +570,19 @@
 			{"weight": 9, "item": "hand_ammo", "count": [6, 16]}, {"weight": 2, "item": "rifle", "count": [1, 1]}
 		],
 		"engineering": [
+			{"weight": 0.7, "item": "rigger_harness", "count": [1, 1]},
+			{"weight": 0.6, "item": "firefighter_coat", "count": [1, 1]},
+			{"weight": 0.3, "item": "jump_pack", "count": [1, 1]},
+			{"weight": 0.06, "item": "marine_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "stone_plates", "count": [1, 1]},
+			{"weight": 0.06, "item": "forge_apron", "count": [1, 1]},
+			{"weight": 0.06, "item": "traders_coat", "count": [1, 1]},
+			{"weight": 0.06, "item": "scrap_gauntlets", "count": [1, 1]},
+			{"weight": 0.06, "item": "ballast_rig", "count": [1, 1]},
+			{"weight": 0.06, "item": "chitin_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "tank_harness", "count": [1, 1]},
+			{"weight": 0.06, "item": "prism_cloak", "count": [1, 1]},
+			{"weight": 0.06, "item": "spore_mantle", "count": [1, 1]},
 			{"weight": 26, "item": "copper", "count": [3, 6]}, {"weight": 22, "item": "scrap", "count": [4, 8]}, {"weight": 10, "item": "silicon", "count": [1, 3]},
 			{"weight": 8, "item": "titanium", "count": [1, 3]}, {"weight": 3, "item": "crystal", "count": [1, 1]}, {"weight": 1.5, "item": "plasma_cell", "count": [1, 1]},
 			{"weight": 2, "item": "fuel", "count": [1, 1]}, {"weight": 2, "item": "reactor_mk1", "count": [1, 1]}, {"weight": 2, "item": "engine_mk1", "count": [1, 1]},
@@ -414,10 +592,22 @@
 			{"weight": 4.2, "item": "mod", "count": [1, 1]}
 		],
 		"medbay": [
+			{"weight": 1.0, "item": "medic_sash", "count": [1, 1]},
 			{"weight": 30, "item": "polymer", "count": [2, 5]}, {"weight": 15, "item": "credits", "count": [3, 12]}, {"weight": 2, "item": "nanite_paste", "count": [1, 1]},
 			{"weight": 3, "item": "basic_armor", "count": [1, 1]}, {"weight": 2, "item": "crystal", "count": [1, 1]}, {"weight": 10, "item": "scrap", "count": [2, 5]}, {"weight": 1, "item": "medbay", "count": [1, 1]}
 		],
 		"command": [
+			{"weight": 0.3, "item": "jump_pack", "count": [1, 1]},
+			{"weight": 0.06, "item": "marine_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "stone_plates", "count": [1, 1]},
+			{"weight": 0.06, "item": "forge_apron", "count": [1, 1]},
+			{"weight": 0.06, "item": "traders_coat", "count": [1, 1]},
+			{"weight": 0.06, "item": "scrap_gauntlets", "count": [1, 1]},
+			{"weight": 0.06, "item": "ballast_rig", "count": [1, 1]},
+			{"weight": 0.06, "item": "chitin_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "tank_harness", "count": [1, 1]},
+			{"weight": 0.06, "item": "prism_cloak", "count": [1, 1]},
+			{"weight": 0.06, "item": "spore_mantle", "count": [1, 1]},
 			{"weight": 30, "item": "credits", "count": [8, 30]}, {"weight": 14, "item": "silicon", "count": [1, 3]}, {"weight": 6, "item": "crystal", "count": [1, 2]},
 			{"weight": 10, "item": "copper", "count": [2, 5]}, {"weight": 3, "item": "plasma_cell", "count": [1, 1]}, {"weight": 2, "item": "radar_mk1", "count": [1, 1]}, {"weight": 1.5, "item": "pulse_mk1", "count": [1, 1]},
 			{"weight": 8, "item": "hand_ammo", "count": [5, 12]}, {"weight": 1, "item": "slugthrower", "count": [1, 1]},
@@ -426,6 +616,18 @@
 			{"weight": 5.6, "item": "mod", "count": [1, 1]}
 		],
 		"quarters": [
+			{"weight": 0.4, "item": "medic_sash", "count": [1, 1]},
+			{"weight": 0.3, "item": "firefighter_coat", "count": [1, 1]},
+			{"weight": 0.06, "item": "marine_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "stone_plates", "count": [1, 1]},
+			{"weight": 0.06, "item": "forge_apron", "count": [1, 1]},
+			{"weight": 0.06, "item": "traders_coat", "count": [1, 1]},
+			{"weight": 0.06, "item": "scrap_gauntlets", "count": [1, 1]},
+			{"weight": 0.06, "item": "ballast_rig", "count": [1, 1]},
+			{"weight": 0.06, "item": "chitin_plate", "count": [1, 1]},
+			{"weight": 0.06, "item": "tank_harness", "count": [1, 1]},
+			{"weight": 0.06, "item": "prism_cloak", "count": [1, 1]},
+			{"weight": 0.06, "item": "spore_mantle", "count": [1, 1]},
 			{"weight": 30, "item": "credits", "count": [2, 10]}, {"weight": 15, "item": "polymer", "count": [2, 4]}, {"weight": 15, "item": "scrap", "count": [3, 7]},
 			{"weight": 8, "item": "copper", "count": [2, 4]}, {"weight": 3, "item": "pistol", "count": [1, 1]}, {"weight": 3, "item": "basic_armor", "count": [1, 1]}, {"weight": 1, "item": "eva_suit", "count": [1, 1]},
 			{"weight": 6, "item": "hand_ammo", "count": [4, 10]}

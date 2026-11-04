@@ -64,13 +64,45 @@ static func armor_mult(m) -> float:
 	return float(Site.config()["armor"].get(str(m.kit.get("body", "")), 1.0))
 
 
-## What body gear `item` does aboard, in words.
+## The data of body gear `item` (boarding.json `gear`): sealed, grants (trait ids while worn), sub (the short line of its slot), line (what it does besides armour),
+## active (an id of `actives`), and the numbers read below. {} for none.
+static func gear_def(item: String) -> Dictionary:
+	var d = Site.config().get("gear", {}).get(item, {}) if item != "" else {}
+	return d if d is Dictionary else {}
+
+
+## The trait ids body gear `item` grants its wearer (data/traits.json) while it is worn.
+static func grants_of(item: String) -> Array:
+	var g = gear_def(item).get("grants", [])
+	return g if g is Array else []
+
+
+## A number of the body gear `m` wears (gear.<item>.<key>), `dflt` when they wear none or it has none.
+static func gear_num(m, key: String, dflt: float) -> float:
+	return float(gear_def(str(m.kit.get("body", "")) if m != null and not m.kit.is_empty() else "").get(key, dflt))
+
+
+## The id of the active (G on foot) of the body gear `m` wears, "" for none.
+static func active_of(m) -> String:
+	return str(gear_def(str(m.kit.get("body", "")) if m != null and not m.kit.is_empty() else "").get("active", ""))
+
+
+## What body gear `item` does aboard, in words: the armour and the seal, then what else it does (gear.<item>.line, and its active).
 static func body_line(item: String) -> String:
 	var share := float(Site.config()["armor"].get(item, 1.0))
-	var sealed := bool(Site.config().get("gear", {}).get(item, {}).get("sealed", false))  # (air.gd: no airless room without one)
+	var d := gear_def(item)
+	var sealed := bool(d.get("sealed", false))  # (air.gd: no airless room without one)
+	var extra := str(d.get("line", ""))
+	var act := str(d.get("active", ""))
+	if act != "":
+		var a: Dictionary = Site.config()["actives"][act]
+		extra = (extra + " " if extra != "" else "") + "%s: %s (%d s)." % [Site.config()["actives"]["key"], a["name"], roundi(float(a["cooldown"]))]
+	var base := ""
 	if share >= 1.0:
-		return "Sealed: breathe with no air." if sealed else "No use aboard."
-	return "Takes %d%% less damage.%s" % [roundi((1.0 - share) * 100.0), " Sealed." if sealed else ""]
+		base = "Sealed: breathe with no air." if sealed else ("" if extra != "" else "No use aboard.")
+	else:
+		base = "Takes %d%% less damage.%s" % [roundi((1.0 - share) * 100.0), " Sealed." if sealed else ""]
+	return (base + " " + extra).strip_edges()
 
 
 # --- changing a kit --------------------------------------------------------------------------------------------------------

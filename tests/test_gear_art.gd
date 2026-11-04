@@ -7,8 +7,12 @@ const Art = preload("res://scripts/view/art.gd")
 const Site = preload("res://scripts/board/site.gd")
 
 ## item -> the art id its look names (pinned: the data mapping).
-const ART_OF := {"basic_armor": "combat_vest", "eva_suit": "eva_suit", "exosuit": "exosuit", "salamander_suit": "salamander_suit", "heat_suit": "heat_suit"}
-const HAS_HEAD := ["eva_suit", "exosuit", "salamander_suit", "heat_suit"]
+const ART_OF := {"basic_armor": "combat_vest", "eva_suit": "eva_suit", "exosuit": "exosuit", "salamander_suit": "salamander_suit", "heat_suit": "heat_suit",
+	"rigger_harness": "rigger_harness", "firefighter_coat": "firefighter_coat", "medic_sash": "medic_sash", "jump_pack": "jump_pack", "chitin_plate": "chitin_plate",
+	"spore_mantle": "spore_mantle", "prism_cloak": "prism_cloak", "ballast_rig": "ballast_rig", "tank_harness": "tank_harness", "forge_apron": "forge_apron",
+	"traders_coat": "traders_coat", "stone_plates": "stone_plates", "scrap_gauntlets": "scrap_gauntlets", "marine_plate": "marine_plate"}
+const HAS_HEAD := ["eva_suit", "exosuit", "salamander_suit", "heat_suit", "firefighter_coat", "chitin_plate", "spore_mantle", "prism_cloak", "tank_harness", "marine_plate"]
+const HAND := ["basic_armor", "eva_suit", "exosuit", "salamander_suit", "heat_suit"]  ## the hand-made art of the human rig (the rest is generated for every rig: art/_src/sp_wardrobe.py)
 
 
 ## Counts what is drawn.
@@ -72,7 +76,8 @@ func test_every_body_item_resolves_to_art_layers_on_a_human() -> void:
 		eq("gear_head" in names, item in HAS_HEAD, "%s: a head layer only when it has one" % item)
 		if item in HAS_HEAD:
 			eq(names.find("gear_head"), names.find("head") + 1, "%s: its head goes right after the head" % item)
-		check(plan.filter(func(l): return l["layer"] == "gear_body")[0]["sheet"].has_mask(), "%s has a colour mask" % item)
+		if item in HAND:
+			check(plan.filter(func(l): return l["layer"] == "gear_body")[0]["sheet"].has_mask(), "%s has a colour mask" % item)
 	_real()
 
 
@@ -122,24 +127,23 @@ func test_gear_fits_the_rigs_with_the_humans_anchors() -> void:
 	check(Art.gear_fits(Art.crew("human")), "human")
 	check(Art.gear_fits(Art.crew("gauntling")), "gauntling has the same anchors")
 	for rig in ["basalt", "emberkin", "fenn", "rattler", "brine", "lantern"]:
-		check(not Art.gear_fits(Art.crew(rig)), "%s keeps the flat look" % rig)
+		check(not Art.gear_fits(Art.crew(rig)), "%s does not fit the hand-made art" % rig)
 	check(not Art.gear_fits(null), "no art, no fit")
 
 
-func test_a_rig_the_art_does_not_fit_falls_back_to_the_flat_look() -> void:
+func test_every_rig_wears_the_gear_drawn_from_its_own_sprites() -> void:
 	_real()
 	var basalt = Art.crew("basalt")
-	check(PersonDrawer.gear_art(basalt, "exosuit") == null, "no gear art on basalt")
-	check(not _names(PersonDrawer.plan(basalt, {"body": "exosuit"})).any(func(n): return n.begins_with("gear_")), "no gear layers in its plan")
+	for item in ART_OF:
+		check(PersonDrawer.gear_art(basalt, item) != null, "%s has art on basalt" % item)
+		check(_names(PersonDrawer.plan(basalt, {"body": item})).has("gear_body"), "and draws a gear body layer there")
 	var bare := Canvas.new()
 	PersonDrawer.draw(bare, Vector2.ZERO, {"species": "basalt"}, {}, 40.0)
 	var worn := Canvas.new()
 	PersonDrawer.draw(worn, Vector2.ZERO, {"species": "basalt", "body": "exosuit"}, {}, 40.0)
-	check(worn.flat > 0 and bare.flat == 0, "the flat shapes are drawn over it")
-	var human := Canvas.new()
-	PersonDrawer.draw(human, Vector2.ZERO, {"species": "human", "body": "exosuit"}, {}, 40.0)
-	eq(human.flat, 0, "and none on a human, who has the art")
-	check(human.textures > bare.textures, "which is drawn as sprites")
+	eq(worn.flat, 0, "no flat shapes: the sprite is drawn")
+	check(worn.textures > bare.textures, "more sprites than the bare rig")
+	check(PersonDrawer.gear_art(Art.crew("human"), "exosuit") == Art.gear("exosuit"), "the human keeps the hand-made exosuit")
 
 
 func test_every_item_in_every_pose_draws() -> void:
@@ -157,5 +161,5 @@ func test_every_item_in_every_pose_draws() -> void:
 				PersonDrawer.draw(c, Vector2(50, 50), pose, {"suit": "#33c6d6"}, 40.0)
 				n += 1
 				check(c.textures > 0 or c.flat > 0, "%s %s %s drew something" % [rig, item, str(p)])
-	check(n > 500, "%d combinations" % n)
+	check(n > 1500, "%d combinations" % n)
 	_real()

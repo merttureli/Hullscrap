@@ -1271,7 +1271,7 @@ func value_of(ship, item: String) -> int:
 
 ## Credits one `item` sells for.
 func sell_price(ship, item: String) -> int:
-	return floori(float(value_of(ship, item)) * float(cfg["prices"]["sell_fraction"]))
+	return floori(float(value_of(ship, item)) * float(cfg["prices"]["sell_fraction"]) * (1.0 + TraitSet.sell_bonus(ship)))  # (a trader's coat aboard)
 
 
 ## Sell `n` of `item` from the cargo at half its value. Returns {ok, text}.

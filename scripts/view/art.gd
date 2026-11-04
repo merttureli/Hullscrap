@@ -88,7 +88,7 @@ static func crew(species: String) -> RefCounted:
 	var dir := "%s/crew/%s" % [root, species]
 	var d := read_json(dir + "/crew.json")
 	var table: Dictionary = d.get("layers", d)
-	var common := {"frame": d.get("frame"), "pivot": d.get("pivot"), "anchors_origin": d.get("anchors_origin", "topleft"), "kind": d.get("kind", "normal")}
+	var common := {"frame": d.get("frame"), "pivot": d.get("pivot"), "anchors_origin": d.get("anchors_origin", "topleft"), "kind": d.get("kind", "normal"), "species": species}
 	var parts := {}
 	var raw_arms := {}
 	for layer in CREW_LAYERS:
@@ -140,6 +140,29 @@ static func gear(id: String) -> Variant:
 			out[str(name)] = s
 		if out.is_empty():
 			out = null
+	_cache[key] = out
+	return out
+
+
+## Body gear made for one rig (art/gear/<id>/<rig>.png, from art/_src/sp_wardrobe.py): {"body", "head", "sleeves", "legs_over"} sheets (only the layers the item has),
+## each cut from the strip and laid out like the rig's own frames, plus "_gen": true; null when the item has no art for that rig.
+static func gear_rig(id: String, rig: String) -> Variant:
+	var key := "%s/gear/%s@%s" % [root, id, rig]
+	if _cache.has(key):
+		return _cache[key]
+	var out = null
+	var d := read_json("%s/gear/%s/gear.json" % [root, id])
+	var r = d.get("rigs", {}).get(rig) if d.get("rigs") is Dictionary else null
+	if r is Dictionary:
+		var img := load_image("%s/gear/%s/%s.png" % [root, id, rig])
+		if img != null:
+			var n := int(r["frame"])
+			out = {"_gen": true}
+			for layer in r["layers"]:
+				var at: Array = r["layers"][layer]
+				var cut := img.get_region(Rect2i(int(at[0]) * n, 0, int(at[1]) * n, n))
+				var s = SpriteSheet.from_dict({"frame": [n, n], "pivot": [int(r["pivot"]), int(r["pivot"])]}, cut)
+				out["legs_over" if layer == "legs" else str(layer)] = s
 	_cache[key] = out
 	return out
 
