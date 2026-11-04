@@ -28,6 +28,8 @@ static func place(s) -> void:
 		var mouth: Dictionary = s._mouth(r)
 		var walls := _wall_cells(s, r, mouth)
 		var sign_word := str(cfg["signs"].get(str(r["purpose"]), ""))
+		if bool(m.get("own", false)):  # (a race's own room is named for what it is)
+			sign_word = str(m["name"]).to_upper()
 		if sign_word == "" and not r["corridor"]:
 			sign_word = str(m["name"]).to_upper()
 		# walls: one sign (a room with a name), then pipes, cables, vents, lamps, panels, posters by the room's area

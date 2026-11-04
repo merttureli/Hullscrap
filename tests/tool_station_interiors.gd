@@ -1,6 +1,8 @@
 extends SceneTree
 ## Run: xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- sheets [out_dir] [module ids...]
 ##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- room <module> <state> [seed] [out.png]
+##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- overview <state> <type> <seed> <out.png>   (the whole station, lit up)
+## The environment variables RACES (a comma list: the races of the station) and REGION pick who built it and where.
 ## sheets: one contact sheet per module (interiors_<module>.png): the module's room in an abandoned, a half-active and an operational station, in the real
 ## board view (lit up, no HUD). room: one module in one state at full size. Not a test (no test_ prefix).
 
@@ -11,6 +13,7 @@ const BoardView = preload("res://scripts/board/board_view.gd")
 const Foes = preload("res://scripts/board/foes.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
+const Races = preload("res://scripts/board/station_races.gd")
 
 const STATES: Array[String] = ["abandoned", "half", "operational"]
 const REGIONS: Array[String] = ["clan_space", "human_core", "kett_hives", "emberkin_forges", "sporeling_groves", "prismatic_choir", "boneyard", "fenn_bazaar", "basalt_quarries", "gauntling_scrapyards"]
@@ -31,6 +34,23 @@ func _run() -> void:
 	_ship = Ship.from_design("res://data/ships/starter_rustbucket.json")
 	Jobs.spawn_crew(_ship)
 	var mode: String = args[0] if args.size() > 0 else "sheets"
+	if OS.get_environment("RACES") != "":
+		Races.forced = Array(OS.get_environment("RACES").split(","))
+	if mode == "overview":
+		var region := OS.get_environment("REGION") if OS.get_environment("REGION") != "" else "clan_space"
+		var want_type: String = args[2]
+		var sv := int(args[3])
+		var site = null
+		for i in 300:
+			var s = Site.make(sv + i, "station", {"faction": "clans", "region": region, "state": args[1]})
+			if s.gen == "modules" and (want_type == "-" or s.station_type == want_type):
+				site = s
+				break
+		var img := await _overview(site)
+		img.save_png(args[4])
+		print("overview %s %s %s races %s modules %s" % [site.station_type, site.state, site.site_name, str(site.races), str(site.modules.map(func(m): return "%s[%s]" % [m["id"], m["race"]]))])
+		quit()
+		return
 	if mode == "room":
 		var mid: String = args[1]
 		var st: String = args[2]
@@ -142,3 +162,35 @@ func _sheet(mid: String, tiles: Array) -> void:
 	print("saved interiors_%s" % mid)
 	node.queue_free()
 	await process_frame
+
+
+## The whole station lit up in the board view (the HUD away).
+func _overview(site) -> Image:
+	var cam := Camera2D.new()
+	root.add_child(cam)
+	cam.make_current()
+	var board := BoardView.new()
+	board.cam = cam
+	board.ask_party = false
+	root.add_child(board)
+	var ses = Boarding.start(null, null, "shot", {"kind": "station"}, _ship)
+	ses.site = site
+	ses.foes = Foes.new(ses)
+	ses.soldier.pos = site.airlock["spawn"]
+	board.enter(ses)
+	board.set_lights_up(true)
+	board._layer.visible = false
+	var b: Rect2i = site.bounds
+	var vp := get_root().get_visible_rect().size
+	var z := minf(vp.x / (float(b.size.x + 4) * 32.0), vp.y / (float(b.size.y + 4) * 32.0))
+	for k in 6:
+		board._follow = false
+		cam.zoom = Vector2(z, z)
+		cam.position = (Vector2(b.position) + Vector2(b.size) / 2.0) * 32.0
+		await process_frame
+	var img := root.get_texture().get_image()
+	board.leave()
+	board.queue_free()
+	cam.queue_free()
+	await process_frame
+	return img

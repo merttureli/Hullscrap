@@ -8,6 +8,7 @@ extends Node2D
 const Fixtures = preload("res://scripts/board/station_fixtures.gd")
 const Races = preload("res://scripts/board/station_races.gd")
 const Glyph = preload("res://scripts/board/station_glyph.gd")
+const StationGen = preload("res://scripts/board/station_gen.gd")
 
 const CELL := 32.0
 
@@ -50,7 +51,14 @@ func _draw() -> void:
 			continue
 		var sk := _skin(r["id"])
 		var rect: Rect2i = r["rect"]
-		draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), Color(Color(str(sk["floor"])), 0.13))
+		var rr := Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL)
+		draw_rect(rr, Color(Color(str(sk["floor"])), 0.13))
+		var m: Dictionary = site.modules[int(r["module"])]
+		if site.heat_of(r["id"]) >= float(StationGen.config().get("heat", {}).get("hot_visible", 55.0)):  # a hot room: an orange tint and a shimmer over it
+			draw_rect(rr, Color(1.0, 0.45, 0.12, 0.11))
+			_anim.append({"kind": "shimmer", "pos": rr.get_center(), "rect": rr, "seed": int(r["id"]), "room": r["id"]})
+		elif str(m["climate"]) == "cold" and bool(m["powered"]):  # a cool section: a pale blue cast (a look only)
+			draw_rect(rr, Color(0.6, 0.85, 1.0, 0.07))
 	_draw_wall_tints()
 	for d in site.dressing:
 		if str(d["kind"]) in ["stain", "scuff", "arrow", "lane", "debris", "scorch", "clutter", "frost", "hazard"] and (str(d["kind"]) != "scorch" or site.room_of.has(Vector2i(d["cell"]))):
@@ -197,22 +205,25 @@ func _wall_item(d: Dictionary) -> void:
 			draw_rect(pr2, Color(0, 0, 0, 0.6), false, 1.0)
 			draw_line(pr2.position + Vector2(3, 6), pr2.position + Vector2(11, 6), Color(1, 1, 1, 0.5), 1.5)
 			draw_line(pr2.position + Vector2(3, 11), pr2.position + Vector2(9, 11), Color(1, 1, 1, 0.35), 1.5)
-		"sign":
-			var sr := Rect2(a0 + along * 2.0 - Vector2(0, 0), Vector2.ZERO)
+		"sign":  # (a plate with the race's glyph and the room's name; on a side wall the text runs up or down it)
 			var cen := (a0 + a1) / 2.0
 			var w := float(len) * CELL - 6.0
-			var box := Rect2(cen - Vector2(w, 18.0) / 2.0, Vector2(w, 18.0)) if along.x > 0.0 else Rect2(cen - Vector2(18.0, w) / 2.0, Vector2(18.0, w))
-			draw_rect(box, Color(0.04, 0.05, 0.07))
 			var lit := powered
-			var col2 := Color(str(sk["lamp"]))
-			draw_rect(box, col2 if lit else Color(0.2, 0.2, 0.22), false, 1.5)
-			if along.x > 0.0:
-				Glyph.draw(self, str(sk["glyph"]), box.position + Vector2(9, 9), 6.0, col2 if lit else Color(0.28, 0.28, 0.3))
-				draw_string(_font, box.position + Vector2(17, 13), str(d["word"]).left(11), HORIZONTAL_ALIGNMENT_LEFT, w - 18.0, 9, col2 if lit else Color(0.3, 0.3, 0.32))
+			var col2 := Color(str(sk["lamp"])) if lit else Color(0.3, 0.3, 0.32)
+			var vertical := along.y > 0.0
+			if vertical:
+				draw_set_transform(cen, PI / 2.0 if dir.x < 0.0 else -PI / 2.0, Vector2.ONE)
 			else:
-				Glyph.draw(self, str(sk["glyph"]), box.position + Vector2(9, 9), 6.0, col2 if lit else Color(0.28, 0.28, 0.3))
+				draw_set_transform(cen, 0.0, Vector2.ONE)
+			var box := Rect2(Vector2(-w / 2.0, -9.0), Vector2(w, 18.0))
+			draw_rect(box, Color(0.04, 0.05, 0.07))
+			draw_rect(box, col2 if lit else Color(0.2, 0.2, 0.22), false, 1.5)
+			Glyph.draw(self, str(sk["glyph"]), box.position + Vector2(9, 9), 5.0, col2)
+			draw_string(_font, box.position + Vector2(17, 13), str(d["word"]).left(12), HORIZONTAL_ALIGNMENT_LEFT, w - 19.0, 9, col2)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			if lit and site.state == "half":
-				_anim.append({"kind": "sign", "pos": box.get_center(), "size": box.size, "seed": int(d["seed"]), "room": rid})
+				var asz := Vector2(w, 18.0) if not vertical else Vector2(18.0, w)
+				_anim.append({"kind": "sign", "pos": cen, "size": asz, "seed": int(d["seed"]), "room": rid})
 		"scorch":
 			for k in 3:
 				draw_circle(face + along * rng.randf_range(-10, 10) + dir * rng.randf_range(0, 8), rng.randf_range(6, 12), Color(0.02, 0.02, 0.02, 0.35))
@@ -675,7 +686,7 @@ class AnimLayer extends Node2D:
 		var view := vp.get_canvas_transform().affine_inverse() * Rect2(Vector2.ZERO, vp.get_visible_rect().size)
 		view = view.grow(96.0)
 		for a in decor._anim:
-			if not view.has_point(a["pos"]):
+			if not (view.intersects(a["rect"]) if a.has("rect") else view.has_point(a["pos"])):
 				continue
 			var seed_f := float(int(a["seed"]) % 97)
 			match str(a["kind"]):
@@ -688,6 +699,15 @@ class AnimLayer extends Node2D:
 						for j in 3:
 							var ang := seed_f + float(j) * 2.1 + _t * 9.0
 							draw_line(a["pos"], a["pos"] + Vector2.from_angle(ang) * (6.0 + 6.0 * k * 4.0), Color(1.0, 0.9, 0.4, 1.0 - k * 4.0), 1.5)
+				"shimmer":  # (heat haze: a few faint wavy lines rising over the room)
+					var rc: Rect2 = a["rect"]
+					for k in 5:
+						var y0 := rc.position.y + fmod(_t * 14.0 + float(k) * rc.size.y / 5.0 + seed_f * 9.0, rc.size.y)
+						var pts := PackedVector2Array()
+						for q in 13:
+							var x := rc.position.x + rc.size.x * float(q) / 12.0
+							pts.append(Vector2(x, y0 + 2.5 * sin(_t * 3.0 + x * 0.05 + float(k))))
+						draw_polyline(pts, Color(1.0, 0.7, 0.4, 0.06), 3.0)
 				"pulse":
 					var glow: Color = a["color"]
 					var p := 0.5 + 0.5 * sin(_t * 2.0 + seed_f)

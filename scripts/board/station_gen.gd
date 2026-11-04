@@ -681,7 +681,7 @@ func _realize() -> String:
 			a = a.min(c + insts[i]["off"] + off)
 			b = b.max(c + insts[i]["off"] + off)
 		s.modules.append({"id": insts[i]["mod"], "name": str(modules()[insts[i]["mod"]]["name"]), "rect": Rect2i(a, b - a + Vector2i.ONE), "rooms": mrooms,
-			"powered": true, "breached": false})
+			"powered": true, "breached": false, "own": not modules()[insts[i]["mod"]].get("races", []).is_empty()})
 	return _dress()
 
 
