@@ -1141,3 +1141,360 @@ static func a_magnet_coil(cv: CanvasItem, it: Dictionary) -> void:
 	cv.draw_circle(_p(r, 0.07, 0.5), 5.0, g)
 	cv.draw_circle(_p(r, 0.93, 0.5), 5.0, g.darkened(0.25))
 	cv.draw_rect(r, INK, false, 2.0)
+
+
+# --- the plain fixtures that had no art of their own (they were the default block) -------------------------------------------
+
+## A desk or console: a body, `n` screens along the side that faces the room, and a row of keys.
+static func _desk(cv: CanvasItem, it: Dictionary, n: int, screen: Color) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	var dir: Vector2 = it["dir"]
+	for k in n:
+		var u := (float(k) + 0.5) / float(n)
+		var sc := Rect2(Vector2.ZERO, Vector2(10, 8))
+		var p := _p(r, u, 0.7 if (dir.y > 0.0 or dir.x > 0.0) else 0.3)  # (the screen on the side that faces the room)
+		sc.position = p - sc.size / 2.0
+		cv.draw_rect(sc, Color(0.03, 0.04, 0.05))
+		cv.draw_rect(sc.grow(-1.5), screen if not it["dead"] else Color(0.14, 0.15, 0.17))
+	for k in 4:
+		var q := _p(r, 0.15 + 0.22 * float(k), 0.3 if (dir.y > 0.0 or dir.x > 0.0) else 0.7)
+		cv.draw_rect(Rect2(q - Vector2(1.5, 1.5), Vector2(3, 3)), Color(0.75, 0.78, 0.82, 0.8))
+
+
+static func a_control_desk(cv: CanvasItem, it: Dictionary) -> void:
+	_desk(cv, it, 2, _glow(it))
+
+
+static func a_console(cv: CanvasItem, it: Dictionary) -> void:
+	_desk(cv, it, 2, _glow(it))
+
+
+static func a_antenna_console(cv: CanvasItem, it: Dictionary) -> void:
+	_desk(cv, it, 1, _glow(it))
+	var r: Rect2 = it["r"]
+	cv.draw_line(r.position + r.size * Vector2(0.8, 0.2), r.position + r.size * Vector2(0.8, -0.2), Color(0.7, 0.7, 0.75), 1.5)
+
+
+static func a_guard_desk(cv: CanvasItem, it: Dictionary) -> void:
+	_desk(cv, it, 2, _glow(it))
+	var r: Rect2 = it["r"]
+	cv.draw_rect(Rect2(_p(r, 0.78, 0.5) - Vector2(5, 3), Vector2(10, 6)), Color(0.3, 0.3, 0.36))  # (a baton and a cup)
+
+
+static func a_desk(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	cv.draw_rect(r.grow(-2.0), it["base"])
+	cv.draw_rect(Rect2(_p(r, 0.25, 0.5) - Vector2(5, 4), Vector2(10, 8)), Color(0.9, 0.88, 0.8))  # (papers)
+	cv.draw_circle(_p(r, 0.7, 0.4), 3.0, Color(0.9, 0.8, 0.3))  # (a lamp)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_counter(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	cv.draw_rect(_q(r, 0.05, 0.15, 0.95, 0.5), it["base"].lightened(0.25))
+	cv.draw_rect(Rect2(_p(r, 0.2, 0.6) - Vector2(5, 3), Vector2(10, 6)), Color(0.3, 0.32, 0.36))  # (a till)
+	cv.draw_circle(_p(r, 0.6, 0.45), 3.0, Color(0.92, 0.9, 0.84))
+	cv.draw_circle(_p(r, 0.8, 0.45), 3.0, Color(0.92, 0.9, 0.84))
+
+
+static func a_stove(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.1))
+	for k in 2:
+		var p := _p(r, 0.27 + 0.46 * float(k), 0.5)
+		cv.draw_circle(p, 7.0, Color(0.12, 0.12, 0.14))
+		_ring(cv, p, 5.0, _glow(it) if not it["dead"] else Color(0.3, 0.3, 0.32), 2.0)
+
+
+static func a_turbine(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var rad := minf(r.size.x, r.size.y) / 2.0
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	cv.draw_circle(c, rad * 0.9, Color(0.18, 0.19, 0.22))
+	for k in 8:
+		var a := TAU * float(k) / 8.0
+		_poly(cv, [c + Vector2.from_angle(a) * rad * 0.15, c + Vector2.from_angle(a - 0.25) * rad * 0.8, c + Vector2.from_angle(a + 0.2) * rad * 0.8], Color(0.6, 0.63, 0.7), false)
+	cv.draw_circle(c, rad * 0.18, Color(0.8, 0.82, 0.86))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_coolant_tank(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.1))
+	cv.draw_rect(_q(r, 0.15, 0.3, 0.85, 0.7), Color(0.55, 0.85, 1.0, 0.7) if not it["dead"] else Color(0.3, 0.4, 0.45))
+	for k in 3:
+		cv.draw_line(_p(r, 0.08 + 0.42 * float(k), 0.05), _p(r, 0.08 + 0.42 * float(k), 0.95), Color(0, 0, 0, 0.3), 1.5)
+
+
+static func a_vendor_cart(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.1))
+	for k in 4:
+		cv.draw_circle(_p(r, 0.15 + 0.23 * float(k), 0.45), 3.2, Color.from_hsv(0.05 + 0.2 * float(k), 0.55, 0.9))
+	cv.draw_rect(_q(r, 0.0, 0.0, 1.0, 0.18), it["lamp"].darkened(0.1))
+	for q in [_p(r, 0.2, 1.0), _p(r, 0.8, 1.0)]:
+		cv.draw_circle(q, 3.0, Color(0.12, 0.12, 0.14))
+
+
+static func a_footlocker(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	cv.draw_line(r.position + Vector2(r.size.x * 0.5, 2), r.position + Vector2(r.size.x * 0.5, r.size.y - 2), Color(0, 0, 0, 0.35), 2.0)
+	cv.draw_rect(Rect2(r.get_center() - Vector2(3, 3), Vector2(6, 6)), Color(0.85, 0.8, 0.4))
+
+
+static func a_shower_stall(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, Color(0.7, 0.85, 0.9, 0.55))
+	cv.draw_rect(r, Color(0.3, 0.4, 0.45), false, 2.0)
+	var c := r.get_center()
+	cv.draw_circle(c, 5.0, Color(0.75, 0.78, 0.82))
+	for k in 5:
+		cv.draw_line(c + Vector2(float(k - 2) * 3.0, 6), c + Vector2(float(k - 2) * 3.0, 11), Color(0.6, 0.85, 1.0, 0.8), 1.2)
+
+
+static func a_captain_chair(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	cv.draw_circle(c, 10.0, Color(0.25, 0.2, 0.2))
+	cv.draw_circle(c, 8.0, it["base"])
+	cv.draw_arc(c, 10.0, PI * 1.1, PI * 1.9, 10, it["base"].darkened(0.4), 4.0, true)  # (the back)
+	cv.draw_line(c + Vector2(-11, -2), c + Vector2(-11, 5), Color(0.2, 0.18, 0.18), 3.0)
+	cv.draw_line(c + Vector2(11, -2), c + Vector2(11, 5), Color(0.2, 0.18, 0.18), 3.0)
+
+
+static func a_med_cabinet(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	var c := r.get_center()
+	cv.draw_rect(Rect2(c - Vector2(2, 6), Vector2(4, 12)), Color(0.2, 0.7, 0.4))
+	cv.draw_rect(Rect2(c - Vector2(6, 2), Vector2(12, 4)), Color(0.2, 0.7, 0.4))
+
+
+static func a_locker_bank(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	for k in 3:
+		var d := _q(r, 0.06 + 0.31 * float(k), 0.12, 0.34 + 0.31 * float(k), 0.88)
+		cv.draw_rect(d, it["base"].lightened(0.1))
+		cv.draw_rect(d, INK, false, 1.0)
+		cv.draw_line(d.position + d.size * Vector2(0.2, 0.25), d.position + d.size * Vector2(0.8, 0.25), Color(0, 0, 0, 0.4), 1.0)
+
+
+static func a_signpost(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	cv.draw_circle(c + Vector2(0, 9), 6.0, Color(0.25, 0.25, 0.28))
+	cv.draw_line(c + Vector2(0, 9), c + Vector2(0, -8), Color(0.5, 0.5, 0.55), 3.0)
+	cv.draw_rect(Rect2(c + Vector2(-10, -13), Vector2(20, 9)), Color(0.05, 0.06, 0.07))
+	cv.draw_rect(Rect2(c + Vector2(-8, -11), Vector2(16, 5)), _glow(it))
+	cv.draw_colored_polygon(PackedVector2Array([c + Vector2(2, -12), c + Vector2(7, -8.5), c + Vector2(2, -5)]), Color(0.1, 0.1, 0.1, 0.7))
+
+
+static func a_seed_rack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.2))
+	for k in 6:
+		for j in 2:
+			cv.draw_rect(Rect2(_p(r, 0.1 + 0.15 * float(k), 0.2 + 0.45 * float(j)), Vector2(5, 6)), Color.from_hsv(0.08 + 0.12 * float(k + j), 0.5, 0.85))
+
+
+static func a_pallet_jack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(Rect2(r.position + Vector2(2, 3), Vector2(8, r.size.y - 6)), it["base"])
+	cv.draw_rect(Rect2(r.position + Vector2(10, 5), Vector2(r.size.x - 14, 4)), Color(0.45, 0.45, 0.5))  # (the forks)
+	cv.draw_rect(Rect2(r.position + Vector2(10, r.size.y - 9), Vector2(r.size.x - 14, 4)), Color(0.45, 0.45, 0.5))
+	cv.draw_line(r.position + Vector2(4, r.size.y * 0.5), r.position + Vector2(-3, r.size.y * 0.5 - 6), Color(0.2, 0.2, 0.22), 2.5)
+
+
+static func a_antenna_array(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var g := _glow(it)
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	for k in 3:
+		cv.draw_arc(c + Vector2(-6, 0), 8.0 + 6.0 * float(k), -1.0, 1.0, 8, Color(0.75, 0.78, 0.85), 2.0, true)
+	cv.draw_line(c + Vector2(-6, 0), c + Vector2(r.size.x * 0.4, 0), Color(0.6, 0.62, 0.68), 2.0)
+	cv.draw_circle(c + Vector2(r.size.x * 0.4, 0), 3.0, g)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_server_rack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	_box(cv, r, it["base"])
+	for k in 7:
+		var y := 0.08 + 0.13 * float(k)
+		cv.draw_line(_p(r, y, 0.15), _p(r, y, 0.85), Color(0, 0, 0, 0.5), 1.2)
+		cv.draw_circle(_p(r, y + 0.04, 0.3 + 0.4 * float(k % 2)), 1.4, g if (k + int(it["id"])) % 3 != 0 else g.darkened(0.6))
+
+
+static func a_lab_bench(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"].darkened(0.25))
+	cv.draw_rect(r.grow(-2.0), it["base"])
+	for k in 3:
+		var p := _p(r, 0.12 + 0.18 * float(k), 0.5)
+		cv.draw_circle(p, 4.0, Color.from_hsv(0.5 + 0.2 * float(k), 0.5, 0.9, 0.85))  # (flasks)
+		cv.draw_circle(p, 4.0, INK, false)
+	cv.draw_rect(_q(r, 0.68, 0.2, 0.94, 0.8), Color(0.04, 0.05, 0.06))
+	cv.draw_rect(_q(r, 0.7, 0.28, 0.92, 0.72), _glow(it))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_sample_fridge(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	cv.draw_rect(r.grow(-6.0), _glow(it).darkened(0.2) if not it["dead"] else Color(0.2, 0.25, 0.28))
+	cv.draw_line(r.position + Vector2(r.size.x - 5, 6), r.position + Vector2(r.size.x - 5, r.size.y - 6), Color(0.85, 0.88, 0.9), 2.0)
+
+
+static func a_freezer(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	for k in 2:
+		cv.draw_line(_p(r, 0.2 + 0.5 * float(k), 0.2), _p(r, 0.2 + 0.5 * float(k), 0.8), Color(0.9, 0.95, 1.0), 2.0)
+	for k in 5:
+		cv.draw_circle(r.position + r.size * Vector2(_rnd(it, k), _rnd(it, k + 8)), 2.5, Color(1, 1, 1, 0.35))  # (frost)
+
+
+static func a_centrifuge(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var rad := minf(r.size.x, r.size.y) / 2.0
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	cv.draw_circle(c, rad * 0.85, Color(0.55, 0.62, 0.68))
+	for k in 6:
+		var a := TAU * float(k) / 6.0
+		cv.draw_line(c, c + Vector2.from_angle(a) * rad * 0.7, Color(0.3, 0.34, 0.38), 2.0)
+		cv.draw_circle(c + Vector2.from_angle(a) * rad * 0.62, 2.8, _glow(it))
+	cv.draw_circle(c, 3.0, Color(0.9, 0.9, 0.92))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_altar(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	cv.draw_rect(_q(r, 0.1, 0.0, 0.9, 1.0), Color(0.55, 0.2, 0.25, 0.85))  # (a cloth)
+	for k in 2:
+		var p := _p(r, 0.2 + 0.6 * float(k), 0.3)
+		cv.draw_rect(Rect2(p - Vector2(1.5, 3), Vector2(3, 6)), Color(0.95, 0.92, 0.85))
+		cv.draw_circle(p + Vector2(0, -5), 2.2, _glow(it))
+
+
+static func a_candle_stand(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	cv.draw_circle(c + Vector2(0, 8), 6.0, Color(0.3, 0.26, 0.2))
+	cv.draw_rect(Rect2(c + Vector2(-2.5, -3), Vector2(5, 11)), Color(0.95, 0.92, 0.85))
+	if not it["dead"]:
+		cv.draw_circle(c + Vector2(0, -8), 8.0, Color(it["glow"], 0.18))
+	_poly(cv, [c + Vector2(-2.5, -4), c + Vector2(0, -11), c + Vector2(2.5, -4)], _glow(it), false)
+
+
+static func a_weapon_rack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	for k in 4:
+		cv.draw_line(_p(r, 0.1 + 0.2 * float(k), 0.15), _p(r, 0.1 + 0.2 * float(k), 0.85), Color(0.15, 0.15, 0.18), 3.0)
+		cv.draw_line(_p(r, 0.1 + 0.2 * float(k), 0.15), _p(r, 0.1 + 0.2 * float(k), 0.4), Color(0.55, 0.55, 0.6), 2.0)
+
+
+static func a_toilet(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	cv.draw_rect(Rect2(r.position + Vector2(3, 2), Vector2(r.size.x - 6, 8)), Color(0.78, 0.8, 0.84))
+	cv.draw_circle(c + Vector2(0, 4), 8.0, Color(0.85, 0.87, 0.9))
+	cv.draw_circle(c + Vector2(0, 4), 5.0, Color(0.5, 0.55, 0.6))
+	cv.draw_rect(Rect2(r.position + Vector2(3, 2), Vector2(r.size.x - 6, 8)), INK, false, 1.2)
+
+
+static func a_pump(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, _q(r, 0.0, 0.25, 1.0, 0.85), it["base"])
+	cv.draw_rect(_q(r, 0.1, 0.3, 0.5, 0.8), Color(0.3, 0.33, 0.38))  # (the motor)
+	for k in 3:
+		cv.draw_line(_p(r, 0.15 + 0.12 * float(k), 0.3), _p(r, 0.15 + 0.12 * float(k), 0.8), Color(0, 0, 0, 0.4), 1.2)
+	cv.draw_line(_p(r, 0.5, 0.55), _p(r, 1.0, 0.55), Color(0.6, 0.65, 0.7), 4.0)
+	cv.draw_circle(_p(r, 0.75, 0.2), 3.0, Color(0.8, 0.3, 0.25))  # (a valve wheel)
+
+
+static func a_manifold(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, Color(0.16, 0.17, 0.2))
+	cv.draw_line(_p(r, 0.05, 0.5), _p(r, 0.95, 0.5), Color(0.62, 0.66, 0.72), 5.0)
+	for k in 3:
+		cv.draw_line(_p(r, 0.2 + 0.3 * float(k), 0.5), _p(r, 0.2 + 0.3 * float(k), 0.12), Color(0.55, 0.6, 0.66), 3.0)
+		cv.draw_circle(_p(r, 0.2 + 0.3 * float(k), 0.12), 3.0, Color(0.8, 0.3, 0.25))
+	cv.draw_rect(r, INK, false, 1.5)
+
+
+static func a_tool_cart(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"].darkened(0.1))
+	cv.draw_rect(r.grow(-4.0), it["base"].lightened(0.15))
+	cv.draw_line(r.position + Vector2(8, 8), r.position + Vector2(18, 20), Color(0.7, 0.7, 0.75), 2.0)  # (a spanner)
+	cv.draw_rect(Rect2(r.position + Vector2(r.size.x - 14, 8), Vector2(7, 12)), Color(0.8, 0.3, 0.25))
+	cv.draw_rect(r, INK, false, 1.5)
+
+
+static func a_fuse_box(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	for k in 3:
+		cv.draw_rect(Rect2(r.position + Vector2(5.0 + 7.0 * float(k), 7), Vector2(4, 8)), Color(0.15, 0.15, 0.17))
+		cv.draw_rect(Rect2(r.position + Vector2(5.0 + 7.0 * float(k), 7 if k % 2 == 0 else 11), Vector2(4, 4)), _glow(it))
+
+
+static func a_battery_bank(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.1))
+	for k in 4:
+		var cell := _q(r, 0.06 + 0.22 * float(k), 0.2, 0.24 + 0.22 * float(k), 0.8)
+		cv.draw_rect(cell, Color(0.15, 0.17, 0.15))
+		cv.draw_rect(Rect2(cell.position + Vector2(2, 2), Vector2(cell.size.x - 4, 3)), _glow(it) if k < 3 else _glow(it).darkened(0.6))
+
+
+static func a_suit_rack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.3))
+	for k in 3:
+		var p := _p(r, 0.2 + 0.3 * float(k), 0.5)
+		cv.draw_rect(Rect2(p - Vector2(5, 6), Vector2(10, 12)), it["base"].lightened(0.1))
+		cv.draw_circle(p + Vector2(0, -2), 3.5, Color(0.75, 0.9, 1.0, 0.85))  # (a visor)
+		cv.draw_rect(Rect2(p - Vector2(5, 6), Vector2(10, 12)), INK, false, 1.0)
+
+
+static func a_airlock_console(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.2))
+	cv.draw_circle(r.get_center(), 5.0, Color(0.04, 0.05, 0.06))
+	cv.draw_circle(r.get_center(), 3.0, _glow(it))
+
+
+static func a_egg_cluster(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	if not it["dead"]:
+		cv.draw_circle(c, 13.0, Color(it["glow"], 0.12))
+	for k in 4:
+		var p := c + Vector2.from_angle(TAU * float(k) / 4.0 + 0.7) * 6.0
+		cv.draw_circle(p, 5.0, Color(0.9, 0.82, 0.55) if not it["dead"] else Color(0.5, 0.46, 0.35))
+		cv.draw_circle(p + Vector2(-1.5, -1.5), 1.5, Color(1, 1, 1, 0.55))
+		cv.draw_arc(p, 5.0, 0.0, TAU, 8, Color(0.4, 0.3, 0.1), 1.0, true)
+
+
+static func a_hive_pillar(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	_hexcell(cv, c, 13.0, it["base"].darkened(0.1))
+	_hexcell(cv, c, 8.0, it["base"].lightened(0.2))
+	cv.draw_circle(c, 2.5, it["base"].darkened(0.4))
+
+
+static func a_larder(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.2))
+	for k in 4:
+		var p := _p(r, 0.15 + 0.23 * float(k), 0.5)
+		cv.draw_circle(p, 4.5, Color(0.8, 0.65, 0.3) if k % 2 == 0 else Color(0.55, 0.3, 0.25))  # (jars of nectar and cured grubs)
+		cv.draw_circle(p + Vector2(-1.5, -1.5), 1.3, Color(1, 1, 1, 0.5))
