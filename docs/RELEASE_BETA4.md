@@ -3,6 +3,11 @@
 Beta 4.1 is a fights, balance and content update on top of Beta 4, from a content audit and a mechanics audit. What it changes comes first; the Beta 4 notes follow. Download it from **GitHub → Actions → beta builds → the latest green run → Artifacts** (Windows, Linux, macOS). The main menu's corner says **Beta 4.1**.
 
 ## New in Beta 4.1
+### Enemies you can read
+- **Race ships and gang liveries.** In a race's home region you meet that race's own ships (about 60% of pirate fights), crewed by that race with its signature parts; the eight factions keep their own livery. Every ship carries an emblem on its hull, a colour for its plating, floor and engines, and dressing outside the hull (mandibles, crystal shards, cargo pods, welded scrap, tarps, fins, lattice spars).
+- **Roles.** Gunboats, brawlers, escorts, snipers and haulers: the name line says which ("Kett gunboat"). A poor ship looks patched; a rich one looks fine.
+- **No more skulls before a fight.** Event fight choices, radar markers and exit wardens show the enemy ship itself next to yours, her emblem and her name line; the Ledger warns in words only. The fight panel keeps its skull dots.
+
 ### Fights
 - **The Rustbucket** carries a Bubble Rig shield in place of its Rattle Burst, and its Bolt Thrower sits in a notch one cell behind the prow, so it is no longer the first thing shot off.
 - **Every starter has a spare Reactor Mk1** in its hold.
