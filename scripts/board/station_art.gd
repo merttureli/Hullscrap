@@ -705,3 +705,294 @@ static func a_tide_basin(cv: CanvasItem, it: Dictionary) -> void:
 	for k in 2:
 		_ring(cv, r.get_center() + Vector2(float(k) * 14.0 - 7.0, 0), 6.0, Color(1, 1, 1, 0.2), 1.5)
 	cv.draw_rect(r, INK, false, 2.0)
+
+
+# --- lantern -----------------------------------------------------------------------------------------------------------
+
+static func a_lantern_tree(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	cv.draw_circle(c + Vector2(0, 9), 6.0, Color(0.25, 0.2, 0.16))
+	cv.draw_line(c + Vector2(0, 9), c + Vector2(0, -8), Color(0.45, 0.33, 0.22), 3.0)
+	var g := _glow(it)
+	for k in 3:
+		var a := c + Vector2(-8.0 + 8.0 * float(k), -2.0 - 4.0 * float(k % 2))
+		cv.draw_line(c + Vector2(0, 2), a, Color(0.45, 0.33, 0.22), 2.0)
+		if not it["dead"]:
+			cv.draw_circle(a + Vector2(0, 4), 8.0, Color(g, 0.15))
+		cv.draw_circle(a + Vector2(0, 4), 4.0, g)
+		cv.draw_line(a + Vector2(0, 4), a, Color(0.3, 0.22, 0.15), 1.0)
+
+
+static func a_perch_bar(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_line(_p(r, 0.04, 0.5), _p(r, 0.96, 0.5), it["base"].darkened(0.1), 5.0)
+	cv.draw_line(_p(r, 0.0, 0.1), _p(r, 0.0, 0.9), it["base"].darkened(0.4), 4.0)
+	cv.draw_line(_p(r, 1.0, 0.1), _p(r, 1.0, 0.9), it["base"].darkened(0.4), 4.0)
+	for k in 3:  # (resting moths)
+		var p := _p(r, 0.2 + 0.3 * float(k), 0.5)
+		_poly(cv, [p + Vector2(-6, -4), p + Vector2(0, 0), p + Vector2(-6, 4)], Color(0.85, 0.78, 0.66), false)
+		_poly(cv, [p + Vector2(6, -4), p + Vector2(0, 0), p + Vector2(6, 4)], Color(0.85, 0.78, 0.66), false)
+		cv.draw_circle(p, 2.0, Color(0.4, 0.3, 0.22))
+
+
+# --- revenant ----------------------------------------------------------------------------------------------------------
+
+static func a_cairn(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.13, 0.15, 0.14))
+	if not it["dead"]:
+		cv.draw_circle(c, r.size.x * 0.5, Color(g, 0.12))
+	var stones := [Vector2(-14, 8), Vector2(10, 10), Vector2(-2, 12), Vector2(-8, -2), Vector2(9, -1), Vector2(0, -12), Vector2(-3, 1)]
+	for k in stones.size():
+		var p: Vector2 = c + stones[k]
+		var rad := 10.0 - 1.2 * float(k % 4)
+		cv.draw_circle(p, rad, Color(0.38, 0.4, 0.4).darkened(0.1 * float(k % 3)))
+		cv.draw_arc(p, rad, 0.0, TAU, 12, INK, 1.5, true)
+	cv.draw_circle(c + Vector2(0, -14), 5.0, Color(0.85, 0.88, 0.8))  # (a skull on top)
+	cv.draw_circle(c + Vector2(-1.8, -15), 1.2, INK)
+	cv.draw_circle(c + Vector2(1.8, -15), 1.2, INK)
+	cv.draw_circle(c + Vector2(0, -2), 2.5, g)
+
+
+static func a_stitch_slab(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	cv.draw_rect(r.grow(-5.0), Color(0.8, 0.8, 0.76, 0.85))  # (a sheet)
+	for k in 5:
+		var p := _p(r, 0.2 + 0.15 * float(k), 0.5)
+		cv.draw_line(p + Vector2(-2, -4), p + Vector2(2, 4), Color(0.2, 0.3, 0.25), 1.5)
+		cv.draw_line(p + Vector2(2, -4), p + Vector2(-2, 4), Color(0.2, 0.3, 0.25), 1.5)
+	cv.draw_line(_p(r, 0.12, 0.5), _p(r, 0.88, 0.5), Color(0.2, 0.3, 0.25), 1.0)
+
+
+# --- choir -------------------------------------------------------------------------------------------------------------
+
+static func a_singing_bowl(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var rad := minf(r.size.x, r.size.y) / 2.0
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.2, 0.15, 0.22))
+	cv.draw_circle(c, rad * 0.9, it["base"].darkened(0.3))
+	cv.draw_circle(c, rad * 0.72, it["base"])
+	cv.draw_circle(c, rad * 0.5, g.darkened(0.2) if not it["dead"] else Color(0.3, 0.26, 0.32))
+	for k in 3:
+		cv.draw_arc(c, rad * (0.3 + 0.2 * float(k)), -0.7, 0.7, 6, Color(1, 1, 1, 0.5 - 0.12 * float(k)), 1.5, true)
+		cv.draw_arc(c, rad * (0.3 + 0.2 * float(k)), PI - 0.7, PI + 0.7, 6, Color(1, 1, 1, 0.5 - 0.12 * float(k)), 1.5, true)
+	_ring(cv, c, rad * 0.9, INK, 2.0)
+
+
+static func a_choir_stall(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	for k in 3:
+		var s := _q(r, float(k) / 3.0 + 0.03, 0.1, float(k + 1) / 3.0 - 0.03, 0.9)
+		cv.draw_rect(s, it["base"])
+		cv.draw_rect(_q(r, float(k) / 3.0 + 0.1, 0.18, float(k + 1) / 3.0 - 0.1, 0.45), Color(0.92, 0.9, 0.85))  # (a score)
+		cv.draw_rect(s, INK, false, 1.2)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+# --- rattler -----------------------------------------------------------------------------------------------------------
+
+static func a_junk_nest(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	cv.draw_circle(c, minf(r.size.x, r.size.y) * 0.46, Color(0.28, 0.24, 0.2))
+	for k in 16:  # (wire and twigs woven round)
+		var a := TAU * float(k) / 16.0
+		cv.draw_line(c + Vector2.from_angle(a) * 8.0, c + Vector2.from_angle(a + 0.7 + _rnd(it, k)) * (15.0 + 4.0 * _rnd(it, k + 9)), Color(0.55, 0.5, 0.42), 1.5)
+	cv.draw_circle(c, 7.0, Color(0.16, 0.14, 0.12))
+	for k in 4:  # (the hoard)
+		var p := c + Vector2.from_angle(float(k) * 1.7 + _rnd(it, 3)) * 3.5
+		cv.draw_circle(p, 1.8, [Color(0.95, 0.8, 0.3), Color(0.5, 0.8, 0.95), Color(0.95, 0.45, 0.35), Color(0.85, 0.85, 0.9)][k])
+
+
+static func a_gadget_bench(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	cv.draw_rect(r.grow(-2.0), it["base"])
+	var sc := _q(r, 0.06, 0.15, 0.3, 0.85)
+	cv.draw_rect(sc, Color(0.04, 0.05, 0.06))
+	cv.draw_rect(sc.grow(-1.5), _glow(it))
+	cv.draw_line(_p(r, 0.4, 0.3), _p(r, 0.6, 0.7), Color(0.7, 0.7, 0.75), 2.0)  # (a spanner)
+	cv.draw_circle(_p(r, 0.4, 0.3), 2.5, Color(0.7, 0.7, 0.75))
+	cv.draw_rect(Rect2(_p(r, 0.72, 0.4) - Vector2(4, 3), Vector2(8, 6)), Color(0.5, 0.3, 0.25))
+	cv.draw_line(_p(r, 0.3, 0.8), _p(r, 0.72, 0.5), Color(0.1, 0.1, 0.1), 1.5)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+# --- tessellate --------------------------------------------------------------------------------------------------------
+
+static func a_reform_cradle(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.1, 0.16, 0.15))
+	var n := 5
+	var cell := minf(r.size.x, r.size.y) / float(n) * 0.9
+	for ix in n:
+		for iy in n:
+			var p := r.position + r.size * 0.5 - Vector2(cell, cell) * float(n) / 2.0 + Vector2(cell * float(ix), cell * float(iy))
+			var on := (ix + iy * 2 + int(it["id"])) % 3 != 0
+			cv.draw_rect(Rect2(p + Vector2(1, 1), Vector2(cell - 2, cell - 2)), g if on else g.darkened(0.55))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_circuit_column(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	_box(cv, r, it["base"].darkened(0.3))
+	for k in 3:  # (traces and nodes)
+		var a := _p(r, 0.12, 0.25 + 0.25 * float(k))
+		var b := _p(r, 0.88, 0.35 + 0.25 * float(k % 2))
+		cv.draw_polyline(PackedVector2Array([a, Vector2(a.x, b.y), b]), Color(g, 0.8), 1.5)
+		cv.draw_circle(b, 2.2, g)
+
+
+# --- sable -------------------------------------------------------------------------------------------------------------
+
+static func a_boarding_pod(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.13, 0.14, 0.18))
+	var pts: Array = [_p(r, 0.04, 0.2), _p(r, 0.7, 0.08), _p(r, 0.97, 0.5), _p(r, 0.7, 0.92), _p(r, 0.04, 0.8)]
+	_poly(cv, pts, it["base"], true)
+	cv.draw_rect(_q(r, 0.42, 0.3, 0.68, 0.7), Color(0.2, 0.3, 0.4) if it["dead"] else Color(0.5, 0.75, 0.95, 0.9))  # (the port)
+	cv.draw_line(_p(r, 0.1, 0.5), _p(r, 0.36, 0.5), Color(0, 0, 0, 0.4), 2.0)
+	cv.draw_line(_p(r, 0.97, 0.5), _p(r, 1.04, 0.5), Color(0.55, 0.55, 0.6), 3.0)  # (the cutter arm)
+	cv.draw_circle(_p(r, 1.02, 0.5), 3.0, g)
+	cv.draw_line(_p(r, 0.2, 0.12), _p(r, 0.2, 0.0), Color(0.6, 0.6, 0.65), 2.0)  # (a grapple)
+
+
+static func a_torch_rack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"])
+	var g := _glow(it)
+	for k in 3:
+		var p := _p(r, 0.2 + 0.3 * float(k), 0.5)
+		cv.draw_rect(Rect2(p - Vector2(2, 6), Vector2(4, 12)), Color(0.7, 0.7, 0.75))
+		cv.draw_circle(p + Vector2(0, -7), 3.0, g)
+
+
+# --- quillback ---------------------------------------------------------------------------------------------------------
+
+static func a_list_strip(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, Color(0.5, 0.42, 0.3))
+	cv.draw_rect(r.grow(-5.0), it["base"])
+	cv.draw_line(_p(r, 0.5, 0.1), _p(r, 0.5, 0.9), Color(1, 1, 1, 0.5), 2.0)  # (the centre line)
+	cv.draw_line(_p(r, 0.14, 0.2), _p(r, 0.14, 0.8), Color(1, 1, 1, 0.4), 2.0)
+	cv.draw_line(_p(r, 0.86, 0.2), _p(r, 0.86, 0.8), Color(1, 1, 1, 0.4), 2.0)
+	for k in 8:  # (the rail posts)
+		cv.draw_circle(_p(r, 0.03 + 0.134 * float(k), 0.04), 2.2, Color(0.35, 0.28, 0.2))
+		cv.draw_circle(_p(r, 0.03 + 0.134 * float(k), 0.96), 2.2, Color(0.35, 0.28, 0.2))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_quill_rack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.1))
+	for k in 5:  # (long spined lances)
+		var a := _p(r, 0.12 + 0.19 * float(k), 0.8)
+		cv.draw_line(a, _p(r, 0.14 + 0.19 * float(k), 0.1), Color(0.78, 0.72, 0.55), 2.0)
+		cv.draw_circle(_p(r, 0.14 + 0.19 * float(k), 0.1), 1.8, Color(0.9, 0.9, 0.85))
+
+
+# --- kite --------------------------------------------------------------------------------------------------------------
+
+static func a_tether_web(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := Color(it["glow"], 0.0) if it["dead"] else Color(it["glow"], 0.8)
+	var col := Color(it["base"], 0.7)
+	for k in 7:
+		var t := float(k) / 6.0
+		cv.draw_line(r.position + Vector2(r.size.x * t, 0), r.position + Vector2(r.size.x * (1.0 - t), r.size.y), col, 1.2)
+		cv.draw_line(r.position + Vector2(0, r.size.y * t), r.position + Vector2(r.size.x, r.size.y * (1.0 - t)), col, 1.2)
+	for k in 4:
+		cv.draw_circle(r.position + r.size * Vector2(0.2 + 0.2 * float(k), 0.3 + 0.4 * _rnd(it, k)), 2.2, g)
+	for q in [r.position, Vector2(r.end.x, r.position.y), Vector2(r.position.x, r.end.y), r.end]:
+		cv.draw_circle(q, 4.0, Color(0.45, 0.4, 0.6))
+
+
+static func a_grip_post(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	cv.draw_circle(c, 9.0, Color(0.25, 0.22, 0.34))
+	cv.draw_circle(c, 5.0, it["base"])
+	_ring(cv, c, 10.0, it["base"].lightened(0.3), 2.5)
+	cv.draw_circle(c + Vector2(-2, -2), 1.8, Color(1, 1, 1, 0.5))
+
+
+# --- warden-frame ------------------------------------------------------------------------------------------------------
+
+static func a_optic_cradle(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var rad := minf(r.size.x, r.size.y) * 0.4
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.12, 0.17, 0.2))
+	cv.draw_rect(_q(r, 0.0, 0.0, 1.0, 0.12), Color(0.35, 0.45, 0.5))  # (the frame rails)
+	cv.draw_rect(_q(r, 0.0, 0.88, 1.0, 1.0), Color(0.35, 0.45, 0.5))
+	cv.draw_circle(c, rad, Color(0.06, 0.08, 0.1))
+	cv.draw_circle(c, rad * 0.75, g.darkened(0.35) if not it["dead"] else Color(0.15, 0.2, 0.22))
+	cv.draw_circle(c, rad * 0.4, g)
+	cv.draw_circle(c, rad * 0.16, Color(0.02, 0.04, 0.05))
+	cv.draw_line(c - Vector2(rad, 0), c + Vector2(rad, 0), Color(g, 0.5), 1.0)
+	cv.draw_line(c - Vector2(0, rad), c + Vector2(0, rad), Color(g, 0.5), 1.0)
+	_ring(cv, c, rad, INK, 2.0)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_gantry_arm(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	cv.draw_line(_p(r, 0.0, 0.2), _p(r, 1.0, 0.2), Color(0.4, 0.5, 0.55), 4.0)  # (the rail)
+	var a := _p(r, 0.2, 0.2)
+	var b := _p(r, 0.45, 0.65)
+	var c := _p(r, 0.75, 0.5)
+	cv.draw_polyline(PackedVector2Array([a, b, c]), Color(0.55, 0.65, 0.7), 4.0)
+	for q in [a, b, c]:
+		cv.draw_circle(q, 3.0, Color(0.25, 0.3, 0.34))
+	cv.draw_circle(c, 2.0, g)
+
+
+# --- murrow ------------------------------------------------------------------------------------------------------------
+
+static func a_rock_face(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var pts: Array = [r.position + Vector2(0, r.size.y)]
+	for k in 9:
+		pts.append(r.position + Vector2(r.size.x * float(k) / 8.0, r.size.y * (0.08 + 0.35 * _rnd(it, k))))
+	pts.append(r.end)
+	_poly(cv, pts, it["base"].darkened(0.1), true)
+	for k in 3:  # (ore glints)
+		var p := r.position + r.size * Vector2(0.2 + 0.3 * float(k), 0.55 + 0.2 * _rnd(it, k + 5))
+		cv.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -4), p + Vector2(3, 0), p + Vector2(0, 4), p + Vector2(-3, 0)]), [Color(0.95, 0.8, 0.3), Color(0.55, 0.85, 0.95), Color(0.9, 0.55, 0.3)][k])
+
+
+static func a_ore_cart(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.1))
+	for k in 5:
+		cv.draw_circle(_p(r, 0.15 + 0.17 * float(k), 0.3 + 0.4 * _rnd(it, k)), 4.5, Color(0.35, 0.33, 0.3) if k % 2 == 0 else Color(0.5, 0.45, 0.4))
+	cv.draw_circle(_p(r, 0.5, 0.45), 2.0, Color(0.95, 0.8, 0.3))
+	for q in [_p(r, 0.2, 0.0), _p(r, 0.8, 0.0), _p(r, 0.2, 1.0), _p(r, 0.8, 1.0)]:
+		cv.draw_circle(q, 2.5, Color(0.12, 0.12, 0.14))
+
+
+static func a_drill_rig(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	var head := _q(r, 0.0, 0.1, 0.5, 0.9)
+	var c := head.get_center()
+	var rad := minf(head.size.x, head.size.y) * 0.5
+	cv.draw_circle(c, rad, Color(0.3, 0.3, 0.32))
+	for k in 8:
+		var a := TAU * float(k) / 8.0
+		_poly(cv, [c + Vector2.from_angle(a - 0.2) * rad, c + Vector2.from_angle(a) * (rad + 5.0), c + Vector2.from_angle(a + 0.2) * rad], Color(0.7, 0.7, 0.74), false)
+	cv.draw_circle(c, rad * 0.35, Color(0.55, 0.55, 0.6))
+	cv.draw_rect(_q(r, 0.5, 0.2, 1.0, 0.8), it["base"])
+	cv.draw_circle(_p(r, 0.85, 0.4), 3.0, _glow(it))
+	cv.draw_line(_p(r, 0.55, 0.3), _p(r, 0.95, 0.3), Color(0, 0, 0, 0.4), 1.5)
+	cv.draw_rect(r, INK, false, 2.0)

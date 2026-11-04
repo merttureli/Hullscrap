@@ -123,7 +123,28 @@
 		"current_loom": {"name": "Current loom", "size": [3, 2], "blocks": true, "color": "#6aa8b8", "glow": "#a0f8ff", "tall": true, "screen": true, "pulse": true},
 		"static_column": {"name": "Static column", "size": [1, 1], "blocks": true, "color": "#78a8b8", "glow": "#a0f8ff", "tall": true},
 		"barnacle_bank": {"name": "Barnacle bank", "size": [3, 1], "blocks": true, "color": "#8a8a70"},
-		"tide_basin": {"name": "Tide basin", "size": [3, 2], "blocks": true, "color": "#4a8aa0", "glow": "#80d0ff"}
+		"tide_basin": {"name": "Tide basin", "size": [3, 2], "blocks": true, "color": "#4a8aa0", "glow": "#80d0ff"},
+		"lantern_tree": {"name": "Lantern tree", "size": [1, 1], "blocks": true, "color": "#8a6a4a", "glow": "#ffd890", "topple": true},
+		"perch_bar": {"name": "Perch bar", "size": [3, 1], "blocks": true, "color": "#8a7a68", "topple": true},
+		"cairn": {"name": "Cairn", "size": [3, 3], "blocks": true, "color": "#5a5e5a", "glow": "#80ffa0", "tall": true},
+		"stitch_slab": {"name": "Stitch slab", "size": [2, 1], "blocks": true, "color": "#6a6e72", "topple": true},
+		"singing_bowl": {"name": "Singing bowl", "size": [2, 2], "blocks": true, "color": "#d8a8c8", "glow": "#ffc0f0", "pulse": true},
+		"choir_stall": {"name": "Choir stall", "size": [3, 1], "blocks": true, "color": "#9a7a8a", "topple": true},
+		"junk_nest": {"name": "Junk nest", "size": [2, 2], "blocks": true, "color": "#7a6a58"},
+		"gadget_bench": {"name": "Gadget bench", "size": [3, 1], "blocks": true, "color": "#8a7a50", "glow": "#ffd070", "screen": true, "topple": true},
+		"reform_cradle": {"name": "Reform cradle", "size": [2, 2], "blocks": true, "color": "#70c0a0", "glow": "#b0ffe0", "screen": true},
+		"circuit_column": {"name": "Circuit column", "size": [1, 2], "blocks": true, "color": "#4a7a68", "glow": "#b0ffe0", "tall": true},
+		"boarding_pod": {"name": "Boarding pod", "size": [4, 2], "blocks": true, "color": "#6a7a9a", "glow": "#ff8860", "screen": true},
+		"torch_rack": {"name": "Torch rack", "size": [2, 1], "blocks": true, "color": "#5a5a68", "glow": "#ffa070", "tall": true, "topple": true},
+		"list_strip": {"name": "Lists", "size": [7, 2], "blocks": false, "color": "#c8b888"},
+		"quill_rack": {"name": "Quill rack", "size": [2, 1], "blocks": true, "color": "#6a5a38", "tall": true, "topple": true},
+		"tether_web": {"name": "Tether web", "size": [4, 3], "blocks": false, "color": "#a898d8", "glow": "#e0d0ff"},
+		"grip_post": {"name": "Grip post", "size": [1, 1], "blocks": true, "color": "#8878b8", "tall": true},
+		"optic_cradle": {"name": "Optic cradle", "size": [3, 2], "blocks": true, "color": "#5a8898", "glow": "#80f8e0", "tall": true, "screen": true, "pulse": true},
+		"gantry_arm": {"name": "Gantry arm", "size": [4, 1], "blocks": false, "color": "#6a8896", "glow": "#80f8e0"},
+		"rock_face": {"name": "Rock face", "size": [4, 1], "blocks": true, "color": "#6a5a48", "tall": true},
+		"ore_cart": {"name": "Ore cart", "size": [2, 1], "blocks": true, "color": "#7a6a58", "topple": true},
+		"drill_rig": {"name": "Drill rig", "size": [3, 2], "blocks": true, "color": "#8a8a70", "glow": "#ffd060", "tall": true, "screen": true}
 	},
 	"rules": {
 		"dock": [
@@ -426,6 +447,61 @@
 			{"fixture": "tide_basin", "n": [1, 1], "at": "centre"},
 			{"fixture": "barnacle_bank", "n": [2, 4], "at": "wall"},
 			{"fixture": "barnacle_bank", "n": [1, 1], "at": "wall", "room": 1}
+		],
+		"lamp_roost": [
+			{"fixture": "lantern_tree", "n": [4, 7], "at": "free"},
+			{"fixture": "perch_bar", "n": [1, 3], "at": "wall", "window": "only"},
+			{"fixture": "planter", "n": [1, 2], "at": "corner"}
+		],
+		"cairn_hall": [
+			{"fixture": "cairn", "n": [1, 1], "at": "centre"},
+			{"fixture": "stitch_slab", "n": [2, 3], "at": "wall"},
+			{"fixture": "suit_rack", "n": [1, 2], "at": "wall"},
+			{"fixture": "candle_stand", "n": [1, 2], "at": "corner", "room": 1}
+		],
+		"chantry_hall": [
+			{"fixture": "singing_bowl", "n": [1, 1], "at": "centre"},
+			{"fixture": "choir_stall", "n": [2, 3], "at": "wall"},
+			{"fixture": "candle_stand", "n": [1, 2], "at": "wall", "room": 1},
+			{"fixture": "crystal_cluster", "n": [1, 2], "at": "corner", "room": 1}
+		],
+		"gremlin_warren": [
+			{"fixture": "junk_nest", "n": [1, 2], "at": "free"},
+			{"fixture": "gadget_bench", "n": [1, 1], "at": "wall"},
+			{"fixture": "junk_nest", "n": [1, 1], "at": "corner", "room": 1},
+			{"fixture": "gadget_bench", "n": [1, 1], "at": "wall", "room": 2},
+			{"fixture": "junk_nest", "n": [1, 1], "at": "corner", "room": 3}
+		],
+		"reform_bay": [
+			{"fixture": "reform_cradle", "n": [2, 3], "at": "free"},
+			{"fixture": "circuit_column", "n": [2, 4], "at": "wall"},
+			{"fixture": "circuit_column", "n": [1, 1], "at": "wall", "room": 1}
+		],
+		"boarding_yard": [
+			{"fixture": "boarding_pod", "n": [1, 1], "at": "centre"},
+			{"fixture": "torch_rack", "n": [2, 3], "at": "wall"},
+			{"fixture": "tool_cart", "n": [1, 2], "at": "free"},
+			{"fixture": "fuel_drum", "n": [1, 2], "at": "corner"}
+		],
+		"duelling_lists": [
+			{"fixture": "list_strip", "n": [1, 1], "at": "centre"},
+			{"fixture": "quill_rack", "n": [2, 3], "at": "wall"},
+			{"fixture": "bench", "n": [2, 3], "at": "wall", "room": 1}
+		],
+		"tether_loft": [
+			{"fixture": "tether_web", "n": [1, 1], "at": "centre"},
+			{"fixture": "grip_post", "n": [4, 7], "at": "free"},
+			{"fixture": "suit_rack", "n": [1, 2], "at": "wall"}
+		],
+		"optic_cradle": [
+			{"fixture": "optic_cradle", "n": [1, 1], "at": "centre"},
+			{"fixture": "gantry_arm", "n": [1, 2], "at": "wall"},
+			{"fixture": "antenna_console", "n": [1, 1], "at": "wall", "room": 1}
+		],
+		"dig_face": [
+			{"fixture": "drill_rig", "n": [1, 1], "at": "centre"},
+			{"fixture": "rock_face", "n": [2, 3], "at": "wall"},
+			{"fixture": "ore_cart", "n": [1, 3], "at": "free"}
 		]
 	},
 	"dressing": {"signs": {"airlock": "AIRLOCK", "reactor": "REACTOR", "medbay": "MEDBAY", "command": "COMMAND", "security": "SECURITY", "market": "MARKET", "observation": "OBSERVATION", "quarters": "QUARTERS", "storage": "STORES", "cargo": "CARGO", "hydroponics": "GARDEN", "mess": "MESS", "lab": "LAB", "comms": "COMMS", "chapel": "CHAPEL", "brig": "CELL", "water": "WATER", "hangar": "HANGAR", "power": "POWER", "breach": "DANGER", "maintenance": "", "corridor": ""}, "wall": {"pipe": {"per_area": 0.5, "len": [3, 7], "max": 4, "extra": 1.0}, "cable": {"per_area": 0.3, "len": [2, 5], "max": 3, "extra": 1.0}, "vent": {"per_area": 0.25, "len": [1, 1], "max": 2, "extra": 0.8}, "lamp": {"per_area": 0.55, "len": [1, 1], "max": 6, "extra": 1.0}, "panel": {"per_area": 0.2, "len": [1, 2], "max": 2, "extra": 0.6, "purposes": ["reactor", "power", "engineering", "command", "comms", "lab", "water", "hangar", "cargo", "security", "maintenance"]}, "poster": {"per_area": 0.3, "len": [1, 1], "max": 2, "extra": 0.6, "purposes": ["quarters", "mess", "market", "chapel", "observation", "hydroponics", "medbay", "security", "brig"]}}, "floor": {"stain": {"per_area": 0.4, "max": 4, "extra": 1.0}, "scuff": {"per_area": 0.6, "max": 6, "extra": 1.5}, "arrow": {"per_area": 0.15, "max": 2, "extra": 0.5, "purposes": ["corridor", "hangar", "cargo", "market"]}, "lane": {"per_area": 0.2, "max": 2, "extra": 0.4, "purposes": ["hangar", "cargo", "reactor", "power", "water"]}}, "states": {"abandoned": {"floor": {"debris": {"per_area": 0.6, "max": 5}, "scorch": {"per_area": 0.2, "max": 2}}, "wall": {"scorch": {"per_area": 0.2, "max": 2}}}, "half": {"floor": {"clutter": {"per_area": 0.4, "max": 3}}, "wall": {"scorch": {"per_area": 0.06, "max": 1}}}, "operational": {}}}
