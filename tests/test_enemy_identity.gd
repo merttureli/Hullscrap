@@ -59,20 +59,19 @@ func test_a_pack_can_add_a_race_style() -> void:
 	var ship = Shipgen.build("tinkerfolk", "medium", 3, 60.0)
 	check(ship != null, "a pack race builds")
 	if ship != null:
-		eq(ship.get_meta("style")["line"], "Tinker wagon", "the pack's name line")
+		eq(ship.get_meta("style")["line"], "Tinker " + str(ship.get_meta("shipgen")["role"]), "the pack's name line")
 	Content.packs_root = ""
 	check(not Shipgen.tables()["factions"].has("tinkerfolk"), "and it is gone with the pack")
 
 
 func test_a_built_ship_carries_its_livery_crew_and_name_line() -> void:
-	var lines := {"small": "stinger", "medium": "lancer", "large": "hive-cruiser"}
-	for size in lines:
+	for size in ["small", "medium", "large"]:
 		var ship = Shipgen.build("kett", size, 11, 120.0, {"stage": 3})
 		check(ship != null, "a kett " + size)
 		if ship == null:
 			continue
 		var look: Dictionary = ship.get_meta("style")
-		eq(look["line"], "Kett " + lines[size], "the name line of a kett " + size)
+		eq(look["line"], "Kett " + str(ship.get_meta("shipgen")["role"]), "the name line of a kett " + size + " is its people and its role")
 		check(look["emblem"]["prims"].size() > 0, "the emblem is on the ship")
 		check(look["palette"]["tint"] is Color and look["palette"]["tint"] != Color.WHITE, "the tint is on the ship")
 		check(ship.crew_plan.size() > 0 and ship.crew_plan.all(func(m): return m["species"] == "kett"), "crewed by kett")
@@ -175,3 +174,55 @@ func test_no_two_styles_share_both_a_dominant_colour_and_a_dressing_kind() -> vo
 			var key := "%s/%s" % [cls, e["kind"]]
 			check(not seen.has(key), "%s and %s share the colour %s and the dressing %s" % [id, seen.get(key, ""), cls, e["kind"]])
 			seen[key] = id
+
+
+func test_roles_shift_the_split_not_the_budget_and_name_the_ship() -> void:
+	for id in ["kett", "rustfangs", "concord", "revenant"]:
+		var roles: Array = Shipgen.roles_of(id)
+		check(roles.size() >= 2 and roles.size() <= 4, "%s flies 2 to 4 roles: %s" % [id, str(roles)])
+		var seen := {}
+		for sd in 80:
+			var ship = Shipgen.build(id, "medium", sd, 150.0, {"stage": 3})
+			var role := str(ship.get_meta("shipgen")["role"])
+			seen[role] = true
+			check(roles.has(role), "%s: %s is one of its roles" % [id, role])
+			check(ship.get_meta("style")["line"].ends_with(role), "the name line carries the role: " + ship.get_meta("style")["line"])
+			check(float(ship.get_meta("shipgen")["spent"]) <= 150.0 + 0.01, "a role never adds budget")
+		check(seen.size() >= 2, "%s: at least two roles are reachable by seed (%s)" % [id, str(seen.keys())])
+	for id in ["kett", "prismatic", "grundl", "rustfangs", "lumen", "concord"]:
+		check(Shipgen.roles_of(id).size() >= 2, id + " has roles")
+
+
+func test_a_roled_ship_is_built_like_its_role() -> void:
+	var guns := {"gunboat": 0.0, "hauler": 0.0}
+	var armour := {"gunboat": 0.0, "brawler": 0.0}
+	var shields := {"escort": 0.0, "gunboat": 0.0}
+	var n := {"gunboat": 0, "hauler": 0, "brawler": 0, "escort": 0}
+	for sd in 40:
+		for role in n:
+			var ship = Shipgen.build("concord", "large", 200 + sd, 260.0, {"stage": 4, "role": role})
+			var m: Dictionary = ship.get_meta("shipgen")
+			n[role] += 1
+			if guns.has(role): guns[role] += m["weapons"].size()
+			if armour.has(role): armour[role] += int(m["armour"])
+			if shields.has(role): shields[role] += m["shields"].size()
+	check(guns["gunboat"] > guns["hauler"], "a gunboat carries more guns than a hauler (%.1f vs %.1f)" % [guns["gunboat"] / 40.0, guns["hauler"] / 40.0])
+	check(armour["brawler"] > armour["gunboat"], "a brawler wears more armour than a gunboat")
+	check(shields["escort"] > shields["gunboat"], "an escort has more shield than a gunboat")
+
+
+func test_a_higher_budget_looks_stronger_whatever_the_role() -> void:
+	for id in ["kett", "rustfangs", "concord"]:
+		var lo := {"cells": 0.0, "guns": 0.0, "armour": 0.0}
+		var hi := {"cells": 0.0, "guns": 0.0, "armour": 0.0}
+		for sd in 30:
+			for pair in [[lo, 45.0], [hi, 240.0]]:
+				var ship = Shipgen.build(id, "medium", 300 + sd, pair[1], {"stage": 4})
+				pair[0]["cells"] += ship.grid.tiles.size()
+				pair[0]["guns"] += ship.get_meta("shipgen")["weapons"].size()
+				pair[0]["armour"] += int(ship.get_meta("shipgen")["armour"])
+		check(hi["guns"] > lo["guns"] and hi["armour"] > lo["armour"] and hi["cells"] >= lo["cells"], "%s: more guns, plating and hull with the budget (%s vs %s)" % [id, str(lo), str(hi)])
+	var poor = Shipgen.build("kett", "medium", 3, 30.0)
+	var rich = Shipgen.build("kett", "medium", 3, 300.0)
+	eq(poor.get_meta("style")["grade"], "patched", "a low budget looks patched")
+	eq(rich.get_meta("style")["grade"], "fine", "a high one looks fine")

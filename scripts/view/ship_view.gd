@@ -129,10 +129,15 @@ func _draw() -> void:
 	_glow_quads = []
 	_livery = ship.get_meta("style", {})
 	var grid = ship.grid
-	if not _livery.is_empty() and not _livery["dressing"].is_empty():  # the exterior dressing: outside the hull, under everything
-		var dsig := [grid.tiles.size(), grid.shapes.size(), ship.components.instances.size()]
+	if not _livery.is_empty():  # the exterior dressing: outside the hull, under everything
+		var dsig := [grid.tiles.size(), grid.shapes.size(), ship.components.instances.size(), _livery["grade"]]
 		if dsig != _dress_sig:
-			_dress_plan = Dressing.plan(ship, _livery["dressing"])
+			var entries: Array = _livery["dressing"].duplicate()
+			if _livery["grade"] == "patched":  # a low budget looks patched: welded scrap and a bare frame
+				entries.append({"kind": "scrap", "count": [6, 10], "where": "any", "len": 1.1})
+			elif _livery["grade"] == "fine":  # a high one looks kept: trim along the whole outline
+				entries.append({"kind": "trim"})
+			_dress_plan = Dressing.plan(ship, entries)
 			_dress_sig = dsig
 		Dressing.draw(self, _dress_plan, px(Vector2.ZERO), CELL, _livery["palette"], _clock)
 	for c in grid.tiles:

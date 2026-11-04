@@ -245,6 +245,9 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 		var roll := RandomNumberGenerator.new()
 		roll.seed = _mix(seed_value, faction, size, 99)
 		ram = roll.randf() < float(f["ai"]["rammer"]) and size != "small"
+	var role := str(opts["role"]) if opts.has("role") else pick_role(faction, size, seed_value)
+	if role != "" and not opts.has("ram") and bool(tables()["roles"]["list"][role].get("ram", false)) and float(f["ai"]["rammer"]) > 0.0 and size != "small":
+		ram = true  # a brawler of a faction whose pilots ram rams
 	var shields := true
 	var cap := shield_cap(int(opts.get("stage", 0)))
 	if cap < 1.0 and not f.has("budget_mult"):
@@ -255,7 +258,7 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 	for attempt in MAX_ATTEMPTS:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = _mix(seed_value, faction, size, attempt)
-		var r := _attempt(faction, size, rng, budget, ram, attempt, shields)
+		var r := _attempt(faction, size, rng, budget, ram, attempt, shields, role)
 		if r["ship"] != null:
 			var ship: Ship = r["ship"]
 			ship.get_meta("shipgen")["attempts"] = attempt + 1
@@ -326,6 +329,63 @@ static func threat_of(design: String, player: Ship) -> Dictionary:
 	return {} if enemy == null else Threat.rate(enemy, player)
 
 
+# --- roles ---------------------------------------------------------------------------------------------------
+
+## The roles a faction flies (data/enemy_tables.json "roles"): the `per_faction` whose favoured category its weights rate highest (ties by the table's order).
+static func roles_of(faction: String) -> Array:
+	var cfg: Dictionary = tables()["roles"]
+	var w: Dictionary = tables()["factions"][faction]["weights"]
+	var keyed: Array = []
+	var i := 0
+	for id in cfg["list"]:
+		keyed.append([-float(w.get(cfg["list"][id]["favours"], 1)), i, id])
+		i += 1
+	keyed.sort()
+	var ids: Array = keyed.map(func(k): return k[2])
+	return ids.slice(0, int(cfg["per_faction"]))
+
+
+## The role of the ship of (faction, size, seed), rolled from the seed and weighted by the faction's own weights; "" for a faction with no roles.
+static func pick_role(faction: String, size: String, seed_value: int) -> String:
+	var cfg: Dictionary = tables()["roles"]
+	var w: Dictionary = tables()["factions"][faction]["weights"]
+	var order: Array = ["small", "medium", "large"]
+	var pool: Array = []
+	var total := 0.0
+	for id in roles_of(faction):
+		var r: Dictionary = cfg["list"][id]
+		if order.find(size) < order.find(str(r.get("min_size", "small"))):
+			continue
+		pool.append(id)
+		total += float(w.get(r["favours"], 1))
+	if pool.is_empty():
+		return ""
+	var roll := RandomNumberGenerator.new()
+	roll.seed = _mix(seed_value, faction, size, 97)
+	var x := roll.randf() * total
+	for id in pool:
+		x -= float(w.get(cfg["list"][id]["favours"], 1))
+		if x < 0.0:
+			return str(id)
+	return str(pool[pool.size() - 1])
+
+
+## `f` with a role laid over it: its weights times the role's, the weight of a long-range gun times the sniper's bias. A copy; the tables stay as they are.
+static func _with_role(f: Dictionary, role: String) -> Dictionary:
+	if role == "":
+		return f
+	var r: Dictionary = tables()["roles"]["list"][role]
+	var out := f.duplicate(true)
+	for k in r["weights"]:
+		out["weights"][k] = float(out["weights"].get(k, 1)) * float(r["weights"][k])
+	if r.has("range_from"):
+		_comps()
+		for m in out["parts"]["weapons"]:
+			if _weapons.has(str(m["id"])) and float(_weapons.def(str(m["id"]))["range"]) >= float(r["range_from"]):
+				m["weight"] = float(m.get("weight", 1)) * float(r["range_bias"])
+	return out
+
+
 static func _mix(seed_value: int, faction: String, size: String, attempt: int) -> int:
 	var h := posmod(seed_value, 2147483647) * 31 + attempt * 40503 + 7
 	for ch in (faction + "/" + size).to_utf8_buffer():
@@ -334,8 +394,8 @@ static func _mix(seed_value: int, faction: String, size: String, attempt: int) -
 
 
 ## One try at a ship: {ship (null when it failed), why}.
-static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, budget: float, ram: bool, attempt: int, shields := true) -> Dictionary:
-	var f: Dictionary = tables()["factions"][faction]
+static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, budget: float, ram: bool, attempt: int, shields := true, role := "") -> Dictionary:
+	var f: Dictionary = _with_role(tables()["factions"][faction], role)
 	var sz: Dictionary = tables()["sizes"][size]
 	var level := 2 if attempt < 4 else (1 if attempt < 7 else 0)
 	var lo := _buy(f, size, budget, rng, ram, shields)
@@ -390,8 +450,8 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 			parts[family].append(id)
 	ship.set_meta("shipgen", {"faction": faction, "size": size, "budget": budget, "spent": lo["spent"], "ram": ram, "level": level,
 		"weapons": parts["weapon"], "engines": parts["engine"], "shields": parts["shield"], "reactors": parts["reactor"],
-		"armour": lo["armour"], "crew": lo["crew"], "skill": lo["skill"]})
-	var look := style_of(faction, size)
+		"armour": lo["armour"], "crew": lo["crew"], "skill": lo["skill"], "role": role})
+	var look := style_of(faction, size, role, budget)
 	if not look.is_empty():
 		ship.set_meta("style", look)
 	return {"ship": ship, "why": ""}
@@ -1310,14 +1370,18 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 
 ## The look of a faction's (or race's) ships: {id, race, label (the adjective), role (by size), line ("Kett lancer"), palette (colours as
 ## Color, patch an Array of them), emblem (data)}; {} for a faction with no `style`.
-static func style_of(faction: String, size: String) -> Dictionary:
+static func style_of(faction: String, size: String, role := "", budget := -1.0) -> Dictionary:
 	var st = tables()["factions"].get(faction, {}).get("style")
 	if not st is Dictionary:
 		return {}
 	var pal: Dictionary = st["palette"]
-	var role := str(st["roles"].get(size, ""))
-	return {"id": faction, "race": str(tables()["factions"][faction].get("race", "")), "label": str(st["label"]), "role": role,
-		"line": ("%s %s" % [st["label"], role]).strip_edges(), "emblem": st["emblem"], "dressing": st.get("dressing", []),
+	var noun := role if role != "" else str(st["roles"].get(size, ""))
+	var cfg: Dictionary = tables()["roles"]
+	var grade := "plain"  # a low budget looks patched, a high one fine
+	if budget >= 0.0:
+		grade = "patched" if budget < float(cfg["patched_below"]) else ("fine" if budget >= float(cfg["fine_from"]) else "plain")
+	return {"id": faction, "race": str(tables()["factions"][faction].get("race", "")), "label": str(st["label"]), "role": noun, "grade": grade,
+		"line": ("%s %s" % [st["label"], noun]).strip_edges(), "emblem": st["emblem"], "dressing": st.get("dressing", []),
 		"palette": {"tint": Color(str(pal["tint"])), "accent": Color(str(pal["accent"])), "mark": Color(str(pal["accent"])) if Color(str(pal["accent"])).get_luminance() > 0.3 else Color(str(pal["tint"])).lightened(0.3), "lamp": Color(str(pal["lamp"])),
 			"glow": Color(str(pal["glow"])), "floor": Color(str(pal.get("floor", pal["tint"]))), "wall": Color(str(pal.get("wall", pal["tint"]))), "patch": pal.get("patch", []).map(func(c): return Color(str(c)))}}
 

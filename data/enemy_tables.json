@@ -312,6 +312,19 @@
 			}
 		}
 	},
+	"roles": {
+		"_doc": "What a ship is for (Beta 3 enemy identity). A role shifts the split of the budget, never its size: `weights` multiply the faction's category weights (weapons, armour, shield, engine, crew, skill, systems), `range_bias` multiplies the weight of a gun that reaches at least `range_from` (a sniper), `ram` (a brawler of a faction whose pilots ram rams), `min_size` the smallest hull that can be it. A faction flies `per_faction` roles (2 to 4): the ones its own weights favour (weapons: gunboat, armour: brawler, shield: escort, skill: sniper, crew: hauler), picked by the ship's seed. The role is in the name line (Kett gunboat). grade: a low budget looks patched (scrap plating, tarps, a bare frame), a high one fine (trim along the hull): `patched_below`, `fine_from`.",
+		"per_faction": 4,
+		"list": {
+			"gunboat": {"weights": {"weapons": 1.8, "armour": 0.6, "shield": 0.7, "engine": 1.3}, "favours": "weapons"},
+			"brawler": {"weights": {"armour": 2.0, "weapons": 0.85, "shield": 0.8, "engine": 0.8}, "ram": true, "favours": "armour"},
+			"escort": {"weights": {"shield": 2.5, "weapons": 0.8, "armour": 0.9}, "favours": "shield"},
+			"sniper": {"weights": {"skill": 2.0, "armour": 0.8}, "range_from": 800, "range_bias": 2.5, "favours": "skill"},
+			"hauler": {"weights": {"weapons": 0.45, "armour": 1.2, "crew": 2.0, "systems": 2.0, "engine": 0.8}, "min_size": "medium", "favours": "crew"}
+		},
+		"patched_below": 60,
+		"fine_from": 250
+	},
 	"threat": {
 		"cuts": [0.5, 0.85, 1.6, 2.6],
 		"horizon_s": 20,

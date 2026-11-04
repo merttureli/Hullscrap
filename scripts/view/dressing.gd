@@ -54,6 +54,10 @@ static func plan(ship, entries: Array) -> Array:
 			out.append({"kind": kind, "at": Vector2(l[0]) + Vector2(0.5, 0.0), "n": Vector2(-0.45, -1.0).normalized(), "len": float(e.get("len", LENGTH["mandibles"])), "seed": rng.randi()})
 			out.append({"kind": kind, "at": Vector2(r[0]) + Vector2(0.5, 0.0), "n": Vector2(0.45, -1.0).normalized(), "len": float(e.get("len", LENGTH["mandibles"])), "seed": rng.randi()})
 			continue
+		if kind == "trim":  # a fine ship: an accent line along every face of the outline
+			for f in pool:
+				out.append({"kind": kind, "at": Vector2(f[0]) + Vector2(0.5, 0.5) + Vector2(f[1]) * 0.5, "n": Vector2(f[1]), "len": 0.0, "seed": 0})
+			continue
 		if pool.is_empty():
 			continue
 		var n := rng.randi_range(int(e["count"][0]), int(e["count"][1]))
@@ -138,6 +142,8 @@ static func draw(cv: CanvasItem, pieces: Array, origin: Vector2, k: float, pal: 
 				_poly(cv, [base + tg * 0.1 * k, base + tg * 0.3 * k + n * ln * 1.1, base + tg * 1.2 * k + n * ln * 0.6, base + tg * 1.1 * k], body, edge)
 			"slabs":  # heavy flat plates laid along the edge
 				_poly(cv, [base - tg * 1.6 * k, base - tg * 1.6 * k + n * 0.7 * k, base + tg * 1.6 * k + n * 0.7 * k, base + tg * 1.6 * k], body.lightened(0.12), edge)
+			"trim":
+				cv.draw_line(base - tg * 0.5 * k + n * 0.12 * k, base + tg * 0.5 * k + n * 0.12 * k, Color(pal["accent"], 0.9), maxf(1.0, k / 9.0))
 			"mandibles":  # a hooked horn curling in over the prow
 				var inward := Vector2(-n.x, 0.0).normalized()
 				var pts := PackedVector2Array([base + tg * 0.6 * k, base + n * ln * 0.55 + tg * 0.5 * k, base + n * ln + inward * 1.3 * k, base + n * ln * 0.6 - tg * 0.2 * k, base - tg * 0.6 * k])
