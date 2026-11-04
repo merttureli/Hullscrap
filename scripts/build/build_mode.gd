@@ -282,21 +282,16 @@ func pointer() -> Vector2:
 func _unhandled_input(e: InputEvent) -> void:
 	if ship == null or combat or (picker != null and picker.visible):
 		return
+	if pan_input(e):
+		return
 	if e is InputEventMouseMotion:
 		hover = _cell_of(e)
 		hover_pt = _point_of(e)
-		if _panning:
-			if build_on:
-				pan_by(-(e as InputEventMouseMotion).relative / (cam.zoom.x if cam != null else 1.0))
-			else:
-				_panning = false
 		_extend_path()
 	elif e is InputEventMouseButton:
 		hover = _cell_of(e)
 		hover_pt = _point_of(e)
-		if e.button_index == MOUSE_BUTTON_MIDDLE:
-			_panning = e.pressed and build_on and (hud == null or not hud.over_ui(e.position))  # a drag moves the view (build mode only; play mode sends crew)
-		elif e.pressed:
+		if e.pressed:
 			match e.button_index:
 				MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT:
 					if build_on:
@@ -307,15 +302,30 @@ func _unhandled_input(e: InputEvent) -> void:
 			_extend_path()
 			_end_drag()
 	elif e is InputEventKey and e.pressed:
-		if build_on and not dragging and not e.ctrl_pressed and (e.keycode in PAN_KEYS or e.keycode == KEY_HOME):
-			if e.keycode == KEY_HOME:
-				reset_pan()
-			else:
-				_pan_held[e.keycode] = true
-		else:
-			_on_key(e)
+		_on_key(e)
 	_refresh_ghost()
 	queue_redraw()
+
+
+## The build view's own input: a middle-button drag, the arrow keys and Home. True when the event was a middle click or one of those keys (it is used up);
+## a mouse move that drags the view is not (the hover still follows it). Play mode has none of it: the middle button sends crew there.
+func pan_input(e: InputEvent) -> bool:
+	if e is InputEventMouseMotion:
+		if _panning:
+			if build_on:
+				pan_by(-(e as InputEventMouseMotion).relative / (cam.zoom.x if cam != null else 1.0))
+			else:
+				_panning = false
+	elif e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_MIDDLE:
+		_panning = e.pressed and build_on and (hud == null or not hud.over_ui(e.position))  # (a drag moves the view)
+		return build_on
+	elif e is InputEventKey and e.pressed and build_on and not dragging and not e.ctrl_pressed and (e.keycode in PAN_KEYS or e.keycode == KEY_HOME):
+		if e.keycode == KEY_HOME:
+			reset_pan()
+		else:
+			_pan_held[e.keycode] = true
+		return true
+	return false
 
 
 func _on_key(e: InputEventKey) -> void:

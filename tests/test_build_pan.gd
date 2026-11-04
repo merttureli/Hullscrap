@@ -51,17 +51,17 @@ func _key(code: Key) -> InputEventKey:
 
 func test_a_middle_drag_pans_the_build_view() -> void:
 	var b := _build()
-	b._unhandled_input(_mmb(true))
+	b.pan_input(_mmb(true))
 	check(b._panning, "the middle button starts a pan in build mode")
-	b._unhandled_input(_move(Vector2(-64.0, -32.0)))
+	b.pan_input(_move(Vector2(-64.0, -32.0)))
 	eq(b.pan, Vector2(64.0, 32.0), "dragging left and up moves the view right and down (at zoom 1)")
 	eq(b.cam.offset, b.pan, "the camera follows")
-	b._unhandled_input(_mmb(false))
+	b.pan_input(_mmb(false))
 	check(not b._panning, "and letting go ends it")
 	b.cam.zoom = Vector2(2.0, 2.0)
 	b.pan = Vector2.ZERO
-	b._unhandled_input(_mmb(true))
-	b._unhandled_input(_move(Vector2(-64.0, 0.0)))
+	b.pan_input(_mmb(true))
+	b.pan_input(_move(Vector2(-64.0, 0.0)))
 	eq(b.pan, Vector2(32.0, 0.0), "zoomed in, a drag of the same length moves less of the world")
 	_done(b)
 
@@ -76,12 +76,12 @@ func test_the_pan_stays_inside_the_build_area_and_home_centres() -> void:
 	b.reset_pan()
 	var mid := b.ship.world_pos
 	check(b.pan.length() < 1.0 + b.pan_area().size.length() and (b.cam.position + b.pan).distance_to(mid) < float(BuildMode.CELL) * 3.0, "Home centres on the ship")
-	b._unhandled_input(_key(KEY_RIGHT))
+	b.pan_input(_key(KEY_RIGHT))
 	check(b._pan_held.has(KEY_RIGHT), "an arrow key is taken as a pan")
 	eq(BuildMode.pan_dir(b._pan_held), Vector2(1.0, 0.0), "to the right")
 	b._pan_held.clear()
 	b.pan_by(Vector2(500.0, 500.0))
-	b._unhandled_input(_key(KEY_HOME))
+	b.pan_input(_key(KEY_HOME))
 	check((b.cam.position + b.pan).distance_to(mid) < float(BuildMode.CELL) * 3.0, "the Home key resets it")
 	_done(b)
 
@@ -92,8 +92,8 @@ func test_zoom_goes_towards_the_cursor_and_play_mode_has_no_pan() -> void:
 	b._zoom(2.0, Vector2.INF)
 	eq(b.pan, Vector2.ZERO, "no cursor: the old zoom about the centre")
 	b.set_build(false)
-	b._unhandled_input(_mmb(true))
+	b.pan_input(_mmb(true))
 	check(not b._panning, "the middle button does not pan in play mode (it sends crew)")
-	b._unhandled_input(_key(KEY_LEFT))
+	b.pan_input(_key(KEY_LEFT))
 	check(b._pan_held.is_empty() and b.pan == Vector2.ZERO, "and neither do the arrows")
 	_done(b)
