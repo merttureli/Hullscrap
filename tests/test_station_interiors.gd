@@ -509,3 +509,33 @@ func test_the_ships_heat_is_unchanged() -> void:
 	var t := {"dries_out": {"heat_above": 60.0, "hp_per_s": 2.0}, "heat_speed": {"cold": 0.7, "hot": 1.2, "below": 20.0, "above": 50.0}, "heat_proof": false}
 	check(TraitSet.heat_hurt(t, 61.0) == 2.0 and TraitSet.heat_hurt(t, 60.0) == 0.0 and TraitSet.heat_hurt(t, 10.0) == 0.0, "dries_out above its threshold only")
 	check(TraitSet.heat_factor(t, 10.0) == 0.7 and TraitSet.heat_factor(t, 90.0) == 1.2 and TraitSet.heat_factor(t, 30.0) == 1.0, "heat_speed as before")
+
+
+# --- wall and floor dressing --------------------------------------------------------------------------------------------
+
+func test_dressing_sits_on_walls_and_floors_and_the_state_decides_the_rest() -> void:
+	var by_state := {"abandoned": {}, "half": {}, "operational": {}}
+	var signs := 0
+	for s in _sweep():
+		for d in s.dressing:
+			by_state[s.state][d["kind"]] = int(by_state[s.state].get(d["kind"], 0)) + 1
+			var c: Vector2i = d["cell"]
+			if d["kind"] in ["pipe", "cable", "vent", "lamp", "panel", "poster", "sign"] or (d["kind"] == "scorch" and not s.room_of.has(c)):
+				check(s.grid.get_tile(c) == "wall" and not s.room_of.has(c) and s.room_of.get(c + d["dir"], -1) == d["room"], "seed %d: a wall item is on a wall, facing its room" % s.seed_value)
+				check(not s.door_of.has(c), "and not on a door")
+			elif d["kind"] == "hazard":
+				check(s.fixtures[s.fixture_of[c]]["fixture"] in ["reactor_core", "forge_furnace", "generator", "turbine"], "a hazard frame goes round what burns or turns")
+			else:
+				check(s.room_of.get(c, -1) == d["room"] and not s.fixture_of.has(c) and not s.prop_of.has(c), "seed %d: a floor mark is on free floor of its room" % s.seed_value)
+			if d["kind"] == "frost":
+				check(not s.breathable(d["room"]) or float(s.rooms[d["room"]].get("air", 1.0)) < 0.5, "frost only in an airless room")
+			signs += 1 if d["kind"] == "sign" else 0
+	check(signs > 200, "rooms carry their names (%d signs)" % signs)
+	check(int(by_state["abandoned"].get("debris", 0)) > 20 and int(by_state["abandoned"].get("scorch", 0)) > 5, "abandoned: debris and scorch marks (%s)" % str(by_state["abandoned"]))
+	check(int(by_state["operational"].get("debris", 0)) == 0 and int(by_state["operational"].get("scorch", 0)) == 0 and int(by_state["operational"].get("clutter", 0)) == 0, "operational: clean")
+	check(int(by_state["half"].get("clutter", 0)) > 10 and int(by_state["half"].get("debris", 0)) == 0, "half-active: some clutter, no debris")
+	var a = _station(8800, "abandoned")
+	var b = _station(8800, "abandoned")
+	eq(a.dressing, b.dressing, "the same seed dresses the same")
+	var classic = Site.make(8800, "station", {"faction": "clans", "gen": "classic"})
+	check(classic.dressing.is_empty() and classic.fixtures.is_empty() and classic.races.is_empty(), "a classic station has none of it")

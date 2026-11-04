@@ -2467,3 +2467,6 @@ Source and licence of every art and audio file in the repo.
 | `art/gear/traders_coat/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
 | `art/gear/traders_coat/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
 | `art/gear/traders_coat/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
+
+## Station interiors (claude/station-interiors)
+No image or audio files were added. The fixtures, wall and floor dressing, race skins, signage glyphs and the nebula, asteroid-field and distant-station backdrops are drawn in code (scripts/board/station_decor.gd, station_glyph.gd, station_backdrop.gd) in the style of the existing prop art; no outside assets.

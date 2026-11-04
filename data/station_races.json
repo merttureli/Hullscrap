@@ -27,15 +27,15 @@
 		"sporeling_groves": {"mire": 2, "kett": 1, "prismatic": 1}
 	},
 	"races": {
-		"human": {"prefix": "", "items": ["marine_plate"], "skin": {"floor": "#9aa3b2", "wall": "#5d6573", "lamp": "#fff0d0", "glyph": "chevron"}, "variants": {}},
-		"basalt": {"prefix": "basalt", "items": ["stone_plates"], "skin": {"floor": "#8a7f74", "wall": "#4e463f", "lamp": "#ffd8a0", "glyph": "block"}, "variants": {"console": "stone_slab", "bunk": "stone_ledge", "table": "stone_table"}},
-		"emberkin": {"prefix": "emberkin", "items": ["forge_apron"], "skin": {"floor": "#a06048", "wall": "#4a2a22", "lamp": "#ff9040", "glyph": "flame"}, "variants": {"console": "forge_gauge", "reactor_core": "forge_heart", "bunk": "ash_cot"}},
-		"fenn": {"prefix": "fenn", "items": ["traders_coat"], "skin": {"floor": "#a88c5a", "wall": "#5a4a30", "lamp": "#ffe090", "glyph": "ring"}, "variants": {"stall": "bazaar_tent", "console": "ledger_desk"}},
-		"kett": {"prefix": "kett", "items": ["chitin_plate"], "skin": {"floor": "#9a8040", "wall": "#4a3a1a", "lamp": "#ffc060", "glyph": "hex"}, "variants": {"console": "hive_node", "bunk": "brood_cell", "table": "resin_table"}},
-		"mire": {"prefix": "mire", "items": ["tank_harness"], "skin": {"floor": "#5a8a6a", "wall": "#2f4a3a", "lamp": "#a0ffc0", "glyph": "drop"}, "variants": {"console": "reed_panel", "bunk": "hammock"}},
-		"sporeling": {"prefix": "sporeling", "items": ["spore_mantle"], "skin": {"floor": "#7aa060", "wall": "#3a5030", "lamp": "#d0ff90", "glyph": "leaf"}, "variants": {"console": "spore_node", "bunk": "moss_bed", "grow_bed": "spore_bed"}},
-		"gauntling": {"prefix": "gauntling", "items": ["scrap_gauntlets"], "skin": {"floor": "#7a7a8a", "wall": "#3a3a48", "lamp": "#ffb040", "glyph": "gear"}, "variants": {"console": "rig_panel", "bunk": "rack_cot"}},
-		"grundl": {"prefix": "grundl", "items": ["ballast_rig"], "skin": {"floor": "#8a7050", "wall": "#403020", "lamp": "#ffd090", "glyph": "bar"}, "variants": {"cargo_stack": "ballast_stack", "bunk": "hammock"}},
-		"prismatic": {"prefix": "prismatic", "items": ["prism_cloak"], "skin": {"floor": "#a0a0e0", "wall": "#5a5a9a", "lamp": "#e0c0ff", "glyph": "diamond"}, "variants": {"console": "crystal_lectern", "kiosk": "resonator", "bunk": "crystal_bed"}}
+		"human": {"prefix": "", "items": ["marine_plate"], "skin": {"floor": "#9aa3b2", "wall": "#5d6573", "lamp": "#fff0d0", "glyph": "chevron", "style": "plain"}, "variants": {}},
+		"basalt": {"prefix": "basalt", "items": ["stone_plates"], "skin": {"floor": "#8a7f74", "wall": "#4e463f", "lamp": "#ffd8a0", "glyph": "block", "style": "stone"}, "variants": {"console": "stone_slab", "bunk": "stone_ledge", "table": "stone_table"}},
+		"emberkin": {"prefix": "emberkin", "items": ["forge_apron"], "skin": {"floor": "#a06048", "wall": "#4a2a22", "lamp": "#ff9040", "glyph": "flame", "style": "forge"}, "variants": {"console": "forge_gauge", "reactor_core": "forge_heart", "bunk": "ash_cot"}},
+		"fenn": {"prefix": "fenn", "items": ["traders_coat"], "skin": {"floor": "#a88c5a", "wall": "#5a4a30", "lamp": "#ffe090", "glyph": "ring", "style": "tent"}, "variants": {"stall": "bazaar_tent", "console": "ledger_desk"}},
+		"kett": {"prefix": "kett", "items": ["chitin_plate"], "skin": {"floor": "#9a8040", "wall": "#4a3a1a", "lamp": "#ffc060", "glyph": "hex", "style": "hex"}, "variants": {"console": "hive_node", "bunk": "brood_cell", "table": "resin_table"}},
+		"mire": {"prefix": "mire", "items": ["tank_harness"], "skin": {"floor": "#5a8a6a", "wall": "#2f4a3a", "lamp": "#a0ffc0", "glyph": "drop", "style": "reed"}, "variants": {"console": "reed_panel", "bunk": "hammock"}},
+		"sporeling": {"prefix": "sporeling", "items": ["spore_mantle"], "skin": {"floor": "#7aa060", "wall": "#3a5030", "lamp": "#d0ff90", "glyph": "leaf", "style": "organic"}, "variants": {"console": "spore_node", "bunk": "moss_bed", "grow_bed": "spore_bed"}},
+		"gauntling": {"prefix": "gauntling", "items": ["scrap_gauntlets"], "skin": {"floor": "#7a7a8a", "wall": "#3a3a48", "lamp": "#ffb040", "glyph": "gear", "style": "bolt"}, "variants": {"console": "rig_panel", "bunk": "rack_cot"}},
+		"grundl": {"prefix": "grundl", "items": ["ballast_rig"], "skin": {"floor": "#8a7050", "wall": "#403020", "lamp": "#ffd090", "glyph": "bar", "style": "barrel"}, "variants": {"cargo_stack": "ballast_stack", "bunk": "hammock"}},
+		"prismatic": {"prefix": "prismatic", "items": ["prism_cloak"], "skin": {"floor": "#a0a0e0", "wall": "#5a5a9a", "lamp": "#e0c0ff", "glyph": "diamond", "style": "facet"}, "variants": {"console": "crystal_lectern", "kiosk": "resonator", "bunk": "crystal_bed"}}
 	}
 }

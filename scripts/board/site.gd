@@ -67,6 +67,7 @@ var modules: Array = []  ## a module station's modules: [{id, name, rect (cells)
 var power := {}  ## a half-active or abandoned station's generator: {module, fixture (id of the generator fixture), feeds: [module ids it lights and opens], restored}; {} for none
 var races: Array = []  ## a module station's builder races (species ids, the dock's first; station_races.gd)
 var fixtures: Array = []  ## a module station's fixtures: [{id, fixture, cell, size, room, dir, blocks, variant, dead, wreck}] (station_fixtures.gd); not props, so the container ids never move
+var dressing: Array = []  ## what the walls and floors of a module station carry (station_dressing.gd): [{kind, cell, dir, room, len, seed, word}]; none of it blocks
 var fixture_of := {}  ## cell -> fixture id (every cell a fixture covers)
 var room_light := {}  ## room id -> lit, flicker, red or dark (a module station's; empty for the rest, which are dark)
 var windows: Array = []  ## runs of window cells (not in `grid`: space shows through): [{cells: [Vector2i], normal: Vector2i (out)}]
@@ -166,6 +167,7 @@ func _clear() -> void:
 	beds = []
 	fixtures = []
 	fixture_of = {}
+	dressing = []
 	power = {}
 	room_of = {}
 	door_of = {}

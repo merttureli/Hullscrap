@@ -1,9 +1,10 @@
 {
 	"_doc": "Fixtures of module stations (scripts/board/station_fixtures.gd). fixtures: id -> {name, size [w, h] (the long side along the wall it stands on), blocks (the walk stops at it; else it is walked through), tall (never hides a window), glow (a colour: it lights its room when it is on), screen (dead when its section has no power), topple (can lie toppled in a wrecked station), color (the placeholder block and the minimap)}. rules: module id -> [{fixture, n [min, max], at (wall, corner, centre, free, row), inset (cells off the wall), gap (a row), window (only | avoid), ref (the room area n is meant for: n scales with area / ref), room (the module's room number, default 0), purpose (only a room of it), states}]. states: per station state, dead (the chance a lit or screen fixture is dead besides an unpowered section) and topple (the chance a toppleable one lies wrecked). A race's art for a fixture is data/station_races.json variants.",
+	"density": 1.4,
 	"states": {"abandoned": {"dead": 0.8, "topple": 0.3}, "half": {"dead": 0.25, "topple": 0.1}, "operational": {"dead": 0.0, "topple": 0.0}},
 	"fixtures": {
-		"reactor_core": {"name": "Reactor core", "size": [3, 3], "blocks": true, "color": "#d8a050", "glow": "#ffb050", "tall": true},
-		"turbine": {"name": "Turbine", "size": [2, 2], "blocks": true, "color": "#7a8090", "tall": true},
+		"reactor_core": {"name": "Reactor core", "size": [3, 3], "blocks": true, "color": "#d8a050", "glow": "#ffb050", "tall": true, "hazard": true},
+		"turbine": {"name": "Turbine", "size": [2, 2], "blocks": true, "color": "#7a8090", "tall": true, "hazard": true},
 		"coolant_tank": {"name": "Coolant tank", "size": [1, 2], "blocks": true, "color": "#5a8aa8", "tall": true},
 		"control_desk": {"name": "Control desk", "size": [2, 1], "blocks": true, "color": "#6a7a8a", "glow": "#70d0ff", "screen": true, "topple": true},
 		"stall": {"name": "Stall", "size": [3, 2], "blocks": true, "color": "#c89850", "topple": true},
@@ -58,14 +59,14 @@
 		"tool_cart": {"name": "Tool cart", "size": [1, 1], "blocks": true, "color": "#c0a040", "topple": true},
 		"fuel_drum": {"name": "Fuel drum", "size": [1, 1], "blocks": true, "color": "#a85050", "topple": true},
 		"wreckage": {"name": "Wreckage", "size": [2, 2], "blocks": true, "color": "#6a6a70"},
-		"generator": {"name": "Generator", "size": [2, 2], "blocks": true, "color": "#c8a050", "glow": "#ffd060", "screen": true, "tall": true},
+		"generator": {"name": "Generator", "size": [2, 2], "blocks": true, "color": "#c8a050", "glow": "#ffd060", "screen": true, "tall": true, "hazard": true},
 		"fuse_box": {"name": "Fuse box", "size": [1, 1], "blocks": true, "color": "#708090", "glow": "#ffd060", "screen": true},
 		"battery_bank": {"name": "Battery bank", "size": [2, 1], "blocks": true, "color": "#5a6a58", "glow": "#80ff80", "screen": true},
 		"suit_rack": {"name": "Suit rack", "size": [2, 1], "blocks": true, "color": "#58a870", "tall": true, "topple": true},
 		"airlock_console": {"name": "Airlock console", "size": [1, 1], "blocks": true, "color": "#58c878", "glow": "#80ff90", "screen": true},
 		"spore_pool": {"name": "Spore pool", "size": [4, 3], "blocks": true, "color": "#8ac860", "glow": "#d0ff90"},
 		"glow_cap": {"name": "Glow cap", "size": [1, 1], "blocks": true, "color": "#a0e870", "glow": "#d0ff90"},
-		"forge_furnace": {"name": "Forge furnace", "size": [4, 4], "blocks": true, "color": "#e07030", "glow": "#ff9040", "tall": true},
+		"forge_furnace": {"name": "Forge furnace", "size": [4, 4], "blocks": true, "color": "#e07030", "glow": "#ff9040", "tall": true, "hazard": true},
 		"anvil": {"name": "Anvil", "size": [2, 1], "blocks": true, "color": "#4a4a50"},
 		"quench_pool": {"name": "Quench pool", "size": [3, 2], "blocks": true, "color": "#d86030", "glow": "#ff8040"},
 		"egg_cluster": {"name": "Egg cluster", "size": [1, 1], "blocks": true, "color": "#d8b860", "glow": "#ffd070", "topple": true},
@@ -242,5 +243,6 @@
 			{"fixture": "crystal_cluster", "n": [2, 4], "at": "corner"},
 			{"fixture": "resonance_bench", "n": [1, 2], "at": "wall"}
 		]
-	}
+	},
+	"dressing": {"signs": {"airlock": "AIRLOCK", "reactor": "REACTOR", "medbay": "MEDBAY", "command": "COMMAND", "security": "SECURITY", "market": "MARKET", "observation": "OBSERVATION", "quarters": "QUARTERS", "storage": "STORES", "cargo": "CARGO", "hydroponics": "GARDEN", "mess": "MESS", "lab": "LAB", "comms": "COMMS", "chapel": "CHAPEL", "brig": "CELL", "water": "WATER", "hangar": "HANGAR", "power": "POWER", "breach": "DANGER", "maintenance": "", "corridor": ""}, "wall": {"pipe": {"per_area": 0.5, "len": [3, 7], "max": 4, "extra": 1.0}, "cable": {"per_area": 0.3, "len": [2, 5], "max": 3, "extra": 1.0}, "vent": {"per_area": 0.25, "len": [1, 1], "max": 2, "extra": 0.8}, "lamp": {"per_area": 0.55, "len": [1, 1], "max": 6, "extra": 1.0}, "panel": {"per_area": 0.2, "len": [1, 2], "max": 2, "extra": 0.6, "purposes": ["reactor", "power", "engineering", "command", "comms", "lab", "water", "hangar", "cargo", "security", "maintenance"]}, "poster": {"per_area": 0.3, "len": [1, 1], "max": 2, "extra": 0.6, "purposes": ["quarters", "mess", "market", "chapel", "observation", "hydroponics", "medbay", "security", "brig"]}}, "floor": {"stain": {"per_area": 0.4, "max": 4, "extra": 1.0}, "scuff": {"per_area": 0.6, "max": 6, "extra": 1.5}, "arrow": {"per_area": 0.15, "max": 2, "extra": 0.5, "purposes": ["corridor", "hangar", "cargo", "market"]}, "lane": {"per_area": 0.2, "max": 2, "extra": 0.4, "purposes": ["hangar", "cargo", "reactor", "power", "water"]}}, "states": {"abandoned": {"floor": {"debris": {"per_area": 0.6, "max": 5}, "scorch": {"per_area": 0.2, "max": 2}}, "wall": {"scorch": {"per_area": 0.2, "max": 2}}}, "half": {"floor": {"clutter": {"per_area": 0.4, "max": 3}}, "wall": {"scorch": {"per_area": 0.06, "max": 1}}}, "operational": {}}}
 }

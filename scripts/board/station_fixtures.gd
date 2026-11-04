@@ -81,6 +81,8 @@ static func place(s) -> void:
 			if rule.has("ref"):
 				n = int(floor(float(n) * float(r["rect"].get_area()) / float(rule["ref"]) + rng.randf()))
 			var at := str(rule.get("at", "wall"))
+			if at != "centre":  # (the data's `density` fills the big rooms: a centrepiece stays one)
+				n = int(floor(float(n) * float(cfg.get("density", 1.0)) + rng.randf()))
 			var placed := 0
 			if at == "row":
 				placed = _row(s, r, rule, def, n, mouth, taken, rng)
@@ -102,6 +104,8 @@ static func place(s) -> void:
 static func _one(s, r: Dictionary, rule: Dictionary, def: Dictionary, at: String, mouth: Dictionary, taken: Dictionary, rng: RandomNumberGenerator) -> bool:
 	var size := Vector2i(int(def["size"][0]), int(def["size"][1]))
 	var cands := _cands(r["rect"], size, at, int(rule.get("inset", 0)), rng)
+	if at == "centre":  # (a centrepiece that finds no place in the middle takes any other)
+		cands.append_array(_cands(r["rect"], size, "free", 0, rng))
 	for c in cands:
 		if _fits(s, r, rule, def, c, mouth, taken):
 			_commit(s, r, def, str(rule["fixture"]), c, taken)
@@ -179,7 +183,7 @@ static func _cands(rect: Rect2i, size: Vector2i, at: String, inset: int, rng: Ra
 		"centre":
 			for sz in [size, flip]:
 				var base: Vector2i = rect.position + (rect.size - sz) / 2
-				for j in [Vector2i.ZERO, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				for j in [Vector2i.ZERO, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN, Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1), Vector2i(-2, 0), Vector2i(2, 0), Vector2i(0, -2), Vector2i(0, 2)]:
 					out.append({"cell": base + j, "size": sz, "dir": Vector2i.DOWN})
 		_:
 			for sz in [size, flip]:

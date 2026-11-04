@@ -17,6 +17,7 @@ const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Races = preload("res://scripts/board/station_races.gd")
 const Fixtures = preload("res://scripts/board/station_fixtures.gd")
+const Dressing = preload("res://scripts/board/station_dressing.gd")
 
 const PATH := "res://data/station_modules.json"
 const SIDES: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -803,6 +804,7 @@ func _dress() -> String:
 		s.power["fixture"] = gen_fx[0]["id"]
 	if s._cut_off():
 		return "fixtures cut a room off"
+	Dressing.place(s)
 	_backdrop()
 	return ""
 
