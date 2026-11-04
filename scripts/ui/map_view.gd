@@ -31,6 +31,7 @@ const Hazards = preload("res://scripts/combat/hazards.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
 const RunStart = preload("res://scripts/space/run_start.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const WreckSite = preload("res://scripts/board/wreck_site.gd")
 const Boarding = preload("res://scripts/board/boarding.gd")
 
 const MARGIN := 40.0
@@ -552,7 +553,7 @@ func _on_fight_finished(result: Dictionary) -> void:
 			var parts: Array = Salvage.parts(foe)
 			parts.resize(mini(parts.size(), Boarding.WRECK_PARTS))
 			var alive: int = foe.crew.filter(func(c): return not c.is_down()).size() if r["state"] == "won" else 0  # the survivors fight on foot
-			salvage = Boarding.offer(salvage, "wreck", {"name": str(foe.name) if str(foe.name) not in ["", "Ship"] else "", "parts": parts, "crew": alive}, false)
+			salvage = Boarding.offer(salvage, "wreck", {"name": str(foe.name) if str(foe.name) not in ["", "Ship"] else "", "parts": parts, "crew": alive}, false, WreckSite.airless_airlock(foe.to_dict()))
 		if not salvage.is_empty():
 			_queue.append(func(): event_panel.open_event(salvage))
 

@@ -44,6 +44,9 @@ static func resolve(site, id: int, ctx := {}) -> Dictionary:
 	var tier := clampi(int(ctx.get("tier", 1)), 1, 3)
 	var mult := float(kcfg["loot_mult"]) * (1.0 + TIER_GROWTH * float(tier - 1))
 	var out := {"items": {}, "blueprint": "", "log": "", "key": ""}
+	if p.has("foe"):
+		_foe_body(site, p, out["items"], rng, mult, int(ctx.get("stage", 1)))
+		return out
 	var table := table_of(site, id)
 	var rolls := rng.randi_range(int(p["rolls"][0]), int(p["rolls"][1])) + (1 if site.rooms[p["room"]]["locked"] and p["loot"] else 0)
 	for i in rolls:
@@ -72,6 +75,41 @@ static func resolve(site, id: int, ctx := {}) -> Dictionary:
 		"key":
 			out["key"] = p["key"]
 	return out
+
+
+## The data/boarding.json `foe_loot` entry of foe kind `kind`.
+static func foe_entry(kind: String) -> Dictionary:
+	var fl: Dictionary = Site.config()["foe_loot"]
+	return fl["kinds"].get(kind, fl["default"])
+
+
+## What a beaten foe's body (prop `p`) holds, added to `items`: hand ammo and credits always, its weapon at combat.foe_drop, a mod or a piece of body gear at its `extra`.
+## The dice are the container's (seeded from the site and the prop), `mult` grows the counts as the other containers' do.
+static func _foe_body(site, p: Dictionary, items: Dictionary, rng: RandomNumberGenerator, mult: float, stage: int) -> void:
+	var fl: Dictionary = Site.config()["foe_loot"]
+	var kind := str(p["foe"])
+	var e := foe_entry(kind)
+	_add(items, str(Site.config()["combat"]["ammo_item"]), maxi(1, roundi(float(rng.randi_range(int(e["ammo"][0]), int(e["ammo"][1]))) * mult)))
+	_add(items, "credits", maxi(1, roundi(float(rng.randi_range(int(e["credits"][0]), int(e["credits"][1]))) * mult)))
+	var weapon := str(Site.config()["enemies"].get(kind, {}).get("weapon", ""))
+	var held: Dictionary = Site.config()["combat"]["hand_items"]
+	var keys: Array = held.keys()
+	keys.sort()
+	var drop := rng.randf() < float(Site.config()["combat"].get("foe_drop", 0.0))  # (rolled whatever the foe held, so the dice do not shift)
+	for item in keys:
+		if drop and weapon != "" and str(held[item]) == weapon:
+			_add(items, str(item), 1)
+			break
+	if rng.randf() < float(e["extra"]):
+		if rng.randf() < float(fl["mod_share"]):
+			var m := Mods.roll_drop(site.kind, stage, rng, 3 if bool(e.get("elite", false)) else 2)
+			if m != "":
+				_add(items, m, 1)
+		else:
+			var gear: Array = fl["gear"]
+			var pick := _pick(gear, rng)
+			if not pick.is_empty():
+				_add(items, str(pick["item"]), 1)
 
 
 ## Is there nothing left in `contents`?

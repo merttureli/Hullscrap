@@ -34,6 +34,7 @@ const BoardFx = preload("res://scripts/board/board_fx.gd")
 const Bolts = preload("res://scripts/board/bolts.gd")
 const Kit = preload("res://scripts/board/kit.gd")
 const Mods = preload("res://scripts/board/mods.gd")
+const Air = preload("res://scripts/board/air.gd")
 
 ## Emitted when the soldier is back on the ship: Boarding.leave()'s result {cleared, said, name, kind, poi}.
 signal finished(result: Dictionary)
@@ -253,7 +254,7 @@ func _put_away(away: bool) -> void:
 
 func _build_nodes() -> void:
 	var site = session.site
-	_fake = Ship.new("Site", site.grid)
+	_fake = site.ship if site.ship != null else Ship.new("Site", site.grid)  # (a beaten ship is drawn as she is: her parts, her holes)
 	ship_view = ShipView.new()
 	add_child(ship_view)
 	ship_view.show_ship(_fake)
@@ -381,7 +382,7 @@ func step(dt: float) -> void:
 		return
 	var before: Vector2 = m.pos
 	if not s.downed:
-		m.move_input(s.site.walk, _wasd(), dt, s.door_passable())
+		m.move_input(s.site.walk, _wasd(), dt, s.soldier_passable())
 	if m.pos != before and not _follow:
 		_follow = true
 	_walked += m.pos.distance_to(before)
@@ -716,8 +717,12 @@ func toggle_pick(i: int) -> void:
 func confirm_party() -> void:
 	if not picking:
 		return
-	picking = false
 	var src = _src_soldier()
+	if session.needs_suit() and not Air.sealed(src if src != null else session.soldier):  # her air is gone: he goes aboard in a sealed suit or not at all
+		load_msg = Air.NO_SUIT_BOARD
+		Audio.fx(self, "error")
+		return
+	picking = false
 	if src != null:
 		session.rearm(src)  # (his kit may have changed)
 	var n: int = session.join_party(pick)
@@ -740,6 +745,8 @@ func _src_soldier():
 func _loadout_wanted() -> bool:
 	if session.ship == null:
 		return false
+	if session.needs_suit():
+		return true
 	if not Party.eligible(session.ship).is_empty():
 		return true
 	var src = _src_soldier()
@@ -1231,14 +1238,28 @@ func _draw_over() -> void:
 		if r["purpose"] == "gone":
 			continue
 		var rect: Rect2i = r["rect"]
-		_over.draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), Color(Themes.wash(site.theme, Color(str(rdefs[r["purpose"]]["tint"]))), 0.09 if site.theme == "" else 0.2))
+		var wash := Color(Themes.wash(site.theme, Color(str(rdefs[r["purpose"]]["tint"]))), 0.09 if site.theme == "" else 0.2)
+		if r.has("cells"):  # a room of a beaten ship is not a rectangle
+			for c in r["cells"]:
+				_over.draw_rect(Rect2(Vector2(c) * CELL, Vector2(CELL, CELL)), wash)
+		else:
+			_over.draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), wash)
+		if Air.bad(site.air_of(r["id"])):  # no air: a pale blue wash, and its name the first time it is seen
+			var thin := Color(0.55, 0.8, 1.0, 0.22)
+			if r.has("cells"):
+				for c in r["cells"]:
+					_over.draw_rect(Rect2(Vector2(c) * CELL, Vector2(CELL, CELL)), thin)
+			else:
+				_over.draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), thin)
+	_draw_air_labels(site)
 	_draw_hatch(site)
 	for d in site.doors:
 		if d["lock"] != "" and d["lock"] != "gone" and not session.unlocked.has(d["id"]):
 			_draw_lock(d)
 	var pdefs: Dictionary = Site.config()["props"]
 	for p in site.props:
-		_draw_prop(p, pdefs[p["prop"]])
+		if not p.has("part"):  # (a beaten ship's parts are drawn by her own art)
+			_draw_prop(p, pdefs[p["prop"]])
 	if str(target.get("type", "")) == "container":
 		var tp: Dictionary = site.props[target["id"]]
 		_over.draw_rect(Rect2(Vector2(tp["cell"]) * CELL, Vector2(tp["size"]) * CELL).grow(2.0), Color(1, 1, 1, 0.55), false, 2.0)
@@ -1279,6 +1300,16 @@ func _draw_scorch() -> void:
 		var hot := 1.0 - float(sc["age"]) / 1.6
 		if hot > 0.0:
 			_over.draw_circle(sc["pos"], 3.0, Color(1.0, 0.55, 0.2, 0.6 * hot))
+
+
+## "NO AIR" over each airless room the soldier has seen (session.air_seen), bright for the first seconds, then dim.
+func _draw_air_labels(site) -> void:
+	var font := ThemeDB.fallback_font
+	for rid in session.air_seen:
+		var k := clampf(1.0 - (float(session.air_seen[rid]) - 6.0) / 4.0, 0.3, 1.0)
+		var at: Vector2 = site.centre_of_room(rid) * CELL
+		var w := font.get_string_size("NO AIR", HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		_over.draw_string(font, at + Vector2(-w / 2.0, 6.0), "NO AIR", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.7, 0.9, 1.0, k))
 
 
 func _draw_hatch(site) -> void:
@@ -1409,6 +1440,10 @@ func _draw_prop(p: Dictionary, def: Dictionary) -> void:
 			_over.draw_circle(c + dir * 11.0, 4.5, Color("#c9a483") if not spent else Color("#8a735c"))
 			_over.draw_line(c + dir.orthogonal() * 3.0, c + dir.orthogonal() * 10.0 - dir * 6.0, Color("#6b4a4a"), 3.0)
 			_over.draw_line(c - dir.orthogonal() * 3.0, c - dir.orthogonal() * 10.0 - dir * 6.0, Color("#6b4a4a"), 3.0)
+		"corpse":  # the fallen foe is drawn lying; a ring says it can be searched
+			if not spent:
+				var cc: Vector2 = p["centre"] * CELL if p.has("centre") else o + sz / 2.0
+				_over.draw_arc(cc, 17.0, 0.0, TAU, 24, Color(1, 1, 1, 0.28 + 0.12 * sin(_clock * 3.0)), 1.5, true)
 		"cable":
 			var base := o + Vector2(CELL * 0.15, CELL * 0.65)
 			var pts := PackedVector2Array()

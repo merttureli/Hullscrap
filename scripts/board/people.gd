@@ -460,7 +460,7 @@ func reveal(what: String, salt := 0) -> String:
 	var w := {}
 	for p in site.props:
 		var id: int = p["id"]
-		if not p["loot"] or s.opened.has(id) or revealed.has(id):
+		if not p["loot"] or p.has("foe") or s.opened.has(id) or revealed.has(id):
 			continue
 		var locked: bool = site.rooms[p["room"]]["locked"]
 		var x := float(rc["other"])
