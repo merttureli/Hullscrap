@@ -8,7 +8,7 @@ const Content = preload("res://scripts/data/content.gd")
 
 func test_the_fuel_numbers_the_table_was_measured_with() -> void:
 	var fuel: Dictionary = Content.read("res://data/drift.json")["fuel"]
-	eq(int(fuel["start"]), 22, "a run starts with 22 fuel")
+	eq(int(fuel["start"]), 10, "a run starts with 10 fuel (the owner cut it from 22 after the Beta 4.1 playtest)")
 	eq(fuel["stock"].map(func(v): return int(v)), [6, 10], "a fuel visit has 6 to 10 units on sale")
 	eq(int(fuel["price"]), 14, "at 14 credits a unit")
 	var canister := {}

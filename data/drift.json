@@ -28,7 +28,7 @@
 	"region_weight": 20,
 	"instant_jump": false,
 	"jump": {"spool": 8.0, "hostile_range": 2000.0},
-	"fuel": {"start": 22, "price": 14, "trader_multiplier": 3, "drift_hull": 15, "stock": [6, 10], "stations": ["rusthold", "meridian", "prism", "vesper_field", "long_bazaar", "haldane", "tinsel_row", "haulers_moor", "tether_knot", "coil_row", "burrowgate", "gossamer", "earthing_post", "kiln", "fenwater", "folding_room", "listening_gallery", "mother_grove", "singing_lattice", "deepcut", "ninefold", "spare_parts", "dredgers_rest", "barnacle_row", "heat_sink"]},
+	"fuel": {"start": 10, "price": 14, "trader_multiplier": 3, "drift_hull": 15, "stock": [6, 10], "stations": ["rusthold", "meridian", "prism", "vesper_field", "long_bazaar", "haldane", "tinsel_row", "haulers_moor", "tether_knot", "coil_row", "burrowgate", "gossamer", "earthing_post", "kiln", "fenwater", "folding_room", "listening_gallery", "mother_grove", "singing_lattice", "deepcut", "ninefold", "spare_parts", "dredgers_rest", "barnacle_row", "heat_sink"]},
 	"debt": {"total": 1000, "payment": 100, "every": 8, "creditor": "Ma Gantry", "kettle": "reactor_scrap_kettle"},
 	"danger": {"tier2_from": 10, "tier3_from": 25},
 	"enemies": {
