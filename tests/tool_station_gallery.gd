@@ -4,6 +4,8 @@ extends SceneTree
 ## room (lit, flickering, red, dark), airless rooms hatched, windows, locked doors, beds (working or broken), sentries. Not a test (no test_ prefix).
 
 const Site = preload("res://scripts/board/site.gd")
+const Fixtures = preload("res://scripts/board/station_fixtures.gd")
+const Races = preload("res://scripts/board/station_races.gd")
 
 const SEEDS := [101, 2207, 3319, 4421, 5531, 6649, 7757, 8863]
 const OPTS := [{"region": "clan_space"}, {"region": "human_core"}, {"region": "boneyard"}, {"region": "fenn_bazaar"}, {"region": "clan_space", "state": "half"},
@@ -91,6 +93,19 @@ func _draw_site(n: Node2D, s, idx: int) -> void:
 		var col := Color("#b08850") if p["loot"] else Color("#7a7a7a")
 		for c in s.cells_of(p):
 			n.draw_rect(Rect2(o + Vector2(c) * cell, Vector2(cell, cell)).grow(-cell * 0.2), col)
+	for f in s.fixtures:  # the fixtures: their footprints, in the colour of their data (walked-through ones outlined only), an arrow for the way they face
+		var fr := Rect2(o + Vector2(f["cell"]) * cell, Vector2(f["size"]) * cell).grow(-cell * 0.08)
+		var fcol := Color(str(Fixtures.defs()[f["fixture"]]["color"]))
+		if f["blocks"]:
+			n.draw_rect(fr, fcol)
+		n.draw_rect(fr, Color.BLACK, false, 1.0)
+		if f["glow"] != "" and not f["dead"]:
+			n.draw_rect(fr.grow(-cell * 0.3), Color(f["glow"]))
+		var mid := fr.get_center()
+		n.draw_line(mid, mid + Vector2(f["dir"]) * cell * 0.45, Color.BLACK, 1.5)
+	if not s.power.is_empty() and int(s.power["fixture"]) >= 0:
+		var gf: Dictionary = s.fixtures[int(s.power["fixture"])]
+		n.draw_rect(Rect2(o + Vector2(gf["cell"]) * cell, Vector2(gf["size"]) * cell).grow(2.0), Color("#ffd060"), false, 3.0)
 	for bd in s.beds:
 		var br := Rect2(o + Vector2(bd["cell"]) * cell, Vector2(bd["size"]) * cell).grow(-cell * 0.1)
 		n.draw_rect(br, Color("#e8eef4") if bd["works"] else Color("#6a6e74"))
@@ -103,14 +118,14 @@ func _draw_site(n: Node2D, s, idx: int) -> void:
 		var mr := Rect2(o + Vector2(m["rect"].position) * cell, Vector2(m["rect"].size) * cell)
 		var mc := Color.from_hsv(fmod(float(i) * 0.137, 1.0), 0.55, 1.0)
 		n.draw_rect(mr.grow(-1.0), mc, false, 2.0)
-		var label := str(m["name"]) + ("" if m["powered"] else " (no power)") + (" BREACHED" if m["breached"] else "")
+		var label := "%s [%s]%s%s%s" % [m["name"], m["race"], "" if m["powered"] else " (no power)", " BREACHED" if m["breached"] else "", " AIRLESS" if m["airless"] else ""]
 		var fs := 13
 		var sz := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 		var at := mr.get_center() - sz / 2.0
 		n.draw_rect(Rect2(at - Vector2(3, 2), sz + Vector2(6, 4)), Color(0, 0, 0, 0.72))
 		n.draw_string(font, at + Vector2(0, sz.y * 0.78), label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, mc)
-	var title := "Station %d  seed %d  %s  %s%s  %s  %d modules  %dx%d cells  %d rooms  %d containers  %d beds" % [idx + 1, s.seed_value, s.station_type, s.state,
-		(" (" + s.mood + ")") if s.mood != "" else "", s.site_name, s.modules.size(), s.bounds.size.x, s.bounds.size.y, s.rooms.size(), s.containers().size(), s.beds.size()]
+	var title := "Station %d  seed %d  %s  %s%s  %s  %d modules  %dx%d cells  %d rooms  %d containers  %d beds  %d fixtures  races %s" % [idx + 1, s.seed_value, s.station_type, s.state,
+		(" (" + s.mood + ")") if s.mood != "" else "", s.site_name, s.modules.size(), s.bounds.size.x, s.bounds.size.y, s.rooms.size(), s.containers().size(), s.beds.size(), s.fixtures.size(), ",".join(s.races)]
 	n.draw_string(font, Vector2(20, 30), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
-	n.draw_string(font, Vector2(20, 54), "room light: bright lit, striped flicker, red emergency, grey dark; blue hatching no air; cyan windows; pale doors; amber hack lock; coloured card lock; green hatch; beds white (working) or grey (broken); red triangle sentry",
+	n.draw_string(font, Vector2(20, 54), "room light: bright lit, striped flicker, red emergency, grey dark; blue hatching no air; cyan windows; pale doors; amber hack lock; coloured card lock; green hatch; beds white (working) or grey (broken); fixtures: coloured blocks with an arrow (the way they face), outlined = walked through, glow = lit; gold frame = the generator; red triangle sentry",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.75, 0.8, 0.88))

@@ -1002,8 +1002,7 @@ func _health(ship, dt: float) -> void:
 				heats = Heat.room_heat(ship)
 				heats_read = true
 			heat = float(heats.get(room, 0.0))
-			if heat > float(dry["heat_above"]) and float(dry["hp_per_s"]) > 0.0:
-				dmg += float(dry["hp_per_s"])
+			dmg += TraitSet.heat_hurt(t, heat)
 		m.speed_mod = (TraitSet.heat_factor(t, heat) if room >= 0 and by_heat else 1.0) * float(t["walk_mult"])
 		if room >= 0 and float(t["vacuum_speed"]) != 1.0:  # in thin air (vacuum_speed)
 			m.speed_mod *= TraitSet.thin_air_factor(t, ship.atmosphere.pressure_of(room))

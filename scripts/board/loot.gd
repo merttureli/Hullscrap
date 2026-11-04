@@ -10,6 +10,7 @@ extends RefCounted
 ## Contents: {items: {id: n}, blueprint: recipe id or "", log: log id or "", key: key id or ""}.
 
 const Site = preload("res://scripts/board/site.gd")
+const Races = preload("res://scripts/board/station_races.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
 const Themes = preload("res://scripts/board/themes.gd")
 const Mods = preload("res://scripts/board/mods.gd")
@@ -58,9 +59,10 @@ static func resolve(site, id: int, ctx := {}) -> Dictionary:
 		return out
 	var table := table_of(site, id)
 	var purpose := str(site.rooms[p["room"]]["purpose"])
+	var race := race_of(site, int(p["room"]))
 	var rolls := rng.randi_range(int(p["rolls"][0]), int(p["rolls"][1])) + (1 if site.rooms[p["room"]]["locked"] and p["loot"] else 0)
 	for i in rolls:
-		var o := roll(table, purpose, rng)
+		var o := roll(table, purpose, rng, race)
 		if not o.is_empty() and str(o["item"]) in [MOD, MOD_LOW]:  # a mod: which one and which tier come from the site kind and the stage of the run (mods.gd)
 			var drop := Mods.roll_drop(site.kind, int(ctx.get("stage", 1)), rng, 2 if str(o["item"]) == MOD_LOW else 3)
 			if drop != "":
@@ -71,7 +73,7 @@ static func resolve(site, id: int, ctx := {}) -> Dictionary:
 		_add(out["items"], str(item), int(p["fixed"][item]))
 	match p["slot"]:
 		"blueprint":
-			out["blueprint"] = _blueprint(ctx, tier, rng, purpose)
+			out["blueprint"] = _blueprint(ctx, tier, rng, purpose, race)
 			if out["blueprint"] == "":
 				var fb: Dictionary = cfg["blueprint"]["fallback"]
 				for item in fb:
@@ -140,9 +142,19 @@ static func theme_cfg() -> Dictionary:
 	return Site.config().get("loot_theme", {})
 
 
-## The tags of the rooms of `purpose` ([] for a purpose with none).
-static func room_tags(purpose: String) -> Array:
-	return theme_cfg().get("rooms", {}).get(purpose, [])
+## The tags of the rooms of `purpose` ([] for a purpose with none), and the tag of `race`'s items when the room is a section of that race's.
+static func room_tags(purpose: String, race := "") -> Array:
+	var out: Array = theme_cfg().get("rooms", {}).get(purpose, [])
+	if race != "":
+		out = out + [Races.tag(race)]
+	return out
+
+
+## The race of the section room `rid` belongs to ("" outside a module station).
+static func race_of(site, rid: int) -> String:
+	if site.modules.is_empty() or int(site.rooms[rid].get("module", -1)) < 0:
+		return ""
+	return str(site.modules[int(site.rooms[rid]["module"])].get("race", ""))
 
 
 ## The tags of item `id`: its own (loot_theme.items), and a part's family's (loot_theme.families).
@@ -151,6 +163,9 @@ static func item_tags(id: String) -> Array:
 	if not _tags.has(id):
 		var out: Array = theme_cfg().get("items", {}).get(id, []).duplicate()
 		out.append_array(theme_cfg().get("families", {}).get(str(_family.get(id, "")), []))
+		for race in Races.ids():  # (the race's own: its gear, its tech pack's parts and what they are made from)
+			if Races.owns(str(race), id):
+				out.append(Races.tag(str(race)))
 		_tags[id] = out
 	return _tags[id]
 
@@ -224,9 +239,9 @@ static func _tier_of(id: String) -> String:
 
 ## One outcome of `table` for a container in a room of `purpose`: today's roll, which settles the tier; then, when the room's tags tell some items of that
 ## tier from the rest, a second pick within the tier with the fitting ones `mult` times as likely. {} when the table is empty.
-static func roll(table: Array, purpose: String, rng: RandomNumberGenerator) -> Dictionary:
+static func roll(table: Array, purpose: String, rng: RandomNumberGenerator, race := "") -> Dictionary:
 	var o := _pick(table, rng)
-	var room := room_tags(purpose)
+	var room := room_tags(purpose, race)
 	if o.is_empty() or room.is_empty():
 		return o
 	var tier := tier_of(str(o["item"]))
@@ -258,10 +273,10 @@ static func _pick(table: Array, rng: RandomNumberGenerator) -> Dictionary:
 ## A recipe of `ctx.unknown`: the one the ship (`ctx.ship`) can craft next, the pick of a salvage's Scan row (Salvage.next_recipe); when the room's tags
 ## (`purpose`) fit an equally wanted one better, that one `mult - 1` times in `mult`. When it can craft none of them, or `ctx` has no ship, one by the
 ## weights of the tier's levels, those that fit the room `mult` times as likely; "" when there is none.
-static func _blueprint(ctx: Dictionary, tier: int, rng: RandomNumberGenerator, purpose := "") -> String:
+static func _blueprint(ctx: Dictionary, tier: int, rng: RandomNumberGenerator, purpose := "", race := "") -> String:
 	var unknown: Array = ctx.get("unknown", []).duplicate()
 	unknown.sort()
-	var room := room_tags(purpose)
+	var room := room_tags(purpose, race)
 	var mult := float(theme_cfg().get("mult", 1.0))
 	if ctx.get("ship") != null:
 		var ship = ctx["ship"]

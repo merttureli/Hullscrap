@@ -588,6 +588,16 @@ func _station_lights(site) -> void:
 			_room_lights.append([l, l.energy, mode, 0.0])
 
 
+## The station's light maps again (the power came back): the old ones go, the new are baked from site.room_light.
+func _rebuild_station_lights() -> void:
+	for e in _room_lights:
+		if e[0].is_inside_tree():
+			e[0].queue_free()
+		else:
+			e[0].free()
+	_station_lights(session.site)
+
+
 ## The light map of `mode` (lit: with the windows and the beds; flicker; red): 4 px to a cell, each room's floor and walls soft at the rim, a window's
 ## light brightest at the glass and gone 6 cells in. null when nothing is lit that way.
 func _light_map(site, mode: String) -> PointLight2D:
@@ -1050,6 +1060,10 @@ func find_target() -> Dictionary:
 		if d2 < best_d:
 			best = {"type": "door", "id": did, "dist": d2}
 			best_d = d2
+	var gd: float = s.site.generator_dist(p)
+	if gd >= 0.0 and gd <= reach and gd < best_d:  # the generator that lights a dark section (hold E)
+		best = {"type": "generator", "id": 0, "dist": gd}
+		best_d = gd
 	var bed_reach := float(Site.config()["beds"]["reach"])
 	var bid: int = s.beds.near(p, bed_reach)
 	if bid >= 0:  # a bed (beds.gd): the soldier heals on it; by a hurt follower, E lays them on it
@@ -1079,6 +1093,8 @@ func _hold_need(t: Dictionary) -> float:
 			return session.revive_time()
 		"sentry":
 			return float(Arms.cfg()["hack_sentry_s"])
+		"generator":
+			return session.power_time()
 	return 0.0
 
 
@@ -1106,7 +1122,7 @@ func _interact(dt: float) -> void:
 	if down and need > 0.0 and panel < 0 and shop < 0:
 		_hold_gap = 0.0
 		hold += dt
-		hacking = str(t.get("type", "")) in ["door", "sentry"]
+		hacking = str(t.get("type", "")) in ["door", "sentry", "generator"]
 		if hold >= need:
 			hold = 0.0
 			_finish_hold(t)
@@ -1144,7 +1160,7 @@ func press_e() -> void:
 				Audio.fx(self, "error")
 				return
 			leave()
-		"revive", "sentry", "bedside":
+		"revive", "sentry", "bedside", "generator":
 			say("Hold E.")
 		"container":
 			if s.opened.has(target["id"]) and s.left.has(target["id"]):
@@ -1188,6 +1204,11 @@ func _finish_hold(t: Dictionary) -> void:
 		s.revive_member(who)
 		say("%s is up." % who.name)
 		Audio.fx(self, "collect")
+	elif str(t.get("type", "")) == "generator":
+		var n: int = s.restore_power()
+		_rebuild_station_lights()
+		say("The generator catches. Lights come on%s." % (" and %d locks release" % n if n > 0 else ""))
+		Audio.fx(self, "unlock")
 	elif str(t.get("type", "")) == "sentry":
 		s.foes.hack(s.foes.find(t["id"]))
 	elif str(t.get("type", "")) == "bedside":

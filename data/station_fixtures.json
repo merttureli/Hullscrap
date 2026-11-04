@@ -1,0 +1,246 @@
+{
+	"_doc": "Fixtures of module stations (scripts/board/station_fixtures.gd). fixtures: id -> {name, size [w, h] (the long side along the wall it stands on), blocks (the walk stops at it; else it is walked through), tall (never hides a window), glow (a colour: it lights its room when it is on), screen (dead when its section has no power), topple (can lie toppled in a wrecked station), color (the placeholder block and the minimap)}. rules: module id -> [{fixture, n [min, max], at (wall, corner, centre, free, row), inset (cells off the wall), gap (a row), window (only | avoid), ref (the room area n is meant for: n scales with area / ref), room (the module's room number, default 0), purpose (only a room of it), states}]. states: per station state, dead (the chance a lit or screen fixture is dead besides an unpowered section) and topple (the chance a toppleable one lies wrecked). A race's art for a fixture is data/station_races.json variants.",
+	"states": {"abandoned": {"dead": 0.8, "topple": 0.3}, "half": {"dead": 0.25, "topple": 0.1}, "operational": {"dead": 0.0, "topple": 0.0}},
+	"fixtures": {
+		"reactor_core": {"name": "Reactor core", "size": [3, 3], "blocks": true, "color": "#d8a050", "glow": "#ffb050", "tall": true},
+		"turbine": {"name": "Turbine", "size": [2, 2], "blocks": true, "color": "#7a8090", "tall": true},
+		"coolant_tank": {"name": "Coolant tank", "size": [1, 2], "blocks": true, "color": "#5a8aa8", "tall": true},
+		"control_desk": {"name": "Control desk", "size": [2, 1], "blocks": true, "color": "#6a7a8a", "glow": "#70d0ff", "screen": true, "topple": true},
+		"stall": {"name": "Stall", "size": [3, 2], "blocks": true, "color": "#c89850", "topple": true},
+		"stock_crates": {"name": "Stock crates", "size": [2, 1], "blocks": true, "color": "#a88050", "topple": true},
+		"vendor_cart": {"name": "Vendor cart", "size": [2, 1], "blocks": true, "color": "#b0a060", "topple": true},
+		"bunk": {"name": "Bunk", "size": [2, 1], "blocks": true, "color": "#6a7aa0", "topple": true},
+		"footlocker": {"name": "Footlocker", "size": [1, 1], "blocks": true, "color": "#6a6a78", "topple": true},
+		"table": {"name": "Table", "size": [2, 2], "blocks": true, "color": "#9a8060", "topple": true},
+		"shower_stall": {"name": "Shower stall", "size": [1, 1], "blocks": true, "color": "#8ab8c8", "tall": true},
+		"shelf_rack": {"name": "Shelf rack", "size": [3, 1], "blocks": true, "color": "#8a7a5a", "tall": true, "topple": true},
+		"console": {"name": "Console", "size": [2, 1], "blocks": true, "color": "#4a5a78", "glow": "#70d0ff", "screen": true, "topple": true},
+		"holo_table": {"name": "Holo table", "size": [3, 2], "blocks": true, "color": "#4a7aa8", "glow": "#60c8ff", "screen": true},
+		"captain_chair": {"name": "Captain chair", "size": [1, 1], "blocks": true, "color": "#7a5a5a", "topple": true},
+		"bench": {"name": "Bench", "size": [2, 1], "blocks": true, "color": "#8a8a98", "topple": true},
+		"long_bench": {"name": "Long bench", "size": [3, 1], "blocks": true, "color": "#8a8a98", "topple": true},
+		"planter": {"name": "Planter", "size": [2, 1], "blocks": true, "color": "#4a8a4a", "topple": true},
+		"med_cabinet": {"name": "Med cabinet", "size": [1, 1], "blocks": true, "color": "#a8d8c8", "topple": true},
+		"scanner": {"name": "Scanner", "size": [2, 2], "blocks": true, "color": "#7ac8b8", "glow": "#80ffe0", "screen": true, "tall": true},
+		"curtain": {"name": "Curtain", "size": [2, 1], "blocks": false, "color": "#b8d8d0", "topple": true},
+		"scanner_arch": {"name": "Scanner arch", "size": [2, 1], "blocks": false, "color": "#d08060", "glow": "#ff6040", "screen": true},
+		"desk": {"name": "Desk", "size": [3, 1], "blocks": true, "color": "#7a6a5a", "topple": true},
+		"locker_bank": {"name": "Locker bank", "size": [2, 1], "blocks": true, "color": "#6a7088", "tall": true, "topple": true},
+		"kiosk": {"name": "Kiosk", "size": [2, 2], "blocks": true, "color": "#5a88b0", "glow": "#70d0ff", "screen": true, "tall": true},
+		"signpost": {"name": "Signpost", "size": [1, 1], "blocks": true, "color": "#c8c060", "glow": "#ffe070", "screen": true, "topple": true},
+		"grow_bed": {"name": "Grow bed", "size": [3, 1], "blocks": true, "color": "#4a9a4a", "glow": "#a0ff70"},
+		"water_tank": {"name": "Water tank", "size": [2, 2], "blocks": true, "color": "#5a8aa8", "tall": true},
+		"seed_rack": {"name": "Seed rack", "size": [1, 2], "blocks": true, "color": "#8a7a5a", "tall": true, "topple": true},
+		"long_table": {"name": "Long table", "size": [4, 1], "blocks": true, "color": "#9a8060", "topple": true},
+		"counter": {"name": "Counter", "size": [3, 1], "blocks": true, "color": "#8a8a90"},
+		"stove": {"name": "Stove", "size": [2, 1], "blocks": true, "color": "#6a6a70", "glow": "#ff9040"},
+		"cargo_stack": {"name": "Cargo stack", "size": [2, 2], "blocks": true, "color": "#a88a50", "tall": true, "topple": true},
+		"shipping_container": {"name": "Shipping container", "size": [3, 2], "blocks": true, "color": "#587898", "tall": true},
+		"pallet_jack": {"name": "Pallet jack", "size": [1, 1], "blocks": true, "color": "#c8b040", "topple": true},
+		"antenna_array": {"name": "Antenna array", "size": [3, 2], "blocks": true, "color": "#8a90a8", "glow": "#a0c0ff", "screen": true, "tall": true},
+		"antenna_console": {"name": "Antenna console", "size": [2, 1], "blocks": true, "color": "#4a5a78", "glow": "#70ffb0", "screen": true, "topple": true},
+		"server_rack": {"name": "Server rack", "size": [1, 2], "blocks": true, "color": "#3a4258", "glow": "#60ff90", "screen": true, "tall": true, "topple": true},
+		"lab_bench": {"name": "Lab bench", "size": [3, 1], "blocks": true, "color": "#a0b8c0", "glow": "#a0e8ff", "screen": true, "topple": true},
+		"sample_fridge": {"name": "Sample fridge", "size": [1, 1], "blocks": true, "color": "#a0c8d8", "glow": "#a0e0ff", "screen": true, "topple": true},
+		"freezer": {"name": "Freezer", "size": [2, 1], "blocks": true, "color": "#88b0c8", "glow": "#a0e0ff", "tall": true},
+		"centrifuge": {"name": "Centrifuge", "size": [2, 2], "blocks": true, "color": "#7890a0", "glow": "#ffd060", "screen": true},
+		"pew": {"name": "Pew", "size": [3, 1], "blocks": true, "color": "#7a5a40", "topple": true},
+		"altar": {"name": "Altar", "size": [2, 1], "blocks": true, "color": "#c8c0b0", "glow": "#ffc060"},
+		"candle_stand": {"name": "Candle stand", "size": [1, 1], "blocks": true, "color": "#c8b080", "glow": "#ffc060"},
+		"guard_desk": {"name": "Guard desk", "size": [3, 1], "blocks": true, "color": "#6a6a78", "glow": "#ff7060", "screen": true, "topple": true},
+		"weapon_rack": {"name": "Weapon rack", "size": [2, 1], "blocks": true, "color": "#5a5a68", "tall": true, "topple": true},
+		"cell_bunk": {"name": "Cell bunk", "size": [2, 1], "blocks": true, "color": "#7a7a88", "topple": true},
+		"toilet": {"name": "Toilet", "size": [1, 1], "blocks": true, "color": "#a8a8b0"},
+		"reclaim_tank": {"name": "Reclaim tank", "size": [3, 3], "blocks": true, "color": "#4a88b8", "glow": "#60b0ff", "tall": true},
+		"pump": {"name": "Pump", "size": [2, 1], "blocks": true, "color": "#7a8890", "topple": true},
+		"manifold": {"name": "Manifold", "size": [1, 2], "blocks": true, "color": "#6a7a88"},
+		"shuttle": {"name": "Shuttle", "size": [5, 4], "blocks": true, "color": "#8890a8", "glow": "#80a0ff", "tall": true},
+		"tool_cart": {"name": "Tool cart", "size": [1, 1], "blocks": true, "color": "#c0a040", "topple": true},
+		"fuel_drum": {"name": "Fuel drum", "size": [1, 1], "blocks": true, "color": "#a85050", "topple": true},
+		"wreckage": {"name": "Wreckage", "size": [2, 2], "blocks": true, "color": "#6a6a70"},
+		"generator": {"name": "Generator", "size": [2, 2], "blocks": true, "color": "#c8a050", "glow": "#ffd060", "screen": true, "tall": true},
+		"fuse_box": {"name": "Fuse box", "size": [1, 1], "blocks": true, "color": "#708090", "glow": "#ffd060", "screen": true},
+		"battery_bank": {"name": "Battery bank", "size": [2, 1], "blocks": true, "color": "#5a6a58", "glow": "#80ff80", "screen": true},
+		"suit_rack": {"name": "Suit rack", "size": [2, 1], "blocks": true, "color": "#58a870", "tall": true, "topple": true},
+		"airlock_console": {"name": "Airlock console", "size": [1, 1], "blocks": true, "color": "#58c878", "glow": "#80ff90", "screen": true},
+		"spore_pool": {"name": "Spore pool", "size": [4, 3], "blocks": true, "color": "#8ac860", "glow": "#d0ff90"},
+		"glow_cap": {"name": "Glow cap", "size": [1, 1], "blocks": true, "color": "#a0e870", "glow": "#d0ff90"},
+		"forge_furnace": {"name": "Forge furnace", "size": [4, 4], "blocks": true, "color": "#e07030", "glow": "#ff9040", "tall": true},
+		"anvil": {"name": "Anvil", "size": [2, 1], "blocks": true, "color": "#4a4a50"},
+		"quench_pool": {"name": "Quench pool", "size": [3, 2], "blocks": true, "color": "#d86030", "glow": "#ff8040"},
+		"egg_cluster": {"name": "Egg cluster", "size": [1, 1], "blocks": true, "color": "#d8b860", "glow": "#ffd070", "topple": true},
+		"hive_pillar": {"name": "Hive pillar", "size": [1, 1], "blocks": true, "color": "#a08040"},
+		"larder": {"name": "Larder", "size": [2, 1], "blocks": true, "color": "#8a7040", "topple": true},
+		"crystal_spire": {"name": "Crystal spire", "size": [3, 3], "blocks": true, "color": "#c0a0f0", "glow": "#e0c0ff", "tall": true},
+		"crystal_cluster": {"name": "Crystal cluster", "size": [1, 1], "blocks": true, "color": "#b090e0", "glow": "#e0c0ff"},
+		"resonance_bench": {"name": "Resonance bench", "size": [2, 1], "blocks": true, "color": "#8a8ac8", "topple": true}
+	},
+	"rules": {
+		"dock": [
+			{"fixture": "suit_rack", "n": [1, 2], "at": "wall"},
+			{"fixture": "airlock_console", "n": [1, 1], "at": "wall"}
+		],
+		"spoke": [
+			{"fixture": "bench", "n": [0, 1], "at": "wall", "ref": 30}
+		],
+		"hub": [
+			{"fixture": "kiosk", "n": [1, 1], "at": "centre"},
+			{"fixture": "bench", "n": [2, 4], "at": "wall"},
+			{"fixture": "signpost", "n": [1, 2], "at": "free"}
+		],
+		"observation": [
+			{"fixture": "long_bench", "n": [2, 3], "at": "wall", "window": "only", "ref": 50},
+			{"fixture": "planter", "n": [1, 2], "at": "corner"}
+		],
+		"market": [
+			{"fixture": "stall", "n": [2, 3], "at": "wall", "inset": 0, "ref": 96},
+			{"fixture": "stock_crates", "n": [2, 4], "at": "wall"},
+			{"fixture": "vendor_cart", "n": [0, 2], "at": "free"}
+		],
+		"habitation": [
+			{"fixture": "bench", "n": [0, 2], "at": "wall", "ref": 55},
+			{"fixture": "bunk", "n": [1, 3], "at": "wall", "room": 1, "purpose": "quarters"},
+			{"fixture": "footlocker", "n": [1, 2], "at": "wall", "room": 1, "purpose": "quarters"},
+			{"fixture": "table", "n": [0, 1], "at": "free", "room": 1, "purpose": "quarters"},
+			{"fixture": "shower_stall", "n": [0, 1], "at": "corner", "room": 1, "purpose": "quarters"},
+			{"fixture": "shelf_rack", "n": [1, 2], "at": "wall", "room": 1, "purpose": "storage"},
+			{"fixture": "cargo_stack", "n": [0, 1], "at": "corner", "room": 1, "purpose": "storage"},
+			{"fixture": "bunk", "n": [1, 3], "at": "wall", "room": 2, "purpose": "quarters"},
+			{"fixture": "footlocker", "n": [1, 2], "at": "wall", "room": 2, "purpose": "quarters"},
+			{"fixture": "table", "n": [0, 1], "at": "free", "room": 2, "purpose": "quarters"},
+			{"fixture": "shower_stall", "n": [0, 1], "at": "corner", "room": 2, "purpose": "quarters"},
+			{"fixture": "shelf_rack", "n": [1, 2], "at": "wall", "room": 2, "purpose": "storage"},
+			{"fixture": "cargo_stack", "n": [0, 1], "at": "corner", "room": 2, "purpose": "storage"},
+			{"fixture": "bunk", "n": [1, 3], "at": "wall", "room": 3, "purpose": "quarters"},
+			{"fixture": "footlocker", "n": [1, 2], "at": "wall", "room": 3, "purpose": "quarters"},
+			{"fixture": "table", "n": [0, 1], "at": "free", "room": 3, "purpose": "quarters"},
+			{"fixture": "shower_stall", "n": [0, 1], "at": "corner", "room": 3, "purpose": "quarters"},
+			{"fixture": "shelf_rack", "n": [1, 2], "at": "wall", "room": 3, "purpose": "storage"},
+			{"fixture": "cargo_stack", "n": [0, 1], "at": "corner", "room": 3, "purpose": "storage"},
+			{"fixture": "bunk", "n": [1, 3], "at": "wall", "room": 4, "purpose": "quarters"},
+			{"fixture": "footlocker", "n": [1, 2], "at": "wall", "room": 4, "purpose": "quarters"},
+			{"fixture": "table", "n": [0, 1], "at": "free", "room": 4, "purpose": "quarters"},
+			{"fixture": "shower_stall", "n": [0, 1], "at": "corner", "room": 4, "purpose": "quarters"},
+			{"fixture": "shelf_rack", "n": [1, 2], "at": "wall", "room": 4, "purpose": "storage"},
+			{"fixture": "cargo_stack", "n": [0, 1], "at": "corner", "room": 4, "purpose": "storage"}
+		],
+		"reactor": [
+			{"fixture": "reactor_core", "n": [1, 1], "at": "centre"},
+			{"fixture": "turbine", "n": [1, 2], "at": "wall"},
+			{"fixture": "coolant_tank", "n": [2, 4], "at": "wall"},
+			{"fixture": "control_desk", "n": [1, 2], "at": "wall"}
+		],
+		"checkpoint": [
+			{"fixture": "scanner_arch", "n": [1, 1], "at": "centre"},
+			{"fixture": "desk", "n": [1, 1], "at": "wall"},
+			{"fixture": "locker_bank", "n": [1, 2], "at": "wall"}
+		],
+		"command": [
+			{"fixture": "holo_table", "n": [1, 1], "at": "centre"},
+			{"fixture": "console", "n": [3, 5], "at": "wall", "ref": 78},
+			{"fixture": "captain_chair", "n": [1, 1], "at": "free"}
+		],
+		"medbay": [
+			{"fixture": "med_cabinet", "n": [2, 3], "at": "wall"},
+			{"fixture": "scanner", "n": [1, 1], "at": "corner"},
+			{"fixture": "curtain", "n": [1, 2], "at": "free"}
+		],
+		"ring_segment": [
+			{"fixture": "planter", "n": [1, 3], "at": "wall", "ref": 56},
+			{"fixture": "bench", "n": [1, 2], "at": "wall", "window": "only", "ref": 56}
+		],
+		"ring_corner": [
+			{"fixture": "planter", "n": [1, 2], "at": "corner"},
+			{"fixture": "signpost", "n": [1, 1], "at": "free"}
+		],
+		"hydroponics": [
+			{"fixture": "grow_bed", "n": [2, 3], "at": "row", "inset": 1},
+			{"fixture": "water_tank", "n": [0, 1], "at": "corner"},
+			{"fixture": "seed_rack", "n": [0, 2], "at": "wall"}
+		],
+		"mess": [
+			{"fixture": "long_table", "n": [1, 2], "at": "row", "inset": 2},
+			{"fixture": "counter", "n": [1, 1], "at": "wall"},
+			{"fixture": "stove", "n": [1, 1], "at": "wall"}
+		],
+		"cargo": [
+			{"fixture": "cargo_stack", "n": [2, 4], "at": "wall"},
+			{"fixture": "shipping_container", "n": [1, 2], "at": "wall"},
+			{"fixture": "pallet_jack", "n": [0, 1], "at": "free"}
+		],
+		"storage": [
+			{"fixture": "shelf_rack", "n": [1, 2], "at": "wall"},
+			{"fixture": "cargo_stack", "n": [0, 1], "at": "corner"}
+		],
+		"comms": [
+			{"fixture": "antenna_array", "n": [1, 1], "at": "centre"},
+			{"fixture": "antenna_console", "n": [2, 3], "at": "wall"},
+			{"fixture": "server_rack", "n": [1, 2], "at": "wall"}
+		],
+		"lab": [
+			{"fixture": "lab_bench", "n": [1, 2], "at": "wall"},
+			{"fixture": "sample_fridge", "n": [1, 2], "at": "wall"},
+			{"fixture": "freezer", "n": [2, 3], "at": "wall", "room": 1},
+			{"fixture": "centrifuge", "n": [1, 1], "at": "corner", "room": 1}
+		],
+		"chapel": [
+			{"fixture": "pew", "n": [2, 4], "at": "row", "inset": 2},
+			{"fixture": "altar", "n": [1, 1], "at": "wall"},
+			{"fixture": "candle_stand", "n": [1, 3], "at": "corner"}
+		],
+		"brig": [
+			{"fixture": "guard_desk", "n": [1, 1], "at": "wall"},
+			{"fixture": "weapon_rack", "n": [1, 1], "at": "wall"},
+			{"fixture": "cell_bunk", "n": [1, 1], "at": "wall", "room": 1},
+			{"fixture": "toilet", "n": [1, 1], "at": "corner", "room": 1},
+			{"fixture": "cell_bunk", "n": [1, 1], "at": "wall", "room": 2},
+			{"fixture": "toilet", "n": [1, 1], "at": "corner", "room": 2},
+			{"fixture": "cell_bunk", "n": [1, 1], "at": "wall", "room": 3},
+			{"fixture": "toilet", "n": [1, 1], "at": "corner", "room": 3}
+		],
+		"water": [
+			{"fixture": "reclaim_tank", "n": [1, 2], "at": "corner"},
+			{"fixture": "pump", "n": [1, 3], "at": "wall"},
+			{"fixture": "manifold", "n": [1, 2], "at": "wall"}
+		],
+		"hangar": [
+			{"fixture": "shuttle", "n": [1, 1], "at": "centre"},
+			{"fixture": "tool_cart", "n": [1, 3], "at": "free"},
+			{"fixture": "fuel_drum", "n": [1, 3], "at": "corner"},
+			{"fixture": "cargo_stack", "n": [1, 2], "at": "wall"}
+		],
+		"breach_section": [
+			{"fixture": "wreckage", "n": [1, 2], "at": "free"}
+		],
+		"power": [
+			{"fixture": "generator", "n": [1, 1], "at": "wall"},
+			{"fixture": "fuse_box", "n": [1, 2], "at": "wall"},
+			{"fixture": "battery_bank", "n": [1, 2], "at": "wall"}
+		],
+		"spore_garden": [
+			{"fixture": "spore_pool", "n": [1, 1], "at": "centre"},
+			{"fixture": "grow_bed", "n": [2, 4], "at": "row", "inset": 1},
+			{"fixture": "glow_cap", "n": [2, 4], "at": "corner"},
+			{"fixture": "water_tank", "n": [0, 1], "at": "corner"}
+		],
+		"forge": [
+			{"fixture": "forge_furnace", "n": [1, 1], "at": "centre"},
+			{"fixture": "anvil", "n": [1, 2], "at": "free"},
+			{"fixture": "quench_pool", "n": [1, 2], "at": "wall"},
+			{"fixture": "coolant_tank", "n": [1, 3], "at": "wall"}
+		],
+		"brood_chamber": [
+			{"fixture": "hive_pillar", "n": [1, 2], "at": "free"},
+			{"fixture": "larder", "n": [1, 1], "at": "wall"},
+			{"fixture": "egg_cluster", "n": [1, 2], "at": "wall", "room": 1},
+			{"fixture": "egg_cluster", "n": [1, 2], "at": "wall", "room": 2},
+			{"fixture": "egg_cluster", "n": [1, 2], "at": "wall", "room": 3},
+			{"fixture": "egg_cluster", "n": [1, 2], "at": "wall", "room": 4}
+		],
+		"resonance_hall": [
+			{"fixture": "crystal_spire", "n": [1, 1], "at": "centre"},
+			{"fixture": "crystal_cluster", "n": [2, 4], "at": "corner"},
+			{"fixture": "resonance_bench", "n": [1, 2], "at": "wall"}
+		]
+	}
+}
