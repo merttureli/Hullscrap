@@ -20,6 +20,7 @@ const DESIGNS: Array[String] = [
 	"res://data/ships/starter_prism.json",
 ]
 const BLANK_TEXT := "%s: build your ship from the hold, then B for play mode and M for the map to launch"  ## a build-your-own start (ship.build_first)
+const SEED_PAD := 9  ## cells of empty frame shown round a build-first seed
 const CELL_PX := 32.0  ## the build view's cell size, for fitting the camera to a ship
 ## Screen px the build HUD (hud.gd) covers: the top bar, the mode bar with its hints, and the palette and the card at
 ## the sides. A chosen ship is fitted in the space between them.
@@ -109,13 +110,14 @@ static func stats_of(co) -> Dictionary:
 
 ## The camera ({zoom, pos}) that shows the whole hull of `grid` in a viewport of `view` px, centred
 ## in the part of the screen the HUD leaves free. The grid sits at the world origin, as build_mode.gd draws it.
-static func fit(grid, view: Vector2) -> Dictionary:
+## With `cells` (a build-first start: the seed's tiles padded by SEED_PAD) it frames those cells, not the whole hull.
+static func fit(grid, view: Vector2, cells: Array = []) -> Dictionary:
 	var lo := Vector2(INF, INF)
 	var hi := Vector2(-INF, -INF)
-	for c in grid.hull:
+	for c in (cells if not cells.is_empty() else grid.hull.keys()):
 		lo = Vector2(minf(lo.x, c.x), minf(lo.y, c.y))
 		hi = Vector2(maxf(hi.x, c.x + 1.0), maxf(hi.y, c.y + 1.0))
-	if grid.hull.is_empty():
+	if lo.x == INF:
 		return {"zoom": 0.5, "pos": Vector2.ZERO}
 	var px := (hi - lo) * CELL_PX
 	var z := clampf(minf((view.x - 2.0 * HUD_SIDE) / px.x, (view.y - HUD_TOP - HUD_BOTTOM) / px.y) * 0.95, 0.1, 1.2)
@@ -152,6 +154,15 @@ func _show_cards(on: bool) -> void:
 		c["schematic"].visible = on
 
 
+## The cells a build-first start's camera frames: the built tiles with SEED_PAD cells of empty frame round them.
+static func seed_frame(ship) -> Array:
+	var out := []
+	for c in ship.grid.tiles:
+		for d in [Vector2i(-SEED_PAD, -SEED_PAD), Vector2i(SEED_PAD, SEED_PAD)]:
+			out.append(c + d)
+	return out
+
+
 ## Load card `i` into the player's ship. "" when it worked, else why not.
 func choose(i: int) -> String:
 	if sim == null or i < 0 or i >= cards.size():
@@ -168,7 +179,7 @@ func choose(i: int) -> String:
 		crew.set("ada", null)
 	var ship = sim.player_ship()
 	if cam != null:
-		var f := fit(ship.grid, get_viewport_rect().size if is_inside_tree() else size)
+		var f := fit(ship.grid, get_viewport_rect().size if is_inside_tree() else size, seed_frame(ship) if ship.build_first else [])
 		cam.zoom = Vector2(f["zoom"], f["zoom"])
 		cam.position = f["pos"]
 	if build != null:
