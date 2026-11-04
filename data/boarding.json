@@ -195,7 +195,7 @@
 		"salamander_suit": {"sealed": true},
 		"rigger_harness": {"grants": ["gear_rigger"], "hack": 1.4, "sub": "5% less dmg, rigger", "line": "Repairs 30% faster aboard; hacks doors 40% faster on foot.", "sealed": false},
 		"firefighter_coat": {"grants": ["gear_firefighter"], "sub": "12% less, fireproof", "line": "Half fire damage; puts out fires 50% faster. Lighter than the Salamander Suit.", "sealed": false},
-		"medic_sash": {"grants": ["gear_medic"], "revive": 1.67, "active": "patch", "sub": "Heal aura, G: patch", "line": "A small heal aura in its room aboard; revives 40% faster on foot.", "sealed": false},
+		"medic_sash": {"grants": ["gear_medic"], "revive": 1.6667, "active": "patch", "sub": "Heal aura, G: patch", "line": "A small heal aura in its room aboard; revives 40% faster on foot.", "sealed": false},
 		"jump_pack": {"active": "dash", "sub": "G: dash", "line": "Not sealed.", "sealed": false},
 		"chitin_plate": {"grants": ["gear_chitin"], "active": "brace", "sub": "30% less, thorns", "line": "Melee attackers take 4 damage back; walks 5% slower.", "sealed": false},
 		"spore_mantle": {"grants": ["gear_spore"], "ally_heal": 0.8, "ally_r": 3.5, "sub": "10% less, heal aura", "line": "Slowly heals allies near you on foot and aboard.", "sealed": false},

@@ -42,6 +42,7 @@ signal finished(result: Dictionary)
 ## event panel and calls talk_done() when it is over. The world stands still meanwhile.
 signal talk_requested(ctx: Dictionary)
 
+const AFX_S := 0.7  ## seconds a gear effect lasts (_draw_active_fx)
 const CELL := 32.0
 const DARK := Color(0.022, 0.026, 0.04)
 const ZOOM := 1.1
@@ -121,6 +122,7 @@ var _skitter := 0.0
 var _fight_t := 0.0  # seconds the combat music runs on after the last foe on the hunt
 var _fire_wait := false  # a click that picked or took something is not a shot: the trigger waits until the button is let go
 var _mood := "explore"
+var _afx: Array = []  # [{id, pos (cells), dir, t}] what the gear actives and a deflect look like for a moment (_draw_active_fx)
 var _flicker := 0.0  # seconds of flickering lights left (the Hollow arrives)
 var _self_light: PointLight2D
 var _red: Array = []  # [[light, base energy, phase]]
@@ -189,6 +191,7 @@ func enter(p_session) -> String:
 	_fight_t = 0.0
 	_mood = "explore"
 	_anim = {}
+	_afx = []
 	_walked = 0.0
 	_put_away(true)
 	_build_nodes()
@@ -385,6 +388,9 @@ func step(dt: float) -> void:
 		m.move_input(s.site.walk, _wasd(), dt, s.soldier_passable())
 	if m.pos != before and not _follow:
 		_follow = true
+	for e in _afx:
+		e["t"] = float(e["t"]) + dt
+	_afx = _afx.filter(func(e): return float(e["t"]) < AFX_S)
 	_walked += m.pos.distance_to(before)
 	if _walked >= STEP_CELLS:
 		_walked = 0.0
@@ -611,6 +617,12 @@ func _play_one(e: Dictionary) -> void:
 			if fx != null:
 				fx.swing(e["from"], float(e["dir"]), float(e["reach"]), Color(str(e.get("look", {}).get("color", "#ffffff"))))
 			Audio.fx(self, "melee_swing", px)
+		"active":
+			_afx.append({"id": str(e["id"]), "pos": at, "dir": float(e.get("dir", 0.0)), "t": 0.0})
+			Audio.fx(self, "arrive", px, -6.0)
+		"deflect":
+			_afx.append({"id": "deflect", "pos": at, "dir": 0.0, "t": 0.0})
+			Audio.fx(self, "bolt_sizzle", px, -4.0)
 		"flare":
 			if fx != null:
 				fx.flare(int(e["id"]), at)
@@ -1300,6 +1312,28 @@ func _draw_over() -> void:
 	_draw_people()
 	_draw_party()
 	_draw_soldier()
+	_draw_active_fx()
+
+
+## The gear actives and a deflect for a moment: a Dash leaves a streak along its way, a Brace a ring round the soldier while it lasts, a Patch a ring that spreads to its reach.
+func _draw_active_fx() -> void:
+	var s = session
+	if s.brace_t > 0.0:
+		var c: Vector2 = s.soldier.pos * CELL
+		_over.draw_arc(c, 17.0 + 1.5 * sin(_clock * 12.0), 0.0, TAU, 28, Color(0.55, 0.85, 1.0, 0.5 + 0.3 * minf(s.brace_t, 1.0)), 3.0, true)
+	for e in _afx:
+		var k: float = float(e["t"]) / AFX_S
+		var at: Vector2 = e["pos"] * CELL
+		match str(e["id"]):
+			"dash":
+				var to := at + Vector2.from_angle(float(e["dir"])) * float(Site.config()["actives"]["dash"]["cells"]) * CELL
+				for i in 4:
+					var off := Vector2(0, -6 + 4 * i).rotated(float(e["dir"]))
+					_over.draw_line(at + off, to + off, Color(1.0, 0.75, 0.3, 0.55 * (1.0 - k)), 2.0)
+			"patch":
+				_over.draw_arc(at, float(Site.config()["actives"]["patch"]["reach"]) * CELL * minf(k * 2.0, 1.0), 0.0, TAU, 36, Color(0.4, 1.0, 0.55, 0.7 * (1.0 - k)), 3.0, true)
+			"deflect":
+				_over.draw_arc(at, 12.0 + 14.0 * k, 0.0, TAU, 20, Color(0.8, 0.7, 1.0, 0.8 * (1.0 - k)), 2.0, true)
 
 
 ## The Spotter Cam's rooms read as a camera feed: faint scan lines over what the feed lights.
