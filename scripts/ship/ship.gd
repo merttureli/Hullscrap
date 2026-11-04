@@ -66,6 +66,7 @@ var clock := 0.0  ## seconds this ship has been simulated; the `t` of new events
 var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; saved as "crew_state" (version 6)
 var dead_crew: Array = []  ## names of crew who bled out (mortality.gd): Jobs.spawn_crew does not bring them back; saved
+var dead_at := {}  ## name -> {pos: [x, y], species} of the crew who bled out where they lay (mortality.gd), so a boarded wreck can show their bodies (wreck_site.gd); saved as the optional "dead_at"
 var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
 var skin := ""  ## the hull skin of the exterior plating (a skin unlock's payload `skin`, unlocks.gd skin_paint); "" = the plain hull; saved when set
 var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
@@ -268,6 +269,8 @@ func to_dict() -> Dictionary:
 	if not crew.is_empty() or not dead_crew.is_empty():  # optional: the people aboard, so Continue brings back the same crew
 		d["crew_state"] = crew.map(func(m): return m.to_dict())
 		d["dead_crew"] = dead_crew.duplicate()
+		if not dead_at.is_empty():
+			d["dead_at"] = dead_at.duplicate(true)
 		if not crew_plan.is_empty():
 			d["crew_plan"] = crew_plan.duplicate(true)
 	if not abandoned.is_empty():  # optional: the rooms the player gave up
@@ -351,6 +354,7 @@ func load_dict(d: Dictionary) -> String:
 		crew.append_array(people["crew"])
 		dead_crew.clear()
 		dead_crew.append_array(people["dead"])
+		dead_at = d["dead_at"].duplicate(true) if d.get("dead_at") is Dictionary else {}
 		crew_plan = people["plan"]
 	shield_balance = ShieldBalance.sanitize(d.get("shield_balance"))
 	skin = str(d.get("skin", ""))

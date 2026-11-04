@@ -16,7 +16,6 @@ const Themes = preload("res://scripts/board/themes.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Bolts = preload("res://scripts/board/bolts.gd")
 const Mods = preload("res://scripts/board/mods.gd")
-const Content = preload("res://scripts/data/content.gd")
 
 const SEARCH_S := 4.0  ## seconds a hunter looks about at the last place it saw someone
 const LOSE_S := 5.0  ## seconds without a line before a hunter gives up the chase at its target
@@ -81,6 +80,9 @@ func spawn_site(ctx := {}) -> void:
 	var sc: Dictionary = Site.config()["spawn"]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = Site._mix(site.seed_value, "spawn", 0)
+	if site.ship != null:  # the wreck of a beaten ship: her crew still on their feet, where they stood
+		_spawn_crew(ctx)
+		return
 	_make_vents(rng)
 	var kc: Dictionary = sc["kinds"].get(site.kind, {"count": [0, 0], "mix": {"scavenger": 1}})
 	var n := mini(int(ctx.get("crew", 0)), int(sc["crew_max"])) if site.kind == "wreck" else Themes.foe_count(site.theme, rng.randi_range(int(kc["count"][0]), int(kc["count"][1])))
@@ -108,6 +110,28 @@ func spawn_site(ctx := {}) -> void:
 				f["dead"] = true
 				f["mode"] = "dead"
 				f["m"].hp = 0.0
+				if f.has("corpse"):
+					site.wake_corpse(int(f["corpse"]), f["m"].pos)
+
+
+## The crew of a beaten ship who were on their feet when she was left (site.foe_crew; none of a captured ship): a foe of their species' kind, with their hp share.
+func _spawn_crew(ctx: Dictionary) -> void:
+	var site = s.site
+	for e in site.foe_crew:
+		var f := add(str(e["kind"]), e["pos"], site.room_at(e["pos"]))
+		f["m"].name = str(e["name"])
+		f["m"].hp = maxf(f["m"].max_hp * float(e["hp"]), 1.0)
+		f["sealed"] = bool(e["sealed"])
+	var mem: Dictionary = ctx.get("mem", {})
+	if bool(mem.get("hollow", false)) == bool(ctx.get("hollow", false)):
+		for id in mem.get("dead", []):
+			var d := find(int(id))
+			if not d.is_empty():
+				d["dead"] = true
+				d["mode"] = "dead"
+				d["m"].hp = 0.0
+				if d.has("corpse"):
+					site.wake_corpse(int(d["corpse"]), d["m"].pos)
 
 
 ## What a later visit finds: the foes that were beaten.
@@ -140,6 +164,8 @@ func add(kind: String, pos: Vector2, room := -1, spawned := true) -> Dictionary:
 		"hurt_t": 0.0, "cover_cd": 0.0, "cover_pos": pos, "refuge": pos, "base": base, "aim": base, "track": 0.0, "tpos": pos, "spoke": false,
 		"stalk_t": 0.0, "seen_t": 0.0, "lunge": 0.0, "lunge_cd": 1.5, "bites": 0, "frozen": false, "hack": 0.0}
 	_next += 1
+	if spawned:  # its body is made now, so that its id is the same on every visit
+		f["corpse"] = site.add_corpse(kind, int(f["id"]), pos, true, false)
 	if kind == "crawler":
 		f["mode"] = "hidden"
 		f["hidden"] = true
@@ -271,11 +297,7 @@ func hurt(f: Dictionary, amount: float, at: Vector2) -> void:
 	f["hurt_t"] = HIT_MEMORY
 	s.events.append({"type": "hit", "pos": at, "foe": f["id"], "kind": f["kind"]})
 	if m.hp <= 0.0:
-		f["dead"] = true
-		f["mode"] = "dead"
-		m.path.clear()
-		s.events.append({"type": "down", "pos": m.pos, "foe": f["id"], "kind": f["kind"]})
-		_drop_weapon(f)
+		_kill(f)
 		return
 	match str(f["kind"]):
 		"crawler":
@@ -290,21 +312,28 @@ func hurt(f: Dictionary, amount: float, at: Vector2) -> void:
 				_alert(f, s.soldier.pos)
 
 
-## A beaten foe may leave its weapon in the hold, when a cargo item stands for it (combat.hand_items) and the dice of the site and the foe allow
-## (combat.foe_drop). The dice are a stream of their own, so no fight's rng moves.
-func _drop_weapon(f: Dictionary) -> void:
-	if s.ship == null or f["team"] != "foe":
+## `amount` of no-air damage to foe `f` (air.gd): no hit event and no alarm, but it can be beaten by it.
+func suffocate(f: Dictionary, amount: float) -> void:
+	if f["dead"]:
 		return
-	var weapon := str(f["d"].get("weapon", ""))
-	var items: Dictionary = Arms.cfg()["hand_items"]
-	for item in items:
-		if str(items[item]) == weapon and weapon != "":
-			var r := RandomNumberGenerator.new()
-			r.seed = Site._mix(s.site.seed_value, "drop", int(f["id"]))
-			if r.randf() < float(Arms.cfg().get("foe_drop", 0.0)):
-				s.ship.inventory.add(str(item), 1)
-				s.events.append({"type": "line", "text": "+1 %s from the body." % str(Content.entry("items", str(item)).get("name", item))})
-			return
+	f["m"].hurt(amount)
+	if f["m"].hp <= 0.0:
+		_kill(f)
+
+
+## Foe `f` is beaten: it lies where it fell and leaves a body to search (loot.gd rolls what is on it when it is opened: ammo, credits, its weapon, now and then a find).
+## A hacked sentry (the soldier's side) leaves none.
+func _kill(f: Dictionary) -> void:
+	var m: CrewMember = f["m"]
+	f["dead"] = true
+	f["mode"] = "dead"
+	m.path.clear()
+	s.events.append({"type": "down", "pos": m.pos, "foe": f["id"], "kind": f["kind"]})
+	if f["team"] == "foe":
+		if f.has("corpse"):
+			s.site.wake_corpse(int(f["corpse"]), m.pos)
+		else:
+			f["corpse"] = s.site.add_corpse(str(f["kind"]), int(f["id"]), m.pos, bool(f["spawned"]))
 
 
 ## A noise at `at` (a shot, a swing): every foe within `radius` cells that is not already in the fight heads there.
