@@ -1,7 +1,7 @@
 {
   "weapons": {
     "emberkin_pyre_lance": {"kind": "beam", "sound": "sig_pyre", "damage_type": "energy", "damage": 4.5, "cooldown": 9.65, "range": 700, "shots": 1, "pierce": 0, "fire_chance": 0.4, "duration": 2.0, "turret": false, "gimbal": 5, "effects": {"self_room": {"heat": 40, "scorch_dps": 1.5}}},
-    "emberkin_cinder_mortar": {"kind": "bolt", "damage_type": "explosive", "damage": 1.6, "cooldown": 4.2, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.45, "speed": 420, "splash": 2, "turret": false, "gimbal": 4, "effects": {"self_room": {"fire_chance": 0.15}}},
+    "emberkin_cinder_mortar": {"kind": "bolt", "damage_type": "explosive", "damage": 4.5, "cooldown": 4.2, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.45, "speed": 420, "splash": 2, "turret": false, "gimbal": 4, "effects": {"self_room": {"fire_chance": 0.15}}},
     "emberkin_flare_turret": {"kind": "bolt", "damage_type": "energy", "damage": 1.5, "cooldown": 5.25, "range": 700, "shots": 1, "pierce": 0, "fire_chance": 0.1, "speed": 800, "heat_per_shot": 30, "turret": true, "gimbal": 0, "arc": 270, "track": 130, "accuracy": 0.75, "effects": {"sonic": {"stun_s": 1.6}, "self_room": {"scorch_dps": 0.8}}}
   }
 }
