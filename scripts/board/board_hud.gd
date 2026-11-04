@@ -106,7 +106,18 @@ func _draw() -> void:
 	if view.picking:
 		Loadout.draw(self, size)
 	_draw_fade(size)
+	_foe_names()
 	_draw_hover(size)
+
+
+## The name line of each foe on its feet that the soldier can make out ("Kett pirate"), as a hover.
+func _foe_names() -> void:
+	var s = view.session
+	for f in s.foes.list:
+		if f["dead"] or f["team"] != "foe" or str(f.get("species", "")) == "" or not s.foes.seen(f):
+			continue
+		var at: Vector2 = view.to_screen(f["m"].pos)
+		hover_add(Rect2(at - Vector2(22, 26), Vector2(44, 52)), [s.foes.title(f)], BAD)
 
 
 ## The height the line of words (the toast: "Airlock sealed.") is drawn at: low in the middle of the screen, and out of the way of the airlock marker when that is there

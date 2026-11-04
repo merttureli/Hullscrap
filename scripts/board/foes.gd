@@ -19,6 +19,9 @@ const Mods = preload("res://scripts/board/mods.gd")
 const Wear = preload("res://scripts/board/wear.gd")
 const Kit = preload("res://scripts/board/kit.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
+const StationRaces = preload("res://scripts/board/station_races.gd")
+const Regions = preload("res://scripts/space/regions.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 
 const SEARCH_S := 4.0  ## seconds a hunter looks about at the last place it saw someone
 const LOSE_S := 5.0  ## seconds without a line before a hunter gives up the chase at its target
@@ -126,7 +129,7 @@ func spawn_site(ctx := {}) -> void:
 func _spawn_crew(ctx: Dictionary) -> void:
 	var site = s.site
 	for e in site.foe_crew:
-		var f := add(str(e["kind"]), e["pos"], site.room_at(e["pos"]))
+		var f := add(str(e["kind"]), e["pos"], site.room_at(e["pos"]), true, str(e["species"]))  # (they keep the race they had in the fight)
 		f["m"].name = str(e["name"])
 		f["m"].hp = maxf(f["m"].max_hp * float(e["hp"]), 1.0)
 		f["sealed"] = bool(e["sealed"])
@@ -155,29 +158,30 @@ func memory() -> Dictionary:
 
 
 ## A foe of `kind` standing at `pos` (cells). Returns it. `spawned` is false for one that did not stand here from the start (it is not in the site's memory of the dead).
-func add(kind: String, pos: Vector2, room := -1, spawned := true) -> Dictionary:
+## `species` is the race it keeps (a beaten ship's crew, a person who turned); "" = picked from where it stands (pick_species, none for a sentry or a crawler).
+func add(kind: String, pos: Vector2, room := -1, spawned := true, species := "") -> Dictionary:
 	var d: Dictionary = def(kind)
-	var m := CrewMember.new(str(d["name"]), pos, "human")
-	m.max_hp = float(d["hp"])
+	var sp := species if species != "" else pick_species(kind, room, _next)
+	var m := CrewMember.new(str(d["name"]), pos, sp if sp != "" else "human")
+	m.max_hp = float(d["hp"])  # (the numbers are the kind's, whatever the race: set_species read the species' own)
 	m.hp = m.max_hp
 	m.speed = CrewMember.BASE_SPEED * float(d["speed"])
+	m.body_size = 1 if kind == "crawler" else Pathfinder.BODY
 	m.look = d.get("look", {})
-	if kind == "crawler":
-		m.body_size = 1
 	var site = s.site
 	var base := 0.0
 	if room >= 0:
 		var r: Rect2i = site.rooms[room]["rect"]
 		base = (Vector2(r.position) + Vector2(r.size) / 2.0 - pos).angle()
 	m.facing = Vector2.from_angle(base)
-	var f := {"id": _next, "kind": kind, "d": d, "m": m, "team": "foe", "mode": "idle", "dead": false, "hidden": false, "moved": false, "spawned": spawned,
+	var f := {"id": _next, "kind": kind, "species": sp, "d": d, "m": m, "team": "foe", "mode": "idle", "dead": false, "hidden": false, "moved": false, "spawned": spawned,
 		"room": room, "home": pos, "target": pos, "seen_at": pos, "notice": 0.0, "lost": 0.0, "wait": 0.0, "repath": 0.0, "cd": s.rng.randf_range(0.2, 0.9),
 		"hurt_t": 0.0, "cover_cd": 0.0, "cover_pos": pos, "refuge": pos, "base": base, "aim": base, "track": 0.0, "tpos": pos, "spoke": false,
 		"stalk_t": 0.0, "seen_t": 0.0, "lunge": 0.0, "lunge_cd": 1.5, "bites": 0, "frozen": false, "hack": 0.0}
 	_next += 1
 	f["gear"] = ""
 	if spawned:  # its body is made now, so that its id is the same on every visit
-		f["corpse"] = site.add_corpse(kind, int(f["id"]), pos, true, false)
+		f["corpse"] = site.add_corpse(kind, int(f["id"]), pos, true, false, sp)
 	if kind == "crawler":
 		f["mode"] = "hidden"
 		f["hidden"] = true
@@ -190,6 +194,81 @@ func add(kind: String, pos: Vector2, room := -1, spawned := true) -> Dictionary:
 	dress(f, Wear.for_foe(kind, site.region, wr, race))
 	list.append(f)
 	return f
+
+
+# --- race ------------------------------------------------------------------------------------------------------------
+
+static func _cfg() -> Dictionary:
+	return Site.config()["foe"]
+
+
+## Is `id` a species a foe may be (a crew species, never a drone)?
+static func person_species(id: String) -> bool:
+	return id != "" and CrewMember.species_table().get("species", {}).has(id) and not CrewMember.is_drone_species(id)
+
+
+## The race of a foe of `kind` standing in `room`, with id `id`: "" for a kind that is not a person. Its own dice (the site seed and the foe's id; three rolls always),
+## so it never shifts the fight's and a revisit gives the same race. See boarding.json `foe`.
+func pick_species(kind: String, room: int, id: int) -> String:
+	if not bool(_cfg()["kinds"].get(kind, false)):
+		return ""
+	var site = s.site
+	var rng := RandomNumberGenerator.new()
+	rng.seed = Site._mix(site.seed_value, "race", id)
+	var a := rng.randf()
+	var b := rng.randf()
+	var c := rng.randf()
+	if room >= 0 and not site.modules.is_empty() and int(site.rooms[room].get("module", -1)) >= 0:  # a section a race built
+		var race := str(site.modules[int(site.rooms[room]["module"])].get("race", ""))
+		if person_species(race) and a < float(_cfg()["section_share"]):
+			return race
+	var style: Dictionary = Shipgen.tables()["factions"].get(site.faction, {})  # a ship of a race's style (a derelict of the region's faction)
+	if person_species(str(style.get("race", ""))):
+		return str(style["race"])
+	if site.region != "" and Regions.has(site.region):  # the region's own race, at its share
+		var rd := Regions.get_region(site.region)
+		var home := str(rd.get("home_species", ""))
+		if person_species(home) and b < float(rd.get("race_share", Shipgen.RACE_SHARE)):
+			return home
+	var w: Dictionary = Themes.def(site.theme).get("species", Site.config()["people"]["species"])  # else whoever lives there
+	var ok := {}
+	var total := 0.0
+	for sp in w:
+		if person_species(str(sp)):
+			ok[sp] = float(w[sp])
+			total += float(w[sp])
+	var x := c * total
+	for sp in ok:
+		x -= float(ok[sp])
+		if x < 0.0:
+			return str(sp)
+	return str(ok.keys()[-1]) if not ok.is_empty() else "human"
+
+
+## The adjective of race `sp`: the label of its ship style (data/ship_styles.json), else its name.
+static func race_label(sp: String) -> String:
+	var st: Dictionary = Shipgen.tables()["factions"].get(sp, {}).get("style", {})
+	if st.has("label"):
+		return str(st["label"])
+	var n := str(CrewMember.species_def(sp).get("name", sp))
+	return n.capitalize() if n != "" else sp.capitalize()
+
+
+## The name line of foe `f`: "<race label> <kind name>" ("Kett pirate"); just the kind's name for one that is not a person.
+static func title(f: Dictionary) -> String:
+	var kn := str(f["d"]["name"])
+	var sp := str(f.get("species", ""))
+	return kn if sp == "" else "%s %s" % [race_label(sp), kn.to_lower()]
+
+
+## Is foe `f` in the light, where the soldier can make out who it is?
+func seen(f: Dictionary) -> bool:
+	return not f["hidden"] and (lit(f["m"].pos) or (_red.has(int(f["room"])) and s.site.clear_line(s.soldier.pos, f["m"].pos)))
+
+
+## The damage a foe's melee-hit returns to whoever strikes it: its worn gear's alone (a race's own counter_melee trait is not in the numbers).
+static func counter_melee(m) -> float:
+	return maxf(float(TraitSet.of(m)["counter_melee"]) - float(StationRaces.traits_of(str(m.species))["counter_melee"]), 0.0)
 
 
 ## Foe `f` wears body gear `item` ("" for none): drawn on it, its armour and traits, and its body holds it (loot.gd).
@@ -354,12 +433,12 @@ func _kill(f: Dictionary) -> void:
 	f["dead"] = true
 	f["mode"] = "dead"
 	m.path.clear()
-	s.events.append({"type": "down", "pos": m.pos, "foe": f["id"], "kind": f["kind"]})
+	s.events.append({"type": "down", "pos": m.pos, "foe": f["id"], "kind": f["kind"], "name": title(f)})
 	if f["team"] == "foe":
 		if f.has("corpse"):
 			s.site.wake_corpse(int(f["corpse"]), m.pos)
 		else:
-			f["corpse"] = s.site.add_corpse(str(f["kind"]), int(f["id"]), m.pos, bool(f["spawned"]))
+			f["corpse"] = s.site.add_corpse(str(f["kind"]), int(f["id"]), m.pos, bool(f["spawned"]), true, str(f.get("species", "")))
 
 
 ## A noise at `at` (a shot, a swing): every foe within `radius` cells that is not already in the fight heads there.
