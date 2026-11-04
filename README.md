@@ -110,7 +110,7 @@ A manned helm adds 5% evasion in a fight (`Jobs.evasion_bonus(ship)`; the turret
 The HUD (bottom left) has one line, "Crew: Ada repairing Laser Mk1, Rook extinguishing, Juno at helm, ...", and the chronicle logs "Fire in engine room", "Fire out", "Breach sealed", "Kickjet repaired", "Rook is down", "Rook is back on their feet".
 
 ## Combat
-In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_raider.json`, 1200 px ahead). The camera zooms out to frame both ships, the interior is put away and the crew are drawn on the hulls: they keep working (fires, breaches, repairs, stations) on both ships. Power, heat, oxygen, fires and malfunctions keep running on both ships.
+In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_raider.json`, 1800 px ahead, beyond the longest gun). The camera zooms out to frame both ships, the interior is put away and the crew are drawn on the hulls: they keep working (fires, breaches, repairs, stations) on both ships. Power, heat, oxygen, fires and malfunctions keep running on both ships.
 
 | Input | Action |
 |---|---|
