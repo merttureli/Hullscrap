@@ -19,6 +19,7 @@ const DESIGNS: Array[String] = [
 	"res://data/ships/starter_courier.json",
 	"res://data/ships/starter_prism.json",
 ]
+const BLANK_TEXT := "%s: build your ship from the hold, then B for play mode and M for the map to launch"  ## a build-your-own start (ship.build_first)
 const CELL_PX := 32.0  ## the build view's cell size, for fitting the camera to a ship
 ## Screen px the build HUD (hud.gd) covers: the top bar, the mode bar with its hints, and the palette and the card at
 ## the sides. A chosen ship is fitted in the space between them.
@@ -171,7 +172,7 @@ func choose(i: int) -> String:
 		cam.zoom = Vector2(f["zoom"], f["zoom"])
 		cam.position = f["pos"]
 	if build != null:
-		build.ship_replaced("%s: B for play mode, then K to fight. Everything can be rebuilt" % ship.name)
+		build.ship_replaced(BLANK_TEXT % ship.name if ship.build_first else "%s: B for play mode, then K to fight. Everything can be rebuilt" % ship.name)
 	close()
 	on_escape = Callable()
 	chosen.emit()

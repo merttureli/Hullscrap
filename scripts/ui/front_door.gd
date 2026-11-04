@@ -33,6 +33,7 @@ const HINT_TEXT := {
 	"net": "Net Mouth in your cargo: put it on an outer wall to catch scrap",
 	"craft": "Click a recipe to queue it. Place the finished part from the build palette (B).",
 }
+const BLANK_HINT := "Build your ship, then launch: grow the hull, fit the parts from the hold, wire them, then B and M"  ## the Blank frame's, shown at every such start
 
 var sim: Node
 var build: Node
@@ -279,6 +280,10 @@ func record_win(campaign, ship, ending_id: String) -> Dictionary:
 
 
 func _on_ship_picked() -> void:
+	var ship = sim.player_ship() if sim != null else null
+	if ship != null and ship.build_first:
+		toast.push(BLANK_HINT)  # every blank start, not once per profile
+		return
 	_hint("picked")
 
 

@@ -226,6 +226,9 @@ func new_game(seed_value := 0) -> void:
 	campaign.profile = profile
 	if profile != null:
 		RunStart.apply_campaign(campaign, profile.start, profile)  # the map variant picked in the hangar
+	var first = ship()
+	if first != null and first.build_first:
+		campaign.flags[Campaign.BUILD_FIRST] = true  # build first, then launch (launch.gd)
 	_arrived = false
 	_queue.clear()
 	_forget_poi()

@@ -67,6 +67,7 @@ var rng_seed := 1  ## seeds the ship's random rolls (malfunctions), see ShipSim
 var crew: Array = []  ## CrewMember objects aboard; saved as "crew_state" (version 6)
 var dead_crew: Array = []  ## names of crew who bled out (mortality.gd): Jobs.spawn_crew does not bring them back; saved
 var dead_at := {}  ## name -> {pos: [x, y], species} of the crew who bled out where they lay (mortality.gd), so a boarded wreck can show their bodies (wreck_site.gd); saved as the optional "dead_at"
+var build_first := false  ## the design asks for a build-your-own start (from_design `build_first`; not saved: the campaign flag carries it, campaign.gd BUILD_FIRST)
 var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
 var skin := ""  ## the hull skin of the exterior plating (a skin unlock's payload `skin`, unlocks.gd skin_paint); "" = the plain hull; saved when set
 var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
@@ -126,6 +127,7 @@ static func from_design(path: String) -> RefCounted:
 		for e in list:
 			if e is Dictionary and str(e.get("name", "")) != "":
 				s.crew_plan.append({"name": str(e["name"]), "species": str(e.get("species", "human"))})
+	s.build_first = bool(d.get("build_first", false))
 	return s
 
 

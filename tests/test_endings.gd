@@ -504,7 +504,7 @@ func test_the_hangar_lists_the_starters_and_their_locks() -> void:
 	eq([by["starter_rustbucket"]["layout"], by["starter_rustbucket"]["unlock"]], ["A", ""], "layout A, open from the start")
 	eq(by["starter_rustbucket"]["crew"].size(), 1, "with its crew: the soldier alone (playtest 2, A1)")
 	check(by["starter_rustbucket"]["blurb"].length() > 30, "and its pitch")
-	eq(Hangar.groups(list), ["Clans", "Concord", "Fixture", "Lumen", "Wisp"], "the tabs, in order")
+	eq(Hangar.groups(list), ["Clans", "Concord", "Fixture", "Lumen", "Wisp", "Your own"], "the tabs, in order (the Blank frame is the last)")
 	eq(by["fx_tender"]["unlock"], "fx_tender", "a design's own hangar.unlock")
 	eq(by["fx_wisp_c"]["unlock"], "fx_wisp", "an unlock that names the design locks it too")
 	for e in [by["starter_rustbucket"], by["starter_courier"], by["starter_prism"], by["fx_open_b"]]:
@@ -555,7 +555,7 @@ func test_the_hangar_screen_dims_locked_ships_and_refuses_them() -> void:
 	var prof := Profile.new(TMP)
 	var d := _hangar(prof)
 	var h: HangarView = d["h"]
-	eq(h.cards.size(), 6, "three starters and three fixture ships")
+	eq(h.cards.size(), 7, "three starters, the Blank frame and three fixture ships")
 	eq(h.cards[h.sel]["id"], "starter_rustbucket", "it opens on the first open ship")
 	check(h.visible and not h.is_locked(h.sel), "and shows")
 	h._input(_key(KEY_RIGHT))
@@ -583,8 +583,8 @@ func test_the_hangar_screen_dims_locked_ships_and_refuses_them() -> void:
 	h._input(_key(KEY_LEFT))
 	h._input(_key(KEY_LEFT))
 	h._input(_key(KEY_LEFT))
-	eq(h.cards[h.sel]["group"], "Wisp", "Left from the first tab wraps to the last")
-	eq(h.cards[h.sel]["layout"], "C", "and takes that group's only layout")
+	eq(h.cards[h.sel]["group"], "Your own", "Left from the first tab wraps to the last")
+	eq(h.cards[h.sel]["layout"], "A", "and takes that group's only layout")
 	prof.unlock("fx_tender")
 	prof.unlock("fx_wisp")
 	h.open()
@@ -628,7 +628,7 @@ func test_the_hangar_tabs_and_button_answer_the_mouse() -> void:
 	var p: Rect2 = lay["panel"]
 	check(p.encloses(lay["map"]) and p.encloses(lay["info"]) and p.encloses(lay["button"]), "plan, info and button are inside the panel")
 	check(not lay["map"].intersects(lay["info"]), "the plan and the info do not overlap")
-	eq(lay["groups"].size(), 5, "five tabs fit")
+	eq(lay["groups"].size(), 6, "six tabs fit")
 	for r in lay["groups"]:
 		check(p.encloses(r), "a tab is inside the panel")
 	eq(h.zone_at(lay["groups"][1].get_center()), {"kind": "group", "index": 1}, "a tab is found")
