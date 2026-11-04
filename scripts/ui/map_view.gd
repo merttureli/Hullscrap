@@ -167,10 +167,10 @@ func playing() -> bool:
 
 
 ## The one place linger time is counted: `dt` seconds of play pass and the tide creeps on (campaign.linger) while
-## playing() and the tree is not paused. The lines it says go to the chronicle and the toast; they are returned too.
+## playing(), the tree is not paused and the soldier is not aboard another vessel (time on foot is held, the owner's call). The lines it says go to the chronicle and the toast; they are returned too.
 ## Whatever surface the game is played on (the map's play mode, the sector view) calls this each frame.
 func tick_linger(dt: float) -> Array:
-	if not playing() or (is_inside_tree() and get_tree().paused):
+	if not playing() or _boarding or (is_inside_tree() and get_tree().paused):
 		return []
 	var lines := campaign.linger(dt)
 	_tide_say(lines)

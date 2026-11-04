@@ -7,7 +7,7 @@ extends RefCounted
 ##   is learned at once, a log goes to the journal (campaign.logs_found), a keycard is held for the doors of its colour.
 ## - A hack door opens after holding E for `hack_s` seconds (the view counts them, then calls unlock()); a card door needs the keycard.
 ## - leave() writes the visit to the sector's memory and says whether the site is cleared (every container opened): its POI is done then.
-## - The sector does not tick while aboard (sector_view.gd), the Hollow tide's linger clock does (map_view.gd).
+## - The sector does not tick while aboard (sector_view.gd), nor does the Hollow tide's linger clock (map_view.gd).
 ## offer() is the other half: it puts the "Board her" choice into the event a boardable POI rolls.
 
 const Site = preload("res://scripts/board/site.gd")

@@ -2,7 +2,7 @@ extends Node2D
 ## Boarding on screen (docs/BOARDING.md, stage B1): the soldier goes aboard another vessel (a Boarding visit, boarding.gd) and walks it in the dark
 ## with a flashlight toward the mouse and a motion tracker. The ship's own views are put away the way a fight does it (BuildMode.combat, the crew
 ## view, the sector view and the debris) and the ship's world stands still (ShipSim paused, the sector does not tick); the Hollow tide's
-## linger clock keeps running (map_view.gd counts it while the map is shut).
+## linger clock is held too (map_view.gd tick_linger: time on foot does not count).
 ## - The site is drawn by a ShipView on a plain Ship (the same tile art as a ship), the props and the soldier by this node over it, in the dark: a
 ##   CanvasModulate near black, the flashlight (a cone PointLight2D, shadows from the wall occluders of board_light.gd), a small light round the soldier,
 ##   dim red lights in some rooms and a green one in the airlock.

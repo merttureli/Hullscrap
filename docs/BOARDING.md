@@ -33,7 +33,7 @@ Boarding takes the soldier **off the ship and onto another vessel**: a derelict,
   - **you may take up to 2 unposted crew**, who follow and help;
   - the drone stays on the ship.
 - **Leaving**: walk back to the **airlock** (always marked) and press E.
-- **Time**: the sector doesn't tick while you're aboard, so no passing ships come. The Hollow tide's linger clock **does** keep running, so you can't loot forever.
+- **Time**: the sector doesn't tick while you're aboard, so no passing ships come, and the Hollow tide's linger clock is held too: time on foot doesn't count against the tide.
 
 ## Combat on foot (stage B2)
 - **The player's weapon**: the soldier's sidearm (`data/hand_weapons.json`). Aim with the mouse, LMB fires, R reloads, ammo is limited.
