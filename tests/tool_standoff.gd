@@ -246,13 +246,13 @@ static func starter_enemies(name: String, stage: int, n: int) -> Array:
 	var mine: Ship = Session.load_ship(STARTERS[name])
 	var out: Array = []
 	var got := {2: 0, 3: 0}
-	if want_skulls > 0:
+	if want_skulls != 0:
 		for k in got:
 			got[k] = 0 if k == want_skulls else n  # only the wanted threat is looked for
 	var j := roundi(JUMPS_A_STAGE * (float(stage) - 0.5))
 	var tier := 3 if j >= 25 else (2 if j >= 10 else 1)
 	var tries := 0
-	while (got[2] < n or got[3] < n) and tries < MAX_TRIES:
+	while (got[2] < n or got[3] < n or (want_skulls < 0 and out.size() < n)) and tries < MAX_TRIES:
 		var seed_value := 101 + tries * 7919 + stage * 31
 		var faction: String = style_only if style_only != "" else FACTIONS[tries % FACTIONS.size()]
 		tries += 1
@@ -264,6 +264,13 @@ static func starter_enemies(name: String, stage: int, n: int) -> Array:
 		if ship == null:
 			continue
 		var sk: int = Threat.rate(ship, mine)["skulls"]
+		if want_skulls < 0:  # want=-1 (a style that cannot reach three skulls at stage 1): the first n of any threat up to 3
+			if sk > 3 or out.size() >= n:
+				continue
+			got[2] = n
+			got[3] = n
+			out.append({"spec": spec, "faction": faction, "seed": seed_value, "layers": Shields.layers_of_ship(ship, ship.power_state.get("powered", {})), "kind": "%s t%d" % [name, sk], "skulls": sk})
+			continue
 		if not got.has(sk) or got[sk] >= n:
 			continue
 		got[sk] += 1
