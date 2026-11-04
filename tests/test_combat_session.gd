@@ -24,14 +24,14 @@ func _kinds(w: Weapons) -> Dictionary:
 	return out
 
 
-func test_the_enemy_spawns_1200_px_ahead_facing_the_player() -> void:
+func test_the_enemy_spawns_1800_px_ahead_facing_the_player() -> void:
 	var s := _session()
 	var a = s.arena.ships[Session.PLAYER]
 	var b = s.arena.ships[Session.ENEMY]
 	eq(a.flight.pos, Vector2.ZERO, "the player at the origin")
-	eq(b.flight.pos, Vector2(0.0, -1200.0), "the enemy straight ahead")
+	eq(b.flight.pos, Vector2(0.0, -1800.0), "the enemy straight ahead")
 	near(absf(b.flight.angle), PI, "turned to face the player")
-	near(s.distance(), 1200.0, "1200 px apart")
+	near(s.distance(), 1800.0, "1800 px apart")
 	eq(s.state(), "fighting", "on")
 	eq(s.end_text(), "", "no message yet")
 	s.input = {"throttle": 1.0, "turn": 0.0}
@@ -109,7 +109,7 @@ func test_the_weapon_bar_states() -> void:
 
 func test_the_fight_ends_when_a_ship_is_wrecked() -> void:
 	var s := _session()
-	check(not s.can_leave(), "cannot leave at 1200 px")
+	check(not s.can_leave(), "cannot leave at 1800 px")
 	s.arena.wreck(Session.ENEMY)
 	eq(s.state(), "won", "the pirate is wrecked")
 	eq(s.end_text(), "Pirate wrecked. Esc to return", "the message")
@@ -132,7 +132,7 @@ func test_the_fight_ends_when_a_ship_is_wrecked() -> void:
 
 func test_the_jump_drive_spools_then_lets_the_player_leave() -> void:
 	var s := _session()
-	check(not s.can_leave(), "cannot leave at 1200 px")
+	check(not s.can_leave(), "cannot leave at 1800 px")
 	eq(s.start_jump(), "", "J starts the spool")
 	eq(s.start_jump(), "The jump drive is already spooling", "once")
 	var steps := int(Session.JUMP_SPOOL / Session.STEP)
@@ -183,7 +183,7 @@ func test_combat_mode_enters_and_exits_inside_the_scene() -> void:
 	check(build.combat and not build.visible, "the interior is put away")
 	eq(sim.ships.size(), 2, "the pirate joined the simulation")
 	eq(sim.ships[1].name, "Pirate Raider", "it is the pirate")
-	near(view.session.distance(), 1200.0, "1200 px ahead")
+	near(view.session.distance(), 1800.0, "1800 px ahead")
 	for i in 90:
 		view.frame(1.0 / 60.0)
 	check(view.session.arena.tick >= 85, "the fight runs")
