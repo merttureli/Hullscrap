@@ -22,6 +22,8 @@ const Mortality = preload("res://scripts/crew/mortality.gd")
 const Kit = preload("res://scripts/board/kit.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Bolts = preload("res://scripts/board/bolts.gd")
+const Air = preload("res://scripts/board/air.gd")
+const WreckSite = preload("res://scripts/board/wreck_site.gd")
 
 const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
 
@@ -57,6 +59,10 @@ var seen_marks := {}  ## mark id -> true: the discoveries (site.marks) that have
 var flares: Array = []  ## B4: the flares of a flare gun that burn on the site: [{id, pos, wait (seconds until it lands), t (seconds left burning)}]
 var cur_room := -1  ## the room the soldier stands in (the last one, in a doorway)
 var spotted: Array = []  ## B4: the rooms a Spotter Cam in the party shows (room ids, none without one)
+var _door_note := 0.0
+var air_t := 0.0  ## seconds since the soldier last cried out choking (air.gd)
+var air_warned := false  ## the warning at the airlock was given (air.gd airlock_warning)
+var air_seen := {}  ## room id -> seconds since the soldier first saw it airless (the NO AIR label of the view)
 var _flare_id := 0
 
 
@@ -81,7 +87,13 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 		if mem.is_empty():
 			theme = Themes.for_region(p_campaign.region_data, hollow_now)
 	var seed_value: int = Site._mix(p_sector.seed_value if p_sector != null else 0, p_poi_id, 0)
-	b.site = Site.make(seed_value, str(b.spec["kind"]), {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", []), "theme": theme})
+	var opts := {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", []), "theme": theme}
+	var kept: Dictionary = p_sector.wreck_ships.get(p_poi_id, {}) if p_sector != null and str(b.spec["kind"]) == "wreck" else {}
+	if not kept.is_empty():  # the wreck of a ship she beat is that ship (wreck_site.gd); one with none stored is a generated site
+		opts["fight"] = str(kept.get("fight", "won"))
+		b.site = WreckSite.make(seed_value, kept["ship"], opts)
+	if b.site == null:
+		b.site = Site.make(seed_value, str(b.spec["kind"]), opts)
 	b.spec["name"] = b.site.site_name
 	b.spec["parts"] = b.site.parts
 	b.soldier = _soldier_of(p_ship)
@@ -99,10 +111,10 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 	var held: Dictionary = mem.get("left", {})
 	for id in held:
 		b.left[int(id)] = held[id]
-	b.cleared = b.opened.size() >= b.site.containers().size()
 	b.hollow_place = hollow_now
 	b.spec["crew"] = int(mem.get("crew", p_spec.get("crew", 0)))
 	b.foes.spawn_site({"hollow": b.hollow_place, "crew": b.spec["crew"], "mem": mem.get("foes", {})})
+	b.cleared = b.opened_count() >= b.total()  # (after the foes: the bodies of the beaten are containers too, but no part of what clears a site)
 	b.people = People.new(b)
 	b.people.spawn_site({"hollow": b.hollow_place, "mem": mem.get("people", {})})
 	for id in mem.get("marks", []) if mem.get("marks") is Array else []:
@@ -131,7 +143,11 @@ func total() -> int:
 
 
 func opened_count() -> int:
-	return opened.size()
+	var n := 0
+	for id in opened:
+		if id < 0 or id >= site.props.size() or not site.props[id].has("foe"):
+			n += 1
+	return n
 
 
 ## Open container `id` (its contents were rolled now, or are what an earlier look left). The contents: {items, blueprint, log, key}.
@@ -140,7 +156,7 @@ func open(id: int) -> Dictionary:
 		opened[id] = true
 		left[id] = Loot.resolve(site, id, _ctx())
 		_rig(id)
-		cleared = opened.size() >= total()
+		cleared = opened_count() >= total()
 	return left.get(id, {"items": {}, "blueprint": "", "log": "", "key": ""})
 
 
@@ -235,6 +251,18 @@ func unlock(id: int, hacked := false) -> String:
 	unlocked[id] = true
 	site.unlock_door(id)
 	return ""
+
+
+## Callable(door cell) -> bool for the soldier's own steps: as door_passable, and a door into a room with no air is shut to him unless he wears a seal (air.gd).
+func soldier_passable() -> Callable:
+	return func(c: Vector2i) -> bool:
+		var d: int = site.door_of.get(c, -1)
+		return d < 0 or (door_open_to_soldier(d) and not Air.door_refuses(site, site.doors[d], soldier))
+
+
+## Does the airlock open on air too thin to breathe (he needs a sealed suit to go aboard)?
+func needs_suit() -> bool:
+	return Air.bad(site.air_of(int(site.airlock["room"])))
 
 
 ## Is the door open to the soldier (it never had a lock, or it was unlocked)?
@@ -490,6 +518,8 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	for g in guns:
 		Arms.tick(g, dt, take)
 	foes.tick(dt, aim, light_on)
+	Air.tick(self, dt)
+	_air_look(dt)
 	people.tick(dt)
 	Party.tick(self, dt)
 	_tick_flares(dt)
@@ -503,15 +533,41 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 		events = events.slice(events.size() - 300)
 
 
+## The air round the soldier: the warning at the airlock once, and the rooms with no air he has seen (the view labels them, air_seen).
+func _air_look(dt: float) -> void:
+	if not air_warned:
+		air_warned = true
+		var w := Air.airlock_warning(self)
+		if w != "":
+			events.append({"type": "line", "text": w})
+	_door_note -= dt
+	if _door_note <= 0.0:
+		for d in site.doors:
+			if Air.door_refuses(site, d, soldier) and soldier.pos.distance_to(site.door_centre(d)) <= 2.2:
+				_door_note = 3.0
+				events.append({"type": "line", "text": Air.NO_SUIT_DOOR})
+				break
+	for rid in air_seen.keys():
+		air_seen[rid] = float(air_seen[rid]) + dt
+	for r in site.rooms:
+		var rid: int = r["id"]
+		if r["purpose"] == "gone" or air_seen.has(rid) or not Air.bad(site.air_of(rid)):
+			continue
+		var mid: Vector2 = site.centre_of_room(rid)
+		if site.room_at(soldier.pos) == rid or (soldier.pos.distance_to(mid) <= float(Arms.cfg()["flash_range"]) and site.clear_line(soldier.pos, mid)):
+			air_seen[rid] = 0.0
+
+
 ## Open the doors someone stands near (the soldier, his crew, a foe that is up) and shut the rest; a locked door stays shut. Each change is an event.
 func update_doors(near: float) -> void:
-	var movers: Array = [soldier.pos]
+	var movers: Array = [{"pos": soldier.pos, "m": soldier}]
 	for p in party:
-		movers.append(p["m"].pos)
-	movers.append_array(people.movers())
+		movers.append({"pos": p["m"].pos, "m": p["m"]})
+	for q in people.movers():
+		movers.append({"pos": q, "m": null})
 	for f in foes.list:
 		if not f["dead"] and not f["hidden"] and f["kind"] != "sentry":
-			movers.append(f["m"].pos)
+			movers.append({"pos": f["m"].pos, "m": null})
 	for d in site.doors:
 		if d["lock"] == "gone":
 			continue
@@ -519,7 +575,7 @@ func update_doors(near: float) -> void:
 		var want := false
 		if door_open_to_soldier(d["id"]):
 			for q in movers:
-				if q.distance_to(mid) <= near:
+				if q["pos"].distance_to(mid) <= near and not (q["m"] != null and Air.door_refuses(site, d, q["m"])):  # (a door with no air behind it stays shut to the unsealed)
 					want = true
 					break
 		if want != site.grid.is_door_open(d["cells"][0]):
@@ -529,6 +585,14 @@ func update_doors(near: float) -> void:
 
 ## Take the crew named in `names` along (at most party_max of the eligible ones; party.gd). Returns how many came.
 func join_party(names: Array) -> int:
+	if Air.bad(site.air_of(int(site.airlock["room"]))):  # a crew member with no sealed suit stays aboard the ship rather than step into an airless airlock
+		var keep := []
+		for src in Party.eligible(ship):
+			if names.has(src.name) and Air.sealed(src):
+				keep.append(src.name)
+			elif names.has(src.name):
+				said.append("%s stays aboard: no air, and no sealed suit." % src.name)
+		names = keep
 	party = Party.join(self, names)
 	return party.size()
 
@@ -629,7 +693,7 @@ func leave() -> Dictionary:
 	if downed:
 		soldier.hp = soldier.max_hp * float(Arms.cfg()["down_hp"])
 		text = str(Arms.cfg()["down_text"])
-	cleared = downed or opened.size() >= total()
+	cleared = downed or opened_count() >= total()
 	if ship != null:
 		for m in ship.crew:
 			if m.is_player:
@@ -643,8 +707,9 @@ func leave() -> Dictionary:
 func memory() -> Dictionary:
 	var held := {}
 	for id in left:
-		held[str(id)] = left[id].duplicate(true)
-	var o: Array = opened.keys()
+		if site.remembered(id):
+			held[str(id)] = left[id].duplicate(true)
+	var o: Array = opened.keys().filter(func(id): return site.remembered(id))
 	var u: Array = unlocked.keys()
 	var k: Array = keys.keys()
 	o.sort()
@@ -768,7 +833,8 @@ static func kind_for(poi: Dictionary) -> String:
 ## A copy of event `ev` with the "Board her" choice added (its effect is `board: spec`, `extra` is added to the spec), and a free way out when the
 ## event has none (unless `leave` is false: a salvage page is a pick of one prize).
 ## An empty event stays empty.
-static func offer(ev: Dictionary, kind: String, extra := {}, leave := true) -> Dictionary:
+## `suit` true marks the choice as one that needs a sealed suit (the wreck's airlock has no air, wreck_site.gd airless_airlock): it shows grey with the reason until the ship has one.
+static func offer(ev: Dictionary, kind: String, extra := {}, leave := true, suit := false) -> Dictionary:
 	if ev.is_empty() or kind == "":
 		return ev
 	var text: Dictionary = Site.config()["offer"][kind]
@@ -776,7 +842,10 @@ static func offer(ev: Dictionary, kind: String, extra := {}, leave := true) -> D
 	var choices: Array = out.get("choices", []) if out.get("choices") is Array else []
 	var spec := {"kind": kind}
 	spec.merge(extra)
-	choices.append({"text": text["text"], "outcomes": [{"weight": 1, "text": text["flavor"], "effects": {"board": spec}}]})
+	var row := {"text": text["text"], "outcomes": [{"weight": 1, "text": text["flavor"], "effects": {"board": spec}}]}
+	if suit:
+		row["needs_suit"] = true
+	choices.append(row)
 	if leave and not choices.any(func(ch): return _free(ch)):
 		choices.append({"text": Site.config()["leave_text"], "outcomes": [{"weight": 1, "text": "", "effects": {}}]})
 	out["choices"] = choices

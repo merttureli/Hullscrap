@@ -52,7 +52,8 @@ const Kit = preload("res://scripts/board/kit.gd")
 ## 10 drops `hull_loss` (there is no hull pool: the blocks are the health, structure.gd); an older save's is ignored.
 ## 11 adds `boarded` to each saved sector (what the soldier opened and unlocked aboard a POI, boarding.gd); older saves have none.
 ## 12 adds `story_views` (how often each heavy `once` event was shown, events.gd fade_weight); older saves start with none.
-const VERSION := 12
+## 13 adds `wreck_ships` to each saved sector (the enemy Ship as the fight left it, kept with its wreck so the wreck is boarded as that ship, boarding.gd); an older save's wreck has none and is boarded as a generated site.
+const VERSION := 13
 const MIN_VERSION := 1
 ## A fuel is this many parts: a jump costs the powered engines' thrust-weighted mean `fuel_mult`, in hundredths.
 const FUEL_PARTS := 100

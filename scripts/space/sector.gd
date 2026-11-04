@@ -59,6 +59,7 @@ var pois: Array = []  ## the generated POIs, main first
 var ambient: Array = []  ## the passing ships now about (transient; not generated)
 var wrecks: Array = []  ## the wrecks won fights left here (add_wreck); saved
 var boarded := {}  ## POI id -> what the soldier did aboard it: {kind, name, parts, opened, unlocked, keys, left, cleared} (boarding.gd memory); saved
+var wreck_ships := {}  ## wreck id -> {ship: the enemy Ship.to_dict as the fight left it, fight: "won" or "captured"}: the wreck is boarded as that ship (wreck_site.gd); saved. A wreck with none (an older save) is boarded as a generated site
 var hostiles: Array = []  ## positions (Vector2, px) of the hostile ships about; the fight in place keeps this list for the jump block
 var ship_pos := Vector2.ZERO
 var ship_vel := Vector2.ZERO
@@ -713,6 +714,8 @@ func to_save() -> Dictionary:
 		"next_amb": _next_amb, "clock": clock, "rng": str(rng.state), "wrecks": hulks, "next_wreck": _next_wreck}
 	if not boarded.is_empty():
 		out["boarded"] = boarded.duplicate(true)
+	if not wreck_ships.is_empty():
+		out["wreck_ships"] = wreck_ships.duplicate(true)
 	return out
 
 
@@ -746,6 +749,12 @@ func load_save(d: Dictionary) -> String:
 		var w := _wreck(e["id"], _vec(e["pos"]), str(e.get("name", "")))
 		w["state"] = str(e.get("state", NEW)) if [NEW, DONE].has(str(e.get("state", NEW))) else NEW
 		hulks.append(w)
+	var ships := {}  # (a malformed one is dropped: the wreck is boarded as a generated site)
+	if d.get("wreck_ships") is Dictionary:
+		for id in d["wreck_ships"]:
+			var e = d["wreck_ships"][id]
+			if e is Dictionary and e.get("ship") is Dictionary:
+				ships[str(id)] = {"ship": e["ship"].duplicate(true), "fight": str(e.get("fight", "won"))}
 	var memory := {}
 	if not d.get("boarded", {}) is Dictionary:
 		return "bad sector data"
@@ -761,6 +770,7 @@ func load_save(d: Dictionary) -> String:
 		if d["pois"].has(p["id"]):
 			p["state"] = d["pois"][p["id"]]
 	boarded = memory
+	wreck_ships = ships
 	ship_pos = _vec(d["ship"])
 	far_seen = {}
 	for id in d.get("far", {}):

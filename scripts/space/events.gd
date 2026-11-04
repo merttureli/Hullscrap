@@ -47,6 +47,7 @@ extends RefCounted
 ##   is (the repeatable filler quests of data/packs/story_1, so a quest beacon with no quest left still has something to give).
 ## - `c` below is the campaign (campaign.gd); it is not preloaded here, to avoid a cycle.
 
+const Air = preload("res://scripts/board/air.gd")
 const Content = preload("res://scripts/data/content.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const Regions = preload("res://scripts/space/regions.gd")
@@ -64,7 +65,7 @@ const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress
 const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest", "hollow", "boarding_npc", "boarding_site"]
 const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark", "fallback"]
 const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "site", "role", "theme", "mark"]
-const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue"]
+const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue", "needs_suit"]
 const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "species", "species_any", "trait", "items", "pay", "component", "component_any", "credits", "site", "role", "theme", "mark"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win"]
 const AFTER_KEYS: Array = ["text", "effects"]
@@ -468,7 +469,8 @@ func choice_view(ev: Dictionary, c, ship, node: Dictionary = {}) -> Array:
 		var text := str(ch.get("text", ""))
 		if blue and not text.begins_with("["):
 			text = "[%s] %s" % [_reason(req, ship), text]
-		out.append({"index": i, "text": text, "blue": blue, "grey": not short.is_empty(), "need": _need_text(needs(ch), ship) if not short.is_empty() else ""})
+		var locked := Air.NO_SUIT_BOARD if bool(ch.get("needs_suit", false)) and not Air.has_suit(ship) else ""  # (going aboard a ship with no air takes a sealed suit)
+		out.append({"index": i, "text": text, "blue": blue, "grey": not short.is_empty() or locked != "", "need": locked if locked != "" else (_need_text(needs(ch), ship) if not short.is_empty() else ""), "locked": locked})
 	return out
 
 
@@ -528,7 +530,7 @@ func choose(ev: Dictionary, index: int, c, ship, node: Dictionary = {}) -> Dicti
 	if entry.is_empty():
 		return {"ok": false, "why": "not available"}
 	if entry["grey"]:
-		return {"ok": false, "why": "needs " + entry["need"]}
+		return {"ok": false, "why": str(entry["locked"]) if str(entry["locked"]) != "" else "needs " + entry["need"]}
 	var ch: Dictionary = ev["choices"][index]
 	var lines := []
 	if pays(ch):

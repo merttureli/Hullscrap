@@ -11,6 +11,7 @@ const Art = preload("res://scripts/view/art.gd")
 const Kit = preload("res://scripts/board/kit.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Party = preload("res://scripts/board/party.gd")
+const Air = preload("res://scripts/board/air.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 
 const W := 268.0
@@ -67,6 +68,7 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 		var n := "%d/%d" % [ceili(m.hp), roundi(m.max_hp)]
 		var w2: float = h._font().get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 		h._text(n, Vector2(r.end.x - w2 - 10.0, r.position.y + 22.0), 13, h.DIM_TEXT)
+	_air(h, r, m)
 	# the gear: the weapon, the body, the mods
 	var art: String = str(s.gun()["w"]["art"]) if e["p"] == null else str(e["p"]["gun"]["w"]["art"])
 	var wid: String = str(s.gun()["id"]) if e["p"] == null else str(e["p"]["gun"]["id"])
@@ -105,6 +107,18 @@ static func _rounds(h, r: Rect2, p: Dictionary, down: bool) -> void:
 	var tw: float = h._font().get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 	h._text(t, Vector2(r.get_center().x - tw / 2.0, r.position.y + 16.0), 13, col if not down else h.DIM_TEXT)
 	h.hover_add(r, ["Rounds", "%d in the weapon, %d spare. A copy of the party's rounds: gone when you leave." % [int(p["gun"]["mag"]), int(p["rest"])]], col)
+
+
+## The AIR line: OK, THIN or NONE where the person stands, the seconds they have left in that air (or "suit" when a seal keeps them safe).
+static func _air(h, r: Rect2, m) -> void:
+	var a: Dictionary = Air.line(h.view.session.site, m, m.pos)
+	var t := "AIR " + str(a["word"])
+	var col: Color = h.GOOD
+	if str(a["word"]) != "OK":
+		col = h.AMBER if str(a["word"]) == "THIN" else h.BAD
+		t += " suit" if bool(a["sealed"]) else (" %ds" % ceili(float(a["secs"])) if float(a["secs"]) >= 0.0 else "")
+	var w: float = h._font().get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+	h._text(t, Vector2(r.end.x - w - 8.0, r.position.y + 58.0), 12, col)
 
 
 ## How far the revive of this person has got (0 to 1): the soldier's hold of E on them, or a crew mate kneeling by them.

@@ -14,6 +14,7 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Kit = preload("res://scripts/board/kit.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Bolts = preload("res://scripts/board/bolts.gd")
+const Air = preload("res://scripts/board/air.gd")
 
 const ERR := 0.12  ## radians of error in a follower's shot
 const SEE := 14.0  ## cells a follower looks for something to shoot
@@ -207,4 +208,6 @@ static func _go(s, p: Dictionary, to: Vector2, dt: float) -> void:
 	if float(p["repath"]) <= 0.0:
 		s.foes.path_to(p, to)
 		p["repath"] = 0.5
+	if Air.wait(s, p):  # no sealed suit: it waits at the door of an airless room
+		return
 	p["m"].step(dt)

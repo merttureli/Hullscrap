@@ -124,3 +124,8 @@ Code: `scripts/board/people.gd` (placing them, the talk, the six effects, the sh
 2. **B2, combat**: hand weapons, enemies and AI, crew followers, the downed rules, tracker pings, sounds.
 3. **B3, people**: NPC talk, boarding events, region themes, balance.
 4. **B4, light and kit**: light bolts, the fight HUD, loadouts, mods (Spotter Cam, Salvage Rig, Overcharge Coil).
+
+## Boarding the ship you beat, and air on foot (Beta 4.1)
+- **The wreck of a ship you beat is that ship** (`wreck_site.gd`): her grid, doors and rooms, her parts as props, holes where walls were shot away, her dead as bodies, and after a win her crew still on their feet as foes. A captured ship has none. She is stored with the wreck in the sector save (campaign save 13); an older save's wreck is a generated site.
+- **Rooms have a pressure** (a beaten ship's is what the fight left). A person without a sealed suit cannot go into an airless room: the door stays shut ("No air past this door. You need a sealed suit."), followers wait at it. The airlock prefers a room with air. When it has none, "Board her" needs a sealed suit (worn or in the hold) and "Go aboard" is refused until it is worn. Suits are found, never given.
+- **A beaten foe leaves a body** you open with E: hand ammo, credits, its weapon now and then, rarely a mod or body gear (`foe_loot`).

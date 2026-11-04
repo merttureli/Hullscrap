@@ -266,12 +266,20 @@ func test_go_alone_and_the_limit_and_the_number_keys() -> void:
 	b3.leave()
 
 
-func test_a_no_suit_tag_shows_only_once_suits_are_marked() -> void:
+func test_a_no_suit_tag_marks_the_crew_with_no_sealed_suit() -> void:
 	var sh := _ship()
+	sh.inventory.add("eva_suit", 1)
 	var s = _visit("station", sh)
 	var b := BoardView.new()
 	b.ask_party = true
 	b.enter(s)
-	check(not b.pick_rows().any(func(r): return r["no_suit"]), "nothing is marked sealed yet: no tags")
-	check(not Kit.suits_marked(), "(the rules mark no suit)")
+	check(b.pick_rows().all(func(r): return r["no_suit"]), "nobody wears a sealed suit: all are tagged")
 	b.leave()
+	CrewKit.equip_from_hold(sh, _by(sh, "Rook"), "eva_suit")
+	var s2 = _visit("station", sh)
+	var b2 := BoardView.new()
+	b2.ask_party = true
+	b2.enter(s2)
+	var rook: Dictionary = b2.pick_rows().filter(func(r): return r["name"] == "Rook")[0]
+	check(not rook["no_suit"], "Rook in an EVA suit is not")
+	b2.leave()

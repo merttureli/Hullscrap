@@ -56,6 +56,7 @@ static func tick(ship, dt: float) -> Array:
 		if _split(ship, m):
 			lines.append("%s splits in two." % m.name)
 		else:
+			ship.dead_at[m.name] = {"pos": [m.pos.x, m.pos.y], "species": m.species}  # (a boarded wreck shows where they lay)
 			_die(ship, m)
 			lines.append("%s has died." % m.name)
 			var back: String = Kit.give_back(ship, m)  # their kit goes back to the hold (only a crew member left aboard a site loses it)

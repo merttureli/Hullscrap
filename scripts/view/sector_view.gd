@@ -385,7 +385,10 @@ func _on_fight_finished(result: Dictionary) -> void:
 	if result.get("state", "") in ["won", "captured"]:
 		var foe = result.get("enemy")
 		var label := "Wreck of %s" % foe.name if foe != null and str(foe.name) not in ["", "Ship"] else ""
-		_sector.add_wreck(result["enemy_pos"], label)["state"] = Sector.DONE  # the salvage pick is the map's, once
+		var hulk: Dictionary = _sector.add_wreck(result["enemy_pos"], label)
+		hulk["state"] = Sector.DONE  # the salvage pick is the map's, once
+		if foe != null:  # she is boarded as the ship the fight left (boarding.gd), so it is kept with the wreck
+			_sector.wreck_ships[str(hulk["id"])] = {"ship": foe.to_dict(), "fight": str(result["state"])}
 
 
 func _say(text: String) -> void:
