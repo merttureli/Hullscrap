@@ -40,6 +40,7 @@ const TAG_TEXT := "Abandoned: click to reopen"
 var door_passable: Callable = func(_cell: Vector2i) -> bool: return true
 var player: CrewMember
 var ada: CrewMember
+var kit_hover: CrewMember  ## the crew member the crew kit screen (I) points at: they get a white ring
 var selected: CrewMember  ## the crew member picked last (a left click in play mode or a card on the crew bar); G uses their ability
 var group: Array = []  ## everyone selected (Shift+click, a drag box): see selection(); a plain click or card makes it just `selected`
 var _drag_from: Variant = null  # where a left drag began (this node's coordinates) while the button is down
@@ -367,6 +368,9 @@ func _wasd() -> Vector2:
 	var craft := get_node_or_null("../CraftLayer/CraftingPanel")
 	if craft != null and craft.visible:
 		return Vector2.ZERO
+	var kit_panel := get_node_or_null("../CraftLayer/CrewKitPanel")
+	if kit_panel != null and kit_panel.visible:
+		return Vector2.ZERO  # (the crew kit screen takes the keys)
 	var sector := get_node_or_null("../Sector")
 	if sector != null and sector.piloting():
 		return Vector2.ZERO  # the soldier has the helm: WASD fly the ship
@@ -449,6 +453,11 @@ func _draw() -> void:
 		var r: float = build.CELL * (1.45 + 0.06 * sin(_clock * 5.0))
 		draw_circle(at, r, Color(SELECT_COLOR, 0.10))
 		draw_arc(at, r, 0.0, TAU, 40, SELECT_COLOR, 2.5, true)
+	if kit_hover != null and ship.crew.has(kit_hover):  # the one the crew kit screen points at
+		var at2 := _world(kit_hover.pos)
+		var r2: float = build.CELL * (1.6 + 0.08 * sin(_clock * 6.0))
+		draw_circle(at2, r2, Color(1, 1, 1, 0.10))
+		draw_arc(at2, r2, 0.0, TAU, 40, Color.WHITE, 3.0, true)
 	if _drag_from != null and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):  # the box being dragged
 		var box := Rect2(_drag_from, Vector2.ZERO).expand(get_local_mouse_position())
 		draw_rect(box, Color(SELECT_COLOR, 0.08))

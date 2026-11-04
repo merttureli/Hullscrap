@@ -9,6 +9,7 @@ extends RefCounted
 const Site = preload("res://scripts/board/site.gd")
 const Arms = preload("res://scripts/board/arms.gd")
 const Mods = preload("res://scripts/board/mods.gd")
+const Content = preload("res://scripts/data/content.gd")
 
 
 static func cfg() -> Dictionary:
@@ -62,6 +63,31 @@ static func weapons_of(m) -> Array:
 ## The share of the damage `m` takes aboard in their body gear (1.0 for none).
 static func armor_mult(m) -> float:
 	return float(Site.config()["armor"].get(str(m.kit.get("body", "")), 1.0))
+
+
+## Is body gear `item` marked as one that seals (a suit that holds air, boarding.json or items.json `sealed`)? Nothing marks one until the air rules land.
+static func is_sealed(item: String) -> bool:
+	if item == "":
+		return false
+	var sealed = cfg().get("sealed")
+	if sealed is Array and sealed.has(item):
+		return true
+	if sealed is Dictionary and bool(sealed.get(item, false)):
+		return true
+	return bool(Content.entry("items", item).get("sealed", false))
+
+
+## Do the rules mark any body gear as sealed at all?
+static func suits_marked() -> bool:
+	for item in cfg()["bodies"]:
+		if is_sealed(str(item)):
+			return true
+	return false
+
+
+## Show a "no suit" tag for `m`: only once suits are marked, and `m` wears none that is sealed.
+static func no_suit(m) -> bool:
+	return suits_marked() and not is_sealed(str(m.kit.get("body", "")))
 
 
 ## What body gear `item` does aboard, in words.

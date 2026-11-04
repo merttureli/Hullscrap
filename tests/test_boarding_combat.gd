@@ -716,7 +716,8 @@ func test_the_crew_picker_takes_at_most_two_and_the_world_waits_while_it_is_up()
 	b2.leave()
 	var nobody = _visit("station", 31, Ship.from_design(RUSTBUCKET))
 	var b3 = _view(nobody, true)
-	check(not b3.picking, "with nobody to take there is no picker")
+	check(b3.picking and b3.pick_rows().is_empty(), "with nobody to take the picker still opens: it is how you go alone")
+	b3.go_alone()
 	b3.leave()
 
 

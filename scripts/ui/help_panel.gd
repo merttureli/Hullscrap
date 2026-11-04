@@ -4,7 +4,7 @@ extends Control
 ## (the main menu and the pause menu list it too); Esc, Enter or Space close it. While open it takes
 ## every key and click. The keys are the real ones of the input handlers: build_mode.gd, crew_view.gd,
 ## combat_view.gd, weapon_bar.gd, map_view.gd, event_panel.gd, station_panel.gd, shield_panel.gd, ledger_card.gd and
-## crafting_panel.gd; tests/test_front_door.gd checks that every one of them is on the screen.
+## crafting_panel.gd and crew_kit_panel.gd; tests/test_front_door.gd checks that every one of them is on the screen.
 ## In the UI colours of station_panel.gd.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
@@ -27,6 +27,7 @@ const COLUMNS: Array = [
 			["Station bar", "Post the selected crew member"],
 			["R / V", "Breach alert: repair / evacuate"],
 			["G", "Use the selected crew member's special ability (in a fight too)"],
+			["I", "Crew kit: weapons, body gear and mods of every crew member (play mode, not in a fight)"],
 			["B", "Build mode / play mode"],
 			["O / P", "Oxygen / power overlay"],
 			["Wheel", "Zoom"],
