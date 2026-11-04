@@ -48,6 +48,9 @@ func _init(p_session = null) -> void:
 		for l in s.site.lights:
 			if l["color"] == "red":
 				_red[l["room"]] = true
+		for rid in s.site.room_light:  # (a lit room of a station with power is seen in as well as a red one)
+			if s.site.room_light[rid] in ["lit", "flicker"]:
+				_red[rid] = true
 		_prev_soldier = s.soldier.pos
 
 
@@ -87,7 +90,7 @@ func spawn_site(ctx := {}) -> void:
 		_spawn_crew(ctx)
 		return
 	_make_vents(rng)
-	var kc: Dictionary = sc["kinds"].get(site.kind, {"count": [0, 0], "mix": {"scavenger": 1}})
+	var kc: Dictionary = site.crowd.get("spawn", sc["kinds"].get(site.kind, {"count": [0, 0], "mix": {"scavenger": 1}}))  # (a module station's state says who is aboard)
 	var n := mini(int(ctx.get("crew", 0)), int(sc["crew_max"])) if site.kind == "wreck" else Themes.foe_count(site.theme, rng.randi_range(int(kc["count"][0]), int(kc["count"][1])))
 	var mix: Dictionary = Themes.foe_mix(site.theme, kc["mix"])  # (the theme's tilt of who stands here)
 	var spots := _spots(float(sc["min_from_airlock"]))
@@ -102,7 +105,9 @@ func spawn_site(ctx := {}) -> void:
 		if spot.is_empty():
 			break
 		add(kind, spot["pos"], int(spot["room"]))
-	if not vents.is_empty() and rng.randf() < float(sc["crawler"]["chance"]):
+	for e in site.posts:  # the sentries the site posts (a station's crossings)
+		add(str(e["kind"]), e["pos"], int(e["room"]))
+	if not vents.is_empty() and rng.randf() < float(sc["crawler"]["chance"]) and int(kc["count"][1]) > 0:
 		var v: Vector2 = vents[rng.randi() % vents.size()]
 		add("crawler", v, site.room_at(v))
 	var mem: Dictionary = ctx.get("mem", {})

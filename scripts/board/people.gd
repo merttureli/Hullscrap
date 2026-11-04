@@ -67,7 +67,7 @@ func spawn_site(ctx := {}) -> void:
 	var site = s.site
 	var pc := cfg()
 	var theme := Themes.def(site.theme)
-	var kc: Dictionary = pc["kinds"].get(site.kind, {"count": {"0": 1.0}, "roles": {}})
+	var kc: Dictionary = site.crowd.get("people", pc["kinds"].get(site.kind, {"count": {"0": 1.0}, "roles": {}}))  # (a module station's state says who is aboard)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = Site._mix(site.seed_value, "people", 0)
 	var counts: Dictionary = kc["count"].duplicate()
@@ -307,12 +307,12 @@ func turn(n: Dictionary, kind := "", fresh := true) -> Dictionary:
 	return f
 
 
-## Person `n` walks off to the room farthest from the soldier and is gone when they get there (or after people.leave_s).
+## Person `n` walks off to the room farthest from the soldier (one no lock shuts off) and is gone when they get there (or after people.leave_s).
 func walk_away(n: Dictionary) -> void:
 	var best := Vector2.ZERO
 	var bd := -1.0
 	for r in s.site.rooms:
-		if r["purpose"] == "gone":
+		if r["purpose"] == "gone" or r["locked"]:
 			continue
 		var anchors: Array = s.site.free_anchors(r["id"])
 		if anchors.is_empty():
@@ -399,7 +399,7 @@ func roll_shop(n: Dictionary) -> Array:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = Site._mix(site.seed_value, "shop", int(n["id"]))
 	var purpose := str(site.rooms[n["room"]]["purpose"]) if n["room"] >= 0 else "storage"
-	var table: Array = Loot.table_for(site, purpose if Site.config()["tables"].has(purpose) else "storage").filter(func(o): return str(o["item"]) != "credits")
+	var table: Array = Loot.table_for(site, Loot.purpose_table(purpose) if Site.config()["tables"].has(Loot.purpose_table(purpose)) else "storage").filter(func(o): return str(o["item"]) != "credits")
 	var mult := float(Site.config()["kinds"][site.kind]["loot_mult"])
 	var out := []
 	for k in int(sc["tries"]):

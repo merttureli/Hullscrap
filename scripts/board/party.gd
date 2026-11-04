@@ -120,7 +120,7 @@ static func tick(s, dt: float) -> void:
 		if m.is_down():
 			m.path.clear()
 			p["revive"] = 0.0
-		else:
+		elif int(p.get("bed", -1)) < 0:  # (one lying on a bed rests there: beds.gd)
 			_act(s, p, dt)
 		p["moving"] = m.pos.distance_to(prev) > 0.002
 

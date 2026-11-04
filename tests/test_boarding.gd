@@ -87,8 +87,8 @@ func test_the_airlock_is_on_the_hull_edge_and_a_prop_never_blocks_a_door() -> vo
 			var site = Site.make(s * 29 + 1, kind, {})
 			var h: Array = site.airlock["hatch"]
 			for c in h:
-				check(site.grid.get_tile(c) == "wall" and not site.grid.in_hull(c + Vector2i(int(site.airlock["normal"].x) * 2, 0)) == false, "%s %d: the hatch is a wall cell" % [kind, s])
-			var out: Vector2i = h[0] + Vector2i(int(site.airlock["normal"].x), 0)
+				check(site.grid.get_tile(c) == "wall" and not site.grid.in_hull(c + Vector2i(site.airlock["normal"]) * 2) == false, "%s %d: the hatch is a wall cell" % [kind, s])
+			var out: Vector2i = h[0] + Vector2i(site.airlock["normal"])  # (a module station's hatch may face up or down)
 			check(site.grid.get_tile(out) == "", "%s %d: nothing is outside the hatch" % [kind, s])
 			for d in site.doors:
 				if d["lock"] == "gone":
@@ -142,7 +142,7 @@ func test_the_loot_tables_resolve() -> void:
 			check(cfg["props"].has(e["prop"]), "room %s names a prop that exists (%s)" % [purpose, e["prop"]])
 			var def: Dictionary = cfg["props"][e["prop"]]
 			if def["loot"]:
-				check(tables.has(def.get("table", purpose)), "%s: %s has a table" % [purpose, e["prop"]])
+				check(tables.has(def.get("table", Loot.purpose_table(purpose))), "%s: %s has a table" % [purpose, e["prop"]])
 	for kind in Site.kinds():
 		for purpose in cfg["kinds"][kind]["weights"]:
 			check(tables.has(purpose) and cfg["rooms"].has(purpose), "%s: purpose %s has a table and props" % [kind, purpose])
@@ -267,7 +267,7 @@ func test_the_soldier_walks_the_site_and_locked_doors_stop_him() -> void:
 	check(b.at_airlock(), "he arrives at the airlock")
 	var pass_fn := b.door_passable()
 	for i in 200:
-		b.soldier.move_input(site.walk, Vector2(-site.airlock["normal"].x, 0.0), 0.05, pass_fn)
+		b.soldier.move_input(site.walk, -site.airlock["normal"], 0.05, pass_fn)
 	check(not b.at_airlock() and site.walk.in_hull(Vector2i(b.soldier.pos)), "he walks away from it")
 	check(b.soldier.fits(site.walk, b.soldier.pos, pass_fn), "and stands on free floor")
 	var locked: Array = site.doors.filter(func(d): return d["lock"] != "" and d["lock"] != "gone")

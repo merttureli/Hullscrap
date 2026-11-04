@@ -276,6 +276,16 @@ func _draw_prompt(size: Vector2) -> void:
 			at = view.to_screen(who.pos)
 			need = s.revive_time()
 			text = "Hold E: bring %s round (%d s)" % [who.name, int(need)]
+		"bed":
+			var bed: Dictionary = site.beds[t["id"]]
+			at = view.to_screen(site.bed_centre(bed))
+			var why: String = s.beds.why_not(t["id"])
+			text = why if why != "" else ("Hold E: rest on the bed (%d/%d)" % [int(s.soldier.hp), int(s.soldier.max_hp)] if s.soldier.hp < s.soldier.max_hp else "A working bed")
+		"bedside":
+			var who = s.party[t["id"]]["m"]
+			at = view.to_screen(who.pos)
+			need = s.revive_time()
+			text = "Hold E: put %s on the bed (%d s)" % [who.name, int(need)]
 		"sentry":
 			at = view.to_screen(s.foes.find(t["id"])["m"].pos)
 			need = float(Arms.cfg()["hack_sentry_s"])
