@@ -1,11 +1,11 @@
 extends Control
-## The crew equipment screen (I, in play mode): what every crew member carries, set while the ship flies. It is a panel on the right of the screen, so the ship stays in
+## The crew equipment screen (I, in play mode and in build mode): what every crew member carries, set while the ship flies. It is a panel on the right of the screen, so the ship stays in
 ## view and the game keeps running; the person under the cursor on the ship (or the one whose tab the cursor is on) gets a ring.
 ## - Top: a tab for every crew member (not the drones). Below: the person shown, drawn by the airlock's loadout drawing (board_loadout.gd: the same slots, the same
 ##   choices with their stats lines): two weapons, a body and two mods. A click on a slot lists what fits; a click on a choice takes it, "Nothing" takes it off (back to
 ##   the hold), "Give to <name>" moves it to another crew member. Their sidearm stays with them.
 ## - Bottom: the gear in the hold. A click on an item puts it in the open slot, or the first free slot it fits.
-## It is not open in a fight, while boarding, in build mode, or over another screen. Rules: crew_kit.gd (and kit.gd under it); this node reads input and draws.
+## It is not open in a fight, while boarding or over another screen. In build mode (the game is paused there) it works the same and takes the keys. Rules: crew_kit.gd (and kit.gd under it); this node reads input and draws.
 
 const CrewKit = preload("res://scripts/crew/crew_kit.gd")
 const Loadout = preload("res://scripts/board/board_loadout.gd")
@@ -40,6 +40,7 @@ const HOLD_ROW := 44.0
 var sim: Node  ## the ShipSim whose player ship is shown
 var build: Node  ## the BuildMode (play mode, fights)
 var crew: Node  ## the Crew view (it draws the ring)
+var swallowed := 0  ## how many input events the open screen kept from the views under it (a test reads it)
 var kit := CrewKit.new()
 var _hits: Array = []  # [[Rect2, Dictionary]] what a click means (drawn fresh every frame)
 var _hover: Array = []  # [[Rect2, lines, edge]] what the mouse on a rect explains
@@ -99,7 +100,7 @@ func _process(dt: float) -> void:
 func can_open() -> bool:
 	if ship() == null:
 		return false
-	if build != null and (bool(build.get("combat")) or bool(build.get("build_on"))):
+	if build != null and bool(build.get("combat")):
 		return false
 	var main: Node = get_node_or_null("../..")
 	if main != null:
@@ -218,10 +219,13 @@ func _input(e: InputEvent) -> void:
 			_handled()
 			if e.button_index == MOUSE_BUTTON_LEFT:
 				click(e.position)
-		elif e.button_index == MOUSE_BUTTON_LEFT and crew != null:  # a click on a person of the ship shows them here (the ship's own click selects them too)
-			var who = hovered_person()
-			if who != null:
-				kit.focus(kit.people().find(who))
+		else:
+			if e.button_index == MOUSE_BUTTON_LEFT and crew != null:  # a click on a person of the ship shows them here (the ship's own click selects them too)
+				var who = hovered_person()
+				if who != null:
+					kit.focus(kit.people().find(who))
+			if build != null and bool(build.get("build_on")) and e.button_index != MOUSE_BUTTON_WHEEL_UP and e.button_index != MOUSE_BUTTON_WHEEL_DOWN:
+				_handled()  # (build mode's clicks must not place or pick parts under the open screen)
 
 
 ## A left click at screen point `p` on the panel: a tab, a slot, a choice or a row of the hold.
@@ -271,6 +275,7 @@ func take_from_hold(row: Dictionary) -> String:
 
 
 func _handled() -> void:
+	swallowed += 1
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
 
@@ -316,7 +321,7 @@ func _draw() -> void:
 	draw_rect(p, Color(PANEL_BG, 0.96))
 	draw_rect(p, EDGE, false, 2.0)
 	_text("Crew kit", p.position + Vector2(MARGIN + 4.0, 38.0), 26, TEXT)
-	_text("I or Esc closes. Click a slot to see what fits, then pick one; or click a slot, then an item of the hold. The ship keeps flying.", p.position + Vector2(MARGIN + 4.0, 58.0), 13, DIM_TEXT)
+	_text("I or Esc closes. Click a slot to see what fits, then pick one; or click a slot, then an item of the hold. " + ("The game is paused." if build != null and bool(build.get("build_on")) else "The ship keeps flying."), p.position + Vector2(MARGIN + 4.0, 58.0), 13, DIM_TEXT)
 	var people := kit.people()
 	for i in people.size():
 		var r := tab_rect(i)

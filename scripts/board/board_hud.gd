@@ -96,6 +96,7 @@ func _draw() -> void:
 	_draw_feed(size)
 	_draw_reveals(size)
 	_draw_prompt(size)
+	_draw_leave(size)
 	_draw_panel(size)
 	_draw_shop(size)
 	if view.message_alive():
@@ -209,6 +210,33 @@ func _draw_feed(size: Vector2) -> void:
 		draw_rect(Rect2(size.x - w - 44.0, y - 17.0, w + 28.0, 24.0), Color(PANEL_BG, 0.8 * a))
 		_text(str(f["text"]), Vector2(size.x - w - 30.0, y), 16, Color(GOOD, a))
 		y -= 28.0
+
+
+## The Leave button (L), top right: green when the party can go, grey with the reason under it while a foe hunts them; the question when a crewman is down.
+func leave_rect() -> Rect2:
+	var size := get_viewport_rect().size
+	return Rect2(Vector2(size.x - 150.0 - 16.0, 16.0), Vector2(150.0, 34.0))
+
+
+func _draw_leave(size: Vector2) -> void:
+	var s = view.session
+	if view.picking or s.downed:
+		return
+	var r := leave_rect()
+	var ok: bool = s.can_quick_leave()
+	var col := AIRLOCK if ok else DIM_TEXT
+	draw_rect(r, Color(PANEL_BG, 0.88))
+	draw_rect(r, col if ok else EDGE_DIM, false, 1.5)
+	_centred("Leave (L)", r.position + Vector2(r.size.x / 2.0, 23.0), 17, col)
+	if not ok:
+		_centred(str(Arms.cfg()["leave_hunted"]), r.position + Vector2(r.size.x / 2.0, 54.0), 14, DIM_TEXT)
+	if view._ask_leave:
+		var q: String = view.leave_question()
+		var w := _font().get_string_size(q, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x + 40.0
+		var b := Rect2(Vector2(size.x / 2.0 - w / 2.0, size.y / 2.0 - 70.0), Vector2(w, 44.0))
+		draw_rect(b, Color(PANEL_BG, 0.95))
+		draw_rect(b, BAD, false, 2.0)
+		_centred(q, b.position + Vector2(w / 2.0, 29.0), 18, TEXT)
 
 
 ## What E does at the target, and the ring of a hold on the thing being held.
@@ -365,6 +393,8 @@ func _draw_panel(size: Vector2) -> void:
 
 ## After the soldier goes down the screen fades out, with where he wakes.
 func _draw_fade(size: Vector2) -> void:
+	if view._go_t >= 0.0:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.0, 0.0, 0.0, clampf(view._go_t / float(Arms.cfg()["leave_fade_s"]), 0.0, 1.0)))
 	if not view.session.downed:
 		return
 	var f := clampf(view._down_t / (view.DOWN_S * 0.7), 0.0, 1.0)

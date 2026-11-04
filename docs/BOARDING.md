@@ -33,7 +33,7 @@ Boarding takes the soldier **off the ship and onto another vessel**: a derelict,
   - **you may take up to 2 unposted crew**, who follow and help;
   - the drone stays on the ship.
 - **Leaving**: walk back to the **airlock** (always marked) and press E.
-- **Time**: the sector doesn't tick while you're aboard, so no passing ships come. The Hollow tide's linger clock **does** keep running, so you can't loot forever.
+- **Time**: the sector doesn't tick while you're aboard, so no passing ships come, and the Hollow tide's linger clock is held too: time on foot doesn't count against the tide.
 
 ## Combat on foot (stage B2)
 - **The player's weapon**: the soldier's sidearm (`data/hand_weapons.json`). Aim with the mouse, LMB fires, R reloads, ammo is limited.
@@ -55,7 +55,7 @@ Code: `scripts/board/arms.gd` (hand weapons, guns, the hitscan), `foes.gd` (spaw
 - **Keys**: LMB fires, R reloads, Q swaps to the second weapon (a `pistol` or `rifle` item in the hold, found in loot), F is the flashlight. Hold E by a downed crew member (4 s) or behind a sentry (3 s). Rounds are the `hand_ammo` cargo item (the ship starts with 40); what is loaded goes back to the hold on leaving.
 - **Shots** are rays: walls and shut doors stop them, a prop in the way stops them half the time, the first body on the line is hit. A foe's aim has an error (`inacc`, x1.3 against a target that is moving), so its hit chance falls with distance on its own.
 - **Foes see** in a cone: 4.5 cells in the dark, 8 in a room with an emergency light, 13 when the soldier's beam is on them. A shot or a swing calls every foe within 12 (5) cells. A hunter paths with the crew pathfinder; a hurt scavenger runs for the room farthest from him; a hit pirate goes beside a prop that stands between it and him (and then shows less of itself); sentries sweep, track and can be hacked from behind; the crawler waits in a vent, comes out when he is 7 to 16 cells off in the dark, freezes while his beam is on it, lunges from 4.5 cells, bites twice and goes back to a vent.
-- **Down**: the soldier wakes at the airlock with 15% health and the site is closed (its POI is done); loot taken stays. Crew who are down when he leaves are lost (a confirm first); the ones standing come home with the health they had.
+- **Down**: the soldier wakes at the airlock with 15% health and the site is closed (its POI is done); loot taken stays. Crew who are down when he leaves are lost (a confirm first; the **Leave** button, L, asks "Leave <name> behind?" with Enter/Esc, and works only when no foe has hunted the party for `leave_quiet_s`, 8 s; it fades 1.5 s and leaves by the same `leave()`, so the site is remembered); the ones standing come home with the health they had.
 - **The Hollow** falling while he is aboard: lights flicker, "Visitors: noted.", 2 or 3 hollow-touched appear on the airlock side already hunting him, and the HUD says "The Hollow is here. Get out."
 
 ## People (stage B3)

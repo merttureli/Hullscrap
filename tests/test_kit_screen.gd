@@ -170,7 +170,7 @@ func test_i_opens_the_screen_in_play_mode_and_i_or_esc_shuts_it() -> void:
 	_free(d)
 
 
-func test_it_does_not_open_in_a_fight_or_in_build_mode() -> void:
+func test_it_does_not_open_in_a_fight_but_does_in_build_mode() -> void:
 	var fake := FakeBuild.new()
 	var d := _panel(_ship(), fake)
 	var panel: CrewKitPanel = d["panel"]
@@ -181,9 +181,60 @@ func test_it_does_not_open_in_a_fight_or_in_build_mode() -> void:
 	fake.combat = false
 	fake.build_on = true
 	panel._input(_key(KEY_I))
-	check(not panel.visible, "not in build mode")
+	check(panel.visible, "in build mode I opens it")
+	panel.close()
 	fake.build_on = false
 	check(panel.open(), "in play mode it opens")
+	fake.free()
+	_free(d)
+
+
+func test_it_stays_shut_while_boarding() -> void:
+	var fake := FakeBuild.new()
+	var d := _panel(_ship(), fake)
+	var panel: CrewKitPanel = d["panel"]
+	var main := Node.new()
+	var layer := Node.new()
+	main.add_child(layer)
+	layer.add_child(panel)
+	var board = BoardView.new()
+	board.name = "Board"
+	main.add_child(board)
+	board.active = true
+	panel._input(_key(KEY_I))
+	check(not panel.visible, "not while boarding")
+	board.active = false
+	check(panel.open(), "and it opens again once aboard is over")
+	main.free()
+	fake.free()
+	d["sim"].free()
+
+
+func test_in_build_mode_the_open_screen_takes_the_keys() -> void:
+	var fake := FakeBuild.new()
+	fake.build_on = true
+	var d := _panel(_ship(), fake)
+	var panel: CrewKitPanel = d["panel"]
+	panel._input(_key(KEY_B))
+	eq(panel.swallowed, 0, "shut, B is build mode's own")
+	panel.open()
+	for code in [KEY_B, KEY_C, KEY_H, KEY_1, KEY_DELETE]:
+		panel._input(_key(code))
+	eq(panel.swallowed, 5, "open, none of build mode's keys get through")
+	check(panel.visible, "and none of them closed it")
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = Vector2(20.0, 400.0)  # (on the ship, left of the panel)
+	var before: int = panel.swallowed
+	panel._input(click)
+	eq(panel.swallowed, before + 1, "a click on the ship does not place a part under it")
+	fake.build_on = false
+	before = panel.swallowed
+	panel._input(click)
+	eq(panel.swallowed, before, "in play mode that click is the ship's (select)")
+	panel._input(_key(KEY_ESCAPE))
+	check(not panel.visible, "Esc closes it")
 	fake.free()
 	_free(d)
 

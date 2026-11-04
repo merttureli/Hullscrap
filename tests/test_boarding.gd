@@ -539,14 +539,14 @@ func test_the_board_effect_puts_the_soldier_aboard_and_the_airlock_brings_him_ba
 	check(board.session.at_airlock(), "he arrives at the airlock")
 	eq(board.session.site.kind, "station", "on a station")
 	check(map.campaign.is_hollow(map.campaign.current) or true, "(the tide is another test)")
-	# the sector does not tick, the tide's linger clock does
+	# neither the sector nor the tide's linger clock ticks while aboard
 	var clock: float = s.clock
 	var left: float = map.campaign.tide.linger_left()
 	for i in 20:
 		d["view"].frame(0.5)
 	map._process(1.0)
 	eq(s.clock, clock, "no time passes in the sector")
-	check(map.campaign.tide.linger_left() < left, "but the Hollow tide's clock runs (%s then %s)" % [str(left), str(map.campaign.tide.linger_left())])
+	eq(map.campaign.tide.linger_left(), left, "and the Hollow tide's clock is held while he is aboard")
 	# E at the airlock leaves
 	board.step(0.05)
 	eq(str(board.target.get("type", "")), "airlock", "E would leave here")
