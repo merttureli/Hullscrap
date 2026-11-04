@@ -939,6 +939,8 @@ func _finish(ship, job: Dictionary) -> void:
 			var w: Dictionary = ship.components.clear_wreck(ship.components.wreck_at(job["cells"][0]))
 			if not w.is_empty():
 				var refund: Dictionary = ship.wreck_refund(w["id"])
+				if refund.has("scrap"):
+					refund["scrap"] = roundi(float(refund["scrap"]) * TraitSet.scrap_mult(ship))  # (scrap gauntlets)
 				for m in refund:
 					ship.inventory.add(m, refund[m])
 				ship.log_event("Cleared the wreck of %s%s" % [job["name"], " (+%s)" % ", ".join(refund.keys().map(func(m): return "%d %s" % [refund[m], m])) if not refund.is_empty() else ""])
@@ -1002,7 +1004,7 @@ func _health(ship, dt: float) -> void:
 			heat = float(heats.get(room, 0.0))
 			if heat > float(dry["heat_above"]) and float(dry["hp_per_s"]) > 0.0:
 				dmg += float(dry["hp_per_s"])
-		m.speed_mod = TraitSet.heat_factor(t, heat) if room >= 0 and by_heat else 1.0
+		m.speed_mod = (TraitSet.heat_factor(t, heat) if room >= 0 and by_heat else 1.0) * float(t["walk_mult"])
 		if room >= 0 and float(t["vacuum_speed"]) != 1.0:  # in thin air (vacuum_speed)
 			m.speed_mod *= TraitSet.thin_air_factor(t, ship.atmosphere.pressure_of(room))
 		if dmg > 0.0:
@@ -1468,6 +1470,9 @@ static func spawn_enemy_crew(ship) -> Array:
 		var entry: Dictionary = plan[i] if not plan.is_empty() else {}
 		var names: Array = cfg["names"]
 		var m = _person(str(entry.get("name", _next_name(ship, names))), cfg["look"], Pathfinder.centre_of(spot), str(entry.get("species", "human")))
+		var wr := RandomNumberGenerator.new()  # (an enemy's crew wear their race's gear, drawn: from the species alone, seeded by the ship and the person)
+		wr.seed = hash([str(ship.name), i, m.name])
+		m.kit = load("res://scripts/board/wear.gd").kit_of(load("res://scripts/board/wear.gd").for_crew(m.species, wr))
 		ship.crew.append(m)
 		out.append(m)
 	return out

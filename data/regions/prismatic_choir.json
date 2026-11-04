@@ -16,7 +16,7 @@
 	"debris": {"crystal_shard": 2.0},
 	"pois": {"anomaly": 2.0, "quest": 1.5},
 	"ambient": {"patrol": 3, "trader": 2, "pirate": 1},
-	"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "engine_neon_mk2": 680, "shield_neon_mk1": 340, "siren_ion_neon": 400, "heat_lance_neon": 420, "prismatic_prism_lens": 480, "prismatic_refractor": 440, "prismatic_glimmer_turret": 420, "prismatic_lattice_shield": 520, "prismatic_song_reactor": 480, "prismatic_resonance_helm": 200},
+	"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "engine_neon_mk2": 680, "shield_neon_mk1": 340, "siren_ion_neon": 400, "heat_lance_neon": 420, "prismatic_prism_lens": 480, "prismatic_refractor": 440, "prismatic_glimmer_turret": 420, "prismatic_lattice_shield": 520, "prismatic_song_reactor": 480, "prismatic_resonance_helm": 200, "prism_cloak": 270},
 	"recruit": {"prismatic": 8, "emberkin": 1, "sporeling": 1},
 	"enemies": "wardens",
 	"hazards": ["ion_storm", "radiation"],

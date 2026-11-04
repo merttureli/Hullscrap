@@ -16,6 +16,9 @@ const Themes = preload("res://scripts/board/themes.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Bolts = preload("res://scripts/board/bolts.gd")
 const Mods = preload("res://scripts/board/mods.gd")
+const Wear = preload("res://scripts/board/wear.gd")
+const Kit = preload("res://scripts/board/kit.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 
 const SEARCH_S := 4.0  ## seconds a hunter looks about at the last place it saw someone
 const LOSE_S := 5.0  ## seconds without a line before a hunter gives up the chase at its target
@@ -122,6 +125,9 @@ func _spawn_crew(ctx: Dictionary) -> void:
 		f["m"].name = str(e["name"])
 		f["m"].hp = maxf(f["m"].max_hp * float(e["hp"]), 1.0)
 		f["sealed"] = bool(e["sealed"])
+		var wr := RandomNumberGenerator.new()
+		wr.seed = Site._mix(site.seed_value, "crew_wear", int(f["id"]))
+		dress(f, Wear.for_crew(str(e["species"]), wr))  # (her crew wear their race's gear)
 	var mem: Dictionary = ctx.get("mem", {})
 	if bool(mem.get("hollow", false)) == bool(ctx.get("hollow", false)):
 		for id in mem.get("dead", []):
@@ -164,14 +170,26 @@ func add(kind: String, pos: Vector2, room := -1, spawned := true) -> Dictionary:
 		"hurt_t": 0.0, "cover_cd": 0.0, "cover_pos": pos, "refuge": pos, "base": base, "aim": base, "track": 0.0, "tpos": pos, "spoke": false,
 		"stalk_t": 0.0, "seen_t": 0.0, "lunge": 0.0, "lunge_cd": 1.5, "bites": 0, "frozen": false, "hack": 0.0}
 	_next += 1
+	f["gear"] = ""
 	if spawned:  # its body is made now, so that its id is the same on every visit
 		f["corpse"] = site.add_corpse(kind, int(f["id"]), pos, true, false)
 	if kind == "crawler":
 		f["mode"] = "hidden"
 		f["hidden"] = true
 		f["wait"] = s.rng.randf_range(2.0, 6.0)
+	var wr := RandomNumberGenerator.new()  # (its own dice: the fight's are not shifted)
+	wr.seed = Site._mix(site.seed_value, "wear", int(f["id"]))
+	dress(f, Wear.for_foe(kind, site.region, wr))
 	list.append(f)
 	return f
+
+
+## Foe `f` wears body gear `item` ("" for none): drawn on it, its armour and traits, and its body holds it (loot.gd).
+func dress(f: Dictionary, item: String) -> void:
+	f["gear"] = item
+	f["m"].kit = Wear.kit_of(item)
+	if f.has("corpse"):
+		s.site.props[int(f["corpse"])]["worn"] = item
 
 
 func _anchors_of(rid: int) -> Array:
@@ -293,7 +311,7 @@ func hurt(f: Dictionary, amount: float, at: Vector2) -> void:
 	if f["dead"]:
 		return
 	var m: CrewMember = f["m"]
-	m.hurt(amount)
+	m.hurt(amount * Kit.armor_mult(m))  # (the gear it wears)
 	f["hurt_t"] = HIT_MEMORY
 	s.events.append({"type": "hit", "pos": at, "foe": f["id"], "kind": f["kind"]})
 	if m.hp <= 0.0:
@@ -777,7 +795,7 @@ func _shoot(f: Dictionary, t: Dictionary) -> void:
 	if r["ref"] != null:
 		var i0: int = s.events.size()
 		if to_party:
-			s.hurt_member(r["ref"], float(at["damage"]), m.pos)
+			s.hurt_member(r["ref"], float(at["damage"]), m.pos, str(f["kind"]))
 		else:
 			hurt(r["ref"], float(at["damage"]), r["end"])
 		s._delay(i0, fly, look)
@@ -789,6 +807,9 @@ func _melee(f: Dictionary, t: Dictionary) -> void:
 	f["cd"] = 1.0 / float(at["rate"])
 	s.events.append({"type": "melee", "pos": f["m"].pos, "foe": f["id"], "kind": f["kind"]})
 	s.hurt_member(t["ref"], float(at["damage"]), f["m"].pos)
+	var back := float(TraitSet.of(t["ref"])["counter_melee"])  # (a chitin plate bites back)
+	if back > 0.0 and not f["dead"]:
+		hurt(f, back, f["m"].pos)
 
 
 # --- sentries -------------------------------------------------------------------------------------------------------

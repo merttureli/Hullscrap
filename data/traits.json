@@ -33,6 +33,11 @@
 			"low_pressure_heal": "hit points a second they heal in a room with less than 50% of its air (TraitSet.LOW_AIR), on top of beds and auras; amounts add",
 			"haggler": "a fraction (0.1 = 10%) off the prices of a station while they are aboard and up (Campaign.price, added to the faction's discount); the best haggler aboard counts, amounts add on one person",
 			"loot_bonus": "a whole number: extra rows in a salvage pick (Salvage.picks_for) and extra rolls of a loot table (a sealed crate) while they are aboard and up; the best one aboard counts, amounts add on one person",
+			"walk_mult": "factor on their walk speed, aboard the ship and on foot (set with speed_mod each tick); factors multiply. Worn gear: stone plates, ballast rig, chitin plate",
+			"no_knock": "true: the crew knock of a collision does not hurt them (CrewMember hurt by Collisions._knock)",
+			"heat_proof": "true: a hot room does not slow them (heat_speed's hot factor is ignored); cold still does",
+			"sell_bonus": "a fraction (0.15 = 15%) more credits for what the ship sells while they are aboard and up (Campaign.sell_price); the best one aboard counts",
+			"scrap_mult": "factor on the scrap they get from clearing a wreck (the clear_wreck job) or opening a container on foot; factors multiply",
 			"mimic": "true: while in a room with another crew member who is up, they copy the best trait of the others there (TraitSet.mimic_pick: the trait whose first key comes first in TraitSet.MIMIC_ORDER; never a body trait (body, hp_mult, speed_mult), another mimic's, or one they have). It ends when they or the other leave the room"
 		}
 	},
@@ -41,6 +46,18 @@
 		"no_breath": {"name": "Does not breathe", "o2_use": 0},
 		"heat_resistant": {"name": "Heat resistant", "damage_taken": {"fire": 0.25}},
 		"fast_repair": {"name": "Quick hands", "notes": "repair and breach time x0.6, which is a work speed of 1/0.6", "work_mult": {"repair": 1.6666667, "breach": 1.6666667}},
-		"tinkerer": {"name": "Tinkerer", "blurb": "Proud of every part: repairs and breach patches take x0.8 the time. Ada has it (data/crew.json), and so do the Gauntlings (races_1).", "work_mult": {"repair": 1.25, "breach": 1.25}}
+		"tinkerer": {"name": "Tinkerer", "blurb": "Proud of every part: repairs and breach patches take x0.8 the time. Ada has it (data/crew.json), and so do the Gauntlings (races_1).", "work_mult": {"repair": 1.25, "breach": 1.25}},
+		"gear_rigger": {"name": "Rigger's kit", "blurb": "Repairs and breach patches x0.77 the time.", "work_mult": {"repair": 1.3, "breach": 1.3}},
+		"gear_firefighter": {"name": "Fire coat", "blurb": "Half fire damage, puts fires out 50% faster.", "damage_taken": {"fire": 0.5}, "work_mult": {"extinguish": 1.5}},
+		"gear_medic": {"name": "Medic's sash", "blurb": "A small heal aura in the room, faster revives.", "aura": {"heal_per_s": 0.5}, "work_mult": {"heal_others": 1.6}},
+		"gear_chitin": {"name": "Chitin plate", "blurb": "Melee attackers take 4 back; a little slower.", "counter_melee": 4, "walk_mult": 0.95},
+		"gear_spore": {"name": "Spore mantle", "blurb": "A slow heal aura for the room.", "aura": {"heal_per_s": 0.4}},
+		"gear_prism": {"name": "Prism cloak", "blurb": "Ion hits do 40% less.", "damage_taken": {"ion": 0.6}},
+		"gear_ballast": {"name": "Ballast rig", "blurb": "No knockback, slower.", "no_knock": true, "walk_mult": 0.85},
+		"gear_tank": {"name": "Own air tank", "blurb": "Thin air hurts far less.", "suffocate_mult": 0.3},
+		"gear_forge": {"name": "Forge apron", "blurb": "Immune to fire; a hot room does not slow them.", "damage_taken": {"fire": 0.0}, "heat_proof": true},
+		"gear_trader": {"name": "Trader's coat", "blurb": "Shops pay 15% more for what you sell.", "sell_bonus": 0.15},
+		"gear_stone": {"name": "Stone plates", "blurb": "Slower.", "walk_mult": 0.85},
+		"gear_gauntlets": {"name": "Scrap gauntlets", "blurb": "Melee x1.35, 50% more scrap from wrecks.", "melee_mult": 1.35, "scrap_mult": 1.5}
 	}
 }

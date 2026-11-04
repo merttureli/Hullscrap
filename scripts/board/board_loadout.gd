@@ -141,6 +141,9 @@ static func _person(h, area: Rect2, v, m) -> void:
 
 ## The line under a body gear's name in its slot: what it does without "Takes" (the whole sentence ran over the slot's edge; the hover has it).
 static func body_sub(item: String) -> String:
+	var own := str(Kit.gear_def(item).get("sub", ""))
+	if own != "":
+		return own
 	var line := Kit.body_line(item).trim_prefix("Takes ")
 	if line.ends_with(" Sealed."):  # the slot is narrow
 		return line.trim_suffix(" damage. Sealed.") + " dmg, sealed"
@@ -223,7 +226,8 @@ static func stats(slot: String, id: String) -> String:
 			var l: Array = Cards._weapon_lines(id)
 			return str(l[1]) if l.size() > 1 else ""
 		"body":
-			return Kit.body_line(id)
+			var own := str(Kit.gear_def(id).get("sub", ""))  # (the whole sentence runs over a choice's row: the hover has it)
+			return own if own != "" else Kit.body_line(id)
 		"mod":
 			var l2: Array = Mods.hover(id)
 			return str(l2[1]) if l2.size() > 1 else ""

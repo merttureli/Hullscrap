@@ -28,9 +28,10 @@ static func table_of(site, id: int) -> Array:
 static func table_for(site, name: String) -> Array:
 	var cfg := Site.config()
 	var table: Array = cfg["tables"].get(name, []) + cfg["kinds"][site.kind]["bonus"]
-	if site.theme == "":
+	var home: Dictionary = cfg.get("regional", {}).get(site.region, {}) if site.region != "" else {}  # (the race gear of the region)
+	if site.theme == "" and home.is_empty():
 		return table
-	return table.map(func(o): return {"weight": float(o["weight"]) * Themes.tilt(site.theme, str(o["item"])), "item": o["item"], "count": o["count"]})  # (the theme's tilt)
+	return table.map(func(o): return {"weight": float(o["weight"]) * Themes.tilt(site.theme, str(o["item"])) * float(home.get(str(o["item"]), 1.0)), "item": o["item"], "count": o["count"]})  # (the theme's tilt)
 
 
 ## Roll the contents of container `id`. `ctx`: {tier (1-3), stage (of the run, for mods), unknown (recipe ids the ship has no blueprint for), levels (recipe id -> fab_level),
@@ -110,6 +111,9 @@ static func _foe_body(site, p: Dictionary, items: Dictionary, rng: RandomNumberG
 			var pick := _pick(gear, rng)
 			if not pick.is_empty():
 				_add(items, str(pick["item"]), 1)
+	var worn := str(p.get("worn", ""))
+	if worn != "" and rng.randf() < float(Site.config()["wear"]["drop"]):  # (the gear it wore, after every older roll so those do not shift)
+		_add(items, worn, 1)
 
 
 ## Is there nothing left in `contents`?

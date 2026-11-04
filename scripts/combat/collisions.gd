@@ -19,6 +19,7 @@ extends RefCounted
 ## Tuning is data/collision.json (loaded into `arena.collision`).
 
 const Damage = preload("res://scripts/combat/damage.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 
@@ -462,7 +463,7 @@ static func _knock(arena, idx: int, cells: Array, closing: float) -> void:
 				rooms[r] = true
 	var amount := float(arena.collision["crew_knock"]) * closing / 100.0
 	for m in ship.crew:
-		if rooms.has(ship.atmosphere.room_of.get(m.cell(), -1)):
+		if rooms.has(ship.atmosphere.room_of.get(m.cell(), -1)) and not TraitSet.of(m)["no_knock"]:  # (a ballast rig keeps its wearer on their feet)
 			m.hurt(amount)
 
 
