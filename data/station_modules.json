@@ -4,7 +4,7 @@
   "attempts": 8,
   "race_boost": 2.5,
   "power": {"reach": 3, "repair_s": 4.0},
-  "heat": {"ambient": 30, "hot": 70, "hot_visible": 55, "purposes": {"reactor": 70}, "modules": {"forge": 85, "magma_hall": 85, "hearth_hall": 80}},
+  "heat": {"ambient": 30, "hot": 70, "hot_visible": 55, "purposes": {"reactor": 70}, "modules": {"forge": 85, "magma_hall": 85, "hearth_hall": 80, "fighting_pit": 75}},
   "types": {
     "outpost": {"weight": 3, "modules": [5, 7], "min": {"reactor": 1, "command": 1, "habitation": 1}, "max": {}, "beds": [1, 2], "names": ["Outpost", "Survey Post", "Relay Platform", "Picket Station"]},
     "waystation": {"weight": 4, "modules": [8, 10], "min": {"reactor": 1, "command": 1, "habitation": 1}, "max": {}, "beds": [2, 3], "names": ["Waystation", "Depot", "Transfer Station", "Crossroads Platform"]},
@@ -179,6 +179,21 @@
       "rooms": [{"purpose": "mess", "props": [{"prop": "crate", "n": [1, 2]}, {"prop": "cask", "n": [1, 2]}]}, {"purpose": "mess", "props": [{"prop": "crate", "n": [1, 1]}, {"prop": "cabinet", "n": [0, 1]}]}]},
     "lens_gallery": {"name": "Lens gallery", "tags": ["lens"], "races": ["prismatic"], "weights": {"outpost": 0.4, "waystation": 1.2, "habitat": 1.6}, "max": 1, "clear": 3, "close": "window",
       "cells": ["######hhphh#######", "#................#", "#................#", "d................d", "d................d", "#................#", "#................#", "#................#", "##wwwwwwwwwwwwww##"],
-      "rooms": [{"purpose": "comms", "props": [{"prop": "crystal", "n": [1, 2]}, {"prop": "terminal", "n": [0, 1]}]}]}
+      "rooms": [{"purpose": "comms", "props": [{"prop": "crystal", "n": [1, 2]}, {"prop": "terminal", "n": [0, 1]}]}]},
+    "fold_stacks": {"name": "Fold stacks", "tags": ["archive", "fold"], "races": ["vellum"], "weights": {"outpost": 0.5, "waystation": 1.2, "habitat": 1.5}, "max": 1,
+      "cells": ["##############       ", "#............########", "#............#111111#", "d............+111111d", "d............+111111d", "#............#111111#", "#............#111111#", "#............########", "####hhphh#####       "],
+      "rooms": [{"purpose": "lab", "props": [{"prop": "files", "n": [2, 3]}, {"prop": "crate", "n": [0, 1]}]}, {"purpose": "lab", "props": [{"prop": "files", "n": [1, 2]}, {"prop": "terminal", "n": [0, 1]}]}]},
+    "quiet_chamber": {"name": "Quiet chamber", "tags": ["quiet"], "races": ["oorth"], "weights": {"outpost": 0.4, "waystation": 1.0, "habitat": 1.4}, "max": 1,
+      "cells": ["  ##dd##  ", "  #1111#  ", "  #1111#  ", "  #1111#  ", "####++####", "#........#", "#........#", "d........d", "d........d", "#........#", "#........#", "####++####", "  #2222#  ", "  #2222#  ", "  #2222#  ", "  ##dd##  "],
+      "rooms": [{"purpose": "chapel", "props": [{"prop": "cabinet", "n": [0, 1]}, {"prop": "crystal", "n": [1, 1]}]}, {"purpose": "chapel", "props": [{"prop": "files", "n": [1, 1]}]}, {"purpose": "chapel", "props": [{"prop": "crate", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]}]},
+    "fighting_pit": {"name": "Fighting pit", "tags": ["pit"], "races": ["drakkin"], "weights": {"outpost": 0.7, "waystation": 1.2, "habitat": 1.4}, "max": 1,
+      "cells": ["########dd########", "#................#", "#................#", "#................#", "#................#", "d................d", "d................d", "#................#", "#................#", "#................#", "#................#", "#................#", "######hhphh#######"],
+      "rooms": [{"purpose": "security", "props": [{"prop": "crate", "n": [1, 2]}, {"prop": "trophy", "n": [1, 2]}, {"prop": "body", "n": [0, 1]}]}]},
+    "current_roost": {"name": "Current roost", "tags": ["roost"], "races": ["wisp"], "weights": {"outpost": 0.5, "waystation": 1.2, "habitat": 1.4}, "max": 1, "airless": true,
+      "cells": ["############", "#..........#", "#..........#", "d..........d", "d..........d", "#..........#", "#..........#", "#..........#", "#####++#####", "   #1111#   ", "   #1111#   ", "   #1111#   ", "   #1111#   ", "   ##dd##   "],
+      "rooms": [{"purpose": "comms", "props": [{"prop": "terminal", "n": [1, 1]}, {"prop": "crystal", "n": [0, 1]}]}, {"purpose": "comms", "props": [{"prop": "crate", "n": [1, 1]}]}]},
+    "barnacle_reef": {"name": "Barnacle reef", "tags": ["water", "reef"], "races": ["hullkin"], "weights": {"outpost": 0.6, "waystation": 1.2, "habitat": 1.3}, "max": 1,
+      "cells": ["####hhphh###     ", "#..........#     ", "#..........#     ", "d..........######", "d..........#1111#", "#..........+1111d", "#..........+1111d", "#..........#1111#", "#############dd##"],
+      "rooms": [{"purpose": "water", "props": [{"prop": "crate", "n": [1, 2]}, {"prop": "heap", "n": [1, 1]}, {"prop": "cable", "n": [0, 1]}]}, {"purpose": "water", "props": [{"prop": "heap", "n": [1, 1]}, {"prop": "crate", "n": [0, 1]}]}]}
   }
 }

@@ -535,3 +535,173 @@ static func a_beam_rail(cv: CanvasItem, it: Dictionary) -> void:
 	for k in 3:
 		var p := _p(r, 0.1 + 0.4 * float(k), 0.5)
 		cv.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -6), p + Vector2(5, 0), p + Vector2(0, 6), p + Vector2(-5, 0)]), Color(g, 0.95))
+
+
+# --- vellum ------------------------------------------------------------------------------------------------------------
+
+static func a_paper_stack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.25))
+	for k in 6:  # (rolled scrolls on the shelves)
+		for j in 2:
+			var p := _p(r, 0.1 + 0.15 * float(k), 0.3 + 0.4 * float(j))
+			cv.draw_circle(p, 3.6, Color(0.93, 0.9, 0.78) if (k + j) % 2 == 0 else Color(0.86, 0.8, 0.66))
+			cv.draw_circle(p, 1.3, Color(0.5, 0.42, 0.3))
+
+
+static func a_folding_desk(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	cv.draw_rect(r.grow(-2.0), it["base"])
+	for k in 3:  # (folded cranes and a sheet)
+		var p := _p(r, 0.2 + 0.3 * float(k), 0.5)
+		_poly(cv, [p + Vector2(-5, 3), p + Vector2(0, -6), p + Vector2(5, 3), p + Vector2(0, 1)], Color(0.97, 0.95, 0.88), true)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_paper_lantern(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	if not it["dead"]:
+		cv.draw_circle(c, 15.0, Color(it["glow"], 0.16))
+	cv.draw_circle(c, 9.0, Color(0.96, 0.9, 0.7) if not it["dead"] else Color(0.55, 0.52, 0.45))
+	for k in 3:
+		cv.draw_arc(c, 9.0, 0.0, TAU, 12, Color(0.6, 0.4, 0.25, 0.7), 1.0, true)
+		cv.draw_line(c + Vector2(float(k - 1) * 4.0, -8), c + Vector2(float(k - 1) * 2.0, 8), Color(0.6, 0.4, 0.25, 0.6), 1.0)
+	cv.draw_line(c + Vector2(0, -9), c + Vector2(0, -13), Color(0.3, 0.25, 0.2), 1.5)
+
+
+# --- oorth -------------------------------------------------------------------------------------------------------------
+
+static func a_still_basin(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var rad := minf(r.size.x, r.size.y) / 2.0
+	cv.draw_rect(r, Color(0.14, 0.14, 0.2))
+	cv.draw_circle(c, rad * 0.95, Color(0.3, 0.3, 0.42))
+	cv.draw_circle(c, rad * 0.8, _lit(it, Color(0.25, 0.25, 0.6)))
+	for k in 3:
+		_ring(cv, c, rad * (0.25 + 0.2 * float(k)), Color(0.8, 0.78, 1.0, 0.3), 1.5)
+	cv.draw_circle(c, 3.0, _lit(it, Color(0.85, 0.82, 1.0)))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_meditation_mat(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	cv.draw_rect(r.grow(-3.0), Color(it["base"], 0.85))
+	cv.draw_rect(r.grow(-3.0), Color(0, 0, 0, 0.35), false, 1.5)
+	cv.draw_circle(c, minf(r.size.x, r.size.y) * 0.28, it["base"].lightened(0.25))
+	_ring(cv, c, minf(r.size.x, r.size.y) * 0.28, Color(0, 0, 0, 0.3), 1.2)
+
+
+static func a_hood_statue(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.2))
+	var c := r.get_center()
+	cv.draw_circle(c + Vector2(0, 4), 9.0, it["base"].lightened(0.1))  # (the shoulders)
+	_poly(cv, [c + Vector2(-8, 2), c + Vector2(0, -12), c + Vector2(8, 2)], it["base"].lightened(0.25), true)  # (the hood)
+	cv.draw_circle(c + Vector2(0, -2), 2.2, _lit(it, Color(0.7, 0.68, 1.0)))  # (the third eye)
+
+
+# --- drakkin -----------------------------------------------------------------------------------------------------------
+
+static func a_fighting_pit(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var sand := Color(0.72, 0.58, 0.38)
+	cv.draw_rect(r, Color(0.28, 0.2, 0.15))
+	cv.draw_rect(r.grow(-4.0), sand.darkened(0.15))
+	cv.draw_rect(r.grow(-10.0), sand)
+	for k in 7:  # (scuffs, and old blood)
+		var p := r.position + r.size * Vector2(0.15 + 0.7 * _rnd(it, k), 0.2 + 0.6 * _rnd(it, k + 11))
+		cv.draw_line(p, p + Vector2(8.0 * (_rnd(it, k + 5) - 0.5), 5.0 * (_rnd(it, k + 8) - 0.5)), Color(0.5, 0.38, 0.22, 0.6), 2.0)
+		if k % 3 == 0:
+			cv.draw_circle(p, 3.0, Color(0.45, 0.12, 0.1, 0.5))
+	_ring(cv, c, minf(r.size.x, r.size.y) * 0.22, Color(0.45, 0.32, 0.2, 0.6), 2.0)
+	for q in [r.position + Vector2(8, 8), Vector2(r.end.x - 8, r.position.y + 8), Vector2(r.position.x + 8, r.end.y - 8), r.end - Vector2(8, 8)]:  # (the corner stakes)
+		cv.draw_circle(q, 4.0, Color(0.3, 0.28, 0.26))
+		cv.draw_line(q, c, Color(0.35, 0.33, 0.3, 0.4), 1.0)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_trophy_wall(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.2))
+	for k in 3:
+		var p := _p(r, (float(k) + 0.5) / 3.0, 0.5)
+		cv.draw_circle(p, 6.0, Color(0.88, 0.84, 0.72))  # (a skull)
+		cv.draw_circle(p + Vector2(-2.2, -1), 1.4, Color(0.1, 0.08, 0.08))
+		cv.draw_circle(p + Vector2(2.2, -1), 1.4, Color(0.1, 0.08, 0.08))
+		cv.draw_line(p + Vector2(-5, -5), p + Vector2(-9, -9), Color(0.85, 0.8, 0.65), 2.0)  # (horns)
+		cv.draw_line(p + Vector2(5, -5), p + Vector2(9, -9), Color(0.85, 0.8, 0.65), 2.0)
+
+
+static func a_spectator_bench(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_slats(cv, it)
+	for k in 4:  # (spined)
+		var p := _p(r, 0.12 + 0.25 * float(k), 0.0)
+		cv.draw_colored_polygon(PackedVector2Array([p + Vector2(-3, 0), p + Vector2(0, -5), p + Vector2(3, 0)]), it["base"].lightened(0.3))
+
+
+static func _slats(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"])
+	cv.draw_rect(r, INK, false, 2.0)
+	for k in int(maxf(r.size.x, r.size.y) / 8.0):
+		cv.draw_line(_p(r, (5.0 + 8.0 * float(k)) / maxf(r.size.x, r.size.y), 0.1), _p(r, (5.0 + 8.0 * float(k)) / maxf(r.size.x, r.size.y), 0.9), Color(0, 0, 0, 0.3), 1.5)
+
+
+# --- wisp --------------------------------------------------------------------------------------------------------------
+
+static func a_current_loom(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, Color(0.08, 0.14, 0.18))
+	var g := _glow(it)
+	for k in 3:  # (ribbons of current)
+		var pts := PackedVector2Array()
+		for q in 14:
+			pts.append(_p(r, 0.06 + 0.88 * float(q) / 13.0, 0.5 + 0.3 * sin(float(q) * 0.9 + float(k) * 2.1 + _rnd(it, 2) * 5.0) * (1.0 - 0.25 * float(k))))
+		cv.draw_polyline(pts, Color(g, 0.9 - 0.2 * float(k)), 2.5 - 0.5 * float(k))
+	cv.draw_rect(_q(r, 0.0, 0.0, 0.05, 1.0), Color(0.45, 0.55, 0.6))
+	cv.draw_rect(_q(r, 0.95, 0.0, 1.0, 1.0), Color(0.45, 0.55, 0.6))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_static_column(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	var g := _glow(it)
+	cv.draw_circle(c, 8.0, Color(0.2, 0.28, 0.32))
+	cv.draw_circle(c, 5.0, Color(0.45, 0.58, 0.64))
+	if not it["dead"]:
+		cv.draw_circle(c, 13.0, Color(g, 0.14))
+	for k in 3:
+		cv.draw_arc(c, 6.0 + 2.5 * float(k), float(k) * 2.0, float(k) * 2.0 + 1.5, 6, Color(g, 0.9), 1.5, true)
+	cv.draw_circle(c, 2.0, g.lightened(0.4))
+	_ring(cv, c, 8.0, INK, 1.5)
+
+
+# --- hullkin -----------------------------------------------------------------------------------------------------------
+
+static func a_barnacle_bank(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, Color(0.3, 0.3, 0.28))
+	for k in 14:
+		var p := r.position + r.size * Vector2(0.06 + 0.88 * _rnd(it, k), 0.2 + 0.6 * _rnd(it, k + 30))
+		var rad := 3.0 + 3.0 * _rnd(it, k + 60)
+		cv.draw_circle(p, rad, Color(0.72, 0.72, 0.64))
+		cv.draw_circle(p, rad * 0.45, Color(0.18, 0.18, 0.16))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_tide_basin(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, Color(0.3, 0.3, 0.28))
+	cv.draw_rect(r.grow(-3.0), _lit(it, Color(0.2, 0.5, 0.62)))
+	for k in 3:  # (shells and a starfish)
+		var p := r.position + r.size * Vector2(0.2 + 0.3 * float(k), 0.35 + 0.3 * float(k % 2))
+		cv.draw_circle(p, 4.5, Color(0.9, 0.78, 0.62))
+		cv.draw_arc(p, 3.0, 0.0, PI, 6, Color(0.5, 0.35, 0.25), 1.2, true)
+	for k in 2:
+		_ring(cv, r.get_center() + Vector2(float(k) * 14.0 - 7.0, 0), 6.0, Color(1, 1, 1, 0.2), 1.5)
+	cv.draw_rect(r, INK, false, 2.0)
