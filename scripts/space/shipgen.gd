@@ -228,7 +228,11 @@ static func from_spec(text: String) -> Ship:
 	for x in p.slice(4):
 		if x.length() > 1 and x.begins_with("s") and x.substr(1).is_valid_int():
 			stage = int(x.substr(1))
-	return build(p[0], p[1], int(p[2]), float(p[3]) / 100.0, {"ram": p.slice(4).has("ram"), "stage": stage, "warden": p.slice(4).has("warden")})
+	var opts := {"ram": p.slice(4).has("ram"), "stage": stage, "warden": p.slice(4).has("warden")}
+	var at := p.slice(4).find("role")  # ":role:<id>" pins the role (the tools measure each role); a spec without it rolls the role from its seed
+	if at >= 0 and at + 1 < p.slice(4).size() and tables().get("roles", {}).get("list", {}).has(p.slice(4)[at + 1]):
+		opts["role"] = p.slice(4)[at + 1]
+	return build(p[0], p[1], int(p[2]), float(p[3]) / 100.0, opts)
 
 
 # --- building ------------------------------------------------------------------------------------

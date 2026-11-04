@@ -52,6 +52,7 @@ const BUILDS := {
 
 var args := {}
 static var style_only := ""  ## style=<id>: the enemies of the starters= mode are all of this faction or race (Beta 3 enemy identity)
+static var role_only := ""  ## role=<id>: every enemy of the run is this role (a spec with :role:<id>)
 static var want_skulls := 0  ## want=3: only the enemies of that threat (default: 2 and 3)
 var cap := 180.0
 var rows: Array = []
@@ -64,6 +65,7 @@ func _initialize() -> void:
 	cap = float(args.get("cap", cap))
 	style_only = str(args.get("style", ""))
 	want_skulls = int(args.get("want", 0))
+	role_only = str(args.get("role", ""))
 	if args.has("break"):
 		Morale.config()["break_structure"] = float(args["break"])
 	if args.has("ghost_flee"):
@@ -133,7 +135,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters", "paim", "only", "style", "want", "starter_stages"]:
+	for key in ["stages", "seeds", "cap", "kinds", "break", "ghost_flee", "starters", "paim", "only", "style", "want", "starter_stages", "role"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
@@ -227,7 +229,7 @@ static func enemies(stage: int, kind: String, n: int) -> Array:
 		var budget := Shipgen.budget_for(tier, j, danger_for(str(Shipgen.tables()["factions"][faction].get("lines_as", faction))), "normal", stage)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_value
-		var spec := Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage)
+		var spec := Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage) + (":role:" + role_only if role_only != "" else "")
 		var ship: Ship = Session.load_ship(spec)
 		if ship == null:
 			continue
@@ -259,7 +261,7 @@ static func starter_enemies(name: String, stage: int, n: int) -> Array:
 		var budget := Shipgen.budget_for(tier, j, danger_for(str(Shipgen.tables()["factions"][faction].get("lines_as", faction))), "normal", stage)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_value
-		var spec := Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage)
+		var spec := Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage) + (":role:" + role_only if role_only != "" else "")
 		var ship: Ship = Session.load_ship(spec)
 		if ship == null:
 			continue
@@ -480,7 +482,7 @@ static func starter_table(list: Array) -> String:
 		var cap := sel.filter(func(r): return str(r["state"]) == "fighting").size()
 		var g1 := sel.filter(func(r): return float(r["t_gun1"]) >= 0.0).map(func(r): return float(r["t_gun1"]))
 		var gall := sel.filter(func(r): return float(r["t_guns"]) >= 0.0).map(func(r): return float(r["t_guns"]))
-		L.append("| %s | %d | %s | %d | %.0f | %.0f | %d | %d | %d | %d | %s | %d | %s |" % [keys[key][0], keys[key][1], keys[key][2], sel.size(), _median(sel.map(func(r): return float(r["t"]))), _mean(sel.map(func(r): return float(r["t"]))),
+		L.append("| %s | %d | %s | %d | %.0f | %.0f | %d | %d | %d | %d | %s | %d | %s | %s |" % [keys[key][0], keys[key][1], keys[key][2], sel.size(), _median(sel.map(func(r): return float(r["t"]))), _mean(sel.map(func(r): return float(r["t"]))),
 			roundi(100.0 * (n - lost - cap) / n), roundi(100.0 * lost / n), roundi(100.0 * cap / n), roundi(100.0 * g1.size() / n), "%.0f" % _median(g1) if not g1.is_empty() else "-",
 			roundi(100.0 * gall.size() / n), "%.0f" % _median(gall) if not gall.is_empty() else "-",
 			"%.2f" % _mean(sel.map(func(r): return (float(r["p_hull"]) + float(r["p_part"])) / maxf(float(r["t"]), 1.0)))])
