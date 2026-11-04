@@ -27,7 +27,7 @@ const COLUMNS: Array = [
 			["Station bar", "Post the selected crew member"],
 			["R / V", "Breach alert: repair / evacuate"],
 			["G", "Use the selected crew member's special ability (in a fight too)"],
-			["I", "Crew kit: what each crew member carries"],
+			["I", "Crew kit (play or build mode)"],
 			["B", "Build mode / play mode"],
 			["O / P", "Oxygen / power overlay"],
 			["Wheel", "Zoom (build: MMB drag, arrows pan)"],
@@ -118,7 +118,7 @@ const COLUMNS: Array = [
 		]],
 		["BOARDING (an event's Board her)", [
 			["Mouse R Q F", "Aboard: fire, reload, swap, flashlight"],
-			["E (hold)", "Open, hack, revive; airlock: leave. Tap E to talk"],
+			["E (hold), L", "Hold: open, hack, revive. Tap: talk. Airlock or L: leave"],
 		]],
 	],
 ]
