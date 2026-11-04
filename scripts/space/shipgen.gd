@@ -279,7 +279,7 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 ## Why `ship` (a generated one or any) is not a valid enemy: [] when it is fine. Power covers the demand and every part is
 ## on it, every room holds air, every floor cell can be reached by a crew body from the helm, every mount is placed by the
 ## mount rules, it can fly, it has a gun, and it is no rectangle.
-static func validate(ship: Ship, max_fill := 0.85) -> Array:
+static func validate(ship: Ship, max_fill := -1.0) -> Array:
 	var bad: Array = []
 	ship.refresh()
 	for n in ship.power_state["networks"]:
@@ -309,6 +309,9 @@ static func validate(ship: Ship, max_fill := 0.85) -> Array:
 	var f := Flight.new()
 	if f.can_fly(comps, ship.power_state["powered"]) != "":
 		bad.append("cannot fly: " + f.can_fly(comps, ship.power_state["powered"]))
+	if max_fill < 0.0:  # a faction's own limit (a brick hull, `max_fill` of its hull table) when the ship says whose it is
+		var made: String = str(ship.get_meta("shipgen", {}).get("faction", ""))
+		max_fill = float(tables()["factions"].get(made, {}).get("hull", {}).get("max_fill", MAX_FILL - 0.01)) + 0.01
 	var area := 0.0
 	var lo := Vector2i(1 << 20, 1 << 20)
 	var hi := Vector2i(-(1 << 20), -(1 << 20))
