@@ -19,6 +19,8 @@ const Hullgen = preload("res://scripts/space/hullgen.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Themes = preload("res://scripts/board/themes.gd")
+const StationGen = preload("res://scripts/board/station_gen.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 const PATH := "res://data/boarding.json"
 const TILES_PATH := "res://data/tiles.json"
@@ -57,6 +59,18 @@ var bounds := Rect2i()  ## the cells of the hull (the grid minus its margin)
 var ship = null  ## the beaten ship a wreck is made from (wreck_site.gd): drawn as it is (parts, holes, damage); null on a generated site
 var fight := ""  ## the end of the fight that left a beaten ship: "won" or "captured"
 var foe_crew: Array = []  ## a beaten ship's crew still on their feet after a win: [{name, species, pos, hp (share), sealed}] (foes.gd spawn_site)
+var gen := ""  ## how a station was built: "modules" (station_gen.gd) or "classic" (the bands); "" for another kind
+var state := ""  ## a module station's state: abandoned, half or operational (data/station_modules.json states)
+var mood := ""  ## an operational station's: friendly or hostile
+var station_type := ""  ## a module station's type (outpost, waystation, habitat)
+var modules: Array = []  ## a module station's modules: [{id, name, rect (cells), rooms: [ids], powered, breached}]
+var room_light := {}  ## room id -> lit, flicker, red or dark (a module station's; empty for the rest, which are dark)
+var windows: Array = []  ## runs of window cells (not in `grid`: space shows through): [{cells: [Vector2i], normal: Vector2i (out)}]
+var backdrop := {}  ## what the windows look out on (station_gen.gd _backdrop), {} for none
+var crowd := {}  ## who is aboard instead of the kind's (boarding.json spawn and people): {spawn: {count, mix}, people: {count, roles}}
+var posts: Array = []  ## foes that stand watch where the site puts them: [{kind, pos (cells), room}]
+var beds: Array = []  ## [{id, cell, size, room, works}]: hold E by a working one to heal (beds.gd); not props, so the container ids never move
+var arrival := ""  ## a module station's line on arrival: what its state looks like
 var _skin := {}  # cell -> true: flat hull cells on the outside (where a hatch can go)
 var _rng := RandomNumberGenerator.new()
 
@@ -93,17 +107,33 @@ static func make(p_seed: int, p_kind: String, opts := {}):
 	s.region = str(opts.get("region", ""))
 	if not Themes.ids().has(s.theme):
 		s.theme = ""
-	for i in ATTEMPTS:
-		s._clear()
-		if s._try(i) == "":
-			s.ok = true
-			s.attempt = i
-			break
-	var names: Array = cfg["names"]
+	if p_kind == "station":
+		s.gen = str(opts.get("gen", ""))
+		if s.gen == "":
+			s.gen = StationGen.switch()
+	if s.gen == "modules" and StationGen.build(s, opts) == "":
+		s.ok = true
+		s._rng.seed = _mix(p_seed, "station_name", 0)  # (the name's dice: the bands seed them in _try)
+	else:  # the bands (a module station that could not be built falls back to them)
+		s.gen = "classic" if p_kind == "station" else ""
+		s.state = ""
+		s.arrival = ""
+		s.mood = ""
+		s.station_type = ""
+		s.modules = []
+		for i in ATTEMPTS:
+			s._clear()
+			if s._try(i) == "":
+				s.ok = true
+				s.attempt = i
+				break
+	var names: Array = cfg["names"] if s.station_type == "" else StationGen.config()["types"][s.station_type]["names"]
 	var themed := Themes.site_name(s.theme, p_kind, s._rng) if str(opts.get("name", "")) == "" else ""
 	s.site_name = str(opts.get("name", "")) if str(opts.get("name", "")) != "" else (themed if themed != "" else str(names[s._rng.randi() % names.size()]))
 	if s.ok:
 		s._place_marks()
+		if s.gen != "modules":
+			s._classic_beds()
 	return s
 
 
@@ -123,6 +153,12 @@ func _clear() -> void:
 	marks = []
 	airlock = {}
 	lights = []
+	room_light = {}
+	windows = []
+	backdrop = {}
+	crowd = {}
+	posts = []
+	beds = []
 	room_of = {}
 	door_of = {}
 	prop_of = {}
@@ -274,6 +310,11 @@ func air_at(p: Vector2) -> float:
 	return air_of(room_at(p))
 
 
+## Can someone breathe in room `id` without a seal (crew.json air.breath_ok)?
+func breathable(id: int) -> bool:
+	return air_of(id) >= float(CrewMember.config().get("air", {}).get("breath_ok", 0.5))
+
+
 ## The body a foe of `kind_name` leaves at `pos` (cells): a container on the 2x2 cells it fell on, opened like a locker (loot.gd rolls its foe_loot). `foe` is its foe id,
 ## `spawned` whether it stood here from the start (the memory of a visit keeps the bodies of those: they are made with the foe, ids first, and wake when it falls, so
 ## their ids are the same on every visit). `active` false makes one that holds nothing yet (wake_corpse). Returns the prop's id.
@@ -349,12 +390,13 @@ func reach(from: Vector2i, open: Callable) -> Dictionary:
 	return seen
 
 
-## The rooms (ids) the soldier can get to from the airlock: doors with a lock in `shut` (a list of lock kinds, "hack" and "card") are closed.
-func reachable_rooms(shut: Array) -> Dictionary:
+## The rooms (ids) the soldier can get to from the airlock: doors with a lock in `shut` (a list of lock kinds, "hack" and "card") are closed; with
+## `breathe`, so is every door into a room whose air is too thin (he may have no sealed suit).
+func reachable_rooms(shut: Array, breathe := false) -> Dictionary:
 	var out := {}
 	var open := func(c: Vector2i) -> bool:
 		var d: int = door_of.get(c, -1)
-		return d < 0 or not shut.has(doors[d]["lock"])
+		return d < 0 or (not shut.has(doors[d]["lock"]) and not (breathe and doors[d]["rooms"].any(func(r): return not breathable(r))))
 	var seen := reach(spawn_anchor(), open)
 	for a in seen:
 		var r: int = int(room_of.get(a, -1))
@@ -377,7 +419,7 @@ func problems() -> Array:
 	for r in rooms:
 		if r["purpose"] != "gone" and not all.has(r["id"]):
 			out.append("room %d (%s) cannot be reached" % [r["id"], r["purpose"]])
-	var no_card := reachable_rooms(["card"])
+	var no_card := reachable_rooms(["card"], true)
 	for d in doors:
 		if d["lock"] == "card":
 			var held := false
@@ -395,6 +437,13 @@ func problems() -> Array:
 				break
 	if airlock.is_empty() or rooms[airlock["room"]]["purpose"] != "airlock":
 		out.append("no airlock")
+	elif not breathable(airlock["room"]):
+		out.append("the airlock has no air")
+	for b in beds.filter(func(x): return not x.get("part", false)):  # (a beaten ship's bed is her own part, where the fight left it)
+		for c in bed_cells(b):
+			if walk.get_tile(c) != "wall" or prop_of.has(c) or int(room_of.get(c, -1)) != int(b["room"]):
+				out.append("bed %d stands outside its room or on something" % b["id"])
+				break
 	return out
 
 
@@ -796,7 +845,7 @@ func _place_props(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 			continue
 		var mult := float(cfg["prop_mult"]) * (float(cfg["locked_bonus"]) if r["locked"] else 1.0)
 		var mouth := _mouth(r)
-		var entries: Array = rdefs[r["purpose"]]["props"] + Themes.def(theme).get("rooms", {}).get(r["purpose"], [])
+		var entries: Array = r.get("props", rdefs[r["purpose"]]["props"]) + Themes.def(theme).get("rooms", {}).get(r["purpose"], [])  # (a module's room may bring its own)
 		for entry in entries:
 			var n := rng.randi_range(int(entry["n"][0]), int(entry["n"][1]))
 			n = int(floor(float(n) * mult + rng.randf()))
@@ -922,7 +971,7 @@ func _fill_slots(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 		var id := _pick_weighted(w, rng)
 		if id >= 0:
 			props[id]["slot"] = "log"
-	var no_card := reachable_rooms(["card"])
+	var no_card := reachable_rooms(["card"], true)
 	for d in doors:
 		if d["lock"] != "card":
 			continue
@@ -990,6 +1039,103 @@ func _place_lights(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 			lights.append({"pos": mid, "color": "green", "room": r["id"]})
 		elif rng.randf() < float(cfg["emergency"]) * float(Themes.def(theme).get("emergency", 1.0)):
 			lights.append({"pos": mid, "color": "red", "room": r["id"]})
+
+
+## The cells a bed covers.
+func bed_cells(b: Dictionary) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	if b.has("cells"):
+		out.assign(b["cells"])
+		return out
+	for y in b["size"].y:
+		for x in b["size"].x:
+			out.append(b["cell"] + Vector2i(x, y))
+	return out
+
+
+## The middle of a bed, in cells.
+func bed_centre(b: Dictionary) -> Vector2:
+	var cl := bed_cells(b)
+	var sum := Vector2.ZERO
+	for c in cl:
+		sum += Vector2(c) + Vector2(0.5, 0.5)
+	return sum / float(cl.size())
+
+
+## Beds in the medbays of a generated site (boarding.json beds: count by kind, mostly broken): a stream of their own, after everything else, so the layout,
+## the containers and their ids are what they were before there were beds.
+func _classic_beds() -> void:
+	var bc: Dictionary = config().get("beds", {})
+	var span: Array = bc.get("count", {}).get(kind, [0, 0])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _mix(seed_value, "beds", 0)
+	var want := {}
+	var works := {}
+	for r in rooms:
+		if r["purpose"] == "medbay":
+			want[r["id"]] = rng.randi_range(int(span[0]), int(span[1]))
+			works[r["id"]] = float(bc.get("works", 0.15))
+	_place_beds(want, works, rng)
+
+
+## Beds along the walls: `want` (room id -> how many), each working at `works` (room id -> chance). A bed blocks the walk like a pallet and turns along a
+## side wall; never in front of a door, never where it would cut a room off (then it is not placed).
+func _place_beds(want: Dictionary, works: Dictionary, rng: RandomNumberGenerator) -> void:
+	var size_d: Array = config().get("beds", {}).get("size", [2, 1])
+	var ids: Array = want.keys()
+	ids.sort()
+	var taken := {}
+	for rid in ids:
+		var r: Dictionary = rooms[rid]
+		var rect: Rect2i = r["rect"]
+		var mouth := _mouth(r)
+		for i in int(want[rid]):
+			var cand: Array[Vector2i] = []
+			for yy in range(rect.position.y, rect.end.y):
+				for xx in range(rect.position.x, rect.end.x):
+					if _on_ring(rect, Vector2i(xx, yy)):
+						cand.append(Vector2i(xx, yy))
+			while not cand.is_empty():
+				var c: Vector2i = cand.pop_at(rng.randi() % cand.size())
+				var size := Vector2i(int(size_d[0]), int(size_d[1]))
+				if c.y != rect.position.y and c.y != rect.end.y - 1:
+					size = Vector2i(size.y, size.x)
+				var cells: Array[Vector2i] = []
+				for yy in size.y:
+					for xx in size.x:
+						cells.append(c + Vector2i(xx, yy))
+				if cells.any(func(cc): return not rect.has_point(cc) or not _on_ring(rect, cc) or mouth.has(cc) or prop_of.has(cc) or taken.has(cc)):
+					continue
+				for cc in cells:
+					walk.tiles[cc] = "wall"
+				if _cut_off():
+					for cc in cells:
+						walk.tiles[cc] = grid.tiles[cc]
+					continue
+				for cc in cells:
+					taken[cc] = true
+				beds.append({"id": beds.size(), "cell": c, "size": size, "room": rid, "works": rng.randf() < float(works.get(rid, 0.0))})
+				break
+
+
+## Is some room out of a 2x2 body's reach from the airlock (every door open)?
+func _cut_off() -> bool:
+	var reached := {}
+	for a in reach(spawn_anchor(), func(_c: Vector2i) -> bool: return true):
+		var r: int = int(room_of.get(a, -1))
+		if r >= 0 and room_of.get(a + Vector2i.ONE, -2) == r:
+			reached[r] = true
+	return rooms.any(func(r): return r["purpose"] != "gone" and not reached.has(r["id"]))
+
+
+## The beds of a beaten ship: her bed parts, mostly broken (boarding.json beds.works).
+func beds_of_parts() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _mix(seed_value, "beds", 0)
+	for p in props:
+		if p.has("part") and ship != null and p["room"] >= 0 and str(ship.components.def(str(p["part"])).get("family", "")) == "bed":
+			beds.append({"id": beds.size(), "cells": cells_of(p), "cell": p["cell"], "size": p["size"], "room": p["room"], "part": true,
+				"works": rng.randf() < float(config().get("beds", {}).get("works", 0.15))})
 
 
 ## Discoveries (data/boarding.json `marks`): a few rooms that are not the airlock or a corridor hold a marked terminal, a marked body, or are a strange room

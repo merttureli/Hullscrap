@@ -107,10 +107,10 @@ func test_people_are_placed_at_about_the_target_rates() -> void:
 			var b = Boarding.start(null, null, "r%d" % i, {"kind": kind}, null)
 			if not b.people.list.is_empty():
 				some += 1
-			for n in b.people.list:
-				check(People.cfg()["kinds"][kind]["roles"].has(n["role"]), "%s: a %s is a person of that kind of site" % [kind, n["role"]])
+			for n in b.people.list:  # (a module station's state says who is aboard: site.crowd)
+				check(b.site.crowd.get("people", People.cfg()["kinds"][kind])["roles"].has(n["role"]), "%s: a %s is a person of that kind of site" % [kind, n["role"]])
 		rate[kind] = float(some) / float(total)
-	check(rate["station"] >= 0.35 and rate["station"] <= 0.65, "about 1 in 2 stations holds someone (%.2f)" % rate["station"])
+	check(rate["station"] >= 0.35 and rate["station"] <= 0.85, "about 1 in 2 stations holds someone, more of the live ones (%.2f)" % rate["station"])
 	check(rate["derelict"] >= 0.25 and rate["derelict"] <= 0.6, "about 2 in 5 derelicts does (%.2f)" % rate["derelict"])
 	check(rate["nest"] > 0.0 and rate["nest"] <= 0.5, "a nest holds a captive now and then (%.2f)" % rate["nest"])
 	eq(rate["wreck"], 0.0, "a wreck holds only the survivors who fight")

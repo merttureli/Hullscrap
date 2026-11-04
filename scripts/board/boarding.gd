@@ -7,7 +7,7 @@ extends RefCounted
 ##   is learned at once, a log goes to the journal (campaign.logs_found), a keycard is held for the doors of its colour.
 ## - A hack door opens after holding E for `hack_s` seconds (the view counts them, then calls unlock()); a card door needs the keycard.
 ## - leave() writes the visit to the sector's memory and says whether the site is cleared (every container opened): its POI is done then.
-## - The sector does not tick while aboard (sector_view.gd), the Hollow tide's linger clock does (map_view.gd).
+## - The sector does not tick while aboard (sector_view.gd), nor does the Hollow tide's linger clock (map_view.gd).
 ## offer() is the other half: it puts the "Board her" choice into the event a boardable POI rolls.
 
 const Site = preload("res://scripts/board/site.gd")
@@ -26,6 +26,7 @@ const Air = preload("res://scripts/board/air.gd")
 const WreckSite = preload("res://scripts/board/wreck_site.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const GearActive = preload("res://scripts/board/gear_active.gd")
+const Beds = preload("res://scripts/board/beds.gd")
 
 const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
 
@@ -54,9 +55,11 @@ var foes  ## foes.gd: everyone hostile aboard
 var spare_rounds := 0  ## the rounds he holds when there is no ship (a test)
 var hollow_place := false  ## the place was the Hollow's when he came (hollow-touched stand in it)
 var hollow := false  ## the Hollow took the place while he was aboard (note_hollow)
+var quiet_s := 1.0e9  ## seconds since a foe last had noticed anyone (the Leave button wants Arms.cfg() leave_quiet_s of it)
 var downed := false  ## the soldier went down: the view fades out and calls leave()
 var party: Array = []  ## the crew who came along (party.gd), and a person who follows for now (`temp`)
 var people  ## people.gd: everyone aboard who is not hostile (survivors, traders, a captive ...)
+var beds  ## beds.gd: who lies on which bed
 var seen_marks := {}  ## mark id -> true: the discoveries (site.marks) that have been shown
 var flares: Array = []  ## B4: the flares of a flare gun that burn on the site: [{id, pos, wait (seconds until it lands), t (seconds left burning)}]
 var cur_room := -1  ## the room the soldier stands in (the last one, in a doorway)
@@ -94,6 +97,9 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 			theme = Themes.for_region(p_campaign.region_data, hollow_now)
 	var seed_value: int = Site._mix(p_sector.seed_value if p_sector != null else 0, p_poi_id, 0)
 	var opts := {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", []), "theme": theme, "region": str(p_campaign.region_data.get("id", "")) if p_campaign != null else ""}
+	if not mem.is_empty():  # (a station first seen before module stations stays as it was: classic)
+		opts["gen"] = str(mem.get("gen", "classic"))
+		opts["state"] = str(mem.get("state", ""))
 	var kept: Dictionary = p_sector.wreck_ships.get(p_poi_id, {}) if p_sector != null and str(b.spec["kind"]) == "wreck" else {}
 	if not kept.is_empty():  # the wreck of a ship she beat is that ship (wreck_site.gd); one with none stored is a generated site
 		opts["fight"] = str(kept.get("fight", "won"))
@@ -123,6 +129,7 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 	b.cleared = b.opened_count() >= b.total()  # (after the foes: the bodies of the beaten are containers too, but no part of what clears a site)
 	b.people = People.new(b)
 	b.people.spawn_site({"hollow": b.hollow_place, "mem": mem.get("people", {})})
+	b.beds = Beds.new(b)
 	for id in mem.get("marks", []) if mem.get("marks") is Array else []:
 		b.seen_marks[int(id)] = true
 	return b
@@ -531,9 +538,11 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	for g in guns:
 		Arms.tick(g, dt, take)
 	foes.tick(dt, aim, light_on)
+	quiet_s = 0.0 if hunted() else quiet_s + dt
 	Air.tick(self, dt)
 	_air_look(dt)
 	people.tick(dt)
+	beds.tick(dt)
 	Party.tick(self, dt)
 	_tick_flares(dt)
 	_look_around()
@@ -750,7 +759,7 @@ func memory() -> Dictionary:
 	u.sort()
 	k.sort()
 	return {"kind": site.kind, "name": site.site_name, "parts": site.parts.duplicate(), "opened": o, "unlocked": u, "keys": k, "left": held, "cleared": cleared,
-		"crew": int(spec.get("crew", 0)), "foes": foes.memory(), "theme": site.theme, "people": people.memory(), "marks": seen_marks.keys()}
+		"crew": int(spec.get("crew", 0)), "foes": foes.memory(), "theme": site.theme, "people": people.memory(), "marks": seen_marks.keys(), "gen": site.gen, "state": site.state}
 
 
 # --- people and discoveries -------------------------------------------------------------------------------------
@@ -784,6 +793,11 @@ func discover(mark_id: int) -> Dictionary:
 	var node := {"type": "boarding_site", "site": site.kind, "theme": site.theme, "mark": m["kind"]}
 	var ev: Dictionary = campaign.events.pick(campaign, node, ship)
 	return {"id": -1, "name": "", "node": node, "event": ev} if not ev.is_empty() else {}
+
+
+## May the party leave with one click (the Leave button)? Only while nobody has been hunted for leave_quiet_s.
+func can_quick_leave() -> bool:
+	return not finished and not downed and quiet_s >= float(Arms.cfg()["leave_quiet_s"])
 
 
 ## Is some foe on the hunt (it has noticed someone)?

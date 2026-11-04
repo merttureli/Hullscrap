@@ -2,13 +2,13 @@ extends Node2D
 ## Boarding on screen (docs/BOARDING.md, stage B1): the soldier goes aboard another vessel (a Boarding visit, boarding.gd) and walks it in the dark
 ## with a flashlight toward the mouse and a motion tracker. The ship's own views are put away the way a fight does it (BuildMode.combat, the crew
 ## view, the sector view and the debris) and the ship's world stands still (ShipSim paused, the sector does not tick); the Hollow tide's
-## linger clock keeps running (map_view.gd counts it while the map is shut).
+## linger clock is held too (map_view.gd tick_linger: time on foot does not count).
 ## - The site is drawn by a ShipView on a plain Ship (the same tile art as a ship), the props and the soldier by this node over it, in the dark: a
 ##   CanvasModulate near black, the flashlight (a cone PointLight2D, shadows from the wall occluders of board_light.gd), a small light round the soldier,
 ##   dim red lights in some rooms and a green one in the airlock.
 ## - WASD walks (screen-relative, CrewMember.move_input on the site's walk grid), the mouse aims the light, the wheel zooms.
 ## - E: hold it on a container to open it (a progress ring), then the loot list shows: E takes all, 1-9 one row, Esc shuts it. Hold E for 4 s by a
-##   locked door to hack it, tap E by a card door to use the keycard. E in the airlock leaves. Esc is the pause menu; Ctrl+S is refused aboard.
+##   locked door to hack it, tap E by a card door to use the keycard. E in the airlock leaves, and so does L (the Leave button) when no foe has hunted the party for a while. Esc is the pause menu; Ctrl+S is refused aboard.
 ## - The HUD (board_hud.gd): the site and its containers, the airlock marker (an arrow at the screen edge when it is off screen), the tracker.
 ## Stage B4: a shot is a bolt of light that flies to its hit point (board_fx.gd: the bolts, their pooled lights, the impacts, the flares; the events of the session
 ## carry the look and the flight time, and a hit waits for its bolt in `_later`), the HUD has party cards and a weapon bar (board_cards.gd), the crew picker is
@@ -35,6 +35,7 @@ const Bolts = preload("res://scripts/board/bolts.gd")
 const Kit = preload("res://scripts/board/kit.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Air = preload("res://scripts/board/air.gd")
+const StationBackdrop = preload("res://scripts/board/station_backdrop.gd")
 
 ## Emitted when the soldier is back on the ship: Boarding.leave()'s result {cleared, said, name, kind, poi}.
 signal finished(result: Dictionary)
@@ -117,6 +118,8 @@ var _shake_rng := RandomNumberGenerator.new()
 var _cam_lights := {}  # room id -> the PointLight2D of the Spotter Cam's feed
 var _cam_energy := {}  # room id -> the energy it shows now (it fades in and out)
 var _down_t := 0.0
+var _go_t := -1.0  # seconds the Leave button's fade has run (-1: not leaving)
+var _ask_leave := false  # "Leave <name> behind?" stands: Enter confirms, Esc cancels
 var _leave_t := 0.0  # seconds a "leave them behind?" question stands
 var _skitter := 0.0
 var _fight_t := 0.0  # seconds the combat music runs on after the last foe on the hunt
@@ -127,6 +130,8 @@ var _flicker := 0.0  # seconds of flickering lights left (the Hollow arrives)
 var _self_light: PointLight2D
 var _red: Array = []  # [[light, base energy, phase]]
 var _door_occ := {}  # door id -> LightOccluder2D
+var _room_lights: Array = []  # [[light, base energy, mode, phase]]: the lit rooms of a station with power (site.room_light), the light through its windows, its working beds
+var _sky: CanvasLayer  # the backdrop the windows show (station_backdrop.gd), under the site and out of its dark
 var _layer: CanvasLayer
 var _saved_cam := {}
 var _clock := 0.0
@@ -188,6 +193,8 @@ func enter(p_session) -> String:
 	_down_t = 0.0
 	_flicker = 0.0
 	_leave_t = 0.0
+	_go_t = -1.0
+	_ask_leave = false
 	_fight_t = 0.0
 	_mood = "explore"
 	_anim = {}
@@ -207,7 +214,7 @@ func enter(p_session) -> String:
 	Audio.mood(self, "explore")
 	Audio.muffle_music(self, true)
 	Audio.fx(self, "arrive", null, -6.0)
-	say("Airlock sealed. %s." % session.site.site_name)
+	say("Airlock sealed. %s.%s" % [session.site.site_name, (" " + session.site.arrival) if session.site.arrival != "" else ""])  # (a module station says what state it is in)
 	pick = []
 	picking = ask_party and _loadout_wanted()
 	if picking:
@@ -237,6 +244,31 @@ func leave() -> void:
 	finished.emit(result)
 
 
+## The Leave button (L): the party goes home after a short fade, as if they had walked out. Not while a foe hunts them; a crewman who is down is lost, so that
+## asks first (`_ask_leave`; Enter confirms, Esc cancels). Returns "" when it began (or asked), else why not.
+func quick_leave() -> String:
+	if not active or picking or _go_t >= 0.0 or session.downed:
+		return "busy"
+	if not session.can_quick_leave():
+		var why := str(Arms.cfg()["leave_hunted"])
+		say(why + ".")
+		Audio.fx(self, "error")
+		return why
+	var down: Array = session.downed_party()
+	if not down.is_empty() and not _ask_leave:
+		_ask_leave = true
+		return ""
+	_ask_leave = false
+	_go_t = 0.0
+	return ""
+
+
+## The question's text: who is left behind and what goes with them.
+func leave_question() -> String:
+	var down: Array = session.downed_party()
+	return "Leave %s behind? (lost for good%s)     Enter: leave     Esc: stay" % [", ".join(down), lost_note(down)]
+
+
 ## The ship's views make way (or come back). BuildMode.combat does most of it: no input, no drawing, no HUD; the ship's sim is held and
 ## the sector, its debris and the sky stand still.
 func _put_away(away: bool) -> void:
@@ -249,8 +281,8 @@ func _put_away(away: bool) -> void:
 	if crew != null:
 		crew.visible = not away
 		crew.set_process(not away)
-	if starfield != null:
-		starfield.visible = not away
+	if starfield != null:  # (a station with windows keeps the sector's sky up: it shows through them)
+		starfield.visible = not away or (session != null and not session.site.backdrop.is_empty())
 	if sector != null:
 		sector.set("boarding", away)
 
@@ -283,9 +315,19 @@ func _build_nodes() -> void:
 	_red.clear()
 	for l in site.lights:
 		var red: bool = l["color"] == "red"
+		if red and site.gen == "modules":
+			continue  # (a module station's red rooms are in its light map: _station_lights)
 		var node := _light(BoardLight.round_texture(), RED_RANGE if red else GREEN_RANGE, Color(1.0, 0.14, 0.08) if red else Color(0.2, 1.0, 0.45), 0.5 if red else 0.6, red, 64.0)
 		node.position = l["pos"] * CELL
 		_red.append([node, node.energy, float(hash(l["pos"]) % 628) / 100.0, red])
+	_station_lights(site)
+	if not site.backdrop.is_empty():
+		_sky = CanvasLayer.new()
+		_sky.layer = -1
+		var sky := StationBackdrop.new()
+		_sky.add_child(sky)
+		add_child(_sky)
+		sky.setup(site.backdrop)
 	_layer = CanvasLayer.new()
 	_layer.layer = 3
 	fx = BoardFx.new()
@@ -322,7 +364,7 @@ func _occluder(r: Rect2) -> LightOccluder2D:
 
 
 func _free_nodes() -> void:
-	for n in [ship_view, _over, _lights, _mod, _layer]:
+	for n in [ship_view, _over, _lights, _mod, _layer, _sky]:
 		if n != null:
 			if n.is_inside_tree():
 				n.queue_free()
@@ -333,6 +375,8 @@ func _free_nodes() -> void:
 	_lights = null
 	_mod = null
 	_layer = null
+	_sky = null
+	_room_lights.clear()
 	hud = null
 	fx = null
 	_cam_lights.clear()
@@ -472,6 +516,14 @@ func _update_lights(dt: float) -> void:
 		var flicker: float = 1.0 + 0.12 * sin(_clock * 2.3 + float(e[2])) + (0.0 if not e[3] else 0.06 * sin(_clock * 11.0 + float(e[2]) * 3.0))
 		e[0].energy = float(e[1]) * flicker * fk
 		e[0].visible = not lights_up
+	for e in _room_lights:
+		var k := 1.0
+		if e[2] == "flicker":  # failing tubes: mostly on, dropping out in short bursts
+			k = 0.12 if sin(_clock * 7.1) * sin(_clock * 2.9 + 1.7) > 0.55 else (0.85 + 0.15 * sin(_clock * 31.0))
+		elif e[2] == "red":
+			k = 1.0 + 0.12 * sin(_clock * 2.3) + 0.06 * sin(_clock * 11.0)
+		e[0].energy = float(e[1]) * k * fk
+		e[0].visible = not lights_up
 
 
 ## The Spotter Cam's feed (mods.gd): a flat light over each room it shows, a cool grey-green, that fades in and out as the soldier moves. A feed is not a lamp:
@@ -525,6 +577,83 @@ func _feed_light(rid: int) -> PointLight2D:
 	return l
 
 
+## A module station's own light, baked into three lights as wide as the station (the renderer lights a canvas item with only a few lights, and the
+## whole site is one item): the steady one (every lit room, the light that falls in through each window run, a faint glow on each working bed), the
+## flickering rooms', and the red emergency rooms'. Space is bright, so a window is a calm spot in the dark.
+func _station_lights(site) -> void:
+	_room_lights.clear()
+	for mode in ["lit", "flicker", "red"]:
+		var l := _light_map(site, mode)
+		if l != null:
+			_room_lights.append([l, l.energy, mode, 0.0])
+
+
+## The light map of `mode` (lit: with the windows and the beds; flicker; red): 4 px to a cell, each room's floor and walls soft at the rim, a window's
+## light brightest at the glass and gone 6 cells in. null when nothing is lit that way.
+func _light_map(site, mode: String) -> PointLight2D:
+	const PX := 4
+	var size: Vector2i = site.grid.size * PX
+	var img := Image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
+	img.fill(Color.BLACK)
+	var any := false
+	var tone: Color = {"lit": Color(1.0, 0.93, 0.8), "flicker": Color(1.0, 0.93, 0.8), "red": Color(1.0, 0.16, 0.1)}[mode]
+	for rid in site.room_light:
+		if str(site.room_light[rid]) != mode:
+			continue
+		any = true
+		var r: Rect2i = site.rooms[rid]["rect"].grow(1)
+		var x0 := r.position.x * PX
+		var y0 := r.position.y * PX
+		var w := r.size.x * PX
+		var h := r.size.y * PX
+		for y in h:
+			for x in w:
+				var k := clampf(minf(minf(x + 0.5, w - x - 0.5), minf(y + 0.5, h - y - 0.5)) / 5.0, 0.0, 1.0)
+				_add_px(img, Vector2i(x0 + x, y0 + y), tone * k)
+	if mode == "lit":
+		for run in site.windows:
+			any = true
+			var n: Vector2i = run["normal"]
+			var along := Vector2i(absi(n.y), absi(n.x))
+			for c in run["cells"]:
+				for depth in 7:
+					var cell: Vector2i = c - n * depth
+					var fall := pow(1.0 - float(depth) / 7.0, 1.4)
+					for py in PX:
+						for px in PX:
+							var at := cell * PX + Vector2i(px, py)
+							_add_px(img, at, Color(0.55, 0.72, 1.0) * fall * 0.95)
+							if depth > 0:  # (it spreads a little past the ends of the run)
+								_add_px(img, at + along * PX, Color(0.55, 0.72, 1.0) * fall * 0.4)
+								_add_px(img, at - along * PX, Color(0.55, 0.72, 1.0) * fall * 0.4)
+		for bd in site.beds:
+			if bool(bd["works"]):
+				any = true
+				var mid: Vector2 = site.bed_centre(bd) * PX
+				for y in range(int(mid.y) - 8, int(mid.y) + 9):
+					for x in range(int(mid.x) - 8, int(mid.x) + 9):
+						var k := clampf(1.0 - Vector2(x, y).distance_to(mid) / 8.0, 0.0, 1.0)
+						_add_px(img, Vector2i(x, y), Color(0.3, 1.0, 0.55) * k * 0.5)
+	if not any:
+		return null
+	var l := PointLight2D.new()
+	l.texture = ImageTexture.create_from_image(img)
+	l.texture_scale = CELL / float(PX)
+	l.energy = {"lit": 1.0, "flicker": 1.0, "red": 0.6}[mode]
+	l.shadow_enabled = false
+	l.position = Vector2(site.grid.size) * CELL / 2.0
+	_lights.add_child(l)
+	return l
+
+
+## Add light `c` to pixel `at` of a light map (the brighter of the two, channel by channel).
+static func _add_px(img: Image, at: Vector2i, c: Color) -> void:
+	if at.x < 0 or at.y < 0 or at.x >= img.get_width() or at.y >= img.get_height():
+		return
+	var o := img.get_pixelv(at)
+	img.set_pixelv(at, Color(maxf(o.r, c.r), maxf(o.g, c.g), maxf(o.b, c.b)))
+
+
 # --- fighting -------------------------------------------------------------------------------------------------------
 
 func _fire_down() -> bool:
@@ -543,6 +672,13 @@ func _combat(dt: float) -> void:
 	if want != _mood:
 		_mood = want
 		Audio.mood(self, want)
+	if _go_t >= 0.0:
+		_go_t += dt
+		if s.downed:
+			_go_t = -1.0
+		elif _go_t >= float(Arms.cfg()["leave_fade_s"]):
+			leave()
+			return
 	if s.downed:
 		_down_t += dt
 		if _down_t >= DOWN_S:
@@ -914,6 +1050,20 @@ func find_target() -> Dictionary:
 		if d2 < best_d:
 			best = {"type": "door", "id": did, "dist": d2}
 			best_d = d2
+	var bed_reach := float(Site.config()["beds"]["reach"])
+	var bid: int = s.beds.near(p, bed_reach)
+	if bid >= 0:  # a bed (beds.gd): the soldier heals on it; by a hurt follower, E lays them on it
+		var d5: float = s.site.bed_centre(s.site.beds[bid]).distance_to(p)
+		if d5 < best_d:
+			best = {"type": "bed", "id": bid, "dist": d5}
+			best_d = d5
+	for i in s.party.size():
+		var q = s.party[i]
+		if q["m"].is_down() or int(q.get("bed", -1)) >= 0 or q["m"].hp >= q["m"].max_hp or q["m"].pos.distance_to(p) > float(Arms.cfg()["revive_reach"]):
+			continue
+		if s.beds.bed_for(i, bed_reach + 1.5) >= 0 and str(best.get("type", "")) in ["", "bed", "container", "door", "airlock"]:
+			best = {"type": "bedside", "id": i, "dist": q["m"].pos.distance_to(p)}
+			break
 	return best
 
 
@@ -925,7 +1075,7 @@ func _hold_need(t: Dictionary) -> float:
 			return float(Site.config()["props"][session.site.props[t["id"]]["prop"]]["hold"])
 		"door":
 			return session.hack_time() if session.site.doors[t["id"]]["lock"] == "hack" else 0.0
-		"revive":
+		"revive", "bedside":
 			return session.revive_time()
 		"sentry":
 			return float(Arms.cfg()["hack_sentry_s"])
@@ -965,6 +1115,10 @@ func _interact(dt: float) -> void:
 		if _hold_gap > HOLD_RESET:
 			hold = 0.0
 	Audio.fx_loop(self, "hack", "repair_loop", hacking and hold > 0.0, 0.8)
+	if down and str(t.get("type", "")) == "bed" and panel < 0 and shop < 0:  # holding E by a bed heals while it is held
+		var why: String = s.beds.heal(int(t["id"]), dt)
+		if why != "" and (pressed or why != message):
+			say(why)
 	if pressed:
 		press_e()
 
@@ -990,7 +1144,7 @@ func press_e() -> void:
 				Audio.fx(self, "error")
 				return
 			leave()
-		"revive", "sentry":
+		"revive", "sentry", "bedside":
 			say("Hold E.")
 		"container":
 			if s.opened.has(target["id"]) and s.left.has(target["id"]):
@@ -1036,6 +1190,12 @@ func _finish_hold(t: Dictionary) -> void:
 		Audio.fx(self, "collect")
 	elif str(t.get("type", "")) == "sentry":
 		s.foes.hack(s.foes.find(t["id"]))
+	elif str(t.get("type", "")) == "bedside":
+		var bed: int = s.beds.bed_for(int(t["id"]), float(Site.config()["beds"]["reach"]) + 1.5)
+		var why: String = s.beds.lay(int(t["id"]), bed) if bed >= 0 else str(Site.config()["beds"]["busy"])
+		if why != "":
+			say(why)
+			Audio.fx(self, "error")
 
 
 ## Begin a talk: `ctx` is session.talk() or session.discover(). An event goes to the map's event panel (the world stands still until talk_done()); goods go on
@@ -1164,7 +1324,12 @@ func _unhandled_input(e: InputEvent) -> void:
 				_zoom(1.0 / 1.1)
 			MOUSE_BUTTON_LEFT:
 				_fire_wait = picking or panel >= 0 or shop >= 0
-				if hud != null and shop >= 0:
+				if hud != null and not picking and hud.leave_rect().has_point(e.position):
+					_fire_wait = true
+					quick_leave()
+				elif _ask_leave:
+					_fire_wait = true
+				elif hud != null and shop >= 0:
 					buy_row(hud.shop_row_at(e.position))
 				elif hud != null and picking:
 					_loadout_click(hud.loadout_at(e.position))
@@ -1180,6 +1345,12 @@ func _unhandled_input(e: InputEvent) -> void:
 			elif e.keycode == KEY_L:
 				say("Can't load aboard another vessel.")
 				Audio.fx(self, "error")
+		elif _ask_leave:
+			if e.keycode == KEY_ENTER or e.keycode == KEY_KP_ENTER:
+				quick_leave()
+			elif e.keycode == KEY_ESCAPE:
+				_ask_leave = false
+				say("You stay.")
 		elif picking:
 			if not load_slot.is_empty() and e.keycode >= KEY_1 and e.keycode <= KEY_9:
 				loadout_choose(e.keycode - KEY_1)
@@ -1196,6 +1367,8 @@ func _unhandled_input(e: InputEvent) -> void:
 					load_slot = {}
 				else:
 					go_alone()
+		elif e.keycode == KEY_L:
+			quick_leave()
 		elif e.keycode == KEY_R:
 			session.reload()
 		elif e.keycode == KEY_Q:
@@ -1294,6 +1467,7 @@ func _draw_over() -> void:
 			else:
 				_over.draw_rect(Rect2(Vector2(rect.position) * CELL, Vector2(rect.size) * CELL), thin)
 	_draw_air_labels(site)
+	_draw_windows(site)
 	_draw_hatch(site)
 	for d in site.doors:
 		if d["lock"] != "" and d["lock"] != "gone" and not session.unlocked.has(d["id"]):
@@ -1305,6 +1479,7 @@ func _draw_over() -> void:
 	if str(target.get("type", "")) == "container":
 		var tp: Dictionary = site.props[target["id"]]
 		_over.draw_rect(Rect2(Vector2(tp["cell"]) * CELL, Vector2(tp["size"]) * CELL).grow(2.0), Color(1, 1, 1, 0.55), false, 2.0)
+	_draw_beds(site)
 	_draw_marks(site)
 	_draw_feed_lines()
 	_draw_scorch()
@@ -1313,6 +1488,72 @@ func _draw_over() -> void:
 	_draw_party()
 	_draw_soldier()
 	_draw_active_fx()
+
+
+## The glass of the windows: a faint pane with its frame and a glint, over the space that shows through (station_backdrop.gd and the sky).
+func _draw_windows(site) -> void:
+	for run in site.windows:
+		var n: Vector2i = run["normal"]
+		for c in run["cells"]:
+			var r := Rect2(Vector2(c) * CELL, Vector2(CELL, CELL))
+			_over.draw_rect(r, Color(0.55, 0.8, 1.0, 0.1))
+			var inner := r.position + (Vector2(CELL, CELL) / 2.0) - Vector2(n) * CELL * 0.5
+			var along := Vector2(absf(n.y), absf(n.x))
+			_over.draw_line(inner, inner + along * CELL * 0.5, Color(0.75, 0.88, 1.0, 0.7), 2.0)  # (the inner frame)
+			_over.draw_line(inner, inner - along * CELL * 0.5, Color(0.75, 0.88, 1.0, 0.7), 2.0)
+			_over.draw_line(r.get_center() - along * CELL * 0.5, r.get_center() - along * CELL * 0.45 + Vector2(n) * CELL * 0.1, Color(0.6, 0.75, 0.9, 0.6), 2.0)  # (a mullion)
+		var a: Vector2 = Vector2(run["cells"][0]) * CELL
+		_over.draw_line(a + Vector2(6, 6), a + Vector2(14, 14) + Vector2(absf(n.y), absf(n.x)) * 6.0, Color(1, 1, 1, 0.22), 2.0)  # (a glint)
+
+
+## The beds: a frame, a mattress and a head panel. A working one is clean and its panel glows; a broken one is dim, its panel cracked, and it sparks.
+## The bed the soldier heals on pulses; a follower lies on theirs (drawn with the party).
+func _draw_beds(site) -> void:
+	for b in site.beds:
+		var cells: Array = site.bed_cells(b)
+		var lo: Vector2i = cells[0]
+		var hi: Vector2i = cells[0]
+		for c in cells:
+			lo = lo.min(c)
+			hi = hi.max(c)
+		var r := Rect2(Vector2(lo) * CELL, Vector2(hi - lo + Vector2i.ONE) * CELL).grow(-3.0)
+		var works := bool(b["works"])
+		var long_x := r.size.x >= r.size.y
+		var head := Rect2(r.position, Vector2(7.0, r.size.y)) if long_x else Rect2(r.position, Vector2(r.size.x, 7.0))
+		if not b.get("part", false):
+			_over.draw_rect(r, Color("#3a424e") if works else Color("#2a2e34"))
+			_over.draw_rect(r.grow(-3.0), Color("#c8d4dc") if works else Color("#6a6e70"))
+			var pillow := Rect2(r.position + (Vector2(9, 5) if long_x else Vector2(5, 9)), Vector2(10, r.size.y - 10) if long_x else Vector2(r.size.x - 10, 10))
+			_over.draw_rect(pillow, Color("#e8eef2") if works else Color("#80827e"))
+			_over.draw_rect(r, Color("#1a1e24"), false, 2.0)
+			_over.draw_rect(head, Color("#20262e"))
+		var panel := head.grow(-1.5)
+		if works:
+			var pulse := 0.7 + 0.3 * sin(_clock * 2.0 + float(b["id"]))
+			_over.draw_rect(panel, Color(0.3, 1.0, 0.55, 0.85 * pulse))
+			if session.beds != null and session.beds.healing == b["id"]:
+				var c := r.get_center()
+				_over.draw_arc(c, r.size.length() * 0.45 + 3.0 * sin(_clock * 6.0), 0.0, TAU, 32, Color(0.35, 1.0, 0.55, 0.55), 2.5, true)
+		else:
+			_over.draw_rect(panel, Color(0.12, 0.13, 0.14))
+			var p0 := panel.position
+			_over.draw_polyline(PackedVector2Array([p0 + Vector2(1, 2), p0 + panel.size * Vector2(0.7, 0.35), p0 + panel.size * Vector2(0.3, 0.6), p0 + panel.size - Vector2(1, 2)]), Color(0.55, 0.58, 0.6), 1.0)
+			var h := hash(b["id"] * 7919 + int(_clock * 9.0))
+			if h % 5 == 0:  # a spark now and then off the dead panel
+				var at := panel.get_center()
+				for k in 3:
+					var ang := float((h >> (k * 4)) % 628) / 100.0
+					_over.draw_line(at, at + Vector2.from_angle(ang) * (4.0 + float((h >> (k * 3)) % 6)), Color(1.0, 0.8, 0.35, 0.9), 1.5)
+	var hb: int = session.beds.healing if session.beds != null else -1
+	if hb >= 0:  # the soldier heals: a soft green ring and a few crosses rising off him
+		var c: Vector2 = session.soldier.pos * CELL
+		_over.draw_arc(c, 19.0, 0.0, TAU, 28, Color(0.35, 1.0, 0.55, 0.6), 2.5, true)
+		for k in 3:
+			var t := fmod(_clock * 0.8 + float(k) / 3.0, 1.0)
+			var at := c + Vector2(-10.0 + 10.0 * float(k), -14.0 - 22.0 * t)
+			var col := Color(0.45, 1.0, 0.6, 1.0 - t)
+			_over.draw_line(at - Vector2(4, 0), at + Vector2(4, 0), col, 2.0)
+			_over.draw_line(at - Vector2(0, 4), at + Vector2(0, 4), col, 2.0)
 
 
 ## The gear actives and a deflect for a moment: a Dash leaves a streak along its way, a Brace a ring round the soldier while it lasts, a Patch a ring that spreads to its reach.
@@ -1637,5 +1878,5 @@ func _draw_party() -> void:
 		var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
 		var look: Dictionary = m.look if not m.look.is_empty() else ShipView.LOOKS.get(m.name, ShipView.OTHER_LOOK)
 		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-			"item": str(p["gun"]["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head, "body": PersonDrawer.gear_of(m)}
+			"item": str(p["gun"]["w"]["art"]), "down": m.is_down() or int(p.get("bed", -1)) >= 0, "work": false, "t": _clock, "head": m.head, "body": PersonDrawer.gear_of(m)}
 		PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
