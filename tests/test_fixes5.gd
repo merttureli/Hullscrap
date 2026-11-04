@@ -181,7 +181,9 @@ func test_beaten_foes_leave_their_weapon_sometimes() -> void:
 			if f["kind"] in ["scavenger", "pirate"]:
 				foes += 1
 				s.foes.hurt(f, 9999.0, f["m"].pos)
-		dropped += ship.inventory.count("flare_gun") + ship.inventory.count("doorbuster")
+				s.open(f["corpse"])  # the weapon is on the body now (loot.gd foe_loot)
+				var items: Dictionary = s.left[f["corpse"]]["items"]
+				dropped += int(items.get("flare_gun", 0)) + int(items.get("doorbuster", 0))
 	check(foes > 10, "foes to beat (%d)" % foes)
 	check(dropped > 0 and dropped < foes, "some leave a weapon, not all (%d of %d)" % [dropped, foes])
 

@@ -53,6 +53,9 @@ var room_of := {}  ## cell -> room id
 var door_of := {}  ## cell -> door id
 var prop_of := {}  ## cell -> prop id (every cell a prop covers)
 var bounds := Rect2i()  ## the cells of the hull (the grid minus its margin)
+var ship = null  ## the beaten ship a wreck is made from (wreck_site.gd): drawn as it is (parts, holes, damage); null on a generated site
+var fight := ""  ## the end of the fight that left a beaten ship: "won" or "captured"
+var foe_crew: Array = []  ## a beaten ship's crew still on their feet after a win: [{name, species, pos, hp (share), sealed}] (foes.gd spawn_site)
 var _skin := {}  # cell -> true: flat hull cells on the outside (where a hatch can go)
 var _rng := RandomNumberGenerator.new()
 
@@ -129,6 +132,9 @@ func _clear() -> void:
 ## Cells a prop covers.
 func cells_of(p: Dictionary) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
+	if p.has("cells"):  # a part of a beaten ship is not a rectangle
+		out.assign(p["cells"])
+		return out
 	for y in p["size"].y:
 		for x in p["size"].x:
 			out.append(p["cell"] + Vector2i(x, y))
@@ -137,6 +143,8 @@ func cells_of(p: Dictionary) -> Array[Vector2i]:
 
 ## The middle of a prop, in cells.
 func centre_of(p: Dictionary) -> Vector2:
+	if p.has("centre"):  # (a body lies where the foe fell, not on the grid)
+		return p["centre"]
 	return Vector2(p["cell"]) + Vector2(p["size"]) / 2.0
 
 
@@ -149,7 +157,7 @@ func door_centre(d: Dictionary) -> Vector2:
 func containers() -> Array:
 	var out := []
 	for p in props:
-		if p["loot"]:
+		if p["loot"] and not p.has("foe"):  # (the body of a beaten foe is loot, but no part of what clears a site)
 			out.append(p["id"])
 	return out
 
@@ -231,9 +239,61 @@ func free_anchors(id: int) -> Array[Vector2i]:
 	var r: Rect2i = rooms[id]["rect"]
 	for y in range(r.position.y, r.end.y - 1):
 		for x in range(r.position.x, r.end.x - 1):
-			if Pathfinder.body_ok(walk, Vector2i(x, y)):
+			if Pathfinder.body_ok(walk, Vector2i(x, y)) and (not rooms[id].has("cells") or _body_in(id, Vector2i(x, y))):
 				out.append(Vector2i(x, y))
 	return out
+
+
+## Does the 2x2 body on `anchor` stand wholly in room `id` (a room of a beaten ship is not a rectangle)?
+func _body_in(id: int, anchor: Vector2i) -> bool:
+	for c in Pathfinder.body_cells(anchor):
+		if int(room_of.get(c, -1)) != id:
+			return false
+	return true
+
+
+# --- the air ------------------------------------------------------------------------------------------------------
+
+## The middle of room `id`'s bounding box, in cells.
+func centre_of_room(id: int) -> Vector2:
+	var r: Rect2i = rooms[id]["rect"]
+	return Vector2(r.position) + Vector2(r.size) / 2.0
+
+
+## The pressure of room `id` (0 to 1): the room's own (a beaten ship's rooms keep what the fight left), else the kind's `air`, else 1.
+func air_of(id: int) -> float:
+	if id < 0 or id >= rooms.size():
+		return 1.0
+	return float(rooms[id].get("air", config()["kinds"].get(kind, {}).get("air", 1.0)))
+
+
+## The pressure at point `p` (cells); 1 where there is no room (a doorway, a hole).
+func air_at(p: Vector2) -> float:
+	return air_of(room_at(p))
+
+
+## The body a foe of `kind_name` leaves at `pos` (cells): a container on the 2x2 cells it fell on, opened like a locker (loot.gd rolls its foe_loot). `foe` is its foe id,
+## `spawned` whether it stood here from the start (the memory of a visit keeps the bodies of those: they are made with the foe, ids first, and wake when it falls, so
+## their ids are the same on every visit). `active` false makes one that holds nothing yet (wake_corpse). Returns the prop's id.
+func add_corpse(kind_name: String, foe_id: int, pos: Vector2, spawned: bool, active := true) -> int:
+	var id := props.size()
+	props.append({"id": id, "prop": "corpse", "cell": Pathfinder.anchor_of(pos), "size": Vector2i(2, 2), "room": room_at(pos), "blocks": false, "loot": active, "rolls": [0, 0],
+		"table": "", "slot": "", "key": "", "fixed": {}, "foe": kind_name, "fid": foe_id, "spawned": spawned, "centre": pos})
+	return id
+
+
+## The foe of body `id` fell at `pos`: the body can be searched now.
+func wake_corpse(id: int, pos: Vector2) -> void:
+	var p: Dictionary = props[id]
+	p["loot"] = true
+	p["centre"] = pos
+	p["cell"] = Pathfinder.anchor_of(pos)
+	p["room"] = room_at(pos)
+
+
+## Does the memory of a visit keep container `id`? Not the body of a foe that came later (an ambush, the Hollow's).
+func remembered(id: int) -> bool:
+	return id < 0 or id >= props.size() or not props[id].has("foe") or bool(props[id]["spawned"])
 
 
 ## Does a shot or a look stop in cell `c`: outside the hull, a wall, or a door that is shut?
@@ -325,6 +385,8 @@ func problems() -> Array:
 			if not held:
 				out.append("the %s keycard cannot be reached without itself" % d["card"])
 	for p in props:
+		if p.has("foe"):
+			continue
 		for c in cells_of(p):
 			if prop_of.get(c, -1) != p["id"] or not room_of.has(c):
 				out.append("prop %d stands outside its room or on another prop" % p["id"])

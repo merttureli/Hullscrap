@@ -142,7 +142,7 @@ func choose(i: int) -> String:
 		return "no such choice"
 	var v: Dictionary = view[i]
 	if v["grey"]:
-		message = "You need " + v["need"]
+		message = str(v["locked"]) if str(v.get("locked", "")) != "" else "You need " + v["need"]
 		Audio.fx(self, "error")
 		return message
 	Audio.fx(self, "confirm")
@@ -305,7 +305,7 @@ func layout() -> Dictionary:
 
 
 func _row_label(v: Dictionary) -> String:
-	return "%s%s" % [v["text"], ("   (needs %s)" % v["need"]) if v["grey"] else ""]
+	return "%s%s" % [v["text"], (("   (%s)" if str(v.get("locked", "")) != "" else "   (needs %s)") % v["need"]) if v["grey"] else ""]
 
 
 # --- threat tags ----------------------------------------------------------------------------------------------------
