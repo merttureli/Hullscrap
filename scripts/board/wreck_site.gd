@@ -78,6 +78,7 @@ static func make(p_seed: int, ship_dict: Dictionary, opts := {}):
 	_lights(s, cfg, rng)
 	s.ok = true
 	s._place_marks()
+	s.beds_of_parts()
 	return s
 
 

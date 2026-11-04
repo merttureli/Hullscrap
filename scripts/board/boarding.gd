@@ -26,6 +26,7 @@ const Air = preload("res://scripts/board/air.gd")
 const WreckSite = preload("res://scripts/board/wreck_site.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const GearActive = preload("res://scripts/board/gear_active.gd")
+const Beds = preload("res://scripts/board/beds.gd")
 
 const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
 
@@ -57,6 +58,7 @@ var hollow := false  ## the Hollow took the place while he was aboard (note_holl
 var downed := false  ## the soldier went down: the view fades out and calls leave()
 var party: Array = []  ## the crew who came along (party.gd), and a person who follows for now (`temp`)
 var people  ## people.gd: everyone aboard who is not hostile (survivors, traders, a captive ...)
+var beds  ## beds.gd: who lies on which bed
 var seen_marks := {}  ## mark id -> true: the discoveries (site.marks) that have been shown
 var flares: Array = []  ## B4: the flares of a flare gun that burn on the site: [{id, pos, wait (seconds until it lands), t (seconds left burning)}]
 var cur_room := -1  ## the room the soldier stands in (the last one, in a doorway)
@@ -94,6 +96,9 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 			theme = Themes.for_region(p_campaign.region_data, hollow_now)
 	var seed_value: int = Site._mix(p_sector.seed_value if p_sector != null else 0, p_poi_id, 0)
 	var opts := {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", []), "theme": theme, "region": str(p_campaign.region_data.get("id", "")) if p_campaign != null else ""}
+	if not mem.is_empty():  # (a station first seen before module stations stays as it was: classic)
+		opts["gen"] = str(mem.get("gen", "classic"))
+		opts["state"] = str(mem.get("state", ""))
 	var kept: Dictionary = p_sector.wreck_ships.get(p_poi_id, {}) if p_sector != null and str(b.spec["kind"]) == "wreck" else {}
 	if not kept.is_empty():  # the wreck of a ship she beat is that ship (wreck_site.gd); one with none stored is a generated site
 		opts["fight"] = str(kept.get("fight", "won"))
@@ -123,6 +128,7 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 	b.cleared = b.opened_count() >= b.total()  # (after the foes: the bodies of the beaten are containers too, but no part of what clears a site)
 	b.people = People.new(b)
 	b.people.spawn_site({"hollow": b.hollow_place, "mem": mem.get("people", {})})
+	b.beds = Beds.new(b)
 	for id in mem.get("marks", []) if mem.get("marks") is Array else []:
 		b.seen_marks[int(id)] = true
 	return b
@@ -534,6 +540,7 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	Air.tick(self, dt)
 	_air_look(dt)
 	people.tick(dt)
+	beds.tick(dt)
 	Party.tick(self, dt)
 	_tick_flares(dt)
 	_look_around()
@@ -750,7 +757,7 @@ func memory() -> Dictionary:
 	u.sort()
 	k.sort()
 	return {"kind": site.kind, "name": site.site_name, "parts": site.parts.duplicate(), "opened": o, "unlocked": u, "keys": k, "left": held, "cleared": cleared,
-		"crew": int(spec.get("crew", 0)), "foes": foes.memory(), "theme": site.theme, "people": people.memory(), "marks": seen_marks.keys()}
+		"crew": int(spec.get("crew", 0)), "foes": foes.memory(), "theme": site.theme, "people": people.memory(), "marks": seen_marks.keys(), "gen": site.gen, "state": site.state}
 
 
 # --- people and discoveries -------------------------------------------------------------------------------------
