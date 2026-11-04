@@ -466,8 +466,8 @@ static func _tint(sheet, key: String) -> Color:
 
 ## Draw a skin plan (skin_plan) of a grid whose cell (0, 0) starts at `origin` px, `cell_px` per cell:
 ## the skin over every planned cell, then the decals over them (`t`: seconds, for the lamps). Neon
-## skin adds its edge glow. `paint` ({tint, lamp}: Unlocks.skin_paint, the player's hull skin) multiplies the line's tint by
-## `tint` and replaces the lamp colour with `lamp`. False when there is no skin art.
+## skin adds its edge glow. `paint` ({tint, lamp, patch}: Unlocks.skin_paint, the player's hull skin, or an enemy's livery) multiplies the line's tint by
+## `tint` (and per 2x2 plate by one of `patch`, an Array of colours) and replaces the lamp colour with `lamp`. False when there is no skin art.
 static func draw_skin(canvas, plan: Dictionary, origin: Vector2, cell_px: float, t: float, glow_out = null, paint := {}) -> bool:
 	var plain = Art.tiles("hull_skin")
 	var shaped = Art.tiles("hull_skin_shapes")
@@ -477,13 +477,15 @@ static func draw_skin(canvas, plan: Dictionary, origin: Vector2, cell_px: float,
 	var tint: Color = skin_tint(plain, line) * paint.get("tint", Color.WHITE)
 	var edge = skin_glow(plain, line)
 	var lamp: Color = paint.get("lamp", _tint(plain, "lamp_glow"))
+	var patch: Array = paint.get("patch", [])
 	for e in plan["cells"]:
 		var s = shaped if e["row"] >= 0 else plain
 		if s == null:
 			continue
 		var rect := Rect2(origin + Vector2(e["c"]) * cell_px, Vector2(cell_px, cell_px))
 		var frame: int = (e["row"] if e["row"] >= 0 else e["variant"]) * MASK_FRAMES + e["mask"]
-		canvas.draw_texture_rect_region(s.texture, rect, s.region(frame), tint)
+		var plate: Color = tint * patch[posmod(hash(Vector2i(e["c"].x / 2, e["c"].y / 2)), patch.size())] if not patch.is_empty() else tint  # a mismatched hull: a tint per 2x2 plate
+		canvas.draw_texture_rect_region(s.texture, rect, s.region(frame), plate)
 		var g = s.glow
 		if g != null and edge != null:
 			var k := rect.size / Vector2(s.frame)

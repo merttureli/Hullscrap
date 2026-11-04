@@ -239,7 +239,7 @@ func test_the_tables_name_real_things() -> void:
 		fac_ids.append(f["id"])
 	for fid in t["factions"]:
 		var f: Dictionary = t["factions"][fid]
-		check(fac_ids.has(fid), fid + " is a faction of factions.json")
+		check(fac_ids.has(fid) or f.has("race"), fid + " is a faction of factions.json (or a race style)")
 		for sp in f["crew"]["species"]:
 			check(Content.has("species", str(sp)), "%s: the crew species %s exists" % [fid, sp])
 		for tile in f["armour"]["tiles"]:

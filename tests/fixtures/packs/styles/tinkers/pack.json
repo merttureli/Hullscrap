@@ -1,0 +1,1 @@
+{"id": "tinkers", "name": "Tinkers (test pack)", "version": "1.0", "requires": [], "notes": "A fixture: a pack with a ship_styles.json of its own (tests/test_enemy_identity.gd)."}

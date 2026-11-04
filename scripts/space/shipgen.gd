@@ -29,6 +29,8 @@ const Morale = preload("res://scripts/combat/morale.gd")
 
 const PREFIX := "gen:"
 const TABLES_PATH := "res://data/enemy_tables.json"
+const STYLES_PATH := "res://data/ship_styles.json"
+const RACE_SHARE := 0.6  ## the share of a home region's pirate fights that meet the region's own race (a region's `race_share` says otherwise)
 const MAX_ATTEMPTS := 10
 const MARGIN := 4  ## free cells round the hull in the grid (a mount's outside half is up to 3 deep)
 const HULL_MARGIN := 2  ## the buildable hull is everything built plus this
@@ -62,9 +64,53 @@ static func tables() -> Dictionary:
 				for id in more["factions"]:
 					if not data["factions"].has(id):
 						data["factions"][id] = more["factions"][id]
+		_add_races(data)
 		_tables = data
 		_tables_for = [Content.root, Content.packs_root]
 	return _tables
+
+
+## The race styles of data/ship_styles.json and of every pack's ship_styles.json (a race already there is kept) become factions of
+## `data`: the table of the style's `base` faction with the style laid over it (see the file's _doc). The race's own id is the faction id.
+static func _add_races(data: Dictionary) -> void:
+	var races := {}
+	var files: Array = [STYLES_PATH]
+	for p in Content.packs():
+		files.append(p["dir"] + "/ship_styles.json")
+	for path in files:
+		var more = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		if more is Dictionary and more.get("races") is Dictionary:
+			for id in more["races"]:
+				if not races.has(id):
+					races[id] = more["races"][id]
+	var names = Content.names()
+	var crews = names.get("crew", {}) if names is Dictionary else {}
+	for id in races:
+		var st: Dictionary = races[id]
+		if data["factions"].has(id) or not data["factions"].has(str(st.get("base", ""))):
+			continue
+		var f: Dictionary = data["factions"][str(st["base"])].duplicate(true)
+		f["race"] = id
+		f["lines_as"] = str(st["base"])  # the faction whose voice lines (data/morale.json) it says
+		f["name_pool"] = ""
+		f["ship_names"] = st.get("ship_names", [])
+		f["crew"] = st.get("crew", f["crew"]).duplicate(true)
+		if crews is Dictionary and crews.get(str(f["crew"]["species"][0])) is Array:
+			f["crew"]["names"] = crews[str(f["crew"]["species"][0])]
+		for k in ["ai", "weights", "hull"]:
+			if st.get(k) is Dictionary:
+				f[k].merge(st[k].duplicate(true), true)
+		if st.get("parts") is Dictionary:
+			for cat in st["parts"]:
+				if cat == "base":
+					f["parts"]["base"].merge(st["parts"]["base"], true)
+				else:
+					f["parts"][cat] = st["parts"][cat].duplicate(true)
+		if st.get("armour") is Dictionary:
+			f["armour"]["tiles"] = st["armour"]["tiles"].duplicate()
+			f["armour"]["factor"].merge(st["armour"].get("factor", {}), true)
+		f["style"] = st["style"].duplicate(true)
+		data["factions"][id] = f
 
 
 static func _comps() -> Components:
@@ -337,6 +383,9 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 	ship.set_meta("shipgen", {"faction": faction, "size": size, "budget": budget, "spent": lo["spent"], "ram": ram, "level": level,
 		"weapons": parts["weapon"], "engines": parts["engine"], "shields": parts["shield"], "reactors": parts["reactor"],
 		"armour": lo["armour"], "crew": lo["crew"], "skill": lo["skill"]})
+	var look := style_of(faction, size)
+	if not look.is_empty():
+		ship.set_meta("style", look)
 	return {"ship": ship, "why": ""}
 
 
@@ -1235,7 +1284,7 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 		var base_name := str(names[(first + i) % names.size()])
 		var lap := i / names.size()  # more crew than names: the second lap is "Vex II"
 		ship.crew_plan.append({"name": base_name if lap == 0 else "%s %s" % [base_name, "I".repeat(lap + 1)], "species": str(crew["species"][rng.randi() % crew["species"].size()])})
-	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01), "morale": str(f["ai"].get("morale", "default")), "faction": faction}  # morale: a style of data/morale.json; faction: whose lines (morale.json) it says
+	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01), "morale": str(f["ai"].get("morale", "default")), "faction": str(f.get("lines_as", faction))}  # morale: a style of data/morale.json; faction: whose lines (morale.json) it says
 	if ram:
 		ai["style"] = "rammer"
 		ai["morale"] = "ram"
@@ -1249,6 +1298,20 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 	ship.rng_seed = rng.randi() % 100000 + 1
 	ship.mark_dirty()
 	ship.refresh()
+
+
+## The look of a faction's (or race's) ships: {id, race, label (the adjective), role (by size), line ("Kett lancer"), palette (colours as
+## Color, patch an Array of them), emblem (data)}; {} for a faction with no `style`.
+static func style_of(faction: String, size: String) -> Dictionary:
+	var st = tables()["factions"].get(faction, {}).get("style")
+	if not st is Dictionary:
+		return {}
+	var pal: Dictionary = st["palette"]
+	var role := str(st["roles"].get(size, ""))
+	return {"id": faction, "race": str(tables()["factions"][faction].get("race", "")), "label": str(st["label"]), "role": role,
+		"line": ("%s %s" % [st["label"], role]).strip_edges(), "emblem": st["emblem"],
+		"palette": {"tint": Color(str(pal["tint"])), "accent": Color(str(pal["accent"])), "mark": Color(str(pal["accent"])) if Color(str(pal["accent"])).get_luminance() > 0.3 else Color(str(pal["tint"])).lightened(0.3), "lamp": Color(str(pal["lamp"])),
+			"glow": Color(str(pal["glow"])), "patch": pal.get("patch", []).map(func(c): return Color(str(c)))}}
 
 
 static func _name_of(f: Dictionary, faction: String, rng: RandomNumberGenerator) -> String:

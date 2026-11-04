@@ -1,0 +1,131 @@
+{
+	"_doc": "Race ships (Beta 3 enemy identity, scripts/space/shipgen.gd tables()): per race (a data/species.json id) the look and the kit of the ships that race flies in its own home region (a region's `race`, `race_share`). Each style becomes a faction of the enemy tables with the id of the race: it is the faction `base`'s table (the economy: costs, weights, the AI) with this block laid over it. `crew` = the race's own crew; `parts` replaces a category of the base menu (weapons, shields, engines, reactors, systems); `armour` = {tiles, factor} replaces the layers' plating; `hull` = keys laid over the base hull grammar (data/enemy_tables.json `hull`, scrap/hullgen.gd); `weights` = laid over the base weights; `ai` = laid over the base ai. `style`: what makes it read at a glance: `label` (the adjective of the name line), `roles` (the noun by size class: \"<label> <role>\"), `palette` (tint = the hull skin's multiply tint, accent = the emblem and trim, lamp = the skin's lamps, glow = the engine flame, patch = multiply tints picked per 2x2 plate for a mismatched or patchwork hull), `emblem` (a glyph in a unit box: prims of poly / circle / line, fill true or false; a `line` is a polyline of x, y pairs). A pack may add its own races in its ship_styles.json beside species.json (same shape; a race already here is kept).",
+	"races": {
+		"kett": {
+			"ship_names": ["Ninefold Drone", "Chitter", "Brood Seven", "The Hum", "Skrit's Nest", "Cell Forty"],
+			"base": "clans",
+			"crew": {"species": ["kett"]},
+			"ai": {"rammer": 0.0, "aim_skill": [0.35, 0.7]},
+			"parts": {
+				"base": {"weapon": "kett_chitin_thrower"},
+				"weapons": [
+			{"id": "kett_chitin_thrower", "cost": 8, "weight": 4},
+					{"id": "shrapnel_cannon_scrap", "cost": 10, "weight": 3},
+					{"id": "kett_hive_swarm_launcher", "cost": 18, "weight": 3, "from": 40},
+					{"id": "kett_drone_picket", "cost": 8, "weight": 2, "from": 30}
+				],
+				"shields": [
+					{"id": "shield_scrap_mk1", "cost": 12, "weight": 2},
+					{"id": "kett_hive_battery", "cost": 30, "weight": 4, "from": 60}
+				]
+			},
+			"hull": {
+				"prow": [1, 3], "tail": [1, 3],
+				"band": {"gun": 0.45, "bridge": 0.7, "core": 1.0, "aux": 0.62, "engine": 0.6},
+				"jitter_w": [0, 2], "jitter_c": 1, "asym": true,
+				"ops": [
+					{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 0.7, "side": "random_one"},
+					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3], "side": "random_one"},
+					{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 2]},
+					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]},
+					{"op": "spikes", "count": [4, 6], "depth": 1}
+				]
+			},
+			"style": {
+				"label": "Kett", "roles": {"small": "stinger", "medium": "lancer", "large": "hive-cruiser"},
+				"palette": {"tint": "#e0a23c", "accent": "#4a2a12", "lamp": "#8fe04a", "glow": "#8fe04a", "patch": ["#ffffff", "#d8b070", "#ffe0a0"]},
+				"emblem": {"prims": [
+					{"poly": [[0.5, 0.04], [0.9, 0.27], [0.9, 0.73], [0.5, 0.96], [0.1, 0.73], [0.1, 0.27]], "fill": false},
+					{"poly": [[0.5, 0.3], [0.68, 0.4], [0.68, 0.6], [0.5, 0.7], [0.32, 0.6], [0.32, 0.4]], "fill": true}
+				]}
+			}
+		},
+		"prismatic": {
+			"ship_names": ["Resonance", "Third Harmonic", "Facet of Glass", "Prism Song", "Choir Light", "Held Note"],
+			"base": "lumen",
+			"crew": {"species": ["prismatic"]},
+			"ai": {"aim_skill": [0.55, 0.9]},
+			"parts": {
+				"base": {"weapon": "prismatic_glimmer_turret"},
+				"weapons": [
+					{"id": "prismatic_glimmer_turret", "cost": 24, "weight": 2},
+					{"id": "prismatic_refractor", "cost": 34, "weight": 1, "from": 60},
+					{"id": "prismatic_prism_lens", "cost": 34, "weight": 1, "from": 60},
+					{"id": "siren_ion_neon", "cost": 16, "weight": 4},
+					{"id": "pulse_mk1", "cost": 10, "weight": 2}
+				],
+				"shields": [
+					{"id": "shield_mk1", "cost": 14, "weight": 1},
+					{"id": "prismatic_lattice_shield", "cost": 36, "weight": 4, "from": 36}
+				]
+			},
+			"hull": {
+				"prow": [3, 5], "tail": [2, 4],
+				"band": {"gun": 0.3, "bridge": 0.6, "core": 1.0, "aux": 0.8, "engine": 0.4},
+				"jitter_w": [0, 0], "jitter_c": 0, "asym": false,
+				"spine": "neon_lattice",
+				"ops": [
+					{"op": "wedge", "at": "bow", "slope": ["steep", "45"], "chance": 1.0},
+					{"op": "wedge", "at": "stern", "slope": ["45"], "chance": 1.0},
+					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 4]},
+					{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [3, 5]},
+					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}
+				]
+			},
+			"style": {
+				"label": "Prismatic", "roles": {"small": "shard", "medium": "refractor", "large": "cathedral"},
+				"palette": {"tint": "#c9b4f4", "accent": "#7fe8ff", "lamp": "#bff4ff", "glow": "#9aeaff", "patch": ["#ffffff", "#e8f4ff"]},
+				"emblem": {"prims": [
+					{"poly": [[0.5, 0.03], [0.97, 0.5], [0.5, 0.97], [0.03, 0.5]], "fill": false},
+					{"poly": [[0.5, 0.3], [0.7, 0.5], [0.5, 0.7], [0.3, 0.5]], "fill": true}
+				]}
+			}
+		},
+		"grundl": {
+			"ship_names": ["Slow Mercy", "Long Haul", "Dunnage", "Ballast Rights", "The Heavy Dinner", "Mooring"],
+			"base": "concord",
+			"crew": {"species": ["grundl"]},
+			"ai": {"aim_skill": [0.3, 0.6]},
+			"weights": {"weapons": 5, "armour": 2, "shield": 4, "engine": 2, "crew": 2, "skill": 3, "systems": 1},
+			"armour": {"tiles": ["heavy_armor", "heavy_armor", "heavy_armor"], "factor": {"heavy_armor": 1.6}},
+			"parts": {
+				"base": {"weapon": "laser_mk1"},
+				"weapons": [
+					{"id": "laser_mk1", "cost": 10, "weight": 2},
+					{"id": "grundl_barge_flak", "cost": 12, "weight": 1},
+					{"id": "laser_turret_mk1", "cost": 12, "weight": 2, "from": 30},
+					{"id": "grundl_slug_mortar", "cost": 20, "weight": 4, "from": 40},
+					{"id": "grundl_grapple_harpoon", "cost": 12, "weight": 1, "from": 60},
+					{"id": "laser_mk2", "cost": 22, "weight": 3, "from": 80}
+				],
+				"shields": [
+					{"id": "shield_mk1", "cost": 14, "weight": 1},
+					{"id": "grundl_freight_shield", "cost": 30, "weight": 4, "from": 60}
+				],
+				"engines": [
+					{"id": "engine_mk1", "cost": 5},
+					{"id": "grundl_hauler_thrusters", "cost": 12, "from": 40},
+					{"id": "engine_mk3", "cost": 22, "from": 120}
+				]
+			},
+			"hull": {
+				"prow": [0, 0], "tail": [0, 1],
+				"band": {"gun": 0.55, "bridge": 0.8, "core": 1.0, "aux": 1.0, "engine": 1.0},
+				"jitter_w": [2, 4], "jitter_c": 0, "asym": false,
+				"ops": [
+					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 1]}
+				]
+			},
+			"style": {
+				"label": "Grundl", "roles": {"small": "tender", "medium": "hauler", "large": "barge"},
+				"palette": {"tint": "#c9923a", "accent": "#b5461f", "lamp": "#ff9a3a", "glow": "#ff9a3a", "patch": ["#ffffff", "#d8a060"]},
+				"emblem": {"prims": [
+					{"circle": [0.5, 0.18, 0.12], "fill": false},
+					{"line": [0.5, 0.3, 0.5, 0.88]},
+					{"line": [0.3, 0.45, 0.7, 0.45]},
+					{"line": [0.14, 0.62, 0.5, 0.9, 0.86, 0.62]}
+				]}
+			}
+		}
+	}
+}

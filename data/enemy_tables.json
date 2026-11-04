@@ -56,6 +56,7 @@
 					{"id": "inertial_dampener", "cost": 12, "weight": 1, "from": 60}
 				]
 			},
+			"style": {"label": "Rustfang", "roles": {"small": "gunboat", "medium": "raider", "large": "reaver"}, "palette": {"tint": "#c0482c", "accent": "#1c1512", "lamp": "#ff5a2a", "glow": "#ff6a30", "patch": ["#ffffff", "#7a7a7a", "#e07a50", "#4a4440"]}, "emblem": {"prims": [{"poly": [[0.12, 0.08], [0.46, 0.08], [0.3, 0.92]], "fill": true}, {"poly": [[0.54, 0.08], [0.88, 0.08], [0.7, 0.92]], "fill": true}]}},
 			"hull": {
 				"prow": [1, 3], "tail": [0, 2],
 				"band": {"gun": 0.5, "bridge": 0.75, "core": 0.9, "aux": 0.85, "engine": 1.0},
@@ -65,7 +66,7 @@
 					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2], "side": "random_one"},
 					{"op": "chamfer", "at": "shoulder", "kind": ["45", "shallow"], "n": [1, 2], "chance": 0.8},
 					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2], "side": "random_one"},
-					{"op": "spikes", "count": [1, 3], "depth": 2}
+					{"op": "spikes", "count": [3, 5], "depth": 2}
 				]
 			}
 		},
@@ -151,6 +152,7 @@
 					{"id": "radiator", "cost": 4, "weight": 1}
 				]
 			},
+			"style": {"label": "Lumen", "roles": {"small": "spark", "medium": "radiant", "large": "corona"}, "palette": {"tint": "#ffe27a", "accent": "#f2c240", "lamp": "#fff2a8", "glow": "#ffe27a", "patch": ["#ffffff", "#fff6dc"]}, "emblem": {"prims": [{"circle": [0.5, 0.5, 0.17], "fill": true}, {"line": [0.77, 0.5, 0.96, 0.5]}, {"line": [0.6909184802780338, 0.6909191815620579, 0.8252685219551688, 0.8252697167353579]}, {"line": [0.4999990082346221, 0.7699999999981786, 0.49999831032565245, 0.9599999999968967]}, {"line": [0.3090801171564941, 0.6909177789914338, 0.17472908848884172, 0.8252673271705909]}, {"line": [0.23000000000728588, 0.4999980164692442, 0.040000000012412995, 0.49999662065130496]}, {"line": [0.3090829222977422, 0.3090794158776219, 0.17473386761837562, 0.17472789371742986]}, {"line": [0.5000029752961336, 0.2300000000163933, 0.5000050690230424, 0.04000000002792936]}, {"line": [0.6909212853986741, 0.30908362358949404, 0.8252733010495931, 0.1747350624117306]}]}},
 			"hull": {
 				"prow": [3, 5], "tail": [2, 4],
 				"band": {"gun": 0.45, "bridge": 0.8, "core": 1.0, "aux": 0.9, "engine": 0.55},
@@ -199,6 +201,7 @@
 					{"id": "radiator", "cost": 4, "weight": 1}
 				]
 			},
+			"style": {"label": "Warden", "roles": {"small": "sentry", "medium": "keeper", "large": "bastion"}, "palette": {"tint": "#7a4a22", "accent": "#3fe0c8", "lamp": "#3fe0c8", "glow": "#3fe0c8", "patch": ["#ffffff", "#b08a58"]}, "emblem": {"prims": [{"poly": [[0.3, 0.03], [0.7, 0.03], [0.97, 0.3], [0.97, 0.7], [0.7, 0.97], [0.3, 0.97], [0.03, 0.7], [0.03, 0.3]], "fill": false}, {"poly": [[0.18, 0.5], [0.5, 0.3], [0.82, 0.5], [0.5, 0.7]], "fill": false}, {"circle": [0.5, 0.5, 0.09], "fill": true}]}},
 			"hull": {
 				"prow": [3, 5], "tail": [2, 4],
 				"band": {"gun": 0.5, "bridge": 0.85, "core": 1.0, "aux": 0.85, "engine": 0.6},
@@ -207,10 +210,9 @@
 				"ops": [
 					{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0},
 					{"op": "wedge", "at": "stern", "slope": ["45"], "chance": 1.0},
-					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]},
-					{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 4]},
-					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]},
-					{"op": "spikes", "count": [1, 2], "depth": 2}
+					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 4]},
+					{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [3, 5]},
+					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}
 				]
 			}
 		},
@@ -248,14 +250,16 @@
 					{"id": "inertial_dampener", "cost": 12, "weight": 1, "from": 60}
 				]
 			},
+			"style": {"label": "Clan", "roles": {"small": "cutter", "medium": "homestead", "large": "steading"}, "palette": {"tint": "#9cb06a", "accent": "#e8c84a", "lamp": "#ffe28a", "glow": "#ffd070", "patch": ["#ffffff", "#f0e07a", "#7e9a5a", "#c8d890"]}, "emblem": {"prims": [{"poly": [[0.08, 0.5], [0.5, 0.1], [0.92, 0.5], [0.8, 0.5], [0.8, 0.9], [0.2, 0.9], [0.2, 0.5]], "fill": false}, {"poly": [[0.5, 0.45], [0.6, 0.78], [0.4, 0.78]], "fill": true}]}},
 			"hull": {
 				"prow": [0, 1], "tail": [0, 1],
 				"band": {"gun": 0.5, "bridge": 1.0, "core": 0.85, "aux": 1.0, "engine": 0.7},
 				"jitter_w": [2, 4], "jitter_c": 0, "asym": false,
 				"ops": [
-					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]},
+					{"op": "arc", "at": "tip", "count": [2, 2]},
 					{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]},
-					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 3]}
+					{"op": "arc", "at": "stern_end", "count": [2, 2]},
+					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}
 				]
 			}
 		},

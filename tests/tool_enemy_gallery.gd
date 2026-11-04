@@ -10,7 +10,7 @@ const Shipgen = preload("res://scripts/space/shipgen.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const Content = preload("res://scripts/data/content.gd")
 
-const STAGES := [1, 3, 5, 7]
+static var STAGES := [1, 3, 5, 7]
 const SIZES := ["small", "medium", "large"]
 const JUMPS_A_STAGE := 12.5
 const K := 3.0  ## screen px per cell on the sheet
@@ -26,6 +26,10 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	if args.has("stages"):
+		STAGES = []
+		for x in str(args["stages"]).split(","):
+			STAGES.append(int(x))
 	var seeds := int(args.get("seeds", 6))
 	var tag := str(args.get("tag", "before"))
 	var out := str(args.get("out", "/home/user/hs/shots"))
@@ -43,8 +47,9 @@ static func budget_of(faction: String, stage: int) -> float:
 	var j := roundi(JUMPS_A_STAGE * (float(stage) - 0.5))
 	var tier := 3 if j >= 25 else (2 if j >= 10 else 1)
 	var danger := INF
+	var kin := str(Shipgen.tables()["factions"][faction].get("lines_as", faction))  # a race ship has its base faction's regions' danger
 	for r in Content.regions():
-		if str(r.get("enemies", "")) == faction:
+		if str(r.get("enemies", "")) == kin:
 			danger = minf(danger, float(r.get("danger", 1.0)))
 	return Shipgen.budget_for(tier, j, danger if danger < INF else 1.0, "normal", stage)
 
