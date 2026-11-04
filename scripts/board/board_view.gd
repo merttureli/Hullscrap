@@ -8,7 +8,7 @@ extends Node2D
 ##   dim red lights in some rooms and a green one in the airlock.
 ## - WASD walks (screen-relative, CrewMember.move_input on the site's walk grid), the mouse aims the light, the wheel zooms.
 ## - E: hold it on a container to open it (a progress ring), then the loot list shows: E takes all, 1-9 one row, Esc shuts it. Hold E for 4 s by a
-##   locked door to hack it, tap E by a card door to use the keycard. E in the airlock leaves. Esc is the pause menu; Ctrl+S is refused aboard.
+##   locked door to hack it, tap E by a card door to use the keycard. E in the airlock leaves, and so does L (the Leave button) when no foe has hunted the party for a while. Esc is the pause menu; Ctrl+S is refused aboard.
 ## - The HUD (board_hud.gd): the site and its containers, the airlock marker (an arrow at the screen edge when it is off screen), the tracker.
 ## Stage B4: a shot is a bolt of light that flies to its hit point (board_fx.gd: the bolts, their pooled lights, the impacts, the flares; the events of the session
 ## carry the look and the flight time, and a hit waits for its bolt in `_later`), the HUD has party cards and a weapon bar (board_cards.gd), the crew picker is
@@ -117,6 +117,8 @@ var _shake_rng := RandomNumberGenerator.new()
 var _cam_lights := {}  # room id -> the PointLight2D of the Spotter Cam's feed
 var _cam_energy := {}  # room id -> the energy it shows now (it fades in and out)
 var _down_t := 0.0
+var _go_t := -1.0  # seconds the Leave button's fade has run (-1: not leaving)
+var _ask_leave := false  # "Leave <name> behind?" stands: Enter confirms, Esc cancels
 var _leave_t := 0.0  # seconds a "leave them behind?" question stands
 var _skitter := 0.0
 var _fight_t := 0.0  # seconds the combat music runs on after the last foe on the hunt
@@ -188,6 +190,8 @@ func enter(p_session) -> String:
 	_down_t = 0.0
 	_flicker = 0.0
 	_leave_t = 0.0
+	_go_t = -1.0
+	_ask_leave = false
 	_fight_t = 0.0
 	_mood = "explore"
 	_anim = {}
@@ -235,6 +239,31 @@ func leave() -> void:
 	session = null
 	Audio.fx(self, "close")
 	finished.emit(result)
+
+
+## The Leave button (L): the party goes home after a short fade, as if they had walked out. Not while a foe hunts them; a crewman who is down is lost, so that
+## asks first (`_ask_leave`; Enter confirms, Esc cancels). Returns "" when it began (or asked), else why not.
+func quick_leave() -> String:
+	if not active or picking or _go_t >= 0.0 or session.downed:
+		return "busy"
+	if not session.can_quick_leave():
+		var why := str(Arms.cfg()["leave_hunted"])
+		say(why + ".")
+		Audio.fx(self, "error")
+		return why
+	var down: Array = session.downed_party()
+	if not down.is_empty() and not _ask_leave:
+		_ask_leave = true
+		return ""
+	_ask_leave = false
+	_go_t = 0.0
+	return ""
+
+
+## The question's text: who is left behind and what goes with them.
+func leave_question() -> String:
+	var down: Array = session.downed_party()
+	return "Leave %s behind? (lost for good%s)     Enter: leave     Esc: stay" % [", ".join(down), lost_note(down)]
 
 
 ## The ship's views make way (or come back). BuildMode.combat does most of it: no input, no drawing, no HUD; the ship's sim is held and
@@ -543,6 +572,13 @@ func _combat(dt: float) -> void:
 	if want != _mood:
 		_mood = want
 		Audio.mood(self, want)
+	if _go_t >= 0.0:
+		_go_t += dt
+		if s.downed:
+			_go_t = -1.0
+		elif _go_t >= float(Arms.cfg()["leave_fade_s"]):
+			leave()
+			return
 	if s.downed:
 		_down_t += dt
 		if _down_t >= DOWN_S:
@@ -1164,7 +1200,12 @@ func _unhandled_input(e: InputEvent) -> void:
 				_zoom(1.0 / 1.1)
 			MOUSE_BUTTON_LEFT:
 				_fire_wait = picking or panel >= 0 or shop >= 0
-				if hud != null and shop >= 0:
+				if hud != null and not picking and hud.leave_rect().has_point(e.position):
+					_fire_wait = true
+					quick_leave()
+				elif _ask_leave:
+					_fire_wait = true
+				elif hud != null and shop >= 0:
 					buy_row(hud.shop_row_at(e.position))
 				elif hud != null and picking:
 					_loadout_click(hud.loadout_at(e.position))
@@ -1180,6 +1221,12 @@ func _unhandled_input(e: InputEvent) -> void:
 			elif e.keycode == KEY_L:
 				say("Can't load aboard another vessel.")
 				Audio.fx(self, "error")
+		elif _ask_leave:
+			if e.keycode == KEY_ENTER or e.keycode == KEY_KP_ENTER:
+				quick_leave()
+			elif e.keycode == KEY_ESCAPE:
+				_ask_leave = false
+				say("You stay.")
 		elif picking:
 			if not load_slot.is_empty() and e.keycode >= KEY_1 and e.keycode <= KEY_9:
 				loadout_choose(e.keycode - KEY_1)
@@ -1196,6 +1243,8 @@ func _unhandled_input(e: InputEvent) -> void:
 					load_slot = {}
 				else:
 					go_alone()
+		elif e.keycode == KEY_L:
+			quick_leave()
 		elif e.keycode == KEY_R:
 			session.reload()
 		elif e.keycode == KEY_Q:

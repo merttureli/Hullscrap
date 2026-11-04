@@ -54,6 +54,7 @@ var foes  ## foes.gd: everyone hostile aboard
 var spare_rounds := 0  ## the rounds he holds when there is no ship (a test)
 var hollow_place := false  ## the place was the Hollow's when he came (hollow-touched stand in it)
 var hollow := false  ## the Hollow took the place while he was aboard (note_hollow)
+var quiet_s := 1.0e9  ## seconds since a foe last had noticed anyone (the Leave button wants Arms.cfg() leave_quiet_s of it)
 var downed := false  ## the soldier went down: the view fades out and calls leave()
 var party: Array = []  ## the crew who came along (party.gd), and a person who follows for now (`temp`)
 var people  ## people.gd: everyone aboard who is not hostile (survivors, traders, a captive ...)
@@ -531,6 +532,7 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	for g in guns:
 		Arms.tick(g, dt, take)
 	foes.tick(dt, aim, light_on)
+	quiet_s = 0.0 if hunted() else quiet_s + dt
 	Air.tick(self, dt)
 	_air_look(dt)
 	people.tick(dt)
@@ -784,6 +786,11 @@ func discover(mark_id: int) -> Dictionary:
 	var node := {"type": "boarding_site", "site": site.kind, "theme": site.theme, "mark": m["kind"]}
 	var ev: Dictionary = campaign.events.pick(campaign, node, ship)
 	return {"id": -1, "name": "", "node": node, "event": ev} if not ev.is_empty() else {}
+
+
+## May the party leave with one click (the Leave button)? Only while nobody has been hunted for leave_quiet_s.
+func can_quick_leave() -> bool:
+	return not finished and not downed and quiet_s >= float(Arms.cfg()["leave_quiet_s"])
 
 
 ## Is some foe on the hunt (it has noticed someone)?
