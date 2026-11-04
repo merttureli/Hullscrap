@@ -273,7 +273,7 @@ func test_a_no_suit_tag_marks_the_crew_with_no_sealed_suit() -> void:
 	var b := BoardView.new()
 	b.ask_party = true
 	b.enter(s)
-	check(b.pick_rows().all(func(r): return r["no_suit"]), "nobody wears a sealed suit: all are tagged")
+	check(b.pick_rows().filter(func(r): return r["name"] == "Rook")[0]["no_suit"], "Rook wears no sealed suit: tagged (a body that needs no suit is not, the air rules)")
 	b.leave()
 	CrewKit.equip_from_hold(sh, _by(sh, "Rook"), "eva_suit")
 	var s2 = _visit("station", sh)
