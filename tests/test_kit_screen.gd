@@ -266,6 +266,10 @@ func test_go_alone_and_the_limit_and_the_number_keys() -> void:
 	b3.leave()
 
 
+func _row(b, name: String) -> Dictionary:
+	return b.pick_rows().filter(func(r): return r["name"] == name)[0]
+
+
 func test_a_no_suit_tag_marks_the_crew_with_no_sealed_suit() -> void:
 	var sh := _ship()
 	sh.inventory.add("eva_suit", 1)
@@ -273,13 +277,12 @@ func test_a_no_suit_tag_marks_the_crew_with_no_sealed_suit() -> void:
 	var b := BoardView.new()
 	b.ask_party = true
 	b.enter(s)
-	check(b.pick_rows().filter(func(r): return r["name"] == "Rook")[0]["no_suit"], "Rook wears no sealed suit: tagged (a body that needs no suit is not, the air rules)")
+	check(_row(b, "Tess")["no_suit"], "Tess wears no sealed suit: tagged")
 	b.leave()
-	CrewKit.equip_from_hold(sh, _by(sh, "Rook"), "eva_suit")
+	eq(CrewKit.equip_from_hold(sh, _by(sh, "Tess"), "eva_suit"), "", "Tess puts the EVA suit on")
 	var s2 = _visit("station", sh)
 	var b2 := BoardView.new()
 	b2.ask_party = true
 	b2.enter(s2)
-	var rook: Dictionary = b2.pick_rows().filter(func(r): return r["name"] == "Rook")[0]
-	check(not rook["no_suit"], "Rook in an EVA suit is not")
+	check(not _row(b2, "Tess")["no_suit"], "in a sealed suit she is not")
 	b2.leave()
