@@ -144,7 +144,17 @@
 		"gantry_arm": {"name": "Gantry arm", "size": [4, 1], "blocks": false, "color": "#6a8896", "glow": "#80f8e0"},
 		"rock_face": {"name": "Rock face", "size": [4, 1], "blocks": true, "color": "#6a5a48", "tall": true},
 		"ore_cart": {"name": "Ore cart", "size": [2, 1], "blocks": true, "color": "#7a6a58", "topple": true},
-		"drill_rig": {"name": "Drill rig", "size": [3, 2], "blocks": true, "color": "#8a8a70", "glow": "#ffd060", "tall": true, "screen": true}
+		"drill_rig": {"name": "Drill rig", "size": [3, 2], "blocks": true, "color": "#8a8a70", "glow": "#ffd060", "tall": true, "screen": true},
+		"gas_bladder": {"name": "Gas bladder", "size": [2, 2], "blocks": true, "color": "#e0a8c8", "glow": "#f0c0f0"},
+		"bloom_bed": {"name": "Bloom bed", "size": [3, 1], "blocks": true, "color": "#c88ab8", "glow": "#ffc0e8", "topple": true},
+		"glint_hoard": {"name": "Glint hoard", "size": [3, 2], "blocks": true, "color": "#8a7a50", "glow": "#fff0a0"},
+		"trinket_shelf": {"name": "Trinket shelf", "size": [3, 1], "blocks": true, "color": "#5a5a6a", "tall": true, "topple": true},
+		"crab_pot_stack": {"name": "Crab pot stack", "size": [2, 2], "blocks": true, "color": "#a86a50", "topple": true},
+		"net_rack": {"name": "Net rack", "size": [3, 1], "blocks": true, "color": "#7a8a8a", "topple": true},
+		"mirror_pane": {"name": "Mirror pane", "size": [3, 1], "blocks": true, "color": "#c8d0e0", "tall": true},
+		"echo_pillar": {"name": "Echo pillar", "size": [1, 1], "blocks": true, "color": "#b0b8d0", "glow": "#f0f8ff", "tall": true},
+		"ferro_pool": {"name": "Ferrofluid pool", "size": [4, 3], "blocks": true, "color": "#3a3e4a", "glow": "#90b8ff"},
+		"magnet_coil": {"name": "Magnet coil", "size": [1, 2], "blocks": true, "color": "#5a6a8a", "glow": "#90b8ff", "tall": true}
 	},
 	"rules": {
 		"dock": [
@@ -502,6 +512,34 @@
 			{"fixture": "drill_rig", "n": [1, 1], "at": "centre"},
 			{"fixture": "rock_face", "n": [2, 3], "at": "wall"},
 			{"fixture": "ore_cart", "n": [1, 3], "at": "free"}
+		],
+		"bloom_loft": [
+			{"fixture": "gas_bladder", "n": [3, 5], "at": "free"},
+			{"fixture": "bloom_bed", "n": [2, 3], "at": "row", "inset": 1},
+			{"fixture": "water_tank", "n": [0, 1], "at": "corner"}
+		],
+		"curio_roost": [
+			{"fixture": "glint_hoard", "n": [1, 1], "at": "centre"},
+			{"fixture": "trinket_shelf", "n": [2, 3], "at": "wall"},
+			{"fixture": "stall", "n": [0, 1], "at": "wall"},
+			{"fixture": "trinket_shelf", "n": [1, 1], "at": "wall", "room": 1}
+		],
+		"crab_wharf": [
+			{"fixture": "crab_pot_stack", "n": [3, 5], "at": "free"},
+			{"fixture": "net_rack", "n": [1, 2], "at": "wall"},
+			{"fixture": "shipping_container", "n": [0, 1], "at": "wall"}
+		],
+		"glass_hall": [
+			{"fixture": "mirror_pane", "n": [3, 5], "at": "wall"},
+			{"fixture": "echo_pillar", "n": [3, 5], "at": "free"},
+			{"fixture": "bench", "n": [1, 2], "at": "wall"}
+		],
+		"magnet_dynamo": [
+			{"fixture": "generator", "n": [1, 1], "at": "wall"},
+			{"fixture": "ferro_pool", "n": [1, 1], "at": "centre"},
+			{"fixture": "magnet_coil", "n": [2, 3], "at": "wall"},
+			{"fixture": "fuse_box", "n": [1, 2], "at": "wall"},
+			{"fixture": "magnet_coil", "n": [1, 1], "at": "wall", "room": 1}
 		]
 	},
 	"dressing": {"signs": {"airlock": "AIRLOCK", "reactor": "REACTOR", "medbay": "MEDBAY", "command": "COMMAND", "security": "SECURITY", "market": "MARKET", "observation": "OBSERVATION", "quarters": "QUARTERS", "storage": "STORES", "cargo": "CARGO", "hydroponics": "GARDEN", "mess": "MESS", "lab": "LAB", "comms": "COMMS", "chapel": "CHAPEL", "brig": "CELL", "water": "WATER", "hangar": "HANGAR", "power": "POWER", "breach": "DANGER", "maintenance": "", "corridor": ""}, "wall": {"pipe": {"per_area": 0.5, "len": [3, 7], "max": 4, "extra": 1.0}, "cable": {"per_area": 0.3, "len": [2, 5], "max": 3, "extra": 1.0}, "vent": {"per_area": 0.25, "len": [1, 1], "max": 2, "extra": 0.8}, "lamp": {"per_area": 0.55, "len": [1, 1], "max": 6, "extra": 1.0}, "panel": {"per_area": 0.2, "len": [1, 2], "max": 2, "extra": 0.6, "purposes": ["reactor", "power", "engineering", "command", "comms", "lab", "water", "hangar", "cargo", "security", "maintenance"]}, "poster": {"per_area": 0.3, "len": [1, 1], "max": 2, "extra": 0.6, "purposes": ["quarters", "mess", "market", "chapel", "observation", "hydroponics", "medbay", "security", "brig"]}}, "floor": {"stain": {"per_area": 0.4, "max": 4, "extra": 1.0}, "scuff": {"per_area": 0.6, "max": 6, "extra": 1.5}, "arrow": {"per_area": 0.15, "max": 2, "extra": 0.5, "purposes": ["corridor", "hangar", "cargo", "market"]}, "lane": {"per_area": 0.2, "max": 2, "extra": 0.4, "purposes": ["hangar", "cargo", "reactor", "power", "water"]}}, "states": {"abandoned": {"floor": {"debris": {"per_area": 0.6, "max": 5}, "scorch": {"per_area": 0.2, "max": 2}}, "wall": {"scorch": {"per_area": 0.2, "max": 2}}}, "half": {"floor": {"clutter": {"per_area": 0.4, "max": 3}}, "wall": {"scorch": {"per_area": 0.06, "max": 1}}}, "operational": {}}}

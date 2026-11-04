@@ -996,3 +996,148 @@ static func a_drill_rig(cv: CanvasItem, it: Dictionary) -> void:
 	cv.draw_circle(_p(r, 0.85, 0.4), 3.0, _glow(it))
 	cv.draw_line(_p(r, 0.55, 0.3), _p(r, 0.95, 0.3), Color(0, 0, 0, 0.4), 1.5)
 	cv.draw_rect(r, INK, false, 2.0)
+
+
+# --- siltborn ----------------------------------------------------------------------------------------------------------
+
+static func a_gas_bladder(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var c := r.get_center()
+	var rad := minf(r.size.x, r.size.y) * 0.42
+	if not it["dead"]:
+		cv.draw_circle(c, rad * 1.3, Color(it["glow"], 0.12))
+	cv.draw_circle(c + Vector2(3, 4), rad, Color(0, 0, 0, 0.25))
+	cv.draw_circle(c, rad, it["base"] if not it["dead"] else it["base"].darkened(0.2))
+	cv.draw_circle(c + Vector2(-rad * 0.3, -rad * 0.3), rad * 0.35, Color(1, 1, 1, 0.5))
+	for k in 3:
+		cv.draw_arc(c, rad * (0.4 + 0.2 * float(k)), 0.4 + float(k), 1.4 + float(k), 6, Color(0.7, 0.4, 0.55, 0.4), 1.2, true)
+	cv.draw_line(c + Vector2(0, rad), c + Vector2(0, rad + 5), Color(0.35, 0.3, 0.3), 2.0)  # (the tether valve)
+	_ring(cv, c, rad, INK, 1.5)
+
+
+static func a_bloom_bed(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.28, 0.22, 0.28))
+	cv.draw_rect(r.grow(-2.0), Color(0.2, 0.15, 0.2))
+	for k in 4:
+		var p := _p(r, 0.14 + 0.24 * float(k), 0.5)
+		cv.draw_line(p, p + Vector2(0, 5), Color(0.3, 0.5, 0.35), 2.0)
+		for q in 5:
+			cv.draw_circle(p + Vector2.from_angle(TAU * float(q) / 5.0) * 4.0, 2.4, g if q % 2 == 0 else g.lightened(0.3))
+		cv.draw_circle(p, 2.0, Color(1.0, 0.95, 0.8))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+# --- corvin ------------------------------------------------------------------------------------------------------------
+
+static func a_glint_hoard(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.22, 0.2, 0.16))
+	if not it["dead"]:
+		cv.draw_circle(r.get_center(), r.size.x * 0.4, Color(g, 0.12))
+	for k in 18:
+		var p := r.position + r.size * Vector2(0.1 + 0.8 * _rnd(it, k), 0.15 + 0.7 * _rnd(it, k + 17))
+		match k % 4:
+			0:
+				cv.draw_circle(p, 3.2, Color(0.95, 0.8, 0.3))
+			1:
+				cv.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -4), p + Vector2(3, 0), p + Vector2(0, 4), p + Vector2(-3, 0)]), Color(0.5, 0.85, 0.95))
+			2:
+				cv.draw_line(p + Vector2(-4, -1), p + Vector2(4, 1), Color(0.85, 0.85, 0.9), 2.0)
+			_:
+				cv.draw_circle(p, 2.2, Color(0.95, 0.5, 0.45))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_trinket_shelf(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	_box(cv, r, it["base"].darkened(0.2))
+	for k in 6:
+		var p := _p(r, 0.1 + 0.16 * float(k), 0.3 + 0.4 * float(k % 2))
+		match k % 3:
+			0:
+				cv.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -4), p + Vector2(3, 0), p + Vector2(0, 4), p + Vector2(-3, 0)]), Color(0.6, 0.9, 1.0))
+			1:
+				cv.draw_circle(p, 3.0, Color(0.95, 0.8, 0.3))
+			_:
+				cv.draw_line(p + Vector2(-3, 3), p + Vector2(3, -3), Color(0.9, 0.9, 0.95), 2.0)
+
+
+# --- brine -------------------------------------------------------------------------------------------------------------
+
+static func a_crab_pot_stack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, Color(0.16, 0.12, 0.1))
+	for ix in 2:
+		for iy in 2:
+			var q := Rect2(r.position + r.size * Vector2(0.5 * float(ix), 0.5 * float(iy)), r.size * 0.5).grow(-2.0)
+			cv.draw_rect(q, it["base"].darkened(0.1 * float(ix + iy)))
+			for k in 3:
+				cv.draw_line(q.position + Vector2(q.size.x * float(k + 1) / 4.0, 0), q.position + Vector2(q.size.x * float(k + 1) / 4.0, q.size.y), Color(0, 0, 0, 0.35), 1.0)
+				cv.draw_line(q.position + Vector2(0, q.size.y * float(k + 1) / 4.0), q.position + Vector2(q.size.x, q.size.y * float(k + 1) / 4.0), Color(0, 0, 0, 0.35), 1.0)
+			cv.draw_circle(q.get_center(), 2.5, Color(0.1, 0.08, 0.06))  # (the pot's mouth)
+			cv.draw_rect(q, INK, false, 1.2)
+
+
+static func a_net_rack(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, it["base"].darkened(0.3))
+	for k in 9:
+		cv.draw_line(_p(r, 0.04 + 0.11 * float(k), 0.1), _p(r, 0.15 + 0.11 * float(k), 0.9), Color(0.75, 0.8, 0.78, 0.7), 1.2)
+		cv.draw_line(_p(r, 0.15 + 0.11 * float(k), 0.1), _p(r, 0.04 + 0.11 * float(k), 0.9), Color(0.75, 0.8, 0.78, 0.7), 1.2)
+	for k in 3:  # (floats)
+		cv.draw_circle(_p(r, 0.2 + 0.3 * float(k), 0.5), 3.0, Color(0.9, 0.35, 0.25))
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+# --- echo --------------------------------------------------------------------------------------------------------------
+
+static func a_mirror_pane(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	cv.draw_rect(r, Color(0.35, 0.38, 0.45))
+	var glass := r.grow(-3.0)
+	cv.draw_rect(glass, Color(0.78, 0.86, 0.95) if not it["dead"] else Color(0.5, 0.55, 0.62))
+	for k in 4:  # (the glint across it)
+		cv.draw_line(glass.position + glass.size * Vector2(0.1 + 0.25 * float(k), 0.9), glass.position + glass.size * Vector2(0.3 + 0.25 * float(k), 0.1), Color(1, 1, 1, 0.6 - 0.12 * float(k)), 2.0)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_echo_pillar(cv: CanvasItem, it: Dictionary) -> void:
+	var c: Vector2 = it["r"].get_center()
+	var g := _glow(it)
+	if not it["dead"]:
+		cv.draw_circle(c, 14.0, Color(g, 0.12))
+	for k in 3:  # (the pillar and its echoes)
+		var o := Vector2(float(k - 1) * 5.0, float(k - 1) * 3.0)
+		cv.draw_colored_polygon(PackedVector2Array([c + o + Vector2(0, -12), c + o + Vector2(7, 0), c + o + Vector2(0, 12), c + o + Vector2(-7, 0)]), Color(0.82, 0.88, 0.98, 0.25 + 0.2 * float(k % 2)) if k != 1 else Color(0.85, 0.9, 1.0, 0.8))
+	cv.draw_line(c + Vector2(0, -12), c + Vector2(0, 12), g, 1.2)
+
+
+# --- ferro -------------------------------------------------------------------------------------------------------------
+
+static func a_ferro_pool(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.14, 0.15, 0.18))
+	cv.draw_rect(r.grow(-3.0), Color(0.07, 0.08, 0.11))
+	for k in 16:  # (the fluid stands up in spikes)
+		var b := r.position + r.size * Vector2(0.1 + 0.8 * _rnd(it, k), 0.2 + 0.65 * _rnd(it, k + 21))
+		var h := 5.0 + 7.0 * _rnd(it, k + 40)
+		cv.draw_colored_polygon(PackedVector2Array([b + Vector2(-2.5, 0), b + Vector2(0, -h), b + Vector2(2.5, 0)]), Color(0.45, 0.5, 0.6))
+		cv.draw_circle(b + Vector2(0, -h), 1.2, g)
+	cv.draw_arc(r.get_center(), minf(r.size.x, r.size.y) * 0.3, 0.3, 2.4, 10, Color(g, 0.45), 2.0, true)
+	cv.draw_rect(r, INK, false, 2.0)
+
+
+static func a_magnet_coil(cv: CanvasItem, it: Dictionary) -> void:
+	var r: Rect2 = it["r"]
+	var g := _glow(it)
+	cv.draw_rect(r, Color(0.12, 0.14, 0.2))
+	_box(cv, _q(r, 0.0, 0.2, 1.0, 0.8), Color(0.6, 0.38, 0.2))
+	for k in 5:
+		cv.draw_line(_p(r, 0.24 + 0.13 * float(k), 0.2), _p(r, 0.24 + 0.13 * float(k), 0.8), Color(0, 0, 0, 0.35), 1.5)
+	cv.draw_circle(_p(r, 0.07, 0.5), 5.0, g)
+	cv.draw_circle(_p(r, 0.93, 0.5), 5.0, g.darkened(0.25))
+	cv.draw_rect(r, INK, false, 2.0)
