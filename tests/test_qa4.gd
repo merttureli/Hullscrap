@@ -86,8 +86,8 @@ func test_a_body_gear_line_fits_its_loadout_slot() -> void:
 		longest = maxf(longest, w)
 		check(54.0 + w <= Loadout.SLOT.x - 4.0, "%s: '%s' is %.0f px, the slot has %.0f after its icon" % [item, Loadout.body_sub(str(item)), w, Loadout.SLOT.x - 58.0])
 	check(longest > 60.0, "(measured the real lines)")
-	eq(Loadout.body_sub("exosuit"), "35% less damage.", "the sentence without its first word")
-	eq(Kit.body_line("exosuit"), "Takes 35% less damage.", "the hover keeps the whole one")
+	eq(Loadout.body_sub("exosuit"), "35% less dmg, sealed", "the short form of the sentence for the slot")
+	eq(Kit.body_line("exosuit"), "Takes 35% less damage. Sealed.", "the hover keeps the whole one")
 
 
 ## A thin purse at the exit with a few hundred scrap to sell gets the toll line (it waited for 600 scrap, so a poorer player heard nothing).

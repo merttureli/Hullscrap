@@ -67,9 +67,10 @@ static func armor_mult(m) -> float:
 ## What body gear `item` does aboard, in words.
 static func body_line(item: String) -> String:
 	var share := float(Site.config()["armor"].get(item, 1.0))
+	var sealed := bool(Site.config().get("gear", {}).get(item, {}).get("sealed", false))  # (air.gd: no airless room without one)
 	if share >= 1.0:
-		return "No use aboard."
-	return "Takes %d%% less damage." % roundi((1.0 - share) * 100.0)
+		return "Sealed: breathe with no air." if sealed else "No use aboard."
+	return "Takes %d%% less damage.%s" % [roundi((1.0 - share) * 100.0), " Sealed." if sealed else ""]
 
 
 # --- changing a kit --------------------------------------------------------------------------------------------------------

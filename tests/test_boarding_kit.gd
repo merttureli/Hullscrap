@@ -249,8 +249,8 @@ func test_body_gear_takes_damage_off_aboard() -> void:
 		_wear(s, [], body)
 		s.hurt_member(s.soldier, 10.0, Vector2.ZERO)
 		check(absf((s.soldier.max_hp - s.soldier.hp) - float(want[body])) < 0.001, "%s: 10 damage costs %s (%s)" % [body if body != "" else "nothing", want[body], s.soldier.max_hp - s.soldier.hp])
-	eq(Kit.body_line("eva_suit"), "No use aboard.", "an EVA suit says it is no use aboard")
-	eq(Kit.body_line("exosuit"), "Takes 35% less damage.", "and an exosuit how much it takes off")
+	eq(Kit.body_line("eva_suit"), "Sealed: breathe with no air.", "an EVA suit takes no damage off but says it is sealed")
+	eq(Kit.body_line("exosuit"), "Takes 35% less damage. Sealed.", "and an exosuit how much it takes off, and that it is sealed")
 
 
 func test_overcharge_hits_harder_by_tier_and_mk3_goes_through_the_first_body() -> void:

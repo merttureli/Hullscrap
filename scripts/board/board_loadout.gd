@@ -119,7 +119,7 @@ static func _person(h, area: Rect2, v, m) -> void:
 		_slot(h, v, Rect2(x + float(i) * (SLOT.x + 12.0), y + 22.0, SLOT.x, SLOT.y), "weapon", i, "", str(wd.get("name", "")), \
 			"%s, %d dmg" % [str(wd.get("class", "")).capitalize(), roundi(float(wd.get("damage", 0)))] if w != "" else "", str(wd.get("art", "")), Cards._weapon_lines(w) if w != "" else [], h.TEXT)
 	y += 96.0
-	_label(h, "BODY", Vector2(x, y + 14.0), "Armour takes damage off. Suits are for the ship.")
+	_label(h, "BODY", Vector2(x, y + 14.0), "Armour takes damage off. Sealed suits work with no air.")
 	var body := str(kit["body"])
 	_slot(h, v, Rect2(x, y + 22.0, SLOT.x, SLOT.y), "body", 0, body, _name(ship, body) if body != "" else "", body_sub(body) if body != "" else "", "", \
 		["Body gear", Kit.body_line(body)] if body != "" else [], h.TEXT)
@@ -141,7 +141,10 @@ static func _person(h, area: Rect2, v, m) -> void:
 
 ## The line under a body gear's name in its slot: what it does without "Takes" (the whole sentence ran over the slot's edge; the hover has it).
 static func body_sub(item: String) -> String:
-	return Kit.body_line(item).trim_prefix("Takes ")
+	var line := Kit.body_line(item).trim_prefix("Takes ")
+	if line.ends_with(" Sealed."):  # the slot is narrow
+		return line.trim_suffix(" damage. Sealed.") + " dmg, sealed"
+	return "Sealed for no air." if line.begins_with("Sealed") else line
 
 
 static func _label(h, text: String, at: Vector2, note: String) -> void:

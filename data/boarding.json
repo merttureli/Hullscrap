@@ -95,7 +95,7 @@
 			{"shape": "rect", "at": [-3.0, -3.5], "size": [6.0, 2.0], "tone": "#3a4654", "over_head": true}]}
 	},
 	"armor": {
-		"_doc": "The share of the damage a person takes aboard, by the body gear they wear (1.0 = none). The EVA suit and the heat suit are made for the ship's hazards: no use aboard.",
+		"_doc": "The share of the damage a person takes aboard, by the body gear they wear (1.0 = none). The EVA suit and the heat suit take no damage off, but they are sealed (`gear`): their line says so (kit.gd body_line).",
 		"basic_armor": 0.8,
 		"exosuit": 0.65,
 		"salamander_suit": 0.9,
