@@ -8,6 +8,24 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **Roles.** Gunboats, brawlers, escorts, snipers and haulers: the name line says which ("Kett gunboat"). A poor ship looks patched; a rich one looks fine.
 - **No more skulls before a fight.** Event fight choices, radar markers and exit wardens show the enemy ship itself next to yours, her emblem and her name line; the Ledger warns in words only. The fight panel keeps its skull dots.
 
+### Boarding and stations
+- **Board the ship you just beat** as she is: her rooms, holes, parts, bodies and survivors. Kill her crew by draining her air and she stays airless.
+- **Air on foot**: an airless room needs a sealed suit (EVA suit, exosuit, heat suit). Without one, "Board her" is shut when her airlock is airless, and you loot what's sealed or scrap her.
+- **Choose who goes**: the airlock picks the party, or you go alone. A beaten foe leaves a body to loot: rounds, credits, now and then its weapon, rarely a mod or gear.
+- **L leaves** a site with one click when nothing is hunting you. A site remembers what you opened.
+- **The Hollow tide's clock stops while you're aboard** another vessel.
+- **Stations are built from 31 modules**: hubs, spokes, glass tubes, rings, hydroponics, mess halls, labs, a chapel, a brig, hangars, gantries over a gap, breached sections. Every room is furnished for what it is.
+- **States**: abandoned, half-active (some sections dark; find the generator and hold E to bring the power back) or operational (lit, people at their posts, friendly guards).
+- **Windows to space**: a planet, a gas giant with moons, a nebula, an asteroid field or a distant station.
+- **Race-built stations**: one race or a mix, with that race's colours and loot. A Basalt section can run with no air, and an Emberkin section is hot on foot. The Sporeling spore garden, Emberkin forge, Kett brood chamber and Prismatic resonance hall are the first signature rooms.
+- **Medbays** have working and broken beds, and a room's loot fits the room (the odds of rare items are unchanged).
+
+### Crew kit and gear
+- **I opens the crew kit screen** in flight and in build mode: every crew member's weapons, body and mods, moved around by hand.
+- **Gear shows on the crew**: armour and suits are drawn on every race. There are 14 new items, some with a worn trait and three with an active on G (Dash, Brace, Patch).
+- **A Blueprints tab** in the crafting panel (C) lists every blueprint you know. With no smelter aboard, the Smelter tab says how to get one (craft a Slag Pot). Hovering a recipe shows what it does, and a click no longer queues it (Enter or a double-click does). The middle mouse button pans the build view.
+- **A run starts with 10 fuel** (was 22).
+
 ### Fights
 - **The Rustbucket** carries a Bubble Rig shield in place of its Rattle Burst, and its Bolt Thrower sits in a notch one cell behind the prow, so it is no longer the first thing shot off.
 - **Every starter has a spare Reactor Mk1** in its hold.
