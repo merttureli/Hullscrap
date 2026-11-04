@@ -28,7 +28,7 @@ const HAZARDS: Array[String] = ["ion_storm", "gas_cloud", "debris_surge", "radia
 const AMBIENT_KINDS: Array[String] = ["trader", "patrol", "pirate"]
 const SERVICES: Array[String] = ["sell", "stock", "repair", "recruit"]  ## a region station's services when it has no drift.json menu (fuel is added where data/drift.json fuel.stations lists the place)
 const FIELDS: Array[String] = ["id", "name", "home_species", "faction", "stages", "weight", "rarity", "danger", "palette", "map", "node_weights",
-	"places", "debris", "pois", "ambient", "stock", "recruit", "enemies", "hazards", "events", "blurb", "override", "reason", "_doc"]
+	"places", "debris", "pois", "ambient", "stock", "recruit", "enemies", "race_share", "hazards", "events", "blurb", "override", "reason", "_doc"]
 const REQUIRED: Array[String] = ["id", "name", "home_species", "faction", "stages", "weight", "rarity", "danger", "palette", "ambient", "enemies", "events", "blurb"]
 const PLACE_KEYS: Array[String] = ["id", "name", "type", "faction", "pos", "jitter", "hidden_until", "start", "beacon"]
 const FIXED_TYPES: Array[String] = ["station", "gate", "exit"]  ## node types only fixed places have (never rolled by weight)

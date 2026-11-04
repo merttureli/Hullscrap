@@ -1,0 +1,4 @@
+{"races": {"tinkerfolk": {"base": "concord", "crew": {"species": ["human"]},
+	"style": {"label": "Tinker", "roles": {"small": "cart", "medium": "wagon", "large": "caravan"},
+		"palette": {"tint": "#aa8844", "accent": "#ffee99", "lamp": "#ffee99", "glow": "#ffcc66"},
+		"emblem": {"prims": [{"circle": [0.5, 0.5, 0.4], "fill": false}]}}}}}

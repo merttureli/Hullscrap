@@ -23,9 +23,10 @@ func test_every_faction_has_captain_names_and_all_four_kinds_of_line() -> void:
 	var lines: Dictionary = Morale.config()["lines"]
 	var factions: Dictionary = Shipgen.tables()["factions"]
 	check(factions.size() >= 8, "the eight factions: %d" % factions.size())
-	for id in factions:
-		var names: Array = factions[id]["crew"]["names"]
-		check(names.size() >= 10, "%s: a pool of captain names (%d)" % [id, names.size()])
+	for fid in factions:
+		var id: String = str(factions[fid].get("lines_as", fid))  # a race style (data/ship_styles.json) says its base faction's lines
+		var names: Array = factions[fid]["crew"]["names"]
+		check(names.size() >= 10, "%s: a pool of captain names (%d)" % [fid, names.size()])
 		check(lines.has(id), id + ": has lines in data/morale.json")
 		for kind in KINDS:
 			var pool = lines.get(id, {}).get(kind)
@@ -45,7 +46,7 @@ func test_a_generated_enemy_hails_by_its_captain_and_its_ship() -> void:
 		eq(s.morale.captain, foe.crew_plan[0]["name"], faction + ": the captain is the first of the crew")
 		var who: String = s.morale.speaker()
 		if faction == "wardens":
-			eq(who, "The " + foe.name, "a warden has no captain to name")
+			eq(who, foe.name if foe.name.begins_with("The ") else "The " + foe.name, "a warden has no captain to name")
 		else:
 			eq(who, "Captain %s of the %s" % [foe.crew_plan[0]["name"], foe.name.trim_prefix("The ")], faction + ": 'Captain <name> of the <ship>'")
 		eq(s.morale.banner(), "", "no hail yet at the start of the fight (the threat banner has the floor)")

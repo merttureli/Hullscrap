@@ -123,14 +123,15 @@ func test_the_threat_is_rated_against_the_ship_and_cached() -> void:
 	var w := Wardens.for_region(11, 4, Regions.get_region("concord_space"), 27)
 	var n := Wardens.skulls(w, ship)
 	check(n >= 1 and n <= 5, "1 to 5 skulls: %d" % n)
-	eq(Wardens.threat_label(w, ship), Threat.label(n), "the label is Threat n/5")
-	eq(Wardens.line(w, ship), "Exit warden: Concord Bulwark (%s)" % Threat.label(n), "the card and tooltip line")
+	check(Wardens.look_line(w) != "", "she has a name line")
+	eq(Wardens.line(w, ship), "Exit warden: Concord Bulwark (%s)" % Wardens.look_line(w), "the card and tooltip line name her ship, with no rating")
+	check(not Wardens.line(w, ship).contains("Threat") and not Wardens.line(w, ship).contains("/5"), "no skulls or numbers on it")
 	var cached := Wardens._rated.size()
 	eq(Wardens.skulls(w, ship), n, "asked again, the same")
 	eq(Wardens._rated.size(), cached, "from the cache")
 	eq(Wardens.skulls({}, ship), 0, "no warden, no rating")
 	eq(Wardens.skulls(w, null), 0, "no ship, no rating")
-	eq(Wardens.line(w, null), "Exit warden: Concord Bulwark", "and the line leaves the threat out")
+	eq(Wardens.line(w, null), Wardens.line(w, ship), "the line does not depend on your ship")
 
 
 # --- the event at the beacon ----------------------------------------------------------------------------------------
@@ -142,8 +143,8 @@ func test_the_event_names_the_warden_the_toll_and_the_threat_and_offers_four_way
 	var w: Dictionary = c.warden
 	eq(ev["title"], "Clan Hulk", "the title is the warden's name")
 	check(str(ev["text"]).contains("30 credits"), "the text names the toll: " + str(ev["text"]))
-	check(str(ev["text"]).contains("Threat "), "and shows the threat: " + str(ev["text"]))
-	check(str(ev["text"]).contains(Wardens.threat_label(w, m["ship"])), "the one the card shows")
+	check(not str(ev["text"]).contains("Threat ") and not str(ev["text"]).contains("/5"), "and no threat rating: " + str(ev["text"]))
+	check(str(ev["text"]).contains(Wardens.look_line(w)), "it says what her ship is, as the card does")
 	var texts: Array = c.events.choice_view(ev, c, m["ship"], c.node(c.current)).map(func(v): return v["text"])
 	eq(texts, ["Pay the toll (30 credits).", "Break through.", "Turn back."], "pay, break through, turn back (no pass at 0 standing)")
 	c.rep["clans"] = 4
@@ -388,14 +389,14 @@ func test_a_fight_against_the_warden_ends_at_the_region_choice() -> void:
 	_free(d)
 
 
-func test_the_beacon_tooltip_names_the_warden_and_its_threat() -> void:
+func test_the_beacon_tooltip_names_the_warden_and_her_ship() -> void:
 	var d := _screen()
 	var map: MapView = d["map"]
 	var c: Campaign = map.campaign
 	var tip: Array = map.warden_tip()
 	eq(tip.size(), 1, "one line")
 	eq(tip[0], Wardens.line(c.warden, map.ship()), "the warden's name and threat")
-	check(str(tip[0]).contains("Clan Hulk") and str(tip[0]).contains("Threat "), "Clan Hulk, Threat n/5: " + str(tip[0]))
+	check(str(tip[0]).contains("Clan Hulk") and not str(tip[0]).contains("Threat "), "Clan Hulk and what she is, no rating: " + str(tip[0]))
 	c.flags[c.warden["flag"]] = true
 	check(str(map.warden_tip()[0]).contains("has let you through"), "once cleared it says it let you through")
 	_free(d)
@@ -419,8 +420,7 @@ func test_the_region_cards_show_the_next_warden_and_its_hint() -> void:
 		eq(rc.wardens[i], want, "card %d shows the warden of %s at stage 2" % [i, offers[i]])
 		var line: String = rc.warden_line(i)
 		check(line.begins_with("Exit warden: " + str(want["name"])), "card %d: %s" % [i, line])
-		check(line.contains("(Threat ") and line.ends_with("/5)"), "and its threat: " + line)
-		check(rc.warden_skulls[i] >= 1 and rc.warden_skulls[i] <= 5, "with skulls")
+		check(not line.contains("Threat") and not line.contains("/5") and line.ends_with(")"), "and her name line, no threat: " + line)
 		check(str(want["hint"]) != "", "and a hint")
 	_press(rc, KEY_1)
 	eq(c.warden, Wardens.for_region(c.seed_value, 2, Regions.get_region(offers[0]), c.jumps), "the card told the truth about the warden met in the region")

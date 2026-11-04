@@ -29,6 +29,8 @@ const Morale = preload("res://scripts/combat/morale.gd")
 
 const PREFIX := "gen:"
 const TABLES_PATH := "res://data/enemy_tables.json"
+const STYLES_PATH := "res://data/ship_styles.json"
+const RACE_SHARE := 0.6  ## the share of a home region's pirate fights that meet the region's own race (a region's `race_share` says otherwise)
 const MAX_ATTEMPTS := 10
 const MARGIN := 4  ## free cells round the hull in the grid (a mount's outside half is up to 3 deep)
 const HULL_MARGIN := 2  ## the buildable hull is everything built plus this
@@ -62,9 +64,61 @@ static func tables() -> Dictionary:
 				for id in more["factions"]:
 					if not data["factions"].has(id):
 						data["factions"][id] = more["factions"][id]
+		_add_races(data)
 		_tables = data
 		_tables_for = [Content.root, Content.packs_root]
 	return _tables
+
+
+## The race styles of data/ship_styles.json and of every pack's ship_styles.json (a race already there is kept) become factions of
+## `data`: the table of the style's `base` faction with the style laid over it (see the file's _doc). The race's own id is the faction id.
+static func _add_races(data: Dictionary) -> void:
+	var races := {}
+	var files: Array = [STYLES_PATH]
+	for p in Content.packs():
+		files.append(p["dir"] + "/ship_styles.json")
+	for path in files:
+		var more = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		if more is Dictionary and more.get("races") is Dictionary:
+			for id in more["races"]:
+				if not races.has(id):
+					races[id] = more["races"][id]
+	var names = Content.names()
+	var crews = names.get("crew", {}) if names is Dictionary else {}
+	for id in races:
+		var st: Dictionary = races[id]
+		if data["factions"].has(id) or not data["factions"].has(str(st.get("base", ""))):
+			continue
+		var f: Dictionary = data["factions"][str(st["base"])].duplicate(true)
+		f["race"] = id
+		f["lines_as"] = str(st["base"])  # the faction whose voice lines (data/morale.json) it says
+		f["name_pool"] = ""
+		f["ship_names"] = st.get("ship_names", [])
+		f["crew"] = st.get("crew", f["crew"]).duplicate(true)
+		if crews is Dictionary and crews.get(str(f["crew"]["species"][0])) is Array:
+			f["crew"]["names"] = crews[str(f["crew"]["species"][0])]
+		for k in ["ai", "weights", "hull"]:
+			if st.get(k) is Dictionary:
+				f[k].merge(st[k].duplicate(true), true)
+		if st.get("parts") is Dictionary:
+			for cat in st["parts"]:
+				if cat == "base":
+					f["parts"]["base"].merge(st["parts"]["base"], true)
+				else:
+					f["parts"][cat] = st["parts"][cat].duplicate(true)
+		if st.get("armour") is Dictionary:
+			f["armour"]["tiles"] = st["armour"]["tiles"].duplicate()
+			f["armour"]["factor"].merge(st["armour"].get("factor", {}), true)
+		if st.has("cost_mult"):  # the tuning knob of a style's weapon prices (never its budget): dearer guns, fewer of them
+			for m in f["parts"]["weapons"]:
+				m["cost"] = snappedf(float(m["cost"]) * float(st["cost_mult"]), 0.1)
+		if st.get("prefer") is Dictionary:  # a race with no pack of its own leans on some parts of the base menu: those weights x the factor
+			for cat in st["prefer"]:
+				for m in f["parts"].get(cat, []):
+					if st["prefer"][cat].has(m["id"]):
+						m["weight"] = float(m.get("weight", 1)) * float(st["prefer"][cat][m["id"]])
+		f["style"] = st["style"].duplicate(true)
+		data["factions"][id] = f
 
 
 static func _comps() -> Components:
@@ -174,7 +228,11 @@ static func from_spec(text: String) -> Ship:
 	for x in p.slice(4):
 		if x.length() > 1 and x.begins_with("s") and x.substr(1).is_valid_int():
 			stage = int(x.substr(1))
-	return build(p[0], p[1], int(p[2]), float(p[3]) / 100.0, {"ram": p.slice(4).has("ram"), "stage": stage, "warden": p.slice(4).has("warden")})
+	var opts := {"ram": p.slice(4).has("ram"), "stage": stage, "warden": p.slice(4).has("warden")}
+	var at := p.slice(4).find("role")  # ":role:<id>" pins the role (the tools measure each role); a spec without it rolls the role from its seed
+	if at >= 0 and at + 1 < p.slice(4).size() and tables().get("roles", {}).get("list", {}).has(p.slice(4)[at + 1]):
+		opts["role"] = p.slice(4)[at + 1]
+	return build(p[0], p[1], int(p[2]), float(p[3]) / 100.0, opts)
 
 
 # --- building ------------------------------------------------------------------------------------
@@ -191,6 +249,9 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 		var roll := RandomNumberGenerator.new()
 		roll.seed = _mix(seed_value, faction, size, 99)
 		ram = roll.randf() < float(f["ai"]["rammer"]) and size != "small"
+	var role := str(opts["role"]) if opts.has("role") else pick_role(faction, size, seed_value)
+	if role != "" and not opts.has("ram") and bool(tables()["roles"]["list"][role].get("ram", false)) and float(f["ai"]["rammer"]) > 0.0 and size != "small":
+		ram = true  # a brawler of a faction whose pilots ram rams
 	var shields := true
 	var cap := shield_cap(int(opts.get("stage", 0)))
 	if cap < 1.0 and not f.has("budget_mult"):
@@ -201,7 +262,7 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 	for attempt in MAX_ATTEMPTS:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = _mix(seed_value, faction, size, attempt)
-		var r := _attempt(faction, size, rng, budget, ram, attempt, shields)
+		var r := _attempt(faction, size, rng, budget, ram, attempt, shields, role)
 		if r["ship"] != null:
 			var ship: Ship = r["ship"]
 			ship.get_meta("shipgen")["attempts"] = attempt + 1
@@ -218,7 +279,7 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 ## Why `ship` (a generated one or any) is not a valid enemy: [] when it is fine. Power covers the demand and every part is
 ## on it, every room holds air, every floor cell can be reached by a crew body from the helm, every mount is placed by the
 ## mount rules, it can fly, it has a gun, and it is no rectangle.
-static func validate(ship: Ship) -> Array:
+static func validate(ship: Ship, max_fill := -1.0) -> Array:
 	var bad: Array = []
 	ship.refresh()
 	for n in ship.power_state["networks"]:
@@ -248,6 +309,9 @@ static func validate(ship: Ship) -> Array:
 	var f := Flight.new()
 	if f.can_fly(comps, ship.power_state["powered"]) != "":
 		bad.append("cannot fly: " + f.can_fly(comps, ship.power_state["powered"]))
+	if max_fill < 0.0:  # a faction's own limit (a brick hull, `max_fill` of its hull table) when the ship says whose it is
+		var made: String = str(ship.get_meta("shipgen", {}).get("faction", ""))
+		max_fill = float(tables()["factions"].get(made, {}).get("hull", {}).get("max_fill", MAX_FILL - 0.01)) + 0.01
 	var area := 0.0
 	var lo := Vector2i(1 << 20, 1 << 20)
 	var hi := Vector2i(-(1 << 20), -(1 << 20))
@@ -255,7 +319,7 @@ static func validate(ship: Ship) -> Array:
 		lo = lo.min(c)
 		hi = hi.max(c)
 		area += ship.grid.area_at(c)
-	if area >= 0.85 * (hi.x - lo.x + 1) * (hi.y - lo.y + 1):
+	if area >= max_fill * (hi.x - lo.x + 1) * (hi.y - lo.y + 1):
 		bad.append("a rectangle (%.0f%% of its box)" % (100.0 * area / ((hi.x - lo.x + 1) * (hi.y - lo.y + 1))))
 	return bad
 
@@ -272,6 +336,63 @@ static func threat_of(design: String, player: Ship) -> Dictionary:
 	return {} if enemy == null else Threat.rate(enemy, player)
 
 
+# --- roles ---------------------------------------------------------------------------------------------------
+
+## The roles a faction flies (data/enemy_tables.json "roles"): the `per_faction` whose favoured category its weights rate highest (ties by the table's order).
+static func roles_of(faction: String) -> Array:
+	var cfg: Dictionary = tables()["roles"]
+	var w: Dictionary = tables()["factions"][faction]["weights"]
+	var keyed: Array = []
+	var i := 0
+	for id in cfg["list"]:
+		keyed.append([-float(w.get(cfg["list"][id]["favours"], 1)), i, id])
+		i += 1
+	keyed.sort()
+	var ids: Array = keyed.map(func(k): return k[2])
+	return ids.slice(0, int(cfg["per_faction"]))
+
+
+## The role of the ship of (faction, size, seed), rolled from the seed and weighted by the faction's own weights; "" for a faction with no roles.
+static func pick_role(faction: String, size: String, seed_value: int) -> String:
+	var cfg: Dictionary = tables()["roles"]
+	var w: Dictionary = tables()["factions"][faction]["weights"]
+	var order: Array = ["small", "medium", "large"]
+	var pool: Array = []
+	var total := 0.0
+	for id in roles_of(faction):
+		var r: Dictionary = cfg["list"][id]
+		if order.find(size) < order.find(str(r.get("min_size", "small"))):
+			continue
+		pool.append(id)
+		total += float(w.get(r["favours"], 1))
+	if pool.is_empty():
+		return ""
+	var roll := RandomNumberGenerator.new()
+	roll.seed = _mix(seed_value, faction, size, 97)
+	var x := roll.randf() * total
+	for id in pool:
+		x -= float(w.get(cfg["list"][id]["favours"], 1))
+		if x < 0.0:
+			return str(id)
+	return str(pool[pool.size() - 1])
+
+
+## `f` with a role laid over it: its weights times the role's, the weight of a long-range gun times the sniper's bias. A copy; the tables stay as they are.
+static func _with_role(f: Dictionary, role: String) -> Dictionary:
+	if role == "":
+		return f
+	var r: Dictionary = tables()["roles"]["list"][role]
+	var out := f.duplicate(true)
+	for k in r["weights"]:
+		out["weights"][k] = float(out["weights"].get(k, 1)) * float(r["weights"][k])
+	if r.has("range_from"):
+		_comps()
+		for m in out["parts"]["weapons"]:
+			if _weapons.has(str(m["id"])) and float(_weapons.def(str(m["id"]))["range"]) >= float(r["range_from"]):
+				m["weight"] = float(m.get("weight", 1)) * float(r["range_bias"])
+	return out
+
+
 static func _mix(seed_value: int, faction: String, size: String, attempt: int) -> int:
 	var h := posmod(seed_value, 2147483647) * 31 + attempt * 40503 + 7
 	for ch in (faction + "/" + size).to_utf8_buffer():
@@ -280,8 +401,8 @@ static func _mix(seed_value: int, faction: String, size: String, attempt: int) -
 
 
 ## One try at a ship: {ship (null when it failed), why}.
-static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, budget: float, ram: bool, attempt: int, shields := true) -> Dictionary:
-	var f: Dictionary = tables()["factions"][faction]
+static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, budget: float, ram: bool, attempt: int, shields := true, role := "") -> Dictionary:
+	var f: Dictionary = _with_role(tables()["factions"][faction], role)
 	var sz: Dictionary = tables()["sizes"][size]
 	var level := 2 if attempt < 4 else (1 if attempt < 7 else 0)
 	var lo := _buy(f, size, budget, rng, ram, shields)
@@ -312,7 +433,7 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 		var r := Hullgen.raster(hull["outline"])
 		if not r["errors"].is_empty():
 			why_not = "outline: " + str(r["errors"][0])
-		elif Hullgen.fill_ratio(r["cells"]) < MAX_FILL:
+		elif Hullgen.fill_ratio(r["cells"]) < float(f["hull"].get("max_fill", MAX_FILL)):
 			ras = r
 			break
 		else:
@@ -323,7 +444,7 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 	if made["ship"] == null:
 		return made
 	var ship: Ship = made["ship"]
-	var why := validate(ship)
+	var why := validate(ship, float(f["hull"].get("max_fill", MAX_FILL)) + 0.01)
 	if not why.is_empty():
 		return {"ship": null, "why": str(why[0])}
 	var parts := {"weapon": [], "engine": [], "shield": [], "reactor": []}  # what stands in the hull, not what was bought
@@ -336,7 +457,10 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 			parts[family].append(id)
 	ship.set_meta("shipgen", {"faction": faction, "size": size, "budget": budget, "spent": lo["spent"], "ram": ram, "level": level,
 		"weapons": parts["weapon"], "engines": parts["engine"], "shields": parts["shield"], "reactors": parts["reactor"],
-		"armour": lo["armour"], "crew": lo["crew"], "skill": lo["skill"]})
+		"armour": lo["armour"], "crew": lo["crew"], "skill": lo["skill"], "role": role})
+	var look := style_of(faction, size, role, budget)
+	if not look.is_empty():
+		ship.set_meta("style", look)
 	return {"ship": ship, "why": ""}
 
 
@@ -1235,7 +1359,7 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 		var base_name := str(names[(first + i) % names.size()])
 		var lap := i / names.size()  # more crew than names: the second lap is "Vex II"
 		ship.crew_plan.append({"name": base_name if lap == 0 else "%s %s" % [base_name, "I".repeat(lap + 1)], "species": str(crew["species"][rng.randi() % crew["species"].size()])})
-	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01), "morale": str(f["ai"].get("morale", "default")), "faction": faction}  # morale: a style of data/morale.json; faction: whose lines (morale.json) it says
+	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01), "morale": str(f["ai"].get("morale", "default")), "faction": str(f.get("lines_as", faction))}  # morale: a style of data/morale.json; faction: whose lines (morale.json) it says
 	if ram:
 		ai["style"] = "rammer"
 		ai["morale"] = "ram"
@@ -1249,6 +1373,24 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 	ship.rng_seed = rng.randi() % 100000 + 1
 	ship.mark_dirty()
 	ship.refresh()
+
+
+## The look of a faction's (or race's) ships: {id, race, label (the adjective), role (by size), line ("Kett lancer"), palette (colours as
+## Color, patch an Array of them), emblem (data)}; {} for a faction with no `style`.
+static func style_of(faction: String, size: String, role := "", budget := -1.0) -> Dictionary:
+	var st = tables()["factions"].get(faction, {}).get("style")
+	if not st is Dictionary:
+		return {}
+	var pal: Dictionary = st["palette"]
+	var noun := role if role != "" else str(st["roles"].get(size, ""))
+	var cfg: Dictionary = tables()["roles"]
+	var grade := "plain"  # a low budget looks patched, a high one fine
+	if budget >= 0.0:
+		grade = "patched" if budget < float(cfg["patched_below"]) else ("fine" if budget >= float(cfg["fine_from"]) else "plain")
+	return {"id": faction, "race": str(tables()["factions"][faction].get("race", "")), "label": str(st["label"]), "role": noun, "grade": grade,
+		"line": ("%s %s" % [st["label"], noun]).strip_edges(), "emblem": st["emblem"], "dressing": st.get("dressing", []),
+		"palette": {"tint": Color(str(pal["tint"])), "accent": Color(str(pal["accent"])), "mark": Color(str(pal["accent"])) if Color(str(pal["accent"])).get_luminance() > 0.3 else Color(str(pal["tint"])).lightened(0.3), "lamp": Color(str(pal["lamp"])),
+			"glow": Color(str(pal["glow"])), "floor": Color(str(pal.get("floor", pal["tint"]))), "wall": Color(str(pal.get("wall", pal["tint"]))), "patch": pal.get("patch", []).map(func(c): return Color(str(c)))}}
 
 
 static func _name_of(f: Dictionary, faction: String, rng: RandomNumberGenerator) -> String:

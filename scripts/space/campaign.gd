@@ -950,6 +950,10 @@ func gen_spec(entry: String, kind: String, roller: RandomNumberGenerator = null)
 	var r: RandomNumberGenerator = roller if roller != null else rng
 	var p := entry.trim_prefix(Shipgen.PREFIX).split(":")
 	var faction := p[0] if p[0] != "" else Shipgen.faction_for(region_data, kind)
+	var home := str(region_data.get("home_species", ""))  # a region whose people have a ship style (data/ship_styles.json) flies their ships for race_share of its pirate fights
+	if p[0] == "" and kind == "pirate" and home != "" and home != faction and Shipgen.tables()["factions"].get(home, {}).has("race"):
+		if r.randf() < float(region_data.get("race_share", Shipgen.RACE_SHARE)):
+			faction = home
 	var difficulty := str(cfg.get("difficulty", "normal"))
 	var budget := maxf(Shipgen.budget_for(tier(), jumps, Shipgen.danger_of(region_data), difficulty, stage), Shipgen.budget_floor(faction, difficulty))
 	budget *= Shipgen.budget_mult(faction, r)  # a rare faction (CONTENT 18) fights far above the stage, from the first jump on; the others roll nothing here

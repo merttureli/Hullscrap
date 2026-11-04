@@ -399,7 +399,7 @@ func conditions(vals: Dictionary, ctx := {}) -> Array:
 		out.append({"id": "fuel", "level": -fm})
 	var skulls := warn_value("skulls_ratio")
 	var foe := float(ctx.get("foe_ratio", 0.0))
-	if not is_nan(skulls) and foe >= skulls:
+	if mode() == "full" and not is_nan(skulls) and foe >= skulls:  # a mismatch said in words, and only at the Full setting
 		out.append({"id": "skulls", "level": foe / skulls})
 	var hops := int(vals.get("hops", -1))
 	var want := stage_value(at, "credits_over_toll")  # the cushion over the toll the stage asks for (the toll itself when the numbers are missing)

@@ -1,0 +1,276 @@
+{
+	"_doc": "Race ships (Beta 3 enemy identity, scripts/space/shipgen.gd tables()): per race (a data/species.json id) the look and the kit of the ships that race flies in its own home region (a region's `race`, `race_share`). Each style becomes a faction of the enemy tables with the id of the race: it is the faction `base`'s table (the economy: costs, weights, the AI) with this block laid over it. `crew` = the race's own crew; `parts` replaces a category of the base menu (weapons, shields, engines, reactors, systems); `armour` = {tiles, factor} replaces the layers' plating; `hull` = keys laid over the base hull grammar (data/enemy_tables.json `hull`, scrap/hullgen.gd); `weights` = laid over the base weights; `ai` = laid over the base ai. `style`: what makes it read at a glance: `label` (the adjective of the name line), `roles` (the noun by size class: \"<label> <role>\"), `palette` (tint = the hull skin's multiply tint, accent = the emblem and trim, lamp = the skin's lamps, glow = the engine flame, patch = multiply tints picked per 2x2 plate for a mismatched or patchwork hull), `emblem` (a glyph in a unit box: prims of poly / circle / line, fill true or false; a `line` is a polyline of x, y pairs). A pack may add its own races in its ship_styles.json beside species.json (same shape; a race already here is kept).",
+	"races": {
+		"kett": {
+			"ship_names": ["Ninefold Drone", "Chitter", "Brood Seven", "The Hum", "Skrit's Nest", "Cell Forty"],
+			"base": "clans",
+			"crew": {"species": ["kett"]},
+			"ai": {"rammer": 0.0, "aim_skill": [0.35, 0.7]},
+			"parts": {"base": {"weapon": "kett_chitin_thrower"}, "weapons": [{"id": "kett_chitin_thrower", "cost": 8, "weight": 4}, {"id": "shrapnel_cannon_scrap", "cost": 10, "weight": 3}, {"id": "kett_hive_swarm_launcher", "cost": 18, "weight": 3, "from": 40}, {"id": "kett_drone_picket", "cost": 8, "weight": 2, "from": 30}], "shields": [{"id": "shield_scrap_mk1", "cost": 12, "weight": 3}, {"id": "kett_hive_battery", "cost": 30, "weight": 1.5, "from": 60}]},
+			"hull": {"prow": [1, 3], "tail": [1, 3], "band": {"gun": 0.45, "bridge": 0.55, "core": 1.0, "aux": 0.55, "engine": 0.5}, "jitter_w": [0, 2], "jitter_c": 1, "asym": true, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 0.7, "side": "random_one"}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3], "side": "random_one"}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}, {"op": "spikes", "count": [4, 6], "depth": 1}]},
+			"style": {"label": "Kett", "roles": {"small": "stinger", "medium": "lancer", "large": "hive-cruiser"}, "palette": {"tint": "#e0a23c", "accent": "#4a2a12", "lamp": "#8fe04a", "glow": "#8fe04a", "patch": ["#ffffff", "#d8b070", "#ffe0a0"], "floor": "#e8a830", "wall": "#a8681c"}, "emblem": {"prims": [{"poly": [[0.5, 0.04], [0.9, 0.27], [0.9, 0.73], [0.5, 0.96], [0.1, 0.73], [0.1, 0.27]], "fill": false}, {"poly": [[0.5, 0.3], [0.68, 0.4], [0.68, 0.6], [0.5, 0.7], [0.32, 0.6], [0.32, 0.4]], "fill": true}]}, "dressing": [{"kind": "mandibles"}, {"kind": "ribs", "count": [10, 16], "where": "flank", "len": 1.0}]},
+			"weights": {"weapons": 5, "armour": 2.0, "shield": 2, "engine": 1, "crew": 3, "skill": 1, "systems": 2}
+		},
+		"prismatic": {
+			"ship_names": ["Resonance", "Third Harmonic", "Facet of Glass", "Prism Song", "Choir Light", "Held Note"],
+			"base": "lumen",
+			"crew": {"species": ["prismatic"]},
+			"ai": {"aim_skill": [0.55, 0.9]},
+			"parts": {"base": {"weapon": "prismatic_glimmer_turret"}, "weapons": [{"id": "prismatic_glimmer_turret", "cost": 24, "weight": 2}, {"id": "prismatic_refractor", "cost": 34, "weight": 1, "from": 60}, {"id": "prismatic_prism_lens", "cost": 34, "weight": 1, "from": 60}, {"id": "siren_ion_neon", "cost": 16, "weight": 4}, {"id": "pulse_mk1", "cost": 10, "weight": 2}], "shields": [{"id": "shield_mk1", "cost": 14, "weight": 1}, {"id": "prismatic_lattice_shield", "cost": 36, "weight": 4, "from": 36}]},
+			"hull": {"prow": [4, 6], "tail": [3, 5], "band": {"gun": 0.28, "bridge": 0.55, "core": 1.0, "aux": 0.7, "engine": 0.35}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "spine": "neon_lattice", "ops": [{"op": "wedge", "at": "bow", "slope": ["steep", "45"], "chance": 1.0}, {"op": "wedge", "at": "stern", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 4]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [3, 5]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}]},
+			"style": {"label": "Prismatic", "roles": {"small": "shard", "medium": "refractor", "large": "cathedral"}, "palette": {"tint": "#c9b4f4", "accent": "#7fe8ff", "lamp": "#bff4ff", "glow": "#9aeaff", "patch": ["#ffffff", "#e8f4ff"], "floor": "#a888ff", "wall": "#7060c8"}, "emblem": {"prims": [{"poly": [[0.5, 0.03], [0.97, 0.5], [0.5, 0.97], [0.03, 0.5]], "fill": false}, {"poly": [[0.5, 0.3], [0.7, 0.5], [0.5, 0.7], [0.3, 0.5]], "fill": true}]}, "dressing": [{"kind": "shards", "count": [6, 9], "sym": true, "where": "any", "len": 2.6}]},
+			"cost_mult": 1.054
+		},
+		"grundl": {
+			"ship_names": ["Slow Mercy", "Long Haul", "Dunnage", "Ballast Rights", "The Heavy Dinner", "Mooring"],
+			"base": "concord",
+			"crew": {"species": ["grundl"]},
+			"ai": {"aim_skill": [0.3, 0.6]},
+			"weights": {"weapons": 5, "armour": 2, "shield": 4, "engine": 2, "crew": 2, "skill": 3, "systems": 1},
+			"armour": {"tiles": ["heavy_armor", "heavy_armor", "heavy_armor"], "factor": {"heavy_armor": 1.6}},
+			"parts": {"base": {"weapon": "laser_mk1"}, "weapons": [{"id": "laser_mk1", "cost": 10, "weight": 2}, {"id": "grundl_barge_flak", "cost": 12, "weight": 1}, {"id": "laser_turret_mk1", "cost": 12, "weight": 2, "from": 30}, {"id": "grundl_slug_mortar", "cost": 20, "weight": 4, "from": 40}, {"id": "grundl_grapple_harpoon", "cost": 12, "weight": 1, "from": 60}, {"id": "laser_mk2", "cost": 22, "weight": 3, "from": 80}], "shields": [{"id": "shield_mk1", "cost": 14, "weight": 1}, {"id": "grundl_freight_shield", "cost": 30, "weight": 4, "from": 60}], "engines": [{"id": "engine_mk1", "cost": 5}, {"id": "grundl_hauler_thrusters", "cost": 12, "from": 40}, {"id": "engine_mk3", "cost": 22, "from": 120}]},
+			"hull": {"prow": [0, 0], "tail": [0, 0], "band": {"gun": 0.75, "bridge": 1.0, "core": 1.0, "aux": 1.0, "engine": 1.0}, "jitter_w": [2, 4], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 1]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 1]}], "max_fill": 0.93},
+			"style": {"label": "Grundl", "roles": {"small": "tender", "medium": "hauler", "large": "barge"}, "palette": {"tint": "#c9923a", "accent": "#b5461f", "lamp": "#ff9a3a", "glow": "#ff9a3a", "patch": ["#ffffff", "#d8a060"], "floor": "#a8703c", "wall": "#6a4020"}, "emblem": {"prims": [{"circle": [0.5, 0.18, 0.12], "fill": false}, {"line": [0.5, 0.3, 0.5, 0.88]}, {"line": [0.3, 0.45, 0.7, 0.45]}, {"line": [0.14, 0.62, 0.5, 0.9, 0.86, 0.62]}]}, "dressing": [{"kind": "pods", "count": [4, 7], "where": "flank", "len": 2.2}, {"kind": "slabs", "count": [4, 6], "where": "any", "len": 0.8}]},
+			"cost_mult": 1.141
+		},
+		"human": {
+			"base": "concord",
+			"crew": {"species": ["human"]},
+			"hull": {"prow": [0, 1], "tail": [1, 3], "band": {"gun": 1.0, "bridge": 0.55, "core": 0.8, "aux": 0.6, "engine": 0.5}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}]},
+			"style": {"label": "Human", "roles": {"small": "cutter", "medium": "frigate", "large": "cruiser"}, "palette": {"tint": "#7aa4e8", "accent": "#f2f6ff", "lamp": "#aaccff", "glow": "#aaccff", "floor": "#9ec0ff", "wall": "#4a78c8", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "spars", "count": [3, 5], "where": "any", "len": 3.2, "sym": true}], "emblem": {"prims": [{"circle": [0.5, 0.5, 0.44], "fill": false}, {"poly": [[0.5, 0.18], [0.582, 0.387], [0.804, 0.401], [0.633, 0.543], [0.688, 0.759], [0.5, 0.64], [0.312, 0.759], [0.367, 0.543], [0.196, 0.401], [0.418, 0.387]], "fill": true}]}},
+			"parts": {"base": {"weapon": "laser_mk1"}, "weapons": [{"id": "laser_mk1", "cost": 10, "weight": 2}, {"id": "pulse_mk1", "cost": 10, "weight": 2}, {"id": "human_volley_rack", "cost": 14, "weight": 3, "from": 30}, {"id": "human_concord_railgun", "cost": 20, "weight": 3, "from": 60}, {"id": "human_flak_screen", "cost": 14, "weight": 3, "from": 30}]},
+			"cost_mult": 0.457,
+			"ship_names": ["Human Small Mercy", "Human Long Way Round", "Human Second Wind", "Human Quiet Errand", "Human Good Intentions", "Human Slow Tide"]
+		},
+		"basalt": {
+			"base": "clans",
+			"crew": {"species": ["basalt"]},
+			"hull": {"prow": [0, 0], "tail": [0, 0], "band": {"gun": 0.75, "bridge": 1.0, "core": 1.0, "aux": 1.0, "engine": 1.0}, "jitter_w": [2, 4], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 1]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}], "max_fill": 0.93},
+			"style": {"label": "Basalt", "roles": {"small": "chunk", "medium": "quarrier", "large": "slab-ship"}, "palette": {"tint": "#8a8a90", "accent": "#d8d2c0", "lamp": "#ffb060", "glow": "#ffb060", "floor": "#a8a49c", "wall": "#5c5a58", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "slabs", "count": [5, 8], "where": "any", "len": 0.9}], "emblem": {"prims": [{"poly": [[0.05, 0.9], [0.4, 0.15], [0.62, 0.55], [0.75, 0.35], [0.95, 0.9]], "fill": false}, {"line": [0.05, 0.9, 0.95, 0.9]}]}},
+			"parts": {"base": {"weapon": "rattle_burst_scrap"}, "weapons": [{"id": "rattle_burst_scrap", "cost": 8, "weight": 2}, {"id": "shrapnel_cannon_scrap", "cost": 10, "weight": 2}, {"id": "basalt_magma_spitter", "cost": 14, "weight": 3, "from": 30}, {"id": "basalt_quarry_driver", "cost": 20, "weight": 3, "from": 60}, {"id": "basalt_pumice_flak", "cost": 14, "weight": 3, "from": 30}]},
+			"cost_mult": 2.116,
+			"ship_names": ["Basalt Small Mercy", "Basalt Long Way Round", "Basalt Second Wind", "Basalt Quiet Errand", "Basalt Good Intentions", "Basalt Slow Tide"]
+		},
+		"fenn": {
+			"base": "clans",
+			"crew": {"species": ["fenn"]},
+			"hull": {"prow": [0, 1], "tail": [1, 3], "band": {"gun": 1.0, "bridge": 0.55, "core": 0.8, "aux": 0.6, "engine": 0.5}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}]},
+			"style": {"label": "Fenn", "roles": {"small": "scamp", "medium": "haggler", "large": "barter-ship"}, "palette": {"tint": "#e8d050", "accent": "#6a4a20", "lamp": "#fff090", "glow": "#fff090", "floor": "#f0e080", "wall": "#a89030", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "lanterns", "count": [6, 9], "where": "any", "len": 1.4}], "emblem": {"prims": [{"poly": [[0.1, 0.9], [0.1, 0.1], [0.4, 0.45]], "fill": true}, {"poly": [[0.9, 0.9], [0.9, 0.1], [0.6, 0.45]], "fill": true}, {"line": [0.1, 0.9, 0.9, 0.9]}]}},
+			"parts": {"base": {"weapon": "rattle_burst_scrap"}, "weapons": [{"id": "rattle_burst_scrap", "cost": 8, "weight": 2}, {"id": "shrapnel_cannon_scrap", "cost": 10, "weight": 2}, {"id": "fenn_twitch_cannon", "cost": 14, "weight": 3, "from": 30}, {"id": "fenn_spark_lattice", "cost": 14, "weight": 3, "from": 30}, {"id": "fenn_market_missile", "cost": 14, "weight": 3, "from": 30}], "engines": [{"id": "engine_scrap_mk1", "cost": 4}, {"id": "fenn_haggle_engine", "cost": 12, "from": 40}]},
+			"cost_mult": 2.34,
+			"ship_names": ["Fenn Small Mercy", "Fenn Long Way Round", "Fenn Second Wind", "Fenn Quiet Errand", "Fenn Good Intentions", "Fenn Slow Tide"]
+		},
+		"mire": {
+			"base": "concord",
+			"crew": {"species": ["mire"]},
+			"hull": {"prow": [1, 2], "tail": [1, 2], "band": {"gun": 0.4, "bridge": 0.7, "core": 1.0, "aux": 1.0, "engine": 0.75}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "arc", "at": "tip", "count": [2, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "arc", "at": "stern_end", "count": [2, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Mire", "roles": {"small": "ripple", "medium": "bogger", "large": "fenwalker"}, "palette": {"tint": "#3ab0a0", "accent": "#e0fff4", "lamp": "#60ffe0", "glow": "#60ffe0", "floor": "#70d8c8", "wall": "#1a6860", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "tarps", "count": [4, 6], "where": "flank", "len": 1.0}], "emblem": {"prims": [{"poly": [[0.5, 0.05], [0.8, 0.55], [0.75, 0.85], [0.5, 0.95], [0.25, 0.85], [0.2, 0.55]], "fill": false}, {"line": [0.3, 0.65, 0.5, 0.75, 0.7, 0.65]}]}},
+			"parts": {"base": {"weapon": "laser_mk1"}, "weapons": [{"id": "laser_mk1", "cost": 10, "weight": 2}, {"id": "pulse_mk1", "cost": 10, "weight": 2}, {"id": "mire_steam_lance", "cost": 14, "weight": 3, "from": 30}, {"id": "mire_bog_mortar", "cost": 14, "weight": 3, "from": 30}, {"id": "mire_mist_projector", "cost": 10, "weight": 3, "from": 0}], "shields": [{"id": "shield_mk2", "cost": 30, "weight": 3, "from": 70}, {"id": "mire_rain_shield", "cost": 30, "weight": 3, "from": 60}]},
+			"ship_names": ["Mire Small Mercy", "Mire Long Way Round", "Mire Second Wind", "Mire Quiet Errand", "Mire Good Intentions", "Mire Slow Tide"]
+		},
+		"gauntling": {
+			"base": "clans",
+			"crew": {"species": ["gauntling"]},
+			"hull": {"prow": [1, 3], "tail": [0, 2], "band": {"gun": 0.45, "bridge": 0.7, "core": 0.95, "aux": 0.8, "engine": 0.7}, "jitter_w": [1, 4], "jitter_c": 0, "asym": true, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}, {"op": "spikes", "count": [3, 5], "depth": 1}]},
+			"style": {"label": "Gauntling", "roles": {"small": "welder", "medium": "patchwork", "large": "rebuild"}, "palette": {"tint": "#8898a8", "accent": "#ff9040", "lamp": "#ffa050", "glow": "#ffa050", "floor": "#98a8b8", "wall": "#506070", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "scrap", "count": [5, 8], "where": "any", "len": 1.3}], "emblem": {"prims": [{"poly": [[0.925, 0.676], [0.676, 0.925], [0.324, 0.925], [0.075, 0.676], [0.075, 0.324], [0.324, 0.075], [0.676, 0.075], [0.925, 0.324]], "fill": false}, {"circle": [0.5, 0.5, 0.17], "fill": true}]}},
+			"parts": {"base": {"weapon": "rattle_burst_scrap"}, "weapons": [{"id": "rattle_burst_scrap", "cost": 8, "weight": 2}, {"id": "shrapnel_cannon_scrap", "cost": 10, "weight": 2}, {"id": "gauntling_arc_hammer", "cost": 14, "weight": 3, "from": 30}, {"id": "gauntling_scrap_shotgun", "cost": 10, "weight": 3, "from": 0}, {"id": "gauntling_tesla_picket", "cost": 14, "weight": 3, "from": 30}], "engines": [{"id": "engine_scrap_mk1", "cost": 4}, {"id": "gauntling_overclock_engine", "cost": 12, "from": 40}]},
+			"cost_mult": 2.663,
+			"ship_names": ["Gauntling Small Mercy", "Gauntling Long Way Round", "Gauntling Second Wind", "Gauntling Quiet Errand", "Gauntling Good Intentions", "Gauntling Slow Tide"]
+		},
+		"vellum": {
+			"base": "wardens",
+			"crew": {"species": ["vellum"]},
+			"hull": {"prow": [0, 1], "tail": [0, 1], "band": {"gun": 0.55, "bridge": 0.9, "core": 1.0, "aux": 0.95, "engine": 0.75}, "jitter_w": [2, 3], "jitter_c": 0, "asym": false, "ops": [{"op": "arc", "at": "tip", "count": [2, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "arc", "at": "stern_end", "count": [2, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Vellum", "roles": {"small": "fold", "medium": "crease", "large": "origami"}, "palette": {"tint": "#f4efe0", "accent": "#e8c8a0", "lamp": "#fff0c0", "glow": "#fff0c0", "floor": "#fff8e8", "wall": "#c8c0a8", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "tarps", "count": [3, 5], "where": "any", "len": 0.9, "sym": true}], "emblem": {"prims": [{"poly": [[0.1, 0.1], [0.7, 0.1], [0.9, 0.3], [0.9, 0.9], [0.1, 0.9]], "fill": false}, {"line": [0.7, 0.1, 0.7, 0.3, 0.9, 0.3]}]}},
+			"prefer": {"weapons": {"heat_lance_neon": 2.0}},
+			"ship_names": ["Vellum Small Mercy", "Vellum Long Way Round", "Vellum Second Wind", "Vellum Quiet Errand", "Vellum Good Intentions", "Vellum Slow Tide"]
+		},
+		"oorth": {
+			"base": "concord",
+			"crew": {"species": ["oorth"]},
+			"hull": {"prow": [0, 1], "tail": [1, 3], "band": {"gun": 1.0, "bridge": 0.55, "core": 0.8, "aux": 0.6, "engine": 0.5}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}]},
+			"style": {"label": "Oorth", "roles": {"small": "hush", "medium": "veil", "large": "quietude"}, "palette": {"tint": "#5a5ab8", "accent": "#c8b8ff", "lamp": "#a8a0ff", "glow": "#a8a0ff", "floor": "#7a78d8", "wall": "#34346a", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "spars", "count": [2, 4], "where": "any", "len": 4.0, "sym": true}], "emblem": {"prims": [{"poly": [[0.15, 0.95], [0.15, 0.4], [0.5, 0.05], [0.85, 0.4], [0.85, 0.95]], "fill": false}, {"circle": [0.5, 0.5, 0.09], "fill": true}]}},
+			"prefer": {"weapons": {"ion_blast_mk1": 2.0, "laser_turret_mk1": 2.0}},
+			"ship_names": ["Oorth Small Mercy", "Oorth Long Way Round", "Oorth Second Wind", "Oorth Quiet Errand", "Oorth Good Intentions", "Oorth Slow Tide"]
+		},
+		"drakkin": {
+			"base": "clans",
+			"crew": {"species": ["drakkin"]},
+			"hull": {"prow": [0, 1], "tail": [3, 5], "band": {"gun": 1.0, "bridge": 0.9, "core": 0.7, "aux": 0.5, "engine": 0.3}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}]},
+			"style": {"label": "Drakkin", "roles": {"small": "fang", "medium": "claw", "large": "wyrm"}, "palette": {"tint": "#a02838", "accent": "#f0c040", "lamp": "#ffb040", "glow": "#ffb040", "floor": "#c04050", "wall": "#601020", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "ribs", "count": [8, 12], "where": "flank", "len": 1.4}], "emblem": {"prims": [{"line": [0.2, 0.08, 0.35, 0.92]}, {"line": [0.5, 0.08, 0.6, 0.92]}, {"line": [0.8, 0.08, 0.85, 0.92]}]}},
+			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "laser_mk1": 2.0}},
+			"cost_mult": 1.659,
+			"ship_names": ["Drakkin Small Mercy", "Drakkin Long Way Round", "Drakkin Second Wind", "Drakkin Quiet Errand", "Drakkin Good Intentions", "Drakkin Slow Tide"]
+		},
+		"wisp": {
+			"base": "wardens",
+			"crew": {"species": ["wisp"]},
+			"hull": {"prow": [3, 5], "tail": [2, 4], "band": {"gun": 0.3, "bridge": 0.6, "core": 1.0, "aux": 0.75, "engine": 0.4}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 4]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [3, 5]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}], "spine": "neon_lattice"},
+			"style": {"label": "Wisp", "roles": {"small": "flicker", "medium": "streamer", "large": "stormcloud"}, "palette": {"tint": "#50d8f0", "accent": "#e8ffff", "lamp": "#a0f8ff", "glow": "#a0f8ff", "floor": "#90f0ff", "wall": "#287898", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "fins", "count": [6, 9], "where": "any", "len": 2.4, "sym": true}], "emblem": {"prims": [{"line": [0.5, 0.5, 0.58, 0.45, 0.62, 0.55, 0.5, 0.68, 0.32, 0.6, 0.28, 0.38, 0.45, 0.2, 0.72, 0.25, 0.85, 0.5]}]}},
+			"prefer": {"weapons": {"heat_lance_neon": 2.0}},
+			"cost_mult": 0.615,
+			"ship_names": ["Wisp Small Mercy", "Wisp Long Way Round", "Wisp Second Wind", "Wisp Quiet Errand", "Wisp Good Intentions", "Wisp Slow Tide"]
+		},
+		"hullkin": {
+			"base": "clans",
+			"crew": {"species": ["hullkin"]},
+			"hull": {"prow": [0, 1], "tail": [0, 1], "band": {"gun": 0.55, "bridge": 0.9, "core": 1.0, "aux": 0.95, "engine": 0.75}, "jitter_w": [2, 3], "jitter_c": 0, "asym": false, "ops": [{"op": "arc", "at": "tip", "count": [2, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "arc", "at": "stern_end", "count": [2, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Hullkin", "roles": {"small": "barnacle", "medium": "reef-hulk", "large": "drydock"}, "palette": {"tint": "#d8b878", "accent": "#a8683a", "lamp": "#ffc880", "glow": "#ffc880", "floor": "#e8d098", "wall": "#9a7a48", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "scrap", "count": [8, 12], "where": "any", "len": 0.9}], "emblem": {"prims": [{"circle": [0.3, 0.7, 0.18], "fill": true}, {"circle": [0.7, 0.7, 0.18], "fill": true}, {"circle": [0.5, 0.3, 0.18], "fill": true}]}},
+			"prefer": {"weapons": {"bolt_thrower_scrap": 2.0, "laser_mk1": 2.0}},
+			"cost_mult": 1.887,
+			"ship_names": ["Hullkin Small Mercy", "Hullkin Long Way Round", "Hullkin Second Wind", "Hullkin Quiet Errand", "Hullkin Good Intentions", "Hullkin Slow Tide"]
+		},
+		"lantern": {
+			"base": "concord",
+			"crew": {"species": ["lantern"]},
+			"hull": {"prow": [2, 4], "tail": [0, 1], "band": {"gun": 0.3, "bridge": 0.5, "core": 0.7, "aux": 0.9, "engine": 1.0}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 4]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Lantern", "roles": {"small": "moth", "medium": "glowwing", "large": "beacon"}, "palette": {"tint": "#f8b088", "accent": "#fff0d0", "lamp": "#ffd890", "glow": "#ffd890", "floor": "#ffd0a8", "wall": "#c07850", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "lanterns", "count": [3, 5], "where": "front", "len": 1.8, "sym": true}], "emblem": {"prims": [{"poly": [[0.3, 0.2], [0.7, 0.2], [0.75, 0.85], [0.25, 0.85]], "fill": false}, {"line": [0.38, 0.1, 0.62, 0.1]}, {"circle": [0.5, 0.52, 0.1], "fill": true}]}},
+			"prefer": {"weapons": {"pulse_mk1": 2.0, "laser_mk1": 2.0}},
+			"cost_mult": 0.629,
+			"ship_names": ["Lantern Small Mercy", "Lantern Long Way Round", "Lantern Second Wind", "Lantern Quiet Errand", "Lantern Good Intentions", "Lantern Slow Tide"]
+		},
+		"revenant": {
+			"base": "hollow",
+			"crew": {"species": ["revenant"]},
+			"hull": {"prow": [1, 3], "tail": [0, 2], "band": {"gun": 0.45, "bridge": 0.7, "core": 0.95, "aux": 0.8, "engine": 0.7}, "jitter_w": [1, 4], "jitter_c": 0, "asym": true, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}, {"op": "spikes", "count": [3, 5], "depth": 1}]},
+			"style": {"label": "Revenant", "roles": {"small": "wraith", "medium": "husk", "large": "lingerer"}, "palette": {"tint": "#42464e", "accent": "#c0ffd0", "lamp": "#80ffa0", "glow": "#80ffa0", "floor": "#58606c", "wall": "#22262e", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "spars", "count": [3, 6], "where": "any", "len": 3.0}], "emblem": {"prims": [{"circle": [0.5, 0.5, 0.42], "fill": false}, {"line": [0.2, 0.8, 0.8, 0.2]}]}},
+			"prefer": {"weapons": {"leech_laser": 2.0, "siren_ion_neon": 2.0}},
+			"cost_mult": 1.329,
+			"ship_names": ["Revenant Small Mercy", "Revenant Long Way Round", "Revenant Second Wind", "Revenant Quiet Errand", "Revenant Good Intentions", "Revenant Slow Tide"]
+		},
+		"choir": {
+			"base": "wardens",
+			"crew": {"species": ["choir"]},
+			"hull": {"prow": [3, 5], "tail": [2, 4], "band": {"gun": 0.3, "bridge": 0.6, "core": 1.0, "aux": 0.75, "engine": 0.4}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 4]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [3, 5]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}], "spine": "neon_lattice"},
+			"style": {"label": "Choir", "roles": {"small": "chime", "medium": "anthem", "large": "chantry"}, "palette": {"tint": "#f0a8d8", "accent": "#fff0fa", "lamp": "#ffc0f0", "glow": "#ffc0f0", "floor": "#ffd0ee", "wall": "#b06890", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "shards", "count": [5, 8], "where": "any", "len": 2.0, "sym": true}], "emblem": {"prims": [{"line": [0.3, 0.1, 0.3, 0.6, 0.7, 0.6, 0.7, 0.1]}, {"line": [0.5, 0.6, 0.5, 0.95]}]}},
+			"prefer": {"weapons": {"pulse_mk1": 2.0}},
+			"cost_mult": 0.949,
+			"ship_names": ["Choir Small Mercy", "Choir Long Way Round", "Choir Second Wind", "Choir Quiet Errand", "Choir Good Intentions", "Choir Slow Tide"]
+		},
+		"rattler": {
+			"base": "clans",
+			"crew": {"species": ["rattler"]},
+			"hull": {"prow": [1, 3], "tail": [0, 2], "band": {"gun": 0.45, "bridge": 0.7, "core": 0.95, "aux": 0.8, "engine": 0.7}, "jitter_w": [1, 4], "jitter_c": 0, "asym": true, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}, {"op": "spikes", "count": [3, 5], "depth": 1}]},
+			"style": {"label": "Rattler", "roles": {"small": "scrapling", "medium": "gremlin", "large": "heap"}, "palette": {"tint": "#c8784a", "accent": "#ffe0a0", "lamp": "#ffb868", "glow": "#ffb868", "floor": "#e09868", "wall": "#7a4020", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "ribs", "count": [6, 10], "where": "any", "len": 1.0}], "emblem": {"prims": [{"poly": [[0.55, 0.05], [0.25, 0.55], [0.48, 0.55], [0.4, 0.95], [0.78, 0.4], [0.52, 0.4]], "fill": true}]}},
+			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "bolt_thrower_scrap": 2.0}},
+			"cost_mult": 2.075,
+			"ship_names": ["Rattler Small Mercy", "Rattler Long Way Round", "Rattler Second Wind", "Rattler Quiet Errand", "Rattler Good Intentions", "Rattler Slow Tide"]
+		},
+		"tessellate": {
+			"base": "concord",
+			"crew": {"species": ["tessellate"]},
+			"hull": {"prow": [0, 0], "tail": [0, 0], "band": {"gun": 0.75, "bridge": 1.0, "core": 1.0, "aux": 1.0, "engine": 1.0}, "jitter_w": [2, 4], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 1]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}], "max_fill": 0.93},
+			"style": {"label": "Tessellate", "roles": {"small": "tile", "medium": "mosaic", "large": "lattice-ship"}, "palette": {"tint": "#90e8c0", "accent": "#ffffff", "lamp": "#b0ffe0", "glow": "#b0ffe0", "floor": "#c0fff0", "wall": "#50a888", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "slabs", "count": [5, 8], "where": "any", "len": 0.7, "sym": true}], "emblem": {"prims": [{"poly": [[0.08, 0.08], [0.46, 0.08], [0.46, 0.46], [0.08, 0.46]], "fill": true}, {"poly": [[0.54, 0.54], [0.92, 0.54], [0.92, 0.92], [0.54, 0.92]], "fill": true}, {"poly": [[0.54, 0.08], [0.92, 0.08], [0.92, 0.46], [0.54, 0.46]], "fill": false}, {"poly": [[0.08, 0.54], [0.46, 0.54], [0.46, 0.92], [0.08, 0.92]], "fill": false}]}},
+			"prefer": {"weapons": {"ion_blast_mk1": 2.0, "laser_mk1": 2.0}},
+			"ship_names": ["Tessellate Small Mercy", "Tessellate Long Way Round", "Tessellate Second Wind", "Tessellate Quiet Errand", "Tessellate Good Intentions", "Tessellate Slow Tide"]
+		},
+		"sable": {
+			"base": "clans",
+			"crew": {"species": ["sable"]},
+			"hull": {"prow": [3, 5], "tail": [0, 2], "band": {"gun": 0.3, "bridge": 0.7, "core": 0.9, "aux": 0.85, "engine": 1.0}, "jitter_w": [0, 2], "jitter_c": 0, "asym": true, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}, {"op": "spikes", "count": [2, 3], "depth": 1}]},
+			"style": {"label": "Sable", "roles": {"small": "boarder", "medium": "slipknot", "large": "reaver"}, "palette": {"tint": "#2c3c70", "accent": "#ff7050", "lamp": "#ff8860", "glow": "#ff8860", "floor": "#4a5c9a", "wall": "#18204a", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "spikes", "count": [5, 8], "where": "any", "len": 1.6}], "emblem": {"prims": [{"line": [0.5, 0.05, 0.5, 0.75]}, {"line": [0.5, 0.75, 0.3, 0.9, 0.15, 0.7]}, {"line": [0.5, 0.75, 0.7, 0.9, 0.85, 0.7]}, {"circle": [0.5, 0.12, 0.07], "fill": false}]}},
+			"prefer": {"weapons": {"bolt_thrower_scrap": 2.0, "laser_mk1": 2.0}},
+			"cost_mult": 1.908,
+			"ship_names": ["Sable Small Mercy", "Sable Long Way Round", "Sable Second Wind", "Sable Quiet Errand", "Sable Good Intentions", "Sable Slow Tide"]
+		},
+		"quillback": {
+			"base": "clans",
+			"crew": {"species": ["quillback"]},
+			"hull": {"prow": [2, 3], "tail": [1, 2], "band": {"gun": 0.45, "bridge": 0.6, "core": 1.0, "aux": 0.6, "engine": 0.5}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}]},
+			"style": {"label": "Quillback", "roles": {"small": "pricker", "medium": "duellist", "large": "porcupine"}, "palette": {"tint": "#b0a060", "accent": "#6a5028", "lamp": "#ffd878", "glow": "#ffd878", "floor": "#d0c488", "wall": "#7a6a38", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "spikes", "count": [9, 14], "where": "flank", "len": 1.5}], "emblem": {"prims": [{"line": [0.5, 0.92, 0.1, 0.3]}, {"line": [0.5, 0.92, 0.3, 0.1]}, {"line": [0.5, 0.92, 0.5, 0.05]}, {"line": [0.5, 0.92, 0.7, 0.1]}, {"line": [0.5, 0.92, 0.9, 0.3]}]}},
+			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "bolt_thrower_scrap": 2.0}},
+			"cost_mult": 1.721,
+			"ship_names": ["Quillback Small Mercy", "Quillback Long Way Round", "Quillback Second Wind", "Quillback Quiet Errand", "Quillback Good Intentions", "Quillback Slow Tide"]
+		},
+		"kite": {
+			"base": "clans",
+			"crew": {"species": ["kite"]},
+			"hull": {"prow": [2, 4], "tail": [0, 1], "band": {"gun": 0.3, "bridge": 0.5, "core": 0.7, "aux": 0.9, "engine": 1.0}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 4]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Kite", "roles": {"small": "skimmer", "medium": "tumbler", "large": "windrider"}, "palette": {"tint": "#b8a0e8", "accent": "#ffffff", "lamp": "#e0d0ff", "glow": "#e0d0ff", "floor": "#d8c8ff", "wall": "#7864b0", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "fins", "count": [3, 5], "where": "any", "len": 2.8, "sym": true}], "emblem": {"prims": [{"poly": [[0.5, 0.05], [0.8, 0.4], [0.5, 0.75], [0.2, 0.4]], "fill": false}, {"line": [0.5, 0.75, 0.4, 0.88, 0.55, 0.95]}]}},
+			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "shrapnel_cannon_scrap": 2.0}},
+			"cost_mult": 1.477,
+			"ship_names": ["Kite Small Mercy", "Kite Long Way Round", "Kite Second Wind", "Kite Quiet Errand", "Kite Good Intentions", "Kite Slow Tide"]
+		},
+		"warden_frame": {
+			"base": "wardens",
+			"crew": {"species": ["warden_frame"]},
+			"hull": {"prow": [2, 3], "tail": [1, 2], "band": {"gun": 0.45, "bridge": 0.6, "core": 1.0, "aux": 0.6, "engine": 0.5}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}]},
+			"style": {"label": "Warden-frame", "roles": {"small": "unit", "medium": "keeper-frame", "large": "bastion-frame"}, "palette": {"tint": "#5a8898", "accent": "#a8f0e0", "lamp": "#80f8e0", "glow": "#80f8e0", "floor": "#78a8b8", "wall": "#304c5c", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "spars", "count": [4, 6], "where": "stern", "len": 2.6, "sym": true}], "emblem": {"prims": [{"poly": [[0.08, 0.08], [0.92, 0.08], [0.92, 0.92], [0.08, 0.92]], "fill": false}, {"poly": [[0.3, 0.3], [0.7, 0.3], [0.7, 0.7], [0.3, 0.7]], "fill": false}, {"line": [0.08, 0.08, 0.3, 0.3]}, {"line": [0.92, 0.92, 0.7, 0.7]}]}},
+			"prefer": {"weapons": {"siren_ion_neon": 2.0, "pulse_mk2": 2.0}},
+			"cost_mult": 1.666,
+			"ship_names": ["Warden-frame Small Mercy", "Warden-frame Long Way Round", "Warden-frame Second Wind", "Warden-frame Quiet Errand", "Warden-frame Good Intentions", "Warden-frame Slow Tide"]
+		},
+		"murrow": {
+			"base": "clans",
+			"crew": {"species": ["murrow"]},
+			"hull": {"prow": [0, 1], "tail": [3, 5], "band": {"gun": 1.0, "bridge": 0.9, "core": 0.7, "aux": 0.5, "engine": 0.3}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [3, 4]}]},
+			"style": {"label": "Murrow", "roles": {"small": "digger", "medium": "borer", "large": "tunneller"}, "palette": {"tint": "#7a5a3a", "accent": "#e0b070", "lamp": "#ffb060", "glow": "#ffb060", "floor": "#9a7a54", "wall": "#4a3220", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "slabs", "count": [4, 7], "where": "bow", "len": 1.1}], "emblem": {"prims": [{"line": [0.12, 0.2, 0.88, 0.8]}, {"line": [0.88, 0.2, 0.12, 0.8]}, {"circle": [0.5, 0.5, 0.1], "fill": true}]}},
+			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "shrapnel_cannon_scrap": 2.0}},
+			"cost_mult": 1.524,
+			"ship_names": ["Murrow Small Mercy", "Murrow Long Way Round", "Murrow Second Wind", "Murrow Quiet Errand", "Murrow Good Intentions", "Murrow Slow Tide"]
+		},
+		"siltborn": {
+			"base": "wardens",
+			"crew": {"species": ["siltborn"]},
+			"hull": {"prow": [1, 2], "tail": [1, 2], "band": {"gun": 0.4, "bridge": 0.7, "core": 1.0, "aux": 1.0, "engine": 0.75}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "arc", "at": "tip", "count": [2, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "arc", "at": "stern_end", "count": [2, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Siltborn", "roles": {"small": "drifter", "medium": "float", "large": "gasbag"}, "palette": {"tint": "#a888a8", "accent": "#f0e0f0", "lamp": "#f0c0f0", "glow": "#f0c0f0", "floor": "#c8a8c8", "wall": "#705070", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "pods", "count": [4, 6], "where": "any", "len": 2.0, "sym": true}], "emblem": {"prims": [{"circle": [0.5, 0.5, 0.42], "fill": false}, {"line": [0.1, 0.4, 0.9, 0.4]}, {"line": [0.12, 0.62, 0.88, 0.62]}]}},
+			"prefer": {"weapons": {"ion_blast_mk1": 2.0, "pulse_mk1": 2.0}},
+			"cost_mult": 1.136,
+			"ship_names": ["Siltborn Small Mercy", "Siltborn Long Way Round", "Siltborn Second Wind", "Siltborn Quiet Errand", "Siltborn Good Intentions", "Siltborn Slow Tide"]
+		},
+		"corvin": {
+			"base": "clans",
+			"crew": {"species": ["corvin"]},
+			"hull": {"prow": [0, 1], "tail": [1, 3], "band": {"gun": 1.0, "bridge": 0.55, "core": 0.8, "aux": 0.6, "engine": 0.5}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}]},
+			"style": {"label": "Corvin", "roles": {"small": "scrounger", "medium": "crow", "large": "carrion-ship"}, "palette": {"tint": "#585868", "accent": "#e0e0f8", "lamp": "#c0c8ff", "glow": "#c0c8ff", "floor": "#707084", "wall": "#303040", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "lanterns", "count": [3, 5], "where": "any", "len": 1.2}], "emblem": {"prims": [{"line": [0.05, 0.3, 0.3, 0.7, 0.5, 0.35, 0.7, 0.7, 0.95, 0.3]}, {"circle": [0.5, 0.8, 0.07], "fill": true}]}},
+			"prefer": {"weapons": {"rattle_burst_scrap": 2.0, "shrapnel_cannon_scrap": 2.0}},
+			"cost_mult": 1.687,
+			"ship_names": ["Corvin Small Mercy", "Corvin Long Way Round", "Corvin Second Wind", "Corvin Quiet Errand", "Corvin Good Intentions", "Corvin Slow Tide"]
+		},
+		"brine": {
+			"base": "concord",
+			"crew": {"species": ["brine"]},
+			"hull": {"prow": [0, 1], "tail": [0, 1], "band": {"gun": 0.55, "bridge": 0.9, "core": 1.0, "aux": 0.95, "engine": 0.75}, "jitter_w": [2, 3], "jitter_c": 0, "asym": false, "ops": [{"op": "arc", "at": "tip", "count": [2, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "arc", "at": "stern_end", "count": [2, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Brine", "roles": {"small": "shellback", "medium": "dockhand", "large": "crabber"}, "palette": {"tint": "#f08068", "accent": "#fff0e0", "lamp": "#ffb0a0", "glow": "#ffb0a0", "floor": "#ffa090", "wall": "#a04838", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "slabs", "count": [4, 6], "where": "front", "len": 1.0, "sym": true}], "emblem": {"prims": [{"poly": [[0.15, 0.95], [0.1, 0.4], [0.3, 0.1], [0.45, 0.4], [0.35, 0.5], [0.3, 0.3], [0.25, 0.5], [0.3, 0.95]], "fill": false}, {"poly": [[0.85, 0.95], [0.9, 0.4], [0.7, 0.1], [0.55, 0.4], [0.65, 0.5], [0.7, 0.3], [0.75, 0.5], [0.7, 0.95]], "fill": false}]}},
+			"prefer": {"weapons": {"ion_blast_mk1": 2.0, "artemis_mk1": 2.0}},
+			"cost_mult": 0.895,
+			"ship_names": ["Brine Small Mercy", "Brine Long Way Round", "Brine Second Wind", "Brine Quiet Errand", "Brine Good Intentions", "Brine Slow Tide"]
+		},
+		"echo": {
+			"base": "wardens",
+			"crew": {"species": ["echo"]},
+			"hull": {"prow": [3, 5], "tail": [0, 2], "band": {"gun": 0.3, "bridge": 0.7, "core": 0.9, "aux": 0.85, "engine": 1.0}, "jitter_w": [0, 2], "jitter_c": 0, "asym": true, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}, {"op": "spikes", "count": [2, 3], "depth": 1}]},
+			"style": {"label": "Echo", "roles": {"small": "mimic", "medium": "reflection", "large": "double"}, "palette": {"tint": "#d0d8e8", "accent": "#ffffff", "lamp": "#f0f8ff", "glow": "#f0f8ff", "floor": "#e8eef8", "wall": "#8890a0", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "shards", "count": [4, 6], "where": "any", "len": 1.6}], "emblem": {"prims": [{"circle": [0.36, 0.5, 0.3], "fill": false}, {"circle": [0.64, 0.5, 0.3], "fill": false}]}},
+			"prefer": {"weapons": {"siren_ion_neon": 2.0, "pulse_mk2": 2.0}},
+			"cost_mult": 1.841,
+			"ship_names": ["Echo Small Mercy", "Echo Long Way Round", "Echo Second Wind", "Echo Quiet Errand", "Echo Good Intentions", "Echo Slow Tide"]
+		},
+		"ferro": {
+			"base": "clans",
+			"crew": {"species": ["ferro"]},
+			"hull": {"prow": [4, 6], "tail": [2, 4], "band": {"gun": 0.25, "bridge": 0.45, "core": 0.6, "aux": 0.5, "engine": 0.4}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [3, 4]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [2, 3]}]},
+			"style": {"label": "Ferro", "roles": {"small": "slick", "medium": "magnet", "large": "flux-ship"}, "palette": {"tint": "#506078", "accent": "#a0c0ff", "lamp": "#90b8ff", "glow": "#90b8ff", "floor": "#687890", "wall": "#283448", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "shards", "count": [7, 11], "where": "stern", "len": 1.8}], "emblem": {"prims": [{"line": [0.2, 0.1, 0.2, 0.6]}, {"line": [0.8, 0.1, 0.8, 0.6]}, {"line": [0.2, 0.6, 0.3, 0.85, 0.5, 0.92, 0.7, 0.85, 0.8, 0.6]}, {"line": [0.12, 0.1, 0.28, 0.1]}, {"line": [0.72, 0.1, 0.88, 0.1]}]}},
+			"prefer": {"weapons": {"shrapnel_cannon_scrap": 2.0, "bolt_thrower_scrap": 2.0}},
+			"cost_mult": 0.902,
+			"ship_names": ["Ferro Small Mercy", "Ferro Long Way Round", "Ferro Second Wind", "Ferro Quiet Errand", "Ferro Good Intentions", "Ferro Slow Tide"]
+		},
+		"emberkin": {
+			"base": "wardens",
+			"crew": {"species": ["emberkin"]},
+			"hull": {"prow": [2, 4], "tail": [0, 1], "band": {"gun": 0.3, "bridge": 0.5, "core": 0.7, "aux": 0.9, "engine": 1.0}, "jitter_w": [0, 0], "jitter_c": 0, "asym": false, "ops": [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}, {"op": "chamfer", "at": "tip", "kind": ["45"], "n": [2, 3]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 4]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Emberkin", "roles": {"small": "spark", "medium": "kiln", "large": "forge"}, "palette": {"tint": "#e8782a", "accent": "#ffd060", "lamp": "#ff8030", "glow": "#ff8030", "floor": "#ff9a40", "wall": "#a8480e", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "fins", "count": [4, 6], "where": "flank", "len": 3.0, "sym": true}], "emblem": {"prims": [{"poly": [[0.5, 0.05], [0.78, 0.45], [0.7, 0.9], [0.3, 0.9], [0.22, 0.45]], "fill": false}, {"poly": [[0.5, 0.45], [0.6, 0.8], [0.4, 0.8]], "fill": true}]}},
+			"parts": {"weapons": [{"id": "pulse_mk1", "cost": 10, "weight": 2}, {"id": "ion_blast_mk1", "cost": 14, "weight": 2}, {"id": "emberkin_pyre_lance", "cost": 14, "weight": 3, "from": 30}, {"id": "emberkin_cinder_mortar", "cost": 14, "weight": 3, "from": 30}, {"id": "emberkin_flare_turret", "cost": 10, "weight": 3, "from": 30}], "shields": [{"id": "shield_mk1", "cost": 14, "weight": 1}, {"id": "emberkin_hearth_shield", "cost": 14, "weight": 3, "from": 36}], "engines": [{"id": "engine_neon_mk1", "cost": 8}, {"id": "emberkin_pyre_drive", "cost": 12, "from": 40}]},
+			"cost_mult": 2.273,
+			"ship_names": ["Emberkin Small Mercy", "Emberkin Long Way Round", "Emberkin Second Wind", "Emberkin Quiet Errand", "Emberkin Good Intentions", "Emberkin Slow Tide"]
+		},
+		"sporeling": {
+			"base": "wardens",
+			"crew": {"species": ["sporeling"]},
+			"hull": {"prow": [1, 2], "tail": [1, 2], "band": {"gun": 0.4, "bridge": 0.7, "core": 1.0, "aux": 1.0, "engine": 0.75}, "jitter_w": [0, 2], "jitter_c": 0, "asym": false, "ops": [{"op": "arc", "at": "tip", "count": [2, 2]}, {"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 3]}, {"op": "arc", "at": "stern_end", "count": [2, 2]}, {"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}]},
+			"style": {"label": "Sporeling", "roles": {"small": "puffball", "medium": "bloom", "large": "garden"}, "palette": {"tint": "#8ad040", "accent": "#f0ffb0", "lamp": "#c8ff60", "glow": "#c8ff60", "floor": "#b8f070", "wall": "#4a7a20", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "pods", "count": [6, 10], "where": "any", "len": 1.3}], "emblem": {"prims": [{"poly": [[0.08, 0.55], [0.2, 0.25], [0.5, 0.1], [0.8, 0.25], [0.92, 0.55]], "fill": true}, {"poly": [[0.42, 0.55], [0.42, 0.92], [0.58, 0.92], [0.58, 0.55]], "fill": false}]}},
+			"parts": {"weapons": [{"id": "pulse_mk1", "cost": 10, "weight": 2}, {"id": "ion_blast_mk1", "cost": 14, "weight": 2}, {"id": "sporeling_spore_cannon", "cost": 14, "weight": 3, "from": 30}, {"id": "sporeling_rot_pod", "cost": 14, "weight": 3, "from": 30}, {"id": "sporeling_pollen_turret", "cost": 10, "weight": 3, "from": 30}], "shields": [{"id": "shield_mk1", "cost": 14, "weight": 1}, {"id": "sporeling_mycelium_shield", "cost": 14, "weight": 3, "from": 36}]},
+			"cost_mult": 1.841,
+			"ship_names": ["Sporeling Small Mercy", "Sporeling Long Way Round", "Sporeling Second Wind", "Sporeling Quiet Errand", "Sporeling Good Intentions", "Sporeling Slow Tide"]
+		}
+	}
+}
