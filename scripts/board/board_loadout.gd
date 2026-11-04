@@ -43,7 +43,8 @@ static func draw(h, size: Vector2) -> void:
 	h.draw_rect(alone, h.AMBER, false, 1.5)
 	h._text("Go alone", alone.position + Vector2(20, 23), 18, h.TEXT)
 	h.hit_add(alone, {"type": "alone"})
-	h._text("Click a crew row or press its number to bring them. Click a person, then a slot.   Tab: next   Enter: go aboard   A or Esc: go alone", r.position + Vector2(20, PH - 20), 13, h.DIM_TEXT)
+	h._text("Click a crew row, or press its number, to bring them. Click a slot to set a kit.", r.position + Vector2(20, PH - 36), 13, h.DIM_TEXT)
+	h._text("Tab: next person    Enter: go aboard    A or Esc: go alone", r.position + Vector2(20, PH - 18), 13, h.DIM_TEXT)
 	if str(v.load_msg) != "":
 		h._text(str(v.load_msg), r.position + Vector2(316, PH - 62), 15, h.BAD)
 
