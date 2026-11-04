@@ -219,7 +219,7 @@ func take(id: int, what := "all") -> Array:
 	if (what == "all" or what == "blueprint") and str(c["blueprint"]) != "":
 		var rid: String = c["blueprint"]
 		if ship != null and ship.crafting.unlock(rid):
-			lines.append("Blueprint learned: " + _name(_output_of(rid)))
+			lines.append(ship.crafting.learned_line(rid, ship.components))
 		c["blueprint"] = ""
 	if (what == "all" or what == "log") and str(c["log"]) != "":
 		var lid: String = c["log"]

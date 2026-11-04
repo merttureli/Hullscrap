@@ -30,7 +30,7 @@ const COLUMNS: Array = [
 			["I", "Crew kit: what each crew member carries"],
 			["B", "Build mode / play mode"],
 			["O / P", "Oxygen / power overlay"],
-			["Wheel", "Zoom"],
+			["Wheel", "Zoom (build: MMB drag, arrows pan)"],
 			["Ctrl+S / Ctrl+L", "Save / load the ship and the run"],
 			["Ctrl+M", "Mute / unmute all sound"],
 			["N / Esc / F1", "New ship / pause menu / this help"],

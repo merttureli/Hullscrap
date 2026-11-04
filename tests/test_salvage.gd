@@ -125,7 +125,7 @@ func test_a_scan_row_only_for_an_unknown_recipe_and_it_unlocks_the_blueprint() -
 	var r := c.events.choose(ev, scan, c, ship)
 	check(r["ok"], "the row can be taken")
 	check(ship.crafting.is_known("pulse_mk2"), "taking it unlocks the blueprint")
-	check(r["lines"].any(func(l): return l.begins_with("Blueprint learned")), "and says so")
+	check(r["lines"].any(func(l): return l.begins_with("Blueprint: ")), "and says so")
 	eq(_row(Salvage.event_for(enemy, "won", c, ship), "Scan the "), -1, "known now: no scan row")
 	var known_only := _enemy(["laser_mk1", "engine_mk1"])
 	eq(_row(Salvage.event_for(known_only, "won", c, _ship()), "Scan the "), -1, "parts whose recipes are known have no scan row")

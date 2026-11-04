@@ -127,7 +127,7 @@ func _unhandled_input(e: InputEvent) -> void:
 		press_ability()  # (in a fight combat_view.gd takes the key)
 	elif e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_X and not e.ctrl_pressed and not e.meta_pressed and not build.build_on:
 		press_spread()
-	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_MIDDLE and not build.combat:  # (in a fight combat_view.gd takes the click)
+	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_MIDDLE and not build.combat and not build.build_on:  # (in a fight combat_view.gd takes the click; in build mode a middle drag pans the view)
 		order_at((make_input_local(e).position - _world(Vector2.ZERO)) / build.CELL)
 
 
