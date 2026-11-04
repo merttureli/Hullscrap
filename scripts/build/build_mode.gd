@@ -130,6 +130,11 @@ const FOCUS_HOLD := 3.0  ## seconds the camera holds on the damaged block the wr
 var _focus_cell := Vector2i(-1, -1)  # the damaged block the camera is on
 var _focus_t := 0.0  # seconds it still holds there
 var _focus_on := false  # the camera's offset is this node's to move (it eases back to 0 when the hold is over)
+const PAN_SPEED := 700.0  ## px/s of world the arrow keys pan the build view at (at zoom 1: the speed on screen follows the zoom)
+const PAN_KEYS: Array[Key] = [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN]
+var pan := Vector2.ZERO  ## the build view's offset from where the camera sits (world px): MMB drag, arrow keys, Home resets
+var _panning := false  # the middle button is held on the world
+var _pan_held := {}  # arrow key -> true: pressed on the world (a key a panel took never gets here); Input says when it was let go
 var _focus_seen := {}  # damaged cells the wrench has already shown, so pressing it again goes on to the next
 
 
@@ -200,8 +205,10 @@ func _process(dt: float) -> void:
 	if combat:
 		_focus_t = 0.0
 		_focus_on = false
+		_panning = false
 		return
 	_follow_focus(dt)
+	_pan_keys(dt)
 	queue_redraw()
 
 
@@ -240,9 +247,9 @@ func _follow_focus(dt: float) -> void:
 		var want: Vector2 = transform * cell_rect(_focus_cell).get_center() - cam.position
 		cam.offset = cam.offset.lerp(want, minf(dt * 8.0, 1.0))
 	else:
-		cam.offset = cam.offset.lerp(Vector2.ZERO, minf(dt * 5.0, 1.0))
-		if cam.offset.length() < 1.0:
-			cam.offset = Vector2.ZERO
+		cam.offset = cam.offset.lerp(pan, minf(dt * 5.0, 1.0))  # back to where the pan has the view
+		if cam.offset.distance_to(pan) < 1.0:
+			cam.offset = pan
 			_focus_on = false
 
 
@@ -278,11 +285,18 @@ func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion:
 		hover = _cell_of(e)
 		hover_pt = _point_of(e)
+		if _panning:
+			if build_on:
+				pan_by(-(e as InputEventMouseMotion).relative / (cam.zoom.x if cam != null else 1.0))
+			else:
+				_panning = false
 		_extend_path()
 	elif e is InputEventMouseButton:
 		hover = _cell_of(e)
 		hover_pt = _point_of(e)
-		if e.pressed:
+		if e.button_index == MOUSE_BUTTON_MIDDLE:
+			_panning = e.pressed and build_on and (hud == null or not hud.over_ui(e.position))  # a drag moves the view (build mode only; play mode sends crew)
+		elif e.pressed:
 			match e.button_index:
 				MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT:
 					if build_on:
@@ -293,7 +307,13 @@ func _unhandled_input(e: InputEvent) -> void:
 			_extend_path()
 			_end_drag()
 	elif e is InputEventKey and e.pressed:
-		_on_key(e)
+		if build_on and not dragging and not e.ctrl_pressed and (e.keycode in PAN_KEYS or e.keycode == KEY_HOME):
+			if e.keycode == KEY_HOME:
+				reset_pan()
+			else:
+				_pan_held[e.keycode] = true
+		else:
+			_on_key(e)
 	_refresh_ghost()
 	queue_redraw()
 
@@ -488,6 +508,12 @@ func set_build(on: bool) -> void:
 	if on != build_on:
 		Audio.fx(self, "open" if on else "close")
 	build_on = on
+	if not on:  # the pan belongs to build mode: play mode starts from where the camera sits
+		pan = Vector2.ZERO
+		_panning = false
+		_pan_held.clear()
+		if cam != null and not _focus_on:
+			cam.offset = Vector2.ZERO
 	message = ""
 	dragging = false
 	_fix_component()
@@ -712,12 +738,63 @@ func _redo() -> void:
 func wheel(e: InputEventMouseButton) -> void:
 	if hud != null and hud.over_ui(e.position):
 		return
-	_zoom(1.1 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.1)
+	_zoom(1.1 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.1, e.position)
 
 
-func _zoom(f: float) -> void:
+func _zoom(f: float, at := Vector2.INF) -> void:
 	if cam:
+		var before := cam.zoom
 		cam.zoom = (cam.zoom * f).clamp(Vector2(0.06, 0.06), Vector2(3, 3))  # far out: the ship in the sector
+		if build_on and at != Vector2.INF and is_inside_tree():  # towards the cursor: the world point under it stays under it
+			var mid := get_viewport_rect().size / 2.0
+			pan_by((at - mid) * (Vector2.ONE / before - Vector2.ONE / cam.zoom))
+
+
+## The area the build view's centre may move over: the grid (the hull frame you can build in), in world px.
+func pan_area() -> Rect2:
+	return Rect2(_origin(), Vector2(grid.size * CELL)) if ship != null else Rect2()
+
+
+## Move the build view by `d` world px, keeping its centre inside pan_area() so the ship cannot be lost off screen.
+func pan_by(d: Vector2) -> void:
+	if cam == null or ship == null or not build_on:
+		return
+	var a := pan_area()
+	var centre := (cam.position + pan + d).clamp(a.position, a.end)
+	pan = centre - cam.position
+	if not _focus_on:
+		cam.offset = pan
+
+
+## Home: centre the view on the ship (the middle of its hull; the grid's middle for an empty one).
+func reset_pan() -> void:
+	if cam == null or ship == null:
+		return
+	var lo := Vector2i(1 << 30, 1 << 30)
+	var hi := Vector2i(-(1 << 30), -(1 << 30))
+	for c in grid.tiles:
+		lo = Vector2i(mini(lo.x, c.x), mini(lo.y, c.y))
+		hi = Vector2i(maxi(hi.x, c.x), maxi(hi.y, c.y))
+	var mid := ship.world_pos if hi.x < lo.x else _origin() + (Vector2(lo) + Vector2(hi) + Vector2.ONE) * CELL / 2.0
+	pan = Vector2.ZERO
+	pan_by(mid - cam.position)
+
+
+## The arrow keys held on the world pan the view while build mode is on.
+func _pan_keys(dt: float) -> void:
+	for k in _pan_held.keys():
+		if not Input.is_key_pressed(k):
+			_pan_held.erase(k)
+	if _pan_held.is_empty() or not build_on or cam == null:
+		return
+	var dir := pan_dir(_pan_held)
+	if dir != Vector2.ZERO:
+		pan_by(dir.normalized() * PAN_SPEED * dt / cam.zoom.x)
+
+
+## The direction the held arrow keys point (screen-up is negative y).
+static func pan_dir(held: Dictionary) -> Vector2:
+	return Vector2(float(held.has(KEY_RIGHT)) - float(held.has(KEY_LEFT)), float(held.has(KEY_DOWN)) - float(held.has(KEY_UP)))
 
 
 func _save() -> void:
@@ -790,7 +867,7 @@ func _controls_text() -> String:
 		how = "LMB place   RMB remove   R rotate   F repair"
 	elif group == Group.BELTS:
 		how = "LMB lay belt   Shift line   Ctrl rectangle   RMB remove"
-	return "%s   E door   O oxygen   P power\nTab palette   1-9 pick   Ctrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   Wheel zoom" % how
+	return "%s   E door   O oxygen   P power\nTab palette   1-9 pick   Ctrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   Wheel zoom (to the cursor)   MMB drag or arrows pan   Home centre" % how
 
 
 ## Why the pending edit would do nothing, when every cell of it is refused ("" otherwise).

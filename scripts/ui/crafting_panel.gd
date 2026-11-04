@@ -914,8 +914,7 @@ func _draw_smelter(s, st: Dictionary) -> void:
 	var col := GOOD
 	if int(st["count"]) == 0:
 		var hint := no_smelter_hint(s)
-		_text("No smelter aboard", box.position + Vector2(10.0, 50.0), 20, BAD)
-		_para(hint["text"], box.position + Vector2(10.0, 58.0), box.size.x - 20.0, 13, TEXT)
+		_para(hint["text"], box.position + Vector2(10.0, 34.0), box.size.x - 20.0, 14, BAD)
 		if hint["recipe"] != "":
 			var b := hint_button_rect()
 			UiKit.button(self, b, false, b.has_point(get_local_mouse_position()))
