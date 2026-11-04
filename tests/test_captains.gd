@@ -23,9 +23,10 @@ func test_every_faction_has_captain_names_and_all_four_kinds_of_line() -> void:
 	var lines: Dictionary = Morale.config()["lines"]
 	var factions: Dictionary = Shipgen.tables()["factions"]
 	check(factions.size() >= 8, "the eight factions: %d" % factions.size())
-	for id in factions:
-		var names: Array = factions[id]["crew"]["names"]
-		check(names.size() >= 10, "%s: a pool of captain names (%d)" % [id, names.size()])
+	for fid in factions:
+		var id: String = str(factions[fid].get("lines_as", fid))  # a race style (data/ship_styles.json) says its base faction's lines
+		var names: Array = factions[fid]["crew"]["names"]
+		check(names.size() >= 10, "%s: a pool of captain names (%d)" % [fid, names.size()])
 		check(lines.has(id), id + ": has lines in data/morale.json")
 		for kind in KINDS:
 			var pool = lines.get(id, {}).get(kind)
