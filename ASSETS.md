@@ -1189,6 +1189,10 @@ Source and licence of every art and audio file in the repo.
 | `art/gear/exosuit_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit_legs.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit_legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/salamander_suit.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/salamander_suit.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/salamander_suit_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |

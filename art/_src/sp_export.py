@@ -119,6 +119,7 @@ GEAR_NOTES = {
  'combat_vest': 'Combat vest: steel shoulder plates, a back plate, a pouch belt with orange tags. Fits the human rig.',
  'exosuit': 'Exosuit: bulky armour shell (tinted plates), a back power unit with a glowing core, a closed helm with a cyan visor. It replaces the legs and the arms too. Fits the human rig.',
  'salamander_suit': 'Salamander suit: a heat-reflective foil mantle with gold trim and a hood with an ember visor slit. Fits the human rig.',
+ 'heat_suit': 'Heat suit: a reflective silver mantle with tinted shoulder and collar bands, a back cooling pack, a hood with a gold-tinted visor. Fits the human rig.',
 }
 def export_gear():
     dg = ART + '/gear'

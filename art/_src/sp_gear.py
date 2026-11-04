@@ -157,13 +157,47 @@ def sal_head():
     for (x, y) in ((12, 12), (13, 11), (12, 13)): s.put(x, y, 'H')
     return s
 
-GEAR = ['eva_suit', 'combat_vest', 'exosuit', 'salamander_suit']
+
+# ================================================================== heat suit: reflective silver mantle, tinted bands, a gold-visored hood
+def heat_body():
+    s = Spr(N, N)
+    # back cooling pack with fins
+    bev(s, 11, 19, 10, 9, 'M', 'S', 'W', cham=True)
+    for y in (21, 23, 25): s.hline(12, y, 8, 'W')
+    s.put(16, 27, 'g'); s.hline(12, 28, 8, 'D')
+    # silver shoulder domes with tinted bands
+    for sx in (4, 22):
+        for j, (a, b) in enumerate([(1, 5), (0, 6), (0, 6), (0, 6), (0, 6), (0, 6), (0, 6), (1, 5)]):
+            s.hline(sx + a, 10 + j, b - a + 1, 'M')
+        s.hline(sx, 13, 7, 'A'); s.hline(sx, 14, 7, 'B'); s.hline(sx, 15, 7, 'C')
+        s.put(sx + 1, 11, 'H'); s.put(sx + 2, 11, 'H')
+    # reflective yoke across the shoulders, tinted collar band
+    for j, (a, b) in enumerate([(9, 23), (9, 23), (10, 22), (11, 21)]): s.hline(a, 12 + j, b - a + 1, 'M')
+    s.hline(11, 15, 11, 'B'); s.hline(11, 16, 11, 'C')
+    s = shade_gen(s, 'M', 'L', 'S')
+    for (x, y) in ((8, 12), (24, 12), (6, 11), (26, 11)): s.put(x, y, 'H')
+    return s
+def heat_head():
+    s = Spr(N, N)
+    spans = [(13, 19), (11, 21), (10, 22), (10, 22), (10, 22), (10, 22), (10, 22), (10, 22), (11, 21), (11, 21), (12, 20), (13, 19), (14, 18)]
+    for j, (a, b) in enumerate(spans): s.hline(a, 7 + j, b - a + 1, 'M')
+    s = shade_gen(s, 'M', 'L', 'S')
+    for y in range(9, 14):                                                                    # gold-tinted visor
+        for x in range(12, 21):
+            if abs(x - 16) + (y - 9) * 0.6 <= 5.2: s.put(x, y, 'y' if (x + y) % 5 else 'a')
+    s.hline(13, 9, 7, 'o'); s.put(14, 10, 'H'); s.put(13, 10, 'H')
+    s.hline(11, 14, 11, 'B'); s.hline(12, 15, 9, 'C')                                        # tinted chin band
+    s.put(16, 18, 'S'); s.put(16, 17, 'S')
+    return s
+
+GEAR = ['eva_suit', 'combat_vest', 'exosuit', 'salamander_suit', 'heat_suit']
 def parts(gid):
     """-> dict(body=Spr|None, head=Spr|None, legs=[7 Spr]|None, arms={pose: Spr}|None, head_outer=bool), interior (no outline)."""
     if gid == 'eva_suit':        return dict(body=eva_body(), head=eva_head(), head_outer=True)
     if gid == 'combat_vest':     return dict(body=vest_body(), head=None)
     if gid == 'exosuit':         return dict(body=exo_body(), head=exo_head(), legs=True, arms=True)
     if gid == 'salamander_suit': return dict(body=sal_body(), head=sal_head())
+    if gid == 'heat_suit':       return dict(body=heat_body(), head=heat_head())
 def glow_for(gid):
     """-> (body_glow Rgba|None, head_glow Rgba|None)"""
     b = new_glow(); h = new_glow()
@@ -176,6 +210,9 @@ def glow_for(gid):
     elif gid == 'salamander_suit':
         glow_px(b, spr_pts(sal_body(), 'o'), (255, 138, 30), 0.5, 2.4)
         glow_px(h, spr_pts(sal_head(), 'oy'), (255, 138, 30), 0.7, 2.8)
+    elif gid == 'heat_suit':
+        glow_px(b, spr_pts(heat_body(), 'g'), (107, 211, 74), 0.5, 2.2)
+        glow_px(h, spr_pts(heat_head(), 'y'), (255, 200, 80), 0.4, 2.4)
     elif gid == 'combat_vest':
         glow_px(b, spr_pts(vest_body(), 'o'), (255, 138, 30), 0.35, 2.0)
     return b, h

@@ -113,6 +113,45 @@ static func crew(species: String) -> RefCounted:
 	return out
 
 
+## Body gear (art/gear/<id>.json, made for the human rig): {layer name: SpriteSheet} for the layers the spec lists ("body", "head",
+## "legs", "arms"), or null when there is no spec. A layer sheet's `meta` is its spec entry (frame index, draw_after, replaces), its
+## `named_frames` the arm poses, and its `glow` a sheet cut to the spec's frame_size (the glow frame index is meta["glow"]["frame"]).
+static func gear(id: String) -> Variant:
+	var key := "%s/gear/%s" % [root, id]
+	if _cache.has(key):
+		return _cache[key]
+	var dir := "%s/gear" % root
+	var d := read_json("%s/%s.json" % [dir, id])
+	var out = null
+	if d.get("layers") is Dictionary:
+		out = {}
+		for name in d["layers"]:
+			var ld: Dictionary = d["layers"][name]
+			var img := load_image("%s/%s" % [dir, str(ld.get("image", ""))])
+			if img == null:
+				continue
+			var mask := load_image("%s/%s" % [dir, str(ld["color_mask"])]) if ld.has("color_mask") else null
+			var s = SpriteSheet.from_dict({"frame": d.get("frame"), "pivot": d.get("pivot"), "anims": ld.get("anims", {}), "frames": ld.get("frames", {})}, img, mask)
+			s.meta = ld
+			var g = ld.get("glow")
+			var gimg := load_image("%s/%s" % [dir, str(g.get("image", ""))]) if g is Dictionary else null
+			if gimg != null:
+				s.glow = SpriteSheet.from_dict({"frame": g.get("frame_size", d.get("frame"))}, gimg)
+			out[str(name)] = s
+		if out.is_empty():
+			out = null
+	_cache[key] = out
+	return out
+
+
+## True when body gear (made for the human rig) fits crew art `sheet`: a normal rig with the human's frame and anchors.
+static func gear_fits(sheet) -> bool:
+	var human = crew("human")
+	if sheet == null or human == null:
+		return false
+	return sheet == human or (str(sheet.meta.get("kind", "normal")) == "normal" and sheet.frame == human.frame and sheet.anchors == human.anchors)
+
+
 ## The art folder to draw a crew member with: `rig` (art/crew/<rig>/) when its art is there, else "human".
 static func crew_rig(rig: String) -> String:
 	return rig if crew(rig) != null else "human"
