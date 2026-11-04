@@ -952,6 +952,54 @@
       "tools": [],
       "time": 30,
       "category": "gear"
+    },
+    {
+      "id": "rigger_harness",
+      "output": {
+        "item": "rigger_harness",
+        "count": 1
+      },
+      "materials": {"scrap": 8, "polymer": 6, "copper": 3},
+      "fab_level": 2,
+      "tools": [],
+      "time": 22,
+      "category": "gear"
+    },
+    {
+      "id": "firefighter_coat",
+      "output": {
+        "item": "firefighter_coat",
+        "count": 1
+      },
+      "materials": {"polymer": 10, "scrap": 4, "silicon": 1},
+      "fab_level": 2,
+      "tools": [],
+      "time": 24,
+      "category": "gear"
+    },
+    {
+      "id": "medic_sash",
+      "output": {
+        "item": "medic_sash",
+        "count": 1
+      },
+      "materials": {"polymer": 8, "nanite_paste": 1},
+      "fab_level": 2,
+      "tools": [],
+      "time": 20,
+      "category": "gear"
+    },
+    {
+      "id": "jump_pack",
+      "output": {
+        "item": "jump_pack",
+        "count": 1
+      },
+      "materials": {"scrap": 10, "copper": 6, "silicon": 3},
+      "fab_level": 3,
+      "tools": [],
+      "time": 35,
+      "category": "gear"
     }
   ]
 }

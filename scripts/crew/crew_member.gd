@@ -120,14 +120,20 @@ static func is_drone_species(id: String) -> bool:
 
 ## Every trait this person has, without repeats: their species' (data/species.json), their own
 ## (data/crew.json `traits`, by name), their character's (when its `traits` is a list of ids) and the ones worn
-## gear gives (`gear_traits`).
+## gear gives (`gear_traits`), and what the body gear in their kit grants while it is worn (boarding.json gear.<item>.grants; taking it off ends them).
 func traits() -> Array:
 	var out := []
-	for list in [species_def(species).get("traits", []), config().get("traits", {}).get(name, []), Characters.trait_ids(character), gear_traits]:
+	for list in [species_def(species).get("traits", []), config().get("traits", {}).get(name, []), Characters.trait_ids(character), gear_traits, _worn_grants()]:
 		for t in list:
 			if not out.has(t):
 				out.append(t)
 	return out
+
+
+## The trait ids the body gear in their kit grants (none for a person with no kit or gear that grants nothing).
+func _worn_grants() -> Array:
+	var body := str(kit.get("body", "")) if not kit.is_empty() else ""
+	return load("res://scripts/board/kit.gd").grants_of(body) if body != "" else []
 
 
 ## "" when this person may wear the gear that gives trait `id`, else why not ("<name> cannot wear a suit or armour": the

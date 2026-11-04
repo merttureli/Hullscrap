@@ -912,9 +912,9 @@ func _hold_need(t: Dictionary) -> float:
 				return 0.0
 			return float(Site.config()["props"][session.site.props[t["id"]]["prop"]]["hold"])
 		"door":
-			return float(Site.config()["hack_s"]) if session.site.doors[t["id"]]["lock"] == "hack" else 0.0
+			return session.hack_time() if session.site.doors[t["id"]]["lock"] == "hack" else 0.0
 		"revive":
-			return float(Arms.cfg()["revive_s"])
+			return session.revive_time()
 		"sentry":
 			return float(Arms.cfg()["hack_sentry_s"])
 	return 0.0
@@ -1190,6 +1190,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			session.swap()
 		elif e.keycode == KEY_F:
 			toggle_light()
+		elif e.keycode == KEY_G:  # the active of the gear he wears (gear_active.gd)
+			use_active()
 		elif e.keycode == KEY_ESCAPE:
 			if _leave_t > 0.0:
 				_leave_t = 0.0
@@ -1204,6 +1206,16 @@ func _unhandled_input(e: InputEvent) -> void:
 			take_row(e.keycode - KEY_1)
 		elif e.keycode >= KEY_1 and e.keycode <= KEY_9 and shop >= 0:
 			buy_row(e.keycode - KEY_1)
+
+
+## G: the active of the soldier's body gear toward the aim. The view says what happened.
+func use_active() -> void:
+	if session == null or session.soldier.is_down():
+		return
+	var r: Dictionary = session.use_active(_aim)
+	if str(r["text"]) != "":
+		say(str(r["text"]))
+	Audio.fx(self, "arrive" if bool(r["ok"]) else "error", null, -8.0)
 
 
 ## A click on the loadout screen (hud.loadout_at): a person, a crew row, a slot, a choice or the go button.
@@ -1516,7 +1528,7 @@ func _draw_foe(f: Dictionary) -> void:
 	var look := {"suit": "#888888", "hair": "#2a2018", "tool": "#cfd5dd"}
 	look.merge(f["d"].get("look", {}), true)
 	var pose := {"species": Art.crew_rig("human"), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-		"item": str(f["d"].get("weapon", "")), "down": f["dead"], "work": false, "t": _clock, "head": ""}
+		"item": str(f["d"].get("weapon", "")), "down": f["dead"], "work": false, "t": _clock, "head": "", "body": str(f.get("gear", ""))}
 	PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
 
 
@@ -1576,7 +1588,7 @@ func _draw_people() -> void:
 		var look: Dictionary = {"suit": "#888888", "hair": "#2a2018", "tool": "#cfd5dd"}
 		look.merge(m.look, true)
 		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-			"item": str(n["d"].get("weapon", "")), "down": false, "work": false, "t": _clock, "head": m.head}
+			"item": str(n["d"].get("weapon", "")), "down": false, "work": false, "t": _clock, "head": m.head, "body": PersonDrawer.gear_of(m)}
 		PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
 		if n["role"] == "captive":
 			var c: Vector2 = m.pos * CELL

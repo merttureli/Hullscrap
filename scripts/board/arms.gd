@@ -34,10 +34,12 @@ static func item_weapon(item: String) -> String:
 
 
 ## A gun of weapon `id`, loaded when `loaded`; null for an unknown weapon.
-static func make_gun(id: String, loaded := true):
+static func make_gun(id: String, loaded := true, mag_mult := 1.0):
 	var w := weapon(id)
 	if w.is_empty():
 		return null
+	if int(w["mag"]) > 0 and mag_mult != 1.0:
+		w["mag"] = maxi(1, roundi(float(w["mag"]) * mag_mult))  # (a marine plate's big magazines)
 	return {"id": id, "w": w, "mag": int(w["mag"]) if loaded else 0, "cd": 0.0, "reload": 0.0}
 
 

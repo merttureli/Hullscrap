@@ -9,6 +9,8 @@ extends RefCounted
 const Arms = preload("res://scripts/board/arms.gd")
 const Art = preload("res://scripts/view/art.gd")
 const Kit = preload("res://scripts/board/kit.gd")
+const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
+const GearActive = preload("res://scripts/board/gear_active.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Party = preload("res://scripts/board/party.gd")
 const Air = preload("res://scripts/board/air.gd")
@@ -89,8 +91,26 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 			continue
 		Mods.draw_icon(h, item, mr, down)
 		h.hover_add(mr, Mods.hover(item), Mods.color(Mods.parse(item)["mod"]))
+	if e["p"] == null:
+		_active(h, Rect2(gx + 28.0 * float(kit["mods"].size() + 1), r.position.y + 40.0, r.end.x - 10.0 - (gx + 28.0 * float(kit["mods"].size() + 1)), 22.0), s, down)
 	if e["p"] != null:
 		_rounds(h, Rect2(gx + 28.0 * float(kit["mods"].size() + 1), r.position.y + 40.0, r.end.x - 10.0 - (gx + 28.0 * float(kit["mods"].size() + 1)), 22.0), e["p"], down)
+
+
+## The soldier's gear active: "G Dash" lit when it is ready, with the seconds and a fill that drains while it cools down. Nothing when his gear has none.
+static func _active(h, r: Rect2, s, down: bool) -> void:
+	var a: Dictionary = GearActive.current(s)
+	if a.is_empty():
+		return
+	var ready: bool = s.active_cd <= 0.0
+	var frac := 0.0 if ready else clampf(s.active_cd / float(a["cooldown"]), 0.0, 1.0)
+	h.draw_rect(r, Color(h.ROW_BG, 0.8))
+	h.draw_rect(Rect2(r.position, Vector2(r.size.x * (1.0 - frac), r.size.y)), Color(h.GOOD, 0.22) if ready else Color(h.AMBER, 0.16))
+	h.draw_rect(r, h.GOOD if ready else h.EDGE_DIM, false, 1.0)
+	var t := "%s %s" % [GearActive.key(), a["name"]] if ready else "%s %ds" % [a["name"], ceili(s.active_cd)]
+	var w: float = h._font().get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+	h._text(t, Vector2(r.get_center().x - w / 2.0, r.position.y + 16.0), 12, h.DIM_TEXT if down or not ready else h.TEXT)
+	h.hover_add(r, ["%s (%s)" % [a["name"], GearActive.key()], "Cooldown %d s. Ready now." % roundi(float(a["cooldown"])) if ready else "Ready in %d s." % ceili(s.active_cd)], h.EDGE)
 
 
 ## A follower's rounds, "magazine/spare" like the soldier's weapon bar: amber at one magazine left, OUT (red) at none. A melee weapon shows nothing.
@@ -124,7 +144,7 @@ static func _air(h, r: Rect2, m) -> void:
 ## How far the revive of this person has got (0 to 1): the soldier's hold of E on them, or a crew mate kneeling by them.
 static func _revive(h, e: Dictionary) -> float:
 	var s = h.view.session
-	var need := float(Arms.cfg()["revive_s"])
+	var need: float = s.revive_time()
 	var best := 0.0
 	var m = e["m"]
 	var t: Dictionary = h.view.target
@@ -225,7 +245,8 @@ static func _body_icon(h, r: Rect2, item: String) -> void:
 	if item == "":
 		h.draw_rect(r, Color(h.ROW_BG, 0.5), false, 1.0)
 		return
-	var col := Color(str(BODY_COLORS.get(item, "#aaaaaa")))
+	var look := PersonDrawer.gear_look(item)
+	var col := Color(str(BODY_COLORS.get(item, look.get("color", "#aaaaaa"))))
 	var u := r.size.x / 16.0
 	var o := r.position
 	h.draw_rect(r, Color(col.darkened(0.75), 1.0))
@@ -233,6 +254,34 @@ static func _body_icon(h, r: Rect2, item: String) -> void:
 	var pts := PackedVector2Array([o + Vector2(3, 3) * u, o + Vector2(6, 2.5) * u, o + Vector2(8, 4) * u, o + Vector2(10, 2.5) * u, o + Vector2(13, 3) * u, o + Vector2(12.5, 8) * u, o + Vector2(11, 8) * u, o + Vector2(11, 13) * u, o + Vector2(5, 13) * u, o + Vector2(5, 8) * u, o + Vector2(3.5, 8) * u])
 	h.draw_colored_polygon(pts, col)
 	h.draw_line(o + Vector2(8, 4.5) * u, o + Vector2(8, 12.5) * u, col.darkened(0.5), maxf(1.0, u * 0.9))
+	var dark := Color(str(look.get("dark", "#222222")))
+	match str(look.get("mark", "")):
+		"cross":
+			h.draw_rect(Rect2(o + Vector2(7, 5) * u, Vector2(2, 6) * u), Color("#d6362f"))
+			h.draw_rect(Rect2(o + Vector2(5, 7) * u, Vector2(6, 2) * u), Color("#d6362f"))
+		"pack":
+			h.draw_rect(Rect2(o + Vector2(5, 13) * u, Vector2(2, 2.5) * u), Color("#ff8a1e"))
+			h.draw_rect(Rect2(o + Vector2(9, 13) * u, Vector2(2, 2.5) * u), Color("#ff8a1e"))
+		"spikes":
+			h.draw_colored_polygon(PackedVector2Array([o + Vector2(3, 3) * u, o + Vector2(1, 1) * u, o + Vector2(5, 2.5) * u]), col.lightened(0.3))
+			h.draw_colored_polygon(PackedVector2Array([o + Vector2(13, 3) * u, o + Vector2(15, 1) * u, o + Vector2(11, 2.5) * u]), col.lightened(0.3))
+		"dots":
+			for dp in [Vector2(6, 6), Vector2(10, 7), Vector2(8, 10)]:
+				h.draw_circle(o + dp * u, maxf(1.0, u * 0.9), Color("#ffb347") if col.r > col.g else Color("#e8ff7a"))
+		"stripes":
+			h.draw_rect(Rect2(o + Vector2(5, 6) * u, Vector2(6, 1) * u), Color("#e8ecee"))
+			h.draw_rect(Rect2(o + Vector2(5, 9) * u, Vector2(6, 1) * u), Color("#e8ecee"))
+		"straps":
+			h.draw_line(o + Vector2(5, 4) * u, o + Vector2(11, 12) * u, dark, maxf(1.0, u))
+			h.draw_line(o + Vector2(11, 4) * u, o + Vector2(5, 12) * u, dark, maxf(1.0, u))
+		"blocks":
+			h.draw_rect(Rect2(o + Vector2(5, 7) * u, Vector2(6, 1) * u), dark)
+			h.draw_rect(Rect2(o + Vector2(5, 10) * u, Vector2(6, 1) * u), dark)
+		"buttons":
+			for by in [5.5, 8.0, 10.5]:
+				h.draw_circle(o + Vector2(9, by) * u, maxf(1.0, u * 0.7), Color("#d4a63a"))
+		"gem":
+			h.draw_circle(o + Vector2(8, 8) * u, maxf(1.5, u * 1.6), Color("#6ee7ff"))
 
 
 ## The head of person `m` in their outfit colour, fitted into `box`; a disc with the initial when the art has no head.

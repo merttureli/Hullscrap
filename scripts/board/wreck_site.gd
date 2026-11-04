@@ -46,6 +46,7 @@ static func make(p_seed: int, ship_dict: Dictionary, opts := {}):
 		s.faction = "clans"
 	s.parts = opts.get("parts", []).duplicate()
 	s.fight = str(opts.get("fight", "won"))
+	s.region = str(opts.get("region", ""))
 	var crew := []  # who was aboard: [{name, species, pos, hp, max_hp, down, sealed}]
 	for m in ship.crew:
 		crew.append({"name": m.name, "species": m.species, "pos": m.pos, "hp": m.hp, "max_hp": m.max_hp, "down": m.is_down(), "sealed": Air.sealed(m)})

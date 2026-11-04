@@ -160,7 +160,12 @@ static func draw(canvas, centre_px: Vector2, pose: Dictionary, palette: Dictiona
 ## The body gear art (Art.gear) of `item` on crew art `sheet`: the `art` id of its look (boarding.json `looks`) when the rig fits it, else null.
 static func gear_art(sheet, item: String) -> Variant:
 	var id := str(gear_look(item).get("art", ""))
-	return Art.gear(id) if id != "" and Art.gear_fits(sheet) else null
+	if id == "":
+		return null
+	var own = Art.gear_rig(id, str(sheet.meta.get("species", "")))  # made from this rig's own sprites
+	if own != null:
+		return own
+	return Art.gear(id) if Art.gear_fits(sheet) else null
 
 
 ## The additive layer that shows the glow of gear drawn on `canvas`: a child node, made on first use.
@@ -276,6 +281,9 @@ static func plan(sheet, pose: Dictionary) -> Array:
 		var n: int = legs.anims["walk"]["count"]
 		frame = legs.start_of("walk") + int(fposmod(float(pose.get("phase", 0.0)), TAU) / TAU * n) % n
 	out.append({"layer": "legs", "sheet": legs, "frame": frame, "angle": move + PI / 2.0, "pos": legs.origin_of_frame(), "tint": true})
+	if ge != null and ge.has("legs_over"):  # generated gear: an overlay on the same legs frame
+		var lo = ge["legs_over"]
+		out.append({"layer": "gear_legs", "sheet": lo, "frame": mini(frame, lo.count - 1), "angle": move + PI / 2.0, "pos": lo.origin_of_frame(), "tint": false})
 	out.append({"layer": "torso", "sheet": sheet, "frame": 0, "angle": aim + PI / 2.0, "pos": sheet.origin_of_frame(), "tint": true})
 	if ge != null and ge.has("body"):
 		_add_gear(out, "gear_body", ge["body"], aim, down)  # after the torso, before the arms
@@ -291,24 +299,29 @@ static func plan(sheet, pose: Dictionary) -> Array:
 		var arm_art = ge["arms"] if ge != null and ge.has("arms") else null  # an exosuit's own arms, in the same pose
 		out.append({"layer": "arms", "sheet": arms if arm_art == null else arm_art, "frame": pose_frame if arm_art == null else arm_art.named_frames.get(cls, pose_frame),
 			"angle": aim + PI / 2.0, "pos": arms.origin_of_frame() + jab, "tint": true})
+		if ge != null and ge.has("sleeves"):  # generated gear: sleeves or gauntlets over the arms in the same pose
+			var sl = ge["sleeves"]
+			out.append({"layer": "gear_sleeves", "sheet": sl, "frame": mini(pose_frame, sl.count - 1), "angle": aim + PI / 2.0, "pos": arms.origin_of_frame() + jab, "tint": false})
 		if not held.is_empty():
 			var it = held["sheet"]
 			out.append({"layer": "item", "sheet": it, "frame": 0, "angle": aim + PI / 2.0, "tint": false, "id": held["id"],
 				"pos": sheet.poses[cls]["mount"] - it.anchors.get("grip", Vector2.ZERO) + arms.origin_of_frame() + jab})
 	var head = sheet.layers.get("head")
+	var hf_gen := 0
 	if head != null:
 		var hf: int = head.named_frames.get("helmet" if pose.get("helmet", false) else "hair", 0)
 		hf = head.named_frames.get(str(pose.get("head", "")), hf)  # a character's own head frame (CrewMember.head)
+		hf_gen = hf
 		out.append({"layer": "head", "sheet": head, "frame": hf, "angle": aim + PI / 2.0, "pos": head.origin_of_frame(), "tint": true})
 	if ge != null and ge.has("head"):
-		_add_gear(out, "gear_head", ge["head"], aim, down)  # after the head
+		_add_gear(out, "gear_head", ge["head"], aim, down, hf_gen if ge.has("_gen") else -1)  # after the head
 	return out
 
 
 ## Append gear art layer `s` (a body or head layer of Art.gear) to the plan `out`, with its glow (lit while the wearer is up).
-static func _add_gear(out: Array, name: String, s, aim: float, down: bool) -> void:
+static func _add_gear(out: Array, name: String, s, aim: float, down: bool, frame := -1) -> void:
 	var at: Vector2 = s.origin_of_frame()
-	var l := {"layer": name, "sheet": s, "frame": int(s.meta.get("frame", 0)), "angle": aim + PI / 2.0, "pos": at, "tint": true}
+	var l := {"layer": name, "sheet": s, "frame": (0 if s.meta.get("frame") is Array else int(s.meta.get("frame", 0))) if frame < 0 else mini(frame, s.count - 1), "angle": aim + PI / 2.0, "pos": at, "tint": true}
 	out.append(l)
 	if s.glow != null and not down:
 		out.append({"layer": name + "_glow", "sheet": s, "frame": l["frame"], "angle": l["angle"], "pos": at, "tint": false, "glow": s.glow, "glow_frame": int(s.meta["glow"].get("frame", 0))})

@@ -24,6 +24,8 @@ const Mods = preload("res://scripts/board/mods.gd")
 const Bolts = preload("res://scripts/board/bolts.gd")
 const Air = preload("res://scripts/board/air.gd")
 const WreckSite = preload("res://scripts/board/wreck_site.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
+const GearActive = preload("res://scripts/board/gear_active.gd")
 
 const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
 
@@ -64,6 +66,10 @@ var air_t := 0.0  ## seconds since the soldier last cried out choking (air.gd)
 var air_warned := false  ## the warning at the airlock was given (air.gd airlock_warning)
 var air_seen := {}  ## room id -> seconds since the soldier first saw it airless (the NO AIR label of the view)
 var _flare_id := 0
+var active_cd := 0.0  ## seconds until the soldier's gear active (G) can be used again (gear_active.gd)
+var brace_t := 0.0  ## seconds of a Brace left: the soldier takes brace.share x the damage
+var dash_left := 0.0  ## cells of a Dash still to fly
+var dash_dir := 0.0  ## the way of the Dash (radians)
 
 
 ## A visit to POI `poi_id` of `sector` with the `board` effect `spec` ({kind, name?, parts?}). The soldier stands at the airlock.
@@ -87,7 +93,7 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 		if mem.is_empty():
 			theme = Themes.for_region(p_campaign.region_data, hollow_now)
 	var seed_value: int = Site._mix(p_sector.seed_value if p_sector != null else 0, p_poi_id, 0)
-	var opts := {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", []), "theme": theme}
+	var opts := {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", []), "theme": theme, "region": str(p_campaign.region_data.get("id", "")) if p_campaign != null else ""}
 	var kept: Dictionary = p_sector.wreck_ships.get(p_poi_id, {}) if p_sector != null and str(b.spec["kind"]) == "wreck" else {}
 	if not kept.is_empty():  # the wreck of a ship she beat is that ship (wreck_site.gd); one with none stored is a generated site
 		opts["fight"] = str(kept.get("fight", "won"))
@@ -207,6 +213,8 @@ func take(id: int, what := "all") -> Array:
 		for item in c["items"].keys():
 			if what == "all" or what == "item:" + str(item):
 				var n: int = int(c["items"][item])
+				if str(item) == "scrap":
+					n = roundi(float(n) * (float(TraitSet.of(soldier).get("scrap_mult", 1.0)) if soldier != null else 1.0))  # (scrap gauntlets)
 				if ship != null:
 					ship.inventory.add(str(item), n)
 				lines.append("+%d %s" % [n, _name(str(item))])
@@ -290,10 +298,10 @@ func _arm() -> void:
 	guns = []
 	if Kit.is_set(soldier):
 		for w in Kit.weapons_of(soldier):
-			guns.append(Arms.make_gun(str(w), false))
+			guns.append(Arms.make_gun(str(w), false, Kit.gear_num(soldier, "mag", 1.0)))
 	else:
 		var side := soldier.sidearm()
-		var g = Arms.make_gun(side, false)
+		var g = Arms.make_gun(side, false, Kit.gear_num(soldier, "mag", 1.0))
 		if g == null:
 			g = Arms.make_gun("service_pistol", false)
 		guns.append(g)
@@ -348,7 +356,7 @@ func _found(item: String) -> String:
 	var wid := Arms.item_weapon(item)
 	if wid == "" or guns.size() >= 2 or guns.any(func(g): return g["id"] == wid):
 		return ""
-	var g = Arms.make_gun(wid, false)
+	var g = Arms.make_gun(wid, false, Kit.gear_num(soldier, "mag", 1.0))
 	if g == null:
 		return ""
 	g["mag"] = _take(int(g["w"]["mag"]))
@@ -434,20 +442,24 @@ func _swing(dir: float, w: Dictionary) -> void:
 	var c := Arms.cfg()
 	var reach: float = float(w["range"]) + 0.9
 	var half := deg_to_rad(float(c["swing_arc_deg"])) / 2.0
-	var dmg := float(w["damage"]) * Mods.damage_mult(soldier)
+	var dmg := float(w["damage"]) * Mods.damage_mult(soldier) * float(TraitSet.of(soldier)["melee_mult"])  # (scrap gauntlets)
 	events.append({"type": "swing", "from": soldier.pos, "dir": dir, "reach": reach, "who": "soldier", "look": Bolts.look(str(w["id"]), Mods.bolt_size(soldier))})
 	for b in foes.bodies() + people.bodies():
 		if Arms.in_arc(soldier.pos, dir, half, reach, b["pos"]):
-			_strike(b["ref"], dmg, b["pos"])
+			_strike(b["ref"], dmg, b["pos"], true)
 	foes.noise(soldier.pos, float(c["noise_swing"]))
 
 
 ## A shot or a blow of the soldier's hit `ref`: a foe is hurt, a person (who has a role) turns on him.
-func _strike(ref: Dictionary, amount: float, at: Vector2) -> void:
+func _strike(ref: Dictionary, amount: float, at: Vector2, melee := false) -> void:
 	if ref.has("role"):
 		people.shot(ref, amount)
 	else:
 		foes.hurt(ref, amount, at)
+		if melee and ref.has("m") and not soldier.is_down():  # a foe in chitin hits back
+			var back := float(TraitSet.of(ref["m"])["counter_melee"])
+			if back > 0.0:
+				hurt_member(soldier, back, ref["m"].pos)
 
 
 # --- flares ---------------------------------------------------------------------------------------------------------------
@@ -514,6 +526,7 @@ func take_events() -> Array:
 ## One tick of a fight, `dt` seconds with the flashlight pointing `aim` (radians), lit or not: the weapons cool and reload, the foes and the crew
 ## act, the doors open for whoever comes near them, a fallen soldier is noticed.
 func tick(dt: float, aim := 0.0, light_on := true) -> void:
+	GearActive.tick(self, dt)
 	var take := func(n: int) -> int: return _take(n)
 	for g in guns:
 		Arms.tick(g, dt, take)
@@ -583,6 +596,20 @@ func update_doors(near: float) -> void:
 			events.append({"type": "door", "id": d["id"], "open": want, "pos": mid})
 
 
+## G on foot: use the active of the body gear the soldier wears (gear_active.gd). Returns {ok, text}.
+func use_active(dir: float) -> Dictionary:
+	return GearActive.use(self, dir)
+
+
+## Seconds of holding E to hack a lock, and to revive a downed crewman: the soldier's gear speeds them (a rigger's harness, a medic's sash).
+func hack_time() -> float:
+	return float(Site.config()["hack_s"]) / maxf(Kit.gear_num(soldier, "hack", 1.0), 0.1)
+
+
+func revive_time() -> float:
+	return float(Arms.cfg()["revive_s"]) / maxf(Kit.gear_num(soldier, "revive", 1.0), 0.1)
+
+
 ## Take the crew named in `names` along (at most party_max of the eligible ones; party.gd). Returns how many came.
 func join_party(names: Array) -> int:
 	if Air.bad(site.air_of(int(site.airlock["room"]))):  # a crew member with no sealed suit stays aboard the ship rather than step into an airless airlock
@@ -631,11 +658,18 @@ func party_bodies() -> Array:
 	return out
 
 
-## `amount` damage to party member `m` (the soldier or a follower's CrewMember), less what their body gear takes (boarding.json `armor`).
-func hurt_member(m: CrewMember, amount: float, _from: Vector2) -> void:
+## `amount` damage to party member `m` (the soldier or a follower's CrewMember), less what their body gear takes (boarding.json `armor`), and what a Brace takes.
+## `by` is the foe kind that fired: a Prism Cloak throws back a share of an energy bolt (gear.<item>.deflect, wear.energy_foes) and it does no harm.
+func hurt_member(m: CrewMember, amount: float, _from: Vector2, by := "") -> void:
 	if m.is_down():
 		return
-	m.hurt(amount * Kit.armor_mult(m))
+	if by != "" and Site.config()["wear"]["energy_foes"].has(by) and rng.randf() < Kit.gear_num(m, "deflect", 0.0):
+		events.append({"type": "deflect", "pos": m.pos})
+		return
+	var share := Kit.armor_mult(m)
+	if m == soldier and brace_t > 0.0:
+		share *= float(Site.config()["actives"]["brace"]["share"])
+	m.hurt(amount * share)
 	events.append({"type": "hurt", "pos": m.pos, "who": "soldier" if m == soldier else "ally", "down": m.is_down()})
 
 

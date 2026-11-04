@@ -14,6 +14,7 @@ const Themes = preload("res://scripts/board/themes.gd")
 const Party = preload("res://scripts/board/party.gd")
 const Foes = preload("res://scripts/board/foes.gd")
 const Mods = preload("res://scripts/board/mods.gd")
+const Wear = preload("res://scripts/board/wear.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 var s  ## the session (boarding.gd)
@@ -183,6 +184,9 @@ func add(role: String, pos: Vector2, room: int, species: String, name: String) -
 		var r: Rect2i = s.site.rooms[room]["rect"]
 		base = (Vector2(r.position) + Vector2(r.size) / 2.0 - pos).angle()
 	m.facing = Vector2.from_angle(base)
+	var wr := RandomNumberGenerator.new()  # (its own dice, seeded by the site and the person)
+	wr.seed = Site._mix(s.site.seed_value, "wear_npc", _next)
+	m.kit = Wear.kit_of(Wear.for_person(role, species, wr))  # (what they wear is drawn on them)
 	var n := {"id": _next, "role": role, "name": name, "species": species, "m": m, "d": d, "room": room, "home": pos, "state": "here", "ev": "", "done": false,
 		"shop": [], "shop_open": false, "dest": pos, "leave_t": 0.0, "repath": 0.0, "tried": false, "moved": false, "foe": -1}
 	_next += 1

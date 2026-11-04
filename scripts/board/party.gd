@@ -54,7 +54,7 @@ static func join(s, names: Array) -> Array:
 			m.pos = Pathfinder.centre_of(spots[out.size()], m.body_size)
 		else:
 			m.pos = s.soldier.pos
-		var g = Arms.make_gun(str(Kit.weapons_of(m)[0]), false)  # (a follower fights with the first weapon of their kit)
+		var g = Arms.make_gun(str(Kit.weapons_of(m)[0]), false, Kit.gear_num(m, "mag", 1.0))  # (a follower fights with the first weapon of their kit)
 		if g == null:
 			g = Arms.make_gun("service_pistol", false)
 		var p := {"m": m, "src": src, "gun": g, "cd": 0.0, "repath": 0.0, "revive": 0.0, "moving": false}

@@ -246,7 +246,7 @@ func _draw_prompt(size: Vector2) -> void:
 		"revive":
 			var who = s.party[t["id"]]["m"]
 			at = view.to_screen(who.pos)
-			need = float(Arms.cfg()["revive_s"])
+			need = s.revive_time()
 			text = "Hold E: bring %s round (%d s)" % [who.name, int(need)]
 		"sentry":
 			at = view.to_screen(s.foes.find(t["id"])["m"].pos)
@@ -256,7 +256,7 @@ func _draw_prompt(size: Vector2) -> void:
 			var d: Dictionary = site.doors[t["id"]]
 			at = view.to_screen(site.door_centre(d))
 			if d["lock"] == "hack":
-				need = float(Site.config()["hack_s"])
+				need = s.hack_time()
 				text = "Hold E: hack the lock (%d s)" % int(need)
 			else:
 				text = "E: use the %s keycard" % str(d["card"]) if s.keys.has(d["card"]) else "Locked: it wants the %s keycard" % str(d["card"])

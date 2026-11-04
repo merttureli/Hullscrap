@@ -141,6 +141,9 @@ static func _person(h, area: Rect2, v, m) -> void:
 
 ## The line under a body gear's name in its slot: what it does without "Takes" (the whole sentence ran over the slot's edge; the hover has it).
 static func body_sub(item: String) -> String:
+	var own := str(Kit.gear_def(item).get("sub", ""))
+	if own != "":
+		return own
 	var line := Kit.body_line(item).trim_prefix("Takes ")
 	if line.ends_with(" Sealed."):  # the slot is narrow
 		return line.trim_suffix(" damage. Sealed.") + " dmg, sealed"
