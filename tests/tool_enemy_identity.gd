@@ -43,6 +43,7 @@ func _run() -> void:
 		if str(a).begins_with("cards="):
 			cards = str(a).substr(6).split(",")
 	await lineup(out + "/enemy_identity_lineup.png")
+	await lineup_all(out + "/enemy_identity_all.png")
 	for id in cards:
 		await card(id, "%s/enemy_identity_card_%s.png" % [out, id])
 	quit(0)
@@ -85,17 +86,17 @@ func _save(vp: SubViewport, path: String) -> void:
 
 
 func lineup(path: String) -> void:
-	var k := 5.0
-	var cw := 230
-	var vp := _viewport(Vector2i(cw * IDS.size(), 300))
+	var k := 7.0
+	var cw := 310
+	var vp := _viewport(Vector2i(cw * IDS.size(), 400))
 	var lab := Labels.new()
 	vp.add_child(lab)
 	for i in IDS.size():
 		var ship = _ship(IDS[i])
 		var look: Dictionary = ship.get_meta("style")
-		_view(vp, ship, Vector2(i * cw + cw / 2.0, 30.0), k)
-		lab.items.append({"kind": "emblem", "e": look["emblem"], "r": Rect2(i * cw + cw / 2.0 - 22.0, 215.0, 44.0, 44.0), "col": look["palette"]["mark"], "lw": 3.0})
-		lab.items.append({"kind": "text", "at": Vector2(i * cw + 10.0, 285.0), "s": look["line"], "col": Color("#dfe8f5"), "size": 16, "w": cw - 20.0})
+		_view(vp, ship, Vector2(i * cw + cw / 2.0, 40.0), k)
+		lab.items.append({"kind": "emblem", "e": look["emblem"], "r": Rect2(i * cw + cw / 2.0 - 22.0, 305.0, 44.0, 44.0), "col": look["palette"]["mark"], "lw": 3.0})
+		lab.items.append({"kind": "text", "at": Vector2(i * cw + 10.0, 380.0), "s": look["line"], "col": Color("#dfe8f5"), "size": 16, "w": cw - 20.0})
 	await _save(vp, path)
 
 
@@ -104,7 +105,7 @@ func card(id: String, path: String) -> void:
 	var vp := _viewport(Vector2i(760, 460))
 	var lab := Labels.new()
 	vp.add_child(lab)
-	var enemy = _ship(id)
+	var enemy = _ship(id, "medium", 7)
 	var look: Dictionary = enemy.get_meta("style")
 	var mine = Session.load_ship(PLAYER)
 	lab.items.append({"kind": "rect", "r": Rect2(6, 6, 748, 448), "col": Color("#141a24")})
@@ -113,12 +114,33 @@ func card(id: String, path: String) -> void:
 	lab.items.append({"kind": "text", "at": Vector2(78.0, 40.0), "s": look["line"], "col": Color("#eef3fb"), "size": 22})
 	lab.items.append({"kind": "text", "at": Vector2(78.0, 60.0), "s": "contact: %s" % ("home race" if look["race"] != "" else "gang"), "col": Color("#8696b0"), "size": 12})
 	_view(vp, enemy, Vector2(230.0, 100.0), k)
-	var o := Vector2(560.0, 100.0)  # your ship: the silhouette of its hull at the same scale, bow up
-	var lo := Vector2(1 << 20, 1 << 20)
-	var hi := Vector2(-(1 << 20), -(1 << 20))
-	for c in mine.grid.tiles:
-		lo = lo.min(Vector2(c))
-		hi = hi.max(Vector2(c))
-	lab.items.append({"kind": "hull", "cells": mine.grid.tiles.keys(), "o": o - Vector2((lo.x + hi.x + 1.0) / 2.0 * k, lo.y * k), "k": k, "col": Color("#5d7aa0")})
+	_view(vp, mine, Vector2(560.0, 100.0), k)  # your ship at the same scale, its own art
 	lab.items.append({"kind": "text", "at": Vector2(530.0, 440.0), "s": "your ship", "col": Color("#8696b0"), "size": 12})
+	await _save(vp, path)
+
+
+## Every style (the 30 races and the 8 factions) on one sheet: a medium stage 3 ship each, 8 to a row, its emblem and name line under it.
+func lineup_all(path: String) -> void:
+	var ids: Array = []
+	for id in Shipgen.factions():
+		if Shipgen.tables()["factions"][id].has("style"):
+			ids.append(id)
+	var k := 5.0
+	var cw := 260
+	var ch := 330
+	var cols := 8
+	var rows := int(ceil(float(ids.size()) / cols))
+	var vp := _viewport(Vector2i(cw * cols, ch * rows))
+	var lab := Labels.new()
+	vp.add_child(lab)
+	for i in ids.size():
+		var ship = _ship(ids[i])
+		if ship == null:
+			continue
+		var look: Dictionary = ship.get_meta("style")
+		var ox := (i % cols) * cw
+		var oy := (i / cols) * ch
+		_view(vp, ship, Vector2(ox + cw / 2.0, oy + 24.0), k)
+		lab.items.append({"kind": "emblem", "e": look["emblem"], "r": Rect2(ox + 10.0, oy + ch - 58.0, 34.0, 34.0), "col": look["palette"]["mark"], "lw": 2.5})
+		lab.items.append({"kind": "text", "at": Vector2(ox + 50.0, oy + ch - 36.0), "s": look["line"], "col": Color("#dfe8f5"), "size": 14, "w": cw - 56.0})
 	await _save(vp, path)

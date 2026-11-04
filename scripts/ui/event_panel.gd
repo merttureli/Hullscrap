@@ -5,10 +5,9 @@ extends Control
 ## shows its outcome, the changes in words and any derelict log found; Continue (Enter, Space or a
 ## click) goes on to the next page (goto), starts a fight, opens the ending screen (an outcome with the `ending`
 ## effect) or ends. open_notice() shows a plain page.
-## A choice whose outcomes include a fight ends with a threat tag, "[Threat 4/5]" ("[may fight: Threat 4/5]" when only some of
-## its outcomes fight): the skulls of the enemy that fight would send, against your ship (Shipgen.threat), coloured dim
-## for 1-2, amber for 3 and red for 4-5. The campaign rolls that enemy when the page opens and keeps it (Campaign.foe_for),
-## so the fight is the one that was rated.
+## A choice whose outcomes include a fight ends with the name line of the enemy it would send, "[Kett lancer]" ("[may fight: Kett lancer]" when only
+## some of its outcomes fight), in her livery's colour, and a card beside the panel shows her real ship next to yours: no skulls, no numbers (the
+## player learns to judge a ship by her look). The campaign rolls that enemy when the page opens and keeps it (Campaign.foe_for), so the fight is the one shown.
 ## While open it takes every key and click, over the map. The rules are in events.gd and campaign.gd; this
 ## node only reads input and draws, in the UI colours of docs/ART_STYLE.md.
 
@@ -28,7 +27,8 @@ signal talk_done(ops: Array, acted: bool)
 const Session = preload("res://scripts/combat/combat_session.gd")
 const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
-const Skulls = preload("res://scripts/ui/skulls.gd")
+const FoeInfo = preload("res://scripts/space/foe_info.gd")
+const FoePic = preload("res://scripts/ui/foe_pic.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 
 const WIDTH := 940.0
@@ -38,7 +38,6 @@ const GAP := 14.0
 const ROW_PAD := 11.0
 const ROW_GAP := 8.0
 const ROW_TEXT_W := 90.0  ## px kept free at the right of a row's text
-const RATED_CAP := 128  ## ratings kept (_rated) before the cache starts over
 const TEXT_SIZE := 18
 const ROW_SIZE := 17
 const DIM := Color(0.0, 0.0, 0.0, 0.55)
@@ -66,7 +65,8 @@ var talk := {}  ## aboard another vessel: the node of the person or the spot the
 var talk_ops: Array = []  ## the ops the outcomes taken in this talk asked for
 var talk_acted := false
 
-static var _rated := {}  ## "design path|ship key" -> the skulls of that enemy against that ship, so the panel does not rebuild ships
+var foe_pic: Control  ## the card of the enemy the hovered (else the first) fight choice may send: her ship next to yours
+var _pic_for := ""
 
 
 func _ready() -> void:
@@ -77,7 +77,36 @@ func _ready() -> void:
 
 func _process(_dt: float) -> void:
 	if visible:
+		_update_pic()
 		queue_redraw()
+
+
+## The enemy card beside the panel: the fight choice under the mouse, else the first one that may fight.
+func _update_pic() -> void:
+	if foe_pic == null:
+		foe_pic = FoePic.new()
+		add_child(foe_pic)
+		foe_pic.visible = false
+	var design := ""
+	if page == "choices":
+		if hover >= 0 and hover < view.size() and view[hover].has("foe"):
+			design = str(view[hover]["foe"])
+		else:
+			for v in view:
+				if v.has("foe"):
+					design = str(v["foe"])
+					break
+	if design == "":
+		foe_pic.visible = false
+		_pic_for = ""
+		return
+	if design != _pic_for:
+		_pic_for = design
+		var info := FoeInfo.of(design)
+		foe_pic.show_foe(info.get("ship"), map.ship(), str(info.get("line", "")))
+	var p: Rect2 = layout()["panel"]
+	foe_pic.position = Vector2(minf(p.end.x + 12.0, size.x - FoePic.BOX.x - 8.0), p.position.y)
+	foe_pic.visible = true
 
 
 func _campaign():
@@ -310,23 +339,29 @@ func _row_label(v: Dictionary) -> String:
 
 # --- threat tags ----------------------------------------------------------------------------------------------------
 
-## Mark choice `v` (an entry of `view`) with the threat of the fight it may start: `threat` (skulls), `tag` ("[Threat 4/5]" or
-## "[may fight: Threat 4/5]") and `lines` (its label wrapped with the tag at the end of the last line). Nothing for a choice with no fight.
+## Mark choice `v` (an entry of `view`) with the enemy the fight it may start would send: `tag` ("[Kett lancer]" or "[may fight: Kett lancer]", the
+## name line of her real ship: no skulls, no numbers), `foe` (the design, for the picture) and `lines` (its label wrapped with the tag at the end of
+## the last line). Nothing for a choice with no fight.
 func _tag_threat(v: Dictionary) -> void:
 	if int(v["index"]) < 0:
 		return
 	var outcomes: Array = event["choices"][v["index"]].get("outcomes", [])
 	var fights := 0
-	var worst := 0
+	var design := ""
 	for o in outcomes:
 		var eff = o.get("effects") if o is Dictionary else null
 		if eff is Dictionary and str(eff.get("fight", "")) != "":
 			fights += 1
-			worst = maxi(worst, _skulls_of(str(eff["fight"])))
-	if fights == 0 or worst == 0:
+			if design == "":
+				design = map.fight_design(str(eff["fight"]))
+	if fights == 0 or design == "":
 		return
-	v["threat"] = worst
-	v["tag"] = Skulls.tag(worst, fights < outcomes.size())
+	var info := FoeInfo.of(design)
+	if info.is_empty():
+		return
+	v["foe"] = design
+	v["tag"] = "[%s%s]" % ["may fight: " if fights < outcomes.size() else "", info["line"]]
+	v["tag_color"] = info["palette"]["mark"] if not info["palette"].is_empty() else AMBER
 	var para := TextParagraph.new()  # the tag's spaces do not break, so it never splits over two lines
 	para.width = WIDTH - 2.0 * PAD - ROW_TEXT_W
 	var text := "%s %s" % [_row_label(v), str(v["tag"]).replace(" ", "\u00a0")]
@@ -336,22 +371,6 @@ func _tag_threat(v: Dictionary) -> void:
 		var span := para.get_line_range(k)
 		lines.append(text.substr(span.x, span.y - span.x).replace("\u00a0", " ").strip_edges(false, true))
 	v["lines"] = lines
-
-
-## The skulls (0 when the design does not load) of the enemy a `fight` effect of `value` ("tier" or a design id) sends now,
-## against the player's ship; kept per (design path, ship) in _rated.
-func _skulls_of(value: String) -> int:
-	var ship = map.ship()
-	if ship == null:
-		return 0
-	var path: String = map.fight_design(value)
-	var key := "%s|%d" % [path, ship_key(ship)]
-	if not _rated.has(key):
-		if _rated.size() >= RATED_CAP:
-			_rated.clear()
-		var foe = Session.load_ship(path)  # as the fight loads it, with the design's pilot skill, so the skulls agree with the banner
-		_rated[key] = 0 if foe == null else int(Shipgen.threat(foe, ship)["skulls"])
-	return _rated[key]
 
 
 ## A number that changes when the ship's hull, parts, damage or power do (what its threat rating depends on).
@@ -402,7 +421,7 @@ func _draw_row(i: int, r: Rect2) -> void:
 			continue
 		var head := line.substr(0, line.length() - str(v["tag"]).length())
 		_text(head, at, ROW_SIZE, col)
-		_text(str(v["tag"]), at + Vector2(_font().get_string_size(head, HORIZONTAL_ALIGNMENT_LEFT, -1, ROW_SIZE).x, 0.0), ROW_SIZE, Skulls.color(int(v["threat"])))
+		_text(str(v["tag"]), at + Vector2(_font().get_string_size(head, HORIZONTAL_ALIGNMENT_LEFT, -1, ROW_SIZE).x, 0.0), ROW_SIZE, v["tag_color"])
 
 
 func _draw_result(lay: Dictionary) -> void:

@@ -12,7 +12,6 @@ const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
-const Threat = preload("res://scripts/space/threat.gd")
 const Art = preload("res://scripts/view/art.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
@@ -40,7 +39,6 @@ var page := "confirm"  ## "confirm", then "choose"
 var options: Array = []  ## the regions on offer: their data (Regions.get_region), in order
 var known: Array = []  ## per option: is its rarity known (Campaign.rarity_known), worked out when the cards open
 var wardens: Array = []  ## per option: the warden of its exit beacon (Wardens.for_region at the next stage; {} for the ending region)
-var warden_skulls: Array = []  ## per option: that warden's threat against the ship, 1-5 (0 when it cannot be rated)
 var hover := -1  ## the card (or, on the confirm page, the row) under the mouse
 var message := ""
 
@@ -74,7 +72,6 @@ func show_choices() -> void:
 	options = c.region_offers().map(func(id): return Regions.get_region(str(id)))
 	known = options.map(func(r): return c.rarity_known(str(r["id"]), map.ship()))
 	wardens = options.map(func(r): return Wardens.for_region(c.seed_value, c.stage + 1, r, c.jumps, str(c.cfg.get("difficulty", "normal"))))
-	warden_skulls = wardens.map(func(w): return Wardens.skulls(w, map.ship()))
 	page = "choose"
 	hover = -1
 	message = "" if not options.is_empty() else "The charts are blank: there is no way on from here."
@@ -85,10 +82,9 @@ func close() -> void:
 	visible = false
 	options = []
 	wardens = []
-	warden_skulls = []
 
 
-## Card `i`'s warden line, "Exit warden: Concord Bulwark (Threat 4/5)", "" for a region with no exit (the last one).
+## Card `i`'s warden line, "Exit warden: Concord Bulwark (Concord frigate)", "" for a region with no exit (the last one).
 func warden_line(i: int) -> String:
 	return Wardens.line(wardens[i], map.ship()) if i >= 0 and i < wardens.size() and not wardens[i].is_empty() else ""
 
@@ -270,8 +266,7 @@ func _draw_card(i: int, r: Dictionary) -> void:
 	_draw_warden(i, box)
 
 
-## The card's exit warden at its foot: a rule, "Exit warden: <name> (Threat n/5)" with the threat coloured by its skulls (1-2 dim,
-## 3 amber, 4-5 red), and the warden's hint in dim text.
+## The card's exit warden at its foot: a rule, "Exit warden: <name> (<her name line>)" (no skulls: the ship says what she is), and the warden's hint in dim text.
 func _draw_warden(i: int, box: Rect2) -> void:
 	if i >= wardens.size() or wardens[i].is_empty():
 		return
@@ -281,20 +276,15 @@ func _draw_warden(i: int, box: Rect2) -> void:
 	var y := box.end.y - 98.0
 	draw_line(Vector2(x, y), Vector2(x + width, y), EDGE_DIM, 1.0)
 	var font := ThemeDB.fallback_font
-	var n: int = warden_skulls[i]
+	var look := Wardens.look_line(w)
 	var parts := [["Exit warden: ", DIM_TEXT], [str(w["name"]), TEXT]]
-	if n > 0:
-		parts.append([" (%s)" % Threat.label(n), threat_color(n)])
+	if look != "":
+		parts.append([" (%s)" % look, DIM_TEXT])
 	var at := x
 	for part in parts:
 		_text(part[0], Vector2(at, y + 22.0), 14, part[1])
 		at += font.get_string_size(part[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 	draw_multiline_string(font, Vector2(x, y + 44.0), str(w["hint"]), HORIZONTAL_ALIGNMENT_LEFT, width, 13, 4, DIM_TEXT)
-
-
-## The colour of a threat of `n` skulls: 1-2 dim, 3 amber, 4-5 red.
-static func threat_color(n: int) -> Color:
-	return Skulls.color(n)
 
 
 ## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.

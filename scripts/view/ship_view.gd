@@ -20,8 +20,10 @@ const Unlocks = preload("res://scripts/space/unlocks.gd")
 const BeltArt = preload("res://scripts/view/belt_art.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Emblem = preload("res://scripts/view/emblem.gd")
+const Dressing = preload("res://scripts/view/dressing.gd")
 
 const CELL := 32.0
+const FLOOR_WASH := 0.3  ## how much of an enemy livery's floor tint is washed over its floor
 const LIVERY_WASH := 0.5  ## how much of an enemy livery's tint is washed over its armour plating
 const HOLE := Color("#06080c")
 const HOLE_RIM := Color("#9a5428")
@@ -58,6 +60,9 @@ var _paint := {}  # Unlocks.skin_paint() of the ship's hull skin, remade when th
 var _paint_skin := "?"
 var _emblem_at := Vector2(-1.0e9, -1.0e9)
 var _emblem_sig := []
+var _dress_plan: Array = []  # Dressing.plan() of the ship, remade when its cells change
+var _dress_sig := []
+var _emblem_cells := 4.0  # the emblem decal's side, in cells
 var _livery := {}  # the ship's `style` meta of this frame
 
 
@@ -124,6 +129,12 @@ func _draw() -> void:
 	_glow_quads = []
 	_livery = ship.get_meta("style", {})
 	var grid = ship.grid
+	if not _livery.is_empty() and not _livery["dressing"].is_empty():  # the exterior dressing: outside the hull, under everything
+		var dsig := [grid.tiles.size(), grid.shapes.size(), ship.components.instances.size()]
+		if dsig != _dress_sig:
+			_dress_plan = Dressing.plan(ship, _livery["dressing"])
+			_dress_sig = dsig
+		Dressing.draw(self, _dress_plan, px(Vector2.ZERO), CELL, _livery["palette"], _clock)
 	for c in grid.tiles:
 		_draw_tile(grid, c, grid.tiles[c])
 	if arena != null or skin_on:
@@ -231,10 +242,13 @@ func _draw_tile(grid, c: Vector2i, id: String) -> void:
 	elif def.get("solid", false):
 		TileArt.solid_cell(self, r, grid, c, id, col)
 		if not _livery.is_empty() and grid.shape_of(c).is_empty():  # the livery washes the plating (the skin only covers the outermost ring)
-			draw_rect(r, Color(_livery["palette"]["tint"], LIVERY_WASH if id != "wall" else LIVERY_WASH * 0.6))
-	elif not TileArt.floor_tile(self, r, c):
-		draw_rect(r, col)
-		draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
+			draw_rect(r, Color(_livery["palette"]["tint"], LIVERY_WASH) if id != "wall" else Color(_livery["palette"]["wall"], LIVERY_WASH * 0.7))
+	else:
+		if not TileArt.floor_tile(self, r, c):
+			draw_rect(r, col)
+			draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
+		if not _livery.is_empty():  # the livery's floor tint: the inside reads too
+			draw_rect(r, Color(_livery["palette"]["floor"], FLOOR_WASH))
 
 
 ## The exterior skin over the walls that face space. The plan is remade when walls come or go (a breach, a repair).
@@ -255,13 +269,24 @@ func _draw_skin(grid) -> void:
 	if not look.is_empty():
 		if _emblem_sig != _skin_sig:
 			_emblem_at = emblem_spot(_skin)
+			_emblem_cells = emblem_cells(_skin)
 			_emblem_sig = _skin_sig
 		if _emblem_at.x > -1.0e8:
-			Emblem.draw(self, look["emblem"], Rect2(px(_emblem_at) - Vector2(1.8, 1.8) * CELL, Vector2(3.6, 3.6) * CELL), Color(look["palette"]["mark"], 0.95), CELL / 9.0)
+			Emblem.draw(self, look["emblem"], Rect2(px(_emblem_at) - Vector2(_emblem_cells, _emblem_cells) * CELL / 2.0, Vector2(_emblem_cells, _emblem_cells) * CELL), Color(look["palette"]["mark"], 0.95), CELL / 9.0)
 
 
 ## Where the emblem decal goes, in cell coordinates (the centre of the plate): the skin cell with the most skin around it, the one nearest the
 ## ship's middle column among those. (-1e9, -1e9) when the plan has no full plate.
+## The side of the emblem decal in cells: a quarter of the hull's width (4 to 8).
+static func emblem_cells(plan: Dictionary) -> float:
+	var lo := 1 << 20
+	var hi := -(1 << 20)
+	for e in plan.get("cells", []):
+		lo = mini(lo, e["c"].x)
+		hi = maxi(hi, e["c"].x)
+	return clampf(float(hi - lo + 1) * 0.25, 4.0, 8.0)
+
+
 static func emblem_spot(plan: Dictionary) -> Vector2:
 	var have := {}
 	var lo := Vector2i(1 << 20, 1 << 20)
@@ -280,8 +305,8 @@ static func emblem_spot(plan: Dictionary) -> Vector2:
 	cells.sort()
 	for c in cells:
 		var n := 0
-		for dy in range(-3, 4):
-			for dx in range(-3, 4):
+		for dy in range(-4, 5):
+			for dx in range(-4, 5):
 				if have.has(c + Vector2i(dx, dy)):
 					n += 1
 		var score := float(n) - 0.01 * absf(float(c.x) + 0.5 - mid)

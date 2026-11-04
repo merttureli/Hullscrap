@@ -155,10 +155,17 @@ static func title(ct: Dictionary) -> String:
 ## (fighter_kind). `c` is the campaign: the ship rated is the one a fight here would send (the tier table of the kind, as
 ## Campaign.fight_path rolls it); its rng is put back as it was, so looking at a contact moves nothing.
 static func threat(c, ship, ct: Dictionary) -> int:
+	var design := design_of(c, ship, ct)
+	return 0 if design == "" else int(Shipgen.threat_of(design, ship).get("skulls", 0))
+
+
+## The design (a generated spec) of the ship behind contact `ct`, "" when it shows none: the same rule as threat(), for the card and the marker
+## that show her ship instead of a rating. The campaign's rng is put back as it was.
+static func design_of(c, ship, ct: Dictionary) -> String:
 	var kind := fighter_kind(ct["poi"])
 	if kind == "" or not bool(ct.get("scanned", false)) or c == null or ship == null:
-		return 0
+		return ""
 	var at = c.rng.state
 	var design: String = c.fight_path("tier", kind)
 	c.rng.state = at
-	return int(Shipgen.threat_of(design, ship).get("skulls", 0))
+	return design

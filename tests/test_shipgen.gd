@@ -109,7 +109,7 @@ func _problems(ship: Ship) -> Array:
 		hi = hi.max(c)
 		area += g.area_at(c)
 	var box := float((hi.x - lo.x + 1) * (hi.y - lo.y + 1))
-	if area >= MAX_FILL * box:
+	if area >= (float(Shipgen.tables()["factions"][str(ship.get_meta("shipgen", {}).get("faction", ""))]["hull"].get("max_fill", MAX_FILL - 0.01)) + 0.01 if ship.has_meta("shipgen") else MAX_FILL) * box:
 		bad.append("its solid cells fill %.0f%% of their bounding box" % (100.0 * area / box))
 	if g.shapes.size() < MIN_SHAPED:
 		bad.append("only %d shaped cells" % g.shapes.size())

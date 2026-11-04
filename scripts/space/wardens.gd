@@ -14,6 +14,7 @@ extends RefCounted
 const Regions = preload("res://scripts/space/regions.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Threat = preload("res://scripts/space/threat.gd")
+const FoeInfo = preload("res://scripts/space/foe_info.gd")
 
 const PATH := "res://data/wardens.json"
 const DRIFT_PATH := "res://data/drift.json"
@@ -139,16 +140,19 @@ static func skulls(w: Dictionary, ship) -> int:
 	return _rated[key]
 
 
-## "Threat 4/5" for the warden against `ship`, "" when it cannot be rated.
-static func threat_label(w: Dictionary, ship) -> String:
-	var n := skulls(w, ship)
-	return Threat.label(n) if n > 0 else ""
+## What the warden is, in words: the name line of her real ship ("Clan homestead"), "" when the spec does not build. The map and the cards show this,
+## never a rating (skulls() stays for the advisor and the tools).
+static func look_line(w: Dictionary) -> String:
+	if w.is_empty():
+		return ""
+	var info := FoeInfo.of(str(w["spec"]))
+	return "" if info.is_empty() else str(info["line"])
 
 
-## "Exit warden: Concord Bulwark (Threat 4/5)" for the region card and the map tip.
-static func line(w: Dictionary, ship) -> String:
-	var t := threat_label(w, ship)
-	return "Exit warden: %s%s" % [w["name"], " (%s)" % t if t != "" else ""]
+## "Exit warden: Concord Bulwark (Concord frigate)" for the region card and the map tip: her name and what she is.
+static func line(w: Dictionary, _ship = null) -> String:
+	var look := look_line(w)
+	return "Exit warden: %s%s" % [w["name"], " (%s)" % look if look != "" else ""]
 
 
 # --- the event at the beacon -----------------------------------------------------------------------------------
@@ -177,14 +181,14 @@ static func event(w: Dictionary, c, ship) -> Dictionary:
 	var fac := str(w["faction"])
 	var stage := int(w["stage"])
 	var toll := toll_of(w)
-	var rating := threat_label(w, ship)
+	var rating := look_line(w)
 	var text := str(entry.get("hail", "The %s holds the exit lane." % name))
 	var story: Array = cfg.get("story", [])  # one line a stage, whoever holds the lane: the beacon's old log echoes that stage's beat of the story
 	if stage >= 1 and stage <= story.size():
 		text += " " + str(story[stage - 1])
 	text += " It wants %d credits for the lane." % toll if toll > 0 else " It asks for nothing. It only holds the lane."
 	if rating != "":
-		text += " Your scanners rate it %s." % rating
+		text += " Your scanners make her a %s." % rating
 	var clear := {"flag": [flag]}
 	var choices := []
 	if toll > 0:

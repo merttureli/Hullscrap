@@ -109,6 +109,14 @@ static func _add_races(data: Dictionary) -> void:
 		if st.get("armour") is Dictionary:
 			f["armour"]["tiles"] = st["armour"]["tiles"].duplicate()
 			f["armour"]["factor"].merge(st["armour"].get("factor", {}), true)
+		if st.has("cost_mult"):  # the tuning knob of a style's weapon prices (never its budget): dearer guns, fewer of them
+			for m in f["parts"]["weapons"]:
+				m["cost"] = snappedf(float(m["cost"]) * float(st["cost_mult"]), 0.1)
+		if st.get("prefer") is Dictionary:  # a race with no pack of its own leans on some parts of the base menu: those weights x the factor
+			for cat in st["prefer"]:
+				for m in f["parts"].get(cat, []):
+					if st["prefer"][cat].has(m["id"]):
+						m["weight"] = float(m.get("weight", 1)) * float(st["prefer"][cat][m["id"]])
 		f["style"] = st["style"].duplicate(true)
 		data["factions"][id] = f
 
@@ -264,7 +272,7 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 ## Why `ship` (a generated one or any) is not a valid enemy: [] when it is fine. Power covers the demand and every part is
 ## on it, every room holds air, every floor cell can be reached by a crew body from the helm, every mount is placed by the
 ## mount rules, it can fly, it has a gun, and it is no rectangle.
-static func validate(ship: Ship) -> Array:
+static func validate(ship: Ship, max_fill := 0.85) -> Array:
 	var bad: Array = []
 	ship.refresh()
 	for n in ship.power_state["networks"]:
@@ -301,7 +309,7 @@ static func validate(ship: Ship) -> Array:
 		lo = lo.min(c)
 		hi = hi.max(c)
 		area += ship.grid.area_at(c)
-	if area >= 0.85 * (hi.x - lo.x + 1) * (hi.y - lo.y + 1):
+	if area >= max_fill * (hi.x - lo.x + 1) * (hi.y - lo.y + 1):
 		bad.append("a rectangle (%.0f%% of its box)" % (100.0 * area / ((hi.x - lo.x + 1) * (hi.y - lo.y + 1))))
 	return bad
 
@@ -358,7 +366,7 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 		var r := Hullgen.raster(hull["outline"])
 		if not r["errors"].is_empty():
 			why_not = "outline: " + str(r["errors"][0])
-		elif Hullgen.fill_ratio(r["cells"]) < MAX_FILL:
+		elif Hullgen.fill_ratio(r["cells"]) < float(f["hull"].get("max_fill", MAX_FILL)):
 			ras = r
 			break
 		else:
@@ -369,7 +377,7 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 	if made["ship"] == null:
 		return made
 	var ship: Ship = made["ship"]
-	var why := validate(ship)
+	var why := validate(ship, float(f["hull"].get("max_fill", MAX_FILL)) + 0.01)
 	if not why.is_empty():
 		return {"ship": null, "why": str(why[0])}
 	var parts := {"weapon": [], "engine": [], "shield": [], "reactor": []}  # what stands in the hull, not what was bought
@@ -1309,9 +1317,9 @@ static func style_of(faction: String, size: String) -> Dictionary:
 	var pal: Dictionary = st["palette"]
 	var role := str(st["roles"].get(size, ""))
 	return {"id": faction, "race": str(tables()["factions"][faction].get("race", "")), "label": str(st["label"]), "role": role,
-		"line": ("%s %s" % [st["label"], role]).strip_edges(), "emblem": st["emblem"],
+		"line": ("%s %s" % [st["label"], role]).strip_edges(), "emblem": st["emblem"], "dressing": st.get("dressing", []),
 		"palette": {"tint": Color(str(pal["tint"])), "accent": Color(str(pal["accent"])), "mark": Color(str(pal["accent"])) if Color(str(pal["accent"])).get_luminance() > 0.3 else Color(str(pal["tint"])).lightened(0.3), "lamp": Color(str(pal["lamp"])),
-			"glow": Color(str(pal["glow"])), "patch": pal.get("patch", []).map(func(c): return Color(str(c)))}}
+			"glow": Color(str(pal["glow"])), "floor": Color(str(pal.get("floor", pal["tint"]))), "wall": Color(str(pal.get("wall", pal["tint"]))), "patch": pal.get("patch", []).map(func(c): return Color(str(c)))}}
 
 
 static func _name_of(f: Dictionary, faction: String, rng: RandomNumberGenerator) -> String:

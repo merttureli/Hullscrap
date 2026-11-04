@@ -20,11 +20,15 @@ extends Node2D
 ##   spool ring. On the HUD: the compass ring (contacts, the course and debris within 2,000 px as dots), edge markers
 ##   (art/ui/poi_icons.png: the icon, the distance, the type once identified; Radar.contacts) that set a course when
 ##   clicked (again: cancel), and the sector, helm and jump drive lines. A radar that identifies (Mk2 and up) also names a
-##   passing ship by its kind and rates the threat of one that may fight in skulls under its marker (Radar.threat).
+##   passing ship by its kind and shows one that may fight as her emblem and a silhouette of her hull in her colours under its marker, and her ship
+##   next to yours on a card when the mouse is over it (Radar.design_of, FoeInfo): no skulls.
 ## Off on the build screen (build mode is the old upright view at the origin, and the world holds) and with the old
 ## instant jump. frame(dt) runs one tick without the scene tree, so tests can drive it.
 
 const Helm = preload("res://scripts/space/helm.gd")
+const FoeInfo = preload("res://scripts/space/foe_info.gd")
+const FoePic = preload("res://scripts/ui/foe_pic.gd")
+const Emblem = preload("res://scripts/view/emblem.gd")
 const Radar = preload("res://scripts/space/radar.gd")
 const Sector = preload("res://scripts/space/sector.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
@@ -33,8 +37,8 @@ const HollowFog = preload("res://scripts/view/hollow_fog.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 
 const DEBRIS_DOTS := 2000.0  ## px: debris this near shows on the compass ring
-const THREAT_S := 2.0  ## seconds a contact's skulls are kept before they are rated again
-const SKULL_STEP := 13.0  ## screen px between two skulls under a marker
+const FOE_S := 2.0  ## seconds a contact's enemy is kept before it is looked up again
+const SIL_K := 0.8  ## screen px per cell of the hull silhouette under a marker
 const FLASH_S := 0.45  ## seconds the jump flash plays on arrival
 const SPOOL_SOUND_S := 3.0  ## the jump drive's whine (jump_spool, 3 s) starts this long before the drive fires
 const SAY_S := 4.0  ## seconds a message stays
@@ -78,7 +82,9 @@ var _hollow_seen := false  # whether the sector was Hollow at the last look: the
 var _spool_heard := false  # the whine of this spool has played
 var _markers: Array = []  # [{rect (screen), id}] of the last HUD frame, for clicks
 var _labels: Array = []  # the label boxes drawn so far this frame (place_label keeps two markers' texts apart)
-var _threats := {}  # POI id -> {n (skulls), t (the clock it was rated at)} for this sector
+var _foes := {}  # POI id -> {info (FoeInfo.of), runs (the hull silhouette), design, t (the clock it was looked up at)} for this sector
+var _foe_pic: Control  # the card of the enemy under the mouse
+var _pic_design := ""
 var _layer: CanvasLayer
 var _hud: Control
 var _fog: Control  # the Hollow tide's fog, under the HUD
@@ -277,6 +283,7 @@ func frame(dt: float) -> void:
 		starfield.set("region", "gate" if str(c.node(c.current).get("type", "")) == "gate" else str(_sector.region))
 	queue_redraw()
 	_hud.queue_redraw()
+	_update_pic()
 
 
 ## The campaign or its current sector changed (a jump, a tow, a load, a new run): the helm takes the ship's place there.
@@ -286,7 +293,7 @@ func _sync(c, ship) -> void:
 		return
 	_campaign = c
 	_sector = s
-	_threats.clear()
+	_foes.clear()
 	_hollow_seen = s.hollow
 	helm.refresh(ship)
 	helm.place(s.ship_pos, s.ship_vel, s.ship_angle)
@@ -467,17 +474,49 @@ static func contact_name(ct: Dictionary) -> String:
 	return Radar.title(ct)
 
 
-## The skulls (1 to 5) of the ship behind contact `ct`, 0 when it shows none (Radar.threat: a radar that identifies, a ship that
-## may fight). Kept THREAT_S seconds a contact, as building the enemy to rate it costs a little.
-func threat_of(ct: Dictionary) -> int:
+## The enemy behind contact `ct` ({info (ship, line, emblem, palette), runs (rects of her hull in cells), design}), {} when it shows none (Radar.design_of: a
+## radar that identifies, a ship that may fight). Kept FOE_S seconds a contact, as building the enemy costs a little.
+func foe_of(ct: Dictionary) -> Dictionary:
 	if Radar.fighter_kind(ct["poi"]) == "" or not bool(ct.get("scanned", false)):
-		return 0
+		return {}
 	var id := str(ct["poi"]["id"])
-	var e: Dictionary = _threats.get(id, {})
-	if e.is_empty() or _clock - float(e["t"]) > THREAT_S:
-		e = {"n": Radar.threat(campaign(), _ship(), ct), "t": _clock}
-		_threats[id] = e
-	return int(e["n"])
+	var e: Dictionary = _foes.get(id, {})
+	if e.is_empty() or _clock - float(e["t"]) > FOE_S:
+		var design := Radar.design_of(campaign(), _ship(), ct)
+		var info := FoeInfo.of(design) if design != "" else {}
+		e = {"t": _clock, "design": design, "info": info, "runs": hull_runs(info["ship"]) if not info.is_empty() else []}
+		_foes[id] = e
+	return e if not e["info"].is_empty() else {}
+
+
+## The rows of a ship's hull as [Rect2 (cells)] runs: its silhouette in few rects.
+static func hull_runs(ship) -> Array:
+	var rows := {}
+	for c in ship.grid.tiles:
+		if not rows.has(c.y):
+			rows[c.y] = []
+		rows[c.y].append(c.x)
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for c in ship.grid.tiles:
+		lo = Vector2(minf(lo.x, c.x), minf(lo.y, c.y))
+		hi = Vector2(maxf(hi.x, c.x + 1.0), maxf(hi.y, c.y + 1.0))
+	var runs: Array = []
+	var ys: Array = rows.keys()
+	ys.sort()
+	for y in ys:
+		var xs: Array = rows[y]
+		xs.sort()
+		var start: int = xs[0]
+		var prev: int = xs[0]
+		for i in range(1, xs.size() + 1):
+			if i == xs.size() or xs[i] != prev + 1:
+				runs.append(Rect2(Vector2(start, y) - lo - Vector2((hi.x - lo.x) / 2.0, 0.0), Vector2(prev - start + 1, 1)))
+				if i < xs.size():
+					start = xs[i]
+			if i < xs.size():
+				prev = xs[i]
+	return runs
 
 
 ## The sector's title: the node and the region.
@@ -747,12 +786,21 @@ func _draw_marker(ct: Dictionary, xf: Transform2D, centre: Vector2, vp: Vector2)
 	_hud.draw_string_outline(font, tp, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color(0, 0, 0, 0.9 * alpha))
 	_hud.draw_string(font, tp, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(CYAN if course else TEXT, alpha))
 	var rect := Rect2(at - Vector2(ICON, ICON) * 0.6, Vector2(ICON, ICON) * 1.2).merge(Rect2(tp + Vector2(0.0, -12.0), Vector2(tw, 16.0)))
-	var skulls := threat_of(ct)
-	if skulls > 0:
-		var row := Vector2(tp.x + tw / 2.0 - SKULL_STEP * 2.5, tp.y + 12.0)
-		_draw_skulls(row, skulls, alpha)
-		rect = rect.merge(Rect2(row + Vector2(0.0, -8.0), Vector2(SKULL_STEP * 5.0 + 24.0, 16.0)))
-	_markers.append({"rect": rect, "id": poi["id"]})
+	var foe := foe_of(ct)
+	var design := ""
+	if not foe.is_empty():  # her emblem and a silhouette of her hull in her colours under the label: what she is, not how strong
+		design = str(foe["design"])
+		var look: Dictionary = foe["info"]["palette"]
+		var o := Vector2(tp.x + tw / 2.0, tp.y + 16.0)
+		var runs: Array = foe["runs"]
+		var depth := 0.0
+		for r in runs:
+			depth = maxf(depth, r.end.y)
+			_hud.draw_rect(Rect2(o + r.position * SIL_K + Vector2(10.0, 0.0), r.size * SIL_K), Color(look["tint"] if not look.is_empty() else DIM_TEXT, alpha))
+		if not foe["info"]["emblem"].is_empty():
+			Emblem.draw(_hud, foe["info"]["emblem"], Rect2(o + Vector2(-26.0, 0.0), Vector2(16.0, 16.0)), Color(look["mark"], alpha), 1.5)
+		rect = rect.merge(Rect2(o + Vector2(-30.0, -4.0), Vector2(60.0, maxf(depth * SIL_K, 18.0) + 8.0)))
+	_markers.append({"rect": rect, "id": poi["id"], "design": design})
 
 
 ## Where the text of a marker at `at` goes (the left end of its baseline): under its icon, else above it, else a line lower or higher, so
@@ -768,21 +816,31 @@ static func place_label(at: Vector2, tw: float, vp: Vector2, taken: Array) -> Ve
 	return Vector2(x, base)
 
 
-## `n` of 5 small skulls in a row from `at` (the row's left middle) and "n/5" after them: lit ones in the band's colour
-## (1-2 dim, 3 amber, 4-5 red), as the region cards and the enemy's schematic show a rating.
-func _draw_skulls(at: Vector2, n: int, alpha: float) -> void:
-	var on := RED if n >= 4 else (AMBER if n == 3 else DIM_TEXT)
-	for i in 5:
-		var c := Color(on if i < n else Color("#3a4350"), alpha)
-		var o := at + Vector2(SKULL_STEP * i + 6.0, 0.0)
-		_hud.draw_circle(o, 5.0, c)
-		_hud.draw_rect(Rect2(o + Vector2(-3.0, 3.0), Vector2(6.0, 4.0)), c)
-		_hud.draw_circle(o + Vector2(-2.0, 0.0), 1.4, Color("#10151c", alpha))
-		_hud.draw_circle(o + Vector2(2.0, 0.0), 1.4, Color("#10151c", alpha))
-	var font := ThemeDB.fallback_font
-	var tx := at + Vector2(SKULL_STEP * 5.0 + 8.0, 4.0)
-	_hud.draw_string_outline(font, tx, "%d/5" % n, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 3, Color(0, 0, 0, 0.9 * alpha))
-	_hud.draw_string(font, tx, "%d/5" % n, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(on, alpha))
+## The card of the enemy under the mouse: her ship next to yours, her emblem and name line. Hidden when no marker with an enemy is under it.
+func _update_pic() -> void:
+	var design := ""
+	var at := Vector2.ZERO
+	if _hud != null and not _fighting():
+		var m := _hud.get_local_mouse_position()
+		for i in range(_markers.size() - 1, -1, -1):
+			if _markers[i]["rect"].has_point(m) and str(_markers[i].get("design", "")) != "":
+				design = str(_markers[i]["design"])
+				at = _markers[i]["rect"].end
+				break
+	if design == "":
+		if _foe_pic != null:
+			_foe_pic.visible = false
+		_pic_design = ""
+		return
+	if _foe_pic == null:
+		_foe_pic = FoePic.new()
+		_hud.add_child(_foe_pic)
+	if design != _pic_design:
+		_pic_design = design
+		var info := FoeInfo.of(design)
+		_foe_pic.show_foe(info.get("ship"), _ship(), str(info.get("line", "")))
+	_foe_pic.position = Vector2(clampf(at.x + 8.0, 4.0, _hud.size.x - FoePic.BOX.x - 4.0), clampf(at.y - FoePic.BOX.y / 2.0, 44.0, _hud.size.y - FoePic.BOX.y - 4.0))
+	_foe_pic.visible = true
 
 
 ## Where the line from `from` toward `to` leaves `box`.

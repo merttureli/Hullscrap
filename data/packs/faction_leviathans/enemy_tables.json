@@ -53,6 +53,7 @@
 					{"id": "inertial_dampener", "cost": 12, "weight": 1, "from": 80}
 				]
 			},
+			"style": {"label": "Leviathan", "roles": {"small": "calf", "medium": "starwhale", "large": "grandmother"}, "palette": {"tint": "#2a5a98", "accent": "#90e0ff", "lamp": "#80d0ff", "glow": "#80d0ff", "floor": "#a8d8ff", "wall": "#3a70b0", "patch": ["#ffffff", "#e8e8e8"]}, "dressing": [{"kind": "ribs", "count": [10, 15], "where": "flank", "len": 1.7, "sym": true}], "emblem": {"prims": [{"line": [0.5, 0.92, 0.5, 0.55, 0.25, 0.3, 0.1, 0.05]}, {"line": [0.5, 0.55, 0.75, 0.3, 0.9, 0.05]}, {"line": [0.5, 0.92, 0.42, 0.98]}]}},
 			"hull": {
 				"prow": [2, 4],
 				"tail": [2, 4],

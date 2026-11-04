@@ -14,7 +14,7 @@ const TileArt = preload("res://scripts/view/tile_art.gd")
 
 const RACES: Array[String] = ["kett", "prismatic", "grundl"]
 const GANGS: Array[String] = ["rustfangs", "clans", "lumen", "wardens"]
-const BASE := {"kett": "clans", "prismatic": "lumen", "grundl": "concord"}
+const BASE := {"kett": "clans", "prismatic": "lumen", "grundl": "concord", "revenant": "hollow", "choir": "wardens", "human": "concord"}
 
 
 func test_the_styles_load_and_every_prototype_has_a_look() -> void:
@@ -80,8 +80,8 @@ func test_a_built_ship_carries_its_livery_crew_and_name_line() -> void:
 	for id in GANGS:
 		var s = Shipgen.build(id, "medium", 5, 90.0)
 		check(s != null and s.get_meta("style", {}).get("id") == id, id + " has its livery")
-	var plain = Shipgen.build("concord", "medium", 5, 90.0)
-	check(plain != null and not plain.has_meta("style"), "a faction without a style has none")
+	for id in Shipgen.factions():  # every faction and every race has a look
+		check(Shipgen.style_of(id, "medium").has("emblem"), id + " has a livery")
 
 
 func test_the_emblem_has_a_spot_on_the_hull_and_draws() -> void:
@@ -135,9 +135,11 @@ func test_a_race_region_sends_its_own_ships_for_the_race_share() -> void:
 	c.region_data = Regions.get_region("clan_space")
 	for i in 40:
 		eq(c.gen_spec("gen:", "pirate", roll).split(":")[1], "rustfangs", "a region with no race style meets its faction")
-	c.region_data = Regions.get_region("sporeling_groves")  # a home species with no ship style: nothing changes
-	for i in 40:
-		eq(c.gen_spec("gen:", "pirate", roll).split(":")[1], "wardens", "a race with no style meets the region's faction")
+	c.region_data = Regions.get_region("sporeling_groves")  # every race has a style now: its home region sends it too
+	var spor := 0
+	for i in 100:
+		spor += int(c.gen_spec("gen:", "pirate", roll).begins_with("gen:sporeling:"))
+	check(spor > 40 and spor < 80, "a Sporeling grove meets Sporelings about as often as the share: %d of 100" % spor)
 
 
 func _mean_power(faction: String, budget: float, stage: int, seeds: int) -> float:
@@ -154,8 +156,22 @@ func _mean_power(faction: String, budget: float, stage: int, seeds: int) -> floa
 
 
 func test_race_ships_keep_the_threat_of_the_faction_they_are_built_on() -> void:
-	for id in RACES:
+	for id in ["kett", "prismatic", "grundl", "revenant", "choir", "human"]:  # one style of each base faction (the full tables: tests/tool_enemy_parity.gd)
 		var race := _mean_power(id, 165.0, 3, 40)
 		var base := _mean_power(BASE[id], 165.0, 3, 40)
 		var ratio := race / base
 		check(ratio > 0.8 and ratio < 1.2, "%s mean power %.1f against %s %.1f (x%.2f)" % [id, race, BASE[id], base, ratio])
+
+
+func test_no_two_styles_share_both_a_dominant_colour_and_a_dressing_kind() -> void:
+	var seen := {}
+	for id in Shipgen.factions():
+		var st = Shipgen.tables()["factions"][id].get("style")
+		if not st is Dictionary:
+			continue
+		var tint := Color(str(st["palette"]["tint"]))
+		var cls := ("grey%d" % int(tint.v * 3.0)) if tint.s < 0.18 else ("h%d" % int(tint.h * 12.0) + "l%d" % int((tint.v + tint.s * 0.0) * 2.0 * 0.999))
+		for e in st["dressing"]:
+			var key := "%s/%s" % [cls, e["kind"]]
+			check(not seen.has(key), "%s and %s share the colour %s and the dressing %s" % [id, seen.get(key, ""), cls, e["kind"]])
+			seen[key] = id
