@@ -482,9 +482,9 @@
 		"engineering": {"tint": "#c8845a", "bp": 2.5, "props": [{"prop": "crate", "n": [1, 2]}, {"prop": "locker", "n": [1, 1]}, {"prop": "terminal", "n": [0, 1]}, {"prop": "cable", "n": [1, 3]}]},
 		"airlock": {"tint": "#58c878", "bp": 0.0, "props": [{"prop": "locker", "n": [0, 1]}]},
 		"corridor": {"tint": "#8a94a6", "bp": 0.0, "props": [{"prop": "cable", "n": [0, 2]}, {"prop": "body", "n": [0, 1]}]},
-		"reactor": {"tint": "#d8a050", "bp": 2.5, "table": "engineering", "props": [{"prop": "terminal", "n": [1, 2]}, {"prop": "locker", "n": [0, 1]}, {"prop": "crate", "n": [0, 1]}, {"prop": "cable", "n": [2, 4]}]},
+		"reactor": {"tint": "#d8a050", "bp": 2.5, "table": "engineering", "props": [{"prop": "terminal", "n": [0, 1]}, {"prop": "locker", "n": [1, 2]}, {"prop": "crate", "n": [1, 2]}, {"prop": "cable", "n": [2, 4]}]},
 		"security": {"tint": "#c86a5a", "bp": 1.4, "props": [{"prop": "locker", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 1]}, {"prop": "terminal", "n": [0, 1]}]},
-		"market": {"tint": "#d8b860", "bp": 0.8, "table": "cargo", "props": [{"prop": "crate", "n": [2, 4]}, {"prop": "pallet", "n": [1, 2]}, {"prop": "cask", "n": [0, 1]}, {"prop": "cabinet", "n": [0, 1]}]},
+		"market": {"tint": "#d8b860", "bp": 0.8, "table": "cargo", "props": [{"prop": "crate", "n": [2, 4]}, {"prop": "pallet", "n": [1, 2]}, {"prop": "cabinet", "n": [0, 2]}]},
 		"observation": {"tint": "#7ab8d8", "bp": 0.4, "table": "quarters", "props": [{"prop": "cabinet", "n": [0, 1]}, {"prop": "body", "n": [0, 1]}]}
 	},
 	"beds": {
@@ -665,7 +665,7 @@
 			{"weight": 0.06, "item": "marine_plate", "count": [1, 1]}, {"weight": 0.06, "item": "stone_plates", "count": [1, 1]}, {"weight": 0.06, "item": "chitin_plate", "count": [1, 1]},
 			{"weight": 22, "item": "hand_ammo", "count": [6, 14]}, {"weight": 18, "item": "credits", "count": [4, 14]}, {"weight": 12, "item": "scrap", "count": [2, 6]}, {"weight": 8, "item": "copper", "count": [1, 4]},
 			{"weight": 6, "item": "pistol", "count": [1, 1]}, {"weight": 4, "item": "rifle", "count": [1, 1]}, {"weight": 1, "item": "slugthrower", "count": [1, 1]}, {"weight": 6, "item": "basic_armor", "count": [1, 1]},
-			{"weight": 2, "item": "eva_suit", "count": [1, 1]}, {"weight": 6, "item": "missile", "count": [1, 2]}, {"weight": 4, "item": "titanium", "count": [1, 2]}, {"weight": 2.4, "item": "mod", "count": [1, 1]}
+			{"weight": 2, "item": "eva_suit", "count": [1, 1]}, {"weight": 6, "item": "missile", "count": [1, 2]}, {"weight": 4, "item": "titanium", "count": [1, 2]}, {"weight": 3, "item": "mod", "count": [1, 1]}
 		],
 		"terminal": [
 			{"weight": 60, "item": "credits", "count": [6, 24]}, {"weight": 10, "item": "silicon", "count": [1, 2]}, {"weight": 6, "item": "copper", "count": [1, 3]}

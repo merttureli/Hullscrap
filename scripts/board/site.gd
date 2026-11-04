@@ -70,6 +70,7 @@ var backdrop := {}  ## what the windows look out on (station_gen.gd _backdrop), 
 var crowd := {}  ## who is aboard instead of the kind's (boarding.json spawn and people): {spawn: {count, mix}, people: {count, roles}}
 var posts: Array = []  ## foes that stand watch where the site puts them: [{kind, pos (cells), room}]
 var beds: Array = []  ## [{id, cell, size, room, works}]: hold E by a working one to heal (beds.gd); not props, so the container ids never move
+var arrival := ""  ## a module station's line on arrival: what its state looks like
 var _skin := {}  # cell -> true: flat hull cells on the outside (where a hatch can go)
 var _rng := RandomNumberGenerator.new()
 
@@ -116,6 +117,7 @@ static func make(p_seed: int, p_kind: String, opts := {}):
 	else:  # the bands (a module station that could not be built falls back to them)
 		s.gen = "classic" if p_kind == "station" else ""
 		s.state = ""
+		s.arrival = ""
 		s.mood = ""
 		s.station_type = ""
 		s.modules = []
@@ -437,9 +439,9 @@ func problems() -> Array:
 		out.append("no airlock")
 	elif not breathable(airlock["room"]):
 		out.append("the airlock has no air")
-	for b in beds:
+	for b in beds.filter(func(x): return not x.get("part", false)):  # (a beaten ship's bed is her own part, where the fight left it)
 		for c in bed_cells(b):
-			if walk.get_tile(c) != "wall" or (prop_of.has(c) and not b.get("part", false)) or int(room_of.get(c, -1)) != int(b["room"]):
+			if walk.get_tile(c) != "wall" or prop_of.has(c) or int(room_of.get(c, -1)) != int(b["room"]):
 				out.append("bed %d stands outside its room or on something" % b["id"])
 				break
 	return out

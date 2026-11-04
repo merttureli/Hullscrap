@@ -10,7 +10,7 @@ const Campaign = preload("res://scripts/space/campaign.gd")
 const Sector = preload("res://scripts/space/sector.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
-const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Foes = preload("res://scripts/board/foes.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const STATES: Array[String] = ["abandoned", "half", "operational"]
@@ -273,3 +273,22 @@ func test_glass_tubes_are_crossings_some_airless_some_watched() -> void:
 		var f = _station(4500 + i, "operational")
 		if f.mood == "friendly":
 			check(f.posts.is_empty(), "no sentry on a friendly station")
+
+
+func test_who_stands_aboard_follows_the_state() -> void:
+	for i in 8:
+		for st in ["abandoned", "operational"]:
+			var site = _station(5000 + i * 3, st)
+			if site.gen != "modules":
+				continue
+			var b = Boarding.start(null, null, "w%d" % i, {"kind": "station"}, null)
+			b.site = site
+			b.soldier.pos = site.airlock["spawn"]
+			b.foes = Foes.new(b)
+			b.foes.spawn_site({})
+			var n: int = b.foes.list.filter(func(f): return f["kind"] != "crawler").size()
+			var span: Array = site.crowd["spawn"]["count"]
+			check(n >= int(span[0]) and n <= int(span[1]) + site.posts.size(), "%s %d: %d foes in %s (+%d posted)" % [st, i, n, str(span), site.posts.size()])
+			if site.mood == "friendly":
+				eq(n, 0, "nobody hostile on a friendly station")
+

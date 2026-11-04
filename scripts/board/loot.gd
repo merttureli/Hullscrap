@@ -148,9 +148,11 @@ static func room_tags(purpose: String) -> Array:
 ## The tags of item `id`: its own (loot_theme.items), and a part's family's (loot_theme.families).
 static func item_tags(id: String) -> Array:
 	_index()
-	var out: Array = theme_cfg().get("items", {}).get(id, []).duplicate()
-	out.append_array(theme_cfg().get("families", {}).get(str(_family.get(id, "")), []))
-	return out
+	if not _tags.has(id):
+		var out: Array = theme_cfg().get("items", {}).get(id, []).duplicate()
+		out.append_array(theme_cfg().get("families", {}).get(str(_family.get(id, "")), []))
+		_tags[id] = out
+	return _tags[id]
 
 
 ## The tags of recipe `rid`: those of what it makes.
@@ -172,6 +174,8 @@ static var _family := {}  # part id -> its family
 static var _output := {}  # recipe id -> the item it makes
 static var _rarity := {}  # material id -> rarity
 static var _ammo := {}  # item id -> true: kind ammo
+static var _tags := {}  # item id -> its tags, worked out once
+static var _tier := {}  # item id -> its tier, worked out once
 
 
 ## The parts, recipes, materials and items (with their packs), read once.
@@ -191,6 +195,12 @@ static func _index() -> void:
 
 ## The tier of outcome item `id` (what the first roll decides): credits, mod, part, weapon, ammo, gear, common, rare or special (loot_theme.tiers first).
 static func tier_of(id: String) -> String:
+	if not _tier.has(id):
+		_tier[id] = _tier_of(id)
+	return _tier[id]
+
+
+static func _tier_of(id: String) -> String:
 	_index()
 	var t: Dictionary = theme_cfg().get("tiers", {})
 	if t.has(id):

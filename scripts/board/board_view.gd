@@ -210,7 +210,7 @@ func enter(p_session) -> String:
 	Audio.mood(self, "explore")
 	Audio.muffle_music(self, true)
 	Audio.fx(self, "arrive", null, -6.0)
-	say("Airlock sealed. %s." % session.site.site_name)
+	say("Airlock sealed. %s.%s" % [session.site.site_name, (" " + session.site.arrival) if session.site.arrival != "" else ""])  # (a module station says what state it is in)
 	pick = []
 	picking = ask_party and _loadout_wanted()
 	if picking:

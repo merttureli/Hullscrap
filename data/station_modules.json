@@ -30,7 +30,7 @@
   },
   "modules": {
     "dock": {"name": "Docking collar", "tags": ["dock"], "weights": {}, "max": 1,
-      "cells": ["########", "#......#", "@......#", "@......d", "#......d", "#......#", "########"],
+      "cells": ["##########", "#........#", "@........#", "@........d", "#........d", "#........#", "##########"],
       "rooms": [{"purpose": "airlock"}]},
     "spoke": {"name": "Spoke", "tags": ["link", "spoke"], "weights": {"outpost": 2, "waystation": 2, "habitat": 2.5}, "max": 4, "not_after": ["link"], "close": "window",
       "cells": ["#hhphh#", "#.....#", "#.....#", "d.....d", "d.....d", "#.....#", "#.....#", "#hhphh#"], "stretch": {"y": [6, 0, 6]},

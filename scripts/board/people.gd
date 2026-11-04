@@ -307,12 +307,12 @@ func turn(n: Dictionary, kind := "", fresh := true) -> Dictionary:
 	return f
 
 
-## Person `n` walks off to the room farthest from the soldier and is gone when they get there (or after people.leave_s).
+## Person `n` walks off to the room farthest from the soldier (one no lock shuts off) and is gone when they get there (or after people.leave_s).
 func walk_away(n: Dictionary) -> void:
 	var best := Vector2.ZERO
 	var bd := -1.0
 	for r in s.site.rooms:
-		if r["purpose"] == "gone":
+		if r["purpose"] == "gone" or r["locked"]:
 			continue
 		var anchors: Array = s.site.free_anchors(r["id"])
 		if anchors.is_empty():

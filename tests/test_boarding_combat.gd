@@ -29,7 +29,7 @@ func _ship(rounds := 40) -> Ship:
 func _visit(kind := "station", seed_value := 31, ship = null):
 	var sh = ship if ship != null else _ship()
 	var s = Boarding.start(null, null, "p%d" % seed_value, {"kind": kind}, sh)
-	s.site = Site.make(seed_value, kind, {"faction": "clans"})
+	s.site = Site.make(seed_value, kind, {"faction": "clans", "gen": "classic"})  # (the fights are staged on the classic bands; module stations: test_stations.gd)
 	s.soldier.pos = s.site.airlock["spawn"]
 	s.foes = Foes.new(s)
 	s.foes.spawn_site({})

@@ -111,10 +111,10 @@ func tick(dt: float) -> void:
 	for id in resting.keys():
 		var p: Dictionary = resting[id]
 		var m = p["m"]
+		if not hunted and not m.is_down():
+			m.hp = minf(m.hp + float(cfg()["heal_hp_s"]) * dt, m.max_hp)
 		if hunted or m.is_down() or m.hp >= m.max_hp:
 			rise(p)
-			continue
-		m.hp = minf(m.hp + float(cfg()["heal_hp_s"]) * dt, m.max_hp)
 
 
 ## Is follower `p` lying on a bed?

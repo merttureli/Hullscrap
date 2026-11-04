@@ -92,6 +92,7 @@ func _roll_kind(opts: Dictionary) -> void:
 	s.state = state
 	s.mood = mood
 	s.station_type = type
+	s.arrival = str(config()["states"][state].get("text", ""))
 
 
 # --- one attempt ---------------------------------------------------------------------------------------------------
