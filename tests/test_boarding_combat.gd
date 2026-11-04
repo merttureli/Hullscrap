@@ -21,7 +21,7 @@ func _ship(rounds := 40) -> Ship:
 	Jobs.spawn_crew(s)
 	s.crew.append(CrewMember.new("Rook", Vector2(10, 10), "human"))
 	s.crew.append(CrewMember.new("Tess", Vector2(12, 10), "fenn"))
-	s.inventory.add("hand_ammo", rounds)
+	s.inventory.add("hand_ammo", rounds - s.inventory.count("hand_ammo"))  # (a starter comes with some)
 	return s
 
 

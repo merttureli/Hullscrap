@@ -10,6 +10,7 @@ const Arms = preload("res://scripts/board/arms.gd")
 const Art = preload("res://scripts/view/art.gd")
 const Kit = preload("res://scripts/board/kit.gd")
 const Mods = preload("res://scripts/board/mods.gd")
+const Party = preload("res://scripts/board/party.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 
 const W := 268.0
@@ -45,7 +46,10 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 	var m = e["m"]
 	var down: bool = m.is_down()
 	h.draw_rect(r, Color(h.PANEL_BG, 0.86))
-	h.draw_rect(r, h.BAD if down else (h.EDGE if index == 0 else h.EDGE_DIM), false, 1.5)
+	var edge: Color = h.BAD if down else (h.EDGE if index == 0 else h.EDGE_DIM)
+	if e["p"] != null and not down and Party.rounds(e["p"]) >= 0 and Party.mags_left(e["p"]) <= 1.0:  # a follower down to a magazine: amber, red when out
+		edge = h.BAD if Party.rounds(e["p"]) <= 0 else h.AMBER
+	h.draw_rect(r, edge, false, 1.5)
 	_portrait(h, Rect2(r.position + Vector2(8, 9), Vector2(50, 50)), m)
 	var x := r.position.x + 66.0
 	h._text(str(m.name), Vector2(x, r.position.y + 22.0), 15, h.TEXT if not down else h.DIM_TEXT)
@@ -83,6 +87,24 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 			continue
 		Mods.draw_icon(h, item, mr, down)
 		h.hover_add(mr, Mods.hover(item), Mods.color(Mods.parse(item)["mod"]))
+	if e["p"] != null:
+		_rounds(h, Rect2(gx + 28.0 * float(kit["mods"].size() + 1), r.position.y + 40.0, r.end.x - 10.0 - (gx + 28.0 * float(kit["mods"].size() + 1)), 22.0), e["p"], down)
+
+
+## A follower's rounds, "magazine/spare" like the soldier's weapon bar: amber at one magazine left, OUT (red) at none. A melee weapon shows nothing.
+static func _rounds(h, r: Rect2, p: Dictionary, down: bool) -> void:
+	var n := Party.rounds(p)
+	if n < 0:
+		return
+	var out := n <= 0
+	var low := not out and Party.mags_left(p) <= 1.0
+	var col: Color = h.BAD if out else (h.AMBER if low else h.TEXT)
+	h.draw_rect(r, Color(col, 0.16 if (low or out) else 0.0))
+	h.draw_rect(r, col if (low or out) else h.EDGE_DIM, false, 1.0)
+	var t := "OUT" if out else "%d/%d" % [int(p["gun"]["mag"]), int(p["rest"])]
+	var tw: float = h._font().get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	h._text(t, Vector2(r.get_center().x - tw / 2.0, r.position.y + 16.0), 13, col if not down else h.DIM_TEXT)
+	h.hover_add(r, ["Rounds", "%d in the weapon, %d spare. A copy of the party's rounds: gone when you leave." % [int(p["gun"]["mag"]), int(p["rest"])]], col)
 
 
 ## How far the revive of this person has got (0 to 1): the soldier's hold of E on them, or a crew mate kneeling by them.
