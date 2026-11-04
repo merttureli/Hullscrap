@@ -1,6 +1,6 @@
 {
   "weapons": {
-    "basalt_magma_spitter": {"kind": "bolt", "sound": "sig_magma", "damage_type": "kinetic", "damage": 3, "cooldown": 3.5, "range": 700, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 520, "turret": false, "gimbal": 4, "effects": {"acid": {"dps": 1.5, "seconds": 4.0, "type": "energy", "spread": 0.15}, "self_room": {"o2_drain": 0.3}}},
+    "basalt_magma_spitter": {"kind": "bolt", "sound": "sig_magma", "damage_type": "kinetic", "damage": 2.5, "cooldown": 3.5, "range": 700, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 520, "turret": false, "gimbal": 4, "effects": {"acid": {"dps": 1.0, "seconds": 4.0, "type": "energy", "spread": 0.15}, "self_room": {"o2_drain": 0.3}}},
     "basalt_quarry_driver": {"kind": "bolt", "damage_type": "kinetic", "damage": 13.5, "cooldown": 5.6, "range": 1000, "shots": 1, "pierce": 3, "fire_chance": 0.0, "speed": 480, "heat_per_shot": 10, "turret": false, "gimbal": 3, "effects": {"self_room": {"o2_drain": 0.4}}},
     "basalt_pumice_flak": {"kind": "flak", "damage_type": "kinetic", "damage": 2.5, "cooldown": 3.5, "range": 520, "shots": 4, "pierce": 0, "fire_chance": 0.0, "speed": 540, "spread": 22, "splash": 1, "turret": true, "gimbal": 0, "arc": 240, "track": 80, "accuracy": 0.7, "effects": {"needs_operator": {"species": "basalt", "else_mult": 0.5, "stat": "damage"}}}
   }
