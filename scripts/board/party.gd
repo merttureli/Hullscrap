@@ -2,7 +2,10 @@ extends RefCounted
 ## The crew who come along on a boarding visit (docs/BOARDING.md, stage B2). Up to `party_max` unposted crew follow the soldier, shoot (or swing) with
 ## their species' sidearm and revive whoever is down. Pure logic, static functions on the session (boarding.gd), whose `party` array holds them:
 ## {m (a copy of the crew member: pos, hp, path), src (the ship's own CrewMember, written back on leaving), gun (arms.gd), cd, repath, revive (seconds
-## spent reviving someone), moving}. A crew member who is down when the soldier leaves is lost (boarding.gd leave()).
+## spent reviving someone), moving, rest (their spare rounds: see give_ammo)}. A crew member who is down when the soldier leaves is lost (boarding.gd leave()).
+## - A follower whose weapon has a magazine shoots from rounds of their own: a COPY of the soldier's spare rounds when they come aboard (never fewer than
+##   boarding.json combat.follower_ammo_min), nothing taken from the hold. They reload from them, and with none left they do not shoot (a melee follower swings).
+##   What is left is gone when the visit ends.
 
 const Arms = preload("res://scripts/board/arms.gd")
 const Site = preload("res://scripts/board/site.gd")
@@ -54,8 +57,32 @@ static func join(s, names: Array) -> Array:
 		var g = Arms.make_gun(str(Kit.weapons_of(m)[0]), false)  # (a follower fights with the first weapon of their kit)
 		if g == null:
 			g = Arms.make_gun("service_pistol", false)
-		out.append({"m": m, "src": src, "gun": g, "cd": 0.0, "repath": 0.0, "revive": 0.0, "moving": false})
+		var p := {"m": m, "src": src, "gun": g, "cd": 0.0, "repath": 0.0, "revive": 0.0, "moving": false}
+		give_ammo(p, s.reserve())
+		out.append(p)
 	return out
+
+
+## Load the follower's weapon and give them a copy of `spare` rounds (at least follower_ammo_min) to reload from; a weapon with no magazine needs none.
+static func give_ammo(p: Dictionary, spare: int) -> void:
+	var g: Dictionary = p["gun"]
+	p["rest"] = 0
+	p["out"] = false
+	if not Arms.has_mag(g):
+		return
+	var total := maxi(spare, int(Arms.cfg()["follower_ammo_min"]))
+	g["mag"] = mini(int(g["w"]["mag"]), total)
+	p["rest"] = total - int(g["mag"])
+
+
+## The rounds a follower has in all (magazine and spare), -1 for a weapon with no magazine.
+static func rounds(p: Dictionary) -> int:
+	return int(p["gun"]["mag"]) + int(p.get("rest", 0)) if Arms.has_mag(p["gun"]) else -1
+
+
+## Magazines a follower has left, the one in the weapon counting as a fraction (1.0 = one full magazine): the card turns amber at 1 or less.
+static func mags_left(p: Dictionary) -> float:
+	return float(rounds(p)) / maxf(float(p["gun"]["w"]["mag"]), 1.0)
 
 
 ## A person met aboard (people.gd `npc_follow`) walks with the soldier until he leaves: a follower with no crew member behind it (`src` is null, `temp` true),
@@ -69,6 +96,7 @@ static func add_temp(s, m: CrewMember) -> Dictionary:
 	m.job = {}
 	m.path.clear()
 	var p := {"m": m, "src": null, "temp": true, "gun": g, "cd": 0.0, "repath": 0.0, "revive": 0.0, "moving": false}
+	give_ammo(p, s.reserve())
 	s.party.append(p)
 	return p
 
@@ -84,6 +112,11 @@ static func tick(s, dt: float) -> void:
 		var m: CrewMember = p["m"]
 		var prev: Vector2 = m.pos
 		p["cd"] = maxf(float(p["cd"]) - dt, 0.0)
+		if Arms.has_mag(p["gun"]):
+			Arms.tick(p["gun"], dt, func(n: int) -> int:
+				var k := mini(maxi(n, 0), int(p["rest"]))
+				p["rest"] = int(p["rest"]) - k
+				return k)
 		if m.is_down():
 			m.path.clear()
 			p["revive"] = 0.0
@@ -111,8 +144,15 @@ static func _act(s, p: Dictionary, dt: float) -> void:
 				s.foes.hurt(foe["ref"], float(w["damage"]) * Mods.damage_mult(m), foe["pos"])
 				s.foes.noise(m.pos, float(c["noise_swing"]))
 		else:
-			if float(p["cd"]) <= 0.0:
+			var g: Dictionary = p["gun"]
+			if Arms.has_mag(g) and int(g["mag"]) <= 0 and float(g["reload"]) <= 0.0:  # an empty magazine: reload from their own rounds, or they are out
+				if not Arms.start_reload(g, int(p["rest"])) and not bool(p["out"]):
+					p["out"] = true
+					s.events.append({"type": "line", "text": "%s is out of rounds." % m.name, "pos": m.pos})
+			if float(p["cd"]) <= 0.0 and float(g["reload"]) <= 0.0 and (not Arms.has_mag(g) or int(g["mag"]) > 0):
 				p["cd"] = 1.0 / float(w["rate"])
+				if Arms.has_mag(g):
+					g["mag"] = int(g["mag"]) - 1
 				s.shoot(m, "ally", m.pos + Vector2.from_angle(off.angle()) * 0.9, off.angle() + s.rng.randf_range(-ERR, ERR), w, s.foes.bodies())
 				s.foes.noise(m.pos, float(c["noise_gun"]))
 			if m.pos.distance_to(s.soldier.pos) > float(c["follow_far"]) * 1.8:

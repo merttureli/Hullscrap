@@ -13,7 +13,7 @@
 	"airlock_reach": 3.4,
 	"ring_cells": 1,
 	"combat": {
-		"_doc": "On foot, stage B2 (scripts/board/arms.gd, foes.gd, party.gd). ammo_item: the cargo item a magazine is loaded from. mag, reload_s, spread_deg: by hand weapon class (data/hand_weapons.json); melee and tools have no magazine. hand_items: the cargo items that are hand weapons and the weapon each stands for (found in loot, Q swaps between the two carried; the plasma rifle of the events is the Gatekeeper's Lance). foe_drop: the chance a beaten foe whose weapon has an item here leaves it in the hold (foes.gd). hit_r: the radius of a body a ray hits (cells); prop_stop: the chance a prop a ray enters stops it (cover). noise_gun and noise_swing: cells within which a shot or a swing alerts every foe. flash_range, self_range: how far the flashlight and the small light round the soldier reach (the view draws them). down_hp: the share of his health the soldier wakes with; down_text is what the screen says. door_near: how close a body must come to open a door. revive_s and revive_hp: holding E by a downed crewman (the soldier or a follower) and the share of health they get up with. hack_sentry_s and hack_back_deg: holding E behind a sentry, the angle off its facing that counts as behind. party_max: crew who can come along. follow_near and follow_far: a follower walks to the soldier from further than far and stops within near. sight: how far a foe sees, in cells: dark (always), red (a room with an emergency light), lit (in the beam of the flashlight, or the soldier is lit); notice_s is how long it takes to be sure of what it sees (less when close). hollow: the Hollow falling while the soldier is aboard (count of hollow_touched, the toast, the banner).",
+		"_doc": "On foot, stage B2 (scripts/board/arms.gd, foes.gd, party.gd). ammo_item: the cargo item a magazine is loaded from. mag, reload_s, spread_deg: by hand weapon class (data/hand_weapons.json); melee and tools have no magazine. hand_items: the cargo items that are hand weapons and the weapon each stands for (found in loot, Q swaps between the two carried; the plasma rifle of the events is the Gatekeeper's Lance). foe_drop: the chance a beaten foe whose weapon has an item here leaves it in the hold (foes.gd). hit_r: the radius of a body a ray hits (cells); prop_stop: the chance a prop a ray enters stops it (cover). noise_gun and noise_swing: cells within which a shot or a swing alerts every foe. flash_range, self_range: how far the flashlight and the small light round the soldier reach (the view draws them). down_hp: the share of his health the soldier wakes with; down_text is what the screen says. door_near: how close a body must come to open a door. revive_s and revive_hp: holding E by a downed crewman (the soldier or a follower) and the share of health they get up with. hack_sentry_s and hack_back_deg: holding E behind a sentry, the angle off its facing that counts as behind. party_max: crew who can come along. follower_ammo_min: a follower whose weapon has a magazine boards with a copy of the soldier's spare rounds, at least this many (scripts/board/party.gd). follow_near and follow_far: a follower walks to the soldier from further than far and stops within near. sight: how far a foe sees, in cells: dark (always), red (a room with an emergency light), lit (in the beam of the flashlight, or the soldier is lit); notice_s is how long it takes to be sure of what it sees (less when close). hollow: the Hollow falling while the soldier is aboard (count of hollow_touched, the toast, the banner).",
 		"ammo_item": "hand_ammo",
 		"mag": {"pistol": 8, "rifle": 20, "heavy": 4},
 		"reload_s": {"pistol": 1.2, "rifle": 1.7, "heavy": 2.0},
@@ -40,6 +40,7 @@
 		"hack_sentry_s": 3.0,
 		"hack_back_deg": 110,
 		"party_max": 2,
+		"follower_ammo_min": 10,
 		"follow_near": 3.5,
 		"follow_far": 6.0,
 		"leave_confirm_s": 6.0,
@@ -51,6 +52,47 @@
 		"weapon_slots": 2,
 		"mod_slots": 2,
 		"bodies": ["basic_armor", "eva_suit", "exosuit", "salamander_suit", "heat_suit"]
+	},
+	"looks": {
+		"_doc": "What body gear looks like on a person (scripts/crew/person_drawer.gd draw_gear), flat shapes over the body and under the head. Source px (16 to a cell) in the body's frame: x is the person's right, y is back (forward is -y), the middle is between the shoulders; the pieces turn with the body. color: the main tone, dark and light: the edge and the highlight (from color when missing). pieces, drawn in order: shape (circle: at, r; rect: at (top-left), size; ring: at, r, an outline), tone (main, dark, light or a #hex; main when missing), alpha, edge (true: an outline in the dark tone), over_head (true: drawn over the head, as a helmet is).",
+		"basic_armor": {"color": "#8d96a3", "dark": "#474e59", "light": "#b9c1cc", "pieces": [
+			{"shape": "circle", "at": [-8.5, -1.0], "r": 4.6, "edge": true},
+			{"shape": "circle", "at": [8.5, -1.0], "r": 4.6, "edge": true},
+			{"shape": "rect", "at": [-5.0, -4.5], "size": [10.0, 10.0], "edge": true},
+			{"shape": "rect", "at": [-3.0, -2.5], "size": [6.0, 3.0], "tone": "light"}]},
+		"eva_suit": {"color": "#e6eaee", "dark": "#8a939e", "light": "#ffffff", "pieces": [
+			{"shape": "rect", "at": [-4.0, 6.5], "size": [8.0, 5.0], "tone": "dark", "edge": true},
+			{"shape": "rect", "at": [-6.5, -4.5], "size": [13.0, 11.0], "edge": true},
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.4, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.4, "edge": true},
+			{"shape": "circle", "at": [0.0, -2.5], "r": 7.0, "tone": "#bfe6ff", "alpha": 0.32, "over_head": true},
+			{"shape": "ring", "at": [0.0, -2.5], "r": 7.0, "tone": "#e6eaee", "over_head": true}]},
+		"exosuit": {"color": "#454c57", "dark": "#1d2128", "light": "#7d8796", "pieces": [
+			{"shape": "rect", "at": [-6.0, 6.0], "size": [12.0, 5.0], "tone": "dark", "edge": true},
+			{"shape": "rect", "at": [-12.5, -5.0], "size": [7.0, 9.0], "edge": true},
+			{"shape": "rect", "at": [5.5, -5.0], "size": [7.0, 9.0], "edge": true},
+			{"shape": "rect", "at": [-7.5, -5.5], "size": [15.0, 13.0], "edge": true},
+			{"shape": "rect", "at": [-6.0, -2.0], "size": [12.0, 2.0], "tone": "light"},
+			{"shape": "rect", "at": [-1.0, -5.0], "size": [2.0, 11.0], "tone": "light"}]},
+		"salamander_suit": {"color": "#c4411f", "dark": "#5e1a0c", "light": "#ee7a3c", "pieces": [
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 4.2, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 4.2, "edge": true},
+			{"shape": "rect", "at": [-6.0, -4.5], "size": [12.0, 11.0], "edge": true},
+			{"shape": "circle", "at": [-3.0, -1.5], "r": 1.4, "tone": "dark"},
+			{"shape": "circle", "at": [3.0, -1.5], "r": 1.4, "tone": "dark"},
+			{"shape": "circle", "at": [0.0, 1.5], "r": 1.4, "tone": "dark"},
+			{"shape": "circle", "at": [-3.0, 4.5], "r": 1.4, "tone": "dark"},
+			{"shape": "circle", "at": [3.0, 4.5], "r": 1.4, "tone": "dark"},
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 1.3, "tone": "dark"},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 1.3, "tone": "dark"}]},
+		"heat_suit": {"color": "#cfd6de", "dark": "#7b8794", "light": "#f4f8fb", "pieces": [
+			{"shape": "rect", "at": [-3.5, 6.5], "size": [7.0, 4.0], "tone": "dark", "edge": true},
+			{"shape": "rect", "at": [-6.5, -4.5], "size": [13.0, 11.0], "edge": true},
+			{"shape": "circle", "at": [-8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "circle", "at": [8.0, -1.0], "r": 3.6, "edge": true},
+			{"shape": "rect", "at": [-6.0, -4.0], "size": [5.0, 3.0], "tone": "light"},
+			{"shape": "rect", "at": [-6.0, 0.0], "size": [12.0, 1.4], "tone": "light"},
+			{"shape": "rect", "at": [-3.0, -3.5], "size": [6.0, 2.0], "tone": "#3a4654", "over_head": true}]}
 	},
 	"armor": {
 		"_doc": "The share of the damage a person takes aboard, by the body gear they wear (1.0 = none). The EVA suit and the heat suit are made for the ship's hazards: no use aboard.",

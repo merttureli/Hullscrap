@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/build/build_mode.gd" id="1_build"]
 [ext_resource type="Script" path="res://scripts/space/starfield.gd" id="2_stars"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://scripts/view/sector_view.gd" id="10_sector"]
 [ext_resource type="Script" path="res://scripts/audio/audio.gd" id="11_audio"]
 [ext_resource type="Script" path="res://scripts/board/board_view.gd" id="12_board"]
+[ext_resource type="Script" path="res://scripts/ui/crew_kit_panel.gd" id="13_kit"]
 
 [node name="Main" type="Node2D"]
 
@@ -58,6 +59,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("7_craft")
+
+[node name="CrewKitPanel" type="Control" parent="CraftLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("13_kit")
 
 [node name="PickerLayer" type="CanvasLayer" parent="."]
 layer = 5

@@ -13,6 +13,7 @@ extends RefCounted
 const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
 const Power = preload("res://scripts/sim/power.gd")
+const Site = preload("res://scripts/board/site.gd")
 const SEGMENTS := 20  ## points on a drawn ellipse
 const SCALE := 1.15  ## the figure below is drawn in units of this many cells: arms and legs reach about 3 cells across
 const STRIDE := PI  ## walk phase (radians) per cell walked: one full leg cycle every 2 cells
@@ -28,6 +29,7 @@ const BOB := 1.5  ## source px a floating body rises and sinks about its middle
 const BOB_RATE := 2.4  ## radians a second of that bob
 const HOVER := 1.0  ## source px further than usual that the shadow of a floating body sits
 ## The frame and pivot of each rig kind in source px (art/README.md): every rig is a square frame turned about its middle.
+const GEAR_K := 0.1  ## the placeholder person draws gear this many person-units (SCALE cells) per source px of boarding.json `looks`
 const RIGS := {"normal": [33, 16], "large": [49, 24], "small": [25, 12], "floating": [49, 24]}
 const JOB_ITEMS := {"extinguish": "extinguisher", "repair_breach": "wrench", "repair_component": "wrench", "repair_block": "wrench"}
 
@@ -123,7 +125,7 @@ static func draw(canvas, centre_px: Vector2, pose: Dictionary, palette: Dictiona
 	var sheet = art_of(pose)
 	if sheet == null:
 		var facing := float(pose.get("aim", pose.get("move", 0.0)))
-		draw_person(canvas, centre_px, facing, float(pose.get("phase", 0.0)), bool(pose.get("moving", false)), palette, cell_px)
+		draw_person(canvas, centre_px, facing, float(pose.get("phase", 0.0)), bool(pose.get("moving", false)), palette, cell_px, str(pose.get("body", "")))
 		return
 	var k := cell_px / SpriteSheet.SRC_CELL
 	var layers := plan(sheet, pose)
@@ -133,8 +135,71 @@ static func draw(canvas, centre_px: Vector2, pose: Dictionary, palette: Dictiona
 	for l in layers:  # the shadow first: the same silhouettes, one source px down and right (a floating body: one more)
 		_blit(canvas, l, l["sheet"].texture, centre_px + Vector2(k, k) * (1.0 + HOVER if floating else 1.0), k, SHADOW)
 	var suit := Color(palette.get("suit", "#33c6d6"))
+	var gear := str(pose.get("body", ""))
+	var aim := float(pose.get("aim", pose.get("move", 0.0)))
+	var worn := false
 	for l in layers:
+		if gear != "" and not worn and l["layer"] in ["arms", "head"]:  # worn over the torso, under the arms and the head
+			draw_gear(canvas, centre_px + lift, aim, k, gear, false, base)
+			worn = true
 		_blit(canvas, l, l["sheet"].tinted(suit) if l["tint"] else l["sheet"].texture, centre_px + lift, k, base)
+	if gear != "":
+		draw_gear(canvas, centre_px + lift, aim, k, gear, true, base)
+
+
+## The look of body gear `item` (boarding.json `looks`), {} for none or for an item with no look.
+static func gear_look(item: String) -> Dictionary:
+	var looks = Site.config().get("looks", {})
+	var d = looks.get(item, {}) if item != "" else {}
+	return d if d is Dictionary else {}
+
+
+## The body gear `m` wears ("" for none): the `body` of their kit.
+static func gear_of(m) -> String:
+	return str(m.kit.get("body", "")) if m != null and not m.kit.is_empty() else ""
+
+
+## The colour of `tone` ("main", "dark", "light" or a #hex) in the gear look `d`.
+static func _tone(d: Dictionary, tone: String) -> Color:
+	var main := Color(str(d.get("color", "#888888")))
+	match tone:
+		"main":
+			return main
+		"dark":
+			return Color(str(d["dark"])) if d.has("dark") else main.darkened(0.45)
+		"light":
+			return Color(str(d["light"])) if d.has("light") else main.lightened(0.3)
+	return Color(tone)
+
+
+## Draw body gear `item` on a person at `centre_px`, turned to `angle` (radians, 0 = facing right), `k` px per source px: the pieces of its
+## look (data/boarding.json `looks`) that go under the head (`over_head` false) or over it. `mod` tints it (a person who is down).
+static func draw_gear(canvas, centre_px: Vector2, angle: float, k: float, item: String, over_head: bool, mod := Color.WHITE) -> void:
+	var d := gear_look(item)
+	if d.is_empty():
+		return
+	canvas.draw_set_transform(centre_px, angle + PI / 2.0, Vector2(k, k))
+	for p in d.get("pieces", []):
+		if bool(p.get("over_head", false)) != over_head:
+			continue
+		var col := _tone(d, str(p.get("tone", "main")))
+		col.a *= float(p.get("alpha", 1.0))
+		col *= mod
+		var at := Vector2(float(p["at"][0]), float(p["at"][1]))
+		var edge := _tone(d, "dark") * mod
+		match str(p.get("shape", "rect")):
+			"circle":
+				canvas.draw_circle(at, float(p["r"]), col)
+				if p.get("edge", false):
+					canvas.draw_arc(at, float(p["r"]), 0.0, TAU, 16, edge, 1.0, true)
+			"ring":
+				canvas.draw_arc(at, float(p["r"]), 0.0, TAU, 20, col, 1.2, true)
+			_:
+				var r := Rect2(at, Vector2(float(p["size"][0]), float(p["size"][1])))
+				canvas.draw_rect(r, col)
+				if p.get("edge", false):
+					canvas.draw_rect(r, edge, false, 1.0)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 ## The crew art the pose asks for (art/crew/<species>/), or null: then the placeholder is drawn.
@@ -282,7 +347,7 @@ static func draw_status(canvas: CanvasItem, centre_px: Vector2, text: String, ce
 ## distance walked while `moving`, and with time while standing (it drives the breathing bob).
 ## `palette`: "suit", "hair" and "tool" colours (Color or "#rrggbb"), optional "skin".
 static func draw_person(canvas: CanvasItem, centre_px: Vector2, facing: float, walk_phase: float,
-		moving: bool, palette: Dictionary, cell_px: float) -> void:
+		moving: bool, palette: Dictionary, cell_px: float, gear := "") -> void:
 	var suit := Color(palette.get("suit", "#33c6d6"))
 	var hair := Color(palette.get("hair", "#2a2320"))
 	var tool := Color(palette.get("tool", "#d7dce4"))
@@ -337,6 +402,8 @@ static func draw_person(canvas: CanvasItem, centre_px: Vector2, facing: float, w
 		canvas.draw_circle(body * (Vector2(0.02, s * 0.80) * u), 0.27 * u, suit.lightened(0.05), true, -1.0, true)  # shoulder pad
 		canvas.draw_arc(body * (Vector2(0.02, s * 0.80) * u), 0.27 * u, 0.0, TAU, 16, trim, 0.06 * u, true)
 
+	if gear != "":
+		draw_gear(canvas, centre_px, body.get_rotation(), cell_px * SCALE * GEAR_K, gear, false)
 	# Head: hair (or a helmet) over the head with the face showing at the front.
 	var head := Vector2(0.06 + breath * 0.015, 0.0) * u
 	canvas.draw_circle(body * head, 0.43 * u, Color(0, 0, 0, 0.45), true, -1.0, true)  # edge
@@ -355,6 +422,8 @@ static func draw_person(canvas: CanvasItem, centre_px: Vector2, facing: float, w
 	canvas.draw_arc(body * tip, 0.17 * u, body.get_rotation() + aim + 0.75, body.get_rotation() + aim + TAU - 0.75, 12, tool, 0.10 * u, true)
 	for s in [-1.0, 1.0]:
 		canvas.draw_circle(body * hands[s], 0.15 * u, skin, true, -1.0, true)
+	if gear != "":
+		draw_gear(canvas, centre_px, body.get_rotation(), cell_px * SCALE * GEAR_K, gear, true)
 
 
 ## A filled ellipse with radii `r` (pixels) centred on `c` (pixels) in the frame `xf`.

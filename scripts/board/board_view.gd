@@ -693,7 +693,23 @@ func fight_music() -> bool:
 
 ## The crew who can be taken along, [{name, species, hp, max_hp}].
 func pick_rows() -> Array:
-	return Party.eligible(session.ship).map(func(m): return {"name": m.name, "species": m.species, "hp": m.hp, "max_hp": m.max_hp})
+	return Party.eligible(session.ship).map(func(m): return {"name": m.name, "species": m.species, "hp": m.hp, "max_hp": m.max_hp, "gear": _gear_text(m), "rounds": _rounds_if_aboard(m), "no_suit": Site.config().has("gear") and not Air.sealed(m)})
+
+
+## What a crew member of the picker carries, in a few words: their weapons and body gear ("Service Pistol, Carbine, Basic Armour"), the sidearm when it is all.
+func _gear_text(m) -> String:
+	var names := []
+	for w in Kit.weapons_of(m):
+		names.append(str(Arms.weapon(str(w)).get("name", w)))
+	if str(m.kit.get("body", "")) != "":
+		names.append(session.ship.crafting.name_of(str(m.kit["body"]), session.ship.components))
+	return ", ".join(names)
+
+
+## The rounds a follower would come aboard with (a copy of the spare rounds, at least the floor), -1 for a weapon with no magazine.
+func _rounds_if_aboard(m) -> int:
+	var w := Arms.weapon(str(Kit.weapons_of(m)[0]))
+	return maxi(session.reserve(), int(Arms.cfg()["follower_ammo_min"])) if not w.is_empty() and int(w["mag"]) > 0 else -1
 
 
 ## Pick or drop the `i`th crew member of the picker (at most party_max).
@@ -711,6 +727,12 @@ func toggle_pick(i: int) -> void:
 	load_who = mini(load_who, loadout_people().size() - 1)
 	load_slot = {}
 	load_msg = ""
+
+
+## Go aboard with nobody: the picked crew stay behind.
+func go_alone() -> void:
+	pick.clear()
+	confirm_party()
 
 
 ## Go aboard with the crew picked (none is allowed) and the kits set on the loadout screen.
@@ -741,22 +763,10 @@ func _src_soldier():
 	return null
 
 
-## Is there anything to set before going aboard: crew to take, or gear in the hold the soldier could wear or carry?
+## Does the boarding party screen open first? Always, for every kind of site: the party picker (with "Go alone") is how you choose who goes in. Only a visit with
+## no ship behind it (a test) has none.
 func _loadout_wanted() -> bool:
-	if session.ship == null:
-		return false
-	if session.needs_suit():
-		return true
-	if not Party.eligible(session.ship).is_empty():
-		return true
-	var src = _src_soldier()
-	if src == null:
-		return false
-	for item in session.ship.inventory.counts:
-		var w := Arms.item_weapon(str(item))
-		if Mods.is_item(str(item)) or Kit.cfg()["bodies"].has(str(item)) or (w != "" and w != src.sidearm()):
-			return true
-	return false
+	return session.ship != null
 
 
 ## The screen opens: whoever has no kit yet is given the one they would have had (the soldier takes a spare hand weapon of the hold).
@@ -780,6 +790,11 @@ func loadout_people() -> Array:
 			if m.name == n:
 				out.append(m)
 	return out
+
+
+## The note after "WEAPONS" on the loadout screen.
+func weapons_note() -> String:
+	return "Q swaps in the field." if load_who == 0 else "A crew mate fights with the first."
 
 
 ## Show person `i` (0 is the soldier).
@@ -1158,6 +1173,8 @@ func _unhandled_input(e: InputEvent) -> void:
 				loadout_choose(e.keycode - KEY_1)
 			elif e.keycode >= KEY_1 and e.keycode <= KEY_9:
 				toggle_pick(e.keycode - KEY_1)
+			elif e.keycode == KEY_A and load_slot.is_empty():
+				go_alone()
 			elif e.keycode == KEY_TAB:
 				loadout_focus((load_who + 1) % maxi(loadout_people().size(), 1))
 			elif e.keycode == KEY_ENTER or e.keycode == KEY_KP_ENTER or e.keycode == KEY_SPACE:
@@ -1166,8 +1183,7 @@ func _unhandled_input(e: InputEvent) -> void:
 				if not load_slot.is_empty():
 					load_slot = {}
 				else:
-					pick.clear()
-					confirm_party()
+					go_alone()
 		elif e.keycode == KEY_R:
 			session.reload()
 		elif e.keycode == KEY_Q:
@@ -1195,6 +1211,8 @@ func _loadout_click(hit: Dictionary) -> void:
 	match str(hit.get("type", "")):
 		"go":
 			confirm_party()
+		"alone":
+			go_alone()
 		"pick":
 			toggle_pick(int(hit["i"]))
 			if pick.has(str(pick_rows()[int(hit["i"])]["name"])):  # a crew mate just picked is the one shown
@@ -1466,7 +1484,7 @@ func _draw_soldier() -> void:
 	var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
 	var look: Dictionary = m.look if not m.look.is_empty() else ShipView.LOOKS.get(m.name, ShipView.OTHER_LOOK)
 	var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-		"item": str(session.gun()["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head}
+		"item": str(session.gun()["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head, "body": PersonDrawer.gear_of(m)}
 	PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
 
 
@@ -1573,5 +1591,5 @@ func _draw_party() -> void:
 		var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
 		var look: Dictionary = m.look if not m.look.is_empty() else ShipView.LOOKS.get(m.name, ShipView.OTHER_LOOK)
 		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-			"item": str(p["gun"]["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head}
+			"item": str(p["gun"]["w"]["art"]), "down": m.is_down(), "work": false, "t": _clock, "head": m.head, "body": PersonDrawer.gear_of(m)}
 		PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)

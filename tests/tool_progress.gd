@@ -47,6 +47,26 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 const Shops = preload("res://scripts/space/shops.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
 
+const Inventory = preload("res://scripts/ship/inventory.gd")
+
+
+## The hold, counting where every fuel came from and went (Beta 4.1, fuel): each change of the fuel is booked under `tag`, which the bot sets round what it does
+## (a jump, a dock, a debris slice, an event "event:<id>", a fight's loot, a tow). by: tag -> [gained, spent]. Everything else is "other".
+class FuelLedger extends Inventory:
+	var tag := "other"
+	var by := {}
+
+	func add(id: String, n: int) -> void:
+		var before := count(id)
+		super.add(id, n)
+		if id == "fuel":
+			var d := count(id) - before
+			if d != 0:
+				var row: Array = by.get(tag, [0, 0])
+				row[0 if d > 0 else 1] += absi(d)
+				by[tag] = row
+
+
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
 const PLAYER_EVERY := 3
@@ -83,6 +103,7 @@ var _carry := {}  # item -> the fraction of a unit the scaled debris yield has n
 # the state of the run being played
 var c: Campaign
 var ship: Ship
+var _led: FuelLedger  # the hold of this run, with its fuel ledger
 var run := {}
 var st := {}  # the record of the stage being played
 var _docked := ""  # the node whose station the ship is docked at ("" when not)
@@ -184,6 +205,9 @@ func play(path: String, id: String, seed_index: int) -> Dictionary:
 	c = Campaign.new(SEED_BASE + seed_index)
 	ship = Ship.from_design(path)
 	RunStart.apply_ship(ship, {}, null)  # the start of a real run: fuel.start fuel, recipes.json start_known, the drone (a design's own cargo has 6 fuel)
+	_led = FuelLedger.new()
+	_led.counts = ship.inventory.counts
+	ship.inventory = _led
 	Jobs.spawn_crew(ship)
 	ship.refresh()
 	_armour0 = int(stats_now()["armour"])
@@ -210,6 +234,7 @@ func new_stage() -> Dictionary:
 	var rec := {"stage": c.stage, "region": c.region_id, "nodes": 0, "jumps": 0, "minutes": 0.0, "fights": [], "flow": {}, "pois": 0, "dock": 0, "fuel_bought": 0, "drift_jumps": 0, "tows": 0,
 		"salvage": [], "bp_list": [], "crafted": {}, "installed": [], "failed": {}, "toll": 0, "warden": "", "intake_pieces": 0, "shops": 0, "seen": [], "dens": 0.0, "press": 0.0, "hollow": 0, "dens_n": 0, "slice_new": 0, "slice_old": 0, "speed_sum": 0.0, "fab_max": 0, "peak": {}}
 	rec["start"] = snapshot()
+	rec["fuel_by0"] = _led.by.duplicate(true)
 	return rec
 
 
@@ -268,9 +293,22 @@ func play_stage() -> bool:
 	return end_stage(true)
 
 
+## What a ledger booked since `was`: tag -> [gained, spent].
+func fuel_diff(was: Dictionary, now: Dictionary) -> Dictionary:
+	var out := {}
+	for tag in now:
+		var a: Array = was.get(tag, [0, 0])
+		var b: Array = now[tag]
+		if b[0] != a[0] or b[1] != a[1]:
+			out[tag] = [int(b[0]) - int(a[0]), int(b[1]) - int(a[1])]
+	return out
+
+
 func end_stage(alive: bool) -> bool:
 	st["jumps"] = c.jumps - int(st["j0"])
 	st["end"] = snapshot()
+	st["fuel_by"] = fuel_diff(st["fuel_by0"], _led.by)
+	st.erase("fuel_by0")
 	if not alive:
 		run["end"] = "died" if run["cause"] != "" else "stuck"
 		if run["cause"] == "":
@@ -284,13 +322,19 @@ func end_stage(alive: bool) -> bool:
 func go(to: String) -> bool:
 	if ship.inventory.count("fuel") < 1 + int(c.jump_cost(ship) > 100):
 		fuel_up()
+	_led.tag = "jump"
 	var r: Dictionary = c._jump_now(to, ship, false)
+	_led.tag = "other"
 	if not r["ok"] and r["why"] == Campaign.NO_FUEL:
 		if Structure.wreck_margin(ship) > 0.25:
+			_led.tag = "jump"
 			r = c._jump_now(to, ship, true)
+			_led.tag = "other"
 			st["drift_jumps"] += 1
 		else:
+			_led.tag = "tow"
 			var t: Dictionary = c.tow(ship)
+			_led.tag = "other"
 			st["tows"] += int(t["ok"])
 			r = {"ok": false}
 			return bool(t["ok"]) and go(to)
@@ -356,7 +400,9 @@ func warden_round() -> bool:
 	while c.warden_up() and tries < 2:
 		tries += 1
 		var before := inv_copy()
+		_led.tag = "event:%s" % str(ev.get("id", "?"))
 		var r: Dictionary = c.events.choose(ev, pick, c, ship, c.node(c.current))
+		_led.tag = "other"
 		flow("events", before)
 		if not r["ok"]:
 			return false
@@ -487,6 +533,13 @@ func paired_slice(s, pos0: Vector2, ang: float, piv: Vector2, cur: Vector2, spee
 ## Collect debris for `seconds` in sector `s` with the real intakes: a SAMPLE_S slice is simulated and scaled up. The ambient contacts come while
 ## the ship stays. False when a fight wrecked the ship.
 func collect(s, seconds: float) -> bool:
+	_led.tag = "debris"
+	var ok := _collect(s, seconds)
+	_led.tag = "other"
+	return ok
+
+
+func _collect(s, seconds: float) -> bool:
 	var before := inv_copy()
 	ship.refresh()
 	s.set_flight(ship)
@@ -591,7 +644,9 @@ func chain(ev: Dictionary) -> bool:
 				pick = v
 		var before := inv_copy()
 		var known0: Dictionary = ship.crafting.known.duplicate()
+		_led.tag = "event:%s" % str(e.get("id", "?"))
 		var r: Dictionary = c.events.choose(e, int(pick["index"]), c, ship, c.node(c.current))
+		_led.tag = "other"
 		if not r["ok"]:
 			continue
 		flow("events", before)
@@ -762,7 +817,9 @@ func fight_path(path: String, after_win: Dictionary, why: String, value := "") -
 	var res := {"state": state, "enemy": enemy, "threat": th["skulls"]}
 	sim.free()
 	var before := inv_copy()
+	_led.tag = "fight"
 	var done: Dictionary = c.fight_done(res, ship, after_win)
+	_led.tag = "other"
 	flow("loot", before)
 	if state != "lost":
 		mend(60.0)
@@ -851,12 +908,14 @@ func fuel_up() -> void:
 	if _docked == "" or not c.station_cfg(_docked).get("services", []).has("fuel"):
 		return
 	var want := TANK - ship.inventory.count("fuel")
+	_led.tag = "buy"
 	while want > 0 and ship.inventory.count("credits") > 30 + _reserve:
 		var r: Dictionary = c.buy_fuel(ship, _docked, 1)
 		if not r["ok"]:
 			break
 		st["fuel_bought"] += 1
 		want -= 1
+	_led.tag = "other"
 
 
 # --- the build ladder ------------------------------------------------------------------------------
@@ -1547,6 +1606,7 @@ func report() -> String:
 			mean_of(recs, ["end", "guns"]), mean_of(recs, ["end", "layers"]), mean_of(recs, ["end", "fab"]), mean_of(recs, ["end", "known"]),
 			mean_flow(recs, "debris+", "scrap") + mean_flow(recs, "events+", "scrap") + mean_flow(recs, "loot+", "scrap"), mean_flow(recs, "events+", "credits") + mean_flow(recs, "loot+", "credits"),
 			mean(recs, "minutes"), deaths])
+	L.append_array(fuel_report())
 	L.append("")
 	L.append("## Where runs end")
 	var causes := {}
@@ -1557,6 +1617,66 @@ func report() -> String:
 	for k in causes:
 		L.append("- %s (%d)" % [k, causes[k]])
 	return "\n".join(L)
+
+
+## The fuel of stages 1 to 3 (Beta 4.1): per stage, what was gained by source (canisters in the debris, events, a fight's loot: surrender and salvage offers, the dock's
+## shop, a tow, the rest), what the jumps spent, the ratio of the two, the fuel in the hold at the end and the runs that were towed or drifted with none (`fuel_by` of the stage
+## rows, FuelLedger). The bot does not board a site, so the fuel of a boarding's loot is not here.
+func fuel_report() -> Array[String]:
+	var L: Array[String] = []
+	var have := rows.filter(func(r): return not r["stages"].is_empty() and r["stages"][0].has("fuel_by"))
+	if have.is_empty():
+		return L
+	L.append("")
+	L.append("## Fuel, stages 1 to 3 (per run, mean over the runs that reached the stage)")
+	L.append("| stage | runs | canisters | events | fights | bought | tow+other | gained | spent | gained/spent | free/spent | hold at end (median) | towed or drifted % |")
+	L.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+	var pooled := {"n": 0, "can": 0.0, "ev": 0.0, "fi": 0.0, "buy": 0.0, "oth": 0.0, "spent": 0.0}
+	var events := {}
+	for s in range(1, mini(stages_n, 3) + 1):
+		var recs := []
+		var holds := []
+		var low := 0
+		for r in have:
+			if r["stages"].size() >= s:
+				recs.append(r["stages"][s - 1])
+		if recs.is_empty():
+			continue
+		var t := {"can": 0.0, "ev": 0.0, "fi": 0.0, "buy": 0.0, "oth": 0.0, "spent": 0.0}
+		for sr in recs:
+			holds.append(float(sr["end"]["held"]["fuel"]))
+			low += int(int(sr["tows"]) > 0 or int(sr["drift_jumps"]) > 0)
+			var by: Dictionary = sr["fuel_by"]
+			for tag in by:
+				var g := float(by[tag][0])
+				t["spent"] += float(by[tag][1]) if tag == "jump" else 0.0
+				if tag == "debris":
+					t["can"] += g
+				elif tag.begins_with("event:"):
+					t["ev"] += g
+					events[tag] = float(events.get(tag, 0.0)) + g
+				elif tag == "fight":
+					t["fi"] += g
+				elif tag == "buy":
+					t["buy"] += g
+				elif tag != "jump":
+					t["oth"] += g
+		var n := float(recs.size())
+		var gained: float = float(t["can"]) + float(t["ev"]) + float(t["fi"]) + float(t["buy"]) + float(t["oth"])
+		var free: float = gained - float(t["buy"])
+		holds.sort()
+		L.append("| %d | %d | %.2f | %.2f | %.2f | %.2f | %.2f | %.2f | %.2f | %.2f | %.2f | %.1f | %d%% |" % [s, recs.size(), t["can"] / n, t["ev"] / n, t["fi"] / n, t["buy"] / n, t["oth"] / n, gained / n,
+			t["spent"] / n, gained / maxf(t["spent"], 1.0), free / maxf(t["spent"], 1.0), holds[holds.size() / 2], 100 * low / recs.size()])
+		pooled["n"] += recs.size()
+		for k in t:
+			pooled[k] += t[k]
+	var gained_all: float = float(pooled["can"]) + float(pooled["ev"]) + float(pooled["fi"]) + float(pooled["buy"]) + float(pooled["oth"])
+	L.append("| 1-3 | %d | | | | | | | | **%.2f** | **%.2f** | | |" % [pooled["n"], gained_all / maxf(pooled["spent"], 1.0), (gained_all - float(pooled["buy"])) / maxf(pooled["spent"], 1.0)])
+	var ids: Array = events.keys()
+	ids.sort_custom(func(a, b): return events[a] > events[b])
+	L.append("")
+	L.append("Fuel from events, stages 1 to 3, the biggest first (total over all runs): " + ", ".join(ids.slice(0, 12).map(func(i): return "%s %d" % [str(i).trim_prefix("event:"), int(events[i])])))
+	return L
 
 
 func group_keys(key: String) -> Array:

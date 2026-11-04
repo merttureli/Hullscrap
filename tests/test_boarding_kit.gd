@@ -28,7 +28,7 @@ func _ship(rounds := 80) -> Ship:
 	Jobs.spawn_crew(s)
 	s.crew.append(CrewMember.new("Rook", Vector2(10, 10), "human"))
 	s.crew.append(CrewMember.new("Tess", Vector2(12, 10), "fenn"))
-	s.inventory.add("hand_ammo", rounds)
+	s.inventory.add("hand_ammo", rounds - s.inventory.count("hand_ammo"))  # (a starter comes with some)
 	return s
 
 
@@ -646,7 +646,7 @@ func test_the_loadout_screen_sets_kits_before_going_aboard() -> void:
 	check(s.guns.size() >= 1 and Mods.damage_mult(s.soldier) > 1.0, "and shoots with it")
 	eq(s.party[0]["m"].kit["body"], "basic_armor", "and the crew mate carries his")
 	b.leave()
-	# nobody to take and nothing in the hold to wear: straight in
+	# nobody to take and nothing in the hold to wear: the screen still opens (it is how you choose to go alone)
 	var bare := _ship()
 	for m in bare.crew:
 		if not m.is_player:
@@ -655,7 +655,9 @@ func test_the_loadout_screen_sets_kits_before_going_aboard() -> void:
 	var b2 = BoardView.new()
 	b2.ask_party = true
 	b2.enter(s2)
-	check(not b2.picking, "with nobody to take and nothing to wear there is no screen")
+	check(b2.picking and b2.pick_rows().is_empty(), "with nobody to take the screen still opens, with nobody on it")
+	b2.go_alone()
+	check(not b2.picking, "going alone closes it")
 	b2.leave()
 
 

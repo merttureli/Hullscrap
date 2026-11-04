@@ -451,6 +451,9 @@ func _can_open() -> bool:
 	var board := get_node_or_null("../../Board")
 	if board != null and board.get("active"):
 		return false
+	var kit_panel := get_node_or_null("../CrewKitPanel")
+	if kit_panel != null and kit_panel.visible:
+		return false
 	var picker := get_node_or_null("../../PickerLayer/ShipPicker")
 	return picker == null or not picker.visible
 

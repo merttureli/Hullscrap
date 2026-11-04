@@ -25,7 +25,7 @@ func _ship() -> Ship:
 	var s: Ship = Ship.from_design(RUSTBUCKET)
 	Jobs.spawn_crew(s)
 	s.crew.append(CrewMember.new("Rook", Vector2(10, 10), "human"))
-	s.inventory.add("hand_ammo", 40)
+	s.inventory.add("hand_ammo", 40 - s.inventory.count("hand_ammo"))
 	s.inventory.add("credits", 500)
 	s.inventory.add("scrap", 100)
 	s.inventory.add("polymer", 20)

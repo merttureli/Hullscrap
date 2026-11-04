@@ -40,6 +40,7 @@ const OUT_DIR := "res://data/ships/"
 const SIDES: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
 ## Who starts aboard: the soldier alone (playtest 2, A1). Ada is found in a distress pod (data/packs/start_alone), the rest are hired or met.
 const SOLDIER := [{"name": "Soldier", "species": "human"}]
+const START_AMMO := 10  ## rounds of hand_ammo in every starter's hold
 const STOCK := {"scrap": 5000, "copper": 600, "titanium": 400, "silicon": 400, "crystal": 200, "plasma_cell": 100, "polymer": 600}
 ## Cost of crossing a cell when routing a cable: walls, doors and parts are cheap (the wire hides there).
 const WIRE_COST := {"solid": 2, "part": 2, "floor": 5, "none": 14}
@@ -387,6 +388,8 @@ func _make(spec: Dictionary, skin_only := false) -> void:
 		for c in all:
 			g.hull[c] = true
 	ship.inventory.load_dict(spec["cargo"])
+	if ship.inventory.count("hand_ammo") == 0:
+		ship.inventory.add("hand_ammo", START_AMMO)  # (Beta 4.1) every run starts with some rounds for the hand weapons
 	ship.refresh()
 
 	var saved := ship.to_dict()

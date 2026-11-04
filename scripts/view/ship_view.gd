@@ -153,7 +153,7 @@ func _draw() -> void:
 		var a: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
 		var look: Dictionary = m.look if not m.look.is_empty() else LOOKS.get(m.name, OTHER_LOOK)
 		var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
-			"item": PersonDrawer.item_for(m, ship.clock, arena != null), "down": m.is_down(), "work": PersonDrawer.is_working(m, ship.clock), "t": _clock}
+			"item": PersonDrawer.item_for(m, ship.clock, arena != null), "down": m.is_down(), "work": PersonDrawer.is_working(m, ship.clock), "t": _clock, "body": PersonDrawer.gear_of(m)}
 		pose.merge(PersonDrawer.drone_extras(m, ship))
 		PersonDrawer.draw(self, px(m.pos), pose, look, CELL)
 		PersonDrawer.draw_status(self, px(m.pos), Jobs.drone_status(ship, m), CELL)
