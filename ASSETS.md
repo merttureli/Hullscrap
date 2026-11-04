@@ -2470,3 +2470,6 @@ Source and licence of every art and audio file in the repo.
 
 ## Station interiors (claude/station-interiors)
 No image or audio files were added. The fixtures, wall and floor dressing, race skins, signage glyphs and the nebula, asteroid-field and distant-station backdrops are drawn in code (scripts/board/station_decor.gd, station_glyph.gd, station_backdrop.gd) in the style of the existing prop art; no outside assets.
+
+## Race rooms (claude/race-rooms)
+No image or audio files were added. The art of the 80 fixtures of the 36 race rooms and of 38 plain fixtures, 20 signage glyphs and 20 fixture mark styles are drawn in code (scripts/board/station_art.gd, station_glyph.gd, station_decor.gd); no outside assets.

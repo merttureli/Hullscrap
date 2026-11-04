@@ -2,6 +2,7 @@ extends SceneTree
 ## Run: xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- sheets [out_dir] [module ids...]
 ##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- room <module> <state> [seed] [out.png]
 ##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- overview <state> <type> <seed> <out.png>   (the whole station, lit up)
+##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- ingame <module> <out.png> [seed]   (the real board view with its HUD, the soldier by the room's centrepiece)
 ##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- lineup <out.png> [module ids...]   (every race room, operational and lit, labelled)
 ## The environment variables RACES (a comma list: the races of the station) and REGION pick who built it and where.
 ## sheets: one contact sheet per module (interiors_<module>.png): the module's room in an abandoned, a half-active and an operational station, in the real
@@ -60,6 +61,12 @@ func _run() -> void:
 		img.save_png(args[4] if args.size() > 4 else "%s/interiors_room_%s_%s.png" % [out_dir, mid, st])
 		quit()
 		return
+	if mode == "ingame":
+		var site = _find(args[1], "operational", int(args[3]) if args.size() > 3 else -1)
+		var img := await _shot(site, args[1], false, "", true)
+		img.save_png(args[2])
+		quit()
+		return
 	if mode == "lineup":
 		await _lineup(args[1], args.slice(2))
 		quit()
@@ -110,7 +117,7 @@ func _find(mid: String, state: String, seed_value: int):
 
 
 ## The room of module `mid` in `site` in the real board view, framed on the module.
-func _shot(site, mid: String, lit_up: bool, label := "") -> Image:
+func _shot(site, mid: String, lit_up: bool, label := "", ingame := false) -> Image:
 	var m: Dictionary = site.modules.filter(func(x): return x["id"] == mid)[0]
 	var cam := Camera2D.new()
 	root.add_child(cam)
@@ -131,6 +138,17 @@ func _shot(site, mid: String, lit_up: bool, label := "") -> Image:
 	var r: Rect2i = m["rect"]
 	var vp := get_root().get_visible_rect().size
 	var z := minf(vp.x / (float(r.size.x + 2) * 32.0), vp.y / (float(r.size.y + 2) * 32.0))
+	if ingame:  # (the game's zoom; the soldier stands on the free spot nearest the middle)
+		z = 1.7
+		var mid_p: Vector2 = site.centre_of_room(m["rooms"][0])
+		var near := mid_p
+		var near_d := 1e9
+		for a in site.free_anchors(m["rooms"][0]):
+			var q := Vector2(a) + Vector2.ONE
+			if q.distance_to(mid_p) < near_d:
+				near = q
+				near_d = q.distance_to(mid_p)
+		ses.soldier.pos = near + Vector2(2.5, 2.0) if site.free_anchors(m["rooms"][0]).has(Vector2i(near + Vector2(2.5, 2.0) - Vector2.ONE)) else near
 	cam.zoom = Vector2(z, z)
 	cam.position = (Vector2(r.position) + Vector2(r.size) / 2.0) * 32.0
 	for k in 6:
@@ -221,7 +239,8 @@ func _sheet(mid: String, tiles: Array) -> void:
 	)
 	for k in 3:
 		await process_frame
-	root.get_texture().get_image().save_png("%s/interiors_%s.png" % [out_dir, mid])
+	var prefix := OS.get_environment("PREFIX") if OS.get_environment("PREFIX") != "" else "interiors"
+	root.get_texture().get_image().save_png("%s/%s_%s.png" % [out_dir, prefix, mid])
 	print("saved interiors_%s" % mid)
 	node.queue_free()
 	await process_frame

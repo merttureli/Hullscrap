@@ -20,6 +20,9 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Foes = preload("res://scripts/board/foes.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
+const Content = preload("res://scripts/data/content.gd")
+const Art = preload("res://scripts/board/station_art.gd")
+const Decor = preload("res://scripts/board/station_decor.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const STATES: Array[String] = ["abandoned", "half", "operational"]
@@ -27,6 +30,7 @@ const REGIONS: Array[String] = ["clan_space", "human_core", "kett_hives", "ember
 const SEEDS := 200
 
 static var _sites: Array = []  # the 200 stations of the sweep, made once
+const TIER_SHARES := {"ammo": 0.1028, "common": 0.4454, "credits": 0.2492, "gear": 0.0424, "mod": 0.0312, "part": 0.0186, "rare": 0.0738, "special": 0.0052, "weapon": 0.0313}  # each tier's share of the loot rolls over the 15 x 14 stations of the rate test, measured before the race rooms
 
 
 func _ship() -> Ship:
@@ -73,7 +77,7 @@ func test_the_catalogue_has_twenty_modules_and_the_rules_name_real_things() -> v
 			for r in mods[mid]["races"]:
 				check(Races.ids().has(r), "%s: a race that has a skin (%s)" % [mid, r])
 			check(Fixtures.rules_of(mid).size() > 0, "%s: a race room has fixtures of its own" % mid)
-	check(race_rooms >= 4, "at least 4 race rooms (%d)" % race_rooms)
+	check(race_rooms >= 36, "at least 36 race rooms (%d)" % race_rooms)
 	for mid in Fixtures.config()["rules"]:
 		check(mods.has(mid), "rules: %s is a module" % mid)
 		var rooms: int = mods[mid]["rooms"].size() if mods.has(mid) else 0
@@ -541,3 +545,218 @@ func test_dressing_sits_on_walls_and_floors_and_the_state_decides_the_rest() -> 
 	eq(a.dressing, b.dressing, "the same seed dresses the same")
 	var classic = Site.make(8800, "station", {"faction": "clans", "gen": "classic"})
 	check(classic.dressing.is_empty() and classic.fixtures.is_empty() and classic.races.is_empty(), "a classic station has none of it")
+
+
+# --- the race rooms: every race has its own ------------------------------------------------------------------------------
+
+## The species that have a station skin: every one but the repair drone, which builds nothing.
+func _builders() -> Array:
+	var out: Array = []
+	for id in Content.ids("species"):
+		if id != "drone":
+			out.append(id)
+	return out
+
+
+## The race rooms (module id -> the module), sorted by id.
+func _race_rooms() -> Array:
+	var out: Array = []
+	for mid in StationGen.modules():
+		if not StationGen.modules()[mid].get("races", []).is_empty():
+			out.append(mid)
+	out.sort()
+	return out
+
+
+func test_every_species_but_the_drone_has_a_skin_that_reads_its_ships_colours() -> void:
+	var builders := _builders()
+	check(builders.size() >= 30, "30 builder races (%d)" % builders.size())
+	for id in builders:
+		check(Races.ids().has(id), "%s: has a station skin" % id)
+		var sk := Races.skin(id)
+		var pal := Races.palette(id)
+		check(not pal.is_empty(), "%s: has a ship palette (data/ship_styles.json)" % id)
+		for k in ["floor", "wall", "lamp"]:
+			eq(sk[k], pal[k], "%s: the skin's %s is its ships'" % [id, k])
+		check(sk.has("glyph") and sk.has("style"), "%s: a glyph and a style of its own" % id)
+		for k in Races.config()["races"][id]["skin"]:
+			check(not (k in ["floor", "wall", "lamp"]), "%s: no colour is copied into station_races.json" % id)
+
+
+func test_every_species_but_the_drone_has_a_race_room_and_the_tech_races_two() -> void:
+	var count := {}
+	for mid in _race_rooms():
+		for r in StationGen.modules()[mid]["races"]:
+			count[r] = int(count.get(r, 0)) + 1
+	var tech := 0
+	for p in Content.packs():
+		if str(p["id"]).begins_with("tech_"):
+			tech += 1
+			var r := str(p["id"]).trim_prefix("tech_")
+			check(int(count.get(r, 0)) >= 2, "%s: a tech race has two rooms (%d)" % [r, int(count.get(r, 0))])
+	check(tech >= 10, "ten tech races (%d)" % tech)
+	for id in _builders():
+		check(int(count.get(id, 0)) >= 1, "%s: has a race room" % id)
+	check(not count.has("drone"), "the drone has none")
+
+
+func test_every_race_room_has_two_fixtures_of_its_own_and_every_fixture_has_art() -> void:
+	var used := {}  # fixture id -> the modules whose rules use it
+	for mid in Fixtures.config()["rules"]:
+		for rule in Fixtures.rules_of(str(mid)):
+			if not used.has(rule["fixture"]):
+				used[rule["fixture"]] = {}
+			used[rule["fixture"]][mid] = true
+	for mid in _race_rooms():
+		var own := 0
+		for fid in used:
+			if used[fid].size() == 1 and used[fid].has(mid):
+				own += 1
+		check(own >= 2, "%s: at least 2 fixtures of its own (%d)" % [mid, own])
+	var drawn := {}
+	for m in (Decor as Script).get_script_method_list():
+		drawn[str(m["name"])] = true
+	for fid in Fixtures.defs():
+		check(drawn.has("_art_" + fid) or Art.has_art(fid), "%s: drawn, not the default block" % fid)
+
+
+func test_each_race_room_forced_into_a_station_is_reachable_for_2x2_bodies_over_50_seeds() -> void:
+	for mid in _race_rooms():
+		var found := 0
+		var furnished := 0
+		StationGen.forced_module = mid
+		Races.forced = [StationGen.modules()[mid]["races"][0]]
+		for i in 50:
+			var s = _station(30000 + i * 17, STATES[i % 3], REGIONS[i % REGIONS.size()])
+			if s.gen != "modules" or not s.modules.any(func(m): return m["id"] == mid):
+				continue
+			found += 1
+			eq(s.problems(), [], "%s seed %d: sound for a 2x2 body, the keycards reachable" % [mid, s.seed_value])
+			check(not s._cut_off(), "%s seed %d: no room cut off" % [mid, s.seed_value])
+			for r in s.rooms:
+				if s.modules[int(r["module"])]["id"] == mid:
+					check(Fixtures._lanes_ok(s, r, []), "%s seed %d room %d: every door reaches every other and every container and bed" % [mid, s.seed_value, r["id"]])
+			furnished += 1 if s.fixtures.any(func(f): return s.modules[int(s.rooms[f["room"]]["module"])]["id"] == mid) else 0
+		StationGen.forced_module = ""
+		Races.forced = []
+		check(found >= 25, "%s: found in %d of 50 stations" % [mid, found])
+		check(furnished * 10 >= found * 8, "%s: furnished in most of them (%d of %d)" % [mid, furnished, found])
+
+
+func test_race_room_container_ids_are_stable() -> void:
+	for mid in _race_rooms():
+		StationGen.forced_module = mid
+		Races.forced = [StationGen.modules()[mid]["races"][0]]
+		var s = _station(31000 + mid.length() * 13, "half")
+		var again = _station(31000 + mid.length() * 13, "half")
+		Fixtures.enabled = false
+		var bare = _station(31000 + mid.length() * 13, "half")
+		Fixtures.enabled = true
+		StationGen.forced_module = ""
+		Races.forced = []
+		if s.gen != "modules" or bare.gen != "modules":
+			continue
+		var key := func(site) -> Array: return site.containers().map(func(id): return [id, site.props[id]["prop"], site.props[id]["cell"], site.props[id]["room"]])
+		eq(key.call(s), key.call(again), "%s: the same seed gives the same containers" % mid)
+		eq(key.call(s), key.call(bare), "%s: fixtures leave the container ids as they were" % mid)
+		eq(s.fixtures.map(func(f): return [f["fixture"], f["cell"], f["room"]]), again.fixtures.map(func(f): return [f["fixture"], f["cell"], f["room"]]), "%s: and the same fixtures" % mid)
+
+
+func test_the_race_rooms_use_the_bodies_of_their_people() -> void:
+	# an airless room is airless (and working) in a station of a race that needs no air, only when powered and nothing lies beyond it
+	var airless := 0
+	var rooms := 0
+	for mid in ["stone_archive", "current_roost", "cairn_hall", "reform_bay", "optic_cradle"]:
+		StationGen.forced_module = mid
+		Races.forced = [StationGen.modules()[mid]["races"][0]]
+		check(StationGen.modules()[mid].get("airless", false) and Races.airless_ok(StationGen.modules()[mid]["races"][0]), "%s: its people need no air" % mid)
+		for i in 12:
+			var s = _station(32000 + i * 19, "operational")
+			for m in s.modules:
+				if m["id"] == mid:
+					rooms += 1
+					if m["airless"]:
+						airless += 1
+						check(m["powered"] and s.rooms[m["rooms"][0]]["air"] == 0.0, "%s: working and airless" % mid)
+					eq(s.problems(), [], "%s: and the station is still sound (no keycard behind thin air)" % mid)
+		StationGen.forced_module = ""
+		Races.forced = []
+	check(airless >= 5 and airless <= rooms, "airless rooms are made (%d of %d)" % [airless, rooms])
+	# a generator room of a race replaces the plain one; hold E restores it
+	for mid in ["jury_generator", "arc_core_hall", "magnet_dynamo"]:
+		StationGen.forced_module = mid
+		Races.forced = [StationGen.modules()[mid]["races"][0]]
+		var got := 0
+		for i in 10:
+			var s = _station(33000 + i * 23, "half")
+			if s.gen != "modules" or not s.modules.any(func(m): return m["id"] == mid):
+				continue
+			got += 1
+			check(not s.modules.any(func(m): return m["id"] == "power"), "%s: the plain generator room is not there too" % mid)
+			if not s.power.is_empty():
+				eq(s.modules[int(s.power["module"])]["id"], mid, "%s: is the generator room" % mid)
+				eq(s.fixtures[int(s.power["fixture"])]["fixture"], "generator", "%s: and its generator is the one to repair" % mid)
+				eq(int(s.rooms[s.fixtures[int(s.power["fixture"])]["room"]]["module"]), int(s.power["module"]), "%s: in its own room" % mid)
+		StationGen.forced_module = ""
+		Races.forced = []
+		check(got > 0, "%s: built" % mid)
+	# a hot room is hot on foot; a healing room has beds
+	for mid in ["magma_hall", "hearth_hall", "fighting_pit"]:
+		StationGen.forced_module = mid
+		Races.forced = [StationGen.modules()[mid]["races"][0]]
+		var hot := 0
+		for i in 6:
+			var s = _station(34000 + i * 29, "operational")
+			for m in s.modules:
+				if m["id"] == mid:
+					check(float(s.rooms[m["rooms"][0]]["heat"]) >= 75.0, "%s: a hot room (%s)" % [mid, s.rooms[m["rooms"][0]]["heat"]])
+					hot += 1
+		StationGen.forced_module = ""
+		Races.forced = []
+		check(hot > 0, "%s: built" % mid)
+	for mid in ["nectar_ward", "soak_marsh", "spore_ward"]:
+		StationGen.forced_module = mid
+		Races.forced = [StationGen.modules()[mid]["races"][0]]
+		var beds := 0
+		for i in 8:
+			var s = _station(35000 + i * 31, "operational")
+			for m in s.modules:
+				if m["id"] == mid:
+					beds += s.beds.filter(func(b): return b["room"] == m["rooms"][0]).size()
+		StationGen.forced_module = ""
+		Races.forced = []
+		check(beds > 0, "%s: a medbay with beds (%d)" % [mid, beds])
+
+
+func test_race_rooms_keep_the_early_mod_rate_and_the_tier_shares() -> void:
+	# measured before the race rooms (the same formula and stations): 1.594 early mods a station and TIER_SHARES; with them it was 1.594 and every share within 0.013
+	var total := 0.0
+	var n := 0
+	var tiers := {}
+	var weight := 0.0
+	for r in REGIONS:
+		for i in 14:
+			var s = Site.make(3000 + i * 37, "station", {"faction": "clans", "region": r})
+			if s.gen != "modules":
+				continue
+			n += 1
+			for id in s.containers():
+				var p: Dictionary = s.props[id]
+				var table: Array = Loot.table_of(s, id)
+				var w := 0.0
+				var m := 0.0
+				for o in table:
+					w += float(o["weight"])
+					if str(o["item"]) in ["mod", "mod_low"]:
+						m += float(o["weight"])
+				var rolls := (float(p["rolls"][0]) + float(p["rolls"][1])) / 2.0
+				total += (rolls + (1.0 if s.rooms[p["room"]]["locked"] else 0.0)) * m / w
+				for o in table:
+					var t := Loot.tier_of(str(o["item"]))
+					tiers[t] = float(tiers.get(t, 0.0)) + rolls * float(o["weight"]) / w
+				weight += rolls
+	var rate := total / float(n)
+	check(absf(rate - 1.594) <= 0.1, "the early-mod rate stays within 0.1 of 1.594 (%.3f)" % rate)
+	for t in TIER_SHARES:
+		var share := float(tiers.get(t, 0.0)) / weight
+		check(absf(share - float(TIER_SHARES[t])) <= 0.03, "tier %s keeps its share (%.3f, was %.3f)" % [t, share, float(TIER_SHARES[t])])
