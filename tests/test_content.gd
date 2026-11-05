@@ -18,7 +18,7 @@ const Regions = preload("res://scripts/space/regions.gd")
 
 const FIXTURES := "res://tests/fixtures/packs/"
 const EVENTS_SCRIPT := "res://scripts/space/events.gd"  ## the Drift's loader and validator, once it is on main
-const ITEM_KINDS: Array[String] = ["ammo", "gear", "special", "mod"]
+const ITEM_KINDS: Array[String] = ["ammo", "gear", "special", "mod", "drone"]
 const RARITIES: Array[String] = ["common", "uncommon", "rare", "very_rare"]
 const ENGINE := {"id": "x", "family": "engine", "line": "standard", "tier": 1, "power": -2, "hp": 6, "stats": {"thrust": 10}}
 
