@@ -8,8 +8,8 @@ const Drones = preload("res://scripts/combat/drones.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 
 const SRC := 2.0  ## world px per source px at 1x (a cell is 32 px, 16 source px)
-const BOOST := 1.3  ## drones are drawn a little larger than their art's pixels, so they read at a glance
-const MIN_SCREEN := 1.8  ## fewest screen px per source px (zoomed out, they stay readable)
+const BOOST := 1.4  ## drones are drawn a little larger than their art's pixels, so they read at a glance
+const MIN_SCREEN := 2.4  ## fewest screen px per source px (zoomed out, they stay readable)
 const TRAIL_S := 0.55  ## seconds a puff of the trail lasts
 const TRAIL_STEP := 9.0  ## px between two puffs
 const FIRE_S := 0.14
@@ -120,7 +120,7 @@ static func effects(e: Dictionary, rng: RandomNumberGenerator) -> Array:
 			out.append({"k": "flash", "pos": pos, "life": 0.18, "r": 14.0, "color": Color("#9fd0ff")})
 		"drone_shot":
 			if str(e["kind"]) == "pd":  # a tracer to what it shot at
-				out.append({"k": "beam", "a": e["origin"], "b": e["to"], "life": 0.1, "color": Color("#7dff9b") if bool(e.get("hit", false)) else Color(0.5, 0.9, 0.6, 0.6), "kind": "laser", "weapon": ""})
+				out.append({"k": "beam", "a": e["origin"], "b": e["to"], "life": 0.12, "color": Color("#7dff9b") if bool(e.get("hit", false)) else Color(0.5, 0.9, 0.6, 0.6), "kind": "pd", "weapon": "__pd"})
 			out.append({"k": "flash", "pos": e["origin"], "life": 0.09, "r": 9.0, "color": COLORS.get(_family(str(e["weapon"])), Color.WHITE)})
 	return out
 

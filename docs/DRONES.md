@@ -10,6 +10,17 @@ The owner asked for:
 
 This doc is the design. GUNS.md sets the look and the rules for mounts, families and balance, and drones follow it.
 
+> **D1 landed (rules as built, where they differ from the first draft).**
+> - **Content:** the pack `data/packs/drones_1` holds the bays (`drone_bay_mk1-3`: scrap, standard, neon; inside 3x3, outside 3x1, low; power -1, -1, -2), the **drone part** material, the seven kits and their recipes. A kit is an **item of kind `drone`** with its stats in its `drone` entry (role, tier, hp, gun, orbit); the loaded kit is saved on the bay (`kit` in the component record, no version bump). The kit stays in the hold (kits are permanent); two bays need two kits.
+> - **Bay power** is the bay's own power figure, drawn whenever it is on, not only while a drone is out. A bay that loses power (or is disabled, cut off or its ship wrecked) recalls its drone.
+> - **Re-arm** is 12, 9 and 6 s after a drone is lost, 25% quicker with a crew member in the bay's room; a recalled drone that docks leaves the bay ready at once.
+> - **Choosing the kit** (build mode): hover a placed bay and press **K**, or **Alt+click** it. A panel lists the kits the bay can launch (tier, hp, how many the hold has). A bay left empty takes the best kit in the hold at the start of a fight.
+> - **Drones:** the orbit is outside the target's hull and shield bubble (`gap` px beyond it), so a drone's shot meets the shield. hp 3, 5, 8; a shot that crosses a drone takes `damage / 3` hp off (at least 0.5), a point-defence hit 1, a turret's tracer its damage share. Turrets and swivels answer a third of their volleys at a drone in reach and arc, flak all of them, point defence counts drones as incoming. Drone guns are about half a hull gun's rate at the same hit (pulse 5.3 s, laser 3.5, ion 7, beam 8 s for 1.2 s, flak 5.5 s).
+> - **Controls:** the bay is a slot after the guns on the weapon bar, key 1-9 in order; the slot shows the kit's picture, the part cost and how many are held, the re-arm counting down, and the drone's hp while it is out. Combat and defence drones launch with the key.
+> - **Supply:** stations sell parts (14 credits in Kett and Gauntling regions, 24 elsewhere; 30 in small shops); a won fight gives the parts the enemy had left (plus one from a Kett or Gauntling ship), boarding stores hold 1-3 (more in clan halls). A design with a bay starts with 6 parts and a Pulse Drone Mk I (`RunStart.drone_stock`); no shipped starter has one yet (a core starter cannot name a pack's part).
+> - **Enemies:** `data/enemy_tables.json` `drones`: a generated enemy (a spec, from stage 2; later stages too) has a bay with the chance of its size, placed on a flank or the stern (`Shipgen.add_bay`), kit weighted by faction, 4-9 parts. The AI launches when the foe is within 2600 px (a defence drone once something threatens or after 8 s).
+> - **Art:** `art/_src/drone_export.py` writes the bays and drones (see `art/README.md`); drones are drawn from 32 pre-turned copies at about 1.5 cells, with a screen-size floor, a trail, hit flash and hp bar; a launch grows the drone out of the open hatch in 0.4 s, a recall shrinks it back.
+
 ## 1. Pillars
 1. **A drone is a second front.**
   - Guns hit the face you point at.

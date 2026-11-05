@@ -7,6 +7,7 @@ extends Node2D
 ## follows it. Reusable: with no arena it draws a plain Ship at the node's own transform (pivot = the
 ## hull's centre), with no skin.
 
+const Drones = preload("res://scripts/combat/drones.gd")
 const DroneView = preload("res://scripts/combat/drone_view.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
@@ -170,8 +171,8 @@ func _draw() -> void:
 		Visuals.draw_component(self, _rect_of(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
 		if opts.has("bay_out"):  # a drone bay: the loaded drone on its cradle while docked, riding it up the rail as it launches, nothing while it is out
 			var age: float = float(opts["fired_ago"])
-			if not opts["bay_out"] or age < 0.3:
-				var rise := float(BAY_RISE[mini(int(age * 10.0), 3)]) if opts["bay_out"] else 0.0
+			if not opts["bay_out"] or age < Drones.SHOW_AFTER_S:
+				var rise := float(BAY_RISE[mini(int(age * 25.0), 3)]) if opts["bay_out"] else 0.0
 				DroneView.draw_docked(self, ship.components.def(inst["id"]), inst, _rect_of(inst["cells"]), CELL, _clock, rise)
 	for uid in uids:  # the outside halves and barrels of the hull mounts, over the wall's edge
 		var inst: Dictionary = ship.components.instances[uid]
