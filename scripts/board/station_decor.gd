@@ -9,6 +9,7 @@ const Fixtures = preload("res://scripts/board/station_fixtures.gd")
 const Races = preload("res://scripts/board/station_races.gd")
 const Glyph = preload("res://scripts/board/station_glyph.gd")
 const StationGen = preload("res://scripts/board/station_gen.gd")
+const Art = preload("res://scripts/board/station_art.gd")
 
 const CELL := 32.0
 
@@ -258,6 +259,8 @@ func _fixture(f: Dictionary) -> void:
 	var fn := "_art_" + str(f["fixture"])
 	if has_method(fn):
 		call(fn, item)
+	elif Art.has_art(str(f["fixture"])):  # (the race rooms' fixtures: station_art.gd)
+		Callable(Art, "a_" + str(f["fixture"])).call(self, item)
 	else:
 		_block(item, bool(def.get("screen", false)))
 	if str(item["variant"]) != "" and not wreck:
@@ -266,7 +269,7 @@ func _fixture(f: Dictionary) -> void:
 		draw_line(item["r"].position + item["r"].size * 0.2, item["r"].position + item["r"].size * 0.7, Color(0, 0, 0, 0.7), 2.0)
 		draw_circle(item["r"].position + item["r"].size * Vector2(0.75, 0.3), 3.0, Color(0.9, 0.8, 0.2, 0.0))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	if str(f["fixture"]) in ["reactor_core", "forge_furnace", "crystal_spire", "holo_table", "generator", "shuttle"] and not dead and not wreck:
+	if (str(f["fixture"]) in ["reactor_core", "forge_furnace", "crystal_spire", "holo_table", "generator", "shuttle"] or bool(def.get("pulse", false))) and not dead and not wreck:
 		_anim.append({"kind": "pulse", "pos": r.get_center(), "size": r.size, "color": glow, "seed": int(f["id"]), "room": rid})
 
 
@@ -307,6 +310,71 @@ func _race_mark(it: Dictionary) -> void:
 		"barrel":
 			draw_line(r.position + Vector2(2, r.size.y * 0.35), Vector2(r.end.x - 2, r.position.y + r.size.y * 0.35), dark, 2.0)
 			draw_line(r.position + Vector2(2, r.size.y * 0.7), Vector2(r.end.x - 2, r.position.y + r.size.y * 0.7), dark, 2.0)
+		"paper":
+			draw_line(r.position + r.size * Vector2(0.15, 0.85), r.position + r.size * Vector2(0.85, 0.15), Color(1, 1, 1, 0.55), 1.5)
+			draw_colored_polygon(PackedVector2Array([Vector2(r.end.x - 9, r.position.y), Vector2(r.end.x, r.position.y), Vector2(r.end.x, r.position.y + 9)]), Color(0.95, 0.92, 0.8, 0.9))
+		"hood":
+			draw_arc(r.get_center(), 5.0, 0.0, TAU, 12, Color(c, 0.75), 1.5, true)
+			draw_circle(r.get_center(), 1.8, Color(c, 0.85))
+		"scale":
+			for k in 3:
+				draw_arc(r.position + r.size * Vector2(0.25 + 0.25 * k, 0.55), 5.0, PI, TAU, 8, dark, 1.5, true)
+		"static":
+			draw_polyline(PackedVector2Array([r.position + r.size * Vector2(0.15, 0.6), r.position + r.size * Vector2(0.4, 0.3), r.position + r.size * Vector2(0.55, 0.7), r.position + r.size * Vector2(0.85, 0.35)]), Color(c, 0.85), 1.5)
+		"shell":
+			draw_arc(r.end - Vector2(4, 4), 7.0, PI, PI * 1.5, 8, dark, 1.5, true)
+			draw_arc(r.end - Vector2(4, 4), 11.0, PI, PI * 1.5, 8, dark, 1.5, true)
+		"wing":
+			draw_colored_polygon(PackedVector2Array([r.position + r.size * Vector2(0.5, 0.2), r.position + r.size * Vector2(0.15, 0.1), r.position + r.size * Vector2(0.3, 0.35)]), Color(c, 0.7))
+			draw_colored_polygon(PackedVector2Array([r.position + r.size * Vector2(0.5, 0.2), r.position + r.size * Vector2(0.85, 0.1), r.position + r.size * Vector2(0.7, 0.35)]), Color(c, 0.7))
+		"stitch":
+			for k in 4:
+				draw_line(r.position + r.size * Vector2(0.15 + 0.2 * k, 0.45), r.position + r.size * Vector2(0.25 + 0.2 * k, 0.55), Color(c, 0.8), 1.5)
+				draw_line(r.position + r.size * Vector2(0.25 + 0.2 * k, 0.45), r.position + r.size * Vector2(0.15 + 0.2 * k, 0.55), Color(c, 0.8), 1.5)
+		"voice":
+			for k in 3:
+				draw_arc(r.position + r.size * Vector2(0.3, 0.5), 3.0 + 3.5 * k, -0.9, 0.9, 6, Color(c, 0.8), 1.3, true)
+		"junk":
+			draw_rect(Rect2(r.position + r.size * Vector2(0.1, 0.1), Vector2(7, 5)), Color(0.55, 0.4, 0.25, 0.9))
+			draw_rect(Rect2(r.position + r.size * Vector2(0.6, 0.6), Vector2(6, 6)), Color(0.4, 0.5, 0.55, 0.9))
+		"tile":
+			for k in 4:
+				draw_rect(Rect2(r.get_center() + Vector2(-9 + 9 * (k % 2), -9 + 9 * (k / 2)), Vector2(8, 8)), Color(c, 0.6), k == 0 or k == 3, 1.2)
+		"cut":
+			draw_line(r.position + r.size * Vector2(0.2, 0.2), r.position + r.size * Vector2(0.5, 0.8), Color(1.0, 0.85, 0.5, 0.85), 1.5)
+			draw_line(r.position + r.size * Vector2(0.35, 0.2), r.position + r.size * Vector2(0.65, 0.8), Color(1.0, 0.85, 0.5, 0.85), 1.5)
+		"quill":
+			var n2 := maxi(int(r.size.x / 7.0), 2)
+			for k in n2:
+				var x2 := r.position.x + r.size.x * (float(k) + 0.5) / float(n2)
+				draw_line(Vector2(x2, r.position.y + 5.0), Vector2(x2 + 1.5, r.position.y - 1.0), Color(c, 0.8), 1.5)
+		"tether":
+			draw_arc(r.position + r.size * Vector2(0.7, 0.35), 5.0, 0.0, TAU, 10, Color(c, 0.75), 1.5, true)
+			draw_line(r.position + r.size * Vector2(0.7, 0.55), r.position + r.size * Vector2(0.35, 0.9), Color(c, 0.75), 1.5)
+		"lens":
+			draw_arc(r.get_center(), 6.0, 0.0, TAU, 12, Color(c, 0.8), 1.5, true)
+			draw_circle(r.get_center(), 2.5, Color(c, 0.9))
+		"dig":
+			draw_line(r.position + r.size * Vector2(0.2, 0.85), r.position + r.size * Vector2(0.75, 0.2), dark, 2.0)
+			draw_arc(r.position + r.size * Vector2(0.55, 0.45), 8.0, PI * 1.1, PI * 1.8, 8, dark, 2.0, true)
+		"drift":
+			for k in 3:
+				draw_circle(r.position + r.size * Vector2(0.25 + 0.25 * k, 0.7 - 0.2 * k), 2.5, Color(c, 0.6))
+		"glint":
+			for k in 3:
+				var q2 := r.position + r.size * Vector2(0.2 + 0.3 * k, 0.3 + 0.3 * (k % 2))
+				draw_line(q2 + Vector2(-3, 0), q2 + Vector2(3, 0), Color(c, 0.9), 1.5)
+				draw_line(q2 + Vector2(0, -3), q2 + Vector2(0, 3), Color(c, 0.9), 1.5)
+		"carapace":
+			for k in 3:
+				draw_arc(r.position + r.size * Vector2(0.2 + 0.3 * k, 0.25), 6.0, 0.2, PI - 0.2, 8, dark, 1.5, true)
+		"mirror":
+			draw_line(r.position + r.size * Vector2(0.15, 0.6), r.position + r.size * Vector2(0.4, 0.2), Color(1, 1, 1, 0.6), 1.5)
+			draw_line(r.position + r.size * Vector2(0.3, 0.7), r.position + r.size * Vector2(0.55, 0.3), Color(1, 1, 1, 0.4), 1.5)
+		"ferro":
+			for k in 3:
+				var b2 := r.position + r.size * Vector2(0.25 + 0.25 * k, 0.8)
+				draw_colored_polygon(PackedVector2Array([b2 + Vector2(-3, 0), b2 + Vector2(0, -8), b2 + Vector2(3, 0)]), Color(0.75, 0.78, 0.85, 0.8))
 
 
 ## The plain block: a shadowed body with a lit top edge, its dark outline, and a screen on the side that faces the room when it has one.

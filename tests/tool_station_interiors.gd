@@ -2,6 +2,8 @@ extends SceneTree
 ## Run: xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- sheets [out_dir] [module ids...]
 ##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- room <module> <state> [seed] [out.png]
 ##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- overview <state> <type> <seed> <out.png>   (the whole station, lit up)
+##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- ingame <module> <out.png> [seed]   (the real board view with its HUD, the soldier by the room's centrepiece)
+##      xvfb-run -a godot --path . --script res://tests/tool_station_interiors.gd -- lineup <out.png> [module ids...]   (every race room, operational and lit, labelled)
 ## The environment variables RACES (a comma list: the races of the station) and REGION pick who built it and where.
 ## sheets: one contact sheet per module (interiors_<module>.png): the module's room in an abandoned, a half-active and an operational station, in the real
 ## board view (lit up, no HUD). room: one module in one state at full size. Not a test (no test_ prefix).
@@ -59,6 +61,16 @@ func _run() -> void:
 		img.save_png(args[4] if args.size() > 4 else "%s/interiors_room_%s_%s.png" % [out_dir, mid, st])
 		quit()
 		return
+	if mode == "ingame":
+		var site = _find(args[1], "operational", int(args[3]) if args.size() > 3 else -1)
+		var img := await _shot(site, args[1], false, "", true)
+		img.save_png(args[2])
+		quit()
+		return
+	if mode == "lineup":
+		await _lineup(args[1], args.slice(2))
+		quit()
+		return
 	if args.size() > 1:
 		out_dir = args[1]
 	var only: Array = args.slice(2)
@@ -81,25 +93,31 @@ func _run() -> void:
 	quit()
 
 
-## A station in `state` with module `mid` (a region that has its race for a race room).
+## A station in `state` with module `mid` (a race's room: a station its people built, with the module required).
 func _find(mid: String, state: String, seed_value: int):
 	var races: Array = StationGen.modules()[mid].get("races", [])
+	var forced_before: Array = Races.forced
+	StationGen.forced_module = ""
+	if not races.is_empty():
+		Races.forced = [races[0]]
+		StationGen.forced_module = mid
 	for i in 600:
 		var sv: int = seed_value if seed_value >= 0 else 50000 + i * 31 + state.length() * 7
 		var region: String = REGIONS[i % REGIONS.size()]
-		if not races.is_empty():
-			var homes := {"sporeling": "sporeling_groves", "emberkin": "emberkin_forges", "kett": "kett_hives", "prismatic": "prismatic_choir"}
-			region = str(homes.get(races[0], region))
 		var s = Site.make(sv, "station", {"faction": "clans", "region": region, "state": state})
 		if s.gen == "modules" and s.modules.any(func(m): return m["id"] == mid):
+			Races.forced = forced_before
+			StationGen.forced_module = ""
 			return s
 		if seed_value >= 0:
 			seed_value += 1
+	Races.forced = forced_before
+	StationGen.forced_module = ""
 	return null
 
 
 ## The room of module `mid` in `site` in the real board view, framed on the module.
-func _shot(site, mid: String, lit_up: bool) -> Image:
+func _shot(site, mid: String, lit_up: bool, label := "", ingame := false) -> Image:
 	var m: Dictionary = site.modules.filter(func(x): return x["id"] == mid)[0]
 	var cam := Camera2D.new()
 	root.add_child(cam)
@@ -111,7 +129,7 @@ func _shot(site, mid: String, lit_up: bool) -> Image:
 	var ses = Boarding.start(null, null, "shot", {"kind": "station"}, _ship)
 	ses.site = site
 	ses.foes = Foes.new(ses)
-	ses.soldier.pos = site.centre_of_room(m["rooms"][0])
+	ses.soldier.pos = _aside(site, m["rooms"][0])
 	board.enter(ses)
 	board.set_lights_up(lit_up)
 	if board._layer != null and lit_up:
@@ -120,6 +138,17 @@ func _shot(site, mid: String, lit_up: bool) -> Image:
 	var r: Rect2i = m["rect"]
 	var vp := get_root().get_visible_rect().size
 	var z := minf(vp.x / (float(r.size.x + 2) * 32.0), vp.y / (float(r.size.y + 2) * 32.0))
+	if ingame:  # (the game's zoom; the soldier stands on the free spot nearest the middle)
+		z = 1.7
+		var mid_p: Vector2 = site.centre_of_room(m["rooms"][0])
+		var near := mid_p
+		var near_d := 1e9
+		for a in site.free_anchors(m["rooms"][0]):
+			var q := Vector2(a) + Vector2.ONE
+			if q.distance_to(mid_p) < near_d:
+				near = q
+				near_d = q.distance_to(mid_p)
+		ses.soldier.pos = near + Vector2(2.5, 2.0) if site.free_anchors(m["rooms"][0]).has(Vector2i(near + Vector2(2.5, 2.0) - Vector2.ONE)) else near
 	cam.zoom = Vector2(z, z)
 	cam.position = (Vector2(r.position) + Vector2(r.size) / 2.0) * 32.0
 	for k in 6:
@@ -127,12 +156,64 @@ func _shot(site, mid: String, lit_up: bool) -> Image:
 		cam.zoom = Vector2(z, z)
 		cam.position = (Vector2(r.position) + Vector2(r.size) / 2.0) * 32.0
 		await process_frame
+	var tag: Label = null
+	if label != "":
+		var layer := CanvasLayer.new()
+		layer.layer = 50
+		root.add_child(layer)
+		tag = Label.new()
+		tag.text = label
+		tag.add_theme_font_size_override("font_size", 28)
+		tag.add_theme_color_override("font_outline_color", Color.BLACK)
+		tag.add_theme_constant_override("outline_size", 8)
+		tag.position = Vector2(14, 8)
+		layer.add_child(tag)
+		for k in 2:
+			await process_frame
 	var img := root.get_texture().get_image()
+	if tag != null:
+		tag.get_parent().queue_free()
 	board.leave()
 	board.queue_free()
 	cam.queue_free()
 	await process_frame
 	return img
+
+
+## Every race room (or the `only` ones) operational and lit in one image, 4 to a row, each labelled with its race and its name.
+func _lineup(out: String, only: Array) -> void:
+	var mods: Array = StationGen.modules().keys().filter(func(m): return not StationGen.modules()[m].get("races", []).is_empty() and (only.is_empty() or only.has(m)))
+	mods.sort_custom(func(a, b): return str(StationGen.modules()[a]["races"][0]) + a < str(StationGen.modules()[b]["races"][0]) + b)
+	var cols := 4
+	var tw := 480
+	var th := 315
+	var big := Image.create(cols * tw, ((mods.size() + cols - 1) / cols) * th, false, Image.FORMAT_RGB8)
+	big.fill(Color("#0b0e14"))
+	for i in mods.size():
+		var mid: String = mods[i]
+		var site = _find(mid, "operational", -1)
+		if site == null:
+			continue
+		var m: Dictionary = StationGen.modules()[mid]
+		var img := await _shot(site, mid, true, "%s: %s" % [str(m["races"][0]).capitalize(), m["name"]])
+		img.convert(Image.FORMAT_RGB8)
+		img.resize(tw - 4, th - 4, Image.INTERPOLATE_LANCZOS)
+		big.blit_rect(img, Rect2i(0, 0, tw - 4, th - 4), Vector2i((i % cols) * tw + 2, (i / cols) * th + 2))
+		print("lineup %d/%d %s" % [i + 1, mods.size(), mid])
+	big.save_png(out)
+
+
+## A free spot of room `rid` far from its middle (the soldier stands there, not on the centrepiece).
+func _aside(site, rid: int) -> Vector2:
+	var mid: Vector2 = site.centre_of_room(rid)
+	var best := mid
+	var best_d := -1.0
+	for a in site.free_anchors(rid):
+		var p := Vector2(a) + Vector2.ONE
+		if p.distance_to(mid) > best_d:
+			best = p
+			best_d = p.distance_to(mid)
+	return best
 
 
 func _sheet(mid: String, tiles: Array) -> void:
@@ -158,7 +239,8 @@ func _sheet(mid: String, tiles: Array) -> void:
 	)
 	for k in 3:
 		await process_frame
-	root.get_texture().get_image().save_png("%s/interiors_%s.png" % [out_dir, mid])
+	var prefix := OS.get_environment("PREFIX") if OS.get_environment("PREFIX") != "" else "interiors"
+	root.get_texture().get_image().save_png("%s/%s_%s.png" % [out_dir, prefix, mid])
 	print("saved interiors_%s" % mid)
 	node.queue_free()
 	await process_frame

@@ -122,7 +122,7 @@ func test_stations_are_sound_for_a_2x2_body_in_every_state() -> void:
 				var c: Vector2 = s.centre_of(s.props[id])
 				check(near.keys().any(func(p): return p.distance_to(c) <= float(Site.config()["reach"])), "seed %d: container %d can be reached" % [300 + i * 41, id])
 			check(s.modules.size() >= 5, "a station of modules (%d)" % s.modules.size())
-			check(s.modules.any(func(m): return m["id"] == "command") and s.modules.any(func(m): return m["id"] == "reactor"), "it has its type's minimum modules")
+			check(s.modules.any(func(m): return m["id"] == "command") and s.modules.any(func(m): return m["id"] == "reactor" or str(StationGen.modules()[m["id"]].get("counts_as", "")) == "reactor"), "it has its type's minimum modules (a forge or a magma hall counts as the reactor)")
 	check(made >= 16, "the modules build almost every station (%d of 18)" % made)
 
 
@@ -258,7 +258,7 @@ func test_glass_tubes_are_crossings_some_airless_some_watched() -> void:
 	var tubes := 0
 	var watched := 0
 	var airless := 0
-	for i in 30:
+	for i in 60:  # (a station is now about one race room different from what it was: a few more to find a sentried tube)
 		var s = _station(4000 + i * 11, "abandoned")
 		for m in s.modules:
 			if m["id"] != "glass_tube":

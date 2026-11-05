@@ -25,6 +25,8 @@ const KEY_NAMES: Array[String] = ["red", "blue", "green", "amber"]
 const BREACH_MAX := 2  ## modules that lost their air, at most
 
 static var _cfg := {}
+static var race_rooms := true  ## a test switches it off to compare two stations of different builders: a race's own room is a different layout
+static var forced_module := ""  ## a test or a tool sets it: a module every station must have (besides its type's)
 
 var s  ## the site being built (site.gd)
 var rng := RandomNumberGenerator.new()
@@ -128,7 +130,9 @@ func _attempt(p_attempt: int) -> String:
 		var pick: Array = open[0] if rng.randf() < 0.45 else open[rng.randi() % open.size()]  # (the oldest often: a station grows round its core)
 		if not _grow(pick[0], pick[1], _weights(), true):
 			insts[pick[0]]["links"][pick[1]] = -2
-	var mins: Dictionary = tcfg.get("min", {})
+	var mins: Dictionary = tcfg.get("min", {}).duplicate()
+	if forced_module != "" and modules().has(forced_module):  # (a test or a tool wants this module in)
+		mins[forced_module] = 1
 	var need: Array = mins.keys()
 	need.sort()
 	for mid in need:
@@ -189,9 +193,12 @@ func _weights() -> Dictionary:
 	for mid in ids:
 		var w := float(modules()[mid].get("weights", {}).get(type, 0.0))
 		var rcs: Array = modules()[mid].get("races", [])
-		if not rcs.is_empty() and not rcs.any(func(x): return s.races.has(x)):  # (a race's own room only in a station its people built)
+		if not rcs.is_empty() and (not race_rooms or not rcs.any(func(x): return s.races.has(x))):  # (a race's own room only in a station its people built)
 			continue
 		w *= float(config().get("race_boost", 1.0)) if not rcs.is_empty() else 1.0
+		var ex := str(modules()[mid].get("exclusive", ""))  # (a race's generator room replaces the plain one: not both)
+		if ex != "" and _count_of(ex) > 0:
+			continue
 		if w > 0.0 and _count_of(mid) < _max_of(mid):
 			out[mid] = w * (3.0 if boost.has(mid) else 1.0)
 	return out
@@ -798,7 +805,7 @@ func _dress() -> String:
 	_beds(scfg)
 	Fixtures.place(s)
 	if not s.power.is_empty() and Fixtures.enabled:
-		var gen_fx: Array = s.fixtures.filter(func(f): return f["fixture"] == "generator")
+		var gen_fx: Array = s.fixtures.filter(func(f): return f["fixture"] == "generator" and int(s.rooms[f["room"]]["module"]) == int(s.power["module"]))
 		if gen_fx.is_empty():
 			return "no generator"
 		s.power["fixture"] = gen_fx[0]["id"]
@@ -845,9 +852,11 @@ func _airless_races() -> void:
 	for i in range(1, s.modules.size()):
 		var m: Dictionary = s.modules[i]
 		var roll := r.randf()
-		if left > 0 and m["powered"] and not m["breached"] and Races.airless_ok(str(m["race"])) and roll < float(Races.config()["airless_chance"]):
+		var ends: int = insts[i]["links"].filter(func(l): return int(l) >= 0).size()
+		var lives_so: bool = bool(modules()[m["id"]].get("airless", false)) and ends <= 1  # (a room its people live in without air: airless whenever it has power, if nothing lies beyond it: a keycard is never put behind thin air)
+		if m["powered"] and not m["breached"] and Races.airless_ok(str(m["race"])) and (lives_so or (left > 0 and roll < float(Races.config()["airless_chance"]))):
 			m["airless"] = true
-			left -= 1
+			left -= 0 if lives_so else 1
 			for rid in m["rooms"]:
 				s.rooms[rid]["air"] = 0.0
 
