@@ -38,6 +38,7 @@ if __name__ == '__main__':
     hand_race.export_all()          # racial hand weapons (art/items/<id>.png + art/items/fx/muzzle_<name>.png)
     # every gun's outside half and barrel in its new shape (docs/GUNS.md 8): overwrites the older `_out` / `_barrel` files above; own process, as its palette letters are its own
     subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gun_recipes.py')], check=True, cwd=os.path.dirname(os.path.abspath(__file__)), stdout=subprocess.DEVNULL)
+    subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gun_recipes_g2.py')], check=True, cwd=os.path.dirname(os.path.abspath(__file__)), stdout=subprocess.DEVNULL)    # the 39 G2 guns and their breeches (docs/GUNS.md 5, 7)
     # sector space art (debris, intakes, radars, tractor, HUD icons, backdrop, jump fx) runs in its own process: its palette
     # letters (pal_sector) reuse letters that race wave 1 (pal_races1) gives other colours, so the two can't share px.PAL
     subprocess.run([sys.executable, '-c', 'import sector_all; sector_all.export_all()'], check=True, cwd=os.path.dirname(os.path.abspath(__file__)))
