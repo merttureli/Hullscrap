@@ -117,6 +117,9 @@ A weapon straddles the hull wall, so it is drawn as two halves plus a rotating b
 - `ammo_rack.png` (2x2, 32x32): anims `fill_0..4` (missiles, also `on` = full), `scrap_0..4`, `slug_0..4`, `damaged` (2), `disabled`, `wrecked`.
 - `tiles/wreck.png`: a 16x16 debris decal, 4 variants (scorched floor, twisted plate, loose cables, burnt scrap).
 
+## Healing arms (`medbay_mk2`, `medbay_mk3`; generator `art/_src/lines_medarm.py`, docs/DRONES.md section 10)
+A 2x2 base (`<id>.png`: on, off, damaged, disabled, with a socket ring in the middle) and its arm `<id>_arm.png` (+ `.json`, `_glow`): 16x40 frames drawn pointing UP, `anchors.pivot` the turning point (the middle of the base), `anchors.tip` the head. Anims `idle`, `heal` (2: the lens pulses), `damaged` (2), `disabled`. `Visuals.draw_component` draws the arm over the base turned to `opts.arm_angle` (radians clockwise from up) in the `heal` frames while `opts.arm_heal`; `scripts/view/arm_fx.gd` turns it toward the patient and draws the soft beam (green; cyan for neon) and the glow on the patient in code. Standard line for Mk2, neon for Mk3.
+
 ## Sector space art ("Raft in space", `docs/CONTENT.md` section 11)
 Generator: `art/_src/sector_all.py` (`debris.py`, `comp_salvage.py`, `comp_radar.py`, `comp_tractor.py`, `sector_fx.py`, `poi_icons.py`, `space_bg.py`); `build_all.py` rebuilds it all, `python3 art/_src/sector_all.py` just this set, and `python3 art/_src/sheet_sector.py out.png` draws the 3x preview sheet. Palette: 8 colours were added at the end of `palette.gpl` (45 in all): copper `T` `Y`, ice `i` `z`, polymer `k`, titanium `x` `t`, tractor mint `h`.
 

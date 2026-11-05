@@ -1,0 +1,62 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   4
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "medbay_mk3_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    4
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   16
+  ]
+ },
+ "notes": "Halo Arm base, neon line, 2x2: navy panels with cyan seams, a crystal on each flank and a bright socket ring in the middle (medbay_mk3_arm turns about it); the ring pulses round while it works. Damaged: scorched, a crystal cracked, the ring flickering. Disabled: dark, crystals dull."
+}

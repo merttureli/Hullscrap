@@ -16,6 +16,7 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
+const ArmFx = preload("res://scripts/view/arm_fx.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const Art = preload("res://scripts/view/art.gd")
@@ -82,6 +83,7 @@ func _process(dt: float) -> void:
 	if ship == null:
 		return
 	_clock += dt
+	ArmFx.turn(ship, dt)  # the healing arms turn toward their patients
 	_spawn(ship)
 	if selected != null and not ship.crew.has(selected):
 		selected = null  # they left, or the ship was replaced
@@ -438,6 +440,7 @@ func _draw() -> void:
 	if ship == null:
 		return
 	ShipView.draw_fire(self, ship.fires, _world(Vector2.ZERO), build.CELL, _clock)
+	ArmFx.draw_beams(self, ship, _world, build.CELL, _clock)
 	_draw_abandoned(ship)
 	var sent := order_target()
 	if sent != null:

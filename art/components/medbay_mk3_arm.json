@@ -1,0 +1,68 @@
+{
+ "frame": [
+  16,
+  40
+ ],
+ "anims": {
+  "idle": [
+   0,
+   1,
+   0
+  ],
+  "heal": [
+   1,
+   2,
+   5
+  ],
+  "damaged": [
+   3,
+   2,
+   5
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ]
+ },
+ "aim": "turret",
+ "anchors": {
+  "pivot": [
+   8,
+   32
+  ],
+  "tip": [
+   8,
+   2
+  ]
+ },
+ "glow": {
+  "image": "medbay_mk3_arm_glow.png",
+  "frame": [
+   32,
+   56
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "heal": [
+    1,
+    2,
+    5
+   ],
+   "damaged": [
+    3,
+    2,
+    5
+   ]
+  }
+ },
+ "notes": "The arm of medbay_mk3, drawn pointing UP and turned about anchors.pivot (the socket ring in the middle of the 2x2 base) toward the patient; anchors.tip is the head. idle (at rest), heal (2: the lens pulses while it heals), damaged (2: forearm jammed skewed, sparks), disabled (drooped). The soft green beam and the glow on the patient are drawn in code."
+}

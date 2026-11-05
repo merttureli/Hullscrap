@@ -68,6 +68,8 @@ static func draw_component(canvas, rect: Rect2, def: Dictionary, inst: Dictionar
 		_draw_sheet(canvas, sheet, rect, def, inst, cell_px, opts)
 	else:
 		_draw_placeholder(canvas, rect.grow(-2), def, cell_px, m, bool(opts.get("powered", true)), alpha)
+	if is_arm(def):
+		_draw_arm(canvas, def, inst, rect, cell_px, opts)
 	_draw_marks(canvas, rect.grow(-2), m, alpha)
 	if inst.has("n") and str(def.get("family", "")) == "ammo_rack":  # a rack's count
 		_draw_text(canvas, str(int(inst["n"])), rect.end - Vector2(11.0, 9.0), 11, Color(1, 1, 1, alpha), true)
@@ -124,6 +126,60 @@ static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect
 static func slope_rect(def: Dictionary, inst: Dictionary, origin: Vector2, cell_px: float) -> Rect2:
 	var r := Mounts.out_rect(def, inst)
 	return Rect2(origin + r.position * cell_px, r.size * cell_px)
+
+
+## Is `def` a healing arm (Medbay Mk2, Mk3: a medbay with stats.reach)? Its base is the sheet, the arm that turns is <id>_arm.
+static func is_arm(def: Dictionary) -> bool:
+	return str(def.get("family", "")) == "medbay" and float(def.get("stats", {}).get("reach", 0.0)) > 0.0
+
+
+## The arm of healing arm `def`, drawn pointing UP and turned about the middle of its base (anchors.pivot) to `opts.arm_angle` (radians,
+## clockwise from up, default 0). Frames: heal while `opts.arm_heal` (it has a patient), damaged under half hp, disabled at hp 0 or status
+## disabled, else idle; the glow of the head is added like a barrel's. No art: a line and a ball. The beam is drawn by the ship view.
+static func _draw_arm(canvas, def: Dictionary, inst: Dictionary, rect: Rect2, cell_px: float, opts: Dictionary) -> void:
+	var alpha := float(opts.get("alpha", 1.0))
+	var pivot := rect.get_center()
+	var angle := float(opts.get("arm_angle", 0.0))
+	var sheet = Art.component(str(def.get("id", "")) + "_arm")
+	if sheet == null:
+		var tip := pivot + Vector2.UP.rotated(angle) * cell_px * 1.2
+		canvas.draw_line(pivot, tip, Color(0.85, 0.87, 0.9, alpha), maxf(3.0, cell_px / 8.0))
+		canvas.draw_circle(tip, cell_px * 0.15, Color(0.42, 0.95, 0.55, alpha))
+		return
+	var max_hp := Stats.max_hp(def)
+	var hp := int(inst.get("hp", max_hp))
+	var anim := "idle"
+	if (hp <= 0 or str(inst.get("status", "ok")) == "disabled") and sheet.has_anim("disabled"):
+		anim = "disabled"
+	elif max_hp > 0 and float(hp) < float(max_hp) * DAMAGED_BELOW and sheet.has_anim("damaged"):
+		anim = "damaged"
+	elif bool(opts.get("arm_heal", false)) and sheet.has_anim("heal"):
+		anim = "heal"
+	var t := float(opts.get("time", 0.0))
+	var k := cell_px / SpriteSheet.SRC_CELL
+	var pin: Vector2 = (sheet.anchors["pivot"] + Vector2(0.5, 0.5)) if sheet.anchors.has("pivot") else Vector2(sheet.frame) / 2.0
+	var xf := Transform2D(angle, pivot)
+	var dest := Rect2(-pin * k, Vector2(sheet.frame) * k)
+	canvas.draw_set_transform_matrix(xf)
+	canvas.draw_texture_rect_region(sheet.texture, dest, sheet.region(sheet.frame_at(anim, t)), Color(1, 1, 1, alpha))
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+	var g = sheet.glow
+	if g != null and anim != "disabled" and g.has_anim(anim):
+		var quad := {"tex": g.texture, "rect": Rect2(dest.position + g.offset * k, Vector2(g.frame) * k), "src": g.region(g.frame_at(anim, t)), "xf": xf, "mod": Color(1, 1, 1, alpha)}
+		if opts.has("glow_out"):
+			opts["glow_out"].append(quad)
+		else:
+			canvas.draw_set_transform_matrix(xf)
+			canvas.draw_texture_rect_region(quad["tex"], quad["rect"], quad["src"], quad["mod"])
+			canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+## How far the head of arm `def` is from the middle of its base, in cells (where the beam starts).
+static func arm_len(def: Dictionary) -> float:
+	var sheet = Art.component(str(def.get("id", "")) + "_arm")
+	if sheet != null and sheet.anchors.has("pivot") and sheet.anchors.has("tip"):
+		return float(sheet.anchors["pivot"].y - sheet.anchors["tip"].y) / SpriteSheet.SRC_CELL
+	return 1.2
 
 
 ## The barrel of weapon `def` about `pivot`, turned to point along `aim` (see draw_mount_out): its frame by the outside

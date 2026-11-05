@@ -7,6 +7,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
+const ArmFx = preload("res://scripts/view/arm_fx.gd")
 
 
 func near(got: float, want: float, msg: String, eps := 1e-6) -> void:
@@ -231,3 +232,18 @@ func test_mk1_stays_a_bed_and_the_arm_is_not_one() -> void:
 	jobs.tick(ship, 1.0)
 	near(m.hp, 50.0 + 18.0, "lying on the base heals by the arm only once (no bed rate on top)")
 	check(arm >= 0, "placed")
+
+
+func test_the_arm_turns_toward_its_patient_and_the_art_exists() -> void:
+	var d := _arm_ship()
+	var ship: Ship = d["ship"]
+	var m := _hurt(_npc("Ada", 15, 10), 50.0)  # to the right of the arm: 90 degrees clockwise from up
+	ship.crew.append(m)
+	var jobs := Jobs.new()
+	jobs.tick(ship, 0.1)
+	for i in 40:
+		ArmFx.turn(ship, 0.1)
+	near(ArmFx.opts(ship, d["arm"])["arm_angle"], PI / 2.0, "pointing at Ada", 0.15)
+	check(ArmFx.opts(ship, d["arm"])["arm_heal"], "and healing")
+	for id in ["medbay_mk2_arm", "medbay_mk3_arm", "medbay_mk2", "medbay_mk3"]:
+		check(FileAccess.file_exists("res://art/components/%s.png" % id), id + " has art")

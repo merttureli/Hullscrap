@@ -1,0 +1,62 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   4
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "medbay_mk2_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    4
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   16
+  ]
+ },
+ "notes": "Healing arm base, standard line, 2x2: a plate with a socket ring in the middle (the arm sprite medbay_mk2_arm turns about it), a medical cross, four status lamps that chase round while it works, violet trim. Damaged: scorched plate, a dead lamp, the ring cracked. Disabled: dark, lamps out, ring scorched."
+}

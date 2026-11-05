@@ -13,6 +13,7 @@ const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Mortality = preload("res://scripts/crew/mortality.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
+const ArmFx = preload("res://scripts/view/arm_fx.gd")
 const Art = preload("res://scripts/view/art.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
@@ -108,6 +109,8 @@ func flash_room(cells: Array) -> void:
 
 func _process(dt: float) -> void:
 	_clock += dt
+	if ship != null:
+		ArmFx.turn(ship, dt)
 	flash_left = maxf(flash_left - dt / maxf(Engine.time_scale, 0.01), 0.0)  # real time, so the slow-down does not stretch it
 	_follow()
 	if ship != null:
@@ -161,6 +164,8 @@ func _draw() -> void:
 		if not _livery.is_empty() and str(ship.components.def(inst["id"]).get("family", "")) == "engine":
 			opts["glow_tint"] = Color.WHITE.lerp(_livery["palette"]["glow"], 0.75)  # the engine flame in the livery's colour
 		opts.merge(Ammo.draw_opts(ship, uid))
+		if Visuals.is_arm(ship.components.def(inst["id"])):
+			opts.merge(ArmFx.opts(ship, uid))  # a healing arm: turned toward its patient
 		all_opts[uid] = opts
 		Visuals.draw_component(self, _rect_of(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
 	for uid in uids:  # the outside halves and barrels of the hull mounts, over the wall's edge
@@ -183,6 +188,7 @@ func _draw() -> void:
 		PersonDrawer.draw(self, px(m.pos), pose, look, CELL)
 		PersonDrawer.draw_status(self, px(m.pos), Jobs.drone_status(ship, m), CELL)
 		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL, Mortality.bleed_frac(m))
+	ArmFx.draw_beams(self, ship, func(p): return px(p), CELL, _clock)
 	if flash_left > 0.0:
 		for c in flash_cells:
 			draw_rect(Rect2(px(Vector2(c)), Vector2(CELL, CELL)), Color(MARK_COLOR, 0.7 * flash_left / ROOM_FLASH_S))
