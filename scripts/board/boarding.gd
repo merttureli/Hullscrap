@@ -380,7 +380,7 @@ func gun() -> Dictionary:
 
 
 ## Use the weapon in his hands toward `dir` (radians): a shot, or a swing for a melee weapon. Returns "shot", "swing", "empty", "reloading",
-## "wait" (still cooling) or "down".
+## "wait" (still cooling) or "down". A magazine that runs dry reloads by itself while the hold has rounds (owner, 2026-11-05); R still reloads early.
 func fire(dir: float) -> String:
 	if soldier.is_down() or finished:
 		return "down"
@@ -390,6 +390,8 @@ func fire(dir: float) -> String:
 	if float(g["cd"]) > 0.0:
 		return "wait"
 	if Arms.has_mag(g) and int(g["mag"]) <= 0:
+		if reload():
+			return "reloading"
 		g["cd"] = 0.35
 		events.append({"type": "click", "pos": soldier.pos})
 		return "empty"
@@ -403,6 +405,8 @@ func fire(dir: float) -> String:
 	var from := soldier.pos + Vector2.from_angle(dir) * float(c["muzzle"])
 	shoot(soldier, "soldier", from, dir + spread, w, foes.bodies() + people.bodies())
 	foes.noise(soldier.pos, float(c["noise_gun"]))
+	if Arms.has_mag(g) and int(g["mag"]) <= 0:
+		reload()  # the last round: it reloads by itself
 	return "shot"
 
 
