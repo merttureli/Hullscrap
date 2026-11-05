@@ -4,6 +4,8 @@ Owner: "Guns are one of the biggest features of the game, so good effort into de
 This is the design for the gun rework: the shapes, how they aim, the gun families and their versions (the way FTL: Multiverse grows its arsenal, with our own names), the new mechanics, the visual language, and the plan.
 The mount rules (two halves through the wall, CONTENT.md 4f) and the art bible (ART_STYLE.md) still hold. This adds to them.
 
+> **G1a landed (rules as built, where they differ from the first draft).** Centring: the breech starts `floor((W - bw) / 2)` cells from the outside half's left edge at rotation 0, and turns with the part (a wider breech pokes out equally); the link is as wide as the outside half. Outside hp = `round(hp x cells / 4)`. A one-cell-deep outside half (flush pod, gun strip) is **low**: rams pass over it. The data key `aim` is fixed, swivel or turret, `aim_share` holds the shares, `shapes` the shape table (`data/weapons.json`). Point defence shoots missiles, any shot at or below `pd_speed` (500 px/s) and shots marked `interceptable`. Rattle Burst's arc went 240 to 270 to sit in the turret band, and the two broadsides' gimbal 3 to 20.
+
 ## 1. Pillars
 1. **A gun reads at a glance.** Its silhouette says how it aims (fixed, swivel, turret), its size says how hard it hits, and its colour says its family. The firing arc shows while you place it.
 2. **Shapes are a placement puzzle.** A long barrel fits a thin prow, a broadside wants a long flank wall, a spinal mount wants the keel, and a point turret fits a corner. Where a gun can go matters as much as its numbers.

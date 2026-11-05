@@ -7,4 +7,6 @@ if __name__ == '__main__':
         _, _, J = comp_base.export(C())
         print(C.id, J['frame'], list(J['anims']))
     tile_wreck.export()
+    import os
+    subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gun_recipes.py')], check=True, cwd=os.path.dirname(os.path.abspath(__file__)), stdout=subprocess.DEVNULL)    # the new `_out` / `_barrel` shapes (GUNS.md 8)
     subprocess.run([sys.executable, 'assets_md.py'], check=True)

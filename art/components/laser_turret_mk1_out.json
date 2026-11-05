@@ -1,10 +1,10 @@
 {
  "frame": [
-  64,
+  32,
   36
  ],
  "cells": [
-  4,
+  2,
   2
  ],
  "anims": {
@@ -32,7 +32,7 @@
  "glow": {
   "image": "laser_turret_mk1_out_glow.png",
   "frame": [
-   80,
+   48,
    52
   ],
   "offset": [
@@ -54,28 +54,24 @@
  },
  "anchors": {
   "pivot": [
-   32,
+   16,
    15
   ]
  },
- "notes": "OUTSIDE half of the Laser Turret Mk1 (the Concord Point Turret, a TURRET): turret-ring base with swivel ticks, a compact power-cell block and a sensor dome. damaged: ring and wing cracked, cover flapping; disabled: scorched, dented, sparking.",
+ "notes": "OUTSIDE half of the Laser Turret Mk1 (point): a ring base (2x2 cells), a compact head and a sensor eye: a TURRET; the bottom flange overhangs the outer wall face. damaged: cracks, a loose plate, a spark; disabled: dark, scorched and dented, never destroyed. The inside half (breech) is narrower or wider than this half in places: it sits at floor((W - bw) / 2) cells from this half's left edge at rotation 0.",
  "barrel": {
   "image": "laser_turret_mk1_barrel.png",
   "frame": [
-   21,
-   42
-  ],
-  "pivot_on_base": [
-   32,
-   15
+   17,
+   29
   ],
   "pivot_on_barrel": [
-   10,
-   33
+   8,
+   17
   ],
   "muzzle": [
-   10,
-   12
+   8,
+   1
   ],
   "anims": {
    "idle": [
@@ -97,25 +93,29 @@
     6,
     1,
     0
+   ],
+   "off": [
+    7,
+    1,
+    0
    ]
   },
   "aim": "turret",
+  "pivot_on_base": [
+   16,
+   15
+  ],
   "glow": {
    "image": "laser_turret_mk1_barrel_glow.png",
    "frame": [
-    41,
-    62
+    49,
+    61
    ],
    "offset": [
-    -10,
-    -10
+    -16,
+    -16
    ],
    "anims": {
-    "idle": [
-     0,
-     1,
-     0
-    ],
     "fire": [
      1,
      3,
@@ -125,6 +125,11 @@
      4,
      2,
      4
+    ],
+    "idle": [
+     0,
+     1,
+     0
     ]
    }
   }

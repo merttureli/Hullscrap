@@ -47,11 +47,14 @@ static func _part(cv: CanvasItem, def: Dictionary, r: Rect2, t: float) -> void:
 	var out := Vector2(float(def["mount"]["outside"][0]), float(def["mount"]["outside"][1]))
 	var head := 1.0 if str(def.get("family", "")) in Visuals.BARRELS else 0.0  # the barrel (a gun, a dish, an emitter) sticks out above
 	var wall := 0.5
-	var k := _cell(r, Vector2(maxf(size.x, out.x), head + out.y + wall + size.y))
+	var shift := float(Mounts.breech_shift(Vector2i(out), Vector2i(size), 0).x)  # the centring rule: the breech's place against the outside half's left edge
+	var span := maxf(out.x, shift + size.x) - minf(0.0, shift)  # the picture is as wide as both halves together
+	var k := _cell(r, Vector2(span, head + out.y + wall + size.y))
 	var top := r.get_center().y - (head + out.y + wall + size.y) * k / 2.0 + head * k
-	var out_rect := Rect2(Vector2(r.get_center().x - out.x * k / 2.0, top), out * k)
-	var wall_rect := Rect2(Vector2(r.get_center().x - maxf(size.x, out.x) * k / 2.0, out_rect.end.y), Vector2(maxf(size.x, out.x) * k, wall * k))
-	var in_rect := Rect2(Vector2(r.get_center().x - size.x * k / 2.0, wall_rect.end.y), size * k)
+	var left := r.get_center().x - span * k / 2.0
+	var out_rect := Rect2(Vector2(left - minf(0.0, shift) * k, top), out * k)
+	var wall_rect := Rect2(Vector2(left, out_rect.end.y), Vector2(span * k, wall * k))
+	var in_rect := Rect2(Vector2(out_rect.position.x + shift * k, wall_rect.end.y), size * k)
 	cv.draw_rect(wall_rect, WALL)
 	cv.draw_rect(Rect2(wall_rect.position, Vector2(wall_rect.size.x, maxf(1.0, k / 8.0))), WALL_TOP)
 	Visuals.draw_component(cv, in_rect, def, {"rot": 0}, k, {"time": t})

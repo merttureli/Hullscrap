@@ -6,12 +6,17 @@ extends RefCounted
 ##   measured along the line between the centres from each hull's reach that way (extent()), since muzzles and the parts
 ##   it aims at sit on the hull's edge. (It used to hold that between the centres, and later at least both bounding circles
 ##   apart: a large hull, or a starter's frame round a small core, then kept it out of its own guns' range.)
-## - Pointing: it turns its nose so the fixed guns (their mean outward direction) lead the target, off by
+## - Pointing: it turns the side its fixed guns face to the target, off by
 ##   an aim error that shrinks with `aim_skill` (the design's `ai.aim_skill`, 0..1, default 0.6): up to
 ##   (1 - aim_skill) x AIM_ERROR_DEG degrees either way, re-rolled every RETARGET_S. It fires a fixed gun
 ##   when the gun can bear (its gimbal reaches the aim point, in range), or when its barrel at the edge of the
 ##   gimbal still lines up on the foe's hull within range (on_hull()). Turrets track and fire by themselves
 ##   in the arena (Weapons.tick_turrets). It strafes with side engines when it has them.
+## - Broadside passes (docs/GUNS.md 6): the fixed guns are grouped by the side of the ship they face (bow, starboard, stern, port) and each
+##   group is weighed by its dps (pick_facing()). The pilot presents the heaviest group: the bow when it is at least as heavy as
+##   any side, else a flank (of two heavy flanks the one needing the smaller turn, kept while it stays that way). Presenting a flank it
+##   holds the foe abeam, cruising along it at its range: the nose leans toward the foe when it is too far and away when too near
+##   (ABEAM_LEAN_MAX_DEG at most, about the gimbal of its broadside), and side engines strafe it in or out.
 ## - Aim (pick_target()): a pilot of SNIPE_SKILL or better aims at the foe's weapons first (the outside half of a
 ##   mount, the part it can see), a worse one at its hull; once the guns are out, everyone aims at the hull: the
 ##   facing wall nearest its line to the foe's centre, clear of the guns' outside halves (hull_point()), so the shots
@@ -44,6 +49,10 @@ const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vect
 const GUN_CLEARANCE := 2  ## cells: the point of the hull it aims at keeps this far from a weapon's outside half
 const DEFAULT_AIM_SKILL := 0.6
 const AIM_ERROR_DEG := 12.0  ## aim error either way of a pilot with no skill; a pilot of skill s is off by up to (1 - s) of it
+const ABEAM_LEAN_MAX_DEG := 30.0  ## the most the nose leans off the beam to open or close the range while a flank is presented
+const ABEAM_LEAN_MIN_DEG := 10.0
+const ABEAM_CRUISE := 0.5  ## throttle while a flank is presented (the pass along the foe)
+const FACING_STICK_DEG := 30.0  ## a presented flank is kept unless the other flank needs this much less turn
 const LATERAL_MAX := 225.0  ## px/s of sideways drift before it turns the other way
 const CLOSE_MAX := 390.0  ## px/s it closes at, at most
 const BACK_MAX := 180.0  ## px/s it backs off at, at most
@@ -75,6 +84,7 @@ var hull_aim := Vector2.ZERO  ## with no part to aim at: the point of the foe's 
 var style := ""  ## "" (keeps its range and strafes) or "rammer"
 var morale = null  ## morale.gd of this fight (the session sets it): pilot_mode() says hold, flee or stop
 var foe_morale = null  ## the foe's morale.gd, when the foe is the enemy (the player's pilot in tests and tools): a fleeing foe's engines come first
+var facing := 0  ## the side of the ship it presents to the foe: 0 bow, 1 starboard, 2 stern, 3 port (pick_facing())
 var _flip := 0.0
 var _retarget := 0.0
 var _hold := {}  # weapon uid -> seconds held back
@@ -163,22 +173,19 @@ func _fly(dt: float) -> void:
 	var co = arena.ships[me]
 	var tgt = arena.ships[foe]
 	var armed := _armed()
-	# The axis its fixed guns point along (ship-local: the mean of their outward directions) and the
-	# first of them.
-	var axis := Vector2.ZERO
+	# The fixed guns by the side they face, each side weighed by its dps: the heaviest is presented to the foe.
+	var groups := fixed_groups(armed)
+	var to_foe0: Vector2 = tgt.flight.pos - co.flight.pos
+	facing = pick_facing(groups, (to_foe0.rotated(-co.flight.angle)).angle() + PI / 2.0, facing)
+	var axis := Vector2.UP
 	var lead_mount := {}
-	var pivots := Vector2.ZERO  # where the fixed guns turn, summed
+	var pivots := Vector2.ZERO  # where the presented guns turn, summed
 	var fixed := 0
-	for uid in armed:
-		var m: Dictionary = armed[uid]
-		var w: Dictionary = arena.weapons.def(m["id"])
-		if not w["turret"]:
-			axis += Vector2(m["dir"])
-			pivots += Vector2(m["pos"])
-			fixed += 1
-			if lead_mount.is_empty():
-				lead_mount = m
-	axis = axis.normalized() if axis.length_squared() > 1e-6 else Vector2.UP
+	if groups.has(facing):
+		axis = Vector2(groups[facing]["axis"]).normalized() if Vector2(groups[facing]["axis"]).length_squared() > 1e-6 else Vector2.UP
+		pivots = groups[facing]["pivots"]
+		fixed = int(groups[facing]["n"])
+		lead_mount = groups[facing]["first"]
 	var to_foe: Vector2 = tgt.flight.pos - co.flight.pos
 	var dist := to_foe.length()
 	var u := to_foe / maxf(dist, 1.0)
@@ -202,9 +209,15 @@ func _fly(dt: float) -> void:
 		for k in 3:
 			var at: Vector2 = co.flight.pos + ((pivots / fixed - co.pivot) * arena.CELL).rotated(want)
 			want = (aim - at).angle() - axis.angle()
+	var closing: float = co.flight.vel.dot(u)
+	var abeam := fixed > 0 and (facing == 1 or facing == 3)
+	var lean := 0.0  # the nose leans toward the foe when it is too far, away when too near (abeam only)
+	if abeam:
+		var room := clampf(deg_to_rad(float(arena.weapons.def(lead_mount["id"])["gimbal"])), deg_to_rad(ABEAM_LEAN_MIN_DEG), deg_to_rad(ABEAM_LEAN_MAX_DEG))
+		lean = clampf((dist - preferred) / maxf(preferred, 1.0) - 0.5 * closing / CLOSE_MAX, -1.0, 1.0) * room * (1.0 if axis.x > 0.0 else -1.0)
+		want += lean
 	var turn: float = co.flight.steer_toward(want, co.mass, co.thrust)
 	# Close or open the range with the thrust (it pushes along the heading, near the target's direction).
-	var closing: float = co.flight.vel.dot(u)
 	var brake: float = co.thrust * co.flight.thrust_to_accel / maxf(co.mass, 1.0) * co.flight.REVERSE * 0.6  # px/s^2 it can stop with
 	var gap := dist - preferred
 	var want_closing := signf(gap) * minf(sqrt(2.0 * brake * absf(gap)), CLOSE_MAX if gap > 0.0 else BACK_MAX)
@@ -215,7 +228,68 @@ func _fly(dt: float) -> void:
 		if absf(gap) < preferred * 0.15 and absf(throttle) < HOLD_THROTTLE:
 			throttle = HOLD_THROTTLE * (1.0 if gap >= 0.0 else -1.0)  # keep pushing: the hold is a slow orbit
 	var strafe := side if float(co.thrusts["left"]) + float(co.thrusts["right"]) > 0.0 else 0.0
+	if abeam:  # the pass: cruise along the foe, and slide in or out with the side engines to hold the range
+		var tangent: float = absf(co.flight.vel.dot(u.rotated(PI / 2.0)))
+		throttle = ABEAM_CRUISE if tangent < CLOSE_MAX * 0.6 else 0.0
+		if strafe != 0.0:
+			strafe = (1.0 if axis.x > 0.0 else -1.0) * signf(gap) if absf(gap) > preferred * 0.1 else 0.0
 	arena.set_input(me, throttle, turn, strafe)
+
+
+## The armed fixed guns grouped by the side of the ship they face: facing (0 bow, 1 starboard, 2 stern, 3 port) -> {dps, axis (their
+## outward directions summed, ship-local), pivots (their pivots summed), n, first (the first one's mount)}.
+func fixed_groups(armed: Dictionary) -> Dictionary:
+	var out := {}
+	for uid in armed:
+		var m: Dictionary = armed[uid]
+		var w: Dictionary = arena.weapons.def(m["id"])
+		if w["turret"]:
+			continue
+		var f := facing_of(m["dir"])
+		if not out.has(f):
+			out[f] = {"dps": 0.0, "axis": Vector2.ZERO, "pivots": Vector2.ZERO, "n": 0, "first": m}
+		var g: Dictionary = out[f]
+		g["dps"] += float(w["damage"]) * float(w["shots"]) / maxf(float(w["cooldown"]), 0.1)
+		g["axis"] += Vector2(m["dir"])
+		g["pivots"] += Vector2(m["pos"])
+		g["n"] += 1
+	return out
+
+
+## The side (0 bow, 1 starboard, 2 stern, 3 port) a ship-local direction faces.
+static func facing_of(dir: Vector2) -> int:
+	if absf(dir.x) > absf(dir.y):
+		return 1 if dir.x > 0.0 else 3
+	return 2 if dir.y > 0.0 else 0
+
+
+## The side to present to the foe, from the groups (fixed_groups()): the bow unless a side outweighs it, and of the heaviest sides
+## (within 15 percent of the best) the one that needs the smaller turn. `foe_angle`: the foe's bearing from the ship's nose (radians,
+## clockwise, ship-local, 0 is dead ahead); `now`: the side presented now, which stays unless another needs FACING_STICK_DEG less turn.
+static func pick_facing(groups: Dictionary, foe_angle: float, now := 0) -> int:
+	if groups.is_empty():
+		return 0
+	var bow_dps: float = float(groups[0]["dps"]) if groups.has(0) else 0.0
+	var best := 0.0
+	for f in groups:
+		if f == 0 or float(groups[f]["dps"]) > bow_dps:
+			best = maxf(best, float(groups[f]["dps"]))
+	var pick := -1
+	var pick_turn := INF
+	var now_turn := INF
+	for f in groups:
+		if (f != 0 and float(groups[f]["dps"]) <= bow_dps) or float(groups[f]["dps"]) < best * 0.85:
+			continue
+		var axis_angle := Vector2(groups[f]["axis"]).angle() + PI / 2.0  # 0 for a bow gun (up)
+		var turn := absf(wrapf(foe_angle - axis_angle, -PI, PI))
+		if f == now:
+			now_turn = turn
+		if turn < pick_turn - 1e-6:
+			pick = f
+			pick_turn = turn
+	if now_turn < INF and now_turn <= pick_turn + deg_to_rad(FACING_STICK_DEG):
+		return now
+	return pick if pick >= 0 else 0
 
 
 ## The distance between the centres it keeps with the foe along the world direction `u` (from it to the foe), with the

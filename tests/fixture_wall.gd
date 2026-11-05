@@ -56,5 +56,11 @@ static func wall_ship(thick: int, rot := 0) -> Ship:
 
 
 ## Where the outside half goes to be centred on u = -2..1 and sit against the wall (`depth` rows tall).
-static func out_anchor(rot: int, depth := 2) -> Vector2i:
-	return corner(rot, -2, 1, -depth, -1)
+## `width` is the outside half's width along the wall (a 4 wide casemate is u -2..1; a 3 wide dome -1..1).
+static func out_anchor(rot: int, depth := 2, width := 4) -> Vector2i:
+	return corner(rot, -(width / 2), -(width / 2) + width - 1, -depth, -1)
+
+
+## out_anchor() for the outside half of component def `def` (any shape).
+static func out_for(def: Dictionary, rot: int) -> Vector2i:
+	return out_anchor(rot, int(def["mount"]["outside"][1]), int(def["mount"]["outside"][0]))

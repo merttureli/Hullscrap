@@ -1,11 +1,11 @@
 {
  "frame": [
   64,
-  36
+  20
  ],
  "cells": [
   4,
-  2
+  1
  ],
  "anims": {
   "on": [
@@ -33,7 +33,7 @@
   "image": "kett_hive_swarm_launcher_out_glow.png",
   "frame": [
    80,
-   52
+   36
   ],
   "offset": [
    -8,
@@ -55,27 +55,23 @@
  "anchors": {
   "pivot": [
    32,
-   12
+   8
   ]
  },
- "notes": "OUTSIDE half of the Kett Hive Swarm Launcher: overlapping chitin plates round a honeycomb face of lit cells, a round brood sac on the left with drones crawling on it, and a pair of antennae and compound-eye lamps on the right. damaged: a plate peeled back, two cells dark and leaking, sparks; disabled: plates cracked and grey, cells dead, the sac slumped.",
+ "notes": "OUTSIDE half of the Kett Hive Swarm Launcher (pod): a flush pod plate (4x1 cells); the barrel sprite is its hatch lids, which open and close as it fires in the livery of the kett guns; the bottom flange overhangs the outer wall face. damaged: cracks, a loose plate, a spark; disabled: dark, scorched and dented, never destroyed. The inside half (breech) is narrower or wider than this half in places: it sits at floor((W - bw) / 2) cells from this half's left edge at rotation 0.",
  "barrel": {
   "image": "kett_hive_swarm_launcher_barrel.png",
   "frame": [
-   29,
-   58
-  ],
-  "pivot_on_base": [
-   32,
-   12
+   64,
+   20
   ],
   "pivot_on_barrel": [
-   14,
-   51
+   32,
+   8
   ],
   "muzzle": [
-   14,
-   17
+   32,
+   4
   ],
   "anims": {
    "idle": [
@@ -97,26 +93,30 @@
     6,
     1,
     0
+   ],
+   "off": [
+    7,
+    1,
+    0
    ]
   },
   "aim": "fixed",
-  "gimbal_deg": 6,
+  "pivot_on_base": [
+   32,
+   8
+  ],
+  "gimbal_deg": 10,
   "glow": {
    "image": "kett_hive_swarm_launcher_barrel_glow.png",
    "frame": [
-    49,
-    78
+    96,
+    52
    ],
    "offset": [
-    -10,
-    -10
+    -16,
+    -16
    ],
    "anims": {
-    "idle": [
-     0,
-     1,
-     0
-    ],
     "fire": [
      1,
      3,
@@ -126,6 +126,11 @@
      4,
      2,
      4
+    ],
+    "idle": [
+     0,
+     1,
+     0
     ]
    }
   }

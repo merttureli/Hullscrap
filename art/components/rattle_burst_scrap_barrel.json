@@ -1,11 +1,7 @@
 {
  "frame": [
-  22,
-  45
- ],
- "pivot_on_base": [
-  32,
-  15
+  17,
+  29
  ],
  "aim": "turret",
  "anims": {
@@ -28,35 +24,54 @@
    6,
    1,
    0
+  ],
+  "off": [
+   7,
+   1,
+   0
   ]
  },
  "anchors": {
   "pivot": [
-   10,
-   36
+   8,
+   17
   ],
   "muzzle": [
-   10,
-   12
+   8,
+   2
   ]
  },
- "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of rattle_burst_scrap_out. fire: 3 frames, recoil 2/1/0 px with a muzzle flash.",
  "glow": {
   "image": "rattle_burst_scrap_barrel_glow.png",
   "frame": [
-   42,
-   65
+   49,
+   61
   ],
   "offset": [
-   -10,
-   -10
+   -16,
+   -16
   ],
   "anims": {
    "fire": [
-    0,
+    1,
     3,
     14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "idle": [
+    0,
+    1,
+    0
    ]
   }
- }
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of rattle_burst_scrap_out. fire: 3 frames, recoil 2/1/0 px with the family muzzle flash on the glow layer; off: lights dead.",
+ "pivot_on_base": [
+  16,
+  15
+ ]
 }

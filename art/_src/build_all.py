@@ -25,6 +25,7 @@ def _sector_colours():
 
 if __name__ == '__main__':
     _sector_colours()
+    import pal_guns; pal_guns.register()      # the beam crimson and the slug straw (50 colours in all)
     write_palette_gpl(ART + '/palette.gpl')
     export_crew.export()
     sp_export.export_all()          # species (basalt, emberkin, fenn + race wave 1), hand weapons + fx, gear
@@ -38,6 +39,8 @@ if __name__ == '__main__':
     tech_b.export_projectiles()      # racial tech projectiles + impacts (group b)
     techa_all.export_all()          # racial tech a
     hand_race.export_all()          # racial hand weapons (art/items/<id>.png + art/items/fx/muzzle_<name>.png)
+    # every gun's outside half and barrel in its new shape (docs/GUNS.md 8): overwrites the older `_out` / `_barrel` files above; own process, as its palette letters are its own
+    subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gun_recipes.py')], check=True, cwd=os.path.dirname(os.path.abspath(__file__)), stdout=subprocess.DEVNULL)
     # sector space art (debris, intakes, radars, tractor, HUD icons, backdrop, jump fx) runs in its own process: its palette
     # letters (pal_sector) reuse letters that race wave 1 (pal_races1) gives other colours, so the two can't share px.PAL
     subprocess.run([sys.executable, '-c', 'import sector_all; sector_all.export_all()'], check=True, cwd=os.path.dirname(os.path.abspath(__file__)))

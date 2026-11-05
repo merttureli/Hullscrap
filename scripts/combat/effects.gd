@@ -14,8 +14,8 @@ extends RefCounted
 ##   split_on_shield {count, damage_mult}  when a shield stops the shot, `count` weaker shots (damage x damage_mult) fan out from just outside the
 ##                                    bubble and meet it again: each uses a layer, or reaches the hull where the sector is down. They do not split again.
 ##                                    Needs a shot with a speed (bolt, flak, missile), not a laser or beam
-##   intercept {range}                a turret's point defence: it turns on the nearest enemy missile within `range` px (before any ship) and each
-##                                    shot rolls the turret's accuracy to destroy it. Turrets only (Weapons.missile_target)
+##   intercept {range}                a turret's point defence: it turns on the nearest incoming threat within `range` px (an enemy missile, a slow shot, see weapons.json; before any ship) and each
+##                                    shot rolls the turret's accuracy to destroy it. Turrets only (Weapons.missile_target; also a shot at or below pd_speed or marked interceptable)
 ## On the shooter, per shot:
 ##   self_room {o2_drain, heat, fire_chance, shock_dps, scorch_dps}   the room of the weapon's inside half loses o2_drain of its air, its parts gain `heat`, a fire may start, organic crew take shock_dps a second while it fires,
 ##                                    crew without the heat_resistant trait take scorch_dps a second (both for the weapon's cooldown after each shot, or the beam's duration if longer)

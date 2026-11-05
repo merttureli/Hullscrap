@@ -1,7 +1,7 @@
 {
 "weapons": {
-	"grundl_slug_mortar": {"kind": "bolt", "sound": "sig_thunk", "damage_type": "kinetic", "damage": 10, "cooldown": 2.8, "range": 850, "shots": 1, "pierce": 1, "fire_chance": 0.0, "speed": 520, "ammo": "scrap", "effects": {"ammo_mult": 3}, "turret": false, "gimbal": 4},
-	"grundl_grapple_harpoon": {"kind": "bolt", "damage_type": "kinetic", "damage": 3, "cooldown": 8.75, "range": 900, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 600, "effects": {"magnetic": {"pull": 30}, "needs_operator": {"species": "grundl", "else_mult": 0.3, "stat": "rate"}}, "turret": false, "gimbal": 5},
-	"grundl_barge_flak": {"kind": "flak", "damage_type": "kinetic", "damage": 2, "cooldown": 4.4, "range": 550, "shots": 6, "pierce": 0, "fire_chance": 0.0, "speed": 600, "spread": 14, "ammo": "scrap", "effects": {"ammo_mult": 2}, "turret": true, "gimbal": 0, "arc": 270, "track": 100, "accuracy": 0.75}
+	"grundl_slug_mortar": {"kind": "bolt", "interceptable": true, "sound": "sig_thunk", "damage_type": "kinetic", "damage": 10, "cooldown": 2.8, "range": 850, "shots": 1, "pierce": 1, "fire_chance": 0.0, "speed": 520, "ammo": "scrap", "effects": {"ammo_mult": 3}, "aim": "fixed", "turret": false, "gimbal": 4},
+	"grundl_grapple_harpoon": {"kind": "bolt", "damage_type": "kinetic", "damage": 3, "cooldown": 8.75, "range": 900, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 600, "effects": {"magnetic": {"pull": 30}, "needs_operator": {"species": "grundl", "else_mult": 0.3, "stat": "rate"}}, "aim": "fixed", "turret": false, "gimbal": 5},
+	"grundl_barge_flak": {"kind": "flak", "damage_type": "kinetic", "damage": 2, "cooldown": 4.4, "range": 550, "shots": 6, "pierce": 0, "fire_chance": 0.0, "speed": 600, "spread": 14, "ammo": "scrap", "effects": {"ammo_mult": 2}, "aim": "turret", "turret": true, "gimbal": 0, "arc": 270, "track": 100, "accuracy": 0.75}
 }
 }

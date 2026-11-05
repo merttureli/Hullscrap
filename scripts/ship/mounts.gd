@@ -8,9 +8,8 @@ extends RefCounted
 ##
 ## The player points at the outside half's top-left cell; plan() walks inward from there through the
 ## wall and puts the inside half on the first floor rows behind it. from_inside() runs the same rule
-## the other way for a part saved before mounts existed (it only knows the inside half). A breech narrower
-## than the outside half (a tier 1-2 gun or engine: 2 wide behind a 4 wide barrel) sits centred behind it
-## (breech_shift); the link stays as wide as the outside half.
+## the other way for a part saved before mounts existed (it only knows the inside half) or whose outside half changed shape. A
+## breech narrower or wider than the outside half sits centred on it (breech_shift); the link is as wide as the outside half.
 ##
 ## ANGLED mounts: on a straight run of sloped hull cells (the 45 degree `tri`, the 1:2 `tri2_*` slopes) the outside
 ## half lies against the slope turned to its outward normal (`angle`, degrees clockwise from up, like `rot` x 90),
@@ -47,6 +46,12 @@ static func turned(size: Array, rot: int) -> Vector2i:
 	return Vector2i(int(size[1]), int(size[0])) if posmod(rot, 2) == 1 else Vector2i(int(size[0]), int(size[1]))
 
 
+## Does the outside half of `def` sit LOW: one cell deep (a flush pod, a gun strip)? A low half is hard to hit and rams pass over it
+## (collisions.gd hit_cells); shots still strike it.
+static func is_low(def: Dictionary) -> bool:
+	return is_mount(def) and int(def["mount"]["outside"][1]) <= 1
+
+
 static func rect_cells(r: Rect2i) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for y in r.size.y:
@@ -55,12 +60,18 @@ static func rect_cells(r: Rect2i) -> Array[Vector2i]:
 	return out
 
 
-## How far a breech `isz` wide sits along the wall from the outside half's edge `osz`: centred behind it
-## when narrower, else flush (a wider console starts at the barrel's edge). Sizes are already turned.
+## How far a breech `isz` sits along the wall from the outside half's top/left edge `osz`. The CENTRING RULE (docs/GUNS.md 3):
+## in the gun's own frame (rotation 0) the breech starts floor((W - bw) / 2) cells from the outside half's left edge, W and bw the
+## two widths in cells: a narrower breech sits behind the middle (the odd cell goes right), a wider one (a 4x2 breech under a 3x3
+## dome) pokes out equally (negative). Turned with the part: the left edge of a gun at rotation 1 is the top of the grid, at 2 the
+## right, at 3 the bottom, so there the odd cell goes to the other end. Sizes are already turned.
 static func breech_shift(osz: Vector2i, isz: Vector2i, rot: int) -> Vector2i:
-	if posmod(rot, 2) == 0:
-		return Vector2i(maxi(0, int((osz.x - isz.x) / 2.0)), 0)
-	return Vector2i(0, maxi(0, int((osz.y - isz.y) / 2.0)))
+	var even := posmod(rot, 2) == 0
+	var d := (osz.x - isz.x) if even else (osz.y - isz.y)
+	var s := floori(d / 2.0)
+	if posmod(rot, 4) >= 2:
+		s = d - s
+	return Vector2i(s, 0) if even else Vector2i(0, s)
 
 
 ## The cells of wall layer `k` (0 is against the outside half) of a mount whose outside half is `outside`.
@@ -139,8 +150,8 @@ static func from_inside(grid, comps, def: Dictionary, anchor: Vector2i, rot: int
 	var isz := turned(def["size"], rot)
 	var osz := turned(def["mount"]["outside"], rot)
 	var base := anchor - breech_shift(osz, isz, rot)  # where the halves start together along the wall
-	var wide := Vector2i(maxi(osz.x, isz.x), isz.y) if posmod(rot, 2) == 0 else Vector2i(isz.x, maxi(osz.y, isz.y))
-	var look := Rect2i(base, wide)  # the cells the wall walk looks through: the barrel's full width behind it
+	var wide := Vector2i(osz.x, isz.y) if posmod(rot, 2) == 0 else Vector2i(isz.x, osz.y)
+	var look := Rect2i(base, wide)  # the cells the wall walk looks through: the barrel's full width behind it (the link is as wide as the outside half)
 	var depth := 0
 	while depth < MAX_DEPTH and _beyond(look, rot, depth).all(func(c): return flat_wall(grid, c)):
 		depth += 1
@@ -192,11 +203,12 @@ static func flat_wall(grid, c: Vector2i) -> bool:
 	return id != "" and grid.tile_flag(id, "solid") and not grid.tile_flag(id, "door") and grid.shape_of(c).is_empty()
 
 
-## Where a shot leaves a mount: {pivot: the barrel's turning point (ship-local cell coordinates),
-## reach: cells from the pivot to the muzzle}, read from the art's anchors (art/components/<id>_out.json
-## has the pivot on the outside half and the barrel's pivot and muzzle). The art is drawn at rotation 0
-## (outward up), so the pivot turns about the middle of the outside half with the part. Without that art:
-## the middle of the outside half and DEFAULT_REACH.
+## Where a shot leaves a mount: {pivot: the barrel's turning point (ship-local cell coordinates), reach: cells from the pivot to the
+## muzzle, pivots: every barrel's turning point (one entry, the pivot, for a single barrel; a broadside battery or gun strip has
+## several, all aiming the same way), stagger_s: seconds between one barrel's recoil and the next one's}, read from the art's
+## anchors (art/components/<id>_out.json has the pivot on the outside half and the barrel's pivot and muzzle; `pivots_on_base`
+## lists several). The art is drawn at rotation 0 (outward up), so the pivot turns about the middle of the outside half with the
+## part. `pivot` is the middle of `pivots`. Without that art: the middle of the outside half and DEFAULT_REACH.
 static func barrel(def: Dictionary, out: Vector2i, rot: int) -> Dictionary:
 	return _barrel_at(def, Vector2(out) + Vector2(turned(def["mount"]["outside"], rot)) / 2.0, posmod(rot, 4) * PI / 2.0)
 
@@ -208,17 +220,43 @@ static func _barrel_at(def: Dictionary, centre: Vector2, angle: float) -> Dictio
 		_art[key] = _read_barrel(def)
 	var raw: Array = def["mount"]["outside"]
 	var half := Vector2(float(raw[0]), float(raw[1])) * SRC_CELL / 2.0
-	var pivot_px: Vector2 = _art[key]["pivot_px"]
-	return {"pivot": centre + (pivot_px - half).rotated(angle) / SRC_CELL, "reach": _art[key]["reach"]}
+	var pivots: Array[Vector2] = []
+	var mid := Vector2.ZERO
+	for p in _art[key]["pivots_px"]:
+		pivots.append(centre + (p - half).rotated(angle) / SRC_CELL)
+		mid += pivots[-1]
+	mid /= pivots.size()
+	return {"pivot": mid, "reach": _art[key]["reach"], "pivots": pivots, "stagger_s": _art[key]["stagger_s"]}
 
 
+## The barrel art keys of `def` (cached): {pivots_px: [Vector2] (each barrel's pin on the outside half, source px from its top-left,
+## rotation 0), reach, stagger_s}. The view draws every barrel from it (visuals.gd).
+static func barrel_art(def: Dictionary) -> Dictionary:
+	var key := "%s/%s" % [Art.root, def.get("id", "")]
+	if not _art.has(key):
+		_art[key] = _read_barrel(def)
+	return _art[key]
+
+
+## The turning points of the barrels in the rotation 0 art of the outside half, in source px from its top-left, and the rest of
+## the barrel keys (see barrel()). A barrel's art may be missing or made for another shape (its `cells` differ from the outside
+## half): then the defaults.
 static func _read_barrel(def: Dictionary) -> Dictionary:
 	var raw: Array = def["mount"]["outside"]
-	var out := {"pivot_px": Vector2(float(raw[0]), float(raw[1])) * SRC_CELL / 2.0, "reach": DEFAULT_REACH}
-	var b = Art.read_json("%s/components/%s_out.json" % [Art.root, def.get("id", "")]).get("barrel")
+	var mid := Vector2(float(raw[0]), float(raw[1])) * SRC_CELL / 2.0
+	var out := {"pivots_px": [mid], "reach": DEFAULT_REACH, "stagger_s": 0.0}
+	var art := Art.read_json("%s/components/%s_out.json" % [Art.root, def.get("id", "")])
+	var cells = art.get("cells")
+	if cells is Array and cells.size() == 2 and (int(cells[0]) != int(raw[0]) or int(cells[1]) != int(raw[1])):
+		return out
+	var b = art.get("barrel")
 	if b is Dictionary:
-		if b.get("pivot_on_base") is Array and b["pivot_on_base"].size() == 2:
-			out["pivot_px"] = Vector2(float(b["pivot_on_base"][0]), float(b["pivot_on_base"][1]))
+		var many = b.get("pivots_on_base")
+		if many is Array and not many.is_empty() and many.all(func(p): return p is Array and p.size() == 2):
+			out["pivots_px"] = many.map(func(p): return Vector2(float(p[0]), float(p[1])))
+			out["stagger_s"] = float(b.get("stagger_s", 0.0))
+		elif b.get("pivot_on_base") is Array and b["pivot_on_base"].size() == 2:
+			out["pivots_px"] = [Vector2(float(b["pivot_on_base"][0]), float(b["pivot_on_base"][1]))]
 		var on = b.get("pivot_on_barrel")
 		var mz = b.get("muzzle")
 		if on is Array and mz is Array and on.size() == 2 and mz.size() == 2:

@@ -110,7 +110,7 @@ The reference sheets are in **`docs/art_reference/`**. Every new art agent reads
 9. **Tiers grow by adding parts**: Mk2 adds a second accent, Mk3 extra machinery, Mk4 and Mk5 heavier housings, all in the same silhouette family. So a Mk5 reads as a big brother of the Mk1.
 10. **Every art agent ships a labelled 3× preview sheet** with every frame and an assembled in-context view (mounted through a wall, in a room). The lead reviews it, and the owner sees it before merging.
 
-**Palette budget**: 37 colours now. A new colour needs a reason and is registered in `px.py`/`pal_*.py`, never ad hoc. Stay under 48.
+**Palette budget**: 50 colours now (the gun rework added a beam crimson `#d4143c` and a slug straw `#fff0a8`, `art/_src/pal_guns.py`). A new colour needs a reason and is registered in `px.py`/`pal_*.py`, never ad hoc. The budget is 50: no more without the lead.
 
 ## Files
 - `art/<area>/<id>.png` (crew in `art/crew/<species>_<outfit>.png` as sprite sheets), plus a JSON next to each sheet with frame size, frames per animation and fps.

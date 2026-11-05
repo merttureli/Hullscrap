@@ -1,11 +1,11 @@
 {
  "frame": [
-  64,
-  36
+  32,
+  68
  ],
  "cells": [
-  4,
-  2
+  2,
+  4
  ],
  "anims": {
   "on": [
@@ -32,8 +32,8 @@
  "glow": {
   "image": "mire_steam_lance_out_glow.png",
   "frame": [
-   80,
-   52
+   48,
+   84
   ],
   "offset": [
    -8,
@@ -54,28 +54,24 @@
  },
  "anchors": {
   "pivot": [
-   32,
-   12
+   16,
+   50
   ]
  },
- "notes": "OUTSIDE half of the Mire Steam Lance (a FIXED gun, Mire teal): a forward-heavy teal housing with the barrel in a sleeve, a boiler tank with brass bands, a gauge and a red hand-wheel on the left, three steel steam pipes with a puffing vent on the right. damaged: the vent has sprung a leak (a jet of steam), the tank seam is cracked, the hand-wheel is bent; disabled: scorched, dented, the tank split and dripping, the hand-wheel off, never destroyed.",
+ "notes": "OUTSIDE half of the Mire Steam Lance (long): a narrow braced cradle (2x4 cells) for a long barrel: a FIXED gun that sticks out far in the livery of the mire guns; the bottom flange overhangs the outer wall face. damaged: cracks, a loose plate, a spark; disabled: dark, scorched and dented, never destroyed. The inside half (breech) is narrower or wider than this half in places: it sits at floor((W - bw) / 2) cells from this half's left edge at rotation 0.",
  "barrel": {
   "image": "mire_steam_lance_barrel.png",
   "frame": [
-   13,
-   58
-  ],
-  "pivot_on_base": [
-   32,
-   12
+   17,
+   100
   ],
   "pivot_on_barrel": [
-   6,
-   51
+   8,
+   88
   ],
   "muzzle": [
-   6,
-   13
+   8,
+   8
   ],
   "anims": {
    "idle": [
@@ -97,30 +93,44 @@
     6,
     1,
     0
+   ],
+   "off": [
+    7,
+    1,
+    0
    ]
   },
   "aim": "fixed",
-  "gimbal_deg": 6,
+  "pivot_on_base": [
+   16,
+   50
+  ],
+  "gimbal_deg": 3,
   "glow": {
    "image": "mire_steam_lance_barrel_glow.png",
    "frame": [
-    33,
-    78
+    49,
+    132
    ],
    "offset": [
-    -10,
-    -10
+    -16,
+    -16
    ],
    "anims": {
-    "idle": [
-     0,
-     1,
-     0
-    ],
     "fire": [
      1,
      3,
      14
+    ],
+    "damaged": [
+     4,
+     2,
+     4
+    ],
+    "idle": [
+     0,
+     1,
+     0
     ]
    }
   }

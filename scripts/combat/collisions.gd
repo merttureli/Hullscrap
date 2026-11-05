@@ -68,7 +68,8 @@ static func hit_cells(arena, idx: int) -> Dictionary:
 	var all: Array = g.tiles.keys()
 	for uid in co.ship.components.instances:
 		all.append_array(co.ship.components.instances[uid]["cells"])
-		all.append_array(co.ship.components.instances[uid]["out_cells"])  # the outside half of a mount sticks out: rams hit guns first
+		if not Mounts.is_low(co.ship.components.def(co.ship.components.instances[uid]["id"])):  # a low outside half (a flush pod) is passed over
+			all.append_array(co.ship.components.instances[uid]["out_cells"])  # the outside half of a mount sticks out: rams hit guns first
 	for c in all:
 		if not Damage.solid_at(co, c, true).is_empty():  # a disabled outside half is still there
 			solid[c] = true

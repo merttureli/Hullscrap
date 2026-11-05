@@ -13,6 +13,7 @@ const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Flight = preload("res://scripts/sim/flight.gd")
 const Components = preload("res://scripts/ship/components.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
+const Art = preload("res://scripts/view/art.gd")
 
 const PIRATE := "res://data/ships/pirate_raider.json"
 const DT := 1.0 / 60.0
@@ -25,7 +26,7 @@ func near(got: float, want: float, msg: String, eps := 1e-4) -> void:
 ## A powered mount `id` on a wall `thick` deep, facing `rot`, at the world origin. Returns {arena, ship, uid}.
 func _gun(id: String, rot := 0, thick := 1) -> Dictionary:
 	var ship := Wall.wall_ship(thick, rot)
-	var uid := ship.components.place_mount(ship.grid, id, Wall.out_anchor(rot), rot)
+	var uid := ship.components.place_mount(ship.grid, id, Wall.out_for(ship.components.def(id), rot), rot)
 	var reactor := ship.components.place(ship.grid, "reactor_mk1", Wall.corner(rot, 2, 3, thick, thick + 3), rot % 2)  # 2 wide, 4 deep
 	for c in [Wall.at(rot, 0, thick), Wall.at(rot, 1, thick), Wall.at(rot, 2, thick)]:  # from the breech (u -1..0 for a tier 1-2 gun) to the reactor
 		ship.cables.place(ship.grid, c)
@@ -58,7 +59,8 @@ func test_a_placed_gun_shoots_from_the_muzzle_of_its_barrel_along_the_mount() ->
 		var m: Dictionary = a.ships[0].mounts[g["uid"]]
 		eq(m["dir"], Vector2(Mounts.outward(rot)), "rot %d: the mount points outward" % rot)
 		eq(m["aim"], m["dir"], "and starts at rest along it")
-		near(m["reach"], 35.0 / 16.0, "the muzzle is 35 art pixels along the barrel from its pivot", 1e-6)
+		var b: Dictionary = Art.read_json("%s/components/laser_mk1_out.json" % Art.root)["barrel"]
+		near(m["reach"], absf(float(b["pivot_on_barrel"][1]) - float(b["muzzle"][1])) / 16.0, "the muzzle is as many art pixels along the barrel from its pivot as its art says", 1e-6)
 		var far: Vector2 = a.local_to_world(0, m["pos"]) + Vector2(m["dir"]) * 2000.0
 		check(a.fire(0, g["uid"], far), "fires")
 		var e: Dictionary = _shots(a)[0]
@@ -102,18 +104,20 @@ func test_the_player_barrels_follow_the_cursor_each_substep() -> void:
 func test_a_turret_deals_sixty_percent_of_its_fixed_equivalent() -> void:
 	var w := Weapons.new()
 	eq(w.turret_damage, 0.6, "the data says 60 percent")
+	eq(w.aim_share, {"fixed": 1.0, "swivel": 0.8, "turret": 0.6}, "and 80 for a swivel, all for a fixed gun")
 	var turrets := []
 	for id in w.defs:
 		if w.defs[id].get("turret", false):
 			turrets.append(id)
-			near(w.def(id)["damage"], 0.6 * float(w.defs[id]["damage"]), id + ": 60 percent of the entry", 1e-9)
+			var share: float = 0.8 if w.defs[id].get("aim", "") == "swivel" else 0.6
+			near(w.def(id)["damage"], share * float(w.defs[id]["damage"]), id + ": its class's share of the entry", 1e-9)
 			for k in ["arc", "track", "accuracy"]:
 				check(w.defs[id].has(k), "%s has %s" % [id, k])
 			check(float(w.defs[id]["accuracy"]) >= 0.6 and float(w.defs[id]["accuracy"]) <= 0.95, id + ": accuracy 0.6 to 0.95")
 		elif not id.begins_with("test_"):
 			eq(w.def(id)["damage"], float(w.defs[id]["damage"]), id + ": a fixed gun deals its whole damage")
 	turrets.sort()
-	for id in ["laser_turret_mk1", "leech_laser", "rattle_burst_scrap", "siren_ion_neon"]:  # the core turrets; packs add more
+	for id in ["laser_turret_mk1", "leech_laser", "rattle_burst_scrap", "siren_ion_neon", "basalt_pumice_flak"]:  # the core turrets and a swivel; packs add more
 		check(turrets.has(id), id + " is a turret")
 	near(w.def("laser_turret_mk1")["damage"], 0.6, "the Concord Point Turret: a rapid turret of 1 damage a shot, 60 percent of it", 1e-9)
 	eq([float(w.defs["laser_turret_mk1"]["arc"]), float(w.defs["laser_turret_mk1"]["track"]), float(w.defs["laser_turret_mk1"]["accuracy"]), float(w.defs["laser_turret_mk1"]["cooldown"])], [270.0, 120.0, 0.8, 0.8], "arc 270, 120 degrees a second, accuracy 0.8, cooldown 0.8 (a rapid turret)")

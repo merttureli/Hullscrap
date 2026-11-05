@@ -1,11 +1,7 @@
 {
  "frame": [
-  21,
-  58
- ],
- "pivot_on_base": [
-  32,
-  12
+  23,
+  48
  ],
  "aim": "fixed",
  "anims": {
@@ -28,41 +24,55 @@
    6,
    1,
    0
+  ],
+  "off": [
+   7,
+   1,
+   0
   ]
  },
  "anchors": {
   "pivot": [
-   10,
-   51
+   11,
+   36
   ],
   "muzzle": [
-   10,
-   13
+   11,
+   2
   ]
  },
- "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of gauntling_arc_hammer_out. fire: 3 frames, recoil 2/1/0 px with a muzzle flash.",
- "gimbal_deg": 6,
  "glow": {
   "image": "gauntling_arc_hammer_barrel_glow.png",
   "frame": [
-   41,
-   78
+   55,
+   80
   ],
   "offset": [
-   -10,
-   -10
+   -16,
+   -16
   ],
   "anims": {
-   "idle": [
-    0,
-    1,
-    0
-   ],
    "fire": [
     1,
     3,
     14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "idle": [
+    0,
+    1,
+    0
    ]
   }
- }
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of gauntling_arc_hammer_out. fire: 3 frames, recoil 2/1/0 px with the family muzzle flash on the glow layer; off: lights dead.",
+ "pivot_on_base": [
+  32,
+  12
+ ],
+ "gimbal_deg": 6
 }
