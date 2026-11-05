@@ -35,9 +35,9 @@ func _run() -> void:
 		var j := roundi(12.5 * (float(st) - 0.5))
 		var tier := 3 if j >= 25 else (2 if j >= 10 else 1)
 		for k in n:
-			var seed_value := 101 + k * 7919 + st * 31
+			var seed_value: int = 101 + k * 7919 + st * 31
 			var f: String = factions[k % factions.size()]
-			var budget := Shipgen.budget_for(tier, j, Standoff.danger_for(str(Shipgen.tables()["factions"][f].get("lines_as", f))), "normal", st)
+			var budget: float = Shipgen.budget_for(tier, j, Standoff.danger_for(str(Shipgen.tables()["factions"][f].get("lines_as", f))), "normal", st)
 			var rng := RandomNumberGenerator.new()
 			rng.seed = seed_value
 			var ship: Ship = Session.load_ship(Shipgen.spec(f, Shipgen.pick_size(budget, rng), seed_value, budget, false, st))

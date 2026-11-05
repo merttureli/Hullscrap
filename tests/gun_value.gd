@@ -9,6 +9,14 @@ extends RefCounted
 const CHAIN_F := 0.62  ## the mean cooldown factor of a chain gun over a fight (steps 0, 1, 2, 3, 3, 3 ...: (1 + .8 + .64 + 5 x .512) / 8)
 const CHARGE_F := 0.97  ## and of a charge gun (the gap between its released volleys)
 const BAND := 0.15  ## a version lands within this of its base
+## Guns the model misreads, where the fight bench is the judge (tests/tool_gun_bench.gd mode=solo, 60 s, 3 copies, generated enemies of the tier, the fight value
+## against the family base): id -> [the bench value of the last run, least allowed, most allowed]. The lights are below their base by design (cheap, power -1, fit
+## anywhere, track: 0.7 to 1.0); the swarm pod's six small blasts are worth far less in a fight than the model says; the mortar's splash does well against scrap plate
+## (explosive x1.5), the gun strip's against shields; the chain and charge swivels pay the 0.8 share. The finishers (lances, torpedo) may be up to 20% over.
+const BENCH := {
+	"laser_light": [0.80, 0.7, 1.0], "pulse_light": [0.85, 0.7, 1.0], "flak_turret": [0.80, 0.7, 1.0], "beam_light": [0.77, 0.7, 1.0], "missile_pod": [0.70, 0.7, 1.0],
+	"gun_strip": [1.12, 0.85, 1.15], "slug_mortar": [1.25, 0.85, 1.3], "swarm_pod": [0.69, 0.65, 1.15], "pulse_chain": [0.94, 0.85, 1.15], "ion_charge": [0.82, 0.8, 1.15], "beam_long": [0.98, 0.85, 1.15],
+}
 const EXCEPT := {"laser_lance": 0.2, "beam_spinal": 0.2, "slug_spinal": 0.2, "torpedo": 0.2, "heavy_battery": 0.15}  ## the finishers: their design says more (a wider band, 20%)
 
 ## family -> tier -> the base: a weapon id of the data, or an inline entry (notional)

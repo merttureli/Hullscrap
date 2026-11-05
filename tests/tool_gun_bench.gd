@@ -175,13 +175,11 @@ func tasks_for(mode: String) -> Array:
 						for e in specs.filter(func(x): return x["kind"] == "plain"):
 							out.append({"mode": "solo", "tier": tier, "gun": id, "spec": e["spec"], "kind": "pd", "seed": e["seed"], "pd": "pd_mk%d" % tier})
 			"pairs":
-				var mid: String = args.get("median_%d" % tier, "")
-				if mid == "":
-					mid = _median_gun(tier)
 				for id in guns_of(tier):
-					if id != mid:
+					var base := _base_id(id, tier)
+					if base != id and family_of(id) != "ion" and weapons.defs.has(base):  # each version against its family base (ion does no hull damage: no duel)
 						for e in specs:
-							out.append({"mode": "pair", "tier": tier, "a": id, "b": mid, "spec": e["spec"], "kind": e["kind"], "seed": e["seed"]})
+							out.append({"mode": "pair", "tier": tier, "a": id, "b": base, "spec": e["spec"], "kind": e["kind"], "seed": e["seed"]})
 	return out
 
 
@@ -257,7 +255,7 @@ func solo(t: Dictionary) -> Dictionary:
 		weapons.defs.get(t["pd"])
 		var c1 = a.ships[1].pivot
 		for i in 3:
-			a.add_mount(1, t["pd"], Vector2(c1.x + (i - 1) * 4.0, c1.y + 4.0), true, Vector2.DOWN)
+			a.add_mount(1, t["pd"], Vector2(c1.x + (i - 1) * 6.0, c1.y + a.ships[1].half.y - 2.5), true, Vector2.DOWN)  # on the near edge of the hull
 		a.ships[1].mounts = a.ships[1].mounts.duplicate()
 	var foe = a.ships[1]
 	var s0 := Structure.structure_fraction(foe)
@@ -387,7 +385,7 @@ func _base_id(id: String, tier: int) -> String:
 
 
 func pairs_report() -> String:
-	var L: Array[String] = ["## Pairs (win rate of each gun against the tier's median gun, hull structure left after %d s)" % int(secs), "| tier | gun | median | matches | win rate |", "|---|---|---|---|---|"]
+	var L: Array[String] = ["## Pairs (win rate of each version against its family base: identical hulls, 3 copies each, the hull with more structure left after %d s wins)" % int(secs), "| tier | gun | base | matches | win rate |", "|---|---|---|---|---|"]
 	for tier in _tiers():
 		var by := {}
 		for r in rows:

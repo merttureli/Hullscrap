@@ -70,6 +70,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **More mods**: in lockers and cabinets, in shops, and dropped by some boarding foes.
 - **A plasma rifle in your hold** now arms your boarding soldier (as the Gatekeeper's Lance).
 - **A fuel stop in the Boneyard**: Dredgers' Rest.
+- **Gun versions**: 39 new guns (light, burst, chain, heavy, long, lance and charge versions of the lasers, pulses, ion, flak, missiles and beams; the new slug and point defence families; broadside batteries, gun strips and spinal mounts). A chain gun fires faster the longer it keeps firing; a charge gun stores volleys while idle and releases them together. Slug Gun and Point Defence Mk I are known from the start; the rest are blueprints found in scans, events, boarding loot and shops, and carried by enemies by tier.
 
 ### Fixed
 - The debug keys no longer work in the download builds, and F1 lists them only in a debug build.
