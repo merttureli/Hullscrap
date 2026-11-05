@@ -383,8 +383,8 @@ func _unpose() -> void:
 		build.transform = Transform2D.IDENTITY
 	if crew != null:
 		crew.transform = Transform2D.IDENTITY
-	if cam != null:
-		cam.position = Vector2.ZERO
+	if cam != null:  # (the build screen frames the hull, not the plate's middle)
+		cam.position = build.hull_centre() if build != null and build.ship != null else Vector2.ZERO
 	_posed = false
 
 

@@ -1082,7 +1082,7 @@ func add_crew(ship, who: String, species: String, character := "") -> String:
 	var beds: Array = Jobs._beds(ship)
 	if not beds.is_empty():
 		near = Pathfinder.centre_of(beds[ship.crew.size() % beds.size()])
-	var spot: Vector2i = Jobs._free_spot(ship.grid, near, Jobs._anchors(ship))
+	var spot: Vector2i = Jobs._free_spot(ship.grid, near, Jobs._anchors(ship), Jobs._part_cells(ship, not beds.is_empty()))
 	if spot == Pathfinder.NO_CELL:
 		return ""
 	var looks: Array = CrewMember.config()["looks"]

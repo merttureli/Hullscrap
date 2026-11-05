@@ -1369,7 +1369,7 @@ static func spawn_crew(ship) -> Array:
 	var out := []
 	var player = _find(ship, func(m): return m.is_player)
 	if player == null:
-		var c := Pathfinder.nearest_walkable(grid, mid)
+		var c := _free_spot(grid, mid, [], _part_cells(ship))
 		if c == Pathfinder.NO_CELL:
 			return out
 		player = _person(cfg["player"]["name"], cfg["player"]["look"], Pathfinder.centre_of(c))
@@ -1378,7 +1378,7 @@ static func spawn_crew(ship) -> Array:
 		out.append(player)
 	var ada_name: String = cfg["ada"]["name"]
 	if _find(ship, func(m): return m.name == ada_name) == null and not ship.dead_crew.has(ada_name):
-		var c := Pathfinder.nearest_walkable(grid, mid, Callable(), player.anchor())
+		var c := _free_spot(grid, mid, [player.anchor()], _part_cells(ship))
 		if c == Pathfinder.NO_CELL:
 			return out
 		var ada = _person(ada_name, cfg["ada"]["look"], Pathfinder.centre_of(c))
@@ -1390,7 +1390,7 @@ static func spawn_crew(ship) -> Array:
 		var near := mid
 		if not beds.is_empty():
 			near = Pathfinder.centre_of(beds[have % beds.size()])
-		var spot := _free_spot(grid, near, _anchors(ship))
+		var spot := _free_spot(grid, near, _anchors(ship), _part_cells(ship, not beds.is_empty()))
 		if spot == Pathfinder.NO_CELL:
 			break
 		var looks: Array = cfg["looks"]
@@ -1430,7 +1430,7 @@ static func _spawn_planned(ship) -> Array:
 			look = cfg["looks"][nth % cfg["looks"].size()]
 			if not beds.is_empty():
 				near = Pathfinder.centre_of(beds[nth % beds.size()])
-		var spot := _free_spot(grid, near, _anchors(ship))
+		var spot := _free_spot(grid, near, _anchors(ship), _part_cells(ship, not is_player and not is_ada and not drone))
 		if spot == Pathfinder.NO_CELL:
 			break
 		var m = _person(who, look, Pathfinder.centre_of(spot, 1) if drone else Pathfinder.centre_of(spot), str(e["species"]))
@@ -1484,7 +1484,7 @@ static func launch_drones(ship) -> Array:
 	var item := str(cfg.get("item", ""))
 	var out := []
 	while item != "" and ship.inventory.count(item) > 0:
-		var spot := _free_spot(ship.grid, _drone_home(ship), _anchors(ship))
+		var spot := _free_spot(ship.grid, _drone_home(ship), _anchors(ship), _part_cells(ship))
 		if spot == Pathfinder.NO_CELL:
 			break
 		ship.inventory.add(item, -1)
@@ -1571,16 +1571,33 @@ static func _anchors(ship) -> Array:
 	return ship.crew.map(func(m): return m.anchor())
 
 
+## The cells under the parts of `ship` (components stand on the floor; nobody should be put down on one). `beds_ok`: a bed is not counted (crew start at the beds).
+static func _part_cells(ship, beds_ok := false) -> Dictionary:
+	var out := {}
+	for uid in ship.components.instances:
+		if beds_ok and _family(ship, uid) == "bed":
+			continue
+		for c in ship.components.instances[uid]["cells"]:
+			out[c] = true
+	return out
+
+
 ## The body anchor nearest to `near` (cell units, a body centre) that fits and does not overlap a
-## body on any of `taken`. NO_CELL when there is none.
-static func _free_spot(grid, near: Vector2, taken: Array) -> Vector2i:
+## body on any of `taken`. A spot with no cell of `blocked` (a set of cells: the parts) under its body is
+## preferred; one with is used only when none is free. NO_CELL when there is none.
+static func _free_spot(grid, near: Vector2, taken: Array, blocked := {}) -> Vector2i:
 	var best := Pathfinder.NO_CELL
 	var best_d := INF
+	var clear := Pathfinder.NO_CELL
+	var clear_d := INF
 	for c: Vector2i in grid.tiles:
-		var d := (Pathfinder.centre_of(c) - near).length_squared()
-		if d > best_d or (d == best_d and (c.y > best.y or (c.y == best.y and c.x > best.x))):
+		if _clashes(c, taken) or not Pathfinder.body_ok(grid, c):
 			continue
-		if not _clashes(c, taken) and Pathfinder.body_ok(grid, c):
+		var d := (Pathfinder.centre_of(c) - near).length_squared()
+		if d < best_d or (d == best_d and (c.y < best.y or (c.y == best.y and c.x < best.x))):
 			best = c
 			best_d = d
-	return best
+		if not blocked.is_empty() and (d < clear_d or (d == clear_d and (c.y < clear.y or (c.y == clear.y and c.x < clear.x)))) and not Pathfinder.body_cells(c).any(func(b): return blocked.has(b)):
+			clear = c
+			clear_d = d
+	return clear if clear != Pathfinder.NO_CELL else best

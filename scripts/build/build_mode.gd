@@ -776,16 +776,21 @@ func pan_by(d: Vector2) -> void:
 		cam.offset = pan
 
 
-## Home: centre the view on the ship (the middle of its hull; the grid's middle for an empty one).
-func reset_pan() -> void:
-	if cam == null or ship == null:
-		return
+## The middle of the ship's hull (its built tiles' bounding box) in world px; the plate's middle for an empty one.
+func hull_centre() -> Vector2:
 	var lo := Vector2i(1 << 30, 1 << 30)
 	var hi := Vector2i(-(1 << 30), -(1 << 30))
 	for c in grid.tiles:
 		lo = Vector2i(mini(lo.x, c.x), mini(lo.y, c.y))
 		hi = Vector2i(maxi(hi.x, c.x), maxi(hi.y, c.y))
-	var mid := ship.world_pos if hi.x < lo.x else _origin() + (Vector2(lo) + Vector2(hi) + Vector2.ONE) * CELL / 2.0
+	return ship.world_pos if hi.x < lo.x else _origin() + (Vector2(lo) + Vector2(hi) + Vector2.ONE) * CELL / 2.0
+
+
+## Home: centre the view on the ship (the middle of its hull; the grid's middle for an empty one).
+func reset_pan() -> void:
+	if cam == null or ship == null:
+		return
+	var mid := hull_centre()
 	pan = Vector2.ZERO
 	pan_by(mid - cam.position)
 
