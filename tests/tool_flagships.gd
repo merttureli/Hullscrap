@@ -70,6 +70,12 @@ func make(race: String) -> void:
 	if ship == null:
 		printerr("flagship %s: no hull built; last: %s" % [race, str(Shipgen.last_failed)])
 		return
+	if sp.has("ammo"):  # a flagship carries its guns' ammo in plenty (Shipgen stocks 40 of each kind, which a slug mortar spends in 13 shots)
+		for uid in ship.components.instances:
+			var wid := str(ship.components.instances[uid]["id"])
+			var ammo := str(Shipgen._weapons.def(wid).get("ammo", "")) if Shipgen._weapons.has(wid) else ""
+			if ammo != "" and ship.inventory.count(ammo) < int(sp["ammo"]):
+				ship.inventory.add(ammo, int(sp["ammo"]) - ship.inventory.count(ammo))
 	var d := ship.to_dict()
 	d["name"] = str(sp["ship"])
 	d["crew_plan"] = []
@@ -217,7 +223,7 @@ func bench() -> void:
 		var files := []
 		var pids := []
 		var pass_on := []
-		for key in ["races", "seeds", "cap", "stage", "first", "v", "pstage"]:
+		for key in ["races", "seeds", "cap", "stage", "first", "v", "pstage", "lag"]:
 			if args.has(key):
 				pass_on.append("%s=%s" % [key, args[key]])
 		for k in jobs:
@@ -302,7 +308,7 @@ func _scan(a, cursor: int, d: Dictionary) -> int:
 
 
 func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
-	var player: Ship = Standoff.build_player(int(args.get("pstage", stage)))  # pstage=<n>: a lighter or heavier player-like ship than the flagship's stage
+	var player: Ship = Standoff.build_player(int(args["pstage"]) if args.has("pstage") else maxi(stage - int(args.get("lag", 0)), 1))  # pstage=<n>, or lag=<k> (the stage k below the flagship's): a lighter player-like ship, "a starter and a few upgrades"
 	var enemy: Ship = Session.load_ship(OUT % race)
 	var row := {"state": "error", "t": 0.0, "foe_hull": 1.0, "hull": 1.0}
 	if player == null or enemy == null:

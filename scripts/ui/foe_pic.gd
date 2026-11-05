@@ -95,8 +95,8 @@ func _draw() -> void:
 	if boss.is_empty():
 		draw_string(font, Vector2(52.0, y + 26.0), line, HORIZONTAL_ALIGNMENT_LEFT, BOX.x - 64.0, 18, TEXT)
 	else:  # a flagship: the boss tag over the picture, her name, then her captain and one line
-		draw_rect(Rect2(10.0, 10.0, 92.0, 20.0), BOSS_RED)
-		draw_string(font, Vector2(18.0, 25.0), str(boss["title"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		draw_rect(Rect2(BOX.x - 104.0, 10.0, 92.0, 20.0), BOSS_RED)  # top right: her own ship fills the left of the picture
+		draw_string(font, Vector2(BOX.x - 96.0, 25.0), str(boss["title"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 		draw_string(font, Vector2(52.0, y + 22.0), str(boss["name"]), HORIZONTAL_ALIGNMENT_LEFT, BOX.x - 64.0, 18, TEXT)
 		draw_string(font, Vector2(52.0, y + 38.0), "%s. %s" % [line, str(boss["captain"])], HORIZONTAL_ALIGNMENT_LEFT, BOX.x * 0.77 - 76.0, 11, DIM)
 		draw_string(font, Vector2(12.0, box.y - 8.0), str(boss["line"]), HORIZONTAL_ALIGNMENT_LEFT, BOX.x - 24.0, 11, BOSS_RED.lightened(0.35))

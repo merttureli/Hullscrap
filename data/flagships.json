@@ -89,9 +89,9 @@
    "poi_name": "Flagship: Cathedral of Seven Notes",
    "warning": "FLAGSHIP SIGNAL. A great crystal ship stands off the lane, ringing: seven notes, held, each from a different pane of the hull.",
    "hail": "\"We have sung this note for you since you entered the Choir,\" says a voice in three parts. \"The seventh is yours. Hold it, and we shall see.\"",
-   "card": "Refracting lattice: shots split and scatter",
+   "card": "Lattice shield: layer on layer of light",
    "codex": "The Choirmaster does not give orders. She changes key, and the ship obliges.",
-   "gimmick": "A four-layer lattice shield and refractors that split their fire on every layer it meets; ion rings through the lattice like a bell.",
+   "gimmick": "A four-layer lattice shield that comes back in 3.3 s a layer (and rings under ion), a Song Reactor and a Resonance Helm, behind four precise lasers.",
    "reward": {
     "part": "prismatic_conductor_helm",
     "credits": 340,
@@ -364,7 +364,7 @@
    "hail": "\"This is the Commodore of the Concord Ascendant,\" says a crisp voice. \"You are in Concord space on an unregistered course. Heave to and be boarded, or be corrected.\"",
    "card": "A full company of marines and a Commodore",
    "codex": "Commodore Reyne has been reprimanded twice for winning. Both times the paperwork was the harder fight.",
-   "gimmick": "Fourteen Concord marines man a railgun and volley racks behind a shield wall; if the Commodore is losing she surrenders formally.",
+   "gimmick": "Ten Concord marines man a railgun and volley racks behind a shield wall; if the Commodore is losing she surrenders formally.",
    "reward": {
     "part": "human_flag_array",
     "credits": 300,

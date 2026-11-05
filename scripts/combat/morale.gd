@@ -42,6 +42,8 @@ var captain := ""  ## the name of its captain (the `captain` of its ai, else the
 var _unarmed := 0.0  # seconds with no weapon able to fire
 var _down := 0.0  # seconds every crew member has been down
 var _had_crew := false  # crew has been seen aboard (the sim spawns an enemy's crew on its first tick)
+var _hurt := false  # the enemy has been hurt at some time of the fight (break_after)
+var _hcursor := 0
 var _spent: Array = []  # the player's shots in flight when the offer began: their hits are no refusal
 var _cursor := 0  # arena events read so far
 var _player_auto := true  # the player's turret autofire before the offer
@@ -263,7 +265,12 @@ static func spool_hold(arena, idx: int) -> String:
 func _watch_break(dt: float) -> void:
 	var co = arena.ships[enemy]
 	_unarmed = 0.0 if _can_shoot() else _unarmed + dt
-	var late: bool = break_after > 0.0 and arena.time() >= break_after and co.structure < 1.0 - 1e-6
+	_hurt = _hurt or co.structure < 1.0 - 1e-6
+	var ev: Array = arena.events
+	for k in range(_hcursor, ev.size()):  # a hit of the player's, even if its crew mended it whole again before the clock ran out
+		_hurt = _hurt or (int(ev[k]["ship"]) == player and str(ev[k]["type"]) == "hit")
+	_hcursor = ev.size()
+	var late: bool = break_after > 0.0 and arena.time() >= break_after and _hurt
 	if co.structure <= break_at + 1e-6 or _unarmed >= float(cfg["unarmed_s"]) - 1e-6 or late:
 		match roll_style():
 			"surrender":
