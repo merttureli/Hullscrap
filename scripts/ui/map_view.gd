@@ -454,6 +454,8 @@ func open_poi(res: Dictionary, sector) -> void:
 	_dock = bool(res.get("dock", false))
 	_dock_id = str(res.get("shop", ""))
 	_exit_due = bool(res.get("exit", false)) or bool(res.get("warden", false))
+	if str(res.get("log", "")) != "":
+		_say(str(res["log"]))  # a capital's arrival line
 	panel_only = true
 	visible = true
 	refresh()

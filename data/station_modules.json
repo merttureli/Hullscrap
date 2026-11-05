@@ -8,7 +8,8 @@
   "types": {
     "outpost": {"weight": 3, "modules": [5, 7], "min": {"reactor": 1, "command": 1, "habitation": 1}, "max": {}, "beds": [1, 2], "names": ["Outpost", "Survey Post", "Relay Platform", "Picket Station"]},
     "waystation": {"weight": 4, "modules": [8, 10], "min": {"reactor": 1, "command": 1, "habitation": 1}, "max": {}, "beds": [2, 3], "names": ["Waystation", "Depot", "Transfer Station", "Crossroads Platform"]},
-    "habitat": {"weight": 2, "modules": [11, 14], "min": {"reactor": 1, "command": 1, "habitation": 1, "medbay": 1}, "max": {"habitation": 3, "medbay": 2}, "beds": [3, 4], "names": ["Ring Habitat", "Hab Station", "Colony Platform", "Spindle Habitat"]}
+    "habitat": {"weight": 2, "modules": [11, 14], "min": {"reactor": 1, "command": 1, "habitation": 1, "medbay": 1}, "max": {"habitation": 3, "medbay": 2}, "beds": [3, 4], "names": ["Ring Habitat", "Hab Station", "Colony Platform", "Spindle Habitat"]},
+    "capital": {"weight": 0, "weights_as": "habitat", "modules": [16, 20], "min": {"reactor": 1, "command": 1, "habitation": 1, "medbay": 1}, "max": {"habitation": 4, "medbay": 3}, "beds": [4, 6], "names": ["Capital"]}
   },
   "states": {
     "abandoned": {"weight": 5, "powered": 0.0, "light": {"on": {"lit": 1}, "off": {"dark": 7, "red": 3}}, "breach": 0.16, "hack": 0.18, "card": [0, 1], "beds": {"on": 0.15, "off": 0.15}, "sentry": 0.5,

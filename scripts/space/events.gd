@@ -763,6 +763,14 @@ func validate() -> Array[String]:
 	return errs
 
 
+## The recipes of the core file and of every pack (a pack's racial blueprints are rewards too).
+static func _recipe_ids() -> Dictionary:
+	var out := _ids_of("res://data/recipes.json", "recipes")
+	for id in Content.ids("recipes"):
+		out[id] = true
+	return out
+
+
 static func _ids_of(path: String, key: String) -> Dictionary:
 	var out := {}
 	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -814,7 +822,7 @@ static func _known() -> Dictionary:
 	if ab is Dictionary and ab.get("abilities") is Dictionary:
 		for k in ab["abilities"]:
 			abilities[str(k)] = true
-	return {"abilities": abilities, "characters": characters, "items": items, "components": components, "recipes": _ids_of("res://data/recipes.json", "recipes"),
+	return {"abilities": abilities, "characters": characters, "items": items, "components": components, "recipes": _recipe_ids(),
 		"places": places, "factions": factions, "species": species, "traits": traits, "unlocks": unlocks, "endings": endings, "regions": regions}
 
 

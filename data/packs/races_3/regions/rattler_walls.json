@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"wreck_field": 22, "trader": 16, "pirate": 14, "asteroid_field": 14, "distress": 12, "empty": 10, "patrol": 8, "anomaly": 4},
 	"places": [
-		{"id": "understairs", "name": "The Understairs", "type": "station", "faction": "clans", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "understairs", "name": "The Understairs", "type": "station", "faction": "clans", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"scrap_chunk_s": 1.5, "copper_coil": 1.3},
 	"pois": {"wreck": 1.4, "store": 1.2},

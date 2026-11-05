@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"distress": 20, "asteroid_field": 14, "wreck_field": 14, "trader": 12, "patrol": 12, "pirate": 12, "empty": 10, "anomaly": 6},
 	"places": [
-		{"id": "fenwater", "name": "Fenwater Station", "type": "station", "faction": "concord", "pos": [800, 520], "jitter": 90, "beacon": true}
+		{"id": "fenwater", "name": "Fenwater Station", "type": "station", "faction": "concord", "pos": [800, 520], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {},
 	"pois": {"distress": 1.5, "exp_planet": 2.5},

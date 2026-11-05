@@ -29,6 +29,9 @@ const Helm = preload("res://scripts/space/helm.gd")
 const FoeInfo = preload("res://scripts/space/foe_info.gd")
 const FoePic = preload("res://scripts/ui/foe_pic.gd")
 const Emblem = preload("res://scripts/view/emblem.gd")
+const WonderArt = preload("res://scripts/view/wonder_art.gd")
+const Homelands = preload("res://scripts/space/homelands.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Radar = preload("res://scripts/space/radar.gd")
 const Sector = preload("res://scripts/space/sector.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
@@ -60,7 +63,7 @@ signal played(dt: float)
 const TYPE_COLORS := {"station": Color("#e1a136"), "store": Color("#6bd34a"), "trader": Color("#6bd34a"), "distress": Color("#e0413b"),
 	"wreck": Color("#9aa0a6"), "abandoned_station": Color("#8c96a3"), "mining_field": Color("#c2956a"), "unknown": Color("#c8ced8"),
 	"pirate_nest": Color("#e0413b"), "concord_checkpoint": Color("#4fa3ff"), "anomaly": Color("#c06bff"), "quest": Color("#f2c744"),
-	"exp_planet": Color("#6bd34a"), "exp_base": Color("#c2956a"), "exp_ruin": Color("#8fd8ff"), "exp_platform": Color("#e1a136")}
+	"exp_planet": Color("#6bd34a"), "exp_base": Color("#c2956a"), "exp_ruin": Color("#8fd8ff"), "exp_platform": Color("#e1a136"), "wonder": Color("#ffe9a8")}
 
 var sim: Node  ## ShipSim
 var build: Node  ## BuildMode (its `drift` is the map, which owns the campaign)
@@ -599,8 +602,18 @@ func _draw_poi(poi: Dictionary, px: float) -> void:
 	var a := 0.45 if poi["state"] == Sector.DONE and not bool(Sector.config()["poi_types"].get(poi["type"], {}).get("repeat", false)) else 1.0
 	var seed_h := hash(str(poi["id"]))
 	match str(poi["type"]):
+		"wonder":
+			var w: Dictionary = Homelands.wonder_of(str(poi.get("wonder", "")))
+			WonderArt.draw(self, str(w.get("art", "")), at, float(w.get("radius", 1500.0)), _clock, a)
 		"station", "store":
 			var r := 900.0 if poi["type"] == "station" else 560.0
+			if Sector.poi_is_capital(poi):
+				r = 1200.0
+				var look := Shipgen.style_of(str(poi["capital"]), "medium")
+				if not look.is_empty():
+					col = look["palette"]["tint"]
+					draw_arc(at, r * 1.12, 0.0, TAU, 96, Color(look["palette"]["accent"], a * 0.8), 14.0)
+					Emblem.draw(self, look["emblem"], Rect2(at - Vector2(1, 1) * r * 0.32, Vector2(1, 1) * r * 0.64), Color(look["palette"]["mark"], a * 0.35), 18.0)
 			draw_circle(at, r, Color("#1b222c", a))
 			draw_arc(at, r, 0.0, TAU, 96, Color(col, a), 28.0)
 			draw_arc(at, r * 0.55, 0.0, TAU, 64, Color("#59667a", a), 18.0)
@@ -850,6 +863,13 @@ func _draw_marker(ct: Dictionary, xf: Transform2D, centre: Vector2, vp: Vector2)
 	if course:
 		_hud.draw_arc(at, ICON * 0.75, 0.0, TAU, 32, CYAN, 2.0, true)
 	_icon(kind, at, ICON, Color(1, 1, 1, alpha), _hud)
+	if Sector.poi_is_capital(poi):  # the race's emblem beside the marker
+		var look := Shipgen.style_of(str(poi["capital"]), "medium")
+		if not look.is_empty():
+			Emblem.draw(_hud, look["emblem"], Rect2(at + Vector2(ICON * 0.55, -ICON * 0.5), Vector2(ICON, ICON) * 0.8), Color(look["palette"]["mark"], alpha), 1.5)
+	elif str(poi["type"]) == "wonder":
+		_hud.draw_arc(at, ICON * 0.62, 0.0, TAU, 24, Color(TYPE_COLORS["wonder"], alpha), 2.0, true)
+		_hud.draw_circle(at, ICON * 0.18, Color(TYPE_COLORS["wonder"], alpha))
 	var label := "%s  %s" % [contact_name(ct), dist_text(float(ct["distance"]))]
 	var tw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 	var tp := place_label(at, tw, vp, _labels)

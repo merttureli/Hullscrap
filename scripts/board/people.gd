@@ -75,13 +75,14 @@ func spawn_site(ctx := {}) -> void:
 	for k in counts:
 		if str(k) != "0":
 			counts[k] = float(counts[k]) * more
-	var n := Site._weighted_count(counts, rng)
+	var n := maxi(Site._weighted_count(counts, rng), kc.get("must", []).size())
 	var hollow := bool(ctx.get("hollow", false))
 	var guards := 0
 	if kc.has("guards"):  # (a friendly station keeps its guards besides the people who live there)
 		guards = rng.randi_range(int(kc["guards"][0]), int(kc["guards"][1]))
 	for i in n + guards:
-		var role := "guard" if i >= n else _role(kc["roles"], theme, hollow, rng)
+		var must: Array = kc.get("must", [])  # (roles a capital always has aboard)
+		var role := "guard" if i >= n else (str(must[i]) if i < must.size() else _role(kc["roles"], theme, hollow, rng))
 		if role == "":
 			break
 		var spot := _spot(role, rng)

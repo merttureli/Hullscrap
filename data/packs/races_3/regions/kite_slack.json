@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"empty": 32, "wreck_field": 16, "asteroid_field": 12, "distress": 12, "trader": 10, "pirate": 8, "anomaly": 6, "patrol": 4},
 	"places": [
-		{"id": "tether_knot", "name": "Tether Knot", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "tether_knot", "name": "Tether Knot", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"polymer_barrel": 1.4, "fuel_canister": 1.3},
 	"pois": {"unknown": 1.4, "wreck": 1.3},

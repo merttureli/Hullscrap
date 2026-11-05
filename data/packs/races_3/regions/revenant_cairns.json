@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"anomaly": 20, "wreck_field": 20, "empty": 18, "distress": 12, "asteroid_field": 10, "pirate": 8, "trader": 6, "patrol": 4},
 	"places": [
-		{"id": "tallyhouse", "name": "Tallyhouse", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "tallyhouse", "name": "Tallyhouse", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"scrap_chunk_s": 1.3, "sealed_crate": 1.3},
 	"pois": {"wreck": 1.5, "abandoned_station": 1.4, "anomaly": 1.3},

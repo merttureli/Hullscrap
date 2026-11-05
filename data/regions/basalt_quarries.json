@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"asteroid_field": 30, "pirate": 14, "empty": 14, "wreck_field": 12, "distress": 10, "trader": 10, "anomaly": 6, "patrol": 4},
 	"places": [
-		{"id": "deepcut", "name": "Deepcut Quarry", "type": "station", "faction": "clans", "pos": [820, 480], "jitter": 90, "beacon": true}
+		{"id": "deepcut", "name": "Deepcut Quarry", "type": "station", "faction": "clans", "pos": [820, 480], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"scrap_chunk_m": 1.2, "copper_coil": 1.5},
 	"pois": {"mining_field": 2.0, "exp_base": 2.5, "exp_planet": 1.5},

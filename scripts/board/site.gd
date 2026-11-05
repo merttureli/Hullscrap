@@ -62,6 +62,7 @@ var foe_crew: Array = []  ## a beaten ship's crew still on their feet after a wi
 var gen := ""  ## how a station was built: "modules" (station_gen.gd) or "classic" (the bands); "" for another kind
 var state := ""  ## a module station's state: abandoned, half or operational (data/station_modules.json states)
 var mood := ""  ## an operational station's: friendly or hostile
+var capital := ""  ## the race whose capital a module station is ("" for none)
 var station_type := ""  ## a module station's type (outpost, waystation, habitat)
 var modules: Array = []  ## a module station's modules: [{id, name, rect (cells), rooms: [ids], powered, breached, own (a race's own room), race (a species id), climate ("hot", "cold" or ""), airless (working, no air)}]
 var power := {}  ## a half-active or abandoned station's generator: {module, fixture (id of the generator fixture), feeds: [module ids it lights and opens], restored}; {} for none

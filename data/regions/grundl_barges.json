@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"trader": 22, "asteroid_field": 16, "pirate": 14, "distress": 12, "wreck_field": 12, "patrol": 10, "empty": 10, "anomaly": 4},
 	"places": [
-		{"id": "haulers_moor", "name": "Haulers' Moor", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "haulers_moor", "name": "Haulers' Moor", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"polymer_barrel": 1.5, "sealed_crate": 1.4},
 	"pois": {"trader": 1.5, "mining_field": 1.3, "exp_platform": 1.5, "exp_base": 1.3},

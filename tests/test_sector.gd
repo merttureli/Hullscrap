@@ -207,7 +207,7 @@ func test_every_poi_type_turns_up_somewhere() -> void:
 			for p in Sector.generate(i, _node(type, i), "boneyard").pois:
 				met[p["type"]] = true
 	for t in cfg["poi_types"]:
-		check(met.has(t), "%s turns up in some sector" % t)
+		check(met.has(t) or t == "wonder", "%s turns up in some sector" % t)  # (a wonder is only in a capital's sector: test_homelands.gd)
 	var vis := {}
 	for i in 200:
 		for p in Sector.generate(i, _node("pirate", i), "boneyard").pois:
@@ -1144,7 +1144,7 @@ func test_sectors_json_is_sound() -> void:
 	var want := ["station", "store", "trader", "distress", "wreck", "abandoned_station", "mining_field", "unknown", "pirate_nest", "concord_checkpoint", "anomaly", "quest"]
 	for t in want:
 		check(types.has(t), "POI type %s exists" % t)
-	eq(types.size(), want.size() + 1 + Expedition.kinds().size(), "and the exit beacon and the expedition sites, no others")
+	eq(types.size(), want.size() + 2 + Expedition.kinds().size(), "and the exit beacon, the wonder (homelands) and the expedition sites, no others")
 	check(types.has("exit_beacon") and cfg["nodes"]["exit"]["main"] == "exit_beacon", "the exit node's main POI is the exit beacon")
 	for t in types:
 		var d: Dictionary = types[t]

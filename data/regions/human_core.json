@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"trader": 18, "distress": 16, "patrol": 14, "pirate": 14, "wreck_field": 12, "asteroid_field": 12, "anomaly": 4, "empty": 10},
 	"places": [
-		{"id": "haldane", "name": "Haldane Ring", "type": "station", "faction": "concord", "pos": [760, 520], "jitter": 100, "beacon": true}
+		{"id": "haldane", "name": "Haldane Ring", "type": "station", "faction": "concord", "pos": [760, 520], "jitter": 100, "beacon": true, "capital": true}
 	],
 	"debris": {"polymer_barrel": 1.4},
 	"pois": {"trader": 1.5, "store": 1.5, "exp_planet": 1.5, "exp_ruin": 1.5},

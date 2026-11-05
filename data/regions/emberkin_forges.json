@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"asteroid_field": 18, "anomaly": 14, "pirate": 14, "distress": 12, "trader": 12, "wreck_field": 12, "empty": 12, "patrol": 6},
 	"places": [
-		{"id": "kiln", "name": "The Kiln", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "kiln", "name": "The Kiln", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"copper_coil": 1.4},
 	"pois": {"mining_field": 1.3, "anomaly": 1.3, "exp_platform": 2.0, "exp_planet": 1.5},

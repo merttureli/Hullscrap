@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"anomaly": 26, "asteroid_field": 16, "wreck_field": 12, "empty": 12, "distress": 10, "trader": 8, "pirate": 8, "patrol": 8},
 	"places": [
-		{"id": "singing_lattice", "name": "The Singing Lattice", "type": "station", "faction": "lumen", "pos": [820, 480], "jitter": 90, "beacon": true}
+		{"id": "singing_lattice", "name": "The Singing Lattice", "type": "station", "faction": "lumen", "pos": [820, 480], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"crystal_shard": 2.0},
 	"pois": {"anomaly": 2.0, "quest": 1.5, "exp_ruin": 2.5, "exp_planet": 1.3},

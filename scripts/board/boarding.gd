@@ -10,6 +10,7 @@ extends RefCounted
 ## - The sector does not tick while aboard (sector_view.gd), nor does the Hollow tide's linger clock (map_view.gd).
 ## offer() is the other half: it puts the "Board her" choice into the event a boardable POI rolls.
 
+const Homelands = preload("res://scripts/space/homelands.gd")
 const Site = preload("res://scripts/board/site.gd")
 const StationGen = preload("res://scripts/board/station_gen.gd")
 const HeatFoot = preload("res://scripts/board/heat_foot.gd")
@@ -99,6 +100,13 @@ static func start(p_campaign, p_sector, p_poi_id: String, p_spec: Dictionary, p_
 			theme = Themes.for_region(p_campaign.region_data, hollow_now)
 	var seed_value: int = Site._mix(p_sector.seed_value if p_sector != null else 0, p_poi_id, 0)
 	var opts := {"faction": faction, "name": str(b.spec.get("name", "")), "parts": b.spec.get("parts", []), "theme": theme, "region": str(p_campaign.region_data.get("id", "")) if p_campaign != null else ""}
+	var poi: Dictionary = p_sector.find(p_poi_id) if p_sector != null else {}
+	if str(b.spec.get("kind", "")) == "station" and str(poi.get("capital", "")) != "":  # a race's capital (homelands.gd)
+		opts.merge(Homelands.station_opts({"race": str(poi["capital"])}))
+	elif poi.has("wonder"):  # a wonder's own site
+		var sc: Dictionary = Homelands.wonder_of(str(poi["wonder"])).get("site", {})
+		if str(sc.get("kind", "")) == "station":
+			opts.merge({"race": str(sc["race"]), "module": str(sc["module"]), "state": "operational", "mood": "friendly"})
 	if not mem.is_empty():  # (a station first seen before module stations stays as it was: classic)
 		opts["gen"] = str(mem.get("gen", "classic"))
 		opts["state"] = str(mem.get("state", ""))
