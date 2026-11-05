@@ -97,7 +97,7 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 			n += 1
 			check(Mounts.is_mount(d), id + " is a hull mount")
 			var narrow: bool = d["size"][0] == 2  # a tier 1-2 gun or engine (2x2 behind a 4 wide barrel, playtest 2 P2), Strafe Jets (2x2 and 2x2, docs/waves/engines_1.md)
-			eq(d["size"], [2, 2] if narrow else [4, 2], id + ": the inside half is 4x2 (a Strafe Jets one 2x2)")
+			eq(d["size"], [2, 4] if str(d.get("shape", "")) == "spinal" else ([2, 2] if narrow else [4, 2]), id + ": the inside half is 4x2 (a Strafe Jets one 2x2, a spinal mount 2x4)")
 			var console: bool = d["family"] == "radar" and not narrow  # a Radar Mk2 or Mk3 console is 4x2 behind a 2x2 dish (art/README.md)
 			var small_barrel: bool = id.begins_with("strafe") or id == "net_mouth_scrap" or id == "radar_mk1" or console  # these have a 2 wide outside half
 			if d["family"] != "weapon":  # a gun's outside half is its shape's (tests/test_gun_shapes.gd)
