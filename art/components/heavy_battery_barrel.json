@@ -1,0 +1,89 @@
+{
+ "frame": [
+  19,
+  48
+ ],
+ "aim": "fixed",
+ "anims": {
+  "idle": [
+   0,
+   1,
+   0
+  ],
+  "fire": [
+   1,
+   3,
+   14
+  ],
+  "damaged": [
+   4,
+   2,
+   4
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ],
+  "off": [
+   7,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   9,
+   36
+  ],
+  "muzzle": [
+   9,
+   1
+  ]
+ },
+ "glow": {
+  "image": "heavy_battery_barrel_glow.png",
+  "frame": [
+   51,
+   80
+  ],
+  "offset": [
+   -16,
+   -16
+  ],
+  "anims": {
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "idle": [
+    0,
+    1,
+    0
+   ]
+  }
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on each of pivots_on_base (staggered by stagger_s) of heavy_battery_out. fire: 3 frames, recoil 2/1/0 px with the family muzzle flash on the glow layer; off: lights dead.",
+ "pivots_on_base": [
+  [
+   22,
+   13
+  ],
+  [
+   48,
+   13
+  ],
+  [
+   74,
+   13
+  ]
+ ],
+ "stagger_s": 0.1,
+ "gimbal_deg": 20
+}

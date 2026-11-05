@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "charge": [
+   3,
+   6,
+   0
+  ],
+  "fire": [
+   9,
+   2,
+   12
+  ],
+  "damaged": [
+   11,
+   2,
+   4
+  ],
+  "disabled": [
+   13,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "ion_heavy_glow.png",
+  "frame": [
+   80,
+   52
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "charge": [
+    2,
+    6,
+    0
+   ],
+   "damaged": [
+    8,
+    2,
+    4
+   ]
+  }
+ },
+ "notes": "INSIDE half of the Heavy Ion (breech, outward = up; the top flange overhangs the inner wall face, see offset): a ion core with the heavy add-on, the feed column, power coupling, repair hatch on the wide ones, 5-cell charge strip. charge: frame i lights i of the 5 cells (5 = ready); fire: the strip flashes, then goes dark. damaged: a dead cell, a crack, sparks; disabled: dark, cracked. Module family gun_breech.py (2x2, 4x2, 2x4), in the line of the gun. The rotating head is ion_heavy_barrel.",
+ "offset": [
+  0,
+  -4
+ ]
+}

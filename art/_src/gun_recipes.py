@@ -164,15 +164,16 @@ def export(g, outdir=OUTDIR):
     # barrel
     b = g.bar
     bf, bg, banims, bganims = [], [], {}, {}
-    def add(nm, st, n, fps, glow=True):
+    def add(nm, st, n, fps, glow=True, lit=False):
         banims[nm] = [len(bf), n, fps]
-        res = [g.barrel(st, i) for i in range(n)]
+        res = [g.barrel(st, i, i if lit else None) for i in range(n)]
         bf.extend(r[0] for r in res)
         if glow and st != 'disabled': bganims[nm] = [len(bg), n, fps]; bg.extend(r[1] for r in res)
     add('idle', 'idle', 1, 0); add('fire', 'fire', 3, 14); add('damaged', 'damaged', 2, 4); add('disabled', 'disabled', 1, 0)
     banims['off'] = [len(bf), 1, 0]; bf.append(g.barrel('off', 0)[0])
     # the glow strip: fire 0-2, damaged 0-1 (the old order), then idle
     bganims = {'fire': bganims['fire'], 'damaged': bganims['damaged'], 'idle': bganims['idle']}
+    for (nm, st, n, fps, lit) in getattr(g, 'extra', []): add(nm, st, n, fps, True, lit); bganims[nm] = [len(bg) - n, n, fps]     # extra anims (spin, charge) after `off`
     bw, bh = bf[0].w, bf[0].h
     save(sheet(bf, len(bf), bw, bh), '%s/%s_barrel.png' % (outdir, g.name))
     _write_strip('%s/%s_barrel_glow.png' % (outdir, g.name), bg)
@@ -187,7 +188,7 @@ def export(g, outdir=OUTDIR):
     B['glow'] = BG
     BJ = {'frame': [bw, bh], 'aim': g.aim, 'anims': banims, 'anchors': {'pivot': [px_, py_], 'muzzle': list(mz)}, 'glow': BG,
           'notes': 'Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on %s of %s_out. fire: 3 frames, recoil 2/1/0 px with the family muzzle flash on the glow layer; off: lights dead.'
-                   % ('each of pivots_on_base (staggered by stagger_s)' if multi else 'pivot_on_base', g.name)}
+                   % ('each of pivots_on_base (staggered by stagger_s)' if multi else 'pivot_on_base', g.name) + getattr(g, 'extra_note', '')}
     if multi: BJ['pivots_on_base'] = B['pivots_on_base']; BJ['stagger_s'] = B['stagger_s']
     else: BJ['pivot_on_base'] = B['pivot_on_base']
     if g.aim == 'fixed': BJ['gimbal_deg'] = B['gimbal_deg']
