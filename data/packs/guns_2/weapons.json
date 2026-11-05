@@ -47,7 +47,7 @@
       "turret": false,
       "gimbal": 20,
       "family": "laser",
-      "version": "Burst: several shots a volley, to overwhelm shield layers."
+      "version": "Burst: several shots a volley, to flood shields."
     },
     "laser_chain": {
       "kind": "laser",
@@ -112,7 +112,7 @@
       "turret": false,
       "gimbal": 2,
       "family": "laser",
-      "version": "Lance: a spinal finisher; the ship must face the target."
+      "version": "Lance: a spinal finisher; face the target."
     },
     "pulse_light": {
       "kind": "bolt",
@@ -165,7 +165,7 @@
       "turret": false,
       "gimbal": 20,
       "family": "pulse",
-      "version": "Burst: several shots a volley, to overwhelm shield layers."
+      "version": "Burst: several shots a volley, to flood shields."
     },
     "pulse_chain": {
       "kind": "bolt",
@@ -272,7 +272,7 @@
         "gap_s": 0.15
       },
       "family": "ion",
-      "version": "Charge: stores volleys while idle, then fires them together."
+      "version": "Charge: stores volleys idle, fires them together."
     },
     "flak_turret": {
       "kind": "flak",
@@ -343,7 +343,7 @@
       "turret": false,
       "gimbal": 20,
       "family": "flak",
-      "version": "Burst: several shots a volley, to overwhelm shield layers."
+      "version": "Burst: several shots a volley, to flood shields."
     },
     "missile_pod": {
       "kind": "missile",
@@ -404,7 +404,7 @@
       "turret": false,
       "gimbal": 5,
       "family": "missile",
-      "version": "Burst: several shots a volley, to overwhelm shield layers."
+      "version": "Burst: several shots a volley, to flood shields."
     },
     "torpedo": {
       "kind": "missile",
@@ -495,7 +495,7 @@
       "turret": false,
       "gimbal": 2,
       "family": "beam",
-      "version": "Lance: a spinal finisher; the ship must face the target."
+      "version": "Lance: a spinal finisher; face the target."
     },
     "slug_gun": {
       "kind": "bolt",
@@ -529,7 +529,7 @@
       "gimbal": 5,
       "interceptable": true,
       "family": "slug",
-      "version": "Mk I: a slow shell that point defence can shoot down."
+      "version": "Slow shell: point defence can shoot it down."
     },
     "slug_rail": {
       "kind": "bolt",
@@ -589,7 +589,7 @@
         "gap_s": 0.15
       },
       "family": "slug",
-      "version": "Lance: a spinal rail that stores two volleys; the ship must face the target."
+      "version": "Lance: spinal rail, stores two volleys."
     },
     "pd_mk1": {
       "kind": "bolt",
@@ -613,7 +613,7 @@
         }
       },
       "family": "pd",
-      "version": "Mk I point defence: shoots down missiles and slow shells first."
+      "version": "Point defence: shoots down missiles and slow shells."
     },
     "pd_mk2": {
       "kind": "bolt",
@@ -638,7 +638,7 @@
       },
       "rapid": true,
       "family": "pd",
-      "version": "Mk II point defence: shoots down missiles and slow shells first."
+      "version": "Point defence: shoots down missiles and slow shells."
     },
     "pd_mk3": {
       "kind": "bolt",
@@ -663,7 +663,7 @@
       },
       "rapid": true,
       "family": "pd",
-      "version": "Mk III point defence: shoots down missiles and slow shells first."
+      "version": "Point defence: shoots down missiles and slow shells."
     },
     "gun_strip": {
       "kind": "bolt",
@@ -680,7 +680,7 @@
       "turret": false,
       "gimbal": 20,
       "family": "pulse",
-      "version": "Burst: several shots a volley, to overwhelm shield layers."
+      "version": "Burst: several shots a volley, to flood shields."
     },
     "laser_strip": {
       "kind": "laser",
@@ -696,7 +696,7 @@
       "turret": false,
       "gimbal": 20,
       "family": "laser",
-      "version": "Burst: several shots a volley, to overwhelm shield layers."
+      "version": "Burst: several shots a volley, to flood shields."
     },
     "heavy_battery": {
       "kind": "bolt",
@@ -714,7 +714,7 @@
       "gimbal": 20,
       "interceptable": true,
       "family": "slug",
-      "version": "Burst: three heavy slugs a volley, for long flank runs."
+      "version": "Burst: three heavy slugs a volley."
     }
   }
 }

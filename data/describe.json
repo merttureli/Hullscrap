@@ -33,6 +33,8 @@
 		"ion": {"label": "ION", "color": "#af8dff", "hover": "Knocks shields out and stuns crew."},
 		"auto": {"label": "AUTO", "color": "#f0f4ff", "hover": "Aims and fires by itself. T toggles."},
 		"rapid": {"label": "RAPID", "color": "#c4ba64", "hover": "Many weak shots."},
+		"chain": {"label": "CHAIN {steps}", "color": "#fb61ff", "hover": "Fires faster each volley, up to {steps} steps."},
+		"charge": {"label": "CHARGE {max}", "color": "#8eab78", "hover": "Stores up to {max} volleys idle, then fires them."},
 		"pierce": {"label": "PIERCE {n}", "color": "#64c4c4", "hover": "Goes on through up to {n} more cells."},
 		"splash": {"label": "SPLASH {n}", "color": "#92fce2", "hover": "Also hits cells up to {n} away."},
 		"pass_shields": {"label": "PASSES SHIELDS", "color": "#e292fc", "hover": "Ignores shields and hits the hull."},

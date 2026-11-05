@@ -105,6 +105,8 @@ static func of(id: String, ship, rot := -1, angle := -1.0) -> Dictionary:
 	var tail := []  # a turret's or a fixed gun's aim, after the size
 	if fam == "weapon":
 		_weapon(id, rows, kws, tail)
+		if weapons().has(id) and str(weapons().defs[id].get("version", "")) != "":
+			out["what"] = str(weapons().defs[id]["version"])  # the card names the version and what it does
 	else:
 		_stats(def, eff, fam, rot, rows, angle)
 	var pw := float(eff["power"])
@@ -297,6 +299,10 @@ static func _weapon(id: String, rows: Array, kws: Array, tail: Array) -> void:
 		kws.append(keyword("rapid"))
 	if w["pass_shields"]:
 		kws.append(keyword("pass_shields"))
+	if w.get("chain") is Dictionary:
+		kws.append(keyword("chain", w["chain"]))
+	if w.get("charge") is Dictionary:
+		kws.append(keyword("charge", w["charge"]))
 	if int(w["pierce"]) > 0:
 		kws.append(keyword("pierce", {"n": w["pierce"]}))
 	if float(w["splash"]) > 0.0:

@@ -99,7 +99,7 @@
 					{"id": "laser_turret_mk1", "cost": 12, "weight": 2, "from": 30},
 					{"id": "pulse_mk2", "cost": 18, "weight": 3, "from": 60},
 					{"id": "laser_mk2", "cost": 22, "weight": 3, "from": 60},
-					{"id": "laser_light", "cost": 10, "weight": 3},
+					{"id": "laser_light", "cost": 10, "weight": 1},
 					{"id": "pd_mk1", "cost": 12, "weight": 2, "from": 25},
 					{"id": "missile_pod", "cost": 12, "weight": 1, "from": 40},
 					{"id": "laser_burst", "cost": 18, "weight": 2, "from": 60},
@@ -110,7 +110,7 @@
 					{"id": "flak_mk2", "cost": 18, "weight": 1, "from": 70},
 					{"id": "laser_mk3", "cost": 32, "weight": 2, "from": 140},
 					{"id": "pd_mk3", "cost": 22, "weight": 1, "from": 130},
-					{"id": "laser_lance", "cost": 40, "weight": 1, "from": 160},
+					{"id": "laser_lance", "cost": 40, "weight": 2, "from": 130},
 					{"id": "pulse_mk3", "cost": 32, "weight": 1, "from": 150}
 				],
 				"shields": [
@@ -171,7 +171,7 @@
 					{"id": "beam_long", "cost": 24, "weight": 1, "from": 80},
 					{"id": "pulse_battery", "cost": 18, "weight": 1, "from": 60},
 					{"id": "ion_heavy", "cost": 36, "weight": 1, "from": 140},
-					{"id": "beam_spinal", "cost": 42, "weight": 1, "from": 160}
+					{"id": "beam_spinal", "cost": 42, "weight": 2, "from": 130}
 				],
 				"shields": [
 					{"id": "shield_mk1", "cost": 14, "weight": 1},
@@ -229,7 +229,7 @@
 					{"id": "laser_long", "cost": 20, "weight": 1, "from": 60},
 					{"id": "beam_long", "cost": 24, "weight": 1, "from": 80},
 					{"id": "ion_heavy", "cost": 36, "weight": 1, "from": 140},
-					{"id": "beam_spinal", "cost": 42, "weight": 1, "from": 160}
+					{"id": "beam_spinal", "cost": 42, "weight": 2, "from": 130}
 				],
 				"shields": [
 					{"id": "shield_neon_mk1", "cost": 36, "weight": 4},
