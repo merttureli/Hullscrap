@@ -948,7 +948,7 @@ func test_a_lone_soldier_with_a_pistol_beats_four_foes_one_at_a_time_and_loses_t
 		stats[group] = {"n": n, "downs": downs, "hp": hp / maxf(float(n), 1.0), "rounds": rounds}
 	check(stats[1]["n"] >= 8, "enough sites have the room (%d)" % stats[1]["n"])
 	eq(stats[1]["downs"], 0, "taken one at a time (a door, the beam) he is never down")
-	check(stats[1]["hp"] >= 45.0, "and keeps about half his health (%.0f)" % stats[1]["hp"])
+	check(stats[1]["hp"] >= 15.0, "and keeps a fair part of his health (%.0f; foes hit harder since foot-balance, it was half)" % stats[1]["hp"])
 	check(stats[1]["rounds"] <= 30, "for no more than 30 of his 40 rounds (%d)" % stats[1]["rounds"])
 	check(stats[2]["hp"] < stats[1]["hp"] - 15.0, "two at once cost much more (%.0f)" % stats[2]["hp"])
 	check(float(stats[4]["downs"]) >= 0.7 * float(stats[4]["n"]), "all four at once in the open put him down (%d of %d)" % [stats[4]["downs"], stats[4]["n"]])
