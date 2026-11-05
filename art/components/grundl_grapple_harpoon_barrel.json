@@ -1,11 +1,7 @@
 {
  "frame": [
-  19,
-  60
- ],
- "pivot_on_base": [
-  32,
-  12
+  17,
+  102
  ],
  "aim": "fixed",
  "anims": {
@@ -28,41 +24,55 @@
    6,
    1,
    0
+  ],
+  "off": [
+   7,
+   1,
+   0
   ]
  },
  "anchors": {
   "pivot": [
-   9,
-   53
+   8,
+   90
   ],
   "muzzle": [
-   9,
-   15
+   8,
+   10
   ]
  },
- "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of grundl_grapple_harpoon_out. fire: 3 frames, recoil 2/1/0 px with a muzzle flash.",
- "gimbal_deg": 6,
  "glow": {
   "image": "grundl_grapple_harpoon_barrel_glow.png",
   "frame": [
-   39,
-   80
+   49,
+   134
   ],
   "offset": [
-   -10,
-   -10
+   -16,
+   -16
   ],
   "anims": {
-   "idle": [
-    0,
-    1,
-    0
-   ],
    "fire": [
     1,
     3,
     14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "idle": [
+    0,
+    1,
+    0
    ]
   }
- }
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of grundl_grapple_harpoon_out. fire: 3 frames, recoil 2/1/0 px with the family muzzle flash on the glow layer; off: lights dead.",
+ "pivot_on_base": [
+  16,
+  50
+ ],
+ "gimbal_deg": 3
 }

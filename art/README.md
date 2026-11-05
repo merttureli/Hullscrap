@@ -212,6 +212,20 @@ Each race's parts share one visual signature that reads at 1x. Generators: `art/
 - Sizes worth knowing: `human_crew_quarters_deluxe` is 2x2 (a bunk pod), not the 2x4 of `bed`. Long barrels are drawn long: `basalt_quarry_driver` 72 px, `human_concord_railgun` 74 px, `emberkin_pyre_lance` 74 px (the barrel sprite may extend far above its outside half; the muzzle is in the JSON `barrel.muzzle`).
 - Engines: `emberkin_pyre_drive` breathes a hard-pixel flame over its bell (3-frame loop) and `fenn_haggle_engine` has four small nozzles; anchors `exhaust`/`exhaust_a..d`, `power_coupling`, `repair_hatch` are in the JSONs as for the other engines.
 
+### Guns in their new shapes (gun rework, docs/GUNS.md 3, 7 and 8)
+Generator `art/_src/gun_recipes.py` (one recipe per gun, from the modules of `gun_mod.py` and the race signatures of `gun_race.py`; `build_all.py` and `build_weapons.py` run it last, so it overwrites the older `_out` / `_barrel` files); sheets `python3 art/_src/gun_sheets.py [out_dir] [old_components_dir]`. It writes only `<id>_out.*` and `<id>_barrel.*` (png, json, glow); the inside half `<id>.png` is not touched.
+- **Outside half** `<id>_out.png`: W x (cells high * 16 + 4) px (the bottom 4 px are the flange over the wall face), `cells` is the shape's outside size (point 2x2, dome 3x3, sponson 3x2, casemate 4x2, long 2x4, broadside 6x2, strip 8x1, heavy 4x3, spinal 2x6, pod 4x1). Anims `on` (2), `off`, `damaged` (2), `disabled` (2); the glow strip has `on` and `damaged`. `anchors.pivot` is the barrel pin; a base with several barrels has `anchors.pivots` instead.
+- **Barrel** `<id>_barrel.png`: drawn pointing UP, anims `idle` (1), `fire` (3: recoil 2/1/0 px and the family muzzle flash on the glow layer), `damaged` (2), `disabled`, and `off` (lights dead). The glow strip has `fire`, `damaged` and `idle`.
+- **Barrel keys** (in the `barrel` block of `<id>_out.json`, and in `<id>_barrel.json`):
+  - `pivot_on_base` [x, y] and `pivot_on_barrel` [x, y], `muzzle` [x, y]: single-barrel guns, as before;
+  - `pivots_on_base`: a list of [x, y], for a base with several barrels (broadside battery, gun strip): the same barrel sprite is turned about `pivot_on_barrel` on each of them. It replaces `pivot_on_base`;
+  - `stagger_s`: seconds between one barrel's recoil and the next one's (staggered fire), only with `pivots_on_base`;
+  - `aim`: `fixed` (with `gimbal_deg`: casemate 6, long 3, broadside and strip 20, heavy 4, spinal 2, pod 10), `turret` or `swivel`;
+  - a flush pod's barrel sprite is its hatch lids (64 x 20, never turned): fire frames 0-2 open, half-close and close them;
+  - the optional `off` anim is a barrel frame with its lights dead; a game that has no use for it can ignore it.
+- **Centring rule:** a breech (inside half) narrower than the outside half sits at `floor((W - bw) / 2)` cells from the outside half's left edge at rotation 0 (W, bw in cells). The inside halves are unchanged.
+- Race guns keep their homeland on the new shape: the body's steel ramp (`gun_race.STEEL`), the livery letters (`LIV`, from `data/ship_styles.json`), a wing motif in the wing or corner slots, and a tip or band on the barrel.
+
 ### Racial hand weapons (race wave 1: Kett, Mire, Sporeling, Gauntling, Prismatic, Grundl)
 Generator `art/_src/hand_race.py` (one module, no new palette colours; `build_all.py` calls it), preview `python3 art/_src/sheet_hand.py out.png`. Same format as the other hand weapons of `items/`: ONE PNG per weapon (faces UP, 1 px outline, `anchors.grip` / `muzzle`, `class` = the arm pose), which is both the held sprite and the item's icon, plus `<id>_glow.png`. The id is the `art` of the weapon in `data/packs/tech_<race>/hand_weapons.json`. Muzzle flashes go in `items/fx/muzzle_<name>.png` (3 frames, anim `play`, faces UP, anchor `muzzle` on the weapon's muzzle; `for_item` names the weapon); the melee weapons have none, like the quarry hammer and the ember knife.
 | weapon (class) | race signature | flash |

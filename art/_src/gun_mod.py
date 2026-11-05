@@ -14,6 +14,7 @@ Breeches (inside halves) are W x (cells*16 + FLANGE) with the flange on top. Dam
 damaged = cracks, a loose part, a spark; disabled = dark, scorched and dented (outside halves are never shattered)."""
 import math, os, re
 import pal_lines                                          # navy panels and the neon letters (N I J j C B P), registered on import
+import pal_guns                                           # the beam crimson '(' and the slug straw ')' (px.RGB at once, px.PAL by pal_guns.register)
 from px import *
 from px import ART
 from mach import bev, recess, outline_all, drop_shadow, glow
@@ -22,7 +23,7 @@ from wbase import cylv, ramp_rows, hazard, weld, crack, spark, wire, move, soot,
 from lines_kit import circle, ring as ringpx
 
 # ------------------------------------------------------------------ palette: no new colours, two private letters for hexes already in palette.gpl
-ALIAS = {'%': '3a9a7e', '&': '8cf0c4'}                     # PD green shade (the mire teal-green), PD green bright (the tractor mint)
+ALIAS = {'%': '3a9a7e', '&': '8cf0c4', '[': '1f5f52', ']': '7bd0a6'}   # PD green shade (the mire teal-green), PD green bright (the tractor mint), the mire's dark and light greens
 def _gpl_hexes():
     try: return {l.split('#')[1].split()[0] for l in open(os.path.join(ART, 'palette.gpl')) if re.match(r'\s*\d+\s+\d+\s+\d+\s+#', l)}
     except OSError: return set()
@@ -37,10 +38,10 @@ FAMILY = {
  'laser':   (('e', 'r', 'o', 'H'), (240, 62, 40),  (255, 200, 160)),
  'pulse':   (('u', 'o', 'y', 'H'), (255, 124, 16), (255, 226, 140)),
  'ion':     (('B', 'C', 'c', 'H'), (60, 230, 255), (210, 250, 255)),
- 'flak':    (('n', 'a', 'y', 'H'), (226, 168, 54), (255, 236, 170)),
+ 'flak':    (('n', 'u', 'a', 'y'), (226, 168, 54), (255, 236, 170)),
  'missile': (('r', 'L', 'H', 'H'), (255, 214, 200), (255, 250, 245)),
- 'beam':    (('n', 'P', 'r', 'H'), (214, 22, 72),  (255, 170, 190)),
- 'slug':    (('W', 'y', 'H', 'H'), (255, 238, 140), (255, 252, 230)),
+ 'beam':    (('e', '(', 'r', 'H'), (212, 20, 60),  (255, 170, 190)),
+ 'slug':    (('W', 'y', ')', 'H'), (255, 238, 140), (255, 252, 230)),
  'pd':      (('%', 'g', '&', 'H'), (110, 220, 90), (220, 255, 210)),
 }
 FAMILIES = list(FAMILY)

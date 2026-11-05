@@ -2467,6 +2467,24 @@ Source and licence of every art and audio file in the repo.
 | `art/gear/traders_coat/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
 | `art/gear/traders_coat/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
 | `art/gear/traders_coat/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
+| `art/components/baron_tithe_gun_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 
 ## Station interiors (claude/station-interiors)
 No image or audio files were added. The fixtures, wall and floor dressing, race skins, signage glyphs and the nebula, asteroid-field and distant-station backdrops are drawn in code (scripts/board/station_decor.gd, station_glyph.gd, station_backdrop.gd) in the style of the existing prop art; no outside assets.

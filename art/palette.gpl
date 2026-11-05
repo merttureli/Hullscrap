@@ -50,3 +50,5 @@ Columns: 5
 111 139 163	#6f8ba3 titanium cool mid (debris: cool grey)
 180 208 226	#b4d0e2 titanium cool light / sheen
 140 240 196	#8cf0c4 tractor mint (pale green-cyan: tractor beam, magnet pull)
+212  20  60	#d4143c beam crimson (guns: the beam family light)
+255 240 168	#fff0a8 pale straw (guns: the slug family light)

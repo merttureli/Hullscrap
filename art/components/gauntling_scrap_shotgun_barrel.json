@@ -1,11 +1,7 @@
 {
  "frame": [
-  19,
-  50
- ],
- "pivot_on_base": [
-  32,
-  12
+  15,
+  42
  ],
  "aim": "fixed",
  "anims": {
@@ -28,36 +24,66 @@
    6,
    1,
    0
+  ],
+  "off": [
+   7,
+   1,
+   0
   ]
  },
  "anchors": {
   "pivot": [
-   9,
-   43
+   7,
+   30
   ],
   "muzzle": [
-   9,
-   13
+   7,
+   1
   ]
  },
- "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of gauntling_scrap_shotgun_out. fire: 3 frames, recoil 2/1/0 px with a muzzle flash.",
- "gimbal_deg": 6,
  "glow": {
   "image": "gauntling_scrap_shotgun_barrel_glow.png",
   "frame": [
-   39,
-   70
+   47,
+   74
   ],
   "offset": [
-   -10,
-   -10
+   -16,
+   -16
   ],
   "anims": {
    "fire": [
-    0,
+    1,
     3,
     14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "idle": [
+    0,
+    1,
+    0
    ]
   }
- }
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on each of pivots_on_base (staggered by stagger_s) of gauntling_scrap_shotgun_out. fire: 3 frames, recoil 2/1/0 px with the family muzzle flash on the glow layer; off: lights dead.",
+ "pivots_on_base": [
+  [
+   22,
+   13
+  ],
+  [
+   48,
+   13
+  ],
+  [
+   74,
+   13
+  ]
+ ],
+ "stagger_s": 0.07,
+ "gimbal_deg": 20
 }
