@@ -110,6 +110,10 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 				eq(d["mount"]["outside_hp"], roundi(float(d["hp"]) * d["mount"]["outside"][0] * d["mount"]["outside"][1] / 4.0), id + ": a weapon's outside_hp is its hp x its outside cells / 4 (twice the hp for 8 cells)")
 			else:
 				eq(d["mount"]["outside_hp"], int(floor(d["hp"] * 0.75 + 0.5)), id + ": outside_hp is 75 percent of hp, rounded")
+		elif d["family"] == "drone_bay":  # a hangar 3x3 behind a low 3x1 hatch (docs/DRONES.md 2)
+			check(Mounts.is_mount(d) and Mounts.is_low(d), id + " is a low hull mount")
+			eq([d["size"], d["mount"]["outside"]], [[3, 3], [3, 1]], id + ": 3x3 inside, 3x1 outside")
+			eq(d["mount"]["outside_hp"], int(floor(d["hp"] * 0.75 + 0.5)), id + ": outside_hp is 75 percent of hp, rounded")
 		else:
 			check(not Mounts.is_mount(d), id + " is a plain part")
 	check(n >= 19, "every weapon, engine, intake, radar and tractor was checked (%d)" % n)

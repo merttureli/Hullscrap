@@ -458,7 +458,7 @@ func test_a_spec_names_the_same_ship_as_build() -> void:
 	eq(spec, "gen:concord:medium:12345:12340", "the spec string")
 	check(Shipgen.is_spec(spec) and not Shipgen.is_spec("res://data/ships/pirate_raider.json"), "specs and files are told apart")
 	var a := Shipgen.from_spec(spec)
-	var b := Shipgen.build("concord", "medium", 12345, 123.4, {"ram": false})
+	var b := Shipgen.build("concord", "medium", 12345, 123.4, {"ram": false, "bays": true})
 	eq(JSON.stringify(a.to_dict()), JSON.stringify(b.to_dict()), "from_spec builds what build builds")
 	check(Shipgen.from_spec("gen:nobody:medium:1:100") == null and Shipgen.from_spec("gen:concord") == null, "a bad spec is no ship")
 	var ram := Shipgen.from_spec(Shipgen.spec("rustfangs", "medium", 9, 80.0, true))

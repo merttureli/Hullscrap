@@ -40,6 +40,14 @@ func _items() -> Dictionary:
 	return out
 
 
+## Every item, the packs' too (the drone kits are in a pack).
+func _all_items() -> Dictionary:
+	var out := {}
+	for i in Content.list("items"):
+		out[i["id"]] = i
+	return out
+
+
 func _inv(cargo: Dictionary) -> Inventory:
 	var i := Inventory.new()
 	i.refund(cargo)
@@ -83,7 +91,7 @@ func test_every_component_has_a_recipe() -> void:
 func test_recipe_data_is_valid() -> void:
 	var c := _crafting()
 	var comps := _comps()
-	var items := _items()
+	var items := _all_items()
 	var mats: Array = Content.read(MATERIALS)["materials"]  # the core file and the packs
 	eq(c.materials.size(), mats.size(), "material ids are unique")
 	for m in mats:
@@ -107,7 +115,7 @@ func test_recipe_data_is_valid() -> void:
 				check(c.materials.has(item), "%s output %s is a material" % [id, item])
 			"gear":
 				check(not comps.has(item) and not c.materials.has(item), "%s gear id %s is neither part nor material" % [id, item])
-				check(items.has(item) and items[item]["kind"] in ["gear", "ammo"], "%s output %s is a gear or ammo item" % [id, item])
+				check(items.has(item) and items[item]["kind"] in ["gear", "ammo", "drone"], "%s output %s is a gear or ammo item" % [id, item])
 		check(not r["materials"].is_empty(), id + " costs something")
 		for m in r["materials"]:
 			check(c.materials.has(m), "%s material %s exists" % [id, m])
@@ -207,7 +215,7 @@ func test_items_data() -> void:
 func test_every_recipe_output_exists() -> void:
 	var c := _crafting()
 	var comps := _comps()
-	var items := _items()
+	var items := _all_items()
 	for id in c.ids():
 		var item: String = c.def(id)["output"]["item"]
 		check(comps.has(item) or c.materials.has(item) or items.has(item), "%s output %s is a part, a material or an item" % [id, item])

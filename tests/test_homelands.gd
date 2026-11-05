@@ -96,7 +96,7 @@ func test_the_capital_trader_leans_to_the_race_and_the_recruiter_offers_it() -> 
 			total += float(rec[k])
 		check(float(rec.get(cap["race"], 0.0)) / total >= 0.8, cap["race"] + ": the recruiter offers mostly the race")
 		for id in menu["stock"]:
-			check(Content.has("components", id) or Content.has("items", id), "%s sells a real thing: %s" % [cap["race"], id])
+			check(Content.has("components", id) or Content.has("items", id) or Content.has("materials", id), "%s sells a real thing: %s" % [cap["race"], id])
 		check(menu["services"].has("recruit") and menu["services"].has("stock"), cap["race"] + ": trades and hires")
 	var plain: Dictionary = Campaign.new(5).station_cfg("rusthold")
 	check(Homelands.own_share("kett", plain) < 0.5, "an ordinary station is not leaned")

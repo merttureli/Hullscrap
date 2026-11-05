@@ -1048,7 +1048,7 @@ func loot(enemy, ship, captured := false) -> Array:
 
 ## The drone parts a beaten ship gives: what its holds had left, and one more from a Kett or Gauntling ship, whose regions have them in plenty.
 func _drone_parts(enemy) -> int:
-	if enemy == null:
+	if typeof(enemy) != TYPE_OBJECT or enemy == null:  # (a test may name the enemy by a string)
 		return 0
 	var n: int = enemy.inventory.count("drone_part")
 	if str(enemy.get_meta("shipgen", {}).get("faction", "")) in ["kett", "gauntling"]:
