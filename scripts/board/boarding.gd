@@ -468,7 +468,7 @@ func _strike(ref: Dictionary, amount: float, at: Vector2, melee := false) -> voi
 	else:
 		foes.hurt(ref, amount, at)
 		if melee and ref.has("m") and not soldier.is_down():  # a foe in chitin hits back
-			var back := float(TraitSet.of(ref["m"])["counter_melee"])
+			var back := Foes.counter_melee(ref["m"])
 			if back > 0.0:
 				hurt_member(soldier, back, ref["m"].pos)
 
