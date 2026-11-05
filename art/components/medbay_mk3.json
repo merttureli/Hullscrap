@@ -58,5 +58,5 @@
    16
   ]
  },
- "notes": "Halo Arm base, neon line, 2x2: navy panels with cyan seams, a crystal on each flank and a bright socket ring in the middle (medbay_mk3_arm turns about it); the ring pulses round while it works. Damaged: scorched, a crystal cracked, the ring flickering. Disabled: dark, crystals dull."
+ "notes": "Halo Arm base, neon line, 2x2: navy panels with cyan edges, a cyan cross, crystal facets in two corners and the halo turntable in the middle (anchors.pivot: the arm's shoulder, medbay_mk3_upper, sits on it); its beads run round while it works. Damaged: scorched, a crystal cracked. Disabled: dark, crystals dull."
 }

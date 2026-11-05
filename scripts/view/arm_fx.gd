@@ -1,11 +1,14 @@
 extends RefCounted
-## Healing arms on screen (docs/DRONES.md section 10): where each arm points, the soft beam to its patient and the glow on the patient.
-## The arm's own sprite is drawn by Visuals.draw_component (opts arm_angle, arm_heal); the patient comes from Jobs (the ship's meta
-## "arm_patients", uid -> crew name). The angles are kept in the ship's meta "arm_angles" (uid -> radians clockwise from up), turned
-## every frame by whichever view is up (the interior or the fight). Drawing only, no game logic.
+## Healing arms on screen (docs/DRONES.md section 10): how each arm moves, the soft beam to its patient and the glow on the patient.
+## The arm itself is drawn by Visuals.draw_component as a 2-bone chain (Visuals.arm_pose, from opts arm_angle, arm_ext, arm_dist, arm_heal,
+## arm_phase); the patient comes from Jobs (the ship's meta "arm_patients", uid -> crew name). Where each arm points, how far it reaches and
+## how far its patient is are kept in the ship's meta ("arm_angles": radians clockwise from up, "arm_ext": 0 folded .. 1 reaching,
+## "arm_dists": cells) and eased every frame by whichever view is up (the interior or the fight), so it never snaps. Drawing only, no game logic.
 
 const Visuals = preload("res://scripts/view/visuals.gd")
-const TURN := 5.0  ## radians a second an arm turns toward its patient
+const TURN := 5.0  ## radians a second an arm turns toward its patient, at most
+const EASE := 6.0  ## how quickly (per second) an arm closes the gap to where it wants to point
+const REACH := 3.0  ## how quickly (per second) it unfolds toward a patient or folds back
 const GREEN := Color("#78f096")
 const CYAN := Color("#5bf5ff")
 
@@ -31,27 +34,35 @@ static func centre(ship, uid: int) -> Vector2:
 	return (lo + hi) / 2.0 + Vector2(0.5, 0.5)
 
 
-## Turn each healing arm of `ship` toward its patient by up to TURN x `dt` radians (it stays where it was with none).
+## Ease each healing arm of `ship` toward its patient (turn toward them, unfold, follow them as they move) or, with none, fold back where it points.
 static func turn(ship, dt: float) -> void:
 	var angles: Dictionary = ship.get_meta("arm_angles", {})
+	var exts: Dictionary = ship.get_meta("arm_ext", {})
+	var dists: Dictionary = ship.get_meta("arm_dists", {})
+	var ease := 1.0 - exp(-EASE * dt)
 	for uid in ship.components.instances:
 		if not Visuals.is_arm(ship.components.def(ship.components.instances[uid]["id"])):
 			continue
 		var at: float = angles.get(uid, 0.0)
 		var m = patient(ship, uid)
 		if m != null:
-			var want := Vector2.UP.angle_to(m.pos - centre(ship, uid))
-			at += clampf(angle_difference(at, want), -TURN * dt, TURN * dt)
+			var to: Vector2 = m.pos - centre(ship, uid)
+			at += clampf(angle_difference(at, Vector2.UP.angle_to(to)) * ease, -TURN * dt, TURN * dt)
+			dists[uid] = lerpf(float(dists.get(uid, to.length())), to.length(), ease)
 		angles[uid] = at
+		exts[uid] = lerpf(float(exts.get(uid, 0.0)), 1.0 if m != null else 0.0, 1.0 - exp(-REACH * dt))
 	ship.set_meta("arm_angles", angles)
+	ship.set_meta("arm_ext", exts)
+	ship.set_meta("arm_dists", dists)
 
 
-## The draw options of arm `uid` (merge into Visuals.draw_component's): where it points and whether it is healing.
+## The draw options of arm `uid` (merge into Visuals.draw_component's): where it points, how far it reaches, whether it is healing.
 static func opts(ship, uid: int) -> Dictionary:
-	return {"arm_angle": float(ship.get_meta("arm_angles", {}).get(uid, 0.0)), "arm_heal": patient(ship, uid) != null}
+	return {"arm_angle": float(ship.get_meta("arm_angles", {}).get(uid, 0.0)), "arm_ext": float(ship.get_meta("arm_ext", {}).get(uid, 0.0)),
+			"arm_dist": float(ship.get_meta("arm_dists", {}).get(uid, 0.0)), "arm_heal": patient(ship, uid) != null, "arm_phase": float(uid) * 1.7}
 
 
-## The beam from each working arm's head to its patient, and a glow ring on the patient. `to_px`: Callable(cell units) -> canvas px.
+## The beam from each working arm's emitter to its patient, and a glow ring on the patient. `to_px`: Callable(cell units) -> canvas px.
 static func draw_beams(canvas, ship, to_px: Callable, cell_px: float, clock: float) -> void:
 	var angles: Dictionary = ship.get_meta("arm_angles", {})
 	for uid in angles:
@@ -60,7 +71,8 @@ static func draw_beams(canvas, ship, to_px: Callable, cell_px: float, clock: flo
 			continue
 		var def: Dictionary = ship.components.def(ship.components.instances[uid]["id"])
 		var col := CYAN if str(def.get("line", "")) == "neon" else GREEN
-		var tip: Vector2 = to_px.call(centre(ship, uid) + Vector2.UP.rotated(angles[uid]) * Visuals.arm_len(def))
+		var pose := Visuals.arm_pose(def, opts(ship, uid).merged({"time": clock}), "heal")
+		var tip: Vector2 = to_px.call(centre(ship, uid) + pose["emitter"])  # the beam leaves the head's emitter
 		var to: Vector2 = to_px.call(m.pos)
 		var pulse := 0.8 + 0.2 * sin(clock * 6.0)
 		if tip.distance_to(to) > cell_px * 0.3:

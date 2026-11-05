@@ -33,7 +33,7 @@ if __name__ == '__main__':
         c = C() if isinstance(C, type) else C
         _, _, J = comp_base.export(c)
         print(c.id, J['frame'], list(J['anims']))
-    lines_medarm.export_arms()       # the arms that turn (medbay_mk2_arm, medbay_mk3_arm)
+    lines_medarm.export_arms()       # the healing arms' segments (medbay_mk2/3 _upper, _fore, _head)
     lines_belt.export_tiles(ART + '/tiles')
     tile_wreck.export()
     tech_b.export_projectiles()      # racial tech projectiles + impacts (group b)

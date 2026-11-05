@@ -8,6 +8,7 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ArmFx = preload("res://scripts/view/arm_fx.gd")
+const Visuals = preload("res://scripts/view/visuals.gd")
 
 
 func near(got: float, want: float, msg: String, eps := 1e-6) -> void:
@@ -245,5 +246,33 @@ func test_the_arm_turns_toward_its_patient_and_the_art_exists() -> void:
 		ArmFx.turn(ship, 0.1)
 	near(ArmFx.opts(ship, d["arm"])["arm_angle"], PI / 2.0, "pointing at Ada", 0.15)
 	check(ArmFx.opts(ship, d["arm"])["arm_heal"], "and healing")
-	for id in ["medbay_mk2_arm", "medbay_mk3_arm", "medbay_mk2", "medbay_mk3"]:
-		check(FileAccess.file_exists("res://art/components/%s.png" % id), id + " has art")
+	for mk in ["medbay_mk2", "medbay_mk3"]:
+		for part in ["", "_upper", "_fore", "_head"]:
+			check(FileAccess.file_exists("res://art/components/%s%s.png" % [mk, part]), mk + part + " has art")
+
+
+func test_the_arm_reaches_out_to_its_patient_and_folds_back() -> void:
+	var d := _arm_ship()
+	var ship: Ship = d["ship"]
+	var def: Dictionary = ship.components.def("medbay_mk2")
+	var rest := Visuals.arm_pose(def, ArmFx.opts(ship, d["arm"]), "off")
+	check(rest["emitter"].length() < 1.2, "folded, the head stays over its 2x2 base")
+	var m := _hurt(_npc("Ada", 15, 10), 50.0)  # about 4 cells to the right
+	ship.crew.append(m)
+	Jobs.new().tick(ship, 0.1)
+	for i in 40:
+		ArmFx.turn(ship, 0.1)
+	var o := ArmFx.opts(ship, d["arm"])
+	near(o["arm_ext"], 1.0, "unfolded", 0.01)
+	var reach := Visuals.arm_pose(def, o, "heal")
+	check(reach["emitter"].length() > 1.5 and reach["emitter"].length() < 2.1, "the head stretches out about 1.5-2 cells: %s" % reach["emitter"].length())
+	near(Vector2.UP.angle_to(reach["emitter"]), PI / 2.0, "toward Ada", 0.15)
+	check(Vector2.UP.angle_to(reach["elbow"]) < Vector2.UP.angle_to(reach["wrist"]), "the elbow bends to the left of the reach")
+	near(reach["elbow"].length(), Visuals._bone("medbay_mk2_upper", "tip", 15.0), "the upper arm keeps its length", 0.001)
+	near((reach["wrist"] - reach["elbow"]).length(), Visuals._bone("medbay_mk2_fore", "tip", 13.0), "the forearm keeps its length", 0.001)
+	ship.crew.erase(m)
+	Jobs.new().tick(ship, 0.1)
+	var ext := float(ArmFx.opts(ship, d["arm"])["arm_ext"])
+	ArmFx.turn(ship, 0.1)
+	var ext2 := float(ArmFx.opts(ship, d["arm"])["arm_ext"])
+	check(ext2 < ext and ext - ext2 < 0.5, "with no patient it folds back, eased, not in one snap: %s -> %s" % [ext, ext2])

@@ -58,5 +58,5 @@
    16
   ]
  },
- "notes": "Healing arm base, standard line, 2x2: a plate with a socket ring in the middle (the arm sprite medbay_mk2_arm turns about it), a medical cross, four status lamps that chase round while it works, violet trim. Damaged: scorched plate, a dead lamp, the ring cracked. Disabled: dark, lamps out, ring scorched."
+ "notes": "Healing arm base, standard line, 2x2: a clean white medical plate with a teal stripe and a teal cross, three green status lamps that chase while it works, the power line in a groove from the left edge to the shoulder turntable in the middle (anchors.pivot: the arm's shoulder, medbay_mk2_upper, sits on it). Damaged: scorched, a dead lamp, the plate cracked. Disabled: dark, lamps out."
 }
