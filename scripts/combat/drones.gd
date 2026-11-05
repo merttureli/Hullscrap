@@ -348,6 +348,8 @@ static func _target_ship(arena, d: Dictionary) -> int:
 static func ring_radius(arena, t: int) -> float:
 	var co = arena.ships[t]
 	var r: float = float(Collisions.hit_cells(arena, t)["radius"])
+	if r < 3.0 * arena.CELL:  # (a hull with no wall cells: its bounding box)
+		r = co.half.length() * arena.CELL
 	if co.layers_cap > 0:
 		r = maxf(r, (Shields.reach(co) + 0.5) * arena.CELL)
 	return r
@@ -480,8 +482,7 @@ static func _beam_tick(arena, d: Dictionary) -> void:
 
 
 static func _in_range(arena, t: int, from: Vector2, reach: float) -> bool:
-	var tc = arena.ships[t]
-	return from.distance_to(tc.flight.pos) <= reach + float(Collisions.hit_cells(arena, t)["radius"]) * 0.6
+	return from.distance_to(arena.ships[t].flight.pos) <= reach + ring_radius(arena, t) * 0.6
 
 
 ## A defence drone: shoot the nearest incoming shot (missile or slow), or (Mk II) enemy drone, in range, rolling its accuracy.
