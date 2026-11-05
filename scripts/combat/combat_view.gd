@@ -44,7 +44,7 @@ const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
-const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB/Q weapon groups   drag a gun on the bar to move it   1-9 one weapon   T auto guns   Shift engine   Space shield   E utility   Esc leave"
+const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB/Q weapon groups   1-9 one weapon   T auto guns   Shift engine   Space shield   E utility   Esc leave"
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
 const ENEMY_JUMP_DB := -8.0  ## the enemy's jump drive firing, against the player's own jump
