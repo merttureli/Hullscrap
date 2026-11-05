@@ -648,9 +648,7 @@ func test_the_loadout_screen_sets_kits_before_going_aboard() -> void:
 	b.leave()
 	# nobody to take and nothing in the hold to wear: the screen still opens (it is how you choose to go alone)
 	var bare := _ship()
-	for m in bare.crew:
-		if not m.is_player:
-			m.post = 0
+	bare.crew = bare.crew.filter(func(m): return m.is_player or m.is_drone())  # (posted crew may come along, so only a ship with nobody else will do)
 	var s2 = _visit(bare)
 	var b2 = BoardView.new()
 	b2.ask_party = true
