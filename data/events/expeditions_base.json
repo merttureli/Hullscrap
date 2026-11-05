@@ -1,0 +1,1681 @@
+{
+ "events": [
+  {
+   "id": "exp_base_cut_in_the_rock",
+   "type": "exp_base",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "The base was cut into the asteroid by people with more drill than plan. A lock the size of a wardrobe sits in a flat cliff-face, its outer door open, its inner door shut. A stencil on the rock says WELCOME TO ROCK 9 in three colours of paint and one of rust.",
+   "choices": [
+    {
+     "text": "Cycle the lock and walk the first corridor.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The first corridor is a gallery of lockers, mostly burst, some not. You take what a polite person would call 'the leftovers'.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The first corridor has a drip, and the drip is acid. You find the leftovers anyway, and a hole in a sleeve.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go deep, to the crew deck.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The crew deck is a time capsule: bunks, tools, a cashbox, one hat. The air is gone but the loot is not. You fill every pack.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       },
+       "boost": {
+        "gear": [
+         "exosuit",
+         "salamander_suit",
+         "heat_suit",
+         "eva_suit"
+        ],
+        "x": 1.8
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The deck is half collapsed. You pull a few crates from the rubble and a lot of dust from your helmets.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The deck lights come on as you enter. All of them. Somewhere behind the walls, an old pump starts to run. The doors are closing.",
+       "effects": {
+        "goto": "exp_base_cut_in_the_rock_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Gauntling] Your Gauntling reads the base's dead circuits.",
+     "requires": {
+      "species": "gauntling",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Gauntling puts a hand on the wall and listens to the machines. The base was built by their kind of people. It leads them straight to the safe and holds the doors for them.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Gauntling is right about the safe and wrong about the live wire under it.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Hack / Scan] Ask the base's own computer where it keeps things.",
+     "requires": {
+      "skill": [
+       "hack",
+       "scan"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The computer is hardly secured. It tells your specialist exactly where the good things are, in a cheerful dead voice, and opens the doors on the way.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The computer is cheerful, dead and vindictive. It gives up the cache and a nasty jolt.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_cut_in_the_rock_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The doors have closed behind the team in sequence. A pump is running somewhere, and the air that is left in the corridor is going somewhere else. The only door still open leads deeper. The lock has a manual wheel, stuck.",
+   "choices": [
+    {
+     "text": "Force the wheel and get out of the lock.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You throw your weight on the wheel together. It gives with a bang and the air that was left is the air that carries you out.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The wheel gives, but a pack is caught in the door. It stays behind with the base.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go deeper, through the open door.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The pump was only a pump. The deep door opens on the base's strongroom, and the strongroom, remarkably, still has its strong things in it.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       },
+       "boost": {
+        "gear": [
+         "exosuit",
+         "salamander_suit",
+         "heat_suit",
+         "eva_suit"
+        ],
+        "x": 1.8
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You push through and the pressure takes its toll. The strongroom is half emptied by the same pressure, but the half is yours.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You push through, and the door closes behind {who} for good. Their lamp stays lit for a while at the end of the corridor.",
+       "effects": {
+        "lose_member": "dead"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Exosuit / Salamander] Break the wheel with a powered arm.",
+     "requires": {
+      "gear": [
+       "exosuit",
+       "salamander_suit"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "The suit's arm snaps the wheel off its stem like a twig, and the door gives. The strongroom opens beyond and everything in it is yours.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "The arm snaps the wheel and the wheel snaps back. The door gives anyway.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_survey_station",
+   "type": "exp_base",
+   "weight": 12,
+   "once": false,
+   "requires": {},
+   "text": "A mining survey base, dark, with a single antenna still tracking the sun. The airlock is clean, the floor beyond it clean, and every panel on the wall is switched to the same line: STANDBY. Someone left this place as if they meant to return.",
+   "choices": [
+    {
+     "text": "Read the logs from the front desk, and take only what is on the desk.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The logs are dull, the desk is not. A tray of sample cases, labelled, and nobody to say you can't.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The logs are very dull. The sample cases are sealed, and one of them is not sealed enough.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Wake the station up. Throw the main switch.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The station wakes with a cough and all its lights. The core store opens, then the assay lab, and the whole place is yours for as long as the generator lasts.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       },
+       "boost": {
+        "skill": [
+         "hack",
+         "scan"
+        ],
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The switch is wired badly. The station wakes in pieces. You grab what the pieces gave.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "Every light comes on and every door opens. A recording begins: 'Survey team, this is a recall. You have not been recalled.' The doors begin to close.",
+       "effects": {
+        "goto": "exp_base_survey_station_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Fenn] Your Fenn finds the assay lab by smell. Money has a smell.",
+     "requires": {
+      "species": "fenn",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Fenn goes through the station like a customs officer and stops in front of an unremarkable cupboard. The assay lab's good samples are inside, the labels in neat pen.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Money has a smell and a booby trap. Your Fenn gets the first and the second.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Tinkerer] Coax the old generator on, gently.",
+     "requires": {
+      "trait": "tinkerer",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your tinkerer talks the old generator awake like a nurse. The lights come up slowly, politely. The station gives everything it has, grateful and a little confused.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The generator agrees to wake. It also makes its opinion known, in a blue flash.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_survey_station_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "'You have not been recalled,' says the recording, again, in the same flat, kind voice. The surveyors' lockers open and from them, one by one, stand suits. Empty suits, with lamps lit. They stand facing the airlock.",
+   "choices": [
+    {
+     "text": "Walk out between them, without hurry.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You walk out. The suits turn, one after another, to follow you with their lamps, and none of them moves. At the lock the last of them salutes.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You walk out between them. They do not move, but a pack set down near one is gone when you turn.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go past them to the core store.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The suits let you through. The core store is a bank of assay samples and a safe with a happy-looking dial, and it opens on the first try.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       },
+       "boost": {
+        "skill": [
+         "hack",
+         "scan"
+        ],
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The suits let you through and charge you for it in a loud and uncomfortable way. The store pays out, mostly.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The suits close the line behind you. {who} is on the wrong side of it. When the suits step aside, nobody is there at all.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Hack / Scan] Issue the recall yourself.",
+     "requires": {
+      "skill": [
+       "hack",
+       "scan"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your specialist types the recall code into the first console in sight. The suits sag, one by one, to the floor, and the station thanks you and unlocks everything.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "The recall code works. It also fries the console in your specialist's hands.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_pirate_cache",
+   "type": "exp_base",
+   "weight": 12,
+   "once": false,
+   "requires": {
+    "region": "clan_space"
+   },
+   "text": "The pirates used this rock as a storeroom, and the storeroom is still there. A cargo bay with a hand-painted jolly roger. Seven clean lockers, a crude map of the sector in grease pencil, and a small rack of unspent, unattended guns.",
+   "choices": [
+    {
+     "text": "Take the lockers on the near wall and nothing else.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The near lockers are full of well-oiled pirate pettiness: a spare coat, a good knife, some honest cash. You take it.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The near lockers are trapped, which you should have expected from pirates. The traps are cheap, but not painless.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Take the guns. Take the map. Take the lot.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The guns are good, the map is better and the lockers are jammed with credits. You walk out like a cheerful burglar.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       },
+       "boost": {
+        "species": "fenn",
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The cache is wired. Most of it comes out in one piece. You leave a few things on the floor and some skin on the door.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The pirates who left did not leave. The back wall of the bay moves: a hatch. Boots on the deck behind it, slow and heavy.",
+       "effects": {
+        "goto": "exp_base_pirate_cache_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Human] Your human knows how pirates think. Open the third locker from the left.",
+     "requires": {
+      "species": "human",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "'It is always the third from the left,' says your human, and it is. A snug little vault of coin and a spare bandoleer. They pocket the bandoleer.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "It is always the third from the left. This time it was also wired.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_pirate_cache_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The hatch opens. There is one pirate, not a crowd, and he looks as surprised as you. He is also holding the only exit and a very heavy wrench. 'We can talk about this,' he offers, and starts to circle.",
+   "choices": [
+    {
+     "text": "Back off. Let him have the bay.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You back off and he lets you go with a nod. A thief respects a retreat, but not enough to leave your pockets alone.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You back off and he takes a toll for the courtesy, with the help of a net.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Rush him. There are more of you.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You rush him together and it is over before it begins. He stands aside, then, rubbing his head, and shows you the strongbox in the back as a courtesy.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       },
+       "boost": {
+        "species": "fenn",
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You rush him and he swings the wrench in a wide, ugly arc. You win, but not cleanly.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You rush him and the wrench finds {who} in a flat, nasty sound. He drags them through the hatch, and the hatch closes.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Fenn] Offer him a bargain.",
+     "requires": {
+      "species": "fenn",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Fenn talks. He listens. They settle on a price both think is an insult to the other, and the strongbox changes hands with great ceremony.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Fenn talks. He hits them anyway, but takes the deal.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_gauntling_yard",
+   "type": "exp_base",
+   "weight": 14,
+   "once": false,
+   "requires": {
+    "region": "gauntling_scrapyards"
+   },
+   "text": "A Gauntling scrap rock: whole fleets of dead ships chewed to parts and stacked in the dark, by size. Their base is a warren of crawl-tunnels through the stacks. The sign on the lock says IF YOU CAN READ THIS YOU CAN BARGAIN, and under that, in a different hand, BUT NOT WELL.",
+   "choices": [
+    {
+     "text": "Haggle at the gate with whatever is on the counter.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The counter is covered in scrap tokens, bits and trinkets. You leave with a sack and a feeling of having been rather efficiently cheated.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The haggle goes wrong in a way you do not completely follow. You leave with a sack and a sprained arm.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Crawl in through the stacks. Take the long way round.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "You crawl for an hour and come out at the sorting hall, which is stacked with refined plate and good parts. The Gauntling are not there, and then they are, nodding.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       },
+       "boost": {
+        "species": "gauntling",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The tunnels are narrower than they look. You come out with some good plate and a lot of scrapes.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The tunnels close behind you in a long, slow shuffling. The stacks are moving. Something is rearranging the yard, one dead ship at a time, to go around you.",
+       "effects": {
+        "goto": "exp_base_gauntling_yard_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Gauntling] Your Gauntling hails the yard in the old clicks.",
+     "requires": {
+      "species": "gauntling",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Gauntling clicks a long string of introductions and the yard answers, delighted. A foreman comes out, hugs them, and loads the team with parts.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Gauntling clicks a long string of introductions and gets a few words wrong. The yard laughs and also bites.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Tinkerer] Offer to fix their broken crane.",
+     "requires": {
+      "trait": "tinkerer",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your tinkerer fixes the crane in forty minutes and the foreman, who has been wanting this fixed for a year, pays in the best parts of the yard.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The crane is fixed. The tinkerer is hit by the part the crane did not need.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_gauntling_yard_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The stacks have closed the way back with a dozen hulls, moved by cranes in the dark. In the gap between them, a door. A hand-lettered sign: THE LOT WE DO NOT SELL. A Gauntling stands in front of it, arms folded, many hands.",
+   "choices": [
+    {
+     "text": "Apologise, and ask for the way out.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "They are very good about it. They are also very good at charging for it. You leave a little lighter, and the way out opens.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "They let you out and make a point of the cost: gear from the pack goes into the yard's ledger.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go for the door they do not sell.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "They let you. They would have done it for a price, and you agree to one afterwards. The room behind is a vault of scrap-gold: the finest plate and parts in the yard.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       },
+       "boost": {
+        "species": "gauntling",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You go for the door and the Gauntling wins the first exchange. You win the second, and what the room holds, in part.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You go for the door and the Gauntling catches {who} in many hands, kindly and absolutely, and adds them to the yard's inventory.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Gauntling] Ask in the old clicks for the lot they do not sell.",
+     "requires": {
+      "species": "gauntling",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Gauntling asks. The foreman, hugely affected, opens the door and gives the team the best of the lot as a courtesy between peoples.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Gauntling asks. The foreman is hugely affected, and also still hits them, from habit.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_basalt_vein",
+   "type": "exp_base",
+   "weight": 14,
+   "once": false,
+   "requires": {
+    "region": "basalt_quarries"
+   },
+   "text": "The Basalt mined this rock for a thousand years and the vein is still singing. A long ramp leads down into a gallery lit by the glow of crystal in the walls. Their quarry-tools are hung neatly on pegs. Nothing has been taken. Everything has been tidied.",
+   "choices": [
+    {
+     "text": "Take the offcuts by the entrance, politely.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The offcuts are good stone and good crystal and nobody minds. You haul them out in two trips.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The offcuts are good stone, and you drop one on your own foot.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Walk down the ramp, into the glow.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The gallery opens into a cathedral of crystal and ore, and you take what the vein offers: more than one team can carry out in a trip.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       },
+       "boost": {
+        "species": "basalt",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The ramp is slick and the glow is hot. You take what you can reach and leave before the ceiling reconsiders.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The glow moves. The walls of the gallery are alive with it, flowing down the ramp towards the team in slow, patient waves. It sings a note you can feel in your teeth.",
+       "effects": {
+        "goto": "exp_base_basalt_vein_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Basalt] Your Basalt sings the vein back.",
+     "requires": {
+      "species": "basalt",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Basalt hums the low note and the vein answers, a whole cathedral of reply. The crystals loosen from the wall and fall into their hands like gifts.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Basalt hums and the vein sings back a little too strongly. They come out ringing and rich.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Stone Plates / Ballast Rig] Walk through the glow in heavy plate.",
+     "requires": {
+      "gear": [
+       "stone_plates",
+       "ballast_rig"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The glow washes over plate like water over a dock. The team walks to the heart of the gallery and takes everything they can lift.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The glow is warmer than the plate expected. The team arrives with the haul and a glow of their own.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_basalt_vein_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The walls flow. Crystal is climbing the gallery in a slow wave, singing, closing the ramp behind the team. It is not anger. It is attention. In the heart of the wave stands the vein's mother lode, and a pair of quarry hands has been hung beside it on a peg.",
+   "choices": [
+    {
+     "text": "Go back up the ramp before the wave closes it.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You back up the ramp as fast as the footing allows, and the wave stops at your heels with a sigh. You count packs at the top.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You back up the ramp but the wave takes what it likes on the way: a pack, a rifle, a plate.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Reach into the wave for the mother lode.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The wave parts, singing, and the mother lode is a block of crystal as big as a man. You cut a piece. The wave blesses it.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       },
+       "boost": {
+        "species": "basalt",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You reach in and the wave closes on your arm for a moment, humming. You come out with a piece and a long crystalline burn.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You reach in and the wave closes over {who}, humming, for a long moment. The wave goes still. The gallery is very quiet.",
+       "effects": {
+        "lose_member": "dead"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Basalt] Take the quarry hands off the peg and put them in.",
+     "requires": {
+      "species": "basalt",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Basalt takes the old quarry hands off the peg, puts them in the wave, and the wave takes them, gratefully, and gives up the lode in return.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Basalt does the old thing wrong and the wave notices. It forgives, with a bite.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_comms_relay",
+   "type": "exp_base",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "A relay base: a dish the size of a hangar bolted to a rock and aimed at a piece of sky where nothing is. Inside, the operators' desk is warm and a cup of tea is still steaming. There is no air to steam it in.",
+   "choices": [
+    {
+     "text": "Look at the desk and take what's on it.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The desk holds a day's receipts, a drawer of spare parts and a signed, framed thank-you note from nobody. You take the parts.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "You look at the desk too long. The desk looks back, with a spark.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Follow the cable to the dish's control room.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The control room is a time capsule of good equipment and bad coffee. The dish's last logs are a love-letter to someone in the far reaches, and the gear is exquisite.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       },
+       "boost": {
+        "skill": [
+         "hack",
+         "scan"
+        ],
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The cable leads to a room with a bad floor. You grab a few instruments and mend your bones on the way home.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The cup of tea is on a tray. The tray is on a table. Beside the table: a chair, turned to face the door, and a coat that is a little too warm to be empty.",
+       "effects": {
+        "goto": "exp_base_comms_relay_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Hack / Scan] Listen on the dish's own channel.",
+     "requires": {
+      "skill": [
+       "hack",
+       "scan"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your specialist listens and the dish speaks back, all the stored traffic of years: addresses, accounts, coordinates. It is a fortune in data and the team carries it out on one slate.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The dish is listening back. Your specialist gets a nasty ringing of the ears for their pains.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Prismatic] Your Prismatic aligns with the dish and hums.",
+     "requires": {
+      "species": "prismatic",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Prismatic stands in the dish's focus and the whole structure sings in sympathy. The relay's reserve cells wake for the first time in years and give up their charge.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The dish focuses on your Prismatic and the focus is hot. They come out gleaming.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_base_comms_relay_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The coat on the chair stands up. Nothing is in it that you can see. It walks to the desk, picks up the tea, and drinks. 'Is there any traffic?' says a voice in your radio. 'It has been so quiet.'",
+   "choices": [
+    {
+     "text": "Tell it there's no traffic. Back out.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "'Oh,' it says. 'Of course.' It sets down the cup. You back out of the room, and it watches you go, politely. You have the feeling of having been tipped.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You tell it there's no traffic. It nods, a little hurt, and sends you off with a gift of its own choosing, from your pack.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Tell it the traffic is yours. Ask for the receipts.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "It brightens at the sight of traffic and gives you every record in the place with a long, formal thank-you. The data alone is a fortune.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       },
+       "boost": {
+        "skill": [
+         "hack",
+         "scan"
+        ],
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You tell it the traffic is yours and it is so glad it hugs you, a little hard, with the stiff arms of a coat.",
+       "effects": {
+        "items": {
+         "titanium": 10,
+         "silicon": 8,
+         "scrap": 20
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You tell it the traffic is yours and it takes {who} by the arm and sits them in the operator's chair. It adjusts their headset. It will not let them up.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Hack / Scan] Send it traffic. Anything. Noise.",
+     "requires": {
+      "skill": [
+       "hack",
+       "scan"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your specialist feeds it a pre-recorded stream of nothing, and it is delighted. It pays them in the station's finest instruments and the team walks out between bows.",
+       "effects": {
+        "items": {
+         "titanium": 14,
+         "silicon": 12,
+         "credits": 50,
+         "copper": 15
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your specialist feeds it nothing, and it finds the nothing a little too thin. It shocks them, gently.",
+       "effects": {
+        "items": {
+         "scrap": 30,
+         "copper": 10
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

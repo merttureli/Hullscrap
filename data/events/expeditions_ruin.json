@@ -1,0 +1,1691 @@
+{
+ "events": [
+  {
+   "id": "exp_ruin_under_the_ice",
+   "type": "exp_ruin",
+   "weight": 12,
+   "once": false,
+   "requires": {},
+   "text": "A seam in the ice, a kilometre long, and in the seam a staircase that goes down further than the lander's light. The steps are the wrong height for any people you know. The ice has been polished by something that went up and down them for a very long time.",
+   "choices": [
+    {
+     "text": "Go down fifty steps and no more.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Fifty steps down, a landing, and a niche with offerings in it: coins, beads, a cup. You take the cup and the coins and leave the beads.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Fifty steps down, and every one a different height. The twenty-third is the worst.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go all the way down.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The stairs end in a round hall with a dome of ice. In the hall: a table, a ring of chairs, and a feast of crystal laid out in front of every one. You pocket the places.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       },
+       "boost": {
+        "gear": [
+         "heat_suit",
+         "salamander_suit",
+         "exosuit",
+         "forge_apron"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The stairs end in a hall with a sagging dome. You take what you can from the first chairs, and the dome drips on you the whole way out.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The stairs end in a hall and the hall has company. The chairs are occupied. The company is ice, shaped like people, and facing the door.",
+       "effects": {
+        "goto": "exp_ruin_under_the_ice_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Heat gear] Melt the sealed door at the bottom.",
+     "requires": {
+      "gear": [
+       "heat_suit",
+       "salamander_suit",
+       "forge_apron"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The heat gear makes short work of the ice. Behind the door: a vault, a hundred years of offerings. The ice does not seem to mind, much.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The ice minds a little. It spits the team out of the vault with a shower of splinters.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Emberkin] Warm the hall. Go slowly.",
+     "requires": {
+      "species": "emberkin",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Emberkin sits among the ice company and warms the room by degrees. By the end the ice has softened into a kind of welcome, and the offerings come loose.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Emberkin warms the room a bit too well. The dome comes down in a wet cascade.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_under_the_ice_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The ice company stands. They do it all at once and quietly, like a congregation, and turn to the team. Their faces are mostly the same, a polite, listening emptiness. One of them holds out a hand, palm up. It is full of cold light.",
+   "choices": [
+    {
+     "text": "Take nothing and go up the steps.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You climb, and they do not follow. At the top you realise that you are carrying a little light after all, in a pocket that was empty.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You climb, and as you climb a pack falls from a shoulder and rolls down into the dark. You do not go back for it.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Take the light.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The light is a shard of the ruin's heart: crystal as clear as water and as cold as a vow. The company bows. You carry out what you can of the hall.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2,
+         "heat_suit": 1
+        }
+       },
+       "boost": {
+        "gear": [
+         "heat_suit",
+         "salamander_suit",
+         "exosuit",
+         "forge_apron"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You take the light and the company takes some of your warmth in exchange. You climb out with the shard, and the shakes.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You take the light, and the company takes {who}, all together, in a sound like a tide going out. The hall is empty and clean. The light stays in your hand.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Heat gear] Hold the light in a warm hand. They may like that.",
+     "requires": {
+      "gear": [
+       "heat_suit",
+       "salamander_suit",
+       "forge_apron"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "The heat gear glows red against the cold, and the company murmurs in something like approval. They hand over the hall's best, with a nod, and let the team go.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "The heat gear glows red and the company takes it for a challenge. They let you out, singed.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_glass_library",
+   "type": "exp_ruin",
+   "weight": 14,
+   "once": false,
+   "requires": {
+    "region": "prismatic_choir"
+   },
+   "text": "A library, in the ice. The books are glass, flat and clear, stacked on shelves of ice, with writing that moves when you are not looking at it. The lander's lamp makes the whole room glitter. A bell hangs in the entrance, and the rope is in reach.",
+   "choices": [
+    {
+     "text": "Take two books from the nearest shelf. Do not ring the bell.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The two books are glass, light and strangely warm. The lander's reader cannot read them but a dealer will pay for glass this fine.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The two books are glass and one of them is sharp, as the hand finds out.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Ring the bell. See who comes.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "A librarian comes: a tall, thin, patient creature, slow-moving, who looks at the team for a long time and then points at a shelf. On it: everything you wanted.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       },
+       "boost": {
+        "species": "prismatic",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The bell rings and the shelves shiver. Three books fall. You take them and the librarian's displeasure with you.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The bell rings and the shelves shiver. Something at the back of the library stops reading.",
+       "effects": {
+        "goto": "exp_ruin_glass_library_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Prismatic] Read a glass book aloud, by colour.",
+     "requires": {
+      "species": "prismatic",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Prismatic holds a glass book to the lamp and reads the colours in it, one after another. The library is quiet. The librarian, enchanted, gives them the whole shelf.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Prismatic reads a page the library did not mean to share, and pays for it.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Scan / Hack] Index the library before touching anything.",
+     "requires": {
+      "skill": [
+       "scan",
+       "hack"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your specialist indexes the shelves in a few minutes and goes straight to the pages that matter. The librarian watches, deeply impressed, and holds the door.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The index is perfect and the library resents being indexed. It bites back with a little static.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_glass_library_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The thing at the back of the library comes forward on long legs, folding itself between the shelves. It is made of glass, and the books are what is inside it. It carries a lamp of its own. It does not seem to be angry. It seems to be overdue.",
+   "choices": [
+    {
+     "text": "Return the books. Apologise.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "The glass thing takes the books back one by one and checks them against a ledger in its chest. At the end it nods, and shows you the door.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The glass thing takes back the books and a fine for lateness, which it takes out of your pack.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Check out a book properly. Offer your name.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You give your name, which it writes down in glass. The book you are lent is a treasure, and it lets you go with a fierce, formal 'Return by the next tide.'",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2,
+         "spotter_cam_mk3": 1
+        }
+       },
+       "boost": {
+        "species": "prismatic",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You give your name. It writes it wrong and takes offence at the difference. You leave with the book and a few cuts.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You give your name, and it writes {who}'s instead, by mistake, in the ledger of its chest. It closes the ledger gently. You do not see {who} again.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Prismatic] Offer to read to it, in return.",
+     "requires": {
+      "species": "prismatic",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Prismatic reads aloud to the glass librarian for an hour, a colour at a time, and the creature weeps glass tears. It lends the team the finest pages it has.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Prismatic reads, and the glass thing weeps. Its tears are sharp.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_frozen_shrine",
+   "type": "exp_ruin",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "The ice has grown around a shrine, or the shrine around the ice: a ring of pillars, waist-high, each with a bowl on top, each bowl full of a different colour of frozen flame. In the middle, a small stone seat. It is the right size for any of you.",
+   "choices": [
+    {
+     "text": "Take a single flame from the ring and leave the rest.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The flame lifts out like a coin, still burning in its frozen way, and the ring takes the loss without comment. It is a rare warmth, and valuable.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The flame lifts out and the cold rushes in behind it, to the nearest hand.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Sit in the seat.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The seat is warm. The ring lights up, flame by flame, and something above you says 'Welcome', not in a language but in a temperature. The shrine opens its gifts.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       },
+       "boost": {
+        "species": "emberkin",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The seat is not warm. It is hot. You get up quickly with a gift in each hand and a blister on the seat of your suit.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The seat is warm. The flames in the ring lean towards you. One by one, they go out, and in the dark the pillars begin to hum.",
+       "effects": {
+        "goto": "exp_ruin_frozen_shrine_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Emberkin] Light a flame of your own in an empty bowl.",
+     "requires": {
+      "species": "emberkin",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Emberkin lights a flame in the one empty bowl and the whole ring stands up in thanks. The shrine gives up its offerings as a host gives presents.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Emberkin lights a flame, and it is a little too bright for the shrine's tastes.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Heat gear] Take the flame from the central bowl, bare-handed.",
+     "requires": {
+      "gear": [
+       "forge_apron",
+       "heat_suit",
+       "salamander_suit"
+      ],
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The heat gear takes the cold flame like a favour and does not blink. The shrine, watching, gives up every gift it has.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The heat gear takes the cold flame. It does not take the second one, at the same time.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_frozen_shrine_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The pillars hum. The bowls are empty and the ice around the ring has gone black. Out of the dark in the middle of the shrine comes a column of white fire, slowly, shaped like a person sitting down. It looks at the team without hurry. It looks a long time at each of them.",
+   "choices": [
+    {
+     "text": "Stand up. Bow. Walk out.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You stand and bow and walk, and it watches you go without a word. At the door the cold clings to your suits like a courtesy.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You stand and bow and walk, and it takes a toll, politely, from the gear you carry.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Ask the fire what it wants.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The fire wants a story, and you have one. You tell it, in a few cold sentences, and it gives you the shrine's gift: a seat's worth of crystal, and a blessing in temperature.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2,
+         "salamander_suit": 1
+        }
+       },
+       "boost": {
+        "species": "emberkin",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The fire wants a story. Yours is not very good, and the fire says so, in heat.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The fire wants a story, and {who} has a good one, and the fire takes it, and {who}, to tell it properly, somewhere warmer. The seat is empty.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Emberkin] Tell it the old Emberkin story, the one about the first forge.",
+     "requires": {
+      "species": "emberkin",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Emberkin tells the story and the fire listens, and at the end it laughs, a gust of warmth like a kiln door. It gives the team the finest thing in the shrine.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Emberkin tells the story wrong, and the fire corrects them, with heat.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_dead_survey",
+   "type": "exp_ruin",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "A survey team's camp, under a ledge of old ice. Four tents, flattened but intact. A lantern frozen in the act of burning. A flag on a pole: someone planted it in a hurry, and the hurry shows. Beyond the camp the ice has a hole in it the size of a ship's hangar, and a ladder that goes down.",
+   "choices": [
+    {
+     "text": "Go through the camp and take what was left.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The camp's stores were never opened. A frozen meal, a case of instruments, a little heap of useful junk. The survey team's last log is a short, polite note to whoever reads it, apologising for the mess.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The camp's stores are frozen to the ground. Getting them out is the work of an hour and a few fingers.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go down the ladder after them.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The ladder ends in a cave full of mineral shapes and a base the survey team never reported. Everything they found, they left. You carry out the best of it.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       },
+       "boost": {
+        "skill": "heal_burst",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The ladder is iced over. You get down and up again with a handful of finds and the shakes.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The ladder ends in a cave. At the bottom a lamp is lit, and a voice that is not yours says 'Is that the relief?' in a very old accent.",
+       "effects": {
+        "goto": "exp_ruin_dead_survey_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Human] Answer. Say yes, you're the relief.",
+     "requires": {
+      "species": "human",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your human says yes, we're the relief, and a thin figure steps out of the shadows and shakes every hand, weeping. He hands over the survey's whole find in thanks.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your human says yes. It is a small lie and a large mistake. The figure is grateful and strong.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Heal burst] Bring the survivor back from the cold.",
+     "requires": {
+      "skill": "heal_burst",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your healer works the figure back from the edge with a burst of warmth, and he gives the team everything the survey found, and a very formal thank-you.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your healer works the figure back, and the effort costs them more than they planned.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_dead_survey_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The figure is the last of the survey: a woman, forty years frozen, upright, lit by her lamp. She believes the relief has come at last and she is shaking each hand with a grip that does not let go. 'We found it,' she says. 'But we cannot leave it. Someone has to stay.'",
+   "choices": [
+    {
+     "text": "Tell her gently: the relief is not coming. Help her to the lander.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "She takes it quietly. She walks beside you to the ladder. At the top she turns and looks at the ice a long time, and is gone at the lander's door, with a smile.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "She takes it quietly, and gives you her pack, with gratitude, as a parting gift. The pack is yours. The one you carried is hers.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Take her place. Offer to stay till the relief comes.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You offer, and she weeps, and gives you the survey's find in your hands as thanks. She walks to the lander on her own legs, free. You stay a while, then follow.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2,
+         "overcharge_coil_mk3": 1
+        }
+       },
+       "boost": {
+        "skill": "heal_burst",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You offer, and she weeps. The find is yours. The cold does not let you leave without a price.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You offer, and she weeps, and the ice takes {who} in her place. She steps out of the cave into the sun, alive. {who} does not.",
+       "effects": {
+        "lose_member": "dead"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Heal burst] Give her your warmth. Walk her out.",
+     "requires": {
+      "skill": "heal_burst",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your healer gives her warmth and walks her up the ladder one rung at a time. She takes the sun with her eyes shut, and gives the team the survey's best finds.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your healer gives her warmth, and more than planned.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_kett_tomb",
+   "type": "exp_ruin",
+   "weight": 14,
+   "once": false,
+   "requires": {
+    "region": "kett_hives"
+   },
+   "text": "Kett do not bury their dead. They fold them into the hive. This one was a hive that never got built: a cairn of shell, polished by cold, and a hundred small stone cells, each with a little lamp. A sign in the clicking script says SILENCE, and under it, smaller: THE QUIET IS ALSO A MEMBER.",
+   "choices": [
+    {
+     "text": "Stay quiet. Take from the entrance cells only.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The entrance cells hold lamps, small gifts, bits of shell-work and a few crystals. You take two of each, bowing to every cell.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "You stay quiet, but not all of you. A shuffled foot sets off a rattle of shells, and the shells set off the rest.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Walk through the tomb to the central cell.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The central cell is a chamber of white shell and one deep lamp. The Kett who rest here left their tools, their jewels and a message for the next to come. You take the tools.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       },
+       "boost": {
+        "species": "kett",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The central cell is further than it looked. You come out with a few things and the feeling of having walked through a very polite argument.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The lamps are going out. One by one, from the door inward, in sequence. At the end of the line the central cell is waiting, and it is making a sound.",
+       "effects": {
+        "goto": "exp_ruin_kett_tomb_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Kett] Click the funeral greeting at the first cell.",
+     "requires": {
+      "species": "kett",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Kett clicks the greeting at the first cell, and then the next, and the lamps rekindle one by one. By the central cell, the tomb has opened every drawer for them.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Kett clicks the greeting, and gets one word wrong, and the lamps go out in protest.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Swarm] Go in as a hive, shoulder to shoulder.",
+     "requires": {
+      "trait": "swarm",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The team goes in shoulder to shoulder, a hive in miniature, and the tomb takes them for one of its own. The cells open for them.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The team goes in as a hive, and the tomb counts them, and finds one short.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_kett_tomb_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The sound is a chord, forty voices at once, from forty cells. It is not a threat. It is a vote. The tomb is deciding whether the living may take the dead's things. In the central cell, a single lamp is lit, and waiting.",
+   "choices": [
+    {
+     "text": "Wait for the vote. Say nothing.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "The vote goes your way, narrowly. The lamps relight. You walk out with your hands empty and your honour whole, plus a little something left on the threshold.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The vote goes against you. You walk out with your hands empty, and the tomb keeps a pack to be sure.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Light the central lamp yourselves.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The central lamp catches and the tomb sighs. The votes come in, all in favour. The tomb opens everything for you and sends you out with a formal blessing.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2,
+         "chitin_plate": 1
+        }
+       },
+       "boost": {
+        "species": "kett",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The lamp catches, and the vote is close. You are allowed to take a share, and the tomb sees you out the door a bit forcefully.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The lamp catches, and the tomb takes a member to complete the count. It takes {who}. The lamp goes steady. The cells are quiet.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Kett] Cast your vote with all four hands.",
+     "requires": {
+      "species": "kett",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Kett raises all four hands and votes aloud, and the chord answers, delighted. The tomb gives the team the whole of its hoard.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Kett votes, and the chord answers, delighted, and also bites.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_cryo_vault",
+   "type": "exp_ruin",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "A cryo vault in the ice, a hundred pods in rows, every status light amber. A placard at the door: PATIENTS WILL BE REVIVED WHEN FACILITIES PERMIT. The facilities have not permitted. The ice has been here a very long time.",
+   "choices": [
+    {
+     "text": "Take the vault's supply closet and leave the patients.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The supply closet is a time capsule of medical stock, still sealed. You take what the patients will not miss.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The supply closet is a time capsule of medical stock and a loose hose. The hose is cold, and wet, and angry.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Stay at the lock and send in a camera on a wire.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "The picture is bad and the cable is short, but the lock's little cache is within reach. You take it and nothing else.",
+       "effects": {
+        "items": {
+         "credits": 12,
+         "scrap": 10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "text": "Revive one patient and ask what happened.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The patient wakes slowly, coughing, grateful, and guides the team to the vault's strongroom before they have even stood. 'It's the least I can do,' she says. She's right.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       },
+       "boost": {
+        "skill": "heal_burst",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The patient wakes badly. You get the strongroom's contents anyway, and the patient's frank opinion of your manners.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The patient wakes, and wakes the neighbours. Pod after pod hisses open, down the rows, and the vault fills with slow, coughing silhouettes.",
+       "effects": {
+        "goto": "exp_ruin_cryo_vault_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Heal burst] Revive them gently, one by one.",
+     "requires": {
+      "skill": "heal_burst",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your healer revives the patients in a long, careful chain. By the end, they are weeping and handing the team the contents of their lockers.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your healer revives one patient too many and the strain is a lot to bear.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Human] Say something comforting to the waking.",
+     "requires": {
+      "species": "human",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your human says a few ordinary words, the kind that cost nothing, and the waking calm. They guide the team to the strongroom and wave away thanks.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your human says the wrong word and the waking take it hard.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_ruin_cryo_vault_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The patients stand in the aisles in their thin vault gowns, and they are all looking at the same thing: the team. 'Is it the year?' asks the nearest. 'Is it the year yet?' Their voices are very kind. Their grip, when one of them takes an arm, is not.",
+   "choices": [
+    {
+     "text": "Say no, not yet. Guide them back to their pods.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You say it and they believe you. One by one they climb back into their pods and let the lids close, with sighs of relief.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You say it and they believe you, mostly. They tidy their pods, and take a little for their trouble.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Say yes, it's the year. Lead them out to the lander.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "They believe you. They climb the stairs in a long line, blinking at the sun, and leave the vault and its stores to you.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2
+        },
+        "blueprint": [
+         "repair_drone"
+        ]
+       },
+       "boost": {
+        "skill": "heal_burst",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You say yes, and a few don't believe you. You have to carry the stores out in a hurry.",
+       "effects": {
+        "items": {
+         "crystal": 6,
+         "plasma_cell": 2,
+         "scrap": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You say yes, and they believe you, and they take {who} with them, a patient on each arm, gently, up the stairs into the light. They are not seen again.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Heal burst] Calm the whole row with one warm wave.",
+     "requires": {
+      "skill": "heal_burst",
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your healer sends a warm wave down the aisle, and the patients sigh and sit and wait. The vault's stores are yours, and it is no theft: they said so.",
+       "effects": {
+        "items": {
+         "crystal": 8,
+         "plasma_cell": 4,
+         "nanite_paste": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your healer sends the wave and it is too much. They have to sit, shaking.",
+       "effects": {
+        "items": {
+         "crystal": 3,
+         "scrap": 15
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
