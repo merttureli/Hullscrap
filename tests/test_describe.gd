@@ -258,21 +258,21 @@ func _part_ids(ship, cable := {}) -> Array:
 	return out
 
 
-func test_a_fresh_runs_palette_lists_only_held_or_known_parts() -> void:
+func test_a_fresh_runs_palette_lists_only_held_parts() -> void:
 	var ship := Ship.new_starter()
 	var ids := _part_ids(ship)
 	check(ids.size() > 0 and ids.size() < ship.components.ids().size(), "a trimmed list: %d of %d" % [ids.size(), ship.components.ids().size()])
 	for id in ids:
-		check(ship.inventory.count(id) > 0 or ship.crafting.is_known(id), id + " is held or known")
+		check(ship.inventory.count(id) > 0, id + " is held")
 	check(not ids.has("laser_mk2") and not ids.has("basalt_vacuum_forge"), "a part with no blueprint and none held is not listed")
-	check(ids.has("laser_mk1") and ids.has("reactor_mk1"), "a known blueprint lists its card")
 	var card := Palette.part_entry(ship, "laser_mk1")
 	if ship.inventory.count("laser_mk1") == 0:
+		check(not ids.has("laser_mk1"), "a known blueprint with none held is not listed")
 		eq(card["why"], "Craft at Fabricator (C)", "known but not held says where to craft it")
 	ship.crafting.unlock("laser_mk2")
-	check(_part_ids(ship).has("laser_mk2"), "learning a blueprint adds its card")
-	ship.crafting.unlock("basalt_vacuum_forge")
-	check(_part_ids(ship).has("basalt_vacuum_forge"), "and so does a racial one")
+	check(not _part_ids(ship).has("laser_mk2"), "learning a blueprint adds no card: only the hold does")
+	ship.inventory.add("laser_mk2", 1)
+	check(_part_ids(ship).has("laser_mk2"), "holding one does")
 	ship.inventory.add("leech_laser", 1)
 	check(_part_ids(ship).has("leech_laser"), "a found part with no recipe shows once it is held")
 	var cargo := Palette.entries(Palette.Tab.CARGO, ship, {})
@@ -281,7 +281,9 @@ func test_a_fresh_runs_palette_lists_only_held_or_known_parts() -> void:
 
 func test_the_belt_card_and_the_structure_tab_keep_the_basics() -> void:
 	var ship := Ship.new_starter()
-	var keys := Palette.entries(Palette.Tab.STRUCTURE, ship, {}).map(func(e): return e["key"])
+	for m in ship.crafting.materials:
+		ship.inventory.add(m, 1000)
+	var keys := Palette.entries(Palette.Tab.STRUCTURE, ship, {"copper": 1}).map(func(e): return e["key"])
 	for id in ship.grid.defs.ids():
 		check(keys.has("tile:" + id), "the Structure tab still lists " + id)
 	check(keys.has("cable"), "and the cable")
