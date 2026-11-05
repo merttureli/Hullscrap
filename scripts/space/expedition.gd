@@ -205,7 +205,7 @@ static func weighted(outcomes: Array, team: Array) -> Array:
 # --- odds, shown on a choice -----------------------------------------------------------------------------
 
 static func _harms(eff: Dictionary) -> bool:
-	return eff.has("hurt") or eff.has("lose_member") or eff.has("lose_gear") or int(eff.get("crew_hp", 0)) < 0
+	return eff.has("hurt") or eff.has("goto") or eff.has("lose_member") or eff.has("lose_gear") or int(eff.get("crew_hp", 0)) < 0
 
 
 ## The tag a choice shows in an expedition: {text, tone ("loss", "gear", "risk")} or {} for a safe one. Odds count the team's boosts.
