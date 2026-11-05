@@ -25,10 +25,10 @@
 		"anomaly": {"label": "Anomaly", "visibility": "signal", "event": "anomaly", "max": 1},
 		"quest": {"label": "Quest site", "visibility": "beacon", "event": "quest", "max": 1},
 		"exit_beacon": {"label": "Exit beacon", "visibility": "beacon", "event": "empty", "max": 1},
-		"exp_planet": {"label": "Planet", "visibility": "beacon", "event": "exp_planet", "max": 1, "manual": true, "reach": 1100},
+		"exp_planet": {"label": "Planet", "visibility": "signal", "event": "exp_planet", "max": 1, "manual": true, "reach": 1100},
 		"exp_base": {"label": "Asteroid base", "visibility": "signal", "event": "exp_base", "max": 1, "manual": true, "reach": 900},
 		"exp_ruin": {"label": "Ice ruin", "visibility": "signal", "event": "exp_ruin", "max": 1, "manual": true, "reach": 900},
-		"exp_platform": {"label": "Gas-giant platform", "visibility": "beacon", "event": "exp_platform", "max": 1, "manual": true, "reach": 1100}
+		"exp_platform": {"label": "Gas-giant platform", "visibility": "signal", "event": "exp_platform", "max": 1, "manual": true, "reach": 1100}
 	},
 	"nodes": {
 		"station": {"main": "station", "count": [4, 5], "density": 0.5, "weights": {"wreck": 3, "mining_field": 3, "unknown": 3, "trader": 2, "distress": 1, "abandoned_station": 1, "quest": 3, "exp_planet": 2, "exp_base": 1, "exp_ruin": 1, "exp_platform": 1}, "debris": {}},

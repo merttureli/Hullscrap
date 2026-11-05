@@ -163,7 +163,7 @@ func _visit(where: String, c: Campaign, sim, pick: RandomNumberGenerator) -> boo
 	_helm.place(s.ship_pos, s.ship_vel, s.ship_angle)
 	check(s.ship_pos.distance_to(s.arrival) < 1.0, where + ": the ship arrives at the sector's arrival point")
 	_goals = [s.main_poi()["id"]]
-	var others: Array = s.pois.filter(func(p): return not p["main"] and p["state"] == Sector.NEW)
+	var others: Array = s.pois.filter(func(p): return not p["main"] and p["state"] == Sector.NEW and not bool(s.cfg["poi_types"].get(p["type"], {}).get("manual", false)))  # (an expedition site waits for E)
 	if not others.is_empty() and pick.randf() < OTHER_POI:
 		_goals.append(others[pick.randi() % others.size()]["id"])
 	while not _goals.is_empty():

@@ -6,6 +6,7 @@ extends "res://tests/base_test.gd"
 ## (the hostile block, fuel spent when it fires, arrival), the ambient encounters, saves and the data file.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const Expedition = preload("res://scripts/space/expedition.gd")
 const Sector = preload("res://scripts/space/sector.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const DriftDebris = preload("res://scripts/space/drift_debris.gd")
@@ -762,7 +763,7 @@ func test_an_ambient_contact_moves_leaves_and_fires_its_event() -> void:
 
 # --- the far POIs: space without walls ------------------------------------------------------------------------
 
-const FAR_TYPES: Array = ["wreck", "unknown", "mining_field", "distress", "trader", "abandoned_station", "pirate_nest"]
+const FAR_TYPES: Array = ["wreck", "unknown", "mining_field", "distress", "trader", "abandoned_station", "pirate_nest", "exp_planet", "exp_base", "exp_ruin", "exp_platform"]
 ## The placed layouts of the generator before the far POIs (and before the counts went up by one): [seed, node type, arrival, POIs]
 ## as id:type@x,y,visibility,event. The far POIs must not move them.
 const OLD_COUNTS := {"wreck_field": [3, 5], "pirate": [3, 4], "station": [3, 4], "empty": [2, 3], "asteroid_field": [3, 5], "gate": [2, 2]}
@@ -872,7 +873,7 @@ func test_a_done_far_poi_stays_done_when_you_leave_and_come_back() -> void:
 	_go(c, "n01", ship)
 	var s = c.current_sector()
 	s.ship_pos = Vector2(30000.0, 6000.0)
-	var near_far := _far_of(s)
+	var near_far := _far_of(s).filter(func(q): return not str(q["type"]).begins_with("exp_"))  # (an expedition site waits for E)
 	check(near_far.size() >= 2, "there are far POIs about out here (%d)" % near_far.size())
 	near_far.sort_custom(func(x, y): return x["pos"].distance_to(s.ship_pos) < y["pos"].distance_to(s.ship_pos))
 	var p: Dictionary = near_far[0]
@@ -944,6 +945,10 @@ func test_the_placed_pois_are_what_the_generator_always_made() -> void:
 		cfg["poi"]["count"] = [2, 6]
 		for t in OLD_COUNTS:
 			cfg["nodes"][t]["count"] = OLD_COUNTS[t]
+		for t in cfg["nodes"]:
+			for k in cfg["nodes"][t]["weights"].keys():
+				if str(k).begins_with("exp_"):
+					cfg["nodes"][t]["weights"].erase(k)  # (the expedition sites came later: the layouts of before have none)
 		var s = Sector.generate(row[0], _node(row[1], row[0]).merged({"id": "g%d" % row[0]}, true), "boneyard", cfg)
 		var parts := []
 		for p in s.pois:
@@ -1139,7 +1144,7 @@ func test_sectors_json_is_sound() -> void:
 	var want := ["station", "store", "trader", "distress", "wreck", "abandoned_station", "mining_field", "unknown", "pirate_nest", "concord_checkpoint", "anomaly", "quest"]
 	for t in want:
 		check(types.has(t), "POI type %s exists" % t)
-	eq(types.size(), want.size() + 1, "and the exit beacon, no others")
+	eq(types.size(), want.size() + 1 + Expedition.kinds().size(), "and the exit beacon and the expedition sites, no others")
 	check(types.has("exit_beacon") and cfg["nodes"]["exit"]["main"] == "exit_beacon", "the exit node's main POI is the exit beacon")
 	for t in types:
 		var d: Dictionary = types[t]
