@@ -300,6 +300,8 @@ func to_dict() -> Dictionary:
 		if int(i.get("n", 0)) > 0 or str(i.get("ammo", "")) != "":  # an ammo rack's contents
 			rec["ammo"] = str(i.get("ammo", ""))
 			rec["n"] = int(i.get("n", 0))
+		if str(i.get("kit", "")) != "":  # the drone kit loaded in a bay (drones.gd)
+			rec["kit"] = str(i["kit"])
 		if int(i.get("loaded", 0)) > 0:  # what a gun has taken off a belt
 			rec["loaded"] = int(i["loaded"])
 		list.append(rec)
@@ -445,6 +447,8 @@ func _load_state(inst: Dictionary, saved: Dictionary) -> void:
 		inst["status"] = str(saved["status"])
 	if not inst["out_cells"].is_empty() and (saved.get("out_hp") is float or saved.get("out_hp") is int):
 		inst["out_hp"] = clampi(int(saved["out_hp"]), 0, outside_hp_max(inst["id"]))
+	if saved.get("kit") is String and str(saved["kit"]) != "":
+		inst["kit"] = str(saved["kit"])
 	if saved.get("n") is float or saved.get("n") is int:
 		inst["n"] = maxi(0, int(saved["n"]))
 		inst["ammo"] = str(saved.get("ammo", ""))

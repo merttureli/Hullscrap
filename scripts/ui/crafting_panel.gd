@@ -28,8 +28,8 @@ const STATION_IDS: Array[String] = ["fabricator", "smelter", "blueprints"]  ## t
 const TAB_NAMES := {"fabricator": "Fabricator", "smelter": "Smelter", "blueprints": "Blueprints"}
 const TAB_W: Array[float] = [120.0, 120.0, 176.0]
 ## The Blueprints tab's groups: part families first (in this order, the families not named after them), then the rest.
-const FAMILY_ORDER: Array[String] = ["weapon", "shield", "engine", "reactor", "smelter", "oxygen", "helm", "medbay", "bed", "fabricator", "workshop", "radiator", "utility", "intake", "ammo_rack", "belt_drive", "radar", "tractor"]
-const FAMILY_NAMES := {"weapon": "Weapons", "shield": "Shields", "engine": "Engines", "reactor": "Reactors", "smelter": "Smelters", "oxygen": "Life support", "helm": "Helms", "medbay": "Medbays",
+const FAMILY_ORDER: Array[String] = ["weapon", "drone_bay", "shield", "engine", "reactor", "smelter", "oxygen", "helm", "medbay", "bed", "fabricator", "workshop", "radiator", "utility", "intake", "ammo_rack", "belt_drive", "radar", "tractor"]
+const FAMILY_NAMES := {"weapon": "Weapons", "drone_bay": "Drone bays", "shield": "Shields", "engine": "Engines", "reactor": "Reactors", "smelter": "Smelters", "oxygen": "Life support", "helm": "Helms", "medbay": "Medbays",
 	"bed": "Beds", "fabricator": "Fabricators", "workshop": "Workshop modules", "radiator": "Radiators", "utility": "Utility", "intake": "Intakes", "ammo_rack": "Ammo racks", "belt_drive": "Belt drives",
 	"radar": "Radars", "tractor": "Tractor beams"}
 const G_MATERIALS := "Materials"

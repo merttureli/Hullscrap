@@ -38,6 +38,8 @@ const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const MapView = preload("res://scripts/ui/map_view.gd")
 const ShieldPanel = preload("res://scripts/ui/shield_panel.gd")
+const DroneView = preload("res://scripts/combat/drone_view.gd")
+const BayPanel = preload("res://scripts/ui/bay_panel.gd")
 const Palette = preload("res://scripts/build/palette.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const RedAlert = preload("res://scripts/sim/red_alert.gd")
@@ -112,6 +114,7 @@ var _weapons: Weapons = null  # the weapon stats, read once (the arc wedge of a 
 var _tab_pick := {}  # palette tab -> the key of the card last picked on it
 var _clock := 0.0  # seconds, for the loops of the art
 var _glow: Node2D  # additive layer for the glow art
+var bay_panel: Control  ## the kit choice of a drone bay (bay_panel.gd), made on first use
 var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
 var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state
 var _door_open := {}  # a door piece's first cell -> whether it was open when last drawn (a flip is heard: the door sound)
@@ -300,7 +303,9 @@ func _unhandled_input(e: InputEvent) -> void:
 		if e.pressed:
 			match e.button_index:
 				MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT:
-					if build_on:
+					if build_on and e.button_index == MOUSE_BUTTON_LEFT and e.alt_pressed and open_bay_panel(hover):
+						pass  # Alt+click on a drone bay: its kit choice
+					elif build_on:
 						_begin_drag(e)
 				MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN:
 					wheel(e)
@@ -311,6 +316,21 @@ func _unhandled_input(e: InputEvent) -> void:
 		_on_key(e)
 	_refresh_ghost()
 	queue_redraw()
+
+
+## Open the kit choice of the drone bay at cell `c` (K over it, or Alt+click). False when there is no bay there.
+func open_bay_panel(c: Vector2i) -> bool:
+	var uid: int = ship.components.any_at(c)
+	if uid < 0 or str(ship.components.def(ship.components.instances[uid]["id"]).get("family", "")) != "drone_bay":
+		return false
+	if bay_panel == null and hud != null:
+		bay_panel = BayPanel.new()
+		bay_panel.name = "BayPanel"
+		hud.add_child(bay_panel)
+	if bay_panel == null:
+		return false
+	bay_panel.open(ship, uid, get_viewport().get_mouse_position() if is_inside_tree() else Vector2(400, 300))
+	return true
 
 
 ## The build view's own input: a middle-button drag, the arrow keys and Home. True when the event was a middle click or one of those keys (it is used up);
@@ -381,6 +401,9 @@ func _on_key(e: InputEventKey) -> void:
 			KEY_H:
 				if shields != null:
 					shields.open()
+			KEY_K:
+				if build_on:
+					open_bay_panel(hover)
 			KEY_ESCAPE:
 				if front != null:
 					front.open_pause()
@@ -1068,6 +1091,8 @@ func _draw_components() -> void:
 		if mount_fx.has(uid):
 			opts["fired_ago"] = fmod(_clock, 0.3)  # a beam that is on pulses its strip
 		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
+		if str(ship.components.def(inst["id"]).get("family", "")) == "drone_bay":  # the loaded kit sits on the cradle
+			DroneView.draw_docked(self, ship.components.def(inst["id"]), inst, _cells_rect(inst["cells"]), CELL, _clock)
 	for uid in uids:  # the outside half and barrel of each hull mount, over the edge of the wall
 		var inst: Dictionary = ship.components.instances[uid]
 		if not inst["out_cells"].is_empty():

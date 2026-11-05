@@ -7,6 +7,7 @@ extends Node2D
 ## follows it. Reusable: with no arena it draws a plain Ship at the node's own transform (pivot = the
 ## hull's centre), with no skin.
 
+const DroneView = preload("res://scripts/combat/drone_view.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
@@ -53,6 +54,7 @@ var flash_cells: Array = []  ## the cells of the room just clicked (flash_room),
 var flash_left := 0.0
 var _crew_anim := {}  # CrewMember -> PersonDrawer state, for drawing only
 var _doors := {}  # a door piece's first cell -> TileArt.door_progress() state, for the opening animation
+const BAY_RISE := [0, 9, 19, 27]  ## source px the bay's cradle has risen, by launch frame (art/components/drone_bay_mk*.json)
 var _glow_quads: Array = []  # the glow art of this frame, handed to _glow at the end of _draw
 var _skin := {}  # TileArt.skin_plan() of the grid, remade when _skin_sig changes
 var _skin_sig := []
@@ -166,6 +168,11 @@ func _draw() -> void:
 		opts.merge(Ammo.draw_opts(ship, uid))
 		all_opts[uid] = opts
 		Visuals.draw_component(self, _rect_of(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
+		if opts.has("bay_out"):  # a drone bay: the loaded drone on its cradle while docked, riding it up the rail as it launches, nothing while it is out
+			var age: float = float(opts["fired_ago"])
+			if not opts["bay_out"] or age < 0.3:
+				var rise := float(BAY_RISE[mini(int(age * 10.0), 3)]) if opts["bay_out"] else 0.0
+				DroneView.draw_docked(self, ship.components.def(inst["id"]), inst, _rect_of(inst["cells"]), CELL, _clock, rise)
 	for uid in uids:  # the outside halves and barrels of the hull mounts, over the wall's edge
 		var inst: Dictionary = ship.components.instances[uid]
 		if inst["out_cells"].is_empty():
@@ -227,6 +234,11 @@ func _thrusting(inst: Dictionary) -> bool:
 ## fired (the arena is only read, through cooldown_left); the longest cooldown seen since then is the
 ## full bar. Empty for a part that is not a weapon, or with no arena.
 func _weapon_opts(uid: int) -> Dictionary:
+	if arena != null and arena.ships[index].bays.has(uid):  # a drone bay: launch frames, empty cradle while its drone is out
+		var d = arena.ships[index].bays[uid]["drone"]
+		var ago: float = (arena.tick - int(arena.ships[index].bays[uid]["launched"])) * arena.SUBSTEP
+		var homing: bool = d != null and d["state"] == "home" and Vector2(d["pos"]).distance_to(arena.local_to_world(index, arena.ships[index].bays[uid]["pos"])) < 120.0
+		return {"bay_out": d != null, "bay_open": homing, "fired_ago": ago}
 	if arena == null or not arena.ships[index].mounts.has(uid):
 		return {}
 	var left: float = arena.cooldown_left(index, uid)

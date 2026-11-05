@@ -107,6 +107,9 @@ static func of(id: String, ship, rot := -1, angle := -1.0) -> Dictionary:
 		_weapon(id, rows, kws, tail)
 	else:
 		_stats(def, eff, fam, rot, rows, angle)
+	if fam == "drone_bay":
+		rows.append(["Launches", "tier %d and below" % int(def["bay"]["max_tier"])])
+		rows.append(["Re-arm", "%s s (25%% quicker with crew)" % num(float(def["bay"]["rearm_s"]))])
 	var pw := float(eff["power"])
 	if pw != 0.0:
 		rows.append(["Power", ("+" if pw > 0.0 else MINUS) + num(absf(pw))])
@@ -216,6 +219,10 @@ static func _of_item(id: String, out: Dictionary) -> Dictionary:
 	var kind := str(item.get("kind", "")) if not item.is_empty() else ("material" if Content.has("materials", id) else "")
 	out["what"] = str(item.get("does", data()["items"].get(kind, "")))
 	out["lore"] = first_sentence(str(item.get("blurb", Content.entry("materials", id).get("blurb", ""))))
+	if kind == "drone" and item.get("drone") is Dictionary:  # a drone kit: its tier, hp, role and what a launch costs
+		var dd: Dictionary = item["drone"]
+		out["stats"] = [["Tier", str(dd["tier"])], ["HP", str(dd["hp"])], ["Role", "defence: guards your ship" if dd["role"] == "defence" else "combat: circles the foe"],
+			["Launch", "%d part%s" % [dd["tier"], "" if int(dd["tier"]) == 1 else "s"]], ["Fires", "%s every %s s" % [str(dd["gun"].get("family", "")), num(float(dd["gun"]["cooldown"]))]]]
 	if kind == "mod" and Mods.is_item(id):  # a boarding mod: what it does, the numbers of its tier and who they work for
 		var h := Mods.hover(id)
 		out["what"] = str(h[0])

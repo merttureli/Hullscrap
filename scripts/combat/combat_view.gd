@@ -14,6 +14,7 @@ extends Node2D
 ## an event panel is open, and J opens the map to spool the jump drive (the campaign's, held while the enemy is within
 ## 2,000 px).
 
+const DroneView = preload("res://scripts/combat/drone_view.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ImpactFx = preload("res://scripts/combat/impact_fx.gd")
 const EffectFx = preload("res://scripts/combat/effect_fx.gd")
@@ -76,6 +77,7 @@ var _stars_node: Node2D
 var _stars: Array = []  # [unit position, depth, radius]
 var _star_drift := Vector2.ZERO
 var _fx: Array = []
+var _trails := {}  # drone id -> its thruster puffs (drone_view.gd)
 var _cursor := 0
 var _clock := 0.0
 var _frame := 0
@@ -706,6 +708,15 @@ func _on_event(e: Dictionary) -> void:
 			else:
 				_on_ship(idx, pos, {"k": "flash", "life": 0.22, "r": 18.0 if big else 11.0, "color": col})
 			_sparks(pos, n, 7 if big else 4, col)
+		"drone_launch", "drone_hit", "drone_down", "drone_home", "drone_shot":
+			if e["type"] == "drone_down":
+				_snd("explosion_s", idx, pos, -3.0, -3.0)
+			elif e["type"] == "drone_hit":
+				_snd("hit_hull", idx, pos, -4.0, -3.0)
+			elif e["type"] == "drone_launch":
+				_snd("door", idx, pos, -2.0, -3.0)
+			for f in DroneView.effects(e, _rng):
+				_add_impact_fx(f)
 		"shield":
 			_snd("hit_shield", idx, pos, 0.0, -3.0)
 			var shot_dir := dir
@@ -854,6 +865,7 @@ func _draw_fx() -> void:
 		_draw_one(c, f, px)
 	for p in arena.projectiles:
 		_draw_shot(c, p, px)
+	DroneView.draw(c, arena, _clock, px, _trails, _glow_quads if _glow != null else null)
 	if _glow != null:
 		_glow.show_quads(_glow_quads)
 
@@ -921,7 +933,7 @@ func _draw_shot(c: Node2D, p: Dictionary, px: float) -> void:
 	var d := v.normalized()
 	var art = Art.projectile_of(str(w.get("id", "")), str(w["kind"]))  # its own art by weapon id, else the kind's
 	if art != null:
-		_draw_art_shot(c, art, at, d, px)
+		_draw_art_shot(c, art, at, d, px, 0.7 if w.get("drone", false) else 1.0)  # a drone's shot is its family's art, scaled down
 		return
 	match w["kind"]:
 		"missile":
@@ -962,8 +974,8 @@ func _art_k(px: float) -> float:
 
 ## A projectile sprite at `at` flying along `d` (the art faces up, plus its orientation_rot quarter
 ## turns), its "head" (else "center") pixel on `at`, looping its own animation.
-func _draw_art_shot(c: Node2D, art, at: Vector2, d: Vector2, px: float) -> void:
-	_blit_art(c, art, art.loop_frame(_clock), at, d.angle() + PI / 2.0 + art.orientation_rot * PI / 2.0, _art_k(px), "head" if art.anchors.has("head") else "center")
+func _draw_art_shot(c: Node2D, art, at: Vector2, d: Vector2, px: float, scale := 1.0) -> void:
+	_blit_art(c, art, art.loop_frame(_clock), at, d.angle() + PI / 2.0 + art.orientation_rot * PI / 2.0, _art_k(px) * scale, "head" if art.anchors.has("head") else "center")
 
 
 ## An effect (art/fx/<name>) at the fx's place, played once over its life, turned by f["angle"], its

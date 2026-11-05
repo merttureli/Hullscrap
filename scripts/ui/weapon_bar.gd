@@ -10,6 +10,7 @@ extends Control
 ## Reads a CombatSession; the only input it takes is the three ability keys.
 
 const Describe = preload("res://scripts/ui/describe.gd")
+const Art = preload("res://scripts/view/art.gd")
 
 const SLOT := Vector2(176.0, 58.0)
 const ASLOT := Vector2(196.0, 66.0)  ## an ability slot: taller, for the reason
@@ -54,7 +55,7 @@ func bind(p_session, p_aim: Callable) -> void:
 func _process(_dt: float) -> void:
 	if not visible or session == null:
 		return
-	var weapons_w := _row_width(session.weapons().size(), SLOT.x)
+	var weapons_w := _row_width(session.weapons().size() + session.bays().size(), SLOT.x)
 	var abilities_w := _row_width(session.ability_slots().size(), ASLOT.x)
 	size = Vector2(maxf(weapons_w, abilities_w), SLOT.y + (ASLOT.y + GAP if abilities_w > 0.0 else 0.0))
 	var vp := get_viewport_rect().size
@@ -89,7 +90,7 @@ func _draw() -> void:
 		return
 	var parts: Array = session.shield_sectors()
 	if not parts.is_empty():
-		var rows_left := (size.x - maxf(_row_width(session.weapons().size(), SLOT.x), _row_width(session.ability_slots().size(), ASLOT.x))) / 2.0
+		var rows_left := (size.x - maxf(_row_width(session.weapons().size() + session.bays().size(), SLOT.x), _row_width(session.ability_slots().size(), ASLOT.x))) / 2.0
 		_shield_diagram(Vector2(rows_left - DIAG.x - 14.0, size.y - DIAG.y), parts)
 	var slots: Array = session.ability_slots()
 	var row_y := 0.0
@@ -100,9 +101,12 @@ func _draw() -> void:
 		row_y = ASLOT.y + GAP
 	var list: Array = session.weapons()
 	var target: Vector2 = aim.call()
-	var wx := (size.x - _row_width(list.size(), SLOT.x)) / 2.0
+	var bays: Array = session.bays()
+	var wx := (size.x - _row_width(list.size() + bays.size(), SLOT.x)) / 2.0
 	for i in list.size():
 		_slot(Vector2(wx + i * (SLOT.x + GAP), row_y), i + 1, list[i], target)
+	for i in bays.size():  # the drone bays: their keys follow the guns'
+		_bay_slot(Vector2(wx + (list.size() + i) * (SLOT.x + GAP), row_y), list.size() + i + 1, bays[i])
 
 
 func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2) -> void:
@@ -133,6 +137,52 @@ func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2) -> void:
 		label += " %.1f" % st["cooldown_left"]
 	_text(label, at + Vector2(90.0, 39.0), 11, col)
 	var powered: bool = status not in ["unpowered", "disabled", "overheated", "malfunction", "wrecked"]
+	draw_circle(at + Vector2(SLOT.x - 7.0, 7.0), 3.5, READY if powered else BAD)
+
+
+## One drone bay slot: its key, the loaded kit's picture, the kit's name, what a launch costs in parts, the re-arm counting down, and the drone's hp while it is out.
+func _bay_slot(at: Vector2, number: int, b: Dictionary) -> void:
+	var st: Dictionary = session.bay_state(b["uid"])
+	var status: String = st["status"]
+	var out: bool = st["out"]
+	var col: Color = READY if status == "ready" else (COOLING if status in ["re-arming"] or out else (GREY if status == "no kit" else BAD))
+	draw_rect(Rect2(at, SLOT), BG)
+	draw_rect(Rect2(at, SLOT), Color(col, 0.9), false, 2.0)
+	var c := at + Vector2(30.0, SLOT.y / 2.0)
+	draw_arc(c, 19.0, 0.0, TAU, 28, Color(1, 1, 1, 0.12), 4.0, true)
+	var done := 1.0
+	if status == "re-arming":
+		done = 1.0 - clampf(st["rearm_left"] / maxf(st["rearm"], 0.01), 0.0, 1.0)
+	elif out:
+		done = clampf(st["hp"] / maxf(st["max_hp"], 1.0), 0.0, 1.0)
+	draw_arc(c, 19.0, -PI / 2.0, -PI / 2.0 + TAU * done, 28, Color(col, 0.95), 4.0, true)
+	var sheet = Art.drone(str(st["art"])) if st["art"] != "" else null
+	if sheet != null:  # the loaded kit's picture, inside the ring (the drone's own idle frame)
+		var f := int(Time.get_ticks_msec() / 330) % 2
+		draw_texture_rect_region(sheet.texture, Rect2(c - Vector2(sheet.frame) * 0.62, Vector2(sheet.frame) * 1.24), sheet.region(f), Color(1, 1, 1, 0.45 if status in ["no parts", "unpowered"] else 1.0))
+	_text(str(number), at + Vector2(7.0, 15.0), 13, TEXT)
+	var nm: String = str(st["kit_name"]) if st["kit_name"] != "" else "Empty bay"
+	var shown := fit_name(nm)
+	_text(shown["text"], at + Vector2(58.0, 20.0), shown["size"], TEXT, NAME_W)
+	var label := "READY"
+	match status:
+		"ready":
+			label = "READY"
+		"re-arming":
+			label = "RE-ARM %.1f" % st["rearm_left"]
+		"drone out":
+			label = "OUT  HP %d/%d" % [ceili(st["hp"] - 1e-6), int(st["max_hp"])]
+		"no parts":
+			label = "NO PARTS"
+		"no kit":
+			label = "NO KIT"
+		_:
+			label = STATUS_TEXT.get(status, status.to_upper())
+	_text(label, at + Vector2(58.0, 39.0), 11, col)
+	if st["cost"] > 0:
+		var tint := TEXT if st["parts"] >= st["cost"] else BAD
+		_text("%d part%s  (%d held)" % [st["cost"], "" if st["cost"] == 1 else "s", st["parts"]], at + Vector2(58.0, 53.0), 10, tint)
+	var powered: bool = status not in ["unpowered", "disabled", "overheated", "malfunction", "wrecked", "offline"]
 	draw_circle(at + Vector2(SLOT.x - 7.0, 7.0), 3.5, READY if powered else BAD)
 
 

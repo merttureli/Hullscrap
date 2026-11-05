@@ -5,6 +5,7 @@
 		"helm": "Flies the ship. Press E here to steer.",
 		"engine": "Pushes and steers the ship.",
 		"weapon": "Gun on a hull mount.",
+		"drone_bay": "Hull hatch: launches one drone.",
 		"shield": "Absorbs hits in layers before the hull.",
 		"medbay": "One bed that heals fast.",
 		"bed": "Crew rest and heal slowly.",
@@ -70,6 +71,7 @@
 		"gear": "Crew gear. Not placed on the ship.",
 		"special": "Held until something asks for it.",
 		"material": "Raw material for recipes and trade.",
+		"drone": "A drone for a bay. Permanent; each launch spends drone parts.",
 		"mod": "A small device worn in a kit slot. It changes how a boarding goes."
 	},
 	"tiles": {

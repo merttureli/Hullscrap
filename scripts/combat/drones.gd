@@ -24,6 +24,7 @@ const LAUNCH_SPEED := 230.0  ## px/s out of the hatch
 const LAUNCH_S := 0.4  ## seconds from the hatch to full size
 const ACCEL := 520.0  ## px/s2 a drone can change its velocity by
 const CHASE := 1.9  ## top speed over the orbit speed
+const SHOW_AFTER_S := 0.12  ## seconds a launched drone is still inside the hatch (the view shows the cradle carrying it)
 const HOME_DIST := 26.0  ## px from the hatch at which a returning drone is docked
 const EVASION := 0.12  ## the chance a turret's tracer misses a drone, on top of its accuracy
 const DRONE_EVENTS := ["drone_launch", "drone_shot", "drone_hit", "drone_down", "drone_home", "drone_recall"]
@@ -60,6 +61,7 @@ static func gun_of(arena, spec: Dictionary) -> Dictionary:
 	out["id"] = str(g.get("weapon", "drone"))
 	out["aim"] = "turret"
 	out["turret"] = true
+	out["drone"] = true  # (the view draws its shots smaller)
 	return out
 
 
@@ -246,6 +248,68 @@ static func recall_all(arena) -> void:
 		recall(arena, d)
 
 
+# --- the loaded kit (build mode) -----------------------------------------------------------------
+
+## The kits bay `uid` of `ship` could be loaded with: [{id, name, tier, hp, held (in the hold), free (not loaded in another bay), ok, why}], the lowest tier first.
+static func kit_choices(ship, uid: int) -> Array:
+	var def: Dictionary = ship.components.def(ship.components.instances[uid]["id"])
+	var out := []
+	for id in kit_ids():
+		var k := kit(id)
+		var d: Dictionary = k["drone"]
+		var held: int = ship.inventory.count(id)
+		var used := 0
+		for u in ship.components.instances:
+			if u != uid and str(ship.components.instances[u].get("kit", "")) == id:
+				used += 1
+		var why := ""
+		if not fits(def, int(d["tier"])):
+			why = "needs a Mk %s bay" % ["I", "II", "III"][int(d["tier"]) - 1]
+		elif held <= 0:
+			why = "none in the hold"
+		elif held <= used:
+			why = "loaded in another bay"
+		out.append({"id": id, "name": str(k["name"]), "tier": int(d["tier"]), "hp": int(d["hp"]), "role": str(d["role"]), "held": held, "ok": why == "", "why": why})
+	out.sort_custom(func(a, b): return [a["tier"], a["id"]] < [b["tier"], b["id"]])
+	return out
+
+
+## Load kit `id` ("" to unload) into bay `uid` of `ship`. "" when it worked, else why not.
+static func set_kit(ship, uid: int, id: String) -> String:
+	if not ship.components.instances.has(uid) or str(ship.components.def(ship.components.instances[uid]["id"]).get("family", "")) != FAMILY:
+		return "not a drone bay"
+	if id == "":
+		ship.components.instances[uid].erase("kit")
+		return ""
+	for c in kit_choices(ship, uid):
+		if c["id"] == id:
+			if not c["ok"]:
+				return str(c["why"])
+			ship.components.instances[uid]["kit"] = id
+			return ""
+	return "no such kit"
+
+
+## Fill every empty bay of `ship` with the best kit it can take (what a fight start does for a bay nobody loaded).
+static func autoload(ship) -> void:
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		var inst: Dictionary = ship.components.instances[uid]
+		if str(ship.components.def(inst["id"]).get("family", "")) != FAMILY or str(inst.get("kit", "")) != "":
+			continue
+		var best := ""
+		for c in kit_choices(ship, uid):
+			if c["ok"] and str(c["role"]) == "combat":
+				best = c["id"]
+		if best == "":
+			for c in kit_choices(ship, uid):
+				if c["ok"]:
+					best = c["id"]
+		if best != "":
+			inst["kit"] = best
+
+
 # --- the step ------------------------------------------------------------------------------------
 
 ## Advance every drone one substep: recall on no power, fly, shoot.
@@ -340,7 +404,7 @@ static func _fly_home(arena, d: Dictionary, dt: float) -> bool:
 
 ## 0..1: how far out of the hatch a launching drone is (the view grows it), 1 once it is out; a homing one shrinks again near its hatch.
 static func scale_of(arena, d: Dictionary) -> float:
-	var s := clampf(float(arena.tick - int(d["born"])) * arena.SUBSTEP / LAUNCH_S, 0.0, 1.0)
+	var s := clampf((float(arena.tick - int(d["born"])) * arena.SUBSTEP - SHOW_AFTER_S) / (LAUNCH_S - SHOW_AFTER_S), 0.0, 1.0)
 	if d["state"] == "home":
 		var co = arena.ships[d["owner"]]
 		var hatch: Vector2 = arena.local_to_world(d["owner"], co.bays[d["bay"]]["pos"])

@@ -39,7 +39,7 @@ const EMPTY_TEXT := ["No structure you can afford: gather scrap", "No shapes you
 ## The tab a component def belongs on.
 static func component_tab(def: Dictionary) -> int:
 	match str(def.get("family", "")):
-		"weapon":
+		"weapon", "drone_bay":
 			return Tab.WEAPONS
 		"engine":
 			return Tab.ENGINES
