@@ -26,7 +26,8 @@ const DT := 0.05
 const AIM_SD := 0.06  ## radians
 const HOLD_S := 6.0
 const MAX_S := 420.0  ## simulated seconds of a run, at most
-const SITES := ["derelict", "wreck", "nest", "station", "station_abandoned", "station_half", "station_operational", "won_fight"]
+const ONLY := ["only_scavenger", "only_pirate"]
+const SITES := ["only_scavenger", "only_pirate", "derelict", "wreck", "nest", "station", "station_abandoned", "station_half", "station_operational", "won_fight"]
 
 const GEAR := {
 	"start": {},
@@ -48,13 +49,16 @@ static func ship(rounds: int, crew: int) -> Ship:
 ## The session for site kind `kind` and `seed_value` ("station_<state>" is a module station in that state; "won_fight" a beaten enemy ship's wreck).
 static func session(kind: String, seed_value: int, gear: String, rounds: int, followers: int):
 	var sh := ship(rounds, followers)
-	var s = Boarding.start(null, null, "b%d" % seed_value, {"kind": "wreck" if kind in ["wreck", "won_fight"] else kind.split("_")[0]}, sh)
+	var s = Boarding.start(null, null, "b%d" % seed_value, {"kind": "wreck" if kind in ["wreck", "won_fight"] else ("station" if kind.begins_with("only_") else kind.split("_")[0])}, sh)
 	var site = null
 	match kind:
 		"station_abandoned", "station_half", "station_operational":
 			site = Site.make(seed_value, "station", {"faction": "clans", "gen": "modules", "state": kind.substr(8), "region": "clan_space"})
 		"station":
 			site = Site.make(seed_value, "station", {"faction": "clans", "gen": "classic"})
+		"only_scavenger", "only_pirate":  # a classic station with 3-4 foes of one kind: the same fight for each kind
+			site = Site.make(seed_value, "station", {"faction": "clans", "gen": "classic"})
+			site.crowd = {"spawn": {"count": [3, 4], "mix": {kind.substr(5): 1.0}}}
 		"won_fight":
 			var fac: String = ["rustfangs", "concord", "lumen", "wardens", "clans"][seed_value % 5]
 			var e: Ship = Shipgen.build(fac, "medium", seed_value, 150.0)
