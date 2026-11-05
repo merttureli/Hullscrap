@@ -1,0 +1,144 @@
+{
+ "events": [
+  {
+   "id": "exp_base_ransom_note",
+   "type": "exp_base",
+   "weight": 60,
+   "once": false,
+   "requires": {
+    "flag": "captive"
+   },
+   "text": "A rock you have not been to, and a message waiting at the lock for your ship by name. It is on a slate, in a neat hand: WE HAVE ONE OF YOURS. SHE (HE, IT) IS WELL. THE PRICE IS SIXTY CREDITS, OR A VISIT. The lock is open and the corridor beyond it is lit, as an invitation.",
+   "choices": [
+    {
+     "text": "Pay the sixty credits at the lock.",
+     "requires": {
+      "credits": 60,
+      "pay": true
+     },
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You put the coins in the slot. The inner door opens, and {who} walks out between two shy captors, who apologise for the whole thing. The kit stays on a shelf behind them; the crew member comes home with their hands empty.",
+       "effects": {
+        "rescue": true
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go in and fetch them yourselves.",
+     "requires": {
+      "suits": true
+     },
+     "outcomes": [
+      {
+       "weight": 60,
+       "text": "The corridor is a trap built by amateurs. You walk through it like a tax inspector, find {who} in a cupboard with a book, and walk out. The captors are too embarrassed to stop you.",
+       "effects": {
+        "items": {
+         "scrap": 15
+        },
+        "rescue": true
+       }
+      },
+      {
+       "weight": 40,
+       "text": "The corridor is a trap built by amateurs, and it works, once. You carry {who} out between you and leave a little blood on the lock.",
+       "effects": {
+        "hurt": 15,
+        "rescue": true
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Fenn] Haggle the price down to nothing.",
+     "requires": {
+      "species": "fenn"
+     },
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "Your Fenn talks for an hour. The captors, who do not have the practice, end by paying you to take {who} away. It is the finest haggle you have seen.",
+       "effects": {
+        "items": {
+         "credits": 20
+        },
+        "rescue": true
+       }
+      }
+     ]
+    },
+    {
+     "text": "Leave the slate where it is.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_flare_in_the_dust",
+   "type": "exp_planet",
+   "weight": 60,
+   "once": false,
+   "requires": {
+    "flag": "captive"
+   },
+   "text": "A flare goes up from a ridge of red dust, a clean thin line of smoke straight into the sky, and then another. It is a signal, and an old one, and the lander's log marks it as ours: the pattern is the one a crew member of yours would use. The ridge is a quarter-hour's walk.",
+   "choices": [
+    {
+     "text": "Walk to the ridge together.",
+     "outcomes": [
+      {
+       "weight": 65,
+       "text": "A small camp under an overhang. {who} is sitting by a fire with a tin of something warm, perfectly well, a little embarrassed. Their kit is gone. They are not.",
+       "effects": {
+        "rescue": true
+       }
+      },
+      {
+       "weight": 35,
+       "text": "A small camp under an overhang, and {who} by the fire. The walk back is a long one over loose ground, and nobody likes it. Everyone gets home.",
+       "effects": {
+        "hurt": 12,
+        "rescue": true
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Scan] Scan the ridge for a trap first.",
+     "requires": {
+      "skill": "scan"
+     },
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "Your scan shows the camp, the fire, {who}, and no one else for a kilometre. You walk in with your hands open, and take them home.",
+       "effects": {
+        "items": {
+         "scrap": 10
+        },
+        "rescue": true
+       }
+      }
+     ]
+    },
+    {
+     "text": "Watch the flares from the lander, then leave.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

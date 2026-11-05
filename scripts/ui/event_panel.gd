@@ -144,6 +144,7 @@ func open_event(ev: Dictionary) -> void:
 		view.append(leave)  # every choice needs something you lack: never leave the panel without a way out
 	for v in view:
 		_tag_threat(v)
+		_tag_risk(v)
 	page = "choices"
 	message = ""
 	hover = -1
@@ -365,8 +366,20 @@ func _tag_threat(v: Dictionary) -> void:
 	if info.is_empty():
 		return
 	v["foe"] = design
-	v["tag"] = "[%s%s]" % ["may fight: " if fights < outcomes.size() else "", info["line"]]
-	v["tag_color"] = info["palette"]["mark"] if not info["palette"].is_empty() else AMBER
+	_set_tag(v, "[%s%s]" % ["may fight: " if fights < outcomes.size() else "", info["line"]], info["palette"]["mark"] if not info["palette"].is_empty() else AMBER)
+
+
+## An expedition choice's odds (events.gd choice_view `risk`) as the same kind of tag at the end of its line: red for a crew loss, amber for lost gear, else by risk.
+func _tag_risk(v: Dictionary) -> void:
+	if not v.has("risk"):
+		return
+	var tone := str(v["risk"]["tone"])
+	_set_tag(v, str(v["risk"]["text"]), BAD if tone == "loss" else (AMBER if tone == "gear" else (GOOD if str(v["risk"]["text"]).contains("low") else AMBER)))
+
+
+func _set_tag(v: Dictionary, tag: String, color: Color) -> void:
+	v["tag"] = tag
+	v["tag_color"] = color
 	var para := TextParagraph.new()  # the tag's spaces do not break, so it never splits over two lines
 	para.width = WIDTH - 2.0 * PAD - ROW_TEXT_W
 	var text := "%s %s" % [_row_label(v), str(v["tag"]).replace(" ", "\u00a0")]
@@ -458,7 +471,7 @@ func _draw_result(lay: Dictionary) -> void:
 static func tone_of(line: String) -> int:
 	if line.contains("is lost"):
 		return -1
-	if line.contains("joins") or line.contains("learned") or line.begins_with("Blueprint:") or line.begins_with("Log ") or line.begins_with("On the map") or line.begins_with("Unlocked") or line.begins_with("Landmark"):
+	if line.contains("joins") or line.contains("rejoins") or line.contains("learned") or line.begins_with("Blueprint:") or line.begins_with("Log ") or line.begins_with("On the map") or line.begins_with("Unlocked") or line.begins_with("Landmark"):
 		return 1
 	var re := RegEx.new()
 	re.compile("[+-][0-9]+")

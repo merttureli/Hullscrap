@@ -80,7 +80,7 @@ func locate() -> String:
 		return "board"
 	var m = d.map
 	if m.visible:
-		if m.panel_only or m.event_panel.visible or m.station_panel.visible or m.region_choice.visible or m.journal_panel.visible:
+		if m.panel_only or m.event_panel.visible or m.station_panel.visible or m.team_picker.visible or m.region_choice.visible or m.journal_panel.visible:
 			return "modal"
 		return "map"
 	if (d.craft != null and d.craft.visible) or (b.shields != null and b.shields.visible):
