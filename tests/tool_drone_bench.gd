@@ -119,7 +119,7 @@ func fight(name: String, bay: bool, kit: String, e: Dictionary, cap: float) -> D
 		elif ev["type"] == "drone_down" and ev["ship"] == Session.PLAYER:
 			downs += 1
 	row.merge({"state": sess.state(), "t": n * STEP, "foe_hull": Structure.structure_fraction(a.ships[Session.ENEMY]), "hull": Structure.structure_fraction(a.ships[Session.PLAYER]),
-		"drone_shots": shots, "drone_lost": downs, "launches": a.events.filter(func(ev): return ev["type"] == "drone_launch" and ev["ship"] == Session.PLAYER).size()})
+		"drone_shots": shots, "drone_lost": downs, "launches": a.events.filter(func(ev): return ev["type"] == "drone_launch" and ev["ship"] == Session.PLAYER).size()}, true)
 	sim.free()
 	return row
 
