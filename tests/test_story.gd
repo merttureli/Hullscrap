@@ -10,6 +10,7 @@ const Content = preload("res://scripts/data/content.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Endings = preload("res://scripts/space/endings.gd")
 const Events = preload("res://scripts/space/events.gd")
+const Flagships = preload("res://scripts/space/flagships.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Sector = preload("res://scripts/space/sector.gd")
@@ -91,6 +92,8 @@ func test_every_derelict_log_is_handed_out_by_some_event() -> void:
 	var used := {}
 	for id in ev.order:
 		_collect_logs(ev.events[id], used)
+	for race in Flagships.races():  # a flagship's log is handed out by its beacon's page, made in code (flagships.gd event)
+		used[str(Flagships.entry(race)["log"])] = true
 	var orphans := []
 	for id in ev.logs:
 		if not used.has(id):

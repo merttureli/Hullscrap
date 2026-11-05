@@ -84,7 +84,7 @@ static func node_for(region_seed: int, map) -> String:
 ## The flagship POI of `race` (the sector adds it, Sector.add_boss).
 static func poi_of(race: String) -> Dictionary:
 	var e := entry(race)
-	return {"id": "flagship", "type": "flagship", "name": str(e["poi_name"]), "pos": Vector2.ZERO, "visibility": "beacon", "event_type": "flagship", "state": "new",
+	return {"id": "flagship", "type": "flagship", "name": str(e["poi_name"]), "pos": Vector2.ZERO, "visibility": "beacon", "event_type": "anomaly", "state": "new",
 		"enemy": "", "main": false, "boss": race, "flag": flag_of(race)}
 
 
