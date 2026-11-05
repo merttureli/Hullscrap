@@ -519,13 +519,14 @@ func _with_party(count := 2, seed_value := 31):
 	return s
 
 
-func test_only_unposted_crew_can_come_and_no_more_than_two() -> void:
+func test_any_crew_can_come_posted_or_not_and_no_more_than_two() -> void:
 	var sh := _ship()
 	var ok: Array = Party.eligible(sh)
 	check(ok.size() >= 2, "the rustbucket has crew to take (%d)" % ok.size())
-	check(ok.all(func(m): return not m.is_player and m.post < 0 and not m.is_down()), "none of them is the soldier, posted or down")
+	check(ok.all(func(m): return not m.is_player and not m.is_drone() and not m.is_down()), "none of them is the soldier, the drone or down")
 	ok[0].post = 3
-	check(not Party.eligible(sh).has(ok[0]), "a posted crew member stays aboard")
+	check(Party.eligible(sh).has(ok[0]), "a posted crew member may come too (playtest 2026-11-05)")
+	eq(ok[0].post, 3, "and keeps the post to go back to")
 	sh.crew.append(CrewMember.new("Vik", Vector2(14, 10), "human"))
 	sh.crew.append(CrewMember.new("Ona", Vector2(16, 10), "human"))
 	var s = _visit("station", 31, sh)
