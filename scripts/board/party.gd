@@ -1,5 +1,5 @@
 extends RefCounted
-## The crew who come along on a boarding visit (docs/BOARDING.md, stage B2). Up to `party_max` unposted crew follow the soldier, shoot (or swing) with
+## The crew who come along on a boarding visit (docs/BOARDING.md, stage B2). Up to `party_max` crew (posted or not) follow the soldier, shoot (or swing) with
 ## their species' sidearm and revive whoever is down. Pure logic, static functions on the session (boarding.gd), whose `party` array holds them:
 ## {m (a copy of the crew member: pos, hp, path), src (the ship's own CrewMember, written back on leaving), gun (arms.gd), cd, repath, revive (seconds
 ## spent reviving someone), moving, rest (their spare rounds: see give_ammo)}. A crew member who is down when the soldier leaves is lost (boarding.gd leave()).
@@ -21,13 +21,13 @@ const SEE := 14.0  ## cells a follower looks for something to shoot
 const MELEE_GO := 8.0  ## cells within which a melee follower goes for a foe
 
 
-## The crew the soldier may take: not the soldier, not a drone, not posted to a part, and up.
+## The crew the soldier may take: not the soldier, not a drone, and up. Posted crew may come too: a copy goes, and the ship's own stays at the post.
 static func eligible(ship) -> Array:
 	var out := []
 	if ship == null:
 		return out
 	for m in ship.crew:
-		if not m.is_player and not m.is_drone() and m.post < 0 and not m.is_down():
+		if not m.is_player and not m.is_drone() and not m.is_down():
 			out.append(m)
 	return out
 
