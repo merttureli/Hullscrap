@@ -828,11 +828,6 @@ func _draw_ring(centre: Vector2, ring: float) -> void:
 		var u := Vector2.UP.rotated(float(ct["bearing"]))
 		var col: Color = TYPE_COLORS.get(str(ct["known_type"]), CYAN)
 		_hud.draw_circle(centre + u * ring, 4.0, Color(col, 0.45 if ct["poi"]["state"] == Sector.DONE else 0.95))
-	if d != null:  # a rare find within radar range: a small diamond in its own colour
-		for r in Radar.rare_pieces(d, helm.flight.pos, Radar.reach(_ship())):
-			var at: Vector2 = centre + Vector2.UP.rotated(float(r["bearing"])) * (ring - 4.0)
-			var rc := Color(str(d.type_of(r)["color"])).lightened(0.35)
-			_hud.draw_colored_polygon(PackedVector2Array([at + Vector2(0, -5), at + Vector2(4, 0), at + Vector2(0, 5), at + Vector2(-4, 0)]), rc)
 	var to = helm.target(_sector)
 	if to != null and to.distance_to(helm.flight.pos) > 1.0:
 		var u: Vector2 = (to - helm.flight.pos).normalized()
