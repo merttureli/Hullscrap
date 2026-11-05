@@ -9,7 +9,7 @@ extends RefCounted
 ##   size      Vector2i (a door is 2x1, a piece its footprint, a mount its inside half); out_size: a mount's outside half, else ZERO
 ##   power     line-adjusted (+ makes, - draws; 0 for structure)
 ##   cost      what one placement takes from the cargo (structure; {} for a part); count: how many parts are held
-##   ok, why   it can be placed now (affordable, or held), else why not
+##   ok, why   it can be placed now (affordable, or held), else why not (entries() lists only the ones that can be)
 ## The Cargo tab also lists what else is held and not on the top bar (BAR_IDS) as "item" cards, which pick nothing.
 
 const Shapes = preload("res://scripts/ship/shapes.gd")
@@ -31,6 +31,11 @@ const LINE_ORDER: Array[String] = ["standard", "scrap", "neon"]
 const LINE_NAMES := {"scrap": "Scrap", "standard": "Standard", "neon": "Neon", "unique": "Unique"}
 
 
+## What a tab says when nothing on it can be placed now: one line, what to do about it.
+const EMPTY_TEXT := ["No structure you can afford: gather scrap", "No shapes you can afford: gather scrap", "No systems in the hold: craft one (C)",
+	"No guns in the hold: craft one (C)", "No engines in the hold: craft one (C)", "No utility parts in the hold: craft one (C)", "Nothing in the hold"]
+
+
 ## The tab a component def belongs on.
 static func component_tab(def: Dictionary) -> int:
 	match str(def.get("family", "")):
@@ -41,9 +46,10 @@ static func component_tab(def: Dictionary) -> int:
 	return Tab.UTILITY if str(def.get("family", "")) in UTILITY_FAMILIES else Tab.SYSTEMS
 
 
-## The cards of tab `tab` for `ship` (`cable_cost`: BuildSession.cable_cost). Structure: every tile and the cable;
-## Shapes: every non-full piece of every wall material; Cargo: the parts held, then the other cargo off the top bar;
-## the others: the parts of their families that are held or whose blueprint is known (could be crafted), see shown().
+## The cards of tab `tab` for `ship` (`cable_cost`: BuildSession.cable_cost): only what can be placed now. Structure: the tiles, the
+## cable and the belt that can be paid for; Shapes: the pieces of every wall material that can be paid for; Cargo: the parts held, then
+## the other cargo off the top bar; the others: the parts of their families that are held (what is only known to be craftable lives in
+## the crafting panel).
 static func entries(tab: int, ship, cable_cost: Dictionary) -> Array:
 	var out := []
 	var g = ship.grid
@@ -54,12 +60,15 @@ static func entries(tab: int, ship, cable_cost: Dictionary) -> Array:
 			out.append(cable_entry(ship, cable_cost))
 			if Ammo.belts_unlocked(ship):  # the belt needs its blueprint: no card before it
 				out.append(belt_entry(ship))
+			out = out.filter(func(e): return e["ok"])
 		Tab.SHAPES:
 			for id in g.defs.ids():
 				if g.tile_flag(id, "solid") and not g.tile_flag(id, "door"):
 					for p in Shapes.piece_ids():
 						if p != Shapes.FULL:
-							out.append(piece_entry(ship, p, id))
+							var e := piece_entry(ship, p, id)
+							if e["ok"]:
+								out.append(e)
 		Tab.CARGO:
 			for id in _sorted_parts(ship):
 				if ship.inventory.count(id) > 0:
@@ -75,10 +84,9 @@ static func entries(tab: int, ship, cable_cost: Dictionary) -> Array:
 	return out
 
 
-## Does the build palette list part `id`: one is held, or its blueprint is known (so it could be crafted)? Anything
-## else lives in the crafting panel only.
+## Does the build palette list part `id`: one is held? A part only known (its blueprint) lives in the crafting panel.
 static func shown(ship, id: String) -> bool:
-	return ship.inventory.count(id) > 0 or ship.crafting.is_known(id)
+	return ship.inventory.count(id) > 0
 
 
 ## Every component id, grouped by family (in the order the families first appear), then by line, then as listed.
@@ -202,6 +210,26 @@ static func num(v: float) -> String:
 ## Power with its sign: "+8", "-2", "0".
 static func power_text(v: float) -> String:
 	return ("+" if v > 0.0 else "") + num(v)
+
+
+## The one line a tab shows when it has no card.
+static func empty_text(tab: int) -> String:
+	return EMPTY_TEXT[clampi(tab, 0, EMPTY_TEXT.size() - 1)]
+
+
+## The figures on the picture of card `e`: [{icon, text, what}] and a gun's aim class (describe.gd glance()); a tile or piece shows its
+## hp and mass.
+static func glance(e: Dictionary, ship) -> Dictionary:
+	if e["kind"] == "part":
+		return Describe.glance(e["id"], ship)
+	var out := {"stats": [], "aim": ""}
+	if e["kind"] in ["tile", "piece"]:
+		for r in info(e, ship)["stats"]:
+			if r[0] == "HP":
+				out["stats"].append({"icon": "st_hp", "text": str(r[1]), "what": "HP"})
+			elif r[0] == "Mass":
+				out["stats"].append({"icon": "st_mass", "text": str(r[1]), "what": "Mass"})
+	return out
 
 
 static func size_text(s: Vector2i) -> String:

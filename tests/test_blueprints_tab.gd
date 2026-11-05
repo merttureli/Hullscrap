@@ -7,6 +7,7 @@ const Campaign = preload("res://scripts/space/campaign.gd")
 const CraftingPanel = preload("res://scripts/ui/crafting_panel.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const PartCard = preload("res://scripts/ui/part_card.gd")
+const PicCard = preload("res://scripts/ui/pic_card.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
@@ -209,3 +210,83 @@ func test_hover_shows_a_card_and_a_click_only_selects() -> void:
 	panel._input(_key(KEY_ENTER))
 	eq(ship.crafting.queue.size(), queue_before + 2, "so does Enter")
 	_free(d)
+
+
+func test_the_fabricator_lists_only_known_recipes_and_keeps_the_unaffordable_ones() -> void:
+	var ship := Fixture.room_ship()
+	var d := _panel(ship)
+	var panel: CraftingPanel = d["panel"]
+	panel.open()
+	for id in panel.recipe_ids():
+		check(ship.crafting.is_known(id), id + " is known")
+	var locked: Array = ship.crafting.ids().filter(func(id): return not ship.crafting.is_known(id) and ship.crafting.station_of(id) == "fabricator")
+	check(not locked.is_empty() and locked.all(func(id): return not panel.recipe_ids().has(id)), "locked recipes are hidden")
+	var poor: String = ""
+	for id in panel.recipe_ids():
+		if not ship.inventory.missing(ship.crafting.def(id)["materials"]).is_empty():
+			poor = id
+	if poor == "":
+		for m in ship.crafting.def(panel.recipe_ids()[0])["materials"]:
+			ship.inventory.counts.erase(m)
+		poor = panel.recipe_ids()[0]
+	check(panel.recipe_ids().has(poor), "a known recipe you cannot afford stays")
+	check(not panel.card_spec(poor)["short"].is_empty(), "with its missing materials marked (red)")
+	_free(d)
+
+
+func test_the_blueprints_tab_counts_what_was_found() -> void:
+	var ship := Fixture.room_ship()
+	var d := _panel(ship)
+	var panel: CraftingPanel = d["panel"]
+	panel.open()
+	panel.set_station("blueprints")
+	eq(panel.found_text(), "%d of %d found" % [ship.crafting.known.size(), ship.crafting.ids().size()], "known out of all")
+	var before := ship.crafting.known.size()
+	var locked: Array = ship.crafting.ids().filter(func(id): return not ship.crafting.is_known(id))
+	ship.crafting.unlock(locked[0])
+	eq(panel.found_text(), "%d of %d found" % [before + 1, ship.crafting.ids().size()], "learning one raises the count")
+	_free(d)
+
+
+func test_a_recipe_card_has_no_name_and_its_hover_card_does() -> void:
+	var ship := Fixture.room_ship()
+	var d := _panel(ship)
+	var panel: CraftingPanel = d["panel"]
+	panel.open()
+	var id: String = panel.recipe_ids()[0]
+	var spec: Dictionary = panel.card_spec(id)
+	var name: String = ship.crafting.name_of(ship.crafting.def(id)["output"]["item"], ship.components)
+	check(not PicCard.labels(spec).has(name) and not spec.has("name") and not spec.has("title"), "the card prints no name")
+	check(not spec["cost"].is_empty(), "it shows its materials")
+	var hover: Dictionary = panel.hover_card(id)
+	eq(hover["title"], name, "the hover card has the name")
+	check(hover["what"] != "" or not hover["stats"].is_empty(), "and what it does")
+	panel.set_station("blueprints")
+	ship.crafting.unlock("laser_mk2")
+	panel.set_station("blueprints")
+	check(panel.fresh_now.has("laser_mk2") and PicCard.labels(panel.card_spec("laser_mk2")).has("NEW"), "a new blueprint's card carries NEW")
+	_free(d)
+
+
+func test_the_grid_scrolls_and_moves_by_lines() -> void:
+	var ship := Fixture.room_ship()
+	var d := _panel(ship)
+	var panel: CraftingPanel = d["panel"]
+	panel.open()
+	panel.set_station("blueprints")
+	var starts := panel.line_starts()
+	check(starts.size() > 2, "several lines")
+	panel._gui_input(_wheel(MOUSE_BUTTON_WHEEL_DOWN))
+	eq(panel.top, starts[1], "the wheel scrolls a line")
+	panel._gui_input(_wheel(MOUSE_BUTTON_WHEEL_UP))
+	eq(panel.top, starts[0], "and back")
+	panel.move(1000)
+	check(panel.row_rect(panel.rows().size() - 1).size != Vector2.ZERO, "the last card is on screen after End")
+	_free(d)
+
+
+func _wheel(button: int) -> InputEventMouseButton:
+	var e := InputEventMouseButton.new()
+	e.button_index = button
+	e.pressed = true
+	return e
