@@ -1,13 +1,13 @@
 extends Control
-## The crafting panel (C, in build or play mode): a fabricator screen over the game. Left: every recipe,
-## grouped by category, the known ones first with what each needs (missing materials in red) and why it
-## cannot be made yet, then the ones whose blueprint is missing, dimmed (not those of a unique or relic part, or of a
-## people not met yet: racial tech stays hidden until learned). Middle: what the selected recipe makes, described
-## (describe.gd), or how crafting works (? toggles it). Right: the fabricator (level, tools, workshop modules counted)
+## The crafting panel (C, in build or play mode): a fabricator screen over the game. Left: a grid of picture cards (pic_card.gd: the
+## output's sprite, its figures, its materials with the missing ones in red, no name), grouped by category, only the recipes whose
+## blueprint you know (a known one you cannot afford stays, with its materials in red; locked ones are hidden: the Blueprints tab says how
+## many you have found). Hovering a card shows its name, description and full stats (part_card.gd). Middle: what the selected recipe
+## makes, described (describe.gd), or how crafting works (? toggles it). Right: the fabricator (level, tools, workshop modules counted)
 ## and the queue with progress bars; a click on a queued job cancels it (the materials come back). Bottom: the
 ## cargo's materials. Tab (or a click on the tabs at the top) switches to the smelter (docs/CONTENT.md
-## section 12): its recipes, its level, speed and tools, its own queue. Click a recipe, or select it with Up/Down and press Enter, to queue it. U
-## unlocks a random locked blueprint (debug, until salvage gives real ones).
+## section 12): its recipes, its level, speed and tools, its own queue. Click a card, or select it with the arrows and press Enter, to
+## queue it. U unlocks a random locked blueprint (debug, until salvage gives real ones).
 ## While open it takes every key and click; the game keeps running behind it. It stays shut during a
 ## fight and while the ship picker is up. Rules are in crafting.gd and workshop.gd; this node reads
 ## input and draws, in the UI colours of docs/ART_STYLE.md.
@@ -17,11 +17,11 @@ const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Workshop = preload("res://scripts/craft/workshop.gd")
 const Processing = preload("res://scripts/craft/processing.gd")
 const Describe = preload("res://scripts/ui/describe.gd")
-const Content = preload("res://scripts/data/content.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const PartCard = preload("res://scripts/ui/part_card.gd")
+const PicCard = preload("res://scripts/ui/pic_card.gd")
 
 const BLUEPRINTS := "blueprints"  ## the third tab: every blueprint you know
 const STATION_IDS: Array[String] = ["fabricator", "smelter", "blueprints"]  ## the tabs, in order (Tab cycles them)
@@ -35,7 +35,7 @@ const FAMILY_NAMES := {"weapon": "Weapons", "shield": "Shields", "engine": "Engi
 const G_MATERIALS := "Materials"
 const G_GEAR := "Hand weapons and gear"
 const G_ITEMS := "Items"
-const CARD_W := 330.0  ## the hover card
+const HOVER_W := 330.0  ## the hover card
 const CATEGORIES: Array[String] = ["system", "gear", "material", "module"]
 const CATEGORY_NAMES := {"system": "Systems", "gear": "Gear", "material": "Materials", "module": "Modules"}
 const BLUEPRINT_HELP := "Needs a blueprint"
@@ -43,7 +43,9 @@ const MARGIN := 40.0
 const TITLE_H := 56.0
 const CARGO_H := 96.0
 const HEAD_H := 30.0  ## a category header row
-const ROW_H := 62.0  ## a recipe row
+const CARD_H := 124.0  ## a recipe card
+const COLS := 4  ## cards across the list
+const CARD_GAP := 6.0
 const JOB_H := 52.0
 const FAB_H := 160.0
 const GAP := 14.0
@@ -98,8 +100,8 @@ func ship():
 	return sim.player_ship() if sim != null else null
 
 
-## The ids of the recipes of the shown station in screen order: by category, the known ones first, then the ones
-## whose blueprint is missing (as listed in data/recipes.json), minus the ones kept hidden (_hidden).
+## The ids of the recipes of the shown station in screen order: by category, as listed in data/recipes.json, only the ones whose
+## blueprint is known (the Blueprints tab: every known one, grouped by family).
 func recipe_ids() -> Array[String]:
 	var s = ship()
 	if s == null:
@@ -125,20 +127,12 @@ func recipe_ids() -> Array[String]:
 		_ids_cache = out
 		return out
 	for cat in CATEGORIES:
-		for known in [true, false]:
-			for id in s.crafting.ids():
-				if s.crafting.def(id)["category"] == cat and s.crafting.station_of(id) == station and s.crafting.is_known(id) == known and (known or not _hidden(s, id)):
-					out.append(id)
+		for id in s.crafting.ids():
+			if s.crafting.def(id)["category"] == cat and s.crafting.station_of(id) == station and s.crafting.is_known(id):
+				out.append(id)
 	_ids_key = key
 	_ids_cache = out
 	return out
-
-
-## Is the unknown recipe `id` kept off the list: the part it makes is unique or a relic (found, never built), or it is
-## racial tech of a people you have not met (a tech_* pack)? Learning the blueprint shows it.
-func _hidden(s, id: String) -> bool:
-	var d: Dictionary = s.components.def(s.crafting.def(id)["output"]["item"])
-	return d.get("unique", false) or d.get("relic", false) or Content.origin("recipes", id).begins_with("tech_")
 
 
 ## The Blueprints tab's group of recipe `id`: [rank, name]. A part goes by its family, a material, hand gear and the rest by their own groups.
@@ -281,6 +275,47 @@ func move(delta: int) -> void:
 	_show_selection()
 
 
+## Move the cursor a line down (up when negative) in the grid, to the same column or the last card of that line.
+func move_line(dir: int) -> void:
+	var all := rows()
+	var starts := line_starts()
+	var idx := -1
+	for i in all.size():
+		if all[i].get("id", "") == selected:
+			idx = i
+	if idx < 0 or starts.is_empty():
+		return
+	var li := 0
+	for k in starts.size():
+		if starts[k] <= idx:
+			li = k
+	var col := idx - starts[li]
+	var t := li + dir
+	while t >= 0 and t < starts.size() and all[starts[t]].has("header"):
+		t += dir
+	if t < 0 or t >= starts.size():
+		return
+	var last := (starts[t + 1] if t + 1 < starts.size() else all.size()) - 1
+	selected = all[mini(starts[t] + col, last)]["id"]
+	_show_selection()
+
+
+## The row indices where a line of the grid starts: a header is a line of its own, a group's cards run COLS to a line.
+func line_starts() -> Array[int]:
+	var out: Array[int] = []
+	var all := rows()
+	var col := 0
+	for i in all.size():
+		if all[i].has("header"):
+			out.append(i)
+			col = 0
+		else:
+			if col == 0:
+				out.append(i)
+			col = (col + 1) % COLS
+	return out
+
+
 ## Queue recipe `id`. Returns "" or the reason it was refused; either way it is the message on screen.
 func craft(id: String) -> String:
 	var s = ship()
@@ -378,8 +413,12 @@ func _input(e: InputEvent) -> void:
 		return
 	match e.keycode:
 		KEY_UP:
-			move(-1)
+			move_line(-1)
 		KEY_DOWN:
+			move_line(1)
+		KEY_LEFT:
+			move(-1)
+		KEY_RIGHT:
 			move(1)
 		KEY_PAGEUP:
 			move(-6)
@@ -437,9 +476,9 @@ func _gui_input(e: InputEvent) -> void:
 					elif e.double_click:
 						craft_selected()  # one click selects and pins the card; two queue
 			MOUSE_BUTTON_WHEEL_UP:
-				top = maxi(top - 1, 0)
+				_scroll(-1)
 			MOUSE_BUTTON_WHEEL_DOWN:
-				top = mini(top + 1, maxi(rows().size() - 1, 0))
+				_scroll(1)
 	accept_event()
 
 
@@ -471,14 +510,14 @@ func panel_rect() -> Rect2:
 
 func list_rect() -> Rect2:
 	var p := panel_rect()
-	return Rect2(p.position + Vector2(PAD, TITLE_H), Vector2(p.size.x * 0.42 - PAD, p.size.y - TITLE_H - CARGO_H - PAD))
+	return Rect2(p.position + Vector2(PAD, TITLE_H), Vector2(p.size.x * 0.5 - PAD, p.size.y - TITLE_H - CARGO_H - PAD))
 
 
 ## The middle column: the selected recipe described, or how crafting works.
 func details_rect() -> Rect2:
 	var p := panel_rect()
 	var l := list_rect()
-	return Rect2(Vector2(l.end.x + GAP, l.position.y), Vector2(p.size.x * 0.3, l.size.y))
+	return Rect2(Vector2(l.end.x + GAP, l.position.y), Vector2(p.size.x * 0.26, l.size.y))
 
 
 ## The right column: the station and its queue.
@@ -532,21 +571,38 @@ func job_rect(i: int) -> Rect2:
 	return Rect2(q.position + Vector2(8.0, 40.0 + i * (JOB_H + 6.0)), Vector2(q.size.x - 16.0, JOB_H))
 
 
-func _row_h(row: Dictionary) -> float:
-	return HEAD_H if row.has("header") else ROW_H
+## The width of a card of the grid.
+func card_w() -> float:
+	return (list_rect().size.x - (COLS - 1) * CARD_GAP) / COLS
 
 
-## The rect of row `i` of rows() as drawn (rows before `top` are not on screen: an empty rect).
+## The rect of row `i` of rows() as drawn: a header across the list, a card in its column (rows before `top`, and cards that do not
+## fit under the list's foot, are not on screen: an empty rect).
 func row_rect(i: int) -> Rect2:
 	var l := list_rect()
 	var all := rows()
 	if i < top or i >= all.size():
 		return Rect2()
 	var y := l.position.y
-	for k in range(top, i):
-		y += _row_h(all[k])
-	var r := Rect2(Vector2(l.position.x, y), Vector2(l.size.x, _row_h(all[i])))
-	return r if r.end.y <= l.end.y else Rect2()
+	var col := 0
+	for k in range(top, i + 1):
+		if all[k].has("header"):
+			if col > 0:
+				y += CARD_H + CARD_GAP
+				col = 0
+			if k == i:
+				var h := Rect2(Vector2(l.position.x, y), Vector2(l.size.x, HEAD_H))
+				return h if h.end.y + CARD_H <= l.end.y else Rect2()  # a header is shown only with a line of cards under it
+			y += HEAD_H
+			continue
+		if k == i:
+			var c := Rect2(Vector2(l.position.x + col * (card_w() + CARD_GAP), y), Vector2(card_w(), CARD_H))
+			return c if c.end.y <= l.end.y else Rect2()
+		col += 1
+		if col == COLS:
+			col = 0
+			y += CARD_H + CARD_GAP
+	return Rect2()
 
 
 ## The row at `p`, or -1.
@@ -569,6 +625,16 @@ func job_at(p: Vector2) -> int:
 	return -1
 
 
+## The wheel: `dir` lines down (up when negative).
+func _scroll(dir: int) -> void:
+	var starts := line_starts()
+	var at := 0
+	for k in starts.size():
+		if starts[k] <= top:
+			at = k
+	top = starts[clampi(at + dir, 0, starts.size() - 1)] if not starts.is_empty() else 0
+
+
 ## Scroll so the selected recipe (and its category header) is on screen.
 func _show_selection() -> void:
 	var all := rows()
@@ -579,19 +645,23 @@ func _show_selection() -> void:
 	if idx < 0:
 		top = 0
 		return
-	if idx < top or (idx == top + 1 and top > 0 and all[top].has("header")):
-		top = idx - 1 if idx > 0 and all[idx - 1].has("header") else idx
-	var l := list_rect()
-	while top < idx and _span(all, top, idx) > l.size.y:
-		top += 1
-
-
-## The height of rows first..last, both included.
-func _span(all: Array, first: int, last: int) -> float:
-	var h := 0.0
-	for k in range(first, last + 1):
-		h += _row_h(all[k])
-	return h
+	var starts := line_starts()
+	var li := 0
+	for k in starts.size():
+		if starts[k] <= idx:
+			li = k
+	var first: int = starts[li - 1] if li > 0 and all[starts[li - 1]].has("header") and starts[li - 1] == starts[li] - 1 else starts[li]
+	if first < top:
+		top = first
+	while top < idx and row_rect(idx).size == Vector2.ZERO:
+		var nxt := 0
+		for k in starts.size():
+			if starts[k] > top:
+				nxt = starts[k]
+				break
+		if nxt <= top:
+			break
+		top = nxt
 
 
 # --- drawing --------------------------------------------------------------------------------------
@@ -649,8 +719,8 @@ func help_lines() -> Array[String]:
 		"Fabricator: parts, gear, modules. Needs power. Workshop modules in its room raise its level.",
 		"Smelter (Tab): scrap and ore into refined materials. A crew member at it adds %d%% speed." % roundi(Processing.manned_speed() * 100.0),
 		"Finished parts land in the hold: place them from the build palette (B). Click a queued job to cancel it.",
-		"Click a recipe to select it and see what it does; Enter, a double-click or the Queue button queues it. Blueprints (Tab) lists what you know: click one to open it at its station.",
-		"Dimmed recipes need a blueprint: scan salvage, or find one in events and stores.",
+		"Hover a card for its name and stats; click to select it; Enter, a double-click or the Queue button queues it. Blueprints (Tab) lists what you know: click one to open it at its station.",
+		"Only recipes whose blueprint you know are listed (Blueprints shows how many you found): scan salvage, or find one in events and stores.",
 	]
 
 
@@ -720,9 +790,12 @@ func _draw_hover_card(s) -> void:
 	var id: String = rows_all[hover_row]["id"]
 	var card := hover_card(id)
 	var row := row_rect(hover_row)
-	var h := PartCard.height(card, CARD_W)
+	var h := PartCard.height(card, HOVER_W)
 	var p := panel_rect()
-	PartCard.draw(self, Vector2(row.end.x + 10.0, clampf(row.position.y, p.position.y + TITLE_H, p.end.y - CARGO_H - h)), CARD_W, card)
+	var x := row.end.x + 10.0
+	if x + HOVER_W > p.end.x - 6.0:
+		x = row.position.x - 10.0 - HOVER_W  # no room on the right: on the left of the card
+	PartCard.draw(self, Vector2(maxf(x, p.position.x + 6.0), clampf(row.position.y, p.position.y + TITLE_H, p.end.y - CARGO_H - h)), HOVER_W, card)
 
 
 ## The words of the hover card of recipe `id` (part_card.gd): name, what it does, key stats, materials, and why it cannot be queued.
@@ -730,10 +803,7 @@ func hover_card(id: String) -> Dictionary:
 	var s = ship()
 	if s == null or not s.crafting.has(id):
 		return {}
-	var why := reason(id)
-	if not s.crafting.is_known(id):
-		why = BLUEPRINT_HELP
-	return PartCard.data(id, s, why)
+	return PartCard.data(id, s, reason(id))
 
 
 ## Draw `text` wrapped to `width` with its top at `at`; returns its height.
@@ -747,7 +817,7 @@ func _draw_list(s, fab: Dictionary) -> void:
 	var l := list_rect()
 	var all := rows()
 	if all.is_empty():
-		_text("No recipes here", l.position + Vector2(8.0, 24.0), 16, DIM_TEXT)
+		_para(empty_text(), l.position + Vector2(8.0, 10.0), l.size.x - 16.0, 16, DIM_TEXT)
 		return
 	var last := top - 1
 	for i in range(top, all.size()):
@@ -760,80 +830,61 @@ func _draw_list(s, fab: Dictionary) -> void:
 			_text(str(row["header"]).to_upper(), r.position + Vector2(4.0, 21.0), 15, AMBER)
 			draw_line(r.position + Vector2(0.0, HEAD_H - 4.0), r.position + Vector2(r.size.x, HEAD_H - 4.0), EDGE_DIM, 1.0)
 		else:
-			if station == BLUEPRINTS:
-				_draw_blueprint(s, row["id"], r, i == hover_row)
-			else:
-				_draw_recipe(s, fab, row["id"], r, i == hover_row)
+			PicCard.draw(self, r, s, card_spec(row["id"]), row["id"] == selected, i == hover_row, Time.get_ticks_msec() / 1000.0)
 	if top > 0:
 		_text("^ more", Vector2(l.end.x - 70.0, l.position.y - 6.0), 13, DIM_TEXT)
 	if last < all.size() - 1:
 		_text("v more", Vector2(l.end.x - 70.0, l.end.y + 14.0), 13, DIM_TEXT)
 
 
-func _draw_recipe(s, fab: Dictionary, id: String, r: Rect2, hot: bool) -> void:
-	var rec: Dictionary = s.crafting.def(id)
-	var why := reason(id)
-	var known: bool = s.crafting.is_known(id)
-	if not known:
-		why = BLUEPRINT_HELP
-	var picked := id == selected
-	draw_rect(r.grow(-2.0), ROW_BG if known else PANEL_BG)
-	if not known:
-		draw_rect(r.grow(-2.0), Color(0.0, 0.0, 0.0, 0.2))  # dimmed: its blueprint is missing
-	draw_rect(r.grow(-2.0), EDGE if picked else (AMBER if hot else EDGE_DIM), false, 3.0 if picked else 1.0)
-	var out: Dictionary = rec["output"]
-	var title := _name(id) + (" x%d" % out["count"] if out["count"] > 1 else "")
-	_text(title, r.position + Vector2(12.0, 21.0), 16, TEXT if why == "" else DIM_TEXT)
-	var meta := "L%d   %s s" % [rec["fab_level"], _num(rec["time"])]
-	if not rec["tools"].is_empty():
-		meta += "   " + ", ".join(rec["tools"])
-	var level_ok: bool = int(fab["level"]) >= rec["fab_level"]
-	_text(meta, Vector2(r.position.x, r.position.y + 21.0), 13, DIM_TEXT if level_ok or not known else BAD, r.size.x - 12.0, HORIZONTAL_ALIGNMENT_RIGHT)
-	var x := r.position.x + 12.0
-	var short: Dictionary = s.inventory.missing(rec["materials"])
-	for m in rec["materials"]:
-		var have: int = s.inventory.count(m)
-		var seg := "%s %d" % [s.crafting.name_of(m), rec["materials"][m]] if not short.has(m) else "%s %d/%d" % [s.crafting.name_of(m), have, rec["materials"][m]]
-		_text(seg, Vector2(x, r.position.y + 39.0), 13, BAD if short.has(m) and known else DIM_TEXT)
-		x += ThemeDB.fallback_font.get_string_size(seg, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0
-	_text("Enter / double-click to queue" if why == "" else why, r.position + Vector2(12.0, 56.0), 12, GOOD if why == "" else (DIM_TEXT if not known else AMBER))
+## What the list says when it has no card: no blueprint is known for the station.
+func empty_text() -> String:
+	return "No blueprints known here yet. Learn them from scans, events, stores and boarding."
 
 
-## A row of the Blueprints tab: the name (NEW if learned since the tab was last open), where it is made, the level or tools, the materials
-## (green when the hold has them, red when not) and what stops it being queued now.
-func _draw_blueprint(s, id: String, r: Rect2, hot: bool) -> void:
+## The picture card of recipe `id` (pic_card.gd's spec): the output's sprite and figures, its materials (red when short), NEW on the
+## Blueprints tab, x3 for a batch, the fabricator level it needs (red when the station is too low). No name.
+func card_spec(id: String) -> Dictionary:
+	var s = ship()
 	var rec: Dictionary = s.crafting.def(id)
-	var picked := id == selected
-	draw_rect(r.grow(-2.0), ROW_BG)
-	draw_rect(r.grow(-2.0), EDGE if picked else (AMBER if hot else EDGE_DIM), false, 3.0 if picked else 1.0)
-	var out: Dictionary = rec["output"]
-	var title := _name(id) + (" x%d" % out["count"] if out["count"] > 1 else "")
-	_text(title, r.position + Vector2(12.0, 21.0), 16, TEXT)
+	var out: String = str(rec["output"]["item"])
+	var entry := {"kind": "item", "id": "item"}
+	var stats := []
+	var aim := ""
+	var line := "standard"
+	if s.components.has(out):
+		entry = {"kind": "part", "id": out}
+		var g := Describe.glance(out, s)
+		stats = g["stats"]
+		aim = g["aim"]
+		line = "unique" if s.components.def(out).get("unique", false) else str(s.components.def(out).get("line", "standard"))
+	elif s.crafting.materials.has(out) or UiKit.icon_art(out) != null:
+		entry = {"kind": "item", "id": out}
+	var tags := []
 	if fresh_now.has(id):
-		var tx := 12.0 + ThemeDB.fallback_font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 8.0
-		var tag := Rect2(r.position + Vector2(tx, 7.0), Vector2(38.0, 18.0))
-		draw_rect(tag, AMBER)
-		_text("NEW", tag.position + Vector2(0.0, 14.0), 12, Color("#1a1204"), tag.size.x, HORIZONTAL_ALIGNMENT_CENTER)
-	var meta := "%s  L%d" % [Crafting.STATIONS[rec["station"]], rec["fab_level"]]
-	if not rec["tools"].is_empty():
-		meta += "  " + ", ".join(rec["tools"])
-	_text(meta, Vector2(r.position.x, r.position.y + 21.0), 13, DIM_TEXT, r.size.x - 12.0, HORIZONTAL_ALIGNMENT_RIGHT)
-	var x := r.position.x + 12.0
-	var short: Dictionary = s.inventory.missing(rec["materials"])
-	for m in rec["materials"]:
-		var seg := "%s %d" % [s.crafting.name_of(m), rec["materials"][m]] if not short.has(m) else "%s %d/%d" % [s.crafting.name_of(m), s.inventory.count(m), rec["materials"][m]]
-		_text(seg, Vector2(x, r.position.y + 39.0), 13, BAD if short.has(m) else GOOD)
-		x += ThemeDB.fallback_font.get_string_size(seg, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0
-	var why := reason(id)
-	_text("Click to open at the %s" % str(Crafting.STATIONS[rec["station"]]).to_lower() if why == "" else why, r.position + Vector2(12.0, 56.0), 12, GOOD if why == "" else AMBER)
+		tags.append("NEW")
+	if int(rec["output"]["count"]) > 1:
+		tags.append("x%d" % int(rec["output"]["count"]))
+	var meta := "L%d" % int(rec["fab_level"])
+	if station == BLUEPRINTS and rec["station"] != Crafting.FABRICATOR:
+		meta = "Smelt " + meta
+	var level_low: bool = station != BLUEPRINTS and int(station_info(s)["level"]) < int(rec["fab_level"])
+	return {"entry": entry, "line": line, "stats": stats, "aim": aim, "cost": rec["materials"], "short": s.inventory.missing(rec["materials"]),
+		"held": -1, "tags": tags, "key": 0, "meta": meta, "meta_bad": level_low}
 
 
-## The right column of the Blueprints tab: how many you know and what a click does.
+## "34 of 120 found": the blueprints you know out of every recipe in the game.
+func found_text() -> String:
+	var s = ship()
+	return "%d of %d found" % [s.crafting.known.size(), s.crafting.ids().size()] if s != null else ""
+
+
+## The right column of the Blueprints tab: how many you have found and what a click does.
 func _draw_blueprints_side(s) -> void:
 	var r := side_rect()
 	_panel(r, ROW_BG)
 	_text("BLUEPRINTS", r.position + Vector2(10.0, 24.0), 15, AMBER)
-	_text("%d known" % s.crafting.known.size(), r.position + Vector2(10.0, 54.0), 22, GOOD)
+	_text(found_text(), r.position + Vector2(10.0, 54.0), 22, GOOD)
 	if new_count() > 0:
 		_text("%d new" % new_count(), r.position + Vector2(10.0, 78.0), 16, AMBER)
 	_para("Click a blueprint to open it at the fabricator or the smelter, ready to queue. Learn more from scans, events, stores and boarding.", r.position + Vector2(10.0, 92.0), r.size.x - 20.0, 14, DIM_TEXT)

@@ -11,7 +11,7 @@ Each entry has:
 - `stats` (family-specific, see below);
 - `abilities` (optional, see 5), `unique` (bool; unique items are found or traded only and have no recipe), `blurb` (one line of flavour).
 - Every part explains itself on the build card and in the crafting panel (`scripts/ui/describe.gd`): what its family does, its stats (read from the part's `stats`, `data/weapons.json`, `data/flight.json` and the shield timing, never copied), what its weapon kind, damage type, traits and effects mean, then its `blurb` as the lore. The words live in `data/describe.json`: a new family, weapon kind, damage type, effect key or `stats` key needs a line there (`tests/test_describe.gd` fails without it). A part needs a `blurb` in the same dry voice (`docs/LORE.md`).
-- The build palette lists a part only when one is held or its blueprint is known; the crafting panel lists every recipe (unknown ones dimmed), except those of a `unique` or `relic` part and racial tech (`tech_*` packs) until the blueprint is learned.
+- The build palette lists only what can be placed now: parts held in the cargo, and structure (walls, shapes, floors, doors, cable, belt) that can be paid for. A known blueprint with none held lives in the crafting panel, which lists only the recipes whose blueprint is known (the unaffordable ones stay, their materials in red; the Blueprints tab counts "N of M found"). Both screens show picture cards (sprite, two or three figures, cost, no name); the name, description and full stats are in the hover card.
 
 ## 2. Lines (`data/lines.json`): multipliers on top of the family and tier base
 | | cost | power draw | output | mass | heat | repair time | malfunction / min | ion vulnerability |

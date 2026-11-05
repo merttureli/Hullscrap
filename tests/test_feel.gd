@@ -72,6 +72,8 @@ func _wheel(at: Vector2, up := true) -> InputEventMouseButton:
 func test_the_wheel_over_a_panel_scrolls_it_and_never_zooms_but_over_the_world_it_zooms() -> void:
 	var sim := ShipSim.new()
 	sim.ships = [Fixture.room_ship()]
+	for m in sim.ships[0].crafting.materials:  # the palette lists what can be paid for: be rich
+		sim.ships[0].inventory.add(m, 1000)
 	var b := BuildMode.new()
 	b.sim = sim
 	b.cam = Camera2D.new()

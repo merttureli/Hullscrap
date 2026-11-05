@@ -5,6 +5,7 @@ extends "res://tests/base_test.gd"
 
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const BuildSession = preload("res://scripts/ship/build_session.gd")
+const PicCard = preload("res://scripts/ui/pic_card.gd")
 const Palette = preload("res://scripts/build/palette.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const Describe = preload("res://scripts/ui/describe.gd")
@@ -67,8 +68,10 @@ func _keys(cards: Array) -> Array:
 func test_the_palette_lists_every_placeable_id_by_category() -> void:
 	var b := _build()
 	var ship: Ship = b.ship
-	for id in ship.crafting.ids():  # a part is listed once it is held or its blueprint is known: know them all
-		ship.crafting.unlock(id)
+	for m in ship.crafting.materials:  # a rich ship holding one of every part: everything can be placed
+		ship.inventory.add(m, 1000)
+	for id in ship.components.ids():
+		ship.inventory.add(id, 1)
 	var structure := _keys(Palette.entries(Palette.Tab.STRUCTURE, ship, b.session.cable_cost))
 	for id in ship.grid.defs.ids():
 		check(structure.has("tile:" + id), "Structure has the tile " + id)
@@ -84,7 +87,7 @@ func test_the_palette_lists_every_placeable_id_by_category() -> void:
 			check(not seen.has(e["id"]), e["id"] + " is on one tab only")
 			seen[e["id"]] = tab
 	for id in ship.components.ids():
-		eq(seen.has(id), ship.crafting.has(id), "a part is on a tab when it has a known recipe (found parts with no recipe only when held): " + id)
+		check(seen.has(id), "a held part is on a tab: " + id)
 	for id in seen:
 		var fam := str(ship.components.def(id).get("family", ""))
 		eq(seen[id] == Palette.Tab.WEAPONS, fam == "weapon", id + ": Weapons holds the weapons")
@@ -93,10 +96,52 @@ func test_the_palette_lists_every_placeable_id_by_category() -> void:
 		eq(seen.get(id), Palette.Tab.UTILITY, id + " is a utility")
 	for id in ["reactor_mk1", "helm", "medbay", "radiator"]:
 		eq(seen.get(id), Palette.Tab.SYSTEMS, id + " is a system")
-	eq(_keys(Palette.entries(Palette.Tab.CARGO, ship, b.session.cable_cost)), [], "an empty hold lists nothing but the top bar's materials")
+	_done(b)
+
+
+func test_the_palette_lists_only_what_can_be_placed_now() -> void:
+	var b := _build({"scrap": 2})
+	var ship: Ship = b.ship
+	var cable: Dictionary = b.session.cable_cost
+	for tab in [Palette.Tab.STRUCTURE, Palette.Tab.SHAPES]:
+		for e in Palette.entries(tab, ship, cable):
+			check(e["ok"], "%s is listed only because it can be paid for" % e["key"])
+	var structure := _keys(Palette.entries(Palette.Tab.STRUCTURE, ship, cable))
+	check(structure.has("tile:floor") and not structure.has("tile:titanium_alloy") and not structure.has("tile:heavy_armor"), "structure without the material is not listed")
+	check(not _keys(Palette.entries(Palette.Tab.SHAPES, ship, cable)).any(func(k): return k.contains("titanium_alloy")), "nor are its shapes")
+	ship.crafting.unlock("laser_mk2")
+	for tab in [Palette.Tab.SYSTEMS, Palette.Tab.WEAPONS, Palette.Tab.ENGINES, Palette.Tab.UTILITY]:
+		for e in Palette.entries(tab, ship, cable):
+			check(ship.inventory.count(e["id"]) > 0, "%s is on the palette only because it is held" % e["id"])
+	check(not _keys(Palette.entries(Palette.Tab.WEAPONS, ship, cable)).has("part:laser_mk2"), "a known blueprint with none held is crafting-screen business")
+	eq(Palette.empty_text(Palette.Tab.WEAPONS), "No guns in the hold: craft one (C)", "an empty tab says what to do, in one line")
 	ship.inventory.add("laser_mk1", 2)
 	ship.inventory.add("plasma_cell", 3)
-	eq(_keys(Palette.entries(Palette.Tab.CARGO, ship, b.session.cable_cost)), ["part:laser_mk1", "item:plasma_cell"], "Cargo: the parts held, then the rest off the top bar")
+	eq(_keys(Palette.entries(Palette.Tab.WEAPONS, ship, cable)), ["part:laser_mk1"], "held, it is listed")
+	eq(_keys(Palette.entries(Palette.Tab.CARGO, ship, cable)), ["part:laser_mk1", "item:plasma_cell"], "Cargo: the parts held, then the rest off the top bar")
+	_done(b)
+
+
+func test_a_picture_card_has_figures_and_no_name() -> void:
+	var b := _build({"scrap": 40, "laser_mk1": 1, "shield_mk1": 1, "engine_mk1": 1})
+	var ship: Ship = b.ship
+	b.set_tab(Palette.Tab.WEAPONS)
+	var pal = b.hud.palette
+	var e: Dictionary = Palette.entries(Palette.Tab.WEAPONS, ship, b.session.cable_cost)[0]
+	var spec: Dictionary = pal.spec_of(e, 0)
+	var words: Array = PicCard.labels(spec)
+	check(not words.has(e["name"]) and not spec.has("name") and not spec.has("title"), "the card carries no name")
+	eq(spec["stats"].map(func(s): return s["what"]), ["Damage", "Shots a second", "Range"], "a gun: damage, rate, range")
+	eq(spec["aim"], "fixed", "and its aim mark (read from the gun's data)")
+	eq(spec["key"], 1, "the first card has its number key")
+	eq(spec["held"], 1, "a held part shows its count")
+	var shield: Dictionary = Describe.glance("shield_mk1", ship)
+	eq(shield["stats"].map(func(s): return s["what"]), ["Layers", "Recharge", "HP"], "a shield: layers and recharge")
+	eq(Describe.glance("engine_mk1", ship)["stats"][0]["what"], "Thrust", "an engine: thrust")
+	var wall: Dictionary = Palette.glance(Palette.tile_entry(ship, "wall"), ship)
+	eq(wall["stats"].map(func(s): return s["what"]), ["HP", "Mass"], "structure: hp and mass")
+	var card := Palette.info(e, ship)
+	check(card["title"] == e["name"] and card["what"] != "" and not card["stats"].is_empty(), "the hover card has the name, the description and the full stats")
 	_done(b)
 
 
@@ -163,7 +208,7 @@ func test_number_keys_tab_and_t_move_through_the_palette() -> void:
 
 
 func test_a_click_on_a_tab_or_a_card_picks_it() -> void:
-	var b := _build({"scrap": 200, "laser_mk1": 1})
+	var b := _build({"scrap": 200, "laser_mk1": 1, "pulse_mk1": 1})
 	var pal: Control = b.hud.palette
 	pal.click(pal.tab_rect(Palette.Tab.WEAPONS).get_center())
 	eq(b.tab, Palette.Tab.WEAPONS, "a click on a tab opens it")
@@ -332,7 +377,7 @@ func test_the_mode_bar_switches_modes() -> void:
 
 
 func test_no_hud_panels_overlap() -> void:
-	var b := _build({"scrap": 200, "laser_mk1": 1})
+	var b := _build({"scrap": 200, "laser_mk1": 1, "pulse_mk1": 1})
 	for i in 12:
 		b.ship.log_event("a long chronicle line about something that happened on the ship, number %d" % i)
 	for view in [Vector2(1600, 900), Vector2(1280, 720)]:
