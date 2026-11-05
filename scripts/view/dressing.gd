@@ -97,6 +97,12 @@ static func _fits(where: String, n: Vector2i, c: Vector2i, lo: Vector2i, hi: Vec
 	return true
 
 
+## The pieces of `pieces` (plan()) whose hull cell is still there. In a fight the dressing is never planned again: a lost cell
+## drops the pieces on it and every other piece stays where it was, so nothing slides along the hull as it is shot apart.
+static func kept(pieces: Array, grid) -> Array:
+	return pieces.filter(func(p): return grid.tiles.has(Vector2i((Vector2(p["at"]) - Vector2(p["n"]) * 0.5).floor())))
+
+
 ## Paint `pieces` (plan()) with grid cell (0, 0) at `origin` px, `k` px per cell, in the colours of `pal` (a style's palette: tint, accent, mark, lamp).
 static func draw(cv: CanvasItem, pieces: Array, origin: Vector2, k: float, pal: Dictionary, t := 0.0) -> void:
 	var body: Color = Color(pal["tint"]).darkened(0.35)

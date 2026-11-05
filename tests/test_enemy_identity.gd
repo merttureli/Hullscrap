@@ -11,6 +11,7 @@ const Content = preload("res://scripts/data/content.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
+const Dressing = preload("res://scripts/view/dressing.gd")
 
 const RACES: Array[String] = ["kett", "prismatic", "grundl"]
 const GANGS: Array[String] = ["rustfangs", "clans", "lumen", "wardens"]
@@ -81,6 +82,20 @@ func test_a_built_ship_carries_its_livery_crew_and_name_line() -> void:
 		check(s != null and s.get_meta("style", {}).get("id") == id, id + " has its livery")
 	for id in Shipgen.factions():  # every faction and every race has a look
 		check(Shipgen.style_of(id, "medium").has("emblem"), id + " has a livery")
+
+
+func test_a_lost_cell_drops_its_dressing_and_the_rest_stays_put() -> void:
+	var ship = Shipgen.build("kett", "medium", 11, 120.0, {"stage": 3})
+	var plan: Array = Dressing.plan(ship, ship.get_meta("style")["dressing"])
+	check(plan.size() > 1, "the kett ship wears dressing")
+	eq(Dressing.kept(plan, ship.grid).size(), plan.size(), "an intact hull keeps every piece")
+	var lost := Vector2i((Vector2(plan[0]["at"]) - Vector2(plan[0]["n"]) * 0.5).floor())
+	check(ship.grid.tiles.has(lost), "a piece sits on a hull cell")
+	ship.grid.tiles.erase(lost)
+	var after: Array = Dressing.kept(plan, ship.grid)
+	check(after.size() < plan.size(), "the piece on the lost cell is gone")
+	for p in after:
+		check(plan.has(p), "every other piece stays exactly where it was")
 
 
 func test_the_emblem_has_a_spot_on_the_hull_and_draws() -> void:

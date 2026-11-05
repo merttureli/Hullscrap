@@ -60,7 +60,7 @@ var _paint := {}  # Unlocks.skin_paint() of the ship's hull skin, remade when th
 var _paint_skin := "?"
 var _emblem_at := Vector2(-1.0e9, -1.0e9)
 var _emblem_sig := []
-var _dress_plan: Array = []  # Dressing.plan() of the ship, remade when its cells change
+var _dress_plan: Array = []  # Dressing.plan() of the ship, remade when its cells change outside a fight (in one, Dressing.kept drops what a lost cell held)
 var _dress_sig := []
 var _emblem_cells := 4.0  # the emblem decal's side, in cells
 var _livery := {}  # the ship's `style` meta of this frame
@@ -131,7 +131,10 @@ func _draw() -> void:
 	var grid = ship.grid
 	if not _livery.is_empty():  # the exterior dressing: outside the hull, under everything
 		var dsig := [grid.tiles.size(), grid.shapes.size(), ship.components.instances.size(), _livery["grade"]]
-		if dsig != _dress_sig:
+		if dsig != _dress_sig and arena != null and not _dress_sig.is_empty():  # in a fight it is never planned again: a lost cell drops its pieces, the rest stay put
+			_dress_plan = Dressing.kept(_dress_plan, grid)
+			_dress_sig = dsig
+		elif dsig != _dress_sig:
 			var entries: Array = _livery["dressing"].duplicate()
 			if _livery["grade"] == "patched":  # a low budget looks patched: welded scrap and a bare frame
 				entries.append({"kind": "scrap", "count": [6, 10], "where": "any", "len": 1.1})
