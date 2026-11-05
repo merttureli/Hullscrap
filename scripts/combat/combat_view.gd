@@ -2,7 +2,7 @@ extends Node2D
 ## Combat mode on screen: press K in play mode to meet the test pirate. The camera zooms out to frame
 ## both ships, which are drawn at their arena transforms (ship_view.gd); the interior build mode
 ## and the walking crew are put away. W/S throttle, A/D turn, the mouse aims, LMB fires group 1 (lasers,
-## bolts, beams), RMB group 2 (missiles, flak), 1-9 a single weapon, Shift, Space and Q use the engine, shield and utility abilities,
+## bolts, beams), RMB group 2 (missiles, flak), Q group 3 (whatever the player put there), 1-9 a single weapon, Shift, Space and E use the engine, shield and utility abilities,
 ## the arrow keys shift the shield balance one step toward the bow, stern, port or starboard and End makes it even,
 ## Esc leaves once the enemy is wrecked or 4000 px away, R restarts when you are wrecked.
 ## The rules live in combat_session.gd; this node reads input, runs the session, and draws the aim
@@ -44,7 +44,7 @@ const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
-const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB weapon groups   1-9 one weapon   T turrets   Shift engine   Space shield   Q utility   Esc leave"
+const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB/Q weapon groups   drag a gun on the bar to move it   1-9 one weapon   T auto guns   Shift engine   Space shield   E utility   Esc leave"
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
 const ENEMY_JUMP_DB := -8.0  ## the enemy's jump drive firing, against the player's own jump
@@ -337,8 +337,10 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_END:
 				session.reset_shield()
 				Audio.fx(self, "shield_shift")
+			KEY_Q when not e.ctrl_pressed and not e.meta_pressed:
+				session.fire_group(3, _aim())  # (the rest of the hold is in _process)
 			KEY_T:
-				_say("Turrets: autofire %s" % ("on" if session.toggle_autofire() else "off"))
+				_say("Auto guns: autofire %s" % ("on" if session.toggle_autofire() else "off"))
 			KEY_SPACE:
 				var why := session.arena.overcharge(Session.PLAYER)
 				if why != "":
@@ -350,9 +352,23 @@ func _unhandled_input(e: InputEvent) -> void:
 				var n: int = e.keycode - KEY_1
 				if n >= 0 and n <= 8:
 					session.fire_slot(n + 1, _aim())
+	elif active and e is InputEventMouseMotion and _bar != null and not _bar.drag.is_empty():
+		_bar.motion(e.position - _bar.position)  # a slot in hand follows the mouse
+		_handled()
+	elif active and e is InputEventMouseButton and not e.pressed and e.button_index == MOUSE_BUTTON_LEFT and _bar != null and not _bar.drag.is_empty():
+		var moved: int = _bar.release(e.position - _bar.position)  # dropped on a section, or let go where it was
+		if _bar.last_note != "":
+			_say(_bar.last_note)
+		elif moved >= 0:
+			_say("Moved to %s" % GunBadges.style({"group": moved})["label"])
+		_handled()
 	elif active and e is InputEventMouseButton and e.pressed:
+		if _bar != null and _bar.visible and e.button_index == MOUSE_BUTTON_LEFT and _bar.grab(e.position - _bar.position, e.button_index):
+			_swallow = e.button_index  # a left press on a slot takes it in hand (drag it to another section), it does not fire
+			_handled()
+			return
 		if _bar != null and _bar.visible and e.button_index == MOUSE_BUTTON_RIGHT and _bar.click(e.position - _bar.position, e.button_index):
-			_swallow = e.button_index  # a right-click on a slot moves that gun between LMB and RMB, it does not fire
+			_swallow = e.button_index  # a right-click on a slot cycles that gun's group, it does not fire
 			if _bar.last_note != "":
 				_say(_bar.last_note)
 			_handled()
@@ -461,9 +477,10 @@ func frame(dt: float) -> void:
 	if st != "lost":
 		if _swallow != 0 and not Input.is_mouse_button_pressed(_swallow):
 			_swallow = 0
-		for g in [1, 2]:
-			var btn := MOUSE_BUTTON_LEFT if g == 1 else MOUSE_BUTTON_RIGHT
-			badges.held[g] = hold_override.get(g, false) or (Input.is_mouse_button_pressed(btn) and _swallow != btn)
+		for g in [1, 2, 3]:
+			var down: bool = Input.is_key_pressed(KEY_Q) and not Input.is_key_pressed(KEY_CTRL) and not Input.is_key_pressed(KEY_META) if g == 3 \
+				else Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT if g == 1 else MOUSE_BUTTON_RIGHT) and _swallow != (MOUSE_BUTTON_LEFT if g == 1 else MOUSE_BUTTON_RIGHT)
+			badges.held[g] = hold_override.get(g, false) or down
 			if badges.held[g]:
 				session.fire_group(g, _aim())
 		badges.auto_on = session.arena.autofire.get(Session.PLAYER, true)
@@ -571,8 +588,9 @@ func _draw_bar_extras() -> void:
 			continue
 		var st: Dictionary = session.slot_state(sl["w"]["uid"], _aim())
 		var at: Vector2 = sl["rect"].position + base + Vector2(0.0, WeaponBar.SLOT.y + 10.0)  # under its slot
-		var text := "HIT %d%%  %s" % [roundi(float(st["hit"]) * 100.0), "AUTO" if auto else "HOLD"]
-		_bar_extras.draw_string(ThemeDB.fallback_font, at + Vector2(6.0, 0.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, WeaponBar.READY if auto else WeaponBar.COOLING)
+		var manual: bool = sl["w"]["group"] != 0  # a turret in LMB, RMB or Q fires on its button
+		var text := "HIT %d%%  %s" % [roundi(float(st["hit"]) * 100.0), GunBadges.style(sl["w"])["label"] if manual else ("AUTO" if auto else "HOLD")]
+		_bar_extras.draw_string(ThemeDB.fallback_font, at + Vector2(6.0, 0.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, WeaponBar.READY if auto or manual else WeaponBar.COOLING)
 
 
 # --- effects ----------------------------------------------------------------------------------------

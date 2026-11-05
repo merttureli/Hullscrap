@@ -50,7 +50,7 @@ func test_every_gun_has_a_chip_with_its_key_and_group() -> void:
 	var marks := list.map(func(w): return GunBadges.style(w)["mark"])
 	eq(marks, ["dot", "arc", "ring"], "dot, arc and ring differ without colour")
 	eq(GunBadges.key_of(9), 0, "no key past 9")
-	eq(list.map(func(w): return GunBadges.bar_group(w)), [1, 3, 2], "the bar groups")
+	eq(list.map(func(w): return GunBadges.bar_group(w)), [1, 0, 2], "the bar groups (0 is AUTO)")
 
 
 func test_holding_a_group_outlines_exactly_that_group() -> void:
@@ -77,10 +77,12 @@ func test_the_group_choice_cycles_and_survives_a_save() -> void:
 	back.load_defs(Ship.COMPONENTS_PATH)
 	eq(back.load_dict(saved), "", "loads")
 	eq(back.group_choice(laser), 2, "the choice came back")
-	eq(GunBadges.cycle(comps, w, laser), 1, "another click: back to LMB")
+	eq(GunBadges.cycle(comps, w, laser), 3, "another click: Q")
+	eq(GunBadges.cycle(comps, w, laser), 0, "another: AUTO")
+	eq(GunBadges.cycle(comps, w, laser), 1, "another: back to LMB")
 	check(not comps.to_dict()["instances"].any(func(r): return r.has("group")), "the default is stored as no choice")
-	eq(GunBadges.cycle(comps, w, turret), 0, "a turret stays auto")
-	eq(s.weapons()[1]["group"], w.group_of("rattle_burst_scrap"), "its group is untouched")
+	eq(GunBadges.cycle(comps, w, turret), 1, "a turret moves from AUTO to LMB: any gun can go in any group")
+	eq(s.weapons()[1]["group"], 1, "and the session fires it with LMB")
 
 
 func test_an_old_save_loads_with_the_default_groups() -> void:
@@ -92,7 +94,7 @@ func test_an_old_save_loads_with_the_default_groups() -> void:
 	back.load_defs(Ship.COMPONENTS_PATH)
 	eq(back.load_dict(old), "", "a version 6 save loads")
 	for uid in back.instances:
-		eq(back.group_choice(uid), 0, "no choice: the kind's default")
+		eq(back.group_choice(uid), -1, "no choice: the kind's default")
 
 
 func test_hover_links_the_slot_and_the_gun() -> void:
@@ -101,8 +103,8 @@ func test_hover_links_the_slot_and_the_gun() -> void:
 	var bar := WeaponBar.new()
 	bar.bind(s, func() -> Vector2: return Vector2.ZERO, b)
 	var lay := bar.layout()
-	eq(lay["slots"].map(func(x): return x["w"]["id"]), ["laser_mk1", "test_missile", "rattle_burst_scrap"], "the bar is grouped LMB, RMB, auto")
-	eq(lay["heads"].map(func(h): return h["group"]), [1, 2, 3], "each group has its header")
+	eq(lay["slots"].map(func(x): return x["w"]["id"]), ["laser_mk1", "test_missile", "rattle_burst_scrap"], "the bar is grouped LMB, RMB, Q, AUTO")
+	eq(lay["heads"].map(func(h): return h["group"]), [1, 2, 3, 0], "all four sections have a header, empty or not")
 	bar.size = Vector2(lay["width"], 400.0)
 	var sl: Dictionary = lay["slots"][2]
 	eq(bar.slot_at(sl["rect"].get_center())["w"]["uid"], sl["w"]["uid"], "the point on a slot finds it")

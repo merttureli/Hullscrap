@@ -448,7 +448,7 @@ func test_every_weapon_is_ready_against_an_enemy_ahead() -> void:
 		check(list.size() >= 1, key + " has a weapon in the arena")
 		for w in list:
 			eq(s.slot_state(w["uid"], aim)["status"], "ready", "%s: %s is ready, in arc, powered" % [key, w["name"]])
-		eq(s.fire_group(1, aim) + s.fire_group(2, aim), list.size(), key + ": every weapon fires on the first volley")
+		eq(s.fire_group(1, aim) + s.fire_group(2, aim) + s.fire_group(3, aim) + s.fire_group(0, aim), list.size(), key + ": every weapon fires on the first volley")
 
 
 func test_the_starters_run_for_five_minutes() -> void:
