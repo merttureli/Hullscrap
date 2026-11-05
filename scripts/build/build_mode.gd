@@ -46,6 +46,7 @@ const ArmFx = preload("res://scripts/view/arm_fx.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
+const GunBadges = preload("res://scripts/ui/gun_badges.gd")
 const CELL := 32
 const ARC_COLORS := {"fixed": Color("#ff7a5a"), "swivel": Color("#ffc966"), "turret": Color("#6cc4ff")}  ## the firing arc wedge by aim class
 const ARC_REACH := 0.25  ## the wedge's radius is this share of the gun's range ...
@@ -301,6 +302,9 @@ func _unhandled_input(e: InputEvent) -> void:
 		if e.pressed:
 			match e.button_index:
 				MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT:
+					if e.button_index == MOUSE_BUTTON_RIGHT and build_on and chip_click((make_input_local(e) as InputEventMouse).position):
+						get_viewport().set_input_as_handled()
+						return
 					if build_on:
 						_begin_drag(e)
 				MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN:
@@ -931,6 +935,8 @@ func _draw() -> void:
 	BeltArt.draw(self, ship, _origin(), CELL, _clock)  # the conveyor belts and the ammo riding them
 	Visuals.draw_wrecks(self, ship.components.wrecks, _origin(), CELL)
 	_draw_components()
+	for ch in gun_chips():
+		GunBadges.draw_chip(self, ch["at"], ch["h"], ch["sty"], ch["key"])
 	if show_o2:
 		_draw_oxygen()
 	if show_power:
@@ -1081,6 +1087,40 @@ func _draw_components() -> void:
 			var out_rect := Visuals.slope_rect(def, inst, _origin(), CELL) if Mounts.is_angled(inst) else _cells_rect(inst["out_cells"])
 			Visuals.draw_mount_out(self, def, inst, out_rect, _origin() + Vector2(Mounts.barrel_of(def, inst)["pivot"]) * CELL, CELL,
 				mount_fx.get(uid, {}).get("aim", Vector2.ZERO), opts)
+
+
+## The fire-group chips of the placed guns (gun_badges.gd), in the canvas' pixels: [{uid, at, h, sty, key}]; none outside build mode.
+## The key is the gun's number in a fight (guns by uid, as CombatSession.weapons() lists them).
+func gun_chips() -> Array:
+	var out := []
+	if not build_on or ship == null:
+		return out
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	var n := 0
+	for uid in uids:
+		var inst: Dictionary = ship.components.instances[uid]
+		if not _aim().has(inst["id"]):
+			continue
+		n += 1
+		if inst["out_cells"].is_empty():
+			continue
+		var d: Dictionary = _aim().def(inst["id"])
+		var w := {"aim": d["aim"], "group": _aim().group_of(inst["id"], ship.components.group_choice(uid)),
+			"pd": d["turret"] and d.get("effects") is Dictionary and d["effects"].has("intercept")}
+		out.append({"uid": uid, "at": _cells_rect(inst["out_cells"]).get_center(), "h": 24.0, "sty": GunBadges.style(w), "key": GunBadges.key_of(n - 1)})
+	return out
+
+
+## A right-click on a gun's chip moves a fixed gun between LMB and RMB; true when it hit a chip (the click is used up).
+func chip_click(canvas_pos: Vector2) -> bool:
+	for ch in gun_chips():
+		if canvas_pos.distance_to(ch["at"]) <= ch["h"] * 0.9:
+			if GunBadges.cycle(ship.components, _aim(), ch["uid"]) == 0:
+				message = "That gun fires by itself"
+			queue_redraw()
+			return true
+	return false
 
 
 ## Where the barrel of mount `def` turns, in the canvas' pixels, for an outside half at `out` turned `rot`.

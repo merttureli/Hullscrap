@@ -95,7 +95,7 @@ const COLUMNS: Array = [
 			["Mouse", "Steer; fixed guns aim where the ship points"],
 			["W / S", "Throttle forward / back"],
 			["A / D", "Strafe"],
-			["Left / Right mouse", "Fire group 1 (lasers, bolts, beams) / group 2 (missiles, flak)"],
+			["Left / Right mouse", "Fire the amber / cyan guns; right-click a slot to swap"],
 			["1 - 9", "Fire that weapon"],
 			["T", "Turrets: autofire on / off"],
 			["Shift / Space / Q", "Engine / shield / utility ability"],
