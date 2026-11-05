@@ -1390,7 +1390,7 @@ static func spawn_crew(ship) -> Array:
 		var near := mid
 		if not beds.is_empty():
 			near = Pathfinder.centre_of(beds[have % beds.size()])
-		var spot := _free_spot(grid, near, _anchors(ship), _part_cells(ship))
+		var spot := _free_spot(grid, near, _anchors(ship), _part_cells(ship, not beds.is_empty()))
 		if spot == Pathfinder.NO_CELL:
 			break
 		var looks: Array = cfg["looks"]
@@ -1430,7 +1430,7 @@ static func _spawn_planned(ship) -> Array:
 			look = cfg["looks"][nth % cfg["looks"].size()]
 			if not beds.is_empty():
 				near = Pathfinder.centre_of(beds[nth % beds.size()])
-		var spot := _free_spot(grid, near, _anchors(ship), _part_cells(ship))
+		var spot := _free_spot(grid, near, _anchors(ship), _part_cells(ship, not is_player and not is_ada and not drone))
 		if spot == Pathfinder.NO_CELL:
 			break
 		var m = _person(who, look, Pathfinder.centre_of(spot, 1) if drone else Pathfinder.centre_of(spot), str(e["species"]))
@@ -1571,10 +1571,12 @@ static func _anchors(ship) -> Array:
 	return ship.crew.map(func(m): return m.anchor())
 
 
-## The cells under the parts of `ship` (components stand on the floor; nobody should be put down on one).
-static func _part_cells(ship) -> Dictionary:
+## The cells under the parts of `ship` (components stand on the floor; nobody should be put down on one). `beds_ok`: a bed is not counted (crew start at the beds).
+static func _part_cells(ship, beds_ok := false) -> Dictionary:
 	var out := {}
 	for uid in ship.components.instances:
+		if beds_ok and _family(ship, uid) == "bed":
+			continue
 		for c in ship.components.instances[uid]["cells"]:
 			out[c] = true
 	return out

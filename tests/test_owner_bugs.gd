@@ -137,7 +137,7 @@ func _on_part(ship: Ship) -> Array:
 	var out := []
 	for m in ship.crew:
 		for c in Pathfinder.body_cells(m.anchor(), m.body_size):
-			if parts.has(c):
+			if parts.has(c) and (parts[c] != "bed" or m.is_player):  # (crew start at the beds, the soldier does not)
 				out.append("%s on %s at %s" % [m.name, parts[c], c])
 	return out
 

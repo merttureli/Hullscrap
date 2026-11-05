@@ -280,7 +280,7 @@ func test_play_mode_flies_in_the_sector_and_the_build_screen_holds() -> void:
 		view.frame(0.1)
 	eq(s.ship_pos, held, "the build screen holds the world")
 	eq(build.transform, Transform2D.IDENTITY, "and shows the ship upright at the origin")
-	eq(view.cam.position, Vector2.ZERO, "with the camera there")
+	eq(view.cam.position, build.hull_centre(), "with the camera on the hull (the plate's middle is not the ship's)")
 	check(not view.visible, "and nothing of the sector")
 	_free(d)
 
