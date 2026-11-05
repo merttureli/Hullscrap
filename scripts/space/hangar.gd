@@ -31,7 +31,7 @@ static func starters() -> Array:
 				crew.append({"name": str(m.get("name", "")), "species": str(m.get("species", "human"))})
 		out.append({"id": id, "name": str(design.get("name", id)), "path": str(s["path"]), "pack": str(s["pack"]), "group": str(h.get("group", "")),
 			"layout": str(h.get("layout", "A")), "unlock": unlock if unlock != "" else Unlocks.for_ship(id), "blurb": str(design.get("blurb", "")), "crew": crew, "build_first": bool(design.get("build_first", false))})
-	out.sort_custom(func(a, b): return [a["group"], a["layout"], a["name"]] < [b["group"], b["layout"], b["name"]])
+	out.sort_custom(func(a, b): return [0 if a["build_first"] else 1, a["group"], a["layout"], a["name"]] < [0 if b["build_first"] else 1, b["group"], b["layout"], b["name"]])  # a build-first start's tab comes first, where it is seen
 	return out
 
 

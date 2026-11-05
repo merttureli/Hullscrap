@@ -50,15 +50,12 @@ func _show_cards(_on: bool) -> void:
 	pass
 
 
-## Show the hangar, fresh (the profile may have earned something), on the first ship that is open.
+## Show the hangar, fresh (the profile may have earned something), on the first ship that is open and ready to fly (not a build-first start).
 func open() -> void:
 	load_cards()
-	var first := 0
-	for i in cards.size():
-		if not is_locked(i):
-			first = i
-			break
-	select(first)
+	var open_ids := range(cards.size()).filter(func(i): return not is_locked(i))
+	var ready := open_ids.filter(func(i): return not bool(cards[i].get("build_first", false)))
+	select(ready[0] if not ready.is_empty() else (open_ids[0] if not open_ids.is_empty() else 0))
 	message = ""
 	start = RunStart.clean(profile.start if profile != null else {}, profile)
 	_refresh_row()
