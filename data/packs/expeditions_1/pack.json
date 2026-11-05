@@ -1,0 +1,10 @@
+{
+	"id": "expeditions_1",
+	"name": "Away-team expeditions",
+	"version": "1.0",
+	"requires": [
+		"races_1",
+		"races_4"
+	],
+	"notes": "Beta 3: the events of the away-team expeditions (docs/CONTENT.md section 23): chains of scenes at planet, asteroid-base, ice-ruin and gas-platform sites, read against the team sent. Several ask for the species of races_1 and races_4."
+}

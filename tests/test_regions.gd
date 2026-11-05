@@ -7,6 +7,7 @@ extends "res://tests/base_test.gd"
 
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Regions = preload("res://scripts/space/regions.gd")
+const Homelands = preload("res://scripts/space/homelands.gd")
 const Drift = preload("res://scripts/space/drift.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -161,7 +162,8 @@ func test_a_homeland_has_its_race_station_as_a_beacon_selling_and_recruiting_its
 		check(c.is_known(st), id + ": the station is on the map from the start (a beacon)")
 		var menu := c.station_cfg(st)
 		check(not menu.is_empty() and menu["services"].has("stock") and menu["services"].has("recruit"), id + ": it trades and recruits")
-		eq(menu["stock"], r["stock"], id + ": its stock is the region's")
+		var base: Dictionary = Regions.station(str(places[0]["place"]), c.cfg)
+		eq(menu["stock"], Homelands.menu(str(places[0]["place"]), base)["stock"], id + ": its stock is the region's, leaned to its race in the capital (homelands.gd)")
 		var home: String = HOMELANDS[id]
 		for sp in menu["recruit"]:
 			check(int(menu["recruit"][sp]) <= int(menu["recruit"][home]), "%s: %s weighs no more than the home race" % [id, sp])

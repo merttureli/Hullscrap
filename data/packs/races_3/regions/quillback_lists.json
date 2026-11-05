@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"pirate": 20, "patrol": 14, "trader": 14, "distress": 12, "wreck_field": 12, "empty": 12, "asteroid_field": 8, "anomaly": 4},
 	"places": [
-		{"id": "second_blood", "name": "Second Blood", "type": "station", "faction": "clans", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "second_blood", "name": "Second Blood", "type": "station", "faction": "clans", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"scrap_chunk_m": 1.3, "fuel_canister": 1.1},
 	"pois": {"pirate_nest": 1.3, "quest": 1.3},

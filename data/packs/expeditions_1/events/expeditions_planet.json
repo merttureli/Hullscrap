@@ -1,0 +1,1590 @@
+{
+ "events": [
+  {
+   "id": "exp_planet_salt_flats",
+   "type": "exp_planet",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "The planet is mostly salt, flat as a table and the colour of old teeth. The lander's scanner finds a single straight line across it: a road, or a very patient scar. At the end of the line something metal catches the sun.",
+   "choices": [
+    {
+     "text": "Walk the road slowly, stepping where others have stepped.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The road is real. Whoever built it left a toolshed at the far end and never came back for the tools.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "You follow the road and the road follows you, apparently: a salt crust gives way and someone loses a boot's worth of skin.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Cut straight across the flats to the metal.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The flats hold. The metal is a buried freight lander, hatch ajar, cargo untouched since before the Snap. You carry out what four people can carry.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       },
+       "boost": {
+        "gear": [
+         "exosuit",
+         "salamander_suit",
+         "tank_harness"
+        ],
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The crust holds until it doesn't. You get a few crates out with the salt in your teeth.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "Halfway across the ground starts to sing, a deep note through your boots. Under the crust something is opening.",
+       "effects": {
+        "goto": "exp_planet_salt_flats_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Basalt] Send your Basalt across first. Salt is only a kind of rock.",
+     "requires": {
+      "species": "basalt"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Basalt strides over the flats like a man on a pavement, finds the lander and waves everyone over. The hold is full of good things and the salt did not even notice.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The salt notices, a little. Your Basalt crosses anyway, and comes back with the cargo and a limp.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Jump Pack] Hop the weak crust in long arcs.",
+     "requires": {
+      "gear": [
+       "jump_pack"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Three long jumps and a clean landing at the hatch. The crust is thinner than anyone liked, and nobody was standing on it when it broke.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The last landing is a little too heavy. The cargo is fine; the ankle is another matter.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_salt_flats_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The salt breaks in a long curve and the team stands on a plate that is slowly tilting into a sinkhole. Brine glints below. The lander is thirty paces off, and the way back is twenty.",
+   "choices": [
+    {
+     "text": "Back off the plate, one careful step at a time.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You shuffle back with your arms out, like people on a frozen pond, and the plate sinks behind you with a long wet sigh.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The plate drops before the last two are off. They are hauled out by the straps, and something that was in a pocket stays in the brine.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Run for the lander.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The plate holds exactly as long as you need. The lander is a treasure hold; you strip it in a hurry and leave the salt to its business.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       },
+       "boost": {
+        "gear": [
+         "exosuit",
+         "salamander_suit",
+         "tank_harness"
+        ],
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You make the lander, and most of the plate does not. Someone goes in to the knees and comes out grey, with half the cargo.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The plate tips. Someone is closest to the edge, and the last you see of {who} is a hand and a lamp going down the brine.",
+       "effects": {
+        "lose_member": "dead"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Suit] Wade the brine in a sealed suit and haul the lander out.",
+     "requires": {
+      "gear": [
+       "exosuit",
+       "salamander_suit",
+       "tank_harness"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "The suit takes the brine like a bath. You walk the lander's cargo out through the sinkhole, a crate at a time, and the planet does not get one of you.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "The brine finds a seam. Everyone gets out; one of you does it coughing.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_green_cathedral",
+   "type": "exp_planet",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "Down here the trees are the size of buildings and the buildings are older than the trees. A tower of grey stone stands in a clearing, wrapped in roots, with a door that has been opened and closed many times. The air smells of mushrooms and cold coins.",
+   "choices": [
+    {
+     "text": "Knock, and wait.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Nobody answers, which you take as an invitation. The tower's entrance hall is full of the things travellers leave behind when they decide not to go any further.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Nobody answers. Something in the roots answers instead, with a sharp, sensible sting.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go up the tower, floor by floor.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "Six floors, a ladder, a trapdoor. At the top: a travellers' cache in a stone box, still dry, still locked, and the lock is very old and very stupid.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       },
+       "boost": {
+        "species": [
+         "sporeling",
+         "mire"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The stairs hold until the fourth floor. You come down with a rotted plank's worth of bruises and a sack from the third.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "At the fifth floor there is a smell like warm pennies and a sound like breathing. The stairs behind you are full of roots that were not there before.",
+       "effects": {
+        "goto": "exp_planet_green_cathedral_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Sporeling] Let your Sporeling speak to the roots.",
+     "requires": {
+      "species": "sporeling"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Sporeling stands in the clearing with its caps lowered and the roots part like a curtain. The tower gives up its cache as though it had been waiting.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The roots are polite, but they are very old and very hungry. You are given the cache and a bite.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Mire] Your Mire knows a wet place when it smells one. Follow it in.",
+     "requires": {
+      "species": "mire"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Mire leads the way through the roots by smell and finds the dry cache the first time. 'It wanted to be found,' they say, and nobody wants to ask by whom.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Mire is right about the cache and wrong about the bog under the stairs.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_green_cathedral_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The roots have closed the stairs behind you. Something large shifts above with a sound like a ship's hull settling. Between you and the sky: three floors, a trapdoor, and whatever lives in the trunk of the tower.",
+   "choices": [
+    {
+     "text": "Cut your way back down through the roots.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You hack and slash and the roots give way, grudgingly, to the last step. Outside the sun is blinding and everyone is covered in sap.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You get out, but the roots take something on the way: a pack, a rifle, a glove, a handful of what you were carrying.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go on up, past whatever it is.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The thing above is a hive of pale moths and not a monster at all. They scatter, and behind them is a vault of tradeable curiosities. You carry it out.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       },
+       "boost": {
+        "species": [
+         "sporeling",
+         "mire"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You reach the top, and the top is not pleased to see you. You leave a lot of dignity and some skin in the stairwell.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The roots close on {who} in the dark and the sound that follows is not a sound you will describe later. The trapdoor shuts. You do not get it open again for them.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Sporeling / Mire] Walk up as one of them.",
+     "requires": {
+      "species": [
+       "sporeling",
+       "mire"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "The tower decides your Sporeling or Mire belongs here. The roots draw back. You walk to the top like guests, and the cache is handed over with a long, slow sigh.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "The tower mostly decides. The roots make a point of one last pinch.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_signal_hill",
+   "type": "exp_planet",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "A hill with a radio mast, and under the mast a shed that still has its lights on. The lander's comms pick up a looping voice, three words over and over, in a language no one on the crew has. A dog's skeleton lies at the door, curled up as though asleep.",
+   "choices": [
+    {
+     "text": "Listen to the loop from the bottom of the hill.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "You sit at the foot of the hill and record the loop. Along with it the receiver picks up a handful of data-bursts that are worth something to the right buyer.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "You listen too long. The loop gets into your head, and the walk back is a headache.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Climb up and open the shed.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The shed is a repeater station. The three words, translated at last by the lander's patient software, are 'Come in, please.' You do. The tool racks are full.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       },
+       "boost": {
+        "skill": [
+         "hack",
+         "scan"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The shed door is rigged with a counterweight. It misses you, mostly. What it was guarding is still there.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The shed's lights go out as the door opens. All of them, at once. The loop stops. In the new quiet, something very big shifts on the hill.",
+       "effects": {
+        "goto": "exp_planet_signal_hill_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Hack / Scan] Read the mast before touching it.",
+     "requires": {
+      "skill": [
+       "hack",
+       "scan"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "One look at the mast's controller and the whole sad little system comes apart in your hands. The shed opens for you like a manager's office, and the stores inside are generous.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The mast's controller bites back through the console with a last, nasty spark.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Fenn] Your Fenn offers to haggle with the mast.",
+     "requires": {
+      "species": "fenn"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Fenn plugs in, says a few polite, quick words in what turns out to be trade-cant, and the mast sends a short, formal reply. The shed unlocks. Everyone is a little afraid of how that went.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The haggling goes on too long. The mast wins the argument by overloading the lander's spare cell.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_signal_hill_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The loop starts again, louder, from every speaker on the hill. The mast is turning. Something at the top of the shed is looking at the team, and it has your exact voices. 'Come in, please,' it says, in yours.",
+   "choices": [
+    {
+     "text": "Back down the hill. Do not run.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You walk, jaws tight, and the voices follow you all the way to the lander and then stop, like a wave going out.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You make it to the lander, but not everything makes it with you. The hill keeps a pack, a gun, a strap or two.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Answer it. Go in.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You answer, and the voices stop. The shed is a vault of recorded things and one very good bargain, and nothing stops you carrying it out.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       },
+       "boost": {
+        "skill": [
+         "hack",
+         "scan"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You answer in your own voice and it hates that. You are shouted out of the shed by every speaker on the hill, with a haul in your arms.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You answer, and {who} answers louder than anyone, and then walks into the shed because it is such a polite request. The door shuts. Nothing you do opens it.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Hack] Take the mast's voice apart, from the outside.",
+     "requires": {
+      "skill": "hack"
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your hacker sits on the hillside with a cable and a rock, and takes the voice apart one word at a time. The shed opens for a pair of rude boots.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "The last word is a real bite. The shed opens, but not nicely.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_kett_grove",
+   "type": "exp_planet",
+   "weight": 14,
+   "once": false,
+   "requires": {
+    "region": "kett_hives"
+   },
+   "text": "The Kett built a garden here, long ago, a kilometre of terraced bone-white shell and low green moss. Four-handed gardeners' tools stand where they were left. Between the terraces, a path leads down to a hatch. The hatch has been opened by someone who could not stop talking about it.",
+   "choices": [
+    {
+     "text": "Tidy the terraces. Whoever built it would have wanted that.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "You rake and trim for an hour and the garden seems to take it well. In the tool hut, a Kett has left a gift for whoever bothered.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "You are a worse gardener than you thought. The moss resents you in a few direct ways.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Down the hatch, quickly.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "Down the hatch is a Kett larder: sealed jars, dried hive-cakes, a dozen little engines. You carry all you can.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       },
+       "boost": {
+        "species": "kett",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The larder floods with the first step. You come up with a few jars and a lot of regret.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The larder is hive-grade. Something has been eating it for a very long time and does not want to be disturbed.",
+       "effects": {
+        "goto": "exp_planet_kett_grove_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Kett] Your Kett clicks the garden-greeting, all four hands.",
+     "requires": {
+      "species": "kett"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Kett taps four-hand greetings on the hatch and the hatch, which has been waiting, opens and bows. The larder gives up everything, along with a long, formal blessing.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Kett mispronounces one click and offends a very old door. They are let in anyway, with a bruise.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Tinkerer] Pick the old lock. It is very old.",
+     "requires": {
+      "trait": "tinkerer"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The lock is a delight: a Kett puzzle-lock, three hands, one pin. Your tinkerer takes it apart as lovingly as it was built, and the hatch opens like a smile.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The lock is a delight and a trap. The delight lasts longer.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_kett_grove_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The larder is a hive, and a dead one, but its guards are not. Thin, tall, patient shapes line the walls with all four hands held out in an offer. They do not move. The only way past is down the middle, between them.",
+   "choices": [
+    {
+     "text": "Back out, hands open and visible.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You back out slowly, hands open. The guards watch you go and one of them raises a hand in what could be a farewell.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You back out, but the guards are not so polite about a pack you set down. It stays behind.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Walk down the middle between them.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You walk the line and no one moves. At the end the hive's treasury waits behind a screen of woven shell, and the guards wave you through with all four hands.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       },
+       "boost": {
+        "species": "kett",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You walk the line and the third guard decides you owe a toll. You pay it in hit points and walk out with the treasury.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You walk the line and the guards close around {who} in a quiet, courteous ring. They do not hurt them. They simply do not let them go.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Kett] Your Kett walks the line as one of the hive.",
+     "requires": {
+      "species": "kett"
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Kett takes the first guard's four hands in theirs, and the line parts in a ripple of bows. The treasury is yours by right, and they send you home with a polite blessing.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Kett knows the right gesture and is two seconds late. The guards forgive, with a nip.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_drowned_garage",
+   "type": "exp_planet",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "A yacht club, or what is left of it: a dozen hulls on stilts above a shallow sea that glitters with ash. The lander puts down on the club's own pier. Every boat is gone but one, and that one has its running lights on.",
+   "choices": [
+    {
+     "text": "Wade out to the nearest boat, looking before you step.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The nearest boat is stripped but not looted, which is a different thing. In the locker: a little of everything.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The water is warmer than it looks and more alive. You come out with a lot of bites.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Take the lit boat. See what it wants.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The lit boat is a wreck with an idea: a charging cell and a mad dock-hand's stash. You leave with a hold's worth of the best things.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       },
+       "boost": {
+        "species": [
+         "emberkin",
+         "basalt"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The boat lurches as you board. You grab a few things and a splinter and swim.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The boat is lit because something lives there. Several somethings. They watch you from the water and they do not blink.",
+       "effects": {
+        "goto": "exp_planet_drowned_garage_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Emberkin] Boil a path through the shallows.",
+     "requires": {
+      "species": "emberkin"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Emberkin wades in and the water goes quiet around them in a hiss of steam. The boat is reached dry and the stash taken.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Boiling the shallows turns out to be a good idea for almost everyone. The steam finds the rest of you.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Suit] Go in sealed. Swim for it.",
+     "requires": {
+      "gear": [
+       "eva_suit",
+       "exosuit",
+       "heat_suit",
+       "salamander_suit"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Sealed and weighted, the team walks the seabed to the lit boat's keel. The stash is under the floorboards, where the dock-hand left it.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "A sealed suit is not a sealed pocket. The salt gets in somewhere unfortunate.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_drowned_garage_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The things in the water have come in close. They are the size of a man, flat and pale, and they hold on to the hull with a sound like wet cloth. One of them has a lamp in its hand. It is the same make as yours.",
+   "choices": [
+    {
+     "text": "Back to the pier. Slowly.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You pull back along the planks and the things let you go, almost kindly. At the lander you count heads and find a few pockets empty.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You pull back and they let you go, but not everything with you. A pack floats away. Another is taken from below.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Hold the boat and go through the hold.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "They hold their ground and you hold yours. The hold is a treasure trove. You carry it out under a lot of pale hands.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       },
+       "boost": {
+        "species": [
+         "emberkin",
+         "basalt"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "They hold the boat and you pry the hold open and carry a part of it out. It is not nothing, and it is not free.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The things hold on to {who} first, then the rest of them, in a slow, wet courtesy. They do not hurt them. They take them down.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Emberkin / Basalt] Stand in the water and let them look.",
+     "requires": {
+      "species": [
+       "emberkin",
+       "basalt"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Emberkin or Basalt stands in the shallows and does not flinch. The things look, understand something, and give back the hold and the way out.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "They look, understand something else, and hold on for a time. They let go with a sigh.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_mire_bloom",
+   "type": "exp_planet",
+   "weight": 14,
+   "once": false,
+   "requires": {
+    "region": "mire_fens"
+   },
+   "text": "The swamp is blooming. Great sheets of white flower float on the water, and under the flowers, quiet green lights drift in rows. A boardwalk leads out into the bloom. At the end stands a hut with its door open and a pot on the fire.",
+   "choices": [
+    {
+     "text": "Sit at the edge and let the bloom come to you.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The lights drift in, small and curious, and leave tokens: seeds, a little glass, a bead. A fair trade for an hour's quiet.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The lights drift in and one lands on a hand. It is not at all pleasant. It stings, and it stays.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Follow the boardwalk to the hut.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The hut is a swamp-keeper's. The pot is soup, the shelves are stocked, and a ledger on the wall thanks 'whoever comes' in a patient hand. You take the stock.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       },
+       "boost": {
+        "species": "mire",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The boards groan and then fall. You get the hut's shelf, half of it, and a good soaking.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The pot is soup. The soup is not for you. The hut's keeper comes up out of the water behind the team, dripping and enormous, and says nothing at all.",
+       "effects": {
+        "goto": "exp_planet_mire_bloom_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Mire] Your Mire says the swamp-greeting and eats the soup.",
+     "requires": {
+      "species": "mire"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Mire eats the soup and compliments it in a bubbling accent. The keeper, enormously pleased, loads the team with every jar on the shelf.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Mire gets the greeting right and the soup wrong. The keeper is forgiving, and so is the stomach, later.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Quick hands] Patch the boardwalk as you go.",
+     "requires": {
+      "trait": "fast_repair"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your quick-handed crew repairs the boardwalk board by board as the team walks, and the keeper, watching from the water, is deeply, silently moved. The stock is yours.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Quick hands are not always quick enough. The boardwalk bites back.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_planet_mire_bloom_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The keeper stands in the water between the team and the boardwalk. Its hands are full of long white flowers, and it is holding them out. Whatever it is asking for, it is asking slowly.",
+   "choices": [
+    {
+     "text": "Give it what it is asking for: your attention.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You stand and listen. It speaks in bubbles for a long while and at the end it lets you pass, a little humbled.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You stand and listen and in the middle of it something in the pack gets taken as a gift.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Take the flowers.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You take the flowers and the keeper bows. The flowers are worth a small fortune in medical stores, and its hut is yours to strip.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       },
+       "boost": {
+        "species": "mire",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You take the flowers and the keeper takes the opportunity to take back some of yours.",
+       "effects": {
+        "items": {
+         "polymer": 25,
+         "copper": 15,
+         "credits": 25
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You take the flowers and the keeper takes {who} by the hand, gently, and leads them out into the bloom. You do not see them come back.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Mire] Answer in the keeper's own bubbling.",
+     "requires": {
+      "species": "mire"
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Mire answers, and the keeper laughs, a long wet gurgle. You leave with the stock and a standing invitation.",
+       "effects": {
+        "items": {
+         "polymer": 30,
+         "copper": 25,
+         "credits": 40,
+         "fuel": 2
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Mire answers, and gets a joke wrong, and takes a long nip for it.",
+       "effects": {
+        "items": {
+         "polymer": 15,
+         "copper": 12,
+         "scrap": 5
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

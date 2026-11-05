@@ -29,12 +29,17 @@ const Helm = preload("res://scripts/space/helm.gd")
 const FoeInfo = preload("res://scripts/space/foe_info.gd")
 const FoePic = preload("res://scripts/ui/foe_pic.gd")
 const Emblem = preload("res://scripts/view/emblem.gd")
+const WonderArt = preload("res://scripts/view/wonder_art.gd")
+const Homelands = preload("res://scripts/space/homelands.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Radar = preload("res://scripts/space/radar.gd")
 const Sector = preload("res://scripts/space/sector.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Art = preload("res://scripts/view/art.gd")
 const HollowFog = preload("res://scripts/view/hollow_fog.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Expedition = preload("res://scripts/space/expedition.gd")
+const Backdrop = preload("res://scripts/board/station_backdrop.gd")
 
 const DEBRIS_DOTS := 2000.0  ## px: debris this near shows on the compass ring
 const FOE_S := 2.0  ## seconds a contact's enemy is kept before it is looked up again
@@ -57,7 +62,8 @@ signal played(dt: float)
 
 const TYPE_COLORS := {"station": Color("#e1a136"), "store": Color("#6bd34a"), "trader": Color("#6bd34a"), "distress": Color("#e0413b"),
 	"wreck": Color("#9aa0a6"), "abandoned_station": Color("#8c96a3"), "mining_field": Color("#c2956a"), "unknown": Color("#c8ced8"),
-	"pirate_nest": Color("#e0413b"), "concord_checkpoint": Color("#4fa3ff"), "anomaly": Color("#c06bff"), "quest": Color("#f2c744")}
+	"pirate_nest": Color("#e0413b"), "concord_checkpoint": Color("#4fa3ff"), "anomaly": Color("#c06bff"), "quest": Color("#f2c744"),
+	"exp_planet": Color("#6bd34a"), "exp_base": Color("#c2956a"), "exp_ruin": Color("#8fd8ff"), "exp_platform": Color("#e1a136"), "wonder": Color("#ffe9a8")}
 
 var sim: Node  ## ShipSim
 var build: Node  ## BuildMode (its `drift` is the map, which owns the campaign)
@@ -89,6 +95,7 @@ var _layer: CanvasLayer
 var _hud: Control
 var _fog: Control  # the Hollow tide's fog, under the HUD
 var _icons = null
+var _site_tex := {}  # site kind -> its painted body (site_texture)
 var _icons_read := false
 
 
@@ -409,8 +416,20 @@ func _say(text: String) -> void:
 func _input(e: InputEvent) -> void:
 	if not (e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_E) or e.ctrl_pressed:
 		return
-	if toggle_helm():
+	if open_site() or toggle_helm():
 		get_viewport().set_input_as_handled()
+
+
+## E pressed within reach of an expedition site (and the player not at the helm): the team picker opens. True when it did (the key is used up).
+func open_site() -> bool:
+	var map = _map()
+	if not flying() or boarding or build == null or build.build_on or _fighting() or (map != null and map.visible) or helm.manual or _sector == null:
+		return false
+	var site: Dictionary = _sector.site_near()
+	if site.is_empty() or map == null or not map.has_method("open_team_picker"):
+		return false
+	map.open_team_picker(site, _sector)
+	return true
 
 
 ## E pressed: take or hand back the helm. True when it did either (the key is used up).
@@ -583,8 +602,18 @@ func _draw_poi(poi: Dictionary, px: float) -> void:
 	var a := 0.45 if poi["state"] == Sector.DONE and not bool(Sector.config()["poi_types"].get(poi["type"], {}).get("repeat", false)) else 1.0
 	var seed_h := hash(str(poi["id"]))
 	match str(poi["type"]):
+		"wonder":
+			var w: Dictionary = Homelands.wonder_of(str(poi.get("wonder", "")))
+			WonderArt.draw(self, str(w.get("art", "")), at, float(w.get("radius", 1500.0)), _clock, a)
 		"station", "store":
 			var r := 900.0 if poi["type"] == "station" else 560.0
+			if Sector.poi_is_capital(poi):
+				r = 1200.0
+				var look := Shipgen.style_of(str(poi["capital"]), "medium")
+				if not look.is_empty():
+					col = look["palette"]["tint"]
+					draw_arc(at, r * 1.12, 0.0, TAU, 96, Color(look["palette"]["accent"], a * 0.8), 14.0)
+					Emblem.draw(self, look["emblem"], Rect2(at - Vector2(1, 1) * r * 0.32, Vector2(1, 1) * r * 0.64), Color(look["palette"]["mark"], a * 0.35), 18.0)
 			draw_circle(at, r, Color("#1b222c", a))
 			draw_arc(at, r, 0.0, TAU, 96, Color(col, a), 28.0)
 			draw_arc(at, r * 0.55, 0.0, TAU, 64, Color("#59667a", a), 18.0)
@@ -612,6 +641,8 @@ func _draw_poi(poi: Dictionary, px: float) -> void:
 		"anomaly":
 			for k in 4:
 				draw_arc(at, 180.0 + 150.0 * k, _clock * (0.4 + 0.15 * k), _clock * (0.4 + 0.15 * k) + PI * 1.3, 32, Color(col, a * (0.7 - 0.12 * k)), 18.0)
+		"exp_planet", "exp_base", "exp_ruin", "exp_platform":
+			_draw_site(poi, px, a, seed_h)
 		"pirate_nest":
 			_rock(at, 480.0, seed_h, Color("#3b2f2a", a))
 			for k in 5:
@@ -619,6 +650,60 @@ func _draw_poi(poi: Dictionary, px: float) -> void:
 		_:  # a ship: unknown, trader, checkpoint, a passing contact
 			var heading: float = poi["vel"].angle() + PI / 2.0 if poi.get("vel") is Vector2 and poi["vel"] != Vector2.ZERO else float(seed_h % 628) / 100.0
 			_hull(at, heading, 320.0 if poi["type"] != "concord_checkpoint" else 520.0, Color(col.darkened(0.55), a), Color(col, a))
+
+
+## An expedition site: a planet, a rock with a base cut into it, an icy world with a ruin, a gas giant with a platform. The bodies are the station windows' planets
+## (station_backdrop.gd paint) painted once per kind and drawn smaller; the rest is flat shapes.
+func _draw_site(poi: Dictionary, px: float, a: float, seed_h: int) -> void:
+	var at: Vector2 = poi["pos"]
+	var kind := Expedition.kind_of(poi)
+	var col: Color = TYPE_COLORS.get(str(poi["type"]), TEXT)
+	var spin := float(seed_h % 628) / 100.0
+	var tex = site_texture(kind)
+	var r: float = {"planet": 520.0, "ruin": 380.0, "platform": 760.0, "base": 420.0}[kind]
+	if kind == "base":
+		_rock(at, r, seed_h, Color("#6b5a48", a))
+		_rock(at + Vector2(-r * 0.5, r * 0.35), r * 0.35, seed_h + 3, Color("#5a4a3a", a))
+		draw_line(at + Vector2(r * 0.1, -r * 0.6), at + Vector2(r * 0.1, -r * 1.2), Color(col, a), 14.0)
+		draw_circle(at + Vector2(r * 0.1, -r * 1.2), 28.0, Color(col, a * (0.5 + 0.5 * sin(_clock * 3.0))))
+		for k in 5:
+			draw_rect(Rect2(at + Vector2(-r * 0.35 + k * r * 0.17, -r * 0.1), Vector2(40.0, 24.0)), Color("#ffe8a0", a * 0.8))
+		return
+	for k in 4:
+		draw_circle(at, r * (1.0 + 0.03 * (k + 1)), Color(col, a * 0.05))
+	if tex != null:
+		draw_set_transform(at, spin, Vector2.ONE)
+		draw_texture_rect(tex, Rect2(Vector2(-r, -r), Vector2(r, r) * 2.0), false, Color(1, 1, 1, a))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if kind == "ruin":  # three dark pillars and a cyan glow on the ice
+		for k in 3:
+			var o := at + Vector2(-r * 0.25 + k * r * 0.25, r * 0.1 * (k % 2))
+			draw_rect(Rect2(o, Vector2(r * 0.07, r * 0.26)), Color("#1b222c", a))
+		draw_circle(at + Vector2(0, r * 0.15), r * 0.12, Color(col, a * (0.25 + 0.15 * sin(_clock * 2.0))))
+	elif kind == "platform":  # a hexagonal platform hung off the cloud-tops
+		var o := at + Vector2(r * 1.15, -r * 0.35)
+		var pts := PackedVector2Array()
+		for k in 6:
+			pts.append(o + Vector2.from_angle(k * TAU / 6.0) * 150.0)
+		draw_colored_polygon(pts, Color("#3a3f47", a))
+		pts.append(pts[0])
+		draw_polyline(pts, Color(col, a), 12.0)
+		draw_line(o, at + Vector2.from_angle(-0.3) * r, Color(col, a * 0.5), 6.0)
+		draw_circle(o, 34.0, Color(col, a * (0.5 + 0.5 * sin(_clock * 3.0))))
+	else:  # a beacon on the ground
+		draw_circle(at + Vector2(r * 0.3, -r * 0.2), 22.0, Color(col, a * (0.5 + 0.5 * sin(_clock * 3.0))))
+
+
+## The painted body of site kind `kind` ("planet", "ruin", "platform"), made on first use (null for a base).
+func site_texture(kind: String):
+	if kind == "base":
+		return null
+	if not _site_tex.has(kind):
+		var sky: Dictionary = Expedition.config()["kinds"][kind]["sky"]
+		var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/station_modules.json"))["backdrop"][str(sky["kind"])]
+		var pal: Array = cfg["palettes"][int(sky["palette"]) % cfg["palettes"].size()].map(func(c): return Color(str(c)))
+		_site_tex[kind] = ImageTexture.create_from_image(Backdrop.paint("gas_giant" if str(sky["kind"]) == "gas_giant" else "planet", pal, 11 + kind.length(), 0.3))
+	return _site_tex[kind]
 
 
 ## A pointed hull of `size` px at `at`, nose along `heading` (flight.gd convention).
@@ -706,6 +791,10 @@ func _draw_hud() -> void:
 		for ct in contacts:
 			_draw_marker(ct, xf, centre, vp)
 	var lines: Array = [] if _fighting() else [[title(), DIM_TEXT, 14], [helm_line(), CYAN if helm.state == "autopilot" else TEXT, 15]]  # a fight has its own HUD
+	if not _fighting() and _sector.hollow == false:
+		var site: Dictionary = _sector.site_near()
+		if not site.is_empty() and not helm.manual and (_map() == null or not _map().visible):
+			lines.append(["E: send an away team to the %s" % str(site["name"]).to_lower(), AMBER, 16])
 	var sl := spool_line()
 	if sl != "":
 		lines.append([sl, RED if campaign().jump_status()["blocked"] else AMBER, 16])
@@ -774,6 +863,13 @@ func _draw_marker(ct: Dictionary, xf: Transform2D, centre: Vector2, vp: Vector2)
 	if course:
 		_hud.draw_arc(at, ICON * 0.75, 0.0, TAU, 32, CYAN, 2.0, true)
 	_icon(kind, at, ICON, Color(1, 1, 1, alpha), _hud)
+	if Sector.poi_is_capital(poi):  # the race's emblem beside the marker
+		var look := Shipgen.style_of(str(poi["capital"]), "medium")
+		if not look.is_empty():
+			Emblem.draw(_hud, look["emblem"], Rect2(at + Vector2(ICON * 0.55, -ICON * 0.5), Vector2(ICON, ICON) * 0.8), Color(look["palette"]["mark"], alpha), 1.5)
+	elif str(poi["type"]) == "wonder":
+		_hud.draw_arc(at, ICON * 0.62, 0.0, TAU, 24, Color(TYPE_COLORS["wonder"], alpha), 2.0, true)
+		_hud.draw_circle(at, ICON * 0.18, Color(TYPE_COLORS["wonder"], alpha))
 	var label := "%s  %s" % [contact_name(ct), dist_text(float(ct["distance"]))]
 	var tw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 	var tp := place_label(at, tw, vp, _labels)

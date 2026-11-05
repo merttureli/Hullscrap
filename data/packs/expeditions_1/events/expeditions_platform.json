@@ -1,0 +1,1542 @@
+{
+ "events": [
+  {
+   "id": "exp_platform_cloud_dock",
+   "type": "exp_platform",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "A mining platform, hung on cables in the cloud-tops, turning slowly in the wind. The dock is open, the crane is swinging, and every window is lit. The lander is thrown about like a leaf on its approach. The air outside is yellow and thick and ticks on the hull.",
+   "choices": [
+    {
+     "text": "Go in by the dock and stay on the catwalk.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The catwalk goes the whole length of the platform and every door off it is open. You take the cargo nobody was minding.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The catwalk goes the whole length of the platform and the wind goes through every grating. You take the cargo and a lot of bruises.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Cross the open gantry to the refinery.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The gantry holds. The refinery is a pantry of good chemistry: tanks of gas, sealed cells, a case of clean fuel. You carry what the wind lets you.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       },
+       "boost": {
+        "gear": [
+         "exosuit",
+         "jump_pack",
+         "ballast_rig",
+         "tank_harness"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The gantry bucks. You cross, you grab, you cross back, and everyone has a different story of it.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The wind rises on the gantry. A gust catches the team like a wave. The platform swings, and the gantry lets go at one end.",
+       "effects": {
+        "goto": "exp_platform_cloud_dock_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Siltborn] Your Siltborn floats the gap.",
+     "requires": {
+      "species": "siltborn"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Siltborn steps off the gantry and the thick air takes them like a hand. They drift across, ease down, and open the refinery door from inside.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Siltborn drifts across, and the wind has other ideas. They arrive in an undignified bundle.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Jump Pack / Exosuit] Jump the broken gantry.",
+     "requires": {
+      "gear": [
+       "jump_pack",
+       "exosuit"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "One long arc and everyone is across. The refinery opens as if it had been waiting for visitors, and the cargo is yours.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "One long arc, and a landing that is mostly a controlled fall.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_cloud_dock_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The gantry hangs by its last bolts, swinging in the gale, and the team clings to it. Below: the cloud, a mile of yellow nothing. Ahead: the refinery door, ten metres away. Behind: the dock, fifteen. The wind has found the loose end and is working at it.",
+   "choices": [
+    {
+     "text": "Back along the gantry, hand over hand.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You crawl back along the swinging gantry, one at a time, and the last of you steps onto the dock as the whole span lets go and falls into the yellow.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You crawl back along the gantry. The wind takes a pack from a shoulder and a rifle from a strap, and gives nothing back.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Forward to the refinery.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You make the door at a run. The refinery is untouched, a vault of tanks and cells, and the wind roars outside while you fill every pack.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8,
+         "plasma_rifle": 1
+        }
+       },
+       "boost": {
+        "gear": [
+         "exosuit",
+         "jump_pack",
+         "ballast_rig",
+         "tank_harness"
+        ],
+        "x": 2.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You make the door at a crawl. The refinery gives some of its stock to the effort. The wind takes the rest.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You make the door, and {who} does not. The gantry's last bolt lets go while they are still on it. There is a cry and then there is only the wind.",
+       "effects": {
+        "lose_member": "dead"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Exosuit / Ballast / Jump Pack] Anchor the gantry and cross on the line.",
+     "requires": {
+      "gear": [
+       "exosuit",
+       "ballast_rig",
+       "jump_pack"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "The gear takes the weight. You string a line, clip on and cross one by one, with the wind trying everything it knows. At the end the refinery opens and gives up the lot.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "The gear takes the weight, and the line takes the rest. Someone is thrown against the rail.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_singing_derrick",
+   "type": "exp_platform",
+   "weight": 12,
+   "once": false,
+   "requires": {},
+   "text": "The derrick is still pumping. It stands out of the cloud on a single mast, black and gleaming, and it makes a note: a long low sound that you feel in your chest before you hear it. A platform at its foot is strung with warning lights, all of them green.",
+   "choices": [
+    {
+     "text": "Land on the pad and take the stores from the hut.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The hut has a little of everything, mostly dust. The derrick keeps humming. You leave a good deal of its output in your hold.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The hut has a little of everything, and it has an alarm that you set off on the way out.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Climb the mast to the pump head.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The climb is long and the view is something. The pump head gives up a reservoir of pure gas cells, and you slide down the cable with your packs.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       },
+       "boost": {
+        "skill": [
+         "scan",
+         "hack"
+        ],
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The climb is long and the wind is sharp. You get the cells and a lot of rope-burn.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The note changes. On the climb it drops an octave, then another, and the mast starts to ring. The pump head is opening, and what comes out of it is not gas.",
+       "effects": {
+        "goto": "exp_platform_singing_derrick_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Grundl] Your Grundl hauls the cell cases down on a line.",
+     "requires": {
+      "species": "grundl"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Grundl climbs like a bridge builder and sets up a line of pulleys in minutes. The cases come down one by one, as neat as parcels.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Grundl climbs and sets up and then drops one case, with the usual dignity.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Quick hands] Patch the leaking head. Collect the leak.",
+     "requires": {
+      "trait": "fast_repair"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your quick-handed crew patches the leak and collects what escapes, and the derrick's note rises sweetly in thanks. The cells are yours.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your quick-handed crew patches the leak and the leak, offended, bites.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_singing_derrick_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The pump head opens and a cloud of pale sparks comes out. The sparks gather. They form something like a head, and something like arms, with the lazy grace of weather. It looks at the team through the pump head's window. The note has become a voice. 'Quiet,' it says. 'Please. I am working.'",
+   "choices": [
+    {
+     "text": "Apologise, and climb down.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You apologise to a storm, which is a thing you have not done before. It accepts, politely, and the note drops back to its hum as you descend.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You apologise, and the storm accepts, and then swipes a pack as you climb down, to be sure you remember.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Ask it what it is working on.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "It tells you, at length, in gusts. At the end it hands over the pump head's best cells as a kind of tip. Nobody has listened to it in years.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8,
+         "tank_harness": 1
+        }
+       },
+       "boost": {
+        "skill": [
+         "scan",
+         "hack"
+        ],
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 30,
+       "text": "It tells you, at length, in gusts, some of them painful. At the end it hands over a few cells and loses its temper.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "It tells you, and while it is telling you, it takes {who}, in a kind of enthusiasm, up into the pump head to show them the work. The head shuts. The note goes on.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Scan / Hack] Read its work off the pump head's gauges.",
+     "requires": {
+      "skill": [
+       "scan",
+       "hack"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your specialist reads the gauges and tells the storm exactly what it is doing, to its delight. It rewards the team with the pump head's whole output.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your specialist reads the gauges and tells the storm exactly what it is doing wrong. The storm does not like that.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_grundl_barge_yard",
+   "type": "exp_platform",
+   "weight": 14,
+   "once": false,
+   "requires": {
+    "region": "grundl_barges"
+   },
+   "text": "A Grundl platform: a long barge hull, anchored in the cloud by chains the thickness of a house. A gangplank is out. At the top, a ledger on a stand. A sign: STATE YOUR MASS. Under it, scribbled by a different hand: STATE YOUR CARGO.",
+   "choices": [
+    {
+     "text": "Sign the ledger and ask politely for the stores.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "You sign the ledger. The barge feeds you, charges you, and sends you off with a modest sack of supplies and a receipt.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "You sign the ledger, and the ink is wet and cold. The sack is modest and so is the welcome.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go aboard without signing. Look for the cargo hold.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The cargo hold is where a Grundl keeps its pride: crates and crates, stamped and sealed. A deckhand shrugs and lets you take a few.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       },
+       "boost": {
+        "species": "grundl",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The cargo hold is sealed. You find another, and take what you can and are chased out, mostly in good humour.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You go aboard without signing and the barge notices. All of it. The chains clank, the deck tilts, and ahead of you, in the cargo hold, a very large door is opening.",
+       "effects": {
+        "goto": "exp_platform_grundl_barge_yard_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Grundl] State your mass, with feeling.",
+     "requires": {
+      "species": "grundl"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Grundl states their mass in full, at length, with all its honorifics. The ledger takes it down in ink and the barge, delighted, throws open its stores.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Grundl states their mass with feeling and gets it a little wrong. The barge corrects them, with a crate.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Ballast Rig] Walk the heavy deck unbothered.",
+     "requires": {
+      "gear": [
+       "ballast_rig"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The ballast rig walks the tilting deck like a pier. The crew, watching from the rail, nods with something like respect, and the stores come out.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The ballast rig walks the tilting deck, and the deck, in return, walks on the ballast rig.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_grundl_barge_yard_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The cargo door opens on a hold full of crates, each stamped with a mass, and a Grundl who must be its master, vast and slow, sitting on the biggest of them. 'You have not stated your mass,' it says. 'Therefore I cannot weigh you. Therefore I must guess.'",
+   "choices": [
+    {
+     "text": "State a mass. Any mass. Say it with confidence.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You state a mass with confidence and the master writes it down. It is wrong, and it is accepted, and you are shown the gangplank politely.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You state a mass with confidence. It is wrong, and it is charged for.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Offer to be weighed.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You step on the scales and the master reads them with grave satisfaction. 'You are lighter than you said,' it says, 'and heavier than you think.' It sends you out with a crate of its best.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8,
+         "ballast_rig": 1
+        }
+       },
+       "boost": {
+        "species": "grundl",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You step on the scales and they are not kind. The master sends you out with a crate and a lot of reproach.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You step on the scales, and {who} steps on after you, and the scales give a different weight than expected. The master looks at the ledger and shuts it. They will have to be kept until the sum is right.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Grundl] Weigh yourself in the old Grundl way, with the heart.",
+     "requires": {
+      "species": "grundl"
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Grundl weighs themselves in the old way, with a hand on the heart, and the master is so moved it forgets the scales. The crate it gives is the pick of the hold.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Grundl weighs themselves in the old way, and the master finds them heavy of heart, and gives them a shove.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_forge_float",
+   "type": "exp_platform",
+   "weight": 14,
+   "once": false,
+   "requires": {
+    "region": "emberkin_forges"
+   },
+   "text": "A forge platform, floating on burners in the middle of a storm, glowing. It is not a refinery. It is a smithy. The Emberkin who built it hung it here to keep the air hot, and to be far from anyone's roof. Its lamps are lit and its anvils are warm and its doors are open on a sooty welcome.",
+   "choices": [
+    {
+     "text": "Walk in and take the finished goods from the front rack.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The front rack is full of beautiful, forgotten work: tools, tags, knives, little engines. You take what the smiths left out for the sale.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The front rack is hot. All of it, in fact.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Take the work from the forge itself.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The forge's work is the best in the sector. You take it from the anvil, a piece at a time, and every piece is worth a month's wages.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       },
+       "boost": {
+        "species": "emberkin",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The forge's work is hotter than it looks. You carry out as much as your gloves allow.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The forge goes quiet. The Emberkin who built it, thin and tall and half in the fire, steps out of the furnace mouth to see who has come.",
+       "effects": {
+        "goto": "exp_platform_forge_float_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Emberkin] Pick up a hammer and join the shift.",
+     "requires": {
+      "species": "emberkin"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Emberkin takes a hammer off the wall and falls into the beat. For a whole shift the forge sings. The smith, enraptured, pays in the finest work in the house.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Emberkin takes a hammer and gets the beat wrong. The smith corrects them, with hot iron.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Heat gear] Walk in among the fires.",
+     "requires": {
+      "gear": [
+       "forge_apron",
+       "salamander_suit",
+       "heat_suit"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The heat gear walks among the fires and the smith, who has not been visited by guests in a century, is overjoyed. It pays in the work of a lifetime.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The heat gear walks among the fires, and the smith tests it, with enthusiasm.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_forge_float_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The smith looks the team over, and then over again. 'You will do,' it says. It points to the anvil. On the anvil lies a blade, half-made, still glowing. 'Finish it,' it says. 'Or I will finish you. That is not a threat. That is how we do it here.'",
+   "choices": [
+    {
+     "text": "Decline. Ask to leave.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "The smith frowns, thinks, and shrugs. 'It's a hard trade,' it says. It walks you to the door. At the door it takes a fee.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The smith frowns, thinks, and takes a fee, in a hot hand, from the pack you carry.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Pick up the hammer.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "You pick up the hammer and strike. Your first blow is poor and the second is worse, but the smith, grunting, helps with the third. The blade is passable. It pays you well for it.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8,
+         "forge_apron": 1
+        }
+       },
+       "boost": {
+        "species": "emberkin",
+        "x": 3.0
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You pick up the hammer and strike, and the smith strikes back, once, for form's sake. The blade is passable. The pay is fair.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "You pick up the hammer, and {who} steps forward to finish the blade. They strike. They keep striking. The smith nods, and does not let them stop.",
+       "effects": {
+        "lose_member": "captured"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Emberkin] Finish the blade with the old forge-song.",
+     "requires": {
+      "species": "emberkin"
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Emberkin sings and strikes and the blade comes alive in their hands. The smith falls on their neck. It sends the whole team away loaded with its finest work.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Emberkin sings and strikes and the blade comes alive, and also hot.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_weather_station",
+   "type": "exp_platform",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "A weather station, on stilts above the storm, with a hundred instruments and a cat. The cat is on the roof, a fat ginger, shockingly alive, watching the lander approach. The station's door is propped open with a boot.",
+   "choices": [
+    {
+     "text": "Go in, say hello to the cat, and take only the instruments.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The cat allows it. The instruments are exquisite and the logbook is full of rain. You leave a note and take the best of the gear.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The cat allows it, with a hiss. The instruments bite more than the cat does.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Ask the cat what's wrong with the weather.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The cat looks at you for a very long time and then walks, tail high, into the station's central room. On a table: a map of the next ten storms, and a pile of the station's best parts. You take the parts.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       },
+       "boost": {
+        "species": "fenn",
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The cat looks at you, unmoved. You take what you can from the central room, and the cat takes a swipe.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The cat looks at the sky. The sky looks back. The wind drops, all at once, and the whole platform begins to lean towards the sound of something enormous turning over in the cloud below.",
+       "effects": {
+        "goto": "exp_platform_weather_station_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Scan / Hack] Read the storm's own forecast off the instruments.",
+     "requires": {
+      "skill": [
+       "scan",
+       "hack"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your specialist reads the forecast and finds the one gap in the next ten storms where a platform could be safely entered. The team uses it. The whole station is open to them.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your specialist reads the forecast, and finds it was wrong about one detail, painfully.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Fenn] Befriend the cat. Fenn are cat people.",
+     "requires": {
+      "species": "fenn"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Fenn and the cat look at each other for an hour. At the end the cat sits in their lap. The station, apparently satisfied, opens all its doors.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Fenn and the cat look at each other for an hour. The cat has other ideas, and claws.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_weather_station_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "Below the platform, in the cloud, something very large is turning. The stilts shake with it. The cat is on the table, still, with its tail wrapped round its feet, looking at the team as if to say: you were told. A hatch in the floor is open. A ladder goes down to a lower deck, to the heart of the station's gear.",
+   "choices": [
+    {
+     "text": "Back up the ladder, quickly, to the lander.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You scramble up and out. The platform lurches behind you and the cat leaps from the door onto the lander's roof, a stowaway, unrepentant.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You scramble up and out, but the lurch takes a pack off a shoulder and drops it through the hatch.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Down the ladder to the lower deck.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "The lower deck is a vault: every instrument the station ever made. The platform lurches, twice, and you carry out as much as you can before the third lurch.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8
+        },
+        "blueprint": [
+         "radar_mk2"
+        ]
+       },
+       "boost": {
+        "species": "fenn",
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The lower deck is a vault, and the platform lurches while you fill your packs. You get out with much of it and a lot of bruises.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The lower deck is a vault, and the platform lurches, and the ladder goes. {who} is below. The hatch closes. The cat sits by it.",
+       "effects": {
+        "lose_member": "dead"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Fenn] Ask the cat for the way down. Politely.",
+     "requires": {
+      "species": "fenn"
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your Fenn asks. The cat considers, then walks to the edge of the hatch and sits. The ladder holds for exactly as long as it takes. The vault is yours.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your Fenn asks. The cat declines to help, and sharpens its views on a leg.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_lost_tender",
+   "type": "exp_platform",
+   "weight": 10,
+   "once": false,
+   "requires": {},
+   "text": "A tender ship has docked itself to the platform's underside and stayed there, hooked like a tick. Her hull is dark. Her lock is open. Between her and the platform, a hose runs, still pumping, and the gauge on the hose says it has been pumping for eleven years.",
+   "choices": [
+    {
+     "text": "Follow the hose to the platform's tank and sample it.",
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "The tank is full of fine, clean fuel, and nobody is guarding it. You take a canister and a half and a receipt book.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "The tank is full of fine, clean fuel and a lot of fumes. You take a canister and a headache.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Go aboard the tender and see why it's still pumping.",
+     "outcomes": [
+      {
+       "weight": 45,
+       "text": "The tender's crew died of old age, sitting down, content. The pump runs on the dead man's switch, and the holds are full of eleven years of trade goods. You help yourselves.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       },
+       "boost": {
+        "species": "human",
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 25,
+       "text": "The tender's holds are half sunk in fumes. You take what you can carry before the air turns you round.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 15
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The tender's lock closes behind you. The pump stops. In the silence, something in the hold begins to knock, politely, three times.",
+       "effects": {
+        "goto": "exp_platform_lost_tender_deep"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Tank Harness / Exosuit] Go through the fumes with your own air.",
+     "requires": {
+      "gear": [
+       "tank_harness",
+       "exosuit"
+      ]
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Breathing your own air, you walk the fume-filled holds as through a garden. The tender's whole cargo is yours, tagged and ready.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Breathing your own air is not the same as not breathing. The harness leaks a little.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Mire] Your Mire likes thick air. Lead the way.",
+     "requires": {
+      "species": "mire"
+     },
+     "outcomes": [
+      {
+       "weight": 85,
+       "text": "Your Mire breathes in the thick air and sighs. 'Lovely,' they say. They lead the team through the holds and find the strongroom in minutes.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        }
+       }
+      },
+      {
+       "weight": 15,
+       "text": "Your Mire likes thick air too much, and wanders into a corner of the hold they should have avoided.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": 10
+       }
+      }
+     ]
+    },
+    {
+     "text": "Seal up and go back aboard.",
+     "outcomes": [
+      {
+       "weight": 100,
+       "text": "You go back up the way you came, a little lighter on stories than you hoped."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exp_platform_lost_tender_deep",
+   "type": "page",
+   "weight": 0,
+   "once": false,
+   "requires": {},
+   "text": "The knocking comes from a locker. It stops when you stop. Behind the locker door: the tender's last passenger, in a suit, patient, sitting on the floor with a note on his knees. The note says: 'Please tell my wife the pump kept on.' He has been dead for eleven years. He raps the door again, three times.",
+   "choices": [
+    {
+     "text": "Promise to tell her. Leave the locker closed.",
+     "outcomes": [
+      {
+       "weight": 75,
+       "text": "You promise, aloud, to the dark. The knocking stops. You walk out between the cold holds and nobody follows, and the pump starts again behind you.",
+       "effects": {
+        "hurt": 12
+       }
+      },
+      {
+       "weight": 25,
+       "text": "You promise, and the knocking stops, and the pump starts again, and you leave with a lighter pack than you came with.",
+       "effects": {
+        "lose_gear": true,
+        "hurt": 8
+       }
+      }
+     ]
+    },
+    {
+     "text": "Open the locker.",
+     "outcomes": [
+      {
+       "weight": 40,
+       "text": "He is a skeleton in a suit with a stack of papers on his lap: the tender's accounts, her log and a very tidy list of the cargo and where it can be sold. It is worth a fortune.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8,
+         "salvage_rig_mk3": 1
+        }
+       },
+       "boost": {
+        "species": "human",
+        "x": 2.5
+       }
+      },
+      {
+       "weight": 30,
+       "text": "He is a skeleton in a suit, and the locker collapses as you open it. You get the papers and a lot of dust.",
+       "effects": {
+        "items": {
+         "fuel": 3,
+         "plasma_cell": 3,
+         "polymer": 10
+        },
+        "hurt": {
+         "hp": 25,
+         "who": "random"
+        }
+       }
+      },
+      {
+       "weight": 30,
+       "text": "The locker opens, and the dead man is there with his note, and a hand comes out and takes {who} by the wrist. It is very gentle. The locker shuts, with the two of them inside.",
+       "effects": {
+        "lose_member": "gone"
+       }
+      }
+     ]
+    },
+    {
+     "text": "[Human] Take his note. Say you'll deliver it.",
+     "requires": {
+      "species": "human"
+     },
+     "outcomes": [
+      {
+       "weight": 80,
+       "text": "Your human takes the note, folds it, puts it in a breast pocket and says, quite simply, 'We'll tell her.' The locker opens, and the dead man's papers are handed over with a click of old bones.",
+       "effects": {
+        "items": {
+         "fuel": 4,
+         "plasma_cell": 5,
+         "silicon": 8
+        }
+       }
+      },
+      {
+       "weight": 20,
+       "text": "Your human takes the note. The dead man lets go of it with some difficulty.",
+       "effects": {
+        "items": {
+         "fuel": 2,
+         "polymer": 6
+        },
+        "hurt": {
+         "hp": 20,
+         "who": "actor"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

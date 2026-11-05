@@ -19,17 +19,23 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **Windows to space**: a planet, a gas giant with moons, a nebula, an asteroid field or a distant station.
 - **Race-built stations**: one race or a mix, with that race's colours and loot. A Basalt section can run with no air, and an Emberkin section is hot on foot. A race's stations take the colours of its ships.
 - **Every race has its own rooms** (40 in all, two for each of the ten main races): a magma hall, a fighting pit, a nectar ward with healing beds, a jury generator to restore, an airless optic cradle, a grand galley round a glowing cauldron, and more.
+- **Every homeland has its capital**: a large, operational station of its race alone, with all its race rooms, a race trader (half the shelf is the race's own line, at 0.9x) and a race recruiter. The ten major homelands also hold a **wonder** in space (the Dead Queen-Ship, the Star Forge, the Singing Crystal, the Carved Face, the Scrap Cathedral...), with an event and a race blueprint or gear piece once a run; four of them can be walked.
+- **Away-team expeditions**: planets, asteroid bases, ice ruins and gas-giant platforms in sector space. Fly close, press E, pick 1-4 crew (or go alone) and play two or three scenes. The team's race, traits and gear open options; crew can be hurt, captured or lost, with everything they carried.
+- **Any crew can join a boarding party**, posted or not; they are back at their posts when you return.
+- **Auto reload on foot**: a magazine that runs dry reloads by itself while the hold has rounds.
 - **Foes on foot are real races.** The crew of a ship you beat are the same race when you board her; a race's section is mostly held by that race; elsewhere foes come from the region. Bodies lie as their race, and a foe's name reads "Kett pirate". Their numbers are the same as before.
 - **Medbays** have working and broken beds, and a room's loot fits the room (the odds of rare items are unchanged).
 
 ### Starting out
-- **Blank Frame** (hangar tab "Your own"): a pod with a helm, and a hold of parts and hull materials worth the same as the Courier. The run opens in build mode with the tide clock held; you can't launch until the helm and an engine have power and every room is sealed.
+- **Blank Frame** (hangar tab "Your own", the first tab): a pod with a helm, and a hold of parts and hull materials worth the same as the Courier. The run opens in build mode with the tide clock held; you can't launch until the helm and an engine have power and every room is sealed.
 
 ### Crew kit and gear
 - **I opens the crew kit screen** in flight and in build mode: every crew member's weapons, body and mods, moved around by hand.
 - **Gear shows on the crew**: armour and suits are drawn on every race. There are 14 new items, some with a worn trait and three with an active on G (Dash, Brace, Patch).
 - **A Blueprints tab** in the crafting panel (C) lists every blueprint you know. With no smelter aboard, the Smelter tab says how to get one (craft a Slag Pot). Hovering a recipe shows what it does, and a click no longer queues it (Enter or a double-click does). The middle mouse button pans the build view.
 - **A run starts with 10 fuel** (was 22).
+- **The Slag Pot and the other smelters can be crafted from the start** (a starter's saved blueprint list hid every pack's starting blueprints).
+- **Rare drift** gives itself away only by its glint: no radar diamond, no toast.
 
 ### Fights
 - **Fights start 1800 px apart** (was 1200), beyond the longest gun, so there is time to manoeuvre before the first shot.

@@ -1,0 +1,55 @@
+{
+	"events": [
+		{
+			"id": "bnpc_capital_recruiter",
+			"type": "boarding_npc",
+			"weight": 10,
+			"once": false,
+			"requires": {
+				"role": "recruiter",
+				"site": "station"
+			},
+			"text": "A trestle desk under a hand-lettered sign: SIGN ON. {name} sits behind it with a ledger, a stamp and a long line of nobody. 'The capital's best are all spoken for,' {name} says, 'but the ones that are not are very good, and they are mine, and I would like to find them homes.' The ledger is open at a page of names. Several have small drawings next to them.",
+			"choices": [
+				{
+					"text": "Sign on a recruit (60 credits).",
+					"requires": {
+						"credits": 60
+					},
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} stamps the page, hands you a ticket, and a recruit of the capital's own people steps out of the queue, bag already packed. 'They have been waiting for the right ship,' {name} says. 'Or any ship. Mind them.'",
+							"effects": {
+								"items": {
+									"credits": -60
+								},
+								"npc_join": true
+							}
+						}
+					]
+				},
+				{
+					"text": "Ask who is good.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "{name} turns the ledger around and runs a finger down it. 'Cooks, fixers, two who talk to walls, one who does not talk at all. Take your pick, or come back when you have a berth.' You get the sense that it is a courtesy, and that {name} is already marking you down as someone to remember.",
+							"effects": {}
+						}
+					]
+				},
+				{
+					"text": "Leave the line to the next in it.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "'There is no next,' says {name}. 'There never is. Go on.'",
+							"effects": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}

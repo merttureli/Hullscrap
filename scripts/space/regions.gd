@@ -30,7 +30,7 @@ const SERVICES: Array[String] = ["sell", "stock", "repair", "recruit"]  ## a reg
 const FIELDS: Array[String] = ["id", "name", "home_species", "faction", "stages", "weight", "rarity", "danger", "palette", "map", "node_weights",
 	"places", "debris", "pois", "ambient", "stock", "recruit", "enemies", "race_share", "hazards", "events", "blurb", "override", "reason", "_doc"]
 const REQUIRED: Array[String] = ["id", "name", "home_species", "faction", "stages", "weight", "rarity", "danger", "palette", "ambient", "enemies", "events", "blurb"]
-const PLACE_KEYS: Array[String] = ["id", "name", "type", "faction", "pos", "jitter", "hidden_until", "start", "beacon"]
+const PLACE_KEYS: Array[String] = ["id", "name", "type", "faction", "pos", "jitter", "hidden_until", "start", "beacon", "capital"]
 const FIXED_TYPES: Array[String] = ["station", "gate", "exit"]  ## node types only fixed places have (never rolled by weight)
 
 static var _key := ""
