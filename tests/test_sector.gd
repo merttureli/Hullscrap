@@ -946,6 +946,9 @@ func test_the_placed_pois_are_what_the_generator_always_made() -> void:
 		for t in OLD_COUNTS:
 			cfg["nodes"][t]["count"] = OLD_COUNTS[t]
 		for t in cfg["nodes"]:
+			cfg["nodes"][t]["weights"].erase("store")  # (the playtest-2 stores came later: beacon traders were twice as likely)
+			if cfg["nodes"][t]["weights"].has("trader"):
+				cfg["nodes"][t]["weights"]["trader"] *= 2
 			for k in cfg["nodes"][t]["weights"].keys():
 				if str(k).begins_with("exp_"):
 					cfg["nodes"][t]["weights"].erase(k)  # (the expedition sites came later: the layouts of before have none)
