@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"trader": 22, "patrol": 16, "distress": 12, "pirate": 10, "wreck_field": 10, "empty": 10, "asteroid_field": 8, "anomaly": 2},
 	"places": [
-		{"id": "slip_nine", "name": "Slip Nine", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "slip_nine", "name": "Slip Nine", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"sealed_crate": 1.6, "polymer_barrel": 1.3},
 	"pois": {"trader": 1.4, "concord_checkpoint": 1.4, "abandoned_station": 1.2},

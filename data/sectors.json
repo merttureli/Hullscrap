@@ -24,6 +24,7 @@
 		"concord_checkpoint": {"label": "Concord checkpoint", "visibility": "signal", "event": "patrol", "max": 1},
 		"anomaly": {"label": "Anomaly", "visibility": "signal", "event": "anomaly", "max": 1},
 		"quest": {"label": "Quest site", "visibility": "beacon", "event": "quest", "max": 1},
+		"wonder": {"label": "Wonder", "visibility": "beacon", "event": "anomaly", "max": 1},
 		"exit_beacon": {"label": "Exit beacon", "visibility": "beacon", "event": "empty", "max": 1}
 	},
 	"nodes": {

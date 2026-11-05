@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"anomaly": 18, "empty": 16, "trader": 12, "wreck_field": 12, "distress": 12, "pirate": 10, "patrol": 8, "asteroid_field": 6},
 	"places": [
-		{"id": "sounding_nave", "name": "The Sounding Nave", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "sounding_nave", "name": "The Sounding Nave", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"copper_coil": 1.1},
 	"pois": {"anomaly": 1.5, "trader": 1.2},

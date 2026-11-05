@@ -1,0 +1,7 @@
+{
+	"id": "homelands_1",
+	"name": "Homelands: race wonders",
+	"version": "1.0",
+	"requires": ["regions_1", "tech_basalt", "tech_emberkin", "tech_fenn", "tech_gauntling", "tech_grundl", "tech_human", "tech_kett", "tech_mire", "tech_prismatic", "tech_sporeling"],
+	"notes": "The ten race wonders of the major homelands (data/homelands.json `wonders`, docs/CONTENT.md section 23): one anomaly event each in events/wonders.json. Every one has weight 0 (the sector's wonder POI runs it by id, nothing rolls it), `once`, is a landmark, asks for the flag in_<region id> and pays its reward on every path that takes anything: a race blueprint or gear piece, once per run."
+}

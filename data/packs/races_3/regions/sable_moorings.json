@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"pirate": 28, "trader": 16, "wreck_field": 14, "empty": 10, "distress": 10, "asteroid_field": 8, "patrol": 8, "anomaly": 6},
 	"places": [
-		{"id": "long_table", "name": "The Long Table", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "long_table", "name": "The Long Table", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"scrap_chunk_m": 1.2, "sealed_crate": 1.4},
 	"pois": {"pirate_nest": 1.6, "trader": 1.3},

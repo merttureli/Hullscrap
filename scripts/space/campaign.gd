@@ -15,6 +15,7 @@ extends RefCounted
 ## region), and the offers at an exit from the run seed and the stage. Numbers come from data/drift.json, reputation rules from data/factions.json.
 ## `ship` below is the player's Ship (ship.gd): fuel and credits are cargo items.
 
+const Homelands = preload("res://scripts/space/homelands.gd")
 const Drift = preload("res://scripts/space/drift.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
@@ -1116,9 +1117,9 @@ func station_cfg(id: String) -> Dictionary:
 		return {}
 	var n := drift.node(id)
 	if n.is_empty():
-		return Regions.station(id, cfg)
+		return Homelands.menu(id, Regions.station(id, cfg))
 	if str(n.get("place", "")) != "":
-		return Regions.station(str(n["place"]), cfg)
+		return Homelands.menu(str(n["place"]), Regions.station(str(n["place"]), cfg))
 	if n.get("type", "") == "trader" and bool(n.get("clan", false)):
 		return cfg["stations"]["clan_trader"]
 	return {}

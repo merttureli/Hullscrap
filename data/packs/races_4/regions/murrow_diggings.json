@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"asteroid_field": 28, "pirate": 16, "wreck_field": 12, "distress": 12, "trader": 10, "empty": 8, "anomaly": 8, "patrol": 4},
 	"places": [
-		{"id": "burrowgate", "name": "Burrowgate", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "burrowgate", "name": "Burrowgate", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"scrap_chunk_m": 1.5, "copper_coil": 1.5},
 	"pois": {"mining_field": 2.5, "abandoned_station": 1.2},

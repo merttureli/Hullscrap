@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"patrol": 16, "empty": 16, "trader": 14, "distress": 14, "asteroid_field": 14, "pirate": 12, "wreck_field": 8, "anomaly": 6},
 	"places": [
-		{"id": "vesper_field", "name": "Vesper Field", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "vesper_field", "name": "Vesper Field", "type": "station", "faction": "concord", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"fuel_canister": 1.5, "polymer_barrel": 1.2},
 	"pois": {"concord_checkpoint": 1.5, "trader": 1.3},

@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"anomaly": 30, "empty": 16, "distress": 10, "trader": 10, "wreck_field": 10, "pirate": 10, "asteroid_field": 8, "patrol": 6},
 	"places": [
-		{"id": "receiving_room", "name": "The Receiving Room", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "receiving_room", "name": "The Receiving Room", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"copper_coil": 1.2},
 	"pois": {"anomaly": 2.0, "unknown": 1.5},

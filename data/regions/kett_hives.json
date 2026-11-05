@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"wreck_field": 20, "pirate": 18, "trader": 14, "distress": 14, "asteroid_field": 14, "empty": 10, "anomaly": 6, "patrol": 4},
 	"places": [
-		{"id": "ninefold", "name": "Hive Ninefold", "type": "station", "faction": "clans", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "ninefold", "name": "Hive Ninefold", "type": "station", "faction": "clans", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"scrap_chunk_s": 1.3, "polymer_barrel": 1.3},
 	"pois": {"wreck": 1.3},

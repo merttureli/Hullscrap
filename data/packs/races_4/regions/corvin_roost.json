@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"trader": 24, "wreck_field": 24, "pirate": 12, "distress": 10, "patrol": 8, "asteroid_field": 8, "empty": 8, "anomaly": 6},
 	"places": [
-		{"id": "tinsel_row", "name": "Tinsel Row", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "tinsel_row", "name": "Tinsel Row", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"sealed_crate": 2.0, "copper_coil": 1.3},
 	"pois": {"trader": 1.8, "store": 1.6, "wreck": 1.4},

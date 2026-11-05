@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"trader": 30, "pirate": 16, "distress": 14, "wreck_field": 10, "asteroid_field": 10, "empty": 8, "anomaly": 6, "patrol": 6},
 	"places": [
-		{"id": "long_bazaar", "name": "The Long Bazaar", "type": "station", "faction": "", "pos": [780, 500], "jitter": 90, "beacon": true}
+		{"id": "long_bazaar", "name": "The Long Bazaar", "type": "station", "faction": "", "pos": [780, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"sealed_crate": 1.5, "polymer_barrel": 1.2},
 	"pois": {"trader": 2.0, "store": 2.0, "unknown": 1.3},

@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"anomaly": 28, "wreck_field": 18, "asteroid_field": 12, "empty": 12, "distress": 10, "pirate": 8, "trader": 6, "patrol": 6},
 	"places": [
-		{"id": "earthing_post", "name": "The Earthing Post", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "earthing_post", "name": "The Earthing Post", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"copper_coil": 1.6, "scrap_chunk_s": 1.2},
 	"pois": {"anomaly": 2.0, "wreck": 1.3},

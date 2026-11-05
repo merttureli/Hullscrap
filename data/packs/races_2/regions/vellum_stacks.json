@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"anomaly": 18, "wreck_field": 16, "empty": 14, "distress": 12, "trader": 12, "asteroid_field": 10, "pirate": 10, "patrol": 8},
 	"places": [
-		{"id": "folding_room", "name": "The Folding Room", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "folding_room", "name": "The Folding Room", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"sealed_crate": 1.5},
 	"pois": {"abandoned_station": 1.5, "quest": 1.3},
