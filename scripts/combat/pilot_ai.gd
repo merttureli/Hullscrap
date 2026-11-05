@@ -16,7 +16,7 @@ extends RefCounted
 ##   group is weighed by its dps (pick_facing()). The pilot presents the heaviest group: the bow when it is at least as heavy as
 ##   any side, else a flank (of two heavy flanks the one needing the smaller turn, kept while it stays that way). Presenting a flank it
 ##   holds the foe abeam, cruising along it at its range: the nose leans toward the foe when it is too far and away when too near
-##   (ABEAM_LEAN_DEG at most, the gimbal of its broadside), and side engines strafe it in or out.
+##   (ABEAM_LEAN_MAX_DEG at most, about the gimbal of its broadside), and side engines strafe it in or out.
 ## - Aim (pick_target()): a pilot of SNIPE_SKILL or better aims at the foe's weapons first (the outside half of a
 ##   mount, the part it can see), a worse one at its hull; once the guns are out, everyone aims at the hull: the
 ##   facing wall nearest its line to the foe's centre, clear of the guns' outside halves (hull_point()), so the shots
