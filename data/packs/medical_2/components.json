@@ -1,0 +1,46 @@
+{
+	"components": [
+		{
+			"id": "medbay_mk2",
+			"name": "Medbay Mk2",
+			"blurb": "The bed was the problem, the committee decided, so the bed has been removed. The arm reaches across the room and finds you at your post. It is courteous about it.",
+			"family": "medbay",
+			"line": "standard",
+			"tier": 2,
+			"size": [2, 2],
+			"color": "#4ad1b8",
+			"power": -3,
+			"priority": 3,
+			"manned": false,
+			"hp": 5,
+			"heat_limit": 100,
+			"heat_per_s": 0,
+			"cooling": 3,
+			"stats": {
+				"heal": 1.2,
+				"reach": 6
+			}
+		},
+		{
+			"id": "medbay_mk3",
+			"name": "Halo Arm Mk3",
+			"blurb": "A Lumen mending arm on a slow gimbal. It holds a green light a hand's breadth from the patient and does not look away until they are well. Nine cells of reach; the patients find this very hard to be modest about.",
+			"family": "medbay",
+			"line": "neon",
+			"tier": 3,
+			"size": [2, 2],
+			"color": "#6bf2c4",
+			"power": -4,
+			"priority": 3,
+			"manned": false,
+			"hp": 6,
+			"heat_limit": 100,
+			"heat_per_s": 0,
+			"cooling": 3,
+			"stats": {
+				"heal": 1.6,
+				"reach": 9
+			}
+		}
+	]
+}

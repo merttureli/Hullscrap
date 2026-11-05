@@ -1,0 +1,39 @@
+{
+ "frame": [
+  9,
+  21
+ ],
+ "anims": {
+  "idle": [
+   0,
+   1,
+   0
+  ],
+  "off": [
+   1,
+   1,
+   0
+  ],
+  "damaged": [
+   2,
+   2,
+   6
+  ],
+  "disabled": [
+   4,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   4,
+   17
+  ],
+  "tip": [
+   4,
+   4
+  ]
+ },
+ "notes": "The forearm of medbay_mk2, drawn pointing UP: anchors.pivot is the elbow, anchors.tip the wrist. Its damaged frames (2) are the arm's sparks: a cracked shell and the cable torn loose."
+}

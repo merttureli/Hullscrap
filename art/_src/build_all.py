@@ -4,6 +4,7 @@ from px import *
 import export_crew, comp_base, comp_laser, comp_new, sp_export, comp_weapons, tile_wreck
 import pal_races1                 # race wave 1: three Mire skin greens + two private cyan letters (before the palette is written)
 import lines_reactor, lines_engine, lines_engine1, lines_o2_shield, lines_shield, lines_shop, lines_belt     # equipment lines + workshop + belts (extra palette letters register on import)
+import lines_medarm              # healing arms (docs/DRONES.md section 10): Medbay Mk2 / Mk3 bases and their turning arms
 import tech_b                     # racial tech, group b: Mire, Sporeling, Gauntling, Prismatic, Grundl (docs/waves/racial_tech_1.md)
 import hand_race                  # racial hand weapons (12 sprites + 8 muzzle flashes) for the six race-wave-1 races; existing palette letters only
 import techa_all                  # racial tech, group a (human, basalt, emberkin, fenn, kett): 15 weapons, 15 components, 15 projectile sets; uses existing palette letters only
@@ -11,6 +12,7 @@ LINES = lines_reactor.ALL + lines_engine.ALL + lines_engine1.ALL + lines_o2_shie
 REPLACED = {'engine_mk1', 'shield_mk1'}            # redrawn by the lines modules (engine split into core + _out, shield with the new animation); comp_engine.py is the old west-facing engine, superseded
 COMPS = [C for C in [comp_laser.Laser] + comp_new.ALL if C.id not in REPLACED] + LINES + comp_weapons.ALL
 COMPS += tech_b.ALL
+COMPS += lines_medarm.ALL
 def _sector_colours():
     """pal_sector's colours, read without importing it (its letters clash with pal_races1), under private keys."""
     import ast
@@ -31,6 +33,7 @@ if __name__ == '__main__':
         c = C() if isinstance(C, type) else C
         _, _, J = comp_base.export(c)
         print(c.id, J['frame'], list(J['anims']))
+    lines_medarm.export_arms()       # the healing arms' segments (medbay_mk2/3 _upper, _fore, _head)
     lines_belt.export_tiles(ART + '/tiles')
     tile_wreck.export()
     tech_b.export_projectiles()      # racial tech projectiles + impacts (group b)

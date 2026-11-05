@@ -1,0 +1,7 @@
+{
+	"id": "medical_2",
+	"name": "Healing arms",
+	"version": "1.0",
+	"requires": [],
+	"notes": "Medbay Mk2 and Mk3 as healing arms (docs/DRONES.md section 10, scripts/crew/jobs.gd): a 2x2 base with an arm that reaches crew within stats.reach cells of walking (floor and doors, not walls) and heals one patient at a time where they stand. Mk2 is a mid-run blueprint (two shops' blueprint list, a wreck-field event, boarding loot by fab_level), Mk3 a late and rare one. Medbay Mk1 stays the bed."
+}

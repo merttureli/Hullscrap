@@ -1,0 +1,34 @@
+{
+ "frame": [
+  11,
+  24
+ ],
+ "anims": {
+  "idle": [
+   0,
+   1,
+   0
+  ],
+  "off": [
+   1,
+   1,
+   0
+  ],
+  "disabled": [
+   2,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   5,
+   19
+  ],
+  "tip": [
+   5,
+   4
+  ]
+ },
+ "notes": "The upper arm of medbay_mk3, drawn pointing UP: anchors.pivot is the shoulder (on the base's middle), anchors.tip the elbow; the game turns it about the shoulder toward the elbow of the pose (Visuals.arm_pose). The shoulder joint cap is in this sprite; a cable runs down its right side."
+}
