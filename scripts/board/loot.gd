@@ -63,6 +63,11 @@ static func resolve(site, id: int, ctx := {}) -> Dictionary:
 	var rolls := rng.randi_range(int(p["rolls"][0]), int(p["rolls"][1])) + (1 if site.rooms[p["room"]]["locked"] and p["loot"] else 0)
 	for i in rolls:
 		var o := roll(table, purpose, rng, race)
+		if not o.is_empty() and Site.config()["combat"]["hand_items"].has(str(o["item"])) and rng.randf() >= float(Site.config()["combat"].get("gun_loot", 1.0)):
+			for k in 6:  # (a hand gun comes up only at combat.gun_loot of its rolls: the other rolls take another outcome, so no container ends empty)
+				o = roll(table, purpose, rng, race)
+				if o.is_empty() or not Site.config()["combat"]["hand_items"].has(str(o["item"])):
+					break
 		if not o.is_empty() and str(o["item"]) in [MOD, MOD_LOW]:  # a mod: which one and which tier come from the site kind and the stage of the run (mods.gd)
 			var drop := Mods.roll_drop(site.kind, int(ctx.get("stage", 1)), rng, 2 if str(o["item"]) == MOD_LOW else 3)
 			if drop != "":

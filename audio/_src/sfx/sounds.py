@@ -284,13 +284,14 @@ def arrive(k):
 
 @sound("collect", "raft", 3)
 def collect(k):
-    r, dur = R("collect", k), 0.25
+    # a short dry metal clunk: no tonal blip (it fought the music); inharmonic bar partials with very fast decay + a noise tick
+    r, dur = R("collect", k), 0.14
     n = n_of(dur)
-    f = [760, 860, 680][k]
-    blip = tri(sweep(f, f * 1.6, dur), n) * ad(dur, 0.001, 0.025)
-    clink = modal(PLATE[:4] * [2200, 2500, 2000][k], [0.05, 0.04, 0.03, 0.02], [0.3, 0.25, 0.2, 0.15], dur, r, 0.02) * 0.55
-    pop = lp(white(r, n), 1600) * ad(dur, 0.0005, 0.012) * 0.6
-    return lp(crush(blip * 0.8 + clink + pop, 10, 2), 5800)
+    f0 = [520, 610, 450][k]
+    clunk = modal(BAR[:5] * f0, [0.018, 0.014, 0.01, 0.007, 0.005], [0.5, 0.4, 0.3, 0.2, 0.12], dur, r, 0.06)
+    tick = bp(white(r, n), 3200, 0.8) * ad(dur, 0.0004, 0.006) * 0.5
+    thud = lp(white(r, n), 700) * ad(dur, 0.0006, 0.02) * 0.5
+    return lp(crush(clunk * 0.9 + tick + thud, 10, 2), 5200) * ad(dur, 0.0005, 0.05)
 
 
 @sound("tractor_loop", "loop", 1, loop=(2.0, 0.25))

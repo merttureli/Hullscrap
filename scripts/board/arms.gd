@@ -64,6 +64,10 @@ static func start_reload(gun: Dictionary, reserve: int) -> bool:
 ## Returns true in the tick a reload ends.
 static func tick(gun: Dictionary, dt: float, take: Callable) -> bool:
 	gun["cd"] = maxf(float(gun["cd"]) - dt, 0.0)
+	if float(gun.get("heat", 0.0)) > 0.0:  # a burst ends when the gun has rested a moment
+		gun["heat"] = float(gun["heat"]) - dt
+		if float(gun["heat"]) <= 0.0:
+			gun["streak"] = 0
 	if float(gun["reload"]) <= 0.0:
 		return false
 	gun["reload"] = float(gun["reload"]) - dt
@@ -79,6 +83,16 @@ static func spend(gun: Dictionary) -> void:
 	if has_mag(gun):
 		gun["mag"] = int(gun["mag"]) - 1
 	gun["cd"] = 1.0 / maxf(float(gun["w"]["rate"]), 0.01)
+	gun["streak"] = int(gun.get("streak", 0)) + 1
+	gun["heat"] = float(cfg()["burst_window_s"])
+
+
+## The half-angle (radians) a shot of `gun` may stray to either side right now: the class spread, opened by each shot of a burst in a row (rifles), times `move_mult` while moving.
+static func spread_of(gun: Dictionary, moving: bool) -> float:
+	var c := cfg()
+	var cls: String = gun["w"]["class"]
+	var open := minf(float(c["burst_deg"].get(cls, 0.0)) * float(gun.get("streak", 0)), float(c["burst_max_deg"].get(cls, 0.0)))
+	return (float(gun["w"]["spread"]) + deg_to_rad(open)) * (float(c["spread_move"]) if moving else 1.0)
 
 
 ## Shoot a ray from `from` along `dir` (radians) for at most `reach` cells. `bodies`: [{pos, r, ref}] what it can hit. Returns {end (where it stopped),
