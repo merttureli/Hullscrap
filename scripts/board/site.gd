@@ -328,10 +328,10 @@ func breathable(id: int) -> bool:
 ## The body a foe of `kind_name` leaves at `pos` (cells): a container on the 2x2 cells it fell on, opened like a locker (loot.gd rolls its foe_loot). `foe` is its foe id,
 ## `spawned` whether it stood here from the start (the memory of a visit keeps the bodies of those: they are made with the foe, ids first, and wake when it falls, so
 ## their ids are the same on every visit). `active` false makes one that holds nothing yet (wake_corpse). Returns the prop's id.
-func add_corpse(kind_name: String, foe_id: int, pos: Vector2, spawned: bool, active := true) -> int:
+func add_corpse(kind_name: String, foe_id: int, pos: Vector2, spawned: bool, active := true, species := "") -> int:
 	var id := props.size()
 	props.append({"id": id, "prop": "corpse", "cell": Pathfinder.anchor_of(pos), "size": Vector2i(2, 2), "room": room_at(pos), "blocks": false, "loot": active, "rolls": [0, 0],
-		"table": "", "slot": "", "key": "", "fixed": {}, "foe": kind_name, "fid": foe_id, "spawned": spawned, "centre": pos})
+		"table": "", "slot": "", "key": "", "fixed": {}, "foe": kind_name, "species": species, "fid": foe_id, "spawned": spawned, "centre": pos})
 	return id
 
 
