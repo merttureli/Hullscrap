@@ -1007,31 +1007,31 @@ func _draw_upgrade_card() -> void:
 		draw_rect(rect.grow(3.0 * (1.0 - a)), Color(0.55, 1.0, 0.8, 0.55 * a))
 		draw_rect(rect.grow(2.0 + 10.0 * (1.0 - a)), Color(0.55, 1.0, 0.8, a), false, 2.0)
 	var inf := Workshop.upgrade_info(ship, upgrade_uid)
+	var k := 1.0 / maxf(get_global_transform_with_canvas().get_scale().x, 0.01)  # (the camera zooms and this node is scaled: the card keeps its screen size)
 	var w := 280.0
 	var lines := UiKit.wrap(str(inf["text"]), w - 20.0, 13)
-	var h := 12.0 + 24.0 + lines.size() * 17.0 + (28.0 if int(inf["next"]) > 0 else 0.0) + 22.0
-	var k := 1.0 / (cam.zoom.x if cam != null else 1.0)
-	draw_set_transform(Vector2(rect.end.x + 10.0 * k, rect.position.y), 0.0, Vector2(k, k))
-	UiKit.panel(self, Rect2(0, 0, w, h))
+	var h := 12.0 + 24.0 + lines.size() * 17.0 + (28.0 if int(inf["next"]) > 0 else 0.0) + 30.0
+	var o := Vector2(rect.end.x + 10.0 * k, rect.position.y)  # the card's corner; sizes below are screen px times k
+	UiKit.panel(self, Rect2(o, Vector2(w, h) * k))
+	var fs := maxi(1, roundi(13.0 * k))
 	var y := 24.0
-	UiKit.text(self, "Fabricator, level %d" % int(inf["level"]), Vector2(10, y), 15, UiKit.AMBER, HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
+	UiKit.text(self, "Fabricator, level %d" % int(inf["level"]), o + Vector2(10, y) * k, maxi(1, roundi(15.0 * k)), UiKit.AMBER, HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
 	y += 8.0
 	for l in lines:
 		y += 17.0
-		UiKit.text(self, l, Vector2(10, y), 13, UiKit.TEXT if int(inf["next"]) > 0 else UiKit.GOOD)
+		UiKit.text(self, l, o + Vector2(10, y) * k, fs, UiKit.TEXT if int(inf["next"]) > 0 else UiKit.GOOD)
 	if int(inf["next"]) > 0:
 		y += 26.0
-		UiKit.text(self, "Cost", Vector2(10, y), 13, UiKit.DIM_TEXT)
+		UiKit.text(self, "Cost", o + Vector2(10, y) * k, fs, UiKit.DIM_TEXT)
 		var x := 50.0
 		for m in inf["cost"]:
-			UiKit.icon(self, m, Rect2(x, y - 12.0, 14, 14))
+			UiKit.icon(self, m, Rect2(o + Vector2(x, y - 12.0) * k, Vector2(14, 14) * k))
 			x += 16.0
 			var t := str(inf["cost"][m])
-			UiKit.text(self, t, Vector2(x, y), 13, UiKit.BAD.lightened(0.2) if inf["short"].has(m) else UiKit.TEXT)
+			UiKit.text(self, t, o + Vector2(x, y) * k, fs, UiKit.BAD.lightened(0.2) if inf["short"].has(m) else UiKit.TEXT)
 			x += UiKit.text_width(t, 13) + 10.0
 		y += 22.0
-		UiKit.text(self, "Click again to upgrade" if inf["can"] else "Not enough materials yet", Vector2(10, y), 12, UiKit.GOOD if inf["can"] else UiKit.DIM_TEXT)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		UiKit.text(self, "Click again to upgrade" if inf["can"] else "Not enough materials yet", o + Vector2(10, y) * k, maxi(1, roundi(12.0 * k)), UiKit.GOOD if inf["can"] else UiKit.DIM_TEXT)
 
 
 ## The empty frame: a few long row runs and grid lines made once per hull (a round frame has 2600 cells), moved to the grid.
