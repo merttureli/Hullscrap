@@ -35,6 +35,8 @@ var escape_time := -1.0  ## the arena time it jumped
 var refused_at := -1.0  ## arena time the offer was refused (fighting_on after an offer), else -1
 var rolls := 0  ## style rolls made: one per fight at most
 var faction := ""  ## the faction of a generated enemy (its ai `faction`), whose lines in cfg["lines"] it says; "" for an authored design
+var break_at := 0.95  ## the structure at which it breaks: morale.json's break_structure, or the `break_structure` of its design's ai (a race flagship yields at its own line)
+var break_after := 0.0  ## seconds into the fight after which a hurt enemy breaks whatever its structure (the `break_after_s` of its design's ai; 0 = never): a race flagship, too big to wreck, yields when the fight has dragged on
 var captain := ""  ## the name of its captain (the `captain` of its ai, else the first of its crew plan) when it has a faction
 
 var _unarmed := 0.0  # seconds with no weapon able to fire
@@ -65,6 +67,8 @@ func _init(p_arena, p_enemy: int, p_player: int, p_style := "default", p_cfg := 
 	var ship = arena.ships[enemy].ship
 	var ai: Dictionary = ship.get_meta("ai", {})
 	faction = str(ai.get("faction", ""))
+	break_at = float(ai.get("break_structure", cfg["break_structure"]))
+	break_after = float(ai.get("break_after_s", 0.0))
 	if faction != "":
 		captain = str(ai.get("captain", ship.crew_plan[0]["name"] if not ship.crew_plan.is_empty() else ""))
 
@@ -259,7 +263,8 @@ static func spool_hold(arena, idx: int) -> String:
 func _watch_break(dt: float) -> void:
 	var co = arena.ships[enemy]
 	_unarmed = 0.0 if _can_shoot() else _unarmed + dt
-	if co.structure <= float(cfg["break_structure"]) + 1e-6 or _unarmed >= float(cfg["unarmed_s"]) - 1e-6:
+	var late: bool = break_after > 0.0 and arena.time() >= break_after and co.structure < 1.0 - 1e-6
+	if co.structure <= break_at + 1e-6 or _unarmed >= float(cfg["unarmed_s"]) - 1e-6 or late:
 		match roll_style():
 			"surrender":
 				_begin_offer()

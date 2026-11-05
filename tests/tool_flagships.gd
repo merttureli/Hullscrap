@@ -77,11 +77,12 @@ func make(race: String) -> void:
 	var names: Array = sp["names"]
 	for i in names.size():
 		d["crew_plan"].append({"name": names[i], "species": species[i % species.size()]})
-	d["ai"] = {"aim_skill": float(sp["aim"]), "morale": str(sp["morale"]), "faction": "flagship_" + race, "captain": str(sp["captain"])}
+	d["ai"] = {"aim_skill": float(sp["aim"]), "morale": str(sp["morale"]), "faction": "flagship_" + race, "captain": str(sp["captain"]), "break_after_s": float(sp.get("after_s", 120)), "break_structure": snappedf(1.0 - float(sp.get("yield_hp", 70)) / maxf(Structure.totals(ship).y, 1.0), 0.001)}  # it yields after losing yield_hp of its blocks
 	if bool(sp.get("ram", false)):
 		d["ai"]["style"] = "rammer"
 	d["flagship"] = {"race": race, "role": str(sp.get("role", "flagship"))}
-	d["blurb"] = str(sp["blurb"])
+	var fl: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/flagships.json"))["flagships"].get(race, {})
+	d["blurb"] = "%s: %s" % [str(fl.get("name", sp["ship"])), str(fl.get("gimmick", ""))]
 	d.erase("crew_state")
 	d.erase("dead_crew")
 	var f := FileAccess.open(OUT % race, FileAccess.WRITE)
@@ -216,7 +217,7 @@ func bench() -> void:
 		var files := []
 		var pids := []
 		var pass_on := []
-		for key in ["races", "seeds", "cap", "stage", "first"]:
+		for key in ["races", "seeds", "cap", "stage", "first", "v", "pstage"]:
 			if args.has(key):
 				pass_on.append("%s=%s" % [key, args[key]])
 		for k in jobs:
@@ -244,13 +245,15 @@ func bench() -> void:
 				var row := fight(str(race), stage, s, cap)
 				row.merge({"race": race, "stage": stage, "seed": s})
 				rows.append(row)
-				if args.has("v"):
-					print("  %s seed %d: %s in %.0f s (foe hull %.2f, mine %.2f)" % [race, s, row["state"], row["t"], row["foe_hull"], row["hull"]])
 		if args.has("rows"):
 			var f := FileAccess.open(str(args["rows"]), FileAccess.WRITE)
 			f.store_string(JSON.stringify(rows))
 			f.close()
 			return
+	if args.has("v"):
+		rows.sort_custom(func(x, y): return [x["race"], x["seed"]] < [y["race"], y["seed"]])
+		for row in rows:
+			print("  %s seed %d: %s in %.0f s (foe hull %.2f, mine %.2f) shots p/e %d/%d, shields stopped p/e %d/%d, dealt hull p/e %.0f/%.0f, parts %.0f/%.0f" % [row["race"], row["seed"], row["state"], row["t"], row["foe_hull"], row["hull"], row["p_shots"], row["e_shots"], row["p_shield"], row["e_shield"], row["p_hull"], row["e_hull"], row["p_part"], row["e_part"]])
 	print(summary(rows))
 
 
@@ -278,8 +281,28 @@ static func summary(rows: Array) -> String:
 	return "\n".join(out)
 
 
+## Count the arena's new events into `d` by attacker (p: the player, e: the flagship): shots, shots a shield layer stopped, the damage on hull and on parts.
+func _scan(a, cursor: int, d: Dictionary) -> int:
+	var ev: Array = a.events
+	for k in range(cursor, ev.size()):
+		var e: Dictionary = ev[k]
+		var who := "p" if int(e["ship"]) == 0 else "e"
+		var other := "e" if who == "p" else "p"
+		match str(e["type"]):
+			"shot":
+				d[who + "_shots"] += 1
+			"hit":
+				if e.get("kind", "") == "component":
+					d[other + "_part"] += float(e.get("dealt", 0.0))
+				else:
+					d[other + "_hull"] += float(e.get("dealt", 0.0))
+			"shield":
+				d[other + "_shield"] += 1
+	return ev.size()
+
+
 func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
-	var player: Ship = Standoff.build_player(stage)
+	var player: Ship = Standoff.build_player(int(args.get("pstage", stage)))  # pstage=<n>: a lighter or heavier player-like ship than the flagship's stage
 	var enemy: Ship = Session.load_ship(OUT % race)
 	var row := {"state": "error", "t": 0.0, "foe_hull": 1.0, "hull": 1.0}
 	if player == null or enemy == null:
@@ -294,6 +317,8 @@ func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 	var a = sess.arena
 	var n := 0
 	var ticks := int(cap * 60.0)
+	var d := {"p_shots": 0, "e_shots": 0, "p_hull": 0.0, "e_hull": 0.0, "p_part": 0.0, "e_part": 0.0, "p_shield": 0, "e_shield": 0}
+	var cursor := 0
 	while sess.state() == "fighting" and n < ticks:
 		if n % PLAYER_EVERY == 0:
 			pilot.think(STEP * PLAYER_EVERY)
@@ -305,6 +330,9 @@ func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 		n += 1
 		if n % SIM_EVERY == 0:
 			sim.step(SIM_EVERY * STEP)
+			cursor = _scan(a, cursor, d)
+	cursor = _scan(a, cursor, d)
+	row.merge(d)
 	row["state"] = sess.state()
 	row["t"] = n * STEP
 	row["foe_hull"] = Structure.structure_fraction(a.ships[Session.ENEMY])

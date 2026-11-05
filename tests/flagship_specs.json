@@ -6,10 +6,13 @@
   "role": "hive-queen",
   "weapons": [
    "kett_hive_swarm_launcher",
+   "kett_hive_swarm_launcher",
    "kett_chitin_thrower",
    "kett_chitin_thrower",
    "kett_drone_picket",
-   "kett_drone_picket"
+   "kett_drone_picket",
+   "rattle_burst_scrap",
+   "rattle_burst_scrap"
   ],
   "engines": [
    "engine_scrap_mk2",
@@ -33,7 +36,7 @@
   "aim": 0.55,
   "beds": 3,
   "hull_seed": 11,
-  "morale": "flagship",
+  "morale": "flagship_kett",
   "crew": [
    "kett"
   ],
@@ -51,7 +54,9 @@
    "Sutter",
    "Pip"
   ],
-  "blurb": "x"
+  "blurb": "x",
+  "yield_hp": 100,
+  "interior": 44
  },
  "emberkin": {
   "stage": 5,
@@ -59,6 +64,7 @@
   "captain": "Veshti",
   "role": "kiln-barge",
   "weapons": [
+   "emberkin_pyre_lance",
    "emberkin_pyre_lance",
    "heat_lance_neon",
    "emberkin_cinder_mortar",
@@ -88,7 +94,7 @@
   "aim": 0.6,
   "beds": 3,
   "hull_seed": 21,
-  "morale": "flagship",
+  "morale": "flagship_emberkin",
   "crew": [
    "emberkin"
   ],
@@ -99,13 +105,11 @@
    "Soot",
    "Ember-Kel",
    "Kindle",
-   "Tallow",
-   "Flint",
-   "Smoulder",
-   "Char"
+   "Tallow"
   ],
   "blurb": "x",
-  "interior": 44
+  "interior": 54,
+  "yield_hp": 120
  },
  "prismatic": {
   "stage": 6,
@@ -114,8 +118,11 @@
   "role": "cathedral",
   "weapons": [
    "prismatic_refractor",
+   "prismatic_refractor",
    "prismatic_prism_lens",
    "prismatic_prism_lens",
+   "prismatic_glimmer_turret",
+   "prismatic_glimmer_turret",
    "prismatic_glimmer_turret",
    "prismatic_glimmer_turret"
   ],
@@ -140,7 +147,7 @@
   "aim": 0.8,
   "beds": 3,
   "hull_seed": 31,
-  "morale": "flagship",
+  "morale": "flagship_prismatic",
   "crew": [
    "prismatic"
   ],
@@ -151,13 +158,11 @@
    "Sela",
    "Verre",
    "Quill",
-   "Tessel",
-   "Ione",
-   "Corvane",
-   "Mirelle"
+   "Tessel"
   ],
   "blurb": "x",
-  "interior": 46
+  "interior": 56,
+  "yield_hp": 100
  },
  "basalt": {
   "stage": 4,
@@ -168,6 +173,8 @@
    "basalt_quarry_driver",
    "basalt_magma_spitter",
    "basalt_magma_spitter",
+   "basalt_pumice_flak",
+   "basalt_pumice_flak",
    "basalt_pumice_flak",
    "basalt_pumice_flak"
   ],
@@ -192,7 +199,7 @@
   "aim": 0.5,
   "beds": 3,
   "hull_seed": 41,
-  "morale": "flagship",
+  "morale": "flagship_basalt",
   "edits": [
    {
     "op": "rear_tiles",
@@ -211,12 +218,10 @@
    "Brek",
    "Obdur",
    "Kolm",
-   "Dunt",
-   "Granit",
-   "Pell",
-   "Rhun"
+   "Dunt"
   ],
-  "blurb": "x"
+  "blurb": "x",
+  "yield_hp": 100
  },
  "sporeling": {
   "stage": 5,
@@ -227,9 +232,11 @@
    "sporeling_spore_cannon",
    "sporeling_spore_cannon",
    "sporeling_rot_pod",
-   "sporeling_rot_pod",
+   "shrapnel_cannon_scrap",
    "sporeling_pollen_turret",
-   "sporeling_pollen_turret"
+   "sporeling_pollen_turret",
+   "rattle_burst_scrap",
+   "rattle_burst_scrap"
   ],
   "engines": [
    "engine_mk2",
@@ -254,7 +261,7 @@
   "aim": 0.5,
   "beds": 3,
   "hull_seed": 51,
-  "morale": "flagship",
+  "morale": "flagship_sporeling",
   "crew": [
    "sporeling"
   ],
@@ -265,12 +272,10 @@
    "Morel",
    "Cap",
    "Frond",
-   "Lichen",
-   "Gill",
-   "Rhizo",
-   "Bloom"
+   "Lichen"
   ],
-  "blurb": "x"
+  "blurb": "x",
+  "yield_hp": 100
  },
  "mire": {
   "stage": 5,
@@ -282,7 +287,9 @@
    "mire_steam_lance",
    "mire_bog_mortar",
    "mire_mist_projector",
-   "mire_mist_projector"
+   "mire_mist_projector",
+   "rattle_burst_scrap",
+   "rattle_burst_scrap"
   ],
   "engines": [
    "engine_mk2",
@@ -305,7 +312,7 @@
   "aim": 0.5,
   "beds": 4,
   "hull_seed": 61,
-  "morale": "flagship",
+  "morale": "flagship_mire",
   "crew": [
    "mire"
   ],
@@ -323,7 +330,8 @@
    "Brine",
    "Moss"
   ],
-  "blurb": "x"
+  "blurb": "x",
+  "yield_hp": 90
  },
  "fenn": {
   "stage": 5,
@@ -359,7 +367,7 @@
   "aim": 0.6,
   "beds": 3,
   "hull_seed": 71,
-  "morale": "flagship_parley",
+  "morale": "flagship_fenn",
   "crew": [
    "fenn"
   ],
@@ -370,12 +378,11 @@
    "Dabble",
    "Skit",
    "Pocket",
-   "Tally",
-   "Wick",
-   "Haggle",
-   "Fob"
+   "Tally"
   ],
-  "blurb": "x"
+  "blurb": "x",
+  "yield_hp": 130,
+  "interior": 44
  },
  "gauntling": {
   "stage": 4,
@@ -388,7 +395,9 @@
    "gauntling_scrap_shotgun",
    "gauntling_scrap_shotgun",
    "gauntling_tesla_picket",
-   "gauntling_tesla_picket"
+   "gauntling_tesla_picket",
+   "rattle_burst_scrap",
+   "rattle_burst_scrap"
   ],
   "engines": [
    "gauntling_overclock_engine",
@@ -410,12 +419,10 @@
   "aim": 0.6,
   "beds": 2,
   "hull_seed": 81,
-  "morale": "flagship",
+  "morale": "flagship_gauntling",
   "crew": [
    "gauntling",
    "gauntling",
-   "drone",
-   "drone",
    "drone"
   ],
   "names": [
@@ -426,11 +433,10 @@
    "Spark-2",
    "Spark-3",
    "Spark-4",
-   "Spark-5",
-   "Spark-6",
-   "Spark-7"
+   "Spark-5"
   ],
-  "blurb": "x"
+  "blurb": "x",
+  "yield_hp": 80
  },
  "grundl": {
   "stage": 5,
@@ -439,10 +445,12 @@
   "role": "ramhead",
   "weapons": [
    "grundl_slug_mortar",
-   "grundl_barge_flak",
-   "grundl_barge_flak",
    "grundl_grapple_harpoon",
-   "laser_mk2"
+   "laser_mk2",
+   "grundl_barge_flak",
+   "grundl_barge_flak",
+   "grundl_barge_flak",
+   "grundl_barge_flak"
   ],
   "engines": [
    "grundl_hauler_thrusters",
@@ -465,7 +473,7 @@
   "aim": 0.45,
   "beds": 3,
   "hull_seed": 91,
-  "morale": "flagship",
+  "morale": "flagship_grundl",
   "ram": true,
   "crew": [
    "grundl"
@@ -477,12 +485,10 @@
    "Crate",
    "Tonnage",
    "Heft",
-   "Slab",
-   "Draught",
-   "Lug",
-   "Mooring"
+   "Slab"
   ],
-  "blurb": "x"
+  "blurb": "x",
+  "yield_hp": 110
  },
  "human": {
   "stage": 4,
@@ -493,9 +499,11 @@
    "human_concord_railgun",
    "human_volley_rack",
    "human_volley_rack",
+   "shrapnel_cannon_scrap",
    "human_flak_screen",
    "human_flak_screen",
-   "laser_mk2"
+   "human_flak_screen",
+   "human_flak_screen"
   ],
   "engines": [
    "engine_mk2",
@@ -518,7 +526,7 @@
   "aim": 0.7,
   "beds": 4,
   "hull_seed": 101,
-  "morale": "flagship_parley",
+  "morale": "flagship_human",
   "crew": [
    "human"
   ],
@@ -531,11 +539,9 @@
    "Pvt. Duval",
    "Pvt. Kerr",
    "Pvt. Sato",
-   "Pvt. Brandt",
-   "Pvt. Lindqvist",
-   "Pvt. Ng",
-   "Pvt. Alder"
+   "Pvt. Brandt"
   ],
-  "blurb": "x"
+  "blurb": "x",
+  "yield_hp": 110
  }
 }
