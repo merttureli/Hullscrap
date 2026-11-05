@@ -180,7 +180,7 @@ func add(kind: String, pos: Vector2, room := -1, spawned := true, species := "")
 		"stalk_t": 0.0, "seen_t": 0.0, "lunge": 0.0, "lunge_cd": 1.5, "bites": 0, "frozen": false, "hack": 0.0}
 	_next += 1
 	f["gear"] = ""
-	if spawned:  # its body is made now, so that its id is the same on every visit
+	if spawned and kind != "crawler":  # its body is made now, so that its id is the same on every visit (a crawler leaves none: nothing to loot)
 		f["corpse"] = site.add_corpse(kind, int(f["id"]), pos, true, false, sp)
 	if kind == "crawler":
 		f["mode"] = "hidden"
@@ -427,14 +427,14 @@ func suffocate(f: Dictionary, amount: float) -> void:
 
 
 ## Foe `f` is beaten: it lies where it fell and leaves a body to search (loot.gd rolls what is on it when it is opened: ammo, credits, its weapon, now and then a find).
-## A hacked sentry (the soldier's side) leaves none.
+## A hacked sentry (the soldier's side) leaves none, nor does a crawler.
 func _kill(f: Dictionary) -> void:
 	var m: CrewMember = f["m"]
 	f["dead"] = true
 	f["mode"] = "dead"
 	m.path.clear()
 	s.events.append({"type": "down", "pos": m.pos, "foe": f["id"], "kind": f["kind"], "name": title(f)})
-	if f["team"] == "foe":
+	if f["team"] == "foe" and f["kind"] != "crawler":
 		if f.has("corpse"):
 			s.site.wake_corpse(int(f["corpse"]), m.pos)
 		else:
