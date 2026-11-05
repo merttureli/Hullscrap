@@ -1,0 +1,9 @@
+{
+ "id": "drones_1",
+ "name": "Drones wave 1",
+ "version": "1.0",
+ "requires": [
+  "engines_1"
+ ],
+ "notes": "The drone bay and the combat and defence drones (docs/DRONES.md sections 2, 3 and 7): three bays (Mk I-III, scrap, standard and neon), seven drone kits (items, their stats in `drone`), the drone part material, and the drone guns (weapons.json, ids begin drone_)."
+}

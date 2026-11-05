@@ -1,0 +1,12 @@
+{
+ "materials": [
+  {
+   "id": "drone_part",
+   "name": "Drone Parts",
+   "color": "#9fd0e8",
+   "rarity": "uncommon",
+   "kind": "material",
+   "blurb": "Actuators, a thruster and a battery in a tidy tin. A launch spends one tin per tier of the drone, and the drone never comes back for a refund."
+  }
+ ]
+}

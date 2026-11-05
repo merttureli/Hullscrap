@@ -1,0 +1,106 @@
+{
+ "components": [
+  {
+   "id": "drone_bay_mk1",
+   "name": "Drone Bay Mk I",
+   "blurb": "A hangar with a hatch and a rail. The rail is mostly straight.",
+   "quirk": "Launches tier 1 drones. Re-arms in 12 s after a loss; a crew member in the bay room makes it 25% faster.",
+   "family": "drone_bay",
+   "line": "scrap",
+   "tier": 1,
+   "size": [
+    3,
+    3
+   ],
+   "mount": {
+    "outside": [
+     3,
+     1
+    ],
+    "outside_hp": 5
+   },
+   "color": "#8a8f96",
+   "power": -1,
+   "priority": 4,
+   "manned": false,
+   "hp": 6,
+   "heat_limit": 100,
+   "heat_per_s": 0.5,
+   "cooling": 3,
+   "stats": {},
+   "bay": {
+    "max_tier": 1,
+    "rearm_s": 12.0,
+    "crew_mult": 0.75
+   }
+  },
+  {
+   "id": "drone_bay_mk2",
+   "name": "Drone Bay Mk II",
+   "blurb": "Room for a better drone and a faster cradle. The racks are labelled, which is new.",
+   "quirk": "Launches tier 1 and 2 drones. Re-arms in 9 s; a crew member in the bay room makes it 25% faster.",
+   "family": "drone_bay",
+   "line": "standard",
+   "tier": 2,
+   "size": [
+    3,
+    3
+   ],
+   "mount": {
+    "outside": [
+     3,
+     1
+    ],
+    "outside_hp": 6
+   },
+   "color": "#9fb4c9",
+   "power": -1,
+   "priority": 4,
+   "manned": false,
+   "hp": 8,
+   "heat_limit": 100,
+   "heat_per_s": 0.5,
+   "cooling": 3,
+   "stats": {},
+   "bay": {
+    "max_tier": 2,
+    "rearm_s": 9.0,
+    "crew_mult": 0.75
+   }
+  },
+  {
+   "id": "drone_bay_mk3",
+   "name": "Drone Bay Mk III",
+   "blurb": "A launch rail that hums. Everything in the cradle is flown, nothing is dropped.",
+   "quirk": "Launches every tier. Re-arms in 6 s; a crew member in the bay room makes it 25% faster.",
+   "family": "drone_bay",
+   "line": "neon",
+   "tier": 3,
+   "size": [
+    3,
+    3
+   ],
+   "mount": {
+    "outside": [
+     3,
+     1
+    ],
+    "outside_hp": 8
+   },
+   "color": "#3cf2ff",
+   "power": -2,
+   "priority": 4,
+   "manned": false,
+   "hp": 10,
+   "heat_limit": 100,
+   "heat_per_s": 0.5,
+   "cooling": 3,
+   "stats": {},
+   "bay": {
+    "max_tier": 3,
+    "rearm_s": 6.0,
+    "crew_mult": 0.75
+   }
+  }
+ ]
+}

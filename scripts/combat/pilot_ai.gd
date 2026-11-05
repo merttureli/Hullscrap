@@ -40,6 +40,7 @@ extends RefCounted
 const Shields = preload("res://scripts/combat/shields.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
+const Drones = preload("res://scripts/combat/drones.gd")
 
 const RANGE_FRACTION := 0.7  ## of a gun's range: the gap it keeps for it
 const HULL_MARGIN := 96.0  ## px kept between the two hulls, at least (three cells: an orbit at less clips the foe's hull)
@@ -141,6 +142,7 @@ func think(dt: float) -> void:
 		_fly(dt)
 	_balance(dt)
 	_shoot(dt)
+	Drones.ai_launch(arena, me, foe)  # its bays launch when they can (drones.gd)
 
 
 # --- flying ------------------------------------------------------------------------------------

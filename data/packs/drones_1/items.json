@@ -1,0 +1,217 @@
+{
+ "items": [
+  {
+   "id": "pulse_drone_mk1",
+   "name": "Pulse Drone Mk I",
+   "kind": "drone",
+   "blurb": "A hull, a lens and a pulse barrel that has been told to hurry. It circles the foe and thumps at half the rate of a gun.",
+   "drone": {
+    "role": "combat",
+    "tier": 1,
+    "hp": 3,
+    "gun": {
+     "kind": "bolt",
+     "damage_type": "energy",
+     "damage": 3,
+     "cooldown": 5.3,
+     "range": 800,
+     "speed": 700,
+     "accuracy": 0.6,
+     "family": "pulse",
+     "weapon": "pulse_mk1"
+    },
+    "orbit": {
+     "gap": 150,
+     "speed": 150,
+     "weave": 24,
+     "hz": 0.45
+    },
+    "art": "pulse_drone_mk1"
+   }
+  },
+  {
+   "id": "laser_drone_mk2",
+   "name": "Laser Drone Mk II",
+   "kind": "drone",
+   "blurb": "Twin rails and swept fins. It never holds still, and neither does its laser.",
+   "drone": {
+    "role": "combat",
+    "tier": 2,
+    "hp": 5,
+    "gun": {
+     "kind": "laser",
+     "damage_type": "energy",
+     "damage": 4.5,
+     "cooldown": 3.5,
+     "range": 900,
+     "accuracy": 0.65,
+     "family": "laser",
+     "weapon": "laser_mk2"
+    },
+    "orbit": {
+     "gap": 190,
+     "speed": 175,
+     "weave": 28,
+     "hz": 0.4
+    },
+    "art": "laser_drone_mk2"
+   }
+  },
+  {
+   "id": "ion_drone_mk2",
+   "name": "Ion Drone Mk II",
+   "kind": "drone",
+   "blurb": "A coil on a hull. It strips a shield layer and goes on circling.",
+   "drone": {
+    "role": "combat",
+    "tier": 2,
+    "hp": 5,
+    "gun": {
+     "kind": "laser",
+     "damage_type": "ion",
+     "damage": 1.5,
+     "cooldown": 7.0,
+     "range": 900,
+     "accuracy": 0.65,
+     "family": "ion",
+     "weapon": "ion_blast_mk1"
+    },
+    "orbit": {
+     "gap": 200,
+     "speed": 165,
+     "weave": 26,
+     "hz": 0.4
+    },
+    "art": "ion_drone_mk2"
+   }
+  },
+  {
+   "id": "beam_drone_mk3",
+   "name": "Beam Drone Mk III",
+   "kind": "drone",
+   "blurb": "Armoured, finned and fitted with a prism. Its beam sweeps across whatever rooms it passes.",
+   "drone": {
+    "role": "combat",
+    "tier": 3,
+    "hp": 8,
+    "gun": {
+     "kind": "beam",
+     "damage_type": "energy",
+     "damage": 4.5,
+     "cooldown": 8.0,
+     "duration": 1.2,
+     "tick": 0.25,
+     "range": 700,
+     "accuracy": 0.7,
+     "family": "beam",
+     "weapon": "prismatic_prism_lens"
+    },
+    "orbit": {
+     "gap": 150,
+     "speed": 150,
+     "weave": 20,
+     "hz": 0.35
+    },
+    "art": "beam_drone_mk3"
+   }
+  },
+  {
+   "id": "flak_drone_mk3",
+   "name": "Flak Drone Mk III",
+   "kind": "drone",
+   "blurb": "Three barrels and a tendency to get close. Good against small ships and the other side's drones.",
+   "drone": {
+    "role": "combat",
+    "tier": 3,
+    "hp": 8,
+    "gun": {
+     "kind": "flak",
+     "damage_type": "kinetic",
+     "damage": 1.5,
+     "cooldown": 5.5,
+     "range": 520,
+     "shots": 5,
+     "speed": 600,
+     "spread": 22,
+     "accuracy": 0.65,
+     "family": "flak",
+     "weapon": "shrapnel_cannon_scrap"
+    },
+    "orbit": {
+     "gap": 125,
+     "speed": 190,
+     "weave": 24,
+     "hz": 0.5
+    },
+    "art": "flak_drone_mk3"
+   }
+  },
+  {
+   "id": "defence_drone_mk1",
+   "name": "Defence Drone Mk I",
+   "kind": "drone",
+   "blurb": "A radar ring that circles your own hull and swats missiles and slow shells.",
+   "drone": {
+    "role": "defence",
+    "tier": 1,
+    "hp": 3,
+    "gun": {
+     "kind": "bolt",
+     "damage_type": "kinetic",
+     "damage": 1,
+     "cooldown": 1.5,
+     "range": 380,
+     "speed": 900,
+     "accuracy": 0.5,
+     "family": "pd",
+     "targets": [
+      "missile",
+      "slow"
+     ],
+     "weapon": "human_flak_screen"
+    },
+    "orbit": {
+     "gap": 70,
+     "speed": 130,
+     "weave": 10,
+     "hz": 0.5
+    },
+    "art": "defence_drone_mk1"
+   }
+  },
+  {
+   "id": "defence_drone_mk2",
+   "name": "Defence Drone Mk II",
+   "kind": "drone",
+   "blurb": "A doubled hoop and a second dish. It swats missiles, slow shells and the other side's drones.",
+   "drone": {
+    "role": "defence",
+    "tier": 2,
+    "hp": 5,
+    "gun": {
+     "kind": "bolt",
+     "damage_type": "kinetic",
+     "damage": 1,
+     "cooldown": 1.0,
+     "range": 420,
+     "speed": 900,
+     "accuracy": 0.65,
+     "family": "pd",
+     "targets": [
+      "missile",
+      "slow",
+      "drone"
+     ],
+     "weapon": "human_flak_screen"
+    },
+    "orbit": {
+     "gap": 80,
+     "speed": 150,
+     "weave": 12,
+     "hz": 0.5
+    },
+    "art": "defence_drone_mk2"
+   }
+  }
+ ]
+}
