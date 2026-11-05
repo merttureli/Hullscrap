@@ -29,8 +29,7 @@ const WALLS: Array[int] = [1, 3, 5]
 ## u 2..3, and a cable between them. Returns {ship, uid, reactor, rot, thick, id}.
 func _rig(thick := 1, rot := 0, id := "laser_mk1") -> Dictionary:
 	var ship := Wall.wall_ship(thick, rot)
-	var depth: int = ship.components.by_id[id]["mount"]["outside"][1]
-	var uid := ship.components.place_mount(ship.grid, id, Wall.out_anchor(rot, depth), rot)
+	var uid := ship.components.place_mount(ship.grid, id, Wall.out_for(ship.components.by_id[id], rot), rot)
 	var reactor := ship.components.place(ship.grid, "reactor_mk1", Wall.corner(rot, 2, 3, thick, thick + 3), rot % 2)
 	for c in [Wall.at(rot, 0, thick), Wall.at(rot, 1, thick), Wall.at(rot, 2, thick)]:  # from the breech (u -1..0) to the reactor (u 2..3)
 		ship.cables.place(ship.grid, c)
@@ -101,11 +100,14 @@ func test_every_mount_has_halves_that_share_their_width_and_a_known_outside_hp()
 			eq(d["size"], [2, 2] if narrow else [4, 2], id + ": the inside half is 4x2 (a Strafe Jets one 2x2)")
 			var console: bool = d["family"] == "radar" and not narrow  # a Radar Mk2 or Mk3 console is 4x2 behind a 2x2 dish (art/README.md)
 			var small_barrel: bool = id.begins_with("strafe") or id == "net_mouth_scrap" or id == "radar_mk1" or console  # these have a 2 wide outside half
-			eq(d["mount"]["outside"][0], 2 if small_barrel else 4, id + ": the barrel is 4 wide (a Strafe Jets, a net mouth or a radar's dish is 2 wide)")
-			if not console:
+			if d["family"] != "weapon":  # a gun's outside half is its shape's (tests/test_gun_shapes.gd)
+				eq(d["mount"]["outside"][0], 2 if small_barrel else 4, id + ": the barrel is 4 wide (a Strafe Jets, a net mouth or a radar's dish is 2 wide)")
+			if not console and d["family"] != "weapon":
 				check(d["mount"]["outside"][0] >= d["size"][0], id + ": the barrel is at least as wide as the breech")
-			if d["family"] == "weapon":  # an armoured barrel housing (the balance pass: at 75% a bow gun went at the first volley)
-				eq(d["mount"]["outside_hp"], 2 * int(d["hp"]), id + ": a weapon's outside_hp is twice its hp")
+			if d["family"] == "weapon" and id == "shrapnel_cannon_scrap":
+				eq(d["mount"]["outside_hp"], 12, id + ": the Shrapnel Cannon keeps its 12 (it was a 4x3 before the shapes)")
+			elif d["family"] == "weapon":  # an armoured barrel housing (the balance pass: at 75% a bow gun went at the first volley); twice the hp for 8 cells, so hp x cells / 4
+				eq(d["mount"]["outside_hp"], roundi(float(d["hp"]) * d["mount"]["outside"][0] * d["mount"]["outside"][1] / 4.0), id + ": a weapon's outside_hp is its hp x its outside cells / 4 (twice the hp for 8 cells)")
 			else:
 				eq(d["mount"]["outside_hp"], int(floor(d["hp"] * 0.75 + 0.5)), id + ": outside_hp is 75 percent of hp, rounded")
 		else:
@@ -587,17 +589,17 @@ func test_a_breached_link_cell_takes_the_mount_offline_until_it_is_patched() -> 
 
 
 func test_the_outside_half_is_part_of_the_hitbox_and_the_mass() -> void:
-	var d := _rig(1, 0, "leech_laser")  # a 4x2 + 4x2 mount that weighs by its cells (the tier 1-2 guns are listed in flight.json at their old mass)
+	var d := _rig(1, 0, "leech_laser")  # a 3x3 dome over a 4x2 breech: a mount that weighs by its cells (the tier 1-2 guns are listed in flight.json at their old mass)
 	var with: Ship = d["ship"]
 	var a := Arena.new(1)
 	a.add_ship(with)
 	var cells: Array = Collisions.hit_cells(a, 0)["cells"]
 	var barrel: Array = with.components.instances[d["uid"]]["out_cells"]
 	var outer := barrel.filter(func(c): return cells.has(c))
-	eq(outer.size(), 6, "the barrel's outer cells (all but the two between the others and the wall) are collision cells")
+	eq(outer.size(), 7, "the barrel's outer cells (all but the two between the others and the wall, 9 cells) are collision cells")
 	with.components.instances[d["uid"]]["out_hp"] = 0
 	a.ships[0].hit_cache = {}
-	eq(barrel.filter(func(c): return Collisions.hit_cells(a, 0)["cells"].has(c)).size(), 6, "and a disabled barrel still is")
+	eq(barrel.filter(func(c): return Collisions.hit_cells(a, 0)["cells"].has(c)).size(), 7, "and a disabled barrel still is")
 	var f = a.ships[0].flight
 	var m_with: float = f.mass_of(with.grid, with.components, with.cables)
 	var bare := Wall.wall_ship(1)  # the same ship with the laser's inside half only
@@ -605,7 +607,7 @@ func test_the_outside_half_is_part_of_the_hitbox_and_the_mass() -> void:
 	bare.components.place(bare.grid, "reactor_mk1", with.components.instances[d["reactor"]]["anchor"], 0)
 	for u in 3:
 		bare.cables.place(bare.grid, Wall.at(0, u, 1))
-	near(m_with - f.mass_of(bare.grid, bare.components, bare.cables), 8.0 * f.component_mass_per_cell, "the outside half weighs 8 cells more", 1e-6)
+	near(m_with - f.mass_of(bare.grid, bare.components, bare.cables), 9.0 * f.component_mass_per_cell, "the outside half weighs 9 cells more", 1e-6)
 
 
 func test_a_ram_on_a_disabled_barrel_goes_on_into_the_wall_behind_it() -> void:

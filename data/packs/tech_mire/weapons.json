@@ -1,7 +1,7 @@
 {
 "weapons": {
-	"mire_steam_lance": {"kind": "laser", "sound": "sig_hiss", "damage_type": "energy", "damage": 6.5, "cooldown": 1.75, "range": 1000, "shots": 1, "pierce": 0, "fire_chance": 0.05, "effects": {"self_room": {"fire_chance": 0.1}}, "turret": false, "gimbal": 5},
-	"mire_bog_mortar": {"kind": "bolt", "damage_type": "explosive", "damage": 4, "cooldown": 3.5, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 450, "splash": 1.5, "effects": {"corrode": {"resist_mult": 0.6, "seconds": 12}}, "turret": false, "gimbal": 5},
-	"mire_mist_projector": {"kind": "bolt", "damage_type": "energy", "damage": 3, "cooldown": 5.25, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 600, "effects": {"frost": {"slow": 0.4, "seconds": 6}}, "turret": true, "gimbal": 0, "arc": 270, "track": 120, "accuracy": 0.8}
+	"mire_steam_lance": {"kind": "laser", "sound": "sig_hiss", "damage_type": "energy", "damage": 6.5, "cooldown": 1.75, "range": 1000, "shots": 1, "pierce": 0, "fire_chance": 0.05, "effects": {"self_room": {"fire_chance": 0.1}}, "aim": "fixed", "turret": false, "gimbal": 5},
+	"mire_bog_mortar": {"kind": "bolt", "damage_type": "explosive", "damage": 4, "cooldown": 3.5, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 450, "splash": 1.5, "effects": {"corrode": {"resist_mult": 0.6, "seconds": 12}}, "aim": "fixed", "turret": false, "gimbal": 5},
+	"mire_mist_projector": {"kind": "bolt", "damage_type": "energy", "damage": 3, "cooldown": 5.25, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 600, "effects": {"frost": {"slow": 0.4, "seconds": 6}}, "aim": "turret", "turret": true, "gimbal": 0, "arc": 270, "track": 120, "accuracy": 0.8}
 }
 }

@@ -12,10 +12,11 @@
         2,
         2
       ],
+      "shape": "long_barrel",
       "mount": {
         "outside": [
-          4,
-          2
+          2,
+          4
         ],
         "outside_hp": 10
       },
@@ -41,6 +42,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -70,12 +72,13 @@
         2,
         2
       ],
+      "shape": "dome_turret",
       "mount": {
         "outside": [
-          4,
-          2
+          3,
+          3
         ],
-        "outside_hp": 10
+        "outside_hp": 11
       },
       "color": "#f2b134",
       "power": -3,

@@ -223,6 +223,7 @@ Generator `art/_src/gun_recipes.py` (one recipe per gun, from the modules of `gu
   - `aim`: `fixed` (with `gimbal_deg`: casemate 6, long 3, broadside and strip 20, heavy 4, spinal 2, pod 10), `turret` or `swivel`;
   - a flush pod's barrel sprite is its hatch lids (64 x 20, never turned): fire frames 0-2 open, half-close and close them;
   - the optional `off` anim is a barrel frame with its lights dead; a game that has no use for it can ignore it.
+- **How the game reads it:** `Mounts._read_barrel` takes `pivots_on_base` (else `pivot_on_base`) and `stagger_s`; the muzzle comes from `pivot_on_barrel` and `muzzle`. A shot leaves from the barrel that fires next, round-robin by shot; `Visuals._draw_barrel` draws one barrel per pivot, the recoil of barrel k delayed by k x `stagger_s`. A flush pod's barrel never turns (it is drawn along the mount). The `off` anim shows while the mount is unpowered. An `_out.json` whose `cells` differ from the gun's outside half is ignored: the flat placeholder is drawn instead, never stretched art.
 - **Centring rule:** a breech (inside half) narrower than the outside half sits at `floor((W - bw) / 2)` cells from the outside half's left edge at rotation 0 (W, bw in cells). The inside halves are unchanged.
 - Race guns keep their homeland on the new shape: the body's steel ramp (`gun_race.STEEL`), the livery letters (`LIV`, from `data/ship_styles.json`), a wing motif in the wing or corner slots, and a tip or band on the barrel.
 

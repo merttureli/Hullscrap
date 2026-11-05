@@ -282,6 +282,7 @@ const SPECS := {
 		"aim": 0.5,
 		"beds": 3,
 		"hull_seed": 51,
+		"prow_add": 3,
 		"morale": "flagship_sporeling",
 		"crew": [
 			"sporeling"

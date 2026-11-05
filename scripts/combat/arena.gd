@@ -131,7 +131,7 @@ func add_mount(idx: int, weapon_id: String, cell_pos: Vector2, powered := true, 
 	co.next_virtual -= 1
 	if dir == Vector2.ZERO:
 		dir = (cell_pos - co.pivot).normalized() if cell_pos.distance_squared_to(co.pivot) > 1e-6 else Vector2.UP
-	co.mounts[uid] = {"id": weapon_id, "pos": cell_pos, "dir": dir.normalized(), "reach": 0.0, "aim": dir.normalized(), "virtual": true, "powered": powered}
+	co.mounts[uid] = {"id": weapon_id, "pos": cell_pos, "dir": dir.normalized(), "reach": 0.0, "aim": dir.normalized(), "virtual": true, "powered": powered, "offsets": [], "shots": 0}
 	return uid
 
 

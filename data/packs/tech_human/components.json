@@ -12,12 +12,13 @@
         2,
         2
       ],
+      "shape": "flush_pod",
       "mount": {
         "outside": [
           4,
-          2
+          1
         ],
-        "outside_hp": 10
+        "outside_hp": 5
       },
       "color": "#5b8fd9",
       "power": -3,
@@ -41,10 +42,11 @@
         4,
         2
       ],
+      "shape": "long_barrel",
       "mount": {
         "outside": [
-          4,
-          2
+          2,
+          4
         ],
         "outside_hp": 12
       },
@@ -70,12 +72,13 @@
         2,
         2
       ],
+      "shape": "point_turret",
       "mount": {
         "outside": [
-          4,
+          2,
           2
         ],
-        "outside_hp": 10
+        "outside_hp": 5
       },
       "color": "#6f9fd0",
       "power": -4,

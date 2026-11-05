@@ -12,12 +12,13 @@
         2,
         2
       ],
+      "shape": "point_turret",
       "mount": {
         "outside": [
-          4,
+          2,
           2
         ],
-        "outside_hp": 10
+        "outside_hp": 5
       },
       "color": "#e8d9b0",
       "power": -3,
@@ -43,12 +44,13 @@
         2,
         2
       ],
+      "shape": "dome_turret",
       "mount": {
         "outside": [
-          4,
-          2
+          3,
+          3
         ],
-        "outside_hp": 10
+        "outside_hp": 11
       },
       "color": "#f0e2a8",
       "power": -4,
@@ -86,12 +88,13 @@
         2,
         2
       ],
+      "shape": "flush_pod",
       "mount": {
         "outside": [
           4,
-          2
+          1
         ],
-        "outside_hp": 10
+        "outside_hp": 5
       },
       "color": "#d9c68a",
       "power": -3,

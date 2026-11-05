@@ -1,7 +1,7 @@
 {
 "weapons": {
-	"prismatic_prism_lens": {"kind": "beam", "damage_type": "energy", "damage": 7.5, "cooldown": 8.75, "range": 800, "shots": 1, "pierce": 1, "fire_chance": 0.0, "duration": 1.5, "effects": {"needs_operator": {"species": "prismatic", "else_mult": 0.5, "stat": "damage"}}, "turret": false, "gimbal": 8},
-	"prismatic_refractor": {"kind": "bolt", "sound": "sig_crystal", "damage_type": "energy", "damage": 4.5, "cooldown": 2.45, "range": 900, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 800, "effects": {"shard": {"splinters": 2, "dmg": 1.15}, "split_on_shield": {"count": 3, "damage_mult": 0.35}}, "turret": false, "gimbal": 5},
-	"prismatic_glimmer_turret": {"kind": "bolt", "damage_type": "energy", "damage": 1, "cooldown": 0.8, "range": 900, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 900, "effects": {"needs_operator": {"species": "prismatic", "else_mult": 0.4, "stat": "rate"}}, "turret": true, "gimbal": 0, "arc": 300, "track": 170, "accuracy": 0.85, "rapid": true}
+	"prismatic_prism_lens": {"kind": "beam", "damage_type": "energy", "damage": 7.5, "cooldown": 8.75, "range": 800, "shots": 1, "pierce": 1, "fire_chance": 0.0, "duration": 1.5, "effects": {"needs_operator": {"species": "prismatic", "else_mult": 0.5, "stat": "damage"}}, "aim": "fixed", "turret": false, "gimbal": 8},
+	"prismatic_refractor": {"kind": "bolt", "sound": "sig_crystal", "damage_type": "energy", "damage": 4.5, "cooldown": 2.45, "range": 900, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 800, "effects": {"shard": {"splinters": 2, "dmg": 1.15}, "split_on_shield": {"count": 3, "damage_mult": 0.35}}, "aim": "fixed", "turret": false, "gimbal": 5},
+	"prismatic_glimmer_turret": {"kind": "bolt", "damage_type": "energy", "damage": 1, "cooldown": 0.8, "range": 900, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 900, "effects": {"needs_operator": {"species": "prismatic", "else_mult": 0.4, "stat": "rate"}}, "aim": "turret", "turret": true, "gimbal": 0, "arc": 300, "track": 170, "accuracy": 0.85, "rapid": true}
 }
 }
