@@ -60,7 +60,7 @@
 		"gear": {"rigger_harness": 150, "firefighter_coat": 160, "medic_sash": 170, "jump_pack": 260},
 		"mods": {"spotter_cam_mk1": 240, "spotter_cam_mk2": 420, "spotter_cam_mk3": 720, "salvage_rig_mk1": 240, "salvage_rig_mk2": 420, "salvage_rig_mk3": 760, "overcharge_coil_mk1": 260, "overcharge_coil_mk2": 450, "overcharge_coil_mk3": 780},
 		"blueprints": {"pulse_mk2": 360, "tractor_mk2": 360, "radar_mk2": 360, "intake_mk2": 360, "laser_mk2": 360, "shield_mk2": 360, "assembly_rig": 360, "engine_neon_mk3": 640, "strafe_jets_mk3": 640, "longburn_mk3": 640},
-		"common": {"radiator": 40, "bed": 30, "ammo_rack": 60, "oxygen_gen": 90, "helm": 70, "engine_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130, "intake_mk1": 120, "tractor_mk1": 160, "radar_mk1": 130, "medbay": 180, "strafe_jets_mk1": 60, "longburn_mk1": 120, "robot_arm": 150, "laser_cutter": 140}
+		"common": {"drone_part": 30, "radiator": 40, "bed": 30, "ammo_rack": 60, "oxygen_gen": 90, "helm": 70, "engine_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130, "intake_mk1": 120, "tractor_mk1": 160, "radar_mk1": 130, "medbay": 180, "strafe_jets_mk1": 60, "longburn_mk1": 120, "robot_arm": 150, "laser_cutter": 140}
 	},
 	"stations": {
 		"rusthold": {
