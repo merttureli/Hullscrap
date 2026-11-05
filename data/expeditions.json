@@ -1,0 +1,13 @@
+{
+	"_doc": "Away-team expeditions (scripts/space/expedition.gd, docs/CONTENT.md section 17). A site is a sector POI of type exp_<kind> (data/sectors.json poi_types, `manual`: it never triggers by itself); fly within its `reach` and press E to pick a team and send it down. The event is picked from the events of type exp_<kind> (data/events/expeditions_*.json) by the campaign's seeded rng, and the chain of pages that follows reads the TEAM, not the crew. team: min and max crew sent (you may go alone; the soldier is a candidate besides the unposted crew). kinds: label, airless (sites with no air: choices that ask `suits` need a sealed suit on every member), sky (the station backdrop body drawn for it, data/station_modules.json backdrop: kind and palette), color (the HUD marker), blurb (the line on the team picker). The soldier never dies: a `lose_member` that falls on a soldier who is alone knocks them down (hp 0) instead. risk: the share of an outcome set that hurts a team, under which a choice is tagged `low` and under which `mid` (above it: `high`); a choice that can lose a member or a carried item is tagged for that instead. value: what one unit of an item is worth, for rating a reward (anything not named counts `other`; a blueprint counts `blueprint`, special gear `gear`). tiers: the least value of each reward tier; a good wreck pays about `fair`, an expedition that goes well pays `good` or better. The odds are tested and reported by tests/expedition_sim.gd.",
+	"team": {"min": 1, "max": 4},
+	"kinds": {
+		"planet": {"label": "Planet surface", "airless": false, "sky": {"kind": "planet", "palette": 0}, "color": "#6bd34a", "blurb": "Air you can nearly breathe, ground you can walk on, and nobody to tell you which way is safe."},
+		"base": {"label": "Asteroid base", "airless": true, "sky": {"kind": "asteroid_field", "palette": 0}, "color": "#c2956a", "blurb": "Cut into a rock, no air left. Sealed suits, or nothing past the lock."},
+		"ruin": {"label": "Ice ruin", "airless": true, "sky": {"kind": "planet", "palette": 2}, "color": "#8fd8ff", "blurb": "Something old under the ice. The cold is the least of it. No air."},
+		"platform": {"label": "Gas-giant platform", "airless": false, "sky": {"kind": "gas_giant", "palette": 1}, "color": "#e1a136", "blurb": "A mining platform hung in the cloud-tops. The wind is the hazard; the air is thick and bad."}
+	},
+	"risk": {"low": 0.2, "mid": 0.4},
+	"value": {"credits": 1, "scrap": 1, "copper": 1.5, "polymer": 1.5, "titanium": 4, "silicon": 4, "crystal": 8, "plasma_cell": 10, "nanite_paste": 20, "fuel": 15, "blueprint": 40, "gear": 60, "other": 25},
+	"tiers": {"poor": 0, "fair": 30, "good": 70, "rich": 130}
+}
