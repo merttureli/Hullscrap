@@ -33,7 +33,7 @@ const WEAPON_PACK := {
 	"breach_harpoon": ["standard", 2, [4, 2], "bolt", "kinetic"],
 }
 const SHIELD_SECTORS: Array[int] = [1, 2, 4, 8]
-const SHIELD_RECHARGE := {"shield_mk1": 7.0, "shield_scrap_mk1": 8.0, "shield_mk2": 5.5, "shield_neon_mk1": 4.0, "mirror_veil": 6.0, "sovereign_aegis": 4.5, "sporeling_mycelium_shield": 3.7}  ## stats.recharge (s a layer) of the parts that are not just their tier's number
+const SHIELD_RECHARGE := {"shield_mk1": 7.0, "shield_scrap_mk1": 8.0, "shield_mk2": 5.5, "shield_neon_mk1": 4.0, "mirror_veil": 6.0, "sovereign_aegis": 4.5, "sporeling_mycelium_shield": 3.7, "sporeling_grove_veil": 3.0}  ## stats.recharge (s a layer) of the parts that are not just their tier's number
 const UNIQUES: Array[String] = ["leech_laser", "breach_harpoon", "mirror_veil", "afterburner"]
 
 
@@ -115,6 +115,8 @@ func test_data_is_complete() -> void:
 		# the smelters (docs/CONTENT.md section 12, data/packs/processing_1)
 		"smelter_scrap_mk1": [-3, 7, 1], "smelter_mk1": [-3, 7, 1], "smelter_mk2": [-4, 7, 2], "smelter_mk3": [-5, 7, 3], "smelter_neon_mk1": [-4, 7, 1],
 		# the rare factions (docs/CONTENT.md 18, data/packs/faction_barons, faction_leviathans)
+		"kett_brood_crown": [-6, 3, 3], "emberkin_kiln_mantle": [-5, 3, 3], "prismatic_conductor_helm": [-2, 2, 2], "basalt_anvil_bay": [-1, 3, 3], "sporeling_grove_veil": [-5, 3, 3],
+		"mire_fenwater_heart": [13, 0, 2], "fenn_exchange_drive": [-3, 4, 3], "gauntling_overseer_drive": [-3, 4, 3], "grundl_ramhead_thrusters": [-4, 4, 3], "human_flag_array": [-2, 3, 2],
 		"gilded_lance": [-4, 5, 3], "baron_tithe_gun": [-4, 5, 3], "sovereign_turret": [-3, 5, 3], "sovereign_aegis": [-7, 3, 3], "starwhale_fin": [-4, 4, 4],
 	}
 	eq(c.ids().size(), want.size(), "component count")

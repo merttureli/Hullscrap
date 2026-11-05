@@ -1,6 +1,6 @@
 extends RefCounted
 ## The race flagships (data/flagships.json, docs/CONTENT.md section 25): one named, hand-made boss ship for each of the ten major races, sailing in its
-## homeland. A flagship is a design file (data/ships/flagship_<race>.json, drawn with tests/tool_flagships.gd) and an entry of data/flagships.json.
+## homeland. A flagship is a design file (data/packs/flagships_1/ships/flagship_<race>.json, drawn with tests/tool_flagships.gd) and an entry of data/flagships.json.
 ## - attach() puts the flagship's beacon into ONE sector of the homeland's map (a POI of type `flagship`, sectors.json), only from the entry's `stage`
 ##   on, so it is met at most once in a run (a run crosses a region once). It never touches the exit and never blocks it: the player may fly past.
 ## - event() is the page the beacon opens: the warning, the hail, and the choice to engage or to stay clear. Winning (or sparing, or capturing)
@@ -11,7 +11,7 @@ extends RefCounted
 const Content = preload("res://scripts/data/content.gd")
 
 const PATH := "res://data/flagships.json"
-const DESIGN := "res://data/ships/flagship_%s.json"
+const DESIGN := "res://data/packs/flagships_1/ships/flagship_%s.json"
 const ENTRY_KEYS: Array[String] = ["region", "name", "captain", "design", "stage", "poi_name", "warning", "hail", "card", "codex", "gimmick", "role", "reward", "log", "lines"]
 const REWARD_KEYS: Array[String] = ["part", "credits", "scrap"]
 const LINE_KINDS: Array[String] = ["title", "hail", "surrender", "flee", "refuse"]
@@ -109,7 +109,7 @@ static func event(c, _ship, poi: Dictionary) -> Dictionary:
 	var win := {"flag": [flag], "items": items, "log": [str(e["log"])]}
 	var text := "%s\n\n%s" % [str(e["warning"]), str(e["hail"])]
 	var choices := [
-		{"text": "Engage the %s." % str(e["name"]), "outcomes": [{"weight": 1, "text": "You raise shields and turn to meet her.", "effects": {"fight": "flagship_" + race},
+		{"text": "Engage the %s." % str(e["name"]), "outcomes": [{"weight": 1, "text": "You raise shields and turn to meet her.", "effects": {"fight": design_of(race)},
 			"after_win": {"text": "The %s is finished. %s" % [str(e["name"]), str(e["codex"])], "effects": win}}]},
 		{"text": "Stay clear.", "outcomes": [{"weight": 1, "text": "You turn away from the beacon. The %s does not follow, and will still be here." % str(e["name"]), "effects": {}}]}]
 	return {"id": "flagship_" + race, "type": "flagship", "once": false, "title": str(e["name"]), "text": text, "choices": choices}
@@ -152,7 +152,7 @@ static func problems() -> Array[String]:
 		elif not (e.get("stage") is float or e.get("stage") is int) or int(e["stage"]) < int(homes[race]["stages"][0]) or int(e["stage"]) > int(homes[race]["stages"][1]):
 			out.append("%s: stage must be inside the region's stages %s" % [at, str(homes[race]["stages"])])
 		if str(e.get("design", "")) != "flagship_" + str(race) or not FileAccess.file_exists(design_of(str(race))):
-			out.append("%s: design must be 'flagship_%s' and data/ships/flagship_%s.json must exist" % [at, race, race])
+			out.append("%s: design must be 'flagship_%s' and %s must exist" % [at, race, design_of(str(race))])
 		var reward = e.get("reward")
 		if not reward is Dictionary:
 			out.append(at + ": reward must be an object")

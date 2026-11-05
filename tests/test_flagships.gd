@@ -1,5 +1,5 @@
 extends "res://tests/base_test.gd"
-## The race flagships (scripts/space/flagships.gd, data/flagships.json, data/ships/flagship_<race>.json, data/packs/flagships_1; docs/CONTENT.md section 25): one
+## The race flagships (scripts/space/flagships.gd, data/flagships.json, data/packs/flagships_1/ships/flagship_<race>.json, data/packs/flagships_1; docs/CONTENT.md section 25): one
 ## named boss ship for each of the ten major races, met as an optional beacon in its homeland. The designs are valid and use only real parts; the
 ## beacon appears in one sector of the homeland, from its stage on, never at the exit; a win pays the trophy once and sets the flag; the contact card
 ## says it is a boss; a flagship never flees; each fight ends inside 180 s.
@@ -216,7 +216,7 @@ func test_a_win_pays_the_trophy_once_sets_the_flag_and_leaves_a_log() -> void:
 		sector.ship_pos = b["poi"]["pos"]
 		var res: Dictionary = sector.trigger(c, ship)
 		var picked := c.events.choose(res["event"], 0, c, ship, c.node(c.current))
-		eq(str(picked["fight"]), "flagship_" + race, race + ": engaging fights the flagship's design")
+		eq(str(picked["fight"]), Flagships.design_of(race), race + ": engaging fights the flagship's design")
 		eq(sector.fight_design(c, "flagship", str(picked["fight"])), Flagships.design_of(race), race + ": and the sector sends that design")
 		var foe = Session.load_ship(Flagships.design_of(race))
 		var part := str(e["reward"]["part"])

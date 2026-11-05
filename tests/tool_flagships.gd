@@ -1,5 +1,5 @@
 extends SceneTree
-## Not a test (the runner only loads test_*.gd). The flagship workshop (data/flagships.json, data/ships/flagship_<race>.json):
+## Not a test (the runner only loads test_*.gd). The flagship workshop (data/flagships.json, data/packs/flagships_1/ships/flagship_<race>.json):
 ##   godot --headless --path . --script res://tests/tool_flagships.gd -- make [races=kett,basalt]
 ##     builds each flagship's hull and fit-out from SPECS below with Shipgen's own hull grammar, real mount rules and checks (a larger
 ##     frame than any generated class), applies its hand edits and writes the design file. The designs are committed; this is how they were drawn.
@@ -15,11 +15,12 @@ const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const Standoff = preload("res://tests/tool_standoff.gd")
+const Specs = preload("res://tests/flagship_specs.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
 const PLAYER_EVERY := 3
-const OUT := "res://data/ships/flagship_%s.json"
+const OUT := "res://data/packs/flagships_1/ships/flagship_%s.json"
 ## The frame of a flagship: wider and deeper than the generated `large` class (data/enemy_tables.json sizes).
 const FRAME := {"width": 42, "k_mid": 3, "max_interior": 36, "max": {"bow": 6, "flank": 6, "engine": 4, "reactor": 5, "shield": 3, "armour": 4, "crew": 14, "beds": 4}}
 
@@ -34,7 +35,7 @@ func _initialize() -> void:
 	for a in OS.get_cmdline_user_args():
 		var kv := str(a).split("=", true, 1)
 		args[kv[0]] = kv[1] if kv.size() > 1 else ""
-	SPECS = JSON.parse_string(FileAccess.get_file_as_string("res://tests/flagship_specs.json"))
+	SPECS = Specs.SPECS
 	_run.call_deferred()
 
 
