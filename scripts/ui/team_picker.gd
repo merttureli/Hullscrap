@@ -1,6 +1,6 @@
 extends Control
 ## The away-team picker: who goes down to a site (E near an expedition site, docs/CONTENT.md section 17). One card per crew member who may go (the soldier and the
-## unposted crew, expedition.gd candidates) with their species, health, what they carry and whether a sealed suit protects them; keys 1-9 or a click pick up to
+## any crew, posted or not: expedition.gd candidates) with their species, health, what they carry and whether a sealed suit protects them; keys 1-9 or a click pick up to
 ## data/expeditions.json team.max, Enter sends the team (one is enough: you may go alone), Esc stays aboard. Only draws and reads input; the rules are expedition.gd.
 
 ## Emitted with the names picked when the team is sent.
