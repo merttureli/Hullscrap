@@ -114,7 +114,7 @@ func test_the_card_is_listed_and_open_with_no_unlocks() -> void:
 	check(not Hangar.locked(e, null), "it is open to a profile that has earned nothing")
 	check(e["build_first"], "it asks for the build-first start")
 	eq(Hangar.open_count(list, e["group"], null), [1, 1], "its tab holds it alone")
-	eq(e["group"], "Your own", "the tab sorts after every race and faction, so the hangar still opens on the first of them")
+	eq(e["group"], "Your own", "its own tab, the first of the row (the hangar still opens on the first ship ready to fly)")
 	eq(Hangar.validate(), [], "the hangar is sound with it")
 	for other in list:
 		if other["id"] != "starter_blank":
