@@ -1,5 +1,5 @@
 extends RefCounted
-## Homelands: the capital of every race and the wonders of the ten major ones (data/homelands.json, docs/CONTENT.md section 23). Pure logic, no nodes.
+## Homelands: the capital of every race and the wonders of the ten major ones (data/homelands.json, docs/CONTENT.md section 24). Pure logic, no nodes.
 ## - A capital is a region place with `capital: true`; its race is the region's home_species. capital_of() / capital_at() find it, menu() leans its dock
 ##   menu to the race (the race trader and the race recruiter), station_opts() says how its station is built (station_gen.gd) and line() is the arrival line.
 ## - A wonder is a one-off POI of type `wonder` in the sector of the capital node (sector.gd): wonder_of() reads it, event() is the anomaly event it runs.

@@ -29,8 +29,7 @@ Boarding takes the soldier **off the ship and onto another vessel**: a derelict,
   - Blueprints are learned at once, with a toast.
   - Logs go to the journal.
 - **Crew**:
-  - **posted** crew stay aboard;
-  - **you may take up to 2 unposted crew**, who follow and help;
+  - **you may take up to 2 crew**, posted or not, who follow and help; a posted crew member is back at the post when you return;
   - the drone stays on the ship.
 - **Leaving**: walk back to the **airlock** (always marked) and press E.
 - **Time**: the sector doesn't tick while you're aboard, so no passing ships come, and the Hollow tide's linger clock is held too: time on foot doesn't count against the tide.

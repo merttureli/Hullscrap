@@ -1,5 +1,5 @@
 extends RefCounted
-## The art of the ten race wonders (data/homelands.json `wonders`, docs/CONTENT.md section 23), drawn in code in the race's colours, each as big as a station:
+## The art of the ten race wonders (data/homelands.json `wonders`, docs/CONTENT.md section 24), drawn in code in the race's colours, each as big as a station:
 ## draw(cv, art, at, radius, clock, alpha) paints wonder `art` on canvas item `cv`, centred on `at`, about `radius` px across half. Visual only: its own fixed numbers.
 
 const IDS: Array[String] = ["queen_ship", "star_forge", "singing_crystal", "bloom_world", "carved_face", "held_lake", "auction_ring", "scrap_cathedral", "barge_city", "concord_beacon"]

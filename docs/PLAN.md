@@ -113,6 +113,7 @@ Every system should be **unique, FTL Multiverse style**: not just "+10% thrust",
   - Rewards: materials, blueprints, gear, new crew.
   - **Risk is real and permanent**: crew can be injured, captured, killed or **just disappear**, and **any gear they carried is gone with them**. Taking your best exosuit makes success likelier, but you might lose it. That tension is the point.
   - Expedition results come from seeded randomness, so they can be replayed and tested.
+  - **Built (Beta 3): away-team expeditions** to planet, asteroid-base, ice-ruin and gas-platform sites in sector space (docs/CONTENT.md section 23).
 - Events and expeditions are **data** (`data/events/*.json`): a scene text, choices, requirements (trait, gear, skill), and weighted outcomes.
 
 ## Fabricator levels and workshop modules

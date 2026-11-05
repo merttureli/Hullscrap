@@ -1,5 +1,5 @@
 extends "res://tests/base_test.gd"
-## Homelands (docs/CONTENT.md section 23): the capital of every race (an operational, friendly, single-race, large station with all its race's rooms, a race trader
+## Homelands (docs/CONTENT.md section 24): the capital of every race (an operational, friendly, single-race, large station with all its race's rooms, a race trader
 ## and a race recruiter, race guards, its emblem and arrival line) and the wonder of each of the ten major races.
 
 const Campaign = preload("res://scripts/space/campaign.gd")

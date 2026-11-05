@@ -20,6 +20,8 @@ const Campaign = preload("res://scripts/space/campaign.gd")
 const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const EventPanel = preload("res://scripts/ui/event_panel.gd")
+const TeamPicker = preload("res://scripts/ui/team_picker.gd")
+const Expedition = preload("res://scripts/space/expedition.gd")
 const StationPanel = preload("res://scripts/ui/station_panel.gd")
 const JournalPanel = preload("res://scripts/ui/journal_panel.gd")
 const TideHud = preload("res://scripts/ui/tide_hud.gd")
@@ -69,6 +71,7 @@ var campaign: Campaign
 var profile = null  ## the player's Profile (front_door.gd sets it): the campaigns write their unlocks and landmarks to it
 var event_panel: Control
 var station_panel: Control
+var team_picker: Control  ## who goes down to an expedition site (team_picker.gd)
 var tide_hud: Control  ## the play-mode line of the Hollow tide (tide_hud.gd), a sibling in this canvas layer
 var region_choice: Control
 var journal_panel: Control  ## the logs found this run (J)
@@ -112,7 +115,7 @@ func _ready() -> void:
 
 
 func _process(dt: float) -> void:
-	if visible and panel_only and not event_panel.visible and not station_panel.visible and not region_choice.visible and not _fighting:
+	if visible and panel_only and not event_panel.visible and not station_panel.visible and not team_picker.visible and not region_choice.visible and not _fighting:
 		_hide_panels()  # nothing left to show over the sector
 	if visible:
 		queue_redraw()
@@ -141,6 +144,11 @@ func _ensure_panels() -> void:
 	event_panel.board_requested.connect(_start_board)
 	event_panel.talk_done.connect(_on_talk_done)
 	add_child(event_panel)
+	team_picker = TeamPicker.new()
+	team_picker.map = self
+	team_picker.chosen.connect(_on_team_chosen)
+	team_picker.cancelled.connect(_on_team_stays)
+	add_child(team_picker)
 	station_panel = StationPanel.new()
 	station_panel.map = self
 	station_panel.closed.connect(_on_station_closed)
@@ -211,7 +219,7 @@ func open() -> void:
 
 
 func close() -> void:
-	if event_panel.visible or station_panel.visible or region_choice.visible or journal_panel.visible:
+	if event_panel.visible or station_panel.visible or team_picker.visible or region_choice.visible or journal_panel.visible:
 		return
 	if visible:
 		Audio.fx(self, "close")
@@ -235,6 +243,7 @@ func new_game(seed_value := 0) -> void:
 	panel_only = false
 	_exit_due = false
 	event_panel.visible = false
+	team_picker.visible = false
 	station_panel.visible = false
 	region_choice.visible = false
 	journal_panel.visible = false
@@ -402,6 +411,8 @@ func _open_exit() -> void:
 ## The event panel has no more to show: whatever was queued (a fight's follow-up), else the region choice at the exit
 ## beacon, else the station menu.
 func _on_events_finished() -> void:
+	if Expedition.active(campaign):
+		Expedition.finish(campaign)  # the team is home
 	refresh()
 	if not _queue.is_empty():
 		_queue.pop_front().call()
@@ -463,6 +474,47 @@ func open_poi(res: Dictionary, sector) -> void:
 		_poi_done()
 
 
+## E near an expedition site: the team picker opens over the sector (the tide clock and the sector stand still while it and the event are up).
+func open_team_picker(poi: Dictionary, sector) -> void:
+	_ensure_panels()
+	_poi = str(poi["id"])
+	_poi_sector = sector
+	_dock = false
+	panel_only = true
+	visible = true
+	refresh()
+	team_picker.open(poi)
+
+
+func _on_team_chosen(names: Array) -> void:
+	var poi: Dictionary = _poi_sector.find(_poi) if _poi_sector != null else {}
+	var r := Expedition.begin(campaign, ship(), poi, names)
+	if not r["ok"]:
+		event_panel.open_notice(str(poi.get("name", "Away team")), str(r["why"]), [])
+		return
+	campaign.events_seen += 1
+	event_panel.open_event(r["event"])
+
+
+func _on_team_stays() -> void:
+	_forget_poi()
+	_hide_panels()
+
+
+## A saved run with a team still away: the page it was on opens again.
+func resume_expedition() -> void:
+	if not Expedition.active(campaign) or not campaign.events.has(str(campaign.expedition.get("page", ""))):
+		campaign.expedition = {}
+		return
+	_ensure_panels()
+	_poi = str(campaign.expedition["poi"])
+	_poi_sector = campaign.current_sector()
+	panel_only = true
+	visible = true
+	refresh()
+	event_panel.open_event(campaign.events.get_event(str(campaign.expedition["page"])))
+
+
 ## The title of an event window with none of its own, while a POI's chain is up: the POI's name ("Wreck", "Distress beacon"), so
 ## a wreck far from the beacon is not titled with the node's name. "" for the node's own POI (it is the node) or with no POI.
 func poi_title() -> String:
@@ -473,7 +525,7 @@ func poi_title() -> String:
 ## The POI's chain is over: it is resolved, and the panels make way for the sector.
 func _poi_done() -> void:
 	_poi_resolve()
-	if panel_only and not event_panel.visible and not station_panel.visible and not region_choice.visible:
+	if panel_only and not event_panel.visible and not station_panel.visible and not team_picker.visible and not region_choice.visible:
 		_hide_panels()
 
 
@@ -660,6 +712,7 @@ func load_campaign() -> String:
 		journal_panel.visible = false
 		_fighting = false
 		refresh()
+		resume_expedition()
 		return ""
 	new_game()
 	return why
@@ -672,7 +725,7 @@ func _input(e: InputEvent) -> void:
 		return
 	if BreachPrompt.claims(e):
 		return  # R and V answer the breach card, whatever window is open
-	if event_panel.visible or station_panel.visible or region_choice.visible or journal_panel.visible:
+	if event_panel.visible or station_panel.visible or team_picker.visible or region_choice.visible or journal_panel.visible:
 		return  # they take the keys
 	if get_viewport() != null:
 		get_viewport().set_input_as_handled()

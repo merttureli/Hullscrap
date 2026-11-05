@@ -469,8 +469,8 @@ func trigger(c, ship) -> Dictionary:
 	var best := {}
 	var best_d := INF
 	for poi in all_pois():
-		if poi["state"] != NEW:
-			continue
+		if poi["state"] != NEW or bool(cfg["poi_types"].get(poi["type"], {}).get("manual", false)):
+			continue  # (a manual POI, an expedition site, waits for the player: site_near)
 		var d := ship_pos.distance_to(poi["pos"])
 		if _engaged.has(poi["id"]):
 			if d > away:
@@ -504,6 +504,23 @@ func trigger(c, ship) -> Dictionary:
 
 static func poi_is_capital(poi: Dictionary) -> bool:
 	return str(poi.get("capital", "")) != ""
+
+
+## The nearest manual POI (an expedition site) that is still new and within its `reach` of the ship, {} for none. Not in a Hollow place.
+func site_near() -> Dictionary:
+	var best := {}
+	var best_d := INF
+	if hollow:
+		return best
+	for poi in all_pois():
+		var t: Dictionary = cfg["poi_types"].get(poi["type"], {})
+		if poi["state"] != NEW or not bool(t.get("manual", false)):
+			continue
+		var d := ship_pos.distance_to(poi["pos"])
+		if d <= float(t.get("reach", 800.0)) and d < best_d:
+			best = poi
+			best_d = d
+	return best
 
 
 func _event_for(c, ship, poi: Dictionary) -> Dictionary:
