@@ -284,10 +284,16 @@ func _put_away(away: bool) -> void:
 	if crew != null:
 		crew.visible = not away
 		crew.set_process(not away)
-	if starfield != null:  # (a station with windows keeps the sector's sky up: it shows through them)
-		starfield.visible = not away or (session != null and not session.site.backdrop.is_empty())
+	if starfield != null:
+		starfield.visible = not away or sky_up()
 	if sector != null:
 		sector.set("boarding", away)
+
+
+## Whether the sector's stars stay up aboard: a station with windows shows them through the glass, and the ship you beat floats in open space (no station
+## frame or backdrop round her hull).
+func sky_up() -> bool:
+	return session != null and (not session.site.backdrop.is_empty() or session.site.ship != null)
 
 
 func _build_nodes() -> void:
@@ -371,7 +377,7 @@ func _occluder(r: Rect2) -> LightOccluder2D:
 
 
 func _free_nodes() -> void:
-	for n in [ship_view, _over, _lights, _mod, _layer, _sky]:
+	for n in [ship_view, _decor, _over, _lights, _mod, _layer, _sky]:
 		if n != null:
 			if n.is_inside_tree():
 				n.queue_free()

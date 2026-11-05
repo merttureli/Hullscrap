@@ -290,7 +290,7 @@
 		"narrow": 3,
 		"bare": "storage",
 		"foe": {"default": "pirate", "species": {}},
-		"hatch": {"thick": 3},
+		"hatch": {"thick": 5},
 		"lights": 0.5
 	},
 	"foe_loot": {
