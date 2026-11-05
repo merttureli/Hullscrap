@@ -43,11 +43,13 @@ const MIN_ARMOUR_HP := 200.0  ## every starter has real armour: at least this mu
 const BOW_ROWS := 6  ## the Courier is an arrowhead: its titanium skin covers the nose, shoulders included (docs/CONTENT.md 4c)
 
 
-## Every starter of the hangar, name -> design path (the first three, then the packs' ships).
+## Every built starter of the hangar, name -> design path (the first three, then the packs' ships). The Blank frame is a seed, not
+## a built ship: tests/test_blank_start.gd holds it to its own rules.
 func _all() -> Dictionary:
 	var out := {}
 	for e in Hangar.starters():
-		out[e["name"]] = e["path"]
+		if not e["build_first"]:
+			out[e["name"]] = e["path"]
 	return out
 
 

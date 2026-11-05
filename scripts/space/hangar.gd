@@ -14,7 +14,7 @@ const LAYOUTS: Array[String] = ["A", "B", "C"]
 const LOCKED_HINT := "Locked."
 
 
-## Every starter, by group, layout and name: {id, name, path, pack, group, layout, unlock, blurb, crew [{name, species}]}.
+## Every starter, by group, layout and name: {id, name, path, pack, group, layout, unlock, blurb, build_first, crew [{name, species}]}.
 static func starters() -> Array:
 	var defaults := _defaults()
 	var out := []
@@ -30,7 +30,7 @@ static func starters() -> Array:
 			if m is Dictionary:
 				crew.append({"name": str(m.get("name", "")), "species": str(m.get("species", "human"))})
 		out.append({"id": id, "name": str(design.get("name", id)), "path": str(s["path"]), "pack": str(s["pack"]), "group": str(h.get("group", "")),
-			"layout": str(h.get("layout", "A")), "unlock": unlock if unlock != "" else Unlocks.for_ship(id), "blurb": str(design.get("blurb", "")), "crew": crew})
+			"layout": str(h.get("layout", "A")), "unlock": unlock if unlock != "" else Unlocks.for_ship(id), "blurb": str(design.get("blurb", "")), "crew": crew, "build_first": bool(design.get("build_first", false))})
 	out.sort_custom(func(a, b): return [a["group"], a["layout"], a["name"]] < [b["group"], b["layout"], b["name"]])
 	return out
 

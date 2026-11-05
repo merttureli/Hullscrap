@@ -36,6 +36,7 @@ const Wardens = preload("res://scripts/space/wardens.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const Shops = preload("res://scripts/space/shops.gd")
 const Kit = preload("res://scripts/board/kit.gd")
+const Launch = preload("res://scripts/space/launch.gd")
 
 ## Save format. Bump it when the file changes, and keep loading the old ones or refuse them clearly.
 ## 2 adds `fuel_part` (the fraction of a fuel already used up, docs/waves/engines_1.md); version 1 loads with 0.
@@ -64,6 +65,7 @@ const SAVE_PATH := "user://campaign.json"
 const REFUSED_TEXT := "The dock master turns you away."
 const DARK_TEXT := "The gate is dark."
 const NO_FUEL := "no fuel"
+const BUILD_FIRST := "build_first"  ## flag of a build-your-own start (a design with `build_first`): no jump, and no tide clock, until the ship can fly and leaves (launch.gd)
 const SHOP_PREFIX := "shop:"  ## the id of a small shop is "shop:<node id>:<POI id>" (shop_id)
 const HOSTILES_TEXT := "hostiles too close to jump"
 const SPOOL_TEXT := "spool the jump drive first"
@@ -312,6 +314,10 @@ func jump_block(to: String, ship, drift_jump := false) -> String:
 		return "no lane there"
 	if gate_dark(to):
 		return DARK_TEXT
+	if flags.has(BUILD_FIRST):  # the build-your-own start: the first launch waits for a ship that can fly
+		var held := Launch.why_not(ship)
+		if held != "":
+			return held
 	if drift_jump:
 		if not fuel_short(ship):
 			return "you still have fuel"
@@ -356,6 +362,7 @@ func _jump_now(to: String, ship, drift_jump: bool) -> Dictionary:
 		ship.inventory.add("fuel", -(parts / FUEL_PARTS))
 		fuel_part = parts % FUEL_PARTS
 	flags.erase("at_" + str(drift.node(current).get("place", "")))  # undocked
+	flags.erase(BUILD_FIRST)  # launched: the tide clock runs from here
 	current = to
 	visited[to] = true
 	_enter(to, ship)
@@ -451,6 +458,8 @@ func _mark_hollow(mid_stay := false) -> void:
 ## A stretch of `dt` seconds is lived in the same place (play mode, no fight, no map): the tide creeps on. Returns lines for
 ## the HUD and the chronicle. It never moves the jump counter or the debt.
 func linger(dt: float) -> Array:
+	if flags.has(BUILD_FIRST):
+		return []  # the tide waits for the first launch of a build-your-own start
 	var fell := tide.hollow_count()
 	var lines := tide.linger(dt)
 	if not tide.warns.is_empty() and lines.has("The tide rises in %d s" % int(tide.warns[0])) and tide.jumps_until(current) == 1 and tide_pressure(current) > 0.0:

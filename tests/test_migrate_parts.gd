@@ -153,7 +153,8 @@ func test_every_shipped_design_is_on_version_7_with_all_its_parts_powered_and_it
 			continue
 		for uid in ship.components.instances:
 			var inst: Dictionary = ship.components.instances[uid]
-			check(ship.power_state["powered"].get(uid, false), "%s: %s is powered" % [path.get_file(), inst["id"]])
+			if not ship.build_first:  # (the Blank frame's seed helm has no reactor: the player builds it)
+				check(ship.power_state["powered"].get(uid, false), "%s: %s is powered" % [path.get_file(), inst["id"]])
 			if ship.components.is_mount(inst["id"]):
 				check(ship.components.has_outside(uid) and ship.components.link_intact(ship.grid, uid), "%s: %s is mounted through its wall" % [path.get_file(), inst["id"]])
 		var lost := HullOutline.pockets(ship)
