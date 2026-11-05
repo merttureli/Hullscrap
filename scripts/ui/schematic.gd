@@ -208,7 +208,10 @@ func _draw() -> void:
 		Emblem.draw(self, look["emblem"], Rect2(7.0, 4.0, 16.0, 16.0), look["palette"]["mark"], 1.5)
 		lead = 22.0
 		head = "%s - %s" % [look["line"], title]
-	draw_string(ThemeDB.fallback_font, Vector2(10.0 + lead, 17), head.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, PANEL.x - 20.0 - skulls_w - lead, 13, TEXT)
+	var room := PANEL.x - 20.0 - skulls_w - lead
+	if head != title and ThemeDB.fallback_font.get_string_size(head.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x > room:
+		head = title  # too long for the bar (a flagship's name): the name alone, the emblem still says whose it is
+	draw_string(ThemeDB.fallback_font, Vector2(10.0 + lead, 17), head.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, room, 13, TEXT)
 	if threat > 0:
 		Skulls.draw(self, Vector2(PANEL.x - 8.0 - Skulls.width(SKULL_K), 12.0), threat, Skulls.color(threat), SKULL_K)
 	if grid.hull.is_empty():

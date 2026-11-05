@@ -347,8 +347,7 @@ func _fight(race: String, seed_value: int) -> Dictionary:
 	return out
 
 
-func test_each_flagship_fight_ends_within_180_seconds_on_three_seeds() -> void:
+func test_each_flagship_fight_ends_within_180_seconds() -> void:  # one seed each keeps the suite short; tests/tool_flagships.gd runs the full bench
 	for race in MAJORS:
-		for s in 3:
-			var r := _fight(race, s)
-			check(r["state"] != "fighting", "%s seed %d: the fight ends (%s after %.0f s)" % [race, s, r["state"], r["t"]])
+		var r := _fight(race, 0)
+		check(r["state"] != "fighting", "%s: the fight ends (%s after %.0f s)" % [race, r["state"], r["t"]])
