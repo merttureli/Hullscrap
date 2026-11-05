@@ -23,6 +23,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **Away-team expeditions**: planets, asteroid bases, ice ruins and gas-giant platforms in sector space. Fly close, press E, pick 1-4 crew (or go alone) and play two or three scenes. The team's race, traits and gear open options; crew can be hurt, captured or lost, with everything they carried.
 - **Any crew can join a boarding party**, posted or not; they are back at their posts when you return.
 - **Auto reload on foot**: a magazine that runs dry reloads by itself while the hold has rounds.
+- **On-foot fights last longer**: about three foes to a health bar (it was five or more). Scavengers hit harder (9), aim better and call others from further off, so they come two or three at once; armour matters more.
 - **Foes on foot are real races.** The crew of a ship you beat are the same race when you board her; a race's section is mostly held by that race; elsewhere foes come from the region. Bodies lie as their race, and a foe's name reads "Kett pirate". Their numbers are the same as before.
 - **Medbays** have working and broken beds, and a room's loot fits the room (the odds of rare items are unchanged).
 
