@@ -212,7 +212,7 @@ func can_leave() -> bool:
 	return arena.ships[ENEMY].wrecked or morale.end_state() != "fighting" or distance() > LEAVE_DISTANCE or jump_ready()
 
 
-## The player's weapons in slot order: [{uid, id, name, group, turret}]: placed ones by uid, then virtual mounts as added.
+## The player's weapons in slot order: [{uid, id, name, group (the mount's own choice first), turret, aim (fixed, swivel, turret), pd (point defence)}]: placed ones by uid, then virtual mounts as added.
 func weapons() -> Array:
 	var co = arena.ships[PLAYER]
 	var uids: Array = co.mounts.keys()
@@ -221,9 +221,13 @@ func weapons() -> Array:
 	for uid in uids:
 		var m: Dictionary = co.mounts[uid]
 		var name := str(m["id"])
+		var choice := 0
 		if not m["virtual"]:
 			name = str(co.ship.components.def(co.ship.components.instances[uid]["id"]).get("name", name))
-		out.append({"uid": uid, "id": m["id"], "name": name, "group": arena.weapons.group_of(m["id"]), "turret": bool(arena.weapons.def(m["id"])["turret"])})
+			choice = co.ship.components.group_choice(uid)
+		var d: Dictionary = arena.weapons.def(m["id"])
+		out.append({"uid": uid, "id": m["id"], "name": name, "group": arena.weapons.group_of(m["id"], choice), "turret": bool(d["turret"]),
+			"aim": str(d["aim"]), "pd": bool(d["turret"]) and d.get("effects") is Dictionary and d["effects"].has("intercept")})
 	return out
 
 

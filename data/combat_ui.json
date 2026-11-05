@@ -1,10 +1,15 @@
 {
-  "_doc": "Numbers for the combat HUD, read by scripts/combat/intent.gd and scripts/ui/schematic.gd. INTENT (enemy intent on your schematic): a red reticle sits on the part of your ship the enemy pilot aims at, and every enemy weapon that is heavy and ready within warn_s seconds gets a row ('Artemis in 1.2 s', red under red_under_s). A weapon is HEAVY when its damage is at least heavy_damage (a turret's damage is already scaled down), its shot kind is one of heavy_kinds, or its damage type is one of heavy_damage_types. A heavy weapon only gets a row if its cooldown is at least min_cooldown seconds (2 x warn_s): a warning has to mean 'a big shot is coming, react now', and a gun that fires faster than that is noise whatever its damage. A new target is shown only after the old one has been up for hold_s seconds (a target that is gone switches at once), so the reticle does not flicker. At most max_rows rows are drawn, then '+N more'. family_names: how the reticle's line names the family of the part ('Targeting: Weapons'; a family not listed is capitalised).",
+  "_doc": "Numbers for the combat HUD, read by scripts/combat/intent.gd and scripts/ui/schematic.gd. INTENT (enemy intent on your schematic): a red reticle sits on the part of your ship the enemy pilot aims at, and every enemy weapon that is heavy and ready within warn_s seconds gets a row ('Artemis in 1.2 s', red under red_under_s). A weapon is HEAVY when its damage is at least heavy_damage (a turret's damage is already scaled down), its shot kind is one of heavy_kinds, or its damage type is one of heavy_damage_types. A heavy weapon only gets a row if its cooldown is at least min_cooldown seconds (2 x warn_s): a warning has to mean 'a big shot is coming, react now', and a gun that fires faster than that is noise whatever its damage. A new target is shown only after the old one has been up for hold_s seconds (a target that is gone switches at once), so the reticle does not flicker. At most max_rows rows are drawn, then '+N more'. family_names: how the reticle's line names the family of the part ('Targeting: Weapons'; a family not listed is capitalised). GUN BADGES (scripts/ui/gun_badges.gd, weapon_bar.gd): groups[key] is how a fire group looks on the ship and on the weapon bar: its name, the button that fires it, a colour and a shape mark (dot, ring, arc) so it reads without colour. Keys: 1 (LMB), 2 (RMB), auto (swivels and turrets, they fire themselves; T holds them), pd (point defence, auto too). flash_s: how long a chip and its slot flash after the gun fires. chip_min/chip_max: the chip's size on screen in px (it follows the zoom between them). Colours stay clear of the weapon family colours of docs/GUNS.md 4.",
   "intent": {
     "warn_s": 1.5,
     "heavy_damage": 4.5,
-    "heavy_kinds": ["missile", "beam"],
-    "heavy_damage_types": ["ion"],
+    "heavy_kinds": [
+      "missile",
+      "beam"
+    ],
+    "heavy_damage_types": [
+      "ion"
+    ],
     "min_cooldown": 3.0,
     "hold_s": 0.5,
     "red_under_s": 0.5,
@@ -24,6 +29,43 @@
       "intake": "Intake",
       "ram": "Ram",
       "utility": "Utility"
+    }
+  },
+  "gun_badges": {
+    "flash_s": 0.5,
+    "chip_min": 14,
+    "chip_max": 22,
+    "groups": {
+      "1": {
+        "label": "LMB",
+        "name": "Left mouse button",
+        "color": "#ffb020",
+        "mark": "dot"
+      },
+      "2": {
+        "label": "RMB",
+        "name": "Right mouse button",
+        "color": "#22e0d0",
+        "mark": "ring"
+      },
+      "drones": {
+        "label": "DRONES",
+        "name": "Drone bays (a press launches)",
+        "color": "#d7e86a",
+        "mark": "dot"
+      },
+      "auto": {
+        "label": "AUTO",
+        "name": "Fires by itself (T holds)",
+        "color": "#7aa2ff",
+        "mark": "arc"
+      },
+      "pd": {
+        "label": "PD",
+        "name": "Point defence (fires by itself)",
+        "color": "#6be07a",
+        "mark": "arc"
+      }
     }
   }
 }

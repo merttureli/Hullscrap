@@ -14,7 +14,8 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 ## middle of the outside half on the face) and the cells it holds, `ocells` (empty space under the barrel) and `link`.
 ## 6 is the gun rework (docs/GUNS.md 8): the guns have new outside halves (shapes of any size), so a mount saved before 6 whose gun
 ## changed shape (_reshaped()) is re-planned from its inside half; one whose new outside half does not fit goes back to the cargo.
-const VERSION := 6
+## 7 adds the optional fire group a player chose for a fixed gun (`group`, 1 or 2; absent: the kind's default); older saves load with the defaults.
+const VERSION := 7
 const OLD_OUTSIDE := [4, 2]  ## the outside half every gun had before version 6 ...
 const OLD_OUTSIDE_OF := {"shrapnel_cannon_scrap": [4, 3]}  ## ... but this one
 const MIN_VERSION := 1
@@ -107,6 +108,20 @@ func place(grid, id: String, anchor: Vector2i, rot: int) -> int:
 	_next_uid += 1
 	_add(uid, id, anchor, rot)
 	return uid
+
+
+## The fire group (1 or 2) the player chose for gun `uid`, or 0 for the kind's default.
+func group_choice(uid: int) -> int:
+	return int(instances[uid].get("group", 0)) if instances.has(uid) else 0
+
+
+## Choose gun `uid`'s fire group (1 or 2; 0 goes back to the default).
+func set_group_choice(uid: int, group: int) -> void:
+	if instances.has(uid) and group in [0, 1, 2]:
+		if group == 0:
+			instances[uid].erase("group")
+		else:
+			instances[uid]["group"] = group
 
 
 ## Is `id` a hull mount (a weapon or engine with an outside half)?
@@ -304,6 +319,8 @@ func to_dict() -> Dictionary:
 			rec["kit"] = str(i["kit"])
 		if int(i.get("loaded", 0)) > 0:  # what a gun has taken off a belt
 			rec["loaded"] = int(i["loaded"])
+		if int(i.get("group", 0)) > 0:  # the fire group the player chose
+			rec["group"] = int(i["group"])
 		list.append(rec)
 	var d := {"version": VERSION, "next_uid": _next_uid, "instances": list}
 	if not wrecks.is_empty():
@@ -454,6 +471,8 @@ func _load_state(inst: Dictionary, saved: Dictionary) -> void:
 		inst["ammo"] = str(saved.get("ammo", ""))
 	if saved.get("loaded") is float or saved.get("loaded") is int:
 		inst["loaded"] = maxi(0, int(saved["loaded"]))
+	if (saved.get("group") is float or saved.get("group") is int) and int(saved["group"]) in [1, 2]:
+		inst["group"] = int(saved["group"])
 
 
 ## A floor-type tile: something is built there and it is neither solid (wall) nor a door.
