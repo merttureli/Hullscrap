@@ -162,10 +162,9 @@ func test_the_new_start_known_recipes_are_known_on_a_new_run() -> void:
 		check(start.has(id), id + " is in recipes.json start_known")
 	check(not start.has("assembly_rig"), "the Assembly Rig stays a blueprint to find")
 	var ship := Ship.from_design(STARTER)
-	check(not ship.crafting.is_known("laser_cutter"), "(the design saved its own, older list)")
 	RunStart.apply_ship(ship, {}, null)
-	for id in ["laser_cutter", "titanium"]:
-		check(ship.crafting.is_known(id), id + " is known when the run starts")
+	for id in ["laser_cutter", "titanium", "smelter_scrap_mk1"]:
+		check(ship.crafting.is_known(id), id + " is known when the run starts, though the design saved an older list (a pack's start list too: the Slag Pot)")
 	check(not ship.crafting.is_known("assembly_rig") and not ship.crafting.is_known("laser_mk2"), "the Rig and the Mk2 parts are not")
 	eq(ship.inventory.count("fuel"), int(Campaign.config()["fuel"]["start"]), "(and the run starts with the fuel of the data)")
 
