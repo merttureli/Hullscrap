@@ -26,7 +26,7 @@ def crop(img, k, fw, fh):
         for x in range(fw): o.p[y][x] = list(img.p[y][k * fw + x])
     return o
 
-def scene(d, pid, state='on', bstate='idle', bi=0, deg=0, pad=18, top_extra=14):
+def scene(d, pid, state='on', bstate='idle', bi=0, deg=0, pad=18, top_extra=14, stag=False):
     """the gun `pid` of art directory d: outside half in space, a 2-row wall, the (unchanged) inside half on the floor; barrels at the pivots."""
     J = json.load(open('%s/%s_out.json' % (d, pid))); B = J['barrel']
     fw, fh = J['frame']; on = J['anims'][state]
@@ -67,17 +67,23 @@ def scene(d, pid, state='on', bstate='idle', bi=0, deg=0, pad=18, top_extra=14):
     img.blit_rgba(inn, ix, iy)
     if og is not None: img.blit_rgba(og, ox - gs.OPAD, top - gs.OPAD, 1, add=True)
     if ig is not None: img.blit_rgba(ig, ix + I['glow']['offset'][0], iy + I['glow']['offset'][1] + 4, 1, add=True)
-    for (px, py) in pivots:
+    for k, (px, py) in enumerate(pivots):
+        spr_k, bg_k = spr, bg
+        if stag and bstate == 'fire':                                          # staggered fire: barrel k is k frames behind the first
+            kk = bi - k; nm_ = 'fire' if 0 <= kk <= 2 else 'idle'; kk = kk if nm_ == 'fire' else 0
+            spr_k = crop(bimg, B['anims'][nm_][0] + kk, bfw, bfh); bg_k = None
+            if 'glow' in B and nm_ in B['glow']['anims']:
+                bg_k = crop(load('%s/%s' % (d, B['glow']['image'])), B['glow']['anims'][nm_][0] + kk, B['glow']['frame'][0], B['glow']['frame'][1])
         gs.place_barrel(img, (Spr(1, 1), None, (0, 0)), 0, 0, 0) if False else None
         bx, by = ox + px - pb[0], top + py - pb[1]
         if deg:
             from compose import rotate
             S = 2 * max(bfw, bfh) + 4; h = S // 2
-            cv = Rgba(S, S); cv.blit_rgba(spr, h - pb[0], h - pb[1])
+            cv = Rgba(S, S); cv.blit_rgba(spr_k, h - pb[0], h - pb[1])
             img.blit_rgba(gs.turn_rgba(cv, deg, h, h), ox + px - h, top + py - h)
         else:
-            img.blit_rgba(spr, bx, by)
-            if bg is not None: img.blit_rgba(bg, bx - gs.BPAD if 'glow' in B and False else bx + B['glow']['offset'][0], by + B['glow']['offset'][1], 1, add=True)
+            img.blit_rgba(spr_k, bx, by)
+            if bg_k is not None: img.blit_rgba(bg_k, bx - gs.BPAD if 'glow' in B and False else bx + B['glow']['offset'][0], by + B['glow']['offset'][1], 1, add=True)
     return img
 
 SHEETS = [

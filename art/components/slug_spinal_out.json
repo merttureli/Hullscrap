@@ -1,0 +1,148 @@
+{
+ "frame": [
+  32,
+  100
+ ],
+ "cells": [
+  2,
+  6
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "slug_spinal_out_glow.png",
+  "frame": [
+   48,
+   116
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    2,
+    2,
+    4
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   86
+  ]
+ },
+ "notes": "OUTSIDE half of the Spinal Rail (spinal): a spinal sleeve (2x6 cells): two tapering armour plates along the barrel channel with conduits of the family colour: a FIXED gun that must face the target; the bottom flange overhangs the outer wall face. damaged: cracks, a loose plate, a spark; disabled: dark, scorched and dented, never destroyed. The inside half (breech) is narrower or wider than this half in places: it sits at floor((W - bw) / 2) cells from this half's left edge at rotation 0.",
+ "barrel": {
+  "image": "slug_spinal_barrel.png",
+  "frame": [
+   17,
+   116
+  ],
+  "pivot_on_barrel": [
+   8,
+   104
+  ],
+  "muzzle": [
+   8,
+   4
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "disabled": [
+    6,
+    1,
+    0
+   ],
+   "off": [
+    7,
+    1,
+    0
+   ],
+   "charge": [
+    8,
+    3,
+    0
+   ]
+  },
+  "aim": "fixed",
+  "pivot_on_base": [
+   16,
+   86
+  ],
+  "gimbal_deg": 2,
+  "glow": {
+   "image": "slug_spinal_barrel_glow.png",
+   "frame": [
+    49,
+    148
+   ],
+   "offset": [
+    -16,
+    -16
+   ],
+   "anims": {
+    "fire": [
+     1,
+     3,
+     14
+    ],
+    "damaged": [
+     4,
+     2,
+     4
+    ],
+    "idle": [
+     0,
+     1,
+     0
+    ],
+    "charge": [
+     6,
+     3,
+     0
+    ]
+   }
+  }
+ }
+}

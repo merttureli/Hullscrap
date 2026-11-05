@@ -796,15 +796,16 @@ def tube_rotary(c, top, bot, r=4.5, tw=3):
     ts = []
     for k in range(4):
         a = math.radians(spin * 22.5 + 90 * k + 22.5)
-        ts.append((math.cos(a), cx + 0.5 + r * math.sin(a)))
-    for depth, x in sorted(ts):                                                # back tubes first, each with a dark flank
+        ts.append((math.cos(a), cx + 0.5 + r * math.sin(a), k))
+    for depth, x, k_ in sorted(ts):                                                # back tubes first, each with a dark flank
         x0 = int(round(x - tw / 2.0))
         tone_ = 'LMW' if depth > 0.3 else ('MSE' if depth > -0.3 else 'SWD')
         tube(s, x0 - 1, top + 2 + o, tw + 2, bot - top - 9, 'K' + tone_ + 'K' if depth > -0.3 else 'D' + tone_ + 'D')
         s.hline(x0, top + 2 + o, tw, 'K' if depth > -0.3 else 'D')
+        if k_ == 0 and depth > -0.3 and c.st.powered: s.vline(x0 + tw // 2, top + 4 + o, bot - top - 13, '2')       # one tube carries a family stripe, so the turn reads
     step = c.st.lit or 0
     if step and c.st.powered:                                                  # heat at the muzzles with the chain steps
-        for depth, x in ts:
+        for depth, x, k_ in ts:
             if depth > -0.3:
                 x0 = int(round(x - tw / 2.0))
                 for j in range(min(4, step + 1)): s.hline(x0, top + 3 + j + o, tw, ('y', 'o', 'r', 'r')[j] if j < step else 'u')
@@ -812,7 +813,7 @@ def tube_rotary(c, top, bot, r=4.5, tw=3):
     for y in (top + 6, top + 6 + span // 2, bot - 13):
         band(s, cx - 7, y + o, 15, 3)
     s.put(cx - 6, top + 7 + o, '2'); s.put(cx + 5, top + 7 + o, '2'); c.lightglow(cx, top + 7 + o, 4, 0.4, sx=1.6)
-    for depth, x in ts:
+    for depth, x, k_ in ts:
         if depth > -0.3: c.muzzles.append((int(x), top + 2 + o))
     c.muzzles[:] = c.muzzles[-1:]                                              # one flash per shot, at the barrel in front
     if step: c.lightglow(cx, top + 5 + o, 4 + 2 * step, 0.12 + 0.1 * step, (255, 110, 40), 0.8)        # heat haze on the glow layer
