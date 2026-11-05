@@ -1,0 +1,20 @@
+{
+ "id": "flagships_1",
+ "name": "Race flagships",
+ "version": "1.0",
+ "requires": [
+  "races_1",
+  "engines_1",
+  "tech_kett",
+  "tech_emberkin",
+  "tech_prismatic",
+  "tech_basalt",
+  "tech_sporeling",
+  "tech_mire",
+  "tech_fenn",
+  "tech_gauntling",
+  "tech_grundl",
+  "tech_human"
+ ],
+ "notes": "The ten race flagships (data/flagships.json, scripts/space/flagships.gd, docs/CONTENT.md section 25): their designs (ships/flagship_<race>.json, in a pack because they use the races' tech parts) and one unique tier 2-3 trophy part each (components.json), found only by beating that race's flagship: a variant of the race's own tech with the same pro and con, a step stronger. logs.json holds the log each flagship leaves."
+}

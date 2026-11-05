@@ -27,6 +27,7 @@ extends Node2D
 
 const Helm = preload("res://scripts/space/helm.gd")
 const FoeInfo = preload("res://scripts/space/foe_info.gd")
+const Flagships = preload("res://scripts/space/flagships.gd")
 const FoePic = preload("res://scripts/ui/foe_pic.gd")
 const Emblem = preload("res://scripts/view/emblem.gd")
 const WonderArt = preload("res://scripts/view/wonder_art.gd")
@@ -63,7 +64,7 @@ signal played(dt: float)
 const TYPE_COLORS := {"station": Color("#e1a136"), "store": Color("#6bd34a"), "trader": Color("#6bd34a"), "distress": Color("#e0413b"),
 	"wreck": Color("#9aa0a6"), "abandoned_station": Color("#8c96a3"), "mining_field": Color("#c2956a"), "unknown": Color("#c8ced8"),
 	"pirate_nest": Color("#e0413b"), "concord_checkpoint": Color("#4fa3ff"), "anomaly": Color("#c06bff"), "quest": Color("#f2c744"),
-	"exp_planet": Color("#6bd34a"), "exp_base": Color("#c2956a"), "exp_ruin": Color("#8fd8ff"), "exp_platform": Color("#e1a136"), "wonder": Color("#ffe9a8")}
+	"exp_planet": Color("#6bd34a"), "exp_base": Color("#c2956a"), "exp_ruin": Color("#8fd8ff"), "exp_platform": Color("#e1a136"), "wonder": Color("#ffe9a8"), "flagship": Color("#ff5a3c")}
 
 var sim: Node  ## ShipSim
 var build: Node  ## BuildMode (its `drift` is the map, which owns the campaign)
@@ -496,12 +497,13 @@ static func contact_name(ct: Dictionary) -> String:
 ## The enemy behind contact `ct` ({info (ship, line, emblem, palette), runs (rects of her hull in cells), design}), {} when it shows none (Radar.design_of: a
 ## radar that identifies, a ship that may fight). Kept FOE_S seconds a contact, as building the enemy costs a little.
 func foe_of(ct: Dictionary) -> Dictionary:
-	if Radar.fighter_kind(ct["poi"]) == "" or not bool(ct.get("scanned", false)):
+	var boss: bool = ct["poi"].has("boss")  # a race flagship is known by its beacon: no scan needed
+	if not boss and (Radar.fighter_kind(ct["poi"]) == "" or not bool(ct.get("scanned", false))):
 		return {}
 	var id := str(ct["poi"]["id"])
 	var e: Dictionary = _foes.get(id, {})
 	if e.is_empty() or _clock - float(e["t"]) > FOE_S:
-		var design := Radar.design_of(campaign(), _ship(), ct)
+		var design := Flagships.design_of(str(ct["poi"]["boss"])) if boss else Radar.design_of(campaign(), _ship(), ct)
 		var info := FoeInfo.of(design) if design != "" else {}
 		e = {"t": _clock, "design": design, "info": info, "runs": hull_runs(info["ship"]) if not info.is_empty() else []}
 		_foes[id] = e
@@ -641,6 +643,10 @@ func _draw_poi(poi: Dictionary, px: float) -> void:
 		"anomaly":
 			for k in 4:
 				draw_arc(at, 180.0 + 150.0 * k, _clock * (0.4 + 0.15 * k), _clock * (0.4 + 0.15 * k) + PI * 1.3, 32, Color(col, a * (0.7 - 0.12 * k)), 18.0)
+		"flagship":  # a great hull with a pulsing red ring: it reads as the boss it is
+			var pulse := fmod(_clock, 2.0) / 2.0
+			_hull(at, float(seed_h % 628) / 100.0, 760.0, Color(col.darkened(0.7), a), Color(col, a))
+			draw_arc(at, 520.0 + 700.0 * pulse, 0.0, TAU, 64, Color(col, a * (1.0 - pulse)), 6.0 * px)
 		"exp_planet", "exp_base", "exp_ruin", "exp_platform":
 			_draw_site(poi, px, a, seed_h)
 		"pirate_nest":
@@ -767,8 +773,11 @@ func _icon(kind: String, at: Vector2, size: float, mod := Color.WHITE, canvas: C
 	if not _icons_read:
 		_icons_read = true
 		_icons = Art.load_sheet("%s/ui/poi_icons" % Art.root)
-	if _icons != null and _icons.has_anim(kind):
-		cv.draw_texture_rect_region(_icons.texture, Rect2(at - Vector2(size, size) / 2.0, Vector2(size, size)), _icons.region(_icons.start_of(kind)), mod)
+	var sheet := "pirate_nest" if kind == "flagship" else kind  # a flagship wears the pirate nest's icon, in its own red, with a ring
+	if kind == "flagship":
+		cv.draw_arc(at, size * 0.62 + 2.0 * sin(_clock * 4.0), 0.0, TAU, 24, Color(TYPE_COLORS["flagship"], mod.a), 2.0, true)
+	if _icons != null and _icons.has_anim(sheet):
+		cv.draw_texture_rect_region(_icons.texture, Rect2(at - Vector2(size, size) / 2.0, Vector2(size, size)), _icons.region(_icons.start_of(sheet)), mod if kind != "flagship" else Color(1.0, 0.55, 0.45, mod.a))
 	else:
 		cv.draw_circle(at, size * 0.4, Color(TYPE_COLORS.get(kind, CYAN), mod.a))
 
@@ -929,8 +938,8 @@ func _update_pic() -> void:
 	if design != _pic_design:
 		_pic_design = design
 		var info := FoeInfo.of(design)
-		_foe_pic.show_foe(info.get("ship"), _ship(), str(info.get("line", "")))
-	_foe_pic.position = Vector2(clampf(at.x + 8.0, 4.0, _hud.size.x - FoePic.BOX.x - 4.0), clampf(at.y - FoePic.BOX.y / 2.0, 44.0, _hud.size.y - FoePic.BOX.y - 4.0))
+		_foe_pic.show_foe(info.get("ship"), _ship(), str(info.get("line", "")), info.get("boss", {}))
+	_foe_pic.position = Vector2(clampf(at.x + 8.0, 4.0, _hud.size.x - FoePic.BOX.x - 4.0), clampf(at.y - _foe_pic.size.y / 2.0, 44.0, _hud.size.y - _foe_pic.size.y - 4.0))
 	_foe_pic.visible = true
 
 

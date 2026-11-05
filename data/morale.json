@@ -21,11 +21,21 @@
     "ram": {"surrender": 0.0, "flee": 0.4, "fight": 0.6},
     "concord": {"surrender": 0.4, "flee": 0.4, "fight": 0.2},
     "hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0},
-    "ghost": {"surrender": 0.0, "flee": 1.0, "fight": 0.0, "spool_s": 6.0, "fades": true}
+    "ghost": {"surrender": 0.0, "flee": 1.0, "fight": 0.0, "spool_s": 6.0, "fades": true},
+    "flagship_basalt": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [50, 90], "extra": [{"item": "titanium", "count": [1, 3]}], "part_chance": 0.0}},
+    "flagship_emberkin": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [60, 100], "extra": [{"item": "fuel", "count": [2, 4]}], "part_chance": 0.0}},
+    "flagship_fenn": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [140, 220], "extra": [{"item": "fuel", "count": [2, 3]}], "part_chance": 0.0}},
+    "flagship_gauntling": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [50, 90], "extra": [{"item": "silicon", "count": [1, 2]}], "part_chance": 0.0}},
+    "flagship_grundl": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [60, 100], "extra": [{"item": "fuel", "count": [2, 4]}], "part_chance": 0.0}},
+    "flagship_human": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [90, 140], "extra": [{"item": "missile", "count": [2, 4]}], "part_chance": 0.5}},
+    "flagship_kett": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [50, 90], "extra": [{"item": "scrap", "count": [30, 50]}], "part_chance": 0.0}},
+    "flagship_mire": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [50, 90], "extra": [{"item": "copper", "count": [2, 4]}], "part_chance": 0.0}},
+    "flagship_prismatic": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [80, 130], "extra": [{"item": "crystal", "count": [1, 2]}], "part_chance": 0.0}},
+    "flagship_sporeling": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [40, 80], "extra": [{"item": "polymer", "count": [1, 3]}], "part_chance": 0.0}}
   },
 	"hail_s": [3.0, 8.0],
 	"lines": {
-		"_doc": "What an enemy says. Per faction of data/enemy_tables.json: `title` (\"Captain\", or \"\" for a ship with nobody to name: then it is 'The <ship>'), and the lines of `hail` (at the start of the fight, for the hail_s window), `surrender` (the offer), `flee` (as it spools its jump drive) and `refuse` (when the offer is refused). A ship says the same line every time: the line is picked by the hash of its name. {captain} is its captain's name and {ship} its ship's. The captain is the first of a generated ship's crew plan (or the `captain` of its design's `ai`). A ship without a faction (an authored design, no `faction` in its ai) keeps the plain lines in morale.gd. Wardens and Leviathans never break (style hollow): their surrender, flee and refuse lines are there for a style that might. The Hollow's ghosts fade (style ghost): their flee lines are the fade lines (they never surrender or refuse).",
+		"_doc": "What an enemy says. Per faction of data/enemy_tables.json: `title` (\"Captain\", or \"\" for a ship with nobody to name: then it is 'The <ship>'), and the lines of `hail` (at the start of the fight, for the hail_s window), `surrender` (the offer), `flee` (as it spools its jump drive) and `refuse` (when the offer is refused). A ship says the same line every time: the line is picked by the hash of its name. {captain} is its captain's name and {ship} its ship's. The captain is the first of a generated ship's crew plan (or the `captain` of its design's `ai`). A ship without a faction (an authored design, no `faction` in its ai) keeps the plain lines in morale.gd. Wardens and Leviathans never break (style hollow): their surrender, flee and refuse lines are there for a style that might. The Hollow's ghosts fade (style ghost): their flee lines are the fade lines (they never surrender or refuse). The ten race flagships (data/flagships.json) have lines of their own under flagship_<race>, which their design's ai faction names; they never flee. Their style flagship_<race> yields (surrender 1.0: a fight that nothing else ends would run to the cap, since the defeat line is half the blocks of a very big hull) with the `offer` block of the style in place of the global one (credits, extra, part_chance: the race's own goods), at the structure the design's ai `break_structure` names (morale.gd break_at), and the player may refuse it and fight on.",
 		"rustfangs": {
 			"title": "Captain",
 			"hail": [
@@ -196,6 +206,196 @@
 			],
 			"refuse": [
 				"It does not mind."
+			]
+		},
+		"flagship_kett": {
+			"title": "Captain",
+			"hail": [
+				"Nine cells hum as one. Come and be counted.",
+				"The hive does not shoot first. The hive is already shooting.",
+				"Twelve hands to a gun. Count yours."
+			],
+			"surrender": [
+				"The hive yields a cell. Only a cell.",
+				"Enough. Take the cell and go."
+			],
+			"flee": [
+				"The hive does not run. It moves house."
+			],
+			"refuse": [
+				"The hum says no.",
+				"Cells, to the guns."
+			]
+		},
+		"flagship_emberkin": {
+			"title": "Matron",
+			"hail": [
+				"It's cosy in here. Won't you come in?",
+				"Everything that burns is welcome at the Kiln.",
+				"The Kiln is warm. You are cold. This can be fixed."
+			],
+			"surrender": [
+				"Enough! Bank the fires! Take what you like.",
+				"The Kiln yields, and it will remember."
+			],
+			"flee": [
+				"Damp the fires! Out!"
+			],
+			"refuse": [
+				"Then you will be warm after all.",
+				"The Kiln does not take no."
+			]
+		},
+		"flagship_prismatic": {
+			"title": "Choirmaster",
+			"hail": [
+				"The seventh note is yours. Hold it.",
+				"We have been singing since before you were built.",
+				"Listen. It will help."
+			],
+			"surrender": [
+				"The piece is over. Take the score.",
+				"A rest, then. Take what you came for."
+			],
+			"flee": [
+				"Diminuendo. Out."
+			],
+			"refuse": [
+				"Tutti. From the top.",
+				"The piece is not over."
+			]
+		},
+		"flagship_basalt": {
+			"title": "Foreman",
+			"hail": [
+				"The Anvil holds. Come and hit it.",
+				"Stone does not hurry.",
+				"Front plate is thick. Do not take that as an invitation to the back."
+			],
+			"surrender": [
+				"The Anvil yields. Once. Take it and go.",
+				"Enough. The stone has made its point."
+			],
+			"flee": [
+				"Stone does not run."
+			],
+			"refuse": [
+				"Then break on it.",
+				"Stone says no."
+			]
+		},
+		"flagship_sporeling": {
+			"title": "Elder",
+			"hail": [
+				"Breathe in. It is only us.",
+				"Mother's Bloom has opened for you.",
+				"We did not mean the air. It was a gift."
+			],
+			"surrender": [
+				"The Bloom closes. Take the seed.",
+				"Enough, enough! Take the cuttings!"
+			],
+			"flee": [
+				"Spore, spore, spore!"
+			],
+			"refuse": [
+				"Then the Bloom will open further.",
+				"It is only air."
+			]
+		},
+		"flagship_mire": {
+			"title": "Old Mother",
+			"hail": [
+				"She is slow. You will come to love it.",
+				"The Tide does not hurry. The Tide arrives.",
+				"Mind the wet. It minds you."
+			],
+			"surrender": [
+				"Enough. Take what the Tide brought.",
+				"The water has had its say."
+			],
+			"flee": [
+				"The tide goes out."
+			],
+			"refuse": [
+				"The Tide says wait.",
+				"She will mend. You will not."
+			]
+		},
+		"flagship_fenn": {
+			"title": "Broker",
+			"hail": [
+				"Everything has a price. Even leaving. Especially leaving.",
+				"A fair fight is a fair price. I'm told.",
+				"Browse! Don't touch! Shoot, if you must!"
+			],
+			"surrender": [
+				"Wait, wait! Let's talk! Name your price!",
+				"Fine! Take the till and call it even!"
+			],
+			"flee": [
+				"Closing! Closing!"
+			],
+			"refuse": [
+				"Ah. A negotiator.",
+				"I'll take that as an opening bid."
+			]
+		},
+		"flagship_gauntling": {
+			"title": "Overseer",
+			"hail": [
+				"Please remain calm. The drones will be with you shortly.",
+				"Spare Parts Prime. Everything repaired, nothing returned.",
+				"Scheduled maintenance has begun. Yours."
+			],
+			"surrender": [
+				"Component failure. Please accept compensation.",
+				"Overseer Nine yields. Please do not blame the drones."
+			],
+			"flee": [
+				"Rescheduling."
+			],
+			"refuse": [
+				"Request denied. Repairs continue.",
+				"Drones, resume."
+			]
+		},
+		"flagship_grundl": {
+			"title": "Hauler-Chief",
+			"hail": [
+				"Forward. That's the whole plan.",
+				"Mind the bow.",
+				"The Barge doesn't stop. The Barge arrives."
+			],
+			"surrender": [
+				"Hold! Hold! We'll haul your goods for free!",
+				"Enough! Take the cargo and let us stop!"
+			],
+			"flee": [
+				"Hard astern!"
+			],
+			"refuse": [
+				"Barge says forward.",
+				"Then mind the bow."
+			]
+		},
+		"flagship_human": {
+			"title": "Commodore",
+			"hail": [
+				"Heave to and be boarded, or be corrected.",
+				"Concord Ascendant. You are on an unregistered course.",
+				"The Commodore sees you. The Commodore is not impressed."
+			],
+			"surrender": [
+				"The Commodore will accept terms. Formally.",
+				"Marines, stand down. Terms are being drafted."
+			],
+			"flee": [
+				"Withdraw in good order."
+			],
+			"refuse": [
+				"Terms are not being drafted.",
+				"Marines, to stations."
 			]
 		}
 	}
