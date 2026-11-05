@@ -1,0 +1,9 @@
+{
+  "id": "guns_2",
+  "name": "Gun versions (G2)",
+  "version": "1.0",
+  "requires": [
+    "races_1"
+  ],
+  "notes": "39 new guns (docs/GUNS.md): the versions light, mk, burst, chain, heavy, long, lance and charge on the families laser, pulse, ion, flak, missile, beam, slug and point defence. Slug Gun and Point Defence Mk I are known from the start; the rest are blueprints. Generated from the G2 list; tuned with tests/tool_gun_bench.gd."
+}

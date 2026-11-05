@@ -582,6 +582,8 @@ func _shoot(dt: float) -> void:
 			if s in danger and float(_hold.get(uid, 0.0)) < HOLD_MAX:
 				_hold[uid] = float(_hold.get(uid, 0.0)) + dt
 				continue
+		if arena.weapons.holds_charge(arena, me, m, foe):
+			continue  # a charge gun waits for its volleys (or the foe's shields to fall)
 		_hold.erase(uid)
 		arena.fire(me, uid, aim)
 

@@ -35,7 +35,19 @@
 					{"id": "pulse_mk1", "cost": 10, "weight": 1},
 					{"id": "laser_turret_mk1", "cost": 12, "weight": 1, "from": 40},
 					{"id": "breach_harpoon", "cost": 14, "weight": 1, "from": 70},
-					{"id": "laser_mk2", "cost": 22, "weight": 1, "from": 120}
+					{"id": "laser_mk2", "cost": 22, "weight": 1, "from": 120},
+					{"id": "pulse_light", "cost": 8, "weight": 2},
+					{"id": "flak_turret", "cost": 10, "weight": 2},
+					{"id": "gun_strip", "cost": 12, "weight": 2, "from": 20},
+					{"id": "slug_gun", "cost": 12, "weight": 3},
+					{"id": "slug_mortar", "cost": 12, "weight": 2, "from": 30},
+					{"id": "missile_pod", "cost": 12, "weight": 3, "from": 30},
+					{"id": "flak_battery", "cost": 18, "weight": 2, "from": 60},
+					{"id": "swarm_pod", "cost": 20, "weight": 2, "from": 70},
+					{"id": "artemis_mk2", "cost": 22, "weight": 2, "from": 80},
+					{"id": "slug_chain", "cost": 20, "weight": 1, "from": 70},
+					{"id": "torpedo", "cost": 38, "weight": 1, "from": 150},
+					{"id": "flak_heavy", "cost": 38, "weight": 1, "from": 150}
 				],
 				"shields": [
 					{"id": "shield_scrap_mk1", "cost": 12, "weight": 3},
@@ -86,7 +98,20 @@
 					{"id": "ion_blast_mk1", "cost": 14, "weight": 2, "from": 50},
 					{"id": "laser_turret_mk1", "cost": 12, "weight": 2, "from": 30},
 					{"id": "pulse_mk2", "cost": 18, "weight": 3, "from": 60},
-					{"id": "laser_mk2", "cost": 22, "weight": 3, "from": 60}
+					{"id": "laser_mk2", "cost": 22, "weight": 3, "from": 60},
+					{"id": "laser_light", "cost": 10, "weight": 3},
+					{"id": "pd_mk1", "cost": 12, "weight": 2, "from": 25},
+					{"id": "missile_pod", "cost": 12, "weight": 1, "from": 40},
+					{"id": "laser_burst", "cost": 18, "weight": 2, "from": 60},
+					{"id": "pd_mk2", "cost": 16, "weight": 2, "from": 70},
+					{"id": "laser_heavy", "cost": 24, "weight": 1, "from": 70},
+					{"id": "artemis_mk2", "cost": 22, "weight": 2, "from": 70},
+					{"id": "slug_rail", "cost": 22, "weight": 1, "from": 80},
+					{"id": "flak_mk2", "cost": 18, "weight": 1, "from": 70},
+					{"id": "laser_mk3", "cost": 32, "weight": 2, "from": 140},
+					{"id": "pd_mk3", "cost": 22, "weight": 1, "from": 130},
+					{"id": "laser_lance", "cost": 40, "weight": 1, "from": 160},
+					{"id": "pulse_mk3", "cost": 32, "weight": 1, "from": 150}
 				],
 				"shields": [
 					{"id": "shield_mk1", "cost": 14, "weight": 3},
@@ -134,7 +159,19 @@
 					{"id": "siren_ion_neon", "cost": 16, "weight": 3},
 					{"id": "ion_blast_mk1", "cost": 14, "weight": 2},
 					{"id": "heat_lance_neon", "cost": 22, "weight": 3, "from": 40, "needs": {"radiator": 2}},
-					{"id": "pulse_mk2", "cost": 18, "weight": 2, "from": 60}
+					{"id": "pulse_mk2", "cost": 18, "weight": 2, "from": 60},
+					{"id": "beam_light", "cost": 12, "weight": 3},
+					{"id": "laser_light", "cost": 10, "weight": 1},
+					{"id": "ion_needle", "cost": 20, "weight": 2, "from": 60},
+					{"id": "ion_charge", "cost": 20, "weight": 2, "from": 60},
+					{"id": "laser_long", "cost": 20, "weight": 2, "from": 60},
+					{"id": "ion_mk2", "cost": 18, "weight": 2, "from": 50},
+					{"id": "beam_mk2", "cost": 24, "weight": 2, "from": 70},
+					{"id": "laser_strip", "cost": 24, "weight": 1, "from": 70},
+					{"id": "beam_long", "cost": 24, "weight": 1, "from": 80},
+					{"id": "pulse_battery", "cost": 18, "weight": 1, "from": 60},
+					{"id": "ion_heavy", "cost": 36, "weight": 1, "from": 140},
+					{"id": "beam_spinal", "cost": 42, "weight": 1, "from": 160}
 				],
 				"shields": [
 					{"id": "shield_mk1", "cost": 14, "weight": 1},
@@ -183,7 +220,16 @@
 					{"id": "heat_lance_neon", "cost": 22, "weight": 3, "needs": {"radiator": 2}},
 					{"id": "ion_blast_mk1", "cost": 14, "weight": 3},
 					{"id": "pulse_mk1", "cost": 10, "weight": 2},
-					{"id": "pulse_mk2", "cost": 18, "weight": 2, "from": 70}
+					{"id": "pulse_mk2", "cost": 18, "weight": 2, "from": 70},
+					{"id": "beam_light", "cost": 12, "weight": 3},
+					{"id": "ion_needle", "cost": 20, "weight": 2, "from": 60},
+					{"id": "ion_charge", "cost": 20, "weight": 2, "from": 60},
+					{"id": "ion_mk2", "cost": 18, "weight": 2, "from": 50},
+					{"id": "beam_mk2", "cost": 24, "weight": 2, "from": 70},
+					{"id": "laser_long", "cost": 20, "weight": 1, "from": 60},
+					{"id": "beam_long", "cost": 24, "weight": 1, "from": 80},
+					{"id": "ion_heavy", "cost": 36, "weight": 1, "from": 140},
+					{"id": "beam_spinal", "cost": 42, "weight": 1, "from": 160}
 				],
 				"shields": [
 					{"id": "shield_neon_mk1", "cost": 36, "weight": 4},
@@ -230,7 +276,17 @@
 					{"id": "rattle_burst_scrap", "cost": 8, "weight": 4},
 					{"id": "shrapnel_cannon_scrap", "cost": 10, "weight": 4},
 					{"id": "bolt_thrower_scrap", "cost": 12, "weight": 2},
-					{"id": "laser_mk1", "cost": 10, "weight": 1}
+					{"id": "laser_mk1", "cost": 10, "weight": 1},
+					{"id": "pulse_light", "cost": 8, "weight": 2},
+					{"id": "flak_turret", "cost": 10, "weight": 3},
+					{"id": "gun_strip", "cost": 12, "weight": 3, "from": 20},
+					{"id": "slug_gun", "cost": 12, "weight": 3},
+					{"id": "slug_mortar", "cost": 12, "weight": 2, "from": 30},
+					{"id": "flak_battery", "cost": 18, "weight": 2, "from": 60},
+					{"id": "slug_chain", "cost": 20, "weight": 2, "from": 70},
+					{"id": "flak_mk2", "cost": 18, "weight": 1, "from": 70},
+					{"id": "heavy_battery", "cost": 40, "weight": 1, "from": 150},
+					{"id": "flak_heavy", "cost": 38, "weight": 1, "from": 150}
 				],
 				"shields": [
 					{"id": "shield_scrap_mk1", "cost": 12, "weight": 3},
@@ -279,7 +335,10 @@
 					{"id": "breach_harpoon", "cost": 14, "weight": 3},
 					{"id": "siren_ion_neon", "cost": 16, "weight": 3},
 					{"id": "ion_blast_mk1", "cost": 14, "weight": 2},
-					{"id": "heat_lance_neon", "cost": 22, "weight": 2, "from": 60, "needs": {"radiator": 2}}
+					{"id": "heat_lance_neon", "cost": 22, "weight": 2, "from": 60, "needs": {"radiator": 2}},
+					{"id": "beam_light", "cost": 12, "weight": 2},
+					{"id": "ion_needle", "cost": 20, "weight": 1, "from": 60},
+					{"id": "ion_charge", "cost": 20, "weight": 1, "from": 60}
 				],
 				"shields": [
 					{"id": "mirror_veil", "cost": 24, "weight": 3},

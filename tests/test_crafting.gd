@@ -11,7 +11,7 @@ const ITEMS := "res://data/items.json"
 const ITEM_KINDS := ["ammo", "gear", "special", "mod"]
 ## Mk1 parts of the standard line that are blueprints to find, not known at the start (every other
 ## Mk1 Scrap or Standard system is known; Neon is always unlocked).
-const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1", "laser_turret_mk1", "strafe_jets_mk1", "longburn_mk1", "intake_mk1", "belt_drive_scrap", "radar_mk1", "tractor_mk1"]  # intake_mk1, radar_mk1 and tractor_mk1 (the Raft loop): bought at Meridian or found, not known at the start; belt_drive_scrap: bought at Rusthold or found, its blueprint comes with the first drive (docs/CONTENT.md 4f)
+const MK1_TO_UNLOCK: Array[String] = ["pulse_mk1", "ion_blast_mk1", "artemis_mk1", "laser_turret_mk1", "strafe_jets_mk1", "longburn_mk1", "intake_mk1", "belt_drive_scrap", "radar_mk1", "tractor_mk1", "laser_light", "pulse_light", "flak_turret", "missile_pod", "slug_mortar", "gun_strip", "beam_light"]  # the G2 Mk I guns are blueprints (only slug_gun and pd_mk1 start known: docs/GUNS.md 10); intake_mk1, radar_mk1 and tractor_mk1 (the Raft loop): bought at Meridian or found, not known at the start; belt_drive_scrap: bought at Rusthold or found, its blueprint comes with the first drive (docs/CONTENT.md 4f)
 const RARITIES := ["common", "uncommon", "rare", "very_rare"]
 const CATEGORIES := ["system", "gear", "material", "module"]
 const WORKSHOP_TOOLS := ["laser_cutter", "nanoforge", "plasma"]  # what workshop.gd and processing.gd can provide
@@ -259,9 +259,9 @@ func test_weapon_and_shield_recipes_follow_the_lines() -> void:
 			"scrap":
 				eq(r["fab_level"], 1, id + ": scrap is level 1")
 				check(int(r["materials"].get("scrap", 0)) * 2 > total, id + ": scrap is mostly scrap")
-				check(d["tier"] != 1 or c.is_known(id), id + ": a scrap Mk1 is known at the start")
+				check(d["tier"] != 1 or c.is_known(id) or id in MK1_TO_UNLOCK, id + ": a scrap Mk1 is known at the start")
 			"standard":
-				check(r["fab_level"] in [1, 2], id + ": standard is level 1 or 2")
+				check(r["fab_level"] in [1, 2] or (d["tier"] == 3 and Content.origin("components", id) == "guns_2"), id + ": standard is level 1 or 2 (a G2 tier-3 gun is 3: late and rare, docs/GUNS.md 10)")
 			"neon":
 				eq(r["fab_level"], 3, id + ": neon is level 3")
 				check("laser_cutter" in r["tools"], id + ": neon needs the laser cutter")

@@ -16,7 +16,7 @@
 	"debris": {"polymer_barrel": 1.4},
 	"pois": {"trader": 1.5, "store": 1.5, "exp_planet": 1.5, "exp_ruin": 1.5},
 	"ambient": {"trader": 4, "patrol": 3, "pirate": 2},
-	"stock": {"engine_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130, "artemis_mk1": 220, "oxygen_gen": 90, "medbay": 180, "helm": 70, "intake_mk1": 120, "radiator": 40, "bed": 30, "missile": 14, "human_volley_rack": 330, "human_concord_railgun": 520, "human_flak_screen": 300, "human_reactor_plus": 180, "human_comms_array": 150, "human_crew_quarters_deluxe": 120, "marine_plate": 210, "rigger_harness": 150, "medic_sash": 170, "jump_pack": 260},
+	"stock": {"engine_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130, "artemis_mk1": 220, "oxygen_gen": 90, "medbay": 180, "helm": 70, "intake_mk1": 120, "radiator": 40, "bed": 30, "missile": 14, "human_volley_rack": 330, "human_concord_railgun": 520, "human_flak_screen": 300, "human_reactor_plus": 180, "human_comms_array": 150, "human_crew_quarters_deluxe": 120, "marine_plate": 210, "rigger_harness": 150, "medic_sash": 170, "jump_pack": 260, "laser_light": 150, "pd_mk1": 130, "missile_pod": 170, "laser_burst": 330, "pd_mk2": 300, "slug_rail": 360},
 	"recruit": {"human": 8, "fenn": 1, "mire": 1},
 	"enemies": "concord",
 	"hazards": [],

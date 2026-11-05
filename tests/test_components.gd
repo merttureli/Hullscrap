@@ -110,6 +110,17 @@ func test_data_is_complete() -> void:
 		"engine_scrap_mk4": [-5, 4, 4], "engine_neon_mk2": [-3, 4, 2], "engine_neon_mk3": [-4, 4, 3], "engine_neon_mk4": [-5, 4, 4],
 		"strafe_jets_mk1": [-1, 4, 1], "strafe_jets_mk2": [-2, 4, 2], "strafe_jets_mk3": [-2, 4, 3],
 		"longburn_mk1": [-2, 4, 1], "longburn_mk2": [-3, 4, 2], "longburn_mk3": [-4, 4, 3],
+		# gun versions (data/packs/guns_2)
+		"laser_light": [-1, 5, 1], "laser_mk3": [-4, 5, 3], "laser_burst": [-3, 5, 2], "laser_chain": [-3, 5, 2],
+		"laser_heavy": [-4, 5, 2], "laser_long": [-3, 5, 2], "laser_lance": [-5, 5, 3], "pulse_light": [-1, 5, 1],
+		"pulse_mk3": [-4, 5, 3], "pulse_battery": [-3, 5, 2], "pulse_chain": [-3, 5, 2], "pulse_heavy": [-5, 5, 3],
+		"ion_needle": [-3, 5, 2], "ion_mk2": [-3, 5, 2], "ion_heavy": [-5, 5, 3], "ion_charge": [-3, 5, 2],
+		"flak_turret": [-1, 5, 1], "flak_mk2": [-3, 5, 2], "flak_heavy": [-5, 5, 3], "flak_battery": [-3, 5, 2],
+		"missile_pod": [-1, 5, 1], "artemis_mk2": [-3, 5, 2], "swarm_pod": [-3, 5, 2], "torpedo": [-5, 5, 3],
+		"beam_light": [-2, 5, 1], "beam_mk2": [-4, 5, 2], "beam_long": [-4, 5, 2], "beam_spinal": [-6, 5, 3],
+		"slug_gun": [-2, 5, 1], "slug_mortar": [-2, 5, 1], "slug_rail": [-4, 5, 2], "slug_chain": [-3, 5, 2],
+		"slug_spinal": [-6, 5, 3], "pd_mk1": [-2, 5, 1], "pd_mk2": [-3, 5, 2], "pd_mk3": [-4, 5, 3],
+		"gun_strip": [-2, 5, 1], "laser_strip": [-3, 5, 2], "heavy_battery": [-5, 5, 3],
 		# ammo racks and conveyor belts (docs/CONTENT.md 4f)
 		"ammo_rack": [0, 0, 1], "belt_drive_scrap": [-1, 2, 1], "belt_drive_std": [-1, 2, 2], "belt_drive_neon": [-1, 2, 3],
 		# the smelters (docs/CONTENT.md section 12, data/packs/processing_1)

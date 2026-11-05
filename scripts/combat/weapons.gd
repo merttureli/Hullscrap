@@ -43,6 +43,7 @@ const KIND_DEFAULTS := {
 	"beam": {"duration": 2.0, "tick": 0.25},  # damage is per second, dealt every `tick` seconds
 }
 
+const CHAIN_WINDOW_S := 1.5  ## seconds past its cooldown that a chain gun's next volley still adds a step
 const ON_TARGET_DEG := 4.0  ## a turret fires when its barrel is this close to the lead direction
 const SPEED_EVASION := 0.25  ## evasion of a ship at full speed (docs/CONTENT.md 4)
 const MISS_MARGIN := 40.0  ## px past the hull's edge that a missed turret shot aims at
@@ -281,7 +282,26 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 	var co = arena.ships[idx]
 	var m: Dictionary = co.mounts[uid]
 	var w := Effects.adjust(arena, idx, uid, m, def(m["id"]))  # less power or rate without the operator or crew it needs
-	co.cooldowns[uid] = arena.tick + int(ceil(float(w["cooldown"]) / arena.SUBSTEP - 1e-6))
+	var ticks := int(ceil(float(w["cooldown"]) * _chain_mult(arena, m, w) / arena.SUBSTEP - 1e-6))
+	var queued := 0
+	if w.get("charge") is Dictionary:  # the stored volleys leave `gap_s` apart behind this one; the cooldown starts after the last
+		queued = int(m.get("stored", 0))
+		ticks += queued * _gap_ticks(arena, w)
+	co.cooldowns[uid] = arena.tick + ticks
+	m["store_at"] = -1
+	_volley(arena, idx, uid, m, w, aim)
+	if queued > 0:
+		m["stored"] = 0
+		m["queue"] = queued
+		m["next_rel"] = arena.tick + _gap_ticks(arena, w)
+		m["rel_aim"] = aim
+	return true
+
+
+## One volley of mount `uid` (ship `idx`) with the stats `w`, aimed at the world point `aim`: the barrel turns, the shot event, the
+## ammo and heat, then the shots (or the point-defence intercept, or the beam), the on-fire effects and the shield drop.
+func _volley(arena, idx: int, uid: int, m: Dictionary, w: Dictionary, aim: Vector2) -> void:
+	var co = arena.ships[idx]
 	var mis = missile_target(arena, idx, m, w) if w["turret"] else null  # point defence shoots a missile before a ship
 	if w["turret"]:
 		var point: Vector2 = missile_point(arena, idx, m, w, mis) if mis != null else _turret_point(arena, idx, uid, m, w, target_of(arena, idx))
@@ -296,7 +316,7 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 	if mis != null:
 		_intercept(arena, idx, w, origin, mis)
 		Effects.on_fire(arena, idx, uid, m, w)
-		return true  # (a point-defence shot leaves through its own port: it does not open the shield)
+		return  # (a point-defence shot leaves through its own port: it does not open the shield)
 	if w["kind"] == "beam":
 		var every := maxi(1, roundi(float(w["tick"]) / arena.SUBSTEP))
 		arena.beams.append({"owner": idx, "uid": uid, "w": w, "local_dir": m["aim"], "k": int(m.get("shots", 0)),
@@ -315,7 +335,101 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 	m["shots"] = int(m.get("shots", 0)) + (1 if w["kind"] == "beam" else int(w["shots"]))
 	Effects.on_fire(arena, idx, uid, m, w)
 	Shields.drop(arena, idx, w, origin, dir)  # after the shots: those in contact this tick were resolved first
-	return true
+
+
+# --- chain and charge (docs/GUNS.md 6) ----------------------------------------------------------------------
+
+## The chain steps mount `m` has now: those it won with its last volley, less one for every second it has been idle past
+## `decay_s`. 0 for a gun with no `chain` entry.
+func _steps(arena, m: Dictionary, w: Dictionary) -> int:
+	var spec = w.get("chain")
+	if not spec is Dictionary or int(m.get("chain", 0)) <= 0:
+		return 0
+	var idle: float = float(arena.tick - int(m.get("chain_tick", 0))) * arena.SUBSTEP
+	var lost := int(floor(idle - float(spec["decay_s"]))) + 1 if idle > float(spec["decay_s"]) else 0
+	return maxi(int(m["chain"]) - lost, 0)
+
+
+## The cooldown multiplier of the volley mount `m` fires now, and (a side effect) the step it earns: a volley inside the window
+## (the last cooldown plus CHAIN_WINDOW_S) adds a step up to `steps`, and each step cuts the cooldown by `cut`, one after the other.
+func _chain_mult(arena, m: Dictionary, w: Dictionary) -> float:
+	var spec = w.get("chain")
+	if not spec is Dictionary:
+		return 1.0
+	var steps := _steps(arena, m, w)
+	if arena.tick <= int(m.get("chain_until", -1)):
+		steps = mini(steps + 1, int(spec["steps"]))
+	m["chain"] = steps
+	m["chain_tick"] = arena.tick
+	m["chain_until"] = arena.tick + int(ceil((float(w["cooldown"]) * pow(1.0 - float(spec["cut"]), steps) + CHAIN_WINDOW_S) / arena.SUBSTEP))
+	return pow(1.0 - float(spec["cut"]), steps)
+
+
+func _gap_ticks(arena, w: Dictionary) -> int:
+	return maxi(1, int(ceil(float(w["charge"]["gap_s"]) / arena.SUBSTEP - 1e-6)))
+
+
+## Read-only state for the weapon bar and the art. chain_steps: the steps mount `uid` of ship `idx` has now (0 for a gun with no `chain`);
+## chain_max: the most steps weapon entry `w` (a def()) can have; charges: the volleys stored in the mount (0 for a gun with no `charge`);
+## charge_max: the most it stores.
+func chain_steps(arena, idx: int, uid: int) -> int:
+	var m = arena.ships[idx].mounts.get(uid)
+	return 0 if m == null else _steps(arena, m, def(m["id"]))
+
+
+func chain_max(w: Dictionary) -> int:
+	return int(w["chain"]["steps"]) if w.get("chain") is Dictionary else 0
+
+
+func charges(arena, idx: int, uid: int) -> int:
+	var m = arena.ships[idx].mounts.get(uid)
+	return 0 if m == null or not def(m["id"]).get("charge") is Dictionary else int(m.get("stored", 0))
+
+
+func charge_max(w: Dictionary) -> int:
+	return int(w["charge"]["max"]) if w.get("charge") is Dictionary else 0
+
+
+## Should the AI or the autofire hold the fire order of mount `m` (ship `idx`) back from ship `target`? A charge gun waits to release
+## until it holds `max` volleys, or the target's shields are down. False for any other gun.
+func holds_charge(arena, idx: int, m: Dictionary, target: int) -> bool:
+	var w := def(m["id"])
+	if not w.get("charge") is Dictionary or target < 0:
+		return false
+	return int(m.get("stored", 0)) < int(w["charge"]["max"]) and arena.ships[target].layers > 0
+
+
+## Store a volley in every idle charge gun that has been ready for a cooldown, and let the release of a fire order run: one stored
+## volley every `gap_s`, on the aim of the order.
+func tick_charge(arena) -> void:
+	for idx in arena.ships.size():
+		var co = arena.ships[idx]
+		if co.wrecked:
+			continue
+		for uid in co.mounts:
+			var m: Dictionary = co.mounts[uid]
+			var w := def(m["id"])
+			var spec = w.get("charge")
+			if not spec is Dictionary:
+				continue
+			var ok: bool = status_of(arena, idx, uid) == "ok" and (m["powered"] if m["virtual"] else co.powered.get(uid, false))
+			if int(m.get("queue", 0)) > 0:
+				if not ok or (w["turret"] and target_of(arena, idx) < 0) or (str(w["ammo"]) != "" and Ammo.refusal(co.ship, uid, str(w["ammo"]), 1) not in ["", "feeding"]):
+					m["queue"] = 0
+				elif arena.tick >= int(m["next_rel"]):
+					var aim: Vector2 = arena.aim_points.get(idx, m["rel_aim"])
+					m["queue"] = int(m["queue"]) - 1
+					m["next_rel"] = arena.tick + _gap_ticks(arena, w)
+					_volley(arena, idx, uid, m, Effects.adjust(arena, idx, uid, m, w), aim)
+				continue
+			var stored := int(m.get("stored", 0))
+			if not ok or arena.tick < int(co.cooldowns.get(uid, 0)) or stored >= int(spec["max"]):
+				m["store_at"] = -1
+			elif int(m.get("store_at", -1)) < 0:
+				m["store_at"] = arena.tick + int(ceil(float(w["cooldown"]) / arena.SUBSTEP - 1e-6))
+			elif arena.tick >= int(m["store_at"]):
+				m["stored"] = stored + 1
+				m["store_at"] = -1
 
 
 # --- turrets ------------------------------------------------------------------------------------
@@ -465,7 +579,7 @@ func tick_turrets(arena) -> void:
 			var step: float = deg_to_rad(float(w["track"])) * arena.SUBSTEP
 			cur += clampf(angle_difference(cur, goal), -step, step)
 			m["aim"] = Vector2(m["dir"]).rotated(cur)
-			if arena.autofire.get(idx, true) and absf(angle_difference(cur, Vector2(m["dir"]).angle_to(want))) <= deg_to_rad(ON_TARGET_DEG) \
+			if arena.autofire.get(idx, true) and not holds_charge(arena, idx, m, tgt) and absf(angle_difference(cur, Vector2(m["dir"]).angle_to(want))) <= deg_to_rad(ON_TARGET_DEG) \
 					and arena.cooldown_left(idx, uid) <= 0.0 and (mis != null or _in_range(arena, idx, m, w, tgt)):
 				arena.fire(idx, uid, lead)
 

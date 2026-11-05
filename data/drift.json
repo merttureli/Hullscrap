@@ -59,7 +59,7 @@
 		"drone": {"repair_drone": 420},
 		"gear": {"rigger_harness": 150, "firefighter_coat": 160, "medic_sash": 170, "jump_pack": 260},
 		"mods": {"spotter_cam_mk1": 240, "spotter_cam_mk2": 420, "spotter_cam_mk3": 720, "salvage_rig_mk1": 240, "salvage_rig_mk2": 420, "salvage_rig_mk3": 760, "overcharge_coil_mk1": 260, "overcharge_coil_mk2": 450, "overcharge_coil_mk3": 780},
-		"blueprints": {"pulse_mk2": 360, "tractor_mk2": 360, "radar_mk2": 360, "intake_mk2": 360, "laser_mk2": 360, "shield_mk2": 360, "assembly_rig": 360, "engine_neon_mk3": 640, "strafe_jets_mk3": 640, "longburn_mk3": 640},
+		"blueprints": {"pulse_mk2": 360, "tractor_mk2": 360, "radar_mk2": 360, "intake_mk2": 360, "laser_mk2": 360, "shield_mk2": 360, "assembly_rig": 360, "engine_neon_mk3": 640, "strafe_jets_mk3": 640, "longburn_mk3": 640, "laser_mk3": 640, "laser_burst": 360, "laser_chain": 360, "laser_heavy": 360, "laser_long": 360, "laser_lance": 640, "pulse_mk3": 640, "pulse_battery": 360, "pulse_chain": 360, "pulse_heavy": 640, "ion_needle": 360, "ion_mk2": 360, "ion_heavy": 640, "ion_charge": 360, "flak_mk2": 360, "flak_heavy": 640, "flak_battery": 360, "artemis_mk2": 360, "swarm_pod": 360, "torpedo": 640, "beam_mk2": 360, "beam_long": 360, "beam_spinal": 640, "slug_rail": 360, "slug_chain": 360, "slug_spinal": 640, "pd_mk2": 360, "pd_mk3": 640, "laser_strip": 360, "heavy_battery": 640},
 		"common": {"radiator": 40, "bed": 30, "ammo_rack": 60, "oxygen_gen": 90, "helm": 70, "engine_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "laser_mk1": 140, "pulse_mk1": 130, "intake_mk1": 120, "tractor_mk1": 160, "radar_mk1": 130, "medbay": 180, "strafe_jets_mk1": 60, "longburn_mk1": 120, "robot_arm": 150, "laser_cutter": 140}
 	},
 	"stations": {

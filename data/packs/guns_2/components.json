@@ -1,0 +1,1174 @@
+{
+  "components": [
+    {
+      "id": "laser_light",
+      "name": "Light Laser",
+      "blurb": "A laser on a swivel the size of a dinner plate. It will hit what you point it at, mostly the part of it you did not mean.",
+      "quirk": "Light: small and cheap, fits anywhere, hits lighter.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "point_turret",
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#c7543f",
+      "power": -1,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "laser_mk3",
+      "name": "Laser Mk3",
+      "blurb": "The third laser, and the first with a cooling manual that anyone read. It cuts what the Mk2 only scorched.",
+      "quirk": "Mk III: the family line, one tier up.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 12
+      },
+      "color": "#ff6d52",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "laser_burst",
+      "name": "Burst Laser",
+      "blurb": "Three lenses in a row and a schedule. Shield layers learn to count past one.",
+      "quirk": "Burst: several shots a volley, to overwhelm shield layers.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "broadside",
+      "mount": {
+        "outside": [
+          6,
+          2
+        ],
+        "outside_hp": 15
+      },
+      "color": "#e8624a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "laser_chain",
+      "name": "Chain Laser",
+      "blurb": "Four lenses on a drum. It starts like a cough and ends like a sentence.",
+      "quirk": "Chain: fires faster the longer it keeps firing.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 10
+      },
+      "color": "#e8624a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "laser_heavy",
+      "name": "Heavy Laser",
+      "blurb": "A laser with a sleeve, braces and opinions. It goes through the first wall and thinks about the second.",
+      "quirk": "Heavy: slow, big hits that break armour.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "heavy_cannon",
+      "mount": {
+        "outside": [
+          4,
+          3
+        ],
+        "outside_hp": 18
+      },
+      "color": "#e8624a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "laser_long",
+      "name": "Long Laser",
+      "blurb": "A thin neon barrel that reaches over the horizon and politely asks you to hold still.",
+      "quirk": "Long: reaches farther, but needs a steady aim.",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "long_barrel",
+      "mount": {
+        "outside": [
+          2,
+          4
+        ],
+        "outside_hp": 10
+      },
+      "color": "#e8624a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "laser_lance",
+      "name": "Lance Laser",
+      "blurb": "Runs the length of the keel. The ship points; the lance decides. Aim the ship like you mean it.",
+      "quirk": "Lance: a spinal finisher; the ship must face the target.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        2,
+        4
+      ],
+      "shape": "spinal",
+      "mount": {
+        "outside": [
+          2,
+          6
+        ],
+        "outside_hp": 18
+      },
+      "color": "#ff6d52",
+      "power": -5,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "pulse_light",
+      "name": "Light Pulse",
+      "blurb": "A pulse turret from the scrap yards. It rattles when it fires, and when it does not.",
+      "quirk": "Light: small and cheap, fits anywhere, hits lighter.",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "point_turret",
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#d18b53",
+      "power": -1,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "pulse_mk3",
+      "name": "Pulse Mk3",
+      "blurb": "Heavier bolts, a longer barrel, the same slow wit. It is still a shot you can see coming.",
+      "quirk": "Mk III: the family line, one tier up.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 12
+      },
+      "color": "#ffb56c",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "pulse_battery",
+      "name": "Pulse Battery",
+      "blurb": "Three pulse barrels shoulder to shoulder. Fire them along a flank and call it a salute.",
+      "quirk": "Burst: several shots a volley, to overwhelm shield layers.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "broadside",
+      "mount": {
+        "outside": [
+          6,
+          2
+        ],
+        "outside_hp": 15
+      },
+      "color": "#f4a261",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "pulse_chain",
+      "name": "Chain Pulse",
+      "blurb": "A pulse drum on a yoke. The first shot is a request; the fifth is a policy.",
+      "quirk": "Chain: fires faster the longer it keeps firing.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "sponson",
+      "mount": {
+        "outside": [
+          3,
+          2
+        ],
+        "outside_hp": 8
+      },
+      "color": "#f4a261",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "pulse_heavy",
+      "name": "Heavy Pulse",
+      "blurb": "One very large pulse at a time, delivered with the grace of a falling cabinet.",
+      "quirk": "Heavy: slow, big hits that break armour.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "heavy_cannon",
+      "mount": {
+        "outside": [
+          4,
+          3
+        ],
+        "outside_hp": 21
+      },
+      "color": "#ffb56c",
+      "power": -5,
+      "priority": 5,
+      "manned": true,
+      "hp": 7,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "ion_needle",
+      "name": "Ion Needle",
+      "blurb": "A needle of ion light that finds the shield generator the way a rumour finds the captain.",
+      "quirk": "Long: reaches farther, but needs a steady aim.",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "long_barrel",
+      "mount": {
+        "outside": [
+          2,
+          4
+        ],
+        "outside_hp": 10
+      },
+      "color": "#4cc9f0",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "ion_mk2",
+      "name": "Ion Blast Mk2",
+      "blurb": "The second ion blast, with a better capacitor and the same sense of occasion.",
+      "quirk": "Mk II: the family line, one tier up.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 10
+      },
+      "color": "#4cc9f0",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "ion_heavy",
+      "name": "Heavy Ion",
+      "blurb": "Every shield layer in the sector would like a word, and this is the word. Slowly.",
+      "quirk": "Heavy: slow, big hits that break armour.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "heavy_cannon",
+      "mount": {
+        "outside": [
+          4,
+          3
+        ],
+        "outside_hp": 21
+      },
+      "color": "#55e1ff",
+      "power": -5,
+      "priority": 5,
+      "manned": true,
+      "hp": 7,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "ion_charge",
+      "name": "Charge Ion",
+      "blurb": "Three capacitor rings and the patience to fill them. Let it sit, then watch the shields leave in a row.",
+      "quirk": "Charge: stores volleys while idle, then fires them together.",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "sponson",
+      "mount": {
+        "outside": [
+          3,
+          2
+        ],
+        "outside_hp": 8
+      },
+      "color": "#4cc9f0",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "flak_turret",
+      "name": "Flak Turret",
+      "blurb": "A scrap dome that spits tin at anything small enough to take it personally.",
+      "quirk": "Light: small and cheap, fits anywhere, hits lighter.",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "dome_turret",
+      "mount": {
+        "outside": [
+          3,
+          3
+        ],
+        "outside_hp": 11
+      },
+      "color": "#c89a41",
+      "power": -1,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "flak_mk2",
+      "name": "Flak Mk2",
+      "blurb": "A proper flak casemate: six pellets, a tidy spread, and a warranty that excludes armour.",
+      "quirk": "Mk II: the family line, one tier up.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 10
+      },
+      "color": "#e9b44c",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "flak_heavy",
+      "name": "Heavy Flak",
+      "blurb": "Fat pellets in a tight cone. What it hits stays hit, and so does the wall behind it.",
+      "quirk": "Heavy: slow, big hits that break armour.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "heavy_cannon",
+      "mount": {
+        "outside": [
+          4,
+          3
+        ],
+        "outside_hp": 21
+      },
+      "color": "#ffc955",
+      "power": -5,
+      "priority": 5,
+      "manned": true,
+      "hp": 7,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "flak_battery",
+      "name": "Flak Battery",
+      "blurb": "Three flak mouths along the flank. The pellets arrive as weather.",
+      "quirk": "Burst: several shots a volley, to overwhelm shield layers.",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "broadside",
+      "mount": {
+        "outside": [
+          6,
+          2
+        ],
+        "outside_hp": 15
+      },
+      "color": "#e9b44c",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "missile_pod",
+      "name": "Missile Pod",
+      "blurb": "Four tubes under a lid, flush with the hull. Cheap, quiet, and rude on arrival.",
+      "quirk": "Light: small and cheap, fits anywhere, hits lighter.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "flush_pod",
+      "mount": {
+        "outside": [
+          4,
+          1
+        ],
+        "outside_hp": 5
+      },
+      "color": "#c7c0b9",
+      "power": -1,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "artemis_mk2",
+      "name": "Artemis Mk2",
+      "blurb": "The second Artemis keeps its temper in the tube and loses it on the target.",
+      "quirk": "Mk II: the family line, one tier up.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 10
+      },
+      "color": "#e8e0d8",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "swarm_pod",
+      "name": "Swarm Pod",
+      "blurb": "Eight little lids and six little missiles, all with the same idea. Point defence has to pick.",
+      "quirk": "Burst: several shots a volley, to overwhelm shield layers.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "flush_pod",
+      "mount": {
+        "outside": [
+          4,
+          1
+        ],
+        "outside_hp": 5
+      },
+      "color": "#e8e0d8",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "torpedo",
+      "name": "Torpedo",
+      "blurb": "One missile the size of a closet. It arrives late, on purpose, and takes the hull with it.",
+      "quirk": "Heavy: slow, big hits that break armour.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "heavy_cannon",
+      "mount": {
+        "outside": [
+          4,
+          3
+        ],
+        "outside_hp": 21
+      },
+      "color": "#fffaf1",
+      "power": -5,
+      "priority": 5,
+      "manned": true,
+      "hp": 7,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "beam_light",
+      "name": "Light Beam",
+      "blurb": "A thin hot line on a yoke. It sweeps across a room the way a draught does, and with similar results.",
+      "quirk": "Light: small and cheap, fits anywhere, hits lighter.",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "sponson",
+      "mount": {
+        "outside": [
+          3,
+          2
+        ],
+        "outside_hp": 8
+      },
+      "color": "#b82b4d",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "beam_mk2",
+      "name": "Beam Mk2",
+      "blurb": "Holds the line a little longer than the Heat Lance and burns a little more of whatever is on it.",
+      "quirk": "Mk II: the family line, one tier up.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 10
+      },
+      "color": "#d6335a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "beam_long",
+      "name": "Long Beam",
+      "blurb": "A long neon beam, drawn slowly across the dark like a ruler. Whatever it crosses gets marked.",
+      "quirk": "Long: reaches farther, but needs a steady aim.",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "long_barrel",
+      "mount": {
+        "outside": [
+          2,
+          4
+        ],
+        "outside_hp": 10
+      },
+      "color": "#d6335a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "beam_spinal",
+      "name": "Spinal Beam",
+      "blurb": "Fires down the whole keel for two long seconds. Turn the ship, then turn it off again.",
+      "quirk": "Lance: a spinal finisher; the ship must face the target.",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 3,
+      "size": [
+        2,
+        4
+      ],
+      "shape": "spinal",
+      "mount": {
+        "outside": [
+          2,
+          6
+        ],
+        "outside_hp": 18
+      },
+      "color": "#ef3964",
+      "power": -6,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "slug_gun",
+      "name": "Slug Gun",
+      "blurb": "A slab of steel on a rail, thrown at a polite distance. Armour is a suggestion to it.",
+      "quirk": "Mk I: the slug line begins here.",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 10
+      },
+      "color": "#848c94",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "slug_mortar",
+      "name": "Mortar",
+      "blurb": "Throws a shell in a high lazy line. You could dodge it. Point defence could simply shoot it.",
+      "quirk": "Mk I: a slow shell that point defence can shoot down.",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "casemate",
+      "mount": {
+        "outside": [
+          4,
+          2
+        ],
+        "outside_hp": 10
+      },
+      "color": "#848c94",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "slug_rail",
+      "name": "Rail",
+      "blurb": "The long slug rail. By the time you hear it the argument is over.",
+      "quirk": "Long: reaches farther, but needs a steady aim.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "long_barrel",
+      "mount": {
+        "outside": [
+          2,
+          4
+        ],
+        "outside_hp": 10
+      },
+      "color": "#9aa3ad",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "slug_chain",
+      "name": "Chain Slug",
+      "blurb": "A belt of slugs on a swivel, held together with wire and conviction. It speeds up when it is happy.",
+      "quirk": "Chain: fires faster the longer it keeps firing.",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "sponson",
+      "mount": {
+        "outside": [
+          3,
+          2
+        ],
+        "outside_hp": 8
+      },
+      "color": "#9aa3ad",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "slug_spinal",
+      "name": "Spinal Rail",
+      "blurb": "A rail down the keel that stores two shots while you are not looking. The third is the answer.",
+      "quirk": "Lance: a spinal rail that stores two volleys; the ship must face the target.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        2,
+        4
+      ],
+      "shape": "spinal",
+      "mount": {
+        "outside": [
+          2,
+          6
+        ],
+        "outside_hp": 18
+      },
+      "color": "#acb6c1",
+      "power": -6,
+      "priority": 5,
+      "manned": true,
+      "hp": 6,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "pd_mk1",
+      "name": "Point Defence Mk I",
+      "blurb": "A small dome that dislikes anything inbound. It fires at the nearest worry, then at you.",
+      "quirk": "Mk I point defence: shoots down missiles and slow shells first.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 1,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "point_turret",
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#51b276",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "pd_mk2",
+      "name": "Point Defence Mk II",
+      "blurb": "More radar, a second mast, and the confidence of a thing that rarely misses.",
+      "quirk": "Mk II point defence: shoots down missiles and slow shells first.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 2,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "point_turret",
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#5fd08a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "pd_mk3",
+      "name": "Point Defence Mk III",
+      "blurb": "Two dishes and a clamp on the barrel. A swarm of missiles looks, to it, like an invoice.",
+      "quirk": "Mk III point defence: shoots down missiles and slow shells first.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        2,
+        2
+      ],
+      "shape": "point_turret",
+      "mount": {
+        "outside": [
+          2,
+          2
+        ],
+        "outside_hp": 5
+      },
+      "color": "#6ae89a",
+      "power": -4,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    },
+    {
+      "id": "gun_strip",
+      "name": "Gun Strip",
+      "blurb": "Five little barrels along the hull like teeth. Individually unimpressive.",
+      "quirk": "Burst: several shots a volley, to overwhelm shield layers.",
+      "family": "weapon",
+      "line": "scrap",
+      "tier": 1,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "gun_strip",
+      "mount": {
+        "outside": [
+          8,
+          1
+        ],
+        "outside_hp": 10
+      },
+      "color": "#d18b53",
+      "power": -2,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "laser_strip",
+      "name": "Laser Strip",
+      "blurb": "Five neon emitters in a row, low on the hull. A shield sees five hits and files one complaint.",
+      "quirk": "Burst: several shots a volley, to overwhelm shield layers.",
+      "family": "weapon",
+      "line": "neon",
+      "tier": 2,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "gun_strip",
+      "mount": {
+        "outside": [
+          8,
+          1
+        ],
+        "outside_hp": 10
+      },
+      "color": "#e8624a",
+      "power": -3,
+      "priority": 5,
+      "manned": true,
+      "hp": 5,
+      "heat_limit": 100,
+      "heat_per_s": 2.0,
+      "cooling": 3,
+      "stats": {}
+    },
+    {
+      "id": "heavy_battery",
+      "name": "Heavy Battery",
+      "blurb": "Three heavy barrels on a flank, for when one slug is not enough of a statement.",
+      "quirk": "Burst: three heavy slugs a volley, for long flank runs.",
+      "family": "weapon",
+      "line": "standard",
+      "tier": 3,
+      "size": [
+        4,
+        2
+      ],
+      "shape": "broadside",
+      "mount": {
+        "outside": [
+          6,
+          2
+        ],
+        "outside_hp": 21
+      },
+      "color": "#acb6c1",
+      "power": -5,
+      "priority": 5,
+      "manned": true,
+      "hp": 7,
+      "heat_limit": 100,
+      "heat_per_s": 3.0,
+      "cooling": 4,
+      "stats": {}
+    }
+  ]
+}

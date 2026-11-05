@@ -16,7 +16,7 @@
 	"debris": {"polymer_barrel": 1.5, "sealed_crate": 1.4},
 	"pois": {"trader": 1.5, "mining_field": 1.3, "exp_platform": 1.5, "exp_base": 1.3},
 	"ambient": {"trader": 4, "patrol": 2, "pirate": 2},
-	"stock": {"engine_mk1": 120, "engine_mk2": 270, "longburn_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "intake_mk1": 120, "bed": 30, "missile": 14, "grundl_slug_mortar": 560, "grundl_grapple_harpoon": 340, "grundl_barge_flak": 330, "grundl_hauler_thrusters": 440, "grundl_freight_shield": 480, "grundl_cargo_deck": 220, "ballast_rig": 280},
+	"stock": {"engine_mk1": 120, "engine_mk2": 270, "longburn_mk1": 120, "reactor_mk1": 150, "shield_mk1": 160, "intake_mk1": 120, "bed": 30, "missile": 14, "grundl_slug_mortar": 560, "grundl_grapple_harpoon": 340, "grundl_barge_flak": 330, "grundl_hauler_thrusters": 440, "grundl_freight_shield": 480, "grundl_cargo_deck": 220, "ballast_rig": 280, "pulse_battery": 320, "laser_burst": 330, "gun_strip": 140, "flak_battery": 290},
 	"recruit": {"grundl": 8, "human": 1, "mire": 1},
 	"enemies": "concord",
 	"hazards": [],
