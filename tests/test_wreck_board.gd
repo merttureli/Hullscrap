@@ -268,9 +268,9 @@ func test_a_beaten_foe_leaves_a_body_with_ammo_and_credits() -> void:
 	eq(s.opened_count(), 0, "an opened body is not an opened container")
 	var rolls := 0
 	var weapons := 0
-	for i in 200:  # the weapon at about foe_drop, from the dice of the site and the body
+	for i in 200:  # the weapon at about foe_drop (0.2 since the playtest cut guns by half), from the dice of the site and the body
 		site.seed_value = i
 		var got: Dictionary = Loot.resolve(site, id, {})["items"]
 		rolls += 1
 		weapons += int(got.has("doorbuster"))
-	check(weapons > 50 and weapons < 110, "the weapon comes at about 40 percent (%d of %d)" % [weapons, rolls])
+	check(weapons > 24 and weapons < 58, "the weapon comes at about 20 percent (%d of %d)" % [weapons, rolls])

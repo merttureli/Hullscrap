@@ -403,13 +403,14 @@ func fire(dir: float) -> String:
 		g["cd"] = 0.35
 		events.append({"type": "click", "pos": soldier.pos})
 		return "empty"
+	var half := Arms.spread_of(g, foes.soldier_moving)
 	Arms.spend(g)
 	var w: Dictionary = g["w"]
 	var c := Arms.cfg()
 	if bool(w["melee"]):
 		_swing(dir, w)
 		return "swing"
-	var spread := rng.randf_range(-float(w["spread"]), float(w["spread"]))
+	var spread := rng.randf_range(-half, half)
 	var from := soldier.pos + Vector2.from_angle(dir) * float(c["muzzle"])
 	shoot(soldier, "soldier", from, dir + spread, w, foes.bodies() + people.bodies())
 	foes.noise(soldier.pos, float(c["noise_gun"]))
