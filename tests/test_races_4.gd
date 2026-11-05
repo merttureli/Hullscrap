@@ -7,6 +7,7 @@ const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Regions = preload("res://scripts/space/regions.gd")
+const Homelands = preload("res://scripts/space/homelands.gd")
 const Campaign = preload("res://scripts/space/campaign.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 
@@ -171,7 +172,7 @@ func test_a_homeland_has_its_station_and_is_offered_in_its_band() -> void:
 		eq(places.size(), 1, HOMES[id] + ": one station")
 		var menu := c.station_cfg(places[0]["id"])
 		check(not menu.is_empty() and menu["services"].has("stock") and menu["services"].has("recruit"), HOMES[id] + ": it trades and recruits")
-		eq(menu["stock"], c.region_data["stock"], HOMES[id] + ": its stock is the region's")
+		eq(menu["stock"], Homelands.menu(str(places[0]["place"]), Regions.station(str(places[0]["place"]), cfg))["stock"], HOMES[id] + ": its stock is the region's, leaned to its race in the capital (homelands.gd)")
 		# offered at some exit, in a seeded sweep (the weight must not bury it)
 		var seen := false
 		var band: Array = Regions.get_region(HOMES[id])["stages"]

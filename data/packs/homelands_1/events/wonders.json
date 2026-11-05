@@ -1,0 +1,986 @@
+{
+	"events": [
+		{
+			"id": "wonder_kett_queen_ship",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Dead Queen-Ship",
+			"requires": {
+				"flag": "in_kett_hives"
+			},
+			"text": "Nine hulls the length of a street, welded end to end into a single dead body: the queen-ship of the old Ninefold, drifting where the Snap left her. Her brood cells are dark except for a few that pulse a tired green, one beat at a time, like a heart that has not been told. Every Kett who passes her slows down to stop humming. A hand-painted sign on her flank reads: PLEASE BE QUIET, SHE IS ONLY RESTING. The sign is not new.",
+			"choices": [
+				{
+					"text": "Cut into the brood decks and take what the cells hold.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "The cells open one by one, and each holds a little engine of chitin and glue that was meant to be a weapon. You take the plans of the biggest and leave the rest. Somewhere in the hull a single note stops, and the green light goes out.",
+							"effects": {
+								"blueprint": "kett_hive_swarm_launcher",
+								"flag": "wonder_kett",
+								"items": {
+									"credits": 60
+								}
+							}
+						},
+						{
+							"weight": 40,
+							"text": "The first cell holds a launcher, whole and cold. The second holds a hatchling that is not quite dead, and has views about being woken. Your crew carry the plans out past it at a run. The hull rings like a bell as you leave.",
+							"effects": {
+								"blueprint": "kett_hive_swarm_launcher",
+								"flag": "wonder_kett",
+								"crew_hp": -5,
+								"items": {
+									"credits": 60
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "[Kett] Hum the old knot-song at her flank.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Kett hums nine notes at the hull and the hull hums three back, which is as much as she has left. A cell opens on its own. Inside, set out like a gift on a very small altar, are the queen's own brood-weapon plans, and a pad of shares nobody ever collected. 'She remembers us,' your Kett says, and does not say anything else for a day.",
+							"effects": {
+								"blueprint": "kett_hive_swarm_launcher",
+								"flag": "wonder_kett",
+								"crew_hp": 10,
+								"items": {
+									"credits": 120
+								}
+							}
+						}
+					],
+					"requires": {
+						"species": "kett"
+					}
+				},
+				{
+					"text": "[Mechanical] Plug into her dead nerves and ask nicely.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Gauntling finds the queen's old ports under a drift of resin and plugs in. The hull gives a long, grateful shudder and dumps her whole armoury index into your lap. 'She is chatty,' your Gauntling reports. 'She wants to be remembered correctly. I said I would.'",
+							"effects": {
+								"blueprint": "kett_hive_swarm_launcher",
+								"flag": "wonder_kett",
+								"items": {
+									"copper": 15,
+									"credits": 40
+								}
+							}
+						}
+					],
+					"requires": {
+						"trait": "mechanical"
+					}
+				},
+				{
+					"text": "Go aboard her.",
+					"outcomes": [
+						{
+							"weight": 1,
+							"text": "You seal your suit and cross the gap. The dark inside hums at a pitch you feel in your fillings.",
+							"effects": {
+								"board": {
+									"kind": "derelict",
+									"name": "The Dead Queen-Ship"
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_emberkin_star_forge",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Star Forge",
+			"requires": {
+				"flag": "in_emberkin_forges"
+			},
+			"text": "A red giant sinking into its last century, and on its lip a ring of forge-cities hung like a bracelet on a thin wrist. The Emberkin call it the Star Forge and the star 'the Customer'. Slag falls in long burning ropes from the ring into the sun and the sun eats it with mild surprise. A voice on the open channel says, cheerfully, that it is a bit warm out and would you like to come in out of the cold.",
+			"choices": [
+				{
+					"text": "Buy a pour at the main crucible (the forge-boss takes it in scrap).",
+					"outcomes": [
+						{
+							"weight": 65,
+							"text": "The forge-boss tips a ladle the size of a house, pours a pyre drive into a mould of star-glass, and gives you the casting plans on a cooled slab. 'Keep it out of the damp,' she says. 'Keep it out of everything.'",
+							"effects": {
+								"blueprint": "emberkin_pyre_drive",
+								"flag": "wonder_emberkin",
+								"items": {
+									"scrap": -20,
+									"credits": 50
+								}
+							}
+						},
+						{
+							"weight": 35,
+							"text": "The pour spits. Your hull takes a splash of slag the colour of a sunrise, and the forge-boss gives you the plans with an apology and a free blanket. 'Never seen it do that,' she says. She has.",
+							"effects": {
+								"blueprint": "emberkin_pyre_drive",
+								"flag": "wonder_emberkin",
+								"hull": -6,
+								"items": {
+									"scrap": -20,
+									"credits": 50
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "[Emberkin] Take a shift at the Customer's mouth.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Emberkin walks out onto the lip with a long iron rake, in no suit at all, and works a shift feeding the Customer. They come back glowing and sunburnt and entirely happy, with the forge-boss's own drive plans tucked in a belt, and the Customer's thanks, which are a rise in temperature.",
+							"effects": {
+								"blueprint": "emberkin_pyre_drive",
+								"flag": "wonder_emberkin",
+								"crew_hp": 10,
+								"items": {
+									"credits": 90
+								}
+							}
+						}
+					],
+					"requires": {
+						"species": "emberkin"
+					}
+				},
+				{
+					"text": "[Heat-proof] Walk the cooling gallery to the old foundry floor.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Down on the foundry floor, in a heat that bends the light, a rack of unclaimed moulds waits under a plaque: PYRE DRIVE, LOT 1, NEVER COLLECTED. The plans are still taped to the rack. Nobody told the Emberkin you were coming and they all knew.",
+							"effects": {
+								"blueprint": "emberkin_pyre_drive",
+								"flag": "wonder_emberkin",
+								"items": {
+									"credits": 60
+								}
+							}
+						}
+					],
+					"requires": {
+						"trait": "heat_resistant"
+					}
+				},
+				{
+					"text": "Take the forge-boss's sample case and ask no questions.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The case holds a pyre drive casting-record and, under it, three slag ingots still pleasantly warm. The forge-boss waves you off from a distance. 'That's a gift,' she calls. 'The Customer gets the invoice.'",
+							"effects": {
+								"blueprint": "emberkin_pyre_drive",
+								"flag": "wonder_emberkin",
+								"items": {
+									"scrap": 25,
+									"credits": 30
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_prismatic_singing_crystal",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Singing Crystal",
+			"requires": {
+				"flag": "in_prismatic_choir"
+			},
+			"text": "A single crystal the size of a small moon, hanging in the Choir's ion haze with its facets turned to the dark. It sings. It has always sung one note, and every Prismatic in the Choir tunes to it, and the pylons of the whole region are cut to its pitch. When your ship comes close the note drops half a tone, as if it were turning to look at you. Your hull rings like a glass that someone is about to tap.",
+			"choices": [
+				{
+					"text": "Hold station and let it hear your engines.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "The Crystal listens for a long time and then sings your engine's note back, improved. A thin facet of itself comes loose and drifts to you: a lens ground by nobody, with a refractor's plans etched into its heart in a script of light.",
+							"effects": {
+								"blueprint": "prismatic_refractor",
+								"flag": "wonder_prismatic",
+								"items": {
+									"crystal": 6,
+									"credits": 40
+								}
+							}
+						},
+						{
+							"weight": 40,
+							"text": "The Crystal listens, winces, and sings your engine's note back two octaves higher. Every glass aboard rings and one cracks. A facet comes loose anyway, with a refractor's plans in it, and a small, polite chime that might be an apology.",
+							"effects": {
+								"blueprint": "prismatic_refractor",
+								"flag": "wonder_prismatic",
+								"hull": -4,
+								"items": {
+									"crystal": 6,
+									"credits": 40
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "[Prismatic] Join the chord.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Prismatic floats out to the facet and hums the note a fifth above. The Crystal holds the chord for a full minute while the whole Choir listens on every channel. When it is over a lens drifts to your hold and everyone, everywhere, is very quiet. 'We were not alone,' your Prismatic says. 'We were never alone.'",
+							"effects": {
+								"blueprint": "prismatic_refractor",
+								"flag": "wonder_prismatic",
+								"crew_hp": 10,
+								"items": {
+									"crystal": 10,
+									"credits": 80
+								}
+							}
+						}
+					],
+					"requires": {
+						"species": "prismatic"
+					}
+				},
+				{
+					"text": "[Mechanical] Tune a scrap speaker to the note.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Gauntling bolts a speaker to a rod and tunes it to the Crystal's pitch, badly. The Crystal listens to the speaker with what you can only call interest, then sings a long correction, and a lens comes loose to show you where you went wrong.",
+							"effects": {
+								"blueprint": "prismatic_refractor",
+								"flag": "wonder_prismatic",
+								"items": {
+									"crystal": 4,
+									"copper": 10
+								}
+							}
+						}
+					],
+					"requires": {
+						"trait": "mechanical"
+					}
+				},
+				{
+					"text": "Sit in its shadow and say nothing.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You sit in the shadow of the Singing Crystal for an hour and nobody speaks. It is the best hour of the run. When you leave there is a small lens on your hull, left like a coin on a gravestone, with something etched in it.",
+							"effects": {
+								"blueprint": "prismatic_refractor",
+								"flag": "wonder_prismatic",
+								"crew_hp": 5,
+								"items": {
+									"crystal": 3
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_sporeling_bloom_world",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Bloom-World",
+			"requires": {
+				"flag": "in_sporeling_groves"
+			},
+			"text": "A small world that was a cargo hulk once and is now a green planet in its own right: a kilometre of fungal forest breathing out a mist of spores that drifts in a long cloud behind it like a comet's tail. Lights glow among the caps. Every Sporeling in the Groves was started here, in a bed of the old hulk's cargo, and the whole place smells of rain on a floor. A voice in the mist says, kindly: 'Mind the roots. They mind you.'",
+			"choices": [
+				{
+					"text": "Walk the canopy and ask the elders for a cutting.",
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "The elders take their time, which is how elders are. At the end of a long afternoon one of them peels a mantle off a living cap, still warm and faintly singing, and drapes it over your shoulders. 'Wear it,' says the elder. 'It will tell you when you are wrong.'",
+							"effects": {
+								"items": {
+									"spore_mantle": 1,
+									"credits": 30
+								},
+								"flag": "wonder_sporeling"
+							}
+						},
+						{
+							"weight": 30,
+							"text": "The elders take their time, and some of the time is spent on you. You come out of the canopy coughing gold, with a mantle on your shoulders and a faint, lasting fondness for strangers.",
+							"effects": {
+								"items": {
+									"spore_mantle": 1,
+									"credits": 30
+								},
+								"flag": "wonder_sporeling",
+								"crew_hp": -5
+							}
+						}
+					]
+				},
+				{
+					"text": "[Sporeling] Go home for a night.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Sporeling kneels in the soft dark and the forest knows them at once, in the roots first and then the caps. They come back at dawn, taller, with a mantle that fits like a second skin, and a list of seven relatives they did not know they had.",
+							"effects": {
+								"items": {
+									"spore_mantle": 1,
+									"credits": 60
+								},
+								"flag": "wonder_sporeling",
+								"crew_hp": 10
+							}
+						}
+					],
+					"requires": {
+						"species": "sporeling"
+					}
+				},
+				{
+					"text": "[Mire] Trade damp for damp.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Mire wades into the spore-mist and the caps open to them like a hand. The elders trade a mantle for an evening of stories about water. 'You have so much of it,' one says, wistfully. 'It has so many uses.'",
+							"effects": {
+								"items": {
+									"spore_mantle": 1,
+									"polymer": 12
+								},
+								"flag": "wonder_sporeling"
+							}
+						}
+					],
+					"requires": {
+						"species": "mire"
+					}
+				},
+				{
+					"text": "Stay at the edge and buy a cutting from the market stall.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "There is a stall at the edge of the mist, run by a small and very serious Sporeling, who sells you a mantle at a price that is only slightly an insult. 'The forest says you are probably fine,' they add. It is the nicest thing anyone has said all week.",
+							"effects": {
+								"items": {
+									"spore_mantle": 1,
+									"credits": -30
+								},
+								"flag": "wonder_sporeling"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_basalt_carved_face",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Carved Face",
+			"requires": {
+				"flag": "in_basalt_quarries"
+			},
+			"text": "A quarry-moon, and the Basalt have spent four hundred years cutting it into a face. Brow, cheek, the long line of the nose, a mouth a mile wide. Nobody will say whose face. The scaffolds crawl across it in the slow dark and the lamps of the cutters glow in the eye sockets like the pupils of a very patient animal. A cutter on the open channel speaks eleven words and then a long silence, and the silence is the part that matters.",
+			"choices": [
+				{
+					"text": "Wait at the mouth until someone speaks to you.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "You wait a day. A cutter lowers herself from the lip, nods, and hands you the driver's plans on a slab of cut stone, without a word. She goes back up. You are fairly sure you have been judged, and fairly sure you passed.",
+							"effects": {
+								"blueprint": "basalt_quarry_driver",
+								"flag": "wonder_basalt",
+								"items": {
+									"credits": 40
+								}
+							}
+						},
+						{
+							"weight": 40,
+							"text": "You wait two days. A cutter lowers himself from the lip, looks at your hull, looks at you, and sighs. The plans come down on a slab, and so does a small rock, on your bridge. 'For the wait,' he says.",
+							"effects": {
+								"blueprint": "basalt_quarry_driver",
+								"flag": "wonder_basalt",
+								"hull": -5,
+								"items": {
+									"credits": 40
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "[Basalt] Take a chisel and add one stroke.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Basalt climbs the scaffold and, without hurry, takes four days to add a single line under the left eye. Nobody comments. When they come down the cutters have gathered at the base in a long silent row, and the foreman gives them the driver's plans and the stone the line was cut from. It is the highest honour the quarries have.",
+							"effects": {
+								"blueprint": "basalt_quarry_driver",
+								"flag": "wonder_basalt",
+								"crew_hp": 10,
+								"items": {
+									"credits": 90,
+									"titanium": 6
+								}
+							}
+						}
+					],
+					"requires": {
+						"species": "basalt"
+					}
+				},
+				{
+					"text": "[Airless] Walk the brow without a suit.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "There is no air on the brow and nobody on it, only the plans of the driver cut into the stone like a map of a country you don't know. Your crew copy them out in grease pencil, all night, under the eye of the Face. It does not blink. It does not need to.",
+							"effects": {
+								"blueprint": "basalt_quarry_driver",
+								"flag": "wonder_basalt",
+								"items": {
+									"credits": 30
+								}
+							}
+						}
+					],
+					"requires": {
+						"trait": "no_breath"
+					}
+				},
+				{
+					"text": "Offer scrap for a slab of the nose.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The foreman looks at the scrap for a long while and then at you. 'The nose is not for sale,' he says. 'The nose is the nose.' He sells you the plans for the price of the scrap instead, and a bowl of something very hot.",
+							"effects": {
+								"blueprint": "basalt_quarry_driver",
+								"flag": "wonder_basalt",
+								"items": {
+									"scrap": -30,
+									"credits": 20
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_mire_held_lake",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Held Lake",
+			"requires": {
+				"flag": "in_mire_fens"
+			},
+			"text": "A lake, entire, hanging in the black. Two kilometres of clean water in a field of humming pylons that hold it round like a hand round a cup. Fish turn in it. Birds, somehow, fly in it. A Mire fire-barge skims the surface, spraying it against the cold, and the field flickers and the lake sways and a little of it slops over the edge into space and freezes in a long glittering fringe. Someone has hung bunting from the pylons.",
+			"choices": [
+				{
+					"text": "Ask the Wet Watch for a drink.",
+					"outcomes": [
+						{
+							"weight": 70,
+							"text": "The Wet Watch lowers a ladle on a chain, and the water is the best you have ever had. As thanks they hand over a tank harness, patched, bunting still tied to it, and a hearty clap on the back that leaves a damp print. 'Stay hydrated,' they say.",
+							"effects": {
+								"items": {
+									"tank_harness": 1,
+									"credits": 30
+								},
+								"flag": "wonder_mire"
+							}
+						},
+						{
+							"weight": 30,
+							"text": "The ladle slops. A wave comes out of the field and over your bridge, and for a minute you are the wettest ship in the Fens. The Watch give you a tank harness by way of apology, and a towel the size of a flag.",
+							"effects": {
+								"items": {
+									"tank_harness": 1,
+									"credits": 30
+								},
+								"flag": "wonder_mire",
+								"hull": -3
+							}
+						}
+					]
+				},
+				{
+					"text": "[Mire] Dive in and bring up the lake's keeper.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Mire goes in off the side of the ship with a splash that sets the pylons ringing, and comes up forty minutes later holding the harness the keeper keeps for its own. 'Old friend,' they say, wringing out their sleeves. The Watch applaud from the pylons. A fish nods.",
+							"effects": {
+								"items": {
+									"tank_harness": 1,
+									"credits": 70
+								},
+								"flag": "wonder_mire",
+								"crew_hp": 10
+							}
+						}
+					],
+					"requires": {
+						"species": "mire"
+					}
+				},
+				{
+					"text": "[Emberkin] Offer to warm the cold edge.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Emberkin stands at the rim of the field and radiates, politely, for an hour. The ice fringe melts and falls back into the lake in a hundred little rains, and the Watch are so happy they forget to charge you for the harness.",
+							"effects": {
+								"items": {
+									"tank_harness": 1,
+									"credits": 40
+								},
+								"flag": "wonder_mire"
+							}
+						}
+					],
+					"requires": {
+						"species": "emberkin"
+					}
+				},
+				{
+					"text": "Hang a flag from a pylon for luck.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You hang the nearest thing aboard you can spare from a pylon and the Watch salute it gravely. The lake shivers. An hour later a harness comes up on the line, wet and pleased with itself, with a note: THANK YOU FOR THE BUNTING.",
+							"effects": {
+								"items": {
+									"tank_harness": 1
+								},
+								"flag": "wonder_mire"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_fenn_auction_ring",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Great Auction Ring",
+			"requires": {
+				"flag": "in_fenn_bazaar"
+			},
+			"text": "A ring four kilometres across, rimmed with stalls and lanterns, every stall for sale and every lantern a bid. In its middle hangs the rostrum, and on the rostrum an auctioneer so old that her hammer has worn a groove in her hand. The Ring has been selling since before the Snap and has not once closed. Whatever you want is here, and whatever you have is wanted, and everything, everything, is for sale twice.",
+			"choices": [
+				{
+					"text": "Bid on lot nine, whatever it is.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "You bid. You bid again, because the old auctioneer's eyebrow demands it. Lot nine turns out to be a haggle engine, plans and all, and you win it for a price that is both fair and insulting. The Ring applauds, and sells the applause to a passing barge.",
+							"effects": {
+								"blueprint": "fenn_haggle_engine",
+								"flag": "wonder_fenn",
+								"items": {
+									"credits": -60
+								}
+							}
+						},
+						{
+							"weight": 40,
+							"text": "You bid, and are outbid by a very small Fenn in a very large hat, who turns out to be the auctioneer's granddaughter, and who then sells you the same lot at cost, for the pleasure of it. The plans come with a receipt for the pleasure.",
+							"effects": {
+								"blueprint": "fenn_haggle_engine",
+								"flag": "wonder_fenn",
+								"items": {
+									"credits": -30
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "[Fenn] Take the rostrum for one lot.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Fenn mounts the rostrum and sells a single lot in under a minute at three times its value, to a crowd that has been waiting four hundred years for that exact voice. The old woman hands over the haggle engine's plans, the hammer, and a seat in the front row. 'You will do,' she says. It is the best review in the Bazaar.",
+							"effects": {
+								"blueprint": "fenn_haggle_engine",
+								"flag": "wonder_fenn",
+								"crew_hp": 10,
+								"items": {
+									"credits": 140
+								}
+							}
+						}
+					],
+					"requires": {
+						"species": "fenn"
+					}
+				},
+				{
+					"text": "Sell something you don't have.",
+					"outcomes": [
+						{
+							"weight": 50,
+							"text": "You sell the Ring a futures contract on your own luck. The Ring buys it, adds a margin, and sells it on. Somehow, by the end of the afternoon, you are up, and holding the plans for a haggle engine nobody remembers selling you.",
+							"effects": {
+								"blueprint": "fenn_haggle_engine",
+								"flag": "wonder_fenn",
+								"items": {
+									"credits": 100
+								}
+							}
+						},
+						{
+							"weight": 50,
+							"text": "You sell the Ring a futures contract on your own luck. The Ring spots the trick at once and sells it back to you at a penalty. The haggle engine's plans come with the fine, as a courtesy, on the assumption you need the help.",
+							"effects": {
+								"blueprint": "fenn_haggle_engine",
+								"flag": "wonder_fenn",
+								"items": {
+									"credits": -40
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "Go aboard the Ring and walk the stalls.",
+					"outcomes": [
+						{
+							"weight": 1,
+							"text": "You step onto the rim. Lanterns swing. Somewhere a gavel falls and someone shouts SOLD.",
+							"effects": {
+								"board": {
+									"kind": "station",
+									"name": "The Great Auction Ring"
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_gauntling_scrap_cathedral",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Scrap Cathedral",
+			"requires": {
+				"flag": "in_gauntling_scrapyards"
+			},
+			"text": "Three hundred wrecks, welded nave to nave, rise out of the junk in a single vaulted body with spires of cut girder and a rose window made of a thousand bright hatch covers. Lightning walks along the buttresses, tamed, and the whole building hums like a plucked wire. It is the proudest thing the Gauntlings have ever made. It is also, they admit, mostly someone else's. A sexton on the loading ramp rings a bell made from a reactor shell and wishes you good morning.",
+			"choices": [
+				{
+					"text": "Hear the service, and give what you can to the plate.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "You sit through the hymn, which is mostly the sound of a hydraulic press, and put the plate a part you did not need. The sexton blesses the part and returns it, plus a set of plans for a tesla picket, drawn on the back of a hymn sheet. 'Everything comes back changed,' she says.",
+							"effects": {
+								"blueprint": "gauntling_tesla_picket",
+								"flag": "wonder_gauntling",
+								"items": {
+									"scrap": -15,
+									"credits": 40
+								}
+							}
+						},
+						{
+							"weight": 40,
+							"text": "You sit through the hymn, and the hymn sits through you. The organ is a lightning rod and it chooses you, briefly, as a note. You come out of the pew a little singed and a little blessed, holding the tesla picket plans and a coin made of fused spoons.",
+							"effects": {
+								"blueprint": "gauntling_tesla_picket",
+								"flag": "wonder_gauntling",
+								"hull": -3,
+								"items": {
+									"credits": 40
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "[Gauntling] Offer a limb to the reliquary.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Gauntling unscrews a hand in a ceremony older than the Snap, and sets it in the reliquary among a thousand others, and gets one back from the shelf with someone else's rings on it. The sexton weeps oil. The picket plans are handed over with the new hand, and a pat on the new hand's back.",
+							"effects": {
+								"blueprint": "gauntling_tesla_picket",
+								"flag": "wonder_gauntling",
+								"crew_hp": 10,
+								"items": {
+									"copper": 20,
+									"credits": 70
+								}
+							}
+						}
+					],
+					"requires": {
+						"species": "gauntling"
+					}
+				},
+				{
+					"text": "[Mechanical] Take over the organ for one verse.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your engineer sits at the lightning-organ and plays something that is not in the hymnal. The nave rings like a struck anvil; the choir of welders weeps in perfect time. By the end of it the sexton has given them the picket's plans, a medal, and a standing offer of the pulpit.",
+							"effects": {
+								"blueprint": "gauntling_tesla_picket",
+								"flag": "wonder_gauntling",
+								"items": {
+									"copper": 15,
+									"credits": 50
+								}
+							}
+						}
+					],
+					"requires": {
+						"trait": "mechanical"
+					}
+				},
+				{
+					"text": "Go inside and see the vaults for yourself.",
+					"outcomes": [
+						{
+							"weight": 1,
+							"text": "You walk in under the first buttress. The lightning follows you for a while, curious, and then loses interest.",
+							"effects": {
+								"board": {
+									"kind": "derelict",
+									"name": "The Scrap Cathedral"
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_grundl_barge_city",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The Lashed Barge-City",
+			"requires": {
+				"flag": "in_grundl_barges"
+			},
+			"text": "Four hundred barges, each a kilometre long, lashed side to side with cable thick as a ship's waist, into a floating town the size of a moon. Every barge has lamps in its windows and washing on its lines and a dinner on at all hours. Smoke rises from a thousand galley vents and goes out sideways. A child in a big sweater waves at you from a hatch and shouts something you can't hear and everyone nearby laughs at it. You are hungry for the first time in weeks.",
+			"choices": [
+				{
+					"text": "Accept a seat at the long table.",
+					"outcomes": [
+						{
+							"weight": 65,
+							"text": "There is a long table, and it is full, and a place is made. You eat for three hours and are told it is a snack. When the dishes are cleared, the barge-mother wipes her hands, nods, and hands over the plans for the slug mortar in a greasy envelope. 'Don't tell anyone how much it weighs,' she says.",
+							"effects": {
+								"blueprint": "grundl_slug_mortar",
+								"flag": "wonder_grundl",
+								"crew_hp": 8,
+								"items": {
+									"credits": 30
+								}
+							}
+						},
+						{
+							"weight": 35,
+							"text": "There is a long table, and you are put at the wrong end of it, next to the soup. You eat for five hours and are carried out. The plans for the slug mortar are slipped into your pocket by a very small hand, and a very large one pats your head.",
+							"effects": {
+								"blueprint": "grundl_slug_mortar",
+								"flag": "wonder_grundl",
+								"crew_hp": 5,
+								"items": {
+									"credits": 30
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "[Grundl] Take your place in the lashing line.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Grundl walks into the line and takes the cable as if they had never left. They heave and sing for a shift, with four hundred cousins they didn't know they had. The barge-mother gives them the mortar's plans, a bag of dumplings and a seat on the council, which they politely decline.",
+							"effects": {
+								"blueprint": "grundl_slug_mortar",
+								"flag": "wonder_grundl",
+								"crew_hp": 10,
+								"items": {
+									"credits": 90
+								}
+							}
+						}
+					],
+					"requires": {
+						"species": "grundl"
+					}
+				},
+				{
+					"text": "Work a shift on the cable.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "You haul cable for six hours alongside people who consider this a hobby. The barge-mother is impressed against her will, and hands over the mortar's plans with the air of someone passing a family recipe.",
+							"effects": {
+								"blueprint": "grundl_slug_mortar",
+								"flag": "wonder_grundl",
+								"crew_hp": -5,
+								"items": {
+									"credits": 50
+								}
+							}
+						}
+					],
+					"requires": {
+						"crew_min": 2
+					}
+				},
+				{
+					"text": "Go aboard and find the galley.",
+					"outcomes": [
+						{
+							"weight": 1,
+							"text": "The first barge's hatch opens on a smell like every good meal you have ever been promised.",
+							"effects": {
+								"board": {
+									"kind": "station",
+									"name": "The Lashed Barge-City"
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "wonder_human_concord_beacon",
+			"type": "anomaly",
+			"weight": 0,
+			"once": true,
+			"landmark": "The First Concord Beacon",
+			"requires": {
+				"flag": "in_human_core"
+			},
+			"text": "A needle of white alloy a mile tall, spinning slowly on its own axis, with a ring of old solar wings at its waist and, at its tip, a lamp that has been on since the Concord was a petition. This is the first beacon; the one that made the others. It is badly dented. It has been painted over so many times it has a texture. There is a visitor book at its foot, and a queue to sign it, and the queue is, naturally, four hours long.",
+			"choices": [
+				{
+					"text": "Queue, sign the book, and wait for the guide.",
+					"outcomes": [
+						{
+							"weight": 60,
+							"text": "Four hours later you sign, and the guide, a tired woman in a Concord cardigan, leads you up the needle on a lift that smells of 1000 years of tea. At the top is a locker with the original Concord railgun plans in it, under a laminated notice: DO NOT TAKE. She takes them out, hands them to you, and looks away.",
+							"effects": {
+								"blueprint": "human_concord_railgun",
+								"flag": "wonder_human",
+								"items": {
+									"credits": 50
+								}
+							}
+						},
+						{
+							"weight": 40,
+							"text": "Four hours later you sign, and the guide leads you up the needle. The lift stops between floors for forty minutes. When it starts again the locker is at the top, and the railgun plans are in it, and so is a very upset pigeon. The plans come out first.",
+							"effects": {
+								"blueprint": "human_concord_railgun",
+								"flag": "wonder_human",
+								"crew_hp": -5,
+								"items": {
+									"credits": 50
+								}
+							}
+						}
+					]
+				},
+				{
+					"text": "[Human] Sign the book with your family name.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your human signs the book, and the guide stops. There is a page in the book, near the front, with the same name on it, in a hand like theirs. The guide takes them up the needle personally, and the lamp, for a moment, flickers in a pattern that might be a greeting. The railgun's plans are theirs. The cardigan is a gift.",
+							"effects": {
+								"blueprint": "human_concord_railgun",
+								"flag": "wonder_human",
+								"crew_hp": 10,
+								"items": {
+									"credits": 100
+								}
+							}
+						}
+					],
+					"requires": {
+						"species": "human"
+					}
+				},
+				{
+					"text": "[Mechanical] Offer to fix the lamp.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "Your Gauntling climbs the needle with a toolkit and fixes a lamp that has been faulty for eleven years. The guide is moved to tears and to paperwork; the plans for the railgun come out of the locker with a signed waiver, an apology, and a lanyard.",
+							"effects": {
+								"blueprint": "human_concord_railgun",
+								"flag": "wonder_human",
+								"items": {
+									"copper": 10,
+									"credits": 40
+								}
+							}
+						}
+					],
+					"requires": {
+						"trait": "mechanical"
+					}
+				},
+				{
+					"text": "File a complaint about the queue.",
+					"outcomes": [
+						{
+							"weight": 100,
+							"text": "The complaints office is at the foot of the needle and has been since the founding. A clerk stamps your form in triplicate, apologises, and lets you up the side stairs. At the top there are no plans, only a note: SEE THE GUIDE. The guide rolls her eyes and hands the plans over from a drawer.",
+							"effects": {
+								"blueprint": "human_concord_railgun",
+								"flag": "wonder_human",
+								"rep": {
+									"concord": 1
+								},
+								"items": {
+									"credits": 20
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

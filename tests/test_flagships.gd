@@ -1,5 +1,5 @@
 extends "res://tests/base_test.gd"
-## The race flagships (scripts/space/flagships.gd, data/flagships.json, data/ships/flagship_<race>.json, data/packs/flagships_1; docs/CONTENT.md section 23): one
+## The race flagships (scripts/space/flagships.gd, data/flagships.json, data/ships/flagship_<race>.json, data/packs/flagships_1; docs/CONTENT.md section 25): one
 ## named boss ship for each of the ten major races, met as an optional beacon in its homeland. The designs are valid and use only real parts; the
 ## beacon appears in one sector of the homeland, from its stage on, never at the exit; a win pays the trophy once and sets the flag; the contact card
 ## says it is a boss; a flagship never flees; each fight ends inside 180 s.

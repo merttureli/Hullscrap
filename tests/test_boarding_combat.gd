@@ -101,22 +101,41 @@ func test_the_magazine_the_reload_and_the_reserve_count() -> void:
 		eq(s.fire(0.0), "shot", "shot %d" % i)
 		s.tick(0.7)
 	eq(g["mag"], 0, "the magazine is empty")
-	eq(s.fire(0.0), "empty", "and it clicks")
-	check(s.take_events().any(func(e): return e["type"] == "click"), "the click is told")
-	check(s.reload(), "R reloads")
+	check(float(g["reload"]) > 0.0, "and the last round started a reload by itself (owner, 2026-11-05)")
 	eq(s.fire(0.0), "reloading", "he cannot shoot meanwhile")
-	s.tick(1.0)
-	eq(g["mag"], 0, "1.0 s is not enough")
-	s.tick(0.3)
-	eq(g["mag"], 8, "the magazine is full again")
+	s.tick(0.6)
+	eq(g["mag"], 8, "1.2 s after the last round the magazine is full again")
 	eq(s.reserve(), 24, "from the reserve")
 	check(not s.reload(), "a full magazine is not reloaded")
 	s.fire(0.0)
 	s.tick(0.7)
+	check(s.reload(), "R reloads a magazine that is not empty")
+	s.tick(1.0)
+	eq(g["mag"], 7, "1.0 s is not enough")
+	s.tick(0.3)
+	eq(g["mag"], 8, "and then it is full")
+	eq(s.reserve(), 23, "one more round from the reserve")
 	sh.inventory.add("hand_ammo", -sh.inventory.count("hand_ammo"))
+	for i in 7:
+		s.fire(0.0)
+		s.tick(0.7)
+	eq(g["mag"], 1, "one round left")
 	check(not s.reload(), "no rounds in the hold, no reload")
 	s.leave()
-	eq(sh.inventory.count("hand_ammo"), 7, "what is loaded goes back to the hold on leaving")
+	eq(sh.inventory.count("hand_ammo"), 1, "what is loaded goes back to the hold on leaving")
+
+
+func test_an_empty_gun_with_no_rounds_in_the_hold_clicks() -> void:
+	var sh := _ship(8)
+	var s = _visit("station", 31, sh)
+	var g: Dictionary = s.gun()
+	for i in 8:
+		s.fire(0.0)
+		s.tick(0.7)
+	eq([g["mag"], s.reserve()], [0, 0], "the magazine and the hold are empty")
+	eq(float(g["reload"]), 0.0, "so it cannot reload by itself")
+	eq(s.fire(0.0), "empty", "and it clicks")
+	check(s.take_events().any(func(e): return e["type"] == "click"), "the click is told")
 
 
 func test_a_found_rifle_is_the_second_weapon_and_q_swaps() -> void:
@@ -519,13 +538,14 @@ func _with_party(count := 2, seed_value := 31):
 	return s
 
 
-func test_only_unposted_crew_can_come_and_no_more_than_two() -> void:
+func test_any_crew_can_come_posted_or_not_and_no_more_than_two() -> void:
 	var sh := _ship()
 	var ok: Array = Party.eligible(sh)
 	check(ok.size() >= 2, "the rustbucket has crew to take (%d)" % ok.size())
-	check(ok.all(func(m): return not m.is_player and m.post < 0 and not m.is_down()), "none of them is the soldier, posted or down")
+	check(ok.all(func(m): return not m.is_player and not m.is_drone() and not m.is_down()), "none of them is the soldier, the drone or down")
 	ok[0].post = 3
-	check(not Party.eligible(sh).has(ok[0]), "a posted crew member stays aboard")
+	check(Party.eligible(sh).has(ok[0]), "a posted crew member may come too (playtest 2026-11-05)")
+	eq(ok[0].post, 3, "and keeps the post to go back to")
 	sh.crew.append(CrewMember.new("Vik", Vector2(14, 10), "human"))
 	sh.crew.append(CrewMember.new("Ona", Vector2(16, 10), "human"))
 	var s = _visit("station", 31, sh)
@@ -927,10 +947,9 @@ func test_a_lone_soldier_with_a_pistol_beats_four_foes_one_at_a_time_and_loses_t
 			rounds = maxi(rounds, int(r["rounds"]))
 		stats[group] = {"n": n, "downs": downs, "hp": hp / maxf(float(n), 1.0), "rounds": rounds}
 	check(stats[1]["n"] >= 8, "enough sites have the room (%d)" % stats[1]["n"])
-	eq(stats[1]["downs"], 0, "taken one at a time (a door, the beam) he is never down")
-	check(stats[1]["hp"] >= 45.0, "and keeps about half his health (%.0f)" % stats[1]["hp"])
+	check(stats[1]["downs"] * 2 <= stats[1]["n"], "taken one at a time (a door, the beam) he beats all four in most fights (down in %d of %d): about three foes a health bar is the aim (owner, 2026-11-05)" % [stats[1]["downs"], stats[1]["n"]])
 	check(stats[1]["rounds"] <= 30, "for no more than 30 of his 40 rounds (%d)" % stats[1]["rounds"])
-	check(stats[2]["hp"] < stats[1]["hp"] - 15.0, "two at once cost much more (%.0f)" % stats[2]["hp"])
+	check(stats[2]["downs"] > stats[1]["downs"] and stats[2]["hp"] < stats[1]["hp"], "two at once cost more (down in %d, %.0f hp left against %.0f)" % [stats[2]["downs"], stats[2]["hp"], stats[1]["hp"]])
 	check(float(stats[4]["downs"]) >= 0.7 * float(stats[4]["n"]), "all four at once in the open put him down (%d of %d)" % [stats[4]["downs"], stats[4]["n"]])
 	check(stats[4]["hp"] < 15.0, "with next to nothing left (%.0f)" % stats[4]["hp"])
 

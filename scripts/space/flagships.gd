@@ -1,5 +1,5 @@
 extends RefCounted
-## The race flagships (data/flagships.json, docs/CONTENT.md section 23): one named, hand-made boss ship for each of the ten major races, sailing in its
+## The race flagships (data/flagships.json, docs/CONTENT.md section 25): one named, hand-made boss ship for each of the ten major races, sailing in its
 ## homeland. A flagship is a design file (data/ships/flagship_<race>.json, drawn with tests/tool_flagships.gd) and an entry of data/flagships.json.
 ## - attach() puts the flagship's beacon into ONE sector of the homeland's map (a POI of type `flagship`, sectors.json), only from the entry's `stage`
 ##   on, so it is met at most once in a run (a run crosses a region once). It never touches the exit and never blocks it: the player may fly past.

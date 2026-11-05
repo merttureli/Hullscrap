@@ -14,7 +14,7 @@
 		{"id": "prism", "name": "The Prism", "type": "station", "faction": "lumen", "pos": [1100, 380], "jitter": 80, "hidden_until": "prism_revealed"}
 	],
 	"debris": {"crystal_shard": 2.0},
-	"pois": {"anomaly": 2.0, "quest": 1.5},
+	"pois": {"anomaly": 2.0, "quest": 1.5, "exp_platform": 2.0, "exp_ruin": 1.5},
 	"ambient": {"trader": 3, "patrol": 2, "pirate": 1},
 	"stock": {},
 	"recruit": {},

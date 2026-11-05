@@ -15,6 +15,7 @@ extends RefCounted
 ## region), and the offers at an exit from the run seed and the stage. Numbers come from data/drift.json, reputation rules from data/factions.json.
 ## `ship` below is the player's Ship (ship.gd): fuel and credits are cargo items.
 
+const Homelands = preload("res://scripts/space/homelands.gd")
 const Drift = preload("res://scripts/space/drift.gd")
 const Events = preload("res://scripts/space/events.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
@@ -119,6 +120,8 @@ var region_data := {}  ## that region's data (Regions.get_region), not saved
 var route: Array = []  ## the regions of the run in order, this one last
 var region_seed := 0  ## the seed of this region's map and sectors
 var story_views := {}  ## heavy once-events: id -> times shown in this run (their weight halves with each); saved
+var expedition := {}  ## the away team now out (expedition.gd): {poi, kind, team (names), page}; {} when none. Saved as the optional "expedition"
+var captives := {}  ## crew an expedition left captured: name -> species, for a later `rescue` (expedition.gd). Saved as the optional "captives"
 var crew_offers := 0  ## events that add crew fired in this region (events.gd counts them in pick): data/drift.json `crew.offers_per_region` is the limit; saved
 var debt_stop := -1  ## the jump count at which Ma's debt clock stopped (from stage run.debt_stages + 1), -1 while it runs
 var warden := {}  ## the warden of this region's exit beacon (Wardens.for_region), rolled on entering; {} in the ending region
@@ -1118,9 +1121,9 @@ func station_cfg(id: String) -> Dictionary:
 		return {}
 	var n := drift.node(id)
 	if n.is_empty():
-		return Regions.station(id, cfg)
+		return Homelands.menu(id, Regions.station(id, cfg))
 	if str(n.get("place", "")) != "":
-		return Regions.station(str(n["place"]), cfg)
+		return Homelands.menu(str(n["place"]), Regions.station(str(n["place"]), cfg))
 	if n.get("type", "") == "trader" and bool(n.get("clan", false)):
 		return cfg["stations"]["clan_trader"]
 	return {}
@@ -1378,7 +1381,7 @@ func to_dict() -> Dictionary:
 		"sectors": _sectors_dict(), "spool": spool.duplicate(), "landmarks": landmarks.duplicate(), "unlocks_earned": unlocks_earned.duplicate(),
 		"chronicle": chronicle.duplicate(true), "stage": stage, "region": region_id, "route": route.duplicate(), "region_seed": str(region_seed),
 		"debt_stop": debt_stop, "tide": tide.to_save(), "warden": warden.duplicate(), "foes": foes.duplicate(), "crew_offers": crew_offers,
-		"story_views": story_views.duplicate(), "fuel_stock": fuel_stock.duplicate(true), "shop_sold": shop_sold.duplicate(true)}
+		"story_views": story_views.duplicate(), "fuel_stock": fuel_stock.duplicate(true), "shop_sold": shop_sold.duplicate(true), "expedition": expedition.duplicate(true), "captives": captives.duplicate()}
 
 
 func _sectors_dict() -> Dictionary:
@@ -1459,6 +1462,13 @@ func load_dict(d: Dictionary) -> String:
 			story_views[str(k)] = maxi(0, int(d["story_views"][k]))
 	fuel_stock = d["fuel_stock"].duplicate(true) if d.get("fuel_stock") is Dictionary else {}  # saves from before the scarce fuel have none
 	shop_sold = d["shop_sold"].duplicate(true) if d.get("shop_sold") is Dictionary else {}  # nor the small shops
+	expedition = {}  # saves from before the expeditions have none
+	if d.get("expedition") is Dictionary and d["expedition"].get("team") is Array and d["expedition"].get("poi") is String:
+		expedition = d["expedition"].duplicate(true)
+	captives = {}
+	if d.get("captives") is Dictionary:
+		for k in d["captives"]:
+			captives[str(k)] = str(d["captives"][k])
 	_shops = {}
 	sectors = made
 	spool = charge

@@ -11,7 +11,7 @@
 	"map": {},
 	"node_weights": {"wreck_field": 30, "distress": 14, "pirate": 14, "asteroid_field": 10, "trader": 10, "empty": 10, "anomaly": 6, "patrol": 4},
 	"places": [
-		{"id": "barnacle_row", "name": "Barnacle Row", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "barnacle_row", "name": "Barnacle Row", "type": "station", "faction": "", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"scrap_chunk_m": 1.5, "sealed_crate": 1.4},
 	"pois": {"wreck": 1.5, "abandoned_station": 1.3},

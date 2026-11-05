@@ -18,6 +18,7 @@ const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Races = preload("res://scripts/board/station_races.gd")
 const Fixtures = preload("res://scripts/board/station_fixtures.gd")
 const Dressing = preload("res://scripts/board/station_dressing.gd")
+const Homelands = preload("res://scripts/space/homelands.gd")
 
 const PATH := "res://data/station_modules.json"
 const SIDES: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -31,6 +32,8 @@ static var forced_module := ""  ## a test or a tool sets it: a module every stat
 var s  ## the site being built (site.gd)
 var rng := RandomNumberGenerator.new()
 var type := ""
+var capital := ""  ## the race whose capital this is (a single-race station with all its signature rooms), "" for none
+var wanted := ""  ## a module this station must have (a wonder's site)
 var state := ""
 var mood := ""
 var insts: Array = []  ## [{mod, v (the variant: rotated, stretched), off (Vector2i), parent, links: [per connector: -1 open, -2 closed, or the inst joined]}]
@@ -89,6 +92,9 @@ func _roll_kind(opts: Dictionary) -> void:
 	for t in config()["types"]:
 		tw[t] = float(config()["types"][t]["weight"])
 	type = _pick(tw, r)
+	if str(opts.get("capital", "")) != "":  # a race's capital: the size class above the habitat (homelands.gd)
+		capital = str(opts["capital"])
+		type = str(Homelands.config()["capital"]["type"])
 	var sw := {}
 	var tilt: Dictionary = config().get("regions", {}).get(s.region, {})
 	var ttilt: Dictionary = config().get("themes", {}).get(s.theme, {})
@@ -103,7 +109,9 @@ func _roll_kind(opts: Dictionary) -> void:
 		mood = str(opts["mood"])
 	var rr := RandomNumberGenerator.new()
 	rr.seed = s._mix(s.seed_value, "races", 0)
-	s.races = Races.roll(rr, s.region, type)
+	s.races = [capital] if capital != "" else ([str(opts["race"])] if str(opts.get("race", "")) != "" else Races.roll(rr, s.region, type))
+	if opts.has("module"):
+		wanted = str(opts["module"])
 	s.state = state
 	s.mood = mood
 	s.station_type = type
@@ -133,6 +141,12 @@ func _attempt(p_attempt: int) -> String:
 	var mins: Dictionary = tcfg.get("min", {}).duplicate()
 	if forced_module != "" and modules().has(forced_module):  # (a test or a tool wants this module in)
 		mins[forced_module] = 1
+	if wanted != "" and modules().has(wanted):
+		mins[wanted] = 1
+	if capital != "":  # every signature room of the race
+		for mid in modules():
+			if modules()[mid].get("races", []).has(capital):
+				mins[mid] = 1
 	var need: Array = mins.keys()
 	need.sort()
 	for mid in need:
@@ -148,6 +162,11 @@ func _attempt(p_attempt: int) -> String:
 
 
 ## Modules placed besides the dock.
+## The type whose module weights this station uses (a capital uses the habitat's).
+func wtype() -> String:
+	return str(config()["types"][type].get("weights_as", type))
+
+
 func _count() -> int:
 	return insts.size() - 1
 
@@ -191,7 +210,7 @@ func _weights() -> Dictionary:
 				if str(modules()[m].get("leads", "")) != "" and modules()[mid].get("tags", []).has(str(modules()[m]["leads"])):
 					boost[m] = true
 	for mid in ids:
-		var w := float(modules()[mid].get("weights", {}).get(type, 0.0))
+		var w := float(modules()[mid].get("weights", {}).get(wtype(), 0.0))
 		var rcs: Array = modules()[mid].get("races", [])
 		if not rcs.is_empty() and (not race_rooms or not rcs.any(func(x): return s.races.has(x))):  # (a race's own room only in a station its people built)
 			continue
@@ -245,7 +264,7 @@ func _lead(i: int) -> bool:
 	var w := {}
 	for mid in modules():
 		if modules()[mid].get("tags", []).has(tag) and _count_of(mid) < _max_of(mid):
-			w[mid] = maxf(float(modules()[mid].get("weights", {}).get(type, 0.0)), 0.1)
+			w[mid] = maxf(float(modules()[mid].get("weights", {}).get(wtype(), 0.0)), 0.1)
 	var ks: Array = []
 	for k in insts[i]["links"].size():
 		if int(insts[i]["links"][k]) == -1:
@@ -352,7 +371,7 @@ func _place_required(mid: String) -> void:
 			return
 	var links := {}  # nowhere for it: a spoke first, and it at the spoke's far end
 	for m in modules():
-		if modules()[m].get("tags", []).has("link") and float(modules()[m].get("weights", {}).get(type, 0.0)) > 0.0 and _count_of(m) < _max_of(m):
+		if modules()[m].get("tags", []).has("link") and float(modules()[m].get("weights", {}).get(wtype(), 0.0)) > 0.0 and _count_of(m) < _max_of(m):
 			links[m] = 1.0
 	for o in open:
 		var n := insts.size()
@@ -793,6 +812,9 @@ func _dress() -> String:
 	_heat()
 	_lock(scfg)
 	s.crowd = scfg["crowd"].get(mood if mood != "" else "any", scfg["crowd"].get("any", {}))
+	if capital != "":  # a capital's people: its traders and recruiters, and its guards
+		s.crowd = {"spawn": {"count": [0, 0], "mix": {"scavenger": 1}}, "people": Homelands.config()["capital"]["people"].duplicate(true)}
+		s.capital = capital
 	s._place_props(kcfg, rng)
 	s._make_walk()
 	var why: String = s._clear_lanes()

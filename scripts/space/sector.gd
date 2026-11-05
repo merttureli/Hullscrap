@@ -33,6 +33,7 @@ const Stats = preload("res://scripts/sim/stats.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Boarding = preload("res://scripts/board/boarding.gd")
 const Flagships = preload("res://scripts/space/flagships.gd")
+const Homelands = preload("res://scripts/space/homelands.gd")
 
 const PATH := "res://data/sectors.json"
 const NEW := "new"
@@ -120,6 +121,7 @@ static func generate(campaign_seed: int, node: Dictionary, region_id: String, p_
 	var r := RandomNumberGenerator.new()
 	r.seed = s.seed_value
 	s._build(r, node, region_data)
+	s._homeland(node)
 	s.rng.seed = s.seed_value + 7919
 	s.enter()
 	return s
@@ -170,6 +172,40 @@ func _build(r: RandomNumberGenerator, node: Dictionary, region_data: Dictionary)
 		var off := r.randf_range(float(sc["angle_off"][0]), float(sc["angle_off"][1])) * (1.0 if r.randf() < 0.5 else -1.0)
 		streams.append({"angle": fposmod(current_angle + off, 360.0), "speed": r.randf_range(float(c["speed"][0]), float(c["speed"][1])),
 			"share": r.randf_range(float(sc["share"][0]), float(sc["share"][1]))})
+
+
+## A capital's node: its main POI is the capital (`capital`: the race), and the race's wonder, if it has one, is one more POI (`wonder`: the race), placed
+## last from a stream of its own, so the layout above is what it always was.
+func _homeland(node: Dictionary) -> void:
+	var cap := Homelands.capital_of(str(node.get("place", "")))
+	if cap.is_empty() or pois.is_empty() or not pois[0]["main"]:
+		return
+	pois[0]["capital"] = str(cap["race"])
+	var w := Homelands.wonder_of(str(cap["race"]))
+	if w.is_empty() or not cfg["poi_types"].has("wonder"):
+		return
+	var r := RandomNumberGenerator.new()
+	r.seed = seed_value ^ 0x57_0D_E5
+	var t: Dictionary = cfg["poi_types"]["wonder"]
+	pois.append({"id": "pw", "type": "wonder", "name": str(w["name"]), "pos": _place(r, cfg["poi"]), "visibility": str(t["visibility"]), "event_type": str(t["event"]), "state": NEW,
+		"enemy": "", "main": false, "wonder": str(cap["race"])})
+
+
+## The capital's greeting `ev` (a station event, or {} for none) with the arrival line over it and the "Go aboard" choice that builds its station.
+func _capital_greeting(ev: Dictionary, poi: Dictionary) -> Dictionary:
+	var cap := Homelands.capital_in(region)
+	var out := ev.duplicate(true)
+	if out.is_empty():
+		out = {"id": "capital_arrival", "type": "station", "text": "", "choices": [{"text": "Dock.", "outcomes": [{"weight": 1, "text": "", "effects": {}}]}]}
+	out["text"] = (Homelands.line(cap) + "\n\n" + str(out.get("text", ""))).strip_edges()
+	out = Boarding.offer(out, "station", {"name": str(poi["name"]), "capital": str(poi["capital"])})
+	var bc: Dictionary = Homelands.config()["capital"]["board"]
+	for ch in out["choices"]:
+		var fx = ch["outcomes"][0].get("effects", {})
+		if fx is Dictionary and fx.get("board") is Dictionary and fx["board"].has("capital"):
+			ch["text"] = str(bc["text"]) % poi["name"]
+			ch["outcomes"][0]["text"] = str(bc["flavor"])
+	return out
 
 
 ## The POI types of the sector in order: the node's main one, the ones it always has (`also`), then others rolled by the
@@ -447,8 +483,8 @@ func trigger(c, ship) -> Dictionary:
 	for poi in all_pois():
 		if poi.has("boss") and _flags.has(str(poi["flag"])):  # a beaten flagship is done
 			poi["state"] = DONE
-		if poi["state"] != NEW:
-			continue
+		if poi["state"] != NEW or bool(cfg["poi_types"].get(poi["type"], {}).get("manual", false)):
+			continue  # (a manual POI, an expedition site, waits for the player: site_near)
 		var d := ship_pos.distance_to(poi["pos"])
 		if _engaged.has(poi["id"]):
 			if d > away:
@@ -466,7 +502,10 @@ func trigger(c, ship) -> Dictionary:
 		res = {"node": c.node(node_id), "refused": "", "event": {}}
 	else:
 		res = _event_for(c, ship, best)
-		if res["refused"] == "" and not hollow and not res["event"].is_empty() and Boarding.kind_for(best) != "":
+		if res["refused"] == "" and not hollow and poi_is_capital(best):
+			res["event"] = _capital_greeting(res["event"], best)
+			res["log"] = Homelands.line(Homelands.capital_in(region))
+		elif res["refused"] == "" and not hollow and not res["event"].is_empty() and Boarding.kind_for(best) != "":
 			res["event"] = Boarding.offer(res["event"], Boarding.kind_for(best))  # a vessel the soldier can board
 	_greeted[best["id"]] = true
 	res["poi"] = best
@@ -477,9 +516,35 @@ func trigger(c, ship) -> Dictionary:
 	return res
 
 
+static func poi_is_capital(poi: Dictionary) -> bool:
+	return str(poi.get("capital", "")) != ""
+
+
+## The nearest manual POI (an expedition site) that is still new and within its `reach` of the ship, {} for none. Not in a Hollow place.
+func site_near() -> Dictionary:
+	var best := {}
+	var best_d := INF
+	if hollow:
+		return best
+	for poi in all_pois():
+		var t: Dictionary = cfg["poi_types"].get(poi["type"], {})
+		if poi["state"] != NEW or not bool(t.get("manual", false)):
+			continue
+		var d := ship_pos.distance_to(poi["pos"])
+		if d <= float(t.get("reach", 800.0)) and d < best_d:
+			best = poi
+			best_d = d
+	return best
+
+
 func _event_for(c, ship, poi: Dictionary) -> Dictionary:
 	if poi["main"] and c.current == node_id:
 		return c.arrive(ship)
+	if not hollow and poi.has("wonder"):  # a wonder runs its own event, once a run
+		var w := Homelands.wonder_of(str(poi["wonder"]))
+		var wev: Dictionary = c.events.get_event(str(w.get("event", "")))
+		var node := {"id": node_id, "type": "anomaly", "place": ""}
+		return {"node": c.node(node_id), "refused": "", "event": wev if not wev.is_empty() and c.events.eligible(wev, c, node, ship) else {}}
 	var kind := str(poi["event_type"])
 	if hollow and not bool(cfg["poi_types"].get(poi["type"], {}).get("repeat", false)):
 		kind = "hollow"  # the tide has taken the place: every POI but a station or store sends ghosts and dead beacons, no rewards

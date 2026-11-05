@@ -69,6 +69,8 @@ func test_the_pack_has_the_events_it_promises() -> void:
 	eq(site.size(), 18, "18 discoveries")
 	eq(pack.size(), 49, "and nothing else")
 	for role in People.role_ids():
+		if role == "recruiter":
+			continue  # (the capital's recruiter: its events are in the homelands_1 pack)
 		var mine := npc.filter(func(e): return _role_of(e) == role)
 		check(mine.size() >= 3, "%s has at least three events (%d)" % [role, mine.size()])
 	for kind in ["terminal", "body", "room"]:

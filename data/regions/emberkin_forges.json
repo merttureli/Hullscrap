@@ -11,10 +11,10 @@
 	"map": {},
 	"node_weights": {"asteroid_field": 18, "anomaly": 14, "pirate": 14, "distress": 12, "trader": 12, "wreck_field": 12, "empty": 12, "patrol": 6},
 	"places": [
-		{"id": "kiln", "name": "The Kiln", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true}
+		{"id": "kiln", "name": "The Kiln", "type": "station", "faction": "lumen", "pos": [800, 500], "jitter": 90, "beacon": true, "capital": true}
 	],
 	"debris": {"copper_coil": 1.4},
-	"pois": {"mining_field": 1.3, "anomaly": 1.3},
+	"pois": {"mining_field": 1.3, "anomaly": 1.3, "exp_platform": 2.0, "exp_planet": 1.5},
 	"ambient": {"trader": 3, "pirate": 2, "patrol": 1},
 	"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "heat_lance_neon": 420, "engine_scrap_mk1": 90, "radiator": 50, "emberkin_pyre_lance": 340, "emberkin_cinder_mortar": 290, "emberkin_flare_turret": 150, "emberkin_pyre_drive": 330, "emberkin_furnace_core": 210, "emberkin_hearth_shield": 340, "forge_apron": 230, "firefighter_coat": 160},
 	"recruit": {"emberkin": 8, "human": 1, "prismatic": 1},
