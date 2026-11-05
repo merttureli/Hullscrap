@@ -131,6 +131,41 @@ static func of(id: String, ship, rot := -1, angle := -1.0) -> Dictionary:
 	return out
 
 
+## What a picture card shows of part `id` instead of its name: {stats: [{icon, text, what}] (two or three figures, chosen by family: a gun's
+## damage, rate and range; a shield's layers and recharge; an engine's thrust; a reactor's power; any other part's hp and power), aim:
+## "fixed", "swivel", "turret" for a gun (read from its weapons.json entry, so a new aim class shows by its name), else ""}.
+static func glance(id: String, ship) -> Dictionary:
+	var out := {"stats": [], "aim": ""}
+	if not ship.components.has(id):
+		return out
+	var def: Dictionary = ship.components.def(id)
+	var eff: Dictionary = ship.effective(id)
+	var st: Dictionary = eff["stats"]
+	var rows: Array = out["stats"]
+	match str(def.get("family", "")):
+		"weapon":
+			if weapons().has(id):
+				var w: Dictionary = weapons().def(id)
+				var beam: bool = w["kind"] == "beam"
+				rows.append({"icon": "st_damage", "text": num(float(w["damage"]) * (1.0 if beam else maxf(1.0, float(w["shots"])))) + ("/s" if beam else ""), "what": "Damage"})
+				rows.append({"icon": "st_rate", "text": num(snappedf(1.0 / maxf(float(w["cooldown"]), 0.05), 0.1)), "what": "Shots a second"})
+				rows.append({"icon": "st_range", "text": num(float(w["range"])), "what": "Range"})
+				out["aim"] = str(w.get("aim", "turret" if w["turret"] else "fixed"))
+		"shield":
+			rows.append({"icon": "st_layers", "text": num(float(st.get("layers", 1.0))), "what": "Layers"})
+			rows.append({"icon": "st_recharge", "text": num(float(st.get("recharge", Abilities.shield_base()))) + "s", "what": "Recharge"})
+		"engine":
+			rows.append({"icon": "st_thrust", "text": num(float(st.get("thrust", 0.0))), "what": "Thrust"})
+		_:
+			var pw := float(eff["power"])
+			if pw != 0.0:
+				rows.append({"icon": "power", "text": ("+" if pw > 0.0 else MINUS) + num(absf(pw)), "what": "Power"})
+			rows.append({"icon": "st_hp", "text": str(eff["hp"]), "what": "HP"})
+	if str(def.get("family", "")) in ["engine", "shield", "weapon"] and rows.size() < 3:
+		rows.append({"icon": "st_hp", "text": str(eff["hp"]), "what": "HP"})
+	return out
+
+
 ## The description as plain text, a line each (what tests and plain readers get).
 static func text(id: String, ship, rot := -1, angle := -1.0) -> String:
 	var d := of(id, ship, rot, angle)

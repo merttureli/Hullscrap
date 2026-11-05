@@ -5,6 +5,7 @@ extends RefCounted
 
 const Describe = preload("res://scripts/ui/describe.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
+const Crafting = preload("res://scripts/craft/crafting.gd")
 
 const PAD := 10.0
 const LINE := 17.0
@@ -31,7 +32,7 @@ static func data(id: String, ship, why: String) -> Dictionary:
 	for m in rec["materials"]:
 		var have: int = ship.inventory.count(m)
 		mats.append([ship.crafting.name_of(m), int(rec["materials"][m]), have, have >= int(rec["materials"][m])])
-	return {"title": ship.crafting.name_of(item, ship.components), "what": str(d["what"]), "stats": stats, "mats": mats, "level": int(rec["fab_level"]), "reason": why}
+	return {"title": ship.crafting.name_of(item, ship.components), "what": str(d["what"]), "stats": stats, "mats": mats, "level": int(rec["fab_level"]), "where": "%s L%d%s" % [Crafting.STATIONS.get(rec["station"], "Fabricator"), int(rec["fab_level"]), (", needs " + ", ".join(rec["tools"])) if not rec["tools"].is_empty() else ""], "reason": why}
 
 
 ## The height the card needs at `width`.
@@ -40,7 +41,7 @@ static func height(d: Dictionary, width: float) -> float:
 	if d["what"] != "":
 		h += UiKit.wrap(d["what"], width - 2.0 * PAD, 13).size() * LINE + 4.0
 	h += ceili(d["stats"].size() / 2.0) * LINE + 6.0
-	h += LINE + 6.0
+	h += 2.0 * LINE + 6.0
 	if d["reason"] != "":
 		h += UiKit.wrap(d["reason"], width - 2.0 * PAD, 13).size() * LINE
 	return h
@@ -75,6 +76,8 @@ static func draw(cv: CanvasItem, at: Vector2, width: float, d: Dictionary) -> Re
 		var seg := "%s %d" % [m[0], m[1]] if m[3] else "%s %d/%d" % [m[0], m[2], m[1]]
 		cv.draw_string(f, Vector2(mx, y), seg, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, GOOD if m[3] else BAD)
 		mx += UiKit.text_width(seg, 13) + 12.0
+	y += LINE
+	cv.draw_string(f, Vector2(x, y), str(d.get("where", "")), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, DIM_TEXT)
 	if d["reason"] != "":
 		y += 6.0
 		for l in UiKit.wrap(d["reason"], width - 2.0 * PAD, 13):

@@ -191,10 +191,12 @@ func test_the_panel_lists_every_recipe_by_category_known_ones_first() -> void:
 	eq(headers, ["Systems", "Gear", "Materials", "Modules"], "the four categories in order")
 	var ids := panel.recipe_ids()
 	check(ids.has(KICKJET) and ids.has("pistol") and ids.has("polymer") and ids.has("robot_arm"), "known recipes of each kind")
-	check(ids.has("reactor_mk2") and ids.has("laser_mk2"), "unknown blueprints are listed too")
-	check(ids.find(KICKJET) < ids.find("reactor_mk2"), "after the known ones of their category")
+	check(not ids.has("reactor_mk2") and not ids.has("laser_mk2"), "recipes whose blueprint is unknown are hidden")
+	for id in ids:
+		check(panel.sim.player_ship().crafting.is_known(id), "%s is listed only because it is known" % id)
 	eq(panel.reason(KICKJET), "", "Kickjet can be made")
 	panel.sim.player_ship().crafting.unlock("reactor_mk2")
+	check(panel.recipe_ids().has("reactor_mk2"), "learning it lists it")
 	eq(panel.reason("reactor_mk2"), "needs fabricator level 3", "level 3 is out of reach")
 	panel.sim.player_ship().crafting.unlock("laser_mk2")
 	eq(panel.reason("laser_mk2"), "needs fabricator level 2", "and laser_mk2 needs level 2 first")
@@ -203,13 +205,13 @@ func test_the_panel_lists_every_recipe_by_category_known_ones_first() -> void:
 	_free(d)
 
 
-func test_unknown_recipes_are_dimmed_but_racial_tech_waits_for_its_blueprint() -> void:
+func test_unknown_recipes_are_hidden_and_racial_tech_waits_for_its_blueprint() -> void:
 	var d := _panel(_rig()["ship"])
 	var panel: CraftingPanel = d["panel"]
 	var ship: Ship = panel.sim.player_ship()
 	var ids := panel.recipe_ids()
-	check(ids.has("reactor_mk2") and not ship.crafting.is_known("reactor_mk2"), "an unknown recipe of the game's own tech is listed")
-	check(not ids.has("basalt_vacuum_forge"), "racial tech of a people not met is not")
+	check(not ids.has("reactor_mk2") and not ship.crafting.is_known("reactor_mk2"), "an unknown recipe of the game's own tech is not listed")
+	check(not ids.has("basalt_vacuum_forge"), "nor is racial tech of a people not met")
 	panel.selected = "reactor_mk2"
 	panel.craft_selected()
 	eq(panel.message, "Reactor Mk2: " + CraftingPanel.BLUEPRINT_HELP, "asking for it explains where blueprints come from")
@@ -268,11 +270,15 @@ func test_the_panel_keys() -> void:
 	panel._input(_key(KEY_C))
 	check(panel.visible, "C opens it")
 	var first: String = panel.selected
+	panel._input(_key(KEY_RIGHT))
+	eq(panel.selected, panel.recipe_ids()[1], "Right moves the cursor one card")
+	panel._input(_key(KEY_LEFT))
+	eq(panel.selected, first, "Left moves it back")
 	panel._input(_key(KEY_DOWN))
-	eq(panel.selected, panel.recipe_ids()[1], "Down moves the cursor")
+	check(panel.selected != first and panel.recipe_ids().find(panel.selected) >= 1, "Down moves the cursor a line of cards")
 	panel._input(_key(KEY_UP))
 	panel._input(_key(KEY_UP))
-	eq(panel.selected, first, "Up stops at the top")
+	eq(panel.selected, first, "Up goes back and stops at the top")
 	panel._input(_key(KEY_ENTER))
 	eq(ship.crafting.queue.size(), 1, "Enter queues the selected recipe")
 	var known := ship.crafting.known.size()

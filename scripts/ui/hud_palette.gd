@@ -1,27 +1,24 @@
 extends Control
 ## The build palette, on the left in build mode: a row of category tabs (Tab and Shift+Tab cycle them) over a
-## scrolling grid of icon cards (scripts/build/palette.gd says what each tab holds). A card shows the real sprite,
-## the name, the size, the power and the cost or how many are in the cargo, framed in its line's colour, greyed
-## when it can't be paid for or isn't held (a part card is listed when it is held or its blueprint is known); the first nine carry their number key. A click on a tab opens it, a
+## scrolling grid of picture cards, three across (scripts/build/palette.gd says what each tab holds: only what can be placed
+## now). A card is pic_card.gd's: the real sprite, two or three figures, the cost or the count held, framed in its line's colour, with
+## no name; the first nine carry their number key. A click on a tab opens it, a
 ## click on a card picks it (build_mode.gd pick()), the wheel scrolls, and the card under the mouse is what the
 ## selection card (hud_card.gd) shows.
 
 const Palette = preload("res://scripts/build/palette.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
-const Thumbs = preload("res://scripts/ui/thumbs.gd")
-const Describe = preload("res://scripts/ui/describe.gd")
+const PicCard = preload("res://scripts/ui/pic_card.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 
 const PAD := 14.0
 const TAB_H := 38.0
 const TAB_GAP := 4.0
 const HEAD_H := 30.0
-const CARD_H := 112.0
-const GAP := 8.0
-const COLS := 2
+const CARD_H := 124.0
+const GAP := 6.0
+const COLS := 3
 const SCROLL_STEP := 54.0
-const GREY := Color(0.07, 0.09, 0.12, 0.62)
-const EMPTY_TEXT := "Nothing here. Craft parts at the Fabricator (C)."
 
 var hud: Control
 var list: Control  ## the clipped grid of cards
@@ -184,14 +181,12 @@ func _draw() -> void:
 	UiKit.title_bar(self, head, Palette.TAB_NAMES[shown].to_upper(), 13)
 	var list_e := entries()
 	var note := "Tab: next   1-9: pick"
-	if b.tab == Palette.Tab.CARGO and list_e.is_empty():
-		note = "nothing in the hold"
 	UiKit.text(self, note, Vector2(head.position.x, head.get_center().y + 4.0), 10, UiKit.DIM_TEXT, HORIZONTAL_ALIGNMENT_RIGHT, head.size.x - 22.0)
 	var lr := list_rect()
 	UiKit.inset(self, lr.grow(4))
 	var total := content_height(list_e.size())
 	if list_e.is_empty():
-		var lines := UiKit.wrap(EMPTY_TEXT, lr.size.x - 16.0, 13)
+		var lines := UiKit.wrap(Palette.empty_text(b.tab), lr.size.x - 16.0, 13)
 		for i in lines.size():
 			UiKit.text(self, lines[i], lr.position + Vector2(10.0, 26.0 + i * 18.0), 13, UiKit.DIM_TEXT)
 	if total > lr.size.y:
@@ -211,51 +206,17 @@ func _draw_list() -> void:
 		draw_card(list, list_e[i], r, list_e[i]["key"] == key, list_e[i]["key"] == hover_key, i)
 
 
-## One card: frame, picture, number key, name, size and power, then the cost or the count.
-func draw_card(cv: CanvasItem, e: Dictionary, r: Rect2, selected: bool, hot: bool, index: int) -> void:
-	var b: Node = hud.build
-	UiKit.card(cv, r, e["line"], selected, hot)
-	var pic := Rect2(r.position + Vector2(10, 10), Vector2(r.size.x - 20.0, 48.0))
-	Thumbs.draw(cv, e, b.ship, pic, _clock)
-	if index < 9:
-		var k := Rect2(r.position + Vector2(7, 7), Vector2(16, 16))
-		cv.draw_rect(k, Color(0, 0, 0, 0.7))
-		cv.draw_rect(k, UiKit.EDGE_DIM, false, 1.0)
-		cv.draw_string(UiKit.bold(), k.position + Vector2(4.5, 12.5), str(index + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, UiKit.AMBER if selected else UiKit.TEXT)
-	var x := r.position.x + 10.0
-	var w := r.size.x - 20.0
-	UiKit.text(cv, e["name"], Vector2(x, r.position.y + 74.0), 12, UiKit.TEXT, HORIZONTAL_ALIGNMENT_LEFT, w, UiKit.bold())
-	var line := Palette.size_text(e["size"])  # a mount's outside half shows in the picture
-	UiKit.text(cv, line, Vector2(x, r.end.y - 12.0), 11, UiKit.DIM_TEXT)
-	var pw := float(e["power"])
-	if pw != 0.0:
-		UiKit.text(cv, Palette.power_text(pw), Vector2(x + UiKit.text_width(line, 11) + 6.0, r.end.y - 12.0), 11, UiKit.GOOD if pw > 0.0 else UiKit.AMBER)
-	_draw_price(cv, e, Vector2(r.end.x - 10.0, r.end.y - 12.0))
-	if not e["ok"]:
-		cv.draw_rect(r.grow(-3), GREY)
-	if e["kind"] == "part":  # a weapon's kind in its colour (and AUTO for a turret) under the name, bright even when greyed
-		var tx := x
-		for k in Describe.weapon_tags(e["id"]):
-			UiKit.text(cv, k["label"], Vector2(tx, r.position.y + 87.0), 11, k["color"], HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
-			tx += UiKit.text_width(k["label"], 11, UiKit.bold()) + 8.0
-
-
-## Right-aligned at `right` (its baseline): how many are held for a part, else each material of the cost with its icon.
-func _draw_price(cv: CanvasItem, e: Dictionary, right: Vector2) -> void:
+## The picture card of entry `e` (pic_card.gd's spec): no name, its figures, its cost or how many are held, its number key (the first nine).
+func spec_of(e: Dictionary, index: int) -> Dictionary:
+	var ship = hud.build.ship
+	var g: Dictionary = Palette.glance(e, ship)
+	var held := -1
 	if e["kind"] in ["part", "item"]:
-		var t := "x%d in cargo" % e["count"] if e["count"] > 0 else "0 held"
-		UiKit.text(cv, t, right - Vector2(UiKit.text_width(t, 11), 0), 11, UiKit.TEXT if e["count"] > 0 else UiKit.BAD.lightened(0.2))
-		return
-	var short: Dictionary = hud.build.ship.inventory.missing(e["cost"])
-	var x := right.x
-	var ids: Array = e["cost"].keys()
-	ids.reverse()
-	if ids.is_empty():
-		UiKit.text(cv, "free", Vector2(x - UiKit.text_width("free", 11), right.y), 11, UiKit.TEXT)
-	for m in ids:
-		var t := str(e["cost"][m])
-		x -= 13.0
-		UiKit.icon(cv, m, Rect2(x, right.y - 11.0, 13, 13))
-		x -= UiKit.text_width(t, 11) + 2.0
-		UiKit.text(cv, t, Vector2(x, right.y), 11, UiKit.BAD.lightened(0.2) if short.has(m) else UiKit.TEXT)
-		x -= 6.0
+		held = int(e["count"])
+	return {"entry": e, "line": e["line"], "stats": g["stats"], "aim": g["aim"], "cost": e["cost"], "short": ship.inventory.missing(e["cost"]),
+		"held": held, "tags": [], "key": index + 1 if index < 9 else 0, "meta": "", "meta_bad": false}
+
+
+## One card: PicCard draws it from spec_of().
+func draw_card(cv: CanvasItem, e: Dictionary, r: Rect2, selected: bool, hot: bool, index: int) -> void:
+	PicCard.draw(cv, r, hud.build.ship, spec_of(e, index), selected, hot, _clock)

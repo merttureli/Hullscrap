@@ -468,6 +468,46 @@ static func _glyph(cv: CanvasItem, id: String, r: Rect2, mod: Color) -> void:
 		"utility":
 			box.call(6.5, 2, 3, 12, GOOD)
 			box.call(2, 6.5, 12, 3, GOOD)
+		"st_damage":  # a burst
+			poly.call([[8, 1], [10, 6], [15, 8], [10, 10], [8, 15], [6, 10], [1, 8], [6, 6]], Color("#ff6a4a"))
+			box.call(7, 7, 2, 2, Color("#ffe0a0"))
+		"st_rate":  # three chevrons
+			for k in 3:
+				cv.draw_polyline(p.call([[3 + k * 3.5, 3], [7 + k * 3.5, 8], [3 + k * 3.5, 13]]), Color("#f2c14e") * mod, 2.0 * u.x)
+		"st_range":  # a line between two ticks, an arrow head
+			box.call(1, 4, 1.5, 8, EDGE)
+			box.call(1, 7.2, 11, 1.6, EDGE)
+			poly.call([[15, 8], [10.5, 4.5], [10.5, 11.5]], EDGE)
+		"st_layers":  # nested arcs
+			cv.draw_arc(o + Vector2(8, 12) * u, 7.0 * u.x, PI, TAU, 12, SHIELD * mod, 1.6 * u.x)
+			cv.draw_arc(o + Vector2(8, 12) * u, 4.5 * u.x, PI, TAU, 10, SHIELD.lightened(0.25) * mod, 1.6 * u.x)
+			cv.draw_arc(o + Vector2(8, 12) * u, 2.0 * u.x, PI, TAU, 8, SHIELD.lightened(0.5) * mod, 1.6 * u.x)
+		"st_recharge":  # a circular arrow
+			cv.draw_arc(o + Vector2(8, 8) * u, 5.0 * u.x, -0.4, TAU - 1.2, 14, SHIELD * mod, 2.0 * u.x)
+			poly.call([[11, 1.5], [14.5, 5], [9.5, 6.5]], SHIELD)
+		"st_thrust":  # a flame under a bar
+			box.call(3, 2, 10, 3, Color("#7d8798"))
+			poly.call([[4, 5], [12, 5], [8, 15]], Color("#ff8a1e"))
+			poly.call([[6.5, 5], [9.5, 5], [8, 10]], Color("#ffd23a"))
+		"st_hp":  # a plus
+			box.call(6, 2, 4, 12, BAD)
+			box.call(2, 6, 12, 4, BAD)
+		"st_mass":  # a weight
+			poly.call([[5, 4], [11, 4], [14, 14], [2, 14]], Color("#8a93a3"))
+			cv.draw_arc(o + Vector2(8, 4) * u, 2.5 * u.x, PI, TAU, 8, EDGE * mod, 1.4 * u.x)
+		"aim_fixed":  # one line forward
+			box.call(7, 3, 2, 12, EDGE)
+			poly.call([[8, 0.5], [12, 5], [4, 5]], EDGE)
+		"aim_swivel":  # a narrow fan
+			poly.call([[8, 14], [2, 3], [14, 3]], Color("#f2c14e"))
+			poly.call([[8, 14], [5.5, 5], [10.5, 5]], Color("#f2c14e").lightened(0.4))
+		"aim_turret":  # a ring with a barrel
+			cv.draw_arc(o + Vector2(8, 9) * u, 5.5 * u.x, 0.0, TAU, 16, GOOD * mod, 1.6 * u.x)
+			box.call(7, 1, 2, 8, GOOD)
+		"item":  # a crate
+			box.call(2, 4, 12, 10, Color("#8a93a3"))
+			box.call(2, 4, 12, 2.5, Color("#aab3c2"))
+			cv.draw_rect(Rect2(o + Vector2(2, 4) * u, Vector2(12, 10) * u), Color("#3b4452") * mod, false, 1.0)
 		"cargo":
 			box.call(2, 3, 12, 11, Color("#8a6a45"))
 			cv.draw_line(o + Vector2(2, 3) * u, o + Vector2(14, 14) * u, Color("#5a4228") * mod, 1.5)
