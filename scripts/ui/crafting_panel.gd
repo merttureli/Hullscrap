@@ -716,7 +716,7 @@ func described() -> Dictionary:
 func help_lines() -> Array[String]:
 	return [
 		"Click a recipe (or Up/Down, Enter) to queue it. Its materials leave the cargo.",
-		"Fabricator: parts, gear, modules. Needs power. Workshop modules in its room raise its level.",
+		"Fabricator: parts, gear, modules. Needs power. Raise its level in build mode (B): click it, then click again to pay. Arms and rigs in its room make it 25% faster each (up to +50%); a laser cutter or nanoforge there gives it that tool.",
 		"Smelter (Tab): scrap and ore into refined materials. A crew member at it adds %d%% speed." % roundi(Processing.manned_speed() * 100.0),
 		"Finished parts land in the hold: place them from the build palette (B). Click a queued job to cancel it.",
 		"Hover a card for its name and stats; click to select it; Enter, a double-click or the Queue button queues it. Blueprints (Tab) lists what you know: click one to open it at its station.",
@@ -929,6 +929,14 @@ func hint_button_rect() -> Rect2:
 	return Rect2(r.position.x + 10.0, r.position.y + FAB_H - 38.0, 190.0, 28.0)
 
 
+## The fabricator box's line: "Level 2 · Tools: laser cutter · Speed +25%" (`with_level` false: without the "Level 2 · ").
+static func fab_line(fab: Dictionary, with_level := true) -> String:
+	var tools: Array = fab["tools"]
+	var out := "Tools: " + (", ".join(tools).replace("_", " ") if not tools.is_empty() else "none")
+	out += " \u00b7 Speed +%d%%" % roundi((float(fab.get("speed", 1.0)) - 1.0) * 100.0)
+	return ("Level %d \u00b7 " % int(fab["level"]) + out) if with_level else out
+
+
 func _draw_fabricator(s, fab: Dictionary) -> void:
 	var r := side_rect()
 	var box := Rect2(r.position, Vector2(r.size.x, FAB_H))
@@ -943,8 +951,7 @@ func _draw_fabricator(s, fab: Dictionary) -> void:
 		status = "Offline: no power"
 		col = BAD
 	_text(status, box.position + Vector2(10.0, 54.0), 22, col)
-	var tools: Array = fab["tools"]
-	_text("Tools: " + (", ".join(tools) if not tools.is_empty() else "none"), box.position + Vector2(10.0, 80.0), 14, TEXT)
+	_text(fab_line(fab, false), box.position + Vector2(10.0, 80.0), 14, TEXT)
 	var counts := {}
 	for uid in fab["modules"]:
 		var nm: String = s.components.def(s.components.instances[uid]["id"]).get("name", "?")
@@ -955,7 +962,7 @@ func _draw_fabricator(s, fab: Dictionary) -> void:
 	for nm in names:
 		parts.append("%s x%d" % [nm, counts[nm]])
 	draw_multiline_string(ThemeDB.fallback_font, box.position + Vector2(10.0, 102.0),
-		"Modules: " + (", ".join(parts) if not parts.is_empty() else "none counted"), HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 20.0, 14, 3, TEXT)
+		"Modules: " + (", ".join(parts) if not parts.is_empty() else "none counted") + ". To raise the level: build mode (B), click the fabricator.", HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 20.0, 14, 3, TEXT)
 
 
 ## The smelter's box: its level, speed (manned or not), tools, count and heat.

@@ -65,21 +65,18 @@ func test_a_ship_owns_its_crafting_and_the_best_fabricator_counts() -> void:
 	check(ship.crafting.is_known(KICKJET) and not ship.crafting.is_known("reactor_mk2"), "the start blueprints")
 	var fab := Workshop.best(ship)
 	eq([fab["level"], fab["uid"], fab["count"], fab["tools"]], [1, d["fab"], 1, []], "a lone powered fabricator is level 1")
-	var spare := Fixture.put(ship, "fabricator", 15, 12)  # no cable: not powered
-	fab = Workshop.best(ship)
-	eq([fab["level"], fab["uid"], fab["count"]], [1, d["fab"], 2], "an unpowered second one changes nothing")
+	eq(Fixture.put(ship, "fabricator", 15, 12), -1, "a second fabricator is refused: one per ship")
 	var arm := Fixture.put(ship, "robot_arm", 19, 10)
 	Fixture.wire(ship, [Vector2i(18, 11), Vector2i(19, 11)])
 	ship.refresh()
 	fab = Workshop.best(ship)
-	eq([fab["level"], fab["modules"]], [2, [arm]], "a powered Robot Arm in the room makes it level 2")
-	Fixture.wire(ship, [Vector2i(15, 12)])
-	ship.refresh()
-	check(spare > 0 and Workshop.best(ship)["level"] == 2, "two powered fabricators: the best level")
+	eq([fab["level"], fab["modules"], fab["speed"]], [1, [arm], 1.25], "a powered Robot Arm in the room: crafting 25% faster, the level is the fabricator's own")
+	ship.components.instances[d["fab"]]["fab_level"] = 2
+	eq(Workshop.best(ship)["level"], 2, "an upgrade makes it level 2")
 	ship.cables.cells.clear()
 	ship.mark_dirty()
 	fab = Workshop.best(ship)
-	eq([fab["level"], fab["uid"], fab["count"]], [0, -1, 2], "no power: level 0, none usable")
+	eq([fab["level"], fab["uid"], fab["count"]], [0, -1, 1], "no power: level 0, none usable")
 	eq(Workshop.best(Fixture.room_ship())["count"], 0, "a ship without one")
 
 
