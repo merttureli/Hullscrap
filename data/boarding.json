@@ -263,6 +263,11 @@
 			"lines": ["Hello. You are not on the list.", "Visitor. Noted.", "Please stay where you are.", "We are so glad you came.", "Do not run. It is rude."]},
 		"crawler": {"sealed": true, "name": "Crawler", "hp": 35, "attack": {"damage": 10.0, "rate": 1.2, "range": 1.5}, "melee": true, "speed": 2.4, "emerge": 16.0, "hide_s": 2.0, "lunge": {"range": 4.5, "speed": 11.0, "time": 0.35, "damage": 14.0, "cooldown": 6.0}, "alert_r": 0.0}
 	},
+	"foe": {
+		"_doc": "A foe on foot is a real race (scripts/board/foes.gd pick_species). Only the kinds listed true in `kinds` are people and get a race; the rest (sentry, crawler) are not. The race follows from where it stands, on its own dice (the site seed and the foe's id; the fight's are not shifted): a foe taken from a beaten ship's crew, or a person who turned on you, keeps its species; in a section of a race-built station, `section_share` of them are that section's race; else the race of the ship style of the site's faction, else the region's own race (its home_species) at the region's race_share (shipgen RACE_SHARE when it has none), else the people species of the site's theme (people.species). A drone species is never picked. The numbers, weapon, loot and gear stay the kind's: the race is the body, the name line (label of the race's ship style, else the species name, then the kind's name) and the traits of the systems that already run on foot (air, heat).",
+		"kinds": {"scavenger": true, "pirate": true, "hollow_touched": true, "sentry": false, "crawler": false},
+		"section_share": 0.6
+	},
 	"spawn": {
 		"_doc": "Who stands where (foes.gd spawn). Per site kind: count [min, max] of foes, mix = weights of the foe kinds. A foe stands on a free spot of a room picked by room_weights (the airlock's own room never), at least min_from_airlock cells from where the soldier arrives. In a place the Hollow already holds, hollow_share of them are hollow_touched instead. A wreck holds its surviving crew (the `crew` of the board effect, at most crew_max). crawler: the chance a site has one, and how many vents [min, max] it has (floor cells by a wall where it hides).",
 		"min_from_airlock": 9.0,

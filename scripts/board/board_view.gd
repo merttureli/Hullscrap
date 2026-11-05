@@ -824,6 +824,8 @@ func _play_one(e: Dictionary) -> void:
 		"down":
 			_hit_flash(e)
 			Audio.fx(self, "foe_down", px)
+			if e.has("name") and str(e["kind"]) not in ["sentry", "crawler"]:
+				feed.append({"text": "%s down." % str(e["name"]), "t": _clock})
 		"hurt":
 			_hit_flash(e)
 			Audio.fx(self, "crew_hurt", px)
@@ -1852,7 +1854,8 @@ func _draw_foe(f: Dictionary) -> void:
 	var a: Dictionary = _anim.get(m, PersonDrawer.new_state(m))
 	var look := {"suit": "#888888", "hair": "#2a2018", "tool": "#cfd5dd"}
 	look.merge(f["d"].get("look", {}), true)
-	var pose := {"species": Art.crew_rig("human"), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
+	look.merge(f.get("look", {}), true)  # (a person who turned keeps the look they had)
+	var pose := {"species": Art.crew_rig(m.rig()), "move": a["angle"], "aim": a["aim"], "phase": a["phase"], "moving": a["moving"],
 		"item": str(f["d"].get("weapon", "")), "down": f["dead"], "work": false, "t": _clock, "head": "", "body": str(f.get("gear", ""))}
 	PersonDrawer.draw(_over, m.pos * CELL, pose, look, CELL)
 

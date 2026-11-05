@@ -312,7 +312,10 @@ func turn(n: Dictionary, kind := "", fresh := true) -> Dictionary:
 	var fk := kind
 	if fk == "" or not Foes.kinds().has(fk) or fk in ["sentry", "crawler"]:
 		fk = str(n["d"].get("hostile", "scavenger"))
-	var f: Dictionary = s.foes.add(fk, n["m"].pos, int(n["room"]), false)
+	var f: Dictionary = s.foes.add(fk, n["m"].pos, int(n["room"]), false, str(n["species"]))  # (they keep their race, name, gear and look)
+	f["m"].name = str(n["name"])
+	f["look"] = n["d"].get("look", {})
+	s.foes.dress(f, str(n["m"].kit.get("body", "")))
 	f["npc"] = n["id"]
 	s.foes.provoke(f)
 	n["state"] = "hostile"

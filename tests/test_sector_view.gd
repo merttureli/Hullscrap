@@ -393,7 +393,7 @@ func test_a_fight_in_the_sector_starts_where_the_ship_flies_and_a_win_leaves_a_w
 	var foe = combat.session.arena.ships[Session.ENEMY]
 	eq(mine.flight.pos, Vector2(9000.0, 9000.0), "the ship fights where it flew")
 	near(mine.flight.angle, 0.5, "heading as it was")
-	near(foe.flight.pos.distance_to(mine.flight.pos), Session.SPAWN_DISTANCE, "the pirate appears 1,200 px off", 0.5)
+	near(foe.flight.pos.distance_to(mine.flight.pos), Session.SPAWN_DISTANCE, "the pirate appears 1,800 px off", 0.5)
 	view.frame(0.1)
 	eq(s.hostiles, [foe.flight.pos], "the sector knows the hostile")
 	var to: String = c.neighbours(c.current).filter(func(o): return c.node(o)["type"] != "gate")[0]
