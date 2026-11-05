@@ -268,6 +268,8 @@ func load_dict(d: Dictionary) -> String:
 	if r.has("error"):
 		return r["error"]
 	known = r["known"]
+	for id in _start_known:  # what every run starts knowing, even a set saved before it was added (a starter's design, an old save)
+		known[id] = true
 	seen = r["seen"]
 	queue = r["queue"]
 	others = r["queues"]

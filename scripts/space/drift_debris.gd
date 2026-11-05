@@ -37,7 +37,7 @@ var types: Array = []  ## data/debris.json "types"
 var pieces: Array = []  ## {uid, type, pos, vel, angle, spin, phase, age, r, no_pull}
 var collected := {}  ## cargo id -> units taken in this session; for the HUD
 var picked := 0  ## pieces collected in this session
-var events: Array = []  ## for the view, until take_events(): {kind: "collect", pos (the mouth), text, uid, type}, or {kind: "rare", pos, text, uid, type} the first time a rare piece is in view
+var events: Array = []  ## for the view, until take_events(): {kind: "collect", pos (the mouth), text, uid, type}
 var pulling := {}  ## intake uid -> seconds it still shows the pulling animation
 var mouth_count := 0  ## working intakes at the last step
 var tractor_on := false  ## Q is held: the working tractor beams haul pieces toward the nearest intake (the view sets it)
@@ -198,7 +198,7 @@ func prewarm(ship) -> void:
 ## Add a piece of type `type_id` at `pos` moving at `vel` (a test or a later feature, such as a crate shot open, puts one where it likes).
 func add_piece(type_id: String, pos: Vector2, vel: Vector2) -> Dictionary:
 	var p := {"uid": _next_uid, "type": type_id, "pos": pos, "vel": vel, "angle": 0.0, "spin": 0.0, "phase": 0.0, "age": 0.0,
-		"r": float(_by_id[type_id]["size"]) * 0.5, "no_pull": false, "stream": 0, "seen": false}
+		"r": float(_by_id[type_id]["size"]) * 0.5, "no_pull": false, "stream": 0}
 	_next_uid += 1
 	pieces.append(p)
 	return p
@@ -240,19 +240,6 @@ func _sub(ship, mouths: Array, h: float) -> void:
 			pieces.remove_at(i)
 	if not _beams.is_empty():
 		_note_hauls()
-	_note_rare()
-
-
-## The first time a rare piece (types with `rare`) is inside the view it announces itself: an event {kind: "rare", text} for the view's toast.
-func _note_rare() -> void:
-	var view := Rect2(view_centre - view_half, view_half * 2.0)
-	for p in pieces:
-		if bool(p.get("seen", false)) or not bool(type_of(p).get("rare", false)) or not view.has_point(p["pos"]):
-			continue
-		p["seen"] = true
-		events.append({"kind": "rare", "pos": p["pos"], "text": "Rare drift: %s" % str(type_of(p)["name"]).to_lower(), "uid": p["uid"], "type": p["type"]})
-		if events.size() > MAX_EVENTS:
-			events.pop_front()
 
 
 ## Move one piece by `h`; `now`: its stream's vel and flow dir and the despawn distances (along, across). False when it is gone.
@@ -349,7 +336,7 @@ func _spawn(ship, scattered := false) -> Dictionary:
 	var a := rng.randf_range(-reach, reach * 0.6) if scattered else -reach
 	var p := {"uid": _next_uid, "type": str(t["id"]), "pos": view_centre + dir * a + perp * lat,
 		"vel": stream_vel(stream) * rng.randf_range(0.9, 1.1), "angle": rng.randf() * TAU, "spin": rng.randf_range(-0.8, 0.8),
-		"phase": rng.randf() * 10.0, "age": 0.0, "r": float(t["size"]) * 0.5, "no_pull": false, "stream": stream, "seen": false}
+		"phase": rng.randf() * 10.0, "age": 0.0, "r": float(t["size"]) * 0.5, "no_pull": false, "stream": stream}
 	_next_uid += 1
 	pieces.append(p)
 	return p
