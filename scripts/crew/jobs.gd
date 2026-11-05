@@ -72,6 +72,9 @@ var progress := {}  ## job key -> seconds of work done so far (kept while the jo
 var closed := {}  ## job key -> job: the jobs of abandoned rooms, off the board (nobody is sent), but the player's hand_work still does them
 var orders := {}  ## job key -> job: repairs the player ordered (F), kept until done
 var patients := {}  ## medbay uid -> the name of the one crew member it is healing (a medbay is one bed)
+var arm_patients := {}  ## healing-arm uid -> the name of the one crew member it is healing (stats.reach > 0; docs/DRONES.md section 10)
+var arm_heal := {}  ## crew name -> hp a second the healing arms give them now (set by _choose_arm_patients)
+var _arm_reach := {}  ## arm uid -> {"cells": {cell: true}, "age": seconds since it was worked out}: the cells within its reach
 var opened := {}  ## job key -> ship.clock until which a closed job (a lost or abandoned room's) stays on the board because the player sent crew to it
 var restocking := {}  ## rack uid -> true: racks a crew member has started filling (they fill them to the top, not just to half)
 var combat := false  ## a fight is on: weapons, engines and shields get repaired first
@@ -496,7 +499,7 @@ func assign(ship) -> void:
 			claims[m.job["key"]] = int(claims[m.job["key"]]) - 1
 		_take(ship, m, pick["job"], pick["spot"], claims)
 	for m in free:
-		if m.job.is_empty() and m.hp < m.max_hp:
+		if m.job.is_empty() and m.hp < m.max_hp and not arm_covers(ship, m):  # an arm in reach heals them where they stand
 			_rest(ship, m)
 
 
@@ -528,7 +531,7 @@ static func _for_member(job: Dictionary, m) -> Dictionary:
 func _still_valid(ship, m) -> bool:
 	var job: Dictionary = m.job
 	if job["type"] == "rest":
-		return m.hp < m.max_hp and _rest_ok(ship, int(job["uid"])) and patients.get(int(job["uid"]), m.name) == m.name
+		return m.hp < m.max_hp and _rest_ok(ship, int(job["uid"])) and patients.get(int(job["uid"]), m.name) == m.name and not arm_covers(ship, m)
 	if not board.has(job["key"]):
 		return false
 	var spot = job.get("spot")
@@ -650,7 +653,7 @@ func _rest(ship, m) -> void:
 		var cands: Array = []
 		for uid in uids:
 			var inst: Dictionary = ship.components.instances[uid]
-			if ship.components.def(inst["id"]).get("family", "") == family and _rest_ok(ship, uid) and (family != "medbay" or _medbay_open(ship, uid, m)) and (air_exempt(m) or not _cells_airless(ship, inst["cells"])):
+			if ship.components.def(inst["id"]).get("family", "") == family and not is_arm(ship.components.def(inst["id"])) and _rest_ok(ship, uid) and (family != "medbay" or _medbay_open(ship, uid, m)) and (air_exempt(m) or not _cells_airless(ship, inst["cells"])):
 				cands.append(_job("rest", "rest:%d" % uid, inst["cells"], {"uid": uid}))
 		var got := _nearest(ship, m, cands, taken)
 		if not got.is_empty():
@@ -675,7 +678,7 @@ func _choose_patients(ship) -> void:
 	var next := {}
 	for uid in ship.components.instances:
 		var inst: Dictionary = ship.components.instances[uid]
-		if ship.components.def(inst["id"]).get("family", "") != "medbay":
+		if ship.components.def(inst["id"]).get("family", "") != "medbay" or is_arm(ship.components.def(inst["id"])):
 			continue
 		var keep: String = patients.get(uid, "")
 		var pick := ""
@@ -982,6 +985,7 @@ func _health(ship, dt: float) -> void:
 	var heats := {}  # room id -> heat of its hottest part, read once and only if somebody dries out
 	var heats_read := false
 	_choose_patients(ship)
+	_choose_arm_patients(ship, dt)
 	for m in ship.crew:
 		var t := TraitSet.of(m)
 		var was_down: bool = m.is_down()
@@ -1008,7 +1012,7 @@ func _health(ship, dt: float) -> void:
 			m.speed_mod *= TraitSet.thin_air_factor(t, ship.atmosphere.pressure_of(room))
 		if dmg > 0.0:
 			m.hurt(dmg * dt)
-		var heal := _heal_rate(ship, m) + float(auras.get(room, {}).get("heal_per_s", 0.0))
+		var heal := _heal_rate(ship, m) + float(arm_heal.get(m.name, 0.0)) + float(auras.get(room, {}).get("heal_per_s", 0.0))
 		if room >= 0:
 			heal += TraitSet.low_pressure_heal_rate(t, ship.atmosphere.pressure_of(room))
 		if heal > 0.0:
@@ -1059,6 +1063,97 @@ func _mend(ship, m, dt: float) -> void:
 		_finish(ship, {"key": "breach:%d,%d" % [breach.x, breach.y], "type": "repair_breach", "cell": breach})
 
 
+# --- the healing arm (docs/DRONES.md section 10) -------------------------------------------------
+
+const ARM_REFRESH := 0.5  ## seconds a healing arm's reach is kept before it is worked out again
+
+## Is `def` a healing arm: a medbay with a reach (stats.reach, in cells)? Mk I has none and stays the bed.
+static func is_arm(def: Dictionary) -> bool:
+	return str(def.get("family", "")) == "medbay" and float(def.get("stats", {}).get("reach", 0.0)) > 0.0
+
+
+## The cells in the reach of arm `uid`: its own cells, and every floor cell or door (not a locked one) a walk of at most
+## stats.reach steps from them reaches, so a wall blocks the arm and a door does not. Worked out again every ARM_REFRESH seconds.
+func arm_cells(ship, uid: int) -> Dictionary:
+	var got: Dictionary = _arm_reach.get(uid, {})
+	if not got.is_empty() and float(got["age"]) < ARM_REFRESH:
+		return got["cells"]
+	var inst: Dictionary = ship.components.instances[uid]
+	var reach := int(ceil(float(ship.components.def(inst["id"])["stats"]["reach"])))
+	var seen := {}
+	var front: Array = []
+	for c in inst["cells"]:
+		seen[c] = true
+		front.append(c)
+	for _step in reach:
+		var next: Array = []
+		for c in front:
+			for d in SIDES:
+				var n: Vector2i = c + d
+				if not seen.has(n) and Pathfinder.walkable(ship.grid, n):
+					seen[n] = true
+					next.append(n)
+		front = next
+	_arm_reach[uid] = {"cells": seen, "age": 0.0}
+	return seen
+
+
+## Can arm `uid` heal `m` right now: it works (ok, powered), `m` stands in its reach, can be healed by a medbay, and has air
+## (or needs none)?
+func _arm_serves(ship, uid: int, m) -> bool:
+	return _rest_ok(ship, uid) and arm_cells(ship, uid).has(m.cell()) and float(TraitSet.of(m)["heal_mult"]["medbay"]) > 0.0 \
+		and (air_exempt(m) or not _room_airless(ship, ship.atmosphere.room_at(m.cell())))
+
+
+## Is `m` in the reach of a working healing arm? Then a hurt `m` is not sent to a bed or medbay: they keep working or stay put.
+func arm_covers(ship, m) -> bool:
+	for uid in ship.components.instances:
+		if is_arm(ship.components.def(ship.components.instances[uid]["id"])) and _arm_serves(ship, uid, m):
+			return true
+	return false
+
+
+## Each healing arm works on one crew member at a time. It keeps its patient until they are full or out of its reach (or the arm
+## stops, or the air goes); then it takes, among the hurt in reach, the lowest share of hp, ties to the soldier, then to whoever mans a
+## station, then the crew list order. Sets arm_patients (and the ship's meta, for the view) and arm_heal (hp a second by name).
+func _choose_arm_patients(ship, dt: float) -> void:
+	var next := {}
+	var rates := {}
+	var base: float = float(CrewMember.config()["heal_per_s"]["medbay"])
+	for uid in _arm_reach.keys():
+		if not ship.components.instances.has(uid):
+			_arm_reach.erase(uid)
+		else:
+			_arm_reach[uid]["age"] = float(_arm_reach[uid]["age"]) + dt
+	var uids: Array = ship.components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		var def: Dictionary = ship.components.def(ship.components.instances[uid]["id"])
+		if not is_arm(def):
+			continue
+		var keep: String = arm_patients.get(uid, "")
+		var pick = null
+		var best := []
+		for i in ship.crew.size():
+			var m = ship.crew[i]
+			if m.hp >= m.max_hp or not _arm_serves(ship, uid, m):
+				continue
+			if m.name == keep:
+				pick = m
+				break
+			var key := [snappedf(m.hp / maxf(m.max_hp, 1.0), 1e-6), 0 if m.is_player else 1, 0 if not m.job.is_empty() and m.job["type"] == "man_station" else 1, i]
+			if best.is_empty() or key < best:
+				best = key
+				pick = m
+		if pick != null:
+			next[uid] = pick.name
+			rates[pick.name] = float(rates.get(pick.name, 0.0)) + base * float(def["stats"].get("heal", 1.0)) * float(TraitSet.of(pick)["heal_mult"]["medbay"])
+	arm_patients = next
+	arm_heal = rates
+	ship.set_meta("arm_patients", next)
+
+
+
 ## hp per second where `m` lies: a bed, or a medbay that is on (its stats.heal scales the rate), times their heal_mult for it.
 ## Neither heals a crew member who breathes while its room has no air.
 func _heal_rate(ship, m) -> float:
@@ -1076,7 +1171,7 @@ func _heal_rate(ship, m) -> float:
 		"bed":
 			return float(rates["bed"]) * float(heal["bed"])
 		"medbay":
-			if _rest_ok(ship, uid) and patients.get(uid, m.name) == m.name:  # one bed: only its patient heals (_health picks it first)
+			if not is_arm(def) and _rest_ok(ship, uid) and patients.get(uid, m.name) == m.name:  # one bed: only its patient heals (_health picks it first)
 				return float(rates["medbay"]) * float(def.get("stats", {}).get("heal", 1.0)) * float(heal["medbay"])
 	return 0.0
 

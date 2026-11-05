@@ -69,6 +69,8 @@ static func draw_component(canvas, rect: Rect2, def: Dictionary, inst: Dictionar
 		_draw_sheet(canvas, sheet, rect, def, inst, cell_px, opts)
 	else:
 		_draw_placeholder(canvas, rect.grow(-2), def, cell_px, m, bool(opts.get("powered", true)), alpha)
+	if is_arm(def):
+		_draw_arm(canvas, def, inst, rect, cell_px, opts)
 	_draw_marks(canvas, rect.grow(-2), m, alpha)
 	if inst.has("n") and str(def.get("family", "")) == "ammo_rack":  # a rack's count
 		_draw_text(canvas, str(int(inst["n"])), rect.end - Vector2(11.0, 9.0), 11, Color(1, 1, 1, alpha), true)
@@ -146,6 +148,110 @@ static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect
 static func slope_rect(def: Dictionary, inst: Dictionary, origin: Vector2, cell_px: float) -> Rect2:
 	var r := Mounts.out_rect(def, inst)
 	return Rect2(origin + r.position * cell_px, r.size * cell_px)
+
+
+## Is `def` a healing arm (Medbay Mk2, Mk3: a medbay with stats.reach)? Its base is the sheet, the arm that turns is <id>_arm.
+static func is_arm(def: Dictionary) -> bool:
+	return str(def.get("family", "")) == "medbay" and float(def.get("stats", {}).get("reach", 0.0)) > 0.0
+
+
+## The arm of healing arm `def` (docs/DRONES.md 10): an articulated robot arm drawn as a 2-bone chain over its base, from the base's middle
+## (the shoulder): the upper arm (<id>_upper), the forearm (<id>_fore) and the head (<id>_head), each turned about its joint (anchors.pivot) to
+## the angles of arm_pose, with a soft shadow under them. opts: arm_angle (radians clockwise from up), arm_ext (0 folded .. 1 reaching), arm_dist
+## (the patient's distance in cells), arm_heal (it has a patient), arm_phase (the idle sway's phase), time. States as arm_state; the head's
+## glow is added like a barrel's. No art: lines and a ball on the same pose. The beam to the patient is drawn by ArmFx.
+static func _draw_arm(canvas, def: Dictionary, inst: Dictionary, rect: Rect2, cell_px: float, opts: Dictionary) -> void:
+	var alpha := float(opts.get("alpha", 1.0))
+	var shoulder := rect.get_center()
+	var id := str(def.get("id", ""))
+	var state := arm_state(def, inst, opts)
+	var p := arm_pose(def, opts, state)
+	var joints := [shoulder, shoulder + p["elbow"] * cell_px, shoulder + p["wrist"] * cell_px]
+	var sheets := [Art.component(id + "_upper"), Art.component(id + "_fore"), Art.component(id + "_head")]
+	if sheets.has(null):
+		canvas.draw_polyline(PackedVector2Array(joints), Color(0.85, 0.87, 0.9, alpha), maxf(3.0, cell_px / 8.0))
+		canvas.draw_circle(shoulder + p["emitter"] * cell_px, cell_px * 0.15, Color(0.42, 0.95, 0.55, alpha))
+		return
+	var angles := [p["upper"], p["fore"], p["head"]]
+	var anims := ["idle", "idle", "heal" if state == "heal" or (state == "damaged" and bool(opts.get("arm_heal", false))) else "idle"]
+	if state in ["off", "disabled"]:
+		anims = [state, state, state]
+	elif state == "damaged":
+		anims[1] = "damaged"  # the forearm is the one that sparks
+	var t := float(opts.get("time", 0.0))
+	var k := cell_px / SpriteSheet.SRC_CELL
+	var lift := Vector2(k, k) * (2.0 if state != "disabled" else 1.0)  # its shadow on the floor: it is raised over the base
+	for shade in [true, false]:
+		for n in 3:
+			var sheet = sheets[n]
+			var anim: String = anims[n] if sheet.has_anim(anims[n]) else "idle"
+			var pin: Vector2 = sheet.anchors["pivot"] + Vector2(0.5, 0.5)
+			canvas.draw_set_transform_matrix(Transform2D(angles[n], joints[n] + (lift if shade else Vector2.ZERO)))
+			canvas.draw_texture_rect_region(sheet.texture, Rect2(-pin * k, Vector2(sheet.frame) * k), sheet.region(sheet.frame_at(anim, t)),
+					Color(0, 0, 0, 0.35 * alpha) if shade else Color(1, 1, 1, alpha))
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+	var head = sheets[2]
+	var g = head.glow
+	if g != null and g.has_anim(anims[2]):
+		var xf := Transform2D(angles[2], joints[2])
+		var pin: Vector2 = head.anchors["pivot"] + Vector2(0.5, 0.5)
+		var quad := {"tex": g.texture, "rect": Rect2(-pin * k + g.offset * k, Vector2(g.frame) * k), "src": g.region(g.frame_at(anims[2], t)), "xf": xf, "mod": Color(1, 1, 1, alpha)}
+		if opts.has("glow_out"):
+			opts["glow_out"].append(quad)
+		else:
+			canvas.draw_set_transform_matrix(xf)
+			canvas.draw_texture_rect_region(quad["tex"], quad["rect"], quad["src"], quad["mod"])
+			canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+## What healing arm `def` shows: "disabled" (hp 0 or status disabled), "off" (no power), "damaged" (under half hp), "heal" (opts.arm_heal), else "idle".
+static func arm_state(def: Dictionary, inst: Dictionary, opts: Dictionary) -> String:
+	var max_hp := Stats.max_hp(def)
+	var hp := int(inst.get("hp", max_hp))
+	if hp <= 0 or str(inst.get("status", "ok")) == "disabled":
+		return "disabled"
+	if not bool(opts.get("powered", true)):
+		return "off"
+	if max_hp > 0 and float(hp) < float(max_hp) * DAMAGED_BELOW:
+		return "damaged"
+	return "heal" if bool(opts.get("arm_heal", false)) else "idle"
+
+
+const ARM_REST := 0.5  ## cells from the shoulder to the wrist when the arm is folded over its base
+const ARM_FAR := 1.5  ## the farthest the wrist reaches (the emitter is a head's length further, about 1.9 cells)
+
+## The pose of healing arm `def` as a 2-bone chain, in cell units from its shoulder (the base's middle; y down): the wrist goes `arm_ext` of the
+## way from the rest fold to the patient's distance less 0.6 cells (at most ARM_FAR) along `arm_angle`, the elbow bends to the left of the reach,
+## the head faces the reach. Idle and folded it sways a little; disabled it slumps, folded, with the head hanging aside. art/_src/lines_medarm.py
+## `pose` is the same solve. -> {elbow, wrist, emitter: Vector2; upper, fore, head: radians clockwise from up}.
+static func arm_pose(def: Dictionary, opts: Dictionary, state := "idle") -> Dictionary:
+	var id := str(def.get("id", ""))
+	var l1 := _bone(id + "_upper", "tip", 15.0)
+	var l2 := _bone(id + "_fore", "tip", 13.0)
+	var ext := clampf(float(opts.get("arm_ext", 0.0)), 0.0, 1.0)
+	var dist := float(opts.get("arm_dist", 0.0))
+	var far := clampf(dist - 0.6, ARM_REST, ARM_FAR) if dist > 0.0 else ARM_REST
+	var r := lerpf(ARM_REST, far, ext)
+	var th := float(opts.get("arm_angle", 0.0))
+	if state == "disabled":
+		r = ARM_REST * 0.75
+	elif state != "off":
+		th += (1.0 - ext) * 0.35 * sin(float(opts.get("time", 0.0)) * 0.6 + float(opts.get("arm_phase", 0.0)))
+	var bend := acos(clampf((l1 * l1 + r * r - l2 * l2) / (2.0 * l1 * r), -1.0, 1.0))
+	var elbow := Vector2.UP.rotated(th - bend) * l1
+	var wrist := Vector2.UP.rotated(th) * r
+	var fore := Vector2.UP.angle_to(wrist - elbow)
+	var head := fore - 1.1 if state == "disabled" else th
+	return {"elbow": elbow, "wrist": wrist, "emitter": wrist + Vector2.UP.rotated(head) * _bone(id + "_head", "emitter", 7.0),
+			"upper": th - bend, "fore": fore, "head": head}
+
+
+## The length in cells of a segment sheet's bone, from anchors.pivot to anchors[`to`] (`px` source px without art).
+static func _bone(sheet_id: String, to: String, px: float) -> float:
+	var sheet = Art.component(sheet_id)
+	if sheet != null and sheet.anchors.has("pivot") and sheet.anchors.has(to):
+		return sheet.anchors["pivot"].distance_to(sheet.anchors[to]) / SpriteSheet.SRC_CELL
+	return px / SpriteSheet.SRC_CELL
 
 
 ## The barrel of weapon `def` about `pivot`, turned to point along `aim` (see draw_mount_out): its frame by the outside

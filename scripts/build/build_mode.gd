@@ -44,6 +44,7 @@ const Palette = preload("res://scripts/build/palette.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const RedAlert = preload("res://scripts/sim/red_alert.gd")
 const BeltArt = preload("res://scripts/view/belt_art.gd")
+const ArmFx = preload("res://scripts/view/arm_fx.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
@@ -1096,6 +1097,8 @@ func _draw_components() -> void:
 		opts.merge(Ammo.draw_opts(ship, uid))
 		if mount_fx.has(uid):
 			opts["fired_ago"] = fmod(_clock, 0.3)  # a beam that is on pulses its strip
+		if Visuals.is_arm(ship.components.def(inst["id"])):
+			opts.merge(ArmFx.opts(ship, uid))  # a healing arm points at its patient
 		Visuals.draw_component(self, _cells_rect(inst["cells"]), ship.components.def(inst["id"]), inst, CELL, opts)
 		if str(ship.components.def(inst["id"]).get("family", "")) == "drone_bay":  # the loaded kit sits on the cradle
 			DroneView.draw_docked(self, ship.components.def(inst["id"]), inst, _cells_rect(inst["cells"]), CELL, _clock)

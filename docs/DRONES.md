@@ -153,6 +153,10 @@ This doc is the design. GUNS.md sets the look and the rules for mounts, families
   - it switches patient only when the current one is full or leaves its reach, to avoid flicker;
   - power: Mk II −3, Mk III −4; it stops in a room without air;
   - **look:** the arm sprite turns toward the patient, with a soft green beam and a glow on the patient.
+- **As built (H1, `scripts/crew/jobs.gd`):**
+  - **reach rule:** crew whose cell is within `stats.reach` steps of walking from the arm's own cells, over floor and doors (4-neighbour steps through `Pathfinder.walkable`: walls block it, a door does not, a locked door of an abandoned room does). Worked out per arm every 0.5 s.
+  - **patient:** the hurt or down crew in reach who can be healed by a medbay and have air (or need none); kept until full or out of reach (or the arm loses power); then the lowest share of hp, ties to the soldier, then to whoever has a `man_station` job, then crew list order. Two arms heal independently and may stack on one patient.
+  - **the job:** a hurt crew member with nothing to do is not sent to a bed or medbay while a working arm serves them; they keep their post or work. A crew member who works keeps working as before (rest is the lowest job).
 - **Medbay Mk I stays the bed.**
 - The arm is a blueprint, Mk II mid-run and Mk III late.
 

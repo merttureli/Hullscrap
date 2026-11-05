@@ -1,0 +1,62 @@
+{
+ "frame": [
+  13,
+  14
+ ],
+ "anims": {
+  "idle": [
+   0,
+   1,
+   0
+  ],
+  "heal": [
+   1,
+   2,
+   5
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "disabled": [
+   4,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   6,
+   12
+  ],
+  "emitter": [
+   6,
+   5
+  ]
+ },
+ "notes": "The head of medbay_mk3: a soft gripper, two fingers curled round the emitter (a glowing orb; Mk3 a crystal) and the thumb under it, drawn pointing UP: anchors.pivot is the wrist, anchors.emitter where the soft beam starts. heal (2): the emitter pulses; off: dark; disabled: dark, the fingers hang open. The glow is the emitter's light.",
+ "glow": {
+  "image": "medbay_mk3_head_glow.png",
+  "frame": [
+   29,
+   30
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "idle": [
+    0,
+    1,
+    0
+   ],
+   "heal": [
+    1,
+    2,
+    5
+   ]
+  }
+ }
+}

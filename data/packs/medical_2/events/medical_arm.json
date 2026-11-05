@@ -1,0 +1,28 @@
+{
+	"events": [
+		{
+			"id": "wreck_field_hospital", "type": "wreck_field", "weight": 7, "once": true,
+			"requires": {"not_flag": "bp_medbay_mk2"},
+			"text": "A hospital hulk, drifting, her wards stripped to the frames. In the surgery a mounting ring still holds a jointed arm, folded at the elbow like a sleeper. A sign above it reads: PLEASE DO NOT LIE ON THE ARM.",
+			"choices": [
+				{"text": "Trace the arm's drive and copy the plans.", "outcomes": [
+					{"weight": 65, "text": "The drive is intact enough to read. You leave with the plans of a medbay that comes to the patient, and a small pride in your handwriting.", "effects": {"blueprint": "medbay_mk2", "flag": "bp_medbay_mk2"}},
+					{"weight": 35, "text": "The drive is burnt out. You take what copper the surgery has left and the arm stays folded.", "effects": {"items": {"copper": 20}}}
+				]},
+				{"text": "Leave her wards to the dark.", "outcomes": [{"weight": 100, "text": "The arm stays folded in the dark. It has waited this long.", "effects": {}}]}
+			]
+		},
+		{
+			"id": "wreck_lumen_halo_clinic", "type": "wreck_field", "weight": 3, "once": true,
+			"requires": {"region": "lumen_space", "not_flag": "bp_medbay_mk3"},
+			"text": "A Lumen clinic skiff, cold and perfect. Over the one cot a green halo hangs in the air at the end of a slim arm and, as you come in, turns slowly to find you.",
+			"choices": [
+				{"text": "Ask the clinic for its specification.", "outcomes": [
+					{"weight": 55, "text": "The halo dims, then writes. A full specification of the arm unrolls across your console, with a note in a neat hand: 'Please lose fewer people.'", "effects": {"blueprint": "medbay_mk3", "flag": "bp_medbay_mk3"}},
+					{"weight": 45, "text": "The halo considers you for a long moment and dims. Nothing is written. It has declined, kindly.", "effects": {}}
+				]},
+				{"text": "Leave the clinic as you found it.", "outcomes": [{"weight": 100, "text": "The halo turns to follow you to the door and holds there, patient.", "effects": {}}]}
+			]
+		}
+	]
+}
