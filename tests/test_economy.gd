@@ -62,41 +62,6 @@ func test_rare_pieces_spawn_about_their_weight_share() -> void:
 	check(not seen.has("ice_chunk_s"), "no ice")
 
 
-func test_the_radar_lists_rare_pieces_within_range() -> void:
-	var d := _dd()
-	var here := Vector2(1000.0, 1000.0)
-	d.add_piece("crystal_shard", here + Vector2(0.0, -800.0), Vector2.ZERO)  # due north
-	d.add_piece("scrap_chunk_s", here + Vector2(100.0, 0.0), Vector2.ZERO)
-	d.add_piece("titanium_plate", here + Vector2(2500.0, 0.0), Vector2.ZERO)
-	var near_list := Radar.rare_pieces(d, here, 1500.0)
-	eq(near_list.map(func(r): return r["type"]), ["crystal_shard"], "one rare piece in 1,500 px; scrap is no rare piece, titanium is too far")
-	near(float(near_list[0]["bearing"]), 0.0, "straight up is bearing 0")
-	near(float(near_list[0]["distance"]), 800.0, "the distance")
-	var far_list := Radar.rare_pieces(d, here, 3000.0)
-	eq(far_list.map(func(r): return r["type"]), ["crystal_shard", "titanium_plate"], "a 3,000 px radar sees both, nearest first")
-	near(float(far_list[1]["bearing"]), PI / 2.0, "east is a quarter turn clockwise")
-	eq(Radar.rare_pieces(null, here, 3000.0), [], "no debris, no list")
-
-
-func test_a_rare_piece_announces_itself_once_when_it_comes_into_view() -> void:
-	var ship := Wall.wall_ship(1, 0)
-	var d := _dd()
-	d.view_centre = Vector2.ZERO
-	d.view_half = Vector2(800.0, 450.0)
-	var p := d.add_piece("crystal_shard", Vector2(3000.0, 0.0), Vector2.ZERO)
-	d._note_rare()
-	eq(d.take_events(), [], "out of view: nothing yet")
-	p["pos"] = Vector2(100.0, 100.0)
-	d._note_rare()
-	d._note_rare()
-	var ev := d.take_events()
-	eq(ev.map(func(e): return [e["kind"], e["text"]]), [["rare", "Rare drift: crystal shard"]], "once, with its name")
-	d.add_piece("scrap_chunk_s", Vector2(50.0, 50.0), Vector2.ZERO)
-	d._note_rare()
-	eq(d.take_events(), [], "ordinary debris says nothing")
-	check(ship != null, "fixture")
-
-
 func test_collecting_a_rare_piece_gives_its_material() -> void:
 	var ship := Wall.wall_ship(1, 0)
 	var d := _dd()

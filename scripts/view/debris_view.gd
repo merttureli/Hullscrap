@@ -126,9 +126,6 @@ func frame(dt: float) -> void:
 	debris.step(ship, dt)
 	_set_fx(debris.beam_aims() if debris.tractor_on else {}, debris.beams_on)
 	for e in debris.take_events():
-		if e["kind"] == "rare":  # a rare piece came into view: a toast, no pop
-			_toast(str(e["text"]))
-			continue
 		pops.append({"pos": e["pos"], "text": e["text"], "age": 0.0})
 		Audio.fx(self, "collect", e["pos"])  # (the catch is at the mouth on the player's ship)
 	for uid in debris.pulling:
@@ -144,14 +141,6 @@ func frame(dt: float) -> void:
 	queue_redraw()
 	if _top != null:
 		_top.queue_redraw()
-
-
-## A hint toast at the top of the screen (the front door's), when the scene has one.
-func _toast(text: String) -> void:
-	var door = get_node_or_null("../FrontDoor")
-	var t = door.get("toast") if door != null else null
-	if t != null:
-		t.push(text)
 
 
 ## Light the emitters of the beams that are on (BuildMode.mount_fx): `aims` is uid -> the way a beam that hauls points.
