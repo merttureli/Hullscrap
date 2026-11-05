@@ -28,6 +28,7 @@ const JumpBar = preload("res://scripts/ui/jump_bar.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
+const GunBadges = preload("res://scripts/ui/gun_badges.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const HazardBar = preload("res://scripts/ui/hazard_bar.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
@@ -35,7 +36,6 @@ const Ambience = preload("res://scripts/audio/ambience.gd")
 
 const PLAYER_SHOT := {"energy": Color("#7dffe8"), "kinetic": Color("#ffe07a"), "explosive": Color("#ffb04a"), "ion": Color("#b99bff")}
 const ENEMY_SHOT := {"energy": Color("#ff6a4a"), "kinetic": Color("#ff9a6a"), "explosive": Color("#ff5a3a"), "ion": Color("#b99bff")}
-const GROUP_COLORS := {1: Color("#5fd4ff"), 2: Color("#ff9a3c")}
 const GREY := Color("#7a8494")
 const BEAM_LIFE := 0.15
 const BLOCK_FLASH := 0.45  ## seconds a broken block flashes
@@ -86,6 +86,8 @@ var _saved_cam := {}
 var _rng := RandomNumberGenerator.new()  # visual only
 var _schem: Array = []
 var _bar: Control
+var badges := GunBadges.new()  ## the chips on your guns, shared with the weapon bar
+var _swallow := 0  ## a mouse button whose press was used on the weapon bar: it fires nothing until released
 var _bar_extras: Control  # over the weapon bar: each turret's hit chance and whether it autofires
 var _banner: Label
 var _jump_bar: Control  # under the enemy schematic while it flees
@@ -214,7 +216,7 @@ func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 		_schem[1].bind(session.arena, Session.ENEMY, enemy.name)
 		_schem[1].threat = session.threat
 		_schem[1].look = enemy.get_meta("style", {})
-		_bar.bind(session, _aim)
+		_bar.bind(session, _aim, badges)
 	_show_hud(true)
 	return ""
 
@@ -349,6 +351,12 @@ func _unhandled_input(e: InputEvent) -> void:
 				if n >= 0 and n <= 8:
 					session.fire_slot(n + 1, _aim())
 	elif active and e is InputEventMouseButton and e.pressed:
+		if _bar != null and _bar.visible and e.button_index == MOUSE_BUTTON_RIGHT and _bar.click(e.position - _bar.position, e.button_index):
+			_swallow = e.button_index  # a right-click on a slot moves that gun between LMB and RMB, it does not fire
+			if _bar.last_note != "":
+				_say(_bar.last_note)
+			_handled()
+			return
 		if e.button_index == MOUSE_BUTTON_LEFT:
 			session.fire_group(1, _aim())
 		elif e.button_index == MOUSE_BUTTON_RIGHT:
@@ -451,9 +459,15 @@ func frame(dt: float) -> void:
 	session.input = _helm() if st != "lost" else {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
 	session.cursor = _aim()
 	if st != "lost":
+		if _swallow != 0 and not Input.is_mouse_button_pressed(_swallow):
+			_swallow = 0
 		for g in [1, 2]:
-			if hold_override.get(g, false) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT if g == 1 else MOUSE_BUTTON_RIGHT):
+			var btn := MOUSE_BUTTON_LEFT if g == 1 else MOUSE_BUTTON_RIGHT
+			badges.held[g] = hold_override.get(g, false) or (Input.is_mouse_button_pressed(btn) and _swallow != btn)
+			if badges.held[g]:
 				session.fire_group(g, _aim())
+		badges.auto_on = session.arena.autofire.get(Session.PLAYER, true)
+		badges.world_hover = badges.gun_at(session, _aim(), cam.zoom.x if cam != null else 1.0)
 	session.tick(dt)
 	if session.jump_ready():
 		Audio.fx(self, "jump_ready")
@@ -549,16 +563,15 @@ static func banner_line(s: Session, note: String) -> Dictionary:
 func _draw_bar_extras() -> void:
 	if session == null or _bar == null or not _bar.visible:
 		return
-	var list: Array = session.weapons()
-	var row_y := WeaponBar.ASLOT.y + WeaponBar.GAP if not session.ability_slots().is_empty() else 0.0
-	var x0 := (_bar.size.x - (list.size() * (WeaponBar.SLOT.x + WeaponBar.GAP) - WeaponBar.GAP)) / 2.0
+	var lay: Dictionary = _bar.layout()
+	var base := Vector2((_bar.size.x - lay["width"]) / 2.0, 0.0)
 	var auto: bool = session.arena.autofire.get(Session.PLAYER, true)
-	for i in list.size():
-		if not list[i]["turret"]:
+	for sl in lay["slots"]:
+		if not sl["w"]["turret"]:
 			continue
-		var st: Dictionary = session.slot_state(list[i]["uid"], _aim())
-		var at := Vector2(x0 + i * (WeaponBar.SLOT.x + WeaponBar.GAP), row_y + WeaponBar.SLOT.y + 10.0)  # under its slot
-		var text := "TURRET  HIT %d%%  %s" % [roundi(float(st["hit"]) * 100.0), "AUTO" if auto else "HOLD"]
+		var st: Dictionary = session.slot_state(sl["w"]["uid"], _aim())
+		var at: Vector2 = sl["rect"].position + base + Vector2(0.0, WeaponBar.SLOT.y + 10.0)  # under its slot
+		var text := "HIT %d%%  %s" % [roundi(float(st["hit"]) * 100.0), "AUTO" if auto else "HOLD"]
 		_bar_extras.draw_string(ThemeDB.fallback_font, at + Vector2(6.0, 0.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, WeaponBar.READY if auto else WeaponBar.COOLING)
 
 
@@ -663,6 +676,8 @@ func _on_event(e: Dictionary) -> void:
 	var dir: Vector2 = e.get("dir", Vector2.ZERO)
 	match e["type"]:
 		"shot":
+			if idx == Session.PLAYER and e.has("uid"):
+				badges.on_fire(int(e["uid"]))
 			var fire_sound := Audio.weapon_sound(arena.weapons.def(str(e.get("weapon", ""))), _line_of(idx, str(e.get("weapon", ""))))
 			if not Audio.is_loop(fire_sound):  # (a beam sounds from its beam events)
 				_snd(fire_sound, idx, e["origin"])
@@ -850,6 +865,7 @@ func _draw_fx() -> void:
 	_glow_quads = []
 	if session.state() != "lost":
 		_draw_aim(c, px)
+		badges.draw_ship(c, session, cam.zoom.x if cam != null else 1.0, _aim())
 	for f in _fx:
 		_draw_one(c, f, px)
 	for p in arena.projectiles:
@@ -1031,7 +1047,7 @@ func _draw_aim(c: Node2D, px: float) -> void:
 		var muzzle: Vector2 = arena.weapons.muzzle_of(arena, Session.PLAYER, m)
 		var st: Dictionary = session.slot_state(w["uid"], aim)
 		var can: bool = st["status"] in ["ready", "cooling down"]
-		var col: Color = GROUP_COLORS.get(w["group"], Color.WHITE) if can else GREY
+		var col: Color = GunBadges.style(w)["color"] if can else GREY
 		var reach := float(def["range"])
 		var half := deg_to_rad(float(def["arc"]) * 0.5) if def["turret"] else deg_to_rad(float(def["gimbal"]))
 		if half < PI - 0.01:

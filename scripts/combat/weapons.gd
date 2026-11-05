@@ -112,9 +112,12 @@ func aim_of(d: Dictionary) -> Dictionary:
 	return {"class": cls, "arc": float(w["arc"]) if cls != "fixed" else 2.0 * float(w["gimbal"]), "gimbal": float(w["gimbal"]), "shape": str(d.get("shape", ""))}
 
 
-## The fire group (1 or 2) of weapon `id`: its `group` entry, else by kind (lasers, bolts and beams 1; missiles and flak 2).
-func group_of(id: String) -> int:
+## The fire group (1 or 2) of weapon `id`: the mount's own `choice` (1 or 2, a fixed gun only), else its `group` entry, else by kind
+## (lasers, bolts and beams 1; missiles and flak 2).
+func group_of(id: String, choice := 0) -> int:
 	var w := def(id)
+	if choice in [1, 2] and not w["turret"]:
+		return choice
 	return int(w["group"]) if w.has("group") else int(GROUPS.get(w["kind"], 1))
 
 
