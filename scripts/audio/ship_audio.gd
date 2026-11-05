@@ -110,7 +110,7 @@ func _look_at_the_boots(soldier, first: bool, out: Dictionary) -> void:
 ## The machines: the medbay's patient, the smelter and the fabricator at work, racks that were being restocked and are not now, the reactor's load.
 func _look_at_the_works(ship, jobs, first: bool, out: Dictionary) -> void:
 	if jobs != null:
-		out["healing"] = not jobs.patients.is_empty()
+		out["healing"] = not jobs.patients.is_empty() or not (jobs.get("arm_patients") if jobs.get("arm_patients") != null else {}).is_empty()  # a medbay or a healing arm has a patient
 		var racks: Dictionary = jobs.restocking.duplicate()
 		if not first:
 			for r in _racks:

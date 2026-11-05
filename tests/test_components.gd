@@ -114,6 +114,8 @@ func test_data_is_complete() -> void:
 		"ammo_rack": [0, 0, 1], "belt_drive_scrap": [-1, 2, 1], "belt_drive_std": [-1, 2, 2], "belt_drive_neon": [-1, 2, 3],
 		# the smelters (docs/CONTENT.md section 12, data/packs/processing_1)
 		"smelter_scrap_mk1": [-3, 7, 1], "smelter_mk1": [-3, 7, 1], "smelter_mk2": [-4, 7, 2], "smelter_mk3": [-5, 7, 3], "smelter_neon_mk1": [-4, 7, 1],
+		# the healing arms (docs/DRONES.md section 10, data/packs/medical_2)
+		"medbay_mk2": [-3, 3, 2], "medbay_mk3": [-4, 3, 3],
 		# the rare factions (docs/CONTENT.md 18, data/packs/faction_barons, faction_leviathans)
 		"kett_brood_crown": [-6, 3, 3], "emberkin_kiln_mantle": [-5, 3, 3], "prismatic_conductor_helm": [-2, 2, 2], "basalt_anvil_bay": [-1, 3, 3], "sporeling_grove_veil": [-5, 3, 3],
 		"mire_fenwater_heart": [13, 0, 2], "fenn_exchange_drive": [-3, 4, 3], "gauntling_overseer_drive": [-3, 4, 3], "grundl_ramhead_thrusters": [-4, 4, 3], "human_flag_array": [-2, 3, 2],
