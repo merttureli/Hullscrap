@@ -12,6 +12,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -41,12 +42,13 @@
         4,
         2
       ],
+      "shape": "heavy_cannon",
       "mount": {
         "outside": [
           4,
-          2
+          3
         ],
-        "outside_hp": 12
+        "outside_hp": 18
       },
       "color": "#8a7f74",
       "power": -4,
@@ -70,12 +72,13 @@
         2,
         2
       ],
+      "shape": "sponson",
       "mount": {
         "outside": [
-          4,
+          3,
           2
         ],
-        "outside_hp": 10
+        "outside_hp": 8
       },
       "color": "#a89a8a",
       "power": -4,

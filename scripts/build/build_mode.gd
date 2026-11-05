@@ -44,7 +44,12 @@ const RedAlert = preload("res://scripts/sim/red_alert.gd")
 const BeltArt = preload("res://scripts/view/belt_art.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Weapons = preload("res://scripts/combat/weapons.gd")
 const CELL := 32
+const ARC_COLORS := {"fixed": Color("#ff7a5a"), "swivel": Color("#ffc966"), "turret": Color("#6cc4ff")}  ## the firing arc wedge by aim class
+const ARC_REACH := 0.25  ## the wedge's radius is this share of the gun's range ...
+const ARC_MIN := 3.0  ## ... but at least this many cells ...
+const ARC_MAX := 9.0  ## ... and at most this many
 const SAVE_PATH := "user://ship.json"
 const OK_TINT := Color(0.35, 1, 0.45)
 const BAD_TINT := Color(1, 0.35, 0.35)
@@ -103,6 +108,7 @@ var drag_start := Vector2i.ZERO
 var drag_path: Array = []  # cells a PAINT stroke went over
 var ghost: Array = []  # session.preview() of the pending edit: the changes, each with a "reason"
 var _session: BuildSession
+var _weapons: Weapons = null  # the weapon stats, read once (the arc wedge of a gun ghost)
 var _tab_pick := {}  # palette tab -> the key of the card last picked on it
 var _clock := 0.0  # seconds, for the loops of the art
 var _glow: Node2D  # additive layer for the glow art
@@ -577,6 +583,8 @@ func cursor_note() -> Dictionary:
 			n += 1
 	if n == 0 or not dragging:
 		var why := _ghost_note()
+		if why == "" and n > 0:
+			return {"text": _gun_hint(), "bad": false}
 		return {"text": "can't: " + why if why != "" else "", "bad": n == 0}
 	var pay := {}
 	var back := {}
@@ -883,6 +891,16 @@ func _controls_text() -> String:
 	elif group == Group.BELTS:
 		how = "LMB lay belt   Shift line   Ctrl rectangle   RMB remove"
 	return "%s   E door   O oxygen   P power\nTab palette   1-9 pick   Ctrl+Z undo   Ctrl+Y redo   Ctrl+S/L save/load   Wheel zoom (to the cursor)   MMB drag or arrows pan   Home centre" % how
+
+
+## A hint for the gun about to be placed: a broadside battery or a gun strip is built for a side wall ("" for anything else).
+func _gun_hint() -> String:
+	for g in ghost:
+		if g.get("layer", "") == "component" and g["reason"] == "":
+			var def: Dictionary = ship.components.def(str(g.get("id", "")))
+			if Mounts.is_mount(def) and str(def.get("shape", "")) in _aim().aim_classes.get("fixed", {}).get("wide", []):
+				return "best on a side wall"
+	return ""
 
 
 ## Why the pending edit would do nothing, when every cell of it is refused ("" otherwise).
@@ -1205,6 +1223,37 @@ func _draw_ghost_system(g: Dictionary, tint: Color) -> void:
 	_draw_facing(r.get_center(), g["rot"], tint)
 
 
+## The firing arc of gun `id` as a wedge about the barrel's pivot `pivot` (canvas pixels), centred on `dir`: red for a fixed gun (its gimbal),
+## yellow for a swivel and blue for a turret (their arc). Its radius is the gun's range scaled down: ARC_REACH of it, between ARC_MIN and
+## ARC_MAX cells, so a long gun's wedge reaches further than a short one's without filling the screen.
+func _draw_arc(pivot: Vector2, dir: Vector2, id: String) -> void:
+	var weapons := _aim()
+	if not weapons.has(id):
+		return
+	var w := weapons.def(id)
+	var col: Color = ARC_COLORS[str(w["aim"])]
+	var half := minf(deg_to_rad(float(w["arc"]) * 0.5) if w["turret"] else deg_to_rad(float(w["gimbal"])), PI)
+	var radius := clampf(float(w["range"]) / 32.0 * ARC_REACH, ARC_MIN, ARC_MAX) * CELL
+	var rim := PackedVector2Array()
+	var steps := maxi(2, ceili(half * 2.0 / deg_to_rad(6.0)))
+	for i in steps + 1:
+		rim.append(pivot + Vector2.from_angle(dir.angle() - half + 2.0 * half * i / steps) * radius)
+	var fan := PackedVector2Array([pivot])
+	fan.append_array(rim)
+	if half < PI - 0.01:
+		draw_colored_polygon(fan, Color(col, 0.18))
+		draw_polyline(PackedVector2Array([rim[0], pivot, rim[rim.size() - 1]]), Color(col, 0.55), 1.5)
+	else:
+		draw_colored_polygon(rim, Color(col, 0.18))
+	draw_polyline(rim, Color(col, 0.7), 1.5)
+
+
+func _aim() -> Weapons:
+	if _weapons == null:
+		_weapons = Weapons.new()
+	return _weapons
+
+
 ## A hull mount about to be placed with its outside half on g["anchor"]: the outside half and barrel there, and, when the
 ## placement rule finds a spot behind the wall, the inside half, with the wall between them lit.
 func _draw_ghost_mount(g: Dictionary, tint: Color) -> void:
@@ -1216,6 +1265,7 @@ func _draw_ghost_mount(g: Dictionary, tint: Color) -> void:
 		return
 	var out_cells := Mounts.rect_cells(Rect2i(g["anchor"], Mounts.turned(def["mount"]["outside"], g["rot"])))
 	var out_rect := _cells_rect(out_cells)
+	_draw_arc(_pivot_px(def, g["anchor"], g["rot"]), Vector2(Mounts.outward(g["rot"])), id)
 	draw_rect(out_rect.grow(-1), Color(tint, 0.14))
 	Visuals.draw_mount_out(self, def, {"rot": g["rot"]}, out_rect, _pivot_px(def, g["anchor"], g["rot"]), CELL, Vector2.ZERO, {"alpha": 0.6})
 	draw_rect(out_rect.grow(-1), tint, false, 2.0)
@@ -1245,6 +1295,7 @@ func _draw_ghost_slope(def: Dictionary, plan: Dictionary, tint: Color) -> void:
 	var px_poly := PackedVector2Array()
 	for v in corners:
 		px_poly.append(_origin() + v * CELL)
+	_draw_arc(_origin() + Vector2(Mounts.barrel_of(def, ghost_inst)["pivot"]) * CELL, Mounts.dir_of(ghost_inst), str(def["id"]))
 	draw_colored_polygon(px_poly, Color(tint, 0.14))
 	Visuals.draw_mount_out(self, def, ghost_inst, Visuals.slope_rect(def, ghost_inst, _origin(), CELL), _origin() + Vector2(Mounts.barrel_of(def, ghost_inst)["pivot"]) * CELL, CELL, Vector2.ZERO, {"alpha": 0.6})
 	px_poly.append(px_poly[0])

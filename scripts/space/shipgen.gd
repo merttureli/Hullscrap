@@ -4,7 +4,10 @@ extends RefCounted
 ##   1. the LOADOUT is bought from the budget out of the faction's menu (weapons, shield layers and sectors, engine tiers,
 ##      armour layers, crew, the pilot's aim_skill, systems), with the reactors the power needs;
 ##   2. the DECKS are planned from it (a gun deck, the decks between with the bridge, quarters, reactor and shield rooms and
-##      the flank turrets, and the engine room), and hullgen.gd draws the faction's silhouette round them;
+##      the flank guns, and the engine room), and hullgen.gd draws the faction's silhouette round them. A gun goes where its SHAPE
+##      says (slot_of(), docs/GUNS.md 3 and 9): casemates, long barrels and heavy cannons on the bow, a spinal mount on the keel (the
+##      bow axis, in the middle of the gun deck), and on the flanks the turrets, swivels, broadsides, gun strips and flush pods, with
+##      one point-defence turret leading each side when the table gives one;
 ##   3. the hull is built (armour layers on the outer walls, rooms carved from the floor, doors, parts, mounts placed
 ##      through the real mount rules, cables) and checked; a failed attempt is retried with a new roll, then a plainer hull.
 ## Everything random goes through one RandomNumberGenerator seeded from (seed, faction, size), so the same arguments
@@ -26,18 +29,21 @@ const Hullgen = preload("res://scripts/space/hullgen.gd")
 const Threat = preload("res://scripts/space/threat.gd")
 const HullOutline = preload("res://scripts/ship/hull_outline.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
+const Effects = preload("res://scripts/combat/effects.gd")
 
 const PREFIX := "gen:"
 const TABLES_PATH := "res://data/enemy_tables.json"
 const STYLES_PATH := "res://data/ship_styles.json"
 const RACE_SHARE := 0.6  ## the share of a home region's pirate fights that meet the region's own race (a region's `race_share` says otherwise)
 const MAX_ATTEMPTS := 10
-const MARGIN := 4  ## free cells round the hull in the grid (a mount's outside half is up to 3 deep)
+const MARGIN := 4  ## free cells round the hull in the grid (a mount's outside half is up to 4 deep: a long barrel)
 const HULL_MARGIN := 2  ## the buildable hull is everything built plus this
 const MAX_FILL := 0.84  ## the solid area of a hull over its bounding box, at most (the tests say 0.85)
 const MID_H := 4  ## floor rows of a deck between the gun deck and the engine room
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const AMMO_STOCK := 40  ## units of ammo a weapon that uses some starts with
+const BOW_SHAPES: Array[String] = ["casemate", "long_barrel", "heavy_cannon"]  ## the shapes that shoot forward: they stand on the bow
+const KEEL_SHAPES: Array[String] = ["spinal"]  ## the shapes that run along the keel, on the bow axis
 const ESSENTIAL := 1  ## rooms of this priority or better (the helm room, the reactors) are never dropped for lack of floor
 
 static var _tables := {}
@@ -46,7 +52,6 @@ static var _defs: Components = null
 static var _lines := {}
 static var _weapons: Weapons = null
 static var _powers := {}  # part id -> its line-adjusted power
-static var _turrets := {}  # weapon id -> is it a turret
 static var last_failed: Array = []  ## why the attempts of the last build() failed (all of them when it returned null)
 
 
@@ -140,11 +145,38 @@ static func _power(id: String) -> float:
 	return _powers[id]
 
 
-static func _is_turret(id: String) -> bool:
-	if not _turrets.has(id):
-		_comps()
-		_turrets[id] = bool(_weapons.def(id)["turret"])
-	return _turrets[id]
+## Where a gun of component `id` stands: "bow" (a fixed forward gun), "keel" (a spinal mount, in the middle of the gun deck on the bow
+## axis), "pd" (a point-defence turret: one leads each flank) or "flank" (turrets, swivels, broadsides, gun strips, flush pods). A gun
+## with no shape is placed by its aim: a turret on the flank, any other on the bow.
+static func slot_of(id: String) -> String:
+	var d := _def(id)
+	_comps()
+	var w := _weapons.def(id)
+	if Effects.of(w).has("intercept"):
+		return "pd"
+	var shape := str(d.get("shape", ""))
+	if shape in KEEL_SHAPES:
+		return "keel"
+	if shape in BOW_SHAPES:
+		return "bow"
+	if shape == "":
+		return "flank" if bool(w["turret"]) else "bow"
+	return "flank"
+
+
+## How much a flank gun `id` (slot_of(): "pd" or "flank") wants a flank slot, 0 first: point defence, a broadside or gun strip, a flush pod,
+## a swivel, then the turrets (which cover the bow arc from anywhere).
+static func _flank_rank(id: String) -> int:
+	if slot_of(id) == "pd":
+		return 0
+	match str(_def(id).get("shape", "")):
+		"broadside", "gun_strip":
+			return 1
+		"flush_pod":
+			return 2
+		"sponson":
+			return 3
+	return 4
 
 
 static func factions() -> Array:
@@ -705,16 +737,16 @@ static func _cheapest(f: Dictionary, cat: String, ids: Array) -> Dictionary:
 	return best
 
 
-## Do these weapons fit the hull? Fixed guns only go on the bow; turrets fill the flank slots, then what is left of the bow.
+## Do these weapons fit the hull? Bow and keel guns only go on the bow; the flank guns (slot_of()) fill the flank slots, then what is left of the bow.
 static func _slots_ok(ids: Array, mx: Dictionary) -> bool:
 	var fixed := 0
-	var turrets := 0
+	var side := 0
 	for id in ids:
-		if _is_turret(str(id)):
-			turrets += 1
-		else:
+		if slot_of(str(id)) in ["bow", "keel"]:
 			fixed += 1
-	return fixed <= int(mx["bow"]) and turrets <= int(mx["bow"]) - fixed + int(mx["flank"])
+		else:
+			side += 1
+	return fixed <= int(mx["bow"]) and side <= int(mx["bow"]) - fixed + int(mx["flank"])
 
 
 static func _apply(lo: Dictionary, o: Dictionary) -> void:
@@ -753,16 +785,33 @@ static func _plan(lo: Dictionary, sz: Dictionary, f: Dictionary, boost := 0, pro
 	var mx: Dictionary = sz["max"]
 	var bow: Array = []
 	var flank: Array = []
+	var keel: Array = []
+	var pd: Array = []
 	for id in lo["weapons"]:
-		if not _is_turret(str(id)):
-			bow.append(id)
-	for id in lo["weapons"]:
-		if _is_turret(str(id)):
-			if flank.size() < int(mx["flank"]):
-				flank.append(id)
-			else:
+		match slot_of(str(id)):
+			"bow":
 				bow.append(id)
-	if bow.is_empty() and not flank.is_empty():  # a ship with only turrets has the first on the bow, where it is sure to stand
+			"keel":
+				keel.append(id)
+			"pd":
+				pd.append(id)
+			_:
+				flank.append(id)
+	var side: Array = []  # the flank guns in the order they win a flank slot: point defence, then the guns made for a side wall, the turrets last
+	for rank in 5:
+		for id in pd + flank:
+			if _flank_rank(str(id)) == rank:
+				side.append(id)
+	flank = []
+	var slots := mini(int(mx["flank"]), maxi(0, 2 * (int(sz["k_mid"]) - 1)))  # a flank gun stands at the end of a deck between the gun deck and the engines: two a deck
+	for id in side:
+		if flank.size() < slots:  # (the first stands on the right, the second on the left)
+			flank.append(id)
+		else:
+			bow.append(id)
+	for id in keel:  # a spinal mount shoots along the keel: the middle of the gun deck
+		bow.insert(bow.size() / 2, id)
+	if bow.is_empty() and not flank.is_empty():  # a ship with only flank guns has the first on the bow, where it is sure to stand
 		bow.append(flank.pop_front())
 	bow = bow.slice(0, maxi(1, int(mx["bow"]) - maxi(0, boost - 1)))  # a hull still too boxy gives up bow guns and engines
 	var bands: Array = []
@@ -1154,8 +1203,13 @@ static func _place_mounts(ship: Ship, d: Dictionary, placed: Dictionary) -> void
 		for m in mounts:
 			var id := str(m["id"])
 			var w: int = _along(id, int(m["rot"])).x
-			var lo_c: int = rect.position.y if vertical else rect.position.x
-			var hi_c: int = (rect.end.y if vertical else rect.end.x) - w
+			var osz: Vector2i = Mounts.turned(_def(id)["mount"]["outside"], int(m["rot"]))
+			var isz: Vector2i = Mounts.turned(_def(id)["size"], int(m["rot"]))
+			var sh: Vector2i = Mounts.breech_shift(osz, isz, int(m["rot"]))
+			var s: int = sh.y if vertical else sh.x  # the breech starts this far into the outside half: the outside half may reach past the room
+			var bw: int = isz.y if vertical else isz.x
+			var lo_c: int = (rect.position.y if vertical else rect.position.x) - s
+			var hi_c: int = (rect.end.y if vertical else rect.end.x) - bw - s
 			for shift in [0, 1, -1, 2, -2, 3, -3]:
 				var pos: int = at + shift
 				if pos < lo_c or pos > hi_c:

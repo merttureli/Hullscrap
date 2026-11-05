@@ -1,11 +1,7 @@
 {
  "frame": [
-  27,
-  46
- ],
- "pivot_on_base": [
-  32,
-  15
+  17,
+  31
  ],
  "aim": "turret",
  "anims": {
@@ -28,40 +24,54 @@
    6,
    1,
    0
+  ],
+  "off": [
+   7,
+   1,
+   0
   ]
  },
  "anchors": {
   "pivot": [
-   13,
-   36
+   8,
+   19
   ],
   "muzzle": [
    8,
-   12
+   1
   ]
  },
- "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of human_flak_screen_out. fire: 3 frames, recoil 2/1/0 px with a muzzle flash.",
  "glow": {
   "image": "human_flak_screen_barrel_glow.png",
   "frame": [
-   47,
-   66
+   49,
+   63
   ],
   "offset": [
-   -10,
-   -10
+   -16,
+   -16
   ],
   "anims": {
-   "idle": [
-    0,
-    1,
-    0
-   ],
    "fire": [
     1,
     3,
     14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "idle": [
+    0,
+    1,
+    0
    ]
   }
- }
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on pivot_on_base of human_flak_screen_out. fire: 3 frames, recoil 2/1/0 px with the family muzzle flash on the glow layer; off: lights dead.",
+ "pivot_on_base": [
+  16,
+  15
+ ]
 }

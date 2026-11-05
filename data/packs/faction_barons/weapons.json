@@ -10,6 +10,7 @@
 			"pierce": 1,
 			"fire_chance": 0.05,
 			"heat_per_shot": 9,
+			"aim": "fixed",
 			"turret": false,
 			"gimbal": 5
 		},
@@ -25,6 +26,8 @@
 			"speed": 520,
 			"breach_chance": 0.15,
 			"jam_chance": 0.1,
+			"aim": "fixed",
+			"interceptable": true,
 			"turret": false,
 			"gimbal": 4
 		},
@@ -40,6 +43,7 @@
 			"speed": 650,
 			"spread": 4,
 			"effects": {"needs_crew_in_room": {"count": 1, "else_mult": 0.6, "stat": "rate"}},
+			"aim": "turret",
 			"turret": true,
 			"gimbal": 0,
 			"arc": 300,

@@ -8,9 +8,12 @@ extends RefCounted
 ## its `arc` at `track` degrees per second toward the lead point on the enemy (tick_turrets) and fires by
 ## itself when ready and on target (the owner's T key toggles it); each of its shots rolls a hit
 ## against the target's evasion on the arena's rng: a hit aims at a random outer cell facing the
-## turret, a miss at a point just off the hull. A turret deals `turret_damage` of its entry's damage.
-## A turret with an `intercept` {range} effect (point defence, effects.gd) turns on the nearest enemy missile within that
-## range before any ship, and each shot rolls its accuracy to destroy the missile outright.
+## turret, a miss at a point just off the hull. A weapon's AIM CLASS (`aim`: fixed, swivel or turret; docs/GUNS.md 2) says how it
+## aims: swivel and turret track by themselves (`turret` true) inside their arc, a swivel in a narrower one at 0.8 of the entry's
+## damage, a turret at 0.6 (`aim_share` in the data, was `turret_damage`); a fixed gun deals all of it.
+## A turret with an `intercept` {range} effect (point defence, effects.gd) turns on the nearest incoming threat within that
+## range before any ship: an enemy missile, or a shot at or below `pd_speed` px/s (or marked `interceptable`), and each shot
+## rolls its accuracy to destroy it outright. It shoots a ship only when nothing incoming is in range.
 ## Works on the arena (arena.gd).
 
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
@@ -45,7 +48,11 @@ const SPEED_EVASION := 0.25  ## evasion of a ship at full speed (docs/CONTENT.md
 const MISS_MARGIN := 40.0  ## px past the hull's edge that a missed turret shot aims at
 
 var defs := {}  ## weapon id -> entry as written in the data file
-var turret_damage := 0.6  ## the share of its entry's damage that a turret deals
+var turret_damage := 0.6  ## the share of its entry's damage that a turret deals (aim_share["turret"])
+var aim_share := {"fixed": 1.0, "swivel": 0.8, "turret": 0.6}  ## aim class -> the share of its entry's damage a weapon of that class deals
+var pd_speed := 500.0  ## point defence also shoots down any shot flying at or below this speed (px/s)
+var shapes := {}  ## gun shape name -> {name, outside [w, h], breech [w, h], aim, gimbal?}: docs/GUNS.md 3 (the data's `shapes`)
+var aim_classes := {}  ## aim class -> its bands {gimbal_max?, arc [min, max]?, track}: what tests/test_gun_shapes.gd holds every gun to
 
 
 func _init(path := PATH) -> void:
@@ -57,24 +64,52 @@ func load_defs(path: String) -> void:
 	var data = Content.read(path)
 	assert(data is Dictionary and data.get("weapons") is Dictionary, "bad weapon data: " + path)
 	defs = data["weapons"]
-	turret_damage = float(data.get("turret_damage", turret_damage))
+	turret_damage = float(data.get("turret_damage", turret_damage))  # the old key: the turret share when `aim_share` has none
+	aim_share = {"fixed": 1.0, "swivel": 0.8, "turret": turret_damage}
+	if data.get("aim_share") is Dictionary:
+		for k in data["aim_share"]:
+			aim_share[str(k)] = float(data["aim_share"][k])
+	turret_damage = float(aim_share["turret"])
+	pd_speed = float(data.get("pd_speed", pd_speed))
+	shapes = {}
+	for s in data.get("shapes", {}):
+		var e: Dictionary = data["shapes"][s].duplicate()
+		for k in ["outside", "breech"]:
+			if e.get(k) is Array:
+				e[k] = [int(e[k][0]), int(e[k][1])]
+		shapes[str(s)] = e
+	aim_classes = data.get("aim_classes", {})
 
 
 func has(id: String) -> bool:
 	return defs.has(id)
 
 
-## The full stats of weapon `id`: base values, then the kind's defaults, then its own entry. A
-## turret's damage is turret_damage of the entry's (the fixed equivalent at its tier).
+## The full stats of weapon `id`: base values, then the kind's defaults, then its own entry. `aim` is its class (the entry's, else
+## turret/fixed by `turret`) and `turret` is true for swivel and turret. A tracking weapon's damage is its class's share of the
+## entry's (the fixed equivalent at its tier).
 func def(id: String) -> Dictionary:
 	var e: Dictionary = defs.get(id, {})
 	var out := BASE.duplicate()
 	out.merge(KIND_DEFAULTS.get(e.get("kind", "laser"), {}), true)
 	out.merge(e, true)
 	out["id"] = id  # the art looks for art/projectiles/<id> before the kind's
-	if out["turret"]:
-		out["damage"] = float(out["damage"]) * turret_damage
+	var cls := str(e.get("aim", ""))
+	if cls == "":
+		cls = "turret" if out["turret"] else "fixed"
+	out["aim"] = cls
+	out["turret"] = cls != "fixed"
+	out["damage"] = float(out["damage"]) * float(aim_share.get(cls, 1.0))
 	return out
+
+
+## How weapon `d` aims, for the cards and the generator: {class (fixed, swivel, turret), arc (the width in degrees of the wedge it can
+## fire in: 2 x gimbal for a fixed gun, its arc for a tracking one), gimbal, shape (the gun shape name of a component def, else "")}.
+## `d` is a weapon entry (def()) or a component def (it has an `id` of a weapon).
+func aim_of(d: Dictionary) -> Dictionary:
+	var w: Dictionary = d if d.has("kind") else def(str(d.get("id", "")))
+	var cls := str(w.get("aim", "fixed"))
+	return {"class": cls, "arc": float(w["arc"]) if cls != "fixed" else 2.0 * float(w["gimbal"]), "gimbal": float(w["gimbal"]), "shape": str(d.get("shape", ""))}
 
 
 ## The fire group (1 or 2) of weapon `id`: its `group` entry, else by kind (lasers, bolts and beams 1; missiles and flak 2).
@@ -84,9 +119,10 @@ func group_of(id: String) -> int:
 
 
 ## A mount for every placed component that has weapon stats: {uid: {id, pos (the barrel's pivot, cell
-## coordinates), dir (outward, ship-local unit vector), reach (cells from the pivot to the muzzle), aim
-## (the barrel's live direction, ship-local; starts as dir), virtual: false}}. A part with no outside
-## half pivots at the middle of its inside half and fires from there.
+## coordinates; the middle of its barrels), dir (outward, ship-local unit vector), reach (cells from the pivot to the muzzle), aim
+## (the barrels' live direction, ship-local; starts as dir), offsets (each barrel's place against pos, one for a single barrel),
+## shots (how many it has fired: the next shot leaves from barrel `shots` mod their number), virtual: false}}. A part with no
+## outside half pivots at the middle of its inside half and fires from there.
 func mounts_of(ship) -> Dictionary:
 	var out := {}
 	var uids: Array = ship.components.instances.keys()
@@ -98,15 +134,20 @@ func mounts_of(ship) -> Dictionary:
 		var dir := Mounts.dir_of(inst)  # the true outward direction: a mount on a slope faces along it
 		var pos := Vector2.ZERO
 		var reach := 0.0
+		var barrels: Array = []
 		if ship.components.has_outside(uid):
 			var b := Mounts.barrel_of(ship.components.def(inst["id"]), inst)
 			pos = b["pivot"]
 			reach = b["reach"]
+			barrels = b["pivots"]
 		else:
 			for c in inst["cells"]:
 				pos += Vector2(c) + Vector2(0.5, 0.5)
 			pos /= inst["cells"].size()
-		out[uid] = {"id": inst["id"], "pos": pos, "dir": dir, "reach": reach, "aim": dir, "virtual": false}
+		var offsets: Array[Vector2] = []  # a base with several barrels (broadside, strip): each one's place against `pos`, their middle
+		for p in barrels:
+			offsets.append(p - pos)
+		out[uid] = {"id": inst["id"], "pos": pos, "dir": dir, "reach": reach, "aim": dir, "virtual": false, "offsets": offsets, "shots": 0}
 	return out
 
 
@@ -222,9 +263,12 @@ func point_barrel(arena, idx: int, uid: int, aim: Vector2) -> void:
 		m["aim"] = fixed_dir(arena, idx, m, aim)
 
 
-## Where a shot of mount `m` (ship `idx`) leaves, in the world: the muzzle, `reach` cells along its barrel.
-func muzzle_of(arena, idx: int, m: Dictionary) -> Vector2:
-	return arena.local_to_world(idx, m["pos"] + Vector2(m["aim"]) * float(m["reach"]))
+## Where a shot of mount `m` (ship `idx`) leaves, in the world: the muzzle, `reach` cells along its barrel. A mount with several
+## barrels fires from them in turn: barrel `k` (default: the one that fires next, `shots` mod their number).
+func muzzle_of(arena, idx: int, m: Dictionary, k := -1) -> Vector2:
+	var offs: Array = m.get("offsets", [])
+	var off: Vector2 = offs[(int(m.get("shots", 0)) if k < 0 else k) % offs.size()] if offs.size() > 1 else Vector2.ZERO
+	return arena.local_to_world(idx, m["pos"] + off + Vector2(m["aim"]) * float(m["reach"]))
 
 
 ## Fire mount `uid` of ship `idx` at the world point `aim`. Returns false (and does nothing) when
@@ -245,7 +289,7 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 		m["aim"] = clamp_dir(want, m["dir"], float(w["arc"]) * 0.5)
 	else:
 		m["aim"] = fixed_dir(arena, idx, m, aim)
-	var origin: Vector2 = muzzle_of(arena, idx, m)
+	var origin: Vector2 = muzzle_of(arena, idx, m)  # (the first barrel of a volley: the shot event and the shield drop use it)
 	var dir: Vector2 = Vector2(m["aim"]).rotated(co.flight.angle)
 	arena.log_event("shot", idx, Vector2i(-1, -1), {"weapon": m["id"], "uid": uid, "kind": w["kind"], "origin": origin, "dir": dir})
 	_spend(arena, idx, uid, m, w)
@@ -255,7 +299,7 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 		return true  # (a point-defence shot leaves through its own port: it does not open the shield)
 	if w["kind"] == "beam":
 		var every := maxi(1, roundi(float(w["tick"]) / arena.SUBSTEP))
-		arena.beams.append({"owner": idx, "uid": uid, "w": w, "local_dir": m["aim"],
+		arena.beams.append({"owner": idx, "uid": uid, "w": w, "local_dir": m["aim"], "k": int(m.get("shots", 0)),
 			"end": arena.tick + int(ceil(float(w["duration"]) / arena.SUBSTEP - 1e-6)), "every": every, "next": arena.tick + 1})
 	else:
 		var spread := deg_to_rad(float(w["spread"]))
@@ -263,10 +307,12 @@ func fire(arena, idx: int, uid: int, aim: Vector2) -> bool:
 			var d := dir
 			if spread > 0.0:
 				d = dir.rotated(arena.rng.randf_range(-spread * 0.5, spread * 0.5))
+			var from: Vector2 = muzzle_of(arena, idx, m, int(m["shots"]) + i)  # round-robin over the barrels
 			if w["kind"] == "laser":
-				_line(arena, idx, w, m["id"], origin, origin + d * float(w["range"]))
+				_line(arena, idx, w, m["id"], from, from + d * float(w["range"]))
 			else:
-				Projectiles.spawn(arena, idx, w, origin, d)
+				Projectiles.spawn(arena, idx, w, from, d)
+	m["shots"] = int(m.get("shots", 0)) + (1 if w["kind"] == "beam" else int(w["shots"]))
 	Effects.on_fire(arena, idx, uid, m, w)
 	Shields.drop(arena, idx, w, origin, dir)  # after the shots: those in contact this tick were resolved first
 	return true
@@ -288,8 +334,15 @@ func target_of(arena, idx: int) -> int:
 	return best
 
 
-## The enemy missile (an entry of arena.projectiles) turret mount `m` of ship `idx` would shoot down now: the nearest one within the
-## `intercept` range of its entry `w`, or null (a weapon without the effect, or no missile near).
+## Is shot `p` (an entry of arena.projectiles) something point defence shoots down: a missile, a shot at or below `pd_speed`, or one
+## whose weapon is marked `interceptable`? A fast bolt is not.
+func interceptable(p: Dictionary) -> bool:
+	var w: Dictionary = p["w"]
+	return str(w["kind"]) == "missile" or bool(w.get("interceptable", false)) or Vector2(p["vel"]).length() <= pd_speed
+
+
+## The incoming shot (an entry of arena.projectiles) turret mount `m` of ship `idx` would shoot down now: the nearest enemy one
+## (interceptable()) within the `intercept` range of its entry `w`, or null (a weapon without the effect, or nothing in range).
 func missile_target(arena, idx: int, m: Dictionary, w: Dictionary):
 	var spec = Effects.of(w).get("intercept")
 	if not spec is Dictionary:
@@ -298,7 +351,7 @@ func missile_target(arena, idx: int, m: Dictionary, w: Dictionary):
 	var best = null
 	var best_d := float(spec["range"]) * float(spec["range"])
 	for p in arena.projectiles:
-		if p["owner"] == idx or str(p["w"]["kind"]) != "missile":
+		if p["owner"] == idx or not interceptable(p):
 			continue
 		var d := from.distance_squared_to(p["pos"])
 		if d <= best_d:
@@ -313,8 +366,8 @@ func missile_point(arena, idx: int, m: Dictionary, w: Dictionary, mis: Dictionar
 	return PilotAI.lead_point(arena.local_to_world(idx, m["pos"]), mis["pos"], mis["vel"], speed)
 
 
-## A point-defence shot at the missile `mis` from `origin`: a tracer to where it is, and it is destroyed when the shot rolls
-## its accuracy (no evasion: a missile does not dodge). Logs an `intercept` effect event ({weapon, hit}, at the missile).
+## A point-defence shot at the incoming shot `mis` from `origin`: a tracer to where it is, and it is destroyed when the shot rolls
+## its accuracy (no evasion: a shell does not dodge). Logs an `intercept` effect event ({weapon, hit}, at the missile).
 func _intercept(arena, idx: int, w: Dictionary, origin: Vector2, mis: Dictionary) -> void:
 	var id := str(w["id"])
 	var hit: bool = arena.rng.randf() < float(w["accuracy"])
@@ -472,7 +525,7 @@ func tick_beams(arena) -> void:
 		var w: Dictionary = b["w"].duplicate()
 		w["damage"] = float(w["damage"]) * b["every"] * arena.SUBSTEP
 		w["fx_k"] = float(b["every"]) * arena.SUBSTEP  # the effects that act per hit (shard, magnetic) scale the same way
-		var origin: Vector2 = arena.local_to_world(b["owner"], m["pos"] + Vector2(b["local_dir"]) * float(m["reach"]))
+		var origin: Vector2 = muzzle_of(arena, b["owner"], {"pos": m["pos"], "aim": b["local_dir"], "reach": m["reach"], "offsets": m.get("offsets", [])}, int(b.get("k", 0)))
 		var d: Vector2 = b["local_dir"].rotated(co.flight.angle)
 		_line(arena, b["owner"], w, m["id"], origin, origin + d * float(w["range"]))
 	arena.beams = live

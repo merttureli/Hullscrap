@@ -98,6 +98,9 @@ static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect
 		o2["powered"] = bool(opts.get("thrusting", false)) and bool(opts.get("powered", true))
 	var alpha := float(opts.get("alpha", 1.0))
 	var sheet = Art.component(str(def.get("id", "")) + "_out")
+	var fits: bool = sheet != null and (sheet.cells == Vector2i.ZERO or sheet.cells == Vector2i(int(mount["outside"][0]), int(mount["outside"][1])))
+	if sheet != null and not fits:  # art made for another shape: the flat block, never the old art stretched
+		sheet = null
 	if sheet != null:
 		_draw_sheet(canvas, sheet, rect, d2, i2, cell_px, o2)
 	else:
@@ -115,8 +118,26 @@ static func draw_mount_out(canvas, def: Dictionary, inst: Dictionary, rect: Rect
 	var dir := Mounts.dir_of(inst)
 	if family == "radar" and aim == Vector2.ZERO and bool(opts.get("powered", true)):  # the dish turns by itself while it works
 		aim = Vector2.UP.rotated(float(opts.get("time", 0.0)) * DISH_SPIN)
-	var live := aim if aim != Vector2.ZERO and out_hp > 0 else dir  # a disabled barrel hangs along the mount
-	_draw_barrel(canvas, def, i2, pivot, cell_px, live, opts, Mounts.barrel(def, Mounts.NONE, rot)["reach"])
+	var live := aim if aim != Vector2.ZERO and out_hp > 0 and str(def.get("shape", "")) != "flush_pod" else dir  # a disabled barrel hangs along the mount; a pod's hatch lids never turn
+	var pivots: Array[Vector2] = [pivot]
+	var art := Mounts.barrel_art(def)
+	if fits and art["pivots_px"].size() > 1:  # a base with several barrels (broadside battery, gun strip): each turned the same way
+		var half := Vector2(float(mount["outside"][0]), float(mount["outside"][1])) * SpriteSheet.SRC_CELL / 2.0
+		var turn := deg_to_rad(float(inst["angle"])) if angled else posmod(rot, 4) * PI / 2.0
+		pivots = []
+		for p in art["pivots_px"]:
+			pivots.append(rect.get_center() + (p - half).rotated(turn) * cell_px / SpriteSheet.SRC_CELL)
+	var reach: float = Mounts.barrel(def, Mounts.NONE, rot)["reach"]
+	for k in pivots.size():
+		var o3 := opts
+		if pivots.size() > 1 and opts.has("fired_ago"):  # staggered recoil: barrel k fires stagger_s later than barrel k - 1 (idle until then)
+			o3 = opts.duplicate()
+			var ago: float = float(opts["fired_ago"]) - k * float(art["stagger_s"])
+			if ago < 0.0:
+				o3.erase("fired_ago")
+			else:
+				o3["fired_ago"] = ago
+		_draw_barrel(canvas, def, i2, pivots[k], cell_px, live, o3, reach)
 
 
 ## The screen rectangle of the outside half of a placed mount on a slope: the box of its quarter-turn size about its middle
@@ -143,6 +164,8 @@ static func _draw_barrel(canvas, def: Dictionary, i2: Dictionary, pivot: Vector2
 	var frame := 0
 	if hp <= 0 and sheet.has_anim("disabled"):
 		anim = "disabled"
+	elif not bool(opts.get("powered", true)) and sheet.has_anim("off"):  # the lights are dead
+		anim = "off"
 	elif opts.has("fired_ago") and float(opts["fired_ago"]) < FIRE_WINDOW + 0.1 and sheet.has_anim("fire"):
 		anim = "fire"
 	elif float(hp) < float(max_hp) * DAMAGED_BELOW and sheet.has_anim("damaged"):

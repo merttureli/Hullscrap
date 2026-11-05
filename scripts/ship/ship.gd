@@ -41,6 +41,8 @@ const MigrateParts = preload("res://scripts/ship/migrate_parts.gd")
 ## optional "post" (the part they man, posts.gd) inside "crew_state": older saves have none.
 ## 7: the tier 1-2 weapons, engines, reactors, shields and the medbay take less room inside (data/components.json); an older save
 ## is re-anchored on load by MigrateParts (mounts centred behind their barrels, the rest by their top-left; cables and belts re-joined).
+## The gun rework (docs/GUNS.md 8) is Components version 6 inside a ship save of version 7: the guns' outside halves have new shapes, an
+## older save's mounts are re-planned from their inside halves on load, and a gun whose new outside half does not fit goes back to the cargo.
 const VERSION := 7
 const TILES_PATH := "res://data/tiles.json"
 const COMPONENTS_PATH := "res://data/components.json"

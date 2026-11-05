@@ -164,9 +164,9 @@ func test_the_recipes_are_blueprints_and_meridian_sells_them_at_the_price_rule()
 
 # --- radar ---------------------------------------------------------------------------------------------------------
 
-## The rig with radar `id` through the wall at u -10.
+## The rig with radar `id` through the wall, its outside half at u -9 (a console wider than its dish pokes out of it by the centring rule).
 func _radar_rig(id: String) -> Dictionary:
-	return _rig([[id, -10]])
+	return _rig([[id, -9]])
 
 
 func test_the_radar_parts_set_the_ranges_and_what_they_identify() -> void:

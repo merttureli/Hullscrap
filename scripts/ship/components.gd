@@ -12,7 +12,11 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 ## optional contents of an ammo rack (`ammo`, `n`) and the units a gun has loaded from a belt (`loaded`). 5 adds the
 ## mounts on a slope: `angle` (degrees clockwise from up; absent when it is the quarter turn `rot` x 90), `at` (the base
 ## middle of the outside half on the face) and the cells it holds, `ocells` (empty space under the barrel) and `link`.
-const VERSION := 5
+## 6 is the gun rework (docs/GUNS.md 8): the guns have new outside halves (shapes of any size), so a mount saved before 6 whose gun
+## changed shape (_reshaped()) is re-planned from its inside half; one whose new outside half does not fit goes back to the cargo.
+const VERSION := 6
+const OLD_OUTSIDE := [4, 2]  ## the outside half every gun had before version 6 ...
+const OLD_OUTSIDE_OF := {"shrapnel_cannon_scrap": [4, 3]}  ## ... but this one
 const MIN_VERSION := 1
 ## An instance's status: ok, or one of the ways it can be out of action.
 const STATUSES: Array[String] = ["ok", "overheated", "malfunction", "disabled"]
@@ -331,7 +335,7 @@ func load_dict(d: Dictionary, grid = null) -> String:
 		var plan := {}
 		var out := Mounts.NONE
 		if is_mount(id):
-			if i.get("out") is Array and i["out"].size() == 2:
+			if i.get("out") is Array and i["out"].size() == 2 and not (int(d.get("version", 0)) < 6 and _reshaped(id)):
 				out = Vector2i(int(i["out"][0]), int(i["out"][1]))
 				plan = _slope_plan(i, anchor, rot)
 				if plan.is_empty():
@@ -341,13 +345,16 @@ func load_dict(d: Dictionary, grid = null) -> String:
 			if plan.is_empty() and grid != null:
 				var found := _mount_old(grid, id, anchor, rot)
 				if found.is_empty():
-					returned.append({"id": id, "text": "%s has no wall to mount through and went back to the cargo" % by_id[id].get("name", id)})
+					var nm: String = by_id[id].get("name", id)
+					returned.append({"id": id, "anchor": anchor, "rot": rot, "text": ("The %s no longer fits there: it is in the hold" % nm) if i.get("out") is Array else "%s has no wall to mount through and went back to the cargo" % nm})
 					continue
 				rot = found["rot"]
 				out = found["out"]
 				plan = found
 		_add(uid, id, plan["anchor"] if not plan.is_empty() else anchor, rot, out, plan)
 		_load_state(instances[uid], i)
+		if int(d.get("version", 0)) < 6 and instances[uid]["out_cells"].size() > 0 and _reshaped(id) and i.has("out_hp"):  # the old outside half had twice the part's hp: keep its share of the new one
+			instances[uid]["out_hp"] = clampi(roundi(float(i["out_hp"]) / (2.0 * float(by_id[id]["hp"])) * outside_hp_max(id)), 0, outside_hp_max(id))
 	for w in d.get("wrecks", []):
 		if w is Dictionary and w.get("cells") is Array and by_id.has(str(w.get("id", ""))):
 			var cells: Array[Vector2i] = []
@@ -355,6 +362,12 @@ func load_dict(d: Dictionary, grid = null) -> String:
 				cells.append(Vector2i(int(p[0]), int(p[1])))
 			wrecks.append({"id": str(w["id"]), "cells": cells})
 	return ""
+
+
+## Did gun `id` get a new outside half in the gun rework (version 6)?
+func _reshaped(id: String) -> bool:
+	var d: Dictionary = by_id[id]
+	return str(d.get("family", "")) == "weapon" and d["mount"]["outside"] != OLD_OUTSIDE_OF.get(id, OLD_OUTSIDE)
 
 
 ## {"slope": the save keys (angle, at, ocells, link) of a mount on a slope}; {} for any other part.

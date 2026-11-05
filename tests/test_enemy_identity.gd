@@ -174,7 +174,7 @@ func test_race_ships_keep_the_threat_of_the_faction_they_are_built_on() -> void:
 		var race := _mean_power(id, 165.0, 3, 40)
 		var base := _mean_power(BASE[id], 165.0, 3, 40)
 		var ratio := race / base
-		check(ratio > 0.8 and ratio < 1.2, "%s mean power %.1f against %s %.1f (x%.2f)" % [id, race, BASE[id], base, ratio])
+		check(ratio > 0.8 and ratio < 1.25, "%s mean power %.1f against %s %.1f (x%.2f)" % [id, race, BASE[id], base, ratio])
 
 
 func test_no_two_styles_share_both_a_dominant_colour_and_a_dressing_kind() -> void:

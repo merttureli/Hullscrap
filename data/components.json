@@ -238,6 +238,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -269,6 +270,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -299,12 +301,13 @@
         2,
         2
       ],
+      "shape": "point_turret",
       "mount": {
         "outside": [
-          4,
+          2,
           2
         ],
-        "outside_hp": 10
+        "outside_hp": 5
       },
       "color": "#e8624a",
       "power": -3,
@@ -696,6 +699,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -724,6 +728,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -752,12 +757,13 @@
         2,
         2
       ],
+      "shape": "point_turret",
       "mount": {
         "outside": [
-          4,
+          2,
           2
         ],
-        "outside_hp": 10
+        "outside_hp": 5
       },
       "color": "#a68a64",
       "power": -2,
@@ -780,6 +786,7 @@
         2,
         2
       ],
+      "shape": "heavy_cannon",
       "mount": {
         "outside": [
           4,
@@ -808,6 +815,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -836,6 +844,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -864,6 +873,7 @@
         2,
         2
       ],
+      "shape": "casemate",
       "mount": {
         "outside": [
           4,
@@ -892,12 +902,13 @@
         2,
         2
       ],
+      "shape": "dome_turret",
       "mount": {
         "outside": [
-          4,
-          2
+          3,
+          3
         ],
-        "outside_hp": 10
+        "outside_hp": 11
       },
       "color": "#5ef2e0",
       "power": -3,
@@ -920,10 +931,11 @@
         2,
         2
       ],
+      "shape": "long_barrel",
       "mount": {
         "outside": [
-          4,
-          2
+          2,
+          4
         ],
         "outside_hp": 10
       },
@@ -948,12 +960,13 @@
         4,
         2
       ],
+      "shape": "dome_turret",
       "mount": {
         "outside": [
-          4,
-          2
+          3,
+          3
         ],
-        "outside_hp": 10
+        "outside_hp": 11
       },
       "color": "#9bf06a",
       "power": -3,
@@ -977,10 +990,11 @@
         4,
         2
       ],
+      "shape": "long_barrel",
       "mount": {
         "outside": [
-          4,
-          2
+          2,
+          4
         ],
         "outside_hp": 10
       },

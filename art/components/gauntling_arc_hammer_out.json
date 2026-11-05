@@ -58,24 +58,20 @@
    12
   ]
  },
- "notes": "OUTSIDE half of the Gauntling Arc Hammer (a FIXED gun, scrap): a grey housing with a rust patch, a big copper-wound capacitor can with a cyan window on the left and, on the right, a pair of rods where a small arc climbs on the loop. damaged: the capacitor leaks sparks, the rods bent and the arc stuttering; disabled: scorched, dented, the can split and its winding unwound, never destroyed.",
+ "notes": "OUTSIDE half of the Gauntling Arc Hammer (casemate): a rectangular casemate (4x2 cells), the barrel braced in a sleeve with a gimbal collar: a FIXED gun in the livery of the gauntling guns; the bottom flange overhangs the outer wall face. damaged: cracks, a loose plate, a spark; disabled: dark, scorched and dented, never destroyed. The inside half (breech) is narrower or wider than this half in places: it sits at floor((W - bw) / 2) cells from this half's left edge at rotation 0.",
  "barrel": {
   "image": "gauntling_arc_hammer_barrel.png",
   "frame": [
-   21,
-   58
-  ],
-  "pivot_on_base": [
-   32,
-   12
+   23,
+   48
   ],
   "pivot_on_barrel": [
-   10,
-   51
+   11,
+   36
   ],
   "muzzle": [
-   10,
-   13
+   11,
+   2
   ],
   "anims": {
    "idle": [
@@ -97,30 +93,44 @@
     6,
     1,
     0
+   ],
+   "off": [
+    7,
+    1,
+    0
    ]
   },
   "aim": "fixed",
+  "pivot_on_base": [
+   32,
+   12
+  ],
   "gimbal_deg": 6,
   "glow": {
    "image": "gauntling_arc_hammer_barrel_glow.png",
    "frame": [
-    41,
-    78
+    55,
+    80
    ],
    "offset": [
-    -10,
-    -10
+    -16,
+    -16
    ],
    "anims": {
-    "idle": [
-     0,
-     1,
-     0
-    ],
     "fire": [
      1,
      3,
      14
+    ],
+    "damaged": [
+     4,
+     2,
+     4
+    ],
+    "idle": [
+     0,
+     1,
+     0
     ]
    }
   }

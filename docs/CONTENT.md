@@ -53,6 +53,11 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
     - A small **gimbal** (`gimbal` in degrees; Scrap 3, Standard 5, Neon 8) lets the barrel follow the cursor inside that cone.
     - Nose guns fire forward, and guns on a side wall fire sideways. **Broadside ships** are a real build.
     - A faint boresight line shows where each fixed gun points.
+  - **Aim classes (gun rework, docs/GUNS.md 2)**: a weapon's `aim` is `fixed`, `swivel` or `turret`; `turret: true` means it tracks by itself (swivel and turret).
+    - The damage share is per class, `aim_share` in `data/weapons.json`: fixed 1.0, swivel 0.8, turret 0.6 (it replaces the single `turret_damage`, which is still read as the turret share).
+    - **Arc bands** (tests/test_gun_shapes.gd): a fixed gun's gimbal is up to 8 degrees (20 for a broadside battery or a gun strip); a swivel's arc is 120 to 180 (90 degrees a second); a turret's 270 to 360 (120 degrees a second).
+    - A swivel uses the turret code path with its own arc and share. Pumice Flak is the first: arc 180, its damage scaled by 0.6 / 0.8 so it deals what it dealt.
+    - `Weapons.aim_of(def)` gives `{class, arc, gimbal, shape}` to the cards and the generator.
   - **Turrets** (`"turret": true`) rotate within their `arc` (centred on the outward direction) at `track` degrees per second, and **aim themselves** at the enemy with perfect lead, firing when ready.
     - **Reliable but weak**: about 60% of a fixed gun's damage at the same tier, ×1.5 cost, and 1 more power.
     - **Hit chance** = `accuracy` (0.6–0.85) − the target's evasion. Evasion = 0.25 × speed ÷ max speed, +0.05 with a manned helm. The weapon bar shows the hit % against the current target.
@@ -62,7 +67,7 @@ Combat is **action, not menus**. When an enemy engages, the camera **zooms out t
   - **Skill beats spending**: a good pilot with cheap fixed guns puts full damage exactly where they want and dodges turret fire. A bad pilot is better off with turrets.
   - **Targeting Computer** (utility, 2×2, power −1, standard line, C): shows a **lead marker** for fixed guns, and gives turrets +0.1 accuracy.
     - Variants: Scrap "Spotter's Scope" (cheap, and the marker jitters) and Neon "Oracle Lens" (marker, plus the enemy's weapon charge bars).
-  - **Pilot AI** turns its nose to lead you with fixed guns. `ai.aim_skill` (0–1) adds aim error: Rustfangs 0.5, Concord 0.85.
+  - **Pilot AI** turns the side of its ship its fixed guns face to lead you (broadside passes, docs/GUNS.md 6): it groups its fixed guns by facing (bow, starboard, stern, port), weighs each by dps, and presents the bow unless a flank outweighs it; then it holds you abeam at its range, nose leaning in or out to hold the gap, and strafes if it has side engines. `ai.aim_skill` (0–1) adds aim error: Rustfangs 0.5, Concord 0.85.
   - **Which weapons are turrets**:
     - Turrets: Rattle Burst (scrap), Siren (neon ion), Leech Laser (★), and a new **Concord Point Turret** `laser_turret_mk1` (standard, damage 1, cooldown 4, accuracy 0.8, arc 270, track 120°/s).
     - Everything else is fixed: lasers, pulses, Shrapnel Cannon, Bolt Thrower, Artemis, Ion Blast, Heat Lance (sweep the beam by turning) and Breach Harpoon.
@@ -231,7 +236,11 @@ Weapons and engines are **two linked halves**, not FTL's all-outside nor a box i
 - **Between them is your wall, as thick as you like**: 1 cell of steel, or 5 layers of composite and ablative plating. The halves are linked straight through it.
 
 - **Data**: `size` is the inside half. `"mount": {"outside": [4, 2], "outside_hp": 30}` adds the outside half.
-  - Standard guns and engines are 4×2 + 4×2. Heavy ones have a 4×3 outside half.
+  - Engines are 4×2 + 4×2 (heavy ones 4×3). **Guns have a shape** (the `shape` key, docs/GUNS.md 3): the outside half is the shape's, 2×2, 3×3, 3×2, 4×2, 2×4, 6×2, 8×1, 4×3, 2×6 or 4×1 (`shapes` in `data/weapons.json`), and the breech (`size`) is the gun's own and does not move.
+  - **Centring rule**: at rotation 0 the breech starts `floor((W − bw) / 2)` cells from the outside half's left edge (W, bw the two widths): a narrower breech sits behind the middle, a wider one (a 4×2 breech under a 3×3 dome or a 2×4 barrel) pokes out equally. Turned with the part (the left edge of the gun is the top, right, bottom of the grid at rotations 1, 2, 3). The link is as wide as the outside half. `Mounts.breech_shift` is the one place the rule lives.
+  - **Outside hp** scales with the cells it covers: `outside_hp = round(hp × cells / 4)` (twice the hp for the old 8 cells; the Shrapnel Cannon keeps its older 12).
+  - **Low halves**: an outside half one cell deep (a flush pod, a gun strip) is hard to hit, and rams pass over it (it is not a collision cell; shots still strike it).
+  - **Several barrels** on one base (broadside battery, gun strip): `barrel.pivots_on_base` in the art, all aiming the same way, firing in turn (round-robin by shot) with `stagger_s` between their recoils.
   - At rotation 0, **outward is UP**: the outside half sits above the inside half, with the wall in between. Rotate to mount on any wall (rear engines use rotation 2).
 - **Placement** (one item, one placement, with a ghost of both halves):
   - The player places the **outside half** against the outer face of the hull.
@@ -240,7 +249,7 @@ Weapons and engines are **two linked halves**, not FTL's all-outside nor a box i
   - The outside cells must be exterior (no tile, open to space), and the inside cells free floor.
   - Refusal reasons: "the barrel must stick out into space", "needs an outer wall or a slope to mount through", "the breech needs 4×2 free floor behind the wall".
   - Thicker walls protect the inside half better and weigh more. That's the trade-off; there's no depth limit.
-  - **Saves** store one record per mount: `pos` (inside half), `rot` and `out` (the outside half's top-left). Bump the save version.
+  - **Saves** store one record per mount: `pos` (inside half), `rot` and `out` (the outside half's top-left). Bump the save version. Components version 6 (the gun rework): a mount saved before it whose gun changed shape is re-planned from its inside half (`Mounts.from_inside`); if the new outside half does not fit, the gun goes to the cargo with a log line ("The Railgun no longer fits there: it is in the hold").
 - **Damage: outside is built to take it, inside is not**:
   - **Outside half**: its own hp (`outside_hp`). At 0 it's **disabled, never destroyed**: the gun stops firing, or the engine stops pushing.
     - Shots that hit a disabled outside half pass through to the wall behind it.
