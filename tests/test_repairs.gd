@@ -519,6 +519,21 @@ func test_the_toggle_slows_the_game_in_a_fight_and_a_second_press_restores_it() 
 	b.free()
 
 
+func test_tab_is_read_before_the_gui_can_take_it_for_focus() -> void:
+	var d := _banner()
+	var b: SlowBanner = d[0]
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_TAB
+	ev.pressed = true
+	b._input(ev)  # read in _input, before the GUI: in _unhandled_input the mode bar's buttons took every Tab as focus-next
+	eq(Engine.time_scale, 0.25, "Tab slows the fight")
+	b._input(ev)
+	eq(Engine.time_scale, 1.0, "and a second Tab puts it back")
+	var names: Array = b.get_script().get_script_method_list().map(func(m): return m["name"])
+	check(names.has("_input") and not names.has("_unhandled_input"), "the key is not left to _unhandled_input, where focus-next eats it")
+	b.free()
+
+
 func test_the_slow_down_can_be_used_again_and_again() -> void:
 	var d := _banner()
 	var b: SlowBanner = d[0]

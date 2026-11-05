@@ -1,0 +1,62 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   4
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "medbay_mk2_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    4
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   16,
+   16
+  ]
+ },
+ "notes": "Healing arm base, standard line, 2x2: a clean white medical plate with a teal stripe and a teal cross, three green status lamps that chase while it works, the power line in a groove from the left edge to the shoulder turntable in the middle (anchors.pivot: the arm's shoulder, medbay_mk2_upper, sits on it). Damaged: scorched, a dead lamp, the plate cracked. Disabled: dark, lamps out."
+}

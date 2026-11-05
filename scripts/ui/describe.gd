@@ -97,7 +97,8 @@ static func of(id: String, ship, rot := -1, angle := -1.0) -> Dictionary:
 	var def: Dictionary = ship.components.def(id)
 	var eff: Dictionary = ship.effective(id)
 	var fam := str(def.get("family", ""))
-	out["what"] = fill(str(data()["families"].get(fam, "")), {"break_delay": Abilities.shield_break_delay()})
+	var words := "medbay_arm" if fam == "medbay" and float(def.get("stats", {}).get("reach", 0.0)) > 0.0 else fam  # a healing arm, not the bed
+	out["what"] = fill(str(data()["families"].get(words, "")), {"break_delay": Abilities.shield_break_delay()})
 	out["lore"] = first_sentence(str(def.get("blurb", "")))
 	var rows: Array = out["stats"]
 	var kws: Array = out["keywords"]
