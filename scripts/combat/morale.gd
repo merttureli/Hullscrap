@@ -297,7 +297,7 @@ func _begin_offer() -> void:
 
 ## credits, one extra and maybe an intact part: item id -> count.
 func _roll_offer() -> Dictionary:
-	var o: Dictionary = cfg["offer"]
+	var o: Dictionary = _style_cfg().get("offer", cfg["offer"])  # a style may make its own offer (a flagship's, data/morale.json)
 	var out := {"credits": arena.rng.randi_range(int(o["credits"][0]), int(o["credits"][1]))}
 	var extras: Array = o["extra"]
 	if not extras.is_empty():

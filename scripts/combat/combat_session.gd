@@ -62,6 +62,14 @@ static func load_ship(path: String) -> Ship:
 		return null
 	if d.get("ai") is Dictionary:
 		ship.set_meta("ai", d["ai"])
+	if d.get("flagship") is Dictionary:  # a race flagship (data/flagships.json): its race's livery and its crew list
+		var fl: Dictionary = d["flagship"]
+		var look := Shipgen.style_of(str(fl.get("race", "")), "large", str(fl.get("role", "")), 1.0e9)
+		if not look.is_empty():
+			ship.set_meta("style", look)
+		for e in d.get("crew_plan", []):
+			if e is Dictionary and str(e.get("name", "")) != "":
+				ship.crew_plan.append({"name": str(e["name"]), "species": str(e.get("species", "human"))})
 	return ship
 
 

@@ -33,6 +33,7 @@ const Hazards = preload("res://scripts/combat/hazards.gd")
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
 const Wardens = preload("res://scripts/space/wardens.gd")
+const Flagships = preload("res://scripts/space/flagships.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const Shops = preload("res://scripts/space/shops.gd")
 const Kit = preload("res://scripts/board/kit.gd")
@@ -644,6 +645,7 @@ func sector_at(id: String):
 		if not drift.has(id):
 			return null
 		sectors[id] = Sector.generate(region_seed, drift.node(id), region_id, {}, region_data)
+		Flagships.attach(sectors[id], region_data, stage, drift, region_seed)  # the homeland's flagship, in one sector, from its stage on
 		sectors[id].set_hollow(is_hollow(id))
 		sectors[id].set_pressure(tide_pressure(id))
 	return sectors[id]
@@ -1412,7 +1414,7 @@ func load_dict(d: Dictionary) -> String:
 			return "bad campaign data"
 	if not (d.get("rep") is Dictionary and d.get("offers") is Dictionary and d.has("seed") and d.has("rng_state") and d.has("debt") and d.has("paid") and d.has("jumps")):
 		return "bad campaign data"
-	var made = _read_sectors(d, map, where["seed"], Regions.get_region(where["region"]))
+	var made = _read_sectors(d, map, where["seed"], Regions.get_region(where["region"]), where["stage"])
 	if made == null:
 		return "bad campaign sectors"
 	var charge = _read_spool(d, map)
@@ -1499,7 +1501,7 @@ func _read_region(d: Dictionary):
 
 ## The sectors of a save (version 3 on), made again from the region seed with their saved states; {} for an older save,
 ## null when malformed.
-static func _read_sectors(d: Dictionary, map, rseed: int, rdata: Dictionary):
+static func _read_sectors(d: Dictionary, map, rseed: int, rdata: Dictionary, p_stage := 1):
 	var raw = d.get("sectors", {})
 	if not raw is Dictionary:
 		return null
@@ -1508,6 +1510,7 @@ static func _read_sectors(d: Dictionary, map, rseed: int, rdata: Dictionary):
 		if not (raw[id] is Dictionary and map.has(str(id))):
 			return null
 		var s = Sector.generate(rseed, map.node(str(id)), str(rdata.get("id", "")), {}, rdata)
+		Flagships.attach(s, rdata, p_stage, map, rseed)
 		if s.load_save(raw[id]) != "":
 			return null
 		out[str(id)] = s

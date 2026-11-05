@@ -1,0 +1,456 @@
+{
+ "components": [
+  {
+   "id": "kett_brood_crown",
+   "name": "Brood Crown",
+   "blurb": "Nine cells of shield grown round one throne. The Queen wore it once. It has been wearing the hive ever since.",
+   "quirk": "Four layers while 3 crew stand in its room, two otherwise (a Hive Battery makes three and one), and its layers come back faster: Kett swarm it. Found only on the Queen of Nine Cells.",
+   "family": "shield",
+   "line": "standard",
+   "tier": 3,
+   "size": [
+    2,
+    4
+   ],
+   "color": "#c98a2a",
+   "power": -6,
+   "priority": 3,
+   "manned": false,
+   "hp": 6,
+   "heat_limit": 100,
+   "heat_per_s": 2,
+   "cooling": 3,
+   "stats": {
+    "layers": 4,
+    "sectors": 2,
+    "recharge": 4.5
+   },
+   "abilities": [
+    {
+     "id": "overcharge",
+     "name": "Overcharge",
+     "type": "active",
+     "key": "shield",
+     "duration": 6,
+     "cooldown": 15,
+     "event": "overcharge",
+     "effects": {
+      "shield_layer": 1
+     },
+     "side_effects": []
+    },
+    {
+     "id": "hive",
+     "name": "Hive-fed",
+     "type": "passive",
+     "effects": {
+      "crew_needed": {
+       "count": 3,
+       "stat": "shield_layer",
+       "else_mult": 0.5
+      }
+     },
+     "side_effects": []
+    }
+   ],
+   "unique": true
+  },
+  {
+   "id": "emberkin_kiln_mantle",
+   "name": "Kiln Mantle",
+   "blurb": "A shield cast in the wall of the Long Kiln, still warm after nine hundred firings. The Ash-Matron called it a blanket.",
+   "quirk": "Three layers, a fourth while its room is above 60 heat, and layers come back in 4.5 s; it warms itself and scorches 0.5 hp a second off the crew in its room: Emberkin shrug the heat off. Found only on the Long Kiln.",
+   "family": "shield",
+   "line": "standard",
+   "tier": 3,
+   "size": [
+    2,
+    4
+   ],
+   "color": "#e89a3a",
+   "power": -5,
+   "priority": 3,
+   "manned": false,
+   "hp": 6,
+   "heat_limit": 100,
+   "heat_per_s": 3,
+   "cooling": 3,
+   "stats": {
+    "layers": 3,
+    "sectors": 2,
+    "recharge": 4.5
+   },
+   "abilities": [
+    {
+     "id": "overcharge",
+     "name": "Overcharge",
+     "type": "active",
+     "key": "shield",
+     "duration": 6,
+     "cooldown": 15,
+     "event": "overcharge",
+     "effects": {
+      "shield_layer": 1
+     },
+     "side_effects": []
+    },
+    {
+     "id": "hearth",
+     "name": "Hearth",
+     "type": "passive",
+     "effects": {
+      "heat_above": {
+       "heat": 60,
+       "shield_layer": 1
+      }
+     },
+     "side_effects": [
+      {
+       "type": "heat",
+       "rate": 0.8
+      },
+      {
+       "type": "scorch",
+       "rate": 0.5
+      }
+     ]
+    }
+   ],
+   "unique": true
+  },
+  {
+   "id": "prismatic_conductor_helm",
+   "name": "Conductor's Helm",
+   "blurb": "The baton, the podium and the helm in one fitting. The Choirmaster never explained which of the three steers.",
+   "family": "helm",
+   "line": "standard",
+   "tier": 2,
+   "size": [
+    2,
+    2
+   ],
+   "color": "#c8b0ff",
+   "power": -2,
+   "priority": 2,
+   "manned": true,
+   "hp": 4,
+   "heat_limit": 100,
+   "heat_per_s": 0,
+   "cooling": 3,
+   "stats": {},
+   "abilities": [
+    {
+     "id": "resonance",
+     "name": "Resonance",
+     "type": "passive",
+     "effects": {
+      "evasion_add": 0.2,
+      "crew_needed": {
+       "count": 1,
+       "stat": "evasion",
+       "else_mult": 0,
+       "who": "prismatic"
+      }
+     },
+     "side_effects": []
+    }
+   ],
+   "quirk": "Evasion +0.2 while a Prismatic is in its room (a Resonance Helm gives 0.1); with none it is a plain helm that draws one power more. Found only on the Cathedral of Seven Notes.",
+   "unique": true
+  },
+  {
+   "id": "basalt_anvil_bay",
+   "name": "Anvil Plating Bay",
+   "blurb": "Quarried plate laid so thick over every wall of the room that the room has stopped being a room and become a position.",
+   "quirk": "The walls of its room get +100% hp in a fight (a Stonehide Bay gives +50%), but the room cannot keep its air (3% a second): Basalt do not breathe. Found only on the Deepcut Anvil.",
+   "family": "utility",
+   "line": "standard",
+   "tier": 3,
+   "size": [
+    2,
+    2
+   ],
+   "color": "#9a8c7a",
+   "power": -1,
+   "priority": 3,
+   "manned": false,
+   "hp": 5,
+   "heat_limit": 100,
+   "heat_per_s": 0.5,
+   "cooling": 3.0,
+   "stats": {},
+   "abilities": [
+    {
+     "id": "stonehide",
+     "name": "Stonehide",
+     "type": "passive",
+     "effects": {
+      "room_wall_hp_mult": 2.0
+     },
+     "side_effects": [
+      {
+       "type": "drain_o2",
+       "rate": 0.03
+      }
+     ]
+    }
+   ],
+   "unique": true
+  },
+  {
+   "id": "sporeling_grove_veil",
+   "name": "Grove Veil",
+   "blurb": "Mother's own web, thinned to a veil and hung in the dark of the hull. It knits as it is cut, and does not apologise.",
+   "family": "shield",
+   "line": "standard",
+   "tier": 3,
+   "size": [
+    2,
+    4
+   ],
+   "color": "#9b86c8",
+   "power": -5,
+   "priority": 3,
+   "manned": false,
+   "hp": 6,
+   "heat_limit": 100,
+   "heat_per_s": 2,
+   "cooling": 3,
+   "stats": {
+    "layers": 3,
+    "sectors": 2,
+    "recharge": 3.0
+   },
+   "abilities": [
+    {
+     "id": "overcharge",
+     "name": "Overcharge",
+     "type": "active",
+     "key": "shield",
+     "duration": 6,
+     "cooldown": 15,
+     "event": "overcharge",
+     "effects": {
+      "shield_layer": 1
+     },
+     "side_effects": []
+    },
+    {
+     "id": "mycelium",
+     "name": "Mycelium",
+     "type": "passive",
+     "effects": {},
+     "side_effects": [
+      {
+       "type": "drain_o2",
+       "rate": 0.015
+      }
+     ]
+    }
+   ],
+   "quirk": "Three layers that come back in 3 s (a Mycelium Shield makes two in 3.7 s), but the shield breathes the room's air (1.5% a second). Sporeling auras put air back. Found only on Mother's Bloom.",
+   "unique": true
+  },
+  {
+   "id": "mire_fenwater_heart",
+   "name": "Fenwater Heart",
+   "blurb": "The core of the Slow Tide, still beating at the speed of weather. It was cut out and handed over. It still sulks in the dry.",
+   "family": "reactor",
+   "line": "standard",
+   "tier": 2,
+   "size": [
+    2,
+    4
+   ],
+   "color": "#e2a03f",
+   "power": 13,
+   "priority": 0,
+   "manned": false,
+   "hp": 8,
+   "heat_limit": 100,
+   "heat_per_s": 4,
+   "cooling": 5,
+   "stats": {},
+   "abilities": [
+    {
+     "id": "wetwell",
+     "name": "Wetwell",
+     "type": "passive",
+     "effects": {},
+     "side_effects": [
+      {
+       "type": "fire_risk",
+       "rate": 0.02
+      }
+     ]
+    }
+   ],
+   "quirk": "+4 power over a Reactor Mk1 (a Wetwell Reactor gives +2), with the same fire risk of 0.02 a second in its room. Mire put fires out twice as fast and take half the burn. Found only on the Slow Tide.",
+   "unique": true
+  },
+  {
+   "id": "fenn_exchange_drive",
+   "name": "Fair Exchange Drive",
+   "blurb": "A drive the Broker was never seen to pay for. The receipt, when it turns up, will be in somebody else's name.",
+   "quirk": "Thrust 27 (x1.5 over a Mk2) and it malfunctions only 10% a minute (a Haggle Engine makes 23 and 20%): the Fenn mend it in no time. Found only on the Fair Exchange.",
+   "family": "engine",
+   "line": "standard",
+   "tier": 3,
+   "size": [
+    2,
+    2
+   ],
+   "mount": {
+    "outside": [
+     4,
+     2
+    ],
+    "outside_hp": 5
+   },
+   "color": "#e8d9b0",
+   "power": -3,
+   "priority": 4,
+   "manned": false,
+   "hp": 6,
+   "heat_limit": 100,
+   "heat_per_s": 4,
+   "cooling": 4,
+   "stats": {
+    "thrust": 27,
+    "fuel_mult": 1.0,
+    "malfunction_per_min": 0.1
+   },
+   "unique": true
+  },
+  {
+   "id": "gauntling_overseer_drive",
+   "name": "Overseer's Drive",
+   "blurb": "Wired by the Overseer for the Overseer's own taste in current. Everything else on the ship has learned to cope.",
+   "family": "engine",
+   "line": "standard",
+   "tier": 3,
+   "size": [
+    2,
+    2
+   ],
+   "mount": {
+    "outside": [
+     4,
+     2
+    ],
+    "outside_hp": 6
+   },
+   "color": "#c9703a",
+   "power": -3,
+   "priority": 4,
+   "manned": false,
+   "hp": 8,
+   "heat_limit": 100,
+   "heat_per_s": 4,
+   "cooling": 4,
+   "stats": {
+    "thrust": 31,
+    "fuel_mult": 1.0
+   },
+   "abilities": [
+    {
+     "id": "overclock",
+     "name": "Overclock",
+     "type": "passive",
+     "effects": {
+      "crew_needed": {
+       "count": 1,
+       "stat": "thrust",
+       "else_mult": 0.58,
+       "who": "mechanical"
+      }
+     },
+     "side_effects": [
+      {
+       "type": "shock_organic",
+       "rate": 1.0
+      }
+     ]
+    }
+   ],
+   "quirk": "Thrust x1.7 (31) with a mechanical crew member in its room; without one it makes the Mk2's 18. It shocks organic crew in its room (1 hp a second). Found only on Spare Parts Prime.",
+   "unique": true
+  },
+  {
+   "id": "grundl_ramhead_thrusters",
+   "name": "Ramhead Thrusters",
+   "blurb": "Four bells the size of doors on a barge that has only ever wanted one thing. They are warm to the touch, and eager.",
+   "family": "engine",
+   "line": "standard",
+   "tier": 3,
+   "size": [
+    2,
+    2
+   ],
+   "mount": {
+    "outside": [
+     4,
+     2
+    ],
+    "outside_hp": 7
+   },
+   "color": "#7a6a4a",
+   "power": -4,
+   "priority": 4,
+   "manned": false,
+   "hp": 9,
+   "heat_limit": 100,
+   "heat_per_s": 4,
+   "cooling": 4,
+   "stats": {
+    "thrust": 33,
+    "fuel_mult": 1.0
+   },
+   "abilities": [
+    {
+     "id": "haul",
+     "name": "Haul",
+     "type": "passive",
+     "effects": {
+      "crew_needed": {
+       "count": 1,
+       "stat": "thrust",
+       "else_mult": 0.6,
+       "who": "grundl"
+      }
+     },
+     "side_effects": []
+    }
+   ],
+   "quirk": "Thrust x1.8 (33) with a Grundl in its room tending the fuel cells; without one it makes 20. The heavy mass cannot be set from a pack. Found only on the Last Barge.",
+   "unique": true
+  },
+  {
+   "id": "human_flag_array",
+   "name": "Commodore's Comms Array",
+   "blurb": "A flag officer's listening post, with every registry in Concord space on speed dial. Most of them pick up.",
+   "quirk": "A radar that names every contact within 3200 px and sees the hidden ones too (a Comms Array names within 2400). Found only on the Concord Ascendant.",
+   "family": "utility",
+   "line": "standard",
+   "tier": 2,
+   "size": [
+    2,
+    2
+   ],
+   "color": "#6fa8e8",
+   "power": -2,
+   "priority": 3,
+   "manned": false,
+   "hp": 4,
+   "heat_limit": 100,
+   "heat_per_s": 1,
+   "cooling": 3.0,
+   "stats": {
+    "radar_range": 3200,
+    "identify": 1,
+    "see_hidden": 1
+   },
+   "unique": true
+  }
+ ]
+}

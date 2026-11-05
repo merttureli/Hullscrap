@@ -1,0 +1,395 @@
+{
+ "_doc": "The race flagships (scripts/space/flagships.gd, docs/CONTENT.md section 23): one named, hand-made boss ship per major race, met in its homeland. Keys of an entry: region (the race's homeland, data/regions), name (the ship), captain (the first of the design's crew), design (flagship_<race>: data/ships/flagship_<race>.json, drawn with tests/tool_flagships.gd), stage (the run stage from which the flagship sails: inside the region's stages), poi_name (the beacon's label in the sector), warning (the beacon's page, first paragraph), hail (the second), card (the contact card's line), codex (a line in the win text), gimmick (what makes it different, for the notes and the tools), role (the noun of its name line: Kett hive-queen), reward {part (the unique trophy, data/packs/flagships_1), credits, scrap}, log (the id of the log it leaves, data/packs/flagships_1/logs.json), lines {title, hail, surrender, flee, refuse}: what its captain says (the design's ai faction flagship_<race> picks the same lines in data/morale.json). Winning, capturing or sparing it sets the flag flagship_<race>_beaten, pays the reward and leaves the log. It appears in one sector of the homeland, never at the exit, and only from `stage` on.",
+ "flagships": {
+  "kett": {
+   "region": "kett_hives",
+   "name": "Queen of Nine Cells",
+   "captain": "Skrit-of-Skrits",
+   "design": "flagship_kett",
+   "stage": 3,
+   "role": "hive-queen",
+   "poi_name": "Flagship: Queen of Nine Cells",
+   "warning": "FLAGSHIP SIGNAL. A hive-queen of the Kett hangs in the dark off the lane, three nests welded into one hull, humming on every band at once.",
+   "hail": "\"Nine cells, one throne,\" the hum settles into, \"and you are flying through the throne room. Skrit-of-Skrits receives. Briefly.\"",
+   "card": "Twelve Kett aboard: every swarm gun fires full rate",
+   "codex": "Twelve Kett go quiet at once, which is the loudest thing the hive has ever done.",
+   "gimmick": "Twelve Kett crew keep every swarm weapon at full rate and the Brood Crown at four layers.",
+   "reward": {
+    "part": "kett_brood_crown",
+    "credits": 260,
+    "scrap": 90
+   },
+   "log": "log_flagship_kett",
+   "lines": {
+    "title": "Captain",
+    "hail": [
+     "Nine cells hum as one. Come and be counted.",
+     "The hive does not shoot first. The hive is already shooting.",
+     "Twelve hands to a gun. Count yours."
+    ],
+    "surrender": [
+     "The hive yields a cell. Only a cell.",
+     "Enough. Take the cell and go."
+    ],
+    "flee": [
+     "The hive does not run. It moves house."
+    ],
+    "refuse": [
+     "The hum says no.",
+     "Cells, to the guns."
+    ]
+   }
+  },
+  "emberkin": {
+   "region": "emberkin_forges",
+   "name": "The Long Kiln",
+   "captain": "Veshti",
+   "design": "flagship_emberkin",
+   "stage": 5,
+   "role": "kiln-barge",
+   "poi_name": "Flagship: The Long Kiln",
+   "warning": "FLAGSHIP SIGNAL. A kiln-barge of the Emberkin glows off the lane, a mile of furnace under a single plume, venting heat on every band.",
+   "hail": "\"The Long Kiln has fired nine hundred years,\" a warm voice says, \"and it is not about to go out for a visitor. Do come closer. It is cold out there.\"",
+   "card": "Heat lances: they cook your systems from range",
+   "codex": "The Matron is said to have been born in the Kiln's first firing. The firing, by all accounts, is still going.",
+   "gimmick": "Pyre lances and a heat lance cook your systems from range, behind two hearth shields that glow brighter as the Kiln warms.",
+   "reward": {
+    "part": "emberkin_kiln_mantle",
+    "credits": 300,
+    "scrap": 100
+   },
+   "log": "log_flagship_emberkin",
+   "lines": {
+    "title": "Matron",
+    "hail": [
+     "It's cosy in here. Won't you come in?",
+     "Everything that burns is welcome at the Kiln.",
+     "The Kiln is warm. You are cold. This can be fixed."
+    ],
+    "surrender": [
+     "Enough! Bank the fires! Take what you like.",
+     "The Kiln yields, and it will remember."
+    ],
+    "flee": [
+     "Damp the fires! Out!"
+    ],
+    "refuse": [
+     "Then you will be warm after all.",
+     "The Kiln does not take no."
+    ]
+   }
+  },
+  "prismatic": {
+   "region": "prismatic_choir",
+   "name": "Cathedral of Seven Notes",
+   "captain": "Ilvane",
+   "design": "flagship_prismatic",
+   "stage": 6,
+   "role": "cathedral",
+   "poi_name": "Flagship: Cathedral of Seven Notes",
+   "warning": "FLAGSHIP SIGNAL. A great crystal ship stands off the lane, ringing: seven notes, held, each from a different pane of the hull.",
+   "hail": "\"We have sung this note for you since you entered the Choir,\" says a voice in three parts. \"The seventh is yours. Hold it, and we shall see.\"",
+   "card": "Refracting lattice: shots split and scatter",
+   "codex": "The Choirmaster does not give orders. She changes key, and the ship obliges.",
+   "gimmick": "A four-layer lattice shield and refractors that split their fire on every layer it meets; ion rings through the lattice like a bell.",
+   "reward": {
+    "part": "prismatic_conductor_helm",
+    "credits": 340,
+    "scrap": 110
+   },
+   "log": "log_flagship_prismatic",
+   "lines": {
+    "title": "Choirmaster",
+    "hail": [
+     "The seventh note is yours. Hold it.",
+     "We have been singing since before you were built.",
+     "Listen. It will help."
+    ],
+    "surrender": [
+     "The piece is over. Take the score.",
+     "A rest, then. Take what you came for."
+    ],
+    "flee": [
+     "Diminuendo. Out."
+    ],
+    "refuse": [
+     "Tutti. From the top.",
+     "The piece is not over."
+    ]
+   }
+  },
+  "basalt": {
+   "region": "basalt_quarries",
+   "name": "Deepcut Anvil",
+   "captain": "Gorr",
+   "design": "flagship_basalt",
+   "stage": 4,
+   "role": "anvil",
+   "poi_name": "Flagship: Deepcut Anvil",
+   "warning": "FLAGSHIP SIGNAL. A quarry-barge of the Basalt sits off the lane like a cut in the dark, plated in stone to the width of a street.",
+   "hail": "\"The Deepcut Anvil takes no visitors,\" a flat voice says, \"and gives no ground. The front is not for you. The back is not for anyone either, which is a long story.\"",
+   "card": "Near-unbreakable armour, thin at the stern",
+   "codex": "Foreman Gorr cut his own ship's armour out of the quarry wall and never forgave the wall.",
+   "gimmick": "Armour four plates deep fore and flank, with a thin back door; stonehide and anvil bays keep the plate whole.",
+   "reward": {
+    "part": "basalt_anvil_bay",
+    "credits": 280,
+    "scrap": 140
+   },
+   "log": "log_flagship_basalt",
+   "lines": {
+    "title": "Foreman",
+    "hail": [
+     "The Anvil holds. Come and hit it.",
+     "Stone does not hurry.",
+     "Front plate is thick. Do not take that as an invitation to the back."
+    ],
+    "surrender": [
+     "The Anvil yields. Once. Take it and go.",
+     "Enough. The stone has made its point."
+    ],
+    "flee": [
+     "Stone does not run."
+    ],
+    "refuse": [
+     "Then break on it.",
+     "Stone says no."
+    ]
+   }
+  },
+  "sporeling": {
+   "region": "sporeling_groves",
+   "name": "Mother's Bloom",
+   "captain": "Thallus",
+   "design": "flagship_sporeling",
+   "stage": 5,
+   "role": "bloom",
+   "poi_name": "Flagship: Mother's Bloom",
+   "warning": "FLAGSHIP SIGNAL. A grove-ship of the Sporelings drifts off the lane in a haze, a whole canopy of caps grown round a hull, trailing a faint, sweet cloud.",
+   "hail": "\"Mother's Bloom has flowered,\" a soft chorus says, \"and the air is thick with what she means. Do come in. Take a breath. Take several.\"",
+   "card": "Acid and spore clouds that foul your air",
+   "codex": "Elder Thallus is older than the Grove's records. Some say he is the records.",
+   "gimmick": "Spore cannons and rot pods fill your rooms with acid and bad air; mycelium shields knit back quicker than you can cut them.",
+   "reward": {
+    "part": "sporeling_grove_veil",
+    "credits": 300,
+    "scrap": 100
+   },
+   "log": "log_flagship_sporeling",
+   "lines": {
+    "title": "Elder",
+    "hail": [
+     "Breathe in. It is only us.",
+     "Mother's Bloom has opened for you.",
+     "We did not mean the air. It was a gift."
+    ],
+    "surrender": [
+     "The Bloom closes. Take the seed.",
+     "Enough, enough! Take the cuttings!"
+    ],
+    "flee": [
+     "Spore, spore, spore!"
+    ],
+    "refuse": [
+     "Then the Bloom will open further.",
+     "It is only air."
+    ]
+   }
+  },
+  "mire": {
+   "region": "mire_fens",
+   "name": "The Slow Tide",
+   "captain": "Quag",
+   "design": "flagship_mire",
+   "stage": 5,
+   "role": "fenwater",
+   "poi_name": "Flagship: The Slow Tide",
+   "warning": "FLAGSHIP SIGNAL. A fen-barge of the Mire rides low off the lane, wet to the rails, with a bog's worth of weed trailing from every gun.",
+   "hail": "\"The Slow Tide has not been hurried since she was laid down,\" a damp voice says. \"She is not about to start for you. Take your time. She will.\"",
+   "card": "A hull that mends itself while you shoot it",
+   "codex": "Old Mother Quag mends the Tide faster than anyone can break her, and has not been seen to look up.",
+   "gimmick": "Twelve Mire hands and two spray decks mend the plate as fast as you shoot it; steam lances and bog mortars finish what the damp starts.",
+   "reward": {
+    "part": "mire_fenwater_heart",
+    "credits": 290,
+    "scrap": 120
+   },
+   "log": "log_flagship_mire",
+   "lines": {
+    "title": "Old Mother",
+    "hail": [
+     "She is slow. You will come to love it.",
+     "The Tide does not hurry. The Tide arrives.",
+     "Mind the wet. It minds you."
+    ],
+    "surrender": [
+     "Enough. Take what the Tide brought.",
+     "The water has had its say."
+    ],
+    "flee": [
+     "The tide goes out."
+    ],
+    "refuse": [
+     "The Tide says wait.",
+     "She will mend. You will not."
+    ]
+   }
+  },
+  "fenn": {
+   "region": "fenn_bazaar",
+   "name": "Fair Exchange",
+   "captain": "Tivvik",
+   "design": "flagship_fenn",
+   "stage": 5,
+   "role": "bazaar-barge",
+   "poi_name": "Flagship: Fair Exchange",
+   "warning": "FLAGSHIP SIGNAL. A bazaar-barge of the Fenn hangs off the lane under a hundred strings of lamps, gun ports open and price tags on every one.",
+   "hail": "\"Welcome to the Fair Exchange, the last honest ship in the Bazaar!\" says a quick voice. \"Everything has a price. Even leaving. Especially leaving.\"",
+   "card": "Quick guns and a Broker who prefers a bribe",
+   "codex": "Broker Tivvik has been offered the Long Bazaar twice. Both times he named a price, and both times the buyer left.",
+   "gimmick": "Twitch cannons and haggle engines out-pace you; if she is losing she tries to buy you off with credits.",
+   "reward": {
+    "part": "fenn_exchange_drive",
+    "credits": 320,
+    "scrap": 100
+   },
+   "log": "log_flagship_fenn",
+   "lines": {
+    "title": "Broker",
+    "hail": [
+     "Everything has a price. Even leaving. Especially leaving.",
+     "A fair fight is a fair price. I'm told.",
+     "Browse! Don't touch! Shoot, if you must!"
+    ],
+    "surrender": [
+     "Wait, wait! Let's talk! Name your price!",
+     "Fine! Take the till and call it even!"
+    ],
+    "flee": [
+     "Closing! Closing!"
+    ],
+    "refuse": [
+     "Ah. A negotiator.",
+     "I'll take that as an opening bid."
+    ]
+   }
+  },
+  "gauntling": {
+   "region": "gauntling_scrapyards",
+   "name": "Spare Parts Prime",
+   "captain": "Nine",
+   "design": "flagship_gauntling",
+   "stage": 4,
+   "role": "overseer",
+   "poi_name": "Flagship: Spare Parts Prime",
+   "warning": "FLAGSHIP SIGNAL. A yard-ship of the Gauntlings sits off the lane in a cloud of tiny lights: repair drones, forty of them, flying in formation round a hull of spare parts.",
+   "hail": "\"Overseer Nine,\" a polite voice says. \"Spare Parts Prime is the original, and the original is a ship nobody has been able to break since. Please do not try to find out why.\"",
+   "card": "Drones that mend the hull while you shoot",
+   "codex": "Overseer Nine is the first Gauntling ever to be called an Overseer, and the only one. Nobody has been quite sure whether to ask.",
+   "gimmick": "Repair drones swarm the hull and mend it as fast as it breaks, while arc hammers and tesla pickets shock whoever stands in your gun rooms.",
+   "reward": {
+    "part": "gauntling_overseer_drive",
+    "credits": 270,
+    "scrap": 130
+   },
+   "log": "log_flagship_gauntling",
+   "lines": {
+    "title": "Overseer",
+    "hail": [
+     "Please remain calm. The drones will be with you shortly.",
+     "Spare Parts Prime. Everything repaired, nothing returned.",
+     "Scheduled maintenance has begun. Yours."
+    ],
+    "surrender": [
+     "Component failure. Please accept compensation.",
+     "Overseer Nine yields. Please do not blame the drones."
+    ],
+    "flee": [
+     "Rescheduling."
+    ],
+    "refuse": [
+     "Request denied. Repairs continue.",
+     "Drones, resume."
+    ]
+   }
+  },
+  "grundl": {
+   "region": "grundl_barges",
+   "name": "Last Barge",
+   "captain": "Brunn",
+   "design": "flagship_grundl",
+   "stage": 5,
+   "role": "ramhead",
+   "poi_name": "Flagship: Last Barge",
+   "warning": "FLAGSHIP SIGNAL. A hauler-barge of the Grundl crawls off the lane under a bow like a wall of iron, thrusters glowing, and not slowing down.",
+   "hail": "\"The Last Barge has one speed,\" a gravel voice says, \"and it is forward. Hauler-Chief Brunn. Lane's clear. Mind the bow.\"",
+   "card": "A ram that wants your hull: keep your distance",
+   "codex": "Hauler-Chief Brunn has never in his life waited for a gap. The gap waits for him.",
+   "gimmick": "A ram plated bow and four hauler thrusters drive her straight at you; slug mortar and flak cover the closing.",
+   "reward": {
+    "part": "grundl_ramhead_thrusters",
+    "credits": 330,
+    "scrap": 140
+   },
+   "log": "log_flagship_grundl",
+   "lines": {
+    "title": "Hauler-Chief",
+    "hail": [
+     "Forward. That's the whole plan.",
+     "Mind the bow.",
+     "The Barge doesn't stop. The Barge arrives."
+    ],
+    "surrender": [
+     "Hold! Hold! We'll haul your goods for free!",
+     "Enough! Take the cargo and let us stop!"
+    ],
+    "flee": [
+     "Hard astern!"
+    ],
+    "refuse": [
+     "Barge says forward.",
+     "Then mind the bow."
+    ]
+   }
+  },
+  "human": {
+   "region": "human_core",
+   "name": "Concord Ascendant",
+   "captain": "Reyne",
+   "design": "flagship_human",
+   "stage": 4,
+   "role": "flagship",
+   "poi_name": "Flagship: Concord Ascendant",
+   "warning": "FLAGSHIP SIGNAL. A Concord flagship holds station off the lane in full lights, a hull the length of a street with a full company of marines in the dock.",
+   "hail": "\"This is the Commodore of the Concord Ascendant,\" says a crisp voice. \"You are in Concord space on an unregistered course. Heave to and be boarded, or be corrected.\"",
+   "card": "A full company of marines and a Commodore",
+   "codex": "Commodore Reyne has been reprimanded twice for winning. Both times the paperwork was the harder fight.",
+   "gimmick": "Fourteen Concord marines man a railgun and volley racks behind a shield wall; if the Commodore is losing she surrenders formally.",
+   "reward": {
+    "part": "human_flag_array",
+    "credits": 300,
+    "scrap": 120
+   },
+   "log": "log_flagship_human",
+   "lines": {
+    "title": "Commodore",
+    "hail": [
+     "Heave to and be boarded, or be corrected.",
+     "Concord Ascendant. You are on an unregistered course.",
+     "The Commodore sees you. The Commodore is not impressed."
+    ],
+    "surrender": [
+     "The Commodore will accept terms. Formally.",
+     "Marines, stand down. Terms are being drafted."
+    ],
+    "flee": [
+     "Withdraw in good order."
+    ],
+    "refuse": [
+     "Terms are not being drafted.",
+     "Marines, to stations."
+    ]
+   }
+  }
+ }
+}

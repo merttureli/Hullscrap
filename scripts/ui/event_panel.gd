@@ -103,14 +103,14 @@ func _update_pic() -> void:
 	if design != _pic_for:
 		_pic_for = design
 		var info := FoeInfo.of(design)
-		foe_pic.show_foe(info.get("ship"), map.ship(), str(info.get("line", "")))
+		foe_pic.show_foe(info.get("ship"), map.ship(), str(info.get("line", "")), info.get("boss", {}))
 	var p: Rect2 = layout()["panel"]
 	if p.end.x + 12.0 + FoePic.BOX.x + 8.0 <= size.x:  # beside the panel when there is room, else under it (or over it)
 		foe_pic.position = Vector2(p.end.x + 12.0, p.position.y)
-	elif p.end.y + 12.0 + FoePic.BOX.y + 8.0 <= size.y:
+	elif p.end.y + 12.0 + foe_pic.size.y + 8.0 <= size.y:
 		foe_pic.position = Vector2(p.position.x, p.end.y + 12.0)
 	else:
-		foe_pic.position = Vector2(p.position.x, maxf(p.position.y - FoePic.BOX.y - 12.0, 4.0))
+		foe_pic.position = Vector2(p.position.x, maxf(p.position.y - foe_pic.size.y - 12.0, 4.0))
 	foe_pic.visible = true
 
 

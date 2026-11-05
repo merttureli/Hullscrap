@@ -1,0 +1,74 @@
+{
+ "logs": [
+  {
+   "id": "log_flagship_kett",
+   "title": "Tally of the Nine Cells",
+   "ship": "Queen of Nine Cells",
+   "faction": "",
+   "text": "Cell 1: fed. Cell 2: fed. Cell 3: fed.\nCell 4: Tik took the throne for a nap and the throne did not object.\nCell 5 through 8: also fed.\nCell 9: the Queen, who has asked that the tally stop counting her.\nIt does not stop counting her. It is a tally."
+  },
+  {
+   "id": "log_flagship_emberkin",
+   "title": "Firing Log, Long Kiln",
+   "ship": "The Long Kiln",
+   "faction": "",
+   "text": "Firing 1: bread. Firing 2: bread and a small mistake. Firing 3 through 400: the mistake, in some quantity.\nThe Matron says the mistake has become structural.\nThe engineers say it is the structure. We have stopped checking which."
+  },
+  {
+   "id": "log_flagship_prismatic",
+   "title": "Score for Seven Voices",
+   "ship": "Cathedral of Seven Notes",
+   "faction": "",
+   "text": "I. The first note is the hull. II. The second is the dark between.\nIII. The third is whoever is listening. IV through VI, to be sung on the day.\nVII. Left blank, by order. The Choirmaster says it will be filled in by the first stranger who stays to the end of the piece."
+  },
+  {
+   "id": "log_flagship_basalt",
+   "title": "Foreman's Quarry Note",
+   "ship": "Deepcut Anvil",
+   "faction": "",
+   "text": "Plate on the front, plate on the flanks, plate on the roof. We ran out on the back and said we would come back to it.\nWe have been saying it for thirty years.\nThe back is fine. Do not look at the back."
+  },
+  {
+   "id": "log_flagship_sporeling",
+   "title": "Spore Count, Mother's Bloom",
+   "ship": "Mother's Bloom",
+   "faction": "",
+   "text": "Day 1: the cap opened. Day 2: the cap kept opening. Day 3: the cap is now the corridor.\nThe Elder says this is how a hull should be grown, and that the old hulls were only waiting.\nDo not worry about the humming. It is happy."
+  },
+  {
+   "id": "log_flagship_mire",
+   "title": "The Tide Book",
+   "ship": "The Slow Tide",
+   "faction": "",
+   "text": "High water: a patch. Low water: a patch. Slack water: a patch and a cup of tea.\nThe hull is more patch than hull by now. The Old Mother says this makes it stronger.\nShe has been right so far, and we have not yet found out what she is right about."
+  },
+  {
+   "id": "log_flagship_fenn",
+   "title": "Receipt, Fair Exchange",
+   "ship": "Fair Exchange",
+   "faction": "",
+   "text": "ITEM: one (1) ship, slightly used. SELLER: the Broker. BUYER: whoever is holding this.\nITEM: one (1) fight, avoidable. SELLER: the Broker. BUYER: you, if you are quick.\nTOTAL: negotiable. The Broker says to ask again."
+  },
+  {
+   "id": "log_flagship_gauntling",
+   "title": "Parts Manifest, Prime",
+   "ship": "Spare Parts Prime",
+   "faction": "",
+   "text": "Item 1: one hull. Item 2: one hull (spare). Item 3: one hull (spare spare).\nItem 4 through 4000: parts, loosely classified.\nThe drones sort the manifest every night and every morning it has grown again. The Overseer says this is as it should be. The Overseer is not worried."
+  },
+  {
+   "id": "log_flagship_grundl",
+   "title": "Haul Book of the Last Barge",
+   "ship": "Last Barge",
+   "faction": "",
+   "text": "Cargo: six hundred tons of nothing in particular. Destination: forward.\nThe crew voted on the route in the third year. It was unanimous. The route was: forward.\nThere have been no complaints. There have been some collisions, which are different."
+  },
+  {
+   "id": "log_flagship_human",
+   "title": "Commodore's Report",
+   "ship": "Concord Ascendant",
+   "faction": "",
+   "text": "The engagement was decisive. The paperwork was not.\nA full account follows, in triplicate. Triplicate A for the file. Triplicate B for the file's file.\nTriplicate C was lost, and the Commodore reports it as the only casualty."
+  }
+ ]
+}

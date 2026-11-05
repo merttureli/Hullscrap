@@ -6,6 +6,7 @@ extends RefCounted
 const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Threat = preload("res://scripts/space/threat.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
+const Flagships = preload("res://scripts/space/flagships.gd")
 
 const CACHE_CAP := 24
 static var _ships := {}  # design -> Ship, so a card does not rebuild the ship every frame
@@ -20,15 +21,17 @@ static func ship_of(design: String):
 	return _ships[design]
 
 
-## {ship, line (the name line), emblem ({} for an authored design), palette ({}), race (a race ship: its people's name, else "")} of `design`; {} when it does not load.
+## {ship, line (the name line), emblem ({} for an authored design), palette ({}), race (a race ship: its people's name, else ""), boss ({title, name, captain, line, race} of
+## a race flagship, flagships.gd card_of; {} for any other ship)} of `design`; {} when it does not load.
 static func of(design: String) -> Dictionary:
 	var foe = ship_of(design)
 	if foe == null:
 		return {}
 	var look: Dictionary = foe.get_meta("style", {})
+	var boss := Flagships.card_of(design)
 	if look.is_empty():
-		return {"ship": foe, "line": str(foe.name), "emblem": {}, "palette": {}, "race": ""}
-	return {"ship": foe, "line": str(look["line"]), "emblem": look["emblem"], "palette": look["palette"], "race": str(look["race"])}
+		return {"ship": foe, "line": str(foe.name), "emblem": {}, "palette": {}, "race": "", "boss": boss}
+	return {"ship": foe, "line": str(look["line"]), "emblem": look["emblem"], "palette": look["palette"], "race": str(look["race"]), "boss": boss}
 
 
 ## The Ledger's sentence about an enemy that outguns `mine`, in words and with no number; "" when she does not. Only a big mismatch speaks.

@@ -32,6 +32,7 @@ const Flight = preload("res://scripts/sim/flight.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Boarding = preload("res://scripts/board/boarding.gd")
+const Flagships = preload("res://scripts/space/flagships.gd")
 
 const PATH := "res://data/sectors.json"
 const NEW := "new"
@@ -83,6 +84,7 @@ var _next_amb := 1
 var _next_wreck := 1
 var _engaged := {}  # POI id -> true while its event is open (or, for a station, until the ship has left); not saved
 var _greeted := {}  # station and store POI ids that have greeted this visit; not saved
+var _flags := {}  # the campaign's flags, kept at the last trigger(): a boss POI (add_boss) is done once its flag is set; not saved
 
 
 ## data/sectors.json, read once.
@@ -240,6 +242,15 @@ func _place(r: RandomNumberGenerator, pc: Dictionary) -> Vector2:
 		if pois.all(func(q): return q["pos"].distance_to(p) >= gap):
 			return p
 	return arrival + (Vector2(size, size) / 2.0 - arrival).normalized() * (lo + hi) / 2.0
+
+
+## Add a boss POI (flagships.gd poi_of: a `boss` race and the `flag` that says it is beaten): placed like the others, from a rng of its own, so the layout of the
+## other POIs is what it always was. It is saved with the others' states (its id is "flagship").
+func add_boss(poi: Dictionary) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = seed_value ^ 0x5F1A6B
+	poi["pos"] = _place(r, cfg["poi"])
+	pois.append(poi)
 
 
 ## `v` itself when it is a string, else one key of the weighted object `v`.
@@ -432,7 +443,10 @@ func trigger(c, ship) -> Dictionary:
 	var away := near * float(pc["rearm"])
 	var best := {}
 	var best_d := INF
+	_flags = c.flags
 	for poi in all_pois():
+		if poi.has("boss") and _flags.has(str(poi["flag"])):  # a beaten flagship is done
+			poi["state"] = DONE
 		if poi["state"] != NEW:
 			continue
 		var d := ship_pos.distance_to(poi["pos"])
@@ -469,6 +483,10 @@ func _event_for(c, ship, poi: Dictionary) -> Dictionary:
 	var kind := str(poi["event_type"])
 	if hollow and not bool(cfg["poi_types"].get(poi["type"], {}).get("repeat", false)):
 		kind = "hollow"  # the tide has taken the place: every POI but a station or store sends ghosts and dead beacons, no rewards
+	elif poi.has("boss"):  # a race flagship: its own page (flagships.gd), not one of the events
+		var page := Flagships.event(c, ship, poi)
+		c.events_seen += int(not page.is_empty())
+		return {"node": c.node(node_id), "refused": "", "event": page}
 	var ev: Dictionary = c.HOSTILE_PATROL if kind == "patrol" and c.refuses("concord") else c.events.pick(c, {"id": node_id, "type": kind, "place": ""}, ship)
 	if ev.is_empty() and kind == "hollow":  # a ghost always meets the ship (the tide pack has the real events)
 		ev = c.HOSTILE_HOLLOW
@@ -483,6 +501,8 @@ func resolve(id: String) -> void:
 	if poi.is_empty():
 		return
 	if bool(cfg["poi_types"].get(poi["type"], {}).get("repeat", false)):
+		return
+	if poi.has("boss") and not _flags.has(str(poi["flag"])):  # a flagship that was not beaten stays: it hails again when the ship comes back
 		return
 	poi["state"] = DONE
 	_engaged.erase(id)
