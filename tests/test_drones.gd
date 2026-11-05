@@ -12,6 +12,8 @@ const Shipgen = preload("res://scripts/space/shipgen.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
+const Session = preload("res://scripts/combat/combat_session.gd")
+const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
 
 
 func _ship() -> Ship:
@@ -316,3 +318,33 @@ func test_a_drone_shoots_the_ship_and_loses_hp_to_a_shot_that_crosses_it() -> vo
 	Projectiles.spawn(a, 1, a.weapons.def("test_bolt"), Vector2(d["pos"]) - dir * 60.0, dir)
 	a.step(0.2)
 	check(float(d["hp"]) < hp or a.drones.is_empty(), "a shot that crosses a drone hurts it")
+
+
+func test_the_bay_is_a_slot_with_its_key_and_a_group_on_the_weapon_bar() -> void:
+	var player = null
+	var uid := -1
+	for t in 10:
+		player = Shipgen.build("concord", "large", 70 + t, 300.0)
+		uid = Shipgen.add_bay(player, "drone_bay_mk2", "laser_drone_mk2")
+		if uid >= 0:
+			break
+	check(uid >= 0, "a player ship with a bay")
+	if uid < 0:
+		return
+	player.inventory.add("laser_drone_mk2", 1)
+	player.inventory.add(PART, 5)
+	var s := Session.new()
+	s.start(player, Shipgen.build("rustfangs", "medium", 3, 100.0), 5)
+	var guns: int = s.weapons().size()
+	eq(s.bays().size(), 1, "one bay slot")
+	eq(s.bay_state(uid)["status"], "ready", "ready")
+	eq(s.bay_state(uid)["cost"], 2, "tier 2 costs 2 parts")
+	var bar := WeaponBar.new()
+	bar.bind(s, func() -> Vector2: return Vector2.ZERO)
+	var lay := bar.layout()
+	check(lay["heads"].any(func(h): return h["group"] == 4) and lay["slots"].any(func(sl): return sl.has("bay") and sl["number"] == guns + 1), "a DRONES group with the bay at the key after the guns")
+	check(s.fire_slot(guns + 1, Vector2.ZERO), "its key launches")
+	eq(s.bay_state(uid)["status"], "drone out", "now out")
+	check(not s.fire_slot(guns + 1, Vector2.ZERO), "and a second press does nothing")
+	eq(s.bay_state(uid)["parts"], 3, "the parts were spent")
+	bar.free()

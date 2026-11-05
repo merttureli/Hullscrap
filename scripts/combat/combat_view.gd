@@ -569,7 +569,7 @@ func _draw_bar_extras() -> void:
 	var base := Vector2((_bar.size.x - lay["width"]) / 2.0, 0.0)
 	var auto: bool = session.arena.autofire.get(Session.PLAYER, true)
 	for sl in lay["slots"]:
-		if not sl["w"]["turret"]:
+		if sl.has("bay") or not sl["w"]["turret"]:
 			continue
 		var st: Dictionary = session.slot_state(sl["w"]["uid"], _aim())
 		var at: Vector2 = sl["rect"].position + base + Vector2(0.0, WeaponBar.SLOT.y + 10.0)  # under its slot
