@@ -96,6 +96,8 @@ const COLUMNS: Array = [
 			["W / S", "Throttle forward / back"],
 			["A / D", "Strafe"],
 			["Left / Right mouse", "Fire amber / cyan guns, Q pink; drag a slot to move one"],
+			["Click a header", "Group fires Ripple (as ready) or Volley (together, shield open once)"],
+			["Alt+click a gun", "Standard / piercing rounds (fast kinetic guns)"],
 			["1 - 9", "Fire that weapon"],
 			["T", "Auto guns: fire on their own on / off"],
 			["Shift / Space / E", "Engine / shield / utility ability"],
