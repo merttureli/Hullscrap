@@ -276,3 +276,29 @@ func test_the_arm_reaches_out_to_its_patient_and_folds_back() -> void:
 	ArmFx.turn(ship, 0.1)
 	var ext2 := float(ArmFx.opts(ship, d["arm"])["arm_ext"])
 	check(ext2 < ext and ext - ext2 < 0.5, "with no patient it folds back, eased, not in one snap: %s -> %s" % [ext, ext2])
+
+
+func test_a_second_arm_takes_another_patient_and_stacks_only_when_alone() -> void:
+	var d := _arm_ship()
+	var ship: Ship = d["ship"]
+	var arm2 := Fixture.put(ship, "medbay_mk2", 12, 12)
+	Fixture.wire(ship, [Vector2i(12, 12)])
+	ship.refresh()
+	var ada := _hurt(_npc("Ada", 13, 10), 50.0)
+	var bo := _hurt(_npc("Bo", 15, 13), 60.0)
+	ship.crew.append_array([ada, bo])
+	var jobs := Jobs.new()
+	jobs._choose_arm_patients(ship, 0.1)
+	var got := [jobs.arm_patients.get(d["arm"], ""), jobs.arm_patients.get(arm2, "")]
+	got.sort()
+	eq(got, ["Ada", "Bo"], "two arms, two hurt crew in both reaches: one each")
+	bo.hp = bo.max_hp  # one patient left: both arms may heal them
+	jobs._choose_arm_patients(ship, 0.1)
+	eq([jobs.arm_patients.get(d["arm"], ""), jobs.arm_patients.get(arm2, "")], ["Ada", "Ada"], "one hurt crew member: both arms heal them")
+
+
+func test_the_beam_shows_only_over_a_straight_line_of_floor() -> void:
+	var floor_only := func(c: Vector2i) -> bool: return c.x < 5 or c.y >= 3  # a wall block at x 5.., y 0..2
+	check(ArmFx.beam_shown(Vector2(1.5, 1.5), Vector2(4.5, 1.5), floor_only), "all floor: the beam shows")
+	check(not ArmFx.beam_shown(Vector2(1.5, 1.5), Vector2(7.5, 1.5), floor_only), "through a wall: no beam")
+	check(ArmFx.beam_shown(Vector2(1.5, 1.5), Vector2(1.5, 1.5), floor_only), "on the spot: shown")

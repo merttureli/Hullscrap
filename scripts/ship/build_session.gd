@@ -17,8 +17,8 @@ extends RefCounted
 ##   cable     {"layer": "cable", "cell"} places; add "remove": true to remove
 ##   belt      {"layer": "belt", "cell"} lays a conveyor-belt cell (docs/CONTENT.md 4f; floor and doors, once the belt blueprint
 ##             is known: Ammo.belts_unlocked); add "remove": true to remove. A belt cell costs build.json's belt_cost.
-##             "craft": true makes the item on the spot from its recipe when the cargo has none (blueprint known, materials paid; no
-##             station needed); "group" sets the fire group. The step's entry then has "made" (the materials) and "group".
+##             "craft": true makes the item on the spot from its recipe when the cargo has none (blueprint known, a working fabricator of the recipe's level
+##             and tools, materials paid); "group" sets the fire group. The step's entry then has "made" (the materials) and "group".
 ## Placing a component takes one item with its id from the cargo; removing it gives the item back.
 ## A cable costs build.json's cable_cost per cell, refunded in full. A tile costs per cell, so a door
 ## piece costs twice. A step is the list of what was really done: tiles {layer, cell, from, to}
@@ -35,6 +35,7 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 const Inventory = preload("res://scripts/ship/inventory.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Belts = preload("res://scripts/sim/belts.gd")
+const Workshop = preload("res://scripts/craft/workshop.gd")
 const MAX_HISTORY := 200
 const BUILD_PATH := "res://data/build.json"
 
@@ -531,6 +532,14 @@ func _try_component(ch: Dictionary, step: Array) -> String:
 				return "cannot be built (no recipe)"
 			if not ship.crafting.is_known(id):
 				return "blueprint not known"
+			var fab: Dictionary = Workshop.best(ship)  # making it takes a working fabricator of the recipe's level and tools
+			if int(fab["count"]) == 0 or int(fab["level"]) <= 0:
+				return "needs a working fabricator"
+			if int(fab["level"]) < int(rec["fab_level"]):
+				return "needs fabricator level %d" % int(rec["fab_level"])
+			for t in rec["tools"]:
+				if not fab["tools"].has(t):
+					return "needs tool: " + str(t)
 			var short: Dictionary = inventory.missing(rec["materials"])
 			if not short.is_empty():
 				return "not enough " + str(short.keys()[0])

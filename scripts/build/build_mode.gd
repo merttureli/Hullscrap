@@ -923,11 +923,11 @@ func layout_action(id: String) -> void:
 		return
 	if id == "save":
 		ship.layout = Layout.capture(ship)
-		message = "Layout saved: %d tiles, %d parts" % [ship.layout["tiles"].size(), ship.layout["parts"].size()]
+		message = "Layout saved: %d cells, %d parts" % [ship.layout["tiles"].size(), ship.layout["parts"].size()]
 		if drift != null:
 			drift.save_campaign()
 	elif ship.layout.is_empty():
-		message = "No saved layout yet: press Save layout first"
+		message = "Save a layout first"
 	else:
 		message = Layout.rebuild(session, ship.layout, id)["text"]
 
