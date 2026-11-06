@@ -4,10 +4,11 @@ extends RefCounted
 ## `station` that runs it (default "fabricator"); `fab_level` and `tools` are then the level and tools of that station.
 ## Each station has its own queue, and the station a recipe needs is asked of the `fab` dictionary a caller passes in
 ## (`station`, default "fabricator"; `speed`, default 1: work done per second), see workshop.gd and processing.gd.
-## Materials are spent when a job is queued and refunded if it is cancelled. Pure data, no nodes.
+## Materials are spent a unit at a time: the first when a job is queued, each next one of a batch when it starts (the job waits, and the ones behind it carry on, while the cargo is short); cancelling refunds the unit in progress. Pure data, no nodes.
 
 const Content = preload("res://scripts/data/content.gd")
-const VERSION := 1
+const VERSION := 2  ## 2: jobs carry count and done (a version 1 job loads as a batch of 1)
+const MAX_COUNT := 99  ## the most units one job can ask for (a count of 0 is Repeat: until cancelled)
 const QUEUE_MAX := 8
 const ITEMS_PATH := "res://data/items.json"  ## names of ammo, gear and special items
 const FABRICATOR := "fabricator"
@@ -18,9 +19,10 @@ var order: Array[String] = []
 var materials := {}  # id -> {id, name, color, rarity}
 var known := {}      # recipe id -> true; the blueprints the player has (a set)
 var seen := {}       # recipe id -> true; the known blueprints the player has looked at on the Fabricator tab (the rest are NEW); saved
-var queue: Array = []  # the fabricator's FIFO jobs: {recipe, progress (seconds of work done), paid (materials spent)}
+var queue: Array = []  # the fabricator's FIFO jobs: {recipe, progress (seconds of work done on the unit), paid (the materials of the unit in progress, {} between units), count (units wanted; 0: repeat), done (units made)}; a waiting job also has `wait` (what it is short of; not saved)
 var paused := false  ## the first job could not run during the last tick (fabricator offline or too weak); not saved
 var others := {}  ## station id -> its FIFO jobs, for every station but the fabricator (the smelter); read through queue_of()
+var idle := {}  ## station id -> true: every job is waiting for materials during the last tick; not saved
 var paused_at := {}  ## station id -> true: its first job could not run during the last tick; not saved
 var working := {}  ## part uid -> true: the smelters that worked during the last tick (heat.gd reads it); not saved
 var lead := {}  ## station id -> uid of the part running that station's queue during the last tick (crew man it: jobs.gd); not saved
@@ -193,8 +195,8 @@ func can_craft(recipe_id: String, inventory, fab: Dictionary) -> String:
 	return ""
 
 
-## Queue a craft: pays the materials now. Returns "" or the reason it was refused.
-func enqueue(recipe_id: String, inventory, fab: Dictionary) -> String:
+## Queue a craft of `count` units (0: repeat until cancelled): pays the first unit now. Returns "" or the reason it was refused.
+func enqueue(recipe_id: String, inventory, fab: Dictionary, count := 1) -> String:
 	var why := can_craft(recipe_id, inventory, fab)
 	if why != "":
 		return why
@@ -203,23 +205,35 @@ func enqueue(recipe_id: String, inventory, fab: Dictionary) -> String:
 		return "queue full"
 	var paid: Dictionary = recipes[recipe_id]["materials"].duplicate()
 	inventory.spend(paid)
-	jobs.append({"recipe": recipe_id, "progress": 0.0, "paid": paid})
+	jobs.append({"recipe": recipe_id, "progress": 0.0, "paid": paid, "count": clampi(count, 0, MAX_COUNT), "done": 0})
 	return ""
 
 
-## Advance the first job of the station `fab` describes by `dt` seconds (times `fab.speed`, default 1: a manned
-## smelter works faster). It only progresses while the station has the level and tools it needs (so it pauses when
-## power drops). Finished items go into `inventory`; spare time carries on into the next job. Returns the recipe ids
-## finished, in order. `paused` (is_paused) says whether the first job was stopped by the station.
+## Advance the queue of the station `fab` describes by `dt` seconds (times `fab.speed`, default 1: a manned
+## smelter works faster): the first job that is not waiting for materials. It only progresses while the station has the level
+## and tools it needs (so it pauses when power drops). A unit of a batch is paid when it starts; a job that cannot pay waits
+## (`wait`) and the next one works. Finished items go into `inventory`; spare time carries on. Returns the recipe ids
+## finished, one per unit, in order. `paused` (is_paused) says whether the job was stopped by the station.
 func tick(dt: float, inventory, fab: Dictionary) -> Array[String]:
 	var station := str(fab.get("station", FABRICATOR))
 	var jobs := queue_of(station)
 	var done: Array[String] = []
 	var left := dt * float(fab.get("speed", 1.0))
 	_pause(station, false)
-	while not jobs.is_empty():
-		var job: Dictionary = jobs[0]
+	idle[station] = false
+	var i := 0
+	while i < jobs.size():
+		var job: Dictionary = jobs[i]
 		var r: Dictionary = recipes[job["recipe"]]
+		if job["paid"].is_empty():  # between units: start the next, or wait
+			var short: Dictionary = inventory.missing(r["materials"])
+			if not short.is_empty():
+				job["wait"] = short
+				i += 1
+				continue
+			job["paid"] = r["materials"].duplicate()
+			inventory.spend(job["paid"])
+		job.erase("wait")
 		if not _can_run(r, fab):
 			_pause(station, true)
 			break
@@ -232,7 +246,13 @@ func tick(dt: float, inventory, fab: Dictionary) -> Array[String]:
 		left -= need
 		inventory.add(r["output"]["item"], r["output"]["count"])
 		done.append(job["recipe"])
-		jobs.pop_front()
+		job["done"] = int(job["done"]) + 1
+		job["progress"] = 0.0
+		job["paid"] = {}
+		if int(job["count"]) > 0 and int(job["done"]) >= int(job["count"]):
+			jobs.remove_at(i)
+	if not jobs.is_empty() and i >= jobs.size() and not is_paused(station):
+		idle[station] = true  # (every job is waiting)
 	return done
 
 
@@ -241,7 +261,7 @@ func cancel(index: int, inventory, station := FABRICATOR) -> bool:
 	var jobs := queue_of(station)
 	if index < 0 or index >= jobs.size():
 		return false
-	inventory.refund(jobs[index]["paid"])
+	inventory.refund(jobs[index]["paid"])  # (only the unit in progress)
 	jobs.remove_at(index)
 	if jobs.is_empty():
 		_pause(station, false)
@@ -277,6 +297,7 @@ func load_dict(d: Dictionary) -> String:
 	others = r["queues"]
 	paused = false
 	paused_at.clear()
+	idle.clear()
 	working.clear()
 	lead.clear()
 	return ""
@@ -289,7 +310,7 @@ func check_dict(d: Dictionary) -> String:
 
 ## Parse a saved set: {known, queue, queues}, or {error} for the first problem.
 func _read(d: Dictionary) -> Dictionary:
-	if int(d.get("version", 0)) != VERSION:
+	if not [1, VERSION].has(int(d.get("version", 0))):
 		return {"error": "unsupported crafting version"}
 	var fresh_known := {}
 	for id in d.get("known", []):
@@ -331,6 +352,10 @@ func _read_jobs(jobs, station: String) -> Dictionary:
 			return {"error": "bad job in the queue"}
 		if station_of(str(j["recipe"])) != station:
 			return {"error": "job %s is in the wrong queue" % str(j["recipe"])}
+		var cnt = j.get("count", 1)
+		var dn = j.get("done", 0)
+		if not (cnt is int or cnt is float) or cnt < 0 or cnt > MAX_COUNT or not (dn is int or dn is float) or dn < 0:
+			return {"error": "bad job count"}
 		var p = j.get("progress", -1)
 		if not (p is int or p is float) or p < 0:
 			return {"error": "bad job progress"}
@@ -342,14 +367,14 @@ func _read_jobs(jobs, station: String) -> Dictionary:
 			if not (v is int or v is float) or v < 0 or v != floorf(v):
 				return {"error": "bad job cost for " + str(id)}
 			paid[str(id)] = int(v)
-		fresh_queue.append({"recipe": str(j["recipe"]), "progress": float(p), "paid": paid})
+		fresh_queue.append({"recipe": str(j["recipe"]), "progress": float(p), "paid": paid, "count": int(cnt), "done": int(dn)})
 	return {"jobs": fresh_queue}
 
 
 func _jobs_out(jobs: Array) -> Array:
 	var out := []
 	for j in jobs:
-		out.append({"recipe": j["recipe"], "progress": j["progress"], "paid": j["paid"].duplicate()})
+		out.append({"recipe": j["recipe"], "progress": j["progress"], "paid": j["paid"].duplicate(), "count": j["count"], "done": j["done"]})
 	return out
 
 
@@ -365,6 +390,7 @@ func _clear_stations() -> void:
 	paused = false
 	others.clear()
 	paused_at.clear()
+	idle.clear()
 	working.clear()
 	lead.clear()
 
