@@ -318,7 +318,7 @@ func _run_station(ship: Ship, dt: float, station: String) -> void:
 			Audio.fx(self, "craft_done")
 	if smelting and int(st["uid"]) >= 0:
 		c.lead[station] = int(st["uid"])
-		if not c.is_paused(station):
+		if not c.is_paused(station) and not c.idle.get(station, false):
 			c.working[int(st["uid"])] = true
 	if c.is_paused(station) and not was:
 		if int(st["level"]) <= 0:

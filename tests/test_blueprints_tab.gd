@@ -1,5 +1,5 @@
 extends "res://tests/base_test.gd"
-## The craft panel's Blueprints tab (every blueprint you know, grouped, NEW tags saved with the run), the way to a smelter (the no-smelter hint, the
+## The craft panel's Fabricator tab (every blueprint you know, grouped, NEW tags saved with the run; it was the Blueprints tab before the merge), the way to a smelter (the no-smelter hint, the
 ## Ledger's Slag Pot goal), the line that says a blueprint was learned, and the hover card with its separate Queue action.
 
 const Advisor = preload("res://scripts/sim/advisor.gd")
@@ -51,19 +51,24 @@ func _row_of(panel: CraftingPanel, id: String) -> int:
 	return -1
 
 
-func test_the_blueprints_tab_lists_every_known_blueprint_grouped() -> void:
+func test_the_fabricator_tab_lists_every_known_blueprint_grouped() -> void:
 	var ship := Fixture.room_ship()
 	var d := _panel(ship)
 	var panel: CraftingPanel = d["panel"]
 	panel.open()
-	check(panel.set_station("blueprints"), "the tab exists")
+	eq(panel.station, "fabricator", "the one tab for them")
+	check(not panel.set_station("blueprints"), "the Blueprints tab is gone")
 	var ids := panel.recipe_ids()
-	var known: Array = ship.crafting.known.keys()
-	eq(ids.size(), known.size(), "one row for each blueprint known")
+	var known: Array = ship.crafting.known.keys().filter(func(id): return ship.crafting.station_of(id) == "fabricator")
+	eq(ids.size(), known.size(), "one row for each fabricator blueprint known (the smelter's are on its tab)")
 	for id in known:
 		check(ids.has(id), "%s is listed" % id)
 	var heads := panel.rows().filter(func(r): return r.has("header")).map(func(r): return r["header"])
 	check(heads.has("Smelters") and heads.has("Materials") and heads.has("Weapons"), "grouped: " + str(heads))
+	var seen := {}
+	for id in ids:
+		check(not seen.has(id), id + " once")
+		seen[id] = true
 	check(heads.find("Weapons") < heads.find("Smelters") and heads.find("Smelters") < heads.find("Materials"), "families first, then materials")
 	check(heads.has(CraftingPanel.G_GEAR) and heads.has(CraftingPanel.G_ITEMS), "hand gear and items have their groups")
 	var rows := panel.rows()
@@ -80,13 +85,11 @@ func test_new_tags_count_and_clear_once_the_tab_was_viewed() -> void:
 	check(ship.crafting.unlock("laser_mk2"), "learned")
 	eq(ship.crafting.fresh(), ["laser_mk2"] as Array[String], "it is NEW")
 	panel.open()
-	eq(panel.tab_label("blueprints"), "Blueprints (1 new)", "the tab title counts it")
-	panel.set_station("blueprints")
+	eq(panel.tab_label("fabricator"), "Fabricator (1 new)", "the tab title counts it")
 	check(panel.fresh_now.has("laser_mk2"), "the row carries the tag while the tab is open")
-	eq(panel.tab_label("blueprints"), "Blueprints (1 new)", "and the title still says so")
+	panel.set_station("smelter")
+	eq(panel.tab_label("fabricator"), "Fabricator", "gone after it was viewed")
 	panel.set_station("fabricator")
-	eq(panel.tab_label("blueprints"), "Blueprints", "gone after it was viewed")
-	panel.set_station("blueprints")
 	check(panel.fresh_now.is_empty(), "and the tag is gone on the next visit")
 	_free(d)
 
@@ -106,22 +109,20 @@ func test_the_seen_set_is_saved_and_a_save_without_it_has_seen_all() -> void:
 	eq(third.crafting.fresh().size(), 0, "and has seen everything")
 
 
-func test_a_row_click_opens_the_recipe_on_its_station() -> void:
+func test_a_row_click_selects_it_whatever_its_station() -> void:
 	var ship := Fixture.room_ship()
 	var d := _panel(ship)
 	var panel: CraftingPanel = d["panel"]
 	panel.open()
-	panel.set_station("blueprints")
-	var r := _row_of(panel, "steel")
+	var r := _row_of(panel, "polymer")
 	check(r >= 0, "steel is listed")
 	panel.top = maxi(r - 1, 0)
 	panel._gui_input(_click(panel.row_rect(r).get_center()))
-	eq([panel.station, panel.selected], ["smelter", "steel"], "a smelter recipe opens on the smelter tab")
-	panel.set_station("blueprints")
+	eq([panel.station, panel.selected], ["fabricator", "polymer"], "a click selects it and stays on the tab")
 	r = _row_of(panel, "laser_mk1")
 	panel.top = maxi(r - 1, 0)
 	panel._gui_input(_click(panel.row_rect(r).get_center()))
-	eq([panel.station, panel.selected], ["fabricator", "laser_mk1"], "a part opens at the fabricator")
+	eq([panel.station, panel.selected], ["fabricator", "laser_mk1"], "a part too")
 	eq(ship.crafting.queue.size(), 0, "and nothing was queued")
 	_free(d)
 
@@ -234,12 +235,11 @@ func test_the_fabricator_lists_only_known_recipes_and_keeps_the_unaffordable_one
 	_free(d)
 
 
-func test_the_blueprints_tab_counts_what_was_found() -> void:
+func test_the_fabricator_tab_counts_what_was_found() -> void:
 	var ship := Fixture.room_ship()
 	var d := _panel(ship)
 	var panel: CraftingPanel = d["panel"]
 	panel.open()
-	panel.set_station("blueprints")
 	eq(panel.found_text(), "%d of %d found" % [ship.crafting.known.size(), ship.crafting.ids().size()], "known out of all")
 	var before := ship.crafting.known.size()
 	var locked: Array = ship.crafting.ids().filter(func(id): return not ship.crafting.is_known(id))
@@ -261,9 +261,9 @@ func test_a_recipe_card_has_no_name_and_its_hover_card_does() -> void:
 	var hover: Dictionary = panel.hover_card(id)
 	eq(hover["title"], name, "the hover card has the name")
 	check(hover["what"] != "" or not hover["stats"].is_empty(), "and what it does")
-	panel.set_station("blueprints")
 	ship.crafting.unlock("laser_mk2")
-	panel.set_station("blueprints")
+	panel.close()
+	panel.open()
 	check(panel.fresh_now.has("laser_mk2") and PicCard.labels(panel.card_spec("laser_mk2")).has("NEW"), "a new blueprint's card carries NEW")
 	_free(d)
 
@@ -273,7 +273,6 @@ func test_the_grid_scrolls_and_moves_by_lines() -> void:
 	var d := _panel(ship)
 	var panel: CraftingPanel = d["panel"]
 	panel.open()
-	panel.set_station("blueprints")
 	var starts := panel.line_starts()
 	check(starts.size() > 2, "several lines")
 	panel._gui_input(_wheel(MOUSE_BUTTON_WHEEL_DOWN))
