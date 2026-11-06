@@ -169,6 +169,8 @@ func can_craft(recipe_id: String, inventory, fab: Dictionary) -> String:
 	var r: Dictionary = recipes[recipe_id]
 	if r["station"] != str(fab.get("station", FABRICATOR)):
 		return "needs a " + str(STATIONS[r["station"]]).to_lower()
+	if str(r["output"]["item"]) == "fabricator" and int(fab.get("count", 0)) > 0:  # (a ship with one is the only place this runs)
+		return "one fabricator per ship: click yours to upgrade it"
 	var sname := str(STATIONS[r["station"]]).to_lower()
 	var level := int(fab.get("level", 0))
 	if level <= 0:

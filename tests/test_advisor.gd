@@ -53,7 +53,9 @@ func _built() -> Ship:
 	for y in range(21, 25):
 		for x in [8, 15]:
 			ship.grid.force_tile(Vector2i(x, y), "wall")
-	check(c.place(ship.grid, "fabricator", Vector2i(9, 22), 0) > 0, "the fabricator")
+	var fab_uid: int = c.place(ship.grid, "fabricator", Vector2i(9, 22), 0)
+	check(fab_uid > 0, "the fabricator")
+	c.instances[fab_uid]["fab_level"] = 2  # (upgraded in build mode)
 	check(c.place(ship.grid, "robot_arm", Vector2i(13, 22), 0) > 0, "its arm")
 	check(c.place(ship.grid, "medbay", Vector2i(17, 22), 1) > 0, "the medbay")
 	for x in range(9, 22):  # a part is on the network when a cable runs through its footprint
@@ -84,7 +86,7 @@ func test_each_check_computes_right_on_a_built_ship() -> void:
 	eq(v["guns"], 3, "guns: three powered lasers")
 	eq(v["layers"], 1, "layers: one Shield Mk1 layer")
 	eq(v["medbays"], 1, "medbays")
-	eq(v["fab"], 2, "fab: a fabricator and a robot arm in its room is level 2")
+	eq(v["fab"], 2, "fab: a fabricator upgraded once is level 2")
 	near(v["margin"], 4.0, "margin: 18 supplied, 14 asked")
 	eq(v["damaged_blocks"], 0, "damaged_blocks: none on a fresh ship")
 	eq(v["known"], ship.crafting.known.size(), "known: the blueprints held")
