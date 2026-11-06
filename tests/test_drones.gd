@@ -46,10 +46,11 @@ const PART := "drone_part"
 
 
 func test_kits_and_bays_are_data() -> void:
-	eq(Drones.kit_ids().size(), 7, "seven kits")
+	eq(Drones.kit_ids().filter(func(id): return Drones.kit(id)["drone"]["role"] in ["combat", "defence"]).size(), 7, "seven combat and defence kits")
 	for id in Drones.kit_ids():
 		var k := Drones.kit(id)
-		check(k["drone"]["hp"] == [0, 3, 5, 8][int(k["drone"]["tier"])], "%s hp by tier" % id)
+		if k["drone"]["role"] in ["combat", "defence"]:
+			check(k["drone"]["hp"] == [0, 3, 5, 8][int(k["drone"]["tier"])], "%s hp by tier" % id)
 	var s := _ship()
 	for id in ["drone_bay_mk1", "drone_bay_mk2", "drone_bay_mk3"]:
 		var d := s.components.def(id)

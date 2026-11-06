@@ -13,6 +13,7 @@ const Collisions = preload("res://scripts/combat/collisions.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const Content = preload("res://scripts/data/content.gd")
+const Limpets = preload("res://scripts/combat/limpets.gd")
 
 const FAMILY := "drone_bay"
 const PART := "drone_part"
@@ -28,6 +29,9 @@ const GROW_S := 0.25  ## seconds from the hatch mouth to its full size
 const DOCKED_SCALE := 0.714  ## the size it has on the cradle (the view draws a flying drone 1/this larger)
 const HOME_DIST := 26.0  ## px from the hatch at which a returning drone is docked
 const EVASION := 0.12  ## the chance a turret's tracer misses a drone, on top of its accuracy
+const LIMPET_REACH := 1900.0  ## an enemy throws limpets and pods only when the foe is this near
+const LIMPET_SIGHT := 3.0  ## point defence and turrets engage a flying limpet or pod from this many times their usual reach
+const AI_SKILL := 0.75  ## how often the enemy picks its best-predicted throw
 const DRONE_EVENTS := ["drone_launch", "drone_shot", "drone_hit", "drone_down", "drone_home", "drone_recall"]
 
 static var _kits := {}
@@ -200,8 +204,9 @@ static func can_launch(arena, idx: int, uid: int) -> String:
 	return ""
 
 
-## Launch bay `uid`'s drone. "" when it flew, else why not (can_launch). Spends the parts. The drone leaves the hatch along the mount's outward direction.
-static func launch(arena, idx: int, uid: int) -> String:
+## Launch bay `uid`'s drone. "" when it flew, else why not (can_launch). Spends the parts. The drone leaves the hatch along the mount's outward direction; a limpet or
+## a boarder pod (limpets.gd) is thrown toward the world point `aim` (straight out of the hatch when it is left out) and the magnet does the rest.
+static func launch(arena, idx: int, uid: int, aim := Vector2.INF) -> String:
 	var why := can_launch(arena, idx, uid)
 	if why != "":
 		return why
@@ -211,14 +216,17 @@ static func launch(arena, idx: int, uid: int) -> String:
 	co.ship.inventory.add(PART, -int(spec["tier"]))
 	var hatch: Vector2 = arena.local_to_world(idx, b["pos"])
 	var dir: Vector2 = Vector2(b["dir"]).rotated(co.flight.angle)
-	var o: Dictionary = spec["orbit"]
+	var o: Dictionary = spec.get("orbit", {"gap": 0.0, "speed": 0.0, "weave": 0.0, "hz": 0.0})
 	var d := {"id": arena.drone_serial, "owner": idx, "bay": uid, "kit": str(b["kit"]), "role": str(spec["role"]), "tier": int(spec["tier"]), "name": str(kit(str(b["kit"]))["name"]),
-		"art": str(spec["art"]), "hp": float(spec["hp"]), "max_hp": float(spec["hp"]), "spec": spec, "w": gun_of(arena, spec),
+		"art": str(spec["art"]), "hp": float(spec["hp"]), "max_hp": float(spec["hp"]), "spec": spec, "w": gun_of(arena, spec) if spec.has("gun") else {},
 		"pos": hatch, "dir": dir, "vel": dir * LAUNCH_SPEED + co.flight.vel, "angle": dir.angle() + PI / 2.0, "born": arena.tick, "state": "out", "hit_tick": -1000000, "fire_tick": -1000000,
 		"cool": arena.tick + int(1.2 / arena.SUBSTEP), "theta": arena.rng.randf() * TAU, "sign": 1.0 if arena.rng.randf() < 0.5 else -1.0, "ph1": arena.rng.randf() * TAU,
 		"ph2": arena.rng.randf() * TAU, "ph3": arena.rng.randf() * TAU, "orbit": o, "beam": {}, "r": 0.0}
 	arena.drone_serial += 1
 	arena.drones.append(d)
+	if Limpets.is_limpet(d):
+		Limpets.start(arena, d, hatch, aim if aim != Vector2.INF else hatch + dir * 600.0, co.flight.vel)
+		dir = Vector2.from_angle(float(d["angle"]) - PI / 2.0)
 	b["drone"] = d
 	b["launched"] = arena.tick
 	arena.log_event("drone_launch", idx, Vector2i(-1, -1), {"drone": d["id"], "uid": uid, "pos": hatch, "dir": dir, "kit": d["kit"]})
@@ -237,6 +245,8 @@ static func out_of(arena, idx: int, uid: int):
 
 ## Recall one drone: it flies home and docks.
 static func recall(arena, d: Dictionary) -> void:
+	if Limpets.is_limpet(d):  # (it cannot turn back: the magnet has it)
+		return
 	if d["state"] != "home":
 		d["state"] = "home"
 		d["home_tick"] = arena.tick
@@ -247,6 +257,7 @@ static func recall(arena, d: Dictionary) -> void:
 static func recall_all(arena) -> void:
 	for d in arena.drones:
 		recall(arena, d)
+	Limpets.clear(arena)
 
 
 # --- the loaded kit (build mode) -----------------------------------------------------------------
@@ -319,6 +330,10 @@ static func step(arena, dt: float) -> void:
 		return
 	var keep: Array = []
 	for d in arena.drones.duplicate():
+		if Limpets.is_limpet(d):  # (a limpet or a pod flies by the magnet and works where it sticks)
+			if d["hp"] > 0.0 and Limpets.step(arena, d, dt):
+				keep.append(d)
+			continue
 		var co = arena.ships[d["owner"]]
 		var b: Dictionary = co.bays.get(d["bay"], {})
 		if d["state"] != "home" and (b.is_empty() or status_of(arena, d["owner"], d["bay"]) != "ok"):
@@ -339,6 +354,11 @@ static func step(arena, dt: float) -> void:
 		keep.append(d)
 	# (a drone shot down inside this step was removed by kill())
 	arena.drones = arena.drones.filter(func(d): return keep.has(d) and d["hp"] > 0.0)
+
+
+## A limpet or pod already stuck to a hull (or falling off): no shot or turret takes it any more.
+static func _clamped(d: Dictionary) -> bool:
+	return d["state"] == "stuck" or d["state"] == "fall" or d["state"] == "gone"
 
 
 static func _target_ship(arena, d: Dictionary) -> int:
@@ -515,7 +535,7 @@ static func _defend(arena, d: Dictionary) -> void:
 			best = p
 	if targets.has("drone"):
 		for e in arena.drones:
-			if e["owner"] != d["owner"]:
+			if e["owner"] != d["owner"] and not _clamped(e):
 				var dd := from.distance_squared_to(e["pos"])
 				if dd <= best_d:
 					best_d = dd
@@ -544,7 +564,7 @@ static func contact(arena, owner: int, p0: Vector2, p1: Vector2) -> Dictionary:
 	var seg := p1 - p0
 	var len2 := seg.length_squared()
 	for d in arena.drones:
-		if d["owner"] == owner or d["hp"] <= 0.0 or float(arena.tick - int(d["born"])) * arena.SUBSTEP < SHOW_AFTER_S:  # (not while it is inside the bay)
+		if d["owner"] == owner or d["hp"] <= 0.0 or float(arena.tick - int(d["born"])) * arena.SUBSTEP < SHOW_AFTER_S or _clamped(d):  # (not while it is inside the bay)
 			continue
 		var r: float = float(HIT_RADIUS[int(d["tier"])]) * scale_of(arena, d)
 		var t := 0.0 if len2 < 1e-9 else clampf((Vector2(d["pos"]) - p0).dot(seg) / len2, 0.0, 1.0)
@@ -596,12 +616,13 @@ static func turret_target(arena, idx: int, m: Dictionary, w: Dictionary, uid: in
 	var from: Vector2 = arena.local_to_world(idx, m["pos"])
 	var reach: float = float((Effects_of(w).get("intercept") as Dictionary)["range"]) if pd else float(w["range"]) * 0.9
 	var best = null
-	var best_d := reach * reach
+	var best_d := INF
 	for d in arena.drones:
-		if d["owner"] == idx or d["hp"] <= 0.0:
+		if d["owner"] == idx or d["hp"] <= 0.0 or _clamped(d):
 			continue
+		var rr := reach * (LIMPET_SIGHT if Limpets.is_limpet(d) else 1.0)  # a slow limpet or pod is seen coming from further off
 		var dd := from.distance_squared_to(d["pos"])
-		if dd <= best_d and arena.weapons.in_arc(arena, idx, m, d["pos"]):
+		if dd <= rr * rr and dd <= best_d and arena.weapons.in_arc(arena, idx, m, d["pos"]):
 			best_d = dd
 			best = d
 	return null if best == null else {"pos": best["pos"], "vel": best["vel"], "drone": best, "d2": best_d}
@@ -633,7 +654,11 @@ static func ai_launch(arena, idx: int, foe: int) -> void:
 			continue
 		if str(k["drone"]["role"]) == "defence" and not _threatened(arena, idx):
 			continue
-		if co.flight.pos.distance_to(arena.ships[foe].flight.pos) < 2600.0:
+		if Limpets.is_limpet({"role": str(k["drone"]["role"])}):  # limpets and pods are thrown: a lead plus a skilled wide angle for the side and back rooms
+			if co.flight.pos.distance_to(arena.ships[foe].flight.pos) < LIMPET_REACH:
+				var hatch: Vector2 = arena.local_to_world(idx, co.bays[uid]["pos"])
+				launch(arena, idx, uid, Limpets.ai_aim(arena, idx, hatch, k["drone"], AI_SKILL))
+		elif co.flight.pos.distance_to(arena.ships[foe].flight.pos) < 2600.0:
 			launch(arena, idx, uid)
 
 

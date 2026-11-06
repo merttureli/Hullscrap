@@ -1,0 +1,58 @@
+{
+ "frame": [
+  25,
+  25
+ ],
+ "pivot": [
+  12,
+  12
+ ],
+ "anims": {
+  "fly": [
+   0,
+   2,
+   6
+  ],
+  "stuck": [
+   2,
+   4,
+   5
+  ],
+  "husk": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "heat_limpet_glow.png",
+  "frame": [
+   45,
+   45
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "fly": [
+    0,
+    2,
+    6
+   ],
+   "stuck": [
+    2,
+    4,
+    5
+   ],
+   "husk": [
+    6,
+    1,
+    0
+   ]
+  }
+ },
+ "kind": "limpet",
+ "family": "heat",
+ "notes": "A heat limpet, 25 px square, pivot at its core. Frames: flying 0-1 (spikes folded), stuck 0-3 (spikes splayed, the core pulses), husk (dead, bent spikes). It is round: draw it unturned. The game pulses the glow strip with the same frame."
+}

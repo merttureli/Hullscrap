@@ -1,0 +1,147 @@
+{
+ "species": "boarding_robot_mk1",
+ "frame": [
+  33,
+  33
+ ],
+ "pivot": [
+  16,
+  16
+ ],
+ "notes": "Boarding robot Mk I: the drill robot. A crew rig (normal kind) for a hostile unit: every layer faces UP at rotation 0; the legs are treads; arms poses unarmed / melee / melee_2 (the strike, two frames: play them alternately while it attacks); no item is held. The shoulder plates are the tint mask (the owner colour).",
+ "draw_order": [
+  "legs",
+  "torso",
+  "arms",
+  "head"
+ ],
+ "rotate": {
+  "legs": "move direction",
+  "torso": "aim",
+  "arms": "aim",
+  "head": "aim"
+ },
+ "layers": {
+  "legs": {
+   "image": "legs.png",
+   "color_mask": "legs_color.png",
+   "anims": {
+    "walk": [
+     0,
+     6,
+     8
+    ],
+    "stand": [
+     6,
+     1,
+     0
+    ]
+   },
+   "notes": "tread links run back one px a frame"
+  },
+  "torso": {
+   "image": "torso.png",
+   "color_mask": "torso_color.png",
+   "anchors": {
+    "head": [
+     16,
+     14
+    ],
+    "back": [
+     16,
+     24
+    ],
+    "shoulder_l": [
+     8,
+     15
+    ],
+    "shoulder_r": [
+     24,
+     15
+    ]
+   },
+   "glow": {
+    "image": "torso_glow.png",
+    "frame": [
+     33,
+     33
+    ],
+    "frames": 1
+   }
+  },
+  "arms": {
+   "image": "arms.png",
+   "color_mask": "arms_color.png",
+   "frames": {
+    "unarmed": 0,
+    "melee": 1,
+    "melee_2": 2
+   },
+   "glow": {
+    "image": "arms_glow.png",
+    "frame": [
+     33,
+     33
+    ],
+    "frames": 3
+   },
+   "anchors": {
+    "unarmed": {
+     "hand_l": [
+      8,
+      9
+     ],
+     "hand_r": [
+      23,
+      10
+     ],
+     "mount": null
+    },
+    "melee": {
+     "hand_l": [
+      12,
+      7
+     ],
+     "hand_r": [
+      23,
+      8
+     ],
+     "mount": [
+      23,
+      8
+     ]
+    },
+    "melee_2": {
+     "hand_l": [
+      12,
+      7
+     ],
+     "hand_r": [
+      23,
+      8
+     ],
+     "mount": [
+      23,
+      8
+     ]
+    }
+   }
+  },
+  "head": {
+   "image": "head.png",
+   "color_mask": "head_color.png",
+   "frames": {
+    "lens": 0
+   },
+   "glow": {
+    "image": "head_glow.png",
+    "frame": [
+     33,
+     33
+    ],
+    "frames": 2,
+    "notes": "alternate at 2 fps: the lens pulses"
+   }
+  }
+ }
+}

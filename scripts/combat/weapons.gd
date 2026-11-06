@@ -376,7 +376,7 @@ func missile_target(arena, idx: int, m: Dictionary, w: Dictionary):
 			best_d = d
 			best = p
 	var dr = Drones.turret_target(arena, idx, m, w, _uid_of(arena, idx, m), true)  # point defence counts drones as incoming
-	if dr != null and float(dr["d2"]) <= best_d:
+	if dr != null and (best == null or float(dr["d2"]) <= best_d):  # (a limpet is seen from further off than a shell)
 		return dr
 	return best
 

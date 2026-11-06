@@ -54,10 +54,11 @@ const Processing = preload("res://scripts/craft/processing.gd")
 const Power = preload("res://scripts/sim/power.gd")
 const Posts = preload("res://scripts/crew/posts.gd")
 const Evacuate = preload("res://scripts/crew/evacuate.gd")
+const Intruders = preload("res://scripts/crew/intruders.gd")
 const QUALIFIED_BONUS := 15  ## a station whose abilities need traits: crew who have them prefer it by this much
 const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere first
 ## The jobs with a finite work time that the breath budget (crew.json air.breath_margin) holds a crew member to in bad air.
-const BREATH_JOBS: Array[String] = ["repair_breach", "repair_component", "repair_block", "repair_belt", "clear_wreck", "revive"]
+const BREATH_JOBS: Array[String] = ["repair_breach", "repair_component", "repair_block", "repair_belt", "clear_wreck", "revive", "scrape"]
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const FAULTY: Array[String] = ["malfunction", "disabled"]  ## part statuses a crew member can repair
 const NO_FIRE := Vector2i(-1, -1)  ## "no burning cell"
@@ -95,11 +96,18 @@ func tick(ship, dt: float, in_combat := false) -> void:
 		build_board(ship)
 		assign(ship)
 	ship.manned.clear()
+	Intruders.tick(ship, self, dt)  # boarding robots fight and sabotage (docs/DRONES.md section 6)
 	for m in ship.crew:
 		m.hold = maxf(m.hold - dt, 0.0)
 		var stunned: bool = m.is_stunned()
 		m.stun = maxf(m.stun - dt, 0.0)
-		if m.is_down() or m.is_player or stunned:
+		if m.is_down() or stunned:
+			continue
+		if (not ship.intruders.is_empty() or str(m.job.get("type", "")) == "intruder") and not m.is_drone() and Intruders.respond(ship, self, m, dt):
+			if not m.is_player:
+				m.step(dt)  # (the intruder response: fight what is in reach, go for what is near)
+			continue
+		if m.is_player:
 			continue
 		if m.is_drone() and not Power.drone_fed(ship.power_state, m.name):
 			continue  # no power: the drone stands still
@@ -159,7 +167,7 @@ func work(ship, m, job: Dictionary, dt: float) -> void:
 				progress.erase(job["key"])
 				_erase(job["key"])
 				_since = 1.0e9
-		"repair_breach", "repair_component", "revive", "clear_wreck", "repair_belt", "repair_block":
+		"repair_breach", "repair_component", "revive", "clear_wreck", "repair_belt", "repair_block", "scrape":
 			var key: String = job["key"]
 			var line: String = TraitSet.part_line(ship, job["uid"]) if job["type"] == "repair_component" else ""  # their line_affinity
 			progress[key] = float(progress.get(key, 0.0)) + dt * _work_rate(ship, m, job["type"], line) * _fire_mult(ship, job)
@@ -266,6 +274,9 @@ func build_board(ship) -> void:
 		_add(b, _job("repair_belt", "belt:%d,%d" % [c.x, c.y], [c], {"cell": c}))
 	for w in ship.components.wrecks:
 		_add(b, _job("clear_wreck", "wreck:%d,%d" % [w["cells"][0].x, w["cells"][0].y], w["cells"], {"id": w["id"], "name": ship.components.def(w["id"]).get("name", w["id"])}))
+	for d in ship.stuck:  # a limpet clamped to the wall: scraped off from the room behind (priority crew.json jobs.scrape)
+		if str(d["state"]) == "stuck" and str(d["role"]) == "limpet" and not bool(d.get("scraped", false)):
+			_add(b, _job("scrape", "scrape:%d" % int(d["id"]), [d["cell"]], {"drone": d, "name": str(d["name"])}))
 	for key in orders.keys():
 		var uid := int(orders[key]["uid"])
 		if not ship.components.instances.has(uid) or _fine(ship, uid):
@@ -954,6 +965,8 @@ func _finish(ship, job: Dictionary) -> void:
 		"repair_belt":
 			if ship.belts.repair(job["cell"]):
 				ship.log_event("Belt repaired")
+		"scrape":
+			job["drone"]["scraped"] = true  # (limpets.gd lets it go on its next step)
 		"repair_block":
 			ship.grid.hp.erase(job["cell"])  # a cell that is not listed has full hp
 		"repair_component":

@@ -1,0 +1,76 @@
+{
+ "species": {
+  "boarding_robot_mk1": {
+   "name": "Drill Robot",
+   "hp": 40,
+   "speed": 0.75,
+   "traits": [],
+   "rig": "boarding_robot_mk1",
+   "robot": true,
+   "mechanical": true,
+   "o2_use": 0,
+   "vacuum_walk": true,
+   "body": 2,
+   "damage_taken": {
+    "fire": 0.25,
+    "poison": 0.0,
+    "no_air": 0.0
+   },
+   "intruder": {
+    "dps": 10.0,
+    "reach": 1.6,
+    "sabotage_dps": 6.0,
+    "ion": false
+   },
+   "notes": "A boarding robot (docs/DRONES.md section 6): a hostile unit in the crew sim of the ship it was dropped into (ship.intruders, scripts/crew/intruders.gd). It fights crew in reach, otherwise walks to the nearest powered system and wrecks it. Mk II ion-locks the system. It never comes home."
+  },
+  "boarding_robot_mk2": {
+   "name": "Shock Robot",
+   "hp": 60,
+   "speed": 0.9,
+   "traits": [],
+   "rig": "boarding_robot_mk2",
+   "robot": true,
+   "mechanical": true,
+   "o2_use": 0,
+   "vacuum_walk": true,
+   "body": 2,
+   "damage_taken": {
+    "fire": 0.25,
+    "poison": 0.0,
+    "no_air": 0.0
+   },
+   "intruder": {
+    "dps": 7.0,
+    "reach": 1.6,
+    "sabotage_dps": 4.0,
+    "ion": true
+   },
+   "notes": "A boarding robot (docs/DRONES.md section 6): a hostile unit in the crew sim of the ship it was dropped into (ship.intruders, scripts/crew/intruders.gd). It fights crew in reach, otherwise walks to the nearest powered system and wrecks it. Mk II ion-locks the system. It never comes home."
+  },
+  "boarding_robot_mk3": {
+   "name": "Heavy Drill Robot",
+   "hp": 90,
+   "speed": 0.7,
+   "traits": [],
+   "rig": "boarding_robot_mk3",
+   "robot": true,
+   "mechanical": true,
+   "o2_use": 0,
+   "vacuum_walk": true,
+   "body": 2,
+   "damage_taken": {
+    "fire": 0.25,
+    "poison": 0.0,
+    "no_air": 0.0
+   },
+   "intruder": {
+    "dps": 12.0,
+    "reach": 1.6,
+    "sabotage_dps": 8.0,
+    "ion": false
+   },
+   "notes": "A boarding robot (docs/DRONES.md section 6): a hostile unit in the crew sim of the ship it was dropped into (ship.intruders, scripts/crew/intruders.gd). It fights crew in reach, otherwise walks to the nearest powered system and wrecks it. Mk II ion-locks the system. It never comes home."
+  }
+ }
+}

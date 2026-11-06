@@ -1,0 +1,9 @@
+{
+ "id": "drones_2",
+ "name": "Drones wave 2",
+ "version": "1.0",
+ "requires": [
+  "drones_1"
+ ],
+ "notes": "Magnetic limpets (fire, poison, heat) and boarder pods with their robots (docs/DRONES.md sections 4-6): nine drone kits (items of kind `drone`, role limpet or boarder; the magnet, effect and robots are in the item's `drone` entry), the boarding robot species and their recipes. Art: art/drones/*_limpet, boarder_pod*, art/crew/boarding_robot_mk*."
+}

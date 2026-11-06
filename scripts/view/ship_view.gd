@@ -9,6 +9,7 @@ extends Node2D
 
 const Drones = preload("res://scripts/combat/drones.gd")
 const DroneView = preload("res://scripts/combat/drone_view.gd")
+const LimpetView = preload("res://scripts/combat/limpet_view.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
@@ -121,6 +122,10 @@ func _process(dt: float) -> void:
 			var a: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
 			PersonDrawer.animate(a, m, dt, PersonDrawer.job_aim(m))
 			_crew_anim[m] = a
+		for m in ship.intruders:
+			var a2: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
+			PersonDrawer.animate(a2, m, dt, PersonDrawer.job_aim(m))
+			_crew_anim[m] = a2
 	queue_redraw()
 
 
@@ -190,6 +195,8 @@ func _draw() -> void:
 		var out_rect := Visuals.slope_rect(def, inst, px(Vector2.ZERO), CELL) if Mounts.is_angled(inst) else _rect_of(inst["out_cells"])
 		Visuals.draw_mount_out(self, def, inst, out_rect, px(Mounts.barrel_of(def, inst)["pivot"]), CELL, aim, all_opts[uid])
 	draw_fire(self, ship.fires, px(Vector2.ZERO), CELL, _clock, _glow_quads)
+	if arena != null:  # the room behind a stuck limpet: poison haze, hot parts
+		LimpetView.draw_rooms(self, arena, index, px, CELL, _clock)
 	for m in ship.crew:
 		var a: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
 		var look: Dictionary = m.look if not m.look.is_empty() else LOOKS.get(m.name, OTHER_LOOK)
@@ -199,6 +206,19 @@ func _draw() -> void:
 		PersonDrawer.draw(self, px(m.pos), pose, look, CELL)
 		PersonDrawer.draw_status(self, px(m.pos), Jobs.drone_status(ship, m), CELL)
 		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL, Mortality.bleed_frac(m))
+	for m in ship.intruders:  # boarding robots (intruders.gd): the same rig drawing as crew, in the owner's red
+		var ia: Dictionary = _crew_anim.get(m, PersonDrawer.new_state(m))
+		var ipose := {"species": Art.crew_rig(m.rig()), "move": ia["angle"], "aim": ia["aim"], "phase": ia["phase"], "moving": ia["moving"], "item": "", "down": m.is_down(),
+			"work": false, "t": _clock, "body": "",
+			"arm_pose": ["melee", "melee_2"][int(_clock * 6.0) % 2] if str(m.job.get("type", "")) == "attack" else "unarmed"}
+		PersonDrawer.draw(self, px(m.pos), ipose, m.look, CELL)
+		draw_health(self, px(m.pos), m.hp / m.max_hp, m.is_down(), CELL, 0.0)
+	for w in ship.intruder_dead:  # a fallen robot's debris, for a moment
+		var age: float = ship.clock - float(w["t"])
+		if age < 2.0:
+			for i in 6:
+				var dir := Vector2.from_angle(float(i) * 1.047 + float(hash(w["t"]) % 7))
+				draw_circle(px(w["pos"]) + dir * CELL * 0.5 * minf(age * 1.5, 1.0), 2.5 * (1.0 - age / 2.0), Color(0.55, 0.57, 0.62, 1.0 - age / 2.0))
 	ArmFx.draw_beams(self, ship, func(p): return px(p), CELL, _clock)
 	if flash_left > 0.0:
 		for c in flash_cells:

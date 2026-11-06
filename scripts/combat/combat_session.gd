@@ -7,6 +7,7 @@ extends RefCounted
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
 const Drones = preload("res://scripts/combat/drones.gd")
+const Limpets = preload("res://scripts/combat/limpets.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
@@ -245,8 +246,26 @@ func fire_slot(slot: int, aim: Vector2) -> bool:
 	var list := weapons()
 	if slot > list.size():
 		var b := bays()
-		return slot - list.size() <= b.size() and arena.launch_drone(PLAYER, b[slot - list.size() - 1]["uid"]) == ""
+		return slot - list.size() <= b.size() and arena.launch_drone(PLAYER, b[slot - list.size() - 1]["uid"], aim) == ""
 	return slot >= 1 and slot <= list.size() and arena.fire(PLAYER, list[slot - 1]["uid"], aim)
+
+
+## Is slot `slot` a bay loaded with a limpet or a boarder pod? Those are aimed: the key held shows the path, released it throws (combat_view.gd).
+func slot_thrown(slot: int) -> bool:
+	var n := slot - weapons().size()
+	var b := bays()
+	if n < 1 or n > b.size():
+		return false
+	return str(Drones.kit(str(b[n - 1]["kit"])).get("drone", {}).get("role", "")) in Limpets.ROLES
+
+
+## The path a kit thrown from slot `slot` toward world point `aim` would fly (Limpets.predict), or {} when the slot throws nothing.
+func slot_path(slot: int, aim: Vector2) -> Dictionary:
+	if not slot_thrown(slot):
+		return {}
+	var uid: int = bays()[slot - weapons().size() - 1]["uid"]
+	var b: Dictionary = arena.ships[PLAYER].bays[uid]
+	return Limpets.predict(arena, PLAYER, arena.local_to_world(PLAYER, b["pos"]), aim, Drones.kit_of(arena, PLAYER, uid)["drone"])
 
 
 ## The player's drone bays in slot order: [{uid, name, kit}]. Their keys follow the guns'.
