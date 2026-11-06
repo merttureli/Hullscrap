@@ -42,6 +42,7 @@ const DroneView = preload("res://scripts/combat/drone_view.gd")
 const BayPanel = preload("res://scripts/ui/bay_panel.gd")
 const Palette = preload("res://scripts/build/palette.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
+const Layout = preload("res://scripts/ship/layout.gd")
 const FireDock = preload("res://scripts/ui/fire_dock.gd")
 const RedAlert = preload("res://scripts/sim/red_alert.gd")
 const BeltArt = preload("res://scripts/view/belt_art.gd")
@@ -914,6 +915,21 @@ func _save() -> void:
 	message = "saved to " + ProjectSettings.globalize_path(SAVE_PATH)
 	if drift != null:
 		drift.save_campaign()
+
+
+## The layout buttons: "save" stores the ship as its reference layout; "hull", "parts" and "both" rebuild what is missing (layout.gd).
+func layout_action(id: String) -> void:
+	if ship == null or combat:
+		return
+	if id == "save":
+		ship.layout = Layout.capture(ship)
+		message = "Layout saved: %d tiles, %d parts" % [ship.layout["tiles"].size(), ship.layout["parts"].size()]
+		if drift != null:
+			drift.save_campaign()
+	elif ship.layout.is_empty():
+		message = "No saved layout yet: press Save layout first"
+	else:
+		message = Layout.rebuild(session, ship.layout, id)["text"]
 
 
 func _load() -> void:
