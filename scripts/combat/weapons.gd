@@ -125,16 +125,34 @@ func group_of(id: String, choice := -1) -> int:
 	return int(w["group"]) if w.has("group") else int(GROUPS.get(w["kind"], 1))
 
 
+## The group gun `uid` of `components` falls in with no choice of its own: group_of() by kind, except that when no gun of the ship
+## ends up in LMB (counting the others' saved choices), a gun that is not AUTO takes LMB so a new player's click fires something.
+func default_group(components, uid: int) -> int:
+	var g := group_of(str(components.instances[uid]["id"]))
+	if g == 0 or g == 1 or g == 3:
+		return g
+	for u in components.instances:
+		var id: String = components.instances[u]["id"]
+		if u != uid and has(id) and str(components.def(id).get("family", "")) != "drone_bay" and group_of(id, components.group_choice(u)) == 1:
+			return g
+	return 1
+
+
+## The fire group of placed gun `uid`: the player's choice, else default_group().
+func group_in(components, uid: int) -> int:
+	var c: int = components.group_choice(uid)
+	return c if c >= 0 else default_group(components, uid)
+
+
 ## The fire group of mount `uid` of ship `idx`: group_of() with the choice the player made for a placed gun.
 func mount_group(arena, idx: int, uid: int) -> int:
 	var co = arena.ships[idx]
 	var m = co.mounts.get(uid)
 	if m == null:
 		return 0
-	var choice := -1
 	if not m["virtual"] and co.ship.components.instances.has(uid):
-		choice = co.ship.components.group_choice(uid)
-	return group_of(m["id"], choice)
+		return group_in(co.ship.components, uid)
+	return group_of(m["id"])
 
 
 ## A mount for every placed component that has weapon stats: {uid: {id, pos (the barrel's pivot, cell

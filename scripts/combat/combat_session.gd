@@ -222,12 +222,12 @@ func weapons() -> Array:
 	for uid in uids:
 		var m: Dictionary = co.mounts[uid]
 		var name := str(m["id"])
-		var choice := -1
+		var group: int = arena.weapons.group_of(m["id"])
 		if not m["virtual"]:
 			name = str(co.ship.components.def(co.ship.components.instances[uid]["id"]).get("name", name))
-			choice = co.ship.components.group_choice(uid)
+			group = arena.weapons.group_in(co.ship.components, uid)
 		var d: Dictionary = arena.weapons.def(m["id"])
-		out.append({"uid": uid, "id": m["id"], "name": name, "group": arena.weapons.group_of(m["id"], choice), "turret": bool(d["turret"]),
+		out.append({"uid": uid, "id": m["id"], "name": name, "group": group, "turret": bool(d["turret"]),
 			"aim": str(d["aim"]), "pd": bool(d["turret"]) and d.get("effects") is Dictionary and d["effects"].has("intercept")})
 	return out
 
@@ -308,6 +308,24 @@ func slot_state(uid: int, aim: Vector2) -> Dictionary:
 ## The player's ability slots in key order (Abilities.slots): [{uid, id, slot, key, name, part, ability}].
 func ability_slots() -> Array:
 	return Abilities.slots(arena.ships[PLAYER].ship)
+
+
+## ability_slots() with parts that share a key and an ability merged into one box: the first slot plus `count` (how many parts) and `slots` (all their slot ids).
+func ability_boxes() -> Array:
+	var out := []
+	var at := {}
+	for s in ability_slots():
+		var k := "%s:%s" % [s["key"], s["id"]]
+		if at.has(k):
+			out[at[k]]["count"] += 1
+			out[at[k]]["slots"].append(s["slot"])
+		else:
+			at[k] = out.size()
+			var b: Dictionary = s.duplicate()
+			b["count"] = 1
+			b["slots"] = [s["slot"]]
+			out.append(b)
+	return out
 
 
 ## The player presses ability key `key` ("engine" Shift, "shield" Space, "utility" E): every ability

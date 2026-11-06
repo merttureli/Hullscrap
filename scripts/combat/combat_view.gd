@@ -46,7 +46,7 @@ const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
 const ART_SCALE := 2.0  ## fewest screen px per source px for the effect and projectile art
-const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB/Q weapon groups   1-9 one weapon or bay   T auto guns   Shift engine   Space shield   E utility   Esc leave"
+const HINT := "Mouse steers   W/S throttle   A/D strafe   LMB/RMB/Q fire groups   1-9 one gun   T auto   Shift/Space/E abilities   Esc leave"
 
 const SHIELD_HINT := "   arrows shift the shield balance   End even"
 const ENEMY_JUMP_DB := -8.0  ## the enemy's jump drive firing, against the player's own jump
@@ -167,7 +167,8 @@ func _make_hud() -> void:
 	_hint = Label.new()
 	_hint.size = Vector2(1000.0, 44.0)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.add_theme_font_size_override("font_size", 13)
+	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hint.add_theme_font_size_override("font_size", 12)
 	_hint.add_theme_color_override("font_color", Color("#9fb6d0"))
 	_hint.visible = false
 	layer.add_child(_hint)
@@ -556,6 +557,7 @@ func _update_hud() -> void:
 	_schem[0].intent = Intent.of(session.arena, session.ai, Session.PLAYER)
 	_schem[1].reveal = TraitSet.reveals_enemy(session.arena.ships[Session.PLAYER].ship)  # a crew member with reveal_enemy: the enemy's crew show
 	_banner.position = Vector2((vp.x - _banner.size.x) / 2.0, vp.y * 0.28)
+	_hint.size.x = minf(1000.0, vp.x - 2.0 * (Schematic.PANEL.x + 24.0))  # between the two schematics
 	_hint.position = Vector2((vp.x - _hint.size.x) / 2.0, 10.0)
 	_jump_bar.position = _schem[1].position + Vector2(0.0, Schematic.PANEL.y + 6.0)
 	var line := banner_line(session, _note if _clock < _note_until else "")
