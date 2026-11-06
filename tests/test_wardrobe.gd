@@ -31,7 +31,8 @@ const OLD_ART := ["combat_vest", "eva_suit", "exosuit", "salamander_suit", "heat
 func _rigs() -> Array:
 	var out := []
 	for n in DirAccess.open("res://art/crew").get_directories():
-		out.append(n)
+		if not n.begins_with("boarding_robot"):  # (the boarding robots wear nothing)
+			out.append(n)
 	out.sort()
 	return out
 

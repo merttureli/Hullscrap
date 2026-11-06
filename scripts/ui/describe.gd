@@ -222,8 +222,13 @@ static func _of_item(id: String, out: Dictionary) -> Dictionary:
 	out["lore"] = first_sentence(str(item.get("blurb", Content.entry("materials", id).get("blurb", ""))))
 	if kind == "drone" and item.get("drone") is Dictionary:  # a drone kit: its tier, hp, role and what a launch costs
 		var dd: Dictionary = item["drone"]
-		out["stats"] = [["Tier", str(dd["tier"])], ["HP", str(dd["hp"])], ["Role", "defence: guards your ship" if dd["role"] == "defence" else "combat: circles the foe"],
-			["Launch", "%d part%s" % [dd["tier"], "" if int(dd["tier"]) == 1 else "s"]], ["Fires", "%s every %s s" % [str(dd["gun"].get("family", "")), num(float(dd["gun"]["cooldown"]))]]]
+		var roles := {"defence": "defence: guards your ship", "combat": "combat: circles the foe", "limpet": "limpet: clamps to the hull and works on the room behind", "boarder": "boarder: cuts in and drops a robot"}
+		out["stats"] = [["Tier", str(dd["tier"])], ["HP", str(dd["hp"])], ["Role", str(roles.get(str(dd["role"]), str(dd["role"])))],
+			["Launch", "%d part%s" % [dd["tier"], "" if int(dd["tier"]) == 1 else "s"]]]
+		if dd.get("gun") is Dictionary:
+			out["stats"].append(["Fires", "%s every %s s" % [str(dd["gun"].get("family", "")), num(float(dd["gun"]["cooldown"]))]])
+		elif dd.get("effect") is Dictionary:
+			out["stats"].append(["Works", "%s for %s s" % [str(dd["effect"]["kind"]), num(float(dd["effect"]["seconds"]))]])
 	if kind == "mod" and Mods.is_item(id):  # a boarding mod: what it does, the numbers of its tier and who they work for
 		var h := Mods.hover(id)
 		out["what"] = str(h[0])

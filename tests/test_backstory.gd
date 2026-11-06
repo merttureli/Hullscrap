@@ -39,6 +39,8 @@ func test_every_species_has_a_home_and_a_story() -> void:
 	var home: Dictionary = Backstory.config()["home"]
 	var fixed: Dictionary = Backstory.config().get("fixed", {})  # a species with a fixed line (the repair drone) needs no home
 	for id in ids:
+		if CrewMember.species_def(str(id)).get("robot", false):  # a boarding robot is no person: it has no story
+			continue
 		check(home.has(id) or fixed.has(id), id + ": no home in data/backstory.json")
 		var s := Backstory.of("Test", str(id))
 		check(s != "" and not s.contains("{"), "%s: a whole story, no holes: %s" % [id, s])

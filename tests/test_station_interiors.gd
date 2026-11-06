@@ -553,7 +553,7 @@ func test_dressing_sits_on_walls_and_floors_and_the_state_decides_the_rest() -> 
 func _builders() -> Array:
 	var out: Array = []
 	for id in Content.ids("species"):
-		if id != "drone":
+		if id != "drone" and not Content.entry("species", str(id)).get("robot", false) and not str(id).begins_with("boarding_robot"):
 			out.append(id)
 	return out
 
