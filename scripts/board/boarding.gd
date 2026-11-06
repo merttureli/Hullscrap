@@ -30,6 +30,7 @@ const WreckSite = preload("res://scripts/board/wreck_site.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 const GearActive = preload("res://scripts/board/gear_active.gd")
 const Beds = preload("res://scripts/board/beds.gd")
+const Orders = preload("res://scripts/board/orders.gd")
 
 const WRECK_PARTS := 5  ## most parts of the enemy that a boarded wreck holds in its containers
 
@@ -68,6 +69,7 @@ var flares: Array = []  ## B4: the flares of a flare gun that burn on the site: 
 var cur_room := -1  ## the room the soldier stands in (the last one, in a doorway)
 var spotted: Array = []  ## B4: the rooms a Spotter Cam in the party shows (room ids, none without one)
 var _door_note := 0.0
+var soldier_claim := -1  ## the container the soldier is opening or looking in: no follower loots it meanwhile (orders.gd)
 var air_t := 0.0  ## seconds since the soldier last cried out choking (air.gd)
 var air_warned := false  ## the warning at the airlock was given (air.gd airlock_warning)
 var air_seen := {}  ## room id -> seconds since the soldier first saw it airless (the NO AIR label of the view)
@@ -561,7 +563,7 @@ func tick(dt: float, aim := 0.0, light_on := true) -> void:
 	_air_look(dt)
 	people.tick(dt)
 	beds.tick(dt)
-	Party.tick(self, dt)
+	Party.tick(self, dt, Orders.act)
 	_tick_flares(dt)
 	_look_around()
 	update_doors(float(Arms.cfg()["door_near"]))
