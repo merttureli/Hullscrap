@@ -213,12 +213,12 @@ func _bay_slot(at: Vector2, number: int, b: Dictionary) -> void:
 	if sheet != null:
 		var k := 1.9
 		var f := int(Time.get_ticks_msec() / 330) % 2
-		var dim := Color(1, 1, 1, 0.4 if status in ["no parts", "unpowered", "disabled", "offline"] else (0.55 if out else 1.0))
+		var dim := Color(1, 1, 1, 0.4 if status in ["no parts", "unpowered", "disabled", "offline"] and not out else 1.0)
 		draw_texture_rect_region(sheet.texture, Rect2(pic.get_center() - Vector2(sheet.frame) * k / 2.0 + Vector2(0.0, 4.0), Vector2(sheet.frame) * k), sheet.region(f), dim)
 	if out:  # the hp pips over the picture
 		for i in int(st["max_hp"]):
 			draw_rect(Rect2(at + Vector2(SLOT.x - 12.0 - (int(st["max_hp"]) - i) * 5.0, 62.0), Vector2(4.0, 5.0)), Color(READY if i < ceili(st["hp"] - 1e-6) else GREY, 0.9))
-	var shown := fit_name(str(st["kit_name"]) if st["kit_name"] != "" else "Empty bay", SLOT.x - 8.0)
+	var shown := fit_name(str(st["kit_name"]).replace(" Drone", "") if st["kit_name"] != "" else "Empty bay", SLOT.x - 8.0)  # (the header already says DRONES)
 	_text(shown["text"], at + Vector2(5.0, 76.0), mini(shown["size"], 11), TEXT, SLOT.x - 8.0)
 	var label := "READY"
 	match status:

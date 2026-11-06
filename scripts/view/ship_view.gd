@@ -177,7 +177,7 @@ func _draw() -> void:
 		if opts.has("bay_out"):  # a drone bay: the loaded drone on its cradle while docked, riding it up the rail as it launches, nothing while it is out
 			var age: float = float(opts["fired_ago"])
 			if not opts["bay_out"] or age < Drones.SHOW_AFTER_S:
-				var rise := float(BAY_RISE[mini(int(age * 25.0), 3)]) if opts["bay_out"] else 0.0
+				var rise := float(BAY_RISE[mini(int(age * 10.0), 3)]) if opts["bay_out"] else 0.0
 				DroneView.draw_docked(self, ship.components.def(inst["id"]), inst, _rect_of(inst["cells"]), CELL, _clock, rise)
 	for uid in uids:  # the outside halves and barrels of the hull mounts, over the wall's edge
 		var inst: Dictionary = ship.components.instances[uid]

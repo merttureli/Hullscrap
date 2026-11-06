@@ -348,3 +348,22 @@ func test_the_bay_is_a_slot_with_its_key_and_a_group_on_the_weapon_bar() -> void
 	check(not s.fire_slot(guns + 1, Vector2.ZERO), "and a second press does nothing")
 	eq(s.bay_state(uid)["parts"], 3, "the parts were spent")
 	bar.free()
+
+
+func test_a_launched_drone_waits_hidden_in_the_bay_then_shows_in_the_open_hatch() -> void:
+	var r := _duel("laser_drone_mk2")
+	var a: Arena = r[0]
+	a.launch_drone(0, r[1])
+	var d: Dictionary = a.drones[0]
+	var hatch: Vector2 = a.local_to_world(0, a.ships[0].bays[r[1]]["pos"])
+	a.step(0.25)
+	check(Vector2(d["pos"]).distance_to(hatch) < 1.0, "held at the hatch mouth, no motion while hidden")
+	var before := float(d["hp"])
+	check(Drones.contact(a, 1, hatch + Vector2(-30, 0), hatch + Vector2(30, 0)).is_empty(), "nothing hits a drone that is still inside")
+	check(not a.events.any(func(e): return e["type"] == "drone_emerge"), "no puff before it shows")
+	a.step(0.1)
+	check(a.events.filter(func(e): return e["type"] == "drone_emerge").size() == 1, "it shows at 0.3 s with one puff")
+	eq(before, float(d["hp"]), "unhurt")
+	check(absf(Drones.scale_of(a, d) - Drones.DOCKED_SCALE) < 0.1, "it leaves at the size it had on the cradle")
+	a.step(0.5)
+	check(Drones.scale_of(a, d) > 0.99, "and grows to full size")

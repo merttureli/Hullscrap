@@ -80,5 +80,9 @@
  "kind": "defence",
  "family": "pd",
  "tier": 1,
- "notes": "A defence drone facing UP (nose = the way it flies and shoots), 25x25 px, pivot at its middle. Frames: idle 0-1, fire 0-1, hit (a white flash). <name>_rot.png holds 32 pre-turned copies of every frame (column k = turned k*11 degrees clockwise, row = frame, outlined after turning), so a turned drone does not jag at 2x; the glow strip is turned by the engine (it is soft)."
+ "notes": "A defence drone facing UP (nose = the way it flies and shoots), 25x25 px, pivot at its middle. Frames: idle 0-1, fire 0-1, hit (a white flash). <name>_rot.png holds 32 pre-turned copies of every frame (column k = turned k*11 degrees clockwise, row = frame, outlined after turning), so a turned drone does not jag at 2x; the glow strip is turned by the engine (it is soft). A defence drone is drawn in two layers: <name>_base.png (the dark backing, hoop and dome, never turned) and <name>_barrel_rot.png (the twin barrel, 32 headings); the full sprite above is for the bar and the cards.",
+ "parts": {
+  "base": "defence_drone_mk1_base.png",
+  "barrel_rot": "defence_drone_mk1_barrel_rot.png"
+ }
 }

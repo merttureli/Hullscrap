@@ -723,7 +723,7 @@ func _on_event(e: Dictionary) -> void:
 			else:
 				_on_ship(idx, pos, {"k": "flash", "life": 0.22, "r": 18.0 if big else 11.0, "color": col})
 			_sparks(pos, n, 7 if big else 4, col)
-		"drone_launch", "drone_hit", "drone_down", "drone_home", "drone_shot":
+		"drone_launch", "drone_emerge", "drone_hit", "drone_down", "drone_home", "drone_shot":
 			if e["type"] == "drone_down":
 				_snd("explosion_s", idx, pos, -3.0, -3.0)
 			elif e["type"] == "drone_hit":

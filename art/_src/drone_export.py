@@ -68,6 +68,20 @@ def turned_frames(d):
     return out, S
 
 
+def export_defence_parts(d):
+    """a defence drone is two layers: the hoop, dome and backing (never turned) and the twin barrel (turned by the engine, 32 headings)."""
+    base = [d.frame(st, i, part='base')[0] for (st, i) in FRAMES]
+    save(sheet(base, len(base), base[0].w, base[0].h), '%s/%s_base.png' % (ART_D, d.name))
+    big = None
+    for r, (st, i) in enumerate(FRAMES):
+        spr = d.frame(st, i, raw=True, part='barrel')[0]
+        for k in range(ROTS):
+            t, G, h = ds.turned(spr, None, k * 360 // ROTS, dm.DC, dm.GP)
+            if big is None: big = Spr(t.w * ROTS, t.w * len(FRAMES))
+            big.stamp(k * t.w, r * t.w, t.rows())
+    save(big, '%s/%s_barrel_rot.png' % (ART_D, d.name))
+
+
 def export_drone(d):
     spr, gl = [], []
     for (st, i) in FRAMES:
@@ -88,6 +102,10 @@ def export_drone(d):
          'notes': 'A %s drone facing UP (nose = the way it flies and shoots), %dx%d px, pivot at its middle. Frames: idle 0-1, fire 0-1, hit (a white flash). <name>_rot.png holds %d pre-turned '
                   'copies of every frame (column k = turned k*%d degrees clockwise, row = frame, outlined after turning), so a turned drone does not jag at 2x; the glow strip is turned by the '
                   'engine (it is soft).' % (d.kind, dm.DN, dm.DN, ROTS, 360 // ROTS)}
+    if d.kind == 'defence':
+        export_defence_parts(d)
+        J['parts'] = {'base': d.name + '_base.png', 'barrel_rot': d.name + '_barrel_rot.png'}
+        J['notes'] += ' A defence drone is drawn in two layers: <name>_base.png (the dark backing, hoop and dome, never turned) and <name>_barrel_rot.png (the twin barrel, 32 headings); the full sprite above is for the bar and the cards.'
     write('%s/%s.json' % (ART_D, d.name), J)
     print(d.name, J['frame'], S)
 

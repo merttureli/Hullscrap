@@ -299,6 +299,14 @@ def pd_dome(c, tier):
     if c.line == 'scrap': rust_over(s, cx - 3, cy + 1, 2, 2); s.put(cx + 2, cy - 3, 'u')
     elif c.line == 'neon': s.put(cx - 3, cy - 1, 'c'); s.put(cx - 2, cy - 2, 'c'); s.put(cx - 1, cy - 3, 'c')
 
+def backing(c, tier):
+    """a dark backing disc inside the hoop (a defence drone must not read as a grey ring over a grey hull)."""
+    s = c.s; cx, cy = c.px, c.py
+    r = 6.0
+    for y in range(cy - 7, cy + 8):
+        for x in range(cx - 7, cx + 8):
+            if (x - cx) ** 2 + (y - cy) ** 2 < r * r: s.put(x, y, 'E')
+
 def pd_barrels(c, tier):
     """twin small barrels (the PD twin) over the hoop."""
     s = c.s; cx, cy = c.px, c.py; o = c.st.rc
@@ -319,13 +327,16 @@ class Drone:
     def variant(s, **kw):
         d = dict(name=s.name, fam=s.fam, tier=s.tier, gun=s.gun, add=s.add, kind=s.kind, label=s.label, line=s.line)
         d.update(kw); return Drone(**d)
-    def frame(s, state='idle', i=0, raw=False):
+    def frame(s, state='idle', i=0, raw=False, part=None):
         """-> (sprite, glow, anchors): the sprite on a DN x DN canvas (pivot (DC, DC)), its glow (pad GP), the muzzle and nozzle points.
         raw: the sprite without its outline (to turn it first and outline after, as the crew compositor does)."""
         st = DSt(state, i)
         c = Ctx(DN, DN, s.look, st); c.px, c.py = DC, DC; c.nozzles = []
         if s.kind == 'defence':
-            radar_ring(c, s.tier); pd_barrels(c, s.tier); pd_dome(c, s.tier)
+            if part != 'barrel': backing(c, s.tier)
+            if part != 'barrel': radar_ring(c, s.tier)
+            if part != 'base': pd_barrels(c, s.tier)
+            if part != 'barrel': pd_dome(c, s.tier)
         else:
             pods(c, s.tier)
             if 'fins' in s.add: fins(c, s.tier)
