@@ -222,3 +222,21 @@ func test_a_short_fight_agrees_with_the_model_for_a_burst_and_a_long_gun() -> vo
 		var v: float = float(dealt[id]) / float(dealt["laser_mk2"])
 		check(v >= 0.7 and v <= 1.4, "%s deals %.2f of the Laser Mk2 in a short fight" % [id, v])
 	bench.free()
+
+
+func test_point_defence_mk1_to_mk3_shoot_drones_as_incoming() -> void:
+	for id in ["pd_mk1", "pd_mk2", "pd_mk3"]:
+		var r: Array = load("res://tests/test_drones.gd").new()._duel("flak_drone_mk3")
+		var a: Arena = r[0]
+		a.launch_drone(0, r[1])
+		var d: Dictionary = a.drones[0]
+		for at in [Vector2(15.5, 1.0), Vector2(15.5, 30.0), Vector2(1.0, 15.5), Vector2(30.0, 15.5)]:
+			a.add_mount(1, id, at, true)
+		var hp0 := float(d["hp"])
+		var min_hp := hp0
+		for i in 900:
+			a.step(1.0 / 20.0)
+			if a.drones.is_empty():
+				break
+			min_hp = minf(min_hp, float(d["hp"]))
+		check(a.drones.is_empty() or min_hp < hp0, "%s hurts the drone: %.1f of %.1f" % [id, min_hp, hp0])
