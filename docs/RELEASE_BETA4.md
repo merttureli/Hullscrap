@@ -77,6 +77,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **More mods**: in lockers and cabinets, in shops, and dropped by some boarding foes.
 - **A plasma rifle in your hold** now arms your boarding soldier (as the Gatekeeper's Lance).
 - **A fuel stop in the Boneyard**: Dredgers' Rest.
+- **Gun versions**: 39 new guns (light, burst, chain, heavy, long, lance and charge versions of the lasers, pulses, ion, flak, missiles and beams; the new slug and point defence families; broadside batteries, gun strips and spinal mounts). A chain gun fires faster the longer it keeps firing; a charge gun stores volleys while idle and releases them together. Slug Gun and Point Defence Mk I are known from the start; the rest are blueprints found in scans, events, boarding loot and shops, and carried by enemies by tier.
 - **The fabricator upgrades in place**: no more building robot arms for level 2. In build mode click the fabricator (or hover it and press U) for a card with the next level, what it opens and its price, then click again to pay. Levels 1 to 4, no blueprints; a ship carries one fabricator, and it is never wrecked, only disabled. Arms and rigs in its room now make crafting 25% faster each (up to +50%); the laser cutter and nanoforge stay tools. Older saves keep the level their modules gave them.
 
 ### Fixed

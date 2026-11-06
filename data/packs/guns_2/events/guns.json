@@ -1,0 +1,490 @@
+{
+  "events": [
+    {
+      "id": "gun_find_concord_fire_control",
+      "type": "wreck_field",
+      "weight": 10,
+      "once": true,
+      "requires": {
+        "region": [
+          "concord_space",
+          "human_core"
+        ],
+        "stage_min": 2,
+        "not_flag": "bp_pd_mk2"
+      },
+      "text": "A Concord picket, gutted and tidy. Her fire-control locker is still sealed, and stencilled on its door: SEE ALSO, FORM 9, POINT DEFENCE (REVISED).",
+      "choices": [
+        {
+          "text": "Copy the revised point defence drawings.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "The drawings are annotated in three hands, two of them furious. Point Defence Mk II, with the corrections already made.",
+              "effects": {
+                "blueprint": "pd_mk2",
+                "flag": "bp_pd_mk2"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_concord_long_lens",
+      "type": "wreck_field",
+      "weight": 8,
+      "once": true,
+      "requires": {
+        "region": [
+          "concord_space",
+          "human_core",
+          "grundl_barges"
+        ],
+        "stage_min": 2,
+        "not_flag": "bp_laser_burst"
+      },
+      "text": "A survey barge with a broadside of lenses where the cargo bay should be. The log says \"calibration\"; the burn marks say otherwise.",
+      "choices": [
+        {
+          "text": "Take the lens rack plans.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "Three lenses to a battery, firing in sequence. The Concord call it a salute. The target would call it a Tuesday.",
+              "effects": {
+                "blueprint": "laser_burst",
+                "flag": "bp_laser_burst"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_concord_lance",
+      "type": "wreck_field",
+      "weight": 4,
+      "once": true,
+      "requires": {
+        "region": [
+          "concord_space",
+          "human_core",
+          "grundl_barges"
+        ],
+        "stage_min": 5,
+        "not_flag": "bp_laser_lance"
+      },
+      "text": "A dreadnought keel, sliced clean from the hull, its spinal lens still mounted and still faintly warm. Someone left in a hurry and took the crew.",
+      "choices": [
+        {
+          "text": "Cut the lance mount free and copy its plans.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "The lance runs the length of the keel. The plans run to forty pages, the last of which says \"face the target\".",
+              "effects": {
+                "blueprint": "laser_lance",
+                "flag": "bp_laser_lance"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_clan_gun_strip",
+      "type": "wreck_field",
+      "weight": 12,
+      "once": true,
+      "requires": {
+        "region": [
+          "clan_space",
+          "kett_hives",
+          "gauntling_scrapyards",
+          "basalt_quarries"
+        ],
+        "stage_min": 1,
+        "not_flag": "bp_gun_strip"
+      },
+      "text": "A hull plate with five little barrels bolted along it in a row, like teeth in a jaw. Someone has chalked \"MINE\" on it. Someone else has chalked over that.",
+      "choices": [
+        {
+          "text": "Prise the strip off and take its drawings.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "Five barrels, one feed, and a tag in clan script: \"Do not fire near your own engines.\" The drawings are in the margin.",
+              "effects": {
+                "blueprint": "gun_strip",
+                "flag": "bp_gun_strip"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_clan_flak_battery",
+      "type": "wreck_field",
+      "weight": 8,
+      "once": true,
+      "requires": {
+        "region": [
+          "kett_hives",
+          "gauntling_scrapyards",
+          "basalt_quarries"
+        ],
+        "stage_min": 2,
+        "not_flag": "bp_flak_battery"
+      },
+      "text": "A scrap barge with three flak mouths along her flank and nothing left to shoot at. Her gunner is still at the sights, in a manner of speaking.",
+      "choices": [
+        {
+          "text": "Take the battery plans from the gun deck.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "Three flak mouths, one trigger. The pellets arrive as weather. The plans are stained with something you decide is coffee.",
+              "effects": {
+                "blueprint": "flak_battery",
+                "flag": "bp_flak_battery"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_clan_slug_chain",
+      "type": "trader",
+      "weight": 6,
+      "once": true,
+      "requires": {
+        "region": [
+          "fenn_bazaar",
+          "gauntling_scrapyards"
+        ],
+        "stage_min": 3,
+        "not_flag": "bp_slug_chain"
+      },
+      "text": "A clan trader with a belt of slugs wound round her counter like a scarf. \"Chain slug,\" she says, \"fastest thing on the barge if you feed it.\"",
+      "choices": [
+        {
+          "text": "Buy the plans for what she asks.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "She wants nothing for the plans and a great deal for the lecture. You take both.",
+              "effects": {
+                "blueprint": "slug_chain",
+                "flag": "bp_slug_chain"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_boneyard_swarm",
+      "type": "wreck_field",
+      "weight": 10,
+      "once": true,
+      "requires": {
+        "region": [
+          "boneyard"
+        ],
+        "stage_min": 2,
+        "not_flag": "bp_swarm_pod"
+      },
+      "text": "A hulk with eight little hatches in her flank, every one open. Whatever lived in them left in a hurry and took its sense of proportion.",
+      "choices": [
+        {
+          "text": "Strip the hatch controllers and the plans.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "Six small missiles, all with the same idea. Point defence has to pick one, and the rest remember it.",
+              "effects": {
+                "blueprint": "swarm_pod",
+                "flag": "bp_swarm_pod"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_boneyard_torpedo",
+      "type": "wreck_field",
+      "weight": 4,
+      "once": true,
+      "requires": {
+        "region": [
+          "boneyard"
+        ],
+        "stage_min": 5,
+        "not_flag": "bp_torpedo"
+      },
+      "text": "A torpedo rack the size of a chapel, one tube still loaded. It is pointed at nothing in particular, which is how you know it has been waiting.",
+      "choices": [
+        {
+          "text": "Take the plans and unload nothing.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "One missile the size of a closet. You copy the plans from a distance, and then from a greater distance.",
+              "effects": {
+                "blueprint": "torpedo",
+                "flag": "bp_torpedo"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_lumen_charge",
+      "type": "anomaly",
+      "weight": 10,
+      "once": true,
+      "requires": {
+        "region": [
+          "lumen_space",
+          "emberkin_forges",
+          "prismatic_choir",
+          "sporeling_groves"
+        ],
+        "stage_min": 2,
+        "not_flag": "bp_ion_charge"
+      },
+      "text": "A coil of rings drifting in the dark, lit one at a time from within, as if something were counting. It reaches three, and the light waits.",
+      "choices": [
+        {
+          "text": "Copy the capacitor winding.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "Three rings and the patience to fill them. Let it sit, then watch the shields leave in a row.",
+              "effects": {
+                "blueprint": "ion_charge",
+                "flag": "bp_ion_charge"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_lumen_long_beam",
+      "type": "anomaly",
+      "weight": 8,
+      "once": true,
+      "requires": {
+        "region": [
+          "lumen_space",
+          "emberkin_forges",
+          "prismatic_choir"
+        ],
+        "stage_min": 3,
+        "not_flag": "bp_beam_long"
+      },
+      "text": "A drawn line of light, motionless, a kilometre long. At its source, a barrel. At its end, a very surprised asteroid.",
+      "choices": [
+        {
+          "text": "Trace the line back and take the barrel plans.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "A long beam, drawn slowly, like a ruler. Whatever it crosses gets marked.",
+              "effects": {
+                "blueprint": "beam_long",
+                "flag": "bp_beam_long"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_lumen_spinal",
+      "type": "anomaly",
+      "weight": 4,
+      "once": true,
+      "requires": {
+        "region": [
+          "lumen_space",
+          "prismatic_choir"
+        ],
+        "stage_min": 6,
+        "not_flag": "bp_beam_spinal"
+      },
+      "text": "A hull-long crystal, humming a single note. When you hum it back, a door opens in it, and in the door, a set of plans.",
+      "choices": [
+        {
+          "text": "Take the plans and hum quietly.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "Fires down the whole keel for two long seconds. The plans warn: turn the ship, then turn it off again.",
+              "effects": {
+                "blueprint": "beam_spinal",
+                "flag": "bp_beam_spinal"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gun_find_human_rail",
+      "type": "trader",
+      "weight": 8,
+      "once": true,
+      "requires": {
+        "region": [
+          "human_core",
+          "grundl_barges"
+        ],
+        "stage_min": 3,
+        "not_flag": "bp_slug_rail"
+      },
+      "text": "A Concord requisitions clerk with a crate marked OBSOLETE, a smile marked INTERIM, and a rail gun marked, in pencil, \"ask me\".",
+      "choices": [
+        {
+          "text": "Ask, and take the rail plans.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "\"Long,\" she says, \"and fast, and nobody has ever seen it coming.\" She stamps the plans twice, in case.",
+              "effects": {
+                "blueprint": "slug_rail",
+                "flag": "bp_slug_rail"
+              }
+            }
+          ]
+        },
+        {
+          "text": "Leave it for someone with more patience.",
+          "outcomes": [
+            {
+              "weight": 100,
+              "text": "You leave it. The Drift will find it another owner; it usually does.",
+              "effects": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
