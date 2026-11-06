@@ -31,16 +31,18 @@ const Threat = preload("res://scripts/space/threat.gd")
 const HullOutline = preload("res://scripts/ship/hull_outline.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
+const Lanes = preload("res://scripts/space/lanes.gd")
 
 const PREFIX := "gen:"
 const TABLES_PATH := "res://data/enemy_tables.json"
 const STYLES_PATH := "res://data/ship_styles.json"
 const RACE_SHARE := 0.6  ## the share of a home region's pirate fights that meet the region's own race (a region's `race_share` says otherwise)
 const MAX_ATTEMPTS := 10
+const ARRANGE_NODES := 300  ## the most spots a room tries for its parts before it leaves the last ones out
 const MARGIN := 6  ## free cells round the hull in the grid (a mount's outside half is up to 6 deep: a spinal mount)
 const HULL_MARGIN := 2  ## the buildable hull is everything built plus this
 const MAX_FILL := 0.84  ## the solid area of a hull over its bounding box, at most (the tests say 0.85)
-const MID_H := 4  ## floor rows of a deck between the gun deck and the engine room
+const MID_H := 6  ## floor rows of a deck between the gun deck and the engine room
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const AMMO_STOCK := 40  ## units of ammo a weapon that uses some starts with
 const BOW_SHAPES: Array[String] = ["casemate", "long_barrel", "heavy_cannon"]  ## the shapes that shoot forward: they stand on the bow
@@ -478,6 +480,8 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 	var made := _construct(f, faction, lo, bands, ras["cells"], t, ram, rng)
 	if made["ship"] == null:
 		return made
+	if int(made.get("cut", 0)) > 0 and attempt < MAX_ATTEMPTS - 1:
+		return {"ship": null, "why": "a room is cut off by its parts"}  # (the next roll lays it out again; the last accepts it)
 	var ship: Ship = made["ship"]
 	var why := validate(ship, float(f["hull"].get("max_fill", MAX_FILL)) + 0.01)
 	if not why.is_empty():
@@ -1022,27 +1026,133 @@ static func _construct(f: Dictionary, faction: String, lo: Dictionary, bands: Ar
 		for c in fset:
 			if g.get_tile(c) == "wall" and absi(c.x - (decks[0]["rect"].position.x + decks[0]["rect"].size.x / 2)) <= 1:
 				g.force_tile(c, spine)
-	var placed := {"helm": false, "o2": false, "reactor": false, "engine": false}
+	var placed := {"helm": false, "o2": false, "reactor": false, "engine": false, "gun": false}
+	var left_over: Array = []  # {rect, items} of each room (see _arrange)
 	for d in decks:
 		for r in d["rooms"]:
+			var items: Array = []
 			for p in r["room"]["parts"]:
 				var dx := int(p["dx"])
 				var origin: Vector2i = r["rect"].position if dx >= 0 else Vector2i(r["rect"].end.x, r["rect"].position.y)
-				var uid := comps.place(g, str(p["id"]), origin + Vector2i(dx, int(p["dy"])), 0)
-				if uid < 0:
-					if p["id"] == lo["helm"] or p["id"] == lo["o2"] or _is_reactor(str(p["id"])):
-						return {"ship": null, "why": "a vital part did not fit: " + str(p["id"])}
-				elif p["id"] == lo["helm"]:
-					placed["helm"] = true
+				var id := str(p["id"])
+				items.append({"id": id, "want": origin + Vector2i(dx, int(p["dy"])), "vital": id == lo["helm"] or id == lo["o2"] or _is_reactor(id), "n": items.size()})
+			var stood := _arrange(g, comps, r["rect"], items)
+			left_over.append({"rect": r["rect"], "items": items})
+			for it in items:
+				if it["uid"] >= 0:
+					if it["id"] == lo["helm"]:
+						placed["helm"] = true
+				elif it["vital"]:
+					return {"ship": null, "why": "a vital part did not fit: " + str(it["id"])}
 		_place_mounts(ship, d, placed)
 	if not placed["helm"] or not placed["engine"]:
 		return {"ship": null, "why": "no helm or no engine"}
+	_repair_doors(g, comps, decks, left_over)
+	var rects: Array = []
+	for d in decks:
+		for r in d["rooms"]:
+			rects.append(r["rect"])
+	var cut := _cut_off(g, comps, rects)
 	# the cables, then the finishing touches
 	if not _wire(ship):
 		return {"ship": null, "why": "no route to a part"}
 	_trim(ship)
 	_finish(ship, f, faction, lo, rng, ram)
-	return {"ship": ship, "why": ""}
+	return {"ship": ship, "why": "", "cut": cut}
+
+
+## Stand the parts `items` ({id, want, vital, n}) in room `rect` so a body can walk between the room's doors (Lanes): biggest
+## first, each on its planned spot or one that hugs a wall or a part, turned either way, by a search that backs out of a spot
+## that leaves the others no room. When no arrangement does, the vital parts go on without the others (or, if even they cannot,
+## where they fit) and the last of the rest are left out. Sets `uid` in each item (-1: not standing). Returns the items standing.
+static func _arrange(g: ShipGrid, comps: Components, rect: Rect2i, items: Array) -> Array:
+	for it in items:
+		it["uid"] = -1
+	var rest: Array = items.duplicate()
+	var next_uid: int = comps._next_uid
+	while true:
+		if _search(g, comps, rect, _biggest_first(rest), 0, [ARRANGE_NODES]):
+			return rest
+		for it in rest:  # (a failed search leaves nothing standing)
+			it["uid"] = -1
+		comps._next_uid = next_uid
+		var drop := -1
+		for i in rest.size():
+			if not rest[i]["vital"]:
+				drop = i
+		if drop < 0:
+			break
+		rest.remove_at(drop)
+	for it in rest:  # even the vital parts alone cut the room: stand them where they fit
+		for t in _tries(comps, rect, it):
+			var uid := comps.place(g, it["id"], t[0], t[1])
+			if uid >= 0:
+				it["uid"] = uid
+				break
+	return rest.filter(func(it): return it["uid"] >= 0)
+
+
+static func _biggest_first(items: Array) -> Array:
+	var out: Array = items.duplicate()
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var sa := _area_of(a["id"])
+		var sb := _area_of(b["id"])
+		return sa > sb or (sa == sb and int(a["n"]) < int(b["n"])))
+	return out
+
+
+static func _area_of(id: String) -> int:
+	return int(_def(id)["size"][0]) * int(_def(id)["size"][1])
+
+
+## Stand items[i:] one by one; false (with none of items[i:] left standing) when no way keeps the walk.
+static func _search(g: ShipGrid, comps: Components, rect: Rect2i, items: Array, i: int, budget: Array) -> bool:
+	if i >= items.size():
+		return true
+	var it: Dictionary = items[i]
+	for t in _tries(comps, rect, it):
+		budget[0] -= 1
+		if budget[0] < 0:
+			return false
+		var next_uid: int = comps._next_uid
+		var uid := comps.place(g, it["id"], t[0], t[1])
+		if uid < 0:
+			continue
+		if not Lanes.rect_blocked(g, comps, rect):
+			it["uid"] = uid
+			if _search(g, comps, rect, items, i + 1, budget):
+				return true
+			it["uid"] = -1
+		comps.remove_uid(uid)
+		comps._next_uid = next_uid  # (a trial leaves no gap in the numbers)
+	return false
+
+
+## Where item `it` could stand in `rect` now, best first: [anchor, turn, ...]. The planned spot, then the spots that leave the
+## least free floor round the part (against a wall or another part), then the nearest.
+static func _tries(comps: Components, rect: Rect2i, it: Dictionary) -> Array:
+	var want: Vector2i = it["want"]
+	var tries: Array = []
+	for rot in [0, 1]:
+		for y in range(rect.position.y, rect.end.y):
+			for x in range(rect.position.x, rect.end.x):
+				var at := Vector2i(x, y)
+				var cells: Array[Vector2i] = comps.footprint(it["id"], at, rot)
+				if cells.any(func(c): return not rect.has_point(c) or comps.at(c) >= 0):
+					continue
+				var free := {}
+				for c in cells:
+					for d in ShipGrid.SIDES:
+						var n: Vector2i = c + d
+						if rect.has_point(n) and comps.at(n) < 0 and not cells.has(n):
+							free[n] = true
+				tries.append([at, rot, 0 if at == want and rot == 0 else 1, free.size(), absi(x - want.x) + absi(y - want.y)])
+	tries.sort_custom(func(a: Array, b: Array) -> bool:
+		for k in [2, 3, 4, 1]:
+			if a[k] != b[k]:
+				return a[k] < b[k]
+		return a[0].y < b[0].y or (a[0].y == b[0].y and a[0].x < b[0].x))
+	return tries
 
 
 static func _is_reactor(id: String) -> bool:
@@ -1158,9 +1268,16 @@ static func _doors(g: ShipGrid, decks: Array) -> String:
 			var a: Rect2i = rooms[i]["rect"]
 			var placed := false
 			var mid := a.position.y + (a.size.y - 2) / 2
+			var ys: Array = []
 			for dy in [0, 1, -1, 2, -2]:
 				var y: int = mid + dy
-				if y >= a.position.y and y + 1 < a.end.y + 0 and g.place_door("door", Vector2i(a.end.x, y), Vector2i.DOWN):
+				if y >= a.position.y and y + 1 < a.end.y + 0:
+					ys.append(y)
+			var pa := _planned(rooms[i])
+			pa.merge(_planned(rooms[i + 1]))
+			ys = _by_planned(ys, pa, func(y: int) -> Array: return [Vector2i(a.end.x - 2, y), Vector2i(a.end.x + 1, y)], a.position.y)
+			for y in ys:
+				if g.place_door("door", Vector2i(a.end.x, y), Vector2i.DOWN):
 					placed = true
 					break
 			if not placed:
@@ -1180,14 +1297,154 @@ static func _doors(g: ShipGrid, decks: Array) -> String:
 			return "no rooms overlap between decks %d and %d: %s / %s" % [i, i + 1, str(up.map(func(r): return [r["room"]["kind"], r["rect"]])), str(down.map(func(r): return [r["room"]["kind"], r["rect"]]))]
 		var placed := false
 		var centre: int = (best[0] + best[1] - 2) / 2
+		var xs: Array = []
 		for dx in [0, 1, -1, 2, -2, 3, -3]:
 			var x: int = centre + dx
-			if x >= best[0] and x + 2 <= best[1] and g.place_door("door", Vector2i(x, row), Vector2i.RIGHT):
+			if x >= best[0] and x + 2 <= best[1]:
+				xs.append(x)
+		var pd := {}
+		for r in up + down:
+			pd.merge(_planned(r))
+		xs = _by_planned(xs, pd, func(x: int) -> Array: return [Vector2i(x, row - 2), Vector2i(x, row + 1)], best[0])
+		for x in xs:
+			if g.place_door("door", Vector2i(x, row), Vector2i.RIGHT):
 				placed = true
 				break
 		if not placed:
 			return "no door between decks %d and %d at %s" % [i, i + 1, str(best)]
 	return ""
+
+
+## Rooms (of `decks`) cut off by their parts, counted.
+static func _cut_off(g: ShipGrid, comps: Components, rects: Array) -> int:
+	var n := 0
+	for r in rects:
+		n += int(Lanes.rect_blocked(g, comps, r))
+	return n
+
+
+## A room whose parts (`left_over`: {rect, items}, see _arrange) did not all stand, or cut its walk,: move one of its
+## doors along the wall and stand all its parts again, until they all stand. The door stays when it cuts off no other room.
+static func _repair_doors(g: ShipGrid, comps: Components, decks: Array, left_over: Array) -> void:
+	var rects: Array = []
+	for d in decks:
+		for r in d["rooms"]:
+			rects.append(r["rect"])
+	for room in left_over:
+		var rect: Rect2i = room["rect"]
+		var items: Array = room["items"]
+		if items.all(func(it): return it["uid"] >= 0) and not Lanes.rect_blocked(g, comps, rect):
+			continue
+		var cut := _cut_off(g, comps, rects)
+		var pieces: Array = Lanes.doors_round(g, rect)
+		pieces.sort_custom(func(a: Array, b: Array) -> bool: return a[0].y < b[0].y or (a[0].y == b[0].y and a[0].x < b[0].x))
+		var tries: Array = []
+		for piece in pieces:
+			var axis: Vector2i = piece[1] - piece[0]
+			var door_tile := str(g.get_tile(piece[0]))
+			for q in piece:
+				g.force_tile(q, "wall")  # (the door's own cells are wall to it for a moment: it may slide by one)
+			for i in range(1, 9):
+				for o in [i, -i]:
+					if _door_site(g, piece[0] + axis * o, axis):
+						tries.append([piece, piece[0] + axis * o])
+			for q in piece:
+				g.force_tile(q, door_tile)
+		for t in tries:
+			var piece: Array = t[0]
+			var axis: Vector2i = piece[1] - piece[0]
+			var old_tile := str(g.get_tile(piece[0]))
+			for q in piece:
+				g.force_tile(q, "wall")
+			var prev: Array = [g.get_tile(t[1]), g.get_tile(t[1] + axis)]  # (a wall, or the keel's spine)
+			if not g.place_door(old_tile, t[1], axis):
+				for q in piece:
+					g.force_tile(q, old_tile)
+				continue
+			var saved := _lift_parts(comps, rect)
+			var next_uid: int = comps._next_uid
+			var fresh: Array = items.map(func(it): return it.duplicate())
+			var stood := _arrange(g, comps, rect, fresh)
+			if stood.size() == fresh.size() and not Lanes.rect_blocked(g, comps, rect) and _cut_off(g, comps, rects) < cut:
+				for k in items.size():
+					items[k]["uid"] = fresh[k]["uid"]
+				break
+			_lift_parts(comps, rect)  # (what the new try stood)
+			comps._next_uid = next_uid
+			for part in saved:
+				comps.place(g, str(part["id"]), part["anchor"], int(part["rot"]))
+			g.force_tile(t[1], prev[0])
+			g.force_tile(t[1] + axis, prev[1])
+			for q in piece:
+				g.force_tile(q, old_tile)
+
+
+## Take the plain parts (no mount) standing in `rect` out of `comps`: [{id, anchor, rot}].
+static func _lift_parts(comps: Components, rect: Rect2i) -> Array:
+	var out: Array = []
+	var uids: Array = comps.instances.keys()
+	uids.sort()
+	for uid in uids:
+		var inst: Dictionary = comps.instances[uid]
+		if not inst["out_cells"].is_empty() or not rect.has_point(inst["anchor"]) or not inst["cells"].all(func(c): return rect.has_point(c)):
+			continue
+		out.append({"id": inst["id"], "anchor": inst["anchor"], "rot": inst["rot"]})
+		comps.remove_uid(uid)
+	return out
+
+
+## Is `c` (with the next cell along `axis`) a stretch of solid wall with floor to both sides: a place for a door?
+static func _door_site(g: ShipGrid, c: Vector2i, axis: Vector2i) -> bool:
+	var side := Vector2i(axis.y, axis.x)
+	for q in [c, c + axis]:
+		var here: String = g.get_tile(q)
+		if here == "" or not g.tile_flag(here, "solid") or g.tile_flag(here, "door") or g.shape_of(q).size() > 0:
+			return false
+		for sd in [side, -side]:
+			var t: String = g.get_tile(q + sd)
+			if t == "" or g.tile_flag(t, "solid") or g.tile_flag(t, "door"):
+				return false
+	return true
+
+
+## The cells the parts of room `r` (of _lay_rooms) are planned to cover (turned the plan's way).
+static func _planned(r: Dictionary) -> Dictionary:
+	var out := {}
+	var rect: Rect2i = r["rect"]
+	for p in r["room"]["parts"]:
+		var dx := int(p["dx"])
+		var at: Vector2i = (rect.position if dx >= 0 else Vector2i(rect.end.x, rect.position.y)) + Vector2i(dx, int(p["dy"]))
+		var sz: Vector2i = Vector2i(int(_def(str(p["id"]))["size"][0]), int(_def(str(p["id"]))["size"][1]))
+		for y in sz.y:
+			for x in sz.x:
+				out[at + Vector2i(x, y)] = true
+	return out
+
+
+## `spots` (door positions, best first) put in order of how few of the `planned` part cells a body standing at the door's
+## ports (`ports`: spot -> the anchors of the 2x2 bodies at either side) would share; the spots that clear them keep their order.
+## When all of them share some, the one at `edge` goes first: a part can then be turned and stood against the other wall.
+static func _by_planned(spots: Array, planned: Dictionary, ports: Callable, edge: int) -> Array:
+	var score := {}
+	var least := 1 << 20
+	for s in spots:
+		var n := 0
+		for a in ports.call(s):
+			for y in 2:
+				for x in 2:
+					n += int(planned.has(a + Vector2i(x, y)))
+		score[s] = n
+		least = mini(least, n)
+	var out: Array = []
+	if least > 0 and spots.has(edge):
+		out.append(edge)
+	for s in spots:
+		if score[s] == least and not out.has(s):
+			out.append(s)
+	for s in spots:
+		if not out.has(s):
+			out.append(s)
+	return out
 
 
 ## Place the mounts of a deck through the mount rules: the outside half against a flat stretch of the outer wall.
@@ -1213,16 +1470,34 @@ static func _place_mounts(ship: Ship, d: Dictionary, placed: Dictionary) -> void
 			var bw: int = isz.y if vertical else isz.x
 			var lo_c: int = (rect.position.y if vertical else rect.position.x) - s
 			var hi_c: int = (rect.end.y if vertical else rect.end.x) - bw - s
-			for shift in [0, 1, -1, 2, -2, 3, -3]:
-				var pos: int = at + shift
-				if pos < lo_c or pos > hi_c:
-					continue
-				var out := _out_anchor(ship.grid, id, int(m["rot"]), pos)
-				if out.x < -900:
-					continue
-				if ship.components.place_mount(ship.grid, id, out, int(m["rot"])) >= 0:
+			var essential: bool = str(_def(id)["family"]) == "engine" or not placed.get("gun", false)
+			var shifts: Array = [0, 1, -1, 2, -2, 3, -3]
+			for k in range(4, hi_c - lo_c + 1):  # (further along the wall, when the near spots would cut the walk between the doors)
+				shifts.append_array([k, -k])
+			var kept := false
+			for pass_no in 2:  # first only a spot that leaves a lane (Lanes); the last mount of its kind, the first that fits
+				for shift in shifts:
+					var pos: int = at + shift
+					if pos < lo_c or pos > hi_c:
+						continue
+					var out := _out_anchor(ship.grid, id, int(m["rot"]), pos)
+					if out.x < -900:
+						continue
+					var next_uid: int = ship.components._next_uid
+					var uid: int = ship.components.place_mount(ship.grid, id, out, int(m["rot"]))
+					if uid < 0:
+						continue
+					if pass_no == 0 and Lanes.rect_blocked(ship.grid, ship.components, rect):
+						ship.components.remove_uid(uid)
+						ship.components._next_uid = next_uid
+						continue
+					kept = true
 					if str(_def(id)["family"]) == "engine":
 						placed["engine"] = true
+					else:
+						placed["gun"] = true
+					break
+				if kept or not essential:
 					break
 			at += w + (1 if r["room"]["kind"] == "engine" else 0)
 
