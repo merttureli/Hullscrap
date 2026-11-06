@@ -2,8 +2,8 @@ extends SceneTree
 ## Not a test (the runner only loads test_*.gd). The Volley against Ripple bench of docs/GUNS.md 14: a stage player-like ship
 ## (tests/tool_standoff.gd BUILDS) with a strong or a weak shield, every fire group in Ripple or in Volley (and optionally Piercing on
 ## its rapid guns), against the same generated enemies; per cell: wins, mean fight seconds, the player's hull at the end, and the share
-## of the fight the player's sector facing the enemy was open (it had just fired) and was down (no shield HP).
-##   godot --headless --path . --script res://tests/tool_volley_bench.gd [-- stages=3,5 seeds=8 kinds=shield,plain cap=120 modes=ripple,volley,volley+ap turret=rattle out=<path>]
+## of the engaged time (a gun of the player cooling) the player's sector facing the enemy was open (it had just fired) and was down (no shield HP).
+##   godot --headless --path . --script res://tests/tool_volley_bench.gd [-- stages=3,5 seeds=8 kinds=shield,plain cap=120 modes=ripple,volley,volley+ap turret=rattle shields=strong,weak out=<path>]
 ## turret=rattle swaps the Laser Turrets of the build for the Rattle Burst (the gun that can load piercing rounds)
 ## Shields: strong = the best the stage's shop sells, twice; weak = one scrap generator.
 
@@ -39,7 +39,7 @@ func _initialize() -> void:
 	for st in stages:
 		for kind in kinds:
 			var foes: Array = Standoff.enemies(int(st), kind, seeds)
-			for sh in ["strong", "weak"]:
+			for sh in str(args.get("shields", "strong,weak")).split(","):
 				for mode in str(args.get("modes", "ripple,volley")).split(","):
 					var rows := []
 					for e in foes:
@@ -137,6 +137,7 @@ func _fight(stage: int, shield: String, mode: String, e: Dictionary) -> Dictiona
 	var n := 0
 	var open := 0
 	var down := 0
+	var engaged := 0
 	var ticks := int(float(args.get("cap", 120)) * 60.0)
 	while sess.state() == "fighting" and n < ticks:
 		if n % PLAYER_EVERY == 0:
@@ -148,14 +149,18 @@ func _fight(stage: int, shield: String, mode: String, e: Dictionary) -> Dictiona
 		sess.morale.tick(STEP)
 		n += 1
 		var co = a.ships[0]
-		if co.layers_cap > 0 and not co.wrecked:
+		var busy := false
+		for uid in co.cooldowns:
+			busy = busy or int(co.cooldowns[uid]) > a.tick
+		engaged += int(busy)  # (some gun of the player is cooling: the fight is on, not an approach)
+		if busy and co.layers_cap > 0 and not co.wrecked:
 			var s := Shields.sector_of_world_dir(co, a.ships[1].flight.pos - co.flight.pos)
 			open += int(Shields.sector_open(co, s, a.tick))
 			down += int(float(co.sector_layers[s]) <= Shields.EPS)
 		if n % SIM_EVERY == 0:
 			sim.step(SIM_EVERY * STEP)
 	var st := sess.state()
-	row.merge({"state": st, "t": n * STEP, "hull": Structure.structure_fraction(a.ships[0]), "open": float(open) / maxf(n, 1.0), "down": float(down) / maxf(n, 1.0)}, true)
+	row.merge({"state": st, "t": n * STEP, "hull": Structure.structure_fraction(a.ships[0]), "open": float(open) / maxf(engaged, 1.0), "down": float(down) / maxf(engaged, 1.0)}, true)
 	sim.free()
 	return row
 
