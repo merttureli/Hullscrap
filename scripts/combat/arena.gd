@@ -159,8 +159,8 @@ func fire(idx: int, uid: int, aim: Vector2) -> bool:
 
 
 ## Launch the drone of bay `uid` of ship `idx` (drones.gd). "" when it flew, else why not.
-func launch_drone(idx: int, uid: int) -> String:
-	return Drones.launch(self, idx, uid)
+func launch_drone(idx: int, uid: int, aim := Vector2.INF) -> String:
+	return Drones.launch(self, idx, uid, aim)
 
 
 ## Seconds until mount `uid` of ship `idx` may fire again (0 when ready).

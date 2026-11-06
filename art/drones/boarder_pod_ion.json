@@ -1,0 +1,78 @@
+{
+ "frame": [
+  21,
+  37
+ ],
+ "pivot": [
+  10,
+  18
+ ],
+ "anims": {
+  "fly": [
+   0,
+   2,
+   8
+  ],
+  "drill": [
+   2,
+   3,
+   12
+  ],
+  "husk": [
+   5,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "boarder_pod_ion_glow.png",
+  "frame": [
+   41,
+   57
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "fly": [
+    0,
+    2,
+    8
+   ],
+   "drill": [
+    2,
+    3,
+    12
+   ],
+   "husk": [
+    5,
+    1,
+    0
+   ]
+  }
+ },
+ "rot": {
+  "image": "boarder_pod_ion_rot.png",
+  "frame": [
+   37,
+   37
+  ],
+  "count": 32,
+  "frames": [
+   "flying0",
+   "flying1",
+   "drilling0",
+   "drilling1",
+   "drilling2",
+   "husk0"
+  ],
+  "pivot": [
+   18,
+   18
+  ]
+ },
+ "kind": "boarder",
+ "family": "ion",
+ "notes": "A boarder pod, nose (the drill) UP, 21 x 37 px, pivot on the hatch. Frames: flying 0-1, drilling 0-2 (claws gripped, sparks), husk (empty). <name>_rot.png: 32 pre-turned copies of every frame (column = heading, row = frame)."
+}

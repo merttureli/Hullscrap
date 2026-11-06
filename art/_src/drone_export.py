@@ -1,7 +1,7 @@
 """Exports the drone art into the game (docs/DRONES.md section 8): the three bays (inside and outside halves in art/components/, in the scrap, standard and neon
 lines as Mk I, II and III), every combat and defence drone (art/drones/<name>.png: idle 0-1, fire 0-1, hit; its glow strip and 32 pre-turned copies of each
 frame, <name>_rot.png) and the thruster trails (art/drones/trail_<line>.png). Usage: python3 drone_export.py   (writes the files, prints them)."""
-import json, os
+import json, os, sys
 from px import *
 import drone_mod as dm
 import drone_samples as ds
@@ -120,8 +120,62 @@ def export_trails():
               'notes': 'A thruster puff of the %s line: 4 frames (a hot core, the body colour, its fade). One puff every few px behind a nozzle; frame = age.' % line})
 
 
+LIMPET_FRAMES = [('flying', 0), ('flying', 1), ('stuck', 0), ('stuck', 1), ('stuck', 2), ('stuck', 3), ('husk', 0)]
+POD_FRAMES = [('flying', 0), ('flying', 1), ('drilling', 0), ('drilling', 1), ('drilling', 2), ('husk', 0)]
+POD_S = 37                                                                   # the pod's square turning canvas (pivot at its middle)
+
+
+def export_limpet(l):
+    """art/drones/<name>.png: flying 0-1, stuck 0-3 (the core pulses, the spikes splayed), husk; 25 px, pivot at the core. It is round: the game does not turn it."""
+    spr, gl = [], []
+    for (st, i) in LIMPET_FRAMES:
+        s, g, _ = l.frame(st, i)
+        spr.append(s); gl.append(g)
+    save(sheet(spr, len(spr), spr[0].w, spr[0].h), '%s/%s.png' % (ART_D, l.name))
+    strip(gl).save('%s/%s_glow.png' % (ART_D, l.name))
+    an = {'fly': [0, 2, 6], 'stuck': [2, 4, 5], 'husk': [6, 1, 0]}
+    write('%s/%s.json' % (ART_D, l.name), {'frame': [spr[0].w, spr[0].h], 'pivot': [dm.DC, dm.DC], 'anims': an,
+          'glow': {'image': l.name + '_glow.png', 'frame': [gl[0].w, gl[0].h], 'offset': [-dm.GP, -dm.GP], 'anims': an}, 'kind': 'limpet', 'family': l.fam,
+          'notes': 'A %s limpet, 25 px square, pivot at its core. Frames: flying 0-1 (spikes folded), stuck 0-3 (spikes splayed, the core pulses), husk (dead, bent spikes). '
+                   'It is round: draw it unturned. The game pulses the glow strip with the same frame.' % l.fam})
+    print(l.name)
+
+
+def export_pod(p):
+    """art/drones/<name>.png: flying 0-1, drilling 0-2, husk (21 x 37) and <name>_rot.png: 32 pre-turned copies of each (37 px square, pivot at the middle)."""
+    spr, gl = [], []
+    rot = Spr(POD_S * ROTS, POD_S * len(POD_FRAMES))
+    for r, (st, i) in enumerate(POD_FRAMES):
+        s, g, _ = p.frame(st, i)
+        spr.append(s); gl.append(g)
+        pad = Spr(POD_S, POD_S); pad.stamp(POD_S // 2 - dm.PCX, 0, ds.strip_outline(s).rows())
+        gp = Rgba(POD_S + 2 * dm.GP, POD_S + 2 * dm.GP); gp.blit_rgba(g, POD_S // 2 - dm.PCX, 0)
+        for k in range(ROTS):
+            t, G, h = ds.turned(pad, gp, k * 360 // ROTS, POD_S // 2, dm.GP)
+            rot.stamp(k * POD_S, r * POD_S, t.rows())
+    save(sheet(spr, len(spr), spr[0].w, spr[0].h), '%s/%s.png' % (ART_D, p.name))
+    strip(gl).save('%s/%s_glow.png' % (ART_D, p.name))
+    save(rot, '%s/%s_rot.png' % (ART_D, p.name))
+    an = {'fly': [0, 2, 8], 'drill': [2, 3, 12], 'husk': [5, 1, 0]}
+    write('%s/%s.json' % (ART_D, p.name), {'frame': [spr[0].w, spr[0].h], 'pivot': [dm.PCX, 18], 'anims': an,
+          'glow': {'image': p.name + '_glow.png', 'frame': [gl[0].w, gl[0].h], 'offset': [-dm.GP, -dm.GP], 'anims': an},
+          'rot': {'image': p.name + '_rot.png', 'frame': [POD_S, POD_S], 'count': ROTS, 'frames': [f[0] + str(f[1]) for f in POD_FRAMES], 'pivot': [POD_S // 2, POD_S // 2]},
+          'kind': 'boarder', 'family': p.fam,
+          'notes': 'A boarder pod, nose (the drill) UP, 21 x 37 px, pivot on the hatch. Frames: flying 0-1, drilling 0-2 (claws gripped, sparks), husk (empty). '
+                   '<name>_rot.png: 32 pre-turned copies of every frame (column = heading, row = frame).'})
+    print(p.name)
+
+
+def export_robots():
+    ds.export_rigs(ART + '/crew')
+
+
 if __name__ == '__main__':
     os.makedirs(ART_D, exist_ok=True)
-    for b in BAYS: export_bay(*b)
-    for d in dm.COMBAT + dm.DEFENCE: export_drone(d)
-    export_trails()
+    for l in dm.LIMPETS: export_limpet(l)
+    export_pod(dm.BOARDER); export_pod(dm.BOARDER.variant(name='boarder_pod_ion', fam='ion', label='SHOCK POD'))
+    export_robots()
+    if '--d2' not in sys.argv:
+        for b in BAYS: export_bay(*b)
+        for d in dm.COMBAT + dm.DEFENCE: export_drone(d)
+        export_trails()

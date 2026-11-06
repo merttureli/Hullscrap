@@ -44,6 +44,8 @@ static func draw(c: CanvasItem, arena, clock: float, px: float, trails: Dictiona
 	var live := {}
 	var fade := clampf((1.0 / px - GLOW_FADE_FROM) / (GLOW_FADE_TO - GLOW_FADE_FROM), 0.0, 1.0)  # the glow thins out as the camera pulls away
 	for d in arena.drones:
+		if d["role"] == "limpet" or d["role"] == "boarder":  # (limpet_view.gd draws those)
+			continue
 		live[d["id"]] = true
 		var age: float = float(arena.tick - int(d["born"])) * arena.SUBSTEP
 		if age < Drones.SHOW_AFTER_S:  # still inside the bay: the cradle carries it
