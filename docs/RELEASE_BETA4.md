@@ -75,6 +75,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **More mods**: in lockers and cabinets, in shops, and dropped by some boarding foes.
 - **A plasma rifle in your hold** now arms your boarding soldier (as the Gatekeeper's Lance).
 - **A fuel stop in the Boneyard**: Dredgers' Rest.
+- **The fabricator upgrades in place**: no more building robot arms for level 2. In build mode click the fabricator (or hover it and press U) for a card with the next level, what it opens and its price, then click again to pay. Levels 1 to 4, no blueprints; a ship carries one fabricator, and it is never wrecked, only disabled. Arms and rigs in its room now make crafting 25% faster each (up to +50%); the laser cutter and nanoforge stay tools. Older saves keep the level their modules gave them.
 
 ### Fixed
 - The debug keys no longer work in the download builds, and F1 lists them only in a debug build.

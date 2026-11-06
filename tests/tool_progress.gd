@@ -933,6 +933,10 @@ func target(key: String) -> int:
 ## Spend what the ship has by the ladder, until nothing more can be done.
 func build_phase() -> void:
 	_skip.clear()
+	var fu := Workshop.fab_uid(ship)
+	if fu >= 0:  # (economy check) could the hold pay the next level now, before anything else is bought?
+		var fi := Workshop.upgrade_info(ship, fu)
+		st["fab_afford"] = [int(fi["next"]), bool(fi["can"])]
 	var guard := 0
 	while guard < 14:
 		guard += 1
@@ -941,6 +945,13 @@ func build_phase() -> void:
 			break
 		var done := false
 		var opts: Array = it["ids"]
+		if it["kind"] == "fab":  # the fabricator upgrades in place in build mode (Workshop.upgrade): no part to place
+			var up := Workshop.upgrade(ship, Workshop.fab_uid(ship))
+			if up == "":
+				st["installed"].append(["fab_level_%d" % int(Workshop.best(ship)["level"]), c.stage])
+			else:
+				_skip["fab"] = true
+			continue
 		for id in opts:
 			var got := procure(str(id), it["kind"] == "titanium")
 			if got == "" and it["kind"] == "titanium":
@@ -989,10 +1000,7 @@ func next_intent() -> Dictionary:
 	if not _skip.has("engine") and policy != "idle" and snap["engines"] < _engines0 + 1 + c.stage / 2 and float(Sector.flight_numbers(ship)["accel"]) < 0.75 * _accel0:
 		return {"kind": "engine", "ids": ranked(["engine_mk3", "engine_mk2", "engine_mk1", "engine_scrap_mk3", "engine_scrap_mk2", "engine_scrap_mk1"], "engine")}
 	if not _skip.has("fab") and snap["fab"] < target("fab"):
-		var fab_ids := ["robot_arm"]
-		if snap["fab"] >= 2:
-			fab_ids = ["assembly_rig"] if snap["rigs"] < 1 else ["robot_arm"] if snap["arms"] < 2 else ["nanoforge"]
-		return {"kind": "fab", "ids": fab_ids}
+		return {"kind": "fab", "ids": []}
 	if not _skip.has("cutter") and bool(POLICIES[policy]["cutter"]) and snap["fab"] >= 2 and snap["cutters"] < 1:
 		return {"kind": "cutter", "ids": ["laser_cutter"]}
 	if not _skip.has("titanium") and snap["cutters"] >= 1 and ship.crafting.is_known("titanium") and ship.inventory.count("titanium") < 60 and ship.inventory.count("scrap") > 700 + 100 * c.stage:

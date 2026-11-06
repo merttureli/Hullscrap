@@ -26,16 +26,18 @@ const BLUEPRINT_EVENTS := {
 }
 
 
-## A test-room ship with a powered fabricator: level 1, or level 2 with a Robot Arm; `cutter` adds a powered Laser Cutter (the tool) to the room.
+## A test-room ship with a powered fabricator: level 1, or level 2 with `arm`; `cutter` adds a powered Laser Cutter (the tool) to the room.
 func _ship(arm := false, cutter := false) -> Ship:
 	var ship := Fixture.room_ship()
 	Fixture.put(ship, "reactor_mk1", 10, 10)
-	Fixture.put(ship, "fabricator", 15, 10)
+	var fab := Fixture.put(ship, "fabricator", 15, 10)
+	if arm:
+		ship.components.instances[fab]["fab_level"] = 2  # (the level is the fabricator's own: upgraded in build mode)
 	var wires := [Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11), Vector2i(14, 11), Vector2i(15, 11)]
 	if arm or cutter:
 		wires.append_array([Vector2i(18, 11), Vector2i(19, 11)])
 	if arm:
-		Fixture.put(ship, "robot_arm", 19, 10)
+		Fixture.put(ship, "robot_arm", 19, 10)  # (only makes crafting faster now)
 	if cutter:
 		Fixture.put(ship, "laser_cutter", 19, 12)
 		wires.append(Vector2i(19, 12))

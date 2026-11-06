@@ -16,7 +16,10 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 ## changed shape (_reshaped()) is re-planned from its inside half; one whose new outside half does not fit goes back to the cargo.
 ## 7 adds the optional fire group a player chose for a fixed gun (`group`, 1 or 2; absent: the kind's default); older saves load with the defaults.
 ## 8 widens the choice to every gun and four groups: `group` 1 (LMB), 2 (RMB), 3 (Q) or 0 (AUTO); absent still means the kind's default.
-const VERSION := 8
+## 9: the fabricator has its own level (`fab_level`, 1 to 4); an older save's takes the level its room's modules gave it (Workshop.migrate)
+const VERSION := 9
+const FAB := "fabricator"
+const ONE_FAB := "One fabricator per ship: click yours to upgrade it"
 const OLD_OUTSIDE := [4, 2]  ## the outside half every gun had before version 6 ...
 const OLD_OUTSIDE_OF := {"shrapnel_cannon_scrap": [4, 3]}  ## ... but this one
 const MIN_VERSION := 1
@@ -27,6 +30,7 @@ var by_id := {}
 var order: Array[String] = []
 var instances := {}  # uid -> {uid, id, anchor, rot, angle, cells, hp, heat, status, out_anchor, out_at, out_cells, link, out_hp}; out_at only means something on a slope (Mounts.is_angled)
 var wrecks: Array = []  # [{id, cells}]: parts shot to pieces, their debris on the floor until a crew member clears it
+var legacy_fabs: Array[int] = []  # fabricators the last load_dict() read with no saved level: Ship.load_dict gives them the level their modules made (Workshop.migrate)
 var returned: Array[Dictionary] = []  # what the last load_dict() could not mount: [{id, text}] (the caller returns them to the cargo)
 var _cell_uid := {}  # Vector2i -> uid of the component covering it (inside halves)
 var _out_uid := {}  # Vector2i -> uid of the mount whose outside half covers it
@@ -92,12 +96,27 @@ func can_place(grid, id: String, anchor: Vector2i, rot: int) -> String:
 	for c in cells:
 		if not _is_floor(grid, c):
 			return "needs floor underneath"
+	if id == FAB and has_fabricator():
+		return ONE_FAB
 	for c in cells:
 		if _cell_uid.has(c):
 			return "overlaps " + str(by_id[instances[_cell_uid[c]]["id"]]["name"])
 		if wreck_at(c) >= 0:
 			return "wreckage in the way"
 	return ""
+
+
+## Does the ship already have a fabricator? (One per ship.)
+func has_fabricator() -> bool:
+	for uid in instances:
+		if instances[uid]["id"] == FAB:
+			return true
+	return false
+
+
+## Can part `id` be shot to pieces? The fabricator cannot: a hit only disables it (repairable), or the run would lose crafting for good.
+func can_wreck(id: String) -> bool:
+	return not bool(by_id.get(id, {}).get("no_wreck", false))
 
 
 ## Place a component. Returns its new uid, or -1 when it cannot go there. A hull mount placed this
@@ -316,6 +335,8 @@ func to_dict() -> Dictionary:
 		if int(i.get("n", 0)) > 0 or str(i.get("ammo", "")) != "":  # an ammo rack's contents
 			rec["ammo"] = str(i.get("ammo", ""))
 			rec["n"] = int(i.get("n", 0))
+		if i.has("fab_level"):  # the fabricator's level
+			rec["fab_level"] = int(i["fab_level"])
 		if int(i.get("loaded", 0)) > 0:  # what a gun has taken off a belt
 			rec["loaded"] = int(i["loaded"])
 		if i.has("group"):  # the fire group the player chose (0 is AUTO)
@@ -343,11 +364,15 @@ func load_dict(d: Dictionary, grid = null) -> String:
 	_out_uid.clear()
 	wrecks.clear()
 	returned = []
+	legacy_fabs.clear()
 	_next_uid = int(d["next_uid"])
 	for i in d["instances"]:
 		var uid := int(i["uid"])
 		_next_uid = maxi(_next_uid, uid + 1)
 		var id := str(i["id"])
+		if id == FAB and has_fabricator():  # one per ship: the second goes back to the cargo
+			returned.append({"id": id, "anchor": Vector2i(int(i["anchor"][0]), int(i["anchor"][1])), "rot": int(i["rot"]), "text": ONE_FAB + ": the extra one is in the hold"})
+			continue
 		var anchor := Vector2i(int(i["anchor"][0]), int(i["anchor"][1]))
 		var rot := int(i["rot"])
 		var plan := {}
@@ -371,6 +396,8 @@ func load_dict(d: Dictionary, grid = null) -> String:
 				plan = found
 		_add(uid, id, plan["anchor"] if not plan.is_empty() else anchor, rot, out, plan)
 		_load_state(instances[uid], i)
+		if id == FAB and not (i.get("fab_level") is float or i.get("fab_level") is int):
+			legacy_fabs.append(uid)
 		if int(d.get("version", 0)) < 6 and instances[uid]["out_cells"].size() > 0 and _reshaped(id) and i.has("out_hp"):  # the old outside half had twice the part's hp: keep its share of the new one
 			instances[uid]["out_hp"] = clampi(roundi(float(i["out_hp"]) / (2.0 * float(by_id[id]["hp"])) * outside_hp_max(id)), 0, outside_hp_max(id))
 	for w in d.get("wrecks", []):
@@ -434,6 +461,8 @@ func _add(uid: int, id: String, anchor: Vector2i, rot: int, out := Mounts.NONE, 
 	var inst := {"uid": uid, "id": id, "anchor": anchor, "rot": posmod(rot, 4), "angle": posmod(rot, 4) * 90.0, "cells": cells,
 		"hp": Stats.max_hp(by_id[id]), "heat": 0.0, "status": "ok",
 		"out_anchor": Mounts.NONE, "out_at": Vector2.ZERO, "out_cells": [], "link": [], "out_hp": 0}
+	if id == FAB:
+		inst["fab_level"] = 1
 	if not plan.is_empty():
 		inst["out_anchor"] = out
 		inst["out_cells"] = plan["out_cells"]
@@ -468,6 +497,8 @@ func _load_state(inst: Dictionary, saved: Dictionary) -> void:
 		inst["ammo"] = str(saved.get("ammo", ""))
 	if saved.get("loaded") is float or saved.get("loaded") is int:
 		inst["loaded"] = maxi(0, int(saved["loaded"]))
+	if inst["id"] == FAB and (saved.get("fab_level") is float or saved.get("fab_level") is int):
+		inst["fab_level"] = clampi(int(saved["fab_level"]), 1, 4)
 	if (saved.get("group") is float or saved.get("group") is int) and int(saved["group"]) in [0, 1, 2, 3]:
 		inst["group"] = int(saved["group"])
 

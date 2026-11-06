@@ -685,6 +685,17 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 - **Engine wave 1** is re-costed by `override` entries in the pack (every one raw-material neutral): Mk3+ scrap becomes steel (40 -> 10), Mk4+ steel + titanium becomes alloy, Neon Mk2+ silicon + crystal becomes glass lattice. Conductor has no consumer yet except the Smelter Mk3 (power, shield and weapon parts of Mk3+ do not exist yet); Reflective Coating still costs silicon + crystal.
 - **Not built**: the Refinery (needs ore from section 10), the Fuel Cracker and the `fuel` rung (ice is not a cargo material), belts feeding a smelter, and art (the parts and the four materials are drawn by code placeholders).
 
+## 12b. The fabricator upgrades in place (owner, 2026-11-05)
+> "Fabricator level 2 is required for most of the upgrades. I think it should be a default upgrade path: the fabricator does not need blueprints, we come with one, and we can only have one on the ship, and clicking on it in build mode upgrades it. It can be expensive, but it should be accessible. Everything else is gated by blueprints anyway."
+
+- **Level**: the fabricator has its own level, 1 to 4 (`fab_level` on its instance, saved; Components version 8). `Workshop.level_of` returns it (0 when unpowered or missing). Tools and speed still come from the powered workshop modules in its room.
+- **Upgrade**: in build mode, a click on the fabricator with a part (or nothing) in hand, or U with the pointer over it, opens a card beside it (next level, what it unlocks counted from the known recipes, the cost with icons, red when short). A second click (or U) pays and upgrades, with a flash and the `unlock` sound. At level 4 the card says "Fully upgraded". No blueprint.
+- **Costs** (`data/components.json`, the fabricator's `upgrades`): L2 80 scrap, 30 copper, 8 titanium; L3 150 scrap, 30 titanium, 15 silicon, 20 polymer; L4 250 scrap, 40 alloy, 20 conductor, 10 crystal.
+- **One per ship**: placing a second one (build mode, cargo, a saved set) is refused with "One fabricator per ship: click yours to upgrade it"; a saved set with two keeps one and returns the other to the cargo. The `fabricator` recipe stays in the data (the kit valuation reads it) but is refused on a ship that has one.
+- **Never wrecked** (`no_wreck` in the part's data): hits disable it (repairable) and it never turns to debris.
+- **Modules**: the Robot Arm and the Assembly Rig no longer set the level; each one powered in the fabricator's room makes crafting 25% faster, up to +50% (`Workshop.SPEED_PER_MODULE`, `SPEED_MAX`). The Laser Cutter and the Nanoforge are tools.
+- **Old saves**: a saved fabricator with no `fab_level` takes the level its room's modules gave it before (arm 2; rig and two arms 3; nanoforge on top 4; power ignored), and is saved with it from then on (`Workshop.migrate`).
+
 ## 13. The end: endings, and why to start again (owner, 2026-10-30)
 > "We need an end goal so the game can end and give you a reason to restart with a new build: depending on the lore, finding an established civilisation that survived and is thriving (like I Am Legend), or multiple endings you can run into."
 
