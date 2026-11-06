@@ -179,13 +179,14 @@ func _free(d: Dictionary) -> void:
 	d["sim"].free()
 
 
-func test_the_panel_lists_every_recipe_by_category_known_ones_first() -> void:
+func test_the_panel_lists_every_known_recipe_by_family() -> void:
 	var d := _panel(_rig()["ship"])
 	var panel: CraftingPanel = d["panel"]
 	var rows := panel.rows()
-	eq(rows[0], {"header": "Systems"}, "systems first")
+	eq(rows[0], {"header": "Weapons"}, "weapons first")
 	var headers := rows.filter(func(r): return r.has("header")).map(func(r): return r["header"])
-	eq(headers, ["Systems", "Gear", "Materials", "Modules"], "the four categories in order")
+	var tail := headers.slice(headers.size() - 3)
+	eq(tail, ["Materials", CraftingPanel.G_GEAR, CraftingPanel.G_ITEMS], "the families first, then materials, hand gear and items")
 	var ids := panel.recipe_ids()
 	check(ids.has(KICKJET) and ids.has("pistol") and ids.has("polymer") and ids.has("robot_arm"), "known recipes of each kind")
 	check(not ids.has("reactor_mk2") and not ids.has("laser_mk2"), "recipes whose blueprint is unknown are hidden")
