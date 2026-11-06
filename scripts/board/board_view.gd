@@ -1583,7 +1583,6 @@ func _draw_over() -> void:
 	_draw_scorch()
 	_draw_foes()
 	_draw_people()
-	_draw_squad_marks(site)
 	_draw_party()
 	_draw_soldier()
 	_draw_active_fx()
@@ -1970,27 +1969,6 @@ func _draw_people() -> void:
 			_over.draw_arc(c, 13.0, 0.3, 2.6, 10, Color("#c8b070"), 2.0, true)
 			_over.draw_arc(c, 13.0, 3.5, 5.8, 10, Color("#c8b070"), 2.0, true)
 			_over.draw_circle(c + Vector2(0, 13.0), 2.0, Color("#c8b070"))
-
-
-## The room a follower was sent to: a frame and a flag in its colour; a ring under the feet of each selected follower.
-func _draw_squad_marks(site) -> void:
-	var font := ThemeDB.fallback_font
-	for i in session.party.size():
-		var p: Dictionary = session.party[i]
-		var col := Orders.colour(i)
-		var o: Dictionary = p.get("order", {})
-		if not o.is_empty():
-			var r: Rect2i = site.rooms[int(o["room"])]["rect"]
-			var box := Rect2(Vector2(r.position) * CELL, Vector2(r.size) * CELL).grow(-3.0 - 3.0 * float(i))
-			_over.draw_rect(box, Color(col, 0.07))
-			_over.draw_rect(box, Color(col, 0.75), false, 2.0)
-			var at: Vector2 = Vector2(r.position) * CELL + Vector2(10.0 + 22.0 * float(i), 20.0)
-			_over.draw_circle(at, 9.0, col)
-			_over.draw_string(font, at + Vector2(-4.0, 5.0), str(i + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.BLACK)
-		if bool(p.get("sel", false)) and not p["m"].is_down():
-			var c: Vector2 = p["m"].pos * CELL + Vector2(0.0, 14.0)
-			_over.draw_arc(c, 17.0, 0.0, TAU, 28, Color(col, 0.95), 2.5, true)
-			_over.draw_arc(c, 21.0, 0.0, TAU, 28, Color(col, 0.35), 1.5, true)
 
 
 func _draw_party() -> void:
