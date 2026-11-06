@@ -34,6 +34,7 @@ const SPARED_TEXT := "Deal struck. Pirate stands down. Esc to return"
 const ESCAPED_TEXT := "They got away. Esc to return"
 const FADED_TEXT := "The ship thins out of the world. Nothing is left. Esc to return"
 const THREAT_BANNER_S := 3.0  ## seconds of the fight the banner names the enemy and its threat
+const SLOW_FILL := 0.7  ## the share of the screen height your hull fills while the Tab slow-down is on
 const ESCAPE_LOOK_S := 1.5  ## seconds the camera keeps the place the enemy jumped from in view
 
 var arena: Arena
@@ -377,9 +378,16 @@ func shield_sectors() -> Array:
 
 
 ## Where the camera should be and how far to zoom so both ships fit a viewport of `view` px:
-## {center, zoom}. `margin`: the fraction of the screen kept free.
-func framing(view: Vector2, margin := 0.2) -> Dictionary:
+## {center, zoom}. `margin`: the fraction of the screen kept free. `own_ship`: frame only the player's ship, big enough to click the crew.
+func framing(view: Vector2, margin := 0.2, own_ship := false) -> Dictionary:
 	var a = arena.ships[PLAYER]
+	if own_ship:  # the Tab slow-down: your hull (not the shield bubble) centred, filling SLOW_FILL of the screen height (or the width, if that is tighter)
+		var up: float = ai.extent(PLAYER, Vector2.UP)
+		var down: float = ai.extent(PLAYER, Vector2.DOWN)
+		var left: float = ai.extent(PLAYER, Vector2.LEFT)
+		var right: float = ai.extent(PLAYER, Vector2.RIGHT)
+		var zoom := minf(view.y * SLOW_FILL / maxf(up + down, 1.0), view.x * 0.9 / maxf(left + right, 1.0))
+		return {"center": a.flight.pos + Vector2(right - left, down - up) / 2.0, "zoom": clampf(zoom, 0.05, 2.0)}
 	var b = arena.ships[ENEMY]
 	var b_pos: Vector2 = b.flight.pos
 	if morale.state == "escaped":  # it jumped away: the camera keeps the place a moment, then the player alone
