@@ -538,7 +538,7 @@ func test_a_click_on_the_fabricator_opens_its_card_and_a_second_one_upgrades() -
 
 
 func test_u_over_the_fabricator_works_like_the_click_and_a_short_hold_refuses() -> void:
-	var r := _fab_mode({"scrap": 200, "copper": 40, "titanium": 9})
+	var r := _fab_mode({"scrap": 200, "copper": 40, "titanium": 7})
 	var b: BuildMode = r[0]
 	var fab: int = r[1]
 	_key(b, KEY_U)

@@ -215,15 +215,15 @@ func _ship(stock := true) -> Dictionary:
 	var ship := Fixture.room_ship()
 	var fab := Fixture.put(ship, "fabricator", 15, 10)
 	if stock:
-		ship.inventory.load_dict({"scrap": 1000, "copper": 100, "titanium": 100, "silicon": 50, "conductor": 50, "alloy": 100, "crystal": 50})
+		ship.inventory.load_dict({"scrap": 1000, "copper": 100, "titanium": 100, "silicon": 50, "conductor": 50, "polymer": 50, "alloy": 100, "crystal": 50})
 	return {"ship": ship, "fab": fab}
 
 
 func test_the_upgrade_costs_are_data_and_the_path_runs_one_to_four() -> void:
 	var d := _ship()
 	var ship: Ship = d["ship"]
-	eq(Workshop.upgrade_cost(ship, 2), {"scrap": 80, "copper": 30, "titanium": 10}, "level 2 costs")
-	eq(Workshop.upgrade_cost(ship, 3), {"scrap": 150, "titanium": 40, "silicon": 20, "conductor": 10}, "level 3 costs")
+	eq(Workshop.upgrade_cost(ship, 2), {"scrap": 80, "copper": 30, "titanium": 8}, "level 2 costs")
+	eq(Workshop.upgrade_cost(ship, 3), {"scrap": 150, "titanium": 30, "silicon": 15, "polymer": 20}, "level 3 costs")
 	eq(Workshop.upgrade_cost(ship, 4), {"scrap": 250, "alloy": 40, "conductor": 20, "crystal": 10}, "level 4 costs")
 	eq(Workshop.upgrade_cost(ship, 5), {}, "nothing beyond 4")
 	eq(Workshop.upgrade_cost(ship, 1), {}, "nothing for 1")
@@ -242,7 +242,7 @@ func test_the_upgrade_costs_are_data_and_the_path_runs_one_to_four() -> void:
 func test_an_upgrade_when_short_is_refused_and_pays_nothing() -> void:
 	var d := _ship(false)
 	var ship: Ship = d["ship"]
-	ship.inventory.load_dict({"scrap": 80, "copper": 30, "titanium": 9})
+	ship.inventory.load_dict({"scrap": 80, "copper": 30, "titanium": 7})
 	var inf := Workshop.upgrade_info(ship, d["fab"])
 	eq(inf["short"], {"titanium": 1}, "one titanium short")
 	check(not inf["can"], "cannot")

@@ -395,8 +395,8 @@
       "family": "fabricator",
       "no_wreck": true,
       "upgrades": {
-        "2": {"scrap": 80, "copper": 30, "titanium": 10},
-        "3": {"scrap": 150, "titanium": 40, "silicon": 20, "conductor": 10},
+        "2": {"scrap": 80, "copper": 30, "titanium": 8},
+        "3": {"scrap": 150, "titanium": 30, "silicon": 15, "polymer": 20},
         "4": {"scrap": 250, "alloy": 40, "conductor": 20, "crystal": 10}
       },
       "line": "standard",
