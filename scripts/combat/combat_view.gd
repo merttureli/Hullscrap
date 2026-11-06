@@ -15,6 +15,7 @@ extends Node2D
 ## 2,000 px).
 
 const DroneView = preload("res://scripts/combat/drone_view.gd")
+const LimpetView = preload("res://scripts/combat/limpet_view.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const ImpactFx = preload("res://scripts/combat/impact_fx.gd")
 const EffectFx = preload("res://scripts/combat/effect_fx.gd")
@@ -77,6 +78,8 @@ var _stars_node: Node2D
 var _stars: Array = []  # [unit position, depth, radius]
 var _star_drift := Vector2.ZERO
 var _fx: Array = []
+var _hold_slot := 0  ## the weapon slot of a limpet or pod kit whose key is held: its predicted path shows, and releasing the key throws it (limpet_view.gd)
+var _trails2 := {}  # limpet or pod id -> its spark dots (limpet_view.gd)
 var _trails := {}  # drone id -> its thruster puffs (drone_view.gd)
 var _cursor := 0
 var _clock := 0.0
@@ -351,7 +354,18 @@ func _unhandled_input(e: InputEvent) -> void:
 			_:
 				var n: int = e.keycode - KEY_1
 				if n >= 0 and n <= 8:
-					session.fire_slot(n + 1, _aim())
+					if session.slot_thrown(n + 1):
+						_hold_slot = n + 1  # a thrown kit: hold to aim (the path shows), release to throw
+					else:
+						session.fire_slot(n + 1, _aim())
+	elif e is InputEventKey and not e.pressed and _hold_slot > 0 and e.keycode - KEY_1 == _hold_slot - 1:
+		var slot := _hold_slot
+		_hold_slot = 0
+		if active:
+			var why: String = "" if session.fire_slot(slot, _aim()) else "can't throw that now"
+			if why != "":
+				_say(why)
+			_handled()
 	elif active and e is InputEventMouseButton and e.pressed:
 		if _bar != null and _bar.visible and e.button_index == MOUSE_BUTTON_RIGHT and _bar.click(e.position - _bar.position, e.button_index):
 			_swallow = e.button_index  # a right-click on a slot moves that gun between LMB and RMB, it does not fire
@@ -723,6 +737,13 @@ func _on_event(e: Dictionary) -> void:
 			else:
 				_on_ship(idx, pos, {"k": "flash", "life": 0.22, "r": 18.0 if big else 11.0, "color": col})
 			_sparks(pos, n, 7 if big else 4, col)
+		"limpet_stick", "limpet_off", "limpet_lost", "pod_breach":
+			if e["type"] == "limpet_stick":
+				_snd("hit_hull", idx, pos, -6.0, -3.0)
+			elif e["type"] == "pod_breach":
+				_snd("explosion_s", idx, pos, -5.0, -3.0)
+			for f in LimpetView.effects(e, _rng):
+				_add_impact_fx(f)
 		"drone_launch", "drone_hit", "drone_down", "drone_home", "drone_shot":
 			if e["type"] == "drone_down":
 				_snd("explosion_s", idx, pos, -3.0, -3.0)
@@ -882,6 +903,12 @@ func _draw_fx() -> void:
 	for p in arena.projectiles:
 		_draw_shot(c, p, px)
 	DroneView.draw(c, arena, _clock, px, _trails, _glow_quads if _glow != null else null)
+	LimpetView.draw(c, arena, _clock, px, _trails2, _glow_quads if _glow != null else null)
+	if _hold_slot > 0 and session.state() == "fighting":
+		var pred: Dictionary = session.slot_path(_hold_slot, _aim())
+		if not pred.is_empty():
+			var kit: Dictionary = session.arena.Drones.kit(str(session.bays()[_hold_slot - session.weapons().size() - 1]["kit"]))
+			LimpetView.draw_path(c, pred, px, LimpetView.COLORS.get(str(kit["drone"].get("family", kit["drone"]["role"])), Color.WHITE))
 	if _glow != null:
 		_glow.show_quads(_glow_quads)
 

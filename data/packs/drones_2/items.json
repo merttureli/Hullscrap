@@ -1,0 +1,228 @@
+{
+ "items": [
+  {
+   "id": "fire_limpet_mk1",
+   "name": "Fire Limpet Mk I",
+   "kind": "drone",
+   "blurb": "A magnet disc with three burner vents. It clamps to the hull and lights the room behind the wall, over and over, until it is scraped off or runs dry.",
+   "drone": {
+    "role": "limpet",
+    "family": "fire",
+    "tier": 1,
+    "hp": 2,
+    "art": "fire_limpet",
+    "magnet": {
+     "launch": 520.0,
+     "pull": 1500.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.7
+    },
+    "effect": {
+     "kind": "fire",
+     "seconds": 30,
+     "every": 6,
+     "cells": 1
+    }
+   }
+  },
+  {
+   "id": "fire_limpet_mk2",
+   "name": "Fire Limpet Mk II",
+   "kind": "drone",
+   "blurb": "The same disc with a bigger tank: it lights two cells at a time, a little quicker, and burns for 40 seconds.",
+   "drone": {
+    "role": "limpet",
+    "family": "fire",
+    "tier": 2,
+    "hp": 3,
+    "art": "fire_limpet",
+    "magnet": {
+     "launch": 520.0,
+     "pull": 1500.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.7
+    },
+    "effect": {
+     "kind": "fire",
+     "seconds": 40,
+     "every": 5,
+     "cells": 2
+    }
+   }
+  },
+  {
+   "id": "poison_limpet_mk1",
+   "name": "Poison Limpet Mk I",
+   "kind": "drone",
+   "blurb": "Two toxin bulbs and a sprayer. Crew in the room behind take 2 hp a second unless suited, and the air drains, for 30 seconds.",
+   "drone": {
+    "role": "limpet",
+    "family": "poison",
+    "tier": 1,
+    "hp": 2,
+    "art": "poison_limpet",
+    "magnet": {
+     "launch": 520.0,
+     "pull": 1500.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.7
+    },
+    "effect": {
+     "kind": "poison",
+     "seconds": 30,
+     "dps": 2.0,
+     "o2_drain": 0.012
+    }
+   }
+  },
+  {
+   "id": "poison_limpet_mk2",
+   "name": "Poison Limpet Mk II",
+   "kind": "drone",
+   "blurb": "Stronger bulbs: 3 hp a second to anyone unsuited and the air goes faster.",
+   "drone": {
+    "role": "limpet",
+    "family": "poison",
+    "tier": 2,
+    "hp": 3,
+    "art": "poison_limpet",
+    "magnet": {
+     "launch": 520.0,
+     "pull": 1500.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.7
+    },
+    "effect": {
+     "kind": "poison",
+     "seconds": 30,
+     "dps": 3.0,
+     "o2_drain": 0.02
+    }
+   }
+  },
+  {
+   "id": "heat_limpet_mk1",
+   "name": "Heat Limpet Mk I",
+   "kind": "drone",
+   "blurb": "A radiator ring that only runs one way. The parts in the room behind heat until they trip out, in about 15 seconds of sticking.",
+   "drone": {
+    "role": "limpet",
+    "family": "heat",
+    "tier": 1,
+    "hp": 2,
+    "art": "heat_limpet",
+    "magnet": {
+     "launch": 520.0,
+     "pull": 1500.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.7
+    },
+    "effect": {
+     "kind": "heat",
+     "seconds": 30,
+     "rate": 9.0
+    }
+   }
+  },
+  {
+   "id": "heat_limpet_mk2",
+   "name": "Heat Limpet Mk II",
+   "kind": "drone",
+   "blurb": "A hotter ring: parts trip in about 9 seconds, and people feel it.",
+   "drone": {
+    "role": "limpet",
+    "family": "heat",
+    "tier": 2,
+    "hp": 3,
+    "art": "heat_limpet",
+    "magnet": {
+     "launch": 520.0,
+     "pull": 1500.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.7
+    },
+    "effect": {
+     "kind": "heat",
+     "seconds": 30,
+     "rate": 15.0
+    }
+   }
+  },
+  {
+   "id": "boarder_pod_mk1",
+   "name": "Boarder Pod Mk I",
+   "kind": "drone",
+   "blurb": "A drill-nosed capsule. It cuts a small breach in the wall and drops a drill robot into the room behind.",
+   "drone": {
+    "role": "boarder",
+    "tier": 1,
+    "hp": 4,
+    "art": "boarder_pod",
+    "magnet": {
+     "launch": 480.0,
+     "pull": 1350.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.5
+    },
+    "robots": [
+     "boarding_robot_mk1"
+    ],
+    "breach_s": 2.4
+   }
+  },
+  {
+   "id": "boarder_pod_mk2",
+   "name": "Boarder Pod Mk II",
+   "kind": "drone",
+   "blurb": "The shock pod: its robot ion-locks the system it works on.",
+   "drone": {
+    "role": "boarder",
+    "tier": 2,
+    "hp": 5,
+    "art": "boarder_pod_ion",
+    "magnet": {
+     "launch": 480.0,
+     "pull": 1350.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.5
+    },
+    "robots": [
+     "boarding_robot_mk2"
+    ],
+    "breach_s": 2.4
+   }
+  },
+  {
+   "id": "boarder_pod_mk3",
+   "name": "Boarder Pod Mk III",
+   "kind": "drone",
+   "blurb": "A pair of heavy drill robots in one capsule.",
+   "drone": {
+    "role": "boarder",
+    "tier": 3,
+    "hp": 6,
+    "art": "boarder_pod",
+    "magnet": {
+     "launch": 480.0,
+     "pull": 1350.0,
+     "d0": 6.0,
+     "cap": 660.0,
+     "turn": 1.5
+    },
+    "robots": [
+     "boarding_robot_mk3",
+     "boarding_robot_mk3"
+    ],
+    "breach_s": 2.4
+   }
+  }
+ ]
+}

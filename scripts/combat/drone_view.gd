@@ -37,6 +37,8 @@ static func row_of(arena, d: Dictionary, clock: float) -> int:
 static func draw(c: CanvasItem, arena, clock: float, px: float, trails: Dictionary, quads) -> void:
 	var live := {}
 	for d in arena.drones:
+		if d["role"] == "limpet" or d["role"] == "boarder":  # (limpet_view.gd draws those)
+			continue
 		live[d["id"]] = true
 		var line: String = str(arena.ships[d["owner"]].ship.components.def(arena.ships[d["owner"]].bays[d["bay"]]["id"]).get("line", "standard")) if arena.ships[d["owner"]].bays.has(d["bay"]) else "standard"
 		var k := k_of(px)

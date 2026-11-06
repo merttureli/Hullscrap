@@ -1,0 +1,146 @@
+{
+ "recipes": [
+  {
+   "id": "fire_limpet_mk1",
+   "output": {
+    "item": "fire_limpet_mk1",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 14,
+    "copper": 5
+   },
+   "fab_level": 1,
+   "tools": [],
+   "time": 18,
+   "category": "gear"
+  },
+  {
+   "id": "fire_limpet_mk2",
+   "output": {
+    "item": "fire_limpet_mk2",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 14,
+    "copper": 7,
+    "silicon": 3
+   },
+   "fab_level": 2,
+   "tools": [],
+   "time": 26,
+   "category": "gear"
+  },
+  {
+   "id": "poison_limpet_mk1",
+   "output": {
+    "item": "poison_limpet_mk1",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 14,
+    "copper": 5
+   },
+   "fab_level": 1,
+   "tools": [],
+   "time": 18,
+   "category": "gear"
+  },
+  {
+   "id": "poison_limpet_mk2",
+   "output": {
+    "item": "poison_limpet_mk2",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 14,
+    "copper": 7,
+    "silicon": 3
+   },
+   "fab_level": 2,
+   "tools": [],
+   "time": 26,
+   "category": "gear"
+  },
+  {
+   "id": "heat_limpet_mk1",
+   "output": {
+    "item": "heat_limpet_mk1",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 14,
+    "copper": 6
+   },
+   "fab_level": 1,
+   "tools": [],
+   "time": 18,
+   "category": "gear"
+  },
+  {
+   "id": "heat_limpet_mk2",
+   "output": {
+    "item": "heat_limpet_mk2",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 14,
+    "copper": 8,
+    "silicon": 3
+   },
+   "fab_level": 2,
+   "tools": [],
+   "time": 26,
+   "category": "gear"
+  },
+  {
+   "id": "boarder_pod_mk1",
+   "output": {
+    "item": "boarder_pod_mk1",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 18,
+    "copper": 8
+   },
+   "fab_level": 1,
+   "tools": [],
+   "time": 18,
+   "category": "gear"
+  },
+  {
+   "id": "boarder_pod_mk2",
+   "output": {
+    "item": "boarder_pod_mk2",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 20,
+    "copper": 10,
+    "silicon": 4,
+    "crystal": 1
+   },
+   "fab_level": 2,
+   "tools": [],
+   "time": 26,
+   "category": "gear"
+  },
+  {
+   "id": "boarder_pod_mk3",
+   "output": {
+    "item": "boarder_pod_mk3",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 28,
+    "copper": 14,
+    "titanium": 8,
+    "silicon": 4
+   },
+   "fab_level": 3,
+   "tools": [],
+   "time": 34,
+   "category": "gear"
+  }
+ ]
+}

@@ -294,6 +294,10 @@ static func plan(sheet, pose: Dictionary) -> Array:
 		if held.is_empty() or not sheet.poses.has(cls) or sheet.poses[cls]["mount"] == null:
 			cls = "unarmed"
 			held = {}
+		var ap := str(pose.get("arm_pose", ""))  # a rig's own arm pose by name (a boarding robot's strike frames)
+		if ap != "" and sheet.poses.has(ap):
+			cls = ap
+			held = {}
 		var jab := Vector2(0.0, -absf(sin(float(pose.get("t", 0.0)) * 9.0)) * JAB) if pose.get("work", false) and not down else Vector2.ZERO
 		var pose_frame: int = sheet.poses[cls]["frame"] if sheet.poses.has(cls) else 0
 		var arm_art = ge["arms"] if ge != null and ge.has("arms") else null  # an exosuit's own arms, in the same pose

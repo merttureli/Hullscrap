@@ -55,7 +55,7 @@ const CrewFx = preload("res://scripts/crew/crew_fx.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 
 const LEGACY_PATH := "res://data/species.json"  ## its `traits` table is the old home of the library
-const DAMAGE: Array[String] = ["fire", "no_air", "melee", "ranged", "ion"]
+const DAMAGE: Array[String] = ["fire", "no_air", "melee", "ranged", "ion", "poison"]
 const WORK: Array[String] = ["repair", "extinguish", "breach", "man", "restock", "craft", "heal_others"]
 const HEAL: Array[String] = ["bed", "medbay"]
 const FLAGS: Array[String] = ["mechanical", "vacuum_walk", "no_tools", "reveal_enemy", "no_suit", "mimic", "no_knock", "heat_proof"]  ## the keys that are true or false
