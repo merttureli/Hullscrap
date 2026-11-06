@@ -8,6 +8,8 @@ extends RefCounted
 ## size last (default BODY), its anchor is the cell it stands on and its centre the anchor plus (0.5, 0.5),
 ## so it also walks the 1-wide corridors (crawlspaces) that 2x2 bodies cannot.
 ## Ties on f break on lower h, then lower (y, x), so the same grid always gives the same path.
+## A climber (a repair drone, CrewMember.climbs) also walks over solid wall and hull cells (any tile, not the empty space); each function
+## takes `climb` last (default false).
 ## Everything is static: call it as `Pathfinder.find_path(...)`. No nodes, testable headless.
 
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
@@ -19,10 +21,12 @@ const FAR := 1 << 30
 ## Can a crew member stand on `c`? `door_passable` is a Callable(cell) -> bool for door cells;
 ## an invalid (default) Callable means every door is passable but a locked one (grid.door_locked: the doors of an
 ## abandoned room), which only a valid Callable that says yes lets through (the player's soldier walks in).
-static func walkable(grid: ShipGrid, c: Vector2i, door_passable: Callable = Callable()) -> bool:
+static func walkable(grid: ShipGrid, c: Vector2i, door_passable: Callable = Callable(), climb := false) -> bool:
 	var id := grid.get_tile(c)
 	if id == "":
 		return false
+	if climb and grid.tile_flag(id, "solid"):
+		return true
 	var def: Dictionary = grid.defs.get_def(id) if grid.defs != null else {}
 	if def.get("door", false):
 		if grid.door_locked.has(c):
@@ -32,10 +36,10 @@ static func walkable(grid: ShipGrid, c: Vector2i, door_passable: Callable = Call
 
 
 ## Can a body stand with its top-left cell on `anchor`? All body x body cells must be walkable.
-static func body_ok(grid: ShipGrid, anchor: Vector2i, door_passable: Callable = Callable(), body := BODY) -> bool:
+static func body_ok(grid: ShipGrid, anchor: Vector2i, door_passable: Callable = Callable(), body := BODY, climb := false) -> bool:
 	for y in body:
 		for x in body:
-			if not walkable(grid, anchor + Vector2i(x, y), door_passable):
+			if not walkable(grid, anchor + Vector2i(x, y), door_passable, climb):
 				return false
 	return true
 
@@ -64,9 +68,9 @@ static func body_cells(anchor: Vector2i, body := BODY) -> Array[Vector2i]:
 
 ## Shortest path of body anchors from `from` to `to`, both ends included. Empty when either end
 ## is not usable (see body_ok) or no route exists.
-static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passable: Callable = Callable(), body := BODY) -> Array[Vector2i]:
+static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passable: Callable = Callable(), body := BODY, climb := false) -> Array[Vector2i]:
 	var path: Array[Vector2i] = []
-	if not body_ok(grid, from, door_passable, body) or not body_ok(grid, to, door_passable, body):
+	if not body_ok(grid, from, door_passable, body, climb) or not body_ok(grid, to, door_passable, body, climb):
 		return path
 	var g_cost := {from: 0}
 	var came_from := {}
@@ -86,7 +90,7 @@ static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passabl
 		var g: int = g_cost[cur] + 1
 		for d in ShipGrid.SIDES:
 			var n := cur + d
-			if closed.has(n) or g >= g_cost.get(n, FAR) or not body_ok(grid, n, door_passable, body):
+			if closed.has(n) or g >= g_cost.get(n, FAR) or not body_ok(grid, n, door_passable, body, climb):
 				continue
 			g_cost[n] = g
 			came_from[n] = cur
@@ -105,7 +109,7 @@ static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passabl
 
 ## The usable body anchor whose body centre is nearest to `p` (cell units). Anchors whose body
 ## would overlap a body on `exclude` are skipped. Ties go to the lower (y, x). NO_CELL when none.
-static func nearest_walkable(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), exclude := NO_CELL, body := BODY) -> Vector2i:
+static func nearest_walkable(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), exclude := NO_CELL, body := BODY, climb := false) -> Vector2i:
 	var best := NO_CELL
 	var best_d := INF
 	for c: Vector2i in grid.tiles:  # an anchor is itself a walkable tile
@@ -114,7 +118,7 @@ static func nearest_walkable(grid: ShipGrid, p: Vector2, door_passable: Callable
 		var d := (centre_of(c, body) - p).length_squared()
 		if d > best_d or (d == best_d and (c.y > best.y or (c.y == best.y and c.x > best.x))):
 			continue
-		if body_ok(grid, c, door_passable, body):
+		if body_ok(grid, c, door_passable, body, climb):
 			best = c
 			best_d = d
 	return best

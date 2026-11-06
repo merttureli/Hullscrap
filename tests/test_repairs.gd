@@ -78,15 +78,15 @@ func test_a_crew_member_refuses_a_job_in_bad_air_that_takes_longer_than_one_brea
 
 func test_a_crew_member_takes_a_short_job_in_bad_air() -> void:
 	var ship := _two_rooms()
-	ship.grid.hp[Vector2i(22, 12)] = 3.0  # one hp missing from the east wall: 1.5 s of work
+	ship.grid.hp[Vector2i(15, 10)] = 3.0  # one hp missing from the dividing wall: 1.5 s of work
 	ship.atmosphere.pressure[_east(ship)] = 0.0
-	var ada := _npc("Ada", 19, 12)
+	var ada := _npc("Ada", 17, 10)
 	ship.crew.append(ada)
 	var jobs := Jobs.new()
 	_run(jobs, ship, 1.5)
 	eq(_types(ada), "repair_block", "a quick wall fits on one breath")
 	_run(jobs, ship, 6.0)
-	check(not ship.grid.hp.has(Vector2i(22, 12)), "and she mends it")
+	check(not ship.grid.hp.has(Vector2i(15, 10)), "and she mends it")
 	check(ada.hp > ada.max_hp * 0.4, "well above hurt_below")
 
 
@@ -246,7 +246,7 @@ func test_a_part_hit_in_the_last_seconds_is_repaired_slower_and_so_is_a_wall() -
 	var ship := _two_rooms()
 	var engine := Fixture.put(ship, "engine_mk1", 17, 10)
 	ship.components.instances[engine]["status"] = "malfunction"
-	var ada := _npc("Ada", 17, 13)
+	var ada := _npc("Ada", 17, 10)
 	ship.crew.append(ada)
 	var jobs := Jobs.new()
 	_run(jobs, ship, 2.0)

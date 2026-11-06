@@ -39,6 +39,9 @@ extends RefCounted
 ## The player's orders are not held to the budget (order_warning says so), but an ordered crew member still leaves when they cannot get out safely any more.
 ## In a fight a room whose boundary is shot open in too many places is lost (Evacuate.lost_rooms, ship.lost_rooms): its jobs are closed like an abandoned room's and the crew walk out;
 ## a wall or part hit in the last under_fire.seconds is mended at under_fire.mult of the speed (_fire_mult).
+## Who repairs what: a repair drone climbs wall and hull cells (Pathfinder `climb`) and also takes the `hull` jobs: a wall or door open to space on a
+## side or with no floor beside it (is_hull_cell), and a mount whose only damage is its outside half (worked from the link wall); they come first
+## for a drone (crew.json drone_hull_bonus). Crew never take a `hull` job, only inner walls and inside parts. A wreck is nobody's to repair (clear_wreck).
 ## A repair drone (CrewMember.is_drone, R1) is handed only the jobs of crew.json `drone_jobs`, and only while Power.feed_drones powers it
 ## (without power it stands still); at 0 hp it is broken, not dead: a crewmate's repair_crew job (or the player's hand) mends it.
 
@@ -296,6 +299,26 @@ func build_board(ship) -> void:
 			progress.erase(key)
 
 
+## A hull job with the drone's hull_bonus (crew.json) on its priority.
+static func _hull_first(job: Dictionary) -> Dictionary:
+	if not job.get("hull", false):
+		return job
+	var j := job.duplicate()
+	j["priority"] = int(job["priority"]) + int(CrewMember.config().get("drone_hull_bonus", 20))
+	return j
+
+
+## Is wall or door `c` outer hull: open to space on a side, or with no floor beside it? Crew do not work it, drones do.
+static func is_hull_cell(grid, c: Vector2i) -> bool:
+	var floor_beside := false
+	for d in SIDES:
+		var id: String = grid.get_tile(c + d)
+		if id == "":
+			return true
+		floor_beside = floor_beside or Pathfinder.walkable(grid, c + d)
+	return not floor_beside
+
+
 ## The player (F in build mode) asks the nearest crew member to repair part `uid`. Returns what to
 ## tell the player. Unlike the board, an order also covers a part that works but is damaged.
 func order_repair(ship, uid: int) -> String:
@@ -308,6 +331,8 @@ func order_repair(ship, uid: int) -> String:
 	if _fine(ship, uid):
 		return "%s needs no repair" % name
 	var job := _fix_job(ship, uid)
+	if job.get("hull", false):
+		return "only a repair drone can reach %s" % name
 	var best = null
 	var best_d := 1 << 30
 	for m in ship.crew:
@@ -569,6 +594,8 @@ func _pick(ship, m, claims: Dictionary, floor_p: int) -> Dictionary:
 		var job: Dictionary = board[key]
 		if job["priority"] < floor_p or (not m.job.is_empty() and m.job["key"] == key) or _is_own(job, m) or (not tools and job["type"] in TOOL_JOBS):
 			continue
+		if job.get("hull", false) and not m.is_drone():
+			continue  # the outer hull and a mount's outside half: only a drone climbs there
 		if m.is_drone() and not job["type"] in drone_jobs:
 			continue  # a drone takes only the jobs of crew.json drone_jobs: no station, no revive, no mending a crewmate
 		if job["type"] == "man_station" and not str(job.get("held", "")) in ["", m.name]:
@@ -580,6 +607,8 @@ func _pick(ship, m, claims: Dictionary, floor_p: int) -> Dictionary:
 	if open.is_empty():
 		return {}
 	open = by_priority(open.map(func(job): return _for_member(job, m)))
+	if m.is_drone():  # hull and outside damage first, then what crew can't reach
+		open = by_priority(open.map(func(job): return _hull_first(job)))
 	var taken := _taken(ship, m)
 	var i := 0
 	while i < open.size():
@@ -623,7 +652,7 @@ func _route(ship, m, job: Dictionary, taken: Array, check := true) -> Dictionary
 		return {"cost": 0, "spot": m.anchor(), "path": []}
 	var grid = ship.grid
 	var start := _start(grid, m)
-	var spots := stand_spots(ship, job, m.body_size).filter(func(s): return not _clashes(s, taken))
+	var spots := stand_spots(ship, job, m.body_size, m.climbs()).filter(func(s): return not _clashes(s, taken))
 	spots.sort_custom(func(a, b):
 		var da := absi(a.x - start.x) + absi(a.y - start.y)
 		var db := absi(b.x - start.x) + absi(b.y - start.y)
@@ -633,7 +662,7 @@ func _route(ship, m, job: Dictionary, taken: Array, check := true) -> Dictionary
 		if paths_used >= int(jcfg()["search"]["paths"]):
 			break
 		paths_used += 1
-		var path := Pathfinder.find_path(grid, start, spot, Callable(), m.body_size)
+		var path := Pathfinder.find_path(grid, start, spot, Callable(), m.body_size, m.climbs())
 		if not path.is_empty() and (best.is_empty() or path.size() - 1 < best["cost"]) and (not check or _lasts(ship, m, spot, path, _work_left(ship, m, job), _margin())):
 			best = {"cost": path.size() - 1, "spot": spot, "path": path}
 	return best
@@ -1230,7 +1259,7 @@ func in_reach(m, job: Dictionary) -> bool:
 ## Body anchors from which a crew member reaches `job`: next to its cells, not on them (rest: with
 ## the body's centre on the bed). Spots clear of fire, of doorways, then of parts, are preferred; (y, x) order.
 ## `body`: the size of the body that stands there (a small one, 1, also finds spots in crawlspaces).
-func stand_spots(ship, job: Dictionary, body := Pathfinder.BODY) -> Array[Vector2i]:
+func stand_spots(ship, job: Dictionary, body := Pathfinder.BODY, climb := false) -> Array[Vector2i]:
 	var grid = ship.grid
 	var inside := {}
 	for c in job["cells"]:
@@ -1239,12 +1268,12 @@ func stand_spots(ship, job: Dictionary, body := Pathfinder.BODY) -> Array[Vector
 	var all: Array[Vector2i] = []
 	for c in job["cells"]:
 		if job["type"] == "rest":
-			_try_spot(grid, c - Vector2i.ONE * (body - 1), [], seen, all, body)
+			_try_spot(grid, c - Vector2i.ONE * (body - 1), [], seen, all, body, climb)
 			continue
 		for n in _beside(c, inside):
 			for oy in body:
 				for ox in body:
-					_try_spot(grid, n - Vector2i(ox, oy), inside, seen, all, body)
+					_try_spot(grid, n - Vector2i(ox, oy), inside, seen, all, body, climb)
 	if all.is_empty() and job.has("reach"):  # a breach in a mount's wall: beside the mount's inside half
 		var near := {}
 		for c in job["reach"]:
@@ -1253,12 +1282,12 @@ func stand_spots(ship, job: Dictionary, body := Pathfinder.BODY) -> Array[Vector
 			for n in _beside(c, near):
 				for oy in body:
 					for ox in body:
-						_try_spot(grid, n - Vector2i(ox, oy), near, seen, all, body)
+						_try_spot(grid, n - Vector2i(ox, oy), near, seen, all, body, climb)
 	if all.is_empty() and job["type"] != "rest":  # no room beside it: stand on it
 		for c in job["cells"]:
 			for oy in body:
 				for ox in body:
-					_try_spot(grid, c - Vector2i(ox, oy), [], seen, all, body)
+					_try_spot(grid, c - Vector2i(ox, oy), [], seen, all, body, climb)
 	all.sort_custom(func(a: Vector2i, b: Vector2i): return a.y < b.y or (a.y == b.y and a.x < b.x))
 	var safe := all.filter(func(a): return not Pathfinder.body_cells(a, body).any(func(c): return ship.fires.has(c)))
 	if not safe.is_empty():
@@ -1301,11 +1330,11 @@ func _beside(c: Vector2i, inside: Dictionary) -> Array[Vector2i]:
 
 
 ## Add `anchor` to `out` once if a body fits there and none of its cells is in `avoid`.
-func _try_spot(grid, anchor: Vector2i, avoid, seen: Dictionary, out: Array[Vector2i], body := Pathfinder.BODY) -> void:
+func _try_spot(grid, anchor: Vector2i, avoid, seen: Dictionary, out: Array[Vector2i], body := Pathfinder.BODY, climb := false) -> void:
 	if seen.has(anchor):
 		return
 	seen[anchor] = true
-	if not Pathfinder.body_ok(grid, anchor, Callable(), body):
+	if not Pathfinder.body_ok(grid, anchor, Callable(), body, climb):
 		return
 	for c in Pathfinder.body_cells(anchor, body):
 		if avoid.has(c):
@@ -1316,7 +1345,7 @@ func _try_spot(grid, anchor: Vector2i, avoid, seen: Dictionary, out: Array[Vecto
 ## Where `m` starts walking from: their own anchor, or the nearest one a body fits on.
 func _start(grid, m) -> Vector2i:
 	var a: Vector2i = m.anchor()
-	return a if Pathfinder.body_ok(grid, a, Callable(), m.body_size) else Pathfinder.nearest_walkable(grid, m.pos, Callable(), Pathfinder.NO_CELL, m.body_size)
+	return a if Pathfinder.body_ok(grid, a, Callable(), m.body_size, m.climbs()) else Pathfinder.nearest_walkable(grid, m.pos, Callable(), Pathfinder.NO_CELL, m.body_size, m.climbs())
 
 
 ## Spots other crew are standing on or heading for (so two bodies do not end up on one spot).
@@ -1370,6 +1399,7 @@ func _block_job(ship, c: Vector2i) -> Dictionary:
 	var near := _parts_by_breach(ship, c)
 	if not near.is_empty():  # a part may fill the only floor beside it: worked from beside the part
 		extra["reach"] = near
+	extra["hull"] = is_hull_cell(grid, c)
 	return _job("repair_block", "block:%d,%d" % [c.x, c.y], [c], extra)
 
 
@@ -1382,8 +1412,12 @@ func _fix_job(ship, uid: int) -> Dictionary:
 	var priority := int(c["priority"])
 	if combat and str(def.get("family", "")) in c["combat_families"]:
 		priority += int(c["combat_bonus"])
-	return _job("repair_component", "fix:%d" % uid, inst["cells"], {"uid": uid, "name": def.get("name", inst["id"]),
-		"priority": priority, "work": float(c["seconds"]) * float(ship.effective(inst["id"])["repair_mult"])})
+	var extra := {"uid": uid, "name": def.get("name", inst["id"]), "priority": priority, "work": float(c["seconds"]) * float(ship.effective(inst["id"])["repair_mult"])}
+	var cells: Array = inst["cells"]
+	if not inst["status"] in FAULTY and ship.outside_hurt(uid):  # only the outside half is hurt: worked from the link wall, by a drone
+		extra["hull"] = true
+		cells = inst["link"] + inst["out_cells"]
+	return _job("repair_component", "fix:%d" % uid, cells, extra)
 
 
 ## Works and not damaged: nothing to repair.
