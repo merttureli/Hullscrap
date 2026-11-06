@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  48
+ ],
+ "cells": [
+  4,
+  3
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "smelter_neon_mk1_glow.png",
+  "frame": [
+   84,
+   68
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Lumen \"Plasma Forge\" (neon, 4x3, manned): the smelter frame in navy panels with 1px cyan edges. A glass bottle holds a magenta arc that spins round a crystal electrode (two bright arc heads chase round the ring, 4 frames); tuning-fork resonators either side hum (their tines spread and close: it sings); a crystal hopper top-left feeds silicon shards in; the console screen draws the song as a cyan wave; a capacitor bank with magenta charge lamps on the right; the line along the bottom carries new glass lattice (white-magenta hot, then cyan, then set). Damaged: the bottle is cracked and the arc leaks out through it in a stray tendril, one resonator is bent and silent, the wave is jagged. Disabled: the bottle shattered and dark, the electrode dull, every edge line dead, shards in the line."
+}

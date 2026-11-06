@@ -1,0 +1,57 @@
+{
+ "frame": [
+  64,
+  32
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   2
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   6
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "battering_bow_glow.png",
+  "frame": [
+   76,
+   44
+  ],
+  "offset": [
+   -6,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    2
+   ],
+   "damaged": [
+    2,
+    2,
+    6
+   ]
+  }
+ },
+ "orientation": "rotation 0: the ram faces UP (place it on the hull edge and turn it outward, as a mount)",
+ "notes": "Scrapper \"Battering Bow\" (ram, scrap, 4x2): a wedge of welded girders pointing UP: a heavy base beam bolted along the bottom, two raking girders (one steel, one rust) and a king post meeting at a battered ram head; dark ram-plate armour with big bolt heads fills the wedge (the walls_ram plating); the head carries the amber-and-black hazard tape on its leading edge, as ram plating does, and two hooked latch claws (it latches on to what it hits), drawn by a chain from a winch at the base. The nose is a solid steel point. Unpowered: the on loop is only its amber lamp blinking. Damaged: the left claw bent back, a weld on the rust girder cracked open, the head dented deeper and scorched. Disabled: the head knocked askew, the rust girder snapped at its weld, the right claw broken off and lying on the plate, the chain slack."
+}

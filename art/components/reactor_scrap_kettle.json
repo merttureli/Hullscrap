@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  64
+ ],
+ "cells": [
+  4,
+  4
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "reactor_scrap_kettle_glow.png",
+  "frame": [
+   84,
+   84
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "notes": "Scrapper \"Ma's Kettle\" (reactor, scrap, 4x4, unique): Ma Gantry's own reactor, a big dented copper kettle on a patched stove plate. The amber core boils behind a caged porthole in the lid (bubbles rise, the lid rattles a pixel), the spout puffs steam, the handle arches over it wrapped in red rag; a bolted steel patch over an old dent, hazard tape on the plate, a power cable out of the back, and a mug of tea on the corner of the plate. Damaged: the spout has split and steam jets sideways, the rag on the handle is smouldering, a dent glows where the core is too close, the lid rattles hard. Disabled: the core dead behind cracked glass, the lid knocked half off, the spout broken off and lying on the plate, the mug knocked over."
+}
