@@ -849,7 +849,7 @@ func test_a_chunk_always_rolls_the_same_far_pois_from_the_sector_seed() -> void:
 				var p: Dictionary = got[i]
 				total += 1
 				kinds[p["type"]] = int(kinds.get(p["type"], 0)) + 1
-				eq(p["id"], "f%d_%d_%d" % [cx, cy, i], "the id names the chunk and the index")
+				check(str(p["id"]).begins_with("f%d_%d_" % [cx, cy]) and int(str(p["id"]).get_slice("_", 2)) < int(f["count"][1]), "%s: the id names the chunk and the index rolled" % p["id"])
 				check(FAR_TYPES.has(p["type"]), "%s: %s is a far type" % [p["id"], p["type"]])
 				check(p["pos"].x >= cx * chunk + margin - 0.01 and p["pos"].x <= (cx + 1) * chunk - margin + 0.01 and p["pos"].y >= cy * chunk + margin - 0.01 and p["pos"].y <= (cy + 1) * chunk - margin + 0.01, "%s: inside its chunk, in from the edge" % p["id"])
 				for j in i:
@@ -860,11 +860,36 @@ func test_a_chunk_always_rolls_the_same_far_pois_from_the_sector_seed() -> void:
 	check(differs, "another sector seed rolls other chunks")
 	check(total > 100 and empties > 10, "chunks give 0 to 2 POIs (%d POIs, %d empty chunks)" % [total, empties])
 	check(int(kinds.get("pirate_nest", 0)) * 3 < int(kinds.get("distress", 0)) + int(kinds.get("mining_field", 0)), "pirate nests are rare: a quarter of the weight (%s)" % str(kinds))
+
 	check(kinds.size() >= 5, "and a mix turns up (%s)" % str(kinds))
 	var gate = Sector.generate(2, _node("gate", 2), "boneyard")
 	for cx in range(4, 9):
 		for p in gate.far_pois(Vector2i(cx, 4)):
 			eq(p["type"], "wreck", "a node's own weights decide: a gate only has wrecks")
+
+
+func test_free_space_has_about_30_percent_fewer_far_pois_and_the_kept_ones_keep_their_place() -> void:
+	var node := _node("wreck_field", 4)
+	var cfg: Dictionary = Sector.config()
+	var thin := float(cfg["far"].get("thin", 0.0))
+	check(thin > 0.25 and thin < 0.35, "free space drops about 30%% of its far POIs (thin %.2f)" % thin)
+	var a = Sector.generate(5, node, "boneyard")
+	var kept := 0
+	var rolled := 0
+	for cy in range(-12, 13):
+		for cx in range(-12, 13):
+			var ck := Vector2i(cx, cy)
+			var thinned: Array = a.far_pois(ck)
+			cfg["far"]["thin"] = 0.0
+			var full: Array = a.far_pois(ck)
+			cfg["far"]["thin"] = thin
+			kept += thinned.size()
+			rolled += full.size()
+			for p in thinned:
+				check(full.any(func(q): return q["id"] == p["id"] and q["pos"] == p["pos"] and q["type"] == p["type"]), "%s keeps its place, id and type" % p["id"])
+	var ratio := float(kept) / maxf(1.0, float(rolled))
+	check(rolled > 300, "enough far POIs rolled to measure (%d)" % rolled)
+	check(ratio > 0.62 and ratio < 0.78, "about 70%% of the far POIs stay (%d of %d, %.2f)" % [kept, rolled, ratio])
 
 
 func test_a_done_far_poi_stays_done_when_you_leave_and_come_back() -> void:

@@ -351,7 +351,7 @@ func chunk_seed(ck: Vector2i) -> int:
 ## The far POIs chunk `ck` rolls: `far.count` of them, of the node's own weights (times the region's) limited to `far.types`
 ## (times the type's multiplier there), within each type's `max` for the chunk, from the chunk's own rng, so the same chunk
 ## always gives the same ones. A chunk that touches the layout's square (0 to `size`) rolls none. A POI the save or an
-## earlier visit remembers as done (far_seen) is done.
+## earlier visit remembers as done (far_seen) is done. Each is then dropped by chance `far.thin`, from a stream of its own.
 func far_pois(ck: Vector2i) -> Array:
 	var out := []
 	var f: Dictionary = cfg.get("far", {})
@@ -384,7 +384,12 @@ func far_pois(ck: Vector2i) -> Array:
 		var pos := _far_place(r, ck, out)
 		out.append({"id": id, "type": type, "name": str(t["label"]), "pos": pos, "visibility": _roll(r, t["visibility"]), "event_type": _roll(r, t["event"]),
 			"state": str(far_seen.get(id, NEW)), "enemy": str(t.get("enemy", "")), "main": false, "far": true})
-	return out
+	var thin := float(f.get("thin", 0.0))
+	if thin <= 0.0:
+		return out
+	var tr := RandomNumberGenerator.new()  # a stream of its own, so the kept ones keep their place and id
+	tr.seed = chunk_seed(ck) ^ 0x7417
+	return out.filter(func(_p): return tr.randf() >= thin)
 
 
 ## A spot inside chunk `ck`, `poi.margin` in from its edges, at least `poi.gap` from the far POIs `made` already and from the
