@@ -1247,7 +1247,7 @@ func arm_covers(ship, m) -> bool:
 
 ## Each healing arm works on one crew member at a time. It keeps its patient until they are full or out of its reach (or the arm
 ## stops, or the air goes); then it takes, among the hurt in reach, the lowest share of hp, ties to the soldier, then to whoever mans a
-## station, then the crew list order. Sets arm_patients (and the ship's meta, for the view) and arm_heal (hp a second by name).
+## station, then the crew list order. A second arm takes someone no other arm has when it can, and stacks on one patient only when nobody else needs it. Sets arm_patients (and the ship's meta, for the view) and arm_heal (hp a second by name).
 func _choose_arm_patients(ship, dt: float) -> void:
 	var next := {}
 	var rates := {}
@@ -1265,18 +1265,21 @@ func _choose_arm_patients(ship, dt: float) -> void:
 			continue
 		var keep: String = arm_patients.get(uid, "")
 		var pick = null
-		var best := []
-		for i in ship.crew.size():
-			var m = ship.crew[i]
-			if m.hp >= m.max_hp or not _arm_serves(ship, uid, m):
-				continue
-			if m.name == keep:
-				pick = m
+		for fresh in [true, false]:  # first among those no other arm has; stack only when nobody else needs it
+			var best := []
+			for i in ship.crew.size():
+				var m = ship.crew[i]
+				if m.hp >= m.max_hp or not _arm_serves(ship, uid, m) or (fresh and next.values().has(m.name)):
+					continue
+				if m.name == keep:
+					pick = m
+					break
+				var key := [snappedf(m.hp / maxf(m.max_hp, 1.0), 1e-6), 0 if m.is_player else 1, 0 if not m.job.is_empty() and m.job["type"] == "man_station" else 1, i]
+				if best.is_empty() or key < best:
+					best = key
+					pick = m
+			if pick != null:
 				break
-			var key := [snappedf(m.hp / maxf(m.max_hp, 1.0), 1e-6), 0 if m.is_player else 1, 0 if not m.job.is_empty() and m.job["type"] == "man_station" else 1, i]
-			if best.is_empty() or key < best:
-				best = key
-				pick = m
 		if pick != null:
 			next[uid] = pick.name
 			rates[pick.name] = float(rates.get(pick.name, 0.0)) + base * float(def["stats"].get("heal", 1.0)) * float(TraitSet.of(pick)["heal_mult"]["medbay"])

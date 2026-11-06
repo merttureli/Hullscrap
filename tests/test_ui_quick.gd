@@ -35,3 +35,12 @@ func test_default_lmb_only_when_lmb_is_empty() -> void:
 	comps.instances[9001]["group"] = 2
 	eq(w.group_in(comps, missile), 1, "the laser's saved RMB leaves LMB empty again")
 	comps.instances.erase(9001)
+
+
+func test_a_merged_ability_box_shows_ready_if_any_part_is_ready_else_the_shortest_cooldown() -> void:
+	var ready := {"state": "ready", "cooldown_left": 0.0}
+	var c5 := {"state": "cooling", "cooldown_left": 5.0}
+	var c2 := {"state": "cooling", "cooldown_left": 2.0}
+	eq(Session.merge_states([c5, ready, c2])["state"], "ready", "any ready part: READY")
+	eq(Session.merge_states([c5, c2])["cooldown_left"], 2.0, "all cooling: the shortest wait")
+	eq(Session.merge_states([c2, {"state": "active", "cooldown_left": 0.0}])["state"], "active", "one running: shown running")

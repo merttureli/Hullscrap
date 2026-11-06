@@ -6,6 +6,7 @@ extends RefCounted
 ## "arm_dists": cells) and eased every frame by whichever view is up (the interior or the fight), so it never snaps. Drawing only, no game logic.
 
 const Visuals = preload("res://scripts/view/visuals.gd")
+const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const TURN := 5.0  ## radians a second an arm turns toward its patient, at most
 const EASE := 6.0  ## how quickly (per second) an arm closes the gap to where it wants to point
 const REACH := 3.0  ## how quickly (per second) it unfolds toward a patient or folds back
@@ -62,6 +63,17 @@ static func opts(ship, uid: int) -> Dictionary:
 			"arm_dist": float(ship.get_meta("arm_dists", {}).get(uid, 0.0)), "arm_heal": patient(ship, uid) != null, "arm_phase": float(uid) * 1.7}
 
 
+## Is the straight line from `a` to `b` (cell units) over floor all the way? `open`: Callable(Vector2i cell) -> bool (a floor cell, a door or a part of the
+## arm itself). When it is not (the patient is past a wall, the reach went through a door), the beam is not drawn.
+static func beam_shown(a: Vector2, b: Vector2, open: Callable) -> bool:
+	var n := int(ceil(a.distance_to(b) / 0.25))
+	for i in n + 1:
+		var p := a.lerp(b, float(i) / float(maxi(n, 1)))
+		if not open.call(Vector2i(floori(p.x), floori(p.y))):
+			return false
+	return true
+
+
 ## The beam from each working arm's emitter to its patient, and a glow ring on the patient. `to_px`: Callable(cell units) -> canvas px.
 static func draw_beams(canvas, ship, to_px: Callable, cell_px: float, clock: float) -> void:
 	var angles: Dictionary = ship.get_meta("arm_angles", {})
@@ -75,7 +87,11 @@ static func draw_beams(canvas, ship, to_px: Callable, cell_px: float, clock: flo
 		var tip: Vector2 = to_px.call(centre(ship, uid) + pose["emitter"])  # the beam leaves the head's emitter
 		var to: Vector2 = to_px.call(m.pos)
 		var pulse := 0.8 + 0.2 * sin(clock * 6.0)
-		if tip.distance_to(to) > cell_px * 0.3:
+		var own: Dictionary = {}
+		for c in ship.components.instances[uid]["cells"]:
+			own[c] = true
+		var open := func(c: Vector2i) -> bool: return own.has(c) or Pathfinder.walkable(ship.grid, c)
+		if tip.distance_to(to) > cell_px * 0.3 and beam_shown(centre(ship, uid) + pose["emitter"], m.pos, open):  # no beam through walls
 			canvas.draw_line(tip, to, Color(col, 0.14 * pulse), 12.0, true)
 			canvas.draw_line(tip, to, Color(col, 0.30 * pulse), 6.0, true)
 			canvas.draw_line(tip, to, Color(col, 0.75), 2.0, true)
