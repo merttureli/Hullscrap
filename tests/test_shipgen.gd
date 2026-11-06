@@ -540,36 +540,30 @@ func test_few_generated_ships_have_a_room_cut_off_by_its_parts() -> void:
 		check(r["blocked"] * 20 <= r["ships"], "stage %d: %d of %d ships have a room cut off (5%% at most)" % [stage, r["blocked"], r["ships"]])
 
 
-## A 2 wide, 6 tall room with a door on each side at the bottom rows and a 2x4 part planned at the doors.
-func _lane_room() -> Array:
+## A 2 wide, 6 tall room (x 4-5, y 3-8) between walls at x=3 and x=6, with a room either side; the doors are `left_y` / `right_y`.
+func _lane_room(left_y: int, right_y: int) -> Array:
 	var defs := TileDefs.new()
 	defs.load_file("res://data/tiles.json")
-	var g := ShipGrid.new(Vector2i(16, 14), defs)
-	for y in 14:
-		for x in 16:
+	var g := ShipGrid.new(Vector2i(12, 12), defs)
+	for y in 12:
+		for x in 12:
 			g.hull[Vector2i(x, y)] = true
-	for y in range(1, 11):
-		for x in range(1, 9):
+	for y in range(2, 10):
+		for x in range(0, 10):
 			g.force_tile(Vector2i(x, y), "wall")
 	for y in range(3, 9):
-		for x in range(4, 6):
+		for x in [1, 2, 4, 5, 7, 8]:
 			g.force_tile(Vector2i(x, y), "floor")
-	for y in range(3, 9):  # (the rooms either side)
-		for x in [2, 3, 6, 7]:
-			g.force_tile(Vector2i(x, y), "floor")
-	return [g, Ship.new("T", g)]
+	var ok: bool = g.place_door("door", Vector2i(3, left_y), Vector2i.DOWN) and g.place_door("door", Vector2i(6, right_y), Vector2i.DOWN)
+	return [g, Ship.new("T", g), ok]
 
 
 func test_a_part_is_stood_to_leave_a_lane_between_the_doors() -> void:
-	var made := _lane_room()
+	var made := _lane_room(7, 7)
+	check(made[2], "the doors go in")
 	var g: ShipGrid = made[0]
 	var ship: Ship = made[1]
-	check(g.place_door("door", Vector2i(3, 6), Vector2i.DOWN) or true, "setup")
 	var rect := Rect2i(4, 3, 2, 6)
-	g.force_tile(Vector2i(3, 6), "wall")
-	g.force_tile(Vector2i(3, 7), "wall")
-	check(g.place_door("door", Vector2i(3, 7), Vector2i.DOWN), "left door")
-	check(g.place_door("door", Vector2i(6, 7), Vector2i.DOWN), "right door")
 	var items: Array = [{"id": "reactor_mk1", "want": Vector2i(4, 5), "vital": false, "n": 0}]
 	var stood := Shipgen._arrange(g, ship.components, rect, items)
 	check(stood.size() == 1, "the part stands")
@@ -579,16 +573,13 @@ func test_a_part_is_stood_to_leave_a_lane_between_the_doors() -> void:
 
 func test_a_part_with_no_clear_spot_is_left_out_unless_the_ship_needs_it() -> void:
 	for vital in [false, true]:
-		var made := _lane_room()
+		var made := _lane_room(5, 5)
+		check(made[2], "the doors go in")
 		var g: ShipGrid = made[0]
 		var ship: Ship = made[1]
-		g.force_tile(Vector2i(3, 5), "wall")
-		g.force_tile(Vector2i(3, 6), "wall")
-		g.place_door("door", Vector2i(3, 5), Vector2i.DOWN)
-		g.place_door("door", Vector2i(6, 5), Vector2i.DOWN)
 		var rect := Rect2i(4, 3, 2, 6)
-		# two 2x4 parts in a 2x6 room: the second can never leave the lane
-		var items: Array = [{"id": "reactor_mk1", "want": Vector2i(4, 3), "vital": true, "n": 0}, {"id": "shield_mk1", "want": Vector2i(4, 3), "vital": vital, "n": 1}]
+		# a 2x4 and a 2x2 fill a 2x6 room: no lane is left with both
+		var items: Array = [{"id": "reactor_mk1", "want": Vector2i(4, 3), "vital": true, "n": 0}, {"id": "helm", "want": Vector2i(4, 3), "vital": vital, "n": 1}]
 		var stood := Shipgen._arrange(g, ship.components, rect, items)
 		check(stood.size() == (2 if vital else 1), "vital %s: %d stand" % [str(vital), stood.size()])
 

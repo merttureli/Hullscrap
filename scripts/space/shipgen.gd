@@ -1287,12 +1287,15 @@ static func _doors(g: ShipGrid, decks: Array) -> String:
 		var down: Array = decks[i + 1]["rooms"]
 		var row: int = decks[i]["rect"].end.y
 		var best: Array = []
+		var best_worth := 0
 		for u in up:
 			for v in down:
 				var lo_x := maxi(u["rect"].position.x, v["rect"].position.x)
 				var hi_x := mini(u["rect"].end.x, v["rect"].end.x)
-				if hi_x - lo_x >= 2 and (best.is_empty() or hi_x - lo_x > best[1] - best[0]):
+				var worth: int = hi_x - lo_x - 6 * (_tall(u) + _tall(v))  # (a room with a big part has its walk cut easily: the stairs go elsewhere when they can)
+				if hi_x - lo_x >= 2 and (best.is_empty() or worth > best_worth):
 					best = [lo_x, hi_x]
+					best_worth = worth
 		if best.is_empty():
 			return "no rooms overlap between decks %d and %d: %s / %s" % [i, i + 1, str(up.map(func(r): return [r["room"]["kind"], r["rect"]])), str(down.map(func(r): return [r["room"]["kind"], r["rect"]]))]
 		var placed := false
@@ -1405,6 +1408,14 @@ static func _door_site(g: ShipGrid, c: Vector2i, axis: Vector2i) -> bool:
 			if t == "" or g.tile_flag(t, "solid") or g.tile_flag(t, "door"):
 				return false
 	return true
+
+
+## 1 when room `r` (of _lay_rooms) holds a part of 8 cells or more (a reactor, a shield, the oxygen plant), else 0.
+static func _tall(r: Dictionary) -> int:
+	for p in r["room"]["parts"]:
+		if _area_of(str(p["id"])) >= 8:
+			return 1
+	return 0
 
 
 ## The cells the parts of room `r` (of _lay_rooms) are planned to cover (turned the plan's way).
