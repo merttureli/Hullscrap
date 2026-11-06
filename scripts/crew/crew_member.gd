@@ -47,6 +47,10 @@ var is_player := false  ## the player's soldier: moved by hand, never given a jo
 var look := {}  ## PersonDrawer palette ("suit", "hair", "tool"); empty = the viewer picks one by name
 var job := {}  ## what they are doing now (a Jobs board entry plus its "spot"); empty = idle
 var hold := 0.0  ## seconds left of a manual order, during which the job board leaves them alone
+var held := false  ## the player sent them somewhere by hand: Jobs does not walk them back to their post until Jobs.recall (the "Back to posts" button). Saved
+var return_to := Vector2i(-1, -1)  ## where a held crew member goes back to after a revive (Jobs); (-1, -1) = nowhere. Not saved
+var hurt_at := -1.0e9  ## ship.clock when they last lost hp (Jobs._health): a rescuer who is being hurt does not go for a revive. Not saved
+var hp_seen := -1.0  ## their hp at the last Jobs._health tick
 var post := -1  ## uid of the part they are posted to (K1, Posts): they man it for good and leave it only for a fire or a breach in its room, repairing it or restocking its ammo; -1 = none. Saved
 var winded := false  ## hurt (under crew.json air.hurt_below) and not yet over air.back_above again: they take no job in an airless room (Jobs, K3). Not saved
 var stun := 0.0  ## seconds left stunned (an ion hit on their room, trait ion_stun): no walking, no work
@@ -180,6 +184,8 @@ func to_dict() -> Dictionary:
 		d["is_player"] = true
 	if post >= 0:
 		d["post"] = post
+	if held:
+		d["held"] = true
 	if character != "":
 		d["character"] = character
 	if not look.is_empty():
@@ -226,6 +232,7 @@ static func from_dict(d: Dictionary):
 		m.name = str(d["name"])
 	m.is_player = bool(d.get("is_player", false))
 	m.post = int(d["post"]) if _is_num(d.get("post")) else -1
+	m.held = bool(d.get("held", false))  # (older saves have none)
 	if d.get("look") is Dictionary:
 		m.look = d["look"].duplicate()
 	m.head = str(d.get("head", m.head))

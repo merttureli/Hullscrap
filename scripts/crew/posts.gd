@@ -92,6 +92,7 @@ static func post(ship, m, uid: int) -> String:
 		line += " (%s is relieved)" % prev.name
 	m.post = uid
 	m.hold = 0.0  # back to work at once
+	m.held = false
 	return line
 
 

@@ -64,6 +64,8 @@ const UNQUALIFIED_PENALTY := 20  ## ...and crew who lack them look elsewhere fir
 const BREATH_JOBS: Array[String] = ["repair_breach", "repair_component", "repair_block", "repair_belt", "clear_wreck", "revive", "scrape"]
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const FAULTY: Array[String] = ["malfunction", "disabled"]  ## part statuses a crew member can repair
+const NO_RETURN := Vector2i(-1, -1)
+const HURT_RECENT := 1.5  ## seconds after a hit during which a crew member does not go to revive anyone
 const NO_FIRE := Vector2i(-1, -1)  ## "no burning cell"
 const HAND_SHOWN := 0.6  ## seconds the HUD still says what the player was doing by hand
 ## The jobs that need tools: a crew member with the trait no_tools takes none of them.
@@ -356,6 +358,7 @@ func order_repair(ship, uid: int) -> String:
 	_take(ship, best, board[job["key"]], route["spot"], {})
 	if not best.job.is_empty():
 		best.job["ordered"] = true
+	best.held = true
 	return "%s will repair %s" % [best.name, name]
 
 
@@ -444,6 +447,7 @@ func _send(ship, m, job: Dictionary, claims: Dictionary) -> bool:
 		return false
 	m.job["ordered"] = true
 	m.hold = float(jcfg().get("order_hold", 8.0))
+	m.held = true
 	return true
 
 
@@ -525,7 +529,13 @@ func assign(ship) -> void:
 			m.path.clear()
 			if ordered:
 				free.append(m)
+	_rescue(ship, claims, free)
 	var margin := int(jcfg().get("switch_margin", 30))
+	for m in free.duplicate():
+		if m.held and m.return_to != NO_RETURN and m.job.is_empty():  # back to the held spot after a revive
+			m.go_to(ship.grid, m.return_to)
+			m.return_to = NO_RETURN
+			free.erase(m)
 	for m in free:
 		var floor_p := 0 if m.job.is_empty() or _on_post(m) else int(m.job["priority"]) + margin  # (anything their post allows beats the post)
 		var pick := _pick(ship, m, claims, floor_p)
@@ -578,11 +588,82 @@ func _still_valid(ship, m) -> bool:
 		m.job["ordered"] = true
 	if ordered:
 		return true
+	if m.job["type"] == "revive" and not _safe_rescue(ship, m, m.job):
+		return false
+	if m.job["type"] == "man_station" and m.held and int(m.job.get("uid", -1)) == m.post:
+		return false  # sent away by hand: not back to the post until recalled
 	if m.job["type"] == "man_station" and not str(m.job.get("held", "")) in ["", m.name]:
 		return false  # somebody was posted there
-	if m.post >= 0 and not orders.has(m.job["key"]) and not Posts.allows(ship, m, m.job):
+	if m.post >= 0 and not m.held and not orders.has(m.job["key"]) and not Posts.allows(ship, m, m.job):
 		return false  # posted since: only what the post allows (and an order of the player's)
 	return not (m.winded and _job_airless(ship, m.job))
+
+
+## Recall: every held crew member (or just `only`) goes back to their assigned position and the hold is cleared. Returns how many were held.
+func recall(ship, only = null) -> int:
+	var n := 0
+	for m in ship.crew:
+		if (only != null and m != only) or not m.held:
+			continue
+		n += 1
+		m.held = false
+		m.return_to = NO_RETURN
+		if m.post >= 0 and not m.is_down():
+			m.job = {}
+			m.path.clear()
+			m.hold = 0.0
+	_since = 1.0e9
+	return n
+
+
+## Would it be safe for `m` to go and revive the downed crew member of `job`? Not when they are being hurt, or the room is airless (and they have no suit),
+## on fire, or has a hostile in it. (The path is checked by _route's breath budget.)
+func _safe_rescue(ship, m, job: Dictionary) -> bool:
+	if ship.clock - m.hurt_at < HURT_RECENT:
+		return false
+	var who = _find(ship, func(c): return c.name == job.get("who", ""))
+	if who == null:
+		return false
+	var room: int = ship.atmosphere.room_at(who.cell())
+	if room < 0:
+		return true
+	if _room_airless(ship, room) and not air_exempt(m):
+		return false
+	for c in ship.fires:
+		if ship.atmosphere.room_at(c) == room:
+			return false
+	for r in Intruders.alive(ship):
+		if ship.atmosphere.room_at(r.cell()) == room:
+			return false
+	return true
+
+
+## Revives come first: for each downed crew member nobody is on the way to, the nearest safe crew member (held ones too, but not one on an order in
+## progress) drops what they do and goes. `free` loses whoever is sent.
+func _rescue(ship, claims: Dictionary, free: Array) -> void:
+	for d in ship.crew:
+		var key: String = "revive:" + d.name
+		if not d.is_down() or not board.has(key) or int(claims.get(key, 0)) >= int(board[key]["slots"]):
+			continue
+		var job: Dictionary = board[key]
+		var cands: Array = ship.crew.filter(func(m): return not m.is_player and not m.is_drone() and not m.is_down() and not m.is_stunned() and m.hold <= 0.0 \
+				and not bool(m.job.get("ordered", false)) and str(m.job.get("type", "")) != "revive" and _safe_rescue(ship, m, job))
+		cands.sort_custom(func(a, b): return _gap(a.anchor(), job["cells"]) < _gap(b.anchor(), job["cells"]))
+		var best = null
+		var best_route := {}
+		for m in cands.slice(0, int(jcfg()["search"]["jobs"])):
+			var r := _route(ship, m, job, _taken(ship, m))
+			if not r.is_empty() and (best == null or r["cost"] < best_route["cost"]):
+				best = m
+				best_route = r
+		if best == null:
+			continue
+		if not best.job.is_empty() and best.job["type"] != "rest" and claims.has(best.job["key"]):
+			claims[best.job["key"]] = int(claims[best.job["key"]]) - 1
+		if best.held and best.return_to == NO_RETURN:
+			best.return_to = best.anchor()
+		free.erase(best)
+		_take(ship, best, job, best_route["spot"], claims)
 
 
 ## The best job for `m` with a priority of at least `floor_p`: {job, spot}, or {} when none.
@@ -600,7 +681,11 @@ func _pick(ship, m, claims: Dictionary, floor_p: int) -> Dictionary:
 			continue  # a drone takes only the jobs of crew.json drone_jobs: no station, no revive, no mending a crewmate
 		if job["type"] == "man_station" and not str(job.get("held", "")) in ["", m.name]:
 			continue  # a post somebody holds
-		if (m.post >= 0 and not Posts.allows(ship, m, job)) or (m.winded and _job_airless(ship, job)):
+		if job["type"] == "revive" and not _safe_rescue(ship, m, job):
+			continue
+		if job["type"] == "man_station" and m.held and int(job["uid"]) == m.post:
+			continue  # sent away by hand: not back to the post until recalled
+		if (m.post >= 0 and not m.held and not Posts.allows(ship, m, job)) or (m.winded and _job_airless(ship, job)):
 			continue  # posted crew do only what the post allows; hurt crew keep out of airless rooms
 		if int(claims.get(key, 0)) < int(job["slots"]):
 			open.append(job)
@@ -1031,6 +1116,8 @@ func _health(ship, dt: float) -> void:
 	for m in ship.crew:
 		var t := TraitSet.of(m)
 		var was_down: bool = m.is_down()
+		if m.hp < m.hp_seen - 1e-6:
+			m.hurt_at = ship.clock
 		var dmg := 0.0
 		for c in m.body_cells():
 			if ship.fires.has(c):
@@ -1059,6 +1146,9 @@ func _health(ship, dt: float) -> void:
 			heal += TraitSet.low_pressure_heal_rate(t, ship.atmosphere.pressure_of(room))
 		if heal > 0.0:
 			m.heal(heal * dt)
+		if dmg > 0.0:
+			m.hurt_at = ship.clock
+		m.hp_seen = m.hp
 		if m.is_down() and not was_down:
 			m.job = {}
 			m.path.clear()
@@ -1674,6 +1764,7 @@ static func order_move(ship, m, anchor: Vector2i, door_passable: Callable = Call
 		return false
 	m.job = {}
 	m.hold = float(jcfg().get("order_hold", 8.0))
+	m.held = true
 	return true
 
 

@@ -42,6 +42,8 @@ const GREY := Color("#7a8494")
 const BEAM_LIFE := 0.15
 const BLOCK_FLASH := 0.45  ## seconds a broken block flashes
 const MAX_FX := 500
+const SLOW_EASE_S := 0.3  ## real seconds the camera takes to zoom to your ship (Tab slow-down) and back
+const CAM_RATE_EASE := 14.0  ## camera settle rate while it eases (the ease itself takes SLOW_EASE_S)
 const CAM_RATE := 3.0  ## how fast the camera settles, 1/s
 const SHAKE_DECAY := 7.0  ## how fast a screen shake dies away, 1/s
 const STAR_COUNT := 220
@@ -86,6 +88,7 @@ var _clock := 0.0
 var _frame := 0
 var _cam_pos := Vector2.ZERO
 var _zoom := 0.5
+var _slow_mix := 0.0  # 0 = both ships framed, 1 = your ship framed (Tab slow-down); eased in real time
 var _shake := 0.0  # screen px of camera shake left (a ram kicks it)
 var _saved_cam := {}
 var _rng := RandomNumberGenerator.new()  # visual only
@@ -202,6 +205,7 @@ func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 	_fx.clear()
 	_note = ""
 	_star_drift = Vector2.ZERO
+	_slow_mix = 0.0
 	_put_away(true)
 	if cam != null:
 		_saved_cam = {"pos": cam.position, "zoom": cam.zoom}
@@ -535,8 +539,11 @@ func _panel_open() -> bool:
 
 
 func _move_camera(dt: float) -> void:
-	var f := session.framing(_view_size())
-	var k := 1.0 - exp(-CAM_RATE * dt)
+	dt /= maxf(Engine.time_scale, 0.01)  # (real time: the slow-down must not slow the camera)
+	var slowed: bool = crew != null and crew.get("slow_banner") != null and crew.slow_banner.slow.on
+	_slow_mix = move_toward(_slow_mix, 1.0 if slowed else 0.0, dt / SLOW_EASE_S)
+	var f := blend_framing(session.framing(_view_size()), session.framing(_view_size(), 0.2, true), _slow_mix)
+	var k := 1.0 - exp(-(CAM_RATE if _slow_mix <= 0.0 and not slowed else CAM_RATE_EASE) * dt)
 	_cam_pos = _cam_pos.lerp(f["center"], k)
 	_zoom = exp(lerpf(log(_zoom), log(f["zoom"]), k))
 	if cam != null:
@@ -544,6 +551,12 @@ func _move_camera(dt: float) -> void:
 		cam.zoom = Vector2(_zoom, _zoom)
 		_shake *= exp(-SHAKE_DECAY * dt)
 		cam.offset = Vector2(_rng.randf_range(-1.0, 1.0), _rng.randf_range(-1.0, 1.0)) * _shake / _zoom if _shake > 0.3 else Vector2.ZERO
+
+
+## Between two framings ({center, zoom}): `t` 0 = `a`, 1 = `b`, eased; the zoom blends in logs.
+static func blend_framing(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
+	var e := smoothstep(0.0, 1.0, t)
+	return {"center": a["center"].lerp(b["center"], e), "zoom": exp(lerpf(log(a["zoom"]), log(b["zoom"]), e))}
 
 
 func _update_hud() -> void:
