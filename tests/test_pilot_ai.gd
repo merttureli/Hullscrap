@@ -186,7 +186,7 @@ func test_a_large_enemy_brings_its_guns_to_bear() -> void:
 			n += int(e["type"] == "shot" and e["ship"] == 1 and e["uid"] == uid)
 		if a.weapons.def(id)["turret"]:
 			turrets += int(n > 0)
-		else:
+		elif Vector2(a.ships[1].mounts[uid]["dir"]).y < -0.5:  # (a broadside on a flank fires only when its side is presented, docs/GUNS.md 6)
 			check(n >= 3, "the bow gun %s (%d) fires (%d shots)" % [id, uid, n])
 			fixed += 1
 	check(fixed >= 2, "(it has a row of bow guns: %d)" % fixed)
