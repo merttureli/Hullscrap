@@ -542,7 +542,7 @@ func test_a_repair_from_inside_heals_the_outside_half_first_when_the_link_is_who
 	eq(inst["out_hp"], 1, "and a repair then does not heal it")
 
 
-func test_the_crew_repair_a_hurt_barrel_from_the_inside_and_patch_a_cut_link_first() -> void:
+func test_a_drone_repairs_a_hurt_barrel_from_the_link_wall_and_the_crew_do_not() -> void:
 	var d := _rig(2)
 	var ship: Ship = d["ship"]
 	var inst: Dictionary = ship.components.instances[d["uid"]]
@@ -550,7 +550,7 @@ func test_the_crew_repair_a_hurt_barrel_from_the_inside_and_patch_a_cut_link_fir
 	var jobs := Jobs.new()
 	jobs.build_board(ship)
 	check(jobs.board.has("fix:%d" % d["uid"]), "a repair job for a part that works but whose barrel is hurt")
-	eq(jobs.board["fix:%d" % d["uid"]]["cells"], inst["cells"], "worked on from the inside half")
+	check(jobs.board["fix:%d" % d["uid"]].get("hull", false), "a hull job: worked on the link wall and the barrel")
 	var cut: Vector2i = inst["link"][3]
 	ship.grid.breach(cut)
 	jobs.build_board(ship)
@@ -559,11 +559,21 @@ func test_the_crew_repair_a_hurt_barrel_from_the_inside_and_patch_a_cut_link_fir
 	ship.grid.repair(cut)
 	jobs.build_board(ship)
 	check(jobs.board.has("fix:%d" % d["uid"]), "and then the barrel")
-	# a crew member does it
-	var m := CrewMember.new("Ada", Pathfinder.centre_of(Wall.corner(0, 4, 5, 5, 6)))
+	# a crew member does not take it
+	var ada := CrewMember.new("Ada", Pathfinder.centre_of(Wall.corner(0, 4, 5, 5, 6)))
+	ship.crew.append(ada)
+	ship.atmosphere.pressure.fill(1.0)
+	for i in 30:
+		jobs.tick(ship, 0.1)
+	check(ada.job.is_empty() or ada.job["type"] != "repair_component", "the crew keep off the outside half")
+	eq(inst["out_hp"], 1, "and it stays hurt")
+	# a drone does it
+	var m := CrewMember.new("Drone", Pathfinder.centre_of(Wall.corner(0, 4, 5, 5, 6), 1), "drone")
 	ship.crew.append(m)
+	ship.refresh()  # (feeds the drone)
 	ship.atmosphere.pressure.fill(1.0)  # (the rig is open to space and Jobs alone does not tick the air: with none, Ada would leave at 40 percent hp, K3)
-	for i in 160:
+	for i in 700:
+		ship.refresh()
 		jobs.tick(ship, 0.1)
 	eq(inst["out_hp"], 10, "the barrel is whole after a while")
 	check(ship.events.any(func(e): return e["text"].ends_with("repaired")), "and the chronicle says so")

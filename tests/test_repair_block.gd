@@ -87,14 +87,18 @@ func test_the_work_follows_the_hp_missing_and_the_lines_repair_multiplier() -> v
 func test_the_crew_mend_a_damaged_wall_and_the_wrench_clears() -> void:
 	var ship := _ship()
 	var bob := _human(ship, "Bob", 14, 12)
-	ship.grid.hp[WALL] = 1.0
-	ship.grid.hp[Vector2i(16, 8)] = 2.0
+	var inner := [Vector2i(15, 15), Vector2i(16, 15)]  # crew mend inner walls only (the room's outer wall is the drones')
+	for c in inner:
+		ship.grid.force_tile(c, "wall")
+	ship.refresh()
+	ship.grid.hp[inner[0]] = 1.0
+	ship.grid.hp[inner[1]] = 2.0
 	eq(Structure.damaged(ship).size(), 2, "two damaged blocks: the wrench counts them")
 	var jobs := Jobs.new()
 	jobs.build_board(ship)
 	_run(jobs, ship, 60.0)
-	check(not ship.grid.hp.has(WALL) and not ship.grid.hp.has(Vector2i(16, 8)), "both walls are mended by the crew")
-	eq(ship.grid.hp_of(WALL), 4.0, "at full hp")
+	check(not ship.grid.hp.has(inner[0]) and not ship.grid.hp.has(inner[1]), "both walls are mended by the crew")
+	eq(ship.grid.hp_of(inner[0]), 4.0, "at full hp")
 	eq(Structure.damaged(ship).size(), 0, "and the wrench clears")
 	check(bob.job.is_empty() or bob.job["type"] != "repair_block", "nothing left for them")
 

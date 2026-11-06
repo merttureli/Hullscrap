@@ -179,11 +179,12 @@ static func relocate_crew(ship: Ship) -> int:
 	var open_doors := func(_c: Vector2i) -> bool: return true  # (a locked door of an abandoned room is no wall: the soldier may be in there)
 	var moved: Array[String] = []
 	for m in ship.crew:
-		if not maps.has(m.body_size):
-			maps[m.body_size] = _body_areas(grid, cells, m.body_size, open_doors)
-		var comp: Dictionary = maps[m.body_size]["comp"]
-		var areas: Array = maps[m.body_size]["areas"]
-		var main: int = maps[m.body_size]["main"]
+		var mk: int = m.body_size + (100 if m.climbs() else 0)  # (a climber has its own areas: it walks the hull)
+		if not maps.has(mk):
+			maps[mk] = _body_areas(grid, cells, m.body_size, open_doors, m.climbs())
+		var comp: Dictionary = maps[mk]["comp"]
+		var areas: Array = maps[mk]["areas"]
+		var main: int = maps[mk]["main"]
 		if m.fits(grid, m.pos, open_doors, m.body_radius() - 0.01) and main >= 0 and comp.get(m.anchor(), -1) == main:
 			continue
 		var to := Vector2.INF
@@ -208,11 +209,11 @@ static func relocate_crew(ship: Ship) -> int:
 
 ## The areas a body of `body` cells can walk between: {comp: body anchor -> area number, areas: area number -> its
 ## anchors, main: the biggest area (-1 when there is none)}. `cells`: the tiles of `grid` in (y, x) order.
-static func _body_areas(grid: ShipGrid, cells: Array, body: int, door_passable: Callable = Callable()) -> Dictionary:
+static func _body_areas(grid: ShipGrid, cells: Array, body: int, door_passable: Callable = Callable(), climb := false) -> Dictionary:
 	var comp := {}
 	var areas: Array = []
 	for c in cells:
-		if comp.has(c) or not Pathfinder.body_ok(grid, c, door_passable, body):
+		if comp.has(c) or not Pathfinder.body_ok(grid, c, door_passable, body, climb):
 			continue
 		var list: Array[Vector2i] = [c]
 		comp[c] = areas.size()
@@ -220,7 +221,7 @@ static func _body_areas(grid: ShipGrid, cells: Array, body: int, door_passable: 
 		while i < list.size():
 			for d in ShipGrid.SIDES:
 				var n: Vector2i = list[i] + d
-				if not comp.has(n) and Pathfinder.body_ok(grid, n, door_passable, body):
+				if not comp.has(n) and Pathfinder.body_ok(grid, n, door_passable, body, climb):
 					comp[n] = areas.size()
 					list.append(n)
 			i += 1

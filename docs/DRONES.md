@@ -180,3 +180,6 @@ This doc is the design. GUNS.md sets the look and the rules for mounts, families
 - **H1, the healing arm** (section 10): small, can run now. Its files are `jobs.gd` heal and the medical pack; the art goes through the art pipeline.
 - **D1, the bay and combat drones** (sections 2, 3 and 7 for combat and defence drones, with their art). After G2a, since both touch `weapons.gd`, `weapon_bar.gd` and PD.
 - **D2, limpets and boarders** (sections 4–6, the robot, the intruder response, with their art). After D1.
+
+## Repairs (2026-11-06)
+- Repair drones now climb over walls and the outer hull and mend any damaged cell or mount half, hull first; the crew mend only inner walls and inside parts. Destroyed parts need a rebuild.

@@ -117,6 +117,11 @@ func is_drone() -> bool:
 	return _drone
 
 
+## Does it walk over solid wall and hull cells too (Pathfinder `climb`)? Repair drones do.
+func climbs() -> bool:
+	return _drone
+
+
 ## Is species `id` a repair drone?
 static func is_drone_species(id: String) -> bool:
 	return bool(species_def(id).get("drone", false))
@@ -316,8 +321,8 @@ func body_radius() -> float:
 ## Walk until the body sits on anchor `target` (see Pathfinder), along the shortest path from the
 ## nearest usable anchor. Returns false (and keeps the current path) when there is no route.
 func go_to(grid: ShipGrid, target: Vector2i, door_passable: Callable = Callable()) -> bool:
-	var from := Pathfinder.nearest_walkable(grid, pos, door_passable, Pathfinder.NO_CELL, body_size)
-	var p := Pathfinder.find_path(grid, from, target, door_passable, body_size)
+	var from := Pathfinder.nearest_walkable(grid, pos, door_passable, Pathfinder.NO_CELL, body_size, _drone)
+	var p := Pathfinder.find_path(grid, from, target, door_passable, body_size, _drone)
 	if p.is_empty():
 		return false
 	path = p
@@ -438,7 +443,7 @@ func fits(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), radi
 	var r2 := radius * radius
 	for cy in range(floori(p.y - radius), floori(p.y + radius) + 1):
 		for cx in range(floori(p.x - radius), floori(p.x + radius) + 1):
-			if Pathfinder.walkable(grid, Vector2i(cx, cy), door_passable):
+			if Pathfinder.walkable(grid, Vector2i(cx, cy), door_passable, _drone):
 				continue
 			var near := Vector2(clampf(p.x, cx, cx + 1), clampf(p.y, cy, cy + 1))
 			var d2 := (p - near).length_squared()
@@ -452,12 +457,12 @@ func fits(grid: ShipGrid, p: Vector2, door_passable: Callable = Callable(), radi
 ## path that now crosses an anchor the body can't stand on.
 func resolve(grid: ShipGrid, door_passable: Callable = Callable()) -> void:
 	if not fits(grid, pos, door_passable, body_radius() - 0.01):
-		var n := Pathfinder.nearest_walkable(grid, pos, door_passable, Pathfinder.NO_CELL, body_size)
+		var n := Pathfinder.nearest_walkable(grid, pos, door_passable, Pathfinder.NO_CELL, body_size, _drone)
 		if n == Pathfinder.NO_CELL:
 			return
 		pos = Pathfinder.centre_of(n, body_size)
 	for c in path:
-		if not Pathfinder.body_ok(grid, c, door_passable, body_size):
+		if not Pathfinder.body_ok(grid, c, door_passable, body_size, _drone):
 			if not go_to(grid, path.back(), door_passable):
 				path.clear()
 			break
