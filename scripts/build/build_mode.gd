@@ -351,12 +351,12 @@ func open_bay_panel(c: Vector2i) -> bool:
 	return true
 
 
-## A left click in build mode on the fabricator with a part (or nothing) in hand: the first opens its upgrade card, a second
+## A left click in build mode on the fabricator (any palette tab, a part or nothing in hand): the first opens its upgrade card, a second
 ## one pays for the next level. True when the click was used up. A click elsewhere closes the card and goes on as usual.
 func _fab_click(e: InputEventMouseButton) -> bool:
 	var uid := ship.components.at(hover)
 	var is_fab: bool = uid >= 0 and ship.components.instances[uid]["id"] == Workshop.FAB
-	if is_fab and group == Group.SYSTEMS and not e.ctrl_pressed and not e.shift_pressed:
+	if is_fab and not e.ctrl_pressed and not e.shift_pressed:  # (whatever the palette tab: the default one is Tiles, which used to let the click through to a drag)
 		_fab_use(uid)
 		return true
 	upgrade_uid = -1

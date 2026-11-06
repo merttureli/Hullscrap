@@ -11,6 +11,9 @@ const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const BeltArt = preload("res://scripts/view/belt_art.gd")
+const Art = preload("res://scripts/view/art.gd")
+const Content = preload("res://scripts/data/content.gd")
+const Drones = preload("res://scripts/combat/drones.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const WALL := Color("#3b3f45")
 const WALL_TOP := Color("#5a6068")
@@ -18,6 +21,7 @@ const CABLE := Color("#d98a4e")
 const MAX_CELL := 32.0
 
 static var _grids := {}  # entry key -> the scratch grid its tiles are drawn from
+static var _used := {}  # sprite path -> the used pixel rect of its frame
 
 
 ## Draw card `e` of `ship` into `r`. `t`: seconds, for the art's loops.
@@ -26,14 +30,69 @@ static func draw(cv: CanvasItem, e: Dictionary, ship, r: Rect2, t := 0.0) -> voi
 		"part":
 			_part(cv, ship.components.def(e["id"]), r, t)
 		"item":
-			var s := minf(r.size.x, r.size.y) * 0.8
-			UiKit.icon(cv, e["id"], Rect2(r.get_center() - Vector2(s, s) / 2.0, Vector2(s, s)))
+			if not _item_sprite(cv, str(e["id"]), r):
+				var s := minf(r.size.x, r.size.y) * 0.8
+				UiKit.icon(cv, e["id"], Rect2(r.get_center() - Vector2(s, s) / 2.0, Vector2(s, s)))
 		"cable":
 			_cable(cv, r)
 		"belt":
 			_belt(cv, r, t)
 		_:
 			_tiles(cv, e, ship, r)
+
+
+## Where item `id` has a picture of its own: {"kind": "items" (a hand weapon or tool), "drones" (a drone kit) or "gear" (worn), "art": the art id,
+## "path": the PNG} or {} when it has none (then the card falls back to the UI icon). Pure: it only asks which files exist.
+static func item_art(id: String) -> Dictionary:
+	var w := Content.entry("hand_weapons", id)
+	var aid := str(w.get("art", id)) if not w.is_empty() else id
+	if Art.item(aid) != null:
+		return {"kind": "items", "art": aid, "path": "%s/items/%s.png" % [Art.root, aid]}
+	var kit := Drones.kit(id)
+	var did := str(kit.get("drone", {}).get("art", "")) if not kit.is_empty() else ""
+	if did != "" and Art.drone(did) != null:
+		return {"kind": "drones", "art": did, "path": "%s/drones/%s.png" % [Art.root, did]}
+	var g = Art.gear(id)
+	if g is Dictionary and g.has("body"):
+		return {"kind": "gear", "art": id, "path": "%s/gear/%s.png" % [Art.root, id]}
+	if Art.gear_rig(id, "human") != null:
+		return {"kind": "gear", "art": id, "path": "%s/gear/%s/human.png" % [Art.root, id]}
+	return {}
+
+
+## The sprite of item `id` (item_art) scaled to fit `r`, cropped to its pixels. False when it has none.
+static func _item_sprite(cv: CanvasItem, id: String, r: Rect2) -> bool:
+	var a := item_art(id)
+	if a.is_empty():
+		return false
+	var sheet = null
+	var frame := 0
+	match a["kind"]:
+		"items":
+			sheet = Art.item(a["art"])
+		"drones":
+			sheet = Art.drone(a["art"])
+		_:
+			var g = Art.gear(id)
+			if g is Dictionary and g.has("body"):
+				sheet = g["body"]
+				frame = 0 if sheet.meta.get("frame") is Array else int(sheet.meta.get("frame", 0))
+			else:
+				sheet = Art.gear_rig(id, "human")["body"]
+	var reg: Rect2 = sheet.region(frame)
+	var key := "%s#%d" % [a["path"], frame]
+	if not _used.has(key):
+		_used[key] = Rect2(sheet.image.get_region(Rect2i(reg)).get_used_rect())
+	var used: Rect2 = _used[key]
+	if used.size.x <= 0.0 or used.size.y <= 0.0:
+		return false
+	var box := r.size * 0.9
+	var k := minf(box.x / used.size.x, box.y / used.size.y)
+	if k >= 1.0:
+		k = floorf(k)
+	var sz := used.size * k
+	cv.draw_texture_rect_region(sheet.texture, Rect2(r.get_center() - sz / 2.0, sz), Rect2(reg.position + used.position, used.size))
+	return true
 
 
 ## A part at rotation 0. A mount: [barrel room] outside half, wall, inside half, top to bottom.
