@@ -2,7 +2,7 @@ extends RefCounted
 ## The reference layout and Rebuild (build mode's "Save layout" and "Rebuild" buttons). `capture` stores the tiles, the
 ## parts and the cables of a ship as JSON-friendly data (Ship.layout, saved with the run); `rebuild` puts back what is missing
 ## or destroyed compared with it, through BuildSession, so it is paid at the normal build cost and is ONE undo step.
-## Hull = every tile (walls, outer hull, floor, doors); Parts = the components (with their fire group) and the cables.
+## Hull = every tile (walls, outer hull, floor, doors); Parts = the components (with their fire group), the cables and the belts.
 ## Order: hull before parts, cheap before dear (doors last: they need their walls). A part is taken from the cargo first,
 ## else made on the spot from its recipe (blueprint known, materials paid). What cannot be done is listed, never skipped silently.
 
@@ -43,7 +43,14 @@ static func capture(ship: Ship) -> Dictionary:
 	for c in ship.cables.cells.keys():
 		cables.append([c.x, c.y])
 	cables.sort_custom(func(a, b): return a[1] < b[1] or (a[1] == b[1] and a[0] < b[0]))
-	return {"tiles": tiles, "parts": parts, "cables": cables}
+	var belts := []
+	for c in ship.belts.cells.keys():
+		belts.append([c.x, c.y])
+	belts.sort_custom(func(a, b): return a[1] < b[1] or (a[1] == b[1] and a[0] < b[0]))
+	var out := {"tiles": tiles, "parts": parts, "cables": cables}
+	if not belts.is_empty():
+		out["belts"] = belts
+	return out
 
 
 ## Put back what `layout` has and the ship lacks: `what` is "hull", "parts" or "both". One undo step on `session`.
@@ -108,12 +115,18 @@ static func rebuild(session: BuildSession, layout: Dictionary, what: String) -> 
 				changes.append({"layer": "cable", "cell": cell})
 				kinds.append("cable")
 				names.append("cables")
+		for c in layout.get("belts", []):
+			var cell := Vector2i(int(c[0]), int(c[1]))
+			if not ship.belts.has(cell):
+				changes.append({"layer": "belt", "cell": cell})
+				kinds.append("belt")
+				names.append("belts")
 	var auto: bool = session.auto_floor
 	session.auto_floor = false  # the layout says which cells get floor
 	session.apply(changes)
 	session.auto_floor = auto
 	var reasons: Array = session.last_reasons
-	var out := {"hull_done": 0, "hull_missing": 0, "parts_done": 0, "parts_missing": 0, "cables_done": 0, "cables_missing": 0, "short": {}, "blocked": []}
+	var out := {"hull_done": 0, "hull_missing": 0, "parts_done": 0, "parts_missing": 0, "cables_done": 0, "cables_missing": 0, "belts_done": 0, "belts_missing": 0, "short": {}, "blocked": []}
 	var need := {}  # what the cells and parts left undone would take: name -> {material: count}
 	var seen_block := {}
 	for i in changes.size():
@@ -131,7 +144,7 @@ static func rebuild(session: BuildSession, layout: Dictionary, what: String) -> 
 				need[nm] = {}
 			for m in cost:
 				need[nm][m] = int(need[nm].get(m, 0)) + int(cost[m])
-		elif k != "cable" or not seen_block.has(why):
+		elif (k != "cable" and k != "belt") or not seen_block.has(why):
 			seen_block[why] = true
 			out["blocked"].append([names[i], why])
 	var short_txt := []
@@ -148,9 +161,11 @@ static func rebuild(session: BuildSession, layout: Dictionary, what: String) -> 
 		bits.append("%d of %d parts" % [out["parts_done"], out["parts_missing"]])
 	var text := "Rebuilt " + ", ".join(bits) + "."
 	if changes.is_empty():
-		text = "Nothing to rebuild: the ship matches the saved layout."
+		text = "Nothing missing."
 	if out["cables_missing"] > 0:
 		text += " Cables: %d of %d." % [out["cables_done"], out["cables_missing"]]
+	if out["belts_missing"] > 0:
+		text += " Belts: %d of %d." % [out["belts_done"], out["belts_missing"]]
 	if not short_txt.is_empty():
 		text += " Short: " + "; ".join(short_txt) + "."
 	if not out["blocked"].is_empty():
@@ -180,5 +195,7 @@ static func _cost(session: BuildSession, ch: Dictionary) -> Dictionary:
 			return session.grid.cost_of(ch["to"])
 		"component":
 			return session.ship.crafting.def(ch["id"]).get("materials", {})
+		"belt":
+			return session.belt_cost
 		_:
 			return session.cable_cost
