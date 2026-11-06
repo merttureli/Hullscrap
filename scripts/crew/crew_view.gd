@@ -277,6 +277,17 @@ func release_station(uid: int) -> String:
 	return Posts.unpost(ship, uid) if ship != null else ""
 
 
+## "Back to posts" (station_bar.gd): every held crew member (or just `who`) goes back to their assigned position and the hold is cleared. Returns what to tell the player.
+func recall(who = null) -> String:
+	var ship = _ship()
+	if ship == null or sim == null or not sim.has_method("jobs_of"):
+		return ""
+	var n: int = sim.jobs_of(ship).recall(ship, who)
+	if n == 0:
+		return "Nobody is held away from a post"
+	return "%s goes back to the post" % who.name if who != null else "%d back to their posts" % n
+
+
 ## The abandoned rooms with the rectangle of their tag, in screen pixels (the tag stays upright whichever way the ship is turned): [{id, rect}].
 func abandoned_tags() -> Array:
 	var out := []

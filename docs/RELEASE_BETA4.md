@@ -67,6 +67,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **Repairs under fire**: a wall or part hit in the last 5 s repairs at about a third of the speed, on both ships, so an enemy crew no longer mends as fast as one gun hurts.
 - **Orders for several crew**: Shift+click or drag a box to select several (Shift+click on the crew bar works too). Middle click a room to split its jobs among them, and **X** spreads them over the damaged rooms.
 - **Tab slows a ship fight to a quarter speed** until you press it again: time to give orders. There's no limit on it.
+- **Orders stick**: a crew member you send somewhere by hand stays there (the medbay, a repair, a room) and does local work; they no longer walk back to their post on their own. The **Back to posts** button on top of the station bar (left) recalls everyone, and Shift+click a station recalls just its crew member; held crew wear an H pin. Crew now go and revive a downed crewmate first (held ones too), unless the room is airless without a suit, on fire, has a hostile in it, or they are being hurt. Tab also eases the camera in to your ship (your hull fills 70% of the height, 0.3 s) so you can click your crew, and back out when it ends.
 
 ### Content
 - **Boarding**: 10 new discoveries, 2 new hermits and 2 new traders aboard derelicts, and 4 new logs. More derelicts have someone aboard, and suits turn up in engineering and command lockers.
