@@ -79,7 +79,7 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 		var n := "%d/%d" % [ceili(m.hp), roundi(m.max_hp)]
 		var w2: float = h._font().get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 		h._text(n, Vector2(r.end.x - w2 - 10.0, r.position.y + 22.0), 13, h.DIM_TEXT)
-	_air(h, r, m)
+	_air(h, r, m, down)
 	_heat(h, r, m)
 	# the gear: the weapon, the body, the mods
 	var art: String = str(s.gun()["w"]["art"]) if e["p"] == null else str(e["p"]["gun"]["w"]["art"])
@@ -153,7 +153,7 @@ static func _rounds(h, r: Rect2, p: Dictionary, down: bool) -> void:
 
 
 ## The AIR line: OK, THIN or NONE where the person stands, the seconds they have left in that air (or "suit" when a seal keeps them safe).
-static func _air(h, r: Rect2, m) -> void:
+static func _air(h, r: Rect2, m, down: bool) -> void:
 	var a: Dictionary = Air.line(h.view.session.site, m, m.pos)
 	var t := "AIR " + str(a["word"])
 	var col: Color = h.GOOD
@@ -161,7 +161,8 @@ static func _air(h, r: Rect2, m) -> void:
 		col = h.AMBER if str(a["word"]) == "THIN" else h.BAD
 		t += " suit" if bool(a["sealed"]) else (" %ds" % ceili(float(a["secs"])) if float(a["secs"]) >= 0.0 else "")
 	var w: float = h._font().get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-	h._text(t, Vector2(r.end.x - w - 8.0, r.position.y + 58.0), 12, col)
+	var hp_w: float = h._font().get_string_size("DOWN, hold E" if down else "%d/%d" % [ceili(m.hp), roundi(m.max_hp)], HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	h._text(t, Vector2(r.end.x - hp_w - 18.0 - w, r.position.y + 21.0), 12, col)  # (in the name row, left of the health number: the rounds box takes the row below)
 
 
 ## The HOT line: where the heat of the room hurts or slows this person (heat_foot.gd), beside the AIR line.
