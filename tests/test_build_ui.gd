@@ -537,6 +537,20 @@ func test_a_click_on_the_fabricator_opens_its_card_and_a_second_one_upgrades() -
 	_done(b)
 
 
+func test_a_click_on_the_fabricator_works_on_every_palette_tab() -> void:
+	# (the default tab is Tiles: the owner's click used to fall through to a tile drag there and do nothing)
+	for g in [BuildMode.Group.TILES, BuildMode.Group.CABLES, BuildMode.Group.BELTS, BuildMode.Group.SYSTEMS]:
+		var r := _fab_mode({"scrap": 200, "copper": 40, "titanium": 12})
+		var b: BuildMode = r[0]
+		b.group = g
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = true
+		check(b._fab_click(click), "the click is used up on tab %d" % g)
+		eq(b.upgrade_uid, r[1], "and opens the card on tab %d" % g)
+		_done(b)
+
+
 func test_u_over_the_fabricator_works_like_the_click_and_a_short_hold_refuses() -> void:
 	var r := _fab_mode({"scrap": 200, "copper": 40, "titanium": 7})
 	var b: BuildMode = r[0]

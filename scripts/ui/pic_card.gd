@@ -5,7 +5,7 @@ extends RefCounted
 ## (hud_card.gd in the build view, part_card.gd in the crafting panel). The caller builds a spec, labels() lists every word the
 ## card prints (what tests read), draw() paints it.
 ## spec: {entry (thumbs.gd's card: kind, id ...), line, stats [{icon, text, what}], aim ("" or fixed/swivel/turret), cost {id: n}, short {id: n}
-##        (what is missing), held (-1: not a held part, else how many), tags [text], key (1..9, 0 none), meta (text), meta_bad}
+##        (what is missing), dim (draw it faded: a blueprint known but not makeable yet), held (-1: not a held part, else how many), tags [text], key (1..9, 0 none), meta (text), meta_bad}
 
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
@@ -88,6 +88,8 @@ static func draw(cv: CanvasItem, r: Rect2, ship, spec: Dictionary, selected: boo
 		UiKit.text(cv, str(s["text"]), Vector2(px + ICON + 2.0, py + 10.0), FONT, UiKit.TEXT)
 	y += float(fl["rows"]) * ROW
 	_cost_row(cv, spec, x, y, w)
+	if spec.get("dim", false):  # known but not makeable yet
+		cv.draw_rect(r, Color(0.06, 0.08, 0.11, 0.5))
 
 
 ## The foot: the cost's materials as icon and count (red when short), a held part as the cargo icon and "xN", the meta text on the right.

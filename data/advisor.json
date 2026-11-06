@@ -140,7 +140,7 @@
    {
     "id": "s2_fab",
     "title": "Upgrade the {fabricator}.",
-    "why": "Build mode (B), click the fabricator, click again: level two builds what the shops are too proud to sell.",
+    "why": "Crafting screen (C), Upgrade button on the fabricator: level two builds what the shops are too proud to sell.",
     "check": {
      "fab": 2
     }
@@ -202,7 +202,7 @@
    {
     "id": "s3_fab",
     "title": "Raise the {fabricator} to level {=fab}.",
-    "why": "Click the fabricator in build mode to upgrade it again. The titanium loop starts here.",
+    "why": "Press Upgrade in the crafting screen (C) to raise the fabricator again. The titanium loop starts here.",
     "check": {
      "fab": "p:fab"
     }
@@ -453,7 +453,7 @@
   {
    "id": "first_fabricator",
    "title": "The fabricator",
-   "text": "It builds what you hold a blueprint for. A higher level opens more recipes: click the fabricator in build mode to upgrade it."
+   "text": "It builds what you hold a blueprint for. A higher level opens more recipes: press Upgrade in the crafting screen (C) to raise it."
   },
   {
    "id": "first_blueprint",

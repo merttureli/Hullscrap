@@ -17,7 +17,7 @@ var recipes := {}    # id -> {id, output {item, count}, materials, fab_level, to
 var order: Array[String] = []
 var materials := {}  # id -> {id, name, color, rarity}
 var known := {}      # recipe id -> true; the blueprints the player has (a set)
-var seen := {}       # recipe id -> true; the known blueprints the player has looked at on the Blueprints tab (the rest are NEW); saved
+var seen := {}       # recipe id -> true; the known blueprints the player has looked at on the Fabricator tab (the rest are NEW); saved
 var queue: Array = []  # the fabricator's FIFO jobs: {recipe, progress (seconds of work done), paid (materials spent)}
 var paused := false  ## the first job could not run during the last tick (fabricator offline or too weak); not saved
 var others := {}  ## station id -> its FIFO jobs, for every station but the fabricator (the smelter); read through queue_of()
@@ -170,7 +170,7 @@ func can_craft(recipe_id: String, inventory, fab: Dictionary) -> String:
 	if r["station"] != str(fab.get("station", FABRICATOR)):
 		return "needs a " + str(STATIONS[r["station"]]).to_lower()
 	if str(r["output"]["item"]) == "fabricator" and int(fab.get("count", 0)) > 0:  # (a ship with one is the only place this runs)
-		return "one fabricator per ship: click yours to upgrade it"
+		return "one fabricator per ship: upgrade yours at the crafting screen (C)"
 	var sname := str(STATIONS[r["station"]]).to_lower()
 	var level := int(fab.get("level", 0))
 	if level <= 0:

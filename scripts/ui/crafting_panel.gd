@@ -1,9 +1,8 @@
 extends Control
 ## The crafting panel (C, in build or play mode): a fabricator screen over the game. Left: a grid of picture cards (pic_card.gd: the
-## output's sprite, its figures, its materials with the missing ones in red, no name), grouped by category, only the recipes whose
-## blueprint you know (a known one you cannot afford stays, with its materials in red; locked ones are hidden: the Blueprints tab says how
-## many you have found). Hovering a card shows its name, description and full stats (part_card.gd). Middle: what the selected recipe
-## makes, described (describe.gd), or how crafting works (? toggles it). Right: the fabricator (level, tools, workshop modules counted)
+## output's sprite, its figures, its materials with the missing ones in red, no name), grouped by family (every blueprint you know, once;
+## one you cannot make yet stays, dimmed, and its details say why; locked ones are hidden, the box at the right says how many you found). Hovering a card shows its name, description and full stats (part_card.gd). Middle: what the selected recipe
+## makes, described (describe.gd), or how crafting works (? toggles it). Right: the fabricator (level, tools, workshop modules counted, the Upgrade button)
 ## and the queue with progress bars; a click on a queued job cancels it (the materials come back). Bottom: the
 ## cargo's materials. Tab (or a click on the tabs at the top) switches to the smelter (docs/CONTENT.md
 ## section 12): its recipes, its level, speed and tools, its own queue. Click a card, or select it with the arrows and press Enter, to
@@ -22,12 +21,12 @@ const Audio = preload("res://scripts/audio/audio.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const PartCard = preload("res://scripts/ui/part_card.gd")
 const PicCard = preload("res://scripts/ui/pic_card.gd")
+const Thumbs = preload("res://scripts/ui/thumbs.gd")
 
-const BLUEPRINTS := "blueprints"  ## the third tab: every blueprint you know
-const STATION_IDS: Array[String] = ["fabricator", "smelter", "blueprints"]  ## the tabs, in order (Tab cycles them)
-const TAB_NAMES := {"fabricator": "Fabricator", "smelter": "Smelter", "blueprints": "Blueprints"}
-const TAB_W: Array[float] = [120.0, 120.0, 176.0]
-## The Blueprints tab's groups: part families first (in this order, the families not named after them), then the rest.
+const STATION_IDS: Array[String] = ["fabricator", "smelter"]  ## the tabs, in order (Tab cycles them)
+const TAB_NAMES := {"fabricator": "Fabricator", "smelter": "Smelter"}
+const TAB_W: Array[float] = [176.0, 120.0]
+## The Fabricator tab's groups: part families first (in this order, the families not named after them), then the rest.
 const FAMILY_ORDER: Array[String] = ["weapon", "drone_bay", "shield", "engine", "reactor", "smelter", "oxygen", "helm", "medbay", "bed", "fabricator", "workshop", "radiator", "utility", "intake", "ammo_rack", "belt_drive", "radar", "tractor"]
 const FAMILY_NAMES := {"weapon": "Weapons", "drone_bay": "Drone bays", "shield": "Shields", "engine": "Engines", "reactor": "Reactors", "smelter": "Smelters", "oxygen": "Life support", "helm": "Helms", "medbay": "Medbays",
 	"bed": "Beds", "fabricator": "Fabricators", "workshop": "Workshop modules", "radiator": "Radiators", "utility": "Utility", "intake": "Intakes", "ammo_rack": "Ammo racks", "belt_drive": "Belt drives",
@@ -47,7 +46,8 @@ const CARD_H := 124.0  ## a recipe card
 const COLS := 4  ## cards across the list
 const CARD_GAP := 6.0
 const JOB_H := 52.0
-const FAB_H := 160.0
+const FAB_H := 160.0  ## the smelter's box
+const FAB_BOX_H := 262.0  ## the fabricator's box: its level, modules and the Upgrade button
 const GAP := 14.0
 const PAD := 14.0
 const DIM := Color(0.0, 0.0, 0.0, 0.62)
@@ -69,11 +69,12 @@ var selected := ""  ## the recipe id under the cursor
 var top := 0  ## the first row of rows() shown
 var debug_keys := OS.is_debug_build()  ## U (free blueprint) and M (all mods) work only in a debug build; a release export has neither
 var message := ""
+var flash := 0.0  ## seconds left of the green flash after an upgrade
 var message_bad := false
 var hover_row := -1  ## index into rows()
 var hover_job := -1
 var help_open := false  ## the middle column shows how crafting works, not the selected recipe
-var fresh_now := {}  ## the NEW blueprints shown on the Blueprints tab this visit (they count as seen once it was opened)
+var fresh_now := {}  ## the NEW blueprints shown on the Fabricator tab this visit (they count as seen once it was opened)
 var hover_kw := {}  ## the keyword chip under the mouse in the description ({} for none), and its rect
 var hover_rect := Rect2()
 var chips_at := []  # the description's chips as drawn: [[Rect2, keyword]]
@@ -88,7 +89,8 @@ func _ready() -> void:
 	visible = false
 
 
-func _process(_dt: float) -> void:
+func _process(dt: float) -> void:
+	flash = maxf(0.0, flash - dt)
 	if visible:
 		queue_redraw()
 
@@ -101,7 +103,7 @@ func ship():
 
 
 ## The ids of the recipes of the shown station in screen order: by category, as listed in data/recipes.json, only the ones whose
-## blueprint is known (the Blueprints tab: every known one, grouped by family).
+## blueprint is known (the Fabricator tab: every known one, grouped by family).
 func recipe_ids() -> Array[String]:
 	var s = ship()
 	if s == null:
@@ -111,11 +113,11 @@ func recipe_ids() -> Array[String]:
 	if key == _ids_key:
 		return _ids_cache
 	var out: Array[String] = []
-	if station == BLUEPRINTS:
+	if station == Crafting.FABRICATOR:
 		var groups := {}
 		var ranks := []
 		for id in s.crafting.ids():
-			if s.crafting.is_known(id):
+			if s.crafting.is_known(id) and s.crafting.station_of(id) == station and not (has_fab and id == "fabricator"):  # (the smelter's own are on its tab)
 				var g := group_of(s, id)
 				if not groups.has(g[1]):
 					groups[g[1]] = []
@@ -136,7 +138,7 @@ func recipe_ids() -> Array[String]:
 	return out
 
 
-## The Blueprints tab's group of recipe `id`: [rank, name]. A part goes by its family, a material, hand gear and the rest by their own groups.
+## The Fabricator tab's group of recipe `id`: [rank, name]. A part goes by its family, a material, hand gear and the rest by their own groups.
 func group_of(s, id: String) -> Array:
 	var out: String = str(s.crafting.def(id)["output"]["item"])
 	if s.components.has(out):
@@ -151,7 +153,7 @@ func group_of(s, id: String) -> Array:
 	return [102, G_ITEMS]
 
 
-## The rows of the left column: {"header": text} for a category (a group on the Blueprints tab), {"id": recipe id} for a recipe.
+## The rows of the left column: {"header": text} for a category (a group on the Fabricator tab), {"id": recipe id} for a recipe.
 func rows() -> Array:
 	var out := []
 	var s = ship()
@@ -159,9 +161,9 @@ func rows() -> Array:
 		return out
 	var last := ""
 	for id in recipe_ids():
-		var cat: String = group_of(s, id)[1] if station == BLUEPRINTS else str(s.crafting.def(id)["category"])
+		var cat: String = group_of(s, id)[1] if station == Crafting.FABRICATOR else str(s.crafting.def(id)["category"])
 		if cat != last:
-			out.append({"header": cat if station == BLUEPRINTS else CATEGORY_NAMES.get(cat, cat)})
+			out.append({"header": cat if station == Crafting.FABRICATOR else CATEGORY_NAMES.get(cat, cat)})
 			last = cat
 		out.append({"id": id})
 	return out
@@ -170,7 +172,7 @@ func rows() -> Array:
 ## The shown station's level, tools and speed (workshop.gd's or processing.gd's best result) for `s`.
 func station_info(s, st := "") -> Dictionary:
 	if st == "":
-		st = station if station != BLUEPRINTS else Crafting.FABRICATOR
+		st = station
 	return Processing.best(s, st) if st != Crafting.FABRICATOR else Workshop.best(s)
 
 
@@ -206,27 +208,27 @@ func close() -> void:
 	fresh_now = {}
 
 
-## The Blueprints tab is on screen: the blueprints learned since it was last looked at are NEW for this visit, and count as seen from now on.
+## The Fabricator tab is on screen: the blueprints learned since it was last looked at are NEW for this visit, and count as seen from now on.
 func _enter_tab() -> void:
 	fresh_now = {}
 	var s = ship()
-	if station == BLUEPRINTS and s != null:
+	if station == Crafting.FABRICATOR and s != null:
 		for id in s.crafting.fresh():
 			fresh_now[id] = true
 		s.crafting.mark_seen()
 
 
-## How many blueprints are NEW: this visit's on the Blueprints tab, else the ones not looked at yet.
+## How many blueprints are NEW: this visit's on the Fabricator tab, else the ones not looked at yet.
 func new_count() -> int:
 	var s = ship()
 	if s == null:
 		return 0
-	return fresh_now.size() if station == BLUEPRINTS else s.crafting.fresh().size()
+	return fresh_now.size() if station == Crafting.FABRICATOR else s.crafting.fresh().size()
 
 
-## The Blueprints tab's title: "Blueprints (2 new)".
+## The Fabricator tab's title: "Fabricator (2 new)".
 func tab_label(id: String) -> String:
-	var n := new_count() if id == BLUEPRINTS else 0
+	var n := new_count() if id == Crafting.FABRICATOR else 0
 	return str(TAB_NAMES[id]) + (" (%d new)" % n if n > 0 else "")
 
 
@@ -332,11 +334,8 @@ func craft(id: String) -> String:
 	return why
 
 
-## Enter or a double-click on recipe `id`: queue it, or on the Blueprints tab open it at its station.
+## Enter or a double-click on recipe `id`: queue it.
 func activate(id: String) -> String:
-	if station == BLUEPRINTS:
-		open_recipe(id)
-		return ""
 	return craft(id) if id != "" else "nothing selected"
 
 
@@ -347,7 +346,7 @@ func craft_selected() -> String:
 ## Cancel queued job `index` of the shown station (its materials come back). False when there is no such job.
 func cancel_job(index: int) -> bool:
 	var s = ship()
-	if s == null or station == BLUEPRINTS or index < 0 or index >= s.crafting.queue_of(station).size():
+	if s == null or index < 0 or index >= s.crafting.queue_of(station).size():
 		return false
 	var id: String = s.crafting.queue_of(station)[index]["recipe"]
 	s.crafting.cancel(index, s.inventory, station)
@@ -468,13 +467,13 @@ func _gui_input(e: InputEvent) -> void:
 					cancel_job(job)
 				elif station == "smelter" and hint_button_rect().has_point(e.position) and no_smelter_recipe() != "":
 					open_recipe(no_smelter_recipe())
-				elif queue_rect_btn().has_point(e.position) and station != BLUEPRINTS and not help_open:
+				elif station == Crafting.FABRICATOR and upgrade_rect().has_point(e.position) and fab_upgrade()["next"] != 0:
+					upgrade_fab()
+				elif queue_rect_btn().has_point(e.position) and not help_open:
 					craft_selected()
 				elif row >= 0 and rows()[row].has("id"):
 					selected = rows()[row]["id"]
-					if station == BLUEPRINTS:
-						open_recipe(selected)  # a Blueprints row opens at its station
-					elif e.double_click:
+					if e.double_click:
 						craft_selected()  # one click selects and pins the card; two queue
 			MOUSE_BUTTON_WHEEL_UP:
 				_scroll(-1)
@@ -541,7 +540,8 @@ func queue_rect_btn() -> Rect2:
 
 func queue_rect() -> Rect2:
 	var r := side_rect()
-	return Rect2(r.position + Vector2(0.0, FAB_H + GAP), Vector2(r.size.x, r.size.y - FAB_H - GAP))
+	var h := FAB_BOX_H if station == Crafting.FABRICATOR else FAB_H
+	return Rect2(r.position + Vector2(0.0, h + GAP), Vector2(r.size.x, r.size.y - h - GAP))
 
 
 ## The tab button of station `i` of STATION_IDS, in the title row after the title (the top right is under the HUD's tide box).
@@ -618,7 +618,7 @@ func row_at(p: Vector2) -> int:
 ## The queued job at `p`, or -1.
 func job_at(p: Vector2) -> int:
 	var s = ship()
-	if s == null or station == BLUEPRINTS:
+	if s == null:
 		return -1
 	for i in s.crafting.queue_of(station).size():
 		if job_rect(i).has_point(p):
@@ -683,8 +683,6 @@ func _draw() -> void:
 	if station == Crafting.FABRICATOR:
 		_draw_fabricator(s, fab)
 		_draw_queue(s)
-	elif station == BLUEPRINTS:
-		_draw_blueprints_side(s)
 	else:
 		_draw_smelter(s, fab)
 		_draw_queue(s)
@@ -717,11 +715,11 @@ func described() -> Dictionary:
 func help_lines() -> Array[String]:
 	return [
 		"Click a recipe (or Up/Down, Enter) to queue it. Its materials leave the cargo.",
-		"Fabricator: parts, gear, modules. Needs power. Raise its level in build mode (B): click it, then click again to pay. Arms and rigs in its room make it 25% faster each (up to +50%); a laser cutter or nanoforge there gives it that tool.",
+		"Fabricator: every blueprint you know, grouped. Needs power. The Upgrade button in its box raises its level and pays at once. Arms and rigs in its room make it 25% faster each (up to +50%); a laser cutter or nanoforge there gives it that tool.",
 		"Smelter (Tab): scrap and ore into refined materials. A crew member at it adds %d%% speed." % roundi(Processing.manned_speed() * 100.0),
 		"Finished parts land in the hold: place them from the build palette (B). Click a queued job to cancel it.",
-		"Hover a card for its name and stats; click to select it; Enter, a double-click or the Queue button queues it. Blueprints (Tab) lists what you know: click one to open it at its station.",
-		"Only recipes whose blueprint you know are listed (Blueprints shows how many you found): scan salvage, or find one in events and stores.",
+		"Hover a card for its name and stats; click to select it; Enter, a double-click or the Queue button queues it. A dimmed card is a blueprint you know but cannot make yet: select it to see why (fabricator level, a tool, materials).",
+		"Only recipes whose blueprint you know are listed (the box at the right says how many you found): scan salvage, or find one in events and stores.",
 	]
 
 
@@ -768,11 +766,8 @@ func _draw_details() -> void:
 		UiKit.note(self, lines, Vector2(minf(hover_rect.position.x, r.end.x - 8.0 - tw), hover_rect.end.y + 4.0), hover_kw["color"])
 
 
-## The foot of the pinned card: the Queue button (a click queues the selected recipe), or why it cannot be queued. Not on the Blueprints tab.
+## The foot of the pinned card: the Queue button (a click queues the selected recipe), or why it cannot be queued.
 func _draw_pinned_foot(r: Rect2) -> void:
-	if station == BLUEPRINTS:
-		_text("Click a row, or press Enter, to open it at its station", Vector2(r.position.x + 12.0, r.end.y - 20.0), 13, DIM_TEXT)
-		return
 	var why := reason(selected)
 	var b := queue_rect_btn()
 	var ok := why == ""
@@ -780,7 +775,7 @@ func _draw_pinned_foot(r: Rect2) -> void:
 	_text("Queue" if ok else "Can't queue", b.position + Vector2(0.0, 22.0), 16, GOOD if ok else DIM_TEXT, b.size.x, HORIZONTAL_ALIGNMENT_CENTER)
 	if not ok:
 		var f := ThemeDB.fallback_font
-		draw_multiline_string(f, Vector2(r.position.x + 12.0, r.end.y - 40.0), why, HORIZONTAL_ALIGNMENT_LEFT, b.position.x - r.position.x - 20.0, 13, 2, AMBER)
+		draw_multiline_string(f, Vector2(r.position.x + 12.0, r.end.y - 40.0), why.substr(0, 1).to_upper() + why.substr(1), HORIZONTAL_ALIGNMENT_LEFT, b.position.x - r.position.x - 20.0, 13, 2, AMBER)
 
 
 ## The hover card: the row under the mouse (not the pinned one), as PartCard shows it, to the right of the row.
@@ -844,7 +839,7 @@ func empty_text() -> String:
 
 
 ## The picture card of recipe `id` (pic_card.gd's spec): the output's sprite and figures, its materials (red when short), NEW on the
-## Blueprints tab, x3 for a batch, the fabricator level it needs (red when the station is too low). No name.
+## the Fabricator tab, x3 for a batch, the fabricator level it needs (red when the station is too low). No name.
 func card_spec(id: String) -> Dictionary:
 	var s = ship()
 	var rec: Dictionary = s.crafting.def(id)
@@ -859,7 +854,7 @@ func card_spec(id: String) -> Dictionary:
 		stats = g["stats"]
 		aim = g["aim"]
 		line = "unique" if s.components.def(out).get("unique", false) else str(s.components.def(out).get("line", "standard"))
-	elif s.crafting.materials.has(out) or UiKit.icon_art(out) != null:
+	elif s.crafting.materials.has(out) or UiKit.icon_art(out) != null or not Thumbs.item_art(out).is_empty():
 		entry = {"kind": "item", "id": out}
 	var tags := []
 	if fresh_now.has(id):
@@ -867,28 +862,16 @@ func card_spec(id: String) -> Dictionary:
 	if int(rec["output"]["count"]) > 1:
 		tags.append("x%d" % int(rec["output"]["count"]))
 	var meta := "L%d" % int(rec["fab_level"])
-	if station == BLUEPRINTS and rec["station"] != Crafting.FABRICATOR:
-		meta = "Smelt " + meta
-	var level_low: bool = station != BLUEPRINTS and int(station_info(s)["level"]) < int(rec["fab_level"])
+	var level_low: bool = int(station_info(s)["level"]) < int(rec["fab_level"])
+	var can: bool = s.crafting.can_craft(id, s.inventory, station_info(s)) == ""
 	return {"entry": entry, "line": line, "stats": stats, "aim": aim, "cost": rec["materials"], "short": s.inventory.missing(rec["materials"]),
-		"held": -1, "tags": tags, "key": 0, "meta": meta, "meta_bad": level_low}
+		"held": -1, "tags": tags, "key": 0, "meta": meta, "meta_bad": level_low, "dim": not can}
 
 
 ## "34 of 120 found": the blueprints you know out of every recipe in the game.
 func found_text() -> String:
 	var s = ship()
 	return "%d of %d found" % [s.crafting.known.size(), s.crafting.ids().size()] if s != null else ""
-
-
-## The right column of the Blueprints tab: how many you have found and what a click does.
-func _draw_blueprints_side(s) -> void:
-	var r := side_rect()
-	_panel(r, ROW_BG)
-	_text("BLUEPRINTS", r.position + Vector2(10.0, 24.0), 15, AMBER)
-	_text(found_text(), r.position + Vector2(10.0, 54.0), 22, GOOD)
-	if new_count() > 0:
-		_text("%d new" % new_count(), r.position + Vector2(10.0, 78.0), 16, AMBER)
-	_para("Click a blueprint to open it at the fabricator or the smelter, ready to queue. Learn more from scans, events, stores and boarding.", r.position + Vector2(10.0, 92.0), r.size.x - 20.0, 14, DIM_TEXT)
 
 
 ## What to do about having no smelter: {text, recipe}, from the cheapest smelter recipe you know (its name and costs are read from the data).
@@ -938,11 +921,63 @@ static func fab_line(fab: Dictionary, with_level := true) -> String:
 	return ("Level %d \u00b7 " % int(fab["level"]) + out) if with_level else out
 
 
+## The fabricator's upgrade card (workshop.gd upgrade_info) for the ship's fabricator; "next" is 0 at the top level or with no fabricator.
+func fab_upgrade() -> Dictionary:
+	var s = ship()
+	var uid: int = Workshop.fab_uid(s) if s != null else -1
+	if uid < 0:
+		return {"level": 0, "next": 0, "cost": {}, "short": {}, "new": 0, "total": 0, "text": "", "can": false}
+	return Workshop.upgrade_info(s, uid)
+
+
+## The Upgrade button's words: what is missing when short, else "Upgrade to level N".
+func upgrade_label() -> String:
+	var s = ship()
+	var inf := fab_upgrade()
+	if s == null or int(inf["next"]) == 0:
+		return ""
+	if inf["can"]:
+		return "Upgrade to level %d" % int(inf["next"])
+	var parts := PackedStringArray()
+	for m in inf["short"]:
+		parts.append("%d %s" % [inf["short"][m], s.crafting.name_of(m).to_lower()])
+	return "Need " + ", ".join(parts)
+
+
+## Pay for and raise the fabricator one level (workshop.gd's upgrade, as the build-mode card does). Returns "" or why not.
+func upgrade_fab() -> String:
+	var s = ship()
+	if s == null:
+		return "no ship"
+	var uid: int = Workshop.fab_uid(s)
+	if uid < 0:
+		_say("No fabricator on this ship", true)
+		return "No fabricator on this ship"
+	var why := Workshop.upgrade(s, uid)
+	if why != "":
+		_say(why, true)
+		Audio.fx(self, "invalid")
+		return why
+	_say("Fabricator upgraded to level %d" % int(s.components.instances[uid]["fab_level"]), false)
+	flash = 0.7
+	Audio.fx(self, "unlock")
+	s.mark_dirty()
+	_ids_key = ""
+	return ""
+
+
+## The Upgrade button, at the foot of the fabricator's box.
+func upgrade_rect() -> Rect2:
+	var r := side_rect()
+	return Rect2(r.position.x + 10.0, r.position.y + FAB_BOX_H - 42.0, r.size.x - 20.0, 32.0)
+
+
 func _draw_fabricator(s, fab: Dictionary) -> void:
 	var r := side_rect()
-	var box := Rect2(r.position, Vector2(r.size.x, FAB_H))
+	var box := Rect2(r.position, Vector2(r.size.x, FAB_BOX_H))
 	_panel(box, ROW_BG)
 	_text("FABRICATOR", box.position + Vector2(10.0, 24.0), 15, AMBER)
+	_text(found_text(), box.position + Vector2(0.0, 24.0), 13, DIM_TEXT, box.size.x - 10.0, HORIZONTAL_ALIGNMENT_RIGHT)
 	var status := "Level %d" % fab["level"]
 	var col := GOOD
 	if int(fab["count"]) == 0:
@@ -963,7 +998,30 @@ func _draw_fabricator(s, fab: Dictionary) -> void:
 	for nm in names:
 		parts.append("%s x%d" % [nm, counts[nm]])
 	draw_multiline_string(ThemeDB.fallback_font, box.position + Vector2(10.0, 102.0),
-		"Modules: " + (", ".join(parts) if not parts.is_empty() else "none counted") + ". To raise the level: build mode (B), click the fabricator.", HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 20.0, 14, 3, TEXT)
+		"Modules: " + (", ".join(parts) if not parts.is_empty() else "none counted"), HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 20.0, 14, 3, TEXT)
+	if int(fab["count"]) == 0:
+		return
+	var inf := fab_upgrade()
+	var y := box.position.y + 150.0
+	draw_line(Vector2(box.position.x + 10.0, y), Vector2(box.end.x - 10.0, y), EDGE_DIM, 1.0)
+	if int(inf["next"]) == 0:
+		_text("Fully upgraded", Vector2(box.position.x + 10.0, y + 30.0), 18, GOOD)
+		return
+	var h := _para(str(inf["text"]), Vector2(box.position.x + 10.0, y + 6.0), box.size.x - 20.0, 14, TEXT)
+	var cx := box.position.x + 10.0
+	var cy := y + 12.0 + h
+	for m in inf["cost"]:
+		var t := str(inf["cost"][m])
+		UiKit.icon(self, str(m), Rect2(cx, cy, 16.0, 16.0))
+		_text(t, Vector2(cx + 19.0, cy + 13.0), 14, BAD.lightened(0.2) if inf["short"].has(m) else TEXT)
+		cx += 19.0 + UiKit.text_width(t, 14) + 12.0
+	var b := upgrade_rect()
+	var ok: bool = inf["can"]
+	UiKit.button(self, b, false, ok and b.has_point(get_local_mouse_position()))
+	_text(upgrade_label(), b.position + Vector2(0.0, 22.0), 15, GOOD if ok else AMBER, b.size.x, HORIZONTAL_ALIGNMENT_CENTER)
+	if flash > 0.0:
+		var a := flash / 0.7
+		draw_rect(box.grow(2.0 + 8.0 * (1.0 - a)), Color(0.55, 1.0, 0.8, a), false, 2.0)
 
 
 ## The smelter's box: its level, speed (manned or not), tools, count and heat.
@@ -1031,7 +1089,7 @@ func _draw_cargo(s) -> void:
 	var r := cargo_rect()
 	_panel(r, ROW_BG)
 	_text("CARGO", r.position + Vector2(10.0, 24.0), 15, AMBER)
-	_text("C/Esc close   ?: help   Tab: next tab   Click: select   Enter / double-click / Queue: queue   Click a job: cancel   Wheel: scroll",
+	_text("C/Esc close   ?: help   Tab: next tab   Click: select   Enter / double-click / Queue: queue   Upgrade button: raise the fabricator   Click a job: cancel",
 		r.position + Vector2(10.0, r.size.y - 10.0), 13, DIM_TEXT)
 	var x := r.position.x + 90.0
 	var y := r.position.y + 24.0
