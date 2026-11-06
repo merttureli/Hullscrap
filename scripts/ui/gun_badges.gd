@@ -42,7 +42,7 @@ static func cfg() -> Dictionary:
 ## How weapon `w` (a CombatSession.weapons() entry: group, pd) is marked: {key ("1", "2", "3", "auto" or "pd"), label, color, mark}.
 static func style(w: Dictionary) -> Dictionary:
 	var g := int(w.get("group", 1))
-	var key := ("pd" if w.get("pd", false) else "auto") if g == 0 else str(g)
+	var key := "drones" if w.get("drones", false) else (("pd" if w.get("pd", false) else "auto") if g == 0 else str(g))
 	var cfg_g: Dictionary = cfg().get("groups", {}).get(key, {"label": "?", "color": "#ffffff", "mark": "dot"})
 	return {"key": key, "label": str(cfg_g["label"]), "color": Color(str(cfg_g["color"])), "mark": str(cfg_g["mark"])}
 

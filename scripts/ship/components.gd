@@ -137,7 +137,7 @@ func group_choice(uid: int) -> int:
 
 ## Choose gun `uid`'s fire group (0-3; -1 goes back to the default).
 func set_group_choice(uid: int, group: int) -> void:
-	if instances.has(uid) and group in [-1, 0, 1, 2, 3]:
+	if instances.has(uid) and group in [-1, 0, 1, 2, 3] and str(def(str(instances[uid]["id"])).get("family", "")) != "drone_bay":  # (a drone bay is never in a fire group: only its key launches it)
 		if group < 0:
 			instances[uid].erase("group")
 		else:
@@ -335,6 +335,8 @@ func to_dict() -> Dictionary:
 		if int(i.get("n", 0)) > 0 or str(i.get("ammo", "")) != "":  # an ammo rack's contents
 			rec["ammo"] = str(i.get("ammo", ""))
 			rec["n"] = int(i.get("n", 0))
+		if str(i.get("kit", "")) != "":  # the drone kit loaded in a bay (drones.gd)
+			rec["kit"] = str(i["kit"])
 		if i.has("fab_level"):  # the fabricator's level
 			rec["fab_level"] = int(i["fab_level"])
 		if int(i.get("loaded", 0)) > 0:  # what a gun has taken off a belt
@@ -492,6 +494,8 @@ func _load_state(inst: Dictionary, saved: Dictionary) -> void:
 		inst["status"] = str(saved["status"])
 	if not inst["out_cells"].is_empty() and (saved.get("out_hp") is float or saved.get("out_hp") is int):
 		inst["out_hp"] = clampi(int(saved["out_hp"]), 0, outside_hp_max(inst["id"]))
+	if saved.get("kit") is String and str(saved["kit"]) != "":
+		inst["kit"] = str(saved["kit"])
 	if saved.get("n") is float or saved.get("n") is int:
 		inst["n"] = maxi(0, int(saved["n"]))
 		inst["ammo"] = str(saved.get("ammo", ""))

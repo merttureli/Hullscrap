@@ -262,6 +262,7 @@ Weapons and engines are **two linked halves**, not FTL's all-outside nor a box i
     - Wrecking the inside half wrecks the whole mount; the outside half breaks off.
   - **The link cut**: if any link cell breaches, the mount goes offline (no feed, power or control) until crew patch that breach. The room vents as usual.
   - The outside half is part of the hitbox. Turrets stick out, so **rams hit guns first**.
+- **The drone bay (docs/DRONES.md 2)** is a hull mount of family `drone_bay`: inside 3x3, outside 3x1 (a low hatch), `bay: {max_tier, rearm_s, crew_mult}` in its data, the loaded kit saved per bay as `kit`. Its art (`art/components/drone_bay_mk*`) draws an empty cradle; the game draws the loaded drone on it.
 - **Wrecked components (owner, 2026-10-30)**: "disable first, destroy when exposed". This applies to every interior component, not just mounts.
   - A wrecked component is **gone**: removed from the ship, with a wreck decal on its cells.
   - A crew job **`clear_wreck`** (priority 30, 4 s) clears the cells and recovers **half its recipe materials** (rounded down) into cargo. A unique (found) component has no recipe, so wrecking it loses it for good.

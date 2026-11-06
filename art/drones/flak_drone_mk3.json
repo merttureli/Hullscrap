@@ -1,0 +1,84 @@
+{
+ "frame": [
+  25,
+  25
+ ],
+ "pivot": [
+  12,
+  12
+ ],
+ "anims": {
+  "idle": [
+   0,
+   2,
+   3
+  ],
+  "fire": [
+   2,
+   2,
+   12
+  ],
+  "hit": [
+   4,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "flak_drone_mk3_glow.png",
+  "frame": [
+   45,
+   45
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "idle": [
+    0,
+    2,
+    3
+   ],
+   "fire": [
+    2,
+    2,
+    12
+   ],
+   "hit": [
+    4,
+    1,
+    0
+   ]
+  }
+ },
+ "rot": {
+  "image": "flak_drone_mk3_rot.png",
+  "frame": [
+   53,
+   53
+  ],
+  "count": 32,
+  "frames": [
+   "idle0",
+   "idle1",
+   "fire0",
+   "fire1",
+   "hit0"
+  ],
+  "pivot": [
+   26,
+   26
+  ]
+ },
+ "anchors": {
+  "muzzle": [
+   10,
+   3
+  ]
+ },
+ "kind": "combat",
+ "family": "flak",
+ "tier": 3,
+ "notes": "A combat drone facing UP (nose = the way it flies and shoots), 25x25 px, pivot at its middle. Frames: idle 0-1, fire 0-1, hit (a white flash). <name>_rot.png holds 32 pre-turned copies of every frame (column k = turned k*11 degrees clockwise, row = frame, outlined after turning), so a turned drone does not jag at 2x; the glow strip is turned by the engine (it is soft)."
+}

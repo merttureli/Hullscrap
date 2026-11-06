@@ -42,6 +42,38 @@ static func _lower_tier(id: String) -> RefCounted:
 	return null
 
 
+## A drone (art/drones/<name>.png, docs/DRONES.md section 8): idle 0-1, fire 0-1, hit, its glow strip, and `meta["rot"]` for the pre-turned copies.
+static func drone(name: String) -> RefCounted:
+	return _sheet("drones", name)
+
+
+## The pre-turned copies of drone `name`: a sheet with one frame per heading (column = k * 360 / count degrees clockwise) and one row per frame of the drone sheet, or null.
+static func drone_rot(name: String) -> RefCounted:
+	var key := "%s/drones/%s_rot" % [root, name]
+	if not _cache.has(key):
+		var d = drone(name)
+		var r = d.meta.get("rot") if d != null else null
+		var img := load_image("%s/drones/%s" % [root, str(r.get("image", ""))]) if r is Dictionary else null
+		_cache[key] = SpriteSheet.from_dict({"frame": r["frame"], "pivot": r["pivot"]}, img) if img != null else null
+	return _cache[key]
+
+
+## The layer `part` ("base": the hoop and dome, never turned; "barrel_rot": the twin barrel, 32 headings) of defence drone `name`, or null.
+static func drone_part(name: String, part: String) -> RefCounted:
+	var key := "%s/drones/%s_%s" % [root, name, part]
+	if not _cache.has(key):
+		var d = drone(name)
+		var img := load_image("%s/drones/%s_%s.png" % [root, name, part])
+		var fr = d.meta["rot"]["frame"] if d != null else null
+		_cache[key] = SpriteSheet.from_dict({"frame": fr if part == "barrel_rot" else d.meta["frame"], "pivot": d.meta["pivot"]}, img) if img != null and d != null else null
+	return _cache[key]
+
+
+## A thruster trail puff of `line` (art/drones/trail_<line>.png): 4 frames, the age.
+static func trail(line: String) -> RefCounted:
+	return _sheet("drones", "trail_" + line)
+
+
 ## A hand-held item: art/items/<id>.png.
 static func item(id: String) -> RefCounted:
 	return _sheet("items", id)

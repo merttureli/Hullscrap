@@ -7,6 +7,7 @@ extends RefCounted
 ## script only applies it: apply_ship when the ship is chosen (ship_picker.gd), apply_campaign when the campaign is made
 ## (map_view.gd). No nodes, no drawing, no randomness.
 
+const Drones = preload("res://scripts/combat/drones.gd")
 const Unlocks = preload("res://scripts/space/unlocks.gd")
 const Content = preload("res://scripts/data/content.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
@@ -83,6 +84,7 @@ static func blueprints(profile) -> Array[String]:
 static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 	var lines: Array[String] = []
 	fuel_up(ship)
+	drone_stock(ship)
 	var pick := clean(choice, profile)
 	if pick["species"] != "":
 		var p := Unlocks.payload_of(str(pick["species"]))
@@ -98,6 +100,18 @@ static func apply_ship(ship, choice: Dictionary, profile) -> Array[String]:
 	for l in lines:
 		ship.log_event(l)
 	return lines
+
+
+## A design with a drone bay starts with 6 drone parts, and a Pulse Drone Mk I to fly if it holds no kit at all (docs/DRONES.md section 2).
+static func drone_stock(ship) -> void:
+	var has_bay := false
+	for inst in ship.components.instances.values():
+		has_bay = has_bay or str(ship.components.def(inst["id"]).get("family", "")) == "drone_bay"
+	if not has_bay:
+		return
+	ship.inventory.add("drone_part", maxi(0, 6 - ship.inventory.count("drone_part")))
+	if not Drones.kit_ids().any(func(id): return ship.inventory.count(id) > 0):
+		ship.inventory.add("pulse_drone_mk1", 1)
 
 
 ## Top the cargo's fuel up to fuel.start of data/drift.json (a design with more keeps it). Fuel is scarce (stations sell a few units, most

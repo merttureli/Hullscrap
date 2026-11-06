@@ -360,7 +360,7 @@
 			"wash": "#a8603a", "wash_mix": 0.55,
 			"colors": {"crate": ["#7a4a2c", "#2c1a0e"], "locker": ["#7a4a36", "#2a160e"], "cabinet": ["#6e5446", "#2a1c14"], "pallet": ["#5e4026", "#22160c"], "terminal": ["#3a3028", "#14100c"], "heap": ["#6a4a30", "#241608"]},
 			"rooms": {"storage": [{"prop": "heap", "n": [1, 2]}], "cargo": [{"prop": "heap", "n": [1, 1]}], "engineering": [{"prop": "heap", "n": [0, 1]}]},
-			"loot": {"tilt": {"scrap": 1.9, "copper": 1.3, "polymer": 1.2}},
+			"loot": {"tilt": {"scrap": 1.9, "copper": 1.3, "polymer": 1.2, "drone_part": 2.2}},
 			"foes": {"mix": {"scavenger": 1.9, "pirate": 0.7, "sentry": 0.5}, "count": 1.1},
 			"npc": {"count": 1.0, "roles": {"scavenger_talker": 2.0, "hermit": 1.4, "trader": 0.8}},
 			"species": {"human": 10, "gauntling": 3, "hullkin": 2, "rattler": 2, "corvin": 2},
@@ -586,6 +586,7 @@
 	},
 	"tables": {
 		"storage": [
+			{"weight": 4, "item": "drone_part", "count": [1, 3]},
 			{"weight": 0.5, "item": "rigger_harness", "count": [1, 1]},
 			{"weight": 0.3, "item": "firefighter_coat", "count": [1, 1]},
 			{"weight": 0.2, "item": "jump_pack", "count": [1, 1]},
@@ -604,6 +605,7 @@
 			{"weight": 9, "item": "hand_ammo", "count": [6, 14]}
 		],
 		"cargo": [
+			{"weight": 4, "item": "drone_part", "count": [1, 3]},
 			{"weight": 0.4, "item": "rigger_harness", "count": [1, 1]},
 			{"weight": 0.25, "item": "jump_pack", "count": [1, 1]},
 			{"weight": 0.06, "item": "marine_plate", "count": [1, 1]},
@@ -623,6 +625,7 @@
 			{"weight": 9, "item": "hand_ammo", "count": [6, 16]}, {"weight": 2, "item": "rifle", "count": [1, 1]}
 		],
 		"engineering": [
+			{"weight": 4, "item": "drone_part", "count": [1, 3]},
 			{"weight": 0.7, "item": "rigger_harness", "count": [1, 1]},
 			{"weight": 0.6, "item": "firefighter_coat", "count": [1, 1]},
 			{"weight": 0.3, "item": "jump_pack", "count": [1, 1]},

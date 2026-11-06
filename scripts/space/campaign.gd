@@ -1035,11 +1035,25 @@ func loot(enemy, ship, captured := false) -> Array:
 		credits = roundi(credits * 1.5)
 	ship.inventory.add("credits", credits)
 	var lines := ["+%d credits" % credits]
+	var parts := _drone_parts(enemy)  # the parts its bays had left, and one for a Kett or Gauntling wreck (docs/DRONES.md section 2)
+	if parts > 0:
+		ship.inventory.add("drone_part", parts)
+		lines.append("+%d drone part%s" % [parts, "" if parts == 1 else "s"])
 	if captured:
 		var scrap := Salvage.strip_scrap(enemy, self)
 		ship.inventory.add("scrap", scrap)
 		lines.append("+%d scrap (stripped)" % scrap)
 	return lines
+
+
+## The drone parts a beaten ship gives: what its holds had left, and one more from a Kett or Gauntling ship, whose regions have them in plenty.
+func _drone_parts(enemy) -> int:
+	if typeof(enemy) != TYPE_OBJECT or enemy == null:  # (a test may name the enemy by a string)
+		return 0
+	var n: int = enemy.inventory.count("drone_part")
+	if str(enemy.get_meta("shipgen", {}).get("faction", "")) in ["kett", "gauntling"]:
+		n += 1
+	return n
 
 
 ## The salvage event that follows a won fight (a wreck_field one), or {}.

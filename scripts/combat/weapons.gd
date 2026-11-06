@@ -27,6 +27,7 @@ const Content = preload("res://scripts/data/content.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
+const Drones = preload("res://scripts/combat/drones.gd")
 
 const PATH := "res://data/weapons.json"
 const BASE := {"damage_type": "energy", "damage": 1.0, "cooldown": 1.0, "range": 900.0, "arc": 360.0,
@@ -363,7 +364,7 @@ func interceptable(p: Dictionary) -> bool:
 func missile_target(arena, idx: int, m: Dictionary, w: Dictionary):
 	var spec = Effects.of(w).get("intercept")
 	if not spec is Dictionary:
-		return null
+		return Drones.turret_target(arena, idx, m, w, _uid_of(arena, idx, m), false)  # a gun answers some drones (drones.gd)
 	var from: Vector2 = arena.local_to_world(idx, m["pos"])
 	var best = null
 	var best_d := float(spec["range"]) * float(spec["range"])
@@ -374,7 +375,18 @@ func missile_target(arena, idx: int, m: Dictionary, w: Dictionary):
 		if d <= best_d:
 			best_d = d
 			best = p
+	var dr = Drones.turret_target(arena, idx, m, w, _uid_of(arena, idx, m), true)  # point defence counts drones as incoming
+	if dr != null and float(dr["d2"]) <= best_d:
+		return dr
 	return best
+
+
+## The uid of mount `m` of ship `idx` (a drone pick rotates by it).
+func _uid_of(arena, idx: int, m: Dictionary) -> int:
+	for u in arena.ships[idx].mounts:
+		if arena.ships[idx].mounts[u] == m:
+			return int(u)
+	return 0
 
 
 ## The world point turret mount `m` of ship `idx` aims at to hit the missile `mis`, with perfect lead for the shot's speed.
@@ -387,10 +399,11 @@ func missile_point(arena, idx: int, m: Dictionary, w: Dictionary, mis: Dictionar
 ## its accuracy (no evasion: a shell does not dodge). Logs an `intercept` effect event ({weapon, hit}, at the missile).
 func _intercept(arena, idx: int, w: Dictionary, origin: Vector2, mis: Dictionary) -> void:
 	var id := str(w["id"])
-	var hit: bool = arena.rng.randf() < float(w["accuracy"])
+	var drone: bool = mis.has("drone")  # a drone loses hp instead of being destroyed outright (drones.gd)
+	var hit: bool = Drones.shot_at(arena, idx, w, mis, Effects.of(w).get("intercept") is Dictionary) if drone else arena.rng.randf() < float(w["accuracy"])
 	arena.log_event("beam", idx, Vector2i(-1, -1), {"weapon": id, "from": origin, "to": mis["pos"], "dtype": w["damage_type"], "shield": false, "bounce": false})
 	arena.log_event("effect", idx, Vector2i(-1, -1), {"kind": "intercept", "weapon": id, "hit": hit, "pos": mis["pos"]})
-	if hit:
+	if hit and not drone:
 		arena.projectiles.erase(mis)
 
 

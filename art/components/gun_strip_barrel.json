@@ -1,0 +1,97 @@
+{
+ "frame": [
+  11,
+  26
+ ],
+ "aim": "fixed",
+ "anims": {
+  "idle": [
+   0,
+   1,
+   0
+  ],
+  "fire": [
+   1,
+   3,
+   14
+  ],
+  "damaged": [
+   4,
+   2,
+   4
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ],
+  "off": [
+   7,
+   1,
+   0
+  ]
+ },
+ "anchors": {
+  "pivot": [
+   5,
+   14
+  ],
+  "muzzle": [
+   5,
+   1
+  ]
+ },
+ "glow": {
+  "image": "gun_strip_barrel_glow.png",
+  "frame": [
+   43,
+   58
+  ],
+  "offset": [
+   -16,
+   -16
+  ],
+  "anims": {
+   "fire": [
+    1,
+    3,
+    14
+   ],
+   "damaged": [
+    4,
+    2,
+    4
+   ],
+   "idle": [
+    0,
+    1,
+    0
+   ]
+  }
+ },
+ "notes": "Rotating barrel, drawn pointing UP. Turn it about anchors.pivot placed on each of pivots_on_base (staggered by stagger_s) of gun_strip_out. fire: 3 frames, recoil 2/1/0 px with the family muzzle flash on the glow layer; off: lights dead.",
+ "pivots_on_base": [
+  [
+   16,
+   6
+  ],
+  [
+   40,
+   6
+  ],
+  [
+   64,
+   6
+  ],
+  [
+   88,
+   6
+  ],
+  [
+   112,
+   6
+  ]
+ ],
+ "stagger_s": 0.07,
+ "gimbal_deg": 20
+}

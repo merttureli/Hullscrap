@@ -11,6 +11,7 @@ extends RefCounted
 const Damage = preload("res://scripts/combat/damage.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
+const Drones = preload("res://scripts/combat/drones.gd")
 
 const MAX_BOUNCES := 2
 const LASER_BOUNCES := 1
@@ -109,6 +110,12 @@ static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2, ou
 		var hit := _contact(arena, i, w, p0, p1, skip)
 		if not hit.is_empty() and (best.is_empty() or hit["t"] < best["t"]):
 			best = hit
+	var dh := Drones.contact(arena, owner, p0, p1) if not own_target else {}  # a drone the line crosses before it reaches a ship
+	if not dh.is_empty() and (best.is_empty() or dh["t"] < best["t"]):
+		out["end"] = p0.lerp(p1, dh["t"])
+		out["shield"] = false
+		Drones.hit_by_shot(arena, dh["drone"], w, owner)
+		return true
 	out["end"] = p1 if best.is_empty() else p0.lerp(p1, best["t"])
 	out["shield"] = not best.is_empty() and best["shield"]
 	if best.is_empty():

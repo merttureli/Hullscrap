@@ -1,0 +1,169 @@
+{
+ "start_known": [
+  "drone_bay_mk1",
+  "pulse_drone_mk1"
+ ],
+ "recipes": [
+  {
+   "id": "drone_bay_mk1",
+   "output": {
+    "item": "drone_bay_mk1",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 34,
+    "copper": 12
+   },
+   "fab_level": 1,
+   "tools": [],
+   "time": 24,
+   "category": "system"
+  },
+  {
+   "id": "drone_bay_mk2",
+   "output": {
+    "item": "drone_bay_mk2",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 40,
+    "copper": 16,
+    "titanium": 6
+   },
+   "fab_level": 2,
+   "tools": [],
+   "time": 32,
+   "category": "system"
+  },
+  {
+   "id": "drone_bay_mk3",
+   "output": {
+    "item": "drone_bay_mk3",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 44,
+    "copper": 18,
+    "titanium": 10,
+    "silicon": 6
+   },
+   "fab_level": 3,
+   "tools": [],
+   "time": 44,
+   "category": "system"
+  },
+  {
+   "id": "pulse_drone_mk1",
+   "output": {
+    "item": "pulse_drone_mk1",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 14,
+    "copper": 6
+   },
+   "fab_level": 1,
+   "tools": [],
+   "time": 12,
+   "category": "gear"
+  },
+  {
+   "id": "laser_drone_mk2",
+   "output": {
+    "item": "laser_drone_mk2",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 16,
+    "copper": 8,
+    "silicon": 3
+   },
+   "fab_level": 2,
+   "tools": [],
+   "time": 18,
+   "category": "gear"
+  },
+  {
+   "id": "ion_drone_mk2",
+   "output": {
+    "item": "ion_drone_mk2",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 16,
+    "copper": 8,
+    "silicon": 3,
+    "crystal": 1
+   },
+   "fab_level": 2,
+   "tools": [],
+   "time": 18,
+   "category": "gear"
+  },
+  {
+   "id": "beam_drone_mk3",
+   "output": {
+    "item": "beam_drone_mk3",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 20,
+    "copper": 10,
+    "titanium": 6,
+    "crystal": 2
+   },
+   "fab_level": 3,
+   "tools": [],
+   "time": 28,
+   "category": "gear"
+  },
+  {
+   "id": "flak_drone_mk3",
+   "output": {
+    "item": "flak_drone_mk3",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 20,
+    "copper": 10,
+    "titanium": 6,
+    "silicon": 4
+   },
+   "fab_level": 3,
+   "tools": [],
+   "time": 28,
+   "category": "gear"
+  },
+  {
+   "id": "defence_drone_mk1",
+   "output": {
+    "item": "defence_drone_mk1",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 14,
+    "copper": 8
+   },
+   "fab_level": 1,
+   "tools": [],
+   "time": 12,
+   "category": "gear"
+  },
+  {
+   "id": "defence_drone_mk2",
+   "output": {
+    "item": "defence_drone_mk2",
+    "count": 1
+   },
+   "materials": {
+    "scrap": 16,
+    "copper": 10,
+    "silicon": 3
+   },
+   "fab_level": 2,
+   "tools": [],
+   "time": 18,
+   "category": "gear"
+  }
+ ]
+}

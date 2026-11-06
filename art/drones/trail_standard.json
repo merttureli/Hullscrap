@@ -1,0 +1,36 @@
+{
+ "frame": [
+  5,
+  5
+ ],
+ "pivot": [
+  2,
+  2
+ ],
+ "anims": {
+  "puff": [
+   0,
+   4,
+   0
+  ]
+ },
+ "glow": {
+  "image": "trail_standard_glow.png",
+  "frame": [
+   13,
+   13
+  ],
+  "offset": [
+   -4,
+   -4
+  ],
+  "anims": {
+   "puff": [
+    0,
+    4,
+    0
+   ]
+  }
+ },
+ "notes": "A thruster puff of the standard line: 4 frames (a hot core, the body colour, its fade). One puff every few px behind a nozzle; frame = age."
+}

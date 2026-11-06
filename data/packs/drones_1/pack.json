@@ -1,0 +1,9 @@
+{
+ "id": "drones_1",
+ "name": "Drones wave 1",
+ "version": "1.0",
+ "requires": [
+  "engines_1"
+ ],
+ "notes": "The drone bay and the combat and defence drones (docs/DRONES.md sections 2, 3 and 7): three bays (Mk I-III in the scrap, standard and neon lines), seven drone kits (items of kind `drone`, their stats in the item's `drone` entry), the drone part material and the recipes. Art: art/components/drone_bay_mk*, art/drones/."
+}

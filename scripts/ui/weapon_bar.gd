@@ -15,6 +15,7 @@ extends Control
 const Describe = preload("res://scripts/ui/describe.gd")
 const GunBadges = preload("res://scripts/ui/gun_badges.gd")
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
+const Art = preload("res://scripts/view/art.gd")
 
 const SLOT := Vector2(92.0, 104.0)  ## a weapon slot: key, picture, name, state
 const HEAD := 20.0  ## the strip above a fire group with its mouse icon
@@ -92,7 +93,19 @@ static func sections(list: Array, slot: Vector2, y: float, gap := GAP) -> Dictio
 ## The weapons laid out for the bar (see sections()), under the ability row.
 func layout() -> Dictionary:
 	var list: Array = session.weapons() if session != null else []
-	return sections(list, SLOT, (ASLOT.y + GAP if session != null and not session.ability_slots().is_empty() else 0.0) + HEAD)
+	var y := (ASLOT.y + GAP if session != null and not session.ability_slots().is_empty() else 0.0) + HEAD
+	var lay := sections(list, SLOT, y)
+	var bays: Array = session.bays() if session != null else []  # the drone bays: no fire group, no drop zone, their own DRONES header after the groups (keys follow the guns')
+	if not bays.is_empty():
+		var x0: float = float(lay["width"]) + GROUP_GAP
+		var bs := []
+		for i in bays.size():
+			bs.append({"rect": Rect2(Vector2(x0 + i * (SLOT.x + GAP), y), SLOT), "bay": bays[i], "number": list.size() + i + 1})
+		var x1: float = x0 + bays.size() * (SLOT.x + GAP) - GAP
+		lay["bay_slots"] = bs
+		lay["bay_head"] = Rect2(Vector2(x0, y - HEAD + 2.0), Vector2(x1 - x0, HEAD - 4.0))
+		lay["width"] = x1
+	return lay
 
 
 ## Where the layout's left edge sits in the bar (it is centred).
@@ -242,6 +255,11 @@ func _draw() -> void:
 	var over: int = group_at(drag["at"]) if not drag.is_empty() and drag["moved"] else -1
 	for h in lay["heads"]:
 		draw_head(self, h["rect"].position + base, h["rect"].size, h["group"], over == h["group"])
+	if lay.has("bay_head"):
+		var bh: Rect2 = lay["bay_head"]
+		draw_head(self, bh.position + base, bh.size, 4)
+	for b in lay.get("bay_slots", []):
+		_bay_slot(b["rect"].position + base, b["number"], b["bay"])
 	for z in lay["zones"]:
 		var empty := true
 		for sl in lay["slots"]:
@@ -270,15 +288,72 @@ func _draw() -> void:
 		_slot(drag["at"] - drag["grab"], held_slot["number"], held_slot["w"], target, true)
 
 
+## One drone bay slot, in the guns' picture style: its key in a ring (the re-arm counting down, or the drone's hp while it is out), the loaded kit's picture, the
+## kit's name, its state, and what a launch costs in parts (red when the hold is short).
+func _bay_slot(at: Vector2, number: int, b: Dictionary) -> void:
+	var st: Dictionary = session.bay_state(b["uid"])
+	var status: String = st["status"]
+	var out: bool = st["out"]
+	var col: Color = READY if status == "ready" else (COOLING if status == "re-arming" or out else (GREY if status == "no kit" else BAD))
+	var gcol: Color = GunBadges.style({"drones": true})["color"]
+	var r := Rect2(at, SLOT)
+	draw_rect(r, BG)
+	draw_rect(Rect2(at + Vector2(0.0, 2.0), Vector2(SLOT.x, 3.0)), Color(gcol, 0.9))
+	draw_rect(r, Color(gcol, 0.75), false, 2.0)
+	var c := at + Vector2(17.0, 17.0)
+	draw_circle(c, 13.0, Color(0, 0, 0, 0.7))
+	draw_arc(c, 12.0, 0.0, TAU, 24, Color(1, 1, 1, 0.14), 3.0, true)
+	var done := 1.0
+	if status == "re-arming":
+		done = 1.0 - clampf(st["rearm_left"] / maxf(st["rearm"], 0.01), 0.0, 1.0)
+	elif out:
+		done = clampf(st["hp"] / maxf(st["max_hp"], 1.0), 0.0, 1.0)
+	draw_arc(c, 12.0, -PI / 2.0, -PI / 2.0 + TAU * done, 24, Color(col, 0.95), 3.0, true)
+	if number <= 9:
+		_text(str(number), c + Vector2(-4.0, 6.0), 16, TEXT)
+	var pic := Rect2(at + Vector2(6.0, 10.0), Vector2(SLOT.x - 12.0, 50.0))
+	var sheet = Art.drone(str(st["art"])) if st["art"] != "" else null
+	if sheet != null:
+		var k := 1.9
+		var f := int(Time.get_ticks_msec() / 330) % 2
+		var dim := Color(1, 1, 1, 0.4 if status in ["no parts", "unpowered", "disabled", "offline"] and not out else 1.0)
+		draw_texture_rect_region(sheet.texture, Rect2(pic.get_center() - Vector2(sheet.frame) * k / 2.0 + Vector2(0.0, 4.0), Vector2(sheet.frame) * k), sheet.region(f), dim)
+	if out:  # the hp pips over the picture
+		for i in int(st["max_hp"]):
+			draw_rect(Rect2(at + Vector2(SLOT.x - 12.0 - (int(st["max_hp"]) - i) * 5.0, 62.0), Vector2(4.0, 5.0)), Color(READY if i < ceili(st["hp"] - 1e-6) else GREY, 0.9))
+	var shown := fit_name(str(st["kit_name"]).replace(" Drone", "") if st["kit_name"] != "" else "Empty bay", SLOT.x - 8.0)  # (the header already says DRONES)
+	_text(shown["text"], at + Vector2(5.0, 76.0), mini(shown["size"], 11), TEXT, SLOT.x - 8.0)
+	var label := "READY"
+	match status:
+		"ready":
+			label = "READY"
+		"re-arming":
+			label = "RE-ARM %.1f" % st["rearm_left"]
+		"drone out":
+			label = "OUT %d/%d" % [ceili(st["hp"] - 1e-6), int(st["max_hp"])]
+		"no parts":
+			label = "NO PARTS"
+		"no kit":
+			label = "NO KIT"
+		_:
+			label = STATUS_TEXT.get(status, status.to_upper())
+	_text(label, at + Vector2(5.0, 92.0), 11, col, SLOT.x - 40.0)
+	if st["cost"] > 0:
+		_text("%dp" % st["cost"], at + Vector2(SLOT.x - 24.0, 92.0), 11, TEXT if st["parts"] >= st["cost"] else BAD)
+	var powered: bool = status not in ["unpowered", "disabled", "overheated", "malfunction", "wrecked", "offline"]
+	draw_circle(at + Vector2(SLOT.x - 8.0, 17.0), 3.5, READY if powered else BAD)
+
+
 ## A section's header at `at`: its colour band, icon and name. `lit` brightens it (a drag is over the section).
 static func draw_head(c: CanvasItem, at: Vector2, sz: Vector2, group: int, lit := false) -> void:
-	var sty := GunBadges.style({"group": group})
+	var sty := GunBadges.style({"drones": true} if group == 4 else {"group": group})
 	var col: Color = sty["color"]
 	var r := Rect2(at, sz)
 	c.draw_rect(r, Color(col, 0.34 if lit else 0.18))
 	c.draw_rect(Rect2(r.position + Vector2(0.0, r.size.y - 2.0), Vector2(r.size.x, 2.0)), col)
-	GunBadges.draw_mouse(c, Rect2(r.position + Vector2(3.0, 1.0), Vector2(10.0, r.size.y - 4.0)), group, col)
-	c.draw_string(ThemeDB.fallback_font, r.position + Vector2(17.0, r.size.y - 5.0), str(sty["label"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, col)
+	if group != 4:  # (the drone header has no mouse icon: a bay launches by its key only)
+		GunBadges.draw_mouse(c, Rect2(r.position + Vector2(3.0, 1.0), Vector2(10.0, r.size.y - 4.0)), group, col)
+	c.draw_string(ThemeDB.fallback_font, r.position + Vector2(17.0 if group != 4 else 6.0, r.size.y - 5.0), str(sty["label"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, col)
 
 
 func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2, lifted := false) -> void:

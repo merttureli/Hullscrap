@@ -54,6 +54,12 @@
         "color": "#ff6fb5",
         "mark": "diamond"
       },
+      "drones": {
+        "label": "DRONES",
+        "name": "Drone bays (a press launches)",
+        "color": "#d7e86a",
+        "mark": "dot"
+      },
       "auto": {
         "label": "AUTO",
         "name": "Fires by itself (T holds)",
