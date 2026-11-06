@@ -1,0 +1,75 @@
+{
+ "frame": [
+  64,
+  36
+ ],
+ "cells": [
+  4,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   3,
+   8
+  ],
+  "off": [
+   3,
+   1,
+   0
+  ],
+  "damaged": [
+   4,
+   2,
+   8
+  ],
+  "disabled": [
+   6,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "afterburner_glow.png",
+  "frame": [
+   84,
+   50
+  ],
+  "offset": [
+   -10,
+   -6
+  ],
+  "anims": {
+   "on": [
+    0,
+    3,
+    8
+   ],
+   "damaged": [
+    3,
+    2,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "power_coupling": [
+   51,
+   29
+  ],
+  "repair_hatch": [
+   51,
+   18
+  ]
+ },
+ "orientation": "inside half: rotation 0, outward is UP: the core sits on the floor with its top 4px overhanging the inner wall face (see offset); cable plugs into the power coupling",
+ "offset": [
+  0,
+  -4
+ ],
+ "mount": {
+  "part": "inside",
+  "faces": "rotation 0: outward is up"
+ },
+ "notes": "Concord Afterburner (engine, standard, tier 2, unique), a hull mount (outward is up). OUTSIDE: one big reheat can on the Concord nacelle plate, its tail heat-tinted in straw and brown bands, an amber Mk2 collar ring, a ring of fuel injectors under the mouth and an iris of petals round it; the exhaust plume (glow) is long, with shock diamonds. INSIDE: the air intake that burns the engine room's air: a big louvred fan cowl whose blades turn, with the room air drawn toward it (pale dashes); the manned console (a throttle lever and a screen), a warning plate with a helmet (man it in a suit), a fuel tank on its feed line, the repair hatch and the power coupling. Damaged: two petals blown off the iris and the can cracked and sputtering; inside, a fan blade gone (the fan wobbles), the tank weeps fuel, the console red. Disabled: the can bent over and scorched, the iris jammed; inside the fan dead with its cowl split, the tank split, the console dark. THIS FILE: the INSIDE half (core, power coupling, repair hatch; its top 4px overhang the inner wall face as a flange)."
+}

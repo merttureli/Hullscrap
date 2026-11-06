@@ -1,0 +1,56 @@
+{
+ "frame": [
+  48,
+  48
+ ],
+ "cells": [
+  3,
+  3
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   5
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   5
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "smelter_scrap_mk1_glow.png",
+  "frame": [
+   68,
+   68
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    5
+   ],
+   "damaged": [
+    4,
+    2,
+    5
+   ]
+  }
+ },
+ "notes": "Scrapper Clans \"Slag Pot\" (scrap, 3x3, manned): a riveted iron cauldron on four stubby legs, no frame round it. Scrap goes in the top: a rusty hopper top-right tips into it, and a half-melted hazard-striped hull plate and a pipe end are still sinking in the slag. A welded rust patch on its side, a hand wheel on the left that tips it (the operator's post) and a cracked gauge with an amber lamp; a pour lip bottom-right dribbles into a rusty ingot tray with hazard tape. The on loop: the crust drifts, bubbles pop in turn, the plate bobs, a drop falls from the lip, the fresh ingot dims, and the fire under it flickers on the floor (glow). Damaged: the side has split above a leg and molten weeps onto the floor, the patch plate hangs by one bolt, the gauge needle is pinned in the red. Disabled: a cold grey cake with the plate stuck in it, the back-left leg snapped and its foot lying loose, the patch fallen off onto the floor, the tray kicked askew."
+}

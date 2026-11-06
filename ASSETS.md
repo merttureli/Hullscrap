@@ -4,6 +4,12 @@ Source and licence of every art and audio file in the repo.
 
 | File | Source | Licence |
 |---|---|---|
+| `art/components/afterburner.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/afterburner.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/afterburner_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/afterburner_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/afterburner_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/afterburner_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/ammo_rack.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/ammo_rack.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/ammo_rack_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -73,6 +79,9 @@ Source and licence of every art and audio file in the repo.
 | `art/components/basalt_vacuum_forge.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/basalt_vacuum_forge.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/basalt_vacuum_forge_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/battering_bow.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/battering_bow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/battering_bow_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/beam_light.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/beam_light.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/beam_light_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -504,6 +513,9 @@ Source and licence of every art and audio file in the repo.
 | `art/components/human_volley_rack_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/human_volley_rack_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/human_volley_rack_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/inertial_dampener.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/inertial_dampener.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/inertial_dampener_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/intake_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/intake_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/intake_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -1011,6 +1023,9 @@ Source and licence of every art and audio file in the repo.
 | `art/components/reactor_neon_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/reactor_neon_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/reactor_neon_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_scrap_kettle.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_scrap_kettle.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/reactor_scrap_kettle_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/reactor_scrap_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/reactor_scrap_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/reactor_scrap_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -1092,6 +1107,21 @@ Source and licence of every art and audio file in the repo.
 | `art/components/slug_spinal_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/slug_spinal_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/slug_spinal_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk3.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk3.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_mk3_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_neon_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_neon_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_neon_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_scrap_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_scrap_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/smelter_scrap_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sovereign_turret.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sovereign_turret.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sovereign_turret_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |

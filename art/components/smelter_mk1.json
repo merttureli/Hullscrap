@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  48
+ ],
+ "cells": [
+  4,
+  3
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "smelter_mk1_glow.png",
+  "frame": [
+   84,
+   68
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Concord Smelter Mk1 (standard, 4x3, manned): one big tilting crucible in a two-turn copper induction coil, hung on two trunnion pins in a dark well; a feed hopper top-left with scrap in it and a chute over the lip; the operator console under it (a temperature bar, green and amber lamps) and the power coupling; an induction supply (two capacitor drums on copper bus bars) right of the crucible; the spout pours down into the casting line along the bottom. The on loop is the working loop: the slag crust drifts round the stirred yellow middle, the feed settles, and the moulds slide right one pitch per loop (liquid under the spout, then red, dull and grey steel). Damaged: the outer coil turn has burnt through and arcs at the break, the crucible lip is cracked and weeps a molten dribble into the well, the console bar jumps to red. Disabled: the melt has set into a cracked grey cake, the coil is snapped and blackened, the chute hangs off, the line is cold and still."
+}

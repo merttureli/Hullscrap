@@ -1,0 +1,56 @@
+{
+ "frame": [
+  32,
+  32
+ ],
+ "cells": [
+  2,
+  2
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "inertial_dampener_glow.png",
+  "frame": [
+   48,
+   48
+  ],
+  "offset": [
+   -8,
+   -8
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Concord Inertial Dampener (utility, standard, 2x2): a heavy round mass hung in a clean square frame on four spring dampers (a piston and a coil each, bolted to the corners); the mass carries a ring of blue field lamps and the field ring round it pulses out (glow), the springs breathe a pixel in and out. Registry stencil, a green power lamp. Damaged: the lower-right damper has snapped and the mass has sagged a pixel toward it, the field ring stutters. Disabled: two dampers broken, the mass down on the frame with a cracked hub, the field dark."
+}

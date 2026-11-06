@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  48
+ ],
+ "cells": [
+  4,
+  3
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "smelter_mk3_glow.png",
+  "frame": [
+   84,
+   68
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Concord Smelter Mk3 (standard, 4x3, manned): three crucibles on one frame in a zig-zag (two at the back, one forward), each in a copper coil; a feed conveyor across the top from the hopper with a drop to each; heat-sink fin stacks either side of the forward crucible; armoured, bolted corners; the paint burnt off round the coils (bare steel and brown scorch). Three spouts pour into the casting line. Damaged: a fin stack is bent and glowing, the forward crucible lip is cracked and dribbles, the left coil arcs, the console bar reads red. Disabled: three cold cracked cakes, the fin stack collapsed, the feed conveyor broken and sagging, the line dead."
+}

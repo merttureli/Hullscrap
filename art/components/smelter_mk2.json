@@ -1,0 +1,56 @@
+{
+ "frame": [
+  64,
+  48
+ ],
+ "cells": [
+  4,
+  3
+ ],
+ "anims": {
+  "on": [
+   0,
+   4,
+   6
+  ],
+  "off": [
+   4,
+   1,
+   0
+  ],
+  "damaged": [
+   5,
+   2,
+   6
+  ],
+  "disabled": [
+   7,
+   1,
+   0
+  ]
+ },
+ "glow": {
+  "image": "smelter_mk2_glow.png",
+  "frame": [
+   84,
+   68
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    4,
+    6
+   ],
+   "damaged": [
+    4,
+    2,
+    6
+   ]
+  }
+ },
+ "notes": "Concord Smelter Mk2 (standard, 4x3, manned): the Mk1 frame (hopper, console, coupling, casting line) with two crucibles, each in one copper coil turn, fed by a long chute off the hopper, and a great deal of cooling pipe: a steel loop with blue coolant bands runs down the right edge, along under the crucibles and up between them. Two spouts pour into the line. Damaged: the pipe between the crucibles has split and vents coolant steam, the right crucible lip is cracked and dribbles, the console bar reads red. Disabled: both melts set into cracked grey cakes, the split pipe hangs open, the chute sags, the line is cold."
+}

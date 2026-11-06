@@ -8,11 +8,13 @@ import lines_medarm              # healing arms (docs/DRONES.md section 10): Med
 import tech_b                     # racial tech, group b: Mire, Sporeling, Gauntling, Prismatic, Grundl (docs/waves/racial_tech_1.md)
 import hand_race                  # racial hand weapons (12 sprites + 8 muzzle flashes) for the six race-wave-1 races; existing palette letters only
 import techa_all                  # racial tech, group a (human, basalt, emberkin, fenn, kett): 15 weapons, 15 components, 15 projectile sets; uses existing palette letters only
+import lines_smelter, lines_extra_parts   # the five smelters, the afterburner, inertial dampener, battering bow and Ma's Kettle (parts_art.py runs just these); existing palette letters only
 LINES = lines_reactor.ALL + lines_engine.ALL + lines_engine1.ALL + lines_o2_shield.ALL + lines_shield.ALL + lines_shop.ALL + lines_belt.ALL
 REPLACED = {'engine_mk1', 'shield_mk1'}            # redrawn by the lines modules (engine split into core + _out, shield with the new animation); comp_engine.py is the old west-facing engine, superseded
 COMPS = [C for C in [comp_laser.Laser] + comp_new.ALL if C.id not in REPLACED] + LINES + comp_weapons.ALL
 COMPS += tech_b.ALL
 COMPS += lines_medarm.ALL
+COMPS += lines_smelter.ALL + lines_extra_parts.ALL
 def _sector_colours():
     """pal_sector's colours, read without importing it (its letters clash with pal_races1), under private keys."""
     import ast
