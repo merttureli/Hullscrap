@@ -1,11 +1,11 @@
 extends RefCounted
 ## Which gun is which, by picture (docs/GUNS.md 7, the owner's "see which guns we are firing and which button fires which gun").
 ## Every gun of the player's ship carries a CHIP on its outside half: its number key (1-9), its fire group's colour and a shape mark
-## (LMB a filled dot, RMB a ring, a gun that fires by itself a small arc, so it reads without colour). While LMB or RMB is held, the
+## (LMB a filled dot, RMB a ring, Q a diamond, AUTO a small arc, so it reads without colour). While LMB, RMB or Q is held, the
 ## guns of that group get a bright outline round their mount (dim, with a small icon for the reason, when the gun cannot bear); a gun
 ## that fires flashes; hovering a weapon bar slot (or a gun on the ship) lights the pair and draws the gun's firing arc. The colours
 ## and marks are data (data/combat_ui.json, "gun_badges"). weapon_bar.gd shares one of these with combat_view.gd; build_mode.gd
-## draws the same chips on placed guns (draw_chip) and right-click cycles a fixed gun's group (cycle).
+## draws the same chips on placed guns (draw_chip); right-click cycles a gun's group (cycle) and a drag sets it (assign).
 
 const PATH := "res://data/combat_ui.json"
 const ARC_COLORS := {"fixed": Color("#ff7a5a"), "swivel": Color("#ffc966"), "turret": Color("#6cc4ff")}  ## the firing arc by aim class (as the build ghost)
@@ -21,7 +21,7 @@ const REASON_ICON := {"out of arc": "arc", "cooling down": "clock", "feeding": "
 
 static var _cfg := {}
 
-var held := {1: false, 2: false}  ## fire group -> its button (or hold override) is down (combat_view.gd sets it every frame)
+var held := {1: false, 2: false, 3: false}  ## fire group -> its button (or hold override) is down (combat_view.gd sets it every frame)
 var bar_hover := -1  ## uid of the gun whose weapon bar slot the mouse is on
 var world_hover := -1  ## uid of the gun under the mouse on the ship
 var auto_on := true  ## do the swivels and turrets fire by themselves (T)
@@ -39,16 +39,17 @@ static func cfg() -> Dictionary:
 	return _cfg
 
 
-## How weapon `w` (a CombatSession.weapons() entry: aim, group, pd) is marked: {key ("1", "2", "auto" or "pd"), label, color, mark}.
+## How weapon `w` (a CombatSession.weapons() entry: group, pd) is marked: {key ("1", "2", "3", "auto" or "pd"), label, color, mark}.
 static func style(w: Dictionary) -> Dictionary:
-	var key := "drones" if w.get("drones", false) else "pd" if w.get("pd", false) else ("auto" if str(w.get("aim", "fixed")) != "fixed" else str(int(w.get("group", 1))))
-	var g: Dictionary = cfg().get("groups", {}).get(key, {"label": "?", "color": "#ffffff", "mark": "dot"})
-	return {"key": key, "label": str(g["label"]), "color": Color(str(g["color"])), "mark": str(g["mark"])}
+	var g := int(w.get("group", 1))
+	var key := "drones" if w.get("drones", false) else (("pd" if w.get("pd", false) else "auto") if g == 0 else str(g))
+	var cfg_g: Dictionary = cfg().get("groups", {}).get(key, {"label": "?", "color": "#ffffff", "mark": "dot"})
+	return {"key": key, "label": str(cfg_g["label"]), "color": Color(str(cfg_g["color"])), "mark": str(cfg_g["mark"])}
 
 
-## The group a gun sits in on the weapon bar: 1 (LMB), 2 (RMB) or 3 (fires by itself).
+## The group a gun sits in on the weapon bar: 1 (LMB), 2 (RMB), 3 (Q) or 0 (AUTO, it fires by itself).
 static func bar_group(w: Dictionary) -> int:
-	return 3 if str(w.get("aim", "fixed")) != "fixed" else int(w.get("group", 1))
+	return int(w.get("group", 1))
 
 
 ## The number key of the gun in 0-based slot `i`, 0 when it has none (the keys stop at 9).
@@ -73,23 +74,35 @@ func hover_uid() -> int:
 	return bar_hover if bar_hover >= 0 else world_hover
 
 
-## Is gun `w` outlined now: it is not an auto gun, and its group's button is down.
+## Is gun `w` outlined now: it is not an AUTO gun, and its group's button is down.
 func outlined(w: Dictionary) -> bool:
-	return str(w.get("aim", "fixed")) == "fixed" and bool(held.get(int(w["group"]), false))
+	return int(w["group"]) != 0 and bool(held.get(int(w["group"]), false))
 
 
-## Next group of fixed gun `uid` of `components` after a right-click: 1 -> 2 -> 1. Stored as the mount's own choice (0 when it is the
-## kind's default). Returns the new effective group, 0 when the gun fires by itself (swivels and turrets stay auto).
+const ORDER := [1, 2, 3, 0]  ## the fire groups in the order a right-click cycles them: LMB, RMB, Q, AUTO
+
+
+## Put gun `uid` of `components` in fire group `group` (1, 2, 3 or 0 for AUTO). The mount's own choice is stored, or cleared when it is
+## the kind's default. Returns the group now, -1 when the gun cannot be moved (not a placed gun, or a bad group).
+static func assign(components, weapons, uid: int, group: int) -> int:
+	if not components.instances.has(uid) or not group in ORDER:
+		return -1
+	var id: String = components.instances[uid]["id"]
+	if not weapons.has(id):
+		return -1
+	components.set_group_choice(uid, -1 if group == weapons.group_of(id) else group)
+	return group
+
+
+## Next group of gun `uid` after a right-click: LMB, RMB, Q, AUTO, LMB ... Returns the new group, -1 when the gun cannot be moved.
 static func cycle(components, weapons, uid: int) -> int:
 	if not components.instances.has(uid):
-		return 0
+		return -1
 	var id: String = components.instances[uid]["id"]
-	if not weapons.has(id) or weapons.def(id)["turret"]:
-		return 0
+	if not weapons.has(id):
+		return -1
 	var now: int = weapons.group_of(id, components.group_choice(uid))
-	var next := 2 if now == 1 else 1
-	components.set_group_choice(uid, 0 if next == weapons.group_of(id) else next)
-	return next
+	return assign(components, weapons, uid, ORDER[(ORDER.find(now) + 1) % ORDER.size()])
 
 
 # --- where a gun is on the ship ---------------------------------------------------------------------
@@ -157,7 +170,7 @@ func draw_ship(c: CanvasItem, session, zoom: float, aim: Vector2) -> void:
 		var m: Dictionary = co.mounts[uid]
 		var st: Dictionary = session.slot_state(uid, aim)
 		var sty := style(w)
-		var auto: bool = str(w["aim"]) != "fixed"
+		var auto: bool = int(w["group"]) == 0
 		var bears: bool = st["status"] in OKAY
 		var fl := flash_of(uid)
 		var lit := outlined(w)
@@ -221,12 +234,14 @@ static func draw_chip(c: CanvasItem, at: Vector2, h: float, sty: Dictionary, key
 	return r
 
 
-## A group's mark: dot (LMB), ring (RMB), arc over a dot (fires by itself) - three shapes that differ without colour.
+## A group's mark: dot (LMB), ring (RMB), diamond (Q), arc over a dot (AUTO) - four shapes that differ without colour.
 static func draw_mark(c: CanvasItem, at: Vector2, r: float, mark: String, col: Color) -> void:
 	var wd := maxf(1.0, r * 0.45)
 	match mark:
 		"ring":
 			c.draw_arc(at, r * 0.85, 0.0, TAU, 20, col, wd)
+		"diamond":
+			c.draw_colored_polygon(PackedVector2Array([at + Vector2(0.0, -r * 1.2), at + Vector2(r * 1.2, 0.0), at + Vector2(0.0, r * 1.2), at + Vector2(-r * 1.2, 0.0)]), col)
 		"arc":
 			c.draw_arc(at + Vector2(0.0, r * 0.35), r * 1.05, deg_to_rad(205.0), deg_to_rad(335.0), 12, col, wd)
 			c.draw_circle(at + Vector2(0.0, r * 0.45), r * 0.3, col)
@@ -257,10 +272,13 @@ static func draw_reason(c: CanvasItem, at: Vector2, r: float, status: String, co
 			c.draw_circle(at + Vector2(0.0, r * 0.75), wd * 0.8, col)
 
 
-## The mouse icon of a group header: a small mouse with the fired button filled (1 left, 2 right); 3 (auto) a mouse with none.
+## The icon of a group header: a small mouse with the fired button filled (1 left, 2 right); 0 (AUTO) a mouse with none; 3 a keycap with Q.
 static func draw_mouse(c: CanvasItem, r: Rect2, group: int, col: Color) -> void:
 	c.draw_rect(r, Color(0.1, 0.13, 0.18), true)
 	c.draw_rect(r, Color(col, 0.9), false, 1.5)
+	if group == 3:
+		c.draw_string(ThemeDB.fallback_font, r.position + Vector2(1.0, r.size.y - 2.0), "Q", HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 2.0, int(r.size.y * 0.8), col)
+		return
 	var mid := r.position.x + r.size.x / 2.0
 	var top := Rect2(r.position, Vector2(r.size.x, r.size.y * 0.45))
 	if group == 1:

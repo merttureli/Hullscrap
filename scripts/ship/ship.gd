@@ -24,6 +24,7 @@ const Evacuate = preload("res://scripts/crew/evacuate.gd")
 const Crafting = preload("res://scripts/craft/crafting.gd")
 const ShieldBalance = preload("res://scripts/combat/shield_balance.gd")
 const MigrateParts = preload("res://scripts/ship/migrate_parts.gd")
+const Workshop = preload("res://scripts/craft/workshop.gd")
 
 ## Save format. 3 adds name, world transform, components, cables and oxygen on top of the
 ## grid and cargo of 2; versions 1 and 2 still load (no components, no cables). The optional
@@ -339,6 +340,7 @@ func load_dict(d: Dictionary) -> String:
 	var empty_parts := {"version": Components.VERSION, "next_uid": 1, "instances": []}
 	var empty_cables := {"version": Cables.VERSION, "cells": []}
 	components.load_dict(d["components"] if version >= 3 else empty_parts, grid)
+	Workshop.migrate(self)  # a fabricator saved before it had a level of its own takes the one its modules gave it
 	for r in components.returned:  # old weapons and engines with no wall to mount through
 		inventory.add(r["id"], 1)
 		log_event(r["text"])

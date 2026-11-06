@@ -118,14 +118,12 @@ Every system should be **unique, FTL Multiverse style**: not just "+10% thrust",
 
 ## Fabricator levels and workshop modules
 - Every recipe has a `fab_level` (1 to 4) and optional `tools` (e.g. `laser_cutter`, `robot_arm`, `nanoforge`, `plasma_furnace`).
-- The **Fabricator's level** comes from **workshop modules placed in the same room**:
-  - base level 1;
-  - a Robot Arm makes it level 2;
-  - a Laser Cutter adds the `laser_cutter` tool;
-  - an Assembly Rig plus two Robot Arms make level 3;
-  - a Nanoforge makes level 4.
+- The **Fabricator's level** is its own, 1 to 4, saved on the part and raised in build mode (click it, then click again to pay; `docs/CONTENT.md` section 12b). No blueprint is needed, and a ship carries exactly one fabricator.
+- **Workshop modules** in the fabricator's room do the rest:
+  - a Laser Cutter adds the `laser_cutter` tool, a Nanoforge the `nanoforge` tool;
+  - each Robot Arm or Assembly Rig makes crafting 25% faster, up to +50%.
   - Modules need power, and some need crew.
-- So an advanced engine may be **too high-level to craft** until you build out a proper workshop room. That's another reason compartments matter.
+- So an advanced engine may be **too high-level to craft** until you have paid for the upgrade.
 - Blueprints still have to be unlocked (salvage and scan). Knowing a blueprint and being able to craft it are separate.
 
 ### Data sketch (component entry)

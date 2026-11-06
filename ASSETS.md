@@ -1546,10 +1546,14 @@ Source and licence of every art and audio file in the repo.
 | `art/drones/beam_drone_mk3_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/defence_drone_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/defence_drone_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk1_barrel_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk1_base.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/defence_drone_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/defence_drone_mk1_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/defence_drone_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/defence_drone_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk2_barrel_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk2_base.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/defence_drone_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/defence_drone_mk2_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/drones/flak_drone_mk3.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |

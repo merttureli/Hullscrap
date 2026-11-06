@@ -496,3 +496,63 @@ func test_the_top_bar_shows_the_cargo_and_the_pause() -> void:
 	b.set_build(false)
 	eq(b.hud.top_bar.status(), ["PLAY MODE"] as Array[String], "play mode runs it")
 	_done(b)
+
+
+# --- the fabricator's upgrade card -----------------------------------------------------------------------------------
+
+## A build mode on the test room's ship with its fabricator at (15, 10) and `stock` in the hold.
+func _fab_mode(stock: Dictionary) -> Array:
+	var ship := Fixture.room_ship()
+	var fab := Fixture.put(ship, "fabricator", 15, 10)
+	ship.inventory.load_dict(stock)
+	var sim := ShipSim.new()
+	sim.ships = [ship]
+	var b := BuildMode.new()
+	b.sim = sim
+	b.hover = Vector2i(16, 10)
+	b.hud = Hud.new()
+	b.hud.setup(b)
+	return [b, fab]
+
+
+func test_a_click_on_the_fabricator_opens_its_card_and_a_second_one_upgrades() -> void:
+	var r := _fab_mode({"scrap": 200, "copper": 40, "titanium": 12})
+	var b: BuildMode = r[0]
+	var fab: int = r[1]
+	b.group = BuildMode.Group.SYSTEMS
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	eq(b.upgrade_uid, -1, "no card at first")
+	check(b._fab_click(click), "the click on the fabricator is used up")
+	eq(b.upgrade_uid, fab, "its card is open")
+	eq(int(b.ship.components.instances[fab]["fab_level"]), 1, "nothing is paid by the first click")
+	check(b._fab_click(click), "the second click too")
+	eq(int(b.ship.components.instances[fab]["fab_level"]), 2, "paid and upgraded")
+	check(b.upgrade_flash > 0.0, "with a flash")
+	eq(b.ship.inventory.count("scrap"), 120, "80 scrap paid")
+	b.hover = Vector2i(3, 3)  # elsewhere
+	check(not b._fab_click(click), "a click elsewhere is not used up")
+	eq(b.upgrade_uid, -1, "and closes the card")
+	_done(b)
+
+
+func test_u_over_the_fabricator_works_like_the_click_and_a_short_hold_refuses() -> void:
+	var r := _fab_mode({"scrap": 200, "copper": 40, "titanium": 7})
+	var b: BuildMode = r[0]
+	var fab: int = r[1]
+	_key(b, KEY_U)
+	eq(b.upgrade_uid, fab, "U opens the card")
+	_key(b, KEY_U)
+	eq(int(b.ship.components.instances[fab]["fab_level"]), 1, "short of titanium: not upgraded")
+	check(b.message != "", "with a reason: " + b.message)
+	eq(b.ship.inventory.count("scrap"), 200, "nothing paid")
+	b.ship.inventory.add("titanium", 1)
+	_key(b, KEY_U)
+	eq(int(b.ship.components.instances[fab]["fab_level"]), 2, "with enough, it goes")
+	_done(b)
+
+
+func test_the_crafting_panels_fabricator_line() -> void:
+	eq(CraftingPanel.fab_line({"level": 2, "tools": ["laser_cutter"], "speed": 1.25}), "Level 2 · Tools: laser cutter · Speed +25%", "level, tools, speed")
+	eq(CraftingPanel.fab_line({"level": 1, "tools": [], "speed": 1.0}), "Level 1 · Tools: none · Speed +0%", "bare")

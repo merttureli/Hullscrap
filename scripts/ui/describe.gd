@@ -21,7 +21,7 @@ const Mods = preload("res://scripts/board/mods.gd")
 
 const PATH := "res://data/describe.json"
 const STAT_NAMES := {"rate": "fire rate", "damage": "damage"}
-const KEY_NAMES := {"engine": "Shift", "shield": "Space", "utility": "Q"}  ## the ability keys (weapon_bar.gd KEY_LABEL)
+const KEY_NAMES := {"engine": "Shift", "shield": "Space", "utility": "E"}  ## the ability keys (weapon_bar.gd KEY_LABEL)
 const MINUS := "\u2212"
 
 static var _data := {}
@@ -301,7 +301,7 @@ static func _weapon(id: String, rows: Array, kws: Array, tail: Array) -> void:
 		tail.append(["Hit", "%s%%" % num(float(w["accuracy"]) * 100.0)])
 	else:
 		tail.append(["Gimbal", "%s\u00b0" % num(float(w["gimbal"]))])
-		tail.append(["Fire", "LMB" if weapons().group_of(id) == 1 else "RMB"])
+		tail.append(["Fire", ["AUTO", "LMB", "RMB", "Q"][weapons().group_of(id)]])
 	kws.append(keyword(str(w["kind"])))
 	kws.append(keyword(str(w["damage_type"])))
 	if w["turret"]:

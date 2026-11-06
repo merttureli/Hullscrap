@@ -22,10 +22,11 @@ const HP_PER_DAMAGE := 3.0  ## a shot of damage d takes d / this hp off a drone 
 const MIN_LOSS := 0.5
 const HIT_RADIUS := {1: 14.0, 2: 16.0, 3: 19.0}  ## px: how near a shot's line must pass to hit a drone of that tier
 const LAUNCH_SPEED := 230.0  ## px/s out of the hatch
-const LAUNCH_S := 0.4  ## seconds from the hatch to full size
 const ACCEL := 520.0  ## px/s2 a drone can change its velocity by
 const CHASE := 1.9  ## top speed over the orbit speed
-const SHOW_AFTER_S := 0.12  ## seconds a launched drone is still inside the hatch (the view shows the cradle carrying it)
+const SHOW_AFTER_S := 0.3  ## seconds a launched drone is still inside the hatch (the cradle carries it up the rail; the doors are open 2 by then)
+const GROW_S := 0.25  ## seconds from the hatch mouth to its full size
+const DOCKED_SCALE := 0.714  ## the size it has on the cradle (the view draws a flying drone 1/this larger)
 const HOME_DIST := 26.0  ## px from the hatch at which a returning drone is docked
 const EVASION := 0.12  ## the chance a turret's tracer misses a drone, on top of its accuracy
 const LIMPET_REACH := 1900.0  ## an enemy throws limpets and pods only when the foe is this near
@@ -218,7 +219,7 @@ static func launch(arena, idx: int, uid: int, aim := Vector2.INF) -> String:
 	var o: Dictionary = spec.get("orbit", {"gap": 0.0, "speed": 0.0, "weave": 0.0, "hz": 0.0})
 	var d := {"id": arena.drone_serial, "owner": idx, "bay": uid, "kit": str(b["kit"]), "role": str(spec["role"]), "tier": int(spec["tier"]), "name": str(kit(str(b["kit"]))["name"]),
 		"art": str(spec["art"]), "hp": float(spec["hp"]), "max_hp": float(spec["hp"]), "spec": spec, "w": gun_of(arena, spec) if spec.has("gun") else {},
-		"pos": hatch, "vel": dir * LAUNCH_SPEED + co.flight.vel, "angle": dir.angle() + PI / 2.0, "born": arena.tick, "state": "out", "hit_tick": -1000000, "fire_tick": -1000000,
+		"pos": hatch, "dir": dir, "vel": dir * LAUNCH_SPEED + co.flight.vel, "angle": dir.angle() + PI / 2.0, "born": arena.tick, "state": "out", "hit_tick": -1000000, "fire_tick": -1000000,
 		"cool": arena.tick + int(1.2 / arena.SUBSTEP), "theta": arena.rng.randf() * TAU, "sign": 1.0 if arena.rng.randf() < 0.5 else -1.0, "ph1": arena.rng.randf() * TAU,
 		"ph2": arena.rng.randf() * TAU, "ph3": arena.rng.randf() * TAU, "orbit": o, "beam": {}, "r": 0.0}
 	arena.drone_serial += 1
@@ -347,6 +348,8 @@ static func step(arena, dt: float) -> void:
 				continue
 		else:
 			_fly_orbit(arena, d, dt)
+			if arena.tick == int(d["born"]) + int(round(SHOW_AFTER_S / dt)):  # it shows: the puff out of the open hatch
+				arena.log_event("drone_emerge", d["owner"], Vector2i(-1, -1), {"drone": d["id"], "pos": d["pos"], "dir": d["dir"]})
 			_shoot(arena, d)
 		keep.append(d)
 	# (a drone shot down inside this step was removed by kill())
@@ -395,7 +398,13 @@ static func _fly_orbit(arena, d: Dictionary, dt: float) -> void:
 	var v_des: Vector2 = (want - d["pos"]) / 0.35 + tc.flight.vel * 0.0
 	if v_des.length() > vmax:
 		v_des = v_des.normalized() * vmax
-	var launching: bool = float(arena.tick - int(d["born"])) * dt < LAUNCH_S
+	var age: float = float(arena.tick - int(d["born"])) * dt
+	if age < SHOW_AFTER_S:  # still in the bay: held at the hatch mouth, no motion until it shows
+		d["pos"] = arena.local_to_world(d["owner"], arena.ships[d["owner"]].bays[d["bay"]]["pos"])
+		d["vel"] = Vector2(d["dir"]) * LAUNCH_SPEED + arena.ships[d["owner"]].flight.vel
+		d["angle"] = Vector2(d["dir"]).angle() + PI / 2.0
+		return
+	var launching: bool = age < SHOW_AFTER_S + GROW_S
 	if launching:
 		v_des = d["vel"]  # straight out of the hatch first
 	d["vel"] = Vector2(d["vel"]).move_toward(v_des, ACCEL * dt)
@@ -426,12 +435,12 @@ static func _fly_home(arena, d: Dictionary, dt: float) -> bool:
 
 ## 0..1: how far out of the hatch a launching drone is (the view grows it), 1 once it is out; a homing one shrinks again near its hatch.
 static func scale_of(arena, d: Dictionary) -> float:
-	var s := clampf((float(arena.tick - int(d["born"])) * arena.SUBSTEP - SHOW_AFTER_S) / (LAUNCH_S - SHOW_AFTER_S), 0.0, 1.0)
+	var s := clampf((float(arena.tick - int(d["born"])) * arena.SUBSTEP - SHOW_AFTER_S) / GROW_S, 0.0, 1.0)
 	if d["state"] == "home":
 		var co = arena.ships[d["owner"]]
 		var hatch: Vector2 = arena.local_to_world(d["owner"], co.bays[d["bay"]]["pos"])
 		s = minf(s, clampf((Vector2(d["pos"]).distance_to(hatch) - HOME_DIST) / 90.0 + 0.25, 0.25, 1.0))
-	return 0.3 + 0.7 * s
+	return DOCKED_SCALE + (1.0 - DOCKED_SCALE) * s
 
 
 # --- shooting ------------------------------------------------------------------------------------
@@ -555,7 +564,7 @@ static func contact(arena, owner: int, p0: Vector2, p1: Vector2) -> Dictionary:
 	var seg := p1 - p0
 	var len2 := seg.length_squared()
 	for d in arena.drones:
-		if d["owner"] == owner or d["hp"] <= 0.0 or float(d["born"]) + 0.0 > arena.tick or _clamped(d):
+		if d["owner"] == owner or d["hp"] <= 0.0 or float(arena.tick - int(d["born"])) * arena.SUBSTEP < SHOW_AFTER_S or _clamped(d):  # (not while it is inside the bay)
 			continue
 		var r: float = float(HIT_RADIUS[int(d["tier"])]) * scale_of(arena, d)
 		var t := 0.0 if len2 < 1e-9 else clampf((Vector2(d["pos"]) - p0).dot(seg) / len2, 0.0, 1.0)

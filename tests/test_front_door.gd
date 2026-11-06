@@ -97,7 +97,7 @@ const HANDLER_KEYS: Array[String] = [
 	"W A S D", "E (hold)", "E on a door", "Middle click", "Left click", "G", "Mouse", "B", "O / P", "Wheel", "Ctrl+S / Ctrl+L", "Ctrl+M", "N", "Esc", "F1",
 	"Tab / Shift+Tab", "1 - 9", "Left mouse", "Shift+Left drag", "Ctrl+Left drag", "Right mouse", "T", "R", "Shift+R", "F", "Ctrl+Z / Ctrl+Y",
 	"M", "Click a lit neighbour", "Shift+click", "Enter", "1 - 9 or click", "Enter / Space", "Click a marker", "E at the helm",
-	"K", "W / S", "A / D", "Left / Right mouse", "Shift / Space / Q", "Arrows / End", "Y",
+	"K", "W / S", "A / D", "Left / Right mouse", "Shift / Space / E", "Arrows / End", "Y",
 	"Right click", "Esc / Enter / M", "H", "H / Esc",
 	"C", "Click, or Up / Down + Enter", "PgUp / PgDn", "Click a queued job", "U", "C / Esc",
 ]

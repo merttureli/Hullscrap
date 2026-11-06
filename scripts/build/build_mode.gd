@@ -42,6 +42,7 @@ const DroneView = preload("res://scripts/combat/drone_view.gd")
 const BayPanel = preload("res://scripts/ui/bay_panel.gd")
 const Palette = preload("res://scripts/build/palette.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
+const FireDock = preload("res://scripts/ui/fire_dock.gd")
 const RedAlert = preload("res://scripts/sim/red_alert.gd")
 const BeltArt = preload("res://scripts/view/belt_art.gd")
 const ArmFx = preload("res://scripts/view/arm_fx.gd")
@@ -49,6 +50,8 @@ const Ammo = preload("res://scripts/sim/ammo.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
 const GunBadges = preload("res://scripts/ui/gun_badges.gd")
+const Workshop = preload("res://scripts/craft/workshop.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 const CELL := 32
 const ARC_COLORS := {"fixed": Color("#ff7a5a"), "swivel": Color("#ffc966"), "turret": Color("#6cc4ff")}  ## the firing arc wedge by aim class
 const ARC_REACH := 0.25  ## the wedge's radius is this share of the gun's range ...
@@ -146,6 +149,8 @@ const PAN_KEYS: Array[Key] = [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN]
 var pan := Vector2.ZERO  ## the build view's offset from where the camera sits (world px): MMB drag, arrow keys, Home resets
 var _panning := false  # the middle button is held on the world
 var _pan_held := {}  # arrow key -> true: pressed on the world (a key a panel took never gets here); Input says when it was let go
+var upgrade_uid := -1  ## the fabricator whose upgrade card is open (a click or U on it opens it, a second one pays): -1 for none
+var upgrade_flash := 0.0  # seconds the flash over an upgraded fabricator still runs
 var _focus_seen := {}  # damaged cells the wrench has already shown, so pressing it again goes on to the next
 
 
@@ -178,6 +183,10 @@ func _make_hud() -> void:
 	hud.name = "Hud"
 	hud.setup(self)
 	layer.add_child(hud)
+	var dock := FireDock.new()  # the fire groups of the placed guns, drag a chip to another section
+	dock.name = "FireDock"
+	dock.bind(self)
+	layer.add_child(dock)
 	get_parent().add_child.call_deferred(layer)
 
 
@@ -220,6 +229,7 @@ func _process(dt: float) -> void:
 		return
 	_follow_focus(dt)
 	_pan_keys(dt)
+	upgrade_flash = maxf(0.0, upgrade_flash - dt)
 	queue_redraw()
 
 
@@ -310,6 +320,8 @@ func _unhandled_input(e: InputEvent) -> void:
 						return
 					if build_on and e.button_index == MOUSE_BUTTON_LEFT and e.alt_pressed and open_bay_panel(hover):
 						pass  # Alt+click on a drone bay: its kit choice
+					elif build_on and e.button_index == MOUSE_BUTTON_LEFT and _fab_click(e):
+						get_viewport().set_input_as_handled()
 					elif build_on:
 						_begin_drag(e)
 				MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN:
@@ -338,6 +350,38 @@ func open_bay_panel(c: Vector2i) -> bool:
 	return true
 
 
+## A left click in build mode on the fabricator with a part (or nothing) in hand: the first opens its upgrade card, a second
+## one pays for the next level. True when the click was used up. A click elsewhere closes the card and goes on as usual.
+func _fab_click(e: InputEventMouseButton) -> bool:
+	var uid := ship.components.at(hover)
+	var is_fab: bool = uid >= 0 and ship.components.instances[uid]["id"] == Workshop.FAB
+	if is_fab and group == Group.SYSTEMS and not e.ctrl_pressed and not e.shift_pressed:
+		_fab_use(uid)
+		return true
+	upgrade_uid = -1
+	return false
+
+
+## The upgrade card of fabricator `uid` (click or U): opens it, and pays the next level when it is already open. Not a fabricator: nothing.
+func _fab_use(uid: int) -> void:
+	if uid < 0 or not ship.components.instances.has(uid) or ship.components.instances[uid]["id"] != Workshop.FAB:
+		return
+	if upgrade_uid != uid:
+		upgrade_uid = uid
+		message = ""
+		Audio.fx(self, "click")
+		return
+	var why := Workshop.upgrade(ship, uid)
+	if why != "":
+		message = why
+		Audio.fx(self, "invalid")
+		return
+	message = "Fabricator upgraded to level %d" % int(ship.components.instances[uid]["fab_level"])
+	upgrade_flash = 0.7
+	Audio.fx(self, "unlock")
+	ship.mark_dirty()
+
+
 ## The build view's own input: a middle-button drag, the arrow keys and Home. True when the event was a middle click or one of those keys (it is used up);
 ## a mouse move that drags the view is not (the hover still follows it). Play mode has none of it: the middle button sends crew there.
 func pan_input(e: InputEvent) -> bool:
@@ -360,7 +404,9 @@ func pan_input(e: InputEvent) -> bool:
 
 
 func _on_key(e: InputEventKey) -> void:
-	if e.keycode == KEY_ESCAPE and dragging:
+	if e.keycode == KEY_ESCAPE and upgrade_uid >= 0 and not dragging:
+		upgrade_uid = -1
+	elif e.keycode == KEY_ESCAPE and dragging:
 		dragging = false
 		message = ""
 	elif dragging:
@@ -391,6 +437,9 @@ func _on_key(e: InputEventKey) -> void:
 			KEY_F:
 				if build_on:
 					_repair_under_mouse()
+			KEY_U:
+				if build_on:
+					_fab_use(ship.components.at(hover))
 			KEY_O:
 				show_o2 = not show_o2
 			KEY_P:
@@ -552,6 +601,7 @@ func set_build(on: bool) -> void:
 	if on != build_on:
 		Audio.fx(self, "open" if on else "close")
 	build_on = on
+	upgrade_uid = -1
 	if not on:  # the pan belongs to build mode: play mode starts from where the camera sits
 		pan = Vector2.ZERO
 		_panning = false
@@ -967,10 +1017,49 @@ func _draw() -> void:
 	if hud == null or not hud.over_ui(get_viewport().get_mouse_position()):  # no ghost while the mouse is on a panel
 		for g in ghost:
 			_draw_ghost(g)
+	_draw_upgrade_card()
 	if _focus_t > 0.0:  # the damaged block the wrench pointed at
 		draw_rect(cell_rect(_focus_cell).grow(2.0 + 3.0 * (0.5 + 0.5 * sin(_clock * 8.0))), Color("#e1a136"), false, 2.0)
 	if _glow != null:
 		_glow.show_quads(_glow_quads)
+
+
+## The fabricator's upgrade card beside it: the next level, what it opens, its cost (red when short) and what a click does; a flash
+## over the fabricator for a moment after an upgrade. Drawn at screen size whatever the zoom.
+func _draw_upgrade_card() -> void:
+	if upgrade_uid < 0 or not ship.components.instances.has(upgrade_uid):
+		return
+	var rect := _cells_rect(ship.components.instances[upgrade_uid]["cells"])
+	if upgrade_flash > 0.0:
+		var a := upgrade_flash / 0.7
+		draw_rect(rect.grow(3.0 * (1.0 - a)), Color(0.55, 1.0, 0.8, 0.55 * a))
+		draw_rect(rect.grow(2.0 + 10.0 * (1.0 - a)), Color(0.55, 1.0, 0.8, a), false, 2.0)
+	var inf := Workshop.upgrade_info(ship, upgrade_uid)
+	var k := 1.0 / maxf(get_global_transform_with_canvas().get_scale().x, 0.01)  # (the camera zooms and this node is scaled: the card keeps its screen size)
+	var w := 280.0
+	var lines := UiKit.wrap(str(inf["text"]), w - 20.0, 13)
+	var h := 12.0 + 24.0 + lines.size() * 17.0 + (28.0 if int(inf["next"]) > 0 else 0.0) + 30.0
+	var o := Vector2(rect.end.x + 10.0 * k, rect.position.y)  # the card's corner; sizes below are screen px times k
+	UiKit.panel(self, Rect2(o, Vector2(w, h) * k))
+	var fs := maxi(1, roundi(13.0 * k))
+	var y := 24.0
+	UiKit.text(self, "Fabricator, level %d" % int(inf["level"]), o + Vector2(10, y) * k, maxi(1, roundi(15.0 * k)), UiKit.AMBER, HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
+	y += 8.0
+	for l in lines:
+		y += 17.0
+		UiKit.text(self, l, o + Vector2(10, y) * k, fs, UiKit.TEXT if int(inf["next"]) > 0 else UiKit.GOOD)
+	if int(inf["next"]) > 0:
+		y += 26.0
+		UiKit.text(self, "Cost", o + Vector2(10, y) * k, fs, UiKit.DIM_TEXT)
+		var x := 50.0
+		for m in inf["cost"]:
+			UiKit.icon(self, m, Rect2(o + Vector2(x, y - 12.0) * k, Vector2(14, 14) * k))
+			x += 16.0
+			var t := str(inf["cost"][m])
+			UiKit.text(self, t, o + Vector2(x, y) * k, fs, UiKit.BAD.lightened(0.2) if inf["short"].has(m) else UiKit.TEXT)
+			x += UiKit.text_width(t, 13) + 10.0
+		y += 22.0
+		UiKit.text(self, "Click again to upgrade" if inf["can"] else "Not enough materials yet", o + Vector2(10, y) * k, maxi(1, roundi(12.0 * k)), UiKit.GOOD if inf["can"] else UiKit.DIM_TEXT)
 
 
 ## The empty frame: a few long row runs and grid lines made once per hull (a round frame has 2600 cells), moved to the grid.
@@ -1114,11 +1203,10 @@ func _draw_components() -> void:
 				mount_fx.get(uid, {}).get("aim", Vector2.ZERO), opts)
 
 
-## The fire-group chips of the placed guns (gun_badges.gd), in the canvas' pixels: [{uid, at, h, sty, key}]; none outside build mode.
-## The key is the gun's number in a fight (guns by uid, as CombatSession.weapons() lists them).
-func gun_chips() -> Array:
+## The placed guns that have an outside half, in key order (as CombatSession.weapons() lists them): [{uid, id, name, group, aim, pd, number}].
+func gun_entries() -> Array:
 	var out := []
-	if not build_on or ship == null:
+	if ship == null:
 		return out
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
@@ -1131,18 +1219,29 @@ func gun_chips() -> Array:
 		if inst["out_cells"].is_empty():
 			continue
 		var d: Dictionary = _aim().def(inst["id"])
-		var w := {"aim": d["aim"], "group": _aim().group_of(inst["id"], ship.components.group_choice(uid)),
-			"pd": d["turret"] and d.get("effects") is Dictionary and d["effects"].has("intercept")}
-		out.append({"uid": uid, "at": _cells_rect(inst["out_cells"]).get_center(), "h": 24.0, "sty": GunBadges.style(w), "key": GunBadges.key_of(n - 1)})
+		out.append({"uid": uid, "id": inst["id"], "name": str(ship.components.def(inst["id"]).get("name", inst["id"])), "number": n, "aim": d["aim"],
+			"group": _aim().group_of(inst["id"], ship.components.group_choice(uid)),
+			"pd": d["turret"] and d.get("effects") is Dictionary and d["effects"].has("intercept")})
 	return out
 
 
-## A right-click on a gun's chip moves a fixed gun between LMB and RMB; true when it hit a chip (the click is used up).
+## The fire-group chips of the placed guns (gun_badges.gd), in the canvas' pixels: [{uid, at, h, sty, key}]; none outside build mode.
+## The key is the gun's number in a fight (guns by uid, as CombatSession.weapons() lists them).
+func gun_chips() -> Array:
+	var out := []
+	if not build_on or ship == null:
+		return out
+	for w in gun_entries():
+		out.append({"uid": w["uid"], "at": _cells_rect(ship.components.instances[w["uid"]]["out_cells"]).get_center(), "h": 24.0, "sty": GunBadges.style(w),
+			"key": GunBadges.key_of(int(w["number"]) - 1)})
+	return out
+
+
+## A right-click on a gun's chip cycles its group (LMB, RMB, Q, AUTO); true when it hit a chip (the click is used up).
 func chip_click(canvas_pos: Vector2) -> bool:
 	for ch in gun_chips():
 		if canvas_pos.distance_to(ch["at"]) <= ch["h"] * 0.9:
-			if GunBadges.cycle(ship.components, _aim(), ch["uid"]) == 0:
-				message = "That gun fires by itself"
+			GunBadges.cycle(ship.components, _aim(), ch["uid"])
 			queue_redraw()
 			return true
 	return false
