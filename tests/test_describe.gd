@@ -184,7 +184,7 @@ func test_the_numbers_come_from_the_data() -> void:
 	var laser := {}
 	for r in Describe.of("laser_mk1", ship)["stats"]:
 		laser[r[0]] = r[1]
-	eq([laser["Damage"], laser["Every"], laser["Range"], laser["Power"], laser["HP"]], ["3", "2.1 s", "900", "\u22122", "5 (out 10)"], "laser_mk1: " + str(laser))
+	eq([laser["Damage"], laser["Every"], laser["Range"], laser["Power"], laser["HP"]], ["3", "2.1 s", "1260", "\u22122", "5 (out 10)"], "laser_mk1: " + str(laser))
 	eq(laser["Size"], "2\u00d72 (out 4\u00d72)", "its size, both halves")
 	check(laser["Gimbal"] == "5\u00b0" and laser["Fire"] == "LMB", "a fixed gun: how far it turns, which button: " + str(laser))
 	var turret := {}

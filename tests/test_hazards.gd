@@ -324,8 +324,8 @@ func test_gas_cloud_lowers_turret_accuracy_and_widens_the_pilots_aim() -> void:
 		return rad_to_deg(worst)
 	var clear: float = spread.call(_arena())
 	var cloud: float = spread.call(a)
-	check(clear <= 7.2 + 1e-6 and clear > 6.0, "skill 0.4 is off by up to 7.2 degrees: %s" % clear)
-	check(cloud <= 10.8 + 1e-6 and cloud > 7.5, "in a gas cloud by up to 10.8: %s" % cloud)
+	check(clear <= 5.1 + 1e-6 and clear > 4.3, "skill 0.4 is off by up to 5.1 degrees (8.5 x 0.6): %s" % clear)
+	check(cloud <= 7.65 + 1e-6 and cloud > 5.6, "in a gas cloud by up to 7.65: %s" % cloud)
 
 
 # --- radiation ---------------------------------------------------------------------------------------
