@@ -17,6 +17,8 @@ extends RefCounted
 ##   cable     {"layer": "cable", "cell"} places; add "remove": true to remove
 ##   belt      {"layer": "belt", "cell"} lays a conveyor-belt cell (docs/CONTENT.md 4f; floor and doors, once the belt blueprint
 ##             is known: Ammo.belts_unlocked); add "remove": true to remove. A belt cell costs build.json's belt_cost.
+##             "craft": true makes the item on the spot from its recipe when the cargo has none (blueprint known, materials paid; no
+##             station needed); "group" sets the fire group. The step's entry then has "made" (the materials) and "group".
 ## Placing a component takes one item with its id from the cargo; removing it gives the item back.
 ## A cable costs build.json's cable_cost per cell, refunded in full. A tile costs per cell, so a door
 ## piece costs twice. A step is the list of what was really done: tiles {layer, cell, from, to}
@@ -44,6 +46,7 @@ var cable_cost := {}  ## material id -> count per cable cell
 var belt_cost := {}  ## material id -> count per belt cell
 var auto_floor := false  ## when set, a wall that closes a loop floors the empty cells inside it in the same step (build mode sets it)
 var last_preview_cost := {}  ## what the last preview() would take from the cargo: id -> count (negative = given back)
+var last_reasons: Array = []  ## one entry per change of the last apply(): "" = done, else why not
 var undo_stack: Array = []
 var redo_stack: Array = []
 var grid: ShipGrid:
@@ -75,6 +78,7 @@ static func start_cargo(path := Ship.START_PATH) -> Dictionary:
 ## undo step); if the player cannot pay the whole floor nothing is filled and `fill_note` says so.
 func apply(changes: Array) -> Dictionary:
 	var run := _run(changes)
+	last_reasons = run["reasons"]
 	var step: Array = run["step"]
 	var filled := 0
 	var fill_note := ""
@@ -518,11 +522,31 @@ func _try_component(ch: Dictionary, step: Array) -> String:
 		for c in (plan["cells"] if mount else parts.footprint(id, anchor, rot)):
 			if ship.belts.has(c):
 				return "a belt runs here"
+		var made := {}  # the materials of an item made on the spot (it never reaches the cargo)
 		if inventory.count(id) < 1:
-			return "no %s in cargo" % parts.def(id).get("name", id)
+			if not ch.get("craft", false):
+				return "no %s in cargo" % parts.def(id).get("name", id)
+			var rec: Dictionary = ship.crafting.def(id)
+			if rec.is_empty() or bool(parts.def(id).get("unique", false)):
+				return "cannot be built (no recipe)"
+			if not ship.crafting.is_known(id):
+				return "blueprint not known"
+			var short: Dictionary = inventory.missing(rec["materials"])
+			if not short.is_empty():
+				return "not enough " + str(short.keys()[0])
+			for m in rec["materials"]:
+				made[str(m)] = int(rec["materials"][m])
 		var new_uid: int = parts.place_planned(id, plan) if mount else parts.place(grid, id, anchor, rot)
-		inventory.add(id, -1)
+		if made.is_empty():
+			inventory.add(id, -1)
+		else:
+			inventory.spend(made)
 		var e := {"layer": "component", "uid": new_uid, "id": id, "anchor": parts.instances[new_uid]["anchor"], "rot": parts.instances[new_uid]["rot"], "added": true}
+		if not made.is_empty():
+			e["made"] = made
+		if ch.has("group"):
+			parts.instances[new_uid]["group"] = int(ch["group"])
+			e["group"] = int(ch["group"])
 		if mount:
 			e["out"] = plan["out"]
 			e.merge(parts.slope_record(parts.instances[new_uid]))
@@ -629,6 +653,8 @@ func _set_component(e: Dictionary, present: bool) -> void:
 				inventory.add(str(st["ammo"]), -int(st["n"]))
 			if int(st.get("loaded", 0)) > 0:
 				inventory.add(Ammo.ammo_item(e["id"]), -int(st["loaded"]))
+		if e.has("group"):
+			rec["group"] = e["group"]
 		d["instances"].append(rec)
 		parts.load_dict(d)
 	else:
@@ -636,7 +662,10 @@ func _set_component(e: Dictionary, present: bool) -> void:
 		if not held.is_empty():
 			e["stock"] = held
 		parts.remove_uid(e["uid"])
-	inventory.add(e["id"], -1 if present else 1)
+	if e.has("made"):  # made on the spot: the materials go and come back, the item never sat in the cargo
+		_shift(e["made"], -1 if present else 1)
+	else:
+		inventory.add(e["id"], -1 if present else 1)
 
 
 func _set_cable(c: Vector2i, present: bool) -> void:

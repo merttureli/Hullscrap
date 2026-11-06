@@ -83,6 +83,7 @@ var intruder_dead: Array = []  ## where boarding robots fell: {pos (cell coordin
 var hit_at := {}  ## a wall cell (Vector2i) or part uid -> ship.clock when it last lost hp (Damage.apply); Jobs repairs it slower for crew.json under_fire.seconds. Not saved
 var manned := {}  ## part uid -> name of the crew member at its station, this tick (jobs.gd); not saved
 var ability_state := Abilities.fresh_state()  ## abilities running or resting (abilities.gd); not saved
+var layout := {}  ## the reference layout "Save layout" stored (layout.gd): what Rebuild puts back; saved when set
 var world_pos := Vector2.ZERO  ## pixels; for drawing, 0 for now
 var rot_quarters := 0  ## quarter turns; for drawing, 0 for now
 var _structure_dirty := true
@@ -274,6 +275,8 @@ func to_dict() -> Dictionary:
 		d["shield_balance"] = shield_balance.duplicate(true)
 	if skin != "":
 		d["skin"] = skin
+	if not layout.is_empty():
+		d["layout"] = layout.duplicate(true)
 	if not crew.is_empty() or not dead_crew.is_empty():  # optional: the people aboard, so Continue brings back the same crew
 		d["crew_state"] = crew.map(func(m): return m.to_dict())
 		d["dead_crew"] = dead_crew.duplicate()
@@ -367,6 +370,7 @@ func load_dict(d: Dictionary) -> String:
 		crew_plan = people["plan"]
 	shield_balance = ShieldBalance.sanitize(d.get("shield_balance"))
 	skin = str(d.get("skin", ""))
+	layout = d["layout"].duplicate(true) if d.get("layout") is Dictionary else {}
 	manned = {}
 	ability_state = Abilities.fresh_state()
 	if d.has("crafting"):

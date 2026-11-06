@@ -11,6 +11,7 @@ const InfoCard = preload("res://scripts/ui/hud_card.gd")
 const ModeBar = preload("res://scripts/ui/hud_mode_bar.gd")
 const LogPanel = preload("res://scripts/ui/hud_log.gd")
 const StationBar = preload("res://scripts/ui/station_bar.gd")
+const LayoutBar = preload("res://scripts/ui/layout_bar.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const MARGIN := 8.0
@@ -29,6 +30,7 @@ var palette: Control
 var card: Control
 var mode_bar: Control
 var log_panel: Control
+var layout_bar: Control  ## Save layout and Rebuild, bottom right, in build mode
 var station_bar: Control  ## one button per crewable part, left edge above the log, in play mode (K1)
 var hint_rect := Rect2()  ## where the message and the key hints are drawn
 var view := Vector2(1600, 900)  ## the screen size of the last layout
@@ -49,6 +51,7 @@ func setup(p_build: Node) -> void:
 	station_bar = _add(StationBar.new())
 	palette = _add(PalettePanel.new())
 	card = _add(InfoCard.new())
+	layout_bar = _add(LayoutBar.new())
 	mode_bar = _add(ModeBar.new())
 	_tip = Control.new()
 	_tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -79,6 +82,7 @@ func sync(p_view: Vector2) -> void:
 	visible = not build.combat and build.ship != null and (picker == null or not picker.visible)
 	palette.visible = build.build_on
 	card.visible = build.build_on
+	layout_bar.visible = build.build_on
 	station_bar.visible = not build.build_on and station_bar.count() > 0
 	layout(p_view)
 
@@ -98,7 +102,8 @@ func layout(p_view: Vector2) -> void:
 	mode_bar.compact = ModeBar.width_for(false) > view.x - 2.0 * side
 	var mw: float = mode_bar.full_width()
 	_place(mode_bar, Rect2(floorf((view.x - mw) / 2.0), view.y - MARGIN - MODE_H, mw, MODE_H))
-	_place(card, Rect2(view.x - MARGIN - SIDE_W, TOP_H + MARGIN, SIDE_W, minf(card.wanted_height(), view.y - TOP_H - 2.0 * MARGIN)))
+	_place(card, Rect2(view.x - MARGIN - SIDE_W, TOP_H + MARGIN, SIDE_W, minf(card.wanted_height(), view.y - TOP_H - 3.0 * MARGIN - LayoutBar.HEIGHT)))
+	_place(layout_bar, Rect2(view.x - MARGIN - SIDE_W, view.y - MARGIN - LayoutBar.HEIGHT, SIDE_W, LayoutBar.HEIGHT))
 	var lines := hint_lines(view.x - 2.0 * side - 2.0 * HINT_PAD)
 	var h := lines.size() * HINT_LINE + (2.0 * HINT_PAD if not lines.is_empty() else 0.0)
 	hint_rect = Rect2(side, mode_bar.position.y - MARGIN - h, view.x - 2.0 * side, h)
@@ -112,7 +117,7 @@ func _place(c: Control, r: Rect2) -> void:
 ## The rect of every panel on show (name -> Rect2, screen px), the hints included when there are any, and the Ledger's card in build mode.
 func panel_rects() -> Dictionary:
 	var out := {}
-	for n in ["top_bar", "palette", "card", "mode_bar", "log_panel", "station_bar"]:
+	for n in ["top_bar", "palette", "card", "layout_bar", "mode_bar", "log_panel", "station_bar"]:
 		var c: Control = get(n)
 		if c.visible:
 			out[n] = Rect2(c.position, c.size)
