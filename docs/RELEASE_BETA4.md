@@ -67,6 +67,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **Repairs under fire**: a wall or part hit in the last 5 s repairs at about a third of the speed, on both ships, so an enemy crew no longer mends as fast as one gun hurts.
 - **Orders for several crew**: Shift+click or drag a box to select several (Shift+click on the crew bar works too). Middle click a room to split its jobs among them, and **X** spreads them over the damaged rooms.
 - **Tab slows a ship fight to a quarter speed** until you press it again: time to give orders. There's no limit on it.
+- **Save layout and Rebuild**: in build mode (bottom right), **Save layout** remembers the ship as it is. After a fight, **Rebuild** Hull, Parts or Both puts back what is missing at the normal cost: hull before parts, cheap before dear, cargo parts first (else made on the spot from a known blueprint), all as one undo step. It says what it rebuilt and what it was short of.
 
 ### Content
 - **Boarding**: 10 new discoveries, 2 new hermits and 2 new traders aboard derelicts, and 4 new logs. More derelicts have someone aboard, and suits turn up in engineering and command lockers.
