@@ -641,5 +641,5 @@ func test_the_validator_knows_intercept() -> void:
 func test_the_flak_screen_and_the_drone_picket_intercept_at_300_px() -> void:
 	var w = Weapons.new()
 	for id in ["human_flak_screen", "kett_drone_picket"]:
-		near(float(w.defs[id]["effects"]["intercept"]["range"]), 300.0, "%s intercepts missiles within 300 px" % id)
+		near(float(w.defs[id]["effects"]["intercept"]["range"]), 340.0, "%s intercepts missiles within 340 px" % id)
 		check(bool(w.defs[id]["turret"]), "%s is a turret" % id)

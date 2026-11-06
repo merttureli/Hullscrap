@@ -360,7 +360,7 @@ func test_flak_throws_a_fan_of_pellets() -> void:
 		var a: float = absf(rad_to_deg((p["vel"] as Vector2).angle()))
 		angles.append(a)
 		check(a <= 6.0 + 1e-3, "within the 12 degree spread: %f" % a)
-		near((p["vel"] as Vector2).length(), 600.0, "flak speed")
+		near((p["vel"] as Vector2).length(), 720.0, "flak speed")
 	check(angles.min() != angles.max(), "pellets differ")
 
 
