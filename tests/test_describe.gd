@@ -201,7 +201,7 @@ func test_the_numbers_come_from_the_data() -> void:
 	var front_slope: String = Describe.of("engine_mk1", ship, 0, 45.0)["stats"].filter(func(r): return r[0] == "Push")[0][1]
 	eq(front_slope, "7.07 back, 7.07 side", "over a front-facing slope it brakes, and R does not help: " + front_slope)
 	var shield := Describe.text("shield_mk1", ship)
-	for want in ["Layers: 1", "Sectors: 1", "Recharge: 7 s"]:
+	for want in ["Layers: 1", "Sectors: 1", "Layer HP: 4", "Regen: 1 HP/s after 3 s", "Broken: 5 s down"]:
 		check(shield.contains(want), "shield_mk1 says " + want + ": " + shield)
 	eq(Abilities.shield_base(), 7.0, "the base the shield text follows")
 	var rector := Describe.text("reactor_mk1", ship)
@@ -216,15 +216,15 @@ func test_the_numbers_come_from_the_data() -> void:
 	eq([cost["cost"], cost["level"]], [ship.crafting.def("laser_mk1")["materials"], 1], "the cost is the recipe's")
 
 
-func test_a_shield_with_no_recharge_stat_uses_the_base() -> void:
+func test_a_shield_with_no_hp_stats_uses_its_tiers_row() -> void:
 	var ship := Ship.new_starter()
 	var d: Dictionary = ship.components.def("shield_mk1").duplicate(true)  # a copy of this ship's own def, with no recharge
 	d["id"] = "shield_plain"
 	d["stats"].erase("recharge")
 	ship.components.by_id["shield_plain"] = d
-	check(Describe.text("shield_plain", ship).contains("Recharge: 7 s"), "an unset recharge reads the shields block of weapons.json")
+	check(Describe.text("shield_plain", ship).contains("Layer HP: 4"), "unset HP numbers read the tier's row of the shields block of weapons.json")
 	var info := Palette.info(Palette.part_entry(ship, "shield_plain"), ship)
-	check(info["stats"].has(["Recharge", "7 s"]), "and so does the card, not '2.0 s'")
+	check(info["stats"].has(["Layer HP", "4"]) and info["stats"].has(["Broken", "5 s down"]), "and so does the card")
 
 
 func test_tags_no_code_reads_are_left_off_the_card() -> void:
