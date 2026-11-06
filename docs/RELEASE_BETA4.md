@@ -35,6 +35,8 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **On-foot fights last longer**: about three foes to a health bar (it was five or more). Scavengers hit harder (9), aim better and call others from further off, so they come two or three at once; armour matters more.
 - **Foes on foot are real races.** The crew of a ship you beat are the same race when you board her; a race's section is mostly held by that race; elsewhere foes come from the region. Bodies lie as their race, and a foe's name reads "Kett pirate". Their numbers are the same as before.
 - **Medbays** have working and broken beds, and a room's loot fits the room (the odds of rare items are unchanged).
+- **About 30% fewer events** in a sector: each extra contact beyond the sector's own place, its fixed ones, its stores, stations, quests, exits and flagships is dropped about three times in four, never below three contacts. The stores and the story beats all stay.
+- **Walls that close a loop fill with floor**: place walls (a line, a drag or one more segment) so they enclose empty cells and the inside is floored at once, at the usual floor price. If you cannot pay for the whole floor, nothing is filled and the message says how much scrap it needs. One Ctrl+Z takes the walls and the floor together.
 
 ### Starting out
 - **Blank Frame** (hangar tab "Your own", the first tab): a pod with a helm, and a hold of parts and hull materials worth the same as the Courier. The run opens in build mode with the tide clock held; you can't launch until the helm and an engine have power and every room is sealed.

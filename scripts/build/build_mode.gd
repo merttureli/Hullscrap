@@ -137,6 +137,7 @@ var session: BuildSession:
 	get:
 		if _session == null or _session.ship != ship:
 			_session = BuildSession.new(ship)
+			_session.auto_floor = true
 		return _session
 
 @onready var cam: Camera2D = get_node_or_null("../Camera2D")
@@ -728,6 +729,8 @@ func _end_drag() -> void:
 		Audio.fx(self, _edit_sound(pl["changes"]))
 	if r["applied"] > 0 and r["skipped"] > 0 and not r["reason"] in QUIET_REASONS:
 		message = "%d done, %d skipped: %s" % [r["applied"], r["skipped"], r["reason"]]
+	if r.get("fill_note", "") != "":
+		message = r["fill_note"]
 
 
 ## The sound of an edit that went through: a part placed, something removed, else a tile placed.

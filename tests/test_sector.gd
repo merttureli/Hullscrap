@@ -164,7 +164,7 @@ func test_the_poi_mix_follows_sectors_json() -> void:
 		for t in nc["weights"]:
 			if float(nc["weights"][t]) > 0.0:
 				allowed[t] = true
-		var lo := maxi(int(nc["count"][0]), int(cfg["poi"]["count"][0]))
+		var lo: int = maxi(int(cfg["poi"]["count"][0]), 1 + nc.get("also", []).size())  # the main and its `also` ones, the sector least at least (poi.thin drops the rolled extras)
 		var hi := mini(int(nc["count"][1]), int(cfg["poi"]["count"][1]))
 		share[type] = {}
 		for i in 40:
@@ -943,6 +943,7 @@ func test_the_placed_pois_are_what_the_generator_always_made() -> void:
 	for row in OLD_LAYOUTS:
 		var cfg: Dictionary = Sector.config().duplicate(true)
 		cfg["poi"]["count"] = [2, 6]
+		cfg["poi"]["thin"] = 0.0  # (the fewer events of 2026-11 came later)
 		for t in OLD_COUNTS:
 			cfg["nodes"][t]["count"] = OLD_COUNTS[t]
 		for t in cfg["nodes"]:
@@ -1183,3 +1184,34 @@ func test_sectors_json_is_sound() -> void:
 	eq(cfg["current"]["speed"], [20.0, 60.0], "the current")
 	eq(Campaign.config()["jump"]["spool"], 8.0, "the spool")
 	eq(Campaign.config()["jump"]["hostile_range"], 2000.0, "the hostile range")
+
+
+## The events (POIs after the node's main one, its `also` ones and the kept types: stores, quests...) of 120 sectors.
+func _events_of(cfg: Dictionary) -> int:
+	var n := 0
+	for i in 120:
+		var type: String = TYPES[i % TYPES.size()]
+		var nc: Dictionary = cfg["nodes"][type]
+		var s = Sector.generate(500 + i, _node(type, i), "boneyard", cfg)
+		for k in range(1 + nc.get("also", []).size(), s.pois.size()):
+			n += 0 if bool(cfg["poi_types"][s.pois[k]["type"]].get("keep", false)) else 1
+	return n
+
+
+func test_about_a_third_fewer_events_and_the_guaranteed_ones_stay() -> void:
+	var cfg: Dictionary = Sector.config().duplicate(true)
+	var after := _events_of(cfg)
+	cfg["poi"]["thin"] = 0.0
+	var before := _events_of(cfg)
+	var ratio := float(after) / float(maxi(before, 1))
+	check(ratio >= 0.6 and ratio <= 0.8, "events are about 0.7 of before: %d of %d (%.2f)" % [after, before, ratio])
+	cfg = Sector.config()
+	for type in TYPES:
+		var nc: Dictionary = cfg["nodes"][type]
+		for i in 30:
+			var s = Sector.generate(900 + i, _node(type, i), "boneyard")
+			check(s.pois.size() >= 3, "%s #%d: at least three POIs" % [type, i])
+			eq(s.pois[0]["type"], nc["main"], "%s #%d: the main POI stays" % [type, i])
+			var kinds: Array = s.pois.map(func(p): return p["type"])
+			for t in nc.get("also", []):
+				check(kinds.has(t), "%s #%d: its %s stays" % [type, i, t])
