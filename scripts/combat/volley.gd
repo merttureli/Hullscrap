@@ -11,6 +11,7 @@ extends RefCounted
 
 const STAGGER_S := 0.15  ## the volley's shots leave over this long
 const MAX_WAIT_S := 3.0  ## the longest the guns wait for the slowest one
+const READY_GRACE := 2  ## substeps a gun that just came off cooldown is given to ask before the others go without it
 const FRESH_TICKS := 10  ## a fire order counts for this many substeps (the player's button is read once a frame)
 
 
@@ -104,8 +105,12 @@ static func _cooling(arena, idx: int, group: int, asking: Dictionary, aim: Vecto
 	for uid in uids:
 		if asking.has(uid) or not mode(arena, idx, uid) or arena.weapons.mount_group(arena, idx, uid) != group:
 			continue
-		if arena.weapons.can_fire(arena, idx, uid, aim) in ["cooling down", "feeding"]:
+		var why: String = arena.weapons.can_fire(arena, idx, uid, aim)
+		if why in ["cooling down", "feeding"]:
 			return true
+		var cd: int = int(arena.ships[idx].cooldowns.get(uid, 0))
+		if why == "" and cd > 0 and arena.tick - cd <= READY_GRACE:
+			return true  # it only just became ready: its controller has not had a substep to ask yet
 	return false
 
 

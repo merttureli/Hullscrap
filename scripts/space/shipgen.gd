@@ -1521,6 +1521,20 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 		var ammo := str(_weapons.def(w).get("ammo", "")) if _weapons.has(w) else ""
 		if ammo != "" and ship.inventory.count(ammo) < AMMO_STOCK:
 			ship.inventory.add(ammo, AMMO_STOCK)
+	var ap: Dictionary = tables().get("piercing", {})  # a late, big-budget ship may load piercing rounds into its rapid kinetic guns (a roll of its own: the rest of the build is untouched)
+	if not ap.is_empty() and budget >= float(ap["budget_from"]):
+		var apr := RandomNumberGenerator.new()
+		apr.seed = rng.seed ^ 0xA9
+		var uids: Array = ship.components.instances.keys()
+		uids.sort()
+		var loaded := false
+		for uid in uids:
+			var wid := str(ship.components.instances[uid]["id"])
+			if _weapons.has(wid) and _weapons.can_pierce(_weapons.def(wid)) and apr.randf() < float(ap["chance"]):
+				ship.ap_guns[uid] = true
+				loaded = true
+		if loaded:
+			ship.inventory.add(Weapons.AP_ITEM, int(ap["rounds"]))
 	ship.name = _name_of(f, faction, rng)
 	ship.rng_seed = rng.randi() % 100000 + 1
 	ship.mark_dirty()
