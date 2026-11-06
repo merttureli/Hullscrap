@@ -673,3 +673,67 @@ func test_save_load_round_trip_with_systems_and_cables() -> void:
 	eq(t.undo_stack.size(), 0, "history cleared")
 	check(t.ship.components.at(Vector2i(5, 5)) >= 0 and t.ship.cables.has(Vector2i(5, 4)), "the system and the cable")
 	eq(t.apply([_reactor(8, 8)])["reason"], "no Reactor Mk1 in cargo", "the reactor in the save was the only one")
+
+
+# --- A closed wall outline fills with floor ---
+
+func _ring(s: BuildSession, gap := false) -> Dictionary:
+	var cells := BuildSession.rect_cells(Vector2i(3, 3), Vector2i(7, 6), true)
+	if gap:
+		cells.erase(Vector2i(5, 3))
+	return s.apply(_put("wall", cells))
+
+
+func test_closed_ring_fills_inside_with_floor() -> void:
+	var s := _session()
+	s.auto_floor = true
+	var r := _ring(s)
+	eq(r["filled"], 6, "a 5x4 ring floors its 3x2 inside")
+	for c in BuildSession.rect_cells(Vector2i(4, 4), Vector2i(6, 5), false):
+		eq(s.grid.get_tile(c), "floor", "inside %s is floor" % str(c))
+	eq(s.grid.get_tile(Vector2i(2, 4)), "", "outside stays empty")
+	eq(s.inventory.count("scrap"), 100 - 14 * 2 - 6, "walls and floor are paid for")
+	s.undo()
+	eq(s.grid.tiles.size(), 0, "one undo takes the walls and the floor")
+	eq(s.inventory.count("scrap"), 100, "and gives the scrap back")
+	s.redo()
+	eq(s.grid.tiles.size(), 20, "redo puts both back")
+
+
+func test_ring_with_a_gap_fills_nothing() -> void:
+	var s := _session()
+	s.auto_floor = true
+	var r := _ring(s, true)
+	eq(r.get("filled", 0), 0, "no fill through a gap")
+	eq(s.grid.get_tile(Vector2i(5, 4)), "", "the inside is empty")
+	var r2 := s.apply(_put("wall", [Vector2i(5, 3)]))
+	eq(r2["filled"], 6, "extending the wall into a closed loop fills it")
+
+
+func test_fill_skips_occupied_cells() -> void:
+	var s := _session()
+	s.auto_floor = true
+	s.apply(_put("floor", [Vector2i(5, 4)]))
+	var r := _ring(s)
+	eq(r["filled"], 5, "the floor already there is skipped")
+	eq(s.inventory.count("scrap"), 100 - 1 - 28 - 5, "only the empty cells are paid for")
+
+
+func test_fill_short_of_scrap_fills_nothing() -> void:
+	var s := _session(28 + 3)
+	s.auto_floor = true
+	var r := _ring(s)
+	eq(r["filled"], 0, "nothing filled when the whole floor is too dear")
+	eq(r["fill_note"], "Not enough scrap to floor the inside: needs 6", "the message says how much")
+	eq(s.grid.get_tile(Vector2i(5, 4)), "", "no partial fill")
+	eq(s.inventory.count("scrap"), 3, "the walls stand and the rest is kept")
+
+
+func test_fill_off_by_default_and_outside_the_hull() -> void:
+	var s := _session()
+	eq(_ring(s).get("filled", 0), 0, "a bare session never fills")
+	var s2 := _session()
+	s2.auto_floor = true
+	# a ring that reaches over the edge of the round hull is open to the outside
+	var cells := BuildSession.rect_cells(Vector2i(0, 5), Vector2i(4, 9), true)
+	eq(s2.apply(_put("wall", cells)).get("filled", 0), 0, "cells off the round hull are outside, not inside")

@@ -269,7 +269,7 @@ func test_the_front_door_records_a_win_with_its_score_and_the_ship_in_the_hall()
 
 func test_the_score_adds_up() -> void:
 	_scenario("endings")
-	var c := Campaign.new(3)
+	var c := Campaign.new(4)  # (a seed whose start sector keeps two POIs to finish after poi.thin)
 	c.jumps = 50
 	c.landmarks = ["a", "b"]
 	var ship := _ship()

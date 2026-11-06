@@ -234,7 +234,22 @@ func _mix(r: RandomNumberGenerator, n: Dictionary, mults: Dictionary = {}, quest
 		var pick := _pick(r, open)
 		types.append(pick)
 		made[pick] = int(made.get(pick, 0)) + 1
-	return types
+	return _thin(types, 1 + n.get("also", []).size())
+
+
+## `types` with each rolled extra (after the first `fixed` ones) dropped by chance poi.thin, from a stream of its own,
+## unless its type is kept (poi_types `keep`: stores, quests...). A sector keeps at least poi.count's least POIs.
+func _thin(types: Array, fixed: int) -> Array:
+	var thin := float(cfg["poi"].get("thin", 0.0))
+	if thin <= 0.0:
+		return types
+	var tr := RandomNumberGenerator.new()
+	tr.seed = seed_value ^ 0x7417
+	var out := types.slice(0, fixed)
+	for t in types.slice(fixed):
+		if bool(cfg["poi_types"][t].get("keep", false)) or out.size() < int(cfg["poi"]["count"][0]) or tr.randf() >= thin:
+			out.append(t)
+	return out
 
 
 ## Does region `region_id` (its events tag `tag`) have a quest event of its own: a `quest` event that asks for it by

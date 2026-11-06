@@ -42,6 +42,7 @@ enum Mode { PAINT, LINE, RECT }
 var ship: Ship
 var cable_cost := {}  ## material id -> count per cable cell
 var belt_cost := {}  ## material id -> count per belt cell
+var auto_floor := false  ## when set, a wall that closes a loop floors the empty cells inside it in the same step (build mode sets it)
 var last_preview_cost := {}  ## what the last preview() would take from the cargo: id -> count (negative = given back)
 var undo_stack: Array = []
 var redo_stack: Array = []
@@ -70,10 +71,17 @@ static func start_cargo(path := Ship.START_PATH) -> Dictionary:
 ## One user action: `changes` (see the top) applied in order. A change that breaks a rule or
 ## can't be paid for is skipped. Returns {"applied": n, "skipped": n, "reason": the first skip
 ## reason or ""}: `applied` counts what was really done (a door piece is two cells), `skipped`
-## the changes refused.
+## the changes refused. With `auto_floor`, walls that close a loop also floor the inside (`filled` cells, in the same
+## undo step); if the player cannot pay the whole floor nothing is filled and `fill_note` says so.
 func apply(changes: Array) -> Dictionary:
 	var run := _run(changes)
 	var step: Array = run["step"]
+	var filled := 0
+	var fill_note := ""
+	if auto_floor and not step.is_empty():
+		var f := _fill_inside(step)
+		filled = int(f["filled"])
+		fill_note = str(f["note"])
 	var skipped := 0
 	var reason := ""
 	for why in run["reasons"]:
@@ -87,7 +95,85 @@ func apply(changes: Array) -> Dictionary:
 			undo_stack.pop_front()
 		redo_stack.clear()
 		ship.mark_dirty()
-	return {"applied": step.size(), "skipped": skipped, "reason": reason}
+	var out := {"applied": step.size(), "skipped": skipped, "reason": reason}
+	if filled > 0 or fill_note != "":  # only when the floor fill did something, so the plain result is what it always was
+		out["filled"] = filled
+		out["fill_note"] = fill_note
+	return out
+
+
+## The empty cells enclosed by the walls `step` just placed: the empty hull cells next to a new wall that a 4-neighbour
+## flood through non-wall cells (empty or floor; doors count as wall) cannot get to from outside the hull.
+func enclosed_cells(step: Array) -> Array:
+	var seeds := []
+	for e in step:
+		if e.get("layer", "") == "tile" and str(e["to"]) != "" and grid.tile_flag(str(e["to"]), "solid"):
+			for d in ShipGrid.SIDES:
+				seeds.append(e["cell"] + d)
+	if seeds.is_empty():
+		return []
+	var out_seen := {}  # cells reached from outside
+	var queue := []
+	for c in grid.hull:  # outside = every hull cell that touches a cell off the hull and is not a wall
+		for d in ShipGrid.SIDES:
+			if not grid.in_hull(c + d) and not out_seen.has(c) and _passable(c):
+				out_seen[c] = true
+				queue.append(c)
+				break
+	var i := 0
+	while i < queue.size():
+		var c: Vector2i = queue[i]
+		i += 1
+		for d in ShipGrid.SIDES:
+			var n: Vector2i = c + d
+			if grid.in_hull(n) and not out_seen.has(n) and _passable(n):
+				out_seen[n] = true
+				queue.append(n)
+	var done := {}
+	var cells := []
+	for s0 in seeds:
+		if done.has(s0) or out_seen.has(s0) or not grid.in_hull(s0) or not _passable(s0):
+			continue
+		var comp := [s0]  # a pocket the walls enclose, grown by flood
+		done[s0] = true
+		var j := 0
+		while j < comp.size():
+			for d in ShipGrid.SIDES:
+				var n: Vector2i = comp[j] + d
+				if grid.in_hull(n) and not done.has(n) and _passable(n):
+					done[n] = true
+					comp.append(n)
+			j += 1
+		for c in comp:
+			if grid.get_tile(c) == "" and ship.components.any_at(c) < 0 and ship.components.link_at(c) < 0 and ship.components.at_out(c) < 0 and not ship.belts.has(c):
+				cells.append(c)
+	return cells
+
+
+## Can the flood pass through `c`: it is not a wall or a door.
+func _passable(c: Vector2i) -> bool:
+	var t := grid.get_tile(c)
+	return t == "" or not (grid.tile_flag(t, "solid") or grid.tile_flag(t, "door"))
+
+
+## Floor the inside of the loop the walls of `step` closed, adding to `step`. {"filled": n, "note": text if it was too dear}.
+func _fill_inside(step: Array) -> Dictionary:
+	var floor_id := floor_tile()
+	var cells := enclosed_cells(step) if floor_id != "" else []
+	if cells.is_empty():
+		return {"filled": 0, "note": ""}
+	var cost := {}
+	for c in cells:
+		_add_cost(cost, grid.cost_of(floor_id))
+	var short: Dictionary = inventory.missing(cost)
+	if not short.is_empty():
+		var m: String = short.keys()[0]
+		return {"filled": 0, "note": "Not enough %s to floor the inside: needs %d" % [m, int(cost[m])]}
+	var n := 0
+	for c in cells:
+		if _try_tile(c, floor_id, step) == "":
+			n += 1
+	return {"filled": n, "note": ""}
 
 
 ## What apply() would do, without keeping it: each change plus "reason" ("" = it would apply). Also sets last_preview_cost.
