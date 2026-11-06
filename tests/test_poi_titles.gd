@@ -95,6 +95,9 @@ func test_a_near_poi_that_is_not_the_nodes_own_gets_its_name_and_the_nodes_own_k
 			main = p
 		elif not p["main"] and other.is_empty() and p["type"] in ["wreck", "unknown", "distress", "abandoned_station"]:
 			other = p
+	if other.is_empty():  # (poi.thin can leave a sector with only its own places)
+		other = {"id": "pw1", "type": "wreck", "name": "Wreck", "pos": s.ship_pos, "visibility": "signal", "event_type": "wreck_field", "state": Sector.NEW, "enemy": "", "main": false}
+		s.pois.append(other)
 	check(not main.is_empty() and not other.is_empty(), "(setup) the sector has its main POI and another")
 	var res := _fire(d, main)
 	check(not res.is_empty() and not res["event"].is_empty(), "(setup) the node's own POI has an event")
