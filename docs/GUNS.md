@@ -87,6 +87,14 @@ A version is a template on a base family at a tier. The numbers are against the 
   - A hit destroys the shot, with a small burst.
 - **Broadside passes** (pilot AI): when a ship's side guns outweigh its bow guns, its pilot turns its side to the target and strafes along, rather than pointing its nose. The player does the same with A/D.
 - **The firing arc while placing:** the build ghost of any gun draws its arc as a wedge (the sketch's colours: red fixed, yellow swivel, blue turret). The hover card names the aim class and the arc.
+- **Fire groups** (owner: "configure and drag weapons to sub categories ... left, right and Q"): four groups, and any gun can go in any of them.
+  - **LMB** (amber, a dot), **RMB** (cyan, a ring), **Q** (hot pink `#ff6fb5`, a diamond; lighter than the blue and different in shape, so it holds up without colour) and **AUTO** (soft blue, an arc over a dot).
+  - A group fires while its button is held. A turret or swivel in LMB, RMB or Q tracks and fires only then; it holds fire the rest of the time.
+  - An **AUTO** gun fires by itself. A turret does as before. A fixed gun in AUTO points its barrel at the foe and fires when the shot bears: the aim is inside its gimbal cone, or the barrel at the edge of the cone still lines up on the foe's hull, and the foe is in range (the enemy pilot's rule, `pilot_ai.gd` `on_hull`). **T** holds every AUTO gun.
+  - Defaults with no choice: fixed guns by kind (lasers, bolts, beams LMB; missiles, flak RMB); turrets, swivels and point defence AUTO.
+  - **Setting a group:** drag a weapon bar slot (fight) or a dock chip (build mode) to another section; or right-click the slot, the dock chip or the chip on the ship to cycle LMB, RMB, Q, AUTO. The bar always shows the four sections, each with its header; an empty one is a slim drop zone.
+  - **Saved** per mount as `group` (1, 2, 3 or 0 for AUTO; absent means the default), components version 8; older saves load with their choice (version 7 held 1 or 2) or the defaults.
+  - **E** is the utility ability now (Q was).
 
 ## 7. Visual language (adds to ART_STYLE.md)
 - **The silhouette is the aim class:**

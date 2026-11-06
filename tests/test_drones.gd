@@ -14,6 +14,7 @@ const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const WeaponBar = preload("res://scripts/ui/weapon_bar.gd")
+const GunBadges = preload("res://scripts/ui/gun_badges.gd")
 
 
 func _ship() -> Ship:
@@ -342,7 +343,8 @@ func test_the_bay_is_a_slot_with_its_key_and_a_group_on_the_weapon_bar() -> void
 	var bar := WeaponBar.new()
 	bar.bind(s, func() -> Vector2: return Vector2.ZERO)
 	var lay := bar.layout()
-	check(lay["heads"].any(func(h): return h["group"] == 4) and lay["slots"].any(func(sl): return sl.has("bay") and sl["number"] == guns + 1), "a DRONES group with the bay at the key after the guns")
+	check(lay.has("bay_head") and lay["bay_slots"].any(func(sl): return sl["number"] == guns + 1), "a DRONES header with the bay at the key after the guns")
+	check(not lay["slots"].any(func(sl): return sl.has("bay")) and not lay["zones"].any(func(z): return z["group"] == 4), "the bay is in no fire group and has no drop zone")
 	check(s.fire_slot(guns + 1, Vector2.ZERO), "its key launches")
 	eq(s.bay_state(uid)["status"], "drone out", "now out")
 	check(not s.fire_slot(guns + 1, Vector2.ZERO), "and a second press does nothing")
@@ -367,3 +369,34 @@ func test_a_launched_drone_waits_hidden_in_the_bay_then_shows_in_the_open_hatch(
 	check(absf(Drones.scale_of(a, d) - Drones.DOCKED_SCALE) < 0.1, "it leaves at the size it had on the cradle")
 	a.step(0.5)
 	check(Drones.scale_of(a, d) > 0.99, "and grows to full size")
+
+
+func test_a_drone_bay_cannot_be_put_in_a_fire_group() -> void:
+	var player = null
+	var uid := -1
+	for t in 10:
+		player = Shipgen.build("concord", "large", 70 + t, 300.0)
+		uid = Shipgen.add_bay(player, "drone_bay_mk2", "laser_drone_mk2")
+		if uid >= 0:
+			break
+	check(uid >= 0, "a ship with a bay")
+	if uid < 0:
+		return
+	player.inventory.add("laser_drone_mk2", 1)
+	player.inventory.add(PART, 5)
+	var s := Session.new()
+	s.start(player, Shipgen.build("rustfangs", "medium", 3, 100.0), 5)
+	var ws = s.arena.weapons
+	for g in [0, 1, 2, 3]:
+		eq(GunBadges.assign(player.components, ws, uid, g), -1, "assign to group %d is refused" % g)
+	eq(GunBadges.cycle(player.components, ws, uid), -1, "a right-click cycle is refused")
+	player.components.set_group_choice(uid, 2)
+	eq(player.components.group_choice(uid), -1, "and the component takes no group at all")
+	var bar := WeaponBar.new()
+	bar.bind(s, func() -> Vector2: return Vector2.ZERO)
+	var lay := bar.layout()
+	var b: Dictionary = lay["bay_slots"][0]
+	var over: Vector2 = b["rect"].get_center() + bar._base(lay)
+	eq(bar.group_at(over), -1, "dropping a gun on the DRONES header is refused like any invalid drop")
+	check(bar.slot_at(over).is_empty(), "a bay slot cannot be picked up to drag")
+	bar.free()
