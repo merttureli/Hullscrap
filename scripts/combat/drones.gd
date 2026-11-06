@@ -29,6 +29,7 @@ const SHOW_AFTER_S := 0.12  ## seconds a launched drone is still inside the hatc
 const HOME_DIST := 26.0  ## px from the hatch at which a returning drone is docked
 const EVASION := 0.12  ## the chance a turret's tracer misses a drone, on top of its accuracy
 const LIMPET_REACH := 1900.0  ## an enemy throws limpets and pods only when the foe is this near
+const LIMPET_SIGHT := 3.0  ## point defence and turrets engage a flying limpet or pod from this many times their usual reach
 const AI_SKILL := 0.75  ## how often the enemy picks its best-predicted throw
 const DRONE_EVENTS := ["drone_launch", "drone_shot", "drone_hit", "drone_down", "drone_home", "drone_recall"]
 
@@ -606,12 +607,13 @@ static func turret_target(arena, idx: int, m: Dictionary, w: Dictionary, uid: in
 	var from: Vector2 = arena.local_to_world(idx, m["pos"])
 	var reach: float = float((Effects_of(w).get("intercept") as Dictionary)["range"]) if pd else float(w["range"]) * 0.9
 	var best = null
-	var best_d := reach * reach
+	var best_d := INF
 	for d in arena.drones:
 		if d["owner"] == idx or d["hp"] <= 0.0 or _clamped(d):
 			continue
+		var rr := reach * (LIMPET_SIGHT if Limpets.is_limpet(d) else 1.0)  # a slow limpet or pod is seen coming from further off
 		var dd := from.distance_squared_to(d["pos"])
-		if dd <= best_d and arena.weapons.in_arc(arena, idx, m, d["pos"]):
+		if dd <= rr * rr and dd <= best_d and arena.weapons.in_arc(arena, idx, m, d["pos"]):
 			best_d = dd
 			best = d
 	return null if best == null else {"pos": best["pos"], "vel": best["vel"], "drone": best, "d2": best_d}

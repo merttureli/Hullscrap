@@ -17,9 +17,9 @@
     "no_air": 0.0
    },
    "intruder": {
-    "dps": 6.0,
+    "dps": 10.0,
     "reach": 1.6,
-    "sabotage_dps": 4.0,
+    "sabotage_dps": 6.0,
     "ion": false
    },
    "notes": "A boarding robot (docs/DRONES.md section 6): a hostile unit in the crew sim of the ship it was dropped into (ship.intruders, scripts/crew/intruders.gd). It fights crew in reach, otherwise walks to the nearest powered system and wrecks it. Mk II ion-locks the system. It never comes home."
@@ -41,9 +41,9 @@
     "no_air": 0.0
    },
    "intruder": {
-    "dps": 5.0,
+    "dps": 7.0,
     "reach": 1.6,
-    "sabotage_dps": 2.5,
+    "sabotage_dps": 4.0,
     "ion": true
    },
    "notes": "A boarding robot (docs/DRONES.md section 6): a hostile unit in the crew sim of the ship it was dropped into (ship.intruders, scripts/crew/intruders.gd). It fights crew in reach, otherwise walks to the nearest powered system and wrecks it. Mk II ion-locks the system. It never comes home."
@@ -65,9 +65,9 @@
     "no_air": 0.0
    },
    "intruder": {
-    "dps": 8.0,
+    "dps": 12.0,
     "reach": 1.6,
-    "sabotage_dps": 4.0,
+    "sabotage_dps": 8.0,
     "ion": false
    },
    "notes": "A boarding robot (docs/DRONES.md section 6): a hostile unit in the crew sim of the ship it was dropped into (ship.intruders, scripts/crew/intruders.gd). It fights crew in reach, otherwise walks to the nearest powered system and wrecks it. Mk II ion-locks the system. It never comes home."

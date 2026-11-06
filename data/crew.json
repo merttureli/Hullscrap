@@ -43,7 +43,7 @@
 		"scrape": {"priority": 85, "seconds": 6.0, "slots": 1},
 		"rest": {"priority": 10}
 	},
-	"intruder": {"chase": 9, "soldier_chase": 14, "crew_dps": 7.0, "soldier_dps": 14.0, "robot_step_s": 0.5, "sabotage_every": 1.0, "ion_lock_s": 6.0, "label": "fighting a boarding robot", "robot_label": "boarding robot"},
+	"intruder": {"chase": 9, "soldier_chase": 14, "crew_dps": 4.0, "soldier_dps": 10.0, "robot_step_s": 0.5, "sabotage_every": 1.0, "ion_lock_s": 6.0, "label": "fighting a boarding robot", "robot_label": "boarding robot"},
 	"drone": {"species": "drone", "item": "repair_drone", "name": "Drone", "power": 1.0},
 	"drone_jobs": ["extinguish", "repair_breach", "repair_component", "repair_block", "repair_belt", "restock", "clear_wreck"],
 	"manned": {"helm_evasion": 0.05, "weapon_cooldown": 0.1, "process_speed": 0.3},
