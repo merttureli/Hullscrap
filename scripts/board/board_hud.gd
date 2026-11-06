@@ -8,6 +8,7 @@ extends Control
 const Site = preload("res://scripts/board/site.gd")
 const Tracker = preload("res://scripts/board/tracker.gd")
 const Arms = preload("res://scripts/board/arms.gd")
+const Orders = preload("res://scripts/board/orders.gd")
 const Cards = preload("res://scripts/board/board_cards.gd")
 const Loadout = preload("res://scripts/board/board_loadout.gd")
 const Mods = preload("res://scripts/board/mods.gd")
@@ -95,7 +96,9 @@ func _draw() -> void:
 	Cards.draw_cards(self, size)
 	_draw_feed(size)
 	_draw_reveals(size)
+	_draw_squad_marks(size)
 	_draw_prompt(size)
+	_draw_squad_hint(size)
 	_draw_leave(size)
 	_draw_panel(size)
 	_draw_shop(size)
@@ -108,6 +111,13 @@ func _draw() -> void:
 	_draw_fade(size)
 	_foe_names()
 	_draw_hover(size)
+
+
+## The squad keys, dim along the bottom edge while followers are aboard.
+func _draw_squad_hint(size: Vector2) -> void:
+	if view.session.party.is_empty() or view.picking or view.panel >= 0 or view.shop >= 0:
+		return
+	_centred("Right-click a room: send the squad     B: call back     1 / 2 or click a card: select", Vector2(size.x / 2.0, size.y - 14.0), 13, DIM_TEXT)
 
 
 ## The name line of each foe on its feet that the soldier can make out ("Kett pirate"), as a hover.
@@ -343,6 +353,31 @@ func _draw_reveals(size: Vector2) -> void:
 		var label := str(sp[1])
 		var w := _font().get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 		_text(label, Vector2(clampf(at.x - w / 2.0, 8.0, size.x - w - 8.0), at.y - 18.0 - 15.0 * float(i % 3)), 13, col)  # (staggered, so two near each other can be read)
+
+
+## The room each follower was sent to (a frame, and a numbered flag in its colour, held at the screen's edge when the room is off it) and a ring under each selected
+## follower. Drawn here, not in the dark of the site, so they show in rooms nobody has lit.
+func _draw_squad_marks(size: Vector2) -> void:
+	var s = view.session
+	var inner := Rect2(Vector2(30.0, 90.0), size - Vector2(60.0, 330.0))
+	for i in s.party.size():
+		var p: Dictionary = s.party[i]
+		var col := Orders.colour(i)
+		var o: Dictionary = p.get("order", {})
+		if not o.is_empty():
+			var r: Rect2i = s.site.rooms[int(o["room"])]["rect"]
+			var a: Vector2 = view.to_screen(Vector2(r.position)) + Vector2(4.0 + 4.0 * float(i), 4.0 + 4.0 * float(i))
+			var b: Vector2 = view.to_screen(Vector2(r.end)) - Vector2(4.0 + 4.0 * float(i), 4.0 + 4.0 * float(i))
+			draw_rect(Rect2(a, b - a), Color(col, 0.08))
+			draw_rect(Rect2(a, b - a), Color(col, 0.8), false, 2.0)
+			var at := Vector2(clampf(a.x + 14.0, inner.position.x, inner.end.x), clampf(a.y + 16.0 + 24.0 * float(i), inner.position.y, inner.end.y))
+			draw_circle(at, 10.0, col)
+			_text(str(i + 1), at + Vector2(-4.0, 5.0), 14, Color.BLACK)
+			_text("%s: %s" % [p["m"].name, Orders.room_name(s.site, int(o["room"]))], at + Vector2(14.0, 5.0), 13, col)
+		if bool(p.get("sel", false)) and not p["m"].is_down():
+			var c: Vector2 = view.to_screen(p["m"].pos) + Vector2(0.0, 12.0)
+			draw_arc(c, 17.0, 0.0, TAU, 28, Color(col, 0.95), 2.5, true)
+			draw_arc(c, 21.0, 0.0, TAU, 28, Color(col, 0.35), 1.5, true)
 
 
 ## A person's goods: three rows with a price, 1-3 buys.
