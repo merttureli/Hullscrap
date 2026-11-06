@@ -16,10 +16,10 @@ const SPECS := {
 			"kett_hive_swarm_launcher",
 			"kett_chitin_thrower",
 			"kett_chitin_thrower",
+			"laser_burst",
+			"laser_burst",
 			"kett_drone_picket",
-			"kett_drone_picket",
-			"rattle_burst_scrap",
-			"rattle_burst_scrap"
+			"kett_drone_picket"
 		],
 		"engines": [
 			"engine_scrap_mk2",
@@ -27,6 +27,7 @@ const SPECS := {
 			"engine_scrap_mk2"
 		],
 		"shields": [
+			"kett_hive_battery",
 			"kett_hive_battery"
 		],
 		"systems": [
@@ -39,8 +40,8 @@ const SPECS := {
 			"reactor_mk2",
 			"reactor_mk2"
 		],
-		"armour": 1,
-		"aim": 0.55,
+		"armour": 2,
+		"aim": 0.7,
 		"beds": 3,
 		"hull_seed": 11,
 		"morale": "flagship_kett",
@@ -62,9 +63,9 @@ const SPECS := {
 			"Pip"
 		],
 		"blurb": "x",
-		"yield_hp": 100,
 		"interior": 44,
-		"after_s": 150
+		"after_s": 0,
+		"yield_frac": 0.8
 	},
 	"emberkin": {
 		"stage": 5,
@@ -73,11 +74,13 @@ const SPECS := {
 		"role": "kiln-barge",
 		"weapons": [
 			"emberkin_pyre_lance",
-			"laser_mk2",
-			"laser_mk2",
-			"laser_mk2",
-			"rattle_burst_scrap",
-			"rattle_burst_scrap"
+			"laser_mk3",
+			"laser_mk3",
+			"laser_mk3",
+			"laser_mk3",
+			"pulse_mk3",
+			"laser_turret_mk1",
+			"laser_turret_mk1"
 		],
 		"engines": [
 			"emberkin_pyre_drive",
@@ -85,6 +88,7 @@ const SPECS := {
 			"emberkin_pyre_drive"
 		],
 		"shields": [
+			"emberkin_hearth_shield",
 			"emberkin_hearth_shield",
 			"emberkin_hearth_shield"
 		],
@@ -98,8 +102,8 @@ const SPECS := {
 			"emberkin_furnace_core",
 			"reactor_mk2"
 		],
-		"armour": 2,
-		"aim": 0.6,
+		"armour": 3,
+		"aim": 0.75,
 		"beds": 3,
 		"hull_seed": 21,
 		"morale": "flagship_emberkin",
@@ -119,9 +123,9 @@ const SPECS := {
 			"Mott-em"
 		],
 		"blurb": "x",
-		"interior": 54,
-		"yield_hp": 250,
-		"after_s": 150
+		"interior": 64,
+		"after_s": 0,
+		"yield_frac": 0.8
 	},
 	"prismatic": {
 		"stage": 6,
@@ -129,14 +133,14 @@ const SPECS := {
 		"captain": "Ilvane",
 		"role": "cathedral",
 		"weapons": [
-			"laser_mk2",
-			"laser_mk2",
-			"laser_mk2",
-			"laser_mk2",
-			"rattle_burst_scrap",
-			"rattle_burst_scrap",
-			"rattle_burst_scrap",
-			"rattle_burst_scrap"
+			"laser_mk3",
+			"laser_mk3",
+			"laser_mk3",
+			"laser_mk3",
+			"laser_mk3",
+			"laser_mk3",
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"engine_mk2",
@@ -144,6 +148,8 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
+			"prismatic_lattice_shield",
+			"prismatic_lattice_shield",
 			"prismatic_lattice_shield"
 		],
 		"systems": [
@@ -155,7 +161,7 @@ const SPECS := {
 			"prismatic_song_reactor",
 			"reactor_mk2"
 		],
-		"armour": 1,
+		"armour": 3,
 		"aim": 0.95,
 		"beds": 3,
 		"hull_seed": 31,
@@ -176,9 +182,9 @@ const SPECS := {
 			"Mott-pr"
 		],
 		"blurb": "x",
-		"interior": 56,
-		"yield_hp": 100,
-		"after_s": 150
+		"interior": 66,
+		"after_s": 0,
+		"yield_frac": 0.8
 	},
 	"basalt": {
 		"stage": 4,
@@ -188,10 +194,10 @@ const SPECS := {
 		"weapons": [
 			"basalt_quarry_driver",
 			"basalt_quarry_driver",
+			"basalt_quarry_driver",
 			"basalt_magma_spitter",
-			"laser_mk2",
-			"basalt_pumice_flak",
-			"basalt_pumice_flak",
+			"pulse_heavy",
+			"pulse_heavy",
 			"basalt_pumice_flak",
 			"basalt_pumice_flak"
 		],
@@ -201,7 +207,8 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
-			"shield_mk1"
+			"shield_mk2",
+			"shield_mk2"
 		],
 		"systems": [
 			"basalt_stonehide_bay",
@@ -213,7 +220,7 @@ const SPECS := {
 			"reactor_mk1"
 		],
 		"armour": 4,
-		"aim": 0.5,
+		"aim": 0.65,
 		"beds": 3,
 		"hull_seed": 41,
 		"morale": "flagship_basalt",
@@ -241,8 +248,8 @@ const SPECS := {
 			"Mott-ba"
 		],
 		"blurb": "x",
-		"yield_hp": 100,
-		"after_s": 150
+		"after_s": 0,
+		"yield_frac": 0.8
 	},
 	"sporeling": {
 		"stage": 5,
@@ -252,12 +259,12 @@ const SPECS := {
 		"weapons": [
 			"sporeling_spore_cannon",
 			"sporeling_spore_cannon",
+			"sporeling_spore_cannon",
 			"sporeling_rot_pod",
-			"shrapnel_cannon_scrap",
+			"sporeling_rot_pod",
 			"sporeling_pollen_turret",
 			"sporeling_pollen_turret",
-			"rattle_burst_scrap",
-			"rattle_burst_scrap"
+			"swarm_pod"
 		],
 		"engines": [
 			"engine_mk2",
@@ -265,6 +272,7 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
+			"sporeling_mycelium_shield",
 			"sporeling_mycelium_shield",
 			"sporeling_mycelium_shield"
 		],
@@ -278,8 +286,8 @@ const SPECS := {
 			"sporeling_bloom_reactor",
 			"reactor_mk1"
 		],
-		"armour": 1,
-		"aim": 0.5,
+		"armour": 2,
+		"aim": 0.8,
 		"beds": 3,
 		"hull_seed": 51,
 		"prow_add": 3,
@@ -300,8 +308,8 @@ const SPECS := {
 			"Mott-sp"
 		],
 		"blurb": "x",
-		"yield_hp": 100,
-		"after_s": 125
+		"after_s": 0,
+		"yield_frac": 0.8
 	},
 	"mire": {
 		"stage": 5,
@@ -311,18 +319,20 @@ const SPECS := {
 		"weapons": [
 			"mire_steam_lance",
 			"mire_steam_lance",
+			"mire_steam_lance",
+			"mire_bog_mortar",
 			"mire_bog_mortar",
 			"laser_mk2",
 			"mire_mist_projector",
-			"mire_mist_projector",
-			"rattle_burst_scrap",
-			"rattle_burst_scrap"
+			"laser_turret_mk1",
+			"laser_turret_mk1"
 		],
 		"engines": [
 			"engine_mk2",
 			"engine_mk2"
 		],
 		"shields": [
+			"mire_rain_shield",
 			"mire_rain_shield"
 		],
 		"systems": [
@@ -335,8 +345,8 @@ const SPECS := {
 			"mire_wetwell_reactor",
 			"reactor_mk2"
 		],
-		"armour": 3,
-		"aim": 0.5,
+		"armour": 4,
+		"aim": 0.65,
 		"beds": 4,
 		"hull_seed": 61,
 		"morale": "flagship_mire",
@@ -358,8 +368,9 @@ const SPECS := {
 			"Moss"
 		],
 		"blurb": "x",
-		"yield_hp": 90,
-		"after_s": 130
+		"after_s": 0,
+		"yield_frac": 0.8,
+		"interior": 56
 	},
 	"fenn": {
 		"stage": 5,
@@ -368,11 +379,11 @@ const SPECS := {
 		"role": "bazaar-barge",
 		"weapons": [
 			"fenn_market_missile",
-			"laser_mk2",
-			"laser_mk2",
-			"laser_mk2",
-			"fenn_twitch_cannon",
-			"fenn_twitch_cannon",
+			"fenn_market_missile",
+			"laser_chain",
+			"laser_chain",
+			"pulse_chain",
+			"pulse_chain",
 			"fenn_spark_lattice",
 			"fenn_spark_lattice"
 		],
@@ -382,6 +393,8 @@ const SPECS := {
 			"fenn_haggle_engine"
 		],
 		"shields": [
+			"shield_mk2",
+			"shield_mk2",
 			"shield_mk2"
 		],
 		"systems": [
@@ -393,8 +406,8 @@ const SPECS := {
 			"fenn_jury_reactor",
 			"reactor_mk2"
 		],
-		"armour": 1,
-		"aim": 0.6,
+		"armour": 2,
+		"aim": 0.8,
 		"beds": 3,
 		"hull_seed": 71,
 		"morale": "flagship_fenn",
@@ -414,9 +427,9 @@ const SPECS := {
 			"Mott-fe"
 		],
 		"blurb": "x",
-		"yield_hp": 130,
 		"interior": 44,
-		"after_s": 150
+		"after_s": 0,
+		"yield_frac": 0.8
 	},
 	"gauntling": {
 		"stage": 4,
@@ -426,12 +439,12 @@ const SPECS := {
 		"weapons": [
 			"gauntling_arc_hammer",
 			"gauntling_arc_hammer",
+			"gauntling_arc_hammer",
+			"gauntling_arc_hammer",
 			"gauntling_scrap_shotgun",
 			"gauntling_scrap_shotgun",
 			"gauntling_tesla_picket",
-			"gauntling_tesla_picket",
-			"rattle_burst_scrap",
-			"rattle_burst_scrap"
+			"pulse_mk2"
 		],
 		"engines": [
 			"gauntling_overclock_engine",
@@ -439,7 +452,8 @@ const SPECS := {
 			"gauntling_overclock_engine"
 		],
 		"shields": [
-			"shield_scrap_mk1"
+			"shield_mk2",
+			"shield_mk2"
 		],
 		"systems": [
 			"gauntling_graft_bay"
@@ -449,8 +463,8 @@ const SPECS := {
 			"gauntling_arc_core",
 			"reactor_mk1"
 		],
-		"armour": 2,
-		"aim": 0.6,
+		"armour": 3,
+		"aim": 0.75,
 		"beds": 2,
 		"hull_seed": 81,
 		"morale": "flagship_gauntling",
@@ -470,8 +484,8 @@ const SPECS := {
 			"Spark-5"
 		],
 		"blurb": "x",
-		"yield_hp": 80,
-		"after_s": 150
+		"after_s": 0,
+		"yield_frac": 0.8
 	},
 	"grundl": {
 		"stage": 5,
@@ -481,9 +495,9 @@ const SPECS := {
 		"weapons": [
 			"grundl_slug_mortar",
 			"grundl_slug_mortar",
-			"laser_mk2",
-			"laser_mk2",
-			"grundl_barge_flak",
+			"grundl_slug_mortar",
+			"laser_mk3",
+			"laser_mk3",
 			"grundl_barge_flak",
 			"grundl_barge_flak",
 			"grundl_barge_flak"
@@ -495,6 +509,7 @@ const SPECS := {
 			"grundl_hauler_thrusters"
 		],
 		"shields": [
+			"grundl_freight_shield",
 			"grundl_freight_shield"
 		],
 		"systems": [
@@ -505,8 +520,8 @@ const SPECS := {
 			"reactor_mk2",
 			"reactor_mk1"
 		],
-		"armour": 3,
-		"aim": 0.45,
+		"armour": 4,
+		"aim": 0.6,
 		"beds": 3,
 		"hull_seed": 91,
 		"morale": "flagship_grundl",
@@ -527,9 +542,9 @@ const SPECS := {
 			"Mott-gr"
 		],
 		"blurb": "x",
-		"yield_hp": 110,
-		"after_s": 150,
-		"ammo": 120
+		"after_s": 0,
+		"ammo": 120,
+		"yield_frac": 0.8
 	},
 	"human": {
 		"stage": 4,
@@ -538,12 +553,12 @@ const SPECS := {
 		"role": "flagship",
 		"weapons": [
 			"human_concord_railgun",
+			"human_concord_railgun",
 			"human_volley_rack",
-			"pulse_mk1",
-			"shrapnel_cannon_scrap",
-			"human_flak_screen",
-			"human_flak_screen",
-			"human_flak_screen",
+			"human_volley_rack",
+			"pulse_mk2",
+			"pulse_mk2",
+			"laser_mk2",
 			"human_flak_screen"
 		],
 		"engines": [
@@ -552,6 +567,8 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
+			"shield_mk2",
+			"shield_mk2",
 			"shield_mk2"
 		],
 		"systems": [
@@ -563,8 +580,8 @@ const SPECS := {
 			"human_reactor_plus",
 			"reactor_mk2"
 		],
-		"armour": 2,
-		"aim": 0.7,
+		"armour": 3,
+		"aim": 0.8,
 		"beds": 4,
 		"hull_seed": 101,
 		"morale": "flagship_human",
@@ -584,7 +601,7 @@ const SPECS := {
 			"Pvt. Lindqvist"
 		],
 		"blurb": "x",
-		"yield_hp": 110,
-		"after_s": 150
+		"after_s": 0,
+		"yield_frac": 0.8
 	}
 }

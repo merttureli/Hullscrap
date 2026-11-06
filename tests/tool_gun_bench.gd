@@ -10,7 +10,7 @@ extends SceneTree
 ##   gun, stationary, face to face for `secs`; the winner is the hull with more structure left. Win rate over the `seeds` hulls (plain and shielded).
 ## counters: point defence against missiles and slow shells (a hull with 3 pd_mk2 against the same hull without), shields against beams and lasers (the solo damage on
 ##   shielded hulls over plain ones, by family), and the armour table (the share of a gun's damage type the plating lets through).
-## Keys: tiers (default 1,2,3), seeds (default 6 of each kind), secs (60), jobs (processes, default 4), out (write the rows), sum (print the tables of out files).
+## Keys: gap (px, solo: one distance for every gun instead of 0.65 x its range), tiers (default 1,2,3), seeds (default 6 of each kind), secs (60), jobs (processes, default 4), out (write the rows), sum (print the tables of out files).
 ## Internal: shard (k/n), rows.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -84,7 +84,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["mode", "tiers", "seeds", "secs", "guns"]:
+	for key in ["mode", "tiers", "seeds", "secs", "guns", "gap"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
@@ -207,7 +207,7 @@ func _arena(spec: String, seed_value: int, range_px: float) -> Dictionary:
 	me.inventory.add("scrap", 999)
 	var foe: Ship = Session.load_ship(spec)
 	a.add_ship(me, Vector2.ZERO)
-	var gap := clampf(0.65 * range_px, 250.0, 650.0)
+	var gap := float(args["gap"]) if args.has("gap") else clampf(0.65 * range_px, 250.0, 650.0)  # gap=<px>: the hull-to-hull distance of every gun, e.g. 880 (0.7 x 1260, where a ship with lasers holds)
 	a.add_ship(foe, Vector2.ZERO)
 	var co = a.ships[1]
 	var bow: float = (a.ships[0].pivot.y - BOW_CELL_Y) * a.CELL

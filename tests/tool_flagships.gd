@@ -84,7 +84,7 @@ func make(race: String) -> void:
 	var names: Array = sp["names"]
 	for i in names.size():
 		d["crew_plan"].append({"name": names[i], "species": species[i % species.size()]})
-	d["ai"] = {"aim_skill": float(sp["aim"]), "morale": str(sp["morale"]), "faction": "flagship_" + race, "captain": str(sp["captain"]), "break_after_s": float(sp.get("after_s", 120)), "break_structure": snappedf(1.0 - float(sp.get("yield_hp", 70)) / maxf(Structure.totals(ship).y, 1.0), 0.001)}  # it yields after losing yield_hp of its blocks
+	d["ai"] = {"aim_skill": float(sp["aim"]), "morale": str(sp["morale"]), "faction": "flagship_" + race, "captain": str(sp["captain"]), "break_after_s": float(sp.get("after_s", 120)), "break_structure": snappedf(1.0 - (float(sp["yield_hp"]) / maxf(Structure.totals(ship).y, 1.0) if sp.has("yield_hp") else float(sp.get("yield_frac", 0.1))), 0.001)}  # it yields after losing yield_frac of its blocks (or yield_hp of them)
 	if bool(sp.get("ram", false)):
 		d["ai"]["style"] = "rammer"
 	d["flagship"] = {"race": race, "role": str(sp.get("role", "flagship"))}
