@@ -130,6 +130,7 @@ Boarding, a rebuilt hull, the Ledger, and a balance pass measured by a playtest 
 - **Settings → Ledger**: Full, Warnings only or Off. After your first finished run it asks once whether to keep it on.
 
 ## Economy and balance
+- **Longer fights, room to flank.** Every ship gun reaches 1.4x as far and its shots fly 1.2x as fast (point defence 1.15x). A pilot holds the range that most of its firepower reaches, not that of its shortest gun, so a wide many-gun ship no longer creeps in for one flak turret. Hulls over 1000 mass turn slower (a 2000-mass ship takes about three times as long to turn 90 degrees), so a quick ship can work round a big one. Flagships yield later (fights of 110 to 150 s).
 - **Fuel**: you start with 22. It costs 14 credits, at 24 of 33 stations (6–10 units a visit). Canisters drift by now and then.
 - **Small shops** in traders and stores sell rare items, mods and blueprints, among them Laser Mk2, Shield Mk2 and the Assembly Rig.
 - **About ten events** can teach a blueprint, at a price.

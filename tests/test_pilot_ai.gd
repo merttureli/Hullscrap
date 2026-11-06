@@ -152,6 +152,27 @@ func test_the_hold_distance_counts_each_hull_and_each_gun() -> void:
 	check(gap < 0.7 * 900.0 - 50.0 and gap >= PilotAI.HULL_MARGIN - 1e-3, "the large ship's flank turrets ask for a closer gap than its bow guns would (%d)" % gap)
 
 
+## One short gun among long ones does not pull the ship in: it holds the gap that the guns with 60% of the dps reach (docs/GUNS.md 13).
+func test_one_short_gun_does_not_set_the_hold_distance() -> void:
+	var a := Arena.new(1)
+	a.add_ship(Ship.from_design(COURIER), Vector2.ZERO)
+	a.add_ship(Session.load_ship(PIRATE), Vector2(0.0, -2000.0), PI)
+	var ai := PilotAI.new(a, 0, 1)
+	var armed: Dictionary = ai._intact()
+	check(not armed.is_empty(), "the courier has a gun")
+	var m: Dictionary = armed[armed.keys()[0]].duplicate()
+	m["id"] = "pulse_mk1"
+	var short: Dictionary = m.duplicate()
+	short["id"] = "flak_turret"
+	var d_long: float = ai.hold_distance(Vector2.UP, {1: m})
+	var d_short: float = ai.hold_distance(Vector2.UP, {1: short})
+	check(d_short < d_long - 100.0, "a flak gun alone holds a closer gap than a pulse gun (%d, %d)" % [d_short, d_long])
+	var w: Dictionary = a.weapons.def("pulse_mk1")
+	var mixed: Dictionary = {1: m, 2: short, 3: m.duplicate(), 4: m.duplicate()}
+	near(ai.hold_distance(Vector2.UP, mixed), d_long, "three pulse guns with a flak gun: the pulse range is held", 1.0)
+	check(float(w["range"]) > 1000.0, "and the gun ranges are the longer ones")
+
+
 ## A starter flown by the AI reaches a large generated enemy (radius 600+ px, more than the starter's gun range between
 ## the bounding circles) and hits it.
 func test_a_starter_reaches_a_large_enemy_and_hits_it() -> void:

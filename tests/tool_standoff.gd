@@ -313,7 +313,7 @@ func fight(stage: int, e: Dictionary, starter := "") -> Dictionary:
 	pilot.foe_morale = sess.morale
 	var a = sess.arena
 	var d := {"p_shots": 0, "e_shots": 0, "p_hull": 0.0, "e_hull": 0.0, "p_part": 0.0, "e_part": 0.0, "p_shield": 0, "e_shield": 0, "p_hits": 0, "e_hits": 0,
-		"in_range": 0, "samples": 0, "gap": 0.0, "t_half": -1.0, "t_break": -1.0, "t_gun1": -1.0, "t_guns": -1.0}
+		"in_range": 0, "samples": 0, "gap": 0.0, "cdist": 0.0, "bow30": 0, "t_half": -1.0, "t_break": -1.0, "t_gun1": -1.0, "t_guns": -1.0}
 	var cursor := 0
 	var n := 0
 	var ticks := int(cap * 60.0)
@@ -360,6 +360,8 @@ func _sample(sess: Session, pilot: PilotAI, d: Dictionary, t: float) -> void:
 		d["t_guns"] = t  # and the last
 	var to_foe: Vector2 = a.ships[Session.ENEMY].flight.pos - co.flight.pos
 	d["gap"] += to_foe.length() - pilot.extent(0, to_foe.normalized()) - pilot.extent(1, -to_foe.normalized())
+	d["cdist"] += to_foe.length()  # centre to centre, and whether the foe's bow is within 30 degrees of pointing at us
+	d["bow30"] += int(absf(angle_difference(a.ships[Session.ENEMY].flight.angle, (to_foe * -1.0).angle() + PI * 0.5)) < deg_to_rad(30.0))
 	var reach := false
 	for uid in co.mounts:
 		var m: Dictionary = co.mounts[uid]

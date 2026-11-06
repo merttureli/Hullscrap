@@ -29,8 +29,8 @@ const GROW_S := 0.25  ## seconds from the hatch mouth to its full size
 const DOCKED_SCALE := 0.714  ## the size it has on the cradle (the view draws a flying drone 1/this larger)
 const HOME_DIST := 26.0  ## px from the hatch at which a returning drone is docked
 const EVASION := 0.12  ## the chance a turret's tracer misses a drone, on top of its accuracy
-const LIMPET_REACH := 1900.0  ## an enemy throws limpets and pods only when the foe is this near
-const LIMPET_SIGHT := 3.0  ## point defence and turrets engage a flying limpet or pod from this many times their usual reach
+const LIMPET_REACH := 2660.0  ## an enemy throws limpets and pods only when the foe is this near
+const LIMPET_SIGHT := 3.6  ## point defence and turrets engage a flying limpet or pod from this many times their usual reach
 const AI_SKILL := 0.75  ## how often the enemy picks its best-predicted throw
 const DRONE_EVENTS := ["drone_launch", "drone_shot", "drone_hit", "drone_down", "drone_home", "drone_recall"]
 
@@ -658,7 +658,7 @@ static func ai_launch(arena, idx: int, foe: int) -> void:
 			if co.flight.pos.distance_to(arena.ships[foe].flight.pos) < LIMPET_REACH:
 				var hatch: Vector2 = arena.local_to_world(idx, co.bays[uid]["pos"])
 				launch(arena, idx, uid, Limpets.ai_aim(arena, idx, hatch, k["drone"], AI_SKILL))
-		elif co.flight.pos.distance_to(arena.ships[foe].flight.pos) < 2600.0:
+		elif co.flight.pos.distance_to(arena.ships[foe].flight.pos) < 3640.0:
 			launch(arena, idx, uid)
 
 

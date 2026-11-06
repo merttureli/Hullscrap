@@ -12,10 +12,10 @@
     "hp": 2,
     "art": "fire_limpet",
     "magnet": {
-     "launch": 440.0,
+     "launch": 530.0,
      "pull": 1500.0,
      "d0": 6.0,
-     "cap": 560.0,
+     "cap": 670.0,
      "turn": 1.7
     },
     "effect": {
@@ -38,10 +38,10 @@
     "hp": 3,
     "art": "fire_limpet",
     "magnet": {
-     "launch": 440.0,
+     "launch": 530.0,
      "pull": 1500.0,
      "d0": 6.0,
-     "cap": 560.0,
+     "cap": 670.0,
      "turn": 1.7
     },
     "effect": {
@@ -64,10 +64,10 @@
     "hp": 2,
     "art": "poison_limpet",
     "magnet": {
-     "launch": 440.0,
+     "launch": 530.0,
      "pull": 1500.0,
      "d0": 6.0,
-     "cap": 560.0,
+     "cap": 670.0,
      "turn": 1.7
     },
     "effect": {
@@ -90,10 +90,10 @@
     "hp": 3,
     "art": "poison_limpet",
     "magnet": {
-     "launch": 440.0,
+     "launch": 530.0,
      "pull": 1500.0,
      "d0": 6.0,
-     "cap": 560.0,
+     "cap": 670.0,
      "turn": 1.7
     },
     "effect": {
@@ -116,10 +116,10 @@
     "hp": 2,
     "art": "heat_limpet",
     "magnet": {
-     "launch": 440.0,
+     "launch": 530.0,
      "pull": 1500.0,
      "d0": 6.0,
-     "cap": 560.0,
+     "cap": 670.0,
      "turn": 1.7
     },
     "effect": {
@@ -141,10 +141,10 @@
     "hp": 3,
     "art": "heat_limpet",
     "magnet": {
-     "launch": 440.0,
+     "launch": 530.0,
      "pull": 1500.0,
      "d0": 6.0,
-     "cap": 560.0,
+     "cap": 670.0,
      "turn": 1.7
     },
     "effect": {
@@ -165,10 +165,10 @@
     "hp": 4,
     "art": "boarder_pod",
     "magnet": {
-     "launch": 400.0,
+     "launch": 480.0,
      "pull": 1350.0,
      "d0": 6.0,
-     "cap": 500.0,
+     "cap": 600.0,
      "turn": 1.5
     },
     "robots": [
@@ -188,10 +188,10 @@
     "hp": 5,
     "art": "boarder_pod_ion",
     "magnet": {
-     "launch": 400.0,
+     "launch": 480.0,
      "pull": 1350.0,
      "d0": 6.0,
-     "cap": 500.0,
+     "cap": 600.0,
      "turn": 1.5
     },
     "robots": [
@@ -211,10 +211,10 @@
     "hp": 6,
     "art": "boarder_pod",
     "magnet": {
-     "launch": 400.0,
+     "launch": 480.0,
      "pull": 1350.0,
      "d0": 6.0,
-     "cap": 500.0,
+     "cap": 600.0,
      "turn": 1.5
     },
     "robots": [

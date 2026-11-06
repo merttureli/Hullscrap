@@ -306,7 +306,7 @@ func test_the_selection_card_shows_the_stats_of_the_selected_def() -> void:
 	rows = {}
 	for r in b.hud.card.info()["stats"]:
 		rows[r[0]] = r[1]
-	eq([rows.get("Damage"), rows.get("Every"), rows.get("Range")], ["3", "2.1 s", "900"], "a weapon's damage, fire rate and range")
+	eq([rows.get("Damage"), rows.get("Every"), rows.get("Range")], ["3", "2.1 s", "1260"], "a weapon's damage, fire rate and range")
 	check(rows.get("Gimbal") == "5\u00b0", "and its aim: " + str(rows.get("Gimbal")))
 	var labels: Array = b.hud.card.info()["keywords"].map(func(k): return k["label"])
 	check(labels.has("LASER") and labels.has("ENERGY"), "a part's kind and damage type are chips: " + str(labels))

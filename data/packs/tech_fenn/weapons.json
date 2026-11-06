@@ -1,7 +1,7 @@
 {
   "weapons": {
-    "fenn_twitch_cannon": {"kind": "bolt", "sound": "sig_pop", "damage_type": "energy", "damage": 1, "cooldown": 0.6, "range": 800, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 800, "aim": "turret", "turret": true, "gimbal": 0, "arc": 270, "track": 130, "accuracy": 0.75, "rapid": true},
-    "fenn_spark_lattice": {"kind": "bolt", "damage_type": "energy", "damage": 3.5, "cooldown": 3.15, "range": 750, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 750, "aim": "turret", "turret": true, "gimbal": 0, "arc": 270, "track": 140, "accuracy": 0.8, "effects": {"shard": {"splinters": 3, "dmg": 1.0}}},
-    "fenn_market_missile": {"kind": "missile", "damage_type": "explosive", "damage": 3.75, "cooldown": 4.9, "range": 1000, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 340, "turn": 2.0, "splash": 1, "pass_shields": true, "ammo": "scrap", "aim": "fixed", "turret": false, "gimbal": 5}
+    "fenn_twitch_cannon": {"kind": "bolt", "sound": "sig_pop", "damage_type": "energy", "damage": 1, "cooldown": 0.6, "range": 1120, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 960, "aim": "turret", "turret": true, "gimbal": 0, "arc": 270, "track": 130, "accuracy": 0.75, "rapid": true},
+    "fenn_spark_lattice": {"kind": "bolt", "damage_type": "energy", "damage": 3.5, "cooldown": 3.15, "range": 1050, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 900, "aim": "turret", "turret": true, "gimbal": 0, "arc": 270, "track": 140, "accuracy": 0.8, "effects": {"shard": {"splinters": 3, "dmg": 1.0}}},
+    "fenn_market_missile": {"kind": "missile", "damage_type": "explosive", "damage": 3.75, "cooldown": 4.9, "range": 1400, "shots": 1, "pierce": 0, "fire_chance": 0.0, "speed": 410, "turn": 2.0, "splash": 1, "pass_shields": true, "ammo": "scrap", "aim": "fixed", "turret": false, "gimbal": 5}
   }
 }
