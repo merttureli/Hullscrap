@@ -39,7 +39,7 @@
 		"charge": {"label": "CHARGE {max}", "color": "#fece5f", "hover": "Stores up to {max} volleys idle, then fires them."},
 		"pierce": {"label": "PIERCE {n}", "color": "#64c4c4", "hover": "Goes on through up to {n} more cells."},
 		"splash": {"label": "SPLASH {n}", "color": "#92fce2", "hover": "Also hits cells up to {n} away."},
-		"pd_stop": {"label": "PD CAN STOP", "color": "#ff66ff", "hover": "Point defence can shoot this shot down."},
+		"pd_stop": {"label": "PD CAN STOP", "color": "#b0a800", "hover": "Point defence can shoot this shot down."},
 		"pass_shields": {"label": "PASSES SHIELDS", "color": "#e292fc", "hover": "Ignores shields and hits the hull."},
 		"intercept": {"label": "INTERCEPT", "color": "#92fcb7", "hover": "Shoots down enemy missiles within {range} px first."},
 		"ammo": {"label": "AMMO", "color": "#c49e64", "hover": "Spends one {ammo} from the cargo per shot."},
