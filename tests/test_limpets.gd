@@ -421,3 +421,20 @@ func _fight(seed_value: int) -> String:
 
 func test_the_same_seed_gives_the_same_limpet_fight() -> void:
 	eq(_fight(3), _fight(3), "deterministic")
+
+
+func test_race_ships_pick_their_races_limpets_and_pods() -> void:
+	# Sporeling poison, Emberkin fire, Basalt heat, Gauntling boarders: the race styles are factions of the generator (Shipgen.tables), and their bays roll these kits
+	for pair in [["sporeling", "poison_limpet"], ["emberkin", "fire_limpet"], ["basalt", "heat_limpet"], ["gauntling", "boarder_pod"]]:
+		var mine := 0
+		var all := 0
+		for k in 60:
+			for size in ["small", "medium", "large"]:
+				var ship = Shipgen.from_spec(Shipgen.spec(pair[0], size, 500 + k, 300.0, false, 2))
+				if ship == null:
+					continue
+				for uid in Drones.bays_of(ship):
+					all += 1
+					mine += 1 if str(ship.components.instances[uid]["kit"]).begins_with(pair[1]) else 0
+		check(all >= 10, "%s ships carry bays (%d)" % [pair[0], all])
+		check(float(mine) > 0.5 * float(all), "%s bays favour %s: %d of %d" % [pair[0], pair[1], mine, all])
