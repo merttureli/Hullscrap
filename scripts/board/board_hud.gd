@@ -96,6 +96,7 @@ func _draw() -> void:
 	_draw_feed(size)
 	_draw_reveals(size)
 	_draw_prompt(size)
+	_draw_squad_hint(size)
 	_draw_leave(size)
 	_draw_panel(size)
 	_draw_shop(size)
@@ -108,6 +109,13 @@ func _draw() -> void:
 	_draw_fade(size)
 	_foe_names()
 	_draw_hover(size)
+
+
+## The squad keys, dim along the bottom edge while followers are aboard.
+func _draw_squad_hint(size: Vector2) -> void:
+	if view.session.party.is_empty() or view.picking or view.panel >= 0 or view.shop >= 0:
+		return
+	_centred("Right-click a room: send the squad     B: call back     1 / 2 or click a card: select", Vector2(size.x / 2.0, size.y - 14.0), 13, DIM_TEXT)
 
 
 ## The name line of each foe on its feet that the soldier can make out ("Kett pirate"), as a hover.

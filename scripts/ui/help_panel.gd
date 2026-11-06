@@ -119,6 +119,8 @@ const COLUMNS: Array = [
 		["BOARDING (an event's Board her)", [
 			["Mouse R Q F", "Aboard: fire, reload, swap, flashlight"],
 			["E (hold), L", "Hold: open, hack, revive. Tap: talk. Airlock or L: leave"],
+			["Mouse R", "Send the squad to a room: they fight, loot, hold"],
+			["B, 1 2", "Call the squad back; select follower 1 / 2 (or click a card)"],
 		]],
 	],
 ]

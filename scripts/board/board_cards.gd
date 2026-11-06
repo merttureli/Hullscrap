@@ -13,6 +13,7 @@ const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const GearActive = preload("res://scripts/board/gear_active.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Party = preload("res://scripts/board/party.gd")
+const Orders = preload("res://scripts/board/orders.gd")
 const Air = preload("res://scripts/board/air.gd")
 const HeatFoot = preload("res://scripts/board/heat_foot.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
@@ -22,6 +23,7 @@ const H := 68.0
 const GAP := 6.0
 const PAD := 16.0
 const BOTTOM := 14.0
+const STATE_H := 16.0  ## the state line under a follower's card (orders.gd)
 const BODY_COLORS := {"basic_armor": "#8aa0bd", "eva_suit": "#dfe8f2", "exosuit": "#e6893a", "salamander_suit": "#e0553a", "heat_suit": "#e8c040"}
 
 static var _tex := {}  # art name -> Texture2D or null
@@ -30,7 +32,7 @@ static var _crops := {}  # head frame -> the rectangle of it that is drawn
 
 ## The top of the first card for a party of `n` people.
 static func top(size: Vector2, n: int) -> float:
-	return size.y - BOTTOM - float(n) * (H + GAP) + GAP
+	return size.y - BOTTOM - float(n) * (H + GAP) - float(maxi(n - 1, 0)) * STATE_H + GAP
 
 
 # --- the cards ---------------------------------------------------------------------------------------------------------
@@ -41,8 +43,14 @@ static func draw_cards(h, size: Vector2) -> void:
 	for p in s.party:
 		who.append({"m": p["m"], "p": p})
 	var y0 := top(size, who.size())
+	var y := y0
 	for i in who.size():
-		_card(h, Rect2(PAD, y0 + float(i) * (H + GAP), W, H), who[i], i)
+		var r := Rect2(PAD, y, W, H)
+		_card(h, r, who[i], i)
+		y += H + GAP
+		if i > 0:
+			_squad(h, r, who[i]["p"], i - 1)
+			y += STATE_H
 
 
 static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
@@ -97,6 +105,19 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 		_active(h, Rect2(gx + 28.0 * float(kit["mods"].size() + 1), r.position.y + 40.0, r.end.x - 10.0 - (gx + 28.0 * float(kit["mods"].size() + 1)), 22.0), s, down)
 	if e["p"] != null:
 		_rounds(h, Rect2(gx + 28.0 * float(kit["mods"].size() + 1), r.position.y + 40.0, r.end.x - 10.0 - (gx + 28.0 * float(kit["mods"].size() + 1)), 22.0), e["p"], down)
+
+
+## A follower's squad marks: its colour stripe on the card, a lit edge when selected (click the card to select), and the state line under it.
+static func _squad(h, r: Rect2, p: Dictionary, i: int) -> void:
+	var col := Orders.colour(i)
+	h.draw_rect(Rect2(r.position, Vector2(4.0, r.size.y)), col)
+	if bool(p.get("sel", false)):
+		h.draw_rect(r.grow(2.0), col, false, 2.0)
+	h.hit_add(r, {"squad": i})
+	h.hover_add(r, ["Click: select (Shift adds). Key %d." % (i + 1), "Right-click a room to send the selected (else all); B calls them back."], col)
+	var t := Orders.state(h.view.session, p)
+	var bad := t.begins_with("Can't") or t == "Falling back"
+	h._text(t, r.position + Vector2(8.0, r.size.y + 13.0), 13, h.AMBER if bad else (col if t.begins_with("Fighting") else h.DIM_TEXT))
 
 
 ## The soldier's gear active: "G Dash" lit when it is ready, with the seconds and a fill that drains while it cools down. Nothing when his gear has none.
