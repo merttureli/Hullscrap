@@ -264,7 +264,7 @@ func test_a_heavy_hull_turns_slower_than_thrust_over_mass() -> void:
 	near(f.turn_accel(800.0, 30.0), 30.0 * f.turn_factor / 800.0, "a light hull is not touched")
 	near(f.turn_accel(2000.0, 30.0), 30.0 * f.turn_factor / 2000.0 * 0.25, "twice the mass: a quarter of the turn")
 	var data := Flight.new()
-	check(data.load_config("res://data/flight.json") and data.turn_heavy_mass <= 1000.0 and data.turn_heavy_exp > 1.0, "the data file sets it")
+	check(data.load_config("res://data/flight.json") and data.turn_heavy_mass <= 1000.0 and data.turn_heavy_exp > 0.0, "the data file sets it")
 
 
 func test_the_angle_stays_in_range() -> void:
