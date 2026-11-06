@@ -58,10 +58,23 @@ func _gui_input(e: InputEvent) -> void:
 		accept_event()
 
 
+## True when the ship has a saved layout to rebuild from.
+func has_layout() -> bool:
+	return hud == null or hud.build.ship == null or not hud.build.ship.layout.is_empty()
+
+
+func _get_tooltip(at_position: Vector2) -> String:
+	var i := button_at(at_position)
+	return "Save a layout first" if i > 0 and not has_layout() else ""
+
+
 func _draw() -> void:
 	UiKit.panel(self, Rect2(Vector2.ZERO, size))
 	for i in BUTTONS.size():
 		var r := button_rect(i)
-		UiKit.button(self, r, false, hover == i)
-		UiKit.text(self, BUTTONS[i]["label"], Vector2(r.position.x, r.position.y + 19.0), 14, UiKit.TEXT, HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
+		UiKit.button(self, r, false, hover == i and (i == 0 or has_layout()))
+		var off: bool = i > 0 and not has_layout()  # (the Rebuild buttons wait for a saved layout)
+		UiKit.text(self, BUTTONS[i]["label"], Vector2(r.position.x, r.position.y + 19.0), 14, UiKit.DIM_TEXT if off else UiKit.TEXT, HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
+		if off:
+			draw_rect(r, Color(0, 0, 0, 0.35))
 	UiKit.text(self, "Rebuild what is missing:", Vector2(PAD + 2.0, PAD + ROW + GAP + 11.0), 11, UiKit.DIM_TEXT)
