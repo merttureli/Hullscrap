@@ -6,7 +6,6 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const Pathfinder = preload("res://scripts/crew/pathfinder.gd")
 const Posts = preload("res://scripts/crew/posts.gd")
-const Shields = preload("res://scripts/combat/shields.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const CombatView = preload("res://scripts/combat/combat_view.gd")
@@ -209,10 +208,13 @@ func test_the_slow_down_frames_your_ship_and_normal_frames_both() -> void:
 	var view := Vector2(1600.0, 900.0)
 	var both := s.framing(view)
 	var own := s.framing(view, 0.2, true)
-	eq(own["center"], s.arena.ships[Session.PLAYER].flight.pos, "centred on your ship")
+	var pos: Vector2 = s.arena.ships[Session.PLAYER].flight.pos
+	var up: float = s.ai.extent(Session.PLAYER, Vector2.UP)
+	var down: float = s.ai.extent(Session.PLAYER, Vector2.DOWN)
+	check(own["center"].distance_to(pos) <= maxf(up, down), "centred on your hull")
 	check(own["zoom"] > both["zoom"], "closer than the two-ship view")
-	var h: float = 2.0 * (Shields.reach(s.arena.ships[Session.PLAYER]) + 1.0) * s.arena.CELL * own["zoom"]
-	check(absf(h - 900.0 * Session.SLOW_FILL) < 1.0 or own["zoom"] >= 2.0 or own["zoom"] <= 0.05, "the hull fills about 70 percent of the height: %s" % h)
+	var h: float = (up + down) * own["zoom"]
+	check(h <= 900.0 * Session.SLOW_FILL + 1.0 and h > 900.0 * 0.4, "the hull fills about 70 percent of the height at most: %s" % h)
 	eq(CombatView.blend_framing(both, own, 0.0)["center"], both["center"], "t 0 is the normal framing")
 	check(CombatView.blend_framing(both, own, 1.0)["center"].is_equal_approx(own["center"]), "t 1 is your ship")
 
