@@ -90,7 +90,7 @@ static func assign(components, weapons, uid: int, group: int) -> int:
 	var id: String = components.instances[uid]["id"]
 	if not weapons.has(id):
 		return -1
-	components.set_group_choice(uid, -1 if group == weapons.group_of(id) else group)
+	components.set_group_choice(uid, -1 if group == weapons.group_of(id) and group == weapons.default_group(components, uid) else group)
 	return group
 
 
@@ -101,7 +101,7 @@ static func cycle(components, weapons, uid: int) -> int:
 	var id: String = components.instances[uid]["id"]
 	if not weapons.has(id):
 		return -1
-	var now: int = weapons.group_of(id, components.group_choice(uid))
+	var now: int = weapons.group_in(components, uid)
 	return assign(components, weapons, uid, ORDER[(ORDER.find(now) + 1) % ORDER.size()])
 
 
