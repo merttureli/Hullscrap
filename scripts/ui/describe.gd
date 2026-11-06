@@ -312,6 +312,8 @@ static func _weapon(id: String, rows: Array, kws: Array, tail: Array) -> void:
 		kws.append(keyword("rapid"))
 	if w["pass_shields"]:
 		kws.append(keyword("pass_shields"))
+	if weapons().pd_can_stop(w):
+		kws.append(keyword("pd_stop"))
 	if w.get("chain") is Dictionary:
 		kws.append(keyword("chain", w["chain"]))
 	if w.get("charge") is Dictionary:

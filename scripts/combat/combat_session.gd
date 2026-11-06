@@ -335,10 +335,16 @@ func press_ability(key: String) -> Dictionary:
 	return arena.use_key(PLAYER, key)
 
 
-## What the bar shows for ability slot `s` (an ability_slots() entry): {state ("active", "cooling",
+## What the bar shows for ability slot `s` (an ability_slots() entry, or an ability_boxes() one: then its parts are merged by merge_states): {state ("active", "cooling",
 ## "blocked" or "ready"), active_left, duration, cooldown_left, cooldown, reason}. `reason` is why it
 ## cannot start now ("" when it can or is running).
 func ability_state(s: Dictionary) -> Dictionary:
+	if int(s.get("count", 1)) > 1:
+		return merge_states(ability_slots().filter(func(o): return o["slot"] in s["slots"]).map(_state_of))
+	return _state_of(s)
+
+
+func _state_of(s: Dictionary) -> Dictionary:
 	var co = arena.ships[PLAYER]
 	var left := Abilities.active_left(co.ship, s["uid"], s["id"])
 	var cd := Abilities.cooldown_left(co.ship, s["uid"], s["id"])
@@ -352,6 +358,20 @@ func ability_state(s: Dictionary) -> Dictionary:
 		state = "blocked"
 	return {"state": state, "active_left": left, "duration": float(s["ability"].get("duration", 0.0)), "cooldown_left": cd,
 		"cooldown": float(s["ability"].get("cooldown", 0.0)), "reason": "" if state in ["active", "ready"] else why}
+
+
+## The one state a merged box (parts on one key) shows, from their ability states: READY if any is ready, else active if any runs,
+## else the shortest cooldown, else blocked (the first reason).
+static func merge_states(states: Array) -> Dictionary:
+	for want in ["ready", "active"]:
+		for st in states:
+			if st["state"] == want:
+				return st
+	var best: Dictionary = {}
+	for st in states:
+		if st["state"] == "cooling" and (best.is_empty() or float(st["cooldown_left"]) < float(best["cooldown_left"])):
+			best = st
+	return best if not best.is_empty() else states[0]
 
 
 ## The player presses an arrow key: one step of shield balance toward "up" (bow), "down" (stern), "left"
