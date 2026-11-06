@@ -136,7 +136,7 @@ func test_a_picture_card_has_figures_and_no_name() -> void:
 	eq(spec["key"], 1, "the first card has its number key")
 	eq(spec["held"], 1, "a held part shows its count")
 	var shield: Dictionary = Describe.glance("shield_mk1", ship)
-	eq(shield["stats"].map(func(s): return s["what"]), ["Layers", "Recharge", "HP"], "a shield: layers and recharge")
+	eq(shield["stats"].map(func(s): return s["what"]), ["Shield HP", "Regen", "HP"], "a shield: its HP and regen")
 	eq(Describe.glance("engine_mk1", ship)["stats"][0]["what"], "Thrust", "an engine: thrust")
 	var wall: Dictionary = Palette.glance(Palette.tile_entry(ship, "wall"), ship)
 	eq(wall["stats"].map(func(s): return s["what"]), ["HP", "Mass"], "structure: hp and mass")

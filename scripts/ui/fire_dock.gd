@@ -195,9 +195,10 @@ func _slot(at: Vector2, sl: Dictionary, lifted: bool) -> void:
 	if sl["number"] <= 9:
 		draw_string(font, at + Vector2(6.0, 22.0), str(sl["number"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, TEXT)
 	GunBadges.draw_mark(self, at + Vector2(SLOT.x - 12.0, 15.0), 5.0, sty["mark"], col)
-	var shown: Dictionary = WeaponBar.fit_name(str(w["name"]), SLOT.x - 44.0)
-	draw_string(font, at + Vector2(20.0, 21.0), shown["text"], HORIZONTAL_ALIGNMENT_LEFT, SLOT.x - 44.0, mini(shown["size"], 11), TEXT)
+	var name_w := SLOT.x - (68.0 if w.get("can_ap", false) else 44.0)  # (the AP tag takes the room before the group mark)
+	var shown: Dictionary = WeaponBar.fit_name(str(w["name"]), name_w)
+	draw_string(font, at + Vector2(20.0, 21.0), shown["text"], HORIZONTAL_ALIGNMENT_LEFT, name_w, mini(shown["size"], 11), TEXT)
 	if w.get("can_ap", false):  # piercing rounds: the AP tag, bright when on
 		var on: bool = w.get("ap", false)
-		draw_rect(Rect2(at + Vector2(SLOT.x - 36.0, 18.0), Vector2(22.0, 11.0)), Color(0.98, 0.82, 0.29, 0.9) if on else Color(0.42, 0.46, 0.53, 0.35))
-		draw_string(font, at + Vector2(SLOT.x - 34.0, 27.0), "AP", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("#10151c") if on else TEXT)
+		draw_rect(Rect2(at + Vector2(SLOT.x - 40.0, 10.0), Vector2(22.0, 11.0)), Color(0.98, 0.82, 0.29, 0.9) if on else Color(0.42, 0.46, 0.53, 0.35))
+		draw_string(font, at + Vector2(SLOT.x - 38.0, 19.0), "AP", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("#10151c") if on else TEXT)
