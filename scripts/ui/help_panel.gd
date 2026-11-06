@@ -106,7 +106,6 @@ const COLUMNS: Array = [
 			["R", "After your ship is wrecked"],
 		]],
 		["CRAFTING (C)", [
-			["C", "Crafting panel, in build or play mode"],
 			["Tab", "Fabricator / smelter (steel, alloy, conductor, glass)"],
 			["?", "How crafting works"],
 			["Click, or Up / Down + Enter", "Queue a recipe, then place the part from the palette (B)."],
@@ -114,11 +113,12 @@ const COLUMNS: Array = [
 			["PgUp / PgDn", "Scroll fast"],
 			["Click a queued job", "Cancel it"],
 			["U", "Debug: unlock a random blueprint", "debug"],
-			["C / Esc", "Close it"],
+			["C / Esc", "Open / close it (build or play mode)"],
 		]],
 		["BOARDING (an event's Board her)", [
 			["Mouse R Q F", "Aboard: fire, reload, swap, flashlight"],
 			["E (hold), L", "Hold: open, hack, revive. Tap: talk. Airlock or L: leave"],
+			["Mouse R, B, 1 2", "Squad: send, call back, select"],
 		]],
 	],
 ]
