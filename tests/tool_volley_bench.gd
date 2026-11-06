@@ -3,7 +3,8 @@ extends SceneTree
 ## (tests/tool_standoff.gd BUILDS) with a strong or a weak shield, every fire group in Ripple or in Volley (and optionally Piercing on
 ## its rapid guns), against the same generated enemies; per cell: wins, mean fight seconds, the player's hull at the end, and the share
 ## of the fight the player's sector facing the enemy was open (it had just fired) and was down (no shield HP).
-##   godot --headless --path . --script res://tests/tool_volley_bench.gd [-- stages=3,5 seeds=8 kinds=shield,plain cap=120 out=<path>]
+##   godot --headless --path . --script res://tests/tool_volley_bench.gd [-- stages=3,5 seeds=8 kinds=shield,plain cap=120 modes=ripple,volley,volley+ap turret=rattle out=<path>]
+## turret=rattle swaps the Laser Turrets of the build for the Rattle Burst (the gun that can load piercing rounds)
 ## Shields: strong = the best the stage's shop sells, twice; weak = one scrap generator.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -16,6 +17,7 @@ const Structure = preload("res://scripts/ship/structure.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Standoff = preload("res://tests/tool_standoff.gd")
 
+static var args_turret := ""
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
 const PLAYER_EVERY := 3
@@ -29,6 +31,7 @@ func _initialize() -> void:
 		var kv := a.split("=")
 		if kv.size() == 2:
 			args[kv[0]] = kv[1]
+	args_turret = str(args.get("turret", ""))
 	var stages: Array = str(args.get("stages", "3,5")).split(",")
 	var kinds: Array = str(args.get("kinds", "shield,plain")).split(",")
 	var seeds := int(args.get("seeds", 8))
@@ -37,7 +40,7 @@ func _initialize() -> void:
 		for kind in kinds:
 			var foes: Array = Standoff.enemies(int(st), kind, seeds)
 			for sh in ["strong", "weak"]:
-				for mode in ["ripple", "volley", "volley+ap"]:
+				for mode in str(args.get("modes", "ripple,volley")).split(","):
 					var rows := []
 					for e in foes:
 						rows.append(_fight(int(st), sh, mode, e))
@@ -62,6 +65,8 @@ const BUILDS := {
 static func build_player(stage: int, shields: Array) -> Ship:
 	var b: Dictionary = BUILDS[stage].duplicate()
 	b["shields"] = shields
+	if str(args_turret) == "rattle":
+		b["weapons"] = b["weapons"].map(func(w): return "rattle_burst_scrap" if w == "laser_turret_mk1" else w)
 	var f: Dictionary = Shipgen.tables()["factions"]["concord"]
 	var sz: Dictionary = Shipgen.tables()["sizes"][b["size"]]
 	Shipgen._comps()
