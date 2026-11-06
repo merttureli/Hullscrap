@@ -240,3 +240,36 @@ func test_point_defence_mk1_to_mk3_shoot_drones_as_incoming() -> void:
 				break
 			min_hp = minf(min_hp, float(d["hp"]))
 		check(a.drones.is_empty() or min_hp < hp0, "%s hurts the drone: %.1f of %.1f" % [id, min_hp, hp0])
+
+
+func test_point_defence_mk1_to_mk3_see_a_limpet_coming_from_afar() -> void:
+	var lim = load("res://tests/test_limpets.gd").new()
+	for id in ["pd_mk1", "pd_mk2", "pd_mk3"]:
+		var r: Array = lim._duel("fire_limpet_mk1", 1400.0)
+		var a: Arena = r[0]
+		for at in [Vector2(15.5, 1.0), Vector2(15.5, 30.0), Vector2(1.0, 15.5), Vector2(30.0, 15.5)]:
+			a.add_mount(1, id, at, true)
+		a.launch_drone(0, r[1], lim._aim(a, r[1], 0.0))
+		var d: Dictionary = a.drones[0]
+		var hp0 := float(d["hp"])
+		var min_hp := hp0
+		for i in 240:
+			a.step(1.0 / 20.0)
+			if not a.drones.has(d):
+				min_hp = 0.0
+				break
+			min_hp = minf(min_hp, float(d["hp"]))
+		if id == "pd_mk1":  # the slowest: it picks the limpet out (60% a shot, 1.2 s) but may not land a hit before it sticks
+			var picked := false
+			var r2: Array = lim._duel("fire_limpet_mk1", 1400.0)
+			var a2: Arena = r2[0]
+			var u2: int = a2.add_mount(1, id, Vector2(15.5, 1.0), true)
+			a2.launch_drone(0, r2[1], lim._aim(a2, r2[1], 0.0))
+			for i in 120:
+				a2.step(1.0 / 20.0)
+				if a2.weapons.missile_target(a2, 1, a2.ships[1].mounts[u2], a2.weapons.def(id)) != null:
+					picked = true
+					break
+			check(picked, "pd_mk1 picks the flying limpet out as a target")
+			continue
+		check(min_hp < hp0, "%s hits the flying limpet (%.1f of %.1f)" % [id, min_hp, hp0])
