@@ -262,6 +262,23 @@ def radar_ring(c, tier):
             if tier == 2 and r0 + 1.0 < d < r0 + 1.7: s.put(x, y, 'E')          # Mk II: a doubled hoop, a dark groove between the two
     for sd in (-1, 1):                                                          # the two rear struts
         for k in range(3, 6): s.put(cx + sd * k, cy + k, 'S' if sd < 0 else 'W')
+    # the PD accent: lit arcs of the hoop in the family colour at the compass points (two at Mk I, four at Mk II), the pair across from each other
+    # alternating in idle so the ring seems to run; bright enough to read on black space and on a grey hull
+    arcs = (0, 180) if tier == 1 else (0, 90, 180, 270)
+    for ai, centre in enumerate(arcs):
+        on = c.st.powered and (c.st.dstate != 'idle' or (c.st.i + ai) % 2 == 0 or tier == 2)
+        for y in range(cy - 9, cy + 10):
+            for x in range(cx - 9, cx + 10):
+                dx, dy = x - cx, y - cy
+                d = (dx * dx + dy * dy) ** 0.5
+                if not (r0 <= d <= r1): continue
+                a = math.degrees(math.atan2(dx, -dy)) % 360
+                da = min((a - centre) % 360, (centre - a) % 360)
+                if da <= 24:
+                    s.put(x, y, ('3' if da <= 16 else '2') if on else '1')
+        if on:
+            ax, ay = cx + (r0 + r1) / 2 * math.sin(math.radians(centre)), cy - (r0 + r1) / 2 * math.cos(math.radians(centre))
+            c.lightglow(ax, ay, 4.5, 0.6)
     n = 3 if tier == 1 else 4
     turn = (c.st.i * (60 if n == 3 else 45)) if c.st.dstate == 'idle' else 0
     for k in range(n):                                                          # the emitters on the hoop, in the family light
